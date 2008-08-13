@@ -25,6 +25,9 @@
  * Primary interface for accessing Zotero collection
  */
 Zotero.Collections = new function() {
+	Zotero.DataObjects.apply(this, ['collection']);
+	this.constructor.prototype = new Zotero.DataObjects();
+	
 	var _collections = {};
 	var _collectionsLoaded = false;
 	

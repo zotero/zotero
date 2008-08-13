@@ -25,6 +25,9 @@
  * Same structure as Zotero.Creators -- make changes in both places if possible
  */
 Zotero.Tags = new function() {
+	Zotero.DataObjects.apply(this, ['tag']);
+	this.constructor.prototype = new Zotero.DataObjects();
+	
 	var _tags = []; // indexed by tag text
 	var _tagsByID = []; // indexed by tagID
 	
