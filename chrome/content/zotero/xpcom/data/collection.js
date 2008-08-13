@@ -179,12 +179,6 @@ Zotero.Collection.prototype.hasChildItems = function() {
 	return !!(parseInt(this._hasChildItems));
 }
 
-Zotero.Collection.prototype.refreshChildCollections = function () {
-	this._hasChildCollections = undefined;
-	this._childCollectionsLoaded = false;
-}
-
-
 /**
  * Check if collection exists in the database
  *
@@ -319,7 +313,12 @@ Zotero.Collection.prototype.save = function () {
 		Zotero.Collections.unload(oldID);
 		Zotero.Notifier.trigger('id-change', 'collection', oldID + '-' + this.id);
 		
-		// update caches
+		// Update child collections that have cached the previous id
+		var sql = "SELECT collectionID FROM collections WHERE parentCollectionID=?";
+		var children = Zotero.DB.columnQuery(sql, this.id);
+		if (children) {
+			Zotero.Collections.refreshParents(children);
+		}
 	}
 	
 	var isNew = !this.id || !this.exists();
@@ -510,12 +509,9 @@ Zotero.Collection.prototype.save = function () {
 		Zotero.Notifier.trigger('modify', 'collection', this.id, this._previousData);
 	}
 	
-	// Refresh child collection counts
+	// Invalidate cached child collections
 	if (parentIDs) {
-		for each(var id in parentIDs) {
-			var col = Zotero.Collections.get(id);
-			col.refreshChildCollections();
-		}
+		Zotero.Collections.refreshChildCollections(parentIDs)
 	}
 	
 	return this.id;
@@ -979,6 +975,35 @@ Zotero.Collection.prototype._loadChildItems = function() {
 	}
 	
 	this._childItemsLoaded = true;
+}
+
+
+/**
+ * Note: This is called by Zotero.Collections.refreshParent()
+ *
+ * @private
+ */
+Zotero.Collection.prototype._refreshParent = function () {
+	if (!this.id) {
+		throw ("Cannot call Zotero.Collection._refreshParent() on unsaved collection");
+	}
+	
+	var sql = "SELECT parentCollectionID FROM collections "
+		+ "WHERE collectionID=?";
+	this._parent = Zotero.DB.valueQuery(sql, this.id);
+}
+
+
+/**
+ * Invalid child collection cache
+ *
+ * Note: This is called by Zotero.Collections.refreshChildCollections()
+ *
+ * @private
+ */
+Zotero.Collection.prototype._refreshChildCollections = function () {
+	this._hasChildCollections = undefined;
+	this._childCollectionsLoaded = false;
 }
 
 
