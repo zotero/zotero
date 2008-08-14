@@ -1,4 +1,7 @@
-// These are DEFAULT prefs for the INSTALL. You will have to reinstall the extension to see differences!
+// These are DEFAULT prefs for the install.
+//
+// Add new user-adjustable hidden preferences to
+// http://www.zotero.org/documentation/hidden_prefs
 
 pref("extensions.zotero.firstRun", true);
 pref("extensions.zotero@chnm.gmu.edu.description", "chrome://zotero/locale/zotero.properties");
