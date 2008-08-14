@@ -74,6 +74,19 @@
       </else>
     </choose>
   </macro>
+  <macro name="edition">
+    <choose>
+      <if is-numeric="edition">
+        <group delimiter=" ">
+	      <number variable="edition" form="ordinal"/>
+	      <text term="edition" form="short" suffix="."/>
+        </group>
+      </if>
+      <else>
+	    <text variable="edition"/>
+      </else>
+    </choose>
+  </macro>
   <macro name="publisher-year">
     <group delimiter=", ">
       <group delimiter=": ">
@@ -126,6 +139,7 @@
       <text macro="title" prefix=" " suffix="."/>
       <choose>
         <if type="book">
+          <text macro="edition" prefix=" " suffix="."/>
           <text macro="editor-translator" prefix=" " suffix="."/>
           <text macro="publisher-year"  prefix=" " suffix="."/>
         </if>
