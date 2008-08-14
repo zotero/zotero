@@ -2297,6 +2297,10 @@ Zotero.Item.prototype.__defineGetter__('attachmentLinkMode', function () {
 		return this._attachmentLinkMode;
 	}
 	
+	if (!this.id) {
+		return '';
+	}
+	
 	var sql = "SELECT linkMode FROM itemAttachments WHERE itemID=?";
 	var linkMode = Zotero.DB.valueQuery(sql, this.id);
 	this._attachmentLinkMode = linkMode;
@@ -2349,6 +2353,10 @@ Zotero.Item.prototype.__defineGetter__('attachmentMIMEType', function () {
 		return this._attachmentMIMEType;
 	}
 	
+	if (!this.id) {
+		return '';
+	}
+	
 	var sql = "SELECT mimeType FROM itemAttachments WHERE itemID=?";
 	var mimeType = Zotero.DB.valueQuery(sql, this.id);
 	if (!mimeType) {
@@ -2398,6 +2406,10 @@ Zotero.Item.prototype.__defineGetter__('attachmentCharset', function () {
 		return this._attachmentCharset;
 	}
 	
+	if (!this.id) {
+		return '';
+	}
+	
 	var sql = "SELECT charsetID FROM itemAttachments WHERE itemID=?";
 	var charset = Zotero.DB.valueQuery(sql, this.id);
 	if (!charset) {
@@ -2439,7 +2451,7 @@ Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
 	}
 	
 	if (!this.id) {
-		return undefined;
+		return '';
 	}
 	
 	var sql = "SELECT path FROM itemAttachments WHERE itemID=?";

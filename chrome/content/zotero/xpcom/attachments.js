@@ -300,6 +300,7 @@ Zotero.Attachments = new function(){
 							attachmentItem.save();
 							
 							Zotero.Notifier.trigger('add', 'item', itemID);
+							Zotero.Notifier.trigger('modify', 'item', sourceItemID);
 							
 							// We don't have any way of knowing that the file
 							// is flushed to disk, so we just wait a second
