@@ -146,6 +146,7 @@
         <else-if type="chapter">
           <group class="container">
             <text variable="container-title" font-style="italic" prefix=" " suffix="."/>
+            <text macro="edition" prefix=" " suffix="."/>
             <text macro="editor-translator" prefix=" " suffix="."/>
             <text macro="publisher-year"  prefix=" " suffix="."/>
           </group>
