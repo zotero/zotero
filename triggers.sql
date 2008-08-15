@@ -1,4 +1,4 @@
--- 2
+-- 3
 
 -- Triggers to validate date field
 DROP TRIGGER IF EXISTS insert_date_field;
@@ -45,7 +45,7 @@ DROP TRIGGER IF EXISTS fku_annotations_itemID_itemAttachments_itemID;
 CREATE TRIGGER fku_annotations_itemID_itemAttachments_itemID
   BEFORE UPDATE OF itemID ON annotations
   FOR EACH ROW
-BEGIN
+  BEGIN
     SELECT RAISE(ABORT, 'update on table "annotations" violates foreign key constraint "fku_annotations_itemID_itemAttachments_itemID"')
     WHERE NEW.itemID IS NOT NULL AND (SELECT COUNT(*) FROM itemAttachments WHERE itemID = NEW.itemID) = 0;
   END;
@@ -56,6 +56,13 @@ CREATE TRIGGER fkd_annotations_itemID_itemAttachments_itemID
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'delete on table "itemAttachments" violates foreign key constraint "fkd_annotations_itemID_itemAttachments_itemID"')
     WHERE (SELECT COUNT(*) FROM annotations WHERE itemID = OLD.itemID) > 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_itemAttachments_itemID_annotations_itemID;
+CREATE TRIGGER fku_itemAttachments_itemID_annotations_itemID
+  AFTER UPDATE OF itemID ON itemAttachments
+  FOR EACH ROW BEGIN
+    UPDATE annotations SET itemID=NEW.itemID WHERE itemID=OLD.itemID;
   END;
 
 -- collections/parentCollectionID
@@ -83,6 +90,13 @@ CREATE TRIGGER fkd_collections_parentCollectionID_collections_collectionID
     WHERE (SELECT COUNT(*) FROM collections WHERE parentCollectionID = OLD.collectionID) > 0;
   END;
 
+DROP TRIGGER IF EXISTS fku_collections_collectionID_collections_parentCollectionID;
+CREATE TRIGGER fku_collections_collectionID_collections_parentCollectionID
+  AFTER UPDATE OF collectionID ON collections
+  FOR EACH ROW BEGIN
+    UPDATE collections SET parentCollectionID=NEW.collectionID WHERE parentCollectionID=OLD.collectionID;
+  END;
+
 -- collectionItems/collectionID
 DROP TRIGGER IF EXISTS fki_collectionItems_collectionID_collections_collectionID;
 CREATE TRIGGER fki_collectionItems_collectionID_collections_collectionID
@@ -106,6 +120,13 @@ CREATE TRIGGER fkd_collectionItems_collectionID_collections_collectionID
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'delete on table "collections" violates foreign key constraint "fkd_collectionItems_collectionID_collections_collectionID"')
     WHERE (SELECT COUNT(*) FROM collectionItems WHERE collectionID = OLD.collectionID) > 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_collections_collectionID_collectionItems_collectionID;
+CREATE TRIGGER fku_collections_collectionID_collectionItems_collectionID
+  AFTER UPDATE OF collectionID ON collections
+  FOR EACH ROW BEGIN
+    UPDATE collectionItems SET collectionID=NEW.collectionID WHERE collectionID=OLD.collectionID;
   END;
 
 -- collectionItems/itemID
@@ -133,6 +154,13 @@ CREATE TRIGGER fkd_collectionItems_itemID_items_itemID
     WHERE (SELECT COUNT(*) FROM collectionItems WHERE itemID = OLD.itemID) > 0;
   END;
 
+DROP TRIGGER IF EXISTS fku_items_itemID_collectionItems_itemID;
+CREATE TRIGGER fku_items_itemID_collectionItems_itemID
+  AFTER UPDATE OF itemID ON items
+  FOR EACH ROW BEGIN
+    UPDATE collectionItems SET collectionID=NEW.itemID WHERE collectionID=OLD.itemID;
+  END;
+
 -- creators/creatorDataID
 DROP TRIGGER IF EXISTS fki_creators_creatorDataID_creatorData_creatorDataID;
 CREATE TRIGGER fki_creators_creatorDataID_creatorData_creatorDataID
@@ -155,6 +183,14 @@ CREATE TRIGGER fkd_creators_creatorDataID_creatorData_creatorDataID
   BEFORE DELETE ON creatorData
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'delete on table "creatorData" violates foreign key constraint "fkd_creators_creatorDataID_creatorData_creatorDataID"')
+    WHERE (SELECT COUNT(*) FROM creators WHERE creatorDataID = OLD.creatorDataID) > 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_creatorData_creatorDataID_creators_creatorDataID;
+CREATE TRIGGER fku_creatorData_creatorDataID_creators_creatorDataID
+  BEFORE UPDATE OF creatorDataID ON creatorData
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'update on table "creatorData" violates foreign key constraint "fku_creatorData_creatorDataID_creators_creatorDataID"')
     WHERE (SELECT COUNT(*) FROM creators WHERE creatorDataID = OLD.creatorDataID) > 0;
   END;
 
@@ -183,6 +219,14 @@ CREATE TRIGGER fkd_fulltextItems_itemID_items_itemID
     WHERE (SELECT COUNT(*) FROM fulltextItems WHERE itemID = OLD.itemID) > 0;
   END;
 
+DROP TRIGGER IF EXISTS fku_items_itemID_fulltextItems_itemID;
+CREATE TRIGGER fku_items_itemID_fulltextItems_itemID
+  AFTER UPDATE OF itemID ON items
+  FOR EACH ROW BEGIN
+    UPDATE fulltextItems SET itemID=NEW.itemID WHERE itemID=OLD.itemID;
+  END;
+
+
 -- fulltextItemWords/wordID
 DROP TRIGGER IF EXISTS fki_fulltextItemWords_wordID_fulltextWords_wordID;
 CREATE TRIGGER fki_fulltextItemWords_wordID_fulltextWords_wordID
@@ -205,6 +249,14 @@ CREATE TRIGGER fkd_fulltextItemWords_wordID_fulltextWords_wordID
   BEFORE DELETE ON fulltextWords
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'delete on table "fulltextWords" violates foreign key constraint "fkd_fulltextItemWords_wordID_fulltextWords_wordID"')
+    WHERE (SELECT COUNT(*) FROM fulltextItemWords WHERE wordID = OLD.wordID) > 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_fulltextWords_wordID_fulltextItemWords_wordID;
+CREATE TRIGGER fku_fulltextWords_wordID_fulltextItemWords_wordID
+  BEFORE UPDATE OF wordID ON fulltextWords
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'update on table "fulltextWords" violates foreign key constraint "fku_fulltextWords_wordID_fulltextItemWords_wordID"')
     WHERE (SELECT COUNT(*) FROM fulltextItemWords WHERE wordID = OLD.wordID) > 0;
   END;
 
@@ -233,6 +285,13 @@ CREATE TRIGGER fkd_fulltextItemWords_itemID_items_itemID
     WHERE (SELECT COUNT(*) FROM fulltextItemWords WHERE itemID = OLD.itemID) > 0;
   END;
 
+DROP TRIGGER IF EXISTS fku_items_itemID_fulltextItemWords_itemID;
+CREATE TRIGGER fku_items_itemID_fulltextItemWords_itemID
+  AFTER UPDATE OF itemID ON items
+  FOR EACH ROW BEGIN
+    UPDATE fulltextItemWords SET itemID=NEW.itemID WHERE itemID=OLD.itemID;
+  END;
+
 -- highlights/itemID
 DROP TRIGGER IF EXISTS fki_highlights_itemID_itemAttachments_itemID;
 CREATE TRIGGER fki_highlights_itemID_itemAttachments_itemID
@@ -256,6 +315,13 @@ CREATE TRIGGER fkd_highlights_itemID_itemAttachments_itemID
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'delete on table "itemAttachments" violates foreign key constraint "fkd_highlights_itemID_itemAttachments_itemID"')
     WHERE (SELECT COUNT(*) FROM highlights WHERE itemID = OLD.itemID) > 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_itemAttachments_itemID_highlights_itemID;
+CREATE TRIGGER fku_itemAttachments_itemID_highlights_itemID
+  AFTER UPDATE OF itemID ON itemAttachments
+  FOR EACH ROW BEGIN
+    UPDATE highlights SET itemID=NEW.itemID WHERE itemID=OLD.itemID;
   END;
 
 -- itemAttachments/itemID
@@ -283,6 +349,13 @@ CREATE TRIGGER fkd_itemAttachments_itemID_items_itemID
     WHERE (SELECT COUNT(*) FROM itemAttachments WHERE itemID = OLD.itemID) > 0;
   END;
 
+DROP TRIGGER IF EXISTS fku_items_itemID_itemAttachments_itemID;
+CREATE TRIGGER fku_items_itemID_itemAttachments_itemID
+  AFTER UPDATE OF itemID ON items
+  FOR EACH ROW BEGIN
+    UPDATE itemAttachments SET itemID=NEW.itemID WHERE itemID=OLD.itemID;
+  END;
+
 -- itemAttachments/sourceItemID
 DROP TRIGGER IF EXISTS fki_itemAttachments_sourceItemID_items_itemID;
 CREATE TRIGGER fki_itemAttachments_sourceItemID_items_itemID
@@ -306,6 +379,13 @@ CREATE TRIGGER fkd_itemAttachments_sourceItemID_items_itemID
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'delete on table "items" violates foreign key constraint "fkd_itemAttachments_sourceItemID_items_sourceItemID"')
     WHERE (SELECT COUNT(*) FROM itemAttachments WHERE sourceItemID = OLD.itemID) > 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_items_itemID_itemAttachments_sourceItemID;
+CREATE TRIGGER fku_items_itemID_itemAttachments_sourceItemID
+  AFTER UPDATE OF itemID ON items
+  FOR EACH ROW BEGIN
+    UPDATE itemAttachments SET sourceItemID=NEW.itemID WHERE sourceItemID=OLD.itemID;
   END;
 
 -- itemCreators/itemID
@@ -333,6 +413,13 @@ CREATE TRIGGER fkd_itemCreators_itemID_items_itemID
     WHERE (SELECT COUNT(*) FROM itemCreators WHERE itemID = OLD.itemID) > 0;
   END;
 
+DROP TRIGGER IF EXISTS fku_items_itemID_itemCreators_itemID;
+CREATE TRIGGER fku_items_itemID_itemCreators_itemID
+  AFTER UPDATE OF itemID ON items
+  FOR EACH ROW BEGIN
+    UPDATE itemCreators SET itemID=NEW.itemID WHERE itemID=OLD.itemID;
+  END;
+
 -- itemCreators/creatorID
 DROP TRIGGER IF EXISTS fki_itemCreators_creatorID_creators_creatorID;
 CREATE TRIGGER fki_itemCreators_creatorID_creators_creatorID
@@ -358,6 +445,13 @@ CREATE TRIGGER fkd_itemCreators_creatorID_creators_creatorID
     WHERE (SELECT COUNT(*) FROM itemCreators WHERE creatorID = OLD.creatorID) > 0;
   END;
 
+DROP TRIGGER IF EXISTS fku_creators_creatorID_itemCreators_creatorID;
+CREATE TRIGGER fku_creators_creatorID_itemCreators_creatorID
+  AFTER UPDATE OF creatorID ON creators
+  FOR EACH ROW BEGIN
+    UPDATE itemCreators SET creatorID=NEW.creatorID WHERE creatorID=OLD.creatorID;
+  END;
+
 -- itemCreators/creatorTypeID
 DROP TRIGGER IF EXISTS fki_itemCreators_creatorTypeID_creatorTypes_creatorTypeID;
 CREATE TRIGGER fki_itemCreators_creatorTypeID_creatorTypes_creatorTypeID
@@ -380,6 +474,14 @@ CREATE TRIGGER fkd_itemCreators_creatorTypeID_creatorTypes_creatorTypeID
   BEFORE DELETE ON creatorTypes
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'delete on table "creatorTypes" violates foreign key constraint "fkd_itemCreators_creatorTypeID_creatorTypes_creatorTypeID"')
+    WHERE (SELECT COUNT(*) FROM itemCreators WHERE creatorTypeID = OLD.creatorTypeID) > 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_creatorTypes_creatorTypeID_itemCreators_creatorTypeID;
+CREATE TRIGGER fku_creatorTypes_creatorTypeID_itemCreators_creatorTypeID
+  BEFORE UPDATE OF creatorTypeID ON creatorTypes
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'update on table "creatorTypes" violates foreign key constraint "fku_creatorTypes_creatorTypeID_itemCreators_creatorTypeID"')
     WHERE (SELECT COUNT(*) FROM itemCreators WHERE creatorTypeID = OLD.creatorTypeID) > 0;
   END;
 
@@ -408,6 +510,13 @@ CREATE TRIGGER fkd_itemData_itemID_items_itemID
     WHERE (SELECT COUNT(*) FROM itemData WHERE itemID = OLD.itemID) > 0;
   END;
 
+DROP TRIGGER IF EXISTS fku_items_itemID_itemData_itemID;
+CREATE TRIGGER fku_items_itemID_itemData_itemID
+  AFTER UPDATE OF itemID ON items
+  FOR EACH ROW BEGIN
+    UPDATE itemData SET itemID=NEW.itemID WHERE itemID=OLD.itemID;
+  END;
+
 -- itemData/fieldID
 DROP TRIGGER IF EXISTS fki_itemData_fieldID_fields_fieldID;
 CREATE TRIGGER fki_itemData_fieldID_fields_fieldID
@@ -430,6 +539,14 @@ CREATE TRIGGER fkd_itemData_fieldID_fields_fieldID
   BEFORE DELETE ON FIELDS
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'delete on table "fields" violates foreign key constraint "fkd_itemData_fieldID_fields_fieldID"')
+    WHERE (SELECT COUNT(*) FROM itemData WHERE fieldID = OLD.fieldID) > 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_fields_fieldID_itemData_fieldID;
+CREATE TRIGGER fku_fields_fieldID_itemData_fieldID
+  BEFORE UPDATE OF fieldID ON FIELDS
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'update on table "fields" violates foreign key constraint "fku_fields_fieldID_itemData_fieldID"')
     WHERE (SELECT COUNT(*) FROM itemData WHERE fieldID = OLD.fieldID) > 0;
   END;
 
@@ -458,6 +575,14 @@ CREATE TRIGGER fkd_itemData_valueID_itemDataValues_valueID
     WHERE (SELECT COUNT(*) FROM itemData WHERE valueID = OLD.valueID) > 0;
   END;
 
+DROP TRIGGER IF EXISTS fku_itemDataValues_valueID_itemData_valueID;
+CREATE TRIGGER fku_itemDataValues_valueID_itemData_valueID
+  BEFORE UPDATE OF valueID ON itemDataValues
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'update on table "itemDataValues" violates foreign key constraint "fku_itemDataValues_valueID_itemData_valueID"')
+    WHERE (SELECT COUNT(*) FROM itemData WHERE valueID = OLD.valueID) > 0;
+  END;
+
 -- itemNotes/itemID
 DROP TRIGGER IF EXISTS fki_itemNotes_itemID_items_itemID;
 CREATE TRIGGER fki_itemNotes_itemID_items_itemID
@@ -481,6 +606,13 @@ CREATE TRIGGER fkd_itemNotes_itemID_items_itemID
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'delete on table "items" violates foreign key constraint "fkd_itemNotes_itemID_items_itemID"')
     WHERE (SELECT COUNT(*) FROM itemNotes WHERE itemID = OLD.itemID) > 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_items_itemID_itemNotes_itemID;
+CREATE TRIGGER fku_items_itemID_itemNotes_itemID
+  AFTER UPDATE OF itemID ON items
+  FOR EACH ROW BEGIN
+    UPDATE itemNotes SET itemID=NEW.itemID WHERE itemID=OLD.itemID;
   END;
 
 -- itemNotes/sourceItemID
@@ -508,6 +640,13 @@ CREATE TRIGGER fkd_itemNotes_sourceItemID_items_itemID
     WHERE (SELECT COUNT(*) FROM itemNotes WHERE sourceItemID = OLD.itemID) > 0;
   END;
 
+DROP TRIGGER IF EXISTS fku_items_itemID_itemNotes_sourceItemID;
+CREATE TRIGGER fku_items_itemID_itemNotes_sourceItemID
+  AFTER UPDATE OF itemID ON items
+  FOR EACH ROW BEGIN
+    UPDATE itemNotes SET sourceItemID=NEW.itemID WHERE sourceItemID=OLD.itemID;
+  END;
+
 -- itemSeeAlso/itemID
 DROP TRIGGER IF EXISTS fki_itemSeeAlso_itemID_items_itemID;
 CREATE TRIGGER fki_itemSeeAlso_itemID_items_itemID
@@ -531,6 +670,13 @@ CREATE TRIGGER fkd_itemSeeAlso_itemID_items_itemID
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'delete on table "items" violates foreign key constraint "fkd_itemSeeAlso_itemID_items_itemID"')
     WHERE (SELECT COUNT(*) FROM itemSeeAlso WHERE itemID = OLD.itemID) > 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_items_itemID_itemSeeAlso_itemID;
+CREATE TRIGGER fku_items_itemID_itemSeeAlso_itemID
+  AFTER UPDATE OF itemID ON items
+  FOR EACH ROW BEGIN
+    UPDATE itemSeeAlso SET itemID=NEW.itemID WHERE itemID=OLD.itemID;
   END;
 
 -- itemSeeAlso/linkedItemID
@@ -558,6 +704,13 @@ CREATE TRIGGER fkd_itemSeeAlso_linkedItemID_items_itemID
     WHERE (SELECT COUNT(*) FROM itemSeeAlso WHERE linkedItemID = OLD.itemID) > 0;
   END;
 
+DROP TRIGGER IF EXISTS fku_items_itemID_itemSeeAlso_linkedItemID;
+CREATE TRIGGER fku_items_itemID_itemSeeAlso_linkedItemID
+  AFTER UPDATE OF itemID ON items
+  FOR EACH ROW BEGIN
+    UPDATE itemSeeAlso SET linkedItemID=NEW.itemID WHERE linkedItemID=OLD.itemID;
+  END;
+
 -- itemTags/itemID
 DROP TRIGGER IF EXISTS fki_itemTags_itemID_items_itemID;
 CREATE TRIGGER fki_itemTags_itemID_items_itemID
@@ -581,6 +734,13 @@ CREATE TRIGGER fkd_itemTags_itemID_items_itemID
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'delete on table "items" violates foreign key constraint "fkd_itemTags_itemID_items_itemID"')
     WHERE (SELECT COUNT(*) FROM itemTags WHERE itemID = OLD.itemID) > 0;
+  END;
+
+DROP TRIGGER IF EXISTS fkd_items_itemID_itemTags_itemID;
+CREATE TRIGGER fkd_items_itemID_itemTags_itemID
+  AFTER UPDATE OF itemID ON items
+  FOR EACH ROW BEGIN
+    UPDATE itemTags SET itemID=NEW.itemID WHERE itemID=OLD.itemID;
   END;
 
 -- itemTags/tagID
@@ -608,6 +768,13 @@ CREATE TRIGGER fkd_itemTags_tagID_tags_tagID
     WHERE (SELECT COUNT(*) FROM itemTags WHERE tagID = OLD.tagID) > 0;
   END;
 
+DROP TRIGGER IF EXISTS fku_tags_tagID_itemTags_tagID;
+CREATE TRIGGER fku_tags_tagID_itemTags_tagID
+  AFTER UPDATE OF tagID ON tags
+  FOR EACH ROW BEGIN
+    UPDATE itemTags SET tagID=NEW.tagID WHERE tagID=OLD.tagID;
+  END;
+
 -- savedSearchConditions/savedSearchID
 DROP TRIGGER IF EXISTS fki_savedSearchConditions_savedSearchID_savedSearches_savedSearchID;
 CREATE TRIGGER fki_savedSearchConditions_savedSearchID_savedSearches_savedSearchID
@@ -631,6 +798,13 @@ CREATE TRIGGER fkd_savedSearchConditions_savedSearchID_savedSearches_savedSearch
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'delete on table "savedSearches" violates foreign key constraint "fkd_savedSearchConditions_savedSearchID_savedSearches_savedSearchID"')
     WHERE (SELECT COUNT(*) FROM savedSearchConditions WHERE savedSearchID = OLD.savedSearchID) > 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_savedSearches_savedSearchID_savedSearchConditions_savedSearchID;
+CREATE TRIGGER fku_savedSearches_savedSearchID_savedSearchConditions_savedSearchID
+  AFTER UPDATE OF savedSearchID ON savedSearches
+  FOR EACH ROW BEGIN
+    UPDATE savedSearchConditions SET savedSearchID=NEW.savedSearchID WHERE savedSearchID=OLD.savedSearchID;
   END;
 
 -- syncDeleteLog/syncObjectTypeID
@@ -658,6 +832,14 @@ CREATE TRIGGER fkd_syncDeleteLog_syncObjectTypeID_syncObjectTypes_syncObjectType
     WHERE (SELECT COUNT(*) FROM syncDeleteLog WHERE syncObjectTypeID = OLD.syncObjectTypeID) > 0;
   END;
 
+DROP TRIGGER IF EXISTS fku_syncObjectTypes_syncObjectTypeID_syncDeleteLog_syncObjectTypeID;
+CREATE TRIGGER fku_syncObjectTypes_syncObjectTypeID_syncDeleteLog_syncObjectTypeID
+  BEFORE DELETE ON syncObjectTypes
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'update on table "syncObjectTypes" violates foreign key constraint "fku_syncObjectTypes_syncObjectTypeID_syncDeleteLog_syncObjectTypeID"')
+    WHERE (SELECT COUNT(*) FROM syncDeleteLog WHERE syncObjectTypeID = OLD.syncObjectTypeID) > 0;
+  END;
+
 -- proxyHosts/proxyID
 DROP TRIGGER IF EXISTS fki_proxyHosts_proxyID_proxies_proxyID;
 CREATE TRIGGER fki_proxyHosts_proxyID_proxies_proxyID
@@ -680,5 +862,13 @@ CREATE TRIGGER fkd_proxyHosts_proxyID_proxies_proxyID
   BEFORE DELETE ON proxies
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'delete on table "proxies" violates foreign key constraint "fkd_proxyHosts_proxyID_proxies_proxyID"')
+    WHERE (SELECT COUNT(*) FROM proxyHosts WHERE proxyID = OLD.proxyID) > 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_proxies_proxyID_proxyHosts_proxyID;
+CREATE TRIGGER fku_proxies_proxyID_proxyHosts_proxyID
+  BEFORE DELETE ON proxies
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'update on table "proxies" violates foreign key constraint "fku_proxies_proxyID_proxyHosts_proxyID"')
     WHERE (SELECT COUNT(*) FROM proxyHosts WHERE proxyID = OLD.proxyID) > 0;
   END;
