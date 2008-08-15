@@ -135,6 +135,18 @@ Zotero.Sync = new function() {
 	}
 	
 	
+	this.removeFromUpdated = function (updated, ids) {
+		ids = Zotero.flattenArguments(ids);
+		var index;
+		for each(var id in ids) {
+			index = updated.indexOf(id);
+			if (index != -1) {
+				updated.splice(index, 1);
+			}
+		}
+	}
+	
+	
 	/**
 	 * @param	object	lastSyncDate	JS Date object
 	 * @return	mixed	Returns object with deleted ids
@@ -647,6 +659,9 @@ Zotero.Sync.Server = new function () {
 					xml.updated, lastLocalSyncDate, uploadIDs
 				);
 				
+				//Zotero.debug(xmlstr);
+				//throw('break');
+				
 				if (xmlstr === false) {
 					Zotero.debug("Sync cancelled");
 					Zotero.DB.rollbackTransaction();
@@ -659,8 +674,6 @@ Zotero.Sync.Server = new function () {
 				if (xmlstr) {
 					Zotero.debug(xmlstr);
 				}
-				
-				//throw('break1');
 				
 				Zotero.Sync.Server.lastRemoteSyncTime = response.getAttribute('timestamp');
 				
@@ -1312,6 +1325,7 @@ Zotero.Sync.Server.Data = new function() {
 			
 			typeloop:
 			for each(var xmlNode in xml[types][type]) {
+				var isNewObject;
 				var localDelete = false;
 				
 				// Get local object with same id
@@ -1319,6 +1333,8 @@ Zotero.Sync.Server.Data = new function() {
 				if (obj) {
 					// Key match -- same item
 					if (obj.key == xmlNode.@key.toString()) {
+						isNewObject = false;
+						
 						var objDate = Zotero.Date.sqlToDate(obj.dateModified, true);
 						
 						// Local object has been modified since last sync
@@ -1417,6 +1433,8 @@ Zotero.Sync.Server.Data = new function() {
 					// Key mismatch -- different objects with same id,
 					// so change id of local object
 					else {
+						isNewObject = true;
+						
 						var oldID = parseInt(xmlNode.@id);
 						var newID = Zotero.ID.get(types, true);
 						
@@ -1466,6 +1484,8 @@ Zotero.Sync.Server.Data = new function() {
 				
 				// Object doesn't exist locally
 				else {
+					isNewObject = true;
+					
 					// Check if object has been deleted locally
 					for each(var pair in uploadIDs.deleted[types]) {
 						if (pair.id != parseInt(xmlNode.@id) ||
@@ -1506,6 +1526,23 @@ Zotero.Sync.Server.Data = new function() {
 				
 				// Create or overwrite locally
 				obj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode, obj);
+				
+				// If a local tag matches the name of a different remote tag,
+				// delete the local tag and add items linked to it to the
+				// matching remote tag
+				if (isNewObject && type == 'tag') {
+					var tagName = xmlNode.@name.toString();
+					var tagType = xmlNode.@type.toString()
+									? parseInt(xmlNode.@type) : 0;
+					var linkedItems = _deleteConflictingTag(tagName, tagType, uploadIDs);
+					if (linkedItems) {
+						obj.dateModified = Zotero.DB.transactionDateTime;
+						for each(var id in linkedItems) {
+							obj.addItem(id);
+						}
+						Zotero.Sync.addToUpdated(uploadIDs.updated.tags, parseInt(xmlNode.@id));
+					}
+				}
 				
 				if (localDelete) {
 					// TODO: order reconcile by parent/child?
@@ -2348,7 +2385,7 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		tag.name = xmlTag.@name.toString();
-		tag.type = parseInt(xmlTag.@type);
+		tag.type = xmlTag.@type.toString() ? parseInt(xmlTag.@type) : 0;
 		if (!skipPrimary) {
 			tag.dateModified = xmlTag.@dateModified.toString();
 			tag.key = xmlTag.@key.toString();
@@ -2358,6 +2395,38 @@ Zotero.Sync.Server.Data = new function() {
 		tag.linkedItems = str ? str.split(' ') : [];
 		
 		return tag;
+	}
+	
+	
+	/**
+	 * @param	{String}		name		Tag name
+	 * @param	{Integer}	type		Tag type
+	 * @return	{Integer[]|FALSE}	Array of itemIDs of items linked to
+	 *									deleted tag, or FALSE if no
+	 *									matching tag found
+	 */
+	function _deleteConflictingTag(name, type, uploadIDs) {
+		var tagID = Zotero.Tags.getID(name, type);
+		if (tagID) {
+			var tag = Zotero.Tags.get(tagID);
+			var linkedItems = tag.getLinkedItems(true);
+			Zotero.Tags.erase(tagID);
+			// DEBUG: should purge() be called by Tags.erase()
+			Zotero.Tags.purge();
+			
+			Zotero.Sync.removeFromUpdated(
+				uploadIDs.updated.tags, tagID
+			);
+			
+			uploadIDs.deleted.tags.push({
+				id: tagID,
+				key: tag.key
+			});
+			
+			return linkedItems;
+		}
+		
+		return false;
 	}
 	
 	

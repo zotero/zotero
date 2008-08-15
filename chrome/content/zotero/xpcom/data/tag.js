@@ -280,12 +280,25 @@ Zotero.Tag.prototype.save = function () {
 			key
 		];
 		
-		var sql = "REPLACE INTO tags (" + columns.join(', ') + ") VALUES ("
-			+ placeholders.join(', ') + ")";
-		var insertID = Zotero.DB.query(sql, sqlValues);
-		if (!tagID) {
-			tagID = insertID;
+		if (isNew) {
+			var sql = "INSERT INTO tags (" + columns.join(', ') + ") VALUES ("
+				+ placeholders.join(', ') + ")";
+			var insertID = Zotero.DB.query(sql, sqlValues);
+			if (!tagID) {
+				tagID = insertID;
+			}
 		}
+		else {
+			// Remove tagID from beginning
+			columns.shift();
+			sqlValues.shift();
+			sqlValues.push(tagID);
+			
+			var sql = "UPDATE tags SET " + columns.join("=?, ") + "=?"
+				+ " WHERE tagID=?";
+			Zotero.DB.query(sql, sqlValues);
+		}
+		
 		
 		// Linked items
 		if (this._changed.linkedItems) {
@@ -392,8 +405,7 @@ Zotero.Tag.prototype.serialize = function () {
  *
  * Tags.erase() should be used externally instead of this
  *
- * Actual deletion of tag occurs in Zotero.Tags.purge(),
- * which is called by Tags.erase()
+ * Actual deletion of tag occurs in Zotero.Tags.purge()
  */
 Zotero.Tag.prototype.erase = function () {
 	Zotero.debug('Deleting tag ' + this.id);
