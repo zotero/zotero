@@ -175,7 +175,7 @@ Zotero.Attachments = new function(){
 		Zotero.debug('Importing attachment from URL');
 		
 		// Throw error on invalid URLs
-		urlRe = /^https?:\/\/[^\s]*$/;
+		var urlRe = /^https?:\/\/[^\s]*$/;
 		var matches = urlRe.exec(url);
 		if (!matches) {
 			throw ("Invalid URL '" + url + "' in Zotero.Attachments.importFromURL()");
@@ -351,7 +351,7 @@ Zotero.Attachments = new function(){
 		Zotero.debug('Linking attachment from URL');
 		
 		// Throw error on invalid URLs
-		urlRe = /^https?:\/\/[^\s]*$/;
+		var urlRe = /^https?:\/\/[^\s]*$/;
 		var matches = urlRe.exec(url);
 		if (!matches) {
 			throw ("Invalid URL '" + url + "' in Zotero.Attachments.linkFromURL()");
@@ -1051,22 +1051,20 @@ Zotero.Attachments = new function(){
 		
 		var browser = Zotero.Browser.createHiddenBrowser();
 		
-		Zotero.File.addCharsetListener(browser, new function(){
-			return function(charset, id){
-				var charsetID = Zotero.CharacterSets.getID(charset);
-				if (charsetID){
-					var sql = "UPDATE itemAttachments SET charsetID=" + charsetID
-						+ " WHERE itemID=" + itemID;
-					Zotero.DB.query(sql);
-				}
-				
-				// Chain fulltext indexer inside the charset callback,
-				// since it's asynchronous and a prerequisite
-				Zotero.Fulltext.indexDocument(browser.contentDocument, itemID);
-				
-				Zotero.Browser.deleteHiddenBrowser(browser);
-			};
-		}, itemID);
+		var callback = function(charset, args) {
+			var charsetID = Zotero.CharacterSets.getID(charset);
+			if (charsetID) {
+				var sql = "UPDATE itemAttachments SET charsetID=? "
+					+ "WHERE itemID=?";
+				Zotero.DB.query(sql, [charsetID, itemID]);
+			}
+			
+			// Chain fulltext indexer inside the charset callback,
+			// since it's asynchronous and a prerequisite
+			Zotero.Fulltext.indexDocument(browser.contentDocument, itemID);
+		};
+		
+		Zotero.File.addCharsetListener(browser, callback, itemID);
 		
 		var url = Components.classes["@mozilla.org/network/protocol;1?name=file"]
 					.getService(Components.interfaces.nsIFileProtocolHandler)
