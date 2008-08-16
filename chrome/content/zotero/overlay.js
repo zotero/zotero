@@ -832,6 +832,7 @@ var ZoteroPane = new function()
 				// Create a <description> element, essentially
 				else
 				{
+					label.removeAttribute('value');
 					label.appendChild(document.createTextNode(val));
 				}
 				
