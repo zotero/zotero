@@ -86,8 +86,7 @@
   </citation>
   <bibliography>
     <option name="hanging-indent" value="true"/>
-    <option name="et-al-min" value="6"/>
-    <option name="et-al-use-first" value="6"/>
+    <option name="entry-spacing" value="0"/>
     <sort>
       <key macro="author"/>
       <key variable="title"/>
@@ -95,7 +94,7 @@
     <layout>
       <text variable="citation-number" suffix=". "/>
       <text macro="author" suffix=" "/>
-      <date variable="issued" prefix=" (" suffix=")">
+      <date variable="issued" prefix="(" suffix=")">
 	<date-part name="year"/>
       </date>
       <choose>
@@ -125,11 +124,10 @@
 	  </group>
 	</else-if>
 	<else>
-	  <group class="container" prefix=" " suffix=".">
-	    <text variable="container-title" font-style="italic"/>
-	    <group prefix=". ">
+	  <group class="container" prefix=" ">
+	    <text variable="container-title" form="short" font-style="italic"/>
+	    <group prefix=" ">
 	      <text variable="volume" font-weight="bold"/>
-	      <text variable="issue" prefix="(" suffix=")"/>
 	    </group>
 	    <group prefix=", ">
 	      <text variable="page"/>
