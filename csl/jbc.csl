@@ -78,6 +78,19 @@
       <text variable="publisher-place"/>
     </group>
   </macro>
+  <macro name="edition">
+    <choose>
+      <if is-numeric="edition">
+        <group delimiter=" ">
+	  <number variable="edition" form="ordinal"/>
+	  <text term="edition" form="short" suffix="."/>
+        </group>
+      </if>
+      <else>
+	    <text variable="edition"/>
+      </else>
+    </choose>
+  </macro>
   <citation>
     <option name="collapse" value="citation-number"/>
     <layout prefix="(" suffix=")" delimiter=", ">
@@ -97,9 +110,10 @@
 	<if type="book">
 	  <group suffix=",">
 	    <text macro="title" prefix=" "/>
+	    <text macro="edition" prefix=", "/>
 	    <text macro="editor" prefix=" "/>
 	  </group>
-	  <text prefix=" " suffix="." macro="publisher"/>
+	  <text prefix=" " macro="publisher"/>
 	</if>
 	<else-if type="chapter">
 	  <text macro="title" prefix=" " quotes="true"/>
@@ -111,8 +125,9 @@
 	    </names>
 	    <text variable="container-title"  prefix=" " suffix="."/>
 	    <text variable="collection-title" prefix=" " suffix="."/>
-	    <group suffix=".">
-	      <text macro="publisher" prefix=" "/>
+	    <group>
+	      <text macro="edition" prefix=" "/>
+	      <text macro="publisher" prefix=", "/>
 	      <group prefix=", ">
 		<text variable="page"/>
 	      </group>
