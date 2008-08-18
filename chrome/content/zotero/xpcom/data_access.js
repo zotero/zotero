@@ -1699,6 +1699,8 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 		return true;
 	}
 	catch (e) {
+		Zotero.debug(e);
+		Components.utils.reportError(e);
 		return -2;
 	}
 }
