@@ -16773,7 +16773,7 @@ REPLACE INTO translators VALUES ('8b35ab14-f18a-4f69-8472-b2df18c984da', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('1885b93c-cf37-4b25-aef5-283f42eada9d', '1.0.0b4.r5', '', '2008-02-01 19:30:00', '0', '100', '4', 'Informaworld', 'Michael Berkowitz', 'http://www.informaworld.com', 
+REPLACE INTO translators VALUES ('1885b93c-cf37-4b25-aef5-283f42eada9d', '1.0.0b4.r5', '', '2008-08-18 13:57:14', '0', '100', '4', 'Informaworld', 'Michael Berkowitz', 'http://www.informaworld.com', 
 'function detectWeb(doc, url) {
 	if (url.indexOf("quicksearch") != -1) {
 		return "multiple";
@@ -16835,7 +16835,8 @@ REPLACE INTO translators VALUES ('1885b93c-cf37-4b25-aef5-283f42eada9d', '1.0.0b
 			}
 			thing = stuff.iterateNext();
 		}
-		
+		var pdfurl = newDoc.evaluate(''//div[@id="content"]/div/a[1]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		Zotero.debug(pdfurl);
 		var id = newDoc.location.href.match(/content=([\w\d]+)/);
 		var post = ''tab=citation&selecteditems='' + id[1].substr(1) + ''&content='' + id[1] + ''&citstyle=refworks&showabs=false&format=file'';
 		Zotero.Utilities.HTTP.doPost(''http://www.informaworld.com/smpp/content'', post, function(text) {
@@ -16860,6 +16861,7 @@ REPLACE INTO translators VALUES ('1885b93c-cf37-4b25-aef5-283f42eada9d', '1.0.0b
 				if (doi) {
 					item.DOI = doi;
 				}
+				item.attachments.push({url:pdfurl, title:item.title, mimeType:''application/pdf''});
 				item.complete();
 			});
 			translator.translate();
