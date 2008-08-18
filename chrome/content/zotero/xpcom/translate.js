@@ -941,12 +941,8 @@ Zotero.Translate.prototype._generateErrorString = function(error) {
 	}
 	
 	errorString += "\nurl => "+this.path
-		+ "\nextensions.zotero.cacheTranslatorData => "+Zotero.Prefs.get("cacheTranslatorData")
-		// TODO: Currently using automaticSnapshots pref for everything
-		// Eventually downloadAssociatedFiles may be a separate pref
-		// for PDFs and other large files
-		+ "\nextensions.zotero.downloadAssociatedFiles => "+Zotero.Prefs.get("downloadAssociatedFiles");
-		+ "\nextensions.zotero.automaticSnapshots => "+Zotero.Prefs.get("automaticSnapshots");
+		+ "\ndownloadAssociatedFiles => "+Zotero.Prefs.get("downloadAssociatedFiles")
+		+ "\nautomaticSnapshots => "+Zotero.Prefs.get("automaticSnapshots");
 	return errorString.substr(1);
 }
 
@@ -955,10 +951,10 @@ Zotero.Translate.prototype._generateErrorString = function(error) {
  */
 Zotero.Translate.prototype._reportTranslationFailure = function(errorData) {
 	if(this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
-		var postBody = "ids[]="+escape(this.translator[0].translatorID)+
-					   "&lastUpdated="+escape(this.translator[0].lastUpdated)+
-					   "&extVersion="+escape(Zotero.version)+
-					   "&errorData="+escape(errorData);
+		var postBody = "id=" + encodeURIComponent(this.translator[0].translatorID) +
+					   "&lastUpdated=" + encodeURIComponent(this.translator[0].lastUpdated) +
+					   "&diagnostic=" + encodeURIComponent(Zotero.getSystemInfo()) +
+					   "&errorData=" + encodeURIComponent(errorData);
 		Zotero.Utilities.HTTP.doPost("http://www.zotero.org/repo/report", postBody);
 	}
 }

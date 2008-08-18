@@ -649,7 +649,8 @@ var Zotero = new function(){
 			platform: Zotero.platform,
 			locale: Zotero.locale,
 			appName: appInfo.name,
-			appVersion: appInfo.version
+			appVersion: appInfo.version,
+			extensions: this.getInstalledExtensions().join(', ')
 		};
 		
 		var str = '';
@@ -658,6 +659,31 @@ var Zotero = new function(){
 		}
 		str = str.substr(0, str.length - 2);
 		return str;
+	}
+	
+	
+	/**
+	 * @return	{String[]}		Array of extension names and versions
+	 */
+	this.getInstalledExtensions = function () {
+		var em = Components.classes["@mozilla.org/extensions/manager;1"].
+					getService(Components.interfaces.nsIExtensionManager);
+		var installed = em.getItemList(
+			Components.interfaces.nsIUpdateItem.TYPE_ANY, {}
+		);
+		
+		var addons = [];
+		for each(var addon in installed) {
+			switch (addon.id) {
+				case "zotero@chnm.gmu.edu":
+				case "{972ce4c6-7e08-4474-a285-3208198ce6fd}": // Default theme
+					continue;
+			}
+			
+			addons.push(addon.name + " (" + addon.version
+				+ (addon.type != 2 ? ", " + addon.type : "") + ")");
+		}
+		return addons;
 	}
 	
 	
