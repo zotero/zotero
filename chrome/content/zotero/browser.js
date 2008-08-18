@@ -41,7 +41,7 @@ var Zotero_Browser = new function() {
 	this.scrapeThisPage = scrapeThisPage;
 	this.annotatePage = annotatePage;
 	this.toggleMode = toggleMode;
-	this.setCollapsed = setCollapsed;
+	this.toggleCollapsed = toggleCollapsed;
 	this.chromeLoad = chromeLoad;
 	this.chromeUnload = chromeUnload;
 	this.contentLoad = contentLoad;
@@ -141,8 +141,6 @@ var Zotero_Browser = new function() {
 		else {
 			var tab = _getTabObject(this.tabbrowser.selectedBrowser);
 		}
-		tab.annotateNextLoad = true;
-		tab.annotateID = id;
 	}
 	
 	/*
@@ -182,9 +180,9 @@ var Zotero_Browser = new function() {
 	/*
 	 * expands all annotations
 	 */
-	function setCollapsed(status) {
+	function toggleCollapsed() {
 		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
-		tab.page.annotations.setCollapsed(status);
+		tab.page.annotations.toggleCollapsed();
 	}
 	
 	/*
@@ -340,34 +338,26 @@ var Zotero_Browser = new function() {
 		var tab = _getTabObject(browser);
 		
 		if(isHTML) {
-			if(tab.annotateNextLoad) {				
-				if(Zotero.Annotate.isAnnotated(tab.annotateID)) {
+			var annotationID = Zotero.Annotate.getAnnotationIDFromURL(browser.currentURI.spec);
+			if(annotationID) {
+				if(Zotero.Annotate.isAnnotated(annotationID)) {
 					window.alert(Zotero.getString("annotations.oneWindowWarning"));
-				} else {		
+				} else if(!tab.page.annotations) {
 					// enable annotation
-					tab.page.annotations = new Zotero.Annotations(this, browser, tab.annotateID);
-					Zotero.Annotate.setAnnotated(tab.annotateID, true);
-					browser.contentWindow.addEventListener('beforeunload', function() {			
-						// save annotations
-						try {
-							tab.page.annotations.save();
-						} catch(e) {
-							throw(e);
-						} finally {
-							Zotero.Annotate.setAnnotated(tab.page.annotations.itemID, false);
-						}
-					}, false);
+					tab.page.annotations = new Zotero.Annotations(this, browser, annotationID);
+					var saveAnnotations = function() {
+						tab.page.annotations.save();
+						tab.page.annotations = undefined;
+					};
+					browser.contentWindow.addEventListener('beforeunload', saveAnnotations, false);
+					browser.contentWindow.addEventListener('close', saveAnnotations, false);
+					tab.page.annotations.load();
 				}
 			}
 		}
 		
 		// detect translators
 		tab.detectTranslators(rootDoc, doc);
-		
-		// clear annotateNextLoad
-		if(tab.annotateNextLoad) {
-			tab.annotateNextLoad = tab.annotateID = undefined;
-		}
 	}
 
 	/*
@@ -410,7 +400,7 @@ var Zotero_Browser = new function() {
 		
 		// To execute if document object does not exist
 		_deleteTabObject(event.target.linkedBrowser);
-		toggleMode(null);
+		toggleMode();
 	}
 	
 	
@@ -556,7 +546,7 @@ var Zotero_Browser = new function() {
 			if(selection.isCollapsed) return;
 			
 			if(type == "highlight") {
-	 			tab.page.annotations.createHighlight(selection.getRangeAt(0));
+	 			tab.page.annotations.highlight(selection.getRangeAt(0));
 			} else if(type == "unhighlight") {
 	 			tab.page.annotations.unhighlight(selection.getRangeAt(0));
 			}

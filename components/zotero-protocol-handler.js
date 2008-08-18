@@ -645,7 +645,7 @@ function ChromeExtensionHandler() {
 				
 				if (parseInt(id) != id) {
 					// Proxy annotation icons
-					if (id.match(/^annotation.*\.png$/)) {
+					if (id.match(/^annotation.*\.(png|html|css|gif)$/)) {
 						var chromeURL = 'chrome://zotero/skin/' + id;
 						var file = Zotero.convertChromeURLToFile(chromeURL);
 					}
