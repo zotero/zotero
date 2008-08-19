@@ -457,21 +457,13 @@ Zotero.Utilities.Ingester.prototype.parseContextObject = function(co, item) {
 // Ingester adapters for Zotero.Utilities.HTTP to handle proxies
 
 Zotero.Utilities.Ingester.prototype.loadDocument = function(url, succeeded, failed) {
-	this.processDocuments([ url ], succeeded, null, failed);
+	this.processDocuments([url], succeeded, null, failed);
 }
 
-Zotero.Utilities.Ingester._protocolRe = new RegExp();
-Zotero.Utilities.Ingester._protocolRe.compile("^(?:(?:http|https|ftp):|[^:](?:/.*)?$)", "i");
 Zotero.Utilities.Ingester.prototype.processDocuments = function(urls, processor, done, exception) {
 	if(this.translate.locationIsProxied) {
 		for(var i in urls) {
-			if(this.translate.locationIsProxied) {
-				urls[i] = Zotero.Ingester.ProxyMonitor.properToProxy(urls[i]);
-			}
-			// check for a protocol colon
-			if(!Zotero.Utilities.Ingester._protocolRe.test(urls[i])) {
-				throw("invalid URL in processDocuments");
-			}
+			urls[i] = Zotero.Utilities.HTTP.convertURL(urls[i], this.translate);
 		}
 	}
 	
@@ -501,12 +493,7 @@ Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done,
 		var url = urls.shift();
 	}
 	
-	if(this.translate.locationIsProxied) {
-		url = Zotero.Ingester.ProxyMonitor.properToProxy(url);
-	}
-	if(!Zotero.Utilities.Ingester._protocolRe.test(url)) {
-		throw("invalid URL in processDocuments");
-	}
+	url = Zotero.Utilities.HTTP.convertURL(url, this.translate);
 	
 	var me = this;
 	
@@ -530,12 +517,7 @@ Zotero.Utilities.Ingester.HTTP.prototype.doGet = function(urls, processor, done,
 }
 
 Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone, requestContentType, responseCharset) {
-	if(this.translate.locationIsProxied) {
-		url = Zotero.Ingester.ProxyMonitor.properToProxy(url);
-	}
-	if(!Zotero.Utilities.Ingester._protocolRe.test(url)) {
-		throw("invalid URL in processDocuments");
-	}
+	url = Zotero.Utilities.HTTP.convertURL(url, this.translate);
 	
 	var translate = this.translate;
 	Zotero.Utilities.HTTP.doPost(url, body, function(xmlhttp) {
@@ -551,13 +533,6 @@ Zotero.Utilities.Ingester.HTTP.prototype.doPost = function(url, body, onDone, re
 // accessed outside the sandbox, and even if it could, it wouldn't let scripts
 // access across domains, so everything's replicated here.
 Zotero.Utilities.HTTP = new function() {
-	this.doGet = doGet;
-	this.doPost = doPost;
-	this.doHead = doHead;
-	this.doOptions = doOptions;
-	this.browserIsOffline = browserIsOffline;
-	
-	
 	/**
 	* Send an HTTP GET request via XMLHTTPRequest
 	*
@@ -566,7 +541,7 @@ Zotero.Utilities.HTTP = new function() {
 	* doGet can be called as:
 	* Zotero.Utilities.HTTP.doGet(url, onDone)
 	**/
-	function doGet(url, onDone, onError, responseCharset) {
+	this.doGet = function(url, onDone, onError, responseCharset) {
 		Zotero.debug("HTTP GET "+url);
 		if (this.browserIsOffline()){
 			return false;
@@ -601,7 +576,6 @@ Zotero.Utilities.HTTP = new function() {
 		return true;
 	}
 	
-	
 	/**
 	* Send an HTTP POST request via XMLHTTPRequest
 	*
@@ -610,7 +584,7 @@ Zotero.Utilities.HTTP = new function() {
 	* doPost can be called as:
 	* Zotero.Utilities.HTTP.doPost(url, body, onDone)
 	**/
-	function doPost(url, body, onDone, requestContentType, responseCharset) {
+	this.doPost = function(url, body, onDone, requestContentType, responseCharset) {
 		Zotero.debug("HTTP POST "+body+" to "+url);
 		
 		if (this.browserIsOffline()){
@@ -648,8 +622,7 @@ Zotero.Utilities.HTTP = new function() {
 		return true;
 	}
 	
-	
-	function doHead(url, onDone) {
+	this.doHead = function(url, onDone) {
 		Zotero.debug("HTTP HEAD "+url);
 		if (this.browserIsOffline()){
 			return false;
@@ -684,7 +657,6 @@ Zotero.Utilities.HTTP = new function() {
 		return true;
 	}
 	
-	
 	/**
 	* Send an HTTP OPTIONS request via XMLHTTPRequest
 	*
@@ -694,7 +666,7 @@ Zotero.Utilities.HTTP = new function() {
 	* The status handler, which doesn't really serve a very noticeable purpose
 	* in our code, is required for compatiblity with the Piggy Bank project
 	**/
-	function doOptions(url, body, onDone) {
+	this.doOptions = function(url, body, onDone) {
 		Zotero.debug("HTTP OPTIONS "+url);
 		if (this.browserIsOffline()){
 			return false;
@@ -729,12 +701,27 @@ Zotero.Utilities.HTTP = new function() {
 		return true;
 	}
 	
-	
-	function browserIsOffline() { 
+	this.browserIsOffline = function() { 
 		return Components.classes["@mozilla.org/network/io-service;1"]
 			.getService(Components.interfaces.nsIIOService).offline;
 	}
 	
+	this.convertURL = function(url, translate) {
+		const protocolRe = /^(?:(?:http|https|ftp):)/i;
+		const fileRe = /^[^:]*/;
+		
+		if(translate.locationIsProxied) {
+			url = Zotero.Ingester.ProxyMonitor.properToProxy(url);
+		}
+		if(protocolRe.test(url)) return url;
+		if(!fileRe.test(url)) {
+			throw "Invalid URL supplied for HTTP request";
+		} else {
+			return Components.classes["@mozilla.org/network/io-service;1"].
+				getService(Components.interfaces.nsIIOService).
+				newURI(translate.location, "", null).resolve(url);
+		}
+	}
 	
 	function _stateChange(xmlhttp, onDone, responseCharset){
 		switch (xmlhttp.readyState){
@@ -758,8 +745,6 @@ Zotero.Utilities.HTTP = new function() {
 			break;
 		}
 	}
-	
-	
 }
 
 // Downloads and processes documents with processor()
