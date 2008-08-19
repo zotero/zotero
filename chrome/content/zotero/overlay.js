@@ -846,11 +846,35 @@ var ZoteroPane = new function()
 					var checkState = { value: Zotero.Prefs.get('lastRenameAssociatedFile') };
 					
 					while (true) {
-						var result = nsIPS.prompt(window,
+						// Don't show "Rename associated file" option for
+						// linked URLs
+						if (linkMode = item.ref.getAttachmentLinkMode() ==
+								Zotero.Attachments.LINK_MODE_LINKED_URL) {
+							var result = nsIPS.prompt(
+								window,
+								'',
+								Zotero.getString('pane.item.attachments.rename.title'),
+								newTitle,
+								null,
+								{}
+							);
+							
+							// If they hit cancel or left it blank
+							if (!result || !newTitle.value) {
+								return;
+							}
+							
+							break;
+						}
+						
+						var result = nsIPS.prompt(
+							window,
+							'',
 							Zotero.getString('pane.item.attachments.rename.title'),
-							'', newTitle,
+							newTitle,
 							Zotero.getString('pane.item.attachments.rename.renameAssociatedFile'),
-							checkState);
+							checkState
+						);
 						
 						// If they hit cancel or left it blank
 						if (!result || !newTitle.value) {

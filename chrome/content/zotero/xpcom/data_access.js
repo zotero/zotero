@@ -1675,6 +1675,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 	var file = this.getFile();
 	if (!file) {
+		Zotero.debug("Attachment file not found in renameAttachmentFile()", 2);
 		return false;
 	}
 	
@@ -1695,7 +1696,6 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 		
 		file.moveTo(file.parent, newName);
 		this.relinkAttachmentFile(file);
-		
 		return true;
 	}
 	catch (e) {
