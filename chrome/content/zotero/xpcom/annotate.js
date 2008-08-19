@@ -23,7 +23,8 @@
 const TEXT_TYPE = Components.interfaces.nsIDOMNode.TEXT_NODE;
 
 /**
- * Global functions for annotations
+ * Globally accessible functions relating to annotations
+ * @namespace
  **/
 Zotero.Annotate = new function() {
 	var _annotated = {};
@@ -32,11 +33,11 @@ Zotero.Annotate = new function() {
 	this.alternativeHighlightColor = "#555fa9";
 	
 	/**
-	 * Gets the pixel offset of an item from the top left of a page.
+	 * Gets the pixel offset of an item from the top left of a page
 	 *
 	 * @param {Node} node DOM node to get the pixel offset of
 	 * @param {Integer} offset Text offset
-	 * @return X and Y coordinates, in an array
+	 * @return {Integer[]} X and Y coordinates
 	 **/
 	this.getPixelOffset = function(node, offset) {
 		var x = 0;
@@ -61,8 +62,9 @@ Zotero.Annotate = new function() {
 	}
 	
 	/**
-	 * Parses CSS/HTML color descriptions into an array of 3 values from 0 to 255 representing the
-	 * R, G, and B components
+	 * Parses CSS/HTML color descriptions
+	 *
+	 * @return {Integer[]} An array of 3 values from 0 to 255 representing R, G, and B components
 	 **/
 	this.parseColor = function(color) {
 		const rgbColorRe = /rgb\(([0-9]+), ?([0-9]+), ?([0-9]+)\)/i;
@@ -84,7 +86,11 @@ Zotero.Annotate = new function() {
 	
 	/**
 	 * Gets the city block distance between two colors. Accepts colors in the format returned by
-	 * parseColor()
+	 * Zotero.Annotate.parseColor()
+	 *
+	 * @param {Integer[]} color1
+	 * @param {Integer[]} color2
+	 * @return {Integer} The distance
 	 **/
 	this.getColorDistance = function(color1, color2) {
 		color1 = this.parseColor(color1);
@@ -102,6 +108,7 @@ Zotero.Annotate = new function() {
 	 * Checks to see if a given item is already open for annotation
 	 *
 	 * @param {Integer} id An item ID
+	 * @return {Boolean}
 	 **/
 	this.isAnnotated = function(id) {
 		const XUL_NAMESPACE = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
@@ -138,12 +145,12 @@ Zotero.Annotate = new function() {
 	}
 	
 	/**
-	 * Sometimes, Firefox gives us a node offset inside another node, as opposed to a text offset.
-	 * This function replaces such offsets with references to the nodes themselves.
+	 * Sometimes, Firefox gives us a node offset inside another node, as opposed to a text offset
+	 * This function replaces such offsets with references to the nodes themselves
 	 *
 	 * @param {Node} node DOM node
 	 * @param {Integer} offset Node offset
-	 * @return The DOM node
+	 * @return {Node} The DOM node after dereferencing has taken place
 	 **/
 	this.dereferenceNodeOffset = function(node, offset) {
 		if(offset != 0) {
@@ -162,11 +169,11 @@ Zotero.Annotate = new function() {
 	
 	/**
 	 * Normalizes a DOM range, resolving it to a range that begins and ends at a text offset and
-	 * remains unchanged when serialized to a Path object.
+	 * remains unchanged when serialized to a Zotero.Annotate.Path object
 	 *
 	 * @param {Range} selectedRange The range to normalize
 	 * @param {Function} nsResolver Namespace resolver function
-	 * @return An array containing the start and end Path objects
+	 * @return {Zotero.Annotate.Path[]} Start and end paths
 	 **/
 	this.normalizeRange = function(selectedRange, nsResolver) {
 		var document = selectedRange.startContainer.ownerDocument;
@@ -197,10 +204,12 @@ Zotero.Annotate = new function() {
 	/**
 	 * Takes a node and finds the relevant text node inside of it
 	 *
+	 * @private
 	 * @param {Node} container Node to get text node of
 	 * @param {Integer} offset Node offset (see dereferenceNodeOffset)
 	 * @param {Boolean} isStart Whether to treat this node as a start node. We look for the first
-	 * 	text node from the start of start nodes, or the first from the end of end nodes.
+	 * 	text node from the start of start nodes, or the first from the end of end nodes
+	 * @return {Array} The node and offset
 	 **/
 	function _getTextNode(container, offset, isStart) {
 		var childAttribute = isStart ? "firstChild" : "lastChild";
@@ -232,17 +241,22 @@ Zotero.Annotate = new function() {
 }
 
 /**
- * Path objects serve as the persistent descriptors for points in the DOM. They comprise an XPath,
- * a text node number, and a text offset, which may be referenced by public properties parent,
- * textNode, and offset, respectively. They are invariant to the modifications of the DOM
- * produced by highlights and annotations.
+ * Creates a new Zotero.Annotate.Path object from an XPath, text node index, and text offset
  *
+ * @class A persistent descriptor for a point in the DOM, invariant to modifications of
+ *	the DOM produced by highlights and annotations
+ *
+ * @property {String} parent XPath of parent node of referenced text node, or XPath of referenced
+ *	element
+ * @property {Integer} textNode Index of referenced text node
+ * @property {Integer} offset Offset of referenced point inside text node
+ * 
  * @constructor
  * @param {Document} document DOM document this path references
  * @param {Function} nsResolver Namespace resolver (for XPaths)
  * @param {String} parent (Optional) XPath of parent node
- * @param {Integer} parent (Optional) Text node number
- * @param {Integer} parent (Optional) Text offset
+ * @param {Integer} textNode (Optional) Text node number
+ * @param {Integer} offset (Optional) Text offset
  **/
 Zotero.Annotate.Path = function(document, nsResolver, parent, textNode, offset) {
 	if(parent !== undefined) {
@@ -255,7 +269,7 @@ Zotero.Annotate.Path = function(document, nsResolver, parent, textNode, offset) 
 }
 
 /**
- * Converts a DOM node/offset combination to a Path object
+ * Converts a DOM node/offset combination to a Zotero.Annotate.Path object
  *
  * @param {Node} node The DOM node to reference
  * @param {Integer} offset The text offset, if the DOM node is a text node
@@ -377,9 +391,9 @@ Zotero.Annotate.Path.prototype.fromNode = function(node, offset) {
 }
 
 /**
- * Converts a Path object to a DOM/offset combination
+ * Converts a Zotero.Annotate.Path object to a DOM/offset combination
  *
- * @return The array [node, offset]
+ * @return {Array} Node and offset
  **/
 Zotero.Annotate.Path.prototype.toNode = function() {
 	Zotero.debug("toNode on "+this.parent+" "+this.textNode+", "+this.offset);
@@ -473,7 +487,8 @@ Zotero.Annotate.Path.prototype.toNode = function() {
 }
 
 /**
- * Manages all annotations and highlights for a given item.
+ * Creates a new Zotero.Annotations object
+ * @class Manages all annotations and highlights for a given item
  *
  * @constructor
  * @param {Zotero_Browser} Zotero_Browser object for the tab in which this item is loaded
@@ -497,6 +512,7 @@ Zotero.Annotations = function(Zotero_Browser, browser, itemID) {
 
 /**
  * Creates a new annotation at the cursor position
+ * @return {Zotero.Annotation}
  **/
 Zotero.Annotations.prototype.createAnnotation = function() {
 	var annotation = new Zotero.Annotation(this);
@@ -508,6 +524,7 @@ Zotero.Annotations.prototype.createAnnotation = function() {
  * Highlights text
  *
  * @param {Range} selectedRange Range to highlight
+ * @return {Zotero.Highlight}
  **/
 Zotero.Annotations.prototype.highlight = function(selectedRange) {
 	var startPath, endPath;
@@ -734,9 +751,10 @@ Zotero.Annotations.prototype.toggleCollapsed = function() {
 }
 
 /**
- * Class representing an annotation
+ * @class Represents an individual annotation
  *
  * @constructor
+ * @property {Boolean} collapsed Whether this annotation is collapsed (minimized)
  * @param {Zotero.Annotations} annotationsObj The Zotero.Annotations object corresponding to the
  * 	page this annotation is on
  **/
@@ -933,7 +951,7 @@ Zotero.Annotation.prototype.displayWithAbsoluteCoordinates = function(absX, absY
 /**
  * Collapses or uncollapses annotation
  *
- * @param status {Boolean}
+ * @param {Boolean} status True to collapse, false to uncollapse
  **/
 Zotero.Annotation.prototype.setCollapsed = function(status) {
 	if(status == true) {	// hide iframe
@@ -949,9 +967,10 @@ Zotero.Annotation.prototype.setCollapsed = function(status) {
 
 /**
  * Generates a marker within a paragraph for this annotation. Such markers will remain in place
- * even if the DOM is changed, e.g., by highlighting.
+ * even if the DOM is changed, e.g., by highlighting
  *
- * @param offset {Integer} Text offset within parent node
+ * @param {Integer} offset Text offset within parent node
+ * @private
  **/
 Zotero.Annotation.prototype._generateMarker = function(offset) {
 	// first, we create a new span at the correct offset in the node
@@ -972,9 +991,10 @@ Zotero.Annotation.prototype._generateMarker = function(offset) {
 }
 
 /**
- * Prepare iframe representing this annotation.
+ * Prepare iframe representing this annotation
  *
- * @param select {Boolean} Whether to select the textarea once iframe is prepared.
+ * @param {Boolean} select Whether to select the textarea once iframe is prepared
+ * @private
  **/
 Zotero.Annotation.prototype._addChildElements = function(select) {
 	var me = this;
@@ -1013,7 +1033,8 @@ Zotero.Annotation.prototype._addChildElements = function(select) {
 }
 
 /**
- * Brings annotation to the foreground.
+ * Brings annotation to the foreground
+ * @private
  **/
 Zotero.Annotation.prototype._click = function() {
 	// clear current action
@@ -1025,7 +1046,8 @@ Zotero.Annotation.prototype._click = function() {
 }
 
 /**
- * Asks user to confirm deletion of this annotation.
+ * Asks user to confirm deletion of this annotation
+ * @private
  **/
 Zotero.Annotation.prototype._confirmDelete = function(event) {
 	if (this.textarea.value == '' || !Zotero.Prefs.get('annotations.warnOnClose')) {
@@ -1052,7 +1074,8 @@ Zotero.Annotation.prototype._confirmDelete = function(event) {
 }
 
 /**
- * Deletes this annotation.
+ * Deletes this annotation
+ * @private
  **/
 Zotero.Annotation.prototype._delete = function() {
 	if(this.annotationID) {
@@ -1070,9 +1093,10 @@ Zotero.Annotation.prototype._delete = function() {
 }
 
 /**
- * Called to begin resizing the annotation.
+ * Called to begin resizing the annotation
  *
  * @param {Event} e DOM event corresponding to click on the grippy
+ * @private
  **/
 Zotero.Annotation.prototype._startDrag = function(e) {
 	var me = this;
@@ -1082,13 +1106,19 @@ Zotero.Annotation.prototype._startDrag = function(e) {
 	this.clickStartCols = this.textarea.cols;
 	this.clickStartRows = this.textarea.rows;
 	
-	// add a listener to handle mouse moves
+	/**
+	 * Listener to handle mouse moves
+	 * @inner
+	 **/
 	var handleDrag = function(e) { me._doDrag(e); };
 	this.iframeDoc.addEventListener("mousemove", handleDrag, false);
 	this.document.addEventListener("mousemove", handleDrag, false);
 	
-	// add a listener that gets called when things stop happening
-	endDrag = function() {
+	/**
+	 * Listener to call when mouse is let up
+	 * @inner
+	 **/
+	var endDrag = function() {
 		me.iframeDoc.removeEventListener("mousemove", handleDrag, false);
 		me.document.removeEventListener("mousemove", handleDrag, false);
 		me.iframeDoc.removeEventListener("mouseup", endDrag, false);
@@ -1107,6 +1137,7 @@ Zotero.Annotation.prototype._startDrag = function(e) {
  * Called when mouse is moved while annotation is being resized
  *
  * @param {Event} e DOM event corresponding to mouse move
+ * @private
  **/
 Zotero.Annotation.prototype._doDrag = function(e) {
 	var x = e.screenX - this.clickStartX;
@@ -1130,9 +1161,10 @@ Zotero.Annotation.prototype._doDrag = function(e) {
 }
 
 /**
- * Called to begin moving the annotation.
+ * Called to begin moving the annotation
  *
  * @param {Event} e DOM event corresponding to click on the grippy
+ * @private
  **/
 Zotero.Annotation.prototype._startMove = function(e) {
 	// stop propagation
@@ -1146,6 +1178,11 @@ Zotero.Annotation.prototype._startMove = function(e) {
 	
 	var me = this;
 	// set the handler required to deactivate
+	
+	/**
+	 * Callback to end move action
+	 * @inner
+	 **/
 	this.annotationsObj.clearAction = function() {
 		me.document.removeEventListener("click", me._handleMove, false);
 		body.style.cursor = "auto";
@@ -1153,17 +1190,27 @@ Zotero.Annotation.prototype._startMove = function(e) {
 		me.annotationsObj.clearAction = undefined;
 	}
 	
-	// create a handler for moving mouse
+	/**
+	 * Listener to handle mouse moves on main page
+	 * @inner
+	 **/
 	var handleMoveMouse1 = function(e) {
 		me.displayWithAbsoluteCoordinates(e.pageX + 1, e.pageY + 1);
 	};
+	/**
+	 * Listener to handle mouse moves in iframe
+	 * @inner
+	 **/
 	var handleMoveMouse2 = function(e) {
 		me.displayWithAbsoluteCoordinates(e.pageX + me.iframeX + 1, e.pageY + me.iframeY + 1);
 	};
 	this.document.addEventListener("mousemove", handleMoveMouse1, false);
 	this.iframeDoc.addEventListener("mousemove", handleMoveMouse2, false);
 	
-	// create a handler for clicking
+	/**
+	 * Listener to finish off move when a click is made
+	 * @inner
+	 **/
 	var handleMove = function(e) {
 		me.document.removeEventListener("mousemove", handleMoveMouse1, false);
 		me.iframeDoc.removeEventListener("mousemove", handleMoveMouse2, false);
@@ -1183,10 +1230,11 @@ Zotero.Annotation.prototype._startMove = function(e) {
 }
 
 /**
- * Represents an individual highlighted range
+ * @class Represents an individual highlighted range
  *
  * @constructor
- * @param {Zotero.Annotations} 
+ * @param {Zotero.Annotations} annotationsObj The Zotero.Annotations object corresponding to the
+ *	page this highlight is on
  **/
 Zotero.Highlight = function(annotationsObj) {
 	this.annotationsObj = annotationsObj;
@@ -1199,6 +1247,7 @@ Zotero.Highlight = function(annotationsObj) {
 
 /**
  * Gets the highlighted DOM range
+ * @return {Range} DOM range
  **/
 Zotero.Highlight.prototype.getRange = function() {
 	this.range = this.document.createRange();
@@ -1207,8 +1256,7 @@ Zotero.Highlight.prototype.getRange = function() {
 	[endContainer, endOffset] = this.endPath.toNode();
 	
 	if(!startContainer || !endContainer) {
-		Zotero.debug("Annotate: PATH ERROR in highlight module!");
-		return false;
+		throw("Annotate: PATH ERROR in highlight module!");
 	}
 	
 	this.range.setStart(startContainer, startOffset);
@@ -1232,8 +1280,8 @@ Zotero.Highlight.prototype.initWithDBRow = function(row) {
  * Generates a highlight representing given a DOM range
  *
  * @param {Range} range DOM range
- * @param {Path} startPath Path object representing start of range
- * @param {Path} endPath Path object representing end of range
+ * @param {Zotero.Annotate.Path} startPath Path representing start of range
+ * @param {Zotero.Annotate.Path} endPath Path representing end of range
  **/
 Zotero.Highlight.prototype.initWithRange = function(range, startPath, endPath) {
 	this.startPath = startPath;
@@ -1276,7 +1324,8 @@ Zotero.Highlight.UNHIGHLIGHT_FROM_POINT = 2;
  *
  * @param {Node} container Node to highlight/unhighlight from, or null if mode == UNHIGHLIGHT_ALL
  * @param {Integer} offset Text offset, or null if mode == UNHIGHLIGHT_ALL
- * @param {Path} path Path object representing node, offset combination, or null if mode == UNHIGHLIGHT_ALL
+ * @param {Zotero.Annotate.Path} path Path representing node, offset combination, or null
+ *	if mode == UNHIGHLIGHT_ALL
  * @param {Integer} mode Unhighlight mode
  **/
 Zotero.Highlight.prototype.unhighlight = function(container, offset, path, mode) {
@@ -1344,6 +1393,7 @@ Zotero.Highlight.prototype.unhighlight = function(container, offset, path, mode)
 
 /**
  * Actually highlights the range this object refers to
+ * @private
  **/
 Zotero.Highlight.prototype._highlight = function() {
 	var endUpdated = false;
@@ -1414,6 +1464,8 @@ Zotero.Highlight.prototype._highlight = function() {
  * Highlights a single text node
  *
  * @param {Node} textNode
+ * @return {Node} Span including the highlighted text
+ * @private
  **/
 Zotero.Highlight.prototype._highlightTextNode = function(textNode) {
 	if(!textNode) return;
@@ -1502,6 +1554,8 @@ Zotero.Highlight.prototype._highlightTextNode = function(textNode) {
  *
  * @param {Node} start
  * @param {Node} end
+ * @return {Node} Span containing the first block of highlighted text
+ * @private
  **/
 Zotero.Highlight.prototype._highlightSpaceBetween = function(start, end) {
 	var firstSpan = false;
