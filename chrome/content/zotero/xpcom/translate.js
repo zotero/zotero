@@ -655,7 +655,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 		
 		// add ingester utilities
 		this._sandbox.Zotero.Utilities = new Zotero.Utilities.Ingester(this);
-		this._sandbox.Zotero.Utilities.HTTP = new Zotero.Utilities.Ingester.HTTP(this);
+		this._sandbox.Zotero.Utilities.HTTP = this._sandbox.Zotero.Utilities;
 		
 		// set up selectItems handler
 		this._sandbox.Zotero.selectItems = function(options) { return me._selectItems(options) };
@@ -710,7 +710,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 		// note that setLocation() is not allowed
 		var safeTranslator = new Object();
 		safeTranslator.setSearch = function(arg) { return translation.setSearch(arg) };
-		safeTranslator.setBrowser = function(arg) { return translation.setBrowser(arg) };
+		safeTranslator.setDocument = function(arg) { return translation.setDocument(arg) };
 		safeTranslator.setHandler = function(arg1, arg2) { translation.setHandler(arg1, arg2) };
 		safeTranslator.setString = function(arg) { translation.setString(arg) };
 		safeTranslator.setTranslator = function(arg) { return translation.setTranslator(arg) };
