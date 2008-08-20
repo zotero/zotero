@@ -1,4 +1,4 @@
-Zotero.DataObjects = function (object, objectPlural) {
+Zotero.DataObjects = function (object, objectPlural, id, table) {
 	var self = this;
 	
 	if (!object) {
@@ -11,8 +11,8 @@ Zotero.DataObjects = function (object, objectPlural) {
 	this._ZDO_Object = object.substr(0, 1).toUpperCase() + object.substr(1);
 	this._ZDO_Objects = this._ZDO_objects.substr(0, 1).toUpperCase()
 							+ this._ZDO_objects.substr(1);
-	this._ZDO_id = object + 'ID';
-	this._ZDO_table = this._ZDO_objects;
+	this._ZDO_id = (id ? id : object) + 'ID';
+	this._ZDO_table = table ? table : this._ZDO_objects;
 	
 	
 	/**
