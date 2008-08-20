@@ -22664,7 +22664,7 @@ REPLACE INTO translators VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b4.r1', '', '2008-03-25 00:50:00', '1', '100', '4', 'Project MUSE', 'Simon Kornblith', 'https?://[^/]*muse\.jhu\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/results)', 
+REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b4.r1', '', '2008-08-20 13:07:51', '1', '100', '4', 'Project MUSE', 'Simon Kornblith', 'https?://[^/]*muse\.jhu\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/results)', 
 'function detectWeb(doc, url) {
 	var searchRe = new RegExp("^https?://[^/]+/search/results");
 	if(searchRe.test(url)) {
@@ -22680,22 +22680,22 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	} : null;
 	
 	var searchRe = new RegExp("^https?://[^/]+/search/results");
-	if(searchRe.test(doc.location.href)) {
+	if(detectWeb(doc, url) == "multiple") {
 		var items = new Array();
 		var attachments = new Array();
 		var pdfRe = /\.pdf$/i;
 		var htmlRe = /\.html$/i;
 		
-		var tableRows = doc.evaluate(''/html/body/table[@class="navbar"]/tbody/tr/td//form/table'',
+		var tableRows = doc.evaluate(''//div[@id="advancedsearch"]/save_form/table//tr'',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var tableRow;
 		// Go through table rows
 		while(tableRow = tableRows.iterateNext()) {
 			// aid (article id) is what we need to get it all as one file
-			var input = doc.evaluate(''./tbody/tr/td/input[@name="aid"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			var title = doc.evaluate(''.//b/i/text()'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if(input && input.value && title && title.nodeValue) {
-				items[input.value] = title.nodeValue;
+			var input = doc.evaluate(''.//input[@name="aid"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var title = doc.evaluate(''.//div[@class="title"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if(input && input.value && title && title.textContent) {
+				items[input.value] = title.textContent;
 				
 				var aTags = tableRow.getElementsByTagName("a");
 				
@@ -22714,7 +22714,6 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 				}
 			}
 		}
-		
 		items = Zotero.selectItems(items);
 		if(!items) {
 			return true;
