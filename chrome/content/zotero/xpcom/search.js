@@ -1483,7 +1483,7 @@ Zotero.Search.prototype._generateKey = function () {
 
 
 Zotero.Searches = new function(){
-	Zotero.DataObjects.apply(this, ['search', 'searches']);
+	Zotero.DataObjects.apply(this, ['search', 'searches', 'savedSearch', 'savedSearches']);
 	this.constructor.prototype = new Zotero.DataObjects();
 	
 	this.get = get;
