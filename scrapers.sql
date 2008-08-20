@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-08-19 10:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-08-20 15:20:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-05 07:10:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -16909,7 +16909,7 @@ REPLACE INTO translators VALUES ('f880bf79-d42f-4337-b0d2-7a7de4a48b7d', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('0cdc6a07-38cf-4ec1-b9d5-7a3c0cc89b15', '1.0.0b4.r5', '', '2008-08-20 11:03:27', '0', '100', '4', 'OSTI Energy Citations', 'Michael Berkowitz', 'http://www.osti.gov/energycitations', 
+REPLACE INTO translators VALUES ('0cdc6a07-38cf-4ec1-b9d5-7a3c0cc89b15', '1.0.0b4.r5', '', '2008-08-20 15:20:00', '0', '100', '4', 'OSTI Energy Citations', 'Michael Berkowitz', 'http://www.osti.gov/energycitations', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@class="searchresults"]//a[@class="citation"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
