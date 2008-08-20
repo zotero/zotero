@@ -95,7 +95,7 @@
 				}
 				var csl;
 				if (str.indexOf("<defaults") != -1) {
-					csl = new Zotero.CSL.Compat(str);
+					return "Old-style CSLs are no longer supported.";
 				}
 				else {
 					csl = new Zotero.CSL(str);

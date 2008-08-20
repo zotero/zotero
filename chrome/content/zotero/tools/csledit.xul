@@ -101,7 +101,11 @@
 				}
 				var csl;
 				if (str.indexOf("<defaults") != -1) {
-					csl = new Zotero.CSL.Compat(str);
+					iframe.contentDocument.documentElement.innerHTML = 
+						'<div>'
+						+ "Old-style CSLs are no longer supported."
+						+ '</div>';
+					return;
 				}
 				else {
 					csl = new Zotero.CSL(str);
