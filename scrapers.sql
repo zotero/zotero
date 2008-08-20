@@ -16836,7 +16836,6 @@ REPLACE INTO translators VALUES ('1885b93c-cf37-4b25-aef5-283f42eada9d', '1.0.0b
 			thing = stuff.iterateNext();
 		}
 		var pdfurl = newDoc.evaluate(''//div[@id="content"]/div/a[1]'', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
-		Zotero.debug(pdfurl);
 		var id = newDoc.location.href.match(/content=([\w\d]+)/);
 		var post = ''tab=citation&selecteditems='' + id[1].substr(1) + ''&content='' + id[1] + ''&citstyle=refworks&showabs=false&format=file'';
 		Zotero.Utilities.HTTP.doPost(''http://www.informaworld.com/smpp/content'', post, function(text) {
@@ -16850,7 +16849,6 @@ REPLACE INTO translators VALUES ('1885b93c-cf37-4b25-aef5-283f42eada9d', '1.0.0b
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
 				var type = text.match(/TY\s+\-\s+([^\n]*)/)[1];
-				Zotero.debug(type);
 				if (type == "Journal") {
 					item.itemType = "journalArticle";
 				} else if (type == "Book, Whole") {
@@ -16911,7 +16909,7 @@ REPLACE INTO translators VALUES ('f880bf79-d42f-4337-b0d2-7a7de4a48b7d', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('0cdc6a07-38cf-4ec1-b9d5-7a3c0cc89b15', '1.0.0b4.r5', '', '2008-01-30 21:00:00', '0', '100', '4', 'OSTI Energy Citations', 'Michael Berkowitz', 'http://www.osti.gov/energycitations', 
+REPLACE INTO translators VALUES ('0cdc6a07-38cf-4ec1-b9d5-7a3c0cc89b15', '1.0.0b4.r5', '', '2008-08-20 11:03:27', '0', '100', '4', 'OSTI Energy Citations', 'Michael Berkowitz', 'http://www.osti.gov/energycitations', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//table[@class="searchresults"]//a[@class="citation"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -16937,8 +16935,9 @@ REPLACE INTO translators VALUES ('0cdc6a07-38cf-4ec1-b9d5-7a3c0cc89b15', '1.0.0b
 		urls = [url.match(/osti_id=\d+/)[0]];
 	}
 	for (var i = 0 ; i < urls.length ; i++) {
-		var getstr = ''http://www.osti.gov/energycitations/endnote?osti_id=140097'';
+		var getstr = ''http://www.osti.gov/energycitations/endnote?'' + urls[i];
 		Zotero.Utilities.HTTP.doGet(getstr, function(text) {
+			Zotero.debug(text);
 			text = text.replace(/(%.)/g, "$1 ");
 			var trans = Zotero.loadTranslator("import");
 			trans.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d");
