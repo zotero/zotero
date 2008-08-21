@@ -205,10 +205,7 @@ var Zotero_File_Interface_Export = new function() {
 		}
 		
 		// save options
-		Zotero.debug("EXPORT OPTIONS");
-		Zotero.debug(optionsAvailable);
 		optionString = Zotero.JSON.serialize(optionsAvailable);
-		Zotero.debug(optionString);
 		Zotero.Prefs.set("export.translatorSettings", optionString);
 	}
 	

@@ -28895,7 +28895,7 @@ REPLACE INTO translators VALUES ('af4cf622-eaca-450b-bd45-0f4ba345d081', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '1.0.0b4.r1', '', '2007-03-22 15:55:00', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
+REPLACE INTO translators VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '1.0.8', '', '2008-08-20 01:05:28', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
 'Zotero.addOption("exportNotes", true);
 
 function detectImport() {
@@ -29226,7 +29226,6 @@ function doImport() {
 	};
 	
 	
-	var text = "";
 	var read;
 	
 	// read until we see if the file begins with a parse instruction
@@ -29253,13 +29252,14 @@ function doImport() {
 		}
 	} else {
 		Zotero.setCharacterSet("utf-8");
-		text += firstPart;
 	}
 	
 	// read in 16384 byte increments
+	var text = "";
 	while(read = Zotero.read(16384)) {
 		text += read;
 	}
+	text = text.replace(/<\?xml[^>]+\?>/, "");
 	
 	// parse with E4X
 	var m = new Namespace("http://www.loc.gov/mods/v3");

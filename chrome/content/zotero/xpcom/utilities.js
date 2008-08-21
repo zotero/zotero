@@ -365,17 +365,17 @@ Zotero.Utilities.prototype.capitalizeTitle = function(string, force) {
  * @borrows Zotero.Utilities.HTTP.doPost as this.doPost
  * @param {Zotero.Translate} translate
  */
-Zotero.Utilities.Ingester = function(translate) {
+Zotero.Utilities.Translate = function(translate) {
 	this.translate = translate;
 }
 
-Zotero.Utilities.Ingester.prototype = new Zotero.Utilities();
-Zotero.Utilities.Ingester.prototype.inArray = Zotero.inArray;
-Zotero.Utilities.Ingester.prototype.formatDate = Zotero.Date.formatDate;
-Zotero.Utilities.Ingester.prototype.strToDate = Zotero.Date.strToDate;
-Zotero.Utilities.Ingester.prototype.strToISO = Zotero.Date.strToISO;
-Zotero.Utilities.Ingester.prototype.lookupContextObject = Zotero.OpenURL.lookupContextObject;
-Zotero.Utilities.Ingester.prototype.parseContextObject = Zotero.OpenURL.parseContextObject;
+Zotero.Utilities.Translate.prototype = new Zotero.Utilities();
+Zotero.Utilities.Translate.prototype.inArray = Zotero.inArray;
+Zotero.Utilities.Translate.prototype.formatDate = Zotero.Date.formatDate;
+Zotero.Utilities.Translate.prototype.strToDate = Zotero.Date.strToDate;
+Zotero.Utilities.Translate.prototype.strToISO = Zotero.Date.strToISO;
+Zotero.Utilities.Translate.prototype.lookupContextObject = Zotero.OpenURL.lookupContextObject;
+Zotero.Utilities.Translate.prototype.parseContextObject = Zotero.OpenURL.parseContextObject;
 
 /**
  * Gets the current Zotero version
@@ -392,7 +392,7 @@ Zotero.Utilities.prototype.getVersion = function() {
  * @deprecated Use doc.evaluate() directly instead
  * @type Node[]
  */
-Zotero.Utilities.Ingester.prototype.gatherElementsOnXPath = function(doc, parentNode, xpath, nsResolver) {
+Zotero.Utilities.Translate.prototype.gatherElementsOnXPath = function(doc, parentNode, xpath, nsResolver) {
 	var elmts = [];
 	
 	var iterator = doc.evaluate(xpath, parentNode, nsResolver, Components.interfaces.nsIDOMXPathResult.ANY_TYPE,null);
@@ -411,7 +411,7 @@ Zotero.Utilities.Ingester.prototype.gatherElementsOnXPath = function(doc, parent
  * @deprecated Use doc.evaluate and the "nodeValue" or "textContent" property
  * @type String
  */
-Zotero.Utilities.Ingester.prototype.getNodeString = function(doc, contextNode, xpath, nsResolver) {
+Zotero.Utilities.Translate.prototype.getNodeString = function(doc, contextNode, xpath, nsResolver) {
 	var elmts = this.gatherElementsOnXPath(doc, contextNode, xpath, nsResolver);
 	var returnVar = "";
 	for(var i=0; i<elmts.length; i++) {
@@ -430,7 +430,7 @@ Zotero.Utilities.Ingester.prototype.getNodeString = function(doc, contextNode, x
  * @return {Object} Associative array of link => textContent pairs, suitable for passing to
  *	Zotero.selectItems from within a translator
  */
-Zotero.Utilities.Ingester.prototype.getItemArray = function(doc, inHere, urlRe, rejectRe) {
+Zotero.Utilities.Translate.prototype.getItemArray = function(doc, inHere, urlRe, rejectRe) {
 	var availableItems = new Object();	// Technically, associative arrays are objects
 	
 	// Require link to match this
@@ -484,9 +484,9 @@ Zotero.Utilities.Ingester.prototype.getItemArray = function(doc, inHere, urlRe, 
  * Load a single document in a hidden browser
  *
  * @deprecated Use processDocuments with a single URL
- * @see Zotero.Utilities.Ingester#processDocuments
+ * @see Zotero.Utilities.Translate#processDocuments
  */
-Zotero.Utilities.Ingester.prototype.loadDocument = function(url, succeeded, failed) {
+Zotero.Utilities.Translate.prototype.loadDocument = function(url, succeeded, failed) {
 	Zotero.debug("Zotero.Utilities.loadDocument is deprecated; please use processDocuments in new code");
 	this.processDocuments([url], succeeded, null, failed);
 }
@@ -495,7 +495,7 @@ Zotero.Utilities.Ingester.prototype.loadDocument = function(url, succeeded, fail
  * Already documented in Zotero.Utilities.HTTP
  * @ignore
  */
-Zotero.Utilities.Ingester.prototype.processDocuments = function(urls, processor, done, exception) {
+Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor, done, exception) {
 	if(this.translate.locationIsProxied) {
 		if(typeof(urls) == "string") {
 			urls = [this._convertURL(urls)];
@@ -527,7 +527,7 @@ Zotero.Utilities.Ingester.prototype.processDocuments = function(urls, processor,
 * @param {String} responseCharset Character set to force on the response
 * @return {Boolean} True if the request was sent, or false if the browser is offline
 */
-Zotero.Utilities.Ingester.prototype.doGet = function(urls, processor, done, responseCharset) {
+Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, responseCharset) {
 	var callAgain = false;
 	
 	if(typeof(urls) == "string") {
@@ -564,7 +564,7 @@ Zotero.Utilities.Ingester.prototype.doGet = function(urls, processor, done, resp
  * Already documented in Zotero.Utilities.HTTP
  * @ignore
  */
-Zotero.Utilities.Ingester.prototype.doPost = function(url, body, onDone, requestContentType, responseCharset) {
+Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, requestContentType, responseCharset) {
 	url = this._convertURL(url);
 	
 	var translate = this.translate;
@@ -585,7 +585,7 @@ Zotero.Utilities.Ingester.prototype.doPost = function(url, body, onDone, request
  * @type String
  * @private
  */
-Zotero.Utilities.Ingester.prototype._convertURL = function(url) {
+Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 	const protocolRe = /^(?:(?:http|https|ftp):)/i;
 	const fileRe = /^[^:]*/;
 	
