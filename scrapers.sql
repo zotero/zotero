@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-08-20 15:20:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-08-21 15:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-05 07:10:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -3361,6 +3361,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
+
 REPLACE INTO translators VALUES ('4ea89035-3dc4-4ae3-b22d-726bc0d83a64', '1.0.0b4.r5', '', '2008-07-24 05:30:00', '0', '100', '4', 'Gale - Cengage Learning', 'Adam Crymble', 'http://www.gale.cengage.com', 
 'function detectWeb(doc, url) {
 	
@@ -3490,7 +3491,8 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('f87c10fe-2bdc-4e1e-aedd-7fd20ec4b4c2', '1.0.0b4.r5', '', '2008-07-03 11:50:41', '0', '100', '4', 'Getty Research Library Catalog', 'Adam Crymble', 'http://(opac.pub|library).getty.edu', 
+
+REPLACE INTO translators VALUES ('f87c10fe-2bdc-4e1e-aedd-7fd20ec4b4c2', '1.0.0b4.r5', '', '2008-08-21 15:45:00', '0', '100', '4', 'Getty Research Library Catalog', 'Adam Crymble', 'http://(opac.pub|library).getty.edu', 
 'function detectWeb(doc, url) {
 	
 	var  multiCheck = '''';
@@ -3732,7 +3734,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('330f283f-12e9-4421-aa59-e17ec5f4aa37', '1.0.0b4.r5', '', '2008-06-09 10:51:36', '0', '100', '4', 'Glenbow Library', 'Adam Crymble', 'http://ww2.glenbow.org/', 
+
+
+REPLACE INTO translators VALUES ('330f283f-12e9-4421-aa59-e17ec5f4aa37', '1.0.0b4.r5', '', '2008-08-21 15:45:00', '0', '100', '4', 'Glenbow Library', 'Adam Crymble', 'http://ww2.glenbow.org/', 
 'function detectWeb(doc, url) {
 	
 	if (doc.title.match("Library Main Catalogue Search Results") && doc.location.href.match("GET_RECORD")) {
@@ -3983,9 +3987,9 @@ function doWeb(doc, url) {
 	
 	Zotero.Utilities.processDocuments(uris, scrape, function() {Zotero.done();});
 	Zotero.wait();
-	
-}
-');
+}');
+
+
 REPLACE INTO translators VALUES ('e0234bcf-bc56-4577-aa94-fe86a27f6fd6', '1.0.0b4.r5', '', '2008-08-04 07:10:00', '0', '100', '4', 'The Globe and Mail', 'Adam Crymble', 'http://www.theglobeandmail.com', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -4590,7 +4594,7 @@ function doWeb(doc, url) {
 }');
 
 
-REPLACE INTO translators VALUES ('9418dcc2-cc1e-432b-b7a6-7b00b7402d2f', '1.0.0b4.r5', '', '2008-06-26 13:21:15', '0', '100', '4', 'Hurricane Digital Memory Bank', 'Adam Crymble', 'http://hurricanearchive.org', 
+REPLACE INTO translators VALUES ('9418dcc2-cc1e-432b-b7a6-7b00b7402d2f', '1.0.0b4.r5', '', '2008-08-21 15:45:00', '0', '100', '4', 'Hurricane Digital Memory Bank', 'Adam Crymble', 'http://hurricanearchive.org', 
 'function detectWeb(doc, url) {
 	
 	if (doc.evaluate(''//p[@id="cite-as"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -4691,6 +4695,8 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
+
+
 REPLACE INTO translators VALUES ('add79dfd-7951-4c72-af1d-ce1d50aa4fb4', '1.0.0b4.r5', '', '2008-06-30 17:43:00', '0', '100', '4', 'informIT database', 'Adam Crymble', 'http://www.informit.com', 
 'function detectWeb(doc,  url) {
 	if (doc.title.match("Search Results")) {
@@ -4862,6 +4868,7 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
+
 
 REPLACE INTO translators VALUES ('db0f4858-10fa-4f76-976c-2592c95f029c', '1.0.0b4.r5', '', '2008-07-24 05:30:00', '0', '100', '4', 'Internet Archive', 'Adam Crymble', 'http://www.archive.org', 
 'function detectWeb(doc, url) {
@@ -5115,7 +5122,8 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d1605270-d7dc-459f-9875-74ad8dde1f7d', '1.0.0b4.r5', '', '2008-07-15 13:39:37', '0', '100', '4', 'Le Devoir', 'Adam Crymble', 'http://www.ledevoir.com', 
+
+REPLACE INTO translators VALUES ('d1605270-d7dc-459f-9875-74ad8dde1f7d', '1.0.0b4.r5', '', '2008-08-21 15:45:00', '0', '100', '4', 'Le Devoir', 'Adam Crymble', 'http://www.ledevoir.com', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("Recherche")) {
 		return "multiple";
@@ -5244,7 +5252,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('22d17fb9-ae32-412e-bcc4-7650ed3359bc', '1.0.0b4.r5', '', '2008-06-19 15:26:24', '0', '100', '4', 'Musee du Louvre', 'Adam Crymble', 'http://www.louvre.fr', 
+
+
+REPLACE INTO translators VALUES ('22d17fb9-ae32-412e-bcc4-7650ed3359bc', '1.0.0b4.r5', '', '2008-08-21 15:45:00', '0', '100', '4', 'Musee du Louvre', 'Adam Crymble', 'http://www.louvre.fr', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("recherche")) {
 		return "multiple";
@@ -5393,7 +5403,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();	
 }');
-REPLACE INTO translators VALUES ('5b02e8d4-d8fb-4143-af3d-3576d4c1b49c', '1.0.0b4.r5', '', '2008-07-18 09:58:50', '0', '100', '4', 'National Archives of South Africa', 'Adam Crymble', 'http://www.national.archsrch.gov.za', 
+
+
+REPLACE INTO translators VALUES ('5b02e8d4-d8fb-4143-af3d-3576d4c1b49c', '1.0.0b4.r5', '', '2008-08-21 15:45:00', '0', '100', '4', 'National Archives of South Africa', 'Adam Crymble', 'http://www.national.archsrch.gov.za', 
 'function detectWeb(doc, url) {
 	if (doc.title.match("Results Summary")) {
 		return "multiple";
@@ -5510,7 +5522,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
-REPLACE INTO translators VALUES ('ed28758b-9c39-4e1c-af89-ce1c9202b70f', '1.0.0b4.r5', '', '2008-06-17 14:12:37', '0', '100', '4', 'National Gallery of Art - U.S.A.', 'Adam Crymble', 'http://www.nga.gov/', 
+
+
+REPLACE INTO translators VALUES ('ed28758b-9c39-4e1c-af89-ce1c9202b70f', '1.0.0b4.r5', '', '2008-08-21 15:45:00', '0', '100', '4', 'National Gallery of Art - U.S.A.', 'Adam Crymble', 'http://www.nga.gov/', 
 'function detectWeb(doc, url) {
 	var single = 0;
 	
@@ -7736,6 +7750,7 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }');
+
 
 REPLACE INTO translators VALUES ('add79dfd-7951-4c72-af1d-ce1d50aa4fb4', '1.0.0b4.r5', '', '2008-07-07 14:50:00', '0', '100', '4', 'informIT database', 'Adam Crymble', 'http://www.informit.com', 
 'function detectWeb(doc,  url) {
@@ -10533,7 +10548,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('fc410e64-0252-4cd3-acb1-25e584775fa2', '1.0.0b4.r5', '', '2008-08-21 10:06:24', '0', '100', '4', 'National Library of Australia', 'Michael Berkowitz', 'http://librariesaustralia.nla.gov.au/', 
+REPLACE INTO translators VALUES ('fc410e64-0252-4cd3-acb1-25e584775fa2', '1.0.0b4.r5', '', '2008-08-21 15:45:00', '0', '100', '4', 'National Library of Australia', 'Michael Berkowitz', 'http://librariesaustralia.nla.gov.au/', 
 'function detectWeb(doc, url) {
 	if (url.match("action=Search")) {
 		return "multiple";
@@ -22663,7 +22678,7 @@ REPLACE INTO translators VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b4.r1', '', '2008-08-20 13:07:51', '1', '100', '4', 'Project MUSE', 'Simon Kornblith', 'https?://[^/]*muse\.jhu\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/results)', 
+REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b4.r1', '', '2008-08-21 15:45:00', '1', '100', '4', 'Project MUSE', 'Simon Kornblith', 'https?://[^/]*muse\.jhu\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/results)', 
 'function detectWeb(doc, url) {
 	var searchRe = new RegExp("^https?://[^/]+/search/results");
 	if(searchRe.test(url)) {
