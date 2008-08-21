@@ -1088,6 +1088,16 @@ Zotero.Integration.Session.prototype.editCitation = function(index, citation) {
 	var me = this;
 	var io = new function() { this.wrappedJSObject = this; }
 	
+	// if there's already a citation, make sure we have item IDs in addition to keys
+	if(citation) {
+		for each(var citationItem in citation.citationItems) {
+			if(citationItem.key && !citationItem.itemID) {
+				var item = Zotero.Items.getByKey([citationItem.key]);
+				if(item) citationItem.itemID = item.itemID;
+			}
+		}
+	}
+	
 	// create object to hold citation
 	io.citation = (citation ? citation.clone() : this.style.createCitation());
 	io.citation.properties.index = parseInt(index, 10);

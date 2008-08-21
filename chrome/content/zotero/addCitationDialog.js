@@ -258,7 +258,7 @@ var Zotero_Citation_Dialog = new function () {
 	 * Sorts the list of citations
 	 */
 	function sortCitation() {
-		io.citation.properties.sort = _sortCheckbox.checked;
+		io.citation.properties.sort = _sortCheckbox && _sortCheckbox.checked;
 		if(_sortCheckbox.checked) {
 			_getCitation();
 			
