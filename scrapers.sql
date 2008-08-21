@@ -10533,7 +10533,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('fc410e64-0252-4cd3-acb1-25e584775fa2', '1.0.0b4.r5', '', '2008-06-08 23:00:00', '0', '100', '4', 'National Library of Australia', 'Michael Berkowitz', 'http://librariesaustralia.nla.gov.au/', 
+REPLACE INTO translators VALUES ('fc410e64-0252-4cd3-acb1-25e584775fa2', '1.0.0b4.r5', '', '2008-08-21 10:06:24', '0', '100', '4', 'National Library of Australia', 'Michael Berkowitz', 'http://librariesaustralia.nla.gov.au/', 
 'function detectWeb(doc, url) {
 	if (url.match("action=Search")) {
 		return "multiple";
@@ -10567,21 +10567,20 @@ REPLACE INTO translators VALUES ('fc410e64-0252-4cd3-acb1-25e584775fa2', '1.0.0b
 		}
 		item = new Zotero.Item("book");
 		item.title = Zotero.Utilities.trimInternal(data[''Title:''].match(/^[^/]+/)[0]);
-		if (data[''Author:''].match(/\w+/)) item.creators.push(Zotero.Utilities.cleanAuthor(data[''Author:''], "author", true));
+		if (data[''Author:'']) item.creators.push(Zotero.Utilities.cleanAuthor(data[''Author:''], "author", true));
 		if (data[''Published:''].match(/\w+/)) {
-			var pub = data[''Published:''].match(/^([^:]+):([^,]+),(.*)$/);
+			var pub = data[''Published:''].match(/^([^:]+):(.*)\s+([^\s]+)$/);
 			item.location = Zotero.Utilities.trimInternal(pub[1]);
 			item.publisher = Zotero.Utilities.trimInternal(pub[2]);
 			item.date = Zotero.Utilities.trimInternal(pub[3].replace(/\D/g, ""));
 		}
 		if (data[''Subjects:'']) {
 			var kws = data[''Subjects:''].split(".");
-			Zotero.debug(kws);
 			for each (var key in kws) {
 				if (key.match(/\w+/)) item.tags.push(key);
 			}
 		}
-		if (data[''ISBN:''].match(/\w+/)) item.ISBN = Zotero.Utilities.trimInternal(data[''ISBN:''].match(/^[^(]+/)[0]);
+		if (data[''ISBN:'']) item.ISBN = Zotero.Utilities.trimInternal(data[''ISBN:''].match(/^[^(]+/)[0]);
 		item.complete();
 	}, function() {Zotero.done;});
 	Zotero.wait();
