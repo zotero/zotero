@@ -3,9 +3,9 @@
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
   <info>
     <title>Chinese Std GBT7714 (Numeric)</title>
-	<id>http://www.zotero.org/styles/Chinese-Std-GBT7714-Numeric</id>
-	<link href="http://www.zotero.org/styles/Chinese-Std-GBT7714-Numeric"/>
-	<link href="http://www.tshps.com:8070/crm89prd/psft/V-787291876/25991215182144232771259912948633879244053526821017_GB7714-87.pdf" rel="documentation"/>
+    <id>http://www.zotero.org/styles/Chinese-Std-GBT7714-Numeric</id>
+    <link href="http://www.zotero.org/styles/Chinese-Std-GBT7714-Numeric"/>
+    <link href="http://www.tshps.com:8070/crm89prd/psft/V-787291876/25991215182144232771259912948633879244053526821017_GB7714-87.pdf" rel="documentation"/>
     <author>
       <name>heromyth</name>
       <email>zxpmyth@yahoo.com.cn</email>
@@ -13,8 +13,8 @@
     <category term="engineering"/>
     <category term="generic-base"/>
     <category term="numeric"/>
-    <category term="Science"/>
-    <updated>2008-08-20T13:07:18 08:00</updated>
+    <category term="science"/>
+    <updated>2008-08-21T12:42:52+00:00</updated>
   </info>
   <macro name="author">
     <names variable="author">
@@ -37,10 +37,10 @@
   <macro name="title">
     <choose>
       <if type="book">
-	<text variable="title"/>
+        <text variable="title"/>
       </if>
       <else>
-	<text variable="title"/>
+        <text variable="title"/>
       </else>
     </choose>
   </macro>
@@ -78,38 +78,36 @@
       <text variable="citation-number" prefix="[" suffix="]"/>
       <text macro="author" suffix=". "/>
       <choose>
-	<if type="book">
-	  <group delimiter=",">
-	    <text macro="title" suffix="[M]. " />
-	    <text macro="publisher"/>
-	  </group>
-	</if>
-	<else-if type="chapter">
-	  <group delimiter=". "> 
-	    <text macro="title" suffix="[D]. "/>
-	    <text variable="container-title" font-style="italic"/>
-	    <text macro="editor"/>
-	    <text macro="publisher" />
-	    <text macro="page"/>
-	  </group>
-	</else-if>
-	<else>
-	  <text macro="title" suffix="[J]. " />
-	  <group delimiter=","> 
-	    
-	    <text variable="container-title" />
-	    <date variable="issued" >
-	      <date-part name="month" form="short" suffix=". "/>
-	      <date-part name="year"/>
-	    </date>
-	    <group>
-		    <text variable="volume" prefix=" " />
-		    <text variable="issue" prefix="(" suffix=")" />	
-
-		    <text variable="page" prefix=":" />
-	    </group>
-	  </group>
-	</else>
+        <if type="book">
+          <group delimiter=",">
+            <text macro="title" suffix="[M]. " />
+            <text macro="publisher"/>
+          </group>
+        </if>
+        <else-if type="chapter">
+          <group delimiter=". "> 
+            <text macro="title" suffix="[D]. "/>
+            <text variable="container-title" font-style="italic"/>
+            <text macro="editor"/>
+            <text macro="publisher" />
+            <text macro="page"/>
+          </group>
+        </else-if>
+        <else>
+          <text macro="title" suffix="[J]. " />
+          <group delimiter=",">
+            <text variable="container-title" />
+            <date variable="issued" >
+              <date-part name="month" form="short" suffix=". "/>
+              <date-part name="year"/>
+            </date>
+            <group>
+                <text variable="volume" prefix=" " />
+                <text variable="issue" prefix="(" suffix=")" />
+                <text variable="page" prefix=":" />
+            </group>
+          </group>
+        </else>
       </choose>
       <text macro="access" prefix="; "/>
     </layout>
