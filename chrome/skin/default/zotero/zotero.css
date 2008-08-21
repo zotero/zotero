@@ -206,3 +206,9 @@ zoteromergepane {
 {
 	list-style-image: url('chrome://zotero/skin/treesource-collection.png');
 }
+
+.zotero-warning {
+  font-weight: bold;
+  font-size: 1.25em;
+  margin-bottom: 1em;
+}

@@ -89,4 +89,4 @@ pref("extensions.zotero.sync.server.compressData", true);
 
 // Proxy
 pref("extensions.zotero.proxies.autoRecognize", true);
-pref("extensions.zotero.proxies.transparent", false);
+pref("extensions.zotero.proxies.transparent", true);

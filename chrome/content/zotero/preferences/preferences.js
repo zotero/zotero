@@ -1127,6 +1127,16 @@ function refreshProxyList() {
  */
 function updateProxyPrefs() {
 	Zotero.Prefs.set("proxies.autoRecognize", document.getElementById('zotero-proxies-autoRecognize').checked);
-	Zotero.Prefs.set("proxies.transparent", document.getElementById('zotero-proxies-transparent').checked);
+	
+	var oldTransparent = Zotero.Prefs.get("proxies.transparent");
+	var newTransparent = document.getElementById('zotero-proxies-transparent').checked;
+	if(!oldTransparent && newTransparent) {
+		Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService).alert(window,
+			Zotero.getString("proxies.enableTransparentWarning.title"),
+			Zotero.getString("proxies.enableTransparentWarning.description"));
+	}
+	Zotero.Prefs.set("proxies.transparent", newTransparent);
+	
 	Zotero.Proxies.init()
 }
