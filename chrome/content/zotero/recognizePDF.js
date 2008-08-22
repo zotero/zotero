@@ -23,8 +23,7 @@
 /**
  * @fileOverview Tools for automatically retrieving a citation for the given PDF
  */
-const MAX_PAGES = 2;
-
+ 
 /**
  * Front end for recognizing PDFs
  * @namespace
@@ -94,6 +93,8 @@ Zotero_RecognizePDF.Recognizer = function () {}
  * @param {Function} callback The function to be executed when recognition is complete
  */
 Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, pdfTitle, callback) {
+	const MAX_PAGES = 2;
+	
 	this._pdfTitle = pdfTitle;
 	this._callback = callback;
 	
