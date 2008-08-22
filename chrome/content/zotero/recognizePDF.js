@@ -29,7 +29,7 @@ const MAX_PAGES = 2;
  * Front end for recognizing PDFs
  * @namespace
  */
-Zotero_RecognizePDF = new function() {
+var Zotero_RecognizePDF = new function() {
 	/**
 	 * Checks whether a given PDF could theoretically be recognized
 	 * @returns {Boolean} True if the PDF can be recognized, false if it cannot be

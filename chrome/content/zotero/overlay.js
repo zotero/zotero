@@ -1566,6 +1566,7 @@ var ZoteroPane = new function()
 				}
 				
 				if (item.isAttachment()) {
+					var showSep4 = false;
 					hide.push(m.duplicateItem);
 					// If not linked URL, show reindex line
 					if (Zotero.Fulltext.canReindex(item.id)) {
