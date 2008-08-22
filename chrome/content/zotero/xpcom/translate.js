@@ -117,7 +117,7 @@ const BOMs = {
  *
  * output - export output (if no location has been specified)
  */
-Zotero.Translate = function(type, saveItem) {
+Zotero.Translate = function(type, saveItem, saveAttachments) {
 	this.type = type;
 	
 	// import = 0001 = 1
@@ -147,12 +147,8 @@ Zotero.Translate = function(type, saveItem) {
 	}
 	this._numericTypes = this._numericTypes.substr(1);
 	
-	if(saveItem === false) {	// three equals signs means if it's left
-								// undefined, this.saveItem will still be true
-		this.saveItem = false;
-	} else {
-		this.saveItem = true;
-	}
+	this.saveItem = !(saveItem === false);
+	this.saveAttachments = !(saveAttachments === false);
 	
 	this._handlers = new Array();
 	this._streams = new Array();
@@ -1320,7 +1316,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		var downloadAssociatedFiles = Zotero.Prefs.get("downloadAssociatedFiles");
 		
 		// handle attachments
-		if(item.attachments && (automaticSnapshots || downloadAssociatedFiles)) {
+		if(item.attachments && this.saveAttachments && (automaticSnapshots || downloadAssociatedFiles)) {
 			for each(var attachment in item.attachments) {
 				if(this.type == "web") {
 					if(!attachment.url && !attachment.document) {

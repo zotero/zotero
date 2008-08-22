@@ -1482,7 +1482,8 @@ var ZoteroPane = new function()
 			createBib: 11,
 			loadReport: 12,
 			sep4: 13,
-			reindexItem: 14
+			reindexItem: 14,
+			recognizePDF: 15
 		};
 		
 		var menu = document.getElementById('zotero-itemmenu');
@@ -1507,20 +1508,37 @@ var ZoteroPane = new function()
 				hide.push(m.showInLibrary, m.sep1, m.addNote, m.attachSnapshot,
 					m.attachLink, m.sep2, m.duplicateItem);
 				
-				// If all items can be reindexed, show option
+				// If all items can be reindexed, or all items can be recognized, show option
 				var items = this.getSelectedItems();
 				var canIndex = true;
+				var canRecognize = true;
 				for (var i=0; i<items.length; i++) {
-					if (!Zotero.Fulltext.canReindex()) {
+					if (!Zotero.Fulltext.canReindex(items[i].id)) {
 						canIndex = false;
+					}
+					
+					if(!Zotero_RecognizePDF.canRecognize(items[i])) {
+						canRecognize = false;
+					}
+					
+					if(!canIndex && !canRecognize) {
 						break;
 					}
 				}
 				if (canIndex) {
-					show.push(m.sep4, m.reindexItem);
+					show.push(m.reindexItem);
+				} else {
+					hide.push(m.reindexItem);
 				}
-				else {
-					hide.push(m.sep4, m.reindexItem);
+				if (canRecognize) {
+					show.push(m.recognizePDF);
+				} else {
+					hide.push(m.recognizePDF);
+				}
+				if(canIndex || canRecognize) {
+					show.push(m.sep4);
+				} else {
+					hide.push(m.sep4);
 				}
 			}
 			// Single item selected
@@ -1551,15 +1569,28 @@ var ZoteroPane = new function()
 					hide.push(m.duplicateItem);
 					// If not linked URL, show reindex line
 					if (Zotero.Fulltext.canReindex(item.id)) {
-						show.push(m.sep4, m.reindexItem);
+						show.push(m.reindexItem);
+						showSep4 = true;
+					} else {
+						hide.push(m.reindexItem);
 					}
-					else {
-						hide.push(m.sep4, m.reindexItem);
+					
+					if (Zotero_RecognizePDF.canRecognize(item)) {
+						show.push(m.recognizePDF);
+						showSep4 = true;
+					} else {
+						hide.push(m.recognizePDF);
+					}
+					
+					if(showSep4) {
+						show.push(m.sep4);
+					} else {
+						hide.push(m.sep4);
 					}
 				}
 				else {
 					show.push(m.duplicateItem);
-					hide.push(m.sep4, m.reindexItem);
+					hide.push(m.sep4, m.reindexItem, m.recognizePDF);
 				}
 			}
 		}
@@ -1576,7 +1607,8 @@ var ZoteroPane = new function()
 			
 			disable.push(m.showInLibrary, m.duplicateItem, m.deleteItem,
 				m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
-			hide.push(m.addNote, m.attachSnapshot, m.attachLink, m.sep2, m.sep4, m.reindexItem);
+			hide.push(m.addNote, m.attachSnapshot, m.attachLink, m.sep2, m.sep4, m.reindexItem,
+				m.recognizePDF);
 		}
 		
 		// Remove from collection
@@ -1596,6 +1628,7 @@ var ZoteroPane = new function()
 		menu.childNodes[m.createBib].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
 		menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
 		menu.childNodes[m.reindexItem].setAttribute('label', Zotero.getString('pane.items.menu.reindexItem' + multiple));
+		menu.childNodes[m.recognizePDF].setAttribute('label', Zotero.getString('pane.items.menu.recognizePDF' + multiple));
 		
 		for (var i in disable)
 		{
