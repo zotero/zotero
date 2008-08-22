@@ -37,6 +37,7 @@
     <script src="fileInterface.js"/>
 	<script src="reportInterface.js"/>
 	<script src="timelineInterface.js"/>
+	<script src="recognizePDF.js"/>
 	<script src="browser.js"/>
 	<script src="chrome://global/content/nsDragAndDrop.js"/>
 	<script src="chrome://global/content/nsTransferable.js"/>
@@ -108,6 +109,7 @@
 					<menuitem oncommand="Zotero_Report_Interface.loadItemReport()"/>
 					<menuseparator/>
 					<menuitem oncommand="ZoteroPane.reindexItem();"/>
+					<menuitem oncommand="Zotero_RecognizePDF.recognizeSelected();"/>
 				</popup>
 			</popupset>
 			
