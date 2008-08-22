@@ -24,7 +24,7 @@
 -- Set the following timestamp to the most recent scraper update date
 REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-08-21 15:45:00'));
 
-REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-05 07:10:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
+REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
 
 	var suffixRe = new RegExp("https?://(?:www\.)?amazon\.([^/]+)/");
@@ -196,9 +196,10 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 			if (xml..ISBN.length()){
 				newItem.ISBN = Zotero.Utilities.cleanString(xml..ISBN[0].text().toString());
 			}
-			if (xml..NumberOfPages.length()){
-				newItem.pages = Zotero.Utilities.cleanString(xml..NumberOfPages[0].text().toString());
-			}
+//			Uncomment when numPages field is added to schema
+//			if (xml..NumberOfPages.length()){
+//				newItem.numPages = Zotero.Utilities.cleanString(xml..NumberOfPages[0].text().toString());
+//			}
 			var title = Zotero.Utilities.cleanString(xml..Title[0].text().toString());
 			if(title.lastIndexOf("(") != -1 && title.lastIndexOf(")") == title.length-1) {
 				title = title.substring(0, title.lastIndexOf("(")-1);
