@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="http://xbiblio.svn.sourceforge.net/viewvc/*checkout*/xbiblio/csl/schema/trunk/csl.rnc" type="compact"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" xml:lang="en" class="in-text" >
+  <info>
+    <title>Chicago Manual of Style (Author-Date format) DE</title>
+    <id>http://www.zotero.org/styles/chicago-author-date_de</id>
+    <link href="http://www.zotero.org/styles/chicago-author-date_de"/>
+    <author>
+      <name>Julian Onions</name>
+      <email>julian.onions@gmail.com</email>
+    </author>
+    <contributor>
+      <name>Peter Baumgartner</name>
+      <email>peter.baumgartner@donau-uni.ac.at</email>
+    </contributor>
+    <category term="author-date"/>
+    <category term="generic-base"/>
+    <updated >2008-01-01T11:11:12+00:00</updated>
+    <link href="http://www.chicagomanualofstyle.org/tools_citationguide.html" rel="documentation"/>
+    <summary>The author-date variant of the Chicago style adapted for German. I addition to the online reference I've used:
+      Turabian, K. L. (2007). A Manual for Writers of Research Papers, Theses, and Dissertations. Chicago Style for Students and Researchers. University Of Chicago Press.
+      Especially figure 18.1 pp 218-220 --
+      NOTE: check all the details and special cases of chapter 19: "Parethetical Citations-Reference List Style: Citing Specific Types of Sources --
+      I used as template the Chicago Manual of Style (Author-Date) Revision 3195 --
+      Code changes to adapt for a valid German version: --
+      * replaced delimiter-precedes-last="always" with "never" to get rid of the last comma in author names --
+      * added colon as suffix of the term "in" --
+      * added colon as suffix of the termin "accessed" --
+      * changed variable "issue" of "article-journal from "no." to "Nr." --
+      I also changed some script logic which in noted in the code: --
+      * do not add day-month at the end of a book, even it is provided in the date field of the zotero database (as it sometimes come from amazon) --
+      * added access date for material with URL. --
+      * not all archive items should end with a fullstop. A doi is followed by a comma and space, a URL just by a space before the date comes. --
+        NOTE: this should be checked more in detail --
+      * if there is just a secondary contributor (e.g. editor of a book) then this is the primary contributor and the generated output should not repeat the name as secondary contributor.
+    </summary>
+  </info>
+  
+  <macro name="secondary-contributors">
+    <choose>
+      <if type="chapter" match="none">
+    <group delimiter=". ">
+      <names variable="editor">
+        <label form="verb-short" prefix=" " text-case="capitalize-first" suffix=". "/>
+        <name and="text" delimiter=", "/>
+      </names>
+      <choose>
+        <if variable="author editor" match="any">
+          <names variable="translator">
+            <label form="verb-short" prefix=" " text-case="capitalize-first" suffix=". "/>
+            <name and="text" delimiter=", " />
+          </names>
+        </if>
+      </choose>
+    </group>
+      </if>
+    </choose>
+  </macro>
+  <macro name="container-contributors">
+    <choose>
+      <if type="chapter">
+    <group prefix="," delimiter=", ">
+      <names variable="editor">
+        <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
+        <name and="text" delimiter=", "/>
+      </names>
+      <choose>
+        <if variable="author editor" match="any">
+          <names variable="translator">
+            <label form="verb-short" prefix=" " text-case="lowercase" suffix=". "/>
+            <name and="text" delimiter=", "/>
+          </names>
+        </if>
+      </choose>
+    </group>
+      </if>
+    </choose>
+  </macro>
+  <macro name="anon">
+    <choose>
+      <if variable="author editor translator" match="none">
+    <text term="anonymous" form="short" text-case="capitalize-first"/>
+	  </if>
+	</choose>
+  </macro>
+  <macro name="editor">
+    <names variable="editor">
+      <name name-as-sort-order="first" and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="never"/>
+      <label form="short" prefix=", " suffix="."/>
+    </names>
+  </macro>
+  <macro name="translator">
+    <names variable="translator">
+      <name name-as-sort-order="first" and="text" sort-separator=", " delimiter=", " delimiter-precedes-last="never"/>
+      <label form="verb-short" prefix=", " suffix="."/>
+    </names>
+  </macro>
+  <macro name="recipient">
+    <choose>
+      <if type="personal_communication">
+    	<choose>
+	  	  <if variable="genre">
+		<text variable="genre" text-case="capitalize-first"/>
+	  	  </if>
+	  	  <else>
+		<text term="letter" text-case="capitalize-first"/>
+		  </else>
+	    </choose>
+	  </if>
+	</choose>
+    <names variable="recipient" delimiter=", ">
+      <label form="verb" prefix=" " text-case="lowercase" suffix=" "/>
+      <name and="text" delimiter=", "/>
+    </names>
+  </macro>
+  <macro name="contributors">
+    <names variable="author">
+      <name and="text" name-as-sort-order="first" sort-separator=", " delimiter=", "
+        delimiter-precedes-last="never"/>
+      <label form="verb-short" prefix=", " suffix="." text-case="lowercase"/>
+      <substitute>
+        <text macro="editor"/>
+        <text macro="translator"/>
+      </substitute>
+    </names>
+    <text macro="anon"/>
+    <text macro="recipient"/>
+  </macro>
+  <macro name="contributors-short">
+    <names variable="author">
+      <name form="short" and="text" delimiter=", " delimiter-precedes-last="never"/>
+      <substitute>
+        <names variable="editor"/>
+        <names variable="translator"/>
+      </substitute>
+    </names>
+    <text macro="anon"/>
+  </macro>
+  <macro name="interviewer">
+    <names variable="interviewer" delimiter=", ">
+      <label form="verb" prefix=" " text-case="capitalize-first" suffix=" "/>
+      <name and="text" delimiter=", "/>
+    </names>
+  </macro>
+  <macro name="archive">
+    <group delimiter=". ">
+      <text variable="archive_location" text-case="capitalize-first"/>
+      <text variable="archive"/>
+      <text variable="archive-place"/>
+     </group>
+  </macro>
+  <macro name="access">
+    <group delimiter=". ">
+	  <choose>
+	    <if type="graphic report" match="any">
+      <text macro="archive"/>
+	    </if>
+	    <else-if type="book thesis chapter article-journal article-newspaper article-magazine" match="none">
+      <text macro="archive"/>
+	    </else-if>
+	  </choose>
+    </group> <!-- not all items of archive should end with a fullstop. I've transfered end of the delimiter="." group at this place  -->
+      <text variable="DOI" prefix="doi:" suffix=", "/> 
+      <text variable="URL"/>
+      <!-- added date for material on the web -->
+      <group prefix=" (" suffix=")">
+        <text term="accessed" text-case="capitalize-first" suffix=": "/>
+        <date variable="accessed">
+          <date-part name="day" suffix=". "/>
+          <date-part name="month" suffix=" "/>
+          <date-part name="year"/>
+        </date>
+      </group>
+   
+  </macro>
+  <macro name="title">
+    <choose>
+      <if variable="title" match="none">
+        <choose>
+          <if type="personal_communication" match="none">
+        <text variable="genre" text-case="capitalize-first"/>
+          </if>
+        </choose>
+      </if>
+      <else-if type="book">
+        <text variable="title" font-style="italic"/>
+      </else-if>
+      <else>
+        <text variable="title"/>
+      </else>
+    </choose>
+  </macro>
+  <macro name="edition">
+    <choose>
+      <if type="book chapter" match="any">
+    <choose>
+      <if is-numeric="edition">
+        <group delimiter=" ">
+          <number variable="edition" form="ordinal"/>
+          <text term="edition" form="short" suffix="."/>
+        </group>
+      </if>
+      <else>
+        <text variable="edition" suffix="."/>
+      </else>
+    </choose>
+      </if>
+    </choose>
+  </macro>
+  <macro name="locators">
+    <choose>
+      <if type="article-journal">
+        <text variable="volume" prefix=" "/>
+        <text variable="issue" prefix=", Nr. "/>
+      </if>
+      <else-if type="book">
+        <group prefix=". " delimiter=". ">
+          <group>
+            <text term="volume" form="short" text-case="capitalize-first" suffix=". "/>
+            <number variable="volume" form="numeric"/>
+          </group>
+          <group>
+            <number variable="number-of-volumes" form="numeric"/>
+            <text term="volume" form="short" prefix=" " suffix="." plural="true"/>
+          </group>
+        </group>
+      </else-if>
+    </choose>
+  </macro>
+  <macro name="locators-chapter">
+    <choose>
+      <if type="chapter">
+        <group prefix=", ">
+          <text variable="volume" suffix=":"/>
+          <text variable="page"/>
+        </group>
+      </if>
+    </choose>
+  </macro>
+  <macro name="locators-article">
+    <choose>
+      <if type="article-newspaper">
+        <group prefix=", " delimiter=", ">
+          <group>
+        <text variable="edition" suffix=" "/>
+        <text term="edition" prefix=" "/>
+          </group>
+          <group>
+        <text term="section" form="short" suffix=". "/>
+        <text variable="section"/>
+          </group>
+        </group>
+      </if>
+      <else-if type="article-journal">
+    <text variable="page" prefix=": "/>
+      </else-if>
+    </choose>
+  </macro>
+  <macro name="point-locators">
+    <group>
+      <choose>
+	    <if locator="page" match="none">
+	  <label variable="locator" form="short" include-period="true" suffix=" "/>
+	    </if>
+	  </choose>
+      <text variable="locator"/>
+	</group>
+  </macro>
+  <macro name="container-prefix">
+    <text term="in" text-case="capitalize-first" suffix=":"/>
+  </macro>
+  <macro name="container-title">
+    <choose>
+      <if type="chapter">
+        <text macro="container-prefix" suffix=" "/>
+      </if>
+    </choose>
+    <text variable="container-title" font-style="italic"/>
+  </macro>
+  <macro name="publisher">
+    <group delimiter=": ">
+      <text variable="publisher-place"/>
+      <text variable="publisher"/>
+    </group>
+  </macro>
+  <macro name="date">
+    <date variable="issued">
+      <date-part name="year"/>
+    </date>
+  </macro>
+  <macro name="day-month">
+    <date variable="issued">
+      <date-part name="month"/>
+      <date-part name="day" prefix=" "/>
+    </date>
+  </macro>
+  <macro name="collection-title">
+    <text variable="collection-title"/>
+    <text variable="collection-number" prefix=" "/>
+  </macro>
+  <macro name="event">
+    <group>
+      <text term="presented at" suffix=" "/>
+      <text variable="event"/>
+    </group>
+  </macro>
+  <macro name="description">
+    <group delimiter=". ">
+      <text macro="interviewer"/>
+      <text variable="medium" text-case="capitalize-first"/>
+    </group>
+    <choose>
+      <if variable="title" match="none"> </if>
+      <else-if type="thesis"> </else-if>
+      <else>
+        <text variable="genre" text-case="capitalize-first" prefix=". "/>
+      </else>
+    </choose>
+  </macro>
+  <macro name="issue">
+    <choose>
+      <if type="article-journal">
+        <text macro="day-month" prefix=" (" suffix=")"/>
+      </if>
+      <else-if type="speech">
+        <group prefix=" " delimiter=", ">
+          <text macro="event"/>
+          <text macro="day-month"/>
+          <text variable="event-place"/>
+        </group>
+      </else-if>
+      <else-if type="article-newspaper article-magazine" match="any">
+        <text macro="day-month" prefix=", "/>
+      </else-if>
+      <!-- do not add day-month at the end of a book, even it is provided in the date field of the zotero database (as it sometimes come from amazon) -->
+      <else-if type="book">
+        <text macro="publisher" prefix=". " />
+      </else-if>
+      <else>
+        <group prefix=". " delimiter=", ">
+          <choose>
+            <if type="thesis">
+              <text variable="genre" text-case="capitalize-first"/>
+            </if>
+          </choose>
+          <text macro="publisher"/>
+          <text macro="day-month"/>
+        </group>
+      </else>
+    </choose>
+  </macro>
+  <citation>
+    <option name="et-al-min" value="4"/>
+    <option name="et-al-use-first" value="1"/>
+    <option name="et-al-subsequent-min" value="4"/>
+    <option name="et-al-subsequent-use-first" value="1"/>
+    <option name="disambiguate-add-year-suffix" value="true"/>
+    <option name="disambiguate-add-names" value="true"/>
+    <option name="disambiguate-add-givenname" value="true"/>
+    <layout prefix="(" suffix=")" delimiter="; ">
+      <group delimiter=", ">
+        <group delimiter=" ">
+          <text macro="contributors-short" />
+          <text macro="date"/>
+        </group>
+        <text macro="point-locators"/>
+      </group>
+    </layout>
+  </citation>
+  <bibliography>
+    <option name="hanging-indent" value="true"/>
+    <option name="et-al-min" value="11"/>
+    <option name="et-al-use-first" value="7"/>
+    <option name="subsequent-author-substitute" value="---"/>
+    <option name="entry-spacing" value="0"/>
+    <sort>
+      <key macro="contributors"/>
+      <key variable="issued"/>
+    </sort>
+    <layout suffix=".">
+      <text macro="contributors" suffix=". "/>
+      <text macro="date" suffix=". "/>
+      <text macro="title"/>
+      <text macro="description"/>
+      <!-- if there are only secondary-contributors then do no repeat secondary contributors 
+      I know this code should be somewhere else in the macro part of the file but I couldn't find the right place 
+      Help will be appreciated -->
+      <choose> 
+        <if variable="author" match="any">
+            <text macro="secondary-contributors" prefix=". "/>
+          </if>
+      </choose> 
+      <text macro="container-title" prefix=". "/>
+      <text macro="container-contributors"/>
+      <text macro="locators-chapter"/>
+      <text macro="edition" prefix=". "/>
+      <text macro="locators"/>
+      <text macro="collection-title" prefix=". "/>
+      <text macro="issue"/>
+      <text macro="locators-article"/>
+      <text macro="access" prefix=". "/>
+    </layout>
+  </bibliography>
+</style>
