@@ -12071,7 +12071,7 @@ REPLACE INTO translators VALUES ('bdaac15c-b0ee-453f-9f1d-f35d00c7a994', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-05-19 19:00:00', '1', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://[^/]*web2.artstor.org[^/]*', 
+REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-08-29 14:26:14', '1', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://[^/]artstor.org[^/]*', 
 'function detectWeb(doc, url) {
 	if (url.match(/(S|s)earch/) && (doc.evaluate(''//div[@id="thumbContentWrap"]/div'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/\w+/))) return "multiple"
 }', 
@@ -26174,7 +26174,7 @@ REPLACE INTO translators VALUES ('19643c25-a4b2-480d-91b7-4e0b761fb6ad', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d75381ee-7d8d-4a3b-a595-b9190a06f43f', '1.0.0b3.r1', '', '2007-04-05 19:45:00', '0', '100', '4', 'Scitation', 'Eugeniy Mikhailov', '^https?://(?:www\.)?scitation.aip.org', 
+REPLACE INTO translators VALUES ('d75381ee-7d8d-4a3b-a595-b9190a06f43f', '1.0.0b3.r1', '', '2008-08-21 11:32:13', '0', '100', '4', 'Scitation', 'Eugeniy Mikhailov', '^https?://(?:www\.)?scitation.aip.org', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -26229,8 +26229,12 @@ REPLACE INTO translators VALUES ('d75381ee-7d8d-4a3b-a595-b9190a06f43f', '1.0.0b
 		// load translator for RIS
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		Zotero.debug(text);
 		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+			var doi = text.match(/ER\s{2}\-\s.*org\/(.*)\n/)[1];
+			if (doi) item.DOI = doi;
+			item.complete();
+		});
 		translator.translate();
 
 		Zotero.done();
