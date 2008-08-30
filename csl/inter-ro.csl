@@ -38,19 +38,19 @@
   </macro>
   <macro name="author">
     <names variable="author">
-      <name delimiter=", " delimiter-precedes-last="always" font-variant="small-caps" sort-separator=", "/>
+      <name delimiter=", " delimiter-precedes-last="always" sort-separator=", "/>
       <label form="short" prefix=" (" suffix=".)"/>
       <substitute>
-	<names variable="editor" font-variant="small-caps"/> 
+	<names variable="editor"/> 
       </substitute>
     </names>
   </macro>
   <macro name="author-bib">
     <names variable="author">
-      <name name-as-sort-order="all" form="long" delimiter="; " delimiter-precedes-last="always" font-variant="small-caps" sort-separator=", "/>
+      <name name-as-sort-order="all" form="long" delimiter="; " delimiter-precedes-last="always" sort-separator=", "/>
       <label form="short" prefix=" (" suffix=".)"/>
       <substitute>
-	<names variable="editor" font-variant="small-caps"/>
+	<names variable="editor"/>
       </substitute>
     </names>
   </macro>
