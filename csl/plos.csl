@@ -139,7 +139,7 @@
 	    <text variable="container-title" form="short"/>
 	    <text variable="volume"/>
 	  </group>
-	  <text variable="page" prefix=":" suffix="." />
+	  <text variable="page" prefix=": " suffix="." />
 	</else>
       </choose>
       <text prefix=" " macro="access" />

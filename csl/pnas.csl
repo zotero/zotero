@@ -12,7 +12,7 @@
     <category term="science"/>
     <updated>2008-01-14T08:48:39+00:00</updated>
     <summary>The Proceedings of the National Academy of Sciences Journal style.</summary>
-    <link href="http://www.pnas.org/misc/iforc.shtml" rel="documentation"/>
+    <link href="http://www.pnas.org/site/misc/iforc.shtml#order" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor" prefix=" " delimiter=", ">
