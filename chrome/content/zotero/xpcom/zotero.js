@@ -305,8 +305,7 @@ var Zotero = new function(){
 		var id = ZOTERO_CONFIG.GUID;
 		var em = Components.classes["@mozilla.org/extensions/manager;1"].
 					getService(Components.interfaces.nsIExtensionManager);
-		var installDir = em.getInstallLocation(id).location;
-		installDir.append(id);
+		var installDir = em.getInstallLocation(id).getItemLocation(id);
 		return installDir;
 	}
 	
