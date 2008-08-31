@@ -265,8 +265,11 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 							var type = 'null';
 						}
 						else {
-							throw('Invalid bound parameter ' + params[i] +
-								' in ' + Zotero.varDump(params));
+							var msg = 'Invalid bound parameter ' + params[i]
+								+ ' in ' + Zotero.varDump(params)
+								+ ' [QUERY: ' + sql + ']';
+							Zotero.debug(msg);
+							throw(msg);
 						}
 				}
 				var value = params[i];

@@ -303,9 +303,9 @@ var ZoteroPane = new function()
 			// Focus the quicksearch on pane open
 			setTimeout("document.getElementById('zotero-tb-search').inputField.select();", 1);
 			
-			if (Zotero.Prefs.get('sync.server.autoSync') && Zotero.Sync.Server.enabled) {
+			if (Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Server.enabled) {
 				setTimeout(function () {
-					Zotero.Sync.Server.sync();
+					Zotero.Sync.Runner.sync();
 				}, 1000);
 			}
 		}
