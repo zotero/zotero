@@ -13,7 +13,7 @@
     <updated/>
     <summary>Antonie van Leeuwenhoek
 International Journal of General and Molecular Microbiology.</summary>
-    <link href="http://www.springer.com/east/home/life+sci/microbiology?SGWID=5-10037-70-35549341-0%38detailsPage=contentItemPage%38contentItemId=138521%38CIPageCounter=CI_FOR_AUTHORS_AND_EDITORS_PAGE0#anchor4" rel="documentation"/>
+    <link href="http://www.springer.com/life+sci/microbiology/journal/10482" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor" delimiter=", ">
@@ -39,7 +39,6 @@ International Journal of General and Molecular Microbiology.</summary>
       <substitute>
 	<names variable="editor"/>
 	<names variable="translator"/>
-	<text macro="anon"/>
       </substitute>
     </names>
   </macro>
@@ -85,10 +84,8 @@ International Journal of General and Molecular Microbiology.</summary>
     </date>
   </macro>
   <citation>
-    <option name="et-al-min" value="6"/>
+    <option name="et-al-min" value="3"/>
     <option name="et-al-use-first" value="1"/>
-    <option name="et-al-subsequent-min" value="6"/>
-    <option name="et-al-subsequent-use-first" value="1"/>
     <option name="disambiguate-add-year-suffix" value="true"/>
     <option name="disambiguate-add-names" value="true"/>
     <option name="disambiguate-add-givenname" value="true"/>
@@ -105,34 +102,37 @@ International Journal of General and Molecular Microbiology.</summary>
   </citation>
   <bibliography>
     <option name="hanging-indent" value="true"/>
-    <option name="et-al-min" value="6"/>
-    <option name="et-al-use-first" value="1"/>
-    <layout suffix=".">
+    <option name="et-al-min" value="11"/>
+    <option name="et-al-use-first" value="3"/>
+    <sort>
+      <key macro="author"/>
+      <key variable="title"/>
+    </sort>
+    <layout>
       <text macro="author"/>
       <date variable="issued" prefix=" (" suffix=")">
 	<date-part name="year"/>
       </date>
       <choose>
 	<if type="book">
-	  <group delimiter=" " prefix=" ">
+	  <group prefix=" ">
 	    <text macro="title"/>
-	    <text macro="edition"/>
-	    <text macro="editor" />
-	    <text macro="publisher" />
+	    <text macro="edition" prefix=", "/>
+	    <text macro="publisher" prefix=" "/>
 	  </group>
 	</if>
 	<else-if type="chapter">
 	  <group class="container" prefix=" " delimiter=" ">
 	    <text macro="title" suffix="."/>
 	    <text term="in" text-case="capitalize-first" suffix=":"/>
-	    <group delimiter=", ">
+	    <group>
 	      <text macro="editor"/>
-	      <text variable="container-title" />
+	      <text variable="container-title" prefix=" " />
 	      <text variable="collection-title" prefix=" " suffix="."/>
-	    <text macro="edition" />
+	      <text macro="edition" prefix=", "/>
 	    </group>
 	  </group>
-	  <group suffix=".">
+	  <group>
 	    <text macro="publisher" prefix=" "/>
 	    <group prefix=", ">
 	      <label variable="page" suffix=". " form="short"/>
@@ -142,7 +142,7 @@ International Journal of General and Molecular Microbiology.</summary>
 	</else-if>
 	<else>
 	  <text macro="title" prefix=" " suffix="."/>
-	  <group class="container" delimiter=":" prefix=" " suffix=".">
+	  <group class="container" delimiter=":" prefix=" ">
 	    <group delimiter=" ">
 	      <text variable="container-title" form="short" />
 	      <text variable="volume" />
@@ -151,7 +151,7 @@ International Journal of General and Molecular Microbiology.</summary>
 	  </group>
 	</else>
       </choose>
-      <text variable="DOI" prefix=" DOI: "/>
+      <text variable="DOI" prefix=". DOI: "/>
     </layout>
   </bibliography>
 </style>
