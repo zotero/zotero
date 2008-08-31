@@ -241,7 +241,7 @@ Zotero.Sync = new function() {
 
 
 /**
- * Notifier observer to add deleted objects to syncDeleteLog
+ * Notifier observer to add deleted objects to syncDeleteLog/storageDeleteLog
  * 		plus related methods
  */
 Zotero.Sync.EventListener = new function () {
@@ -313,17 +313,26 @@ Zotero.Sync.EventListener = new function () {
 			return;
 		}
 		
+		var isItem = Zotero.Sync.getObjectTypeName(objectTypeID) == 'item';
+		
 		var ZU = new Zotero.Utilities;
 		
 		Zotero.DB.beginTransaction();
 		
 		if (event == 'delete') {
 			var sql = "INSERT INTO syncDeleteLog VALUES (?, ?, ?, ?)";
-			var statement = Zotero.DB.getStatement(sql);
+			var syncStatement = Zotero.DB.getStatement(sql);
+			
+			if (isItem && Zotero.Sync.Storage.active) {
+				var storageEnabled = true;
+				var sql = "INSERT INTO storageDeleteLog VALUES (?, ?)";
+				var storageStatement = Zotero.DB.getStatement(sql);
+			}
+			var storageBound = false;
 			
 			var ts = Zotero.Date.getUnixTimestamp();
 			
-			for(var i=0, len=ids.length; i<len; i++) {
+			for (var i=0, len=ids.length; i<len; i++) {
 				if (_deleteBlacklist[ids[i]]) {
 					Zotero.debug("Not logging blacklisted '"
 						+ type + "' id " + ids[i]
@@ -331,24 +340,51 @@ Zotero.Sync.EventListener = new function () {
 					continue;
 				}
 				
-				var key = extraData[ids[i]].old.primary.key;
+				var oldItem = extraData[ids[i]].old;
+				var key = oldItem.primary.key;
 				
-				statement.bindInt32Parameter(0, objectTypeID);
-				statement.bindInt32Parameter(1, ids[i]);
-				statement.bindStringParameter(2, key);
-				statement.bindInt32Parameter(3, ts);
+				if (!key) {
+					throw("Key not provided in notifier object in "
+						+ "Zotero.Sync.EventListener.notify()");
+				}
+				
+				syncStatement.bindInt32Parameter(0, objectTypeID);
+				syncStatement.bindInt32Parameter(1, ids[i]);
+				syncStatement.bindStringParameter(2, key);
+				syncStatement.bindInt32Parameter(3, ts);
+				
+				if (storageEnabled &&
+						oldItem.primary.itemType == 'attachment' &&
+						[
+							Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+							Zotero.Attachments.LINK_MODE_IMPORTED_URL
+						].indexOf(oldItem.attachment.linkMode) != -1) {
+					storageStatement.bindStringParameter(0, key);
+					storageStatement.bindInt32Parameter(1, ts);
+					storageBound = true;
+				}
 				
 				try {
-					statement.execute();
+					syncStatement.execute();
+					if (storageBound) {
+						storageStatement.execute();
+						storageBound = false;
+					}
 				}
 				catch(e) {
-					statement.reset();
+					syncStatement.reset();
+					if (storageEnabled) {
+						storageStatement.reset();
+					}
 					Zotero.DB.rollbackTransaction();
 					throw(Zotero.DB.getLastErrorString());
 				}
 			}
 			
-			statement.reset();
+			syncStatement.reset();
+			if (storageEnabled) {
+				storageStatement.reset();
+			}
 		}
 		
 		Zotero.DB.commitTransaction();
@@ -374,12 +410,154 @@ Zotero.Sync.EventListener = new function () {
 }
 
 
+Zotero.Sync.Runner = new function () {
+	this.__defineGetter__("lastSyncError", function () {
+		return _lastSyncError;
+	});
+	this.__defineSetter__("lastSyncError", function (val) {
+		_lastSyncError = val ? val : '';
+	});
+	
+	var _lastSyncError;
+	var _autoSyncTimer;
+	var _queue;
+	var _running;
+	
+	this.init = function () {
+		this.EventListener.init();
+	}
+	
+	
+	this.sync = function () {
+		if (_running) {
+			throw ("Sync already running in Zotero.Sync.Runner.sync()");
+		}
+		_queue = [
+			Zotero.Sync.Storage.sync,
+			Zotero.Sync.Server.sync,
+			Zotero.Sync.Storage.sync
+		];
+		_running = true;
+		this.clearSyncTimeout();
+		this.setSyncIcon('animate');
+		this.next();
+	}
+	
+	
+	this.next = function () {
+		if (!_queue.length) {
+			this.setSyncIcon();
+			_running = false;
+			return;
+		}
+		var func = _queue.shift();
+		func();
+	}
+	
+	
+	this.reset = function () {
+		_queue = [];
+	}
+	
+	
+	this.setSyncTimeout = function () {
+		// check if server/auto-sync are enabled
+		
+		var autoSyncTimeout = 15;
+		Zotero.debug('Setting auto-sync timeout to ' + autoSyncTimeout + ' seconds');
+		
+		if (_autoSyncTimer) {
+			_autoSyncTimer.cancel();
+		}
+		else {
+			_autoSyncTimer = Components.classes["@mozilla.org/timer;1"].
+				createInstance(Components.interfaces.nsITimer);
+		}
+		
+		// {} implements nsITimerCallback
+		_autoSyncTimer.initWithCallback({ notify: function (event, type, ids) {
+			if (event == 'refresh') {
+				return;
+			}
+			
+			if (Zotero.Sync.Storage.syncInProgress) {
+				Zotero.debug('Storage sync already in progress -- skipping auto-sync', 4);
+				return;
+			}
+			
+			if (Zotero.Sync.Server.syncInProgress) {
+				Zotero.debug('Sync already in progress -- skipping auto-sync', 4);
+				return;
+			}
+			Zotero.Sync.Runner.sync();
+		}}, autoSyncTimeout * 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+	}
+	
+	
+	this.clearSyncTimeout = function () {
+		if (_autoSyncTimer) {
+			_autoSyncTimer.cancel();
+		}
+	}
+	
+	
+	this.setSyncIcon = function (status) {
+		status = status ? status : '';
+		
+		switch (status) {
+			case '':
+			case 'animate':
+			case 'error':
+				break;
+			
+		default:
+			throw ("Invalid sync icon status '" + status
+					+ "' in Zotero.Sync.Runner.setSyncIcon()");
+		}
+		
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+			.getService(Components.interfaces.nsIWindowMediator);
+		var win = wm.getMostRecentWindow('navigator:browser');
+		var icon = win.document.getElementById('zotero-tb-sync');
+		icon.setAttribute('status', status);
+		
+		switch (status) {
+			case 'animate':
+				icon.setAttribute('disabled', true);
+				break;
+			
+			default:
+				icon.setAttribute('disabled', false);
+		}
+	}
+}
+
+
+Zotero.Sync.Runner.EventListener = {
+	init: function () {
+		Zotero.Notifier.registerObserver(this);
+	},
+	
+	notify: function (event, type, ids, extraData) {
+		// TODO: skip others
+		if (type == 'refresh') {
+			return;
+		}
+		
+		if (Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Server.enabled
+				&& !Zotero.Sync.Server.syncInProgress
+				&& !Zotero.Sync.Storage.syncInProgress) {
+			Zotero.Sync.Runner.setSyncTimeout();
+		}
+	}
+}
+
+
 
 /**
  * Methods for syncing with the Zotero Server
  */
 Zotero.Sync.Server = new function () {
-	this.init = init;
 	this.login = login;
 	this.sync = sync;
 	this.lock = lock;
@@ -388,14 +566,12 @@ Zotero.Sync.Server = new function () {
 	this.resetServer = resetServer;
 	this.resetClient = resetClient;
 	this.logout = logout;
-	this.setSyncTimeout = setSyncTimeout;
-	this.clearSyncTimeout = clearSyncTimeout;
-	this.setSyncIcon = setSyncIcon;
 	
 	this.__defineGetter__('enabled', function () {
 		// Set auto-sync expiry
-		var expiry = new Date("September 1, 2008 00:00:00");
+		var expiry = new Date("November 1, 2008 00:00:00");
 		if (new Date() > expiry) {
+			Components.utils.reportError("Build has expired -- syncing disabled");
 			return false;
 		}
 		
@@ -469,6 +645,7 @@ Zotero.Sync.Server = new function () {
 		}
 	});
 	
+	this.__defineGetter__("syncInProgress", function () _syncInProgress);
 	this.__defineGetter__("sessionIDComponent", function () {
 		return 'sessionid=' + _sessionID;
 	});
@@ -483,12 +660,6 @@ Zotero.Sync.Server = new function () {
 	});
 	this.__defineSetter__("lastLocalSyncTime", function (val) {
 		Zotero.DB.query("REPLACE INTO version VALUES ('lastlocalsync', ?)", { int: val });
-	});
-	this.__defineGetter__("lastSyncError", function () {
-		return _lastSyncError;
-	});
-	this.__defineSetter__("lastSyncError", function (val) {
-		_lastSyncError = val ? val : '';
 	});
 	
 	this.nextLocalSyncDate = false;
@@ -508,13 +679,6 @@ Zotero.Sync.Server = new function () {
 	var _syncInProgress;
 	var _sessionID;
 	var _sessionLock;
-	var _lastSyncError;
-	var _autoSyncTimer;
-	
-	
-	function init() {
-		this.EventListener.init();
-	}
 	
 	
 	function login(callback) {
@@ -572,8 +736,7 @@ Zotero.Sync.Server = new function () {
 	
 	
 	function sync() {
-		Zotero.Sync.Server.clearSyncTimeout();
-		Zotero.Sync.Server.setSyncIcon('animate');
+		Zotero.Sync.Runner.setSyncIcon('animate');
 		
 		if (_attempts < 0) {
 			_error('Too many attempts in Zotero.Sync.Server.sync()');
@@ -594,6 +757,7 @@ Zotero.Sync.Server = new function () {
 			_error("Sync operation already in progress");
 		}
 		
+		Zotero.debug("Beginning server sync");
 		_syncInProgress = true;
 		
 		// Get updated data
@@ -682,8 +846,10 @@ Zotero.Sync.Server = new function () {
 					Zotero.Sync.Server.lastLocalSyncTime = nextLocalSyncTime;
 					Zotero.Sync.Server.nextLocalSyncDate = false;
 					Zotero.DB.commitTransaction();
-					Zotero.Sync.Server.unlock();
-					_syncInProgress = false;
+					Zotero.Sync.Server.unlock(function () {
+						_syncInProgress = false;
+						Zotero.Sync.Runner.next();
+					});
 					return;
 				}
 				
@@ -722,8 +888,10 @@ Zotero.Sync.Server = new function () {
 					//throw('break2');
 					
 					Zotero.DB.commitTransaction();
-					Zotero.Sync.Server.unlock();
-					_syncInProgress = false;
+					Zotero.Sync.Server.unlock(function () {
+						_syncInProgress = false;
+						Zotero.Sync.Runner.next();
+					});
 				}
 				
 				var compress = Zotero.Prefs.get('sync.server.compressData');
@@ -894,12 +1062,6 @@ Zotero.Sync.Server = new function () {
 			if (callback) {
 				callback();
 			}
-			
-			// Reset sync icon and last error
-			if (syncInProgress) {
-				Zotero.Sync.Server.lastSyncError = '';
-				Zotero.Sync.Server.setSyncIcon();
-			}
 		});
 	}
 	
@@ -1001,6 +1163,7 @@ Zotero.Sync.Server = new function () {
 		Zotero.DB.query(sql);
 		
 		Zotero.DB.query("DELETE FROM syncDeleteLog");
+		Zotero.DB.query("DELETE FROM storageDeleteLog");
 		
 		sql = "INSERT INTO version VALUES ('syncdeletelog', ?)";
 		Zotero.DB.query(sql, Zotero.Date.getUnixTimestamp());
@@ -1034,61 +1197,6 @@ Zotero.Sync.Server = new function () {
 				callback();
 			}
 		});
-	}
-	
-	
-	function setSyncTimeout() {
-		// check if server/auto-sync are enabled
-		
-		var autoSyncTimeout = 15;
-		Zotero.debug('Setting auto-sync timeout to ' + autoSyncTimeout + ' seconds');
-		
-		if (_autoSyncTimer) {
-			_autoSyncTimer.cancel();
-		}
-		else {
-			_autoSyncTimer = Components.classes["@mozilla.org/timer;1"].
-				createInstance(Components.interfaces.nsITimer);
-		}
-		
-		// {} implements nsITimerCallback
-		_autoSyncTimer.initWithCallback({ notify: function (event, type, ids) {
-			if (event == 'refresh') {
-				return;
-			}
-			if (_syncInProgress) {
-				Zotero.debug('Sync already in progress -- skipping auto-sync');
-				return;
-			}
-			Zotero.Sync.Server.sync();
-		}}, autoSyncTimeout * 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-	}
-	
-	
-	function clearSyncTimeout() {
-		if (_autoSyncTimer) {
-			_autoSyncTimer.cancel();
-		}
-	}
-	
-	
-	function setSyncIcon(status) {
-		status = status ? status : '';
-		
-		switch (status) {
-			case '':
-			case 'animate':
-			case 'error':
-				break;
-			
-		default:
-			throw ("Invalid sync icon status '" + status + "' in Zotero.Sync.Server.setSyncIcon()");
-		}
-		
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			.getService(Components.interfaces.nsIWindowMediator);
-		var win = wm.getMostRecentWindow('navigator:browser');
-		win.document.getElementById('zotero-tb-sync').setAttribute('status', status);
 	}
 	
 	
@@ -1130,14 +1238,15 @@ Zotero.Sync.Server = new function () {
 			Zotero.Sync.Server.unlock()
 		}
 		
-		Zotero.Sync.Server.setSyncIcon('error');
-		
+		Zotero.Sync.Runner.setSyncIcon('error');
 		if (e.name) {
-			Zotero.Sync.Server.lastSyncError = e.name;
+			Zotero.Sync.Runner.lastSyncError = e.name;
 		}
 		else {
-			Zotero.Sync.Server.lastSyncError = e;
+			Zotero.Sync.Runner.lastSyncError = e;
 		}
+		Zotero.debug(e, 1);
+		Zotero.Sync.Runner.reset();
 		throw(e);
 	}
 }
@@ -1180,26 +1289,6 @@ Zotero.BufferedInputListener.prototype = {
 		throw Components.results.NS_ERROR_NO_INTERFACE;
 	}
 }
-
-
-// TODO: use prototype
-Zotero.Sync.Server.EventListener = {
-	init: function () {
-		Zotero.Notifier.registerObserver(this);
-	},
-	
-	notify: function (event, type, ids, extraData) {
-		// TODO: skip others
-		if (type == 'refresh') {
-			return;
-		}
-		
-		if (Zotero.Prefs.get('sync.server.autoSync') && Zotero.Sync.Server.enabled) {
-			Zotero.Sync.Server.setSyncTimeout();
-		}
-	}
-}
-
 
 
 Zotero.Sync.Server.Data = new function() {
@@ -1299,6 +1388,7 @@ Zotero.Sync.Server.Data = new function() {
 		
 		var remoteCreatorStore = {};
 		var relatedItemsStore = {};
+		var itemStorageModTimes = {};
 		
 		Zotero.DB.beginTransaction();
 		
@@ -1527,10 +1617,10 @@ Zotero.Sync.Server.Data = new function() {
 				// Create or overwrite locally
 				obj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode, obj);
 				
-				// If a local tag matches the name of a different remote tag,
-				// delete the local tag and add items linked to it to the
-				// matching remote tag
 				if (isNewObject && type == 'tag') {
+					// If a local tag matches the name of a different remote tag,
+					// delete the local tag and add items linked to it to the
+					// matching remote tag
 					var tagName = xmlNode.@name.toString();
 					var tagType = xmlNode.@type.toString()
 									? parseInt(xmlNode.@type) : 0;
@@ -1562,6 +1652,25 @@ Zotero.Sync.Server.Data = new function() {
 				
 				// Don't use assigned-but-unsaved ids for new ids
 				Zotero.ID.skip(types, obj.id);
+				
+				if (type == 'item' && obj.isAttachment() &&
+						(obj.attachmentLinkMode ==
+							Zotero.Attachments.LINK_MODE_IMPORTED_FILE ||
+						 obj.attachmentLinkMode ==
+							Zotero.Attachments.LINK_MODE_IMPORTED_URL)) {
+					// Mark new attachments for download
+					if (isNewObject) {
+						obj.attachmentSyncState =
+							Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
+					}
+					// Set existing attachments mtime update check
+					else {
+						var mtime = xmlNode.@storageModTime.toString();
+						if (mtime) {
+							itemStorageModTimes[obj.id] = parseInt(mtime);
+						}
+					}
+				}
 			}
 			
 			
@@ -1738,6 +1847,19 @@ Zotero.Sync.Server.Data = new function() {
 				Zotero[Types].erase(toDeleteParents);
 				Zotero.Sync.EventListener.unignoreDeletions(type, toDeleteParents);
 			}
+			
+			
+			// Check mod times of updated items against stored time to see
+			// if they've been updated elsewhere and mark for download if so
+			if (type == 'item') {
+				var ids = [];
+				for (var id in itemStorageModTimes) {
+					ids.push(id);
+				}
+				if (ids.length > 0) {
+					Zotero.Sync.Storage.checkForUpdatedFiles(ids, itemStorageModTimes);
+				}
+			}
 		}
 		
 		var xmlstr = Zotero.Sync.Server.Data.buildUploadXML(uploadIDs);
@@ -1888,10 +2010,18 @@ Zotero.Sync.Server.Data = new function() {
 		if (item.primary.itemType == 'attachment') {
 			xml.@linkMode = item.attachment.linkMode;
 			xml.@mimeType = item.attachment.mimeType;
-			xml.@charset = item.attachment.charset;
+			var charset = item.attachment.charset;
+			if (charset) {
+				xml.@charset = charset;
+			}
 			
-			// Don't include paths for links
+			// Include storage sync time and paths for non-links
 			if (item.attachment.linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
+				var mtime = Zotero.Sync.Storage.getSyncedModificationTime(item.primary.itemID);
+				if (mtime) {
+					xml.@storageModTime = mtime;
+				}
+				
 				var path = <path>{item.attachment.path}</path>;
 				xml.path += path;
 			}
@@ -2018,8 +2148,8 @@ Zotero.Sync.Server.Data = new function() {
 		// Attachment metadata
 		if (item.isAttachment()) {
 			item.attachmentLinkMode = parseInt(xmlItem.@linkMode);
-			item.attachmentMIMEType = xmlItem.@mimeType;
-			item.attachmentCharset = parseInt(xmlItem.@charsetID);
+			item.attachmentMIMEType = xmlItem.@mimeType.toString();
+			item.attachmentCharset = xmlItem.@charset.toString();
 			if (item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) { 
 				item.attachmentPath = xmlItem.path.toString();
 			}

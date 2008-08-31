@@ -1671,6 +1671,14 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("CREATE TABLE proxyHosts (\n    hostID INTEGER PRIMARY KEY,\n    proxyID INTEGER,\n    hostname TEXT,\n    FOREIGN KEY (proxyID) REFERENCES proxies(proxyID)\n)");
 					Zotero.DB.query("CREATE INDEX proxyHosts_proxyID ON proxyHosts(proxyID)");
 				}
+				
+				if (i==40) {
+					Zotero.DB.query("ALTER TABLE itemAttachments ADD COLUMN syncState INT DEFAULT 0");
+					Zotero.DB.query("ALTER TABLE itemAttachments ADD COLUMN storageModTime INT");
+					Zotero.DB.query("CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState)");
+					Zotero.DB.query("CREATE TABLE storageDeleteLog (\n    key TEXT PRIMARY KEY,\n    timestamp INT NOT NULL\n)");
+					Zotero.DB.query("CREATE INDEX storageDeleteLog_timestamp ON storageDeleteLog(timestamp)");
+				}
 			}
 			
 			_updateDBVersion('userdata', toVersion);

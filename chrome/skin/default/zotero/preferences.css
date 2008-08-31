@@ -3,14 +3,8 @@ prefwindow .chromeclass-toolbar
 	display: -moz-box !important; /* Ignore toolbar collapse button on OS X */
 }
 
-/* Prevent bugs in automatic prefpane sizing in Firefox 2.0
-	From http://forums.mozillazine.org/viewtopic.php?p=2883233&sid=e1285f81ea9c824363802ea5ca96c9b2
-*/
 prefwindow {
-   width: 45em;
-}
-prefwindow > prefpane > vbox.content-box {
-   height: 42em;
+   min-width: 600px;
 }
 
 radio[pane]
@@ -72,6 +66,50 @@ grid row hbox:first-child
 #fontSize radio .radio-icon, #statusBarIcon radio .radio-icon
 {
 	margin-left: 6px;
+}
+
+
+/*
+ * Sync pane
+ */
+#zotero-prefpane-sync row, #zotero-prefpane-sync row hbox
+{
+	-moz-box-align: center;
+}
+#zotero-prefpane-sync row label:first-child
+{
+	text-align: right;
+}
+#zotero-prefpane-sync row hbox
+{
+	margin-left: 4px;
+}
+#zotero-prefpane-sync row hbox label:first-child
+{
+	margin-left: 0;
+	margin-right: 0;
+}
+#zotero-prefpane-sync row hbox textbox
+{
+	margin-left: 3px;
+	margin-right: 3px;
+}
+#zotero-prefpane-sync row hbox label:last-child
+{
+	margin-left: 0;
+	margin-right: 10px;
+}
+
+#storage-settings
+{
+	margin-left: 10px;
+	margin-right: 5px;
+}
+
+#storage-verify, #storage-abort, #storage-clean
+{
+	margin-left: 0;
+	min-width: 8em;
 }
 
 

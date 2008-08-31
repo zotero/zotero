@@ -87,8 +87,9 @@ Zotero.Item.prototype._init = function () {
 	
 	this._attachmentLinkMode = null;
 	this._attachmentMIMEType = null;
-	this._attachmentCharset = null;
+	this._attachmentCharset;
 	this._attachmentPath = null;
+	this._attachmentSyncState;
 	
 	this._relatedItems = false;
 }
@@ -1254,22 +1255,13 @@ Zotero.Item.prototype.save = function() {
 			// Attachment
 			if (this.isAttachment()) {
 				var sql = "INSERT INTO itemAttachments (itemID, sourceItemID, linkMode, "
-					+ "mimeType, charsetID, path) VALUES (?,?,?,?,?,?)";
+					+ "mimeType, charsetID, path, syncState) VALUES (?,?,?,?,?,?,?)";
 				var parent = this.getSource();
 				var linkMode = this.attachmentLinkMode;
-				switch (linkMode) {
-					case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
-					case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
-					case Zotero.Attachments.LINK_MODE_LINKED_FILE:
-					case Zotero.Attachments.LINK_MODE_LINKED_URL:
-						break;
-						
-					default:
-						throw ("Invalid attachment link mode " + linkMode + " in Zotero.Item.save()");
-				}
 				var mimeType = this.attachmentMIMEType;
 				var charsetID = this.attachmentCharset;
 				var path = this.attachmentPath;
+				var syncState = this.attachmentSyncState;
 				
 				var bindParams = [
 					itemID,
@@ -1277,7 +1269,8 @@ Zotero.Item.prototype.save = function() {
 					{ int: linkMode },
 					mimeType ? { string: mimeType } : null,
 					charsetID ? { int: charsetID } : null,
-					path ? { string: path } : null
+					path ? { string: path } : null,
+					syncState ? { int: syncState } : 0
 				];
 				Zotero.DB.query(sql, bindParams);
 			}
@@ -1596,21 +1589,24 @@ Zotero.Item.prototype.save = function() {
 			
 			// Attachment
 			if (this._changedAttachmentData) {
-				var sql = "REPLACE INTO itemAttachments (itemID, sourceItemID, linkMode, "
-					+ "mimeType, charsetID, path) VALUES (?,?,?,?,?,?)";
+				var sql = "UPDATE itemAttachments SET sourceItemID=?, "
+					+ "linkMode=?, mimeType=?, charsetID=?, path=?, syncState=? "
+					+ "WHERE itemID=?";
 				var parent = this.getSource();
 				var linkMode = this.attachmentLinkMode;
 				var mimeType = this.attachmentMIMEType;
 				var charsetID = this.attachmentCharset;
 				var path = this.attachmentPath;
+				var syncState = this.attachmentSyncState;
 				
 				var bindParams = [
-					this.id,
 					parent ? parent : null,
 					{ int: linkMode },
 					mimeType ? { string: mimeType } : null,
 					charsetID ? { int: charsetID } : null,
-					path ? { string: path } : null
+					path ? { string: path } : null,
+					syncState ? { int: syncState } : 0,
+					this.id
 				];
 				Zotero.DB.query(sql, bindParams);
 			}
@@ -2109,7 +2105,7 @@ Zotero.Item.prototype.numAttachments = function() {
 * Get an nsILocalFile for the attachment, or false if the associated file
 * doesn't exist
 *
-* _row_ is optional itemAttachments row if available to skip query
+* _row_ is optional itemAttachments row if available to skip queries
 *
 * Note: Always returns false for items with LINK_MODE_LINKED_URL,
 * since they have no files -- use getField('url') instead
@@ -2120,12 +2116,10 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 	}
 	
 	if (!row) {
-		var sql = "SELECT linkMode, path FROM itemAttachments WHERE itemID=?"
-		var row = Zotero.DB.rowQuery(sql, this.id);
-	}
-	
-	if (!row) {
-		throw ('Attachment data not found for item ' + this.id + ' in getFile()');
+		var row = {
+			linkMode: this.attachmentLinkMode,
+			path: this.attachmentPath
+		};
 	}
 	
 	// No associated files for linked URLs
@@ -2144,7 +2138,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			var path = row.path.substr(8);
 			var file = Zotero.Attachments.getStorageDirectory(this.id);
 			file.QueryInterface(Components.interfaces.nsILocalFile);
-			file.append(path);
+			file.setRelativeDescriptor(file, path);
 			if (!file.exists()) {
 				Zotero.debug("Attachment file '" + path + "' not found");
 				throw ('File not found');
@@ -2321,7 +2315,8 @@ Zotero.Item.prototype.__defineSetter__('attachmentLinkMode', function (val) {
 			break;
 			
 		default:
-			throw ("Invalid attachment link mode '" + val + "' in Zotero.Item.attachmentLinkMode setter");
+			throw ("Invalid attachment link mode '" + val
+				+ "' in Zotero.Item.attachmentLinkMode setter");
 	}
 	
 	if (val === this._attachmentLinkMode) {
@@ -2402,18 +2397,18 @@ Zotero.Item.prototype.__defineGetter__('attachmentCharset', function () {
 		return undefined;
 	}
 	
-	if (this._attachmentCharset !== null) {
+	if (this._attachmentCharset != undefined) {
 		return this._attachmentCharset;
 	}
 	
 	if (!this.id) {
-		return '';
+		return null;
 	}
 	
 	var sql = "SELECT charsetID FROM itemAttachments WHERE itemID=?";
 	var charset = Zotero.DB.valueQuery(sql, this.id);
 	if (!charset) {
-		charset = '';
+		charset = null;
 	}
 	this._attachmentCharset = charset;
 	return charset;
@@ -2425,8 +2420,10 @@ Zotero.Item.prototype.__defineSetter__('attachmentCharset', function (val) {
 		throw (".attachmentCharset can only be set for attachment items");
 	}
 	
+	val = Zotero.CharacterSets.getID(val);
+	
 	if (!val) {
-		val = '';
+		val = null;
 	}
 	
 	if (val == this._attachmentCharset) {
@@ -2486,6 +2483,90 @@ Zotero.Item.prototype.__defineSetter__('attachmentPath', function (val) {
 	}
 	this._changedAttachmentData.path = true;
 	this._attachmentPath = val;
+});
+
+
+Zotero.Item.prototype.__defineGetter__('attachmentSyncState', function () {
+	if (!this.isAttachment()) {
+		return undefined;
+	}
+	
+	if (this._attachmentSyncState != undefined) {
+		return this._attachmentSyncState;
+	}
+	
+	if (!this.id) {
+		return undefined;
+	}
+	
+	var sql = "SELECT syncState FROM itemAttachments WHERE itemID=?";
+	var syncState = Zotero.DB.valueQuery(sql, this.id);
+	this._attachmentSyncState = syncState;
+	return syncState;
+});
+
+
+Zotero.Item.prototype.__defineSetter__('attachmentSyncState', function (val) {
+	if (!this.isAttachment()) {
+		throw ("attachmentSyncState can only be set for attachment items");
+	}
+	
+	switch (this.attachmentLinkMode) {
+		case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
+		case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
+			break;
+			
+		default:
+			throw ("attachmentSyncState can only be set for snapshots and "
+				+ "imported files");
+	}
+	
+	switch (val) {
+		case Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD:
+		case Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD:
+		case Zotero.Sync.Storage.SYNC_STATE_IN_SYNC:
+			break;
+			
+		default:
+			throw ("Invalid sync state '" + val
+				+ "' in Zotero.Item.attachmentSyncState setter");
+	}
+	
+	if (val == this._attachmentSyncState) {
+		return;
+	}
+	
+	if (!this._changedAttachmentData) {
+		this._changedAttachmentData = {};
+	}
+	this._changedAttachmentData.syncState = true;
+	this._attachmentSyncState = val;
+});
+
+
+/**
+ * Modification time of an attachment file
+ *
+ * Note: This is the mod time of the file itself, not the last-known mod time
+ * of the file on the storage server as stored in the database
+ *
+ * @return	{Number}		File modification time as UNIX timestamp
+ */
+Zotero.Item.prototype.__defineGetter__('attachmentModificationTime', function () {
+	if (!this.isAttachment()) {
+		return undefined;
+	}
+	
+	if (!this.id) {
+		return undefined;
+	}
+	
+	var file = this.getFile();
+	if (!file) {
+		return undefined;
+	}
+	
+	return file.lastModifiedTime / 1000;
 });
 
 
@@ -2579,16 +2660,26 @@ Zotero.Item.prototype.addTag = function(name, type) {
 	
 	Zotero.DB.beginTransaction();
 	
-	var existingTypes = Zotero.Tags.getTypes(name);
-	if (existingTypes) {
-		// If existing automatic and adding identical user, remove automatic
-		if (type == 0 && existingTypes.indexOf(1) != -1) {
-			this.removeTag(Zotero.Tags.getID(name, 1));
-		}
-		else {
-			Zotero.debug('Identical tag already exists -- not adding tag');
-			Zotero.DB.commitTransaction();
-			return false;
+	var matchingTags = Zotero.Tags.getIDs(name);
+	if (matchingTags) {
+		var itemTags = this.getTags();
+		for each(var id in matchingTags) {
+			if (itemTags.indexOf(id) != -1) {
+				var tag = Zotero.Tags.get(id);
+				// If existing automatic and adding identical user,
+				// remove automatic
+				if (type == 0 && tag.type == 1) {
+					this.removeTag(id);
+					break;
+				}
+				// If existing user and adding automatic, skip
+				else if (type == 1 && tag.type == 0) {
+					Zotero.debug("Identical user tag '" + name
+						+ "' already exists -- skipping automatic tag");
+					Zotero.DB.commitTransaction();
+					return false;
+				}
+			}
 		}
 	}
 	
@@ -2601,9 +2692,9 @@ Zotero.Item.prototype.addTag = function(name, type) {
 	}
 	
 	try {
-		this.addTagByID(tagID);
+		var added = this.addTagByID(tagID);
 		Zotero.DB.commitTransaction();
-		return tagID;
+		return added ? tagID : false;
 	}
 	catch (e) {
 		Zotero.DB.rollbackTransaction();
@@ -2641,8 +2732,12 @@ Zotero.Item.prototype.addTagByID = function(tagID) {
 		throw ('Cannot add invalid tag ' + tagID + ' in Zotero.Item.addTagByID()');
 	}
 	
-	tag.addItem(this.id);
+	var added = tag.addItem(this.id);
+	if (!added) {
+		return false;
+	}
 	tag.save();
+	return true;
 }
 
 Zotero.Item.prototype.hasTag = function(tagID) {

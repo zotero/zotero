@@ -297,6 +297,31 @@ Zotero.Utilities.prototype.isInt = function(x) {
 
 
 /**
+ * Generate a random integer between min and max inclusive
+ *
+ * @param	{Integer}	min
+ * @param	{Integer}	max
+ * @return	{Integer}
+ */
+Zotero.Utilities.prototype.rand = function (min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+/**
+ * Return true according to a given probability
+ *
+ * @param	{Integer}	x		Will return true every x times on average
+ * @return	{Boolean}			On average, TRUE every x times
+ *									the function is called
+ */
+Zotero.Utilities.prototype.probability = function (x) {
+	return this.rand(1, x) == this.rand(1, x);
+}
+
+
+
+/**
  * Determine the necessary data type for SQLite parameter binding
  *
  * @return	int		0 for string, 32 for int32, 64 for int64
@@ -643,9 +668,9 @@ Zotero.Utilities.HTTP = new function() {
 	this.doGet = doGet;
 	this.doPost = doPost;
 	this.doHead = doHead;
-	this.doOptions = doOptions;
 	this.browserIsOffline = browserIsOffline;
 	
+	this.WebDAV = {};
 	
 	/**
 	* Send an HTTP GET request via XMLHTTPRequest
@@ -665,8 +690,9 @@ Zotero.Utilities.HTTP = new function() {
 		
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 						.createInstance();
-		
-		var test = xmlhttp.open('GET', url, true);
+		// Prevent certificate/authentication dialogs from popping up
+		xmlhttp.mozBackgroundRequest = true;
+		xmlhttp.open('GET', url, true);
 		
 		xmlhttp.onreadystatechange = function(){
 			_stateChange(xmlhttp, onDone, responseCharset);
@@ -716,7 +742,8 @@ Zotero.Utilities.HTTP = new function() {
 		
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 					.createInstance();
-		
+		// Prevent certificate/authentication dialogs from popping up
+		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open('POST', url, true);
 		xmlhttp.setRequestHeader("Content-Type", (requestContentType ? requestContentType : "application/x-www-form-urlencoded" ));
 		
@@ -750,8 +777,9 @@ Zotero.Utilities.HTTP = new function() {
 		
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 						.createInstance();
-		
-		var test = xmlhttp.open('HEAD', url, true);
+		// Prevent certificate/authentication dialogs from popping up
+		xmlhttp.mozBackgroundRequest = true;
+		xmlhttp.open('HEAD', url, true);
 		
 		xmlhttp.onreadystatechange = function(){
 			_stateChange(xmlhttp, onDone);
@@ -776,26 +804,30 @@ Zotero.Utilities.HTTP = new function() {
 	
 	
 	/**
-	* Send an HTTP OPTIONS request via XMLHTTPRequest
-	*
-	* doOptions can be called as:
-	* Zotero.Utilities.HTTP.doOptions(url, body, onDone)
-	*
-	* Returns the XMLHTTPRequest object
-	**/
-	function doOptions(url, body, onDone) {
-		Zotero.debug("HTTP OPTIONS "+url);
-		if (this.browserIsOffline()){
+	 * Send an HTTP OPTIONS request via XMLHTTPRequest
+	 *
+	 * @param	{nsIURI}		url
+	 * @param	{Function}	onDone
+	 * @return	{XMLHTTPRequest}
+	 */
+	this.doOptions = function (uri, callback) {
+		// Don't display password in console
+		var disp = uri.clone();
+		disp.password = "********";
+		Zotero.debug("HTTP OPTIONS to " + disp.spec);
+		
+		if (Zotero.Utilities.HTTP.browserIsOffline()){
 			return false;
 		}
 		
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 					.createInstance();
+		// Prevent certificate/authentication dialogs from popping up
+		xmlhttp.mozBackgroundRequest = true;
+		xmlhttp.open('OPTIONS', uri.spec, true);
 		
-		xmlhttp.open('OPTIONS', url, true);
-		
-		xmlhttp.onreadystatechange = function(){
-			_stateChange(xmlhttp, onDone);
+		xmlhttp.onreadystatechange = function() {
+			_stateChange(xmlhttp, callback);
 		};
 		
 		// Temporarily set cookieBehavior to 0 for Firefox 3
@@ -806,7 +838,7 @@ Zotero.Utilities.HTTP = new function() {
 			var cookieBehavior = prefService.getIntPref("network.cookie.cookieBehavior");
 			prefService.setIntPref("network.cookie.cookieBehavior", 0);
 			
-			xmlhttp.send(body);
+			xmlhttp.send(null);
 		}
 		finally {
 			prefService.setIntPref("network.cookie.cookieBehavior", cookieBehavior);
@@ -816,36 +848,231 @@ Zotero.Utilities.HTTP = new function() {
 	}
 	
 	
+	//
+	// WebDAV methods
+	//
+	
+	
+	/**
+	* Send a WebDAV PROP* request via XMLHTTPRequest
+	*
+	* Returns false if browser is offline
+	*
+	* @param		{String}		method			PROPFIND or PROPPATCH
+	* @param		{nsIURI}		uri
+	* @param		{String}		body				XML string
+	* @param		{Function}	callback
+	* @param		{Object}		requestHeaders	e.g. { Depth: 0 }
+	*/
+	this.WebDAV.doProp = function (method, uri, body, callback, requestHeaders) {
+		switch (method) {
+			case 'PROPFIND':
+			case 'PROPPATCH':
+				break;
+			
+			default:
+				throw ("Invalid method '" + method
+					+ "' in Zotero.Utilities.HTTP.doProp");
+		}
+		
+		if (requestHeaders && requestHeaders.depth != undefined) {
+			var depth = requestHeaders.depth;
+		}
+		
+		// Don't display password in console
+		var disp = uri.clone();
+		disp.password = "********";
+		
+		var bodyStart = body.substr(0, 1024);
+		Zotero.debug("HTTP " + method + " "
+			+ (depth != undefined ? "(depth " + depth + ") " : "")
+			+ (body.length > 1024 ?
+				bodyStart + "... (" + body.length + " chars)" : bodyStart)
+			+ " to " + disp.spec);
+		
+		if (Zotero.Utilities.HTTP.browserIsOffline()) {
+			Zotero.debug("Browser is offline", 2);
+			return false;
+		}
+		
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+						.createInstance();
+		// Prevent certificate/authentication dialogs from popping up
+		xmlhttp.mozBackgroundRequest = true;
+		xmlhttp.open(method, uri.spec, true);
+		
+		if (requestHeaders) {
+			for (var header in requestHeaders) {
+				xmlhttp.setRequestHeader(header, requestHeaders[header]);
+			}
+		}
+		
+		xmlhttp.setRequestHeader("Content-Type", 'text/xml; charset="utf-8"');
+		
+		xmlhttp.onreadystatechange = function() {
+			_stateChange(xmlhttp, callback);
+		};
+		
+		xmlhttp.send(body);
+		
+		return xmlhttp;
+	}
+	
+	
+	/**
+	 * Send a WebDAV MKCOL request via XMLHTTPRequest
+	 *
+	 * @param	{nsIURI}		url
+	 * @param	{Function}	onDone
+	 * @return	{XMLHTTPRequest}
+	 */
+	this.WebDAV.doMkCol = function (uri, callback) {
+		// Don't display password in console
+		var disp = uri.clone();
+		disp.password = "********";
+		Zotero.debug("HTTP MKCOL to " + disp.spec);
+		
+		if (Zotero.Utilities.HTTP.browserIsOffline()) {
+			return false;
+		}
+		
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+					.createInstance();
+		// Prevent certificate/authentication dialogs from popping up
+		xmlhttp.mozBackgroundRequest = true;
+		xmlhttp.open('MKCOL', uri.spec, true);
+		xmlhttp.onreadystatechange = function() {
+			_stateChange(xmlhttp, callback);
+		};
+		xmlhttp.send(null);
+		return xmlhttp;
+	}
+	
+	
+	/**
+	 * Send a WebDAV PUT request via XMLHTTPRequest
+	 *
+	 * @param	{nsIURI}		url
+	 * @param	{String}		body			String body to PUT
+	 * @param	{Function}	onDone
+	 * @return	{XMLHTTPRequest}
+	 */
+	this.WebDAV.doPut = function (uri, body, callback) {
+		// Don't display password in console
+		var disp = uri.clone();
+		disp.password = "********";
+		
+		var bodyStart = "'" + body.substr(0, 1024) + "'";
+		Zotero.debug("HTTP PUT "
+			+ (body.length > 1024 ?
+				bodyStart + "... (" + body.length + " chars)" : bodyStart)
+			+ " to " + disp.spec);
+		
+		if (Zotero.Utilities.HTTP.browserIsOffline()) {
+			return false;
+		}
+		
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+					.createInstance();
+		// Prevent certificate/authentication dialogs from popping up
+		xmlhttp.mozBackgroundRequest = true;
+		xmlhttp.open("PUT", uri.spec, true);
+		xmlhttp.onreadystatechange = function() {
+			_stateChange(xmlhttp, callback);
+		};
+		xmlhttp.send(body);
+		return xmlhttp;
+	}
+	
+	
+	/**
+	 * Send a WebDAV PUT request via XMLHTTPRequest
+	 *
+	 * @param	{nsIURI}		url
+	 * @param	{Function}	onDone
+	 * @return	{XMLHTTPRequest}
+	 */
+	this.WebDAV.doDelete = function (uri, callback) {
+		// Don't display password in console
+		var disp = uri.clone();
+		disp.password = "********";
+		
+		Zotero.debug("WebDAV DELETE to " + disp.spec);
+		
+		if (Zotero.Utilities.HTTP.browserIsOffline()) {
+			return false;
+		}
+		
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+					.createInstance();
+		// Prevent certificate/authentication dialogs from popping up
+		xmlhttp.mozBackgroundRequest = true;
+		xmlhttp.open("DELETE", uri.spec, true);
+		xmlhttp.onreadystatechange = function() {
+			_stateChange(xmlhttp, callback);
+		};
+		xmlhttp.send(null);
+		return xmlhttp;
+	}
+	
+	
+	/**
+	 * Get the Authorization header used by a channel
+	 *
+	 * As of Firefox 3.0.1 subsequent requests to higher-level directories
+	 * seem not to authenticate properly and just return 401s, so this
+	 * can be used to manually include the Authorization header in a request
+	 *
+	 * It can also be used to check whether a request was forced to
+	 * use authentication
+	 *
+	 * @param	{nsIChannel}		channel
+	 * @return	{String|FALSE}				Authorization header, or FALSE if none
+	 */
+	this.getChannelAuthorization = function (channel) {
+		try {
+			channel.QueryInterface(Components.interfaces.nsIHttpChannel);
+			var authHeader = channel.getRequestHeader("Authorization");
+			return authHeader;
+		}
+		catch (e) {
+			Zotero.debug(e);
+			return false;
+		}
+	}
+	
+	
 	function browserIsOffline() { 
 		return Components.classes["@mozilla.org/network/io-service;1"]
 			.getService(Components.interfaces.nsIIOService).offline;
 	}
 	
 	
-	function _stateChange(xmlhttp, onDone, responseCharset){
+	function _stateChange(xmlhttp, callback, responseCharset, data) {
 		switch (xmlhttp.readyState){
 			// Request not yet made
 			case 1:
-			break;
-	
-			// Called multiple while downloading in progress
+				break;
+			
+			case 2:
+				break;
+			
+			// Called multiple times while downloading in progress
 			case 3:
-			break;
-	
+				break;
+			
 			// Download complete
 			case 4:
-				if(onDone){
+				if (callback) {
 					// Override the content charset
 					if (responseCharset) {
 						xmlhttp.channel.contentCharset = responseCharset;
 					}
-					onDone(xmlhttp);
+					callback(xmlhttp, data);
 				}
 			break;
 		}
 	}
-	
-	
 }
 
 // Downloads and processes documents with processor()
@@ -953,3 +1180,142 @@ Zotero.Utilities.AutoComplete = new function(){
 		return false;
 	}
 }
+
+
+/**
+ *  Base64 encode / decode
+ *  From http://www.webtoolkit.info/
+ */
+Zotero.Utilities.Base64 = {
+	 // private property
+	 _keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
+	 
+	 // public method for encoding
+	 encode : function (input) {
+		 var output = "";
+		 var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+		 var i = 0;
+		 
+		 input = this._utf8_encode(input);
+		 
+		 while (i < input.length) {
+			 
+			 chr1 = input.charCodeAt(i++);
+			 chr2 = input.charCodeAt(i++);
+			 chr3 = input.charCodeAt(i++);
+			 
+			 enc1 = chr1 >> 2;
+			 enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+			 enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+			 enc4 = chr3 & 63;
+			 
+			 if (isNaN(chr2)) {
+				 enc3 = enc4 = 64;
+			 } else if (isNaN(chr3)) {
+				 enc4 = 64;
+			 }
+			 
+			 output = output +
+			 this._keyStr.charAt(enc1) + this._keyStr.charAt(enc2) +
+			 this._keyStr.charAt(enc3) + this._keyStr.charAt(enc4);
+			 
+		 }
+		 
+		 return output;
+	 },
+	 
+	 // public method for decoding
+	 decode : function (input) {
+		 var output = "";
+		 var chr1, chr2, chr3;
+		 var enc1, enc2, enc3, enc4;
+		 var i = 0;
+		 
+		 input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+		 
+		 while (i < input.length) {
+			 
+			 enc1 = this._keyStr.indexOf(input.charAt(i++));
+			 enc2 = this._keyStr.indexOf(input.charAt(i++));
+			 enc3 = this._keyStr.indexOf(input.charAt(i++));
+			 enc4 = this._keyStr.indexOf(input.charAt(i++));
+			 
+			 chr1 = (enc1 << 2) | (enc2 >> 4);
+			 chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+			 chr3 = ((enc3 & 3) << 6) | enc4;
+			 
+			 output = output + String.fromCharCode(chr1);
+			 
+			 if (enc3 != 64) {
+				 output = output + String.fromCharCode(chr2);
+			 }
+			 if (enc4 != 64) {
+				 output = output + String.fromCharCode(chr3);
+			 }
+			 
+		 }
+		 
+		 output = this._utf8_decode(output);
+		 
+		 return output;
+		 
+	 },
+	 
+	 // private method for UTF-8 encoding
+	 _utf8_encode : function (string) {
+		 string = string.replace(/\r\n/g,"\n");
+		 var utftext = "";
+		 
+		 for (var n = 0; n < string.length; n++) {
+			 
+			 var c = string.charCodeAt(n);
+			 
+			 if (c < 128) {
+				 utftext += String.fromCharCode(c);
+			 }
+			 else if((c > 127) && (c < 2048)) {
+				 utftext += String.fromCharCode((c >> 6) | 192);
+				 utftext += String.fromCharCode((c & 63) | 128);
+			 }
+			 else {
+				 utftext += String.fromCharCode((c >> 12) | 224);
+				 utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+				 utftext += String.fromCharCode((c & 63) | 128);
+			 }
+			 
+		 }
+		 
+		 return utftext;
+	 },
+	 
+	 // private method for UTF-8 decoding
+	 _utf8_decode : function (utftext) {
+		 var string = "";
+		 var i = 0;
+		 var c = c1 = c2 = 0;
+		 
+		 while ( i < utftext.length ) {
+			 
+			 c = utftext.charCodeAt(i);
+			 
+			 if (c < 128) {
+				 string += String.fromCharCode(c);
+				 i++;
+			 }
+			 else if((c > 191) && (c < 224)) {
+				 c2 = utftext.charCodeAt(i+1);
+				 string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+				 i += 2;
+			 }
+			 else {
+				 c2 = utftext.charCodeAt(i+1);
+				 c3 = utftext.charCodeAt(i+2);
+				 string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+				 i += 3;
+			 }
+			 
+		 }
+		 
+		 return string;
+	 }
+ }

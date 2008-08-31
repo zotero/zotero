@@ -41,6 +41,7 @@ var Zotero = new function(){
 	this.getZoteroDirectory = getZoteroDirectory;
 	this.getStorageDirectory = getStorageDirectory;
 	this.getZoteroDatabase = getZoteroDatabase;
+	this.getTempDirectory = getTempDirectory;
 	this.chooseZoteroDirectory = chooseZoteroDirectory;
 	this.debug = debug;
 	this.log = log;
@@ -249,6 +250,9 @@ var Zotero = new function(){
 				if (typeof e == 'string' && e.match('newer than SQL file')) {
 					_startupError = e;
 				}
+				else {
+					_startupError = "Database upgrade error";
+				}
 				Components.utils.reportError(_startupError);
 				return false;
 			}
@@ -265,7 +269,8 @@ var Zotero = new function(){
 		Zotero.Zeroconf.init();
 		
 		Zotero.Sync.init();
-		Zotero.Sync.Server.init();
+		Zotero.Sync.Runner.init();
+		Zotero.Sync.Storage.init();
 		
 		this.initialized = true;
 		
@@ -354,6 +359,22 @@ var Zotero = new function(){
 		var file = Zotero.getZoteroDirectory();
 		file.append(name + ext);
 		return file;
+	}
+	
+	
+	/**
+	 * @return	{nsIFile}
+	 */
+	function getTempDirectory() {
+		var tmp = this.getZoteroDirectory();
+		tmp.append('tmp');
+		if (!tmp.exists() || !tmp.isDirectory()) {
+			if (tmp.exists() && !tmp.isDirectory()) {
+				tmp.remove(null);
+			}
+			tmp.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+		}
+		return tmp;
 	}
 	
 	
@@ -1284,6 +1305,66 @@ Zotero.Date = new function(){
 	}
 	
 	
+	/**
+	 * Convert a JS Date object to an ISO 8601 UTC date/time
+	 *
+	 * @param	{Date}		date		JS Date object
+	 * @return	{String}				ISO 8601 UTC date/time
+	 *									e.g. 2008-08-15T20:00:00Z
+	 */
+	this.dateToISO = function (date) {
+		var year = date.getUTCFullYear();
+		var month = date.getUTCMonth();
+		var day = date.getUTCDate();
+		var hours = date.getUTCHours();
+		var minutes = date.getUTCMinutes();
+		var seconds = date.getUTCSeconds();
+		
+		var utils = new Zotero.Utilities();
+		year = utils.lpad(year, '0', 4);
+		month = utils.lpad(month + 1, '0', 2);
+		day = utils.lpad(day, '0', 2);
+		hours = utils.lpad(hours, '0', 2);
+		minutes = utils.lpad(minutes, '0', 2);
+		seconds = utils.lpad(seconds, '0', 2);
+		
+		return year + '-' + month + '-' + day + 'T'
+			+ hours + ':' + minutes + ':' + seconds + 'Z';
+	}
+	
+	
+	/**
+	 * Convert an ISO 8601–formatted UTC date/time to a JS Date
+	 *
+	 * Adapted from http://delete.me.uk/2005/03/iso8601.html (AFL-licensed)
+	 *
+	 * @param	{String}		isoDate		ISO 8601 date
+	 * @return	{Date}					JS Date
+	 */
+	this.isoToDate = function (isoDate) {
+		var re8601 = /([0-9]{4})(-([0-9]{2})(-([0-9]{2})(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?/;
+		var d = isoDate.match(re8601);
+		
+		var offset = 0;
+		var date = new Date(d[1], 0, 1);
+		
+		if (d[3]) { date.setMonth(d[3] - 1); }
+		if (d[5]) { date.setDate(d[5]); }
+		if (d[7]) { date.setHours(d[7]); }
+		if (d[8]) { date.setMinutes(d[8]); }
+		if (d[10]) { date.setSeconds(d[10]); }
+		if (d[12]) { date.setMilliseconds(Number("0." + d[12]) * 1000); }
+		if (d[14]) {
+			offset = (Number(d[16]) * 60) + Number(d[17]);
+			offset *= ((d[15] == '-') ? 1 : -1);
+		}
+		
+		offset -= date.getTimezoneOffset();
+		var time = (Number(date) + (offset * 60 * 1000));
+		return new Date(time);
+	}
+	
+	
 	/*
 	 * converts a string to an object containing:
 	 *    day: integer form of the day
@@ -1494,7 +1575,7 @@ Zotero.Date = new function(){
 		return string;
 	}
 	
-	function strToISO(str){
+	function strToISO(str) {
 		var date = Zotero.Date.strToDate(str);
 		
 		if(date.year) {

@@ -1,4 +1,4 @@
--- 39
+-- 40
 
 -- This file creates tables containing user-specific data -- any changes made
 -- here must be mirrored in transition steps in schema.js::_migrateSchema()
@@ -62,11 +62,14 @@ CREATE TABLE itemAttachments (
     charsetID INT,
     path TEXT,
     originalPath TEXT,
+    syncState INT DEFAULT 0,
+    storageModTime INT,
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (sourceItemID) REFERENCES items(sourceItemID)
 );
 CREATE INDEX itemAttachments_sourceItemID ON itemAttachments(sourceItemID);
 CREATE INDEX itemAttachments_mimeType ON itemAttachments(mimeType);
+CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState);
 
 -- Individual entries for each tag
 CREATE TABLE tags (
@@ -201,6 +204,12 @@ CREATE TABLE syncDeleteLog (
     FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)
 );
 CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp);
+
+CREATE TABLE storageDeleteLog (
+    key TEXT PRIMARY KEY,
+    timestamp INT NOT NULL
+);
+CREATE INDEX storageDeleteLog_timestamp ON storageDeleteLog(timestamp);
 
 CREATE TABLE translators (
     translatorID TEXT PRIMARY KEY,

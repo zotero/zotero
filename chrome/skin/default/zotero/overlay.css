@@ -191,11 +191,28 @@
 	list-style-image: url('chrome://zotero/skin/toolbar-advanced-search.png');
 }
 
+#zotero-tb-syncProgress
+{
+	min-width: 50px;
+	width: 50px;
+	height: 10px;
+}
+
+#zotero-tb-syncProgress-tooltip row label:first-child
+{
+	text-align: right;
+	font-weight: bold;
+}
+
+#zotero-tb-storage-sync
+{
+	list-style-image: url(chrome://zotero/skin/drive_network.png);
+}
+
 #zotero-tb-sync {
-	margin-top: -2px;
+	list-style-image: url(chrome://zotero/skin/arrow_rotate_static.png);
 	margin-left: -2px;
 	margin-right: -2px;
-	list-style-image: url(chrome://zotero/skin/arrow_rotate_static.png);
 }
 
 #zotero-tb-sync[status=animate] {
