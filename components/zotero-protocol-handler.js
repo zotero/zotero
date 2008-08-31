@@ -648,6 +648,11 @@ function ChromeExtensionHandler() {
 					if (id.match(/^annotation.*\.(png|html|css|gif)$/)) {
 						var chromeURL = 'chrome://zotero/skin/' + id;
 						var file = Zotero.convertChromeURLToFile(chromeURL);
+						if (!file.exists()) {
+							Zotero.debug(file.path + " not found");
+							Components.utils.reportError(file.path + " not found");
+							return _errorChannel("File not found");
+						}
 					}
 					else {
 						return _errorChannel("Attachment id not an integer");
