@@ -51,6 +51,7 @@ var xpcomFiles = [
 	'schema',
 	'search',
 	'sync',
+	'storage',
 	'timeline',
 	'translate',
 	'utilities',

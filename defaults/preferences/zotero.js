@@ -82,10 +82,17 @@ pref("extensions.zotero.zeroconf.server.enabled", false);
 // Annotation settings
 pref("extensions.zotero.annotations.warnOnClose", true);
 
-// Server
-pref("extensions.zotero.sync.server.autoSync", true);
+// Sync
+pref("extensions.zotero.sync.autoSync", true);
 pref("extensions.zotero.sync.server.username", '');
 pref("extensions.zotero.sync.server.compressData", true);
+pref("extensions.zotero.sync.storage.enabled", false);
+pref("extensions.zotero.sync.storage.verified", false);
+pref("extensions.zotero.sync.storage.url", '');
+pref("extensions.zotero.sync.storage.username", '');
+pref("extensions.zotero.sync.storage.maxDownloads", 4);
+pref("extensions.zotero.sync.storage.maxUploads", 4);
+pref("extensions.zotero.sync.storage.deleteDelayDays", 30);
 
 // Proxy
 pref("extensions.zotero.proxies.autoRecognize", true);

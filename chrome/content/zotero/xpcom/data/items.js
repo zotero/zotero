@@ -401,6 +401,11 @@ Zotero.Items = new function() {
 		var sql = "DELETE FROM itemDataValues WHERE valueID NOT IN "
 			+ "(SELECT valueID FROM itemData)";
 		Zotero.DB.query(sql);
+		
+		var ZU = new Zotero.Utilities;
+		if (Zotero.Sync.Storage.active && ZU.probability(10)) {
+			Zotero.Sync.Storage.purgeDeletedStorageFiles();
+		}
 	}
 	
 	

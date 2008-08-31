@@ -156,31 +156,116 @@ To add a new preference:
 	<!-- localize -->
 	<prefpane id="zotero-prefpane-sync"
 						label="Sync"
-						onpaneload="document.getElementById('sync-password').value = Zotero.Sync.Server.password;"
+						onpaneload="document.getElementById('sync-password').value = Zotero.Sync.Server.password; document.getElementById('storage-password').value = Zotero.Sync.Storage.password;"
 						image="chrome://zotero/skin/prefs-sync.png">
 		<preferences>
-			<preference id="pref-sync-username" name="extensions.zotero.sync.server.username" type="string"/>
+			<preference id="pref-sync-autosync" name="extensions.zotero.sync.autoSync" type="bool"/>
+			<preference id="pref-sync-username" name="extensions.zotero.sync.server.username" type="string" instantApply="true"/>
+			<preference id="pref-storage-enabled" name="extensions.zotero.sync.storage.enabled" type="bool"/>
+			<preference id="pref-storage-url" name="extensions.zotero.sync.storage.url" type="string" instantApply="true"/>
+			<preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string" instantApply="true"/>
 		</preferences>
 		
-		<grid>
-			<columns>
-				<columns/>
-				<columns/>
-			</columns>
+		<groupbox>
+			<caption label="Zotero Sync Server"/>
 			
-			<rows>
-				<row>
-					<label value="Username:"/>
-					<textbox preference="pref-sync-username"
-						onchange="Zotero.Prefs.set('sync.server.username', this.value); var pass = document.getElementById('sync-password'); if (pass.value) { Zotero.Sync.Server.password = pass.value; }"/>
-				</row>
-				<row>
-					<label value="Password:"/>
-					<textbox id="sync-password" type="password"
-						onchange="Zotero.Sync.Server.password = this.value"/>
-				</row>
-			</rows>
-		</grid>
+			<grid>
+				<columns>
+					<column/>
+					<column/>
+				</columns>
+				
+				<rows>
+					<row>
+						<label value="Username:"/>
+						<textbox preference="pref-sync-username"
+							onchange="Zotero.Prefs.set('sync.server.username', this.value); var pass = document.getElementById('sync-password'); if (pass.value) { Zotero.Sync.Server.password = pass.value; }"/>
+					</row>
+					<row>
+						<label value="Password:"/>
+						<textbox id="sync-password" type="password"
+							onchange="Zotero.Sync.Server.password = this.value"/>
+					</row>
+					<!--
+					<row>
+						<box/>
+						<hbox>
+							<button label="Verify login"
+								oncommand="alert('Unimplemented')"/>
+						</hbox>
+					</row>
+					-->
+				</rows>
+			</grid>
+			
+			<separator class="thin"/>
+			
+			<hbox>
+				<checkbox label="Sync automatically" preference="pref-sync-autosync"/>
+			</hbox>
+		</groupbox>
+		
+		
+		<groupbox>
+			<caption label="Storage Server"/>
+			
+			<hbox>
+				<checkbox label="Enable file syncing" preference="pref-storage-enabled"/>
+			</hbox>
+			
+			<separator class="thin"/>
+			
+			<grid id="storage-settings">
+				<columns>
+					<column/>
+					<column flex="1"/>
+				</columns>
+				
+				<rows>
+					<row>
+						<label value="URL:"/>
+						<hbox>
+							<label value="https://"/>
+							<textbox id="storage-url" flex="1"
+								preference="pref-storage-url"
+								onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); verifyStorageServer(); }"
+								onsynctopreference="unverifyStorageServer();"
+								onchange="this.value = this.value.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, '')"/>
+							<label value="/zotero/"/>
+						</hbox>
+					</row>
+					<row>
+						<label value="Username:"/>
+						<hbox>
+							<textbox id="storage-username"
+								preference="pref-storage-username"
+								onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout('verifyStorageServer();', 1); }"
+								onsynctopreference="unverifyStorageServer();"
+								onchange="var pass = document.getElementById('storage-password'); if (pass.value) { Zotero.Sync.Storage.password = pass.value; }"/>
+						</hbox>
+					</row>
+					<row>
+						<label value="Password:"/>
+						<hbox>
+							<textbox id="storage-password" flex="0" type="password"
+								onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout('verifyStorageServer();', 1); }"
+								oninput="unverifyStorageServer()"
+								onchange="Zotero.Sync.Storage.password = this.value"/>
+						</hbox>
+					</row>
+					<row>
+						<box/>
+						<hbox>
+							<button id="storage-verify" label="Verify Server"
+								oncommand="verifyStorageServer()"/>
+							<button id="storage-abort" label="Stop" hidden="true"/>
+							<progressmeter id="storage-progress" hidden="true"
+								mode="undetermined"/>
+						</hbox>
+					</row>
+				</rows>
+			</grid>
+		</groupbox>
 	</prefpane>
 	
 	
@@ -282,8 +367,12 @@ To add a new preference:
 		
 		<groupbox>
 			<caption label="&zotero.preferences.citationOptions.caption;"/>
+			
 			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="pref-export-citePaperJournalArticleURL"/>
-			<label id="export-citePaperJournalArticleURL">&zotero.preferences.export.citePaperJournalArticleURL.description;</label>
+			<!-- This doesn't wrap without an explicit wrap, for some reason -->
+			<label id="export-citePaperJournalArticleURL" width="45em">
+				&zotero.preferences.export.citePaperJournalArticleURL.description;
+			</label>
 		</groupbox>
 		
 		<groupbox>
@@ -511,9 +600,8 @@ To add a new preference:
 		</groupbox>
 	</prefpane>
 	
-	
-	<!-- These mess up the prefwindow if they come before the prefpanes
-	     https://bugzilla.mozilla.org/show_bug.cgi?id=296418 -->
+	<!-- These mess up the prefwindow (more) if they come before the prefpanes
+	 https://bugzilla.mozilla.org/show_bug.cgi?id=296418 -->
 	<script src="chrome://zotero/content/include.js"/>
 	<script src="preferences.js"/>
 </prefwindow>

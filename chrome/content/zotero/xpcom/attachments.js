@@ -943,10 +943,59 @@ Zotero.Attachments = new function(){
 	function getPath(file, linkMode) {
 		if (linkMode == self.LINK_MODE_IMPORTED_URL ||
 				linkMode == self.LINK_MODE_IMPORTED_FILE) {
-			return 'storage:' + file.leafName;
+			file.QueryInterface(Components.interfaces.nsILocalFile);
+			var fileName = file.getRelativeDescriptor(file.parent);
+			return 'storage:' + fileName;
 		}
 		
 		return file.persistentDescriptor;
+	}
+	
+	
+	/**
+	 * @param	{Zotero.Item}	item
+	 * @param	{Boolean}		[skipHidden=FALSE]	Don't count hidden files
+	 * @return	{Integer}							Total file size in bytes
+	 */
+	this.getTotalFileSize = function (item, skipHidden) {
+		var funcName = "Zotero.Attachments.getTotalFileSize()";
+		
+		if (!item.isAttachment()) {
+			throw ("Item is not an attachment in " + funcName);
+		}
+		
+		var linkMode = item.attachmentLinkMode;
+		switch (linkMode) {
+			case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
+			case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
+			case Zotero.Attachments.LINK_MODE_LINKED_FILE:
+				break;
+			
+			default:
+				throw ("Invalid attachment link mode in " + funcName);
+		}
+		
+		var file = item.getFile();
+		if (!file) {
+			throw ("File not found in " + funcName);
+		}
+		
+		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+			return item.fileSize;
+		}
+		
+		var parentDir = file.parent;
+		var files = parentDir.directoryEntries;
+		var size = 0;
+		while (files.hasMoreElements()) {
+			file = files.getNext();
+			file.QueryInterface(Components.interfaces.nsIFile);
+			if (skipHidden && file.leafName.indexOf('.') == 0) {
+				continue;
+			}
+			size += file.fileSize;
+		}
+		return size;
 	}
 	
 	
