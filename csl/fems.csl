@@ -16,7 +16,7 @@ FEMS Immunology and Medical Microbiology
 FEMS Microbiology Letters
 FEMS Microbiology Reviews
 FEMS Yeast Research</summary>
-    <link href="http://www.blackwellpublishing.com/submit.asp?ref=1567-1356%26site=1" rel="documentation"/>
+    <link href="http://www.blackwellpublishing.com/submit.asp?ref=1567-1356" rel="documentation"/>
   </info>
   <macro name="editor">
     <names variable="editor">
@@ -47,7 +47,6 @@ FEMS Yeast Research</summary>
       <substitute>
 	<names variable="editor"/>
 	<names variable="translator"/>
-	<text macro="anon"/>
       </substitute>
     </names>
   </macro>
