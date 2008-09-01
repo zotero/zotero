@@ -701,6 +701,17 @@ Zotero.Sync.Storage = new function () {
 		Zotero.Sync.Storage.getStorageModificationTime(item, function (item, mdate) {
 			if (!mdate) {
 				Zotero.debug("Remote file not found for item " + item.id);
+				_removeRequest({
+					name: _getItemURI(item).spec,
+					requestMethod: "GET",
+					QueryInterface: function (iid) {
+						if (iid.equals(Components.interfaces.nsIHttpChannel) ||
+								iid.equals(Components.interfaces.nsISupports)) {
+							return this;
+						}
+						throw Components.results.NS_NOINTERFACE;
+					}
+				});
 				_queueAdvance('download', Zotero.Sync.Storage.downloadFile, true);
 				return;
 			}
@@ -1816,8 +1827,8 @@ Zotero.Sync.Storage = new function () {
 	 * Also updates progress meter
 	 */
 	function _resetRequestsIfDone() {
-		Zotero.debug(_requests);
-		Zotero.debug(_numRequests);
+		//Zotero.debug(_requests);
+		//Zotero.debug(_numRequests);
 		for (var queue in _requests) {
 			if (_numRequests[queue].active != 0 || _numRequests[queue].queued != 0) {
 				return false;
