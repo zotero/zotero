@@ -3142,8 +3142,7 @@ Zotero.Item.prototype.erase = function(deleteChildren) {
 				break;
 			default:
 				try {
-					var file = Zotero.getStorageDirectory();
-					file.append(this.id);
+					var file = Zotero.Attachments.getStorageDirectory(this.id);
 					if (file.exists()) {
 						file.remove(true);
 					}
