@@ -2252,8 +2252,8 @@ Zotero.CSL.Item._optionalTypeMap = {
 	audioRecording:"song",		// ??
 	presentation:"speech",
 	videoRecording:"motion_picture",
-	tvBroadcast:"motion_picture",
-	radioBroadcast:"motion_picture",
+	tvBroadcast:"broadcast",
+	radioBroadcast:"broadcast",
 	podcast:"song",			// ??
 	computerProgram:"book"		// ??
 };

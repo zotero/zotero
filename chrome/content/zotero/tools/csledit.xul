@@ -137,7 +137,7 @@
 				var bibliography = '<hr/><h1>Bibliography</h1>' + 
 					csl.formatBibliography(itemSet, "HTML");
 				iframe.contentDocument.documentElement.innerHTML = 
-					'<div style="white-space: pre">'
+					'<div style="white-space: pre-wrap">'
 					+ citations + multCitations + bibliography
 					+ '</div>';
 			}

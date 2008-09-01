@@ -568,6 +568,8 @@ To add a new preference:
 		<preferences>
 			<preference id="pref-useDataDir" name="extensions.zotero.useDataDir" type="bool"/>
 			<preference id="pref-dataDir" name="extensions.zotero.dataDir" type="string"/>
+			<preference id="pref-export-displayCharsetOption" name="extensions.zotero.export.displayCharsetOption" type="bool"/>
+			<preference id="pref-import-charset" name="extensions.zotero.import.charset" type="string"/>
 		</preferences>
 		
 		<groupbox>
@@ -598,10 +600,29 @@ To add a new preference:
 				<button label="&zotero.preferences.dbMaintenance.resetTranslatorsAndStyles;" oncommand="resetTranslatorsAndStyles()"/>
 			</hbox>
 		</groupbox>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.charset;"/>
+			
+			<checkbox id="zotero-export-displayCharsetOption" label="&zotero.preferences.charset.displayExportOption;"
+				preference="pref-export-displayCharsetOption"/>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.charset.importCharset;:" control="zotero-import-charsetMenu"/>
+				<menulist id="zotero-import-charsetMenu" preference="pref-import-charset"/>
+			</hbox>
+		</groupbox>
 	</prefpane>
 	
 	<!-- These mess up the prefwindow (more) if they come before the prefpanes
 	 https://bugzilla.mozilla.org/show_bug.cgi?id=296418 -->
 	<script src="chrome://zotero/content/include.js"/>
+	<script src="chrome://zotero/content/charsetMenu.js"/>
+	<script type="application/javascript">
+	<![CDATA[
+		var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
+		observerService.notifyObservers(null, "charsetmenu-selected", "other");
+	]]>
+	</script>
 	<script src="preferences.js"/>
 </prefwindow>

@@ -181,7 +181,7 @@ Zotero.File = new function(){
 	/*
 	 * Not implemented, but it'd sure be great if it were
 	 */
-	function getCharsetFromString(str){
+	function getCharsetFromByteArray(arr) {
 		
 	}
 	
@@ -213,7 +213,10 @@ Zotero.File = new function(){
 				.getService(Components.interfaces.nsIFileProtocolHandler)
 				.getURLSpecFromFile(file);
 		
-		this.addCharsetListener(browser, callback, args);
+		this.addCharsetListener(browser, function (charset, args) {
+			callback(charset, args);
+			Zotero.Browser.deleteHiddenBrowser(browser);
+		}, args);
 		
 		browser.loadURI(url);
 	}

@@ -133,7 +133,7 @@
 			
 				// Generate bibliography
 				var bibliography = '<p>' + csl.formatBibliography(itemSet, "HTML");
-				return '<div style="white-space: pre">' +
+				return '<div style="white-space: pre-wrap">' +
 					citations + bibliography + '</div>';
 			}
 			
