@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-08-29 04:10:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-09-01 06:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -220,7 +220,7 @@ REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('aee2323e-ce00-4fcc-a949-06eb1becc98f', '1.0.0b4.r1', '', '2007-08-27 05:00:00', '0', '100', '4', 'Epicurious', 'Sean Takats', '^https?://www\.epicurious\.com/(?:tools/searchresults|recipes/food/views)', 
+REPLACE INTO translators VALUES ('aee2323e-ce00-4fcc-a949-06eb1becc98f', '1.0.0', '', '2008-09-01 06:00:00', '0', '100', '4', 'Epicurious', 'Sean Takats', '^https?://www\.epicurious\.com/(?:tools/searchresults|recipes/food/views)', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -255,6 +255,7 @@ function scrape(doc){
 
 	var xpath = ''//title'';
 	var title = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	title = Zotero.Utilities.trimInternal(title);
 	title = title.substring(0, title.indexOf(" Recipe at Epicurious.com"));
 	newItem.title = title;
 
