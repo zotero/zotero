@@ -848,7 +848,7 @@ var ZoteroPane = new function()
 					while (true) {
 						// Don't show "Rename associated file" option for
 						// linked URLs
-						if (linkMode = item.ref.getAttachmentLinkMode() ==
+						if (item.ref.getAttachmentLinkMode() ==
 								Zotero.Attachments.LINK_MODE_LINKED_URL) {
 							var result = nsIPS.prompt(
 								window,
