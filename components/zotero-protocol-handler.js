@@ -647,41 +647,41 @@ function ChromeExtensionHandler() {
 					// Proxy annotation icons
 					if (id.match(/^annotation.*\.(png|html|css|gif)$/)) {
 						var chromeURL = 'chrome://zotero/skin/' + id;
-						var file = Zotero.convertChromeURLToFile(chromeURL);
-						if (!file.exists()) {
-							Zotero.debug(file.path + " not found");
-							Components.utils.reportError(file.path + " not found");
-							return _errorChannel("File not found");
-						}
+						var ios = Components.classes["@mozilla.org/network/io-service;1"].
+									getService(Components.interfaces.nsIIOService);
+						var uri = ios.newURI(chromeURL, null, null);
+						var chromeReg = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
+								.getService(Components.interfaces.nsIChromeRegistry);
+						var fileURI = chromeReg.convertChromeURL(uri);
 					}
 					else {
 						return _errorChannel("Attachment id not an integer");
 					}
 				}
 				
-				if (!file) {
+				if (!fileURI) {
 					var item = Zotero.Items.get(id);
 					if (!item) {
 						return _errorChannel("Item not found");
 					}
 					var file = item.getFile();
-				}
-				
-				if (!file) {
-					return _errorChannel("File not found");
-				}
-				
-				if (fileName) {
-					file = file.parent;
-					file.append(fileName);
-					if (!file.exists()) {
+					if (!file) {
 						return _errorChannel("File not found");
+					}
+					if (fileName) {
+						file = file.parent;
+						file.append(fileName);
+						if (!file.exists()) {
+							return _errorChannel("File not found");
+						}
 					}
 				}
 				
 				var ph = Components.classes["@mozilla.org/network/protocol;1?name=file"].
 						createInstance(Components.interfaces.nsIFileProtocolHandler);
-				var fileURI = ph.newFileURI(file);
+				if (!fileURI) {
+					var fileURI = ph.newFileURI(file);
+				}
 				var channel = ioService.newChannelFromURI(fileURI);
 				return channel;
 			}

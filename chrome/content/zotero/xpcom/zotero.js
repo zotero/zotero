@@ -41,8 +41,6 @@ var Zotero = new function(){
 	this.getZoteroDirectory = getZoteroDirectory;
 	this.getStorageDirectory = getStorageDirectory;
 	this.getZoteroDatabase = getZoteroDatabase;
-	this.convertChromeURLToFile = convertChromeURLToFile;
-	this.convertChromeURLToFileURL = convertChromeURLToFileURL;
 	this.chooseZoteroDirectory = chooseZoteroDirectory;
 	this.debug = debug;
 	this.log = log;
@@ -366,72 +364,6 @@ var Zotero = new function(){
 		var file = Zotero.getZoteroDirectory();
 		file.append(name + ext);
 		return file;
-	}
-	
-	
-	/**
-	 * Get a file from a chrome://zotero URL
-	 *
-	 * Currently only works for skin URLs
-	 *
-	 * @param	{String}		chromeURI
-	 * @return	{nsIFile}
-	 */
-	function convertChromeURLToFile(chromeURL) {
-		var ios = Components.classes["@mozilla.org/network/io-service;1"].
-					getService(Components.interfaces.nsIIOService);
-		var uri = ios.newURI(chromeURL, null, null);
-		uri.QueryInterface(Components.interfaces.nsIStandardURL);
-		
-		if (uri.scheme != 'chrome') {
-			throw ("URI " + uri.spec +
-				" not a chrome URI in Zotero.convertChromeURLToFileURL()");
-		}
-		
-		if (uri.host != 'zotero') {
-			throw ("URI " + uri.spec +
-				" not a Zotero chrome URI in Zotero.convertChromeURLToFileURL()");
-		}
-		
-		var parts = uri.path.substr(1).split('/');
-		
-		// Auto-expand URL if necessary
-		var chromeReg = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
-				.getService(Components.interfaces.nsIChromeRegistry);
-		uri = chromeReg.convertChromeURL(uri);
-		
-		var file = this.getInstallDirectory();
-		file.append('chrome');
-		
-		switch (parts[0]) {
-			case 'skin':
-				file.append('skin');
-				file.append('default');
-				file.append('zotero');
-				
-				for (var i=1; i<parts.length; i++) {
-					file.append(parts[i]);
-				}
-				break;
-				
-			default:
-				throw ("Chrome URI part '" + parts[0]
-					+ "' not implemented in Zotero.convertChromeURLToFileURL()")
-		}
-		
-		return file;
-	}
-	
-	
-	/**
-	 * @param	{String}		chromeURI
-	 * @return	{nsIURL}						file:// nsIURL
-	 */
-	function convertChromeURLToFileURL(chromeURL) {
-		var ios = Components.classes["@mozilla.org/network/io-service;1"].
-					getService(Components.interfaces.nsIIOService);
-		var file = this.convertChromeURLToFile(chromeURL);
-		return ios.newFileURI(file).spec;
 	}
 	
 	
