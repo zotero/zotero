@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "Formát:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Možnosti konvertora">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "Zachovaj zdroje zoradené">
 
 <!ENTITY zotero.citation.page "Strana">
@@ -151,3 +154,13 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Záložky sa zachovajú pri prenose z MS Wordu do OpenOffice a naopak, ale môžu byť náhodne modifikované.">
 
 <!ENTITY zotero.integration.references.label "Referencie v bibliografii">
+
+<!ENTITY zotero.sync.storage.progress "Progress:">
+<!ENTITY zotero.sync.storage.downloads "Downloads:">
+<!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
+<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
+
+<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
+<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">

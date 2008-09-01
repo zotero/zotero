@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "格式:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "转换器选项">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
 
 <!ENTITY zotero.citation.page "页">
@@ -151,3 +154,13 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "书签会在Microsoft Word和OpenOffice.org中保留, 但在某些情况下可能会被改动.">
 
 <!ENTITY zotero.integration.references.label "References in Bibliography">
+
+<!ENTITY zotero.sync.storage.progress "Progress:">
+<!ENTITY zotero.sync.storage.downloads "Downloads:">
+<!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
+<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
+
+<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
+<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">

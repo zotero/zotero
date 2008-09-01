@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "フォーマット：">
 <!ENTITY zotero.exportOptions.translatorOptions.label "トランスレーターのオプション">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "参照文献の配列をキープ">
 
 <!ENTITY zotero.citation.page "ページ">
@@ -151,3 +154,13 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "ブックマークはMicrosoft Word、OpenOffice.org双方で保存されますが、偶然に変更されてしまう場合があります。">
 
 <!ENTITY zotero.integration.references.label "参照文献リストの中の参照文献">
+
+<!ENTITY zotero.sync.storage.progress "Progress:">
+<!ENTITY zotero.sync.storage.downloads "Downloads:">
+<!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
+<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
+
+<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
+<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">

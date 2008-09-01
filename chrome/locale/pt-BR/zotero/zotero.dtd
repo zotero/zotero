@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "Formato:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Opções do tradutor">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
 
 <!ENTITY zotero.citation.page "Página">
@@ -151,3 +154,13 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice.org, but may be accidentally modified.">
 
 <!ENTITY zotero.integration.references.label "References in Bibliography">
+
+<!ENTITY zotero.sync.storage.progress "Progress:">
+<!ENTITY zotero.sync.storage.downloads "Downloads:">
+<!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
+<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
+
+<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
+<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">

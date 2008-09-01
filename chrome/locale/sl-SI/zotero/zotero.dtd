@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "Vrsta datoteke:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Možnosti prevajanja">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "Obdrži vire razvrščene">
 
 <!ENTITY zotero.citation.page "Stran">
@@ -151,3 +154,13 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Zaznamki so načeloma ohranjeni v Microsoft Word in OpenOffice.org, vendar se lahko ponesreči spremenijo.">
 
 <!ENTITY zotero.integration.references.label "Sklici v bibliografiji">
+
+<!ENTITY zotero.sync.storage.progress "Progress:">
+<!ENTITY zotero.sync.storage.downloads "Downloads:">
+<!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
+<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
+
+<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
+<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
