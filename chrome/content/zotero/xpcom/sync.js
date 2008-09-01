@@ -457,6 +457,7 @@ Zotero.Sync.Runner = new function () {
 	
 	this.reset = function () {
 		_queue = [];
+		_running = false;
 	}
 	
 	
