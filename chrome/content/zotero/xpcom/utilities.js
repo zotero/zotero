@@ -703,7 +703,7 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 	const fileRe = /^[^:]*/;
 	
 	if(this.translate.locationIsProxied) {
-		url = Zotero.Ingester.ProxyMonitor.properToProxy(url);
+		url = Zotero.Proxies.properToProxy(url);
 	}
 	if(protocolRe.test(url)) return url;
 	if(!fileRe.test(url)) {
