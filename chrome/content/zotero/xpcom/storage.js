@@ -689,12 +689,8 @@ Zotero.Sync.Storage = new function () {
 	this.downloadFile = function (itemID) {
 		var item = Zotero.Items.get(itemID);
 		if (!item) {
-			var msg = "Item " + itemID
-						+ " not found in Zotero.Sync.Storage.downloadFile()";
-			Zotero.debug(msg);
-			Components.utils.reportError(msg);
-			_queueAdvance('download', Zotero.Sync.Storage.downloadFile, true);
-			return;
+			_error("Item " + itemID
+						+ " not found in Zotero.Sync.Storage.downloadFile()");
 		}
 		
 		// Retrieve modification time from server to store locally afterwards 
@@ -1121,6 +1117,17 @@ Zotero.Sync.Storage = new function () {
 		if (fileList.length == 0) {
 			Zotero.debug('No files to add -- removing zip file');
 			tmpFile.remove(null);
+			_removeRequest({
+				name: _getItemURI(item).spec,
+				requestMethod: "PUT",
+				QueryInterface: function (iid) {
+					if (iid.equals(Components.interfaces.nsIHttpChannel) ||
+							iid.equals(Components.interfaces.nsISupports)) {
+						return this;
+					}
+					throw Components.results.NS_NOINTERFACE;
+				}
+			});
 			_queueAdvance('upload', Zotero.Sync.Storage.uploadFile, true);
 			return false;
 		}
