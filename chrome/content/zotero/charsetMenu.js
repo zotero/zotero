@@ -28,9 +28,9 @@ Zotero_Charset_Menu = new function() {
 	 * closer to the top
 	 *
 	 * @param {DOMElement} charsetMenu The menu to populate
-	 * @param {Boolean} showEndian Whether to show endian (e.g., UTF-32) options
+	 * @param {Boolean} exportMenu Whether the menu is to be used for export
 	 **/
-	function populate(charsetMenu, showEndian) {
+	function populate(charsetMenu, exportMenu) {
 		var charsetMap = {};
 		
 		// get charset popup and charset RDF
@@ -60,16 +60,16 @@ Zotero_Charset_Menu = new function() {
 			
 			var isUTF16 = charset.length >= 6 && charset.substr(0, 6) == "UTF-16";
 			
-			// Show UTF-16 element appropriately depending on showEndian
-			if(isUTF16 && showEndian == (charset == "UTF-16") ||
-					(!showEndian && charset == "UTF-32LE")) {
+			// Show UTF-16 element appropriately depending on exportMenu
+			if(isUTF16 && exportMenu == (charset == "UTF-16") ||
+					(!exportMenu && charset == "UTF-32LE")) {
 				continue;
 			} else if(charset == "x-mac-roman") {
 				// use the IANA name
-				value = "macintosh";
-			} else if(!showEndian && charset == "UTF-32BE") {
+				charset = "macintosh";
+			} else if(!exportMenu && charset == "UTF-32BE") {
 				label = "Unicode (UTF-32)";
-				value = "UTF-32";
+				charset = "UTF-32";
 			}
 			
 			// add element
@@ -85,7 +85,7 @@ Zotero_Charset_Menu = new function() {
 				var oldFirst = (charsetPopup.firstChild ? charsetPopup.firstChild : null);
 				charsetPopup.insertBefore(itemNode, oldFirst);
 				// also add (without BOM) if requested
-				if(showEndian) {
+				if(exportMenu) {
 					var itemNode = document.createElement("menuitem");
 					itemNode.setAttribute("label", Zotero.getString("charset.UTF8withoutBOM"));
 					itemNode.setAttribute("value", charset+"xBOM");
@@ -95,6 +95,14 @@ Zotero_Charset_Menu = new function() {
 			} else {
 				charsetPopup.appendChild(itemNode);
 			}
+		}
+		
+		if(!exportMenu) {
+			var itemNode = document.createElement("menuitem");
+			itemNode.setAttribute("label", Zotero.getString("charset.autoDetect"));
+			itemNode.setAttribute("value", "auto");
+			charsetMap["auto"] = itemNode;
+			charsetPopup.insertBefore(itemNode, charsetPopup.firstChild);
 		}
 		
 		return charsetMap;

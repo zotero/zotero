@@ -1387,7 +1387,8 @@ Zotero.Search.prototype._buildQuery = function(){
 				if (includeParentsAndChildren || includeChildren) {
 					var childrenSQL = "SELECT itemID FROM itemAttachments WHERE "
 						+ "sourceItemID IN (" + condSQL + ") UNION "
-						+ "SELECT itemID FROM itemNotes WHERE sourceItemID IN (" + condSQL + ")";
+						+ "SELECT itemID FROM itemNotes "
+						+ "WHERE sourceItemID IN (" + condSQL + ")";
 					var childSQLParams = condSQLParams.concat(condSQLParams);
 				}
 				

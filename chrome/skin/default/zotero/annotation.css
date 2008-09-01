@@ -1,0 +1,54 @@
+body {
+	margin: 0;
+	padding: 0;
+	background-color: #fff580;
+	border: 1px solid #878244;
+	width: auto;
+}
+
+#bar {
+	display: block;
+	padding: 1px 1px 1px 0;
+	background-color: #c0b860;
+	border-bottom: 1px solid #878244;
+	height: 10px;
+}
+
+#close, #move, #collapse {
+	position: absolute;
+	display: block;
+	top: 2px;
+	cursor: pointer;
+	width: 10px;
+	height: 10px;
+}
+
+#close {
+	left: 1px;
+}
+
+#move {
+	right: 14px;
+}
+
+#collapse {
+	right: 2px;
+}
+
+#grippy {
+	position: absolute;
+	display: block;
+	right: 0;
+	bottom: 0;
+	cursor: se-resize;
+	width: 8px;
+	height: 8px;
+}
+
+#text {
+	font-family: Arial, Lucida Grande, FreeSans, sans;
+	font-size: 12px;
+	border: none;
+	margin: 3px 2px 5px 2px;
+	background-color: #fff580;
+}

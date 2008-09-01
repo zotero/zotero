@@ -136,20 +136,22 @@
 			<method name="_doPopupItemEnabling">
 				<parameter name="popupNode"/>
 				<body>
-				  <![CDATA[
-					var controller = document.commandDispatcher.getControllerForCommand(command);
+				<![CDATA[
 					var children = popupNode.childNodes;
 					for (var i = 0; i < children.length; i++) {
-					  var command = children[i].getAttribute("cmd");
-					  if (command) {
-						var enabled = controller.isCommandEnabled(command);
-						if (enabled)
-						  children[i].removeAttribute("disabled");
-						else
-						  children[i].setAttribute("disabled", "true");
-					  }
+						var command = children[i].getAttribute("cmd");
+						if (command) {
+							var controller = document.commandDispatcher.getControllerForCommand(command);
+							var enabled = controller.isCommandEnabled(command);
+							if (enabled) {
+								children[i].removeAttribute("disabled");
+							}
+							else {
+								children[i].setAttribute("disabled", "true");
+							}
+						}
 					}
-				  ]]>
+				]]>
 				</body>
 			</method>
 			

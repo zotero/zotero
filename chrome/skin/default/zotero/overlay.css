@@ -345,12 +345,7 @@
 
 #zotero-annotate-tb-collapse
 {
-	list-style-image: url('chrome://zotero/skin/annotate-collapse-all.png');
-}
-
-#zotero-annotate-tb-expand
-{
-	list-style-image: url('chrome://zotero/skin/annotate-expand-all.png');
+	list-style-image: url('chrome://zotero/skin/annotate-collapse.png');
 }
 
 #zotero-annotate-tb-highlight

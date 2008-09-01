@@ -36,7 +36,7 @@ var Zotero_File_Interface_Export = new function() {
 	this.accept = accept;
 	this.cancel = cancel;
 	
-	var _charsets;
+	var _charsets = false;
 	
 	/*
 	 * add options to export
@@ -100,7 +100,9 @@ var Zotero_File_Interface_Export = new function() {
 		}
 		
 		// from charsetMenu.js
-		_charsets = Zotero_Charset_Menu.populate(document.getElementById(OPTION_PREFIX+"exportCharset"), true);
+		if(Zotero.Prefs.get("export.displayCharsetOption")) {
+			_charsets = Zotero_Charset_Menu.populate(document.getElementById(OPTION_PREFIX+"exportCharset"), true);
+		}
 		
 		updateOptions(Zotero.Prefs.get("export.translatorSettings"));
 	}
@@ -156,11 +158,11 @@ var Zotero_File_Interface_Export = new function() {
 		}
 		
 		// handle charset popup
-		var charsetMenu = document.getElementById(OPTION_PREFIX+"exportCharset");
-		if(translatorOptions.exportCharset) {
-			document.getElementById("charset-box").hidden = undefined;
+		if(_charsets && translatorOptions.exportCharset) {
 			optionsBox.hidden = undefined;
-			var charset = "UTF-8xBOM";
+			document.getElementById("charset-box").hidden = undefined;
+			var charsetMenu = document.getElementById(OPTION_PREFIX+"exportCharset");
+			var charset = "UTF-8";
 			if(options && options.exportCharset && _charsets[options.exportCharset]) {
 				charset = options.exportCharset;
 			} else if(translatorOptions.exportCharset && _charsets[translatorOptions.exportCharset]) {
@@ -168,6 +170,8 @@ var Zotero_File_Interface_Export = new function() {
 			}
 			
 			charsetMenu.selectedItem = _charsets[charset];
+		} else {
+			document.getElementById("charset-box").hidden = true;
 		}
 		
 		window.sizeToContent();
@@ -192,17 +196,16 @@ var Zotero_File_Interface_Export = new function() {
 			var element = document.getElementById(OPTION_PREFIX+option);
 			
 			if(option == "exportCharset") {
-				optionsAvailable[option] = element.selectedItem.value;
+				if(_charsets) {
+					optionsAvailable[option] = element.selectedItem.value;
+				}
 			} else if(typeof(defValue) == "boolean") {
 				optionsAvailable[option] = !!element.checked;
 			}
 		}
 		
 		// save options
-		Zotero.debug("EXPORT OPTIONS");
-		Zotero.debug(optionsAvailable);
 		optionString = Zotero.JSON.serialize(optionsAvailable);
-		Zotero.debug(optionString);
 		Zotero.Prefs.set("export.translatorSettings", optionString);
 	}
 	

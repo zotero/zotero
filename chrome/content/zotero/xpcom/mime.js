@@ -66,6 +66,8 @@ Zotero.MIME = new function(){
 		'text/css': true,
 		'image/jpeg': true,
 		'image/gif': true,
+		'image/png': true,
+		'image/svg+xml': true,
 		'text/xml': true,
 		'application/xhtml+xml': true,
 		'application/xml': true,

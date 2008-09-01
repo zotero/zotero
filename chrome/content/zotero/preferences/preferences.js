@@ -23,6 +23,7 @@
 var openURLServerField;
 var openURLVersionMenu;
 var proxies;
+var charsets;
 
 function init()
 {
@@ -37,6 +38,10 @@ function init()
 	populateQuickCopyList();
 	updateQuickCopyInstructions();
 	initSearchPane();
+	
+	var charsetMenu = document.getElementById("zotero-import-charsetMenu");
+	charsetMap = Zotero_Charset_Menu.populate(charsetMenu, false);
+	charsetMenu.selectedItem = charsetMap[Zotero.Prefs.get("import.charset")] ? charsetMap[Zotero.Prefs.get("import.charset")] : charsetMap["auto"];
 }
 
 
@@ -54,7 +59,7 @@ function onDataDirUpdate(event) {
 	
 	// If triggered from the Choose button, don't show the dialog, since
 	// Zotero.chooseZoteroDirectory() shows its own
-	if (event.originalTarget.tagName == 'button') {
+	if (event.originalTarget && event.originalTarget.tagName == 'button') {
 		return true;
 	}
 	// If directory not set or invalid, prompt for location

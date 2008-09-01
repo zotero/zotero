@@ -38,10 +38,13 @@ var Zotero = new function(){
 	this.stateCheck = stateCheck;
 	//this.shutdown = shutdown;
 	this.getProfileDirectory = getProfileDirectory;
+	this.getInstallDirectory = getInstallDirectory;
 	this.getZoteroDirectory = getZoteroDirectory;
 	this.getStorageDirectory = getStorageDirectory;
 	this.getZoteroDatabase = getZoteroDatabase;
 	this.getTempDirectory = getTempDirectory;
+	this.convertChromeURLToFile = convertChromeURLToFile;
+	this.convertChromeURLToFileURL = convertChromeURLToFileURL;
 	this.chooseZoteroDirectory = chooseZoteroDirectory;
 	this.debug = debug;
 	this.log = log;
@@ -310,6 +313,15 @@ var Zotero = new function(){
 	}
 	
 	
+	function getInstallDirectory() {
+		var id = ZOTERO_CONFIG.GUID;
+		var em = Components.classes["@mozilla.org/extensions/manager;1"].
+					getService(Components.interfaces.nsIExtensionManager);
+		var installDir = em.getInstallLocation(id).getItemLocation(id);
+		return installDir;
+	}
+	
+	
 	function getZoteroDirectory(){
 		if (_zoteroDirectory != false) {
 			// Return a clone of the file pointer so that callers can modify it
@@ -319,7 +331,14 @@ var Zotero = new function(){
 		if (Zotero.Prefs.get('useDataDir')) {
 			var file = Components.classes["@mozilla.org/file/local;1"].
 				createInstance(Components.interfaces.nsILocalFile);
-			file.persistentDescriptor = Zotero.Prefs.get('dataDir');
+			try {
+				file.persistentDescriptor = Zotero.Prefs.get('dataDir');
+			}
+			catch (e) {
+				Zotero.debug("Persistent descriptor in extensions.zotero.dataDir did not resolve", 1);
+				e = { name: "NS_ERROR_FILE_NOT_FOUND" };
+				throw (e);
+			}
 			if (!file.exists()) {
 				var e = { name: "NS_ERROR_FILE_NOT_FOUND" };
 				throw (e);
@@ -375,6 +394,72 @@ var Zotero = new function(){
 			tmp.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
 		}
 		return tmp;
+	}
+	
+	
+	/**
+	 * Get a file from a chrome://zotero URL
+	 *
+	 * Currently only works for skin URLs
+	 *
+	 * @param	{String}		chromeURI
+	 * @return	{nsIFile}
+	 */
+	function convertChromeURLToFile(chromeURL) {
+		var ios = Components.classes["@mozilla.org/network/io-service;1"].
+					getService(Components.interfaces.nsIIOService);
+		var uri = ios.newURI(chromeURL, null, null);
+		uri.QueryInterface(Components.interfaces.nsIStandardURL);
+		
+		if (uri.scheme != 'chrome') {
+			throw ("URI " + uri.spec +
+				" not a chrome URI in Zotero.convertChromeURLToFileURL()");
+		}
+		
+		if (uri.host != 'zotero') {
+			throw ("URI " + uri.spec +
+				" not a Zotero chrome URI in Zotero.convertChromeURLToFileURL()");
+		}
+		
+		var parts = uri.path.substr(1).split('/');
+		
+		// Auto-expand URL if necessary
+		var chromeReg = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
+				.getService(Components.interfaces.nsIChromeRegistry);
+		uri = chromeReg.convertChromeURL(uri);
+		
+		var file = this.getInstallDirectory();
+		file.append('chrome');
+		
+		switch (parts[0]) {
+			case 'skin':
+				file.append('skin');
+				file.append('default');
+				file.append('zotero');
+				
+				for (var i=1; i<parts.length; i++) {
+					file.append(parts[i]);
+				}
+				break;
+				
+			default:
+				throw ("Chrome URI part '" + parts[0]
+					+ "' not implemented in Zotero.convertChromeURLToFileURL()")
+		}
+		
+		return file;
+	}
+	
+	
+	/**
+	 * @param	{String}		chromeURI
+	 * @return	{nsIURL}						file:// nsIURL
+	 */
+	function convertChromeURLToFileURL(chromeURL) {
+		var ios = Components.classes["@mozilla.org/network/io-service;1"].
+					getService(Components.interfaces.nsIIOService);
+		var file = this.convertChromeURLToFile(chromeURL);
+		return ios.newFileURI(file).spec;
 	}
 	
 	
@@ -590,7 +675,8 @@ var Zotero = new function(){
 			platform: Zotero.platform,
 			locale: Zotero.locale,
 			appName: appInfo.name,
-			appVersion: appInfo.version
+			appVersion: appInfo.version,
+			extensions: this.getInstalledExtensions().join(', ')
 		};
 		
 		var str = '';
@@ -599,6 +685,31 @@ var Zotero = new function(){
 		}
 		str = str.substr(0, str.length - 2);
 		return str;
+	}
+	
+	
+	/**
+	 * @return	{String[]}		Array of extension names and versions
+	 */
+	this.getInstalledExtensions = function () {
+		var em = Components.classes["@mozilla.org/extensions/manager;1"].
+					getService(Components.interfaces.nsIExtensionManager);
+		var installed = em.getItemList(
+			Components.interfaces.nsIUpdateItem.TYPE_ANY, {}
+		);
+		
+		var addons = [];
+		for each(var addon in installed) {
+			switch (addon.id) {
+				case "zotero@chnm.gmu.edu":
+				case "{972ce4c6-7e08-4474-a285-3208198ce6fd}": // Default theme
+					continue;
+			}
+			
+			addons.push(addon.name + " (" + addon.version
+				+ (addon.type != 2 ? ", " + addon.type : "") + ")");
+		}
+		return addons;
 	}
 	
 	
@@ -1803,6 +1914,11 @@ Zotero.Browser = new function() {
 		hiddenBrowser.setAttribute('type', 'content');
 		hiddenBrowser.setAttribute('disablehistory', 'true');
 		win.document.documentElement.appendChild(hiddenBrowser);
+		// Disable some features
+		hiddenBrowser.docShell.allowImages = false;
+		hiddenBrowser.docShell.allowJavascript = false;
+		hiddenBrowser.docShell.allowMetaRedirects = false;
+		hiddenBrowser.docShell.allowPlugins = false;
 		Zotero.debug("created hidden browser ("
 			+ win.document.getElementsByTagName('browser').length + ")");
 		return hiddenBrowser;
