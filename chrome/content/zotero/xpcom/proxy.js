@@ -454,7 +454,7 @@ Zotero.Proxy.prototype.toProper = function(m) {
  * @type String
  */
 Zotero.Proxy.prototype.toProxy = function(uri) {
-	proxyURL = this.scheme;
+	var proxyURL = this.scheme;
 	
 	for(var i=this.parameters.length-1; i>=0; i--) {
 		var param = this.parameters[i];
