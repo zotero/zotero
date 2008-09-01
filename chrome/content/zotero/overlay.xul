@@ -130,13 +130,14 @@
 								<menuseparator id="zotero-tb-actions-plugins-separator"/>
 								<menuitem id="zotero-tb-actions-timeline" label="&zotero.toolbar.timeline.label;" oncommand="Zotero_Timeline_Interface.loadTimeline()"/>
 								<menuseparator id="zotero-tb-actions-sync-separator"/>
-								<menuitem label="Clear Server Data" oncommand="Zotero.Sync.Server.clear()"/>
-								<menuitem label="Reset Server Lock" oncommand="Zotero.Sync.Server.resetServer()"/>
-								<menuitem label="Reset Client" oncommand="Zotero.Sync.Server.resetClient()"/>
-								<menuseparator id="zotero-tb-actions-storage-separator"/>
-								<menuitem label="Reset Storage History" oncommand="Zotero.Sync.Storage.resetAllSyncStates()"/>
-								<menuitem label="Purge Deleted Storage Files" oncommand="Zotero.Sync.Storage.purgeDeletedStorageFiles(function(results) { Zotero.debug(results); })"/>
-								<menuitem label="Purge Orphaned Storage Files" oncommand="Zotero.Sync.Storage.purgeOrphanedStorageFiles(function(results) { Zotero.debug(results); })"/>
+								<menuitem label="Sync Debugging" disabled="true"/>
+								<menuitem label="  Clear Server Data" oncommand="Zotero.Sync.Server.clear()"/>
+								<menuitem label="  Reset Server Lock" oncommand="Zotero.Sync.Server.resetServer()"/>
+								<menuitem label="  Reset Client" oncommand="Zotero.Sync.Server.resetClient()"/>
+								<menuitem label="Storage Debugging" disabled="true"/>
+								<menuitem label="  Reset Storage History" oncommand="Zotero.Sync.Storage.resetAllSyncStates()"/>
+								<menuitem label="  Purge Deleted Storage Files" oncommand="Zotero.Sync.Storage.purgeDeletedStorageFiles(function(results) { Zotero.debug(results); })"/>
+								<menuitem label="  Purge Orphaned Storage Files" oncommand="Zotero.Sync.Storage.purgeOrphanedStorageFiles(function(results) { Zotero.debug(results); })"/>
 								<menuseparator id="zotero-tb-actions-separator"/>
 								<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;"
 									oncommand="window.openDialog('chrome://zotero/content/preferences/preferences.xul', 'zotero-prefs', 'chrome,titlebar,toolbar,' + Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal')"/>

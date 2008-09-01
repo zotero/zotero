@@ -1816,6 +1816,8 @@ Zotero.Sync.Storage = new function () {
 	 * Also updates progress meter
 	 */
 	function _resetRequestsIfDone() {
+		Zotero.debug(_requests);
+		Zotero.debug(_numRequests);
 		for (var queue in _requests) {
 			if (_numRequests[queue].active != 0 || _numRequests[queue].queued != 0) {
 				return false;
@@ -1989,10 +1991,9 @@ Zotero.Sync.Storage.ZipWriterObserver.prototype = {
 		
 		Zotero.Sync.Storage.compressionTracker.compressed += this._zipWriter.file.fileSize;
 		Zotero.Sync.Storage.compressionTracker.uncompressed += originalSize;
-		Zotero.debug("Ratio so far: " + Zotero.Sync.Storage.compressionTracker.ratio);
+		Zotero.debug("Average compression so far: "
+			+ Zotero.Sync.Storage.compressionTracker.ratio + "%");
 		
-		var item = Zotero.Items.get(this._data.itemID);
-		Zotero.debug("Original sum " + Zotero.Attachments.getTotalFileSize(item));
 		this._callback(this._data);
 	}
 }
