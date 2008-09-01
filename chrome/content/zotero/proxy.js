@@ -28,7 +28,7 @@
  * Interface for proxy.xul add proxy confirmation dialog
  * @namespace
  */
-Zotero_Proxy_Dialog = new function() {
+var Zotero_Proxy_Dialog = new function() {
 	var halfSecondsRemaining = 4;
 	var acceptButton;
 	var addString;
