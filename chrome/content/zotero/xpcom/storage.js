@@ -1964,13 +1964,13 @@ Zotero.Sync.Storage = new function () {
 		_syncInProgress = false;
 		Zotero.DB.rollbackAllTransactions();
 		
-		Zotero.Sync.Server.setSyncIcon('error');
+		Zotero.Sync.Runner.setSyncIcon('error');
 		
 		if (e.name) {
-			Zotero.Sync.Server.lastSyncError = e.name;
+			Zotero.Sync.Runner.lastSyncError = e.name;
 		}
 		else {
-			Zotero.Sync.Server.lastSyncError = e;
+			Zotero.Sync.Runner.lastSyncError = e;
 		}
 		Zotero.debug(e, 1);
 		Zotero.Sync.Runner.reset();
