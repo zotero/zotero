@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "Định dạng:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Các tùy chọn cho Bộ-biến-đổi">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "Giữ thứ tự sắp xếp của các Tài liệu nguồn">
 
 <!ENTITY zotero.citation.page "Trang">
@@ -151,3 +154,13 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Các bookmarks được giữ nguyên giữa các tài liệu Microsoft Word và OpenOffice.org, nhưng đôi khi chúng có thể bị thay đổi một cách tình cờ.">
 
 <!ENTITY zotero.integration.references.label "Các Tham khảo trong Thư tịch">
+
+<!ENTITY zotero.sync.storage.progress "Progress:">
+<!ENTITY zotero.sync.storage.downloads "Downloads:">
+<!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
+<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
+
+<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
+<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">

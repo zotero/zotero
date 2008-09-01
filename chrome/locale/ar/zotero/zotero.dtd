@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "الشكل:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "خيارات المترجم">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "الاحتفاظ بمصادر مرتبة">
 
 <!ENTITY zotero.citation.page "الصفحة">
@@ -151,3 +154,13 @@
 <!ENTITY zotero.integration.prefs.bookmarks.caption "التأشيرات تظل محفوظة في مايكروسوفت وورد و OpenOffice.org. ولكنها قد تكون عرضة للتغيير الغير مقصود.">
 
 <!ENTITY zotero.integration.references.label "مراجع في قائمة المؤلفات">
+
+<!ENTITY zotero.sync.storage.progress "Progress:">
+<!ENTITY zotero.sync.storage.downloads "Downloads:">
+<!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
+<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
+
+<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
+<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
