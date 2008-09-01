@@ -20,7 +20,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero_Charset_Menu = new function() {
+var Zotero_Charset_Menu = new function() {
 	this.populate = populate;
 	
 	/**

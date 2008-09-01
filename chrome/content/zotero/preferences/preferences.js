@@ -40,8 +40,10 @@ function init()
 	initSearchPane();
 	
 	var charsetMenu = document.getElementById("zotero-import-charsetMenu");
-	charsetMap = Zotero_Charset_Menu.populate(charsetMenu, false);
-	charsetMenu.selectedItem = charsetMap[Zotero.Prefs.get("import.charset")] ? charsetMap[Zotero.Prefs.get("import.charset")] : charsetMap["auto"];
+	var charsetMap = Zotero_Charset_Menu.populate(charsetMenu, false);
+	charsetMenu.selectedItem =
+		charsetMap[Zotero.Prefs.get("import.charset")] ?
+			charsetMap[Zotero.Prefs.get("import.charset")] : charsetMap["auto"];
 }
 
 
