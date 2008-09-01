@@ -2664,8 +2664,8 @@ Zotero.Item.prototype.addTag = function(name, type) {
 	Zotero.DB.beginTransaction();
 	
 	var matchingTags = Zotero.Tags.getIDs(name);
-	if (matchingTags) {
-		var itemTags = this.getTags();
+	var itemTags = this.getTags();
+	if (matchingTags && itemTags) {
 		for each(var id in matchingTags) {
 			if (itemTags.indexOf(id) != -1) {
 				var tag = Zotero.Tags.get(id);
