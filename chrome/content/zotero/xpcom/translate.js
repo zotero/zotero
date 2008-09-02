@@ -1281,9 +1281,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 			newItem.save();
 		} else {
 			var myID = newItem.save();
-			if(myID == true || !myID) {
-				myID = newItem.id;
-			}
+			newItem = Zotero.Items.get(myID);
 		}
 		
 		// handle notes
