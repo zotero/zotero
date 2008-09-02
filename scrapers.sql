@@ -25934,7 +25934,7 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-07-24 05:15:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://[^/]*www\.sciencedirect\.com[^/]*/science(\/article)?(\?(?:.+\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?', 
+REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-08-02 03:02:12', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://[^/]*www\.sciencedirect\.com[^/]*/science(\/article)?(\?(?:.+\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?', 
 'function detectWeb(doc, url) {
 	if ((url.indexOf("_ob=DownloadURL") != -1) || doc.title == "ScienceDirect Login") {
 		return false;
@@ -26019,7 +26019,6 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 					});
 					translator.translate();
 				});
-				Zotero.wait();
 			});
 		}, function() {Zotero.done;});
 	} else {
@@ -26094,8 +26093,8 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 				item.complete();
 			});
 		}, function() {Zotero.done;});
-		Zotero.wait();
 	}
+	Zotero.wait();
 }');
 
 REPLACE INTO translators VALUES ('19643c25-a4b2-480d-91b7-4e0b761fb6ad', '1.0.0b3.r1', '', '2007-03-16 03:00:00', '1', '100', '4', 'ScientificCommons', 'Sean Takats', '^http://(?:en|de|www)\.scientificcommons\.org', 
