@@ -24265,7 +24265,7 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2007-12-22 21:20:00', '1', '100', '4', 'Google Books', 'Simon Kornblith', '^http://books\.google\.[a-z]+(\.[a-z]+)?/books\?(.*id=.*|.*q=.*)', 
+REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2008-09-02 11:02:57', '1', '100', '4', 'Google Books', 'Simon Kornblith and Michael Berkowitz', '^http://books\.google\.[a-z]+(\.[a-z]+)?/books\?(.*id=.*|.*q=.*)', 
 'function detectWeb(doc, url) {
 	var re = new RegExp(''^http://books\\.google\\.[a-z]+(\.[a-z]+)?/books\\?id=([^&]+)'', ''i'');
 	if(re.test(doc.location.href)) {
@@ -24303,6 +24303,7 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 			newUris.push(''http://books.google.''+suffix+''/books?id=''+m[2]);
 		}
 	}
+	Zotero.debug(newUris);
 	Zotero.Utilities.processDocuments(newUris, function(newDoc) {
 		var newItem = new Zotero.Item("book");
 		newItem.extra = "";
@@ -24333,16 +24334,16 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 			}
 		}
 		
-		xpath = ''//table[@id="bibdata"]/tbody/tr'';
+		xpath = ''//td[2][@id="bookinfo"]/div[@class="bookinfo_sectionwrap"]/div'';
 		var elmts = newDoc.evaluate(xpath, newDoc, nsResolver,
 		                            XPathResult.ANY_TYPE, null);
 		while(elmt = elmts.iterateNext()) {
-			var fieldelmt = newDoc.evaluate(''./td[1]//text()'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var fieldelmt = newDoc.evaluate(''.//text()'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if(fieldelmt) {
 				field = Zotero.Utilities.superCleanString(fieldelmt.nodeValue);
 				Zotero.debug("output: " + field);
 				if(field.substring(0,10) == "Published ") {
-					newItem.date = field.substring(10);
+					newItem.date = field.substring(field.length-4);
 					var publisher = newDoc.evaluate(''..//a'', fieldelmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 					if (publisher){
 						publisher =  Zotero.Utilities.superCleanString(publisher.textContent);
