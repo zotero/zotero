@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-09-02 13:40:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-09-02 13:55:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1541,7 +1541,7 @@ function doWeb(doc, url) {
 }');
 
 
-REPLACE INTO translators VALUES ('661fc39a-2500-4710-8285-2d67ddc00a69', '1.0', '', '2008-07-24 09:20:44', '0', '100', '4', 'Artefacts Canada', 'Adam Crymble', 'http://daryl.chin.gc.ca', 
+REPLACE INTO translators VALUES ('661fc39a-2500-4710-8285-2d67ddc00a69', '1.0', '', '2008-09-02 13:55:00', '0', '100', '4', 'Artefacts Canada', 'Adam Crymble', 'http://daryl.chin.gc.ca', 
 'function detectWeb(doc, url) {
 	var multi1 = '''';
 	var single1 = '''';
@@ -11920,7 +11920,7 @@ REPLACE INTO translators VALUES ('bdaac15c-b0ee-453f-9f1d-f35d00c7a994', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-08-29 14:26:14', '1', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://[^/]artstor.org[^/]*', 
+REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-09-02 13:55:00', '1', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://[^/]artstor.org[^/]*', 
 'function detectWeb(doc, url) {
 	if (url.match(/(S|s)earch/) && (doc.evaluate(''//div[@id="thumbContentWrap"]/div'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/\w+/))) return "multiple"
 }', 
