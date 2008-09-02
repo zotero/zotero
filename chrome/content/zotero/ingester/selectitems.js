@@ -20,14 +20,9 @@
     ***** END LICENSE BLOCK *****
 */
 
-//////////////////////////////////////////////////////////////////////////////
-//
-// Zotero_Ingester_Interface_SelectItems
-//
-//////////////////////////////////////////////////////////////////////////////
-
-// Class to interface with the browser when ingesting data
-
+/**
+ * @namespace Singleton to interface with the browser when ingesting data
+ */
 var Zotero_Ingester_Interface_SelectItems = function() {}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -36,9 +31,9 @@ var Zotero_Ingester_Interface_SelectItems = function() {}
 //
 //////////////////////////////////////////////////////////////////////////////
 
-/*
- * Initialize some variables and prepare event listeners for when chrome is done
- * loading
+/**
+ * Presents items to select in the select box. Assumes window.arguments[0].dataIn is an object with
+ * URLs as keys and descriptions as values
  */
 Zotero_Ingester_Interface_SelectItems.init = function() {
 	// Set font size from pref
@@ -48,7 +43,7 @@ Zotero_Ingester_Interface_SelectItems.init = function() {
 	this.io = window.arguments[0];
 	var listbox = document.getElementById("zotero-selectitems-links");
 	
-	for(i in this.io.dataIn) {	// we could use a tree for this if we wanted to
+	for(var i in this.io.dataIn) {	// we could use a tree for this if we wanted to
 		var itemNode = document.createElement("listitem");
 		itemNode.setAttribute("type", "checkbox");
 		itemNode.setAttribute("value", i);
@@ -58,6 +53,10 @@ Zotero_Ingester_Interface_SelectItems.init = function() {
 	}
 }
 
+/**
+ * Selects or deselects all items
+ * @param {Boolean} deselect If true, deselect all items instead of selecting all items
+ */
 Zotero_Ingester_Interface_SelectItems.selectAll = function(deselect) {
 	var listbox = document.getElementById("zotero-selectitems-links");
 	for (var i=0; i<listbox.childNodes.length; i++){
@@ -65,6 +64,9 @@ Zotero_Ingester_Interface_SelectItems.selectAll = function(deselect) {
 	}
 }
 
+/**
+ * Called when "OK" button is pressed to populate window.arguments[0].dataOut with selected items
+ */
 Zotero_Ingester_Interface_SelectItems.acceptSelection = function() {
 	var listbox = document.getElementById("zotero-selectitems-links");
 	
@@ -80,10 +82,5 @@ Zotero_Ingester_Interface_SelectItems.acceptSelection = function() {
 		}
 	}
 	
-	// What a hack! this makes code down the road much easier because otherwise
-	// an empty array is true but empty and we can't figure that out, because
-	// there's no length
-	if(!returnObject) {
-		this.io.dataOut = null;
-	}
+	if(!returnObject) this.io.dataOut = null;
 }
