@@ -243,7 +243,7 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, callback, ca
 	//this._captchaCallback = captchaCallback;
 	
 	var cacheFile = Zotero.getZoteroDirectory();
-	cacheFile.append(".zotero-recpdf-cache");
+	cacheFile.append("recognizePDFcache.txt");
 	if(cacheFile.exists()) {
 		cacheFile.remove(false);
 	}
