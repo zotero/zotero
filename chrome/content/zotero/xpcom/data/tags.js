@@ -28,8 +28,8 @@ Zotero.Tags = new function() {
 	Zotero.DataObjects.apply(this, ['tag']);
 	this.constructor.prototype = new Zotero.DataObjects();
 	
-	var _tags = []; // indexed by tag text
-	var _tagsByID = []; // indexed by tagID
+	var _tags = {}; // indexed by tag text
+	var _tagsByID = {}; // indexed by tagID
 	
 	this.get = get;
 	this.getName = getName;
@@ -425,6 +425,12 @@ Zotero.Tags = new function() {
 				delete _tags[tag.type]['_' + tag.name];
 			}
 		}
+	}
+	
+	
+	this.unloadAll = function (ids) {
+		_tags = {};
+		_tagsByID = {};
 	}
 }
 
