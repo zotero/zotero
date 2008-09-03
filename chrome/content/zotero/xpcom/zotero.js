@@ -913,8 +913,9 @@ var Zotero = new function(){
 	
 	
 	function reloadDataObjects() {
+		Zotero.Tags.unloadAll();
 		Zotero.Collections.reloadAll();
-		Zotero.Creators.reloadAll();
+		Zotero.Creators.unloadAll();
 		Zotero.Items.reloadAll();
 	}
 };

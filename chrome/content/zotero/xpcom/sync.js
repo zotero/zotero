@@ -1234,6 +1234,7 @@ Zotero.Sync.Server = new function () {
 		_syncInProgress = false;
 		_resetAttempts();
 		Zotero.DB.rollbackAllTransactions();
+		Zotero.reloadDataObjects();
 		
 		if (_sessionID && _sessionLock) {
 			Zotero.Sync.Server.unlock()
@@ -1497,8 +1498,9 @@ Zotero.Sync.Server.Data = new function() {
 								}
 								
 								if (type != 'item') {
-									alert('Reconciliation unimplemented for ' + types);
-									throw ('Reconciliation unimplemented for ' + types);
+									var msg = "Reconciliation unimplemented for " + types;
+									alert(msg);
+									throw(msg);
 								}
 								
 								if (obj.isAttachment()) {
@@ -2123,9 +2125,14 @@ Zotero.Sync.Server.Data = new function() {
 				throw ('No creator in position ' + i);
 			}
 			
+			var creatorID = parseInt(creator.@id);
+			var creatorObj = Zotero.Creators.get(creatorID);
+			if (!creatorObj) {
+				throw ("Creator " + creatorID + " does not exist");
+			}
 			item.setCreator(
 				pos,
-				Zotero.Creators.get(parseInt(creator.@id)),
+				creatorObj,
 				creator.@creatorType.toString()
 			);
 			i++;

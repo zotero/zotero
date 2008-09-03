@@ -36,7 +36,6 @@ Zotero.Creators = new function() {
 	this.updateData = updateData;
 	this.deleteData = deleteData;
 	this.reload = reload;
-	this.reloadAll = reloadAll;
 	this.erase = erase;
 	this.purge = purge;
 	this.unload = unload;
@@ -200,20 +199,6 @@ Zotero.Creators = new function() {
 	}
 	
 	
-	function reloadAll() {
-		Zotero.debug("Reloading all creators");
-		_creatorDataHash = {};
-		for (var id in _creatorsByID) {
-			_creatorsByID[id].load();
-			var realID = _creatorsByID[id].id;
-			if (realID != id) {
-				Zotero.debug("Clearing cache entry for creator " + id);
-				delete _creatorsByID[id];
-			}
-		}
-	}
-	
-	
 	/**
 	 * Remove creator(s) from all linked items and call this.purge()
 	 * to delete creator rows
@@ -297,6 +282,13 @@ Zotero.Creators = new function() {
 	 */
 	function unload(id) {
 		delete _creatorsByID[id];
+	}
+	
+	
+	this.unloadAll = function () {
+		Zotero.debug("Unloading all creators");
+		_creatorsByID = {};
+		_creatorDataHash = {};
 	}
 	
 	
