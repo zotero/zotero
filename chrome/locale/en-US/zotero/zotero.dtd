@@ -164,3 +164,9 @@
 <!ENTITY zotero.proxy.recognized.warning.secondary		"Adding other proxies allows malicious sites to masquerade as sites you trust."> 
 <!ENTITY zotero.proxy.recognized.disable.label			"Do not automatically redirect requests through previously recognized proxies">
 <!ENTITY zotero.proxy.recognized.ignore.label			"Ignore">
+
+<!ENTITY zotero.recognizePDF.recognizing.label			"Retrieving Metadata...">
+<!ENTITY zotero.recognizePDF.cancel.label					"Cancel">
+<!ENTITY zotero.recognizePDF.pdfName.label				"PDF Name">
+<!ENTITY zotero.recognizePDF.itemName.label				"Item Name">
+<!ENTITY zotero.recognizePDF.captcha.label				"Type the text below to continue retrieving metadata.">
