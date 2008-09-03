@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-09-02 11:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-09-03 23:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -776,7 +776,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('a2363670-7040-4cb9-8c48-6b96584e92ee', '1.0.0b4.r5', '', '2008-02-08 20:30:00', '0', '100', '4', 'Florida University Libraries (Endeca 1)', 'Sean Takats', '^http://[^/]+/[^\.]+.jsp\?[^/]*(?:Ntt=|NttWRD=)', 
+REPLACE INTO translators VALUES ('a2363670-7040-4cb9-8c48-6b96584e92ee', '1.0.0b4.r5', '', '2008-09-03 23:00:00', '0', '100', '4', 'Florida University Libraries (Endeca 1)', 'Sean Takats', '^http://[^/]+/[^\.]+.jsp\?[^/]*(?:Ntt=|NttWRD=)', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -801,7 +801,7 @@ REPLACE INTO translators VALUES ('a2363670-7040-4cb9-8c48-6b96584e92ee', '1.0.0b
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 		} : null;	
-	var xpath = ''//div[starts-with(@id, "briefTitle")]/a'';
+	var xpath = ''//div[starts-with(@id, "briefTitle")]/a[starts-with(@id, "Title")]'';
 	var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var elmt;
 	if(elmt = elmts.iterateNext()) {
@@ -809,7 +809,6 @@ REPLACE INTO translators VALUES ('a2363670-7040-4cb9-8c48-6b96584e92ee', '1.0.0b
 		var items = new Array();
 		do {
 			items[elmt.href] = Zotero.Utilities.cleanString(elmt.textContent);
-			Zotero.debug(elmt.textContent);
 		} while (elmt = elmts.iterateNext());
 		
 		items = Zotero.selectItems(items);
@@ -836,14 +835,13 @@ REPLACE INTO translators VALUES ('a2363670-7040-4cb9-8c48-6b96584e92ee', '1.0.0b
 		
 		var record = new marc.record();
 		while(elmt = elmts.iterateNext()) {
-			var field = Zotero.Utilities.superCleanString(doc.evaluate(''./TD[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-			var value = doc.evaluate(''./TD[3]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var field = Zotero.Utilities.superCleanString(newDoc.evaluate(''./TD[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			var value = newDoc.evaluate(''./TD[3]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			
 			if(field == "LDR") {
 				record.leader = value;
 			} else if(field != "FMT") {
 				
-				Zotero.debug("field=" + field);
 				value = value.replace(/\|([a-z]) /g, marc.subfieldDelimiter+"$1");
 				
 				var code = field.substring(0, 3);
