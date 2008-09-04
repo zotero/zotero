@@ -17,6 +17,7 @@
     <category term="generic-base"/>
     <category term="numeric"/>
     <updated></updated>
+    <link href="http://www.ieee.org/portal/cms_docs_iportals/iportals/publications/authors/transjnl/stylemanual.pdf" rel="documentation"/>
   </info>
   <macro name="author">
     <names variable="author">
@@ -70,6 +71,7 @@
     </layout>
   </citation>
   <bibliography>
+    <option name="entry-spacing" value="0"/>
     <option name="et-al-min" value="4"/>
     <option name="et-al-use-first" value="1"/>
     <option name="second-field-align" value="true"/>
