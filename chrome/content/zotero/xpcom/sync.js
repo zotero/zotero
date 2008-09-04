@@ -2368,11 +2368,7 @@ Zotero.Sync.Server.Data = new function() {
 				creator = new Zotero.Creator;
 			}
 			else {
-				var creatorID = parseInt(xmlCreator.@id);
-				creator = Zotero.Creators.get(creatorID);
-				if (!creator) {
-					creator = new Zotero.Creator(creatorID);
-				}
+				creator = new Zotero.Creator(parseInt(xmlCreator.@id));
 				/*
 				if (creator.exists()) {
 					throw ("Creator specified in XML node already exists "
