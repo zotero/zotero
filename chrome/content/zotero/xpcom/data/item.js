@@ -3538,8 +3538,12 @@ Zotero.Item.prototype._loadCreators = function() {
 	}
 	
 	for (var i=0; i<creators.length; i++) {
+		var creatorObj = Zotero.Creators.get(creators[i].creatorID);
+		if (!creatorObj) {
+			creatorObj = new Zotero.Creator(creators[i].creatorID);
+		}
 		this._creators[creators[i].orderIndex] = {
-			ref: new Zotero.Creator(creators[i].creatorID),
+			ref: creatorObj,
 			creatorTypeID: creators[i].creatorTypeID
 		};
 	}
