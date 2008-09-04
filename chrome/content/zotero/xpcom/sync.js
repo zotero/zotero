@@ -1392,6 +1392,9 @@ Zotero.Sync.Server.Data = new function() {
 		var relatedItemsStore = {};
 		var itemStorageModTimes = {};
 		
+		//Zotero.debug("Updated IDs:");
+		//Zotero.debug(uploadIDs);
+		
 		Zotero.DB.beginTransaction();
 		
 		for each(var syncObject in Zotero.Sync.syncObjects) {
@@ -1480,7 +1483,9 @@ Zotero.Sync.Server.Data = new function() {
 										var creators = obj.getCreators();
 										creators = creators.concat(remoteObj.getCreators());
 										for each(var creator in creators) {
-											if (remoteCreatorStore[obj.id]) {
+											var r = remoteCreatorStore[creator.ref.id];
+											// Doesn't include dateModified
+											if (r && !r.equals(creator.ref)) {
 												creatorsChanged = true;
 												break;
 											}
@@ -1656,21 +1661,38 @@ Zotero.Sync.Server.Data = new function() {
 				// Don't use assigned-but-unsaved ids for new ids
 				Zotero.ID.skip(types, obj.id);
 				
-				if (type == 'item' && obj.isAttachment() &&
-						(obj.attachmentLinkMode ==
-							Zotero.Attachments.LINK_MODE_IMPORTED_FILE ||
-						 obj.attachmentLinkMode ==
-							Zotero.Attachments.LINK_MODE_IMPORTED_URL)) {
-					// Mark new attachments for download
-					if (isNewObject) {
-						obj.attachmentSyncState =
-							Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
+				if (type == 'item') {
+					// Make sure none of the item's creators are marked as
+					// deleted, which could happen if a creator was deleted
+					// locally but attached to a new/modified item remotely
+					// and added back in xmlToItem()
+					if (obj.isRegularItem()) {
+						var creators = obj.getCreators();
+						for each(var creator in creators) {
+							Zotero.Sync.removeFromDeleted(
+								uploadIDs.deleted.creators,
+								creator.ref.id,
+								creator.ref.key,
+								true
+							);
+						}
 					}
-					// Set existing attachments mtime update check
-					else {
-						var mtime = xmlNode.@storageModTime.toString();
-						if (mtime) {
-							itemStorageModTimes[obj.id] = parseInt(mtime);
+					else if (obj.isAttachment() &&
+							(obj.attachmentLinkMode ==
+								Zotero.Attachments.LINK_MODE_IMPORTED_FILE ||
+							 obj.attachmentLinkMode ==
+								Zotero.Attachments.LINK_MODE_IMPORTED_URL)) {
+						// Mark new attachments for download
+						if (isNewObject) {
+							obj.attachmentSyncState =
+								Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD;
+						}
+						// Set existing attachments mtime update check
+						else {
+							var mtime = xmlNode.@storageModTime.toString();
+							if (mtime) {
+								itemStorageModTimes[obj.id] = parseInt(mtime);
+							}
 						}
 					}
 				}
@@ -1866,6 +1888,9 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		var xmlstr = Zotero.Sync.Server.Data.buildUploadXML(uploadIDs);
+		
+		//Zotero.debug(xmlstr);
+		//throw ('break');
 		
 		Zotero.DB.commitTransaction();
 		
@@ -2127,8 +2152,20 @@ Zotero.Sync.Server.Data = new function() {
 			
 			var creatorID = parseInt(creator.@id);
 			var creatorObj = Zotero.Creators.get(creatorID);
+			// If creator doesn't exist locally (e.g., if it was deleted locally
+			// and appears in a new/modified item remotely), get it from within
+			// the item's creator block, where a copy should be provided
 			if (!creatorObj) {
-				throw ("Creator " + creatorID + " does not exist");
+				if (creator.creator.length() == 0) {
+					throw ("Data for missing local creator " + creatorID
+						+ " not provided in Zotero.Sync.Server.Data.xmlToItem()");
+				}
+				var creatorObj =
+					Zotero.Sync.Server.Data.xmlToCreator(creator.creator);
+				if (creatorObj.id != creatorID) {
+					throw ("Creator id " + creatorObj.id + " does not match "
+						+ "item creator in Zotero.Sync.Server.Data.xmlToItem()");
+				}
 			}
 			item.setCreator(
 				pos,
@@ -2328,10 +2365,14 @@ Zotero.Sync.Server.Data = new function() {
 	function xmlToCreator(xmlCreator, creator, skipPrimary) {
 		if (!creator) {
 			if (skipPrimary) {
-				creator = new Zotero.Creator(null);
+				creator = new Zotero.Creator;
 			}
 			else {
-				creator = new Zotero.Creator(parseInt(xmlCreator.@id));
+				var creatorID = parseInt(xmlCreator.@id);
+				creator = Zotero.Creators.get(creatorID);
+				if (!creator) {
+					creator = new Zotero.Creator(creatorID);
+				}
 				/*
 				if (creator.exists()) {
 					throw ("Creator specified in XML node already exists "
