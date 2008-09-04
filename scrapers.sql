@@ -1688,7 +1688,7 @@ function doWeb(doc, url) {
 }
 ');
 
-REPLACE INTO translators VALUES ('fef07360-ee97-4f67-b022-6f64d5ec0c25', '1.0.0b4.r5', '', '2008-08-04 07:10:00', '0', '100', '4', 'KOBV', 'Gunar Maiwald', '^http://vs13.kobv.de/V/', 
+REPLACE INTO translators VALUES ('fef07360-ee97-4f67-b022-6f64d5ec0c25', '1.0.0b4.r5', '', '2008-09-04 08:15:46', '1', '100', '4', 'KOBV', 'Gunar Maiwald', '^http://vs13.kobv.de/V/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//tr /td[@class="no_wrap_center"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -1702,7 +1702,11 @@ REPLACE INTO translators VALUES ('fef07360-ee97-4f67-b022-6f64d5ec0c25', '1.0.0b
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	var marc = translator.getTranslatorObject();
 
-	var xpath =''//li/a[@title="Ansicht des bibliothekarischen Formats"]'';
+	 var xpath;
+	if (doc.title.match("Freie Universität Berlin")) { xpath =''//li/a[@title="Ansicht des Originalformats"]''; }
+	else if (doc.title.match("KOBV")) { xpath =''//li/a[@title="Ansicht des bibliothekarischen Formats"]''; }
+	else if (doc.title.match("UB der HU Berlin")) { xpath =''//li/a[@title="Ansicht des Originalformats"]''; }
+	else if (doc.title.match("^MetaLib")) { xpath =''//li/a[@title="Ansicht des Originalformats"]''; }
 	var hrefs = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 	var href;
 	
@@ -1731,7 +1735,7 @@ REPLACE INTO translators VALUES ('fef07360-ee97-4f67-b022-6f64d5ec0c25', '1.0.0b
 					value = marc.subfieldDelimiter+"a"+surname+", "+forename;
 					ind = 1;
 				}
-    		    record.addField(code, ind, value);
+    		    		record.addField(code, ind, value);
 			}
 			
 			var newItem = new Zotero.Item();
