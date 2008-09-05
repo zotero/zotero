@@ -1201,7 +1201,8 @@ Zotero.Sync.Storage = new function () {
 				{
 					onProgress: _updateProgress,
 					onStop: _onUploadComplete,
-					item: item
+					item: item,
+					streams: [fis, bis]
 				}
 			);
 			channel.notificationCallbacks = listener;
@@ -2019,9 +2020,10 @@ Zotero.Sync.Storage.ZipWriterObserver.prototype = {
 
 /**
  * Possible properties of data object:
- *   - onStart f(request)
- *   - onProgress  f(name, progess, progressMax)
- *   - onStop  f(request, status, response, data)
+ *   - onStart: f(request)
+ *   - onProgress:  f(name, progess, progressMax)
+ *   - onStop:  f(request, status, response, data)
+ *   - streams: array of streams to close on completion
  *   - Other values to pass to onStop()
  */
 Zotero.Sync.Storage.StreamListener = function (data) {
@@ -2135,6 +2137,12 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 			request.QueryInterface(Components.interfaces.nsIHttpChannel);
 			status = request.responseStatus;
 			request.QueryInterface(Components.interfaces.nsIRequest);
+		}
+		
+		if (this._data.streams) {
+			for each(var stream in this._data.streams) {
+				stream.close();
+			}
 		}
 		
 		if (this._data.onStop) {
