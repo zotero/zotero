@@ -3067,7 +3067,7 @@ Zotero.Item.prototype.clone = function(includePrimary) {
 	
 	if (obj.tags) {
 		for each(var tag in obj.tags) {
-			newItem.addTagByID(tag.id);
+			newItem.addTagByID(tag.primary.tagID);
 		}
 	}
 	
