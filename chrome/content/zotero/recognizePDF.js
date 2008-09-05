@@ -370,14 +370,8 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 	
 	this._hiddenBrowser.addEventListener("pageshow", function() { me._scrape(translate) }, true);
 	
-	// to make us a little less obvious, specify a referrer
-	var referrer = Components.classes["@mozilla.org/network/io-service;1"]
-		.getService(Components.interfaces.nsIIOService)
-		.newURI(this._previousURL ? this._previousURL : "http://scholar.google.com/", null, null);
 	this._hiddenBrowser.loadURIWithFlags(url,
-		Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, referrer, null, null);
-	
-	this._previousURL = url;
+		Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, null, null);
 }
 
 /**
