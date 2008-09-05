@@ -1014,7 +1014,7 @@ Zotero.Sync.Server = new function () {
 			}
 			
 			if (response.firstChild.tagName != 'locked') {
-				_error('Invalid response from server');
+				_error('Invalid response from server', xmlhttp.responseText);
 			}
 			
 			_sessionLock = true;
@@ -1055,7 +1055,7 @@ Zotero.Sync.Server = new function () {
 			}
 			
 			if (response.firstChild.tagName != 'unlocked') {
-				_error('Invalid response from server');
+				_error('Invalid response from server', xmlhttp.responseText);
 			}
 			
 			_sessionLock = null;
@@ -1099,7 +1099,7 @@ Zotero.Sync.Server = new function () {
 			}
 			
 			if (response.firstChild.tagName != 'cleared') {
-				_error('Invalid response from server');
+				_error('Invalid response from server', xmlhttp.responseText);
 			}
 			
 			Zotero.Sync.Server.resetClient();
@@ -1146,7 +1146,7 @@ Zotero.Sync.Server = new function () {
 			}
 			
 			if (response.firstChild.tagName != 'reset') {
-				_error('Invalid response from server');
+				_error('Invalid response from server', xmlhttp.responseText);
 			}
 			
 			_syncInProgress = false;
@@ -1191,7 +1191,7 @@ Zotero.Sync.Server = new function () {
 			}
 			
 			if (response.firstChild.tagName != 'loggedout') {
-				_error('Invalid response from server');
+				_error('Invalid response from server', xmlhttp.responseText);
 			}
 			
 			if (callback) {
@@ -1206,7 +1206,7 @@ Zotero.Sync.Server = new function () {
 				!xmlhttp.responseXML.childNodes[0] ||
 				xmlhttp.responseXML.childNodes[0].tagName != 'response') {
 			Zotero.debug(xmlhttp.responseText);
-			_error('Invalid response from server');
+			_error('Invalid response from server', xmlhttp.responseText);
 		}
 		
 		if (!xmlhttp.responseXML.childNodes[0].firstChild) {
@@ -1230,7 +1230,14 @@ Zotero.Sync.Server = new function () {
 	}
 	
 	
-	function _error(e) {
+	function _error(e, extraInfo) {
+		if (extraInfo) {
+			// Server errors will generally be HTML
+			var ZU = new Zotero.Utilities
+			extraInfo = ZU.unescapeHTML(extraInfo);
+			Components.utils.reportError(extraInfo);
+		}
+		
 		_syncInProgress = false;
 		_resetAttempts();
 		Zotero.DB.rollbackAllTransactions();
