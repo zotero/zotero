@@ -1487,14 +1487,22 @@ Zotero.Sync.Server.Data = new function() {
 									if (!diff) {
 										// Check if creators changed
 										var creatorsChanged = false;
+										
 										var creators = obj.getCreators();
-										creators = creators.concat(remoteObj.getCreators());
-										for each(var creator in creators) {
-											var r = remoteCreatorStore[creator.ref.id];
-											// Doesn't include dateModified
-											if (r && !r.equals(creator.ref)) {
-												creatorsChanged = true;
-												break;
+										var remoteCreators = remoteObj.getCreators();
+										
+										if (creators.length != remoteCreators.length) {
+											creatorsChanged = true;
+										}
+										else {
+											creators = creators.concat(remoteCreators);
+											for each(var creator in creators) {
+												var r = remoteCreatorStore[creator.ref.id];
+												// Doesn't include dateModified
+												if (r && !r.equals(creator.ref)) {
+													creatorsChanged = true;
+													break;
+												}
 											}
 										}
 										if (!creatorsChanged) {
