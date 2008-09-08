@@ -7777,7 +7777,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('587aa172-af1a-4cab-b188-2b6d392cae5c', '1.0', '', '2008-09-08 18:40:46', '0', '100', '4', 'Unidade de Biologia do Conservaço', 'Giovanni Manghi and Michael Berkowitz', 'http://www.ubc.uevora.pt/', 
+REPLACE INTO translators VALUES ('587aa172-af1a-4cab-b188-2b6d392cae5c', '1.0', '', '2008-09-08 18:40:46', '0', '100', '4', 'Unidade de Biologia da Conservaçao', 'Giovanni Manghi and Michael Berkowitz', 'http://www.ubc.uevora.pt/', 
 'function detectWeb(doc, url) {
    if(doc.title == "UBC: referencia bibliografica") {
 	return "book";
