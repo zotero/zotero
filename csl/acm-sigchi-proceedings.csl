@@ -85,7 +85,7 @@
     <text variable="publisher" suffix=" "/>
     <text macro="year" prefix="(" suffix=")"/>
   </macro>
-  
+
   <macro name="book-publisher">
     <group delimiter=", ">
       <text variable="publisher"/>
@@ -117,14 +117,7 @@
     <layout suffix=".">
       <text variable="citation-number" suffix="."/>
       <text macro="author" suffix=". "/>
-      <choose>
-        <if type="book">
-          <text macro="title" suffix=". " font-style="italic"/>
-        </if>
-        <else>
-          <text macro="title" suffix=". "/>
-        </else>
-      </choose>
+      <text macro="title" suffix=". "/>
       <choose>
 	  <if type="book">
         <text macro="book-publisher" suffix="."/>
