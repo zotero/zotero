@@ -39,7 +39,7 @@ var Zotero_RecognizePDF = new function() {
 	 * @returns {Boolean} True if the PDF can be recognized, false if it cannot be
 	 */
 	this.canRecognize = function(/**Zotero.Item*/ item) {
-		return (Zotero.Fulltext.pdfConverterIsRegistered && item.attachmentMIMEType &&
+		return (Zotero.Fulltext.pdfConverterIsRegistered() && item.attachmentMIMEType &&
 			item.attachmentMIMEType == "application/pdf" && !item.getSource());
 	}
 	
