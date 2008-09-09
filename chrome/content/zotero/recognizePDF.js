@@ -308,6 +308,7 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, callback, ca
 	
 	this._startLine = this._iteration = 0;
 	
+	inputStream.close();
 	cacheFile.remove(false);
 	this._queryGoogle();
 }
