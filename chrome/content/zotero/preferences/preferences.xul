@@ -161,6 +161,7 @@ To add a new preference:
 		<preferences>
 			<preference id="pref-sync-autosync" name="extensions.zotero.sync.autoSync" type="bool"/>
 			<preference id="pref-sync-username" name="extensions.zotero.sync.server.username" type="string" instantApply="true"/>
+			<preference id="pref-storage-protocol" name="extensions.zotero.sync.storage.protocol" type="string"/>
 			<preference id="pref-storage-enabled" name="extensions.zotero.sync.storage.enabled" type="bool"/>
 			<preference id="pref-storage-url" name="extensions.zotero.sync.storage.url" type="string" instantApply="true"/>
 			<preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string" instantApply="true"/>
@@ -223,9 +224,23 @@ To add a new preference:
 				
 				<rows>
 					<row>
+						<label value="Protocol:"/>
+						<hbox>
+							<menulist id="storage-url-protocol"
+									preference="pref-storage-protocol"
+									onsynctopreference="updateStorageSettings(this.value)">
+								<menupopup>
+									<menuitem label="WebDAV" value="webdav"/>
+									<!-- TODO: localize -->
+									<menuitem label="WebDAV (Secure)" value="webdavs"/>
+								</menupopup>
+							</menulist>
+						</hbox>
+					</row>
+					<row>
 						<label value="URL:"/>
 						<hbox>
-							<label value="https://"/>
+							<label id="storage-url-prefix"/>
 							<textbox id="storage-url" flex="1"
 								preference="pref-storage-url"
 								onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); verifyStorageServer(); }"

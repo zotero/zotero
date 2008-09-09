@@ -72,7 +72,22 @@ Zotero.Sync.Storage = new function () {
 			});
 		}
 		
-		spec = 'https://' + spec + '/zotero/';
+		var protocol = Zotero.Prefs.get('sync.storage.protocol');
+		switch (protocol) {
+			case 'webdav':
+				var scheme = "http";
+				break;
+			
+			case 'webdavs':
+				var scheme = "https";
+				break;
+			
+			default:
+				throw ("Invalid storage protocol '" + protocol
+					+ "' in Zotero.Sync.Storage.rootURI");
+		}
+		
+		spec = scheme + '://' + spec + '/zotero/';
 		
 		var ios = Components.classes["@mozilla.org/network/io-service;1"].
 					getService(Components.interfaces.nsIIOService);
