@@ -292,25 +292,27 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, callback, ca
 	var lineLengthsLength = lineLengths.length;
 	if(lineLengthsLength < 20) {
 		this._callback(false, "recognizePDF.noOCR");
-		return;
+	} else {		
+		var sortedLengths = lineLengths.sort();
+		var medianLength = sortedLengths[Math.floor(lineLengthsLength/2)];
+		
+		// pick lines within 4 chars of the median (this is completely arbitrary)
+		this._goodLines = [];
+		var uBound = medianLength + 4;
+		var lBound = medianLength - 4;
+		for (var i=0; i<lineLengthsLength; i++) {
+			if(lineLengths[i] > lBound && lineLengths[i] < uBound) this._goodLines.push(lines[i]);
+		}
+		
+		this._startLine = this._iteration = 0;
 	}
-	
-	var sortedLengths = lineLengths.sort();
-	var medianLength = sortedLengths[Math.floor(lineLengthsLength/2)];
-	
-	// pick lines within 4 chars of the median (this is completely arbitrary)
-	this._goodLines = [];
-	var uBound = medianLength + 4;
-	var lBound = medianLength - 4;
-	for (var i=0; i<lineLengthsLength; i++) {
-		if(lineLengths[i] > lBound && lineLengths[i] < uBound) this._goodLines.push(lines[i]);
-	}
-	
-	this._startLine = this._iteration = 0;
 	
 	inputStream.close();
 	cacheFile.remove(false);
-	this._queryGoogle();
+	
+	if(lineLengthsLength >= 20) {
+		this._queryGoogle();
+	}
 }
 
 /**
