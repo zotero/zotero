@@ -27,7 +27,7 @@
       * added colon as suffix of the term "in" --
       * added colon as suffix of the termin "accessed" --
       * changed variable "issue" of "article-journal from "no." to "Nr." --
-      * chenged "month day" to "day. month" for blog posts (and other entry types? which ones else?)
+      * changed "month day" to "day. month" for blog posts (and other entry types? which ones else?)
       I also changed some script logic which in noted in the code: --
       * do not add day-month at the end of a book, even it is provided in the date field of the zotero database (as it sometimes come from amazon) --
       * added access date for material with URL. --
