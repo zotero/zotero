@@ -1029,7 +1029,7 @@ Zotero.Sync.Storage = new function () {
 				var fileName = entryName;
 			}
 			
-			if (fileName.indexOf('/') != -1 || fileName.indexOf('.') == 0) {
+			if (fileName.indexOf('.') == 0) {
 				Zotero.debug("Skipping " + fileName);
 				continue;
 			}
@@ -1090,30 +1090,7 @@ Zotero.Sync.Storage = new function () {
 		var zw = Components.classes["@mozilla.org/zipwriter;1"]
 			.createInstance(Components.interfaces.nsIZipWriter);
 		zw.open(tmpFile, 0x04 | 0x08 | 0x20); // open rw, create, truncate
-		var fileList = [];
-		dir = dir.directoryEntries;
-		while (dir.hasMoreElements()) {
-			var file = dir.getNext();
-			file.QueryInterface(Components.interfaces.nsILocalFile);
-			var fileName = file.getRelativeDescriptor(file.parent);
-			
-			if (fileName.indexOf('.') == 0) {
-				Zotero.debug('Skipping file ' + fileName);
-				continue;
-			}
-			
-			//Zotero.debug("Adding file " + fileName);
-			
-			fileName = Zotero.Utilities.Base64.encode(fileName) + "%ZB64";
-			zw.addEntryFile(
-				fileName,
-				Components.interfaces.nsIZipWriter.COMPRESSION_DEFAULT,
-				file,
-				true
-			);
-			fileList.push(fileName);
-		}
-		
+		var fileList = _zipDirectory(dir, dir, zw);
 		if (fileList.length == 0) {
 			Zotero.debug('No files to add -- removing zip file');
 			tmpFile.remove(null);
@@ -1139,6 +1116,37 @@ Zotero.Sync.Storage = new function () {
 		);
 		zw.processQueue(observer, null);
 		return true;
+	}
+	
+	function _zipDirectory(rootDir, dir, zipWriter) {
+		var fileList = [];
+		dir = dir.directoryEntries;
+		while (dir.hasMoreElements()) {
+			var file = dir.getNext();
+			file.QueryInterface(Components.interfaces.nsILocalFile);
+			if (file.isDirectory()) {
+				//Zotero.debug("Recursing into directory " + file.leafName);
+				fileList.concat(_zipDirectory(rootDir, file, zipWriter));
+				continue;
+			}
+			var fileName = file.getRelativeDescriptor(rootDir);
+			if (fileName.indexOf('.') == 0) {
+				Zotero.debug('Skipping file ' + fileName);
+				continue;
+			}
+			
+			//Zotero.debug("Adding file " + fileName);
+			
+			fileName = Zotero.Utilities.Base64.encode(fileName) + "%ZB64";
+			zipWriter.addEntryFile(
+				fileName,
+				Components.interfaces.nsIZipWriter.COMPRESSION_DEFAULT,
+				file,
+				true
+			);
+			fileList.push(fileName);
+		}
+		return fileList;
 	}
 	
 	
