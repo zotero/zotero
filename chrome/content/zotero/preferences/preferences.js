@@ -33,6 +33,7 @@ function init()
 		rows[i].firstChild.nextSibling.value = Zotero.isMac ? 'Cmd+Shift+' : 'Ctrl+Alt+';
 	}
 	
+	updateStorageSettings();
 	refreshStylesList();
 	refreshProxyList();
 	populateQuickCopyList();
@@ -147,6 +148,23 @@ function populateOpenURLResolvers() {
 //
 // Sync
 //
+function updateStorageSettings(value) {
+	if (!value) {
+		value = document.getElementById('pref-storage-protocol').value;
+	}
+	var prefix = document.getElementById('storage-url-prefix');
+	switch (value) {
+		case 'webdav':
+			prefix.value = 'http://';
+			break;
+		
+		case 'webdavs':
+			prefix.value = 'https://';
+			break;
+	}
+	unverifyStorageServer();
+}
+
 function unverifyStorageServer() {
 	Zotero.debug("Clearing storage settings");
 	Zotero.Sync.Storage.clearSettingsCache();

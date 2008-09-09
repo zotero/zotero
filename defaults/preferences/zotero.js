@@ -88,6 +88,7 @@ pref("extensions.zotero.annotations.warnOnClose", true);
 pref("extensions.zotero.sync.autoSync", true);
 pref("extensions.zotero.sync.server.username", '');
 pref("extensions.zotero.sync.server.compressData", true);
+pref("extensions.zotero.sync.storage.protocol", "webdavs");
 pref("extensions.zotero.sync.storage.enabled", false);
 pref("extensions.zotero.sync.storage.verified", false);
 pref("extensions.zotero.sync.storage.url", '');

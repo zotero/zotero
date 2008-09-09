@@ -84,7 +84,8 @@ grid row hbox:first-child
 {
 	margin-left: 4px;
 }
-#zotero-prefpane-sync row hbox label:first-child
+#zotero-prefpane-sync row hbox label:first-child,
+#zotero-prefpane-sync row hbox menulist:first-child
 {
 	margin-left: 0;
 	margin-right: 0;
