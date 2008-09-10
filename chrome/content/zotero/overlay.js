@@ -1490,6 +1490,7 @@ var ZoteroPane = new function()
 		
 		var enable = [], disable = [], show = [], hide = [], multiple = '';
 		
+		// Some items selected
 		if (this.itemsView && this.itemsView.selection.count > 0) {
 			enable.push(m.showInLibrary, m.addNote, m.attachSnapshot, m.attachLink,
 				m.sep2, m.duplicateItem, m.deleteItem, m.deleteFromLibrary,
@@ -1502,16 +1503,21 @@ var ZoteroPane = new function()
 					m.attachLink, m.sep2, m.duplicateItem);
 				
 				// If all items can be reindexed, show option
-				var items = this.getSelectedItems();
-				var canIndex = true;
-				for (var i=0; i<items.length; i++) {
-					if (!Zotero.Fulltext.canReindex()) {
-						canIndex = false;
-						break;
+				if (Zotero.Fulltext.pdfConverterIsRegistered()) {
+					var items = this.getSelectedItems();
+					var canIndex = true;
+					for (var i=0; i<items.length; i++) {
+						if (!Zotero.Fulltext.canReindex()) {
+							canIndex = false;
+							break;
+						}
 					}
-				}
-				if (canIndex) {
-					show.push(m.sep4, m.reindexItem);
+					if (canIndex) {
+						show.push(m.sep4, m.reindexItem);
+					}
+					else {
+						hide.push(m.sep4, m.reindexItem);
+					}
 				}
 				else {
 					hide.push(m.sep4, m.reindexItem);
@@ -1543,9 +1549,14 @@ var ZoteroPane = new function()
 				
 				if (item.isAttachment()) {
 					hide.push(m.duplicateItem);
-					// If not linked URL, show reindex line
-					if (Zotero.Fulltext.canReindex(item.getID())) {
-						show.push(m.sep4, m.reindexItem);
+					if (Zotero.Fulltext.pdfConverterIsRegistered()) {
+						// If not linked URL, show reindex line
+						if (Zotero.Fulltext.canReindex(item.getID())) {
+							show.push(m.sep4, m.reindexItem);
+						}
+						else {
+							hide.push(m.sep4, m.reindexItem);
+						}
 					}
 					else {
 						hide.push(m.sep4, m.reindexItem);
