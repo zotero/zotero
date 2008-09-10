@@ -392,11 +392,11 @@ Zotero.Sync.Storage = new function () {
 				return;
 			}
 			else if (req.status != 207) {
+				Zotero.debug(req.responseText);
 				_error("Unexpected status code " + req.status + " in " + funcName);
 			}
 			
 			_checkResponse(req);
-			
 			Zotero.debug(req.responseText);
 			
 			var D = "DAV:";
