@@ -427,7 +427,6 @@ Zotero.Sync.Runner = new function () {
 		this.EventListener.init();
 	}
 	
-	
 	this.sync = function () {
 		if (_running) {
 			throw ("Sync already running in Zotero.Sync.Runner.sync()");
@@ -438,6 +437,7 @@ Zotero.Sync.Runner = new function () {
 			Zotero.Sync.Storage.sync
 		];
 		_running = true;
+		Zotero.Sync.Runner.lastSyncError = '';
 		this.clearSyncTimeout();
 		this.setSyncIcon('animate');
 		this.next();
