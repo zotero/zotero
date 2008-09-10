@@ -437,7 +437,7 @@ Zotero.Sync.Runner = new function () {
 			Zotero.Sync.Storage.sync
 		];
 		_running = true;
-		Zotero.Sync.Runner.lastSyncError = '';
+		this.lastSyncError = '';
 		this.clearSyncTimeout();
 		this.setSyncIcon('animate');
 		this.next();
