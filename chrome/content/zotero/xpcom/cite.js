@@ -47,11 +47,11 @@ Zotero.Styles = new function() {
 		
 		// main dir
 		var dir = Zotero.getStylesDirectory();
-		var i = _readStylesFromDirectory(dir, true);
+		var i = _readStylesFromDirectory(dir, false);
 		
 		// hidden dir
 		dir.append("hidden");
-		if(dir.exists()) i += _readStylesFromDirectory(dir);
+		if(dir.exists()) i += _readStylesFromDirectory(dir, true);
 		
 		Zotero.debug("Cached "+i+" styles in "+((new Date()).getTime() - start)+" ms");
 	}
@@ -59,7 +59,7 @@ Zotero.Styles = new function() {
 	/**
 	 * Reads all styles from a given directory and caches their metadata
 	 */
-	function _readStylesFromDirectory(dir, visible) {
+	function _readStylesFromDirectory(dir, hidden) {
 		var i = 0;
 		var contents = dir.directoryEntries;
 		while(contents.hasMoreElements()) {
@@ -77,7 +77,8 @@ Zotero.Styles = new function() {
 				} else {
 					// add to cache
 					_styles[style.styleID] = style;
-					if(visible) _visibleStyles.push(style);
+					_styles.hidden = hidden;
+					if(!hidden) _visibleStyles.push(style);
 				}
 			}
 			i++;
@@ -99,7 +100,7 @@ Zotero.Styles = new function() {
 	 */
 	this.getVisible = function() {
 		if(!_initialized || !this.cacheTranslatorData) this.init();
-		return _visibleStyles;
+		return _visibleStyles.slice(0);
 	}
 	
 	/**
@@ -121,6 +122,8 @@ Zotero.Styles = new function() {
  * @property {String} source The CSL that contains the formatting information for this one, or null
  *	if this CSL contains formatting information
  * @property {Zotero.CSL} csl The Zotero.CSL object used to format using this style
+ * @property {Boolean} hidden True if this style is hidden in style selection dialogs, false if it
+ *	is not
  */
 Zotero.Style = function(file) {
 	this.file = file;
