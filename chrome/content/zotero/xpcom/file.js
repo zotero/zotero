@@ -165,7 +165,7 @@ Zotero.File = new function(){
 	function getValidFileName(fileName) {
 		// TODO: use space instead, and figure out what's doing extra
 		// URL encode when saving attachments that trigger this
-		fileName = fileName.replace(/[\/\\\?%\*:|"<>\.]/g, '');
+		fileName = fileName.replace(/[\/\\\?%\*:|"<>]/g, '');
 		// Don't allow blank filename
 		if (!fileName) {
 			fileName = '_';
