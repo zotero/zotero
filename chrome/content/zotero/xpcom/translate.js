@@ -67,7 +67,7 @@ Zotero.Translators = new function() {
 						_translators[translator.translatorID].file.leafName+'"');
 				} else {
 					// add to cache
-					_translators[translator.translatorID] = translator.translatorID;
+					_translators[translator.translatorID] = translator;
 					for(var type in TRANSLATOR_TYPES) {
 						if(translator.translatorType & TRANSLATOR_TYPES[type]) {
 							_cache[type].push(translator);
@@ -101,7 +101,7 @@ Zotero.Translators = new function() {
 /**
  * @class Represents an individual translator
  * @constructor
- * @param {nsIFile} File from which to generate a translator object
+ * @param {nsIFile} file File from which to generate a translator object
  * @property {String} translatorID Unique GUID of the translator
  * @property {Integer} translatorType Type of the translator (use bitwise & with TRANSLATOR_TYPES to read)
  * @property {String} label Human-readable name of the translator
