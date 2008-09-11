@@ -173,22 +173,15 @@ function() {
 /**
  * Log a translator-related error
  * @param {String} message The error message
- * @param {Integer} [errorType] The error type (defaults to Components.interfaces.nsIScriptError.errorFlag)
+ * @param {String} [type] The error type ("error", "warning", "exception", or "strict")
  * @param {String} [line] The text of the line on which the error occurred
  * @param {Integer} lineNumber
  * @param {Integer} colNumber
  */
-Zotero.Translator.prototype.logError = function(message, errorType, line, lineNumber, colNumber) {
-	var consoleService = Components.classes["@mozilla.org/consoleservice;1"].
-		getService(Components.interfaces.nsIConsoleService);
-	var scriptError = Components.classes["@mozilla.org/scripterror;1"].
-		createInstance(Components.interfaces.nsIScriptError);
+Zotero.Translator.prototype.logError = function(message, type, line, lineNumber, colNumber) {
 	var ios = Components.classes["@mozilla.org/network/io-service;1"].
 		getService(Components.interfaces.nsIIOService);
-	scriptError.init(message, ios.newFileURI(this.file).spec, line ? line : null,
-		lineNumber ? lineNumber : null, colNumber ? colNumber : null,
-		(errorType ? errorType : Components.interfaces.nsIScriptError.errorFlag), null);
-	consoleService.logMessage(scriptError);
+	Zotero.log(message, type ? type : "error", ios.newFileURI(this.file).spec);
 }
 
 /*
@@ -920,7 +913,7 @@ Zotero.Translate.prototype._translationComplete = function(returnValue, error) {
 			if(!returnValue) {
 				// report error to console
 				if(this.translator[0]) {
-					this.translator[0].logError(error.toString(), Components.interfaces.nsIScriptError.exceptionFlag);
+					this.translator[0].logError(error.toString(), "exception");
 				} else {
 					Components.utils.reportError(error);
 				}
@@ -2404,7 +2397,7 @@ Zotero.Translate.TranslatorSearch.prototype.complete = function(returnValue, err
 		this.processReturnValue(this.currentTranslator, returnValue);
 	} else if(error) {
 		var errorString = this.translate._generateErrorString(error);
-		this.currentTranslator.logError(error, Components.interfaces.nsIScriptError.warningFlag);
+		this.currentTranslator.logError(error, "warning");
 		this.translate._debug("detectCode for "+(this.currentTranslator ? this.currentTranslator.label : "no translator")+" failed: \n"+errorString, 4);
 	}
 	
