@@ -164,6 +164,16 @@ Zotero.File = new function(){
 	}
 	
 	
+	this.createDirectoryIfMissing = function (dir) {
+		if (!dir.exists() || !dir.isDirectory()) {
+			if (dir.exists() && !dir.isDirectory()) {
+				dir.remove(null);
+			}
+			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+		}
+	}
+	
+	
 	// Strip potentially invalid characters
 	// See http://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
 	function getValidFileName(fileName) {
