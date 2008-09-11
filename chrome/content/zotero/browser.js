@@ -590,7 +590,7 @@ Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
 		}
 	}
 	
-	if(doc instanceof HTMLDocument) {
+	if(doc instanceof HTMLDocument && doc.documentURI.substr(0, 6) != "about:") {
 		// get translators
 		var me = this;
 		
@@ -598,7 +598,7 @@ Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
 		translate.setDocument(doc);
 		translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
 		translate.getTranslators();
-	} else if(doc.documentURI.length > 7 && doc.documentURI.substr(0, 7) == "file://") {
+	} else if(doc.documentURI.substr(0, 7) == "file://") {
 		this._attemptLocalFileImport(doc);
 	}
 }
