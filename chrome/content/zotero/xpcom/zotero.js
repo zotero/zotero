@@ -256,7 +256,7 @@ var Zotero = new function(){
 				else {
 					_startupError = "Database upgrade error";
 				}
-				Components.utils.reportError(_startupError);
+				Components.utils.reportError(e);
 				return false;
 			}
 		}
