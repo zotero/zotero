@@ -51,7 +51,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		}
 		
 		var listbox = document.getElementById("style-listbox");
-		var styles = Zotero.Cite.getStyles();
+		var styles = Zotero.Styles.getVisible();
 		
 		// if no style is set, get the last style used
 		if(!_io.style) {
@@ -61,13 +61,14 @@ var Zotero_File_Interface_Bibliography = new function() {
 		
 		// add styles to list
 		var index = 0;
-		for (var i in styles) {
+		var nStyles = styles.length;
+		for(var i=0; i<nStyles; i++) {
 			var itemNode = document.createElement("listitem");
-			itemNode.setAttribute("value", i);
-			itemNode.setAttribute("label", styles[i]);
+			itemNode.setAttribute("value", styles[i].styleID);
+			itemNode.setAttribute("label", styles[i].title);
 			listbox.appendChild(itemNode);
 			
-			if(i == _io.style) {
+			if(styles[i].styleID == _io.style) {
 				var selectIndex = index;
 			}
 			index++;
@@ -142,7 +143,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		
 		// update status of displayAs box based
 		
-		var styleClass = Zotero.Cite.getStyleClass(selectedStyle);
+		var styleClass = Zotero.Styles.get(selectedStyle).class;
 		document.getElementById("displayAs").disabled = styleClass != "note";
 	}
 

@@ -371,13 +371,13 @@ function buildQuickCopyFormatDropDown(menulist, contentType, currentFormat) {
 	popup.appendChild(itemNode);
 	
 	// add styles to list
-	var styles = Zotero.Cite.getStyles();
-	for (var i in styles) {
+	var styles = Zotero.Styles.getVisible();
+	for each(var style in styles) {
 		var baseVal = 'bibliography=' + i;
-		var val = 'bibliography' + (contentType == 'html' ? '/html' : '') + '=' + i;
+		var val = 'bibliography' + (contentType == 'html' ? '/html' : '') + '=' + style.styleID;
 		var itemNode = document.createElement("menuitem");
 		itemNode.setAttribute("value", val);
-		itemNode.setAttribute("label", styles[i]);
+		itemNode.setAttribute("label", style.title);
 		itemNode.setAttribute("oncommand", 'updateQuickCopyHTMLCheckbox()');
 		popup.appendChild(itemNode);
 		
@@ -1188,7 +1188,7 @@ function addStyle() {
 			var name = file.leafName.replace(/\.ens$/i, "");
 			var date = new Date(file.lastModifiedTime);
 			
-			var cslID = Zotero.Cite.installStyle(read, false, date, name);
+			var cslID = Zotero.Styles.install(read, false, date, name);
 		} else {
 			// This _should_ get the right charset for us automatically
 			var fileURI = Components.classes["@mozilla.org/network/protocol;1?name=file"]
@@ -1205,7 +1205,7 @@ function addStyle() {
 				throw e;
 			}
 			
-			var cslID = Zotero.Cite.installStyle(req.responseText);
+			var cslID = Zotero.Styles.install(req.responseText);
 		}
 	}
 	
@@ -1221,8 +1221,14 @@ function deleteStyle() {
 	var treeitem = tree.lastChild.childNodes[tree.currentIndex];
 	var cslID = treeitem.getAttribute('id').substr(11);
 	
-	Zotero.Cite.deleteStyle(cslID);
-	this.refreshStylesList();
+	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+		.getService(Components.interfaces.nsIPromptService);
+	var text = Zotero.getString('styles.deleteStyle', [title]);
+	if(ps.confirm(null, '', text)) {
+		Zotero.Styles.get(cslID).delete();
+		this.refreshStylesList();
+	}
+	
 	document.getElementById('styleManager-delete').disabled = true;
 }
 

@@ -629,7 +629,7 @@ Zotero_Browser.Tab.prototype._attemptLocalFileImport = function(doc) {
 		var csl = Zotero.File.getContentsFromURL(doc.documentURI);
 		if(csl.indexOf("http://purl.org/net/xbiblio/csl") != -1) {
 			// looks like a CSL; try to import
-			Zotero.Cite.installStyle(csl, doc.documentURI);
+			Zotero.Styles.install(csl, doc.documentURI);
 		}
 	} else {
 		// see if we can import this file

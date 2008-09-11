@@ -20,175 +20,185 @@
     ***** END LICENSE BLOCK *****
 */
 
-/*
- * Zotero.Cite: a class for creating bibliographies from within Scholar
- * this class handles pulling the CSL file and item data out of the database,
- * while CSL, below, handles the actual generation of the bibliography
+/**
+ * @property {Boolean} cacheTranslatorData Whether translator data should be cached or reloaded
+ *	every time a translator is accessed
+ * @property {Zotero.CSL} lastCSL
  */
-
-Zotero.Cite = new function() {
-	default xml namespace = "http://purl.org/net/xbiblio/csl";
+Zotero.Styles = new function() {
+	var _initialized = false;
+	var _styles, _visibleStyles;
 	
-	var _lastCSL = null;
-	var _lastStyle = null;
+	this.ios = Components.classes["@mozilla.org/network/io-service;1"].
+		getService(Components.interfaces.nsIIOService);
 	
-	this.getStyles = getStyles;
-	this.getStyleClass = getStyleClass;
-	this.getStyle = getStyle;
-	this.installStyle = installStyle;
-	this.deleteStyle = deleteStyle;
-	
-	/*
-	 * returns an associative array of cslID => styleName pairs
+	/**
+	 * Initializes styles cache, loading metadata for styles into memory
 	 */
-	function getStyles() {
-		// get styles
-		var sql = "SELECT cslID, title FROM csl ORDER BY title";
-		var styles = Zotero.DB.query(sql);
+	this.init = function() {
+		_initialized = true;
 		
-		// convert to associative array
-		var stylesObject = new Object();
-		for each(var style in styles) {
-			stylesObject[style.cslID] = style.title;
-		}
+		var start = (new Date()).getTime()
 		
-		return stylesObject;
-	}
-	
-	/*
-	 * gets the class of a given style
-	 */
-	function getStyleClass(cslID) {
-		var csl = _getCSL(cslID);
-		var xml = new XML(Zotero.CSL.Global.cleanXML(csl));
-		return xml["@class"].toString();
-	}
-	
-	/*
-	 * gets CSL from the database, or, if it's the most recently used style,
-	 * from the cache
-	 */
-	function getStyle(cslID) {
-		if(_lastStyle != cslID || Zotero.Prefs.get("cacheTranslatorData") == false) {
-			// create a CSL instance
-			var csl = _getCSL(cslID);
-			
-			// load CSL in EN mode if necessary
-			if(csl.substr(0, 6) == "\x00\x08\xFF\x00\x00\x00") {	
-				// EN style
-				var enConverter = new Zotero.ENConverter(csl);
-				csl = enConverter.parse();
-			}
-			_lastCSL = new Zotero.CSL(csl);
-			
-			_lastStyle = cslID;
-		}
-		return _lastCSL;
-	}
-	
-	/*
-	 * get CSL for a given style from the database
-	 */
-	function _getCSL(cslID) {
-		var style = Zotero.DB.valueQuery("SELECT csl FROM csl WHERE cslID = ?", [cslID]);
-		if(!style) throw "Zotero.Cite: invalid CSL ID";
-		return style;
+		_styles = {};
+		_visibleStyles = [];
+		this.cacheTranslatorData = Zotero.Prefs.get("cacheTranslatorData");
+		this.lastCSL = null;
+		
+		// main dir
+		var dir = Zotero.getStylesDirectory();
+		var i = _readStylesFromDirectory(dir, true);
+		
+		// hidden dir
+		dir.append("hidden");
+		if(dir.exists()) i += _readStylesFromDirectory(dir);
+		
+		Zotero.debug("Cached "+i+" styles in "+((new Date()).getTime() - start)+" ms");
 	}
 	
 	/**
-	 * installs a style 
-	 **/
-	function installStyle(cslString, loadURI, date, name) {
-		var error = false;
-		try {
-			if(cslString.substr(0, 6) == "\x00\x08\xFF\x00\x00\x00") { 			
-				// EN style
-				var enConverter = new Zotero.ENConverter(cslString, date, name);
-				var xml = enConverter.parse();
-			} else {
-				// CSL
-				var xml = new XML(Zotero.CSL.Global.cleanXML(cslString));
+	 * Reads all styles from a given directory and caches their metadata
+	 */
+	function _readStylesFromDirectory(dir, visible) {
+		var i = 0;
+		var contents = dir.directoryEntries;
+		while(contents.hasMoreElements()) {
+			var file = contents.getNext().QueryInterface(Components.interfaces.nsIFile);
+			if(!file.leafName || file.leafName[0] == "." || file.isDirectory()) continue;
+			
+			var style = new Zotero.Style(file);
+			
+			if(style.styleID) {
+				if(_styles[style.styleID]) {
+					// same style is already cached
+					Zotero.log('Style with ID '+style.styleID+' already loaded from "'+
+						_styles[style.styleID].file.leafName+'"', "error",
+						Zotero.Styles.ios.newFileURI(style.file).spec);
+				} else {
+					// add to cache
+					_styles[style.styleID] = style;
+					if(visible) _visibleStyles.push(style);
+				}
 			}
+			i++;
 		}
-		catch (e) {
-			error = true;
-			Components.utils.reportError(e);
-		}
-		
-		if (!xml || error) {
-			alert(Zotero.getString('styles.installError', (loadURI ? loadURI : "This")));
-			return false;
-		}
-		
-		var uri = xml.info.id.toString();
-		var title = xml.info.title.toString();
-		var updated = xml.info.updated.toString().replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
-		
-		var sql = "SELECT title FROM csl WHERE cslID=?";
-		var existingTitle = Zotero.DB.valueQuery(sql, uri);
-		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
-		
-		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
-		
-		if (existingTitle) {
-			if(loadURI) {
-				var text = Zotero.getString('styles.updateStyleURI', [existingTitle, title, loadURI]);
-			} else {
-				var text = Zotero.getString('styles.updateStyle', [existingTitle, title]);
-			}
-		}
-		else {
-			if(loadURI) {
-				var text = Zotero.getString('styles.installStyleURI', [title, loadURI]);
-			} else {
-				var text = Zotero.getString('styles.installStyle', [title]);
-			}
-		}
-		
-		var acceptButton = Zotero.getString('general.install');
-		
-		var index = ps.confirmEx(null,
-			'',
-			text,
-			buttonFlags,
-			acceptButton, null, null, null, {}
-		);
-		
-		if (index == 0) {
-			var sql = "REPLACE INTO csl VALUES (?,?,?,?)";
-			Zotero.DB.query(sql, [uri, updated, title, cslString]);
-			alert(Zotero.getString('styles.installed', title));
-			return uri;
-		}
+		return i;
 	}
 	
 	/**
-	 * deletes a style
-	 **/
-	function deleteStyle(uri) {
-		var sql = "SELECT title FROM csl WHERE cslID=?";
-		var title = Zotero.DB.valueQuery(sql, uri);
-		
-		if(!title) throw "Cite: style to delete does not exist!"
-		
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
-		
-		var text = Zotero.getString('styles.deleteStyle', [title]);
-		
-		if(ps.confirm(null, '', text)) {
-			var sql = "DELETE FROM csl WHERE cslID=?";
-			Zotero.DB.query(sql, uri);
-		}
+	 * Gets a style with a given ID
+	 * @param {String} id
+	 */
+	this.get = function(id) {
+		if(!_initialized) this.init();
+		return _styles[id];
+	}
+	
+	/**
+	 * Gets all visible styles
+	 */
+	this.getVisible = function() {
+		if(!_initialized || !this.cacheTranslatorData) this.init();
+		return _visibleStyles;
+	}
+	
+	/**
+	 * Gets all styles
+	 */
+	this.getAll = function() {
+		if(!_initialized || !this.cacheTranslatorData) this.init();
+		return _styles;
 	}
 }
 
+/**
+ * @class Represents a style file and its metadata
+ * @property {String} styleID
+ * @property {String} title
+ * @property {String} updated
+ * @property {String} class
+ * @property {Zotero.CSL} csl
+ */
+Zotero.Style = function(file) {
+	this.file = file;
+	
+	var extension = file.leafName.substr(-4).toLowerCase();
+	if(extension == ".ens") {
+		this.type = "ens";
+		
+		this.styleID = Zotero.Styles.ios.newFileURI(this.file).spec;
+		this.title = file.leafName.substr(0, file.leafName.length-4);
+		this.updated = Zotero.Date.dateToSQL(new Date(file.lastModifiedTime));
+	} else if(extension == ".csl") {
+		// "with ({});" needed to fix default namespace scope issue
+		// See https://bugzilla.mozilla.org/show_bug.cgi?id=330572
+		default xml namespace = "http://purl.org/net/xbiblio/csl"; with ({});
+		
+		this.type = "csl";
+		
+		var xml = Zotero.CSL.Global.cleanXML(Zotero.File.getContents(file));
+		xml = new XML(xml);
+		
+		this.styleID = xml.info.id.toString();
+		this.title = xml.info.title.toString();
+		this.updated = xml.info.updated.toString().replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
+		this._class = xml.@class.toString();
+	}
+}
+
+Zotero.Style.prototype.__defineGetter__("csl",
+/**
+ * Retrieves the Zotero.CSL object for this style
+ * @type Zotero.CSL
+ */
+function() {
+	// cache last style
+	if(Zotero.Styles.cacheTranslatorData && Zotero.Styles.lastCSL.styleID == this.styleID) {
+		return Zotero.Styles.lastCSL;
+	}
+	
+	
+	if(this.type == "ens") {
+		// EN style
+		var iStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+					 .createInstance(Components.interfaces.nsIFileInputStream);
+		iStream.init(this.file, 0x01, 0664, 0);
+		var bStream = Components.classes["@mozilla.org/binaryinputstream;1"]
+					 .createInstance(Components.interfaces.nsIBinaryInputStream);
+		bStream.setInputStream(iStream);
+		var string = bStream.readBytes(this.file.fileSize);
+		iStream.close();
+		
+		var enConverter = new Zotero.ENConverter(string, null, this.title);
+		var xml = enConverter.parse();
+	} else {
+		var cslString = Zotero.File.getContents(this.file);
+		var xml = new XML(Zotero.CSL.Global.cleanXML(cslString));
+	}
+	
+	return (Zotero.Styles.lastCSL = new Zotero.CSL(xml));
+});
+
+Zotero.Style.prototype.__defineGetter__("class",
+/**
+ * Retrieves the style class, either from the metadata that's already loaded or by loading the file
+ * @type String
+ */
+function() {
+	if(this._class) return this._class;
+	return (this._class = this.csl.class);
+});
+
+/**
+ * Deletes a style
+ */
+Zotero.Style.prototype.delete = function() {
+	this.file.remove();
+	Zotero.Styles.init();
+}
 
 
-Zotero.Cite.MIMEHandler = new function () {
+Zotero.Styles.MIMEHandler = new function () {
 	this.init = init;
 	
 	/*
@@ -198,16 +208,16 @@ Zotero.Cite.MIMEHandler = new function () {
 		Zotero.debug("Registering URIContentListener for text/x-csl");
 		var uriLoader = Components.classes["@mozilla.org/uriloader;1"]
 			.getService(Components.interfaces.nsIURILoader);
-		uriLoader.registerContentListener(Zotero.Cite.MIMEHandler.URIContentListener);
+		uriLoader.registerContentListener(Zotero.Styles.MIMEHandler.URIContentListener);
 	}
 }
 
 
 /*
- * Zotero.Cite.MIMEHandler.URIContentListener: implements
+ * Zotero.Styles.MIMEHandler.URIContentListener: implements
  * nsIURIContentListener interface to grab MIME types
  */
-Zotero.Cite.MIMEHandler.URIContentListener = new function() {
+Zotero.Styles.MIMEHandler.URIContentListener = new function() {
 	// list of content types to capture
 	// NOTE: must be from shortest to longest length
 	this.desiredContentTypes = ["text/x-csl"];
@@ -236,7 +246,7 @@ Zotero.Cite.MIMEHandler.URIContentListener = new function() {
 	
 	function doContent(contentType, isContentPreferred, request, contentHandler) {
 		Zotero.debug("Running doContent() for " + request.name);
-		contentHandler.value = new Zotero.Cite.MIMEHandler.StreamListener(request, contentType);
+		contentHandler.value = new Zotero.Styles.MIMEHandler.StreamListener(request, contentType);
 		return false;
 	}
 	
@@ -253,10 +263,10 @@ Zotero.Cite.MIMEHandler.URIContentListener = new function() {
 }
 
 /*
- * Zotero.Cite.MIMEHandler.StreamListener: implements nsIStreamListener and
+ * Zotero.Styles.MIMEHandler.StreamListener: implements nsIStreamListener and
  * nsIRequestObserver interfaces to download MIME types we've grabbed
  */
-Zotero.Cite.MIMEHandler.StreamListener = function(request, contentType) {
+Zotero.Styles.MIMEHandler.StreamListener = function(request, contentType) {
 	this._request = request;
 	this._contentType = contentType
 	this._readString = "";
@@ -266,7 +276,7 @@ Zotero.Cite.MIMEHandler.StreamListener = function(request, contentType) {
 	Zotero.debug("Prepared to grab content type " + contentType);
 }
 
-Zotero.Cite.MIMEHandler.StreamListener.prototype.QueryInterface = function(iid) {
+Zotero.Styles.MIMEHandler.StreamListener.prototype.QueryInterface = function(iid) {
 	if (iid.equals(Components.interfaces.nsISupports)
 	   || iid.equals(Components.interfaces.nsIRequestObserver)
 	   || iid.equals(Components.interfaces.nsIStreamListener)) {
@@ -275,12 +285,12 @@ Zotero.Cite.MIMEHandler.StreamListener.prototype.QueryInterface = function(iid) 
 	throw Components.results.NS_ERROR_NO_INTERFACE;
 }
 
-Zotero.Cite.MIMEHandler.StreamListener.prototype.onStartRequest = function(channel, context) {}
+Zotero.Styles.MIMEHandler.StreamListener.prototype.onStartRequest = function(channel, context) {}
 
 /*
  * Called when there's data available; basically, we just want to collect this data
  */
-Zotero.Cite.MIMEHandler.StreamListener.prototype.onDataAvailable = function(request, context, inputStream, offset, count) {
+Zotero.Styles.MIMEHandler.StreamListener.prototype.onDataAvailable = function(request, context, inputStream, offset, count) {
 	Zotero.debug(count + " bytes available");
 	
 	if (inputStream != this._scriptableStreamInput) {
@@ -295,7 +305,7 @@ Zotero.Cite.MIMEHandler.StreamListener.prototype.onDataAvailable = function(requ
 /*
  * Called when the request is done
  */
-Zotero.Cite.MIMEHandler.StreamListener.prototype.onStopRequest = function(channel, context, status) {
+Zotero.Styles.MIMEHandler.StreamListener.prototype.onStopRequest = function(channel, context, status) {
 	Zotero.debug("Request finished");
 	var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"]
 		.getService(Components.interfaces.nsIExternalHelperAppService);
@@ -307,7 +317,7 @@ Zotero.Cite.MIMEHandler.StreamListener.prototype.onStopRequest = function(channe
 		var loadURI = '';
 	}
 	
-	Zotero.Cite.installStyle(this._readString, loadURI);
+	Zotero.Styles.install(this._readString, loadURI);
 }
 
 
@@ -333,12 +343,12 @@ Zotero.CSL = function(csl) {
 	// load localizations
 	this._terms = Zotero.CSL.Global.parseLocales(this._csl.terms);
 	
-	// load class
-	this.class =  this._csl["@class"].toString();
+	// load class and styleID
+	this.styleID = this._csl.info.id.toString();
+	this.class = this._csl["@class"].toString();
 	Zotero.debug("CSL: style class is "+this.class);
 	
 	this.hasBibliography = (this._csl.bibliography.length() ? 1 : 0);
-	Zotero.debug("hasBibliography "+this.hasBibliography);
 }
 
 /*
