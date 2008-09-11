@@ -84,7 +84,7 @@ Zotero.Translators = new function() {
 	/**
 	 * Gets the translator that corresponds to a given ID
 	 */
-	this.getTranslatorById = function(id) {
+	this.get = function(id) {
 		if(!_initialized) this.init();
 		return _translators[id] ? _translators[id] : false;
 	}
@@ -92,7 +92,7 @@ Zotero.Translators = new function() {
 	/**
 	 * Gets all translators for a specific type of translation
 	 */
-	this.getTranslatorsByType = function(type) {
+	this.getAllForType = function(type) {
 		if(!_initialized) this.init();
 		return _cache[type].slice(0);
 	}
@@ -418,12 +418,12 @@ Zotero.Translate.prototype.setTranslator = function(translator) {
 				if(typeof(translator[i]) == "object") {
 					this.translator.push([translator[i]]);
 				} else {
-					this.translator.push([Zotero.Translators.getTranslatorById(translator[i])]);
+					this.translator.push([Zotero.Translators.get(translator[i])]);
 				}
 			}
 		}
 	} else {
-		this.translator = [Zotero.Translators.getTranslatorById(translator)];
+		this.translator = [Zotero.Translators.get(translator)];
 	}
 	
 	return !!this.translator;
@@ -542,7 +542,7 @@ Zotero.Translate.prototype.getTranslators = function() {
 	// do not allow simultaneous instances of getTranslators
 	if(this._translatorSearch) this._translatorSearch.running = false;
 	
-	var translators = Zotero.Translators.getTranslatorsByType(this.type);
+	var translators = Zotero.Translators.getAllForType(this.type);
 	
 	// create a new sandbox
 	this._generateSandbox();
