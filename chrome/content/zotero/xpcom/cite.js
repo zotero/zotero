@@ -154,11 +154,10 @@ Zotero.Style = function(file) {
 		this.updated = xml.info.updated.toString().replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
 		this._class = xml.@class.toString();
 		
-		this.source = null
+		this.source = null;
 		for each(var link in xml.info.link) {
 			if(link.@rel == "source") {
 				this.source = link.@href.toString();
-				Zotero.debug("have source "+this.source);
 			}
 		}
 	}
