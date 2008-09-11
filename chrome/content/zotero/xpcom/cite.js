@@ -114,10 +114,13 @@ Zotero.Styles = new function() {
 /**
  * @class Represents a style file and its metadata
  * @property {String} styleID
+ * @property {String} type "csl" for CSL styles, "ens" for legacy styles
  * @property {String} title
- * @property {String} updated
- * @property {String} class
- * @property {Zotero.CSL} csl
+ * @property {String} updated SQL-style date updated
+ * @property {String} class "in-text" or "note"
+ * @property {String} source The CSL that contains the formatting information for this one, or null
+ *	if this CSL contains formatting information
+ * @property {Zotero.CSL} csl The Zotero.CSL object used to format using this style
  */
 Zotero.Style = function(file) {
 	this.file = file;
@@ -137,12 +140,27 @@ Zotero.Style = function(file) {
 		this.type = "csl";
 		
 		var xml = Zotero.CSL.Global.cleanXML(Zotero.File.getContents(file));
-		xml = new XML(xml);
-		
+		try {
+			xml = new XML(xml);
+		} catch(e) {
+			Zotero.log(e.toString(), "error",
+				Zotero.Styles.ios.newFileURI(this.file).spec, xml.split(/\r?\n/)[e.lineNumber-1],
+				e.lineNumber);
+			return;
+		}
+					
 		this.styleID = xml.info.id.toString();
 		this.title = xml.info.title.toString();
 		this.updated = xml.info.updated.toString().replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
 		this._class = xml.@class.toString();
+		
+		this.source = null
+		for each(var link in xml.info.link) {
+			if(link.@rel == "source") {
+				this.source = link.@href.toString();
+				Zotero.debug("have source "+this.source);
+			}
+		}
 	}
 }
 
@@ -156,7 +174,6 @@ function() {
 	if(Zotero.Styles.cacheTranslatorData && Zotero.Styles.lastCSL.styleID == this.styleID) {
 		return Zotero.Styles.lastCSL;
 	}
-	
 	
 	if(this.type == "ens") {
 		// EN style
@@ -172,7 +189,23 @@ function() {
 		var enConverter = new Zotero.ENConverter(string, null, this.title);
 		var xml = enConverter.parse();
 	} else {
-		var cslString = Zotero.File.getContents(this.file);
+		// "with ({});" needed to fix default namespace scope issue
+		// See https://bugzilla.mozilla.org/show_bug.cgi?id=330572
+		default xml namespace = "http://purl.org/net/xbiblio/csl"; with ({});
+		
+		if(this.source) {
+			// parent/child
+			var formatCSL = Zotero.Styles.get(this.source);
+			if(!formatCSL) {
+				throw(new Error('Style references '+this.source+', but this style is not installed',
+					Zotero.Styles.ios.newFileURI(this.file).spec, null));
+			}
+			var file = formatCSL.file;
+		} else {
+			var file = this.file;
+		}
+		
+		var cslString = Zotero.File.getContents(file);
 		var xml = new XML(Zotero.CSL.Global.cleanXML(cslString));
 	}
 	
@@ -193,7 +226,7 @@ function() {
  * Deletes a style
  */
 Zotero.Style.prototype.delete = function() {
-	this.file.remove();
+	this.file.remove(false);
 	Zotero.Styles.init();
 }
 
