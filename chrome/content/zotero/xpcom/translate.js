@@ -37,17 +37,21 @@ const BOMs = {
  * @namespace
  */
 Zotero.Translators = new function() {
-	var _cache = {"import":[], "export":[], "web":[], "search":[]};
-	var _translators = {};
+	var _cache, _translators;
 	var _initialized = false;
 	
 	/**
 	 * Initializes translator cache, loading all relevant translators into memory
 	 */
 	this.init = function() {
-		if(_initialized) return;
 		_initialized = true;
 		
+		var start = (new Date()).getTime()
+		
+		_cache = {"import":[], "export":[], "web":[], "search":[]};
+		_translators = {};
+		
+		var i = 0;
 		var contents = Zotero.getTranslatorsDirectory().directoryEntries;
 		while(contents.hasMoreElements()) {
 			var file = contents.getNext().QueryInterface(Components.interfaces.nsIFile);
@@ -71,13 +75,17 @@ Zotero.Translators = new function() {
 					}
 				}
 			}
+			i++;
 		}
+		
+		Zotero.debug("Cached "+i+" translators in "+((new Date()).getTime() - start)+" ms");
 	}
 	
 	/**
 	 * Gets the translator that corresponds to a given ID
 	 */
 	this.getTranslatorById = function(id) {
+		if(!_initialized) this.init();
 		return _translators[id] ? _translators[id] : false;
 	}
 	
@@ -85,6 +93,7 @@ Zotero.Translators = new function() {
 	 * Gets all translators for a specific type of translation
 	 */
 	this.getTranslatorsByType = function(type) {
+		if(!_initialized) this.init();
 		return _cache[type].slice(0);
 	}
 }
