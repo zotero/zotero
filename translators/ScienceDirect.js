@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"ScienceDirect",
 	"creator":"Michael Berkowitz",
-	"target":"https?://[^/]*www\\.sciencedirect\\.com[^/]*/science(\\/article)?(\\?(?:.+\\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?",
+	"target":"https?://[^/]*science-?direct\\.com[^/]*/science(\\/article)?(\\?(?:.+\\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
