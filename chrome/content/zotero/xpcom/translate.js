@@ -131,34 +131,40 @@ Zotero.Translator = function(file) {
 	if(!m) {
 		this.logError("Invalid or missing translator metadata JSON object");
 	} else {
-		var info = Zotero.JSON.unserialize(m[0]);
-		var haveMetadata = true;
-		// make sure we have all the properties
-		for each(var property in ["translatorID", "translatorType", "label", "target", "lastUpdated"]) {
-			if(info[property] === undefined) {
-				this.logError('Missing property "'+property+'" in translator metadata JSON object');
-				haveMetadata = false;
-				break;
-			} else {
-				this[property] = info[property];
-			}
+		try {
+			var info = Zotero.JSON.unserialize(m[0]);
+		} catch(e) {
+			this.logError("Invalid or missing translator metadata JSON object");
 		}
-		
-		if(haveMetadata) {
-			if(this.translatorType & TRANSLATOR_TYPES["import"]) {
-				// compile import regexp to match only file extension
-				this.importRegexp = this.target ? new RegExp("\\."+this.target+"$", "i") : null;
+		if(info) {
+			var haveMetadata = true;
+			// make sure we have all the properties
+			for each(var property in ["translatorID", "translatorType", "label", "target", "lastUpdated"]) {
+				if(info[property] === undefined) {
+					this.logError('Missing property "'+property+'" in translator metadata JSON object');
+					haveMetadata = false;
+					break;
+				} else {
+					this[property] = info[property];
+				}
 			}
-			if(this.translatorType & TRANSLATOR_TYPES["web"]) {
-				// compile web regexp
-				this.webRegexp = this.target ? new RegExp(this.target, "i") : null;
-				
-				if(!this.target) {
-					// for translators used on every page, cache code in memory
-					var strs = [str.value];
-					var amountRead;
-					while(amountRead = cStream.readString(4096, str)) strs.push(str.value);
-					this._code = strs.join("");
+			
+			if(haveMetadata) {
+				if(this.translatorType & TRANSLATOR_TYPES["import"]) {
+					// compile import regexp to match only file extension
+					this.importRegexp = this.target ? new RegExp("\\."+this.target+"$", "i") : null;
+				}
+				if(this.translatorType & TRANSLATOR_TYPES["web"]) {
+					// compile web regexp
+					this.webRegexp = this.target ? new RegExp(this.target, "i") : null;
+					
+					if(!this.target) {
+						// for translators used on every page, cache code in memory
+						var strs = [str.value];
+						var amountRead;
+						while(amountRead = cStream.readString(4096, str)) strs.push(str.value);
+						this._code = strs.join("");
+					}
 				}
 			}
 		}
