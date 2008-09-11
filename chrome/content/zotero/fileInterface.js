@@ -320,7 +320,7 @@ var Zotero_File_Interface = new function() {
 						   createInstance(Components.interfaces.nsITransferable);
 		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
 							   getService(Components.interfaces.nsIClipboard);
-		var csl = Zotero.Cite.getStyle(style);
+		var csl = Zotero.Styles.get(style).csl;
 		var itemSet = csl.createItemSet(items); 
 		
 		// add HTML
@@ -357,7 +357,7 @@ var Zotero_File_Interface = new function() {
 		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
 							   getService(Components.interfaces.nsIClipboard);
 		
-		var csl = Zotero.Cite.getStyle(style);
+		var csl = Zotero.Styles.get(style).csl;
 		var itemSet = csl.createItemSet(items);
 		var itemIDs = [];
 		for (var i=0; i<items.length; i++) {
@@ -420,7 +420,7 @@ var Zotero_File_Interface = new function() {
 				return;
 			}
 			else {
-				var csl = Zotero.Cite.getStyle(io.style);
+				var csl = Zotero.Styles.get(io.style).csl;
 				var itemSet = csl.createItemSet(items); 
 				var bibliography = csl.formatBibliography(itemSet, format);
 			}

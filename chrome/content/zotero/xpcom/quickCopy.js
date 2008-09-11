@@ -190,7 +190,7 @@ Zotero.QuickCopy = new function() {
 				return content;
 			}
 			
-			var csl = Zotero.Cite.getStyle(format);
+			var csl = Zotero.Styles.get(format).csl;
 			var itemSet = csl.createItemSet(items);
 			
 			// Copy citations if shift key pressed
@@ -223,9 +223,9 @@ Zotero.QuickCopy = new function() {
 		var translators = translation.getTranslators();
 		
 		// add styles to list
-		var styles = Zotero.Cite.getStyles();
-		for (var i in styles) {
-			_formattedNames['bibliography=' + i] = styles[i];
+		var styles = Zotero.Styles.getVisible();
+		for each(var style in styles) {
+			_formattedNames['bibliography=' + style.styleID] = style.title;
 		}
 		
 		for (var i=0; i<translators.length; i++) {

@@ -704,7 +704,7 @@ Zotero.Integration.SOAP_Compat = new function() {
 		}
 
 		try {
-			Zotero.Cite.getStyle(vars[2]);
+			Zotero.Styles.get(vars[2]);
 		} catch(e) {
 			return "ERROR:prefsNeedReset";
 		}
@@ -809,7 +809,7 @@ Zotero.Integration.Session.prototype.setStyle = function(styleID, prefs) {
 	if(styleID) {
 		this.styleID = styleID;
 		try {
-			this.style = Zotero.Cite.getStyle(styleID);
+			this.style = Zotero.Styles.get(styleID).csl;
 			this.dateModified = new Object();
 			
 			this.itemSet = this.style.createItemSet();
@@ -1482,22 +1482,36 @@ Zotero.Integration.Session.prototype.getBibliographyData = function() {
 	}
 }
 
-/*
- * Interface for bibliography editor
+/**
+ * @class Interface for bibliography editor to alter document bibliography
+ * @constructor
+ * Creates a new bibliography editor interface
+ * @param {Zotero.Integration.Session} session
  */
 Zotero.Integration.Session.BibliographyEditInterface = function(session) {
 	this.session = session;
 }
 
+/**
+ * Gets the @link {Zotero.CSL.ItemSet} for the bibliography being edited
+ * The item set should not be modified, but may be used to determine what items are in the
+ * bibliography.
+ */
 Zotero.Integration.Session.BibliographyEditInterface.prototype.getItemSet = function() {
 	return this.session.itemSet;
 }
 
+/**
+ * Checks whether an item is cited in the bibliography being edited
+ */
 Zotero.Integration.Session.BibliographyEditInterface.prototype.isCited = function(item) {
 	if(this.session.citationsByItemID[item.id]) return true;
 	return false;
 }
 
+/**
+ * Checks whether an item is cited in the bibliography being edited
+ */
 Zotero.Integration.Session.BibliographyEditInterface.prototype.add = function(item) {
 	// create new item
 	this.session.itemSet.add([item]);
@@ -1505,6 +1519,9 @@ Zotero.Integration.Session.BibliographyEditInterface.prototype.add = function(it
 	this.session.sortItemSet();
 }
 
+/**
+ * Removes an item from the bibliography being edited
+ */
 Zotero.Integration.Session.BibliographyEditInterface.prototype.remove = function(item) {
 	// create new item
 	this.session.itemSet.remove([item]);
@@ -1524,6 +1541,9 @@ Zotero.Integration.Session.BibliographyEditInterface.prototype.remove = function
 	if(this.session.uncitedItems[item.key]) this.session.uncitedItems[item.key] = undefined;
 }
 
+/**
+ * Generates a preview of the bibliography entry for a given item
+ */
 Zotero.Integration.Session.BibliographyEditInterface.prototype.preview = function(item) {
 	var itemSet = this.session.style.createItemSet([item]);
 	return this.session.style.formatBibliography(itemSet, "Integration");
