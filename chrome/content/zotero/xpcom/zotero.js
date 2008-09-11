@@ -97,6 +97,8 @@ var Zotero = new function(){
 			return false;
 		}
 		
+		var start = (new Date()).getTime()
+		
 		// Register shutdown handler to call Zotero.shutdown()
 		/*
 		var observerService = Components.classes["@mozilla.org/observer-service;1"]
@@ -273,7 +275,12 @@ var Zotero = new function(){
 		Zotero.Sync.Runner.init();
 		Zotero.Sync.Storage.init();
 		
+		Zotero.Proxies.init();
+		Zotero.Ingester.MIMEHandler.init();
+		Zotero.Cite.MIMEHandler.init();
+		
 		this.initialized = true;
+		Zotero.debug("Initialized in "+((new Date()).getTime() - start)+" ms");
 		
 		return true;
 	}
