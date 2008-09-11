@@ -345,16 +345,12 @@ var Zotero = new function(){
 		else {
 			var file = Zotero.getProfileDirectory();
 			file.append('zotero');
-			
-			// If it doesn't exist, create
-			if (!file.exists() || !file.isDirectory()){
-				file.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
-			}
+			Zotero.File.createDirectoryIfMissing(file);
 		}
 		Zotero.debug("Using data directory " + file.path);
 		
 		_zoteroDirectory = file;
-		return file;
+		return file.clone();
 	}
 	
 	
@@ -362,10 +358,7 @@ var Zotero = new function(){
 		var file = Zotero.getZoteroDirectory();
 		
 		file.append('storage');
-		// If it doesn't exist, create
-		if (!file.exists() || !file.isDirectory()){
-			file.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
-		}
+		Zotero.File.createDirectoryIfMissing(file);
 		return file;
 	}
 	
@@ -385,13 +378,24 @@ var Zotero = new function(){
 	function getTempDirectory() {
 		var tmp = this.getZoteroDirectory();
 		tmp.append('tmp');
-		if (!tmp.exists() || !tmp.isDirectory()) {
-			if (tmp.exists() && !tmp.isDirectory()) {
-				tmp.remove(null);
-			}
-			tmp.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
-		}
+		Zotero.File.createDirectoryIfMissing(tmp);
 		return tmp;
+	}
+	
+	
+	this.getStylesDirectory = function () {
+		var dir = this.getZoteroDirectory();
+		dir.append('styles');
+		Zotero.File.createDirectoryIfMissing(dir);
+		return dir;
+	}
+	
+	
+	this.getTranslatorsDirectory = function () {
+		var dir = this.getZoteroDirectory();
+		dir.append('translators');
+		Zotero.File.createDirectoryIfMissing(dir);
+		return dir;
 	}
 	
 	
