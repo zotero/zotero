@@ -24,10 +24,7 @@ Zotero.Schema = new function(){
 	this.userDataUpgradeRequired = userDataUpgradeRequired;
 	this.showUpgradeWizard = showUpgradeWizard;
 	this.updateSchema = updateSchema;
-	this.updateScrapersRemote = updateScrapersRemote;
 	this.stopRepositoryTimer = stopRepositoryTimer;
-	this.rebuildTranslatorsAndStylesTables = rebuildTranslatorsAndStylesTables;
-	this.rebuildTranslatorsTable = rebuildTranslatorsTable;
 	
 	this.dbInitialized = false;
 	this.upgradeFinished = false;
@@ -122,7 +119,6 @@ Zotero.Schema = new function(){
 				var up1 = _migrateUserDataSchema(dbVersion);
 				var up2 = _updateSchema('system');
 				var up3 = _updateSchema('triggers');
-				var up4 = _updateSchema('scrapers');
 				
 				Zotero.DB.commitTransaction();
 			}
@@ -150,10 +146,13 @@ Zotero.Schema = new function(){
 				}
 			}
 			
-			if (up2 || up3 || up4) {
+			var up4 = this.updateBundledFiles('translators');
+			var up5 = this.updateBundledFiles('styles');
+			
+			if (up2 || up3 || up4 || up5) {
 				// Run a manual scraper update if upgraded and pref set
 				if (Zotero.Prefs.get('automaticScraperUpdates')){
-					this.updateScrapersRemote(2);
+					this.updateFromRepository(2);
 				}
 			}
 		}
@@ -162,14 +161,234 @@ Zotero.Schema = new function(){
 		}
 		return;
 	}
-
+	
+	
 	/**
-	* Send XMLHTTP request for updated scrapers to the central repository
-	*
-	* _force_ forces a repository query regardless of how long it's been
-	* 	since the last check
-	**/
-	function updateScrapersRemote(force, callback) {
+	 * Update styles and translators in data directory with versions from
+	 * ZIP file (XPI) or directory (SVN) in extension directory
+	 *
+	 * @param	{String}		mode		'translators' or 'styles'
+	 */
+	this.updateBundledFiles = function (mode) {
+		switch (mode) {
+			case "translators":
+				var titleField = 'label';
+				var fileExt = ".js";
+				break;
+			
+			case "styles":
+				var titleField = 'title';
+				var fileExt = ".csl";
+				var hiddenDir = Zotero.getTranslatorsDirectory();
+				hiddenDir.append('hidden');
+				break;
+			
+			default:
+				throw ("Invalid mode '" + mode + "' in Zotero.Schema.updateBundledFiles()");
+		}
+		
+		var modes = mode;
+		mode = mode.substr(0, mode.length - 1);
+		var Mode = mode[0].toUpperCase() + mode.substr(1);
+		var Modes = Mode + "s";
+		
+		var extDir = Zotero.getInstallDirectory();
+		
+		var repotime = extDir.clone();
+		repotime.append('repotime.txt');
+		repotime = Zotero.File.getContents(repotime);
+		var date = Zotero.Date.sqlToDate(repotime, true);
+		repotime = Zotero.Date.toUnixTimestamp(date);
+		
+		var zipFile = extDir.clone();
+		zipFile.append(modes + ".zip");
+		
+		var fileNameRE = new RegExp("^[^\.].+\\" + fileExt + "$");
+		
+		var destDir = Zotero["get" + Modes + "Directory"]();
+		
+		// If directory is empty, force reinstall
+		var forceReinstall = false;
+		var entries = destDir.directoryEntries;
+		while (entries.hasMoreElements()) {
+			var file = entries.getNext();
+			file.QueryInterface(Components.interfaces.nsIFile);
+			if (!file.leafName.match(fileNameRE) || file.isDirectory()) {
+				continue;
+			}
+			forceReinstall = true;
+			break;
+		}
+		
+		var sql = "SELECT version FROM version WHERE schema=?";
+		var lastModTime = Zotero.DB.valueQuery(sql, modes);
+		
+		if (zipFile.exists()) {
+			var modTime = Math.round(zipFile.lastModifiedTime / 1000);
+			
+			if (!forceReinstall && lastModTime && modTime <= lastModTime) {
+				Zotero.debug("Installed " + modes + " are up-to-date with " + modes + ".zip");
+				return 0;
+			}
+			
+			Zotero.debug("Updating installed " + modes + " from " + modes + ".zip");
+			
+			var zipReader = Components.classes["@mozilla.org/libjar/zip-reader;1"]
+					.getService(Components.interfaces.nsIZipReader);
+			zipReader.open(zipFile);
+			var tmpDir = Zotero.getTempDirectory();
+			var entries = zipReader.findEntries(null);
+			while (entries.hasMore()) {
+				var entry = entries.getNext();
+				
+				var tmpFile = tmpDir.clone();
+				tmpFile.append(entry);
+				if (tmpFile.exists()) {
+					tmpFile.remove(false);
+				}
+				zipReader.extract(entry, tmpFile);
+				var newObj = new Zotero[Mode](tmpFile);
+				
+				var existingObj = Zotero[Modes].get(newObj[mode + "ID"]);
+				if (!existingObj) {
+					Zotero.debug("Installing " + mode + " '" + newObj[titleField] + "'");
+				}
+				else {
+					Zotero.debug("Updating "
+						+ (existingObj.hidden ? "hidden " : "")
+						+ mode + " '" + existingObj[titleField] + "'");
+					if (existingObj.file.exists()) {
+						existingObj.file.remove(false);
+					}
+				}
+				
+				if (mode == 'translator') {
+					var fileName = Zotero.File.getValidFileName(newObj[titleField]) + fileExt;
+					
+					var destFile = destDir.clone();
+					destFile.append(fileName);
+					if (destFile.exists()) {
+						var msg = "Overwriting translator with same filename '"
+							+ fileName + "'";
+						Zotero.debug(msg, 1);
+						Components.utils.reportError(msg + " in Zotero.Schema.updateBundledFiles()");
+						destFile.remove(false);
+					}
+				}
+				else if (mode == 'style') {
+					var fileName = tmpFile.leafName;
+				}
+				
+				if (!existingObj || !existingObj.hidden) {
+					tmpFile.moveTo(destDir, fileName);
+				}
+				else {
+					tmpFile.moveTo(hiddenDir, fileName);
+				}
+			}
+			zipReader.close();
+		}
+		else {
+			var sourceDir = extDir.clone();
+			// TODO: rename 'csl' to 'styles'
+			sourceDir.append(modes == "translators" ? modes : "csl");
+			if (!sourceDir.exists()) {
+				Components.utils.reportError("No " + modes + " ZIP file or directory "
+					+ " in Zotero.Schema.updateBundledFiles()");
+				return -1;
+			}
+			
+			var entries = sourceDir.directoryEntries;
+			var modTime = 0;
+			while (entries.hasMoreElements()) {
+				var file = entries.getNext();
+				file.QueryInterface(Components.interfaces.nsIFile);
+				if (!file.leafName.match(fileNameRE) || file.isDirectory()) {
+					continue;
+				}
+				var fileModTime = Math.round(file.lastModifiedTime / 1000);
+				if (fileModTime > modTime) {
+					modTime = fileModTime;
+				}
+			}
+			
+			if (forceReinstall && lastModTime && modTime <= lastModTime) {
+				Zotero.debug("Installed " + modes + " are up-to-date with " + modes + " directory");
+				return 0;
+			}
+			
+			Zotero.debug("Updating installed " + modes + " from " + modes + " directory");
+			
+			var entries = sourceDir.directoryEntries;
+			while (entries.hasMoreElements()) {
+				var file = entries.getNext();
+				file.QueryInterface(Components.interfaces.nsIFile);
+				if (!file.leafName.match(fileNameRE) || file.isDirectory()) {
+					continue;
+				}
+				var newObj = new Zotero[Mode](file);
+				var existingObj = Zotero[Modes].get(newObj[mode + "ID"]);
+				if (!existingObj) {
+					Zotero.debug("Installing " + mode + " '" + newObj[titleField] + "'");
+				}
+				else {
+					Zotero.debug("Updating "
+						+ (existingObj.hidden ? "hidden " : "")
+						+ mode + " '" + existingObj[titleField] + "'");
+					if (existingObj.file.exists()) {
+						existingObj.file.remove(false);
+					}
+				}
+				
+				if (mode == 'translator') {
+					var fileName = Zotero.File.getValidFileName(newObj[titleField]) + fileExt
+					
+					var destFile = destDir.clone();
+					destFile.append(fileName);
+					if (destFile.exists()) {
+						var msg = "Overwriting translator with same filename '"
+							+ fileName + "'";
+						Zotero.debug(msg, 1);
+						Components.utils.reportError(msg + " in Zotero.Schema.updateBundledFiles()");
+						destFile.remove(false);
+					}
+				}
+				else if (mode == 'style') {
+					var fileName = file.leafName;
+				}
+				
+				if (!existingObj || !existingObj.hidden) {
+					file.copyTo(destDir, fileName);
+				}
+				else {
+					file.copyTo(hiddenDir, fileName);
+				}
+			}
+		}
+		
+		Zotero.DB.beginTransaction();
+		
+		var sql = "REPLACE INTO version VALUES (?, ?)";
+		Zotero.DB.query(sql, [modes, modTime]);
+		
+		var sql = "REPLACE INTO version VALUES ('repository', ?)";
+		Zotero.DB.query(sql, repotime);
+		
+		Zotero.DB.commitTransaction();
+		
+		Zotero[Modes].init();
+		return 1;
+	}
+	
+	
+	/**
+	 * Send XMLHTTP request for updated translators and styles to the central repository
+	 *
+	 * @param	{Boolean}	force	Force a repository query regardless of how
+	 *									long it's been since the last check
+	 * @param	{Function}	callback
+	 */
+	this.updateFromRepository = function (force, callback) {
 		// Little hack to manually update CSLs from repo on upgrades
 		if (!force && Zotero.Prefs.get('automaticScraperUpdates')) {
 			var syncTargetVersion = 3; // increment this when releasing new version that requires it
@@ -188,7 +407,7 @@ Zotero.Schema = new function(){
 			
 			// Check user preference for automatic updates
 			if (!Zotero.Prefs.get('automaticScraperUpdates')){
-				Zotero.debug('Automatic scraper updating disabled -- not checking repository', 4);
+				Zotero.debug('Automatic repository updating disabled -- not checking repository', 4);
 				return false;
 			}
 			
@@ -240,7 +459,7 @@ Zotero.Schema = new function(){
 		}
 		
 		var get = Zotero.Utilities.HTTP.doGet(url, function (xmlhttp) {
-			var updated = _updateScrapersRemoteCallback(xmlhttp, !!force);
+			var updated = _updateFromRepositoryCallback(xmlhttp, !!force);
 			if (callback) {
 				callback(xmlhttp, updated)
 			}
@@ -262,61 +481,30 @@ Zotero.Schema = new function(){
 	}
 	
 	
-	function rebuildTranslatorsAndStylesTables(callback) {
-		Zotero.debug("Rebuilding translators and styles tables");
-		Zotero.DB.beginTransaction();
+	this.resetTranslatorsAndStyles = function (callback) {
+		Zotero.debug("Resetting translators and styles");
 		
-		Zotero.DB.query("DELETE FROM translators");
-		Zotero.DB.query("DELETE FROM csl");
 		var sql = "DELETE FROM version WHERE schema IN "
-			+ "('scrapers', 'repository', 'lastcheck')";
+			+ "('translators', 'styles', 'repository', 'lastcheck')";
 		Zotero.DB.query(sql);
-		_dbVersions['scrapers'] = null;
-		_dbVersions['repository'] = null;
-		_dbVersions['lastcheck'] = null;
+		_dbVersions.repository = null;
+		_dbVersions.lastcheck = null;
 		
-		// Rebuild from scrapers.sql
-		_updateSchema('scrapers');
+		var translatorsDir = Zotero.getTranslatorsDirectory();
+		translatorsDir.remove(true);
+		Zotero.getTranslatorsDirectory(); // recreate directory
+		Zotero.Translators.init();
+		this.updateBundledFiles('translators');
 		
-		// Rebuild the translator cache
-		Zotero.debug("Clearing translator cache");
-		Zotero.Translate.cache = null;
-		Zotero.Translate.init();
-		
-		Zotero.DB.commitTransaction();
+		var stylesDir = Zotero.getStylesDirectory();
+		stylesDir.remove(true);
+		Zotero.getStylesDirectory(); // recreate directory
+		Zotero.Styles.init();
+		this.updateBundledFiles('styles');
 		
 		// Run a manual update from repository if pref set
 		if (Zotero.Prefs.get('automaticScraperUpdates')) {
-			this.updateScrapersRemote(2, callback);
-		}
-	}
-	
-	
-	function rebuildTranslatorsTable(callback) {
-		Zotero.debug("Rebuilding translators table");
-		Zotero.DB.beginTransaction();
-		
-		Zotero.DB.query("DELETE FROM translators");
-		var sql = "DELETE FROM version WHERE schema IN "
-			+ "('scrapers', 'repository', 'lastcheck')";
-		Zotero.DB.query(sql);
-		_dbVersions['scrapers'] = null;
-		_dbVersions['repository'] = null;
-		_dbVersions['lastcheck'] = null;
-		
-		// Rebuild from scrapers.sql
-		_updateSchema('scrapers');
-		
-		// Rebuild the translator cache
-		Zotero.debug("Clearing translator cache");
-		Zotero.Translate.cache = null;
-		Zotero.Translate.init();
-		
-		Zotero.DB.commitTransaction();
-		
-		// Run a manual update from repository if pref set
-		if (Zotero.Prefs.get('automaticScraperUpdates')) {
-			this.updateScrapersRemote(2, callback);
+			this.updateFromRepository(2, callback);
 		}
 	}
 	
@@ -489,12 +677,10 @@ Zotero.Schema = new function(){
 			Zotero.DB.query(_getSchemaSQL('system'));
 			Zotero.DB.query(_getSchemaSQL('userdata'));
 			Zotero.DB.query(_getSchemaSQL('triggers'));
-			Zotero.DB.query(_getSchemaSQL('scrapers'));
 			
 			_updateDBVersion('system', _getSchemaSQLVersion('system'));
 			_updateDBVersion('userdata', _getSchemaSQLVersion('userdata'));
 			_updateDBVersion('triggers', _getSchemaSQLVersion('triggers'));
-			_updateDBVersion('scrapers', _getSchemaSQLVersion('scrapers'));
 			
 			/*
 			TODO: uncomment for release
@@ -574,7 +760,7 @@ Zotero.Schema = new function(){
 	/**
 	* Process the response from the repository
 	**/
-	function _updateScrapersRemoteCallback(xmlhttp, manual){
+	function _updateFromRepositoryCallback(xmlhttp, manual){
 		if (!xmlhttp.responseXML){
 			try {
 				if (xmlhttp.status>1000){
@@ -635,17 +821,16 @@ Zotero.Schema = new function(){
 		
 		try {
 			for (var i=0, len=translatorUpdates.length; i<len; i++){
-				_translatorXMLToDB(translatorUpdates[i]);
+				_translatorXMLToFile(translatorUpdates[i]);
 			}
 			
 			for (var i=0, len=styleUpdates.length; i<len; i++){
-				_styleXMLToDB(styleUpdates[i]);
+				_styleXMLToFile(styleUpdates[i]);
 			}
 			
-			// Rebuild the translator cache
-			Zotero.debug("Clearing translator cache");
-			Zotero.Translate.cache = null;
-			Zotero.Translate.init();
+			// Rebuild caches
+			Zotero.Translators.init();
+			Zotero.Styles.init();
 		}
 		catch (e) {
 			Zotero.debug(e, 1);
@@ -687,7 +872,7 @@ Zotero.Schema = new function(){
 			_repositoryTimer.initWithCallback({
 				// implements nsITimerCallback
 				notify: function(timer){
-					Zotero.Schema.updateScrapersRemote();
+					Zotero.Schema.updateFromRepository();
 				}
 			}, interval, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
 		}
@@ -696,99 +881,126 @@ Zotero.Schema = new function(){
 	
 	/**
 	* Traverse an XML translator node from the repository and
-	* update the local scrapers table with the scraper data
+	* update the local translators folder with the translator data
 	**/
-	function _translatorXMLToDB(xmlnode){
+	function _translatorXMLToFile(xmlnode) {
 		// Don't split >4K chunks into multiple nodes
 		// https://bugzilla.mozilla.org/show_bug.cgi?id=194231
 		xmlnode.normalize();
+		var translatorID = xmlnode.getAttribute('id');
+		var translator = Zotero.Translators.get(translatorID);
 		
 		// Delete local version of remote translators with priority 0
 		if (xmlnode.getElementsByTagName('priority')[0].firstChild.nodeValue === "0") {
-			var sql = "DELETE FROM translators WHERE translatorID=?";
-			return Zotero.DB.query(sql, {string: xmlnode.getAttribute('id')});
+			if (translator && translator.file.exists()) {
+				Zotero.debug("Deleting translator '" + translator.label + "'");
+				translator.file.remove(false);
+			}
+			return false;
 		}
 		
-		var sqlValues = [
-			{string: xmlnode.getAttribute('id')},
-			{string: xmlnode.getAttribute('minVersion')},
-			{string: xmlnode.getAttribute('maxVersion')},
-			{string: xmlnode.getAttribute('lastUpdated')},
-			1, // inRepository
-			{int: xmlnode.getElementsByTagName('priority')[0].firstChild.nodeValue},
-			{int: xmlnode.getAttribute('type')},
-			{string: xmlnode.getElementsByTagName('label')[0].firstChild.nodeValue},
-			{string: xmlnode.getElementsByTagName('creator')[0].firstChild.nodeValue},
-			// target
-			(xmlnode.getElementsByTagName('target').item(0) &&
-				xmlnode.getElementsByTagName('target')[0].firstChild)
-				? {string: xmlnode.getElementsByTagName('target')[0].firstChild.nodeValue}
-				: {null: true},
-			// detectCode can not exist or be empty
-			(xmlnode.getElementsByTagName('detectCode').item(0) &&
-				xmlnode.getElementsByTagName('detectCode')[0].firstChild)
-				? {string: xmlnode.getElementsByTagName('detectCode')[0].firstChild.nodeValue}
-				: {null: true},
-			{string: xmlnode.getElementsByTagName('code')[0].firstChild.nodeValue}
-		];
+		var metadata = {
+			translatorID: translatorID,
+			translatorType: parseInt(xmlnode.getAttribute('type')),
+			label: xmlnode.getElementsByTagName('label')[0].firstChild.nodeValue,
+			creator: xmlnode.getElementsByTagName('creator')[0].firstChild.nodeValue,
+			target: (xmlnode.getElementsByTagName('target').item(0) &&
+						xmlnode.getElementsByTagName('target')[0].firstChild)
+					? xmlnode.getElementsByTagName('target')[0].firstChild.nodeValue
+					: null,
+			minVersion: xmlnode.getAttribute('minVersion'),
+			maxVersion: xmlnode.getAttribute('maxVersion'),
+			priority: parseInt(
+				xmlnode.getElementsByTagName('priority')[0].firstChild.nodeValue
+			),
+			inRepository: true,
+			lastUpdated: xmlnode.getAttribute('lastUpdated')
+		};
 		
-		var sql = "REPLACE INTO translators VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
-		return Zotero.DB.query(sql, sqlValues);
+		// detectCode can not exist or be empty
+		var detectCode = (xmlnode.getElementsByTagName('detectCode').item(0) &&
+					xmlnode.getElementsByTagName('detectCode')[0].firstChild)
+				? xmlnode.getElementsByTagName('detectCode')[0].firstChild.nodeValue
+				: null;
+		var code = xmlnode.getElementsByTagName('code')[0].firstChild.nodeValue;
+		
+		var fileName = Zotero.Translators.getFileNameFromLabel(metadata.label);
+		var destFile = Zotero.getTranslatorsDirectory();
+		destFile.append(fileName);
+		
+		var nsIJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
+		var metadataJSON = nsIJSON.encode(metadata);
+		
+		var str = metadataJSON + "\n\n" + (detectCode ? detectCode + "\n\n" : "") + code;
+		
+		if (translator && destFile.equals(translator.file)) {
+			var sameFile = true;
+		}
+		
+		if (!sameFile && destFile.exists()) {
+			var msg = "Overwriting translator with same filename '"
+				+ fileName + "'";
+			Zotero.debug(msg, 1);
+			Zotero.debug(metadata, 1);
+			Components.utils.reportError(msg + " in Zotero.Schema._translatorXMLToFile()");
+		}
+		
+		if (translator && translator.file.exists()) {
+			translator.file.remove(false);
+		}
+		
+		Zotero.debug("Saving translator '" + metadata.label + "'");
+		Zotero.File.putContents(destFile, str);
+		return destFile;
 	}
 	
 	
 	/**
-	* Traverse an XML style node from the repository and
-	* update the local csl table with the style data
-	**/
-	function _styleXMLToDB(xmlnode){
+	 * Traverse an XML style node from the repository and
+	 * update the local styles folder with the style data
+	 */
+	function _styleXMLToFile(xmlnode) {
 		// Don't split >4K chunks into multiple nodes
 		// https://bugzilla.mozilla.org/show_bug.cgi?id=194231
 		xmlnode.normalize();
-		
-		var uri = xmlnode.getAttribute('id');
-		
-		//
-		// Workaround for URI change -- delete existing versions with old URIs of updated styles
-		//
-		var re = new RegExp("http://www.zotero.org/styles/(.+)");
-		var matches = uri.match(re);
-		
-		if (matches) {
-			var zoteroReplacements = ['chicago-author-date', 'chicago-note-bibliography'];
-			var purlReplacements = [
-				'apa', 'asa', 'chicago-note', 'ieee', 'mhra_note_without_bibliography',
-				'mla', 'nature', 'nlm'
-			];
-			
-			if (zoteroReplacements.indexOf(matches[1]) != -1) {
-				var sql = "DELETE FROM csl WHERE cslID=?";
-				Zotero.DB.query(sql, 'http://www.zotero.org/namespaces/CSL/' + matches[1] + '.csl');
-			}
-			else if (purlReplacements.indexOf(matches[1]) != -1) {
-				var sql = "DELETE FROM csl WHERE cslID=?";
-				Zotero.DB.query(sql, 'http://purl.org/net/xbiblio/csl/styles/' + matches[1] + '.csl');
-			}
-		}
 		
 		var uri = xmlnode.getAttribute('id');
 		
 		// Delete local style if CSL code is empty
 		if (!xmlnode.getElementsByTagName('csl')[0].firstChild) {
-			var sql = "DELETE FROM csl WHERE cslID=?";
-			Zotero.DB.query(sql, uri);
-			return true;
+			var style = Zotero.Styles.get(uri);
+			if (style) {
+				style.file.remove(null);
+			}
+			return;
 		}
 		
-		var sqlValues = [
-			{string: uri},
-			{string: xmlnode.getAttribute('updated')},
-			{string: xmlnode.getElementsByTagName('title')[0].firstChild.nodeValue},
-			{string: xmlnode.getElementsByTagName('csl')[0].firstChild.nodeValue}
-		];
+		var str = xmlnode.getElementsByTagName('csl')[0].firstChild.nodeValue;
 		
-		var sql = "REPLACE INTO csl VALUES (?,?,?,?)";
-		return Zotero.DB.query(sql, sqlValues);
+		var style = Zotero.Styles.get(uri);
+		if (style) {
+			if (style.file.exists()) {
+				style.file.remove(false);
+			}
+			var destFile = style.file;
+		}
+		else {
+			// Get last part of URI for filename
+			var matches = uri.match(/([^\/]+)$/);
+			if (!matches) {
+				throw ("Invalid style URI '" + uri + "' from repository");
+			}
+			var destFile = Zotero.getStylesDirectory();
+			destFile.append(matches[1]);
+			if (destFile.exists()) {
+				throw ("Different style with filename '" + matches[1]
+					+ "' already exists in Zotero.Schema._styleXMLToFile()");
+			}
+		}
+		
+		Zotero.debug("Saving style '" + uri + "'");
+		Zotero.File.putContents(destFile, str);
+		return;
 	}
 	
 	
@@ -1678,6 +1890,50 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState)");
 					Zotero.DB.query("CREATE TABLE storageDeleteLog (\n    key TEXT PRIMARY KEY,\n    timestamp INT NOT NULL\n)");
 					Zotero.DB.query("CREATE INDEX storageDeleteLog_timestamp ON storageDeleteLog(timestamp)");
+				}
+				
+				if (i==41) {
+					var translators = Zotero.DB.query("SELECT * FROM translators WHERE inRepository!=1");
+					if (translators) {
+						var dir = Zotero.getTranslatorsDirectory();
+						if (dir.exists()) {
+							dir.remove(true);
+						}
+						Zotero.getTranslatorsDirectory()
+						for each(var row in translators) {
+							var file = dir.clone();
+							var fileName = Zotero.Translators.getFileNameFromLabel(row.label);
+							file.append(fileName);
+							var metadata = { translatorID: row.translatorID, translatorType: parseInt(row.translatorType), label: row.label, creator: row.creator, target: row.target ? row.target : null, minVersion: row.minVersion, maxVersion: row.maxVersion, priority: parseInt(row.priority), inRepository: row.inRepository == 1 ? true : false, lastUpdated: row.lastUpdated };
+							var nsIJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
+							var metadataJSON = nsIJSON.encode(metadata);
+							var str = metadataJSON + "\n\n" + (row.detectCode ? row.detectCode + "\n\n" : "") + row.code;
+							Zotero.debug("Extracting translator '" + row.label + "' from database");
+							Zotero.File.putContents(file, str);
+						}
+						Zotero.Translators.init();
+					}
+					var styles = Zotero.DB.query("SELECT * FROM csl");
+					if (styles) {
+						var dir = Zotero.getStylesDirectory();
+						if (dir.exists()) {
+							dir.remove(true);
+						}
+						Zotero.getStylesDirectory()
+						for each(var row in styles) {
+							var file = dir.clone();
+							var matches = row.cslID.match(/([^\/]+)$/);
+							if (!matches) {
+								continue;
+							}
+							file.append(matches[1]);
+							Zotero.debug("Extracting styles '" + matches[1] + "' from database");
+							Zotero.File.putContents(file, row.csl);
+						}
+						Zotero.Styles.init();
+					}
+					Zotero.DB.query("DROP TABLE translators");
+					Zotero.DB.query("DROP TABLE csl");
 				}
 			}
 			

@@ -1,0 +1,20 @@
+#!/bin/bash
+if [ -f translators.zip ]; then
+	rm translators.zip
+fi
+if [ ! -d output ]; then
+	mkdir output;
+fi
+
+counter=0;
+for file in *.js; do
+	newfile=$counter.js;
+	cp "$file" output/$newfile;
+	counter=`echo $counter + 1 | bc`;
+done;
+
+cd output
+zip ../translators.zip *
+cd ..
+rm -rf output
+mv translators.zip ..
