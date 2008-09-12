@@ -1,4 +1,4 @@
--- 40
+-- 41
 
 -- This file creates tables containing user-specific data -- any changes made
 -- here must be mirrored in transition steps in schema.js::_migrateSchema()
@@ -210,29 +210,6 @@ CREATE TABLE storageDeleteLog (
     timestamp INT NOT NULL
 );
 CREATE INDEX storageDeleteLog_timestamp ON storageDeleteLog(timestamp);
-
-CREATE TABLE translators (
-    translatorID TEXT PRIMARY KEY,
-    minVersion TEXT,
-    maxVersion TEXT,
-    lastUpdated DATETIME,
-    inRepository INT,
-    priority INT,
-    translatorType INT,
-    label TEXT,
-    creator TEXT,
-    target TEXT,
-    detectCode TEXT,
-    code TEXT
-);
-CREATE INDEX translators_type ON translators(translatorType);
-
-CREATE TABLE csl (
-    cslID TEXT PRIMARY KEY,
-    updated DATETIME,
-    title TEXT,
-    csl TEXT
-);
 
 CREATE TABLE annotations (
     annotationID INTEGER PRIMARY KEY,

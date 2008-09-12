@@ -67,7 +67,6 @@ Zotero.Styles = new function() {
 			if(!file.leafName || file.leafName[0] == "." || file.isDirectory()) continue;
 			
 			var style = new Zotero.Style(file);
-			
 			if(style.styleID) {
 				if(_styles[style.styleID]) {
 					// same style is already cached
@@ -77,7 +76,7 @@ Zotero.Styles = new function() {
 				} else {
 					// add to cache
 					_styles[style.styleID] = style;
-					_styles.hidden = hidden;
+					_styles[style.styleID].hidden = hidden;
 					if(!hidden) _visibleStyles.push(style);
 				}
 			}
@@ -92,7 +91,7 @@ Zotero.Styles = new function() {
 	 */
 	this.get = function(id) {
 		if(!_initialized) this.init();
-		return _styles[id];
+		return _styles[id] ? _styles[id] : false;
 	}
 	
 	/**

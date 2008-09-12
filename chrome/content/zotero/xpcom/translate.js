@@ -96,6 +96,15 @@ Zotero.Translators = new function() {
 		if(!_initialized) this.init();
 		return _cache[type].slice(0);
 	}
+	
+	
+	/**
+	 * @param	{String}		label
+	 * @return	{String}
+	 */
+	this.getFileNameFromLabel = function(label) {
+		return Zotero.File.getValidFileName(label) + ".js";
+	}
 }
 
 /**

@@ -262,7 +262,7 @@ var Zotero = new function(){
 		}
 		
 		Zotero.DB.startDummyStatement();
-		Zotero.Schema.updateScrapersRemote();
+		Zotero.Schema.updateFromRepository();
 		
 		// Initialize integration web server
 		Zotero.Integration.init();
@@ -1028,7 +1028,7 @@ Zotero.Prefs = new function(){
 		switch (data){
 			case "automaticScraperUpdates":
 				if (this.get('automaticScraperUpdates')){
-					Zotero.Schema.updateScrapersRemote();
+					Zotero.Schema.updateFromRepository();
 				}
 				else {
 					Zotero.Schema.stopRepositoryTimer();

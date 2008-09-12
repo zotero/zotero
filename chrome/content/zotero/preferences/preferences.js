@@ -1004,7 +1004,7 @@ function runIntegrityCheck() {
 
 
 function updateTranslators() {
-	Zotero.Schema.updateScrapersRemote(true, function (xmlhttp, updated) {
+	Zotero.Schema.updateFromRepository(true, function (xmlhttp, updated) {
 		var button = document.getElementById('updateButton');
 		if (button) {
 			if (updated===-1) {
@@ -1037,7 +1037,7 @@ function resetTranslatorsAndStyles() {
 		null, null, null, {});
 	
 	if (index == 0) {
-		Zotero.Schema.rebuildTranslatorsAndStylesTables(function (xmlhttp, updated) {
+		Zotero.Schema.resetTranslatorsAndStyles(function (xmlhttp, updated) {
 			populateQuickCopyList();
 		});
 	}
@@ -1059,7 +1059,7 @@ function resetTranslators() {
 		null, null, null, {});
 	
 	if (index == 0) {
-		Zotero.Schema.rebuildTranslatorsTable();
+		Zotero.Schema.resetTranslators();
 	}
 }
 
@@ -1079,7 +1079,7 @@ function resetStyles() {
 		null, null, null, {});
 	
 	if (index == 0) {
-		Zotero.Schema.rebuildStylesTable(function (xmlhttp, updated) {
+		Zotero.Schema.resetStyles(function (xmlhttp, updated) {
 			populateQuickCopyList();
 		});
 	}
@@ -1117,26 +1117,29 @@ function refreshStylesList(cslID) {
 		treechildren.removeChild(treechildren.firstChild);
 	}
 	
-	var sql = "SELECT cslID, title, updated FROM csl ORDER BY title";
-	var styleData = Zotero.DB.query(sql);
-	if (!styleData) return;
+	var styles = Zotero.Styles.getAll();
 	
 	var selectIndex = false;
-	for (var i=0; i<styleData.length; i++) {
+	for each(var style in styles) {
 		var treeitem = document.createElement('treeitem');
 		var treerow = document.createElement('treerow');
 		var titleCell = document.createElement('treecell');
 		var updatedCell = document.createElement('treecell');
 		var cslCell = document.createElement('treecell');
 		
-		var updatedDate = Zotero.Date.formatDate(Zotero.Date.strToDate(styleData[i].updated), true);
+		if (style.updated) {
+			var updatedDate = Zotero.Date.formatDate(Zotero.Date.strToDate(style.updated), true);
+		}
+		else {
+			var updatedDate = '';
+		}
 		
-		treeitem.setAttribute('id', 'zotero-csl-'+styleData[i].cslID);
-		titleCell.setAttribute('label', styleData[i].title);
+		treeitem.setAttribute('id', 'zotero-csl-' + style.styleID);
+		titleCell.setAttribute('label', style.title);
 		updatedCell.setAttribute('label', updatedDate);
 		// if not EN
-		if(styleData[i].cslID.length < Zotero.ENConverter.uriPrefix.length ||
-				styleData[i].cslID.substr(0, Zotero.ENConverter.uriPrefix.length) != Zotero.ENConverter.uriPrefix) {
+		if (style.styleID.length < Zotero.ENConverter.uriPrefix.length ||
+				style.styleID.substr(0, Zotero.ENConverter.uriPrefix.length) != Zotero.ENConverter.uriPrefix) {
 			cslCell.setAttribute('src', 'chrome://zotero/skin/tick.png');
 		}
 		
@@ -1146,7 +1149,7 @@ function refreshStylesList(cslID) {
 		treeitem.appendChild(treerow);
 		treechildren.appendChild(treeitem);
 		
-		if(cslID == styleData[i].cslID) {
+		if (cslID == style.styleID) {
 			document.getElementById('styleManager').view.selection.select(i);
 		}
 	}
