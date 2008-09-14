@@ -641,6 +641,22 @@ var wpdDOMSaver = {
 		}
 		if ( aCSS.href != null && aCSS.href.indexOf("chrome") == 0 ) return "";
 		var flag = "";
+		
+		// Added by Dan S. for Zotero
+		//
+		// Make sure cssRules is accessible -- it might not be if a <link>
+		// element appears within <body> instead of <head>
+		try {
+			aCSS.cssRules
+		}
+		catch (e) {
+			var msg = "Unable to access cssRules property of " + aCSS.href
+				+ " in wpdDOMSaver.processCSSRecursively()";
+			Zotero.debug(msg);
+			Components.utils.reportError(msg);
+			return "";
+		}
+		
 		for ( var i=0; i<aCSS.cssRules.length; i++ ) {
 			if ( aCSS.cssRules[i].type == 1 || aCSS.cssRules[i].type == 4 ) {
 				if (flag=="") { 
