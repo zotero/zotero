@@ -652,7 +652,7 @@ var wpdDOMSaver = {
 		catch (e) {
 			var msg = "Unable to access cssRules property of " + aCSS.href
 				+ " in wpdDOMSaver.processCSSRecursively()";
-			Zotero.debug(msg);
+			Zotero.debug(msg, 2);
 			Components.utils.reportError(msg);
 			return "";
 		}
