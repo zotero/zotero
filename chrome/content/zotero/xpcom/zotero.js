@@ -598,8 +598,17 @@ var Zotero = new function(){
 				}
 			}
 			
+			// Remove password in malformed XML messages
+			if (msg.category == 'malformed-xml') {
+				try {
+					// msg.message is read-only, so store separately
+					var altMessage = msg.message.replace(/(file: "https?:\/\/[^:]+:)([^@]+)(@[^"]+")/, "$1********$3");
+				}
+				catch (e) {}
+			}
+			
 			if (asStrings) {
-				errors.push(msg.message)
+				errors.push(altMessage ? altMessage : msg.message)
 			}
 			else {
 				errors.push(msg);
