@@ -172,7 +172,8 @@ Zotero.Style.prototype.__defineGetter__("csl",
  */
 function() {
 	// cache last style
-	if(Zotero.Styles.cacheTranslatorData && Zotero.Styles.lastCSL.styleID == this.styleID) {
+	if(Zotero.Styles.cacheTranslatorData && Zotero.Styles.lastCSL &&
+			Zotero.Styles.lastCSL.styleID == this.styleID) {
 		return Zotero.Styles.lastCSL;
 	}
 	
