@@ -418,7 +418,17 @@ Zotero.Sync.Storage = new function () {
 				_error("DAV:href not found in " + funcName);
 			}
 			
-			if (href.firstChild.nodeValue != uri.path) {
+			// Absolute
+			if (href.firstChild.nodeValue.match(/^https?:\/\//)) {
+				var ios = Components.classes["@mozilla.org/network/io-service;1"].
+							getService(Components.interfaces.nsIIOService);
+				var href = ios.newURI(href.firstChild.nodeValue, null, null);
+				if (href.path != uri.path) {
+					_error("DAV:href does not match path in " + funcName);
+				}
+			}
+			// Relative
+			else if (href.firstChild.nodeValue != uri.path) {
 				_error("DAV:href does not match path in " + funcName);
 			}
 			
@@ -889,10 +899,26 @@ Zotero.Sync.Storage = new function () {
 			var deleteFiles = [];
 			for each(var response in xml.D::response) {
 				var href = response.D::href.toString();
+				
+				// Convert absolute to relative
+				if (href.match(/^https?:\/\//)) {
+					var ios = Components.classes["@mozilla.org/network/io-service;1"].
+								getService(Components.interfaces.nsIIOService);
+					href = ios.newURI(href, null, null).path;
+				}
+				
+				// Skip root URI
 				if (href == path) {
 					continue;
 				}
-				var file = href.match(/[^\/]+$/)[0];
+				
+				var matches = href.match(/[^\/]+$/);
+				if (!matches) {
+					_error("Unexpected href '" + href
+						+ "' in Zotero.Sync.Storage.purgeOrphanedStorageFiles()")
+				}
+				var file = matches[0];
+				
 				if (file.indexOf('.') == 0) {
 					Zotero.debug("Skipping hidden file " + file);
 					continue;
@@ -1244,6 +1270,7 @@ Zotero.Sync.Storage = new function () {
 		switch (status) {
 			case 201:
 			case 204:
+			case 200: // IIS 5
 				break;
 			
 			default:
@@ -1422,6 +1449,8 @@ Zotero.Sync.Storage = new function () {
 		
 		var requestXML = new XML('<D:propfind ' + nsDeclarations + '/>');
 		requestXML.D::prop = '';
+		// IIS 5.1 requires at least one property in PROPFIND
+		requestXML.D::prop.D::getcontentlength = '';
 		
 		var xmlstr = prolog + requestXML.toXMLString();
 		
@@ -1502,6 +1531,8 @@ Zotero.Sync.Storage = new function () {
 											
 											switch (req.status) {
 												case 204:
+												// IIS 5.1 returns 200
+												case 200:
 													callback(
 														uri,
 														Zotero.Sync.Storage.SUCCESS,
@@ -1560,7 +1591,7 @@ Zotero.Sync.Storage = new function () {
 						var parentURI = uri.clone();
 						parentURI.spec = parentURI.spec.replace(/zotero\/$/, '');
 						
-						// Zotero directory wasn't found, so if at least
+						// Zotero directory wasn't found, so see if at least
 						// the parent directory exists
 						Zotero.Utilities.HTTP.WebDAV.doProp("PROPFIND", parentURI, xmlstr,
 							function (req) {
@@ -1571,6 +1602,10 @@ Zotero.Sync.Storage = new function () {
 									// Parent directory existed
 									case 207:
 										callback(uri, Zotero.Sync.Storage.ERROR_ZOTERO_DIR_NOT_FOUND);
+										return;
+									
+									case 400:
+										callback(uri, Zotero.Sync.Storage.ERROR_BAD_REQUEST);
 										return;
 									
 									case 401:
