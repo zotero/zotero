@@ -290,8 +290,7 @@ Zotero.Schema = new function(){
 		}
 		else {
 			var sourceDir = extDir.clone();
-			// TODO: rename 'csl' to 'styles'
-			sourceDir.append(modes == "translators" ? modes : "csl");
+			sourceDir.append(modes);
 			if (!sourceDir.exists()) {
 				Components.utils.reportError("No " + modes + " ZIP file or directory "
 					+ " in Zotero.Schema.updateBundledFiles()");
