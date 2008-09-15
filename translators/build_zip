@@ -10,7 +10,7 @@ counter=0;
 for file in *.js; do
 	newfile=$counter.js;
 	cp "$file" output/$newfile;
-	counter=`echo $counter + 1 | bc`;
+	counter=$(($counter+1));
 done;
 
 cd output
