@@ -903,6 +903,7 @@ Zotero.Utilities.HTTP = new function() {
 		xmlhttp.onreadystatechange = function() {
 			_stateChange(xmlhttp, callback);
 		};
+		xmlhttp.overrideMimeType("text/plain");
 		xmlhttp.send(null);
 		return xmlhttp;
 	}
