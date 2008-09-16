@@ -429,7 +429,10 @@ Zotero.Sync.Storage = new function () {
 			}
 			// Relative
 			else if (href.firstChild.nodeValue != uri.path) {
-				_error("DAV:href does not match path in " + funcName);
+				// Try URL-encoded as well
+				if (decodeURIComponent(href.firstChild.nodeValue) != uri.path) {
+					_error("DAV:href does not match path in " + funcName);
+				}
 			}
 			
 			var modified = response.getElementsByTagNameNS(dcterms, "modified").item(0);
