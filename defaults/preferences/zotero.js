@@ -14,6 +14,7 @@ pref("extensions.zotero.debug.log",false);
 pref("extensions.zotero.debug.level",5);
 pref("extensions.zotero.debug.time", false);
 pref("extensions.zotero.automaticScraperUpdates",true);
+pref("extensions.zotero.zoteroDotOrgVersionHeader", true);
 pref("extensions.zotero.cacheTranslatorData",true);
 pref("extensions.zotero.zoteroPaneOnTop",false);
 pref("extensions.zotero.statusBarIcon", 2);

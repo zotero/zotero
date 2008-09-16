@@ -215,6 +215,8 @@ var Zotero = new function(){
 			return;
 		}
 		
+		Zotero.VersionHeader.init();
+		
 		// Initialize keyboard shortcuts
 		Zotero.Keys.init();
 		
@@ -1042,6 +1044,15 @@ Zotero.Prefs = new function(){
 					Zotero.Schema.stopRepositoryTimer();
 				}
 				break;
+			
+			case "zoteroDotOrgVersionHeader":
+				if (this.get("zoteroDotOrgVersionHeader")) {
+					Zotero.VersionHeader.register();
+				}
+				else {
+					Zotero.VersionHeader.unregister();
+				}
+				break;
 		}
 	}
 }
@@ -1139,6 +1150,46 @@ Zotero.Keys = new function() {
 		return _keys[key] ? _keys[key] : false;
 	}
 }
+
+
+/**
+ * Add X-Zotero-Version header to HTTP requests to zotero.org
+ *
+ * @namespace
+ */
+Zotero.VersionHeader = {
+	init: function () {
+		if (Zotero.Prefs.get("zoteroDotOrgVersionHeader")) {
+			this.register();
+		}
+	},
+	
+	// Called from this.init() and Zotero.Prefs.observe()
+	register: function () {
+		var observerService = Components.classes["@mozilla.org/observer-service;1"]
+								.getService(Components.interfaces.nsIObserverService);
+		observerService.addObserver(this, "http-on-modify-request", false);
+	},
+	
+	observe: function (subject, topic, data) {
+		try {
+			var channel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
+			if (channel.URI.host.match(/zotero\.org$/)) {
+				channel.setRequestHeader("X-Zotero-Version", Zotero.version, false);
+			}
+		}
+		catch (e) {
+			Zotero.debug(e);
+		}
+	},
+	
+	unregister: function () {
+		var observerService = Components.classes["@mozilla.org/observer-service;1"]
+								.getService(Components.interfaces.nsIObserverService);
+		observerService.removeObserver(this, "http-on-modify-request");
+	}
+}
+
 
 
 /**
