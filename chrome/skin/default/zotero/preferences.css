@@ -164,6 +164,11 @@ grid row hbox:first-child
 	-moz-box-align: center;
 }
 
+#styleManager-csl
+{
+	width: 36px;
+}
+
 #zotero-prefpane-keys textbox
 {
 	margin-left: -1px;

@@ -78,6 +78,22 @@ Zotero.File = new function(){
 	}
 	
 	
+	/**
+	 * Get contents of a binary file
+	 */
+	this.getBinaryContents = function(file) {
+		var iStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+					 .createInstance(Components.interfaces.nsIFileInputStream);
+		iStream.init(file, 0x01, 0664, 0);
+		var bStream = Components.classes["@mozilla.org/binaryinputstream;1"]
+					 .createInstance(Components.interfaces.nsIBinaryInputStream);
+		bStream.setInputStream(iStream);
+		var string = bStream.readBytes(file.fileSize);
+		iStream.close();
+		return string;
+	}
+	
+	
 	function getContents(file, charset, maxLength){
 		var fis = Components.classes["@mozilla.org/network/file-input-stream;1"].
 			createInstance(Components.interfaces.nsIFileInputStream);

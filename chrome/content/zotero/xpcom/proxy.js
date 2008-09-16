@@ -44,12 +44,11 @@ Zotero.Proxies = new function() {
 	 */
 	this.init = function() {
 		if(!on) {
-			var observerService = Components.classes["@mozilla.org/observer-service;1"]
-										.getService(Components.interfaces.nsIObserverService);
-			observerService.addObserver(this, "http-on-examine-response", false);
+			var me = this;
+			Zotero.MIMETypeHandler.addObserver(function(ch) { me.observe(ch) });
 			this.get();
+			on = true;
 		}
-		on = true;
 		
 		autoRecognize = Zotero.Prefs.get("proxies.autoRecognize");
 		transparent = Zotero.Prefs.get("proxies.transparent");
@@ -63,94 +62,73 @@ Zotero.Proxies = new function() {
 	 * @param {nsIChannel} channel
 	 */
 	this.observe = function(channel) {
-		channel.QueryInterface(Components.interfaces.nsIHttpChannel);
-		try {
-			// remove content-disposition headers for endnote, etc.
-			var contentType = channel.getResponseHeader("Content-Type").toLowerCase();
-			for each(var desiredContentType in Zotero.Ingester.MIMEHandler.URIContentListener.desiredContentTypes) {
-				if(contentType.length < desiredContentType.length) {
-					break;
-				} else {
-					if(contentType.substr(0, desiredContentType.length) == desiredContentType) {
-						channel.setResponseHeader("Content-Disposition", "", false);
-						break;
-					}
-				}
-			}
-		} catch(e) {}
-		
 		// try to detect a proxy
-		channel.QueryInterface(Components.interfaces.nsIRequest);
-		if(channel.loadFlags & Components.interfaces.nsIHttpChannel.LOAD_DOCUMENT_URI) {
-			channel.QueryInterface(Components.interfaces.nsIHttpChannel);
-			var url = channel.URI.spec;
+		channel.QueryInterface(Components.interfaces.nsIHttpChannel);
+		var url = channel.URI.spec;
 
-			// see if there is a proxy we already know
-			var m = false;
-			var proxy;
-			for each(proxy in proxies) {
-				if(proxy.regexp && proxy.multiHost) {
-					m = proxy.regexp.exec(url);
-					if(m) break;
+		// see if there is a proxy we already know
+		var m = false;
+		var proxy;
+		for each(proxy in proxies) {
+			if(proxy.regexp && proxy.multiHost) {
+				m = proxy.regexp.exec(url);
+				if(m) break;
+			}
+		}
+		
+		if(m) {
+			// add this host if we know a proxy
+			if(proxy.autoAssociate) {
+				var host = m[proxy.parameters.indexOf("%h")+1];
+				if(proxy.hosts.indexOf(host) == -1) {
+					proxy.hosts.push(host);
+					proxy.save();
 				}
 			}
-			
-			if(m) {
-				// add this host if we know a proxy
-				if(proxy.autoAssociate) {
-					var host = m[proxy.parameters.indexOf("%h")+1];
-					if(proxy.hosts.indexOf(host) == -1) {
-						proxy.hosts.push(host);
-						proxy.save();
-					}
+		} else if(autoRecognize) {
+			// otherwise, try to detect a proxy
+			var proxy = false;
+			for each(var detector in Zotero.Proxies.Detectors) {
+				try {
+					proxy = detector(channel);
+				} catch(e) {
+					Components.utils.reportError(e);
 				}
-			} else if(autoRecognize) {
-				// otherwise, try to detect a proxy
-				var proxy = false;
-				for each(var detector in Zotero.Proxies.Detectors) {
-					try {
-						proxy = detector(channel);
-					} catch(e) {
-						Components.utils.reportError(e);
+				
+				if(!transparent) {
+					// if transparent is turned off, just save the proxy
+					proxy.save();
+				} else if(proxy) {
+					// otherwise, make sure we want it
+					var io = {site:proxy.hosts[0], proxy:channel.URI.hostPort};
+					var window = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						.getService(Components.interfaces.nsIWindowMediator)
+						.getMostRecentWindow("navigator:browser");
+					window.openDialog('chrome://zotero/content/proxy.xul', '', 'chrome,modal', io);
+					
+					if(io.add) proxy.save();
+					if(io.disable) {
+						transparent = false;
+						Zotero.Prefs.set("proxies.transparent", false);
 					}
 					
-					if(!transparent) {
-						// if transparent is turned off, just save the proxy
-						proxy.save();
-					} else if(proxy) {
-						// otherwise, make sure we want it
-						var io = {site:proxy.hosts[0], proxy:channel.URI.hostPort};
-						var window = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-							.getService(Components.interfaces.nsIWindowMediator)
-							.getMostRecentWindow("navigator:browser");
-						window.openDialog('chrome://zotero/content/proxy.xul', '', 'chrome,modal', io);
-						
-						if(io.add) proxy.save();
-						if(io.disable) {
-							transparent = false;
-							Zotero.Prefs.set("proxies.transparent", false);
-						}
-						
-						break;
-					}
-				}
-			}
-			
-			// try to get an applicable proxy
-			if(transparent) {
-				var webNav = null;
-				try {
-					webNav = channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIWebNavigation);
-				} catch(e) {}
-				
-				if(webNav) {
-					var proxied = this.properToProxy(url, true);
-					if(proxied) webNav.loadURI(proxied, 0, channel.URI, null, null);
+					break;
 				}
 			}
 		}
 		
-		delete channel;
+		// try to get an applicable proxy
+		if(transparent) {
+			var webNav = null;
+			try {
+				webNav = channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIWebNavigation);
+			} catch(e) {}
+			
+			if(webNav) {
+				var proxied = this.properToProxy(url, true);
+				if(proxied) webNav.loadURI(proxied, 0, channel.URI, null, null);
+			}
+		}
 	}
 	
 	/**

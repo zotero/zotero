@@ -17,14 +17,40 @@
     See the License for the specific language governing permissions and
     limitations under the License.
     
-	
-	Utilities based in part on code taken from Piggy Bank 2.1.1 (BSD-licensed)
-	
-	
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Ingester = new Object();
+Zotero.Ingester = new function() {
+	this.importHandler = function(string, uri) {
+		// attempt to import through Zotero.Translate
+		var translation = new Zotero.Translate("import");
+		translation.setLocation(uri);
+		translation.setString(string);
+		
+		var frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
+			getService(Components.interfaces.nsIWindowWatcher).activeWindow;
+		
+		frontWindow.Zotero_Browser.progress.show();
+		var saveLocation = null;
+		try {
+			saveLocation = frontWindow.ZoteroPane.getSelectedCollection();
+		} catch(e) {}
+		translation.setHandler("itemDone", function(obj, item) { frontWindow.Zotero_Browser.itemDone(obj, item, saveLocation) });
+		translation.setHandler("done", function(obj, item) { frontWindow.Zotero_Browser.finishScraping(obj, item, saveLocation) });
+		
+		// attempt to retrieve translators
+		var translators = translation.getTranslators();
+		if(!translators.length) {
+			// we lied. we can't really translate this file.
+			frontWindow.Zotero_Browser.progress.close();
+			throw "No translator found for handled RIS or Refer file"
+		}
+		
+		// translate using first available
+		translation.setTranslator(translators[0]);
+		translation.translate();
+	}
+}
 
 Zotero.OpenURL = new function() {
 	this.resolve = resolve;
@@ -457,176 +483,4 @@ Zotero.OpenURL = new function() {
 			return "";
 		}
 	}
-}
-
-Zotero.Ingester.MIMEHandler = new function() {
-	var on = false;
-	
-	this.init = init;
-	
-	/*
-	 * registers URIContentListener to handle MIME types
-	 */
-	function init() {
-		var prefStatus = Zotero.Prefs.get("parseEndNoteMIMETypes");
-		if(!on && prefStatus) {
-			Zotero.debug("Registering URIContentListener for RIS/Refer");
-			var uriLoader = Components.classes["@mozilla.org/uriloader;1"].
-			                getService(Components.interfaces.nsIURILoader);
-			uriLoader.registerContentListener(Zotero.Ingester.MIMEHandler.URIContentListener);
-			on = true;
-		} else if(on && !prefStatus) {
-			Zotero.debug("Unregistering URIContentListener for RIS/Refer");
-			var uriLoader = Components.classes["@mozilla.org/uriloader;1"].
-			                getService(Components.interfaces.nsIURILoader);
-			uriLoader.unRegisterContentListener(Zotero.Ingester.MIMEHandler.URIContentListener);
-			on = false;			
-		}
-	}
-}
-
-/*
- * Zotero.Ingester.MIMEHandler.URIContentListener: implements
- * nsIURIContentListener interface to grab MIME types
- */
-Zotero.Ingester.MIMEHandler.URIContentListener = new function() {
-	// list of content types to capture
-	// NOTE: must be from shortest to longest length
-	this.desiredContentTypes = ["application/x-endnote-refer",
-	                           "application/x-research-info-systems"];
-	
-	this.QueryInterface = QueryInterface;
-	this.canHandleContent = canHandleContent;
-	this.doContent = doContent;
-	this.isPreferred = isPreferred;
-	this.onStartURIOpen = onStartURIOpen;
-	
-	function QueryInterface(iid) {
-		if(iid.equals(Components.interfaces.nsISupports)
-		   || iid.equals(Components.interfaces.nsISupportsWeakReference)
-		   || iid.equals(Components.interfaces.nsIURIContentListener)) {
-			return this;
-		}
-		throw Components.results.NS_ERROR_NO_INTERFACE;
-	}
-	
-	function canHandleContent(contentType, isContentPreferred, desiredContentType) {
-		if(Zotero.inArray(contentType, this.desiredContentTypes)) {
-			return true;
-		}
-		return false;
-	}
-	
-	function doContent(contentType, isContentPreferred, request, contentHandler) {
-		Zotero.debug("doing content for "+request.name);
-		contentHandler.value = new Zotero.Ingester.MIMEHandler.StreamListener(request, contentType);
-		return false;
-	}
-	
-	function isPreferred(contentType, desiredContentType) {
-		if(Zotero.inArray(contentType, this.desiredContentTypes)) {
-			return true;
-		}
-		return false;
-	}
-	
-	function onStartURIOpen(URI) {
-		return true;
-	}
-}
-
-/*
- * Zotero.Ingester.MIMEHandler.StreamListener: implements nsIStreamListener and
- * nsIRequestObserver interfaces to download MIME types we've grabbed
- */
-Zotero.Ingester.MIMEHandler.StreamListener = function(request, contentType) {
-	this._request = request;
-	this._contentType = contentType
-	this._readString = "";
-	this._scriptableStream = null;
-	this._scriptableStreamInput = null
-	
-	// get front window
-	var windowWatcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
-						getService(Components.interfaces.nsIWindowWatcher);
-	this._frontWindow = windowWatcher.activeWindow;
-	this._frontWindow.Zotero_Browser.progress.show();
-	
-	Zotero.debug("EndNote prepared to grab content type "+contentType);
-}
-
-Zotero.Ingester.MIMEHandler.StreamListener.prototype.QueryInterface = function(iid) {
-	if(iid.equals(Components.interfaces.nsISupports)
-	   || iid.equals(Components.interfaces.nsIRequestObserver)
-	   || iid.equals(Components.interfaces.nsIStreamListener)) {
-		return this;
-	}
-	throw Components.results.NS_ERROR_NO_INTERFACE;
-}
-
-Zotero.Ingester.MIMEHandler.StreamListener.prototype.onStartRequest = function(channel, context) {}
-
-/*
- * called when there's data available; basicallly, we just want to collect this data
- */
-Zotero.Ingester.MIMEHandler.StreamListener.prototype.onDataAvailable = function(request, context, inputStream, offset, count) {
-	Zotero.debug(count+" bytes available");
-	
-	if(inputStream != this._scriptableStreamInput) {	// get storage stream
-														// if there's not one
-		this._scriptableStream = Components.classes["@mozilla.org/scriptableinputstream;1"].
-					             createInstance(Components.interfaces.nsIScriptableInputStream);
-		this._scriptableStream.init(inputStream);
-		this._scriptableStreamInput = inputStream;
-	}
-	this._readString += this._scriptableStream.read(count);
-}
-
-/*
- * called when the request is done
- */
-Zotero.Ingester.MIMEHandler.StreamListener.prototype.onStopRequest = function(channel, context, status) {
-	Zotero.debug("request finished");
-	var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"].
-	                               getService(Components.interfaces.nsIExternalHelperAppService);
-	
-	// attempt to import through Zotero.Translate
-	var translation = new Zotero.Translate("import");
-	translation.setLocation(this._request.name);
-	translation.setString(this._readString);
-	
-	//  use front window's save functions and folder
-	var frontWindow = this._frontWindow;
-	
-	var saveLocation = null;
-	try {
-		saveLocation = frontWindow.ZoteroPane.getSelectedCollection();
-	} catch(e) {}
-	translation.setHandler("itemDone", function(obj, item) { frontWindow.Zotero_Browser.itemDone(obj, item, saveLocation) });
-	translation.setHandler("done", function(obj, item) { frontWindow.Zotero_Browser.finishScraping(obj, item, saveLocation) });
-	
-	// attempt to retrieve translators
-	var translators = translation.getTranslators();
-	if(!translators.length) {
-		// we lied. we can't really translate this file. call
-		// nsIExternalHelperAppService with the data
-		frontWindow.Zotero_Browser.progress.close();
-
-		var streamListener;
-		if(streamListener = externalHelperAppService.doContent(this._contentType, this._request, frontWindow)) {
-			// create a string input stream
-			var inputStream = Components.classes["@mozilla.org/io/string-input-stream;1"].
-							  createInstance(Components.interfaces.nsIStringInputStream);
-			inputStream.setData(this._readString, this._readString.length);
-			
-			streamListener.onStartRequest(channel, context);
-			streamListener.onDataAvailable(this._request, context, inputStream, 0, this._readString.length);
-			streamListener.onStopRequest(channel, context, status);
-		}
-		return false;
-	}
-	
-	// translate using first available
-	translation.setTranslator(translators[0]);
-	translation.translate();
 }

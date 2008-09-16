@@ -1110,16 +1110,18 @@ function onOpenURLCustomized()
 
 /**
  * Refreshes the list of styles in the styles pane
- **/
+ * @param {String} cslID Style to select
+ */
 function refreshStylesList(cslID) {
 	var treechildren = document.getElementById('styleManager-rows');
 	while (treechildren.hasChildNodes()) {
 		treechildren.removeChild(treechildren.firstChild);
 	}
 	
-	var styles = Zotero.Styles.getAll();
+	var styles = Zotero.Styles.getVisible();
 	
 	var selectIndex = false;
+	var i = 0;
 	for each(var style in styles) {
 		var treeitem = document.createElement('treeitem');
 		var treerow = document.createElement('treerow');
@@ -1138,8 +1140,7 @@ function refreshStylesList(cslID) {
 		titleCell.setAttribute('label', style.title);
 		updatedCell.setAttribute('label', updatedDate);
 		// if not EN
-		if (style.styleID.length < Zotero.ENConverter.uriPrefix.length ||
-				style.styleID.substr(0, Zotero.ENConverter.uriPrefix.length) != Zotero.ENConverter.uriPrefix) {
+		if(style.type == "csl") {
 			cslCell.setAttribute('src', 'chrome://zotero/skin/tick.png');
 		}
 		
@@ -1152,6 +1153,7 @@ function refreshStylesList(cslID) {
 		if (cslID == style.styleID) {
 			document.getElementById('styleManager').view.selection.select(i);
 		}
+		i++;
 	}
 }
 
@@ -1169,70 +1171,52 @@ function addStyle() {
 	
 	var rv = fp.show();
 	if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
-		var file = fp.file;
-		
-		// read file
-		var iStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-					 .createInstance(Components.interfaces.nsIFileInputStream);
-		iStream.init(file, 0x01, 0664, 0);
-		var bStream = Components.classes["@mozilla.org/binaryinputstream;1"]
-					 .createInstance(Components.interfaces.nsIBinaryInputStream);
-		bStream.setInputStream(iStream);
-		
-		var read = bStream.readBytes(6);
-		
-		if(read == "\x00\x08\xFF\x00\x00\x00") {
-			// EndNote style
-			
-			// read the rest of the bytes in the file
-			read += bStream.readBytes(file.fileSize-6);
-			
-			// get name and modification date
-			var name = file.leafName.replace(/\.ens$/i, "");
-			var date = new Date(file.lastModifiedTime);
-			
-			var cslID = Zotero.Styles.install(read, false, date, name);
-		} else {
-			// This _should_ get the right charset for us automatically
-			var fileURI = Components.classes["@mozilla.org/network/protocol;1?name=file"]
-									.getService(Components.interfaces.nsIFileProtocolHandler)
-									.getURLSpecFromFile(file);
-			var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
-				createInstance();
-			req.open("GET", fileURI, false);
-			req.overrideMimeType("text/plain");
-			try {
-				req.send(null);
-			} catch(e) {
-				styleImportError();
-				throw e;
-			}
-			
-			var cslID = Zotero.Styles.install(req.responseText);
-		}
+		Zotero.Styles.install(fp.file);
 	}
-	
-	if(cslID !== false) this.refreshStylesList(cslID);
 }
 
 /**
- * Deletes a style from the style pane
+ * Deletes selected styles from the styles pane
  **/
 function deleteStyle() {
+	// get selected cslIDs
 	var tree = document.getElementById('styleManager');
-	if(tree.currentIndex == -1) return;
-	var treeitem = tree.lastChild.childNodes[tree.currentIndex];
-	var cslID = treeitem.getAttribute('id').substr(11);
+	var treeItems = tree.lastChild.childNodes;
+	var cslIDs = [];
+	var start = {};
+	var end = {};
+	var nRanges = tree.view.selection.getRangeCount();
+	for(var i=0; i<nRanges; i++) {
+		tree.view.selection.getRangeAt(i, start, end);
+		for(var j=start.value; j<=end.value; j++) {
+			cslIDs.push(treeItems[j].getAttribute('id').substr(11));
+		}
+	}
+	
+	if(cslIDs.length == 0) {
+		return;
+	} else if(cslIDs.length == 1) {
+		var selectedStyle = Zotero.Styles.get(cslIDs[0])
+		var text = Zotero.getString('styles.deleteStyle', selectedStyle.title);
+	} else {
+		var text = Zotero.getString('styles.deleteStyles');
+	}
 	
 	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 		.getService(Components.interfaces.nsIPromptService);
-	var text = Zotero.getString('styles.deleteStyle', [title]);
 	if(ps.confirm(null, '', text)) {
-		Zotero.Styles.get(cslID).delete();
+		// delete if requested
+		if(cslIDs.length == 1) {
+			selectedStyle.delete();
+		} else {
+			for(var i=0; i<cslIDs.length; i++) {
+				Zotero.Styles.get(cslIDs[i]).delete();
+			}
+		}
+		
 		this.refreshStylesList();
+		document.getElementById('styleManager-delete').disabled = true;
 	}
-	
-	document.getElementById('styleManager-delete').disabled = true;
 }
 
 /**
@@ -1241,6 +1225,8 @@ function deleteStyle() {
 function styleImportError() {
 	alert(Zotero.getString('styles.installError', "This"));
 }
+
+/**PROXIES**/
 
 /**
  * Adds a proxy to the proxy pane
