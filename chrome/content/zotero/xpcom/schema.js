@@ -302,7 +302,10 @@ Zotero.Schema = new function(){
 			while (entries.hasMoreElements()) {
 				var file = entries.getNext();
 				file.QueryInterface(Components.interfaces.nsIFile);
-				if (!file.leafName.match(fileNameRE) || file.isDirectory()) {
+				// File might not exist in an SVN build with style symlinks
+				if (!file.exists()
+						|| !file.leafName.match(fileNameRE)
+						|| file.isDirectory()) {
 					continue;
 				}
 				var fileModTime = Math.round(file.lastModifiedTime / 1000);
