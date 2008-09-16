@@ -429,7 +429,8 @@ Zotero.Sync.Storage = new function () {
 			}
 			// Relative
 			else if (href.firstChild.nodeValue != uri.path) {
-				// Try URL-encoded as well
+				// Try URL-encoded as well, in case there's a '~' or similar
+				// character in the URL and the server is encoding the value
 				if (decodeURIComponent(href.firstChild.nodeValue) != uri.path) {
 					_error("DAV:href does not match path in " + funcName);
 				}
