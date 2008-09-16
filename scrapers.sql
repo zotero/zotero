@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-09-03 23:35:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-09-16 18:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -1090,6 +1090,75 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		
 		Zotero.done();
 	})
+	Zotero.wait();
+}');
+
+REPLACE INTO translators VALUES ('a81243b5-a9fd-4921-8441-3142a518fdb7', '1.0', '', '2008-09-16 18:00:00', '0', '100', '4', 'Library Catalog (Voyager 7)', 'Sean Takats', '/vwebv/(holdingsInfo|search)', 
+'function detectWeb(doc, url){
+	var bibIdRe = new RegExp("bibId=[0-9]+");
+	if (bibIdRe.test(url)){
+		return "book";
+	}
+	
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;	
+	
+	var titles = doc.evaluate(''//div[@class="resultListTextCell"]/div/label'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	if (titles.iterateNext()){
+		return "multiple";
+	}
+}', 
+'function doWeb(doc, url){
+	var bibIdRe = new RegExp("bibId=([0-9]+)");
+	var m = bibIdRe.exec(url);
+	var hostRegexp = new RegExp("^(https?://[^/]+)/");
+	var hMatch = hostRegexp.exec(url);
+	var host = hMatch[1];
+	
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == ''x'') return namespace; else return null;
+	} : null;
+	
+	var newUris = new Array();
+
+	if (m){ //single item
+		newUris.push(host + "/vwebv/exportRecord.do?bibId=" + m[1] + "&format=utf-8");
+	}
+	else { //search results
+		var items = new Object();
+		var titles = doc.evaluate(''//div[@class="resultListTextCell"]/div/label'', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var title;
+		
+		while (title = titles.iterateNext()) {
+			var bibId = doc.evaluate(''@for'', title, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			items[bibId] = title.textContent;
+		}
+		items = Zotero.selectItems(items);
+		for (var i in items) {
+			newUris.push(host + "/vwebv/exportRecord.do?bibId=" + i + "&format=utf-8");
+		}
+	}
+
+	Zotero.Utilities.HTTP.doGet(newUris, function(text) {
+		// load translator for MARC
+		var marc = Zotero.loadTranslator("import");
+		marc.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+		marc.setString(text);
+		
+		var domain = url.match(/https?:\/\/([^/]+)/);
+		marc.setHandler("itemDone", function(obj, item) {
+			item.repository = domain[1]+" Library Catalog";
+			item.complete();
+		});
+
+		marc.translate();
+		
+		Zotero.done();
+		})
+	
 	Zotero.wait();
 }');
 
