@@ -49,6 +49,7 @@ To add a new preference:
 			<preference id="pref-statusBarIcon" name="extensions.zotero.statusBarIcon" type="int"/>
 			<preference id="pref-automaticScraperUpdates" name="extensions.zotero.automaticScraperUpdates" type="bool"/>
 			<preference id="pref-reportTranslationFailure" name="extensions.zotero.reportTranslationFailure" type="bool"/>
+			<preference id="pref-zoteroDotOrgVersionHeader" name="extensions.zotero.zoteroDotOrgVersionHeader" type="bool"/>
 			<preference id="pref-parseEndNoteMIMETypes" name="extensions.zotero.parseEndNoteMIMETypes" type="bool" onchange="Zotero.Ingester.MIMEHandler.init()"/>
 			<preference id="pref-automaticSnapshots" name="extensions.zotero.automaticSnapshots" type="bool"/>
 			<preference id="pref-downloadAssociatedFiles" name="extensions.zotero.downloadAssociatedFiles" type="bool"/>
@@ -118,6 +119,10 @@ To add a new preference:
 			</hbox>
 			
 			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="pref-reportTranslationFailure"/>
+			<!-- TODO: localize -->
+			<checkbox label="Allow zotero.org to customize content based on current Zotero version"
+				tooltiptext="If enabled, the current Zotero version will be added to HTTP requests to zotero.org."
+				preference="pref-zoteroDotOrgVersionHeader"/>
 			<checkbox label="&zotero.preferences.parseRISRefer;" preference="pref-parseEndNoteMIMETypes"/>
 			<checkbox label="&zotero.preferences.automaticSnapshots;" preference="pref-automaticSnapshots"/>
 			<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
