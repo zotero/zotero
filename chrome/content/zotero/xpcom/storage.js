@@ -1384,6 +1384,8 @@ Zotero.Sync.Storage = new function () {
 			Zotero.Utilities.HTTP.WebDAV.doDelete(deleteURI, function (req) {
 				switch (req.status) {
 					case 204:
+					// IIS 5.1 and some versions of mod_dav return 200
+					case 200:
 						results.deleted.push(fileName);
 						break;
 					
@@ -1531,7 +1533,7 @@ Zotero.Sync.Storage = new function () {
 											
 											switch (req.status) {
 												case 204:
-												// IIS 5.1 returns 200
+												// IIS 5.1 and some versions of mod_dav return 200
 												case 200:
 													callback(
 														uri,
