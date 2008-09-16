@@ -275,9 +275,8 @@ var Zotero = new function(){
 		Zotero.Sync.Runner.init();
 		Zotero.Sync.Storage.init();
 		
+		Zotero.MIMETypeHandler.init();
 		Zotero.Proxies.init();
-		Zotero.Ingester.MIMEHandler.init();
-		Zotero.Styles.MIMEHandler.init();
 		
 		this.initialized = true;
 		Zotero.debug("Initialized in "+((new Date()).getTime() - start)+" ms");
