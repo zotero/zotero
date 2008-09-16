@@ -477,8 +477,10 @@ Zotero.Sync.Storage = new function () {
 			{ Authorization: _cachedCredentials.authHeader } : null;
 		
 		Zotero.Utilities.HTTP.WebDAV.doProp('PROPPATCH', uri, xmlstr, function (req) {
-			_checkResponse(req);
-			
+			// Some servers return 200 instead of 207 is everything is OK
+			if (req.status != 200) {
+				_checkResponse(req);
+			}
 			callback(item, Zotero.Date.toUnixTimestamp(mdate));
 		}, headers);
 	}
@@ -1671,11 +1673,11 @@ Zotero.Sync.Storage = new function () {
 				!(req.responseXML.firstChild.namespaceURI == 'DAV:' &&
 					req.responseXML.firstChild.localName == 'multistatus')) {
 			Zotero.debug(req.responseText);
-			_error('Invalid response from server');
+			_error('Invalid response from storage server');
 		}
 		
 		if (!req.responseXML.childNodes[0].firstChild) {
-			_error('Empty response from server');
+			_error('Empty response from storage server');
 		}
 	}
 	
