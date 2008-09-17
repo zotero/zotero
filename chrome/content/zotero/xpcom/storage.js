@@ -824,6 +824,8 @@ Zotero.Sync.Storage = new function () {
 		var lastSyncDate = new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000);
 		
 		Zotero.Utilities.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (req) {
+			var funcName = "Zotero.Sync.Storage.purgeOrphanedStorageFiles()";
+			
 			// Strip XML declaration and convert to E4X
 			var xml = new XML(req.responseText.replace(/<\?xml.*\?>/, ''));
 			
@@ -831,22 +833,30 @@ Zotero.Sync.Storage = new function () {
 			for each(var response in xml.D::response) {
 				var href = response.D::href.toString();
 				
-				// Convert absolute to relative
+				// Absolute
 				if (href.match(/^https?:\/\//)) {
 					var ios = Components.classes["@mozilla.org/network/io-service;1"].
 								getService(Components.interfaces.nsIIOService);
-					href = ios.newURI(href, null, null).path;
+					var href = ios.newURI(href, null, null);
+					if (href.path != path) {
+						_error("DAV:href '" + href.path
+								+ "' does not match path in " + funcName);
+					}
+					href = href.path;
 				}
 				
 				// Skip root URI
-				if (href == path) {
+				//
+				// Try URL-encoded as well, in case there's a '~' or similar
+				// character in the URL and the server (e.g., Sakai) is
+				// encoding the value
+				if (href == path || decodeURIComponent(href) == path) {
 					continue;
 				}
 				
 				var matches = href.match(/[^\/]+$/);
 				if (!matches) {
-					_error("Unexpected href '" + href
-						+ "' in Zotero.Sync.Storage.purgeOrphanedStorageFiles()")
+					_error("Unexpected href '" + href + "' in " + funcName)
 				}
 				var file = matches[0];
 				
@@ -859,7 +869,7 @@ Zotero.Sync.Storage = new function () {
 					continue;
 				}
 				
-				var key = file.replace(/\.zip/, '');
+				var key = file.replace(/\.(zip|prop)$/, '');
 				var item = Zotero.Items.getByKey(key);
 				if (item) {
 					Zotero.debug("Skipping existing file " + file);
@@ -1364,7 +1374,7 @@ Zotero.Sync.Storage = new function () {
 			let last = (i == files.length - 1);
 			let fileName = files[i];
 			
-			var deleteURI = Zotero.Sync.Storage.rootURI;
+			let deleteURI = Zotero.Sync.Storage.rootURI;
 			// This should never happen, but let's be safe
 			if (!deleteURI.spec.match(/\/$/)) {
 				callback(deleted);
