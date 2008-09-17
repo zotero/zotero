@@ -726,14 +726,25 @@ Zotero.Utilities.HTTP = new function() {
 	/**
 	* Send an HTTP GET request via XMLHTTPRequest
 	* 
-	* @param {String} url URL to request
-	* @param {Function} onDone Callback to be executed upon request completion
-	* @param {Function} onError Callback to be executed if an error occurs. Not implemented
-	* @param {String} responseCharset Character set to force on the response
+	* @param {nsIURI|String}	url				URL to request
+	* @param {Function} 		onDone			Callback to be executed upon request completion
+	* @param {String} 		responseCharset	Character set to force on the response
 	* @return {Boolean} True if the request was sent, or false if the browser is offline
 	*/
 	this.doGet = function(url, onDone, responseCharset) {
-		Zotero.debug("HTTP GET "+url);
+		if (url instanceof Components.interfaces.nsIURI) {
+			// Don't display password in console
+			var disp = url.clone();
+			if (disp.password) {
+				disp.password = "********";
+			}
+			Zotero.debug("HTTP GET " + disp.spec);
+			url = url.spec;
+		}
+		else {
+			Zotero.debug("HTTP GET " + url);
+		
+		}
 		if (this.browserIsOffline()){
 			return false;
 		}
@@ -784,7 +795,7 @@ Zotero.Utilities.HTTP = new function() {
 	*/
 	this.doPost = function(url, body, onDone, requestContentType, responseCharset) {
 		var bodyStart = body.substr(0, 1024);
-		// Don't display password in console
+		// Don't display sync password in console
 		bodyStart = bodyStart.replace(/password=[^&]+/, 'password=********');
 		
 		Zotero.debug("HTTP POST "
@@ -887,8 +898,10 @@ Zotero.Utilities.HTTP = new function() {
 	this.doOptions = function (uri, callback) {
 		// Don't display password in console
 		var disp = uri.clone();
-		disp.password = "********";
-		Zotero.debug("HTTP OPTIONS to " + disp.spec);
+		if (disp.password) {
+			disp.password = "********";
+		}
+		Zotero.debug("HTTP OPTIONS for " + disp.spec);
 		
 		if (Zotero.Utilities.HTTP.browserIsOffline()){
 			return false;
@@ -939,7 +952,9 @@ Zotero.Utilities.HTTP = new function() {
 		
 		// Don't display password in console
 		var disp = uri.clone();
-		disp.password = "********";
+		if (disp.password) {
+			disp.password = "********";
+		}
 		
 		var bodyStart = body.substr(0, 1024);
 		Zotero.debug("HTTP " + method + " "
@@ -986,8 +1001,10 @@ Zotero.Utilities.HTTP = new function() {
 	this.WebDAV.doMkCol = function (uri, callback) {
 		// Don't display password in console
 		var disp = uri.clone();
-		disp.password = "********";
-		Zotero.debug("HTTP MKCOL to " + disp.spec);
+		if (disp.password) {
+			disp.password = "********";
+		}
+		Zotero.debug("HTTP MKCOL " + disp.spec);
 		
 		if (Zotero.Utilities.HTTP.browserIsOffline()) {
 			return false;
@@ -1017,7 +1034,9 @@ Zotero.Utilities.HTTP = new function() {
 	this.WebDAV.doPut = function (uri, body, callback) {
 		// Don't display password in console
 		var disp = uri.clone();
-		disp.password = "********";
+		if (disp.password) {
+			disp.password = "********";
+		}
 		
 		var bodyStart = "'" + body.substr(0, 1024) + "'";
 		Zotero.debug("HTTP PUT "
@@ -1052,7 +1071,9 @@ Zotero.Utilities.HTTP = new function() {
 	this.WebDAV.doDelete = function (uri, callback) {
 		// Don't display password in console
 		var disp = uri.clone();
-		disp.password = "********";
+		if (disp.password) {
+			disp.password = "********";
+		}
 		
 		Zotero.debug("WebDAV DELETE to " + disp.spec);
 		
