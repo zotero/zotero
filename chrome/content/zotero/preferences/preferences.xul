@@ -119,9 +119,8 @@ To add a new preference:
 			</hbox>
 			
 			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="pref-reportTranslationFailure"/>
-			<!-- TODO: localize -->
-			<checkbox label="Allow zotero.org to customize content based on current Zotero version"
-				tooltiptext="If enabled, the current Zotero version will be added to HTTP requests to zotero.org."
+			<checkbox label="&zotero.preferences.zoteroDotOrgVersionHeader;"
+				tooltiptext="&zotero.preferences.zoteroDotOrgVersionHeader.tooltip;"
 				preference="pref-zoteroDotOrgVersionHeader"/>
 			<checkbox label="&zotero.preferences.parseRISRefer;" preference="pref-parseEndNoteMIMETypes"/>
 			<checkbox label="&zotero.preferences.automaticSnapshots;" preference="pref-automaticSnapshots"/>
