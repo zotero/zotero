@@ -50,7 +50,7 @@ Zotero.MIMETypeHandler = new function () {
 			this.addHandler("application/x-endnote-refer", Zotero.Ingester.importHandler, true);
 			this.addHandler("application/x-research-info-systems", Zotero.Ingester.importHandler, true);
 		}
-		this.addHandler("text/x-csl", function(a1, a2, a3) { Zotero.Styles.install(a1, a2, a3) });
+		this.addHandler("text/x-csl", function(a1, a2) { Zotero.Styles.install(a1, a2) });
 	}
 	
 	/**
