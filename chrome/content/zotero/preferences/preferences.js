@@ -166,7 +166,6 @@ function updateStorageSettings(value) {
 }
 
 function unverifyStorageServer() {
-	Zotero.debug("Clearing storage settings");
 	Zotero.Sync.Storage.clearSettingsCache();
 	Zotero.Prefs.set('sync.storage.verified', false);
 }
@@ -350,7 +349,6 @@ function buildQuickCopyFormatDropDown(menulist, contentType, currentFormat) {
 	}
 	// Strip contentType from mode
 	currentFormat = Zotero.QuickCopy.stripContentType(currentFormat);
-		
 	
 	menulist.selectedItem = null;
 	menulist.removeAllItems();
@@ -373,7 +371,7 @@ function buildQuickCopyFormatDropDown(menulist, contentType, currentFormat) {
 	// add styles to list
 	var styles = Zotero.Styles.getVisible();
 	for each(var style in styles) {
-		var baseVal = 'bibliography=' + i;
+		var baseVal = 'bibliography=' + style.styleID;
 		var val = 'bibliography' + (contentType == 'html' ? '/html' : '') + '=' + style.styleID;
 		var itemNode = document.createElement("menuitem");
 		itemNode.setAttribute("value", val);
