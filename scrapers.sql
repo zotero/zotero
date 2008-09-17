@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-09-16 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-09-17 20:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5043,6 +5043,55 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
+REPLACE INTO translators VALUES ('513a53f5-b95e-4df6-a03e-3348d9ec9f44', '1.0', '', '2008-09-17 20:00:00', '0', '100', '4', 'Internet Archive Wayback Machine', 'Sean Takats', '^http://web.archive.org/web/', 
+'function detectWeb(doc, url){
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+			if (prefix == "x") return namespace; else return null;
+		} : null;
+	var xpath = ''//td[@class="mainBody"]/a'';
+	var links = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+	if (links.iterateNext()){
+		return "multiple";
+	}
+	return "webpage";	
+}', 
+'function doWeb(doc, url){
+	var uris = new Array();
+	var dateRe = new RegExp("^http://web.archive.org/web/([0-9]+)"); 
+	if (dateRe.test(url)){ //handle single item
+		uris.push(url);
+	} else{//handle multiple items
+		var namespace = doc.documentElement.namespaceURI;
+		var nsResolver = namespace ? function(prefix) {
+				if (prefix == "x") return namespace; else return null;
+			} : null;
+		var xpath = ''//td[@class="mainBody"]/a'';
+		var links = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var items=new Array();
+		var link;
+		while (link = links.iterateNext()){
+			items[link.href] = link.textContent;
+		}
+		items=Zotero.selectItems(items);
+		for (var i in items) {
+			uris.push(i);
+		}
+	}
+	Zotero.Utilities.processDocuments(uris, function(newDoc) {
+		//create new webpage Item from page
+		var newItem = new Zotero.Item("webpage");
+		//parse date and add
+		var m = dateRe.exec(newDoc.location.href);
+		var date = m[1];
+		date = date.substr(0, 4) + "-" + date.substr(4,2) + "-" + date.substr(6,2);
+		newItem.date = date;
+		//create snapshot
+		newItem.attachments = [{url:newDoc.location.href, title:newDoc.title, mimeType:"text/html"}];
+		newItem.complete();
+	}, function() {Zotero.done;});
+	Zotero.wait();
+	}');
 
 REPLACE INTO translators VALUES ('d1605270-d7dc-459f-9875-74ad8dde1f7d', '1.0.0b4.r5', '', '2008-08-21 15:45:00', '0', '100', '4', 'Le Devoir', 'Adam Crymble', 'http://www.ledevoir.com', 
 'function detectWeb(doc, url) {
