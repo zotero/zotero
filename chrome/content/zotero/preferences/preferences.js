@@ -1207,10 +1207,10 @@ function deleteStyle() {
 	if(ps.confirm(null, '', text)) {
 		// delete if requested
 		if(cslIDs.length == 1) {
-			selectedStyle.delete();
+			selectedStyle.remove();
 		} else {
 			for(var i=0; i<cslIDs.length; i++) {
-				Zotero.Styles.get(cslIDs[i]).delete();
+				Zotero.Styles.get(cslIDs[i]).remove();
 			}
 		}
 		

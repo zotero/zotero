@@ -426,7 +426,7 @@ function() {
 /**
  * Deletes a style
  */
-Zotero.Style.prototype.delete = function() {
+Zotero.Style.prototype.remove = function() {
 	// make sure no styles depend on this one
 	var dependentStyles = false;
 	var styles = Zotero.Styles.getAll();
@@ -464,7 +464,7 @@ Zotero.Style.prototype.delete = function() {
 			
 			// if it was only this style with the dependency, delete the source
 			if(deleteSource) {
-				source.delete();
+				source.remove();
 			}
 		}
 	}
