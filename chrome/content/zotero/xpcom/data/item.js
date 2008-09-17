@@ -2569,7 +2569,7 @@ Zotero.Item.prototype.__defineGetter__('attachmentModificationTime', function ()
 		return undefined;
 	}
 	
-	return file.lastModifiedTime / 1000;
+	return Math.round(file.lastModifiedTime / 1000);
 });
 
 
