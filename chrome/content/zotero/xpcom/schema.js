@@ -1459,7 +1459,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DELETE FROM version WHERE schema='fulltext'");
 				}
 				
-				// 1.5 Sync Preview
+				// 1.5 Sync Preview 1
 				if (i==37) {
 					// Some data cleanup from the pre-FK-trigger days
 					Zotero.DB.query("DELETE FROM annotations WHERE itemID NOT IN (SELECT itemID FROM items)");
@@ -1873,6 +1873,7 @@ Zotero.Schema = new function(){
 					}
 				}
 				
+				// 1.5 Sync Preview 2
 				if (i==38) {
 					var ids = Zotero.DB.columnQuery("SELECT itemID FROM items WHERE itemTypeID=14 AND itemID NOT IN (SELECT itemID FROM itemAttachments)");
 					for each(var id in ids) {
@@ -1894,6 +1895,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("CREATE INDEX storageDeleteLog_timestamp ON storageDeleteLog(timestamp)");
 				}
 				
+				// 1.5 Sync Preview 2.1
 				if (i==41) {
 					var translators = Zotero.DB.query("SELECT * FROM translators WHERE inRepository!=1");
 					if (translators) {
@@ -1936,6 +1938,11 @@ Zotero.Schema = new function(){
 					}
 					Zotero.DB.query("DROP TABLE translators");
 					Zotero.DB.query("DROP TABLE csl");
+				}
+				
+				//
+				if (i==42) {
+					Zotero.DB.query("UPDATE itemAttachments SET syncState=0");
 				}
 			}
 			

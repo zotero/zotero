@@ -366,88 +366,32 @@ Zotero.Sync.Storage = new function () {
 	 * @param	{Function}		callback		Callback f(item, mdate)
 	 */
 	this.getStorageModificationTime = function (item, callback) {
-		var prolog = '<?xml version="1.0" encoding="utf-8" ?>\n';
-		var D = new Namespace("D", "DAV:");
-		var dcterms = new Namespace("dcterms", "http://purl.org/dc/terms/");
-		
-		var nsDeclarations = 'xmlns:' + D.prefix + '=' + '"' + D.uri + '" '
-			+ 'xmlns:' + dcterms.prefix + '=' + '"' + dcterms.uri + '" ';
-		
-		// Retrieve Dublin Core 'modified' property
-		var requestXML = new XML('<D:propfind ' + nsDeclarations + '/>');
-		requestXML.D::prop = '';
-		requestXML.D::prop.dcterms::modified = '';
-		
-		var xmlstr = prolog + requestXML.toXMLString();
-		
-		var uri = _getItemURI(item);
+		var uri = _getItemPropertyURI(item);
 		var headers = _cachedCredentials.authHeader ?
 			{ Authorization: _cachedCredentials.authHeader } : null;
 		
-		Zotero.Utilities.HTTP.WebDAV.doProp('PROPFIND', uri, xmlstr, function (req) {
+		Zotero.Utilities.HTTP.doGet(uri, function (req) {
 			var funcName = "Zotero.Sync.Storage.getStorageModificationTime()";
 			
 			if (req.status == 404) {
 				callback(item, false);
 				return;
 			}
-			else if (req.status != 207) {
+			else if (req.status != 200) {
 				Zotero.debug(req.responseText);
 				_error("Unexpected status code " + req.status + " in " + funcName);
 			}
 			
-			_checkResponse(req);
 			Zotero.debug(req.responseText);
 			
-			var D = "DAV:";
-			var dcterms = "http://purl.org/dc/terms/";
-			
-			// Error checking
-			var multistatus = req.responseXML.firstChild;
-			var responses = multistatus.getElementsByTagNameNS(D, "response");
-			if (responses.length == 0) {
-				_error("No <response/> sections found in " + funcName);
-			}
-			else if (responses.length > 1) {
-				_error("Multiple <response/> sections in " + funcName);
-			}
-			
-			var response = responses.item(0);
-			var href = response.getElementsByTagNameNS(D, "href").item(0);
-			if (!href) {
-				_error("DAV:href not found in " + funcName);
-			}
-			
-			// Absolute
-			if (href.firstChild.nodeValue.match(/^https?:\/\//)) {
-				var ios = Components.classes["@mozilla.org/network/io-service;1"].
-							getService(Components.interfaces.nsIIOService);
-				var href = ios.newURI(href.firstChild.nodeValue, null, null);
-				if (href.path != uri.path) {
-					_error("DAV:href does not match path in " + funcName);
-				}
-			}
-			// Relative
-			else if (href.firstChild.nodeValue != uri.path) {
-				// Try URL-encoded as well, in case there's a '~' or similar
-				// character in the URL and the server is encoding the value
-				if (decodeURIComponent(href.firstChild.nodeValue) != uri.path) {
-					_error("DAV:href does not match path in " + funcName);
-				}
-			}
-			
-			var modified = response.getElementsByTagNameNS(dcterms, "modified").item(0);
-			if (!modified) {
-				_error("dcterms:modified not found in " + funcName);
-			}
-			
+			var mtime = req.responseText;
 			// No modification time set
-			if (modified.childNodes.length == 0) {
+			if (!mtime) {
 				callback(item, false);
 				return;
 			}
 			
-			var mdate = Zotero.Date.isoToDate(modified.firstChild.nodeValue);
+			var mdate = new Date(mtime * 1000);
 			callback(item, mdate);
 		}, headers);
 	}
@@ -460,32 +404,21 @@ Zotero.Sync.Storage = new function () {
 	 * @param	{Function}		callback		Callback f(item, mtime)
 	 */
 	this.setStorageModificationTime = function (item, callback) {
-		var prolog = '<?xml version="1.0" encoding="utf-8" ?>\n';
-		var D = new Namespace("D", "DAV:");
-		var dcterms = new Namespace("dcterms", "http://purl.org/dc/terms/");
-		
-		var nsDeclarations = 'xmlns:' + D.prefix + '=' + '"' + D.uri + '" '
-			+ 'xmlns:' + dcterms.prefix + '=' + '"' + dcterms.uri + '" ';
-		
-		// Set Dublin Core 'modified' property
-		var requestXML = new XML('<D:propertyupdate ' + nsDeclarations + '/>');
-		
-		var mdate = new Date(item.attachmentModificationTime * 1000);
-		var modified = Zotero.Date.dateToISO(mdate);
-		requestXML.D::set.D::prop.dcterms::modified = modified;
-		
-		var xmlstr = prolog + requestXML.toXMLString();
-		
-		var uri = _getItemURI(item);
+		var uri = _getItemPropertyURI(item);
 		var headers = _cachedCredentials.authHeader ?
 			{ Authorization: _cachedCredentials.authHeader } : null;
 		
-		Zotero.Utilities.HTTP.WebDAV.doProp('PROPPATCH', uri, xmlstr, function (req) {
-			// Some servers return 200 instead of 207 is everything is OK
-			if (req.status != 200) {
-				_checkResponse(req);
+		Zotero.Utilities.HTTP.WebDAV.doPut(uri, item.attachmentModificationTime + '', function (req) {
+			switch (req.status) {
+				case 201:
+				case 204:
+					break;
+				
+				default:
+					throw ("Unexpected status code " + req.status + " in "
+						+ "Zotero.Sync.Storage.setStorageModificationTime()");
 			}
-			callback(item, Zotero.Date.toUnixTimestamp(mdate));
+			callback(item, item.attachmentModificationTime);
 		}, headers);
 	}
 	
@@ -748,7 +681,7 @@ Zotero.Sync.Storage = new function () {
 			var destFile = Zotero.getTempDirectory();
 			destFile.append(item.key + '.zip.tmp');
 			if (destFile.exists()) {
-				destFile.remove(null);
+				destFile.remove(false);
 			}
 			
 			var listener = new Zotero.Sync.Storage.StreamListener(
@@ -769,15 +702,6 @@ Zotero.Sync.Storage = new function () {
 			
 			wbp.progressListener = listener;
 			wbp.saveURI(uri, null, null, null, null, destFile);
-			
-			
-			/*
-			// Start the download
-			var incrDown = Components.classes["@mozilla.org/network/incremental-download;1"]
-					.createInstance(Components.interfaces.nsIIncrementalDownload);
-			incrDown.init(uri, destFile, -1, 2);
-			incrDown.start(listener, null);
-			*/
 		});
 	}
 	
@@ -847,16 +771,17 @@ Zotero.Sync.Storage = new function () {
 		var files = files.map(function (file) file + ".zip");
 		
 		_deleteStorageFiles(files, function (results) {
-			// Remove nonexistent files from storage delete log
-			if (results.missing.length > 0) {
+			// Remove deleted and nonexistent files from storage delete log
+			var toPurge = results.deleted.concat(results.missing);
+			if (toPurge.length > 0) {
 				var done = 0;
 				var maxFiles = 999;
-				var numFiles = results.missing.length;
+				var numFiles = toPurge.length;
 				
 				Zotero.DB.beginTransaction();
 				
 				do {
-					var chunk = files.splice(0, maxFiles);
+					var chunk = toPurge.splice(0, maxFiles);
 					var sql = "DELETE FROM storageDeleteLog WHERE key IN ("
 						+ chunk.map(function () '?').join() + ")";
 					Zotero.DB.query(sql, chunk);
@@ -929,8 +854,8 @@ Zotero.Sync.Storage = new function () {
 					Zotero.debug("Skipping hidden file " + file);
 					continue;
 				}
-				if (!file.match(/\.zip/)) {
-					Zotero.debug("Skipping non-ZIP file " + file);
+				if (!file.match(/\.zip$/) && !file.match(/\.prop$/)) {
+					Zotero.debug("Skipping file " + file);
 					continue;
 				}
 				
@@ -950,6 +875,14 @@ Zotero.Sync.Storage = new function () {
 				
 				// Delete files older than a day before last sync time
 				var days = (lastSyncDate - lastModified) / 1000 / 60 / 60 / 24;
+				
+				// DEBUG!!!!!!!!!!!!
+				//
+				// For now, delete all orphaned files immediately
+				if (true) {
+					deleteFiles.push(file);
+				} else
+				
 				if (days > daysBeforeSyncTime) {
 					deleteFiles.push(file);
 				}
@@ -1026,6 +959,8 @@ Zotero.Sync.Storage = new function () {
 	 * @return	{Object}			data			Properties 'item', 'syncModTime'
 	 */
 	function _processDownload(request, status, response, data) {
+		var funcName = "Zotero.Sync.Storage._processDownload()";
+		
 		var item = data.item;
 		var syncModTime = data.syncModTime;
 		var zipFile = Zotero.getTempDirectory();
@@ -1056,11 +991,37 @@ Zotero.Sync.Storage = new function () {
 		while (otherFiles.hasMoreElements()) {
 			var file = otherFiles.getNext();
 			file.QueryInterface(Components.interfaces.nsIFile);
-			if (file.leafName.indexOf('.') == 0 || file.equals(zipFile)) {
+			if (file.leafName[0] == '.' || file.equals(zipFile)) {
 				continue;
 			}
-			Zotero.debug("Deleting existing file " + file.leafName);
-			file.remove(null);
+			
+			// Firefox (as of 3.0.1) can't detect symlinks (at least on OS X),
+			// so use pre/post-normalized path to check
+			var origPath = file.path;
+			var origFileName = file.leafName;
+			file.normalize();
+			if (origPath != file.path) {
+				var msg = "Not deleting symlink '" + origFileName + "'";
+				Zotero.debug(msg, 2);
+				Components.utils.reportError(msg + " in " + funcName);
+				continue;
+			}
+			// This should be redundant with above check, but let's do it anyway
+			if (!parentDir.contains(file, false)) {
+				var msg = "Storage directory doesn't contain '" + file.leafName + "'";
+				Zotero.debug(msg, 2);
+				Components.utils.reportError(msg + " in " + funcName);
+				continue;
+			}
+			
+			if (file.isFile()) {
+				Zotero.debug("Deleting existing file " + file.leafName);
+				file.remove(false);
+			}
+			else if (file.isDirectory()) {
+				Zotero.debug("Deleting existing directory " + file.leafName);
+				file.remove(true);
+			}
 		}
 		
 		var entries = zipReader.findEntries(null);
@@ -1085,12 +1046,30 @@ Zotero.Sync.Storage = new function () {
 			var destFile = parentDir.clone();
 			destFile.QueryInterface(Components.interfaces.nsILocalFile);
 			destFile.setRelativeDescriptor(parentDir, fileName);
+			if (destFile.exists()) {
+				var msg = "ZIP entry '" + fileName + "' "
+					+ " already exists";
+				Zotero.debug(msg);
+				Components.utils.reportError(msg + " in " + funcName);
+				continue;
+			}
 			destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
 			zipReader.extract(entryName, destFile);
+			
+			var origPath = destFile.path;
+			var origFileName = destFile.leafName;
+			destFile.normalize();
+			if (origPath != destFile.path) {
+				var msg = "ZIP file " + zipFile.leafName + " contained symlink '"
+					+ origFileName + "'";
+				Zotero.debug(msg, 1);
+				Components.utils.reportError(msg + " in " + funcName);
+				continue;
+			}
 			destFile.permissions = 0644;
 		}
 		zipReader.close();
-		zipFile.remove(null);
+		zipFile.remove(false);
 		
 		var file = item.getFile();
 		if (!file) {
@@ -1261,6 +1240,13 @@ Zotero.Sync.Storage = new function () {
 				}
 			);
 			channel.notificationCallbacks = listener;
+			
+			var dispURI = uri.clone();
+			if (dispURI.password) {
+				dispURI.password = '********';
+			}
+			Zotero.debug("HTTP PUT of " + file.leafName + " to " + dispURI.spec);
+			
 			channel.asyncOpen(listener, null);
 		});
 	}
@@ -1280,7 +1266,8 @@ Zotero.Sync.Storage = new function () {
 				break;
 			
 			default:
-				_error("File upload status was " + status
+				Zotero.debug(response);
+				_error("Unexpected file upload status " + status
 					+ " in Zotero.Sync.Storage._onUploadComplete()");
 		}
 		
@@ -1390,31 +1377,86 @@ Zotero.Sync.Storage = new function () {
 			Zotero.Utilities.HTTP.WebDAV.doDelete(deleteURI, function (req) {
 				switch (req.status) {
 					case 204:
-					// IIS 5.1 and some versions of mod_dav return 200
+					// IIS 5.1 and Sakai return 200
 					case 200:
-						results.deleted.push(fileName);
+						var fileDeleted = true;
 						break;
 					
 					case 404:
-						results.missing.push(fileName);
+						var fileDeleted = false;
 						break;
 					
 					default:
-						var error = true;
-
+						if (last && callback) {
+							callback(results);
+						}
+						
+						results.error.push(fileName);
+						var msg = "An error occurred attempting to delete "
+							+ "'" + fileName
+							+ "' (" + req.status + " " + req.statusText + ").";
+						_error(msg);
+						return;
 				}
 				
-				if (last && callback) {
-					callback(results);
+				// If an item file URI, get the property URI
+				var deletePropURI = _getPropertyURIFromItemURI(deleteURI);
+				if (!deletePropURI) {
+					if (fileDeleted) {
+						results.deleted.push(fileName);
+					}
+					else {
+						results.missing.push(fileName);
+					}
+					if (last && callback) {
+						callback(results);
+					}
+					return;
 				}
 				
-				if (error) {
-					results.error.push(fileName);
-					var msg = "An error occurred attempting to delete "
-						+ "'" + fileName
-						+ "' (" + req.status + " " + req.statusText + ").";
-					_error(msg);
+				// If property file appears separately in delete queue,
+				// remove it, since we're taking care of it here
+				var propIndex = files.indexOf(deletePropURI.fileName);
+				if (propIndex > i) {
+					delete files[propIndex];
+					i--;
+					last = (i == files.length - 1);
 				}
+				
+				// Delete property file
+				Zotero.Utilities.HTTP.WebDAV.doDelete(deletePropURI, function (req) {
+					switch (req.status) {
+						case 204:
+						// IIS 5.1 and Sakai return 200
+						case 200:
+							results.deleted.push(fileName);
+							break;
+						
+						case 404:
+							if (fileDeleted) {
+								results.deleted.push(fileName);
+							}
+							else {
+								results.missing.push(fileName);
+							}
+							break;
+						
+						default:
+							var error = true;
+					}
+					
+					if (last && callback) {
+						callback(results);
+					}
+					
+					if (error) {
+						results.error.push(fileName);
+						var msg = "An error occurred attempting to delete "
+							+ "'" + fileName
+							+ "' (" + req.status + " " + req.statusText + ").";
+						_error(msg);
+					}
+				});
 			});
 		}
 	}
@@ -1539,7 +1581,7 @@ Zotero.Sync.Storage = new function () {
 											
 											switch (req.status) {
 												case 204:
-												// IIS 5.1 and some versions of mod_dav return 200
+												// IIS 5.1 and Sakai return 200
 												case 200:
 													callback(
 														uri,
@@ -1667,6 +1709,38 @@ Zotero.Sync.Storage = new function () {
 	
 	
 	/**
+	 * Get the storage property file URI for an item
+	 *
+	 * @inner
+	 * @param	{Zotero.Item}
+	 * @return	{nsIURI}					URI of property file on storage server
+	 */
+	function _getItemPropertyURI(item) {
+		var uri = Zotero.Sync.Storage.rootURI;
+		uri.spec = uri.spec + item.key + '.prop';
+		return uri;
+	}
+	
+	
+	/**
+	 * Get the storage property file URI corresponding to a given item storage URI
+	 *
+	 * @param	{nsIURI}			Item storage URI
+	 * @return	{nsIURI|FALSE}	Property file URI, or FALSE if not an item storage URI
+	 */
+	function _getPropertyURIFromItemURI(uri) {
+		if (!uri.spec.match(/\.zip$/)) {
+			return false;
+		}
+		var propURI = uri.clone();
+		propURI.QueryInterface(Components.interfaces.nsIURL);
+		propURI.fileName = uri.fileName.replace(/\.zip$/, '.prop');
+		propURI.QueryInterface(Components.interfaces.nsIURI);
+		return propURI;
+	}
+	
+	
+	/**
 	 * @inner
 	 * @param	{XMLHTTPRequest}		req
 	 * @throws
@@ -1717,11 +1791,10 @@ Zotero.Sync.Storage = new function () {
 			return;
 		}
 		
-		Zotero.debug("Processing next object in " + queueName + " queue");
-		
 		var id = q.queue.shift();
 		q.current++;
 		
+		Zotero.debug("Processing " + queueName + " object " + id);
 		callback(id);
 		
 		// Wait a second, and then, if still under limit and there are more
