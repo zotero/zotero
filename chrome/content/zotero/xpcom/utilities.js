@@ -795,8 +795,9 @@ Zotero.Utilities.HTTP = new function() {
 	*/
 	this.doPost = function(url, body, onDone, requestContentType, responseCharset) {
 		var bodyStart = body.substr(0, 1024);
-		// Don't display sync password in console
+		// Don't display sync password or session id in console
 		bodyStart = bodyStart.replace(/password=[^&]+/, 'password=********');
+		bodyStart = bodyStart.replace(/sessionid=[^&]+/, 'sessionid=********');
 		
 		Zotero.debug("HTTP POST "
 			+ (body.length > 1024 ?
