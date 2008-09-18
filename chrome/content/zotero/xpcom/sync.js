@@ -1233,10 +1233,12 @@ Zotero.Sync.Server = new function () {
 	function _error(e, extraInfo) {
 		if (extraInfo) {
 			// Server errors will generally be HTML
-			var ZU = new Zotero.Utilities
+			var ZU = new Zotero.Utilities;
 			extraInfo = ZU.unescapeHTML(extraInfo);
 			Components.utils.reportError(extraInfo);
 		}
+		
+		Zotero.debug(e, 1);
 		
 		_syncInProgress = false;
 		_resetAttempts();
@@ -1254,7 +1256,6 @@ Zotero.Sync.Server = new function () {
 		else {
 			Zotero.Sync.Runner.lastSyncError = e;
 		}
-		Zotero.debug(e, 1);
 		Zotero.Sync.Runner.reset();
 		throw(e);
 	}
