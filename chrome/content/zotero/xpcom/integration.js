@@ -31,7 +31,7 @@ Zotero.Integration = new function() {
 	this.sessions = {};
 	
 	var ns = "http://www.zotero.org/namespaces/SOAP";
-	this.ns = ns;
+	this.ns = new Namespace(ns);
 	
 	this.init = init;
 	this.handleHeader = handleHeader;
@@ -394,17 +394,17 @@ Zotero.Integration.DataListener.prototype._requestFinished = function(response) 
 }
 
 Zotero.Integration.Request = function(xml) {
-	default xml namespace = Zotero.Integration.ns; with({});
-	
 	var env = Zotero.Integration.env;
 	this.header = xml.env::Header;
 	this.body = xml.env::Body;
 	
-	this.responseXML = <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:z={Zotero.Integration.ns}>
+	this.responseXML = <SOAP-ENV:Envelope xmlns={Zotero.Integration.ns}
+		xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
 			<SOAP-ENV:Header/>
 			<SOAP-ENV:Body/>
 		</SOAP-ENV:Envelope>
 	
+	default xml namespace = Zotero.Integration.ns; with({});
 	this.responseHeader = this.responseXML.env::Header;
 	this.responseBody = this.responseXML.env::Body;
 	
@@ -434,7 +434,7 @@ Zotero.Integration.Request = function(xml) {
 		} catch(e) {
 		}
 		
-		this.responseXML = <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:z={Zotero.Integration.ns}>
+		this.responseXML = <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
 			<SOAP-ENV:Body>
 				<SOAP-ENV:Fault>
 					<SOAP-ENV:Code>
