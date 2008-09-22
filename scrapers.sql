@@ -1093,7 +1093,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('a81243b5-a9fd-4921-8441-3142a518fdb7', '1.0', '', '2008-09-16 18:00:00', '0', '100', '4', 'Library Catalog (Voyager 7)', 'Sean Takats', '/vwebv/(holdingsInfo|search)', 
+REPLACE INTO translators VALUES ('a81243b5-a9fd-4921-8441-3142a518fdb7', '1.0', '', '2008-09-22 20:20:00', '0', '100', '4', 'Library Catalog (Voyager 7)', 'Sean Takats', '/vwebv/(holdingsInfo|search)', 
 'function detectWeb(doc, url){
 	var bibIdRe = new RegExp("bibId=[0-9]+");
 	if (bibIdRe.test(url)){
@@ -1757,7 +1757,7 @@ function doWeb(doc, url) {
 }
 ');
 
-REPLACE INTO translators VALUES ('fef07360-ee97-4f67-b022-6f64d5ec0c25', '1.0.0b4.r5', '', '2008-09-04 08:15:46', '1', '100', '4', 'KOBV', 'Gunar Maiwald', '^http://vs13.kobv.de/V/', 
+REPLACE INTO translators VALUES ('fef07360-ee97-4f67-b022-6f64d5ec0c25', '1.0.0b4.r5', '', '2008-09-22 20:20:00', '1', '100', '4', 'KOBV', 'Gunar Maiwald', '^http://vs13.kobv.de/V/', 
 'function detectWeb(doc, url) {
 	if (doc.evaluate(''//tr /td[@class="no_wrap_center"]/a'', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
@@ -5043,7 +5043,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('513a53f5-b95e-4df6-a03e-3348d9ec9f44', '1.0', '', '2008-09-17 20:00:00', '0', '100', '4', 'Internet Archive Wayback Machine', 'Sean Takats', '^http://web.archive.org/web/', 
+REPLACE INTO translators VALUES ('513a53f5-b95e-4df6-a03e-3348d9ec9f44', '1.0', '', '2008-09-22 20:20:00', '0', '100', '4', 'Internet Archive Wayback Machine', 'Sean Takats', '^http://web.archive.org/web/', 
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -5091,7 +5091,7 @@ REPLACE INTO translators VALUES ('513a53f5-b95e-4df6-a03e-3348d9ec9f44', '1.0', 
 		newItem.complete();
 	}, function() {Zotero.done;});
 	Zotero.wait();
-	}');
+}');
 
 REPLACE INTO translators VALUES ('d1605270-d7dc-459f-9875-74ad8dde1f7d', '1.0.0b4.r5', '', '2008-08-21 15:45:00', '0', '100', '4', 'Le Devoir', 'Adam Crymble', 'http://www.ledevoir.com', 
 'function detectWeb(doc, url) {
@@ -7895,7 +7895,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('587aa172-af1a-4cab-b188-2b6d392cae5c', '1.0', '', '2008-09-08 18:40:46', '0', '100', '4', 'Unidade de Biologia da Conservaçao', 'Giovanni Manghi and Michael Berkowitz', 'http://www.ubc.uevora.pt/', 
+REPLACE INTO translators VALUES ('587aa172-af1a-4cab-b188-2b6d392cae5c', '1.0', '', '2008-09-22 20:20:00', '0', '100', '4', 'Unidade de Biologia da Conservaçao', 'Giovanni Manghi and Michael Berkowitz', 'http://www.ubc.uevora.pt/', 
 'function detectWeb(doc, url) {
    if(doc.title == "UBC: referencia bibliografica") {
 	return "book";
@@ -26025,7 +26025,7 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-09-02 13:40:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://[^/]*www\.sciencedirect\.com[^/]*/science(\/article)?(\?(?:.+\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?', 
+REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-09-22 20:20:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://[^/]*science-?direct\\.com[^/]*/science(\\/article)?(\\?(?:.+\\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?', 
 'function detectWeb(doc, url) {
 	if ((url.indexOf("_ob=DownloadURL") != -1) || doc.title == "ScienceDirect Login") {
 		return false;
