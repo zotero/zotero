@@ -73,8 +73,8 @@ var Zotero_Citation_Dialog = new function () {
 		if(io.citation.sortable) {
 			_sortCheckbox = document.getElementById("keepSorted");
 			_sortCheckbox.hidden = false;
-			_sortCheckbox.checked = true;
-			io.citation.properties.sort = true;
+			if(io.citation.properties.sort === undefined) io.citation.properties.sort = true;
+			_sortCheckbox.checked = io.citation.properties.sort;
 		}
 		
 		// load locators
