@@ -1202,14 +1202,18 @@ Zotero.Sync.Server = new function () {
 	
 	
 	function _checkResponse(xmlhttp) {
-		if (!xmlhttp.responseXML ||
-				!xmlhttp.responseXML.childNodes[0] ||
+		if (!xmlhttp.responseXML) {
+			_error('Empty response from server');
+		}
+		
+		if (	!xmlhttp.responseXML.childNodes[0] ||
 				xmlhttp.responseXML.childNodes[0].tagName != 'response') {
 			Zotero.debug(xmlhttp.responseText);
 			_error('Invalid response from server', xmlhttp.responseText);
 		}
 		
 		if (!xmlhttp.responseXML.childNodes[0].firstChild) {
+			Zotero.debug(xmlhttp.responseText);
 			_error('Empty response from server');
 		}
 	}
