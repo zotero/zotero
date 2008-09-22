@@ -21365,7 +21365,7 @@ function doWeb(doc, url){
 	}
 }');
 
-REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2008-09-22 23:30:00', '1', '100', '4', 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/(pqdlink|pqdweb)\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=|(?:.*\&)TS=[0-9])', 
+REPLACE INTO translators VALUES ('a77690cf-c5d1-8fc4-110f-d1fc765dcf88', '1.0.0b3.r1', '', '2008-09-22 21:30:00', '1', '100', '4', 'ProQuest', 'Simon Kornblith', '^https?://[^/]+/(pqdlink|pqdweb)\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=|(?:.*\&)TS=[0-9])', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -21562,7 +21562,6 @@ function doWeb(doc, url) {
 				
 			}
 		}
-
 }');
 
 REPLACE INTO translators VALUES ('6773a9af-5375-3224-d148-d32793884dec', '1.0.0b3.r1', '', '2006-12-18 06:00:45', '1', '100', '4', 'InfoTrac', 'Simon Kornblith', '^https?://[^/]+/itw/infomark/', 
