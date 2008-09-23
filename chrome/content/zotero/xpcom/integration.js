@@ -843,13 +843,13 @@ Zotero.Integration.Session.prototype.resetRequest = function() {
  * generates a field from a citation object
  */
 Zotero.Integration.Session._acceptableTypes = ["string", "boolean", "number"];
-Zotero.Integration.Session._saveProperties = ["custom"];
+Zotero.Integration.Session._saveProperties = ["custom", "sort"];
 Zotero.Integration.Session.prototype.getCitationField = function(citation) {
 	var type, field = "";
 	
 	for(var j=0; j<Zotero.Integration.Session._saveProperties.length; j++) {
 		var property = Zotero.Integration.Session._saveProperties[j];
-		if(citation.properties[property]) {
+		if(citation.properties[property] || citation.properties[property] === false) {
 			field += ',"'+property+'":'+Zotero.JSON.serialize(citation.properties[property]);
 		}
 	}

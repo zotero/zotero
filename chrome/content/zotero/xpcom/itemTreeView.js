@@ -791,8 +791,20 @@ Zotero.ItemTreeView.prototype.cycleHeader = function(column)
 	
 	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
+	if (savedSelection.length == 1) {
+		var pos = this._itemRowMap[savedSelection[0]] - this._treebox.getFirstVisibleRow();
+	}
 	this.sort();
 	this.rememberSelection(savedSelection);
+	// If single row was selected, try to keep it in the same place
+	if (savedSelection.length == 1) {
+		var newRow = this._itemRowMap[savedSelection[0]];
+		// Calculate the last row that would give us a full view
+		var fullTop = Math.max(0, this._dataItems.length - this._treebox.getPageLength());
+		// Calculate the row that would give us the same position
+		var consistentTop = Math.max(0, newRow - pos);
+		this._treebox.scrollToRow(Math.min(fullTop, consistentTop));
+	}
 	this._treebox.invalidate();
 	this.selection.selectEventsSuppressed = false;
 }

@@ -33,7 +33,7 @@
 	width="600" height="450"
 	onload="Zotero_Citation_Dialog.load();"
 	onunload="doUnload();"
-	ondialogaccept="Zotero_Citation_Dialog.accept();"
+	ondialogaccept="return Zotero_Citation_Dialog.accept();"
 	ondialogcancel="Zotero_Citation_Dialog.cancel();"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
