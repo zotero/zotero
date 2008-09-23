@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-09-22 23:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-09-23 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -14067,7 +14067,7 @@ REPLACE INTO translators VALUES ('a69deb08-47d9-46ad-afca-bc3a2499ad34', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2008-05-27 16:45:00', '1', '100', '4', 'JSTOR', 'Simon Kornblith, Sean Takats and Michael Berkowitz', 'https?://[^/]*jstor\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch)|stable/|pss|sici)', 
+REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2008-09-23 19:00:00', '1', '100', '4', 'JSTOR', 'Simon Kornblith, Sean Takats and Michael Berkowitz', 'https?://[^/]*jstor\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doBasicResults|doAdvancedResults)|stable/|pss|sici)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
