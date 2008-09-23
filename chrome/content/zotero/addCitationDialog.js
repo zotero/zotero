@@ -73,8 +73,8 @@ var Zotero_Citation_Dialog = new function () {
 		if(io.citation.sortable) {
 			_sortCheckbox = document.getElementById("keepSorted");
 			_sortCheckbox.hidden = false;
-			_sortCheckbox.checked = true;
-			io.citation.properties.sort = true;
+			if(io.citation.properties.sort === undefined) io.citation.properties.sort = true;
+			_sortCheckbox.checked = io.citation.properties.sort;
 		}
 		
 		// load locators
@@ -345,10 +345,27 @@ var Zotero_Citation_Dialog = new function () {
 	 */
 	function accept() {
 		_getCitation();
-		if(_previewShown && io.citation.citationItems.length	// if a citation is selected
-				&& document.getElementById('editor').value != _originalHTML) {	// and citation has been edited
-			io.citation.properties.custom = document.getElementById('editor').value;
+		var isCustom = _previewShown && io.citation.citationItems.length	// if a citation is selected
+				&& document.getElementById('editor').value != _originalHTML	// and citation has been edited
+		
+		if(isCustom) {	
+			var citation = document.getElementById('editor').value
+		} else {
+			var citation = (io.citation.citationItems.length ? io.previewFunction() : "");
 		}
+		
+		if(Zotero.Utilities.prototype.trim(citation) == "") {				
+			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+						.getService(Components.interfaces.nsIPromptService);
+			var insert = promptService.confirm(window,
+				Zotero.getString("integration.emptyCitationWarning.title"),
+				Zotero.getString("integration.emptyCitationWarning.body"));
+			if(!insert) return false;
+		}
+		
+		if(isCustom) io.citation.properties.custom = citation;
+		
+		return true;
 	}
 	
 	/*

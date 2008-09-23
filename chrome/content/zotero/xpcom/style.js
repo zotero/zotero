@@ -160,7 +160,7 @@ Zotero.Styles = new function() {
 		}
 		
 		if(!xml || error) {
-			if(!hidden) alert(Zotero.getString('styles.installErrorURI', loadURI));
+			if(!hidden) alert(Zotero.getString('styles.installError', loadURI));
 			if(error) throw error;
 			return false;
 		}
@@ -181,7 +181,7 @@ Zotero.Styles = new function() {
 				if(link.@rel == "source") {
 					source = link.@href.toString();
 					if(source == styleID) {
-						if(!hidden) alert(Zotero.getString('styles.installErrorURI', loadURI));
+						if(!hidden) alert(Zotero.getString('styles.installError', loadURI));
 						throw "Style with ID "+this.styleID+" references itself as source";
 					}
 					break;
@@ -231,9 +231,9 @@ Zotero.Styles = new function() {
 				.getService(Components.interfaces.nsIPromptService);
 			
 			if(existingTitle) {
-				var text = Zotero.getString('styles.updateStyleURI', [existingTitle, title, loadURI]);
+				var text = Zotero.getString('styles.updateStyle', [existingTitle, title, loadURI]);
 			} else {
-				var text = Zotero.getString('styles.installStyleURI', [title, loadURI]);
+				var text = Zotero.getString('styles.installStyle', [title, loadURI]);
 			}
 			
 			var index = ps.confirmEx(null, '',
@@ -261,12 +261,12 @@ Zotero.Styles = new function() {
 						if(success) {
 							_completeInstall(style, styleID, destFile, existingFile, styleFile);
 						} else {
-							if(!hidden) alert(Zotero.getString('styles.installSourceErrorURI', [loadURI, source]));
+							if(!hidden) alert(Zotero.getString('styles.installSourceError', [loadURI, source]));
 							throw error;
 						}
 					});
 				} else {
-					if(!hidden) alert(Zotero.getString('styles.installSourceErrorURI', [loadURI, source]));
+					if(!hidden) alert(Zotero.getString('styles.installSourceError', [loadURI, source]));
 					throw "Source CSL URI is invalid";
 				}
 			} else {

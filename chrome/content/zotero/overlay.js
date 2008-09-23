@@ -1534,36 +1534,39 @@ var ZoteroPane = new function()
 					m.attachLink, m.sep2, m.duplicateItem);
 				
 				// If all items can be reindexed, or all items can be recognized, show option
-				var items = this.getSelectedItems();
-				var canIndex = true;
-				var canRecognize = true;
-				for (var i=0; i<items.length; i++) {
-					if (!Zotero.Fulltext.canReindex(items[i].id)) {
-						canIndex = false;
+				if (Zotero.Fulltext.pdfConverterIsRegistered()) {
+					var items = this.getSelectedItems();
+					var canIndex = true;
+					var canRecognize = true;
+					for (var i=0; i<items.length; i++) {
+						if (!Zotero.Fulltext.canReindex(items[i].id)) {
+							canIndex = false;
+						}
+						if(!Zotero_RecognizePDF.canRecognize(items[i])) {
+							canRecognize = false;
+						}
+						if(!canIndex && !canRecognize) {
+							break;
+						}
 					}
-					
-					if(!Zotero_RecognizePDF.canRecognize(items[i])) {
-						canRecognize = false;
+					if (canIndex) {
+						show.push(m.reindexItem);
 					}
-					
-					if(!canIndex && !canRecognize) {
-						break;
+					else {
+						hide.push(m.reindexItem);
 					}
-				}
-				if (canIndex) {
-					show.push(m.reindexItem);
-				} else {
-					hide.push(m.reindexItem);
-				}
-				if (canRecognize) {
-					show.push(m.recognizePDF);
-				} else {
-					hide.push(m.recognizePDF);
-				}
-				if(canIndex || canRecognize) {
-					show.push(m.sep4);
-				} else {
-					hide.push(m.sep4);
+					if (canRecognize) {
+						show.push(m.recognizePDF);
+					}
+					else {
+						hide.push(m.recognizePDF);
+					}
+					if (canIndex || canRecognize) {
+						show.push(m.sep4);
+					}
+					else {
+						hide.push(m.sep4);
+					}
 				}
 			}
 			// Single item selected
@@ -1593,24 +1596,29 @@ var ZoteroPane = new function()
 				if (item.isAttachment()) {
 					var showSep4 = false;
 					hide.push(m.duplicateItem);
-					// If not linked URL, show reindex line
-					if (Zotero.Fulltext.canReindex(item.id)) {
-						show.push(m.reindexItem);
-						showSep4 = true;
-					} else {
-						hide.push(m.reindexItem);
+					if (Zotero.Fulltext.pdfConverterIsRegistered()) {
+						// If not linked URL, show reindex line
+						if (Zotero.Fulltext.canReindex(item.id)) {
+							show.push(m.reindexItem);
+							showSep4 = true;
+						}
+						else {
+							hide.push(m.reindexItem);
+						}
 					}
 					
 					if (Zotero_RecognizePDF.canRecognize(item)) {
 						show.push(m.recognizePDF);
 						showSep4 = true;
-					} else {
+					}
+					else {
 						hide.push(m.recognizePDF);
 					}
 					
-					if(showSep4) {
+					if (showSep4) {
 						show.push(m.sep4);
-					} else {
+					}
+					else {
 						hide.push(m.sep4);
 					}
 				}
