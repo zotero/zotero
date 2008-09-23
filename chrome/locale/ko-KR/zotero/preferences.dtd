@@ -20,6 +20,8 @@
 <!ENTITY zotero.preferences.autoUpdate "중계기 갱신 여부를 자동 확인">
 <!ENTITY zotero.preferences.updateNow "지금 갱신">
 <!ENTITY zotero.preferences.reportTranslationFailure "고장난 사이트 중계기 신고">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "내려받은 RIS/Refer 파일을 Zotero에 사용">
 <!ENTITY zotero.preferences.automaticSnapshots "웹 페이지로 항목을 생성시 자동으로 스냅샷을 찍습니다">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "항목 저장시 PDF와 다른 파일의 조합을 자동으로 첨부합니다">

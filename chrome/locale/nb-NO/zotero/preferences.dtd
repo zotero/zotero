@@ -20,6 +20,8 @@
 <!ENTITY zotero.preferences.autoUpdate "Sjekk automatisk for oppdaterte oversettere">
 <!ENTITY zotero.preferences.updateNow "Oppdater nå">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapporter ødelagte nettstedoversettere">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Bruk Zotero for nedlastede RIS/Refer-filer">
 <!ENTITY zotero.preferences.automaticSnapshots "Ta snapshot automatisk når du genererer elementer fra nettsider">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Lagre assosierte PDF-filer og andre filer når du lagrer elementer">

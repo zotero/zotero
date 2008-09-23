@@ -20,6 +20,8 @@
 <!ENTITY zotero.preferences.autoUpdate "自動檢查更新的轉譯器">
 <!ENTITY zotero.preferences.updateNow "立刻更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "回報故障的網站轉換轉譯器">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "用 Zotero 處理所下載的 RIS/Refer 檔案">
 <!ENTITY zotero.preferences.automaticSnapshots "從網頁建立項目時自動拍攝快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "儲存項目時自動附加相關的 PDF 檔與其他檔案">

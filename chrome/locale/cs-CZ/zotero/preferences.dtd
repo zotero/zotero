@@ -20,6 +20,8 @@
 <!ENTITY zotero.preferences.autoUpdate "Automaticky kontroluj aktualizace překladačů">
 <!ENTITY zotero.preferences.updateNow "Aktualizuj nyní">
 <!ENTITY zotero.preferences.reportTranslationFailure "Oznam poškozené překladače">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Použij Zotero pro stažené RIS/Refer soubory">
 <!ENTITY zotero.preferences.automaticSnapshots "Automaticky udělej snapshot při vytváření položky z internetových stránek">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automaticky připoj propojené PDF a ostatní soubory při ukládání položek">
