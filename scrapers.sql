@@ -14067,7 +14067,7 @@ REPLACE INTO translators VALUES ('a69deb08-47d9-46ad-afca-bc3a2499ad34', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2008-09-23 19:00:00', '1', '100', '4', 'JSTOR', 'Simon Kornblith, Sean Takats and Michael Berkowitz', 'https?://[^/]*jstor\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doBasicResults|doAdvancedResults)|stable/|pss|sici)', 
+REPLACE INTO translators VALUES ('d921155f-0186-1684-615c-ca57682ced9b', '1.0.0b4.r1', '', '2008-09-23 21:05:00', '1', '100', '4', 'JSTOR', 'Simon Kornblith, Sean Takats and Michael Berkowitz', 'https?://[^/]*jstor\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doBasicResults|doAdvancedResults)|stable/|pss|sici)', 
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
