@@ -36,6 +36,9 @@ function doLoad()
 	Zotero.setFontSize(sbc);
 	
 	io = window.arguments[0];
+	if(io.wrappedJSObject) io = io.wrappedJSObject;
+	if(io.addBorder) document.getElementsByTagName("dialog")[0].style.border = "1px solid black";
+	if(io.singleSelection) document.getElementById("zotero-items-tree").setAttribute("seltype", "single");
 	
 	collectionsView = new Zotero.CollectionTreeView();
 	document.getElementById('zotero-collections-tree').view = collectionsView;
