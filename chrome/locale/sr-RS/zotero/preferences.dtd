@@ -20,6 +20,8 @@
 <!ENTITY zotero.preferences.autoUpdate "Самостално провери за ажуриране преводиоце">
 <!ENTITY zotero.preferences.updateNow "Ажурирај сада">
 <!ENTITY zotero.preferences.reportTranslationFailure "Извести о грешкама у „преводиоцу странице“">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Користи Зотеро за преузимање RIS/Refer датотека">
 <!ENTITY zotero.preferences.automaticSnapshots "Самостално узми снимак када се прави ставка са веб странице">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Самостално приложи повезане PDF и друге датотека када чуваш ставке">

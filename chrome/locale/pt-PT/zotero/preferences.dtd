@@ -20,6 +20,8 @@
 <!ENTITY zotero.preferences.autoUpdate "Verificar automaticamente actualizações de tradutores">
 <!ENTITY zotero.preferences.updateNow "Actualizar agora">
 <!ENTITY zotero.preferences.reportTranslationFailure "Reportar tradutores de sítios com problemas">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Usar o Zotero para arquivos RIS/Refer descarregados">
 <!ENTITY zotero.preferences.automaticSnapshots "Capturar automaticamente ao criar itens a partir de páginas Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Anexar automaticamente arquivos PDF e de outros tipos associados a um item quando este é guardado">
