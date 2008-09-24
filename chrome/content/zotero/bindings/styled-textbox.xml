@@ -27,141 +27,69 @@
 		  xmlns:xbl="http://www.mozilla.org/xbl"
 		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<binding id="styled-textbox">
-		<resources>
-			<stylesheet src="chrome://zotero/skin/bindings/styled-textbox.css"/>
-		</resources>
-		
 		<implementation>
 			<constructor><![CDATA[
-					this._box = document.getAnonymousElementByAttribute(this, "anonid", "rt-box");
 					this._browser = document.getAnonymousElementByAttribute(this, "anonid", "rt-view");
-					this._buttons = {
-						'italic':document.getAnonymousElementByAttribute(this, "anonid", "rt-italic"),
-						'bold':document.getAnonymousElementByAttribute(this, "anonid", "rt-bold"),
-						'underline':document.getAnonymousElementByAttribute(this, "anonid", "rt-underline"),
-						'superscript':document.getAnonymousElementByAttribute(this, "anonid", "rt-superscript"),
-						'subscript':document.getAnonymousElementByAttribute(this, "anonid", "rt-subscript")
+					this._editor = null;
+					this._value = null;
+					
+					this._rtfMap = {
+						"\\":"\\\\",
+						"&amp;":"&",
+						"&lt;":"<",
+						"&gt;":">",
+						"<i>":"\\i ",
+						"</i>":"\\i0 ",
+						"<b>":"\\b ",
+						"</b>":"\\b0 ",
+						"<u>":"\\ul ",
+						"</u>":"\\ul0 ",
+						"<br>":"\x0B",
+						"<sup>":"\\super ",
+						"</sup>":"\\super0 ",
+						"<sub>":"\\sub ",
+						"</sub>":"\\sub0 ",
+						// there's no way to mimic a tab stop in CSS without
+						// tables, which wouldn't work here.
+						'<span class="tab">&nbsp;</span>':"\t"
 					};
 					
-					// globals
-					this._formatMap = {
-						"Integration":{
-							"\\":"\\\\",
-							"&amp;":"&",
-							"&lt;":"<",
-							"&gt;":">",
-							"<i>":"\\i ",
-							"</i>":"\\i0 ",
-							"<b>":"\\b ",
-							"</b>":"\\b0 ",
-							"<u>":"\\ul ",
-							"</u>":"\\ul0 ",
-							"<br>":"\x0B",
-							"<sup>":"\\super ",
-							"</sup>":"\\super0 ",
-							"<sub>":"\\sub ",
-							"</sub>":"\\sub0 ",
-							// there's no way to mimic a tab stop in CSS without
-							// tables, which wouldn't work here.
-							'<span class="tab">&nbsp;</span>':"\t"
-						}
-					};
-					
-					// defaults
-					this._format = "HTML";
-					this._readonly = false;
-					this._styleWithCSS = false;
-					// storage variables before loaded
-					this._value = false;
-					this._toggle = [];
-					
-					// why is this necessary? because the browser takes time to
-					// load, but doesn't appear to fire an event when loaded,
-					// when recovering from being hidden. why does this work?
-					// no idea.
-					this._isLoaded = false;
+					// not sure why an event is necessary here, but it is
 					var me = this;
-					if(this.hasAttribute("hidden")) {
-						window.setTimeout(function() {me._loaded()}, 1);
-					} else {
-						this._browser.contentWindow.addEventListener("load", function() {me._loaded()}, false);
-					}
+					this._loadHandler = function() {me._browserLoaded()};
+					this._browser.addEventListener("DOMContentLoaded", this._loadHandler, false);
 			]]></constructor>
 			
-			<!-- Called when loaded. Until the browser is loaded, we can't do 
+			<!-- Called when browser is loaded. Until the browser is loaded, we can't do 
 			     anything with it, so we just keep track of what's supposed to
 			     happen. -->
-			<method name="_loaded">
+			<method name="_browserLoaded">
 				<body><![CDATA[
-					this._isLoaded = true;
-					this.readonly = this._readonly;
-					this.format = this._format;
-					if(this._value !== false) this.value = this._value;
-					if(this._toggle.length) {
-						for(var i=0; i<this._toggle.length; i++) {
-							this.toggle(this._toggle[i]);
-						}
-					}
+					this._browser.removeEventListener("DOMContentLoaded", this._loadHandler, false);
+					
+					var ios = Components.classes["@mozilla.org/network/io-service;1"].
+						getService(Components.interfaces.nsIIOService);
+					var uri = ios.newURI("chrome://zotero/content/tiny_mce/integration.html", null, null);
+					var chromeReg = Components.classes["@mozilla.org/chrome/chrome-registry;1"].
+						getService(Components.interfaces.nsIChromeRegistry);
+					var fileURI = chromeReg.convertChromeURL(uri);
+					
+					this._browser.webNavigation.loadURI(fileURI.spec,
+						Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, null, null);
+					
+					// Register handler for deferred setting of content
+					var me = this;
+					var listener = function() {
+						me._browser.removeEventListener("DOMContentLoaded", listener, false);
+						var editor = me._browser.contentWindow.wrappedJSObject.tinyMCE.get("tinymce");
+						editor.onInit.add(function() {
+							me._editor = editor;
+							if(me._value) me.value = me._value;
+						});
+					};
+					this._browser.addEventListener("DOMContentLoaded", listener, false);
 				]]></body>
 			</method>
-			
-			<!-- Toggle underlining/italics/boldface -->
-			<method name="toggle">
-				<parameter name="command"/>
-				<body><![CDATA[
-					if(this._isLoaded) {
-						if(!this._buttons[command]) {
-							throw "Invalid command to toggle";
-						}
-						
-						this._browser.contentWindow.document.execCommand(command, false, !this._buttons[command].hasAttribute("selected"));
-						this._updateButtons();
-					} else {
-						this._toggle.push(command);
-					}
-				]]></body>
-			</method>
-			
-			<!-- Updates the status of text toggle buttons -->
-			<method name="_updateButtons">
-				<body><![CDATA[
-					for each(var command in ["bold", "italic", "underline", "superscript", "subscript"]) {
-						try {
-							var enabled = this._browser.contentDocument.queryCommandState(command);
-							
-							var buttonEnabled = this._buttons[command].hasAttribute("selected");
-							if(buttonEnabled != enabled) {
-								if(enabled) {
-									this._buttons[command].setAttribute("selected", "true");
-								} else {
-									this._buttons[command].removeAttribute("selected");
-								}
-							}
-						} catch(e) {}
-					}
-				]]></body>
-			</method>
-			
-			<!-- Returns contained browser object -->
-			<property name="browser" readonly="true" onget="return this._browser;"/>
-			
-			<!-- Toggle read-only status -->
-			<property name="readonly">
-				<getter><![CDATA[
-					return this._readonly;
-				]]></getter>
-				<setter><![CDATA[
-					this._readonly = val;
-					if(this._isLoaded) {
-						if(val) {
-							this._browser.contentDocument.designMode = "off";
-						} else {
-							this._browser.contentDocument.designMode = "on";
-						}
-					}
-					return this._readonly;
-				]]></setter>
-			</property>
 			
 			<!-- Sets or returns formatting (currently, HTML or Integration) of rich text box -->
 			<property name="format">
@@ -169,130 +97,83 @@
 					return this._format;
 				]]></getter>
 				<setter><![CDATA[
-					this._format = val;
-					if(this._isLoaded) {
-						if(val != "HTML") {
-							if(!this._formatMap[val]) {
-								throw "Invalid format for rich text area";
-								return false;
-							}
-							this._styleWithCSS = false;
-						} else {
-							this._styleWithCSS = true;
-						}
-						
-						try {
-							this._browser.contentDocument.execCommand("styleWithCSS", false, this._styleWithCSS);
-						}
-						catch (e) {}
-					}
-					return val;
+					return this._format = val;
 				]]></setter>
 			</property>
 			
 			<!-- Sets or returns contents of rich text box -->
 			<property name="value">
 				<getter><![CDATA[
-					var output = this._browser.contentDocument.body.innerHTML;
-					if(this._format != "HTML") {
-						// do appropriate replacement operations for non-HTML
-						// formats
-						var replacements = this._formatMap[this._format];
-						for(var needle in replacements) {
-							output = output.replace(needle, replacements[needle], "g"); 
+					this._editor.execCommand("mceCleanup");
+					var body = this._editor.getBody();
+					var output = body.innerHTML;
+					
+					if(this._format == "Integration" || this._format == "RTF") {
+						// do appropriate replacement operations
+						for(var needle in this._rtfMap) {
+							output = output.replace(needle, this._rtfMap[needle], "g"); 
 						}
+						output = output.replace("<p>", "", "g");
+						output = output.replace("</p>", "\\par ", "g");
+						output = output.replace(/<\/?div[^>]*>/g, "");
+						output = Zotero.Utilities.prototype.trim(output);
+						if(output.substr(-4) == "\\par") output = output.substr(0, output.length-4);
 					}
+					
 					return output;
 				]]></getter>
 				<setter><![CDATA[
-					if(this._isLoaded) {
-						var html = val;
+					if(!this._editor) {
+						// if not loaded, wait until it is to set
+						return this._value = val;
+					}
+					
+					var html = val;
+					
+					if(this._format == "Integration" || this._format == "RTF") {
 						bodyStyle = "";
-						if(this._format != "HTML") {
-							if(this._format == "Integration") {
-								if(html.substr(0, 3) == "\\li") {
-									// try to show paragraph formatting
-									var returnIndex = html.indexOf("\r\n");
-									
-									var tags = html.substr(1, returnIndex).split("\\");
-									html = html.substr(returnIndex+2);
-									
-									for(var i=0; i<tags.length; i++) {
-										var tagName = tags[i].substr(0, 2);
-										var tagValue = tags[i].substring(2, tags[i].length-1);
-										if(tagName == "li") {
-											var li = parseInt(tagValue, 10);
-										} else if(tagName == "fi") {
-											var fi = parseInt(tagValue, 10);
-										}
-									}
-									
-									// don't negatively indent
-									Zotero.debug(li);
-									Zotero.debug(fi);
-									if(fi < 0 && li == 0) {
-										li = -fi;
-									}
-									
-									bodyStyle = "margin-left:"+(li/20+6)+"pt;text-indent:"+(fi/20)+"pt;";
-									Zotero.debug(bodyStyle);
+						if(html.substr(0, 3) == "\\li") {
+							// try to show paragraph formatting
+							var returnIndex = html.indexOf("\r\n");
+							
+							var tags = html.substr(1, returnIndex).split("\\");
+							html = html.substr(returnIndex+2);
+							
+							for(var i=0; i<tags.length; i++) {
+								var tagName = tags[i].substr(0, 2);
+								var tagValue = tags[i].substring(2, tags[i].length-1);
+								if(tagName == "li") {
+									var li = parseInt(tagValue, 10);
+								} else if(tagName == "fi") {
+									var fi = parseInt(tagValue, 10);
 								}
 							}
 							
-							// do appropriate replacement operations for non-HTML
-							// formats
-							var replacements = this._formatMap[this._format];
-							for(var needle in replacements) {
-								html = html.replace(replacements[needle], needle, "g"); 
-							}
+							// don't negatively indent
+							if(fi < 0 && li == 0) li = -fi;
+							
+							bodyStyle = "margin-left:"+(li/20+6)+"pt;text-indent:"+(fi/20)+"pt;";
 						}
 						
-						// write
-						this._browser.contentDocument.write('<body style="'+bodyStyle+'">'+html+"</body>");
-						this._browser.contentDocument.close();
-						this._browser.contentDocument.designMode = (this._readonly ? "off" : "on");
-						try {
-							this._browser.contentDocument.execCommand("styleWithCSS", false, this._styleWithCSS);
-						} catch(e) {}
-						
-						this._updateButtons();
-					} else {
-						this._value = val;
+						// do appropriate replacement operations
+						for(var needle in this._rtfMap) {
+							if(this._rtfMap[needle]) {
+								html = html.replace(this._rtfMap[needle], needle, "g");
+							}
+						}
+						html = '<div style="'+bodyStyle+'"><p>'+html.replace("\par ", "</p><p>")+"</p></div>";
+						Zotero.debug("setting content to "+html);
 					}
+					
+					this._editor.setContent(html);
 					return val;
 				]]></setter>
 			</property>
-			
-			<!-- Sets or returns contents of hidden attribute -->
-			<property name="hidden" getter="return this._box.hidden;"
-				setter="return this._box.hidden = val;"/>
 		</implementation>
 		
 		<content>
-			<xul:vbox anonid="rt-box" class="rt-box" xbl:inherits="onfocus,onblur,flex">
-				<xul:toolbar class="rt-toolbar" mode="icons">
-					<xul:toolbarbutton anonid="rt-bold" class="rt-bold rt-text-control"
-						tooltiptext="&zotero.richText.bold.label;"
-						oncommand="parentNode.parentNode.parentNode.toggle('bold');"/>
-					<xul:toolbarbutton anonid="rt-italic" class="rt-italic rt-text-control"
-						tooltiptext="&zotero.richText.italic.label;"
-						oncommand="parentNode.parentNode.parentNode.toggle('italic');"/>
-					<xul:toolbarbutton anonid="rt-underline" class="rt-underline rt-text-control"
-						tooltiptext="&zotero.richText.underline.label;"
-						oncommand="parentNode.parentNode.parentNode.toggle('underline');"/>
-					<xul:toolbarbutton anonid="rt-superscript" class="rt-superscript rt-text-control"
-						tooltiptext="&zotero.richText.superscript.label;"
-						oncommand="parentNode.parentNode.parentNode.toggle('superscript');"/>
-					<xul:toolbarbutton anonid="rt-subscript" class="rt-subscript rt-text-control"
-						tooltiptext="&zotero.richText.subscript.label;"
-						oncommand="parentNode.parentNode.parentNode.toggle('subscript');"/>
-				</xul:toolbar>
-				
-				<xul:browser flex="1" anonid="rt-view" class="rt-view"
-					onclick="parentNode.parentNode._loaded()"
-					onmouseup="parentNode.parentNode._updateButtons();"
-					onkeyup="parentNode.parentNode._updateButtons();"/>
-			</xul:vbox>
+			<xul:iframe flex="1" anonid="rt-view" class="rt-view" type="content" style="min-height:130px"
+				xbl:inherits="onfocus,onblur,flex,width,height,hidden"/>
 		</content>
 	</binding>
 </bindings>
