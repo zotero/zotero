@@ -721,9 +721,8 @@ Zotero.Ingester.MIMEHandler.URIContentListener = new function() {
 Zotero.Ingester.MIMEHandler.StreamListener = function(request, contentType) {
 	this._request = request;
 	this._contentType = contentType
-	this._readString = "";
-	this._scriptableStream = null;
-	this._scriptableStreamInput = null
+	this._storageStream = null;
+	this._binaryInputStream = null;
 	
 	// get front window
 	var windowWatcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
@@ -746,19 +745,24 @@ Zotero.Ingester.MIMEHandler.StreamListener.prototype.QueryInterface = function(i
 Zotero.Ingester.MIMEHandler.StreamListener.prototype.onStartRequest = function(channel, context) {}
 
 /*
- * called when there's data available; basicallly, we just want to collect this data
+ * called when there's data available; basically, we just want to collect this data
  */
 Zotero.Ingester.MIMEHandler.StreamListener.prototype.onDataAvailable = function(request, context, inputStream, offset, count) {
 	Zotero.debug(count+" bytes available");
 	
-	if(inputStream != this._scriptableStreamInput) {	// get storage stream
-														// if there's not one
-		this._scriptableStream = Components.classes["@mozilla.org/scriptableinputstream;1"].
-					             createInstance(Components.interfaces.nsIScriptableInputStream);
-		this._scriptableStream.init(inputStream);
-		this._scriptableStreamInput = inputStream;
+	if (!this._storageStream) {
+		this._storageStream = Components.classes["@mozilla.org/storagestream;1"].
+				createInstance(Components.interfaces.nsIStorageStream);
+		this._storageStream.init(4096, 4294967295, null); // PR_UINT32_MAX
+		
+		this._binaryInputStream = Components.classes["@mozilla.org/binaryinputstream;1"].
+				createInstance(Components.interfaces.nsIBinaryInputStream);
+		this._binaryInputStream.setInputStream(inputStream);
 	}
-	this._readString += this._scriptableStream.read(count);
+	
+	var bytes = this._binaryInputStream.readBytes(count);
+	var outputStream = this._storageStream.getOutputStream(0);
+	outputStream.write(bytes, count);
 }
 
 /*
@@ -766,13 +770,30 @@ Zotero.Ingester.MIMEHandler.StreamListener.prototype.onDataAvailable = function(
  */
 Zotero.Ingester.MIMEHandler.StreamListener.prototype.onStopRequest = function(channel, context, status) {
 	Zotero.debug("request finished");
+	
+	Zotero.debug("charset is " + channel.contentCharset);
+	
+	var inputStream = this._storageStream.newInputStream(0);
+	var charset = channel.contentCharset ? channel.contentCharset : "UTF-8";
+	const replacementChar = Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
+	var convStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+				.createInstance(Components.interfaces.nsIConverterInputStream);
+	convStream.init(inputStream, charset, 1024, replacementChar);
+	var readString = "";
+	var str = {};
+	while (convStream.readString(4096, str) != 0) {
+		readString += str.value;
+	}
+	convStream.close();
+	inputStream.close();
+	
 	var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"].
 	                               getService(Components.interfaces.nsIExternalHelperAppService);
 	
 	// attempt to import through Zotero.Translate
 	var translation = new Zotero.Translate("import");
 	translation.setLocation(this._request.name);
-	translation.setString(this._readString);
+	translation.setString(readString);
 	
 	//  use front window's save functions and folder
 	var frontWindow = this._frontWindow;
@@ -790,20 +811,19 @@ Zotero.Ingester.MIMEHandler.StreamListener.prototype.onStopRequest = function(ch
 		// we lied. we can't really translate this file. call
 		// nsIExternalHelperAppService with the data
 		frontWindow.Zotero_Browser.progress.close();
-
-		var streamListener;
-		if(streamListener = externalHelperAppService.doContent(this._contentType, this._request, frontWindow)) {
-			// create a string input stream
-			var inputStream = Components.classes["@mozilla.org/io/string-input-stream;1"].
-							  createInstance(Components.interfaces.nsIStringInputStream);
-			inputStream.setData(this._readString, this._readString.length);
-			
+		
+		var inputStream = this._storageStream.newInputStream(0);
+		var streamListener = externalHelperAppService.doContent(this._contentType, this._request, frontWindow, null);
+		if(streamListener) {
 			streamListener.onStartRequest(channel, context);
-			streamListener.onDataAvailable(this._request, context, inputStream, 0, this._readString.length);
+			streamListener.onDataAvailable(this._request, context, inputStream, 0, this._storageStream.length);
 			streamListener.onStopRequest(channel, context, status);
 		}
+		this._storageStream.close();
 		return false;
 	}
+	
+	this._storageStream.close();
 	
 	// translate using first available
 	translation.setTranslator(translators[0]);
