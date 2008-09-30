@@ -165,7 +165,13 @@ var Zotero = new function(){
 		xmlhttp.open('GET', 'chrome://global/locale/global.dtd', false);
 		xmlhttp.overrideMimeType('text/plain');
 		xmlhttp.send(null);
-		this.dir = xmlhttp.responseText.match(/(ltr|rtl)/)[0];
+		var matches = xmlhttp.responseText.match(/(ltr|rtl)/);
+		if (matches && matches[0] == 'rtl') {
+			this.dir = 'rtl';
+		}
+		else {
+			this.dir = 'ltr';
+		}
 		
 		try {
 			this.getZoteroDirectory();
