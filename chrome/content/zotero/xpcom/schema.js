@@ -208,7 +208,7 @@ Zotero.Schema = new function(){
 		var destDir = Zotero["get" + Modes + "Directory"]();
 		
 		// If directory is empty, force reinstall
-		var forceReinstall = false;
+		var forceReinstall = true;
 		var entries = destDir.directoryEntries;
 		while (entries.hasMoreElements()) {
 			var file = entries.getNext();
@@ -216,7 +216,8 @@ Zotero.Schema = new function(){
 			if (!file.leafName.match(fileNameRE) || file.isDirectory()) {
 				continue;
 			}
-			forceReinstall = true;
+			// Not empty
+			forceReinstall = false;
 			break;
 		}
 		
@@ -314,7 +315,7 @@ Zotero.Schema = new function(){
 				}
 			}
 			
-			if (forceReinstall && lastModTime && modTime <= lastModTime) {
+			if (!forceReinstall && lastModTime && modTime <= lastModTime) {
 				Zotero.debug("Installed " + modes + " are up-to-date with " + modes + " directory");
 				return 0;
 			}
@@ -1940,7 +1941,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE csl");
 				}
 				
-				//
+				// 1.5 Sync Preview 2.2
 				if (i==42) {
 					Zotero.DB.query("UPDATE itemAttachments SET syncState=0");
 				}
