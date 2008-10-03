@@ -3218,7 +3218,9 @@ Zotero.Item.prototype.erase = function(deleteChildren) {
 		//Zotero.Fulltext.clearItemContent(this.id);
 	}
 	
-	
+
+	Zotero.DB.query('DELETE FROM annotations WHERE itemID=?', this.id);
+	Zotero.DB.query('DELETE FROM highlights WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM itemCreators WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM itemNotes WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM itemAttachments WHERE itemID=?', this.id);
@@ -3227,8 +3229,6 @@ Zotero.Item.prototype.erase = function(deleteChildren) {
 	Zotero.DB.query('DELETE FROM itemTags WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM itemData WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM items WHERE itemID=?', this.id);
-	Zotero.DB.query('DELETE FROM annotations WHERE itemID=?', this.id);
-	Zotero.DB.query('DELETE FROM highlights WHERE itemID=?', this.id);
 	
 	try {
 		Zotero.DB.commitTransaction();
