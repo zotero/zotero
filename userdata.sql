@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS itemAttachments (
     path TEXT,
     originalPath TEXT,
     FOREIGN KEY (itemID) REFERENCES items(itemID),
-    FOREIGN KEY (sourceItemID) REFERENCES items(sourceItemID)
+    FOREIGN KEY (sourceItemID) REFERENCES items(itemID)
 );
 CREATE INDEX IF NOT EXISTS itemAttachments_sourceItemID ON itemAttachments(sourceItemID);
 CREATE INDEX IF NOT EXISTS itemAttachments_mimeType ON itemAttachments(mimeType);
