@@ -1241,7 +1241,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 						// try to assign correct creator type
 						if(data[j].creatorType) {
 							try {
-								var creatorType = Zotero.CreatorTypes.getID(data[j].creatorType);
+								var creatorTypeID = Zotero.CreatorTypes.getID(data[j].creatorType);
 							} catch(e) {
 								Zotero.debug("Translate: Invalid creator type "+data[j].creatorType+" for creator index "+j, 2);
 							}
