@@ -66,14 +66,17 @@
 				progressWin.show();
 				progressWin.startCloseTimer();
 				var f = function() {
-					var csls = Zotero.DB.query("SELECT title, csl FROM csl ORDER BY title");
+					var styles = Zotero.Styles.getAll();
 					// XXX needs its own string really for the title!
 					var str = '<html><head><title></title></head><body><h1>Citation/Bibliography list<h1>';
-					for (var i=0; i<csls.length; i++) {
-						Zotero.debug("Generate Bib for " + csls[i].title);
-						var cite = generateBibliography(csls[i].csl);
+					for each(var style in styles) {
+						if (style.source) {
+							continue;
+						}
+						Zotero.debug("Generate Bib for " + style.title);
+						var cite = generateBibliography(style);
 						if (cite) {
-							str += '<hr><h2>' + csls[i].title + '</h2>';
+							str += '<hr><h2>' + style.title + '</h2>';
 							str += cite;
 						}
 					}
@@ -85,7 +88,7 @@
 				setTimeout(f, 100);
 			}
 			 
-			function generateBibliography(str) {
+			function generateBibliography(style) {
 				var iframe = document.getElementById('zotero-csl-preview-box');
 				
 				var items = mainWindow.ZoteroPane.getSelectedItems();
@@ -93,25 +96,19 @@
 					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No references selected in Zotero.</p></body></html>';
 					return '';
 				}
-				var csl;
-				if (str.indexOf("<defaults") != -1) {
-					return "Old-style CSLs are no longer supported.";
-				}
-				else {
-					csl = new Zotero.CSL(str);
-				}
+				
 				var authordate = document.getElementById("format-author-date");
 				var numeric = document.getElementById("format-numeric");
-				Zotero.debug("style class is " + csl.class);
-				if (document.getElementById("format-note").checked == false && csl.class == "note") {
+				Zotero.debug("style class is " + style.class);
+				if (document.getElementById("format-note").checked == false && style.class == "note") {
 					Zotero.debug("CSL IGNORE NOTE one");
 					return '';
 				}
-				if (document.getElementById("format-in-text").checked == false && csl.class == "in-text") {
+				if (document.getElementById("format-in-text").checked == false && style.class == "in-text") {
 					Zotero.debug("CSL IGNORE IN-TEXT one");
 					return '';
 				}
-				var xmlinfo = csl._csl.info;
+				var xmlinfo = style.csl._csl.info;
 				var terms = new Object();
 				for each(var cat in xmlinfo.category.@term) {
 					Zotero.debug("TERM is " + cat.toString());
@@ -125,14 +122,14 @@
 					Zotero.debug("CSL IGNORE this AD");
 					return '';
 				}
-				var itemSet = csl.createItemSet(items);
+				var itemSet = style.csl.createItemSet(items);
 				
 				// Generate multiple citations
-				var citation = csl.createCitation(itemSet.items);
-				var citations = csl.formatCitation(citation, "HTML");
+				var citation = style.csl.createCitation(itemSet.items);
+				var citations = style.csl.formatCitation(citation, "HTML");
 			
 				// Generate bibliography
-				var bibliography = '<p>' + csl.formatBibliography(itemSet, "HTML");
+				var bibliography = '<p>' + style.csl.formatBibliography(itemSet, "HTML");
 				return '<div style="white-space: pre-wrap">' +
 					citations + bibliography + '</div>';
 			}
