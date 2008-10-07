@@ -902,22 +902,16 @@ Zotero.DBConnection.prototype._getTypedValue = function (statement, i) {
 	var type = statement.getTypeOfIndex(i);
 	switch (type) {
 		case statement.VALUE_TYPE_INTEGER:
-			var func = statement.getInt64;
-			break;
+			return statement.getInt64(i);
 		case statement.VALUE_TYPE_TEXT:
-			var func = statement.getUTF8String;
-			break;
+			return statement.getUTF8String(i);
 		case statement.VALUE_TYPE_NULL:
 			return null;
 		case statement.VALUE_TYPE_FLOAT:
-			var func = statement.getDouble;
-			break;
+			return statement.getDouble(i);
 		case statement.VALUE_TYPE_BLOB:
-			var func = statement.getBlob;
-			break;
+			return statement.getBlob(i);
 	}
-	
-	return func(i);
 }
 
 
