@@ -1936,8 +1936,12 @@ Zotero.Item.prototype.numNotes = function() {
 
 
 /**
-* Get the first line of the note for display in the items list
-**/
+ * Get the first line of the note for display in the items list
+ *
+ * Note: Note titles can also come from Zotero.Items.cacheFields()!
+ *
+ * @return	{String}
+ */
 Zotero.Item.prototype.getNoteTitle = function() {
 	if (!this.isNote() && !this.isAttachment()) {
 		throw ("getNoteTitle() can only be called on notes and attachments");
@@ -2124,6 +2128,11 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 	
 	// No associated files for linked URLs
 	if (row.linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+		return false;
+	}
+	
+	if (!row.path) {
+		Zotero.debug("Attachment path is empty", 2);
 		return false;
 	}
 	

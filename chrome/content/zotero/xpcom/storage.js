@@ -1083,8 +1083,9 @@ Zotero.Sync.Storage = new function () {
 		
 		var file = item.getFile();
 		if (!file) {
-			_error("File " + file.leafName + " not found for item "
-				+ itemID + " after extracting ZIP");
+			_removeRequest(request);
+			_queueAdvance('download', Zotero.Sync.Storage.downloadFile, true);
+			_error("File not found for item " + item.id + " after extracting ZIP");
 		}
 		file.lastModifiedTime = syncModTime * 1000;
 		
