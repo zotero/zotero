@@ -310,7 +310,6 @@ Zotero.Collection.prototype.save = function () {
 		Zotero.DB.query("DELETE FROM collections WHERE collectionID=?", oldID);
 		Zotero.DB.query("UPDATE collections SET key=? WHERE collectionID=?", [row.key, this.id]);
 		
-		Zotero.Collections.unload(oldID);
 		Zotero.Notifier.trigger('id-change', 'collection', oldID + '-' + this.id);
 		
 		// Update child collections that have cached the previous id

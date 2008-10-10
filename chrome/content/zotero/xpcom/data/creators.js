@@ -25,9 +25,6 @@ Zotero.Creators = new function() {
 	Zotero.DataObjects.apply(this, ['creator']);
 	this.constructor.prototype = new Zotero.DataObjects();
 	
-	var _creatorsByID = {}; // Zotero.Creator objects indexed by creatorID
-	var _creatorDataHash = {}; // creatorDataIDs indexed by md5 hash of data
-	
 	this.get = get;
 	this.getUpdated = getUpdated;
 	this.getDataID = getDataID;
@@ -35,21 +32,19 @@ Zotero.Creators = new function() {
 	this.countCreatorsWithData = countCreatorsWithData;
 	this.updateData = updateData;
 	this.deleteData = deleteData;
-	this.reload = reload;
 	this.erase = erase;
 	this.purge = purge;
-	this.unload = unload;
 	
 	this.fields = ['firstName', 'lastName', 'fieldMode', 'birthYear'];
 	
-	var self = this;
+	var _creatorDataHash = {}; // creatorDataIDs indexed by md5 hash of data
 	
 	/*
 	 * Returns a Zotero.Creator object for a given creatorID
 	 */
 	function get(creatorID) {
-		if (_creatorsByID[creatorID]) {
-			return _creatorsByID[creatorID];
+		if (this._objectCache[creatorID]) {
+			return this._objectCache[creatorID];
 		}
 		
 		var sql = 'SELECT COUNT(*) FROM creators WHERE creatorID=?';
@@ -59,8 +54,8 @@ Zotero.Creators = new function() {
 			return false;
 		}
 		
-		_creatorsByID[creatorID] = new Zotero.Creator(creatorID);
-		return _creatorsByID[creatorID];
+		this._objectCache[creatorID] = new Zotero.Creator(creatorID);
+		return this._objectCache[creatorID];
 	}
 	
 	
@@ -173,32 +168,6 @@ Zotero.Creators = new function() {
 	}
 	
 	
-	/*
-	 * Reloads data for specified creators into internal array
-	 *
-	 * Can be passed ids as individual parameters or as an array of ids, or both
-	 */
-	function reload() {
-		if (!arguments[0]) {
-			return false;
-		}
-		
-		var ids = Zotero.flattenArguments(arguments);
-		Zotero.debug('Reloading creators ' + ids);
-		
-		for each(var id in ids) {
-			if (!_creatorsByID[id]) {
-				this.get(id);
-			}
-			else {
-				_creatorsByID[id].load();
-			}
-		}
-		
-		return true;
-	}
-	
-	
 	/**
 	 * Remove creator(s) from all linked items and call this.purge()
 	 * to delete creator rows
@@ -249,7 +218,7 @@ Zotero.Creators = new function() {
 		if (toDelete) {
 			// Clear creator entries in internal array
 			for each(var creatorID in toDelete) {
-				delete _creatorsByID[creatorID];
+				delete this._objectCache[creatorID];
 			}
 			
 			var sql = "DELETE FROM creators WHERE creatorID NOT IN "
@@ -275,20 +244,47 @@ Zotero.Creators = new function() {
 	}
 	
 	
-	/**
-	 * Clear creator from internal array
-	 *
-	 * @param	int		id		creatorID
-	 */
-	function unload(id) {
-		delete _creatorsByID[id];
-	}
-	
-	
-	this.unloadAll = function () {
-		Zotero.debug("Unloading all creators");
-		_creatorsByID = {};
-		_creatorDataHash = {};
+	this._load = function () {
+		if (!arguments[0] && !this._reloadCache) {
+			return;
+		}
+		
+		if (this._reloadCache) {
+			Zotero.debug("Clearing creator data hash");
+			_creatorDataHash = {};
+		}
+		
+		var sql = "SELECT C.*, CD.* FROM creators C NATURAL JOIN creatorData CD "
+					+ "WHERE 1";
+		if (arguments[0]) {
+			sql += " AND creatorID IN (" + Zotero.join(arguments[0], ",") + ")";
+		}
+		var rows = Zotero.DB.query(sql);
+		var ids = [];
+		for each(var row in rows) {
+			var id = row.creatorID;
+			ids.push(id);
+			
+			// Creator doesn't exist -- create new object and stuff in array
+			if (!this._objectCache[id]) {
+				this.get(id);
+			}
+			// Existing creator -- reload in place
+			else {
+				this._objectCache[id].loadFromRow(row);
+			}
+		}
+		
+		// If loading all creators, remove old creators that no longer exist
+		if (!arguments[0]) {
+			for each(var c in this._objectCache) {
+				if (ids.indexOf(c.id) == -1) {
+					this.unload(c.id);
+				}
+			}
+			
+			this._reloadCache = false;
+		}
 	}
 	
 	
@@ -349,8 +345,8 @@ Zotero.Creators = new function() {
 		
 		var creators = getCreatorsWithData(creatorDataID);
 		for each(var creatorID in creators) {
-			if (_creatorsByID[creatorID]) {
-				_creatorsByID[creatorID].load();
+			if (this._objectCache[creatorID]) {
+				this._objectCache[creatorID].load();
 			}
 		}
 	}

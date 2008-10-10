@@ -28,26 +28,20 @@ Zotero.Collections = new function() {
 	Zotero.DataObjects.apply(this, ['collection']);
 	this.constructor.prototype = new Zotero.DataObjects();
 	
-	var _collections = {};
-	var _collectionsLoaded = false;
-	
 	this.get = get;
 	this.add = add;
 	this.getUpdated = getUpdated;
 	this.getCollectionsContainingItems = getCollectionsContainingItems;
-	this.reload = reload;
-	this.reloadAll = reloadAll;
 	this.erase = erase;
-	this.unload = unload;
 	
 	/*
 	 * Returns a Zotero.Collection object for a collectionID
 	 */
 	function get(id) {
-		if (!_collectionsLoaded) {
+		if (this._reloadCache) {
 			this.reloadAll();
 		}
-		return (typeof _collections[id]!='undefined') ? _collections[id] : false;
+		return this._objectCache[id] ? this._objectCache[id] : false;
 	}
 	
 	
@@ -107,8 +101,8 @@ Zotero.Collections = new function() {
 		ids = Zotero.flattenArguments(ids);
 		
 		for each(var id in ids) {
-			if (_collections[id]) {
-				_collections[id]._refreshParent();
+			if (this._objectCache[id]) {
+				this._objectCache[id]._refreshParent();
 			}
 		}
 	}
@@ -124,65 +118,10 @@ Zotero.Collections = new function() {
 		ids = Zotero.flattenArguments(ids);
 		
 		for each(var id in ids) {
-			if (_collections[id]) {
-				_collections[id]._refreshChildCollections();
+			if (this._objectCache[id]) {
+				this._objectCache[id]._refreshChildCollections();
 			}
 		}
-	}
-	
-	
-	function reload(id) {
-		if (!_collectionsLoaded) {
-			this.reloadAll();
-			return;
-		}
-		
-		if (!_collections[id]) {
-			_collections[id] = new Zotero.Collection(id);
-		}
-		_collections[id].load();
-	}
-	
-	
-	/**
-	* Loads collection data from DB and adds to internal cache
-	**/
-	function reloadAll() {
-		Zotero.debug('Loading all collections');
-		
-		// This should be the same as the query in Zotero.Collection.load(),
-		// just without a specific collectionID
-		var sql = "SELECT C.*, "
-			+ "(SELECT COUNT(*) FROM collections WHERE "
-			+ "parentCollectionID=C.collectionID)!=0 AS hasChildCollections, "
-			+ "(SELECT COUNT(*) FROM collectionItems WHERE "
-			+ "collectionID=C.collectionID)!=0 AS hasChildItems "
-			+ "FROM collections C";
-		var result = Zotero.DB.query(sql);
-		
-		var collectionIDs = [];
-		
-		if (result) {
-			for (var i=0; i<result.length; i++) {
-				var collectionID = result[i].collectionID;
-				collectionIDs.push(collectionID);
-				
-				// If collection doesn't exist, create new object and stuff in array
-				if (!_collections[collectionID]) {
-					_collections[collectionID] = new Zotero.Collection;
-				}
-				_collections[collectionID].loadFromRow(result[i]);
-			}
-		}
-		
-		// Remove old collections that no longer exist
-		for each(var c in _collections) {
-			if (collectionIDs.indexOf(c.id) == -1) {
-				this.unload(c.id);
-			}
-		}
-		
-		_collectionsLoaded = true;
 	}
 	
 	
@@ -204,18 +143,50 @@ Zotero.Collections = new function() {
 	}
 	
 	
-	/**
-	* Clear collection from internal cache (used by Zotero.Collection.erase())
-	*
-	* Can be passed ids as individual parameters or as an array of ids, or both
-	**/
-	function unload() {
-		var ids = Zotero.flattenArguments(arguments);
+	this._load = function () {
+		if (!arguments[0] && !this._reloadCache) {
+			return;
+		}
 		
-		for(var i=0; i<ids.length; i++) {
-			delete _collections[ids[i]];
+		this._reloadCache = false;
+		
+		// This should be the same as the query in Zotero.Collection.load(),
+		// just without a specific collectionID
+		var sql = "SELECT C.*, "
+			+ "(SELECT COUNT(*) FROM collections WHERE "
+			+ "parentCollectionID=C.collectionID)!=0 AS hasChildCollections, "
+			+ "(SELECT COUNT(*) FROM collectionItems WHERE "
+			+ "collectionID=C.collectionID)!=0 AS hasChildItems "
+			+ "FROM collections C WHERE 1";
+		if (arguments[0]) {
+			sql += " AND collectionID IN (" + Zotero.join(arguments[0], ",") + ")";
+		}
+		var rows = Zotero.DB.query(sql);
+		var ids = [];
+		for each(var row in rows) {
+			var id = row.collectionID;
+			ids.push(id);
+			
+			// Creator doesn't exist -- create new object and stuff in array
+			if (!this._objectCache[id]) {
+				//this.get(id);
+				this._objectCache[id] = new Zotero.Collection;
+				this._objectCache[id].loadFromRow(row);
+			}
+			// Existing creator -- reload in place
+			else {
+				this._objectCache[id].loadFromRow(row);
+			}
+		}
+		
+		// If loading all creators, remove old creators that no longer exist
+		if (!arguments[0]) {
+			for each(var c in this._objectCache) {
+				if (ids.indexOf(c.id) == -1) {
+					this.unload(c.id);
+				}
+			}
 		}
 	}
-
 }
 
