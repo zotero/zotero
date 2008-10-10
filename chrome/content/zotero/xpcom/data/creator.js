@@ -166,9 +166,11 @@ Zotero.Creator.prototype.save = function () {
 		Zotero.DB.query("DELETE FROM creators WHERE creatorID=?", oldID);
 		Zotero.DB.query("UPDATE creators SET key=? WHERE creatorID=?", [row.key, this.id]);
 		
-		Zotero.Creators.unload(oldID);
 		Zotero.Notifier.trigger('id-change', 'creator', oldID + '-' + this.id);
 		
+		// Do this here because otherwise updateLinkedItems() below would
+		// load a duplicate copy in the new position
+		Zotero.Creators.reload(this.id);
 		// update caches
 	}
 	
@@ -230,6 +232,7 @@ Zotero.Creator.prototype.save = function () {
 		}
 		
 		if (this.id) {
+			Zotero.debug("Updating linked items");
 			this.updateLinkedItems();
 		}
 		
@@ -390,29 +393,41 @@ Zotero.Creator.prototype.erase = function () {
 }
 
 
-// Also called from Zotero.Creators.reload()
-Zotero.Creator.prototype.load = function () {
+Zotero.Creator.prototype.load = function (allowFail) {
 	Zotero.debug("Loading data for creator " + this.id + " in Zotero.Creator.load()");
 	
 	if (!this.id) {
 		throw ("creatorID not set in Zotero.Creator.load()");
 	}
 	
-	var sql = "SELECT key, dateModified, creatorDataID, CD.* "
-			+ "FROM creators C NATURAL JOIN creatorData CD WHERE creatorID=?";
-	var data = Zotero.DB.rowQuery(sql, this.id);
+	var sql = "SELECT C.*, CD.* FROM creators C NATURAL JOIN creatorData CD "
+				+ "WHERE creatorID=?";
+	var row = Zotero.DB.rowQuery(sql, this.id);
 	
-	this._init();
-	this._loaded = true;
-	
-	if (!data) {
-		return;
+	if (!row) {
+		if (allowFail) {
+			this._loaded = true;
+			return false;
+		}
+		throw ("Creator " + this.id + " not found in Zotero.Item.load()");
 	}
 	
-	for (var key in data) {
-		this['_' + key] = data[key];
-	}
+	this.loadFromRow(row);
+	return true;
 }
+
+
+Zotero.Creator.prototype.loadFromRow = function (row) {
+	this._init();
+	
+	for (var col in row) {
+		//Zotero.debug("Setting field '" + col + "' to '" + row[col] + "' for creator " + this.id);
+		this['_' + col] = row[col] ? row[col] : '';
+	}
+	
+	this._loaded = true;
+}
+
 
 
 Zotero.Creator.prototype._checkValue = function (field, value) {

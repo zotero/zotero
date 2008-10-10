@@ -302,7 +302,6 @@ Zotero.Item.prototype.loadPrimaryData = function(allowFail) {
 	}
 	
 	this.loadFromRow(row);
-	
 	return true;
 }
 
@@ -1038,7 +1037,6 @@ Zotero.Item.prototype.save = function() {
 		Zotero.DB.query("DELETE FROM items WHERE itemID=?", oldID);
 		Zotero.DB.query("UPDATE items SET key=? WHERE itemID=?", [row.key, this.id]);
 		
-		Zotero.Items.unload(oldID);
 		Zotero.Notifier.trigger('id-change', 'item', oldID + '-' + this.id);
 		
 		// update caches
@@ -2792,7 +2790,7 @@ Zotero.Item.prototype.getTags = function() {
 	
 	var tagObjs = [];
 	for (var i=0; i<tags.length; i++) {
-		var tag = Zotero.Tags.get(tags[i].tagID, true);
+		var tag = Zotero.Tags.get(tags[i].tagID);
 		tagObjs.push(tag);
 	}
 	return tagObjs;

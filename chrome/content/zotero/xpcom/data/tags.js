@@ -29,7 +29,6 @@ Zotero.Tags = new function() {
 	this.constructor.prototype = new Zotero.DataObjects();
 	
 	var _tags = {}; // indexed by tag text
-	var _tagsByID = {}; // indexed by tagID
 	
 	this.get = get;
 	this.getName = getName;
@@ -42,31 +41,18 @@ Zotero.Tags = new function() {
 	this.getTagItems = getTagItems;
 	this.search = search;
 	this.rename = rename;
-	this.reload = reload;
 	this.erase = erase;
 	this.purge = purge;
-	this.unload = unload;
 	
 	
 	/*
 	 * Returns a tag and type for a given tagID
 	 */
-	function get(tagID, skipCheck) {
-		if (_tagsByID[tagID]) {
-			return _tagsByID[tagID];
+	function get(id, skipCheck) {
+		if (this._reloadCache) {
+			this.reloadAll();
 		}
-		
-		if (!skipCheck) {
-			var sql = 'SELECT COUNT(*) FROM tags WHERE tagID=?';
-			var result = Zotero.DB.valueQuery(sql, tagID);
-			
-			if (!result) {
-				return false;
-			}
-		}
-		
-		_tagsByID[tagID] = new Zotero.Tag(tagID);
-		return _tagsByID[tagID];
+		return this._objectCache[id] ? this._objectCache[id] : false;
 	}
 	
 	
@@ -326,11 +312,6 @@ Zotero.Tags = new function() {
 	}
 	
 	
-	function reload(ids) {
-		this.unload(ids);
-	}
-	
-	
 	function erase(ids) {
 		ids = Zotero.flattenArguments(ids);
 		
@@ -415,12 +396,12 @@ Zotero.Tags = new function() {
 	 *
 	 * @param	int|array	ids	 	One or more tagIDs
 	 */
-	function unload() {
+	this.unload = function () {
 		var ids = Zotero.flattenArguments(arguments);
 		
 		for each(var id in ids) {
-			var tag = _tagsByID[id];
-			delete _tagsByID[id];
+			var tag = this._objectCache[id];
+			delete this._objectCache[id];
 			if (tag && _tags[tag.type]) {
 				delete _tags[tag.type]['_' + tag.name];
 			}
@@ -428,9 +409,49 @@ Zotero.Tags = new function() {
 	}
 	
 	
-	this.unloadAll = function (ids) {
-		_tags = {};
-		_tagsByID = {};
+	this._load = function () {
+		if (!arguments[0] && !this._reloadCache) {
+			return;
+		}
+		
+		if (this._reloadCache) {
+			_tags = {};
+		}
+		
+		this._reloadCache = false;
+		
+		// This should be the same as the query in Zotero.Tag.load(),
+		// just without a specific tagID
+		var sql = "SELECT * FROM tags WHERE 1";
+		if (arguments[0]) {
+			sql += " AND tagID IN (" + Zotero.join(arguments[0], ",") + ")";
+		}
+		var rows = Zotero.DB.query(sql);
+		var ids = [];
+		for each(var row in rows) {
+			var id = row.tagID;
+			ids.push(id);
+			
+			// Tag doesn't exist -- create new object and stuff in array
+			if (!this._objectCache[id]) {
+				//this.get(id);
+				this._objectCache[id] = new Zotero.Tag;
+				this._objectCache[id].loadFromRow(row);
+			}
+			// Existing tag -- reload in place
+			else {
+				this._objectCache[id].loadFromRow(row);
+			}
+		}
+		
+		if (!arguments[0]) {
+			// If loading all tags, remove old tags that no longer exist
+			for each(var c in this._objectCache) {
+				if (ids.indexOf(c.id) == -1) {
+					this.unload(c.id);
+				}
+			}
+		}
 	}
 }
 

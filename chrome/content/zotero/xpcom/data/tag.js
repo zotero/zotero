@@ -118,19 +118,24 @@ Zotero.Tag.prototype.load = function() {
 	}
 	
 	var sql = "SELECT name, type, dateModified, key FROM tags WHERE tagID=?";
-	var data = Zotero.DB.rowQuery(sql, this.id);
+	var row = Zotero.DB.rowQuery(sql, this.id);
 	
-	this._init();
-	this._loaded = true;
-	
-	if (!data) {
-		return;
-	}
-	
-	for (var key in data) {
-		this['_' + key] = data[key];
-	}
+	this.loadFromRow(row);
+	return true;
 }
+
+
+Zotero.Tag.prototype.loadFromRow = function (row) {
+	this._init();
+	
+	for (var col in row) {
+		//Zotero.debug("Setting field '" + col + "' to '" + row[col] + "' for tag " + this.id);
+		this['_' + col] = row[col] ? row[col] : '';
+	}
+	
+	this._loaded = true;
+}
+
 
 
 /**
@@ -249,7 +254,6 @@ Zotero.Tag.prototype.save = function () {
 		
 		Zotero.DB.query("UPDATE tags SET key=? WHERE tagID=?", [row.key, this.id]);
 		
-		Zotero.Tags.unload(oldID);
 		Zotero.Notifier.trigger('id-change', 'tag', oldID + '-' + this.id);
 		
 		// update caches

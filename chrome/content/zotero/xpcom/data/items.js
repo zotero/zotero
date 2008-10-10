@@ -34,18 +34,13 @@ Zotero.Items = new function() {
 	this.getAll = getAll;
 	this.getUpdated = getUpdated;
 	this.add = add;
-	this.reload = reload;
-	this.reloadAll = reloadAll;
 	this.cacheFields = cacheFields;
 	this.erase = erase;
 	this.purge = purge;
-	this.unload = unload;
 	this.getFirstCreatorSQL = getFirstCreatorSQL;
 	this.getSortTitle = getSortTitle;
 	
 	// Private members
-	var _items = [];
-	var _itemsLoaded = false;
 	var _cachedFields = [];
 	var _firstCreatorSQL = '';
 	
@@ -71,33 +66,33 @@ Zotero.Items = new function() {
 		
 		for (var i=0; i<ids.length; i++) {
 			// Check if already loaded
-			if (!_items[ids[i]]) {
+			if (!this._objectCache[ids[i]]) {
 				toLoad.push(ids[i]);
 			}
 		}
 		
 		// New items to load
 		if (toLoad.length) {
-			_load(toLoad);
+			this._load(toLoad);
 		}
 		
 		// If single id, return the object directly
 		if (arguments[0] && typeof arguments[0]!='object'
 				&& typeof arguments[1]=='undefined') {
-			if (!_items[arguments[0]]) {
+			if (!this._objectCache[arguments[0]]) {
 				Zotero.debug("Item " + arguments[0] + " doesn't exist", 2);
 				return false;
 			}
-			return _items[arguments[0]];
+			return this._objectCache[arguments[0]];
 		}
 		
 		// Otherwise, build return array
 		for (i=0; i<ids.length; i++) {
-			if (!_items[ids[i]]) {
+			if (!this._objectCache[ids[i]]) {
 				Zotero.debug("Item " + ids[i] + " doesn't exist", 2);
 				continue;
 			}
-			loaded.push(_items[ids[i]]);
+			loaded.push(this._objectCache[ids[i]]);
 		}
 		
 		return loaded;
@@ -210,36 +205,19 @@ Zotero.Items = new function() {
 	}
 	
 	
-	/*
-	 * Reloads data for specified items into internal array
-	 *
-	 * Can be passed ids as individual parameters or as an array of ids, or both
-	 */
-	function reload() {
-		if (!arguments[0]) {
-			return false;
+	function cacheFields(fields, items) {
+		if (items && items.length == 0) {
+			return;
 		}
 		
-		var ids = Zotero.flattenArguments(arguments);
-		Zotero.debug('Reloading ' + ids);
-		_load(ids);
-		
-		return true;
-	}
-	
-	
-	function reloadAll() {
-		Zotero.debug("Loading all items");
-		_items = [];
-		_itemsLoaded = false;
-		_load();
-	}
-	
-	
-	function cacheFields(fields, items) {
 		Zotero.debug("Caching fields [" + fields.join() + "]"
-			+ (items ? " for " + items + " items" : ''));
-		_load(items);
+			+ (items ? " for " + items.length + " items" : ''));
+		if (items && items.length > 0) {
+			this._load(items);
+		}
+		else {
+			this._load();
+		}
 		
 		var primaryFields = [];
 		var fieldIDs = [];
@@ -270,7 +248,7 @@ Zotero.Items = new function() {
 			var rows = Zotero.DB.query(sql);
 			for each(var row in rows) {
 				//Zotero.debug('Calling loadFromRow for item ' + row.itemID);
-				_items[row.itemID].loadFromRow(row);
+				this._objectCache[row.itemID].loadFromRow(row);
 			}
 		}
 		
@@ -292,8 +270,8 @@ Zotero.Items = new function() {
 		var itemDataRows = Zotero.DB.query(sql);
 		for each(var row in itemDataRows) {
 			//Zotero.debug('Setting field ' + row.fieldID + ' for item ' + row.itemID);
-			if (_items[row.itemID]) {
-				_items[row.itemID].setField(row.fieldID, row.value, true);
+			if (this._objectCache[row.itemID]) {
+				this._objectCache[row.itemID].setField(row.fieldID, row.value, true);
 			}
 			else {
 				if (!missingItems) {
@@ -323,8 +301,8 @@ Zotero.Items = new function() {
 			
 			for each(var row in rows) {
 				//Zotero.debug('Setting title for note ' + row.itemID);
-				if (_items[row.itemID]) {
-					_items[row.itemID].setField(titleFieldID, row['title'], true);
+				if (this._objectCache[row.itemID]) {
+					this._objectCache[row.itemID].setField(titleFieldID, row.title, true);
 				}
 				else {
 					if (!missingItems) {
@@ -341,10 +319,10 @@ Zotero.Items = new function() {
 		// Set nonexistent fields in the cache list to false (instead of null)
 		for each(var itemID in allItemIDs) {
 			for each(var fieldID in fieldIDs) {
-				if (Zotero.ItemFields.isValidForType(fieldID, _items[itemID].itemTypeID)) {
+				if (Zotero.ItemFields.isValidForType(fieldID, this._objectCache[itemID].itemTypeID)) {
 					if (!itemFieldsCached[itemID] || !itemFieldsCached[itemID][fieldID]) {
 						//Zotero.debug('Setting field ' + fieldID + ' to false for item ' + itemID);
-						_items[itemID].setField(fieldID, false, true);
+						this._objectCache[itemID].setField(fieldID, false, true);
 					}
 				}
 			}
@@ -406,14 +384,6 @@ Zotero.Items = new function() {
 		if (Zotero.Sync.Storage.active && ZU.probability(10)) {
 			Zotero.Sync.Storage.purgeDeletedStorageFiles();
 		}
-	}
-	
-	
-	/**
-	* Clear item from internal array (used by Zotero.Item.erase())
-	**/
-	function unload(id) {
-		delete _items[id];
 	}
 	
 	
@@ -541,8 +511,8 @@ Zotero.Items = new function() {
 	}
 	
 	
-	function _load() {
-		if (!arguments[0] && _itemsLoaded) {
+	this._load = function () {
+		if (!arguments[0] && !this._reloadCache) {
 			return;
 		}
 		
@@ -552,9 +522,8 @@ Zotero.Items = new function() {
 			+ "(SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=I.itemID) AS numNotes, "
 			+ "(SELECT COUNT(*) FROM itemAttachments WHERE sourceItemID=I.itemID) AS numAttachments "
 			+ 'FROM items I WHERE 1';
-		
 		if (arguments[0]) {
-			sql += ' AND I.itemID IN (' + Zotero.join(arguments,',') + ')';
+			sql += ' AND I.itemID IN (' + Zotero.join(arguments[0], ',') + ')';
 		}
 		var itemsRows = Zotero.DB.query(sql);
 		var itemIDs = [];
@@ -564,30 +533,28 @@ Zotero.Items = new function() {
 			itemIDs.push(itemID);
 			
 			// Item doesn't exist -- create new object and stuff in array
-			if (!_items[row.itemID]) {
+			if (!this._objectCache[row.itemID]) {
 				var item = new Zotero.Item();
 				item.loadFromRow(row, true);
-				_items[row.itemID] = item;
+				this._objectCache[row.itemID] = item;
 			}
 			// Existing item -- reload in place
 			else {
-				_items[row.itemID].loadFromRow(row, true);
+				this._objectCache[row.itemID].loadFromRow(row, true);
 			}
 		}
 		
 		// If loading all items, remove old items that no longer exist
 		if (!arguments[0]) {
-			for each(var c in _items) {
+			for each(var c in this._objectCache) {
 				if (itemIDs.indexOf(c.id) == -1) {
 					this.unload(c.id);
 				}
 			}
-		}
-		
-		if (!arguments[0]) {
-			_itemsLoaded = true;
+			
 			_cachedFields = ['itemID', 'itemTypeID', 'dateAdded', 'dateModified',
 				'firstCreator', 'numNotes', 'numAttachments', 'numChildren'];
+			this._reloadCache = false;
 		}
 	}
 }
