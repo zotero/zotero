@@ -117,7 +117,7 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	this.unload = function () {
 		var ids = Zotero.flattenArguments(arguments);
 		for (var i=0; i<ids.length; i++) {
-			delete _objectCache[ids[i]];
+			delete this._objectCache[ids[i]];
 		}
 	}
 }
