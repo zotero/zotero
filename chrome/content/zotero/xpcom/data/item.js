@@ -1242,7 +1242,7 @@ Zotero.Item.prototype.save = function() {
 				var parent = this.isNote() ? this.getSource() : null;
 				var noteText = this._noteText ? this._noteText : '';
 				// Add <div> wrapper if not present
-				if (!noteText.match(/^<div class="zotero\-note znv[0-9]+">.*<\/div>$/)) {
+				if (!noteText.match(/^<div class="zotero-note znv[0-9]+">[\s\S]*<\/div>$/)) {
 					noteText = '<div class="zotero-note znv1">' + noteText + '</div>';
 				}
 				
@@ -1583,7 +1583,7 @@ Zotero.Item.prototype.save = function() {
 				var parent = this.isNote() ? this.getSource() : null;
 				var noteText = this._noteText;
 				// Add <div> wrapper if not present
-				if (!noteText.match(/^<div class="zotero\-note znv[0-9]+">.*<\/div>$/)) {
+				if (!noteText.match(/^<div class="zotero-note znv[0-9]+">[\s\S]*<\/div>$/)) {
 					noteText = '<div class="zotero-note znv1">' + noteText + '</div>';
 				}
 				var bindParams = [
@@ -1994,8 +1994,22 @@ Zotero.Item.prototype.getNote = function() {
 	
 	var sql = "SELECT note FROM itemNotes WHERE itemID=?";
 	var note = Zotero.DB.valueQuery(sql, this.id);
+	
+	// Convert non-HTML notes on-the-fly
+	if (!note.match(/^<div class="zotero-note znv[0-9]+">[\s\S]*<\/div>$/)) {
+		note = Zotero.Utilities.prototype.htmlSpecialChars(note);
+		note = '<p>'
+				+ note.replace(/\n/g, '</p><p>')
+					.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+					.replace(/  /g, '&nbsp;&nbsp;')
+			+ '</p>';
+		note = note.replace(/<p>\s*<\/p>/g, '<p>&nbsp;</p>');
+		var sql = "UPDATE itemNotes SET note=? WHERE itemID=?";
+		Zotero.DB.query(sql, [note, this.id]);
+	}
+	
 	// Don't include <div> wrapper when returning value
-	note = note.replace(/^<div class="zotero-note znv[0-9]+">(.*)<\/div>$/, '$1');
+	note = note.replace(/^<div class="zotero-note znv[0-9]+">([\s\S]*)<\/div>$/, '$1');
 	
 	this._noteText = note ? note : '';
 	
