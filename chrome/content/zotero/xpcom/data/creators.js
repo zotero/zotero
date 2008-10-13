@@ -345,8 +345,8 @@ Zotero.Creators = new function() {
 		
 		var creators = getCreatorsWithData(creatorDataID);
 		for each(var creatorID in creators) {
-			if (this._objectCache[creatorID]) {
-				this._objectCache[creatorID].load();
+			if (Zotero.Creators._objectCache[creatorID]) {
+				Zotero.Creators._objectCache[creatorID].load();
 			}
 		}
 	}
