@@ -121,7 +121,7 @@
 							var self = this;
 							
 							this._eventHandler = function (event) {
-								Zotero.debug(event.type);
+								//Zotero.debug(event.type);
 								switch (event.type) {
 									case 'keypress':
 										// Ignore keypresses that don't change
