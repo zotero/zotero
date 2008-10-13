@@ -155,11 +155,11 @@
 						textbox.setAttribute('readonly', 'true');
 					}
 					
-					var scrollPos = textbox.inputField.scrollTop;
+					//var scrollPos = textbox.inputField.scrollTop;
 					if (this.item) {
 						textbox.value = this.item.getNote();
 					}
-					textbox.inputField.scrollTop = scrollPos;
+					//textbox.inputField.scrollTop = scrollPos;
 					
 					this._id('linksbox').hidden = !(this.displayTags && this.displayRelated);
 					
@@ -322,7 +322,7 @@
 			<method name="disableUndo">
 				<body>
 				<![CDATA[
-					this.noteField.editor.enableUndo(true);
+					//this.noteField.editor.enableUndo(true);
 				]]>
 				</body>
 			</method>
@@ -330,7 +330,7 @@
 			<method name="enableUndo">
 				<body>
 				<![CDATA[
-					this.noteField.editor.enableUndo(false);
+					//this.noteField.editor.enableUndo(false);
 				]]>
 				</body>
 			</method>
@@ -357,7 +357,7 @@
 		<content>
 			<xul:vbox xbl:inherits="flex">
 				<xul:label id="citeLabel"/>
-				<xul:textbox id="noteField" multiline="true" type="timed" timeout="1000" flex="1"/>
+				<xul:textbox id="noteField" type="styled" mode="note" timeout="1000" flex="1"/>
 				<xul:hbox id="linksbox" hidden="true">
 					<xul:linksbox id="links" flex="1"/>
 				</xul:hbox>

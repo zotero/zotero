@@ -1240,10 +1240,16 @@ Zotero.Item.prototype.save = function() {
 				sql = "INSERT INTO itemNotes "
 						+ "(itemID, sourceItemID, note, title) VALUES (?,?,?,?)";
 				var parent = this.isNote() ? this.getSource() : null;
+				var noteText = this._noteText ? this._noteText : '';
+				// Add <div> wrapper if not present
+				if (!noteText.match(/^<div class="zotero\-note znv[0-9]+">.*<\/div>$/)) {
+					noteText = '<div class="zotero-note znv1">' + noteText + '</div>';
+				}
+				
 				var bindParams = [
 					itemID,
 					parent ? parent : null,
-					this._noteText ? this._noteText : '',
+					noteText,
 					this._noteTitle ? this._noteTitle : ''
 				];
 				Zotero.DB.query(sql, bindParams);
@@ -1575,10 +1581,15 @@ Zotero.Item.prototype.save = function() {
 				sql = "REPLACE INTO itemNotes "
 						+ "(itemID, sourceItemID, note, title) VALUES (?,?,?,?)";
 				var parent = this.isNote() ? this.getSource() : null;
+				var noteText = this._noteText;
+				// Add <div> wrapper if not present
+				if (!noteText.match(/^<div class="zotero\-note znv[0-9]+">.*<\/div>$/)) {
+					noteText = '<div class="zotero-note znv1">' + noteText + '</div>';
+				}
 				var bindParams = [
 					this.id,
 					parent ? parent : null,
-					this._noteText,
+					noteText,
 					this._noteTitle
 				];
 				Zotero.DB.query(sql, bindParams);
@@ -1983,6 +1994,8 @@ Zotero.Item.prototype.getNote = function() {
 	
 	var sql = "SELECT note FROM itemNotes WHERE itemID=?";
 	var note = Zotero.DB.valueQuery(sql, this.id);
+	// Don't include <div> wrapper when returning value
+	note = note.replace(/^<div class="zotero-note znv[0-9]+">(.*)<\/div>$/, '$1');
 	
 	this._noteText = note ? note : '';
 	

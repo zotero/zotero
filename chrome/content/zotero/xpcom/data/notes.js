@@ -30,6 +30,9 @@ Zotero.Notes = new function() {
 	* Return first line (or first MAX_LENGTH characters) of note content
 	**/
 	function noteToTitle(text) {
+		text = Zotero.Utilities.prototype.trim(text);
+		text = Zotero.Utilities.prototype.unescapeHTML(text);
+		
 		var max = this.MAX_TITLE_LENGTH;
 		
 		var t = text.substring(0, max);

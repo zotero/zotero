@@ -28,23 +28,33 @@
 		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<binding id="styled-textbox">
 		<implementation>
+			<field name="_mode"/>
+			<field name="_format"/>
+			<field name="_loadHandler"/>
+			<field name="_commandString"/>
+			<field name="_eventHandler"/>
+			<field name="_timer"/>
+			
 			<constructor><![CDATA[
-					this._browser = document.getAnonymousElementByAttribute(this, "anonid", "rt-view");
+					this.mode = this.getAttribute('mode');
+					
+					this._iframe = document.getAnonymousElementByAttribute(this, "anonid", "rt-view");
 					this._editor = null;
 					this._value = null;
 					
 					this._rtfMap = {
 						"\\":"\\\\",
-						"&amp;":"&",
-						"&lt;":"<",
-						"&gt;":">",
+						"<em>":"\\i ",
+						"</em>":"\\i0 ",
 						"<i>":"\\i ",
 						"</i>":"\\i0 ",
+						"<strong>":"\\b ",
+						"</strong>":"\\b0 ",
 						"<b>":"\\b ",
 						"</b>":"\\b0 ",
 						"<u>":"\\ul ",
 						"</u>":"\\ul0 ",
-						"<br>":"\x0B",
+						"<br />":"\x0B",
 						"<sup>":"\\super ",
 						"</sup>":"\\super0 ",
 						"<sub>":"\\sub ",
@@ -56,40 +66,107 @@
 					
 					// not sure why an event is necessary here, but it is
 					var me = this;
-					this._loadHandler = function() {me._browserLoaded()};
-					this._browser.addEventListener("DOMContentLoaded", this._loadHandler, false);
+					this._loadHandler = function() {me._iframeLoaded()};
+					this._iframe.addEventListener("DOMContentLoaded", this._loadHandler, false);
 			]]></constructor>
 			
-			<!-- Called when browser is loaded. Until the browser is loaded, we can't do 
+			<!-- Called when iframe browser is loaded. Until the browser is loaded, we can't do 
 			     anything with it, so we just keep track of what's supposed to
 			     happen. -->
-			<method name="_browserLoaded">
+			<method name="_iframeLoaded">
 				<body><![CDATA[
-					this._browser.removeEventListener("DOMContentLoaded", this._loadHandler, false);
+					this._iframe.removeEventListener("DOMContentLoaded", this._loadHandler, false);
 					
 					var ios = Components.classes["@mozilla.org/network/io-service;1"].
 						getService(Components.interfaces.nsIIOService);
-					var uri = ios.newURI("chrome://zotero/content/tiny_mce/integration.html", null, null);
+					var uri = ios.newURI("chrome://zotero/content/tiny_mce/" + this.mode + ".html", null, null);
 					var chromeReg = Components.classes["@mozilla.org/chrome/chrome-registry;1"].
 						getService(Components.interfaces.nsIChromeRegistry);
 					var fileURI = chromeReg.convertChromeURL(uri);
 					
-					this._browser.webNavigation.loadURI(fileURI.spec,
+					this._iframe.webNavigation.loadURI(fileURI.spec,
 						Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, null, null);
 					
 					// Register handler for deferred setting of content
 					var me = this;
+					
 					var listener = function() {
-						me._browser.removeEventListener("DOMContentLoaded", listener, false);
-						var editor = me._browser.contentWindow.wrappedJSObject.tinyMCE.get("tinymce");
+						me._iframe.removeEventListener("DOMContentLoaded", listener, false);
+						var editor = me._iframe.contentWindow.wrappedJSObject.tinyMCE.get("tinymce");
+						
 						editor.onInit.add(function() {
 							me._editor = editor;
 							if(me._value) me.value = me._value;
 						});
+						
+						if (me._eventHandler) {
+							me._iframe.contentWindow.wrappedJSObject.handleEvent = me._eventHandler;
+						}
 					};
-					this._browser.addEventListener("DOMContentLoaded", listener, false);
+					this._iframe.addEventListener("DOMContentLoaded", listener, false);
 				]]></body>
 			</method>
+			
+			<property name="mode">
+				<getter><![CDATA[
+					if (!this._mode) {
+						throw ("mode is not defined in styled-textbox.xml");
+					}
+					return this._mode;
+				]]></getter>
+				<setter><![CDATA[
+					Zotero.debug("Setting mode to " + val);
+					switch (val) {
+						case 'note':
+							var self = this;
+							
+							this._eventHandler = function (event) {
+								Zotero.debug(event.type);
+								switch (event.type) {
+									case 'keypress':
+										// Ignore keypresses that don't change
+										// any text
+										if (!event.isChar &&
+												event.keyCode != event.DOM_VK_DELETE &&
+												event.keyCode != event.DOM_VK_BACK_SPACE) {
+											//Zotero.debug("Not a char");
+											return;
+										}
+										break;
+									
+									case 'change':
+										Zotero.debug("Event type is " + event.type);
+										break;
+									
+									default:
+										return;
+								}
+								
+								if (self._timer) {
+									clearTimeout(self._timer);
+								}
+								
+								// Get the command event
+								self._timer = self.timeout && setTimeout(function () {
+									var attr = self.getAttribute('oncommand');
+									attr = attr.replace('this', 'thisObj');
+									var func = new Function('thisObj', 'event', attr);
+									func(self, event);
+								}, self.timeout);
+								
+								return true;
+							};
+							break;
+						
+						case 'integration':
+							break;
+							
+						default:
+							throw ("Invalid mode '" + val + "' in styled-textbox.xml");
+					}
+					return this._mode = val;
+				]]></setter>
+			</property>
 			
 			<!-- Sets or returns formatting (currently, HTML or Integration) of rich text box -->
 			<property name="format">
@@ -104,29 +181,49 @@
 			<!-- Sets or returns contents of rich text box -->
 			<property name="value">
 				<getter><![CDATA[
-					this._editor.execCommand("mceCleanup");
-					var body = this._editor.getBody();
-					var output = body.innerHTML;
+					var output = this._editor.getBody();
+					output = output.innerHTML;
+					Zotero.debug("RAW");
+					Zotero.debug(output);
+					
+					var output = this._editor.getContent();
+					Zotero.debug("XHTML");
+					Zotero.debug(output);
 					
 					if(this._format == "Integration" || this._format == "RTF") {
 						// do appropriate replacement operations
 						for(var needle in this._rtfMap) {
 							output = output.replace(needle, this._rtfMap[needle], "g"); 
 						}
+						
 						output = output.replace("<p>", "", "g");
 						output = output.replace("</p>", "\\par ", "g");
 						output = output.replace(/<\/?div[^>]*>/g, "");
 						output = Zotero.Utilities.prototype.trim(output);
+						output = Zotero.Utilities.prototype.unescapeHTML(output);
 						if(output.substr(-4) == "\\par") output = output.substr(0, output.length-4);
 					}
 					
 					return output;
 				]]></getter>
 				<setter><![CDATA[
+					Zotero.debug("Setting value!");
+					
+					if (self._timer) {
+						clearTimeout(self._timer);
+					}
+					
 					if(!this._editor) {
 						// if not loaded, wait until it is to set
 						return this._value = val;
 					}
+					
+					if (this.value == val) {
+						Zotero.debug("Value hasn't changed!");
+						return;
+					}
+					
+					Zotero.debug("Value has changed");
 					
 					var html = val;
 					
@@ -169,11 +266,16 @@
 					return val;
 				]]></setter>
 			</property>
+			
+			<property name="timeout"
+					onset="this.setAttribute('timeout', val); return val;"
+					onget="return parseInt(this.getAttribute('timeout')) || 0;"/>
 		</implementation>
 		
 		<content>
-			<xul:iframe flex="1" anonid="rt-view" class="rt-view" type="content" style="min-height:130px"
-				xbl:inherits="onfocus,onblur,flex,width,height,hidden"/>
+			<xul:iframe flex="1" anonid="rt-view" class="rt-view" type="content"
+				xbl:inherits="onfocus,onblur,flex,width,height,hidden"
+				style="overflow: hidden"/>
 		</content>
 	</binding>
 </bindings>

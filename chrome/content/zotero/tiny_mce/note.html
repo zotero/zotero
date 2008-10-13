@@ -2,24 +2,79 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>TinyMCE</title>
+<style>
+html, body {
+	height: 100%;
+	margin: 0;
+}
+#tinymce_parent {
+	display: block;
+	height: 100%;
+}
+#tinymce_tbl {
+	height: 100% !important;
+	width: 100% !important;
+}
+
+table.mceLayout > tbody > tr.mceLast {
+	position: absolute;
+	display: block;
+	top: 82px;
+	bottom: 2px;
+	left: 1px;
+	right: 1px;
+}
+
+td.mceIframeContainer {
+	display: block;
+	height: 100% !important;
+	width: 100% !important;
+}
+#tinymce_ifr {
+	height: 100% !important;
+	width: 100% !important;
+}
+</style>
 <script type="text/javascript" src="tiny_mce.js"></script>
 <script type="text/javascript">
 	tinyMCE.init({
 		// General options
-		mode : "textareas",
+		mode : "none",
 		theme : "advanced",
-
+		content_css : "../../../skin/default/zotero/tinymce/note-content.css",
+		button_tile_map : true,
+		language : "en", // TODO: localize
+		entity_encoding : "raw",
+		gecko_spellcheck : true,
+		
+		handle_event_callback : function (event) {
+			if (handleEvent) {
+				handleEvent(event);
+			}
+		},
+		
+		onchange_callback : function () {
+			var event = { type: 'change' };
+			if (handleEvent) {
+				handleEvent(event);
+			}
+		},
+		
+		fix_list_elements : true,
+		fix_table_elements : true,
+		
 		// Theme options
-		theme_advanced_buttons1 : "bold,italic,underline,strikethrough,|,sub,sup,|,forecolor,backcolor,|,removeformat",
+		theme_advanced_buttons1 : "bold,italic,underline,strikethrough,|,sub,sup,|,forecolor,backcolor,|,removeformat,code",
 		theme_advanced_buttons2 : "justifyleft,justifycenter,justifyright,justifyfull,|,bullist,numlist,|,outdent,indent,blockquote,|,link,unlink",
 		theme_advanced_buttons3 : "formatselect,fontselect,fontsizeselect",
 		theme_advanced_toolbar_location : "top",
 		theme_advanced_toolbar_align : "left",
 		theme_advanced_resizing : true
 	});
+	tinyMCE.execCommand("mceAddControl", true, "tinymce");
 </script>
 </head>
 <body>
-<textarea id="tinymce" rows="15" cols="80" style="width: 100%"></textarea>
+<div id="tinymce"></div>
 </body>
 </html>

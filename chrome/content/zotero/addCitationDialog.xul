@@ -192,7 +192,7 @@
 			</hbox>
 		</vbox>
 		
-		<textbox id="editor" type="styled" hidden="true" flex="1"/>
+		<textbox id="editor" type="styled" mode="integration" hidden="true" flex="1"/>
 		
 		<hbox style="margin-top: 15px">
 			<hbox>

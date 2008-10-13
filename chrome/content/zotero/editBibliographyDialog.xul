@@ -111,6 +111,6 @@
 			</hbox>
 		</vbox>
 		
-		<textbox id="editor" type="styled" flex="1"/>
+		<textbox id="editor" type="styled" mode="integration" flex="1"/>
 	</vbox>
 </dialog>
