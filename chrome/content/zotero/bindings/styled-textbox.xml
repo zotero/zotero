@@ -228,7 +228,7 @@
 					var html = val;
 					
 					if(this._format == "Integration" || this._format == "RTF") {
-						bodyStyle = "";
+						var bodyStyle = "";
 						if(html.substr(0, 3) == "\\li") {
 							// try to show paragraph formatting
 							var returnIndex = html.indexOf("\r\n");
