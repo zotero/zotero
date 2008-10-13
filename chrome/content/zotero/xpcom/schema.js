@@ -326,7 +326,7 @@ Zotero.Schema = new function(){
 			while (entries.hasMoreElements()) {
 				var file = entries.getNext();
 				file.QueryInterface(Components.interfaces.nsIFile);
-				if (!file.leafName.match(fileNameRE) || file.isDirectory()) {
+				if (!file.exists || !file.leafName.match(fileNameRE) || file.isDirectory()) {
 					continue;
 				}
 				var newObj = new Zotero[Mode](file);
