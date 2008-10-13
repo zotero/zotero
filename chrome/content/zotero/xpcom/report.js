@@ -70,7 +70,14 @@ Zotero.Report = new function() {
 				
 				// Independent note
 				if (arr['note']) {
-					content += '<p>' + escapeXML(arr['note']) + '</p>\n';
+					content += '\n';
+					if (arr.note.substr(0, 1024).match(/<p[^>]*>/)) {
+						content += arr.note + '\n';
+					}
+					// Wrap plaintext notes in <p>
+					else {
+						content += '<p class="plaintext">' + arr.note + '</p>\n';
+					}
 				}
 			}
 			
@@ -85,7 +92,15 @@ Zotero.Report = new function() {
 					content += '<ul class="notes">\n';
 					for each(var note in arr.reportChildren.notes) {
 						content += '<li id="i' + note.itemID + '">\n';
-						content += '<p>' + escapeXML(note.note) + '</p>\n';
+						
+						content += note.note + '\n';
+						if (note.note.substr(0, 1024).match(/<p[^>]*>/)) {
+							content += note.note + '\n';
+						}
+						// Wrap plaintext notes in <p>
+						else {
+							content += '<p class="plaintext">' + note.note + '</p>\n';
+						}
 						
 						// Child note tags
 						content += _generateTagsList(note);

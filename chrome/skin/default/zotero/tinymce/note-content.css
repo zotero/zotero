@@ -1,0 +1,14 @@
+body {
+	font-size: 11px;
+	font-family: Lucida Grande, Tahoma, Verdana, Helvetica, sans-serif;
+}
+
+/*
+blockquote p:not(:empty):before  {
+	content: '“'
+}
+
+blockquote p:not(:empty):after {
+	content: '”'
+}
+*/

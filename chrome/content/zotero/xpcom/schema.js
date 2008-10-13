@@ -1945,6 +1945,11 @@ Zotero.Schema = new function(){
 				if (i==42) {
 					Zotero.DB.query("UPDATE itemAttachments SET syncState=0");
 				}
+				
+				// 1.5 Sync Preview 2.3
+				if (i==43) {
+					Zotero.DB.query("UPDATE itemNotes SET note='<div class=\"zotero-note znv1\">' || TEXT2HTML(note) || '</div>' WHERE note NOT LIKE '<div class=\"zotero-note %'");
+				}
 			}
 			
 			_updateDBVersion('userdata', toVersion);
