@@ -66,7 +66,7 @@ Zotero.Creator.prototype.__defineSetter__('creatorDataID', function () { this._s
 
 Zotero.Creator.prototype._get = function (field) {
 	if (this.id && !this._loaded) {
-		this.load();
+		this.load(true);
 	}
 	return this['_' + field];
 }
@@ -82,7 +82,7 @@ Zotero.Creator.prototype._set = function (field, val) {
 	
 	if (this.id) {
 		if (!this._loaded) {
-			this.load();
+			this.load(true);
 		}
 	}
 	else {
