@@ -56,7 +56,7 @@ td {
 }
 
 
-ul {
+ul.report, ul.notes, ul.tags {
 	list-style: none;
 	margin-left: 0;
 	padding-left: 0;
@@ -111,8 +111,18 @@ ul.notes > li p:last-child {
 	margin-bottom: 0;
 }
 
+/* Add quotation marks around blockquote */
+ul.notes > li blockquote p:not(:empty):before,
+li.note blockquote p:not(:empty):before {
+	content: '“';
+}
 
-/* Preserve whitespace on notes */
+ul.notes > li blockquote p:not(:empty):last-child:after,
+li.note blockquote p:not(:empty):last-child:after {
+	content: '”';
+}
+
+/* Preserve whitespace on plaintext notes */
 ul.notes li p.plaintext, li.note p.plaintext {
 	white-space: pre-wrap;
 }

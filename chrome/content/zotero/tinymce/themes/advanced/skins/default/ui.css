@@ -49,8 +49,10 @@
 /* ListBox */
 .defaultSkin .mceListBox {direction:ltr}
 .defaultSkin .mceListBox, .defaultSkin .mceListBox a {display:block}
-.defaultSkin .mceListBox .mceText {padding-left:4px; width:70px; text-align:left; border:1px solid #CCC; border-right:0; background:#FFF; font-family:Tahoma,Verdana,Arial,Helvetica; font-size:11px; height:20px; line-height:20px; overflow:hidden}
-.defaultSkin .mceListBox .mceOpen {width:9px; height:20px; background:url(../../img/icons.gif) -741px 0; margin-right:2px; border:1px solid #CCC;}
+/* width changed to 65px by Dan S./Zotero */
+.defaultSkin .mceListBox .mceText {padding-left:4px; width:65px; text-align:left; border:1px solid #CCC; border-right:0; background:#FFF; font-family:Tahoma,Verdana,Arial,Helvetica; font-size:11px; height:20px; line-height:20px; overflow:hidden}
+/* margin-right changed to 1px by Dan S./Zotero */
+.defaultSkin .mceListBox .mceOpen {width:9px; height:20px; background:url(../../img/icons.gif) -741px 0; margin-right:1px; border:1px solid #CCC;}
 .defaultSkin table.mceListBoxEnabled:hover .mceText, .defaultSkin .mceListBoxHover .mceText, .defaultSkin .mceListBoxSelected .mceText {border:1px solid #A2ABC0; border-right:0; background:#FFF}
 .defaultSkin table.mceListBoxEnabled:hover .mceOpen, .defaultSkin .mceListBoxHover .mceOpen, .defaultSkin .mceListBoxSelected .mceOpen {background-color:#FFF; border:1px solid #A2ABC0}
 .defaultSkin .mceListBoxDisabled a.mceText {color:gray; background-color:transparent;}

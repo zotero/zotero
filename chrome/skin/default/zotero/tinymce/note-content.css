@@ -1,14 +1,21 @@
-body {
+body, td, pre {
 	font-size: 11px;
 	font-family: Lucida Grande, Tahoma, Verdana, Helvetica, sans-serif;
 }
 
-/*
-blockquote p:not(:empty):before  {
-	content: '“'
+pre {
+	font-family: -moz-fixed;
 }
 
-blockquote p:not(:empty):after {
-	content: '”'
+blockquote {
+	margin-left: 2em;
 }
-*/
+
+/* Add quotation marks around blockquote */
+blockquote p:not(:empty):before {
+	content: '“';
+}
+
+blockquote p:not(:empty):last-child:after {
+	content: '”';
+}
