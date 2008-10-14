@@ -79,7 +79,7 @@
 					
 					var ios = Components.classes["@mozilla.org/network/io-service;1"].
 						getService(Components.interfaces.nsIIOService);
-					var uri = ios.newURI("chrome://zotero/content/tiny_mce/" + this.mode + ".html", null, null);
+					var uri = ios.newURI("chrome://zotero/content/tinymce/" + this.mode + ".html", null, null);
 					var chromeReg = Components.classes["@mozilla.org/chrome/chrome-registry;1"].
 						getService(Components.interfaces.nsIChromeRegistry);
 					var fileURI = chromeReg.convertChromeURL(uri);
