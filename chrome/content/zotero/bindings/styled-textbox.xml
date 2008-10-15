@@ -28,6 +28,7 @@
 		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<binding id="styled-textbox">
 		<implementation>
+			<field name="_editable"/>
 			<field name="_mode"/>
 			<field name="_format"/>
 			<field name="_loadHandler"/>
@@ -63,11 +64,6 @@
 						// tables, which wouldn't work here.
 						'<span class="tab">&nbsp;</span>':"\t"
 					};
-					
-					// not sure why an event is necessary here, but it is
-					var me = this;
-					this._loadHandler = function() {me._iframeLoaded()};
-					this._iframe.addEventListener("DOMContentLoaded", this._loadHandler, false);
 			]]></constructor>
 			
 			<!-- Called when iframe browser is loaded. Until the browser is loaded, we can't do 
@@ -75,35 +71,6 @@
 			     happen. -->
 			<method name="_iframeLoaded">
 				<body><![CDATA[
-					this._iframe.removeEventListener("DOMContentLoaded", this._loadHandler, false);
-					
-					var ios = Components.classes["@mozilla.org/network/io-service;1"].
-						getService(Components.interfaces.nsIIOService);
-					var uri = ios.newURI("chrome://zotero/content/tinymce/" + this.mode + ".html", null, null);
-					var chromeReg = Components.classes["@mozilla.org/chrome/chrome-registry;1"].
-						getService(Components.interfaces.nsIChromeRegistry);
-					var fileURI = chromeReg.convertChromeURL(uri);
-					
-					this._iframe.webNavigation.loadURI(fileURI.spec,
-						Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, null, null);
-					
-					// Register handler for deferred setting of content
-					var me = this;
-					
-					var listener = function() {
-						me._iframe.removeEventListener("DOMContentLoaded", listener, false);
-						var editor = me._iframe.contentWindow.wrappedJSObject.tinyMCE.get("tinymce");
-						
-						editor.onInit.add(function() {
-							me._editor = editor;
-							if(me._value) me.value = me._value;
-						});
-						
-						if (me._eventHandler) {
-							me._iframe.contentWindow.wrappedJSObject.handleEvent = me._eventHandler;
-						}
-					};
-					this._iframe.addEventListener("DOMContentLoaded", listener, false);
 				]]></body>
 			</method>
 			
@@ -214,8 +181,13 @@
 					}
 					
 					if(!this._editor) {
-						// if not loaded, wait until it is to set
-						return this._value = val;
+						Zotero.debug('No editor yet');
+						
+						this._value = val;
+						if (!this._loaded) {
+							this._load();
+						}
+						return ;
 					}
 					
 					if (this.value == val) {
@@ -270,6 +242,51 @@
 			<property name="timeout"
 					onset="this.setAttribute('timeout', val); return val;"
 					onget="return parseInt(this.getAttribute('timeout')) || 0;"/>
+			
+			<field name="_loaded"/>
+			<method name="_load">
+				<body>
+				<![CDATA[
+					this._loaded = true;
+					
+					// Unless we find a better way, use a separate HTML file
+					// for read-only mode
+					var htmlFile = this.mode + (this.getAttribute('readonly') != 'true' ? "" : "view");
+					
+					var ios = Components.classes["@mozilla.org/network/io-service;1"].
+						getService(Components.interfaces.nsIIOService);
+					var uri = ios.newURI("chrome://zotero/content/tinymce/" + htmlFile + ".html", null, null);
+					var chromeReg = Components.classes["@mozilla.org/chrome/chrome-registry;1"].
+						getService(Components.interfaces.nsIChromeRegistry);
+					var fileURI = chromeReg.convertChromeURL(uri);
+					
+					Zotero.debug("Loading " + fileURI.spec);
+					
+					// Register handler for deferred setting of content
+					var self = this;
+					var listener = function() {
+						self._iframe.removeEventListener("DOMContentLoaded", listener, false);
+						var editor = self._iframe.contentWindow.wrappedJSObject.tinyMCE.get("tinymce");
+						
+						editor.onInit.add(function() {
+							self._editor = editor;
+							if (self._value) {
+								self.value = self._value;
+							}
+						});
+						
+						if (self._eventHandler) {
+							self._iframe.contentWindow.wrappedJSObject.handleEvent = self._eventHandler;
+						}
+					};
+					this._iframe.addEventListener("DOMContentLoaded", listener, false);
+					
+					this._iframe.webNavigation.loadURI(fileURI.spec,
+						Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, null, null);
+				]]>
+				</body>
+			</method>
+			
 		</implementation>
 		
 		<content>

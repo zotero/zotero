@@ -1,0 +1,32 @@
+html, body {
+	height: 100%;
+	margin: 0;
+}
+#tinymce_parent {
+	display: block;
+	height: 100%;
+}
+#tinymce_tbl {
+	height: 100% !important;
+	width: 100% !important;
+}
+
+table.mceLayout > tbody > tr.mceLast {
+	position: absolute;
+	display: block;
+	top: 54px;
+	bottom: 2px;
+	left: 1px;
+	right: 1px;
+}
+
+td.mceIframeContainer {
+	display: block;
+	height: 100% !important;
+	width: 100% !important;
+}
+#tinymce_ifr {
+	height: 100% !important;
+	width: 100% !important;
+}
+
