@@ -167,6 +167,7 @@
 						output = output.replace("</p>", "\\par ", "g");
 						output = output.replace(/<\/?div[^>]*>/g, "");
 						output = Zotero.Utilities.prototype.trim(output);
+						output = output.replace(" ", "&nbsp;", "g");
 						output = Zotero.Utilities.prototype.unescapeHTML(output);
 						if(output.substr(-4) == "\\par") output = output.substr(0, output.length-4);
 					}
