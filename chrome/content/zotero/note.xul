@@ -8,7 +8,7 @@
     id="zotero-note-window"
     orient="vertical"
 	width="400"
-	height="250"
+	height="350"
 	title="&zotero.items.menu.attach.note;"
 	persist="screenX screenY width height"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
