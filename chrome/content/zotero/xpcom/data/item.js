@@ -2279,16 +2279,14 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 
 
 Zotero.Item.prototype.relinkAttachmentFile = function(file) {
-	var linkMode = this.getAttachmentLinkMode();
-	
+	var linkMode = this.attachmentLinkMode;
 	if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 		throw('Cannot relink linked URL in Zotero.Items.relinkAttachmentFile()');
 	}
 	
 	var path = Zotero.Attachments.getPath(file, linkMode);
-	
-	var sql = "UPDATE itemAttachments SET path=? WHERE itemID=?";
-	Zotero.DB.query(sql, [path, this.id]);
+	this.attachmentPath = path;
+	this.save();
 }
 
 
