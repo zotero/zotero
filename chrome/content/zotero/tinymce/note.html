@@ -2,39 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>TinyMCE</title>
-<style>
-html, body {
-	height: 100%;
-	margin: 0;
-}
-#tinymce_parent {
-	display: block;
-	height: 100%;
-}
-#tinymce_tbl {
-	height: 100% !important;
-	width: 100% !important;
-}
-
-table.mceLayout > tbody > tr.mceLast {
-	position: absolute;
-	display: block;
-	top: 54px;
-	bottom: 2px;
-	left: 1px;
-	right: 1px;
-}
-
-td.mceIframeContainer {
-	display: block;
-	height: 100% !important;
-	width: 100% !important;
-}
-#tinymce_ifr {
-	height: 100% !important;
-	width: 100% !important;
-}
-</style>
+<link type="text/css" rel="stylesheet" href="../../../skin/default/zotero/tinymce/note-ui.css"/>
 <script type="text/javascript" src="tiny_mce.js"></script>
 <script type="text/javascript">
 	tinyMCE.init({
@@ -65,13 +33,11 @@ td.mceIframeContainer {
 		/*plugins : "xhtmlxtras",*/
 		
 		// Theme options
-		theme_advanced_layout_manager : "SimpleLayout",
 		theme_advanced_buttons1 : "bold,italic,underline,strikethrough,|,sub,sup,|,forecolor,backcolor,|,blockquote,|,link,unlink",
 		theme_advanced_buttons2 : "formatselect,|,justifyleft,justifycenter,justifyright,|,bullist,numlist,outdent,indent,|,removeformat,code",
 		theme_advanced_buttons3 : "",
 		theme_advanced_toolbar_location : "top",
-		theme_advanced_toolbar_align : "left",
-		theme_advanced_resizing : true
+		theme_advanced_toolbar_align : "left"
 	});
 	tinyMCE.execCommand("mceAddControl", true, "tinymce");
 </script>
