@@ -517,13 +517,23 @@ tinymce.create('tinymce.util.Dispatcher', {
 
 			// Parse URL (Credits goes to Steave, http://blog.stevenlevithan.com/archives/parseuri)
 			u = u.replace(/@@/g, '(mce_at)'); // Zope 3 workaround, they use @@something
+			
+			// Added by Dan S./Zotero
+			u = u.replace("jar:file", "jarfile");
+			u = u.replace("zotero@chnm.gmu.edu", "zotero.chnm.gmu.edu");
+			
 			u = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*):?([^:@]*))?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/.exec(u);
 			each(["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"], function(v, i) {
 				var s = u[i];
 
-				// Zope 3 workaround, they use @@something
-				if (s)
+				if (s) {
+					// Zope 3 workaround, they use @@something
 					s = s.replace(/\(mce_at\)/g, '@@');
+					
+					// Added by Dan S./Zotero
+					s = s.replace("jarfile", "jar:file");
+					s = s.replace("zotero.chnm.gmu.edu", "zotero@chnm.gmu.edu");
+				}
 
 				t[v] = s;
 			});
@@ -887,7 +897,8 @@ tinymce.create('static tinymce.util.XHR', {
 
 			function ready() {
 				if (!o.async || x.readyState == 4 || c++ > 10000) {
-					if (o.success && c < 10000 && x.status == 200)
+					// Modified by Dan S./Zotero
+					if (o.success && c < 10000 && (x.status == 200 || x.status == 0))
 						o.success.call(o.success_scope, '' + x.responseText, x, o);
 					else if (o.error)
 						o.error.call(o.error_scope, c > 10000 ? 'TIMED_OUT' : 'GENERAL', x, o);
