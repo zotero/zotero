@@ -127,12 +127,10 @@ Zotero.Tag.prototype.load = function() {
 
 Zotero.Tag.prototype.loadFromRow = function (row) {
 	this._init();
-	
 	for (var col in row) {
 		//Zotero.debug("Setting field '" + col + "' to '" + row[col] + "' for tag " + this.id);
-		this['_' + col] = row[col] ? row[col] : '';
+		this['_' + col] = (!row[col] && row[col] !== 0) ? '' : row[col];
 	}
-	
 	this._loaded = true;
 }
 
@@ -215,7 +213,7 @@ Zotero.Tag.prototype.save = function () {
 		this.type = 0;
 	}
 	
-	if (this.type != 0 && this.type != 1) {
+	if (this.type !== 0 && this.type !== 1) {
 		throw ('Invalid tag type ' + this.type + ' in Zotero.Tag.save()');
 	}
 	
