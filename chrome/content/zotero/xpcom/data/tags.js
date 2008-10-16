@@ -60,14 +60,14 @@ Zotero.Tags = new function() {
 	 * Returns a tag for a given tagID
 	 */
 	function getName(tagID) {
-		if (_tagsByID[tagID]) {
-			return _tagsByID[tagID].name;
+		if (this._objectCache[tagID]) {
+			return this._objectCache[tagID].name;
 		}
 		
 		// Populate cache
 		var tag = this.get(tagID);
 		
-		return _tagsByID[tagID] ? _tagsByID[tagID].name : false;
+		return this._objectCache[tagID] ? this._objectCache[tagID].name : false;
 	}
 	
 	
@@ -278,7 +278,7 @@ Zotero.Tags = new function() {
 			if (_tags[oldType]) {
 				delete _tags[oldType]['_' + oldName];
 			}
-			delete _tagsByID[tagID];
+			delete this._objectCache[tagID];
 			Zotero.Notifier.trigger('delete', 'tag', tagID, notifierData);
 			
 			// Simulate tag removal on items that used old tag
