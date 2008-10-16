@@ -217,11 +217,8 @@ Zotero.Cite.MIMEHandler.URIContentListener = new function() {
  * nsIRequestObserver interfaces to download MIME types we've grabbed
  */
 Zotero.Cite.MIMEHandler.StreamListener = function(request, contentType) {
-	this._request = request;
-	this._contentType = contentType
 	this._readString = "";
-	this._scriptableStream = null;
-	this._scriptableStreamInput = null
+	this._converterInputStream = null;
 	
 	Zotero.debug("Prepared to grab content type " + contentType);
 }
@@ -243,25 +240,37 @@ Zotero.Cite.MIMEHandler.StreamListener.prototype.onStartRequest = function(chann
 Zotero.Cite.MIMEHandler.StreamListener.prototype.onDataAvailable = function(request, context, inputStream, offset, count) {
 	Zotero.debug(count + " bytes available");
 	
-	if (inputStream != this._scriptableStreamInput) {
-		this._scriptableStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
-			.createInstance(Components.interfaces.nsIScriptableInputStream);
-		this._scriptableStream.init(inputStream);
-		this._scriptableStreamInput = inputStream;
+	if (!this._converterInputStream) {
+		request.QueryInterface(Components.interfaces.nsIChannel);
+		var charset = request.contentCharset;
+		if (!charset) {
+			charset = "UTF-8";
+		}
+		const replacementChar = Components.interfaces.nsIConverterInputStream
+								.DEFAULT_REPLACEMENT_CHARACTER;
+		var cis = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+					.createInstance(Components.interfaces.nsIConverterInputStream);
+		cis.init(inputStream, charset, 1024, replacementChar);
+		this._converterInputStream = cis;
 	}
-	this._readString += this._scriptableStream.read(count);
+	
+	var str = {};
+	while (this._converterInputStream.readString(4096, str) != 0) {
+		this._readString += str.value;
+	}
 }
+
 
 /*
  * Called when the request is done
  */
-Zotero.Cite.MIMEHandler.StreamListener.prototype.onStopRequest = function(channel, context, status) {
+Zotero.Cite.MIMEHandler.StreamListener.prototype.onStopRequest = function(request, context, status) {
 	Zotero.debug("Request finished");
 	var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"]
 		.getService(Components.interfaces.nsIExternalHelperAppService);
 	
-	if (this._request.name) {
-		var loadURI = this._request.name;
+	if (request.name) {
+		var loadURI = request.name;
 	}
 	else {
 		var loadURI = '';
