@@ -1791,13 +1791,18 @@ Zotero.Schema = new function(){
 					for each(var row in rows) {
 						keys[row.itemID] = row.key;
 					}
+					Zotero.debug(keys);
 					if (storage37.exists()) {
 						var entries = storage37.directoryEntries;
 						while (entries.hasMoreElements()) {
 							var file = entries.getNext();
 							file.QueryInterface(Components.interfaces.nsILocalFile);
+							Zotero.debug("Directory is " + file.leafName);
 							var id = parseInt(file.leafName);
+							Zotero.debug(id);
+							Zotero.debug(file.isDirectory());
 							if (!file.isDirectory() || file.leafName != id) {
+								Zotero.debug("Skipping " + id);
 								continue;
 							}
 							if (keys[id]) {
