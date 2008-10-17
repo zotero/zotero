@@ -1569,7 +1569,7 @@ Zotero.CSL.Global = new function() {
 	                           .getApplicationLocale());
 	                           
 	var locatorTypeTerms = ["page", "book", "chapter", "column", "figure", "folio",
-		"issue", "line", "note", "opus", "paragraph", "part", "section",
+		"issue", "line", "note", "opus", "paragraph", "part", "section", "sub verbo",
 		"volume", "verse"];
 
 	/*
