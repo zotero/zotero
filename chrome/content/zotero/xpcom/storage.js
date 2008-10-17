@@ -415,6 +415,7 @@ Zotero.Sync.Storage = new function () {
 					break;
 				
 				default:
+					Zotero.debug(req.responseText);
 					throw ("Unexpected status code " + req.status + " in "
 						+ "Zotero.Sync.Storage.setStorageModificationTime()");
 			}
