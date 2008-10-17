@@ -93,7 +93,7 @@
 									case 'keypress':
 										// Ignore keypresses that don't change
 										// any text
-										if (!event.isChar &&
+										if (!event.which &&
 												event.keyCode != event.DOM_VK_DELETE &&
 												event.keyCode != event.DOM_VK_BACK_SPACE) {
 											//Zotero.debug("Not a char");
