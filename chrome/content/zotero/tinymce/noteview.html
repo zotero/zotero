@@ -18,21 +18,7 @@ table.mceLayout > tbody > tr.mceLast {
 		button_tile_map : true,
 		language : "en", // TODO: localize
 		entity_encoding : "raw",
-		gecko_spellcheck : true,
 		readonly : true,
-		
-		handle_event_callback : function (event) {
-			if (handleEvent) {
-				handleEvent(event);
-			}
-		},
-		
-		onchange_callback : function () {
-			var event = { type: 'change' };
-			if (handleEvent) {
-				handleEvent(event);
-			}
-		},
 		
 		fix_list_elements : true,
 		fix_table_elements : true,
