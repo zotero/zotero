@@ -29008,7 +29008,7 @@ REPLACE INTO translators VALUES ('af4cf622-eaca-450b-bd45-0f4ba345d081', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '1.0.8', '', '2008-08-20 01:05:28', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
+REPLACE INTO translators VALUES ('0e2235e7-babf-413c-9acf-f27cce5f059c', '1.0.8', '', '2008-10-20 10:10:37', 1, 50, 3, 'MODS', 'Simon Kornblith', 'xml',
 'Zotero.addOption("exportNotes", true);
 
 function detectImport() {
@@ -29590,8 +29590,25 @@ function doImport() {
 		newItem.callNumber = mods.m::classification.text().toString();
 		// archiveLocation
 		newItem.archiveLocation = mods.m::location.m::physicalLocation.text().toString();
-		// url
-		newItem.url = mods.m::location.m::url.text().toString();
+		// attachments and url
+		for each(var url in mods.m::location.m::url) {
+			var value = url.text().toString();
+			if (url.@access == "raw object") {
+				var filetitle;
+				if (url.@displayLabel){
+					filetitle = url.@displayLabel;
+				} else {
+					filetitle = "Attachment";
+				}
+				if (value.substr(-4,4)==".pdf") {
+					newItem.attachments.push({url:value, mimeType:"application/pdf", title:filetitle, downloadable:true});
+				} else {
+					newItem.attachments.push({url:value, title:filetitle, downloadable:true});
+				}
+			} else {
+				newItem.url = value;
+			}
+		}
 		// abstract
 		newItem.abstractNote = mods.m::abstract.text().toString();
 		
@@ -29610,6 +29627,7 @@ function doImport() {
 		newItem.complete();
 	}
 }');
+
 
 REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b4.r1', '', '2008-07-20 01:40:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("getCollections", true);
