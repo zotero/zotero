@@ -282,6 +282,7 @@
 					};
 					this._iframe.addEventListener("DOMContentLoaded", listener, false);
 					
+					Zotero.debug("Loading " + fileURI.spec);
 					this._iframe.webNavigation.loadURI(fileURI.spec,
 						Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, null, null);
 				]]>
