@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-05-08 20:30:00"
+	"lastUpdated":"2008-10-20 17:35:00"
 }
 
 function detectWeb(doc, url) {
@@ -115,6 +115,7 @@ function doWeb(doc, url) {
 					var pdfpath = '//td[2][@class="bodyCopyBlackLarge"]/a[@class="bodyCopy"][substring(text(), 1, 3) = "PDF"]';
 					var pdfurlElmt = newDoc.evaluate(pdfpath, newDoc, namespace, XPathResult.ANY_TYPE, null).iterateNext();
 					if (pdfurlElmt) {
+						pdfurlElmt.href = pdfurlElmt.href.substr(0,32) + 'PDF/getPDF' + pdfurlElmt.href.substr(38);
 						item.attachments = [{url:pdfurlElmt.href, title:"IEEE Xplore Full Text PDF", mimeType:"application/pdf"}];
 					}
 					item.complete();
