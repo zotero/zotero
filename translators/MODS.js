@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":50,
 	"inRepository":true,
-	"lastUpdated":"2008-08-20 01:05:28"
+	"lastUpdated":"2008-10-20 10:10:37"
 }
 
 Zotero.addOption("exportNotes", true);
@@ -593,8 +593,25 @@ function doImport() {
 		newItem.callNumber = mods.m::classification.text().toString();
 		// archiveLocation
 		newItem.archiveLocation = mods.m::location.m::physicalLocation.text().toString();
-		// url
-		newItem.url = mods.m::location.m::url.text().toString();
+		// attachments and url
+		for each(var url in mods.m::location.m::url) {
+			var value = url.text().toString();
+			if (url.@access == "raw object") {
+				var filetitle;
+				if (url.@displayLabel){
+					filetitle = url.@displayLabel;
+				} else {
+					filetitle = "Attachment";
+				}
+				if (value.substr(-4,4)==".pdf") {
+					newItem.attachments.push({url:value, mimeType:"application/pdf", title:filetitle, downloadable:true});
+				} else {
+					newItem.attachments.push({url:value, title:filetitle, downloadable:true});
+				}
+			} else {
+				newItem.url = value;
+			}
+		}
 		// abstract
 		newItem.abstractNote = mods.m::abstract.text().toString();
 		
