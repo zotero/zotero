@@ -159,6 +159,9 @@
 					if (this.item) {
 						textbox.value = this.item.getNote();
 					}
+					else {
+						textbox.value = ''
+					}
 					//textbox.inputField.scrollTop = scrollPos;
 					
 					this._id('linksbox').hidden = !(this.displayTags && this.displayRelated);
