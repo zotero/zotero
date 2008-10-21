@@ -66,14 +66,6 @@
 					};
 			]]></constructor>
 			
-			<!-- Called when iframe browser is loaded. Until the browser is loaded, we can't do 
-			     anything with it, so we just keep track of what's supposed to
-			     happen. -->
-			<method name="_iframeLoaded">
-				<body><![CDATA[
-				]]></body>
-			</method>
-			
 			<property name="mode">
 				<getter><![CDATA[
 					if (!this._mode) {
