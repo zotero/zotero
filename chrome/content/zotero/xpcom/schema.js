@@ -1791,18 +1791,14 @@ Zotero.Schema = new function(){
 					for each(var row in rows) {
 						keys[row.itemID] = row.key;
 					}
-					Zotero.debug(keys);
 					if (storage37.exists()) {
 						var entries = storage37.directoryEntries;
-						while (entries.hasMoreElements()) {
-							var file = entries.getNext();
-							file.QueryInterface(Components.interfaces.nsILocalFile);
-							Zotero.debug("Directory is " + file.leafName);
+						entries.QueryInterface(Components.interfaces.nsIDirectoryEnumerator);
+						var file;
+						var renameQueue = [];
+						while (file = entries.nextFile) {
 							var id = parseInt(file.leafName);
-							Zotero.debug(id);
-							Zotero.debug(file.isDirectory());
 							if (!file.isDirectory() || file.leafName != id) {
-								Zotero.debug("Skipping " + id);
 								continue;
 							}
 							if (keys[id]) {
@@ -1822,8 +1818,11 @@ Zotero.Schema = new function(){
 									}
 									renameTarget.moveTo(orphaned, newName);
 								}
-								file.moveTo(null, keys[id]);
-								moveReport += keys[id] + ' ' + id + "\n";
+								renameQueue.push({
+									id: id,
+									file: file,
+									key: keys[id]
+								});
 							}
 							else {
 								if (!orphaned.exists()) {
@@ -1838,9 +1837,18 @@ Zotero.Schema = new function(){
 									target.remove(null);
 								}
 								file.moveTo(orphaned, newName);
+								movedFiles37[id] = file;
 							}
-							movedFiles37[id] = file;
 						}
+						entries.close();
+						
+						for each(var dir in renameQueue) {
+							Zotero.debug("Moving " + dir.file.leafName + " to " + dir.key);
+							dir.file.moveTo(null, dir.key);
+							moveReport += dir.key + ' ' + dir.id + "\n";
+							movedFiles37[dir.id] = dir.file;
+						}
+						
 						if (moveReport) {
 							moveReport = 'The following directory names in storage were changed:\n'
 										+ '------------------------------------------------------\n'
@@ -1955,6 +1963,92 @@ Zotero.Schema = new function(){
 				if (i==43) {
 					Zotero.DB.query("UPDATE itemNotes SET note='<div class=\"zotero-note znv1\">' || TEXT2HTML(note) || '</div>' WHERE note NOT LIKE '<div class=\"zotero-note %'");
 				}
+				
+				if (i==44) {
+					if (fromVersion < 37) {
+						continue;
+					}
+					
+					if (Zotero.Prefs.get('useDataDir')) {
+						var dataDir = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+						dataDir.persistentDescriptor = Zotero.Prefs.get('dataDir');
+					}
+					else {
+						var dataDir = Zotero.getProfileDirectory();
+						dataDir.append('zotero');
+					}
+					if (!dataDir.exists() || !dataDir.isDirectory()){
+						var e = { name: "NS_ERROR_FILE_NOT_FOUND" };
+						throw (e);
+					}
+					var movedFiles44 = {};
+					var orphaned = dataDir.clone();
+					var storage44 = dataDir.clone();
+					orphaned.append('orphaned-files');
+					storage44.append('storage');
+					var keys = {};
+					var rows = Zotero.DB.query("SELECT itemID, key FROM items NATURAL JOIN itemAttachments");
+					for each(var row in rows) {
+						keys[row.itemID] = row.key;
+					}
+					if (storage44.exists()) {
+						var entries = storage44.directoryEntries;
+						entries.QueryInterface(Components.interfaces.nsIDirectoryEnumerator);
+						var file;
+						var renameQueue = [];
+						while (file = entries.nextFile) {
+							var id = parseInt(file.leafName);
+							if (!file.isDirectory() || file.leafName != id) {
+								continue;
+							}
+							if (keys[id]) {
+								var renameTarget = storage44.clone();
+								renameTarget.append(keys[id]);
+								if (renameTarget.exists()) {
+									if (!orphaned.exists()) {
+										orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+									}
+									var target = orphaned.clone();
+									target.append(id);
+									var newName = null;
+									if (target.exists()) {
+										target.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+										newName = target.leafName;
+										target.remove(null);
+									}
+									renameTarget.moveTo(orphaned, newName);
+								}
+								renameQueue.push({
+									id: id,
+									file: file,
+									key: keys[id]
+								});
+							}
+							else {
+								if (!orphaned.exists()) {
+									orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+								}
+								var target = orphaned.clone();
+								target.append(file.leafName);
+								var newName = null;
+								if (target.exists()) {
+									target.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+									newName = target.leafName;
+									target.remove(null);
+								}
+								file.moveTo(orphaned, newName);
+								movedFiles44[id] = file;
+							}
+						}
+						entries.close();
+						
+						for each(var dir in renameQueue) {
+							Zotero.debug("Moving " + dir.file.leafName + " to " + dir.key);
+							dir.file.moveTo(null, dir.key);
+							movedFiles44[dir.id] = dir.file;
+						}
+					}
+				}
 			}
 			
 			_updateDBVersion('userdata', toVersion);
@@ -1966,6 +2060,14 @@ Zotero.Schema = new function(){
 				for (var id in movedFiles37) {
 					try {
 						movedFiles37[id].moveTo(storage37, id);
+					}
+					catch (e2) { Zotero.debug(e2); }
+				}
+			}
+			if (movedFiles44) {
+				for (var id in movedFiles44) {
+					try {
+						movedFiles44[id].moveTo(storage44, id);
 					}
 					catch (e2) { Zotero.debug(e2); }
 				}
