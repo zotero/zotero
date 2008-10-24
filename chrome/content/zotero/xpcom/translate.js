@@ -2043,8 +2043,7 @@ Zotero.Translate.prototype._exportGetAttachment = function(attachment) {
 			}
 		} else {
 			// copy imported files from the Zotero directory
-			var directory = Zotero.getStorageDirectory();
-			directory.append(attachmentArray.itemID);
+			var directory = file.parent;
 			try {
 				directory.copyTo(this._exportFileDirectory, attachmentArray.itemID);
 			} catch(e) {
