@@ -62,6 +62,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		// add styles to list
 		var index = 0;
 		var nStyles = styles.length;
+		var selectIndex = -1;
 		for(var i=0; i<nStyles; i++) {
 			var itemNode = document.createElement("listitem");
 			itemNode.setAttribute("value", styles[i].styleID);
@@ -69,7 +70,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 			listbox.appendChild(itemNode);
 			
 			if(styles[i].styleID == _io.style) {
-				var selectIndex = index;
+				selectIndex = index;
 			}
 			index++;
 		}
