@@ -1856,11 +1856,10 @@ var ZoteroPane = new function()
 		}
 		
 		if (!popup) {
-			try {
-				// trim
-				text = text.replace(/^[\xA0\r\n\s]*(.*)[\xA0\r\n\s]*$/m, "$1");
+			if (!text) {
+				text = '';
 			}
-			catch (e){}
+			text = Zotero.Utilities.prototype.trim(text);
 			
 			var item = new Zotero.Item(false, 'note');
 			item.setNote(text);

@@ -66,6 +66,10 @@ Zotero.Tag.prototype._get = function (field) {
 
 
 Zotero.Tag.prototype._set = function (field, val) {
+	if (field == 'name') {
+		val = Zotero.Utilities.prototype.trim(val);
+	}
+	
 	switch (field) {
 		case 'id': // set using constructor
 		//case 'tagID': // set using constructor
@@ -386,6 +390,39 @@ Zotero.Tag.prototype.save = function () {
 }
 
 
+/**
+ * Compares this tag to another
+ *
+ * Returns a two-element array containing two objects with the differing values,
+ * or FALSE if no differences
+ *
+ * @param	{Zotero.Tag}		tag						Zotero.Tag to compare this item to
+ * @param	{Boolean}		includeMatches			Include all fields, even those that aren't different
+ * @param	{Boolean}		ignoreOnlyDateModified	If no fields other than dateModified
+ *														are different, just return false
+ */
+Zotero.Tag.prototype.diff = function (tag, includeMatches, ignoreOnlyDateModified) {
+	var diff = [];
+	var thisData = this.serialize();
+	var otherData = tag.serialize();
+	var numDiffs = Zotero.Tags.diff(thisData, otherData, diff, includeMatches);
+	
+	// For the moment, just compare linked items and increase numDiffs if any differences
+	var d1 = Zotero.Utilities.prototype.arrayDiff(
+		thisData.linkedItems, otherData.linkedItems
+	);
+	
+	// DEBUG: ignoreOnlyDateModified wouldn't work if includeMatches was set?
+	if (numDiffs == 0 ||
+			(ignoreOnlyDateModified && numDiffs == 1
+				&& diff[0].primary && diff[0].primary.dateModified)) {
+		return false;
+	}
+	
+	return diff;
+}
+
+
 Zotero.Tag.prototype.serialize = function () {
 	var obj = {
 		primary: {
@@ -393,13 +430,14 @@ Zotero.Tag.prototype.serialize = function () {
 			dateModified: this.dateModified,
 			key: this.key
 		},
-		name: this.name,
-		type: this.type,
+		fields: {
+			name: this.name,
+			type: this.type,
+		},
 		linkedItems: this.getLinkedItems(true),
 	};
 	return obj;
 }
-
 
 
 /**

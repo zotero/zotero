@@ -541,6 +541,10 @@ Zotero.Item.prototype.inCollection = function(collectionID) {
  * Field can be passed as fieldID or fieldName
  */
 Zotero.Item.prototype.setField = function(field, value, loadIn) {
+	if (typeof value == 'string') {
+		value = Zotero.Utilities.prototype.trim(value);
+	}
+	
 	this._disabledCheck();
 	
 	//Zotero.debug("Setting field '" + field + "' to '" + value + "' (loadIn: " + (loadIn ? 'true' : 'false') + ")");
@@ -580,8 +584,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		}
 		
 		// If field value has changed
-		// dateModified is always marked as changed
-		if (this['_' + field] != value || field == 'dateModified') {
+		if (this['_' + field] != value) {
 			Zotero.debug("Field '" + field + "' has changed from '" + this['_' + field] + "' to '" + value + "'", 4);
 			
 			// Save a copy of the object before modifying
@@ -1816,14 +1819,6 @@ Zotero.Item.prototype.save = function() {
 }
 
 
-Zotero.Item.prototype.updateDateModified = function() {
-	var sql = "UPDATE items SET dateModified=? WHERE itemID=?";
-	Zotero.DB.query(sql, [Zotero.DB.transactionDateTime, this.id]);
-	sql = "SELECT dateModified FROM items WHERE itemID=?";
-	this._dateModified = Zotero.DB.valueQuery(sql, this.id);
-}
-
-
 Zotero.Item.prototype.isRegularItem = function() {
 	return !(this.isNote() || this.isAttachment());
 }
@@ -1879,7 +1874,8 @@ Zotero.Item.prototype.setSource = function(sourceItemID) {
 		throw ("setSource() can only be called on items of type 'note' or 'attachment'");
 	}
 	
-	if (this._sourceItemID == sourceItemID) {
+	var oldSourceItemID = this.getSource();
+	if (oldSourceItemID == sourceItemID) {
 		Zotero.debug("Source item has not changed in Zotero.Item.setSource()");
 		return false;
 	}
@@ -2029,7 +2025,14 @@ Zotero.Item.prototype.setNote = function(text) {
 		throw ("updateNote() can only be called on notes and attachments");
 	}
 	
-	if (text == this._noteText) {
+	if (typeof text != 'string') {
+		throw ("text must be a string in Zotero.Item.setNote()");
+	}
+	
+	text = Zotero.Utilities.prototype.trim(text);
+	
+	var oldText = this.getNote();
+	if (text == oldText) {
 		Zotero.debug("Note has not changed in Zotero.Item.setNote()");
 		return false;
 	}
@@ -2934,69 +2937,16 @@ Zotero.Item.prototype.getImageSrc = function() {
  * Returns a two-element array containing two objects with the differing values,
  * or FALSE if no differences
  *
- * @param	object	item						Zotero.Item to compare this item to
- * @param	bool		includeMatches			Include all fields, even those that aren't different
- * @param	bool		ignoreOnlyDateModified	If no fields other than dateModified
- *											are different, just return false
+ * @param	{Zotero.Item}	item						Zotero.Item to compare this item to
+ * @param	{Boolean}		includeMatches			Include all fields, even those that aren't different
+ * @param	{Boolean}		ignoreOnlyDateModified	If no fields other than dateModified
+ *														are different, just return false
  */
 Zotero.Item.prototype.diff = function (item, includeMatches, ignoreOnlyDateModified) {
+	var diff = [];
 	var thisData = this.serialize();
 	var otherData = item.serialize();
-	
-	var diff = [{}, {}];
-	var numDiffs = 0;
-	
-	var subs = ['primary', 'fields'];
-	
-	// TODO: base-mapped fields
-	for each(var sub in subs) {
-		diff[0][sub] = {};
-		diff[1][sub] = {};
-		for (var field in thisData[sub]) {
-			if (!thisData[sub][field] && !otherData[sub][field]) {
-				continue;
-			}
-			
-			var changed = !thisData[sub][field] || !otherData[sub][field] ||
-					thisData[sub][field] != otherData[sub][field];
-			
-			if (includeMatches || changed) {
-				diff[0][sub][field] = thisData[sub][field] ?
-					thisData[sub][field] : '';
-				diff[1][sub][field] = otherData[sub][field] ?
-					otherData[sub][field] : '';
-			}
-			
-			if (changed) {
-				numDiffs++;
-			}
-		}
-		
-		// DEBUG: some of this is probably redundant
-		for (var field in otherData[sub]) {
-			if (diff[0][sub][field] != undefined) {
-				continue;
-			}
-			
-			if (!thisData[sub][field] && !otherData[sub][field]) {
-				continue;
-			}
-			
-			var changed = !thisData[sub][field] || !otherData[sub][field] ||
-					thisData[sub][field] != otherData[sub][field];
-			
-			if (includeMatches || changed) {
-				diff[0][sub][field] = thisData[sub][field] ?
-					thisData[sub][field] : '';
-				diff[1][sub][field] = otherData[sub][field] ?
-					otherData[sub][field] : '';
-			}
-			
-			if (changed) {
-				numDiffs++;
-			}
-		}
-	}
+	var numDiffs = Zotero.Items.diff(thisData, otherData, diff, includeMatches);
 	
 	diff[0].creators = [];
 	diff[1].creators = [];
@@ -3012,6 +2962,7 @@ Zotero.Item.prototype.diff = function (item, includeMatches, ignoreOnlyDateModif
 	
 	// TODO: annotations
 	
+	// DEBUG: ignoreOnlyDateModified wouldn't work if includeMatches was set?
 	if (numDiffs == 0 ||
 			(ignoreOnlyDateModified && numDiffs == 1
 				&& diff[0].primary && diff[0].primary.dateModified)) {

@@ -74,6 +74,14 @@ Zotero.Creator.prototype._get = function (field) {
 
 Zotero.Creator.prototype._set = function (field, val) {
 	switch (field) {
+		case 'firstName':
+		case 'lastName':
+		case 'shortName':
+			val = value = Zotero.Utilities.prototype.trim(val);
+			break;
+	}
+	
+	switch (field) {
 		case 'id': // set using constructor
 		//case 'creatorID': // set using constructor
 		case 'creatorDataID':

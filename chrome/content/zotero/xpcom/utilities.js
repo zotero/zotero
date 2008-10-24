@@ -290,6 +290,31 @@ Zotero.Utilities.prototype.isInt = function(x) {
 	return false;
 }
 
+
+/**
+ * Compares an array with another (comparator) and returns an array with
+ *	the values from comparator that don't exist in vector
+ *
+ * Code by Carlos R. L. Rodrigues
+ * From http://jsfromhell.com/array/diff [rev. #1]
+ *
+ * @param	{Array}		v			Array that will be checked
+ * @param	{Array}		c			Array that will be compared
+ * @param	{Boolean}	useIndex		If true, returns an array containing just
+ *										the index of the comparator's elements;
+ *										otherwise returns the values
+ */
+Zotero.Utilities.prototype.arrayDiff = function(v, c, m) {
+    var d = [], e = -1, h, i, j, k;
+    for(i = c.length, k = v.length; i--;){
+        for(j = k; j && (h = c[i] !== v[--j]););
+        h && (d[++e] = m ? i : c[i]);
+    }
+    return d;
+};
+
+
+
 /**
  * Generate a random integer between min and max inclusive
  *
