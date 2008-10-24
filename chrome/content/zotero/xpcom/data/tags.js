@@ -315,19 +315,13 @@ Zotero.Tags = new function() {
 	function erase(ids) {
 		ids = Zotero.flattenArguments(ids);
 		
-		var erasedTags = {};
-		
 		Zotero.DB.beginTransaction();
 		for each(var id in ids) {
 			var tag = this.get(id);
 			if (tag) {
-				erasedTags[id] = tag.serialize();
 				tag.erase();
 			}
 		}
-		
-		this.unload(ids);
-		
 		Zotero.DB.commitTransaction();
 	}
 	
@@ -364,8 +358,9 @@ Zotero.Tags = new function() {
 			
 			for each(var tagID in toDelete) {
 				var tag = Zotero.Tags.get(tagID);
-				Zotero.debug(tag);
-				notifierData[tagID] = { old: tag.serialize() }
+				if (tag) {
+					notifierData[tagID] = { old: tag.serialize() }
+				}
 			}
 			
 			this.unload(toDelete);
