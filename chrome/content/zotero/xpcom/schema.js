@@ -2049,6 +2049,57 @@ Zotero.Schema = new function(){
 						}
 					}
 				}
+				
+				if (i==45) {
+					var rows = Zotero.DB.query("SELECT * FROM itemDataValues WHERE value REGEXP '(^\\s+|\\s+$)'");
+					if (rows) {
+						for each(var row in rows) {
+							var trimmed = Zotero.Utilities.prototype.trim(row.value);
+							var valueID = Zotero.DB.valueQuery("SELECT valueID FROM itemDataValues WHERE value=?", trimmed);
+							if (valueID) {
+								Zotero.DB.query("UPDATE itemData SET valueID=? WHERE valueID=?", [valueID, row.valueID]);
+								Zotero.DB.query("DELETE FROM itemDataValues WHERE valueID=?", row.valueID);
+							}
+							else {
+								Zotero.DB.query("UPDATE itemDataValues SET value=? WHERE valueID=?", [trimmed, row.valueID]);
+							}
+						}
+					}
+					
+					Zotero.DB.query("UPDATE creatorData SET firstName=TRIM(firstName), lastName=TRIM(lastName)");
+					var rows = Zotero.DB.query("SELECT * FROM creatorData ORDER BY lastName, firstName, creatorDataID");
+					if (rows) {
+						for (var j=0; j<rows.length-1; j++) {
+							var k = j + 1;
+							while (rows[k].lastName == rows[j].lastName &&
+									rows[k].firstName == rows[j].firstName &&
+									rows[k].fieldMode == rows[j].fieldMode) {
+								Zotero.DB.query("UPDATE creators SET creatorDataID=? WHERE creatorDataID=?", [rows[j].creatorDataID, rows[k].creatorDataID]);
+								Zotero.DB.query("DELETE FROM creatorData WHERE creatorDataID=?", rows[k].creatorDataID);
+								k++;
+							}
+						}
+					}
+					
+					var rows = Zotero.DB.query("SELECT * FROM tags WHERE name REGEXP '(^\\s+|\\s+$)'");
+					if (rows) {
+						for each(var row in rows) {
+							var trimmed = Zotero.Utilities.prototype.trim(row.name);
+							var tagID = Zotero.DB.valueQuery("SELECT tagID FROM tags WHERE name=?", trimmed);
+							if (tagID) {
+								Zotero.DB.query("UPDATE itemTags SET tagID=? WHERE tagID=?", [tagID, row.tagID]);
+								Zotero.DB.query("DELETE FROM tags WHERE tagID=?", row.tagID);
+							}
+							else {
+								Zotero.DB.query("UPDATE itemTags SET tag=? WHERE tagID=?", [trimmed, row.tagID]);
+							}
+						}
+					}
+					
+					Zotero.DB.query("UPDATE itemNotes SET note=TRIM(note)");
+					Zotero.DB.query("UPDATE collections SET collectionName=TRIM(collectionName)");
+					Zotero.DB.query("UPDATE savedSearches SET savedSearchName=TRIM(savedSearchName)");
+				}
 			}
 			
 			_updateDBVersion('userdata', toVersion);

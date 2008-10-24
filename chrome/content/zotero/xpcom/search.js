@@ -86,6 +86,10 @@ Zotero.Search.prototype._get = function (field) {
 
 
 Zotero.Search.prototype._set = function (field, val) {
+	if (field == 'name') {
+		val = Zotero.Utilities.prototype.trim(val);
+	}
+	
 	switch (field) {
 		//case 'id': // set using constructor
 		case 'searchID':
@@ -814,7 +818,9 @@ Zotero.Search.prototype.serialize = function() {
 			dateModified: this.dateModified,
 			key: this.key
 		},
-		name: this.name,
+		fields: {
+			name: this.name,
+		},
 		conditions: this.getSearchConditions()
 	};
 	return obj;

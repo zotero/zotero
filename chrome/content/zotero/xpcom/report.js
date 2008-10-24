@@ -313,7 +313,7 @@ Zotero.Report = new function() {
 			content += '<h3 class="tags">' + escapeXML(str) + '</h3>\n';
 			content += '<ul class="tags">\n';
 			for each(var tag in arr.tags) {
-				content += '<li>' + escapeXML(tag.name) + '</li>\n';
+				content += '<li>' + escapeXML(tag.fields.name) + '</li>\n';
 			}
 			content += '</ul>\n';
 		}

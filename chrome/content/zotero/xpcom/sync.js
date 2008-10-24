@@ -2,12 +2,9 @@ Zotero.Sync = new function() {
 	this.init = init;
 	this.getObjectTypeID = getObjectTypeID;
 	this.getObjectTypeName = getObjectTypeName;
-	this.buildUploadIDs = buildUploadIDs;
 	this.getUpdatedObjects = getUpdatedObjects;
-	this.addToUpdated = addToUpdated;
 	this.getDeletedObjects = getDeletedObjects;
 	this.purgeDeletedObjects = purgeDeletedObjects;
-	this.removeFromDeleted = removeFromDeleted;
 	
 	// Keep in sync with syncObjectTypes table
 	this.__defineGetter__('syncObjects', function () {
@@ -80,25 +77,6 @@ Zotero.Sync = new function() {
 	}
 	
 	
-	function buildUploadIDs() {
-		var uploadIDs = {};
-		
-		uploadIDs.updated = {};
-		uploadIDs.changed = {};
-		uploadIDs.deleted = {};
-		
-		for each(var syncObject in Zotero.Sync.syncObjects) {
-			var types = syncObject.plural.toLowerCase(); // 'items'
-			
-			uploadIDs.updated[types] = [];
-			uploadIDs.changed[types] = {};
-			uploadIDs.deleted[types] = [];
-		}
-		
-		return uploadIDs;
-	}
-	
-	
 	/**
 	 * @param	object	lastSyncDate	JS Date object
 	 * @return	object	{ items: [123, 234, ...], creators: [321, 432, ...], ... }
@@ -122,28 +100,6 @@ Zotero.Sync = new function() {
 			}
 		}
 		return updatedIDs;
-	}
-	
-	
-	function addToUpdated(updated, ids) {
-		ids = Zotero.flattenArguments(ids);
-		for each(var id in ids) {
-			if (updated.indexOf(id) == -1) {
-				updated.push(id);
-			}
-		}
-	}
-	
-	
-	this.removeFromUpdated = function (updated, ids) {
-		ids = Zotero.flattenArguments(ids);
-		var index;
-		for each(var id in ids) {
-			index = updated.indexOf(id);
-			if (index != -1) {
-				updated.splice(index, 1);
-			}
-		}
 	}
 	
 	
@@ -214,16 +170,6 @@ Zotero.Sync = new function() {
 		}
 		var sql = "DELETE FROM syncDeleteLog WHERE timestamp<?";
 		Zotero.DB.query(sql, { int: deleteOlderThan });
-	}
-	
-	
-	function removeFromDeleted(deleted, id, key) {
-		for (var i=0; i<deleted.length; i++) {
-			if (deleted[i].id == id && deleted[i].key == key) {
-				deleted.splice(i, 1);
-				i--;
-			}
-		}
 	}
 	
 	
@@ -804,14 +750,14 @@ Zotero.Sync.Server = new function () {
 				var lastLocalSyncDate = lastLocalSyncTime ?
 					new Date(lastLocalSyncTime * 1000) : false;
 				
-				var uploadIDs = Zotero.Sync.buildUploadIDs();
-				uploadIDs.updated = Zotero.Sync.getUpdatedObjects(lastLocalSyncDate);
+				var syncSession = new Zotero.Sync.Server.Session;
+				syncSession.uploadIDs.updated = Zotero.Sync.getUpdatedObjects(lastLocalSyncDate);
 				var deleted = Zotero.Sync.getDeletedObjects(lastLocalSyncDate);
 				if (deleted == -1) {
 					_error('Sync delete log starts after last sync date in Zotero.Sync.Server.sync()');
 				}
 				if (deleted) {
-					uploadIDs.deleted = deleted;
+					syncSession.uploadIDs.deleted = deleted;
 				}
 				
 				var nextLocalSyncDate = Zotero.DB.transactionDate;
@@ -821,7 +767,7 @@ Zotero.Sync.Server = new function () {
 				// Reconcile and save updated data from server and
 				// prepare local data to upload
 				var xmlstr = Zotero.Sync.Server.Data.processUpdatedXML(
-					xml.updated, lastLocalSyncDate, uploadIDs
+					xml.updated, lastLocalSyncDate, syncSession
 				);
 				
 				//Zotero.debug(xmlstr);
@@ -830,7 +776,10 @@ Zotero.Sync.Server = new function () {
 				if (xmlstr === false) {
 					Zotero.debug("Sync cancelled");
 					Zotero.DB.rollbackTransaction();
-					Zotero.Sync.Server.unlock();
+					Zotero.Sync.Server.unlock(function () {
+						Zotero.Sync.Runner.reset();
+						Zotero.Sync.Runner.next();
+					});
 					Zotero.reloadDataObjects();
 					_syncInProgress = false;
 					return;
@@ -1305,9 +1254,109 @@ Zotero.BufferedInputListener.prototype = {
 }
 
 
+/**
+ * Stores information about a sync session
+ *
+ * @class
+ * @property		{Object}		uploadIDs	IDs to be uploaded to server
+ *
+ * {
+ *	updated: {
+ *		items: [123, 234, 345, 456],
+ *		creators: [321, 432, 543, 654]
+ *	},
+ *	changed: {
+ *		items: {
+ * 			1234: { oldID: 1234, newID: 5678 }, ...
+ *		},
+ *		creators: {
+ *			1234: { oldID: 1234, newID: 5678 }, ...
+ *		}
+ *	},
+ *	deleted: {
+ *		items: [
+ * 			{ id: 1234, key: ABCDEFGHIJKMNPQRSTUVWXYZ23456789 }, ...
+ *		],
+ *		creators: [
+ * 			{ id: 1234, key: ABCDEFGHIJKMNPQRSTUVWXYZ23456789 }, ...
+ *		]
+ * 	}
+ * };
+ */
+Zotero.Sync.Server.Session = function () {
+	this.uploadIDs = {};
+	this.uploadIDs.updated = {};
+	this.uploadIDs.changed = {};
+	this.uploadIDs.deleted = {};
+	
+	for each(var syncObject in Zotero.Sync.syncObjects) {
+		var types = syncObject.plural.toLowerCase(); // 'items'
+		
+		this.uploadIDs.updated[types] = [];
+		this.uploadIDs.changed[types] = {};
+		this.uploadIDs.deleted[types] = [];
+	}
+}
+
+
+Zotero.Sync.Server.Session.prototype.addToUpdated = function (syncObjectTypeName, ids) {
+	var pluralType = Zotero.Sync.syncObjects[syncObjectTypeName].plural.toLowerCase();
+	var updated = this.uploadIDs.updated[pluralType];
+	
+	ids = Zotero.flattenArguments(ids);
+	for each(var id in ids) {
+		if (updated.indexOf(id) == -1) {
+			updated.push(id);
+		}
+	}
+}
+
+
+Zotero.Sync.Server.Session.prototype.removeFromUpdated = function (syncObjectTypeName, ids) {
+	var pluralType = Zotero.Sync.syncObjects[syncObjectTypeName].plural.toLowerCase();
+	var updated = this.uploadIDs.updated[pluralType];
+	
+	ids = Zotero.flattenArguments(ids);
+	var index;
+	for each(var id in ids) {
+		index = updated.indexOf(id);
+		if (index != -1) {
+			updated.splice(index, 1);
+		}
+	}
+}
+
+
+Zotero.Sync.Server.Session.prototype.addToDeleted = function (syncObjectTypeName, id, key) {
+	var pluralType = Zotero.Sync.syncObjects[syncObjectTypeName].plural.toLowerCase();
+	var deleted = this.uploadIDs.deleted[pluralType];
+	
+	// DEBUG: inefficient
+	for each(var pair in deleted) {
+		if (pair.id == id) {
+			return;
+		}
+	}
+	deleted.push({ id: id, key: key});
+}
+
+
+Zotero.Sync.Server.Session.prototype.removeFromDeleted = function (syncObjectTypeName, id, key) {
+	var pluralType = Zotero.Sync.syncObjects[syncObjectTypeName].plural.toLowerCase();
+	var deleted = this.uploadIDs.deleted[pluralType];
+	
+	for (var i=0; i<deleted.length; i++) {
+		if (deleted[i].id == id && deleted[i].key == key) {
+			deleted.splice(i, 1);
+			i--;
+		}
+	}
+}
+
+
+
 Zotero.Sync.Server.Data = new function() {
 	this.processUpdatedXML = processUpdatedXML;
-	this.buildUploadXML = buildUploadXML;
 	this.itemToXML = itemToXML;
 	this.xmlToItem = xmlToItem;
 	this.removeMissingRelatedItems = removeMissingRelatedItems;
@@ -1392,10 +1441,10 @@ Zotero.Sync.Server.Data = new function() {
 	}
 	
 	
-	function processUpdatedXML(xml, lastLocalSyncDate, uploadIDs) {
+	function processUpdatedXML(xml, lastLocalSyncDate, syncSession) {
 		if (xml.children().length() == 0) {
 			Zotero.debug('No changes received from server');
-			return Zotero.Sync.Server.Data.buildUploadXML(uploadIDs);
+			return Zotero.Sync.Server.Data.buildUploadXML(syncSession);
 		}
 		
 		xml = _preprocessUpdatedXML(xml);
@@ -1403,9 +1452,6 @@ Zotero.Sync.Server.Data = new function() {
 		var remoteCreatorStore = {};
 		var relatedItemsStore = {};
 		var itemStorageModTimes = {};
-		
-		//Zotero.debug("Updated IDs:");
-		//Zotero.debug(uploadIDs);
 		
 		Zotero.DB.beginTransaction();
 		
@@ -1419,10 +1465,8 @@ Zotero.Sync.Server.Data = new function() {
 				continue;
 			}
 			
-			var toSaveParents = [];
-			var toSaveChildren = [];
-			var toDeleteParents = [];
-			var toDeleteChildren = [];
+			var toSave = [];
+			var toDelete = [];
 			var toReconcile = [];
 			
 			//
@@ -1452,7 +1496,7 @@ Zotero.Sync.Server.Data = new function() {
 								// date equal to Zotero.Sync.Server.nextLocalSyncDate
 								// and therefore excluded above (example: an item
 								// linked to a creator whose id changed)
-								|| uploadIDs.updated[types].indexOf(obj.id) != -1) {
+								|| syncSession.uploadIDs[types].indexOf(obj.id) != -1) {
 							
 							// Merge and store related items, since CR doesn't
 							// affect related items
@@ -1477,7 +1521,7 @@ Zotero.Sync.Server.Data = new function() {
 							// Some types we don't bother to reconcile
 							if (_noMergeTypes.indexOf(type) != -1) {
 								if (obj.dateModified > remoteObj.dateModified) {
-									Zotero.Sync.addToUpdated(uploadIDs.updated.items, obj.id);
+									syncSession.addToUpdated(type, obj.id);
 									continue;
 								}
 								
@@ -1487,45 +1531,58 @@ Zotero.Sync.Server.Data = new function() {
 							else {
 								// Skip item if dateModified is the only modified
 								// field (and no linked creators changed)
-								if (type == 'item') {
-									var diff = obj.diff(remoteObj, false, true);
-									if (!diff) {
-										// Check if creators changed
-										var creatorsChanged = false;
+								switch (type) {
+									// Will be handled by item CR for now
+									case 'creator':
+										remoteCreatorStore[remoteObj.id] = remoteObj;
+										syncSession.removeFromUpdated(type, obj.id);
+										continue;
 										
-										var creators = obj.getCreators();
-										var remoteCreators = remoteObj.getCreators();
-										
-										if (creators.length != remoteCreators.length) {
-											creatorsChanged = true;
-										}
-										else {
-											creators = creators.concat(remoteCreators);
-											for each(var creator in creators) {
-												var r = remoteCreatorStore[creator.ref.id];
-												// Doesn't include dateModified
-												if (r && !r.equals(creator.ref)) {
-													creatorsChanged = true;
-													break;
+									case 'item':
+										var diff = obj.diff(remoteObj, false, true);
+										if (!diff) {
+											// Check if creators changed
+											var creatorsChanged = false;
+											
+											var creators = obj.getCreators();
+											var remoteCreators = remoteObj.getCreators();
+											
+											if (creators.length != remoteCreators.length) {
+												creatorsChanged = true;
+											}
+											else {
+												creators = creators.concat(remoteCreators);
+												for each(var creator in creators) {
+													var r = remoteCreatorStore[creator.ref.id];
+													// Doesn't include dateModified
+													if (r && !r.equals(creator.ref)) {
+														creatorsChanged = true;
+														break;
+													}
 												}
 											}
+											if (!creatorsChanged) {
+												syncSession.removeFromUpdated(type, obj.id);
+												continue;
+											}
 										}
-										if (!creatorsChanged) {
+										break;
+									
+									case 'collection':
+									case 'tag':
+										var diff = obj.diff(remoteObj, false, true);
+										if (!diff) {
+											syncSession.removeFromUpdated(type, obj.id);
 											continue;
 										}
-									}
-								}
-								
-								// Will be handled by item CR for now
-								if (type == 'creator') {
-									remoteCreatorStore[remoteObj.id] = remoteObj;
-									continue;
-								}
-								
-								if (type != 'item') {
-									var msg = "Reconciliation unimplemented for " + types;
-									alert(msg);
-									throw(msg);
+										break;
+									
+									default:
+										Zotero.debug(obj);
+										Zotero.debug(remoteObj);
+										var msg = "Reconciliation unimplemented for " + types;
+										alert(msg);
+										throw(msg);
 								}
 								
 								if (obj.isAttachment()) {
@@ -1566,15 +1623,15 @@ Zotero.Sync.Server.Data = new function() {
 						//
 						// Object might not appear in local update array if server
 						// data was cleared and synched from another client
-						var index = uploadIDs.updated[types].indexOf(oldID);
+						var index = syncSession.uploadIDs.updated[types].indexOf(oldID);
 						if (index != -1) {
-							uploadIDs.updated[types][index] = newID;
+							syncSession.uploadIDs.updated[types][index] = newID;
 						}
 						
 						// Update id in local deletions array
-						for (var i in uploadIDs.deleted[types]) {
-							if (uploadIDs.deleted[types][i].id == oldID) {
-								uploadIDs.deleted[types][i] = newID;
+						for (var i in syncSession.uploadIDs.deleted[types]) {
+							if (syncSession.uploadIDs.deleted[types][i].id == oldID) {
+								syncSession.uploadIDs.deleted[types][i] = newID;
 							}
 						}
 						
@@ -1587,11 +1644,11 @@ Zotero.Sync.Server.Data = new function() {
 						if (type == 'creator') {
 							var linkedItems = obj.getLinkedItems();
 							if (linkedItems) {
-								Zotero.Sync.addToUpdated(uploadIDs.updated.items, linkedItems);
+								syncSession.addToUpdated('item', linkedItems);
 							}
 						}
 						
-						uploadIDs.changed[types][oldID] = {
+						syncSession.uploadIDs.changed[types][oldID] = {
 							oldID: oldID,
 							newID: newID
 						};
@@ -1605,7 +1662,7 @@ Zotero.Sync.Server.Data = new function() {
 					isNewObject = true;
 					
 					// Check if object has been deleted locally
-					for each(var pair in uploadIDs.deleted[types]) {
+					for each(var pair in syncSession.uploadIDs.deleted[types]) {
 						if (pair.id != parseInt(xmlNode.@id) ||
 								pair.key != xmlNode.@key.toString()) {
 							continue;
@@ -1630,7 +1687,7 @@ Zotero.Sync.Server.Data = new function() {
 							+ " from '" + oldKey + "' to '" + newKey + "'", 2);
 						keyObj.key = newKey;
 						keyObj.save();
-						Zotero.Sync.addToUpdated(uploadIDs.updated[types], keyObj.id);
+						syncSession.addToUpdated(type, keyObj.id);
 					}
 				}
 				
@@ -1652,13 +1709,13 @@ Zotero.Sync.Server.Data = new function() {
 					var tagName = xmlNode.@name.toString();
 					var tagType = xmlNode.@type.toString()
 									? parseInt(xmlNode.@type) : 0;
-					var linkedItems = _deleteConflictingTag(tagName, tagType, uploadIDs);
+					var linkedItems = _deleteConflictingTag(syncSession, tagName, tagType);
 					if (linkedItems) {
 						obj.dateModified = Zotero.DB.transactionDateTime;
 						for each(var id in linkedItems) {
 							obj.addItem(id);
 						}
-						Zotero.Sync.addToUpdated(uploadIDs.updated.tags, parseInt(xmlNode.@id));
+						syncSession.addToUpdated('tag', parseInt(xmlNode.@id));
 					}
 				}
 				
@@ -1670,12 +1727,8 @@ Zotero.Sync.Server.Data = new function() {
 						obj
 					]);
 				}
-				// Child items have to be saved after parent items
-				else if (type == 'item' && obj.getSource()) {
-					toSaveChildren.push(obj);
-				}
 				else {
-					toSaveParents.push(obj);
+					toSave.push(obj);
 				}
 				
 				// Don't use assigned-but-unsaved ids for new ids
@@ -1689,11 +1742,10 @@ Zotero.Sync.Server.Data = new function() {
 					if (obj.isRegularItem()) {
 						var creators = obj.getCreators();
 						for each(var creator in creators) {
-							Zotero.Sync.removeFromDeleted(
-								uploadIDs.deleted.creators,
+							syncSession.removeFromDeleted(
+								'creator',
 								creator.ref.id,
-								creator.ref.key,
-								true
+								creator.ref.key
 							);
 						}
 					}
@@ -1741,12 +1793,7 @@ Zotero.Sync.Server.Data = new function() {
 					}
 					// Local object hasn't been modified -- delete
 					else {
-						if (type == 'item' && obj.getSource()) {
-							toDeleteChildren.push(id);
-						}
-						else {
-							toDeleteParents.push(id);
-						}
+						toDelete.push(id);
 					}
 				}
 			}
@@ -1755,80 +1802,20 @@ Zotero.Sync.Server.Data = new function() {
 			// Reconcile objects that have changed locally and remotely
 			//
 			if (toReconcile.length) {
-				var io = {
-					dataIn: {
-						captions: [
-							// TODO: localize
-							'Local Item',
-							'Remote Item',
-							'Merged Item'
-						],
-						objects: toReconcile
-					}
-				};
-				
-				if (type == 'item') {
-					io.dataIn.changedCreators = remoteCreatorStore;
-				}
-				
-				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						   .getService(Components.interfaces.nsIWindowMediator);
-				var lastWin = wm.getMostRecentWindow("navigator:browser");
-				lastWin.openDialog('chrome://zotero/content/merge.xul', '', 'chrome,modal,centerscreen', io);
-				
-				if (io.dataOut) {
-					for each(var obj in io.dataOut) {
-						// TODO: do we need to make sure item isn't already being saved?
-						
-						// Handle items deleted during merge
-						if (obj.ref == 'deleted') {
-							// Deleted item was remote
-							if (obj.left != 'deleted') {
-								if (type == 'item' && obj.left.getSource()) {
-									toDeleteParents.push(obj.id);
-								}
-								else {
-									toDeleteChildren.push(obj.id);
-								}
-								
-								if (relatedItemsStore[obj.id]) {
-									delete relatedItemsStore[obj.id];
-								}
-								
-								uploadIDs.deleted[types].push({
-									id: obj.id,
-									key: obj.left.key
-								});
-							}
-							continue;
-						}
-						
-						if (type == 'item' && obj.ref.getSource()) {
-							toSaveParents.push(obj.ref);
-						}
-						else {
-							toSaveChildren.push(obj.ref);
-						}
-						
-						// Don't use assigned-but-unsaved ids for new ids
-						Zotero.ID.skip(types, obj.id);
-						
-						// Item had been deleted locally, so remove from
-						// deleted array
-						if (obj.left == 'deleted') {
-							Zotero.Sync.removeFromDeleted(uploadIDs.deleted[types], obj.id, obj.ref.key);
-						}
-						
-						// TODO: only upload if the local item was chosen
-						// or remote item was changed
-						
-						Zotero.Sync.addToUpdated(uploadIDs.updated[types], obj.id);
-					}
-				}
-				else {
+				var mergeData = _reconcile(type, toReconcile, remoteCreatorStore);
+				if (!mergeData) {
+					// TODO: throw?
 					Zotero.DB.rollbackTransaction();
 					return false;
 				}
+				_processMergeData(
+					syncSession,
+					type,
+					mergeData,
+					toSave,
+					toDelete,
+					relatedItemsStore
+				);
 			}
 			
 			/*
@@ -1836,7 +1823,7 @@ Zotero.Sync.Server.Data = new function() {
 				// Temporarily remove and store subcollections before saving
 				// since referenced collections may not exist yet
 				var collections = [];
-				for each(var obj in toSaveParents) {
+				for each(var obj in toSave) {
 					var colIDs = obj.getChildCollections(true);
 					// TODO: use exist(), like related items above
 					obj.childCollections = [];
@@ -1850,10 +1837,18 @@ Zotero.Sync.Server.Data = new function() {
 			
 			// Save objects
 			Zotero.debug('Saving merged ' + types);
-			for each(var obj in toSaveParents) {
-				obj.save();
+			// Save parent items first
+			if (type == 'item') {
+				for each(var obj in toSave) {
+					if (!obj.getSource()) {
+						obj.save();
+					}
+				}
 			}
-			for each(var obj in toSaveChildren) {
+			for each(var obj in toSave) {
+				if (type == 'item' && !obj.getSource()) {
+					continue;
+				}
 				obj.save();
 			}
 			
@@ -1882,17 +1877,37 @@ Zotero.Sync.Server.Data = new function() {
 			
 			// Delete
 			Zotero.debug('Deleting merged ' + types);
-			if (toDeleteChildren.length) {
-				Zotero.Sync.EventListener.ignoreDeletions(type, toDeleteChildren);
-				Zotero[Types].erase(toDeleteChildren);
-				Zotero.Sync.EventListener.unignoreDeletions(type, toDeleteChildren);
+			if (toDelete.length) {
+				// Items have to be deleted children-first
+				if (type == 'item') {
+					var parents = [];
+					var children = [];
+					for each(var id in toDelete) {
+						var item = Zotero.Items.get(id);
+						if (item.getSource()) {
+							children.push(item.id);
+						}
+						else {
+							parents.push(item.id);
+						}
+					}
+					if (children.length) {
+						Zotero.Sync.EventListener.ignoreDeletions('item', children);
+						Zotero.Items.erase(children);
+						Zotero.Sync.EventListener.unignoreDeletions('item', children);
+					}
+					if (parents.length) {
+						Zotero.Sync.EventListener.ignoreDeletions('item', parents);
+						Zotero.Items.erase(parents);
+						Zotero.Sync.EventListener.unignoreDeletions('item', parents);
+					}
+				}
+				else {
+					Zotero.Sync.EventListener.ignoreDeletions(type, toDelete);
+					Zotero[Types].erase(toDelete);
+					Zotero.Sync.EventListener.unignoreDeletions(type, toDelete);
+				}
 			}
-			if (toDeleteParents.length) {
-				Zotero.Sync.EventListener.ignoreDeletions(type, toDeleteParents);
-				Zotero[Types].erase(toDeleteParents);
-				Zotero.Sync.EventListener.unignoreDeletions(type, toDeleteParents);
-			}
-			
 			
 			// Check mod times of updated items against stored time to see
 			// if they've been updated elsewhere and mark for download if so
@@ -1907,7 +1922,7 @@ Zotero.Sync.Server.Data = new function() {
 			}
 		}
 		
-		var xmlstr = Zotero.Sync.Server.Data.buildUploadXML(uploadIDs);
+		var xmlstr = Zotero.Sync.Server.Data.buildUploadXML(syncSession);
 		
 		//Zotero.debug(xmlstr);
 		//throw ('break');
@@ -1919,30 +1934,11 @@ Zotero.Sync.Server.Data = new function() {
 	
 	
 	/**
-	 *  ids = {
-	 *		updated: {
-	 *			items: [123, 234, 345, 456],
-	 *			creators: [321, 432, 543, 654]
-	 *		},
-	 *		changed: {
-	 *			items: {
-	 * 				oldID: { oldID: 1234, newID: 5678 }, ...
-	 *			},
-	 *			creators: {
-	 *				oldID: { oldID: 1234, newID: 5678 }, ...
-	 *			}
-	 *		},
-	 *		deleted: {
-	 *			items: [
-	 * 				{ id: 1234, key: ABCDEFGHIJKMNPQRSTUVWXYZ23456789 }, ...
-	 *			],
-	 *			creators: [
-	 * 				{ id: 1234, key: ABCDEFGHIJKMNPQRSTUVWXYZ23456789 }, ...
-	 *			]
-	 *		}
-	 *	};
+	 * @param	{Zotero.Sync.Server.Session}		syncSession
 	 */
-	function buildUploadXML(ids) {
+	this.buildUploadXML = function (syncSession) {
+		var ids = syncSession.uploadIDs;
+		
 		var xml = <data/>
 		
 		// Add API version attribute
@@ -1968,7 +1964,7 @@ Zotero.Sync.Server.Data = new function() {
 				case 'item':
 					var objs = Zotero[Types].get(ids.updated[types]);
 					for each(var obj in objs) {
-						xml[types][type] += this[type + 'ToXML'](obj);
+						xml[types][type] += this[type + 'ToXML'](obj, syncSession);
 					}
 					break;
 					
@@ -2013,9 +2009,87 @@ Zotero.Sync.Server.Data = new function() {
 	
 	
 	/**
-	 * Converts a Zotero.Item object to an E4X <item> object
+	 * Open a conflict resolution window and return the results
+	 *
+	 * @param	{String}		type			'item', 'collection', etc.
+	 * @param	{Array[]}	objectPairs	Array of arrays of pairs of Item, Collection, etc.
 	 */
-	function itemToXML(item) {
+	function _reconcile(type, objectPairs, changedCreators) {
+		var io = {
+			dataIn: {
+				captions: [
+					// TODO: localize
+					'Local Item',
+					'Remote Item',
+					'Merged Item'
+				],
+				objects: objectPairs
+			}
+		};
+		
+		if (type == 'item') {
+			io.dataIn.changedCreators = changedCreators;
+		}
+		
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+				   .getService(Components.interfaces.nsIWindowMediator);
+		var lastWin = wm.getMostRecentWindow("navigator:browser");
+		lastWin.openDialog('chrome://zotero/content/merge.xul', '', 'chrome,modal,centerscreen', io);
+		
+		return io.dataOut;
+	}
+	
+	
+	/**
+	 * Process the results of conflict resolution
+	 */
+	function _processMergeData(syncSession, type, data, toSave, toDelete, relatedItems) {
+		var types = Zotero.Sync.syncObjects[type].plural.toLowerCase();
+		
+		for each(var obj in data) {
+			// TODO: do we need to make sure item isn't already being saved?
+			
+			// Handle items deleted during merge
+			if (obj.ref == 'deleted') {
+				// Deleted item was remote
+				if (obj.left != 'deleted') {
+					toDelete.push(obj.id);
+					
+					if (relatedItems[obj.id]) {
+						delete relatedItems[obj.id];
+					}
+					
+					syncSession.addToDeleted(type, obj.id, obj.left.key);
+				}
+				continue;
+			}
+			
+			toSave.push(obj.ref);
+			
+			// Don't use assigned-but-unsaved ids for new ids
+			Zotero.ID.skip(types, obj.id);
+			
+			// Item had been deleted locally, so remove from
+			// deleted array
+			if (obj.left == 'deleted') {
+				syncSession.removeFromDeleted(type, obj.id, obj.ref.key);
+			}
+			
+			// TODO: only upload if the local item was chosen
+			// or remote item was changed
+			
+			syncSession.addToUpdated(type, obj.id);
+		}
+	}
+	
+	
+	/**
+	 * Converts a Zotero.Item object to an E4X <item> object
+	 *
+	 * @param	{Zotero.Item}					item
+	 * @param	{Zotero.Sync.Server.Session}		[syncSession]
+	 */
+	function itemToXML(item, syncSession) {
 		var xml = <item/>;
 		var item = item.serialize();
 		
@@ -2083,10 +2157,21 @@ Zotero.Sync.Server.Data = new function() {
 		// Creators
 		for (var index in item.creators) {
 			var newCreator = <creator/>;
-			newCreator.@id = item.creators[index].creatorID;
+			var creatorID = item.creators[index].creatorID;
+			newCreator.@id = creatorID;
 			newCreator.@creatorType = item.creators[index].creatorType;
 			newCreator.@index = index;
 			xml.creator += newCreator;
+			
+			/*
+			// Add creator XML as glue if not already included in sync session
+			if (syncSession &&
+					syncSession.uploadIDs.updated.creators.indexOf(creatorID) == -1) {
+				var creator = Zotero.Creators.get(creatorID);
+				var creatorXML = Zotero.Sync.Server.Data.creatorToXML(creator);
+				xml.creator.creator = creatorXML;
+			}
+			*/
 		}
 		
 		// Related items
@@ -2315,7 +2400,7 @@ Zotero.Sync.Server.Data = new function() {
 		collection.name = xmlCollection.@name.toString();
 		if (!skipPrimary) {
 			collection.parent = xmlCollection.@parent.toString() ?
-				parseInt(xmlCollection.@parent) : false;
+				parseInt(xmlCollection.@parent) : null;
 			collection.dateAdded = xmlCollection.@dateAdded.toString();
 			collection.dateModified = xmlCollection.@dateModified.toString();
 			collection.key = xmlCollection.@key.toString();
@@ -2600,7 +2685,7 @@ Zotero.Sync.Server.Data = new function() {
 	 *									deleted tag, or FALSE if no
 	 *									matching tag found
 	 */
-	function _deleteConflictingTag(name, type, uploadIDs) {
+	function _deleteConflictingTag(syncSession, name, type) {
 		var tagID = Zotero.Tags.getID(name, type);
 		if (tagID) {
 			var tag = Zotero.Tags.get(tagID);
@@ -2609,14 +2694,8 @@ Zotero.Sync.Server.Data = new function() {
 			// DEBUG: should purge() be called by Tags.erase()
 			Zotero.Tags.purge();
 			
-			Zotero.Sync.removeFromUpdated(
-				uploadIDs.updated.tags, tagID
-			);
-			
-			uploadIDs.deleted.tags.push({
-				id: tagID,
-				key: tag.key
-			});
+			syncSession.removeFromUpdated('tag', tagID);
+			syncSession.addToDeleted('tag', tagID, tag.key);
 			
 			return linkedItems;
 		}

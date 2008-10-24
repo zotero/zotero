@@ -72,6 +72,10 @@ Zotero.Collection.prototype._get = function (field) {
 
 
 Zotero.Collection.prototype._set = function (field, val) {
+	if (field == 'name') {
+		val = Zotero.Utilities.prototype.trim(val);
+	}
+	
 	switch (field) {
 		case 'id': // set using constructor
 		//case 'collectionID': // set using constructor
@@ -649,6 +653,49 @@ Zotero.Collection.prototype.hasDescendent = function(type, id) {
 
 
 /**
+ * Compares this collection to another
+ *
+ * Returns a two-element array containing two objects with the differing values,
+ * or FALSE if no differences
+ *
+ * @param	{Zotero.Collection}	collection			Zotero.Collection to compare this item to
+ * @param	{Boolean}		includeMatches			Include all fields, even those that aren't different
+ * @param	{Boolean}		ignoreOnlyDateModified	If no fields other than dateModified
+ *														are different, just return false
+ */
+Zotero.Collection.prototype.diff = function (collection, includeMatches, ignoreOnlyDateModified) {
+	var diff = [];
+	var thisData = this.serialize();
+	var otherData = collection.serialize();
+	var numDiffs = Zotero.Collections.diff(thisData, otherData, diff, includeMatches);
+	
+	// For the moment, just compare children and increase numDiffs if any differences
+	var d1 = Zotero.Utilities.prototype.arrayDiff(
+		thisData.childCollections, otherData.childCollections
+	);
+	var d2 = Zotero.Utilities.prototype.arrayDiff(
+		thisData.childCollections, otherData.childCollections
+	);
+	var d3 = Zotero.Utilities.prototype.arrayDiff(
+		thisData.childItems, otherData.childItems
+	);
+	var d4 = Zotero.Utilities.prototype.arrayDiff(
+		thisData.childItems, otherData.childItems
+	);
+	numDiffs += d1.length + d2.length + d3.length + d4.length;
+	
+	// DEBUG: ignoreOnlyDateModified wouldn't work if includeMatches was set?
+	if (numDiffs == 0 ||
+			(ignoreOnlyDateModified && numDiffs == 1
+				&& diff[0].primary && diff[0].primary.dateModified)) {
+		return false;
+	}
+	
+	return diff;
+}
+
+
+/**
 * Deletes collection and all descendent collections (and optionally items)
 **/
 Zotero.Collection.prototype.erase = function(deleteItems) {
@@ -721,8 +768,10 @@ Zotero.Collection.prototype.serialize = function(nested) {
 			dateModified: this.dateModified,
 			key: this.key
 		},
-		name: this.name,
-		parent: this.parent,
+		fields: {
+			name: this.name,
+			parent: this.parent,
+		},
 		childCollections: this.getChildCollections(true),
 		childItems: this.getChildItems(true),
 		descendents: this.id ? this.getDescendents(nested) : []
