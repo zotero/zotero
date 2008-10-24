@@ -443,7 +443,7 @@ Zotero.Tag.prototype.serialize = function () {
 /**
  * Remove tag from all linked items
  *
- * Tags.erase() should be used externally instead of this
+ * Tags.erase() should be used instead of tag.erase() for deleting multiple tags
  *
  * Actual deletion of tag occurs in Zotero.Tags.purge()
  */
@@ -484,6 +484,9 @@ Zotero.Tag.prototype.erase = function () {
 		
 		itemTags.push(itemID + '-' + this.id);
 	}
+	
+	this.unload(this.id);
+	
 	Zotero.Notifier.trigger('remove', 'item-tag', itemTags);
 	
 	// Send notification of linked items
