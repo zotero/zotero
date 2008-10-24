@@ -2091,7 +2091,7 @@ Zotero.Schema = new function(){
 								Zotero.DB.query("DELETE FROM tags WHERE tagID=?", row.tagID);
 							}
 							else {
-								Zotero.DB.query("UPDATE itemTags SET tag=? WHERE tagID=?", [trimmed, row.tagID]);
+								Zotero.DB.query("UPDATE tags SET name=? WHERE tagID=?", [trimmed, row.tagID]);
 							}
 						}
 					}
