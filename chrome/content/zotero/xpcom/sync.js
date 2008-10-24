@@ -1496,7 +1496,7 @@ Zotero.Sync.Server.Data = new function() {
 								// date equal to Zotero.Sync.Server.nextLocalSyncDate
 								// and therefore excluded above (example: an item
 								// linked to a creator whose id changed)
-								|| syncSession.uploadIDs[types].indexOf(obj.id) != -1) {
+								|| syncSession.uploadIDs.updated[types].indexOf(obj.id) != -1) {
 							
 							// Merge and store related items, since CR doesn't
 							// affect related items
