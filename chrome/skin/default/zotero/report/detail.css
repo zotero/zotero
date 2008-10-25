@@ -113,7 +113,7 @@ ul.notes > li p:last-child {
 
 
 /* Preserve whitespace on notes */
-ul.notes li p, li.note p {
+ul.notes li p, li.note p, div.note p {
 	white-space: pre-wrap;  /* css-3 */
 	white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
 	white-space: -pre-wrap;  /* Opera 4-6 */
@@ -137,4 +137,22 @@ ul.notes ul.tags {
 
 ul.notes ul.tags li:not(:last-child):after {
 	content: ', ';
+}
+
+
+/* Child attachments */
+h3.attachments {
+	font-size: 1.1em;
+}
+
+ul.attachments li {
+	padding-top: .5em;
+}
+
+ul.attachments div.note {
+	margin-left: 2em;
+}
+
+ul.attachments div.note p:first-child {
+	margin-top: .75em;
 }

@@ -321,6 +321,13 @@ Zotero.Report = new function() {
 				// Attachment tags
 				content += _generateTagsList(attachment);
 				
+				// Attachment note
+				if (attachment.note) {
+					content += '<div class="note">';
+					content += '<p>' + escapeXML(attachment.note) + '</p>\n';
+					content += '</div>';
+				}
+				
 				content += '</li>\n';
 			}
 			content += '</ul>\n';
