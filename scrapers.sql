@@ -31548,7 +31548,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-10-20 10:18:38', 1, 200, 3, 'BibTeX', 'Simon Kornblith', 'bib',
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-10-25 08:11:14', 1, 200, 3, 'BibTeX', 'Simon Kornblith', 'bib',
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("exportCharset", "UTF-8");
 
@@ -33323,10 +33323,14 @@ function writeField(field, value, isMacro) {
 	value = value + ""; // convert integers to strings
 	Zotero.write(",\n\t"+field+" = ");
 	if(!isMacro) Zotero.write("{");
-	// I hope these are all the escape characters!
-	value = value.replace(/[|\<\>\~\^\\]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
-	// Case of words with uppercase characters in non-initial positions is preserved with braces.
-	if(!isMacro) value = value.replace(/([^\s]+[A-Z][^\s]*)/g, "{$1}");
+	// url field is preserved, for use with \href and \url
+	// Other fields (DOI?) may need similar treatment
+	if(field != "url") {
+		// I hope these are all the escape characters!
+		value = value.replace(/[|\<\>\~\^\\]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
+		// Case of words with uppercase characters in non-initial positions is preserved with braces.
+		if(!isMacro) value = value.replace(/([^\s]+[A-Z][^\s]*)/g, "{$1}");
+	}
 	if (!Zotero.getOption("UTF8")) {
 		value = value.replace(/[\u0080-\uFFFF]/g, mapAccent);
 	}
