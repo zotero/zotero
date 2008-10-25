@@ -78,6 +78,21 @@ Zotero.Translators = new function() {
 			i++;
 		}
 		
+		// Sort by priority
+		var collation = Zotero.getLocaleCollation();
+		var cmp = function (a, b) {
+			if (a.priority > b.priority) {
+				return 1;
+			}
+			else if (a.priority < b.priority) {
+				return -1;
+			}
+			return collation.compareString(1, a.label, b.label);
+		}
+		for (var type in _cache) {
+			_cache[type].sort(cmp);
+		}
+		
 		Zotero.debug("Cached "+i+" translators in "+((new Date()).getTime() - start)+" ms");
 	}
 	
@@ -115,6 +130,7 @@ Zotero.Translators = new function() {
  * @property {Integer} translatorType Type of the translator (use bitwise & with TRANSLATOR_TYPES to read)
  * @property {String} label Human-readable name of the translator
  * @property {String} target Location that the translator processes
+ * @property {Integer} priority Lower-priority translators will be selected first
  * @property {Boolean} inRepository Whether the translator may be found in the repository
  * @property {String} lastUpdated SQL-style date and time of translator's last update
  * @property {String} code The executable JavaScript for the translator
@@ -148,7 +164,7 @@ Zotero.Translator = function(file) {
 		if(info) {
 			var haveMetadata = true;
 			// make sure we have all the properties
-			for each(var property in ["translatorID", "translatorType", "label", "target", "lastUpdated"]) {
+			for each(var property in ["translatorID", "translatorType", "label", "target", "priority", "lastUpdated"]) {
 				if(info[property] === undefined) {
 					this.logError('Missing property "'+property+'" in translator metadata JSON object');
 					haveMetadata = false;
