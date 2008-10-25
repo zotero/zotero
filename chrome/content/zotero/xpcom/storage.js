@@ -174,9 +174,16 @@ Zotero.Sync.Storage = new function () {
 		}
 	});
 	
+	this.__defineGetter__('enabled', function () {
+		return Zotero.Prefs.get("sync.storage.enabled");
+	});
+	
+	this.__defineGetter__('verified', function () {
+		return Zotero.Prefs.get("sync.storage.verified");
+	});
+	
 	this.__defineGetter__('active', function () {
-		return Zotero.Prefs.get("sync.storage.enabled") &&
-				Zotero.Prefs.get("sync.storage.verified");
+		return this.enabled && this.verified;
 	});
 	
 	this.__defineGetter__("syncInProgress", function () _syncInProgress);
@@ -242,9 +249,33 @@ Zotero.Sync.Storage = new function () {
 	
 	
 	this.sync = function () {
+		if (!Zotero.Sync.Storage.enabled) {
+			Zotero.debug("Storage sync is not enabled");
+			Zotero.Sync.Runner.next();
+			return;
+		}
+		
 		if (!Zotero.Sync.Storage.active) {
 			Zotero.debug("Storage sync is not active");
-			Zotero.Sync.Runner.next();
+			
+			var callback = function (uri, status, authRequired) {
+				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+							   .getService(Components.interfaces.nsIWindowMediator);
+				var lastWin = wm.getMostRecentWindow("navigator:browser");
+				
+				var success = Zotero.Sync.Storage.checkServerCallback(uri, status, authRequired, lastWin, true);
+				if (success) {
+					Zotero.debug("Storage sync is successfully set up");
+					Zotero.Sync.Storage.sync();
+				}
+				else {
+					Zotero.debug("Storage sync verification failed");
+					Zotero.Sync.Runner.reset();
+					Zotero.Sync.Runner.next();
+				}
+			}
+			
+			Zotero.Sync.Storage.checkServer(callback);
 			return;
 		}
 		
@@ -1475,7 +1506,8 @@ Zotero.Sync.Storage = new function () {
 	
 	
 	/**
-	 * @param	{Function}	callback		Function to pass URI and result value to
+	 * @param	{Function}	callback			Function to pass URI and result value to
+	 * @param	{Object}		errorCallbacks
 	 */
 	this.checkServer = function (callback) {
 		try {
@@ -1703,6 +1735,132 @@ Zotero.Sync.Storage = new function () {
 		
 		requestHolder.request = request;
 		return requestHolder;
+	}
+	
+	
+	this.checkServerCallback = function (uri, status, authRequired, window, skipSuccessMessage) {
+		var promptService =
+			Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
+				createInstance(Components.interfaces.nsIPromptService);
+		if (uri) {
+			var spec = uri.scheme + '://' + uri.hostPort + uri.path;
+		}
+		
+		switch (status) {
+			case Zotero.Sync.Storage.SUCCESS:
+				if (!skipSuccessMessage) {
+					promptService.alert(
+						window,
+						"Server configuration verified",
+						"File storage is successfully set up."
+					);
+				}
+				Zotero.Prefs.set("sync.storage.verified", true);
+				return true;
+			
+			case Zotero.Sync.Storage.ERROR_NO_URL:
+				var errorMessage = "Please enter a URL.";
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_NO_USERNAME:
+				var errorMessage = "Please enter a username.";
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_NO_PASSWORD:
+				var errorMessage = "Please enter a password.";
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_UNREACHABLE:
+				var errorMessage = "The server " + uri.host + " could not be reached.";
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_NOT_DAV:
+				var errorMessage = spec + " is not a valid WebDAV URL.";
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_AUTH_FAILED:
+				var errorTitle = "Permission denied";
+				var errorMessage = "The storage server did not accept the "
+					+ "username and password you entered." + " "
+					+ "Please check your storage settings "
+					+ "or contact your server administrator.";
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_FORBIDDEN:
+				var errorTitle = "Permission denied";
+				var errorMessage = "You don't have permission to access "
+					+ uri.path + " on the storage server." + " "
+					+ "Please check your storage settings "
+					+ "or contact your server administrator.";
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_PARENT_DIR_NOT_FOUND:
+				var errorTitle = "Directory not found";
+				var parentSpec = spec.replace(/\/zotero\/$/, "");
+				var errorMessage = parentSpec + " does not exist.";
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_ZOTERO_DIR_NOT_FOUND:
+				var create = promptService.confirmEx(
+					window,
+					// TODO: localize
+					"Storage directory not found",
+					spec + " does not exist.\n\nDo you want to create it now?",
+					promptService.BUTTON_POS_0
+						* promptService.BUTTON_TITLE_IS_STRING
+					+ promptService.BUTTON_POS_1
+						* promptService.BUTTON_TITLE_CANCEL,
+					"Create",
+					null, null, null, {}
+				);
+				
+				if (create != 0) {
+					return;
+				}
+				
+				Zotero.Sync.Storage.createServerDirectory(function (uri, status) {
+					switch (status) {
+						case Zotero.Sync.Storage.SUCCESS:
+							if (!skipSuccessMessage) {
+								promptService.alert(
+									window,
+									"Server configuration verified",
+									"File storage is successfully set up."
+								);
+							}
+							Zotero.Prefs.set("sync.storage.verified", true);
+							return true;
+						
+						case Zotero.Sync.Storage.ERROR_FORBIDDEN:
+							var errorTitle = "Permission denied";
+							var errorMessage = "You do not have "
+								+ "permission to create a Zotero directory "
+								+ "at the following address:" + "\n\n" + spec;
+							errorMessage += "\n\n"
+								+ "Please check your storage settings or "
+								+ "contact your server administrator.";
+							break;
+					}
+					
+					// TEMP
+					if (!errorMessage) {
+						var errorMessage = status;
+					}
+					promptService.alert(window, errorTitle, errorMessage);
+				});
+				
+				return false;
+		}
+		
+		if (!errorTitle) {
+			var errorTitle = Zotero.getString("general.error");
+		}
+		// TEMP
+		if (!errorMessage) {
+			var errorMessage = status;
+		}
+		promptService.alert(window, errorTitle, errorMessage);
+		return false;
 	}
 	
 	
