@@ -176,136 +176,36 @@ function verifyStorageServer() {
 	var verifyButton = document.getElementById("storage-verify");
 	var abortButton = document.getElementById("storage-abort");
 	var progressMeter = document.getElementById("storage-progress");
+	var urlField = document.getElementById("storage-url");
+	var usernameField = document.getElementById("storage-username");
+	var passwordField = document.getElementById("storage-password");
 	
 	var callback = function (uri, status, authRequired) {
 		verifyButton.hidden = false;
 		abortButton.hidden = true;
 		progressMeter.hidden = true;
 		
-		var promptService =
-			Components.classes["@mozilla.org/network/default-prompt;1"].
-				createInstance(Components.interfaces.nsIPrompt);
-		if (uri) {
-			var spec = uri.scheme + '://' + uri.hostPort + uri.path;
-		}
-		
 		switch (status) {
-			case Zotero.Sync.Storage.SUCCESS:
-				promptService.alert(
-					"Server configuration verified",
-					"File storage is successfully set up."
-				);
-				Zotero.Prefs.set("sync.storage.verified", true);
-				return true;
-			
 			case Zotero.Sync.Storage.ERROR_NO_URL:
-				var errorMessage = "Please enter a URL.";
 				setTimeout(function () {
-					document.getElementById("storage-url").focus();
+					urlField.focus();
 				}, 1);
 				break;
 			
 			case Zotero.Sync.Storage.ERROR_NO_USERNAME:
-				var errorMessage = "Please enter a username.";
 				setTimeout(function () {
-					document.getElementById("storage-username").focus();
+					usernameField.focus();
 				}, 1);
 				break;
 			
 			case Zotero.Sync.Storage.ERROR_NO_PASSWORD:
-				var errorMessage = "Please enter a password.";
 				setTimeout(function () {
-					document.getElementById("storage-password").focus();
+					passwordField.focus();
 				}, 1);
 				break;
-			
-			case Zotero.Sync.Storage.ERROR_UNREACHABLE:
-				var errorMessage = "The server " + uri.host + " could not be reached.";
-				break;
-			
-			case Zotero.Sync.Storage.ERROR_NOT_DAV:
-				var errorMessage = spec + " is not a valid WebDAV URL.";
-				break;
-			
-			case Zotero.Sync.Storage.ERROR_AUTH_FAILED:
-				var errorTitle = "Permission denied";
-				var errorMessage = "The server did not accept the username and "
-					+ "password you entered." + " "
-					+ "Please check your server settings "
-					+ "or contact your server administrator.";
-				break;
-			
-			case Zotero.Sync.Storage.ERROR_FORBIDDEN:
-				var errorTitle = "Permission denied";
-				var errorMessage = "You don't have permission to access "
-					+ uri.path + " on this server." + " "
-					+ "Please check your server settings "
-					+ "or contact your server administrator.";
-				break;
-			
-			case Zotero.Sync.Storage.ERROR_PARENT_DIR_NOT_FOUND:
-				var errorTitle = "Directory not found";
-				var parentSpec = spec.replace(/\/zotero\/$/, "");
-				var errorMessage = parentSpec + " does not exist.";
-				break;
-			
-			case Zotero.Sync.Storage.ERROR_ZOTERO_DIR_NOT_FOUND:
-				var create = promptService.confirmEx(
-					// TODO: localize
-					"Directory not found",
-					spec + " does not exist.\n\nDo you want to create it now?",
-					promptService.BUTTON_POS_0
-						* promptService.BUTTON_TITLE_IS_STRING
-					+ promptService.BUTTON_POS_1
-						* promptService.BUTTON_TITLE_CANCEL,
-					"Create",
-					null, null, null, {}
-				);
-				
-				if (create != 0) {
-					return;
-				}
-				
-				Zotero.Sync.Storage.createServerDirectory(function (uri, status) {
-					switch (status) {
-						case Zotero.Sync.Storage.SUCCESS:
-							promptService.alert(
-								"Server configuration verified",
-								"File storage is successfully set up."
-							);
-							Zotero.Prefs.set("sync.storage.verified", true);
-							return true;
-						
-						case Zotero.Sync.Storage.ERROR_FORBIDDEN:
-							var errorTitle = "Permission denied";
-							var errorMessage = "You do not have "
-								+ "permission to create a Zotero directory "
-								+ "at the following address:" + "\n\n" + spec;
-							errorMessage += "\n\n"
-								+ "Please check your server settings or "
-								+ "contact your server administrator.";
-							break;
-					}
-					
-					// TEMP
-					if (!errorMessage) {
-						var errorMessage = status;
-					}
-					promptService.alert(errorTitle, errorMessage);
-				});
-				
-				return false;
 		}
 		
-		if (!errorTitle) {
-			var errorTitle = Zotero.getString("general.error");
-		}
-		// TEMP
-		if (!errorMessage) {
-			var errorMessage = status;
-		}
-		promptService.alert(errorTitle, errorMessage);
-		return false;
+		Zotero.Sync.Storage.checkServerCallback(uri, status, authRequired, window);
 	}
 	
 	verifyButton.hidden = true;
