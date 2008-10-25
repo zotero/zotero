@@ -1485,11 +1485,10 @@ Zotero.CSL.Global = new function() {
 			for(var i in Zotero.CSL.Global._defaultTerms) {
 				termArray[i] = new Object();
 				for(var j in Zotero.CSL.Global._defaultTerms[i]) {
-					if(typeof(Zotero.CSL.Global._defaultTerms[i]) == "object") {
-						termArray[i][j] = [Zotero.CSL.Global._defaultTerms[i][j][0],
-										Zotero.CSL.Global._defaultTerms[i][j][1]];
+					if(typeof(Zotero.CSL.Global._defaultTerms[i][j]) == "object") {
+						termArray[i][j] = Zotero.CSL.Global._defaultTerms[i][j].concat();
 					} else {
-						termArray[i][j] = Zotero.CSL.Global_defaultTerms[i][j];
+						termArray[i][j] = Zotero.CSL.Global._defaultTerms[i][j];
 					}
 				}
 			}
