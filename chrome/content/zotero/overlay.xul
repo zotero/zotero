@@ -58,10 +58,10 @@
 		<menuseparator id="zotero-context-separator" hidden="true"/>
 		<menuitem id="zotero-context-add-to-current-note" class="menu-iconic"
 			label="&zotero.contextMenu.addTextToCurrentNote;" hidden="true"
-			oncommand="ZoteroPane.addTextToNote(window.content.getSelection().toString())"/>
+			oncommand="var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString(); ZoteroPane.addTextToNote(str)"/>
 		<menuitem id="zotero-context-add-to-new-note" class="menu-iconic"
 			label="&zotero.contextMenu.addTextToNewNote;" hidden="true"
-			oncommand="var itemID = ZoteroPane.addItemFromPage(); ZoteroPane.newNote(false, itemID, window.content.getSelection().toString())"/>
+			oncommand="var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString(); var itemID = ZoteroPane.addItemFromPage(); ZoteroPane.newNote(false, itemID, str)"/>
 		<menuitem id="zotero-context-save-link-as-snapshot" class="menu-iconic"
 			label="&zotero.contextMenu.saveLinkAsSnapshot;" hidden="true"
 			oncommand="Zotero.Attachments.importFromURL(window.gContextMenu.linkURL, false, false, false, ZoteroPane.getSelectedCollection(true))"/>
