@@ -123,7 +123,7 @@ li.note blockquote p:not(:empty):last-child:after {
 }
 
 /* Preserve whitespace on plaintext notes */
-ul.notes li p.plaintext, li.note p.plaintext {
+ul.notes li p.plaintext, li.note p.plaintext, div.note p.plaintext {
 	white-space: pre-wrap;
 }
 
@@ -143,4 +143,22 @@ ul.notes ul.tags {
 
 ul.notes ul.tags li:not(:last-child):after {
 	content: ', ';
+}
+
+
+/* Child attachments */
+h3.attachments {
+	font-size: 1.1em;
+}
+
+ul.attachments li {
+	padding-top: .5em;
+}
+
+ul.attachments div.note {
+	margin-left: 2em;
+}
+
+ul.attachments div.note p:first-child {
+	margin-top: .75em;
 }

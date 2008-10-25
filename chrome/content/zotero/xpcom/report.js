@@ -93,13 +93,12 @@ Zotero.Report = new function() {
 					for each(var note in arr.reportChildren.notes) {
 						content += '<li id="i' + note.itemID + '">\n';
 						
-						content += note.note + '\n';
 						if (note.note.substr(0, 1024).match(/<p[^>]*>/)) {
 							content += note.note + '\n';
 						}
 						// Wrap plaintext notes in <p>
 						else {
-							content += '<p class="plaintext">' + note.note + '</p>\n';
+							content += '<p class="plaintext">' + escapeXML(note.note) + '</p>\n';
 						}
 						
 						// Child note tags
@@ -335,6 +334,19 @@ Zotero.Report = new function() {
 				
 				// Attachment tags
 				content += _generateTagsList(attachment);
+				
+				// Attachment note
+				if (attachment.note) {
+					content += '<div class="note">';
+					if (attachment.note.substr(0, 1024).match(/<p[^>]*>/)) {
+						content += attachment.note + '\n';
+					}
+					// Wrap plaintext notes in <p>
+					else {
+						content += '<p class="plaintext">' + escapeXML(attachment.note) + '</p>\n';
+					}
+					content += '</div>';
+				}
 				
 				content += '</li>\n';
 			}
