@@ -65,7 +65,7 @@ CREATE TABLE itemAttachments (
     syncState INT DEFAULT 0,
     storageModTime INT,
     FOREIGN KEY (itemID) REFERENCES items(itemID),
-    FOREIGN KEY (sourceItemID) REFERENCES items(sourceItemID)
+    FOREIGN KEY (sourceItemID) REFERENCES items(itemID)
 );
 CREATE INDEX itemAttachments_sourceItemID ON itemAttachments(sourceItemID);
 CREATE INDEX itemAttachments_mimeType ON itemAttachments(mimeType);

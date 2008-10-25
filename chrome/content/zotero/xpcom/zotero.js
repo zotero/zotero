@@ -169,7 +169,13 @@ var Zotero = new function(){
 		xmlhttp.open('GET', 'chrome://global/locale/global.dtd', false);
 		xmlhttp.overrideMimeType('text/plain');
 		xmlhttp.send(null);
-		this.dir = xmlhttp.responseText.match(/(ltr|rtl)/)[0];
+		var matches = xmlhttp.responseText.match(/(ltr|rtl)/);
+		if (matches && matches[0] == 'rtl') {
+			this.dir = 'rtl';
+		}
+		else {
+			this.dir = 'ltr';
+		}
 		
 		try {
 			this.getZoteroDirectory();
@@ -1725,9 +1731,8 @@ Zotero.Date = new function(){
 	
 	// Regexes for multipart and SQL dates
 	// Allow zeroes in multipart dates
-	var _multipartRE = /^\-?[0-9]{4}\-[0-9]{2}\-[0-9]{2} /;
-	//var _sqldateRE = /^\-?[0-9]{4}\-[0-9]{2}\-[0-9]{2}/;
-	//var _sqldatetimeRE = /^\-?[0-9]{4}\-[0-9]{2}\-[0-9]{2} ([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])/;
+	// TODO: Allow negative multipart in DB and here with \-?
+	var _multipartRE = /^[0-9]{4}\-(0[0-9]|10|11|12)\-(0[0-9]|[1-2][0-9]|30|31) /;
 	var _sqldateRE = /^\-?[0-9]{4}\-(0[1-9]|10|11|12)\-(0[1-9]|[1-2][0-9]|30|31)$/;
 	var _sqldatetimeRE = /^\-?[0-9]{4}\-(0[1-9]|10|11|12)\-(0[1-9]|[1-2][0-9]|30|31) ([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])$/;
 	
