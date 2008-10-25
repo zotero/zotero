@@ -40,7 +40,7 @@ var Zotero_Bibliography_Dialog = new function () {
 		document.getElementById('editor').format = "Integration";
 		
 		if(Zotero.isWin) {
-			document.getElementById("zotero-select-items-container").style.border = "1px solid black";
+			document.getElementsByTagName("dialog")[0].style.border = "1px solid black";
 		}
 		bibEditInterface = window.arguments[0].wrappedJSObject;
 		itemSet = bibEditInterface.getItemSet();

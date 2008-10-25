@@ -2160,15 +2160,15 @@ var ZoteroPane = new function()
 	function showAttachmentNotFoundDialog(itemID) {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
-		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
+		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 		var index = ps.confirmEx(null,
 			Zotero.getString('pane.item.attachments.fileNotFound.title'),
 			Zotero.getString('pane.item.attachments.fileNotFound.text'),
-			buttonFlags, null, Zotero.getString('general.locate'),
+			buttonFlags, Zotero.getString('general.locate'), null,
 			null, null, {});
 		
-		if (index == 1) {
+		if (index == 0) {
 			this.relinkAttachment(itemID);
 		}
 	}

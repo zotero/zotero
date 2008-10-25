@@ -37,7 +37,7 @@
 	ondialogcancel="Zotero_Citation_Dialog.cancel();"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	style="padding: 0 5px"
+	style="padding: 0"
 	persist="screenX screenY width height">
 	
 	<script src="include.js"/>

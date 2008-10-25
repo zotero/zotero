@@ -149,9 +149,8 @@ Zotero.MIMETypeHandler = new function () {
 	var _StreamListener = function(request, contentType) {
 		this._request = request;
 		this._contentType = contentType
-		this._readString = "";
-		this._scriptableStream = null;
-		this._scriptableStreamInput = null;
+		this._storageStream = null;
+		this._binaryInputStream = null;
 	}
 	
 	/**
@@ -177,21 +176,45 @@ Zotero.MIMETypeHandler = new function () {
 	 * done
 	 */
 	_StreamListener.prototype.onDataAvailable = function(request, context, inputStream, offset, count) {
-		if (inputStream != this._scriptableStreamInput) {
-			this._scriptableStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
-				.createInstance(Components.interfaces.nsIScriptableInputStream);
-			this._scriptableStream.init(inputStream);
-			this._scriptableStreamInput = inputStream;
+		Zotero.debug(count + " bytes available");
+		
+		if (!this._storageStream) {
+			this._storageStream = Components.classes["@mozilla.org/storagestream;1"].
+					createInstance(Components.interfaces.nsIStorageStream);
+			this._storageStream.init(4096, 4294967295, null); // PR_UINT32_MAX
+			
+			this._binaryInputStream = Components.classes["@mozilla.org/binaryinputstream;1"].
+					createInstance(Components.interfaces.nsIBinaryInputStream);
+			this._binaryInputStream.setInputStream(inputStream);
 		}
-		this._readString += this._scriptableStream.read(count);
+		
+		var bytes = this._binaryInputStream.readBytes(count);
+		var outputStream = this._storageStream.getOutputStream(0);
+		outputStream.write(bytes, count);
 	}
 	
 	/**
 	 * Called when the request is done
 	 */
 	_StreamListener.prototype.onStopRequest = function(channel, context, status) {
+		Zotero.debug("charset is " + channel.contentCharset);
+		
+		var inputStream = this._storageStream.newInputStream(0);
+		var charset = channel.contentCharset ? channel.contentCharset : "UTF-8";
+		const replacementChar = Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
+		var convStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+					.createInstance(Components.interfaces.nsIConverterInputStream);
+		convStream.init(inputStream, charset, 1024, replacementChar);
+		var readString = "";
+		var str = {};
+		while (convStream.readString(4096, str) != 0) {
+			readString += str.value;
+		}
+		convStream.close();
+		inputStream.close();
+		
 		try {
-			_typeHandlers[this._contentType](this._readString, (this._request.name ? this._request.name : null),
+			_typeHandlers[this._contentType](readString, (this._request.name ? this._request.name : null),
 				this._contentType);
 		} catch(e) {
 			// if there was an error, handle using nsIExternalHelperAppService
@@ -200,21 +223,19 @@ Zotero.MIMETypeHandler = new function () {
 			var frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
 				getService(Components.interfaces.nsIWindowWatcher).activeWindow;
 			
-			var newStreamListener = externalHelperAppService.doContent(this._contentType,
-				this._request, frontWindow, false);
-			if(newStreamListener) {
-				// create a string input stream
-				var inputStream = Components.classes["@mozilla.org/io/string-input-stream;1"].
-								  createInstance(Components.interfaces.nsIStringInputStream);
-				inputStream.setData(this._readString, this._readString.length);
-				
-				newStreamListener.onStartRequest(channel, context);
-				newStreamListener.onDataAvailable(this._request, context, inputStream, 0, this._readString.length);
-				newStreamListener.onStopRequest(channel, context, status);
+			var inputStream = this._storageStream.newInputStream(0);
+			var streamListener = externalHelperAppService.doContent(this._contentType, this._request, frontWindow, null);
+			if (streamListener) {
+				streamListener.onStartRequest(channel, context);
+				streamListener.onDataAvailable(this._request, context, inputStream, 0, this._storageStream.length);
+				streamListener.onStopRequest(channel, context, status);
 			}
+			this._storageStream.close();
 			
 			// then throw our error
 			throw e;
 		}
+		
+		this._storageStream.close();
 	}
 }
