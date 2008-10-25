@@ -2689,6 +2689,8 @@ Zotero.Item.prototype.addTag = function(name, type) {
 		throw ('Cannot add tag to unsaved item in Item.addTag()');
 	}
 	
+	name = Zotero.Utilities.prototype.trim(name);
+	
 	if (!name) {
 		Zotero.debug('Not saving empty tag in Item.addTag()', 2);
 		return false;
@@ -2835,6 +2837,8 @@ Zotero.Item.prototype.replaceTag = function(oldTagID, newTag) {
 	if (!this.id) {
 		throw ('Cannot replace tag on unsaved item');
 	}
+	
+	newTag = Zotero.Utilities.prototype.trim(newTag);
 	
 	if (!newTag) {
 		Zotero.debug('Not replacing with empty tag', 2);
