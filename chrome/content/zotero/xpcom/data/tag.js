@@ -485,7 +485,7 @@ Zotero.Tag.prototype.erase = function () {
 		itemTags.push(itemID + '-' + this.id);
 	}
 	
-	this.unload(this.id);
+	Zotero.Tags.unload(this.id);
 	
 	Zotero.Notifier.trigger('remove', 'item-tag', itemTags);
 	
