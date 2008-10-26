@@ -2051,6 +2051,8 @@ Zotero.Schema = new function(){
 				}
 				
 				if (i==45) {
+					Zotero.DB.query("DELETE FROM itemData WHERE valueID IN (SELECT valueID FROM itemDataValues WHERE value REGEXP '^\\s*$')");
+					Zotero.DB.query("DELETE FROM itemDataValues WHERE value REGEXP '^\\s*$'");
 					var rows = Zotero.DB.query("SELECT * FROM itemDataValues WHERE value REGEXP '(^\\s+|\\s+$)'");
 					if (rows) {
 						for each(var row in rows) {
@@ -2081,6 +2083,8 @@ Zotero.Schema = new function(){
 						}
 					}
 					
+					Zotero.DB.query("DELETE FROM itemTags WHERE tagID IN (SELECT tagID FROM tags WHERE name REGEXP '^\\s*$')");
+					Zotero.DB.query("DELETE FROM tags WHERE name REGEXP '^\\s*$'");
 					var rows = Zotero.DB.query("SELECT * FROM tags WHERE name REGEXP '(^\\s+|\\s+$)'");
 					if (rows) {
 						for each(var row in rows) {
