@@ -2073,7 +2073,8 @@ Zotero.Schema = new function(){
 					if (rows) {
 						for (var j=0; j<rows.length-1; j++) {
 							var k = j + 1;
-							while (rows[k].lastName == rows[j].lastName &&
+							while (k < rows.length &&
+									rows[k].lastName == rows[j].lastName &&
 									rows[k].firstName == rows[j].firstName &&
 									rows[k].fieldMode == rows[j].fieldMode) {
 								Zotero.DB.query("UPDATE creators SET creatorDataID=? WHERE creatorDataID=?", [rows[j].creatorDataID, rows[k].creatorDataID]);
