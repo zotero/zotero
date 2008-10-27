@@ -249,17 +249,14 @@
 					var ios = Components.classes["@mozilla.org/network/io-service;1"].
 						getService(Components.interfaces.nsIIOService);
 					var uri = ios.newURI("chrome://zotero/content/tinymce/" + htmlFile + ".html", null, null);
-					var chromeReg = Components.classes["@mozilla.org/chrome/chrome-registry;1"].
-						getService(Components.interfaces.nsIChromeRegistry);
-					var fileURI = chromeReg.convertChromeURL(uri);
 					
-					Zotero.debug("Loading " + fileURI.spec);
+					Zotero.debug("Loading " + uri.spec);
 					
 					// Register handler for deferred setting of content
 					var self = this;
 					var listener = function() {
 						self._iframe.removeEventListener("DOMContentLoaded", listener, false);
-						var editor = self._iframe.contentWindow.wrappedJSObject.tinyMCE.get("tinymce");
+						var editor = self._iframe.contentWindow.tinyMCE.get("tinymce");
 						
 						editor.onInit.add(function() {
 							self._editor = editor;
@@ -269,13 +266,12 @@
 						});
 						
 						if (self._eventHandler) {
-							self._iframe.contentWindow.wrappedJSObject.handleEvent = self._eventHandler;
+							self._iframe.contentWindow.handleEvent = self._eventHandler;
 						}
 					};
 					this._iframe.addEventListener("DOMContentLoaded", listener, false);
 					
-					Zotero.debug("Loading " + fileURI.spec);
-					this._iframe.webNavigation.loadURI(fileURI.spec,
+					this._iframe.webNavigation.loadURI(uri.spec,
 						Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, null, null);
 				]]>
 				</body>
@@ -284,7 +280,7 @@
 		</implementation>
 		
 		<content>
-			<xul:iframe flex="1" anonid="rt-view" class="rt-view" type="content"
+			<xul:iframe flex="1" anonid="rt-view" class="rt-view"
 				xbl:inherits="onfocus,onblur,flex,width,height,hidden"
 				style="overflow: hidden"/>
 		</content>

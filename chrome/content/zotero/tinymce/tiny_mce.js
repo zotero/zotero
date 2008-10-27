@@ -6311,8 +6311,12 @@ tinymce.create('tinymce.ui.Toolbar:tinymce.ui.Container', {
 			tinymce.EditorManager.baseURI = new tinymce.util.URI(tinymce.baseURL);
 
 			// User already specified a document.domain value
-			if (document.domain && lo.hostname != document.domain)
-				tinymce.relaxedDomain = document.domain;
+			// try/catch added by Dan S./Zotero
+			try {
+				if (document.domain && lo.hostname != document.domain)
+					tinymce.relaxedDomain = document.domain;
+			}
+			catch (e) {}
 
 			// Setup document domain if tinymce is loaded from other domain
 			if (!tinymce.relaxedDomain && tinymce.EditorManager.baseURI.host != lo.hostname && lo.hostname)
