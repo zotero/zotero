@@ -2161,15 +2161,16 @@ Zotero.Sync.Server.Data = new function() {
 			newCreator.@id = creatorID;
 			newCreator.@creatorType = item.creators[index].creatorType;
 			newCreator.@index = index;
-			xml.creator += newCreator;
 			
 			// Add creator XML as glue if not already included in sync session
 			if (syncSession &&
 					syncSession.uploadIDs.updated.creators.indexOf(creatorID) == -1) {
 				var creator = Zotero.Creators.get(creatorID);
 				var creatorXML = Zotero.Sync.Server.Data.creatorToXML(creator);
-				xml.creator.creator = creatorXML;
+				newCreator.creator = creatorXML;
 			}
+			
+			xml.creator += newCreator;
 		}
 		
 		// Related items
