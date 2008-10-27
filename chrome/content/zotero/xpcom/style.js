@@ -146,15 +146,15 @@ Zotero.Styles = new function() {
 		
 		var error = false;
 		try {
-			/*if(type == "ens") {
+			if(type == "ens") {
 				// EN style
 				var type = "ens";
 				var enConverter = new Zotero.ENConverter(style);
 				var xml = enConverter.parse();
-			} else {*/
+			} else {
 				// CSL
 				var xml = new XML(Zotero.CSL.Global.cleanXML(style));
-			//}
+			}
 		} catch(e) {
 			error = e;
 		}
@@ -330,13 +330,13 @@ Zotero.Style = function(file) {
 	this.file = file;
 	
 	var extension = file.leafName.substr(-4).toLowerCase();
-	/*if(extension == ".ens") {
+	if(extension == ".ens") {
 		this.type = "ens";
 		
 		this.styleID = Zotero.Styles.ios.newFileURI(this.file).spec;
 		this.title = file.leafName.substr(0, file.leafName.length-4);
 		this.updated = Zotero.Date.dateToSQL(new Date(file.lastModifiedTime));
-	} else */if(extension == ".csl") {
+	} else if(extension == ".csl") {
 		// "with ({});" needed to fix default namespace scope issue
 		// See https://bugzilla.mozilla.org/show_bug.cgi?id=330572
 		default xml namespace = "http://purl.org/net/xbiblio/csl"; with ({});
