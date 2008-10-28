@@ -2059,7 +2059,7 @@ Zotero.Schema = new function(){
 							var trimmed = Zotero.Utilities.prototype.trim(row.value);
 							var valueID = Zotero.DB.valueQuery("SELECT valueID FROM itemDataValues WHERE value=?", trimmed);
 							if (valueID) {
-								Zotero.DB.query("UPDATE itemData SET valueID=? WHERE valueID=?", [valueID, row.valueID]);
+								Zotero.DB.query("UPDATE OR REPLACE itemData SET valueID=? WHERE valueID=?", [valueID, row.valueID]);
 								Zotero.DB.query("DELETE FROM itemDataValues WHERE valueID=?", row.valueID);
 							}
 							else {
@@ -2092,7 +2092,7 @@ Zotero.Schema = new function(){
 							var trimmed = Zotero.Utilities.prototype.trim(row.name);
 							var tagID = Zotero.DB.valueQuery("SELECT tagID FROM tags WHERE name=?", trimmed);
 							if (tagID) {
-								Zotero.DB.query("UPDATE itemTags SET tagID=? WHERE tagID=?", [tagID, row.tagID]);
+								Zotero.DB.query("UPDATE OR REPLACE itemTags SET tagID=? WHERE tagID=?", [tagID, row.tagID]);
 								Zotero.DB.query("DELETE FROM tags WHERE tagID=?", row.tagID);
 							}
 							else {
