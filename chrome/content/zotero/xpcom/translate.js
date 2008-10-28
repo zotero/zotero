@@ -1142,10 +1142,9 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 	var type = (item.itemType ? item.itemType : "webpage");
 	
 	if(type == "note") {	// handle notes differently
-		var item = new Zotero.Item(false, 'note');
-		item.setNote(item.note);
-		var myID = item.save();
-		
+		var newItem = new Zotero.Item(false, 'note');
+		newItem.setNote(item.note);
+		var myID = newItem.save();
 		// re-retrieve the item
 		var newItem = Zotero.Items.get(myID);
 	} else {
