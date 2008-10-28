@@ -2147,11 +2147,12 @@ Zotero.Translate.prototype._exportToArray = function(returnItem) {
 	// preserve notes
 	if(returnItemArray.note) returnItemArray.uniqueFields.note = returnItemArray.note;
 	
-	// TODO: Change tag.tag references in scrapers.sql to tag.name
+	// TODO: Change tag.tag references in translators to tag.name
 	// once translators are 1.5-only
+	// TODO: Preserve tag type?
 	if (returnItemArray.tags) {
 		for (var i in returnItemArray.tags) {
-			returnItemArray.tags[i].tag = returnItemArray.tags[i].name;
+			returnItemArray.tags[i].tag = returnItemArray.tags[i].fields.name;
 		}
 	}
 	
@@ -2168,7 +2169,8 @@ Zotero.Translate.prototype._exportGetCollection = function() {
 	
 	if(this._collectionsLeft && this._collectionsLeft.length != 0) {
 		var returnItem = this._collectionsLeft.shift();
-		return returnItem.toArray();
+		var obj = returnItem.serialize();
+		obj.name = obj.fields.name;
 	}
 }
 
