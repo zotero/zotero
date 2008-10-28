@@ -1576,17 +1576,19 @@ Zotero.Sync.Server.Data = new function() {
 											continue;
 										}
 										break;
-									
-									default:
-										Zotero.debug(obj);
-										Zotero.debug(remoteObj);
-										var msg = "Reconciliation unimplemented for " + types;
-										alert(msg);
-										throw(msg);
 								}
 								
-								if (obj.isAttachment()) {
-									var msg = "Reconciliation unimplemented for attachment items";
+								if (type == 'item') {
+									if (obj.isAttachment()) {
+										var msg = "Reconciliation unimplemented for attachment items";
+										alert(msg);
+										throw(msg);
+									}
+								}
+								else {
+									Zotero.debug(obj);
+									Zotero.debug(remoteObj);
+									var msg = "Reconciliation unimplemented for " + types;
 									alert(msg);
 									throw(msg);
 								}
