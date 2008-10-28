@@ -441,6 +441,7 @@ Zotero.Sync.Storage = new function () {
 		
 		Zotero.Utilities.HTTP.WebDAV.doPut(uri, item.attachmentModificationTime + '', function (req) {
 			switch (req.status) {
+				case 200:
 				case 201:
 				case 204:
 					break;
@@ -1303,9 +1304,9 @@ Zotero.Sync.Storage = new function () {
 			+ " finished with status code " + status);
 		
 		switch (status) {
+			case 200:
 			case 201:
 			case 204:
-			case 200: // IIS 5
 				break;
 			
 			default:
@@ -1615,7 +1616,9 @@ Zotero.Sync.Storage = new function () {
 							Zotero.debug(req.status);
 							
 							switch (req.status) {
+								case 200:
 								case 201:
+								case 204:
 									// Delete test file
 									Zotero.Utilities.HTTP.WebDAV.doDelete(
 										testFileURI,
@@ -1624,9 +1627,8 @@ Zotero.Sync.Storage = new function () {
 											Zotero.debug(req.status);
 											
 											switch (req.status) {
+												case 200: // IIS 5.1 and Sakai return 200
 												case 204:
-												// IIS 5.1 and Sakai return 200
-												case 200:
 													callback(
 														uri,
 														Zotero.Sync.Storage.SUCCESS,
