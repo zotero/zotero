@@ -8,26 +8,34 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2008-05-28 18:30:00"
+	"lastUpdated":"2008-10-28 02:41:28"
 }
 
 function detectWeb(doc, url) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == 'x') return namespace; else return null;
+	} : null;
+
+// Central Michigan University fix
+	var xpath = '//div[@class="bibRecordLink"]';
+	var elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if(elmt) {
+		return "book";
+	}
+
+// possibly disastrous edit to regular expression below	
 	if (!url.match(/SEARCH=/) && !url.match(/searchargs?=/) && !url.match(/&FF/)) return false;
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don't reveal the MARC button
-	var matchRegexp = new RegExp('^https?://[^/]+/search[^/]*\\??/[^/]+/[^/]+/[0-9]+\%2C[^/]+/frameset(.+)$');
+	var matchRegexp = new RegExp('^https?://[^/]+/search[^/]*\\??/[^/]+/[^/]+/[^/]+\%2C[^/]+/frameset(.+)$');
 	if(matchRegexp.test(doc.location.href)) {
 		if (!url.match("SEARCH") && !url.match("searchtype")) {
 			return "book";
 		}
 	}
-	// Next, look for the MARC button
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	var xpath = '//a[img[@src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
-	var elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	// Next, look for the MARC button	
+	xpath = '//a[img[@src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
+	elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(elmt) {
 		return "book";
 	}
