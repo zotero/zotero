@@ -21,7 +21,7 @@
 */
 
 const API_VERSION = 2;
-const COMPAT_API_VERSION = 5;
+const COMPAT_API_VERSION = 6;
 
 Zotero.Integration = new function() {
 	var _contentLengthRe = /[\r\n]Content-Length: *([0-9]+)/i;
