@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-03-30 08:30:00"
+	"lastUpdated":"2008-10-29 17:00:00"
 }
 
 function detectWeb(doc, url){
@@ -136,13 +136,24 @@ function getData(ids, host){
 		if (xml..media_description.length()){
 			newItem.abstractNote = xml..media_description[0].text().toString();
 		}
-		
-		var next_url = newItem.url.replace(/\/\/([^/]+)/, "//" + host).replace("watch?v=", "v/") + '&rel=1';
-		Zotero.Utilities.loadDocument(next_url, function(newDoc) {
-			var new_url = newDoc.location.href.replace("swf/l.swf", "get_video");
-			newItem.attachments.push({url:new_url, title:"YouTube Video Recording", mimeType:"video/x-flv"});
+				
+//temporary fix for downloads using techcrunch
+		var techcrunchurl = "http://www.techcrunch.com/ytdownload3.php?url="+encodeURIComponent(newItem.url)+"&submit=Get+Video";
+		Zotero.Utilities.HTTP.doGet(techcrunchurl, function(text) {
+			var flv = text.match(/HREF='([^']+)'/);
+			if (flv[1]){
+				flv = flv[1];
+				// title parameter needs to be encoded
+				var title = flv.match(/&title=([^&]+)/);
+				if (title[1]){
+					title = encodeURIComponent(title[1]);
+					flv = flv.replace(/&title=([^&]+)/, title);
+				}
+				newItem.attachments.push({url:flv, title:"YouTube Video Recording", mimeType:"video/x-flv"});
+			}
 			newItem.complete();
 		}, function() {Zotero.done;});
 	});
 	Zotero.wait();
+}
 }
