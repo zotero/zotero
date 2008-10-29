@@ -16274,7 +16274,7 @@ REPLACE INTO translators VALUES ('5dd22e9a-5124-4942-9b9e-6ee779f1023e', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0rc4', '', '2008-03-30 08:30:00', '1', '100', '4', 'YouTube', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*youtube\.com\/', 
+REPLACE INTO translators VALUES ('d3b1d34c-f8a1-43bb-9dd6-27aa6403b217', '1.0.0rc4', '', '2008-10-29 17:05:00', 1, 100, 4, 'YouTube', 'Sean Takats and Michael Berkowitz', 'https?://[^/]*youtube\.com\/',
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -16399,16 +16399,27 @@ function getData(ids, host){
 		if (xml..media_description.length()){
 			newItem.abstractNote = xml..media_description[0].text().toString();
 		}
-		
-		var next_url = newItem.url.replace(/\/\/([^/]+)/, "//" + host).replace("watch?v=", "v/") + ''&rel=1'';
-		Zotero.Utilities.loadDocument(next_url, function(newDoc) {
-			var new_url = newDoc.location.href.replace("swf/l.swf", "get_video");
-			newItem.attachments.push({url:new_url, title:"YouTube Video Recording", mimeType:"video/x-flv"});
+				
+//temporary fix for downloads using techcrunch
+		var techcrunchurl = "http://www.techcrunch.com/ytdownload3.php?url="+encodeURIComponent(newItem.url)+"&submit=Get+Video";
+		Zotero.Utilities.HTTP.doGet(techcrunchurl, function(text) {
+			var flv = text.match(/HREF=''([^'']+)''/);
+			if (flv[1]){
+				flv = flv[1];
+				// title parameter needs to be encoded
+				var title = flv.match(/&title=([^&]+)/);
+				if (title[1]){
+					title = encodeURIComponent(title[1]);
+					flv = flv.replace(/&title=([^&]+)/, title);
+				}
+				newItem.attachments.push({url:flv, title:"YouTube Video Recording", mimeType:"video/x-flv"});
+			}
 			newItem.complete();
 		}, function() {Zotero.done;});
 	});
 	Zotero.wait();
 }');
+
 
 REPLACE INTO translators VALUES ('e16095ae-986c-4117-9cb6-20f3b7a52f64', '1.0.0b4.r5', '', '2008-02-19 17:00:00', '0', '100', '4', 'Protein Data Bank', 'Michael Berkowitz', 'http://www.pdb.org/', 
 'function detectWeb(doc, url) {
