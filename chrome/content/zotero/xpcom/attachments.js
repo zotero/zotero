@@ -141,19 +141,17 @@ Zotero.Attachments = new function(){
 			// translate.js, which sets the metadata fields itself
 			var itemID = attachmentItem.save();
 			attachmentItem = Zotero.Items.get(itemID)
-			var attachmentKey = attachmentItem.key;
+			
+			var newFile = this.getStorageDirectory(itemID);
+			var newName = newFile.leafName;
 			
 			var storageDir = Zotero.getStorageDirectory();
-			file.parent.copyTo(storageDir, attachmentKey);
+			file.parent.copyTo(storageDir, newName);
 			
 			// Point to copied file
-			var newFile = Components.classes["@mozilla.org/file/local;1"]
-							.createInstance(Components.interfaces.nsILocalFile);
-			newFile.initWithFile(storageDir);
-			newFile.append(attachmentKey);
 			newFile.append(file.leafName);
 			
-			attachmentItem.path = this.getPath(newFile, this.LINK_MODE_IMPORTED_URL);
+			attachmentItem.attachmentPath = this.getPath(newFile, this.LINK_MODE_IMPORTED_URL);
 			attachmentItem.save();
 			
 			Zotero.DB.commitTransaction();
