@@ -734,7 +734,6 @@ Zotero.Sync.Server = new function () {
 			
 			if (response.firstChild.tagName == 'error') {
 				// handle error
-				Zotero.debug(xmlhttp.responseText);
 				_error(response.firstChild.firstChild.nodeValue);
 			}
 			
@@ -825,7 +824,6 @@ Zotero.Sync.Server = new function () {
 					
 					if (response.firstChild.tagName == 'error') {
 						// handle error
-						Zotero.debug(xmlhttp.responseText);
 						_error(response.firstChild.firstChild.nodeValue);
 					}
 					
