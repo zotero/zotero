@@ -592,7 +592,7 @@ var Zotero = new function(){
 				'[JavaScript Error: "[Exception... "\'Component is not available\' when calling method: [nsIHandlerService::getTypeFromExtension',
 				'[JavaScript Error: "this._uiElement is null',
 				'Error: a._updateVisibleText is not a function',
-				'[JavaScript Error: "Warning: unrecognized command line flag -psn',
+				'[JavaScript Error: "Warning: unrecognized command line flag ',
 				'LibX:',
 				'function skype_',
 				'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]'
