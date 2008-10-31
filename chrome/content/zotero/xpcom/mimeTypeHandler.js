@@ -150,6 +150,7 @@ Zotero.MIMETypeHandler = new function () {
 		this._request = request;
 		this._contentType = contentType
 		this._storageStream = null;
+		this._outputStream = null;
 		this._binaryInputStream = null;
 	}
 	
@@ -182,6 +183,7 @@ Zotero.MIMETypeHandler = new function () {
 			this._storageStream = Components.classes["@mozilla.org/storagestream;1"].
 					createInstance(Components.interfaces.nsIStorageStream);
 			this._storageStream.init(4096, 4294967295, null); // PR_UINT32_MAX
+			this._outputStream = this._storageStream.getOutputStream(0);
 			
 			this._binaryInputStream = Components.classes["@mozilla.org/binaryinputstream;1"].
 					createInstance(Components.interfaces.nsIBinaryInputStream);
@@ -189,8 +191,7 @@ Zotero.MIMETypeHandler = new function () {
 		}
 		
 		var bytes = this._binaryInputStream.readBytes(count);
-		var outputStream = this._storageStream.getOutputStream(0);
-		outputStream.write(bytes, count);
+		this._outputStream.write(bytes, count);
 	}
 	
 	/**
