@@ -35,6 +35,7 @@
 			<field name="_commandString"/>
 			<field name="_eventHandler"/>
 			<field name="_timer"/>
+			<field name="_focus"/>
 			
 			<constructor><![CDATA[
 					this.mode = this.getAttribute('mode');
@@ -236,6 +237,20 @@
 					onset="this.setAttribute('timeout', val); return val;"
 					onget="return parseInt(this.getAttribute('timeout')) || 0;"/>
 			
+			<method name="focus">
+				<body>
+				<![CDATA[
+					if (this._editor) {
+						this._editor.focus();
+						this._focus = false;
+					}
+					else {
+						this._focus = true;
+					}
+				]]>
+				</body>
+			</method>
+			
 			<field name="_loaded"/>
 			<method name="_load">
 				<body>
@@ -262,6 +277,10 @@
 							self._editor = editor;
 							if (self._value) {
 								self.value = self._value;
+							}
+							if (self._focus) {
+								self._editor.focus();
+								self._focus = false;
 							}
 						});
 						
