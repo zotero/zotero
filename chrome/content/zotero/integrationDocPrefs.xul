@@ -39,7 +39,7 @@
 				<radio id="fields" selected="true"/>
 				<label class="radioDescription" id="fields-caption"/>
 				<radio id="bookmarks" label="&zotero.integration.prefs.bookmarks.label;"/>
-				<label class="radioDescription" id="bookmarks-caption">&zotero.integration.prefs.bookmarks.caption;</label>
+				<description class="radioDescription" id="bookmarks-caption" style="white-space: pre;">&zotero.integration.prefs.bookmarks.caption;</description>
 			</radiogroup>
 		</groupbox>
 	</vbox>

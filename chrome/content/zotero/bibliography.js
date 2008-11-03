@@ -142,10 +142,14 @@ var Zotero_File_Interface_Bibliography = new function() {
 		
 		var selectedStyle = selectedItem.getAttribute('value');
 		
-		// update status of displayAs box based
+		// update status of displayAs box based on style class
+		var isNote = Zotero.Styles.get(selectedStyle).class == "note";
+		document.getElementById("displayAs").disabled = !isNote;
 		
-		var styleClass = Zotero.Styles.get(selectedStyle).class;
-		document.getElementById("displayAs").disabled = styleClass != "note";
+		// update status of formatUsing box based on style class
+		if(isNote) document.getElementById("formatUsing").selectedIndex = 0;
+		document.getElementById("bookmarks").disabled = isNote;
+		document.getElementById("bookmarks-caption").disabled = isNote;
 	}
 
 	function acceptSelection() {
