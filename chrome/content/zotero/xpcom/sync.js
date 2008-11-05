@@ -636,7 +636,7 @@ Zotero.Sync.Server = new function () {
 		if (!username) {
 			_error("Username not set in Zotero.Sync.Server.login()");
 		}
-		else if (!username.match(/^[\w\d ]+$/)) {
+		else if (!username.match(/^[\w\d\. ]+$/)) {
 			_error("Invalid username '" + username + "' in Zotero.Sync.Server.login()");
 		}
 		
