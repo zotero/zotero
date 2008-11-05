@@ -134,6 +134,29 @@ Zotero.Attachments = new function(){
 			var itemID = attachmentItem.getID();
 			
 			var storageDir = Zotero.getStorageDirectory();
+			
+			var targetDir = this.getStorageDirectory(itemID);
+			if (targetDir.exists()) {
+				// Create orphaned-files directory if it doesn't exist
+				var orphaned = Zotero.getZoteroDirectory();
+				orphaned.append('orphaned-files');
+				if (!orphaned.exists()) {
+					orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+				}
+				
+				// Find unique filename for orphaned file
+				var orphanTarget = orphaned.clone();
+				orphanTarget.append(targetDir.leafName);
+				if (orphanTarget.exists()) {
+					orphanTarget.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+					newName = orphanTarget.leafName;
+					orphanTarget.remove(false);
+				}
+				
+				// Move target to orphaned files directory
+				targetDir.moveTo(orphaned, null);
+			}
+			
 			file.parent.copyTo(storageDir, itemID);
 			
 			// Point to copied file
