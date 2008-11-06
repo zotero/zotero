@@ -30,10 +30,10 @@ Zotero.CSL = function(csl) {
 	// See https://bugzilla.mozilla.org/show_bug.cgi?id=330572
 	default xml namespace = "http://purl.org/net/xbiblio/csl"; with ({});
 	
-	if(typeof csl != "XML") {
+	if(typeof csl != "xml") {
 		this._csl = new XML(Zotero.CSL.Global.cleanXML(csl));
 	} else {
-		this._csl = CSL;
+		this._csl = csl;
 	}
 	
 	// initialize CSL
@@ -306,7 +306,7 @@ Zotero.CSL.prototype.formatBibliography = function(itemSet, format) {
 	
 	if(!itemSet.items.length) return "";
 	
-	var hangingIndent = !!(context.option.(@name == "hanging-indent").@value == "true");
+	var hangingIndent = context.option.(@name == "hanging-indent").@value == "true";
 	var secondFieldAlign = context.option.(@name == "second-field-align").@value.toString();
 	var lineSpacing = context.option.(@name == "line-spacing").@value.toString();
 	lineSpacing = (lineSpacing === "" ? 1 : parseInt(lineSpacing, 10));
