@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-10-16 14:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-11-06 04:25:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -23562,7 +23562,7 @@ REPLACE INTO translators VALUES ('a326fc49-60c2-405b-8f44-607e5d18b9ad', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c3edb423-f267-47a1-a8c2-158c247f87c2', '1.0.0b4.r5', '', '2008-06-12 19:30:00', '0', '100', '4', 'Common-Place', 'Frederick Gibbs', 'http://www.common-place\.|historycooperative\.org/journals/cp', 
+REPLACE INTO translators VALUES ('c3edb423-f267-47a1-a8c2-158c247f87c2', '1.0.0b4.r5', '', '2008-11-06 04:25:00', '0', '100', '4', 'Common-Place', 'Frederick Gibbs', 'http://www.common-place\.|historycooperative\.org/journals/cp', 
 'function detectWeb(doc, url) {
 	if(doc.title.indexOf("Previous Issues") != -1 || doc.title.indexOf("Search Site") != -1 ) {
 		return "multiple";
