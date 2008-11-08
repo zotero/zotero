@@ -1154,14 +1154,10 @@ Zotero.Sync.Server = new function () {
 		}
 		
 		if (!xmlhttp.responseXML || !xmlhttp.responseXML.childNodes[0] ||
-				xmlhttp.responseXML.childNodes[0].tagName != 'response') {
+				xmlhttp.responseXML.childNodes[0].tagName != 'response' ||
+				!xmlhttp.responseXML.childNodes[0].firstChild) {
 			Zotero.debug(xmlhttp.responseText);
 			_error('Invalid response from server', xmlhttp.responseText);
-		}
-		
-		if (!xmlhttp.responseXML.childNodes[0].firstChild) {
-			Zotero.debug(xmlhttp.responseText);
-			_error('Empty response from server');
 		}
 	}
 	
@@ -1184,8 +1180,7 @@ Zotero.Sync.Server = new function () {
 	function _error(e, extraInfo) {
 		if (extraInfo) {
 			// Server errors will generally be HTML
-			var ZU = new Zotero.Utilities;
-			extraInfo = ZU.unescapeHTML(extraInfo);
+			extraInfo = Zotero.Utilities.prototype.unescapeHTML(extraInfo);
 			Components.utils.reportError(extraInfo);
 		}
 		
