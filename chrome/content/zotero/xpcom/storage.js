@@ -1092,7 +1092,7 @@ Zotero.Sync.Storage = new function () {
 			if (destFile.exists()) {
 				var msg = "ZIP entry '" + fileName + "' "
 					+ " already exists";
-				Zotero.debug(msg);
+				Zotero.debug(msg, 2);
 				Components.utils.reportError(msg + " in " + funcName);
 				continue;
 			}
@@ -1117,8 +1117,11 @@ Zotero.Sync.Storage = new function () {
 		var file = item.getFile();
 		if (!file) {
 			_removeRequest(request);
+			var msg = "File not found for item " + item.id + " after extracting ZIP";
+			Zotero.debug(msg, 1);
+			Components.utils.reportError(msg + " in " + funcName);
 			_queueAdvance('download', Zotero.Sync.Storage.downloadFile, true);
-			_error("File not found for item " + item.id + " after extracting ZIP");
+			return;
 		}
 		file.lastModifiedTime = syncModTime * 1000;
 		
@@ -1918,16 +1921,16 @@ Zotero.Sync.Storage = new function () {
 	 * @throws
 	 */
 	function _checkResponse(req) {
+		if (!req.responseText) {
+			_error('Empty response from server');
+		}
 		if (!req.responseXML ||
 				!req.responseXML.firstChild ||
 				!(req.responseXML.firstChild.namespaceURI == 'DAV:' &&
-					req.responseXML.firstChild.localName == 'multistatus')) {
+					req.responseXML.firstChild.localName == 'multistatus') ||
+					!req.responseXML.childNodes[0].firstChild) {
 			Zotero.debug(req.responseText);
 			_error('Invalid response from storage server');
-		}
-		
-		if (!req.responseXML.childNodes[0].firstChild) {
-			_error('Empty response from storage server');
 		}
 	}
 	
