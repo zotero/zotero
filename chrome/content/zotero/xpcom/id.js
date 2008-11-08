@@ -188,8 +188,8 @@ Zotero.ID = new function () {
 		if (_skip[table]) {
 			var max = 0;
 			for (var id in _skip[table]) {
-				if (id > max) {
-					max = id;
+				if (parseInt(id) > max) {
+					max = parseInt(id);
 				}
 			}
 			if (!max) {
