@@ -419,9 +419,8 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 					}
 					var target = newPrimary ? newPrimary : 2;
 					
-					// Reset to contributor (creatorTypeID 2), which exists in all
-					this.setCreator(i, creators[i].firstName,
-						creators[i].lastName, target, creators[i].fieldMode);				}
+					this.setCreator(i, creators[i].ref, target);
+				}
 			}
 		}
 	}
