@@ -601,7 +601,8 @@ Zotero.Sync.Storage = new function () {
 			}
 			
 			if (mtimes[item.id] != fileModTime) {
-				Zotero.debug("Marking attachment " + item.id + " as changed");
+				Zotero.debug("Marking attachment " + item.id + " as changed ("
+					+ mtimes[item.id] + " != " + fileModTime + ")");
 				updatedStates[item.id] =
 					Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD;
 			}
