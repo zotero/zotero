@@ -1834,16 +1834,15 @@ Zotero.Sync.Server.Data = new function() {
 			Zotero.debug('Saving merged ' + types);
 			// Save parent items first
 			if (type == 'item') {
-				for each(var obj in toSave) {
-					if (!obj.getSource()) {
-						obj.save();
+				for (var i=0; i<toSave.length; i++) {
+					if (!toSave[i].getSource()) {
+						toSave[i].save();
+						toSave.splice(i, 1);
+						i--;
 					}
 				}
 			}
 			for each(var obj in toSave) {
-				if (type == 'item' && !obj.getSource()) {
-					continue;
-				}
 				obj.save();
 			}
 			
