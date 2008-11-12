@@ -1495,7 +1495,6 @@ Zotero.Searches = new function(){
 	
 	this.get = get;
 	this.getAll = getAll;
-	this.getUpdated = getUpdated;
 	this.erase = erase;
 	
 	
@@ -1522,16 +1521,6 @@ Zotero.Searches = new function(){
 		var sql = "SELECT savedSearchID AS id, savedSearchName AS name "
 			+ "FROM savedSearches ORDER BY name COLLATE NOCASE";
 		return Zotero.DB.query(sql);
-	}
-	
-	
-	function getUpdated(date) {
-		var sql = "SELECT savedSearchID FROM savedSearches";
-		if (date) {
-			sql += " WHERE dateModified>?";
-			return Zotero.DB.columnQuery(sql, Zotero.Date.dateToSQL(date, true));
-		}
-		return Zotero.DB.columnQuery(sql);
 	}
 	
 	

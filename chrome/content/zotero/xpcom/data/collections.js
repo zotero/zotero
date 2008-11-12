@@ -30,7 +30,6 @@ Zotero.Collections = new function() {
 	
 	this.get = get;
 	this.add = add;
-	this.getUpdated = getUpdated;
 	this.getCollectionsContainingItems = getCollectionsContainingItems;
 	this.erase = erase;
 	
@@ -59,16 +58,6 @@ Zotero.Collections = new function() {
 		col.parent = parent;
 		var id = col.save();
 		return this.get(id);
-	}
-	
-	
-	function getUpdated(date) {
-		var sql = "SELECT collectionID FROM collections";
-		if (date) {
-			sql += " WHERE dateModified>?";
-			return Zotero.DB.columnQuery(sql, Zotero.Date.dateToSQL(date, true));
-		}
-		return Zotero.DB.columnQuery(sql);
 	}
 	
 	
