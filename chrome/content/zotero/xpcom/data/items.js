@@ -32,7 +32,6 @@ Zotero.Items = new function() {
 	this.get = get;
 	this.exist = exist;
 	this.getAll = getAll;
-	this.getUpdated = getUpdated;
 	this.add = add;
 	this.cacheFields = cacheFields;
 	this.erase = erase;
@@ -122,15 +121,6 @@ Zotero.Items = new function() {
 		
 		var ids = Zotero.DB.columnQuery(sql);
 		return this.get(ids);
-	}
-	
-	
-	function getUpdated(date) {
-		var s = new Zotero.Search();
-		if (date) {
-			s.addCondition('dateModified', 'isAfter', Zotero.Date.dateToSQL(date, true));
-		}
-		return s.search();
 	}
 	
 	

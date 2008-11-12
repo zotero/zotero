@@ -26,7 +26,6 @@ Zotero.Creators = new function() {
 	this.constructor.prototype = new Zotero.DataObjects();
 	
 	this.get = get;
-	this.getUpdated = getUpdated;
 	this.getDataID = getDataID;
 	this.getCreatorsWithData = getCreatorsWithData;
 	this.countCreatorsWithData = countCreatorsWithData;
@@ -56,16 +55,6 @@ Zotero.Creators = new function() {
 		
 		this._objectCache[creatorID] = new Zotero.Creator(creatorID);
 		return this._objectCache[creatorID];
-	}
-	
-	
-	function getUpdated(date) {
-		var sql = "SELECT creatorID FROM creators";
-		if (date) {
-			sql += " WHERE dateModified>?";
-			return Zotero.DB.columnQuery(sql, Zotero.Date.dateToSQL(date, true));
-		}
-		return Zotero.DB.columnQuery(sql);
 	}
 	
 	

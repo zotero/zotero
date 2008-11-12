@@ -35,6 +35,33 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	}
 	
 	
+	this.getOlder = function (date) {
+		if (!date || date.constructor.name != 'Date') {
+			throw ("date must be a JS Date in "
+				+ "Zotero." + this._ZDO_Objects + ".getOlder()")
+		}
+		
+		var sql = "SELECT " + this._ZDO_id + " FROM " + this._ZDO_table
+					+ " WHERE dateModified<?";
+		return Zotero.DB.columnQuery(sql, Zotero.Date.dateToSQL(date, true));
+	}
+	
+	
+	this.getNewer = function (date) {
+		if (date && date.constructor.name != 'Date') {
+			throw ("date must be a JS Date in "
+				+ "Zotero." + this._ZDO_Objects + ".getNewer()")
+		}
+		
+		var sql = "SELECT " + this._ZDO_id + " FROM " + this._ZDO_table;
+		if (date) {
+			sql += " WHERE dateModified>?";
+			return Zotero.DB.columnQuery(sql, Zotero.Date.dateToSQL(date, true));
+		}
+		return Zotero.DB.columnQuery(sql);
+	}
+	
+	
 	/*
 	 * Reloads data for specified items into internal array
 	 *

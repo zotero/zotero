@@ -35,7 +35,6 @@ Zotero.Tags = new function() {
 	this.getID = getID;
 	this.getIDs = getIDs;
 	this.getTypes = getTypes;
-	this.getUpdated = getUpdated;
 	this.getAll = getAll;
 	this.getAllWithinSearch = getAllWithinSearch;
 	this.getTagItems = getTagItems;
@@ -112,16 +111,6 @@ Zotero.Tags = new function() {
 		name = Zotero.Utilities.prototype.trim(name);
 		var sql = 'SELECT type FROM tags WHERE name=?';
 		return Zotero.DB.columnQuery(sql, [name]);
-	}
-	
-	
-	function getUpdated(date) {
-		var sql = "SELECT tagID FROM tags";
-		if (date) {
-			sql += " WHERE dateModified>?";
-			return Zotero.DB.columnQuery(sql, Zotero.Date.dateToSQL(date, true));
-		}
-		return Zotero.DB.columnQuery(sql);
 	}
 	
 	

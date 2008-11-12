@@ -2,7 +2,6 @@ Zotero.Sync = new function() {
 	this.init = init;
 	this.getObjectTypeID = getObjectTypeID;
 	this.getObjectTypeName = getObjectTypeName;
-	this.getUpdatedObjects = getUpdatedObjects;
 	this.getDeletedObjects = getDeletedObjects;
 	this.purgeDeletedObjects = purgeDeletedObjects;
 	
@@ -78,13 +77,27 @@ Zotero.Sync = new function() {
 	
 	
 	/**
-	 * @param	object	lastSyncDate	JS Date object
-	 * @return	object	{ items: [123, 234, ...], creators: [321, 432, ...], ... }
+	 * @param	{Date} olderThanDate		Retrieve objects last updated before this date
+	 * @param	{Date} newerThanDate		Retrieve objects last updated after this date
+	 * @return	{Object}		{ items: [123, 234, ...], creators: [321, 432, ...], ... }
 	 */
-	function getUpdatedObjects(lastSyncDate) {
-		if (lastSyncDate && lastSyncDate.constructor.name != 'Date') {
-			throw ('lastSyncDate must be a Date or FALSE in '
-				+ 'Zotero.Sync.getDeletedObjects()')
+	this.getObjectsByDate = function (olderThanDate, newerThanDate) {
+		var funcName = "Zotero.Sync.getObjectsByDate()";
+		if (olderThanDate && olderThanDate.constructor.name != 'Date') {
+			throw ("olderThanDate must be a Date or FALSE in " + funcName)
+		}
+		if (newerThanDate && newerThanDate.constructor.name != 'Date') {
+			throw ("newerThanDate must be a Date or FALSE in " + funcName)
+		}
+		
+		// If dates overlap, retrieve all objects
+		if (!olderThanDate && !newerThanDate) {
+			var all = true;
+		}
+		else if (olderThanDate && newerThanDate && olderThanDate > newerThanDate) {
+			olderThanDate = null;
+			newerThanDate = null;
+			var all = true;
 		}
 		
 		var updatedIDs = {};
@@ -94,7 +107,25 @@ Zotero.Sync = new function() {
 			
 			Zotero.debug("Getting updated local " + types);
 			
-			updatedIDs[types] = Zotero[Types].getUpdated(lastSyncDate);
+			if (olderThanDate) {
+				var earlierIDs = Zotero[Types].getOlder(olderThanDate);
+				if (earlierIDs) {
+					updatedIDs[types] = earlierIDs;
+				}
+			}
+			
+			if (newerThanDate || all) {
+				var laterIDs = Zotero[Types].getNewer(newerThanDate);
+				if (laterIDs) {
+					if (updatedIDs[types]) {
+						updatedIDs[types].concat(laterIDs);
+					}
+					else {
+						updatedIDs[types] = laterIDs;
+					}
+				}
+			}
+			
 			if (!updatedIDs[types]) {
 				updatedIDs[types] = [];
 			}
@@ -745,12 +776,26 @@ Zotero.Sync.Server = new function () {
 			try {
 				Zotero.UnresponsiveScriptIndicator.disable();
 				
+				var earliestRemoteDate = parseInt(xml.@earliest) ?
+					new Date((xml.@earliest + 43200) * 1000) : false;
+				
 				var lastLocalSyncTime = Zotero.Sync.Server.lastLocalSyncTime;
 				var lastLocalSyncDate = lastLocalSyncTime ?
 					new Date(lastLocalSyncTime * 1000) : false;
 				
 				var syncSession = new Zotero.Sync.Server.Session;
-				syncSession.uploadIDs.updated = Zotero.Sync.getUpdatedObjects(lastLocalSyncDate);
+				// Fetch old objects not on server (due to a clear) and new
+				// objects added since last sync
+				if (earliestRemoteDate && lastLocalSyncDate) {
+					syncSession.uploadIDs.updated = Zotero.Sync.getObjectsByDate(
+						earliestRemoteDate, lastLocalSyncDate
+					);
+				}
+				// Fetch all local objects
+				else {
+					syncSession.uploadIDs.updated = Zotero.Sync.getObjectsByDate();
+				}
+				
 				var deleted = Zotero.Sync.getDeletedObjects(lastLocalSyncDate);
 				if (deleted == -1) {
 					_error('Sync delete log starts after last sync date in Zotero.Sync.Server.sync()');
