@@ -77,7 +77,12 @@ Zotero.Creator.prototype._set = function (field, val) {
 		case 'firstName':
 		case 'lastName':
 		case 'shortName':
-			val = value = Zotero.Utilities.prototype.trim(val);
+			if (val) {
+				val = value = Zotero.Utilities.prototype.trim(val);
+			}
+			else {
+				val = value = '';
+			}
 			break;
 	}
 	
