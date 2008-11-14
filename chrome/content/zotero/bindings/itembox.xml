@@ -1089,10 +1089,7 @@
 						valueElement.setAttribute('flex', '1');
 					}
 					
-					var firstSpace;
-					if (typeof valueText == 'string') {
-						firstSpace = valueText.indexOf(" ");
-					}
+					var firstSpace = valueText.indexOf(" ");
 					
 					// To support newlines in 'extra' fields, we use multiple
 					// <description> elements inside a vbox
