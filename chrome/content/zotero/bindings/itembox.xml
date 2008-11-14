@@ -1011,6 +1011,8 @@
 				<parameter name="tabindex"/>
 				<body>
 				<![CDATA[
+					valueText = valueText + '';
+					
 					if (fieldName) {
 						var fieldID = Zotero.ItemFields.getID(fieldName);
 					}
