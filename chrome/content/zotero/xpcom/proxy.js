@@ -95,25 +95,29 @@ Zotero.Proxies = new function() {
 					Components.utils.reportError(e);
 				}
 				
+				if (!proxy) {
+					continue;
+				}
+				
+				// if transparent is turned off, just save the proxy
 				if(!transparent) {
-					// if transparent is turned off, just save the proxy
 					proxy.save();
-				} else if(proxy) {
-					// otherwise, make sure we want it
-					var io = {site:proxy.hosts[0], proxy:channel.URI.hostPort};
-					var window = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						.getService(Components.interfaces.nsIWindowMediator)
-						.getMostRecentWindow("navigator:browser");
-					window.openDialog('chrome://zotero/content/proxy.xul', '', 'chrome,modal', io);
-					
-					if(io.add) proxy.save();
-					if(io.disable) {
-						transparent = false;
-						Zotero.Prefs.set("proxies.transparent", false);
-					}
-					
 					break;
 				}
+				
+				// otherwise, make sure we want it
+				var io = {site:proxy.hosts[0], proxy:channel.URI.hostPort};
+				var window = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					.getService(Components.interfaces.nsIWindowMediator)
+					.getMostRecentWindow("navigator:browser");
+				window.openDialog('chrome://zotero/content/proxy.xul', '', 'chrome,modal', io);
+				
+				if(io.add) proxy.save();
+				if(io.disable) {
+					transparent = false;
+					Zotero.Prefs.set("proxies.transparent", false);
+				}
+				break;
 			}
 		}
 		
