@@ -36,13 +36,11 @@ var Zotero = new function(){
 	// Privileged (public) methods
 	this.init = init;
 	this.stateCheck = stateCheck;
-	//this.shutdown = shutdown;
 	this.getProfileDirectory = getProfileDirectory;
 	this.getInstallDirectory = getInstallDirectory;
 	this.getZoteroDirectory = getZoteroDirectory;
 	this.getStorageDirectory = getStorageDirectory;
 	this.getZoteroDatabase = getZoteroDatabase;
-	this.getTempDirectory = getTempDirectory;
 	this.chooseZoteroDirectory = chooseZoteroDirectory;
 	this.debug = debug;
 	this.log = log;
@@ -85,7 +83,6 @@ var Zotero = new function(){
 	var _debugLevel;
 	var _debugTime;
 	var _debugLastTime;
-	//var _shutdown = false;
 	var _localizedStringBundle;
 	
 	
@@ -100,15 +97,11 @@ var Zotero = new function(){
 		var start = (new Date()).getTime()
 		
 		// Register shutdown handler to call Zotero.shutdown()
-		/*
 		var observerService = Components.classes["@mozilla.org/observer-service;1"]
 			.getService(Components.interfaces.nsIObserverService);
 		observerService.addObserver({
-			observe: function(subject, topic, data){
-				Zotero.shutdown(subject, topic, data)
-			}
-		}, "xpcom-shutdown", false);
-		*/
+			observe: Zotero.shutdown
+		}, "quit-application", false);
 		
 		// Load in the preferences branch for the extension
 		Zotero.Prefs.init();
@@ -307,15 +300,11 @@ var Zotero = new function(){
 	}
 	
 	
-	/*
-	function shutdown(subject, topic, data){
-		// Called twice otherwise, for some reason
-		if (_shutdown){
-			return false;
-		}
+	this.shutdown = function (subject, topic, data) {
+		Zotero.debug("Shutting down Zotero");
+		Zotero.removeTempDirectory();
 		return true;
 	}
-	*/
 	
 	
 	function getProfileDirectory(){
@@ -389,11 +378,23 @@ var Zotero = new function(){
 	/**
 	 * @return	{nsIFile}
 	 */
-	function getTempDirectory() {
+	this.getTempDirectory = function () {
 		var tmp = this.getZoteroDirectory();
 		tmp.append('tmp');
 		Zotero.File.createDirectoryIfMissing(tmp);
 		return tmp;
+	}
+	
+	
+	this.removeTempDirectory = function () {
+		var tmp = this.getZoteroDirectory();
+		tmp.append('tmp');
+		if (tmp.exists()) {
+			try {
+				tmp.remove(true);
+			}
+			catch (e) {}
+		}
 	}
 	
 	
