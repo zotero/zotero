@@ -8,7 +8,6 @@ Zotero.Sync.Storage = new function () {
 	
 	this.SUCCESS = 1;
 	this.ERROR_NO_URL = -1;
-	this.ERROR_NO_USERNAME = -2;
 	this.ERROR_NO_PASSWORD = -3;
 	this.ERROR_OFFLINE = -4;
 	this.ERROR_UNREACHABLE = -5;
@@ -50,18 +49,8 @@ Zotero.Sync.Storage = new function () {
 			});
 		}
 		var username = Zotero.Sync.Storage.username;
-		if (!username) {
-			var msg = "Zotero storage username not provided";
-			Zotero.debug(msg);
-			throw ({
-				message: msg,
-				name: "Z_ERROR_NO_USERNAME",
-				filename: "storage.js",
-				toString: function () { return this.message; }
-			});
-		}
 		var password = Zotero.Sync.Storage.password;
-		if (!password) {
+		if (username && !password) {
 			var msg = "Zotero storage password not provided";
 			Zotero.debug(msg);
 			throw ({
@@ -93,8 +82,10 @@ Zotero.Sync.Storage = new function () {
 					getService(Components.interfaces.nsIIOService);
 		try {
 			var uri = ios.newURI(spec, null, null);
-			uri.username = username;
-			uri.password = password;
+			if (username) {
+				uri.username = username;
+				uri.password = password;
+			}
 		}
 		catch (e) {
 			Zotero.debug(e);
@@ -858,6 +849,8 @@ Zotero.Sync.Storage = new function () {
 		var lastSyncDate = new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000);
 		
 		Zotero.Utilities.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (req) {
+				Zotero.debug(req.responseText);
+				
 			var funcName = "Zotero.Sync.Storage.purgeOrphanedStorageFiles()";
 			
 			// Strip XML declaration and convert to E4X
@@ -872,11 +865,12 @@ Zotero.Sync.Storage = new function () {
 					var ios = Components.classes["@mozilla.org/network/io-service;1"].
 								getService(Components.interfaces.nsIIOService);
 					var href = ios.newURI(href, null, null);
-					if (href.path != path) {
-						_error("DAV:href '" + href.path
-								+ "' does not match path in " + funcName);
-					}
 					href = href.path;
+				}
+				
+				if (href.indexOf(path) == -1) {
+					_error("DAV:href '" + href
+							+ "' does not begin with path '" + path + "' in " + funcName);
 				}
 				
 				// Skip root URI
@@ -1524,10 +1518,6 @@ Zotero.Sync.Storage = new function () {
 					callback(null, Zotero.Sync.Storage.ERROR_NO_URL);
 					return;
 				
-				case 'Z_ERROR_NO_USERNAME':
-					callback(null, Zotero.Sync.Storage.ERROR_NO_USERNAME);
-					return;
-				
 				case 'Z_ERROR_NO_PASSWORD':
 					callback(null, Zotero.Sync.Storage.ERROR_NO_PASSWORD);
 					return;
@@ -1766,10 +1756,6 @@ Zotero.Sync.Storage = new function () {
 			
 			case Zotero.Sync.Storage.ERROR_NO_URL:
 				var errorMessage = "Please enter a URL.";
-				break;
-			
-			case Zotero.Sync.Storage.ERROR_NO_USERNAME:
-				var errorMessage = "Please enter a username.";
 				break;
 			
 			case Zotero.Sync.Storage.ERROR_NO_PASSWORD:

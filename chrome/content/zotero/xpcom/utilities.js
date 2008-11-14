@@ -1079,6 +1079,10 @@ Zotero.Utilities.HTTP = new function() {
 		// Prevent certificate/authentication dialogs from popping up
 		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open("PUT", uri.spec, true);
+		// Some servers (e.g., Jungle Disk DAV) return a 200 response code
+		// with Content-Length: 0, which triggers a "no element found" error
+		// in Firefox, so we override to text
+		xmlhttp.overrideMimeType("text/plain");
 		xmlhttp.onreadystatechange = function() {
 			_stateChange(xmlhttp, callback);
 		};
@@ -1112,6 +1116,9 @@ Zotero.Utilities.HTTP = new function() {
 		// Prevent certificate/authentication dialogs from popping up
 		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open("DELETE", uri.spec, true);
+		// Firefox 3 throws a "no element found" error even with a
+		// 204 ("No Content") response, so we override to text
+		xmlhttp.overrideMimeType("text/plain");
 		xmlhttp.onreadystatechange = function() {
 			_stateChange(xmlhttp, callback);
 		};
