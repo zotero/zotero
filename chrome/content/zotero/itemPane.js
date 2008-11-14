@@ -881,6 +881,8 @@ var ZoteroItemPane = new function()
 	
 	function createValueElement(valueText, fieldName, tabindex, noedit)
 	{
+		valueText = valueText + '';
+		
 		var fieldID = Zotero.ItemFields.getID(fieldName);
 		
 		// If an abstract, check last expand state
@@ -945,9 +947,7 @@ var ZoteroItemPane = new function()
 			valueElement.setAttribute('flex', '1');
 		}
 		
-		var firstSpace;
-		if(typeof valueText == 'string')
-			firstSpace = valueText.indexOf(" ");
+		var firstSpace = valueText.indexOf(" ");
 		
 		// To support newlines in 'extra' fields, we use multiple
 		// <description> elements inside a vbox
