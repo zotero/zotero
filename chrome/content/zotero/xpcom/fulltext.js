@@ -634,7 +634,7 @@ Zotero.Fulltext = new function(){
 	
 	
 	function getPages(itemID, force) {
-		var sql = "SELECT indexedPages AS indexed, totalPages AS total "
+		var sql = "SELECT indexedPages, totalPages AS total "
 			+ "FROM fulltextItems WHERE itemID=?";
 		return Zotero.DB.rowQuery(sql, itemID);
 	}
@@ -663,7 +663,7 @@ Zotero.Fulltext = new function(){
 	
 	
 	function getChars(itemID) {
-		var sql = "SELECT indexedChars AS indexed, totalChars AS total "
+		var sql = "SELECT indexedChars, totalChars AS total "
 			+ "FROM fulltextItems WHERE itemID=?";
 		return Zotero.DB.rowQuery(sql, itemID);
 	}
@@ -726,7 +726,7 @@ Zotero.Fulltext = new function(){
 			case 'application/pdf':
 				var pages = this.getPages(itemID);
 				if (pages) {
-					var indexedPages = pages.indexed;
+					var indexedPages = pages.indexedPages;
 					var totalPages = pages.total;
 					
 					if (!totalPages && !indexedPages) {
@@ -751,7 +751,7 @@ Zotero.Fulltext = new function(){
 			default:
 				var chars = this.getChars(itemID);
 				if (chars) {
-					var indexedChars = chars.indexed;
+					var indexedChars = chars.indexedChars;
 					var totalChars = chars.total;
 					
 					if (!totalChars && !indexedChars) {
