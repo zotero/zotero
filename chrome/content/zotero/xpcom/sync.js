@@ -405,6 +405,13 @@ Zotero.Sync.Runner = new function () {
 	}
 	
 	this.sync = function () {
+		if (Zotero.Utilities.HTTP.browserIsOffline()){
+			this.lastSyncError = "Browser is offline"; // TODO: localize
+			this.clearSyncTimeout(); // DEBUG: necessary?
+			this.setSyncIcon('error');
+			return false;
+		}
+		
 		if (_running) {
 			throw ("Sync already running in Zotero.Sync.Runner.sync()");
 		}
