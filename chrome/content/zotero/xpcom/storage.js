@@ -2068,6 +2068,13 @@ Zotero.Sync.Storage = new function () {
 						+ "_Zotero.Sync.Storage._updateProgress()");
 		}
 		
+		// Workaround for invalid progress values (possibly related to
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=451991 and fixed in 3.1)
+		if (progress < r.progress) {
+			//Zotero.debug("Invalid progress (" + progress + " < " + r.progress + ")");
+			return;
+		}
+		
 		_totalProgress[queue] += progress - r.progress;
 		r.progress = progress;
 		
@@ -2336,6 +2343,11 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	
 	// nsIProgressEventSink
 	onProgress: function (request, context, progress, progressMax) {
+		// Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=451991
+		// (fixed in Fx3.1)
+		if (progress > progressMax) {
+			progress = progressMax;
+		}
 		//Zotero.debug("onProgress with " + progress + "/" + progressMax);
 		this._onProgress(request, progress, progressMax);
 	},
