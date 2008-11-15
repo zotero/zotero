@@ -130,7 +130,17 @@ Zotero.Proxies = new function() {
 			
 			if(webNav) {
 				var proxied = this.properToProxy(url, true);
-				if(proxied) webNav.loadURI(proxied, 0, channel.URI, null, null);
+				if(proxied) {
+					channel.QueryInterface(Components.interfaces.nsIHttpChannel);
+					// If the referrer is a proxiable host, we already have access
+					// (e.g., we're on-campus) and shouldn't redirect
+					if (channel.referrer) {
+						if (this.properToProxy(channel.referrer.spec, true)) {
+							return;
+						}
+					}
+					webNav.loadURI(proxied, 0, channel.URI, null, null);
+				}
 			}
 		}
 	}
