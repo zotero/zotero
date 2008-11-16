@@ -769,7 +769,6 @@ function ChromeExtensionHandler() {
 	
 	var SelectExtensionSpec = ZOTERO_SCHEME + "://select"
 	this._extensions[SelectExtensionSpec] = SelectExtension;
-
 }
 
 
@@ -784,7 +783,12 @@ ChromeExtensionHandler.prototype = {
 	protocolFlags :
 		Components.interfaces.nsIProtocolHandler.URI_NORELATIVE |
 		Components.interfaces.nsIProtocolHandler.URI_NOAUTH |
-		Components.interfaces.nsIProtocolHandler.URI_IS_LOCAL_FILE,
+		// DEBUG: This should be URI_IS_LOCAL_FILE, and MUST be if any
+		// extensions that modify data are added
+		//  - https://www.zotero.org/trac/ticket/1156
+		//
+		//Components.interfaces.nsIProtocolHandler.URI_IS_LOCAL_FILE,
+		Components.interfaces.nsIProtocolHandler.URI_LOADABLE_BY_ANYONE,
 		
 	allowPort : function(port, scheme) {
 		return false;
