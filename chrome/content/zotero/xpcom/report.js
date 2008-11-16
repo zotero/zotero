@@ -43,9 +43,9 @@ Zotero.Report = new function() {
 		content += '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">\n';
 		content += '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n';
 		content += '<title>' + Zotero.getString('report.title.default') + '</title>\n';
-		content += '<link rel="stylesheet" type="text/css" href="chrome://zotero/skin/report/detail.css"/>\n';
-		content += '<link rel="stylesheet" type="text/css" media="screen,projection" href="chrome://zotero/skin/report/detail_screen.css"/>\n';
-		content += '<link rel="stylesheet" type="text/css" media="print" href="chrome://zotero/skin/report/detail_print.css"/>\n';
+		content += '<link rel="stylesheet" type="text/css" href="zotero://report/detail.css"/>\n';
+		content += '<link rel="stylesheet" type="text/css" media="screen,projection" href="zotero://report/detail_screen.css"/>\n';
+		content += '<link rel="stylesheet" type="text/css" media="print" href="zotero://report/detail_print.css"/>\n';
 		content += '</head>\n\n<body>\n';
 		
 		content += '<ul class="report' + (combineChildItems ? ' combineChildItems' : '') + '">\n';
