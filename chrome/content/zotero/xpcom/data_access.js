@@ -1590,8 +1590,10 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 	}
 	
 	if (!row){
-		throw ('Attachment data not found for item ' + this.getID()
-			+ ' in getFile()');
+		Components.utils.reportError(
+			'Attachment data not found for item ' + this.getID() + ' in getFile()'
+		);
+		return false;
 	}
 	
 	// No associated files for linked URLs
