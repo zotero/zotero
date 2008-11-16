@@ -702,7 +702,7 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 Zotero.DBConnection.prototype.startDummyStatement = function () {
 	try {
 		if (!this._dummyConnection) {
-			this._debug("Opening database '" + this._dbName + " for dummy statement");
+			this._debug("Opening database '" + this._dbName + "' for dummy statement");
 			// Get the storage service
 			var store = Components.classes["@mozilla.org/storage/service;1"].
 				getService(Components.interfaces.mozIStorageService);
