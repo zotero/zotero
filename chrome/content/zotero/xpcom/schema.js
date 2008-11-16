@@ -585,6 +585,11 @@ Zotero.Schema = new function(){
 			return false;
 		}
 		else if (dbVersion < schemaVersion){
+			if (!Zotero.isFx3) {
+				Zotero.debug("Not upgrading '" + schema + "' schema in Firefox 2");
+				return;
+			}
+			
 			Zotero.DB.beginTransaction();
 			try {
 				Zotero.DB.query(_getSchemaSQL(schema));
