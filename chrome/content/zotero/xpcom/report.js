@@ -31,11 +31,13 @@ Zotero.Report = new function() {
 		/^http:\/\/([^\.]*\.)?nytimes\.com/
 	];
 	
+	var escapeXML = function (str) {
+		str = str.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/g, '\u2B1A');
+		return Zotero.Utilities.prototype.htmlSpecialChars(str);
+	}
+	
 	
 	function generateHTMLDetails(items, combineChildItems) {
-		var ZU = new Zotero.Utilities();
-		var escapeXML = ZU.htmlSpecialChars;
-		
 		var content = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" ';
         content += '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\n';
 		content += '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">\n';
@@ -128,9 +130,6 @@ Zotero.Report = new function() {
 	
 	
 	function _generateMetadataTable(arr) {
-		var ZU = new Zotero.Utilities();
-		var escapeXML = ZU.htmlSpecialChars;
-		
 		var table = false;
 		var content = '<table>\n';
 		
@@ -206,7 +205,7 @@ Zotero.Report = new function() {
 				continue;
 			}
 			
-			arr[i] = ZU.trim(arr[i] + '');
+			arr[i] = Zotero.Utilities.prototype.trim(arr[i] + '');
 			
 			// Skip empty fields
 			if (!arr[i]) {
@@ -289,9 +288,6 @@ Zotero.Report = new function() {
 	
 	
 	function _generateTagsList(arr) {
-		var ZU = new Zotero.Utilities();
-		var escapeXML = ZU.htmlSpecialChars;
-		
 		var content = '';
 		if (arr['tags'] && arr['tags'].length) {
 			var str = Zotero.getString('report.tags');
@@ -307,9 +303,6 @@ Zotero.Report = new function() {
 	
 	
 	function _generateAttachmentsList(arr) {
-		var ZU = new Zotero.Utilities();
-		var escapeXML = ZU.htmlSpecialChars;
-		
 		var content = '';
 		if (arr.attachments && arr.attachments.length) {
 			content += '<h3 class="attachments">' + escapeXML(Zotero.getString('itemFields.attachments')) + '</h3>\n';
