@@ -1897,7 +1897,7 @@ Zotero.Translate.prototype._export = function() {
 		
 		// delete this file if it exists
 		if(this.location.exists()) {
-			this.location.remove(false);
+			this.location.remove(true);
 		}
 		
 		// get name
