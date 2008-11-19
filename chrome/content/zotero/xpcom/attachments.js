@@ -47,6 +47,10 @@ Zotero.Attachments = new function(){
 		
 		var title = file.leafName;
 		
+		if (!file.isFile()) {
+			throw ("'" + title + "' must be a file in Zotero.Attachments.importFromFile()");
+		}
+		
 		Zotero.DB.beginTransaction();
 		
 		try {

@@ -1140,6 +1140,11 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 				var uri = IOService.newURI(item.path, "", null);
 				var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
 				
+				if (file.path == '/') {
+					Zotero.debug("Translate: Ignoring attachment '" + item.path + "': error parsing path", 2);
+					return;
+				}
+				
 				if (!file.exists()) {
 					// use item title if possible, or else file leaf name
 					var title = item.title;
