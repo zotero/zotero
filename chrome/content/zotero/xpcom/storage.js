@@ -868,17 +868,19 @@ Zotero.Sync.Storage = new function () {
 					href = href.path;
 				}
 				
-				if (href.indexOf(path) == -1) {
+				if (href.indexOf(path) == -1
+						// Try URL-encoded as well, in case there's a '~' or similar
+						// character in the URL and the server (e.g., Sakai) is
+						// encoding the value
+						&& decodeURIComponent(href).indexOf(path) == -1) {
 					_error("DAV:href '" + href
 							+ "' does not begin with path '" + path + "' in " + funcName);
 				}
 				
 				// Skip root URI
-				//
-				// Try URL-encoded as well, in case there's a '~' or similar
-				// character in the URL and the server (e.g., Sakai) is
-				// encoding the value
-				if (href == path || decodeURIComponent(href) == path) {
+				if (href == path
+						// Try URL-encoded as well, as above
+						|| decodeURIComponent(href) == path) {
 					continue;
 				}
 				
