@@ -38,8 +38,6 @@
 	<script src="reportInterface.js"/>
 	<script src="timelineInterface.js"/>
 	<script src="browser.js"/>
-	<script src="chrome://global/content/nsDragAndDrop.js"/>
-	<script src="chrome://global/content/nsTransferable.js"/>
 	
 	<commandset id="mainCommandSet">
 		<command id="cmd_zotero_search" oncommand="ZoteroPane.search();"/>
@@ -137,10 +135,12 @@
 					<tree id="zotero-collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
 						onmouseover="ZoteroPane.collectionsView.setHighlightedRows();"
 						ondblclick="ZoteroPane.onDoubleClick(event, this);"
-						onselect="ZoteroPane.onCollectionSelected();" seltype="single"
-						ondragdrop="nsDragAndDrop.drop(event, ZoteroPane.collectionsView)"
-						ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event, ZoteroPane.collectionsView);"
 						onkeypress="ZoteroPane.handleKeyPress(event, this.id)"
+						onselect="ZoteroPane.onCollectionSelected();" seltype="single"
+						ondraggesture="if (event.target.localName == 'treechildren') { ZoteroPane.startDrag(event, ZoteroPane.collectionsView); }"
+						ondragenter="return ZoteroPane.dragEnter(event, ZoteroPane.collectionsView)"
+						ondragover="return ZoteroPane.dragOver(event, ZoteroPane.collectionsView)"
+						ondragdrop="return ZoteroPane.dragDrop(event, ZoteroPane.collectionsView)"
 						flex="1">
 						<treecols>
 							<treecol
@@ -200,9 +200,10 @@
 						onfocus="if (ZoteroPane.itemsView.rowCount &amp;&amp; !ZoteroPane.itemsView.selection.count) { ZoteroPane.itemsView.selection.select(0); }"
 						onkeypress="ZoteroPane.handleKeyPress(event, this.id)"
 						onselect="ZoteroPane.itemSelected();"
-						ondraggesture="if (event.target.localName == 'treechildren') nsDragAndDrop.startDrag(event,ZoteroPane.itemsView);"
-						ondragover="nsDragAndDrop.dragOver(event, ZoteroPane.itemsView)"
-						ondragdrop="nsDragAndDrop.drop(event, ZoteroPane.itemsView)"
+						ondraggesture="if (event.target.localName == 'treechildren') { ZoteroPane.startDrag(event, ZoteroPane.itemsView); }"
+						ondragenter="return ZoteroPane.dragEnter(event, ZoteroPane.itemsView)"
+						ondragover="return ZoteroPane.dragOver(event, ZoteroPane.itemsView)"
+						ondragdrop="return ZoteroPane.dragDrop(event, ZoteroPane.itemsView)"
 						flex="1">
 						<treecols>
 							<treecol

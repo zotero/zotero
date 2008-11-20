@@ -608,39 +608,66 @@ Zotero.CollectionTreeCommandController.prototype.onEvent = function(evt)
 ///
 ///  Drag-and-drop functions:
 ///		canDrop() and drop() are for nsITreeView
-///		onDragStart(), getSupportedFlavours(), and onDrop() for nsDragAndDrop.js + nsTransferable.js
+///		onDragStart(), getSupportedFlavours(), and onDrop() for nsDragAndDrop.js
 ///
 ////////////////////////////////////////////////////////////////////////////////
+
+
+/**
+ * Start a drag using nsDragAndDrop.js or HTML 5 Drag and Drop
+ */
+Zotero.CollectionTreeView.prototype.onDragStart = function(event, transferData, action) {
+	var collectionID = this._getItemAtRow(this.selection.currentIndex).ref.id;
+	
+	// Use nsDragAndDrop.js interface for Firefox 2 and Firefox 3.0
+	var oldMethod = Zotero.isFx2 || Zotero.isFx30;
+	
+	if (oldMethod) {
+		transferData.data = new TransferData();
+		transferData.data . addDataForFlavour("zotero/collection", collectionID);
+	}
+	else {
+		event.dataTransfer.setData("zotero/collection", collectionID);
+	}
+}
+
+
+/**
+ * Returns the supported drag flavors
+ *
+ * Called by nsDragAndDrop.js
+ */
+Zotero.CollectionTreeView.prototype.getSupportedFlavours = function () {
+	var flavors = new FlavourSet();
+	flavors.appendFlavour("zotero/collection");
+	flavors.appendFlavour("zotero/item");
+	flavors.appendFlavour("text/x-moz-url");
+	flavors.appendFlavour("application/x-moz-file", "nsIFile");
+	return flavors; 
+}
+
 
 /*
  *  Called while a drag is over the tree.
  */
-Zotero.CollectionTreeView.prototype.canDrop = function(row, orient)
+Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 {
-	// workaround... two different services call canDrop
-	// (nsDragAndDrop, and the tree) -- this is for the former,
-	// used when dragging between windows
+	//Zotero.debug("Row is " + row + "; orient is " + orient);
+	
+	// Two different services call canDrop, nsDragAndDrop and the tree
+	// This is for the former, used when dragging between windows
 	if (typeof row == 'object') {
 		return false;
 	}
 	
-	//Zotero.debug('Row is ' + row);
-	//Zotero.debug('Orient is ' + orient);
-	
-	try
-	{
-		var dataSet = nsTransferable.get(this.getSupportedFlavours(),nsDragAndDrop.getDragData, true);
+	if (!dragData) {
+		var dragData = Zotero.DragDrop.getDragData(this);
 	}
-	catch (e)
-	{
-		//a work around a limitation in nsDragAndDrop.js -- the mDragSession is not set until the drag moves over another control.
-		//(this will only happen if the first drag is from the collection list)
-		nsDragAndDrop.mDragSession = nsDragAndDrop.mDragService.getCurrentSession();
+	if (!dragData) {
 		return false;
 	}
-	
-	var data = dataSet.first.first;
-	var dataType = data.flavour.contentType;
+	var dataType = dragData.dataType;
+	var data = dragData.data;
 	
 	// For dropping collections onto root level
 	if (orient == 1 && row == 0 && dataType == 'zotero/collection') {
@@ -651,7 +678,7 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient)
 		var rowCollection = this._getItemAtRow(row).ref; //the collection we are dragging over
 		
 		if (dataType == 'zotero/item') {
-			var ids = data.data.split(',');
+			var ids = data;
 			for each(var id in ids)
 			{
 				var item = Zotero.Items.get(id);
@@ -674,15 +701,16 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient)
 				return false;
 			}
 			// Don't allow folder drag
-			if (dataType == 'application/x-moz-file' && data.data.isDirectory()) {
+			if (dataType == 'application/x-moz-file' && data[0].isDirectory()) {
 				return false;
 			}
 			return true;
 		}
 		else if (dataType == 'zotero/collection'
-				&& data.data != rowCollection.getID()
-				&& !Zotero.Collections.get(data.data).hasDescendent('collection', rowCollection.getID())) {
-			return true;//collections cannot be dropped on themselves, nor in their children
+				// Collections cannot be dropped on themselves, nor in their children
+				&& data[0] != rowCollection.id
+				&& !Zotero.Collections.get(data[0]).hasDescendent('collection', rowCollection.id)) {
+			return true;
 		}
 	}
 	return false;
@@ -693,24 +721,25 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient)
  */
 Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 {
-	var dataSet = nsTransferable.get(this.getSupportedFlavours(),nsDragAndDrop.getDragData, true);
-	var data = dataSet.first.first;
-	var dataType = data.flavour.contentType;
+	var dragData = Zotero.DragDrop.getDragData(this);
 	
-	if (!this.canDrop(row, orient)) {
+	if (!this.canDrop(row, orient, dragData)) {
 		return false;
 	}
+	
+	var dataType = dragData.dataType;
+	var data = dragData.data;
 	
 	if(dataType == 'zotero/collection')
 	{
 		var targetCollectionID;
 		if(this._getItemAtRow(row).isCollection())
 			targetCollectionID = this._getItemAtRow(row).ref.getID();
-		var droppedCollection = Zotero.Collections.get(data.data);
+		var droppedCollection = Zotero.Collections.get(data[0]);
 		droppedCollection.changeParent(targetCollectionID);
 	}
 	else if (dataType == 'zotero/item') {
-		var ids = data.data.split(',');
+		var ids = data;
 		if (ids.length < 1) {
 			return;
 		}
@@ -738,12 +767,11 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		
 		var unlock = Zotero.Notifier.begin(true);
 		try {
-			var dataList = dataSet.dataList;
-			for (var i=0, len=dataList.length; i<len; i++) {
-				var file = dataList[i].first.data;
+			for (var i=0; i<data.length; i++) {
+				var file = data[i];
 				
 				if (dataType == 'text/x-moz-url') {
-					var url = file.split("\n")[0];
+					var url = data[i];
 					
 					if (url.indexOf('file:///') == 0) {
 						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
@@ -796,34 +824,38 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 	}
 }
 
-/*
- *  Begin a drag
- */
-Zotero.CollectionTreeView.prototype.onDragStart = function(evt,transferData,action)
-{
-	transferData.data=new TransferData();
-	
-	//attach ID
-	transferData.data.addDataForFlavour("zotero/collection",this._getItemAtRow(this.selection.currentIndex).ref.getID());
-}
 
 /*
- *  Returns the supported drag flavors
+ * Called by HTML 5 Drag and Drop when dragging over the tree
  */
-Zotero.CollectionTreeView.prototype.getSupportedFlavours = function () 
-{ 
-	var flavors = new FlavourSet();
-	flavors.appendFlavour("zotero/collection");
-	flavors.appendFlavour("zotero/item");
-	flavors.appendFlavour("text/x-moz-url");
-	flavors.appendFlavour("application/x-moz-file", "nsIFile");
-	return flavors; 
+Zotero.CollectionTreeView.prototype.onDragEnter = function (event) {
+	Zotero.debug("Storing current drag data");
+	Zotero.DragDrop.currentDataTransfer = event.dataTransfer;
 }
 
+
 /*
- *  Called by nsDragAndDrop.js for any sort of drop on the tree
+ * Called by nsDragAndDrop.js and HTML 5 Drag and Drop when dragging over the tree
  */
-Zotero.CollectionTreeView.prototype.onDrop = function (evt,dropdata,session) { }
+Zotero.CollectionTreeView.prototype.onDragOver = function (event, dropdata, session) {
+	return false;
+}
+
+
+/*
+ * Called by nsDragAndDrop.js and HTML 5 Drag and Drop when dropping onto the tree
+ */
+Zotero.CollectionTreeView.prototype.onDrop = function (event, dropdata, session) {
+	return false;
+}
+
+Zotero.CollectionTreeView.prototype.onDragExit = function (event) {
+	Zotero.debug("Clearing drag data");
+	Zotero.DragDrop.currentDataTransfer = null;
+}
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///

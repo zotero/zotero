@@ -1657,6 +1657,39 @@ var ZoteroPane = new function()
 	}
 	
 	
+	this.startDrag = function (event, element) {
+		if (Zotero.isFx2 || Zotero.isFx30) {
+			nsDragAndDrop.startDrag(event, element);
+			return;
+		}
+		element.onDragStart(event);
+	}
+	
+	
+	this.dragEnter = function (event, element) {
+		if (Zotero.isFx2 || Zotero.isFx30) {
+			return;
+		}
+		return element.onDragEnter(event);
+	}
+	
+	
+	this.dragOver = function (event, element) {
+		if (Zotero.isFx2 || Zotero.isFx30) {
+			return nsDragAndDrop.dragOver(event, element);
+		}
+		return element.onDragOver(event);
+	}
+	
+	
+	this.dragDrop = function (event, element) {
+		if (Zotero.isFx2 || Zotero.isFx30) {
+			return nsDragAndDrop.drop(event, element);
+		}
+		return element.onDrop(event);
+	}
+	
+	
 	/*
 	 * Loads a URL following the standard modifier key behavior
 	 *  (e.g. meta-click == new background tab, meta-shift-click == new front tab,
