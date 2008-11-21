@@ -411,6 +411,11 @@ Zotero.Tag.prototype.diff = function (tag, includeMatches, ignoreOnlyDateModifie
 	var d1 = Zotero.Utilities.prototype.arrayDiff(
 		thisData.linkedItems, otherData.linkedItems
 	);
+	var d2 = Zotero.Utilities.prototype.arrayDiff(
+		otherData.linkedItems, thisData.linkedItems
+	);
+	numDiffs += d1.length;
+	numDiffs += d2.length;
 	
 	// DEBUG: ignoreOnlyDateModified wouldn't work if includeMatches was set?
 	if (numDiffs == 0 ||
