@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2008-10-25 08:11:14"
+	"lastUpdated":"2008-11-23 21:30:00"
 }
 
 Zotero.configure("dataMode", "block");
@@ -373,7 +373,6 @@ var mappingTable = {
     "\u22D5":"$\\#$", // EQUAL AND PARALLEL TO
     "\u22D8":"<<<", // VERY MUCH LESS-THAN
     "\u22D9":">>>", // VERY MUCH GREATER-THAN
-    "\u22EF":"...", // MIDLINE HORIZONTAL ELLIPSIS
     "\u2329":"{\\textlangle}", // LEFT-POINTING ANGLE BRACKET
     "\u232A":"{\\textrangle}", // RIGHT-POINTING ANGLE BRACKET
     "\u2400":"NUL", // SYMBOL FOR NULL
@@ -1207,7 +1206,6 @@ var reversemappingTable = {
     "$\\#$"                           : "\u22D5", // EQUAL AND PARALLEL TO
     "<<<"                             : "\u22D8", // VERY MUCH LESS-THAN
     ">>>"                             : "\u22D9", // VERY MUCH GREATER-THAN
-    "..."                             : "\u22EF", // MIDLINE HORIZONTAL ELLIPSIS
     "{\\textlangle}"                  : "\u2329", // LEFT-POINTING ANGLE BRACKET
     "{\\textrangle}"                  : "\u232A", // RIGHT-POINTING ANGLE BRACKET
     "{\\textvisiblespace}"            : "\u2423", // OPEN BOX
