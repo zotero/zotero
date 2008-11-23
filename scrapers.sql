@@ -1,4 +1,4 @@
--- 260
+-- 261
 
 --  ***** BEGIN LICENSE BLOCK *****
 --  
@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-11-16 18:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-11-23 21:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -31506,7 +31506,7 @@ function doExport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-10-25 08:11:14', 1, 200, 3, 'BibTeX', 'Simon Kornblith', 'bib',
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-11-23 21:30:00', 1, 200, 3, 'BibTeX', 'Simon Kornblith', 'bib',
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("exportCharset", "UTF-8");
 
@@ -31868,7 +31868,6 @@ var mappingTable = {
     "\u22D5":"$\\#$", // EQUAL AND PARALLEL TO
     "\u22D8":"<<<", // VERY MUCH LESS-THAN
     "\u22D9":">>>", // VERY MUCH GREATER-THAN
-    "\u22EF":"...", // MIDLINE HORIZONTAL ELLIPSIS
     "\u2329":"{\\textlangle}", // LEFT-POINTING ANGLE BRACKET
     "\u232A":"{\\textrangle}", // RIGHT-POINTING ANGLE BRACKET
     "\u2400":"NUL", // SYMBOL FOR NULL
@@ -32702,7 +32701,6 @@ var reversemappingTable = {
     "$\\#$"                           : "\u22D5", // EQUAL AND PARALLEL TO
     "<<<"                             : "\u22D8", // VERY MUCH LESS-THAN
     ">>>"                             : "\u22D9", // VERY MUCH GREATER-THAN
-    "..."                             : "\u22EF", // MIDLINE HORIZONTAL ELLIPSIS
     "{\\textlangle}"                  : "\u2329", // LEFT-POINTING ANGLE BRACKET
     "{\\textrangle}"                  : "\u232A", // RIGHT-POINTING ANGLE BRACKET
     "{\\textvisiblespace}"            : "\u2423", // OPEN BOX
