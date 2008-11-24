@@ -96,7 +96,7 @@ Zotero.CollectionTreeView.prototype.setTree = function(treebox)
 					if (!par) {
 						var msg = "Parent collection not found in "
 							+ "Zotero.CollectionTreeView.setTree()";
-						Zotero.debug(msg, 2);
+						Zotero.debug(msg, 1);
 						Components.utils.reportError(msg);
 						path = [];
 						break;
@@ -106,13 +106,13 @@ Zotero.CollectionTreeView.prototype.setTree = function(treebox)
 				}
 				while (!this._collectionRowMap[lastCol] && failsafe > 0)
 				if (path.length) {
-					for (var i=path.length - 1; i>=0; i--) {
+					for (var i=path.length-1; i>=0; i--) {
 						var id = path[i];
 						var row = this._collectionRowMap[id];
 						if (!row) {
 							var msg = "Collection not found in tree in "
 								+ "Zotero.CollectionTreeView.setTree()";
-							Zotero.debug(msg, 2);
+							Zotero.debug(msg, 1);
 							Components.utils.reportError(msg);
 							break;
 						}
