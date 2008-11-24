@@ -33,6 +33,8 @@
  */
 Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 {
+	this.wrappedJSObject = this;
+	
 	this._initialized = false;
 	
 	this._itemGroup = itemGroup;
@@ -1277,6 +1279,20 @@ Zotero.ItemTreeView.prototype.rememberSelection = function(selection)
 }
 
 
+Zotero.ItemTreeView.prototype.selectSearchMatches = function () {
+	if (this._searchMode) {
+		var ids = [];
+		for (var id in this._searchItemIDs) {
+			ids.push(id);
+		}
+		this.rememberSelection(ids);
+	}
+	else {
+		this.selection.clearSelection();
+	}
+}
+
+
 Zotero.ItemTreeView.prototype.saveOpenState = function() {
 	var ids = [];
 	for (var i=0, len=this.rowCount; i<len; i++) {
@@ -1425,8 +1441,14 @@ Zotero.ItemTreeCommandController.prototype.isCommandEnabled = function(cmd)
 
 Zotero.ItemTreeCommandController.prototype.doCommand = function(cmd)
 {
-	if(cmd == 'cmd_selectAll')
-		this.tree.view.selection.selectAll();
+	if (cmd == 'cmd_selectAll') {
+		if (this.tree.view.wrappedJSObject._itemGroup.isSearchMode()) {
+			this.tree.view.wrappedJSObject.selectSearchMatches();
+		}
+		else {
+			this.tree.view.selection.selectAll();
+		}
+	}
 }
 
 Zotero.ItemTreeCommandController.prototype.onEvent = function(evt)
