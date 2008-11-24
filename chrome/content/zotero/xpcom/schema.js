@@ -1911,7 +1911,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("CREATE INDEX storageDeleteLog_timestamp ON storageDeleteLog(timestamp)");
 				}
 				
-				// 1.5 Sync Preview 2.1
+				// 1.5 Sync Preview 2.2
 				if (i==41) {
 					var translators = Zotero.DB.query("SELECT * FROM translators WHERE inRepository!=1");
 					if (translators) {
@@ -1956,7 +1956,6 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE csl");
 				}
 				
-				// 1.5 Sync Preview 2.2
 				if (i==42) {
 					Zotero.DB.query("UPDATE itemAttachments SET syncState=0");
 				}
@@ -1966,6 +1965,8 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE itemNotes SET note='<div class=\"zotero-note znv1\">' || TEXT2HTML(note) || '</div>' WHERE note NOT LIKE '<div class=\"zotero-note %'");
 				}
 				
+				// 1.5 Sync Preview 3 (i==44)
+				// 1.5 Sync Preview 3.1
 				if (i==45) {
 					Zotero.DB.query("DELETE FROM itemData WHERE valueID IN (SELECT valueID FROM itemDataValues WHERE value REGEXP '^\\s*$')");
 					Zotero.DB.query("DELETE FROM itemDataValues WHERE value REGEXP '^\\s*$'");
@@ -2022,6 +2023,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE savedSearches SET savedSearchName=TRIM(savedSearchName)");
 				}
 				
+				// 1.5 Sync Preview 3.2
 				if (i==46) {
 					if (fromVersion < 37) {
 						continue;
@@ -2109,6 +2111,8 @@ Zotero.Schema = new function(){
 						}
 					}
 				}
+				
+				//
 			}
 			
 			_updateDBVersion('userdata', toVersion);
