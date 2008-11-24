@@ -74,8 +74,58 @@ Zotero.CollectionTreeView.prototype.setTree = function(treebox)
 	var matches = lastViewedFolder.match(/^(?:(C|S)([0-9]+)|L)$/);
 	var select = 0;
 	if (matches) {
-		if (matches[1] == 'C' && this._collectionRowMap[matches[2]]) {
-			select = this._collectionRowMap[matches[2]];
+		if (matches[1] == 'C') {
+			if (this._collectionRowMap[matches[2]]) {
+				select = this._collectionRowMap[matches[2]];
+			}
+			// Search recursively
+			else {
+				var path = [];
+				var failsafe = 10; // Only go up ten levels
+				var lastCol = matches[2];
+				do {
+					failsafe--;
+					var col = Zotero.Collections.get(lastCol);
+					if (!col) {
+						var msg = "Last-viewed collection not found";
+						Zotero.debug(msg);
+						path = [];
+						break;
+					}
+					var par = col.getParent();
+					if (!par) {
+						var msg = "Parent collection not found in "
+							+ "Zotero.CollectionTreeView.setTree()";
+						Zotero.debug(msg, 2);
+						Components.utils.reportError(msg);
+						path = [];
+						break;
+					}
+					lastCol = par;
+					path.push(lastCol);
+				}
+				while (!this._collectionRowMap[lastCol] && failsafe > 0)
+				if (path.length) {
+					for (var i=path.length - 1; i>=0; i--) {
+						var id = path[i];
+						var row = this._collectionRowMap[id];
+						if (!row) {
+							var msg = "Collection not found in tree in "
+								+ "Zotero.CollectionTreeView.setTree()";
+							Zotero.debug(msg, 2);
+							Components.utils.reportError(msg);
+							break;
+						}
+						if (!this.isContainerOpen(row)) {
+							this.toggleOpenState(row);
+							if (this._collectionRowMap[matches[2]]) {
+								select = this._collectionRowMap[matches[2]];
+								break;
+							}
+						}
+					}
+				}
+			}
 		}
 		else if (matches[1] == 'S' && this._searchRowMap[matches[2]]) {
 			select = this._searchRowMap[matches[2]];
