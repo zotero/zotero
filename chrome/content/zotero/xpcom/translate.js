@@ -164,7 +164,7 @@ Zotero.Translator = function(file) {
 		if(info) {
 			var haveMetadata = true;
 			// make sure we have all the properties
-			for each(var property in ["translatorID", "translatorType", "label", "target", "priority", "lastUpdated"]) {
+			for each(var property in ["translatorID", "translatorType", "label", "target", "priority", "lastUpdated", "inRepository"]) {
 				if(info[property] === undefined) {
 					this.logError('Missing property "'+property+'" in translator metadata JSON object');
 					haveMetadata = false;
