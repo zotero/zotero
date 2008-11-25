@@ -2051,7 +2051,7 @@ Zotero.CSL.Item.prototype.getVariable = function(variable, form) {
 	
 	for each(var zoteroField in zoteroFields) {
 		var value = this.zoteroItem.getField(zoteroField, false, true);
-		if(value != "") return value;
+		if(value != "") return value + '';
 	}
 	
 	return "";
