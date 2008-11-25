@@ -33,6 +33,10 @@ Zotero.Integration = new function() {
 	this.handleHeader = handleHeader;
 	this.handleEnvelope = handleEnvelope;
 	
+	this.__defineGetter__("usePopup", function () {
+		return !Zotero.isMac && !Zotero.Prefs.get("integration.realWindow");
+	});
+	
 	/*
 	 * initializes a very rudimentary web server used for SOAP RPC
 	 */
@@ -554,8 +558,12 @@ Zotero.Integration.SOAP = new function() {
 			io.useBookmarks = session.useBookmarks;
 		}
 		
-		watcher.openWindow(null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
-		                   'chrome,modal,centerscreen' + (Zotero.isWin ? ',popup' : ''), io, true);
+		watcher.openWindow(
+			null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
+			'chrome,modal,centerscreen'
+				+ (Zotero.Integration.usePopup ? ',popup' : ''),
+			io, true
+		);
 		session.setStyle(io.style, io.useEndnotes, io.useBookmarks);
 		if(!oldStyle || oldStyle == io.style) {
 			session.regenerateAll = session.bibliographyHasChanged = true;
@@ -854,9 +862,13 @@ Zotero.Integration.Session.prototype.editCitation = function(index, citation) {
 	}
 	
 	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-	          .getService(Components.interfaces.nsIWindowWatcher)
-	          .openWindow(null, 'chrome://zotero/content/addCitationDialog.xul', '',
-					  'chrome,modal,centerscreen,resizable=yes' + (Zotero.isWin ? ',popup' : ''), io);
+			.getService(Components.interfaces.nsIWindowWatcher)
+			.openWindow(
+				null, 'chrome://zotero/content/addCitationDialog.xul', '',
+				'chrome,modal,centerscreen,resizable=yes'
+					+ (Zotero.Integration.usePopup ? ',popup' : ''),
+				io
+			);
 	
 	if(citation && !io.citation.citationItems.length) {
 		io.citation = citation;
@@ -1014,10 +1026,14 @@ Zotero.Integration.Session.prototype.editBibliography = function() {
 	this.documentDataHasChanged = this.bibliographyHasChanged = true;
 	
 	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-	          .getService(Components.interfaces.nsIWindowWatcher)
-	          .openWindow(null, 'chrome://zotero/content/editBibliographyDialog.xul', '',
-					  'chrome,modal,centerscreen,resizable=yes' + (Zotero.isWin ? ',popup' : ''), io, true);
-	
+			.getService(Components.interfaces.nsIWindowWatcher)
+			.openWindow(
+				null, 'chrome://zotero/content/editBibliographyDialog.xul', '',
+				'chrome,modal,centerscreen,resizable=yes'
+					+ (Zotero.Integration.usePopup ? ',popup' : ''),
+				io,
+				true
+			);
 }
 
 /*
