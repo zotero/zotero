@@ -508,7 +508,7 @@ Zotero.Sync.Storage = new function () {
 		
 		// Can only handle 999 bound parameters at a time
 		var numIDs = itemIDs.length;
-		var maxIDs = 990;
+		var maxIDs = 990; // Leave room for other parameters
 		var done = 0;
 		var rows = [];
 		
