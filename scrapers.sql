@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-11-23 21:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-11-27 05:15:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -22842,7 +22842,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-08-29 04:10:00', '1', '100', '4', 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)', 
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-11-27 05:15:00', 1, 100, 4, 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -23006,7 +23006,7 @@ function doWeb(doc, url) {
 				if (other) {
 					var article = doc.evaluate(''.//h2'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				} else {
-					var article = doc.evaluate(''.//div[@class="title"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+					var article = doc.evaluate(''.//p[@class="title"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				}
 				items[uid.value] = article.textContent;
 			}
@@ -23033,6 +23033,7 @@ function doSearch(item) {
 	// pmid was defined earlier in detectSearch
 	lookupPMIDs([getPMID(item.contextObject)]);
 }');
+
 
 REPLACE INTO translators VALUES ('951c027d-74ac-47d4-a107-9c3069ab7b48', '1.0.0b3.r1', '', '2008-03-14 18:00:00', '1', '400', '4', 'Embedded RDF', 'Simon Kornblith', '', 
 'function detectWeb(doc, url) {
