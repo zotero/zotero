@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-08-29 04:10:00"
+	"lastUpdated":"2008-11-26 11:53:00"
 }
 
 function detectWeb(doc, url) {
@@ -175,7 +175,7 @@ function doWeb(doc, url) {
 				if (other) {
 					var article = doc.evaluate('.//h2', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				} else {
-					var article = doc.evaluate('.//div[@class="title"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+					var article = doc.evaluate('.//p[@class="title"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				}
 				items[uid.value] = article.textContent;
 			}
