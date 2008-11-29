@@ -274,7 +274,6 @@ var Zotero = new function(){
 		
 		Zotero.Sync.init();
 		Zotero.Sync.Runner.init();
-		Zotero.Sync.Storage.init();
 		
 		Zotero.MIMETypeHandler.init();
 		Zotero.Proxies.init();

@@ -311,48 +311,48 @@
 			
 			<vbox id="zotero-item-pane" persist="width">
 				<toolbar align="center" pack="end">
-					<progressmeter id="zotero-tb-syncProgress" mode="determined"
-							value="0" tooltip="zotero-tb-syncProgress-tooltip"
-							hidden="true">
-					</progressmeter>
-					<tooltip id="zotero-tb-syncProgress-tooltip" noautohide="true">
-						<grid>
-							<columns>
-								<column/>
-								<column/>
-							</columns>
-							<rows>
-								<row>
-									<label value="&zotero.sync.storage.progress;"/>
-									<label id="zotero-tb-syncProgress-tooltip-progress"/>
-								</row>
-								<row>
-									<label value="&zotero.sync.storage.downloads;"/>
-									<label
-										id="zotero-tb-syncProgress-tooltip-downloads"/>
-								</row>
-								<row>
-									<label value="&zotero.sync.storage.uploads;"/>
-									<label
-										id="zotero-tb-syncProgress-tooltip-uploads"/>
-								</row>
-							</rows>
-						</grid>
-					</tooltip>
+					<hbox id="zotero-tb-sync-progress-box" hidden="true" align="center">
+						<toolbarbutton id="zotero-tb-sync-storage-cancel"
+							tooltiptext="Cancel Storage Sync"
+							oncommand="Zotero.Sync.Storage.QueueManager.cancel()"/>
+						<progressmeter id="zotero-tb-sync-progress" mode="determined"
+							value="0" tooltip="zotero-tb-sync-progress-tooltip">
+						</progressmeter>
+						<tooltip id="zotero-tb-sync-progress-tooltip" noautohide="true">
+							<grid>
+								<columns>
+									<column/>
+									<column/>
+								</columns>
+								<rows>
+									<row>
+										<label value="&zotero.sync.storage.progress;"/>
+										<label id="zotero-tb-sync-progress-tooltip-progress"/>
+									</row>
+									<row>
+										<label value="&zotero.sync.storage.downloads;"/>
+										<label
+											id="zotero-tb-sync-progress-tooltip-downloads"/>
+									</row>
+									<row>
+										<label value="&zotero.sync.storage.uploads;"/>
+										<label
+											id="zotero-tb-sync-progress-tooltip-uploads"/>
+									</row>
+								</rows>
+							</grid>
+						</tooltip>
+					</hbox>
 					<toolbarbutton id="zotero-tb-sync" tooltip="_child"
 							oncommand="Zotero.Sync.Runner.sync()">
 						<tooltip
-								onpopupshowing="if (Zotero.Sync.Runner.lastSyncError) { this.firstChild.nextSibling.value = 'Last error: ' + Zotero.Sync.Runner.lastSyncError; return; } this.firstChild.nextSibling.value = 'Last sync: ' + (Zotero.Sync.Server.lastLocalSyncTime ? new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000).toLocaleString() : 'Not yet synced')"
-								noautohide="true"><!-- TODO: localize -->
+								onpopupshowing="ZoteroPane.setLastSyncStatus(this)"
+								noautohide="true">
+							<!-- TODO: localize -->
 							<label value="Sync with Zotero Server"/>
 							<label id="zotero-last-sync-time"/>
 						</tooltip>
 					</toolbarbutton>
-					<!--
-					<toolbarbutton id="zotero-tb-storage-sync"
-						tooltiptext="Sync with Storage Server"
-						oncommand="Zotero.Sync.Storage.sync()"/>
-					-->
 					<toolbarseparator/>
 					<toolbarbutton id="zotero-tb-fullscreen" tooltiptext="&zotero.toolbar.fullscreen.tooltip;" oncommand="ZoteroPane.fullScreen();"/>
 					<toolbarbutton class="tabs-closebutton" oncommand="ZoteroPane.toggleDisplay()"/>

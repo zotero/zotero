@@ -38,7 +38,6 @@ Zotero.Attachments = new function(){
 	this.createDirectoryForItem = createDirectoryForItem;
 	this.createDirectoryForMissingItem = createDirectoryForMissingItem;
 	this.getStorageDirectory = getStorageDirectory;
-	this.getMissingStorageDirectory = getMissingStorageDirectory;
 	this.getPath = getPath;
 	
 	var self = this;
@@ -907,7 +906,7 @@ Zotero.Attachments = new function(){
 	 * @param	string	key		Item secondary lookup key
 	 */
 	function createDirectoryForMissingItem(key) {
-		var dir = this.getMissingStorageDirectory(key);
+		var dir = this.getStorageDirectoryByKey(key);
 		if (!dir.exists()) {
 			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
 		}
@@ -923,10 +922,10 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	function getMissingStorageDirectory(key) {
+	this.getStorageDirectoryByKey = function (key) {
 		if (typeof key != 'string' || !key.match(/^[A-Z0-9]{8}$/)) {
 			throw ('key must be an 8-character string in '
-				+ 'Zotero.Attachments.getMissingStorageDirectory()')
+				+ 'Zotero.Attachments.getStorageDirectoryByKey()')
 		}
 		var dir = Zotero.getStorageDirectory();
 		dir.append(key);

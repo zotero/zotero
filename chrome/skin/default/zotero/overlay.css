@@ -191,14 +191,21 @@
 	list-style-image: url('chrome://zotero/skin/toolbar-advanced-search.png');
 }
 
-#zotero-tb-syncProgress
+#zotero-tb-sync-storage-cancel
+{
+	list-style-image: url(chrome://zotero/skin/control_stop_blue.png);
+	margin-right: 0;
+}
+
+#zotero-tb-sync-progress
 {
 	min-width: 50px;
 	width: 50px;
 	height: 10px;
+	margin-left: 0;
 }
 
-#zotero-tb-syncProgress-tooltip row label:first-child
+#zotero-tb-sync-progress-tooltip row label:first-child
 {
 	text-align: right;
 	font-weight: bold;

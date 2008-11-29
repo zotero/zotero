@@ -391,9 +391,6 @@ Zotero.Sync.Runner = new function () {
 	this.__defineGetter__("lastSyncError", function () {
 		return _lastSyncError;
 	});
-	this.__defineSetter__("lastSyncError", function (val) {
-		_lastSyncError = val ? val : '';
-	});
 	
 	var _lastSyncError;
 	var _autoSyncTimer;
@@ -406,7 +403,7 @@ Zotero.Sync.Runner = new function () {
 	
 	this.sync = function () {
 		if (Zotero.Utilities.HTTP.browserIsOffline()){
-			this.lastSyncError = "Browser is offline"; // TODO: localize
+			_lastSyncError = "Browser is offline"; // TODO: localize
 			this.clearSyncTimeout(); // DEBUG: necessary?
 			this.setSyncIcon('error');
 			return false;
@@ -416,12 +413,13 @@ Zotero.Sync.Runner = new function () {
 			throw ("Sync already running in Zotero.Sync.Runner.sync()");
 		}
 		_queue = [
+			Zotero.Sync.Server.sync,
 			Zotero.Sync.Storage.sync,
 			Zotero.Sync.Server.sync,
 			Zotero.Sync.Storage.sync
 		];
 		_running = true;
-		this.lastSyncError = '';
+		_lastSyncError = '';
 		this.clearSyncTimeout();
 		this.setSyncIcon('animate');
 		this.next();
@@ -436,6 +434,12 @@ Zotero.Sync.Runner = new function () {
 		}
 		var func = _queue.shift();
 		func();
+	}
+	
+	
+	this.setError = function (msg) {
+		this.setSyncIcon('error');
+		_lastSyncError = msg;
 	}
 	
 	
@@ -1247,13 +1251,7 @@ Zotero.Sync.Server = new function () {
 			Zotero.Sync.Server.unlock()
 		}
 		
-		Zotero.Sync.Runner.setSyncIcon('error');
-		if (e.name) {
-			Zotero.Sync.Runner.lastSyncError = e.name;
-		}
-		else {
-			Zotero.Sync.Runner.lastSyncError = e;
-		}
+		Zotero.Sync.Runner.setError(e.message ? e.message : e);
 		Zotero.Sync.Runner.reset();
 		throw(e);
 	}
@@ -1998,7 +1996,7 @@ Zotero.Sync.Server.Data = new function() {
 			var type = Type.toLowerCase(); // 'item'
 			var types = Types.toLowerCase(); // 'items'
 			
-			if (!ids.updated[types]) {
+			if (!ids.updated[types] || !ids.updated[types].length) {
 				continue;
 			}
 			
@@ -2031,7 +2029,7 @@ Zotero.Sync.Server.Data = new function() {
 			var type = Type.toLowerCase(); // 'item'
 			var types = Types.toLowerCase(); // 'items'
 			
-			if (!ids.deleted[types]) {
+			if (!ids.deleted[types] || !ids.deleted[types].length) {
 				continue;
 			}
 			
