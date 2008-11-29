@@ -2208,6 +2208,25 @@ var ZoteroPane = new function()
 	}
 	
 	
+	this.setLastSyncStatus = function (tooltip) {
+		var label = tooltip.firstChild.nextSibling;
+		
+		var msg = Zotero.Sync.Runner.lastSyncError;
+		if (msg) {
+			label.value = 'Last error: ' + msg; // TODO: localize
+			return;
+		}
+		
+		var lastSyncTime = Zotero.Sync.Server.lastLocalSyncTime;
+		msg = 'Last sync: ' // TODO: localize
+			+ (lastSyncTime
+				? new Date(lastSyncTime * 1000).toLocaleString()
+				: 'Not yet synced'
+			);
+		label.value = msg;
+	}
+	
+	
 	function reportErrors() {
 		var errors = Zotero.getErrors(true);
 		var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
