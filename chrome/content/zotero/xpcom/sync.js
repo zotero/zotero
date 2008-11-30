@@ -1519,6 +1519,7 @@ Zotero.Sync.Server.Data = new function() {
 			
 			typeloop:
 			for each(var xmlNode in xml[types][type]) {
+				Zotero.debug("Processing remote " + type + " " + xmlNode.@id, 4);
 				var isNewObject;
 				var localDelete = false;
 				
@@ -1527,6 +1528,7 @@ Zotero.Sync.Server.Data = new function() {
 				if (obj) {
 					// Key match -- same item
 					if (obj.key == xmlNode.@key.toString()) {
+						Zotero.debug("Matching local " + type + " exists", 4);
 						isNewObject = false;
 						
 						var objDate = Zotero.Date.sqlToDate(obj.dateModified, true);
@@ -1540,6 +1542,9 @@ Zotero.Sync.Server.Data = new function() {
 								// and therefore excluded above (example: an item
 								// linked to a creator whose id changed)
 								|| syncSession.uploadIDs.updated[types].indexOf(obj.id) != -1) {
+							
+							Zotero.debug("Local " + type + " " + obj.id
+									+ " has been modified since last sync", 4);
 							
 							// Merge and store related items, since CR doesn't
 							// affect related items
@@ -1563,6 +1568,7 @@ Zotero.Sync.Server.Data = new function() {
 							
 							// Some types we don't bother to reconcile
 							if (_noMergeTypes.indexOf(type) != -1) {
+								// If local is newer, send to server
 								if (obj.dateModified > remoteObj.dateModified) {
 									syncSession.addToUpdated(type, obj.id);
 									continue;
@@ -1572,6 +1578,8 @@ Zotero.Sync.Server.Data = new function() {
 							}
 							// Mark other types for conflict resolution
 							else {
+								var reconcile = false;
+								
 								// Skip item if dateModified is the only modified
 								// field (and no linked creators changed)
 								switch (type) {
@@ -1609,9 +1617,87 @@ Zotero.Sync.Server.Data = new function() {
 												continue;
 											}
 										}
+										if (obj.isAttachment()) {
+											var msg = "Reconciliation unimplemented for attachment items";
+											alert(msg);
+											throw(msg);
+										}
+										reconcile = true;
 										break;
 									
 									case 'collection':
+										var diff = obj.diff(remoteObj, false, true);
+										if (diff) {
+											var fieldsChanged = false;
+											for (var field in diff[0].primary) {
+												if (field != 'dateModified') {
+													fieldsChanged = true;
+													break;
+												}
+											}
+											for (var field in diff[0].fields) {
+												fieldsChanged = true;
+												break;
+											}
+											
+											if (fieldsChanged) {
+												// Check for collection hierarchy change
+												if (diff[0].childCollections.length) {
+													// TODO
+												}
+												if (diff[1].childCollections.length) {
+													// TODO
+												}
+												// Check for item membership change
+												if (diff[0].childItems.length) {
+													var childItems = remoteObj.getChildItems(true);
+													remoteObj.childItems = childItems.concat(diff[0].childItems);
+												}
+												if (diff[1].childItems.length) {
+													var childItems = obj.getChildItems(true);
+													obj.childItems = childItems.concat(diff[1].childItems);
+												}
+												
+												// TODO: log
+												
+												// TEMP: uncomment once supported
+												//reconcile = true;
+											}
+											// No CR necessary
+											else {
+												var save = false;
+												// Check for child collections in the remote object
+												// that aren't in the local one
+												if (diff[1].childCollections.length) {
+													// TODO: log
+													// TODO: add
+													save = true;
+												}
+												// Check for items in the remote object
+												// that aren't in the local one
+												if (diff[1].childItems.length) {
+													var childItems = obj.getChildItems(true);
+													obj.childItems = childItems.concat(diff[1].childItems);
+													
+													var msg = _logCollectionItemMerge(obj.name, diff[1].childItems);
+													// TODO: log rather than alert
+													alert(msg);
+													
+													save = true;
+												}
+												
+												if (save) {
+													obj.save();
+												}
+												continue;
+											}
+										}
+										else {
+											syncSession.removeFromUpdated(type, obj.id);
+											continue;
+										}
+										break;
+										
 									case 'tag':
 										var diff = obj.diff(remoteObj, false, true);
 										if (!diff) {
@@ -1621,14 +1707,7 @@ Zotero.Sync.Server.Data = new function() {
 										break;
 								}
 								
-								if (type == 'item') {
-									if (obj.isAttachment()) {
-										var msg = "Reconciliation unimplemented for attachment items";
-										alert(msg);
-										throw(msg);
-									}
-								}
-								else {
+								if (!reconcile) {
 									Zotero.debug(obj);
 									Zotero.debug(remoteObj);
 									var msg = "Reconciliation unimplemented for " + types;
@@ -1646,6 +1725,9 @@ Zotero.Sync.Server.Data = new function() {
 								continue;
 							}
 						}
+						else {
+							Zotero.debug("Local " + type + " has not changed", 4);
+						}
 						
 						// Overwrite local below
 					}
@@ -1653,6 +1735,8 @@ Zotero.Sync.Server.Data = new function() {
 					// Key mismatch -- different objects with same id,
 					// so change id of local object
 					else {
+						Zotero.debug("Local " + type + " " + xmlNode.@id + " differs from remote", 4);
+						
 						isNewObject = true;
 						
 						var oldID = parseInt(xmlNode.@id);
@@ -2061,11 +2145,12 @@ Zotero.Sync.Server.Data = new function() {
 	function _reconcile(type, objectPairs, changedCreators) {
 		var io = {
 			dataIn: {
+				type: type,
 				captions: [
 					// TODO: localize
-					'Local Item',
-					'Remote Item',
-					'Merged Item'
+					'Local Object',
+					'Remote Object',
+					'Merged Object'
 				],
 				objects: objectPairs
 			}
@@ -2460,6 +2545,26 @@ Zotero.Sync.Server.Data = new function() {
 		collection.childItems = str == '' ? [] : str.split(' ');
 		
 		return collection;
+	}
+	
+	
+	function _logCollectionItemMerge(collectionName, remoteItemIDs) {
+		// TODO: localize
+		var introMsg = "Items in the collection '" + collectionName + "' have been "
+			+ "added and/or removed in multiple locations. The following remote "
+			+ "items have been added to the local collection:";
+		var itemText = [];
+		for each(var id in remoteItemIDs) {
+			var item = Zotero.Items.get(id);
+			var title = item.getField('title');
+			var text = " - " + title;
+			var firstCreator = item.getField('firstCreator');
+			if (firstCreator) {
+				text += " (" + firstCreator + ")";
+			}
+			itemText.push(text);
+		}
+		return introMsg + "\n\n" + itemText.join("\n");
 	}
 	
 	

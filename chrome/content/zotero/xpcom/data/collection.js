@@ -671,18 +671,38 @@ Zotero.Collection.prototype.diff = function (collection, includeMatches, ignoreO
 	
 	// For the moment, just compare children and increase numDiffs if any differences
 	var d1 = Zotero.Utilities.prototype.arrayDiff(
-		thisData.childCollections, otherData.childCollections
+		otherData.childCollections, thisData.childCollections
 	);
 	var d2 = Zotero.Utilities.prototype.arrayDiff(
 		thisData.childCollections, otherData.childCollections
 	);
 	var d3 = Zotero.Utilities.prototype.arrayDiff(
-		thisData.childItems, otherData.childItems
+		otherData.childItems, thisData.childItems
 	);
 	var d4 = Zotero.Utilities.prototype.arrayDiff(
 		thisData.childItems, otherData.childItems
 	);
-	numDiffs += d1.length + d2.length + d3.length + d4.length;
+	numDiffs += d1.length + d2.length;
+	
+	if (d1.length || d2.length) {
+		numDiffs += d1.length + d2.length;
+		diff[0].childCollections = d1;
+		diff[1].childCollections = d2;
+	}
+	else {
+		diff[0].childCollections = [];
+		diff[1].childCollections = [];
+	}
+	
+	if (d3.length || d4.length) {
+		numDiffs += d3.length + d4.length;
+		diff[0].childItems = d3;
+		diff[1].childItems = d4;
+	}
+	else {
+		diff[0].childItems = [];
+		diff[1].childItems = [];
+	}
 	
 	// DEBUG: ignoreOnlyDateModified wouldn't work if includeMatches was set?
 	if (numDiffs == 0 ||

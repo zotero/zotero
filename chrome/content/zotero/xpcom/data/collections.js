@@ -156,13 +156,13 @@ Zotero.Collections = new function() {
 			var id = row.collectionID;
 			ids.push(id);
 			
-			// Creator doesn't exist -- create new object and stuff in array
+			// Collection doesn't exist -- create new object and stuff in array
 			if (!this._objectCache[id]) {
 				//this.get(id);
 				this._objectCache[id] = new Zotero.Collection;
 				this._objectCache[id].loadFromRow(row);
 			}
-			// Existing creator -- reload in place
+			// Existing collection -- reload in place
 			else {
 				this._objectCache[id].loadFromRow(row);
 			}
