@@ -48,6 +48,10 @@ Zotero.Attachments = new function(){
 		
 		var title = file.leafName;
 		
+		if (!file.isFile()) {
+			throw ("'" + title + "' must be a file in Zotero.Attachments.importFromFile()");
+		}
+		
 		Zotero.DB.beginTransaction();
 		
 		try {
@@ -61,13 +65,10 @@ Zotero.Attachments = new function(){
 			
 			// Create directory for attachment files within storage directory
 			var destDir = this.createDirectoryForItem(itemID);
-			
 			file.copyTo(destDir, null);
 			
 			// Point to copied file
-			var newFile = Components.classes["@mozilla.org/file/local;1"]
-							.createInstance(Components.interfaces.nsILocalFile);
-			newFile.initWithFile(destDir);
+			var newFile = destDir.clone();
 			newFile.append(title);
 			
 			var mimeType = Zotero.MIME.getMIMETypeFromFile(newFile);
@@ -141,13 +142,13 @@ Zotero.Attachments = new function(){
 			var itemID = attachmentItem.save();
 			attachmentItem = Zotero.Items.get(itemID)
 			
-			var newFile = this.getStorageDirectory(itemID);
-			var newName = newFile.leafName;
-			
 			var storageDir = Zotero.getStorageDirectory();
-			file.parent.copyTo(storageDir, newName);
+			var destDir = this.getStorageDirectory(itemID);
+			_moveOrphanedDirectory(destDir);
+			file.parent.copyTo(storageDir, destDir.leafName);
 			
 			// Point to copied file
+			var newFile = destDir.clone();
 			newFile.append(file.leafName);
 			
 			attachmentItem.attachmentPath = this.getPath(newFile, this.LINK_MODE_IMPORTED_URL);
@@ -182,6 +183,8 @@ Zotero.Attachments = new function(){
 		Zotero.debug('Importing attachment from URL');
 		
 		// Throw error on invalid URLs
+		//
+		// TODO: allow other schemes
 		var urlRe = /^https?:\/\/[^\s]*$/;
 		var matches = urlRe.exec(url);
 		if (!matches) {
@@ -274,9 +277,7 @@ Zotero.Attachments = new function(){
 					// Create a new folder for this item in the storage directory
 					var destDir = Zotero.Attachments.createDirectoryForItem(itemID);
 					
-					var file = Components.classes["@mozilla.org/file/local;1"].
-							createInstance(Components.interfaces.nsILocalFile);
-					file.initWithFile(destDir);
+					var file = destDir.clone();
 					file.append(fileName);
 					
 					wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
@@ -890,9 +891,12 @@ Zotero.Attachments = new function(){
 	 * Create directory for attachment files within storage directory
 	 *
 	 * @param	integer		itemID		Item id
+	 *
+	 * If a directory exists with the same name, move it to orphaned-files
 	 */
 	function createDirectoryForItem(itemID) {
 		var dir = this.getStorageDirectory(itemID);
+		_moveOrphanedDirectory(dir);
 		if (!dir.exists()) {
 			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
 		}
@@ -1037,6 +1041,63 @@ Zotero.Attachments = new function(){
 					.createInstance(Components.interfaces.nsIURL);
 		nsIURL.spec = url;
 		return Zotero.MIME.getPrimaryExtension(mimeType, nsIURL.fileExtension);
+	}
+	
+	
+	/**
+	 * If directory exists and is non-empty, move it to orphaned-files directory
+	 *
+	 * If empty, just remove it
+	 */
+	function _moveOrphanedDirectory(dir) {
+		if (!dir.exists()) {
+			return;
+		}
+		
+		dir = dir.clone();
+		
+		var files = dir.directoryEntries;
+		files.QueryInterface(Components.interfaces.nsIDirectoryEnumerator);
+		if (!files.hasMoreElements()) {
+			dir.remove(false);
+		}
+		files.close();
+		
+		// Create orphaned-files directory if it doesn't exist
+		var orphaned = Zotero.getZoteroDirectory();
+		orphaned.append('orphaned-files');
+		if (!orphaned.exists()) {
+			orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
+		}
+		
+		// Find unique filename for orphaned file
+		var orphanTarget = orphaned.clone();
+		orphanTarget.append(dir.leafName);
+		var newName = null;
+		if (orphanTarget.exists()) {
+			try {
+				orphanTarget.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+				newName = orphanTarget.leafName;
+			}
+			catch (e) {
+				// DEBUG: Work around createUnique() brokenness on Windows
+				// as of Fx3.0.3 (https://bugzilla.mozilla.org/show_bug.cgi?id=452217)
+				//
+				// We just delete the conflicting file
+				if (Zotero.isWin && e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+					orphanTarget.remove(true);
+				}
+				else {
+					throw (e);
+				}
+			}
+			if (newName) {
+				orphanTarget.remove(false);
+			}
+		}
+		
+		// Move target to orphaned files directory
+		dir.moveTo(orphaned, newName);
 	}
 	
 	

@@ -33,6 +33,8 @@
  */
 Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 {
+	this.wrappedJSObject = this;
+	
 	this._initialized = false;
 	
 	this._itemGroup = itemGroup;
@@ -1347,6 +1349,20 @@ Zotero.ItemTreeView.prototype.rememberSelection = function(selection)
 }
 
 
+Zotero.ItemTreeView.prototype.selectSearchMatches = function () {
+	if (this._searchMode) {
+		var ids = [];
+		for (var id in this._searchItemIDs) {
+			ids.push(id);
+		}
+		this.rememberSelection(ids);
+	}
+	else {
+		this.selection.clearSelection();
+	}
+}
+
+
 Zotero.ItemTreeView.prototype.saveOpenState = function() {
 	var ids = [];
 	for (var i=0, len=this.rowCount; i<len; i++) {
@@ -1521,8 +1537,14 @@ Zotero.ItemTreeCommandController.prototype.isCommandEnabled = function(cmd)
 
 Zotero.ItemTreeCommandController.prototype.doCommand = function(cmd)
 {
-	if(cmd == 'cmd_selectAll')
-		this.tree.view.selection.selectAll();
+	if (cmd == 'cmd_selectAll') {
+		if (this.tree.view.wrappedJSObject._itemGroup.isSearchMode()) {
+			this.tree.view.wrappedJSObject.selectSearchMatches();
+		}
+		else {
+			this.tree.view.selection.selectAll();
+		}
+	}
 }
 
 Zotero.ItemTreeCommandController.prototype.onEvent = function(evt)
@@ -1532,16 +1554,17 @@ Zotero.ItemTreeCommandController.prototype.onEvent = function(evt)
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
-///  Drag-and-drop functions:
-///		for nsDragAndDrop.js + nsTransferable.js
+///  Drag-and-drop functions
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-/*
- *  Begin a drag
+/**
+ * Start a drag using nsDragAndDrop.js or HTML 5 Drag and Drop
  */
-Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
-{
+Zotero.ItemTreeView.prototype.onDragStart = function (event, transferData, action) {
+	// Use nsDragAndDrop.js interface for Firefox 2 and Firefox 3.0
+	var oldMethod = Zotero.isFx2 || Zotero.isFx30;
+	
 	// Quick implementation of dragging of XML item format
 	if (this.readOnly) {
 		var items = this.getSelectedItems();
@@ -1552,30 +1575,93 @@ Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 			xml.items.item += xmlNode;
 		}
 		Zotero.debug(xml.toXMLString());
-		transferData.data = new TransferData();
-		transferData.data.addDataForFlavour("zotero/item-xml", xml.toXMLString());
+		if (oldMethod) {
+			transferData.data = new TransferData();
+			transferData.data.addDataForFlavour("zotero/item-xml", xml.toXMLString());
+		}
+		else {
+			event.dataTransfer.setData("zotero/item-xml", xml.toXMLString());
+		}
 		return;
 	}
 	
-	transferData.data = new TransferData();
-	transferData.data.addDataForFlavour("zotero/item", this.saveSelection());
+	var itemIDs = this.saveSelection();
+	var items = Zotero.Items.get(itemIDs);
 	
-	var items = Zotero.Items.get(this.saveSelection());
+	if (oldMethod) {
+		transferData.data = new TransferData();
+		transferData.data.addDataForFlavour("zotero/item", itemIDs.join());
+	}
+	else {
+		event.dataTransfer.setData("zotero/item", itemIDs.join());
+	}
 	
-	// If at least one file is a non-web-link attachment and can be found,
-	// enable dragging to file system
-	for (var i=0; i<items.length; i++) {
-		if (items[i].isAttachment() &&
-				items[i].attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL
+	// Multi-file drag
+	//  - Doesn't work on Firefox >=3.0/Windows
+	if (Zotero.isFx2 || !Zotero.isWin) {
+		// If at least one file is a non-web-link attachment and can be found,
+		// enable dragging to file system
+		for (var i=0; i<items.length; i++) {
+			if (items[i].isAttachment()
+					&& items[i].attachmentLinkMode
+						!= Zotero.Attachments.LINK_MODE_LINKED_URL
 					&& items[i].getFile()) {
-			transferData.data.addDataForFlavour("application/x-moz-file-promise",
-				new Zotero.ItemTreeView.fileDragDataProvider(), 0, Components.interfaces.nsISupports);
-			break;
+				Zotero.debug("Adding file via x-moz-file-promise");
+				if (oldMethod) {
+					transferData.data.addDataForFlavour(
+						"application/x-moz-file-promise",
+						new Zotero.ItemTreeView.fileDragDataProvider(),
+						0,
+						Components.interfaces.nsISupports
+					);
+				}
+				else {
+					event.dataTransfer.mozSetDataAt(
+						"application/x-moz-file-promise",
+						new Zotero.ItemTreeView.fileDragDataProvider(),
+						0
+					);
+				}
+				break;
+			}
+		}
+	}
+	// Copy first file on Firefox >=3.0 Windows
+	else {
+		var index = 0;
+		for (var i=0; i<items.length; i++) {
+			if (items[i].isAttachment() &&
+					items[i].getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_URL) {
+				var file = items[i].getFile();
+				if (!file) {
+					continue;
+				}
+				
+				var fph = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+							.createInstance(Components.interfaces.nsIFileProtocolHandler);
+				var uri = fph.getURLSpecFromFile(file);
+				
+				if (oldMethod) {
+					transferData.data.addDataForFlavour("text/x-moz-url", uri + "\n" + file.leafName);
+					transferData.data.addDataForFlavour("application/x-moz-file", file);
+					transferData.data.addDataForFlavour("application/x-moz-file-promise-url", uri);
+					break;
+				}
+				else {
+					event.dataTransfer.mozSetDataAt("text/x-moz-url", uri + "\n" + file.leafName, index);
+					event.dataTransfer.mozSetDataAt("application/x-moz-file", file, index);
+					event.dataTransfer.mozSetDataAt("application/x-moz-file-promise-url", uri, index);
+					// DEBUG: possible to drag multiple files without x-moz-file-promise?
+					break;
+					index++
+				}
+			}
 		}
 	}
 	
 	// Get Quick Copy format for current URL
-	var url = this._ownerDocument.defaultView.content.location.href;
+	var url = this._ownerDocument.defaultView.content ?
+				this._ownerDocument.defaultView.content.location.href : null;
 	var format = Zotero.QuickCopy.getFormatFromURL(url);
 	
 	Zotero.debug("Dragging with format " + Zotero.QuickCopy.getFormattedNameFromSetting(format));
@@ -1587,7 +1673,12 @@ Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 		}
 		
 		var text = obj.output.replace(/\r\n/g, "\n");
-		transferData.data.addDataForFlavour("text/unicode", text);
+		if (oldMethod) {
+			transferData.data.addDataForFlavour("text/unicode", text);
+		}
+		else {
+			event.dataTransfer.setData("text/plain", text);
+		}
 	}
 	
 	try {
@@ -1596,10 +1687,18 @@ Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 			Zotero.QuickCopy.getContentFromItems(items, format, exportCallback);
 		}
 		else if (mode.indexOf('bibliography') == 0) {
-			var content = Zotero.QuickCopy.getContentFromItems(items, format, null, evt.shiftKey);
-			transferData.data.addDataForFlavour("text/unicode", content.text);
-			if (content.html) {
-				transferData.data.addDataForFlavour("text/html", content.html);
+			var content = Zotero.QuickCopy.getContentFromItems(items, format, null, event.shiftKey);
+			if (oldMethod) {
+				if (content.html) {
+					transferData.data.addDataForFlavour("text/html", content.html);
+				}
+				transferData.data.addDataForFlavour("text/unicode", content.text);
+			}
+			else {
+				if (content.html) {
+					event.dataTransfer.setData("text/html", content.html);
+				}
+				event.dataTransfer.setData("text/plain", content.text);
 			}
 		}
 		else {
@@ -1613,6 +1712,8 @@ Zotero.ItemTreeView.prototype.onDragStart = function (evt,transferData,action)
 
 
 // Implements nsIFlavorDataProvider for dragging attachment files to OS
+//
+// Not used on Windows in Firefox 3 or higher
 Zotero.ItemTreeView.fileDragDataProvider = function() { };
 
 Zotero.ItemTreeView.fileDragDataProvider.prototype = {
@@ -1641,6 +1742,7 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 			var items = {};
 			transferable.getTransferData("zotero/item", items, dataSize);
 			items.value.QueryInterface(Components.interfaces.nsISupportsString);
+			
 			var draggedItems = Zotero.Items.get(items.value.data.split(','));
 			
 			var items = [];
@@ -1832,11 +1934,12 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 }
 
 
-/*
- *  Called by nsDragAndDrop.js for any sort of drop on the tree
+/**
+ * Returns the supported drag flavours
+ *
+ * Called by nsDragAndDrop.js
  */
-Zotero.ItemTreeView.prototype.getSupportedFlavours = function () 
-{ 
+Zotero.ItemTreeView.prototype.getSupportedFlavours = function () {
 	var flavors = new FlavourSet();
 	flavors.appendFlavour("zotero/item");
 	flavors.appendFlavour("zotero/item-xml");
@@ -1845,47 +1948,26 @@ Zotero.ItemTreeView.prototype.getSupportedFlavours = function ()
 	return flavors; 
 }
 
-Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
+
+Zotero.ItemTreeView.prototype.canDrop = function(row, orient, dragData)
 {
+	//Zotero.debug("Row is " + row + "; orient is " + orient);
+	
 	if (row == -1 && orient == -1) {
 		return true;
 	}
 	
-	try
-	{
-		var dataSet = nsTransferable.get(this.getSupportedFlavours(),
-			nsDragAndDrop.getDragData, true);
+	if (!dragData) {
+		var dragData = Zotero.DragDrop.getDragData(this);
 	}
-	catch (e)
-	{
-		// A work around a limitation in nsDragAndDrop.js -- the mDragSession
-		// is not set until the drag moves over another control.
-		// (This will only happen if the first drag is from the item list.)
-		nsDragAndDrop.mDragSession = nsDragAndDrop.mDragService.getCurrentSession();
+	if (!dragData) {
 		return false;
 	}
+	var dataType = dragData.dataType;
+	var data = dragData.data;
 	
-	var data = dataSet.first.first;
-	var dataType = data.flavour.contentType;
-	
-	//Zotero.debug("Drag data type is " + dataType);
-	
-	switch (dataType) {
-		case 'zotero/item':
-			var ids = data.data.split(','); // ids of rows we are dragging in
-			break;
-		
-		case 'text/x-moz-url':
-			var url = data.data.split("\n")[0];
-			break;
-			
-		case 'application/x-moz-file':
-			var file = data.data;
-			// Don't allow folder drag
-			if (file.isDirectory()) {
-				return false;
-			}
-			break;
+	if (dataType == 'zotero/item') {
+		var ids = data;
 	}
 	
 	// workaround... two different services call canDrop
@@ -1928,9 +2010,6 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
 		
 		return false;
 	}
-	
-	//Zotero.debug('row is ' + row);
-	//Zotero.debug('orient is ' + orient);
 	
 	// Highlight the rows correctly on drag
 	
@@ -1997,30 +2076,17 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient)
  */
 Zotero.ItemTreeView.prototype.drop = function(row, orient)
 {
-	try
-	{
-		var dataSet = nsTransferable.get(this.getSupportedFlavours(),
-			nsDragAndDrop.getDragData, true);
-	}
-	catch (e)
-	{
-		// A work around a limitation in nsDragAndDrop.js -- the mDragSession
-		// is not set until the drag moves over another control.
-		// (This will only happen if the first drag is from the item list.)
-		nsDragAndDrop.mDragSession = nsDragAndDrop.mDragService.getCurrentSession();
-		var dataSet = nsTransferable.get(this.getSupportedFlavours(),
-			nsDragAndDrop.getDragData, true);
-	}
+	var dragData = Zotero.DragDrop.getDragData(this);
 	
-	var data = dataSet.first.first;
-	var dataType = data.flavour.contentType;
-	
-	if (!this.canDrop(row, orient)) {
+	if (!this.canDrop(row, orient, dragData)) {
 		return false;
 	}
 	
+	var dataType = dragData.dataType;
+	var data = dragData.data;
+	
 	if (dataType == 'zotero/item') {
-		var ids = data.data.split(','); // ids of rows we are dragging in
+		var ids = data;
 		
 		// Dropped directly on a row
 		if (orient == 0)
@@ -2083,12 +2149,11 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 		
 		var unlock = Zotero.Notifier.begin(true);
 		try {
-			var dataList = dataSet.dataList;
-			for (var i=0, len=dataList.length; i<len; i++) {
-				var file = dataList[i].first.data;
+			for (var i=0; i<data.length; i++) {
+				var file = data[i];
 				
 				if (dataType == 'text/x-moz-url') {
-					var url = file.split("\n")[0];
+					var url = data[i];
 					
 					if (url.indexOf('file:///') == 0) {
 						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
@@ -2141,12 +2206,30 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 	}
 }
 
-/*
- * Called by nsDragAndDrop.js for any sort of drop on the tree
- */
-Zotero.ItemTreeView.prototype.onDrop = function (evt,dropdata,session){ }
+Zotero.ItemTreeView.prototype.onDragEnter = function (event) {
+	Zotero.debug("Storing current drag data");
+	Zotero.DragDrop.currentDataTransfer = event.dataTransfer;
+}
 
-Zotero.ItemTreeView.prototype.onDragOver = function (evt,dropdata,session) { }
+/*
+ * Called by nsDragAndDrop.js and HTML 5 Drag and Drop when dragging over the tree
+ */
+Zotero.ItemTreeView.prototype.onDragOver = function (event, dropdata, session) {
+	return false;
+}
+
+/*
+ * Called by nsDragAndDrop.js and HTML 5 Drag and Drop when dropping onto the tree
+ */
+Zotero.ItemTreeView.prototype.onDrop = function (event, dropdata, session) {
+	return false;
+}
+
+Zotero.ItemTreeView.prototype.onDragExit = function (event) {
+	Zotero.debug("Clearing drag data");
+	Zotero.DragDrop.currentDataTransfer = null;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
