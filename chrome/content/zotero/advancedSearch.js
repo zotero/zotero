@@ -124,6 +124,15 @@ var ZoteroAdvancedSearch = new function() {
 	}
 	
 	
+	this.startDrag = function (event, element) {
+		if (Zotero.isFx2 || Zotero.isFx30) {
+			nsDragAndDrop.startDrag(event, element);
+			return;
+		}
+		element.onDragStart(event);
+	}
+	
+	
 	function onUnload() {
 		// Unregister search from Notifier
 		if (this.itemsView) {

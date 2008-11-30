@@ -39,9 +39,6 @@ var Zotero_Bibliography_Dialog = new function () {
 	function load() {
 		document.getElementById('editor').format = "Integration";
 		
-		if(Zotero.isWin) {
-			document.getElementsByTagName("dialog")[0].style.border = "1px solid black";
-		}
 		bibEditInterface = window.arguments[0].wrappedJSObject;
 		itemSet = bibEditInterface.getItemSet();
 		
@@ -50,6 +47,15 @@ var Zotero_Bibliography_Dialog = new function () {
 		
 		// load bibliography entires
 		_loadItems();
+		
+		// Center citation popups manually after a delay when using a popup, since
+		// popups aren't resizable and there might be persisted positions
+		if (Zotero.Integration.usePopup) {
+			document.getElementsByTagName("dialog")[0].style.border = "1px solid black";
+			setTimeout(function () {
+				window.centerWindowOnScreen();
+			}, 1);
+		}
 	}
 	
 	/*

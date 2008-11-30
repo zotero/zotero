@@ -414,9 +414,13 @@ Zotero.Fulltext = new function(){
 			proc.init(_pdfInfo);
 			
 			var args = [file.path, infoFile.path];
-			proc.run(true, args, args.length);
-			
-			var totalPages = this.getTotalPagesFromFile(itemID);
+			try {
+				proc.run(true, args, args.length);
+				var totalPages = this.getTotalPagesFromFile(itemID);
+			}
+			catch (e) {
+				Zotero.debug("Error running pdfinfo");
+			}
 		}
 		else {
 			Zotero.debug(this.pdfInfoName + " is not available");
@@ -443,7 +447,13 @@ Zotero.Fulltext = new function(){
 			var pagesIndexed = Math.min(maxPages, totalPages);
 		}
 		args.push(file.path, cacheFile.path);
-		proc.run(true, args, args.length);
+		try {
+			proc.run(true, args, args.length);
+		}
+		catch (e) {
+			Zotero.debug("Error running pdftotext");
+			return false;
+		}
 		
 		if (!cacheFile.exists()) {
 			Zotero.debug("Cache file doesn't exist!");

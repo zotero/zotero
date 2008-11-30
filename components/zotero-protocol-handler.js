@@ -73,7 +73,7 @@ function ChromeExtensionHandler() {
 	var ReportExtension = new function(){
 		this.newChannel = newChannel;
 		
-		this.__defineGetter__('loadAsChrome', function () { return true; });
+		this.__defineGetter__('loadAsChrome', function () { return false; });
 		
 		function newChannel(uri){
 			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
@@ -119,6 +119,22 @@ function ChromeExtensionHandler() {
 						break;
 						
 					default:
+						// Proxy CSS files
+						if (type.match(/^detail.*\.css$/)) {
+							var chromeURL = 'chrome://zotero/skin/report/' + type;
+							var ios = Components.classes["@mozilla.org/network/io-service;1"]
+										.getService(Components.interfaces.nsIIOService);
+							var uri = ios.newURI(chromeURL, null, null);
+							var chromeReg = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
+										.getService(Components.interfaces.nsIChromeRegistry);
+							var fileURI = chromeReg.convertChromeURL(uri);
+							var ph = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+										.createInstance(Components.interfaces.nsIFileProtocolHandler);
+							var channel = ioService.newChannelFromURI(fileURI);
+							return channel;
+						}
+						
+						// Display all items
 						var type = 'library';
 						var s = new Zotero.Search();
 						s.addCondition('noChildren', 'true');
@@ -753,7 +769,6 @@ function ChromeExtensionHandler() {
 	
 	var SelectExtensionSpec = ZOTERO_SCHEME + "://select"
 	this._extensions[SelectExtensionSpec] = SelectExtension;
-
 }
 
 
@@ -768,7 +783,12 @@ ChromeExtensionHandler.prototype = {
 	protocolFlags :
 		Components.interfaces.nsIProtocolHandler.URI_NORELATIVE |
 		Components.interfaces.nsIProtocolHandler.URI_NOAUTH |
-		Components.interfaces.nsIProtocolHandler.URI_IS_LOCAL_FILE,
+		// DEBUG: This should be URI_IS_LOCAL_FILE, and MUST be if any
+		// extensions that modify data are added
+		//  - https://www.zotero.org/trac/ticket/1156
+		//
+		//Components.interfaces.nsIProtocolHandler.URI_IS_LOCAL_FILE,
+		Components.interfaces.nsIProtocolHandler.URI_LOADABLE_BY_ANYONE,
 		
 	allowPort : function(port, scheme) {
 		return false;
