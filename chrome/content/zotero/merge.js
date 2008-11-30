@@ -38,19 +38,25 @@ var Zotero_Merge_Window = new function () {
 			return;
 		}
 		
-		var firstObj = _objects[0][0] == 'deleted' ? _objects[0][1] : _objects[0][0];
+		_mergeGroup.type = _io.dataIn.type;
 		
-		if (firstObj instanceof Zotero.Item) {
-			if (firstObj.isNote()) {
-				_mergeGroup.type = 'note';
-			}
-			else {
-				_mergeGroup.type = 'item';
-			}
-		}
-		else {
-			throw ("Invalid merge object type '" + firstObj.constructor.name
-				+ "' in Zotero_Merge_Window.init()");
+		switch (_mergeGroup.type) {
+			case 'item':
+				var firstObj = _objects[0][0] == 'deleted' ? _objects[0][1] : _objects[0][0];
+				if (firstObj.isNote()) {
+					_mergeGroup.type = 'note';
+				}
+				else {
+					_mergeGroup.type = 'item';
+				}
+				break;
+			
+			case 'collection':
+				break;
+				
+			default:
+				throw ("Unsupported merge object type '" + type
+					+ "' in Zotero_Merge_Window.init()");
 		}
 		
 		_mergeGroup.leftCaption = _io.dataIn.captions[0];
@@ -83,7 +89,9 @@ var Zotero_Merge_Window = new function () {
 		_mergeGroup.leftpane.removeAttribute("selected");
 		_mergeGroup.rightpane.removeAttribute("selected");
 		
-		_updateChangedCreators();
+		if (_mergeGroup.type == 'item') {
+			_updateChangedCreators();
+		}
 		
 		if (Zotero.isMac) {
 			_wizard.getButton("next").setAttribute("hidden", "false");
@@ -127,7 +135,9 @@ var Zotero_Merge_Window = new function () {
 			_mergeGroup.rightpane.removeAttribute("selected");
 		}
 		
-		_updateChangedCreators();
+		if (_mergeGroup.type == 'item') {
+			_updateChangedCreators();
+		}
 		
 		// On Windows the buttons don't move when one is hidden
 		if ((_pos + 1) != _objects.length) {
@@ -190,7 +200,12 @@ var Zotero_Merge_Window = new function () {
 	
 	// Hack to support creator reconciliation via item view
 	function _updateChangedCreators() {
-		if (_mergeGroup.type == 'item' && _io.dataIn.changedCreators) {
+		if (_mergeGroup.type != 'item') {
+			throw ("_updateChangedCreators called on non-item object in "
+				+ "Zotero_Merge_Window._updateChangedCreators()");
+		}
+		
+		if (_io.dataIn.changedCreators) {
 			var originalCreators = _mergeGroup.rightpane.original.getCreators();
 			var clonedCreators = _mergeGroup.rightpane.ref.getCreators();
 			var refresh = false;
