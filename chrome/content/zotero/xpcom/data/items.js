@@ -321,10 +321,11 @@ Zotero.Items = new function() {
 	
 	
 	/**
-	* Delete item(s) from database and clear from internal array
-	*
-	* If _eraseChildren_ is true, erase child items as well
-	**/
+	 * Delete item(s) from database and clear from internal array
+	 *
+	 * @param	{Integer|Integer[]}	ids					Item ids
+	 * @param	{Boolean}			eraseChildren		Erase child items as well
+	 */
 	function erase(ids, eraseChildren) {
 		ids = Zotero.flattenArguments(ids);
 		

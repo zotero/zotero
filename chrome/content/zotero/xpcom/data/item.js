@@ -3071,10 +3071,12 @@ Zotero.Item.prototype.clone = function(includePrimary) {
 
 
 /**
-* Delete item from database and clear from Zotero.Items internal array
-*
-* Items.erase() should be used instead of this
-**/
+ * Delete item from database and clear from Zotero.Items internal array
+ *
+ * Items.erase() should be used instead of this
+ *
+ * @param	{Boolean}			eraseChildren		Erase child items as well
+ */
 Zotero.Item.prototype.erase = function(deleteChildren) {
 	if (!this.id) {
 		return false;
