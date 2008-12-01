@@ -2143,10 +2143,15 @@ Zotero.Sync.Storage.QueueManager = new function () {
 			Zotero.Utilities.prototype.numberFormat(remaining / 1024, 0)
 		);
 		var totalRequests = queue.totalRequests;
+		// TODO: localize
+		/*
 		var filesRemaining = Zotero.getString(
 			'sync.storage.filesRemaining',
 			[totalRequests - unfinishedRequests, totalRequests]
 		);
+		*/
+		var filesRemaining = (totalRequests - unfinishedRequests)
+								+ "/" + totalRequests + " files";
 		var status = Zotero.localeJoin([kbRemaining, '(' + filesRemaining + ')']);
 		return status;
 	}
