@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-07-24 23:50:00"
+	"lastUpdated":"2008-12-01 18:31:54"
 }
 
 Zotero.configure("dataMode", "line");
@@ -37,7 +37,7 @@ var fieldMap = {
 	T1:"title",
 	T3:"series",
 	JF:"publicationTitle",
-	CP:"place",
+	CY:"place",
 	JA:"journalAbbreviation",
 	M3:"DOI"
 };
