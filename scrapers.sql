@@ -30724,7 +30724,7 @@ function doImport() {
 	}
 }');
 
-REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.2', '', '2008-07-24 23:50:00', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
+REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.2', '', '2008-12-01 18:31:54', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
 Zotero.addOption("exportNotes", true);
 Zotero.addOption("exportCharset", "UTF-8");
@@ -30750,7 +30750,7 @@ function detectImport() {
 	T1:"title",
 	T3:"series",
 	JF:"publicationTitle",
-	CP:"place",
+	CY:"place",
 	JA:"journalAbbreviation",
 	M3:"DOI"
 };
