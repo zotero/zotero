@@ -44,6 +44,8 @@ Zotero.Collection.prototype._init = function () {
 	this._hasChildItems = false;
 	this._childItems = [];
 	this._childItemsLoaded = false;
+	
+	this._dateModifiedLocked = false;
 }
 
 
@@ -263,6 +265,21 @@ Zotero.Collection.prototype.getChildItems = function (asIDs) {
 		objs.push(item);
 	}
 	return objs;
+}
+
+
+/**
+ * Prevent dateModified from being updated when removing an item
+ *
+ * Used for a tricky sync case
+ */
+Zotero.Collection.prototype.lockDateModified = function () {
+	this._dateModifiedLocked = true;
+}
+
+
+Zotero.Collection.prototype.unlockDateModified = function () {
+	this._dateModifiedLocked = false;
 }
 
 
@@ -594,8 +611,10 @@ Zotero.Collection.prototype.removeItem = function(itemID) {
 	var sql = "DELETE FROM collectionItems WHERE collectionID=? AND itemID=?";
 	Zotero.DB.query(sql, [this.id, itemID]);
 	
-	sql = "UPDATE collections SET dateModified=? WHERE collectionID=?";
-	Zotero.DB.query(sql, [Zotero.DB.transactionDateTime, this.id])
+	if (!this._dateModifiedLocked) {
+		sql = "UPDATE collections SET dateModified=? WHERE collectionID=?";
+		Zotero.DB.query(sql, [Zotero.DB.transactionDateTime, this.id])
+	}
 	
 	Zotero.DB.commitTransaction();
 	
