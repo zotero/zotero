@@ -799,12 +799,14 @@ Zotero.Integration.SOAP_Compat = new function() {
 			io.useBookmarks = session.prefs.fieldType;
 		}
 		
-		watcher.openWindow(
-			null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
-			'chrome,modal,centerscreen'
-				+ (Zotero.Integration.usePopup ? ',popup' : ''),
-			io, true
-		);
+		Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+			.getService(Components.interfaces.nsIWindowWatcher)
+			.openWindow(
+				null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
+				'chrome,modal,centerscreen'
+					+ (Zotero.Integration.usePopup ? ',popup' : ''),
+				io, true
+			);
 		session.prefs.useEndnotes = io.useEndnotes;
 		session.prefs.fieldType = io.useBookmarks;
 		session.setStyle(io.style, session.prefs);
