@@ -1484,19 +1484,37 @@ Zotero.Sync.Server.Data = new function() {
 	}
 	
 	
+	/**
+	 * Pull out collections from delete queue in XML
+	 *
+	 * @param	{XML}			xml
+	 * @return	{Integer[]}					Array of collection ids
+	 */
+	function _getDeletedCollections(xml) {
+		var ids = [];
+		if (xml.deleted && xml.deleted.collections) {
+			for each(var xmlNode in xml.deleted.collections.collection) {
+				ids.push(parseInt(xmlNode.@id));
+			}
+		}
+		return ids;
+	}
+	
+	
 	function processUpdatedXML(xml, lastLocalSyncDate, syncSession) {
 		if (xml.children().length() == 0) {
 			Zotero.debug('No changes received from server');
 			return Zotero.Sync.Server.Data.buildUploadXML(syncSession);
 		}
 		
+		Zotero.DB.beginTransaction();
+		
 		xml = _preprocessUpdatedXML(xml);
+		var deletedCollections = _getDeletedCollections(xml);
 		
 		var remoteCreatorStore = {};
 		var relatedItemsStore = {};
 		var itemStorageModTimes = {};
-		
-		Zotero.DB.beginTransaction();
 		
 		for each(var syncObject in Zotero.Sync.syncObjects) {
 			var Type = syncObject.singular; // 'Item'
@@ -2019,6 +2037,17 @@ Zotero.Sync.Server.Data = new function() {
 							parents.push(item.id);
 						}
 					}
+					
+					// Lock dateModified in local versions of remotely deleted
+					// collections so that any deleted items within them don't
+					// update them, which would trigger erroneous conflicts
+					var collections = [];
+					for each(var colID in deletedCollections) {
+						var col = Zotero.Collections.get(colID);
+						col.lockDateModified();
+						collections.push(col);
+					}
+					
 					if (children.length) {
 						Zotero.Sync.EventListener.ignoreDeletions('item', children);
 						Zotero.Items.erase(children);
@@ -2029,6 +2058,12 @@ Zotero.Sync.Server.Data = new function() {
 						Zotero.Items.erase(parents);
 						Zotero.Sync.EventListener.unignoreDeletions('item', parents);
 					}
+					
+					// Unlock dateModified for deleted collections
+					for each(var col in collections) {
+						col.unlockDateModified();
+					}
+					collection = null;
 				}
 				else {
 					Zotero.Sync.EventListener.ignoreDeletions(type, toDelete);
