@@ -604,6 +604,10 @@ Zotero.Schema = new function(){
 			return true;
 		}
 		
+		if (schema == 'scrapers') {
+			return false;
+		}
+		
 		throw("Zotero '" + schema + "' DB version is newer than SQL file");
 	}
 	
