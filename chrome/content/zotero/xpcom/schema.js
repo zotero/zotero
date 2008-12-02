@@ -1835,9 +1835,25 @@ Zotero.Schema = new function(){
 								target.append(orphan.file.leafName);
 								var newName = null;
 								if (target.exists()) {
-									target.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
-									newName = target.leafName;
-									target.remove(null);
+									try {
+										target.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+										newName = target.leafName;
+									}
+									catch (e) {
+										// DEBUG: Work around createUnique() brokenness on Windows
+										// as of Fx3.0.4 (https://bugzilla.mozilla.org/show_bug.cgi?id=452217)
+										//
+										// We just delete the conflicting file
+										if (Zotero.isWin && e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+											target.remove(true);
+										}
+										else {
+											throw (e);
+										}
+									}
+									if (newName) {
+										target.remove(false);
+									}
 								}
 								orphan.file.moveTo(orphaned, newName);
 								movedFiles37[orphan.id] = orphan.file;
@@ -2095,9 +2111,25 @@ Zotero.Schema = new function(){
 								target.append(orphan.file.leafName);
 								var newName = null;
 								if (target.exists()) {
-									target.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
-									newName = target.leafName;
-									target.remove(null);
+									try {
+										target.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+										newName = target.leafName;
+									}
+									catch (e) {
+										// DEBUG: Work around createUnique() brokenness on Windows
+										// as of Fx3.0.4 (https://bugzilla.mozilla.org/show_bug.cgi?id=452217)
+										//
+										// We just delete the conflicting file
+										if (Zotero.isWin && e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+											target.remove(true);
+										}
+										else {
+											throw (e);
+										}
+									}
+									if (newName) {
+										target.remove(false);
+									}
 								}
 								orphan.file.moveTo(orphaned, newName);
 								movedFiles46[orphan.id] = orphan.file;
