@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-07-16 20:10:00"
+	"lastUpdated":"2008-12-02 10:10:00"
 }
 
 function detectWeb(doc, url) {
@@ -132,10 +132,14 @@ function doWeb(doc, url) {
 		}
 	}
 	
+	var responseCharset = null;
+	
 	if(unicode) {
 		var rd = unicode;
+		responseCharset = 'UTF-8';
 	} else if(latin1) {
 		var rd = latin1;
+		responseCharset = 'ISO-8859-1';
 	} else if(raw) {
 		var rd = raw;
 	} else {
@@ -168,6 +172,6 @@ function doWeb(doc, url) {
 		marc.translate();
 		
 		Zotero.done();
-	})
+	}, null, responseCharset);
 	Zotero.wait();
 }
