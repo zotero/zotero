@@ -647,7 +647,15 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 	// after deleting the old backup file
 	var tmpFile = Zotero.getZoteroDatabase(this._dbName, 'tmp');
 	if (tmpFile.exists()) {
-		tmpFile.remove(null);
+		try {
+			tmpFile.remove(false);
+		}
+		catch (e) {
+			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+				alert("Cannot delete " + tmpFile.leafName);
+			}
+			throw (e);
+		}
 	}
 	
 	try {
