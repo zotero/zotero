@@ -1075,10 +1075,13 @@ var ZoteroPane = new function()
 	
 	
 	function duplicateSelectedItem() {
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
-		ps.alert(null, "Error", "Item duplication is not available in this Zotero release.");
-		return;
+		var item = this.getSelectedItems()[0];
+		if (item.getTags()) {
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+											.getService(Components.interfaces.nsIPromptService);
+			ps.alert(null, "Error", "Duplication of tagged items is not available in this Zotero release.");
+			return;
+		}
 		
 		var newItem = this.getSelectedItems()[0].clone();
 		var newItemID = newItem.save()
