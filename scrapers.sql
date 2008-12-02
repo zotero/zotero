@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-11-27 05:15:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-12-02 10:10:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -869,7 +869,7 @@ REPLACE INTO translators VALUES ('a2363670-7040-4cb9-8c48-6b96584e92ee', '1.0.0b
 }');
 
 
-REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2008-07-16 20:10:00', '1', '100', '4', 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi', 
+REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b3.r1', '', '2008-12-02 10:10:00', '1', '100', '4', 'Library Catalog (Voyager)', 'Simon Kornblith', 'Pwebrecon\.cgi', 
 'function detectWeb(doc, url) {
 	var export_options = doc.forms.namedItem(''frm'').elements.namedItem(''RD'').options;
 	for(var i in export_options) {
@@ -990,10 +990,14 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		}
 	}
 	
+	var responseCharset = null;
+    
 	if(unicode) {
 		var rd = unicode;
+		responseCharset = ''UTF-8'';
 	} else if(latin1) {
 		var rd = latin1;
+		responseCharset = ''ISO-8859-1'';
 	} else if(raw) {
 		var rd = raw;
 	} else {
@@ -1026,7 +1030,7 @@ REPLACE INTO translators VALUES ('88915634-1af6-c134-0171-56fd198235ed', '1.0.0b
 		marc.translate();
 		
 		Zotero.done();
-	})
+	}, null, responseCharset);
 	Zotero.wait();
 }');
 
