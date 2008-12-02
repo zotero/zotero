@@ -674,7 +674,7 @@ Zotero.CollectionTreeView.prototype.onDragStart = function(event, transferData, 
 	
 	if (oldMethod) {
 		transferData.data = new TransferData();
-		transferData.data . addDataForFlavour("zotero/collection", collectionID);
+		transferData.data.addDataForFlavour("zotero/collection", collectionID);
 	}
 	else {
 		event.dataTransfer.setData("zotero/collection", collectionID);
