@@ -1,4 +1,15 @@
-{"translatorID":"513a53f5-b95e-4df6-a03e-3348d9ec9f44","translatorType":4,"label":"Internet Archive Wayback Machine","creator":"Sean Takats","target":"^http://web.archive.org/web/","minVersion":"1.0","maxVersion":null,"priority":100,"inRepository":true,"lastUpdated":"2008-12-03 20:20:00"}
+{
+	"translatorID":"513a53f5-b95e-4df6-a03e-3348d9ec9f44",
+	"translatorType":4,
+	"label":"Internet Archive Wayback Machine",
+	"creator":"Sean Takats",
+	"target":"^http://web.archive.org/web/",
+	"minVersion":"1.0",
+	"maxVersion":null,
+	"priority":100,
+	"inRepository":true,
+	"lastUpdated":"2008-12-03 19:00:00"
+}
 
 function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
