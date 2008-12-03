@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-12-02 10:10:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-12-03 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -4984,7 +4984,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('513a53f5-b95e-4df6-a03e-3348d9ec9f44', '1.0', '', '2008-09-22 20:20:00', '0', '100', '4', 'Internet Archive Wayback Machine', 'Sean Takats', '^http://web.archive.org/web/', 
+REPLACE INTO translators VALUES ('513a53f5-b95e-4df6-a03e-3348d9ec9f44', '1.0', '', '2008-12-03 19:00:00', 1, 100, 4, 'Internet Archive Wayback Machine', 'Sean Takats', '^http://web.archive.org/web/',
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -5022,6 +5022,7 @@ REPLACE INTO translators VALUES ('513a53f5-b95e-4df6-a03e-3348d9ec9f44', '1.0', 
 	Zotero.Utilities.processDocuments(uris, function(newDoc) {
 		//create new webpage Item from page
 		var newItem = new Zotero.Item("webpage");
+		newItem.title = newDoc.title;
 		//parse date and add
 		var m = dateRe.exec(newDoc.location.href);
 		var date = m[1];
