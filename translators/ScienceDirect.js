@@ -5,10 +5,10 @@
 	"creator":"Michael Berkowitz",
 	"target":"https?://[^/]*science-?direct\\.com[^/]*/science(\\/article)?(\\?(?:.+\\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?",
 	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
+	"maxVersion":null,
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-09-11 23:34:02"
+	"lastUpdated":"2008-12-04 10:06:00"
 }
 
 function detectWeb(doc, url) {
@@ -28,7 +28,9 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 
-	if (!doc.evaluate('//img[contains(@src, "guest_user.gif")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+    	// MCB-04dec08: Old guest detection logic was broken, the check of advertisement has not been fully vetted
+		//if (!doc.evaluate('//img[contains(@src, "guest_user.gif")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		if (!doc.evaluate('//div[@title = "Advertisement."]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var articles = new Array();
 		if(detectWeb(doc, url) == "multiple") {
 			//search page
@@ -56,7 +58,14 @@ function doWeb(doc, url) {
 		}
 		Zotero.Utilities.processDocuments(articles, function(newDoc) {
 			var doi = newDoc.evaluate('//div[@class="articleHeaderInner"][@id="articleHeader"]/a[contains(text(), "doi")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(4);
-			var PDF = newDoc.evaluate('//a[@class="noul" and div/div[contains(text(), "PDF")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			
+			// MCB-04dec08: grab the correct PDF link, there are at least 2 versions 
+			// MCB-04dec08: In RARE cases the PDF link does not exists...need some logic here and below in the item.attachments section
+			var tempPDF = newDoc.evaluate('//a[@class="noul" and div/div[contains(text(), "PDF")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var PDF = (tempPDF) ? 
+					   tempPDF.href :
+					   newDoc.evaluate('//a[@class="noul" and contains(text(), "PDF")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			
 			var url = newDoc.location.href;
 			var get = newDoc.evaluate('//a[img[contains(@src, "exportarticle_a.gif")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 			Zotero.Utilities.HTTP.doGet(get, function(text) {
