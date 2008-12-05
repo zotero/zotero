@@ -104,7 +104,7 @@ function doWeb(doc, url) {
 						item.complete();
 					});
 					translator.translate();
-				});
+				}, false, 'windows-1252');
 			});
 		}, function() {Zotero.done;});
 	} else {
