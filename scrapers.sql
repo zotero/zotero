@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-12-03 19:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-12-12 12:35:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -9246,7 +9246,7 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('59cce211-9d77-4cdd-876d-6229ea20367f', '1.0.0b4.r5', '', '2008-06-12 19:30:00', '0', '100', '4', 'Bibliothèque et Archives nationales du Québec', 'Adam Crymble', 'http://catalogue.banq.qc.ca', 
+REPLACE INTO translators VALUES ('59cce211-9d77-4cdd-876d-6229ea20367f', '1.0.0b4.r5', '', '2008-12-12 12:35:00', '0', '100', '4', 'Bibliothèque et Archives nationales du Québec', 'Adam Crymble', 'http://catalogue.banq.qc.ca', 
 'function detectWeb(doc, url) {
 	if (doc.title.match("Search")) {
 		return "multiple";
