@@ -441,26 +441,7 @@ Zotero.Schema = new function(){
                     .getItemLocation(ZOTERO_CONFIG['GUID']); 
 		file.append(schemaFile);
 		
-		// Open an input stream from file
-		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-			.createInstance(Components.interfaces.nsIFileInputStream);
-		istream.init(file, 0x01, 0444, 0);
-		istream.QueryInterface(Components.interfaces.nsILineInputStream);
-		
-		var line = {}, sql = '', hasmore;
-		
-		// Skip the first line, which contains the schema version
-		istream.readLine(line);
-		//var schemaVersion = line.value.match(/-- ([0-9]+)/)[1];
-		
-		do {
-			hasmore = istream.readLine(line);
-			sql += line.value + "\n";
-		} while(hasmore);
-		
-		istream.close();
-		
-		return sql;
+		return Zotero.File.getContents(file);
 	}
 	
 	
