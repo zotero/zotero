@@ -141,7 +141,8 @@ function lookupPMIDs(ids, doc) {
 			}
 			newItem.abstractNote = article.Abstract.AbstractText.toString()
 			
-			newItem.DOI = xml.PubmedArticle[i].PubmedData.ArticleIdList.ArticleId[0].text().toString();
+			//10Dec08 MCB: fixed E4X path to fetch via attribute rather than positional
+			newItem.DOI = xml.PubmedArticle[i].PubmedData.ArticleIdList.ArticleId.(@IdType == "doi" ).text().toString();
 			newItem.publicationTitle = Zotero.Utilities.capitalizeTitle(newItem.publicationTitle);
 			newItem.complete();
 		}
