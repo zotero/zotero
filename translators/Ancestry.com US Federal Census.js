@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-03-24 02:15:00"
+	"lastUpdated":"2008-12-13 21:00:00"
 }
 
 function detectWeb(doc, url) {
@@ -42,7 +42,7 @@ function detectWeb(doc, url) {
 			indiv = 1;
 			}
 
-		checkURL = doc.location.href.replace("pf=", "").replace("&h=", "");
+		checkURL = doc.location.href.replace("pf=", "");
 		if(doc.location.href == checkURL && indiv == 1) {
 			return "bookSection";
 		}
@@ -122,12 +122,12 @@ function scrape(doc) {
 	if(m) {
 		db = m[1];
 	}
-	var snapshotRe = /recid=([0-9]+)/;
+	var snapshotRe = /\&h=([0-9]+)/;
 	var m = snapshotRe.exec(doc.location.href);
 		if(m) {
-		snapshotURL = "http://search.ancestry.com/cgi-bin/sse.dll?db="+db+"&indiv=1&pf=1&recid="+m[1];
+		snapshotURL = "http://search.ancestry.com/cgi-bin/sse.dll?db="+db+"&indiv=1&pf=1&h="+m[1];
 		newItem.attachments.push({title:"Ancestry.com Snapshot", mimeType:"text/html", url:snapshotURL, snapshot:true});
-		cleanURL = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&recid="+m[1];
+		cleanURL = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&h="+m[1];
 		newItem.url = cleanURL;
 	}
 			
@@ -179,7 +179,7 @@ function scrape(doc) {
 }
 
 function doWeb(doc, url) {
-	var resultsRegexp = /recid=/;
+	var resultsRegexp = /&h=/;
 	if(resultsRegexp.test(url)) {
 		scrape(doc);
 	} else {
