@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-12-12 12:35:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-12-15 00:25:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -358,7 +358,7 @@ function doWeb(doc, url){
 	}
 }');
 
-REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b4.r1', '', '2008-03-24 02:15:00', '0', '100', '4', 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex', 
+REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b4.r1', '', '2008-12-15 00:25:00', 1, 100, 4, 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -390,7 +390,7 @@ REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b
 			indiv = 1;
 			}
 
-		checkURL = doc.location.href.replace("pf=", "").replace("&h=", "");
+		checkURL = doc.location.href.replace("pf=", "");
 		if(doc.location.href == checkURL && indiv == 1) {
 			return "bookSection";
 		}
@@ -469,12 +469,12 @@ function scrape(doc) {
 	if(m) {
 		db = m[1];
 	}
-	var snapshotRe = /recid=([0-9]+)/;
+	var snapshotRe = /\&h=([0-9]+)/;
 	var m = snapshotRe.exec(doc.location.href);
 		if(m) {
-		snapshotURL = "http://search.ancestry.com/cgi-bin/sse.dll?db="+db+"&indiv=1&pf=1&recid="+m[1];
+		snapshotURL = "http://search.ancestry.com/cgi-bin/sse.dll?db="+db+"&indiv=1&pf=1&h="+m[1];
 		newItem.attachments.push({title:"Ancestry.com Snapshot", mimeType:"text/html", url:snapshotURL, snapshot:true});
-		cleanURL = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&recid="+m[1];
+		cleanURL = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&h="+m[1];
 		newItem.url = cleanURL;
 	}
 			
@@ -526,7 +526,7 @@ function scrape(doc) {
 }
 
 function doWeb(doc, url) {
-	var resultsRegexp = /recid=/;
+	var resultsRegexp = /&h=/;
 	if(resultsRegexp.test(url)) {
 		scrape(doc);
 	} else {
@@ -580,6 +580,7 @@ function doWeb(doc, url) {
 
 	}
 }');
+
 
 REPLACE INTO translators VALUES ('838d8849-4ffb-9f44-3d0d-aa8a0a079afe', '1.0.0b3.r1', '', '2008-02-07 21:15:00', 1, 100, 4, 'OCLC WorldCat FirstSearch', 'Simon Kornblith', 'https?://[^/]*firstsearch\.oclc\.org[^/]*/WebZ/',
 'function detectWeb(doc, url) {
@@ -22847,7 +22848,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-11-27 05:15:00', 1, 100, 4, 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)',
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-12-15 00:25:00', 1, 100, 4, 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -22977,7 +22978,7 @@ function detectSearch(item) {
 			}
 			newItem.abstractNote = article.Abstract.AbstractText.toString()
 			
-			newItem.DOI = xml.PubmedArticle[i].PubmedData.ArticleIdList.ArticleId[0].text().toString();
+			newItem.DOI = xml.PubmedArticle[i].PubmedData.ArticleIdList.ArticleId.(@IdType == "doi" ).text().toString();
 			newItem.publicationTitle = Zotero.Utilities.capitalizeTitle(newItem.publicationTitle);
 			newItem.complete();
 		}
