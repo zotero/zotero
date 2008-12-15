@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-12-12 17:48:00"
+	"lastUpdated":"2008-12-15 00:25:00"
 }
 
 function detectWeb(doc, url) {
@@ -141,7 +141,6 @@ function lookupPMIDs(ids, doc) {
 			}
 			newItem.abstractNote = article.Abstract.AbstractText.toString()
 			
-			//10Dec08 MCB: fixed E4X path to fetch via attribute rather than positional
 			newItem.DOI = xml.PubmedArticle[i].PubmedData.ArticleIdList.ArticleId.(@IdType == "doi" ).text().toString();
 			newItem.publicationTitle = Zotero.Utilities.capitalizeTitle(newItem.publicationTitle);
 			newItem.complete();
