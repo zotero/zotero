@@ -18,14 +18,12 @@
 	margin-bottom: 0;
 }
 
-#zotero-editpane-dynamic-fields row > toolbarbutton
-{
-	margin-right: 5px;
-	-moz-image-region: rect(2px, 14px, 18px, 0px);
-}
-
 #zotero-editpane-dynamic-fields row vbox[fieldname=abstractNote],
 #zotero-editpane-dynamic-fields row vbox[fieldname=extra]
 {
 	margin-left: 1px;
+}
+
+.creator-type-label image {
+	margin-bottom: 0;
 }

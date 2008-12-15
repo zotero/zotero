@@ -18,7 +18,7 @@
 
 /* metadata field names */
 #zotero-editpane-dynamic-fields row > label:first-child,
-#zotero-editpane-dynamic-fields row > toolbarbutton .toolbarbutton-text /* creator type menu */
+#zotero-editpane-dynamic-fields .creator-type-label
 {
 	text-align: right;
 	font-weight: bold;
@@ -34,25 +34,15 @@
 	-moz-user-focus: ignore;
 }
 
- /* creator type menu */
-#zotero-editpane-dynamic-fields row > toolbarbutton
-{
-	margin: 0 2px 0 0;
-	padding: 0 0 0 5px;
-	list-style-image: url("chrome://global/skin/arrow/arrow-dn.gif");
-	
-}
-#zotero-editpane-dynamic-fields row > toolbarbutton .toolbarbutton-text
-{
-	margin-top: -1px;
-}
-#zotero-editpane-dynamic-fields row > toolbarbutton .toolbarbutton-icon,
-#zotero-editpane-dynamic-fields row > toolbarbutton .toolbarbutton-menu-dropmarker
-{
-	margin: 0;
-	padding: 0;
+/* creator type menu */
+#zotero-editpane-dynamic-fields .creator-type-label {
+	-moz-box-align: center;
+	-moz-box-pack: end;
 }
 
+#zotero-editpane-dynamic-fields .creator-type-label image {
+	margin: 0 .5em 1px;
+}
 
 /* no space between last name and comma */
 #zotero-editpane-dynamic-fields row hbox label:first-child

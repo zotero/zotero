@@ -571,6 +571,9 @@ var ZoteroItemPane = new function()
 	
 	function addCreatorRow(firstName, lastName, typeID, singleField, unsaved, defaultRow)
 	{
+		// getCreatorFields(), switchCreatorMode() and handleCreatorAutoCompleteSelect()
+		// may need need to be adjusted if this DOM structure changes
+		
 		// Disable the "+" button on previous rows
 		var elems = _dynamicFields.getElementsByAttribute('value', '+');
 		if (elems.length){
@@ -602,19 +605,26 @@ var ZoteroItemPane = new function()
 			typeID = _creatorTypeMenu.childNodes[0].getAttribute('typeid');
 		}
 		
-		var label = document.createElement("toolbarbutton");
-		label.setAttribute("label",Zotero.getString('creatorTypes.'+Zotero.CreatorTypes.getName(typeID))+":");
-		label.setAttribute("typeid", typeID);
-		label.setAttribute("popup","zotero-creator-type-menu");
-		label.setAttribute("fieldname",'creator-'+_creatorCount+'-typeID');
-		label.className = 'zotero-clicky';
+		var typeBox = document.createElement("hbox");
+		typeBox.setAttribute("typeid", typeID);
+		typeBox.setAttribute("popup","zotero-creator-type-menu");
+		typeBox.setAttribute("fieldname",'creator-'+_creatorCount+'-typeID');
+		typeBox.className = 'creator-type-label zotero-clicky';
 		
-		// getCreatorFields(), switchCreatorMode() and handleCreatorAutoCompleteSelect()
-		// may need need to be adjusted if this DOM structure changes
+		var img = document.createElement('image');
+		img.setAttribute('src', 'chrome://zotero/skin/arrow-down.gif');
+		typeBox.appendChild(img);
+		
+		var label = document.createElement("label");
+		label.setAttribute('value',
+			Zotero.getString('creatorTypes.'+Zotero.CreatorTypes.getName(typeID)) + ":")
+		typeBox.appendChild(label);
+		
 		var hbox = document.createElement("hbox");
 		
 		// Name
 		var firstlast = document.createElement("hbox");
+		firstlast.className = 'creator-name-box';
 		firstlast.setAttribute("flex","1");
 		var tabindex = _tabIndexMinCreators + (_creatorCount * 2);
 		var lastNameLabel = firstlast.appendChild(
@@ -682,7 +692,7 @@ var ZoteroItemPane = new function()
 		
 		_creatorCount++;
 		
-		addDynamicRow(label, hbox, true);
+		addDynamicRow(typeBox, hbox, true);
 		
 		// Set single/double field toggle mode
 		if (singleField)
@@ -759,7 +769,7 @@ var ZoteroItemPane = new function()
 			button.setAttribute('image', 'chrome://zotero/skin/textfield-dual.png');
 			button.setAttribute('tooltiptext', Zotero.getString('pane.item.switchFieldMode.two'));
 			lastName.setAttribute('singleField', 'true');
-			button.setAttribute('onclick', "ZoteroItemPane.switchCreatorMode(this.parentNode.parentNode, false)");
+			button.setAttribute('onclick', "ZoteroItemPane.switchCreatorMode(Zotero.getAncestorByTagName(this, 'row'), false)");
 			lastName.setAttribute('flex', '1');
 			
 			// Remove firstname field from tabindex
@@ -794,7 +804,7 @@ var ZoteroItemPane = new function()
 			button.setAttribute('image', 'chrome://zotero/skin/textfield-single.png');
 			button.setAttribute('tooltiptext', Zotero.getString('pane.item.switchFieldMode.one'));
 			lastName.setAttribute('singleField', 'false');
-			button.setAttribute('onclick', "ZoteroItemPane.switchCreatorMode(this.parentNode.parentNode, true)");
+			button.setAttribute('onclick', "ZoteroItemPane.switchCreatorMode(Zotero.getAncestorByTagName(this, 'row'), true)");
 			lastName.setAttribute('flex', '0');
 			
 			// Add firstname field to tabindex
@@ -1155,7 +1165,7 @@ var ZoteroItemPane = new function()
 				label.value = creator[otherField];
 			}
 			
-			var row = textbox.parentNode.parentNode.parentNode;
+			var row = Zotero.getAncestorByTagName(textbox, 'row');
 			var otherFields = ZoteroItemPane.getCreatorFields(row);
 			otherFields[otherField] = creator[otherField];
 			
@@ -1285,8 +1295,7 @@ var ZoteroItemPane = new function()
 		// Creator fields
 		if (field == 'creator')
 		{
-			var row = textbox.parentNode.parentNode.parentNode;
-			
+			var row = Zotero.getAncestorByTagName(textbox, 'row');
 			var otherFields = getCreatorFields(row);
 			
 			if (saveChanges){
@@ -1489,8 +1498,8 @@ var ZoteroItemPane = new function()
 	
 	
 	function getCreatorFields(row){
-		var typeID = row.getElementsByTagName('toolbarbutton')[0].getAttribute('typeid');
-		var label1 = row.getElementsByTagName('hbox')[0].firstChild.firstChild;
+		var typeID = row.getElementsByClassName('creator-type-label')[0].getAttribute('typeid');
+		var label1 = row.getElementsByClassName('creator-name-box')[0].firstChild;
 		var label2 = label1.parentNode.lastChild;
 		
 		return {
