@@ -3343,14 +3343,14 @@ Zotero.Item.prototype.toArray = function (mode) {
 		var notes = this.getNotes();
 		for (var i in notes) {
 			var note = Zotero.Items.get(notes[i]);
-			arr.notes.push(note.serialize());
+			arr.notes.push(note.toArray());
 		}
 		
 		arr.attachments = [];
 		var attachments = this.getAttachments();
 		for (var i in attachments) {
 			var attachment = Zotero.Items.get(attachments[i]);
-			arr.attachments.push(attachment.serialize());
+			arr.attachments.push(attachment.toArray());
 		}
 	}
 	
