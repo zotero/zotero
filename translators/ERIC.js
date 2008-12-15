@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-06-03 19:40:00"
+	"lastUpdated":"2008-12-14 21:40:00"
 }
 
 function detectWeb(doc, url)	{
@@ -19,9 +19,10 @@ function detectWeb(doc, url)	{
 	var searchpath='//form[@name="searchResultsForm"][@id="searchResultsForm"]';
 	if(doc.evaluate(searchpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
 		return "multiple";
-	var singpath='//tr/td[@class="primaryHeader"][contains(text(), "Result Details")]';
-	if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
-		var typepath='//tr[td/strong/text()="Pub Types:"]/td[2]/text()';
+	//var singpath='//tr/td[@class="primaryHeader"][contains(text(), "Record Details")]';
+	var singpath='contains(//div[@id="titleBarBlue"]/text(), "Record Details")';
+	if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).booleanValue)	{
+		var typepath='//tr[td/span/strong/text()="Pub Types:"]/td[2]/text()';
 		var typestr=doc.evaluate(typepath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 		var typereg=new RegExp("([^;/\-]+)");
 		var typearr=typereg.exec(typestr);
@@ -83,8 +84,8 @@ function doWeb(doc, url)	{
 		});
 		Zotero.wait();
 	}
-	var singpath='//tr/td[@class="primaryHeader"][contains(text(), "Result Details")]';
-	if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
+	var singpath='contains(//div[@id="titleBarBlue"]/text(), "Record Details")';
+	if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).booleanValue)	{
 		var idpath='//input[@type="hidden"][@name="accno"]/@value';
 		var idpath2='//meta[@name="eric #"]/@content';
 		var id = url.match(/accno=([^&]+)/)[1];
