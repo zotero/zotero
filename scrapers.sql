@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-12-15 00:25:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-12-15 05:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -16046,7 +16046,8 @@ function doWeb(doc, url) {
 
 }');
 
-REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b4.r1', '', '2008-06-03 19:40:00', '0', '100', '4', 'ERIC', 'Ramesh Srigiriraju', '^http://(?:www\.)?eric\.ed\.gov/', 
+
+REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b4.r1', '', '2008-12-15 05:30:00', 1, 100, 4, 'ERIC', 'Ramesh Srigiriraju', '^http://(?:www\.)?eric\.ed\.gov/',
 'function detectWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -16055,9 +16056,10 @@ REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b
 	var searchpath=''//form[@name="searchResultsForm"][@id="searchResultsForm"]'';
 	if(doc.evaluate(searchpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
 		return "multiple";
-	var singpath=''//tr/td[@class="primaryHeader"][contains(text(), "Result Details")]'';
-	if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
-		var typepath=''//tr[td/strong/text()="Pub Types:"]/td[2]/text()'';
+	//var singpath=''//tr/td[@class="primaryHeader"][contains(text(), "Record Details")]'';
+	var singpath=''contains(//div[@id="titleBarBlue"]/text(), "Record Details")'';
+	if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).booleanValue)	{
+		var typepath=''//tr[td/span/strong/text()="Pub Types:"]/td[2]/text()'';
 		var typestr=doc.evaluate(typepath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 		var typereg=new RegExp("([^;/\-]+)");
 		var typearr=typereg.exec(typestr);
@@ -16080,7 +16082,7 @@ REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b
 		else
 			return "book";
 	}
-}', 
+}',
 'function doWeb(doc, url)	{
 	var namespace=doc.documentElement.namespaceURI;
 	var nsResolver=namespace?function(prefix)	{
@@ -16118,8 +16120,8 @@ REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b
 		});
 		Zotero.wait();
 	}
-	var singpath=''//tr/td[@class="primaryHeader"][contains(text(), "Result Details")]'';
-	if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())	{
+	var singpath=''contains(//div[@id="titleBarBlue"]/text(), "Record Details")'';
+	if(doc.evaluate(singpath, doc, nsResolver, XPathResult.ANY_TYPE, null).booleanValue)	{
 		var idpath=''//input[@type="hidden"][@name="accno"]/@value'';
 		var idpath2=''//meta[@name="eric #"]/@content'';
 		var id = url.match(/accno=([^&]+)/)[1];
@@ -16142,6 +16144,7 @@ REPLACE INTO translators VALUES ('e4660e05-a935-43ec-8eec-df0347362e4c', '1.0.0b
 		Zotero.wait();
 	}
 }');
+
 
 REPLACE INTO translators VALUES ('5dd22e9a-5124-4942-9b9e-6ee779f1023e', '1.0.0b4.r5', '', '2008-06-01 17:20:00', '1', '100', '4', 'Flickr', 'Sean Takats', '^http://(?:www\.)?flickr\.com/', 
 'function detectWeb(doc, url) {
@@ -25989,7 +25992,8 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-09-23 11:35:00', '1', '100', '4', 'ScienceDirect', 'Michael Berkowitz', 'https?://[^/]*science-?direct\.com[^/]*/science(\/article)?(\?(?:.+\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?', 
+
+REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.r1', '', '2008-12-15 05:30:00', 1, 100, 4, 'ScienceDirect', 'Michael Berkowitz', 'https?://[^/]*science-?direct\.com[^/]*/science(\/article)?(\?(?:.+\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?',
 'function detectWeb(doc, url) {
 	if ((url.indexOf("_ob=DownloadURL") != -1) || doc.title == "ScienceDirect Login") {
 		return false;
@@ -25999,14 +26003,14 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 	} else if (!url.match("pdf")) {
 		return "journalArticle";
 	}
-}', 
+}',
 'function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 
-	if (!doc.evaluate(''//img[contains(@src, "guest_user.gif")]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		if (!doc.evaluate(''//div[@title = "Advertisement."]'', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var articles = new Array();
 		if(detectWeb(doc, url) == "multiple") {
 			//search page
@@ -26034,9 +26038,32 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 		}
 		Zotero.Utilities.processDocuments(articles, function(newDoc) {
 			var doi = newDoc.evaluate(''//div[@class="articleHeaderInner"][@id="articleHeader"]/a[contains(text(), "doi")]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(4);
-			var PDF = newDoc.evaluate(''//a[@class="noul" and div/div[contains(text(), "PDF")]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			
+			var tempPDF = newDoc.evaluate(''//a[@class="noul" and div/div[contains(text(), "PDF")]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if (!tempPDF) { // PDF xpath failed, lets try another
+				tempPDF = newDoc.evaluate(''//a[@class="noul" and contains(text(), "PDF")]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				if (!tempPDF) { // second PDF xpath failed set PDF to null to avoid item.attachments
+					var PDF = null;
+				} else {
+					var PDF = tempPDF.href; // second xpath succeeded, use that link
+				}
+			} else {
+				var PDF = tempPDF.href; // first xpath succeeded, use that link
+			}
+			
 			var url = newDoc.location.href;
 			var get = newDoc.evaluate(''//a[img[contains(@src, "exportarticle_a.gif")]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			// if the PDF is available make it an attachment otherwise only use snapshot.
+			if (PDF) {
+				var attachments = [
+					{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
+					{url:PDF, title:"ScienceDirect Full Text PDF", mimeType:"application/pdf"} // Sometimes PDF is null...I hope that is ok
+				];
+			} else {
+				var attachments = [
+					{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
+				];
+			}
 			Zotero.Utilities.HTTP.doGet(get, function(text) {
 				var md5 = text.match(/<input type=hidden name=md5 value=([^>]+)>/)[1];
 				var acct = text.match(/<input type=hidden name=_acct value=([^>]+)>/)[1];
@@ -26057,12 +26084,8 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 					translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 					translator.setString(text);
 					translator.setHandler("itemDone", function(obj, item) {
-						item.attachments = [
-							{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
-							{url:PDF, title:"ScienceDirect Full Text PDF", mimeType:"application/pdf"}
-						];
-				
-				
+						item.attachments = attachments;
+						
 						if(item.notes[0]) {
 							item.abstractNote = item.notes[0].note;
 							item.notes = new Array();
@@ -26073,7 +26096,7 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 						item.complete();
 					});
 					translator.translate();
-				});
+				}, false, ''windows-1252'');
 			});
 		}, function() {Zotero.done;});
 	} else {
@@ -26151,6 +26174,7 @@ REPLACE INTO translators VALUES ('b6d0a7a-d076-48ae-b2f0-b6de28b194e', '1.0.0b3.
 	}
 	Zotero.wait();
 }');
+
 
 REPLACE INTO translators VALUES ('19643c25-a4b2-480d-91b7-4e0b761fb6ad', '1.0.0b3.r1', '', '2007-03-16 03:00:00', '1', '100', '4', 'ScientificCommons', 'Sean Takats', '^http://(?:en|de|www)\.scientificcommons\.org', 
 'function detectWeb(doc, url) {
