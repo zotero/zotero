@@ -8,7 +8,7 @@
 	"maxVersion":null,
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-12-14 08:06:00"
+	"lastUpdated":"2008-12-15 05:30:00"
 }
 
 function detectWeb(doc, url) {
@@ -60,10 +60,10 @@ function doWeb(doc, url) {
 			var tempPDF = newDoc.evaluate('//a[@class="noul" and div/div[contains(text(), "PDF")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if (!tempPDF) { // PDF xpath failed, lets try another
 				tempPDF = newDoc.evaluate('//a[@class="noul" and contains(text(), "PDF")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				if (!tempPDF) { // second PDF xpath failed set PDF to null to avoid item.attachements
-					PDF = null;
+				if (!tempPDF) { // second PDF xpath failed set PDF to null to avoid item.attachments
+					var PDF = null;
 				} else {
-					PDF = tempPDF.href; // second xpath succeeded, use that link
+					var PDF = tempPDF.href; // second xpath succeeded, use that link
 				}
 			} else {
 				var PDF = tempPDF.href; // first xpath succeeded, use that link
@@ -73,12 +73,12 @@ function doWeb(doc, url) {
 			var get = newDoc.evaluate('//a[img[contains(@src, "exportarticle_a.gif")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 			// if the PDF is available make it an attachment otherwise only use snapshot.
 			if (PDF) {
-				attachements = [
+				var attachments = [
 					{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
 					{url:PDF, title:"ScienceDirect Full Text PDF", mimeType:"application/pdf"} // Sometimes PDF is null...I hope that is ok
 				];
 			} else {
-				attachements = [
+				var attachments = [
 					{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
 				];
 			}
@@ -102,9 +102,8 @@ function doWeb(doc, url) {
 					translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 					translator.setString(text);
 					translator.setHandler("itemDone", function(obj, item) {
-						item.attachments = attachements;
-				
-				
+						item.attachments = attachments;
+						
 						if(item.notes[0]) {
 							item.abstractNote = item.notes[0].note;
 							item.notes = new Array();
