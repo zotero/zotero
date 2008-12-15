@@ -28,8 +28,6 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 
-    	// MCB-04dec08: Old guest detection logic was broken, the check of advertisement has not been fully vetted
-		//if (!doc.evaluate('//img[contains(@src, "guest_user.gif")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		if (!doc.evaluate('//div[@title = "Advertisement."]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var articles = new Array();
 		if(detectWeb(doc, url) == "multiple") {
@@ -59,15 +57,31 @@ function doWeb(doc, url) {
 		Zotero.Utilities.processDocuments(articles, function(newDoc) {
 			var doi = newDoc.evaluate('//div[@class="articleHeaderInner"][@id="articleHeader"]/a[contains(text(), "doi")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(4);
 			
-			// MCB-04dec08: grab the correct PDF link, there are at least 2 versions 
-			// MCB-04dec08: In RARE cases the PDF link does not exists...need some logic here and below in the item.attachments section
 			var tempPDF = newDoc.evaluate('//a[@class="noul" and div/div[contains(text(), "PDF")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			var PDF = (tempPDF) ? 
-					   tempPDF.href :
-					   newDoc.evaluate('//a[@class="noul" and contains(text(), "PDF")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			if (!tempPDF) { // PDF xpath failed, lets try another
+				tempPDF = newDoc.evaluate('//a[@class="noul" and contains(text(), "PDF")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				if (!tempPDF) { // second PDF xpath failed set PDF to null to avoid item.attachements
+					PDF = null;
+				} else {
+					PDF = tempPDF.href; // second xpath succeeded, use that link
+				}
+			} else {
+				var PDF = tempPDF.href; // first xpath succeeded, use that link
+			}
 			
 			var url = newDoc.location.href;
 			var get = newDoc.evaluate('//a[img[contains(@src, "exportarticle_a.gif")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			// if the PDF is available make it an attachment
+			if (PDF) {
+				attachements = [
+					{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
+					{url:PDF, title:"ScienceDirect Full Text PDF", mimeType:"application/pdf"} // Sometimes PDF is null...I hope that is ok
+				];
+			} else {
+				attachements = [
+					{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
+				];
+			}
 			Zotero.Utilities.HTTP.doGet(get, function(text) {
 				var md5 = text.match(/<input type=hidden name=md5 value=([^>]+)>/)[1];
 				var acct = text.match(/<input type=hidden name=_acct value=([^>]+)>/)[1];
@@ -88,10 +102,7 @@ function doWeb(doc, url) {
 					translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 					translator.setString(text);
 					translator.setHandler("itemDone", function(obj, item) {
-						item.attachments = [
-							{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
-							{url:PDF, title:"ScienceDirect Full Text PDF", mimeType:"application/pdf"}
-						];
+						item.attachments = attachements;
 				
 				
 						if(item.notes[0]) {
