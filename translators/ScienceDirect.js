@@ -71,7 +71,7 @@ function doWeb(doc, url) {
 			
 			var url = newDoc.location.href;
 			var get = newDoc.evaluate('//a[img[contains(@src, "exportarticle_a.gif")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-			// if the PDF is available make it an attachment
+			// if the PDF is available make it an attachment otherwise only use snapshot.
 			if (PDF) {
 				attachements = [
 					{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
