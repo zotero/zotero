@@ -8,32 +8,47 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2008-11-23 21:30:00"
+	"lastUpdated":"2008-12-16 23:13:33"
 }
 
 Zotero.configure("dataMode", "block");
 Zotero.addOption("exportCharset", "UTF-8");
 
 function detectImport() {
+	var maxChars = 1048576; // 1MB
+	
+	var inComment = false;
 	var block = "";
-	var read;
+	var buffer = "";
+	var chr = "";
+	var charsRead = 0;
 	
 	var re = /^\s*@[a-zA-Z]+[\(\{]/;
-	var lines_read = 0;
-	while(read = Zotero.read(1)) {
-		if(read == "%") {
-			// read until next newline
-			block = "";
-			while((read = Zotero.read(1)) && read != "\r" && read != "\n") {}
-		} else if((read == "\n" || read == "\r") && block) {
-			// check if this is a BibTeX entry
-			if(re.test(block)) {
-				return true;
-			}
+	while((buffer = Zotero.read(4096)) && charsRead < maxChars) {
+		Zotero.debug("Scanning " + buffer.length + " characters for BibTeX");
+		charsRead += buffer.length;
+		for (var i=0; i<buffer.length; i++) {
+			chr = buffer[i];
 			
-			block = "";
-		} else if(" \n\r\t".indexOf(read) == -1) {
-			block += read;
+			if (inComment && chr != "\r" && chr != "\n") {
+				continue;
+			}
+			inComment = false;
+			
+			if(chr == "%") {
+				// read until next newline
+				block = "";
+				inComment = true;
+			} else if((chr == "\n" || chr == "\r") && block) {
+				// check if this is a BibTeX entry
+				if(re.test(block)) {
+					return true;
+				}
+				
+				block = "";
+			} else if(" \n\r\t".indexOf(chr) == -1) {
+				block += chr;
+			}
 		}
 	}
 }
