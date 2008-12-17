@@ -218,7 +218,15 @@
 				<body>
 					<![CDATA[
 						this.id('tags').reload();
-						this.id('tagsPopup').showPopup(this.id('tagsLabel'),-1,-1,'popup');
+						if (this.id('tagsPopup').openPopupAtScreen) {
+							var x = this.boxObject.screenX;
+							var y = this.boxObject.screenY;
+							this.id('tagsPopup').openPopupAtScreen(x, y, false);
+						}
+						// Deprecated method for Firefox 2
+						else {
+							this.id('tagsPopup').showPopup(this.id('tagsLabel'), -1, -1, 'popup');
+						}
 					]]>
 				</body>
 			</method>
@@ -240,10 +248,20 @@
 				<body>
 					<![CDATA[
 						var seealsoList = this.item.getSeeAlso();
-						if(seealsoList && seealsoList.length > 0)
-							this.id('seeAlsoPopup').showPopup(this.id('seeAlsoLabel'),-1,-1,'popup',0,0);
-						else
+						if(seealsoList && seealsoList.length > 0) {
+							if (this.id('seeAlsoPopup').openPopupAtScreen) {
+								var x = this.boxObject.screenX;
+								var y = this.boxObject.screenY;
+								this.id('seeAlsoPopup').openPopupAtScreen(x, y, false);
+							}
+							// Deprecated method for Firefox 2
+							else {
+								this.id('seeAlsoPopup').showPopup(this.id('seeAlsoLabel'), -1, -1, 'popup');
+							}
+						}
+						else {
 							this.id('seeAlso').add();
+						}
 					]]>
 				</body>
 			</method>
