@@ -1027,7 +1027,8 @@ var ZoteroPane = new function()
 		var str = Zotero.getString('pane.items.menu.reindexItem');
 		reindexButton.setAttribute('tooltiptext', str);
 		
-		if (Zotero.Fulltext.canReindex(item.ref.getID())) {
+		if (Zotero.Fulltext.pdfConverterIsRegistered() &&
+				Zotero.Fulltext.canReindex(item.ref.getID())) {
 			reindexButton.setAttribute('hidden', false);
 		}
 		else {
