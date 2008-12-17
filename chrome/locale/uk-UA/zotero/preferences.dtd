@@ -1,0 +1,96 @@
+<!ENTITY zotero.preferences.title "Налаштування Zotero">
+
+<!ENTITY zotero.preferences.default "По замовчуванню:">
+
+<!ENTITY zotero.preferences.prefpane.general "Загальні">
+
+<!ENTITY zotero.preferences.userInterface "Інтерфейс користувача">
+<!ENTITY zotero.preferences.position "Display Zotero">
+<!ENTITY zotero.preferences.position.above "вище">
+<!ENTITY zotero.preferences.position.below "нижче">
+<!ENTITY zotero.preferences.position.browser "browser content">
+<!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
+<!ENTITY zotero.preferences.statusBarIcon.none "Немає">
+<!ENTITY zotero.preferences.fontSize "Розмір шрифтаЖ">
+<!ENTITY zotero.preferences.fontSize.small "Малий">
+<!ENTITY zotero.preferences.fontSize.medium "Середній">
+<!ENTITY zotero.preferences.fontSize.large "Великий">
+
+<!ENTITY zotero.preferences.miscellaneous "Інше">
+<!ENTITY zotero.preferences.autoUpdate "Автоматична перевірка оновлених перекладів">
+<!ENTITY zotero.preferences.updateNow "Оновити зараз">
+<!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
+<!ENTITY zotero.preferences.parseRISRefer "Використати Zotero для завантажених RIS/Refer файлів">
+<!ENTITY zotero.preferences.automaticSnapshots "Автоматично робити копії екрану під час створення елементів із веб-сторінок">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматично додавати асоційовані Pdf та інші типи файлів під час збереження елементів">
+<!ENTITY zotero.preferences.automaticTags "Автоматично додавати теги до елементів, використовуючи ключові слова та заголовки">
+
+<!ENTITY zotero.preferences.openurl.caption "Відкрити посилання (URL)">
+
+<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.custom "Custom...">
+<!ENTITY zotero.preferences.openurl.server "Resolver:">
+<!ENTITY zotero.preferences.openurl.version "Версія:">
+
+<!ENTITY zotero.preferences.prefpane.search "Пошук">
+<!ENTITY zotero.preferences.search.fulltextCache "Повно">
+<!ENTITY zotero.preferences.search.pdfIndexing "Індексування PDF">
+<!ENTITY zotero.preferences.search.indexStats "Статистика">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Проіндексовано:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Частково:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Неіндексовано:">
+<!ENTITY zotero.preferences.search.indexStats.words "Слів:">
+
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Максимальна кількість символів у індексі на файл:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Максимальна кількість сторінок у індексі на файл:">
+
+<!ENTITY zotero.preferences.prefpane.export "Експорт">
+
+<!ENTITY zotero.preferences.citationOptions.caption "Опцій цирування">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Включати URL друкованих (паперових) статтей в список посилань">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+
+<!ENTITY zotero.preferences.quickCopy.caption "Швидке копіюваня">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Формат виводу за замовчуванням:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Копіювати як HTML">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Note: Rich-text formatting will be lost on Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output Format">
+
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+
+<!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
+
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
+<!ENTITY zotero.preferences.keys.library "Library">
+<!ENTITY zotero.preferences.keys.quicksearch "Quick Search">
+<!ENTITY zotero.preferences.keys.newItem "Create a new item">
+<!ENTITY zotero.preferences.keys.newNote "Create a new note">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
+
+
+<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
+
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
+<!ENTITY zotero.preferences.dataDir "Storage Location">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
+<!ENTITY zotero.preferences.dataDir.custom "Custom:">
+<!ENTITY zotero.preferences.dataDir.choose "Choose...">
+<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+
+<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">

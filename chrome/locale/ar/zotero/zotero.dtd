@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "الشكل:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "خيارات المترجم">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "الاحتفاظ بمصادر مرتبة">
 
 <!ENTITY zotero.citation.page "الصفحة">

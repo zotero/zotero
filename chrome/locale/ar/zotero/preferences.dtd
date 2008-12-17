@@ -79,6 +79,10 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "متقدم">
 
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
 <!ENTITY zotero.preferences.dataDir "موقع التخزين">
 <!ENTITY zotero.preferences.dataDir.useProfile "استخدم مجلد فايرفوكس الجانبي">
 <!ENTITY zotero.preferences.dataDir.custom "تخصيص:">

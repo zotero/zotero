@@ -1,0 +1,156 @@
+<!ENTITY zotero.general.optional "(Додатково)">
+<!ENTITY zotero.general.note "Нотатки:">
+
+<!ENTITY zotero.errorReport.unrelatedMessages "Журнал помилок може містити повідомлення, що не відносяться до Zotero">
+<!ENTITY zotero.errorReport.submissionInProgress "Зачекайте, поки відішлеться звіт про помилки">
+<!ENTITY zotero.errorReport.submitted "Ваш звіт про помилки був відісланий">
+<!ENTITY zotero.errorReport.reportID "Ідентифікатор звіту:">
+<!ENTITY zotero.errorReport.postToForums "Будь ласка, залишіть повідомлення на форумі Zotero (forums.zotero.org) із цим ідентифікатором, описом проблеми та кроками для її відтворення.">
+<!ENTITY zotero.errorReport.notReviewed "Звіти про помилки зазвичай не переглядаються, якщо вони не згадуються у форумах.">
+
+<!ENTITY zotero.upgrade.newVersionInstalled "Ви інсталювали нову версію Zotero.">
+<!ENTITY zotero.upgrade.upgradeRequired "Ваша база даних Zotero повинна бути обновлена для роботи із новою версією.">
+<!ENTITY zotero.upgrade.autoBackup "Резервне копіювання бази даних відбудеться автоматично перед внесенням будь-яких змін.">
+<!ENTITY zotero.upgrade.upgradeInProgress "Зачекайте поки завершиться процес оновлення. Це може тривати кілька хвилин.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Ваша база даних Zotero успішно оновленна">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Дивись">
+<!ENTITY zotero.upgrade.changeLogLink "журнал змін">
+<!ENTITY zotero.upgrade.changeLogAfterLink "щоб знайти інформацію про оновлену функціональність.">
+
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Додати виділене до нотаток Zotero">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Створити запис та нотатки із виділення">
+<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Зберегти посилання у вигляді Zotero Snapshot">
+<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Зберегти малюнок у вигляді Zotero Snapshot">
+
+<!ENTITY zotero.tabs.info.label "Інформація">
+<!ENTITY zotero.tabs.notes.label "Нотатки">
+<!ENTITY zotero.tabs.attachments.label "Додатки">
+<!ENTITY zotero.tabs.tags.label "Ключові слова">
+<!ENTITY zotero.tabs.related.label "Споріднені">
+<!ENTITY zotero.notes.separate "Редагувати у окремому вікні">
+
+<!ENTITY zotero.items.type_column "Тип">
+<!ENTITY zotero.items.title_column "Заголовок">
+<!ENTITY zotero.items.creator_column "Автор">
+<!ENTITY zotero.items.date_column "Дата">
+<!ENTITY zotero.items.year_column "Рік">
+<!ENTITY zotero.items.publisher_column "Видавець">
+<!ENTITY zotero.items.publication_column "Публікація">
+<!ENTITY zotero.items.journalAbbr_column "Журнальне скорочення">
+<!ENTITY zotero.items.language_column "Мова">
+<!ENTITY zotero.items.accessDate_column "Accessed">
+<!ENTITY zotero.items.callNumber_column "Call Number">
+<!ENTITY zotero.items.repository_column "Репозитарій">
+<!ENTITY zotero.items.rights_column "Права">
+<!ENTITY zotero.items.dateAdded_column "Дата створення">
+<!ENTITY zotero.items.dateModified_column "Дата модифікації">
+<!ENTITY zotero.items.numChildren_column "+">
+
+<!ENTITY zotero.items.menu.showInLibrary "Показати у БІБЛІОТЕЦІ">
+<!ENTITY zotero.items.menu.attach.note "Додати нотатки">
+<!ENTITY zotero.items.menu.attach.snapshot "Додати Snapshot поточної сторінки">
+<!ENTITY zotero.items.menu.attach.link "Додати посилання на поточну сторінку">
+<!ENTITY zotero.items.menu.duplicateItem "Подвоїти виділений елемент">
+
+<!ENTITY zotero.collections.name_column "Колекції">
+
+<!ENTITY zotero.toolbar.newItem.label "Новий елемент">
+<!ENTITY zotero.toolbar.moreItemTypes.label "Більше">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Створити новий елемент із поточної сторінки">
+<!ENTITY zotero.toolbar.removeItem.label "Видалити елемент...">
+<!ENTITY zotero.toolbar.newCollection.label "Нова колекція...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Нова підколекція...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Новий збережений пошук...">
+<!ENTITY zotero.toolbar.tagSelector.label "Показати/заховати селектор ключових слів">
+<!ENTITY zotero.toolbar.actions.label "Дії">
+<!ENTITY zotero.toolbar.import.label "Імпорт...">
+<!ENTITY zotero.toolbar.export.label "Експорт БІБЛІОТЕКИ">
+<!ENTITY zotero.toolbar.timeline.label "Створення шкали часу">
+<!ENTITY zotero.toolbar.preferences.label "Налаштування...">
+<!ENTITY zotero.toolbar.documentation.label "Документація">
+<!ENTITY zotero.toolbar.about.label "Про Zotero">
+<!ENTITY zotero.toolbar.advancedSearch "Розширений пошук">
+<!ENTITY zotero.toolbar.search.label "Пошук:">
+<!ENTITY zotero.toolbar.fullscreen.tooltip "Перейти у повноекранний режим">
+<!ENTITY zotero.toolbar.openURL.label "Locate">
+<!ENTITY zotero.toolbar.openURL.tooltip "Пошук у Вашій локальній бібліотеці">
+
+<!ENTITY zotero.item.add "Додати">
+<!ENTITY zotero.item.attachment.file.show "Показати файл">
+<!ENTITY zotero.item.textTransform "Перетворення тектсу">
+<!ENTITY zotero.item.textTransform.lowercase "у нижній регістр">
+<!ENTITY zotero.item.textTransform.titlecase "У Вигляді Заголовку">
+
+<!ENTITY zotero.toolbar.note.standalone "Наві вбудовані нотатки">
+<!ENTITY zotero.toolbar.attachment.linked "Посилання на файл...">
+<!ENTITY zotero.toolbar.attachment.add "Зберегти копію файлу...">
+<!ENTITY zotero.toolbar.attachment.weblink "Зберегти посилання на поточну сторінку">
+<!ENTITY zotero.toolbar.attachment.snapshot "Зробити Snapshot поточної сторінки">
+
+<!ENTITY zotero.tagSelector.noTagsToDisplay "Немає жодних ключових слів для відображення">
+<!ENTITY zotero.tagSelector.filter "Фідьтр:">
+<!ENTITY zotero.tagSelector.showAutomatic "Показувати автоматично">
+<!ENTITY zotero.tagSelector.displayAll "Показувати усі ключові слова">
+<!ENTITY zotero.tagSelector.selectVisible "Виділити видиме">
+<!ENTITY zotero.tagSelector.clearVisible "Зняти виділення із видимої області">
+<!ENTITY zotero.tagSelector.clearAll "Зняти усі виділення">
+<!ENTITY zotero.tagSelector.renameTag "Змінити ключове слово...">
+<!ENTITY zotero.tagSelector.deleteTag "Видалити ключове слово">
+
+<!ENTITY zotero.selectitems.title "Вибрати елементи">
+<!ENTITY zotero.selectitems.intro.label "Вибрати елементи, які ви хочете додати до вашої бібліотеки">
+<!ENTITY zotero.selectitems.cancel.label "Відмінити">
+<!ENTITY zotero.selectitems.select.label "Гаразд">
+
+<!ENTITY zotero.bibliography.title "Створити бібліографію">
+<!ENTITY zotero.bibliography.style.label "Стиль посилань">
+<!ENTITY zotero.bibliography.output.label "Вихідний формат">
+<!ENTITY zotero.bibliography.saveAsRTF.label "Зберегти як RTF">
+<!ENTITY zotero.bibliography.saveAsHTML.label "Зберегти як HTML">
+<!ENTITY zotero.bibliography.copyToClipboard.label "Копіювати у буфер обміну">
+<!ENTITY zotero.bibliography.macClipboardWarning "(форматування RTF буде втрачено)">
+<!ENTITY zotero.bibliography.print.label "Друкувати">
+
+<!ENTITY zotero.integration.docPrefs.title "Налаштування документу">
+<!ENTITY zotero.integration.addEditCitation.title "Додати/Редагувати посилання">
+<!ENTITY zotero.integration.editBibliography.title "Редагувати бібліографію">
+
+<!ENTITY zotero.progress.title "Прогрес">
+
+<!ENTITY zotero.exportOptions.title "Експорт...">
+<!ENTITY zotero.exportOptions.format.label "Формат.">
+<!ENTITY zotero.exportOptions.translatorOptions.label "Налаштування перекладача">
+
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
+<!ENTITY zotero.citation.keepSorted.label "Сортувати джерела">
+
+<!ENTITY zotero.citation.page "Сторінка">
+<!ENTITY zotero.citation.paragraph "Параграф">
+<!ENTITY zotero.citation.line "Стрічка">
+<!ENTITY zotero.citation.suppressAuthor.label "Незначний автор">
+<!ENTITY zotero.citation.prefix.label "Префікс:">
+<!ENTITY zotero.citation.suffix.label "Суфікс:">
+
+<!ENTITY zotero.richText.italic.label "Курсив">
+<!ENTITY zotero.richText.bold.label "Жирний">
+<!ENTITY zotero.richText.underline.label "Підкреслений">
+<!ENTITY zotero.richText.superscript.label "Верхній індекс">
+<!ENTITY zotero.richText.subscript.label "Нижній індекс">
+
+<!ENTITY zotero.annotate.toolbar.add.label "Додати аннотацію">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Згорнути усі аннотації">
+<!ENTITY zotero.annotate.toolbar.expand.label "Розгорнути усі аннотації">
+<!ENTITY zotero.annotate.toolbar.highlight.label "Виділити текст">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "Зняти виділення тексту">
+
+<!ENTITY zotero.integration.prefs.displayAs.label "Видображати посилання як:">
+<!ENTITY zotero.integration.prefs.footnotes.label "зноски знизу сторінки">
+<!ENTITY zotero.integration.prefs.endnotes.label "зноски у кінці документу">
+
+<!ENTITY zotero.integration.prefs.formatUsing.label "Використаний формат:">
+<!ENTITY zotero.integration.prefs.bookmarks.label "Закладки:">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Закладки збережені у Microsoft Word чи OpenOffice.org можуть бути випадково модифіковані">
+
+<!ENTITY zotero.integration.references.label "Посилання у бібліографії">

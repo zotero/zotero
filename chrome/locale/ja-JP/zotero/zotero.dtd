@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "フォーマット：">
 <!ENTITY zotero.exportOptions.translatorOptions.label "トランスレーターのオプション">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "参照文献の配列をキープ">
 
 <!ENTITY zotero.citation.page "ページ">

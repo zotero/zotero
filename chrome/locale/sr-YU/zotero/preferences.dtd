@@ -1,0 +1,96 @@
+<!ENTITY zotero.preferences.title "Зотеро поставке">
+
+<!ENTITY zotero.preferences.default "Подразумевано:">
+
+<!ENTITY zotero.preferences.prefpane.general "Опште">
+
+<!ENTITY zotero.preferences.userInterface "Корисничко сучеље">
+<!ENTITY zotero.preferences.position "Прикажи Зотеро">
+<!ENTITY zotero.preferences.position.above "изнад">
+<!ENTITY zotero.preferences.position.below "испод">
+<!ENTITY zotero.preferences.position.browser "садржаја веб претраживача">
+<!ENTITY zotero.preferences.statusBarIcon "Икона статусне линије:">
+<!ENTITY zotero.preferences.statusBarIcon.none "Ништа">
+<!ENTITY zotero.preferences.fontSize "Величина фонта:">
+<!ENTITY zotero.preferences.fontSize.small "Мали">
+<!ENTITY zotero.preferences.fontSize.medium "Средњи">
+<!ENTITY zotero.preferences.fontSize.large "Велики">
+
+<!ENTITY zotero.preferences.miscellaneous "Разне поставке">
+<!ENTITY zotero.preferences.autoUpdate "Самостално провери за ажуриране преводиоце">
+<!ENTITY zotero.preferences.updateNow "Ажурирај сада">
+<!ENTITY zotero.preferences.reportTranslationFailure "Извести о грешкама у „преводиоцу странице“">
+<!ENTITY zotero.preferences.parseRISRefer "Користи Зотеро за преузимање RIS/Refer датотека">
+<!ENTITY zotero.preferences.automaticSnapshots "Самостално узми снимак када се прави ставка са веб странице">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Самостално приложи повезане PDF и друге датотека када чуваш ставке">
+<!ENTITY zotero.preferences.automaticTags "Самостално стави назнаку на ставке са кључним речима и насловом субјекта">
+
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+
+<!ENTITY zotero.preferences.openurl.search "Нађи разрешиваче">
+<!ENTITY zotero.preferences.openurl.custom "Прилагођено...">
+<!ENTITY zotero.preferences.openurl.server "Разрешивач:">
+<!ENTITY zotero.preferences.openurl.version "Верзија:">
+
+<!ENTITY zotero.preferences.prefpane.search "Претражи">
+<!ENTITY zotero.preferences.search.fulltextCache "Текст кеш">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF индексирање">
+<!ENTITY zotero.preferences.search.indexStats "Статистика индекса">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Индексирано:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Делимично:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Није индексирано:">
+<!ENTITY zotero.preferences.search.indexStats.words "Речи:">
+
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Број знакова индексираних по датотеци:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Број страница индексираних по датотеци:">
+
+<!ENTITY zotero.preferences.prefpane.export "Извоз">
+
+<!ENTITY zotero.preferences.citationOptions.caption "Опције за цитате">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Укључи УРЛе чланака у референцама">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Када је ова опција искључена, Zoterо ће ставити УРЛе при цитирању чланака из журнала, магазина и новина само ако чланак нема наведен опсег страница.">
+
+<!ENTITY zotero.preferences.quickCopy.caption "Брзо умножавање">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Подразумевани излазни формат:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Умножи у HTML облику">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Белешка: Rich-text формат ће бити изгубљен на Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Поставке нарочите за веб место:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Домен/путања">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(нпр. sr.wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Излазни формат">
+
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Добави додатне стилове...">
+
+<!ENTITY zotero.preferences.prefpane.keys "Пречице на тастатури">
+
+<!ENTITY zotero.preferences.keys.openZotero "Отвори/затвори Зотеро површ">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Укључи/искључи приказ преко целог екрана">
+<!ENTITY zotero.preferences.keys.library "Библиотека">
+<!ENTITY zotero.preferences.keys.quicksearch "Брза претрага">
+<!ENTITY zotero.preferences.keys.newItem "Направи нову ставку">
+<!ENTITY zotero.preferences.keys.newNote "Направи нову белешку">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Искључи/укључи избирача ознаке">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Умножи изабрани предмет цитата у списак исечака">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Умножи изабране ставке у списак исечака">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Покушај да премостиш сукобљене пречице">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Промене су постављене само у новом прозору">
+
+
+<!ENTITY zotero.preferences.prefpane.advanced "Напредно">
+
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
+<!ENTITY zotero.preferences.dataDir "Место за складиштење">
+<!ENTITY zotero.preferences.dataDir.useProfile "Користи Firefox директоријум за профил">
+<!ENTITY zotero.preferences.dataDir.custom "Прилагођено:">
+<!ENTITY zotero.preferences.dataDir.choose "Изабери...">
+<!ENTITY zotero.preferences.dataDir.reveal "Прикажи директоријум података">
+
+<!ENTITY zotero.preferences.dbMaintenance "Одржавање базе података">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Провери целовитост базе података">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Постави на почетне вредности преводиоце и стилове...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Постави на почетне вредности преводиоце...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Постави на почетне вредности стилове...">

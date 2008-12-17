@@ -7,7 +7,7 @@
 
 <!ENTITY zotero.search.recursive.label "ค้นหาในโฟลเดอร์ย่อย">
 <!ENTITY zotero.search.noChildren "แสดงเฉพาะไอเทมบนสุด">
-<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+<!ENTITY zotero.search.includeParentsAndChildren "รวมไอเทมทั้ง Parent และ Child ของไอเทมที่ตรงกัน">
 
 <!ENTITY zotero.search.textModes.phrase "พยางค์">
 <!ENTITY zotero.search.textModes.phraseBinary "พยางค์ (รวมแฟ้มไบนารี)">

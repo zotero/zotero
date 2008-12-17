@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "פורמט:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "אפשרויות תרגום">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
 
 <!ENTITY zotero.citation.page "עמוד">

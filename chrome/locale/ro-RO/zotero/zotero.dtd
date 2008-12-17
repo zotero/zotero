@@ -1,4 +1,4 @@
-<!ENTITY zotero.general.optional "(Optional)">
+<!ENTITY zotero.general.optional "(Opţional)">
 <!ENTITY zotero.general.note "Notă:">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Jurnalul de erori poate include mesaje fără legătură cu Zotero.">
@@ -120,6 +120,9 @@
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Opţiuni translator">
+
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
 
 <!ENTITY zotero.citation.keepSorted.label "Păstrează sursele sortate">
 

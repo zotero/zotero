@@ -6,7 +6,7 @@
 <!ENTITY zotero.errorReport.submitted "Le rapport d&apos;erreur a été transmis.">
 <!ENTITY zotero.errorReport.reportID "ID du rapport :">
 <!ENTITY zotero.errorReport.postToForums "Veuillez poster un message sur les forums Zotero (forums.zotero.org) avec cet ID du rapport, une description du problème et les étapes nécessaires pour le reproduire.">
-<!ENTITY zotero.errorReport.notReviewed "Les rapports d&apos;erreurs ne sont généralement pas étudiés sauf sauf s&apos;ils sont référencés dans les forums.">
+<!ENTITY zotero.errorReport.notReviewed "Les rapports d&apos;erreurs ne sont généralement pas étudiés sauf s&apos;ils sont référencés dans les forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Vous avez installé une nouvelle version de Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Votre base de données Zotero doit être mise à jour pour fonctionner avec cette nouvelle version.">
@@ -120,6 +120,9 @@
 <!ENTITY zotero.exportOptions.title "Exporter…">
 <!ENTITY zotero.exportOptions.format.label "Format :">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Options du convertisseur">
+
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
 
 <!ENTITY zotero.citation.keepSorted.label "Conserver les sources en ordre alphabétique">
 

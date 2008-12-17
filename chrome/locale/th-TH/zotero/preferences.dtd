@@ -79,6 +79,10 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Advanced">
 
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
 <!ENTITY zotero.preferences.dataDir "ที่ตั้งของพื้นที่เก็บข้อมูล">
 <!ENTITY zotero.preferences.dataDir.useProfile "ใช้ไดเรคทอรีของโปรไฟล์ไฟร์ฟ๊อกซ์">
 <!ENTITY zotero.preferences.dataDir.custom "Custom:">

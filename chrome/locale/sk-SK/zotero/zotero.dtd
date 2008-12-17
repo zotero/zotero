@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "Formát:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Možnosti konvertora">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "Zachovaj zdroje zoradené">
 
 <!ENTITY zotero.citation.page "Strana">

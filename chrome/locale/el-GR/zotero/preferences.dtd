@@ -1,92 +1,96 @@
-<!ENTITY zotero.preferences.title "Zotero Preferences">
+<!ENTITY zotero.preferences.title "Zotero Προτίμησεις">
 
-<!ENTITY zotero.preferences.default "Default:">
+<!ENTITY zotero.preferences.default "Προεπιλογές:">
 
-<!ENTITY zotero.preferences.prefpane.general "General">
+<!ENTITY zotero.preferences.prefpane.general "Γενικά">
 
-<!ENTITY zotero.preferences.userInterface "User Interface">
-<!ENTITY zotero.preferences.position "Display Zotero">
-<!ENTITY zotero.preferences.position.above "above">
-<!ENTITY zotero.preferences.position.below "below">
-<!ENTITY zotero.preferences.position.browser "browser content">
-<!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
-<!ENTITY zotero.preferences.statusBarIcon.none "None">
-<!ENTITY zotero.preferences.fontSize "Font size:">
-<!ENTITY zotero.preferences.fontSize.small "Small">
-<!ENTITY zotero.preferences.fontSize.medium "Medium">
-<!ENTITY zotero.preferences.fontSize.large "Large">
+<!ENTITY zotero.preferences.userInterface "Γραφικό Περιβάλλον">
+<!ENTITY zotero.preferences.position "Τοποθέτηση Του Zotero">
+<!ENTITY zotero.preferences.position.above "επάνω">
+<!ENTITY zotero.preferences.position.below "κάτω">
+<!ENTITY zotero.preferences.position.browser "απο το περιεχόμενο του φυλομετρητή">
+<!ENTITY zotero.preferences.statusBarIcon "Εικονίδιο γραμμής κατάστασης:">
+<!ENTITY zotero.preferences.statusBarIcon.none "Κανένα">
+<!ENTITY zotero.preferences.fontSize "Μέγεθος γραμματοσειράς">
+<!ENTITY zotero.preferences.fontSize.small "Μικρό">
+<!ENTITY zotero.preferences.fontSize.medium "Μεσαίο">
+<!ENTITY zotero.preferences.fontSize.large "Μεγάλο">
 
-<!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
-<!ENTITY zotero.preferences.updateNow "Update now">
-<!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
-<!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
-<!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
+<!ENTITY zotero.preferences.miscellaneous "Διάφορα">
+<!ENTITY zotero.preferences.autoUpdate "Αυτόματος έλεγχος για ενημερωμένους διασκευαστές">
+<!ENTITY zotero.preferences.updateNow "Άμεση Ενημέρωση">
+<!ENTITY zotero.preferences.reportTranslationFailure "Αναφορά ελλατωματικών διασκευαστών">
+<!ENTITY zotero.preferences.parseRISRefer "Χρήση του Zotero για αρχεία τύπου RIS/Refer">
+<!ENTITY zotero.preferences.automaticSnapshots "Αυτόματη λήψη στιγμιοτύπων κατά τη δημιουργία εισαγωγών απο ιστοσελίδες">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Αυτόματη προσάρτηση των σχετικών PDF και άλλων αρχείων κατα την αποθήκευση εισαγωγών">
+<!ENTITY zotero.preferences.automaticTags "Αυτόματη εισαγωγή ετικετών με βάση τις λέξεις κλειδιά και τον τίτλο">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
-<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
-<!ENTITY zotero.preferences.openurl.custom "Custom...">
-<!ENTITY zotero.preferences.openurl.server "Resolver:">
-<!ENTITY zotero.preferences.openurl.version "Version:">
+<!ENTITY zotero.preferences.openurl.search "Αναζήτηση διαμεσολαβητών">
+<!ENTITY zotero.preferences.openurl.custom "Προτιμόμενος...">
+<!ENTITY zotero.preferences.openurl.server "Διαμεσολαβητής:">
+<!ENTITY zotero.preferences.openurl.version "Έκδοση:">
 
-<!ENTITY zotero.preferences.prefpane.search "Search">
+<!ENTITY zotero.preferences.prefpane.search "Αναζήτηση">
 <!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
-<!ENTITY zotero.preferences.search.indexStats "Index Statistics">
+<!ENTITY zotero.preferences.search.pdfIndexing "Ευρετήριο PDF">
+<!ENTITY zotero.preferences.search.indexStats "Στατιστικά Ευρετηρίου">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
-<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+<!ENTITY zotero.preferences.search.indexStats.indexed "Εντός Ευρετηρίου:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Εν μέρη στο Ευρετήριο:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Εκτός Ευρετηρίου:">
+<!ENTITY zotero.preferences.search.indexStats.words "Λέξεις:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Μέγιστος αριθμός χαρακτήρων σε χρήση απο το ευρετήριο ανα αρχείο:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Μέγιστος αριθμός σελίδων σε χρήση απο το ευρετήριο ανα αρχείο">
 
-<!ENTITY zotero.preferences.prefpane.export "Export">
+<!ENTITY zotero.preferences.prefpane.export "Εξαγωγή">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.citationOptions.caption "Επιλογές Παραθέσεων">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Εισαγωγή των URL των συγγραμμάτων στις παραθέσεις">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Όταν αυτή η επιλογή είναι ενεργοποιημένη, το Zotero συμπεριλαμβάνει το URL στην παράθεση άρθρων συγγραμάτων, περιοδικών και εφημερίδων μόνο αν δεν αναφέροντε οι σελίδες.">
 
-<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Default Output Format:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Note: Rich-text formatting will be lost on Mac OS X.">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output Format">
+<!ENTITY zotero.preferences.quickCopy.caption "Γρήγορη Αντιγραφή">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Προεπιλεγμένη Μορφή Εξόδου:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Αντιγραφή σε HTML">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Σημείωση: Η Rich-text διαμόρφωση θα χαθεί στο Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Επιλογές Ανά Τοποθεσία:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Τομέας / Διαδρομή">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(π.χ wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Διαμόρφωση Εξόδου">
 
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Λήψη περισσότερων μορφών στοίχησης...">
 
-<!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
+<!ENTITY zotero.preferences.prefpane.keys "Πλήκτρα Συντομεύσεων">
 
-<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
-<!ENTITY zotero.preferences.keys.library "Library">
-<!ENTITY zotero.preferences.keys.quicksearch "Quick Search">
-<!ENTITY zotero.preferences.keys.newItem "Create a new item">
-<!ENTITY zotero.preferences.keys.newNote "Create a new note">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
+<!ENTITY zotero.preferences.keys.openZotero "Εμφάνιση / Απόκρυψη του Zotero">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Σε Πλήρη Οθόνη">
+<!ENTITY zotero.preferences.keys.library "Αρχειοθήκη">
+<!ENTITY zotero.preferences.keys.quicksearch "Γρήγορη Αναζήτηση">
+<!ENTITY zotero.preferences.keys.newItem "Δημιουργία νέας εγγραφής">
+<!ENTITY zotero.preferences.keys.newNote "Δημιουργία νέας σημείωσης">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Εμφάνιση / Απόκρυψη Των Ετικετών">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Αντιγραφή Των Επιλεγμένων Παραθέσεων Στο Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Αντιγραφή Των Επιλεγμένων Εγγραφών Στο Clipboard">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Προτεραιότητα έναντι αντικρουόμενων συντομεύσεων">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Οι αλλαγές θα ενεργοποιηθούν στα νέα παράθυρα μόνο">
 
 
-<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
+<!ENTITY zotero.preferences.prefpane.advanced "Ειδικά">
 
-<!ENTITY zotero.preferences.dataDir "Storage Location">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
-<!ENTITY zotero.preferences.dataDir.custom "Custom:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose...">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
 
-<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
+<!ENTITY zotero.preferences.dataDir "Τοποθεσία Αποθήκευσης">
+<!ENTITY zotero.preferences.dataDir.useProfile "Χρήση του καταλόγου profile του Firefox">
+<!ENTITY zotero.preferences.dataDir.custom "Προτιμόμενο:">
+<!ENTITY zotero.preferences.dataDir.choose "Επιλέξτε...">
+<!ENTITY zotero.preferences.dataDir.reveal "Εμφάνιση του Υποκαταλόγου Δεδομένων">
+
+<!ENTITY zotero.preferences.dbMaintenance "Συντήρηση Βάσης Δεδομένων">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Έλεγχος Ακεραιότητας Της Βάσης Δεδομένων">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Επανακαθορισμός Διασκευαστών και Μορφών Στοίχησης">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Επανακαθορισμός Διασκευαστών">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Επανακαθορισμός Μορφών Στοίχησης">

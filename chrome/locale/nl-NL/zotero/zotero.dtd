@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "Formaat:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Vertaler-opties">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "Bronnen gesorteerd houden">
 
 <!ENTITY zotero.citation.page "Pagina">

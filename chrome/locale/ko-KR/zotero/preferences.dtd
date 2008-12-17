@@ -79,6 +79,10 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "고급">
 
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
 <!ENTITY zotero.preferences.dataDir "저장 위치">
 <!ENTITY zotero.preferences.dataDir.useProfile "Firefox 프로필 디렉토리 이용">
 <!ENTITY zotero.preferences.dataDir.custom "사용자 지정:">

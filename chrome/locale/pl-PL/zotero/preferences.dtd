@@ -79,6 +79,10 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Zaawansowane">
 
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
 <!ENTITY zotero.preferences.dataDir "Miejsce przechowywania:">
 <!ENTITY zotero.preferences.dataDir.useProfile "Użyj katalogu profilu Firefoksa">
 <!ENTITY zotero.preferences.dataDir.custom "Określ katalog:">

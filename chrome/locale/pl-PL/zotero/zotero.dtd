@@ -60,7 +60,7 @@
 <!ENTITY zotero.toolbar.removeItem.label "Usuń element">
 <!ENTITY zotero.toolbar.newCollection.label "Nowa kolekcja">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nowa subkolekcja">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Nowy zapisane wyszukiwanie">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Nowe zapisane wyszukiwanie">
 <!ENTITY zotero.toolbar.tagSelector.label "Wyświetl/Ukryj selektor etykiet">
 <!ENTITY zotero.toolbar.actions.label "Funkcje">
 <!ENTITY zotero.toolbar.import.label "Importuj">
@@ -120,6 +120,9 @@
 <!ENTITY zotero.exportOptions.title "Eksportuj">
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Opcje translacji">
+
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
 
 <!ENTITY zotero.citation.keepSorted.label "Zachowuj źródło posortowane">
 

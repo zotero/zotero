@@ -3,19 +3,19 @@
 <!ENTITY zotero.search.joinMode.prefix "Odpovídá">
 <!ENTITY zotero.search.joinMode.any "některému">
 <!ENTITY zotero.search.joinMode.all "všem">
-<!ENTITY zotero.search.joinMode.suffix "z nasledujících pravidel:">
+<!ENTITY zotero.search.joinMode.suffix "pravidlu/pravidlům:">
 
 <!ENTITY zotero.search.recursive.label "Prohledat podsložky">
 <!ENTITY zotero.search.noChildren "Zobrazit pouze objekty nejvyšší úrovně">
-<!ENTITY zotero.search.includeParentsAndChildren "Zahrň rodičovské a dceřinné položky odpovídajících položek">
+<!ENTITY zotero.search.includeParentsAndChildren "Zahrout rodičovské a dceřinné položky odpovídajících položek">
 
 <!ENTITY zotero.search.textModes.phrase "Fráze">
 <!ENTITY zotero.search.textModes.phraseBinary "Fráze (vč. binárních souborů)">
 <!ENTITY zotero.search.textModes.regexp "regulární výraz">
-<!ENTITY zotero.search.textModes.regexpCS "regulární výraz (case-sensitive)">
+<!ENTITY zotero.search.textModes.regexpCS "regulární výraz (s rozlišením velikosti písma)">
 
 <!ENTITY zotero.search.date.units.days "dny">
-<!ENTITY zotero.search.date.units.months "měsice">
+<!ENTITY zotero.search.date.units.months "měsíce">
 <!ENTITY zotero.search.date.units.years "roky">
 
 <!ENTITY zotero.search.search "Hledat">

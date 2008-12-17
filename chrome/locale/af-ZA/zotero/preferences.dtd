@@ -79,6 +79,10 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Gevorderd">
 
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
 <!ENTITY zotero.preferences.dataDir "Stoorligging">
 <!ENTITY zotero.preferences.dataDir.useProfile "Gebruik Firerfox-profielgids">
 <!ENTITY zotero.preferences.dataDir.custom "Doelmaak:">

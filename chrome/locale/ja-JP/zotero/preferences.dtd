@@ -17,7 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.large "大">
 
 <!ENTITY zotero.preferences.miscellaneous "色々">
-<!ENTITY zotero.preferences.autoUpdate "アップ･デートされた翻訳者を自動的にチェック">
+<!ENTITY zotero.preferences.autoUpdate "アップ･デートされたトランスレーターを自動的にチェック">
 <!ENTITY zotero.preferences.updateNow "アップデート">
 <!ENTITY zotero.preferences.reportTranslationFailure "壊れたスクレーパを報告する">
 <!ENTITY zotero.preferences.parseRISRefer "ダウン･ロードされたRIS/ReferファイルにZoteroを使用">
@@ -79,6 +79,10 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "詳細">
 
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
 <!ENTITY zotero.preferences.dataDir "保管場所">
 <!ENTITY zotero.preferences.dataDir.useProfile "Firefoxプロファイルダイレクトリーを使用する">
 <!ENTITY zotero.preferences.dataDir.custom "カストム：">
@@ -87,6 +91,6 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "データベースの管理">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "データベースの整合性をチェック">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "翻訳者とスタイルをリセットする...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "翻訳者をリセットする...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "トランスレーターとスタイルをリセットする...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "トランスレーターをリセットする...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "スタイルをリセットする...">

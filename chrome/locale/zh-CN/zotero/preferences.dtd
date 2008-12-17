@@ -79,6 +79,10 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "高级">
 
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
 <!ENTITY zotero.preferences.dataDir "存储位置">
 <!ENTITY zotero.preferences.dataDir.useProfile "使用 Firefox 配置目录">
 <!ENTITY zotero.preferences.dataDir.custom "自定义:">

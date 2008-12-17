@@ -79,6 +79,10 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Расширенные">
 
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
 <!ENTITY zotero.preferences.dataDir "Расположение хранения">
 <!ENTITY zotero.preferences.dataDir.useProfile "Использовать папку профилей Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Пользовательская:">

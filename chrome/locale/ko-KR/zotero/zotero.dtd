@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "형식:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "중계기 선택사항">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "원본 정렬 유지">
 
 <!ENTITY zotero.citation.page "페이지">

@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Назва:">
+
+<!ENTITY zotero.search.joinMode.prefix "Співпадіння">
+<!ENTITY zotero.search.joinMode.any "будь-який">
+<!ENTITY zotero.search.joinMode.all "усе">
+<!ENTITY zotero.search.joinMode.suffix "однин із наступного">
+
+<!ENTITY zotero.search.recursive.label "Пошук піддиректорій">
+<!ENTITY zotero.search.noChildren "Тільки елементи найвищої рівня ієрархії">
+<!ENTITY zotero.search.includeParentsAndChildren "Включити батьківські та дочірні елементи співпадаючих елементів">
+
+<!ENTITY zotero.search.textModes.phrase "Фраза">
+<!ENTITY zotero.search.textModes.phraseBinary "Фраза (включаючи двійкові файли)">
+<!ENTITY zotero.search.textModes.regexp "Регулярний вираз">
+<!ENTITY zotero.search.textModes.regexpCS "Регулярний вираз (чутливий до регістру)">
+
+<!ENTITY zotero.search.date.units.days "дні(в)">
+<!ENTITY zotero.search.date.units.months "місяці(в)">
+<!ENTITY zotero.search.date.units.years "роки (ів)">
+
+<!ENTITY zotero.search.search "Пошук">
+<!ENTITY zotero.search.clear "Очистити">
+<!ENTITY zotero.search.saveSearch "Записати результати пошуку">

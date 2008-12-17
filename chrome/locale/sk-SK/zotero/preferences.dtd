@@ -79,6 +79,10 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Pokročilé">
 
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
 <!ENTITY zotero.preferences.dataDir "Ukladanie dát">
 <!ENTITY zotero.preferences.dataDir.useProfile "Použi priečinok, kde má Firefox uložený profil">
 <!ENTITY zotero.preferences.dataDir.custom "Vlastné umiestnenie:">

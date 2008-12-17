@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "Định dạng:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Các tùy chọn cho Bộ-biến-đổi">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "Giữ thứ tự sắp xếp của các Tài liệu nguồn">
 
 <!ENTITY zotero.citation.page "Trang">

@@ -32,12 +32,14 @@ locale	zotero	pt-BR		chrome/locale/pt-BR/zotero/
 locale	zotero	pt-PT		chrome/locale/pt-PT/zotero/
 locale	zotero	ro-RO		chrome/locale/ro-RO/zotero/
 locale	zotero	ru-RU		chrome/locale/ru-RU/zotero/
-locale  zotero  sk-SK		chrome/locale/sk-SK/zotero/
+locale  zotero	sk-SK		chrome/locale/sk-SK/zotero/
 locale	zotero	sl-SI		chrome/locale/sl-SI/zotero/
 locale	zotero	sr-RS		chrome/locale/sr-RS/zotero/
+locale	zotero	sr-YU		chrome/locale/sr-YU/zotero/
 locale	zotero	sv-SE		chrome/locale/sv-SE/zotero/
 locale	zotero	th-TH		chrome/locale/th-TH/zotero/
 locale	zotero	tr-TR		chrome/locale/tr-TR/zotero/
+locale	zotero	uk-UA		chrome/locale/uk-UA/zotero/
 locale	zotero	vi-VN		chrome/locale/vi-VN/zotero/
 locale	zotero	zh-CN		chrome/locale/zh-CN/zotero/
 locale	zotero	zh-TW		chrome/locale/zh-TW/zotero/

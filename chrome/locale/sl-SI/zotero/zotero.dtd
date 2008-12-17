@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "Vrsta datoteke:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Možnosti prevajanja">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "Obdrži vire razvrščene">
 
 <!ENTITY zotero.citation.page "Stran">

@@ -1,20 +1,20 @@
-<!ENTITY zotero.search.name "Name:">
+<!ENTITY zotero.search.name "Navn:">
 
 <!ENTITY zotero.search.joinMode.prefix "Match">
-<!ENTITY zotero.search.joinMode.any "any">
-<!ENTITY zotero.search.joinMode.all "all">
-<!ENTITY zotero.search.joinMode.suffix "of the following:">
+<!ENTITY zotero.search.joinMode.any "enhver">
+<!ENTITY zotero.search.joinMode.all "Alle">
+<!ENTITY zotero.search.joinMode.suffix "af de følgende">
 
-<!ENTITY zotero.search.recursive.label "Search subfolders">
-<!ENTITY zotero.search.noChildren "Only show top-level items">
+<!ENTITY zotero.search.recursive.label "Søg i underfoldere">
+<!ENTITY zotero.search.noChildren "Hvis kun top elementer">
 <!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
 
 <!ENTITY zotero.search.textModes.phrase "Phrase">
 <!ENTITY zotero.search.textModes.phraseBinary "Phrase (incl. binary files)">
 <!ENTITY zotero.search.textModes.regexp "Regexp">
-<!ENTITY zotero.search.textModes.regexpCS "Regexp (case-sensitive)">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (case-sensitivt)">
 
-<!ENTITY zotero.search.date.units.days "days">
+<!ENTITY zotero.search.date.units.days "dage">
 <!ENTITY zotero.search.date.units.months "months">
 <!ENTITY zotero.search.date.units.years "years">
 

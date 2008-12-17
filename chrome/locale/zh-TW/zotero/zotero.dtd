@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "格式：">
 <!ENTITY zotero.exportOptions.translatorOptions.label "轉譯器選項">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "維持來源的排序">
 
 <!ENTITY zotero.citation.page "頁">

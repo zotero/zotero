@@ -79,6 +79,10 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avansate">
 
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
 <!ENTITY zotero.preferences.dataDir "Locaţie pentru stocare">
 <!ENTITY zotero.preferences.dataDir.useProfile "Foloseşte dosarul de profil din Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Personalizare:">

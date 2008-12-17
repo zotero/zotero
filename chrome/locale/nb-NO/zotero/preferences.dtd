@@ -79,6 +79,10 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avansert">
 
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
 <!ENTITY zotero.preferences.dataDir "Lagringsplass">
 <!ENTITY zotero.preferences.dataDir.useProfile "Bruk profilmappa til Firefox.">
 <!ENTITY zotero.preferences.dataDir.custom "Egendefinert:">
