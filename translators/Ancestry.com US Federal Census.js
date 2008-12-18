@@ -127,7 +127,7 @@ function scrape(doc) {
 		if(m) {
 		snapshotURL = "http://search.ancestry.com/cgi-bin/sse.dll?db="+db+"&indiv=1&pf=1&h="+m[1];
 		newItem.attachments.push({title:"Ancestry.com Snapshot", mimeType:"text/html", url:snapshotURL, snapshot:true});
-		cleanURL = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&h="+m[1];
+		cleanURL = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&fh=0&h="+m[1];
 		newItem.url = cleanURL;
 	}
 			
@@ -203,7 +203,7 @@ function doWeb(doc, url) {
 
 		//select items
 		var items = new Array();
-		var listElts = doc.evaluate('//div[@class="g_container"]/div[@class="g_panelWrap"]/div[@class="g_panelCore"]/div[@class="s_container"]/div[@class="p_rsltList"]/table/tbody/tr[@class="tblrowalt record"] | //div[@class="g_container"]/div[@class="g_panelWrap"]/div[@class="g_panelCore"]/div[@class="s_container"]/div[@class="p_rsltList"]/table/tbody/tr[@class="tblrow record"]', 
+		var listElts = doc.evaluate('//tr[@class="tblrow record keySelect"] | //tr[@class="tblrow record"] | //tr[@class="tblrowalt record"]', 
 				doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var recid;
 		var link;
@@ -215,7 +215,7 @@ function doWeb(doc, url) {
 			if(m) {
 				recid = m[1];
 			}
-			link = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&recid="+recid;
+			link = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&fh=0&h="+recid;
 			name = doc.evaluate('.//span[@class="srchHit"]', listElt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			items[link] = Zotero.Utilities.cleanString(name);
 		} 
