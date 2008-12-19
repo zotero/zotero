@@ -939,7 +939,7 @@ Zotero.CSL.prototype._processNames = function(item, element, formattedString, co
 						}
 					} else if(formattedString.format != "Sort" && 
 							name == "label" && variables[j] != "author") {
-						newString.append(this._getTerm(variables[j], (maxCreators != 1), child["@form"].toString(), child["@include-period"] == "true"), child);
+						newString.append(this._getTerm(variables[j], (maxCreators != 1 || useEtAl), child["@form"].toString(), child["@include-period"] == "true"), child);
 					}
 				}
 				success = true;
