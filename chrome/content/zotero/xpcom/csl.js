@@ -2444,16 +2444,26 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 					item.setProperty("disambiguate-add-year-suffix", "b");
 				} else {
 					var newDisambiguate = "";
-					if(lastDisambiguate.length > 1) {
-						newDisambiguate = oldLetter.substr(0, lastDisambiguate.length-1);
-					}
-					
 					var charCode = lastDisambiguate.charCodeAt(lastDisambiguate.length-1);
 					if(charCode == 122) {
-						// item is z; add another letter
-						newDisambiguate += "a";
-					} else {
+						newDisambiguate = lastDisambiguate.replace(/z+$/, "");
+						var consecutiveZs = lastDisambiguate.length-newDisambiguate.length;
+						if(newDisambiguate.length >= 1) {
+							var nonZCharCode = lastDisambiguate.charCodeAt(newDisambiguate.length-1);
+							newDisambiguate = newDisambiguate.substring(0,newDisambiguate.length-1);
+							newDisambiguate += String.fromCharCode(nonZCharCode+1);
+							for(i=0;i<consecutiveZs;i++) {
+								newDisambiguate += "a";
+							}
+						}
+						else  {
+							newDisambiguate = lastDisambiguate.replace(/z/g, "a");
+							newDisambiguate += "a";
+						}
+					}
+					else  {
 						// next lowercase letter
+						newDisambiguate = lastDisambiguate.substring(0,lastDisambiguate.length-1);
 						newDisambiguate += String.fromCharCode(charCode+1);
 					}
 					
