@@ -2512,11 +2512,14 @@ Zotero.Item.prototype.toArray = function(mode) {
 		arr[Zotero.ItemFields.getName(i)] = this._itemData[i] ? this._itemData[i] + '' : '';
 	}
 	
-	if (mode == 1 || mode == 2) {
-		if (!arr.title &&
-				(this.getType() == Zotero.ItemTypes.getID('letter') ||
-				this.getType() == Zotero.ItemTypes.getID('interview'))) {
-			arr.title = this.getDisplayTitle(mode == 2) + '';
+	if (!arr.title) {
+		switch (this.getType()) {
+			case Zotero.ItemTypes.getID('note'):
+				Zotero.debug('skipping for notes');
+				break;
+			
+			default:
+				arr.title = this.getDisplayTitle(mode == 2) + '';
 		}
 	}
 	
