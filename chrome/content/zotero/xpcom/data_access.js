@@ -2515,7 +2515,6 @@ Zotero.Item.prototype.toArray = function(mode) {
 	if (!arr.title) {
 		switch (this.getType()) {
 			case Zotero.ItemTypes.getID('note'):
-				Zotero.debug('skipping for notes');
 				break;
 			
 			default:
