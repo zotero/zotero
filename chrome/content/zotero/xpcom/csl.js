@@ -99,6 +99,7 @@ Zotero.CSL.prototype.createCitation = function(citationItems) {
 Zotero.CSL._firstNameRegexp = /^[^\s]*/;
 Zotero.CSL._textCharRegexp = /[a-zA-Z0-9]/;
 Zotero.CSL._numberRegexp = /\d+/;
+Zotero.CSL._quotedRegexp = /^".+"$/;
 Zotero.CSL.prototype.formatCitation = function(citation, format) {
 	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
 	
@@ -1824,7 +1825,14 @@ Zotero.CSL.Item.prototype.getVariable = function(variable, form) {
 	
 	for each(var zoteroField in zoteroFields) {
 		var value = this.zoteroItem.getField(zoteroField, false, true);
-		if(value != "") return value + '';
+		value = value + '';
+		if(value != "") {
+			// Strip enclosing quotes
+			if(value.match(Zotero.CSL._quotedRegexp)) {
+				value = value.substr(1, value.length-2);
+			}
+			return value;
+		}
 	}
 	
 	return "";
@@ -1904,6 +1912,12 @@ Zotero.CSL.Item.prototype.getNumericVariable = function(variable, form) {
 	var matches;
 	for each(var zoteroField in zoteroFields) {
 		var value = this.zoteroItem.getField(zoteroField, false, true);
+		
+		// Quoted strings are never numeric
+		if(value.match(Zotero.CSL._quotedRegexp)) {
+			continue;
+		}
+		
 		var matches;
 		if(value != "" && (matches = value.toString().match(Zotero.CSL._numberRegexp)) ) {
 			value = matches[0];
