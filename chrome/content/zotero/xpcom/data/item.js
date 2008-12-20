@@ -3047,7 +3047,9 @@ Zotero.Item.prototype.clone = function(includePrimary) {
 		else {
 			var i = 0;
 			for (var c in obj.creators) {
-				newItem.setCreator(i, this.getCreator(c).ref, c.creatorType);
+				newItem.setCreator(
+					i, this.getCreator(c).ref, this.getCreator(c).creatorTypeID
+				);
 				i++;
 			}
 		}
