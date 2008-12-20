@@ -1824,8 +1824,7 @@ Zotero.CSL.Item.prototype.getVariable = function(variable, form) {
 	}
 	
 	for each(var zoteroField in zoteroFields) {
-		var value = this.zoteroItem.getField(zoteroField, false, true);
-		value = value + '';
+		var value = this.zoteroItem.getField(zoteroField, false, true).toString();
 		if(value != "") {
 			// Strip enclosing quotes
 			if(value.match(Zotero.CSL._quotedRegexp)) {
@@ -1911,7 +1910,7 @@ Zotero.CSL.Item.prototype.getNumericVariable = function(variable, form) {
 	
 	var matches;
 	for each(var zoteroField in zoteroFields) {
-		var value = this.zoteroItem.getField(zoteroField, false, true);
+		var value = this.zoteroItem.getField(zoteroField, false, true).toString();
 		
 		// Quoted strings are never numeric
 		if(value.match(Zotero.CSL._quotedRegexp)) {
@@ -1919,7 +1918,7 @@ Zotero.CSL.Item.prototype.getNumericVariable = function(variable, form) {
 		}
 		
 		var matches;
-		if(value != "" && (matches = value.toString().match(Zotero.CSL._numberRegexp)) ) {
+		if(value != "" && (matches = value.match(Zotero.CSL._numberRegexp)) ) {
 			value = matches[0];
 			if (form == "ordinal") {
 				return this.makeOrdinal(value);
