@@ -79,6 +79,10 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Напредно">
 
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
 <!ENTITY zotero.preferences.dataDir "Место за складиштење">
 <!ENTITY zotero.preferences.dataDir.useProfile "Користи Firefox директоријум за профил">
 <!ENTITY zotero.preferences.dataDir.custom "Прилагођено:">

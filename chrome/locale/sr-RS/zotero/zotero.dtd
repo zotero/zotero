@@ -121,6 +121,9 @@
 <!ENTITY zotero.exportOptions.format.label "Формат:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Опције преводиоца">
 
+<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.moreEncodings.label "More Encodings">
+
 <!ENTITY zotero.citation.keepSorted.label "Држи изворе поредане">
 
 <!ENTITY zotero.citation.page "Страна">
