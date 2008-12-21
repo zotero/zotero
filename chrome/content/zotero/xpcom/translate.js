@@ -1410,10 +1410,12 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 						
 							// if snapshot is not explicitly set to false, retrieve snapshot
 							if(attachment.document) {
-								try {
-									Zotero.Attachments.importFromDocument(attachment.document, myID, attachment.title);
-								} catch(e) {
-									Zotero.debug("Translate: Error attaching document", 2);
+								if(automaticSnapshots) {
+									try {
+										Zotero.Attachments.importFromDocument(attachment.document, myID, attachment.title);
+									} catch(e) {
+										Zotero.debug("Translate: Error attaching document", 2);
+									}
 								}
 							// Save attachment if snapshot pref enabled or not HTML
 							// (in which case downloadAssociatedFiles applies)
