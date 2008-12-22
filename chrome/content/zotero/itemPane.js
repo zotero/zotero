@@ -1502,8 +1502,21 @@ var ZoteroItemPane = new function()
 	
 	
 	function getCreatorFields(row){
-		var typeID = row.getElementsByClassName('creator-type-label')[0].getAttribute('typeid');
-		var label1 = row.getElementsByClassName('creator-name-box')[0].firstChild;
+		if (row.getElementsByClassName) {
+			var typeID = row.getElementsByClassName('creator-type-label')[0].getAttribute('typeid');
+			var label1 = row.getElementsByClassName('creator-name-box')[0].firstChild;
+		}
+		// For Firefox 2 compatibility
+		else {
+			var typeID = row.getElementsByAttribute('popup', 'zotero-creator-type-menu')[0].getAttribute('typeid');
+			var hboxes = row.getElementsByTagName('hbox');
+			for each(var hbox in hboxes) {
+				if (hbox.className == 'creator-name-box') {
+					var label1 = hbox.firstChild;
+					break;
+				}
+			}
+		}
 		var label2 = label1.parentNode.lastChild;
 		
 		return {
