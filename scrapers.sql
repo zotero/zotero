@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-12-15 05:30:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-12-22 19:50:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -358,7 +358,8 @@ function doWeb(doc, url){
 	}
 }');
 
-REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b4.r1', '', '2008-12-15 00:25:00', 1, 100, 4, 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex',
+
+REPLACE INTO translators VALUES ('0dda3f89-15de-4479-987f-cc13f1ba7999', '1.0.0b4.r1', '', '2008-12-22 19:50:00', 1, 100, 4, 'Ancestry.com US Federal Census', 'Elena Razlogova', '^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -474,7 +475,7 @@ function scrape(doc) {
 		if(m) {
 		snapshotURL = "http://search.ancestry.com/cgi-bin/sse.dll?db="+db+"&indiv=1&pf=1&h="+m[1];
 		newItem.attachments.push({title:"Ancestry.com Snapshot", mimeType:"text/html", url:snapshotURL, snapshot:true});
-		cleanURL = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&h="+m[1];
+		cleanURL = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&fh=0&h="+m[1];
 		newItem.url = cleanURL;
 	}
 			
@@ -550,7 +551,7 @@ function doWeb(doc, url) {
 
 		//select items
 		var items = new Array();
-		var listElts = doc.evaluate(''//div[@class="g_container"]/div[@class="g_panelWrap"]/div[@class="g_panelCore"]/div[@class="s_container"]/div[@class="p_rsltList"]/table/tbody/tr[@class="tblrowalt record"] | //div[@class="g_container"]/div[@class="g_panelWrap"]/div[@class="g_panelCore"]/div[@class="s_container"]/div[@class="p_rsltList"]/table/tbody/tr[@class="tblrow record"]'', 
+		var listElts = doc.evaluate(''//tr[@class="tblrow record keySelect"] | //tr[@class="tblrow record"] | //tr[@class="tblrowalt record"]'', 
 				doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var recid;
 		var link;
@@ -562,7 +563,7 @@ function doWeb(doc, url) {
 			if(m) {
 				recid = m[1];
 			}
-			link = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&recid="+recid;
+			link = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&fh=0&h="+recid;
 			name = doc.evaluate(''.//span[@class="srchHit"]'', listElt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			items[link] = Zotero.Utilities.cleanString(name);
 		} 
@@ -22736,7 +22737,8 @@ REPLACE INTO translators VALUES ('0f9fc2fc-306e-5204-1117-25bca009dffc', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b4.r1', '', '2008-08-21 15:45:00', '1', '100', '4', 'Project MUSE', 'Simon Kornblith', 'https?://[^/]*muse\.jhu\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/results)', 
+
+REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b4.r1', '', '2008-12-22 19:50:00', 1, 100, 4, 'Project MUSE', 'Simon Kornblith', 'https?://[^/]*muse\.jhu\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\.html|search/results)',
 'function detectWeb(doc, url) {
 	var searchRe = new RegExp("^https?://[^/]+/search/results");
 	if(searchRe.test(url)) {
@@ -22755,8 +22757,8 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 	if(detectWeb(doc, url) == "multiple") {
 		var items = new Array();
 		var attachments = new Array();
-		var pdfRe = /\.pdf$/i;
-		var htmlRe = /\.html$/i;
+		var pdfRe = /PDF/;
+		var htmlRe = /HTML/;
 		
 		var tableRows = doc.evaluate(''//div[@id="advancedsearch"]/save_form/table//tr'',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -22774,11 +22776,12 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 				// get attachments
 				attachments[input.value] = new Array();
 				for(var i=0; i<aTags.length; i++) {
-					if(pdfRe.test(aTags[i].href)) {
+					var linkText = aTags[i].textContent;
+					if(pdfRe.test(linkText)) {
 						attachments[input.value].push({url:aTags[i].href,
 													  title:"Project MUSE Full Text PDF",
 													  mimeType:"application/pdf"});
-					} else if(htmlRe.test(aTags[i].href)) {
+					} else if(htmlRe.test(linkText)) {
 						attachments[input.value].push({url:aTags[i].href,
 													  title:"Project MUSE Snapshot",
 													  mimeType:"text/html"});
@@ -22822,7 +22825,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 		var m = hostRe.exec(url);
 		var host = m[1];
 
-		var getPDF = doc.evaluate(''//a[text() = "[Access article in PDF]"]'', doc,
+		var getPDF = doc.evaluate(''//a[text() = "PDF Version"]'', doc,
 		                          nsResolver, XPathResult.ANY_TYPE, null).iterateNext();		
 		
 		var newUrl = url.replace(host, host+"/metadata/zotero");
@@ -22850,6 +22853,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 		});
 	}
 }');
+
 
 REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-12-15 00:25:00', 1, 100, 4, 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)',
 'function detectWeb(doc, url) {
@@ -26610,7 +26614,8 @@ function doWeb(doc, url) {
 	});
 }');
 
-REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b3.r1', '', '2008-04-28 17:50:00', '1', '100', '4', 'University of Chicago', 'Sean Takats', 'https?://[^/]*journals\.uchicago\.edu[^/]*/(?:doi/abs|doi/full|toc)', 
+
+REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b3.r1', '', '2008-12-22 19:50:00', 1, 100, 4, 'University of Chicago', 'Sean Takats', 'https?://[^/]*journals\.uchicago\.edu[^/]*/(?:doi/abs|doi/full|toc)',
 'function detectWeb(doc, url) {
 	if(url.indexOf("toc") != -1) {
 		return "multiple";
@@ -26624,6 +26629,13 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 	
+	var proxyURL ="";
+	var proxyRe = /http:\/\/([^\/]*)/;
+	var m = proxyRe.exec(doc.location.href);
+	if(m) {
+		proxyURL = m[1];
+	}
+
 	var post = "";
 	
 	var fulltext = new Object();
@@ -26690,8 +26702,8 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			item.attachments = [
-				{url:item.url, title:"University of Chicago Journals Snapshot", mimeType:"text/html"},
-				{url:item.url.replace("/doi/abs", "/doi/pdf"), title:"University of Chicago Full Text PDF", mimeType:"application/pdf"}
+				{url:item.url.replace("www.journals.uchicago.edu", proxyURL), title:"University of Chicago Journals Snapshot", mimeType:"text/html"},
+				{url:item.url.replace("www.journals.uchicago.edu", proxyURL).replace("/doi/abs", "/doi/pdf"), title:"University of Chicago Full Text PDF", mimeType:"application/pdf"}
 			];
 			if (item.notes[0][''note'']) item.DOI = Zotero.Utilities.trimInternal(item.notes[0][''note''].substr(4));
 			item.notes = new Array();
@@ -26709,6 +26721,7 @@ REPLACE INTO translators VALUES ('df966c80-c199-4329-ab02-fa410c8eb6dc', '1.0.0b
 		
 	Zotero.wait();
 }');
+
 
 REPLACE INTO translators VALUES ('f8765470-5ace-4a31-b4bd-4327b960ccd', '1.0.0b3.r1', '', '2008-04-12 18:40:00', '1', '100', '4', 'SpringerLink', 'Simon Kornblith and Michael Berkowitz', 'https?://(www\.)*springerlink\.com|springerlink.metapress.com[^/]*/content/', 
 'function detectWeb(doc, url) {
