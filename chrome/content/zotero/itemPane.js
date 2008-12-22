@@ -1142,6 +1142,10 @@ var ZoteroItemPane = new function()
 			var [field, creatorIndex, creatorField] =
 				textbox.getAttribute('fieldname').split('-');
 			
+			// Stay focused
+			_lastTabIndex = parseInt(textbox.getAttribute('ztabindex')) - 1;
+			_tabDirection = 1;
+			
 			var creator = Zotero.Creators.get(creatorID);
 			
 			var otherField = creatorField=='lastName' ? 'firstName' : 'lastName';
