@@ -254,13 +254,6 @@ var ZoteroItemPane = new function() {
 		{
 			_relatedBox.item = _itemBeingEdited;
 		}
-		
-		
-		// Move to next or previous field if (shift-)tab was pressed
-		if (focusMode && _lastTabIndex && _tabDirection)
-		{
-			_focusNextField(focusMode, focusBox, _lastTabIndex, _tabDirection==-1);
-		}
 	}
 	
 	
