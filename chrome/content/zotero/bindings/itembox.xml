@@ -504,8 +504,12 @@
 					}
 					
 					
-					var focusMode = 'info';
-					var focusBox = this._dynamicFields;
+					// Move to next or previous field if (shift-)tab was pressed
+					if (this._lastTabIndex && this._tabDirection)
+					{
+					this._focusNextField('info', this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
+					}
+
 				]]>
 				</body>
 			</method>
@@ -1285,6 +1289,10 @@
 						
 						var [field, creatorIndex, creatorField] =
 							textbox.getAttribute('fieldname').split('-');
+						
+						// Stay focused
+						this._lastTabIndex = parseInt(textbox.getAttribute('ztabindex')) - 1;
+						this._tabDirection = 1;
 						
 						var creator = Zotero.Creators.get(creatorID);
 						
