@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-08-21 15:45:00"
+	"lastUpdated":"2008-12-22 19:36:35"
 }
 
 function detectWeb(doc, url) {
@@ -30,8 +30,8 @@ function doWeb(doc, url) {
 	if(detectWeb(doc, url) == "multiple") {
 		var items = new Array();
 		var attachments = new Array();
-		var pdfRe = /\.pdf$/i;
-		var htmlRe = /\.html$/i;
+		var pdfRe = /PDF/;
+		var htmlRe = /HTML/;
 		
 		var tableRows = doc.evaluate('//div[@id="advancedsearch"]/save_form/table//tr',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -49,11 +49,12 @@ function doWeb(doc, url) {
 				// get attachments
 				attachments[input.value] = new Array();
 				for(var i=0; i<aTags.length; i++) {
-					if(pdfRe.test(aTags[i].href)) {
+					var linkText = aTags[i].textContent;
+					if(pdfRe.test(linkText)) {
 						attachments[input.value].push({url:aTags[i].href,
 													  title:"Project MUSE Full Text PDF",
 													  mimeType:"application/pdf"});
-					} else if(htmlRe.test(aTags[i].href)) {
+					} else if(htmlRe.test(linkText)) {
 						attachments[input.value].push({url:aTags[i].href,
 													  title:"Project MUSE Snapshot",
 													  mimeType:"text/html"});
@@ -97,7 +98,7 @@ function doWeb(doc, url) {
 		var m = hostRe.exec(url);
 		var host = m[1];
 
-		var getPDF = doc.evaluate('//a[text() = "[Access article in PDF]"]', doc,
+		var getPDF = doc.evaluate('//a[text() = "PDF Version"]', doc,
 		                          nsResolver, XPathResult.ANY_TYPE, null).iterateNext();		
 		
 		var newUrl = url.replace(host, host+"/metadata/zotero");
