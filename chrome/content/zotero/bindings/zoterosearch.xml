@@ -786,6 +786,7 @@
 										var textbox = document.getAnonymousNodes(this)[0];
 										textbox.setAttribute('type', 'autocomplete');
 										textbox.setAttribute('autocompletesearch', 'zotero');
+										textbox.setAttribute('timeout', '250');
 										
 										if (condition=='creator')
 										{
