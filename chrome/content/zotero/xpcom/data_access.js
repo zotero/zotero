@@ -899,14 +899,11 @@ Zotero.Item.prototype.save = function(){
 								Zotero.DB.query(sql, {int: valueID});
 							}
 							else {
-								// DISABLED
-								//if (Zotero.ItemFields.isInteger(fieldID)) {
-								
 								// If integer not beginning with 0, bind as integer
 								//
 								// If this is changed, search.js also needs to
 								// change
-								if (value.match(/^[1-9]+[0-9]*$/)) {
+								if (value.toString().match(/^[1-9]+[0-9]*$/)) {
 									// Store as 32-bit signed integer
 									if (value <= 2147483647) {
 										insertStatement.
