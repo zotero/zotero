@@ -195,6 +195,12 @@ Zotero.Tags = new function() {
 	}
 	
 	
+	/**
+	 * Get the items associated with the given saved tag
+	 *
+	 * @param	{Integer}	tagID
+	 * @return	{Integer[]|FALSE}
+	 */
 	function getTagItems(tagID) {
 		var sql = "SELECT itemID FROM itemTags WHERE tagID=?";
 		return Zotero.DB.columnQuery(sql, tagID);
@@ -266,7 +272,7 @@ Zotero.Tags = new function() {
 			Zotero.DB.query(sql, [existingTagID, tagID]);
 			
 			// Manual purge of old tag
-			var sql = "DELETE FROM tags WHERE tagID=?";
+			sql = "DELETE FROM tags WHERE tagID=?";
 			Zotero.DB.query(sql, tagID);
 			if (_tags[oldType]) {
 				delete _tags[oldType]['_' + oldName];
@@ -282,13 +288,24 @@ Zotero.Tags = new function() {
 			Zotero.Notifier.trigger('remove', 'item-tag', itemTags);
 			
 			// And send tag add for new tag (except for those that already had it)
+			var changed = false;
 			var itemTags = [];
 			for (var i in itemIDs) {
-				if (existingItemIDs.indexOf(itemIDs[i]) == -1) {
+				if (!existingItemIDs || existingItemIDs.indexOf(itemIDs[i]) == -1) {
 					itemTags.push(itemIDs[i] + '-' + existingTagID);
+					changed = true;
 				}
 			}
-			Zotero.Notifier.trigger('add', 'item-tag', itemTags);
+			
+			if (changed) {
+				Zotero.Notifier.trigger('add', 'item-tag', itemTags);
+				
+				// If any items were added to the existing tag, mark it as updated
+				sql = "UPDATE tags SET dateModified=CURRENT_TIMESTAMP WHERE tagID=?";
+				Zotero.DB.query(sql, existingTagID);
+				Zotero.Notifier.trigger('modify', 'tag', tagID);
+			}
+			
 			// TODO: notify linked items?
 			//Zotero.Notifier.trigger('modify', 'item', itemIDs);
 			
