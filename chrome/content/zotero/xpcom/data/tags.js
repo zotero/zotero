@@ -397,6 +397,14 @@ Zotero.Tags = new function() {
 	
 	
 	/**
+	 * Internal reload hook to clear cache
+	 */
+	this._reload = function (ids) {
+		_tags = {};
+	}
+	
+	
+	/**
 	 * Unload tags from caches
 	 *
 	 * @param	int|array	ids	 	One or more tagIDs
@@ -432,6 +440,7 @@ Zotero.Tags = new function() {
 			sql += " AND tagID IN (" + Zotero.join(arguments[0], ",") + ")";
 		}
 		var rows = Zotero.DB.query(sql);
+		
 		var ids = [];
 		for each(var row in rows) {
 			var id = row.tagID;
