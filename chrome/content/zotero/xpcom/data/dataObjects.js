@@ -104,6 +104,11 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 			this._objectCache[id] = store[id];
 		}
 		
+		// If there's an internal reload hook, call it
+		if (this._reload) {
+			this._reload(ids)
+		}
+		
 		// Reload data
 		this._load(ids);
 		
