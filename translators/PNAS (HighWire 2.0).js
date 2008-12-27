@@ -1,15 +1,17 @@
 {
 	"translatorID":"8c1f42d5-02fa-437b-b2b2-73afc768eb07",
 	"translatorType":4,
-	"label":"PNAS (HighWire 2.0)",
+	"label":"PNAS",
 	"creator":"Matt Burton",
 	"target":"http://www\\.pnas\\.org/(content|search|cgi/collection/.+)",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-12-26 12:35:00"
+	"lastUpdated":"2008-12-27 01:25:00"
 }
+
+// This translator is for HighWire 2.0
 
 function detectWeb(doc, url) {
 	if (url.match("search") || url.match("content/by/section") || doc.title.match("Table of Contents") || doc.title.match("Early Edition") || url.match("cgi/collection/.+")) {
