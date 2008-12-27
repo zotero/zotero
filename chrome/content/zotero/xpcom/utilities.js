@@ -292,27 +292,33 @@ Zotero.Utilities.prototype.isInt = function(x) {
 
 
 /**
- * Compares an array with another (comparator) and returns an array with
- *	the values from comparator that don't exist in vector
+ * Compares an array with another and returns an array with
+ *	the values from array2 that don't exist in array1
  *
- * Code by Carlos R. L. Rodrigues
- * From http://jsfromhell.com/array/diff [rev. #1]
- *
- * @param	{Array}		v			Array that will be checked
- * @param	{Array}		c			Array that will be compared
- * @param	{Boolean}	useIndex		If true, returns an array containing just
+ * @param	{Array}		array1			Array that will be checked
+ * @param	{Array}		array2			Array that will be compared
+ * @param	{Boolean}	useIndex		If true, return an array containing just
  *										the index of the comparator's elements;
- *										otherwise returns the values
+ *										otherwise return the values
  */
-Zotero.Utilities.prototype.arrayDiff = function(v, c, m) {
-    var d = [], e = -1, h, i, j, k;
-    for(i = c.length, k = v.length; i--;){
-        for(j = k; j && (h = c[i] !== v[--j]););
-        h && (d[++e] = m ? i : c[i]);
-    }
-    return d;
-};
-
+Zotero.Utilities.prototype.arrayDiff = function(array1, array2, useIndex) {
+	if (array1.constructor.name != 'Array') {
+		throw ("array1 is not an array in Zotero.Utilities.arrayDiff() (" + array1 + ")");
+	}
+	if (array2.constructor.name != 'Array') {
+		throw ("array2 is not an array in Zotero.Utilities.arrayDiff() (" + array2 + ")");
+	}
+	
+	var val, pos, vals = [];
+	for (var i=0; i<array2.length; i++) {
+		val = array2[i];
+		pos = array1.indexOf(val);
+		if (pos == -1) {
+			vals.push(useIndex ? pos : val);
+		}
+	}
+	return vals;
+}
 
 
 /**
