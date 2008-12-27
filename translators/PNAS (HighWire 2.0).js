@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-12-27 01:25:00"
+	"lastUpdated":"2008-12-27 20:50:00"
 }
 
 // This translator is for HighWire 2.0
