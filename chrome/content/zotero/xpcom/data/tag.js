@@ -143,8 +143,8 @@ Zotero.Tag.prototype.loadFromRow = function (row) {
 /**
  * Returns items linked to this tag
  *
- * @param	bool		asIDs	Return as itemIDs
- * @return	array				Array of Zotero.Item instances or itemIDs,
+ * @param	{Boolean}	asIDs	Return as itemIDs
+ * @return	{Array}				Array of Zotero.Item instances or itemIDs,
  *									or FALSE if none
  */
 Zotero.Tag.prototype.getLinkedItems = function (asIDs) {
@@ -211,7 +211,7 @@ Zotero.Tag.prototype.removeItem = function (itemID) {
 }
 
 
-Zotero.Tag.prototype.save = function () {
+Zotero.Tag.prototype.save = function (full) {
 	// Default to manual tag
 	if (!this.type) {
 		this.type = 0;
@@ -307,7 +307,7 @@ Zotero.Tag.prototype.save = function () {
 		
 		
 		// Linked items
-		if (this._changed.linkedItems) {
+		if (full || this._changed.linkedItems) {
 			var removed = [];
 			var newids = [];
 			var currentIDs = this.getLinkedItems(true);
@@ -315,19 +315,31 @@ Zotero.Tag.prototype.save = function () {
 				currentIDs = [];
 			}
 			
-			if (this._previousData.linkedItems) {
-				for each(var id in this._previousData.linkedItems) {
-					if (currentIDs.indexOf(id) == -1) {
-						removed.push(id);
-					}
+			// Use the database for comparison instead of relying on the cache
+			// This is necessary for a syncing edge case (described in sync.js).
+			if (full) {
+				var sql = "SELECT itemID FROM itemTags WHERE tagID=?";
+				var dbItemIDs = Zotero.DB.columnQuery(sql, tagID);
+				if (dbItemIDs) {
+					removed = Zotero.Utilities.prototype.arrayDiff(currentIDs, dbItemIDs);
+					newids = Zotero.Utilities.prototype.arrayDiff(dbItemIDs, currentIDs);
+				}
+				else {
+					newids = currentIDs;
 				}
 			}
-			for each(var id in currentIDs) {
-				if (this._previousData.linkedItems &&
-						this._previousData.linkedItems.indexOf(id) != -1) {
-					continue;
+			else {
+				if (this._previousData.linkedItems) {
+					removed = Zotero.Utilities.prototype.arrayDiff(
+						currentIDs, this._previousData.linkedItems
+					);
+					newids = Zotero.Utilities.prototype.arrayDiff(
+						this._previousData.linkedItems, currentIDs
+					);
 				}
-				newids.push(id);
+				else {
+					newids = currentIDs;
+				}
 			}
 			
 			if (removed.length) {
@@ -414,8 +426,17 @@ Zotero.Tag.prototype.diff = function (tag, includeMatches, ignoreOnlyDateModifie
 	var d2 = Zotero.Utilities.prototype.arrayDiff(
 		otherData.linkedItems, thisData.linkedItems
 	);
-	numDiffs += d1.length;
-	numDiffs += d2.length;
+	numDiffs += d1.length + d2.length;
+	
+	if (d1.length || d2.length) {
+		numDiffs += d1.length + d2.length;
+		diff[0].linkedItems = d1;
+		diff[1].linkedItems = d2;
+	}
+	else {
+		diff[0].linkedItems = [];
+		diff[1].linkedItems = [];
+	}
 	
 	// DEBUG: ignoreOnlyDateModified wouldn't work if includeMatches was set?
 	if (numDiffs == 0 ||
@@ -429,6 +450,8 @@ Zotero.Tag.prototype.diff = function (tag, includeMatches, ignoreOnlyDateModifie
 
 
 Zotero.Tag.prototype.serialize = function () {
+	var linkedItems = this.getLinkedItems(true);
+	
 	var obj = {
 		primary: {
 			tagID: this.id,
@@ -439,7 +462,7 @@ Zotero.Tag.prototype.serialize = function () {
 			name: this.name,
 			type: this.type,
 		},
-		linkedItems: this.getLinkedItems(true),
+		linkedItems: linkedItems ? linkedItems : []
 	};
 	return obj;
 }

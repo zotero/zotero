@@ -398,7 +398,7 @@ Zotero.Collection.prototype.save = function () {
 				currentIDs = [];
 			}
 			
-			if (this._previousData.childCollections) {
+			if (this._previousData) {
 				for each(var id in this._previousData.childCollections) {
 					if (currentIDs.indexOf(id) == -1) {
 						removed.push(id);
@@ -406,7 +406,7 @@ Zotero.Collection.prototype.save = function () {
 				}
 			}
 			for each(var id in currentIDs) {
-				if (this._previousData.childCollections &&
+				if (this._previousData &&
 						this._previousData.childCollections.indexOf(id) != -1) {
 					continue;
 				}
@@ -442,7 +442,7 @@ Zotero.Collection.prototype.save = function () {
 				currentIDs = [];
 			}
 			
-			if (this._previousData.childItems) {
+			if (this._previousData) {
 				for each(var id in this._previousData.childItems) {
 					if (currentIDs.indexOf(id) == -1) {
 						removed.push(id);
@@ -450,7 +450,7 @@ Zotero.Collection.prototype.save = function () {
 				}
 			}
 			for each(var id in currentIDs) {
-				if (this._previousData.childItems &&
+				if (this._previousData &&
 						this._previousData.childItems.indexOf(id) != -1) {
 					continue;
 				}
@@ -801,6 +801,8 @@ Zotero.Collection.prototype.toArray = function() {
 
 
 Zotero.Collection.prototype.serialize = function(nested) {
+	var childCollections = this.getChildCollections(true);
+	var childItems = this.getChildItems(true);
 	var obj = {
 		primary: {
 			collectionID: this.id,
@@ -811,8 +813,8 @@ Zotero.Collection.prototype.serialize = function(nested) {
 			name: this.name,
 			parent: this.parent,
 		},
-		childCollections: this.getChildCollections(true),
-		childItems: this.getChildItems(true),
+		childCollections: childCollections ? childCollections : [],
+		childItems: childItems ? childItems : [],
 		descendents: this.id ? this.getDescendents(nested) : []
 	};
 	return obj;

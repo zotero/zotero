@@ -2144,7 +2144,15 @@ Zotero.Schema = new function(){
 					}
 				}
 				
-				//
+				// // 1.5 Sync Preview 3.6
+				if (i==47) {
+					Zotero.DB.query("ALTER TABLE syncDeleteLog RENAME TO syncDeleteLogOld");
+					Zotero.DB.query("DROP INDEX syncDeleteLog_timestamp");
+					Zotero.DB.query("CREATE TABLE syncDeleteLog (\n    syncObjectTypeID INT NOT NULL,\n    key TEXT NOT NULL UNIQUE,\n    timestamp INT NOT NULL,\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)\n);");
+					Zotero.DB.query("CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp);");
+					Zotero.DB.query("INSERT INTO syncDeleteLog SELECT syncObjectTypeID, key, timestamp FROM syncDeleteLogOld");
+					Zotero.DB.query("DROP TABLE syncDeleteLogOld");
+				}
 			}
 			
 			_updateDBVersion('userdata', toVersion);

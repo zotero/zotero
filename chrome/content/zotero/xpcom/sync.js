@@ -136,10 +136,10 @@ Zotero.Sync = new function() {
 	
 	/**
 	 * @param	object	lastSyncDate	JS Date object
-	 * @return	mixed	Returns object with deleted ids
+	 * @return	mixed
 	 *		{
-	 *			items: [ { id: 123, key: ABCD1234 }, ... ]
-	 *			creators: [ { id: 123, key: ABCD1234 }, ... ],
+	 *			items: [ 'ABCD1234', 'BCDE2345', ... ]
+	 *			creators: [ 'ABCD1234', 'BCDE2345', ... ],
 	 *			...
 	 *		}
 	 * or FALSE if none or -1 if last sync time is before start of log
@@ -162,7 +162,7 @@ Zotero.Sync = new function() {
 		}
 		
 		var param = false;
-		var sql = "SELECT syncObjectTypeID, objectID, key FROM syncDeleteLog";
+		var sql = "SELECT syncObjectTypeID, key FROM syncDeleteLog";
 		if (lastSyncDate) {
 			param = Zotero.Date.toUnixTimestamp(lastSyncDate);
 			sql += " WHERE timestamp>?";
@@ -174,20 +174,17 @@ Zotero.Sync = new function() {
 			return false;
 		}
 		
-		var deletedIDs = {};
+		var deletedKeys = {};
 		for each(var syncObject in this.syncObjects) {
-			deletedIDs[syncObject.plural.toLowerCase()] = [];
+			deletedKeys[syncObject.plural.toLowerCase()] = [];
 		}
 		
 		for each(var row in rows) {
 			var type = this.getObjectTypeName(row.syncObjectTypeID);
 			type = this.syncObjects[type].plural.toLowerCase()
-			deletedIDs[type].push({
-				id: row.objectID,
-				key: row.key
-			});
+			deletedKeys[type].push(row.key);
 		}
-		return deletedIDs;
+		return deletedKeys;
 	}
 	
 	
@@ -297,7 +294,7 @@ Zotero.Sync.EventListener = new function () {
 		Zotero.DB.beginTransaction();
 		
 		if (event == 'delete') {
-			var sql = "INSERT INTO syncDeleteLog VALUES (?, ?, ?, ?)";
+			var sql = "INSERT INTO syncDeleteLog VALUES (?, ?, ?)";
 			var syncStatement = Zotero.DB.getStatement(sql);
 			
 			if (isItem && Zotero.Sync.Storage.active) {
@@ -326,9 +323,8 @@ Zotero.Sync.EventListener = new function () {
 				}
 				
 				syncStatement.bindInt32Parameter(0, objectTypeID);
-				syncStatement.bindInt32Parameter(1, ids[i]);
-				syncStatement.bindStringParameter(2, key);
-				syncStatement.bindInt32Parameter(3, ts);
+				syncStatement.bindStringParameter(1, key);
+				syncStatement.bindInt32Parameter(2, ts);
 				
 				if (storageEnabled &&
 						oldItem.primary.itemType == 'attachment' &&
@@ -652,7 +648,7 @@ Zotero.Sync.Server = new function () {
 	});
 	
 	this.nextLocalSyncDate = false;
-	this.apiVersion = 2;
+	this.apiVersion = 3;
 	
 	default xml namespace = '';
 	
@@ -715,7 +711,7 @@ Zotero.Sync.Server = new function () {
 			}
 			
 			
-			Zotero.debug('Got session ID ' + _sessionID + ' from server');
+			//Zotero.debug('Got session ID ' + _sessionID + ' from server');
 			
 			if (callback) {
 				callback();
@@ -1318,10 +1314,10 @@ Zotero.BufferedInputListener.prototype = {
  *	},
  *	deleted: {
  *		items: [
- * 			{ id: 1234, key: ABCDEFGHIJKMNPQRSTUVWXYZ23456789 }, ...
+ * 			'ABCD1234', 'BCDE2345', ...
  *		],
  *		creators: [
- * 			{ id: 1234, key: ABCDEFGHIJKMNPQRSTUVWXYZ23456789 }, ...
+ * 			'ABCD1234', 'BCDE2345', ...
  *		]
  * 	}
  * };
@@ -1370,26 +1366,21 @@ Zotero.Sync.Server.Session.prototype.removeFromUpdated = function (syncObjectTyp
 }
 
 
-Zotero.Sync.Server.Session.prototype.addToDeleted = function (syncObjectTypeName, id, key) {
+Zotero.Sync.Server.Session.prototype.addToDeleted = function (syncObjectTypeName, key) {
 	var pluralType = Zotero.Sync.syncObjects[syncObjectTypeName].plural.toLowerCase();
 	var deleted = this.uploadIDs.deleted[pluralType];
-	
-	// DEBUG: inefficient
-	for each(var pair in deleted) {
-		if (pair.id == id) {
-			return;
-		}
+	if (deleted.indexOf(key) != -1) {
+		return;
 	}
-	deleted.push({ id: id, key: key});
+	deleted.push(key);
 }
 
 
-Zotero.Sync.Server.Session.prototype.removeFromDeleted = function (syncObjectTypeName, id, key) {
+Zotero.Sync.Server.Session.prototype.removeFromDeleted = function (syncObjectTypeName, key) {
 	var pluralType = Zotero.Sync.syncObjects[syncObjectTypeName].plural.toLowerCase();
 	var deleted = this.uploadIDs.deleted[pluralType];
-	
 	for (var i=0; i<deleted.length; i++) {
-		if (deleted[i].id == id && deleted[i].key == key) {
+		if (deleted[i] == key) {
 			deleted.splice(i, 1);
 			i--;
 		}
@@ -1488,16 +1479,16 @@ Zotero.Sync.Server.Data = new function() {
 	 * Pull out collections from delete queue in XML
 	 *
 	 * @param	{XML}			xml
-	 * @return	{Integer[]}					Array of collection ids
+	 * @return	{String[]}					Array of collection keys
 	 */
-	function _getDeletedCollections(xml) {
-		var ids = [];
+	function _getDeletedCollectionKeys(xml) {
+		var keys = [];
 		if (xml.deleted && xml.deleted.collections) {
 			for each(var xmlNode in xml.deleted.collections.collection) {
-				ids.push(parseInt(xmlNode.@id));
+				keys.push(xmlNode.@key.toString());
 			}
 		}
-		return ids;
+		return keys;
 	}
 	
 	
@@ -1510,7 +1501,7 @@ Zotero.Sync.Server.Data = new function() {
 		Zotero.DB.beginTransaction();
 		
 		xml = _preprocessUpdatedXML(xml);
-		var deletedCollections = _getDeletedCollections(xml);
+		var deletedCollectionKeys = _getDeletedCollectionKeys(xml);
 		
 		var remoteCreatorStore = {};
 		var relatedItemsStore = {};
@@ -1644,85 +1635,18 @@ Zotero.Sync.Server.Data = new function() {
 										break;
 									
 									case 'collection':
-										var diff = obj.diff(remoteObj, false, true);
-										if (diff) {
-											var fieldsChanged = false;
-											for (var field in diff[0].primary) {
-												if (field != 'dateModified') {
-													fieldsChanged = true;
-													break;
-												}
-											}
-											for (var field in diff[0].fields) {
-												fieldsChanged = true;
-												break;
-											}
-											
-											if (fieldsChanged) {
-												// Check for collection hierarchy change
-												if (diff[0].childCollections.length) {
-													// TODO
-												}
-												if (diff[1].childCollections.length) {
-													// TODO
-												}
-												// Check for item membership change
-												if (diff[0].childItems.length) {
-													var childItems = remoteObj.getChildItems(true);
-													remoteObj.childItems = childItems.concat(diff[0].childItems);
-												}
-												if (diff[1].childItems.length) {
-													var childItems = obj.getChildItems(true);
-													obj.childItems = childItems.concat(diff[1].childItems);
-												}
-												
-												// TODO: log
-												
-												// TEMP: uncomment once supported
-												//reconcile = true;
-											}
-											// No CR necessary
-											else {
-												var save = false;
-												// Check for child collections in the remote object
-												// that aren't in the local one
-												if (diff[1].childCollections.length) {
-													// TODO: log
-													// TODO: add
-													save = true;
-												}
-												// Check for items in the remote object
-												// that aren't in the local one
-												if (diff[1].childItems.length) {
-													var childItems = obj.getChildItems(true);
-													obj.childItems = childItems.concat(diff[1].childItems);
-													
-													var msg = _logCollectionItemMerge(obj.name, diff[1].childItems);
-													// TODO: log rather than alert
-													alert(msg);
-													
-													save = true;
-												}
-												
-												if (save) {
-													obj.save();
-												}
-												continue;
-											}
-										}
-										else {
+										var changed = _mergeCollection(obj, remoteObj);
+										if (!changed) {
 											syncSession.removeFromUpdated(type, obj.id);
-											continue;
 										}
-										break;
-										
+										continue;
+									
 									case 'tag':
-										var diff = obj.diff(remoteObj, false, true);
-										if (!diff) {
+										var changed = _mergeTag(obj, remoteObj);
+										if (!changed) {
 											syncSession.removeFromUpdated(type, obj.id);
-											continue;
 										}
-										break;
+										continue;
 								}
 								
 								if (!reconcile) {
@@ -1775,13 +1699,6 @@ Zotero.Sync.Server.Data = new function() {
 							syncSession.uploadIDs.updated[types][index] = newID;
 						}
 						
-						// Update id in local deletions array
-						for (var i in syncSession.uploadIDs.deleted[types]) {
-							if (syncSession.uploadIDs.deleted[types][i].id == oldID) {
-								syncSession.uploadIDs.deleted[types][i] = newID;
-							}
-						}
-						
 						// Add items linked to creators to updated array,
 						// since their timestamps will be set to the
 						// transaction timestamp
@@ -1808,21 +1725,35 @@ Zotero.Sync.Server.Data = new function() {
 				else {
 					isNewObject = true;
 					
+					Zotero.debug(syncSession.uploadIDs.deleted);
+					
 					// Check if object has been deleted locally
-					for each(var pair in syncSession.uploadIDs.deleted[types]) {
-						if (pair.id != parseInt(xmlNode.@id) ||
-								pair.key != xmlNode.@key.toString()) {
+					for each(var key in syncSession.uploadIDs.deleted[types]) {
+						if (key != xmlNode.@key.toString()) {
 							continue;
 						}
 						
 						// TODO: non-merged items
 						
-						if (type != 'item') {
-							alert('Delete reconciliation unimplemented for ' + types);
-							throw ('Delete reconciliation unimplemented for ' + types);
+						switch (type) {
+							case 'item':
+								localDelete = true;
+								break;
+							
+							// Auto-restore locally deleted tags that have
+							// changed remotely
+							case 'tag':
+								syncSession.removeFromDeleted(type, key);
+								var msg = _generateAutoChangeMessage(
+									type, null, xmlNode.@name.toString()
+								);
+								alert(msg);
+								continue;
+							
+							default:
+								alert('Delete reconciliation unimplemented for ' + types);
+								throw ('Delete reconciliation unimplemented for ' + types);	
 						}
-						
-						localDelete = true;
 					}
 					
 					// If key already exists on a different item, change local key
@@ -1858,11 +1789,17 @@ Zotero.Sync.Server.Data = new function() {
 									? parseInt(xmlNode.@type) : 0;
 					var linkedItems = _deleteConflictingTag(syncSession, tagName, tagType);
 					if (linkedItems) {
-						obj.dateModified = Zotero.DB.transactionDateTime;
+						var mod = false;
 						for each(var id in linkedItems) {
-							obj.addItem(id);
+							var added = obj.addItem(id);
+							if (added) {
+								mod = true;
+							}
 						}
-						syncSession.addToUpdated('tag', parseInt(xmlNode.@id));
+						if (mod) {
+							obj.dateModified = Zotero.DB.transactionDateTime;
+							syncSession.addToUpdated('tag', parseInt(xmlNode.@id));
+						}
 					}
 				}
 				
@@ -1889,11 +1826,7 @@ Zotero.Sync.Server.Data = new function() {
 					if (obj.isRegularItem()) {
 						var creators = obj.getCreators();
 						for each(var creator in creators) {
-							syncSession.removeFromDeleted(
-								'creator',
-								creator.ref.id,
-								creator.ref.key
-							);
+							syncSession.removeFromDeleted('creator', creator.ref.key);
 						}
 					}
 					else if (obj.isAttachment() &&
@@ -1925,10 +1858,14 @@ Zotero.Sync.Server.Data = new function() {
 				Zotero.debug("Processing remotely deleted " + types);
 				
 				for each(var xmlNode in xml.deleted[types][type]) {
-					var id = parseInt(xmlNode.@id);
-					var obj = Zotero[Types].get(id);
+					var key = xmlNode.@key.toString();
+					var obj = Zotero[Types].getByKey(key);
 					// Object can't be found
-					if (!obj || obj.key != xmlNode.@key) {
+					if (!obj) {
+						// Since it's already deleted remotely, don't include
+						// the object in the deleted array if something else
+						// caused its deletion during the sync
+						syncSession.removeFromDeleted(type, xmlNode.@key.toString());
 						continue;
 					}
 					
@@ -1940,7 +1877,7 @@ Zotero.Sync.Server.Data = new function() {
 					}
 					// Local object hasn't been modified -- delete
 					else {
-						toDelete.push(id);
+						toDelete.push(obj.id);
 					}
 				}
 			}
@@ -1995,7 +1932,20 @@ Zotero.Sync.Server.Data = new function() {
 				}
 			}
 			for each(var obj in toSave) {
-				obj.save();
+				// Use a special saving mode for tags to avoid an issue that
+				// occurs if a tag has changed names remotely but another tag
+				// conflicts with the local version after the first tag has been
+				// updated in memory, causing a deletion of the local tag.
+				// Using the normal save mode, when the first remote tag then
+				// goes to save, the linked items aren't saved, since as far
+				// as the in-memory object is concerned, they haven't changed,
+				// even though they've been deleted from the DB.
+				//
+				// To replicate, add an item, add a tag, sync both sides,
+				// rename the tag, add a new one with the old name, and sync.
+				var full = type == 'tag';
+				
+				obj.save(full);
 			}
 			
 			// Add back related items (which now exist)
@@ -2012,7 +1962,7 @@ Zotero.Sync.Server.Data = new function() {
 			// Add back subcollections
 			else if (type == 'collection') {
 				for each(var collection in collections) {
-					if (collection.childCollections) {
+					if (collection.childCollections.length) {
 						collection.obj.childCollections = collection.childCollections;
 						collection.obj.save();
 					}
@@ -2042,8 +1992,8 @@ Zotero.Sync.Server.Data = new function() {
 					// collections so that any deleted items within them don't
 					// update them, which would trigger erroneous conflicts
 					var collections = [];
-					for each(var colID in deletedCollections) {
-						var col = Zotero.Collections.get(colID);
+					for each(var colKey in deletedCollectionKeys) {
+						var col = Zotero.Collections.getByKey(colKey);
 						col.lockDateModified();
 						collections.push(col);
 					}
@@ -2154,10 +2104,9 @@ Zotero.Sync.Server.Data = new function() {
 			
 			Zotero.debug('Processing locally deleted ' + types);
 			
-			for each(var obj in ids.deleted[types]) {
+			for each(var key in ids.deleted[types]) {
 				var deletexml = new XML('<' + type + '/>');
-				deletexml.@id = obj.id;
-				deletexml.@key = obj.key;
+				deletexml.@key = key;
 				xml.deleted[types][type] += deletexml;
 			}
 		}
@@ -2168,6 +2117,215 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		return xmlstr;
+	}
+	
+	
+	function _mergeCollection(localObj, remoteObj) {
+		var diff = localObj.diff(remoteObj, false, true);
+		if (!diff) {
+			return false;
+		}
+		
+		Zotero.debug("COLLECTION HAS CHANGED");
+		Zotero.debug(diff);
+		
+		// Local is newer
+		if (diff[0].primary.dateModified >
+				diff[1].primary.dateModified) {
+			var remoteIsTarget = false;
+			var targetObj = localObj;
+			var targetDiff = diff[0];
+			var otherDiff = diff[1];
+		}
+		// Remote is newer
+		else {
+			var remoteIsTarget = true;
+			var targetObj = remoteObj;
+			var targetDiff = diff[1];
+			var otherDiff = diff[0];
+		}
+		
+		if (targetDiff.fields.name) {
+			var msg = _generateAutoChangeMessage(
+				'collection', diff[0].fields.name, diff[1].fields.name, remoteIsTarget
+			);
+			// TODO: log rather than alert
+			alert(msg);
+		}
+		
+		// Check for child collections in the other object
+		// that aren't in the target one
+		if (otherDiff.childCollections.length) {
+			// TODO: log
+			// TODO: add
+			throw ("Collection hierarchy conflict resolution is unimplemented");
+		}
+		
+		// Add items in other object to target one
+		if (otherDiff.childItems.length) {
+			var childItems = targetObj.getChildItems(true);
+			targetObj.childItems = childItems.concat(otherDiff.childItems);
+			
+			var msg = _generateCollectionItemMergeMessage(
+				targetObj.name,
+				otherDiff.childItems,
+				remoteIsTarget
+			);
+			// TODO: log rather than alert
+			alert(msg);
+		}
+		
+		targetObj.save();
+		return true;
+	}
+	
+	
+	function _mergeTag(localObj, remoteObj) {
+		var diff = localObj.diff(remoteObj, false, true);
+		if (!diff) {
+			return false;
+		}
+		
+		Zotero.debug("TAG HAS CHANGED");
+		Zotero.debug(diff);
+		
+		// Local is newer
+		if (diff[0].primary.dateModified >
+				diff[1].primary.dateModified) {
+			var remoteIsTarget = false;
+			var targetObj = localObj;
+			var targetDiff = diff[0];
+			var otherDiff = diff[1];
+		}
+		// Remote is newer
+		else {
+			var remoteIsTarget = true;
+			var targetObj = remoteObj;
+			var targetDiff = diff[1];
+			var otherDiff = diff[0];
+		}
+		
+		// TODO: log old name
+		if (targetDiff.fields.name) {
+			var msg = _generateAutoChangeMessage(
+				'tag', diff[0].fields.name, diff[1].fields.name, remoteIsTarget
+			);
+			alert(msg);
+		}
+		
+		// Add linked items in the other object to the target one
+		if (otherDiff.linkedItems.length) {
+			// need to handle changed items
+			
+			var linkedItems = targetObj.getLinkedItems(true);
+			targetObj.linkedItems = linkedItems.concat(otherDiff.linkedItems);
+			
+			var msg = _generateTagItemMergeMessage(
+				targetObj.name,
+				otherDiff.linkedItems,
+				remoteIsTarget
+			);
+			// TODO: log rather than alert
+			alert(msg);
+		}
+		
+		targetObj.save();
+		return true;
+	}
+	
+	
+	/**
+	 * @param	{String}	itemType
+	 * @param	{String}	localName
+	 * @param	{String}	remoteName
+	 * @param	{Boolean}	[remoteMoreRecent=false]
+	 */
+	function _generateAutoChangeMessage(itemType, localName, remoteName, remoteMoreRecent) {
+		if (localName === null) {
+			// TODO: localize
+			localName = "[deleted]";
+			var localDelete = true;
+		}
+		
+		// TODO: localize
+		var msg = "A " + itemType + " has changed both locally and "
+			+ "remotely since the last sync:";
+		msg += "\n\n";
+		msg += "Local version: " + localName + "\n";
+		msg += "Remote version: " + remoteName + "\n";
+		msg += "\n";
+		if (localDelete) {
+			msg += "The remote version has been kept.";
+		}
+		else {
+			var moreRecent = remoteMoreRecent ? remoteName : localName;
+			msg += "The most recent version, '" + moreRecent + "', has been kept.";
+		}
+		return msg;
+	}
+	
+	
+	/**
+	 * @param	{String}		collectionName
+	 * @param	{Integer[]}		addedItemIDs
+	 * @param	{Boolean}		remoteIsTarget
+	 */
+	function _generateCollectionItemMergeMessage(collectionName, addedItemIDs, remoteIsTarget) {
+		// TODO: localize
+		var introMsg = "Items in the collection '" + collectionName + "' have been "
+			+ "added and/or removed in multiple locations."
+		
+		introMsg += " ";
+		if (remoteIsTarget) {
+			introMsg += "The following items have been added to the remote collection:";
+		}
+		else {
+			introMsg += "The following items have been added to the local collection:";
+		}
+		var itemText = [];
+		for each(var id in addedItemIDs) {
+			var item = Zotero.Items.get(id);
+			var title = item.getField('title');
+			var text = " - " + title;
+			var firstCreator = item.getField('firstCreator');
+			if (firstCreator) {
+				text += " (" + firstCreator + ")";
+			}
+			itemText.push(text);
+		}
+		return introMsg + "\n\n" + itemText.join("\n");
+	}
+	
+	
+	/**
+	 * @param	{String}		tagName
+	 * @param	{Integer[]}		addedItemIDs
+	 * @param	{Boolean}		remoteIsTarget
+	 */
+	function _generateTagItemMergeMessage(tagName, addedItemIDs, remoteIsTarget) {
+		// TODO: localize
+		var introMsg = "The tag '" + tagName + "' has been "
+			+ "added to and/or removed from items in multiple locations."
+		
+		introMsg += " ";
+		if (remoteIsTarget) {
+			introMsg += "It has been added to the following remote items:";
+		}
+		else {
+			introMsg += "It has been added to the following local items:";
+		}
+		var itemText = [];
+		for each(var id in addedItemIDs) {
+			var item = Zotero.Items.get(id);
+			var title = item.getField('title');
+			var text = " - " + title;
+			var firstCreator = item.getField('firstCreator');
+			if (firstCreator) {
+				text += " (" + firstCreator + ")";
+			}
+			itemText.push(text);
+		}
+		return introMsg + "\n\n" + itemText.join("\n");
 	}
 	
 	
@@ -2223,7 +2381,7 @@ Zotero.Sync.Server.Data = new function() {
 						delete relatedItems[obj.id];
 					}
 					
-					syncSession.addToDeleted(type, obj.id, obj.left.key);
+					syncSession.addToDeleted(type, obj.left.key);
 				}
 				continue;
 			}
@@ -2236,7 +2394,7 @@ Zotero.Sync.Server.Data = new function() {
 			// Item had been deleted locally, so remove from
 			// deleted array
 			if (obj.left == 'deleted') {
-				syncSession.removeFromDeleted(type, obj.id, obj.ref.key);
+				syncSession.removeFromDeleted(type, obj.ref.key);
 			}
 			
 			// TODO: only upload if the local item was chosen
@@ -2583,26 +2741,6 @@ Zotero.Sync.Server.Data = new function() {
 	}
 	
 	
-	function _logCollectionItemMerge(collectionName, remoteItemIDs) {
-		// TODO: localize
-		var introMsg = "Items in the collection '" + collectionName + "' have been "
-			+ "added and/or removed in multiple locations. The following remote "
-			+ "items have been added to the local collection:";
-		var itemText = [];
-		for each(var id in remoteItemIDs) {
-			var item = Zotero.Items.get(id);
-			var title = item.getField('title');
-			var text = " - " + title;
-			var firstCreator = item.getField('firstCreator');
-			if (firstCreator) {
-				text += " (" + firstCreator + ")";
-			}
-			itemText.push(text);
-		}
-		return introMsg + "\n\n" + itemText.join("\n");
-	}
-	
-	
 	/**
 	 * Converts a Zotero.Creator object to an E4X <creator> object
 	 */
@@ -2871,16 +3009,16 @@ Zotero.Sync.Server.Data = new function() {
 	function _deleteConflictingTag(syncSession, name, type) {
 		var tagID = Zotero.Tags.getID(name, type);
 		if (tagID) {
+			Zotero.debug("Deleting conflicting local tag " + tagID);
 			var tag = Zotero.Tags.get(tagID);
 			var linkedItems = tag.getLinkedItems(true);
 			Zotero.Tags.erase(tagID);
-			// DEBUG: should purge() be called by Tags.erase()
 			Zotero.Tags.purge();
 			
 			syncSession.removeFromUpdated('tag', tagID);
-			syncSession.addToDeleted('tag', tagID, tag.key);
+			//syncSession.addToDeleted('tag', tag.key);
 			
-			return linkedItems;
+			return linkedItems ? linkedItems : [];
 		}
 		
 		return false;
