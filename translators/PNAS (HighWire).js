@@ -1,9 +1,9 @@
 {
 	"translatorID":"8c1f42d5-02fa-437b-b2b2-73afc768eb07",
 	"translatorType":4,
-	"label":"PNAS",
+	"label":"PNAS (HighWire 2.0)",
 	"creator":"Matt Burton",
-	"target":"http://[^/]*\\.pnas\\.org[^/]*/",
+	"target":"http://www\\.pnas\\.org/(content|search|cgi/collection/.+)",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
@@ -12,7 +12,7 @@
 }
 
 function detectWeb(doc, url) {
-	if (url.match("search") || doc.title.match("Table of Contents") || doc.title.match("Early Edition")) {
+	if (url.match("search") || url.match("content/by/section") || doc.title.match("Table of Contents") || doc.title.match("Early Edition") || url.match("cgi/collection/.+")) {
 		return "multiple";
 	} else if (url.match("content/[0-9]")) {
 		return "journalArticle";
@@ -24,9 +24,13 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		if (doc.title.match("Table of Contents") || doc.title.match("Early Edition")) {
-			var searchx = '//li[@class = "cit toc-cit"]'; 
+			var searchx = '//li[@class = "cit toc-cit" and not(ancestor::div/h2/a/text() = "Correction" or ancestor::div/h2/a/text() = "Corrections")]'; 
 			var titlex = './/h4';
-		} else {
+		} else if (url.match("content/by/section") || url.match("cgi/collection/.+")) {
+			var searchx = '//li[contains(@class, "results-cit cit")]'; 
+			var titlex = './/span[@class = "cit-title"]';
+		}
+		else {
 			var searchx = '//div[@class = "results-cit cit"]';
 			var titlex = './/span[@class = "cit-title"]';
 		}	
@@ -51,8 +55,13 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.HTTP.doGet(arts, function(text) {
 		var id = text.match(/=([^=]+)\">\s*Download to citation manager/)[1];
-		var newurl = newurls.shift();
-		var pdfurl = newurl.slice(0, newurl.lastIndexOf(".")) + ".full.pdf";
+		var newurl = newurls.shift();		
+		if (newurl.match("cgi/content")) {
+			var pdfurl = newurl.replace(/cgi\/content\/abstract/, "content") + ".full.pdf";
+		} else {
+			// This is not ideal...todo: brew a regex that grabs the correct URL
+			var pdfurl = newurl.slice(0, newurl.lastIndexOf(".")) + ".full.pdf";
+		}
 		var get = 'http://www.pnas.org/citmgr?type=refman&gca=' + id;
 		Zotero.Utilities.HTTP.doGet(get, function(text) {
 			var translator = Zotero.loadTranslator("import");
