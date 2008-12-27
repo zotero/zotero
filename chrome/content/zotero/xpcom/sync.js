@@ -1752,7 +1752,7 @@ Zotero.Sync.Server.Data = new function() {
 							
 							default:
 								alert('Delete reconciliation unimplemented for ' + types);
-								throw ('Delete reconciliation unimplemented for ' + types);	
+								throw ('Delete reconciliation unimplemented for ' + types);
 						}
 					}
 					
@@ -1852,7 +1852,7 @@ Zotero.Sync.Server.Data = new function() {
 			
 			
 			//
-			// Handle deleted objects
+			// Handle remotely deleted objects
 			//
 			if (xml.deleted && xml.deleted[types]) {
 				Zotero.debug("Processing remotely deleted " + types);
@@ -1869,18 +1869,36 @@ Zotero.Sync.Server.Data = new function() {
 						continue;
 					}
 					
-					// Local object has been modified since last sync -- reconcile
-					var now = Zotero.Date.sqlToDate(obj.dateModified, true);
-					if (now >= lastLocalSyncDate) {
-						// TODO: order reconcile by parent/child
-						toReconcile.push([obj, 'deleted']);
-					}
+					var modDate = Zotero.Date.sqlToDate(obj.dateModified, true);
+					
 					// Local object hasn't been modified -- delete
-					else {
+					if (modDate < lastLocalSyncDate) {
 						toDelete.push(obj.id);
+						continue;
+					}
+					
+					// Local object has been modified since last sync -- reconcile
+					switch (type) {
+						case 'item':
+							// TODO: order reconcile by parent/child
+							toReconcile.push([obj, 'deleted']);
+							break;
+						
+						case 'tag':
+							var msg = _generateAutoChangeMessage(
+								type, obj.name, null
+							);
+							alert(msg);
+							continue;
+							
+						default:
+							alert('Delete reconciliation unimplemented for ' + types);
+							throw ('Delete reconciliation unimplemented for ' + types);
+
 					}
 				}
 			}
+			
 			
 			//
 			// Reconcile objects that have changed locally and remotely
@@ -2246,6 +2264,10 @@ Zotero.Sync.Server.Data = new function() {
 			localName = "[deleted]";
 			var localDelete = true;
 		}
+		else if (remoteName === null) {
+			remoteName = "[deleted]";
+			var remoteDelete = true;
+		}
 		
 		// TODO: localize
 		var msg = "A " + itemType + " has changed both locally and "
@@ -2256,6 +2278,9 @@ Zotero.Sync.Server.Data = new function() {
 		msg += "\n";
 		if (localDelete) {
 			msg += "The remote version has been kept.";
+		}
+		else if (remoteDelete) {
+			msg += "The local version has been kept.";
 		}
 		else {
 			var moreRecent = remoteMoreRecent ? remoteName : localName;

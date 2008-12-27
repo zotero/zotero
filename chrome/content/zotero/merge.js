@@ -51,11 +51,8 @@ var Zotero_Merge_Window = new function () {
 				}
 				break;
 			
-			case 'collection':
-				break;
-				
 			default:
-				throw ("Unsupported merge object type '" + type
+				throw ("Unsupported merge object type '" + _mergeGroup.type
 					+ "' in Zotero_Merge_Window.init()");
 		}
 		
