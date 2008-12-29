@@ -42,13 +42,6 @@ var Zotero_Merge_Window = new function () {
 		
 		switch (_mergeGroup.type) {
 			case 'item':
-				var firstObj = _objects[0][0] == 'deleted' ? _objects[0][1] : _objects[0][0];
-				if (firstObj.isNote()) {
-					_mergeGroup.type = 'note';
-				}
-				else {
-					_mergeGroup.type = 'item';
-				}
 				break;
 			
 			default:
@@ -122,14 +115,23 @@ var Zotero_Merge_Window = new function () {
 		// Adjust counter
 		_numObjects.value = _pos + 1;
 		
-		_mergeGroup.left = _objects[_pos][0];
-		_mergeGroup.right = _objects[_pos][1];
-		
-		// Restore previously merged object into merge pane
-		if (_merged[_pos]) {
-			_mergeGroup.merge = _merged[_pos].ref;
-			_mergeGroup.leftpane.removeAttribute("selected");
-			_mergeGroup.rightpane.removeAttribute("selected");
+		try {
+			_mergeGroup.left = _objects[_pos][0];
+			_mergeGroup.right = _objects[_pos][1];
+			
+			// Restore previously merged object into merge pane
+			if (_merged[_pos]) {
+				_mergeGroup.merge = _merged[_pos].ref;
+				_mergeGroup.leftpane.removeAttribute("selected");
+				_mergeGroup.rightpane.removeAttribute("selected");
+			}
+		}
+		catch (e) {
+			var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
+							.createInstance(Components.interfaces.nsIPrompt);
+			prompt.alert(Zotero.getString('general.error'), e);
+			_wizard.getButton('cancel').click();
+			return false;
 		}
 		
 		if (_mergeGroup.type == 'item') {

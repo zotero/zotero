@@ -2949,21 +2949,51 @@ Zotero.Item.prototype.diff = function (item, includeMatches, ignoreOnlyDateModif
 	var diff = [];
 	var thisData = this.serialize();
 	var otherData = item.serialize();
+	
 	var numDiffs = Zotero.Items.diff(thisData, otherData, diff, includeMatches);
 	
 	diff[0].creators = [];
 	diff[1].creators = [];
-	// TODO: creators
-	
-	// TODO: attachments
-	
-	// TODO: notes
-	
-	// TODO: tags
-	
-	// TODO: related
-	
+	// TODO: creators?
+	// TODO: tags?
+	// TODO: related?
 	// TODO: annotations
+	
+	var changed = false;
+	
+	if (thisData.attachment) {
+		for (var field in thisData.attachment) {
+			changed = thisData.attachment[field] != otherData.attachment[field];
+			if (includeMatches || changed) {
+				if (!diff[0].attachment) {
+					diff[0].attachment = {};
+					diff[1].attachment = {};
+				}
+				diff[0].attachment[field] = thisData.attachment[field];
+				diff[1].attachment[field] = otherData.attachment[field];
+			}
+			
+			if (changed) {
+				numDiffs++;
+			}
+		}
+	}
+	
+	if (thisData.note != undefined) {
+		changed = thisData.note != otherData.note;
+		if (includeMatches || changed) {
+			diff[0].note = thisData.note;
+			diff[1].note = otherData.note;
+		}
+		
+		if (changed) {
+			numDiffs++;
+		}
+	}
+	
+	//Zotero.debug(thisData);
+	//Zotero.debug(otherData);
+	//Zotero.debug(diff);
 	
 	// DEBUG: ignoreOnlyDateModified wouldn't work if includeMatches was set?
 	if (numDiffs == 0 ||
@@ -2980,10 +3010,6 @@ Zotero.Item.prototype.diff = function (item, includeMatches, ignoreOnlyDateModif
  * Returns an unsaved copy of the item
  */
 Zotero.Item.prototype.clone = function(includePrimary) {
-	if (this.isAttachment()) {
-		throw ('Cloning attachment items not supported in Zotero.Item.clone()');
-	}
-	
 	Zotero.debug('Cloning item ' + this.id);
 	
 	Zotero.DB.beginTransaction();
@@ -3004,23 +3030,15 @@ Zotero.Item.prototype.clone = function(includePrimary) {
 		}
 	}
 	
-	// Note
-	if (this.isNote()) {
-		newItem.setNote(this.getNote());
-		var parent = this.getSource();
-		if (parent) {
-			newItem.setSource(parent);
+	for (var field in obj.fields) {
+		var fieldID = Zotero.ItemFields.getID(field);
+		if (fieldID && Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
+			newItem.setField(field, obj.fields[field]);
 		}
 	}
+	
 	// Regular item
-	else {
-		for (var field in obj.fields) {
-			var fieldID = Zotero.ItemFields.getID(field);
-			if (fieldID && Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
-				newItem.setField(field, obj.fields[field]);
-			}
-		}
-		
+	if (this.isRegularItem()) {
 		if (includePrimary) {
 			// newItem = loaded from db
 			// obj = in-memory
@@ -3052,6 +3070,21 @@ Zotero.Item.prototype.clone = function(includePrimary) {
 				);
 				i++;
 			}
+		}
+	}
+	else {
+		newItem.setNote(this.getNote());
+		var parent = this.getSource();
+		if (parent) {
+			newItem.setSource(parent);
+		}
+		
+		if (this.isAttachment()) {
+			newItem.attachmentLinkMode = this.attachmentLinkMode;
+			newItem.attachmentMIMEType = this.attachmentMIMEType;
+			newItem.attachmentCharset = this.attachmentCharset;
+			newItem.attachmentPath = this.attachmentPath;
+			newItem.attachmentSyncState = this.attachmentSyncState;
 		}
 	}
 	

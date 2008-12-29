@@ -1,0 +1,430 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright (c) 2006  Center for History and New Media
+                        George Mason University, Fairfax, Virginia, USA
+                        http://chnm.gmu.edu
+    
+    Licensed under the Educational Community License, Version 1.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.opensource.org/licenses/ecl1.php
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/zotero.dtd">
+<!-- <!DOCTYPE bindings SYSTEM "chrome://zotero/locale/attachmentbox.dtd"> -->
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+		  xmlns:xbl="http://www.mozilla.org/xbl"
+		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<binding id="attachment-box">
+		<resources>
+			<stylesheet src="chrome://zotero/skin/bindings/attachmentbox.css"/>
+		</resources>
+		
+		<implementation>
+			<!--
+				Public properties
+			-->
+			<field name="editable">false</field>
+			<field name="displayGoButtons">false</field>
+			<field name="clickableLink">false</field>
+			<field name="displayButton">false</field>
+			
+			<field name="buttonCaption"/>
+			<field name="clickHandler"/>
+			
+			<!-- Modes are predefined settings groups for particular tasks -->
+			<field name="_mode">"view"</field>
+			<property name="mode" onget="return this._mode;">
+				<setter>
+				<![CDATA[
+					this.editable = false;
+					this.displayGoButtons = false;
+					this.clickableLink = false;
+					this.displayIndexed = false;
+					this.displayPages = false;
+					
+					switch (val) {
+						case 'view':
+							this.displayGoButtons = true;
+							this.clickableLink = true;
+							this.displayIndexed = true;
+							this.displayPages = true;
+							break;
+						
+						case 'edit':
+							this.editable = true;
+							this.displayGoButtons = true;
+							this.clickableLink = true;
+							this.displayIndexed = true;
+							this.displayPages = true;
+							break;
+						
+						case 'merge':
+							this.displayButton = true;
+							break;
+						
+						case 'mergeedit':
+							break;
+						
+						default:
+							throw ("Invalid mode '" + val + "' in attachmentbox.xml");
+					}
+					
+					this._mode = val;
+					document.getAnonymousNodes(this)[0].setAttribute('mode', val);
+				]]>
+				</setter>
+			</property>
+			
+			<field name="_item"/>
+			<property name="item"
+				onget="return this._item;"
+				onset="this._item = val; this.refresh();">
+			</property>
+			
+			<!-- .ref is an alias for .item -->
+			<property name="ref"
+				onget="return this._item;"
+				onset="this._item = val; this.refresh();">
+			</property>
+			
+			
+			<!-- Private properties -->
+			
+			<method name="refresh">
+				<body>
+				<![CDATA[
+					Zotero.debug('Refreshing attachment box');
+					
+					var attachmentBox = document.getAnonymousNodes(this)[0];
+					var title = this._id('title');
+					var goButtons = this._id('go-buttons');
+					var viewButton = this._id('view');
+					var showButton = this._id('show');
+					var urlField = this._id('url');
+					var accessed = this._id('accessed');
+					var pagesRow = this._id('pages');
+					var indexBox = this._id('index-box');
+					var selectButton = this._id('select-button');
+					
+					// DEBUG: this is annoying -- we really want to use an abstracted
+					// version of createValueElement() from itemPane.js
+					// (ideally in an XBL binding)
+					
+					// Wrap title to multiple lines if necessary
+					while (title.hasChildNodes()) {
+						title.removeChild(title.firstChild);
+					}
+					var val = this.item.getField('title');
+					
+					var firstSpace = val.indexOf(" ");
+					// Crop long uninterrupted text
+					if ((firstSpace == -1 && val.length > 29 ) || firstSpace > 29) {
+						title.setAttribute('crop', 'end');
+						title.setAttribute('value', val);
+					}
+					// Create a <description> element, essentially
+					else {
+						title.removeAttribute('value');
+						title.appendChild(document.createTextNode(val));
+					}
+					
+					if (this.editable) {
+						title.className = 'zotero-clicky';
+						
+						// For the time being, use a silly little popup
+						title.addEventListener('click', this.editTitle, false);
+					}
+					
+					// View and Show buttons
+					if (this.displayGoButtons) {
+						goButtons.hidden = false;
+						
+						var itemID = this.item.id;
+						var noLocateOnMissing = !this.editable;
+						viewButton.onclick = function (event) {
+							ZoteroPane.viewAttachment(itemID, event, noLocateOnMissing)
+						}
+						showButton.onclick = function (event) {
+							ZoteroPane.showAttachmentInFilesystem(itemID, noLocateOnMissing)
+						}
+					}
+					else {
+						goButtons.hidden = true;
+					}
+					
+					var isImportedURL = this.item.attachmentLinkMode ==
+											Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+					
+					// Metadata for URL's
+					if (this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL
+							|| isImportedURL) {
+						// "View Page"/"View Snapshot" label
+						if (isImportedURL) {
+							var str = Zotero.getString('pane.item.attachments.view.snapshot');
+						}
+						else {
+							var str = Zotero.getString('pane.item.attachments.view.link');
+						}
+						
+						showButton.setAttribute('hidden', !isImportedURL);
+						
+						// URL
+						var urlSpec = this.item.getField('url');
+						urlField.setAttribute('value', urlSpec);
+						urlField.setAttribute('hidden', false);
+						if (this.clickableLink) {
+							 urlField.onclick = function (event) {
+							 	ZoteroPane.loadURI(this.value, event)
+							};
+							urlField.className = 'text-link';
+						}
+						else {
+							urlField.className = '';
+						}
+						
+						// Access date
+						accessed.setAttribute('value',
+							Zotero.getString('itemFields.accessDate') + ': '
+							+ Zotero.Date.sqlToDate(this.item.getField('accessDate'), true).toLocaleString());
+						accessed.setAttribute('hidden', false);
+					}
+					// Metadata for files
+					else {
+						var str = Zotero.getString('pane.item.attachments.view.file');
+						showButton.setAttribute('hidden', false);
+						urlField.setAttribute('hidden', true);
+						accessed.setAttribute('hidden', true);
+					}
+					
+					viewButton.setAttribute('label', str);
+					
+					// Page count
+					if (this.displayPages) {
+						var pages = Zotero.Fulltext.getPages(this.item.id);
+						var pages = pages ? pages.total : null;
+						if (pages) {
+							var str = Zotero.getString('itemFields.pages') + ': ' + pages;
+							pagesRow.setAttribute('value', str);
+							pagesRow.setAttribute('hidden', false);
+						}
+						else {
+							pagesRow.setAttribute('hidden', true);
+						}
+					}
+					else {
+						pagesRow.setAttribute('hidden', true);
+					}
+					
+					// Full-text index information
+					if (this.displayIndexed) {
+						this.updateItemIndexedState();
+						indexBox.hidden = false;
+					}
+					else {
+						indexBox.hidden = true;
+					}
+					
+					// Note editor
+					var noteEditor = this._id('note-editor');
+					// Don't make note editable (at least for now)
+					if (this.mode == 'merge' || this.mode == 'mergeedit') {
+						noteEditor.mode = 'merge';
+						noteEditor.displayButton = false;
+					}
+					else {
+						noteEditor.mode = this.mode;
+					}
+					noteEditor.parent = null;
+					noteEditor.item = this.item;
+					
+					if (this.displayButton) {
+						selectButton.label = this.buttonCaption;
+						selectButton.hidden = false;
+						selectButton.setAttribute('oncommand',
+							'document.getBindingParent(this).clickHandler(this)');
+					}
+					else {
+						selectButton.hidden = true;
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="editTitle">
+				<body>
+				<![CDATA[
+					var item = document.getBindingParent(this).item;
+					var oldTitle = item.getField('title');
+					
+					var nsIPS = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+							.getService(Components.interfaces.nsIPromptService);
+					
+					var newTitle = { value: oldTitle };
+					var checkState = { value: Zotero.Prefs.get('lastRenameAssociatedFile') };
+					
+					while (true) {
+						// Don't show "Rename associated file" option for
+						// linked URLs
+						if (item.attachmentLinkMode ==
+								Zotero.Attachments.LINK_MODE_LINKED_URL) {
+							var result = nsIPS.prompt(
+								window,
+								'',
+								Zotero.getString('pane.item.attachments.rename.title'),
+								newTitle,
+								null,
+								{}
+							);
+							
+							// If they hit cancel or left it blank
+							if (!result || !newTitle.value) {
+								return;
+							}
+							
+							break;
+						}
+						
+						var result = nsIPS.prompt(
+							window,
+							'',
+							Zotero.getString('pane.item.attachments.rename.title'),
+							newTitle,
+							Zotero.getString('pane.item.attachments.rename.renameAssociatedFile'),
+							checkState
+						);
+						
+						// If they hit cancel or left it blank
+						if (!result || !newTitle.value) {
+							return;
+						}
+						
+						Zotero.Prefs.set('lastRenameAssociatedFile', checkState.value);
+						
+						// Rename associated file
+						if (checkState.value) {
+							var renamed = item.renameAttachmentFile(newTitle.value);
+							if (renamed == -1) {
+								var confirmed = confirm(newTitle.value + ' exists. Overwrite existing file?');
+								if (confirmed) {
+									item.renameAttachmentFile(newTitle.value, true);
+									break;
+								}
+								// If they said not to overwrite existing file,
+								// start again
+								continue;
+							}
+							else if (renamed == -2 || !renamed) {
+								alert(Zotero.getString('pane.item.attachments.rename.error'));
+								return;
+							}
+						}
+						
+						break;
+					}
+					
+					if (newTitle.value != oldTitle) {
+						item.setField('title', newTitle.value);
+						item.save();
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<!--
+			 Update Indexed: (Yes|No|Partial) line
+			-->
+			<method name="updateItemIndexedState">
+				<body>
+				<![CDATA[
+					var indexBox = this._id('index-box');
+					var indexStatus = this._id('index-status');
+					var reindexButton = this._id('reindex');
+					
+					var status = Zotero.Fulltext.getIndexedState(this.item.id);
+					var str = 'fulltext.indexState.';
+					switch (status) {
+						case Zotero.Fulltext.INDEX_STATE_UNAVAILABLE:
+							str += 'unavailable';
+							break;
+						case Zotero.Fulltext.INDEX_STATE_UNINDEXED:
+							str = 'general.no';
+							break;
+						case Zotero.Fulltext.INDEX_STATE_PARTIAL:
+							str += 'partial';
+							break;
+						case Zotero.Fulltext.INDEX_STATE_INDEXED:
+							str = 'general.yes';
+							break;
+					}
+					str = Zotero.getString('fulltext.indexState.indexed') + ': ' +
+						Zotero.getString(str);
+					indexStatus.setAttribute('value', str);
+					
+					// Reindex button tooltip (string stored in zotero.properties)
+					var str = Zotero.getString('pane.items.menu.reindexItem');
+					reindexButton.setAttribute('tooltiptext', str);
+					
+					if (this.editable &&
+							Zotero.Fulltext.pdfConverterIsRegistered() &&
+							Zotero.Fulltext.canReindex(this.item.id)) {
+						reindexButton.setAttribute('hidden', false);
+					}
+					else {
+						reindexButton.setAttribute('hidden', true);
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="_id">
+				<parameter name="id"/>
+				<body>
+				<![CDATA[
+					return document.getAnonymousNodes(this)[0].getElementsByAttribute('id', id)[0];
+				]]>
+				</body>
+			</method>
+		</implementation>
+		
+		<content>
+			<vbox id="attachment-box" flex="1" orient="vertical"
+				 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+				<label id="title"/>
+				<hbox id="go-buttons">
+					<button id="view" flex="1"/>
+					<button id="show" label="&zotero.item.attachment.file.show;" flex="1"/>
+				</hbox>
+				<label id="url" crop="end"/>
+				
+				<label id="accessed"/>
+				<label id="pages"/>
+				
+				<hbox id="index-box">
+					<label id="index-status"/>
+					<toolbarbutton id="reindex" oncommand="ZoteroPane.reindexItem()"/>
+				</hbox>
+				
+				<zoteronoteeditor id="note-editor" notitle="1" flex="1"/>
+				
+				<button id="select-button" hidden="true"/>
+			</vbox>
+		</content>
+	</binding>
+</bindings>

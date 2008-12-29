@@ -274,57 +274,11 @@
 	list-style-image: url('chrome://zotero/skin/search-cancel-active.png');
 }
 
-#zotero-attachment-view, #zotero-attachment-show
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow.png');
-	-moz-box-direction: reverse;
-	-moz-box-flex: 1;
-}
-
-
-/* Reindex button in attachment pane */
-#zotero-attachment-index-box
-{
-	-moz-box-align: center;
-}
-#zotero-attachment-reindex
-{
-	margin: 0;
-	padding: 0;
-	list-style-image: url(chrome://zotero/skin/arrow_refresh.png);
-}
-
-
-#zotero-attachment-reindex .toolbarbutton-icon
-{
-	margin: 0;
-	padding: 0;
-}
-
-
 #zotero-view-item > vbox
 {
 	overflow: auto;
 	margin-left: 5px;
 }
-
-/* Don't collapse blank attachment labels, since it prevents renaming */
-#zotero-attachment-label
-{
-	min-height: 1.25em;
-}
-
-#zotero-attachment-index-box
-{
-	-moz-box-align: center;
-}
-
-#zotero-attachment-index-box > button
-{
-	font-size: .95em;
-	padding: 0;
-}
-
 
 #zotero-splitter
 {

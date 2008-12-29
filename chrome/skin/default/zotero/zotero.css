@@ -68,6 +68,12 @@ textbox[type="styled"]
 	-moz-binding: url('chrome://zotero/content/bindings/styled-textbox.xml#styled-textbox');
 }
 
+zoteroattachmentbox
+{
+	-moz-binding: url('chrome://zotero/content/bindings/attachmentbox.xml#attachment-box');
+}
+
+
 zoteronoteeditor
 {
 	-moz-binding: url('chrome://zotero/content/bindings/noteeditor.xml#note-editor');

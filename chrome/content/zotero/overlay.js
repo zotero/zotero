@@ -50,7 +50,6 @@ var ZoteroPane = new function()
 	this.updateTagFilter = updateTagFilter;
 	this.onCollectionSelected = onCollectionSelected;
 	this.itemSelected = itemSelected;
-	this.updateItemIndexedState = updateItemIndexedState;
 	this.reindexItem = reindexItem;
 	this.duplicateSelectedItem = duplicateSelectedItem;
 	this.deleteSelectedItem = deleteSelectedItem;
@@ -83,7 +82,6 @@ var ZoteroPane = new function()
 	this.addAttachmentFromPage = addAttachmentFromPage;
 	this.viewAttachment = viewAttachment;
 	this.viewSelectedAttachment = viewSelectedAttachment;
-	this.showSelectedAttachmentInFilesystem = showSelectedAttachmentInFilesystem;
 	this.showAttachmentNotFoundDialog = showAttachmentNotFoundDialog;
 	this.relinkAttachment = relinkAttachment;
 	this.reportErrors = reportErrors;
@@ -797,12 +795,7 @@ var ZoteroPane = new function()
 			
 			if(item.ref.isNote()) {
 				var noteEditor = document.getElementById('zotero-note-editor');
-				if (this.itemsView.readOnly) {
-					noteEditor.mode = 'view';
-				}
-				else {
-					noteEditor.mode = 'edit';
-				}
+				noteEditor.mode = this.itemsView.readOnly ? 'view' : 'edit';
 				
 				// If loading new or different note, disable undo while we repopulate the text field
 				// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
@@ -828,165 +821,9 @@ var ZoteroPane = new function()
 			}
 			
 			else if(item.ref.isAttachment()) {
-				// DEBUG: this is annoying -- we really want to use an abstracted
-				// version of createValueElement() from itemPane.js
-				// (ideally in an XBL binding)
-				
-				// Wrap title to multiple lines if necessary
-				var label = document.getElementById('zotero-attachment-label');
-				while (label.hasChildNodes())
-				{
-					label.removeChild(label.firstChild);
-				}
-				var val = item.getField('title');
-				
-				var firstSpace = val.indexOf(" ");
-				// Crop long uninterrupted text
-				if ((firstSpace == -1 && val.length > 29 ) || firstSpace > 29)
-				{
-					label.setAttribute('crop', 'end');
-					label.setAttribute('value', val);
-				}
-				// Create a <description> element, essentially
-				else
-				{
-					label.removeAttribute('value');
-					label.appendChild(document.createTextNode(val));
-				}
-				
-				// For the time being, use a silly little popup
-				label.className = 'zotero-clicky';
-				label.onclick = function(event){
-					var nsIPS = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-							.getService(Components.interfaces.nsIPromptService);
-					
-					var newTitle = { value: val };
-					var checkState = { value: Zotero.Prefs.get('lastRenameAssociatedFile') };
-					
-					while (true) {
-						// Don't show "Rename associated file" option for
-						// linked URLs
-						if (item.ref.getAttachmentLinkMode() ==
-								Zotero.Attachments.LINK_MODE_LINKED_URL) {
-							var result = nsIPS.prompt(
-								window,
-								'',
-								Zotero.getString('pane.item.attachments.rename.title'),
-								newTitle,
-								null,
-								{}
-							);
-							
-							// If they hit cancel or left it blank
-							if (!result || !newTitle.value) {
-								return;
-							}
-							
-							break;
-						}
-						
-						var result = nsIPS.prompt(
-							window,
-							'',
-							Zotero.getString('pane.item.attachments.rename.title'),
-							newTitle,
-							Zotero.getString('pane.item.attachments.rename.renameAssociatedFile'),
-							checkState
-						);
-						
-						// If they hit cancel or left it blank
-						if (!result || !newTitle.value) {
-							return;
-						}
-						
-						Zotero.Prefs.set('lastRenameAssociatedFile', checkState.value);
-						
-						// Rename associated file
-						if (checkState.value) {
-							var renamed = item.ref.renameAttachmentFile(newTitle.value);
-							if (renamed == -1) {
-								var confirmed = confirm(newTitle.value + ' exists. Overwrite existing file?');
-								if (confirmed) {
-									item.ref.renameAttachmentFile(newTitle.value, true);
-									break;
-								}
-								// If they said not to overwrite existing file,
-								// start again
-								continue;
-							}
-							else if (renamed == -2 || !renamed) {
-								alert(Zotero.getString('pane.item.attachments.rename.error'));
-								return;
-							}
-						}
-						
-						break;
-					}
-					
-					if (newTitle.value != val) {
-						item.ref.setField('title', newTitle.value);
-						item.ref.save();
-					}
-				}
-				
-				
-				var isImportedURL = item.ref.getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_IMPORTED_URL;
-				
-				// Metadata for URL's
-				if (item.ref.getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_LINKED_URL
-					|| isImportedURL)
-				{
-					// "View Page"/"View Snapshot" label
-					if (isImportedURL)
-					{
-						var str = Zotero.getString('pane.item.attachments.view.snapshot');
-					}
-					else
-					{
-						var str = Zotero.getString('pane.item.attachments.view.link');
-					}
-					
-					document.getElementById('zotero-attachment-show').setAttribute('hidden', !isImportedURL);
-					
-					// URL
-					document.getElementById('zotero-attachment-url').setAttribute('value', item.getField('url'));
-					document.getElementById('zotero-attachment-url').setAttribute('hidden', false);
-					// Access date
-					document.getElementById('zotero-attachment-accessed').setAttribute('value',
-						Zotero.getString('itemFields.accessDate') + ': '
-						+ Zotero.Date.sqlToDate(item.getField('accessDate'), true).toLocaleString());
-					document.getElementById('zotero-attachment-accessed').setAttribute('hidden', false);
-				}
-				// Metadata for files
-				else
-				{
-					var str = Zotero.getString('pane.item.attachments.view.file');
-					document.getElementById('zotero-attachment-show').setAttribute('hidden', false);
-					document.getElementById('zotero-attachment-url').setAttribute('hidden', true);
-					document.getElementById('zotero-attachment-accessed').setAttribute('hidden', true);
-				}
-				
-				document.getElementById('zotero-attachment-view').setAttribute('label', str);
-				
-				// Display page count
-				var pages = Zotero.Fulltext.getPages(item.ref.id);
-				var pages = pages ? pages.total : null;
-				var pagesRow = document.getElementById('zotero-attachment-pages');
-				if (pages) {
-					var str = Zotero.getString('itemFields.pages') + ': ' + pages;
-					pagesRow.setAttribute('value', str);
-					pagesRow.setAttribute('hidden', false);
-				}
-				else {
-					pagesRow.setAttribute('hidden', true);
-				}
-				
-				this.updateItemIndexedState();
-				
-				var noteEditor = document.getElementById('zotero-attachment-note-editor');
-				noteEditor.mode = 'edit';
-				noteEditor.parent = null;
-				noteEditor.item = item.ref;
+				var attachmentBox = document.getElementById('zotero-attachment-box');
+				attachmentBox.mode = this.itemsView.readOnly ? 'view' : 'edit';
+				attachmentBox.item = item.ref;
 				
 				document.getElementById('zotero-item-pane-content').selectedIndex = 3;
 			}
@@ -1015,48 +852,6 @@ var ZoteroPane = new function()
 	}
 	
 	
-	/*
-	 * Update Indexed: (Yes|No|Partial) line in attachment info pane
-	 */
-	function updateItemIndexedState() {
-		var indexBox = document.getElementById('zotero-attachment-index-box');
-		var indexStatus = document.getElementById('zotero-attachment-index-status');
-		var reindexButton = document.getElementById('zotero-attachment-reindex');
-		
-		var item = this.itemsView._getItemAtRow(this.itemsView.selection.currentIndex);
-		var status = Zotero.Fulltext.getIndexedState(item.ref.id);
-		var str = 'fulltext.indexState.';
-		switch (status) {
-			case Zotero.Fulltext.INDEX_STATE_UNAVAILABLE:
-				str += 'unavailable';
-				break;
-			case Zotero.Fulltext.INDEX_STATE_UNINDEXED:
-				str = 'general.no';
-				break;
-			case Zotero.Fulltext.INDEX_STATE_PARTIAL:
-				str += 'partial';
-				break;
-			case Zotero.Fulltext.INDEX_STATE_INDEXED:
-				str = 'general.yes';
-				break;
-		}
-		str = Zotero.getString('fulltext.indexState.indexed') + ': ' +
-			Zotero.getString(str);
-		indexStatus.setAttribute('value', str);
-		
-		// Reindex button tooltip (string stored in zotero.properties)
-		var str = Zotero.getString('pane.items.menu.reindexItem');
-		reindexButton.setAttribute('tooltiptext', str);
-		
-		if (Zotero.Fulltext.canReindex(item.ref.id)) {
-			reindexButton.setAttribute('hidden', false);
-		}
-		else {
-			reindexButton.setAttribute('hidden', true);
-		}
-	}
-	
-	
 	function reindexItem() {
 		var items = this.getSelectedItems();
 		if (!items) {
@@ -1070,7 +865,7 @@ var ZoteroPane = new function()
 			var itemID = items[i].id;
 			Zotero.Fulltext.indexItems(itemID, true);
 		}
-		this.updateItemIndexedState();
+		document.getElementById('zotero-attachment-box').updateItemIndexedState();
 	}
 	
 	
@@ -2100,13 +1895,13 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function viewAttachment(itemID, event) {
+	function viewAttachment(itemID, event, noLocateOnMissing) {
 		var attachment = Zotero.Items.get(itemID);
 		if (!attachment.isAttachment()) {
 			throw ("Item " + itemID + " is not an attachment in ZoteroPane.viewAttachment()");
 		}
 		
-		if (attachment.getAttachmentLinkMode() == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+		if (attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 			this.loadURI(attachment.getField('url'), event);
 			return;
 		}
@@ -2146,61 +1941,67 @@ var ZoteroPane = new function()
 			}
 		}
 		else {
-			this.showAttachmentNotFoundDialog(itemID);
+			this.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
 		}
 	}
 	
 	
-	function viewSelectedAttachment(event)
+	function viewSelectedAttachment(event, noLocateOnMissing)
 	{
 		if (this.itemsView && this.itemsView.selection.count == 1) {
-			this.viewAttachment(this.getSelectedItems(true)[0], event);
+			this.viewAttachment(this.getSelectedItems(true)[0], event, noLocateOnMissing);
 		}
 	}
 	
 	
-	function showSelectedAttachmentInFilesystem()
-	{
-		if (this.itemsView && this.itemsView.selection.count == 1) {
-			var attachment = this.getSelectedItems()[0];
-			
-			if (attachment.getAttachmentLinkMode() != Zotero.Attachments.LINK_MODE_LINKED_URL)
-			{
-				var file = attachment.getFile();
-				if (file){
+	this.showAttachmentInFilesystem = function (itemID, noLocateOnMissing) {
+		var attachment = Zotero.Items.get(itemID)
+		if (attachment.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
+			var file = attachment.getFile();
+			if (file){
+				try {
+					file.reveal();
+				}
+				catch (e) {
+					// On platforms that don't support nsILocalFile.reveal() (e.g. Linux),
+					// "double-click" the parent directory
 					try {
-						file.reveal();
+						var parent = file.parent.QueryInterface(Components.interfaces.nsILocalFile);
+						parent.launch();
 					}
+					// If launch also fails, try the OS handler
 					catch (e) {
-						// On platforms that don't support nsILocalFile.reveal() (e.g. Linux),
-						// "double-click" the parent directory
-						try {
-							var parent = file.parent.QueryInterface(Components.interfaces.nsILocalFile);
-							parent.launch();
-						}
-						// If launch also fails, try the OS handler
-						catch (e) {
-							var uri = Components.classes["@mozilla.org/network/io-service;1"].
-										getService(Components.interfaces.nsIIOService).
-										newFileURI(parent);
-							var protocolService =
-								Components.classes["@mozilla.org/uriloader/external-protocol-service;1"].
-									getService(Components.interfaces.nsIExternalProtocolService);
-							protocolService.loadUrl(uri);
-						}
+						var uri = Components.classes["@mozilla.org/network/io-service;1"].
+									getService(Components.interfaces.nsIIOService).
+									newFileURI(parent);
+						var protocolService =
+							Components.classes["@mozilla.org/uriloader/external-protocol-service;1"].
+								getService(Components.interfaces.nsIExternalProtocolService);
+						protocolService.loadUrl(uri);
 					}
 				}
-				else {
-					this.showAttachmentNotFoundDialog(attachment.id)
-				}
+			}
+			else {
+				this.showAttachmentNotFoundDialog(attachment.id, noLocateOnMissing)
 			}
 		}
 	}
 	
 	
-	function showAttachmentNotFoundDialog(itemID) {
+	function showAttachmentNotFoundDialog(itemID, noLocate) {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
+		
+		
+		// Don't show Locate button
+		if (noLocate) {
+			var index = ps.alert(null,
+				Zotero.getString('pane.item.attachments.fileNotFound.title'),
+				Zotero.getString('pane.item.attachments.fileNotFound.text')
+			);
+			return;
+		}
+		
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 		var index = ps.confirmEx(null,

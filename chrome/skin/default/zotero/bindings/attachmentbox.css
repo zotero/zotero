@@ -1,0 +1,36 @@
+/* Don't collapse blank attachment titles, since it prevents renaming */
+#title
+{
+	min-height: 1.25em;
+}
+
+#view, #show
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow.png');
+	-moz-box-direction: reverse;
+	-moz-box-flex: 1;
+}
+
+#index-box
+{
+	-moz-box-align: center;
+}
+
+#reindex
+{
+	margin: 0;
+	padding: 0;
+	list-style-image: url(chrome://zotero/skin/arrow_refresh.png);
+}
+
+#reindex .toolbarbutton-icon
+{
+	margin: 0;
+	padding: 0;
+}
+
+#index-box > button
+{
+	font-size: .95em;
+	padding: 0;
+}
