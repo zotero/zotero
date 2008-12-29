@@ -379,25 +379,7 @@
 							<button id="zotero-view-note-button" label="&zotero.notes.separate;" oncommand="ZoteroPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ZoteroPane.selectItem(this.getAttribute('sourceID'));"/>
 						</vbox>
 						<!-- Attachment info pane -->
-						<vbox id="zotero-view-attachment" flex="1">
-							<label id="zotero-attachment-label"/>
-							<hbox>
-								<button id="zotero-attachment-view" flex="1" oncommand="ZoteroPane.viewSelectedAttachment(event);"/>
-								<button id="zotero-attachment-show" label="&zotero.item.attachment.file.show;" flex="1" oncommand="ZoteroPane.showSelectedAttachmentInFilesystem()"/>
-							</hbox>
-							<label id="zotero-attachment-url" class="text-link" crop="end" onclick="ZoteroPane.loadURI(this.value, event)"/>
-							
-							
-							<label id="zotero-attachment-accessed"/>
-							<label id="zotero-attachment-pages"/>
-							
-							<hbox id="zotero-attachment-index-box">
-								<label id="zotero-attachment-index-status"/>
-								<toolbarbutton id="zotero-attachment-reindex" oncommand="ZoteroPane.reindexItem()"/>
-							</hbox>
-							
-							<zoteronoteeditor id="zotero-attachment-note-editor" notitle="1" flex="1"/>
-						</vbox>
+						<zoteroattachmentbox id="zotero-attachment-box" flex="1"/>
 					</deck>
 				</groupbox>
 			</vbox>

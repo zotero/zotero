@@ -40,12 +40,11 @@
 			<field name="displayRelated">false</field>
 			<field name="displayButton">false</field>
 			
+			<field name="buttonCaption"/>
 			<field name="parentClickHandler"/>
 			<field name="keyDownHandler"/>
 			<field name="commandHandler"/>
 			<field name="clickHandler"/>
-			
-			<field name="buttonCaption"/>
 			
 			<!-- Modes are predefined settings groups for particular tasks -->
 			<field name="_mode">"view"</field>
@@ -78,7 +77,9 @@
 							break;
 						
 						case 'mergeedit':
-							this.editable = true;
+							// Not currently implemented
+							// (editing works, but value isn't saved)
+							//this.editable = true;
 							this.keyDownHandler = this.handleKeyDown;
 							break;
 						
@@ -145,7 +146,6 @@
 					
 					var parentbox = this._id('citeLabel');
 					var textbox = this._id('noteField');
-					var button = this._id('goButton');
 					var button = this._id('goButton');
 					
 					if (this.editable) {

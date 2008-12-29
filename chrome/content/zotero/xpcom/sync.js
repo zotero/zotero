@@ -1626,11 +1626,6 @@ Zotero.Sync.Server.Data = new function() {
 												continue;
 											}
 										}
-										if (obj.isAttachment()) {
-											var msg = "Reconciliation unimplemented for attachment items";
-											alert(msg);
-											throw(msg);
-										}
 										reconcile = true;
 										break;
 									
@@ -1894,7 +1889,6 @@ Zotero.Sync.Server.Data = new function() {
 						default:
 							alert('Delete reconciliation unimplemented for ' + types);
 							throw ('Delete reconciliation unimplemented for ' + types);
-
 					}
 				}
 			}

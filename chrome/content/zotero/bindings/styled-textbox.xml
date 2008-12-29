@@ -34,37 +34,45 @@
 			<field name="_loadHandler"/>
 			<field name="_commandString"/>
 			<field name="_eventHandler"/>
+			<field name="_editor"/>
+			<field name="_value"/>
 			<field name="_timer"/>
 			<field name="_focus"/>
+			<field name="_constructed"/>
+			<field name="_loadOnConstruct"/>
 			
 			<constructor><![CDATA[
-					this.mode = this.getAttribute('mode');
-					
-					this._iframe = document.getAnonymousElementByAttribute(this, "anonid", "rt-view");
-					this._editor = null;
-					this._value = null;
-					
-					this._rtfMap = {
-						"\\":"\\\\",
-						"<em>":"\\i ",
-						"</em>":"\\i0 ",
-						"<i>":"\\i ",
-						"</i>":"\\i0 ",
-						"<strong>":"\\b ",
-						"</strong>":"\\b0 ",
-						"<b>":"\\b ",
-						"</b>":"\\b0 ",
-						"<u>":"\\ul ",
-						"</u>":"\\ul0 ",
-						"<br />":"\x0B",
-						"<sup>":"\\super ",
-						"</sup>":"\\super0 ",
-						"<sub>":"\\sub ",
-						"</sub>":"\\sub0 ",
-						// there's no way to mimic a tab stop in CSS without
-						// tables, which wouldn't work here.
-						'<span class="tab">&nbsp;</span>':"\t"
-					};
+				this.mode = this.getAttribute('mode');
+				
+				this._iframe = document.getAnonymousElementByAttribute(this, "anonid", "rt-view");
+				
+				this._rtfMap = {
+					"\\":"\\\\",
+					"<em>":"\\i ",
+					"</em>":"\\i0 ",
+					"<i>":"\\i ",
+					"</i>":"\\i0 ",
+					"<strong>":"\\b ",
+					"</strong>":"\\b0 ",
+					"<b>":"\\b ",
+					"</b>":"\\b0 ",
+					"<u>":"\\ul ",
+					"</u>":"\\ul0 ",
+					"<br />":"\x0B",
+					"<sup>":"\\super ",
+					"</sup>":"\\super0 ",
+					"<sub>":"\\sub ",
+					"</sub>":"\\sub0 ",
+					// there's no way to mimic a tab stop in CSS without
+					// tables, which wouldn't work here.
+					'<span class="tab">&nbsp;</span>':"\t"
+				};
+				
+				this._constructed = true;
+				
+				if (this._loadOnConstruct) {
+					this._load();
+				}
 			]]></constructor>
 			
 			<property name="mode">
@@ -178,7 +186,11 @@
 						Zotero.debug('No editor yet');
 						
 						this._value = val;
-						if (!this._loaded) {
+						if (!this._constructed) {
+							Zotero.debug('Styled textbox not yet constructed', 2);
+							this._loadOnConstruct = true;
+						}
+						else if (!this._loaded) {
 							this._load();
 						}
 						return ;
