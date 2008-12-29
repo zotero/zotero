@@ -168,7 +168,7 @@
 					
 					if (this.parentClickHandler) {
 						parentbox.setAttribute('onclick',
-							'document.getBindingParent(this).clickHandler(this)');
+							'document.getBindingParent(this).parentClickHandler()');
 					}
 					else {
 						parentbox.removeAttribute('onclick');
@@ -316,8 +316,9 @@
 						var zp = lastWin.ZoteroPane;
 					}
 					
+					var parentID = this.item.getSource();
 					zp.clearQuicksearch();
-					zp.selectItem(this.item.id);
+					zp.selectItem(parentID);
 				]]>
 				</body>
 			</method>
