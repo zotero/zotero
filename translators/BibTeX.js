@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2008-12-16 23:13:33"
+	"lastUpdated":"2008-12-29 23:54:59"
 }
 
 Zotero.configure("dataMode", "block");
@@ -1807,7 +1807,7 @@ function writeField(field, value, isMacro) {
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
 		if(!isMacro) value = value.replace(/([^\s]+[A-Z][^\s]*)/g, "{$1}");
 	}
-	if (!Zotero.getOption("UTF8")) {
+	if (Zotero.getOption("exportCharset") != "UTF-8") {
 		value = value.replace(/[\u0080-\uFFFF]/g, mapAccent);
 	}
 	Zotero.write(value);
