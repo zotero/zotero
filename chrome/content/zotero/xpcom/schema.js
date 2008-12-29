@@ -2150,7 +2150,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP INDEX syncDeleteLog_timestamp");
 					Zotero.DB.query("CREATE TABLE syncDeleteLog (\n    syncObjectTypeID INT NOT NULL,\n    key TEXT NOT NULL UNIQUE,\n    timestamp INT NOT NULL,\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)\n);");
 					Zotero.DB.query("CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp);");
-					Zotero.DB.query("INSERT IGNORE INTO syncDeleteLog SELECT syncObjectTypeID, key, timestamp FROM syncDeleteLogOld ORDER BY timestamp DESC");
+					Zotero.DB.query("INSERT OR IGNORE INTO syncDeleteLog SELECT syncObjectTypeID, key, timestamp FROM syncDeleteLogOld ORDER BY timestamp DESC");
 					Zotero.DB.query("DROP TABLE syncDeleteLogOld");
 				}
 			}
