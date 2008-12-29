@@ -838,7 +838,7 @@ var Zotero = new function(){
 	function getAncestorByTagName(elem, tagName){
 		while (elem.parentNode){
 			elem = elem.parentNode;
-			if (elem.tagName==tagName || elem.tagName=='xul:' + tagName){
+			if (elem.localName == tagName) {
 				return elem;
 			}
 		}

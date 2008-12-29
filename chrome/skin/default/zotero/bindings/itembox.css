@@ -36,8 +36,7 @@ label[singleField=false]:after
 */
 
 /* metadata field names */
-row > label:first-child,
-row > toolbarbutton .toolbarbutton-text /* creator type menu */
+row > label:first-child, .creator-type-label
 {
 	text-align: right;
 	font-weight: bold;
@@ -53,25 +52,15 @@ row label
 	-moz-user-focus: ignore;
 }
 
- /* creator type menu */
-row > toolbarbutton
-{
-	margin: 0 2px 0 0;
-	padding: 0 0 0 5px;
-	list-style-image: url("chrome://browser/skin/dropmark-nav.png");
-	-moz-image-region: rect(3px, 14px, 19px, 0px);
+/* creator type menu */
+.creator-type-label {
+	-moz-box-align: center;
+	-moz-box-pack: end;
 }
-row > toolbarbutton .toolbarbutton-text
-{
-	margin-top: -1px;
+ 
+.creator-type-label image {
+	margin: 0 .5em 1px;
 }
-row > toolbarbutton .toolbarbutton-icon,
-row > toolbarbutton .toolbarbutton-menu-dropmarker
-{
-	margin: 0;
-	padding: 0;
-}
-
 
 /* no space between last name and comma */
 row hbox label:first-child
