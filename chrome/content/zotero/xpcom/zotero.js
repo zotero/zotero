@@ -595,6 +595,7 @@ var Zotero = new function(){
 				'[JavaScript Error: "this._uiElement is null',
 				'Error: a._updateVisibleText is not a function',
 				'[JavaScript Error: "Warning: unrecognized command line flag ',
+				'[JavaScript Error: "Warning: unrecognized command line flag -foreground',
 				'LibX:',
 				'function skype_',
 				'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]'
