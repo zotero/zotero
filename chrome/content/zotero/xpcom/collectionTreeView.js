@@ -319,6 +319,7 @@ Zotero.CollectionTreeView.prototype.setHighlightedRows = function (ids) {
 	this._treebox.invalidate();
 	
 	for each(var id in ids) {
+		this.expandToCollection(id);
 		this._highlightedRows[this._collectionRowMap[id]] = true;
 		this._treebox.invalidateRow(this._collectionRowMap[id]);
 	}
@@ -465,6 +466,32 @@ Zotero.CollectionTreeView.prototype.expandAllRows = function(treebox) {
 		}
 	}
 	treebox.endUpdateBatch();
+}
+
+
+Zotero.CollectionTreeView.prototype.expandToCollection = function(collectionID) {
+	var col = Zotero.Collections.get(collectionID);
+	if (!col) {
+		Zotero.debug("Cannot expand to nonexistent collection " + collectionID, 2);
+		return false;
+	}
+	var row = this._collectionRowMap[collectionID];
+	if (row) {
+		return true;
+	}
+	var path = [];
+	var parent;
+	while (parent = col.getParent()) {
+		path.unshift(parent);
+		col = Zotero.Collections.get(parent);
+	}
+	for each(var id in path) {
+		row = this._collectionRowMap[id];
+		if (!this.isContainerOpen(row)) {
+			this.toggleOpenState(row);
+		}
+	}
+	return true;
 }
 
 

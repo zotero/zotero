@@ -608,31 +608,35 @@ Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 		}
 	}
 	
-	if(column.id == 'zotero-items-column-dateAdded' || column.id == 'zotero-items-column-dateModified')		//this is not so much that we will use this format for date, but a simple template for later revisions.
-	{
-		// Format date as short date in proper locale order and locale time
+	switch (column.id) {
+		// Format dates as short dates in proper locale order and locale time
 		// (e.g. "4/4/07 14:27:23")
-		var order = Zotero.Date.getLocaleDateOrder();
-		var date = Zotero.Date.sqlToDate(val, true);
-		var parts = [];
-		for (var i=0; i<3; i++) {
-			switch (order[i]) {
-				case 'y':
-					parts.push(date.getFullYear().toString().substr(2));
-					break;
+		case 'zotero-items-column-dateAdded':
+		case 'zotero-items-column-dateModified':
+		case 'zotero-items-column-accessDate':
+			if (val) {
+				var order = Zotero.Date.getLocaleDateOrder();
+				var date = Zotero.Date.sqlToDate(val, true);
+				var parts = [];
+				for (var i=0; i<3; i++) {
+					switch (order[i]) {
+						case 'y':
+							parts.push(date.getFullYear().toString().substr(2));
+							break;
+							
+						case 'm':
+							parts.push((date.getMonth() + 1));
+							break;
+							
+						case 'd':
+							parts.push(date.getDate());
+							break;
+					}
 					
-				case 'm':
-					parts.push((date.getMonth() + 1));
-					break;
-					
-				case 'd':
-					parts.push(date.getDate());
-					break;
+					val = parts.join('/');
+					val += ' ' + date.toLocaleTimeString();
+				}
 			}
-			
-			val = parts.join('/');
-			val += ' ' + date.toLocaleTimeString();
-		}
 	}
 	
 	return val;

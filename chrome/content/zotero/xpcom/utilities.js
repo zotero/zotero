@@ -1267,7 +1267,6 @@ Zotero.Utilities.HTTP = new function() {
 		var loadEvent = Zotero.isFx2 ? "load" : "pageshow";
 		
 		var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
-		hiddenBrowser.docShell.allowImages = false;
 		hiddenBrowser.addEventListener(loadEvent, onLoad, true);
 		
 		doLoad();

@@ -38,7 +38,7 @@ Zotero.Integration = new function() {
 	this.handleEnvelope = handleEnvelope;
 	
 	this.__defineGetter__("usePopup", function () {
-		return !Zotero.isMac && !Zotero.Prefs.get("integration.realWindow");
+		return Zotero.isWin && !Zotero.Prefs.get("integration.realWindow");
 	});
 	
 	/*
