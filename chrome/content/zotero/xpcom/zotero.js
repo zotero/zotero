@@ -126,7 +126,8 @@ var Zotero = new function(){
 				getService(Components.interfaces.nsIXULAppInfo)
 		this.isFx2 = appInfo.platformVersion.indexOf('1.8') === 0;
 		this.isFx3 = appInfo.platformVersion.indexOf('1.9') === 0;
-		this.isFx30 = appInfo.platformVersion.indexOf('1.9.0') === 0;
+		this.isFx30 = appInfo.platformVersion == '1.9'
+						|| appInfo.platformVersion.indexOf('1.9.0') === 0;
 		this.isFx31 = appInfo.platformVersion.indexOf('1.9.1') === 0;
 		
 		// OS platform
