@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-07-07 17:00:00"
+	"lastUpdated":"2008-12-31 00:33:00"
 }
 
 function detectWeb(doc, url)	{
@@ -76,28 +76,35 @@ function doWeb(doc, url) {
 			});
 		} else {
 			var item = new Zotero.Item("journalArticle");
-			item.title = Zotero.Utilities.capitalizeTitle(Zotero.Utilities.trimInternal(doc.evaluate('//tbody/tr/td[2]/font/strong', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent));
-			var authors = doc.evaluate('//tr/td/center/font/a[@class="textlink"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			item.title = Zotero.Utilities.capitalizeTitle(Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="abstractTitle"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent));
+			var authors = doc.evaluate('//center/font/a[@class="textlink"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var author;
 			while (author = authors.iterateNext()) {
 				var aut = Zotero.Utilities.capitalizeTitle(Zotero.Utilities.trimInternal(author.textContent));
 				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 			}
-			item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//td[strong/font]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(10);
-			item.tags = Zotero.Utilities.trimInternal(doc.evaluate('//font[contains(text(), "Key")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(10).split(/,\s+/);
+			item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="innerWhite"]/font[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(10);
+			var tags = doc.evaluate('//font[contains(./b/text(), "Key")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if (tags) {
+				item.tags = Zotero.Utilities.trimInternal(tags.textContent).substr(10).split(/,\s+/);
+			}
 			item.publicationTitle = "SSRN eLibrary";
 			
-			var bits = doc.evaluate('//tr/td/center/font', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var bit;
-			while (bit = bits.iterateNext()) {
-				if (bit.textContent.match(/\d{4}/)) item.date = Zotero.Utilities.trimInternal(bit.textContent);
+			var date = doc.evaluate('id("innerWhite")/center/font[2]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+			if (date && date.textContent.match(/\d{4}/)) {
+				item.date = Zotero.Utilities.trimInternal(date.textContent);
 			}
 			item.url = doc.location.href;
-			if (doc.evaluate('//a[@title="Download from Social Science Research Network"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-				var pdfurl = doc.evaluate('//a[@title="Download from Social Science Research Network"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			/* Commenting out PDF downloading until we add referer capability
+			var pdfurl = doc.evaluate('//a[contains(@href,"pdf")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if (pdfurl) {
+				pdfurl = pdfurl.href;
 			}
+			*/
 			item.attachments = [{url:item.url, title:"SSRN Snapshot", mimeType:"text/html"}];
-			if (pdfurl) item.attachments.push({url:pdfurl, title:"SSRN Full Text PDF", mimeType:"application/pdf"});
+			if (pdfurl) {
+				item.attachments.push({url:pdfurl, title:"SSRN Full Text PDF", mimeType:"application/pdf"});
+			}
 			item.complete();
 		}
 	}, function() {Zotero.done;});
