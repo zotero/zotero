@@ -554,7 +554,7 @@ Zotero.Sync.Server = new function () {
 	
 	this.__defineGetter__('enabled', function () {
 		// Set auto-sync expiry
-		var expiry = new Date("January 1, 2009 00:00:00");
+		var expiry = new Date("February 5, 2009 00:00:00");
 		if (new Date() > expiry) {
 			Components.utils.reportError("Build has expired -- syncing disabled");
 			return false;
