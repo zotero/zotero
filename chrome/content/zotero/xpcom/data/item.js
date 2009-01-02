@@ -3395,7 +3395,10 @@ Zotero.Item.prototype.toArray = function (mode) {
 	var tags = this.getTags();
 	if (tags) {
 		for (var i=0; i<tags.length; i++) {
-			arr.tags.push(tags[i].serialize());
+			var tag = tags[i].serialize();
+			tag.tag = tag.fields.name;
+			tag.type = tag.fields.type;
+			arr.tags.push(tag);
 		}
 	}
 	
