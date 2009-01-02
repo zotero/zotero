@@ -216,6 +216,16 @@ var ZoteroPane = new function()
 			}, 400);
 			Zotero.Prefs.set('firstRun', false);
 		}
+		
+		// Hide sync debugging menu by default
+		if (Zotero.Prefs.get('sync.debugMenu')) {
+			var sep = document.getElementById('zotero-tb-actions-sync-separator');
+			var menuitems = [];
+			sep.nextSibling.hidden = false;
+			sep.nextSibling.nextSibling.hidden = false;
+			sep.nextSibling.nextSibling.nextSibling.hidden = false;
+			sep.nextSibling.nextSibling.nextSibling.nextSibling.hidden = false;
+		}
 	}
 	
 	
