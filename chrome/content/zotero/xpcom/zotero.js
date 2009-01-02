@@ -26,6 +26,7 @@ const ZOTERO_CONFIG = {
 	REPOSITORY_URL: 'http://www.zotero.org/repo',
 	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
 	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
+	FIRST_RUN_URL: 'http://www.zotero.org/support/quick_start_guide',
 	SYNC_URL: 'https://sync.zotero.org/'
 };
 
@@ -173,7 +174,7 @@ var Zotero = new function(){
 		}
 		
 		try {
-			this.getZoteroDirectory();
+			var dataDir = this.getZoteroDirectory();
 		}
 		catch (e) {
 			// Zotero dir not found
@@ -218,8 +219,32 @@ var Zotero = new function(){
 		
 		Zotero.VersionHeader.init();
 		
-		// Initialize keyboard shortcuts
-		Zotero.Keys.init();
+		// Check for DB restore
+		var restoreFile = dataDir.clone();
+		restoreFile.append('restore-from-server');
+		if (restoreFile.exists()) {
+			try {
+				// TODO: better error handling
+				
+				// TODO: prompt for location
+				// TODO: Back up database
+				
+				restoreFile.remove(false);
+				
+				var dbfile = Zotero.getZoteroDatabase();
+				dbfile.remove(false);
+				
+				// Recreate database with no quick start guide
+				Zotero.Schema.skipDefaultData = true;
+				Zotero.Schema.updateSchema();
+				
+				this.restoreFromServer = true;
+			}
+			catch (e) {
+				// Restore from backup?
+				alert(e);
+			}
+		}
 		
 		try {
 			Zotero.DB.test();
@@ -279,6 +304,9 @@ var Zotero = new function(){
 		
 		Zotero.MIMETypeHandler.init();
 		Zotero.Proxies.init();
+		
+		// Initialize keyboard shortcuts
+		Zotero.Keys.init();
 		
 		this.initialized = true;
 		Zotero.debug("Initialized in "+((new Date()).getTime() - start)+" ms");

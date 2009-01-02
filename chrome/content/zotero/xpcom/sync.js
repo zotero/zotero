@@ -408,6 +408,7 @@ Zotero.Sync.Runner = new function () {
 		if (_running) {
 			throw ("Sync already running in Zotero.Sync.Runner.sync()");
 		}
+		
 		_queue = [
 			Zotero.Sync.Server.sync,
 			Zotero.Sync.Storage.sync,
@@ -423,6 +424,12 @@ Zotero.Sync.Runner = new function () {
 	
 	
 	this.next = function () {
+		if (!_running) {
+			var msg = "Sync not running in Zotero.Sync.Runner.next()";
+			this.setError(msg);
+			throw (msg);
+		}
+		
 		if (!_queue.length) {
 			this.setSyncIcon();
 			_running = false;
@@ -536,7 +543,6 @@ Zotero.Sync.Runner.EventListener = {
 		}
 	}
 }
-
 
 
 /**
@@ -666,7 +672,7 @@ Zotero.Sync.Server = new function () {
 	var _sessionLock;
 	
 	
-	function login(callback) {
+	function login(callback, callbackCallback) {
 		var url = _serverURL + "login";
 		
 		var username = Zotero.Sync.Server.username;
@@ -714,13 +720,13 @@ Zotero.Sync.Server = new function () {
 			//Zotero.debug('Got session ID ' + _sessionID + ' from server');
 			
 			if (callback) {
-				callback();
+				callback(callbackCallback);
 			}
 		});
 	}
 	
 	
-	function sync() {
+	function sync(callback) {
 		Zotero.Sync.Runner.setSyncIcon('animate');
 		
 		if (_attempts < 0) {
@@ -729,12 +735,12 @@ Zotero.Sync.Server = new function () {
 		
 		if (!_sessionID) {
 			Zotero.debug("Session ID not available -- logging in");
-			Zotero.Sync.Server.login(Zotero.Sync.Server.sync);
+			Zotero.Sync.Server.login(Zotero.Sync.Server.sync, callback);
 			return;
 		}
 		
 		if (!_sessionLock) {
-			Zotero.Sync.Server.lock(Zotero.Sync.Server.sync);
+			Zotero.Sync.Server.lock(Zotero.Sync.Server.sync, callback);
 			return;
 		}
 		
@@ -764,7 +770,7 @@ Zotero.Sync.Server = new function () {
 				Zotero.debug("Invalid session ID -- logging in");
 				_sessionID = false;
 				_syncInProgress = false;
-				Zotero.Sync.Server.login(Zotero.Sync.Server.sync);
+				Zotero.Sync.Server.login(Zotero.Sync.Server.sync, callback);
 				return;
 			}
 			
@@ -828,8 +834,14 @@ Zotero.Sync.Server = new function () {
 					Zotero.debug("Sync cancelled");
 					Zotero.DB.rollbackTransaction();
 					Zotero.Sync.Server.unlock(function () {
-						Zotero.Sync.Runner.reset();
-						Zotero.Sync.Runner.next();
+						if (callback) {
+							Zotero.Sync.Runner.setSyncIcon();
+							callback();
+						}
+						else { 
+							Zotero.Sync.Runner.reset();
+							Zotero.Sync.Runner.next();
+						}
 					});
 					Zotero.reloadDataObjects();
 					_syncInProgress = false;
@@ -849,7 +861,13 @@ Zotero.Sync.Server = new function () {
 					Zotero.DB.commitTransaction();
 					Zotero.Sync.Server.unlock(function () {
 						_syncInProgress = false;
-						Zotero.Sync.Runner.next();
+						if (callback) {
+							Zotero.Sync.Runner.setSyncIcon();
+							callback();
+						}
+						else {
+							Zotero.Sync.Runner.next();
+						}
 					});
 					return;
 				}
@@ -890,7 +908,13 @@ Zotero.Sync.Server = new function () {
 					Zotero.DB.commitTransaction();
 					Zotero.Sync.Server.unlock(function () {
 						_syncInProgress = false;
-						Zotero.Sync.Runner.next();
+						if (callback) {
+							Zotero.Sync.Runner.setSyncIcon();
+							callback();
+						}
+						else {
+							Zotero.Sync.Runner.next();
+						}
 					});
 				}
 				
@@ -975,7 +999,7 @@ Zotero.Sync.Server = new function () {
 	}
 	
 	
-	function lock(callback) {
+	function lock(callback, callbackCallback) {
 		Zotero.debug("Getting session lock");
 		
 		if (_attempts < 0) {
@@ -1019,7 +1043,7 @@ Zotero.Sync.Server = new function () {
 			_sessionLock = true;
 			
 			if (callback) {
-				callback();
+				callback(callbackCallback);
 			}
 		});
 	}
@@ -1066,14 +1090,14 @@ Zotero.Sync.Server = new function () {
 	}
 	
 	
-	function clear() {
+	function clear(callback) {
 		if (_attempts < 0) {
 			_error('Too many attempts in Zotero.Sync.Server.clear()');
 		}
 		
 		if (!_sessionID) {
 			Zotero.debug("Session ID not available -- logging in");
-			Zotero.Sync.Server.login(Zotero.Sync.Server.clear);
+			Zotero.Sync.Server.login(Zotero.Sync.Server.clear, callback);
 			return;
 		}
 		
@@ -1085,7 +1109,7 @@ Zotero.Sync.Server = new function () {
 			if (_invalidSession(xmlhttp)) {
 				Zotero.debug("Invalid session ID -- logging in");
 				_sessionID = false;
-				Zotero.Sync.Server.login(Zotero.Sync.Server.clear);
+				Zotero.Sync.Server.login(Zotero.Sync.Server.clear, callback);
 				return;
 			}
 			
@@ -1102,6 +1126,10 @@ Zotero.Sync.Server = new function () {
 			}
 			
 			Zotero.Sync.Server.resetClient();
+			
+			if (callback) {
+				callback();
+			}
 		});
 		
 		_resetAttempts();
@@ -1111,14 +1139,14 @@ Zotero.Sync.Server = new function () {
 	/**
 	 * Clear session lock on server
 	 */
-	function resetServer() {
+	function resetServer(callback) {
 		if (_attempts < 0) {
 			_error('Too many attempts in Zotero.Sync.Server.resetServer()');
 		}
 		
 		if (!_sessionID) {
 			Zotero.debug("Session ID not available -- logging in");
-			Zotero.Sync.Server.login(Zotero.Sync.Server.resetServer);
+			Zotero.Sync.Server.login(Zotero.Sync.Server.resetServer, callback);
 			return;
 		}
 		
@@ -1130,7 +1158,7 @@ Zotero.Sync.Server = new function () {
 			if (_invalidSession(xmlhttp)) {
 				Zotero.debug("Invalid session ID -- logging in");
 				_sessionID = false;
-				Zotero.Sync.Server.login(Zotero.Sync.Server.reset);
+				Zotero.Sync.Server.login(Zotero.Sync.Server.reset, callback);
 				return;
 			}
 			
@@ -1149,6 +1177,10 @@ Zotero.Sync.Server = new function () {
 			}
 			
 			_syncInProgress = false;
+			
+			if (callback) {
+				callback();
+			}
 		});
 		
 		_resetAttempts();

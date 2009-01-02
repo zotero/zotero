@@ -26,8 +26,8 @@ Zotero.Schema = new function(){
 	this.updateSchema = updateSchema;
 	this.stopRepositoryTimer = stopRepositoryTimer;
 	
+	this.skipDefaultData = false;
 	this.dbInitialized = false;
-	this.upgradeFinished = false;
 	this.goToChangeLog = false;
 	
 	var _dbVersions = [];
@@ -685,30 +685,32 @@ Zotero.Schema = new function(){
 			_updateDBVersion('userdata', _getSchemaSQLVersion('userdata'));
 			_updateDBVersion('triggers', _getSchemaSQLVersion('triggers'));
 			
-			/*
-			TODO: uncomment for release
-			var sql = "INSERT INTO items VALUES(1, 14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'AJ4PT6IT')";
-			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemAttachments VALUES (1, NULL, 3, 'text/html', 25, NULL, NULL)";
-			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemDataValues VALUES (?, ?)";
-			Zotero.DB.query(sql, [1, "Zotero - " + Zotero.getString('install.quickStartGuide')]);
-			var sql = "INSERT INTO itemData VALUES (1, 110, 1)";
-			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemDataValues VALUES (2, 'http://www.zotero.org/documentation/quick_start_guide')";
-			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemData VALUES (1, 1, 2)";
-			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemDataValues VALUES (3, CURRENT_TIMESTAMP)";
-			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemData VALUES (1, 27, 3)";
-			Zotero.DB.query(sql);
-			var sql = "INSERT INTO itemNotes (itemID, sourceItemID, note) VALUES (1, NULL, ?)";
-			var msg = Zotero.getString('install.quickStartGuide.message.welcome')
-				+ " " + Zotero.getString('install.quickStartGuide.message.clickViewPage')
-				+ "\n\n" + Zotero.getString('install.quickStartGuide.message.thanks');
-			Zotero.DB.query(sql, msg);
-			*/
+			if (!Zotero.Schema.skipDefaultData) {
+				/*
+				TODO: uncomment for release
+				var sql = "INSERT INTO items VALUES(1, 14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'AJ4PT6IT')";
+				Zotero.DB.query(sql);
+				var sql = "INSERT INTO itemAttachments VALUES (1, NULL, 3, 'text/html', 25, NULL, NULL)";
+				Zotero.DB.query(sql);
+				var sql = "INSERT INTO itemDataValues VALUES (?, ?)";
+				Zotero.DB.query(sql, [1, "Zotero - " + Zotero.getString('install.quickStartGuide')]);
+				var sql = "INSERT INTO itemData VALUES (1, 110, 1)";
+				Zotero.DB.query(sql);
+				var sql = "INSERT INTO itemDataValues VALUES (2, 'http://www.zotero.org/documentation/quick_start_guide')";
+				Zotero.DB.query(sql);
+				var sql = "INSERT INTO itemData VALUES (1, 1, 2)";
+				Zotero.DB.query(sql);
+				var sql = "INSERT INTO itemDataValues VALUES (3, CURRENT_TIMESTAMP)";
+				Zotero.DB.query(sql);
+				var sql = "INSERT INTO itemData VALUES (1, 27, 3)";
+				Zotero.DB.query(sql);
+				var sql = "INSERT INTO itemNotes (itemID, sourceItemID, note) VALUES (1, NULL, ?)";
+				var msg = Zotero.getString('install.quickStartGuide.message.welcome')
+					+ " " + Zotero.getString('install.quickStartGuide.message.clickViewPage')
+					+ "\n\n" + Zotero.getString('install.quickStartGuide.message.thanks');
+				Zotero.DB.query(sql, msg);
+				*/
+			}
 			Zotero.DB.commitTransaction();
 			
 			self.dbInitialized = true;
