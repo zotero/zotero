@@ -424,12 +424,6 @@ Zotero.Sync.Runner = new function () {
 	
 	
 	this.next = function () {
-		if (!_running) {
-			var msg = "Sync not running in Zotero.Sync.Runner.next()";
-			this.setError(msg);
-			throw (msg);
-		}
-		
 		if (!_queue.length) {
 			this.setSyncIcon();
 			_running = false;
@@ -1033,6 +1027,15 @@ Zotero.Sync.Server = new function () {
 			var response = xmlhttp.responseXML.childNodes[0];
 			
 			if (response.firstChild.tagName == 'error') {
+				if (_checkServerSessionLock(response.firstChild)) {
+					Zotero.Sync.Server.lock(function () {
+						if (callback) {
+							callback(callbackCallback);
+						}
+					});
+					return;
+				}
+				
 				_error(response.firstChild.firstChild.nodeValue);
 			}
 			
@@ -1243,6 +1246,49 @@ Zotero.Sync.Server = new function () {
 			Zotero.debug(xmlhttp.responseText);
 			_error('Invalid response from server', xmlhttp.responseText);
 		}
+	}
+	
+	
+	function _checkServerSessionLock(errorNode, callback) {
+		var code = errorNode.getAttribute('code');
+		if (code != 'SYNC_IN_PROGRESS') {
+			return false;
+		}
+		var lastAccessTime = errorNode.getAttribute('lastAccessTime');
+		var ipAddress = errorNode.getAttribute('ipAddress');
+		
+		var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+					.createInstance(Components.interfaces.nsIPrompt);
+		var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
+		+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL)
+		+ pr.BUTTON_POS_1_DEFAULT;
+		var index = pr.confirmEx(
+			Zotero.getString('general.warning'),
+			// TODO: localize
+			"Another sync operation, started at " + lastAccessTime + " from "
+			+ (ipAddress
+				? "another IP address (" + ipAddress + ")"
+				: "the current IP address")
+			+ ", "
+			+ "is still in progress. "
+			+ "This may indicate an active sync "
+			+ (ipAddress ? "from another computer " : "")
+			+ "or may have been caused by an interrupted session."
+			+ "\n\n"
+			+ "Do you want to reset the existing session? You should only do so "
+			+ "if you do not believe another sync process is currently running.",
+			buttonFlags,
+			"Reset Session",
+			null, null, null, {}
+			);
+		
+		if (index == 0) {
+			// TODO: 
+			Zotero.Sync.Server.resetServer(callback);
+			return true;
+		}
+		
+		return false;
 	}
 	
 	
