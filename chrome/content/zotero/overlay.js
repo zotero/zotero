@@ -179,12 +179,40 @@ var ZoteroPane = new function()
 		
 		// If the database was initialized and Zotero hasn't been run before
 		// in this profile, display the Quick Start Guide -- this way the guide
-		// won't be displayed they sync their DB to another profile or if
+		// won't be displayed when they sync their DB to another profile or if
 		// they the DB is initialized erroneously (e.g. while switching data
 		// directory locations)
-		if (Zotero.Schema.dbInitialized && Zotero.Prefs.get('firstRun')) {
+		if (Zotero.restoreFromServer) {
+			Zotero.restoreFromServer = false;
+			
 			setTimeout(function () {
-				gBrowser.selectedTab = gBrowser.addTab('http://www.zotero.org/documentation/quick_start_guide');
+				var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+							.getService(Components.interfaces.nsIPrompt);
+				var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
+									+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL);
+				var index = pr.confirmEx(
+					"Zotero Restore",
+					"The local Zotero database has been cleared."
+						+ " "
+						+ "Would you like to restore from the Zotero server now?",
+					buttonFlags,
+					"Sync Now",
+					null, null, null, {}
+				);
+				
+				if (index == 0) {
+					Zotero.Sync.Server.sync(function () {
+						pr.alert(
+							"Restore Completed",
+							"The local Zotero database has been successfully restored."
+						);
+					});
+				}
+			}, 1000);
+		}
+		else if (Zotero.Schema.dbInitialized && Zotero.Prefs.get('firstRun')) {
+			setTimeout(function () {
+				gBrowser.selectedTab = gBrowser.addTab(ZOTERO_CONFIG.FIRST_RUN_URL);
 			}, 400);
 			Zotero.Prefs.set('firstRun', false);
 		}

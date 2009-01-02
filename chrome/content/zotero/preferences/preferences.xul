@@ -171,120 +171,164 @@ To add a new preference:
 			<preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string" instantApply="true"/>
 		</preferences>
 		
-		<groupbox>
-			<caption label="Zotero Sync Server"/>
+		<tabbox>
+			<tabs>
+				<tab label="Settings"/>
+				<tab label="Reset"/>
+			</tabs>
 			
-			<grid>
-				<columns>
-					<column/>
-					<column/>
-				</columns>
+			<tabpanels>
+				<tabpanel orient="vertical">
+					<groupbox>
+						<caption label="Zotero Sync Server"/>
+						
+						<grid>
+							<columns>
+								<column/>
+								<column/>
+							</columns>
+							
+							<rows>
+								<row>
+									<label value="Username:"/>
+									<textbox preference="pref-sync-username"
+										onchange="Zotero.Prefs.set('sync.server.username', this.value); var pass = document.getElementById('sync-password'); if (pass.value) { Zotero.Sync.Server.password = pass.value; }"/>
+								</row>
+								<row>
+									<label value="Password:"/>
+									<textbox id="sync-password" type="password"
+										onchange="Zotero.Sync.Server.password = this.value"/>
+								</row>
+								<!--
+								<row>
+									<box/>
+									<hbox>
+										<button label="Verify login"
+											oncommand="alert('Unimplemented')"/>
+									</hbox>
+								</row>
+								-->
+							</rows>
+						</grid>
+						
+						<separator class="thin"/>
+						
+						<hbox>
+							<checkbox label="Sync automatically" preference="pref-sync-autosync"/>
+						</hbox>
+					</groupbox>
+					
+					
+					<groupbox>
+						<caption label="Storage Server"/>
+						
+						<hbox>
+							<checkbox label="Enable file syncing" preference="pref-storage-enabled"/>
+						</hbox>
+						
+						<separator class="thin"/>
+						
+						<grid id="storage-settings">
+							<columns>
+								<column/>
+								<column flex="1"/>
+							</columns>
+							
+							<rows>
+								<row>
+									<label value="Protocol:"/>
+									<hbox>
+										<menulist id="storage-url-protocol"
+												preference="pref-storage-protocol"
+												onsynctopreference="updateStorageSettings(this.value)">
+											<menupopup>
+												<menuitem label="WebDAV" value="webdav"/>
+												<!-- TODO: localize -->
+												<menuitem label="WebDAV (Secure)" value="webdavs"/>
+											</menupopup>
+										</menulist>
+									</hbox>
+								</row>
+								<row>
+									<label value="URL:"/>
+									<hbox>
+										<label id="storage-url-prefix"/>
+										<textbox id="storage-url" flex="1"
+											preference="pref-storage-url"
+											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); verifyStorageServer(); }"
+											onsynctopreference="unverifyStorageServer();"
+											onchange="this.value = this.value.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, '')"/>
+										<label value="/zotero/"/>
+									</hbox>
+								</row>
+								<row>
+									<label value="Username:"/>
+									<hbox>
+										<textbox id="storage-username"
+											preference="pref-storage-username"
+											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout('verifyStorageServer();', 1); }"
+											onsynctopreference="unverifyStorageServer();"
+											onchange="var pass = document.getElementById('storage-password'); if (pass.value) { Zotero.Sync.Storage.password = pass.value; }"/>
+									</hbox>
+								</row>
+								<row>
+									<label value="Password:"/>
+									<hbox>
+										<textbox id="storage-password" flex="0" type="password"
+											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout('verifyStorageServer();', 1); }"
+											oninput="unverifyStorageServer()"
+											onchange="Zotero.Sync.Storage.password = this.value"/>
+									</hbox>
+								</row>
+								<row>
+									<box/>
+									<hbox>
+										<button id="storage-verify" label="Verify Server"
+											oncommand="verifyStorageServer()"/>
+										<button id="storage-abort" label="Stop" hidden="true"/>
+										<progressmeter id="storage-progress" hidden="true"
+											mode="undetermined"/>
+									</hbox>
+								</row>
+							</rows>
+						</grid>
+					</groupbox>
+				</tabpanel>
 				
-				<rows>
-					<row>
-						<label value="Username:"/>
-						<textbox preference="pref-sync-username"
-							onchange="Zotero.Prefs.set('sync.server.username', this.value); var pass = document.getElementById('sync-password'); if (pass.value) { Zotero.Sync.Server.password = pass.value; }"/>
-					</row>
-					<row>
-						<label value="Password:"/>
-						<textbox id="sync-password" type="password"
-							onchange="Zotero.Sync.Server.password = this.value"/>
-					</row>
-					<!--
-					<row>
-						<box/>
-						<hbox>
-							<button label="Verify login"
-								oncommand="alert('Unimplemented')"/>
-						</hbox>
-					</row>
-					-->
-				</rows>
-			</grid>
-			
-			<separator class="thin"/>
-			
-			<hbox>
-				<checkbox label="Sync automatically" preference="pref-sync-autosync"/>
-			</hbox>
-		</groupbox>
-		
-		
-		<groupbox>
-			<caption label="Storage Server"/>
-			
-			<hbox>
-				<checkbox label="Enable file syncing" preference="pref-storage-enabled"/>
-			</hbox>
-			
-			<separator class="thin"/>
-			
-			<grid id="storage-settings">
-				<columns>
-					<column/>
-					<column flex="1"/>
-				</columns>
-				
-				<rows>
-					<row>
-						<label value="Protocol:"/>
-						<hbox>
-							<menulist id="storage-url-protocol"
-									preference="pref-storage-protocol"
-									onsynctopreference="updateStorageSettings(this.value)">
-								<menupopup>
-									<menuitem label="WebDAV" value="webdav"/>
-									<!-- TODO: localize -->
-									<menuitem label="WebDAV (Secure)" value="webdavs"/>
-								</menupopup>
-							</menulist>
-						</hbox>
-					</row>
-					<row>
-						<label value="URL:"/>
-						<hbox>
-							<label id="storage-url-prefix"/>
-							<textbox id="storage-url" flex="1"
-								preference="pref-storage-url"
-								onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); verifyStorageServer(); }"
-								onsynctopreference="unverifyStorageServer();"
-								onchange="this.value = this.value.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, '')"/>
-							<label value="/zotero/"/>
-						</hbox>
-					</row>
-					<row>
-						<label value="Username:"/>
-						<hbox>
-							<textbox id="storage-username"
-								preference="pref-storage-username"
-								onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout('verifyStorageServer();', 1); }"
-								onsynctopreference="unverifyStorageServer();"
-								onchange="var pass = document.getElementById('storage-password'); if (pass.value) { Zotero.Sync.Storage.password = pass.value; }"/>
-						</hbox>
-					</row>
-					<row>
-						<label value="Password:"/>
-						<hbox>
-							<textbox id="storage-password" flex="0" type="password"
-								onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout('verifyStorageServer();', 1); }"
-								oninput="unverifyStorageServer()"
-								onchange="Zotero.Sync.Storage.password = this.value"/>
-						</hbox>
-					</row>
-					<row>
-						<box/>
-						<hbox>
-							<button id="storage-verify" label="Verify Server"
-								oncommand="verifyStorageServer()"/>
-							<button id="storage-abort" label="Stop" hidden="true"/>
-							<progressmeter id="storage-progress" hidden="true"
-								mode="undetermined"/>
-						</hbox>
-					</row>
-				</rows>
-			</grid>
-		</groupbox>
+				<tabpanel id="zotero-reset" orient="vertical">
+					<radiogroup oncommand="handleSyncResetSelect(this);">
+						<grid>
+							<columns>
+								<column/>
+								<column align="start" pack="start" flex="1"/>
+                            </columns>
+							
+							<rows>
+								<row id="zotero-restore-from-server" selected="true">
+								<radio/>
+									<vbox onclick="this.previousSibling.click()">
+										<label value="Restore from server"/>
+										<description>Erase all local Zotero data and restore from the sync server.</description>
+									</vbox>
+								</row>
+								
+								<row id="zotero-restore-to-server">
+									<radio/>
+									<vbox onclick="this.previousSibling.click()">
+										<label value="Restore to server"/>
+										<description>Erase all server data and overwrite with local Zotero data.</description>
+									</vbox>
+								</row>
+							</rows>
+						</grid>
+					</radiogroup>
+					
+					<hbox>
+						<button id="zotero-reset-button" label="Reset..." oncommand="handleSyncReset(document.getElementById('zotero-reset').firstChild.selectedItem.parentNode.id.substr(7))"/>
+					</hbox>
+				</tabpanel>
+			</tabpanels>
+		</tabbox>
 	</prefpane>
 	
 	

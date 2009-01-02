@@ -72,6 +72,8 @@ grid row hbox:first-child
 /*
  * Sync pane
  */
+ 
+/* Settings tab */
 #zotero-prefpane-sync row, #zotero-prefpane-sync row hbox
 {
 	-moz-box-align: center;
@@ -112,6 +114,50 @@ grid row hbox:first-child
 	margin-left: 0;
 	min-width: 8em;
 }
+
+/* Reset tab */
+#zotero-reset row
+{
+	margin: 0;
+	padding: 15px;
+}
+
+#zotero-reset row:not(:last-child)
+{
+	border-bottom: 1px #999 solid;
+}
+
+#zotero-reset row vbox
+{
+	-moz-box-align: start;
+}
+
+#zotero-reset row[selected="true"]
+{
+}
+
+
+#zotero-reset row vbox label
+{
+	margin-left: 3px;
+	font-weight: bold;
+	font-size: 14px;
+}
+
+#zotero-reset description
+{
+	margin-left: 3px;
+	margin-top: 1px;
+	font-size: 12px;
+}
+
+/* Reset button */
+#zotero-reset > hbox
+{
+	margin-top: 5px;
+	-moz-box-pack: center;
+}
+
 
 
 /*

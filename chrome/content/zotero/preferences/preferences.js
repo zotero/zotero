@@ -148,6 +148,24 @@ function populateOpenURLResolvers() {
 //
 // Sync
 //
+/*
+function updateSyncStatus() {
+	var disabled = !Zotero.Sync.Server.enabled;
+	
+	var radioGroup = document.getElementById('zotero-reset').firstChild;
+	radioGroup.disabled = disabled;
+	var labels = radioGroup.getElementsByTagName('label');
+	for each(var label in labels) {
+		label.disabled = disabled;
+	}
+	var labels = radioGroup.getElementsByTagName('description');
+	for each(var label in labels) {
+		label.disabled = disabled;
+	}
+	document.getElementById('zotero-reset-button').disabled = disabled;
+}
+*/
+
 function updateStorageSettings(value) {
 	if (!value) {
 		value = document.getElementById('pref-storage-protocol').value;
@@ -223,6 +241,130 @@ function verifyStorageServer() {
 	}
 }
 
+function handleSyncResetSelect(obj) {
+	var index = obj.selectedIndex;
+	var rows = obj.getElementsByTagName('row');
+	
+	for (var i=0; i<rows.length; i++) {
+		if (i == index) {
+			rows[i].setAttribute('selected', 'true');
+		}
+		else {
+			rows[i].removeAttribute('selected');
+		}
+	}
+}
+
+function handleSyncReset(action) {
+	var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+				.getService(Components.interfaces.nsIPrompt);
+	
+	if (!Zotero.Sync.Server.enabled) {
+		pr.alert(
+			Zotero.getString('general.error'),
+			// TODO: localize
+			"You must enter a username and password in the "
+				+ document.getElementById('zotero-prefpane-sync')
+					.getElementsByTagName('tab')[0].label
+				+ " tab before using the reset options."
+		);
+		return;
+	}
+	
+	var account = Zotero.Sync.Server.username;
+	
+	switch (action) {
+		case 'restore-from-server':
+			var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
+								+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL)
+								+ pr.BUTTON_POS_1_DEFAULT;
+			var index = pr.confirmEx(
+				// TODO: localize
+				Zotero.getString('general.warning'),
+				"All data in this copy of Zotero will be erased and replaced with "
+					+ "data belonging to user '" + account + "' on the Zotero server.",
+				buttonFlags,
+				"Replace Zotero Data",
+				null, null, null, {}
+			);
+			
+			switch (index) {
+				case 0:
+					// TODO: better error handling
+					
+					// Verify username and password
+					Zotero.Sync.Server.login(function () {
+						Zotero.Schema.stopRepositoryTimer();
+						Zotero.Sync.Runner.clearSyncTimeout();
+						
+						Zotero.DB.skipBackup = true;
+						
+						var file = Zotero.getZoteroDirectory();
+						file.append('restore-from-server');
+						Zotero.File.putContents(file, '');
+						
+						var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING);
+						var index = pr.confirmEx(
+							Zotero.getString('general.restartRequired'),
+							// TODO: localize
+							"Firefox must be restarted to complete the restore process.",
+							buttonFlags,
+							Zotero.getString('general.restartNow'),
+							null, null, null, {}
+						);
+						
+						var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
+								.getService(Components.interfaces.nsIAppStartup);
+						appStartup.quit(Components.interfaces.nsIAppStartup.eRestart);
+						appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
+					});
+					break;
+				
+				// Cancel
+				case 1:
+					return;
+			}
+			break;
+		
+		case 'restore-to-server':
+			var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
+							+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL)
+							+ pr.BUTTON_POS_1_DEFAULT;
+			var index = pr.confirmEx(
+				// TODO: localize
+				Zotero.getString('general.warning'),
+				"All item data belonging to user '" + account + "' on the Zotero server "
+					+ "will be erased and replaced with data from this copy of Zotero.",
+				buttonFlags,
+				"Replace Server Data",
+				null, null, null, {}
+			);
+			
+			switch (index) {
+				case 0:
+					// TODO: better error handling
+					Zotero.Sync.Server.clear(function () {
+						Zotero.Sync.Server.sync(function () {
+							pr.alert(
+								"Restore Completed",
+								"Item data on the Zotero server has been "
+									+ "successfully restored."
+							);
+						});
+					});
+					break;
+				
+				// Cancel
+				case 1:
+					return;
+			}
+			
+			break;
+		
+		default:
+			throw ("Invalid action '" + action + "' in handleSyncReset()");
+	}
+}
 
 
 /*
