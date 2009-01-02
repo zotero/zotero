@@ -293,7 +293,7 @@ function handleSyncReset(action) {
 					// TODO: better error handling
 					
 					// Verify username and password
-					Zotero.Sync.Server.login(function () {
+					var callback = function () {
 						Zotero.Schema.stopRepositoryTimer();
 						Zotero.Sync.Runner.clearSyncTimeout();
 						
@@ -317,7 +317,15 @@ function handleSyncReset(action) {
 								.getService(Components.interfaces.nsIAppStartup);
 						appStartup.quit(Components.interfaces.nsIAppStartup.eRestart);
 						appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
-					});
+					};
+					
+					// TODO: better way of checking for an active session?
+					if (Zotero.Sync.Server.sessionIDComponent == 'sessionid=') {
+						Zotero.Sync.Server.login(callback);
+					}
+					else {
+						callback();
+					}
 					break;
 				
 				// Cancel
