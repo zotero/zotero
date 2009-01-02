@@ -2176,6 +2176,7 @@ Zotero.Translate.prototype._exportGetCollection = function() {
 	if(this._collectionsLeft && this._collectionsLeft.length != 0) {
 		var returnItem = this._collectionsLeft.shift();
 		var obj = returnItem.serialize();
+		obj.id = obj.primary.collectionID;
 		obj.name = obj.fields.name;
 		return obj;
 	}
