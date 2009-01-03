@@ -1356,15 +1356,15 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		// handle notes
 		if(item.notes) {
 			for each(var note in item.notes) {
-				var item = new Zotero.Item(false, 'note');
-				item.setNote(note.note);
+				var myNote = new Zotero.Item(false, 'note');
+				myNote.setNote(note.note);
 				if (myID) {
-					item.setSource(myID);
+					myNote.setSource(myID);
 				}
-				var noteID = item.save();
+				var noteID = myNote.save();
 				
 				// handle see also
-				var myNote = Zotero.Items.get(noteID);
+				myNote = Zotero.Items.get(noteID);
 				this._itemTagsAndSeeAlso(note, myNote);
 			}
 		}
