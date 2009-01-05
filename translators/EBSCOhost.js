@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-08-06 17:00:00"
+	"lastUpdated":"2009-01-05 21:20:00"
 }
 
 function detectWeb(doc, url) {
@@ -76,7 +76,7 @@ function generateDeliverString(nsResolver, doc){
  * given the text of the delivery page, downloads an item
  */
 function downloadFunction(text) {
-	var postLocation = /<form name="aspnetForm" method="post" action="([^"]+)"/
+	var postLocation = /<form (?:autocomplete="o(?:ff|n)" )?name="aspnetForm" method="post" action="([^"]+)"/
 	var m = postLocation.exec(text);
 	var deliveryURL = m[1].replace(/&amp;/g, "&");
 	m = customViewStateMatch.exec(text);

@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":25,
 	"inRepository":true,
-	"lastUpdated":"2008-07-20 01:40:00"
+	"lastUpdated":"2009-01-02 20:55:00"
 }
 
 Zotero.configure("getCollections", true);
