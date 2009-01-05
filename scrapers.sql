@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2008-12-27 20:50:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2009-01-05 21:20:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -24792,7 +24792,8 @@ function doWeb(doc, url) {
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2008-08-06 17:00:00', '1', '100', '4', 'EBSCOhost', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)', 
+
+REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b3.r1', '', '2009-01-05 21:20:00', 1, 100, 4, 'EBSCOhost', 'Simon Kornblith and Michael Berkowitz', 'https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -24825,7 +24826,7 @@ REPLACE INTO translators VALUES ('d0b1914a-11f1-4dd7-8557-b32fe8a3dd47', '1.0.0b
 	if(persistentLink) {
 		return "journalArticle";
 	}
-}', 
+}',
 'var customViewStateMatch = /<input type="hidden" name="__CUSTOMVIEWSTATE" id="__CUSTOMVIEWSTATE" value="([^"]+)" \/>/
 var host;
 
@@ -24857,7 +24858,7 @@ function generateDeliverString(nsResolver, doc){
  * given the text of the delivery page, downloads an item
  */
 function downloadFunction(text) {
-	var postLocation = /<form name="aspnetForm" method="post" action="([^"]+)"/
+	var postLocation = /<form (?:autocomplete="o(?:ff|n)" )?name="aspnetForm" method="post" action="([^"]+)"/
 	var m = postLocation.exec(text);
 	var deliveryURL = m[1].replace(/&amp;/g, "&");
 	m = customViewStateMatch.exec(text);
@@ -24931,6 +24932,7 @@ function doWeb(doc, url) {
 	}
 	Zotero.wait();
 }');
+
 
 REPLACE INTO translators VALUES ('ce7a3727-d184-407f-ac12-52837f3361ff', '1.0.0b3.r1', '', '2008-04-18 08:55:00', '1', '100', '4', 'NYTimes.com', 'Simon Kornblith', '^http://(?:query\.nytimes\.com/search/query|(?:select\.|www\.)?nytimes\.com/.)', 
 'function detectWeb(doc, url) {
@@ -29709,7 +29711,7 @@ function doImport() {
 }');
 
 
-REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b4.r1', '', '2008-07-20 01:40:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
+REPLACE INTO translators VALUES ('14763d24-8ba0-45df-8f52-b8d1108e7ac9', '1.0.0b4.r1', '', '2009-01-02 20:55:00', 1, 25, 2, 'Zotero RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("getCollections", true);
 Zotero.configure("dataMode", "rdf");
 Zotero.addOption("exportNotes", true);
@@ -30153,6 +30155,7 @@ function doExport() {
 	}
 }');
 
+
 REPLACE INTO translators VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '1.0.0b3.r1', '', '2006-10-02 17:00:00', 1, 100, 2, 'Unqualified Dublin Core RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("dataMode", "rdf");',
 'function doExport() {
@@ -30263,7 +30266,8 @@ REPLACE INTO translators VALUES ('6e372642-ed9d-4934-b5d1-c11ac758ebb7', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '1.0.0b4.r1', '', '2007-03-22 15:55:00', 1, 100, 1, 'RDF', 'Simon Kornblith', 'rdf',
+
+REPLACE INTO translators VALUES ('5e3ad958-ac79-463d-812b-a86a9235c28f', '1.0.0b4.r1', '', '2009-01-02 21:15:00', 1, 100, 1, 'RDF', 'Simon Kornblith', 'rdf',
 'Zotero.configure("dataMode", "rdf");
 
 function detectImport() {
@@ -30275,6 +30279,7 @@ function detectImport() {
 		return true;
 	}
 }',
+
 'var rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
 var n = {
@@ -30844,6 +30849,7 @@ function doImport() {
 		}
 	}
 }');
+
 
 REPLACE INTO translators VALUES ('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7', '1.0.2', '', '2008-12-01 18:31:54', '1', '100', '3', 'RIS', 'Simon Kornblith', 'ris', 
 'Zotero.configure("dataMode", "line");
@@ -31629,7 +31635,7 @@ function doExport() {
 }');
 
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-12-16 23:13:33', 1, 200, 3, 'BibTeX', 'Simon Kornblith', 'bib',
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2008-12-29 22:55:00', 1, 200, 3, 'BibTeX', 'Simon Kornblith', 'bib',
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("exportCharset", "UTF-8");
 
@@ -33425,7 +33431,7 @@ function writeField(field, value, isMacro) {
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
 		if(!isMacro) value = value.replace(/([^\s]+[A-Z][^\s]*)/g, "{$1}");
 	}
-	if (!Zotero.getOption("UTF8")) {
+	if (Zotero.getOption("exportCharset") != "UTF-8") {
 		value = value.replace(/[\u0080-\uFFFF]/g, mapAccent);
 	}
 	Zotero.write(value);
