@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2007-03-22 15:55:00"
+	"lastUpdated":"2009-01-02 21:15:00"
 }
 
 Zotero.configure("dataMode", "rdf");
@@ -122,7 +122,6 @@ function processCollection(node, collection) {
 			collection.children.push({id:Zotero.RDF.getResourceURI(child), type:"item"});
 		}
 	}
-	
 	return collection;
 }
 
