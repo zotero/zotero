@@ -2,13 +2,13 @@
 	"translatorID":"a1a97ad4-493a-45f2-bd46-016069de4162",
 	"translatorType":4,
 	"label":"Optical Society of America",
-	"creator":"Michael Berkowitz",
+	"creator":"Michael Berkowitz and billi",
 	"target":"https?://[^.]+\\.(opticsinfobase|osa)\\.org",
 	"minVersion":"1.0.0b4.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-07-15 19:40:00"
+	"lastUpdated":"2009-01-06 17:00:00"
 }
 
 function detectWeb(doc, url) {
@@ -48,14 +48,14 @@ function doWeb(doc, url) {
 		articles = [url];
 	}
 	Zotero.Utilities.processDocuments(articles, function(newDoc) {
-		var osalink = newDoc.evaluate('//div[@id="abstract"]/p/a[contains(text(), "opticsinfobase")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var osalink = newDoc.evaluate('//div[@id="abstract-header"]/p/a[contains(text(), "opticsinfobase")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var pdfpath = '//div[@id="abstract-header"]/p/a[contains(text(), "Full Text")]';
+		var pdflink = newDoc.evaluate(pdfpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var abstractblock = newDoc.evaluate('//meta[@name="dc.description"]', newDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+		var doiblock = newDoc.evaluate('//meta[@name="dc.identifier"]', newDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 		Zotero.Utilities.HTTP.doGet(osalink, function(text) {
 			var action = text.match(/select\s+name=\"([^"]+)\"/)[1];
 			var id = text.match(/input\s+type=\"hidden\"\s+name=\"articles\"\s+value=\"([^"]+)\"/)[1];
-			if (newDoc.evaluate('//p[*[contains(text(), "DOI")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-				var doi = Zotero.Utilities.trimInternal(newDoc.evaluate('//p[*[contains(text(), "DOI")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-				doi = doi.match(/doi:(.*)$/)[1];
-			}
 			var get = 'http://' + host + '/custom_tags/IB_Download_Citations.cfm';
 			var post = 'articles=' + id + '&ArticleAction=save_endnote2&' + action + '=save_endnote2';
 			Zotero.Utilities.HTTP.doPost(get, post, function(text) {
@@ -69,8 +69,17 @@ function doWeb(doc, url) {
 					} else {
 						pubName = item.publicationTitle;
 					}
-					if (doi) item.DOI = doi;
+					if (doiblock) {
+						item.DOI = doiblock.getAttribute('content').match(/doi:(.*)$/)[1];
+					}
 					item.attachments = [{url:osalink, title:pubName + " Snapshot", mimeType:"text/html"}];
+					if (pdflink) {
+						item.attachments.push({url:pdflink.href, title:"OSA Journals PDF", mimeType:"application/pdf"});
+					}
+
+					if (abstractblock) {
+						item.abstractNote = abstractblock.getAttribute('content');
+					}
 					item.complete();
 				});
 				translator.translate();
