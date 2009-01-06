@@ -20215,7 +20215,8 @@ REPLACE INTO translators VALUES ('8a07dd43-2bce-47bf-b4bf-c0fc441b79a9', '1.0.0b
 	}
 }');
 
-REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b4.r1', '', '2008-07-15 19:40:00', '0', '100', '4', 'Optical Society of America', 'Michael Berkowitz', 'https?://[^.]+\.(opticsinfobase|osa)\.org', 
+
+REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b4.r1', '', '2009-01-06 21:05:00', 1, 100, 4, 'Optical Society of America', 'Michael Berkowitz and Eli Osherovich', 'https?://[^.]+\.(opticsinfobase|osa)\.org',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -20228,7 +20229,7 @@ REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b
 	} else if (url.indexOf("abstract.cfm") != -1) {
 		return "journalArticle";
 	}
-}', 
+}',
 'function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -20252,14 +20253,14 @@ REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b
 		articles = [url];
 	}
 	Zotero.Utilities.processDocuments(articles, function(newDoc) {
-		var osalink = newDoc.evaluate(''//div[@id="abstract"]/p/a[contains(text(), "opticsinfobase")]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var osalink = newDoc.evaluate(''//div[@id="abstract-header"]/p/a[contains(text(), "opticsinfobase")]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var pdfpath = ''//div[@id="abstract-header"]/p/a[contains(text(), "Full Text")]'';
+		var pdflink = newDoc.evaluate(pdfpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var abstractblock = newDoc.evaluate(''//meta[@name="dc.description"]'', newDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+		var identifierblock = newDoc.evaluate(''//meta[@name="dc.identifier"]'', newDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 		Zotero.Utilities.HTTP.doGet(osalink, function(text) {
 			var action = text.match(/select\s+name=\"([^"]+)\"/)[1];
 			var id = text.match(/input\s+type=\"hidden\"\s+name=\"articles\"\s+value=\"([^"]+)\"/)[1];
-			if (newDoc.evaluate(''//p[*[contains(text(), "DOI")]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-				var doi = Zotero.Utilities.trimInternal(newDoc.evaluate(''//p[*[contains(text(), "DOI")]]'', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-				doi = doi.match(/doi:(.*)$/)[1];
-			}
 			var get = ''http://'' + host + ''/custom_tags/IB_Download_Citations.cfm'';
 			var post = ''articles='' + id + ''&ArticleAction=save_endnote2&'' + action + ''=save_endnote2'';
 			Zotero.Utilities.HTTP.doPost(get, post, function(text) {
@@ -20273,8 +20274,19 @@ REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b
 					} else {
 						pubName = item.publicationTitle;
 					}
-					if (doi) item.DOI = doi;
+					if (identifierblock) {
+						 if (/doi:(.*)$/.test(identifierblock.getAttribute(''content''))) {
+							item.DOI = RegExp.$1;
+						}
+					}
 					item.attachments = [{url:osalink, title:pubName + " Snapshot", mimeType:"text/html"}];
+					if (pdflink) {
+						item.attachments.push({url:pdflink.href, title:"OSA Journals PDF", mimeType:"application/pdf"});
+					}
+
+					if (abstractblock) {
+						item.abstractNote = abstractblock.getAttribute(''content'');
+					}
 					item.complete();
 				});
 				translator.translate();
@@ -20282,6 +20294,7 @@ REPLACE INTO translators VALUES ('a1a97ad4-493a-45f2-bd46-016069de4162', '1.0.0b
 		});
 	}, function() {Zotero.done;});
 }');
+
 
 REPLACE INTO translators VALUES ('b61c224b-34b6-4bfd-8a76-a476e7092d43', '1.0.0b4.r5', '', '2008-07-07 17:00:00', '1', '100', '4', 'SSRN', 'Michael Berkowitz', 'http://papers\.ssrn\.com/', 
 'function detectWeb(doc, url)	{
