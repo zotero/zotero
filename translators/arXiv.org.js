@@ -61,7 +61,8 @@ function doWeb(doc, url) {
 			do {
 				var newID = doc.evaluate('./text()', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 				newID = newID.replace(/arXiv:/, "");
-				newID = newID.replace(/\//g, "%2F"); 
+				newID = newID.replace(/\//g, "%2F");
+				newID = newID.replace(/v\d*/, ""); //remove version number  
 				availableItems[i] = doc.evaluate(titleNode, title, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; 
 				arXivIDs[i] = newID;
 				i++;
@@ -71,7 +72,8 @@ function doWeb(doc, url) {
 			do {
 				var newID= elmt.textContent;
 				newID = newID.replace(/arXiv:/, "");
-				newID = newID.replace(/\//g, "%2F"); 
+				newID = newID.replace(/\//g, "%2F");
+				newID = newID.replace(/v\d*/, ""); //remove version number 
 				availableItems[i] = Zotero.Utilities.cleanString(title.textContent.replace(/^\s*Title:\s+/, "")); 
 				arXivIDs[i] = newID;
 				i++;
@@ -100,6 +102,8 @@ function doWeb(doc, url) {
 			arXivID = m[1];
 			arXivID = arXivID.replace(/\//g, "%2F"); 
 		}
+		arXivID = arXivID.replace(/v\d*/, ""); //remove version number
+		Zotero.debug("ID= "+ arXivID);
 		newURIs.push("http://export.arxiv.org/oai2?verb=GetRecord&identifier=oai%3AarXiv.org%3A" + arXivID + "&metadataPrefix=oai_dc");
 
 	}
