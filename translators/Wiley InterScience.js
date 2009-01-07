@@ -73,37 +73,54 @@ function doWeb(doc, url){
 	} else if (m){ //single article
 		ids.push(m[2]);
 	}
+	
+	var setupSets = [];
 	for each (id in ids) {
 		var uri = host + 'tools/citex';
 		var poststring = "clienttype=1&subtype=1&mode=1&version=1&id=" + id;
+		setupSets.push({ uri: uri, poststring: poststring });
+	}
+	
+	var setupCallback = function () {
+		if (setupSets.length) {
+			var set = setupSets.shift();
+			Zotero.Utilities.HTTP.doPost(set.uri, set.poststring, processCallback);
+		}
+		else {
+			Zotero.done();
+		}
+	}
+	
+	var processCallback = function () {
+		var uri = host+"tools/CitEx";
+		var poststring = "mode=2&format=3&type=2&file=3&exportCitation.x=16&exportCitation.y=10&exportCitation=submit";
 		Zotero.Utilities.HTTP.doPost(uri, poststring, function(text) {
-			uri = host+"tools/CitEx";
-			poststring = "mode=2&format=3&type=2&file=3&exportCitation.x=16&exportCitation.y=10&exportCitation=submit";
-			Zotero.Utilities.HTTP.doPost(uri, poststring, function(text) {
-				var m = text.match(/%A\s(.*)/);  //following lines fix Wiley's incorrect %A tag (should be separate tags for each author)
-				if (m){
-					var newauthors ="";
-					var authors = m[1].split(",")
-					for each (var author in authors){
-						if (author != ""){
-							newauthors = newauthors + "%A "+Zotero.Utilities.unescapeHTML(Zotero.Utilities.trimInternal(author))+"\n";
-						}
+			var m = text.match(/%A\s(.*)/);  //following lines fix Wiley's incorrect %A tag (should be separate tags for each author)
+			if (m){
+				var newauthors ="";
+				var authors = m[1].split(",")
+				for each (var author in authors){
+					if (author != ""){
+						newauthors = newauthors + "%A "+Zotero.Utilities.unescapeHTML(Zotero.Utilities.trimInternal(author))+"\n";
 					}
-					text = text.replace(/%A\s.*\n/, newauthors);
 				}
-				var translator = Zotero.loadTranslator("import");
-				translator.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d"); //EndNote/Refer/BibIX
-				translator.setString(text);
-				translator.setHandler("itemDone", function(obj, item) {
-					var pdfurl = 'http://download.interscience.wiley.com/cgi-bin/fulltext?ID=' + id + '&PLACEBO=IE.pdf&mode=pdf';
-					item.attachments.push({url:pdfurl, title:"Wiley Interscience PDF", mimeType:"application/pdf"});
-					item.DOI = item.url.match(/\.org\/(.*)$/)[1];
-					item.complete();
-				});
-				translator.translate();
-				Zotero.done();
+				text = text.replace(/%A\s.*\n/, newauthors);
+			}
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d"); //EndNote/Refer/BibIX
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				var pdfurl = 'http://download.interscience.wiley.com/cgi-bin/fulltext?ID=' + id + '&PLACEBO=IE.pdf&mode=pdf';
+				item.attachments.push({url:pdfurl, title:"Wiley Interscience PDF", mimeType:"application/pdf"});
+				item.DOI = item.url.match(/\.org\/(.*)$/)[1];
+				item.complete();
 			});
+			translator.translate();
+			
+			setupCallback();
 		});
-	};
+	}
+	
+	setupCallback();
 	Zotero.wait();
 }
