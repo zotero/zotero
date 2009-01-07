@@ -113,7 +113,7 @@
 				<!-- This extra vbox prevents the toolbar from getting compressed when resizing
 						the tag selector to max height -->
 				<vbox flex="1">
-					<toolbar>
+					<hbox class="toolbar">
 						<toolbarbutton id="zotero-tb-collection-add" tooltiptext="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
 						<spacer flex="1"/>
 						<toolbarbutton id="zotero-tb-tag-selector" tooltiptext="&zotero.toolbar.tagSelector.label;" oncommand="ZoteroPane.toggleTagSelector()"/>
@@ -131,7 +131,7 @@
 								<menuitem id="zotero-tb-actions-about" label="&zotero.toolbar.about.label;" oncommand="window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome')"/>
 							</menupopup>
 						</toolbarbutton>
-					</toolbar>
+					</hbox>
 					<tree id="zotero-collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
 						onmouseover="ZoteroPane.collectionsView.setHighlightedRows();"
 						ondblclick="ZoteroPane.onDoubleClick(event, this);"
@@ -160,7 +160,7 @@
 			<splitter id="zotero-tree-splitter" resizebefore="closest" resizeafter="closest"/>
 			
 			<vbox id="zotero-items-pane" persist="width" flex="1">
-				<toolbar align="center">
+				<hbox class="toolbar" align="center">
 					<toolbarbutton id="zotero-tb-add" tooltiptext="&zotero.toolbar.newItem.label;" type="menu">
 						<!-- New Item drop-down built in overlay.js::onLoad() -->
 						<menupopup>
@@ -190,7 +190,7 @@
 						ontestfail="ZoteroPane.setItemsPaneMessage(Zotero.getString('advancedSearchMode'))">
 						<toolbarbutton id="zotero-tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
 					</textbox>
-				</toolbar>
+				</hbox>
 				
 				<deck id="zotero-items-pane-content" selectedIndex="0" flex="1">
 					<tree 
@@ -298,10 +298,10 @@
 			<splitter id="zotero-view-splitter" resizebefore="closest" resizeafter="closest"/>
 			
 			<vbox id="zotero-item-pane" persist="width">
-				<toolbar align="right">
+				<hbox class="toolbar" align="right">
 					<toolbarbutton id="zotero-tb-fullscreen" tooltiptext="&zotero.toolbar.fullscreen.tooltip;" oncommand="ZoteroPane.fullScreen();"/>
 					<toolbarbutton class="tabs-closebutton" oncommand="ZoteroPane.toggleDisplay()"/>
-				</toolbar>
+				</hbox>
 				<groupbox flex="1">
 					<caption>
 						<tabs id="zotero-view-tabs" onselect="document.getElementById('zotero-view-item').selectedIndex = this.selectedIndex;" hidden="true">

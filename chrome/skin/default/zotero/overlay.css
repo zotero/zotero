@@ -86,22 +86,15 @@
 	min-width: 330px;
 }
 
-#zotero-pane toolbar
+#zotero-pane .toolbar
 {
-	border: none;
 	height: 32px !important; /* Hard-code this to fix toolbar icon compression on Linux */
 	margin: 0;
 	padding: 0;
-	background: transparent !important;
 }
 
 #zotero-pane toolbarseparator {
 	height:24px;
-}
-
-#zotero-pane toolbar .toggler
-{
-	margin: 4px;
 }
 
 #zotero-tb-collection-add
