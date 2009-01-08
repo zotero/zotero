@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-06-06 08:45:00"
+	"lastUpdated":"2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url) {
@@ -97,5 +97,5 @@ function doWeb(doc, url) {
 			newItem.attachments.push({url:pdf, title:"DSpace PDF", mimeType:"application/pdf"});
 		}
 		newItem.complete();
-	}, function() {Zotero.done;});
+	}, function() {Zotero.done();});
 }

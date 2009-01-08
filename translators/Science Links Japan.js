@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-05-08 20:30:00"
+	"lastUpdated":"2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url) {
@@ -68,6 +68,6 @@ function doWeb(doc, url) {
 		item.url = doc.location.href;
 		item.attachments = [{url:item.url, title:"Science Links Japan Snapshot", mimeType:"text/html"}];
 		item.complete();
-	}, function() {Zotero.done;});
+	}, function() {Zotero.done();});
 	Zotero.wait();
 }

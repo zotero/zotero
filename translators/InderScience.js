@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-04-09 00:45:00"
+	"lastUpdated":"2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url) {
@@ -79,5 +79,5 @@ function scrape(link) {
 		item.issue = voliss[4];
 		item.pages = voliss[5];
 		item.complete();
-  	}, function() {Zotero.done;});
+  	}, function() {Zotero.done();});
 }

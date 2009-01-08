@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-10-20 17:35:00"
+	"lastUpdated":"2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url) {
@@ -119,7 +119,7 @@ function doWeb(doc, url) {
 						item.attachments = [{url:pdfurlElmt.href, title:"IEEE Xplore Full Text PDF", mimeType:"application/pdf"}];
 					}
 					item.complete();
-				}, function() {Zotero.done;});
+				}, function() {Zotero.done();});
 			});
 			translator.translate();
 		});

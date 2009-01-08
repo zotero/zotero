@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-10-29 17:05:00"
+	"lastUpdated":"2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url){
@@ -152,7 +152,7 @@ function getData(ids, host){
 				newItem.attachments.push({url:flv, title:"YouTube Video Recording", mimeType:"video/x-flv"});
 			}
 			newItem.complete();
-		}, function() {Zotero.done;});
+		}, function() {Zotero.done();});
 	});
 	Zotero.wait();
 }

@@ -8,7 +8,7 @@
 	"maxVersion":null,
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-12-03 19:00:00"
+	"lastUpdated":"2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url){
@@ -58,6 +58,6 @@ function doWeb(doc, url){
 		//create snapshot
 		newItem.attachments = [{url:newDoc.location.href, title:newDoc.title, mimeType:"text/html"}];
 		newItem.complete();
-	}, function() {Zotero.done;});
+	}, function() {Zotero.done();});
 	Zotero.wait();
 }

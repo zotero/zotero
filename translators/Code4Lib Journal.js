@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-01-25 20:00:00"
+	"lastUpdated":"2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url) {
@@ -63,6 +63,6 @@ function doWeb(doc, url) {
 		
 		newItem.attachments.push({url:newDoc.location.href, title:"Code4Lib Journal Snapshot", mimeType:"text/html"});
 		newItem.complete();
-	}, function() {Zotero.done;});
+	}, function() {Zotero.done();});
 	Zotero.wait();
 }
