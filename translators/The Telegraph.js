@@ -13,7 +13,7 @@
 
 function detectWeb(doc, url) {
 	Zotero.debug("detectWeb URL= "+ url);
-	var result = doc.evaluate('html/head/meta[@name = "article-id"]', doc, null, XPathResult.ANY_TYPE, null);
+	var result = doc.evaluate('html/head/meta[@name = "article-id"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (result) {
 		return "newspaperArticle";
 	}
