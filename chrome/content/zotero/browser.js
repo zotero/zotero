@@ -464,8 +464,6 @@ var Zotero_Browser = new function() {
 		if(collection) {
 			collection.addItem(item.getID());
 		}
-		
-		Zotero_Browser.progress.startCloseTimer();
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////
