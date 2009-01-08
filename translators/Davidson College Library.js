@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-04-01 04:50:00"
+	"lastUpdated":"2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url) {
@@ -76,6 +76,6 @@ function doWeb(doc, url) {
 		var domain = url.match(/https?:\/\/([^/]+)/);
 		newItem.repository = "Davidson College Library Catalog";
 		newItem.complete();
-	}, function() {Zotero.done;});
+	}, function() {Zotero.done();});
 	Zotero.wait();
 }

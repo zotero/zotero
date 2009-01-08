@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-05-15 18:30:00"
+	"lastUpdated":"2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url) {
@@ -64,6 +64,6 @@ function doWeb(doc, url) {
 		item.ISBN = Zotero.Utilities.trimInternal(doc.evaluate('//span[@id="_isbn"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		item.publisher = Zotero.Utilities.trimInternal(doc.evaluate('//span[@id="_publisher"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		item.complete();
-	}, function() {Zotero.done;});
+	}, function() {Zotero.done();});
 	Zotero.wait();
 }

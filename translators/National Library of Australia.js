@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-08-21 15:45:00"
+	"lastUpdated":"2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url) {
@@ -60,6 +60,6 @@ function doWeb(doc, url) {
 		}
 		if (data['ISBN:']) item.ISBN = Zotero.Utilities.trimInternal(data['ISBN:'].match(/^[^(]+/)[0]);
 		item.complete();
-	}, function() {Zotero.done;});
+	}, function() {Zotero.done();});
 	Zotero.wait();
 }

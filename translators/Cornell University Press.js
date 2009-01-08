@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-05-15 19:30:00"
+	"lastUpdated":"2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url) {
@@ -59,6 +59,6 @@ function doWeb(doc, url) {
 		item.date = bits.match(/\d{4}/)[0];
 		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="description"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		item.complete();
-	}, function() {Zotero.done;});
+	}, function() {Zotero.done();});
 	Zotero.wait();
 }

@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-05-06 08:15:00"
+	"lastUpdated":"2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url) {
@@ -63,5 +63,5 @@ function doWeb(doc, url) {
 		if (pdfurl) item.attachments.push({url:pdfurl, title:pub + " Full Text PDF", mimeType:"application/pdf"});
 		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="total"]/p[5]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(10);
 		item.complete();
-	}, function() {Zotero.done;});
+	}, function() {Zotero.done();});
 }

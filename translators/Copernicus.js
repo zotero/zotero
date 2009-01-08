@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-04-24 14:30:00"
+	"lastUpdated":"2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url) {
@@ -67,7 +67,7 @@ function doWeb(doc, url) {
 				
 				Zotero.Utilities.processDocuments(arts, function(doc) {
 					scrape(doc);
-				}, function() {Zotero.done;});				
+				}, function() {Zotero.done();});				
 			});
 		} else {
 			var titles = doc.evaluate('//li[a[contains(text(), "Abstract")]]/span[@class="articletitle"]', doc, null, XPathResult.ANY_TYPE, null);
@@ -81,12 +81,12 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				arts.push(i);
 			}
-			Zotero.Utilities.processDocuments(arts, function(doc) { scrape(doc);}, function() {Zotero.done;});
+			Zotero.Utilities.processDocuments(arts, function(doc) { scrape(doc);}, function() {Zotero.done();});
 		}
 	} else {
 		Zotero.Utilities.processDocuments([url], function(doc) {
 			scrape(doc);
-		}, function() {Zotero.done;});
+		}, function() {Zotero.done();});
 	}
 	Zotero.wait();
 }

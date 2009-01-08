@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-06-08 23:00:00"
+	"lastUpdated":"2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url) {
@@ -60,6 +60,6 @@ function doWeb(doc, url) {
 		if (data['Publicacin']) item.publisher = Zotero.Utilities.trimInternal(data['Publicacin']);
 		if (data['FechaEdicin']) item.date = Zotero.Utilities.trimInternal(data['FechaEdicin']);
 		item.complete();
-	}, function() {Zotero.done;});
+	}, function() {Zotero.done();});
 	Zotero.wait();
 }
