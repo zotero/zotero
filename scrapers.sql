@@ -6680,6 +6680,65 @@ function doWeb(doc, url) {
 }');
 
 
+REPLACE INTO translators VALUES ('40b9ca22-8df4-4f3b-9cb6-8f9b55486d30', '1.0.0b4.r5', '', '2009-01-09 21:10:00', 1, 100, 4, 'Telegraph.co.uk', 'Reino Ruusu', '^http://www\.telegraph\.co\.uk/',
+'function detectWeb(doc, url) {
+	Zotero.debug("detectWeb URL= "+ url);
+	var result = doc.evaluate(''html/head/meta[@name = "article-id"]'', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if (result) {
+		return "newspaperArticle";
+	}
+	return null;
+}',
+'function getAuthors(byline) {
+	if (byline.search(/.+(?:,\s.+)+\sand\s.+/) == -1) {
+		byline = byline.replace(/,\s.+$/, "");
+	}
+	byline = byline.replace(/\s+(?:in|at)\s+.+$/, "");
+	return byline.split(/(?:,\s+|\s+and\s+)/);
+}
+
+function putAuthors(item, byline) {
+	for each (var a in getAuthors(byline)) {
+		item.creators.push(Zotero.Utilities.cleanAuthor(a, "author"));
+	}
+}
+
+function doWeb(doc, url) {
+	Zotero.debug("doWeb URL= "+ url);
+	var newArticle = new Zotero.Item(''newspaperArticle'');
+	newArticle.url = url;
+	newArticle.publicationTitle = ''Telegraph.co.uk'';
+	//newArticle.publisher = ''Telegraph Media Group Limited'';
+	//Zotero.debug(doc.evaluate(''//html/head/meta[@name="title"]/@content'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	var metaElements = doc.evaluate(''html/head/meta'', doc, null, XPathResult.ANY_TYPE, null);
+	var tmp;	
+	while (tmp = metaElements.iterateNext()) {
+		var name = tmp.getAttribute(''name'');
+		var content = tmp.getAttribute(''content'');
+		if (name == ''title'')
+			newArticle.title = content;
+			else if (name == ''author'') {
+				content = Zotero.Utilities.trim(content);
+				//Zotero.debug(content);
+				content = content.replace(/^By\s+/, "");
+				putAuthors(newArticle, content);
+			}
+			else if (name == ''description'') {
+				newArticle.abstractNote = content.replace(/\s+/gm, " ");
+			}
+	}
+	
+	var datePath = ''//div[@class="story"]/div[@class="byline"]/p[1]/br/following-sibling::text()'';
+	var dateElement = doc.evaluate(datePath, doc, null,XPathResult.ANY_TYPE, null).iterateNext();
+	if (dateElement) {
+		var dateRE = /\d\d?\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d\d\d\d/;
+		var date = dateElement.textContent.match(dateRE);
+		if (date) newArticle.date = date[0];
+	}
+	newArticle.complete();
+}');
+
+
 REPLACE INTO translators VALUES ('6b0b11a6-9b77-4b49-b768-6b715792aa37', '1.0.0b4.r5', '', '2008-08-06 17:00:00', '0', '100', '4', 'Toronto Star', 'Adam Crymble', 'http://www.thestar.com', 
 'function detectWeb(doc, url) {
 	if (doc.location.href.match("search") && !doc.location.href.match("classifieds")) {
@@ -25914,7 +25973,8 @@ REPLACE INTO translators VALUES ('232903bc-7307-4058-bb1a-27cfe3e4e655', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b4.r5', '', '2008-07-02 11:00:00', '1', '100', '4', 'Wiley InterScience', 'Sean Takats and Michael Berkowitz', 'https?:\/\/(?:www3\.|www\.)?interscience\.wiley\.com[^\/]*\/(?:search\/|(cgi-bin|journal)\/[0-9]+\/abstract|journal)', 
+
+REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b4.r5', '', '2009-01-09 21:10:00', 1, 100, 4, 'Wiley InterScience', 'Sean Takats and Michael Berkowitz', 'https?:\/\/(?:www3\.|www\.)?interscience\.wiley\.com[^\/]*\/(?:search\/|(cgi-bin|journal)\/[0-9]+\/abstract|journal)',
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -25932,7 +25992,7 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	if (m){
 		return "journalArticle";
 	}
-}', 
+}',
 'function doWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -25976,38 +26036,55 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	} else if (m){ //single article
 		ids.push(m[2]);
 	}
+	
+	var setupSets = [];
 	for each (id in ids) {
 		var uri = host + ''tools/citex'';
 		var poststring = "clienttype=1&subtype=1&mode=1&version=1&id=" + id;
+		setupSets.push({ uri: uri, poststring: poststring });
+	}
+	
+	var setupCallback = function () {
+		if (setupSets.length) {
+			var set = setupSets.shift();
+			Zotero.Utilities.HTTP.doPost(set.uri, set.poststring, processCallback);
+		}
+		else {
+			Zotero.done();
+		}
+	}
+	
+	var processCallback = function () {
+		var uri = host+"tools/CitEx";
+		var poststring = "mode=2&format=3&type=2&file=3&exportCitation.x=16&exportCitation.y=10&exportCitation=submit";
 		Zotero.Utilities.HTTP.doPost(uri, poststring, function(text) {
-			uri = host+"tools/CitEx";
-			poststring = "mode=2&format=3&type=2&file=3&exportCitation.x=16&exportCitation.y=10&exportCitation=submit";
-			Zotero.Utilities.HTTP.doPost(uri, poststring, function(text) {
-				var m = text.match(/%A\s(.*)/);  //following lines fix Wiley''s incorrect %A tag (should be separate tags for each author)
-				if (m){
-					var newauthors ="";
-					var authors = m[1].split(",")
-					for each (var author in authors){
-						if (author != ""){
-							newauthors = newauthors + "%A "+Zotero.Utilities.unescapeHTML(Zotero.Utilities.trimInternal(author))+"\n";
-						}
+			var m = text.match(/%A\s(.*)/);  //following lines fix Wiley''s incorrect %A tag (should be separate tags for each author)
+			if (m){
+				var newauthors ="";
+				var authors = m[1].split(",")
+				for each (var author in authors){
+					if (author != ""){
+						newauthors = newauthors + "%A "+Zotero.Utilities.unescapeHTML(Zotero.Utilities.trimInternal(author))+"\n";
 					}
-					text = text.replace(/%A\s.*\n/, newauthors);
 				}
-				var translator = Zotero.loadTranslator("import");
-				translator.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d"); //EndNote/Refer/BibIX
-				translator.setString(text);
-				translator.setHandler("itemDone", function(obj, item) {
-					var pdfurl = ''http://download.interscience.wiley.com/cgi-bin/fulltext?ID='' + id + ''&PLACEBO=IE.pdf&mode=pdf'';
-					item.attachments.push({url:pdfurl, title:"Wiley Interscience PDF", mimeType:"application/pdf"});
-					item.DOI = item.url.match(/\.org\/(.*)$/)[1];
-					item.complete();
-				});
-				translator.translate();
-				Zotero.done();
+				text = text.replace(/%A\s.*\n/, newauthors);
+			}
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d"); //EndNote/Refer/BibIX
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				var pdfurl = ''http://download.interscience.wiley.com/cgi-bin/fulltext?ID='' + id + ''&PLACEBO=IE.pdf&mode=pdf'';
+				item.attachments.push({url:pdfurl, title:"Wiley Interscience PDF", mimeType:"application/pdf"});
+				item.DOI = item.url.match(/\.org\/(.*)$/)[1];
+				item.complete();
 			});
+			translator.translate();
+			
+			setupCallback();
 		});
-	};
+	}
+	
+	setupCallback();
 	Zotero.wait();
 }');
 
