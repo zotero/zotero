@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"Telegraph.co.uk",
 	"creator":"Reino Ruusu",
-	"target":"^http://www\.telegraph\.co\.uk/",
+	"target":"^http://www\\.telegraph\\.co\\.uk/",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-07 02:36:56"
+	"lastUpdated":"2009-01-09 21:10:00"
 }
 
 function detectWeb(doc, url) {
