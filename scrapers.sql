@@ -25974,7 +25974,7 @@ REPLACE INTO translators VALUES ('232903bc-7307-4058-bb1a-27cfe3e4e655', '1.0.0b
 }');
 
 
-REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b4.r5', '', '2009-01-09 21:10:00', 1, 100, 4, 'Wiley InterScience', 'Sean Takats and Michael Berkowitz', 'https?:\/\/(?:www3\.|www\.)?interscience\.wiley\.com[^\/]*\/(?:search\/|(cgi-bin|journal)\/[0-9]+\/abstract|journal)',
+REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b4.r5', '', '2009-01-10 04:45:00', 1, 100, 4, 'Wiley InterScience', 'Sean Takats and Michael Berkowitz', 'https?:\/\/(?:www3\.|www\.)?interscience\.wiley\.com[^\/]*\/(?:search\/|(cgi-bin|journal)\/[0-9]+\/abstract|journal)',
 'function detectWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -26021,7 +26021,7 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 			var elmt = elmts.iterateNext();
 			do {
 				title = Zotero.Utilities.trimInternal(doc.evaluate(''.//strong'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-				id = doc.evaluate(''.//a[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.match(/abstract\/([\d]+)\//)[1];
+				id = doc.evaluate(''.//a[1]'', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.match(/\/([\d]+)\/abstract/)[1];
 				availableItems[id] = title;
 			} while (elmt = elmts.iterateNext())
 		}
@@ -26041,20 +26041,22 @@ REPLACE INTO translators VALUES ('fe728bc9-595a-4f03-98fc-766f1d8d0936', '1.0.0b
 	for each (id in ids) {
 		var uri = host + ''tools/citex'';
 		var poststring = "clienttype=1&subtype=1&mode=1&version=1&id=" + id;
-		setupSets.push({ uri: uri, poststring: poststring });
+		setupSets.push({ id: id, uri: uri, poststring: poststring });
 	}
 	
 	var setupCallback = function () {
 		if (setupSets.length) {
 			var set = setupSets.shift();
-			Zotero.Utilities.HTTP.doPost(set.uri, set.poststring, processCallback);
+			Zotero.Utilities.HTTP.doPost(set.uri, set.poststring, function () {
+				processCallback(set.id);
+			});
 		}
 		else {
 			Zotero.done();
 		}
 	}
 	
-	var processCallback = function () {
+	var processCallback = function (id) {
 		var uri = host+"tools/CitEx";
 		var poststring = "mode=2&format=3&type=2&file=3&exportCitation.x=16&exportCitation.y=10&exportCitation=submit";
 		Zotero.Utilities.HTTP.doPost(uri, poststring, function(text) {
