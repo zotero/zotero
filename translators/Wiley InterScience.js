@@ -58,7 +58,7 @@ function doWeb(doc, url){
 			var elmt = elmts.iterateNext();
 			do {
 				title = Zotero.Utilities.trimInternal(doc.evaluate('.//strong', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-				id = doc.evaluate('.//a[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.match(/abstract\/([\d]+)\//)[1];
+				id = doc.evaluate('.//a[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.match(/\/([\d]+)\/abstract/)[1];
 				availableItems[id] = title;
 			} while (elmt = elmts.iterateNext())
 		}
@@ -78,20 +78,22 @@ function doWeb(doc, url){
 	for each (id in ids) {
 		var uri = host + 'tools/citex';
 		var poststring = "clienttype=1&subtype=1&mode=1&version=1&id=" + id;
-		setupSets.push({ uri: uri, poststring: poststring });
+		setupSets.push({ id: id, uri: uri, poststring: poststring });
 	}
 	
 	var setupCallback = function () {
 		if (setupSets.length) {
 			var set = setupSets.shift();
-			Zotero.Utilities.HTTP.doPost(set.uri, set.poststring, processCallback);
+			Zotero.Utilities.HTTP.doPost(set.uri, set.poststring, function () {
+				processCallback(set.id);
+			});
 		}
 		else {
 			Zotero.done();
 		}
 	}
 	
-	var processCallback = function () {
+	var processCallback = function (id) {
 		var uri = host+"tools/CitEx";
 		var poststring = "mode=2&format=3&type=2&file=3&exportCitation.x=16&exportCitation.y=10&exportCitation=submit";
 		Zotero.Utilities.HTTP.doPost(uri, poststring, function(text) {
