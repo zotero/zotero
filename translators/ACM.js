@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-06-06 08:45:00"
+	"lastUpdated":"2009-01-10 01:15:00"
 }
 
 function detectWeb(doc, url) {
@@ -52,10 +52,9 @@ function scrape(doc) {
 		if (!abstract.textContent.match(/\w+/)) {
 			var abstract = doc.evaluate('//div[@class="abstract"]/p[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		}
-		if(abstract) abstract = Zotero.Utilities.cleanString(abstract.textContent);
+		if(abstract) abstract = Zotero.Utilities.trimInternal(abstract.textContent);
 	}
 	var snapshot = doc.location.href;
-	
 	var attachments = new Array();
 	var url;
 	var typeLinks = doc.evaluate('//td[@class="smaller-text"]/a[img]', doc, null,
@@ -109,7 +108,7 @@ function scrape(doc) {
 			item.attachments = attachments;
 			item.tags = keywords;
 			item.DOI = doi;
-			item.url = doc.location.href;
+			item.url = snapshot;
 			item.complete();
 		});
 		translator.translate();
