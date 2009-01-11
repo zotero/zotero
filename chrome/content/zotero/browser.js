@@ -360,22 +360,31 @@ var Zotero_Browser = new function() {
 	 * called to unregister Zotero icon, etc.
 	 */
 	function contentHide(event) {
-		if(event.originalTarget instanceof HTMLDocument && !event.originalTarget.defaultView.frameElement) {
+		if(event.originalTarget instanceof HTMLDocument) {
+			// Get root document if this is a frameset
 			var doc = event.originalTarget;
+			var rootDoc = doc;
+			while(rootDoc.defaultView.frameElement) {
+				rootDoc = rootDoc.defaultView.frameElement.ownerDocument;
+			}
 			
 			// Figure out what browser this contentDocument is associated with
 			var browser;
 			for(var i=0; i<this.tabbrowser.browsers.length; i++) {
-				if(doc == this.tabbrowser.browsers[i].contentDocument) {
+				if(rootDoc == this.tabbrowser.browsers[i].contentDocument) {
 					browser = this.tabbrowser.browsers[i];
 					break;
 				}
 			}
 			
-			// clear data object
 			var tab = _getTabObject(browser);
 			if(!tab) return;
-			tab.clear();
+			if(doc == tab.page.document || doc == rootDoc) {
+				// clear translator only if the page on which the pagehide event was called is
+				// either the page to which the translator corresponded, or the root document
+				// (the second check is probably paranoid, but won't hurt)
+				tab.clear();
+			}
 			
 			// update status
 			if(this.tabbrowser.selectedBrowser == browser) {
@@ -581,11 +590,8 @@ Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
 	// if there's already a scrapable page in the browser window, and it's
 	// still there, ensure it is actually part of the page, then return
 	if(this.page.translators && this.page.translators.length && this.page.document.location) {
-		if(this._searchFrames(rootDoc, this.page.document)) {
-			return;
-		} else {
-			this.page.document = null;
-		}
+		if(this._searchFrames(rootDoc, this.page.document)) return;
+		this.clear();
 	}
 	
 	if(doc instanceof HTMLDocument && doc.documentURI.substr(0, 6) != "about:") {
