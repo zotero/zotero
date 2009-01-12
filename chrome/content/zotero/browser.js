@@ -618,6 +618,7 @@ Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
  * searches for a document in all of the frames of a given document
  */
 Zotero_Browser.Tab.prototype._searchFrames = function(rootDoc, searchDoc) {
+	if(rootDoc == searchDoc) return true;
 	var frames = rootDoc.getElementsByTagName("frame");
 	for each(var frame in frames) {
 		if(frame.contentDocument &&
