@@ -18040,14 +18040,15 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('6ec8008d-b206-4a4c-8d0a-8ef33807703b', '1.0.0b4.r5', '', '2008-05-22 20:30:00', '1', '100', '4', 'The Economist', 'Michael Berkowitz', '^http://(www.)?economist.com/', 
+
+REPLACE INTO translators VALUES ('6ec8008d-b206-4a4c-8d0a-8ef33807703b', '1.0.0b4.r5', '', '2009-01-12 23:40:00', 1, 100, 4, 'The Economist', 'Michael Berkowitz', '^http://(www.)?economist.com/',
 'function detectWeb(doc, url) {
        if (doc.location.href.indexOf("search") != -1) {
                return "multiple";
        } else if (doc.location.href.toLowerCase().indexOf("displaystory") != -1 || doc.location.href.indexOf("cityPage") != -1) {
                return "magazineArticle";
        }
-}', 
+}',
 'function scrape(doc, url) {
        var namespace = doc.documentElement.namespaceURI;
        var nsResolver = namespace ? function(prefix) {
@@ -18137,13 +18138,15 @@ function doWeb(doc, url) {
                        urls.push(i);
                }
        } else if (doc.location.href.toLowerCase().indexOf("displaystory") != -1) {
-               urls.push(url);
+               scrape(doc, url);
+               return;
        }
        
        Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
        
        Zotero.wait();
 }');
+
 
 REPLACE INTO translators VALUES ('84bd421d-c6d1-4223-ab80-a156f98a8e30', '1.0.0b4.r1', '', '2007-07-31 16:45:00', '0', '100', '4', 'International Herald Tribune', 'Michael Berkowitz', '^http://(www.)?iht.com/',
 'function detectWeb(doc, url) {
