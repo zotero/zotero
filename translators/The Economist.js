@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-05-22 20:30:00"
+	"lastUpdated":"2009-01-12 23:40:00"
 }
 
 function detectWeb(doc, url) {
@@ -108,7 +108,8 @@ function doWeb(doc, url) {
                        urls.push(i);
                }
        } else if (doc.location.href.toLowerCase().indexOf("displaystory") != -1) {
-               urls.push(url);
+               scrape(doc, url);
+               return;
        }
        
        Zotero.Utilities.processDocuments(urls, scrape, function() { Zotero.done(); });
