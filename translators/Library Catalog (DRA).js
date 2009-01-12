@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2006-12-15 15:11:00"
+	"lastUpdated":"2009-01-12 18:25:00"
 }
 
 function detectWeb(doc, url) {
@@ -39,12 +39,12 @@ function doWeb(doc, url) {
 			return true;
 		}
 		
-		var uris = new Array();
+		var uris = [];
 		for(var i in items) {
 			uris.push(i);
 		}
 	} else {
-		var ug = new Array(doc.location.href);
+		var uris = [doc.location.href];
 	}
 	
 	for(var i in uris) {
@@ -64,7 +64,7 @@ function doWeb(doc, url) {
 		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		
 		var domain = url.match(/https?:\/\/([^/]+)/);
-		marc.setHandler("itemDone", function(obj, item) {
+		translator.setHandler("itemDone", function(obj, item) {
 			item.repository = domain[1]+" Library Catalog";
 			item.complete();
 		});
