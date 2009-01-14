@@ -29,14 +29,18 @@ function doWeb(doc, url) {
 		} else {
 			var searchx = '//form[@id="search_results"]/div[@class="resultsitem"]/div[2]';
 			var titlex = './/label';
+			
 		}	
-		var linkx = './/a[1]';
+		var linkx = './/a[contains(@href, "abstract")]';
 		var searchres = doc.evaluate(searchx, doc, null, XPathResult.ANY_TYPE, null);
 		var next_res;
 		while (next_res = searchres.iterateNext()) {
 			var title = doc.evaluate(titlex, next_res, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			var link = doc.evaluate(linkx, next_res, null, XPathResult.ANY_TYPE, null).iterateNext().href;
-			items[link] = title;
+			// sometimes there is no abstract, the search results returns an entire journal, I am skipping it silently
+			var link = doc.evaluate(linkx, next_res, null, XPathResult.ANY_TYPE, null).iterateNext();
+			if (link) {
+				items[link.href] = title;
+			}
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
@@ -53,6 +57,10 @@ function doWeb(doc, url) {
 		var id = text.match(/=([^=]+)\">\s*Add to Saved Citations/)[1];
 		var newurl = newurls.shift();
 		var pdfurl = newurl.replace(/content\/[^/]+/, "reprint") + ".pdf";
+		if (pdfurl.indexOf("?") != -1) {
+			pdfurl = pdfurl.substring(0,pdfurl.indexOf("?")) + ".pdf";
+		}
+		Zotero.debug("pdf= "+pdfurl);
 		var get = 'http://online.sagepub.com/cgi/citmgr?type=refman&gca=' + id;
 		Zotero.Utilities.HTTP.doGet(get, function(text) {
 			var translator = Zotero.loadTranslator("import");
