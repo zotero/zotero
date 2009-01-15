@@ -42,6 +42,7 @@ var Zotero_Merge_Window = new function () {
 		
 		switch (_mergeGroup.type) {
 			case 'item':
+			case 'storagefile':
 				break;
 			
 			default:
@@ -127,6 +128,8 @@ var Zotero_Merge_Window = new function () {
 			}
 		}
 		catch (e) {
+			Zotero.debug(e);
+			
 			var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
 							.createInstance(Components.interfaces.nsIPrompt);
 			prompt.alert(Zotero.getString('general.error'), e);

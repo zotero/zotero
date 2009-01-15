@@ -134,6 +134,7 @@
 					
 					if (this._leftpane.ref != 'deleted'
 							&& this._rightpane.ref != 'deleted') {
+						
 						var dm1 = this._leftpane.ref.getField('dateModified');
 						if (dm1) {
 							dm1 = Zotero.Date.sqlToDate(dm1);
@@ -318,6 +319,10 @@
 							elementName = 'zoteronoteeditor';
 							break;
 						
+						case 'storagefile':
+							elementName = 'zoterostoragefilebox';
+							break;
+						
 						default:
 							throw ("Object type '" + this.type
 								+ "' not supported in <zoteromergepane>.ref");
@@ -349,6 +354,7 @@
 					switch (this.type) {
 						case 'attachment':
 						case 'note':
+						case 'storagefile':
 							objbox.buttonCaption = 'Choose this version';
 							break;
 					}

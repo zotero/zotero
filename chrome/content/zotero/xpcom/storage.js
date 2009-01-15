@@ -5,6 +5,8 @@ Zotero.Sync.Storage = new function () {
 	this.SYNC_STATE_TO_UPLOAD = 0;
 	this.SYNC_STATE_TO_DOWNLOAD = 1;
 	this.SYNC_STATE_IN_SYNC = 2;
+	this.SYNC_STATE_FORCE_UPLOAD = 3;
+	this.SYNC_STATE_FORCE_DOWNLOAD = 4;
 	
 	this.SUCCESS = 1;
 	this.ERROR_NO_URL = -1;
@@ -21,7 +23,6 @@ Zotero.Sync.Storage = new function () {
 	this.ERROR_ZOTERO_DIR_NOT_WRITABLE = -13;
 	this.ERROR_NOT_ALLOWED = -14;
 	this.ERROR_UNKNOWN = -15;
-	
 	
 	//
 	// Public properties
@@ -242,7 +243,6 @@ Zotero.Sync.Storage = new function () {
 		}
 		
 		Zotero.debug("Beginning storage sync");
-		Zotero.Sync.Runner.setSyncIcon('animate');
 		_syncInProgress = true;
 		_changesMade = false;
 		
@@ -297,6 +297,8 @@ Zotero.Sync.Storage = new function () {
 			case this.SYNC_STATE_TO_UPLOAD:
 			case this.SYNC_STATE_TO_DOWNLOAD:
 			case this.SYNC_STATE_IN_SYNC:
+			case this.SYNC_STATE_FORCE_UPLOAD:
+			case this.SYNC_STATE_FORCE_DOWNLOAD:
 				break;
 			
 			default:
@@ -608,6 +610,10 @@ Zotero.Sync.Storage = new function () {
 	 * @return	{Boolean}
 	 */
 	this.downloadFiles = function () {
+		if (!_syncInProgress) {
+			_syncInProgress = true;
+		}
+		
 		// Check for active operations?
 		var queue = Zotero.Sync.Storage.QueueManager.get('download');
 		if (queue.isRunning()) {
@@ -624,7 +630,9 @@ Zotero.Sync.Storage = new function () {
 		
 		for each(var itemID in downloadFileIDs) {
 			var item = Zotero.Items.get(itemID);
-			if (this.isFileModified(itemID)) {
+			if (Zotero.Sync.Storage.getSyncState(itemID) !=
+						Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD
+					&& this.isFileModified(itemID)) {
 				Zotero.debug("File for attachment " + itemID + " has been modified");
 				this.setSyncState(itemID, this.SYNC_STATE_TO_UPLOAD);
 				continue;
@@ -671,6 +679,24 @@ Zotero.Sync.Storage = new function () {
 			
 			try {
 				var syncModTime = Zotero.Date.toUnixTimestamp(mdate);
+				
+				// Skip download if local file exists and matches mod time
+				var file = item.getFile();
+				if (file && file.exists()
+						&& syncModTime == Math.round(file.lastModifiedTime / 1000)) {
+					Zotero.debug("Stored file mod time matches remote file -- skipping download");
+					
+					Zotero.DB.beginTransaction();
+					var syncState = Zotero.Sync.Storage.getSyncState(item.id);
+					var updateItem = syncState != 1;
+					Zotero.Sync.Storage.setSyncedModificationTime(item.id, syncModTime, true);
+					Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
+					Zotero.DB.commitTransaction();
+					_changesMade = true;
+					request.finish();
+					return;
+				}
+				
 				var uri = _getItemURI(item);
 				var destFile = Zotero.getTempDirectory();
 				destFile.append(item.key + '.zip.tmp');
@@ -715,6 +741,10 @@ Zotero.Sync.Storage = new function () {
 	 * @return	{Boolean}
 	 */
 	this.uploadFiles = function () {
+		if (!_syncInProgress) {
+			_syncInProgress = true;
+		}
+		
 		// Check for active operations?
 		var queue = Zotero.Sync.Storage.QueueManager.get('upload');
 		if (queue.isRunning()) {
@@ -946,9 +976,24 @@ Zotero.Sync.Storage = new function () {
 	}
 	
 	
-	this.resetAllSyncStates = function () {
+	this.resetAllSyncStates = function (syncState) {
+		if (!syncState) {
+			syncState = this.SYNC_STATE_TO_UPLOAD;
+		}
+		
+		switch (syncState) {
+			case this.SYNC_STATE_TO_UPLOAD:
+			case this.SYNC_STATE_TO_DOWNLOAD:
+			case this.SYNC_STATE_IN_SYNC:
+				break;
+			
+			default:
+				throw ("Invalid sync state '" + syncState + "' in "
+					+ "Zotero.Sync.Storage.resetAllSyncStates()");
+		}
+		
 		var sql = "UPDATE itemAttachments SET syncState=?";
-		Zotero.DB.query(sql, [this.SYNC_STATE_TO_UPLOAD]);
+		Zotero.DB.query(sql, [syncState]);
 	}
 	
 	
@@ -1217,18 +1262,28 @@ Zotero.Sync.Storage = new function () {
 			
 			try {
 				// Check for conflict
-				if (mdate) {
-					var file = item.getFile();
-					var mtime = Zotero.Date.toUnixTimestamp(mdate);
-					var smtime = Zotero.Sync.Storage.getSyncedModificationTime(item.id);
-					if (mtime != smtime) {
-						request.error("Conflict! Last known mod time does not match remote time!"
-							+ " (" + mtime + " != " + smtime + ")");
-						return;
+				if (Zotero.Sync.Storage.getSyncState(item.id)
+						!= Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD) {
+					if (mdate) {
+						var file = item.getFile();
+						var mtime = Zotero.Date.toUnixTimestamp(mdate);
+						var smtime = Zotero.Sync.Storage.getSyncedModificationTime(item.id);
+						if (mtime != smtime) {
+							var localData = { modTime: smtime };
+							var remoteData = { modTime: mtime };
+							Zotero.Sync.Storage.QueueManager.addConflict(
+								request.name, localData, remoteData
+							);
+							Zotero.debug("File conflict -- last known mod time "
+								+ "does not match remote time"
+								+ " (" + mtime + " != " + smtime + ")");
+							request.finish();
+							return;
+						}
 					}
-				}
-				else {
-					Zotero.debug("Remote file not found for item " + item.id);
+					else {
+						Zotero.debug("Remote file not found for item " + item.id);
+					}
 				}
 				
 				var file = Zotero.getTempDirectory();
@@ -1364,8 +1419,13 @@ Zotero.Sync.Storage = new function () {
 	 * @return	{Number[]}	Array of attachment itemIDs
 	 */
 	function _getFilesToDownload() {
-		var sql = "SELECT itemID FROM itemAttachments WHERE syncState=?";
-		return Zotero.DB.columnQuery(sql, Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD);
+		var sql = "SELECT itemID FROM itemAttachments WHERE syncState IN (?,?)";
+		return Zotero.DB.columnQuery(sql,
+			[
+				Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD,
+				Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD
+			]
+		);
 	}
 	
 	
@@ -1376,11 +1436,12 @@ Zotero.Sync.Storage = new function () {
 	 * @return	{Number[]}	Array of attachment itemIDs
 	 */
 	function _getFilesToUpload() {
-		var sql = "SELECT itemID FROM itemAttachments WHERE syncState=? "
+		var sql = "SELECT itemID FROM itemAttachments WHERE syncState IN (?,?) "
 					+ "AND linkMode IN (?,?)";
 		return Zotero.DB.columnQuery(sql,
 			[
 				Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD,
+				Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD,
 				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
 				Zotero.Attachments.LINK_MODE_IMPORTED_URL
 			]
@@ -1890,6 +1951,13 @@ Zotero.Sync.Storage = new function () {
 		Zotero.debug("Storage sync is complete");
 		_syncInProgress = false;
 		
+		if (!cancelled && this.resyncOnFinish) {
+			Zotero.debug("Force-resyncing items in conflict");
+			this.resyncOnFinish = false;
+			this.sync();
+			return;
+		}
+		
 		if (cancelled || !_changesMade) {
 			if (!_changesMade) {
 				Zotero.debug("No changes made during storage sync");
@@ -1991,6 +2059,7 @@ Zotero.Sync.Storage = new function () {
 
 Zotero.Sync.Storage.QueueManager = new function () {
 	var _queues = {};
+	var _conflicts = [];
 	
 	
 	/**
@@ -2028,6 +2097,7 @@ Zotero.Sync.Storage.QueueManager = new function () {
 		for each(var queue in _queues) {
 			queue.stop();
 		}
+		_conflicts = [];
 	}
 	
 	
@@ -2035,6 +2105,14 @@ Zotero.Sync.Storage.QueueManager = new function () {
 	 * Tell the storage system that we're finished
 	 */
 	this.finish = function () {
+		if (_conflicts.length) {
+			var data = _reconcileConflicts();
+			if (data) {
+				_processMergeData(data);
+			}
+			_conflicts = [];
+		}
+		
 		Zotero.Sync.Storage.finish(this._cancelled);
 		this._cancelled = false;
 	}
@@ -2075,8 +2153,10 @@ Zotero.Sync.Storage.QueueManager = new function () {
 		//Zotero.debug("Total percentage is " + percentage);
 		
 		// Remaining KB
-		var downloadStatus = _getQueueStatus(_queues.download);
-		var uploadStatus = _getQueueStatus(_queues.upload);
+		var downloadStatus = _queues.download ?
+								_getQueueStatus(_queues.download) : 0;
+		var uploadStatus = _queues.upload ?
+								_getQueueStatus(_queues.upload) : 0;
 		
 		this.updateProgressMeters(
 			activeRequests, percentage, downloadStatus, uploadStatus
@@ -2124,6 +2204,15 @@ Zotero.Sync.Storage.QueueManager = new function () {
 	}
 	
 	
+	this.addConflict = function (requestName, localData, remoteData) {
+		_conflicts.push({
+			name: requestName,
+			localData: localData,
+			remoteData: remoteData
+		});
+	}
+	
+	
 	/**
 	 * Get a status string for a queue
 	 *
@@ -2154,6 +2243,77 @@ Zotero.Sync.Storage.QueueManager = new function () {
 								+ "/" + totalRequests + " files";
 		var status = Zotero.localeJoin([kbRemaining, '(' + filesRemaining + ')']);
 		return status;
+	}
+	
+	
+	function _reconcileConflicts() {
+		var objectPairs = [];
+		for each(var conflict in _conflicts) {
+			var item = Zotero.Items.getByKey(conflict.name);
+			var item1 = item.clone();
+			item1.setField('dateModified',
+				Zotero.Date.dateToSQL(new Date(conflict.localData.modTime * 1000), true));
+			var item2 = item.clone();
+			item2.setField('dateModified',
+				Zotero.Date.dateToSQL(new Date(conflict.remoteData.modTime * 1000), true));
+			objectPairs.push([item1, item2]);
+		}
+		
+		var io = {
+			dataIn: {
+				type: 'storagefile',
+				captions: [
+					// TODO: localize
+					'Local File',
+					'Remote File',
+					'Saved File'
+				],
+				objects: objectPairs
+			}
+		};
+		
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+				   .getService(Components.interfaces.nsIWindowMediator);
+		var lastWin = wm.getMostRecentWindow("navigator:browser");
+		lastWin.openDialog('chrome://zotero/content/merge.xul', '', 'chrome,modal,centerscreen', io);
+		
+		if (!io.dataOut) {
+			return false;
+		}
+		
+		// Since we're only putting cloned items into the merge window,
+		// we have to manually set the ids
+		for (var i=0; i<_conflicts.length; i++) {
+			io.dataOut[i].id = Zotero.Items.getByKey(_conflicts[i].name).id;
+		}
+		
+		return io.dataOut;
+	}
+	
+	
+	function _processMergeData(data) {
+		if (!data.length) {
+			return false;
+		}
+		
+		Zotero.Sync.Storage.resyncOnFinish = true;
+		
+		for each(var mergeItem in data) {
+			var itemID = mergeItem.id;
+			var dateModified = mergeItem.ref.getField('dateModified');
+			// Local
+			if (dateModified == mergeItem.left.getField('dateModified')) {
+				Zotero.Sync.Storage.setSyncState(
+					itemID, Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD
+				);
+			}
+			// Remote
+			else {
+				Zotero.Sync.Storage.setSyncState(
+					itemID, Zotero.Sync.Storage.SYNC_STATE_FORCE_DOWNLOAD
+				);
+			}
+		}
 	}
 }
 
@@ -2229,6 +2389,10 @@ Zotero.Sync.Storage.Queue = function (name) {
 		return remaining;
 	});
 	this.__defineGetter__('percentage', function () {
+		if (this.totalRequests == 0) {
+			return 0;
+		}
+		
 		var completedRequests = 0;
 		for each(var request in this._requests) {
 			completedRequests += request.percentage / 100;
@@ -2374,8 +2538,14 @@ Zotero.Sync.Storage.Queue.prototype.stop = function () {
 		Zotero.debug(this.Name + " queue is already finished");
 		return;
 	}
-	this._stopping = true;
 	
+	// If no requests, finish manually
+	if (this.activeRequests == 0) {
+		this._finishedRequests = this._finishedRequests;
+		return;
+	}
+	
+	this._stopping = true;
 	for each(var request in this._requests) {
 		if (!request.isFinished()) {
 			request.stop();
@@ -2461,6 +2631,7 @@ Zotero.Sync.Storage.Request.prototype.__defineGetter__('percentage', function ()
 	if (this.progressMax == 0) {
 		return 0;
 	}
+	
 	var percentage = Math.round((this.progress / this.progressMax) * 100);
 	if (percentage < this._percentage) {
 		Zotero.debug(percentage + " is less than last percentage of "
