@@ -73,6 +73,10 @@ zoteroattachmentbox
 	-moz-binding: url('chrome://zotero/content/bindings/attachmentbox.xml#attachment-box');
 }
 
+zoterostoragefilebox
+{
+	-moz-binding: url('chrome://zotero/content/bindings/storagefilebox.xml#storage-file-box');
+}
 
 zoteronoteeditor
 {

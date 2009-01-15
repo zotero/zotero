@@ -41,6 +41,7 @@
 			<field name="displayGoButtons">false</field>
 			<field name="clickableLink">false</field>
 			<field name="displayButton">false</field>
+			<field name="displayNote">false</field>
 			
 			<field name="buttonCaption"/>
 			<field name="clickHandler"/>
@@ -52,31 +53,52 @@
 				<![CDATA[
 					this.editable = false;
 					this.displayGoButtons = false;
+					this.displayURL = false;
+					this.displayFileName = false;
 					this.clickableLink = false;
-					this.displayIndexed = false;
+					this.displayAccessed = false;
 					this.displayPages = false;
+					this.displayDateModified = false;
+					this.displayIndexed = false;
+					this.displayNote = false;
 					
 					switch (val) {
 						case 'view':
 							this.displayGoButtons = true;
+							this.displayURL = true;
+							this.displayFileName = true;
 							this.clickableLink = true;
-							this.displayIndexed = true;
+							this.displayAccessed = true;
 							this.displayPages = true;
+							this.displayIndexed = true;
+							this.displayNote = true;
 							break;
 						
 						case 'edit':
 							this.editable = true;
 							this.displayGoButtons = true;
+							this.displayURL = true;
+							this.displayFileName = true;
 							this.clickableLink = true;
-							this.displayIndexed = true;
+							this.displayAccessed = true;
 							this.displayPages = true;
+							this.displayIndexed = true;
+							this.displayNote = true;
 							break;
 						
 						case 'merge':
+							this.displayURL = true;
+							this.displayFileName = true;
+							this.displayAccessed = true;
+							this.displayNote = true;
 							this.displayButton = true;
 							break;
 						
 						case 'mergeedit':
+							this.displayURL = true;
+							this.displayFileName = true;
+							this.displayAccessed = true;
+							this.displayNote = true;
 							break;
 						
 						default:
@@ -114,9 +136,11 @@
 					var goButtons = this._id('go-buttons');
 					var viewButton = this._id('view');
 					var showButton = this._id('show');
+					var fileNameRow = this._id('fileNameRow');
 					var urlField = this._id('url');
 					var accessed = this._id('accessed');
 					var pagesRow = this._id('pages');
+					var dateModifiedRow = this._id('dateModified');
 					var indexBox = this._id('index-box');
 					var selectButton = this._id('select-button');
 					
@@ -180,35 +204,73 @@
 							var str = Zotero.getString('pane.item.attachments.view.link');
 						}
 						
-						showButton.setAttribute('hidden', !isImportedURL);
+						showButton.hidden = !isImportedURL;
 						
 						// URL
-						var urlSpec = this.item.getField('url');
-						urlField.setAttribute('value', urlSpec);
-						urlField.setAttribute('hidden', false);
-						if (this.clickableLink) {
-							 urlField.onclick = function (event) {
-							 	ZoteroPane.loadURI(this.value, event)
-							};
-							urlField.className = 'text-link';
+						if (this.displayURL) {
+							var urlSpec = this.item.getField('url');
+							urlField.setAttribute('value', urlSpec);
+							urlField.setAttribute('hidden', false);
+							if (this.clickableLink) {
+								 urlField.onclick = function (event) {
+									ZoteroPane.loadURI(this.value, event)
+								};
+								urlField.className = 'text-link';
+							}
+							else {
+								urlField.className = '';
+							}
+							urlField.hidden = false;
 						}
 						else {
-							urlField.className = '';
+							urlField.hidden = true;
 						}
 						
 						// Access date
-						accessed.setAttribute('value',
-							Zotero.getString('itemFields.accessDate') + ': '
-							+ Zotero.Date.sqlToDate(this.item.getField('accessDate'), true).toLocaleString());
-						accessed.setAttribute('hidden', false);
+						if (this.displayAccessed) {
+							accessed.value = Zotero.localeJoin([
+								Zotero.getString('itemFields.accessDate'),
+								': ',
+								Zotero.Date.sqlToDate(
+									this.item.getField('accessDate'), true
+								).toLocaleString()
+							], '');
+							accessed.hidden = false;
+						}
+						else {
+							accessed.hidden = true;
+						}
 					}
 					// Metadata for files
 					else {
 						var str = Zotero.getString('pane.item.attachments.view.file');
-						showButton.setAttribute('hidden', false);
-						urlField.setAttribute('hidden', true);
-						accessed.setAttribute('hidden', true);
+						showButton.hidden = false;
+						urlField.hidden = true;
+						accessed.hidden = true;
 					}
+					
+					if (this.item.attachmentLinkMode
+								!= Zotero.Attachments.LINK_MODE_LINKED_URL
+							&& this.displayFileName) {
+						// TODO: localize
+						var file = this.item.getFile(false, true);
+						var fileName = file.leafName;
+						if (fileName) {
+							fileNameRow.value = Zotero.localeJoin([
+								'Filename', // TODO: localize
+								': ', // TODO: probably needs to be in localized string
+								fileName
+							], '');
+							fileNameRow.hidden = false;
+						}
+						else {
+							fileNameRow.hidden = true;
+						}
+					}
+					else {
+						fileNameRow.hidden = true;
+					}
+
 					
 					viewButton.setAttribute('label', str);
 					
@@ -217,16 +279,35 @@
 						var pages = Zotero.Fulltext.getPages(this.item.id);
 						var pages = pages ? pages.total : null;
 						if (pages) {
-							var str = Zotero.getString('itemFields.pages') + ': ' + pages;
-							pagesRow.setAttribute('value', str);
-							pagesRow.setAttribute('hidden', false);
+							var str = Zotero.localeJoin([
+								Zotero.getString('itemFields.pages'),
+								': ',
+								pages
+							], '');
+							pagesRow.value = str;
+							pagesRow.hidden = false;
 						}
 						else {
-							pagesRow.setAttribute('hidden', true);
+							pagesRow.hidden = true;
 						}
 					}
 					else {
-						pagesRow.setAttribute('hidden', true);
+						pagesRow.hidden = true;
+					}
+					
+					if (this.displayDateModified) {
+						var str = Zotero.localeJoin([
+							Zotero.getString('itemFields.dateModified'),
+							': ',
+							Zotero.Date.sqlToDate(
+								this.item.getField('dateModified'), true
+							).toLocaleString()
+						], '');
+						dateModifiedRow.value = str;
+						dateModifiedRow.hidden = false;
+					}
+					else {
+						dateModifiedRow.hidden = true;
 					}
 					
 					// Full-text index information
@@ -240,16 +321,24 @@
 					
 					// Note editor
 					var noteEditor = this._id('note-editor');
-					// Don't make note editable (at least for now)
-					if (this.mode == 'merge' || this.mode == 'mergeedit') {
-						noteEditor.mode = 'merge';
-						noteEditor.displayButton = false;
+					if (this.displayNote) {
+						noteEditor.hidden = false;
+						
+						// Don't make note editable (at least for now)
+						if (this.mode == 'merge' || this.mode == 'mergeedit') {
+							noteEditor.mode = 'merge';
+							noteEditor.displayButton = false;
+						}
+						else {
+							noteEditor.mode = this.mode;
+						}
+						noteEditor.parent = null;
+						noteEditor.item = this.item;
 					}
 					else {
-						noteEditor.mode = this.mode;
+						noteEditor.hidden = true;
 					}
-					noteEditor.parent = null;
-					noteEditor.item = this.item;
+						
 					
 					if (this.displayButton) {
 						selectButton.label = this.buttonCaption;
@@ -412,9 +501,10 @@
 					<button id="show" label="&zotero.item.attachment.file.show;" flex="1"/>
 				</hbox>
 				<label id="url" crop="end"/>
-				
+				<label id="fileNameRow"/>
 				<label id="accessed"/>
 				<label id="pages"/>
+				<label id="dateModified"/>
 				
 				<hbox id="index-box">
 					<label id="index-status"/>
