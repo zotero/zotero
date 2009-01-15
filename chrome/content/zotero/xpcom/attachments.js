@@ -192,6 +192,12 @@ Zotero.Attachments = new function(){
 		}
 		
 		Zotero.Utilities.HTTP.doHead(url, function(obj){
+			if (obj.status != 200 && obj.status != 204) {
+				Zotero.debug("Attachment HEAD request returned with status code "
+					+ obj.status + " in Attachments.importFromURL()", 2);
+				return false;
+			}
+			
 			var mimeType = obj.channel.contentType;
 			
 			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
