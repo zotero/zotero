@@ -187,22 +187,22 @@ Zotero.Attachments = new function(){
 			if (obj.status != 200 && obj.status != 204) {
 				Zotero.debug("Attachment HEAD request returned with status code "
 					+ obj.status + " in Attachments.importFromURL()", 2);
-				return false;
+				var mimeType = '';
 			}
-			
-			var mimeType = obj.channel.contentType;
+			else {
+				var mimeType = obj.channel.contentType;
+			}
 			
 			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
 						.createInstance(Components.interfaces.nsIURL);
 			nsIURL.spec = url;
-			var ext = nsIURL.fileExtension;
 			
 			// Override MIME type to application/pdf if extension is .pdf --
 			// workaround for sites that respond to the HEAD request with an
 			// invalid MIME type (https://www.zotero.org/trac/ticket/460)
 			//
 			// Downloaded file is inspected below and deleted if actually HTML
-			if (ext == 'pdf') {
+			if (nsIURL.fileName.match(/pdf$/) || url.match(/pdf$/)) {
 				mimeType = 'application/pdf';
 			}
 			
