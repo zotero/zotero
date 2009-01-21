@@ -53,6 +53,7 @@ Zotero.DBConnection = function(dbName) {
 	this._shutdown = false;
 	this._connection = null;
 	this._transactionDate = null;
+	this._lastTransactionDate = null;
 	this._transactionRollback = null;
 	this._transactionNestingLevel = 0;
 	this._callbacks = { begin: [], commit: [], rollback: [] };
@@ -358,6 +359,14 @@ Zotero.DBConnection.prototype.beginTransaction = function () {
 		// Set a timestamp for this transaction
 		this._transactionDate = new Date(Math.floor(new Date / 1000) * 1000);
 		
+		// If transaction time hasn't changed since last transaction,
+		// add a second -- this is a hack to get around a sync problem when
+		// multiple sync sessions run within the same second
+		if (this._lastTransactionDate &&
+				this._transactionDate.getTime() <= this._lastTransactionDate.getTime()) {
+			this._transactionDate = new Date(this._lastTransactionDate.getTime() + 1000)
+		}
+		
 		// Run callbacks
 		for (var i=0; i<this._callbacks.begin.length; i++) {
 			if (this._callbacks.begin[i]) {
@@ -382,6 +391,9 @@ Zotero.DBConnection.prototype.commitTransaction = function () {
 	else {
 		this._debug('Committing transaction',5);
 		
+		if (this._transactionDate) {
+			this._lastTransactionDate = this._transactionDate;
+		}
 		// Clear transaction timestamp
 		this._transactionDate = null;
 		
