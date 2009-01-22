@@ -2169,7 +2169,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			row.linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
 		try {
 			if (row.path.indexOf("storage:") == -1) {
-				Zotero.debug("Invalid attachment path '" + row.path + "'");
+				Zotero.debug("Invalid attachment path '" + row.path + "'", 2);
 				throw ('Invalid path');
 			}
 			// Strip "storage:"
@@ -2177,15 +2177,12 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			var file = Zotero.Attachments.getStorageDirectory(this.id);
 			file.QueryInterface(Components.interfaces.nsILocalFile);
 			file.setRelativeDescriptor(file, path);
-			if (!file.exists()) {
-				Zotero.debug("Attachment file '" + path + "' not found");
-				throw ('File not found');
-			}
 		}
 		catch (e) {
 			// See if this is a persistent path
 			// (deprecated for imported attachments)
 			Zotero.debug('Trying as persistent descriptor');
+			
 			try {
 				var file = Components.classes["@mozilla.org/file/local;1"].
 					createInstance(Components.interfaces.nsILocalFile);
@@ -2198,7 +2195,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 				}
 			}
 			catch (e) {
-				Zotero.debug('Invalid persistent descriptor');
+				Zotero.debug('Invalid persistent descriptor', 2);
 				return false;
 			}
 		}
@@ -2224,13 +2221,14 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 				}
 			}
 			catch (e) {
-				Zotero.debug('Invalid relative descriptor');
+				Zotero.debug('Invalid relative descriptor', 2);
 				return false;
 			}
 		}
 	}
 	
 	if (!skipExistsCheck && !file.exists()) {
+		Zotero.debug("Attachment file not found", 2);
 		return false;
 	}
 	
