@@ -1265,18 +1265,36 @@ Zotero.Sync.Storage = new function () {
 				if (Zotero.Sync.Storage.getSyncState(item.id)
 						!= Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD) {
 					if (mdate) {
-						var file = item.getFile();
 						var mtime = Zotero.Date.toUnixTimestamp(mdate);
 						var smtime = Zotero.Sync.Storage.getSyncedModificationTime(item.id);
-						if (mtime != smtime) {
+						// File has been uploaded to storage server but there's
+						// no local record of the time (e.g., due to a reset),
+						// use local file's time
+						if (!smtime) {
+							smtime = item.attachmentModificationTime;
+							if (smtime == mtime) {
+								Zotero.debug("Stored file mod time matches remote file -- skipping upload");
+								
+								Zotero.DB.beginTransaction();
+								var syncState = Zotero.Sync.Storage.getSyncState(item.id);
+								Zotero.Sync.Storage.setSyncedModificationTime(item.id, smtime, true);
+								Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
+								Zotero.DB.commitTransaction();
+								_changesMade = true;
+								request.finish();
+								return;
+							}
+						}
+						
+						if (smtime != mtime) {
 							var localData = { modTime: smtime };
 							var remoteData = { modTime: mtime };
 							Zotero.Sync.Storage.QueueManager.addConflict(
 								request.name, localData, remoteData
 							);
-							Zotero.debug("File conflict -- last known mod time "
-								+ "does not match remote time"
-								+ " (" + mtime + " != " + smtime + ")");
+							Zotero.debug("Conflict -- last synced file mod time "
+								+ "does not match time on storage server"
+								+ " (" + smtime + " != " + mtime + ")");
 							request.finish();
 							return;
 						}
