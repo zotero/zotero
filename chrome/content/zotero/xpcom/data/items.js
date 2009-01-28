@@ -106,6 +106,24 @@ Zotero.Items = new function() {
 	}
 	
 	
+	
+	/**
+	 * Return items marked as deleted
+	 *
+	 * @param	{Boolean}	asIDs			Return itemIDs instead of
+	 *											Zotero.Item objects
+	 * @return	{Zotero.Item[]|Integer[]}
+	 */
+	this.getDeleted = function (asIDs) {
+		var sql = "SELECT itemID FROM deletedItems";
+		var ids = Zotero.DB.columnQuery(sql);
+		if (asIDs) {
+			return ids;
+		}
+		return this.get(ids);
+	}
+	
+	
 	/*
 	 * Returns all items in the database
 	 *
@@ -317,6 +335,45 @@ Zotero.Items = new function() {
 				}
 			}
 		}
+	}
+	
+	
+	this.trash = function (ids) {
+		ids = Zotero.flattenArguments(ids);
+		
+		Zotero.UnresponsiveScriptIndicator.disable();
+		try {
+			Zotero.DB.beginTransaction();
+			for each(var id in ids) {
+				var item = this.get(id);
+				if (!item) {
+					Zotero.debug('Item ' + id + ' does not exist in Items.trash()!', 1);
+					Zotero.Notifier.trigger('delete', 'item', id);
+					continue;
+				}
+				item.deleted = true;
+				item.save();
+			}
+			Zotero.DB.commitTransaction();
+		}
+		catch (e) {
+			Zotero.DB.rollbackTransaction();
+			throw (e);
+		}
+		finally {
+			Zotero.UnresponsiveScriptIndicator.enable();
+		}
+	}
+	
+	
+	this.emptyTrash = function () {
+		Zotero.DB.beginTransaction();
+		var deletedIDs = this.getDeleted(true);
+		if (deletedIDs) {
+			this.erase(deletedIDs, true);
+		}
+		Zotero.Notifier.trigger('refresh', 'collection', 0);
+		Zotero.DB.commitTransaction();
 	}
 	
 	

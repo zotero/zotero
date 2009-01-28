@@ -75,12 +75,14 @@ Zotero.Item.prototype._init = function () {
 	this._changedPrimaryData = false;
 	this._changedItemData = false;
 	this._changedCreators = false;
+	this._changedDeleted = false;
 	this._changedNote = false;
 	this._changedSource = false;
 	this._changedAttachmentData = false;
 	
 	this._previousData = null;
 	
+	this._deleted = null;
 	this._noteTitle = null;
 	this._noteText = null;
 	this._noteAccessTime = null;
@@ -341,8 +343,9 @@ Zotero.Item.prototype.loadFromRow = function(row, reload) {
 Zotero.Item.prototype.hasChanged = function() {
 	return !!(this._changed
 		|| this._changedPrimaryData
-		|| this._changedCreators
 		|| this._changedItemData
+		|| this._changedCreators
+		|| this._changedDeleted
 		|| this._changedNote
 		|| this._changedSource
 		|| this._changedAttachmentData);
@@ -919,6 +922,44 @@ Zotero.Item.prototype.removeCreator = function(orderIndex) {
 }
 
 
+Zotero.Item.prototype.__defineGetter__('deleted', function () {
+	if (this._deleted !== null) {
+		return this._deleted;
+	}
+	
+	if (!this.id) {
+		return '';
+	}
+	
+	var sql = "SELECT COUNT(*) FROM deletedItems WHERE itemID=?";
+	var deleted = !!Zotero.DB.valueQuery(sql, this.id);
+	this._deleted = deleted;
+	return deleted;
+});
+
+
+Zotero.Item.prototype.__defineSetter__('deleted', function (val) {
+	Zotero.debug('setting deleted');
+	Zotero.debug(val);
+	if (!this.id) {
+		Zotero.debug("Deleted state not set on item without id");
+		return;
+	}
+	
+	var deleted = !!val;
+	
+	if (this.deleted == deleted) {
+		Zotero.debug("Deleted state hasn't changed for item " + this.id);
+		return;
+	}
+	
+	if (!this._changedDeleted) {
+		this._changedDeleted = true;
+	}
+	this._deleted = deleted;
+});
+
+
 Zotero.Item.prototype.addRelatedItem = function (itemID) {
 	var parsedInt = parseInt(itemID);
 	if (parsedInt != itemID) {
@@ -1033,6 +1074,7 @@ Zotero.Item.prototype.save = function() {
 		Zotero.DB.query("UPDATE itemTags SET itemID=? WHERE itemID=?", params);
 		Zotero.DB.query("UPDATE fulltextItemWords SET itemID=? WHERE itemID=?", params);
 		Zotero.DB.query("UPDATE fulltextItems SET itemID=? WHERE itemID=?", params);
+		Zotero.DB.query("UPDATE deletedItems SET itemID=? WHERE itemID=?", params);
 		Zotero.DB.query("UPDATE annotations SET itemID=? WHERE itemID=?", params);
 		Zotero.DB.query("UPDATE highlights SET itemID=? WHERE itemID=?", params);
 		
@@ -1237,6 +1279,17 @@ Zotero.Item.prototype.save = function() {
 			}
 			
 			
+			if (this._changedDeleted) {
+				if (this.deleted) {
+					sql = "REPLACE INTO deletedItems (itemID) VALUES (?)";
+				}
+				else {
+					sql = "DELETE FROM deletedItems WHERE itemID=?";
+				}
+				Zotero.DB.query(sql, itemID);
+			}
+			
+			
 			// Note
 			if (this.isNote() || this._changedNote) {
 				sql = "INSERT INTO itemNotes "
@@ -1392,6 +1445,7 @@ Zotero.Item.prototype.save = function() {
 			sqlValues.push({ int: this.id });
 			
 			Zotero.DB.query(sql, sqlValues);
+			
 			
 			//
 			// ItemData
@@ -1570,6 +1624,17 @@ Zotero.Item.prototype.save = function() {
 						[this.id, creatorID, creator['creatorTypeID']]);
 					*/
 				}
+			}
+			
+			
+			if (this._changedDeleted) {
+				if (this.deleted) {
+					sql = "REPLACE INTO deletedItems (itemID) VALUES (?)";
+				}
+				else {
+					sql = "DELETE FROM deletedItems WHERE itemID=?";
+				}
+				Zotero.DB.query(sql, this.id);
 			}
 			
 			
@@ -1788,6 +1853,13 @@ Zotero.Item.prototype.save = function() {
 	
 	if (!this.key) {
 		this._key = key;
+	}
+	
+	if (this._changedDeleted) {
+		Zotero.Notifier.trigger('refresh', 'collection', 0);
+		if (this._deleted) {
+			Zotero.Notifier.trigger('trash', 'item', this.id);
+		}
 	}
 	
 	Zotero.Items.reload(this.id);
@@ -3244,6 +3316,7 @@ Zotero.Item.prototype.erase = function(deleteChildren) {
 
 	Zotero.DB.query('DELETE FROM annotations WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM highlights WHERE itemID=?', this.id);
+	Zotero.DB.query('DELETE FROM deletedItems WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM itemCreators WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM itemNotes WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM itemAttachments WHERE itemID=?', this.id);
@@ -3467,6 +3540,10 @@ Zotero.Item.prototype.serialize = function(mode) {
 		}
 	}
 	
+	// Deleted items flag
+	if (this.deleted) {
+		arr.deleted = true;
+	}
 	
 	if (this.isRegularItem()) {
 		// Creators

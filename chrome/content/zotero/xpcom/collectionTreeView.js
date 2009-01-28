@@ -164,6 +164,11 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 		}
 	}
 	
+	var deletedItems = Zotero.Items.getDeleted();
+	if (deletedItems) {
+		this._showItem(new Zotero.ItemGroup('trash', null), 0, this._dataItems.length);
+	}
+	
 	this._refreshHashMap();
 	
 	// Update the treebox's row count
@@ -1037,6 +1042,12 @@ Zotero.ItemGroup.prototype.isShare = function()
 	return this.type == 'share';
 }
 
+Zotero.ItemGroup.prototype.isTrash = function()
+{
+	return this.type == 'trash';
+}
+
+
 Zotero.ItemGroup.prototype.getName = function()
 {
 	if (this.isCollection()) {
@@ -1050,6 +1061,9 @@ Zotero.ItemGroup.prototype.getName = function()
 	}
 	else if (this.isShare()) {
 		return this.ref.name;
+	}
+	else if (this.isTrash()) {
+		return Zotero.getString('pane.collections.trash');
 	}
 	else {
 		return "";
@@ -1098,12 +1112,18 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 		}
 		includeScopeChildren = true;
 	}
+	else if (this.isTrash()) {
+		s.addCondition('deleted', 'true');
+	}
 	else if (!this.isSearch()) {
 		throw ('Invalid search mode in Zotero.ItemGroup.getSearchObject()');
 	}
 	
 	// Create the outer (filter) search
 	var s2 = new Zotero.Search();
+	if (this.isTrash()) {
+		s2.addCondition('deleted', 'true');
+	}
 	s2.setScope(s, includeScopeChildren);
 	
 	if (this.searchText) {

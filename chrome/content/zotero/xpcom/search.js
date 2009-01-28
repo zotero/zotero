@@ -928,6 +928,10 @@ Zotero.Search.prototype._buildQuery = function(){
 		// Handle special conditions
 		else {
 			switch (data['name']){
+				case 'deleted':
+					var deleted = this._conditions[i].operator == 'true';
+					continue;
+				
 				case 'noChildren':
 					var noChildren = this._conditions[i]['operator']=='true';
 					continue;
@@ -971,20 +975,19 @@ Zotero.Search.prototype._buildQuery = function(){
 		}
 	}
 	
+	// Exclude deleted items by default
+	sql += " WHERE itemID " + (deleted ? "" : "NOT ") + "IN "
+			+ "(SELECT itemID FROM deletedItems)";
+	
 	if (noChildren){
-		sql += " WHERE (itemID NOT IN (SELECT itemID FROM itemNotes "
+		sql += " AND (itemID NOT IN (SELECT itemID FROM itemNotes "
 			+ "WHERE sourceItemID IS NOT NULL) AND itemID NOT IN "
 			+ "(SELECT itemID FROM itemAttachments "
 			+ "WHERE sourceItemID IS NOT NULL))";
 	}
 	
 	if (this._hasPrimaryConditions) {
-		if (noChildren){
-			sql += " AND ";
-		}
-		else {
-			sql += " WHERE ";
-		}
+		sql += " AND ";
 		
 		for each(var condition in conditions){
 				var skipOperators = false;
@@ -1441,12 +1444,10 @@ Zotero.Search.prototype._buildQuery = function(){
 				}
 				// Keep non-required conditions separate if in ANY mode
 				else if (!condition['required'] && joinMode == 'ANY') {
-					var nonQSConditions = true;
 					anySQL += condSQL + ' OR ';
 					anySQLParams = anySQLParams.concat(condSQLParams);
 				}
 				else {
-					var nonQSConditions = true;
 					condSQL += ' AND ';
 					sql += condSQL;
 					sqlParams = sqlParams.concat(condSQLParams);
@@ -1460,11 +1461,8 @@ Zotero.Search.prototype._buildQuery = function(){
 			sql = sql.substring(0, sql.length-4); // remove last ' OR '
 			sql += ')';
 		}
-		else if (nonQSConditions) {
-			sql = sql.substring(0, sql.length-5); // remove last ' AND '
-		}
 		else {
-			sql = sql.substring(0, sql.length-7); // remove ' WHERE '
+			sql = sql.substring(0, sql.length-5); // remove last ' AND '
 		}
 		
 		// Add on quicksearch conditions
@@ -1600,6 +1598,15 @@ Zotero.SearchConditions = new function(){
 			//
 			// Special conditions
 			//
+			
+			
+			{
+				name: 'deleted',
+				operators: {
+					true: true,
+					false: true
+				}
+			},
 			
 			// Don't include child items
 			{

@@ -90,6 +90,7 @@
 					<menuitem oncommand="Zotero_File_Interface.bibliographyFromCollection();"/>
 					<menuitem label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile()"/>
 					<menuitem oncommand="Zotero_Report_Interface.loadCollectionReport()"/>
+					<menuitem label="&zotero.toolbar.emptyTrash.label;" oncommand="ZoteroPane.emptyTrash();"/>
 				</popup>
 				<popup id="zotero-itemmenu" onpopupshowing="ZoteroPane.buildItemContextMenu();">
 					<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="ZoteroPane.selectItem(this.parentNode.getAttribute('itemID'), true)"/>
@@ -99,8 +100,8 @@
 					<menuitem label="&zotero.items.menu.attach.link;" oncommand="ZoteroPane.addAttachmentFromPage(true, this.parentNode.getAttribute('itemID'));"/>
 					<menuseparator/>
 					<menuitem label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane.duplicateSelectedItem();"/>
-					<menuitem oncommand="ZoteroPane.deleteSelectedItem();"/>
-					<menuitem oncommand="ZoteroPane.deleteSelectedItem(true);"/>
+					<menuitem oncommand="ZoteroPane.deleteSelectedItems();"/>
+					<menuitem oncommand="ZoteroPane.deleteSelectedItems(true);"/>
 					<menuseparator/>
 					<menuitem oncommand="Zotero_File_Interface.exportItems();"/>
 					<menuitem oncommand="Zotero_File_Interface.bibliographyFromItems();"/>
@@ -358,6 +359,9 @@
 					<toolbarbutton id="zotero-tb-fullscreen" tooltiptext="&zotero.toolbar.fullscreen.tooltip;" oncommand="ZoteroPane.fullScreen();"/>
 					<toolbarbutton class="tabs-closebutton" oncommand="ZoteroPane.toggleDisplay()"/>
 				</hbox>
+				<!-- TODO: localize -->
+				<button id="zotero-item-restore-button" label="Restore to Library"
+					oncommand="ZoteroPane.restoreSelectedItems()" hidden="true"/>
 				<groupbox flex="1">
 					<caption>
 						<tabs id="zotero-view-tabs" onselect="document.getElementById('zotero-view-item').selectedIndex = this.selectedIndex;" hidden="true">
@@ -368,7 +372,7 @@
 							<tab label="&zotero.tabs.related.label;"/>
 						</tabs>
 					</caption>
-					<deck id="zotero-item-pane-content" selectedIndex="0" flex="1" onselect="document.getElementById('zotero-view-tabs').setAttribute('hidden',(this.selectedIndex != 1));">
+					<deck id="zotero-item-pane-content" selectedIndex="0" flex="1">
 						<box pack="center" align="center">
 							<label id="zotero-view-selected-label"/>
 						</box>

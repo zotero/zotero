@@ -52,7 +52,6 @@ var ZoteroPane = new function()
 	this.itemSelected = itemSelected;
 	this.reindexItem = reindexItem;
 	this.duplicateSelectedItem = duplicateSelectedItem;
-	this.deleteSelectedItem = deleteSelectedItem;
 	this.deleteSelectedCollection = deleteSelectedCollection;
 	this.editSelectedCollection = editSelectedCollection;
 	this.copySelectedItemsToClipboard = copySelectedItemsToClipboard;
@@ -552,7 +551,7 @@ var ZoteroPane = new function()
 					event.keyCode == event.DOM_VK_DELETE) {
 				// If Cmd or Ctrl delete, delete from Library (with prompt)
 				var fromDB = event.metaKey || (!Zotero.isMac && event.ctrlKey);
-				ZoteroPane.deleteSelectedItem(fromDB);
+				ZoteroPane.deleteSelectedItems(fromDB);
 				event.preventDefault();
 				return;
 			}
@@ -827,11 +826,21 @@ var ZoteroPane = new function()
 			return;
 		}
 		
+		// Display restore button if items selected in Trash
+		if (this.itemsView && this.itemsView.selection.count) {
+			document.getElementById('zotero-item-restore-button').hidden
+				= !this.itemsView._itemGroup.isTrash();
+		}
+		
+		var tabs = document.getElementById('zotero-view-tabs');
+		
 		if (this.itemsView && this.itemsView.selection.count == 1 && this.itemsView.selection.currentIndex != -1)
 		{
 			var item = this.itemsView._getItemAtRow(this.itemsView.selection.currentIndex);
 			
 			if(item.ref.isNote()) {
+				tabs.hidden = true;
+				
 				var noteEditor = document.getElementById('zotero-note-editor');
 				noteEditor.mode = this.itemsView.readOnly ? 'view' : 'edit';
 				
@@ -846,19 +855,27 @@ var ZoteroPane = new function()
 				
 				noteEditor.enableUndo();
 				
-				document.getElementById('zotero-view-note-button').setAttribute('noteID',item.ref.id);
-				if(item.ref.getSource())
-				{
-					document.getElementById('zotero-view-note-button').setAttribute('sourceID',item.ref.getSource());
+				var viewButton = document.getElementById('zotero-view-note-button');
+				if (this.itemsView.readOnly) {
+					viewButton.hidden = true;
 				}
-				else
-				{
-					document.getElementById('zotero-view-note-button').removeAttribute('sourceID');
+				else {
+					viewButton.hidden = false;
+					viewButton.setAttribute('noteID', item.ref.id);
+					if (item.ref.getSource()) {
+						viewButton.setAttribute('sourceID', item.ref.getSource());
+					}
+					else {
+						viewButton.removeAttribute('sourceID');
+					}
 				}
+				
 				document.getElementById('zotero-item-pane-content').selectedIndex = 2;
 			}
 			
 			else if(item.ref.isAttachment()) {
+				tabs.hidden = true;
+				
 				var attachmentBox = document.getElementById('zotero-attachment-box');
 				attachmentBox.mode = this.itemsView.readOnly ? 'view' : 'edit';
 				attachmentBox.item = item.ref;
@@ -869,12 +886,22 @@ var ZoteroPane = new function()
 			// Regular item
 			else
 			{
-				ZoteroItemPane.viewItem(item.ref, this.itemsView.readOnly ? 'view' : false);
 				document.getElementById('zotero-item-pane-content').selectedIndex = 1;
+				if (this.itemsView.readOnly) {
+					document.getElementById('zotero-view-item').selectedIndex = 0;
+					ZoteroItemPane.viewItem(item.ref, 'view');
+					tabs.hidden = true;
+				}
+				else {
+					ZoteroItemPane.viewItem(item.ref);
+					tabs.selectedIndex = document.getElementById('zotero-view-item').selectedIndex;
+					tabs.hidden = false;
+				}
 			}
 		}
 		else
 		{
+			tabs.hidden = true;
 			document.getElementById('zotero-item-pane-content').selectedIndex = 0;
 			
 			var label = document.getElementById('zotero-view-selected-label');
@@ -927,11 +954,15 @@ var ZoteroPane = new function()
 	}
 	
 	
+	this.deleteSelectedItem = function () {
+		Zotero.debug("ZoteroPane.deleteSelectedItem() is deprecated -- use ZoteroPane.deleteSelectedItems()");
+		this.deleteSelectedItems();
+	}
+	
 	/*
 	 *  _force_ deletes item from DB even if removing from a collection or search
 	 */
-	function deleteSelectedItem(force)
-	{
+	this.deleteSelectedItems = function (force) {
 		if (this.itemsView && this.itemsView.selection.count > 0) {
 			if (!force){
 				if (this.itemsView._itemGroup.isCollection()) {
@@ -996,6 +1027,35 @@ var ZoteroPane = new function()
 			}
 		}
 	}
+	
+	
+	this.restoreSelectedItems = function () {
+		var items = this.getSelectedItems();
+		if (!items) {
+			return;
+		}
+		
+		Zotero.DB.beginTransaction();
+		for (var i=0; i<items.length; i++) {
+			items[i].deleted = false;
+			items[i].save();
+		}
+		Zotero.DB.commitTransaction();
+	}
+	
+	
+	this.emptyTrash = function () {
+		var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
+								.getService(Components.interfaces.nsIPrompt);
+		
+		var result = prompt.confirm("",
+			Zotero.getString('pane.collections.emptyTrash') + "\n\n" +
+			Zotero.getString('general.actionCannotBeUndone'));
+		if (result) {
+			Zotero.Items.emptyTrash();
+		}
+	}
+	
 	
 	function editSelectedCollection()
 	{
@@ -1253,14 +1313,14 @@ var ZoteroPane = new function()
 			exportCollection: 7,
 			createBibCollection: 8,
 			exportFile: 9,
-			loadReport: 10
+			loadReport: 10,
+			emptyTrash: 11
 		};
 		
 		// Collection
 		if (this.collectionsView.selection.count == 1 &&
 			this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex).isCollection())
 		{
-			var hide = [m.newCollection, m.newSavedSearch, m.exportFile];
 			var show = [m.newSubcollection, m.sep1, m.editSelectedCollection, m.removeCollection,
 				m.sep2, m.exportCollection, m.createBibCollection, m.loadReport];
 			if (this.itemsView.rowCount>0) {
@@ -1275,6 +1335,7 @@ var ZoteroPane = new function()
 				var disable = [m.exportCollection, m.createBibCollection, m.loadReport];
 			}
 			
+			// Adjust labels
 			menu.childNodes[m.editSelectedCollection].setAttribute('label', Zotero.getString('pane.collections.menu.rename.collection'));
 			menu.childNodes[m.removeCollection].setAttribute('label', Zotero.getString('pane.collections.menu.remove.collection'));
 			menu.childNodes[m.exportCollection].setAttribute('label', Zotero.getString('pane.collections.menu.export.collection'));
@@ -1284,7 +1345,6 @@ var ZoteroPane = new function()
 		// Saved Search
 		else if (this.collectionsView.selection.count == 1 &&
 				this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex).isSearch()) {
-			var hide = [m.newCollection, m.newSavedSearch, m.newSubcollection, m.sep1, m.exportFile]
 			var show = [m.editSelectedCollection, m.removeCollection, m.sep2, m.exportCollection,
 				m.createBibCollection, m.loadReport];
 			
@@ -1296,17 +1356,21 @@ var ZoteroPane = new function()
 				var disable = [m.exportCollection, m.createBibCollection, m.loadReport];
 			}
 			
+			// Adjust labels
 			menu.childNodes[m.editSelectedCollection].setAttribute('label', Zotero.getString('pane.collections.menu.edit.savedSearch'));
 			menu.childNodes[m.removeCollection].setAttribute('label', Zotero.getString('pane.collections.menu.remove.savedSearch'));
 			menu.childNodes[m.exportCollection].setAttribute('label', Zotero.getString('pane.collections.menu.export.savedSearch'));
 			menu.childNodes[m.createBibCollection].setAttribute('label', Zotero.getString('pane.collections.menu.createBib.savedSearch'));
 			menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.collections.menu.generateReport.savedSearch'));
 		}
+		// Trash
+		else if (this.collectionsView.selection.count == 1 &&
+				this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex).isTrash()) {
+			var show = [m.emptyTrash];
+		}
 		// Library
 		else
 		{
-			var hide = [m.newSubcollection, m.editSelectedCollection, m.removeCollection, m.sep2,
-				m.exportCollection, m.createBibCollection, m.loadReport];
 			var show = [m.newCollection, m.newSavedSearch, m.sep1, m.exportFile];
 		}
 		
@@ -1320,9 +1384,9 @@ var ZoteroPane = new function()
 			menu.childNodes[enable[i]].setAttribute('disabled', false);
 		}
 		
-		for (var i in hide)
-		{
-			menu.childNodes[hide[i]].setAttribute('hidden', true);
+		// Hide all items by default
+		for each(var pos in m) {
+			menu.childNodes[pos].setAttribute('hidden', true);
 		}
 		
 		for (var i in show)

@@ -2535,6 +2535,11 @@ Zotero.Sync.Server.Data = new function() {
 			xml.field += newField;
 		}
 		
+		// Deleted item flag
+		if (item.deleted) {
+			xml.@deleted = '1';
+		}
+		
 		if (item.primary.itemType == 'note' || item.primary.itemType == 'attachment') {
 			if (item.sourceItemID) {
 				xml.@sourceItemID = item.sourceItemID;
@@ -2664,6 +2669,10 @@ Zotero.Sync.Server.Data = new function() {
 				item.setField(field, false);
 			}
 		}
+		
+		// Deleted item flag
+		var deleted = xmlItem.@deleted.toString();
+		item.deleted = (deleted == 'true' || deleted == "1");
 		
 		// Item creators
 		var i = 0;

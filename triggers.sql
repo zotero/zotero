@@ -1,4 +1,4 @@
--- 3
+-- 4
 
 -- Triggers to validate date field
 DROP TRIGGER IF EXISTS insert_date_field;
@@ -806,6 +806,41 @@ CREATE TRIGGER fku_savedSearches_savedSearchID_savedSearchConditions_savedSearch
   FOR EACH ROW BEGIN
     UPDATE savedSearchConditions SET savedSearchID=NEW.savedSearchID WHERE savedSearchID=OLD.savedSearchID;
   END;
+
+
+-- deletedItems/itemID
+-- savedSearchConditions/savedSearchID
+DROP TRIGGER IF EXISTS fki_deletedItems_itemID_items_itemID;
+CREATE TRIGGER fki_deletedItems_itemID_items_itemID
+  BEFORE INSERT ON deletedItems
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on table "deletedItems" violates foreign key constraint "fki_deletedItems_itemID_items_itemID"')
+    WHERE (SELECT COUNT(*) FROM items WHERE itemID = NEW.itemID) = 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_deletedItems_itemID_items_itemID;
+CREATE TRIGGER fku_deletedItems_itemID_items_itemID
+  BEFORE UPDATE OF itemID ON deletedItems
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'update on table "deletedItems" violates foreign key constraint "fku_deletedItems_itemID_items_itemID"')
+    WHERE (SELECT COUNT(*) FROM items WHERE itemID = NEW.itemID) = 0;
+  END;
+
+DROP TRIGGER IF EXISTS fkd_deletedItems_itemID_items_itemID;
+CREATE TRIGGER fkd_deletedItems_itemID_items_itemID
+  BEFORE DELETE ON items
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'delete on table "items" violates foreign key constraint "fkd_deletedItems_itemID_items_itemID"')
+    WHERE (SELECT COUNT(*) FROM deletedItems WHERE itemID = OLD.itemID) > 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_items_itemID_deletedItems_itemID;
+CREATE TRIGGER fku_items_itemID_deletedItems_itemID
+  AFTER UPDATE OF itemID ON items
+  FOR EACH ROW BEGIN
+    UPDATE deletedItems SET itemID=NEW.itemID WHERE itemID=OLD.itemID;
+  END;
+
 
 -- syncDeleteLog/syncObjectTypeID
 DROP TRIGGER IF EXISTS fki_syncDeleteLog_syncObjectTypeID_syncObjectTypes_syncObjectTypeID;
