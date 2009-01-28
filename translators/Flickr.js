@@ -21,11 +21,13 @@ function detectWeb(doc, url) {
 		return "artwork";
 	} else if (doc.evaluate('//td[@class="DetailPic"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		return "multiple";
-	} else if (doc.evaluate('//div[@class="StreamView"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+	} else if (doc.evaluate('//div[contains(@class, "StreamView")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		return "multiple";
-	} else if (doc.evaluate('//div[@id="setThumbs"]/a[starts-with(@id, "set_thumb_link_")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-		return "multiple";
-	} else if (doc.evaluate('//p[@class="StreamList" or @class="UserTagList"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+	} else if (doc.evaluate('//div[@id="setThumbs"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		if (!doc.URL.match('/comments/')) {
+			return "multiple";
+		}
+	} else if (doc.evaluate('//p[@class="StreamList" or @class="UserTagList"]/span/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		return "multiple";
 	}
 }
@@ -53,7 +55,7 @@ function doWeb(doc, url) {
 		var photoRe = /\/photos\/[^\/]*\/([0-9]+)\//;
 //search results
 		if (doc.evaluate('//td[@class="DetailPic"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			elmts = doc.evaluate('//td[@class="DetailPic"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			elmts = doc.evaluate('//td[@class="DetailPic"]//a', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			while (elmt = elmts.iterateNext()){
 				var title = elmt.title;
 				title = Zotero.Utilities.trimInternal(title);
@@ -63,24 +65,30 @@ function doWeb(doc, url) {
 				items[photo_id] = title;
 			}
 // photo stream
-		} else if (doc.evaluate('//div[@class="StreamView"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			elmts = doc.evaluate('//div[@class="StreamView" and starts-with(@id, "sv_title_")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		} else if (doc.evaluate('//div[contains(@class, "StreamView")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			if (doc.evaluate('//div[contains(@class, "StreamView") and starts-with(@id, "sv_title_")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+				elmts = doc.evaluate('//div[contains(@class, "StreamView") and starts-with(@id, "sv_title_")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			} else {
+				elmts = doc.evaluate('//div[contains(@class, "StreamView") and starts-with(@id, "sv_body_")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+			}
 			while (elmt = elmts.iterateNext()){
-				var title = Zotero.Utilities.trimInternal(elmt.textContent);
+				//var title = Zotero.Utilities.trimInternal(elmt.textContent);
+				var title = elmt.getElementsByTagName("h4")[0].textContent
 				var photo_id = elmt.id;
-				photo_id = photo_id.substr(9);
+				photo_id = photo_id.replace(/(sv_body_|sv_title_)/,''); 
+				Zotero.debug("id="+photo_id)
 				items[photo_id] = title;
 			}
 // photo set
-		} else if (doc.evaluate('//div[@id="setThumbs"]/a[starts-with(@id, "set_thumb_link_")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			elmts = doc.evaluate('//div[@id="setThumbs"]/a[starts-with(@id, "set_thumb_link_")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		} else if (doc.evaluate('//div[@class="setThumbs-indv"]/span', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			elmts = doc.evaluate('//div[@class="setThumbs-indv"]/span', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			while (elmt = elmts.iterateNext()){
-				var title = Zotero.Utilities.trimInternal(elmt.title);
-				var photo_id = elmt.id.substr(15);
+				var title = doc.evaluate('./a/@title', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				var photo_id = elmt.id.substr(11);
 				items[photo_id] = title;
 			}
 // tagged with
-		} else if (doc.evaluate('//p[@class="StreamList" or @class="UserTagList"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+		} else if (doc.evaluate('//p[@class="StreamList" or @class="UserTagList"]/span/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 			var elmts = doc.evaluate('//p[@class="StreamList" or @class="UserTagList"]//a[img]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			while (elmt = elmts.iterateNext()){
 				var title = Zotero.Utilities.trimInternal(elmt.title);
@@ -89,6 +97,8 @@ function doWeb(doc, url) {
 				var photo_id = m[1];
 				items[photo_id] = title;
 			}
+		} else {
+			Zotero.debug('AND NOTHING');
 		}
 		items = Zotero.selectItems(items);
 		if(!items) return true;
