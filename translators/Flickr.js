@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-06-01 17:20:00"
+	"lastUpdated":"2009-01-28 18:10:00"
 }
 
 function detectWeb(doc, url) {
@@ -97,8 +97,6 @@ function doWeb(doc, url) {
 				var photo_id = m[1];
 				items[photo_id] = title;
 			}
-		} else {
-			Zotero.debug('AND NOTHING');
 		}
 		items = Zotero.selectItems(items);
 		if(!items) return true;
