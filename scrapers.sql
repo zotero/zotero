@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2009-01-28 18:10:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2009-01-28 19:00:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -31958,7 +31958,7 @@ function doExport() {
 }');
 
 
-REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2009-01-12 18:05:00', 1, 200, 3, 'BibTeX', 'Simon Kornblith', 'bib',
+REPLACE INTO translators VALUES ('9cb70025-a888-4a29-a210-93ec52da40d4', '1.0.0b4.r1', '', '2009-01-12 19:00:00', 1, 200, 3, 'BibTeX', 'Simon Kornblith', 'bib',
 'Zotero.configure("dataMode", "block");
 Zotero.addOption("exportCharset", "UTF-8");
 
@@ -33504,7 +33504,7 @@ function processField(item, field, value) {
 		item.publicationTitle = value;
 	} else if(field == "author" || field == "editor") {
 		// parse authors/editors
-		var names = value.split(" and ");
+		var names = value.split(/ and /i); // now case insensitive
 		for each(var name in names) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(name, field,
 			                                  (name.indexOf(",") != -1)));
