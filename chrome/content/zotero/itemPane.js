@@ -58,6 +58,7 @@ var ZoteroItemPane = new function() {
 			return;
 		}
 		
+		_deck = document.getElementById('zotero-view-item');
 		_itemBox = document.getElementById('zotero-editpane-item-box');
 		_notesList = document.getElementById('zotero-editpane-dynamic-notes');
 		_notesLabel = document.getElementById('zotero-editpane-notes-label');
@@ -76,7 +77,7 @@ var ZoteroItemPane = new function() {
 		// Force blur() when clicking off a textbox to another item in middle
 		// pane, since for some reason it's not being called automatically
 		if (_itemBeingEdited && _itemBeingEdited != thisItem) {
-			switch (_tabs.selectedIndex) {
+			switch (_deck.selectedIndex) {
 				// Info
 				case 0:
 					// TODO: fix
@@ -100,7 +101,7 @@ var ZoteroItemPane = new function() {
 		_itemBeingEdited = thisItem;
 		_loaded = {};
 		
-		loadPane(_tabs.selectedIndex, mode);
+		loadPane(_deck.selectedIndex, mode);
 	}
 	
 	

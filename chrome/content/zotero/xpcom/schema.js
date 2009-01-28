@@ -2146,7 +2146,7 @@ Zotero.Schema = new function(){
 					}
 				}
 				
-				// // 1.5 Sync Preview 3.6
+				// 1.5 Sync Preview 3.6
 				if (i==47) {
 					Zotero.DB.query("ALTER TABLE syncDeleteLog RENAME TO syncDeleteLogOld");
 					Zotero.DB.query("DROP INDEX syncDeleteLog_timestamp");
@@ -2154,6 +2154,11 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp);");
 					Zotero.DB.query("INSERT OR IGNORE INTO syncDeleteLog SELECT syncObjectTypeID, key, timestamp FROM syncDeleteLogOld ORDER BY timestamp DESC");
 					Zotero.DB.query("DROP TABLE syncDeleteLogOld");
+				}
+				
+				//
+				if (i==48) {
+					Zotero.DB.query("CREATE TABLE deletedItems (\n    itemID INTEGER PRIMARY KEY,\n    dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL\n);");
 				}
 			}
 			

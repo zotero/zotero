@@ -146,13 +146,17 @@
 					
 					var parentbox = this._id('citeLabel');
 					var textbox = this._id('noteField');
+					var textboxReadOnly = this._id('noteFieldReadOnly');
 					var button = this._id('goButton');
 					
 					if (this.editable) {
-						textbox.removeAttribute('readonly');
+						textbox.hidden = false;
+						textboxReadOnly.hidden = true;
 					}
 					else {
-						textbox.setAttribute('readonly', 'true');
+						textbox.hidden = true;
+						textboxReadOnly.hidden = false;
+						textbox = textboxReadOnly;
 					}
 					
 					//var scrollPos = textbox.inputField.scrollTop;
@@ -361,7 +365,10 @@
 		<content>
 			<xul:vbox xbl:inherits="flex">
 				<xul:label id="citeLabel"/>
-				<xul:textbox id="noteField" type="styled" mode="note" timeout="1000" flex="1"/>
+				<xul:textbox id="noteField" type="styled" mode="note"
+					timeout="1000" flex="1" hidden="true"/>
+				<xul:textbox id="noteFieldReadOnly" type="styled" mode="note"
+					readonly="true" flex="1" hidden="true"/>
 				<xul:hbox id="linksbox" hidden="true">
 					<xul:linksbox id="links" flex="1"/>
 				</xul:hbox>

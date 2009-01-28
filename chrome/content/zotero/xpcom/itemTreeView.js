@@ -232,7 +232,7 @@ Zotero.ItemTreeView.prototype.refresh = function()
 
 
 Zotero.ItemTreeView.prototype.__defineGetter__('readOnly', function () {
-	if (this._itemGroup.isShare()) {
+	if (this._itemGroup.isTrash() || this._itemGroup.isShare()) {
 		return true;
 	}
 	return false;
@@ -309,7 +309,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	}
 	
 	if ((action == 'remove' && !this._itemGroup.isLibrary())
-			|| action == 'delete' || action == 'id-change') {
+			|| action == 'delete' || action == 'id-change' || action == 'trash') {
 		
 		// We only care about the old ids
 		if (action == 'id-change') {
@@ -323,7 +323,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		var rows = [];
 		for(var i=0, len=ids.length; i<len; i++)
 		{
-			if (action == 'delete' || action == 'id-change' ||
+			if (action == 'delete' || action == 'trash' || action == 'id-change' ||
 					!this._itemGroup.ref.hasItem(ids[i])) {
 				// Row might already be gone (e.g. if this is a child and
 				// 'modify' was sent to parent)
@@ -350,12 +350,11 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 			madeChanges = true;
 			sort = true;
 		}
-		
 	}
 	else if (action == 'modify')
 	{
-		// If saved search, just re-run search
-		if (this._itemGroup.isSearch())
+		// If trash or saved search, just re-run search
+		if (this._itemGroup.isTrash() || this._itemGroup.isSearch())
 		{
 			this.refresh();
 			madeChanges = true;
@@ -410,6 +409,11 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 						// modify comes in after a delete
 						continue;
 					}
+					// Deleted items get a modify that we have to ignore when
+					// not viewing the trash
+					if (item.deleted) {
+						continue;
+					}
 					if(item.isRegularItem() || !item.getSource())
 					{
 						//most likely, the note or attachment's parent was removed.
@@ -436,9 +440,8 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	}
 	else if(action == 'add')
 	{
-		// If saved search, just re-run search
-		if (this._itemGroup.isSearch())
-		{
+		// If saved search or trash, just re-run search
+		if (this._itemGroup.isSearch() || this._itemGroup.isTrash()) {
 			this.refresh();
 			madeChanges = true;
 			sort = true;
@@ -1167,10 +1170,11 @@ Zotero.ItemTreeView.prototype.getSelectedItems = function(asIDs)
 }
 
 
-/*
+/**
  * Delete the selection
  *
- * _force_ deletes item from DB even if removing from a collection
+ * @param	{Boolean}	eraseChildren
+ * @param	{Boolean}	force			Delete item even if removing from a collection
  */
 Zotero.ItemTreeView.prototype.deleteSelection = function(eraseChildren, force)
 {
@@ -1201,10 +1205,13 @@ Zotero.ItemTreeView.prototype.deleteSelection = function(eraseChildren, force)
 	
 	// Erase item(s) from DB
 	if (this._itemGroup.isLibrary() || force) {
-		Zotero.Items.erase(ids, eraseChildren);
+		Zotero.Items.trash(ids);
 	}
 	else if (this._itemGroup.isCollection()) {
 		this._itemGroup.ref.removeItems(ids);
+	}
+	else if (this._itemGroup.isTrash()) {
+		Zotero.Items.erase(ids, eraseChildren);
 	}
 	this._treebox.endUpdateBatch();
 }

@@ -1,4 +1,4 @@
--- 47
+-- 48
 
 -- This file creates tables containing user-specific data -- any changes made
 -- here must be mirrored in transition steps in schema.js::_migrateSchema()
@@ -169,6 +169,11 @@ CREATE TABLE savedSearchConditions (
     required NONE,
     PRIMARY KEY (savedSearchID, searchConditionID),
     FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID)
+);
+
+CREATE TABLE deletedItems (
+    itemID INTEGER PRIMARY KEY,
+    dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE fulltextItems (
