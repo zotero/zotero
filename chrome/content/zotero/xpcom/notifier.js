@@ -86,7 +86,7 @@ Zotero.Notifier = new function(){
 	* Possible values:
 	*
 	* 	event: 'add', 'modify', 'delete', 'move' ('c', for changing parent),
-	*		'remove' (ci, it), 'refresh'
+	*		'remove' (ci, it), 'refresh', 'trash'
 	* 	type - 'collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'
 	* 	ids - single id or array of ids
 	*
@@ -237,7 +237,7 @@ Zotero.Notifier = new function(){
 		var order = ['collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'];
 		_queue.sort();
 		
-		var order = ['add', 'modify', 'remove', 'move', 'delete'];
+		var order = ['add', 'modify', 'remove', 'move', 'delete', 'trash'];
 		var totals = '';
 		for (var type in _queue) {
 			if (!runQueue[type]) {
