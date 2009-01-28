@@ -1557,7 +1557,7 @@ function processField(item, field, value) {
 		item.publicationTitle = value;
 	} else if(field == "author" || field == "editor") {
 		// parse authors/editors
-		var names = value.split(" and ");
+		var names = value.split(/ and /i); // now case insensitive
 		for each(var name in names) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(name, field,
 			                                  (name.indexOf(",") != -1)));
