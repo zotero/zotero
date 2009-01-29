@@ -833,6 +833,9 @@ var ZoteroPane = new function()
 				= !this.itemsView._itemGroup.isTrash()
 					|| _nonDeletedItemsSelected(this.itemsView);
 		}
+		else {
+			document.getElementById('zotero-item-restore-button').hidden = true;
+		}
 		
 		var tabs = document.getElementById('zotero-view-tabs');
 		
