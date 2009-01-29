@@ -567,8 +567,10 @@ Zotero.Items = new function() {
 		// Should be the same as parts in Zotero.Item.loadPrimaryData
 		var sql = 'SELECT I.*, '
 			+ getFirstCreatorSQL() + ', '
-			+ "(SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=I.itemID) AS numNotes, "
-			+ "(SELECT COUNT(*) FROM itemAttachments WHERE sourceItemID=I.itemID) AS numAttachments "
+			+ "(SELECT COUNT(*) FROM itemNotes INo WHERE sourceItemID=I.itemID AND "
+			+ "INo.itemID NOT IN (SELECT itemID FROM deletedItems)) AS numNotes, "
+			+ "(SELECT COUNT(*) FROM itemAttachments IA WHERE sourceItemID=I.itemID AND "
+			+ "IA.itemID NOT IN (SELECT itemID FROM deletedItems)) AS numAttachments "
 			+ 'FROM items I WHERE 1';
 		if (arguments[0]) {
 			sql += ' AND I.itemID IN (' + Zotero.join(arguments[0], ',') + ')';

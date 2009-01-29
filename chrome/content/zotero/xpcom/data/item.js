@@ -269,13 +269,15 @@ Zotero.Item.prototype.loadPrimaryData = function(allowFail) {
 					break;
 					
 				case 'numNotes':
-					colSQL = '(SELECT COUNT(*) FROM itemNotes '
-						+ 'WHERE sourceItemID=I.itemID) AS numNotes';
+					colSQL = '(SELECT COUNT(*) FROM itemNotes INo '
+						+ 'WHERE sourceItemID=I.itemID AND INo.itemID '
+						+ 'NOT IN (SELECT itemID FROM deletedItems)) AS numNotes';
 					break;
 					
 				case 'numAttachments':
-					colSQL = '(SELECT COUNT(*) FROM itemAttachments '
-						+ 'WHERE sourceItemID=I.itemID) AS numAttachments';
+					colSQL = '(SELECT COUNT(*) FROM itemAttachments IA '
+						+ 'WHERE sourceItemID=I.itemID AND IA.itemID '
+						+ 'NOT IN (SELECT itemID FROM deletedItems)) AS numAttachments';
 					break;
 			}
 			if (colSQL) {
@@ -326,7 +328,15 @@ Zotero.Item.prototype.loadFromRow = function(row, reload) {
 		// Only accept primary field data through loadFromRow()
 		if (this.isPrimaryField(col)) {
 			//Zotero.debug("Setting field '" + col + "' to '" + row[col] + "' for item " + this.id);
-			this['_' + col] = row[col] ? row[col] : '';
+			switch (col) {
+				case 'numNotes':
+				case 'numAttachments':
+					this['_' + col] = row[col] ? parseInt(row[col]) : 0;
+					break;
+				
+				default:
+					this['_' + col] = row[col] ? row[col] : '';
+			}
 		}
 		else {
 			Zotero.debug(col + ' is not a valid primary field');
@@ -1895,8 +1905,8 @@ Zotero.Item.prototype.isRegularItem = function() {
 }
 
 
-Zotero.Item.prototype.numChildren = function() {
-	return this.numNotes() + this.numAttachments();
+Zotero.Item.prototype.numChildren = function(includeTrashed) {
+	return this.numNotes(includeTrashed) + this.numAttachments(includeTrashed);
 }
 
 
@@ -1996,9 +2006,12 @@ Zotero.Item.prototype.updateNote = function(text) {
 
 
 /**
-* Returns number of notes in item
-**/
-Zotero.Item.prototype.numNotes = function() {
+ * Returns number of child notes of item
+ *
+ * @param	{Boolean}	includeTrashed		Include trashed child items in count
+ * @return	{Integer}
+ */
+Zotero.Item.prototype.numNotes = function(includeTrashed) {
 	if (this.isNote()) {
 		throw ("numNotes() cannot be called on items of type 'note'");
 	}
@@ -2007,7 +2020,14 @@ Zotero.Item.prototype.numNotes = function() {
 		return 0;
 	}
 	
-	return this._numNotes;
+	var deleted = 0;
+	if (includeTrashed) {
+		var sql = "SELECT COUNT(*) FROM itemNotes WHERE sourceItemID=? AND "
+			+ "itemID IN (SELECT itemID FROM deletedItems)";
+		deleted = parseInt(Zotero.DB.valueQuery(sql, this.id));
+	}
+	
+	return this._numNotes + deleted;
 }
 
 
@@ -2121,9 +2141,12 @@ Zotero.Item.prototype.setNote = function(text) {
 
 
 /**
-* Returns an array of note itemIDs for this item
-**/
-Zotero.Item.prototype.getNotes = function() {
+ * Returns child notes of this item
+ *
+ * @param	{Boolean}	includeTrashed		Include trashed child items
+ * @return	{Integer[]}						Array of itemIDs, or FALSE if none
+ */
+Zotero.Item.prototype.getNotes = function(includeTrashed) {
 	if (this.isNote()) {
 		throw ("getNotes() cannot be called on items of type 'note'");
 	}
@@ -2134,6 +2157,9 @@ Zotero.Item.prototype.getNotes = function() {
 	
 	var sql = "SELECT N.itemID, title FROM itemNotes N NATURAL JOIN items "
 		+ "WHERE sourceItemID=?";
+	if (!includeTrashed) {
+		sql += " AND N.itemID NOT IN (SELECT itemID FROM deletedItems)";
+	}
 	
 	if (Zotero.Prefs.get('sortNotesChronologically')) {
 		sql += " ORDER BY dateAdded";
@@ -2191,9 +2217,12 @@ Zotero.Item.prototype.isAttachment = function() {
 
 
 /**
-* Returns number of files in item
-**/
-Zotero.Item.prototype.numAttachments = function() {
+ * Returns number of child attachments of item
+ *
+ * @param	{Boolean}	includeTrashed		Include trashed child items in count
+ * @return	{Integer}
+ */
+Zotero.Item.prototype.numAttachments = function(includeTrashed) {
 	if (this.isAttachment()) {
 		throw ("numAttachments() cannot be called on attachment items");
 	}
@@ -2202,7 +2231,14 @@ Zotero.Item.prototype.numAttachments = function() {
 		return 0;
 	}
 	
-	return this._numAttachments;
+	var deleted = 0;
+	if (includeTrashed) {
+		var sql = "SELECT COUNT(*) FROM itemAttachments WHERE sourceItemID=? AND "
+			+ "itemID IN (SELECT itemID FROM deletedItems)";
+		deleted = parseInt(Zotero.DB.valueQuery(sql, this.id));
+	}
+	
+	return this._numAttachments + deleted;
 }
 
 
@@ -2680,10 +2716,12 @@ Zotero.Item.prototype.__defineGetter__('attachmentModificationTime', function ()
 
 
 /**
-* Returns an array of attachment itemIDs that have this item as a source,
-* or FALSE if none
-**/
-Zotero.Item.prototype.getAttachments = function() {
+ * Returns child attachments of this item
+ *
+ * @param	{Boolean}	includeTrashed		Include trashed child items
+ * @return	{Integer[]}						Array of itemIDs, or FALSE if none
+ */
+Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 	if (this.isAttachment()) {
 		throw ("getAttachments() cannot be called on attachment items");
 	}
@@ -2698,6 +2736,9 @@ Zotero.Item.prototype.getAttachments = function() {
 		+ "LEFT JOIN itemDataValues IDV "
 		+ "ON (ID.valueID=IDV.valueID) "
 		+ "WHERE sourceItemID=?";
+	if (!includeTrashed) {
+		sql += " AND A.itemID NOT IN (SELECT itemID FROM deletedItems)";
+	}
 		
 	if (Zotero.Prefs.get('sortAttachmentsChronologically')) {
 		sql +=  " ORDER BY dateAdded";
