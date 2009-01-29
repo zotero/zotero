@@ -613,6 +613,9 @@ Zotero.CollectionTreeView.prototype.saveSelection = function()
 			else if (this._getItemAtRow(i).isSearch()) {
 				return 'S' + this._getItemAtRow(i).ref.id;
 			}
+			else if (this._getItemAtRow(i).isTrash()) {
+				return 'T';
+			}
 		}
 	}
 	return false;
@@ -647,6 +650,15 @@ Zotero.CollectionTreeView.prototype.rememberSelection = function(selection)
 		case 'S':
 			if (this._searchRowMap[id] != undefined) {
 				this.selection.select(this._searchRowMap[id]);
+			}
+			break;
+		
+		case 'T':
+			if (this._getItemAtRow(this.rowCount-1).isTrash()){
+				this.selection.select(this.rowCount-1);
+			}
+			else {
+				this.selection.select(0);
 			}
 			break;
 	}
