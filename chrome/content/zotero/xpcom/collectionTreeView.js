@@ -1170,8 +1170,7 @@ Zotero.ItemGroup.prototype.setTags = function(tags)
  * Returns TRUE if saved search, quicksearch or tag filter
  */
 Zotero.ItemGroup.prototype.isSearchMode = function() {
-	// Search
-	if (this.isSearch()) {
+	if (this.isSearch() || this.isTrash()) {
 		return true;
 	}
 	

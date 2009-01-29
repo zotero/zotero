@@ -819,6 +819,7 @@ var ZoteroPane = new function()
 		}
 	}
 	
+	
 	function itemSelected()
 	{
 		if (!Zotero.stateCheck()) {
@@ -829,7 +830,8 @@ var ZoteroPane = new function()
 		// Display restore button if items selected in Trash
 		if (this.itemsView && this.itemsView.selection.count) {
 			document.getElementById('zotero-item-restore-button').hidden
-				= !this.itemsView._itemGroup.isTrash();
+				= !this.itemsView._itemGroup.isTrash()
+					|| _nonDeletedItemsSelected(this.itemsView);
 		}
 		
 		var tabs = document.getElementById('zotero-view-tabs');
@@ -913,7 +915,27 @@ var ZoteroPane = new function()
 				label.value = Zotero.getString('pane.item.selected.zero');
 			}
 		}
-
+	}
+	
+	
+	/**
+	 * Check if any selected items in the passed (trash) treeview are not deleted
+	 *
+	 * @param	{nsITreeView}
+	 * @return	{Boolean}
+	 */
+	function _nonDeletedItemsSelected(itemsView) {
+		var start = {};
+		var end = {};
+		for (var i=0, len=itemsView.selection.getRangeCount(); i<len; i++) {
+			itemsView.selection.getRangeAt(i, start, end);
+			for (var j=start.value; j<=end.value; j++) {
+				if (!itemsView._getItemAtRow(j).ref.deleted) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	
@@ -973,6 +995,19 @@ var ZoteroPane = new function()
 						this.itemsView._itemGroup.isShare()) {
 					return;
 				}
+				// Do nothing in trash view if any non-deleted items are selected
+				else if (this.itemsView._itemGroup.isTrash()) {
+					var start = {};
+					var end = {};
+					for (var i=0, len=this.itemsView.selection.getRangeCount(); i<len; i++) {
+						this.itemsView.selection.getRangeAt(i, start, end);
+						for (var j=start.value; j<=end.value; j++) {
+							if (!this.itemsView._getItemAtRow(j).ref.deleted) {
+								return;
+							}
+						}
+					}
+				}
 			}
 			
 			var eraseChildren = {value: true};
@@ -981,15 +1016,16 @@ var ZoteroPane = new function()
 			var hasChildren;
 			
 			if (!this.getSelectedCollection()) {
-				var start = new Object();
-				var end = new Object();
+				var start = {};
+				var end = {};
 				for (var i=0, len=this.itemsView.selection.getRangeCount(); i<len; i++) {
-					this.itemsView.selection.getRangeAt(i,start,end);
-					for (var j=start.value; j<=end.value; j++)
+					this.itemsView.selection.getRangeAt(i, start, end);
+					for (var j=start.value; j<=end.value; j++) {
 						if (this.itemsView._getItemAtRow(j).numChildren()) {
 							hasChildren = true;
 							break;
 						}
+					}
 				}
 			}
 			

@@ -586,7 +586,7 @@ Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 	
 	if(column.id == "zotero-items-column-numChildren")
 	{
-		var c = obj.numChildren();
+		var c = obj.numChildren(this._itemGroup.isTrash());
 		// Don't display '0'
 		if(c && parseInt(c) > 0) {
 			val = c;
@@ -668,7 +668,9 @@ Zotero.ItemTreeView.prototype.isContainerEmpty = function(row)
 	if(this._sourcesOnly) {
 		return true;
 	} else {
-		return (this._getItemAtRow(row).numNotes() == 0 && this._getItemAtRow(row).numAttachments() == 0);
+		var includeTrashed = this._itemGroup.isTrash();
+		return (this._getItemAtRow(row).numNotes(includeTrashed) == 0
+			&& this._getItemAtRow(row).numAttachments(includeTrashed) == 0);
 	}
 }
 
@@ -727,8 +729,9 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function(row, skipItemMapRefresh
 	else {
 		var item = this._getItemAtRow(row).ref;
 		//Get children
-		var attachments = item.getAttachments();
-		var notes = item.getNotes();
+		var includeTrashed = this._itemGroup.isTrash();
+		var attachments = item.getAttachments(includeTrashed);
+		var notes = item.getNotes(includeTrashed);
 		
 		var newRows;
 		if(attachments && notes)
@@ -891,6 +894,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		return field;
 	}
 	
+	var includeTrashed = this._itemGroup.isTrash();
+	
 	function rowSort(a,b) {
 		var cmp, fieldA, fieldB;
 		
@@ -915,7 +920,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				break;
 				
 			case 'numChildren':
-				cmp = b.numChildren() - a.numChildren();
+				cmp = b.numChildren(includeTrashed) - a.numChildren(includeTrashed);
 				if (cmp) {
 					return cmp;
 				}
@@ -2273,26 +2278,26 @@ Zotero.ItemTreeView.TreeRow.prototype.getField = function(field, unformatted)
 	return this.ref.getField(field, unformatted, true);
 }
 
-Zotero.ItemTreeView.TreeRow.prototype.numChildren = function()
+Zotero.ItemTreeView.TreeRow.prototype.numChildren = function(includeTrashed)
 {
 	if(this.ref.isRegularItem())
-		return this.ref.numChildren();
+		return this.ref.numChildren(includeTrashed);
 	else
 		return 0;
 }
 
-Zotero.ItemTreeView.TreeRow.prototype.numNotes = function()
+Zotero.ItemTreeView.TreeRow.prototype.numNotes = function(includeTrashed)
 {
 	if(this.ref.isRegularItem())
-		return this.ref.numNotes();
+		return this.ref.numNotes(includeTrashed);
 	else
 		return 0;
 }
 
-Zotero.ItemTreeView.TreeRow.prototype.numAttachments = function()
+Zotero.ItemTreeView.TreeRow.prototype.numAttachments = function(includeTrashed)
 {
 	if(this.ref.isRegularItem())
-		return this.ref.numAttachments();
+		return this.ref.numAttachments(includeTrashed);
 	else
 		return 0;
 }
