@@ -33,6 +33,7 @@ pref("extensions.zotero.capitalizeTitles", true);
 pref("extensions.zotero.launchNonNativeFiles", false);
 pref("extensions.zotero.sortNotesChronologically", false);
 pref("extensions.zotero.sortAttachmentsChronologically", false);
+pref("extensions.zotero.showTrashWhenEmpty", true);
 
 pref("extensions.zotero.lastCreatorFieldMode",0);
 pref("extensions.zotero.lastAbstractExpand",0);

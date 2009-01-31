@@ -165,9 +165,10 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 	}
 	
 	var deletedItems = Zotero.Items.getDeleted();
-	if (deletedItems) {
+	if (deletedItems || Zotero.Prefs.get("showTrashWhenEmpty")) {
 		this._showItem(new Zotero.ItemGroup('trash', null), 0, this._dataItems.length);
 	}
+	this.trashNotEmpty = !!deletedItems;
 	
 	this._refreshHashMap();
 	
@@ -375,6 +376,9 @@ Zotero.CollectionTreeView.prototype.getCellText = function(row, column)
 Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 {
 	var collectionType = this._getItemAtRow(row).type;
+	if (collectionType == 'trash' && this.trashNotEmpty) {
+		collectionType += "-full";
+	}
 	return "chrome://zotero/skin/treesource-" + collectionType + ".png";
 }
 
