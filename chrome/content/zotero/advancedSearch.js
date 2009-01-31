@@ -34,7 +34,9 @@ var ZoteroAdvancedSearch = new function() {
 			},
 			isLibrary: function () { return false; },
 			isCollection: function () { return false; },
-			isSearch: function () { return true; }
+			isSearch: function () { return true; },
+			isShare: function () { return true; },
+			isTrash: function () { return false; }
 		}
 		
 		if (this.itemsView) {
