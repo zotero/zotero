@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2009-01-28 19:00:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2009-02-03 05:45:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -24577,29 +24577,30 @@ function doWeb(doc, url) {
 	}
 }');
 
-REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2008-09-02 11:15:00', '1', '100', '4', 'Google Books', 'Simon Kornblith and Michael Berkowitz', '^http://books\.google\.[a-z]+(\.[a-z]+)?/books\?(.*id=.*|.*q=.*)', 
+REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b3.r1', '', '2009-02-03 05:45:00', 1, 100, 4, 'Google Books', 'Simon Kornblith and Michael Berkowitz', '^http://(books|www)\.google\.[a-z]+(\.[a-z]+)?/books\?(.*id=.*|.*q=.*)',
 'function detectWeb(doc, url) {
-	var re = new RegExp(''^http://books\\.google\\.[a-z]+(\.[a-z]+)?/books\\?id=([^&]+)'', ''i'');
+	var re = new RegExp(''^http://(books|www)\\.google\\.[a-z]+(\.[a-z]+)?/books\\?id=([^&]+)'', ''i'');
 	if(re.test(doc.location.href)) {
 		return "book";
 	} else {
 		return "multiple";
 	}
-}', 
+}',
 'function doWeb(doc, url) {
 	// get local domain suffix
-	var suffixRe = new RegExp("https?://books\.google\.([^/]+)/");
-	var suffixMatch = suffixRe.exec(url);
-	var suffix = suffixMatch[1];              
+	var psRe = new RegExp("https?://(books|www)\.google\.([^/]+)/");
+	var psMatch = psRe.exec(url);
+	var suffix = psMatch[2];
+	var prefix = psMatch[1];
 	var uri = doc.location.href;
 	var newUris = new Array();
 	
-	var re = new RegExp(''^http://books\\.google\\.[a-z]+(\.[a-z]+)?/books\\?id=([^&]+)'', ''i'');
+	var re = new RegExp(''^http://(?:books|www)\\.google\\.[a-z]+(\.[a-z]+)?/books\\?id=([^&]+)'', ''i'');
 	var m = re.exec(uri);
 	if(m) {
-		newUris.push(''http://books.google.''+suffix+''/books?id=''+m[2]);
+		newUris.push(''http://''+prefix+''.google.''+suffix+''/books?id=''+m[2]);
 	} else {
-		var items = Zotero.Utilities.getItemArray(doc, doc, ''http://books\\.google\\.'' + suffix + ''/books\\?id=([^&]+)'', ''^(?:All matching pages|About this Book|Table of Contents|Index)'');
+		var items = Zotero.Utilities.getItemArray(doc, doc, ''http://''+prefix+''\\.google\\.'' + suffix + ''/books\\?id=([^&]+)'', ''^(?:All matching pages|About this Book|Table of Contents|Index)'');
 		// Drop " - Page" thing
 		for(var i in items) {
 			items[i] = items[i].replace(/- Page [0-9]+\s*$/, "");
@@ -24612,7 +24613,7 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 		
 		for(var i in items) {
 			var m = re.exec(i);
-			newUris.push(''http://books.google.''+suffix+''/books?id=''+m[2]);
+			newUris.push(''http://''+prefix+''.google.''+suffix+''/books?id=''+m[2]);
 		}
 	}
 	Zotero.debug(newUris);
@@ -24675,6 +24676,7 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 	
 	Zotero.wait();
 }');
+
 
 REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b3.r1', '', '2008-03-28 16:30:00', '1', '100', '4', 'Google Scholar', 'Simon Kornblith', 'http://scholar\.google\.(?:com|com?\.[a-z]{2}|[a-z]{2})/scholar', 
 'function detectWeb(doc, url) {
