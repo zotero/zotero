@@ -3,16 +3,16 @@
 	"translatorType":4,
 	"label":"Google Books",
 	"creator":"Simon Kornblith and Michael Berkowitz",
-	"target":"^http://books\\.google\\.[a-z]+(\\.[a-z]+)?/books\\?(.*id=.*|.*q=.*)",
+	"target":"^http://(books|www)\\.google\\.[a-z]+(\\.[a-z]+)?/books\\?(.*id=.*|.*q=.*)",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-09-02 11:15:00"
+	"lastUpdated":"2009-02-03 06:15:00"
 }
 
 function detectWeb(doc, url) {
-	var re = new RegExp('^http://books\\.google\\.[a-z]+(\.[a-z]+)?/books\\?id=([^&]+)', 'i');
+	var re = new RegExp('^http://(books|www)\\.google\\.[a-z]+(\.[a-z]+)?/books\\?id=([^&]+)', 'i');
 	if(re.test(doc.location.href)) {
 		return "book";
 	} else {
@@ -22,18 +22,19 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	// get local domain suffix
-	var suffixRe = new RegExp("https?://books\.google\.([^/]+)/");
-	var suffixMatch = suffixRe.exec(url);
-	var suffix = suffixMatch[1];              
+	var psRe = new RegExp("https?://(books|www)\.google\.([^/]+)/");
+	var psMatch = psRe.exec(url);
+	var suffix = psMatch[2];
+	var prefix = psMatch[1];
 	var uri = doc.location.href;
 	var newUris = new Array();
 	
-	var re = new RegExp('^http://books\\.google\\.[a-z]+(\.[a-z]+)?/books\\?id=([^&]+)', 'i');
+	var re = new RegExp('^http://(?:books|www)\\.google\\.[a-z]+(\.[a-z]+)?/books\\?id=([^&]+)', 'i');
 	var m = re.exec(uri);
 	if(m) {
-		newUris.push('http://books.google.'+suffix+'/books?id='+m[2]);
+		newUris.push('http://'+prefix+'.google.'+suffix+'/books?id='+m[2]);
 	} else {
-		var items = Zotero.Utilities.getItemArray(doc, doc, 'http://books\\.google\\.' + suffix + '/books\\?id=([^&]+)', '^(?:All matching pages|About this Book|Table of Contents|Index)');
+		var items = Zotero.Utilities.getItemArray(doc, doc, 'http://'+prefix+'\\.google\\.' + suffix + '/books\\?id=([^&]+)', '^(?:All matching pages|About this Book|Table of Contents|Index)');
 		// Drop " - Page" thing
 		for(var i in items) {
 			items[i] = items[i].replace(/- Page [0-9]+\s*$/, "");
@@ -46,7 +47,7 @@ function doWeb(doc, url) {
 		
 		for(var i in items) {
 			var m = re.exec(i);
-			newUris.push('http://books.google.'+suffix+'/books?id='+m[2]);
+			newUris.push('http://'+prefix+'.google.'+suffix+'/books?id='+m[2]);
 		}
 	}
 	Zotero.debug(newUris);
