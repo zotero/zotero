@@ -345,26 +345,31 @@ Zotero.Schema = new function(){
 				
 				if (mode == 'translator') {
 					var fileName = Zotero.File.getValidFileName(newObj[titleField]) + fileExt
-					
-					var destFile = destDir.clone();
-					destFile.append(fileName);
-					if (destFile.exists()) {
-						var msg = "Overwriting translator with same filename '"
-							+ fileName + "'";
-						Zotero.debug(msg, 1);
-						Components.utils.reportError(msg + " in Zotero.Schema.updateBundledFiles()");
-						destFile.remove(false);
-					}
 				}
 				else if (mode == 'style') {
 					var fileName = file.leafName;
 				}
 				
-				if (!existingObj || !existingObj.hidden) {
-					file.copyTo(destDir, fileName);
+				try {
+					var destFile = destDir.clone();
+					destFile.append(fileName);
+					if (destFile.exists()) {
+						var msg = "Overwriting " + mode + " with same filename '"
+							+ fileName + "'";
+						Zotero.debug(msg, 1);
+						Components.utils.reportError(msg + " in Zotero.Schema.updateBundledFiles()");
+						destFile.remove(false);
+					}
+					
+					if (!existingObj || !existingObj.hidden) {
+						file.copyTo(destDir, fileName);
+					}
+					else {
+						file.copyTo(hiddenDir, fileName);
+					}
 				}
-				else {
-					file.copyTo(hiddenDir, fileName);
+				catch (e) {
+					Components.utils.reportError("Error copying file " + fileName + ": " + e);
 				}
 			}
 		}
