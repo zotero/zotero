@@ -30,6 +30,7 @@ Zotero.Collection.prototype._init = function () {
 	// Public members for access by public methods -- do not access directly
 	this._name = null;
 	this._parent = null;
+	this._dateAdded = null;
 	this._dateModified = null;
 	this._key = null;
 	
@@ -56,6 +57,8 @@ Zotero.Collection.prototype.__defineGetter__('name', function () { return this._
 Zotero.Collection.prototype.__defineSetter__('name', function (val) { this._set('name', val); });
 Zotero.Collection.prototype.__defineGetter__('parent', function () { return this._get('parent'); });
 Zotero.Collection.prototype.__defineSetter__('parent', function (val) { this._set('parent', val); });
+Zotero.Collection.prototype.__defineGetter__('dateAdded', function () { return this._get('dateAdded'); });
+Zotero.Collection.prototype.__defineSetter__('dateAdded', function (val) { this._set('dateAdded', val); });
 Zotero.Collection.prototype.__defineGetter__('dateModified', function () { return this._get('dateModified'); });
 Zotero.Collection.prototype.__defineSetter__('dateModified', function (val) { this._set('dateModified', val); });
 Zotero.Collection.prototype.__defineGetter__('key', function () { return this._get('key'); });
@@ -154,6 +157,7 @@ Zotero.Collection.prototype.loadFromRow = function(row) {
 	this._collectionID = row.collectionID;
 	this._name = row.collectionName;
 	this._parent = row.parentCollectionID;
+	this._dateAdded = row.dateAdded;
 	this._dateModified = row.dateModified;
 	this._key = row.key;
 	this._hasChildCollections = !!row.hasChildCollections;
@@ -321,9 +325,9 @@ Zotero.Collection.prototype.save = function () {
 		var row = Zotero.DB.rowQuery("SELECT * FROM collections WHERE collectionID=?", oldID);
 		// Add a new row so we can update the old rows despite FK checks
 		// Use temp key due to UNIQUE constraint on key column
-		Zotero.DB.query("INSERT INTO collections VALUES (?, ?, ?, ?, ?)",
+		Zotero.DB.query("INSERT INTO collections VALUES (?, ?, ?, ?, ?, ?)",
 			[this.id, row.collectionName, row.parentCollectionID,
-			row.dateModified, 'TEMPKEY']);
+			row.dateAdded, row.dateModified, 'TEMPKEY']);
 		
 		Zotero.DB.query("UPDATE collectionItems SET collectionID=? WHERE collectionID=?", params);
 		Zotero.DB.query("UPDATE collections SET parentCollectionID=? WHERE parentCollectionID=?", params);
@@ -354,13 +358,15 @@ Zotero.Collection.prototype.save = function () {
 		
 		var columns = [
 			'collectionID', 'collectionName', 'parentCollectionID',
-			'dateModified', 'key'
+			'dateAdded', 'dateModified', 'key'
 		];
-		var placeholders = ['?', '?', '?', '?', '?'];
+		var placeholders = ['?', '?', '?', '?', '?', '?'];
 		var sqlValues = [
 			collectionID ? { int: collectionID } : null,
 			{ string: this.name },
 			this.parent ? { int: this.parent } : null,
+			// If date added isn't set, use current timestamp
+			this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime,
 			// If date modified hasn't changed, use current timestamp
 			this._changed.dateModified ?
 				this.dateModified : Zotero.DB.transactionDateTime,
@@ -806,6 +812,7 @@ Zotero.Collection.prototype.serialize = function(nested) {
 	var obj = {
 		primary: {
 			collectionID: this.id,
+			dateAdded: this.dateAdded,
 			dateModified: this.dateModified,
 			key: this.key
 		},

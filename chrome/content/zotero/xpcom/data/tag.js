@@ -30,6 +30,7 @@ Zotero.Tag.prototype._init = function () {
 	// Public members for access by public methods -- do not access directly
 	this._name = null;
 	this._type = null;
+	this._dateAdded = null;
 	this._dateModified = null;
 	this._key = null;
 	
@@ -49,6 +50,8 @@ Zotero.Tag.prototype.__defineGetter__('name', function () { return this._get('na
 Zotero.Tag.prototype.__defineSetter__('name', function (val) { this._set('name', val); });
 Zotero.Tag.prototype.__defineGetter__('type', function () { return this._get('type'); });
 Zotero.Tag.prototype.__defineSetter__('type', function (val) { this._set('type', val); });
+Zotero.Tag.prototype.__defineGetter__('dateAdded', function () { return this._get('dateAdded'); });
+Zotero.Tag.prototype.__defineSetter__('dateAdded', function (val) { this._set('dateAdded', val); });
 Zotero.Tag.prototype.__defineGetter__('dateModified', function () { return this._get('dateModified'); });
 Zotero.Tag.prototype.__defineSetter__('dateModified', function (val) { this._set('dateModified', val); });
 Zotero.Tag.prototype.__defineGetter__('key', function () { return this._get('key'); });
@@ -121,7 +124,7 @@ Zotero.Tag.prototype.load = function() {
 		throw ("tagID not set in Zotero.Tag.load()");
 	}
 	
-	var sql = "SELECT name, type, dateModified, key FROM tags WHERE tagID=?";
+	var sql = "SELECT name, type, dateAdded, dateModified, key FROM tags WHERE tagID=?";
 	var row = Zotero.DB.rowQuery(sql, this.id);
 	
 	this.loadFromRow(row);
@@ -247,8 +250,8 @@ Zotero.Tag.prototype.save = function (full) {
 		
 		// Add a new row so we can update the old rows despite FK checks
 		// Use temp key due to UNIQUE constraint on key column
-		Zotero.DB.query("INSERT INTO tags VALUES (?, ?, ?, ?, ?)",
-			[this.id, row.name, row.type, row.dateModified, 'TEMPKEY']);
+		Zotero.DB.query("INSERT INTO tags VALUES (?, ?, ?, ?, ?, ?)",
+			[this.id, row.name, row.type, row.dateAdded, row.dateModified, 'TEMPKEY']);
 		
 		Zotero.DB.query("UPDATE itemTags SET tagID=? WHERE tagID=?", params);
 		
@@ -273,13 +276,15 @@ Zotero.Tag.prototype.save = function (full) {
 		var key = this.key ? this.key : this._generateKey();
 		
 		var columns = [
-			'tagID', 'name', 'type', 'dateModified', 'key'
+			'tagID', 'name', 'type', 'dateAdded', 'dateModified', 'key'
 		];
-		var placeholders = ['?', '?', '?', '?', '?'];
+		var placeholders = ['?', '?', '?', '?', '?', '?'];
 		var sqlValues = [
 			tagID ? { int: tagID } : null,
 			{ string: this.name },
 			{ int: this.type },
+			// If date added isn't set, use current timestamp
+			this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime,
 			// If date modified hasn't changed, use current timestamp
 			this._changed.dateModified ?
 				this.dateModified : Zotero.DB.transactionDateTime,
@@ -455,6 +460,7 @@ Zotero.Tag.prototype.serialize = function () {
 	var obj = {
 		primary: {
 			tagID: this.id,
+			dateAdded: this.dateAdded,
 			dateModified: this.dateModified,
 			key: this.key
 		},

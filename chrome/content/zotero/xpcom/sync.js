@@ -648,7 +648,7 @@ Zotero.Sync.Server = new function () {
 	});
 	
 	this.nextLocalSyncDate = false;
-	this.apiVersion = 3;
+	this.apiVersion = 4;
 	
 	default xml namespace = '';
 	
@@ -2763,6 +2763,7 @@ Zotero.Sync.Server.Data = new function() {
 		
 		xml.@id = collection.id;
 		xml.@name = _xmlize(collection.name);
+		xml.@dateAdded = collection.dateAdded;
 		xml.@dateModified = collection.dateModified;
 		xml.@key = collection.key;
 		if (collection.parent) {
@@ -2946,6 +2947,7 @@ Zotero.Sync.Server.Data = new function() {
 		
 		xml.@id = search.id;
 		xml.@name = _xmlize(search.name);
+		xml.@dateAdded = search.dateAdded;
 		xml.@dateModified = search.dateModified;
 		xml.@key = search.key;
 		
@@ -3055,6 +3057,7 @@ Zotero.Sync.Server.Data = new function() {
 		if (tag.type) {
 			xml.@type = tag.type;
 		}
+		xml.@dateAdded = tag.dateAdded;
 		xml.@dateModified = tag.dateModified;
 		xml.@key = tag.key;
 		var linkedItems = tag.getLinkedItems(true);
@@ -3095,6 +3098,7 @@ Zotero.Sync.Server.Data = new function() {
 		tag.name = xmlTag.@name.toString();
 		tag.type = xmlTag.@type.toString() ? parseInt(xmlTag.@type) : 0;
 		if (!skipPrimary) {
+			tag.dateAdded = xmlTag.@dateAdded.toString();
 			tag.dateModified = xmlTag.@dateModified.toString();
 			tag.key = xmlTag.@key.toString();
 		}

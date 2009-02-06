@@ -33,6 +33,7 @@ Zotero.Creator.prototype._init = function () {
 	this._fieldMode = null;
 	this._birthYear = null;
 	this._key = null;
+	this._dateAdded = null;
 	this._dateModified = null;
 	
 	this._creatorDataID = null;
@@ -54,6 +55,8 @@ Zotero.Creator.prototype.__defineGetter__('fieldMode', function () { return this
 Zotero.Creator.prototype.__defineSetter__('fieldMode', function (val) { this._set('fieldMode', val); });
 Zotero.Creator.prototype.__defineGetter__('birthYear', function () { return this._get('birthYear'); });
 Zotero.Creator.prototype.__defineSetter__('birthYear', function (val) { this._set('birthYear', val); });
+Zotero.Creator.prototype.__defineGetter__('dateAdded', function () { return this._get('dateAdded'); });
+Zotero.Creator.prototype.__defineSetter__('dateAdded', function (val) { this._set('dateAdded', val); });
 Zotero.Creator.prototype.__defineGetter__('dateModified', function () { return this._get('dateModified'); });
 Zotero.Creator.prototype.__defineSetter__('dateModified', function (val) { this._set('dateModified', val); });
 Zotero.Creator.prototype.__defineGetter__('key', function () { return this._get('key'); });
@@ -171,8 +174,8 @@ Zotero.Creator.prototype.save = function () {
 		var row = Zotero.DB.rowQuery("SELECT * FROM creators WHERE creatorID=?", oldID);
 		// Add a new row so we can update the old rows despite FK checks
 		// Use temp key due to UNIQUE constraint on key column
-		Zotero.DB.query("INSERT INTO creators VALUES (?, ?, ?, ?)",
-			[this.id, row.creatorDataID, row.dateModified, 'TEMPKEY']);
+		Zotero.DB.query("INSERT INTO creators VALUES (?, ?, ?, ?, ?)",
+			[this.id, row.creatorDataID, row.dateAdded, row.dateModified, 'TEMPKEY']);
 		
 		Zotero.DB.query("UPDATE itemCreators SET creatorID=? WHERE creatorID=?", params);
 		
@@ -226,11 +229,13 @@ Zotero.Creator.prototype.save = function () {
 			var creatorDataID = Zotero.Creators.getDataID(this, true);
 		}
 		
-		var columns = ['creatorID', 'creatorDataID', 'dateModified', 'key'];
-		var placeholders = ['?', '?', '?', '?'];
+		var columns = ['creatorID', 'creatorDataID', 'dateAdded', 'dateModified', 'key'];
+		var placeholders = ['?', '?', '?', '?', '?'];
 		var sqlValues = [
 			creatorID ? { int: creatorID } : null,
 			{ int: creatorDataID },
+			// If date added isn't set, use current timestamp
+			this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime,
 			// If date modified hasn't changed, use current timestamp
 			this._changed.dateModified ?
 				this.dateModified : Zotero.DB.transactionDateTime,
@@ -337,6 +342,7 @@ Zotero.Creator.prototype.serialize = function () {
 	
 	obj.primary = {};
 	obj.primary.creatorID = this.id;
+	obj.primary.dateAdded = this.dateAdded;
 	obj.primary.dateModified = this.dateModified;
 	obj.primary.key = this.key;
 	
@@ -462,7 +468,8 @@ Zotero.Creator.prototype._checkValue = function (field, value) {
 				this._invalidValueError(field, value);
 			}
 			break;
-			
+		
+		case 'dateAdded':
 		case 'dateModified':
 			if (value !== '' && !Zotero.Date.isSQLDateTime(value)) {
 				this._invalidValueError(field, value);
