@@ -2165,6 +2165,31 @@ Zotero.Schema = new function(){
 				if (i==48) {
 					Zotero.DB.query("CREATE TABLE deletedItems (\n    itemID INTEGER PRIMARY KEY,\n    dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL\n);");
 				}
+				
+				if (i==49) {
+					Zotero.DB.query("ALTER TABLE collections RENAME TO collectionsOld");
+					Zotero.DB.query("DROP INDEX creators_creatorDataID");
+					Zotero.DB.query("ALTER TABLE creators RENAME TO creatorsOld");
+					Zotero.DB.query("ALTER TABLE savedSearches RENAME TO savedSearchesOld");
+					Zotero.DB.query("ALTER TABLE tags RENAME TO tagsOld");
+					
+					Zotero.DB.query("CREATE TABLE collections (\n    collectionID INTEGER PRIMARY KEY,\n    collectionName TEXT,\n    parentCollectionID INT,\n    dateAdded DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE,\n    FOREIGN KEY (parentCollectionID) REFERENCES collections(collectionID)\n);");
+					Zotero.DB.query("CREATE TABLE creators (\n    creatorID INTEGER PRIMARY KEY,\n    creatorDataID INT NOT NULL,\n    dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE,\n    FOREIGN KEY (creatorDataID) REFERENCES creatorData(creatorDataID)\n);");
+					Zotero.DB.query("CREATE TABLE savedSearches (\n    savedSearchID INTEGER PRIMARY KEY,\n    savedSearchName TEXT,\n    dateAdded DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE\n);");
+					Zotero.DB.query("CREATE TABLE tags (\n    tagID INTEGER PRIMARY KEY,\n    name TEXT COLLATE NOCASE,\n    type INT NOT NULL,\n    dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE,\n    UNIQUE (name, type)\n);");
+					
+					Zotero.DB.query("INSERT INTO collections SELECT collectionID, collectionName, parentCollectionID, dateModified, dateModified, key FROM collectionsOld");
+					Zotero.DB.query("INSERT INTO creators SELECT creatorID, creatorDataID, dateModified, dateModified, key FROM creatorsOld");
+					Zotero.DB.query("INSERT INTO savedSearches SELECT savedSearchID, savedSearchName, dateModified, dateModified, key FROM savedSearchesOld");
+					Zotero.DB.query("INSERT INTO tags SELECT tagID, name, type, dateModified, dateModified, key FROM tagsOld");
+					
+					Zotero.DB.query("CREATE INDEX creators_creatorDataID ON creators(creatorDataID);");
+					
+					Zotero.DB.query("DROP TABLE collectionsOld");
+					Zotero.DB.query("DROP TABLE creatorsOld");
+					Zotero.DB.query("DROP TABLE savedSearchesOld");
+					Zotero.DB.query("DROP TABLE tagsOld");
+				}
 			}
 			
 			_updateDBVersion('userdata', toVersion);

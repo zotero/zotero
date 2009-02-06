@@ -1,4 +1,4 @@
--- 48
+-- 49
 
 -- This file creates tables containing user-specific data -- any changes made
 -- here must be mirrored in transition steps in schema.js::_migrateSchema()
@@ -75,7 +75,8 @@ CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState);
 CREATE TABLE tags (
     tagID INTEGER PRIMARY KEY,
     name TEXT COLLATE NOCASE,
-    type INT,
+    type INT NOT NULL,
+    dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
     dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,
     key TEXT NOT NULL UNIQUE,
     UNIQUE (name, type)
@@ -103,7 +104,8 @@ CREATE INDEX itemSeeAlso_linkedItemID ON itemSeeAlso(linkedItemID);
 
 CREATE TABLE creators (
     creatorID INTEGER PRIMARY KEY,
-    creatorDataID INT,
+    creatorDataID INT NOT NULL,
+    dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
     dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,
     key TEXT NOT NULL UNIQUE,
     FOREIGN KEY (creatorDataID) REFERENCES creatorData(creatorDataID)
@@ -137,6 +139,7 @@ CREATE TABLE collections (
     collectionID INTEGER PRIMARY KEY,
     collectionName TEXT,
     parentCollectionID INT,
+    dateAdded DEFAULT CURRENT_TIMESTAMP NOT NULL,
     dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,
     key TEXT NOT NULL UNIQUE,
     FOREIGN KEY (parentCollectionID) REFERENCES collections(collectionID)
@@ -156,6 +159,7 @@ CREATE INDEX itemID ON collectionItems(itemID);
 CREATE TABLE savedSearches (
     savedSearchID INTEGER PRIMARY KEY,
     savedSearchName TEXT,
+    dateAdded DEFAULT CURRENT_TIMESTAMP NOT NULL,
     dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,
     key TEXT NOT NULL UNIQUE
 );

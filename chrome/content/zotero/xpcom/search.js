@@ -29,6 +29,7 @@ Zotero.Search = function(searchID) {
 Zotero.Search.prototype._init = function () {
 	// Public members for access by public methods -- do not access directly
 	this._name = null;
+	this._dateAdded = null;
 	this._dateModified = null;
 	this._key = null;
 	
@@ -69,6 +70,8 @@ Zotero.Search.prototype.__defineSetter__('id', function (val) { this._set('id', 
 Zotero.Search.prototype.__defineSetter__('searchID', function (val) { this._set('id', val); });
 Zotero.Search.prototype.__defineGetter__('name', function () { return this._get('name'); });
 Zotero.Search.prototype.__defineSetter__('name', function (val) { this._set('name', val); });
+Zotero.Search.prototype.__defineGetter__('dateAdded', function () { return this._get('dateAdded'); });
+Zotero.Search.prototype.__defineSetter__('dateAdded', function (val) { this._set('dateAdded', val); });
 Zotero.Search.prototype.__defineGetter__('dateModified', function () { return this._get('dateModified'); });
 Zotero.Search.prototype.__defineSetter__('dateModified', function (val) { this._set('dateModified', val); });
 Zotero.Search.prototype.__defineGetter__('key', function () { return this._get('key'); });
@@ -158,6 +161,7 @@ Zotero.Search.prototype.load = function() {
 	this._previousData = false;
 	this._id = data.savedSearchID;
 	this._name = data.savedSearchName;
+	this._dateAdded = data.dateAdded;
 	this._dateModified = data.dateModified;
 	this._key = data.key;
 	this._maxSearchConditionID = data.maxID;
@@ -215,8 +219,8 @@ Zotero.Search.prototype.save = function(fixGaps) {
 		var row = Zotero.DB.rowQuery("SELECT * FROM savedSearches WHERE savedSearchID=?", oldID);
 		// Add a new row so we can update the old rows despite FK checks
 		// Use temp key due to UNIQUE constraint on key column
-		Zotero.DB.query("INSERT INTO savedSearches VALUES (?, ?, ?, ?)",
-			[this.id, row.savedSearchName, row.dateModified, 'TEMPKEY']);
+		Zotero.DB.query("INSERT INTO savedSearches VALUES (?, ?, ?, ?, ?)",
+			[this.id, row.savedSearchName, row.dateAdded, row.dateModified, 'TEMPKEY']);
 		
 		Zotero.DB.query("UPDATE savedSearchConditions SET savedSearchID=? WHERE savedSearchID=?", params);
 		
@@ -239,12 +243,14 @@ Zotero.Search.prototype.save = function(fixGaps) {
 		var key = this.key ? this.key : this._generateKey();
 		
 		var columns = [
-			'savedSearchID', 'savedSearchName', 'dateModified', 'key'
+			'savedSearchID', 'savedSearchName', 'dateAdded', 'dateModified', 'key'
 		];
-		var placeholders = ['?', '?', '?', '?'];
+		var placeholders = ['?', '?', '?', '?', '?'];
 		var sqlValues = [
 			searchID ? { int: searchID } : null,
 			{ string: this.name },
+			// If date added isn't set, use current timestamp
+			this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime,
 			// If date modified hasn't changed, use current timestamp
 			this._changed.dateModified ?
 				this.dateModified : Zotero.DB.transactionDateTime,
@@ -815,6 +821,7 @@ Zotero.Search.prototype.serialize = function() {
 	var obj = {
 		primary: {
 			id: this.id,
+			dateAdded: this.dateAdded,
 			dateModified: this.dateModified,
 			key: this.key
 		},
