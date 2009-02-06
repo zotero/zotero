@@ -2479,6 +2479,12 @@ Zotero.Sync.Storage.Queue.prototype.start = function () {
 		throw (this.Name + " queue is already running in "
 			+ "Zotero.Sync.Storage.Queue.start()");
 	}
+	
+	if (!this.queuedRequests) {
+		Zotero.debug("No requests to start in " + this.name + " queue");
+		return;
+	}
+	
 	this._running = true;
 	this.advance();
 }
