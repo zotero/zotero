@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2009-02-03 05:45:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2009-02-08 22:10:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -5596,7 +5596,7 @@ function doWeb(doc, url) {
 }');
 
 
-REPLACE INTO translators VALUES ('54ac4ec1-9d07-45d3-9d96-48bed3411fb6', '1.0.0b4.r5', '', '2008-08-11 20:40:00', '0', '100', '4', 'National Library of Australia (new catalog)', 'Mark Triggs and Steve McPhillips', 'catalogue.nla.gov.au', 
+REPLACE INTO translators VALUES ('54ac4ec1-9d07-45d3-9d96-48bed3411fb6', '1.0.0b4.r5', '', '2009-02-08 22:10:00', 1, 100, 4, 'National Library of Australia (new catalog)', 'Mark Triggs and Steve McPhillips', 'catalogue.nla.gov.au',
 'function detectWeb(doc, url) {
     if (url.match("/Record/[0-9]+")) {
         var format = Zotero.Utilities.cleanString(doc.getElementById("myformat").textContent);
@@ -5635,7 +5635,7 @@ REPLACE INTO translators VALUES ('54ac4ec1-9d07-45d3-9d96-48bed3411fb6', '1.0.0b
                doc.getElementById ("resultItemLine1")) {
         return "multiple";
     }
-}', 
+}',
 'function as_array(obj) {
     if (obj instanceof Array) {
         return obj;
@@ -5646,8 +5646,7 @@ REPLACE INTO translators VALUES ('54ac4ec1-9d07-45d3-9d96-48bed3411fb6', '1.0.0b
 
 
 function load_item(responseText, requestObject, format) {
-    metadata = eval("(" + Zotero.Utilities.cleanString(responseText) + ")");
-
+    var metadata = JSON.parse(Zotero.Utilities.cleanString(responseText));
     var newItem = new Zotero.Item(format);
 
     /* load in our authors */
@@ -5696,7 +5695,7 @@ function doWeb(doc, url) {
     if (items.length > 0) {
         Zotero.Utilities.processDocuments(items, function(onedoc) {
                 handleDocument(onedoc);
-            }, function() { Zotero.done; });
+            }, function() { Zotero.done(); });
 
         Zotero.wait();
     }
@@ -12165,10 +12164,11 @@ REPLACE INTO translators VALUES ('bdaac15c-b0ee-453f-9f1d-f35d00c7a994', '1.0.0b
 	Zotero.wait();
 }');
 
-REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2008-09-02 13:55:00', '1', '100', '4', 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://[^/]artstor.org[^/]*', 
+
+REPLACE INTO translators VALUES ('5278b20c-7c2c-4599-a785-12198ea648bf', '1.0.0b4.r5', '', '2009-02-08 22:10:00', 1, 100, 4, 'ARTstor', 'Ameer Ahmed and Michael Berkowitz', 'http://[^/]artstor.org[^/]*',
 'function detectWeb(doc, url) {
 	if (url.match(/(S|s)earch/) && (doc.evaluate(''//div[@id="thumbContentWrap"]/div'', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/\w+/))) return "multiple"
-}', 
+}',
 'function doWeb(doc, url) {
 	if (url.indexOf("|")!=-1){	
 	scrape(doc, url);
@@ -12204,7 +12204,7 @@ function scrape(doc, url){
 	}
 	// Initial query to get results from the service - primary purpose is to get objectids. which in turn are required for the 2nd service call, which exposes the actual metadata
 	Zotero.Utilities.HTTP.doGet(urlstub + "secure/" + groupname + "//" + groupid, function(text) {
-		json = eval("(" + text + ")");
+		var json = JSON.parse(text);
 		items = new Object();
 		for(var i=0; i<json.thumbnails.length; i++) {
 		child = json.thumbnails[i];
@@ -12409,6 +12409,7 @@ function scrape(doc, url){
 });
 Zotero.wait();
 }');
+
 
 REPLACE INTO translators VALUES ('79f6f9ed-537a-4d4f-8270-c4fbaafdf327', '1.0.0b4.r5', '', '2008-05-05 07:45:00', '0', '100', '4', 'Emerald Publishing', 'Michael Berkowitz', 'www.emeraldinsight.com/', 
 'function detectWeb(doc, url) {
