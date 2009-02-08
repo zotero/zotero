@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"lastUpdated":"2009-02-08 22:10:00"
 }
 
 function detectWeb(doc, url) {
@@ -61,8 +61,7 @@ function as_array(obj) {
 
 
 function load_item(responseText, requestObject, format) {
-    metadata = eval("(" + Zotero.Utilities.cleanString(responseText) + ")");
-
+    var metadata = JSON.parse(Zotero.Utilities.cleanString(responseText));
     var newItem = new Zotero.Item(format);
 
     /* load in our authors */
