@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-09-02 13:55:00"
+	"lastUpdated":"2009-02-08 22:10:00"
 }
 
 function detectWeb(doc, url) {
@@ -50,7 +50,7 @@ function scrape(doc, url){
 	}
 	// Initial query to get results from the service - primary purpose is to get objectids. which in turn are required for the 2nd service call, which exposes the actual metadata
 	Zotero.Utilities.HTTP.doGet(urlstub + "secure/" + groupname + "//" + groupid, function(text) {
-		json = eval("(" + text + ")");
+		var json = JSON.parse(text);
 		items = new Object();
 		for(var i=0; i<json.thumbnails.length; i++) {
 		child = json.thumbnails[i];
