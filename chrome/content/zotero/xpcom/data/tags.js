@@ -423,15 +423,13 @@ Zotero.Tags = new function() {
 	
 	
 	this._load = function () {
-		if (!arguments[0] && !this._reloadCache) {
-			return;
-		}
-		
-		if (this._reloadCache) {
+		if (!arguments[0]) {
+			if (!this._reloadCache) {
+				return;
+			}
 			_tags = {};
+			this._reloadCache = false;
 		}
-		
-		this._reloadCache = false;
 		
 		// This should be the same as the query in Zotero.Tag.load(),
 		// just without a specific tagID
