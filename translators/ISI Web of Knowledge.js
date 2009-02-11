@@ -57,7 +57,7 @@ function doWeb(doc, url) {
 				item.url = url;
 				var authors;
 				var fieldRe = /^[A-Z0-9]{2}(?: |$)/;
-				
+
 				for each(var line in lines) {
 					if(line.match(fieldRe)) {
 						field = line.match(fieldRe)[0].substr(0,2);
@@ -91,6 +91,8 @@ function doWeb(doc, url) {
 							item.pages += "-" + content;
 						} else if (field == "AB") {
 							item.abstractNote = content;
+						} else if (field == "DI") {
+							item.DOI = content;
 						}
 					} else {
 						content = Zotero.Utilities.trimInternal(line);
