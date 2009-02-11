@@ -2085,6 +2085,10 @@ Zotero.Sync.Server.Data = new function() {
 					var collections = [];
 					for each(var colKey in deletedCollectionKeys) {
 						var col = Zotero.Collections.getByKey(colKey);
+						// If collection never existed on this side
+						if (!col) {
+							continue;
+						}
 						col.lockDateModified();
 						collections.push(col);
 					}
