@@ -3,16 +3,18 @@
 	"translatorType":4,
 	"label":"University of Chicago",
 	"creator":"Sean Takats",
-	"target":"https?://[^/]*journals\\.uchicago\\.edu[^/]*/(?:doi/abs|doi/full|toc)",
+	"target":"https?://[^/]*journals\\.uchicago\\.edu[^/]*/(?:doi/abs|doi/full|toc|action/doSearch)",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-12-22 19:50:00"
+	"lastUpdated":"2009-02-10 19:50:00"
 }
 
 function detectWeb(doc, url) {
 	if(url.indexOf("toc") != -1) {
+		return "multiple";
+	} else if(url.match("doSearch")) {
 		return "multiple";
 	} else {
 		return "journalArticle";
@@ -73,6 +75,44 @@ function doWeb(doc, url) {
 				}
 			}
 		}
+	} else if(url.match("doSearch")) { // do search result, yes lots of duped code, please forgive
+		var items = new Array();
+		var links = new Array();
+		
+		var tableRows = doc.evaluate('//li[div[@class="articleResult_col2"]/h3/label][//input[@name="doi"]]', doc,
+			nsResolver, XPathResult.ANY_TYPE, null);
+		var tableRow;
+		// Go through table rows
+		while(tableRow = tableRows.iterateNext()) {
+			var id = doc.evaluate('.//input[@name="doi"]', tableRow, nsResolver, XPathResult.ANY_TYPE,
+				null).iterateNext().value;
+			items[id] = Zotero.Utilities.trimInternal(doc.evaluate('.//label', tableRow,
+				nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		}
+		
+		var items = Zotero.selectItems(items);
+		if(!items) return true;
+		
+		// find all fulltext links so we can determine where we can scrape the fulltext article
+		var fulltextLinks = doc.evaluate('//a[starts-with(text(), "Full Text")]', doc,
+			nsResolver, XPathResult.ANY_TYPE, null);
+		var fulltextLink;
+		while(fulltextLink = fulltextLinks.iterateNext()) {
+			links.push(fulltextLink.href.toString());
+		}
+		
+		for(var i in items) {
+			post += "doi="+encodeURIComponent(i)+"&";
+			
+			// check for fulltext links
+			for each(var link in links) {
+				if(link.indexOf(i) != -1) {
+					fulltext[i] = true;
+					break;
+				}
+			}
+		}
+		
 	} else {
 		var m = url.match(/https?:\/\/[^\/]+\/doi\/[^\/]+\/([^\?]+)(\?|$)/);
 		if (m) {
