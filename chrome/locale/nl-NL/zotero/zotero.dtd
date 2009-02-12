@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "Nieuwe verzameling aanmaken...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nieuwe deelverzameling aanmaken...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nieuwe bewaarde zoekopdracht aanmaken...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Label-kiezer weergeven/verbergen">
 <!ENTITY zotero.toolbar.actions.label "Acties">
 <!ENTITY zotero.toolbar.import.label "Importeren...">

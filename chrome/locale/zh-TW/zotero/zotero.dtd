@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "新增收集…">
 <!ENTITY zotero.toolbar.newSubcollection.label "新增子收集…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "新增存留搜尋…">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "顯示／隱藏標籤選擇器">
 <!ENTITY zotero.toolbar.actions.label "行動">
 <!ENTITY zotero.toolbar.import.label "匯入…">

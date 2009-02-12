@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "คอลเลคชันใหม่...">
 <!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "บันทึกผลการค้นหาใหม่...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
 <!ENTITY zotero.toolbar.actions.label "Actions">
 <!ENTITY zotero.toolbar.import.label "นำเข้า...">

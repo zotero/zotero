@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "Neue Sammlung...">
 <!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Neue gespeicherte Suche...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
 <!ENTITY zotero.toolbar.actions.label "Aktivitäten">
 <!ENTITY zotero.toolbar.import.label "Importieren...">

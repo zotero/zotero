@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "Ny samling...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Ny undersamling...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Ny sparad sökning...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Visa/Göm etikettväljare">
 <!ENTITY zotero.toolbar.actions.label "Åtgärder">
 <!ENTITY zotero.toolbar.import.label "Importera...">

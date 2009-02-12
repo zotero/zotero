@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "Bộ sưu tập mới...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Bô sưu tập con mới...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Tìm kiếm Định sẵn mới...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Hiển thị/Dấu Bộ-lọc-thẻ">
 <!ENTITY zotero.toolbar.actions.label "Hành động">
 <!ENTITY zotero.toolbar.import.label "Nhập khẩu...">
