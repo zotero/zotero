@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "Нова колекция...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Нова подколекция...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Ново запазено търсене...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Показване/скриване на избора на отметки">
 <!ENTITY zotero.toolbar.actions.label "Действия">
 <!ENTITY zotero.toolbar.import.label "Внос...">

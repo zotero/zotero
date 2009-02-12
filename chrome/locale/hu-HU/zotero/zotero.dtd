@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "Új gyűjtemény...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Új algyűjtemény...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Új mentett keresés...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Címkeválasztó mutatása/elrejtése">
 <!ENTITY zotero.toolbar.actions.label "Műveletek">
 <!ENTITY zotero.toolbar.import.label "Importálás...">

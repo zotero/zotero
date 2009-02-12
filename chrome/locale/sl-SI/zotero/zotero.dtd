@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "Nova zbirka ...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nova podzbirka ...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Novo shranjeno iskanje ...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Pokaži/skrij izbirnik značk">
 <!ENTITY zotero.toolbar.actions.label "Dejanja">
 <!ENTITY zotero.toolbar.import.label "Uvozi ...">

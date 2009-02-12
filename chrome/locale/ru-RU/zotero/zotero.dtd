@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "Новая подборка">
 <!ENTITY zotero.toolbar.newSubcollection.label "Новая субподборка">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Новый сохраненный поиск">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Показать/спрятать панель выбора тэгов">
 <!ENTITY zotero.toolbar.actions.label "Действия">
 <!ENTITY zotero.toolbar.import.label "Импортировать...">

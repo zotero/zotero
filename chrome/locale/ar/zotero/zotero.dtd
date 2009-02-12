@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "مجموعة جديدة...">
 <!ENTITY zotero.toolbar.newSubcollection.label "مجموعة فرعية جديدة...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "بحث محفوظ جديد...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "اعرض/اخفي منتقي الأوسمة">
 <!ENTITY zotero.toolbar.actions.label "أدوات">
 <!ENTITY zotero.toolbar.import.label "استيراد...">

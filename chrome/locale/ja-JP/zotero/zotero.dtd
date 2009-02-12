@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "新規コレクション">
 <!ENTITY zotero.toolbar.newSubcollection.label "新規サブコレクション...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "新規検索式保存">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "タグ・セレクターを表示する／表示しない">
 <!ENTITY zotero.toolbar.actions.label "タスク">
 <!ENTITY zotero.toolbar.import.label "インポート">

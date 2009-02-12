@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "...אוסף חדש">
 <!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "...חיפוש שמור חדש">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
 <!ENTITY zotero.toolbar.actions.label "Actions">
 <!ENTITY zotero.toolbar.import.label "Import...">

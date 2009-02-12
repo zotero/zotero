@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "Nová kolekce...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nová podkolekce...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nové uložené hledání...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Ukaž/Schovej štítkový výběr">
 <!ENTITY zotero.toolbar.actions.label "Akce">
 <!ENTITY zotero.toolbar.import.label "Import...">

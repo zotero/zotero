@@ -61,6 +61,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "Colecţie nouă...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Subcolecţie nouă...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Căutare salvată nouă...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Arată/Ascunde selectorul de etichete">
 <!ENTITY zotero.toolbar.actions.label "Acţiuni">
 <!ENTITY zotero.toolbar.import.label "Importă...">
