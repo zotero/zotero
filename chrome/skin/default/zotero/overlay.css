@@ -91,6 +91,7 @@
 	height: 32px !important; /* Hard-code this to fix toolbar icon compression on Linux */
 	margin: 0;
 	padding: 0;
+	min-width: 1px;
 }
 
 #zotero-pane toolbarseparator {
