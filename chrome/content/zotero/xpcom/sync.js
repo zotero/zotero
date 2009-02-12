@@ -2452,7 +2452,9 @@ Zotero.Sync.Server.Data = new function() {
 		};
 		
 		if (type == 'item') {
-			io.dataIn.changedCreators = changedCreators;
+			if (!Zotero.Utilities.prototype.isEmpty(changedCreators)) {
+				io.dataIn.changedCreators = changedCreators;
+			}
 		}
 		
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
