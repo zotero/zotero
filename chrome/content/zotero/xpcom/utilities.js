@@ -291,6 +291,20 @@ Zotero.Utilities.prototype.isInt = function(x) {
 }
 
 
+
+/**
+ * Test if an object is empty
+ *
+ * @param	{Object}
+ */
+Zotero.Utilities.prototype.isEmpty = function (obj) {
+    for (var i in obj) {
+        return false;
+    }
+    return true;
+}
+
+
 /**
  * Compares an array with another and returns an array with
  *	the values from array2 that don't exist in array1
