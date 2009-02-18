@@ -531,6 +531,8 @@ Zotero.Tag.prototype.erase = function () {
 	Zotero.Notifier.trigger('delete', 'tag', this.id, deletedTagNotifierData);
 	
 	Zotero.DB.commitTransaction();
+	
+	Zotero.Prefs.set('purge.tags', true);
 	return;
 }
 

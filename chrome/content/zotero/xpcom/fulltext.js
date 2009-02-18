@@ -634,9 +634,17 @@ Zotero.Fulltext = new function(){
 	
 	function clearItemWords(itemID){
 		Zotero.DB.beginTransaction();
-		Zotero.DB.query("DELETE FROM fulltextItems WHERE itemID=" + itemID);
-		Zotero.DB.query("DELETE FROM fulltextItemWords WHERE itemID=" + itemID);
+		var sql = "SELECT rowid FROM fulltextItems WHERE itemID=? LIMIT 1";
+		var indexed = Zotero.DB.valueQuery(sql, itemID);
+		if (indexed) {
+			Zotero.DB.query("DELETE FROM fulltextItems WHERE itemID=?", itemID);
+			Zotero.DB.query("DELETE FROM fulltextItemWords WHERE itemID=?", itemID);
+		}
 		Zotero.DB.commitTransaction();
+		
+		if (indexed) {
+			Zotero.Prefs.set('purge.fulltext', true);
+		}
 		
 		// Delete fulltext cache file if there is one
 		this.clearCacheFile(itemID);
@@ -933,10 +941,16 @@ Zotero.Fulltext = new function(){
 	*/
 	
 	
-	function purgeUnusedWords(){
+	function purgeUnusedWords() {
+		if (!Zotero.Prefs.get('purge.fulltext')) {
+			return;
+		}
+		
 		var sql = "DELETE FROM fulltextWords WHERE wordID NOT IN "
-			+ "(SELECT wordID FROM fulltextItemWords)";
+					+ "(SELECT wordID FROM fulltextItemWords)";
 		Zotero.DB.query(sql);
+		
+		Zotero.Prefs.set('purge.fulltext', false)
 	}
 	
 	

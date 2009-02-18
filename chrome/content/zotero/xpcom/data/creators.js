@@ -197,6 +197,10 @@ Zotero.Creators = new function() {
 	 * and clear internal array entries
 	 */
 	function purge() {
+		if (!Zotero.Prefs.get('purge.creators')) {
+			return;
+		}
+		
 		Zotero.debug("Purging creator tables");
 		
 		// Purge unused creators
@@ -230,6 +234,8 @@ Zotero.Creators = new function() {
 				+ "(SELECT creatorDataID FROM creators)";
 			Zotero.DB.query(sql);
 		}
+		
+		Zotero.Prefs.set('purge.creators', false);
 	}
 	
 	

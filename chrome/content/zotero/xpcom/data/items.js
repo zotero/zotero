@@ -35,7 +35,6 @@ Zotero.Items = new function() {
 	this.add = add;
 	this.cacheFields = cacheFields;
 	this.erase = erase;
-	this.purge = purge;
 	this.getFirstCreatorSQL = getFirstCreatorSQL;
 	this.getSortTitle = getSortTitle;
 	
@@ -386,7 +385,7 @@ Zotero.Items = new function() {
 	function erase(ids, eraseChildren) {
 		ids = Zotero.flattenArguments(ids);
 		
-		Zotero.UnresponsiveScriptIndicator.disable();
+		var usiDisabled = Zotero.UnresponsiveScriptIndicator.disable();
 		try {
 			Zotero.DB.beginTransaction();
 			for each(var id in ids) {
@@ -399,7 +398,6 @@ Zotero.Items = new function() {
 				item.erase(eraseChildren); // calls unload()
 				item = undefined;
 			}
-			this.purge();
 			Zotero.DB.commitTransaction();
 		}
 		catch (e) {
@@ -407,31 +405,26 @@ Zotero.Items = new function() {
 			throw (e);
 		}
 		finally {
-			Zotero.UnresponsiveScriptIndicator.enable();
+			if (usiDisabled) {
+				Zotero.UnresponsiveScriptIndicator.enable();
+			}
 		}
 	}
 	
 	
-	/*
-	 * Clear entries from various tables that no longer exist
-	 *
-	 * This is called automatically by Items.erase() but must be called
-	 * manually after Item.erase()
+	/**
+	 * Purge unused data values
 	 */
-	function purge() {
-		Zotero.Creators.purge();
-		Zotero.Tags.purge();
-		Zotero.Fulltext.purgeUnusedWords();
+	this.purge = function () {
+		if (!Zotero.Prefs.get('purge.items')) {
+			return;
+		}
 		
-		// Purge unused values
 		var sql = "DELETE FROM itemDataValues WHERE valueID NOT IN "
-			+ "(SELECT valueID FROM itemData)";
+					+ "(SELECT valueID FROM itemData)";
 		Zotero.DB.query(sql);
 		
-		var ZU = new Zotero.Utilities;
-		if (Zotero.Sync.Storage.active && ZU.probability(10)) {
-			Zotero.Sync.Storage.purgeDeletedStorageFiles();
-		}
+		Zotero.Prefs.set('purge.items', false)
 	}
 	
 	

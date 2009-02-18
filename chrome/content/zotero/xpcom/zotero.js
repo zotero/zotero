@@ -970,6 +970,22 @@ var Zotero = new function(){
 	}
 	
 	
+	/*
+	 * Clear entries that no longer exist from various tables
+	 */
+	this.purgeDataObjects = function () {
+		Zotero.Creators.purge();
+		Zotero.Tags.purge();
+		Zotero.Fulltext.purgeUnusedWords();
+		Zotero.Items.purge();
+		
+		var ZU = new Zotero.Utilities;
+		if (Zotero.Sync.Storage.active && ZU.probability(10)) {
+			Zotero.Sync.Storage.purgeDeletedStorageFiles();
+		}
+	}
+	
+	
 	function reloadDataObjects() {
 		Zotero.Tags.reloadAll();
 		Zotero.Collections.reloadAll();
@@ -2103,7 +2119,9 @@ Zotero.UnresponsiveScriptIndicator = new function() {
 	 **/
 	function disable() {
 		// don't do anything if already disabled
-		if(_isDisabled) return;
+		if (_isDisabled) {
+			return false;
+		}
 		
 		var prefService = Components.classes["@mozilla.org/preferences-service;1"].
 		                  getService(Components.interfaces.nsIPrefBranch);
@@ -2111,6 +2129,7 @@ Zotero.UnresponsiveScriptIndicator = new function() {
 		prefService.setIntPref("dom.max_chrome_script_run_time", 0);
 		
 		_isDisabled = true;
+		return true;
 	}
 	 
 	/**
