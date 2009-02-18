@@ -103,3 +103,9 @@ pref("extensions.zotero.sync.storage.deleteDelayDays", 30);
 // Proxy
 pref("extensions.zotero.proxies.autoRecognize", true);
 pref("extensions.zotero.proxies.transparent", true);
+
+// Data layer purging
+pref("extensions.zotero.purge.creators", false);
+pref("extensions.zotero.purge.fulltext", false);
+pref("extensions.zotero.purge.items", false);
+pref("extensions.zotero.purge.tags", false);

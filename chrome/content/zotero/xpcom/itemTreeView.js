@@ -155,6 +155,9 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 Zotero.ItemTreeView.prototype.refresh = function()
 {
 	Zotero.debug('Refreshing items list');
+	
+	var usiDisabled = Zotero.UnresponsiveScriptIndicator.disable();
+	
 	this._searchMode = this._itemGroup.isSearchMode();
 	
 	var oldRows = this.rowCount;
@@ -227,6 +230,10 @@ Zotero.ItemTreeView.prototype.refresh = function()
 	var diff = this._treebox.view.rowCount - oldRows;
 	if (diff != 0) {
 		this._treebox.rowCountChanged(0, diff);
+	}
+	
+	if (usiDisabled) {
+		Zotero.UnresponsiveScriptIndicator.enable();
 	}
 }
 

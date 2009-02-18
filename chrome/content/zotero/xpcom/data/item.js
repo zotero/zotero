@@ -3358,7 +3358,12 @@ Zotero.Item.prototype.erase = function(deleteChildren) {
 	Zotero.DB.query('DELETE FROM annotations WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM highlights WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM deletedItems WHERE itemID=?', this.id);
-	Zotero.DB.query('DELETE FROM itemCreators WHERE itemID=?', this.id);
+	var hasCreators = Zotero.DB.valueQuery(
+		"SELECT rowid FROM itemCreators WHERE itemID=? LIMIT 1", this.id
+	);
+	if (hasCreators) {
+		Zotero.DB.query('DELETE FROM itemCreators WHERE itemID=?', this.id);
+	}
 	Zotero.DB.query('DELETE FROM itemNotes WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM itemAttachments WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM itemSeeAlso WHERE itemID=?', this.id);
@@ -3392,6 +3397,11 @@ Zotero.Item.prototype.erase = function(deleteChildren) {
 	}
 	
 	Zotero.Notifier.trigger('delete', 'item', this.id, deletedItemNotifierData);
+	
+	Zotero.Prefs.set('purge.items', true);
+	if (hasCreators) {
+		Zotero.Prefs.set('purge.creators', true);
+	}
 }
 
 

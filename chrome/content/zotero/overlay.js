@@ -338,6 +338,11 @@ var ZoteroPane = new function()
 			// Focus the quicksearch on pane open
 			setTimeout("document.getElementById('zotero-tb-search').inputField.select();", 1);
 			
+			var d = new Date();
+			Zotero.purgeDataObjects(true);
+			var d2 = new Date();
+			Zotero.debug("Purged data tables in " + (d2 - d) + "ms");
+			
 			if (Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Server.enabled) {
 				setTimeout(function () {
 					Zotero.Sync.Runner.sync();

@@ -342,13 +342,17 @@ Zotero.Tags = new function() {
 	 * Returns removed tagIDs on success
 	 */
 	function purge() {
+		if (!Zotero.Prefs.get('purge.tags')) {
+			return;
+		}
+		
 		Zotero.UnresponsiveScriptIndicator.disable();
 		try {
 			Zotero.DB.beginTransaction();
 			
 			var sql = "CREATE TEMPORARY TABLE tagDelete AS "
 				+ "SELECT tagID FROM tags WHERE tagID "
-				+ "NOT IN (SELECT tagID FROM itemTags);";
+				+ "NOT IN (SELECT tagID FROM itemTags)";
 			Zotero.DB.query(sql);
 			
 			sql = "CREATE INDEX tagDelete_tagID ON tagDelete(tagID)";
@@ -361,6 +365,7 @@ Zotero.Tags = new function() {
 				sql = "DROP TABLE tagDelete";
 				Zotero.DB.query(sql);
 				Zotero.DB.commitTransaction();
+				Zotero.Prefs.set('purge.tags', false);
 				return;
 			}
 			
@@ -393,6 +398,8 @@ Zotero.Tags = new function() {
 		finally {
 			Zotero.UnresponsiveScriptIndicator.enable();
 		}
+		
+		Zotero.Prefs.set('purge.tags', false);
 	}
 	
 	

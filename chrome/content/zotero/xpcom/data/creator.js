@@ -409,6 +409,8 @@ Zotero.Creator.prototype.erase = function () {
 	}
 	
 	Zotero.DB.commitTransaction();
+	
+	Zotero.Prefs.set('purge.creators', true);
 }
 
 
