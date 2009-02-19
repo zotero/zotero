@@ -63,7 +63,7 @@
 					}
 					
 					// Check for note or attachment
-					if (this.type == 'item') {
+					if (val instanceof Zotero.Item) {
 						this.type = this._getTypeFromItem(val);
 					}
 					
