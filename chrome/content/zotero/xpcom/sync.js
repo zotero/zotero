@@ -226,20 +226,12 @@ Zotero.Sync.EventListener = new function () {
 	this.unignoreDeletions = unignoreDeletions;
 	this.notify = notify;
 	
-	var _notifierObserver = false;
-	var _shutdown = false;
 	var _deleteBlacklist = {};
 	
 	
 	function init() {
 		// Initialize delete log listener
-		_notifierObserver = Zotero.Notifier.registerObserver(this);
-		
-		// Register shutdown handler
-		var observerService = Components.classes["@mozilla.org/observer-service;1"]
-			.getService(Components.interfaces.nsIObserverService);
-		observerService.addObserver(this, "xpcom-shutdown", false);
-		observerService = null;
+		Zotero.Notifier.registerObserver(this);
 	}
 	
 	
@@ -362,24 +354,6 @@ Zotero.Sync.EventListener = new function () {
 		
 		Zotero.DB.commitTransaction();
 	}
-	
-	/*
-	 * Shutdown observer -- implements nsIObserver
-	 */
-	function observe(subject, topic, data) {
-		switch (topic) {
-			case 'xpcom-shutdown':
-				if (_shutdown) {
-					Zotero.debug('returning');
-					return;
-				}
-				
-				Zotero.debug('Shutting down sync system');
-				Zotero.Notifier.unregisterObserver(_notifierObserver);
-				_shutdown = true;
-				break;
-		}
-	}
 }
 
 
@@ -388,16 +362,22 @@ Zotero.Sync.Runner = new function () {
 		return _lastSyncError;
 	});
 	
+	this.__defineGetter__("background", function () {
+		return _background;
+	});
+	
 	var _lastSyncError;
 	var _autoSyncTimer;
 	var _queue;
 	var _running;
+	var _background;
 	
 	this.init = function () {
 		this.EventListener.init();
+		this.IdleListener.init();
 	}
 	
-	this.sync = function () {
+	this.sync = function (background) {
 		if (Zotero.Utilities.HTTP.browserIsOffline()){
 			_lastSyncError = "Browser is offline"; // TODO: localize
 			this.clearSyncTimeout(); // DEBUG: necessary?
@@ -409,6 +389,8 @@ Zotero.Sync.Runner = new function () {
 			throw ("Sync already running in Zotero.Sync.Runner.sync()");
 		}
 		
+		_background = !!background;
+		
 		_queue = [
 			Zotero.Sync.Server.sync,
 			Zotero.Sync.Storage.sync,
@@ -417,7 +399,6 @@ Zotero.Sync.Runner = new function () {
 		];
 		_running = true;
 		_lastSyncError = '';
-		this.clearSyncTimeout();
 		this.setSyncIcon('animate');
 		this.next();
 	}
@@ -446,13 +427,20 @@ Zotero.Sync.Runner = new function () {
 	}
 	
 	
-	this.setSyncTimeout = function () {
-		// check if server/auto-sync are enabled
+	/**
+	 * @param	{Integer}	[timeout=15]		Timeout in seconds
+	 * @param	{Boolean}	[recurring=false]
+	 * @param	{Boolean}	[background]		Triggered sync is a background sync
+	 */
+	this.setSyncTimeout = function (timeout, recurring, background) {
+		// check if server/auto-sync are enabled?
 		
-		var autoSyncTimeout = 15;
-		Zotero.debug('Setting auto-sync timeout to ' + autoSyncTimeout + ' seconds');
+		if (!timeout) {
+			var timeout = 15;
+		}
 		
 		if (_autoSyncTimer) {
+			Zotero.debug("CANCELLING");
 			_autoSyncTimer.cancel();
 		}
 		else {
@@ -460,23 +448,38 @@ Zotero.Sync.Runner = new function () {
 				createInstance(Components.interfaces.nsITimer);
 		}
 		
-		// {} implements nsITimerCallback
-		_autoSyncTimer.initWithCallback({ notify: function (event, type, ids) {
-			if (event == 'refresh') {
-				return;
+		// Implements nsITimerCallback
+		var callback = {
+			notify: function (timer) {
+				if (!Zotero.Sync.Server.enabled) {
+					return;
+				}
+				
+				if (Zotero.Sync.Storage.syncInProgress) {
+					Zotero.debug('Storage sync already in progress -- skipping auto-sync', 4);
+					return;
+				}
+				
+				if (Zotero.Sync.Server.syncInProgress) {
+					Zotero.debug('Sync already in progress -- skipping auto-sync', 4);
+					return;
+				}
+				Zotero.Sync.Runner.sync(background);
 			}
-			
-			if (Zotero.Sync.Storage.syncInProgress) {
-				Zotero.debug('Storage sync already in progress -- skipping auto-sync', 4);
-				return;
-			}
-			
-			if (Zotero.Sync.Server.syncInProgress) {
-				Zotero.debug('Sync already in progress -- skipping auto-sync', 4);
-				return;
-			}
-			Zotero.Sync.Runner.sync();
-		}}, autoSyncTimeout * 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+		}
+		
+		if (recurring) {
+			Zotero.debug('Setting auto-sync interval to ' + timeout + ' seconds');
+			_autoSyncTimer.initWithCallback(
+				callback, timeout * 1000, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK
+			);
+		}
+		else {
+			Zotero.debug('Setting auto-sync timeout to ' + timeout + ' seconds');
+			_autoSyncTimer.initWithCallback(
+				callback, timeout * 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT
+			);
+		}
 	}
 	
 	
@@ -521,6 +524,7 @@ Zotero.Sync.Runner = new function () {
 
 Zotero.Sync.Runner.EventListener = {
 	init: function () {
+		// Initialize save observer
 		Zotero.Notifier.registerObserver(this);
 	},
 	
@@ -530,13 +534,84 @@ Zotero.Sync.Runner.EventListener = {
 			return;
 		}
 		
-		if (Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Server.enabled
-				&& !Zotero.Sync.Server.syncInProgress
-				&& !Zotero.Sync.Storage.syncInProgress) {
+		if (Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Server.enabled) {
 			Zotero.Sync.Runner.setSyncTimeout();
 		}
 	}
 }
+
+
+Zotero.Sync.Runner.IdleListener = {
+	_idleTimeout: 3600,
+	_backTimeout: 900,
+	
+	init: function () {
+		// DEBUG: Allow override for testing
+		var idleTimeout = Zotero.Prefs.get("sync.autoSync.idleTimeout");
+		if (idleTimeout) {
+			this._idleTimeout = idleTimeout;
+		}
+		var backTimeout = Zotero.Prefs.get("sync.autoSync.backTimeout");
+		if (backTimeout) {
+			this._backTimeout = backTimeout;
+		}
+		
+		if (Zotero.Prefs.get("sync.autoSync")) {
+			this.register();
+		}
+	},
+	
+	register: function () {
+		Zotero.debug("Initializing sync idle observer");
+		var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
+				.getService(Components.interfaces.nsIIdleService);
+		idleService.addIdleObserver(this, this._idleTimeout);
+		idleService.addIdleObserver(this._backObserver, this._backTimeout);
+	},
+	
+	observe: function (subject, topic, data) {
+		if (topic != 'idle') {
+			return;
+		}
+		
+		if (!Zotero.Sync.Server.enabled
+				|| Zotero.Sync.Server.syncInProgress
+				|| Zotero.Sync.Storage.syncInProgress) {
+			return;
+		}
+		
+		Zotero.debug("Beginning idle sync");
+		Zotero.Sync.Runner.sync(true);
+		Zotero.Sync.Runner.setSyncTimeout(this._idleTimeout, true);
+	},
+	
+	_backObserver: {
+		observe: function (subject, topic, data) {
+			if (topic != 'back') {
+				Zotero.debug('back observer bailing on topic ' + topic);
+				return;
+			}
+			
+			Zotero.Sync.Runner.clearSyncTimeout();
+			if (!Zotero.Sync.Server.enabled
+					|| Zotero.Sync.Server.syncInProgress
+					|| Zotero.Sync.Storage.syncInProgress) {
+				return;
+			}
+			Zotero.debug("Beginning return-from-idle sync");
+			Zotero.Sync.Runner.sync();
+		}
+	},
+	
+	unregister: function () {
+		Zotero.debug("Stopping sync idle observer");
+		var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
+				.getService(Components.interfaces.nsIIdleService);
+		idleService.removeIdleObserver(this, this._idleTimeout);
+		idleService.removeIdleObserver(this._backObserver, this._backTimeout);
+	}
+}
+
 
 
 /**
@@ -1977,6 +2052,12 @@ Zotero.Sync.Server.Data = new function() {
 			// Reconcile objects that have changed locally and remotely
 			//
 			if (toReconcile.length) {
+				if (Zotero.Sync.Runner.background) {
+					Zotero.debug("Background sync resulted in conflict -- aborting");
+					Zotero.DB.rollbackTransaction();
+					return false;
+				}
+				
 				var mergeData = _reconcile(type, toReconcile, remoteCreatorStore);
 				if (!mergeData) {
 					// TODO: throw?

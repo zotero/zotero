@@ -1106,6 +1106,15 @@ Zotero.Prefs = new function(){
 					Zotero.VersionHeader.unregister();
 				}
 				break;
+			
+			case "sync.autoSync":
+				if (this.get("sync.autoSync")) {
+					Zotero.Sync.Runner.IdleListener.register();
+				}
+				else {
+					Zotero.Sync.Runner.IdleListener.unregister();
+				}
+				break;
 		}
 	}
 }
