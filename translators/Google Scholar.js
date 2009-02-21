@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-03-28 16:30:00"
+	"lastUpdated":"2009-02-21 07:30:00"
 }
 
 function detectWeb(doc, url) {
@@ -29,46 +29,21 @@ function scrape(doc) {
 	var itemTypes = new Array();
 	var attachments = new Array();
 	
-	var elmts = doc.evaluate('//p[@class="g"]', doc, nsResolver,
-	                         XPathResult.ANY_TYPE, null);
-	var elmt;
-	var i=0;
-	Zotero.debug("get elmts");
-	Zotero.debug(haveEndNoteLinks);
-	while(elmt = elmts.iterateNext()) {
-		var isCitation = doc.evaluate("./font[1]/b[1]/text()[1]", elmt, nsResolver,
-		                              XPathResult.ANY_TYPE, null).iterateNext();
-		                              
-		// use EndNote links if available
-		if(haveEndNoteLinks) {
-			itemGrabLink = doc.evaluate('.//a[contains(@href, ".enw")]',
-										   elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext(); 
-		} else {
-			itemGrabLink = doc.evaluate('.//a[text() = "Related Articles"]',
-										   elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext(); 
+	var titles = doc.evaluate('//h3[@class="r"]', doc, nsResolver,
+				XPathResult.ANY_TYPE, null);
+	var elmts = doc.evaluate('//a[contains(@href, ".enw")]',
+				doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var title;
+	var i = 0;
+	while(title = titles.iterateNext()) {		
+		itemGrabLinks[i] = elmts.iterateNext().href;
+		items[i] = title.textContent;
+		var link = doc.evaluate('.//a',
+				title, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if (link){
+			links[i] = link.href;
 		}
-        	
-        	var noLinkRe = /^\[[^\]]+\]$/;
-		
-		if(itemGrabLink) {
-			itemGrabLinks[i] = itemGrabLink.href;
-			if(isCitation && noLinkRe.test(isCitation.textContent)) {
-				// get titles for [BOOK] or [CITATION] entries
-				items[i] = Zotero.Utilities.getNodeString(doc, elmt, './text()|./b/text()', nsResolver);
-			} else {
-				// get titles for articles
-				var link = doc.evaluate('.//a', elmt, nsResolver,
-										XPathResult.ANY_TYPE, null).iterateNext();
-				if(link) {
-					items[i] = link.textContent;
-					links[i] = link.href;
-				}
-			}
-			
-			if(items[i]) {
-			i++;
-			}
-		}
+		i++;
 	}
 	
 	items = Zotero.selectItems(items);
@@ -78,18 +53,10 @@ function scrape(doc) {
 		return true;
 	}
 	
-	var relatedMatch = /[&?]q=related:([^&]+)/;
-	
 	var urls = new Array();
 	for(var i in items) {
 		// get url
-		if(haveEndNoteLinks) {
-			urls.push(itemGrabLinks[i]);
-		} else {
-			var m = relatedMatch.exec(itemGrabLinks[i]);
-			urls.push("http://scholar.google.com/scholar.ris?hl=en&lr=&q=info:"+m[1]+"&oe=UTF-8&output=citation&oi=citation");
-		}
-		
+		urls.push(itemGrabLinks[i]);
 		if(links[i]) {
 			attachments.push([{title:"Google Scholar Linked Page", type:"text/html",
 			                  url:links[i]}]);
@@ -119,7 +86,6 @@ function doWeb(doc, url) {
 	// determine if we need to reload the page
 	
 	// first check for EndNote links
-	Zotero.debug("get links");
 	haveEndNoteLinks = doc.evaluate('//a[contains(@href, ".enw")]', 
 			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(!haveEndNoteLinks) {
