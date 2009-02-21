@@ -22,7 +22,7 @@
 
 
 -- Set the following timestamp to the most recent scraper update date
-REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2009-02-08 22:10:00'));
+REPLACE INTO version VALUES ('repository', STRFTIME('%s', '2009-02-21 09:30:00'));
 
 REPLACE INTO translators VALUES ('96b9f483-c44d-5784-cdad-ce21b984fe01', '1.0.0b4.r1', '', '2008-08-22 20:30:00', '1', '100', '4', 'Amazon.com', 'Sean Takats and Michael Berkowitz', '^https?://(?:www\.)?amazon', 
 'function detectWeb(doc, url) { 
@@ -24679,10 +24679,10 @@ REPLACE INTO translators VALUES ('3e684d82-73a3-9a34-095f-19b112d88bbf', '1.0.0b
 }');
 
 
-REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b3.r1', '', '2008-03-28 16:30:00', '1', '100', '4', 'Google Scholar', 'Simon Kornblith', 'http://scholar\.google\.(?:com|com?\.[a-z]{2}|[a-z]{2})/scholar', 
+REPLACE INTO translators VALUES ('57a00950-f0d1-4b41-b6ba-44ff0fc30289', '1.0.0b3.r1', '', '2009-02-21 09:30:00', 1, 100, 4, 'Google Scholar', 'Simon Kornblith', 'http://scholar\.google\.(?:com|com?\.[a-z]{2}|[a-z]{2})/scholar',
 'function detectWeb(doc, url) {
 	return "multiple";
-}', 
+}',
 'var haveEndNoteLinks;
 
 function scrape(doc) {
@@ -24697,46 +24697,21 @@ function scrape(doc) {
 	var itemTypes = new Array();
 	var attachments = new Array();
 	
-	var elmts = doc.evaluate(''//p[@class="g"]'', doc, nsResolver,
-	                         XPathResult.ANY_TYPE, null);
-	var elmt;
-	var i=0;
-	Zotero.debug("get elmts");
-	Zotero.debug(haveEndNoteLinks);
-	while(elmt = elmts.iterateNext()) {
-		var isCitation = doc.evaluate("./font[1]/b[1]/text()[1]", elmt, nsResolver,
-		                              XPathResult.ANY_TYPE, null).iterateNext();
-		                              
-		// use EndNote links if available
-		if(haveEndNoteLinks) {
-			itemGrabLink = doc.evaluate(''.//a[contains(@href, ".enw")]'',
-										   elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext(); 
-		} else {
-			itemGrabLink = doc.evaluate(''.//a[text() = "Related Articles"]'',
-										   elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext(); 
+	var titles = doc.evaluate(''//h3[@class="r"]'', doc, nsResolver,
+				XPathResult.ANY_TYPE, null);
+	var elmts = doc.evaluate(''//a[contains(@href, ".enw")]'',
+				doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var title;
+	var i = 0;
+	while(title = titles.iterateNext()) {		
+		itemGrabLinks[i] = elmts.iterateNext().href;
+		items[i] = title.textContent;
+		var link = doc.evaluate(''.//a'',
+				title, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if (link){
+			links[i] = link.href;
 		}
-        	
-        	var noLinkRe = /^\[[^\]]+\]$/;
-		
-		if(itemGrabLink) {
-			itemGrabLinks[i] = itemGrabLink.href;
-			if(isCitation && noLinkRe.test(isCitation.textContent)) {
-				// get titles for [BOOK] or [CITATION] entries
-				items[i] = Zotero.Utilities.getNodeString(doc, elmt, ''./text()|./b/text()'', nsResolver);
-			} else {
-				// get titles for articles
-				var link = doc.evaluate(''.//a'', elmt, nsResolver,
-										XPathResult.ANY_TYPE, null).iterateNext();
-				if(link) {
-					items[i] = link.textContent;
-					links[i] = link.href;
-				}
-			}
-			
-			if(items[i]) {
-			i++;
-			}
-		}
+		i++;
 	}
 	
 	items = Zotero.selectItems(items);
@@ -24746,18 +24721,10 @@ function scrape(doc) {
 		return true;
 	}
 	
-	var relatedMatch = /[&?]q=related:([^&]+)/;
-	
 	var urls = new Array();
 	for(var i in items) {
 		// get url
-		if(haveEndNoteLinks) {
-			urls.push(itemGrabLinks[i]);
-		} else {
-			var m = relatedMatch.exec(itemGrabLinks[i]);
-			urls.push("http://scholar.google.com/scholar.ris?hl=en&lr=&q=info:"+m[1]+"&oe=UTF-8&output=citation&oi=citation");
-		}
-		
+		urls.push(itemGrabLinks[i]);
 		if(links[i]) {
 			attachments.push([{title:"Google Scholar Linked Page", type:"text/html",
 			                  url:links[i]}]);
@@ -24787,7 +24754,6 @@ function doWeb(doc, url) {
 	// determine if we need to reload the page
 	
 	// first check for EndNote links
-	Zotero.debug("get links");
 	haveEndNoteLinks = doc.evaluate(''//a[contains(@href, ".enw")]'', 
 			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(!haveEndNoteLinks) {
@@ -24810,6 +24776,7 @@ function doWeb(doc, url) {
 	scrape(doc, url);
 	Zotero.wait();
 }');
+
 
 REPLACE INTO translators VALUES ('9c335444-a562-4f88-b291-607e8f46a9bb', '1.0.0b3.r1', '', '2008-07-02 11:00:00', '1', '100', '4', 'Berkeley Library Catalog', 'Simon Kornblith', '^https?://[^/]*berkeley.edu[^/]*/WebZ/(?:html/results.html|FETCH)\?.*sessionid=', 
 'function detectWeb(doc, url) {
