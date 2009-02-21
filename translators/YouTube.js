@@ -2,13 +2,13 @@
 	"translatorID":"d3b1d34c-f8a1-43bb-9dd6-27aa6403b217",
 	"translatorType":4,
 	"label":"YouTube",
-	"creator":"Sean Takats and Michael Berkowitz",
+	"creator":"Sean Takats and Michael Berkowitz and Matt Burton",
 	"target":"https?://[^/]*youtube\\.com\\/",
 	"minVersion":"1.0.0rc4",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"lastUpdated":"2009-02-21 18:19:07"
 }
 
 function detectWeb(doc, url){
@@ -16,23 +16,26 @@ function detectWeb(doc, url){
 	var nsResolver = namespace ? function(prefix) {
 			if (prefix == 'x') return namespace; else return null;
 		} : null;
-		
+	
+	
 	var xpath = '//input[@type="hidden" and @name="video_id"]';
 	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "videoRecording";
 	}
-	if (doc.evaluate('//div[@class="vtitle"]/a[@class="vtitlelink" and contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+	//Search results
+	if (doc.evaluate('//div[@class="video-long-title"]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		return "multiple";
 	}
-	if (doc.evaluate('//div[starts-with(@class, "vtitle")]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){	
+	//playlists
+	if (doc.evaluate('//div[starts-with(@class, "title")]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){	
 		return "multiple";
 	}
+	// still used?
 	if (doc.evaluate('//div[@class="vltitle"]/div[@class="vlshortTitle"]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){	
 		return "multiple";
 	}
+	
 }
-
-
 
 function doWeb(doc, url){
 	var namespace = doc.documentElement.namespaceURI;
@@ -54,13 +57,16 @@ function doWeb(doc, url){
 		// multiple videos
 		var items = new Object();
 		var videoRe = /\/watch\?v=([a-zA-Z0-9-_]+)/;
-// search results		
-		if (elmt = doc.evaluate('//div[@class="vtitle"]/a[@class="vtitlelink" and contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			elmts = doc.evaluate('//div[@class="vtitle"]/a[@class="vtitlelink" and contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-// categories and community pages and user pages and browse pages
-		} else if (doc.evaluate('//div[starts-with(@class, "vtitle")]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			elmts = doc.evaluate('//div[starts-with(@class, "vtitle")]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		} else if (doc.evaluate('//div[@class="vltitle"]/div[@class="vlshortTitle"]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+// search results and community/user pages
+		if (elmt = doc.evaluate('//div[@class="video-long-title"]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			elmts = doc.evaluate('//div[@class="video-long-title"]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		} 
+		// playlists
+		else if (doc.evaluate('//div[starts-with(@class, "title")]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			elmts = doc.evaluate('//div[starts-with(@class, "title")]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		} 
+		// still used?
+		else if (doc.evaluate('//div[@class="vltitle"]/div[@class="vlshortTitle"]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 			elmts = doc.evaluate('//div[@class="vltitle"]/div[@class="vlshortTitle"]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		}
 		while (elmt = elmts.iterateNext()){
@@ -103,7 +109,7 @@ function getData(ids, host){
 		var title = "";
 		var title = xml..media_title[0].text().toString();
 		if (xml..media_title.length()){
-			var title = Zotero.Utilities.cleanString(xml..media_title[0].text().toString());
+			var title = Zotero.Utilities.trimInternal(xml..media_title[0].text().toString());
 			if (title == ""){
 				title = " ";
 			}
@@ -136,9 +142,10 @@ function getData(ids, host){
 		if (xml..media_description.length()){
 			newItem.abstractNote = xml..media_description[0].text().toString();
 		}
-				
+		/*
 //temporary fix for downloads using techcrunch
 		var techcrunchurl = "http://www.techcrunch.com/ytdownload3.php?url="+encodeURIComponent(newItem.url)+"&submit=Get+Video";
+		Zotero.debug(techcrunchurl);
 		Zotero.Utilities.HTTP.doGet(techcrunchurl, function(text) {
 			var flv = text.match(/HREF='([^']+)'/);
 			if (flv[1]){
@@ -153,7 +160,9 @@ function getData(ids, host){
 			}
 			newItem.complete();
 		}, function() {Zotero.done();});
+		*/
+		newItem.complete();
+		Zotero.done();
 	});
 	Zotero.wait();
-}
 }
