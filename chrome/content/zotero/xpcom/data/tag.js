@@ -221,11 +221,11 @@ Zotero.Tag.prototype.save = function (full) {
 	}
 	
 	if (this.type != 0 && this.type != 1) {
-		throw ('Invalid tag type ' + this.type + ' in Zotero.Tag.save()');
+		throw ('Invalid tag type ' + this.type + ' for tag ' + this.id + ' in Zotero.Tag.save()');
 	}
 	
 	if (!this.name) {
-		throw ('Tag name is empty in Zotero.Tag.save()');
+		throw ('Tag ' + this.id + ' name is empty in Zotero.Tag.save()');
 	}
 	
 	if (!this._changed) {
@@ -590,7 +590,9 @@ Zotero.Tag.prototype._setLinkedItems = function (itemIDs) {
 			if (currentIDs.indexOf(id) != -1) {
 				Zotero.debug("Item " + itemIDs[i]
 					+ " is already linked to tag " + this.id);
-				oldIDs.push(id);
+				if (oldIDs.indexOf(id) == -1) {
+					oldIDs.push(id);
+				}
 				continue;
 			}
 			
