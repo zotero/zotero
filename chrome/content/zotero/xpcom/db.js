@@ -31,11 +31,17 @@ Zotero.DBConnection = function(dbName) {
 	// JS Date
 	this.__defineGetter__('transactionDate', function () {
 		if (this._transactionDate) {
+			this._lastTransactionDate = this._transactionDate;
 			return this._transactionDate;
 		}
+		
+		Components.utils.reportError("Zotero.DB.transactionDate retrieved with no transaction");
+		
 		// Use second granularity rather than millisecond
 		// for comparison purposes
-		return new Date(Math.floor(new Date / 1000) * 1000);
+		var d = new Date(Math.floor(new Date / 1000) * 1000);
+		this._lastTransactionDate = d;
+		return d;
 	});
 	// SQL DATETIME
 	this.__defineGetter__('transactionDateTime', function () {
@@ -359,7 +365,7 @@ Zotero.DBConnection.prototype.beginTransaction = function () {
 		// Set a timestamp for this transaction
 		this._transactionDate = new Date(Math.floor(new Date / 1000) * 1000);
 		
-		// If transaction time hasn't changed since last transaction,
+		// If transaction time hasn't changed since last used transaction time,
 		// add a second -- this is a hack to get around a sync problem when
 		// multiple sync sessions run within the same second
 		if (this._lastTransactionDate &&
@@ -391,11 +397,10 @@ Zotero.DBConnection.prototype.commitTransaction = function () {
 	else {
 		this._debug('Committing transaction',5);
 		
+		// Clear transaction time
 		if (this._transactionDate) {
-			this._lastTransactionDate = this._transactionDate;
+			this._transactionDate = null;
 		}
-		// Clear transaction timestamp
-		this._transactionDate = null;
 		
 		try {
 			db.commitTransaction();

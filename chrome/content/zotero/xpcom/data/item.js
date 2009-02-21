@@ -1124,16 +1124,10 @@ Zotero.Item.prototype.save = function() {
 			
 			sqlColumns.push('itemTypeID', 'key');
 			sqlValues.push({ int: this.getField('itemTypeID') }, key);
-			
-			if (this.dateAdded) {
-				sqlColumns.push('dateAdded');
-				sqlValues.push(this.dateAdded);
-			}
-			
-			if (this.dateModified) {
-				sqlColumns.push('dateModified');
-				sqlValues.push(this.dateModified);
-			}
+			sqlColumns.push('dateAdded');
+			sqlValues.push(this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime);
+			sqlColumns.push('dateModified');
+			sqlValues.push(this.dateModified ? this.dateModified : Zotero.DB.transactionDateTime);
 			
 			// Begin history transaction
 			// No associated id yet, so we use false
