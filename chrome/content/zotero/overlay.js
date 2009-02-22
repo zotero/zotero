@@ -341,7 +341,7 @@ var ZoteroPane = new function()
 			var d = new Date();
 			Zotero.purgeDataObjects(true);
 			var d2 = new Date();
-			Zotero.debug("Purged data tables in " + (d2 - d) + "ms");
+			Zotero.debug("Purged data tables in " + (d2 - d) + " ms");
 			
 			if (Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Server.enabled) {
 				setTimeout(function () {
@@ -2201,11 +2201,15 @@ var ZoteroPane = new function()
 		}
 		
 		var lastSyncTime = Zotero.Sync.Server.lastLocalSyncTime;
-		msg = 'Last sync: ' // TODO: localize
-			+ (lastSyncTime
-				? new Date(lastSyncTime * 1000).toLocaleString()
-				: 'Not yet synced'
-			);
+		// TODO: localize
+		msg = 'Last sync: ';
+		if (lastSyncTime) {
+			var time = new Date(lastSyncTime * 1000);
+			msg += Zotero.Date.toRelativeDate(time);
+		}
+		else {
+			msg += 'Not yet synced';
+		}
 		label.value = msg;
 	}
 	

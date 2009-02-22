@@ -1874,6 +1874,70 @@ Zotero.Date = new function(){
 	}
 	
 	
+	/**
+	 * Convert a JS Date to a relative date (e.g., "5 minutes ago")
+	 *
+	 * Adapted from http://snipplr.com/view/10290/javascript-parse-relative-date/
+	 *
+	 * @param	{Date}	date
+	 * @return	{String}
+	 */
+	this.toRelativeDate = function (date) {
+		// TODO: localize
+		
+		var str;
+		var now = new Date();
+		var timeSince = now.getTime() - date;
+		var inSeconds = timeSince / 1000;
+		var inMinutes = timeSince / 1000 / 60;
+		var inHours = timeSince / 1000 / 60 / 60;
+		var inDays = timeSince / 1000 / 60 / 60 / 24;
+		var inYears = timeSince / 1000 / 60 / 60 / 24 / 365;
+		
+		// in seconds
+		if (Math.round(inSeconds) == 1) {
+			str = "1 second ago";
+		}
+		else if (inMinutes < 1.01) {
+			str = Math.round(inSeconds) + " seconds ago";
+		}
+		
+		// in minutes
+		else if (Math.round(inMinutes) == 1) {
+			str = "1 minute ago";
+		}
+		else if (inHours < 1.01) {
+			str = Math.round(inMinutes) + " minutes ago";
+		}
+		
+		// in hours
+		else if (Math.round(inHours) == 1) {
+			str = "1 hour ago";
+		}
+		else if (inDays < 1.01) {
+			str = Math.round(inHours) + " hours ago";
+		}
+		
+		// in days
+		else if (Math.round(inDays) == 1) {
+			str = "1 day ago";
+		}
+		else if (inYears < 1.01) {
+			str = Math.round(inDays) + " days ago";
+		}
+		
+		// in years
+		else if (Math.round(inYears) == 1) {
+			str = "1 year ago";
+		}
+		else {
+			str = Math.round(inYears) + " years ago";
+		}
+		
+		return str;
+	}
+	
+	
 	function getFileDateString(file){
 		var date = new Date();
 		date.setTime(file.lastModifiedTime);
