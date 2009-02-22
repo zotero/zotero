@@ -33,7 +33,7 @@ function doWeb(doc, url) {
 	if(detailsRe.test(uri)) {
 		uris.push(uri+'&fullmarc=true');
 	} else {
-		var items = Zotero.Utilities.getItemArray(doc, doc, "ipac\.jsp\?.*uri=(?:full|link)=[0-9]|^javascript:buildNewList\\('.*uri%3Dfull%3D[0-9]");
+		var items = Zotero.Utilities.getItemArray(doc, doc, "ipac\.jsp\?.*uri=(?:full|link)=[0-9]|^javascript:buildNewList\\('.*uri%3Dfull%3D[0-9]", "Show details");
 		items = Zotero.selectItems(items);
 		
 		if(!items) {
@@ -76,7 +76,14 @@ function doWeb(doc, url) {
 		var record = new marc.record();		
 		while(elmt = elmts.iterateNext()) {
 			var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./TD[1]/A[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
-			var value = newDoc.evaluate('./TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/A[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var value = newDoc.evaluate('./TD[2]/TABLE[1]/TBODY[1]/TR[1]/TD[1]/A[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			
+			// value = null for non-marc table entries w/ that xpath
+			if (!value) {
+				value = '';
+			} else {
+				value = value.textContent;
+			}
 			
 			if(field == "LDR") {
 				record.leader = value;
