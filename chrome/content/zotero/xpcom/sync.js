@@ -588,7 +588,6 @@ Zotero.Sync.Runner.IdleListener = {
 	_backObserver: {
 		observe: function (subject, topic, data) {
 			if (topic != 'back') {
-				Zotero.debug('back observer bailing on topic ' + topic);
 				return;
 			}
 			
@@ -599,7 +598,7 @@ Zotero.Sync.Runner.IdleListener = {
 				return;
 			}
 			Zotero.debug("Beginning return-from-idle sync");
-			Zotero.Sync.Runner.sync();
+			Zotero.Sync.Runner.sync(true);
 		}
 	},
 	
@@ -628,6 +627,11 @@ Zotero.Sync.Server = new function () {
 	this.logout = logout;
 	
 	this.__defineGetter__('enabled', function () {
+		if (_throttleTimeout && new Date() < _throttleTimeout) {
+			Zotero.debug("Auto-syncing is disabled until " + Zotero.Date.dateToSQL(_throttleTimeout) + " -- skipping sync");
+			return false;
+		}
+		
 		// Set auto-sync expiry
 		var expiry = new Date("March 15, 2009 00:00:00");
 		if (new Date() > expiry) {
@@ -739,7 +743,7 @@ Zotero.Sync.Server = new function () {
 	var _syncInProgress;
 	var _sessionID;
 	var _sessionLock;
-	
+	var _throttleTimeout;
 	
 	function login(callback, callbackCallback) {
 		var url = _serverURL + "login";
@@ -1320,6 +1324,24 @@ Zotero.Sync.Server = new function () {
 				!xmlhttp.responseXML.childNodes[0].firstChild) {
 			Zotero.debug(xmlhttp.responseText);
 			_error('Invalid response from server', xmlhttp.responseText);
+		}
+		
+		// Temporarily disable auto-sync if instructed by server
+		if (xmlhttp.responseXML.firstChild.firstChild.localName == 'throttle') {
+			Zotero.debug(xmlhttp.responseText);
+			var delay = xmlhttp.responseXML.firstChild.firstChild.getAttribute('delay');
+			var time = new Date();
+			time = time.getTime() + (delay * 1000);
+			time = new Date(time);
+			_throttleTimeout = time;
+			if (delay < 86400000) {
+				var timeStr = time.toLocaleTimeString();
+			}
+			else {
+				var timeStr = time.toLocaleString();
+			}
+			// TODO: localize
+			_error("Auto-syncing disabled until " + timeStr);
 		}
 	}
 	
