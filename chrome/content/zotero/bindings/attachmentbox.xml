@@ -501,7 +501,7 @@
 					<button id="show" label="&zotero.item.attachment.file.show;" flex="1"/>
 				</hbox>
 				<label id="url" crop="end"/>
-				<label id="fileNameRow"/>
+				<label id="fileNameRow" crop="end"/>
 				<label id="accessed"/>
 				<label id="pages"/>
 				<label id="dateModified"/>
