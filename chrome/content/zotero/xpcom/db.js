@@ -722,7 +722,6 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 	if (!suffix) {
 		var numBackups = Zotero.Prefs.get("backup.numBackups");
 		if (numBackups < 1) {
-			Zotero.debug("Backups disabled");
 			return false;
 		}
 		if (numBackups > 24) {
@@ -756,7 +755,7 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 			var lastBackupTime = backupFile.lastModifiedTime;
 			
 			if (currentDBTime == lastBackupTime) {
-				Zotero.debug("Database '" + this._dbName + "' hasn't changed -- skipping backup");
+				//Zotero.debug("Database '" + this._dbName + "' hasn't changed -- skipping backup");
 				return;
 			}
 			
