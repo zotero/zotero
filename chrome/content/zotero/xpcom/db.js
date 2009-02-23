@@ -725,6 +725,9 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 			Zotero.debug("Backups disabled");
 			return false;
 		}
+		if (numBackups > 24) {
+			numBackups = 24;
+		}
 	}
 	
 	if (this.transactionInProgress()) {
