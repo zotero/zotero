@@ -643,9 +643,13 @@ Zotero.DBConnection.prototype.getNextName = function (table, field, name)
  */
 Zotero.DBConnection.prototype.observe = function(subject, topic, data) {
 	switch (topic) {
+		case 'idle':
+			this.backupDatabase();
+			break;
+		
 		case 'xpcom-shutdown':
 			if (this._shutdown) {
-				this._debug('returning');
+				this._debug('XPCOM already shut down in Zotero.DBConnection.observe()');
 				return;
 			}
 			
@@ -658,6 +662,7 @@ Zotero.DBConnection.prototype.observe = function(subject, topic, data) {
 			}
 			
 			this._shutdown = true;
+			this.closeDatabase();
 			this.backupDatabase();
 			
 			break;
@@ -714,6 +719,14 @@ Zotero.DBConnection.prototype.closeDatabase = function () {
 
 
 Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
+	if (!suffix) {
+		var numBackups = Zotero.Prefs.get("backup.numBackups");
+		if (numBackups < 1) {
+			Zotero.debug("Backups disabled");
+			return false;
+		}
+	}
+	
 	if (this.transactionInProgress()) {
 		this._debug("Transaction in progress--skipping backup of DB '" + this._dbName + "'", 2);
 		return false;
@@ -730,11 +743,32 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 		return false;
 	}
 	
-	this._debug("Backing up database '" + this._dbName + "'");
-	
 	var file = Zotero.getZoteroDatabase(this._dbName);
-	var backupFile = Zotero.getZoteroDatabase(this._dbName,
-		(suffix ? suffix + '.' : '') + 'bak');
+	
+	// For standard backup, make sure last backup is old enough to replace
+	if (!suffix) {
+		var backupFile = Zotero.getZoteroDatabase(this._dbName, 'bak');
+		if (backupFile.exists()) {
+			var currentDBTime = file.lastModifiedTime;
+			var lastBackupTime = backupFile.lastModifiedTime;
+			
+			if (currentDBTime == lastBackupTime) {
+				Zotero.debug("Database '" + this._dbName + "' hasn't changed -- skipping backup");
+				return;
+			}
+			
+			var now = new Date();
+			var intervalMinutes = Zotero.Prefs.get('backup.interval');
+			var interval = intervalMinutes * 60 *  1000;
+			if ((now - lastBackupTime) < interval) {
+				Zotero.debug("Last backup of database '" + this._dbName
+					+ "' was less than " + intervalMinutes + " minutes ago -- skipping backup");
+				return;
+			}
+		}
+	}
+	
+	this._debug("Backing up database '" + this._dbName + "'");
 	
 	// Copy via a temporary file so we don't run into disk space issues
 	// after deleting the old backup file
@@ -752,9 +786,12 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 	}
 	
 	try {
-		file.copyTo(file.parent, tmpFile.leafName);
+		var store = Components.classes["@mozilla.org/storage/service;1"].
+			getService(Components.interfaces.mozIStorageService);
+		store.backupDatabaseFile(file, tmpFile.leafName, file.parent);
 	}
 	catch (e){
+		Zotero.debug(e);
 		// TODO: deal with low disk space
 		throw (e);
 	}
@@ -778,11 +815,47 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 		}
 	}
 	
-	// Remove old backup file
-	if (backupFile.exists()) {
-		backupFile.remove(null);
+	// Special backup
+	if (!suffix && numBackups > 1) {
+		var zdir = Zotero.getZoteroDirectory();
+		
+		// Remove oldest backup file
+		var targetFile = Zotero.getZoteroDatabase(this._dbName, (numBackups - 1) + '.bak')
+		if (targetFile.exists()) {
+			targetFile.remove(false);
+		}
+		
+		// Shift old versions up
+		for (var i=(numBackups - 1); i>=1; i--) {
+			var targetNum = i;
+			var sourceNum = targetNum - 1;
+			
+			var targetFile = Zotero.getZoteroDatabase(
+				this._dbName, targetNum + '.bak'
+			);
+			var sourceFile = Zotero.getZoteroDatabase(
+				this._dbName, sourceNum ? sourceNum + '.bak' : 'bak'
+			);
+			
+			if (!sourceFile.exists()) {
+				continue;
+			}
+			
+			Zotero.debug("Moving " + sourceFile.leafName + " to " + targetFile.leafName);
+			sourceFile.moveTo(zdir, targetFile.leafName);
+		}
 	}
 	
+	var backupFile = Zotero.getZoteroDatabase(
+		this._dbName, (suffix ? suffix + '.' : '') + 'bak'
+	);
+	
+	// Remove old backup file
+	if (backupFile.exists()) {
+		backupFile.remove(false);
+	}
+	
+	Zotero.debug("Saving " + backupFile.leafName);
 	tmpFile.moveTo(tmpFile.parent, backupFile.leafName);
 	
 	return true;
@@ -992,7 +1065,12 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 		Zotero.DB.query("PRAGMA locking_mode=NORMAL");
 	}
 	
-	// Register shutdown handler to call this.observe() for DB backup
+	// Register idle and shutdown handlers to call this.observe() for DB backup
+	var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
+			.getService(Components.interfaces.nsIIdleService);
+	idleService.addIdleObserver(this, 10); // 10 minutes
+	idleService = null;
+	
 	var observerService = Components.classes["@mozilla.org/observer-service;1"]
 		.getService(Components.interfaces.nsIObserverService);
 	observerService.addObserver(this, "xpcom-shutdown", false);
