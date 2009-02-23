@@ -135,7 +135,7 @@ Zotero.Schema = new function(){
 				// directoryEntries.hasMoreElements() throws an error (possibly
 				// because of the temporary SQLite journal file?), so we just look
 				// for all versions
-				for (var i=maxPrevious; i>=29; i--) {
+				for (var i=maxPrevious; i>=28; i--) {
 					var fileName = 'zotero.sqlite.' + i + '.bak';
 					file.append(fileName);
 					if (file.exists()) {
