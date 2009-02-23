@@ -284,7 +284,7 @@ function handleSyncReset(action) {
 				"All data in this copy of Zotero will be erased and replaced with "
 					+ "data belonging to user '" + account + "' on the Zotero server.",
 				buttonFlags,
-				"Replace Zotero Data",
+				"Replace Local Data",
 				null, null, null, {}
 			);
 			
