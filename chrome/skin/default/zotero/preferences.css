@@ -22,7 +22,7 @@ radio[pane]
 }
 
 /* Links within messages */
-label label[class=text-link]
+description label[class=text-link], label label[class=text-link]
 {
 	margin: 0;
 }
