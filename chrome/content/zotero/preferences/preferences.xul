@@ -171,6 +171,18 @@ To add a new preference:
 			<preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string" instantApply="true"/>
 		</preferences>
 		
+		<!-- This doesn't wrap without an explicit width, for some reason -->
+		<vbox style="margin-top: .75em; margin-bottom: 1.25em">
+			<description width="45em" style="font-size: 12px">
+				<label class="text-link" href="http://www.zotero.org/support/sync"
+					value="Sync functionality"/> is under active development.
+				We welcome you to participate in our testing by using Zotero Sync,
+				but we encourage you to
+				<label class="text-link" href="http://www.zotero.org/support/zotero_data"
+					value="back up your Zotero data"/> daily.
+			</description>
+		</vbox>
+		
 		<tabbox>
 			<tabs>
 				<tab label="Settings"/>
@@ -182,34 +194,44 @@ To add a new preference:
 					<groupbox>
 						<caption label="Zotero Sync Server"/>
 						
-						<grid>
-							<columns>
-								<column/>
-								<column/>
-							</columns>
+						<hbox>
+							<grid>
+								<columns>
+									<column/>
+									<column/>
+								</columns>
+								
+								<rows>
+									<row>
+										<label value="Username:"/>
+										<textbox preference="pref-sync-username"
+											onchange="Zotero.Prefs.set('sync.server.username', this.value); var pass = document.getElementById('sync-password'); if (pass.value) { Zotero.Sync.Server.password = pass.value; }"/>
+									</row>
+									<row>
+										<label value="Password:"/>
+										<textbox id="sync-password" type="password"
+											onchange="Zotero.Sync.Server.password = this.value"/>
+									</row>
+									<!--
+									<row>
+										<box/>
+										<hbox>
+											<button label="Verify login"
+												oncommand="alert('Unimplemented')"/>
+										</hbox>
+									</row>
+									-->
+								</rows>
+							</grid>
 							
-							<rows>
-								<row>
-									<label value="Username:"/>
-									<textbox preference="pref-sync-username"
-										onchange="Zotero.Prefs.set('sync.server.username', this.value); var pass = document.getElementById('sync-password'); if (pass.value) { Zotero.Sync.Server.password = pass.value; }"/>
-								</row>
-								<row>
-									<label value="Password:"/>
-									<textbox id="sync-password" type="password"
-										onchange="Zotero.Sync.Server.password = this.value"/>
-								</row>
-								<!--
-								<row>
-									<box/>
-									<hbox>
-										<button label="Verify login"
-											oncommand="alert('Unimplemented')"/>
-									</hbox>
-								</row>
-								-->
-							</rows>
-						</grid>
+							<hbox style="width:2em"/>
+							
+							<vbox>
+								<label class="text-link" value="Create Account" href="http://zotero.org/user/register"/>
+								<separator class="thin"/>
+								<label class="text-link" value="Lost Password?" href="http://zotero.org/user/lostpassword"/>
+							</vbox>
+						</hbox>
 						
 						<separator class="thin"/>
 						
@@ -296,36 +318,40 @@ To add a new preference:
 				</tabpanel>
 				
 				<tabpanel id="zotero-reset" orient="vertical">
-					<radiogroup oncommand="handleSyncResetSelect(this);">
-						<grid>
-							<columns>
-								<column/>
-								<column align="start" pack="start" flex="1"/>
-                            </columns>
-							
-							<rows>
-								<row id="zotero-restore-from-server" selected="true">
-								<radio/>
-									<vbox onclick="this.previousSibling.click()">
-										<label value="Restore from server"/>
-										<description>Erase all local Zotero data and restore from the sync server.</description>
-									</vbox>
-								</row>
+					<groupbox>
+						<caption label="Zotero Sync Server"/>
+						
+						<radiogroup id="zotero-reset-sync-group" oncommand="handleSyncResetSelect(this);">
+							<grid>
+								<columns>
+									<column/>
+									<column align="start" pack="start" flex="1"/>
+								</columns>
 								
-								<row id="zotero-restore-to-server">
+								<rows>
+									<row id="zotero-restore-from-server" selected="true">
 									<radio/>
-									<vbox onclick="this.previousSibling.click()">
-										<label value="Restore to server"/>
-										<description>Erase all server data and overwrite with local Zotero data.</description>
-									</vbox>
-								</row>
-							</rows>
-						</grid>
-					</radiogroup>
-					
-					<hbox>
-						<button id="zotero-reset-button" label="Reset..." oncommand="handleSyncReset(document.getElementById('zotero-reset').firstChild.selectedItem.parentNode.id.substr(7))"/>
-					</hbox>
+										<vbox onclick="this.previousSibling.click()">
+											<label value="Restore from Zotero server"/>
+											<description>Erase all local Zotero data and restore from the sync server.</description>
+										</vbox>
+									</row>
+									
+									<row id="zotero-restore-to-server">
+										<radio/>
+										<vbox onclick="this.previousSibling.click()">
+											<label value="Restore to Zotero server"/>
+											<description>Erase all server data and overwrite with local Zotero data.</description>
+										</vbox>
+									</row>
+								</rows>
+							</grid>
+						</radiogroup>
+						
+						<hbox>
+							<button id="zotero-reset-button" label="Reset..." oncommand="handleSyncReset(document.getElementById('zotero-reset-sync-group').selectedItem.parentNode.id.substr(7))"/>
+						</hbox>
+					</groupbox>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>
@@ -432,7 +458,7 @@ To add a new preference:
 			<caption label="&zotero.preferences.citationOptions.caption;"/>
 			
 			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="pref-export-citePaperJournalArticleURL"/>
-			<!-- This doesn't wrap without an explicit wrap, for some reason -->
+			<!-- This doesn't wrap without an explicit width, for some reason -->
 			<label id="export-citePaperJournalArticleURL" width="45em">
 				&zotero.preferences.export.citePaperJournalArticleURL.description;
 			</label>
