@@ -763,8 +763,8 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 			var intervalMinutes = Zotero.Prefs.get('backup.interval');
 			var interval = intervalMinutes * 60 *  1000;
 			if ((now - lastBackupTime) < interval) {
-				Zotero.debug("Last backup of database '" + this._dbName
-					+ "' was less than " + intervalMinutes + " minutes ago -- skipping backup");
+				//Zotero.debug("Last backup of database '" + this._dbName
+				//	+ "' was less than " + intervalMinutes + " minutes ago -- skipping backup");
 				return;
 			}
 		}
