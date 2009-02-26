@@ -77,7 +77,6 @@ function scrape(doc) {
 				var casedField = Zotero.Utilities.superCleanString(doc.evaluate('./TH[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 				field = casedField.toLowerCase();
  				field = field.replace(/:./,"");
-				Zotero.debug("field="+field);
 				var value = Zotero.Utilities.superCleanString(node.nodeValue);
 				if(field == "publisher") {
 					newItem.publisher = value;
