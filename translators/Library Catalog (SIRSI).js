@@ -2,7 +2,7 @@
 	"translatorID":"add7c71c-21f3-ee14-d188-caf9da12728b",
 	"translatorType":4,
 	"label":"Library Catalog (SIRSI)",
-	"creator":"Sean Takats",
+	"creator":"Sean Takats & Hicham El Kasmi",
 	"target":"/uhtbin/cgisirsi",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
@@ -73,14 +73,17 @@ function scrape(doc) {
 			if(!node) {
 				var node = doc.evaluate('./TD[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			}
+			
 			if(node) {
 				var casedField = Zotero.Utilities.superCleanString(doc.evaluate('./TH[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 				field = casedField.toLowerCase();
  				field = field.replace(/:./,"");
 				var value = Zotero.Utilities.superCleanString(node.nodeValue);
-				if(field == "publisher") {
+				if(field == "publisher" || field == "éditeur" ) {
 					newItem.publisher = value;
-				} else if(field == "pub date") {
+				} else if(field == "physical descrip" || field == "description physique" ) {
+					newItem.physicaldescription = value;
+				} else if(field == "pub date" || field == "année") {
 					var re = /[0-9]+/;
 					var m = re.exec(value);
 					newItem.date = m[0];
@@ -88,10 +91,14 @@ function scrape(doc) {
 					var re = /^[0-9](?:[0-9X]+)/;
 					var m = re.exec(value);
 					newItem.ISBN = m[0];
-				} else if(field == "title" || field == "título" || field == "titre") {
+				} else if(field == "issn") {
+					newItem.ISSN = value;
+				} else if(field == "title" || field == "titre") {
 					var titleParts = value.split(" / ");
 					newItem.title = Zotero.Utilities.capitalizeTitle(titleParts[0]);
-				} else if(field == "publication info" || field == "publicación" || field == "publication") {
+				} else if(field == "series title" || field == "titre de série" || field == "collection") {
+					newItem.seriestitle = value.substr(1, value.length-2);
+				} else if(field == "publication info" || field == "publication") {
 					var pubParts = value.split(" : ");
 					newItem.place = pubParts[0];
 					if (pubParts[1].match(/\d+/)) {
@@ -104,12 +111,12 @@ function scrape(doc) {
 						newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
 						authors.push(value);
 					}
-				} else if(field == "author"){		
+				} else if(field == "author" || field == "auteur"){
 					if(authors.indexOf(value) == -1) { 
 						newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
 						authors.push(value);
 					}
-				} else if(field == "added author") {
+				} else if(field == "added author" || field == "organisme") {
 					if(authors.indexOf(value) == -1) {
 						newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "contributor", true));
 						authors.push(value);
@@ -119,20 +126,33 @@ function scrape(doc) {
 						newItem.creators.push({lastName:value, fieldMode:true});
 						authors.push(value);
 					}
+				} else if(field == "general note" || field == "note") {
+					newItem.generalnote = value;
 				} else if(field == "edition" || field == "édition") {
 					newItem.edition = value;
-				} else if(field == "subject term" || field == "corporate subject" || field == "geographic term" || field == "subject") {
+				} else if(field == "additional formats" || field == "autres supports") {
+					newItem.additionalformats = value;
+				} else if(field == "continued by" || field == "devient") {
+					newItem.continuedby = value;
+				} else if(field == "subject term" || field == "corporate subject" || field == "geographic term" || field == "subject" || field == "sujet" || field == "sujet géographique") {
 					var subjects = value.split("--");
 					for(var i=0; i<subjects.length; i++) {
 						if(newItem.tags.indexOf(subjects[i]) == -1) {
 							newItem.tags.push(subjects[i]);
 						}
 					}
-				} else if(field == "personal subject") {
+				} else if(field == "personal subject" || field == " personne sujet") {
 					var subjects = value.split(", ");
 					var tag = value[0]+", "+value[1];
 					if(newItems.tag.indexOf(tag) == -1) {
 						newItem.tags.push(tag);
+					}
+				} else if(field == "contents" || field == "contient") {
+					var contents = value.split("--");
+					for(var i=0; i<contents.length; i++) {
+						if(newItem.tags.indexOf(contents[i]) == -1) {
+							newItem.tags.push(contents[i]);
+						}
 					}
 				} else if(value && field != "http") {
 					newItem.extra += casedField+": "+value+"\n";
@@ -235,8 +255,8 @@ function doWeb(doc, url){
 			for(var i in items) {
 				uris.push(baseUrl+"&"+i+"=Details");
 			}
-			Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
-				function() { Zotero.done() }, null);
+			Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc); },
+				function() { Zotero.done(); }, null);
 			Zotero.wait();
 		}	
 	} else{  //executes Simon's SIRSI -2003 translator code
@@ -275,7 +295,7 @@ function doWeb(doc, url){
 			// this regex will fail about 1/100,000,000 tries
 			var uriRegexp = /^((.*?)\/([0-9]+?))\//;
 			var m = uriRegexp.exec(uri);
-			var newUri = m[1]+"/40"
+			var newUri = m[1]+"/40";
 			
 			var elmts = doc.evaluate('/html/body/form', doc, nsResolver,
 									 XPathResult.ANY_TYPE, null);
