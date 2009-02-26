@@ -73,10 +73,11 @@ function scrape(doc) {
 			if(!node) {
 				var node = doc.evaluate('./TD[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			}
-			
 			if(node) {
 				var casedField = Zotero.Utilities.superCleanString(doc.evaluate('./TH[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
 				field = casedField.toLowerCase();
+ 				field = field.replace(/:./,"");
+				Zotero.debug("field="+field);
 				var value = Zotero.Utilities.superCleanString(node.nodeValue);
 				if(field == "publisher") {
 					newItem.publisher = value;
@@ -88,14 +89,17 @@ function scrape(doc) {
 					var re = /^[0-9](?:[0-9X]+)/;
 					var m = re.exec(value);
 					newItem.ISBN = m[0];
-				} else if(field == "title" || field == "título") {
+				} else if(field == "title" || field == "título" || field == "titre") {
 					var titleParts = value.split(" / ");
 					newItem.title = Zotero.Utilities.capitalizeTitle(titleParts[0]);
-				} else if(field == "publication info" || field == "publicación") {
+				} else if(field == "publication info" || field == "publicación" || field == "publication") {
 					var pubParts = value.split(" : ");
 					newItem.place = pubParts[0];
-					if (pubParts[1].match(/\d+/)) newItem.date = pubParts[1].match(/\d+/)[0];
-				} else if(field == "personal author" || field == "autor personal") {
+					if (pubParts[1].match(/\d+/)) {
+					    newItem.date = pubParts[1].match(/\d+/)[0];
+					    newItem.publisher = pubParts[1].match(/(.*),/)[1];
+				    }
+				} else if(field == "personal author" || field == "autor personal" || field == "auteur") {
 					if(authors.indexOf(value) == -1) {
 						value = value.replace(/(\(|\)|\d+|\-)/g, "");
 						newItem.creators.push(Zotero.Utilities.cleanAuthor(value, "author", true));
@@ -116,7 +120,7 @@ function scrape(doc) {
 						newItem.creators.push({lastName:value, fieldMode:true});
 						authors.push(value);
 					}
-				} else if(field == "edition") {
+				} else if(field == "edition" || field == "édition") {
 					newItem.edition = value;
 				} else if(field == "subject term" || field == "corporate subject" || field == "geographic term" || field == "subject") {
 					var subjects = value.split("--");
