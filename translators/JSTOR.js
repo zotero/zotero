@@ -65,7 +65,7 @@ function doWeb(doc, url) {
 	var availableItems = new Object();
 	while (currTitleElmt = allTitlesElmts.iterateNext()) {
 		var title = currTitleElmt.textContent;
-		var jid = currTitleElmt.href.match(/stable\/(\d+)/)[1];
+		var jid = currTitleElmt.href.match(/stable\/([a-z]*?\d+)/)[1];
 		if (jid) {
 		availableItems[jid] = title;
 		}
