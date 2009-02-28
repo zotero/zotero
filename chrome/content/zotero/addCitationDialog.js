@@ -149,14 +149,34 @@ var Zotero_Citation_Dialog = new function () {
 	function toggleMultipleSources() {
 		_multipleSourcesOn = !_multipleSourcesOn;
 		if(_multipleSourcesOn) {
+			var items = itemsView.getSelectedItems(true);
+			var itemID = (items.length ? items[0] : false);
+			// var itemDataID = itemID+"::"+0;
 			document.getElementById("multiple-sources").hidden = undefined;
 			document.getElementById("zotero-add-citation-dialog").width = "750";
 			document.getElementById("multiple-sources-button").label = Zotero.getString("citation.singleSource");			
+			// move user field content to multiple before adding XXXXX
+			if (itemID) {
+				// _itemData[itemDataID] = new Object();
+				_itemData[itemID] = new Object();
+				for (box in _preserveData) {
+					element = document.getElementById(box);
+					// _itemData[itemDataID][box] = element[_preserveData[box]];
+					_itemData[itemID][box] = element[_preserveData[box]];
+				}
+			}
 			window.sizeToContent();
 			window.moveTo((window.screenX-75), window.screenY);
 			treeItemSelected();
 			// disable adding info until citation added
 			_itemSelected(false);
+			// add current selection
+			if (itemID) {
+				this.add();
+			} else {
+				_updateAccept();
+				_updatePreview();
+			}
 		} else {
 			document.getElementById("multiple-sources").hidden = true;
 			document.getElementById("zotero-add-citation-dialog").width = "600";
@@ -174,9 +194,9 @@ var Zotero_Citation_Dialog = new function () {
 			
 			// delete all items
 			_clearCitationList();
+			_updateAccept();
+			_updatePreview();
 		}
-		_updateAccept();
-		_updatePreview();
 	}
 	
 	/*
