@@ -3629,12 +3629,10 @@ Zotero.Item.prototype.serialize = function(mode) {
 		if (this.isAttachment()) {
 			arr.attachment = {};
 			arr.attachment.linkMode = this.attachmentLinkMode;
-			var file = this.getFile();
 			arr.attachment.mimeType = this.attachmentMIMEType;
 			var charsetID = this.attachmentCharset;
 			arr.attachment.charset = Zotero.CharacterSets.getName(charsetID);
-			arr.attachment.path = file ?
-				Zotero.Attachments.getPath(file, arr.attachment.linkMode) : '';
+			arr.attachment.path = this.attachmentPath;
 		}
 		
 		arr.note = this.getNote();
