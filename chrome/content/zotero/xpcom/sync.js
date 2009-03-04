@@ -2274,15 +2274,19 @@ Zotero.Sync.Server.Data = new function() {
 				// so we handle them differently
 				case 'item':
 					var objs = Zotero[Types].get(ids.updated[types]);
+					xml.items = <items/>;
 					for each(var obj in objs) {
-						xml[types][type] += this[type + 'ToXML'](obj, syncSession);
+						//xml[types][type] += this[type + 'ToXML'](obj, syncSession);
+						xml[types].appendChild(this[type + 'ToXML'](obj, syncSession));
 					}
 					break;
 					
 				default:
+					xml[types] = new XML("<" + types + "/>");
 					for each(var id in ids.updated[types]) {
 						var obj = Zotero[Types].get(id);
-						xml[types][type] += this[type + 'ToXML'](obj);
+						//xml[types][type] += this[type + 'ToXML'](obj);
+						xml[types].appendChild(this[type + 'ToXML'](obj));
 					}
 			}
 		}
