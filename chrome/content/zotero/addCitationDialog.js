@@ -159,7 +159,8 @@ var Zotero_Citation_Dialog = new function () {
 			if (itemID) {
 				// _itemData[itemDataID] = new Object();
 				_itemData[itemID] = new Object();
-				for (box in _preserveData) {
+				var element;
+				for (var box in _preserveData) {
 					element = document.getElementById(box);
 					// _itemData[itemDataID][box] = element[_preserveData[box]];
 					_itemData[itemID][box] = element[_preserveData[box]];
