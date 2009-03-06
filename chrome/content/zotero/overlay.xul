@@ -128,6 +128,8 @@
 									label="Search for Shared Libraries" oncommand="Zotero.Zeroconf.findInstances()"/>
 								<menuseparator id="zotero-tb-actions-plugins-separator"/>
 								<menuitem id="zotero-tb-actions-timeline" label="&zotero.toolbar.timeline.label;" oncommand="Zotero_Timeline_Interface.loadTimeline()"/>
+								<!-- TODO: localize <menuitem id="zotero-tb-actions-duplicate" label="&zotero.toolbar.duplicate.label;" oncommand="ZoteroPane.showDuplicates()"/>-->
+								<menuitem id="zotero-tb-actions-showDuplicates" label="Show Duplicates" oncommand="ZoteroPane.showDuplicates()" hidden="true"/>
 								<menuseparator id="zotero-tb-actions-sync-separator"/>
 								<menuitem hidden="true" label="Sync Debugging" disabled="true"/>
 								<menuitem hidden="true" label="  Clear Server Data" oncommand="Zotero.Sync.Server.clear()"/>

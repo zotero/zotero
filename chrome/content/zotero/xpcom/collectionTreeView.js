@@ -37,6 +37,7 @@ Zotero.CollectionTreeView = function()
 	this.itemToSelect = null;
 	this._highlightedRows = {};
 	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search', 'share']);
+	this.showDuplicates = false;
 }
 
 /*
@@ -1095,7 +1096,16 @@ Zotero.ItemGroup.prototype.getChildItems = function()
 	
 	var s = this.getSearchObject();
 	try {
-		var ids = s.search();
+		var ids;
+		if (this.showDuplicates) {
+			var duplicates = new Zotero.Duplicate;
+			var tmpTable = s.search(true);
+			ids = duplicates.getIDs(tmpTable);
+			Zotero.DB.query("DROP TABLE " + tmpTable);
+		}
+		else {
+			ids = s.search();
+		}
 	}
 	catch (e) {
 		Zotero.DB.rollbackAllTransactions();
