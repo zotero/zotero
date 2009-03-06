@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-06-20 20:45:00"
+	"lastUpdated":"2009-03-06 20:38:37"
 }
 
 function detectWeb(doc, url) {
@@ -51,14 +51,13 @@ function doWeb(doc, url) {
 		var link = doc.evaluate('//a[contains(text(), "EndNote")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
 		books = [link];
 	}
-	for each (var book in books) {
-		Zotero.Utilities.HTTP.doGet(book, function(text) {
-			text = text.replace("MUSIC", "PAMP");
-			var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			translator.setString(text);
-			translator.translate();
-		});
-		Zotero.wait();
-	}
+	
+	Zotero.Utilities.HTTP.doGet(books, function(text) {
+		text = text.replace("MUSIC", "PAMP");
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.translate();
+	}, function () { Zotero.done(); });
+	Zotero.wait();
 }
