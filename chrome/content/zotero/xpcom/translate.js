@@ -1270,10 +1270,20 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 							var creatorTypeID = 1;
 						}
 						
-						var fields = {
-							firstName: data[j].firstName,
-							lastName: data[j].lastName
-						};
+						// Single-field mode
+						if (data[j].fieldMode == 1) {
+							var fields = {
+								lastName: data[j].lastName,
+								fieldMode: 1
+							};
+						}
+						// Two-field mode
+						else {
+							var fields = {
+								firstName: data[j].firstName,
+								lastName: data[j].lastName
+							};
+						}
 						
 						var creatorDataID = Zotero.Creators.getDataID(fields);
 						if(creatorDataID) {
