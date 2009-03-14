@@ -493,8 +493,9 @@ Zotero.Tag.prototype.erase = function () {
 	
 	Zotero.DB.beginTransaction();
 	
-	var deletedTagNotifierData = {};
-	deletedTagNotifierData[this.id] = { old: this.serialize() };
+	// Deletion done in Zotero.Tags.purge()
+	//var deletedTagNotifierData = {};
+	//deletedTagNotifierData[this.id] = { old: this.serialize() };
 	
 	var sql  = "SELECT itemID FROM itemTags WHERE tagID=?";
 	var linkedItemIDs = Zotero.DB.columnQuery(sql, this.id);
@@ -519,7 +520,8 @@ Zotero.Tag.prototype.erase = function () {
 		itemTags.push(itemID + '-' + this.id);
 	}
 	
-	Zotero.Tags.unload(this.id);
+	// Deletion done in Zotero.Tags.purge()
+	//Zotero.Tags.unload(this.id);
 	
 	Zotero.Notifier.trigger('remove', 'item-tag', itemTags);
 	
@@ -528,7 +530,8 @@ Zotero.Tag.prototype.erase = function () {
 		Zotero.Notifier.trigger('modify', 'item', linkedItems, linkedItemsNotifierData);
 	}
 	
-	Zotero.Notifier.trigger('delete', 'tag', this.id, deletedTagNotifierData);
+	// Deletion done in Zotero.Tags.purge()
+	//Zotero.Notifier.trigger('delete', 'tag', this.id, deletedTagNotifierData);
 	
 	Zotero.DB.commitTransaction();
 	
