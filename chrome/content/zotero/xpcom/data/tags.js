@@ -74,12 +74,16 @@ Zotero.Tags = new function() {
 	 * Returns the tagID matching given tag and type
 	 */
 	function getID(name, type) {
-		name = Zotero.Utilities.prototype.trim(name).toLowerCase();
+		name = Zotero.Utilities.prototype.trim(name);
+		var lcname = name.toLowerCase();
 		
-		if (_tags[type] && _tags[type]['_' + name]) {
-			return _tags[type]['_' + name];
+		if (_tags[type] && _tags[type]['_' + lcname]) {
+			return _tags[type]['_' + lcname];
 		}
 		
+		// FIXME: COLLATE NOCASE doesn't work for Unicode characters, so this
+		// won't find Äbc if "äbc" is entered and will allow a duplicate tag
+		// to be created
 		var sql = 'SELECT tagID FROM tags WHERE name=? AND type=?';
 		var tagID = Zotero.DB.valueQuery(sql, [name, type]);
 		
@@ -87,7 +91,7 @@ Zotero.Tags = new function() {
 			if (!_tags[type]) {
 				_tags[type] = [];
 			}
-			_tags[type]['_' + name] = tagID;
+			_tags[type]['_' + lcname] = tagID;
 		}
 		
 		return tagID;
