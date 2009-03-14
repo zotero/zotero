@@ -84,6 +84,7 @@ Zotero.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
  */
 Zotero.Utilities.prototype.trim = function(/**String*/ s) {
 	if (typeof(s) != "string") {
+		Zotero.debug(s);
 		throw "trim: argument must be a string";
 	}
 	
