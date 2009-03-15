@@ -39,7 +39,7 @@ var Zotero_RecognizePDF = new function() {
 	 * @returns {Boolean} True if the PDF can be recognized, false if it cannot be
 	 */
 	this.canRecognize = function(/**Zotero.Item*/ item) {
-		return (Zotero.Fulltext.pdfConverterIsRegistered() && item.attachmentMIMEType &&
+		return (item.attachmentMIMEType &&
 			item.attachmentMIMEType == "application/pdf" && !item.getSource());
 	}
 	
@@ -48,6 +48,27 @@ var Zotero_RecognizePDF = new function() {
 	 * of the new items
 	 */
 	this.recognizeSelected = function() {
+		if (!Zotero.Fulltext.pdfConverterIsRegistered()) {
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+				.getService(Components.interfaces.nsIPromptService);
+			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+			var index = ps.confirmEx(
+				null,
+				// TODO: localize
+				"PDF Tools Not Installed",
+				"To use this feature, you must first install the PDF tools in "
+					+ "the Zotero preferences.",
+				buttonFlags,
+				"Open Preferences",
+				null, null, null, {}
+			);
+			if (index == 0) {
+				ZoteroPane.openPreferences('zotero-prefpane-search', 'pdftools-install');
+			}
+			return;
+		}
+		
 		var items = ZoteroPane.getSelectedItems();
 		if (!items) return;
 		var itemRecognizer = new Zotero_RecognizePDF.ItemRecognizer();

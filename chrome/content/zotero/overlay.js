@@ -1478,8 +1478,8 @@ var ZoteroPane = new function()
 			createBib: 11,
 			loadReport: 12,
 			sep4: 13,
-			reindexItem: 14,
-			recognizePDF: 15
+			recognizePDF: 14,
+			reindexItem: 15
 		};
 		
 		var menu = document.getElementById('zotero-itemmenu');
@@ -1505,39 +1505,40 @@ var ZoteroPane = new function()
 					m.attachLink, m.sep2, m.duplicateItem);
 				
 				// If all items can be reindexed, or all items can be recognized, show option
-				if (Zotero.Fulltext.pdfConverterIsRegistered()) {
-					var items = this.getSelectedItems();
-					var canIndex = true;
-					var canRecognize = true;
-					for (var i=0; i<items.length; i++) {
-						if (!Zotero.Fulltext.canReindex(items[i].id)) {
-							canIndex = false;
-						}
-						if(!Zotero_RecognizePDF.canRecognize(items[i])) {
-							canRecognize = false;
-						}
-						if(!canIndex && !canRecognize) {
-							break;
-						}
+				var items = this.getSelectedItems();
+				var canIndex = true;
+				var canRecognize = true;
+				if (!Zotero.Fulltext.pdfConverterIsRegistered()) {
+					canIndex = false;
+				}
+				for (var i=0; i<items.length; i++) {
+					if (canIndex && !Zotero.Fulltext.canReindex(items[i].id)) {
+						canIndex = false;
 					}
-					if (canIndex) {
-						show.push(m.reindexItem);
+					if (canRecognize && !Zotero_RecognizePDF.canRecognize(items[i])) {
+						canRecognize = false;
 					}
-					else {
-						hide.push(m.reindexItem);
+					if(!canIndex && !canRecognize) {
+						break;
 					}
-					if (canRecognize) {
-						show.push(m.recognizePDF);
-					}
-					else {
-						hide.push(m.recognizePDF);
-					}
-					if (canIndex || canRecognize) {
-						show.push(m.sep4);
-					}
-					else {
-						hide.push(m.sep4);
-					}
+				}
+				if (canIndex) {
+					show.push(m.reindexItem);
+				}
+				else {
+					hide.push(m.reindexItem);
+				}
+				if (canRecognize) {
+					show.push(m.recognizePDF);
+				}
+				else {
+					hide.push(m.recognizePDF);
+				}
+				if (canIndex || canRecognize) {
+					show.push(m.sep4);
+				}
+				else {
+					hide.push(m.sep4);
 				}
 			}
 			// Single item selected
@@ -1724,6 +1725,20 @@ var ZoteroPane = new function()
 			return nsDragAndDrop.drop(event, element);
 		}
 		return element.onDrop(event);
+	}
+	
+	
+	this.openPreferences = function (paneID, action) {
+		var io = {
+			pane: paneID,
+			action: action
+		};
+		window.openDialog('chrome://zotero/content/preferences/preferences.xul',
+			'zotero-prefs',
+			'chrome,titlebar,toolbar,'
+				+ Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal',
+			io
+		);
 	}
 	
 	

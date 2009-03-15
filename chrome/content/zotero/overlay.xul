@@ -107,8 +107,8 @@
 					<menuitem oncommand="Zotero_File_Interface.bibliographyFromItems();"/>
 					<menuitem oncommand="Zotero_Report_Interface.loadItemReport()"/>
 					<menuseparator/>
-					<menuitem oncommand="ZoteroPane.reindexItem();"/>
 					<menuitem oncommand="Zotero_RecognizePDF.recognizeSelected();"/>
+					<menuitem oncommand="ZoteroPane.reindexItem();"/>
 				</popup>
 			</popupset>
 			
@@ -141,7 +141,7 @@
 								<menuitem label="  Purge Orphaned Storage Files" oncommand="Zotero.Sync.Storage.purgeOrphanedStorageFiles(function(results) { Zotero.debug(results); })"/>
 								<menuseparator id="zotero-tb-actions-separator"/>
 								<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;"
-									oncommand="window.openDialog('chrome://zotero/content/preferences/preferences.xul', 'zotero-prefs', 'chrome,titlebar,toolbar,' + Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal')"/>
+									oncommand="ZoteroPane.openPreferences()"/>
 								<menuitem id="zotero-tb-actions-reportErrors" command="cmd_zotero_reportErrors" disabled="true"/>
 								<menuitem id="zotero-tb-actions-documentation" label="&zotero.toolbar.documentation.label;" oncommand="window.open('http://www.zotero.org/documentation/', '', 'menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes');"/>
 								<menuitem id="zotero-tb-actions-about" label="&zotero.toolbar.about.label;" oncommand="window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome')"/>
