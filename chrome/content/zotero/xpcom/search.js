@@ -1525,7 +1525,16 @@ Zotero.Searches = new function(){
 	function getAll(){
 		var sql = "SELECT savedSearchID AS id, savedSearchName AS name "
 			+ "FROM savedSearches ORDER BY name COLLATE NOCASE";
-		return Zotero.DB.query(sql);
+		var searches = Zotero.DB.query(sql);
+		if (!searches) {
+			return [];
+		}
+		// Do proper collation sort
+		var collation = Zotero.getLocaleCollation();
+		searches.sort(function (a, b) {
+			return collation.compareString(1, a.name, b.name);
+		});
+		return searches;
 	}
 	
 	
