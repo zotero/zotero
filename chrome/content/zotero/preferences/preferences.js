@@ -24,6 +24,7 @@ var openURLServerField;
 var openURLVersionMenu;
 var proxies;
 var charsets;
+var _io;
 
 function init()
 {
@@ -45,6 +46,17 @@ function init()
 	charsetMenu.selectedItem =
 		charsetMap[Zotero.Prefs.get("import.charset")] ?
 			charsetMap[Zotero.Prefs.get("import.charset")] : charsetMap["auto"];
+	
+	_io = window.arguments[0];
+	
+	if (_io.pane) {
+		var pane = document.getElementById(_io.pane);
+		document.getElementById('zotero-prefs').showPane(pane);
+		// Quick hack to support install prompt from PDF recognize option
+		if (_io.action && _io.action == 'pdftools-install') {
+			checkPDFToolsDownloadVersion();
+		}
+	}
 }
 
 
