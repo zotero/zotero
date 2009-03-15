@@ -1049,7 +1049,10 @@ Zotero.Sync.Storage = new function () {
 				return;
 			}
 			
-			var parentDir = Zotero.Attachments.createDirectoryForItem(item.id);
+			var parentDir = Zotero.Attachments.getStorageDirectory(item.id);
+			if (!parentDir.exists()) {
+				Zotero.Attachments.createDirectoryForItem(item.id);
+			}
 			
 			// Delete existing files
 			var otherFiles = parentDir.directoryEntries;
