@@ -1,4 +1,4 @@
--- 21
+-- 22
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -274,6 +274,7 @@ INSERT INTO fields VALUES (113,'subject',NULL);
 INSERT INTO fields VALUES (114,'proceedingsTitle',NULL);
 INSERT INTO fields VALUES (115,'bookTitle',NULL);
 INSERT INTO fields VALUES (116,'shortTitle',NULL);
+INSERT INTO fields VALUES (117,'docketNumber',NULL);
 
 INSERT INTO itemTypeFields VALUES (2, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (2, 90, NULL, 2);
@@ -513,15 +514,16 @@ INSERT INTO itemTypeFields VALUES (17, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (17, 43, NULL, 3);
 INSERT INTO itemTypeFields VALUES (17, 97, NULL, 4);
 INSERT INTO itemTypeFields VALUES (17, 44, NULL, 5);
-INSERT INTO itemTypeFields VALUES (17, 98, NULL, 6);
-INSERT INTO itemTypeFields VALUES (17, 42, NULL, 7);
-INSERT INTO itemTypeFields VALUES (17, 96, NULL, 8);
-INSERT INTO itemTypeFields VALUES (17, 87, NULL, 9);
-INSERT INTO itemTypeFields VALUES (17, 116, NULL, 10);
-INSERT INTO itemTypeFields VALUES (17, 1, NULL, 11);
-INSERT INTO itemTypeFields VALUES (17, 27, NULL, 12);
-INSERT INTO itemTypeFields VALUES (17, 2, NULL, 13);
-INSERT INTO itemTypeFields VALUES (17, 22, NULL, 14);
+INSERT INTO itemTypeFields VALUES (17, 117, NULL, 6);
+INSERT INTO itemTypeFields VALUES (17, 98, NULL, 7);
+INSERT INTO itemTypeFields VALUES (17, 42, NULL, 8);
+INSERT INTO itemTypeFields VALUES (17, 96, NULL, 9);
+INSERT INTO itemTypeFields VALUES (17, 87, NULL, 10);
+INSERT INTO itemTypeFields VALUES (17, 116, NULL, 11);
+INSERT INTO itemTypeFields VALUES (17, 1, NULL, 12);
+INSERT INTO itemTypeFields VALUES (17, 27, NULL, 13);
+INSERT INTO itemTypeFields VALUES (17, 2, NULL, 14);
+INSERT INTO itemTypeFields VALUES (17, 22, NULL, 15);
 INSERT INTO itemTypeFields VALUES (18, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (18, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (18, 46, NULL, 3);
@@ -853,6 +855,7 @@ INSERT INTO baseFieldMappings VALUES (19, 14, 52); -- patent/date/issueDate
 INSERT INTO baseFieldMappings VALUES (20, 14, 100); -- statute/date/dateEnacted
 INSERT INTO baseFieldMappings VALUES (15, 60, 92); -- report/number/reportNumber
 INSERT INTO baseFieldMappings VALUES (16, 60, 93); -- bill/number/billNumber
+INSERT INTO baseFieldMappings VALUES (17, 60, 117); -- case/number/docketNumber
 INSERT INTO baseFieldMappings VALUES (18, 60, 99); -- hearing/number/documentNumber
 INSERT INTO baseFieldMappings VALUES (19, 60, 50); -- patent/number/patentNumber
 INSERT INTO baseFieldMappings VALUES (20, 60, 101); -- statute/number/publicLawNumber
