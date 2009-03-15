@@ -853,7 +853,7 @@ Zotero.Sync.Storage = new function () {
 		var lastSyncDate = new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000);
 		
 		Zotero.Utilities.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (req) {
-				Zotero.debug(req.responseText);
+			Zotero.debug(req.responseText);
 				
 			var funcName = "Zotero.Sync.Storage.purgeOrphanedStorageFiles()";
 			
@@ -861,8 +861,14 @@ Zotero.Sync.Storage = new function () {
 			var xml = new XML(req.responseText.replace(/<\?xml.*\?>/, ''));
 			
 			var deleteFiles = [];
+			var trailingSlash = !!path.match(/\/$/);
 			for each(var response in xml.D::response) {
 				var href = response.D::href.toString();
+				
+				// Strip trailing slash if there isn't one on the root path
+				if (!trailingSlash) {
+					href = href.replace(/\/$/, "")
+				}
 				
 				// Absolute
 				if (href.match(/^https?:\/\//)) {
