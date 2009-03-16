@@ -212,10 +212,10 @@ Zotero.Creator.prototype.save = function () {
 					var creatorDataID = this.creatorDataID;
 				}
 				// Existing data row with the new data -- switch to that
-				// and delete old row
+				// and flag old row for deletion below
 				else if (newCreatorDataID) {
+					var deleteDataID = this.creatorDataID;
 					var creatorDataID = newCreatorDataID;
-					Zotero.Creators.deleteData(this.creatorDataID);
 				}
 				// Update current data row with new data
 				else {
@@ -247,6 +247,10 @@ Zotero.Creator.prototype.save = function () {
 		var insertID = Zotero.DB.query(sql, sqlValues);
 		if (!creatorID) {
 			creatorID = insertID;
+		}
+		
+		if (deleteDataID) {
+			Zotero.Creators.deleteData(deleteDataID);
 		}
 		
 		if (this.id) {
