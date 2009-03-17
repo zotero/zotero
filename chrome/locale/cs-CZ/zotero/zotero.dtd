@@ -67,6 +67,7 @@
 <!ENTITY zotero.toolbar.import.label "Import...">
 <!ENTITY zotero.toolbar.export.label "Exportuj knihovnu...">
 <!ENTITY zotero.toolbar.timeline.label "Vyvoř časovou linii">
+<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "Nastavení...">
 <!ENTITY zotero.toolbar.documentation.label "Dokumentace">
 <!ENTITY zotero.toolbar.about.label "O Zotero">

@@ -67,6 +67,7 @@
 <!ENTITY zotero.toolbar.import.label "Importar...">
 <!ENTITY zotero.toolbar.export.label "Exportar biblioteca...">
 <!ENTITY zotero.toolbar.timeline.label "Crear una cronografía">
+<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "Preferencias...">
 <!ENTITY zotero.toolbar.documentation.label "Documentación">
 <!ENTITY zotero.toolbar.about.label "Acerca de Zotero">

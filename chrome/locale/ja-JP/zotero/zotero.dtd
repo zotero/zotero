@@ -67,6 +67,7 @@
 <!ENTITY zotero.toolbar.import.label "インポート">
 <!ENTITY zotero.toolbar.export.label "ライブラリーをエクスポート">
 <!ENTITY zotero.toolbar.timeline.label "タイムラインを作成">
+<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "設定">
 <!ENTITY zotero.toolbar.documentation.label "このプローグラムについて">
 <!ENTITY zotero.toolbar.about.label "Zoteroについて">

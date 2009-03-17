@@ -67,6 +67,7 @@
 <!ENTITY zotero.toolbar.import.label "Importuj">
 <!ENTITY zotero.toolbar.export.label "Eksportuj bibliotekę">
 <!ENTITY zotero.toolbar.timeline.label "Utwórz oś czasową">
+<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "Ustawienia">
 <!ENTITY zotero.toolbar.documentation.label "Dokumentacja">
 <!ENTITY zotero.toolbar.about.label "Zotero - informacje">

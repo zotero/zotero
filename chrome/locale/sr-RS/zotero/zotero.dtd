@@ -67,6 +67,7 @@
 <!ENTITY zotero.toolbar.import.label "Увези...">
 <!ENTITY zotero.toolbar.export.label "Извези библиотеку...">
 <!ENTITY zotero.toolbar.timeline.label "Направите временски ток">
+<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "Поставке...">
 <!ENTITY zotero.toolbar.documentation.label "Документација">
 <!ENTITY zotero.toolbar.about.label "О програму Зотеро">
