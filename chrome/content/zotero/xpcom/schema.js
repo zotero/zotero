@@ -1725,9 +1725,13 @@ Zotero.Schema = new function(){
 								continue;
 							}
 							
-							// Use most frequent
 							var counts = Zotero.DB.query("SELECT tag, COUNT(*) AS numItems FROM tags NATURAL JOIN itemTags WHERE tag LIKE ? GROUP BY tag ORDER BY numItems DESC", l);
-							if (counts[0].numItems != counts[1].numItems) {
+							// If not associated with any items, use all lowercase
+							if (!counts) {
+								var newTag = l;
+							}
+							// Use most frequent
+							else if (counts[0].numItems != counts[1].numItems) {
 								var newTag = counts[0].tag;
 							}
 							// Use earliest
