@@ -830,6 +830,9 @@ Zotero.Fulltext = new function(){
 				case this.INDEX_STATE_UNAVAILABLE:
 				case this.INDEX_STATE_UNINDEXED:
 				case this.INDEX_STATE_PARTIAL:
+				
+				// TODO: automatically reindex already-indexed attachments?
+				case this.INDEX_STATE_INDEXED:
 					return true;
 			}
 		}
