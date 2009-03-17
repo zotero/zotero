@@ -508,7 +508,7 @@
 				
 				<hbox id="index-box">
 					<label id="index-status"/>
-					<toolbarbutton id="reindex" oncommand="ZoteroPane.reindexItem()"/>
+					<toolbarbutton id="reindex" oncommand="this.hidden = true; setTimeout(function () { ZoteroPane.reindexItem(); }, 50)"/>
 				</hbox>
 				
 				<zoteronoteeditor id="note-editor" notitle="1" flex="1"/>
