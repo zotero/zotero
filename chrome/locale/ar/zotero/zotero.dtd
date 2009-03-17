@@ -67,6 +67,7 @@
 <!ENTITY zotero.toolbar.import.label "استيراد...">
 <!ENTITY zotero.toolbar.export.label "تصدير للمكتبة...">
 <!ENTITY zotero.toolbar.timeline.label "انشئ خط زمني">
+<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "التفضيلات...">
 <!ENTITY zotero.toolbar.documentation.label "التوثيق">
 <!ENTITY zotero.toolbar.about.label "حول زوتيرو">

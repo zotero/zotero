@@ -67,6 +67,7 @@
 <!ENTITY zotero.toolbar.import.label "นำเข้า...">
 <!ENTITY zotero.toolbar.export.label "Export Library...">
 <!ENTITY zotero.toolbar.timeline.label "Create Timeline">
+<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "Preferences...">
 <!ENTITY zotero.toolbar.documentation.label "เอกสาร">
 <!ENTITY zotero.toolbar.about.label "เกี่ยวกับโซแทโร">
