@@ -74,26 +74,22 @@ function doWeb(doc, url){
 		ids.push(m[2]);
 	}
 	
-	var setupSets = [];
+	
+	var sets = [];
 	for each (id in ids) {
 		var uri = host + 'tools/citex';
 		var poststring = "clienttype=1&subtype=1&mode=1&version=1&id=" + id;
-		setupSets.push({ id: id, uri: uri, poststring: poststring });
+		sets.push({ id: id, uri: uri, poststring: poststring });
 	}
 	
-	var setupCallback = function () {
-		if (setupSets.length) {
-			var set = setupSets.shift();
-			Zotero.Utilities.HTTP.doPost(set.uri, set.poststring, function () {
-				processCallback(set.id);
-			});
-		}
-		else {
-			Zotero.done();
-		}
+	var setupCallback = function (set, next) {
+		Zotero.Utilities.HTTP.doPost(set.uri, set.poststring, function () {
+			next();
+		});
 	}
 	
-	var processCallback = function (id) {
+	var processCallback = function (set, next) {
+		var id = set.id;
 		var uri = host+"tools/CitEx";
 		var poststring = "mode=2&format=3&type=2&file=3&exportCitation.x=16&exportCitation.y=10&exportCitation=submit";
 		Zotero.Utilities.HTTP.doPost(uri, poststring, function(text) {
@@ -119,10 +115,11 @@ function doWeb(doc, url){
 			});
 			translator.translate();
 			
-			setupCallback();
+			next();
 		});
 	}
 	
-	setupCallback();
+	var callbacks = [setupCallback, processCallback];
+	Zotero.Utilities.processAsync(sets, callbacks, function () { Zotero.done(); });
 	Zotero.wait();
 }
