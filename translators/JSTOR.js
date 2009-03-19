@@ -8,8 +8,8 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-28 18:10:00"
-	}
+	"lastUpdated":"2009-03-19 17:15:00"
+}
  
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
