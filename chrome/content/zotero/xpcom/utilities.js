@@ -535,6 +535,42 @@ Zotero.Utilities.prototype.capitalizeTitle = function(string, force) {
 	return string;
 }
 
+
+/**
+ * Run sets of data through multiple asynchronous callbacks
+ *
+ * Each callback is passed the current set and a callback to call when done
+ *
+ * @param	{Object[]}		sets			Sets of data
+ * @param	{Function[]}	callbacks
+ * @param	{Function}		onDone			Function to call when done
+ */
+Zotero.Utilities.prototype.processAsync = function (sets, callbacks, onDone) {
+	var currentSet;
+	var index = 0;
+	
+	var nextSet = function () {
+		if (!sets.length) {
+			onDone();
+			return;
+		}
+		index = 0;
+		currentSet = sets.shift();
+		callbacks[0](currentSet, nextCallback);
+	};
+	var nextCallback = function () {
+		callbacks[index](currentSet, nextCallback);
+		index++;
+	};
+	
+	// Add a final callback to proceed to the next set
+	callbacks[callbacks.length] = function () {
+		nextSet();
+	}
+	nextSet();
+}
+
+
 /**
  * @class All functions accessible from within Zotero.Utilities namespace inside sandboxed
  * translators
@@ -665,6 +701,7 @@ Zotero.Utilities.Translate.prototype.getItemArray = function(doc, inHere, urlRe,
 	
 	return availableItems;
 }
+
 
 /**
  * Load a single document in a hidden browser
