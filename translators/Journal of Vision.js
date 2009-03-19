@@ -37,16 +37,26 @@ function doWeb(doc, url) {
 		for (var i in items) {
 			urls.push(i);
 		}
+		
+		Zotero.Utilities.processDocuments(urls, grabCitation, function() {Zotero.done();});
+		Zotero.wait();
+		
 	} else {
-		urls.push(url);
+		grabCitation(doc);
 	}
-	Zotero.debug(urls);
+	//Zotero.debug("URLS="+urls);
 	
-	Zotero.Utilities.processDocuments(urls, function(newDoc) {
+	//h ttp://journalofvision.org/AutomaticCitationDownload.aspx?nos=2.5.1.1&type=ReferenceManager
+	//http://journalofvision.org/AutomaticCitationDownload.aspx?nos=7.4.1.9&type=ReferenceManager
+
+	
+}
+
+function grabCitation(newDoc) {
 		var rislink = newDoc.evaluate('//div[@id="block0"]/table/tbody/tr/td[@class="body"]/a', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href.replace("info/GetCitation", "AutomaticCitationDownload") + '&type=ReferenceManager';
 		var DOI = newDoc.evaluate('//td[2]/span[@class="toc_VolumeLine"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/doi:\s*(.*)$/)[1];
 		var PDF = newDoc.evaluate('//div[@class="jovHistory"]//td[2]/a', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
-		Zotero.debug(rislink);
+		Zotero.debug("RIS="+rislink);
 		Zotero.Utilities.HTTP.doGet(rislink, function(text) {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -59,6 +69,5 @@ function doWeb(doc, url) {
 			});
 			translator.translate();
 		});
-	}, function() {Zotero.done();});
-	Zotero.wait();
+	
 }
