@@ -42,8 +42,15 @@ function doWeb(doc, url) {
 		Zotero.wait();
 		
 	} else {
-		// no need for a processDocuments request for single items
-		grabCitation(doc);
+		if (url.indexOf("article.aspx") == -1 ) {
+		// no need for a processDocuments request for single item abstrac
+			grabCitation(doc);
+		
+		} else { // html fulltext page doesn't include citation link, load abstract and grab RIS
+			url = url.substring(0,url.indexOf("article.aspx"));
+			Zotero.Utilities.processDocuments([url], grabCitation, function() {Zotero.done();});
+			Zotero.wait();
+		}
 	}
 
 }
