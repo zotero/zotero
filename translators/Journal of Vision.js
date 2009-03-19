@@ -60,4 +60,5 @@ function doWeb(doc, url) {
 			translator.translate();
 		});
 	}, function() {Zotero.done();});
+	Zotero.wait();
 }
