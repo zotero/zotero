@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2007-06-18 18:15:00"
+	"lastUpdated":"2009-03-19 13:45:00"
 }
 
 function detectWeb(doc, url) {
@@ -77,7 +77,8 @@ function scrape(doc) {
 	// judge
 	var j = metaTags.namedItem("AUTHOR");
 	if(j) {
-		newItem.creators.push({lastName:j.getAttribute("content"), creatorType:"judge", fieldMode:true});
+		// Some entries the AUTHOR meta tag content is empty, this makes zotero unhappy, adding a default
+		newItem.creators.push({lastName:j.getAttribute("content") ? j.getAttribute("content") : "Author Not Provided", creatorType:"judge", fieldMode:true});
 	}
 
 	// group meta tags
