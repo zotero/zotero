@@ -2,13 +2,13 @@
 	"translatorID":"4345839f-b4fd-4e3f-a73d-268b6f280f6e",
 	"translatorType":4,
 	"label":"Journal of Vision",
-	"creator":"Michael Berkowitz",
+	"creator":"Michael Berkowitz & Matt Burton",
 	"target":"http://(www.)?journalofvision.org/",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"lastUpdated":"2009-03-19 12:32:07"
 }
 
 function detectWeb(doc, url) {
@@ -42,16 +42,12 @@ function doWeb(doc, url) {
 		Zotero.wait();
 		
 	} else {
+		// no need for a processDocuments request for single items
 		grabCitation(doc);
 	}
-	//Zotero.debug("URLS="+urls);
-	
-	//h ttp://journalofvision.org/AutomaticCitationDownload.aspx?nos=2.5.1.1&type=ReferenceManager
-	//http://journalofvision.org/AutomaticCitationDownload.aspx?nos=7.4.1.9&type=ReferenceManager
 
-	
 }
-
+// breaking out the citation extraction step
 function grabCitation(newDoc) {
 		var rislink = newDoc.evaluate('//div[@id="block0"]/table/tbody/tr/td[@class="body"]/a', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href.replace("info/GetCitation", "AutomaticCitationDownload") + '&type=ReferenceManager';
 		var DOI = newDoc.evaluate('//td[2]/span[@class="toc_VolumeLine"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/doi:\s*(.*)$/)[1];
