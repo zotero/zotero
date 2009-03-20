@@ -1993,6 +1993,7 @@ Zotero.CSL.Item._zoteroFieldMap = {
 		"collection-number":"seriesNumber",
 		"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
 		"publisher-place":"place",
+		"authority":"court",
 		"page":"pages",
 		"volume":"volume",
 		"issue":"issue",
