@@ -24,7 +24,7 @@ var openURLServerField;
 var openURLVersionMenu;
 var proxies;
 var charsets;
-var _io;
+var _io = {};
 
 function init()
 {
@@ -47,14 +47,16 @@ function init()
 		charsetMap[Zotero.Prefs.get("import.charset")] ?
 			charsetMap[Zotero.Prefs.get("import.charset")] : charsetMap["auto"];
 	
-	_io = window.arguments[0];
-	
-	if (_io.pane) {
-		var pane = document.getElementById(_io.pane);
-		document.getElementById('zotero-prefs').showPane(pane);
-		// Quick hack to support install prompt from PDF recognize option
-		if (_io.action && _io.action == 'pdftools-install') {
-			checkPDFToolsDownloadVersion();
+	if(window.arguments) {
+		_io = window.arguments[0];
+		
+		if(_io.pane) {
+			var pane = document.getElementById(_io.pane);
+			document.getElementById('zotero-prefs').showPane(pane);
+			// Quick hack to support install prompt from PDF recognize option
+			if (_io.action && _io.action == 'pdftools-install') {
+				checkPDFToolsDownloadVersion();
+			}
 		}
 	}
 }
@@ -1313,7 +1315,13 @@ function deleteProxy() {
  */
 function refreshProxyList() {
 	// get and sort proxies
-	proxies = Zotero.Proxies.get();
+	proxies = Zotero.Proxies.proxies.slice();
+	for(var i=0; i<proxies.length; i++) {
+		if(!proxies[i].proxyID) {
+			proxies.splice(i, 1);
+			i--;
+		}
+	}
 	proxies = proxies.sort(function(a, b) {
 		if(a.multiHost) {
 			if(b.multiHost) {
@@ -1362,7 +1370,6 @@ function refreshProxyList() {
 	
 	document.getElementById('proxyTree').currentIndex = -1;
 	document.getElementById('proxyTree-delete').disabled = true;
-	document.getElementById('zotero-proxies-autoRecognize').checked = Zotero.Prefs.get("proxies.autoRecognize");
 	document.getElementById('zotero-proxies-transparent').checked = Zotero.Prefs.get("proxies.transparent");
 }
 
@@ -1370,16 +1377,10 @@ function refreshProxyList() {
  * Updates proxy autoRecognize and transparent settings based on checkboxes
  */
 function updateProxyPrefs() {
-	Zotero.Prefs.set("proxies.autoRecognize", document.getElementById('zotero-proxies-autoRecognize').checked);
+	Zotero.Prefs.set("proxies.transparent", document.getElementById('zotero-proxies-transparent').checked);
 	
 	var oldTransparent = Zotero.Prefs.get("proxies.transparent");
 	var newTransparent = document.getElementById('zotero-proxies-transparent').checked;
-	if(!oldTransparent && newTransparent) {
-		Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService).alert(window,
-			Zotero.getString("proxies.enableTransparentWarning.title"),
-			Zotero.getString("proxies.enableTransparentWarning.description"));
-	}
 	Zotero.Prefs.set("proxies.transparent", newTransparent);
 	
 	Zotero.Proxies.init()

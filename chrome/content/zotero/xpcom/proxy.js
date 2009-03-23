@@ -16,10 +16,6 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-    
-	
-	Utilities based in part on code taken from Piggy Bank 2.1.1 (BSD-licensed)
-	
 	
     ***** END LICENSE BLOCK *****
 */
@@ -27,15 +23,17 @@
 /**
  * A singleton to handle URL rewriting proxies
  * @namespace
+ * @property transparent {Boolean} Whether transparent proxy functionality is enabled
+ * @property proxies {Zotero.Proxy[]} All loaded proxies
+ * @property hosts {Zotero.Proxy{}} Object mapping hosts to proxies
  */
 Zotero.Proxies = new function() {
-	var on = false;
-	var proxies = false;
-	var hosts;
+	this.proxies = false;
+	this.transparent = false;
+	this.hosts = {};
+	
 	var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 							  .getService(Components.interfaces.nsIIOService);
-	var autoRecognize = false;
-	var transparent = false;
 	var lastRecognizedURI = false;
 	var lastButton = false;
 	
@@ -43,15 +41,21 @@ Zotero.Proxies = new function() {
 	 * Initializes http-on-examine-response observer to intercept page loads and gets preferences
 	 */
 	this.init = function() {
-		if(!on) {
+		if(!this.proxies) {
 			var me = this;
 			Zotero.MIMETypeHandler.addObserver(function(ch) { me.observe(ch) });
-			this.get();
-			on = true;
+			
+			var rows = Zotero.DB.query("SELECT * FROM proxies");
+			Zotero.Proxies.proxies = [new Zotero.Proxy(row) for each(row in rows)];
+			
+			for each(var proxy in Zotero.Proxies.proxies) {
+				for each(var host in proxy.hosts) {
+					Zotero.Proxies.hosts[host] = proxy;
+				}
+			}
 		}
 		
-		autoRecognize = Zotero.Prefs.get("proxies.autoRecognize");
-		transparent = Zotero.Prefs.get("proxies.transparent");
+		Zotero.Proxies.transparent = Zotero.Prefs.get("proxies.transparent");
 	}
 	
 	/**
@@ -69,23 +73,22 @@ Zotero.Proxies = new function() {
 		// see if there is a proxy we already know
 		var m = false;
 		var proxy;
-		for each(proxy in proxies) {
-			if(proxy.regexp && proxy.multiHost) {
+		for each(proxy in Zotero.Proxies.proxies) {
+			if(proxy.proxyID && proxy.regexp && proxy.multiHost) {
 				m = proxy.regexp.exec(url);
 				if(m) break;
 			}
 		}
 		
 		if(m) {
+			var host = m[proxy.parameters.indexOf("%h")+1];
 			// add this host if we know a proxy
-			if(proxy.autoAssociate) {
-				var host = m[proxy.parameters.indexOf("%h")+1];
-				if(proxy.hosts.indexOf(host) == -1) {
-					proxy.hosts.push(host);
-					proxy.save();
-				}
+			if(proxy.autoAssociate && !Zotero.Proxies.hosts[host] && proxy.hosts.indexOf(host) == -1 && !_isBlacklisted(host)) {
+				// if no saved host and host is not blacklisted, auto associate
+				proxy.hosts.push(host);
+				proxy.save(true);
 			}
-		} else if(autoRecognize) {
+		} else {
 			// otherwise, try to detect a proxy
 			var proxy = false;
 			for each(var detector in Zotero.Proxies.Detectors) {
@@ -95,67 +98,33 @@ Zotero.Proxies = new function() {
 					Components.utils.reportError(e);
 				}
 				
-				if (!proxy) {
-					continue;
-				}
-				
-				// if transparent is turned off, just save the proxy
-				if(!transparent) {
-					proxy.save();
-					break;
-				}
-				
-				// otherwise, make sure we want it
-				var io = {site:proxy.hosts[0], proxy:channel.URI.hostPort};
-				var window = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-					.getService(Components.interfaces.nsIWindowMediator)
-					.getMostRecentWindow("navigator:browser");
-				window.openDialog('chrome://zotero/content/proxy.xul', '', 'chrome,modal', io);
-				
-				if(io.add) proxy.save();
-				if(io.disable) {
-					transparent = false;
-					Zotero.Prefs.set("proxies.transparent", false);
-				}
+				if(!proxy) continue;
+				var transparent = _showDialog(proxy.hosts[0], channel.URI.hostPort);
+				proxy.save(transparent);
 				break;
 			}
 		}
 		
 		// try to get an applicable proxy
-		if(transparent) {
-			var webNav = null;
-			try {
-				webNav = channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIWebNavigation);
-			} catch(e) {}
-			
-			if(webNav) {
-				var proxied = this.properToProxy(url, true);
-				if(proxied) {
-					channel.QueryInterface(Components.interfaces.nsIHttpChannel);
-					// If the referrer is a proxiable host, we already have access
-					// (e.g., we're on-campus) and shouldn't redirect
-					if (channel.referrer) {
-						if (this.properToProxy(channel.referrer.spec, true)) {
-							return;
-						}
+		var webNav = null;
+		try {
+			webNav = channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIWebNavigation);
+		} catch(e) {}
+		
+		if(webNav) {
+			var proxied = Zotero.Proxies.properToProxy(url, true);
+			if(proxied) {
+				channel.QueryInterface(Components.interfaces.nsIHttpChannel);
+				// If the referrer is a proxiable host, we already have access
+				// (e.g., we're on-campus) and shouldn't redirect
+				if (channel.referrer) {
+					if (Zotero.Proxies.properToProxy(channel.referrer.spec, true)) {
+						return;
 					}
-					webNav.loadURI(proxied, 0, channel.URI, null, null);
 				}
+				webNav.loadURI(proxied, 0, channel.URI, null, null);
 			}
 		}
-	}
-	
-	/**
-	 * Gets all proxy objects
-	 * @type Zotero.Proxy[]
-	 */
-	this.get = function() {
-		if(!proxies) {
-			var rows = Zotero.DB.query("SELECT * FROM proxies");
-			proxies = [new Zotero.Proxy(row) for each(row in rows)];
-			this.refreshHostMap();
-		}
-		return proxies;
 	}
 	
 	/**
@@ -163,10 +132,16 @@ Zotero.Proxies = new function() {
 	 * @returns {Boolean} True if the proxy was in the list, false if it was not
 	 */
 	this.remove = function(proxy) {
-		var index = proxies.indexOf(proxy);
+		var index = Zotero.Proxies.proxies.indexOf(proxy);
 		if(index == -1) return false;
-		proxies.splice(index, 1);
-		this.refreshHostMap();
+		// remove proxy from proxy list
+		Zotero.Proxies.proxies.splice(index, 1);
+		// remove hosts from host list
+		for(var host in Zotero.Proxies.hosts) {
+			if(Zotero.Proxies.hosts[host] == proxy) {
+				delete Zotero.Proxies.hosts[host];
+			}
+		}
 		return true;
 	}
 	
@@ -174,10 +149,14 @@ Zotero.Proxies = new function() {
 	 * Inserts a proxy into the host map; necessary when proxies are added
 	 */
 	this.save = function(proxy) {
-		proxies.push(proxy);
-		for each(var host in proxy.hosts) {
-			if(!hosts[host]) {
-				hosts[host] = proxy;
+		// add to list of proxies
+		if(Zotero.Proxies.proxies.indexOf(proxy) == -1) Zotero.Proxies.proxies.push(proxy);
+		
+		// if there is a proxy ID (i.e., if this is a persisting, transparent proxy), add to host
+		// list to do reverse mapping
+		if(proxy.proxyID) {
+			for each(var host in proxy.hosts) {
+				Zotero.Proxies.hosts[host] = proxy;
 			}
 		}
 	}
@@ -185,19 +164,22 @@ Zotero.Proxies = new function() {
 	/**
 	 * Refreshes host map; necessary when proxies are changed or deleted
 	 */
-	this.refreshHostMap = function() {
-		hosts = {};
-		for each(var proxy in proxies) {
-			for each(var host in proxy.hosts) {
-				if(!hosts[host]) {
-					hosts[host] = proxy;
-				}
+	this.refreshHostMap = function(proxy) {
+		// if there is no proxyID, then return immediately, since there is no need to update
+		if(!proxy.proxyID) return;
+		
+		// delete hosts that point to this proxy if they no longer exist
+		for(var host in Zotero.Proxies.hosts) {
+			if(Zotero.Proxies.hosts[host] == proxy && proxy.hosts.indexOf(host) == -1) {
+				delete Zotero.Proxies.hosts[host];
 			}
 		}
+		// add new hosts for this proxy
+		Zotero.Proxies.save(proxy);
 	}
 	
 	/**
-	 * Returns a page's proper URL from a proxied URL
+	 * Returns a page's proper URL from a proxied URL. Uses both transparent and opaque proxies.
 	 * @param {String} url
 	 * @param {Boolean} onlyReturnIfProxied Controls behavior if the given URL is not proxied. If
 	 *	it is false or unspecified, unproxied URLs are returned verbatim. If it is true, the
@@ -205,7 +187,7 @@ Zotero.Proxies = new function() {
 	 * @type String
 	 */
 	this.proxyToProper = function(url, onlyReturnIfProxied) {
-		for each(var proxy in proxies) {
+		for each(var proxy in Zotero.Proxies.proxies) {
 			if(proxy.regexp) {
 				var m = proxy.regexp.exec(url);
 				if(m) {
@@ -219,7 +201,7 @@ Zotero.Proxies = new function() {
 	}
 	
 	/**
-	 * Returns a page's proxied URL from the proper URL
+	 * Returns a page's proxied URL from the proper URL. Uses only transparent proxies.
 	 * @param {String} url
 	 * @param {Boolean} onlyReturnIfProxied Controls behavior if the given URL is not proxied. If
 	 *	it is false or unspecified, unproxied URLs are returned verbatim. If it is true, the
@@ -228,13 +210,78 @@ Zotero.Proxies = new function() {
 	 */
 	this.properToProxy = function(url, onlyReturnIfProxied) {
 		var uri = ioService.newURI(url, null, null);
-		if(hosts[uri.hostPort]) {
-			var toProxy = hosts[uri.hostPort].toProxy(uri);
+		if(Zotero.Proxies.hosts[uri.hostPort] && Zotero.Proxies.hosts[uri.hostPort].proxyID) {
+			var toProxy = Zotero.Proxies.hosts[uri.hostPort].toProxy(uri);
 			Zotero.debug("Zotero.Proxies.properToProxy: "+url+" to "+toProxy);
 			return toProxy;
 		}
 		return (onlyReturnIfProxied ? false : url);
 	}
+	
+	/**
+	 * Determines whether a host is blacklisted, i.e., whether we should refuse to save transparent
+	 * proxy entries for this host. This is necessary because EZProxy offers to proxy all Google and
+	 * Wikipedia subdomains, but in practice, this would get really annoying.
+	 *
+	 * @type Boolean
+	 * @private
+	 */
+	 function _isBlacklisted(host) {
+	 	/**
+	 	 * Regular expression patterns of hosts never to proxy
+	 	 * @const
+	 	 */
+		const hostBlacklist = [
+			/google\.com$/,
+			/wikipedia\.org$/
+		];
+	 	/**
+	 	 * Regular expression patterns of hosts that should always be proxied, regardless of whether
+	 	 * they're on the blacklist
+	 	 * @const
+	 	 */
+		const hostWhitelist = [
+			/^scholar\.google\.com$/
+		]
+		
+		for each(var blackPattern in hostBlacklist) {
+			if(blackPattern.test(host)) {
+				for each(var whitePattern in hostWhitelist) {
+					if(whitePattern.test(host)) {
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		return false;
+	 }
+	 
+	 /**
+	  * If transparent is enabled, shows a dialog asking user whether to add a proxy to the
+	  * transparent proxy list.
+	  *
+	  * @param {String} proxiedHost The host that would be redirected through the proxy.
+	  * @param {String} proxyHost The host through which the given site would be redirected.
+	  * @returns {Boolean} True if proxy should be added; false if it should not be.
+	  */
+	 function _showDialog(proxiedHost, proxyHost) {
+		 if(!Zotero.Proxies.transparent) return false;
+		 
+		// ask user whether to add this proxy
+		var io = {site:proxiedHost, proxy:proxyHost};
+		var window = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+			.getService(Components.interfaces.nsIWindowMediator)
+			.getMostRecentWindow("navigator:browser");
+		window.openDialog('chrome://zotero/content/proxy.xul', '', 'chrome,modal', io);
+		
+		// disable transparent if checkbox checked
+		if(io.disable) {
+			Zotero.Proxies.transparent = false;
+			Zotero.Prefs.set("proxies.transparent", false);
+		}
+		return io.add;
+	 }
 }
 
 /**
@@ -260,7 +307,7 @@ const Zotero_Proxy_schemeParameters = {
 	"%p":"(.*?)",	// path
 	"%d":"(.*?)",	// directory
 	"%f":"(.*?)",	// filename
-	"%a":"(.*?)"	// filename
+	"%a":"(.*?)"	// anything
 };
 
 /**
@@ -275,13 +322,13 @@ const Zotero_Proxy_schemeParameterRegexps = {
 	"%a":/([^%])%a/
 };
 
+const Zotero_Proxy_metaRegexp = /[-[\]{}()*+?.\\^$|,#\s]/g;
+
 /**
  * Compiles the regular expression against which we match URLs to determine if this proxy is in use
  * and saves it in this.regexp
  */
 Zotero.Proxy.prototype.compileRegexp = function() {
-	const metaRe = /[-[\]{}()*+?.\\^$|,#\s]/g;
-	
 	// take host only if flagged as multiHost
 	var parametersToCheck = Zotero_Proxy_schemeParameters;
 	if(this.multiHost) parametersToCheck["%h"] = "([a-zA-Z0-9]+\\.[a-zA-Z0-9\.]+)";
@@ -309,7 +356,7 @@ Zotero.Proxy.prototype.compileRegexp = function() {
 	})
 	
 	// now replace with regexp fragment in reverse order
-	var re = "^"+this.scheme.replace(metaRe, "\\$&")+"$";
+	var re = "^"+this.scheme.replace(Zotero_Proxy_metaRegexp, "\\$&")+"$";
 	for(var i=this.parameters.length-1; i>=0; i--) {
 		var param = this.parameters[i];
 		re = re.replace(Zotero_Proxy_schemeParameterRegexps[param], "$1"+parametersToCheck[param]);
@@ -326,19 +373,30 @@ Zotero.Proxy.prototype.compileRegexp = function() {
  */
 Zotero.Proxy.prototype.validate = function() {
 	if(this.scheme.length < 8 || (this.scheme.substr(0, 7) != "http://" && this.scheme.substr(0, 8) != "https://")) {
-		return "scheme.noHTTP";
+		return ["scheme.noHTTP"];
 	}
 	
 	if(!this.multiSite && (!this.hosts.length || !this.hosts[0])) {
-		return "host.invalid";
+		return ["host.invalid"];
 	} else if(this.multiSite && !Zotero_Proxy_schemeParameterRegexps["%h"].test(this.scheme)) {
-		return "scheme.noHost";
+		return ["scheme.noHost"];
 	}
 	
 	if(!Zotero_Proxy_schemeParameterRegexps["%p"].test(this.scheme) && 
 			(!Zotero_Proxy_schemeParameterRegexps["%d"].test(this.scheme) ||
 			!Zotero_Proxy_schemeParameterRegexps["%f"].test(this.scheme))) {
-		return "scheme.noPath";
+		return ["scheme.noPath"];
+	}
+	
+	if(this.scheme.substr(0, 10) == "http://%h/" || this.scheme.substr(0, 11) == "https://%h/") {
+		return ["scheme.invalid"];
+	}
+	
+	for each(var host in this.hosts) {
+		var oldHost = Zotero.Proxies.hosts[host];
+		if(oldHost && oldHost.proxyID && oldHost != this) {
+			return ["host.proxyExists", host];
+		}
 	}
 	
 	return false;
@@ -346,45 +404,50 @@ Zotero.Proxy.prototype.validate = function() {
 
 /**
  * Saves any changes to this proxy
+ *
+ * @param {Boolean} transparent True if proxy should be saved as a persisting, transparent proxy
  */
-Zotero.Proxy.prototype.save = function() {
+Zotero.Proxy.prototype.save = function(transparent) {
 	// ensure this proxy is valid
 	Zotero.debug(this);
 	var hasErrors = this.validate();
-	if(hasErrors) throw "Proxy could not be saved because it is invalid: error "+hasErrors;
+	if(hasErrors) throw "Zotero.Proxy: could not be saved because it is invalid: error "+hasErrors[0];
 	
 	this.autoAssociate = this.multiHost && this.autoAssociate;
 	this.compileRegexp();
 	if(this.proxyID) {
-		Zotero.Proxies.refreshHostMap();
+		Zotero.Proxies.refreshHostMap(this);
+		if(!transparent) throw "Zotero.Proxy: cannot save transparent proxy without transparent param";
 	} else {
 		Zotero.Proxies.save(this);
 	}
 	
-	try {
-		Zotero.DB.beginTransaction();
-		
-		if(this.proxyID) {
-			Zotero.DB.query("UPDATE proxies SET multiHost = ?, autoAssociate = ?, scheme = ? WHERE proxyID = ?",
-				[this.multiHost ? 1 : 0, this.autoAssociate ? 1 : 0, this.scheme, this.proxyID]);
-			Zotero.DB.query("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
-		} else {
-			this.proxyID = Zotero.DB.query("INSERT INTO proxies (multiHost, autoAssociate, scheme) VALUES (?, ?, ?)",
-				[this.multiHost ? 1 : 0, this.autoAssociate ? 1 : 0, this.scheme])
+	if(transparent) {
+		try {
+			Zotero.DB.beginTransaction();
+			
+			if(this.proxyID) {
+				Zotero.DB.query("UPDATE proxies SET multiHost = ?, autoAssociate = ?, scheme = ? WHERE proxyID = ?",
+					[this.multiHost ? 1 : 0, this.autoAssociate ? 1 : 0, this.scheme, this.proxyID]);
+				Zotero.DB.query("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
+			} else {
+				this.proxyID = Zotero.DB.query("INSERT INTO proxies (multiHost, autoAssociate, scheme) VALUES (?, ?, ?)",
+					[this.multiHost ? 1 : 0, this.autoAssociate ? 1 : 0, this.scheme])
+			}
+			
+			this.hosts = this.hosts.sort();
+			var host;
+			for(var i in this.hosts) {
+				host = this.hosts[i] = this.hosts[i].toLowerCase();
+				Zotero.DB.query("INSERT INTO proxyHosts (proxyID, hostname) VALUES (?, ?)",
+					[this.proxyID, host]);
+			}
+			
+			Zotero.DB.commitTransaction();
+		} catch(e) {
+			Zotero.DB.rollbackTransaction();
+			throw(e);
 		}
-		
-		this.hosts = this.hosts.sort();
-		var host;
-		for(var i in this.hosts) {
-			host = this.hosts[i] = this.hosts[i].toLowerCase();
-			Zotero.DB.query("INSERT INTO proxyHosts (proxyID, hostname) VALUES (?, ?)",
-				[this.proxyID, host]);
-		}
-		
-		Zotero.DB.commitTransaction();
-	} catch(e) {
-		Zotero.DB.rollbackTransaction();
-		throw(e);
 	}
 }
 
@@ -400,17 +463,18 @@ Zotero.Proxy.prototype.revert = function() {
  * Deletes this proxy
  */
 Zotero.Proxy.prototype.erase = function() {
-	if(!this.proxyID) throw "Tried to erase an unsaved proxy";
 	Zotero.Proxies.remove(this);
 	
-	try {
-		Zotero.DB.beginTransaction();
-		Zotero.DB.query("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
-		Zotero.DB.query("DELETE FROM proxies WHERE proxyID = ?", [this.proxyID]);
-		Zotero.DB.commitTransaction();
-	} catch(e) {
-		Zotero.DB.rollbackTransaction();
-		throw(e);
+	if(this.proxyID) {
+		try {
+			Zotero.DB.beginTransaction();
+			Zotero.DB.query("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
+			Zotero.DB.query("DELETE FROM proxies WHERE proxyID = ?", [this.proxyID]);
+			Zotero.DB.commitTransaction();
+		} catch(e) {
+			Zotero.DB.rollbackTransaction();
+			throw(e);
+		}
 	}
 }
 
@@ -514,7 +578,7 @@ Zotero.Proxies.Detectors.EZProxy = function(channel) {
 		if(fromProxy && toProxy && fromProxy.host == toProxy.host && fromProxy.port != toProxy.port
 				&& [80, 443, -1].indexOf(toProxy.port) == -1) {
 			var proxy;
-			for each(proxy in Zotero.Proxies.get()) {
+			for each(proxy in Zotero.Proxies.proxies) {
 				if(proxy.regexp) {
 					var m = proxy.regexp.exec(fromProxy.spec);
 					if(m) break;
@@ -569,7 +633,7 @@ Zotero.Proxies.Detectors.EZProxy = function(channel) {
 		proxy.multiHost = false;
 		proxy.scheme = proxiedURI.scheme+"://"+proxiedURI.hostPort+"/%p";
 		proxy.hosts = [properURI.hostPort];
-	} else if(proxiedURI.host != channel.URI.host) {
+	} else if(proxiedURI.host != channel.URI.host && proxiedURI.hostPort.indexOf(properURI.host) != -1) {
 		// Proxy by host
 		var proxy = new Zotero.Proxy();
 		proxy.multiHost = proxy.autoAssociate = true;
@@ -628,7 +692,8 @@ Zotero.Proxies.Detectors.Juniper = function(channel) {
 	if(!m) return false;
 	
 	var proxy = new Zotero.Proxy();
-	proxy.multiHost =  proxy.autoAssociate = true;
+	proxy.multiHost = true;
+	proxy.autoAssociate = false;
 	proxy.scheme = m[1]+"/%d"+",DanaInfo=%h%a+%f";
 	proxy.hosts = [m[3]];
 	return proxy;

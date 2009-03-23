@@ -104,7 +104,6 @@ pref("extensions.zotero.sync.storage.maxUploads", 4);
 pref("extensions.zotero.sync.storage.deleteDelayDays", 30);
 
 // Proxy
-pref("extensions.zotero.proxies.autoRecognize", true);
 pref("extensions.zotero.proxies.transparent", true);
 
 // Data layer purging

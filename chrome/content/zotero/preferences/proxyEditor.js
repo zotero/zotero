@@ -111,17 +111,18 @@ var Zotero_ProxyEditor = new function() {
 		
 		var hasErrors = proxy.validate();
 		if(hasErrors) {
+			error = hasErrors.shift();
+			
 			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 					.getService(Components.interfaces.nsIPromptService);
 			promptService.alert(
-				window,
-				Zotero.getString("proxies.error"),
-				Zotero.getString("proxies.error." + hasErrors)
+				window, Zotero.getString("proxies.error"),
+				Zotero.getString("proxies.error." + error, hasErrors)
 			);
 			if(window.arguments && window.arguments[0]) proxy.revert();
 			return false;
 		}
-		proxy.save();
+		proxy.save(true);
 		return true;
 	}
 	

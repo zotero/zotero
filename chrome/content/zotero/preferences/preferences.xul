@@ -535,13 +535,16 @@ To add a new preference:
 	<prefpane id="zotero-prefpane-proxies"
 						label="&zotero.preferences.prefpane.proxies;"
 						image="chrome://zotero/skin/prefs-proxies.png">
-		<groupbox>
-			<command id="zotero-proxies-update" oncommand="updateProxyPrefs()"/>
-			<checkbox id="zotero-proxies-autoRecognize" label="&zotero.preferences.proxies.autoRecognize;"
-				command="zotero-proxies-update"/>
-			<checkbox id="zotero-proxies-transparent" label="&zotero.preferences.proxies.transparent;"
-				command="zotero-proxies-update"/>
-		</groupbox>
+		<description width="45em" style="font-size: 12px">
+			&zotero.preferences.proxies.desc_before_link;
+			<label class="text-link" href="http://www.zotero.org/support/proxies"
+				value="&zotero.preferences.proxies.desc_link;"/>
+			&zotero.preferences.proxies.desc_after_link;
+		</description>
+		
+		<command id="zotero-proxies-update" oncommand="updateProxyPrefs()"/>
+		<checkbox id="zotero-proxies-transparent" label="&zotero.preferences.proxies.transparent;"
+			command="zotero-proxies-update"/>
 		
 		<groupbox flex="1">
 			<caption label="&zotero.preferences.proxies.configured;"/>

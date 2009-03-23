@@ -1,4 +1,4 @@
--- 49
+-- 50
 
 -- This file creates tables containing user-specific data -- any changes made
 -- here must be mirrored in transition steps in schema.js::_migrateSchema()

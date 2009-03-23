@@ -2194,6 +2194,11 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE savedSearchesOld");
 					Zotero.DB.query("DROP TABLE tagsOld");
 				}
+				
+				if (i==50) {
+					Zotero.DB.query("DELETE FROM proxyHosts");
+					Zotero.DB.query("DELETE FROM proxies");
+				}
 			}
 			
 			_updateDBVersion('userdata', toVersion);
