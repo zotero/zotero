@@ -18,11 +18,17 @@ function detectSearch(item) {
 	return false;
 }
 
+function fixAuthorCapitalization(string) {
+	if(string.toUpperCase() == string) {
+		string = string.toLowerCase().replace(/\b[a-z]/g, function(m) { return m[0].toUpperCase() });
+	}
+	return string;
+}
+
 function processCrossRef(xmlOutput) {
 	xmlOutput = xmlOutput.replace(/<\?xml[^>]*\?>/, "");
 	
 	// parse XML with E4X
-	var qr = new Namespace("http://www.crossref.org/qrschema/2.0");
 	try {
 		var xml = new XML(xmlOutput);
 	} catch(e) {
@@ -30,41 +36,87 @@ function processCrossRef(xmlOutput) {
 	}
 	
 	// ensure status is valid
-	var status = xml.qr::query_result.qr::body.qr::query.@status.toString();
-	if(status != "resolved" && status != "multiresolved") {
-		return false;
+	if(!xml.doi_record.length()) return false;
+	if(xml.doi_record[0].crossref.journal.length()) {
+		var item = new Zotero.Item("journalArticle");
+		var itemXML = xml.doi_record.crossref.journal;
+		var refXML = itemXML.journal_article;
+		var metadataXML = itemXML.journal_metadata;
+		
+		item.ISSN = itemXML.journal_metadata.issn.toString();
+		item.publicationTitle = itemXML.journal_metadata.full_title.toString();
+		item.journalAbbreviation = itemXML.journal_metadata.abbrev_title.toString();
+		item.volume = itemXML.journal_issue.journal_volume.volume.toString();
+		item.issue = itemXML.journal_issue.issue.toString();
+	} else if(xml.doi_record[0].crossref.book.length()) {
+		var item = new Zotero.Item("book");
+		var refXML = xml.doi_record[0].crossref.book.book_metadata;
+		var metadataXML = refXML;
+		var seriesXML = metadataXML.series_metadata;
+		
+		item.place = metadataXML.publisher.publisher_place.toString();
+	} else if(xml.doi_record[0].crossref.conference.length()) {
+		var item = new Zotero.Item("conferencePaper");
+		var itemXML = xml.doi_record[0].crossref.conference;
+		var refXML = itemXML.conference_paper;
+		var metadataXML = itemXML.proceedingsMetadata;
+		var seriesXML = metadataXML.series_metadata;
+		
+		item.publicationTitle = itemXML.proceedings_metadata.proceedings_title.toString();
+		item.place = itemXML.event_metadata.conference_location.toString();
+		item.conferenceName = itemXML.event_metadata.conference_name.toString();
 	}
 	
-	var query = xml.qr::query_result.qr::body.qr::query;
-	var item = new Zotero.Item("journalArticle");
+	var contributors = refXML.contributors.children();
 	
-	// try to get a DOI
-	item.DOI = query.qr::doi.(@type=="journal_article").text().toString();
-	if(!item.DOI) {
-		item.DOI = query.qr::doi.(@type=="book_title").text().toString();
-	}
-	if(!item.DOI) {
-		item.DOI = query.qr::doi.(@type=="book_content").text().toString();
+	if(metadataXML.isbn.length()) item.ISBN = metadataXML.isbn[0].toString();
+	if(metadataXML.issn.length()) item.ISSN = metadataXML.issn[0].toString();
+	item.publisher = metadataXML.publisher.publisher_name.toString();
+	item.edition = metadataXML.edition_number.toString();
+	if(!item.volume) item.volume = metadataXML.volume.toString();
+	
+	if(seriesXML && seriesXML.length()) {
+		if(seriesXML.contributors.length()) {
+			contributors += seriesXML.contributors.children();
+		}
+		item.seriesNumber = seriesXML.series_number.toString();
 	}
 	
-	// try to get an ISSN (no print/electronic preferences)
-	item.ISSN = query.qr::issn[0].text().toString();
-	// get title
-	item.title = query.qr::article_title.text().toString();
-	// get publicationTitle
-	item.publicationTitle = query.qr::journal_title.text().toString();
-	// get author
-	item.creators.push(Zotero.Utilities.cleanAuthor(query.qr::author.text().toString(), "author", true));
-	// get volume
-	item.volume = query.qr::volume.text().toString();
-	// get issue
-	item.issue = query.qr::issue.text().toString();
-	// get year
-	item.date = query.qr::year.text().toString();
-	// get edition
-	item.edition = query.qr::edition_number.text().toString();
-	// get first page
-	item.pages = query.qr::first_page.text().toString();
+	for each(var creatorXML in contributors) {
+		var creator = {creatorType:"author"};
+		if(creatorXML.contributor_role == "editor") {
+			creator.creatorType = "editor";
+		} else if(creatorXML.contributor_role == "translator") {
+			creator.creatorType = "translator";
+		} else if(creatorXML.contributor_role == "chair") {
+			creator.creatorType = "contributor"; 
+		}
+		
+		if(creatorXML.localName() == "organization") {
+			creator.fieldMode = 1;
+			creator.lastName = creatorXML.toString();
+		} else if(creatorXML.localName() == "person_name") {
+			creator.firstName = fixAuthorCapitalization(creatorXML.given_name.toString());
+			creator.lastName = fixAuthorCapitalization(creatorXML.surname.toString());
+		}
+		item.creators.push(creator);
+	}
+	
+	item.date = refXML.publication_date.year.toString();
+	if(refXML.publication_date.month.length()) {
+		item.date = refXML.publication_date.month.toString()+"/"+item.date;
+	}
+	
+	if(refXML.pages.length()) {
+		item.pages = refXML.pages.first_page.toString();
+		if(refXML.pages.last_page.length()) {
+			item.pages += "-"+refXML.pages.last_page.toString();
+		}
+	}
+	
+	item.DOI = refXML.doi_data.doi.toString();
+	item.url = refXML.doi_data.resource.toString();
+	item.title = refXML.titles.title.toString();
 	
 	item.complete();
 	return true;
@@ -80,7 +132,7 @@ function doSearch(item) {
 		var co = Zotero.Utilities.createContextObject(item);
 	}
 	
-	Zotero.Utilities.HTTP.doGet("http://www.crossref.org/openurl?req_dat=zter:zter321&"+co+"&noredirect=true", function(responseText) {
+	Zotero.Utilities.HTTP.doGet("http://www.crossref.org/openurl?req_dat=zter:zter321&"+co+"&noredirect=true&format=unixref", function(responseText) {
 		processCrossRef(responseText);
 		Zotero.done();
 	});

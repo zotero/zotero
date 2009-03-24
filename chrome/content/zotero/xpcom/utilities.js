@@ -581,7 +581,7 @@ Zotero.Utilities.prototype.processAsync = function (sets, callbacks, onDone) {
  * @borrows Zotero.Date.formatDate as this.formatDate
  * @borrows Zotero.Date.strToDate as this.strToDate
  * @borrows Zotero.Date.strToISO as this.strToISO
- * @borrows Zotero.OpenURL.lookupContextObject as this.lookupContextObject
+ * @borrows Zotero.OpenURL.createContextObject as this.createContextObject
  * @borrows Zotero.OpenURL.parseContextObject as this.parseContextObject
  * @borrows Zotero.Utilities.HTTP.processDocuments as this.processDocuments
  * @borrows Zotero.Utilities.HTTP.doPost as this.doPost
@@ -596,7 +596,7 @@ Zotero.Utilities.Translate.prototype.inArray = Zotero.inArray;
 Zotero.Utilities.Translate.prototype.formatDate = Zotero.Date.formatDate;
 Zotero.Utilities.Translate.prototype.strToDate = Zotero.Date.strToDate;
 Zotero.Utilities.Translate.prototype.strToISO = Zotero.Date.strToISO;
-Zotero.Utilities.Translate.prototype.lookupContextObject = Zotero.OpenURL.lookupContextObject;
+Zotero.Utilities.Translate.prototype.createContextObject = Zotero.OpenURL.createContextObject;
 Zotero.Utilities.Translate.prototype.parseContextObject = Zotero.OpenURL.parseContextObject;
 
 /**
