@@ -412,7 +412,7 @@ Zotero.CSL.prototype.formatBibliography = function(itemSet, format) {
 			// This should be done earlier when the data is still in variables
 			//
 			// Ignore URLs preceded by '>', since these are likely already links
-			string = string.replace(/([^>])(https?:\/\/[^\s]+)([\.">:])/g, '$1<a href="$2">$2</a>$3');
+			string = string.replace(/([^>])(https?:\/\/[^\s]+)([\."'>:\]\)\s])/g, '$1<a href="$2">$2</a>$3');
 			string = string.replace(/(doi:[ ]*)([0-9][^\s]+[0-9])/g, '$1<a href="http://dx.doi.org/$2">$2</a>');
 			
 			var span = (coins ? ' <span class="Z3988" title="'+coins.replace("&", "&amp;", "g")+'">&nbsp;</span>' : '');
