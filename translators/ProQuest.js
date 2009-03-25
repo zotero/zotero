@@ -69,18 +69,15 @@ function parseRIS(uris) {
 			translator.setHandler("itemDone", function(obj, item) {
 				var cre = new Array();
 				cre = item.creators;
+				
 				for each(var e in cre) {
-	
+					
 					if(!e['firstName']) {
-						//check if there is a first name, if not, take the first word in the last name
-						var names = e['lastName'].split(" ");
-						e['firstName']=names[0];
-						e['lastName']="";
-						for(var i = 1; i<names.length; i++) {
-							e['lastName']+=names[i];
-						}
+						// Rather than parse, change creator to a single field.
+						e.fieldMode = 1;
 					}
 				}
+				
 				if (item.publicationTitle) item.publicationTitle = Zotero.Utilities.trimInternal(item.publicationTitle.replace(/\([\d\-]+\)/g, ""));
 				item.complete();
 			});
