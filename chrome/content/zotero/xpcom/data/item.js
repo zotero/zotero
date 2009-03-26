@@ -3188,7 +3188,9 @@ Zotero.Item.prototype.clone = function(includePrimary) {
 			newItem.attachmentLinkMode = this.attachmentLinkMode;
 			newItem.attachmentMIMEType = this.attachmentMIMEType;
 			newItem.attachmentCharset = this.attachmentCharset;
-			newItem.attachmentPath = this.attachmentPath;
+			if (this.attachmentPath) {
+				newItem.attachmentPath = this.attachmentPath;
+			}
 			newItem.attachmentSyncState = this.attachmentSyncState;
 		}
 	}
