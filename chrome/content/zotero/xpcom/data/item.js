@@ -3191,7 +3191,9 @@ Zotero.Item.prototype.clone = function(includePrimary) {
 			if (this.attachmentPath) {
 				newItem.attachmentPath = this.attachmentPath;
 			}
-			newItem.attachmentSyncState = this.attachmentSyncState;
+			if (this.attachmentSyncState) {
+				newItem.attachmentSyncState = this.attachmentSyncState;
+			}
 		}
 	}
 	
