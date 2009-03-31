@@ -282,9 +282,8 @@
 						}
 						viewButton.setAttribute('disabled', !validURI);
 						
-						// Enable/disable "Locate =>" (OpenURL) button
-						switch (this.item.itemTypeID)
-						{
+						// Enable/disable "Locate =>" button
+						switch (this.item.itemTypeID) {
 							// DEBUG: handle descendents of these types as well?
 							case Zotero.ItemTypes.getID('book'):
 							case Zotero.ItemTypes.getID('bookSection'):
@@ -296,7 +295,20 @@
 							default:
 								var openURL = false;
 						}
-						document.getElementById('openurl-button').setAttribute('disabled', !openURL);
+						
+						var locateButton = document.getElementById('locate-button');
+						
+						// TODO: move Locate service logic to separate interface
+						var wayback = this._itemHasURL();
+						if (wayback) {
+							locateButton.setAttribute('type', 'menu');
+							locateButton.setAttribute('disabled', false);
+							document.getElementById('locate-service-openurl').disabled = !openURL;
+						}
+						else {
+							locateButton.removeAttribute('type');
+							locateButton.disabled = !openURL;
+						}
 						
 						this._id('go-buttons').hidden = false;
 					}
@@ -510,6 +522,16 @@
 					this._focusNextField('info', this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
 					}
 
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="_itemHasURL">
+				<body>
+				<![CDATA[
+					var url = this.item.getField('url');
+					return url && !url.match(/^file:|^zotero:/);
 				]]>
 				</body>
 			</method>
@@ -943,13 +965,34 @@
 			</method>
 			
 			
-			<method name="onOpenURLClick">
+			<method name="onLocateClick">
 				<parameter name="event"/>
 				<body>
 				<![CDATA[
-					var url = Zotero.OpenURL.resolve(this.item);
-					if (url) {
-						ZoteroPane.loadURI(url, event);
+					// Default OpenURL button
+					if (event.originalTarget.id == 'locate-button') {
+						var url = Zotero.OpenURL.resolve(this.item);
+						if (url) {
+							ZoteroPane.loadURI(url, event);
+						}
+						return;
+					}
+					
+					// Menu options
+					switch (event.originalTarget.id) {
+						case 'locate-service-openurl':
+							var url = Zotero.OpenURL.resolve(this.item);
+							if (url) {
+								ZoteroPane.loadURI(url, event);
+							}
+							break;
+						
+						case 'locate-service-wayback':
+							var prefix = "http://web.archive.org/web/*/";
+							var url = this.item.getField('url');
+							url = prefix + url;
+							ZoteroPane.loadURI(url, event);
+							break;
 					}
 				]]>
 				</body>
@@ -2073,10 +2116,15 @@
 					<button id="view-button"
 						onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
 						oncommand="document.getBindingParent(this).onViewClick(this, event)" disabled="false"/>
-					<button id="openurl-button" label="&zotero.toolbar.openURL.label;"
-						tooltiptext="&zotero.toolbar.openURL.tooltip;"
-						onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
-						oncommand="document.getBindingParent(this).onOpenURLClick(event);"/>
+					<button id="locate-button" label="&zotero.toolbar.openURL.label;"
+							onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
+							type="menu"
+							oncommand="document.getBindingParent(this).onLocateClick(event)">
+						<menupopup>
+							<menuitem id="locate-service-openurl" label="Library Lookup" tooltiptext="&zotero.toolbar.openURL.tooltip;"/>
+							<menuitem id="locate-service-wayback" label="Wayback Machine"/>
+						</menupopup>
+					</button>
 				</hbox>
 				<hbox align="center" hidden="true">
 					<menulist id="item-type-menu" oncommand="document.getBindingParent(this).changeTypeTo(this.value, this)" flex="1"

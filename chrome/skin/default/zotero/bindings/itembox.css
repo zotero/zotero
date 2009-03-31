@@ -22,6 +22,12 @@ textbox, tagsbox textbox
 	-moz-box-flex: 1;
 }
 
+#go-buttons button#locate-button
+{
+	-moz-box-direction: normal;
+}
+
+
 #go-buttons button[disabled=true]
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow-disabled.png');
