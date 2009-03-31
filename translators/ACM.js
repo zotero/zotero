@@ -62,6 +62,7 @@ function scrape(doc) {
 	var typeLink;
 	while(typeLink = typeLinks.iterateNext()) {
 		var linkText = typeLink.textContent.toLowerCase();
+		linkText = linkText.replace(/(\t|\n| )/g, "");
 		if(linkText == "pdf") {
 			attachments.push({title:"ACM Full Text PDF", mimeType:"application/pdf", url:typeLink.href});
 			url = typeLink.href;
