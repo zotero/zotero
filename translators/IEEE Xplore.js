@@ -115,7 +115,7 @@ function doWeb(doc, url) {
 					var pdfpath = '//td[2][@class="bodyCopyBlackLarge"]/a[@class="bodyCopy"][substring(text(), 1, 3) = "PDF"]';
 					var pdfurlElmt = newDoc.evaluate(pdfpath, newDoc, namespace, XPathResult.ANY_TYPE, null).iterateNext();
 					if (pdfurlElmt) {
-						pdfurlElmt.href = pdfurlElmt.href.substr(0,32) + 'PDF/getPDF' + pdfurlElmt.href.substr(38);
+						pdfurlElmt.href = pdfurlElmt.href.replace("/stamp.jsp", "PDF/getPDF.jsp");
 						item.attachments = [{url:pdfurlElmt.href, title:"IEEE Xplore Full Text PDF", mimeType:"application/pdf"}];
 					}
 					item.complete();
