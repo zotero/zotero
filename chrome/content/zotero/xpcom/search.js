@@ -1150,6 +1150,7 @@ Zotero.Search.prototype._buildQuery = function(){
 						break;
 					
 					case 'creator':
+					case 'lastName':
 						condSQL += "creatorID IN (SELECT creatorID FROM creators "
 							+ "NATURAL JOIN creatorData WHERE ";
 						openParens++;
@@ -1820,6 +1821,19 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'itemCreators',
 				field: "firstName || ' ' || lastName"
+			},
+			
+			{
+				name: 'lastName',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'itemCreators',
+				field: 'lastName',
+				special: true
 			},
 			
 			{
