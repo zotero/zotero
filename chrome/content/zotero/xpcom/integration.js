@@ -1557,7 +1557,7 @@ Zotero.Integration.Session.prototype.getBibliographyData = function() {
 	// look for custom bibliography entries
 	if(this.itemSet.items.length) {
 		for(var i=0; i<this.itemSet.items.length; i++) {
-			var custom = this.itemSet.items[i].getProperty("bibliography-Integration");
+			var custom = this.itemSet.items[i].getProperty("bibliography-RTF");
 			if(custom !== "") {
 				if(!bibliographyData.custom) bibliographyData.custom = {};
 				bibliographyData.custom[this.itemSet.items[i].key] = custom;
