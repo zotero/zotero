@@ -232,7 +232,7 @@ Zotero.Integration.SocketListener = new function() {
 	function onSocketAccepted(socket, transport) {
 		// get an input stream
 		var iStream = transport.openInputStream(0, 0, 0);
-		var oStream = transport.openOutputStream(0, 0, 0);
+		var oStream = transport.openOutputStream(0, 0, Components.interfaces.nsITransport.OPEN_BLOCKING);
 		
 		var dataListener = new Zotero.Integration.DataListener(iStream, oStream);
 		var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"]
@@ -389,9 +389,6 @@ Zotero.Integration.DataListener.prototype._requestFinished = function(response) 
 		
 		// write response
 		intlStream.writeString(response);
-	} catch(e) {
-		Zotero.debug("An error occurred.");
-		Zotero.debug(e);
 	} finally {	
 		intlStream.close();
 	}
@@ -1276,7 +1273,7 @@ Zotero.Integration.Session.prototype.updateItemSet = function() {
 		var itemID = item.id;
 		
 		// see if items were removed 
-		if(!this.citationsByItemID[itemID] && !this.uncitedItems[itemID]) {
+		if(!this.citationsByItemID[itemID] && !this.uncitedItems[item.key]) {
 			deleteItems.push(itemID);
 			continue;
 		}
@@ -1495,6 +1492,7 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 			if (!item) {
 				continue;
 			}
+			item.setProperty("bibliography-Integration", documentData.custom[itemID]);
 			item.setProperty("bibliography-RTF", documentData.custom[itemID]);
 		}
 	}

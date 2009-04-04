@@ -139,6 +139,7 @@ var Zotero_Bibliography_Dialog = new function () {
 		if(_lastSelectedItem && editor.value != _originalBibEntry) {
 			Zotero.debug("setting bibliography for "+_lastSelectedItem.getID()+" to "+editor.value);
 			_lastSelectedItem.setProperty("bibliography-Integration", editor.value);
+			_lastSelectedItem.setProperty("bibliography-RTF", editor.value);
 		}
 		
 		editor.readonly = !item;
