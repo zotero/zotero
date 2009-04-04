@@ -232,7 +232,7 @@ Zotero.Integration.SocketListener = new function() {
 	function onSocketAccepted(socket, transport) {
 		// get an input stream
 		var iStream = transport.openInputStream(0, 0, 0);
-		var oStream = transport.openOutputStream(0, 0, Components.interfaces.nsITransport.OPEN_BLOCKING);
+		var oStream = transport.openOutputStream(Components.interfaces.nsITransport.OPEN_BLOCKING, 0, 0);
 		
 		var dataListener = new Zotero.Integration.DataListener(iStream, oStream);
 		var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"]
