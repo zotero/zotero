@@ -93,13 +93,15 @@ function lookupPMIDs(ids, doc) {
 					newItem.ISSN = issn;
 				}
 				
-				if(citation.MedlineJournalInfo.MedlineTA.length()) {
-					newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text().toString());				
+				if(citation.Article.Journal.ISOAbbreviation.length()) {
+					newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.Article.Journal.ISOAbbreviation.text().toString());				
+				} else if(citation.MedlineJournalInfo.MedlineTA.length()) {
+					newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text().toString());
 				}
-//				newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.Article.Journal.ISOAbbreviation.text().toString());
+
 				if(article.Journal.Title.length()) {
 					newItem.publicationTitle = Zotero.Utilities.superCleanString(article.Journal.Title.text().toString());
-				} else if(citation.MedlineJournalInfo.MedlineTA.length()) {
+				} else if(newItem.journalAbbreviation.length()) {
 					newItem.publicationTitle = newItem.journalAbbreviation;
 				}
 
