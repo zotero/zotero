@@ -165,7 +165,6 @@ function lookupPMIDs(ids, doc) {
 }
 
 function doWeb(doc, url) {
-	Zotero.debug("HIHIHI");
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
