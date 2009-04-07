@@ -448,7 +448,10 @@ function doImport() {
 					creator.firstName = namePart.text().toString();
 				} else if(namePart.@type == "family") {
 					creator.lastName = namePart.text().toString();
-				} else {
+				} else if(namePart.@type == "date" || namePart.@type == "termsOfAddress") {
+					// ignore these non name types for now
+				}
+				else {
 					var backupName = namePart.text().toString();
 				}
 			}
