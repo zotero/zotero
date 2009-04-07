@@ -628,6 +628,16 @@ function doImport() {
 			newItem.tags.push(subject.text().toString());
 		}
 		
+		// Language
+		// create an array of languages
+		var languages = new Array();
+		// E4X filter might need to be updated to include languageTerms that are @type="code" only
+		for each(var language in mods.m::language.m::languageTerm.(@type == "text")) { 
+			languages.push(language.text().toString());
+		}
+		// join the list separated by semicolons & add it to zotero item
+		newItem.language = languages.join('; ');
+		
 		Zotero.debug(newItem);
 		
 		newItem.complete();
