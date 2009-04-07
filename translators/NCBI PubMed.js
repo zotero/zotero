@@ -86,13 +86,13 @@ function lookupPMIDs(ids, doc) {
 			if (article.Pagination.MedlinePgn.length()){
 				var fullPageRange = article.Pagination.MedlinePgn.text().toString();
 				var pageRange = fullPageRange.match(/\d+-\d+/g);
-				for (i in pageRange) {
-					var pageRangeStart = pageRange[i].match(/^\d+/).join("");
-					var pageRangeEnd = pageRange[i].match(/\d+$/).join("");
+				for (var i in pageRange) {
+					var pageRangeStart = pageRange[i].match(/^\d+/)[0];
+					var pageRangeEnd = pageRange[i].match(/\d+$/)[0];
 					if (pageRangeStart.length > pageRangeEnd.length) {
 						pageRangeEnd = pageRangeStart.substring(0,pageRangeStart.length-pageRangeEnd.length) + pageRangeEnd;
 						fullPageRange = fullPageRange.replace(pageRange[i],pageRangeStart+"-"+pageRangeEnd);
-					}	
+					}
 				}
 				newItem.pages = fullPageRange;
 			}
