@@ -113,6 +113,8 @@ function lookupPMIDs(ids, doc) {
 							newItem.date = article.Journal.JournalIssue.PubDate.Month.text().toString()+" "+article.Journal.JournalIssue.PubDate.Year.text().toString();
 						} else if(article.Journal.JournalIssue.PubDate.Year.text().toString() != "") {
 							newItem.date = article.Journal.JournalIssue.PubDate.Year.text().toString();
+						} else if(article.Journal.JournalIssue.PubDate.MedlineDate.text().toString() != "") {
+							newItem.date = article.Journal.JournalIssue.PubDate.MedlineDate.text().toString();
 						}
 					}
 				}
@@ -151,6 +153,7 @@ function lookupPMIDs(ids, doc) {
 }
 
 function doWeb(doc, url) {
+	Zotero.debug("HIHIHI");
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
