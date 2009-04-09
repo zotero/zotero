@@ -90,7 +90,7 @@ var ZoteroPane = new function()
 	const COLLECTIONS_HEIGHT = 125; // minimum height of the collections pane and toolbar
 	
 	var self = this;
-	var titlebarcolorState, collapseState, titleState;
+	var titlebarcolorState, toolbarCollapseState, titleState;
 	
 	/*
 	 * Called when the window is open
@@ -360,6 +360,9 @@ var ZoteroPane = new function()
 			
 			document.getElementById('content').setAttribute('collapsed', false);
 			
+			// turn off full window mode, if it was on
+			_setFullWindowMode(false)
+			
 			// Return focus to the browser content pane
 			window.content.window.focus();
 		}
@@ -390,12 +393,18 @@ var ZoteroPane = new function()
 		document.getElementById('zotero-splitter').setAttribute('hidden', makeFullScreen);
 		fs.setAttribute('fullscreenmode', makeFullScreen);
 		
+		_setFullWindowMode(makeFullScreen);
+	}
+	
+	/**
+	 * Hides or shows navigation toolbars
+	 * @param set {Boolean} Whether navigation toolbars should be hidden or shown
+	 */
+	function _setFullWindowMode(set) {
 		// hide or show navigation toolbars
 		var toolbox = getNavToolbox();
-		if(makeFullScreen) {
-			titleState = document.title;
-			document.title = "Zotero";
-			
+		Zotero.debug(toolbarCollapseState);
+		if(set) {
 			// the below would be a good thing to do if the whole title bar (and not just the center
 			// part) got updated when it happened...
 			/*if(Zotero.isMac) {
@@ -403,27 +412,32 @@ var ZoteroPane = new function()
 				document.documentElement.removeAttribute("activetitlebarcolor");
 			}*/
 			if(Zotero.isMac) document.getElementById("zotero-pane").style.borderTop = "1px solid black";
-			
-			collapseState = [node.collapsed for each (node in toolbox.childNodes)];
-			for(var i=0; i<toolbox.childNodes.length; i++) {
-				toolbox.childNodes[i].collapsed = true;
+			if(document.title != "Zotero") {
+				titleState = document.title;
+				document.title = "Zotero";
 			}
 			
-			window.focus();
+			if(!toolbarCollapseState) {
+				toolbarCollapseState = [node.collapsed for each (node in toolbox.childNodes)];
+				for(var i=0; i<toolbox.childNodes.length; i++) {
+					toolbox.childNodes[i].collapsed = true;
+				}
+			}
 		} else {
-			document.title = titleState;
-			
 			/*if(Zotero.isMac) {
 				document.documentElement.setAttribute("activetitlebarcolor", titlebarcolorState);
 			}*/
 			if(Zotero.isMac) document.getElementById("zotero-pane").style.borderTop = "";
+			if(document.title == "Zotero") document.title = titleState;
 			
-			for(var i=0; i<toolbox.childNodes.length; i++) {
-				toolbox.childNodes[i].collapsed = collapseState[i];
+			if(toolbarCollapseState) {
+				for(var i=0; i<toolbox.childNodes.length; i++) {
+					toolbox.childNodes[i].collapsed = toolbarCollapseState[i];
+				}
+				toolbarCollapseState = undefined;
 			}
 		}
 	}
-	
 	
 	function isFullScreen() {
 		var fs = document.getElementById('zotero-tb-fullscreen');
