@@ -394,9 +394,11 @@ function doImport() {
 		
 		// title
 		for each(var titleInfo in mods.m::titleInfo) {
-			if(titleInfo.@type != "abbreviated") {
-				newItem.title = titleInfo.m::title;
-			}
+			// dropping other title types so they don't overwrite the main title
+			// we have same behaviour in the MARC translator
+			if(!titleInfo.@type.toString()) { 
+				newItem.title = titleInfo.*.text(); // including text from sub elements
+			} 
 		}
 		// try to get genre from local genre
 		for each(var genre in mods.m::genre) {
