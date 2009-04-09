@@ -24,6 +24,17 @@
 	overflow: hidden;
 }
 
+/* these are hacks do display a window separator in full screen mode on OS X */
+window[activetitlebarcolor] #zotero-pane[fullscreenmode="true"]
+{
+	border-top: 1px solid #A3A3A3;
+}
+
+window[active="true"][activetitlebarcolor] #zotero-pane[fullscreenmode="true"]
+{
+	border-top: 1px solid black;
+}
+
 #zotero-collections-pane
 {
 	min-width: 150px;
@@ -240,7 +251,7 @@
 	list-style-image: url('chrome://zotero/skin/toolbar-fullscreen-top.png');
 }
 
-#zotero-tb-fullscreen[fullscreenmode="true"]
+#zotero-pane[fullscreenmode="true"] #zotero-tb-fullscreen
 {
 	background: #666666;
 	-moz-border-radius: 6px;

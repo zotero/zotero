@@ -306,8 +306,7 @@ var ZoteroPane = new function()
 		zoteroSplitter.setAttribute('hidden', !makeVisible);
 		
 		// Restore fullscreen mode if necessary
-		var fullScreenMode = document.getElementById('zotero-tb-fullscreen').getAttribute('fullscreenmode') == 'true';
-		if (makeVisible && fullScreenMode) {
+		if (makeVisible && isFullScreen()) {
 			this.fullScreen(true);
 		}
 		
@@ -361,7 +360,7 @@ var ZoteroPane = new function()
 			document.getElementById('content').setAttribute('collapsed', false);
 			
 			// turn off full window mode, if it was on
-			_setFullWindowMode(false)
+			_setFullWindowMode(false);
 			
 			// Return focus to the browser content pane
 			window.content.window.focus();
@@ -378,21 +377,21 @@ var ZoteroPane = new function()
 	
 	function fullScreen(set)
 	{
-		var fs = document.getElementById('zotero-tb-fullscreen');
+		var zPane = document.getElementById('zotero-pane');
 		
 		if (set != undefined) {
-			var makeFullScreen = set;
+			var makeFullScreen = !!set;
 		}
 		else {
-			var makeFullScreen = fs.getAttribute('fullscreenmode') != 'true';
+			var makeFullScreen = zPane.getAttribute('fullscreenmode') != 'true';
 		}
 		
 		// Turn Z-pane flex on to stretch to window in full-screen, but off otherwise so persist works
-		document.getElementById('zotero-pane').setAttribute('flex', makeFullScreen ? "1" : "0");
+		zPane.setAttribute('flex', makeFullScreen ? "1" : "0");
 		document.getElementById('content').setAttribute('collapsed', makeFullScreen);
 		document.getElementById('zotero-splitter').setAttribute('hidden', makeFullScreen);
-		fs.setAttribute('fullscreenmode', makeFullScreen);
 		
+		zPane.setAttribute('fullscreenmode', makeFullScreen);
 		_setFullWindowMode(makeFullScreen);
 	}
 	
@@ -410,7 +409,6 @@ var ZoteroPane = new function()
 				titlebarcolorState = document.documentElement.getAttribute("activetitlebarcolor");
 				document.documentElement.removeAttribute("activetitlebarcolor");
 			}*/
-			if(Zotero.isMac) document.getElementById("zotero-pane").style.borderTop = "1px solid black";
 			if(document.title != "Zotero") {
 				titleState = document.title;
 				document.title = "Zotero";
@@ -426,7 +424,6 @@ var ZoteroPane = new function()
 			/*if(Zotero.isMac) {
 				document.documentElement.setAttribute("activetitlebarcolor", titlebarcolorState);
 			}*/
-			if(Zotero.isMac) document.getElementById("zotero-pane").style.borderTop = "";
 			if(document.title == "Zotero") document.title = titleState;
 			
 			if(toolbarCollapseState) {
@@ -439,8 +436,7 @@ var ZoteroPane = new function()
 	}
 	
 	function isFullScreen() {
-		var fs = document.getElementById('zotero-tb-fullscreen');
-		return fs.getAttribute('fullscreenmode') == 'true'
+		return document.getElementById('zotero-pane').getAttribute('fullscreenmode') == 'true';
 	}
 	
 	
