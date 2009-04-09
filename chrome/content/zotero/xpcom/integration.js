@@ -1152,7 +1152,7 @@ Zotero.Integration.Session.prototype.editCitation = function(index, citation) {
 	if(citation) {
 		for each(var citationItem in citation.citationItems) {
 			if(citationItem.key && !citationItem.itemID) {
-				var item = Zotero.Items.getByKey([citationItem.key]);
+				var item = Zotero.Items.getByKey(citationItem.key);
 				if(item) citationItem.itemID = item.itemID;
 			}
 		}
