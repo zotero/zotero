@@ -25,12 +25,12 @@
 }
 
 /* these are hacks do display a window separator in full screen mode on OS X */
-window[activetitlebarcolor] #zotero-pane[fullscreenmode="true"]
+window #zotero-pane[fullscreenmode="true"][platform="mac"]
 {
 	border-top: 1px solid #A3A3A3;
 }
 
-window[active="true"][activetitlebarcolor] #zotero-pane[fullscreenmode="true"]
+window[active="true"] #zotero-pane[fullscreenmode="true"][platform="mac"]
 {
 	border-top: 1px solid black;
 }

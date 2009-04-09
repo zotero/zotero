@@ -137,6 +137,9 @@ var ZoteroPane = new function()
 		
 		if (Zotero.isMac) {
 			document.getElementById('zotero-tb-actions-zeroconf-update').setAttribute('hidden', false);
+			document.getElementById('zotero-pane').setAttribute('platform', 'mac');
+		} else if(Zotero.isWin) {
+			document.getElementById('zotero-pane').setAttribute('platform', 'win');
 		}
 		
 		//Initialize collections view
