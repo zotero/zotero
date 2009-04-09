@@ -90,6 +90,7 @@ var ZoteroPane = new function()
 	const COLLECTIONS_HEIGHT = 125; // minimum height of the collections pane and toolbar
 	
 	var self = this;
+	var titlebarcolorState, collapseState, titleState;
 	
 	/*
 	 * Called when the window is open
@@ -388,6 +389,39 @@ var ZoteroPane = new function()
 		document.getElementById('content').setAttribute('collapsed', makeFullScreen);
 		document.getElementById('zotero-splitter').setAttribute('hidden', makeFullScreen);
 		fs.setAttribute('fullscreenmode', makeFullScreen);
+		
+		// hide or show navigation toolbars
+		var toolbox = getNavToolbox();
+		if(makeFullScreen) {
+			titleState = document.title;
+			document.title = "Zotero";
+			
+			// the below would be a good thing to do if the whole title bar (and not just the center
+			// part) got updated when it happened...
+			/*if(Zotero.isMac) {
+				titlebarcolorState = document.documentElement.getAttribute("activetitlebarcolor");
+				document.documentElement.removeAttribute("activetitlebarcolor");
+			}*/
+			if(Zotero.isMac) document.getElementById("zotero-pane").style.borderTop = "1px solid black";
+			
+			collapseState = [node.collapsed for each (node in toolbox.childNodes)];
+			for(var i=0; i<toolbox.childNodes.length; i++) {
+				toolbox.childNodes[i].collapsed = true;
+			}
+			
+			window.focus();
+		} else {
+			document.title = titleState;
+			
+			/*if(Zotero.isMac) {
+				document.documentElement.setAttribute("activetitlebarcolor", titlebarcolorState);
+			}*/
+			if(Zotero.isMac) document.getElementById("zotero-pane").style.borderTop = "";
+			
+			for(var i=0; i<toolbox.childNodes.length; i++) {
+				toolbox.childNodes[i].collapsed = collapseState[i];
+			}
+		}
 	}
 	
 	
