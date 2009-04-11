@@ -181,6 +181,7 @@
 						<!-- New Item drop-down built in overlay.js::onLoad() -->
 						<menupopup>
 							<menuseparator/>
+							<menuitem label="&zotero.toolbar.lookup;" oncommand="window.openDialog('chrome://zotero/content/lookup.xul', 'lookup', 'chrome,modal')"/>
 							<menuitem label="&zotero.toolbar.attachment.linked;" oncommand="ZoteroPane.addAttachmentFromDialog(true);" tooltiptext=""/>
 							<menuitem label="&zotero.toolbar.attachment.add;" oncommand="ZoteroPane.addAttachmentFromDialog();"  tooltiptext=""/>
 							<menuseparator/>
@@ -347,7 +348,7 @@
 							</grid>
 						</tooltip>
 					</hbox>
-					<toolbarbutton id="zotero-tb-sync" tooltip="_child"
+					<toolbarbutton id="zotero-tb-sync" class="zotero-small-progress-indicator" tooltip="_child"
 							oncommand="Zotero.Sync.Runner.sync()">
 						<tooltip
 								onpopupshowing="ZoteroPane.setLastSyncStatus(this)"

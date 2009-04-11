@@ -1,6 +1,6 @@
 {
 	"translatorID":"fcf41bed-0cbc-3704-85c7-8062a0068a7a",
-	"translatorType":4,
+	"translatorType":12,
 	"label":"NCBI PubMed",
 	"creator":"Simon Kornblith and Michael Berkowitz",
 	"target":"http://[^/]*www\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",

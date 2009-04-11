@@ -441,9 +441,9 @@ Zotero.Translate.prototype.setTranslator = function(translator) {
 			this.translator = [];
 			for(var i in translator) {
 				if(typeof(translator[i]) == "object") {
-					this.translator.push([translator[i]]);
+					this.translator.push(translator[i]);
 				} else {
-					this.translator.push([Zotero.Translators.get(translator[i])]);
+					this.translator.push(Zotero.Translators.get(translator[i]));
 				}
 			}
 		}

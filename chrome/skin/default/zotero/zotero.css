@@ -222,3 +222,18 @@ zoteromergepane {
   font-size: 1.25em;
   margin-bottom: 1em;
 }
+
+
+.zotero-small-progress-indicator {
+	list-style-image: url(chrome://zotero/skin/arrow_rotate_static.png);
+	margin-left: -2px;
+	margin-right: -2px;
+}
+
+.zotero-small-progress-indicator[status=animate] {
+	list-style-image: url(chrome://zotero/skin/arrow_rotate_animated.png);
+}
+
+.zotero-small-progress-indicator[status=error] {
+	list-style-image: url(chrome://zotero/skin/arrow_rotate_error.png);
+}
