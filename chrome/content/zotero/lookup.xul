@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+
+<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<dialog
+	id="zotero-search-dialog"
+	title="Search"
+	orient="vertical"
+	ondialogaccept="return Zotero_Lookup.accept();"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<script src="include.js"/>
+	<script src="lookup.js"/>
+	
+	<description>&zotero.lookup.description;</description>
+	<textbox id="lookup-textbox" flex="1"/>
+	<hbox id="dialog-button-box">
+		<toolbarbutton class="zotero-small-progress-indicator" id="progress"/>
+		<spacer flex="1"/>
+		<button class="dialog-button" dlgtype="cancel"/>
+		<button class="dialog-button" dlgtype="accept"/>
+	</hbox>
+</dialog>
