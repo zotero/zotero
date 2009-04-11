@@ -112,7 +112,7 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 		var expandAllRows = obj.expandAllRows;
 		var collapseAllRows = obj.collapseAllRows;
 		var tree = obj._treebox.treeBody.parentNode;
-		tree.addEventListener('keypress', function(event) {
+		var listener = function(event) {
 			var key = String.fromCharCode(event.which);
 			
 			if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
@@ -124,7 +124,11 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 				obj.collapseAllRows(treebox);
 				return;
 			}
-		}, false);
+		};
+		// Store listener so we can call removeEventListener()
+		// in overlay.js::onCollectionSelected()
+		obj.listener = listener;
+		tree.addEventListener('keypress', listener, false);
 		
 		obj.sort();
 		obj.expandMatchParents();
@@ -772,6 +776,10 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function(row, skipItemMapRefresh
 				this._showItem(new Zotero.ItemTreeView.TreeRow(newRows[i], thisLevel + 1, false), row + i + 1); // item ref, before row
 			}
 		}
+	}
+	
+	if (!count) {
+		return;
 	}
 	
 	this._dataItems[row].isOpen = !this._dataItems[row].isOpen;
