@@ -84,6 +84,7 @@
 <!ENTITY zotero.item.textTransform.titlecase			"Title Case">
 
 <!ENTITY zotero.toolbar.note.standalone				"New Standalone Note">
+<!ENTITY zotero.toolbar.lookup						"Lookup by Identifier...">
 <!ENTITY zotero.toolbar.attachment.linked				"Link to File...">
 <!ENTITY zotero.toolbar.attachment.add					"Store Copy of File...">
 <!ENTITY zotero.toolbar.attachment.weblink				"Save Link to Current Page">
@@ -98,6 +99,8 @@
 <!ENTITY zotero.tagSelector.clearAll					"Deselect all">
 <!ENTITY zotero.tagSelector.renameTag				"Rename Tag...">
 <!ENTITY zotero.tagSelector.deleteTag				"Delete Tag...">
+
+<!ENTITY zotero.lookup.description				"Enter the DOI or PMID to look up in the box below.">
 
 <!ENTITY zotero.selectitems.title						"Select Items">
 <!ENTITY zotero.selectitems.intro.label				"Select which items you'd like to add to your library">

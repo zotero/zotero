@@ -6,7 +6,7 @@
 	"target":"http://partneraccess.oclc.org/",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
-	"priority":100,
+	"priority":90,
 	"inRepository":true,
 	"lastUpdated":"2007-09-15 21:00:00"
 }
