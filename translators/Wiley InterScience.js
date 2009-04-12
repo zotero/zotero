@@ -108,7 +108,7 @@ function doWeb(doc, url){
 			translator.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d"); //EndNote/Refer/BibIX
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
-				var pdfurl = 'http://download.interscience.wiley.com/cgi-bin/fulltext?ID=' + id + '&PLACEBO=IE.pdf&mode=pdf';
+				var pdfurl = host + "cgi-bin/fulltext?ID=" + id + "&PLACEBO=IE.pdf&mode=pdf";
 				item.attachments.push({url:pdfurl, title:"Wiley Interscience PDF", mimeType:"application/pdf"});
 				item.DOI = item.url.match(/\.org\/(.*)$/)[1];
 				item.complete();
