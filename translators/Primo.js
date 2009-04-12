@@ -80,8 +80,6 @@ function doWeb(doc, url) {
 		var creators = xmldoc.display.creator.toString().replace(/\d{4}-(\d{4})?/, '').split("; ");
 		var contributors = xmldoc.display.contributor.toString().replace(/\d{4}-(\d{4})?/, '').split("; ");
 		
-		Zotero.debug(creators);
-		
 		if (!creators[0]) { // <contributor> not available using <contributor> as author instead
 			creators = contributors;
 			contributors = null;
@@ -118,6 +116,12 @@ function doWeb(doc, url) {
 		
 		var edition = xmldoc.display.edition.toString();
 		if (edition) item.edition = edition;
+		
+		for each (subject in xmldoc.search.subject) {
+			item.tags.push(subject.toString());
+		}
+		// does callNumber get stored anywhere else in the xml?
+		item.callNumber = xmldoc.enrichment.classificationlcc[0];
 		
 		item.complete();
 		
