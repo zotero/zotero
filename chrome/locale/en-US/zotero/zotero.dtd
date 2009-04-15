@@ -57,6 +57,7 @@
 <!ENTITY zotero.toolbar.newItem.label					"New Item">
 <!ENTITY zotero.toolbar.moreItemTypes.label			"More">
 <!ENTITY zotero.toolbar.newItemFromPage.label			"Create New Item from Current Page">
+<!ENTITY zotero.toolbar.lookup.label				"Add Item by Identifier">
 <!ENTITY zotero.toolbar.removeItem.label				"Remove Item...">
 <!ENTITY zotero.toolbar.newCollection.label			"New Collection...">
 <!ENTITY zotero.toolbar.newSubcollection.label			"New Subcollection...">
@@ -66,6 +67,7 @@
 <!ENTITY zotero.toolbar.actions.label					"Actions">
 <!ENTITY zotero.toolbar.import.label					"Import...">
 <!ENTITY zotero.toolbar.export.label					"Export Library...">
+<!ENTITY zotero.toolbar.rtfScan.label					"RTF Scan...">
 <!ENTITY zotero.toolbar.timeline.label				"Create Timeline">
 <!ENTITY zotero.toolbar.duplicate.label				"Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label				"Preferences...">
@@ -100,7 +102,7 @@
 <!ENTITY zotero.tagSelector.renameTag				"Rename Tag...">
 <!ENTITY zotero.tagSelector.deleteTag				"Delete Tag...">
 
-<!ENTITY zotero.lookup.description				"Enter the DOI or PMID to look up in the box below.">
+<!ENTITY zotero.lookup.description				"Enter the ISBN, DOI, or PMID to look up in the box below.">
 
 <!ENTITY zotero.selectitems.title						"Select Items">
 <!ENTITY zotero.selectitems.intro.label				"Select which items you'd like to add to your library">
@@ -175,3 +177,11 @@
 <!ENTITY zotero.recognizePDF.pdfName.label				"PDF Name">
 <!ENTITY zotero.recognizePDF.itemName.label				"Item Name">
 <!ENTITY zotero.recognizePDF.captcha.label				"Type the text below to continue retrieving metadata.">
+
+<!ENTITY zotero.rtfScan.title		                    "RTF Scan">
+<!ENTITY zotero.rtfScan.cancel.label					"Cancel">
+<!ENTITY zotero.rtfScan.citation.label					"Citation">
+<!ENTITY zotero.rtfScan.itemName.label					"Item Name">
+<!ENTITY zotero.rtfScan.unmappedCitations.label				"Unmapped Citations">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label			"Ambiguous Citations">
+<!ENTITY zotero.rtfScan.mappedCitations.label				"Mapped Citations">

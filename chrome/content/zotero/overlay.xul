@@ -181,7 +181,6 @@
 						<!-- New Item drop-down built in overlay.js::onLoad() -->
 						<menupopup>
 							<menuseparator/>
-							<menuitem label="&zotero.toolbar.lookup;" oncommand="window.openDialog('chrome://zotero/content/lookup.xul', 'lookup', 'chrome,modal')"/>
 							<menuitem label="&zotero.toolbar.attachment.linked;" oncommand="ZoteroPane.addAttachmentFromDialog(true);" tooltiptext=""/>
 							<menuitem label="&zotero.toolbar.attachment.add;" oncommand="ZoteroPane.addAttachmentFromDialog();"  tooltiptext=""/>
 							<menuseparator/>
@@ -191,6 +190,7 @@
 						</menupopup>
 					</toolbarbutton>
 					<toolbarbutton id="zotero-tb-item-from-page" tooltiptext="&zotero.toolbar.newItemFromPage.label;" oncommand="ZoteroPane.addItemFromPage()"/>
+					<toolbarbutton id="zotero-tb-lookup" tooltiptext="&zotero.toolbar.lookup.label;" oncommand="window.openDialog('chrome://zotero/content/lookup.xul', 'lookup', 'chrome,modal')"/>
 					<toolbarseparator/>
 					<toolbarbutton id="zotero-tb-link-page" tooltiptext="&zotero.toolbar.attachment.weblink;" oncommand="ZoteroPane.addAttachmentFromPage(true)"/>
 					<toolbarbutton id="zotero-tb-snapshot-page" tooltiptext="&zotero.toolbar.attachment.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage()"/>

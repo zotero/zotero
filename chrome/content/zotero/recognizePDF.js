@@ -25,7 +25,7 @@
  */
 const Zotero_RecognizePDF_SUCCESS_IMAGE = "chrome://zotero/skin/tick.png";
 const Zotero_RecognizePDF_FAILURE_IMAGE = "chrome://zotero/skin/cross.png";
-const Zotero_RecognizePDF_LOADING_IMAGE = "chrome://zotero/skin/indicator.gif";
+const Zotero_RecognizePDF_LOADING_IMAGE = "chrome://global/skin/icons/loading_16.png";
 const DOIre = /\bdoi\: *([^\s]+)/i;
  
 /**
