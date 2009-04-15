@@ -151,6 +151,11 @@ window[active="true"] #zotero-pane[fullscreenmode="true"][platform="mac"]
 	list-style-image: url('chrome://zotero/skin/toolbar-item-add.png');
 }
 
+#zotero-tb-lookup
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-lookup.png');
+}
+
 #zotero-tb-item-from-page
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-item-from-page.png');
@@ -219,6 +224,20 @@ window[active="true"] #zotero-pane[fullscreenmode="true"][platform="mac"]
 #zotero-tb-storage-sync
 {
 	list-style-image: url(chrome://zotero/skin/drive_network.png);
+}
+
+#zotero-tb-sync {
+	list-style-image: url(chrome://zotero/skin/arrow_rotate_static.png);
+	margin-left: -2px;
+	margin-right: -2px;
+}
+
+#zotero-tb-sync[status=animate] {
+	list-style-image: url(chrome://zotero/skin/arrow_rotate_animated.png);
+}
+
+#zotero-tb-sync[status=error] {
+	list-style-image: url(chrome://zotero/skin/arrow_rotate_error.png);
 }
 
 #zotero-tb-sync #zotero-last-sync-time

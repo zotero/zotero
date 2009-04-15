@@ -8,18 +8,19 @@
 	id="zotero-search-dialog"
 	title="Search"
 	orient="vertical"
+	buttons="accept,cancel"
 	ondialogaccept="return Zotero_Lookup.accept();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<script src="include.js"/>
 	<script src="lookup.js"/>
 	
-	<description>&zotero.lookup.description;</description>
-	<textbox id="lookup-textbox" flex="1"/>
+	<description style="font-size: small">&zotero.lookup.description;</description>
+	<textbox style="font-size: small" id="lookup-textbox" flex="1"/>
 	<hbox id="dialog-button-box">
 		<toolbarbutton class="zotero-small-progress-indicator" id="progress"/>
 		<spacer flex="1"/>
-		<button class="dialog-button" dlgtype="cancel"/>
-		<button class="dialog-button" dlgtype="accept"/>
+		<button class="dialog-button" style="font: menu" dlgtype="cancel"/>
+		<button class="dialog-button" style="font: menu" dlgtype="accept"/>
 	</hbox>
 </dialog>

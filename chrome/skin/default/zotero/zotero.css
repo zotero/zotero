@@ -225,15 +225,11 @@ zoteromergepane {
 
 
 .zotero-small-progress-indicator {
-	list-style-image: url(chrome://zotero/skin/arrow_rotate_static.png);
+	list-style-image: url(chrome://global/skin/icons/notloading_16.png);
 	margin-left: -2px;
 	margin-right: -2px;
 }
 
 .zotero-small-progress-indicator[status=animate] {
-	list-style-image: url(chrome://zotero/skin/arrow_rotate_animated.png);
-}
-
-.zotero-small-progress-indicator[status=error] {
-	list-style-image: url(chrome://zotero/skin/arrow_rotate_error.png);
+	list-style-image: url(chrome://global/skin/icons/loading_16.png);
 }
