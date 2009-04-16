@@ -1,0 +1,12 @@
+1  # Increment number when modifying file
+
+96b9f483-c44d-5784-cdad-ce21b984 # Amazon
+add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
+fcf41bed-0cbc-3704-85c7-8062a006 # PubMed
+0faa6714-927a-4b07-911e-7101895daae0 # GBV
+360da304-5a4c-44ea-b655-28dcb5ebfa25 # YouTube
+3af43735-36d3-46ae-9ca8-506ff032b0d3 # HeinOnline
+da440efe-646c-4a18-9958-abe1f7d55cde # NCSU Library (Endeca 2)
+37445f52-64fa-4a2a-9532-35753520a0f0  # HeinOnline
+e07e9b8c-0e98-4915-bb5a-32a08cb2f365  # Open WorldCat (Search)
+490909d7-7d79-4c7a-a136-77df618d4db2  # Worldcat.org
