@@ -132,17 +132,30 @@ Zotero.Schema = new function(){
 				// Upgrade seems to have been a success -- delete any previous backups
 				var maxPrevious = dbVersion - 1;
 				var file = Zotero.getZoteroDirectory();
-				// directoryEntries.hasMoreElements() throws an error (possibly
-				// because of the temporary SQLite journal file?), so we just look
-				// for all versions
-				for (var i=maxPrevious; i>=28; i--) {
-					var fileName = 'zotero.sqlite.' + i + '.bak';
-					file.append(fileName);
-					if (file.exists()) {
-						Zotero.debug('Removing previous backup file ' + fileName);
-						file.remove(null);
+				var toDelete = [];
+				try {
+					var files = file.directoryEntries;
+					while (files.hasMoreElements()) {
+						var file = files.getNext();
+						file.QueryInterface(Components.interfaces.nsIFile);
+						if (file.isDirectory()) {
+							continue;
+						}
+						var matches = file.leafName.match(/zotero\.sqlite\.([0-9]{2,})\.bak/);
+						if (!matches) {
+							continue;
+						}
+						if (matches[1]>=28 && matches[1]<=maxPrevious) {
+							toDelete.push(file);
+						}
 					}
-					file = file.parent;
+					for each(var file in toDelete) {
+						Zotero.debug('Removing previous backup file ' + file.leafName);
+						file.remove(false);
+					}
+				}
+				catch (e) {
+					Zotero.debug(e);
 				}
 			}
 			
