@@ -146,10 +146,9 @@ Zotero.Schema = new function(){
 				}
 			}
 			
-			var up4 = this.updateBundledFiles('translators');
-			var up5 = this.updateBundledFiles('styles');
+			var up4 = this.updateBundledFiles();
 			
-			if (up2 || up3 || up4 || up5) {
+			if (up2 || up3 || up4) {
 				// Run a manual scraper update if upgraded and pref set
 				if (Zotero.Prefs.get('automaticScraperUpdates')){
 					this.updateFromRepository(2);
@@ -167,9 +166,18 @@ Zotero.Schema = new function(){
 	 * Update styles and translators in data directory with versions from
 	 * ZIP file (XPI) or directory (SVN) in extension directory
 	 *
-	 * @param	{String}		mode		'translators' or 'styles'
+	 * @param	{String}	[mode]					'translators' or 'styles'
+	 * @param	{Boolean}	[skipDeleteUpdated]		Skip updating of the file deleting version --
+	 *												since deleting uses a single version table key,
+	 * 												it should only be updated the last time through
 	 */
-	this.updateBundledFiles = function (mode) {
+	this.updateBundledFiles = function (mode, skipDeleteUpdate) {
+		if (!mode) {
+			var up1 = this.updateBundledFiles('translators', true);
+			var up2 = this.updateBundledFiles('styles');
+			return up1 && up2;
+		}
+		
 		switch (mode) {
 			case "translators":
 				var titleField = 'label';
@@ -179,7 +187,7 @@ Zotero.Schema = new function(){
 			case "styles":
 				var titleField = 'title';
 				var fileExt = ".csl";
-				var hiddenDir = Zotero.getTranslatorsDirectory();
+				var hiddenDir = Zotero.getStylesDirectory();
 				hiddenDir.append('hidden');
 				break;
 			
@@ -221,6 +229,82 @@ Zotero.Schema = new function(){
 			break;
 		}
 		
+		//
+		// Delete obsolete files
+		//
+		var sql = "SELECT version FROM version WHERE schema='delete'";
+		var lastVersion = Zotero.DB.valueQuery(sql);
+		
+		var deleted = extDir.clone();
+		deleted.append('deleted.txt');
+		deleted = Zotero.File.getContents(deleted);
+		deleted = deleted.match(/^([^\s]+)/gm);
+		var version = deleted.shift();
+		
+		if (!lastVersion || lastVersion < version) {
+			var toDelete = [];
+			var entries = destDir.directoryEntries;
+			while (entries.hasMoreElements()) {
+				var file = entries.getNext();
+				file.QueryInterface(Components.interfaces.nsIFile);
+				
+				if (!file.exists() // symlink to non-existent file
+						|| file.isDirectory()) {
+					continue;
+				}
+				
+				// Delete incorrectly named files saved via repo pre-1.5b3
+				switch (file.leafName) {
+					case 'ama':
+					case 'apa':
+					case 'apsa':
+					case 'asa':
+					case 'chicago-author-date':
+					case 'chicago-fullnote-bibliography':
+					case 'chicago-note':
+					case 'chicago-note-bibliography':
+					case 'harvard1':
+					case 'ieee':
+					case 'mhra':
+					case 'mhra_note_without_bibliography':
+					case 'mla':
+					case 'nature':
+					case 'nlm':
+					case 'vancouver':
+						toDelete.push(file);
+						continue;
+				}
+				
+				if (forceReinstall || !file.leafName.match(fileNameRE)) {
+					continue;
+				}
+				
+				var newObj = new Zotero[Mode](file);
+				if (deleted.indexOf(newObj[mode + "ID"]) == -1) {
+					continue;
+				}
+				toDelete.push(file);
+			}
+			
+			for each(var file in toDelete) {
+				Zotero.debug("Deleting " + file.path);
+				try {
+					file.remove(false);
+				}
+				catch (e) {
+					Zotero.debug(e);
+				}
+			}
+			
+			if (!skipDeleteUpdate) {
+				sql = "REPLACE INTO version (schema, version) VALUES ('delete', ?)";
+				Zotero.DB.query(sql, version);
+			}
+		}
+		
+		//
+		// Update files
+		//
 		var sql = "SELECT version FROM version WHERE schema=?";
 		var lastModTime = Zotero.DB.valueQuery(sql, modes);
 		
@@ -229,7 +313,7 @@ Zotero.Schema = new function(){
 			
 			if (!forceReinstall && lastModTime && modTime <= lastModTime) {
 				Zotero.debug("Installed " + modes + " are up-to-date with " + modes + ".zip");
-				return 0;
+				return false;
 			}
 			
 			Zotero.debug("Updating installed " + modes + " from " + modes + ".zip");
@@ -295,11 +379,12 @@ Zotero.Schema = new function(){
 			if (!sourceDir.exists()) {
 				Components.utils.reportError("No " + modes + " ZIP file or directory "
 					+ " in Zotero.Schema.updateBundledFiles()");
-				return -1;
+				return false;
 			}
 			
 			var entries = sourceDir.directoryEntries;
 			var modTime = 0;
+			var sourceFilesExist = false;
 			while (entries.hasMoreElements()) {
 				var file = entries.getNext();
 				file.QueryInterface(Components.interfaces.nsIFile);
@@ -309,15 +394,22 @@ Zotero.Schema = new function(){
 						|| file.isDirectory()) {
 					continue;
 				}
+				sourceFilesExist = true;
 				var fileModTime = Math.round(file.lastModifiedTime / 1000);
 				if (fileModTime > modTime) {
 					modTime = fileModTime;
 				}
 			}
 			
+			// Don't attempt installation for SVN build with missing styles
+			if (!sourceFilesExist) {
+				Zotero.debug("No source " + mode + " files exist -- skipping update");
+				return false;
+			}
+			
 			if (!forceReinstall && lastModTime && modTime <= lastModTime) {
 				Zotero.debug("Installed " + modes + " are up-to-date with " + modes + " directory");
-				return 0;
+				return false;
 			}
 			
 			Zotero.debug("Updating installed " + modes + " from " + modes + " directory");
@@ -385,7 +477,7 @@ Zotero.Schema = new function(){
 		Zotero.DB.commitTransaction();
 		
 		Zotero[Modes].init();
-		return 1;
+		return true;
 	}
 	
 	
@@ -986,7 +1078,6 @@ Zotero.Schema = new function(){
 		}
 		
 		var str = xmlnode.getElementsByTagName('csl')[0].firstChild.nodeValue;
-		
 		var style = Zotero.Styles.get(uri);
 		if (style) {
 			if (style.file.exists()) {
@@ -1001,7 +1092,7 @@ Zotero.Schema = new function(){
 				throw ("Invalid style URI '" + uri + "' from repository");
 			}
 			var destFile = Zotero.getStylesDirectory();
-			destFile.append(matches[1]);
+			destFile.append(matches[1] + ".csl");
 			if (destFile.exists()) {
 				throw ("Different style with filename '" + matches[1]
 					+ "' already exists in Zotero.Schema._styleXMLToFile()");
