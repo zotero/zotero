@@ -351,7 +351,6 @@ record.prototype.translate = function(item) {
 	this._associateDBField(item, "050", "ab", "callNumber");
 	this._associateDBField(item, "090", "a", "callNumber");
 	this._associateDBField(item, "099", "a", "callNumber");
-	this._associateDBField(item, "955", "a", "callNumber");
 	
 	//German
 	if (!item.place) this._associateDBField(item, "410", "a", "place");
