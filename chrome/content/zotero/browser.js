@@ -64,7 +64,8 @@ var Zotero_Browser = new function() {
 		"doubleclick.net",
 		"questionmarket.com",
 		"atdmt.com",
-		"aggregateknowledge.com"
+		"aggregateknowledge.com",
+		"ad.yieldmanager.com"
 	];
 	
 	var tools = {
