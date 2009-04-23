@@ -22974,14 +22974,14 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 }');
 
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2008-12-15 00:25:00', 1, 100, 4, 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)',
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2009-04-23 17:55:00', 1, 100, 12, 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == ''x'') return namespace; else return null;
 	} : null;
 
-	var uids = doc.evaluate(''//input[@id="UidCheckBox" or @name="uid"]'', doc,
+	var uids = doc.evaluate(''//input[@type="checkbox" or @name="uid"]'', doc,
 			       nsResolver, XPathResult.ANY_TYPE, null);
 	if(uids.iterateNext() && doc.title.indexOf("PMC Results") == -1) {
 		if (uids.iterateNext() && doc.title.indexOf("PMC Results") == -1){
@@ -23009,9 +23009,10 @@ function detectSearch(item) {
 		}
 	}
 	return false;
-}
-', 
-'function lookupPMIDs(ids, doc) {
+}',
+'
+
+function lookupPMIDs(ids, doc) {
 	Zotero.wait();
 	var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&retmode=xml&rettype=citation&id="+ids.join(",");
 	Zotero.Utilities.HTTP.doGet(newUri, function(text) {
@@ -23047,7 +23048,17 @@ function detectSearch(item) {
 			}
 
 			if (article.Pagination.MedlinePgn.length()){
-				newItem.pages = article.Pagination.MedlinePgn.text().toString();
+				var fullPageRange = article.Pagination.MedlinePgn.text().toString();
+				var pageRange = fullPageRange.match(/\d+-\d+/g);
+				for (var i in pageRange) {
+					var pageRangeStart = pageRange[i].match(/^\d+/)[0];
+					var pageRangeEnd = pageRange[i].match(/\d+$/)[0];
+					if (pageRangeStart.length > pageRangeEnd.length) {
+						pageRangeEnd = pageRangeStart.substring(0,pageRangeStart.length-pageRangeEnd.length) + pageRangeEnd;
+						fullPageRange = fullPageRange.replace(pageRange[i],pageRangeStart+"-"+pageRangeEnd);
+					}
+				}
+				newItem.pages = fullPageRange;
 			}
 
 			if(article.Journal.length()) {
@@ -23056,13 +23067,15 @@ function detectSearch(item) {
 					newItem.ISSN = issn;
 				}
 				
-				if(citation.MedlineJournalInfo.MedlineTA.length()) {
-					newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text().toString());				
+				if(citation.Article.Journal.ISOAbbreviation.length()) {
+					newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.Article.Journal.ISOAbbreviation.text().toString());				
+				} else if(citation.MedlineJournalInfo.MedlineTA.length()) {
+					newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text().toString());
 				}
-//				newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.Article.Journal.ISOAbbreviation.text().toString());
+
 				if(article.Journal.Title.length()) {
 					newItem.publicationTitle = Zotero.Utilities.superCleanString(article.Journal.Title.text().toString());
-				} else if(citation.MedlineJournalInfo.MedlineTA.length()) {
+				} else if(newItem.journalAbbreviation.length()) {
 					newItem.publicationTitle = newItem.journalAbbreviation;
 				}
 
@@ -23076,6 +23089,8 @@ function detectSearch(item) {
 							newItem.date = article.Journal.JournalIssue.PubDate.Month.text().toString()+" "+article.Journal.JournalIssue.PubDate.Year.text().toString();
 						} else if(article.Journal.JournalIssue.PubDate.Year.text().toString() != "") {
 							newItem.date = article.Journal.JournalIssue.PubDate.Year.text().toString();
+						} else if(article.Journal.JournalIssue.PubDate.MedlineDate.text().toString() != "") {
+							newItem.date = article.Journal.JournalIssue.PubDate.MedlineDate.text().toString();
 						}
 					}
 				}
@@ -23119,7 +23134,7 @@ function doWeb(doc, url) {
 		if (prefix == ''x'') return namespace; else return null;
 		} : null;
 	var ids = new Array();
-	var uids = doc.evaluate(''//input[@id="UidCheckBox" or @name="uid"]'', doc, //edited for new PubMed
+	var uids = doc.evaluate(''//input[@type="checkbox" or @name="uid"]'', doc, //edited for new PubMed
 			       nsResolver, XPathResult.ANY_TYPE, null);
 	var uid = uids.iterateNext();
 	if(uid) {
@@ -23134,7 +23149,7 @@ function doWeb(doc, url) {
 			var tableRow;
 			// Go through table rows
 			while(tableRow = tableRows.iterateNext()) {
-				uid = doc.evaluate(''.//input[@id="UidCheckBox"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				uid = doc.evaluate(''.//input[@type="checkbox"]'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				if (other) {
 					var article = doc.evaluate(''.//h2'', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				} else {
