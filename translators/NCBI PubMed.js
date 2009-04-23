@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-12-15 00:25:00"
+	"lastUpdated":"2009-04-23 17:55:00"
 }
 
 function detectWeb(doc, url) {
@@ -17,7 +17,7 @@ function detectWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 
-	var uids = doc.evaluate('//input[@id="UidCheckBox" or @name="uid"]', doc,
+	var uids = doc.evaluate('//input[@type="checkbox" or @name="uid"]', doc,
 			       nsResolver, XPathResult.ANY_TYPE, null);
 	if(uids.iterateNext() && doc.title.indexOf("PMC Results") == -1) {
 		if (uids.iterateNext() && doc.title.indexOf("PMC Results") == -1){
@@ -170,7 +170,7 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 		} : null;
 	var ids = new Array();
-	var uids = doc.evaluate('//input[@id="UidCheckBox" or @name="uid"]', doc, //edited for new PubMed
+	var uids = doc.evaluate('//input[@type="checkbox" or @name="uid"]', doc, //edited for new PubMed
 			       nsResolver, XPathResult.ANY_TYPE, null);
 	var uid = uids.iterateNext();
 	if(uid) {
@@ -185,7 +185,7 @@ function doWeb(doc, url) {
 			var tableRow;
 			// Go through table rows
 			while(tableRow = tableRows.iterateNext()) {
-				uid = doc.evaluate('.//input[@id="UidCheckBox"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				uid = doc.evaluate('.//input[@type="checkbox"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				if (other) {
 					var article = doc.evaluate('.//h2', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				} else {
