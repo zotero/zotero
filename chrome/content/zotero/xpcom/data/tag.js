@@ -177,6 +177,11 @@ Zotero.Tag.prototype.getLinkedItems = function (asIDs) {
 }
 
 
+Zotero.Tag.prototype.countLinkedItems = function () {
+	return this.getLinkedItems().length;
+}
+
+
 Zotero.Tag.prototype.addItem = function (itemID) {
 	var current = this.getLinkedItems(true);
 	if (current && current.indexOf(itemID) != -1) {
@@ -536,7 +541,6 @@ Zotero.Tag.prototype.erase = function () {
 	Zotero.DB.commitTransaction();
 	
 	Zotero.Prefs.set('purge.tags', true);
-	return;
 }
 
 

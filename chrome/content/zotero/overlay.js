@@ -346,7 +346,7 @@ var ZoteroPane = new function()
 			setTimeout("document.getElementById('zotero-tb-search').inputField.select();", 1);
 			
 			var d = new Date();
-			Zotero.purgeDataObjects(true);
+			Zotero.purgeDataObjects();
 			var d2 = new Date();
 			Zotero.debug("Purged data tables in " + (d2 - d) + " ms");
 			
