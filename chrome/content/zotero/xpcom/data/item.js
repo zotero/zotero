@@ -908,9 +908,14 @@ Zotero.Item.prototype.removeCreator = function(orderIndex) {
 		this._loadCreators();
 	}
 	
-	if (!this._creators[orderIndex]) {
+	var creator = this.getCreator(orderIndex);
+	if (!creator) {
 		throw ('No creator exists at position ' + orderIndex
 			+ ' in Zotero.Item.removeCreator()');
+	}
+	
+	if (creator.ref.countLinkedItems() == 1) {
+		Zotero.Prefs.set('purge.creators', true);
 	}
 	
 	// Shift creator orderIndexes down, going to length+1 so we clear the last one
@@ -928,6 +933,7 @@ Zotero.Item.prototype.removeCreator = function(orderIndex) {
 		}
 		this._changedCreators[i] = true;
 	}
+	
 	return true;
 }
 
@@ -2982,6 +2988,10 @@ Zotero.Item.prototype.removeTag = function(tagID) {
 	
 	tag.removeItem(this.id);
 	tag.save();
+	
+	if (!tag.countLinkedItems()) {
+		Zotero.Prefs.set('purge.tags', true);
+	}
 }
 
 Zotero.Item.prototype.removeAllTags = function() {

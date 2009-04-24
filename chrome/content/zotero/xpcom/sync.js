@@ -389,6 +389,9 @@ Zotero.Sync.Runner = new function () {
 			throw ("Sync already running in Zotero.Sync.Runner.sync()");
 		}
 		
+		// Purge deleted objects so they don't cause sync errors (e.g., long tags)
+		Zotero.purgeDataObjects(true);
+		
 		_background = !!background;
 		
 		_queue = [

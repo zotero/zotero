@@ -974,14 +974,13 @@ var Zotero = new function(){
 	/*
 	 * Clear entries that no longer exist from various tables
 	 */
-	this.purgeDataObjects = function () {
+	this.purgeDataObjects = function (skipStoragePurge) {
 		Zotero.Creators.purge();
 		Zotero.Tags.purge();
 		Zotero.Fulltext.purgeUnusedWords();
 		Zotero.Items.purge();
 		
-		var ZU = new Zotero.Utilities;
-		if (Zotero.Sync.Storage.active && ZU.probability(10)) {
+		if (!skipStoragePurge && Zotero.Sync.Storage.active && Zotero.Utilities.prototype.probability(10)) {
 			Zotero.Sync.Storage.purgeDeletedStorageFiles();
 		}
 	}
