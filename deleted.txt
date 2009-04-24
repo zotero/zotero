@@ -1,4 +1,4 @@
-1  # Increment number when modifying file
+2  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -10,3 +10,4 @@ da440efe-646c-4a18-9958-abe1f7d55cde # NCSU Library (Endeca 2)
 37445f52-64fa-4a2a-9532-35753520a0f0  # HeinOnline
 e07e9b8c-0e98-4915-bb5a-32a08cb2f365  # Open WorldCat (Search)
 490909d7-7d79-4c7a-a136-77df618d4db2  # Worldcat.org
+dd149efc-7f0e-43e4-b3df-b6d15e171717  # Persée
