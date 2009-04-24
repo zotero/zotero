@@ -1045,7 +1045,9 @@ Zotero.Sync.Storage = new function () {
 			}
 			catch (e) {
 				Zotero.debug(zipFile.leafName + " is not a valid ZIP file", 2);
-				zipFile.remove(null);
+				if (zipFile.exists()) {
+					zipFile.remove(false);
+				}
 				return;
 			}
 			
