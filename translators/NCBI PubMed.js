@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-04-23 17:55:00"
+	"lastUpdated":"2009-04-27 19:35:00"
 }
 
 function detectWeb(doc, url) {
@@ -86,12 +86,12 @@ function lookupPMIDs(ids, doc) {
 			if (article.Pagination.MedlinePgn.length()){
 				var fullPageRange = article.Pagination.MedlinePgn.text().toString();
 				var pageRange = fullPageRange.match(/\d+-\d+/g);
-				for (var i in pageRange) {
-					var pageRangeStart = pageRange[i].match(/^\d+/)[0];
-					var pageRangeEnd = pageRange[i].match(/\d+$/)[0];
+				for (var j in pageRange) {
+					var pageRangeStart = pageRange[j].match(/^\d+/)[0];
+					var pageRangeEnd = pageRange[j].match(/\d+$/)[0];
 					if (pageRangeStart.length > pageRangeEnd.length) {
 						pageRangeEnd = pageRangeStart.substring(0,pageRangeStart.length-pageRangeEnd.length) + pageRangeEnd;
-						fullPageRange = fullPageRange.replace(pageRange[i],pageRangeStart+"-"+pageRangeEnd);
+						fullPageRange = fullPageRange.replace(pageRange[j],pageRangeStart+"-"+pageRangeEnd);
 					}
 				}
 				newItem.pages = fullPageRange;
