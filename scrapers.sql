@@ -22974,7 +22974,7 @@ REPLACE INTO translators VALUES ('c54d1932-73ce-dfd4-a943-109380e06574', '1.0.0b
 }');
 
 
-REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2009-04-23 17:55:00', 1, 100, 12, 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)',
+REPLACE INTO translators VALUES ('fcf41bed-0cbc-3704-85c7-8062a0068a7a', '1.0.0b3.r1', '', '2009-03-19 17:35:00', 1, 100, 12, 'NCBI PubMed', 'Simon Kornblith and Michael Berkowitz', 'http://[^/]*www\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)',
 'function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -23010,9 +23010,7 @@ function detectSearch(item) {
 	}
 	return false;
 }',
-'
-
-function lookupPMIDs(ids, doc) {
+'function lookupPMIDs(ids, doc) {
 	Zotero.wait();
 	var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=PubMed&retmode=xml&rettype=citation&id="+ids.join(",");
 	Zotero.Utilities.HTTP.doGet(newUri, function(text) {
@@ -23050,12 +23048,12 @@ function lookupPMIDs(ids, doc) {
 			if (article.Pagination.MedlinePgn.length()){
 				var fullPageRange = article.Pagination.MedlinePgn.text().toString();
 				var pageRange = fullPageRange.match(/\d+-\d+/g);
-				for (var i in pageRange) {
-					var pageRangeStart = pageRange[i].match(/^\d+/)[0];
-					var pageRangeEnd = pageRange[i].match(/\d+$/)[0];
+				for (var j in pageRange) {
+					var pageRangeStart = pageRange[j].match(/^\d+/)[0];
+					var pageRangeEnd = pageRange[j].match(/\d+$/)[0];
 					if (pageRangeStart.length > pageRangeEnd.length) {
 						pageRangeEnd = pageRangeStart.substring(0,pageRangeStart.length-pageRangeEnd.length) + pageRangeEnd;
-						fullPageRange = fullPageRange.replace(pageRange[i],pageRangeStart+"-"+pageRangeEnd);
+						fullPageRange = fullPageRange.replace(pageRange[j],pageRangeStart+"-"+pageRangeEnd);
 					}
 				}
 				newItem.pages = fullPageRange;
