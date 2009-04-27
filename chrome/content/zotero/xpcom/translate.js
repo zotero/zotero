@@ -2066,9 +2066,9 @@ Zotero.Translate.prototype._exportGetAttachment = function(attachment) {
 							createInstance(Components.interfaces.nsILocalFile);
 			directory.initWithFile(this._exportFileDirectory);
 			directory.append(attachmentArray.itemID);
-			directory.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
 			// copy file
 			try {
+				directory.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
 				file.copyTo(directory, attachmentArray.filename);
 			} catch(e) {
 				attachmentArray.path = undefined;
