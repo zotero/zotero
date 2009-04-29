@@ -37,6 +37,11 @@ function processCrossRef(xmlOutput) {
 	
 	// ensure status is valid
 	if(!xml.doi_record.length()) return false;
+	// ensure this isn't an error
+	if(xml.doi_record.crossref.error.length()) {
+		throw xml.doi_record.crossref.error
+		return false;
+	}
 	if(xml.doi_record[0].crossref.journal.length()) {
 		var item = new Zotero.Item("journalArticle");
 		var itemXML = xml.doi_record.crossref.journal;
