@@ -409,18 +409,14 @@ Zotero.Proxy.prototype.validate = function() {
  */
 Zotero.Proxy.prototype.save = function(transparent) {
 	// ensure this proxy is valid
-	Zotero.debug(this);
 	var hasErrors = this.validate();
 	if(hasErrors) throw "Zotero.Proxy: could not be saved because it is invalid: error "+hasErrors[0];
 	
+	// we never save any changes to non-persisting proxies, so this works
+	var newProxy = !!this.proxyID;
+	
 	this.autoAssociate = this.multiHost && this.autoAssociate;
 	this.compileRegexp();
-	if(this.proxyID) {
-		Zotero.Proxies.refreshHostMap(this);
-		if(!transparent) throw "Zotero.Proxy: cannot save transparent proxy without transparent param";
-	} else {
-		Zotero.Proxies.save(this);
-	}
 	
 	if(transparent) {
 		try {
@@ -432,7 +428,7 @@ Zotero.Proxy.prototype.save = function(transparent) {
 				Zotero.DB.query("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
 			} else {
 				this.proxyID = Zotero.DB.query("INSERT INTO proxies (multiHost, autoAssociate, scheme) VALUES (?, ?, ?)",
-					[this.multiHost ? 1 : 0, this.autoAssociate ? 1 : 0, this.scheme])
+					[this.multiHost ? 1 : 0, this.autoAssociate ? 1 : 0, this.scheme]);
 			}
 			
 			this.hosts = this.hosts.sort();
@@ -448,6 +444,13 @@ Zotero.Proxy.prototype.save = function(transparent) {
 			Zotero.DB.rollbackTransaction();
 			throw(e);
 		}
+	}
+	
+	if(newProxy) {
+		Zotero.Proxies.save(this);
+	} else {
+		Zotero.Proxies.refreshHostMap(this);
+		if(!transparent) throw "Zotero.Proxy: cannot save transparent proxy without transparent param";
 	}
 }
 
