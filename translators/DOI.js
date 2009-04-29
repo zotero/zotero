@@ -11,14 +11,16 @@
 	"lastUpdated":"2009-04-07 15:48:00"
 }
 
+//var DOIre = /(doi:)?\s*(10\.[\w.]+\/[^\/\s]+)/ig;
 var DOIre = /doi:\s*(10\.[\w.]+\/[^\/\s]+)/ig;
+
 var items = {};
 var selectArray = {};
 
 function detectWeb(doc, url) {
 	var m1 = DOIre.exec(doc.documentElement.textContent);
 	var m2 = DOIre.exec(doc.documentElement.textContent);
-	if(m1 & m2) {
+	if(m1 && m2) {
 		return "multiple";
 	} else if(m1) {
 		return "journalArticle";
