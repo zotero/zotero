@@ -11,8 +11,7 @@
 	"lastUpdated":"2009-04-07 15:48:00"
 }
 
-//var DOIre = /(doi:)?\s*(10\.[\w.]+\/[^\/\s]+)/ig;
-var DOIre = /doi:\s*(10\.[\w.]+\/[^\/\s]+)/ig;
+var DOIre = /(?:doi:)?\s*(10\.[\w.]+\/[^\/\s]+)/igm;
 
 var items = {};
 var selectArray = {};
