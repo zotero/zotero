@@ -26,7 +26,7 @@
 const Zotero_RecognizePDF_SUCCESS_IMAGE = "chrome://zotero/skin/tick.png";
 const Zotero_RecognizePDF_FAILURE_IMAGE = "chrome://zotero/skin/cross.png";
 const Zotero_RecognizePDF_LOADING_IMAGE = "chrome://global/skin/icons/loading_16.png";
-const DOIre = /\bdoi\: *([^\s]+)/i;
+const DOIre = /doi:\s*(10\.[\w.]+\/[^\/\s]+)/i;
  
 /**
  * Front end for recognizing PDFs
@@ -315,6 +315,7 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, callback, ca
 	
 	// look for DOI
 	var allText = lines.join("\n");
+	Zotero.debug(allText);
 	var m = DOIre.exec(allText);
 	if(m) {
 		this._DOI = m[1];
@@ -362,7 +363,7 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 	var me = this;
 	if(this._DOI) {
 		// use CrossRef to look for DOI
-		translate = new Zotero.Translate("search", true, false);
+		var translate = new Zotero.Translate("search", true, false);
 		translate.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
 		var item = {"itemType":"journalArticle", "DOI":this._DOI};
 		translate.setSearch(item);
@@ -425,6 +426,8 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
  * @private
  */
 Zotero_RecognizePDF.Recognizer.prototype._scrape = function(/**Zotero.Translate*/ translate) {
+	if(this._hiddenBrowser.contentDocument.location.href == "about:blank") return;
+	
 	if(this._hiddenBrowser.contentDocument.title == "403 Forbidden") {
 		// hit the captcha
 		/*
