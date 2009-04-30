@@ -55,6 +55,7 @@ var Zotero_Browser = new function() {
 	this.tabbrowser = null;
 	this.appcontent = null;
 	this.statusImage = null;
+	this.isScraping = false;
 	
 	var _scrapePopupShowing = false;
 	var _browserData = new Object();
@@ -450,14 +451,18 @@ var Zotero_Browser = new function() {
 	 */
 	function finishScraping(obj, returnValue) {
 		if(!returnValue) {
+			Zotero_Browser.progress.show();
 			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
 			// Include link to Known Translator Issues page
 			var url = "http://www.zotero.org/documentation/known_translator_issues";
 			var linkText = '<a href="' + url + '" tooltiptext="' + url + '">'
 				+ Zotero.getString('ingester.scrapeErrorDescription.linkText') + '</a>';
 			Zotero_Browser.progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription", linkText));
+			Zotero_Browser.progress.startCloseTimer(8000);
+		} else {
+			Zotero_Browser.progress.startCloseTimer();
 		}
-		Zotero_Browser.progress.startCloseTimer();
+		Zotero_Browser.isScraping = false;
 	}
 	
 	
@@ -467,12 +472,22 @@ var Zotero_Browser = new function() {
 	function itemDone(obj, item, collection) {
 		var title = item.getField("title");
 		var icon = item.getImageSrc();
+		Zotero_Browser.progress.show();
 		Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scraping"));
 		Zotero_Browser.progress.addLines([title], [icon]);
 		
 		// add item to collection, if one was specified
 		if(collection) {
 			collection.addItem(item.getID());
+		}
+		
+		if(Zotero_Browser.isScraping) {
+			// initialize close timer between item saves in case translator doesn't call done
+			Zotero_Browser.progress.startCloseTimer(10000);	// is this long enough?
+		} else {
+			// if we aren't supposed to be scraping now, the translator is broken; assume we're
+			// done
+			Zotero_Browser.progress.startCloseTimer();
 		}
 	}
 	
@@ -657,6 +672,7 @@ Zotero_Browser.Tab.prototype._attemptLocalFileImport = function(doc) {
 Zotero_Browser.Tab.prototype.translate = function(saveLocation) {
 	if(this.page.translators && this.page.translators.length) {
 		Zotero_Browser.progress.show();
+		Zotero_Browser.isScraping = true;
 		
 		if(saveLocation) {
 			saveLocation = Zotero.Collections.get(saveLocation);

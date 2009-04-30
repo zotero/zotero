@@ -894,7 +894,9 @@ Zotero.Translate.prototype._enableAsynchronousDetect = function() {
 Zotero.Translate.prototype._enableAsynchronousTranslate = function() {
 	var me = this;
 	this.waitForCompletion = true;
-	this._sandbox.Zotero.done = function(val) { me._translationComplete(val) };
+	this._sandbox.Zotero.done = function(val, error) {
+		me._translationComplete(val == undefined ? true : val, (error ? error : ""))
+	};
 }
 
 /*
@@ -1115,6 +1117,11 @@ Zotero.Translate.prototype._itemTagsAndSeeAlso = function(item, newItem) {
  */
 Zotero.Translate._urlRe = /(([A-Za-z]+):\/\/[^\s]*)/i;
 Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
+	// warn if itemDone called after translation completed
+	if(this._complete) {
+		Zotero.debug("Translate: WARNING: Zotero.Item.complete() called after Zotero.done(); please fix your code", 2);
+	}
+	
 	if(this.type == "web") {
 		// store repository if this item was captured from a website, and
 		// repository is truly undefined (not false or "")
