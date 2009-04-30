@@ -1295,6 +1295,7 @@ Zotero.Utilities.HTTP = new function() {
 		 * @inner
 		 */
 		var onLoad = function() {
+			if(hiddenBrowser.contentDocument.location.href == "about:blank") return;
 			Zotero.debug(hiddenBrowser.contentDocument.location.href+" has been loaded");
 			if(hiddenBrowser.contentDocument.location.href != prevUrl) {	// Just in case it fires too many times
 				prevUrl = hiddenBrowser.contentDocument.location.href;
