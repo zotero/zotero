@@ -240,6 +240,9 @@ Zotero.File = new function(){
 				.getURLSpecFromFile(file);
 		
 		this.addCharsetListener(browser, function (charset, args) {
+			// ignore spurious about:blank loads
+			if(browser.contentDocument.location.href == "about:blank") return;
+			
 			callback(charset, args);
 			Zotero.Browser.deleteHiddenBrowser(browser);
 		}, args);
