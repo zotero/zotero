@@ -220,6 +220,9 @@ Zotero.Attachments = new function(){
 				var browser = Zotero.Browser.createHiddenBrowser();
 				var imported = false;
 				var onpageshow = function() {
+					// ignore spurious about:blank loads
+					if(browser.contentDocument.location.href == "about:blank") return;
+					
 					// pageshow can be triggered multiple times on some pages,
 					// so make sure we only import once
 					// (https://www.zotero.org/trac/ticket/795)
@@ -1164,6 +1167,9 @@ Zotero.Attachments = new function(){
 		var browser = Zotero.Browser.createHiddenBrowser();
 		
 		var callback = function(charset, args) {
+			// ignore spurious about:blank loads
+			if(browser.contentDocument.location.href == "about:blank") return;
+			
 			var charsetID = Zotero.CharacterSets.getID(charset);
 			if (charsetID) {
 				var disabled = Zotero.Notifier.disable();
