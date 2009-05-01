@@ -185,3 +185,19 @@
 <!ENTITY zotero.rtfScan.unmappedCitations.label				"Unmapped Citations">
 <!ENTITY zotero.rtfScan.ambiguousCitations.label			"Ambiguous Citations">
 <!ENTITY zotero.rtfScan.mappedCitations.label				"Mapped Citations">
+<!ENTITY zotero.rtfScan.introPage.label				"Introduction">
+<!ENTITY zotero.rtfScan.introPage.description		"Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
+<!ENTITY zotero.rtfScan.scanPage.label				"Scanning for Citations">
+<!ENTITY zotero.rtfScan.scanPage.description		"Zotero is scanning your document for citations. Please be patient.">
+<!ENTITY zotero.rtfScan.citationsPage.label				"Verify Cited Items">
+<!ENTITY zotero.rtfScan.citationsPage.description		"Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
+<!ENTITY zotero.rtfScan.stylePage.label				"Document Formatting">
+<!ENTITY zotero.rtfScan.formatPage.label				"Formatting Citations">
+<!ENTITY zotero.rtfScan.formatPage.description		"Zotero is processing and formatting your RTF file. Please be patient.">
+<!ENTITY zotero.rtfScan.completePage.label				"RTF Scan Complete">
+<!ENTITY zotero.rtfScan.completePage.description		"Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
+<!ENTITY zotero.rtfScan.inputFile.label			"Input File">
+<!ENTITY zotero.rtfScan.outputFile.label			"Output File">
+
+<!ENTITY zotero.file.choose.label			"Choose File...">
+<!ENTITY zotero.file.noneSelected.label			"No file selected">

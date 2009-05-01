@@ -1,0 +1,101 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/upgrade.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/bibliography.css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<wizard xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	title="&zotero.rtfScan.title;" width="700" height="550"
+	id="zotero-rtfScan">
+	
+	<script src="include.js"/>
+	<script src="bibliography.js"/>
+	<script src="rtfScan.js"/>
+	
+	<wizardpage id="intro-page" label="&zotero.rtfScan.introPage.label;"
+	onpageshow="Zotero_RTFScan.introPageShowing()"
+	onpageadvanced="Zotero_RTFScan.introPageAdvanced()">
+		<description width="700">&zotero.rtfScan.introPage.description;</description>
+		<groupbox>
+			<caption label="&zotero.rtfScan.inputFile.label;"/>
+			<hbox align="center">
+				<textbox value="&zotero.file.noneSelected.label;" id="input-path" flex="1" readonly="true"/>
+				<button id="choose-input-file" label="&zotero.file.choose.label;" onclick="Zotero_RTFScan.chooseInputFile()"/>
+			</hbox>
+		</groupbox>
+		<groupbox>
+			<caption label="&zotero.rtfScan.outputFile.label;"/>
+			<hbox align="center">
+				<textbox value="&zotero.file.noneSelected.label;" id="output-path" flex="1" readonly="true"/>
+				<button id="choose-output-file" label="&zotero.file.choose.label;" onclick="Zotero_RTFScan.chooseOutputFile()"/>
+			</hbox>
+		</groupbox>
+	</wizardpage>
+	
+	<wizardpage id="scan-page" label="&zotero.rtfScan.scanPage.label;"
+	onpageshow="Zotero_RTFScan.scanPageShowing()">
+		<description width="700">&zotero.rtfScan.scanPage.description;</description>
+		<progressmeter id="progress-indicator" mode="undetermined" flex="1"/>
+	</wizardpage>
+	
+	<wizardpage id="citations-page" label="&zotero.rtfScan.citationsPage.label;"
+	onpageshow="Zotero_RTFScan.citationsPageShowing()"
+	onpagerewound="return Zotero_RTFScan.citationsPageRewound();">
+		<description width="700">&zotero.rtfScan.citationsPage.description;</description>
+		<tree flex="1" id="tree" hidecolumnpicker="true" onclick="Zotero_RTFScan.treeClick(event)">
+			<treecols>
+				<treecol label="&zotero.rtfScan.citation.label;" id="pdf-col" flex="1" primary="true"/>
+				<splitter class="tree-splitter"/>
+				<treecol label="&zotero.rtfScan.itemName.label;" id="item-col" flex="2"/>
+				<treecol id="action-col" style="width:40px"/>
+			</treecols>
+			<treechildren id="treechildren">
+				<treeitem id="unmapped-citations-item" container="true" open="true" hidden="true">
+					<treerow>
+						<treecell label="&zotero.rtfScan.unmappedCitations.label;"/>
+					</treerow>
+					<treechildren id="unmapped-citations-children"/> 
+				</treeitem>
+				<treeitem id="ambiguous-citations-item" container="true" open="true" hidden="true">
+					<treerow>
+						<treecell label="&zotero.rtfScan.ambiguousCitations.label;"/>
+					</treerow>
+					<treechildren id="ambiguous-citations-children"/>
+				</treeitem>
+				<treeitem id="mapped-citations-item" container="true" open="true" hidden="true">
+					<treerow>
+						<treecell label="&zotero.rtfScan.mappedCitations.label;"/>
+					</treerow>
+					<treechildren id="mapped-citations-children"/>
+				</treeitem>
+			</treechildren>
+		</tree>
+	</wizardpage>
+	
+	<wizardpage id="style-page" label="&zotero.rtfScan.stylePage.label;"
+	onpageadvanced="Zotero_RTFScan.stylePageAdvanced()"
+	onpageshow="Zotero_RTFScan.stylePageShowing()">
+		<groupbox flex="1">
+			<caption label="&zotero.bibliography.style.label;"/>
+			<listbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()" flex="1"/>
+		</groupbox>
+		
+		<groupbox>
+			<caption label="&zotero.integration.prefs.displayAs.label;"/>
+			<radiogroup id="displayAs" orient="horizontal">
+				<radio id="footnotes" label="&zotero.integration.prefs.footnotes.label;" selected="true"/>
+				<radio id="endnotes" label="&zotero.integration.prefs.endnotes.label;"/>
+			</radiogroup>
+		</groupbox>
+	</wizardpage>
+	
+	<wizardpage id="format-page" label="&zotero.rtfScan.formatPage.label;"
+	onpageshow="Zotero_RTFScan.formatPageShowing()">
+		<description width="700">&zotero.rtfScan.formatPage.description;</description>
+		<progressmeter id="progress-indicator" mode="undetermined" flex="1"/>
+	</wizardpage>
+	
+	<wizardpage id="complete-page" label="&zotero.rtfScan.completePage.label;">
+		<description width="700">&zotero.rtfScan.completePage.description;</description>
+	</wizardpage>
+</wizard>
