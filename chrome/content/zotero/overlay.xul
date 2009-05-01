@@ -124,6 +124,7 @@
 							<menupopup id="zotero-tb-actions-popup" onpopupshowing="document.getElementById('cmd_zotero_reportErrors').setAttribute('disabled', Zotero.getErrors().length == 0)">
 								<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
 								<menuitem id="zotero-tb-actions-export" label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
+								<menuitem id="zotero-tb-actions-rtfScan" label="&zotero.toolbar.rtfScan.label;" oncommand="window.openDialog('chrome://zotero/content/rtfScan.xul', 'rtfScan', 'chrome,centerscreen')"/>
 								<menuitem hidden="true" id="zotero-tb-actions-zeroconf-update"
 									label="Search for Shared Libraries" oncommand="Zotero.Zeroconf.findInstances()"/>
 								<menuseparator id="zotero-tb-actions-plugins-separator"/>

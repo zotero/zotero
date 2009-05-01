@@ -42,6 +42,7 @@ function doLoad()
 	
 	collectionsView = new Zotero.CollectionTreeView();
 	document.getElementById('zotero-collections-tree').view = collectionsView;
+	if(io.select) itemsView.selectItem(io.select);
 }
 
 function doUnload()

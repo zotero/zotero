@@ -43,11 +43,13 @@ var Zotero_File_Interface_Bibliography = new function() {
 		// Set font size from pref
 		// Affects bibliography.xul and integrationDocPrefs.xul
 		var sbc = document.getElementById('zotero-bibliography-container');
-		Zotero.setFontSize(sbc);
+		if(sbc) Zotero.setFontSize(sbc);
 		
-		_io = window.arguments[0];
-		if(_io.wrappedJSObject){
-			_io = _io.wrappedJSObject;
+		if(window.arguments && window.arguments.length) {
+			_io = window.arguments[0];
+			if(_io.wrappedJSObject) _io = _io.wrappedJSObject;
+		} else {
+			_io = {};
 		}
 		
 		var listbox = document.getElementById("style-listbox");
@@ -103,7 +105,8 @@ var Zotero_File_Interface_Bibliography = new function() {
 		if(document.getElementById("displayAs")) {
 			if(_io.useEndnotes && _io.useEndnotes == 1) document.getElementById("displayAs").selectedIndex = 1;
 			styleChanged(selectIndex);
-			
+		}		
+		if(document.getElementById("formatUsing")) {
 			if(_io.useBookmarks && _io.useBookmarks == 1) document.getElementById("formatUsing").selectedIndex = 1;			
 			if(_io.openOffice) {
 				var formatOption = "referenceMarks";
@@ -139,13 +142,17 @@ var Zotero_File_Interface_Bibliography = new function() {
 		var selectedStyle = selectedItem.getAttribute('value');
 		
 		// update status of displayAs box based on style class
-		var isNote = Zotero.Styles.get(selectedStyle).class == "note";
-		document.getElementById("displayAs").disabled = !isNote;
+		if(document.getElementById("displayAs")) {
+			var isNote = Zotero.Styles.get(selectedStyle).class == "note";
+			document.getElementById("displayAs").disabled = !isNote;
+		}
 		
 		// update status of formatUsing box based on style class
-		if(isNote) document.getElementById("formatUsing").selectedIndex = 0;
-		document.getElementById("bookmarks").disabled = isNote;
-		document.getElementById("bookmarks-caption").disabled = isNote;
+		if(document.getElementById("formatUsing")) {
+			if(isNote) document.getElementById("formatUsing").selectedIndex = 0;
+			document.getElementById("bookmarks").disabled = isNote;
+			document.getElementById("bookmarks-caption").disabled = isNote;
+		}
 	}
 
 	function acceptSelection() {
