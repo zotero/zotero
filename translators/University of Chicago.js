@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-02-25 07:10:00"
+	"lastUpdated":"2009-05-02 14:00:00"
 }
 
 function detectWeb(doc, url) {
@@ -138,8 +138,8 @@ function doWeb(doc, url) {
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			item.attachments = [
-				{url:item.url.replace("www.journals.uchicago.edu", proxyURL), title:"University of Chicago Journals Snapshot", mimeType:"text/html"},
-				{url:item.url.replace("www.journals.uchicago.edu", proxyURL).replace("/doi/abs", "/doi/pdf"), title:"University of Chicago Full Text PDF", mimeType:"application/pdf"}
+				{url:item.url.replace("/dx.doi.org/", proxyURL+"doi/abs/"), title:"University of Chicago Journals Snapshot", mimeType:"text/html"},
+				{url:item.url.replace("/dx.doi.org/", proxyURL+"doi/pdf/"), title:"University of Chicago Full Text PDF", mimeType:"application/pdf"}
 			];
 			if (item.notes[0]['note']) item.DOI = Zotero.Utilities.trimInternal(item.notes[0]['note'].substr(4));
 			item.notes = new Array();
