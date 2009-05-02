@@ -31,7 +31,7 @@ function doWeb(doc, url) {
 	var proxyRe = /http:\/\/([^\/]*)/;
 	var m = proxyRe.exec(doc.location.href);
 	if(m) {
-		proxyURL = m[1];
+		proxyURL = "/"+m[1]+"/";
 	}
 
 	var post = "";
