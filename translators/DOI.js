@@ -11,19 +11,46 @@
 	"lastUpdated":"2009-04-07 15:48:00"
 }
 
-var DOIre = /(?:doi:)?\s*(10\.[\w.]+\/[^\/\s]+)/igm;
-
 var items = {};
 var selectArray = {};
 
-function detectWeb(doc, url) {
-	var m1 = DOIre.exec(doc.documentElement.textContent);
-	var m2 = DOIre.exec(doc.documentElement.textContent);
-	if(m1 && m2) {
-		return "multiple";
-	} else if(m1) {
-		return "journalArticle";
+// builds a list of DOIs
+function getDOIs(doc) {
+	const DOIre = /\b(10\.[\w.]+\/[^\/\s]+)\.?\b/igm;
+	const DOIXPath = "//text()[contains(., '10.')]";
+	
+	DOIre.lastMatch = 0;
+	var DOIs = [];
+	
+	var node, m;
+	var results = doc.evaluate(DOIXPath, doc, null, XPathResult.ANY_TYPE, null);
+	while(node = results.iterateNext()) {
+		while(m = DOIre.exec(node.nodeValue)) {
+			var DOI = m[1];
+			if(DOI.substr(-1) == ")" && DOI.indexOf("(") == -1) {
+				DOI = DOI.substr(0, DOI.length-1);
+			}
+			// only add new DOIs
+			if(DOIs.indexOf(DOI) == -1) {
+				DOIs.push(DOI);
+			}
+		}
 	}
+	
+	return DOIs;
+}
+
+function detectWeb(doc, url) {
+	const blacklistRe = /^https?:\/\/[^/]*google\.com/i;
+	
+	if(!blacklistRe.test(url)) {
+		var DOIs = getDOIs(doc);
+		Zotero.debug(DOIs);
+		if(DOIs.length) {
+			return DOIs.length == 1 ? "journalArticle" : "multiple";
+		}
+	}
+	return false;
 }
 
 function retrieveNextDOI(DOIs, doc) {
@@ -70,17 +97,7 @@ function retrieveNextDOI(DOIs, doc) {
 }
 
 function doWeb(doc, url) {
-	// build a list of DOIs
-	DOIre.lastMatch = 0;
-	DOIs = [];
-	while((m = DOIre.exec(doc.documentElement.textContent))) {
-		var DOI = m[1];
-		if(DOI.substr(-1) == ")" && DOI.indexOf("(") == -1) {
-			DOI = DOI.substr(0, DOI.length-1);
-		}
-		DOIs.push(DOI);
-	}
-	
+	var DOIs = getDOIs(doc);
 	// retrieve full items asynchronously
 	Zotero.wait();
 	retrieveNextDOI(DOIs, doc);
