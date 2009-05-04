@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"JSTOR",
 	"creator":"Simon Kornblith, Sean Takats, Michael Berkowitz and Eli Osherovich",
-	"target":"https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch)|stable/|pss/)",
+	"target":"https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/)",
 	"minVersion":"1.0.0b4.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-03-19 17:15:00"
+	"lastUpdated":"2009-05-04 17:15:00"
 }
  
 function detectWeb(doc, url) {
