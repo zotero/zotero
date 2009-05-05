@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":50,
 	"inRepository":true,
-	"lastUpdated":"2008-10-20 10:10:37"
+	"lastUpdated":"2009-05-05 07:15:00"
 }
 
 Zotero.addOption("exportNotes", true);
