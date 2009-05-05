@@ -632,8 +632,17 @@ Zotero_Browser.Tab.prototype._searchFrames = function(rootDoc, searchDoc) {
 	var frames = rootDoc.getElementsByTagName("frame");
 	for each(var frame in frames) {
 		if(frame.contentDocument &&
-		  (frame.contentDocument == searchDoc ||
-		  this._searchFrames(frame.contentDocument, searchDoc))) {
+				(frame.contentDocument == searchDoc ||
+				this._searchFrames(frame.contentDocument, searchDoc))) {
+			return true;
+		}
+	}
+	
+	var frames = rootDoc.getElementsByTagName("iframe");
+	for each(var frame in frames) {
+		if(frame.contentDocument &&
+				(frame.contentDocument == searchDoc ||
+				this._searchFrames(frame.contentDocument, searchDoc))) {
 			return true;
 		}
 	}
