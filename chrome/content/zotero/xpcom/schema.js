@@ -1806,7 +1806,7 @@ Zotero.Schema = new function(){
 					if (tags) {
 						// Find tags with multiple case forms
 						for each(var row in tags) {
-							var l = row.tag.toLowerCase();
+							var l = '_' + row.tag.toLowerCase();
 							if (!cases[l]) {
 								cases[l] = [];
 							}
@@ -1817,14 +1817,15 @@ Zotero.Schema = new function(){
 						var done = {};
 						for each(var row in tags) {
 							var l = row.tag.toLowerCase();
+							var lk = '_' + l;
 							
-							if (done[l]) {
+							if (done[lk]) {
 								continue;
 							}
-							done[l] = true;
+							done[lk] = true;
 							
 							// Only one tag -- use
-							if (cases[l].length == 1) {
+							if (cases[lk].length == 1) {
 								newTags.push(row);
 								continue;
 							}
