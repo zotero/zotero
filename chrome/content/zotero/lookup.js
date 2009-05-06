@@ -1,6 +1,7 @@
 const Zotero_Lookup = new function () {
 	this.accept = function() {
 		document.getElementById("progress").setAttribute("status", "animate");
+		document.getElementById("accept-button").disabled = true;
 		var identifier = document.getElementById("lookup-textbox").value;
 		if(identifier.substr(0, 3) == "10.") {
 			// DOI
@@ -17,16 +18,18 @@ const Zotero_Lookup = new function () {
 			}
 		}
 		
-		translate = new Zotero.Translate("search", true, false);
+		var translate = new Zotero.Translate("search", true, false);
 		translate.setSearch(item);
+		
 		// be lenient about translators
 		var translators = translate.getTranslators();
-		Zotero.debug(translators[0].label);
 		translate.setTranslator(translators);
+		
 		translate.setHandler("done", function(translate, success) {
 			if(success) {
 				window.close();
 			} else {
+				document.getElementById("accept-button").disabled = undefined;
 				document.getElementById("progress").setAttribute("status", "error");
 				var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 				                        .getService(Components.interfaces.nsIPromptService);
@@ -34,10 +37,15 @@ const Zotero_Lookup = new function () {
 					Zotero.getString("lookup.failure.description"));
 			}
 		});
+		
+		var saveLocation = false;
 		try {
-			var saveLocation = window.opener.ZoteroPane.getSelectedCollection();
+			saveLocation = window.opener.ZoteroPane.getSelectedCollection();
 		} catch(e) {}
-		translate.setHandler("itemDone", function(obj, item) { window.opener.Zotero_Browser.itemDone(obj, item, saveLocation) });
+		translate.setHandler("itemDone", function(obj, item) {
+			if(saveLocation) saveLocation.addItem(item.getID());
+		});
+		
 		translate.translate();
 		return false;
 	}

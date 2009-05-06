@@ -948,6 +948,8 @@ Zotero.Translate.prototype._translationComplete = function(returnValue, error) {
 				this.translate();
 				return;
 			}
+			
+			returnValue = false;
 		} else {
 			// close open streams
 			this._closeStreams();
