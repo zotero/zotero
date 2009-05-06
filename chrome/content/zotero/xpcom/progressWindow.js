@@ -147,7 +147,7 @@ Zotero.ProgressWindow = function(_window){
 			_progressWindow = ww.openWindow(null, "chrome://zotero/content/progressWindow.xul",
 				"", "chrome,dialog=no,titlebar=no,popup=yes", null);
 		}
-		_progressWindow.addEventListener("pageshow", _onWindowLoaded, false);
+		_progressWindow.addEventListener("load", _onWindowLoaded, false);
 		_progressWindow.addEventListener("mouseover", _onMouseOver, false);
 		_progressWindow.addEventListener("mouseout", _onMouseOut, false);
 		_progressWindow.addEventListener("mouseup", _onMouseUp, false);

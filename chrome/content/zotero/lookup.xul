@@ -20,7 +20,7 @@
 	<hbox id="dialog-button-box">
 		<toolbarbutton class="zotero-small-progress-indicator" id="progress"/>
 		<spacer flex="1"/>
-		<button class="dialog-button" style="font: menu" dlgtype="cancel"/>
-		<button class="dialog-button" style="font: menu" dlgtype="accept"/>
+		<button id="cancel-button" class="dialog-button" style="font: menu" dlgtype="cancel"/>
+		<button id="accept-button" class="dialog-button" style="font: menu" dlgtype="accept"/>
 	</hbox>
 </dialog>
