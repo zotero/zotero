@@ -66,6 +66,7 @@
 <!ENTITY zotero.toolbar.tagSelector.label			"Show/Hide Tag Selector">
 <!ENTITY zotero.toolbar.actions.label					"Actions">
 <!ENTITY zotero.toolbar.import.label					"Import...">
+<!ENTITY zotero.toolbar.importFromClipboard			"Import from Clipboard">
 <!ENTITY zotero.toolbar.export.label					"Export Library...">
 <!ENTITY zotero.toolbar.rtfScan.label					"RTF Scan...">
 <!ENTITY zotero.toolbar.timeline.label				"Create Timeline">

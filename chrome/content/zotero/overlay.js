@@ -555,6 +555,9 @@ var ZoteroPane = new function()
 			case 'copySelectedItemsToClipboard':
 				ZoteroPane.copySelectedItemsToClipboard();
 				break;
+			case 'importFromClipboard':
+				Zotero_File_Interface.importFromClipboard();
+				break;
 			default:
 				throw ('Command "' + command + '" not found in ZoteroPane.handleKeyDown()');
 		}
