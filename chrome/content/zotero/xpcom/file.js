@@ -240,9 +240,6 @@ Zotero.File = new function(){
 				.getURLSpecFromFile(file);
 		
 		this.addCharsetListener(browser, function (charset, args) {
-			// ignore spurious about:blank loads
-			if(browser.contentDocument.location.href == "about:blank") return;
-			
 			callback(charset, args);
 			Zotero.Browser.deleteHiddenBrowser(browser);
 		}, args);
@@ -273,6 +270,9 @@ Zotero.File = new function(){
 		}
 		
 		var onpageshow = function(){
+			// ignore spurious about:blank loads
+			if(browser.contentDocument.location.href == "about:blank") return;
+
 			browser.removeEventListener("pageshow", onpageshow, false);
 			
 			var charset = browser.contentDocument.characterSet;
