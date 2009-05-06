@@ -45,7 +45,6 @@ function detectWeb(doc, url) {
 	
 	if(!blacklistRe.test(url)) {
 		var DOIs = getDOIs(doc);
-		Zotero.debug(DOIs);
 		if(DOIs.length) {
 			return DOIs.length == 1 ? "journalArticle" : "multiple";
 		}
