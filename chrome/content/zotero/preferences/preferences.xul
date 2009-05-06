@@ -580,6 +580,7 @@ To add a new preference:
 			<preference id="pref-keys-toggleTagSelector" name="extensions.zotero.keys.toggleTagSelector" type="string"/>
 			<preference id="pref-keys-copySelectedItemCitationsToClipboard" name="extensions.zotero.keys.copySelectedItemCitationsToClipboard" type="string"/>
 			<preference id="pref-keys-copySelectedItemsToClipboard" name="extensions.zotero.keys.copySelectedItemsToClipboard" type="string"/>
+			<preference id="pref-keys-importFromClipboard" name="extensions.zotero.keys.importFromClipboard" type="string"/>
 			<preference id="pref-keys-overrideGlobal" name="extensions.zotero.keys.overrideGlobal" type="bool"/>
 		</preferences>
 		
@@ -645,6 +646,11 @@ To add a new preference:
 					<textbox id="textbox-copySelectedItemsToClipboard" maxlength="1" size="1" preference="pref-keys-copySelectedItemsToClipboard" onchange="updateQuickCopyInstructions()"/>
 				</row>
 				
+				<row>
+					<label value="&zotero.preferences.keys.importFromClipboard;" control="textbox-importFromClipboard"/>
+					<label/>
+					<textbox id="textbox-importFromClipboard" maxlength="1" size="1" preference="pref-keys-importFromClipboard"/>
+				</row>
 			</rows>
 		</grid>
 		

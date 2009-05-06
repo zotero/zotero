@@ -57,6 +57,7 @@ pref("extensions.zotero.keys.newNote", 'O');
 pref("extensions.zotero.keys.toggleTagSelector", 'T');
 pref("extensions.zotero.keys.copySelectedItemCitationsToClipboard", 'A');
 pref("extensions.zotero.keys.copySelectedItemsToClipboard", 'C');
+pref("extensions.zotero.keys.importFromClipboard", 'V');
 
 // Fulltext indexing
 pref("extensions.zotero.fulltext.textMaxLength", 500000);
