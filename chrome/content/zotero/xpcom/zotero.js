@@ -1853,7 +1853,7 @@ Zotero.DragDrop = {
 				dragData.dataType = 'text/x-moz-url';
 				var urls = [];
 				for (var i=0; i<len; i++) {
-					var url = dt.getData("application/x-moz-url", i).split("\n")[0];
+					var url = dt.getData("text/x-moz-url", i).split("\n")[0];
 					urls.push(url);
 				}
 				dragData.data = urls;
