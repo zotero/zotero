@@ -392,6 +392,11 @@ Zotero.Fulltext = new function(){
 			return false;
 		}
 		
+		var maxPages = Zotero.Prefs.get('fulltext.pdfMaxPages');
+		if (maxPages == 0) {
+			return false;
+		}
+		
 		var item = Zotero.Items.get(itemID);
 		var linkMode = item.getAttachmentLinkMode();
 		// If file is stored outside of Zotero, create a directory for the item
@@ -425,8 +430,6 @@ Zotero.Fulltext = new function(){
 		else {
 			Zotero.debug(this.pdfInfoName + " is not available");
 		}
-		
-		var maxPages = Zotero.Prefs.get('fulltext.pdfMaxPages');
 		
 		Zotero.debug('Running pdftotext -enc UTF-8 -nopgbrk '
 			+ (allPages ? '' : '-l ' + maxPages) + ' "' + file.path + '" "'
