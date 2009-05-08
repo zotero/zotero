@@ -240,6 +240,9 @@ Zotero.File = new function(){
 		}
 		
 		var onpageshow = function(){
+			// ignore spurious about:blank loads
+			if(browser.contentDocument.location.href == "about:blank") return;
+			
 			browser.removeEventListener("pageshow", onpageshow, false);
 			
 			var charset = browser.contentDocument.characterSet;
