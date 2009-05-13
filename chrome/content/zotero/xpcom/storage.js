@@ -248,6 +248,26 @@ Zotero.Sync.Storage = new function () {
 		
 		Zotero.Sync.Storage.checkForUpdatedFiles();
 		
+		var successFileCheckCallback = function (lastSyncTime) {
+			var downloadFiles = true;
+			if (lastSyncTime) {
+				var sql = "SELECT version FROM version WHERE schema='storage'";
+				var version = Zotero.DB.valueQuery(sql);
+				if (version == lastSyncTime) {
+					Zotero.debug("Last storage sync time hasn't changed -- skipping file download step");
+					downloadFiles = false;
+				}
+			}
+			
+			var activeDown = downloadFiles ? Zotero.Sync.Storage.downloadFiles() : false;
+			var activeUp = Zotero.Sync.Storage.uploadFiles();
+			if (!activeDown && !activeUp) {
+				_syncInProgress = false;
+				Zotero.Sync.Runner.reset();
+				Zotero.Sync.Runner.next();
+			}
+		};
+		
 		// If authorization header isn't cached, cache it before proceeding,
 		// since during testing Firefox 3.0.1 was being a bit amnesic with auth
 		// info for subsequent requests -- surely a better way to fix this
@@ -258,24 +278,12 @@ Zotero.Sync.Storage = new function () {
 					_cachedCredentials.authHeader = authHeader;
 				}
 				
-				var activeDown = Zotero.Sync.Storage.downloadFiles();
-				var activeUp = Zotero.Sync.Storage.uploadFiles();
-				if (!activeDown && !activeUp) {
-					_syncInProgress = false;
-					Zotero.Sync.Runner.reset();
-					Zotero.Sync.Runner.next();
-				}
+				_getSuccessFileTimestamp(successFileCheckCallback);
 			});
 			return;
 		}
 		
-		var activeDown = Zotero.Sync.Storage.downloadFiles();
-		var activeUp = Zotero.Sync.Storage.uploadFiles();
-		if (!activeDown && !activeUp) {
-			_syncInProgress = false;
-			Zotero.Sync.Runner.reset();
-			Zotero.Sync.Runner.next();
-		}
+		_getSuccessFileTimestamp(successFileCheckCallback);
 	}
 	
 	
@@ -614,6 +622,12 @@ Zotero.Sync.Storage = new function () {
 			_syncInProgress = true;
 		}
 		
+		var downloadFileIDs = _getFilesToDownload();
+		if (!downloadFileIDs) {
+			Zotero.debug("No files to download");
+			return false;
+		}
+		
 		// Check for active operations?
 		var queue = Zotero.Sync.Storage.QueueManager.get('download');
 		if (queue.isRunning()) {
@@ -621,12 +635,6 @@ Zotero.Sync.Storage = new function () {
 					+ "Zotero.Sync.Storage.downloadFiles()");
 		}
 		queue.reset();
-		
-		var downloadFileIDs = _getFilesToDownload();
-		if (!downloadFileIDs) {
-			Zotero.debug("No files to download");
-			return false;
-		}
 		
 		for each(var itemID in downloadFileIDs) {
 			var item = Zotero.Items.get(itemID);
@@ -745,6 +753,12 @@ Zotero.Sync.Storage = new function () {
 			_syncInProgress = true;
 		}
 		
+		var uploadFileIDs = _getFilesToUpload();
+		if (!uploadFileIDs) {
+			Zotero.debug("No files to upload");
+			return false;
+		}
+		
 		// Check for active operations?
 		var queue = Zotero.Sync.Storage.QueueManager.get('upload');
 		if (queue.isRunning()) {
@@ -752,12 +766,6 @@ Zotero.Sync.Storage = new function () {
 					+ "Zotero.Sync.Storage.uploadFiles()");
 		}
 		queue.reset();
-		
-		var uploadFileIDs = _getFilesToUpload();
-		if (!uploadFileIDs) {
-			Zotero.debug("No files to upload");
-			return false;
-		}
 		
 		Zotero.debug(uploadFileIDs.length + " file(s) to upload");
 		
@@ -1000,6 +1008,9 @@ Zotero.Sync.Storage = new function () {
 		
 		var sql = "UPDATE itemAttachments SET syncState=?";
 		Zotero.DB.query(sql, [syncState]);
+		
+		var sql = "DELETE FROM version WHERE schema='storage'";
+		Zotero.DB.query(sql);
 	}
 	
 	
@@ -1972,9 +1983,17 @@ Zotero.Sync.Storage = new function () {
 	}
 	
 	
-	this.finish = function (cancelled) {
+	this.finish = function (cancelled, skipSuccessFile) {
 		if (!_syncInProgress) {
 			throw ("Sync not in progress in Zotero.Sync.Storage.finish()");
+		}
+		
+		// Upload success file when done
+		if (!cancelled && !this.resyncOnFinish && !skipSuccessFile) {
+			_uploadSuccessFile(function () {
+				Zotero.Sync.Storage.finish(false, true);
+			});
+			return;
 		}
 		
 		Zotero.debug("Storage sync is complete");
@@ -1995,6 +2014,80 @@ Zotero.Sync.Storage = new function () {
 		}
 		
 		Zotero.Sync.Runner.next();
+	}
+	
+	
+	function _getSuccessFileTimestamp(callback) {
+		try {
+			var uri = Zotero.Sync.Storage.rootURI;
+			var successFileURI = uri.clone();
+			successFileURI.spec += "lastsync";
+			Zotero.Utilities.HTTP.doGet(successFileURI, function (req) {
+				var ts = undefined;
+				try {
+					Zotero.debug(req.responseText);
+					Zotero.debug(req.status);
+					var lastModified = req.getResponseHeader("Last-modified");
+					var date = new Date(lastModified);
+					Zotero.debug("Last successful storage sync was " + date);
+					var ts = Zotero.Date.toUnixTimestamp(date);
+				}
+				finally {
+					callback(ts);
+				}
+			});
+			return;
+		}
+		catch (e) {
+			Zotero.debug(e);
+			Components.utils.reportError(e);
+			callback();
+			return;
+		}
+	}
+	
+	
+	function _uploadSuccessFile(callback) {
+		try {
+			var uri = Zotero.Sync.Storage.rootURI;
+			var successFileURI = uri.clone();
+			successFileURI.spec += "lastsync";
+			Zotero.Utilities.HTTP.WebDAV.doPut(successFileURI, "", function (req) {
+				Zotero.debug(req.responseText);
+				Zotero.debug(req.status);
+				
+				switch (req.status) {
+					case 200:
+					case 201:
+					case 204:
+						_getSuccessFileTimestamp(function (ts) {
+							if (ts) {
+								var sql = "REPLACE INTO version VALUES ('storage', ?)";
+								Zotero.DB.query(sql, { int: ts });
+							}
+							if (callback) {
+								callback();
+							}
+						});
+						return;
+				}
+				
+				var msg = "Unexpected error code " + req.status + " uploading storage success file";
+				Zotero.debug(msg, 2);
+				Components.utils.reportError(msg);
+				if (callback) {
+					callback();
+				}
+			});
+		}
+		catch (e) {
+			Zotero.debug(e);
+			Components.utils.reportError(e);
+			if (callback) {
+				callback();
+			}
+			return;
+		}
 	}
 	
 	
