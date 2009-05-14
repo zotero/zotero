@@ -81,13 +81,16 @@
 <!ENTITY zotero.preferences.keys.toggleTagSelector "切換標籤選擇器">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "複製選取項目的引用文獻到剪貼簿">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "複製選取項目到剪貼簿">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
 <!ENTITY zotero.preferences.keys.overrideGlobal "嘗試蓋過相衝突的快速鍵">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "改變只會在新開的視窗中生效">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize common URL-rewriting proxy systems">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
+<!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
+<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
 <!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
 <!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
 <!ENTITY zotero.preferences.proxies.hostname "Hostname">

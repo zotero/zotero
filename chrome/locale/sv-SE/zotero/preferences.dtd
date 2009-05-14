@@ -81,13 +81,16 @@
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Växla etikettväljare">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiera valda citeringsposter till klippbordet">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiera valda poster till klippbordet">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Försök överskrida genvägar i konflikt">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Ändringar gäller bara i nya fönster">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize common URL-rewriting proxy systems">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
+<!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
+<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
 <!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
 <!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
 <!ENTITY zotero.preferences.proxies.hostname "Hostname">

@@ -60,6 +60,7 @@
 <!ENTITY zotero.toolbar.lookup.label				"Add Item by Identifier">
 <!ENTITY zotero.toolbar.removeItem.label				"Remove Item...">
 <!ENTITY zotero.toolbar.newCollection.label			"New Collection...">
+<!ENTITY zotero.toolbar.newGroup						"New Group...">
 <!ENTITY zotero.toolbar.newSubcollection.label			"New Subcollection...">
 <!ENTITY zotero.toolbar.newSavedSearch.label			"New Saved Search...">
 <!ENTITY zotero.toolbar.emptyTrash.label				"Empty Trash">

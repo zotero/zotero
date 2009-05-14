@@ -57,15 +57,19 @@
 <!ENTITY zotero.toolbar.newItem.label "Biểu ghi mới">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Khác">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Tạo một Biểu ghi mới cho Trang hiện tại">
+<!ENTITY zotero.toolbar.lookup.label "Add Item by Identifier">
 <!ENTITY zotero.toolbar.removeItem.label "Xóa biểu ghi...">
 <!ENTITY zotero.toolbar.newCollection.label "Bộ sưu tập mới...">
+<!ENTITY zotero.toolbar.newGroup "New Group...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Bô sưu tập con mới...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Tìm kiếm Định sẵn mới...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Hiển thị/Dấu Bộ-lọc-thẻ">
 <!ENTITY zotero.toolbar.actions.label "Hành động">
 <!ENTITY zotero.toolbar.import.label "Nhập khẩu...">
+<!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
 <!ENTITY zotero.toolbar.export.label "Xuất khẩu Thư viện...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
 <!ENTITY zotero.toolbar.timeline.label "Tạo Tuyến thời gian">
 <!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "Tùy chọn...">
@@ -84,6 +88,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Viết hoa đầu từ">
 
 <!ENTITY zotero.toolbar.note.standalone "Ghi chép Độc lập mới">
+<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
 <!ENTITY zotero.toolbar.attachment.linked "Đường dẫn tới Tập tin...">
 <!ENTITY zotero.toolbar.attachment.add "Tạo một Bản lưu của Tập tin...">
 <!ENTITY zotero.toolbar.attachment.weblink "Lưu Đường dẫn tới Trang hiện tại">
@@ -98,6 +103,8 @@
 <!ENTITY zotero.tagSelector.clearAll "Bỏ tất cả lựa chọn">
 <!ENTITY zotero.tagSelector.renameTag "Đổi tên Thẻ...">
 <!ENTITY zotero.tagSelector.deleteTag "Xóa Thẻ...">
+
+<!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
 
 <!ENTITY zotero.selectitems.title "Chọn các Biểu ghi">
 <!ENTITY zotero.selectitems.intro.label "Chọn những biểu ghi bạn muốn thêm vào thư viện của bạn">
@@ -172,3 +179,27 @@
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
 <!ENTITY zotero.recognizePDF.itemName.label "Item Name">
 <!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
+
+<!ENTITY zotero.rtfScan.title "RTF Scan">
+<!ENTITY zotero.rtfScan.cancel.label "Cancel">
+<!ENTITY zotero.rtfScan.citation.label "Citation">
+<!ENTITY zotero.rtfScan.itemName.label "Item Name">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
+<!ENTITY zotero.rtfScan.introPage.label "Introduction">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
+<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
+<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
+<!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
+<!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
+<!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
+<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
+<!ENTITY zotero.rtfScan.inputFile.label "Input File">
+<!ENTITY zotero.rtfScan.outputFile.label "Output File">
+
+<!ENTITY zotero.file.choose.label "Choose File...">
+<!ENTITY zotero.file.noneSelected.label "No file selected">

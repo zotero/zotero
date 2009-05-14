@@ -57,15 +57,19 @@
 <!ENTITY zotero.toolbar.newItem.label "ไอเทมใหม่">
 <!ENTITY zotero.toolbar.moreItemTypes.label "มากกว่านั้น">
 <!ENTITY zotero.toolbar.newItemFromPage.label "สร้างไอเทมใหม่จากหน้าปัจจุบัน">
+<!ENTITY zotero.toolbar.lookup.label "Add Item by Identifier">
 <!ENTITY zotero.toolbar.removeItem.label "ลบไอเทม...">
 <!ENTITY zotero.toolbar.newCollection.label "คอลเลคชันใหม่...">
+<!ENTITY zotero.toolbar.newGroup "New Group...">
 <!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "บันทึกผลการค้นหาใหม่...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
 <!ENTITY zotero.toolbar.actions.label "Actions">
 <!ENTITY zotero.toolbar.import.label "นำเข้า...">
+<!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
 <!ENTITY zotero.toolbar.export.label "Export Library...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
 <!ENTITY zotero.toolbar.timeline.label "Create Timeline">
 <!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "Preferences...">
@@ -84,6 +88,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Title Case">
 
 <!ENTITY zotero.toolbar.note.standalone "New Standalone Note">
+<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
 <!ENTITY zotero.toolbar.attachment.linked "ลิ้งค์ไปยังแฟ้ม...">
 <!ENTITY zotero.toolbar.attachment.add "Store Copy of File...">
 <!ENTITY zotero.toolbar.attachment.weblink "Save Link to Current Page">
@@ -98,6 +103,8 @@
 <!ENTITY zotero.tagSelector.clearAll "Deselect all">
 <!ENTITY zotero.tagSelector.renameTag "Rename Tag...">
 <!ENTITY zotero.tagSelector.deleteTag "Delete Tag...">
+
+<!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
 
 <!ENTITY zotero.selectitems.title "Select Items">
 <!ENTITY zotero.selectitems.intro.label "Select which items you'd like to add to your library">
@@ -172,3 +179,27 @@
 <!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
 <!ENTITY zotero.recognizePDF.itemName.label "Item Name">
 <!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
+
+<!ENTITY zotero.rtfScan.title "RTF Scan">
+<!ENTITY zotero.rtfScan.cancel.label "Cancel">
+<!ENTITY zotero.rtfScan.citation.label "Citation">
+<!ENTITY zotero.rtfScan.itemName.label "Item Name">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
+<!ENTITY zotero.rtfScan.introPage.label "Introduction">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
+<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
+<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
+<!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
+<!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
+<!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
+<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
+<!ENTITY zotero.rtfScan.inputFile.label "Input File">
+<!ENTITY zotero.rtfScan.outputFile.label "Output File">
+
+<!ENTITY zotero.file.choose.label "Choose File...">
+<!ENTITY zotero.file.noneSelected.label "No file selected">
