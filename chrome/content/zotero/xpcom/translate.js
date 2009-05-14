@@ -265,8 +265,8 @@ Zotero.Translator.prototype.logError = function(message, type, line, lineNumber,
  *         setItems). setting items disables export of collections.
  * path - the path to the target; for web, this is the same as location
  * string - the string content to be used as a file.
- * saveItem - whether new items should be saved to the database. defaults to
- *            true; set using second argument of constructor.
+ * libraryID - libraryID (e.g., of a group) of saved database items. null for local items,
+ *           or false not to save. defaults to null; set using second argument of constructor.
  * newItems - items created when translate() was called
  * newCollections - collections created when translate() was called
  *
@@ -305,7 +305,11 @@ Zotero.Translator.prototype.logError = function(message, type, line, lineNumber,
  *
  * output - export output (if no location has been specified)
  */
-Zotero.Translate = function(type, saveItem, saveAttachments) {
+Zotero.Translate = function(type) {
+	if (arguments.length > 1) {
+		throw ("Zotero.Translate only takes one parameter");
+	}
+	
 	this.type = type;
 	
 	// import = 0001 = 1
@@ -334,9 +338,6 @@ Zotero.Translate = function(type, saveItem, saveAttachments) {
 		}
 	}
 	this._numericTypes = this._numericTypes.substr(1);
-	
-	this.saveItem = !(saveItem === false);
-	this.saveAttachments = !(saveAttachments === false);
 	
 	this._handlers = new Array();
 	this._streams = new Array();
@@ -606,10 +607,15 @@ Zotero.Translate.prototype._loadTranslator = function() {
 	return true;
 }
 
-/*
+/**
  * does the actual translation
+ *
+ * @param 	{NULL|Integer|FALSE}	[libraryID=null]		Library in which to save items,
+ *																or NULL for default library;
+ *																if FALSE, don't save items
+ * @param 	{Boolean}				[saveAttachments=true]
  */
-Zotero.Translate.prototype.translate = function() {
+Zotero.Translate.prototype.translate = function(libraryID, saveAttachments) {
 	/*
 	 * initialize properties
 	 */
@@ -627,6 +633,24 @@ Zotero.Translate.prototype.translate = function() {
 		// searches operate differently, because we could have an array of
 		// translators and have to go through each
 		throw("cannot translate: no location specified");
+	}
+	
+	this.libraryID = (libraryID == undefined) ? null : libraryID;
+	this.saveAttachments = !(saveAttachments === false);
+	this.saveFiles = this.saveAttachments;
+	
+	// If group filesEditable==false, don't save attachments
+	if (this.libraryID) {
+		var type = Zotero.Libraries.getType(this.libraryID);
+		switch (type) {
+			case 'group':
+				var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
+				var group = Zotero.Groups.get(groupID);
+				if (!group.filesEditable) {
+					this.saveFiles = false;
+				}
+				break;
+		}
 	}
 	
 	// erroring should end
@@ -750,7 +774,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 
 	// for loading other translators and accessing their methods
 	this._sandbox.Zotero.loadTranslator = function(type) {
-		var translation = new Zotero.Translate(type, false);
+		var translation = new Zotero.Translate(type);
 		translation._parentTranslator = me;
 		
 		if(type == "export" && (this.type == "web" || this.type == "search")) {
@@ -781,7 +805,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 				}
 			}
 			
-			return translation.translate()
+			return translation.translate(false);
 		};
 		safeTranslator.getTranslatorObject = function() {
 			// load the translator into our sandbox
@@ -1134,7 +1158,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 	
 	this._itemsDone = true;
 	
-	if(!this.saveItem) {	// if we're not supposed to save the item, just
+	if(this.libraryID === false) {	// if we're not supposed to save the item, just
 							// return the item array
 		
 		// if a parent sandbox exists, use complete() function from that sandbox
@@ -1151,7 +1175,8 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 	var type = (item.itemType ? item.itemType : "webpage");
 	
 	if(type == "note") {	// handle notes differently
-		var newItem = new Zotero.Item(false, 'note');
+		var newItem = new Zotero.Item('note');
+		newItem.libraryID = this.libraryID ? this.libraryID : null;
 		newItem.setNote(item.note);
 		var myID = newItem.save();
 		// re-retrieve the item
@@ -1248,7 +1273,8 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 			}
 		} else {
 			var typeID = Zotero.ItemTypes.getID(type);
-			var newItem = new Zotero.Item(false, typeID);
+			var newItem = new Zotero.Item(typeID);
+			newItem.libraryID = this.libraryID ? this.libraryID : null;
 		}
 		
 		// makes looping through easier
@@ -1280,7 +1306,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 						}
 						
 						// Single-field mode
-						if (data[j].fieldMode == 1) {
+						if (data[j].fieldMode && data[j].fieldMode == 1) {
 							var fields = {
 								lastName: data[j].lastName,
 								fieldMode: 1
@@ -1294,14 +1320,19 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 							};
 						}
 						
+						var creator = null;
 						var creatorDataID = Zotero.Creators.getDataID(fields);
 						if(creatorDataID) {
-							var linkedCreators = Zotero.Creators.getCreatorsWithData(creatorDataID);
-							// TODO: support identical creators via popup? ugh...
-							var creatorID = linkedCreators[0];
-							var creator = Zotero.Creators.get(creatorID);
-						} else {
-							var creator = new Zotero.Creator;
+							var linkedCreators = Zotero.Creators.getCreatorsWithData(creatorDataID, this.libraryID);
+							if (linkedCreators) {
+								// TODO: support identical creators via popup? ugh...
+								var creatorID = linkedCreators[0];
+								creator = Zotero.Creators.get(creatorID);
+							}
+						}
+						if(!creator) {
+							creator = new Zotero.Creator;
+							creator.libraryID = this.libraryID ? this.libraryID : null;
 							creator.setFields(fields);
 							var creatorID = creator.save();
 						}
@@ -1375,7 +1406,8 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		// handle notes
 		if(item.notes) {
 			for each(var note in item.notes) {
-				var myNote = new Zotero.Item(false, 'note');
+				var myNote = new Zotero.Item('note');
+				myNote.libraryID = this.libraryID ? this.libraryID : null;
 				myNote.setNote(note.note);
 				if (myID) {
 					myNote.setSource(myID);
@@ -1423,9 +1455,9 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 									Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
 								}
 							}
-						} else if(attachment.document
+						} else if(this.saveFiles && (attachment.document
 						|| (attachment.mimeType && attachment.mimeType == "text/html")
-						|| downloadAssociatedFiles) {
+						|| downloadAssociatedFiles)) {
 						
 							// if snapshot is not explicitly set to false, retrieve snapshot
 							if(attachment.document) {
@@ -1438,8 +1470,8 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 								}
 							// Save attachment if snapshot pref enabled or not HTML
 							// (in which case downloadAssociatedFiles applies)
-							} else if(automaticSnapshots || !attachment.mimeType
-									|| attachment.mimeType != "text/html") {
+							} else if(this.saveFiles && (automaticSnapshots || !attachment.mimeType
+									|| attachment.mimeType != "text/html")) {
 								var mimeType = null;
 								var title = null;
 

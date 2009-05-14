@@ -31,12 +31,14 @@ Zotero.Ingester = new function() {
 			getService(Components.interfaces.nsIWindowWatcher).activeWindow;
 		
 		frontWindow.Zotero_Browser.progress.show();
-		var saveLocation = null;
+		var libraryID = null;
+		var collection = null;
 		try {
-			saveLocation = frontWindow.ZoteroPane.getSelectedCollection();
+			libraryID = frontWindow.ZoteroPane.getSelectedLibraryID();
+			collection = frontWindow.ZoteroPane.getSelectedCollection();
 		} catch(e) {}
-		translation.setHandler("itemDone", function(obj, item) { frontWindow.Zotero_Browser.itemDone(obj, item, saveLocation) });
-		translation.setHandler("done", function(obj, item) { frontWindow.Zotero_Browser.finishScraping(obj, item, saveLocation) });
+		translation.setHandler("itemDone", function(obj, item) { frontWindow.Zotero_Browser.itemDone(obj, item, collection) });
+		translation.setHandler("done", function(obj, item) { frontWindow.Zotero_Browser.finishScraping(obj, item, collection) });
 		
 		// attempt to retrieve translators
 		var translators = translation.getTranslators();
@@ -48,7 +50,7 @@ Zotero.Ingester = new function() {
 		
 		// translate using first available
 		translation.setTranslator(translators[0]);
-		translation.translate();
+		translation.translate(libraryID);
 	}
 }
 

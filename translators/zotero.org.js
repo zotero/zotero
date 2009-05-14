@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"zotero.org",
 	"creator":"Dan Stillman",
-	"target":"^https?://[^/]*zotero\\.org/[^/]+/[0-9]+/(items(/?[0-9]+?)?|items/collection/[0-9]+)(\\?.*)?$",
+	"target":"^https?://[^/]*zotero\\.net/(groups/)?[^/]+/[0-9]+/(items(/?[0-9]+?)?|items/collection/[0-9]+)(\\?.*)?$",
 	"minVersion":"1.0",
 	"maxVersion":"",
 	"priority":100,
@@ -16,7 +16,7 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 			if (prefix == 'x') return namespace; else return null;
 		} : null;
-	var a = doc.evaluate('//div[@id="login-links"]/a[text()="My Library"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var a = doc.evaluate('//li[@class="topnav"]/a[text()="My Library"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	// Skip current user's library
 	if (a && url.indexOf(a.href.match(/(^.+)\/items/)[1]) == 0) {
 		return false;
@@ -131,10 +131,20 @@ function xmlToItem(xmlItem) {
 
 }
 
+
 function doWeb(doc, url) {
-	var userID = url.match(/^http:\/\/[^\/]*zotero\.org\/[^\/]+\/([0-9]+)/)[1];
-	var apiPrefix = "https://api.zotero.org/users/" + userID + "/";
-	var itemRe = /^http:\/\/[^\/]*zotero\.org\/[^\/]+\/[0-9]+\/items\/([0-9]+)/;
+	if (url.indexOf("/groups/") == -1) {
+		var userID = url.match(/^http:\/\/[^\/]*zotero\.net\/[^\/]+\/([0-9]+)/)[1];
+		var apiPrefix = "https://apidev.zotero.org/users/" + userID + "/";
+		var itemRe = /^http:\/\/[^\/]*zotero\.net\/[^\/]+\/[0-9]+\/items\/([0-9]+)/;
+	} else {
+		//var groupID = url.match(/^http:\/\/[^\/]*zotero\.net\/groups\/[^\/]+\/([0-9]+)/)[1]; // need slug url fix
+		var groupID = url.match(/^http:\/\/[^\/]*zotero\.net\/groups\/([0-9]+)/)[1];
+		var apiPrefix = "https://apidev.zotero.org/groups/" + groupID + "/";
+		//var itemRe = /^http:\/\/[^\/]*zotero\.net\/groups\/[^\/]+\/[0-9]+\/items\/([0-9]+)/;
+		var itemRe = /^http:\/\/[^\/]*zotero\.net\/groups\/[0-9]+\/items\/([0-9]+)/;
+	}
+	
 	var nsAtom = new Namespace('http://www.w3.org/2005/Atom');
 	var nsZXfer = new Namespace('http://zotero.org/namespaces/transfer');
 	
@@ -143,7 +153,7 @@ function doWeb(doc, url) {
 		var nsResolver = namespace ? function(prefix) {
 				if (prefix == 'x') return namespace; else return null;
 			} : null;
-		var column = doc.evaluate('//table[@id="field-table"]//td[1][@class="title"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var column = doc.evaluate('//table[@id="field-table"]//td[1][@class="title"][not(contains(./a, "Unpublished Note"))]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var elems = [], td;
 		while (td = column.iterateNext()) {
 			elems.push(td);

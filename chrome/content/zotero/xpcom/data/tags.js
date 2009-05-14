@@ -73,25 +73,39 @@ Zotero.Tags = new function() {
 	/*
 	 * Returns the tagID matching given tag and type
 	 */
-	function getID(name, type) {
+	function getID(name, type, libraryID) {
 		name = Zotero.Utilities.prototype.trim(name);
 		var lcname = name.toLowerCase();
 		
-		if (_tags[type] && _tags[type]['_' + lcname]) {
-			return _tags[type]['_' + lcname];
+		if (!libraryID) {
+			libraryID = 0;
+		}
+		
+		if (_tags[libraryID] && _tags[libraryID][type] && _tags[libraryID][type]['_' + lcname]) {
+			return _tags[libraryID][type]['_' + lcname];
 		}
 		
 		// FIXME: COLLATE NOCASE doesn't work for Unicode characters, so this
 		// won't find Äbc if "äbc" is entered and will allow a duplicate tag
 		// to be created
-		var sql = 'SELECT tagID FROM tags WHERE name=? AND type=?';
-		var tagID = Zotero.DB.valueQuery(sql, [name, type]);
-		
+		var sql = "SELECT tagID FROM tags WHERE name=? AND type=? AND libraryID";
+		var params = [name, type];
+		if (libraryID) {
+			sql += "=?";
+			params.push(libraryID);
+		}
+		else {
+			sql += " IS NULL";
+		}
+		var tagID = Zotero.DB.valueQuery(sql, params);
 		if (tagID) {
-			if (!_tags[type]) {
-				_tags[type] = [];
+			if (!_tags[libraryID]) {
+				_tags[libraryID] = {};
 			}
-			_tags[type]['_' + lcname] = tagID;
+			if (!_tags[libraryID][type]) {
+				_tags[libraryID][type] = [];
+			}
+			_tags[libraryID][type]['_' + lcname] = tagID;
 		}
 		
 		return tagID;
@@ -101,20 +115,36 @@ Zotero.Tags = new function() {
 	/*
 	 * Returns all tagIDs for this tag (of all types)
 	 */
-	function getIDs(name) {
+	function getIDs(name, libraryID) {
 		name = Zotero.Utilities.prototype.trim(name);
-		var sql = 'SELECT tagID FROM tags WHERE name=?';
-		return Zotero.DB.columnQuery(sql, [name]);
+		var sql = "SELECT tagID FROM tags WHERE name=? AND libraryID";
+		var params = [name];
+		if (libraryID) {
+			sql += "=?";
+			params.push(libraryID);
+		}
+		else {
+			sql += " IS NULL";
+		}
+		return Zotero.DB.columnQuery(sql, params);
 	}
 	
 	
 	/*
 	 * Returns an array of tag types for tags matching given tag
 	 */
-	function getTypes(name) {
+	function getTypes(name, libraryID) {
 		name = Zotero.Utilities.prototype.trim(name);
-		var sql = 'SELECT type FROM tags WHERE name=?';
-		return Zotero.DB.columnQuery(sql, [name]);
+		var sql = "SELECT type FROM tags WHERE name=? AND libraryID";
+		var params = [name];
+		if (libraryID) {
+			sql += "=?";
+			params.push(libraryID);
+		}
+		else {
+			sql += " IS NULL";
+		}
+		return Zotero.DB.columnQuery(sql, params);
 	}
 	
 	
@@ -123,12 +153,25 @@ Zotero.Tags = new function() {
 	 *
 	 * _types_ is an optional array of tag types to fetch
 	 */
-	function getAll(types) {
-		var sql = "SELECT tagID, name FROM tags ";
-		if (types) {
-			sql += "WHERE type IN (" + types.join() + ") ";
+	function getAll(types, libraryID) {
+		var sql = "SELECT tagID, name FROM tags WHERE libraryID";
+		var params = [];
+		if (libraryID) {
+			sql += "=?";
+			params.push(libraryID);
 		}
-		var tags = Zotero.DB.query(sql);
+		else {
+			sql += " IS NULL";
+		}
+		if (types) {
+			sql += " AND type IN (" + types.join() + ")";
+		}
+		if (params.length) {
+			var tags = Zotero.DB.query(sql, params);
+		}
+		else {
+			var tags = Zotero.DB.query(sql);
+		}
 		if (!tags) {
 			return {};
 		}
@@ -244,6 +287,7 @@ Zotero.Tags = new function() {
 		Zotero.DB.beginTransaction();
 		
 		var tagObj = this.get(tagID);
+		var oldLibraryID = tagObj.libraryID;
 		var oldName = tagObj.name;
 		var oldType = tagObj.type;
 		var notifierData = {};
@@ -278,8 +322,8 @@ Zotero.Tags = new function() {
 			// Manual purge of old tag
 			sql = "DELETE FROM tags WHERE tagID=?";
 			Zotero.DB.query(sql, tagID);
-			if (_tags[oldType]) {
-				delete _tags[oldType]['_' + oldName];
+			if (_tags[oldLibraryID] && _tags[oldLibraryID][oldType]) {
+				delete _tags[oldLibraryID][oldType]['_' + oldName];
 			}
 			delete this._objectCache[tagID];
 			Zotero.Notifier.trigger('delete', 'tag', tagID, notifierData);
@@ -426,8 +470,9 @@ Zotero.Tags = new function() {
 		for each(var id in ids) {
 			var tag = this._objectCache[id];
 			delete this._objectCache[id];
-			if (tag && _tags[tag.type]) {
-				delete _tags[tag.type]['_' + tag.name];
+			var libraryID = tag.libraryID ? tag.libraryID : 0;
+			if (tag && _tags[libraryID] && _tags[libraryID][tag.type]) {
+				delete _tags[libraryID][tag.type]['_' + tag.name];
 			}
 		}
 	}

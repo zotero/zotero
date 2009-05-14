@@ -30,8 +30,13 @@ var xpcomFiles = [
 	'data/collections',
 	'data/creator',
 	'data/creators',
+	'data/group',
+	'data/groups',
 	'data/itemFields',
 	'data/notes',
+	'data/libraries',
+	'data/relation',
+	'data/relations',
 	'data/tag',
 	'data/tags',
 	'db',
@@ -57,6 +62,7 @@ var xpcomFiles = [
 	'storage',
 	'timeline',
 	'translate',
+	'uri',
 	'utilities',
 	'zeroconf'
 ];

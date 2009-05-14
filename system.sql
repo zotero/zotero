@@ -1,4 +1,4 @@
--- 22
+-- 24
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -275,6 +275,7 @@ INSERT INTO fields VALUES (114,'proceedingsTitle',NULL);
 INSERT INTO fields VALUES (115,'bookTitle',NULL);
 INSERT INTO fields VALUES (116,'shortTitle',NULL);
 INSERT INTO fields VALUES (117,'docketNumber',NULL);
+INSERT INTO fields VALUES (118,'numPages',NULL);
 
 INSERT INTO itemTypeFields VALUES (2, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (2, 90, NULL, 2);
@@ -286,7 +287,7 @@ INSERT INTO itemTypeFields VALUES (2, 6, NULL, 7);
 INSERT INTO itemTypeFields VALUES (2, 7, NULL, 8);
 INSERT INTO itemTypeFields VALUES (2, 8, NULL, 9);
 INSERT INTO itemTypeFields VALUES (2, 14, NULL, 10);
-INSERT INTO itemTypeFields VALUES (2, 10, NULL, 11);
+INSERT INTO itemTypeFields VALUES (2, 118, NULL, 11);
 INSERT INTO itemTypeFields VALUES (2, 87, NULL, 12);
 INSERT INTO itemTypeFields VALUES (2, 11, NULL, 13);
 INSERT INTO itemTypeFields VALUES (2, 116, NULL, 14);
@@ -408,7 +409,7 @@ INSERT INTO itemTypeFields VALUES (9, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (9, 66, NULL, 3);
 INSERT INTO itemTypeFields VALUES (9, 7, NULL, 4);
 INSERT INTO itemTypeFields VALUES (9, 14, NULL, 5);
-INSERT INTO itemTypeFields VALUES (9, 10, NULL, 6);
+INSERT INTO itemTypeFields VALUES (9, 118, NULL, 6);
 INSERT INTO itemTypeFields VALUES (9, 87, NULL, 7);
 INSERT INTO itemTypeFields VALUES (9, 116, NULL, 8);
 INSERT INTO itemTypeFields VALUES (9, 1, NULL, 9);
@@ -1253,3 +1254,4 @@ INSERT INTO "syncObjectTypes" VALUES(2, 'creator');
 INSERT INTO "syncObjectTypes" VALUES(3, 'item');
 INSERT INTO "syncObjectTypes" VALUES(4, 'search');
 INSERT INTO "syncObjectTypes" VALUES(5, 'tag');
+INSERT INTO "syncObjectTypes" VALUES(6, 'relations');

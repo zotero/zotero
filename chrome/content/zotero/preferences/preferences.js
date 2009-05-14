@@ -329,8 +329,7 @@ function handleSyncReset(action) {
 						
 						var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
 								.getService(Components.interfaces.nsIAppStartup);
-						appStartup.quit(Components.interfaces.nsIAppStartup.eRestart);
-						appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
+						appStartup.quit(Components.interfaces.nsIAppStartup.eRestart | Components.interfaces.nsIAppStartup.eAttemptQuit);
 					};
 					
 					// TODO: better way of checking for an active session?

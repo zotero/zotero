@@ -1,7 +1,7 @@
--- 50
+-- 53
 
--- This file creates tables containing user-specific data -- any changes made
--- here must be mirrored in transition steps in schema.js::_migrateSchema()
+-- This file creates tables containing user-specific data for new users --
+-- any changes made here must be mirrored in transition steps in schema.js::_migrateSchema()
 
 
 CREATE TABLE version (
@@ -20,11 +20,16 @@ CREATE TABLE settings (
 -- The foundational table; every item collected has a unique record here
 CREATE TABLE items (
     itemID INTEGER PRIMARY KEY,
-    itemTypeID INT,
-    dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP,
-    dateModified DATETIME DEFAULT CURRENT_TIMESTAMP,
-    key TEXT NOT NULL UNIQUE
+    itemTypeID INT NOT NULL,
+    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    libraryID INT,
+    key TEXT NOT NULL,
+    UNIQUE (libraryID, key),
+    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID)
 );
+
 
 CREATE TABLE itemDataValues (
     valueID INTEGER PRIMARY KEY,
@@ -42,7 +47,7 @@ CREATE TABLE itemData (
     FOREIGN KEY (valueID) REFERENCES itemDataValues(valueID)
 );
 
--- Note data for note items
+-- Note data for note and attachment items
 CREATE TABLE itemNotes (
     itemID INTEGER PRIMARY KEY,
     sourceItemID INT,
@@ -71,18 +76,19 @@ CREATE INDEX itemAttachments_sourceItemID ON itemAttachments(sourceItemID);
 CREATE INDEX itemAttachments_mimeType ON itemAttachments(mimeType);
 CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState);
 
--- Individual entries for each tag
 CREATE TABLE tags (
     tagID INTEGER PRIMARY KEY,
-    name TEXT COLLATE NOCASE,
+    name TEXT NOT NULL COLLATE NOCASE,
     type INT NOT NULL,
-    dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    key TEXT NOT NULL UNIQUE,
-    UNIQUE (name, type)
+    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    libraryID INT,
+    key TEXT NOT NULL,
+    UNIQUE (libraryID, name, type),
+    UNIQUE (libraryID, key)
 );
 
--- Associates items with keywords
 CREATE TABLE itemTags (
     itemID INT,
     tagID INT,
@@ -101,18 +107,20 @@ CREATE TABLE itemSeeAlso (
 );
 CREATE INDEX itemSeeAlso_linkedItemID ON itemSeeAlso(linkedItemID);
 
-
 CREATE TABLE creators (
     creatorID INTEGER PRIMARY KEY,
     creatorDataID INT NOT NULL,
-    dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    key TEXT NOT NULL UNIQUE,
+    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    libraryID INT,
+    key TEXT NOT NULL,
+    UNIQUE (libraryID, key),
     FOREIGN KEY (creatorDataID) REFERENCES creatorData(creatorDataID)
 );
 CREATE INDEX creators_creatorDataID ON creators(creatorDataID);
 
--- Each individual creator
+-- Unique creator data, which can be associated with more than one creator
 CREATE TABLE creatorData (
     creatorDataID INTEGER PRIMARY KEY,
     firstName TEXT,
@@ -122,7 +130,6 @@ CREATE TABLE creatorData (
     birthYear INT
 );
 
--- Associates single or multiple creators to items
 CREATE TABLE itemCreators (
     itemID INT,
     creatorID INT,
@@ -134,18 +141,19 @@ CREATE TABLE itemCreators (
     FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID)
 );
 
--- Collections for holding items
 CREATE TABLE collections (
     collectionID INTEGER PRIMARY KEY,
-    collectionName TEXT,
-    parentCollectionID INT,
-    dateAdded DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    key TEXT NOT NULL UNIQUE,
+    collectionName TEXT NOT NULL,
+    parentCollectionID INT DEFAULT NULL,
+    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    libraryID INT,
+    key TEXT NOT NULL,
+    UNIQUE (libraryID, key),
     FOREIGN KEY (parentCollectionID) REFERENCES collections(collectionID)
 );
 
--- Associates items with the various collections they belong to
 CREATE TABLE collectionItems (
     collectionID INT,
     itemID INT,
@@ -158,10 +166,13 @@ CREATE INDEX itemID ON collectionItems(itemID);
 
 CREATE TABLE savedSearches (
     savedSearchID INTEGER PRIMARY KEY,
-    savedSearchName TEXT,
-    dateAdded DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    key TEXT NOT NULL UNIQUE
+    savedSearchName TEXT NOT NULL,
+    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    libraryID INT,
+    key TEXT NOT NULL,
+    UNIQUE (libraryID, key)
 );
 
 CREATE TABLE savedSearchConditions (
@@ -178,6 +189,44 @@ CREATE TABLE savedSearchConditions (
 CREATE TABLE deletedItems (
     itemID INTEGER PRIMARY KEY,
     dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE relations (
+    libraryID INT NOT NULL,
+    subject TEXT NOT NULL,
+    predicate TEXT NOT NULL,
+    object TEXT NOT NULL,
+    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (subject, predicate, object)
+);
+CREATE INDEX relations_object ON relations(object);
+
+CREATE TABLE libraries (
+    libraryID INTEGER PRIMARY KEY,
+    libraryType TEXT NOT NULL
+);
+
+CREATE TABLE users (
+    userID INTEGER PRIMARY KEY,
+    username TEXT NOT NULL
+);
+
+CREATE TABLE groups (
+    groupID INTEGER PRIMARY KEY,
+    libraryID INT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    editable INT NOT NULL,
+    filesEditable INT NOT NULL,
+    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID)
+);
+
+CREATE TABLE groupItems (
+    itemID INTEGER PRIMARY KEY,
+    createdByUserID INT NOT NULL,
+    lastModifiedByUserID INT NOT NULL,
+    FOREIGN KEY (createdByUserID) REFERENCES users(userID),
+    FOREIGN KEY (lastModifiedByUserID) REFERENCES users(userID)
 );
 
 CREATE TABLE fulltextItems (
@@ -207,15 +256,19 @@ CREATE INDEX fulltextItemWords_itemID ON fulltextItemWords(itemID);
 
 CREATE TABLE syncDeleteLog (
     syncObjectTypeID INT NOT NULL,
-    key TEXT NOT NULL UNIQUE,
+    libraryID INT,
+    key TEXT NOT NULL,
     timestamp INT NOT NULL,
+    UNIQUE (libraryID, key),
     FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)
 );
 CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp);
 
 CREATE TABLE storageDeleteLog (
-    key TEXT PRIMARY KEY,
-    timestamp INT NOT NULL
+    libraryID INT,
+    key TEXT NOT NULL,
+    timestamp INT NOT NULL,
+    PRIMARY KEY (libraryID, key)
 );
 CREATE INDEX storageDeleteLog_timestamp ON storageDeleteLog(timestamp);
 

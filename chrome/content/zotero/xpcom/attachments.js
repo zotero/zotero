@@ -56,7 +56,11 @@ Zotero.Attachments = new function(){
 		
 		try {
 			// Create a new attachment
-			var attachmentItem = new Zotero.Item(false, 'attachment');
+			var attachmentItem = new Zotero.Item('attachment');
+			if (sourceItemID) {
+				var parentItem = Zotero.Items.get(sourceItemID);
+				attachmentItem.libraryID = parentItem.libraryID;
+			}
 			attachmentItem.setField('title', title);
 			attachmentItem.setSource(sourceItemID);
 			attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_FILE;
@@ -128,7 +132,11 @@ Zotero.Attachments = new function(){
 		
 		try {
 			// Create a new attachment
-			var attachmentItem = new Zotero.Item(false, 'attachment');
+			var attachmentItem = new Zotero.Item('attachment');
+			if (sourceItemID) {
+				var parentItem = Zotero.Items.get(sourceItemID);
+				attachmentItem.libraryID = parentItem.libraryID;
+			}
 			attachmentItem.setField('title', title);
 			attachmentItem.setField('url', url);
 			attachmentItem.setSource(sourceItemID);
@@ -181,6 +189,13 @@ Zotero.Attachments = new function(){
 	
 	function importFromURL(url, sourceItemID, forceTitle, forceFileBaseName, parentCollectionIDs){
 		Zotero.debug('Importing attachment from URL');
+		
+		if (sourceItemID && parentCollectionIDs) {
+			var msg = "parentCollectionIDs is ignored when sourceItemID is set in Zotero.Attachments.importFromURL()";
+			Zotero.debug(msg, 2);
+			Components.utils.reportError(msg);
+			parentCollectionIDs = undefined;
+		}
 		
 		// Throw error on invalid URLs
 		//
@@ -264,7 +279,11 @@ Zotero.Attachments = new function(){
 				
 				try {
 					// Create a new attachment
-					var attachmentItem = new Zotero.Item(false, 'attachment');
+					var attachmentItem = new Zotero.Item('attachment');
+					if (sourceItemID) {
+						var parentItem = Zotero.Items.get(sourceItemID);
+						attachmentItem.libraryID = parentItem.libraryID;
+					}
 					attachmentItem.setField('title', title);
 					attachmentItem.setField('url', url);
 					attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
@@ -292,6 +311,7 @@ Zotero.Attachments = new function(){
 					wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
 						try {
 							var str = Zotero.File.getSample(file);
+							
 							if (mimeType == 'application/pdf' &&
 									Zotero.MIME.sniffForMIMEType(str) != 'application/pdf') {
 								Zotero.debug("Downloaded PDF did not have MIME type "
@@ -432,6 +452,13 @@ Zotero.Attachments = new function(){
 	function linkFromDocument(document, sourceItemID, parentCollectionIDs){
 		Zotero.debug('Linking attachment from document');
 		
+		if (sourceItemID && parentCollectionIDs) {
+			var msg = "parentCollectionIDs is ignored when sourceItemID is set in Zotero.Attachments.linkFromDocument()";
+			Zotero.debug(msg, 2);
+			Components.utils.reportError(msg);
+			parentCollectionIDs = undefined;
+		}
+		
 		var url = document.location.href;
 		var title = document.title; // TODO: don't use Mozilla-generated title for images, etc.
 		var mimeType = document.contentType;
@@ -475,6 +502,13 @@ Zotero.Attachments = new function(){
 	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs, callback) {
 		Zotero.debug('Importing attachment from document');
 		
+		if (sourceItemID && parentCollectionIDs) {
+			var msg = "parentCollectionIDs is ignored when sourceItemID is set in Zotero.Attachments.importFromDocument()";
+			Zotero.debug(msg, 2);
+			Components.utils.reportError(msg);
+			parentCollectionIDs = undefined;
+		}
+		
 		var url = document.location.href;
 		var title = forceTitle ? forceTitle : document.title;
 		var mimeType = document.contentType;
@@ -496,7 +530,11 @@ Zotero.Attachments = new function(){
 		
 		try {
 			// Create a new attachment
-			var attachmentItem = new Zotero.Item(false, 'attachment');
+			var attachmentItem = new Zotero.Item('attachment');
+			if (sourceItemID) {
+				var parentItem = Zotero.Items.get(sourceItemID);
+				attachmentItem.libraryID = parentItem.libraryID;
+			}
 			attachmentItem.setField('title', title);
 			attachmentItem.setField('url', url);
 			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
@@ -679,7 +717,7 @@ Zotero.Attachments = new function(){
 		
 		try {
 			// Create a new attachment
-			var attachmentItem = new Zotero.Item(false, 'attachment');
+			var attachmentItem = new Zotero.Item('attachment');
 			attachmentItem.setField('title', title);
 			attachmentItem.setField('url', url);
 			attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
@@ -1118,7 +1156,14 @@ Zotero.Attachments = new function(){
 	function _addToDB(file, url, title, linkMode, mimeType, charsetID, sourceItemID) {
 		Zotero.DB.beginTransaction();
 		
-		var attachmentItem = new Zotero.Item(false, 'attachment');
+		var attachmentItem = new Zotero.Item('attachment');
+		if (sourceItemID) {
+			var parentItem = Zotero.Items.get(sourceItemID);
+			if (parentItem.libraryID && linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				throw ("Cannot save linked file in non-local library");
+			}
+			attachmentItem.libraryID = parentItem.libraryID;
+		}
 		attachmentItem.setField('title', title);
 		if (linkMode == self.LINK_MODE_IMPORTED_URL
 				|| linkMode == self.LINK_MODE_LINKED_URL) {

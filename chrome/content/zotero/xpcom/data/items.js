@@ -38,9 +38,29 @@ Zotero.Items = new function() {
 	this.getFirstCreatorSQL = getFirstCreatorSQL;
 	this.getSortTitle = getSortTitle;
 	
+	this.__defineGetter__('primaryFields', function () {
+		if (!_primaryFields.length) {
+			_primaryFields = Zotero.DB.getColumns('items');
+			_primaryFields.splice(_primaryFields.indexOf('clientDateModified'), 1);
+			_primaryFields = _primaryFields.concat(
+				['firstCreator', 'numNotes', 'numAttachments']
+			);
+		}
+		
+		// Make a copy of array
+		var fields = [];
+		for each(var field in _primaryFields) {
+			fields.push(field);
+		}
+		return fields;
+	});
+	
+	this.__defineGetter__('linkedItemPredicate', function () "owl:sameAs");
+	
 	// Private members
 	var _cachedFields = [];
 	var _firstCreatorSQL = '';
+	var _primaryFields = [];
 	
 	
 	/*
@@ -173,7 +193,7 @@ Zotero.Items = new function() {
 	 * var item = Zotero.Items.add('book', data);
 	 */
 	function add(itemTypeOrID, data) {
-		var item = new Zotero.Item(false, itemTypeOrID);
+		var item = new Zotero.Item(itemTypeOrID);
 		for (var field in data) {
 			if (field == 'creators') {
 				var i = 0;
@@ -212,6 +232,11 @@ Zotero.Items = new function() {
 	}
 	
 	
+	this.isPrimaryField = function (field) {
+		return this.primaryFields.indexOf(field) != -1;
+	}
+	
+	
 	function cacheFields(fields, items) {
 		if (items && items.length == 0) {
 			return;
@@ -236,7 +261,7 @@ Zotero.Items = new function() {
 			
 			_cachedFields.push(field);
 			
-			if (Zotero.Item.prototype.isPrimaryField(field)) {
+			if (this.isPrimaryField(field)) {
 				primaryFields.push(field);
 			}
 			else {

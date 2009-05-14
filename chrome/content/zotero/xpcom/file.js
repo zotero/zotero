@@ -148,6 +148,25 @@ Zotero.File = new function(){
 	}
 	
 	
+	/**
+	 * @param	{nsIFile}	file
+	 * @return	{String}			Base-64 representation of MD5 hash
+	 */
+	this.getFileHash = function (file) {
+		var fis = Components.classes["@mozilla.org/network/file-input-stream;1"]
+					.createInstance(Components.interfaces.nsIFileInputStream);
+		fis.init(file, -1, -1, false);
+		
+		var hash = Components.classes["@mozilla.org/security/hash;1"].
+				createInstance(Components.interfaces.nsICryptoHash);
+		hash.init(Components.interfaces.nsICryptoHash.MD5);
+		hash.updateFromStream(fis, 4294967295); // PR_UINT32_MAX
+		hash = hash.finish(true);
+		fis.close();
+		return hash;
+	}
+	
+	
 	/*
 	 * Write string to a file, overwriting existing file if necessary
 	 */

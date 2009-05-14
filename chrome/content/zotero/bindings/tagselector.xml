@@ -39,6 +39,19 @@
 			<field name="_dirty">null</field>
 			<field name="_empty">null</field>
 			<field name="selection"/>
+			
+			<field name="_libraryID"/>
+			<property name="libraryID" onget="return this._libraryID">
+				<setter>
+				<![CDATA[
+					if (this._libraryID != val) {
+						this._dirty = true;
+					}
+					this._libraryID = val;
+				]]>
+				</setter>
+			</property>
+			
 			<property name="showAutomatic" onget="return this.getAttribute('showAutomatic') != 'false'"/>
 			<property name="_types">
 				<getter>
@@ -170,7 +183,7 @@
 					var tagsToggleBox = this.id('tags-toggle');
 					
 					if (fetch || this._dirty) {
-						this._tags = Zotero.Tags.getAll(this._types);
+						this._tags = Zotero.Tags.getAll(this._types, this.libraryID);
 						
 						// Remove children
 						while (tagsToggleBox.hasChildNodes()){
@@ -414,7 +427,7 @@
 				<![CDATA[
 					// If a selected tag no longer exists, deselect it
 					if (event == 'delete') {
-						this._tags = Zotero.Tags.getAll(this._types);
+						this._tags = Zotero.Tags.getAll(this._types, this.libraryID);
 						
 						for (var tag in this.selection) {
 							for each(var tag2 in this._tags) {
@@ -658,6 +671,17 @@
 					
 					
 					function onDragOver(event, flavour, session) {
+						/*
+						// TODO: get drop data
+						var ids = dropData.data.split(',');
+						var items = Zotero.Items.get(ids);
+						for (var i=0; i<items.length; i++) {
+							if (!Zotero.Items.isEditable(items[i])) {
+								return false;
+							}
+						}
+						*/
+						
 						event.target.setAttribute('draggedOver', true);
 						return true;
 					}
@@ -716,7 +740,9 @@
 				
 				<xul:hbox>
 					<xul:hbox pack="start">
-						<xul:checkbox id="display-all-tags" label="&zotero.tagSelector.displayAll;"
+						<!-- TODO: localize or change -->
+						<!-- <xul:checkbox id="display-all-tags" label="&zotero.tagSelector.displayAll;"-->
+						<xul:checkbox id="display-all-tags" label="Display all tags in this library"
 							oncommand="var ts = document.getBindingParent(this); ts.filterToScope = !this.checked; event.stopPropagation();">
 						</xul:checkbox>
 					</xul:hbox>

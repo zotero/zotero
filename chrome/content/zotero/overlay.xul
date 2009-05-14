@@ -60,12 +60,13 @@
 		<menuitem id="zotero-context-add-to-new-note" class="menu-iconic"
 			label="&zotero.contextMenu.addTextToNewNote;" hidden="true"
 			oncommand="var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString(); var itemID = ZoteroPane.addItemFromPage(); ZoteroPane.newNote(false, itemID, str)"/>
-		<menuitem id="zotero-context-save-link-as-snapshot" class="menu-iconic"
-			label="&zotero.contextMenu.saveLinkAsSnapshot;" hidden="true"
-			oncommand="Zotero.Attachments.importFromURL(window.gContextMenu.linkURL, false, false, false, ZoteroPane.getSelectedCollection(true))"/>
-		<menuitem id="zotero-context-save-image-as-snapshot" class="menu-iconic"
-			label="&zotero.contextMenu.saveImageAsSnapshot;" hidden="true"
-			oncommand="Zotero.Attachments.importFromURL(window.gContextMenu.onImage ? window.gContextMenu.imageURL : window.gContextMenu.bgImageURL, false, false, false, ZoteroPane.getSelectedCollection(true))"/>
+		<!-- TODO: localize and remove zotero.contextMenu.saveLinkAsItem/saveImageAsSnapshot -->
+		<menuitem id="zotero-context-save-link-as-item" class="menu-iconic"
+			label="Save Link as Zotero Item" hidden="true"
+			oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.linkURL)"/>
+		<menuitem id="zotero-context-save-image-as-item" class="menu-iconic"
+			label="Save Image as Zotero Item" hidden="true"
+			oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.onImage ? (window.gContextMenu.mediaURL ? window.gContextMenu.mediaURL : window.gContextMenu.imageURL) : window.gContextMenu.bgImageURL, 'artwork')"/>
 	</popup>
 	
 	<vbox id="appcontent">
@@ -96,8 +97,8 @@
 					<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="ZoteroPane.selectItem(this.parentNode.getAttribute('itemID'), true)"/>
 					<menuseparator/>
 					<menuitem label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane.newNote(false, this.parentNode.getAttribute('itemID'))"/>
-					<menuitem label="&zotero.items.menu.attach.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage(false, this.parentNode.getAttribute('itemID'));"/>
-					<menuitem label="&zotero.items.menu.attach.link;" oncommand="ZoteroPane.addAttachmentFromPage(true, this.parentNode.getAttribute('itemID'));"/>
+					<menuitem label="&zotero.items.menu.attach.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage(false, parseInt(this.parentNode.getAttribute('itemID')))"/>
+					<menuitem label="&zotero.items.menu.attach.link;" oncommand="ZoteroPane.addAttachmentFromPage(true, parseInt(this.parentNode.getAttribute('itemID')))"/>
 					<menuseparator/>
 					<menuitem label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane.duplicateSelectedItem();"/>
 					<menuitem oncommand="ZoteroPane.deleteSelectedItems();"/>
@@ -118,6 +119,7 @@
 				<vbox flex="1">
 					<hbox class="toolbar">
 						<toolbarbutton id="zotero-tb-collection-add" tooltiptext="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
+						<toolbarbutton id="zotero-tb-group-add" tooltiptext="&zotero.toolbar.newGroup;" oncommand="ZoteroPane.newGroup()"/>
 						<spacer flex="1"/>
 						<toolbarbutton id="zotero-tb-tag-selector" tooltiptext="&zotero.toolbar.tagSelector.label;" oncommand="ZoteroPane.toggleTagSelector()"/>
 						<toolbarbutton id="zotero-tb-actions-menu" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
@@ -154,7 +156,7 @@
 						onmouseover="ZoteroPane.collectionsView.setHighlightedRows();"
 						ondblclick="ZoteroPane.onDoubleClick(event, this);"
 						onkeypress="ZoteroPane.handleKeyPress(event, this.id)"
-						onselect="ZoteroPane.onCollectionSelected();" seltype="single"
+						onselect="ZoteroPane.onCollectionSelected();" seltype="cell"
 						ondraggesture="if (event.target.localName == 'treechildren') { ZoteroPane.startDrag(event, ZoteroPane.collectionsView); }"
 						ondragenter="return ZoteroPane.dragEnter(event, ZoteroPane.collectionsView)"
 						ondragover="return ZoteroPane.dragOver(event, ZoteroPane.collectionsView)"
@@ -192,10 +194,12 @@
 						</menupopup>
 					</toolbarbutton>
 					<toolbarbutton id="zotero-tb-item-from-page" tooltiptext="&zotero.toolbar.newItemFromPage.label;" oncommand="ZoteroPane.addItemFromPage()"/>
-					<toolbarbutton id="zotero-tb-lookup" tooltiptext="&zotero.toolbar.lookup.label;" oncommand="window.openDialog('chrome://zotero/content/lookup.xul', 'lookup', 'chrome,modal')"/>
+					<toolbarbutton id="zotero-tb-lookup" tooltiptext="&zotero.toolbar.lookup.label;" oncommand="ZoteroPane.openLookupWindow()"/>
+					<!--
 					<toolbarseparator/>
 					<toolbarbutton id="zotero-tb-link-page" tooltiptext="&zotero.toolbar.attachment.weblink;" oncommand="ZoteroPane.addAttachmentFromPage(true)"/>
 					<toolbarbutton id="zotero-tb-snapshot-page" tooltiptext="&zotero.toolbar.attachment.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage()"/>
+					-->
 					<toolbarbutton id="zotero-tb-note-add" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane.newNote(event.shiftKey);"/>
 					<toolbarseparator/>
 					<toolbarbutton id="zotero-tb-advanced-search" tooltiptext="&zotero.toolbar.advancedSearch;" oncommand="ZoteroPane.openAdvancedSearchWindow()"/>
@@ -406,7 +410,7 @@
 	
 	<!-- Scrape Code -->
 	<hbox id="urlbar-icons">
-		<image src="chrome://zotero/skin/treeitem-book.png" id="zotero-status-image" onclick="Zotero_Browser.scrapeThisPage()" position="1" hidden="true"/>
+		<image src="chrome://zotero/skin/treeitem-book.png" id="zotero-status-image" onclick="Zotero_Browser.scrapeThisPage(ZoteroPane.getSelectedLibraryID(), ZoteroPane.getSelectedCollection(true))" position="1" hidden="true"/>
 	</hbox>
 	
 	<statusbar id="status-bar">

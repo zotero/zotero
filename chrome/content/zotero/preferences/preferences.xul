@@ -244,11 +244,10 @@ To add a new preference:
 					<groupbox>
 						<caption label="Storage Server"/>
 						
-						<hbox>
-							<checkbox label="Enable file syncing" preference="pref-storage-enabled"/>
-						</hbox>
-						
 						<separator class="thin"/>
+						<label value="Please note: Attachment files in group libraries are not currently synced."/>
+						
+						<separator/>
 						
 						<grid id="storage-settings">
 							<columns>
@@ -714,8 +713,8 @@ To add a new preference:
 	
 	<!-- These mess up the prefwindow (more) if they come before the prefpanes
 	 https://bugzilla.mozilla.org/show_bug.cgi?id=296418 -->
-	<script src="chrome://zotero/content/include.js"/>
-	<script src="chrome://zotero/content/charsetMenu.js"/>
+	<script src="chrome://zotero/content/include.js"></script>
+	<script src="chrome://zotero/content/charsetMenu.js"></script>
 	<script type="application/javascript">
 	<![CDATA[
 		var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);

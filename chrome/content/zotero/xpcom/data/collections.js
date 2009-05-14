@@ -81,23 +81,6 @@ Zotero.Collections = new function() {
 	
 	
 	/**
-	 * Refresh cached parents in specified collections, skipping
-	 * any that aren't loaded
-	 *
-	 * @param	{Integer|Integer[]}	ids		One or more itemIDs
-	 */
-	this.refreshParents = function (ids) {
-		ids = Zotero.flattenArguments(ids);
-		
-		for each(var id in ids) {
-			if (this._objectCache[id]) {
-				this._objectCache[id]._refreshParent();
-			}
-		}
-	}
-	
-	
-	/**
 	 * Invalidate child collection cache in specified collections, skipping
 	 * any that aren't loaded
 	 *

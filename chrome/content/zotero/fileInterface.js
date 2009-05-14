@@ -330,7 +330,8 @@ var Zotero_File_Interface = new function() {
 		} else {
 			var searchRef = ZoteroPane.getSelectedSavedSearch();
 			if(searchRef) {
-				var search = new Zotero.Search(searchRef.id);
+				var search = new Zotero.Search();
+				search.id = searchRef.id;
 				name = search.name;
 			}
 		}

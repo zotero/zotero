@@ -193,7 +193,7 @@
 						this._leftpane.objectbox.clickableFields = diffFields;
 						this._rightpane.objectbox.clickableFields = diffFields;
 						
-						var mergeItem = new Zotero.Item(false, this._leftpane.ref.itemTypeID);
+						var mergeItem = new Zotero.Item(this._leftpane.ref.itemTypeID);
 						this._mergepane.ref = mergeItem;
 						this._mergepane.objectbox.visibleFields = fields;
 					}
@@ -428,7 +428,7 @@
 						value = row.lastChild.getAttribute('itemTypeID');
 						
 						if (!mergepane.ref) {
-							mergepane.ref = new Zotero.Item(false, value);
+							mergepane.ref = new Zotero.Item(value);
 						}
 						else {
 							mergepane.objectbox.changeTypeTo(value, true);

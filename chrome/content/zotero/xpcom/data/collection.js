@@ -21,18 +21,23 @@
 */
 
 
-Zotero.Collection = function(collectionID) {
-	this._collectionID = collectionID ? collectionID : null;
+Zotero.Collection = function() {
+	if (arguments[0]) {
+		throw ("Zotero.Collection constructor doesn't take any parameters");
+	}
+	
 	this._init();
 }
 
 Zotero.Collection.prototype._init = function () {
 	// Public members for access by public methods -- do not access directly
+	this._id = null;
+	this._libraryID = null
+	this._key = null;
 	this._name = null;
-	this._parent = null;
+	this._parent = false;
 	this._dateAdded = null;
 	this._dateModified = null;
-	this._key = null;
 	
 	this._loaded = false;
 	this._changed = false;
@@ -50,50 +55,82 @@ Zotero.Collection.prototype._init = function () {
 }
 
 
-Zotero.Collection.prototype.__defineGetter__('id', function () { return this._collectionID; });
-
-Zotero.Collection.prototype.__defineSetter__('collectionID', function (val) { this._set('collectionID', val); });
+Zotero.Collection.prototype.__defineGetter__('objectType', function () { return 'collection'; });
+Zotero.Collection.prototype.__defineGetter__('id', function () { return this._get('id'); });
+Zotero.Collection.prototype.__defineSetter__('id', function (val) { this._set('id', val); });
+Zotero.Collection.prototype.__defineGetter__('libraryID', function () { return this._get('libraryID'); });
+Zotero.Collection.prototype.__defineSetter__('libraryID', function (val) { return this._set('libraryID', val); });
+Zotero.Collection.prototype.__defineGetter__('key', function () { return this._get('key'); });
+Zotero.Collection.prototype.__defineSetter__('key', function (val) { this._set('key', val) });
 Zotero.Collection.prototype.__defineGetter__('name', function () { return this._get('name'); });
 Zotero.Collection.prototype.__defineSetter__('name', function (val) { this._set('name', val); });
 Zotero.Collection.prototype.__defineGetter__('parent', function () { return this._get('parent'); });
 Zotero.Collection.prototype.__defineSetter__('parent', function (val) { this._set('parent', val); });
+Zotero.Collection.prototype.__defineGetter__('parentKey', function () { return this._get('parentKey'); });
+Zotero.Collection.prototype.__defineSetter__('parentKey', function (val) { this._set('parentKey', val); });
 Zotero.Collection.prototype.__defineGetter__('dateAdded', function () { return this._get('dateAdded'); });
 Zotero.Collection.prototype.__defineSetter__('dateAdded', function (val) { this._set('dateAdded', val); });
 Zotero.Collection.prototype.__defineGetter__('dateModified', function () { return this._get('dateModified'); });
 Zotero.Collection.prototype.__defineSetter__('dateModified', function (val) { this._set('dateModified', val); });
-Zotero.Collection.prototype.__defineGetter__('key', function () { return this._get('key'); });
-Zotero.Collection.prototype.__defineSetter__('key', function (val) { this._set('key', val); });
 
 //Zotero.Collection.prototype.__defineSetter__('childCollections', function (arr) { this._setChildCollections(arr); });
 Zotero.Collection.prototype.__defineSetter__('childItems', function (arr) { this._setChildItems(arr); });
 
-
 Zotero.Collection.prototype._get = function (field) {
-	if (this.id && !this._loaded) {
+	if ((this._id || this._key) && !this._loaded) {
 		this.load();
 	}
+	
+	switch (field) {
+		case 'parent':
+			return this._getParent();
+			
+		case 'parentKey':
+			return this._getParentKey();
+	}
+	
 	return this['_' + field];
 }
 
 
 Zotero.Collection.prototype._set = function (field, val) {
-	if (field == 'name') {
-		val = Zotero.Utilities.prototype.trim(val);
-	}
-	
 	switch (field) {
-		case 'id': // set using constructor
-		//case 'collectionID': // set using constructor
-			throw ("Invalid field '" + field + "' in Zotero.Collection.set()");
+		case 'id':
+		case 'libraryID':
+		case 'key':
+			if (val == this['_' + field]) {
+				return;
+			}
+			
+			if (this._loaded) {
+				throw ("Cannot set " + field + " after object is already loaded in Zotero.Collection._set()");
+			}
+			//this._checkValue(field, val);
+			this['_' + field] = val;
+			return;
+		
+		case 'name':
+			val = Zotero.Utilities.prototype.trim(val);
+			break;
 	}
 	
-	if (this.id) {
+	if (this.id || this.key) {
 		if (!this._loaded) {
 			this.load();
 		}
 	}
 	else {
 		this._loaded = true;
+	}
+	
+	switch (field) {
+		case 'parent':
+			this._setParent(val);
+			return;
+			
+		case 'parentKey':
+			this._setParentKey(val);
+			return;
 	}
 	
 	if (this['_' + field] != val) {
@@ -126,16 +163,35 @@ Zotero.Collection.prototype.getParent = function() {
  * Build collection from database
  */
 Zotero.Collection.prototype.load = function() {
+	var id = this._id;
+	var key = this._key;
+	var libraryID = this._libraryID;
+	//var desc = id ? id : libraryID + "/" + key;
+	
 	// Should be same as query in Zotero.Collections, just with collectionID
 	var sql = "SELECT C.*, "
 		+ "(SELECT COUNT(*) FROM collections WHERE "
 			+ "parentCollectionID=C.collectionID)!=0 AS hasChildCollections, "
 		+ "(SELECT COUNT(*) FROM collectionItems WHERE "
 			+ "collectionID=C.collectionID)!=0 AS hasChildItems "
-		+ "FROM collections C WHERE collectionID=?";
-	var data = Zotero.DB.rowQuery(sql, this.id);
+		+ "FROM collections C WHERE ";
+	if (id) {
+		sql += "collectionID=?";
+		var params = id;
+	}
+	else {
+		sql += "key=?";
+		var params = [key];
+		if (libraryID) {
+			sql += " AND libraryID=?";
+			params.push(libraryID);
+		}
+		else {
+			sql += " AND libraryID IS NULL";
+		}
+	}
+	var data = Zotero.DB.rowQuery(sql, params);
 	
-	this._init();
 	this._loaded = true;
 	
 	if (!data) {
@@ -154,13 +210,16 @@ Zotero.Collection.prototype.loadFromRow = function(row) {
 	this._changed = false;
 	this._previousData = false;
 	
-	this._collectionID = row.collectionID;
+	this._id = row.collectionID;
+	this._libraryID = row.libraryID;
+	this._key = row.key;
 	this._name = row.collectionName;
 	this._parent = row.parentCollectionID;
 	this._dateAdded = row.dateAdded;
 	this._dateModified = row.dateModified;
-	this._key = row.key;
+	this._childCollectionsLoaded = false;
 	this._hasChildCollections = !!row.hasChildCollections;
+	this._childItemsLoaded = false;
 	this._hasChildItems = !!row.hasChildItems;
 	this._loadChildItems();
 }
@@ -288,6 +347,8 @@ Zotero.Collection.prototype.unlockDateModified = function () {
 
 
 Zotero.Collection.prototype.save = function () {
+	Zotero.Collections.editCheck(this);
+	
 	if (!this.name) {
 		throw ('Collection name is empty in Zotero.Collection.save()');
 	}
@@ -297,53 +358,7 @@ Zotero.Collection.prototype.save = function () {
 		return false;
 	}
 	
-	if (this._changed.parent && this.parent) {
-		if (!Zotero.Collections.get(this.parent)) {
-			throw ('Cannot set parent of collection ' + this.id
-				+ ' to invalid parent ' + this.parent);
-		}
-		
-		if (this.parent == this.id) {
-			throw ('Cannot move collection into itself!');
-		}
-		
-		if (this.id && this.hasDescendent('collection', this.parent)) {
-			throw ('Cannot move collection into one of its own descendents!', 2);
-		}
-	}
-	
-	
 	Zotero.DB.beginTransaction();
-	
-	// ID change
-	if (this._changed['collectionID']) {
-		var oldID = this._previousData.primary.collectionID;
-		var params = [this.id, oldID];
-		
-		Zotero.debug("Changing collectionID " + oldID + " to " + this.id);
-		
-		var row = Zotero.DB.rowQuery("SELECT * FROM collections WHERE collectionID=?", oldID);
-		// Add a new row so we can update the old rows despite FK checks
-		// Use temp key due to UNIQUE constraint on key column
-		Zotero.DB.query("INSERT INTO collections VALUES (?, ?, ?, ?, ?, ?)",
-			[this.id, row.collectionName, row.parentCollectionID,
-			row.dateAdded, row.dateModified, 'TEMPKEY']);
-		
-		Zotero.DB.query("UPDATE collectionItems SET collectionID=? WHERE collectionID=?", params);
-		Zotero.DB.query("UPDATE collections SET parentCollectionID=? WHERE parentCollectionID=?", params);
-		
-		Zotero.DB.query("DELETE FROM collections WHERE collectionID=?", oldID);
-		Zotero.DB.query("UPDATE collections SET key=? WHERE collectionID=?", [row.key, this.id]);
-		
-		Zotero.Notifier.trigger('id-change', 'collection', oldID + '-' + this.id);
-		
-		// Update child collections that have cached the previous id
-		var sql = "SELECT collectionID FROM collections WHERE parentCollectionID=?";
-		var children = Zotero.DB.columnQuery(sql, this.id);
-		if (children) {
-			Zotero.Collections.refreshParents(children);
-		}
-	}
 	
 	var isNew = !this.id || !this.exists();
 	
@@ -356,20 +371,55 @@ Zotero.Collection.prototype.save = function () {
 		
 		var key = this.key ? this.key : this._generateKey();
 		
+		// Verify parent
+		if (this._parent) {
+			if (typeof this._parent == 'number') {
+				var newParent = Zotero.Collections.get(this._parent);
+			}
+			else {
+				var newParent = Zotero.Collections.getByLibraryAndKey(this.libraryID, this._parent);
+			}
+			
+			if (!newParent) {
+				throw("Cannot set parent to invalid collection " + this._parent + " in Zotero.Collection.save()");
+			}
+			
+			if (newParent.id == this.id) {
+				throw ('Cannot move collection into itself!');
+			}
+			
+			if (this.id && this.hasDescendent('collection', newParent.id)) {
+				throw ('Cannot move collection into one of its own descendents!', 2);
+			}
+			
+			var parent = newParent.id;
+		}
+		else {
+			var parent = null;
+		}
+		
 		var columns = [
-			'collectionID', 'collectionName', 'parentCollectionID',
-			'dateAdded', 'dateModified', 'key'
+			'collectionID',
+			'collectionName',
+			'parentCollectionID',
+			'dateAdded',
+			'dateModified',
+			'clientDateModified',
+			'libraryID',
+			'key'
 		];
-		var placeholders = ['?', '?', '?', '?', '?', '?'];
+		var placeholders = ['?', '?', '?', '?', '?', '?', '?', '?'];
 		var sqlValues = [
 			collectionID ? { int: collectionID } : null,
 			{ string: this.name },
-			this.parent ? { int: this.parent } : null,
+			parent ? parent : null,
 			// If date added isn't set, use current timestamp
 			this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime,
 			// If date modified hasn't changed, use current timestamp
 			this._changed.dateModified ?
 				this.dateModified : Zotero.DB.transactionDateTime,
+			Zotero.DB.transactionDateTime,
+			this.libraryID ? this.libraryID : null,
 			key
 		];
 		
@@ -380,19 +430,18 @@ Zotero.Collection.prototype.save = function () {
 			collectionID = insertID;
 		}
 		
-		
 		if (this._changed.parent) {
 			var parentIDs = [];
-			if (this._previousData.parent) {
+			if (this.id && this._previousData.parent) {
 				parentIDs.push(this._previousData.parent);
 			}
 			if (this.parent) {
 				parentIDs.push(this.parent);
 			}
-			
-			Zotero.Notifier.trigger('move', 'collection', this.id);
+			if (this.id) {
+				Zotero.Notifier.trigger('move', 'collection', this.id);
+			}
 		}
-		
 		
 		/*
 		// Subcollections
@@ -502,6 +551,12 @@ Zotero.Collection.prototype.save = function () {
 						insertStatement.execute();
 					}
 					catch (e) {
+						Zotero.debug('=======');
+						Zotero.debug(collectionID);
+						Zotero.debug(itemID);
+						Zotero.debug(orderIndex);
+						Zotero.debug(Zotero.DB.query("SELECT * FROM collections"));
+						Zotero.debug(Zotero.DB.query("SELECT * FROM collectionItems"));
 						throw (e + ' [ERROR: ' + Zotero.DB.getLastErrorString() + ']');
 					}
 				}
@@ -510,6 +565,11 @@ Zotero.Collection.prototype.save = function () {
 			//Zotero.Notifier.trigger('add', 'collection-item', this.id + '-' + itemID);
 		}
 		
+		if (this._changed.libraryID) {
+			var groupID = Zotero.Libraries.getGroupIDFromLibraryID(this.libraryID);
+			var group = Zotero.Groups.get(groupID);
+			group.clearCollectionsCache();
+		}
 		Zotero.DB.commitTransaction();
 	}
 	catch (e) {
@@ -519,7 +579,7 @@ Zotero.Collection.prototype.save = function () {
 	
 	// If successful, set values in object
 	if (!this.id) {
-		this._collectionID = collectionID;
+		this._id = collectionID;
 	}
 	
 	if (!this.key) {
@@ -537,7 +597,7 @@ Zotero.Collection.prototype.save = function () {
 	
 	// Invalidate cached child collections
 	if (parentIDs) {
-		Zotero.Collections.refreshChildCollections(parentIDs)
+		Zotero.Collections.refreshChildCollections(parentIDs);
 	}
 	
 	return this.id;
@@ -569,8 +629,8 @@ Zotero.Collection.prototype.addItem = function(itemID) {
 	sql = "INSERT OR IGNORE INTO collectionItems VALUES (?,?,?)";
 	Zotero.DB.query(sql, [this.id, itemID, nextOrderIndex]);
 	
-	sql = "UPDATE collections SET dateModified=? WHERE collectionID=?";
-	Zotero.DB.query(sql, [Zotero.DB.transactionDateTime, this.id]);
+	sql = "UPDATE collections SET dateModified=?, clientDateModified=? WHERE collectionID=?";
+	Zotero.DB.query(sql, [Zotero.DB.transactionDateTime, Zotero.DB.transactionDateTime, this.id]);
 	
 	Zotero.DB.commitTransaction();
 	
@@ -618,8 +678,8 @@ Zotero.Collection.prototype.removeItem = function(itemID) {
 	Zotero.DB.query(sql, [this.id, itemID]);
 	
 	if (!this._dateModifiedLocked) {
-		sql = "UPDATE collections SET dateModified=? WHERE collectionID=?";
-		Zotero.DB.query(sql, [Zotero.DB.transactionDateTime, this.id])
+		sql = "UPDATE collections SET dateModified=?, clientDateModified=? WHERE collectionID=?";
+		Zotero.DB.query(sql, [Zotero.DB.transactionDateTime, Zotero.DB.transactionDateTime, this.id])
 	}
 	
 	Zotero.DB.commitTransaction();
@@ -812,9 +872,10 @@ Zotero.Collection.prototype.serialize = function(nested) {
 	var obj = {
 		primary: {
 			collectionID: this.id,
+			libraryID: this.libraryID,
+			key: this.key,
 			dateAdded: this.dateAdded,
-			dateModified: this.dateModified,
-			key: this.key
+			dateModified: this.dateModified
 		},
 		fields: {
 			name: this.name,
@@ -835,7 +896,7 @@ Zotero.Collection.prototype.serialize = function(nested) {
  * @param	bool		nested		Return multidimensional array with 'children'
  *									nodes instead of flat array
  * @param	string	type			'item', 'collection', or FALSE for both
- * @return	{Object[]}			Array of objects with 'id',
+ * @return	{Object[]}			Array of objects with 'id', 'key',
  *								'type' ('item' or 'collection'), 'parent',
  *								and, if collection, 'name' and the nesting 'level'
  */
@@ -853,10 +914,10 @@ Zotero.Collection.prototype.getChildren = function(recursive, nested, type, leve
 	// 0 == collection
 	// 1 == item
 	var children = Zotero.DB.query('SELECT collectionID AS id, '
-		+ "0 AS type, collectionName AS collectionName "
+		+ "0 AS type, collectionName AS collectionName, key "
 		+ 'FROM collections WHERE parentCollectionID=?1'
-		+ ' UNION SELECT itemID AS id, 1 AS type, NULL AS collectionName '
-		+ 'FROM collectionItems WHERE collectionID=?1', this.id);
+		+ ' UNION SELECT itemID AS id, 1 AS type, NULL AS collectionName, key '
+		+ 'FROM collectionItems JOIN items USING (itemID) WHERE collectionID=?1', this.id);
 	
 	if (type) {
 		switch (type) {
@@ -879,6 +940,7 @@ Zotero.Collection.prototype.getChildren = function(recursive, nested, type, leve
 					toReturn.push({
 						id: children[i].id,
 						name: children[i].collectionName,
+						key: children[i].key,
 						type: 'collection',
 						level: level,
 						parent: this.id
@@ -905,6 +967,7 @@ Zotero.Collection.prototype.getChildren = function(recursive, nested, type, leve
 				if (!type || type=='item') {
 					toReturn.push({
 						id: children[i].id,
+						key: children[i].key,
 						type: 'item',
 						parent: this.id
 					});
@@ -936,6 +999,139 @@ Zotero.Collection.prototype._prepFieldChange = function (field) {
 	if (this.id && this.exists() && !this._previousData) {
 		this._previousData = this.serialize();
 	}
+}
+
+
+/**
+ * Get the collectionID of the parent collection
+ * @return	{Integer}
+ */
+Zotero.Collection.prototype._getParent = function() {
+	if (this._parent !== false) {
+		if (!this._parent) {
+			return null;
+		}
+		if (typeof this._parent == 'number') {
+			return this._parent;
+		}
+		var parentCollection = Zotero.Collections.getByLibraryAndKey(this.libraryID, this._parent);
+		if (!parentCollection) {
+			throw ("Parent collection for keyed parent doesn't exist in Zotero.Collection._getParent()");
+		}
+		// Replace stored key with id
+		this._parent = parentCollection.id;
+		return parentCollection.id;
+	}
+	
+	if (!this.id) {
+		return false;
+	}
+	
+	var sql = "SELECT parentCollectionID FROM collections WHERE collectionID=?";
+	var parentCollectionID = Zotero.DB.valueQuery(sql, this.id);
+	if (!parentCollectionID) {
+		parentCollectionID = null;
+	}
+	this._parent = parentCollectionID;
+	return parentCollectionID;
+}
+
+
+/**
+ * Get the key of the parent collection
+ * @return	{String}
+ */
+Zotero.Collection.prototype._getParentKey = function() {
+	if (this._parent !== false) {
+		if (!this._parent) {
+			return null;
+		}
+		if (typeof this._parent == 'string') {
+			return this._parent;
+		}
+		var parentCollection = Zotero.Collections.get(this._parent);
+		return parentCollection.key;
+	}
+	
+	if (!this.id) {
+		return false;
+	}
+	
+	var sql = "SELECT B.key FROM collections A JOIN collections B "
+				+ "ON (A.parentCollectionID=B.collectionID) WHERE A.collectionID=?";
+	var key = Zotero.DB.valueQuery(sql, this.id);
+	if (!key) {
+		key = null;
+	}
+	this._parent = key;
+	return key;
+}
+
+
+Zotero.Collection.prototype._setParent = function(parentCollectionID) {
+	if (this.id || this.key) {
+		if (!this.loaded) {
+			this.load(true);
+		}
+	}
+	else {
+		this.loaded = true;
+	}
+	
+	var oldParentCollectionID = this._getParent();
+	if (oldParentCollectionID == parentCollectionID) {
+		Zotero.debug("Parent collection has not changed for collection " + this.id);
+		return false;
+	}
+	
+	if (this.id && this.exists() && !this._previousData) {
+		this._previousData = this.serialize();
+	}
+	
+	this._parent = parentCollectionID ? parseInt(parentCollectionID) : null;
+	if (!this._changed) {
+		this._changed = {};
+	}
+	this._changed.parent = true;
+	
+	return true;
+}
+
+
+Zotero.Collection.prototype._setParentKey = function(parentCollectionKey) {
+	if (this.id || this.key) {
+		if (!this.loaded) {
+			this.load(true);
+		}
+	}
+	else {
+		this.loaded = true;
+	}
+	
+	var oldParentCollectionID = this._getParent();
+	if (oldParentCollectionID) {
+		var parentCollection = Zotero.Collections.get(oldParentCollectionID)
+		var oldParentCollectionKey = parentCollection.key;
+	}
+	else {
+		var oldParentCollectionKey = null;
+	}
+	if (oldParentCollectionKey == parentCollectionKey) {
+		Zotero.debug("Parent collection has not changed in Zotero.Collection._setParentKey()");
+		return false;
+	}
+	
+	if (this.id && this.exists() && !this._previousData) {
+		this._previousData = this.serialize();
+	}
+	
+	this._parent = parentCollectionKey ? parentCollectionKey : null;
+	if (!this._changed) {
+		this._changed = {};
+	}
+	this._changed.parent = true;
+	
+	return true;
 }
 
 
@@ -1053,7 +1249,13 @@ Zotero.Collection.prototype._loadChildCollections = function () {
 }
 
 Zotero.Collection.prototype._loadChildItems = function() {
-	var sql = "SELECT itemID FROM collectionItems WHERE collectionID=? ";
+	if (!this.id) {
+		//throw ("Collection id not set in Zotero.Collection._loadChildItems()");
+		this._childItemsLoaded = true;
+		return;
+	}
+	
+	var sql = "SELECT itemID FROM collectionItems WHERE collectionID=? "
 		// DEBUG: Fix for child items created via context menu on parent within
 		// a collection being added to the current collection
 		+ "AND itemID NOT IN "
@@ -1071,22 +1273,6 @@ Zotero.Collection.prototype._loadChildItems = function() {
 	}
 	
 	this._childItemsLoaded = true;
-}
-
-
-/**
- * Note: This is called by Zotero.Collections.refreshParent()
- *
- * @private
- */
-Zotero.Collection.prototype._refreshParent = function () {
-	if (!this.id) {
-		throw ("Cannot call Zotero.Collection._refreshParent() on unsaved collection");
-	}
-	
-	var sql = "SELECT parentCollectionID FROM collections "
-		+ "WHERE collectionID=?";
-	this._parent = Zotero.DB.valueQuery(sql, this.id);
 }
 
 

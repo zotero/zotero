@@ -42,6 +42,10 @@ Zotero.Creators = new function() {
 	 * Returns a Zotero.Creator object for a given creatorID
 	 */
 	function get(creatorID) {
+		if (!creatorID) {
+			throw ("creatorID not provided in Zotero.Creators.get()");
+		}
+		
 		if (this._objectCache[creatorID]) {
 			return this._objectCache[creatorID];
 		}
@@ -53,7 +57,9 @@ Zotero.Creators = new function() {
 			return false;
 		}
 		
-		this._objectCache[creatorID] = new Zotero.Creator(creatorID);
+		var creator = new Zotero.Creator;
+		creator.id = creatorID;
+		this._objectCache[creatorID] = creator;
 		return this._objectCache[creatorID];
 	}
 	
@@ -114,15 +120,28 @@ Zotero.Creators = new function() {
 	}
 	
 	
-	function getCreatorsWithData(creatorDataID) {
+	function getCreatorsWithData(creatorDataID, libraryID) {
 		var sql = "SELECT creatorID FROM creators WHERE creatorDataID=?";
-		return Zotero.DB.columnQuery(sql, creatorDataID);
+		var params = [creatorDataID];
+		if (libraryID) {
+			sql += " AND libraryID=?";
+			params.push(libraryID);
+		}
+		else {
+			sql += " AND libraryID IS NULL";
+		}
+		return Zotero.DB.columnQuery(sql, params);
 	}
 	
 	
-	function countCreatorsWithData(creatorDataID) {
+	function countCreatorsWithData(creatorDataID, libraryID) {
 		var sql = "SELECT COUNT(*) FROM creators WHERE creatorDataID=?";
-		return Zotero.DB.valueQuery(sql, creatorDataID);
+		var params = [creatorDataID];
+		if (libraryID) {
+			sql += " AND libraryID=?";
+			params.push(libraryID);
+		}
+		return Zotero.DB.valueQuery(sql, params);
 	}
 	
 	

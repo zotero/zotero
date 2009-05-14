@@ -53,7 +53,7 @@
 	
 	<hbox flex="1">
 		<tree id="zotero-collections-tree"
-			style="width: 200px;" hidecolumnpicker="true" seltype="single"
+			style="width: 200px;" hidecolumnpicker="true" seltype="cell"
 			onselect="onCollectionSelected();">
 			<treecols>
 				<treecol
