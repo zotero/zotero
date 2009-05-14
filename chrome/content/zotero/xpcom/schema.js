@@ -116,8 +116,8 @@ Zotero.Schema = new function(){
 					 }
 				}
 				
-				var up1 = _migrateUserDataSchema(dbVersion);
 				var up2 = _updateSchema('system');
+				var up1 = _migrateUserDataSchema(dbVersion);
 				var up3 = _updateSchema('triggers');
 				
 				Zotero.DB.commitTransaction();
@@ -2270,7 +2270,7 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE syncDeleteLogOld");
 				}
 				
-				//
+				// 1.5 Sync Preview 3.7
 				if (i==48) {
 					Zotero.DB.query("CREATE TABLE deletedItems (\n    itemID INTEGER PRIMARY KEY,\n    dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL\n);");
 				}
@@ -2300,9 +2300,72 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE tagsOld");
 				}
 				
+				// 1.5 Beta 3
 				if (i==50) {
 					Zotero.DB.query("DELETE FROM proxyHosts");
 					Zotero.DB.query("DELETE FROM proxies");
+				}
+				
+				if (i==51) {
+					Zotero.DB.query("ALTER TABLE collections RENAME TO collectionsOld");
+					Zotero.DB.query("DROP INDEX creators_creatorDataID");
+					Zotero.DB.query("ALTER TABLE creators RENAME TO creatorsOld");
+					Zotero.DB.query("ALTER TABLE items RENAME TO itemsOld")
+					Zotero.DB.query("ALTER TABLE savedSearches RENAME TO savedSearchesOld");
+					Zotero.DB.query("ALTER TABLE tags RENAME TO tagsOld");
+					
+					Zotero.DB.query("CREATE TABLE collections (\n    collectionID INTEGER PRIMARY KEY,\n    collectionName TEXT NOT NULL,\n    parentCollectionID INT DEFAULT NULL,\n    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    libraryID INT,\n    key TEXT NOT NULL,\n    UNIQUE (libraryID, key),\n    FOREIGN KEY (parentCollectionID) REFERENCES collections(collectionID)\n);");
+					Zotero.DB.query("CREATE TABLE creators (\n    creatorID INTEGER PRIMARY KEY,\n    creatorDataID INT NOT NULL,\n    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    libraryID INT,\n    key TEXT NOT NULL,\n    UNIQUE (libraryID, key),\n    FOREIGN KEY (creatorDataID) REFERENCES creatorData(creatorDataID)\n);");
+					Zotero.DB.query("CREATE TABLE items (\n    itemID INTEGER PRIMARY KEY,\n    itemTypeID INT NOT NULL,\n    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    libraryID INT,\n    key TEXT NOT NULL,\n    UNIQUE (libraryID, key)\n);");
+					Zotero.DB.query("CREATE TABLE savedSearches (\n    savedSearchID INTEGER PRIMARY KEY,\n    savedSearchName TEXT NOT NULL,\n    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    libraryID INT,\n    key TEXT NOT NULL,\n    UNIQUE (libraryID, key)\n);");
+					Zotero.DB.query("CREATE TABLE tags (\n    tagID INTEGER PRIMARY KEY,\n    name TEXT NOT NULL COLLATE NOCASE,\n    type INT NOT NULL,\n    dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    libraryID INT,\n    key TEXT NOT NULL,\n    UNIQUE (libraryID, name, type),\n    UNIQUE (libraryID, key)\n);\n");
+					
+					Zotero.DB.query("INSERT INTO collections SELECT collectionID, collectionName, parentCollectionID, dateAdded, dateModified, dateModified, NULL, key FROM collectionsOld");
+					Zotero.DB.query("INSERT INTO creators SELECT creatorID, creatorDataID, dateAdded, dateModified, dateModified, NULL, key FROM creatorsOld");
+					Zotero.DB.query("INSERT INTO items SELECT itemID, itemTypeID, dateAdded, dateModified, dateModified, NULL, key FROM itemsOld");
+					Zotero.DB.query("INSERT INTO savedSearches SELECT savedSearchID, savedSearchName, dateAdded, dateModified, dateModified, NULL, key FROM savedSearchesOld");
+					Zotero.DB.query("INSERT INTO tags SELECT tagID, name, type, dateAdded, dateModified, dateModified, NULL, key FROM tagsOld");
+					
+					Zotero.DB.query("CREATE INDEX creators_creatorDataID ON creators(creatorDataID);");
+					
+					Zotero.DB.query("DROP TABLE collectionsOld");
+					Zotero.DB.query("DROP TABLE creatorsOld");
+					Zotero.DB.query("DROP TABLE itemsOld");
+					Zotero.DB.query("DROP TABLE savedSearchesOld");
+					Zotero.DB.query("DROP TABLE tagsOld");
+					
+					Zotero.DB.query("CREATE TABLE libraries (\n    libraryID INTEGER PRIMARY KEY,\n    libraryType TEXT NOT NULL\n);");
+					Zotero.DB.query("CREATE TABLE users (\n    userID INTEGER PRIMARY KEY,\n    username TEXT NOT NULL\n);");
+					Zotero.DB.query("CREATE TABLE groups (\n    groupID INTEGER PRIMARY KEY,\n    libraryID INT NOT NULL UNIQUE,\n    name TEXT NOT NULL,\n    description TEXT NOT NULL,\n    editable INT NOT NULL,\n    filesEditable INT NOT NULL,\n    FOREIGN KEY (libraryID) REFERENCES libraries(libraryID)\n);");
+					Zotero.DB.query("CREATE TABLE groupItems (\n    itemID INTEGER PRIMARY KEY,\n    createdByUserID INT NOT NULL,\n    lastModifiedByUserID INT NOT NULL,\n    FOREIGN KEY (createdByUserID) REFERENCES users(userID),\n    FOREIGN KEY (lastModifiedByUserID) REFERENCES users(userID)\n);");
+					
+					Zotero.DB.query("ALTER TABLE syncDeleteLog RENAME TO syncDeleteLogOld");
+					Zotero.DB.query("DROP INDEX syncDeleteLog_timestamp");
+					Zotero.DB.query("CREATE TABLE syncDeleteLog (\n    syncObjectTypeID INT NOT NULL,\n    libraryID INT,\n    key TEXT NOT NULL,\n    timestamp INT NOT NULL,\n    UNIQUE (libraryID, key),\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)\n);");
+					Zotero.DB.query("INSERT INTO syncDeleteLog SELECT syncObjectTypeID, NULL, key, timestamp FROM syncDeleteLogOld");
+					Zotero.DB.query("CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp)");
+					Zotero.DB.query("DROP TABLE syncDeleteLogOld");
+					
+					Zotero.DB.query("ALTER TABLE storageDeleteLog RENAME TO storageDeleteLogOld");
+					Zotero.DB.query("DROP INDEX storageDeleteLog_timestamp");
+					Zotero.DB.query("CREATE TABLE storageDeleteLog (\n    libraryID INT,\n    key TEXT NOT NULL,\n    timestamp INT NOT NULL,\n    PRIMARY KEY (libraryID, key)\n);");
+					Zotero.DB.query("INSERT INTO storageDeleteLog SELECT NULL, key, timestamp FROM storageDeleteLogOld");
+					Zotero.DB.query("CREATE INDEX storageDeleteLog_timestamp ON storageDeleteLog(timestamp)");
+					Zotero.DB.query("DROP TABLE storageDeleteLogOld");
+					
+					Zotero.DB.query("CREATE TEMPORARY TABLE tmpUpdatedItems (itemID INTEGER PRIMARY KEY)");
+					Zotero.DB.query("INSERT INTO tmpUpdatedItems SELECT itemID FROM items NATURAL JOIN itemData WHERE fieldID=10 AND itemTypeID IN (2,9)");
+					Zotero.DB.query("UPDATE itemData SET fieldID=118 WHERE fieldID=10 AND itemID IN (SELECT itemID FROM tmpUpdatedItems)");
+					Zotero.DB.query("DROP TABLE tmpUpdatedItems");
+				}
+				
+				if (i==52) {
+					Zotero.DB.query("CREATE TABLE relations (\n    libraryID INT NOT NULL,\n    subject TEXT NOT NULL,\n    predicate TEXT NOT NULL,\n    object TEXT NOT NULL,\n    clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\n    PRIMARY KEY (libraryID, subject, predicate, object)\n)");
+					Zotero.DB.query("CREATE INDEX relations_object ON relations(libraryID, object)")
+				}
+				
+				if (i==53) {
+					Zotero.DB.query("DELETE FROM collectionItems WHERE itemID IN (SELECT itemID FROM items WHERE itemID IN (SELECT itemID FROM itemAttachments WHERE sourceItemID IS NOT NULL) OR itemID IN (SELECT itemID FROM itemNotes WHERE sourceItemID IS NOT NULL))");
 				}
 			}
 			

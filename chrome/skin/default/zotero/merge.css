@@ -69,7 +69,7 @@ zoteromergegroup {
 	overflow-y: auto;
 }
 
-zoteromergepane #delete-box {
+zoteromergepane #trash-box, zoteromergepane #delete-box {
 	min-width: 15em;
 	-moz-box-align: center;
 	-moz-box-pack: center;

@@ -18,7 +18,7 @@ const Zotero_Lookup = new function () {
 			}
 		}
 		
-		var translate = new Zotero.Translate("search", true, false);
+		var translate = new Zotero.Translate("search");
 		translate.setSearch(item);
 		
 		// be lenient about translators
@@ -38,15 +38,17 @@ const Zotero_Lookup = new function () {
 			}
 		});
 		
-		var saveLocation = false;
+		var libraryID = null;
+		var collection = false;
 		try {
-			saveLocation = window.opener.ZoteroPane.getSelectedCollection();
+			libraryID = window.opener.ZoteroPane.getSelectedLibraryID();
+			collection = window.opener.ZoteroPane.getSelectedCollection();
 		} catch(e) {}
 		translate.setHandler("itemDone", function(obj, item) {
-			if(saveLocation) saveLocation.addItem(item.getID());
+			if(collection) collection.addItem(item.id);
 		});
 		
-		translate.translate();
+		translate.translate(libraryID);
 		return false;
 	}
 }

@@ -115,6 +115,12 @@ window[active="true"] #zotero-pane[fullscreenmode="true"][platform="mac"]
 	margin-top: -2px;
 }
 
+#zotero-tb-group-add
+{
+	list-style-image: url('chrome://zotero/skin/group_add.png');
+}
+
+
 #zotero-tb-tag-selector
 {
 	list-style-image: url(chrome://zotero/skin/tag-selector.png);
@@ -281,6 +287,10 @@ window[active="true"] #zotero-pane[fullscreenmode="true"][platform="mac"]
 #zotero-tb-search-cancel:hover:active
 {
 	list-style-image: url('chrome://zotero/skin/search-cancel-active.png');
+}
+
+#zotero-view-tabs tab
+{
 }
 
 #zotero-view-item > vbox

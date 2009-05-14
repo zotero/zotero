@@ -136,7 +136,7 @@ Zotero.Fulltext = new function(){
 			return false;
 		}
 		
-		versionFile = exec.parent;
+		var versionFile = exec.parent;
 		versionFile.append(fileName + '.version');
 		if (versionFile.exists()) {
 			var version = Zotero.File.getSample(versionFile).split(/[\r\n\s]/)[0];

@@ -222,7 +222,10 @@
 						}
 						
 						// Create new note
-						var item = new Zotero.Item(false, 'note');
+						var item = new Zotero.Item('note');
+						if (this.parent) {
+							item.libraryID = this.parent.libraryID;
+						}
 						item.setNote(noteField.value);
 						if (this.parent) {
 							item.setSource(this.parent.id);
@@ -230,7 +233,7 @@
 						if (this.saveOnEdit) {
 							var id = item.save();
 							
-							if (this.parent && this.collection) {
+							if (!this.parent && this.collection) {
 								this.collection.addItem(id);
 							}
 						}

@@ -461,7 +461,7 @@ Zotero.Sync.Storage = new function () {
 	 * Also marks missing files for downloading
 	 *
 	 * @param	{Integer[]}	itemIDs			An optional set of item ids to check
-	 * @param	{Object}		itemModTimes		Item mod times indexed by item ids
+	 * @param	{Object}	itemModTimes	Item mod times indexed by item ids
 	 *											appearing in itemIDs; if set,
 	 *											items with stored mod times
 	 *											that differ from the provided
@@ -497,8 +497,8 @@ Zotero.Sync.Storage = new function () {
 		do {
 			var chunk = itemIDs.splice(0, maxIDs);
 			var sql = "SELECT itemID, linkMode, path, storageModTime, syncState "
-						+ "FROM itemAttachments "
-						+ "WHERE linkMode IN (?,?) AND syncState IN (?,?)";
+						+ "FROM itemAttachments JOIN items USING (itemID) "
+						+ "WHERE linkMode IN (?,?) AND syncState IN (?,?) AND libraryID IS NULL";
 			var params = [
 				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
 				Zotero.Attachments.LINK_MODE_IMPORTED_URL,
@@ -665,7 +665,7 @@ Zotero.Sync.Storage = new function () {
 	 */
 	this.downloadFile = function (request) {
 		var key = request.name;
-		var item = Zotero.Items.getByKey(key);
+		var item = Zotero.Items.getByLibraryAndKey(null, key);
 		if (!item) {
 			_error("Item '" + key
 						+ "' not found in Zotero.Sync.Storage.downloadFile()");
@@ -735,7 +735,7 @@ Zotero.Sync.Storage = new function () {
 				wbp.saveURI(uri, null, null, null, null, destFile);
 			}
 			catch (e) {
-				request.error(e.message);
+				request.error(e);
 			}
 		});
 	}
@@ -918,7 +918,7 @@ Zotero.Sync.Storage = new function () {
 				}
 				
 				var key = file.replace(/\.(zip|prop)$/, '');
-				var item = Zotero.Items.getByKey(key);
+				var item = Zotero.Items.getByLibraryAndKey(null, key);
 				if (item) {
 					Zotero.debug("Skipping existing file " + file);
 					continue;
@@ -1006,7 +1006,8 @@ Zotero.Sync.Storage = new function () {
 					+ "Zotero.Sync.Storage.resetAllSyncStates()");
 		}
 		
-		var sql = "UPDATE itemAttachments SET syncState=?";
+		var sql = "UPDATE itemAttachments SET syncState=? WHERE itemID IN "
+					+ "(SELECT itemID FROM items WHERE libraryID IS NULL)";
 		Zotero.DB.query(sql, [syncState]);
 		
 		var sql = "DELETE FROM version WHERE schema='storage'";
@@ -1184,7 +1185,7 @@ Zotero.Sync.Storage = new function () {
 	 */
 	function _createUploadFile(request) {
 		var key = request.name;
-		var item = Zotero.Items.getByKey(key);
+		var item = Zotero.Items.getByLibraryAndKey(null, key);
 		Zotero.debug("Creating zip file for item " + item.key);
 		
 		try {
@@ -1222,7 +1223,7 @@ Zotero.Sync.Storage = new function () {
 			return true;
 		}
 		catch (e) {
-			request.error(e.message);
+			request.error(e);
 			return false;
 		}
 	}
@@ -1273,7 +1274,7 @@ Zotero.Sync.Storage = new function () {
 		*/
 		
 		var request = data.request;
-		var item = Zotero.Items.getByKey(request.name);
+		var item = Zotero.Items.getByLibraryAndKey(null, request.name);
 		
 		Zotero.Sync.Storage.getStorageModificationTime(item, function (item, mdate) {
 			if (!request.isRunning()) {
@@ -1378,7 +1379,7 @@ Zotero.Sync.Storage = new function () {
 				channel.asyncOpen(listener, null);
 			}
 			catch (e) {
-				request.error(e.message);
+				request.error(e);
 			}
 		});
 	}
@@ -1459,7 +1460,8 @@ Zotero.Sync.Storage = new function () {
 	 * @return	{Number[]}	Array of attachment itemIDs
 	 */
 	function _getFilesToDownload() {
-		var sql = "SELECT itemID FROM itemAttachments WHERE syncState IN (?,?)";
+		var sql = "SELECT itemID FROM itemAttachments JOIN items USING (itemID) "
+			+ "WHERE syncState IN (?,?) AND libraryID IS NULL";
 		return Zotero.DB.columnQuery(sql,
 			[
 				Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD,
@@ -1476,8 +1478,8 @@ Zotero.Sync.Storage = new function () {
 	 * @return	{Number[]}	Array of attachment itemIDs
 	 */
 	function _getFilesToUpload() {
-		var sql = "SELECT itemID FROM itemAttachments WHERE syncState IN (?,?) "
-					+ "AND linkMode IN (?,?)";
+		var sql = "SELECT itemID FROM itemAttachments JOIN items USING (itemID) "
+			+ "WHERE syncState IN (?,?) AND linkMode IN (?,?) AND libraryID IS NULL";
 		return Zotero.DB.columnQuery(sql,
 			[
 				Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD,
@@ -2371,7 +2373,7 @@ Zotero.Sync.Storage.QueueManager = new function () {
 	function _reconcileConflicts() {
 		var objectPairs = [];
 		for each(var conflict in _conflicts) {
-			var item = Zotero.Items.getByKey(conflict.name);
+			var item = Zotero.Items.getByLibraryAndKey(null, conflict.name);
 			var item1 = item.clone();
 			item1.setField('dateModified',
 				Zotero.Date.dateToSQL(new Date(conflict.localData.modTime * 1000), true));
@@ -2406,7 +2408,7 @@ Zotero.Sync.Storage.QueueManager = new function () {
 		// Since we're only putting cloned items into the merge window,
 		// we have to manually set the ids
 		for (var i=0; i<_conflicts.length; i++) {
-			io.dataOut[i].id = Zotero.Items.getByKey(_conflicts[i].name).id;
+			io.dataOut[i].id = Zotero.Items.getByLibraryAndKey(null, _conflicts[i].name).id;
 		}
 		
 		return io.dataOut;
@@ -2876,6 +2878,8 @@ Zotero.Sync.Storage.Request.prototype.onProgress = function (channel, progress, 
 
 
 Zotero.Sync.Storage.Request.prototype.error = function (msg) {
+	msg = typeof msg == 'object' ? msg.message : msg;
+	
 	this.queue.logError(msg);
 	
 	// DEBUG: ever need to stop channel?

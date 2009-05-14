@@ -407,7 +407,7 @@
 							this._tabIndexMaxInfoFields = Math.max(this._tabIndexMaxInfoFields, tabindex);
 							
 							if (fieldIsClickable &&
-									!this.item.isPrimaryField(fieldName) &&
+									!Zotero.Items.isPrimaryField(fieldName) &&
 									Zotero.ItemFields.isFieldOfBase(Zotero.ItemFields.getID(fieldName), 'date')) {
 								this.addDateRow(fieldNames[i], this.item.getField(fieldName, true), tabindex);
 								continue;
@@ -1688,7 +1688,7 @@
 				<body>
 				<![CDATA[
 					return !this.clickByRow &&
-						((this.clickable && !this.item.isPrimaryField(fieldName))
+						((this.clickable && !Zotero.Items.isPrimaryField(fieldName))
 							|| this._clickableFields.indexOf(fieldName) != -1);
 				]]>
 				</body>
@@ -1802,6 +1802,7 @@
 				<parameter name="changeGlobally"/>
 				<body>
 				<![CDATA[
+					var libraryID = this.item.libraryID;
 					var firstName = fields.firstName;
 					var lastName = fields.lastName;
 					//var shortName = fields.shortName;
@@ -1823,16 +1824,17 @@
 					Zotero.DB.beginTransaction();
 					
 					var newCreator = new Zotero.Creator;
+					newCreator.libraryID = libraryID;
 					newCreator.setFields(fields);
 					
 					var newLinkedCreators = [];
 					var creatorDataID = Zotero.Creators.getDataID(fields);
 					if (creatorDataID) {
-						newLinkedCreators = Zotero.Creators.getCreatorsWithData(creatorDataID);
+						newLinkedCreators = Zotero.Creators.getCreatorsWithData(creatorDataID, libraryID);
 					}
 					
 					if (oldCreator) {
-						if (oldCreator.ref.equals(newCreator)) {
+						if (oldCreator.ref.equals(newCreator) || (oldCreator.ref.libraryID != newCreator.libraryID)) {
 							if (oldCreator.creatorTypeID == creatorTypeID) {
 								Zotero.debug("Creator " + oldCreator.ref.id + " hasn't changed");
 							}
@@ -1913,7 +1915,15 @@
 					
 					this.item.setCreator(index, creator, creatorTypeID);
 					if (this.saveOnEdit) {
-						this.item.save();
+						try {
+							this.item.save();
+						}
+						catch (e) {
+							// DEBUG: Errors aren't being logged in Fx3.1b4pre without this
+							Zotero.debug(e);
+							Components.utils.reportError(e);
+							throw (e);
+						}
 					}
 					
 					Zotero.DB.commitTransaction();

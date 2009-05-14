@@ -242,13 +242,6 @@ Zotero.ItemTreeView.prototype.refresh = function()
 }
 
 
-Zotero.ItemTreeView.prototype.__defineGetter__('readOnly', function () {
-	if (this._itemGroup.isTrash() || this._itemGroup.isShare()) {
-		return true;
-	}
-	return false;
-});
-
 /*
  *  Called by Zotero.Notifier on any changes to items in the data layer
  */
@@ -264,6 +257,8 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		return;
 	}
 	
+	var itemGroup = this._itemGroup;
+	
 	var madeChanges = false;
 	var sort = false;
 	
@@ -272,7 +267,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	// If refreshing a single item, just unselect and reselect it
 	if (action == 'refresh') {
 		if (type == 'share-items') {
-			if (this._itemGroup.isShare()) {
+			if (itemGroup.isShare()) {
 				this.refresh();
 			}
 		}
@@ -299,13 +294,14 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	
 	var quicksearch = this._ownerDocument.getElementById('zotero-tb-search');
 	
+	
 	// 'collection-item' ids are in the form collectionID-itemID
 	if (type == 'collection-item') {
 		var splitIDs = [];
 		for each(var id in ids) {
 			var split = id.split('-');
 			// Skip if not collection or not an item in this collection
-			if (!this._itemGroup.isCollection() || split[0] != this._itemGroup.ref.id) {
+			if (!itemGroup.isCollection() || split[0] != this._itemGroup.ref.id) {
 				continue;
 			}
 			splitIDs.push(split[1]);
@@ -319,23 +315,16 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		}
 	}
 	
-	if ((action == 'remove' && !this._itemGroup.isLibrary())
-			|| action == 'delete' || action == 'id-change' || action == 'trash') {
-		
-		// We only care about the old ids
-		if (action == 'id-change') {
-			for (var i=0, len=ids.length; i<len; i++) {
-				ids[i] = ids[i].split('-')[0];
-			}
-		}
+	if ((action == 'remove' && !itemGroup.isLibrary(true))
+			|| action == 'delete' || action == 'trash') {
 		
 		// Since a remove involves shifting of rows, we have to do it in order,
 		// so sort the ids by row
 		var rows = [];
 		for(var i=0, len=ids.length; i<len; i++)
 		{
-			if (action == 'delete' || action == 'trash' || action == 'id-change' ||
-					!this._itemGroup.ref.hasItem(ids[i])) {
+			if (action == 'delete' || action == 'trash' ||
+					!itemGroup.ref.hasItem(ids[i])) {
 				// Row might already be gone (e.g. if this is a child and
 				// 'modify' was sent to parent)
 				if (this._itemRowMap[ids[i]] != undefined) {
@@ -365,7 +354,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	else if (action == 'modify')
 	{
 		// If trash or saved search, just re-run search
-		if (this._itemGroup.isTrash() || this._itemGroup.isSearch())
+		if (itemGroup.isTrash() || itemGroup.isSearch())
 		{
 			this.refresh();
 			madeChanges = true;
@@ -375,9 +364,11 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		// If no quicksearch, process modifications manually
 		else if (!quicksearch || quicksearch.value == '')
 		{
-			for(var i=0, len=ids.length; i<len; i++)
-			{
-				var row = this._itemRowMap[ids[i]];
+			var items = Zotero.Items.get(ids);
+			for each(var item in items) {
+				var id = item.id;
+				
+				var row = this._itemRowMap[id];
 				// Item already exists in this view
 				if( row != null)
 				{
@@ -401,25 +392,19 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 					else if (!this.isContainer(row) && parentIndex != -1
 						&& !sourceItemID)
 					{
-						var item = Zotero.Items.get(ids[i]);
 						this._showItem(new Zotero.ItemTreeView.TreeRow(item, 0, false), this.rowCount);
 						this._treebox.rowCountChanged(this.rowCount-1, 1);
-						sort = ids[i];
+						sort = id;
 					}
 					// If not moved from under one item to another
 					else if (!(sourceItemID && parentIndex != -1 && this._itemRowMap[sourceItemID] != parentIndex)) {
-						sort = ids[i];
+						sort = id;
 					}
 					madeChanges = true;
 				}
 				
-				else if (this._itemGroup.isLibrary() || this._itemGroup.ref.hasItem(ids[i])) {
-					var item = Zotero.Items.get(ids[i]);
-					if (!item) {
-						// DEBUG: this shouldn't really happen but could if a
-						// modify comes in after a delete
-						continue;
-					}
+				else if (((itemGroup.isLibrary() || itemGroup.isGroup()) && itemGroup.ref.libraryID == item.libraryID)
+							|| (itemGroup.isCollection() && item.inCollection(itemGroup.ref.id))) {
 					// Deleted items get a modify that we have to ignore when
 					// not viewing the trash
 					if (item.deleted) {
@@ -452,7 +437,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	else if(action == 'add')
 	{
 		// If saved search or trash, just re-run search
-		if (this._itemGroup.isSearch() || this._itemGroup.isTrash()) {
+		if (itemGroup.isSearch() || itemGroup.isTrash()) {
 			this.refresh();
 			madeChanges = true;
 			sort = true;
@@ -463,24 +448,21 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		else if (quicksearch && quicksearch.value == '')
 		{
 			var items = Zotero.Items.get(ids);
-			for (var i in items)
-			{
+			for each(var item in items) {
 				// if the item belongs in this collection
-				if((this._itemGroup.isLibrary() || items[i].inCollection(this._itemGroup.ref.id))
+				if ((((itemGroup.isLibrary() || itemGroup.isGroup()) && itemGroup.ref.libraryID == item.libraryID)
+						|| (itemGroup.isCollection() && item.inCollection(itemGroup.ref.id)))
 					// if we haven't already added it to our hash map
-					&& this._itemRowMap[items[i].id] == null
+					&& this._itemRowMap[item.id] == null
 					// Regular item or standalone note/attachment
-					&& (items[i].isRegularItem() || !items[i].getSource()))
-				{
-					this._showItem(new Zotero.ItemTreeView.TreeRow(items[i],0,false),this.rowCount);
+					&& (item.isRegularItem() || !item.getSource())) {
+					this._showItem(new Zotero.ItemTreeView.TreeRow(item, 0, false), this.rowCount);
 					this._treebox.rowCountChanged(this.rowCount-1,1);
-					
 					madeChanges = true;
 				}
 			}
-			
 			if (madeChanges) {
-				sort = (ids.length == 1) ? ids[0] : true;
+				sort = (items.length == 1) ? items[0].id : true;
 			}
 		}
 		// Otherwise re-run the search, which refreshes the item list
@@ -510,6 +492,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 			
 			// Reset to Info tab
 			this._ownerDocument.getElementById('zotero-view-tabs').selectedIndex = 0;
+			
 			this.selectItem(ids[0]);
 		}
 		// If single item is selected and was modified
@@ -548,7 +531,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 			}
 			
 			// On delete, select item at previous position
-			if (action == 'delete') {
+			if (action == 'delete' || action == 'remove') {
 				if (this._dataItems[previousRow]) {
 					this.selection.select(previousRow);
 				}
@@ -569,6 +552,10 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	// ('collection-item' add with tag selector open)
 	else if (selectItem) {
 		this.selectItem(selectItem);
+	}
+	
+	if (Zotero.Sync.Server.syncInProgress) {
+		this.rememberSelection(savedSelection);
 	}
 	
 	this.selection.selectEventsSuppressed = false;
@@ -1085,11 +1072,16 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
+
 /*
  *  Select an item
  */
 Zotero.ItemTreeView.prototype.selectItem = function(id, expand, noRecurse)
 {
+	if (Zotero.Sync.Server.syncInProgress) {
+		return;
+	}
+	
 	// If no row map, we're probably in the process of switching collections,
 	// so store the item to select on the item group for later
 	if (!this._itemRowMap) {
@@ -1223,14 +1215,18 @@ Zotero.ItemTreeView.prototype.deleteSelection = function(eraseChildren, force)
 			ids.push(this._getItemAtRow(j).ref.id);
 	}
 	
-	// Erase item(s) from DB
-	if (this._itemGroup.isLibrary() || force) {
+	var itemGroup = this._itemGroup;
+	
+	if (itemGroup.isGroup() || (force && itemGroup.isWithinGroup())) {
+		Zotero.Items.erase(ids, eraseChildren);
+	}
+	else if (itemGroup.isLibrary() || force) {
 		Zotero.Items.trash(ids);
 	}
-	else if (this._itemGroup.isCollection()) {
-		this._itemGroup.ref.removeItems(ids);
+	else if (itemGroup.isCollection()) {
+		itemGroup.ref.removeItems(ids);
 	}
-	else if (this._itemGroup.isTrash()) {
+	else if (itemGroup.isTrash()) {
 		Zotero.Items.erase(ids, eraseChildren);
 	}
 	this._treebox.endUpdateBatch();
@@ -1597,7 +1593,7 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event, transferData, actio
 	var oldMethod = Zotero.isFx2 || Zotero.isFx30;
 	
 	// Quick implementation of dragging of XML item format
-	if (this.readOnly) {
+	if (this._itemGroup.isShare()) {
 		var items = this.getSelectedItems();
 		
 		var xml = <data/>;
@@ -1985,7 +1981,7 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient, dragData)
 	//Zotero.debug("Row is " + row + "; orient is " + orient);
 	
 	if (row == -1 && orient == -1) {
-		return true;
+		//return true;
 	}
 	
 	if (!dragData) {
@@ -2001,6 +1997,8 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient, dragData)
 		var ids = data;
 	}
 	
+	var itemGroup = this._itemGroup;
+	
 	// workaround... two different services call canDrop
 	// (nsDragAndDrop, and the tree) -- this is for the former,
 	// used when dragging between windows
@@ -2010,53 +2008,56 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient, dragData)
 		if (nsDragAndDrop.mDragSession.sourceNode!=row.target)
 		{
 			if (dataType == 'zotero/item') {
+				var items = Zotero.Items.get(ids);
+				
 				// Check if at least one item (or parent item for children) doesn't
 				// already exist in target
-				for each(var id in ids)
-				{
-					var item = Zotero.Items.get(id);
-					
+				for each(var item in items) {
 					// Skip non-top-level items
-					if (!item.isRegularItem() && item.getSource())
-					{
+					if (!item.isTopLevelItem()) {
 						continue;
 					}
-					// DISABLED: move parent on child drag
-					//var source = item.isRegularItem() ? false : item.getSource();
-					//if (!this._itemGroup.ref.hasItem(source ? source : id))
-					if (this._itemGroup.ref && !this._itemGroup.ref.hasItem(id))
-					{
+					
+					// TODO: For now, disable cross-window cross-library drag
+					if (itemGroup.ref.libraryID != item.libraryID) {
+						return false;
+					}
+					
+					if (itemGroup.ref && !itemGroup.ref.hasItem(item.id)) {
 						return true;
 					}
 				}
 			}
 			else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
-				if (this._itemGroup.isSearch()) {
+				if (itemGroup.isSearch()) {
 					return false;
 				}
-				
 				return true;
 			}
 		}
-		
 		return false;
 	}
 	
-	// Highlight the rows correctly on drag
+	if (orient == 0) {
+		var rowItem = this._getItemAtRow(row).ref; // the item we are dragging over
+	}
 	
-	var rowItem = this._getItemAtRow(row).ref; //the item we are dragging over
 	if (dataType == 'zotero/item') {
+		var items = Zotero.Items.get(ids);
+		
 		// Directly on a row
-		if (orient == 0)
-		{
+		if (orient == 0) {
 			var canDrop = false;
-			for each(var id in ids) {
-				var item = Zotero.Items.get(id);
-				
+			
+			for each(var item in items) {
 				// If any regular items, disallow drop
 				if (item.isRegularItem()) {
-					canDrop = false;
-					break;
+					return false;
+				}
+				
+				// Disallow cross-library child drag
+				if (item.libraryID != itemGroup.ref.libraryID) {
+					return false;
 				}
 				
 				// Only allow dragging of notes and attachments
@@ -2070,14 +2071,19 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient, dragData)
 		}
 		
 		// In library, allow children to be dragged out of parent
-		else if (this._itemGroup.isLibrary() || this._itemGroup.isCollection())
-		{
-			for each(var id in ids)
-			{
+		else if (itemGroup.isLibrary(true) || itemGroup.isCollection()) {
+			for each(var item in items) {
 				// Don't allow drag if any top-level items
-				var item = Zotero.Items.get(id);
-				if (item.isRegularItem() || !item.getSource())
-				{
+				if (item.isTopLevelItem()) {
+					return false;
+				}
+				
+				if (item.isWebAttachment()) {
+					return false;
+				}
+				
+				// Disallow cross-library child drag
+				if (item.libraryID != itemGroup.ref.libraryID) {
 					return false;
 				}
 			}
@@ -2092,7 +2098,8 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient, dragData)
 				return false;
 			}
 		}
-		else if (this._itemGroup.isSearch()) {
+		// Don't allow drop into searches
+		else if (itemGroup.isSearch()) {
 			return false;
 		}
 		
@@ -2116,18 +2123,22 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 	var dataType = dragData.dataType;
 	var data = dragData.data;
 	
+	var itemGroup = this._itemGroup;
+	
 	if (dataType == 'zotero/item') {
 		var ids = data;
+		var items = Zotero.Items.get(ids);
+		if (items.length < 1) {
+			return;
+		}
 		
 		// Dropped directly on a row
-		if (orient == 0)
-		{
-			// If item was a top-level item and it exists in a collection,
-			// replace it in collections with the parent item
+		if (orient == 0) {
+			// Set drop target as the parent item for dragged items
+			//
+			// canDrop() limits this to child items
 			var rowItem = this._getItemAtRow(row).ref; // the item we are dragging over
-			for each(var id in ids)
-			{
-				var item = Zotero.Items.get(id);
+			for each(var item in items) {
 				item.setSource(rowItem.id);
 				item.save();
 			}
@@ -2137,11 +2148,8 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 		else
 		{
 			// Remove from parent and make top-level
-			if (this._itemGroup.isLibrary())
-			{
-				for each(var id in ids)
-				{
-					var item = Zotero.Items.get(id);
+			if (itemGroup.isLibrary(true)) {
+				for each(var item in items) {
 					if (!item.isRegularItem())
 					{
 						item.setSource();
@@ -2152,30 +2160,49 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 			// Add to collection
 			else
 			{
-				for each(var id in ids)
+				for each(var item in items)
 				{
-					var item = Zotero.Items.get(id);
 					var source = item.isRegularItem() ? false : item.getSource();
-					
 					// Top-level item
 					if (source) {
 						item.setSource();
 						item.save()
 					}
-					this._itemGroup.ref.addItem(id);
+					itemGroup.ref.addItem(id);
 				}
 			}
 		}
 	}
 	else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
+		// FIXME: temporarily disable dragging in of files
+		if (dataType == 'application/x-moz-file' && itemGroup.isWithinGroup()) {
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService);
+			ps.alert(null, "", "Files cannot currently be added to group libraries.");
+			return;
+		}
+		
+		// Disallow drop into read-only libraries
+		if (!itemGroup.isEditable()) {
+			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					   .getService(Components.interfaces.nsIWindowMediator);
+			var win = wm.getMostRecentWindow("navigator:browser");
+			win.ZoteroPane.displayCannotEditLibraryMessage();
+			return;
+		}
+		
 		var sourceItemID = false;
 		var parentCollectionID = false;
 		
+		var treerow = this._getItemAtRow(row);
 		if (orient == 0) {
-			sourceItemID = this._getItemAtRow(row).ref.id
+			sourceItemID = treerow.ref.id
 		}
-		else if (this._itemGroup.isCollection()) {
-			var parentCollectionID = this._itemGroup.ref.id;
+		else if (itemGroup.isCollection()) {
+			var parentCollectionID = itemGroup.ref.id;
+		}
+		else if (itemGroup.isLibrary(true)) {
+			var libraryID = itemGroup.ref.libraryID;
 		}
 		
 		var unlock = Zotero.Notifier.begin(true);
@@ -2207,7 +2234,15 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 					
 					// Still string, so remote URL
 					if (typeof file == 'string') {
-						Zotero.Attachments.importFromURL(url, sourceItemID, false, false, parentCollectionID);
+						if (sourceItemID) {
+							Zotero.Attachments.importFromURL(url, sourceItemID);
+						}
+						else {
+							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+									   .getService(Components.interfaces.nsIWindowMediator);
+							var win = wm.getMostRecentWindow("navigator:browser");
+							win.ZoteroPane.addItemFromURL(url);
+						}
 						continue;
 					}
 					

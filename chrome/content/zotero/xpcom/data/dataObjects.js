@@ -14,20 +14,86 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	this._ZDO_id = (id ? id : object) + 'ID';
 	this._ZDO_table = table ? table : this._ZDO_objects;
 	
+	// Certain object types don't have a libary and key and only use an id
+	switch (object) {
+		case 'relation':
+			this._ZDO_idOnly = true;
+			break;
+			
+		default:
+			this._ZDO_idOnly = false;
+	}
+	
 	this._objectCache = {};
 	this._reloadCache = true;
 	
 	
+	this.makeLibraryKeyHash = function (libraryID, key) {
+		var libraryID = libraryID ? libraryID : 0;
+		return libraryID + '_' + key;
+	}
+	
+	
+	this.getLibraryKeyHash = function (obj) {
+		return this.makeLibraryKeyHash(obj.libraryID, obj.key);
+	}
+	
+	
+	this.parseLibraryKeyHash = function (libraryKey) {
+		var [libraryID, key] = libraryKey.split('_');
+		libraryID = parseInt(libraryID);
+		return {
+			libraryID: libraryID ? libraryID : null,
+			key: key
+		};
+	}
+	
+	
 	/**
-	 * Retrieves an object by its secondary lookup key
+	 * Retrieves an object of the current by its key
 	 *
-	 * @param	string	key		Secondary lookup key
-	 * @return	object			Zotero data object, or FALSE if not found
+	 * @param	{String}			key
+	 * @return	{Zotero.DataObject}			Zotero data object, or FALSE if not found
 	 */
 	this.getByKey = function (key) {
-		var sql = "SELECT " + this._ZDO_id + " FROM " + this._ZDO_table
-			+ " WHERE key=?";
-		var id = Zotero.DB.valueQuery(sql, key);
+		if (arguments.length > 1) {
+			throw ("getByKey() takes only one argument");
+		}
+		
+		Components.utils.reportError("Zotero." + this._ZDO_Objects
+			+ ".getByKey() is deprecated -- use getByLibraryAndKey()");
+		
+		return this.getByLibraryAndKey(null, key);
+	}
+	
+	
+	/**
+	 * Retrieves an object by its libraryID and key
+	 *
+	 * @param	{Integer|NULL}		libraryID
+	 * @param	{String}			key
+	 * @return	{Zotero.DataObject}			Zotero data object, or FALSE if not found
+	 */
+	this.getByLibraryAndKey = function (libraryID, key) {
+		var sql = "SELECT ROWID FROM " + this._ZDO_table + " WHERE ";
+		var params = [];
+		if (this._ZDO_idOnly) {
+			sql += "ROWID=?";
+			params.push(key);
+		}
+		else {
+			sql += "libraryID";
+			if (libraryID) {
+				sql += "=? ";
+				params.push(libraryID);
+			}
+			else {
+				sql += " IS NULL ";
+			}
+			sql += "AND key=?";
+			params.push(key);
+		}
+		var id = Zotero.DB.valueQuery(sql, params);
 		if (!id) {
 			return false;
 		}
@@ -41,8 +107,7 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 				+ "Zotero." + this._ZDO_Objects + ".getOlder()")
 		}
 		
-		var sql = "SELECT " + this._ZDO_id + " FROM " + this._ZDO_table
-					+ " WHERE dateModified<?";
+		var sql = "SELECT ROWID FROM " + this._ZDO_table + " WHERE clientDateModified<?";
 		return Zotero.DB.columnQuery(sql, Zotero.Date.dateToSQL(date, true));
 	}
 	
@@ -53,9 +118,9 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 				+ "Zotero." + this._ZDO_Objects + ".getNewer()")
 		}
 		
-		var sql = "SELECT " + this._ZDO_id + " FROM " + this._ZDO_table;
+		var sql = "SELECT ROWID FROM " + this._ZDO_table;
 		if (date) {
-			sql += " WHERE dateModified>?";
+			sql += " WHERE clientDateModified>?";
 			return Zotero.DB.columnQuery(sql, Zotero.Date.dateToSQL(date, true));
 		}
 		return Zotero.DB.columnQuery(sql);
@@ -75,6 +140,7 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 		var ids = Zotero.flattenArguments(arguments);
 		Zotero.debug('Reloading ' + this._ZDO_objects + ' ' + ids);
 		
+		/*
 		// Reset cache keys to itemIDs stored in database using object keys
 		var sql = "SELECT " + this._ZDO_id + " AS id, key FROM " + this._ZDO_table
 					+ " WHERE " + this._ZDO_id + " IN ("
@@ -87,22 +153,32 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 		}
 		var store = {};
 		
+		Zotero.debug('==================');
 		for (var id in this._objectCache) {
+			Zotero.debug('id is ' + id);
 			var obj = this._objectCache[id];
+			//Zotero.debug(obj);
 			var dbID = keyIDs[obj.key];
+			Zotero.debug("DBID: " + dbID);
 			if (!dbID || id == dbID) {
+				Zotero.debug('continuing');
 				continue;
 			}
+			Zotero.debug('Assigning ' + dbID + ' to store');
 			store[dbID] = obj;
+			Zotero.debug('deleting ' + id);
 			delete this._objectCache[id];
 		}
+		Zotero.debug('------------------');
 		for (var id in store) {
+			Zotero.debug(id);
 			if (this._objectCache[id]) {
 				throw("Existing " + this._ZDO_object + " " + id
 					+ " exists in cache in Zotero.DataObjects.reload()");
 			}
 			this._objectCache[id] = store[id];
 		}
+		*/
 		
 		// If there's an internal reload hook, call it
 		if (this._reload) {
@@ -119,21 +195,15 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	this.reloadAll = function () {
 		Zotero.debug("Reloading all " + this._ZDO_objects);
 		
-		// Reset cache keys to itemIDs stored in database using object keys
-		var sql = "SELECT " + this._ZDO_id + " AS id, key FROM " + this._ZDO_table;
-		var rows = Zotero.DB.query(sql);
+		// Remove objects not stored in database
+		var sql = "SELECT ROWID FROM " + this._ZDO_table;
+		var ids = Zotero.DB.columnQuery(sql);
 		
-		var keyIDs = {};
-		for each(var row in rows) {
-			keyIDs[row.key] = row.id;
+		for (var id in this._objectCache) {
+			if (!ids || ids.indexOf(id) == -1) {
+				delete this._objectCache[id];
+			}
 		}
-		
-		var store = {};
-		for each(var obj in this._objectCache) {
-			store[keyIDs[obj.key]] = obj;
-		}
-		
-		this._objectCache = store;
 		
 		// Reload data
 		this._reloadCache = true;
@@ -166,11 +236,16 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 		var numDiffs = 0;
 		
 		var subs = ['primary', 'fields'];
+		var skipFields = ['collectionID', 'creatorID', 'itemID', 'searchID', 'tagID', 'libraryID', 'key'];
 		
 		for each(var sub in subs) {
 			diff[0][sub] = {};
 			diff[1][sub] = {};
 			for (var field in data1[sub]) {
+				if (skipFields.indexOf(field) != -1) {
+					continue;
+				}
+				
 				if (!data1[sub][field] && !data2[sub][field]) {
 					continue;
 				}
@@ -192,6 +267,10 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 			
 			// DEBUG: some of this is probably redundant
 			for (var field in data2[sub]) {
+				if (skipFields.indexOf(field) != -1) {
+					continue;
+				}
+				
 				if (diff[0][sub][field] != undefined) {
 					continue;
 				}
@@ -217,6 +296,40 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 		}
 		
 		return numDiffs;
+	}
+	
+	
+	this.isEditable = function (obj) {
+		var libraryID = obj.libraryID;
+		if (!libraryID) {
+			return true;
+		}
+		
+		var type = Zotero.Libraries.getType(libraryID);
+		switch (type) {
+			case 'group':
+				var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
+				var group = Zotero.Groups.get(groupID);
+				if (!group.editable) {
+					return false;
+				}
+				if (obj.objectType == 'item' && obj.isAttachment()
+						&& (obj.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
+							obj.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE)) {
+					return group.filesEditable;
+				}
+				return true;
+			
+			default:
+				throw ("Unsupported library type '" + type + "' in Zotero.DataObjects.isEditable()");
+		}
+	}
+	
+	
+	this.editCheck = function (obj) {
+		if (!Zotero.Sync.Server.syncInProgress && !this.isEditable(obj)) {
+			throw ("Cannot edit " + this._ZDO_object + " in read-only Zotero library");
+		}
 	}
 }
 

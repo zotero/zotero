@@ -25,7 +25,7 @@ Zotero.Notifier = new function(){
 	var _disabled = false;
 	var _types = [
 		'collection', 'creator', 'search', 'share', 'share-items', 'item',
-		'collection-item', 'item-tag', 'tag'
+		'collection-item', 'item-tag', 'tag', 'group'
 	];
 	var _inTransaction;
 	var _locked = false;
@@ -87,7 +87,7 @@ Zotero.Notifier = new function(){
 	*
 	* 	event: 'add', 'modify', 'delete', 'move' ('c', for changing parent),
 	*		'remove' (ci, it), 'refresh', 'trash'
-	* 	type - 'collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'
+	* 	type - 'collection', 'search', 'item', 'collection-item', 'item-tag', 'tag', 'group'
 	* 	ids - single id or array of ids
 	*
 	* Notes:

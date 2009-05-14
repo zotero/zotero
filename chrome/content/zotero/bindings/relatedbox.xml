@@ -137,10 +137,18 @@
 						window.openDialog('chrome://zotero/content/selectItemsDialog.xul', '',
 								'chrome,dialog=no,modal,centerscreen,resizable=yes', io);
 						
-						if(io.dataOut && this.item)
-						{
-							for(var i = 0; i < io.dataOut.length; i++)
-							{
+						if(io.dataOut) {
+							if (io.dataOut.length) {
+								var relItem = Zotero.Items.get(io.dataOut[0]);
+								if (relItem.libraryID != this.item.libraryID) {
+									// FIXME
+									var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
+															.getService(Components.interfaces.nsIPrompt);
+									prompt.alert("", "You cannot relate items in different libraries in this Zotero release.");
+									return;
+								}
+							}
+							for(var i = 0; i < io.dataOut.length; i++) {
 								this.item.addRelatedItem(io.dataOut[i]);
 							}
 							this.item.save();

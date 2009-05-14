@@ -109,13 +109,14 @@ function ChromeExtensionHandler() {
 						break;
 					
 					case 'search':
-						var s = new Zotero.Search(ids);
-						var ids = s.search();
+						var s = new Zotero.Search();
+						s.id = ids;
+						ids = s.search();
 						break;
 					
 					case 'items':
 					case 'item':
-						var ids = ids.split('-');
+						ids = ids.split('-');
 						break;
 						
 					default:

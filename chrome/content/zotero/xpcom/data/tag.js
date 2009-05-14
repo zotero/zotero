@@ -21,18 +21,23 @@
 */
 
 
-Zotero.Tag = function(tagID) {
-	this._tagID = tagID ? tagID : null;
+Zotero.Tag = function () {
+	if (arguments[0]) {
+		throw ("Zotero.Tag constructor doesn't take any parameters");
+	}
+	
 	this._init();
 }
 
 Zotero.Tag.prototype._init = function () {
 	// Public members for access by public methods -- do not access directly
+	this._id = null;
+	this._libraryID = null
+	this._key = null;
 	this._name = null;
 	this._type = null;
 	this._dateAdded = null;
 	this._dateModified = null;
-	this._key = null;
 	
 	this._loaded = false;
 	this._changed = false;
@@ -43,9 +48,13 @@ Zotero.Tag.prototype._init = function () {
 }
 
 
-Zotero.Tag.prototype.__defineGetter__('id', function () { return this._tagID; });
-
-Zotero.Tag.prototype.__defineSetter__('tagID', function (val) { this._set('tagID', val); });
+Zotero.Tag.prototype.__defineGetter__('objectType', function () { return 'tag'; });
+Zotero.Tag.prototype.__defineGetter__('id', function () { return this._get('id'); });
+Zotero.Tag.prototype.__defineSetter__('id', function (val) { this._set('id', val); });
+Zotero.Tag.prototype.__defineGetter__('libraryID', function () { return this._get('libraryID'); });
+Zotero.Tag.prototype.__defineSetter__('libraryID', function (val) { return this._set('libraryID', val); });
+Zotero.Tag.prototype.__defineGetter__('key', function () { return this._get('key'); });
+Zotero.Tag.prototype.__defineSetter__('key', function (val) { this._set('key', val) });
 Zotero.Tag.prototype.__defineGetter__('name', function () { return this._get('name'); });
 Zotero.Tag.prototype.__defineSetter__('name', function (val) { this._set('name', val); });
 Zotero.Tag.prototype.__defineGetter__('type', function () { return this._get('type'); });
@@ -55,13 +64,12 @@ Zotero.Tag.prototype.__defineSetter__('dateAdded', function (val) { this._set('d
 Zotero.Tag.prototype.__defineGetter__('dateModified', function () { return this._get('dateModified'); });
 Zotero.Tag.prototype.__defineSetter__('dateModified', function (val) { this._set('dateModified', val); });
 Zotero.Tag.prototype.__defineGetter__('key', function () { return this._get('key'); });
-Zotero.Tag.prototype.__defineSetter__('key', function (val) { this._set('key', val); });
 
 Zotero.Tag.prototype.__defineSetter__('linkedItems', function (arr) { this._setLinkedItems(arr); });
 
 
 Zotero.Tag.prototype._get = function (field) {
-	if (this.id && !this._loaded) {
+	if ((this._id || this._key) && !this._loaded) {
 		this.load();
 	}
 	return this['_' + field];
@@ -69,17 +77,27 @@ Zotero.Tag.prototype._get = function (field) {
 
 
 Zotero.Tag.prototype._set = function (field, val) {
-	if (field == 'name') {
-		val = Zotero.Utilities.prototype.trim(val);
-	}
-	
 	switch (field) {
-		case 'id': // set using constructor
-		//case 'tagID': // set using constructor
-			throw ("Invalid field '" + field + "' in Zotero.Tag.set()");
+		case 'id':
+		case 'libraryID':
+		case 'key':
+			if (val == this['_' + field]) {
+				return;
+			}
+			
+			if (this._loaded) {
+				throw ("Cannot set " + field + " after object is already loaded in Zotero.Tag._set()");
+			}
+			//this._checkValue(field, val);
+			this['_' + field] = val;
+			return;
+		
+		case 'name':
+			val = Zotero.Utilities.prototype.trim(val);
+			break;
 	}
 	
-	if (this.id) {
+	if (this.id || this.key) {
 		if (!this._loaded) {
 			this.load();
 		}
@@ -118,14 +136,38 @@ Zotero.Tag.prototype.exists = function() {
  * Build tag from database
  */
 Zotero.Tag.prototype.load = function() {
-	Zotero.debug("Loading data for tag " + this.id + " in Zotero.Tag.load()");
+	var id = this._id;
+	var key = this._key;
+	var libraryID = this._libraryID;
+	var desc = id ? id : libraryID + "/" + key;
 	
-	if (!this.id) {
-		throw ("tagID not set in Zotero.Tag.load()");
+	Zotero.debug("Loading data for tag " + desc + " in Zotero.Tag.load()");
+	
+	if (!id && !key) {
+		throw ("ID or key not set in Zotero.Tag.load()");
 	}
 	
-	var sql = "SELECT name, type, dateAdded, dateModified, key FROM tags WHERE tagID=?";
-	var row = Zotero.DB.rowQuery(sql, this.id);
+	var sql = "SELECT * FROM tags WHERE ";
+	if (id) {
+		sql += "tagID=?";
+		var params = id;
+	}
+	else {
+		sql += "key=?";
+		var params = [key];
+		if (libraryID) {
+			sql += " AND libraryID=?";
+			params.push(libraryID);
+		}
+		else {
+			sql += " AND libraryID IS NULL";
+		}
+	}
+	var row = Zotero.DB.rowQuery(sql, params);
+	
+	if (!row) {
+		return;
+	}
 	
 	this.loadFromRow(row);
 	return true;
@@ -136,6 +178,18 @@ Zotero.Tag.prototype.loadFromRow = function (row) {
 	this._init();
 	for (var col in row) {
 		//Zotero.debug("Setting field '" + col + "' to '" + row[col] + "' for tag " + this.id);
+		switch (col) {
+			case 'clientDateModified':
+				continue;
+			
+			case 'tagID':
+				this._id = row[col];
+				continue;
+			
+			case 'libraryID':
+				this['_' + col] = row[col] ? row[col] : null;
+				continue;
+		}
 		this['_' + col] = (!row[col] && row[col] !== 0) ? '' : row[col];
 	}
 	this._loaded = true;
@@ -220,12 +274,15 @@ Zotero.Tag.prototype.removeItem = function (itemID) {
 
 
 Zotero.Tag.prototype.save = function (full) {
+	Zotero.Tags.editCheck(this);
+	
 	// Default to manual tag
 	if (!this.type) {
 		this.type = 0;
 	}
 	
 	if (this.type != 0 && this.type != 1) {
+		Zotero.debug(this);
 		throw ('Invalid tag type ' + this.type + ' for tag ' + this.id + ' in Zotero.Tag.save()');
 	}
 	
@@ -241,34 +298,6 @@ Zotero.Tag.prototype.save = function (full) {
 	
 	Zotero.DB.beginTransaction();
 	
-	// ID change
-	if (this._changed.tagID) {
-		var oldID = this._previousData.primary.tagID;
-		var params = [this.id, oldID];
-		
-		Zotero.debug("Changing tagID " + oldID + " to " + this.id);
-		
-		var row = Zotero.DB.rowQuery("SELECT * FROM tags WHERE tagID=?", oldID);
-		
-		// Set type on old row to -1, since there's a UNIQUE on name/type
-		Zotero.DB.query("UPDATE tags SET type=-1 WHERE tagID=?", oldID);
-		
-		// Add a new row so we can update the old rows despite FK checks
-		// Use temp key due to UNIQUE constraint on key column
-		Zotero.DB.query("INSERT INTO tags VALUES (?, ?, ?, ?, ?, ?)",
-			[this.id, row.name, row.type, row.dateAdded, row.dateModified, 'TEMPKEY']);
-		
-		Zotero.DB.query("UPDATE itemTags SET tagID=? WHERE tagID=?", params);
-		
-		Zotero.DB.query("DELETE FROM tags WHERE tagID=?", oldID);
-		
-		Zotero.DB.query("UPDATE tags SET key=? WHERE tagID=?", [row.key, this.id]);
-		
-		Zotero.Notifier.trigger('id-change', 'tag', oldID + '-' + this.id);
-		
-		// update caches
-	}
-	
 	var isNew = !this.id || !this.exists();
 	
 	try {
@@ -281,9 +310,16 @@ Zotero.Tag.prototype.save = function (full) {
 		var key = this.key ? this.key : this._generateKey();
 		
 		var columns = [
-			'tagID', 'name', 'type', 'dateAdded', 'dateModified', 'key'
+			'tagID',
+			'name',
+			'type',
+			'dateAdded',
+			'dateModified',
+			'clientDateModified',
+			'libraryID',
+			'key'
 		];
-		var placeholders = ['?', '?', '?', '?', '?', '?'];
+		var placeholders = ['?', '?', '?', '?', '?', '?', '?', '?'];
 		var sqlValues = [
 			tagID ? { int: tagID } : null,
 			{ string: this.name },
@@ -293,6 +329,8 @@ Zotero.Tag.prototype.save = function (full) {
 			// If date modified hasn't changed, use current timestamp
 			this._changed.dateModified ?
 				this.dateModified : Zotero.DB.transactionDateTime,
+			Zotero.DB.transactionDateTime,
+			this.libraryID ? this.libraryID : null,
 			key
 		];
 		
@@ -372,6 +410,8 @@ Zotero.Tag.prototype.save = function (full) {
 						insertStatement.execute();
 					}
 					catch (e) {
+						Zotero.debug("itemID: " + itemID);
+						Zotero.debug("tagID: " + tagID);
 						throw (e + ' [ERROR: ' + Zotero.DB.getLastErrorString() + ']');
 					}
 				}
@@ -392,7 +432,7 @@ Zotero.Tag.prototype.save = function (full) {
 	
 	// If successful, set values in object
 	if (!this.id) {
-		this._tagID = tagID;
+		this._id = tagID;
 	}
 	
 	if (!this.key) {
@@ -465,9 +505,10 @@ Zotero.Tag.prototype.serialize = function () {
 	var obj = {
 		primary: {
 			tagID: this.id,
+			libraryID: this.libraryID,
+			key: this.key,
 			dateAdded: this.dateAdded,
-			dateModified: this.dateModified,
-			key: this.key
+			dateModified: this.dateModified
 		},
 		fields: {
 			name: this.name,
@@ -545,8 +586,18 @@ Zotero.Tag.prototype.erase = function () {
 
 
 Zotero.Tag.prototype._loadLinkedItems = function() {
+	if (!this.id && !this.key) {
+		this._linkedItemsLoaded = true;
+		return;
+	}
+	
 	if (!this._loaded) {
 		this.load();
+	}
+	
+	if (!this.id) {
+		this._linkedItemsLoaded = true;
+		return;
 	}
 	
 	var sql = "SELECT itemID FROM itemTags WHERE tagID=?";

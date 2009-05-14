@@ -27,6 +27,8 @@ const ZOTERO_CONFIG = {
 	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
 	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
 	FIRST_RUN_URL: 'http://www.zotero.org/support/quick_start_guide',
+	BASE_URI: 'http://zotero.org/',
+	WWW_BASE_URL: 'http://www.zotero.org/',
 	SYNC_URL: 'https://sync.zotero.org/'
 };
 
@@ -62,7 +64,6 @@ var Zotero = new function(){
 	this.hasValues = hasValues;
 	this.randomString = randomString;
 	this.moveToUnique = moveToUnique;
-	this.reloadDataObjects = reloadDataObjects;
 	
 	// Public properties
 	this.initialized = false;
@@ -77,6 +78,49 @@ var Zotero = new function(){
 	this.isWin;
 	this.initialURL; // used by Schema to show the changelog on upgrades
 	
+	
+	this.__defineGetter__('userID', function () {
+		var sql = "SELECT value FROM settings WHERE "
+					+ "setting='account' AND key='userID'";
+		return Zotero.DB.valueQuery(sql);
+	});
+	
+	this.__defineSetter__('userID', function (val) {
+		var sql = "REPLACE INTO settings VALUES ('account', 'userID', ?)";
+		Zotero.DB.query(sql, parseInt(val));
+	});
+	
+	this.__defineGetter__('libraryID', function () {
+		var sql = "SELECT value FROM settings WHERE "
+					+ "setting='account' AND key='libraryID'";
+		return Zotero.DB.valueQuery(sql);
+	});
+	
+	this.__defineSetter__('libraryID', function (val) {
+		var sql = "REPLACE INTO settings VALUES ('account', 'libraryID', ?)";
+		Zotero.DB.query(sql, parseInt(val));
+	});
+	
+	this.getLocalUserKey = function (generate) {
+		if (_localUserKey) {
+			return _localUserKey;
+		}
+		
+		var sql = "SELECT value FROM settings WHERE "
+					+ "setting='account' AND key='localUserKey'";
+		var key = Zotero.DB.valueQuery(sql);
+		
+		// Generate a local user key if we don't have a global library id
+		if (!key && generate) {
+			key = Zotero.randomString(8);
+			var sql = "INSERT INTO settings VALUES ('account', 'localUserKey', ?)";
+			Zotero.DB.query(sql, key);
+		}
+		_localUserKey = key;
+		return key;
+	};
+	
+	
 	var _startupError;
 	var _startupErrorHandler;
 	var _zoteroDirectory = false;
@@ -85,7 +129,7 @@ var Zotero = new function(){
 	var _debugTime;
 	var _debugLastTime;
 	var _localizedStringBundle;
-	
+	var _localUserKey;
 	
 	/*
 	 * Initialize the extension
@@ -841,19 +885,21 @@ var Zotero = new function(){
 	 * values and/or an arbitrary number of individual values
 	 */
 	function flattenArguments(args){
+		var isArguments = args.callee && args.length;
+		
 		// Put passed scalar values into an array
-		if (typeof args!='object' || args===null){
+		if (args === null || (args.constructor.name != 'Array' && !isArguments)) {
 			args = [args];
 		}
 		
-		var returns = new Array();
-		
+		var returns = [];
 		for (var i=0; i<args.length; i++){
-			if (typeof args[i]=='object'){
-				if(args[i]) {
-					for (var j=0; j<args[i].length; j++){
-						returns.push(args[i][j]);
-					}
+			if (!args[i]) {
+				continue;
+			}
+			if (args[i].constructor.name == 'Array') {
+				for (var j=0; j<args[i].length; j++){
+					returns.push(args[i][j]);
 				}
 			}
 			else {
@@ -987,7 +1033,7 @@ var Zotero = new function(){
 	}
 	
 	
-	function reloadDataObjects() {
+	this.reloadDataObjects = function () {
 		Zotero.Tags.reloadAll();
 		Zotero.Collections.reloadAll();
 		Zotero.Creators.reloadAll();
@@ -2129,7 +2175,7 @@ Zotero.DragDrop = {
 				dragData.dataType = 'text/x-moz-url';
 				var urls = [];
 				for (var i=0; i<len; i++) {
-					var url = dt.getData("application/x-moz-url", i).split("\n")[0];
+					var url = dt.getData("text/x-moz-url").split("\n")[0];
 					urls.push(url);
 				}
 				dragData.data = urls;
