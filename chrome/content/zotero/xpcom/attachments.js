@@ -1196,6 +1196,11 @@ Zotero.Attachments = new function(){
 	 * asynchronously after the fact
 	 */
 	function _postProcessFile(itemID, file, mimeType){
+		// Don't try to process if MIME type is unknown
+		if (!mimeType) {
+			return;
+		}
+		
 		// MIME types that get cached by the fulltext indexer can just be
 		// indexed directly
 		if (Zotero.Fulltext.isCachedMIMEType(mimeType)) {
