@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"zotero.org",
 	"creator":"Dan Stillman",
-	"target":"^https?://[^/]*zotero\\.net/(groups/)?[^/]+/[0-9]+/(items(/?[0-9]+?)?|items/collection/[0-9]+)(\\?.*)?$",
+	"target":"^https?://[^/]*zotero\\.org/(groups/)?[^/]+/[0-9]+/(items(/?[0-9]+?)?|items/collection/[0-9]+)(\\?.*)?$",
 	"minVersion":"1.0",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-03-10 05:35:00"
+	"lastUpdated":"2009-05-14 20:55:00"
 }
 
 function detectWeb(doc, url) {
