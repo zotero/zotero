@@ -81,13 +81,16 @@
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Bascule du sélecteur de marqueurs">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copier les citations de l&apos;objet sélectionné dans le presse-papiers">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copier les objets sélectionnés dans le presse-papiers">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Essayer de gérer les conflits de raccourcis">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Les modifications ne prendront effet que dans de nouvelles fenêtres">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize common URL-rewriting proxy systems">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
+<!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
+<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
 <!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
 <!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
 <!ENTITY zotero.preferences.proxies.hostname "Hostname">
