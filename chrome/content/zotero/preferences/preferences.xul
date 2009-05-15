@@ -244,6 +244,10 @@ To add a new preference:
 					<groupbox>
 						<caption label="Storage Server"/>
 						
+						<hbox>
+							<checkbox label="Enable file syncing" preference="pref-storage-enabled"/>
+						</hbox>
+						
 						<separator class="thin"/>
 						<label value="Please note: Attachment files in group libraries are not currently synced."/>
 						
