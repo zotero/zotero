@@ -640,7 +640,7 @@ Zotero.Translate.prototype.translate = function(libraryID, saveAttachments) {
 	this.saveFiles = this.saveAttachments;
 	
 	// If group filesEditable==false, don't save attachments
-	if (this.libraryID) {
+	if (typeof this.libraryID == 'number') {
 		var type = Zotero.Libraries.getType(this.libraryID);
 		switch (type) {
 			case 'group':

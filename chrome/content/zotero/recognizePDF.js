@@ -363,14 +363,14 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 	var me = this;
 	if(this._DOI) {
 		// use CrossRef to look for DOI
-		var translate = new Zotero.Translate("search", true, false);
+		var translate = new Zotero.Translate("search");
 		translate.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
 		var item = {"itemType":"journalArticle", "DOI":this._DOI};
 		translate.setSearch(item);
 		translate.setHandler("itemDone", function(translate, item) { me._callback(item); });
 		translate.setHandler("select", function(translate, items) { return me._selectItems(translate, items) });
 		translate.setHandler("done", function(translate, success) { if(!success) me._queryGoogle(); });
-		translate.translate();
+		translate.translate(true, false);
 		delete this._DOI;
 	} else {
 		// take the relevant parts of some lines (exclude hyphenated word)
@@ -405,7 +405,7 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 			this._hiddenBrowser.docShell.allowImages = false;
 		}
 		
-		var translate = new Zotero.Translate("web", true, false);
+		var translate = new Zotero.Translate("web");
 		translate.setTranslator("57a00950-f0d1-4b41-b6ba-44ff0fc30289");
 		translate.setHandler("itemDone", function(translate, item) {
 			Zotero.Browser.deleteHiddenBrowser(me._hiddenBrowser);
@@ -450,7 +450,7 @@ Zotero_RecognizePDF.Recognizer.prototype._scrape = function(/**Zotero.Translate*
 	
 	this._hiddenBrowser.removeEventListener("pageshow", this._scrape.caller, true);
 	translate.setDocument(this._hiddenBrowser.contentDocument);
-	translate.translate();
+	translate.translate(true, false);
 }
 
 /**
