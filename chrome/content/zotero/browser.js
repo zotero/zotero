@@ -692,7 +692,10 @@ Zotero_Browser.Tab.prototype.translate = function(libraryID, collectionID) {
 		Zotero_Browser.isScraping = true;
 		
 		if(collectionID) {
-			collection = Zotero.Collections.get(collectionID);
+			var collection = Zotero.Collections.get(collectionID);
+		}
+		else {
+			var collection = false;
 		}
 		
 		var me = this;
