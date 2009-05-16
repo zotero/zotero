@@ -2280,7 +2280,7 @@ Zotero.Sync.Server.Data = new function() {
 					// update them, which would trigger erroneous conflicts
 					var collections = [];
 					for each(var col in deletedCollectionKeys) {
-						col = Zotero.Collections.getByLibrayAndKey(col.libraryID, col.key);
+						col = Zotero.Collections.getByLibraryAndKey(col.libraryID, col.key);
 						// If collection never existed on this side
 						if (!col) {
 							continue;
