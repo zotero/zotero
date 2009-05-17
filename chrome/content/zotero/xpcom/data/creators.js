@@ -34,7 +34,7 @@ Zotero.Creators = new function() {
 	this.erase = erase;
 	this.purge = purge;
 	
-	this.fields = ['firstName', 'lastName', 'fieldMode', 'birthYear'];
+	this.__defineGetter__('fields', function () ['firstName', 'lastName', 'shortName', 'fieldMode', 'birthYear']);
 	
 	var _creatorDataHash = {}; // creatorDataIDs indexed by md5 hash of data
 	
@@ -82,15 +82,12 @@ Zotero.Creators = new function() {
 			return _creatorDataHash[hash];
 		}
 		
-		Zotero.DB.beginTransaction();
+		var params = [];
+		for each(var field in fields) {
+			params.push(field);
+		}
 		
-		var params = [
-			fields.firstName,
-			fields.lastName,
-			'',
-			fields.fieldMode,
-			fields.birthYear
-		];
+		Zotero.DB.beginTransaction();
 		
 		var sql = "SELECT creatorDataID FROM creatorData WHERE "
 			+ "firstName=? AND lastName=? AND shortName=? "
@@ -303,31 +300,24 @@ Zotero.Creators = new function() {
 	
 	
 	function _cleanFields(fields) {
-		var cleanedFields = {
-			firstName: '',
-			lastName: '',
-			fieldMode: 0,
-			birthYear: ''
-		};
-		for (var field in fields) {
-			if (fields[field]) {
-				switch (field) {
-					// Strings
-					case 'firstName':
-					case 'lastName':
-					case 'shortName':
-						cleanedFields[field] = fields[field] + '';
-						break;
-					
-					// Integer
-					case 'fieldMode':
-						cleanedFields[field] = fields[field] ? fields[field] : 0;
-						break;
-					
-					// Null if empty
-					default:
-						cleanedFields[field] = fields[field] ? fields[field] : null;
-				}
+		var cleanedFields = {};
+		for each(var field in Zotero.Creators.fields) {
+			switch (field) {
+				// Strings
+				case 'firstName':
+				case 'lastName':
+				case 'shortName':
+					cleanedFields[field] = fields[field] ? fields[field] + '' : '';
+					break;
+				
+				// Integer
+				case 'fieldMode':
+					cleanedFields[field] = fields[field] ? fields[field] : 0;
+					break;
+				
+				// Null if empty
+				case 'birthYear':
+					cleanedFields[field] = fields[field] ? fields[field] : null;
 			}
 		}
 		return cleanedFields;

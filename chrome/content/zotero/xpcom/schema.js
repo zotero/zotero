@@ -2367,6 +2367,11 @@ Zotero.Schema = new function(){
 				if (i==53) {
 					Zotero.DB.query("DELETE FROM collectionItems WHERE itemID IN (SELECT itemID FROM items WHERE itemID IN (SELECT itemID FROM itemAttachments WHERE sourceItemID IS NOT NULL) OR itemID IN (SELECT itemID FROM itemNotes WHERE sourceItemID IS NOT NULL))");
 				}
+				
+				if (i==54) {
+					Zotero.DB.query("UPDATE creatorData SET shortName='' WHERE shortName IS NULL");
+					Zotero.DB.query("UPDATE creatorData SET birthYear=NULL WHERE birthYear=''");
+				}
 			}
 			
 			_updateDBVersion('userdata', toVersion);
