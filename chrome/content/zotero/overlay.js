@@ -2275,6 +2275,9 @@ var ZoteroPane = new function()
 			var group = Zotero.Groups.getByLibraryID(item.libraryID);
 			filesEditable = group.filesEditable;
 		}
+		else {
+			filesEditable = true;
+		}
 		
 		// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
 		if (saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'))) {
