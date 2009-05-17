@@ -213,6 +213,65 @@ Zotero.DBConnection.prototype.columnQuery = function (sql,params) {
 Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams) {
 	var db = this._getDBConnection();
 	
+	// First, determine the type of query using first word
+	var matches = sql.match(/^[^\s\(]*/);
+	queryMethod = matches[0].toLowerCase();
+	
+	if (params) {
+		// If single scalar value or single non-array object, wrap in an array
+		if (typeof params != 'object' || params === null ||
+				(params && typeof params == 'object' && !params.length)) {
+			var params = [params];
+		}
+		
+		// Since we might make changes, only work on a copy of the array
+		var params = params.concat();
+		
+		// Replace NULL bound parameters with hard-coded NULLs
+		var nullRE = /\s*=?\s*\?/g;
+		// Reset lastIndex, since regexp isn't recompiled dynamically
+		nullRE.lastIndex = 0;
+		var lastNullParamIndex = -1;
+		for (var i=0; i<params.length; i++) {
+			if (typeof params[i] != 'object' || params[i] !== null) {
+				continue;
+			}
+			
+			// Find index of this parameter, skipping previous ones
+			do {
+				var matches = nullRE.exec(sql);
+				lastNullParamIndex++;
+			}
+			while (lastNullParamIndex < i);
+			lastNullParamIndex = i;
+			
+			if (matches[0].indexOf('=') == -1) {
+				// mozStorage supports null bound parameters in value lists (e.g., "(?,?)") natively
+				continue;
+				//var repl = 'NULL';
+			}
+			else if (queryMethod == 'select') {
+				var repl = ' IS NULL';
+			}
+			else {
+				var repl = '=NULL';
+			}
+			
+			var subpos = matches.index;
+			var sublen = matches[0].length;
+			sql = sql.substring(0, subpos) + repl + sql.substr(subpos + sublen);
+			
+			//Zotero.debug("Hard-coding null bound parameter " + i);
+			
+			params.splice(i, 1);
+			i--;
+			continue;
+		}
+		if (!params.length) {
+			params = undefined;
+		}
+	}
+	
 	try {
 		this._debug(sql,5);
 		var statement = db.createStatement(sql);
@@ -226,12 +285,6 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 	var numParams = statement.parameterCount;
 	
 	if (params) {
-		// If single scalar value or single non-array object, wrap in an array
-		if (typeof params != 'object' || params === null ||
-			(params && typeof params == 'object' && !params.length)) {
-			params = [params];
-		}
-		
 		if (checkParams) {
 			if (numParams == 0) {
 				throw ("Parameters provided for query without placeholders");
@@ -243,6 +296,14 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 		}
 		
 		for (var i=0; i<params.length; i++) {
+			if (params[i] === undefined) {
+				Zotero.debug(params);
+				var msg = 'Parameter ' + i + ' is undefined in Zotero.DB.getStatement() [QUERY: ' + sql + ']';
+				Zotero.debug(msg);
+				Components.utils.reportError(msg);
+				throw (msg);
+			}
+				
 			// Integer
 			if (params[i]!==null && typeof params[i]['int'] != 'undefined') {
 				var type = 'int';
@@ -252,10 +313,6 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 			else if (params[i]!==null && typeof params[i]['string'] != 'undefined') {
 				var type = 'string';
 				var value = params[i]['string'];
-			}
-			// Null
-			else if (params[i]!==null && typeof params[i]['null'] != 'undefined') {
-				var type = 'null';
 			}
 			// Automatic (trust the JS type)
 			else {
@@ -316,8 +373,7 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 					break;
 					
 				case 'null':
-					this._debug('Binding parameter ' + (i+1)
-						+ ' of type NULL', 5);
+					this._debug('Binding parameter ' + (i+1) + ' of type NULL', 5);
 					statement.bindNullParameter(i);
 					break;
 			}
