@@ -150,34 +150,48 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 	var oldCount = this.rowCount;
 	this._dataItems = [];
 	this.rowCount = 0;
-	this._showItem(new Zotero.ItemGroup('library', { id: null, libraryID: null }), 0, 1, 1); // itemgroup ref, level, beforeRow, startOpen
 	
-	var collections = Zotero.getCollections();
-	for (var i=0; i<collections.length; i++) {
-		// Skip group collections
-		if (collections[i].libraryID) {
-			continue;
+	var self = this;
+	var library = {
+		id: null,
+		libraryID: null,
+		expand: function () {
+			var newRows = 0;
+			
+			var collections = Zotero.getCollections();
+			for (var i=0; i<collections.length; i++) {
+				// Skip group collections
+				if (collections[i].libraryID) {
+					continue;
+				}
+				self._showItem(new Zotero.ItemGroup('collection', collections[i]), 1, newRows+1);
+				newRows++;
+			}
+			
+			var savedSearches = Zotero.Searches.getAll();
+			if (savedSearches) {
+				for (var i=0; i<savedSearches.length; i++) {
+					self._showItem(new Zotero.ItemGroup('search', savedSearches[i]), 1, newRows+1);
+					newRows++;
+				}
+			}
+			
+			var deletedItems = Zotero.Items.getDeleted();
+			if (deletedItems || Zotero.Prefs.get("showTrashWhenEmpty")) {
+				self._showItem(new Zotero.ItemGroup('trash', false), 1, newRows+1);
+				newRows++;
+			}
+			self.trashNotEmpty = !!deletedItems;
+			
+			return newRows;
 		}
-		this._showItem(new Zotero.ItemGroup('collection', collections[i]), 1);
-	}
-	
-	var savedSearches = Zotero.Searches.getAll();
-	if (savedSearches) {
-		for (var i=0; i<savedSearches.length; i++) {
-			this._showItem(new Zotero.ItemGroup('search', savedSearches[i]), 1);
-		}
-	}
-	
-	var deletedItems = Zotero.Items.getDeleted();
-	if (deletedItems || Zotero.Prefs.get("showTrashWhenEmpty")) {
-		this._showItem(new Zotero.ItemGroup('trash', false), 1);
-	}
-	this.trashNotEmpty = !!deletedItems;
+	};
+	this._showItem(new Zotero.ItemGroup('library', library), 0, 1, 1); // itemgroup ref, level, beforeRow, startOpen
+	library.expand();
 	
 	var groups = Zotero.Groups.getAll();
 	if (groups.length) {
 		this._showItem(new Zotero.ItemGroup('separator', false));
-		var self = this;
 		var header = {
 			id: "group-libraries-header",
 			label: "Group Libraries", // TODO: localize
@@ -543,15 +557,20 @@ Zotero.CollectionTreeView.prototype.toggleOpenState = function(row)
 			itemGroup.ref.expand();
 		}
 		else {
-			if (itemGroup.isGroup()) {
-				var collections = itemGroup.ref.getCollections(); // Get child collections
+			if (itemGroup.isLibrary()) {
+				count = itemGroup.ref.expand();
 			}
 			else {
-				var collections = Zotero.getCollections(itemGroup.ref.id); // Get child collections
-			}
-			for (var i=0; i<collections.length; i++) {
-				count++;
-				this._showItem(new Zotero.ItemGroup('collection', collections[i]), thisLevel+1, row+i+1); //insert new row
+				if (itemGroup.isGroup()) {
+					var collections = itemGroup.ref.getCollections(); // Get child collections
+				}
+				else {
+					var collections = Zotero.getCollections(itemGroup.ref.id); // Get child collections
+				}
+				for (var i=0; i<collections.length; i++) {
+					this._showItem(new Zotero.ItemGroup('collection', collections[i]), thisLevel+1, row+i+1); //insert new row
+					count++;
+				}
 			}
 		}
 	}
