@@ -551,11 +551,16 @@ function ChromeExtensionHandler() {
 					var d = '';
 					//passes information (type,ids, dateType) for when the XML is created
 					if(!type || (type != 'collection' && type != 'search')) {
-						d += 'library?t=' + dateType;
+						d += 'library';
 					}
 					else {
-						d += type + '/' + id + '?t=' + dateType;
+						d += type + '/' + id;
 					}
+					
+					if(dateType) {
+						d += '?t=' + dateType;
+					}
+					
 					content = content.replace(theTemp, theTemp + d);
 					
 					
@@ -576,7 +581,8 @@ function ChromeExtensionHandler() {
 							break;
 
 						case 'search':
-							var s = new Zotero.Search(ids);
+							var s = new Zotero.Search();
+							s.id = ids; 
 							var ids = s.search();
 							break;
 
