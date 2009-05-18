@@ -1329,7 +1329,10 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 					
 					// Still string, so remote URL
 					if (typeof file == 'string') {
-						Zotero.Attachments.importFromURL(url, false, false, false, parentCollectionID);
+						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								   .getService(Components.interfaces.nsIWindowMediator);
+						var win = wm.getMostRecentWindow("navigator:browser");
+						win.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack', row); // TODO: don't do this
 						continue;
 					}
 					

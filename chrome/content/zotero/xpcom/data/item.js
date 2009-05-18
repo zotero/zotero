@@ -1757,23 +1757,18 @@ Zotero.Item.prototype.save = function() {
 				}
 				
 				if (this._previousData) {
-					var oldSourceItemIDOrKey = this._previousData.sourceItem;
-					if (oldSourceItemIDOrKey) {
-						if (typeof oldSourceItemIDOrKey == 'number') {
-							var oldSourceItem = Zotero.Items.get(oldSourceItemIDOrKey);
-						}
-						else {
-							var oldSourceItem = Zotero.Items.getByLibraryAndKey(this.libraryID, oldSourceItemIDOrKey);
-						}
+					var oldSourceItemID = this._previousData.sourceItemID;
+					if (oldSourceItemID) {
+						var oldSourceItem = Zotero.Items.get(oldSourceItemID);
 					}
 					if (oldSourceItem) {
 						var oldSourceItemNotifierData = {};
 						oldSourceItemNotifierData[oldSourceItem.id] =
 							{ old: oldSourceItem.serialize() };
 					}
-					else if (oldSourceItemIDOrKey) {
+					else if (oldSourceItemID) {
 						var oldSourceItemNotifierData = null;
-						Zotero.debug("Old source item " + oldSourceItemIDOrKey
+						Zotero.debug("Old source item " + oldSourceItemID
 							+ " didn't exist in setSource()", 2);
 					}
 				}
@@ -1782,7 +1777,7 @@ Zotero.Item.prototype.save = function() {
 				// If this was an independent item, remove from any collections
 				// where it existed previously and add source instead if
 				// there is one
-				if (!oldSourceItemIDOrKey) {
+				if (!oldSourceItemID) {
 					var sql = "SELECT collectionID FROM collectionItems "
 								+ "WHERE itemID=?";
 					var changedCollections = Zotero.DB.columnQuery(sql, this.id);
@@ -1796,9 +1791,13 @@ Zotero.Item.prototype.save = function() {
 							sql = "DELETE FROM collectionItems WHERE itemID=?";
 							Zotero.DB.query(sql, this.id);
 						}
+						
+						for each(var c in changedCollections) {
+							Zotero.Notifier.trigger('remove', 'collection-item', c + '-' + this.id);
+						}
+						
+						Zotero.Collections.reload(changedCollections);
 					}
-					
-					// TODO: collection notifier trigger?
 				}
 				
 				// Update DB, if not a note or attachment we already changed above

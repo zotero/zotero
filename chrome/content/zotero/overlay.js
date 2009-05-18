@@ -621,27 +621,41 @@ var ZoteroPane = new function()
 	 *
 	 * _data_ is an optional object with field:value for itemData
 	 */
-	function newItem(typeID, data)
+	function newItem(typeID, data, row)
 	{
 		if (!Zotero.stateCheck()) {
 			this.displayErrorMessage(true);
 			return false;
 		}
 		
-		if (!this.canEdit()) {
+		if (!this.canEdit(row)) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
 		
+		// Currently selected row
+		if (row === undefined) {
+			row = this.collectionsView.selection.currentIndex;
+		}
+		
+		if (row !== undefined) {
+			var itemGroup = this.collectionsView._getItemAtRow(row);
+			var libraryID = itemGroup.ref.libraryID;
+		}
+		else {
+			var libraryID = null;
+			var itemGroup = null;
+		}
+		
 		var item = new Zotero.Item(typeID);
-		item.libraryID = this.getSelectedLibraryID();
+		item.libraryID = libraryID;
 		for (var i in data) {
 			item.setField(i, data[i]);
 		}
 		var itemID = item.save();
 		
-		if (this.itemsView && this.itemsView._itemGroup.isCollection()) {
-			this.itemsView._itemGroup.ref.addItem(itemID);
+		if (itemGroup && itemGroup.isCollection()) {
+			itemGroup.ref.addItem(itemID);
 		}
 		
 		//set to Info tab
@@ -651,6 +665,7 @@ var ZoteroPane = new function()
 		
 		return Zotero.Items.get(itemID);
 	}
+	
 	
 	function newCollection(parent)
 	{
@@ -2228,8 +2243,8 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.addItemFromPage = function (itemType) {
-		return this.addItemFromDocument(window.content.document, itemType);
+	this.addItemFromPage = function (itemType, row) {
+		return this.addItemFromDocument(window.content.document, itemType, row);
 	}
 	
 	
@@ -2239,17 +2254,31 @@ var ZoteroPane = new function()
 	 * @param	{Boolean}			[saveSnapshot]			Force saving of a snapshot,
 	 *														regardless of automaticSnapshots pref
 	 */
-	this.addItemFromDocument = function (doc, itemType, saveSnapshot) {
+	this.addItemFromDocument = function (doc, itemType, saveSnapshot, row) {
 		if (!Zotero.stateCheck()) {
 			this.displayErrorMessage(true);
 			return false;
 		}
 		
-		if (!this.canEdit()) {
+		// Currently selected row
+		if (row === undefined) {
+			row = this.collectionsView.selection.currentIndex;
+		}
+		
+		if (!this.canEdit(row)) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
 		
+		if (row !== undefined) {
+			var itemGroup = this.collectionsView._getItemAtRow(row);
+			var libraryID = itemGroup.ref.libraryID;
+		}
+		else {
+			var libraryID = null;
+			var itemGroup = null;
+		}
+
 		var progressWin = new Zotero.ProgressWindow();
 		progressWin.changeHeadline(Zotero.getString('ingester.scraping'));
 		var icon = 'chrome://zotero/skin/treeitem-webpage.png';
@@ -2263,14 +2292,54 @@ var ZoteroPane = new function()
 			accessDate: "CURRENT_TIMESTAMP"
 		}
 		
+		// TODO: this, needless to say, is a temporary hack
+		if (itemType == 'temporaryPDFHack') {
+			itemType = null;
+			var isPDF = false;
+			if (doc.title.indexOf('application/pdf') != -1) {
+				isPDF = true;
+			}
+			else {
+				var ios = Components.classes["@mozilla.org/network/io-service;1"].
+							getService(Components.interfaces.nsIIOService);
+				try {
+					var uri = ios.newURI(doc.location, null, null);
+					if (uri.fileName && uri.fileName.match(/pdf$/)) {
+						isPDF = true;
+					}
+				}
+				catch (e) {
+					Zotero.debug(e);
+					Components.utils.reportError(e);
+				}
+			}
+			
+			if (isPDF) {
+				if (libraryID) {
+					var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+								.getService(Components.interfaces.nsIPrompt);
+					pr.alert("", "Files cannot currently be added to group libraries.");
+					return;
+				}
+				
+				if (itemGroup && itemGroup.isCollection()) {
+					var collectionID = itemGroup.ref.id;
+				}
+				else {
+					var collectionID = false;
+				}
+				Zotero.Attachments.importFromDocument(doc, false, false, collectionID);
+				return;
+			}
+		}
+		
 		// Save web page item by default
 		if (!itemType) {
 			itemType = 'webpage';
 		}
 		itemType = Zotero.ItemTypes.getID(itemType);
-		var item = this.newItem(itemType, data);
+		var item = this.newItem(itemType, data, row);
 		
-		var filesEditable = false;
 		if (item.libraryID) {
 			var group = Zotero.Groups.getByLibraryID(item.libraryID);
 			filesEditable = group.filesEditable;
@@ -2295,13 +2364,13 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.addItemFromURL = function (url, itemType) {
+	this.addItemFromURL = function (url, itemType, row) {
 		if (url == window.content.document.location.href) {
-			return this.addItemFromPage(itemType);
+			return this.addItemFromPage(itemType, row);
 		}
 		
 		var processor = function (doc) {
-			ZoteroPane.addItemFromDocument(doc, itemType);
+			ZoteroPane.addItemFromDocument(doc, itemType, null, row);
 		};
 		
 		var done = function () {}
@@ -2445,10 +2514,17 @@ var ZoteroPane = new function()
 	 * Test if the user can edit the currently selected library/collection,
 	 * and display an error if not
 	 *
+	 * @param	{Integer}	[row]
+	 *
 	 * @return	{Boolean}		TRUE if user can edit, FALSE if not
 	 */
-	this.canEdit = function () {
-		var itemGroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+	this.canEdit = function (row) {
+		// Currently selected row
+		if (row === undefined) {
+			row = this.collectionsView.selection.currentIndex;
+		}
+		
+		var itemGroup = this.collectionsView._getItemAtRow(row);
 		return itemGroup.isEditable();
 	}
 	
