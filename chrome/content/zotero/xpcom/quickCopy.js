@@ -132,6 +132,11 @@ Zotero.QuickCopy = new function() {
 	 * contain properties 'text' and 'html' is returned.
 	 */
 	function getContentFromItems(items, format, callback, modified) {
+		if (items.length > Zotero.Prefs.get('export.quickCopy.dragLimit')) {
+			Zotero.debug("Skipping quick copy for " + items.length + " items");
+			return false;
+		}
+		
 		var [mode, format] = format.split('=');
 		var [mode, contentType] = mode.split('/');
 		

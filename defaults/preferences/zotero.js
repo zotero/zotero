@@ -81,6 +81,7 @@ pref("extensions.zotero.rtfScan.lastInputFile", "");
 pref("extensions.zotero.rtfScan.lastOutputFile", "");
 
 pref("extensions.zotero.export.quickCopy.setting", 'bibliography=http://www.zotero.org/styles/chicago-note');
+pref("extensions.zotero.export.quickCopy.dragLimit", 50);
 
 // Integration settings
 pref("extensions.zotero.integration.port", 50001);

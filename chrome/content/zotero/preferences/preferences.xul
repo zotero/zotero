@@ -455,6 +455,7 @@ To add a new preference:
 		<preferences>
 			<preference id="pref-export-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
 			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
+			<preference id="pref-quickCopy-dragLimit" name="extensions.zotero.export.quickCopy.dragLimit" type="int"/>
 		</preferences>
 		
 		<groupbox>
@@ -499,6 +500,15 @@ To add a new preference:
 			<hbox pack="end">
 				<button label="-" onclick="deleteSelectedQuickCopySite()"/>
 				<button label="+" onclick="showQuickCopySiteEditor()"/>
+			</hbox>
+			
+			<separator/>
+			
+			<!-- TODO: localize -->
+			<hbox align="center">
+				<label value="Disable Quick Copy when dragging more than"/>
+				<textbox preference="pref-quickCopy-dragLimit" size="3"/>
+				<label value="items" flex="1"/>
 			</hbox>
 			
 			<separator/>

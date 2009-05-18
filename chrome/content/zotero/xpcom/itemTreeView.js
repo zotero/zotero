@@ -1715,17 +1715,19 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event, transferData, actio
 		}
 		else if (mode.indexOf('bibliography') == 0) {
 			var content = Zotero.QuickCopy.getContentFromItems(items, format, null, event.shiftKey);
-			if (oldMethod) {
-				if (content.html) {
-					transferData.data.addDataForFlavour("text/html", content.html);
+			if (content) {
+				if (oldMethod) {
+					if (content.html) {
+						transferData.data.addDataForFlavour("text/html", content.html);
+					}
+					transferData.data.addDataForFlavour("text/unicode", content.text);
 				}
-				transferData.data.addDataForFlavour("text/unicode", content.text);
-			}
-			else {
-				if (content.html) {
-					event.dataTransfer.setData("text/html", content.html);
+				else {
+					if (content.html) {
+						event.dataTransfer.setData("text/html", content.html);
+					}
+					event.dataTransfer.setData("text/plain", content.text);
 				}
-				event.dataTransfer.setData("text/plain", content.text);
 			}
 		}
 		else {
