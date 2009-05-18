@@ -1488,6 +1488,7 @@
 				<parameter name="textbox"/>
 				<body>
 				<![CDATA[
+				try {
 					Zotero.debug('Hiding editor');
 					/*
 					var textbox = Zotero.getAncestorByTagName(t, 'textbox');
@@ -1666,6 +1667,13 @@
 						}
 						this._focusNextField(focusMode, focusBox, this._lastTabIndex, this._tabDirection == -1);
 					}
+				}
+				// Thrown errors don't seem to show up within XBL without explicit logging
+				catch (e) {
+					Zotero.debug(e);
+					Components.utils.reportError(e);
+					throw (e);
+				}
 				]]>
 				</body>
 			</method>
@@ -1802,6 +1810,8 @@
 				<parameter name="changeGlobally"/>
 				<body>
 				<![CDATA[
+				try {
+					
 					var libraryID = this.item.libraryID;
 					var firstName = fields.firstName;
 					var lastName = fields.lastName;
@@ -1927,6 +1937,13 @@
 					}
 					
 					Zotero.DB.commitTransaction();
+				
+				}
+				catch (e) {
+					Zotero.debug(e);
+					Components.utils.reportError(e);
+					throw (e);
+				}
 				]]>
 				</body>
 			</method>

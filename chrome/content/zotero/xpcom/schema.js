@@ -2372,6 +2372,20 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE creatorData SET shortName='' WHERE shortName IS NULL");
 					Zotero.DB.query("UPDATE creatorData SET birthYear=NULL WHERE birthYear=''");
 				}
+				
+				if (i==55) {
+					Zotero.DB.query("CREATE TEMPORARY TABLE tmpEmptyCreators AS SELECT creatorID FROM creators WHERE creatorDataID IN (SELECT creatorDataID FROM creatorData WHERE firstName='' AND lastName='')");
+					Zotero.DB.query("INSERT INTO syncDeleteLog SELECT 2, libraryID, key, CURRENT_TIMESTAMP FROM creators WHERE creatorID IN (SELECT creatorID FROM tmpEmptyCreators)");
+					var rows = Zotero.DB.query("SELECT * FROM itemCreators WHERE creatorID IN (SELECT creatorID FROM tmpEmptyCreators) ORDER BY orderIndex DESC");
+					for each(var row in rows) {
+						Zotero.DB.query("DELETE FROM itemCreators WHERE itemID=? AND creatorID=? AND orderIndex=?", [row.itemID, row.creatorID, row.orderIndex]);
+						Zotero.DB.query("UPDATE itemCreators SET orderIndex=orderIndex-1 WHERE itemID=? AND orderIndex>?", [row.itemID, row.orderIndex]);
+					}
+					Zotero.DB.query("DELETE FROM itemCreators WHERE creatorID IN (SELECT creatorID FROM tmpEmptyCreators)");
+					Zotero.DB.query("DELETE FROM creators WHERE creatorDataID IN (SELECT creatorDataID FROM creatorData WHERE firstName='' AND lastName='')");
+					Zotero.DB.query("DROP TABLE tmpEmptyCreators");
+					Zotero.DB.query("DELETE FROM creatorData WHERE firstName='' AND lastName=''");
+				}
 			}
 			
 			_updateDBVersion('userdata', toVersion);
