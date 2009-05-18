@@ -193,7 +193,7 @@
 							</menu>
 						</menupopup>
 					</toolbarbutton>
-					<toolbarbutton id="zotero-tb-item-from-page" tooltiptext="&zotero.toolbar.newItemFromPage.label;" oncommand="ZoteroPane.addItemFromPage()"/>
+					<toolbarbutton id="zotero-tb-item-from-page" tooltiptext="&zotero.toolbar.newItemFromPage.label;" oncommand="ZoteroPane.addItemFromPage('temporaryPDFHack')"/>
 					<toolbarbutton id="zotero-tb-lookup" tooltiptext="&zotero.toolbar.lookup.label;" oncommand="ZoteroPane.openLookupWindow()"/>
 					<!--
 					<toolbarseparator/>

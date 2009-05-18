@@ -635,7 +635,7 @@ Zotero.Translate.prototype.translate = function(libraryID, saveAttachments) {
 		throw("cannot translate: no location specified");
 	}
 	
-	this.libraryID = (libraryID == undefined) ? null : libraryID;
+	this.libraryID = (libraryID === true || libraryID == undefined) ? null : libraryID;
 	this.saveAttachments = !(saveAttachments === false);
 	this.saveFiles = this.saveAttachments;
 	

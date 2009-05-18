@@ -2078,7 +2078,9 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient, dragData)
 					return false;
 				}
 				
-				if (item.isWebAttachment()) {
+				// Don't allow web attachments to be dragged out of parents,
+				// but do allow PDFs for now so they can be recognized
+				if (item.isWebAttachment() && item.attachmentMIMEType != 'application/pdf') {
 					return false;
 				}
 				
@@ -2168,7 +2170,7 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 						item.setSource();
 						item.save()
 					}
-					itemGroup.ref.addItem(id);
+					itemGroup.ref.addItem(item.id);
 				}
 			}
 		}
@@ -2241,7 +2243,7 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 									   .getService(Components.interfaces.nsIWindowMediator);
 							var win = wm.getMostRecentWindow("navigator:browser");
-							win.ZoteroPane.addItemFromURL(url);
+							win.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack'); // TODO: don't do this
 						}
 						continue;
 					}
