@@ -1,4 +1,4 @@
--- 9
+-- 10
 
 -- Triggers to validate date field
 DROP TRIGGER IF EXISTS insert_date_field;
@@ -25,6 +25,22 @@ CREATE TRIGGER update_date_field BEFORE UPDATE ON itemData
         SUBSTR((SELECT value FROM itemDataValues WHERE valueID=NEW.valueID), 8, 1) = '-' AND
         CAST(SUBSTR((SELECT value FROM itemDataValues WHERE valueID=NEW.valueID), 9, 2) AS INT) BETWEEN 0 AND 31
       WHEN 0 THEN RAISE (ABORT, 'Date field must begin with SQL date') END;
+  END;
+
+
+-- Don't allow empty creators
+DROP TRIGGER IF EXISTS insert_creatorData;
+CREATE TRIGGER insert_creatorData BEFORE INSERT ON creatorData
+  FOR EACH ROW WHEN NEW.firstName='' AND NEW.lastName=''
+  BEGIN
+    SELECT RAISE (ABORT, 'Creator names cannot be empty');
+  END;
+
+DROP TRIGGER IF EXISTS update_creatorData;
+CREATE TRIGGER update_creatorData BEFORE UPDATE ON creatorData
+  FOR EACH ROW WHEN NEW.firstName='' AND NEW.lastName=''
+  BEGIN
+    SELECT RAISE (ABORT, 'Creator names cannot be empty');
   END;
 
 
