@@ -1267,8 +1267,9 @@ Zotero.Collection.prototype._loadChildItems = function() {
 	this._childItems = [];
 	
 	if (ids) {
-		for each(var id in ids) {
-			this._childItems.push(Zotero.Items.get(id));
+		var items = Zotero.Items.get(ids)
+		if (items) {
+			this._childItems = items;
 		}
 	}
 	
