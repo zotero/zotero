@@ -1,4 +1,4 @@
--- 10
+-- 11
 
 -- Triggers to validate date field
 DROP TRIGGER IF EXISTS insert_date_field;
@@ -260,7 +260,7 @@ CREATE TRIGGER fki_collectionItems_itemID_sourceItemID
   BEFORE INSERT ON collectionItems
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on table "collectionItems" violates foreign key constraint "fki_collectionItems_itemID_sourceItemID"')
-    WHERE NEW.itemID IN (SELECT itemID FROM items WHERE itemID IN (SELECT itemID FROM itemAttachments WHERE sourceItemID IS NOT NULL) OR itemID IN (SELECT itemID FROM itemNotes WHERE sourceItemID IS NOT NULL));
+    WHERE NEW.itemID IN (SELECT itemID FROM itemAttachments WHERE sourceItemID IS NOT NULL UNION SELECT itemID FROM itemNotes WHERE sourceItemID IS NOT NULL);
   END;
 
 DROP TRIGGER IF EXISTS fku_collectionItems_itemID_sourceItemID;
@@ -268,7 +268,7 @@ CREATE TRIGGER fku_collectionItems_itemID_sourceItemID
   BEFORE UPDATE OF itemID ON collectionItems
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'update on table "collectionItems" violates foreign key constraint "fku_collectionItems_itemID_sourceItemID"')
-    WHERE NEW.itemID IN (SELECT itemID FROM items WHERE itemID IN (SELECT itemID FROM itemAttachments WHERE sourceItemID IS NOT NULL) OR itemID IN (SELECT itemID FROM itemNotes WHERE sourceItemID IS NOT NULL));
+    WHERE NEW.itemID IN (SELECT itemID FROM itemAttachments WHERE sourceItemID IS NOT NULL UNION SELECT itemID FROM itemNotes WHERE sourceItemID IS NOT NULL);
   END;
 
 DROP TRIGGER IF EXISTS fku_itemAttachments_sourceItemID_collectionItems_itemID;
