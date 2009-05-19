@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-05 21:20:00"
+	"lastUpdated":"2009-05-18 21:20:00"
 }
 
 function detectWeb(doc, url) {
@@ -77,7 +77,7 @@ function generateDeliverString(nsResolver, doc){
  * given the text of the delivery page, downloads an item
  */
 function downloadFunction(text) {
-	Zotero.debug("POSTTEXT="+text);
+	//Zotero.debug("POSTTEXT="+text);
 	var postLocation = /<form (?:autocomplete="o(?:ff|n)" )?name="aspnetForm" method="post" action="([^"]+)"/
 	var postMatch = postLocation.exec(text);
 	var deliveryURL = postMatch[1].replace(/&amp;/g, "&");
@@ -98,6 +98,8 @@ function downloadFunction(text) {
 				item.DOI = text.match(/L3\s+\-\s*(.*)/)[1];
 			}
 			item.itemType = "journalArticle";
+			// RIS translator tries to download the link in "UR" this leads to unhappyness
+			item.attachments = [];
 			item.complete();
 		});
 		translator.translate();
