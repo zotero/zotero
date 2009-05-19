@@ -53,7 +53,7 @@ function fullEscape(text) {
 }
 
 function generateDeliverString(nsResolver, doc){	
-	var hiddenInputs = doc.evaluate('//input[@type="hidden" and not(contains(@name, "folderHas"))]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var hiddenInputs = doc.evaluate('//input[@type="hidden" and not(contains(@name, "folderHas")) and not(@name ="ajax")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var hiddenInput;
 	var deliverString ="";
 	while(hiddenInput = hiddenInputs.iterateNext()) {
@@ -72,15 +72,17 @@ function generateDeliverString(nsResolver, doc){
 	return deliverString;
 }
 
+
 /*
  * given the text of the delivery page, downloads an item
  */
 function downloadFunction(text) {
+	Zotero.debug("POSTTEXT="+text);
 	var postLocation = /<form (?:autocomplete="o(?:ff|n)" )?name="aspnetForm" method="post" action="([^"]+)"/
-	var m = postLocation.exec(text);
-	var deliveryURL = m[1].replace(/&amp;/g, "&");
-	m = customViewStateMatch.exec(text);
-	var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__CUSTOMVIEWSTATE="+fullEscape(m[1])+"&__VIEWSTATE=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24BibFormat=1&ajax=enabled";
+	var postMatch = postLocation.exec(text);
+	var deliveryURL = postMatch[1].replace(/&amp;/g, "&");
+	postMatch = customViewStateMatch.exec(text);
+	var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__CUSTOMVIEWSTATE="+fullEscape(postMatch[1])+"&__VIEWSTATE=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24BibFormat=1&ajax=enabled";
 	
 	Zotero.Utilities.HTTP.doPost(host+"/ehost/"+deliveryURL,
 								 downloadString, function(text) {	// get marked records as RIS
@@ -111,8 +113,8 @@ function doWeb(doc, url) {
 	} : null;
 
 	var hostRe = new RegExp("^(https?://[^/]+)/");
-	var m = hostRe.exec(url);
-	host = m[1];
+	var hostMatch = hostRe.exec(url);
+	host = hostMatch[1];
 	                                
 	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver,
 	                                XPathResult.ANY_TYPE, null).iterateNext();                              
@@ -143,10 +145,15 @@ function doWeb(doc, url) {
 			Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
 		});
 	} else {
-		var postURL = doc.evaluate('//form[@name="aspnetForm"]/@action', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		postURL = host+"/ehost/"+postURL.nodeValue;
-		var deliverString = generateDeliverString(nsResolver, doc);
-		Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
+		//This is a hack, generateDeliveryString is acting up for single pages, but it works on the plink url
+		var link = [doc.evaluate("//input[@id ='pLink']/@value", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue];
+		Zotero.Utilities.processDocuments(link, function(newDoc){
+			var postURL = newDoc.evaluate('//form[@name="aspnetForm"]/@action', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			postURL = host+"/ehost/"+postURL.nodeValue;
+			var deliverString = generateDeliverString(nsResolver, newDoc);
+			Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
+		});
+
 	}
 	Zotero.wait();
 }
