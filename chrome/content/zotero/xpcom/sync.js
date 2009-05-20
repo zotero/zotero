@@ -2373,7 +2373,18 @@ Zotero.Sync.Server.Data = new function() {
 						elementCreated = true;
 					}
 					
-					var obj = Zotero[Types].getByLibraryAndKey(parseInt(libraryID), key);
+					var l = parseInt(libraryID);
+					l = l ? l : null;
+					var obj = Zotero[Types].getByLibraryAndKey(l, key);
+					if (!obj) {
+						Zotero.debug("Updated " + type + " " + l + "/" + key + " has disappeared -- skipping");
+						syncSession.removeFromUpdated({
+							objectType: type,
+							libraryID: l,
+							key: key
+						});
+						continue;
+					}
 					if (type == 'item') {
 						// itemToXML needs the sync session
 						xml.items.appendChild(this.itemToXML(obj, syncSession));
