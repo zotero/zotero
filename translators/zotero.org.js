@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-05-14 20:55:00"
+	"lastUpdated":"2009-05-20 20:55:00"
 }
 
 function detectWeb(doc, url) {
@@ -16,6 +16,12 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 			if (prefix == 'x') return namespace; else return null;
 		} : null;
+		
+	// don't display for private groups
+	if (url.match(/\/groups\/[0-9]+\/items/)) {
+		return false;
+	}
+	
 	var a = doc.evaluate('//li[@id="library-tab"]/a[text()="My Library"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	// Skip current user's library
 	if (a && url.indexOf(a.href.match(/(^.+)\/items/)[1]) == 0) {
@@ -28,6 +34,7 @@ function detectWeb(doc, url) {
 		}
 		return "multiple";
 	}
+
 	// Individual item
 	else if (url.match(/\/items\/[0-9]+(\?.*)?$/)) {
 		// TODO: embed in page, because this is absurd
