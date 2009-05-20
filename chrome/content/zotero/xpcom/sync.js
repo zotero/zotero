@@ -2924,8 +2924,10 @@ Zotero.Sync.Server.Data = new function() {
 						+ data.libraryID + "/" + creator.@key.toString()
 						+ " not provided in Zotero.Sync.Server.Data.xmlToItem()");
 				}
+				var l = creator.@libraryID.toString();
+				l = l ? l : null;
 				var creatorObj = Zotero.Sync.Server.Data.xmlToCreator(creator.creator);
-				if (creatorObj.id != parseInt(creator.@id)) {
+				if (l != creatorObj.libraryID || creator.@key.toString() != creatorObj.key) {
 					throw ("Creator id " + creatorObj.id + " does not match "
 						+ "item creator in Zotero.Sync.Server.Data.xmlToItem()");
 				}
