@@ -104,19 +104,44 @@ function doWeb(doc, url) {
 			if (/stable\/(\d+)/.test(item.url)) {
 				var localJid = RegExp.$1;
 				
-				// Add DOI
-				if (! item.DOI) {
-				item.DOI = "10.2307/"+localJid;
-				}
+				var doi = "10.2307/"+localJid;
+				checkDOI(item, doi);
+				
 				var pdfurl = "http://"+ host + "/stable/pdfplus/" + localJid + ".pdf";
 				item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
 			}
-			item.complete();
 			});
 		
 		translator.translate();
-		
-		Zotero.done();
 		});
 	}
+}
+
+function checkDOI(item, doi) {	
+	var crossrefURL = "http://www.crossref.org/openurl/?req_dat=zter:zter321&url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&rft_id=info%3Adoi/"+doi+"&noredirect=true&format=unixref";
+	var doiCheckGenerate = function(item) {
+		var closedItem = item;
+		var checker = function(responseText) {
+			responseText = responseText.replace(/<\?xml[^>]*\?>/, "");
+			// parse XML with E4X
+			try {
+				var xml = new XML(responseText);
+			} catch(e) {
+				return false;
+			}
+			
+			var doi = xml..doi;
+			
+			// ensure DOI is valid
+			if(!xml..error.length()) {
+				Zotero.debug("DOI is Valid.");
+				closedItem.DOI = doi;
+			}
+			
+		};
+		return checker;
+	};
+	
+	var checkDOI = doiCheckGenerate(item);
+	Zotero.Utilities.HTTP.doGet(crossrefURL, checkDOI, function() { item.complete(); Zotero.done(); });
 }
