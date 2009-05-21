@@ -967,6 +967,9 @@ Zotero.Attachments = new function(){
 	
 	function getStorageDirectory(itemID) {
 		var item = Zotero.Items.get(itemID);
+		if (!item) {
+			throw ("Item " + itemID + " not found in Zotero.Attachments.getStorageDirectory()");
+		}
 		var dir = Zotero.getStorageDirectory();
 		dir.append(item.key);
 		return dir;
