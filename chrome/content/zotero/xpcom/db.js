@@ -265,6 +265,7 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 			
 			params.splice(i, 1);
 			i--;
+			lastNullParamIndex--;
 			continue;
 		}
 		if (!params.length) {
