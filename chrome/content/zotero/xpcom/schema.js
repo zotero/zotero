@@ -2386,6 +2386,10 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE tmpEmptyCreators");
 					Zotero.DB.query("DELETE FROM creatorData WHERE firstName='' AND lastName=''");
 				}
+				
+				if (i==56) {
+					Zotero.DB.query("UPDATE itemAttachments SET mimeType=charsetID, charsetID=NULL WHERE charsetID REGEXP '[a-zA-Z0-9\-]+/[a-zA-Z0-9\-]'");
+				}
 			}
 			
 			_updateDBVersion('userdata', toVersion);
