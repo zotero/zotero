@@ -2243,15 +2243,15 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.addItemFromPage = function (itemType, row) {
-		return this.addItemFromDocument(window.content.document, itemType, row);
+	this.addItemFromPage = function (itemType, saveSnapshot, row) {
+		return this.addItemFromDocument(window.content.document, itemType, saveSnapshot, row);
 	}
 	
 	
 	/**
 	 * @param	{Document}			doc
 	 * @param	{String|Integer}	[itemType='webpage']	Item type id or name
-	 * @param	{Boolean}			[saveSnapshot]			Force saving of a snapshot,
+	 * @param	{Boolean}			[saveSnapshot]			Force saving or non-saving of a snapshot,
 	 *														regardless of automaticSnapshots pref
 	 */
 	this.addItemFromDocument = function (doc, itemType, saveSnapshot, row) {
@@ -2364,13 +2364,13 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.addItemFromURL = function (url, itemType, row) {
+	this.addItemFromURL = function (url, itemType, saveSnapshot, row) {
 		if (url == window.content.document.location.href) {
-			return this.addItemFromPage(itemType, row);
+			return this.addItemFromPage(itemType, saveSnapshot, row);
 		}
 		
 		var processor = function (doc) {
-			ZoteroPane.addItemFromDocument(doc, itemType, null, row);
+			ZoteroPane.addItemFromDocument(doc, itemType, saveSnapshot, row);
 		};
 		
 		var done = function () {}
