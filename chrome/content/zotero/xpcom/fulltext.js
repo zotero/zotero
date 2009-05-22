@@ -488,13 +488,11 @@ Zotero.Fulltext = new function(){
 			
 			var file = i.getFile();
 			if (!file){
-				Zotero.debug("No file to index for item " + i.getID()
-					+ " in Fulltext.indexItems()");
+				Zotero.debug("No file to index for item " + i.id + " in Fulltext.indexItems()");
 				continue;
 			}
 			
-			this.indexFile(file, i.getAttachmentMIMEType(),
-				i.getAttachmentCharset(), i.getID(), !complete);
+			this.indexFile(file, i.attachmentMIMEType, i.attachmentCharset, i.id, !complete);
 		}
 		
 		Zotero.DB.commitTransaction();
@@ -601,10 +599,9 @@ Zotero.Fulltext = new function(){
 				continue;
 			}
 			
-			var mimeType = i.getAttachmentMIMEType();
-			
+			var mimeType = i.attachmentMIMEType;
 			if (isCachedMIMEType(mimeType)) {
-				var file = _getItemCacheFile(i.getID());
+				var file = _getItemCacheFile(i.id);
 				if (!file.exists()) {
 					continue;
 				}
@@ -621,7 +618,7 @@ Zotero.Fulltext = new function(){
 					}
 				}
 				
-				var charset = i.getAttachmentCharset();
+				var charset = i.attachmentCharset;
 			}
 			
 			var match = this.findTextInFile(file, charset, searchText, mode);
@@ -695,7 +692,7 @@ Zotero.Fulltext = new function(){
 	 */
 	function getTotalCharsFromFile(itemID) {
 		var item = Zotero.Items.get(itemID);
-		switch (item.getAttachmentMIMEType()) {
+		switch (item.attachmentMIMEType) {
 			case 'application/pdf':
 				var file = Zotero.Attachments.getStorageDirectory(itemID);
 				file.append(this.pdfConverterCacheFile);
@@ -742,7 +739,7 @@ Zotero.Fulltext = new function(){
 			throw ('Item ' + itemID + ' is not an attachment in Zotero.Fulltext.getIndexedState()');
 		}
 		
-		switch (item.getAttachmentMIMEType()) {
+		switch (item.attachmentMIMEType) {
 			// Use pages for PDFs
 			case 'application/pdf':
 				var pages = this.getPages(itemID);
@@ -827,7 +824,7 @@ Zotero.Fulltext = new function(){
 	 */
 	function canReindex(itemID) {
 		var item = Zotero.Items.get(itemID);
-		if (item && item.isAttachment() && item.getAttachmentLinkMode() !=
+		if (item && item.isAttachment() && item.attachmentLinkMode !=
 				Zotero.Attachments.LINK_MODE_LINKED_URL) {
 			switch (this.getIndexedState(itemID)) {
 				case this.INDEX_STATE_UNAVAILABLE:
@@ -913,11 +910,11 @@ Zotero.Fulltext = new function(){
 		}
 		
 		Zotero.debug('Clearing full-text cache file for item ' + itemID);
-		switch (item.getAttachmentMIMEType()) {
+		switch (item.attachmentMIMEType) {
 			case 'application/pdf':
-				var cacheFile = _getItemCacheFile();
+				var cacheFile = _getItemCacheFile(itemID);
 				if (cacheFile.exists()) {
-					cacheFile.remove(null);
+					cacheFile.remove(false);
 				}
 				break;
 		}
