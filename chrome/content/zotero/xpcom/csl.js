@@ -1685,7 +1685,6 @@ Zotero.CSL.Item = function(item) {
 	}
 	
 	this.id = this.zoteroItem.id;
-	this.key = this.zoteroItem.key;
 	
 	// don't return URL or accessed information for journal articles if a
 	// pages field exists
@@ -2179,7 +2178,6 @@ Zotero.CSL.ItemSet = function(items, csl) {
 	
 	this.items = [];
 	this.itemsById = {};
-	this.itemsByKey = {};
 	
 	// add items
 	this.add(items);
@@ -2223,25 +2221,6 @@ Zotero.CSL.ItemSet.prototype.getItemsByIds = function(ids) {
 	return items;
 }
 
-/**
- * Gets CSL.Item objects from an item set using their keys
- *
- * @param {Array} keys An array of keys
- * @return {Array} items An array whose indexes correspond to those of keys, whose values are either 
- *                       the CSL.Item objects or false
- **/
-Zotero.CSL.ItemSet.prototype.getItemsByKeys = function(keys) {
-	var items = [];
-	for each(var key in keys) {
-		if(this.itemsByKey[key] != undefined) {
-			items.push(this.itemsByKey[key]);
-		} else {
-			items.push(false);
-		}
-	}
-	return items;
-}
-
 /*
  * Adds items to the given item set; must be passed either CSL.Item 
  * objects or objects that may be wrapped as CSL.Item objects
@@ -2259,7 +2238,6 @@ Zotero.CSL.ItemSet.prototype.add = function(items) {
 		newItem.setProperty("index", this.items.length);
 		
 		this.itemsById[newItem.id] = newItem;
-		this.itemsByKey[newItem.key] = newItem;
 		this.items.push(newItem);
 		newItems.push(newItem);
 	}
@@ -2279,9 +2257,10 @@ Zotero.CSL.ItemSet.prototype.remove = function(items) {
 		} else {
 			var item = this.itemsById[items[i]];
 		}
-		this.itemsById[item.id] = undefined;
-		this.itemsByKey[item.key] = undefined;
-		this.items.splice(this.items.indexOf(item), 1);
+		if(item) {
+			this.itemsById[item.id] = undefined;
+			this.items.splice(this.items.indexOf(item), 1);
+		}
 	}
 }
 
