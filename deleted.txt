@@ -11,3 +11,5 @@ da440efe-646c-4a18-9958-abe1f7d55cde # NCSU Library (Endeca 2)
 e07e9b8c-0e98-4915-bb5a-32a08cb2f365  # Open WorldCat (Search)
 490909d7-7d79-4c7a-a136-77df618d4db2  # Worldcat.org
 dd149efc-7f0e-43e4-b3df-b6d15e171717  # Persée
+8c1f42d5-02fa-437b-b2b2-73afc768eb07  # PNAS (replaced by HighWire 2.0)
+56ea09bc-57ee-4f50-976e-cf7cb1f6c6d8  # Royal Society Publishing (replaced by HighWire 2.0)
