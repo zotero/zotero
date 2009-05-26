@@ -2,13 +2,13 @@
 	"translatorID":"a14ac3eb-64a0-4179-970c-92ecc2fec992",
 	"translatorType":4,
 	"label":"Scopus",
-	"creator":"Michael Berkowitz",
+	"creator":"Michael Berkowitz and Rintze Zelle",
 	"target":"http://[^/]*www.scopus.com[^/]*",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"lastUpdated":"2009-05-26 08:19:07"
 }
 
 function detectWeb(doc, url) {
@@ -26,7 +26,6 @@ function getEID(url) {
 function returnURL(eid) {
 	return 'http://www.scopus.com/scopus/citation/output.url?origin=recordpage&eid=' + eid + '&src=s&view=CiteAbsKeywsRefs';
 }
-
 
 function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -56,7 +55,8 @@ function doWeb(doc, url) {
 		var stateKey = newDoc.evaluate('//input[@name="stateKey"]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
 		var get = 'http://www.scopus.com/scopus/citation/export.url';
 		var post = 'origin=recordpage&sid=&src=s&stateKey=' + stateKey + '&eid=' + eid + '&sort=&exportFormat=RIS&view=CiteAbsKeyws&selectedCitationInformationItemsAll=on';
-		Zotero.Utilities.HTTP.doPost(get, post, function(text) {
+		var rislink = get + "?" + post;	
+		Zotero.Utilities.HTTP.doGet(rislink, function(text) {
 			// load translator for RIS
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
