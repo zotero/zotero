@@ -2390,6 +2390,10 @@ Zotero.Schema = new function(){
 				if (i==56) {
 					Zotero.DB.query("UPDATE itemAttachments SET mimeType=charsetID, charsetID=NULL WHERE charsetID REGEXP '[a-zA-Z0-9\-]+/[a-zA-Z0-9\-]'");
 				}
+				
+				if (i==57) {
+					Zotero.DB.query("UPDATE itemAttachments SET linkMode=0, mimeType=NULL WHERE linkMode IS NULL AND mimeType=0");
+				}
 			}
 			
 			_updateDBVersion('userdata', toVersion);
