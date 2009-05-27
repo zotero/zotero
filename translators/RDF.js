@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-02 21:15:00"
+	"lastUpdated":"2009-05-27 05:25:00"
 }
 
 Zotero.configure("dataMode", "rdf");
