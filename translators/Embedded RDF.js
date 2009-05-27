@@ -31,13 +31,10 @@ function doWeb(doc, url) {
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
 	translator.setHandler("itemDone", function(obj, newItem) {
-		// use document title if none given in dublin core
-		if(!newItem.title) {
-			newItem.title = doc.title;
-		}
 		// add attachment
 		newItem.attachments.push({document:doc});
-		// add url
+		// add access date and url
+		newItem.accessDate = 'CURRENT_TIMESTAMP';
 		newItem.url = doc.location.href;
 		newItem.repository = false;
 		newItem.complete();
@@ -61,6 +58,9 @@ function doWeb(doc, url) {
 		}
 	}
 	
+	if (!foundTitle) {
+		rdf.Zotero.RDF.addStatement(url, dc + "title", doc.title, true);
+	}
 	rdf.defaultUnknownType = "webpage";
 	rdf.doImport();
 }
