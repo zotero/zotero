@@ -846,7 +846,7 @@ Zotero.Sync.Server = new function () {
 		if (!username) {
 			_error("Username not set in Zotero.Sync.Server.login()");
 		}
-		else if (!username.match(/^[\w\d\. ]+$/)) {
+		else if (!username.match(/^[\w\d\. \-\_]+$/)) {
 			_error("Invalid username '" + username + "' in Zotero.Sync.Server.login()");
 		}
 		
@@ -1442,10 +1442,12 @@ Zotero.Sync.Server = new function () {
 			_error('Invalid response from server', xmlhttp.responseText);
 		}
 		
+		var firstChild = xmlhttp.responseXML.firstChild.firstChild;
+		
 		// Temporarily disable auto-sync if instructed by server
-		if (xmlhttp.responseXML.firstChild.firstChild.localName == 'throttle') {
+		if (firstChild.localName == 'throttle') {
 			Zotero.debug(xmlhttp.responseText);
-			var delay = xmlhttp.responseXML.firstChild.firstChild.getAttribute('delay');
+			var delay = first.getAttribute('delay');
 			var time = new Date();
 			time = time.getTime() + (delay * 1000);
 			time = new Date(time);
@@ -1458,6 +1460,19 @@ Zotero.Sync.Server = new function () {
 			}
 			// TODO: localize
 			_error("Auto-syncing disabled until " + timeStr);
+		}
+		
+		
+		if (firstChild.localName == 'error' && firstChild.getAttribute('code') == 'ITEM_MISSING') {
+			var [libraryID, key] = firstChild.getAttribute('missingItem').split('/');
+			if (libraryID == Zotero.libraryID) {
+				libraryID = null;
+			}
+			var item = Zotero.Items.getByLibraryAndKey(libraryID, key);
+			if (item) {
+				Zotero.DB.rollbackAllTransactions();
+				item.updateClientDateModified();
+			}
 		}
 	}
 	
