@@ -2489,7 +2489,12 @@ Zotero.Sync.Server.Data = new function() {
 		// Add items in other object to target one
 		if (otherDiff.childItems.length) {
 			var childItems = targetObj.getChildItems(true);
-			targetObj.childItems = childItems.concat(otherDiff.childItems);
+			if (childItems) {
+				targetObj.childItems = childItems.concat(otherDiff.childItems);
+			}
+			else {
+				targetObj.childItems = otherDiff.childItems;
+			}
 			
 			var msg = _generateCollectionItemMergeMessage(
 				targetObj.name,
