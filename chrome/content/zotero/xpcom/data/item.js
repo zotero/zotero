@@ -1943,6 +1943,18 @@ Zotero.Item.prototype.save = function() {
 }
 
 
+/**
+ * Used by sync code
+ */
+Zotero.Item.prototype.updateClientDateModified = function () {
+	if (!this.id) {
+		throw ("Cannot update clientDateModified of unsaved item in Zotero.Item.updateClientDateModified()");
+	}
+	var sql = "UPDATE items SET clientDateModified=? WHERE itemID=?";
+	Zotero.DB.query(sql, [Zotero.DB.transactionDateTime, this.id]);
+}
+
+
 Zotero.Item.prototype.isRegularItem = function() {
 	return !(this.isNote() || this.isAttachment());
 }
@@ -2481,7 +2493,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 	}
 	
 	if (!skipExistsCheck && !file.exists()) {
-		Zotero.debug("Attachment file not found", 2);
+		Zotero.debug("Attachment file '" + file.path + "' not found", 2);
 		return false;
 	}
 	
