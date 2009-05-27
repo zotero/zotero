@@ -274,7 +274,7 @@ function importItem(newItem, node, type) {
 	
 	// check to see if we recognize the type in the fs or dc namespaces
 	var zoteroType = getFirstResults(node, [n.z+"itemType", n.z+"type", n.dc+"type"], true);
-	if(Zotero.Utilities.itemTypeExists(zoteroType)) {
+	if(zoteroType && Zotero.Utilities.itemTypeExists(zoteroType)) {
 		newItem.itemType = zoteroType;
 	}
 	
@@ -383,12 +383,17 @@ function importItem(newItem, node, type) {
 	
 	// date
 	newItem.date = getFirstResults(node, [n.dc+"date"], true);
+	if (!newItem.date) {
+		newItem.date = getFirstResults(node, [n.dc+"date.issued"], true);
+		if (!newItem.date) {
+			newItem.date = getFirstResults(node, [n.dcterms+"issued"], true);
+		}
+	}
 	// accessDate
 	newItem.accessDate = getFirstResults(node, [n.dcterms+"dateSubmitted"], true);
-	// issueDate
-	newItem.issueDate = getFirstResults(node, [n.dcterms+"issued"], true);
 	// lastModified
 	newItem.lastModified = getFirstResults(node, [n.dcterms+"modified"], true);
+	
 	
 	// identifier
 	var identifiers = getFirstResults(node, [n.dc+"identifier"]);
@@ -434,6 +439,9 @@ function importItem(newItem, node, type) {
 	
 	// abstract
 	newItem.abstractNote = getFirstResults(node, [n.dcterms+"abstract"], true);
+	if (!newItem.abstractNote) {
+		newItem.abstractNote = getFirstResults(node, [n.dc+"description.abstract"], true);
+	}
 	
 	// type
 	var type = getFirstResults(node, [n.dc+"type"], true);
