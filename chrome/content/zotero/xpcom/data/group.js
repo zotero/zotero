@@ -279,7 +279,7 @@ Zotero.Group.prototype.save = function () {
 /**
 * Deletes group and all descendant objects
 **/
-Zotero.Group.prototype.erase = function(deleteItems) {
+Zotero.Group.prototype.erase = function() {
 	Zotero.DB.beginTransaction();
 	
 	var sql, ids, obj;
@@ -354,105 +354,6 @@ Zotero.Group.prototype.serialize = function() {
 		}
 	};
 	return obj;
-}
-
-
-/**
- * Returns an array of descendent groups and items
- *
- * @param	bool		recursive	Descend into subgroups
- * @param	bool		nested		Return multidimensional array with 'children'
- *									nodes instead of flat array
- * @param	string	type			'item', 'group', or FALSE for both
- * @return	{Object[]}			Array of objects with 'id', 'key',
- *								'type' ('item' or 'group'), 'parent',
- *								and, if group, 'name' and the nesting 'level'
- */
-Zotero.Group.prototype.getChildren = function(recursive, nested, type, level) {
-	if (!this.id) {
-		throw ('Zotero.Group.getChildren() cannot be called on an unsaved item');
-	}
-	
-	var toReturn = [];
-	
-	if (!level) {
-		level = 1;
-	}
-	
-	// 0 == group
-	// 1 == item
-	var children = Zotero.DB.query('SELECT groupID AS id, '
-		+ "0 AS type, groupName AS groupName, key "
-		+ 'FROM groups WHERE parentGroupID=?1'
-		+ ' UNION SELECT itemID AS id, 1 AS type, NULL AS groupName, key '
-		+ 'FROM groupItems JOIN items USING (itemID) WHERE groupID=?1', this.id);
-	
-	if (type) {
-		switch (type) {
-			case 'item':
-			case 'group':
-				break;
-			default:
-				throw ("Invalid type '" + type + "' in Group.getChildren()");
-		}
-	}
-	
-	for(var i=0, len=children.length; i<len; i++) {
-		// This seems to not work without parseInt() even though
-		// typeof children[i]['type'] == 'number' and
-		// children[i]['type'] === parseInt(children[i]['type']),
-		// which sure seems like a bug to me
-		switch (parseInt(children[i].type)) {
-			case 0:
-				if (!type || type=='group') {
-					toReturn.push({
-						id: children[i].id,
-						name: children[i].groupName,
-						key: children[i].key,
-						type: 'group',
-						level: level,
-						parent: this.id
-					});
-				}
-				
-				if (recursive) {
-					var descendents =
-						Zotero.Groups.get(children[i].id).
-							getChildren(true, nested, type, level+1);
-					
-					if (nested) {
-						toReturn[toReturn.length-1].children = descendents;
-					}
-					else {
-						for (var j=0, len2=descendents.length; j<len2; j++) {
-							toReturn.push(descendents[j]);
-						}
-					}
-				}
-			break;
-			
-			case 1:
-				if (!type || type=='item') {
-					toReturn.push({
-						id: children[i].id,
-						key: children[i].key,
-						type: 'item',
-						parent: this.id
-					});
-				}
-			break;
-		}
-	}
-	
-	return toReturn;
-}
-
-
-/**
- * Alias for the recursive mode of getChildren()
- */
-Zotero.Group.prototype.getDescendents = function(nested, type, level) {
-	return this.getChildren(true, nested, type);
 }
 
 

@@ -148,15 +148,25 @@ Zotero.Items = new function() {
 	 *
 	 * If |onlyTopLevel|, don't include child items
 	 */
-	function getAll(onlyTopLevel) {
+	function getAll(onlyTopLevel, libraryID) {
 		var sql = 'SELECT A.itemID FROM items A';
 		if (onlyTopLevel) {
 			sql += ' LEFT JOIN itemNotes B USING (itemID) '
 			+ 'LEFT JOIN itemAttachments C ON (C.itemID=A.itemID) '
 			+ 'WHERE B.sourceItemID IS NULL AND C.sourceItemID IS NULL';
 		}
+		else {
+			sql += " WHERE 1";
+		}
+		if (libraryID) {
+			sql += " AND libraryID=?";
+			var ids = Zotero.DB.columnQuery(sql, libraryID);
+		}
+		else {
+			//sql += " AND libraryID IS NULL";
+			var ids = Zotero.DB.columnQuery(sql);
+		}
 		
-		var ids = Zotero.DB.columnQuery(sql);
 		return this.get(ids);
 	}
 	
