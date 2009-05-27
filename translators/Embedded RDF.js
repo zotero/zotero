@@ -23,9 +23,11 @@ function getDCPrefix(doc) {
 	for(var i=0; i<links.length; i++) {
 		if(links[i].getAttribute("href") == _dc) {
 			var rel = links[i].getAttribute("rel");
-			var matches = rel.match(/^schema\.([a-zA-Z]+)/);
-			if(matches) {
-				_prefix = matches[1].toLowerCase() + ".";
+			if(rel) {
+				var matches = rel.match(/^schema\.([a-zA-Z]+)/);
+				if(matches) {
+					_prefix = matches[1].toLowerCase() + ".";
+				}
 			}
 			break;
 		}
