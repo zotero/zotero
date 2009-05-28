@@ -187,7 +187,7 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	function importFromURL(url, sourceItemID, forceTitle, forceFileBaseName, parentCollectionIDs){
+	function importFromURL(url, sourceItemID, forceTitle, forceFileBaseName, parentCollectionIDs, mimeType) {
 		Zotero.debug('Importing attachment from URL');
 		
 		if (sourceItemID && parentCollectionIDs) {
@@ -206,180 +206,181 @@ Zotero.Attachments = new function(){
 			throw ("Invalid URL '" + url + "' in Zotero.Attachments.importFromURL()");
 		}
 		
-		Zotero.Utilities.HTTP.doHead(url, function(obj){
-			if (obj.status != 200 && obj.status != 204) {
-				Zotero.debug("Attachment HEAD request returned with status code "
-					+ obj.status + " in Attachments.importFromURL()", 2);
-				var mimeType = '';
-			}
-			else {
-				var mimeType = obj.channel.contentType;
-			}
-			
-			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
-						.createInstance(Components.interfaces.nsIURL);
-			nsIURL.spec = url;
-			
-			// Override MIME type to application/pdf if extension is .pdf --
-			// workaround for sites that respond to the HEAD request with an
-			// invalid MIME type (https://www.zotero.org/trac/ticket/460)
-			//
-			// Downloaded file is inspected below and deleted if actually HTML
-			if (nsIURL.fileName.match(/pdf$/) || url.match(/pdf$/)) {
-				mimeType = 'application/pdf';
-			}
-			
-			// If we can load this natively, use a hidden browser (so we can
-			// get the charset and title and index the document)
-			if (Zotero.MIME.hasNativeHandler(mimeType, ext)){
-				var browser = Zotero.Browser.createHiddenBrowser();
-				var imported = false;
-				var onpageshow = function() {
-					// ignore spurious about:blank loads
-					if(browser.contentDocument.location.href == "about:blank") return;
-					
-					// pageshow can be triggered multiple times on some pages,
-					// so make sure we only import once
-					// (https://www.zotero.org/trac/ticket/795)
-					if (imported) {
-						return;
-					}
-					var callback = function () {
-						browser.removeEventListener("pageshow", onpageshow, false);
-						Zotero.Browser.deleteHiddenBrowser(browser);
-					};
-					Zotero.Attachments.importFromDocument(browser.contentDocument,
-						sourceItemID, forceTitle, parentCollectionIDs, callback);
-					imported = true;
+		// Save using a hidden browser
+		var nativeHandlerImport = function () {
+			var browser = Zotero.Browser.createHiddenBrowser();
+			var imported = false;
+			var onpageshow = function() {
+				// ignore spurious about:blank loads
+				if(browser.contentDocument.location.href == "about:blank") return;
+				
+				// pageshow can be triggered multiple times on some pages,
+				// so make sure we only import once
+				// (https://www.zotero.org/trac/ticket/795)
+				if (imported) {
+					return;
+				}
+				var callback = function () {
+					browser.removeEventListener("pageshow", onpageshow, false);
+					Zotero.Browser.deleteHiddenBrowser(browser);
 				};
-				browser.addEventListener("pageshow", onpageshow, false);
-				browser.loadURI(url);
+				Zotero.Attachments.importFromDocument(browser.contentDocument,
+					sourceItemID, forceTitle, parentCollectionIDs, callback);
+				imported = true;
+			};
+			browser.addEventListener("pageshow", onpageshow, false);
+			browser.loadURI(url);
+		};
+		
+		// Save using remote web browser persist
+		var externalHandlerImport = function (mimeType) {
+			if (forceFileBaseName) {
+				var ext = _getExtensionFromURL(url, mimeType);
+				var fileName = forceFileBaseName + (ext != '' ? '.' + ext : '');
+			}
+			else {
+				var fileName = _getFileNameFromURL(url, mimeType);
 			}
 			
-			// Otherwise use a remote web page persist
-			else {
-				if (forceFileBaseName) {
-					var ext = _getExtensionFromURL(url, mimeType);
-					var fileName = forceFileBaseName + (ext != '' ? '.' + ext : '');
+			var title = forceTitle ? forceTitle : fileName;
+			
+			const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
+			var wbp = Components
+				.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+				.createInstance(nsIWBP);
+			wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
+			var encodingFlags = false;
+			
+			Zotero.DB.beginTransaction();
+			
+			try {
+				// Create a new attachment
+				var attachmentItem = new Zotero.Item('attachment');
+				if (sourceItemID) {
+					var parentItem = Zotero.Items.get(sourceItemID);
+					attachmentItem.libraryID = parentItem.libraryID;
 				}
-				else {
-					var fileName = _getFileNameFromURL(url, mimeType);
+				attachmentItem.setField('title', title);
+				attachmentItem.setField('url', url);
+				attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
+				attachmentItem.setSource(sourceItemID);
+				attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+				attachmentItem.attachmentMIMEType = mimeType;
+				var itemID = attachmentItem.save();
+				attachmentItem = Zotero.Items.get(itemID);
+				
+				// Add to collections
+				if (parentCollectionIDs){
+					var ids = Zotero.flattenArguments(parentCollectionIDs);
+					for each(var id in ids){
+						var col = Zotero.Collections.get(id);
+						col.addItem(itemID);
+					}
 				}
 				
-				var title = forceTitle ? forceTitle : fileName;
+				// Create a new folder for this item in the storage directory
+				var destDir = Zotero.Attachments.createDirectoryForItem(itemID);
 				
-				const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-				var wbp = Components
-					.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-					.createInstance(nsIWBP);
-				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
-				var encodingFlags = false;
+				var file = destDir.clone();
+				file.append(fileName);
 				
-				Zotero.DB.beginTransaction();
+				wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
+					try {
+						var str = Zotero.File.getSample(file);
+						
+						if (mimeType == 'application/pdf' &&
+								Zotero.MIME.sniffForMIMEType(str) != 'application/pdf') {
+							Zotero.debug("Downloaded PDF did not have MIME type "
+								+ "'application/pdf' in Attachments.importFromURL()", 2);
+							attachmentItem.erase();
+							return;
+						}
+						
+						attachmentItem.attachmentPath =
+							Zotero.Attachments.getPath(
+								file, Zotero.Attachments.LINK_MODE_IMPORTED_URL
+							);
+						attachmentItem.save();
+						
+						Zotero.Notifier.trigger('add', 'item', itemID);
+						Zotero.Notifier.trigger('modify', 'item', sourceItemID);
+						
+						// We don't have any way of knowing that the file
+						// is flushed to disk, so we just wait a second
+						// and hope for the best -- we'll index it later
+						// if it fails
+						//
+						// TODO: index later
+						var timer = Components.classes["@mozilla.org/timer;1"].
+							createInstance(Components.interfaces.nsITimer);
+						timer.initWithCallback({notify: function() {
+							Zotero.Fulltext.indexItems([itemID]);
+						}}, 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+					}
+					catch (e) {
+						// Clean up
+						attachmentItem.erase();
+						
+						throw (e);
+					}
+				});
+				
+				// Disable the Notifier during the commit
+				var disabled = Zotero.Notifier.disable();
+				
+				// The attachment is still incomplete here, but we can't risk
+				// leaving the transaction open if the callback never triggers
+				Zotero.DB.commitTransaction();
+				
+				if (disabled) {
+					Zotero.Notifier.enable();
+				}
+				
+				var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
+							.createInstance(Components.interfaces.nsIURL);
+				nsIURL.spec = url;
+				wbp.saveURI(nsIURL, null, null, null, null, file);
+				
+				return attachmentItem;
+			}
+			catch (e){
+				Zotero.DB.rollbackTransaction();
 				
 				try {
-					// Create a new attachment
-					var attachmentItem = new Zotero.Item('attachment');
-					if (sourceItemID) {
-						var parentItem = Zotero.Items.get(sourceItemID);
-						attachmentItem.libraryID = parentItem.libraryID;
-					}
-					attachmentItem.setField('title', title);
-					attachmentItem.setField('url', url);
-					attachmentItem.setField('accessDate', "CURRENT_TIMESTAMP");
-					attachmentItem.setSource(sourceItemID);
-					attachmentItem.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
-					attachmentItem.attachmentMIMEType = mimeType;
-					var itemID = attachmentItem.save();
-					attachmentItem = Zotero.Items.get(itemID);
-					
-					// Add to collections
-					if (parentCollectionIDs){
-						var ids = Zotero.flattenArguments(parentCollectionIDs);
-						for each(var id in ids){
-							var col = Zotero.Collections.get(id);
-							col.addItem(itemID);
+					// Clean up
+					if (itemID) {
+						var itemDir = this.getStorageDirectory(itemID);
+						if (itemDir.exists()) {
+							itemDir.remove(true);
 						}
 					}
-					
-					// Create a new folder for this item in the storage directory
-					var destDir = Zotero.Attachments.createDirectoryForItem(itemID);
-					
-					var file = destDir.clone();
-					file.append(fileName);
-					
-					wbp.progressListener = new Zotero.WebProgressFinishListener(function(){
-						try {
-							var str = Zotero.File.getSample(file);
-							
-							if (mimeType == 'application/pdf' &&
-									Zotero.MIME.sniffForMIMEType(str) != 'application/pdf') {
-								Zotero.debug("Downloaded PDF did not have MIME type "
-									+ "'application/pdf' in Attachments.importFromURL()", 2);
-								attachmentItem.erase();
-								return;
-							}
-							
-							attachmentItem.attachmentPath =
-								Zotero.Attachments.getPath(
-									file, Zotero.Attachments.LINK_MODE_IMPORTED_URL
-								);
-							attachmentItem.save();
-							
-							Zotero.Notifier.trigger('add', 'item', itemID);
-							Zotero.Notifier.trigger('modify', 'item', sourceItemID);
-							
-							// We don't have any way of knowing that the file
-							// is flushed to disk, so we just wait a second
-							// and hope for the best -- we'll index it later
-							// if it fails
-							//
-							// TODO: index later
-							var timer = Components.classes["@mozilla.org/timer;1"].
-								createInstance(Components.interfaces.nsITimer);
-							timer.initWithCallback({notify: function() {
-								Zotero.Fulltext.indexItems([itemID]);
-							}}, 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-						}
-						catch (e) {
-							// Clean up
-							attachmentItem.erase();
-							
-							throw (e);
-						}
-					});
-					
-					// Disable the Notifier during the commit
-					var disabled = Zotero.Notifier.disable();
-					
-					// The attachment is still incomplete here, but we can't risk
-					// leaving the transaction open if the callback never triggers
-					Zotero.DB.commitTransaction();
-					
-					if (disabled) {
-						Zotero.Notifier.enable();
-					}
-					
-					wbp.saveURI(nsIURL, null, null, null, null, file);
 				}
-				catch (e){
-					Zotero.DB.rollbackTransaction();
-					
-					try {
-						// Clean up
-						if (itemID) {
-							var itemDir = this.getStorageDirectory(itemID);
-							if (itemDir.exists()) {
-								itemDir.remove(true);
-							}
-						}
-					}
-					catch (e) {}
-					
-					throw (e);
-				}
+				catch (e) {}
+				
+				throw (e);
 			}
-		});
+		}
+		
+		var process = function (mimeType, hasNativeHandler) {
+			// If we can load this natively, use a hidden browser
+			// (so we can get the charset and title and index the document)
+			if (hasNativeHandler) {
+				nativeHandlerImport();
+			}
+			// Otherwise use a remote web page persist
+			else {
+				return externalHandlerImport(mimeType);
+			}
+		}
+		
+		if (mimeType) {
+			return process(mimeType);
+		}
+		else {
+			Zotero.MIME.getMIMETypeFromURL(url, function (mimeType, hasNativeHandler) {
+				process(mimeType, hasNativeHandler);
+			});
+		}
 	}
 	
 	
@@ -425,9 +426,7 @@ Zotero.Attachments = new function(){
 		
 		if (!mimeType) {
 			// If we don't have the MIME type, do a HEAD request for it
-			Zotero.Utilities.HTTP.doHead(url, function(obj){
-				var mimeType = obj.channel.contentType;
-				
+			Zotero.MIME.getMIMETypeFromURL(url, function (mimeType) {
 				if (mimeType) {
 					var disabled = Zotero.Notifier.disable();
 					

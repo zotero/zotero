@@ -63,7 +63,7 @@
 		<!-- TODO: localize and remove zotero.contextMenu.saveLinkAsItem/saveImageAsSnapshot -->
 		<menuitem id="zotero-context-save-link-as-item" class="menu-iconic"
 			label="Save Link as Zotero Item" hidden="true"
-			oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.linkURL)"/>
+			oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.linkURL, 'temporaryPDFHack')"/>
 		<menuitem id="zotero-context-save-image-as-item" class="menu-iconic"
 			label="Save Image as Zotero Item" hidden="true"
 			oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.onImage ? (window.gContextMenu.mediaURL ? window.gContextMenu.mediaURL : window.gContextMenu.imageURL) : window.gContextMenu.bgImageURL, 'artwork')"/>

@@ -275,6 +275,38 @@ Zotero.MIME = new function(){
 	}
 	
 	
+	this.getMIMETypeFromURL = function (url, callback) {
+		Zotero.Utilities.HTTP.doHead(url, function(xmlhttp) {
+			if (xmlhttp.status != 200 && xmlhttp.status != 204) {
+				Zotero.debug("Attachment HEAD request returned with status code "
+					+ xmlhttp.status + " in Zotero.MIME.getMIMETypeFromURL()", 2);
+				var mimeType = '';
+			}
+			else {
+				var mimeType = xmlhttp.channel.contentType;
+			}
+			
+			var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
+						.createInstance(Components.interfaces.nsIURL);
+			nsIURL.spec = url;
+			
+			// Override MIME type to application/pdf if extension is .pdf --
+			// workaround for sites that respond to the HEAD request with an
+			// invalid MIME type (https://www.zotero.org/trac/ticket/460)
+			//
+			// Downloaded file is inspected in attachment code and deleted if actually HTML
+			if (nsIURL.fileName.match(/pdf$/) || url.match(/pdf$/)) {
+				mimeType = 'application/pdf';
+			}
+			
+			var ext = nsIURL.fileExtension;
+			var hasNativeHandler = Zotero.MIME.hasNativeHandler(mimeType, ext)
+			
+			callback(mimeType, hasNativeHandler);
+		});
+	}
+	
+	
 	/*
 	 * Determine if a MIME type can be handled natively
 	 * or if it needs to be passed off to a plugin or external helper app

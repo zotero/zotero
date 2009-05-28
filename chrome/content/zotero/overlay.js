@@ -628,14 +628,14 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		if (!this.canEdit(row)) {
-			this.displayCannotEditLibraryMessage();
-			return;
-		}
-		
 		// Currently selected row
 		if (row === undefined) {
 			row = this.collectionsView.selection.currentIndex;
+		}
+		
+		if (!this.canEdit(row)) {
+			this.displayCannotEditLibraryMessage();
+			return;
 		}
 		
 		if (row !== undefined) {
@@ -2255,42 +2255,12 @@ var ZoteroPane = new function()
 	 *														regardless of automaticSnapshots pref
 	 */
 	this.addItemFromDocument = function (doc, itemType, saveSnapshot, row) {
-		if (!Zotero.stateCheck()) {
-			this.displayErrorMessage(true);
-			return false;
-		}
-		
-		// Currently selected row
-		if (row === undefined) {
-			row = this.collectionsView.selection.currentIndex;
-		}
-		
-		if (!this.canEdit(row)) {
-			this.displayCannotEditLibraryMessage();
-			return;
-		}
-		
-		if (row !== undefined) {
-			var itemGroup = this.collectionsView._getItemAtRow(row);
-			var libraryID = itemGroup.ref.libraryID;
-		}
-		else {
-			var libraryID = null;
-			var itemGroup = null;
-		}
-
 		var progressWin = new Zotero.ProgressWindow();
 		progressWin.changeHeadline(Zotero.getString('ingester.scraping'));
 		var icon = 'chrome://zotero/skin/treeitem-webpage.png';
 		progressWin.addLines(doc.title, icon)
 		progressWin.show();
 		progressWin.startCloseTimer();
-		
-		var data = {
-			title: doc.title,
-			url: doc.location.href,
-			accessDate: "CURRENT_TIMESTAMP"
-		}
 		
 		// TODO: this, needless to say, is a temporary hack
 		if (itemType == 'temporaryPDFHack') {
@@ -2315,6 +2285,36 @@ var ZoteroPane = new function()
 			}
 			
 			if (isPDF) {
+				//
+				// Duplicate newItem() checks here
+				//
+				if (!Zotero.stateCheck()) {
+					this.displayErrorMessage(true);
+					return false;
+				}
+				
+				// Currently selected row
+				if (row === undefined) {
+					row = this.collectionsView.selection.currentIndex;
+				}
+				
+				if (!this.canEdit(row)) {
+					this.displayCannotEditLibraryMessage();
+					return;
+				}
+				
+				if (row !== undefined) {
+					var itemGroup = this.collectionsView._getItemAtRow(row);
+					var libraryID = itemGroup.ref.libraryID;
+				}
+				else {
+					var libraryID = null;
+					var itemGroup = null;
+				}
+				//
+				//
+				//
+				
 				if (libraryID) {
 					var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
 								.getService(Components.interfaces.nsIPrompt);
@@ -2328,6 +2328,7 @@ var ZoteroPane = new function()
 				else {
 					var collectionID = false;
 				}
+				
 				Zotero.Attachments.importFromDocument(doc, false, false, collectionID);
 				return;
 			}
@@ -2336,6 +2337,11 @@ var ZoteroPane = new function()
 		// Save web page item by default
 		if (!itemType) {
 			itemType = 'webpage';
+		}
+		var data = {
+			title: doc.title,
+			url: doc.location.href,
+			accessDate: "CURRENT_TIMESTAMP"
 		}
 		itemType = Zotero.ItemTypes.getID(itemType);
 		var item = this.newItem(itemType, data, row);
@@ -2369,17 +2375,113 @@ var ZoteroPane = new function()
 			return this.addItemFromPage(itemType, saveSnapshot, row);
 		}
 		
-		var processor = function (doc) {
-			ZoteroPane.addItemFromDocument(doc, itemType, saveSnapshot, row);
-		};
-		
-		var done = function () {}
-		
-		var exception = function (e) {
-			Zotero.debug(e);
-		}
-		
-		Zotero.Utilities.HTTP.processDocuments([url], processor, done, exception);
+		Zotero.MIME.getMIMETypeFromURL(url, function (mimeType, hasNativeHandler) {
+			// If native type, save using a hidden browser
+			if (hasNativeHandler) {
+				var processor = function (doc) {
+					ZoteroPane.addItemFromDocument(doc, itemType, saveSnapshot, row);
+				};
+				
+				var done = function () {}
+				
+				var exception = function (e) {
+					Zotero.debug(e);
+				}
+				
+				Zotero.Utilities.HTTP.processDocuments([url], processor, done, exception);
+			}
+			// Otherwise create placeholder item, attach attachment, and update from that
+			else {
+				// TODO: this, needless to say, is a temporary hack
+				if (itemType == 'temporaryPDFHack') {
+					itemType = null;
+					
+					if (mimeType == 'application/pdf') {
+						//
+						// Duplicate newItem() checks here
+						//
+						if (!Zotero.stateCheck()) {
+							ZoteroPane.displayErrorMessage(true);
+							return false;
+						}
+						
+						// Currently selected row
+						if (row === undefined) {
+							row = ZoteroPane.collectionsView.selection.currentIndex;
+						}
+						
+						if (!ZoteroPane.canEdit(row)) {
+							ZoteroPane.displayCannotEditLibraryMessage();
+							return;
+						}
+						
+						if (row !== undefined) {
+							var itemGroup = ZoteroPane.collectionsView._getItemAtRow(row);
+							var libraryID = itemGroup.ref.libraryID;
+						}
+						else {
+							var libraryID = null;
+							var itemGroup = null;
+						}
+						//
+						//
+						//
+						
+						if (libraryID) {
+							var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+										.getService(Components.interfaces.nsIPrompt);
+							pr.alert("", "Files cannot currently be added to group libraries.");
+							return;
+						}
+						
+						if (itemGroup && itemGroup.isCollection()) {
+							var collectionID = itemGroup.ref.id;
+						}
+						else {
+							var collectionID = false;
+						}
+						
+						Zotero.Attachments.importFromURL(url, false, false, collectionID);
+						return;
+					}
+				}
+				
+				if (!itemType) {
+					itemType = 'webpage';
+				}
+				
+				var item = ZoteroPane.newItem(itemType, {}, row);
+				
+				if (item.libraryID) {
+					var group = Zotero.Groups.getByLibraryID(item.libraryID);
+					filesEditable = group.filesEditable;
+				}
+				else {
+					filesEditable = true;
+				}
+				
+				// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
+				if (saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'))) {
+					var link = false;
+					
+					if (link) {
+						//Zotero.Attachments.linkFromURL(doc, item.id);
+					}
+					else if (filesEditable) {
+						var attachmentItem = Zotero.Attachments.importFromURL(url, item.id, false, false, false, mimeType);
+						if (attachmentItem) {
+							item.setField('title', attachmentItem.getField('title'));
+							item.setField('url', attachmentItem.getField('url'));
+							item.setField('accessDate', attachmentItem.getField('accessDate'));
+							item.save();
+						}
+					}
+				}
+				
+				return item.id;
+
+			}
+		});
 	}
 	
 	
