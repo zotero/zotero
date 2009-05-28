@@ -141,13 +141,13 @@ function xmlToItem(xmlItem) {
 
 function doWeb(doc, url) {
 	if (url.indexOf("/groups/") == -1) {
-		var userID = url.match(/^http:\/\/[^\/]*zotero\.org\/[^\/]+\/([0-9]+)/)[1];
+		var userID = url.match(/^https?:\/\/[^\/]*zotero\.org\/[^\/]+\/([0-9]+)/)[1];
 		var apiPrefix = "https://api.zotero.org/users/" + userID + "/";
-		var itemRe = /^http:\/\/[^\/]*zotero\.org\/[^\/]+\/[0-9]+\/items\/([0-9]+)/;
+		var itemRe = /^https?:\/\/[^\/]*zotero\.org\/[^\/]+\/[0-9]+\/items\/([0-9]+)/;
 	} else {
-		var groupID = url.match(/^http:\/\/[^\/]*zotero\.org\/groups\/[^\/]+\/([0-9]+)/)[1]; 
+		var groupID = url.match(/^https?:\/\/[^\/]*zotero\.org\/groups\/[^\/]+\/([0-9]+)/)[1]; 
 		var apiPrefix = "https://api.zotero.org/groups/" + groupID + "/";
-		var itemRe = /^http:\/\/[^\/]*zotero\.org\/groups\/[^\/]+\/[0-9]+\/items\/([0-9]+)/;
+		var itemRe = /^https?:\/\/[^\/]*zotero\.org\/groups\/[^\/]+\/[0-9]+\/items\/([0-9]+)/;
 	}
 	
 	var nsAtom = new Namespace('http://www.w3.org/2005/Atom');
