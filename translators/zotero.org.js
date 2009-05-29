@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"zotero.org",
 	"creator":"Dan Stillman",
-	"target":"^https?://[^/]*zotero\\.org/(groups/)?[^/]+/[0-9]+/(items(/?[0-9]+?)?|items/collection/[0-9]+)(\\?.*)?$",
+	"target":"^https?://[^/]*zotero\\.org/(groups/)?[^/]+/(items(/?[0-9]+?)?|items/collection/[0-9]+)(\\?.*)?$",
 	"minVersion":"1.0",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-05-20 21:10:00"
+	"lastUpdated":"2009-05-29 22:30:00"
 }
 
 function detectWeb(doc, url) {
@@ -17,9 +17,11 @@ function detectWeb(doc, url) {
 			if (prefix == 'x') return namespace; else return null;
 		} : null;
 		
-	// don't display for private groups
-	if (url.match(/\/groups\/[0-9]+\/items/)) {
-		return false;
+	if (url.match(/\/groups\/[^\/]+\/items/)) {
+		var span = doc.getElementById('libraryGroupID');
+		if (!span) {
+			return false;
+		}
 	}
 	
 	var a = doc.evaluate('//li[@id="library-tab"]/a[text()="My Library"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -140,14 +142,19 @@ function xmlToItem(xmlItem) {
 
 
 function doWeb(doc, url) {
+	// User library
 	if (url.indexOf("/groups/") == -1) {
-		var userID = url.match(/^https?:\/\/[^\/]*zotero\.org\/[^\/]+\/([0-9]+)/)[1];
+		//var userID = url.match(/^http:\/\/[^\/]*zotero\.org\/[^\/]+\/([0-9]+)/)[1];
+		var userID = doc.getElementById('libraryUserID').getAttribute('title');
 		var apiPrefix = "https://api.zotero.org/users/" + userID + "/";
-		var itemRe = /^https?:\/\/[^\/]*zotero\.org\/[^\/]+\/[0-9]+\/items\/([0-9]+)/;
-	} else {
-		var groupID = url.match(/^https?:\/\/[^\/]*zotero\.org\/groups\/[^\/]+\/([0-9]+)/)[1]; 
+		var itemRe = /^https?:\/\/[^\/]*zotero\.org\/[^\/]+\/items\/([0-9]+)/;
+	}
+	// Group library
+	else {
+		//var groupID = url.match(/^http:\/\/[^\/]*zotero\.org\/groups\/[^\/]+\/([0-9]+)/)[1];
+		var groupID = doc.getElementById('libraryGroupID').getAttribute('title');
 		var apiPrefix = "https://api.zotero.org/groups/" + groupID + "/";
-		var itemRe = /^https?:\/\/[^\/]*zotero\.org\/groups\/[^\/]+\/[0-9]+\/items\/([0-9]+)/;
+		var itemRe = /^https?:\/\/[^\/]*zotero\.org\/groups\/[^\/]+\/items\/([0-9]+)/;
 	}
 	
 	var nsAtom = new Namespace('http://www.w3.org/2005/Atom');
