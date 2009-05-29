@@ -2441,7 +2441,7 @@ var ZoteroPane = new function()
 							var collectionID = false;
 						}
 						
-						Zotero.Attachments.importFromURL(url, false, false, collectionID);
+						Zotero.Attachments.importFromURL(url, false, false, false, collectionID);
 						return;
 					}
 				}
