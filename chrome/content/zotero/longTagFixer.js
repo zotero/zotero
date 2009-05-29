@@ -37,7 +37,7 @@ var Zotero_Long_Tag_Fixer = new function () {
 		}
 		
 		document.getElementById('zotero-long-tag-fixer').getButton('accept').label = buttonLabel;
-		
+		window.sizeToContent();
 		Zotero.Prefs.set('lastLongTagMode', index);
 	}
 	
