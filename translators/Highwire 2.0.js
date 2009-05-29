@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"Highwire 2.0",
 	"creator":"Matt Burton",
-	"target":"(content/([0-9]+/[0-9]+|current|firstcite)|search|cgi/collection/.+)",
+	"target":"DISABLED(content/([0-9]+/[0-9]+|current|firstcite)|search|cgi/collection/.+)",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
