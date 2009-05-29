@@ -4,6 +4,7 @@ var Zotero_Long_Tag_Fixer = new function () {
 	
 	this.init = function () {
 		document.getElementById('zotero-old-tag').value = _oldTag;
+		document.getElementById('zotero-old-tag-delimiter').nextSibling.value = 'character'; // TODO: localize
 		
 		var lastMode = Zotero.Prefs.get('lastLongTagMode');
 		if (!lastMode) {
