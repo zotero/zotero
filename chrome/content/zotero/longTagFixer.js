@@ -1,6 +1,6 @@
 var Zotero_Long_Tag_Fixer = new function () {
 	var _oldTag = window.arguments[0];
-	var _callback = window.arguments[1];
+	var _dataOut = window.arguments[1];
 	
 	this.init = function () {
 		document.getElementById('zotero-old-tag').value = _oldTag;
@@ -103,9 +103,7 @@ var Zotero_Long_Tag_Fixer = new function () {
 	
 	
 	this.cancel = function () {
-		if (_callback) {
-			_callback(false);
-		}
+		_dataOut.result = false;
 	}
 	
 	
@@ -172,9 +170,7 @@ var Zotero_Long_Tag_Fixer = new function () {
 				break;
 		}
 		
-		if (_callback) {
-			_callback(true);
-		}
+		_dataOut.result = true;
 		
 		}
 		catch (e) {
