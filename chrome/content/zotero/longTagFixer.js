@@ -68,7 +68,10 @@ var Zotero_Long_Tag_Fixer = new function () {
 		
 		tags.sort();
 		for (var i=0; i<tags.length; i++) {
-			if (i==0 || tags[i] == tags[i-1]) {
+			if (i != 0 && tags[i] == tags[i-1]) {
+				continue;
+			}
+			if (!tags[i]) {
 				continue;
 			}
 			var li = listbox.appendItem(tags[i]);
