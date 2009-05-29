@@ -50,7 +50,7 @@ row > label:first-child, .creator-type-label
 
 row label:first-child[isButton=true]:hover
 {
-	cursor: pointer;
+	cursor: pointer !important;
 }
 
 row label

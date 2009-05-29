@@ -440,6 +440,16 @@
 							label.setAttribute("onclick", "ZoteroPane.loadURI(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value, event)");
 							label.setAttribute("tooltiptext", Zotero.getString('pane.item.goToURL.online.tooltip'));
 						}
+						else if (fieldName == 'DOI' && val) {
+							// Pull out DOI, in case there's a prefix
+							var doi = val.match(/10\..*/);
+							if (doi) {
+								doi = "http://dx.doi.org/" + encodeURIComponent(doi);
+								label.setAttribute("isButton", true);
+								label.setAttribute("onclick", "ZoteroPane.loadURI('" + doi + "', event)");
+								label.setAttribute("tooltiptext", Zotero.getString('pane.item.goToURL.online.tooltip'));
+							}
+						}
 						else if (fieldName == 'abstractNote') {
 							label.setAttribute("onclick",
 								"if (this.nextSibling.inputField) { this.nextSibling.inputField.blur(); } "
