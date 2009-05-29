@@ -36,7 +36,7 @@
 			<vbox>
 				<hbox align="center">
 					<label>Split at the </label>
-					<textbox id="zotero-old-tag-delimiter" size="1" maxLength="1" value=";"
+					<textbox id="zotero-old-tag-delimiter" size="1" maxlength="1" value=";"
 						oninput="Zotero_Long_Tag_Fixer.updateTagList()"/>
 					<label>character</label>
 				</hbox>
