@@ -951,6 +951,8 @@ Zotero.Sync.Server = new function () {
 				_error(response.firstChild.firstChild.nodeValue);
 			}
 			
+			_sessionLock = true;
+			
 			// Strip XML declaration and convert to E4X
 			var xml = new XML(xmlhttp.responseText.replace(/<\?xml.*\?>/, ''));
 			
@@ -1463,15 +1465,40 @@ Zotero.Sync.Server = new function () {
 		}
 		
 		
-		if (firstChild.localName == 'error' && firstChild.getAttribute('code') == 'ITEM_MISSING') {
-			var [libraryID, key] = firstChild.getAttribute('missingItem').split('/');
-			if (libraryID == Zotero.libraryID) {
-				libraryID = null;
-			}
-			var item = Zotero.Items.getByLibraryAndKey(libraryID, key);
-			if (item) {
-				Zotero.DB.rollbackAllTransactions();
-				item.updateClientDateModified();
+		if (firstChild.localName == 'error') {
+			switch (firstChild.getAttribute('code')) {
+				case 'ITEM_MISSING':
+					var [libraryID, key] = firstChild.getAttribute('missingItem').split('/');
+					if (libraryID == Zotero.libraryID) {
+						libraryID = null;
+					}
+					var item = Zotero.Items.getByLibraryAndKey(libraryID, key);
+					if (item) {
+						Zotero.DB.rollbackAllTransactions();
+						item.updateClientDateModified();
+					}
+					break;
+				
+				case 'TAG_TOO_LONG':
+					var tag = xmlhttp.responseXML.firstChild.getElementsByTagName('tag');
+					if (tag.length) {
+						Zotero.DB.rollbackAllTransactions();
+						
+						var tag = tag[0].firstChild.nodeValue;
+						setTimeout(function () {
+							var callback = function (success) {
+								if (success) {
+									Zotero.Sync.Runner.sync();
+								}
+							};
+							
+							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+									   .getService(Components.interfaces.nsIWindowMediator);
+							var lastWin = wm.getMostRecentWindow("navigator:browser");
+							lastWin.openDialog('chrome://zotero/content/longTagFixer.xul', '', 'chrome,modal,centerscreen', tag, callback);
+						}, 1);
+					}
+					break;
 			}
 		}
 	}
@@ -1925,8 +1952,6 @@ Zotero.Sync.Server.Data = new function() {
 									
 								case 'item':
 									var diff = obj.diff(remoteObj, false, ["dateModified"]);
-									Zotero.debug('diff');
-									Zotero.debug(diff);
 									if (!diff) {
 										// Check if creators changed
 										var creatorsChanged = false;
@@ -1944,11 +1969,9 @@ Zotero.Sync.Server.Data = new function() {
 												var r = remoteCreatorStore[Zotero.Creators.getLibraryKeyHash(creator.ref)];
 												// Doesn't include dateModified
 												if (r && !r.equals(creator.ref)) {
-													Zotero.debug('=');
 													creatorsChanged = true;
 													break;
 												}
-												Zotero.debug('-');
 											}
 										}
 										if (!creatorsChanged) {

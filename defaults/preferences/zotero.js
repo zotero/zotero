@@ -42,6 +42,7 @@ pref("extensions.zotero.lastCreatorFieldMode",0);
 pref("extensions.zotero.lastAbstractExpand",0);
 pref("extensions.zotero.lastRenameAssociatedFile", false);
 pref("extensions.zotero.lastViewedFolder", 'L');
+pref("extensions.zotero.lastLongTagMode", 0);
 
 //Tag Cloud
 pref("extensions.zotero.tagCloud", false);
