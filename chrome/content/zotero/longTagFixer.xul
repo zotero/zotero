@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/longTagFixer.css" type="text/css"?>
+
+<dialog id="zotero-long-tag-fixer" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		buttons="accept,cancel"
+		onload="Zotero_Long_Tag_Fixer.init()"
+		ondialogcancel="Zotero_Long_Tag_Fixer.cancel()"
+		ondialogaccept="Zotero_Long_Tag_Fixer.save()"
+		title="Sync Error"> <!-- TODO: localize -->
+	
+	<script src="include.js"/>
+	<script src="longTagFixer.js"/>
+	
+	<!-- TODO: localize -->
+	<label value="The following tag in your Zotero library is too long to sync to the server:"/>
+	<groupbox>
+		<textbox id="zotero-old-tag" multiline="true" rows="4" readonly="true" class="plain"/>
+	</groupbox>
+	<label>Synced tags must be shorter than 256 characters.</label>
+	
+	<separator class="thin"/>
+	
+	<label value="You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it."/>
+	
+	<separator/>
+	
+	<tabbox id="zotero-new-tag-actions">
+		<tabs oncommand="Zotero_Long_Tag_Fixer.switchMode(this.selectedIndex)">
+			<tab label="Split"/>
+			<tab label="Edit"/>
+			<tab label="Delete"/>
+		</tabs>
+		<tabpanels>
+			<!-- Split -->
+			<vbox>
+				<hbox align="center">
+					<label>Split at the </label>
+					<textbox id="zotero-old-tag-delimiter" size="1" maxLength="1" value=";"
+						oninput="Zotero_Long_Tag_Fixer.updateTagList()"/>
+					<label>character</label>
+				</hbox>
+				
+				<separator class="thin"/>
+				
+				<listbox id="zotero-new-tag-list" rows="8"/>
+				
+				<separator class="thin"/>
+				
+				<label value="Unchecked tags will not be saved."/>
+				
+				<hbox>
+					<button label="Deselect All" oncommand="Zotero_Long_Tag_Fixer.deselectAll()"/>
+					<button label="Select All" oncommand="Zotero_Long_Tag_Fixer.selectAll()"/>
+				</hbox>
+			</vbox>
+			
+			<!-- Edit -->
+			<vbox>
+				<textbox id="zotero-new-tag-editor" multiline="true" flex="1"
+					oninput="Zotero_Long_Tag_Fixer.updateEditLength(this.value.length)"/>
+				<hbox id="zotero-new-tag-characters">
+					<label id="zotero-new-tag-character-count"/>
+					<label value="characters"/>
+				</hbox>
+			</vbox>
+			
+			<!-- Delete -->
+			<vbox align="center" pack="center">
+				<label value="The tag will be deleted from all items."/>
+			</vbox>
+		</tabpanels>
+	</tabbox>
+</dialog>
