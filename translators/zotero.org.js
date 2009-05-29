@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-05-29 22:30:00"
+	"lastUpdated":"2009-05-29 22:55:00"
 }
 
 function detectWeb(doc, url) {
@@ -16,12 +16,10 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 			if (prefix == 'x') return namespace; else return null;
 		} : null;
-		
-	if (url.match(/\/groups\/[^\/]+\/items/)) {
-		var span = doc.getElementById('libraryGroupID');
-		if (!span) {
-			return false;
-		}
+	
+	// Skip private groups
+	if (url.match(/\/groups\/[0-9]+\/items/)) {
+		return false;
 	}
 	
 	var a = doc.evaluate('//li[@id="library-tab"]/a[text()="My Library"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
