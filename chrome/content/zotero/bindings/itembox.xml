@@ -260,6 +260,18 @@
 								}
 							}
 							
+							// If that fails, try the DOI field
+							if (!spec) {
+								var doi = this.item.getField('DOI');
+								if (doi) {
+									// Pull out DOI, in case there's a prefix
+									doi = doi.match(/10\..*/);
+									if (doi) {
+										spec = "http://dx.doi.org/" + encodeURIComponent(doi);
+									}
+								}
+							}
+							
 							if (!spec) {
 								break testView;
 							}
