@@ -154,7 +154,6 @@
 					</hbox>
 					<tree id="zotero-collections-tree" hidecolumnpicker="true" context="zotero-collectionmenu"
 						onmouseover="ZoteroPane.collectionsView.setHighlightedRows();"
-						ondblclick="ZoteroPane.onDoubleClick(event, this);"
 						onkeypress="ZoteroPane.handleKeyPress(event, this.id)"
 						onselect="ZoteroPane.onCollectionSelected();" seltype="cell"
 						ondraggesture="if (event.target.localName == 'treechildren') { ZoteroPane.startDrag(event, ZoteroPane.collectionsView); }"
@@ -218,7 +217,6 @@
 				<deck id="zotero-items-pane-content" selectedIndex="0" flex="1">
 					<tree 
 						id="zotero-items-tree" context="zotero-itemmenu"
-						ondblclick="ZoteroPane.onDoubleClick(event, this);"
 						enableColumnDrag="true"
 						onfocus="if (ZoteroPane.itemsView.rowCount &amp;&amp; !ZoteroPane.itemsView.selection.count) { ZoteroPane.itemsView.selection.select(0); }"
 						onkeypress="ZoteroPane.handleKeyPress(event, this.id)"
