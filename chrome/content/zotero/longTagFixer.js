@@ -6,6 +6,9 @@ var Zotero_Long_Tag_Fixer = new function () {
 		document.getElementById('zotero-old-tag').value = _oldTag;
 		document.getElementById('zotero-old-tag-delimiter').nextSibling.value = 'character'; // TODO: localize
 		
+		var delimiter = Zotero.Prefs.get('lastLongTagDelimiter');
+		document.getElementById('zotero-old-tag-delimiter').value = delimiter;
+		
 		var lastMode = Zotero.Prefs.get('lastLongTagMode');
 		if (!lastMode) {
 			lastMode = 0;
@@ -23,6 +26,7 @@ var Zotero_Long_Tag_Fixer = new function () {
 			case 0:
 				var buttonLabel = "Save Tags";
 				this.updateTagList();
+				document.getElementById('zotero-old-tag-delimiter').select();
 				break;
 				
 			case 1:
@@ -54,7 +58,8 @@ var Zotero_Long_Tag_Fixer = new function () {
 		
 		var delimiter = document.getElementById('zotero-old-tag-delimiter').value;
 		if (delimiter) {
-			var re = new RegExp("\\s*" + delimiter + "\\s*");
+			Zotero.Prefs.set('lastLongTagDelimiter', delimiter);
+			var re = new RegExp("\\s*" + delimiter.replace(/([\.\-\[\]\(\)\?\*\+])/g, "\\$1") + "\\s*");
 			var tags = _oldTag.split(re);
 		}
 		
@@ -79,6 +84,8 @@ var Zotero_Long_Tag_Fixer = new function () {
 			li.setAttribute('type', 'checkbox');
 			li.setAttribute('checked', 'true');
 		}
+		
+		window.sizeToContent();
 	}
 	
 	
