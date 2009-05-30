@@ -12,6 +12,15 @@ Zotero.URI = new function () {
 	}
 	
 	
+	this.getCurrentUserLibraryURI = function () {
+		var userID = Zotero.userID;
+		if (!userID) {
+			return false;
+		}
+		return _baseURI + "users/" + userID + "/items";
+	}
+	
+	
 	this.getLibraryURI = function (libraryID) {
 		var libraryType = Zotero.Libraries.getType(libraryID);
 		switch (libraryType) {

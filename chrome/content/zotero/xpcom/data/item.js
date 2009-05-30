@@ -2933,18 +2933,19 @@ Zotero.Item.prototype.getBestSnapshot = function() {
 		throw ("getBestSnapshot() can only be called on regular items");
 	}
 	
-	if (!this.getField('url')) {
+	var url = this.getField('url');
+	
+	if (!url) {
 		return false;
 	}
 	
-	var sql = "SELECT IA.itemID FROM itemAttachments IA NATURAL JOIN items I "
+	var sql = "SELECT IA.itemID, value FROM itemAttachments IA NATURAL JOIN items I "
 		+ "LEFT JOIN itemData ID ON (IA.itemID=ID.itemID AND fieldID=1) "
-		+ "NATURAL JOIN ItemDataValues "
-		+ "WHERE sourceItemID=? AND linkMode=? AND value=? "
-		+ "ORDER BY dateAdded DESC LIMIT 1";
+		+ "NATURAL JOIN itemDataValues WHERE sourceItemID=? AND linkMode NOT IN (?) "
+		+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
+		+ "ORDER BY value=? DESC, mimeType='application/pdf' DESC, dateAdded ASC";
 		
-	return Zotero.DB.valueQuery(sql, [this.id,
-		Zotero.Attachments.LINK_MODE_IMPORTED_URL, {string:this.getField('url')}]);
+	return Zotero.DB.valueQuery(sql, [this.id, Zotero.Attachments.LINK_MODE_LINKED_URL, url]);
 }
 
 

@@ -1863,8 +1863,8 @@ var ZoteroPane = new function()
 	
 	// Adapted from: http://www.xulplanet.com/references/elemref/ref_tree.html#cmnote-9
 	this.onTreeClick = function (event) {
-		// We only care about primary button double-clicks
-		if (!event || event.detail != 2 || event.button != 0) {
+		// We only care about primary button double and triple clicks
+		if (!event || (event.detail != 2 && event.detail != 3) || event.button != 0) {
 			return;
 		}
 		
@@ -1885,25 +1885,53 @@ var ZoteroPane = new function()
 		}
 		
 		if (tree.id == 'zotero-collections-tree') {
-			var itemGroup = ZoteroPane.collectionsView._getItemAtRow(ZoteroPane.collectionsView.selection.currentIndex);
+			// Ignore triple clicks for collections
+			if (event.detail != 2) {
+				return;
+			}
+			
+			var itemGroup = ZoteroPane.collectionsView._getItemAtRow(tree.view.selection.currentIndex);
+			if (itemGroup.isLibrary()) {
+				var uri = Zotero.URI.getCurrentUserLibraryURI();
+				if (uri) {
+					ZoteroPane.loadURI(uri, event);
+					event.stopPropagation();
+				}
+				return;
+			}
+			
 			if (itemGroup.isSearch()) {
 				ZoteroPane.editSelectedCollection();
+				return;
 			}
-			else if (itemGroup.isGroup()) {
+			
+			if (itemGroup.isGroup()) {
 				var uri = Zotero.URI.getGroupURI(itemGroup.ref, true);
 				ZoteroPane.loadURI(uri, event);
 				event.stopPropagation();
+				return;
 			}
-			else if (itemGroup.isHeader()) {
+			
+			if (itemGroup.isHeader()) {
 				if (itemGroup.ref.id == 'group-libraries-header') {
 					var uri = Zotero.URI.getGroupsURL();
 					ZoteroPane.loadURI(uri, event);
 					event.stopPropagation();
 				}
+				return;
 			}
 		}
 		else if (tree.id == 'zotero-items-tree') {
-			if (ZoteroPane.itemsView && ZoteroPane.itemsView.selection.currentIndex > -1) {
+			// Expand/collapse on triple-click
+			if (event.detail == 3) {
+				tree.view.toggleOpenState(tree.view.selection.currentIndex);
+				return;
+			}
+			
+			// Don't expand/collapse on double-click
+			event.stopPropagation();
+			
+			if (tree.view && tree.view.selection.currentIndex > -1) {
 				var item = ZoteroPane.getSelectedItems()[0];
 				if (item) {
 					if (item.isRegularItem()) {
@@ -1934,7 +1962,6 @@ var ZoteroPane = new function()
 						}
 						if (uri) {
 							ZoteroPane.loadURI(uri, event);
-							//event.stopPropagation();
 						}
 					}
 					else if (item.isNote()) {
