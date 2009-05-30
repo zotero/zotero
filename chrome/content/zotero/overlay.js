@@ -1907,6 +1907,20 @@ var ZoteroPane = new function()
 				var item = ZoteroPane.getSelectedItems()[0];
 				if (item) {
 					if (item.isRegularItem()) {
+						var uri = Components.classes["@mozilla.org/network/standard-url;1"].
+								createInstance(Components.interfaces.nsIURI);
+						var snapID = item.getBestSnapshot();
+						if (snapID) {
+							spec = Zotero.Items.get(snapID).getLocalFileURL();
+							if (spec) {
+								uri.spec = spec;
+								if (uri.scheme && uri.scheme == 'file') {
+									ZoteroPane.viewAttachment(snapID, event);
+									return;
+								}
+							}
+						}
+						
 						var uri = item.getField('url');
 						if (!uri) {
 							var doi = item.getField('DOI');

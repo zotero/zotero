@@ -2565,10 +2565,12 @@ Zotero.Item.prototype.getLocalFileURL = function() {
 	}
 	
 	var file = this.getFile();
+	if (!file) {
+		return false;
+	}
 	
 	var nsIFPH = Components.classes["@mozilla.org/network/protocol;1?name=file"]
 			.getService(Components.interfaces.nsIFileProtocolHandler);
-	
 	return nsIFPH.getURLSpecFromFile(file);
 }
 
