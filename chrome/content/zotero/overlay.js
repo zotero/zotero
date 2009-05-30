@@ -67,7 +67,6 @@ var ZoteroPane = new function()
 	this.getSortField = getSortField;
 	this.getSortDirection = getSortDirection;
 	this.buildItemContextMenu = buildItemContextMenu;
-	this.onDoubleClick = onDoubleClick;
 	this.loadURI = loadURI;
 	this.setItemsPaneMessage = setItemsPaneMessage;
 	this.clearItemsPaneMessage = clearItemsPaneMessage;
@@ -146,9 +145,11 @@ var ZoteroPane = new function()
 		var collectionsTree = document.getElementById('zotero-collections-tree');
 		collectionsTree.view = this.collectionsView;
 		collectionsTree.controllers.appendController(new Zotero.CollectionTreeCommandController(collectionsTree));
+		collectionsTree.addEventListener("click", ZoteroPane.onTreeClick, true);
 		
 		var itemsTree = document.getElementById('zotero-items-tree');
 		itemsTree.controllers.appendController(new Zotero.ItemTreeCommandController(itemsTree));
+		itemsTree.addEventListener("click", ZoteroPane.onTreeClick, true);
 		
 		// Create the New Item (+) menu with each item type
 		var addMenu = document.getElementById('zotero-tb-add').firstChild;
@@ -1861,45 +1862,75 @@ var ZoteroPane = new function()
 	
 	
 	// Adapted from: http://www.xulplanet.com/references/elemref/ref_tree.html#cmnote-9
-	function onDoubleClick(event, tree)
-	{
-		if (event && tree && event.type == "dblclick") {
-			var row = {}, col = {}, obj = {};
-			tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
-			
-			// obj.value == 'cell'/'text'/'image'
-			if (!obj.value) {
-				return;
+	this.onTreeClick = function (event) {
+		// We only care about primary button double-clicks
+		if (!event || event.detail != 2 || event.button != 0) {
+			return;
+		}
+		
+		var t = event.originalTarget;
+		
+		if (t.localName != 'treechildren') {
+			return;
+		}
+		
+		var tree = t.parentNode;
+		
+		var row = {}, col = {}, obj = {};
+		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
+		
+		// obj.value == 'cell'/'text'/'image'
+		if (!obj.value) {
+			return;
+		}
+		
+		if (tree.id == 'zotero-collections-tree') {
+			var itemGroup = ZoteroPane.collectionsView._getItemAtRow(ZoteroPane.collectionsView.selection.currentIndex);
+			if (itemGroup.isSearch()) {
+				ZoteroPane.editSelectedCollection();
 			}
-			
-			if (tree.id == 'zotero-collections-tree') {
-				var itemGroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
-				if (itemGroup.isSearch()) {
-					this.editSelectedCollection();
+			else if (itemGroup.isGroup()) {
+				var uri = Zotero.URI.getGroupURI(itemGroup.ref, true);
+				ZoteroPane.loadURI(uri, event);
+				event.stopPropagation();
+			}
+			else if (itemGroup.isHeader()) {
+				if (itemGroup.ref.id == 'group-libraries-header') {
+					var uri = Zotero.URI.getGroupsURL();
+					ZoteroPane.loadURI(uri, event);
+					event.stopPropagation();
 				}
-				else if (itemGroup.isGroup()) {
-					var uri = Zotero.URI.getGroupURI(itemGroup.ref, true);
-					window.loadURI(uri);
-				}
-				else if (itemGroup.isHeader()) {
-					if (itemGroup.ref.id == 'group-libraries-header') {
-						var uri = Zotero.URI.getGroupsURL();
-						window.loadURI(uri);
+			}
+		}
+		else if (tree.id == 'zotero-items-tree') {
+			if (ZoteroPane.itemsView && ZoteroPane.itemsView.selection.currentIndex > -1) {
+				var item = ZoteroPane.getSelectedItems()[0];
+				if (item) {
+					if (item.isRegularItem()) {
+						var uri = item.getField('url');
+						if (!uri) {
+							var doi = item.getField('DOI');
+							if (doi) {
+								// Pull out DOI, in case there's a prefix
+								doi = doi.match(/10\..*/);
+								if (doi) {
+									uri = "http://dx.doi.org/" + encodeURIComponent(doi);
+								}
+							}
+						}
+						if (uri) {
+							ZoteroPane.loadURI(uri, event);
+							//event.stopPropagation();
+						}
 					}
-				}
-			}
-			else if (tree.id == 'zotero-items-tree') {
-				if (!this.collectionsView.editable) {
-					return;
-				}
-				
-				if (this.itemsView && this.itemsView.selection.currentIndex > -1) {
-					var item = this.getSelectedItems()[0];
-					if (item && item.isNote()) {
+					else if (item.isNote()) {
+						if (!ZoteroPane.collectionsView.editable) {
+							return;
+						}
 						document.getElementById('zotero-view-note-button').doCommand();
 					}
-					else if (item && item.isAttachment()) {
-						this.viewSelectedAttachment(event);
+					else if (item.isAttachment()) {
+						ZoteroPane.viewSelectedAttachment(event);
 					}
 				}
 			}
