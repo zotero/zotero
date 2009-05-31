@@ -3,32 +3,47 @@
 	"translatorType":4,
 	"label":"Highwire 2.0",
 	"creator":"Matt Burton",
-	"target":"DISABLED(content/([0-9]+/[0-9]+|current|firstcite)|search|cgi/collection/.+)",
+	"target":"(content/([0-9]+/[0-9]+|current|firstcite)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-05-26 14:35:00"
+	"lastUpdated":"2009-05-31 17:16:00"
 }
 
 function detectWeb(doc, url) {
-	if (
-		url.match("search") || 
-		url.match("content/by/section") || 
-		doc.title.match("Table of Contents") || 
-		doc.title.match("Early Edition") || 
-		url.match("cgi/collection/.+") || 
-		url.match("content/firstcite") 
-	) {
-		return "multiple";
-	} else if (url.match("content/[0-9]+")) {
-		return "journalArticle";
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == 'x') return namespace; else return null;
+	} : null;
+	
+	// lets hope this installations don't tweak this...
+	var highwiretest = doc.evaluate("//link[@href = '/shared/css/hw-global.css']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	
+	if(highwiretest) {
+		
+		if (
+			url.match("search\\?submit=") ||
+			url.match("search\\?fulltext=") ||
+			url.match("content/by/section") || 
+			doc.title.match("Table of Contents") || 
+			doc.title.match("Early Edition") || 
+			url.match("cgi/collection/.+") || 
+			url.match("content/firstcite") 
+		) {
+			return "multiple";
+		} else if (url.match("content/[0-9]+")) {
+			return "journalArticle";
+		}
 	}
 }
 
 function doWeb(doc, url) {
-	
-	
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == 'x') return namespace; else return null;
+	} : null;
+		
 	var host = 'http://' + doc.location.host + "/";
 	
 	var arts = new Array();
@@ -39,18 +54,18 @@ function doWeb(doc, url) {
 			var titlex = './/h4';
 		} else if (url.match("content/by/section") || url.match("cgi/collection/.+")) {
 			var searchx = '//li[contains(@class, "results-cit cit")]'; 
-			var titlex = './/span[contains(@class, "cit-title"])';
+			var titlex = './/span[contains(@class, "cit-title")]';
 		}
 		else {
 			var searchx = '//div[contains(@class,"results-cit cit")]';
 			var titlex = './/span[contains(@class,"cit-title")]';
 		}	
 		var linkx = './/a[1]';
-		var searchres = doc.evaluate(searchx, doc, null, XPathResult.ANY_TYPE, null);
+		var searchres = doc.evaluate(searchx, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var next_res;
 		while (next_res = searchres.iterateNext()) {
-			var title = doc.evaluate(titlex, next_res, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			var link = doc.evaluate(linkx, next_res, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+			var title = doc.evaluate(titlex, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var link = doc.evaluate(linkx, next_res, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 			items[link] = title;
 		}
 		items = Zotero.selectItems(items);
@@ -64,7 +79,6 @@ function doWeb(doc, url) {
 	for each (var i in arts) {
 		newurls.push(i);
 	}
-	Zotero.debug(arts.length);
 	if(arts.length == 0) {
 		Zotero.debug('no items');
 		return false;
