@@ -98,8 +98,9 @@ function doWeb(doc, url) {
 				delete item.notes;
 				item.notes = undefined;
 			}
-			item.attachments[0].title = item.title;
-			item.attachments[0].mimeType = "text/html";
+			
+			// Don't save HTML snapshot from 'UR' tag
+			item.attachments = [];
 			
 			if (/stable\/(\d+)/.test(item.url)) {
 				var localJid = RegExp.$1;
