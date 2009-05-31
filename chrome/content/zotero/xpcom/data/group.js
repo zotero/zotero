@@ -186,7 +186,6 @@ Zotero.Group.prototype.getCollections = function (parent) {
 	var sql = "SELECT collectionID FROM collections WHERE libraryID=? AND "
 				+ "parentCollectionID " + (parent ? '=' + parent : 'IS NULL');
 	var ids = Zotero.DB.columnQuery(sql, this.libraryID);
-	Zotero.debug(ids);
 	
 	// Return Zotero.Collection objects
 	var objs = [];
@@ -194,6 +193,13 @@ Zotero.Group.prototype.getCollections = function (parent) {
 		var col = Zotero.Collections.get(id);
 		objs.push(col);
 	}
+	
+	// Do proper collation sort
+	var collation = Zotero.getLocaleCollation();
+	objs.sort(function (a, b) {
+		return collation.compareString(1, a.name, b.name);
+	});
+	
 	return objs;
 }
 
