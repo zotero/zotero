@@ -798,8 +798,14 @@ Zotero.ItemTreeView.prototype.cycleHeader = function(column)
 		}
 		else
 		{
-			col.element.setAttribute('sortActive',true);
-			col.element.setAttribute('sortDirection',col.element.getAttribute('sortDirection') == 'descending' ? 'ascending' : 'descending');
+			// If not yet selected, start with ascending
+			if (!col.element.getAttribute('sortActive')) {
+				col.element.setAttribute('sortDirection', Zotero.isFx30 ? 'descending' : 'ascending');
+			}
+			else {
+				col.element.setAttribute('sortDirection', col.element.getAttribute('sortDirection') == 'descending' ? 'ascending' : 'descending');
+			}
+			col.element.setAttribute('sortActive', true);
 		}
 	}
 	
@@ -848,7 +854,14 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	}
 	
 	var columnField = this.getSortField();
-	var order = this.getSortDirection() == 'ascending';
+	
+	// Firefox 3 is upside-down
+	if (Zotero.isFx30) {
+		var order = this.getSortDirection() == 'ascending';
+	}
+	else {
+		var order = this.getSortDirection() == 'descending';
+	}
 	
 	var collation = Zotero.getLocaleCollation();
 	
@@ -1526,15 +1539,11 @@ Zotero.ItemTreeView.prototype.getSortField = function() {
 
 /*
  * Returns 'ascending' or 'descending'
- *
- * A-Z == 'descending', because Mozilla is confused
- *	(an upwards-facing triangle is A-Z on OS X and Windows,
- *   but Firefox uses the opposite)
  */
 Zotero.ItemTreeView.prototype.getSortDirection = function() {
 	var column = this._treebox.columns.getSortedColumn();
 	if (!column) {
-		return 'descending';
+		return Zotero.isFx30 ? 'descending' : 'ascending';
 	}
 	return column.element.getAttribute('sortDirection');
 }
