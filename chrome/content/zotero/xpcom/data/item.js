@@ -3406,7 +3406,7 @@ Zotero.Item.prototype.clone = function(includePrimary, newItem) {
 	if (newItem) {
 		var previousFields = this.getUsedFields(true);
 		for each(var field in previousFields) {
-			if (!changedFields[field]) {
+			if (!changedFields[field] && Zotero.ItemFields.isValidForType(field, itemTypeID)) {
 				newItem.setField(field, false);
 			}
 		}
