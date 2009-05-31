@@ -3144,6 +3144,10 @@ Zotero.Sync.Server.Data = new function() {
 		var childItemIDs = [];
 		for each(var key in childItems) {
 			var childItem = Zotero.Items.getByLibraryAndKey(collection.libraryID, key);
+			if (!childItem) {
+				throw ("Missing child item " + key + " for collection " + collection.libraryID + "/" + collection.key
+					+ " in Zotero.Sync.Server.Data.xmlToCollection()"); 
+			}
 			childItemIDs.push(childItem.id);
 		}
 		collection.childItems = childItemIDs;
