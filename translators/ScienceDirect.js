@@ -184,7 +184,7 @@ function doWeb(doc, url) {
 				aus = aus.split(/(,|and)/);
 				for (var a in aus) {
 					if (aus[a] != "," && aus[a] != "and" && aus[a].match(/\w+/)) {
-						item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.trimInternal(aus[a]), "author"));
+						item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.unescapeHTML(Zotero.Utilities.trimInternal(aus[a]), "author")));
 					}
 				}
 				item.complete();
