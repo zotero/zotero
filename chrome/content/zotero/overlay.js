@@ -1962,7 +1962,7 @@ var ZoteroPane = new function()
 							var doi = item.getField('DOI');
 							if (doi) {
 								// Pull out DOI, in case there's a prefix
-								doi = doi.match(/10\..*/);
+								doi = Zotero.Utilities.prototype.cleanDOI(doi);
 								if (doi) {
 									uri = "http://dx.doi.org/" + encodeURIComponent(doi);
 								}

@@ -265,7 +265,7 @@
 								var doi = this.item.getField('DOI');
 								if (doi) {
 									// Pull out DOI, in case there's a prefix
-									doi = doi.match(/10\..*/);
+									doi = Zotero.Utilities.prototype.cleanDOI(doi);;
 									if (doi) {
 										spec = "http://dx.doi.org/" + encodeURIComponent(doi);
 									}
@@ -454,7 +454,7 @@
 						}
 						else if (fieldName == 'DOI' && val) {
 							// Pull out DOI, in case there's a prefix
-							var doi = val.match(/10\..*/);
+							var doi = Zotero.Utilities.prototype.cleanDOI(val);
 							if (doi) {
 								doi = "http://dx.doi.org/" + encodeURIComponent(doi);
 								label.setAttribute("isButton", true);
