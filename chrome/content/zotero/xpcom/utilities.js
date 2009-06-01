@@ -143,6 +143,16 @@ Zotero.Utilities.prototype.cleanTags = function(/**String*/ x) {
 	return x.replace(/<[^>]+>/g, "");
 }
 
+
+Zotero.Utilities.prototype.cleanDOI = function(/**String**/ x) {
+	if(typeof(x) != "string") {
+		throw "cleanDOI: argument must be a string";
+	}
+	
+	return x.match(/10\.[^\s\/]+\/[^\s]+/);
+}
+
+
 /**
  * Encode special XML/HTML characters<br/>
  * <br/>
