@@ -70,7 +70,7 @@ function doWeb(doc, url) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
-			//item.attachments[0]=({url:pdfURL, title:"PLoS Full Text PDF", mimeType:"application/pdf"});
+			item.url = snapshot;
 			item.attachments.push({url:pdfURL, title:"PLoS Full Text PDF", mimeType:"application/pdf"});
 			item.attachments.push({url:snapshot, title:"PLoS Snapshot", mimeType:"text/html", snapshot:true});
 			item.DOI = doi;
