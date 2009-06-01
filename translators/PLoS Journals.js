@@ -63,17 +63,16 @@ function doWeb(doc, url) {
 		doi  = doi.replace("%2F","/");//Replace %2F characters by forward slashes in doi
 		
 		// grab the UR link for a snapshot then blow it away 
-		//var snapshot = text.match(/UR\s+\-\s+(.*)/)[1];
-		//text = text.replace(/UR\s+\-(.*)/, "");
+		var snapshot = text.match(/UR\s+\-\s+(.*)/)[1];
+		text = text.replace(/UR\s+\-(.*)/, "");
 				
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			//item.attachments[0]=({url:pdfURL, title:"PLoS Full Text PDF", mimeType:"application/pdf"});
-			//item.url = snapshot;
 			item.attachments.push({url:pdfURL, title:"PLoS Full Text PDF", mimeType:"application/pdf"});
-			//item.attachments.push({url:snapshot, title:"PLoS Snapshot", mimeType:"text/html", snapshot:true});
+			item.attachments.push({url:snapshot, title:"PLoS Snapshot", mimeType:"text/html", snapshot:true});
 			item.DOI = doi;
 			item.repository = item.publicationTitle;
 			item.complete();
