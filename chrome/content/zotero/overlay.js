@@ -352,7 +352,7 @@ var ZoteroPane = new function()
 			
 			if (Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Server.enabled) {
 				setTimeout(function () {
-					Zotero.Sync.Runner.sync();
+					Zotero.Sync.Runner.sync(true);
 				}, 1000);
 			}
 		}
@@ -1894,7 +1894,7 @@ var ZoteroPane = new function()
 			if (itemGroup.isLibrary()) {
 				var uri = Zotero.URI.getCurrentUserLibraryURI();
 				if (uri) {
-					ZoteroPane.loadURI(uri, event);
+					ZoteroPane.loadURI(uri);
 					event.stopPropagation();
 				}
 				return;
@@ -1907,7 +1907,7 @@ var ZoteroPane = new function()
 			
 			if (itemGroup.isGroup()) {
 				var uri = Zotero.URI.getGroupURI(itemGroup.ref, true);
-				ZoteroPane.loadURI(uri, event);
+				ZoteroPane.loadURI(uri);
 				event.stopPropagation();
 				return;
 			}
@@ -1915,26 +1915,34 @@ var ZoteroPane = new function()
 			if (itemGroup.isHeader()) {
 				if (itemGroup.ref.id == 'group-libraries-header') {
 					var uri = Zotero.URI.getGroupsURL();
-					ZoteroPane.loadURI(uri, event);
+					ZoteroPane.loadURI(uri);
 					event.stopPropagation();
 				}
 				return;
 			}
 		}
 		else if (tree.id == 'zotero-items-tree') {
-			// Expand/collapse on triple-click
-			if (event.detail == 3) {
-				tree.view.toggleOpenState(tree.view.selection.currentIndex);
-				return;
-			}
+			var viewOnDoubleClick = Zotero.Prefs.get('viewOnDoubleClick');
 			
-			// Don't expand/collapse on double-click
-			event.stopPropagation();
+			// Expand/collapse on triple-click
+			if (viewOnDoubleClick) {
+				if (event.detail == 3) {
+					tree.view.toggleOpenState(tree.view.selection.currentIndex);
+					return;
+				}
+				
+				// Don't expand/collapse on double-click
+				event.stopPropagation();
+			}
 			
 			if (tree.view && tree.view.selection.currentIndex > -1) {
 				var item = ZoteroPane.getSelectedItems()[0];
 				if (item) {
 					if (item.isRegularItem()) {
+						if (!viewOnDoubleClick) {
+							return;
+						}
+						
 						var uri = Components.classes["@mozilla.org/network/standard-url;1"].
 								createInstance(Components.interfaces.nsIURI);
 						var snapID = item.getBestSnapshot();
@@ -1961,7 +1969,7 @@ var ZoteroPane = new function()
 							}
 						}
 						if (uri) {
-							ZoteroPane.loadURI(uri, event);
+							ZoteroPane.loadURI(uri);
 						}
 					}
 					else if (item.isNote()) {
@@ -2033,17 +2041,19 @@ var ZoteroPane = new function()
 	 */
 	function loadURI(uri, event, data) {
 		// Open in new tab
-		if (event.metaKey || (!Zotero.isMac && event.ctrlKey)) {
+		if (event && (event.metaKey || (!Zotero.isMac && event.ctrlKey))) {
 			var tab = gBrowser.addTab(uri);
 			var browser = gBrowser.getBrowserForTab(tab);
 			
 			if (event.shiftKey) {
 				gBrowser.selectedTab = tab;
 			}
-		} else if (event.shiftKey) {
+		}
+		else if (event && event.shiftKey) {
 			window.open(uri, "zotero-loaded-page",
 				"menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes");
-		} else {
+		}
+		else {
 			window.loadURI(uri);
 		}
 	}
