@@ -37,7 +37,7 @@ function doWeb(doc, url) {
 			var xpath;
 			if (url.indexOf("_ob=PublicationURL") != -1) {
 				// not sure if this case still arises. may need to be fixed at some point
-				xpath = '//table[@class="txt"]/tbody/tr/td[2]';
+				xpath = '//table[@class="resultRow"]/tbody/tr/td[2]/a';
 			} else {
 				xpath = '//div[@class="font3"][@id="bodyMainResults"]/table/tbody/tr/td[2]/a';
 			}
@@ -54,6 +54,10 @@ function doWeb(doc, url) {
 			}
 		} else {
 			articles = [url];
+		}
+		if(articles.length == 0) {
+			Zotero.debug('no items');
+			return;
 		}
 		Zotero.Utilities.processDocuments(articles, function(newDoc) {
 			var doi = newDoc.evaluate('//div[@class="articleHeaderInner"][@id="articleHeader"]/a[contains(text(), "doi")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(4);
@@ -123,7 +127,7 @@ function doWeb(doc, url) {
 		if (detectWeb(doc, url) == "multiple") {
 			var items = new Object();
 			if (url.indexOf("_ob=PublicationURL") != -1) {
-				xpath = '//table[@class="txt"]/tbody/tr[1]/td[2]';
+				xpath = '//table[@class="resultRow"]/tbody/tr/td[2]/a';
 				// not sure whether this case still exists
 			} else {
 				xpath = '//div[@class="font3"][@id="bodyMainResults"]/table/tbody/tr/td[2]/a';
@@ -133,7 +137,7 @@ function doWeb(doc, url) {
 			while (next_row = rows.iterateNext()) {
 				var title = next_row.textContent;
 				var link = next_row.href;
-				items[link] = title;
+				if (!title.match(/PDF \(/) && !title.match(/Related Articles/)) items[link] = title;
 			}
 			items = Zotero.selectItems(items);
 			for (var i in items) {
@@ -141,6 +145,10 @@ function doWeb(doc, url) {
 			}
 		} else {
 			articles = [url];
+		}
+		if(articles.length == 0) {
+			Zotero.debug('no items');
+			return;
 		}
 		Zotero.Utilities.processDocuments(articles, function(doc2) {
 			var item = new Zotero.Item("journalArticle");
