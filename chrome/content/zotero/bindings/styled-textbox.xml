@@ -294,6 +294,28 @@
 								self._editor.focus();
 								self._focus = false;
 							}
+							
+							// Add CSS rules to notes
+							if (self.mode == 'note') {
+								var css = "body#zotero-tinymce.mceContentBody, "
+									+ "body#zotero-tinymce-note.mceContentBody p, "
+									+ "body#zotero-tinymce-note.mceContentBody pre { "
+										+ "font-size: "
+										+ Zotero.Prefs.get('note.fontSize') + "px; "
+									+ "} "
+									+ "body#zotero-tinymce-note.mceContentBody, "
+									+ "body#zotero-tinymce-note.mceContentBody p { "
+										+ "font-family: "
+										+ Zotero.Prefs.get('note.fontFamily') + "; "
+									+ "}"
+									+ Zotero.Prefs.get('note.css');
+								
+								var doc = editor.contentDocument;
+								var head = doc.getElementsByTagName("head")[0];
+								var style = doc.createElement("style");
+								style.innerHTML = css;
+								head.appendChild(style);
+							}
 						});
 						
 						if (self._eventHandler) {
