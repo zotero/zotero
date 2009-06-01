@@ -67,6 +67,11 @@ pref("extensions.zotero.fulltext.textMaxLength", 500000);
 pref("extensions.zotero.fulltext.pdfMaxPages", 100);
 pref("extensions.zotero.search.useLeftBound", true);
 
+// Notes
+pref("extensions.zotero.note.fontFamily", "Lucida Grande, Tahoma, Verdana, Helvetica, sans-serif");
+pref("extensions.zotero.note.fontSize", "11");
+pref("extensions.zotero.note.css", "");
+
 // Reports
 pref("extensions.zotero.report.includeAllChildItems", true);
 pref("extensions.zotero.report.combineChildItems", true);
