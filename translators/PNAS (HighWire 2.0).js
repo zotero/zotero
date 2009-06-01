@@ -8,11 +8,8 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-12-27 20:50:00"
+	"lastUpdated":"2009-05-26 14:35:00"
 }
-//	"target":"http://www\\.pnas\\.org/(content|search|cgi/collection/.+)",
-
-// This translator is for HighWire 2.0
 
 function detectWeb(doc, url) {
 	if (
