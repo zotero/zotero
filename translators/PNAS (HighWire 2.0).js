@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"Highwire 2.0",
 	"creator":"Matt Burton",
-	"target":"(content/[0-9]+|search|cgi/collection/.+)",
+	"target":"(content/([0-9]+/[0-9]+|current|firstcite)|search|cgi/collection/.+)",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
@@ -15,7 +15,14 @@
 // This translator is for HighWire 2.0
 
 function detectWeb(doc, url) {
-	if (url.match("search") || url.match("content/by/section") || doc.title.match("Table of Contents") || doc.title.match("Early Edition") || url.match("cgi/collection/.+")) {
+	if (
+		url.match("search") || 
+		url.match("content/by/section") || 
+		doc.title.match("Table of Contents") || 
+		doc.title.match("Early Edition") || 
+		url.match("cgi/collection/.+") || 
+		url.match("content/firstcite") 
+	) {
 		return "multiple";
 	} else if (url.match("content/[0-9]+")) {
 		return "journalArticle";
@@ -30,8 +37,8 @@ function doWeb(doc, url) {
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		if (doc.title.match("Table of Contents") || doc.title.match("Early Edition")) {
-			var searchx = '//li[@class = "cit toc-cit" and not(ancestor::div/h2/a/text() = "Correction" or ancestor::div/h2/a/text() = "Corrections")]'; 
+		if (doc.title.match("Table of Contents") || doc.title.match("Early Edition") || url.match("content/firstcite")) {
+			var searchx = '//li[contains(@class, "cit toc-cit") and not(ancestor::div/h2/a/text() = "Correction" or ancestor::div/h2/a/text() = "Corrections")]'; 
 			var titlex = './/h4';
 		} else if (url.match("content/by/section") || url.match("cgi/collection/.+")) {
 			var searchx = '//li[contains(@class, "results-cit cit")]'; 
@@ -39,7 +46,7 @@ function doWeb(doc, url) {
 		}
 		else {
 			var searchx = '//div[@class = "results-cit cit"]';
-			var titlex = './/span[@class = "cit-title"]';
+			var titlex = './/span[contains(@class,"cit-title")]';
 		}	
 		var linkx = './/a[1]';
 		var searchres = doc.evaluate(searchx, doc, null, XPathResult.ANY_TYPE, null);
@@ -59,6 +66,11 @@ function doWeb(doc, url) {
 	var newurls = new Array();
 	for each (var i in arts) {
 		newurls.push(i);
+	}
+	Zotero.debug(arts);
+	if(!arts) {
+		Zotero.debug('no items');
+		return false;
 	}
 	Zotero.Utilities.HTTP.doGet(arts, function(text) {
 		var id = text.match(/=([^=]+)\">\s*Download to citation manager/)[1];
