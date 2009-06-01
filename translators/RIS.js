@@ -252,7 +252,7 @@ function processTag(item, tag, value) {
 			item.url = value;
 		}
 		if(tag == "UR") {
-			item.attachments.push({url:value, snapshot:true, mimeType:"text/html"});
+			item.attachments.push({url:value});
 		} else if(tag == "L1") {
 			item.attachments.push({url:value, mimeType:"application/pdf",
 				title:"Full Text (PDF)", downloadable:true});
