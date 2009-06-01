@@ -8,7 +8,7 @@
 	"maxVersion":null,
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"lastUpdated":"2009-05-31 23:36:07"
 }
 
 function detectWeb(doc, url) {
@@ -28,7 +28,8 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 
-		if (!doc.evaluate('//div[@title = "Advertisement."]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (doc.evaluate('//*[contains(@src, "exportarticle_a.gif")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		Zotero.debug("SPEACIAL");
 		var articles = new Array();
 		if(detectWeb(doc, url) == "multiple") {
 			//search page
