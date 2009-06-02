@@ -51,6 +51,8 @@
 			<property name="mode" onget="return this._mode;">
 				<setter>
 				<![CDATA[
+					Zotero.debug("Setting mode to '" + val + "'");
+					
 					this.editable = false;
 					this.displayGoButtons = false;
 					this.displayURL = false;
@@ -72,6 +74,7 @@
 							this.displayPages = true;
 							this.displayIndexed = true;
 							this.displayNote = true;
+							this.displayDateModified = true;
 							break;
 						
 						case 'edit':
@@ -84,6 +87,7 @@
 							this.displayPages = true;
 							this.displayIndexed = true;
 							this.displayNote = true;
+							this.displayDateModified = true;
 							break;
 						
 						case 'merge':
@@ -92,13 +96,16 @@
 							this.displayAccessed = true;
 							this.displayNote = true;
 							this.displayButton = true;
+							this.displayDateModified = true;
 							break;
 						
 						case 'mergeedit':
+							this.editable = true;
 							this.displayURL = true;
 							this.displayFileName = true;
 							this.displayAccessed = true;
 							this.displayNote = true;
+							this.displayDateModified = true;
 							break;
 						
 						default:
