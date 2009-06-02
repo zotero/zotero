@@ -2516,6 +2516,8 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 	}
 	
 	try {
+		newName = Zotero.File.getValidFileName(newName);
+		
 		if (file.leafName == newName) {
 			return true;
 		}
