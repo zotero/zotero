@@ -2531,6 +2531,8 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 		}
 		
 		file.moveTo(null, newName);
+		// Update mod time so the file syncs
+		file.lastModifiedTime = new Date();
 		this.relinkAttachmentFile(file);
 		
 		return true;
