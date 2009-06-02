@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-05-19 16:00:00"
+	"lastUpdated":"2009-06-01 16:00:00"
 }
 
 function detectWeb(doc, url) {
@@ -77,6 +77,7 @@ function generateDeliverString(nsResolver, doc){
  * given the text of the delivery page, downloads an item
  */
 function downloadFunction(text) {
+	
 	//Zotero.debug("POSTTEXT="+text);
 	var postLocation = /<form (?:autocomplete="o(?:ff|n)" )?name="aspnetForm" method="post" action="([^"]+)"/
 	var postMatch = postLocation.exec(text);
@@ -88,8 +89,9 @@ function downloadFunction(text) {
 								 downloadString, function(text) {	// get marked records as RIS
 		// load translator for RIS
 		var test = text.match(/UR\s+\-(.*)/g);
-		if (test[0].match("@")) text = text.replace(/UR\s+\-(.*)/, "");
 		if (text.match(/AB\s\s\-/)) text = text.replace(/AB\s\s\-/, "N2  -");
+		if (!text.match(/TY\s\s-/)) text = text+"\nTY  - JOUR\n"; 
+		// load translator for RIS
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
@@ -97,10 +99,14 @@ function downloadFunction(text) {
 			if (text.match("L3")) {
 				item.DOI = text.match(/L3\s+\-\s*(.*)/)[1];
 			}
+			if (text.match("T1")) {
+				item.title = text.match(/T1\s+-\s*(.*)/)[1];
+			}
 			item.itemType = "journalArticle";
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
 			item.attachments = [];
 			item.complete();
+
 		});
 		translator.translate();
 		
@@ -122,7 +128,7 @@ function doWeb(doc, url) {
 	                                XPathResult.ANY_TYPE, null).iterateNext();                              
 
 	if(searchResult) {
-		var titlex = '//div[@class="result-list-record" or @class="folder-item-detail"]/span/a';
+		var titlex = '//div[@class="result-list-record" or @class="folder-item-detail" or @class="image-result"]/span/a[@class = "title-link"]';
 		var titles = doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var items = new Object();
 		var title;
@@ -149,7 +155,7 @@ function doWeb(doc, url) {
 	} else {
 		//This is a hack, generateDeliveryString is acting up for single pages, but it works on the plink url
 		var link = [doc.evaluate("//input[@id ='pLink']/@value", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue];
-		Zotero.Utilities.processDocuments(link, function(newDoc){
+		Zotero.Utilities.processDocuments(link, function(newDoc){			
 			var postURL = newDoc.evaluate('//form[@name="aspnetForm"]/@action', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			postURL = host+"/ehost/"+postURL.nodeValue;
 			var deliverString = generateDeliverString(nsResolver, newDoc);
