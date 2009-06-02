@@ -1467,6 +1467,40 @@ Zotero.Sync.Server = new function () {
 		
 		if (firstChild.localName == 'error') {
 			switch (firstChild.getAttribute('code')) {
+				case 'INVALID_UPLOAD_DATA':
+					// On the off-chance that this error is due to invalid characters
+					// in a filename, check them all (since getting a more specific
+					// error from the server would be difficult)
+					var sql = "SELECT itemID FROM itemAttachments WHERE linkMode IN (?,?)";
+					var ids = Zotero.DB.columnQuery(sql, [Zotero.Attachments.LINK_MODE_IMPORTED_FILE, Zotero.Attachments.LINK_MODE_IMPORTED_URL]);
+					if (ids) {
+						var items = Zotero.Items.get(ids);
+						var rolledBack = false;
+						for each(var item in items) {
+							var file = item.getFile();
+							if (!file) {
+								continue;
+							}
+							try {
+								var fn = file.leafName;
+								// TODO: move stripping logic (copied from _xmlize()) to Utilities
+								var xmlfn = file.leafName.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/g, '');
+								if (fn != xmlfn) {
+									if (!rolledBack) {
+										Zotero.DB.rollbackAllTransactions();
+									}
+									Zotero.debug("Changing invalid filename to " + xmlfn);
+									item.renameAttachmentFile(xmlfn);
+								}
+							}
+							catch (e) {
+								Zotero.debug(e);
+								Components.utils.reportError(e);
+							}
+						}
+					}
+					break;
+				
 				case 'ITEM_MISSING':
 					var [libraryID, key] = firstChild.getAttribute('missingItem').split('/');
 					if (libraryID == Zotero.libraryID) {
