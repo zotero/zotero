@@ -8,7 +8,7 @@
 	"maxVersion":null,
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-05-31 23:36:07"
+	"lastUpdated":"2009-06-04 00:00:00"
 }
 
 function detectWeb(doc, url) {
@@ -29,7 +29,6 @@ function doWeb(doc, url) {
 	} : null;
 
 	if (doc.evaluate('//*[contains(@src, "exportarticle_a.gif")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		Zotero.debug("SPEACIAL");
 		var articles = new Array();
 		if(detectWeb(doc, url) == "multiple") {
 			//search page
