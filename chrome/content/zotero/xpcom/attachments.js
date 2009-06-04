@@ -891,7 +891,7 @@ Zotero.Attachments = new function(){
 			
 			switch (field) {
 				case 'year':
-					var value = item.getField('date', true);
+					var value = item.getField('date', true, true);
 					if (value) {
 						value = Zotero.Date.multipartToSQL(value).substr(0, 4);
 						if (value == '0000') {
