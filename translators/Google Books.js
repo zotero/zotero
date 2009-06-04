@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"Google Books",
 	"creator":"Simon Kornblith, Michael Berkowitz and Rintze Zelle",
-	"target":"^http://(books|www)\.google\.[a-z]+(\.[a-z]+)?/books\?(.*id=.*|.*q=.*)",
+	"target":"^http://(books|www)\\.google\\.[a-z]+(\\.[a-z]+)?/books\\?(.*id=.*|.*q=.*)",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-05-14 05:45:00"
+	"lastUpdated":"2009-06-04 01:10:00"
 }
 
 
@@ -101,7 +101,8 @@ function doWeb(doc, url) {
 		
 		newItem.title = xml.title[0].toString();
 		
-		newItem.url = itemUrlBase + xml.identifier[0];
+		var url = itemUrlBase + xml.identifier[0];
+		newItem.attachments = [{title:"Google Books Link", snapshot:false, mimeType:"text/html", url:url}];
 		
 		newItem.complete();
 	}, function() { Zotero.done(); }, null);
