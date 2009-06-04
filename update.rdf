@@ -7,7 +7,7 @@
     <RDF:Seq>
       <RDF:li>
         <RDF:Description>
-          <version>2.0b4.SVN</version>
+          <version>2.0b5.SVN</version>
           <targetApplication>
             <RDF:Description>
               <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
