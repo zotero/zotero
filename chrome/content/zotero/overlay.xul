@@ -109,6 +109,7 @@
 					<menuitem oncommand="Zotero_Report_Interface.loadItemReport()"/>
 					<menuseparator/>
 					<menuitem oncommand="Zotero_RecognizePDF.recognizeSelected();"/>
+					<menuitem oncommand="ZoteroPane.renameSelectedAttachmentsFromParents()"/>
 					<menuitem oncommand="ZoteroPane.reindexItem();"/>
 				</popup>
 			</popupset>
