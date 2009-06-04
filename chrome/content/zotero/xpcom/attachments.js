@@ -926,9 +926,7 @@ Zotero.Attachments = new function(){
 		formatString = rpl('year');
 		formatString = rpl('title');
 		
-		// Strip potentially invalid characters
-		// See http://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
-		formatString = formatString.replace(/[\/\\\?\*:|"<>\.]/g, '');
+		formatString = Zotero.File.getValidFileName(formatString);
 		return formatString;
 	}
 	

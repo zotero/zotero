@@ -1682,7 +1682,8 @@ var ZoteroPane = new function()
 			loadReport: 12,
 			sep4: 13,
 			recognizePDF: 14,
-			reindexItem: 15
+			renameAttachments: 15,
+			reindexItem: 16
 		};
 		
 		var menu = document.getElementById('zotero-itemmenu');
@@ -1737,12 +1738,33 @@ var ZoteroPane = new function()
 				else {
 					hide.push(m.recognizePDF);
 				}
-				if (canIndex || canRecognize) {
+				
+				
+				// If all items are child attachments, show rename option
+				var canRename = true;
+				for (var i=0; i<items.length; i++) {
+					var item = items[i];
+					// Same check as in rename function
+					if (!item.isAttachment() || !item.getSource() || item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+						canRename = false;
+						break;
+					}
+				}
+				if (canRename) {
+					show.push(m.renameAttachments);
+				}
+				else {
+					hide.push(m.renameAttachments);
+				}
+				
+				// Add in attachment separator
+				if (canIndex || canRecognize || canRename) {
 					show.push(m.sep4);
 				}
 				else {
 					hide.push(m.sep4);
 				}
+
 			}
 			// Single item selected
 			else
@@ -1771,23 +1793,31 @@ var ZoteroPane = new function()
 				if (item.isAttachment()) {
 					var showSep4 = false;
 					hide.push(m.duplicateItem);
-					if (Zotero.Fulltext.pdfConverterIsRegistered()) {
-						// If not linked URL, show reindex line
-						if (Zotero.Fulltext.canReindex(item.id)) {
-							show.push(m.reindexItem);
-							showSep4 = true;
-						}
-						else {
-							hide.push(m.reindexItem);
-						}
+					// If not linked URL, show reindex line
+					if (Zotero.Fulltext.pdfConverterIsRegistered()
+							&& Zotero.Fulltext.canReindex(item.id)) {
+						show.push(m.reindexItem);
+						showSep4 = true;
 					}
-					
+					else {
+						hide.push(m.reindexItem);
+					}
+				
 					if (Zotero_RecognizePDF.canRecognize(item)) {
 						show.push(m.recognizePDF);
 						showSep4 = true;
 					}
 					else {
 						hide.push(m.recognizePDF);
+					}
+					
+					// Attachment rename option
+					if (item.getSource() && item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
+						show.push(m.renameAttachments);
+						showSep4 = true;
+					}
+					else {
+						hide.push(m.renameAttachments);
 					}
 					
 					if (showSep4) {
@@ -1799,7 +1829,7 @@ var ZoteroPane = new function()
 				}
 				else {
 					show.push(m.duplicateItem);
-					hide.push(m.sep4, m.reindexItem, m.recognizePDF);
+					hide.push(m.sep4, m.reindexItem, m.recognizePDF, m.renameAttachments);
 				}
 			}
 		}
@@ -1817,7 +1847,7 @@ var ZoteroPane = new function()
 			disable.push(m.showInLibrary, m.duplicateItem, m.deleteItem,
 				m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
 			hide.push(m.addNote, m.attachSnapshot, m.attachLink, m.sep2, m.sep4, m.reindexItem,
-				m.recognizePDF);
+				m.recognizePDF, m.renameAttachments);
 		}
 		
 		// Remove from collection
@@ -1838,6 +1868,8 @@ var ZoteroPane = new function()
 		menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
 		menu.childNodes[m.reindexItem].setAttribute('label', Zotero.getString('pane.items.menu.reindexItem' + multiple));
 		menu.childNodes[m.recognizePDF].setAttribute('label', Zotero.getString('pane.items.menu.recognizePDF' + multiple));
+		// TODO: localize
+		menu.childNodes[m.renameAttachments].setAttribute('label', multiple ? "Rename Files from Parent Metadata" : "Rename File from Parent Metadata");
 		
 		for (var i in disable)
 		{
@@ -2748,6 +2780,53 @@ var ZoteroPane = new function()
 		if (index == 0) {
 			this.relinkAttachment(itemID);
 		}
+	}
+	
+	
+	this.renameSelectedAttachmentsFromParents = function () {
+		if (!this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+		
+		var items = this.getSelectedItems();
+		
+		for (var i=0; i<items.length; i++) {
+			var item = items[i];
+			
+			if (!item.isAttachment() || !item.getSource() || item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+				throw('Item ' + itemID + ' is not a child file attachment in ZoteroPane.renameAttachmentFromParent()');
+			}
+			
+			var file = item.getFile();
+			if (!file) {
+				continue;
+			}
+			
+			// If the attachment title was the same as the filename, change it too
+			var renameTitle = item.getField('title') == file.leafName;
+			
+			var parentItemID = item.getSource();
+			var newName = Zotero.Attachments.getFileBaseNameFromItem(parentItemID);
+			
+			var ext = file.leafName.match(/[^\.]+$/);
+			if (ext) {
+				newName = newName + '.' + ext;
+			}
+			
+			var renamed = item.renameAttachmentFile(newName);
+			if (renamed !== true) {
+				Zotero.debug("Could not rename file (" + renamed + ")");
+				continue;
+			}
+			
+			if (renameTitle) {
+				item.setField('title', newName);
+				item.save();
+			}
+		}
+		
+		return true;
 	}
 	
 	
