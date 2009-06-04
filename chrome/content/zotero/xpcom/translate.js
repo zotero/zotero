@@ -635,7 +635,15 @@ Zotero.Translate.prototype.translate = function(libraryID, saveAttachments) {
 		throw("cannot translate: no location specified");
 	}
 	
-	this.libraryID = (libraryID === true || libraryID == undefined) ? null : libraryID;
+	if(libraryID === false) {
+		this.libraryID = false;
+	}
+	else if(libraryID === true || libraryID == undefined) {
+		this.libraryID = null;
+	}
+	else {
+		this.libraryID = libraryID;
+	}
 	this.saveAttachments = !(saveAttachments === false);
 	this.saveFiles = this.saveAttachments;
 	
@@ -804,7 +812,6 @@ Zotero.Translate.prototype._generateSandbox = function() {
 					translation.setHandler("selectItems", me._handlers["selectItems"]);
 				}
 			}
-			
 			return translation.translate(false);
 		};
 		safeTranslator.getTranslatorObject = function() {
@@ -1158,8 +1165,9 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 	
 	this._itemsDone = true;
 	
-	if(this.libraryID === false) {	// if we're not supposed to save the item, just
-							// return the item array
+	// if we're not supposed to save the item or we're in a child translator,
+	// just return the item array
+	if(this.libraryID === false || this._parentTranslator) {
 		
 		// if a parent sandbox exists, use complete() function from that sandbox
 		if(this._parentTranslator) {
