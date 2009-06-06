@@ -120,6 +120,89 @@ Zotero.Translators = new function() {
 	this.getFileNameFromLabel = function(label) {
 		return Zotero.File.getValidFileName(label) + ".js";
 	}
+	
+	
+	/**
+	 * @param	{String}		metadata
+	 * @param	{String}		metadata.translatorID		Translator GUID
+	 * @param	{Integer}		metadata.translatorType		See TRANSLATOR_TYPES in translate.js
+	 * @param	{String}		metadata.label				Translator title
+	 * @param	{String}		metadata.creator			Translator author
+	 * @param	{String|Null}	metadata.target				Target regexp
+	 * @param	{String|Null}	metadata.minVersion
+	 * @param	{String}		metadata.maxVersion
+	 * @param	{Integer}		metadata.priority
+	 * @param	{Boolean}		metadata.inRepository
+	 * @param	{String}		metadata.lastUpdated		SQL date
+	 * @param	{String}		code
+	 * @return	{nsIFile}
+	 */
+	this.save = function(metadata, code) {
+		if (!metadata.translatorID) {
+			throw ("metadata.translatorID not provided in Zotero.Translators.save()");
+		}
+		
+		if (!metadata.translatorType) {
+			var found = false;
+			for each(var type in TRANSLATOR_TYPES) {
+				if (metadata.translatorType == type) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				throw ("Invalid translatorType '" + metadata.translatorType + "' in Zotero.Translators.save()");
+			}
+		}
+		
+		if (!metadata.label) {
+			throw ("metadata.label not provided in Zotero.Translators.save()");
+		}
+		
+		if (!metadata.priority) {
+			throw ("metadata.priority not provided in Zotero.Translators.save()");
+		}
+		
+		if (!metadata.lastUpdated) {
+			throw ("metadata.lastUpdated not provided in Zotero.Translators.save()");
+		}
+		
+		if (!code) {
+			throw ("code not provided in Zotero.Translators.save()");
+		}
+		
+		var fileName = Zotero.Translators.getFileNameFromLabel(metadata.label);
+		var destFile = Zotero.getTranslatorsDirectory();
+		destFile.append(fileName);
+		
+		var nsIJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
+		var metadataJSON = nsIJSON.encode(metadata);
+		
+		var str = metadataJSON + "\n\n" + code;
+		
+		var translator = Zotero.Translators.get(metadata.translatorID);
+		if (translator && destFile.equals(translator.file)) {
+			var sameFile = true;
+		}
+		
+		if (!sameFile && destFile.exists()) {
+			var msg = "Overwriting translator with same filename '"
+				+ fileName + "'";
+			Zotero.debug(msg, 1);
+			Zotero.debug(metadata, 1);
+			Components.utils.reportError(msg + " in Zotero.Translators.save()");
+		}
+		
+		if (translator && translator.file.exists()) {
+			translator.file.remove(false);
+		}
+		
+		Zotero.debug("Saving translator '" + metadata.label + "'");
+		Zotero.debug(str);
+		Zotero.File.putContents(destFile, str);
+		
+		return destFile;
+	}
 }
 
 /**
@@ -223,6 +306,7 @@ Zotero.Translator.prototype.logError = function(message, type, line, lineNumber,
 		getService(Components.interfaces.nsIIOService);
 	Zotero.log(message, type ? type : "error", ios.newFileURI(this.file).spec);
 }
+
 
 /*
  * Zotero.Translate: a class for translation of Zotero metadata from and to

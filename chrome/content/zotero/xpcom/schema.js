@@ -1038,35 +1038,9 @@ Zotero.Schema = new function(){
 				? xmlnode.getElementsByTagName('detectCode')[0].firstChild.nodeValue
 				: null;
 		var code = xmlnode.getElementsByTagName('code')[0].firstChild.nodeValue;
+		code = (detectCode ? detectCode + "\n\n" : "") + code;
 		
-		var fileName = Zotero.Translators.getFileNameFromLabel(metadata.label);
-		var destFile = Zotero.getTranslatorsDirectory();
-		destFile.append(fileName);
-		
-		var nsIJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
-		var metadataJSON = nsIJSON.encode(metadata);
-		
-		var str = metadataJSON + "\n\n" + (detectCode ? detectCode + "\n\n" : "") + code;
-		
-		if (translator && destFile.equals(translator.file)) {
-			var sameFile = true;
-		}
-		
-		if (!sameFile && destFile.exists()) {
-			var msg = "Overwriting translator with same filename '"
-				+ fileName + "'";
-			Zotero.debug(msg, 1);
-			Zotero.debug(metadata, 1);
-			Components.utils.reportError(msg + " in Zotero.Schema._translatorXMLToFile()");
-		}
-		
-		if (translator && translator.file.exists()) {
-			translator.file.remove(false);
-		}
-		
-		Zotero.debug("Saving translator '" + metadata.label + "'");
-		Zotero.File.putContents(destFile, str);
-		return destFile;
+		return Zotero.Translators.save(metadata, code);
 	}
 	
 	
