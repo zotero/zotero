@@ -2368,6 +2368,12 @@ Zotero.Schema = new function(){
 				if (i==57) {
 					Zotero.DB.query("UPDATE itemAttachments SET linkMode=0, mimeType=NULL WHERE linkMode IS NULL AND mimeType=0");
 				}
+				
+				if (i==58) {
+					if (!Zotero.DB.valueQuery("SELECT COUNT(*) FROM version WHERE schema='syncdeletelog'") && Zotero.DB.valueQuery("SELECT COUNT(*) FROM syncDeleteLog")) {
+						Zotero.DB.query("INSERT INTO version VALUES ('syncdeletelog', CURRENT_TIMESTAMP)");
+					}
+				}
 			}
 			
 			_updateDBVersion('userdata', toVersion);
