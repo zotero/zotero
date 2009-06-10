@@ -111,12 +111,18 @@ Zotero.DBConnection.prototype.query = function (sql,params) {
 			
 			var statement = this.getStatement(sql, params, true);
 			
-			var dataset = new Array();
+			// Get column names
+			var columns = [];
+			var numCols = statement.columnCount;
+			for (var i=0; i<numCols; i++) {
+				columns.push(statement.getColumnName(i));
+			}
+			
+			var dataset = [];
 			while (statement.executeStep()) {
-				var row = new Array();
-				
-				for(var i=0, len=statement.columnCount; i<len; i++) {
-					row[statement.getColumnName(i)] = this._getTypedValue(statement, i);
+				var row = [];
+				for(var i=0; i<numCols; i++) {
+					row[columns[i]] = this._getTypedValue(statement, i);
 				}
 				dataset.push(row);
 			}
