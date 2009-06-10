@@ -46,13 +46,7 @@ Zotero.Items = new function() {
 				['firstCreator', 'numNotes', 'numAttachments']
 			);
 		}
-		
-		// Make a copy of array
-		var fields = [];
-		for each(var field in _primaryFields) {
-			fields.push(field);
-		}
-		return fields;
+		return _primaryFields;
 	});
 	
 	this.__defineGetter__('linkedItemPredicate', function () "owl:sameAs");
@@ -605,7 +599,6 @@ Zotero.Items = new function() {
 		}
 		var itemsRows = Zotero.DB.query(sql);
 		var itemIDs = [];
-		
 		for each(var row in itemsRows) {
 			var itemID = row.itemID;
 			itemIDs.push(itemID);
