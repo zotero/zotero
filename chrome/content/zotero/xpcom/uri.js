@@ -2,6 +2,26 @@ Zotero.URI = new function () {
 	var _baseURI = ZOTERO_CONFIG.BASE_URI;
 	
 	
+	/**
+	 * Get a URI with the user's local key, if there is one
+	 *
+	 * @return	{String|False}		e.g., 'http://zotero.org/users/v3aG8nQf'
+	 */
+	this.getLocalUserURI = function () {
+		var key = Zotero.getLocalUserKey();
+		if (!key) {
+			return false;
+		}
+		
+		return _baseURI + "users/local/" + Zotero.getLocalUserKey();
+	}
+	
+	
+	/**
+	 * Get a URI for the user, creating a local user key if necessary
+	 *
+	 * @return	{String}
+	 */
 	this.getCurrentUserURI = function () {
 		var userID = Zotero.userID;
 		if (userID) {
@@ -78,11 +98,14 @@ Zotero.URI = new function () {
 		
 		// If this is a local URI, compare to the local user key
 		if (itemURI.match(/\/users\/local\//)) {
-			var currentUserURI = this.getCurrentUserURI() + "/";
-			if (itemURI.indexOf(currentUserURI) == 0) {
-				itemURI = itemURI.substr(currentUserURI.length);
-				var libraryType = 'user';
-				var libraryTypeID = null;
+			var localUserURI = this.getLocalUserURI();
+			if (localUserURI) {
+				localUserURI += "/";
+				if (itemURI.indexOf(localUserURI) == 0) {
+					itemURI = itemURI.substr(localUserURI.length);
+					var libraryType = 'user';
+					var libraryTypeID = null;
+				}
 			}
 		}
 		
