@@ -258,7 +258,7 @@ To add a new preference:
 						</hbox>
 						
 						<separator class="thin"/>
-						<label value="Please note: Attachment files in group libraries are not currently synced."/>
+						<label value="Please note: Syncing of attachment files in group libraries is not currently supported."/>
 						
 						<separator/>
 						
