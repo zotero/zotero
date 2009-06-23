@@ -15,7 +15,17 @@
 	<wizardpage id="intro-page" label="&zotero.rtfScan.introPage.label;"
 	onpageshow="Zotero_RTFScan.introPageShowing()"
 	onpageadvanced="Zotero_RTFScan.introPageAdvanced()">
-		<description width="700">&zotero.rtfScan.introPage.description;</description>
+		<vbox>
+			<description width="700">&zotero.rtfScan.introPage.description;</description>
+			<label value="{Smith, 2009}"/>
+			<label value="Smith {2009}"/>
+			<label value="{Smith et al., 2009}"/>
+			<label value="{John Smith, 2009}"/>
+			<label value="{Smith, 2009, 10-14}"/>
+			<label value="{Smith, &quot;Title,&quot; 2009}"/>
+			<label value="{Jones, 2005; Smith, 2009}"/>
+			<description width="700" style="padding-top:1em">&zotero.rtfScan.introPage.description2;</description>
+		</vbox>
 		<groupbox>
 			<caption label="&zotero.rtfScan.inputFile.label;"/>
 			<hbox align="center">

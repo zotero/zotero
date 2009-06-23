@@ -96,7 +96,16 @@ var Zotero_RTFScan = new function() {
 				.createInstance(nsIFilePicker);
 		fp.init(window, Zotero.getString("rtfScan.saveTitle"), nsIFilePicker.modeSave);
 		fp.appendFilter(Zotero.getString("rtfScan.rtf"), "*.rtf");
-		fp.defaultString = "Untitled.rtf";
+		if(inputFile) {
+			var leafName = inputFile.leafName;
+			var dotIndex = leafName.lastIndexOf(".");
+			if(dotIndex != -1) {
+				leafName = leafName.substr(0, dotIndex);
+			}
+			fp.defaultString = leafName+" "+Zotero.getString("rtfScan.scannedFileSuffix")+".rtf";
+		} else {
+			fp.defaultString = "Untitled.rtf";
+		}
 		
 		var rv = fp.show();
 		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {				
@@ -150,7 +159,7 @@ var Zotero_RTFScan = new function() {
 		const creatorRe = '((?:(?:'+nameRe+', )*'+nameRe+'(?:,? and|,? \\&|,) )?'+nameRe+')(,? et al\\.?)?';
 		// TODO: localize "and" term
 		const creatorSplitRe = /(?:,| *(?:and|\&)) +/g;
-		var citationRe = new RegExp('(\\(|; )('+creatorRe+', (?:"([^"]+)(?:,"|",) )?([0-9]{4})[a-z]?)(?:, ([0-9]+))?(?=[);])|(([A-Z][^ .,;]+)(,? et al\\.?)? (\\(([0-9]{4})[a-z]?\\)))', "gm");
+		var citationRe = new RegExp('(\\\\\\{|; )('+creatorRe+',? (?:"([^"]+)(?:,"|",) )?([0-9]{4})[a-z]?)(?:,(?: pp?\.?)? ([^ )]+))?(?=;|\\\\\\})|(([A-Z][^ .,;]+)(,? et al\\.?)? (\\\\\\{([0-9]{4})[a-z]?\\\\\\}))', "gm");
 		
 		// read through RTF file and display items as they're found
 		// we could read the file in chunks, but unless people start having memory issues, it's
@@ -168,7 +177,7 @@ var Zotero_RTFScan = new function() {
 				var date = m[6];
 				var pages = m[7];
 				var start = citationRe.lastIndex-m[0].length;
-				var end = citationRe.lastIndex+1;
+				var end = citationRe.lastIndex+2;
 			} else {	// suppressed
 				var citationString = m[8];
 				var creators = m[9];
@@ -179,6 +188,7 @@ var Zotero_RTFScan = new function() {
 				var start = citationRe.lastIndex-m[11].length;
 				var end = citationRe.lastIndex;
 			}
+			citationString = citationString.replace("\\{", "{", "g").replace("\\}", "}", "g");
 			var suppressAuthor = !m[2];
 			
 			if(lastCitation && lastCitation.end >= start) {
@@ -564,15 +574,32 @@ var Zotero_RTFScan = new function() {
 		
 		// add bibliography
 		if(style.hasBibliography) {
-			var bibliography = false;
-			contents = contents.replace(BIBLIOGRAPHY_PLACEHOLDER, function() {
-				if(bibliography !== false) {
-					return bibliography;
+			var bibliography = style.formatBibliography(itemSet, "RTF");
+			// cut off initial font formatting 
+			bibliography = bibliography.substr(bibliography.indexOf("\r\n"));
+			// fix line breaks
+			var linebreak = "\r\n";
+			if(contents.indexOf("\r\n") == -1) {
+				bibliography = bibliography.replace("\r\n", "\n", "g");
+				linebreak = "\n";
+			}
+			
+			if(contents.indexOf(BIBLIOGRAPHY_PLACEHOLDER) !== -1) {
+				contents = contents.replace(BIBLIOGRAPHY_PLACEHOLDER, bibliography);
+			} else {
+				// add two newlines before bibliography
+				bibliography = linebreak+"\\"+linebreak+"\\"+bibliography;
+				
+				// add bibliography automatically inside last set of brackets closed
+				const bracketRe = /^\{+/;
+				var m = bracketRe.exec(contents);
+				if(m) {
+					var closeBracketRe = new RegExp("(\\}{"+m[0].length+"}\\s*)$");
+					contents = contents.replace(closeBracketRe, bibliography+"\\1");
 				} else {
-					bibliography = style.formatBibliography(itemSet, "RTF");
-					return bibliography;
+					contents += bibliography;
 				}
-			}, "g");
+			}
 		}
 		
 		Zotero.File.putContents(outputFile, contents);
