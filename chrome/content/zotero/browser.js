@@ -475,7 +475,7 @@ var Zotero_Browser = new function() {
 	 * Callback to be executed when an item has been finished
 	 */
 	function itemDone(obj, item, collection) {
-		var title = item.getField("title");
+		var title = item.getField("title", false, true);
 		var icon = item.getImageSrc();
 		Zotero_Browser.progress.show();
 		Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scraping"));
