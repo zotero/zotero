@@ -188,7 +188,8 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label			"Ambiguous Citations">
 <!ENTITY zotero.rtfScan.mappedCitations.label				"Mapped Citations">
 <!ENTITY zotero.rtfScan.introPage.label				"Introduction">
-<!ENTITY zotero.rtfScan.introPage.description		"Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
+<!ENTITY zotero.rtfScan.introPage.description		"Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. The RTF Scan feature currently supports citations in variations upon the following formats:">
+<!ENTITY zotero.rtfScan.introPage.description2		"To get started, select an RTF input file and an output file below:">
 <!ENTITY zotero.rtfScan.scanPage.label				"Scanning for Citations">
 <!ENTITY zotero.rtfScan.scanPage.description		"Zotero is scanning your document for citations. Please be patient.">
 <!ENTITY zotero.rtfScan.citationsPage.label				"Verify Cited Items">
