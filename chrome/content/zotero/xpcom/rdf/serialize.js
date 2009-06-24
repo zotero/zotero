@@ -111,8 +111,8 @@ __Serializer.prototype.makeUpPrefix = function(uri) {
 //  - do stuff about the docu first and then (or first) about its primary topic.
 
 __Serializer.prototype.rootSubjects = function(sts) {
-    var incoming = [];
-    var subjects = [];
+    var incoming = {};
+    var subjects = {};
     var sz = this;
 
     for (var i = 0; i<sts.length; i++) {
@@ -127,7 +127,7 @@ __Serializer.prototype.rootSubjects = function(sts) {
     }
 
     var roots = [];
-    var loopBreakers = [];
+    var loopBreakers = {};
     
     function accountedFor(x, start) {
         if (x.termType != 'bnode') return true; // will be subject
