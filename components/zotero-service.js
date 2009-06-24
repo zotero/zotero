@@ -73,6 +73,28 @@ for (var i=0; i<xpcomFiles.length; i++) {
 		.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFiles[i] + ".js");
 }
 
+
+// Load RDF files into Zotero.RDF.AJAW namespace (easier than modifying all of the references)
+var rdfXpcomFiles = [
+	'rdf/uri',
+	'rdf/term',
+	'rdf/identity',
+	'rdf/match',
+	'rdf/n3parser',
+	'rdf/rdfparser',
+	'rdf/serialize',
+	'rdf'
+];
+
+Zotero.RDF = {AJAW:{}};
+
+for (var i=0; i<rdfXpcomFiles.length; i++) {
+	Cc["@mozilla.org/moz/jssubscript-loader;1"]
+		.getService(Ci.mozIJSSubScriptLoader)
+		.loadSubScript("chrome://zotero/content/xpcom/" + rdfXpcomFiles[i] + ".js", Zotero.RDF.AJAW);
+}
+
+
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
 	.loadSubScript("chrome://global/content/nsTransferable.js");
