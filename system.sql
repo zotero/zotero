@@ -1,4 +1,4 @@
--- 24
+-- 25
 
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
@@ -840,6 +840,7 @@ INSERT INTO baseFieldMappings VALUES (7, 8, 89); -- thesis/publisher/university
 INSERT INTO baseFieldMappings VALUES (15, 8, 31); -- report/publisher/institution
 INSERT INTO baseFieldMappings VALUES (26, 8, 72); -- audioRecording/publisher/label
 INSERT INTO baseFieldMappings VALUES (28, 8, 76); -- videoRecording/publisher/studio
+INSERT INTO baseFieldMappings VALUES (29, 8, 78); -- tvBroadcast/publisher/network
 INSERT INTO baseFieldMappings VALUES (30, 8, 78); -- radioBroadcast/publisher/network
 INSERT INTO baseFieldMappings VALUES (32, 8, 83); -- computerProgram/publisher/company
 INSERT INTO baseFieldMappings VALUES (16, 10, 95); -- bill/pages/codePages
