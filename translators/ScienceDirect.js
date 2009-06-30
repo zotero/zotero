@@ -58,34 +58,63 @@ function doWeb(doc, url) {
 			Zotero.debug('no items');
 			return;
 		}
-		Zotero.Utilities.processDocuments(articles, function(newDoc) {
-			var doi = newDoc.evaluate('//div[@class="articleHeaderInner"][@id="articleHeader"]/a[contains(text(), "doi")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(4);
+		
+		var sets = [];
+		for each (article in articles) {
+			sets.push({article:article});
+		}
+		var first = function(set, next) {
 			
-			var tempPDF = newDoc.evaluate('//a[@class="noul" and div/div[contains(text(), "PDF")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if (!tempPDF) { // PDF xpath failed, lets try another
-				tempPDF = newDoc.evaluate('//a[@class="noul" and contains(text(), "PDF")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				if (!tempPDF) { // second PDF xpath failed set PDF to null to avoid item.attachments
-					var PDF = null;
+			var article = set.article;
+			
+			
+			Zotero.Utilities.processDocuments(article, function(newDoc) {
+				var tempPDF = newDoc.evaluate('//a[@class="noul" and div/div[contains(text(), "PDF")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				if (!tempPDF) { // PDF xpath failed, lets try another
+					tempPDF = newDoc.evaluate('//a[@class="noul" and contains(text(), "PDF")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+					if (!tempPDF) { // second PDF xpath failed set PDF to null to avoid item.attachments
+						var PDF = null;
+					} else {
+						var PDF = tempPDF.href; // second xpath succeeded, use that link
+					}
 				} else {
-					var PDF = tempPDF.href; // second xpath succeeded, use that link
+					var PDF = tempPDF.href; // first xpath succeeded, use that link
 				}
-			} else {
-				var PDF = tempPDF.href; // first xpath succeeded, use that link
-			}
+
+				var url = newDoc.location.href;
+				var get = newDoc.evaluate('//a[img[contains(@src, "exportarticle_a.gif")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+				// if the PDF is available make it an attachment otherwise only use snapshot.
+				if (PDF) {
+					var attachments = [
+						{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
+						{url:PDF, title:"ScienceDirect Full Text PDF", mimeType:"application/pdf"} // Sometimes PDF is null...I hope that is ok
+					];
+				} else {
+					var attachments = [
+						{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
+					];
+				}
+				// This does not work, not sure why.
+				//var doi = newDoc.evaluate('//a[contains(text(), "doi")]/text()', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				//Zotero.debug(doi);
+				//doi = doi.textContent.substr(4);
+				
+				
+				// pass these values to the next function
+				//set.doi = doi;
+				set.url = url;
+				set.get = get;
+				set.attachments = attachments;
+				
+				next();
+				
+			});
+		};
+		
+		var second = function(set, next) {
+			var url = set.url;
+			var get = set.get;
 			
-			var url = newDoc.location.href;
-			var get = newDoc.evaluate('//a[img[contains(@src, "exportarticle_a.gif")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-			// if the PDF is available make it an attachment otherwise only use snapshot.
-			if (PDF) {
-				var attachments = [
-					{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
-					{url:PDF, title:"ScienceDirect Full Text PDF", mimeType:"application/pdf"} // Sometimes PDF is null...I hope that is ok
-				];
-			} else {
-				var attachments = [
-					{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
-				];
-			}
 			Zotero.Utilities.HTTP.doGet(get, function(text) {
 				var md5 = text.match(/<input type=hidden name=md5 value=([^>]+)>/)[1];
 				var acct = text.match(/<input type=hidden name=_acct value=([^>]+)>/)[1];
@@ -101,26 +130,50 @@ function doWeb(doc, url) {
 				}
 				var post = "_ob=DownloadURL&_method=finish&_acct=" + acct + "&_userid=" + userid + "&_docType=FLA&" + docID + "&md5=" + md5 + "&count=1&JAVASCRIPT_ON=Y&format=cite-abs&citation-type=RIS&Export=Export&x=26&y=17";
 				var baseurl = url.match(/https?:\/\/[^/]+\//)[0];
-				Zotero.Utilities.HTTP.doPost(baseurl + 'science', post, function(text) { 
-					var translator = Zotero.loadTranslator("import");
-					translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-					translator.setString(text);
-					translator.setHandler("itemDone", function(obj, item) {
-						item.attachments = attachments;
-						
-						if(item.notes[0]) {
-							item.abstractNote = item.notes[0].note;
-							item.notes = new Array();
-						}
-						if (doi) {
-							item.DOI = doi;
-						}
-						item.complete();
-					});
-					translator.translate();
-				}, false, 'windows-1252');
+				
+				set.post = post;
+				set.baseurl = baseurl;
+				
+				next();
 			});
-		}, function() {Zotero.done();});
+			
+			
+		};
+		
+		var third = function(set, next) {
+			var baseurl = set.baseurl;
+			var post = set.post;
+			var attachments = set.attachments;
+			//var doi = set.doi;
+			
+			
+			Zotero.Utilities.HTTP.doPost(baseurl + 'science', post, function(text) { 
+				var translator = Zotero.loadTranslator("import");
+				translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+				translator.setString(text);
+				translator.setHandler("itemDone", function(obj, item) {
+					item.attachments = attachments;
+					
+					if(item.notes[0]) {
+						item.abstractNote = item.notes[0].note;
+						item.notes = new Array();
+					}
+					item.DOI = item.DOI.substr(10);
+					//if (doi) {
+					//	item.DOI = doi;
+					//}
+					item.complete();
+				});
+				translator.translate();
+				
+				next();
+			}, false, 'windows-1252');
+			
+			
+		};
+		var functioncallbacks = [first, second, third];
+		Zotero.Utilities.processAsync(sets, functioncallbacks, function() {Zotero.done()});
+		
 	} else {
 		var articles = new Array();
 		if (detectWeb(doc, url) == "multiple") {
@@ -149,54 +202,89 @@ function doWeb(doc, url) {
 			Zotero.debug('no items');
 			return;
 		}
-		Zotero.Utilities.processDocuments(articles, function(doc2) {
-			var item = new Zotero.Item("journalArticle");
-			item.repository = "ScienceDirect";
-			item.url = doc2.location.href;
-			var title = doc2.title.match(/^[^-]+\-([^:]+):(.*)$/);
-			item.title = Zotero.Utilities.trimInternal(title[2]);
-			item.publicationTitle = Zotero.Utilities.trimInternal(title[1]);
-			voliss = doc2.evaluate('//div[@class="pageText"][@id="sdBody"]/table/tbody/tr/td[1]', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			if (voliss.match(/Volume\s+\d+/)) item.volume = voliss.match(/Volume\s+(\d+)/)[1];
-			if (voliss.match(/Issues?\s+[^,]+/)) item.issue = voliss.match(/Issues?\s+([^,]+)/)[1];
-			if (voliss.match(/(J|F|M|A|S|O|N|D)\w+\s+\d{4}/)) item.date = voliss.match(/(J|F|M|A|S|O|N|D)\w+\s+\d{4}/)[0];
-			if (voliss.match(/Pages?\s+[^,^\s]+/)) item.pages = voliss.match(/Pages?\s+([^,^\s]+)/)[1];
-			item.DOI = doc2.evaluate('//div[@class="articleHeaderInner"][@id="articleHeader"]/a[contains(text(), "doi")]', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(4);
-			var abspath = '//div[@class="articleHeaderInner"][@id="articleHeader"]/div[@class="articleText"]/p';
-			var absx = doc2.evaluate(abspath, doc2, nsResolver, XPathResult.ANY_TYPE, null);
-			var ab;
-			item.abstractNote = ""
-			while (ab = absx.iterateNext()) {
-				item.abstractNote += Zotero.Utilities.trimInternal(ab.textContent) + " ";
-			}
-			if (item.abstractNote.substr(0, 7) == "Summary") {
-				item.abstractNote = item.abstractNote.substr(9);
-			}
-			var tagpath = '//div[@class="articleText"]/p[strong[starts-with(text(), "Keywords:")]]';
-			if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-				if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1]) {
-					var tags = doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1].split(";");
-					for (var i in tags) {
-						item.tags.push(Zotero.Utilities.trimInternal(tags[i]));
+		
+		
+		var sets = [];
+		for each (article in articles) {
+			sets.push({article:article});
+		}
+
+		
+		var first = function(set, next) {
+			
+			var article = set.article;
+		
+			Zotero.Utilities.processDocuments(article, function(doc2) {
+				var item = new Zotero.Item("journalArticle");
+				item.repository = "ScienceDirect";
+				item.url = doc2.location.href;
+				var title = doc2.title.match(/^[^-]+\-([^:]+):(.*)$/);
+				item.title = Zotero.Utilities.trimInternal(title[2]);
+				item.publicationTitle = Zotero.Utilities.trimInternal(title[1]);
+				voliss = doc2.evaluate('//div[@class="pageText"][@id="sdBody"]/table/tbody/tr/td[1]', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				if (voliss.match(/Volume\s+\d+/)) item.volume = voliss.match(/Volume\s+(\d+)/)[1];
+				if (voliss.match(/Issues?\s+[^,]+/)) item.issue = voliss.match(/Issues?\s+([^,]+)/)[1];
+				if (voliss.match(/(J|F|M|A|S|O|N|D)\w+\s+\d{4}/)) item.date = voliss.match(/(J|F|M|A|S|O|N|D)\w+\s+\d{4}/)[0];
+				if (voliss.match(/Pages?\s+[^,^\s]+/)) item.pages = voliss.match(/Pages?\s+([^,^\s]+)/)[1];
+				// why doesn't this work?
+				//item.DOI = doc2.evaluate('//a[contains(text(), "doi")]/text()', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(4);
+				var abspath = '//div[@class="articleHeaderInner"][@id="articleHeader"]/div[@class="articleText"]/p';
+				var absx = doc2.evaluate(abspath, doc2, nsResolver, XPathResult.ANY_TYPE, null);
+				var ab;
+				item.abstractNote = "";
+				while (ab = absx.iterateNext()) {
+					item.abstractNote += Zotero.Utilities.trimInternal(ab.textContent) + " ";
+				}
+				if (item.abstractNote.substr(0, 7) == "Summary") {
+					item.abstractNote = item.abstractNote.substr(9);
+				}
+				var tagpath = '//div[@class="articleText"]/p[strong[starts-with(text(), "Keywords:")]]';
+				if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+					if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1]) {
+						var tags = doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1].split(";");
+						for (var i in tags) {
+							item.tags.push(Zotero.Utilities.trimInternal(tags[i]));
+						}
 					}
 				}
-			}
-			item.attachments.push({url:doc2.location.href, title:"ScienceDirect Snapshot", mimeType:"text/html"});
+				item.attachments.push({url:doc2.location.href, title:"ScienceDirect Snapshot", mimeType:"text/html"});
+				
+				set.item = item;
+				
+				next();
+			});
+		
+		};
+		
+		var second = function(set, next) {
+		
+			var item = set.item;
+			
 			Zotero.Utilities.HTTP.doGet(item.url, function(text) {
-				var aus = text.match(/<strong>\s+<p>.*<\/strong>/)[0].replace(/<sup>/g, "$").replace(/<\/sup>/g, "$");
-				aus = aus.replace(/\$[^$]*\$/g, "");
-				aus = aus.replace(/<a[^>]*>/g, "$").replace(/<\/a[^>]*>/g, "$");
-				aus = aus.replace(/\$[^$]*\$/g, "");
-				aus = Zotero.Utilities.cleanTags(aus);
-				aus = aus.split(/(,|and)/);
-				for (var a in aus) {
-					if (aus[a] != "," && aus[a] != "and" && aus[a].match(/\w+/)) {
-						item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.unescapeHTML(Zotero.Utilities.trimInternal(aus[a]), "author")));
+				item.DOI = text.match(/>doi:([^<]*)/)[1];
+				
+				try {
+					var aus = text.match(/<strong>\s+<p>.*<\/strong>/)[0].replace(/<sup>/g, "$").replace(/<\/sup>/g, "$");
+					aus = aus.replace(/\$[^$]*\$/g, "");
+					aus = aus.replace(/<a[^>]*>/g, "$").replace(/<\/a[^>]*>/g, "$");
+					aus = aus.replace(/\$[^$]*\$/g, "");
+					aus = Zotero.Utilities.cleanTags(aus);
+					aus = aus.split(/(,|and)/);
+					for (var a in aus) {
+						if (aus[a] != "," && aus[a] != "and" && aus[a].match(/\w+/)) {
+							item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.unescapeHTML(Zotero.Utilities.trimInternal(aus[a]), "author")));
+						}
 					}
+				} catch(e) {
+					Zotero.debug("No Authors listed.");
 				}
 				item.complete();
+				next();
 			});
-		}, function() {Zotero.done();});
+		};
+		var functioncallbacks = [first, second];
+		Zotero.Utilities.processAsync(sets, functioncallbacks, function() {Zotero.done()});
+		
 	}
 	Zotero.wait();
 }
