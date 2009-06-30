@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-09-02 13:40:00"
+	"lastUpdated":"2009-05-29 11:40:00"
 }
 
 function detectWeb(doc, url) {
@@ -17,7 +17,7 @@ function detectWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 
-	var multids = doc.evaluate('//tr/td/input[@type="checkbox" and @name="SelectCheck"]',doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var multids = doc.evaluate('//input[@class="sr-checkbox" and @type="checkbox" and @name="SelectCheck"]',doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var singid = doc.evaluate('//input[@type="hidden" and @name="SelectCheck"]',doc, nsResolver, XPathResult.ANY_TYPE, null);
 
 	if (multids.iterateNext()){
@@ -32,8 +32,7 @@ function doWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-
-	var multids = doc.evaluate('//tr/td/input[@type="checkbox" and @name="SelectCheck"]',doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var multids = doc.evaluate('//input[@class="sr-checkbox" and @type="checkbox" and @name="SelectCheck"]',doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var singids = doc.evaluate('//input[@type="hidden" and @name="SelectCheck"]',doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var multid;
 	var singid;
@@ -44,7 +43,7 @@ function doWeb(doc, url) {
 		var items = new Array();
 		var title;
 		do {
-			title = doc.evaluate('../..//a[1]',multid, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			title = doc.evaluate('../../..//a[1]',multid, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			items[multid.value] = Zotero.Utilities.cleanString(title.textContent);
 		} while (multid =multids.iterateNext());
 		
