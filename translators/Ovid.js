@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-05-08 20:30:00"
+	"lastUpdated":"2009-06-16 13:30:00"
 }
 
 function detectWeb(doc, url) {
@@ -20,9 +20,13 @@ function detectWeb(doc, url) {
 	var results = doc.evaluate('//div[@class="bibheader-resultsrange"]/b', doc, nsResolver,
 		XPathResult.ANY_TYPE, null).iterateNext();
 	
+	if(!doc.evaluate('//span[contains(./text(), "Results Manager")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return false;
+	}
+	
 	if(results) {
-		results = Zotero.Utilities.cleanString(results.textContent);
-		
+		results = Zotero.Utilities.trimInternal(results.textContent);
+		Zotero.debug(results);
 		if(results.indexOf("-") != -1) {
 			return "multiple";
 		} else {
@@ -96,7 +100,7 @@ function doWeb(doc, url) {
 		null).iterateNext().value;
 	post += "&CitManPrev="+doc.evaluate('.//input[@name="CitManPrev"]', doc, nsResolver, XPathResult.ANY_TYPE,
 		null).iterateNext().value;
-	post += "&cmRecordSelect=SELECTED&cmFields=ALL&cmFormat=export&cmsave.x=12&cmsave.y=7";
+	post += "&cmRecordSelect=SELECTED&cmFields=ALL&cmFormat=export&cmsave.x=12&cmsave.y=7&doSave=1";
 		
 	Zotero.Utilities.HTTP.doPost(url, post, function(text) {
 		var lines = text.split("\n");
@@ -128,6 +132,9 @@ function doWeb(doc, url) {
 						names[1] = names[1].replace(/ (?:MD|PhD|[BM]Sc|[BM]A|MPH|MB)$/i, "");
 						
 						newItem.creators.push({firstName:names[1], lastName:names[0], creatorType:"author"});
+					} else if (fieldContent.match(/^(.*) [A-Z]{1,3}$/)) {
+						names = fieldContent.match(/^(.*) ([A-Z]{1,3})$/);
+					  	newItem.creators.push({firstName:names[2], lastName:names[1], creatorType:"author"});
 					} else {
 						newItem.creators.push({lastName:names[0], isInstitution:true, creatorType:"author"});
 					}
@@ -140,12 +147,20 @@ function doWeb(doc, url) {
 						newItem.volume = voliss[1];
 						newItem.issue = voliss[2];
 					}
+					if (fieldContent.match(/vol\.\s*(\d+)/)) {
+						newItem.volume = fieldContent.match(/vol\.\s*(\d+)/)[1];
+					}
+					if (fieldContent.match(/vol\.\s*\d+\s*,\s*no\.\s*(\d+)/)) {
+						newItem.issue = fieldContent.match(/vol\.\s*\d+\s*,\s*no\.\s*(\d+)/)[1];
+					}
 					if (fieldContent.match(/\d+\-\d+/))
 						newItem.pages = fieldContent.match(/\d+\-\d+/)[0];
+			  		if (fieldContent.match(/pp\.\s*(\d+\-\d+)/))
+						newItem.pages = fieldContent.match(/pp\.\s*(\d+\-\d+)/)[1];
 					if (fieldContent.match(/[J|j]ournal/)) {
 						newItem.publicationTitle = fieldContent.match(/[J|j]ournal[-\s\w]+/)[0];
 					} else {
-						newItem.publicationTitle = Zotero.Utilities.trimInternal(fieldContent.split(/(\.|;)/)[0]);
+						newItem.publicationTitle = Zotero.Utilities.trimInternal(fieldContent.split(/(\.|;|(,\s*vol\.))/)[0]);
 					}
 				} else if(fieldCode == "SB") {
 					newItem.tags.push(Zotero.Utilities.superCleanString(fieldContent));
@@ -155,6 +170,12 @@ function doWeb(doc, url) {
 					newItem.repository = "Ovid ("+fieldContent+")";
 				} else if(fieldCode == "DI") {
 					newItem.DOI = fieldContent;
+				} else if(fieldCode == "DO") {
+					newItem.DOI = fieldContent;
+				} else if(fieldCode == "DP") {
+					newItem.date = fieldContent;
+				} else if(fieldCode == "IS") {
+					newItem.ISSN = fieldContent;
 				} else if(fieldCode == "AB") {
 					newItem.abstractNote = fieldContent;
 				}
