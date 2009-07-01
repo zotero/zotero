@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-05-29 22:55:00"
+	"lastUpdated":"2009-07-01 08:40:00"
 }
 
 function detectWeb(doc, url) {
@@ -84,7 +84,7 @@ function detectWeb(doc, url) {
 function xmlToItem(xmlItem) {
 	// "with ({});" needed to fix default namespace scope issue
 	// See https://bugzilla.mozilla.org/show_bug.cgi?id=330572
-	default xml namespace = 'http://zotero.org/namespaces/transfer'; with ({});
+	default xml namespace = 'http://zotero.org/ns/transfer'; with ({});
 	var itemType = xmlItem.@itemType;
 	
 	// FIXME: translate.js only allow top-level attachments in import mode
@@ -156,7 +156,7 @@ function doWeb(doc, url) {
 	}
 	
 	var nsAtom = new Namespace('http://www.w3.org/2005/Atom');
-	var nsZXfer = new Namespace('http://zotero.org/namespaces/transfer');
+	var nsZXfer = new Namespace('http://zotero.org/ns/transfer');
 	
 	if (detectWeb(doc, url) == "multiple") {
 		var namespace = doc.documentElement.namespaceURI;
