@@ -148,7 +148,7 @@
 								<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;"
 									oncommand="ZoteroPane.openPreferences()"/>
 								<menuitem id="zotero-tb-actions-reportErrors" command="cmd_zotero_reportErrors" disabled="true"/>
-								<menuitem id="zotero-tb-actions-documentation" label="&zotero.toolbar.documentation.label;" oncommand="window.open('http://www.zotero.org/documentation/', '', 'menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes');"/>
+								<menuitem id="zotero-tb-actions-support" label="&zotero.toolbar.supportAndDocumentation;" oncommand="window.open('http://www.zotero.org/support/', '', 'menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes');"/>
 								<menuitem id="zotero-tb-actions-about" label="&zotero.toolbar.about.label;" oncommand="window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome')"/>
 							</menupopup>
 						</toolbarbutton>

@@ -73,7 +73,6 @@
 <!ENTITY zotero.toolbar.timeline.label "Tạo Tuyến thời gian">
 <!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "Tùy chọn...">
-<!ENTITY zotero.toolbar.documentation.label "Tài liệu Hướng dẫn">
 <!ENTITY zotero.toolbar.about.label "Giới thiệu về Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Tìm kiếm Nâng cao">
 <!ENTITY zotero.toolbar.search.label "Tìm kiếm:">

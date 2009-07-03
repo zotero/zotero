@@ -73,7 +73,6 @@
 <!ENTITY zotero.toolbar.timeline.label "연표 생성">
 <!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "환경설정...">
-<!ENTITY zotero.toolbar.documentation.label "문서">
 <!ENTITY zotero.toolbar.about.label "Zotero 정보">
 <!ENTITY zotero.toolbar.advancedSearch "고급 검색">
 <!ENTITY zotero.toolbar.search.label "검색:">

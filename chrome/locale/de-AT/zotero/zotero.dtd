@@ -73,7 +73,6 @@
 <!ENTITY zotero.toolbar.timeline.label "Create Timeline">
 <!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "Einstellungen...">
-<!ENTITY zotero.toolbar.documentation.label "Documentation">
 <!ENTITY zotero.toolbar.about.label "Über Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Advanced Search">
 <!ENTITY zotero.toolbar.search.label "Suche:">
