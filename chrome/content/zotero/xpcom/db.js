@@ -855,10 +855,10 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 			getService(Components.interfaces.mozIStorageService);
 		store.backupDatabaseFile(file, tmpFile.leafName, file.parent);
 	}
-	catch (e){
+	catch (e) {
 		Zotero.debug(e);
-		// TODO: deal with low disk space
-		throw (e);
+		Components.utils.reportError(e);
+		return false;
 	}
 	
 	// Opened database files can't be moved on Windows, so we have to skip
