@@ -73,7 +73,6 @@
 <!ENTITY zotero.toolbar.timeline.label "Zaman Çizelgesi Yarat">
 <!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "Tercihler...">
-<!ENTITY zotero.toolbar.documentation.label "Belgeleme">
 <!ENTITY zotero.toolbar.about.label "Zotero Hakkında">
 <!ENTITY zotero.toolbar.advancedSearch "Gelişmiş Arama">
 <!ENTITY zotero.toolbar.search.label "Arama:">

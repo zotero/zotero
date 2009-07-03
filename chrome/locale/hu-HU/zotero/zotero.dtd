@@ -73,7 +73,6 @@
 <!ENTITY zotero.toolbar.timeline.label "Kronológia létrehozása">
 <!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "Beállítások...">
-<!ENTITY zotero.toolbar.documentation.label "Súgó">
 <!ENTITY zotero.toolbar.about.label "Névjegy">
 <!ENTITY zotero.toolbar.advancedSearch "Haladó keresés">
 <!ENTITY zotero.toolbar.search.label "Keresés:">

@@ -73,7 +73,6 @@
 <!ENTITY zotero.toolbar.timeline.label "建立時序列表">
 <!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "偏好設定…">
-<!ENTITY zotero.toolbar.documentation.label "說明文件">
 <!ENTITY zotero.toolbar.about.label "關於 Zotero…">
 <!ENTITY zotero.toolbar.advancedSearch "進階搜尋">
 <!ENTITY zotero.toolbar.search.label "搜尋：">

@@ -73,7 +73,6 @@
 <!ENTITY zotero.toolbar.timeline.label "Создать ось времени">
 <!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "Параметры...">
-<!ENTITY zotero.toolbar.documentation.label "Документация">
 <!ENTITY zotero.toolbar.about.label "О Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Расширенный поиск">
 <!ENTITY zotero.toolbar.search.label "Поиск:">
