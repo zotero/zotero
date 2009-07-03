@@ -991,15 +991,13 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-item-restore-button').hidden = true;
 		}
 		
-		var tabs = document.getElementById('zotero-view-tabs');
+		var tabs = document.getElementById('zotero-view-tabbox');
 		
 		if (this.itemsView && this.itemsView.selection.count == 1 && this.itemsView.selection.currentIndex != -1)
 		{
 			var item = this.itemsView._getItemAtRow(this.itemsView.selection.currentIndex);
 			
 			if(item.ref.isNote()) {
-				tabs.hidden = true;
-				
 				var noteEditor = document.getElementById('zotero-note-editor');
 				noteEditor.mode = this.collectionsView.editable ? 'edit' : 'view';
 				
@@ -1033,8 +1031,6 @@ var ZoteroPane = new function()
 			}
 			
 			else if(item.ref.isAttachment()) {
-				tabs.hidden = true;
-				
 				var attachmentBox = document.getElementById('zotero-attachment-box');
 				attachmentBox.mode = this.collectionsView.editable ? 'edit' : 'view';
 				attachmentBox.item = item.ref;
@@ -1049,18 +1045,15 @@ var ZoteroPane = new function()
 				if (this.collectionsView.editable) {
 					ZoteroItemPane.viewItem(item.ref);
 					tabs.selectedIndex = document.getElementById('zotero-view-item').selectedIndex;
-					tabs.hidden = false;
 				}
 				else {
 					document.getElementById('zotero-view-item').selectedIndex = 0;
 					ZoteroItemPane.viewItem(item.ref, 'view');
-					tabs.hidden = true;
 				}
 			}
 		}
 		else
 		{
-			tabs.hidden = true;
 			document.getElementById('zotero-item-pane-content').selectedIndex = 0;
 			
 			var label = document.getElementById('zotero-view-selected-label');

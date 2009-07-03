@@ -289,8 +289,26 @@ window[active="true"] #zotero-pane[fullscreenmode="true"][platform="mac"]
 	list-style-image: url('chrome://zotero/skin/search-cancel-active.png');
 }
 
-#zotero-view-tabs tab
+#zotero-view-tabbox, #zotero-item-pane-content > groupbox
 {
+	margin: 0;
+}
+
+#zotero-view-tabbox tabs tab
+{
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+}
+
+#zotero-view-tabbox tabs tab .tab-text
+{
+	margin-top: .2em !important;
+	margin-bottom: .25em !important;
+}
+
+#zotero-view-item
+{
+	padding: 1.5em .25em .25em;
 }
 
 #zotero-view-item > vbox

@@ -30,7 +30,6 @@ var ZoteroItemPane = new function() {
 	var _lastPane;
 	var _loaded;
 	
-	var _tabs;
 	var _lastTabIndex;
 	var _tabDirection;
 	var _tabIndexMaxTagsFields = 0;
@@ -51,10 +50,8 @@ var ZoteroItemPane = new function() {
 			return;
 		}
 		
-		_tabs = document.getElementById('zotero-view-tabs');
-		
 		// Not in item pane, so skip the introductions
-		if (!_tabs) {
+		if (!document.getElementById('zotero-view-tabbox')) {
 			return;
 		}
 		
