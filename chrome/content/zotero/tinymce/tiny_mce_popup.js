@@ -1,3 +1,6 @@
+/*
+ * Contains modifications by Zotero (commented)
+ */
 // Some global instances
 var tinymce = null, tinyMCEPopup, tinyMCE;
 
@@ -214,7 +217,8 @@ tinyMCEPopup = {
 
 		// Patch for accessibility
 		tinymce.each(t.dom.select('select'), function(e) {
-			e.onkeydown = tinyMCEPopup._accessHandler;
+			// Disabled by Dan S./Zotero to fix error in link popup
+			//e.onkeydown = tinyMCEPopup._accessHandler;
 		});
 
 		// Call onInit
