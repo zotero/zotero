@@ -354,7 +354,7 @@ function handleSyncReset(action) {
 			var index = pr.confirmEx(
 				// TODO: localize
 				Zotero.getString('general.warning'),
-				"All item data belonging to user '" + account + "' on the Zotero server "
+				"All data belonging to user '" + account + "' on the Zotero server "
 					+ "will be erased and replaced with data from this copy of Zotero.",
 				buttonFlags,
 				"Replace Server Data",
@@ -368,10 +368,43 @@ function handleSyncReset(action) {
 						Zotero.Sync.Server.sync(function () {
 							pr.alert(
 								"Restore Completed",
-								"Item data on the Zotero server has been "
-									+ "successfully restored."
+								"Data on the Zotero server has been successfully restored."
 							);
 						});
+					});
+					break;
+				
+				// Cancel
+				case 1:
+					return;
+			}
+			
+			break;
+		
+		case 'full-sync':
+			var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
+							+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL)
+							+ pr.BUTTON_POS_1_DEFAULT;
+			var index = pr.confirmEx(
+				// TODO: localize
+				Zotero.getString('general.warning'),
+				"The local Zotero library will be completely merged with data belonging to user '" + account + "' on the Zotero server. "
+					+ "Any unsynced changes will appear as conflicts.\n\n"
+					+ "This option should generally be used only for troubleshooting sync errors.",
+				buttonFlags,
+				"Sync",
+				null, null, null, {}
+			);
+			
+			switch (index) {
+				case 0:
+					// TODO: better error handling
+					Zotero.Sync.Server.resetClient();
+					Zotero.Sync.Server.sync(function () {
+						pr.alert(
+							"Full Sync Completed",
+							"The local Zotero library has been merged with data from the Zotero server."
+						);
 					});
 					break;
 				

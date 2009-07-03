@@ -341,10 +341,18 @@ To add a new preference:
 								</columns>
 								
 								<rows>
-									<row id="zotero-restore-from-server" selected="true">
+									<row id="zotero-full-sync">
 									<radio/>
 										<vbox onclick="this.previousSibling.click()">
-											<label value="Restore from Zotero server"/>
+											<label value="Full Sync with Zotero Server"/>
+											<description>Merge local Zotero data with data from the sync server, ignoring sync history.</description>
+										</vbox>
+									</row>
+									
+									<row id="zotero-restore-from-server" selected="true">
+										<radio/>
+										<vbox onclick="this.previousSibling.click()">
+											<label value="Restore from Zotero Server"/>
 											<description>Erase all local Zotero data and restore from the sync server.</description>
 										</vbox>
 									</row>
@@ -352,7 +360,7 @@ To add a new preference:
 									<row id="zotero-restore-to-server">
 										<radio/>
 										<vbox onclick="this.previousSibling.click()">
-											<label value="Restore to Zotero server"/>
+											<label value="Restore to Zotero Server"/>
 											<description>Erase all server data and overwrite with local Zotero data.</description>
 										</vbox>
 									</row>
