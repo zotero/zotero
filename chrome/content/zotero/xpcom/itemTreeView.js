@@ -491,7 +491,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 			}
 			
 			// Reset to Info tab
-			this._ownerDocument.getElementById('zotero-view-tabs').selectedIndex = 0;
+			this._ownerDocument.getElementById('zotero-view-tabbox').selectedIndex = 0;
 			
 			this.selectItem(ids[0]);
 		}
