@@ -212,7 +212,10 @@ Zotero.Translators = new function() {
  * @property {String} translatorID Unique GUID of the translator
  * @property {Integer} translatorType Type of the translator (use bitwise & with TRANSLATOR_TYPES to read)
  * @property {String} label Human-readable name of the translator
+ * @property {String} creator Author(s) of the translator
  * @property {String} target Location that the translator processes
+ * @property {String} minVersion Minimum Zotero version
+ * @property {String} maxVersion Minimum Zotero version
  * @property {Integer} priority Lower-priority translators will be selected first
  * @property {Boolean} inRepository Whether the translator may be found in the repository
  * @property {String} lastUpdated SQL-style date and time of translator's last update
@@ -247,7 +250,7 @@ Zotero.Translator = function(file) {
 		if(info) {
 			var haveMetadata = true;
 			// make sure we have all the properties
-			for each(var property in ["translatorID", "translatorType", "label", "target", "priority", "lastUpdated", "inRepository"]) {
+			for each(var property in ["translatorID", "translatorType", "label", "creator", "target", "minVersion", "maxVersion", "priority", "lastUpdated", "inRepository"]) {
 				if(info[property] === undefined) {
 					this.logError('Missing property "'+property+'" in translator metadata JSON object');
 					haveMetadata = false;
