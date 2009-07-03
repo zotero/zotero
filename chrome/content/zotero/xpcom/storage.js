@@ -375,7 +375,8 @@ Zotero.Sync.Storage = new function () {
 		Zotero.Utilities.HTTP.doGet(uri, function (req) {
 			var funcName = "Zotero.Sync.Storage.getStorageModificationTime()";
 			
-			if (req.status == 404) {
+			// mod_speling can return 300s for 404s with base name matches
+			if (req.status == 404 || req.status == 300) {
 				callback(item, false);
 				return;
 			}
