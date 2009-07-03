@@ -200,7 +200,7 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 		var ids = Zotero.DB.columnQuery(sql);
 		
 		for (var id in this._objectCache) {
-			if (!ids || ids.indexOf(id) == -1) {
+			if (!ids || ids.indexOf(parseInt(id)) == -1) {
 				delete this._objectCache[id];
 			}
 		}
