@@ -370,30 +370,30 @@
 				<!-- TODO: localize -->
 				<button id="zotero-item-restore-button" label="Restore to Library"
 					oncommand="ZoteroPane.restoreSelectedItems()" hidden="true"/>
-				<groupbox flex="1">
-					<caption>
-						<tabs id="zotero-view-tabs" onselect="document.getElementById('zotero-view-item').selectedIndex = this.selectedIndex;" hidden="true">
+				<deck id="zotero-item-pane-content" selectedIndex="0" flex="1">
+					<groupbox pack="center" align="center">
+						<label id="zotero-view-selected-label"/>
+					</groupbox>
+					<tabbox id="zotero-view-tabbox">
+						<tabs>
 							<tab label="&zotero.tabs.info.label;"/>
 							<tab label="&zotero.tabs.notes.label;"/>
 							<tab label="&zotero.tabs.attachments.label;"/>
 							<tab label="&zotero.tabs.tags.label;"/>
 							<tab label="&zotero.tabs.related.label;"/>
 						</tabs>
-					</caption>
-					<deck id="zotero-item-pane-content" selectedIndex="0" flex="1">
-						<box pack="center" align="center">
-							<label id="zotero-view-selected-label"/>
-						</box>
-						<deck id="zotero-view-item" flex="1"/>
-						<!-- Note info pane -->
-						<vbox id="zotero-view-note" flex="1">
-							<zoteronoteeditor id="zotero-note-editor" flex="1"/>
-							<button id="zotero-view-note-button" label="&zotero.notes.separate;" oncommand="ZoteroPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ZoteroPane.selectItem(this.getAttribute('sourceID'));"/>
-						</vbox>
-						<!-- Attachment info pane -->
+						<tabpanels id="zotero-view-item" flex="1"/>
+					</tabbox>
+					<!-- Note info pane -->
+					<groupbox id="zotero-view-note" flex="1">
+						<zoteronoteeditor id="zotero-note-editor" flex="1"/>
+						<button id="zotero-view-note-button" label="&zotero.notes.separate;" oncommand="ZoteroPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ZoteroPane.selectItem(this.getAttribute('sourceID'));"/>
+					</groupbox>
+					<!-- Attachment info pane -->
+					<groupbox flex="1">
 						<zoteroattachmentbox id="zotero-attachment-box" flex="1"/>
-					</deck>
-				</groupbox>
+					</groupbox>
+				</deck>
 			</vbox>
 		</hbox>
 		
