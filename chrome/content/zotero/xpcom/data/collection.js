@@ -551,13 +551,13 @@ Zotero.Collection.prototype.save = function () {
 						insertStatement.execute();
 					}
 					catch (e) {
-						Zotero.debug('=======');
-						Zotero.debug(collectionID);
-						Zotero.debug(itemID);
-						Zotero.debug(orderIndex);
-						Zotero.debug(Zotero.DB.query("SELECT * FROM collections"));
-						Zotero.debug(Zotero.DB.query("SELECT * FROM collectionItems"));
-						throw (e + ' [ERROR: ' + Zotero.DB.getLastErrorString() + ']');
+						Zotero.debug("collectionID: " + collectionID);
+						Zotero.debug("itemID: " + itemID);
+						Zotero.debug("orderIndex: " + orderIndex);
+						var errmsg = Zotero.DB.getLastErrorString();
+						Zotero.debug(Zotero.DB.query("SELECT * FROM collections WHERE collectionID=?", collectionID));
+						Zotero.debug(Zotero.DB.query("SELECT * FROM collectionItems WHERE collectionID=?", collectionID));
+						throw (e + ' [ERROR: ' + errmsg + ']');
 					}
 				}
 			}
