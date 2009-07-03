@@ -1909,6 +1909,28 @@ Zotero.Item.prototype.save = function() {
 	}
 	
 	if (this._changedDeleted) {
+		// Update child item counts on parent
+		var sourceItemID = this.getSource();
+		if (sourceItemID) {
+			var sourceItem = Zotero.Items.get(sourceItemID);
+			if (this._deleted) {
+				if (this.isAttachment()) {
+					sourceItem.decrementAttachmentCount();
+				}
+				else {
+					sourceItem.decrementNoteCount();
+				}
+			}
+			else {
+				if (this.isAttachment()) {
+					sourceItem.incrementAttachmentCount();
+				}
+				else {
+					sourceItem.incrementNoteCount();
+				}
+			}
+		}
+		// Refresh trash
 		Zotero.Notifier.trigger('refresh', 'collection', 0);
 		if (this._deleted) {
 			Zotero.Notifier.trigger('trash', 'item', this.id);
@@ -2342,13 +2364,11 @@ Zotero.Item.prototype.getNotes = function(includeTrashed) {
 //
 ///////////////////////////////////////////////////////
 Zotero.Item.prototype.incrementAttachmentCount = function() {
-	Zotero.debug('incrementing attachment count from ' + this._numAttachments);
 	this._numAttachments++;
 }
 
 
 Zotero.Item.prototype.decrementAttachmentCount = function() {
-	Zotero.debug('decrementing attachment count from ' + this._numAttachments);
 	this._numAttachments--;
 }
 
@@ -3568,7 +3588,9 @@ Zotero.Item.prototype.erase = function(deleteChildren) {
 		if (sourceItemID) {
 			var sourceItem = Zotero.Items.get(sourceItemID);
 			changedItemsNotifierData[sourceItem.id] = { old: sourceItem.serialize() };
-			sourceItem.decrementNoteCount();
+			if (!this.deleted) {
+				sourceItem.decrementNoteCount();
+			}
 			changedItems.push(sourceItemID);
 		}
 	}
@@ -3580,7 +3602,9 @@ Zotero.Item.prototype.erase = function(deleteChildren) {
 		if (sourceItemID) {
 			var sourceItem = Zotero.Items.get(sourceItemID);
 			changedItemsNotifierData[sourceItem.id] = { old: sourceItem.serialize() };
-			sourceItem.decrementAttachmentCount();
+			if (!this.deleted) {
+				sourceItem.decrementAttachmentCount();
+			}
 			changedItems.push(sourceItemID);
 		}
 		
