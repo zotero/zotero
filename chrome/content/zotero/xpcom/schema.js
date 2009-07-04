@@ -1631,61 +1631,35 @@ Zotero.Schema = new function(){
 					
 					// Creator data
 					Zotero.DB.query("CREATE TABLE creatorData (\n    creatorDataID INTEGER PRIMARY KEY,\n    firstName TEXT,\n    lastName TEXT,\n    shortName TEXT,\n    fieldMode INT,\n    birthYear INT\n)");
-					Zotero.DB.query("INSERT INTO creatorData SELECT NULL, firstName, lastName, NULL, fieldMode, NULL FROM creators WHERE creatorID IN (SELECT creatorID FROM itemCreators)");
-					var creatorsOld = Zotero.DB.query("SELECT * FROM creators");
+					Zotero.DB.query("INSERT INTO creatorData SELECT DISTINCT NULL, firstName, lastName, NULL, fieldMode, NULL FROM creators WHERE creatorID IN (SELECT creatorID FROM itemCreators)");
+					Zotero.DB.query("CREATE TEMPORARY TABLE itemCreatorsTemp AS SELECT * FROM itemCreators NATURAL JOIN creators");
 					Zotero.DB.query("DROP TABLE creators");
 					Zotero.DB.query("CREATE TABLE creators (\n    creatorID INTEGER PRIMARY KEY,\n    creatorDataID INT,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL,\n    FOREIGN KEY (creatorDataID) REFERENCES creatorData(creatorDataID)\n);");
 					
 					var data = Zotero.DB.query("SELECT * FROM creatorData");
 					if (data) {
-						var oldCreatorIDHash = {};
-						for (var j=0, len=creatorsOld.length; j<len; j++) {
-							oldCreatorIDHash[
-								ZU.md5(
-									creatorsOld[j].firstName + '_' +
-									creatorsOld[j].lastName + '_' +
-									creatorsOld[j].fieldMode
-								)
-							] = creatorsOld[j].creatorID;
-						}
-						
-						var updatedIDs = {};
+						Zotero.DB.query("CREATE INDEX itemCreatorsTemp_names ON itemCreatorsTemp(lastName, firstName)");
+						Zotero.DB.query("DELETE FROM itemCreators");
+
+						// For each distinct data row, create a new creator
 						var insertStatement = Zotero.DB.getStatement("INSERT INTO creators (creatorID, creatorDataID, key) VALUES (?, ?, ?)");
-						var updateStatement = Zotero.DB.getStatement("UPDATE itemCreators SET creatorID=? WHERE creatorID=?");
 						for (var j=0, len=data.length; j<len; j++) {
 							insertStatement.bindInt32Parameter(0, data[j].creatorDataID);
 							insertStatement.bindInt32Parameter(1, data[j].creatorDataID);
 							var key = Zotero.ID.getKey();
 							insertStatement.bindStringParameter(2, key);
-							
-							var oldCreatorID = oldCreatorIDHash[
-								ZU.md5(
-									data[j].firstName + '_' +
-									data[j].lastName + '_' +
-									data[j].fieldMode
-								)
-							];
-							
-							if (updatedIDs[oldCreatorID]) {
-								continue;
-							}
-							updatedIDs[oldCreatorID] = true;
-							
-							updateStatement.bindInt32Parameter(0, data[j].creatorDataID);
-							updateStatement.bindInt32Parameter(1, oldCreatorID);
-							
 							try {
 								insertStatement.execute();
-								updateStatement.execute();
 							}
 							catch (e) {
 								throw (Zotero.DB.getLastErrorString());
 							}
 						}
 						insertStatement.reset();
-						updateStatement.reset();
+						
+						Zotero.DB.query("INSERT INTO itemCreators SELECT itemID, C.creatorID, creatorTypeID, orderIndex FROM itemCreatorsTemp ICT JOIN creatorData CD ON (ICT.firstName=CD.firstName AND ICT.lastName=CD.lastName AND ICT.fieldMode=CD.fieldMode) JOIN creators C ON (CD.creatorDataID=C.creatorDataID)");
 					}
-					
+					Zotero.DB.query("DROP TABLE itemCreatorsTemp");
 					Zotero.DB.query("CREATE INDEX creators_creatorDataID ON creators(creatorDataID)");
 					
 					// Items
@@ -2373,6 +2347,20 @@ Zotero.Schema = new function(){
 					if (!Zotero.DB.valueQuery("SELECT COUNT(*) FROM version WHERE schema='syncdeletelog'") && Zotero.DB.valueQuery("SELECT COUNT(*) FROM syncDeleteLog")) {
 						Zotero.DB.query("INSERT INTO version VALUES ('syncdeletelog', CURRENT_TIMESTAMP)");
 					}
+				}
+				
+				if (i==59) {
+					var namestr = '[Missing Name]';
+					var id = Zotero.DB.valueQuery("SELECT creatorDataID FROM creatorData WHERE firstName='' AND lastName=? AND fieldMode=1", namestr);
+					if (!id) {
+						id = Zotero.DB.query("INSERT INTO creatorData (firstName, lastName, fieldMode) VALUES ('', ?, 1)", namestr);
+					}
+					var creatorID = Zotero.DB.valueQuery("SELECT creatorID FROM creators WHERE creatorDataID=?", id);
+					if (!creatorID) {
+						var key = Zotero.ID.getKey();
+						creatorID = Zotero.DB.query("INSERT INTO creators (creatorDataID, key) VALUES (?, ?)", [id, key]);
+					}
+					Zotero.DB.query("UPDATE itemCreators SET creatorID=? WHERE creatorID NOT IN (SELECT creatorID FROM creators)", creatorID);
 				}
 			}
 			
