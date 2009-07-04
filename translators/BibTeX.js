@@ -2,7 +2,7 @@
 	"translatorID":"9cb70025-a888-4a29-a210-93ec52da40d4",
 	"translatorType":3,
 	"label":"BibTeX",
-	"creator":"Simon Kornblith",
+	"creator":"Simon Kornblith and Richard Karnesky",
 	"target":"bib",
 	"minVersion":"1.0.0b4.r1",
 	"maxVersion":"",
@@ -62,7 +62,6 @@ var fieldMap = {
 	address:"place",
 	chapter:"section",
 	edition:"edition",
-//	number:"issue",
 	type:"type",
 	series:"series",
 	title:"title",
@@ -72,6 +71,7 @@ var fieldMap = {
 	issn:"ISSN",
 	lccn:"callNumber",
 	location:"archiveLocation",
+	shorttitle:"shortTitle",
 	url:"url",
 	doi:"DOI",
 	"abstract":"abstractNote"
@@ -86,16 +86,7 @@ var inputFieldMap = {
 
 var zotero2bibtexTypeMap = {
 	"book":"book",
-	"bookSection": function (item) {
-		var hasAuthor = false;
-		var hasEditor = false;
-		for each(var creator in item.creators) {
-			if (creator.creatorType == "editor") { hasEditor = true; }
-			if (creator.creatorType == "author") { hasAuthor = true; }
-		}
-		if (hasAuthor && hasEditor) { return "incollection"; }
-		return "inbook";
-		},
+	"bookSection":"incollection",
 	"journalArticle":"article",
 	"magazineArticle":"article",
 	"newspaperArticle":"article",
@@ -121,7 +112,6 @@ var bibtex2zoteroTypeMap = {
 	"conference":"conferencePaper",
 	"techreport":"report",
 	"booklet":"book",
-	"incollection":"bookSection",
 	"manual":"book",
 	"mastersthesis":"thesis",
 	"misc":"book",
@@ -134,7 +124,7 @@ var bibtex2zoteroTypeMap = {
  * LaTeX book.)
  */
 var months = ["jan", "feb", "mar", "apr", "may", "jun",
-              "jul", "aug", "sep", "oct", "nov", "dec"]
+              "jul", "aug", "sep", "oct", "nov", "dec"];
 
 /*
  * new mapping table based on that from Matthias Steffens,
@@ -873,6 +863,8 @@ var mappingTable = {
     "\u013C":"\\c{l}", // LATIN SMALL LETTER L WITH CEDILLA
     "\u013D":"\\v{L}", // LATIN CAPITAL LETTER L WITH CARON
     "\u013E":"\\v{l}", // LATIN SMALL LETTER L WITH CARON
+    "\u0141":"\\L{}", //LATIN CAPITAL LETTER L WITH STROKE
+    "\u0142":"\\l{}", //LATIN SMALL LETTER L WITH STROKE
     "\u0143":"\\'{N}", // LATIN CAPITAL LETTER N WITH ACUTE
     "\u0144":"\\'{n}", // LATIN SMALL LETTER N WITH ACUTE
     "\u0145":"\\c{N}", // LATIN CAPITAL LETTER N WITH CEDILLA
@@ -1054,8 +1046,7 @@ var mappingTable = {
     "\u1EF4":"\\d{Y}", // LATIN CAPITAL LETTER Y WITH DOT BELOW
     "\u1EF5":"\\d{y}", // LATIN SMALL LETTER Y WITH DOT BELOW
     "\u1EF8":"\\~{Y}", // LATIN CAPITAL LETTER Y WITH TILDE
-    "\u1EF9":"\\~{y}", // LATIN SMALL LETTER Y WITH TILDE
-
+    "\u1EF9":"\\~{y}" // LATIN SMALL LETTER Y WITH TILDE
 };
 
 /* unfortunately the mapping isn't reversible - hence this second table - sigh! */
@@ -1108,7 +1099,7 @@ var reversemappingTable = {
     "{\\OE}"                          : "\u0152", // LATIN CAPITAL LIGATURE OE
     "{\\oe}"                          : "\u0153", // LATIN SMALL LIGATURE OE
     "{\\textasciicircum}"             : "\u02C6", // MODIFIER LETTER CIRCUMFLEX ACCENT
-    "\\~{}"                           : "\u02DC", // SMALL TILDE
+//    "\\~{}"                           : "\u02DC", // SMALL TILDE
     "{\\textacutedbl}"                : "\u02DD", // DOUBLE ACUTE ACCENT
     "{\\textendash}"                  : "\u2013", // EN DASH
     "{\\textemdash}"                  : "\u2014", // EM DASH
@@ -1122,7 +1113,7 @@ var reversemappingTable = {
     "{\\textquotedblleft}"            : "\u201C", // LEFT DOUBLE QUOTATION MARK
     "{\\textquotedblright}"           : "\u201D", // RIGHT DOUBLE QUOTATION MARK
     "{\\quotedblbase}"                : "\u201E", // DOUBLE LOW-9 QUOTATION MARK
-    "{\\quotedblbase}"                : "\u201F", // DOUBLE HIGH-REVERSED-9 QUOTATION MARK
+//    "{\\quotedblbase}"                : "\u201F", // DOUBLE HIGH-REVERSED-9 QUOTATION MARK
     "{\\textdagger}"                  : "\u2020", // DAGGER
     "{\\textdaggerdbl}"               : "\u2021", // DOUBLE DAGGER
     "{\\textbullet}"                  : "\u2022", // BULLET
@@ -1204,7 +1195,7 @@ var reversemappingTable = {
     "||"                              : "\u2225", // PARALLEL TO
     "\\~{}"                           : "\u223C", // TILDE OPERATOR
     "/="                              : "\u2260", // NOT EQUAL TO
-    "<="                              : "\u2264", // LESS-THAN OR EQUAL TO
+//    "<="                              : "\u2264", // LESS-THAN OR EQUAL TO
     ">="                              : "\u2265", // GREATER-THAN OR EQUAL TO
     "<<"                              : "\u226A", // MUCH LESS-THAN
     ">>"                              : "\u226B", // MUCH GREATER-THAN
@@ -1214,9 +1205,9 @@ var reversemappingTable = {
     "(/)"                             : "\u2298", // CIRCLED DIVISION SLASH
     "|-"                              : "\u22A2", // RIGHT TACK
     "-|"                              : "\u22A3", // LEFT TACK
-    "|-"                              : "\u22A6", // ASSERTION
+//    "|-"                              : "\u22A6", // ASSERTION
     "|="                              : "\u22A7", // MODELS
-    "|="                              : "\u22A8", // TRUE
+//    "|="                              : "\u22A8", // TRUE
     "||-"                             : "\u22A9", // FORCES
     "$\\#$"                           : "\u22D5", // EQUAL AND PARALLEL TO
     "<<<"                             : "\u22D8", // VERY MUCH LESS-THAN
@@ -1229,11 +1220,11 @@ var reversemappingTable = {
     ":-("                             : "\u2639", // WHITE FROWNING FACE
     ":-)"                             : "\u263A", // WHITE SMILING FACE
     "(-: "                            : "\u263B", // BLACK SMILING FACE
-    "$\\#$"                           : "\u266F", // MUSIC SHARP SIGN
+//    "$\\#$"                           : "\u266F", // MUSIC SHARP SIGN
     "$\\%<$"                          : "\u2701", // UPPER BLADE SCISSORS
-    "$\\%<$"                          : "\u2702", // BLACK SCISSORS
+/*    "$\\%<$"                          : "\u2702", // BLACK SCISSORS
     "$\\%<$"                          : "\u2703", // LOWER BLADE SCISSORS
-    "$\\%<$"                          : "\u2704", // WHITE SCISSORS
+    "$\\%<$"                          : "\u2704", // WHITE SCISSORS */
 /* Derived accented characters */
     "\\`{A}"                          : "\u00C0", // LATIN CAPITAL LETTER A WITH GRAVE
     "\\'{A}"                          : "\u00C1", // LATIN CAPITAL LETTER A WITH ACUTE
@@ -1341,6 +1332,8 @@ var reversemappingTable = {
     "\\c{l}"                          : "\u013C", // LATIN SMALL LETTER L WITH CEDILLA
     "\\v{L}"                          : "\u013D", // LATIN CAPITAL LETTER L WITH CARON
     "\\v{l}"                          : "\u013E", // LATIN SMALL LETTER L WITH CARON
+    "\\L{}"                           : "\u0141", //LATIN CAPITAL LETTER L WITH STROKE
+    "\\l{}"                           : "\u0142", //LATIN SMALL LETTER L WITH STROKE
     "\\'{N}"                          : "\u0143", // LATIN CAPITAL LETTER N WITH ACUTE
     "\\'{n}"                          : "\u0144", // LATIN SMALL LETTER N WITH ACUTE
     "\\c{N}"                          : "\u0145", // LATIN CAPITAL LETTER N WITH CEDILLA
@@ -1522,7 +1515,7 @@ var reversemappingTable = {
     "\\d{Y}"                          : "\u1EF4", // LATIN CAPITAL LETTER Y WITH DOT BELOW
     "\\d{y}"                          : "\u1EF5", // LATIN SMALL LETTER Y WITH DOT BELOW
     "\\~{Y}"                          : "\u1EF8", // LATIN CAPITAL LETTER Y WITH TILDE
-    "\\~{y}"                          : "\u1EF9", // LATIN SMALL LETTER Y WITH TILDE
+    "\\~{y}"                          : "\u1EF9" // LATIN SMALL LETTER Y WITH TILDE
 };
 
 var alwaysMap = {
@@ -1534,7 +1527,7 @@ var alwaysMap = {
 	"\\":"{\\textbackslash}"
 };
 
-var strings = new Object();
+var strings = {};
 var keyRe = /[a-zA-Z0-9\-]/;
 
 function processField(item, field, value) {
@@ -1544,8 +1537,7 @@ function processField(item, field, value) {
 		item[inputFieldMap[field]] = value;
 	} else if(field == "journal") {
 		if(item.publicationTitle) {
-			// we already had an fjournal
-			item.journalAbbreviation = value
+			item.journalAbbreviation = value;
 		} else {
 			item.publicationTitle = value;
 		}
@@ -1555,8 +1547,8 @@ function processField(item, field, value) {
 			item.journalAbbreviation = value;
 		}
 		item.publicationTitle = value;
-	} else if(field == "author" || field == "editor") {
-		// parse authors/editors
+	} else if(field == "author" || field == "editor" || field == "translator") {
+		// parse authors/editors/translators
 		var names = value.split(/ and /i); // now case insensitive
 		for each(var name in names) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(name, field,
@@ -1567,6 +1559,8 @@ function processField(item, field, value) {
 	} else if(field == "number"){ // fix for techreport
 		if (item.itemType == "report") {
 			item.reportNumber = value;
+		} else if (item.itemType == "book" || item.itemType == "bookSection") {
+			item.seriesNumber = value;
 		} else {
 			item.issue = value;
 		}
@@ -1599,7 +1593,7 @@ function processField(item, field, value) {
 		}
 	} else if(field == "pages") {
 		item.pages = value.replace(/--/g, "-");
-	} else if(field == "note" || field == "annote") {
+	} else if(field == "note") {
 		item.extra += "\n"+value;
 	} else if(field == "howpublished") {
 		if(value.length >= 7) {
@@ -1617,11 +1611,27 @@ function processField(item, field, value) {
 		} else {
 			item.tags = value.split(/, ?/g);
 		}
-	} else if (field == "comment") {
+	} else if (field == "comment" || field == "annote" || field == "review") {
 		item.notes.push({note:value});
-	} else if(field == "pdf") { // new code to handle PDF import. absolute file path should be specified in bibtex
-        item.attachments = [{url:"file://"+value, mimeType:"application/pdf"}];
-    }
+	} else if (field == "pdf") {
+		if (/:\/\//.test(value)) { // a full uri is given
+			item.attachments = [{url:value, mimeType:"application/pdf", downloadable:true}];
+		} else { // if no uri is given, assume that it is an absolute path to the PDF
+			item.attachments = [{url:"file://"+value, mimeType:"application/pdf"}];
+		}
+	} else if (field == "sentelink") { // the reference manager 'Sente' has a unique file scheme in exported BibTeX
+			item.attachments = [{url:value.split(",")[0], mimeType:"application/pdf", downloadable:true}];
+	} else if (field == "file") {
+		var [filetitle, filepath, filetype] = value.split(":");
+		if (filetitle.length == 0) {
+			filetitle = "Attachment";
+		}
+		if (filetype.match(/pdf/i)) {
+			item.attachments = [{url:"file://"+filepath, mimeType:"application/pdf", title:filetitle, downloadable:true}];
+		} else {
+			item.attachments = [{url:"file://"+filepath, title:filetitle, downloadable:true}];
+		}
+	}
 }
 
 function getFieldValue(read) {
@@ -1690,7 +1700,7 @@ function getFieldValue(read) {
 		if(value[0] == "\\" && "#$%&~_^\\{}".indexOf(value[1]) != -1) {
 			value = value.substr(1);
 		}
-		if(value[value.length-1] == "\\" &&  "#$%&~_^\\{}".indexOf(value[value.length-2]) != -1) {
+		if(value[value.length-1] == "\\" && "#$%&~_^\\{}".indexOf(value[value.length-2]) != -1) {
 			value = value.substr(0, value.length-1);
 		}
 		value = value.replace(/\\\\/g, "\\");
@@ -1927,8 +1937,8 @@ function doExport() {
 			}
 		}
 
-		if(item.reportNumber || item.issue) {
-			writeField("number", item.reportNumber || item.issue);
+		if(item.reportNumber || item.issue || item.seriesNumber) {
+			writeField("number", item.reportNumber || item.issue || item.seriesNumber);
 		}
 
 		if(item.publicationTitle) {
@@ -1953,6 +1963,7 @@ function doExport() {
 			// split creators into subcategories
 			var author = "";
 			var editor = "";
+			var translator = "";
 			for each(var creator in item.creators) {
 				var creatorString = creator.lastName;
 
@@ -1962,6 +1973,8 @@ function doExport() {
 
 				if (creator.creatorType == "editor") {
 					editor += " and "+creatorString;
+				} else if (creator.creatorType == "translator") {
+					translator += " and "+creatorString;
 				} else {
 					author += " and "+creatorString;
 				}
@@ -1972,6 +1985,9 @@ function doExport() {
 			}
 			if(editor) {
 				writeField("editor", editor.substr(5));
+			}
+			if(translator) {
+				writeField("translator", translator.substr(5));
 			}
 		}
 		
@@ -1993,9 +2009,9 @@ function doExport() {
 		if(item.tags && item.tags.length) {
 			var tagString = "";
 			for each(var tag in item.tags) {
-				tagString += ","+tag.tag;
+				tagString += ", "+tag.tag;
 			}
-			writeField("keywords", tagString.substr(1));
+			writeField("keywords", tagString.substr(2));
 		}
 		
 		if(item.pages) {
@@ -2007,7 +2023,7 @@ function doExport() {
 		}
 		if (item.notes) {
 			for each (var note in item.notes) {
-				writeField("comment", note["note"]);
+				writeField("annote", note["note"]);
 			}
 		}		
 		Zotero.write("\n}");
