@@ -444,10 +444,13 @@ function doImport() {
 		
 		for each(var name in mods.m::name) {
 			// TODO: institutional authors
-			var creator = new Array();
+			var creator = {};
+			creator.firstName = "";
 			for each(var namePart in name.m::namePart) {
 				if(namePart.@type == "given") {
-					creator.firstName = namePart.text().toString();
+					if(creator.firstName != "")
+						creator.firstName = creator.firstName + " ";
+					creator.firstName = creator.firstName + namePart.text().toString();
 				} else if(namePart.@type == "family") {
 					creator.lastName = namePart.text().toString();
 				} else if(namePart.@type == "date" || namePart.@type == "termsOfAddress") {
