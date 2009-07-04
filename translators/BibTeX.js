@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2009-01-12 19:00:00"
+	"lastUpdated":"2009-07-04 05:00:00"
 }
 
 Zotero.configure("dataMode", "block");
