@@ -859,8 +859,7 @@ Zotero.Sync.Server = new function () {
 			var response = xmlhttp.responseXML.childNodes[0];
 			
 			if (response.firstChild.tagName == 'error') {
-				if (response.firstChild.getAttribute('type') == 'forbidden'
-						&& response.firstChild.getAttribute('code') == 'INVALID_LOGIN') {
+				if (response.firstChild.getAttribute('code') == 'INVALID_LOGIN') {
 					_error('Invalid login/pass');
 				}
 				_error(response.firstChild.firstChild.nodeValue);
@@ -1498,16 +1497,14 @@ Zotero.Sync.Server = new function () {
 					}
 					break;
 				
-				case 'ITEM_MISSING':
-					var [libraryID, key] = firstChild.getAttribute('missingItem').split('/');
-					if (libraryID == Zotero.libraryID) {
-						libraryID = null;
-					}
-					var item = Zotero.Items.getByLibraryAndKey(libraryID, key);
-					if (item) {
-						Zotero.DB.rollbackAllTransactions();
-						item.updateClientDateModified();
-					}
+				case 'FULL_SYNC_REQUIRED':
+					Zotero.DB.rollbackAllTransactions();
+					// Let current sync fail, and then do a full sync
+					var background = Zotero.Sync.Runner.background;
+					setTimeout(function () {
+						Zotero.Sync.Server.resetClient();
+						Zotero.Sync.Runner.sync(background);
+					}, 1);
 					break;
 				
 				case 'TAG_TOO_LONG':
@@ -2254,9 +2251,8 @@ Zotero.Sync.Server.Data = new function() {
 			//
 			if (toReconcile.length) {
 				if (Zotero.Sync.Runner.background) {
-					Zotero.debug("Background sync resulted in conflict -- aborting");
-					Zotero.DB.rollbackTransaction();
-					return false;
+					// TODO: localize
+					throw ("Background sync resulted in conflict \u2014 manual sync required");
 				}
 				
 				var mergeData = _reconcile(type, toReconcile, remoteCreatorStore);
