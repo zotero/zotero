@@ -2375,10 +2375,10 @@ Zotero.Sync.Storage.QueueManager = new function () {
 		var objectPairs = [];
 		for each(var conflict in _conflicts) {
 			var item = Zotero.Items.getByLibraryAndKey(null, conflict.name);
-			var item1 = item.clone();
+			var item1 = item.clone(false, false, true);
 			item1.setField('dateModified',
 				Zotero.Date.dateToSQL(new Date(conflict.localData.modTime * 1000), true));
-			var item2 = item.clone();
+			var item2 = item.clone(false, false, true);
 			item2.setField('dateModified',
 				Zotero.Date.dateToSQL(new Date(conflict.remoteData.modTime * 1000), true));
 			objectPairs.push([item1, item2]);
@@ -2480,6 +2480,7 @@ Zotero.Sync.Storage.Queue = function (name) {
 			Zotero.debug(this.Name + " queue is done");
 			// DEBUG info
 			Zotero.debug("Active requests: " + this.activeRequests);
+			Zotero.debug("Errors:");
 			Zotero.debug(this._errors);
 			
 			if (this.activeRequests) {
