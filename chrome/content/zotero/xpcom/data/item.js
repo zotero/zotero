@@ -1763,7 +1763,7 @@ Zotero.Item.prototype.save = function() {
 				if (this._previousData) {
 					var oldSourceItemKey = this._previousData.sourceItemKey;
 					if (oldSourceItemKey) {
-						var oldSourceItem = Zotero.Items.getByKey(this.libraryID, oldSourceItemKey);
+						var oldSourceItem = Zotero.Items.getByLibraryAndKey(this.libraryID, oldSourceItemKey);
 					}
 					if (oldSourceItem) {
 						var oldSourceItemNotifierData = {};

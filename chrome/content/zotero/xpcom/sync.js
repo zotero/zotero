@@ -1720,6 +1720,15 @@ Zotero.Sync.Server = new function () {
 		
 		Zotero.Sync.Runner.setError(e.message ? e.message : e);
 		Zotero.Sync.Runner.reset();
+		try {
+			undefinedFunction();
+		}
+		catch (e) {
+			// Log stack trace to error console
+			if (e.stack) {
+				Components.utils.reportError(e.stack.substr(0, 600));
+			}
+		}
 		Components.utils.reportError(e);
 	}
 }
