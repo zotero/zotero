@@ -354,7 +354,7 @@
 						</tooltip>
 					</hbox>
 					<toolbarbutton id="zotero-tb-sync" class="zotero-small-progress-indicator" tooltip="_child"
-							oncommand="Zotero.Sync.Runner.sync()">
+							oncommand="Zotero.Sync.Server.canAutoResetClient = true; Zotero.Sync.Runner.sync()">
 						<tooltip
 								onpopupshowing="ZoteroPane.setLastSyncStatus(this)"
 								noautohide="true">

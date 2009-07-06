@@ -3379,8 +3379,13 @@ Zotero.Item.prototype.diff = function (item, includeMatches, ignoreFields) {
 
 /**
  * Returns an unsaved copy of the item
+ *
+ * @param	{Boolean}		[includePrimary=false]
+ * @param	{Zotero.Item}	[newItem=null]			Target item for clone (used to pass a saved
+ *														item for duplicating items with tags)
+ * @param	{Boolean}		[unsaved=false]			Skip properties that require a saved object (e.g., tags)
  */
-Zotero.Item.prototype.clone = function(includePrimary, newItem) {
+Zotero.Item.prototype.clone = function(includePrimary, newItem, unsaved) {
 	Zotero.debug('Cloning item ' + this.id);
 	
 	if (includePrimary && newItem) {
@@ -3521,7 +3526,7 @@ Zotero.Item.prototype.clone = function(includePrimary, newItem) {
 		}
 	}
 	
-	if (obj.tags) {
+	if (!unsaved && obj.tags) {
 		for each(var tag in obj.tags) {
 			if (sameLibrary) {
 				newItem.addTagByID(tag.primary.tagID);
