@@ -297,8 +297,10 @@
 							
 							// Add CSS rules to notes
 							if (self.mode == 'note') {
-								var css = "body#zotero-tinymce.mceContentBody, "
+								var css = "body#zotero-tinymce-note.mceContentBody, "
 									+ "body#zotero-tinymce-note.mceContentBody p, "
+									+ "body#zotero-tinymce-note.mceContentBody th, "
+									+ "body#zotero-tinymce-note.mceContentBody td, "
 									+ "body#zotero-tinymce-note.mceContentBody pre { "
 										+ "font-size: "
 										+ Zotero.Prefs.get('note.fontSize') + "px; "
