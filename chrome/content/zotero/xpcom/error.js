@@ -11,6 +11,7 @@ Zotero.Error = function (message, error) {
 
 Zotero.Error.ERROR_UNKNOWN = 0;
 Zotero.Error.ERROR_MISSING_OBJECT = 1;
+Zotero.Error.ERROR_FULL_SYNC_REQUIRED = 2;
 
 Zotero.Error.prototype.toString = function () {
 	return this.message;
