@@ -42,6 +42,7 @@ var xpcomFiles = [
 	'db',
 	'duplicate',
 	'enstyle',
+	'error',
 	'file',
 	'fulltext',
 	'id',
@@ -68,9 +69,15 @@ var xpcomFiles = [
 ];
 
 for (var i=0; i<xpcomFiles.length; i++) {
-	Cc["@mozilla.org/moz/jssubscript-loader;1"]
-		.getService(Ci.mozIJSSubScriptLoader)
-		.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFiles[i] + ".js");
+	try {
+		Cc["@mozilla.org/moz/jssubscript-loader;1"]
+			.getService(Ci.mozIJSSubScriptLoader)
+			.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFiles[i] + ".js");
+	}
+	catch (e) {
+		Components.utils.reportError("Error loading " + xpcomFiles[i] + ".js");
+		throw (e);
+	}
 }
 
 

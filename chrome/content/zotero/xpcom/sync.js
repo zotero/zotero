@@ -837,6 +837,7 @@ Zotero.Sync.Server = new function () {
 	var _sessionID;
 	var _sessionLock;
 	var _throttleTimeout;
+	var _canAutoResetClient = true;
 	
 	function login(callback, callbackCallback) {
 		var url = _serverURL + "login";
@@ -1356,6 +1357,8 @@ Zotero.Sync.Server = new function () {
 	
 	
 	function resetClient() {
+		Zotero.debug("Resetting client");
+		
 		Zotero.DB.beginTransaction();
 		
 		var sql = "DELETE FROM version WHERE schema IN "
@@ -1498,11 +1501,20 @@ Zotero.Sync.Server = new function () {
 					break;
 				
 				case 'FULL_SYNC_REQUIRED':
-					Zotero.DB.rollbackAllTransactions();
 					// Let current sync fail, and then do a full sync
 					var background = Zotero.Sync.Runner.background;
 					setTimeout(function () {
+						if (Zotero.Prefs.get('sync.debugNoAutoResetClient')) {
+							Components.utils.reportError("Skipping automatic client reset due to debug pref");
+							return;
+						}
+						if (!Zotero.Sync.Server.canAutoResetClient) {
+							Components.utils.reportError("Client has already been auto-reset in Zotero.Sync.Server._checkResponse() -- manual sync required");
+							return;
+						}
+						
 						Zotero.Sync.Server.resetClient();
+						Zotero.Sync.Server.canAutoResetClient = false;
 						Zotero.Sync.Runner.sync(background);
 					}, 1);
 					break;
@@ -1511,8 +1523,6 @@ Zotero.Sync.Server = new function () {
 					if (!Zotero.Sync.Runner.background) {
 						var tag = xmlhttp.responseXML.firstChild.getElementsByTagName('tag');
 						if (tag.length) {
-							Zotero.DB.rollbackAllTransactions();
-							
 							var tag = tag[0].firstChild.nodeValue;
 							setTimeout(function () {
 								var callback = function () {
@@ -1667,6 +1677,28 @@ Zotero.Sync.Server = new function () {
 	
 	
 	function _error(e, extraInfo) {
+		if (e.name && e.name == 'ZOTERO_ERROR') {
+			switch (e.error) {
+				case Zotero.Error.ERROR_MISSING_OBJECT:
+					// Let current sync fail, and then do a full sync
+					var background = Zotero.Sync.Runner.background;
+					setTimeout(function () {
+						if (Zotero.Prefs.get('sync.debugNoAutoResetClient')) {
+							Components.utils.reportError("Skipping automatic client reset due to debug pref");
+							return;
+						}
+						if (!Zotero.Sync.Server.canAutoResetClient) {
+							Components.utils.reportError("Client has already been auto-reset in Zotero.Sync.Server._error() -- manual sync required");
+							return;
+						}
+						Zotero.Sync.Server.resetClient();
+						Zotero.Sync.Server.canAutoResetClient = false;
+						Zotero.Sync.Runner.sync(background);
+					}, 1);
+					break;
+			}
+		}
+		
 		if (extraInfo) {
 			// Server errors will generally be HTML
 			extraInfo = Zotero.Utilities.prototype.unescapeHTML(extraInfo);
@@ -1685,7 +1717,7 @@ Zotero.Sync.Server = new function () {
 		
 		Zotero.Sync.Runner.setError(e.message ? e.message : e);
 		Zotero.Sync.Runner.reset();
-		throw(e);
+		Components.utils.reportError(e);
 	}
 }
 
@@ -3001,9 +3033,11 @@ Zotero.Sync.Server.Data = new function() {
 			// the item's creator block, where a copy should be provided
 			if (!creatorObj) {
 				if (creator.creator.length() == 0) {
-					throw ("Data for missing local creator "
+					var msg = "Data for missing local creator "
 						+ data.libraryID + "/" + creator.@key.toString()
-						+ " not provided in Zotero.Sync.Server.Data.xmlToItem()");
+						+ " not provided in Zotero.Sync.Server.Data.xmlToItem()";
+					var e = new Zotero.Error(msg, "MISSING_OBJECT");
+					throw (e);
 				}
 				var l = creator.@libraryID.toString();
 				l = l ? l : null;
@@ -3054,8 +3088,10 @@ Zotero.Sync.Server.Data = new function() {
 			for each(var key in related) {
 				var relItem = Zotero.Items.getByLibraryAndKey(item.libraryID, key);
 				if (!relItem) {
-					throw ("Related item " + item.libraryID + "/" + key
-						+ " doesn't exist in Zotero.Sync.Server.Data.xmlToItem()");
+					var msg = "Related item " + item.libraryID + "/" + key
+						+ " doesn't exist in Zotero.Sync.Server.Data.xmlToItem()";
+					var e = new Zotero.Error(msg, "MISSING_OBJECT");
+					throw (e);
 				}
 				relatedIDs.push(relItem.id);
 			}
@@ -3172,8 +3208,11 @@ Zotero.Sync.Server.Data = new function() {
 		for each(var key in childItems) {
 			var childItem = Zotero.Items.getByLibraryAndKey(collection.libraryID, key);
 			if (!childItem) {
-				throw ("Missing child item " + key + " for collection " + collection.libraryID + "/" + collection.key
-					+ " in Zotero.Sync.Server.Data.xmlToCollection()"); 
+				var msg = "Missing child item " + key + " for collection "
+							+ collection.libraryID + "/" + collection.key
+							+ " in Zotero.Sync.Server.Data.xmlToCollection()";
+				var e = new Zotero.Error(msg, "MISSING_OBJECT");
+				throw (e);
 			}
 			childItemIDs.push(childItem.id);
 		}
@@ -3446,7 +3485,9 @@ Zotero.Sync.Server.Data = new function() {
 			for each(var key in keys) {
 				var item = Zotero.Items.getByLibraryAndKey(tag.libraryID, key);
 				if (!item) {
-					throw ("Linked item " + key + " doesn't exist in Zotero.Sync.Server.Data.xmlToTag()");
+					var msg = "Linked item " + key + " doesn't exist in Zotero.Sync.Server.Data.xmlToTag()";
+					var e = new Zotero.Error(msg, "MISSING_OBJECT");
+					throw (e);
 				}
 				ids.push(item.id);
 			}
