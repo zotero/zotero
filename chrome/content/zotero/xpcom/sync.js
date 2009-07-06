@@ -994,7 +994,9 @@ Zotero.Sync.Server = new function () {
 				
 				var deleted = Zotero.Sync.getDeletedObjects(lastLocalSyncDate, syncSession.uploadKeys.deleted);
 				if (deleted == -1) {
-					_error('Sync delete log starts after last sync date in Zotero.Sync.Server.sync()');
+					var msg = "Sync delete log starts after last sync date in Zotero.Sync.Server.sync()";
+					var e = new Zotero.Error(msg, "FULL_SYNC_REQUIRED");
+					throw (e);
 				}
 				
 				var nextLocalSyncDate = Zotero.DB.transactionDate;
@@ -1680,6 +1682,7 @@ Zotero.Sync.Server = new function () {
 		if (e.name && e.name == 'ZOTERO_ERROR') {
 			switch (e.error) {
 				case Zotero.Error.ERROR_MISSING_OBJECT:
+				case Zotero.Error.ERROR_FULL_SYNC_REQUIRED:
 					// Let current sync fail, and then do a full sync
 					var background = Zotero.Sync.Runner.background;
 					setTimeout(function () {
