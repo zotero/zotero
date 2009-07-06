@@ -108,6 +108,7 @@
 					<menuitem oncommand="Zotero_File_Interface.bibliographyFromItems();"/>
 					<menuitem oncommand="Zotero_Report_Interface.loadItemReport()"/>
 					<menuseparator/>
+					<menuitem oncommand="ZoteroPane.createParentItemsFromSelected();"/>
 					<menuitem oncommand="Zotero_RecognizePDF.recognizeSelected();"/>
 					<menuitem oncommand="ZoteroPane.renameSelectedAttachmentsFromParents()"/>
 					<menuitem oncommand="ZoteroPane.reindexItem();"/>

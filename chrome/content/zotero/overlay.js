@@ -1674,9 +1674,10 @@ var ZoteroPane = new function()
 			createBib: 11,
 			loadReport: 12,
 			sep4: 13,
-			recognizePDF: 14,
-			renameAttachments: 15,
-			reindexItem: 16
+			createParent: 14,
+			recognizePDF: 15,
+			renameAttachments: 16,
+			reindexItem: 17
 		};
 		
 		var menu = document.getElementById('zotero-itemmenu');
@@ -1715,7 +1716,7 @@ var ZoteroPane = new function()
 					if (canRecognize && !Zotero_RecognizePDF.canRecognize(items[i])) {
 						canRecognize = false;
 					}
-					if(!canIndex && !canRecognize) {
+					if (!canIndex && !canRecognize) {
 						break;
 					}
 				}
@@ -1727,11 +1728,25 @@ var ZoteroPane = new function()
 				}
 				if (canRecognize) {
 					show.push(m.recognizePDF);
+					hide.push(m.createParent);
 				}
 				else {
 					hide.push(m.recognizePDF);
+					
+					var canCreateParent = true;
+					for (var i=0; i<items.length; i++) {
+						if (!items[i].isTopLevelItem() || items[i].isRegularItem() || Zotero_RecognizePDF.canRecognize(items[i])) {
+							canCreateParent = false;
+							break;
+						}
+					}
+					if (canCreateParent) {
+						show.push(m.createParent);
+					}
+					else {
+						hide.push(m.createParent);
+					}
 				}
-				
 				
 				// If all items are child attachments, show rename option
 				var canRename = true;
@@ -1751,7 +1766,7 @@ var ZoteroPane = new function()
 				}
 				
 				// Add in attachment separator
-				if (canIndex || canRecognize || canRename) {
+				if (canCreateParent || canRecognize || canRename || canIndex) {
 					show.push(m.sep4);
 				}
 				else {
@@ -1786,22 +1801,23 @@ var ZoteroPane = new function()
 				if (item.isAttachment()) {
 					var showSep4 = false;
 					hide.push(m.duplicateItem);
-					// If not linked URL, show reindex line
-					if (Zotero.Fulltext.pdfConverterIsRegistered()
-							&& Zotero.Fulltext.canReindex(item.id)) {
-						show.push(m.reindexItem);
-						showSep4 = true;
-					}
-					else {
-						hide.push(m.reindexItem);
-					}
-				
+					
 					if (Zotero_RecognizePDF.canRecognize(item)) {
 						show.push(m.recognizePDF);
+						hide.push(m.createParent);
 						showSep4 = true;
 					}
 					else {
 						hide.push(m.recognizePDF);
+						
+						// If not a PDF, allow parent item creation
+						if (item.isTopLevelItem()) {
+							show.push(m.createParent);
+							showSep4 = true;
+						}
+						else {
+							hide.push(m.createParent);
+						}
 					}
 					
 					// Attachment rename option
@@ -1819,10 +1835,27 @@ var ZoteroPane = new function()
 					else {
 						hide.push(m.sep4);
 					}
+					
+					// If not linked URL, show reindex line
+					if (Zotero.Fulltext.pdfConverterIsRegistered()
+							&& Zotero.Fulltext.canReindex(item.id)) {
+						show.push(m.reindexItem);
+						showSep4 = true;
+					}
+					else {
+						hide.push(m.reindexItem);
+					}
 				}
 				else {
+					if (item.isNote() && item.isTopLevelItem()) {
+						show.push(m.sep4, m.createParent);
+					}
+					else {
+						hide.push(m.sep4, m.createParent);
+					}
+					
 					show.push(m.duplicateItem);
-					hide.push(m.sep4, m.reindexItem, m.recognizePDF, m.renameAttachments);
+					hide.push(m.recognizePDF, m.renameAttachments, m.reindexItem);
 				}
 			}
 		}
@@ -1840,7 +1873,7 @@ var ZoteroPane = new function()
 			disable.push(m.showInLibrary, m.duplicateItem, m.deleteItem,
 				m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
 			hide.push(m.addNote, m.attachSnapshot, m.attachLink, m.sep2, m.sep4, m.reindexItem,
-				m.recognizePDF, m.renameAttachments);
+				m.createParent, m.recognizePDF, m.renameAttachments);
 		}
 		
 		// Remove from collection
@@ -1859,10 +1892,12 @@ var ZoteroPane = new function()
 		menu.childNodes[m.exportItems].setAttribute('label', Zotero.getString('pane.items.menu.export' + multiple));
 		menu.childNodes[m.createBib].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
 		menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
-		menu.childNodes[m.reindexItem].setAttribute('label', Zotero.getString('pane.items.menu.reindexItem' + multiple));
+		// TODO: localize
+		menu.childNodes[m.createParent].setAttribute('label', multiple ? "Create Parent Items from Selected Items" : "Create Parent Item from Selected Item");
 		menu.childNodes[m.recognizePDF].setAttribute('label', Zotero.getString('pane.items.menu.recognizePDF' + multiple));
 		// TODO: localize
 		menu.childNodes[m.renameAttachments].setAttribute('label', multiple ? "Rename Files from Parent Metadata" : "Rename File from Parent Metadata");
+		menu.childNodes[m.reindexItem].setAttribute('label', Zotero.getString('pane.items.menu.reindexItem' + multiple));
 		
 		for (var i in disable)
 		{
@@ -2772,6 +2807,42 @@ var ZoteroPane = new function()
 		
 		if (index == 0) {
 			this.relinkAttachment(itemID);
+		}
+	}
+	
+	
+	this.createParentItemsFromSelected = function () {
+		if (!this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+		
+		
+		var items = this.getSelectedItems();
+		for (var i=0; i<items.length; i++) {
+			var item = items[i];
+			if (!item.isTopLevelItem() || item.isRegularItem()) {
+				throw('Item ' + itemID + ' is not a top-level attachment or note in ZoteroPane.createParentItemsFromSelected()');
+			}
+			
+			Zotero.DB.beginTransaction();
+			// TODO: remove once there are no top-level web attachments
+			if (item.isWebAttachment()) {
+				var parent = new Zotero.Item('webpage');
+			}
+			else {
+				var parent = new Zotero.Item('document');
+			}
+			parent.libraryID = item.libraryID;
+			parent.setField('title', item.getField('title'));
+			if (item.isWebAttachment()) {
+				parent.setField('accessDate', item.getField('accessDate'));
+				parent.setField('url', item.getField('url'));
+			}
+			var itemID = parent.save();
+			item.setSource(itemID);
+			item.save();
+			Zotero.DB.commitTransaction();
 		}
 	}
 	
