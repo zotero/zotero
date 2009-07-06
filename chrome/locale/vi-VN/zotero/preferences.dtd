@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Các tùy chọn chung">
 
 <!ENTITY zotero.preferences.userInterface "Giao diện người dùng">
-<!ENTITY zotero.preferences.position "Bố trí cửa sổ Zotero">
-<!ENTITY zotero.preferences.position.above "trên">
-<!ENTITY zotero.preferences.position.below "dưới">
-<!ENTITY zotero.preferences.position.browser "phần hiển thị nội dung của trình duyệt web">
 <!ENTITY zotero.preferences.statusBarIcon "Biểu tượng trong thanh trạng thái:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Không biểu tượng">
 <!ENTITY zotero.preferences.fontSize "Cỡ chữ:">

@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "عام">
 
 <!ENTITY zotero.preferences.userInterface "واجهة المستخدم">
-<!ENTITY zotero.preferences.position "اعرض زوتيرو">
-<!ENTITY zotero.preferences.position.above "فوق">
-<!ENTITY zotero.preferences.position.below "تحت">
-<!ENTITY zotero.preferences.position.browser "محتوى المتصفح">
 <!ENTITY zotero.preferences.statusBarIcon "ايقونة شريط الحالة:">
 <!ENTITY zotero.preferences.statusBarIcon.none "لاشيء">
 <!ENTITY zotero.preferences.fontSize "حجم الخط">

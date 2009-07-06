@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Опште">
 
 <!ENTITY zotero.preferences.userInterface "Корисничко сучеље">
-<!ENTITY zotero.preferences.position "Прикажи Зотеро">
-<!ENTITY zotero.preferences.position.above "изнад">
-<!ENTITY zotero.preferences.position.below "испод">
-<!ENTITY zotero.preferences.position.browser "садржаја веб претраживача">
 <!ENTITY zotero.preferences.statusBarIcon "Икона статусне линије:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Ништа">
 <!ENTITY zotero.preferences.fontSize "Величина фонта:">

@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Общи">
 
 <!ENTITY zotero.preferences.userInterface "Потребителски интерфейс">
-<!ENTITY zotero.preferences.position "Покaзване на Зотеро">
-<!ENTITY zotero.preferences.position.above "над">
-<!ENTITY zotero.preferences.position.below "под">
-<!ENTITY zotero.preferences.position.browser "съдържанието на браузера">
 <!ENTITY zotero.preferences.statusBarIcon "Икона в лентата за състоянието">
 <!ENTITY zotero.preferences.statusBarIcon.none "Няма">
 <!ENTITY zotero.preferences.fontSize "Размер на шрифта:">

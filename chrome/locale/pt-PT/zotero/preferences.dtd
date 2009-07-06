@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Gerais">
 
 <!ENTITY zotero.preferences.userInterface "Interface com Utilizador">
-<!ENTITY zotero.preferences.position "Mostrar o Zotero">
-<!ENTITY zotero.preferences.position.above "acima">
-<!ENTITY zotero.preferences.position.below "abaixo">
-<!ENTITY zotero.preferences.position.browser "conteúdo do navegador">
 <!ENTITY zotero.preferences.statusBarIcon "Ícone na barra de estado:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Nenhum">
 <!ENTITY zotero.preferences.fontSize "Tamanho da Fonte Tipográfica:">

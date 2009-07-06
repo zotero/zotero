@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Általános">
 
 <!ENTITY zotero.preferences.userInterface "Felhasználói felület">
-<!ENTITY zotero.preferences.position "Zotero megjelenítése">
-<!ENTITY zotero.preferences.position.above "felette">
-<!ENTITY zotero.preferences.position.below "alatta">
-<!ENTITY zotero.preferences.position.browser "a böngészőablaknak">
 <!ENTITY zotero.preferences.statusBarIcon "Ikon az állapotsorban:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Egyik sem">
 <!ENTITY zotero.preferences.fontSize "Betűméret">

@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "ทั่วไป">
 
 <!ENTITY zotero.preferences.userInterface "ส่วนต่อประสานกับผู้ใช้">
-<!ENTITY zotero.preferences.position "แสดงโซแทโร">
-<!ENTITY zotero.preferences.position.above "ด้านบน">
-<!ENTITY zotero.preferences.position.below "ด้านล่าง">
-<!ENTITY zotero.preferences.position.browser "เนื้อหาของบราวเซอร์">
 <!ENTITY zotero.preferences.statusBarIcon "ไอคอนแถบสถานะ:">
 <!ENTITY zotero.preferences.statusBarIcon.none "ว่างเปล่า">
 <!ENTITY zotero.preferences.fontSize "ขนาดฟ้อนท์:">

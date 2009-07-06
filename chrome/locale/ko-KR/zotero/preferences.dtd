@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "일반">
 
 <!ENTITY zotero.preferences.userInterface "사용자 인터페이스">
-<!ENTITY zotero.preferences.position "Zotero 표시">
-<!ENTITY zotero.preferences.position.above "위">
-<!ENTITY zotero.preferences.position.below "아래">
-<!ENTITY zotero.preferences.position.browser "브라우저 화면">
 <!ENTITY zotero.preferences.statusBarIcon "상태 막대 아이콘:">
 <!ENTITY zotero.preferences.statusBarIcon.none "없음">
 <!ENTITY zotero.preferences.fontSize "글꼴 크기:">

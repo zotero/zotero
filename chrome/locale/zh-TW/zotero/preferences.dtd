@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "一般">
 
 <!ENTITY zotero.preferences.userInterface "使用介面">
-<!ENTITY zotero.preferences.position "將 Zotero 窗格顯示在網頁顯示區的">
-<!ENTITY zotero.preferences.position.above "上方">
-<!ENTITY zotero.preferences.position.below "下方">
-<!ENTITY zotero.preferences.position.browser "。">
 <!ENTITY zotero.preferences.statusBarIcon "狀態列圖示：">
 <!ENTITY zotero.preferences.statusBarIcon.none "無">
 <!ENTITY zotero.preferences.fontSize "字型大小：">

@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Všeobecné">
 
 <!ENTITY zotero.preferences.userInterface "Používateľské rozhranie">
-<!ENTITY zotero.preferences.position "Zobraz Zotero">
-<!ENTITY zotero.preferences.position.above "pod">
-<!ENTITY zotero.preferences.position.below "nad">
-<!ENTITY zotero.preferences.position.browser "hlavným oknom prehliadača">
 <!ENTITY zotero.preferences.statusBarIcon "Ikonka v spodnej lište:">
 <!ENTITY zotero.preferences.statusBarIcon.none "žiadna">
 <!ENTITY zotero.preferences.fontSize "Veľkosť písma:">

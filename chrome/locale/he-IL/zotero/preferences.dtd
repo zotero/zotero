@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "כללי">
 
 <!ENTITY zotero.preferences.userInterface "ממשק משתמש">
-<!ENTITY zotero.preferences.position "Zotero הצג את">
-<!ENTITY zotero.preferences.position.above "מתחת">
-<!ENTITY zotero.preferences.position.below "מעל">
-<!ENTITY zotero.preferences.position.browser "תוכן הדפדפן">
 <!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
 <!ENTITY zotero.preferences.statusBarIcon.none "None">
 <!ENTITY zotero.preferences.fontSize ":גודל גופן">
