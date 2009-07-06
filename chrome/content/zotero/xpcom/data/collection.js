@@ -1016,7 +1016,9 @@ Zotero.Collection.prototype._getParent = function() {
 		}
 		var parentCollection = Zotero.Collections.getByLibraryAndKey(this.libraryID, this._parent);
 		if (!parentCollection) {
-			throw ("Parent collection for keyed parent doesn't exist in Zotero.Collection._getParent()");
+			var msg = "Parent collection for keyed parent doesn't exist in Zotero.Collection._getParent()";
+			var e = new Zotero.Error(msg, "MISSING_OBJECT");
+			throw (e);
 		}
 		// Replace stored key with id
 		this._parent = parentCollection.id;

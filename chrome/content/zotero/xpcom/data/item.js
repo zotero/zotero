@@ -1380,8 +1380,10 @@ Zotero.Item.prototype.save = function() {
 				}
 				
 				var newSourceItemNotifierData = {};
-				newSourceItemNotifierData[newSourceItem.id] =
-					{ old: newSourceItem.serialize() };
+				newSourceItemNotifierData[newSourceItem.id] = {
+					old: newSourceItem.serialize()
+				};
+				Zotero.Notifier.trigger('modify', 'item', newSourceItem.id, newSourceItemNotifierData);
 				
 				switch (Zotero.ItemTypes.getName(this.itemTypeID)) {
 					case 'note':
@@ -1752,24 +1754,28 @@ Zotero.Item.prototype.save = function() {
 				
 				if (newSourceItem) {
 					var newSourceItemNotifierData = {};
-					newSourceItemNotifierData[newSourceItem.id] =
-						{ old: newSourceItem.serialize() };
+					newSourceItemNotifierData[newSourceItem.id] = {
+						old: newSourceItem.serialize()
+					};
+					Zotero.Notifier.trigger('modify', 'item', newSourceItem.id, newSourceItemNotifierData);
 				}
 				
 				if (this._previousData) {
-					var oldSourceItemID = this._previousData.sourceItemID;
-					if (oldSourceItemID) {
-						var oldSourceItem = Zotero.Items.get(oldSourceItemID);
+					var oldSourceItemKey = this._previousData.sourceItemKey;
+					if (oldSourceItemKey) {
+						var oldSourceItem = Zotero.Items.getByKey(this.libraryID, oldSourceItemKey);
 					}
 					if (oldSourceItem) {
 						var oldSourceItemNotifierData = {};
-						oldSourceItemNotifierData[oldSourceItem.id] =
-							{ old: oldSourceItem.serialize() };
+						oldSourceItemNotifierData[oldSourceItem.id] = {
+							old: oldSourceItem.serialize()
+						};
+						Zotero.Notifier.trigger('modify', 'item', oldSourceItem.id, oldSourceItemNotifierData);
 					}
-					else if (oldSourceItemID) {
+					else if (oldSourceItemKey) {
 						var oldSourceItemNotifierData = null;
-						Zotero.debug("Old source item " + oldSourceItemID
-							+ " didn't exist in setSource()", 2);
+						Zotero.debug("Old source item " + oldSourceItemKey
+							+ " didn't exist in Zotero.Item.save()", 2);
 					}
 				}
 				
@@ -1777,7 +1783,7 @@ Zotero.Item.prototype.save = function() {
 				// If this was an independent item, remove from any collections
 				// where it existed previously and add source instead if
 				// there is one
-				if (!oldSourceItemID) {
+				if (!oldSourceItemKey) {
 					var sql = "SELECT collectionID FROM collectionItems "
 								+ "WHERE itemID=?";
 					var changedCollections = Zotero.DB.columnQuery(sql, this.id);
@@ -1946,15 +1952,6 @@ Zotero.Item.prototype.save = function() {
 		Zotero.Notifier.trigger('modify', 'item', this.id, { old: this._previousData });
 	}
 	
-	if (oldSourceItem) {
-		Zotero.Notifier.trigger('modify', 'item',
-			oldSourceItemID, oldSourceItemNotifierData);
-	}
-	if (newSourceItem) {
-		Zotero.Notifier.trigger('modify', 'item',
-			newSourceItem.id, newSourceItemNotifierData);
-	}
-	
 	if (isNew) {
 		var id = this.id;
 		this._disabled = true;
@@ -2003,7 +2000,9 @@ Zotero.Item.prototype.getSource = function() {
 		}
 		var sourceItem = Zotero.Items.getByLibraryAndKey(this.libraryID, this._sourceItem);
 		if (!sourceItem) {
-			throw ("Source item for keyed source doesn't exist in Zotero.Item.getSource()");
+			var msg = "Source item for keyed source doesn't exist in Zotero.Item.getSource()";
+			var e = new Zotero.Error(msg, "MISSING_OBJECT");
+			throw (e);
 		}
 		// Replace stored key with id
 		this._sourceItem = sourceItem.id;
@@ -3836,9 +3835,9 @@ Zotero.Item.prototype.toArray = function (mode) {
 	// Notes
 	if (this.isNote()) {
 		arr.note = this.getNote();
-		var parent = this.getSource();
+		var parent = this.getSourceKey();
 		if (parent) {
-			arr.sourceItemID = parent;
+			arr.sourceItemKey = parent;
 		}
 	}
 	
@@ -3847,9 +3846,9 @@ Zotero.Item.prototype.toArray = function (mode) {
 		// Attachments can have embedded notes
 		arr.note = this.getNote();
 		
-		var parent = this.getSource();
+		var parent = this.getSourceKey();
 		if (parent) {
-			arr.sourceItemID = parent;
+			arr.sourceItemKey = parent;
 		}
 	}
 	
@@ -4005,9 +4004,9 @@ Zotero.Item.prototype.serialize = function(mode) {
 		}
 		
 		arr.note = this.getNote();
-		var parent = this.getSource();
+		var parent = this.getSourceKey();
 		if (parent) {
-			arr.sourceItemID = parent;
+			arr.sourceItemKey = parent;
 		}
 	}
 	
