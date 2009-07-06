@@ -1844,6 +1844,9 @@ Zotero.Date = new function(){
 	 * e.g. '2006-11-03 November 3rd, 2006'
 	 */
 	function isMultipart(str){
+		if (isSQLDateTime(str)) {
+			return false;
+		}
 		return _multipartRE.test(str);
 	}
 	
