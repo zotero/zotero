@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "常规">
 
 <!ENTITY zotero.preferences.userInterface "用户界面">
-<!ENTITY zotero.preferences.position "显示 Zotero">
-<!ENTITY zotero.preferences.position.above "高于">
-<!ENTITY zotero.preferences.position.below "低于">
-<!ENTITY zotero.preferences.position.browser "浏览器页面">
 <!ENTITY zotero.preferences.statusBarIcon "状态栏图标:">
 <!ENTITY zotero.preferences.statusBarIcon.none "无">
 <!ENTITY zotero.preferences.fontSize "字体大小:">

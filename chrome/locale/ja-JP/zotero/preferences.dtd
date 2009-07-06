@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "一般">
 
 <!ENTITY zotero.preferences.userInterface "表示">
-<!ENTITY zotero.preferences.position "コンテンツの">
-<!ENTITY zotero.preferences.position.above "上">
-<!ENTITY zotero.preferences.position.below "下">
-<!ENTITY zotero.preferences.position.browser "にZoteroを表示する">
 <!ENTITY zotero.preferences.statusBarIcon "ステータスバーのアイコン：">
 <!ENTITY zotero.preferences.statusBarIcon.none "全て解除">
 <!ENTITY zotero.preferences.fontSize "フォントサイズ：">

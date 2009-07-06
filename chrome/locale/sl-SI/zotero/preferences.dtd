@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Splošno">
 
 <!ENTITY zotero.preferences.userInterface "Uporabniški vmesnik">
-<!ENTITY zotero.preferences.position "Prikaži Zotero">
-<!ENTITY zotero.preferences.position.above "nad">
-<!ENTITY zotero.preferences.position.below "pod">
-<!ENTITY zotero.preferences.position.browser "vsebino brskalnika">
 <!ENTITY zotero.preferences.statusBarIcon "Ikona v vrstici stanja:">
 <!ENTITY zotero.preferences.statusBarIcon.none "brez">
 <!ENTITY zotero.preferences.fontSize "Velikost pisave:">

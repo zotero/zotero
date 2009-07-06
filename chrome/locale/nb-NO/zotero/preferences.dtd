@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
 
 <!ENTITY zotero.preferences.userInterface "Brukergrensesnitt">
-<!ENTITY zotero.preferences.position "Vis Zotero">
-<!ENTITY zotero.preferences.position.above "over">
-<!ENTITY zotero.preferences.position.below "under">
-<!ENTITY zotero.preferences.position.browser "nettleserinnhold">
 <!ENTITY zotero.preferences.statusBarIcon "Ikon på statuslinje:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Ingen">
 <!ENTITY zotero.preferences.fontSize "Skriftstørrelse">

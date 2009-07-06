@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Algemeen">
 
 <!ENTITY zotero.preferences.userInterface "Gebruikerkoppelvlak">
-<!ENTITY zotero.preferences.position "Wys Zotero">
-<!ENTITY zotero.preferences.position.above "bokant">
-<!ENTITY zotero.preferences.position.below "onderkant">
-<!ENTITY zotero.preferences.position.browser "blaaierinhoud">
 <!ENTITY zotero.preferences.statusBarIcon "Statusbalk-ikoon:">
 <!ENTITY zotero.preferences.statusBarIcon.none "None">
 <!ENTITY zotero.preferences.fontSize "Fontgrootte:">

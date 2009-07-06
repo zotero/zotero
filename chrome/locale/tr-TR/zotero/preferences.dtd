@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Genel">
 
 <!ENTITY zotero.preferences.userInterface "Kullanıcı Arabirimi">
-<!ENTITY zotero.preferences.position "Zotero&apos;yu Göster">
-<!ENTITY zotero.preferences.position.above "Üst">
-<!ENTITY zotero.preferences.position.below "Alt">
-<!ENTITY zotero.preferences.position.browser "tarayıcı içeriği">
 <!ENTITY zotero.preferences.statusBarIcon "Durum çubuğu simgesi:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Hiçbiri">
 <!ENTITY zotero.preferences.fontSize "Font boyu:">

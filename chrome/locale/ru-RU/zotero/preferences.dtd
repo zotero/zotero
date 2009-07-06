@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Общие">
 
 <!ENTITY zotero.preferences.userInterface "Интерфейс">
-<!ENTITY zotero.preferences.position "Расположение Zotero">
-<!ENTITY zotero.preferences.position.above "над">
-<!ENTITY zotero.preferences.position.below "под">
-<!ENTITY zotero.preferences.position.browser "страницей в браузере">
 <!ENTITY zotero.preferences.statusBarIcon "Вид в строке состояния:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Ничего">
 <!ENTITY zotero.preferences.fontSize "Размер шрифта:">

@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Generale">
 
 <!ENTITY zotero.preferences.userInterface "Interfaţă utilizator">
-<!ENTITY zotero.preferences.position "Afişează Zotero">
-<!ENTITY zotero.preferences.position.above "deasupra">
-<!ENTITY zotero.preferences.position.below "dedesubtul">
-<!ENTITY zotero.preferences.position.browser "conţinutului browserului">
 <!ENTITY zotero.preferences.statusBarIcon "Imaginea din bara de stare:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Niciuna">
 <!ENTITY zotero.preferences.fontSize "Mărime caractere:">

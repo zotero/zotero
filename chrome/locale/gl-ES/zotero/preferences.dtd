@@ -5,10 +5,6 @@
 <!ENTITY zotero.preferences.prefpane.general "Xeral">
 
 <!ENTITY zotero.preferences.userInterface "Interface de usuario">
-<!ENTITY zotero.preferences.position "Mostrar Zotero">
-<!ENTITY zotero.preferences.position.above "arriba">
-<!ENTITY zotero.preferences.position.below "abaixo">
-<!ENTITY zotero.preferences.position.browser "Contido do Navegador">
 <!ENTITY zotero.preferences.statusBarIcon "Icona da Barra de Estado:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Ningún">
 <!ENTITY zotero.preferences.fontSize "Tamaño da Fonte:">
