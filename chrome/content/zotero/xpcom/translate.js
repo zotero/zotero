@@ -145,7 +145,7 @@ Zotero.Translators = new function() {
 		if (!metadata.translatorType) {
 			var found = false;
 			for each(var type in TRANSLATOR_TYPES) {
-				if (metadata.translatorType == type) {
+				if (metadata.translatorType & type) {
 					found = true;
 					break;
 				}
