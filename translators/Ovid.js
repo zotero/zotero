@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-06-16 13:30:00"
+	"lastUpdated":"2009-07-07 00:15:00"
 }
 
 function detectWeb(doc, url) {
@@ -26,7 +26,6 @@ function detectWeb(doc, url) {
 	
 	if(results) {
 		results = Zotero.Utilities.trimInternal(results.textContent);
-		Zotero.debug(results);
 		if(results.indexOf("-") != -1) {
 			return "multiple";
 		} else {
