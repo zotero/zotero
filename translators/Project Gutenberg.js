@@ -1,6 +1,6 @@
 {
 	"translatorID":"d770e7d2-106c-4396-8c32-b35cdc46376c",
-	"translatorType":0,
+	"translatorType":4,
 	"label":"Project Gutenberg",
 	"creator":"Adam Crymble",
 	"target":"http://www.gutenberg.org",
@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-08-11 20:40:00"
+	"lastUpdated":"2009-07-07 00:15:00"
 }
 
 function detectWeb(doc, url) {
