@@ -1729,7 +1729,7 @@ Zotero.Sync.Server = new function () {
 				Components.utils.reportError(e.stack.substr(0, 600));
 			}
 		}
-		Components.utils.reportError(e);
+		throw (e);
 	}
 }
 
