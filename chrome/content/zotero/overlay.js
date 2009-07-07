@@ -214,10 +214,13 @@ var ZoteroPane = new function()
 		// they the DB is initialized erroneously (e.g. while switching data
 		// directory locations)
 		else if (Zotero.Schema.dbInitialized && Zotero.Prefs.get('firstRun')) {
+			/*
 			setTimeout(function () {
-				gBrowser.selectedTab = gBrowser.addTab(ZOTERO_CONFIG.FIRST_RUN_URL);
+				var url = "http://www.zotero.org/support/quick_start_guide";
+				gBrowser.selectedTab = gBrowser.addTab(url);/
 			}, 400);
 			Zotero.Prefs.set('firstRun', false);
+			*/
 		}
 		
 		// Hide sync debugging menu by default
