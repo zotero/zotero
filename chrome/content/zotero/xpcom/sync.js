@@ -726,14 +726,6 @@ Zotero.Sync.Server = new function () {
 			Zotero.debug("Auto-syncing is disabled until " + Zotero.Date.dateToSQL(_throttleTimeout) + " -- skipping sync");
 			return false;
 		}
-		
-		// Set auto-sync expiry
-		var expiry = new Date("September 5, 2009 00:00:00");
-		if (new Date() > expiry) {
-			Components.utils.reportError("Build has expired -- auto-sync disabled");
-			return false;
-		}
-		
 		return this.username && this.password;
 	});
 	
