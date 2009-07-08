@@ -263,7 +263,7 @@
 							// If that fails, try the DOI field
 							if (!spec) {
 								var doi = this.item.getField('DOI');
-								if (doi) {
+								if (doi && typeof val == 'String') {
 									// Pull out DOI, in case there's a prefix
 									doi = Zotero.Utilities.prototype.cleanDOI(doi);;
 									if (doi) {
@@ -452,7 +452,7 @@
 							label.setAttribute("onclick", "ZoteroPane.loadURI(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value, event)");
 							label.setAttribute("tooltiptext", Zotero.getString('pane.item.goToURL.online.tooltip'));
 						}
-						else if (fieldName == 'DOI' && val) {
+						else if (fieldName == 'DOI' && val && typeof val == 'String') {
 							// Pull out DOI, in case there's a prefix
 							var doi = Zotero.Utilities.prototype.cleanDOI(val);
 							if (doi) {
