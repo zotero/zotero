@@ -31,12 +31,12 @@
 	<script src="include.js"/>
 	<script src="itemPane.js"/>
 	
-	<tabpanels id="zotero-view-item" flex="1" oncommand="if (this.selectedIndex !== '') { ZoteroItemPane.loadPane(this.selectedIndex); }">
+	<tabpanels id="zotero-view-item" flex="1">
 		<tabpanel>
 			<zoteroitembox id="zotero-editpane-item-box" flex="1"/>
 		</tabpanel>
 		
-		<tabpanel flex="1" align="top">
+		<tabpanel flex="1" orient="vertical">
 			<hbox align="center">
 				<label id="zotero-editpane-notes-label"/>
 				<button label="&zotero.item.add;" oncommand="ZoteroItemPane.addNote();"/>
