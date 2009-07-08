@@ -2890,10 +2890,7 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		if (item.primary.itemType == 'note' || item.primary.itemType == 'attachment') {
-			if (item.sourceItemID) {
-				var sourceItem = Zotero.Items.get(item.sourceItemID);
-				xml.@sourceItem = sourceItem.key;
-			}
+			xml.@sourceItem = item.sourceItemKey;
 		}
 		
 		// Note
