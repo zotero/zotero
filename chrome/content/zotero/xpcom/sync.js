@@ -1605,7 +1605,7 @@ Zotero.Sync.Server = new function () {
 	 * @return 	TRUE if sync should continue, FALSE if cancelled
 	 */
 	function _checkSyncUser(userID, libraryID) {
-		var sql = "SELECT key, value FROM settings WHERE "
+		var sql = "SELECT value FROM settings WHERE "
 					+ "setting='account' AND key='username'";
 		var lastUsername = Zotero.DB.valueQuery(sql);
 		var username = Zotero.Sync.Server.username;
