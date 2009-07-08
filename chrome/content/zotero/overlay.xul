@@ -375,7 +375,7 @@
 					<groupbox pack="center" align="center">
 						<label id="zotero-view-selected-label"/>
 					</groupbox>
-					<tabbox id="zotero-view-tabbox">
+					<tabbox id="zotero-view-tabbox" flex="1">
 						<tabs>
 							<tab label="&zotero.tabs.info.label;"/>
 							<tab label="&zotero.tabs.notes.label;"/>

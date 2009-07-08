@@ -50,7 +50,7 @@
 			</grid>
 		</tabpanel>
 		
-		<tabpanel flex="1" align="top">
+		<tabpanel flex="1" orient="vertical">
 			<hbox align="center">
 				<label id="zotero-editpane-attachments-label"/>
 				<button id="zotero-tb-item-attachments-add" type="menu" label="&zotero.item.add;">
