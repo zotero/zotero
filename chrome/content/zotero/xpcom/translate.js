@@ -1257,8 +1257,6 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		}
 	}
 	
-	Zotero.debug(item);
-	
 	this._itemsDone = true;
 	
 	// if we're not supposed to save the item or we're in a child translator,
