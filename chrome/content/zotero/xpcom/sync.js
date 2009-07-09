@@ -1712,15 +1712,7 @@ Zotero.Sync.Server = new function () {
 		
 		Zotero.Sync.Runner.setError(e.message ? e.message : e);
 		Zotero.Sync.Runner.reset();
-		try {
-			undefinedFunction();
-		}
-		catch (e) {
-			// Log stack trace to error console
-			if (e.stack) {
-				Components.utils.reportError(e.stack.substr(0, 600));
-			}
-		}
+		
 		throw (e);
 	}
 }
@@ -2882,7 +2874,9 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		if (item.primary.itemType == 'note' || item.primary.itemType == 'attachment') {
-			xml.@sourceItem = item.sourceItemKey;
+			if (item.sourceItemKey) {
+				xml.@sourceItem = item.sourceItemKey;
+			}
 		}
 		
 		// Note
