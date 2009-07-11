@@ -3221,6 +3221,7 @@ Zotero.Sync.Server.Data = new function() {
 	 * Recursively save collections from the top down
 	 */
 	function _saveCollections(collections) {
+		var originalLength = collections.length;
 		var unsaved = [];
 		
 		var parentKey, parentCollection;
@@ -3244,6 +3245,12 @@ Zotero.Sync.Server.Data = new function() {
 			// Add to unsaved list
 			unsaved.push(collection);
 			continue;
+		}
+		
+		if (unsaved.length == originalLength) {
+			var msg = "Incomplete collection hierarchy cannot be saved in Zotero.Sync.Server.Data._saveCollections()";
+			var e = new Zotero.Error(msg, "MISSING_OBJECT");
+			throw (e);
 		}
 		
 		if (unsaved.length) {
