@@ -3247,13 +3247,13 @@ Zotero.Sync.Server.Data = new function() {
 			continue;
 		}
 		
-		if (unsaved.length == originalLength) {
-			var msg = "Incomplete collection hierarchy cannot be saved in Zotero.Sync.Server.Data._saveCollections()";
-			var e = new Zotero.Error(msg, "MISSING_OBJECT");
-			throw (e);
-		}
-		
 		if (unsaved.length) {
+			if (unsaved.length == originalLength) {
+				var msg = "Incomplete collection hierarchy cannot be saved in Zotero.Sync.Server.Data._saveCollections()";
+				var e = new Zotero.Error(msg, "MISSING_OBJECT");
+				throw (e);
+			}
+			
 			_saveCollections(unsaved);
 		}
 	}
