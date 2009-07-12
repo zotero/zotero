@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-02-21 09:30:00"
+	"lastUpdated":"2009-07-12 23:30:00"
 }
 
 function detectWeb(doc, url) {
@@ -31,7 +31,8 @@ function scrape(doc) {
 	
 	var titles = doc.evaluate('//h3[@class="r"]', doc, nsResolver,
 				XPathResult.ANY_TYPE, null);
-	var elmts = doc.evaluate('//a[contains(@href, ".enw")]',
+	// changing .enw to .bib
+	var elmts = doc.evaluate('//a[contains(@href, ".bib")]',
 				doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var title;
 	var i = 0;
@@ -66,7 +67,8 @@ function scrape(doc) {
 	}
 	
 	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d");
+	// changing this to bibtex per note below
+	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 	translator.setHandler("itemDone", function(obj, item) {
 		item.attachments = attachments.shift();
 		item.complete();
@@ -86,7 +88,9 @@ function doWeb(doc, url) {
 	// determine if we need to reload the page
 	
 	// first check for EndNote links
-	haveEndNoteLinks = doc.evaluate('//a[contains(@href, ".enw")]', 
+	// changing to BibTeX since Google is dropping characters in enw and ris output
+	
+	haveEndNoteLinks = doc.evaluate('//a[contains(@href, ".bib")]', 
 			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(!haveEndNoteLinks) {
 			// SR:Commenting out this bit as code for retrieving citations from "Related" links is unreliable and unnecessary
@@ -97,7 +101,8 @@ function doWeb(doc, url) {
 		// SR:Set preferences to show import links in English and do page reload
 		// (bit of a hack as it overwrites user prefs for language and import link type)
 		url = url.replace (/hl\=[^&]*&?/, "");
-		url = url.replace("scholar?", "scholar_setprefs?hl=en&scis=yes&scisf=3&submit=Save+Preferences&");
+		// changing scisf from 3 to 4 to move from .enw to .bib
+		url = url.replace("scholar?", "scholar_setprefs?hl=en&scis=yes&scisf=4&submit=Save+Preferences&");
 		haveEndNoteLinks = true;
 		Zotero.Utilities.loadDocument(url, scrape);
 		Zotero.wait();
