@@ -4,7 +4,7 @@
 	"label":"MODS",
 	"creator":"Simon Kornblith",
 	"target":"xml",
-	"minVersion":"1.0.8",
+	"minVersion":"2.0b6.3",
 	"maxVersion":"",
 	"priority":50,
 	"inRepository":true,
@@ -12,13 +12,11 @@
 }
 
 Zotero.addOption("exportNotes", true);
+Zotero.configure("dataMode", "xml/e4x");
 
 function detectImport() {
-	var read = Zotero.read(512);
-	var modsTagRegexp = /<mods[^>]+>/
-	if(modsTagRegexp.test(read)) {
-		return true;
-	}
+	var name = Zotero.getXML().name();
+	return name.uri == "http://www.loc.gov/mods/v3" && (name.localName == "modsCollection" || name.localName == "mods");
 }
 
 var partialItemTypes = ["bookSection", "journalArticle", "magazineArticle", "newspaperArticle"];
@@ -341,47 +339,11 @@ function doImport() {
 		"web site":"webpage"
 	};
 	
-	
-	var read;
-	
-	// read until we see if the file begins with a parse instruction
-	read = " ";
-	while(read == " " || read == "\n" || read == "\r") {
-		read = Zotero.read(1);
-	}
-	
-	var firstPart = read + Zotero.read(4);
-	if(firstPart == "<?xml") {
-		// got a parse instruction, read until it ends
-		read = true;
-		while((read !== false) && (read !== ">")) {
-			read = Zotero.read(1);
-			firstPart += read;
-		}
-		var encodingRe = /encoding=['"]([^'"]+)['"]/;
-		var m = encodingRe.exec(firstPart);
-		// set character set
-		try {
-			Zotero.setCharacterSet(m[1]);
-		} catch(e) {
-			Zotero.setCharacterSet("utf-8");
-		}
-	} else {
-		Zotero.setCharacterSet("utf-8");
-	}
-	
-	// read in 16384 byte increments
-	var text = "";
-	while(read = Zotero.read(16384)) {
-		text += read;
-	}
-	text = text.replace(/<\?xml[^>]+\?>/, "");
-	
 	// parse with E4X
 	var m = new Namespace("http://www.loc.gov/mods/v3");
 	// why does this default namespace declaration not work!?
 	default xml namespace = m;
-	var xml = new XML(text);
+	var xml = Zotero.getXML();
 	
 	if(xml.m::mods.length()) {
 		var modsElements = xml.m::mods;

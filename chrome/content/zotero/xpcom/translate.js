@@ -1820,55 +1820,23 @@ Zotero.Translate.prototype._importDoneSniffing = function(charset) {
 /*
  * set up import for IO
  */
-Zotero.Translate.prototype._importConfigureIO = function(charset) {	
-	if(this.configOptions.dataMode && (this.configOptions.dataMode == "rdf" || this.configOptions.dataMode == "rdf/n3")) {
-		if(!this._rdf) {
-			Zotero.debug("Translate: initializing data store");
-			// initialize data store
-			this._rdf = new Zotero.RDF.AJAW.RDFIndexedFormula();
-			
-			Zotero.debug("Translate: loading data");
-			// load data into store
-			var IOService = Components.classes['@mozilla.org/network/io-service;1']
-							.getService(Components.interfaces.nsIIOService);
-			if(this._storage) {
-				// parse from string
-				var baseURI = (this.location ? IOService.newURI(this.location, "utf-8", null) : null);
-				var nodeTree = (new DOMParser()).parseFromString(this._storage, 'text/xml');
-			} else {
-				// get URI
-				var fileHandler = IOService.getProtocolHandler("file")
-								  .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-				var baseURI = fileHandler.getURLSpecFromFile(this.location);
-				
-				// load XML from file using xmlhttp for charset detection
-				var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
-				              createInstance(Components.interfaces.nsIXMLHttpRequest);
-				xmlhttp.overrideMimeType("text/xml");
-				xmlhttp.open("GET", baseURI, false);  // Synchronous
-				xmlhttp.send("");
-				
-				var nodeTree = xmlhttp.responseXML;
-				if(nodeTree.getElementsByTagName("parsererror").length) {
-					this._rdf = false;
-					throw("RDF/XML parse error; loading data into data store failed");
-				}
-			}
-			
-			var parser = new Zotero.RDF.AJAW.RDFParser(this._rdf);
-			parser.parse(nodeTree, baseURI);
-		}
-		
-		Zotero.debug("adding apis");
-		// add RDF features to sandbox
-		this._sandbox.Zotero.RDF = new Zotero.Translate.RDF(this._rdf);
-		return;
-	}
-	
+Zotero.Translate.prototype._importConfigureIO = function(charset) {
 	if(this._storage) {
 		// import from string
-		this._storageFunctions(true);
 		this._storagePointer = 0;
+		
+		if(this.configOptions.dataMode && this.configOptions.dataMode == "xml/dom" || this.configOptions.dataMode == "rdf") {
+			// for DOM XML, handle with parseFromString
+			if(this.configOptions.dataMode == "xml/dom" || !this._rdf) {
+				var xmlNodes = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+									   .createInstance(Components.interfaces.nsIDOMParser)
+									   .parseFromString(this._storage, "text/xml");
+			}
+		} else if(this.configOptions.dataMode && this.configOptions.dataMode == "xml/e4x") {
+			var xmlNodes = new XML(this._storage.replace(/<\?xml[^>]+\?>/, ""));
+		} else {
+			this._storageFunctions(true);
+		}
 	} else {
 		// import from file
 		
@@ -1885,8 +1853,10 @@ Zotero.Translate.prototype._importConfigureIO = function(charset) {
 			this._streams.push(this._inputStream);
 		}
 		
+		var sStream = null;
 		var bomLength = 0;
-		if(charset === undefined || (charset && charset.length > 3 && charset.substr(0, 3) == "UTF")) {
+		if(!charset && this._charset) charset = this._charset;
+		if(!charset || (charset && charset.length > 3 && charset.substr(0, 3) == "UTF")) {
 			// seek past BOM
 			var bomCharset = this._importGetBOM();
 			var bomLength = (bomCharset ? BOMs[bomCharset].length : 0);
@@ -1895,80 +1865,185 @@ Zotero.Translate.prototype._importConfigureIO = function(charset) {
 			if(bomCharset) charset = this._charset = bomCharset;
 		}
 		
-		var intlStream = null;
-		if(charset) {
-			// if have detected charset
-			Zotero.debug("Translate: Using detected character set "+charset, 3);
-			// convert from detected charset
-			intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
-								   .createInstance(Components.interfaces.nsIConverterInputStream);
-			intlStream.init(this._inputStream, charset, 65535,
-				Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
-			me._streams.push(intlStream);
-		}
-		
-		// allow translator to set charset
-		this._sandbox.Zotero.setCharacterSet = function(charset) {
-			// seek back to the beginning
-			me._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
-						 .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, bomLength);
-			
-			intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
-								   .createInstance(Components.interfaces.nsIConverterInputStream);
-			try {
-				intlStream.init(me._inputStream, charset, 65535,
-					Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
-			} catch(e) {
-				throw "Text encoding not supported";
-			}
-			me._streams.push(intlStream);
-		}
-		
-		var str = new Object();
-		if(this.configOptions.dataMode && this.configOptions.dataMode == "line") {	// line by line reading	
-			this._inputStream.QueryInterface(Components.interfaces.nsILineInputStream);
-			
-			this._sandbox.Zotero.read = function() {
-				if(intlStream && intlStream instanceof Components.interfaces.nsIUnicharLineInputStream) {
-					var amountRead = intlStream.readLine(str);
-				} else {
-					var amountRead = me._inputStream.readLine(str);
-				}
-				if(amountRead) {
-					return str.value;
-				} else {
-					return false;
-				}
-			}
-		} else {										// block reading
-			var sStream;
-			
-			this._sandbox.Zotero.read = function(amount) {
-				if(intlStream) {
-					// read from international stream, if one is available
-					var amountRead = intlStream.readString(amount, str);
-					
-					if(amountRead) {
-						return str.value;
-					} else {
-						return false;
-					}
-				} else {
-					// allocate sStream on the fly
-					if(!sStream) {
-						sStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
-									 .createInstance(Components.interfaces.nsIScriptableInputStream);
-						sStream.init(me._inputStream);
-					}
-					
-					// read from the scriptable input stream
-					var string = sStream.read(amount);
-					return string;
-				}
-			}
-			
-			// attach sStream to stack of streams to close
+		// look for/seek past XML charset declaration
+		if(this.configOptions.dataMode && (this.configOptions.dataMode == "xml/e4x"
+				|| this.configOptions.dataMode == "xml/dom"
+				|| this.configOptions.dataMode == "rdf")) {
+				
+			sStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
+						 .createInstance(Components.interfaces.nsIScriptableInputStream);
+			sStream.init(this._inputStream);
 			this._streams.push(sStream);
+			
+			// read until we see if the file begins with a parse instruction
+			const whitespaceRe = /\s/g;
+			var read;
+			do {
+				read = sStream.read(1);
+			} while(whitespaceRe.test(read))
+			
+			if(read != "<") throw "XML load error: text does not start with <";
+			
+			var firstPart = read + sStream.read(4);
+			if(firstPart == "<?xml") {
+				// got a parse instruction, read until it ends
+				read = true;
+				while((read !== false) && (read !== ">")) {
+					read = sStream.read(1);
+					firstPart += read;
+				}
+				
+				var encodingRe = /encoding=['"]([^'"]+)['"]/;
+				var m = encodingRe.exec(firstPart);
+				if(m) {
+					try {
+						var charconv = Components.classes["@mozilla.org/charset-converter-manager;1"]
+											   .getService(Components.interfaces.nsICharsetConverterManager)
+											   .getCharsetTitle(m[1]);
+						if(charconv) charset = this._charset = m[1];
+					} catch(e) {}
+				}
+			} else {
+				this._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
+							 .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, bomLength);
+			}
+			
+			if(!charset) charset = "UTF-8";
+		}
+		
+		if(this.configOptions.dataMode && this.configOptions.dataMode == "xml/dom" || this.configOptions.dataMode == "rdf") {
+			// for DOM XML, pass charset to parseFromStream
+			if(this.configOptions.dataMode == "xml/dom" || !this._rdf) {
+				var xmlNodes = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+									   .createInstance(Components.interfaces.nsIDOMParser)
+									   .parseFromStream(this._inputStream, charset, this.location.fileSize, "text/xml");
+			}
+		} else {
+			var intlStream = null;
+			if(charset) {
+				// if have detected charset
+				Zotero.debug("Translate: Using detected character set "+charset, 3);
+				// convert from detected charset
+				intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+									   .createInstance(Components.interfaces.nsIConverterInputStream);
+				intlStream.init(this._inputStream, charset, 65535,
+					Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+				me._streams.push(intlStream);
+			}
+			
+			if(this.configOptions.dataMode && this.configOptions.dataMode == "xml/e4x") {	
+				// read in 16384 byte increments
+				var xmlNodes = "";
+				var str = {};
+				while(intlStream.readString(16384, str)) {
+					xmlNodes += str.value;
+				}
+				
+				// create xml
+				xmlNodes = new XML(xmlNodes);
+			} else {
+				// standard text reading tools
+				
+				// allow translator to set charset
+				this._sandbox.Zotero.setCharacterSet = function(charset) {
+					// seek back to the beginning
+					me._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
+								 .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, bomLength);
+					
+					intlStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+										   .createInstance(Components.interfaces.nsIConverterInputStream);
+					try {
+						intlStream.init(me._inputStream, charset, 65535,
+							Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+					} catch(e) {
+						throw "Text encoding not supported";
+					}
+					me._streams.push(intlStream);
+				}
+				
+				var str = new Object();
+				if(this.configOptions.dataMode && this.configOptions.dataMode == "line") {	// line by line reading	
+					this._inputStream.QueryInterface(Components.interfaces.nsILineInputStream);
+					
+					this._sandbox.Zotero.read = function() {
+						if(intlStream && intlStream instanceof Components.interfaces.nsIUnicharLineInputStream) {
+							var amountRead = intlStream.readLine(str);
+						} else {
+							var amountRead = me._inputStream.readLine(str);
+						}
+						if(amountRead) {
+							return str.value;
+						} else {
+							return false;
+						}
+					}
+				} else {										// block reading
+					this._sandbox.Zotero.read = function(amount) {
+						if(intlStream) {
+							// read from international stream, if one is available
+							var amountRead = intlStream.readString(amount, str);
+							
+							if(amountRead) {
+								return str.value;
+							} else {
+								return false;
+							}
+						} else {
+							// allocate sStream on the fly
+							if(!sStream) {
+								sStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
+											 .createInstance(Components.interfaces.nsIScriptableInputStream);
+								sStream.init(me._inputStream);
+								this._streams.push(sStream);
+							}
+							
+							// read from the scriptable input stream
+							var string = sStream.read(amount);
+							return string;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	if(this.configOptions.dataMode) {
+		// make sure DOM XML actually got parsed
+		if(xmlNodes && (this.configOptions.dataMode == "rdf" || this.configOptions.dataMode == "xml/dom")
+				&& xmlNodes.getElementsByTagName("parsererror").length) {
+			this._rdf = undefined;
+			throw("XML parser error: loading data into data store failed");
+		}
+		
+		if(this.configOptions.dataMode == "rdf") {
+			// set up RDF
+			if(!this._rdf) {
+				// get URI
+				var IOService = Components.classes['@mozilla.org/network/io-service;1']
+								.getService(Components.interfaces.nsIIOService);
+				if(this._storage) {
+					var baseURI = this.location ? this.location : null;
+				} else {
+					var fileHandler = IOService.getProtocolHandler("file")
+									  .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
+					var baseURI = fileHandler.getURLSpecFromFile(this.location);
+				}
+				
+				Zotero.debug("Translate: initializing data store");
+				this._rdf = new Zotero.RDF.AJAW.RDFIndexedFormula();
+				
+				Zotero.debug("Translate: loading data");
+				var parser = new Zotero.RDF.AJAW.RDFParser(this._rdf);
+				parser.parse(xmlNodes, "");
+			}
+			
+			// add RDF features to sandbox
+			this._sandbox.Zotero.RDF = new Zotero.Translate.RDF(this._rdf);
+		} else if(this.configOptions.dataMode == "xml/e4x" || this.configOptions.dataMode == "xml/dom") {
+			// add getXML function
+			this._sandbox.Zotero.getXML = function() {
+				return xmlNodes;
+			}
 		}
 	}
 }
