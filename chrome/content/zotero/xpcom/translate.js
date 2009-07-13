@@ -1135,7 +1135,7 @@ Zotero.Translate.prototype._reportTranslationFailure = function(errorData) {
 Zotero.Translate.prototype._closeStreams = function() {
 	// serialize RDF and unregister dataSource
 	if(this._rdf) {
-		if(this._streams.length) {
+		if(this.type == "export" && this._streams.length) {
 			// initialize serializer and add prefixes
 			var serializer = Serializer();
 			for(var prefix in this._rdf.namespaces) {
@@ -1823,11 +1823,11 @@ Zotero.Translate.prototype._importDoneSniffing = function(charset) {
 Zotero.Translate.prototype._importConfigureIO = function(charset) {	
 	if(this.configOptions.dataMode && (this.configOptions.dataMode == "rdf" || this.configOptions.dataMode == "rdf/n3")) {
 		if(!this._rdf) {
-			Zotero.debug("initializing data store");
+			Zotero.debug("Translate: initializing data store");
 			// initialize data store
 			this._rdf = new Zotero.RDF.AJAW.RDFIndexedFormula();
 			
-			Zotero.debug("loading data");
+			Zotero.debug("Translate: loading data");
 			// load data into store
 			var IOService = Components.classes['@mozilla.org/network/io-service;1']
 							.getService(Components.interfaces.nsIIOService);
@@ -1849,8 +1849,10 @@ Zotero.Translate.prototype._importConfigureIO = function(charset) {
 				xmlhttp.send("");
 				
 				var nodeTree = xmlhttp.responseXML;
-		
-				Zotero.debug(xmlhttp.responseText)
+				if(nodeTree.getElementsByTagName("parsererror").length) {
+					this._rdf = false;
+					throw("RDF/XML parse error; loading data into data store failed");
+				}
 			}
 			
 			var parser = new Zotero.RDF.AJAW.RDFParser(this._rdf);
