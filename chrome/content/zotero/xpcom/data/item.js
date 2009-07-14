@@ -293,9 +293,6 @@ Zotero.Item.prototype.loadPrimaryData = function(allowFail) {
 				where.push(whereSQL);
 			}
 		}
-		else {
-			Zotero.debug("skipping " + field);
-		}
 	}
 	
 	if (!columns.length) {
@@ -1750,9 +1747,7 @@ Zotero.Item.prototype.save = function() {
 						// TODO: clear caches
 						throw ("Cannot set source to invalid item " + this._sourceItem);
 					}
-				}
-				
-				if (newSourceItem) {
+					
 					var newSourceItemNotifierData = {};
 					newSourceItemNotifierData[newSourceItem.id] = {
 						old: newSourceItem.serialize()
@@ -1788,6 +1783,10 @@ Zotero.Item.prototype.save = function() {
 								+ "WHERE itemID=?";
 					var changedCollections = Zotero.DB.columnQuery(sql, this.id);
 					if (changedCollections) {
+						sql = "UPDATE collections SET dateModified=CURRENT_TIMESTAMP, clientDateModified=CURRENT_TIMESTAMP "
+							+ "WHERE collectionID IN (SELECT collectionID FROM collectionItems WHERE itemID=?)";
+						Zotero.DB.query(sql, this.id);
+						
 						if (newSourceItem) {
 							sql = "UPDATE OR REPLACE collectionItems "
 								+ "SET itemID=? WHERE itemID=?";
@@ -1990,10 +1989,13 @@ Zotero.Item.prototype.numChildren = function(includeTrashed) {
 
 
 /**
- * Get the itemID of the source item for a note or file
- * @return	{Integer}
+ * @return	{Integer|FALSE}	 itemID of the parent item for an attachment or note, or FALSE if none
  */
 Zotero.Item.prototype.getSource = function() {
+	if (this._sourceItem === false) {
+		return false;
+	}
+	
 	if (this._sourceItem !== null) {
 		if (typeof this._sourceItem == 'number') {
 			return this._sourceItem;
@@ -2034,10 +2036,13 @@ Zotero.Item.prototype.getSource = function() {
 
 
 /**
- * Get the key of the source item for a note or file
- * @return	{String}
+ * @return	{String|FALSE}	 Key of the parent item for an attachment or note, or FALSE if none
  */
 Zotero.Item.prototype.getSourceKey = function() {
+	if (this._sourceItem === false) {
+		return false;
+	}
+	
 	if (this._sourceItem !== null) {
 		if (typeof this._sourceItem == 'string') {
 			return this._sourceItem;
@@ -2094,7 +2099,7 @@ Zotero.Item.prototype.setSource = function(sourceItemID) {
 		this._previousData = this.serialize();
 	}
 	
-	this._sourceItem = sourceItemID ? parseInt(sourceItemID) : null;
+	this._sourceItem = sourceItemID ? parseInt(sourceItemID) : false;
 	this._changedSource = true;
 	
 	return true;
@@ -2120,7 +2125,7 @@ Zotero.Item.prototype.setSourceKey = function(sourceItemKey) {
 		var oldSourceItemKey = sourceItem.key;
 	}
 	else {
-		var oldSourceItemKey = null;
+		var oldSourceItemKey = false;
 	}
 	if (oldSourceItemKey == sourceItemKey) {
 		Zotero.debug("Source item has not changed in Zotero.Item.setSourceKey()");
@@ -2131,7 +2136,7 @@ Zotero.Item.prototype.setSourceKey = function(sourceItemKey) {
 		this._previousData = this.serialize();
 	}
 	
-	this._sourceItem = sourceItemKey ? sourceItemKey : null;
+	this._sourceItem = sourceItemKey ? sourceItemKey : false;
 	this._changedSource = true;
 	
 	return true;
@@ -3320,6 +3325,16 @@ Zotero.Item.prototype.diff = function (item, includeMatches, ignoreFields) {
 	// TODO: annotations
 	
 	var changed = false;
+	
+	changed = thisData.sourceItemKey != otherData.sourceItemKey;
+	if (includeMatches || changed) {
+		diff[0].sourceItemKey = thisData.sourceItemKey;
+		diff[1].sourceItemKey = otherData.sourceItemKey;
+		
+		if (changed) {
+			numDiffs++;
+		}
+	}
 	
 	if (thisData.attachment) {
 		for (var field in thisData.attachment) {

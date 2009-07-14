@@ -1893,6 +1893,7 @@ Zotero.Sync.Server.Data = new function() {
 		var remoteCreatorStore = {};
 		var relatedItemsStore = {};
 		var itemStorageModTimes = {};
+		var childItemStore = [];
 		
 		if (xml.groups.length()) {
 			Zotero.debug("Processing remotely changed groups");
@@ -1992,12 +1993,11 @@ Zotero.Sync.Server.Data = new function() {
 						}
 						
 						var remoteObj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode);
-						
+
 						// Some types we don't bother to reconcile
 						if (_noMergeTypes.indexOf(type) != -1) {
 							// If local is newer, send to server
 							if (obj.dateModified > remoteObj.dateModified) {
-								Zotero.debug('c');
 								syncSession.addToUpdated(obj);
 								continue;
 							}
@@ -2059,7 +2059,7 @@ Zotero.Sync.Server.Data = new function() {
 									break;
 								
 								case 'collection':
-									var changed = _mergeCollection(obj, remoteObj);
+									var changed = _mergeCollection(obj, remoteObj, childItemStore);
 									if (!changed) {
 										syncSession.removeFromUpdated(obj);
 									}
@@ -2133,6 +2133,7 @@ Zotero.Sync.Server.Data = new function() {
 						}
 					}
 				}
+				
 				
 				// Temporarily remove and store related items that don't yet exist
 				if (type == 'item') {
@@ -2303,6 +2304,13 @@ Zotero.Sync.Server.Data = new function() {
 			Zotero.debug('Saving merged ' + types);
 			
 			if (type == 'collection') {
+				for each(var col in toSave) {
+					var changed = _removeChildItemsFromCollection(col, childItemStore);
+					if (changed) {
+						syncSession.addToUpdated(col);
+					}
+				}
+				
 				// Save collections recursively from the top down
 				_saveCollections(toSave);
 			}
@@ -2318,7 +2326,17 @@ Zotero.Sync.Server.Data = new function() {
 				
 				// Save the rest
 				for each(var obj in toSave) {
+					// Keep list of all child items being saved
+					var store = false;
+					if (!obj.isTopLevelItem()) {
+						store = true;
+					}
+					
 					obj.save();
+					
+					if (store) {
+						childItemStore.push(obj.id)
+					}
 				}
 				
 				// Add back related items (which now exist)
@@ -2534,7 +2552,27 @@ Zotero.Sync.Server.Data = new function() {
 	}
 	
 	
-	function _mergeCollection(localObj, remoteObj) {
+	// Remove any child items from collection, which might exist if an attachment in a collection was
+	// remotely changed from a	top-level item to a child item
+	function _removeChildItemsFromCollection(collection, childItems) {
+		if (!childItems.length) {
+			return false;
+		}
+		var itemIDs = collection.getChildItems(true);
+		// TODO: fix to always return array
+		if (!itemIDs) {
+			return false;
+		}
+		var newItemIDs = Zotero.Utilities.prototype.arrayDiff(childItems, itemIDs);
+		if (itemIDs.length == newItemIDs.length) {
+			return false;
+		}
+		collection.childItems = newItemIDs;
+		return true;
+	}
+	
+	
+	function _mergeCollection(localObj, remoteObj, childItems) {
 		var diff = localObj.diff(remoteObj, false, true);
 		if (!diff) {
 			return false;
@@ -2593,6 +2631,8 @@ Zotero.Sync.Server.Data = new function() {
 			// TODO: log rather than alert
 			alert(msg);
 		}
+		
+		_removeChildItemsFromCollection(targetObj, childItems);
 		
 		targetObj.save();
 		return true;
@@ -3061,7 +3101,7 @@ Zotero.Sync.Server.Data = new function() {
 		// Both notes and attachments might have parents and notes
 		if (item.isNote() || item.isAttachment()) {
 			var sourceItemKey = xmlItem.@sourceItem.toString();
-			item.setSourceKey(sourceItemKey ? sourceItemKey : null);
+			item.setSourceKey(sourceItemKey ? sourceItemKey : false);
 			item.setNote(xmlItem.note.toString());
 		}
 		
