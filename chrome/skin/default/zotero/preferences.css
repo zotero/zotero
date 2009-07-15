@@ -119,12 +119,11 @@ grid row hbox:first-child
 #zotero-reset row
 {
 	margin: 0;
-	padding: 15px;
+	padding: 8px;
 }
 
 #zotero-reset row:not(:last-child)
 {
-	border-bottom: 1px #999 solid;
 }
 
 #zotero-reset row vbox
@@ -155,7 +154,6 @@ grid row hbox:first-child
 #zotero-reset > hbox
 {
 	margin-top: 5px;
-	-moz-box-pack: center;
 }
 
 

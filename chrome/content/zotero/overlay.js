@@ -231,6 +231,7 @@ var ZoteroPane = new function()
 			sep.nextSibling.nextSibling.hidden = false;
 			sep.nextSibling.nextSibling.nextSibling.hidden = false;
 			sep.nextSibling.nextSibling.nextSibling.nextSibling.hidden = false;
+			sep.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.hidden = false;
 		}
 		
 		if (Zotero.Prefs.get('debugShowDuplicates')) {

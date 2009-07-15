@@ -142,7 +142,7 @@
 								<menuitem hidden="true" label="  Reset Server Lock" oncommand="Zotero.Sync.Server.resetServer()"/>
 								<menuitem hidden="true" label="  Reset Client" oncommand="Zotero.Sync.Server.resetClient()"/>
 								<menuitem label="Storage Debugging" disabled="true"/>
-								<menuitem label="  Reset Storage History" oncommand="Zotero.Sync.Storage.resetAllSyncStates()"/>
+								<menuitem hidden="true" label="  Reset Storage History" oncommand="Zotero.Sync.Storage.resetAllSyncStates()"/>
 								<menuitem label="  Purge Deleted Storage Files" oncommand="Zotero.Sync.Storage.purgeDeletedStorageFiles(function(results) { Zotero.debug(results); })"/>
 								<menuitem label="  Purge Orphaned Storage Files" oncommand="Zotero.Sync.Storage.purgeOrphanedStorageFiles(function(results) { Zotero.debug(results); })"/>
 								<menuseparator id="zotero-tb-actions-separator"/>

@@ -274,7 +274,7 @@ To add a new preference:
 									<hbox>
 										<menulist id="storage-url-protocol"
 												preference="pref-storage-protocol"
-												onsynctopreference="updateStorageSettings(this.value)">
+												onsynctopreference="updateStorageSettings(this.value); unverifyStorageServer();">
 											<menupopup>
 												<menuitem label="WebDAV" value="webdav"/>
 												<!-- TODO: localize -->
@@ -330,10 +330,11 @@ To add a new preference:
 				</tabpanel>
 				
 				<tabpanel id="zotero-reset" orient="vertical">
-					<groupbox>
-						<caption label="Zotero Sync Server"/>
-						
-						<radiogroup id="zotero-reset-sync-group" oncommand="handleSyncResetSelect(this);">
+					<radiogroup id="zotero-reset-sync-group" oncommand="handleSyncResetSelect(this)">
+						<groupbox>
+							<!-- TODO: localize -->
+							<caption label="Zotero Sync Server"/>
+							
 							<grid>
 								<columns>
 									<column/>
@@ -366,12 +367,33 @@ To add a new preference:
 									</row>
 								</rows>
 							</grid>
-						</radiogroup>
+						</groupbox>
 						
-						<hbox>
-							<button id="zotero-reset-button" label="Reset..." oncommand="handleSyncReset(document.getElementById('zotero-reset-sync-group').selectedItem.parentNode.id.substr(7))"/>
-						</hbox>
-					</groupbox>
+						<groupbox>
+							<caption label="Storage Server"/>
+							
+							<grid>
+								<columns>
+									<column/>
+									<column align="start" pack="start" flex="1"/>
+								</columns>
+								
+								<rows>
+									<row id="zotero-reset-storage-history">
+									<radio/>
+										<vbox onclick="this.previousSibling.click()">
+											<label value="Reset File Sync History"/>
+											<description>Force checking of the storage server for all local attachment files.</description>
+										</vbox>
+									</row>
+								</rows>
+							</grid>
+						</groupbox>
+					</radiogroup>
+					
+					<hbox>
+						<button id="zotero-reset-button" label="Reset..." oncommand="handleSyncReset(document.getElementById('zotero-reset-sync-group').selectedItem.parentNode.id.substr(7))"/>
+					</hbox>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>
