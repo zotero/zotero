@@ -194,7 +194,6 @@ function updateStorageSettings(value) {
 			prefix.value = 'https://';
 			break;
 	}
-	unverifyStorageServer();
 }
 
 function unverifyStorageServer() {
@@ -406,6 +405,36 @@ function handleSyncReset(action) {
 							"The local Zotero library has been merged with data from the Zotero server."
 						);
 					});
+					break;
+				
+				// Cancel
+				case 1:
+					return;
+			}
+			
+			break;
+		
+		case 'reset-storage-history':
+			var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
+							+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL)
+							+ pr.BUTTON_POS_1_DEFAULT;
+			var index = pr.confirmEx(
+				// TODO: localize
+				Zotero.getString('general.warning'),
+				"All file sync history will be cleared.\n\n"
+					+ "Any local attachment files that do not exist on the storage server will be uploaded on the next sync.",
+				buttonFlags,
+				"Reset",
+				null, null, null, {}
+			);
+			
+			switch (index) {
+				case 0:
+					Zotero.Sync.Storage.resetAllSyncStates();
+					pr.alert(
+						"File Sync History Cleared",
+						"The file sync history has been cleared."
+					);
 					break;
 				
 				// Cancel
