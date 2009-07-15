@@ -551,8 +551,6 @@ To add a new preference:
 			</hbox>
 			
 			<separator/>
-			
-			<label id="quickCopy-macWarning" hidden="true" value="&zotero.preferences.quickCopy.macWarning;"/>
 		</groupbox>
 	</prefpane>
 	
