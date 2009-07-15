@@ -632,10 +632,6 @@ function deleteSelectedQuickCopySite() {
 
 
 function updateQuickCopyInstructions() {
-	if (Zotero.isMac) {
-		document.getElementById('quickCopy-macWarning').setAttribute('hidden', false);
-	}
-	
 	var prefix = Zotero.isMac ? 'Cmd+Shift+' : 'Ctrl+Alt+';
 	var key = Zotero.Prefs.get('keys.copySelectedItemsToClipboard');
 	
