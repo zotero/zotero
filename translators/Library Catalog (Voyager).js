@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-12-02 10:10:00"
+	"lastUpdated":"2009-07-15 20:35:00"
 }
 
 function detectWeb(doc, url) {
@@ -61,7 +61,7 @@ function doWeb(doc, url) {
 		var checkboxes = new Array();
 		var urls = new Array();
 		
-		var tableRows = doc.evaluate('//form[@name="frm"]//table/tbody/tr[td/input[@type="checkbox"]]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var tableRows = doc.evaluate('//form[@name="frm"]//table/tbody/tr[td/input[@type="checkbox" or @type="CHECKBOX"]]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 
 		// Go through table rows
 		var tableRow;
