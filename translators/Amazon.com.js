@@ -16,7 +16,8 @@ function detectWeb(doc, url) {
 	var suffixRe = new RegExp("https?://(?:www\.)?amazon\.([^/]+)/");
 	var suffixMatch = suffixRe.exec(url);
 	var suffix = suffixMatch[1];
-	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|exec/obidos/search-handle-url/|s/)');
+	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|exec/obidos/search-handle-url/|s/|[^/]+/lm/|gp/richpub/)');
+	Zotero.debug(searchRe.test(doc.location.href));
 	if(searchRe.test(doc.location.href)) {
 		return "multiple";
 	} else {
@@ -63,7 +64,7 @@ function doWeb(doc, url) {
 	var suffixMatch = suffixRe.exec(url);
 	var suffix = suffixMatch[1];
 
-	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|exec/obidos/search-handle-url/|s/)');
+	var searchRe = new RegExp('^https?://(?:www\.)?amazon\.' + suffix + '/(gp/search/|exec/obidos/search-handle-url/|s/|[^/]+/lm/|gp/richpub/)');
 	var m = searchRe.exec(doc.location.href);
 	var uris = new Array();
 	if (suffix == "co.jp"){
@@ -71,11 +72,19 @@ function doWeb(doc, url) {
 	}
 	if (suffix == ".com") suffix = "com";
 	if(m) {
-		var xpath = '//div[@class="productTitle"]/a | //a[span[@class="srTitle"]]';
+		var availableItems = new Array();
+		
+		
+		if(doc.location.href.match(/gp\/richpub\//)){ // Show selector for Guides
+			var xpath = '//a[(contains(@href, "ref=cm_syf_dtl_pl") or contains(@href, "ref=cm_syf_dtl_top")) and preceding-sibling::b]';
+		} else if (doc.location.href.match(/\/lm\//)) { // Show selector for Lists
+			var xpath = '//span[@id="lm_asinlink95"]//a'
+		} else { // Show selector for Search results
+			var xpath = '//div[@class="productTitle"]/a | //a[span[@class="srTitle"]]';
+		}
 		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var elmt = elmts.iterateNext();
 		var asins = new Array();
-		var availableItems = new Array();
 		var i = 0;
 		var asinRe = new RegExp('/(dp|product)/([^/]+)/');
 		do {
@@ -89,6 +98,7 @@ function doWeb(doc, url) {
 			}
 		} while (elmt = elmts.iterateNext());
 		var items = Zotero.selectItems(availableItems);
+		
 		
 		if(!items) {
 			return true;
