@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":90,
 	"inRepository":true,
-	"lastUpdated":"2009-07-07 08:50:00"
+	"lastUpdated":"2009-07-16 09:20:00"
 }
 
 function detectSearch(item) {
@@ -32,8 +32,7 @@ function processCrossRef(xmlOutput) {
 	try {
 		var xml = new XML(xmlOutput);
 		if(!xml.doi_record.length()) {
-			default xml namespace = "http://www.crossref.org/xschema/1.0"; with({});
-			var xml = new XML('<container xmlns="http://www.crossref.org/xschema/1.0">' + xmlOutput + '</container>');
+			var xml = new XML(xmlOutput);
 		}
 	} catch(e) {
 		return false;
@@ -141,7 +140,7 @@ function doSearch(item) {
 		var co = Zotero.Utilities.createContextObject(item);
 	}
 	
-	Zotero.Utilities.HTTP.doGet("http://www.crossref.org/openurl?req_dat=zter:zter321&"+co+"&noredirect=true&format=unixref", function(responseText) {
+	Zotero.Utilities.HTTP.doGet("http://www.crossref.org/openurl?pid=zter:zter321&"+co+"&noredirect=true&format=unixref", function(responseText) {
 		processCrossRef(responseText);
 		Zotero.done();
 	});
