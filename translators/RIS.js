@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-12-01 18:31:54"
+	"lastUpdated":"2009-07-16 10:35:00"
 }
 
 Zotero.configure("dataMode", "line");
@@ -18,7 +18,7 @@ Zotero.addOption("exportCharset", "UTF-8");
 function detectImport() {
 	var line;
 	var i = 0;
-	while((line = Zotero.read()) !== "false") {
+	while((line = Zotero.read()) !== false) {
 		line = line.replace(/^\s+/, "");
 		if(line != "") {
 			if(line.substr(0, 6).match(/^TY {1,2}- /)) {
