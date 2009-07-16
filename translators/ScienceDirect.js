@@ -22,6 +22,8 @@ function detectWeb(doc, url) {
 	}
 }
 
+
+
 function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -51,64 +53,68 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
+			
+			var sets = [];
+			for each (article in articles) {
+				sets.push({article:article});
+			}
+			
 		} else {
 			articles = [url];
+			var sets =[{currentdoc:doc}];
 		}
 		if(articles.length == 0) {
 			Zotero.debug('no items');
 			return;
 		}
 		
-		var sets = [];
-		for each (article in articles) {
-			sets.push({article:article});
-		}
-		var first = function(set, next) {
-			
-			var article = set.article;
-			
-			
-			Zotero.Utilities.processDocuments(article, function(newDoc) {
-				var tempPDF = newDoc.evaluate('//a[@class="noul" and div/div[contains(text(), "PDF")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				if (!tempPDF) { // PDF xpath failed, lets try another
-					tempPDF = newDoc.evaluate('//a[@class="noul" and contains(text(), "PDF")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-					if (!tempPDF) { // second PDF xpath failed set PDF to null to avoid item.attachments
-						var PDF = null;
-					} else {
-						var PDF = tempPDF.href; // second xpath succeeded, use that link
-					}
+		
+		var scrape = function(newDoc, set) {
+			var PDF;
+			var tempPDF = newDoc.evaluate('//a[@class="noul" and div/div[contains(text(), "PDF")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if (!tempPDF) { // PDF xpath failed, lets try another
+				tempPDF = newDoc.evaluate('//a[@class="noul" and contains(text(), "PDF")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				if (!tempPDF) { // second PDF xpath failed set PDF to null to avoid item.attachments
+					PDF = null;
 				} else {
-					var PDF = tempPDF.href; // first xpath succeeded, use that link
+					PDF = tempPDF.href; // second xpath succeeded, use that link
 				}
+			} else {
+				PDF = tempPDF.href; // first xpath succeeded, use that link
+			}
+			var url = newDoc.location.href;
+			var get = newDoc.evaluate('//a[img[contains(@src, "exportarticle_a.gif")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			// if the PDF is available make it an attachment otherwise only use snapshot.
+			var attachments;
+			if (PDF) {
+				attachments = [
+					{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
+					{url:PDF, title:"ScienceDirect Full Text PDF", mimeType:"application/pdf"} // Sometimes PDF is null...I hope that is ok
+				];
+			} else {
+				attachments = [
+					{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"}
+				];
+			}
+			// This does not work, not sure why.
+			//var doi = newDoc.evaluate('//a[contains(text(), "doi")]/text()', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			//Zotero.debug(doi);
+			//doi = doi.textContent.substr(4);
+			// pass these values to the next function
+			//set.doi = doi;
+			set.url = url;
+			set.get = get;
+			set.attachments = attachments;
+			return set;
 
-				var url = newDoc.location.href;
-				var get = newDoc.evaluate('//a[img[contains(@src, "exportarticle_a.gif")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-				// if the PDF is available make it an attachment otherwise only use snapshot.
-				if (PDF) {
-					var attachments = [
-						{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
-						{url:PDF, title:"ScienceDirect Full Text PDF", mimeType:"application/pdf"} // Sometimes PDF is null...I hope that is ok
-					];
-				} else {
-					var attachments = [
-						{url:url, title:"ScienceDirect Snapshot", mimeType:"text/html"},
-					];
-				}
-				// This does not work, not sure why.
-				//var doi = newDoc.evaluate('//a[contains(text(), "doi")]/text()', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				//Zotero.debug(doi);
-				//doi = doi.textContent.substr(4);
-				
-				
-				// pass these values to the next function
-				//set.doi = doi;
-				set.url = url;
-				set.get = get;
-				set.attachments = attachments;
-				
-				next();
-				
-			});
+		};
+		
+		var first = function(set, next) {
+				var article = set.article;
+				Zotero.Utilities.processDocuments(article, function(doc){
+					set = scrape(doc, set);
+					next();
+				});
 		};
 		
 		var second = function(set, next) {
@@ -144,7 +150,6 @@ function doWeb(doc, url) {
 			var baseurl = set.baseurl;
 			var post = set.post;
 			var attachments = set.attachments;
-			//var doi = set.doi;
 			
 			
 			Zotero.Utilities.HTTP.doPost(baseurl + 'science', post, function(text) { 
@@ -159,9 +164,6 @@ function doWeb(doc, url) {
 						item.notes = new Array();
 					}
 					item.DOI = item.DOI.substr(10);
-					//if (doi) {
-					//	item.DOI = doi;
-					//}
 					item.complete();
 				});
 				translator.translate();
@@ -171,10 +173,24 @@ function doWeb(doc, url) {
 			
 			
 		};
-		var functioncallbacks = [first, second, third];
-		Zotero.Utilities.processAsync(sets, functioncallbacks, function() {Zotero.done()});
+		
+		
+		if(detectWeb(doc, url) == "journalArticle") {
+			Zotero.debug("Single");
+			var set = scrape(doc, {});
+			second(set, function(){
+				third(set, function(){
+					Zotero.done();
+				});
+			});
+			
+		} else {
+			var functioncallbacks = [first, second, third];
+			Zotero.Utilities.processAsync(sets, functioncallbacks, function() {Zotero.done()});
+		}
 		
 	} else {
+		var sets = [];
 		var articles = new Array();
 		if (detectWeb(doc, url) == "multiple") {
 			var items = new Object();
@@ -195,6 +211,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
+			
 		} else {
 			articles = [url];
 		}
@@ -203,53 +220,53 @@ function doWeb(doc, url) {
 			return;
 		}
 		
-		
-		var sets = [];
 		for each (article in articles) {
 			sets.push({article:article});
 		}
-
+		
+		var unauthScrape = function(doc2) {
+			var item = new Zotero.Item("journalArticle");
+			item.repository = "ScienceDirect";
+			item.url = doc2.location.href;
+			var title = doc2.title.match(/^[^-]+\-([^:]+):(.*)$/);
+			item.title = Zotero.Utilities.trimInternal(title[2]);
+			item.publicationTitle = Zotero.Utilities.trimInternal(title[1]);
+			voliss = doc2.evaluate('//div[@class="pageText"][@id="sdBody"]/table/tbody/tr/td[1]', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			if (voliss.match(/Volume\s+\d+/)) item.volume = voliss.match(/Volume\s+(\d+)/)[1];
+			if (voliss.match(/Issues?\s+[^,]+/)) item.issue = voliss.match(/Issues?\s+([^,]+)/)[1];
+			if (voliss.match(/(J|F|M|A|S|O|N|D)\w+\s+\d{4}/)) item.date = voliss.match(/(J|F|M|A|S|O|N|D)\w+\s+\d{4}/)[0];
+			if (voliss.match(/Pages?\s+[^,^\s]+/)) item.pages = voliss.match(/Pages?\s+([^,^\s]+)/)[1];
+			var abspath = '//div[@class="articleHeaderInner"][@id="articleHeader"]/div[@class="articleText"]/p';
+			var absx = doc2.evaluate(abspath, doc2, nsResolver, XPathResult.ANY_TYPE, null);
+			var ab;
+			item.abstractNote = "";
+			while (ab = absx.iterateNext()) {
+				item.abstractNote += Zotero.Utilities.trimInternal(ab.textContent) + " ";
+			}
+			if (item.abstractNote.substr(0, 7) == "Summary") {
+				item.abstractNote = item.abstractNote.substr(9);
+			}
+			var tagpath = '//div[@class="articleText"]/p[strong[starts-with(text(), "Keywords:")]]';
+			if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+				if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1]) {
+					var tags = doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1].split(";");
+					for (var i in tags) {
+						item.tags.push(Zotero.Utilities.trimInternal(tags[i]));
+					}
+				}
+			}
+			item.attachments.push({url:doc2.location.href, title:"ScienceDirect Snapshot", mimeType:"text/html"});
+			
+			return item;
+		};
 		
 		var first = function(set, next) {
 			
 			var article = set.article;
 		
 			Zotero.Utilities.processDocuments(article, function(doc2) {
-				var item = new Zotero.Item("journalArticle");
-				item.repository = "ScienceDirect";
-				item.url = doc2.location.href;
-				var title = doc2.title.match(/^[^-]+\-([^:]+):(.*)$/);
-				item.title = Zotero.Utilities.trimInternal(title[2]);
-				item.publicationTitle = Zotero.Utilities.trimInternal(title[1]);
-				voliss = doc2.evaluate('//div[@class="pageText"][@id="sdBody"]/table/tbody/tr/td[1]', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				if (voliss.match(/Volume\s+\d+/)) item.volume = voliss.match(/Volume\s+(\d+)/)[1];
-				if (voliss.match(/Issues?\s+[^,]+/)) item.issue = voliss.match(/Issues?\s+([^,]+)/)[1];
-				if (voliss.match(/(J|F|M|A|S|O|N|D)\w+\s+\d{4}/)) item.date = voliss.match(/(J|F|M|A|S|O|N|D)\w+\s+\d{4}/)[0];
-				if (voliss.match(/Pages?\s+[^,^\s]+/)) item.pages = voliss.match(/Pages?\s+([^,^\s]+)/)[1];
-				// why doesn't this work?
-				//item.DOI = doc2.evaluate('//a[contains(text(), "doi")]/text()', doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(4);
-				var abspath = '//div[@class="articleHeaderInner"][@id="articleHeader"]/div[@class="articleText"]/p';
-				var absx = doc2.evaluate(abspath, doc2, nsResolver, XPathResult.ANY_TYPE, null);
-				var ab;
-				item.abstractNote = "";
-				while (ab = absx.iterateNext()) {
-					item.abstractNote += Zotero.Utilities.trimInternal(ab.textContent) + " ";
-				}
-				if (item.abstractNote.substr(0, 7) == "Summary") {
-					item.abstractNote = item.abstractNote.substr(9);
-				}
-				var tagpath = '//div[@class="articleText"]/p[strong[starts-with(text(), "Keywords:")]]';
-				if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-					if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1]) {
-						var tags = doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1].split(";");
-						for (var i in tags) {
-							item.tags.push(Zotero.Utilities.trimInternal(tags[i]));
-						}
-					}
-				}
-				item.attachments.push({url:doc2.location.href, title:"ScienceDirect Snapshot", mimeType:"text/html"});
 				
-				set.item = item;
+				set.item = unauthScrape(doc2);
 				
 				next();
 			});
@@ -257,7 +274,6 @@ function doWeb(doc, url) {
 		};
 		
 		var second = function(set, next) {
-		
 			var item = set.item;
 			
 			Zotero.Utilities.HTTP.doGet(item.url, function(text) {
@@ -283,7 +299,11 @@ function doWeb(doc, url) {
 			});
 		};
 		var functioncallbacks = [first, second];
-		Zotero.Utilities.processAsync(sets, functioncallbacks, function() {Zotero.done()});
+		if(detectWeb(doc, url) == "journalArticle") {
+			second({item:unauthScrape(doc)}, function() {Zotero.done()});
+		} else {
+			Zotero.Utilities.processAsync(sets, functioncallbacks, function() {Zotero.done()});
+		}
 		
 	}
 	Zotero.wait();
