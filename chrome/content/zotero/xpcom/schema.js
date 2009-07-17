@@ -2362,6 +2362,16 @@ Zotero.Schema = new function(){
 					}
 					Zotero.DB.query("UPDATE itemCreators SET creatorID=? WHERE creatorID NOT IN (SELECT creatorID FROM creators)", creatorID);
 				}
+				
+				if (i==60) {
+					Zotero.DB.query("DROP TRIGGER IF EXISTS fki_itemAttachments_libraryID");
+					Zotero.DB.query("DROP TRIGGER IF EXISTS fku_itemAttachments_libraryID");
+					Zotero.DB.query("DROP TRIGGER IF EXISTS fki_itemNotes_libraryID");
+					Zotero.DB.query("DROP TRIGGER IF EXISTS fku_itemNotes_libraryID");
+					Zotero.DB.query("DELETE FROM collectionItems WHERE itemID IN (SELECT itemID FROM items NATURAL JOIN itemAttachments WHERE sourceItemID IS NOT NULL UNION SELECT itemID FROM items NATURAL JOIN itemNotes WHERE sourceItemID IS NOT NULL)");
+					Zotero.DB.query("UPDATE itemAttachments SET sourceItemID=NULL WHERE sourceItemID=itemID");
+					Zotero.DB.query("UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID=itemID");
+				}
 			}
 			
 			_updateDBVersion('userdata', toVersion);

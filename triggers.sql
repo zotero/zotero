@@ -1,4 +1,4 @@
--- 11
+-- 12
 
 -- Triggers to validate date field
 DROP TRIGGER IF EXISTS insert_date_field;
@@ -579,13 +579,12 @@ CREATE TRIGGER fku_items_itemID_itemAttachments_itemID
     UPDATE itemAttachments SET itemID=NEW.itemID WHERE itemID=OLD.itemID;
   END;
 
-
--- itemAttachments libraryID
-DROP TRIGGER IF EXISTS fki_itemAttachments_libraryID;
-CREATE TRIGGER fki_itemAttachments_libraryID
+-- itemAttachments
+DROP TRIGGER IF EXISTS fki_itemAttachments;
+CREATE TRIGGER fki_itemAttachments
   BEFORE INSERT ON itemAttachments
   FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on table "itemAttachments" violates foreign key constraint "fki_itemAttachments_libraryID"')
+    SELECT RAISE(ABORT, 'insert on table "itemAttachments" violates foreign key constraint "fki_itemAttachments"')
     WHERE
     NEW.sourceItemID IS NOT NULL AND (
     (
@@ -599,13 +598,25 @@ CREATE TRIGGER fki_itemAttachments_libraryID
     ) OR
         (SELECT libraryID FROM items WHERE itemID = NEW.itemID) != (SELECT libraryID FROM items WHERE itemID = NEW.sourceItemID)
     );
+    
+    -- Make sure this is an attachment item
+    SELECT RAISE(ABORT, 'item is not an attachment') WHERE
+    (SELECT itemTypeID FROM items WHERE itemID = NEW.itemID) != 14;
+    
+    -- Make sure parent is a regular item
+    SELECT RAISE(ABORT, 'parent is not a regular item') WHERE
+    NEW.sourceItemID IS NOT NULL AND (SELECT itemTypeID FROM items WHERE itemID = NEW.sourceItemID) IN (1,14);
+    
+    -- If child, make sure attachment is not in a collection
+    SELECT RAISE(ABORT, 'collection item must be top level') WHERE
+    NEW.sourceItemID IS NOT NULL AND (SELECT COUNT(*) FROM collectionItems WHERE itemID=NEW.itemID)>0;
   END;
 
-DROP TRIGGER IF EXISTS fku_itemAttachments_libraryID;
-CREATE TRIGGER fku_itemAttachments_libraryID
+DROP TRIGGER IF EXISTS fku_itemAttachments;
+CREATE TRIGGER fku_itemAttachments
   BEFORE UPDATE ON itemAttachments
   FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'update on table "itemAttachments" violates foreign key constraint "fku_itemAttachments_libraryID"')
+    SELECT RAISE(ABORT, 'update on table "itemAttachments" violates foreign key constraint "fku_itemAttachments"')
     WHERE
     NEW.sourceItemID IS NOT NULL AND (
     (
@@ -619,8 +630,15 @@ CREATE TRIGGER fku_itemAttachments_libraryID
     ) OR
         (SELECT libraryID FROM items WHERE itemID = NEW.itemID) != (SELECT libraryID FROM items WHERE itemID = NEW.sourceItemID)
     );
+    
+    -- Make sure parent is a regular item
+    SELECT RAISE(ABORT, 'parent is not a regular item') WHERE
+    NEW.sourceItemID IS NOT NULL AND (SELECT itemTypeID FROM items WHERE itemID = NEW.sourceItemID) IN (1,14);
+    
+    -- If child, make sure attachment is not in a collection
+    SELECT RAISE(ABORT, 'collection item must be top level') WHERE
+    NEW.sourceItemID IS NOT NULL AND (SELECT COUNT(*) FROM collectionItems WHERE itemID=NEW.itemID)>0;
   END;
-
 
 -- itemAttachments/sourceItemID
 DROP TRIGGER IF EXISTS fki_itemAttachments_sourceItemID_items_itemID;
@@ -919,9 +937,9 @@ CREATE TRIGGER fku_items_itemID_itemNotes_itemID
   END;
 
 
--- itemNotes libraryID
-DROP TRIGGER IF EXISTS fki_itemNotes_libraryID;
-CREATE TRIGGER fki_itemNotes_libraryID
+-- itemNotes
+DROP TRIGGER IF EXISTS fki_itemNotes;
+CREATE TRIGGER fki_itemNotes
   BEFORE INSERT ON itemNotes
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'insert on table "itemNotes" violates foreign key constraint "fki_itemNotes_libraryID"')
@@ -938,13 +956,25 @@ CREATE TRIGGER fki_itemNotes_libraryID
     ) OR
         (SELECT libraryID FROM items WHERE itemID = NEW.itemID) != (SELECT libraryID FROM items WHERE itemID = NEW.sourceItemID)
     );
+    
+    -- Make sure this is a note or attachment item
+    SELECT RAISE(ABORT, 'item is not a note or attachment') WHERE
+    (SELECT itemTypeID FROM items WHERE itemID = NEW.itemID) NOT IN (1,14);
+    
+    -- Make sure parent is a regular item
+    SELECT RAISE(ABORT, 'parent is not a regular item') WHERE
+    NEW.sourceItemID IS NOT NULL AND (SELECT itemTypeID FROM items WHERE itemID = NEW.sourceItemID) IN (1,14);
+    
+    -- If child, make sure note is not in a collection
+    SELECT RAISE(ABORT, 'collection item must be top level') WHERE
+    NEW.sourceItemID IS NOT NULL AND (SELECT COUNT(*) FROM collectionItems WHERE itemID=NEW.itemID)>0;
   END;
 
-DROP TRIGGER IF EXISTS fku_itemNotes_libraryID;
-CREATE TRIGGER fku_itemNotes_libraryID
+DROP TRIGGER IF EXISTS fku_itemNotes;
+CREATE TRIGGER fku_itemNotes
   BEFORE UPDATE ON itemNotes
   FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'update on table "itemNotes" violates foreign key constraint "fku_itemNotes_libraryID"')
+    SELECT RAISE(ABORT, 'update on table "itemNotes" violates foreign key constraint "fku_itemNotes"')
     WHERE
     NEW.sourceItemID IS NOT NULL AND (
     (
@@ -958,6 +988,14 @@ CREATE TRIGGER fku_itemNotes_libraryID
     ) OR
         (SELECT libraryID FROM items WHERE itemID = NEW.itemID) != (SELECT libraryID FROM items WHERE itemID = NEW.sourceItemID)
     );
+    
+    -- Make sure parent is a regular item
+    SELECT RAISE(ABORT, 'parent is not a regular item') WHERE
+    NEW.sourceItemID IS NOT NULL AND (SELECT itemTypeID FROM items WHERE itemID = NEW.sourceItemID) IN (1,14);
+    
+    -- If child, make sure note is not in a collection
+    SELECT RAISE(ABORT, 'collection item must be top level') WHERE
+    NEW.sourceItemID IS NOT NULL AND (SELECT COUNT(*) FROM collectionItems WHERE itemID=NEW.itemID)>0;
   END;
 
 
