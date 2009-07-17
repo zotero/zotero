@@ -8,7 +8,7 @@
 	"maxVersion":null,
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-06-04 00:00:00"
+	"lastUpdated":"2009-07-17 05:30:00"
 }
 
 function detectWeb(doc, url) {
@@ -185,8 +185,8 @@ function doWeb(doc, url) {
 			});
 			
 		} else {
-			var functioncallbacks = [first, second, third];
-			Zotero.Utilities.processAsync(sets, functioncallbacks, function() {Zotero.done()});
+			var callbacks = [first, second, third];
+			Zotero.Utilities.processAsync(sets, callbacks, function() {Zotero.done()});
 		}
 		
 	} else {
@@ -298,11 +298,11 @@ function doWeb(doc, url) {
 				next();
 			});
 		};
-		var functioncallbacks = [first, second];
+		var callbacks = [first, second];
 		if(detectWeb(doc, url) == "journalArticle") {
 			second({item:unauthScrape(doc)}, function() {Zotero.done()});
 		} else {
-			Zotero.Utilities.processAsync(sets, functioncallbacks, function() {Zotero.done()});
+			Zotero.Utilities.processAsync(sets, callbacks, function() {Zotero.done()});
 		}
 		
 	}
