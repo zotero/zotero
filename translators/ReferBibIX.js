@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-07-24 23:50:00"
+	"lastUpdated":"2009-07-17 20:20:00"
 }
 
 Zotero.configure("dataMode", "line");
@@ -18,7 +18,7 @@ function detectImport() {
 	var lineRe = /%[A-Z0-9\*\$] .+/;
 	var line;
 	var matched = 0;
-	while((line = Zotero.read()) !== "false") {
+	while((line = Zotero.read()) !== false) {
 		line = line.replace(/^\s+/, "");
 		if(line != "") {
 			if(lineRe.test(line)) {
