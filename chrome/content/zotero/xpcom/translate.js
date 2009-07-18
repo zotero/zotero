@@ -1994,7 +1994,7 @@ Zotero.Translate.prototype._importConfigureIO = function(charset) {
 								sStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
 											 .createInstance(Components.interfaces.nsIScriptableInputStream);
 								sStream.init(me._inputStream);
-								this._streams.push(sStream);
+								me._streams.push(sStream);
 							}
 							
 							// read from the scriptable input stream
