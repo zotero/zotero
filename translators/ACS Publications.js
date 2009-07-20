@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-28 18:10:00"
+	"lastUpdated":"2009-07-20 13:46:00"
 }
 
 function detectWeb(doc, url) {
@@ -32,8 +32,8 @@ function doWeb(doc, url){
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	var host = 'http://' + doc.location.host + "/";
-	//Zotero.debug(host);
-	var m = url.match(/https?:\/\/[^\/]*\/doi\/(abs|full)\/(.+)/);
+	Zotero.debug(host);
+	var m = url.match(/https?:\/\/[^\/]*\/doi\/(abs|full)\/([^\?]+)/);
 	var dois = new Array();
 	if(detectWeb(doc, url) == "multiple") { //search
 		var doi;
