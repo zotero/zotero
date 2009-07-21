@@ -136,6 +136,8 @@ Zotero.CreatorTypes = new function() {
 	this._nameCol = 'creatorType';
 	this._table = 'creatorTypes';
 	
+	var _primaryIDCache = {};
+	
 	function getTypesForItemType(itemTypeID) {
 		var sql = "SELECT creatorTypeID AS id, creatorType AS name "
 			+ "FROM itemTypeCreatorTypes NATURAL JOIN creatorTypes "
@@ -154,9 +156,17 @@ Zotero.CreatorTypes = new function() {
 	
 	
 	function getPrimaryIDForType(itemTypeID) {
+		if (_primaryIDCache[itemTypeID]) {
+			return _primaryIDCache[itemTypeID];
+		}
 		var sql = "SELECT creatorTypeID FROM itemTypeCreatorTypes "
 			+ "WHERE itemTypeID=? AND primaryField=1";
-		return Zotero.DB.valueQuery(sql, itemTypeID);
+		var creatorTypeID = Zotero.DB.valueQuery(sql, itemTypeID);
+		if (!creatorTypeID) {
+			return false;
+		}
+		_primaryIDCache[itemTypeID] = creatorTypeID;
+		return creatorTypeID;
 	}
 }
 
