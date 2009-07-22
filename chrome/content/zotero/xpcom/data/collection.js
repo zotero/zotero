@@ -514,10 +514,8 @@ Zotero.Collection.prototype.save = function () {
 			
 			if (removed.length) {
 				var sql = "DELETE FROM collectionItems WHERE collectionID=? "
-					+ "AND itemID IN ("
-					+ removed.map(function () '?').join()
-					+ ")";
-				Zotero.DB.query(sql, [collectionID].concat(removed));
+					+ "AND itemID IN (" + removed.join() + ")";
+				Zotero.DB.query(sql, collectionID);
 			}
 			
 			if (newids.length) {
