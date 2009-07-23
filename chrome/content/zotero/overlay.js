@@ -304,7 +304,9 @@ var ZoteroPane = new function()
 				// TODO: Add a better error page/window here with reporting
 				// instructions
 				// window.loadURI('chrome://zotero/content/error.xul');
-				alert(errMsg);
+				var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+							.getService(Components.interfaces.nsIPrompt);
+				pr.alert("", errMsg);
 			}
 			
 			return;
