@@ -748,7 +748,20 @@ Zotero.Sync.Server = new function () {
 		Zotero.debug('Getting Zotero sync password');
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 								.getService(Components.interfaces.nsILoginManager);
-		var logins = loginManager.findLogins({}, _loginManagerHost, _loginManagerURL, null);
+		try {
+			var logins = loginManager.findLogins({}, _loginManagerHost, _loginManagerURL, null);
+		}
+		catch (e) {
+			Zotero.debug(e);
+			// TODO: localize
+			var msg = "Zotero cannot access your login information, "
+						+ "likely due to a corrupted Firefox login manager database."
+						+ "\n\n"
+						+ "Close Firefox, back up and delete signons.* from your Firefox profile, "
+						+ "and re-enter your Zotero login information in the Sync pane of the Zotero preferences.";
+			alert(msg);
+			return '';
+		}
 		
 		// Find user from returned array of nsILoginInfo objects
 		for (var i = 0; i < logins.length; i++) {
