@@ -295,6 +295,15 @@ var Zotero = new function(){
 			Zotero.DB.test();
 		}
 		catch (e) {
+			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+				// TODO: localize
+				var msg = Zotero.localeJoin([
+					Zotero.getString('startupError.databaseCannotBeOpened'),
+					Zotero.getString('startupError.checkPermissions')
+				]);
+				_startupError = msg;
+			}
+			
 			Components.utils.reportError(e);
 			this.skipLoading = true;
 			Zotero.DB.skipBackup = true;
