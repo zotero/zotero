@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-05-15 18:30:00"
+	"lastUpdated":"2009-07-24 07:55:00"
 }
 
 function detectWeb(doc, url) {
@@ -16,10 +16,10 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	       
+	
 	if(doc.evaluate('//img[substring(@src, string-length(@src)-32) = "/images/common/logo_proquest.gif" or substring(@src, string-length(@src)-38) = "/images/common/logo_proquest_small.gif"]',
 	                doc, nsResolver, XPathResult.ANY_TYPE, null)) {    
-		                
+		
 		
 		var xpath = '//table[@id="tableIndexTerms"]/tbody/tr/td[@class="textSmall"]';
 		var data= doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -32,21 +32,21 @@ function detectWeb(doc, url) {
 				Zotero.debug("Item Source Type: "+source);
 				break;
 			}
-		}        
-	                
-		if(doc.title == "Results") {
+		}
+		
+		if(doc.title.match("Results")) {
 			return "multiple";
-		} else if(doc.title == "Document View") {
+		} else if(doc.title.match("Document View")) {
 			switch (source) {
 				case 'Dissertation':
 					return "thesis";
-					break;
+				
 				case 'Historical Newspaper':
 				case 'Newspaper':
 					return "newspaperArticle";
+				
 				default:
 					return "journalArticle";
-					break;
 			}
 			
 		}
@@ -61,10 +61,15 @@ function parseRIS(uris) {
 		if(url.match("exportFormat=1")=="exportFormat=1") {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			
+			// Put AB note in abstract field
+			text = text.replace(/^AB  \-/gm, 'N2  -');
+			
 			// Strip lines with just whitespace, which mess up RIS parsing
 			text = text.replace(/^\s*$\n/gm, '');
+			
 			translator.setString(text);
-
+			
 			//Set Handler fixes anomaly in Proquest RIS format. Properly formats author name as [last name], [first name]
 			translator.setHandler("itemDone", function(obj, item) {
 				var cre = new Array();
@@ -79,9 +84,13 @@ function parseRIS(uris) {
 				}
 				
 				if (item.publicationTitle) item.publicationTitle = Zotero.Utilities.trimInternal(item.publicationTitle.replace(/\([\d\-]+\)/g, ""));
+				
+				// Don't save database page as URL
+				item.url = undefined;
+				
 				item.complete();
 			});
-		
+			
 			translator.translate();
 			Zotero.done();
 		}
@@ -104,7 +113,7 @@ function doWeb(doc, url) {
 	
 	if(doc.evaluate('//img[substring(@src, string-length(@src)-32) = "/images/common/logo_proquest.gif" or substring(@src, string-length(@src)-38) = "/images/common/logo_proquest_small.gif"]',
 		                doc, nsResolver, XPathResult.ANY_TYPE, null)) {
-			if(doc.title == "Results") {
+			if(doc.title.match("Results")) {
 				
 				//Get Client ID
 				var xpath = '//a';
