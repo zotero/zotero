@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Legg til lenke til gjeldende side">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliser det valgte elementet">
 
-<!ENTITY zotero.collections.name_column "Samlinger">
-
 <!ENTITY zotero.toolbar.newItem.label "Nytt element">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mer">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Skap nytt element fra gjeldende side">

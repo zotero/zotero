@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Đính kèm Đường dẫn tới Trang hiện tại">
 <!ENTITY zotero.items.menu.duplicateItem "Sao chép Biểu ghi vừa chọn">
 
-<!ENTITY zotero.collections.name_column "Các bộ sưu tập">
-
 <!ENTITY zotero.toolbar.newItem.label "Biểu ghi mới">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Khác">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Tạo một Biểu ghi mới cho Trang hiện tại">

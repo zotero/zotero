@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Додај везу до текуће странице">
 <!ENTITY zotero.items.menu.duplicateItem "Умножите изабрану ставку">
 
-<!ENTITY zotero.collections.name_column "Збирке">
-
 <!ENTITY zotero.toolbar.newItem.label "Нова ставка">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Више">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Направи нову ставку од текуће странице">

@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Joindre le lien vers la page courante">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliquer l&apos;objet sélectionné">
 
-<!ENTITY zotero.collections.name_column "Collections">
-
 <!ENTITY zotero.toolbar.newItem.label "Nouvel élément">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Plus">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Créer un nouvel élément à partir de la page courante">

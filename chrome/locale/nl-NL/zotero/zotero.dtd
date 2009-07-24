@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Koppeling naar huidige pagina toevoegen">
 <!ENTITY zotero.items.menu.duplicateItem "Kopie maken van geselecteerd object">
 
-<!ENTITY zotero.collections.name_column "Verzamelingen">
-
 <!ENTITY zotero.toolbar.newItem.label "Nieuw object">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Meer">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Nieuw object aanmaken van huidige pagina">

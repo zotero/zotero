@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "附加当前页的链接">
 <!ENTITY zotero.items.menu.duplicateItem "生成所选条目复件">
 
-<!ENTITY zotero.collections.name_column "分类">
-
 <!ENTITY zotero.toolbar.newItem.label "新建条目">
 <!ENTITY zotero.toolbar.moreItemTypes.label "更多">
 <!ENTITY zotero.toolbar.newItemFromPage.label "由当前页新建条目">

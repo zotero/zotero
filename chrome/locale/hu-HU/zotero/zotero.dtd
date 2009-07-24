@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Az aktuális oldal csatolása hivatkozásként">
 <!ENTITY zotero.items.menu.duplicateItem "Kiválasztott elem duplikálása">
 
-<!ENTITY zotero.collections.name_column "Gyűjtemények">
-
 <!ENTITY zotero.toolbar.newItem.label "Új elem">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Egyéb...">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Új elem létrehozása az aktuális oldal alapján">

@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "現ページへのリンクを添付">
 <!ENTITY zotero.items.menu.duplicateItem "選択されたアイテムを複製">
 
-<!ENTITY zotero.collections.name_column "コレクション">
-
 <!ENTITY zotero.toolbar.newItem.label "新規アイテム">
 <!ENTITY zotero.toolbar.moreItemTypes.label "その他">
 <!ENTITY zotero.toolbar.newItemFromPage.label "現ページから新規アイテムを作成">

@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Прилагане връзка към настоящата страница">
 <!ENTITY zotero.items.menu.duplicateItem "Дуплициране на избраните обекти">
 
-<!ENTITY zotero.collections.name_column "Колекции">
-
 <!ENTITY zotero.toolbar.newItem.label "Нов обект">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Още">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Създаване на нов обект от настоящата страница">

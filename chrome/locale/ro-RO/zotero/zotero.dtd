@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Ataşează paginii curente legătură">
 <!ENTITY zotero.items.menu.duplicateItem "Fă un duplicat înregistrării selectate">
 
-<!ENTITY zotero.collections.name_column "Colecţii">
-
 <!ENTITY zotero.toolbar.newItem.label "Înregistrare nouă">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mai mult">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Creează o înregistrare nouă din pagina curentă">

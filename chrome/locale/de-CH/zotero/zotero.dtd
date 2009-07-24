@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Link zu aktueller Webseite anhängen">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
 
-<!ENTITY zotero.collections.name_column "Sammlungen">
-
 <!ENTITY zotero.toolbar.newItem.label "Neuer Eintrag">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mehr">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Neuen Eintrag aus aktueller Webseite erstellen">

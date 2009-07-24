@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Adxuntar Enlace á páxina actual">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicar Elementos Seleccionados">
 
-<!ENTITY zotero.collections.name_column "Coleccións">
-
 <!ENTITY zotero.toolbar.newItem.label "Novo Elemento">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Máis">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Crear Novo Elemento a partir da Páxina Actual">
