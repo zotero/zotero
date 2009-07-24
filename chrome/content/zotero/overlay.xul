@@ -96,9 +96,17 @@
 				<popup id="zotero-itemmenu" onpopupshowing="ZoteroPane.buildItemContextMenu();">
 					<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="ZoteroPane.selectItem(this.parentNode.getAttribute('itemID'), true)"/>
 					<menuseparator/>
+					<!-- with icon: <menuitem class="menuitem-iconic" id="zotero-menuitem-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane.newNote(false, this.parentNode.getAttribute('itemID'))"/>-->
 					<menuitem label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane.newNote(false, this.parentNode.getAttribute('itemID'))"/>
-					<menuitem label="&zotero.items.menu.attach.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage(false, parseInt(this.parentNode.getAttribute('itemID')))"/>
-					<menuitem label="&zotero.items.menu.attach.link;" oncommand="ZoteroPane.addAttachmentFromPage(true, parseInt(this.parentNode.getAttribute('itemID')))"/>
+					<!-- TODO: localize -->
+					<menu label="Add Attachment">
+						<menupopup>
+							<menuitem class="menuitem-iconic" id="zotero-menuitem-attachments-snapshot" label="&zotero.items.menu.attach.snapshot;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane.addAttachmentFromPage(false, itemID)"/>
+							<menuitem class="menuitem-iconic" id="zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane.addAttachmentFromPage(true, itemID)"/>
+							<menuitem class="menuitem-iconic" id="zotero-menuitem-attachments-link" label="Attach Link to File..." oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane.addAttachmentFromDialog(true, itemID);"/>
+							<menuitem class="menuitem-iconic" id="zotero-menuitem-attachments-file" label="Attach Stored Copy of File..." oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane.addAttachmentFromDialog(false, itemID);"/>
+						</menupopup>
+					</menu>
 					<menuseparator/>
 					<menuitem label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane.duplicateSelectedItem();"/>
 					<menuitem oncommand="ZoteroPane.deleteSelectedItems();"/>
@@ -123,7 +131,6 @@
 						<toolbarbutton id="zotero-tb-collection-add" tooltiptext="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
 						<toolbarbutton id="zotero-tb-group-add" tooltiptext="&zotero.toolbar.newGroup;" oncommand="ZoteroPane.newGroup()"/>
 						<spacer flex="1"/>
-						<toolbarbutton id="zotero-tb-tag-selector" tooltiptext="&zotero.toolbar.tagSelector.label;" oncommand="ZoteroPane.toggleTagSelector()"/>
 						<toolbarbutton id="zotero-tb-actions-menu" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
 							<menupopup id="zotero-tb-actions-popup" onpopupshowing="document.getElementById('cmd_zotero_reportErrors').setAttribute('disabled', Zotero.getErrors().length == 0)">
 								<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
@@ -173,12 +180,16 @@
 						<treechildren/>
 					</tree>
 				</vbox>
-				<splitter id="zotero-tags-splitter" persist="collapsed" onmouseup="ZoteroPane.updateTagSelectorSize()"/>
+				<splitter id="zotero-tags-splitter" onmouseup="ZoteroPane.updateTagSelectorSize()" collapse="after">
+					<grippy oncommand="ZoteroPane.toggleTagSelector()"/>
+				</splitter>
 				<zoterotagselector id="zotero-tag-selector" persist="height,collapsed,showAutomatic,filterToScope"
 					oncommand="ZoteroPane.updateTagFilter()"/>
 			</vbox>
 			
-			<splitter id="zotero-tree-splitter" resizebefore="closest" resizeafter="closest"/>
+			<splitter id="zotero-tree-splitter" resizebefore="closest" resizeafter="closest" collapse="before">
+				<grippy/>
+			</splitter>
 			
 			<vbox id="zotero-items-pane" persist="width" flex="1">
 				<hbox class="toolbar" align="center">
@@ -196,11 +207,6 @@
 					</toolbarbutton>
 					<toolbarbutton id="zotero-tb-item-from-page" tooltiptext="&zotero.toolbar.newItemFromPage.label;" oncommand="ZoteroPane.addItemFromPage('temporaryPDFHack', event.shiftKey ? !Zotero.Prefs.get('automaticSnapshots') : null)"/>
 					<toolbarbutton id="zotero-tb-lookup" tooltiptext="&zotero.toolbar.lookup.label;" oncommand="ZoteroPane.openLookupWindow()"/>
-					<!--
-					<toolbarseparator/>
-					<toolbarbutton id="zotero-tb-link-page" tooltiptext="&zotero.toolbar.attachment.weblink;" oncommand="ZoteroPane.addAttachmentFromPage(true)"/>
-					<toolbarbutton id="zotero-tb-snapshot-page" tooltiptext="&zotero.toolbar.attachment.snapshot;" oncommand="ZoteroPane.addAttachmentFromPage()"/>
-					-->
 					<toolbarbutton id="zotero-tb-note-add" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane.newNote(event.shiftKey);"/>
 					<toolbarseparator/>
 					<toolbarbutton id="zotero-tb-advanced-search" tooltiptext="&zotero.toolbar.advancedSearch;" oncommand="ZoteroPane.openAdvancedSearchWindow()"/>
@@ -378,8 +384,6 @@
 					<tabbox id="zotero-view-tabbox" flex="1" oncommand="if (this.selectedIndex !== '') { ZoteroItemPane.loadPane(this.selectedIndex); }">
 						<tabs>
 							<tab label="&zotero.tabs.info.label;"/>
-							<tab label="&zotero.tabs.notes.label;"/>
-							<tab label="&zotero.tabs.attachments.label;"/>
 							<tab label="&zotero.tabs.tags.label;"/>
 							<tab label="&zotero.tabs.related.label;"/>
 						</tabs>
