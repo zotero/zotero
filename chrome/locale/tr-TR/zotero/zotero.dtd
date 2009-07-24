@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Geçerli Sayfaya Bağlantı Ekle">
 <!ENTITY zotero.items.menu.duplicateItem "Seçili Eseri Çoğalt">
 
-<!ENTITY zotero.collections.name_column "Dermeler">
-
 <!ENTITY zotero.toolbar.newItem.label "Yeni Eser">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Daha Fazla">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Geçerli Sayfadan Yeni Bir Eser Yarat">

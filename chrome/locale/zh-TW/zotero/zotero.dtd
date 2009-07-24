@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "附上目前網頁的鏈結">
 <!ENTITY zotero.items.menu.duplicateItem "為選取的項目建立副本">
 
-<!ENTITY zotero.collections.name_column "收集">
-
 <!ENTITY zotero.toolbar.newItem.label "新增項目">
 <!ENTITY zotero.toolbar.moreItemTypes.label "更多">
 <!ENTITY zotero.toolbar.newItemFromPage.label "從目前的頁面建立新的項目">

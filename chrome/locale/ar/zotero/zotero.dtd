@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "ارفق رابط إلى الصفحة الحالية">
 <!ENTITY zotero.items.menu.duplicateItem "استنسخ الموضوع المحدد">
 
-<!ENTITY zotero.collections.name_column "مجموعات">
-
 <!ENTITY zotero.toolbar.newItem.label "موضوع جديد">
 <!ENTITY zotero.toolbar.moreItemTypes.label "المزيد">
 <!ENTITY zotero.toolbar.newItemFromPage.label "انشئ موضوع جديد من الصفحة الحالية">

@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Bifoga länk till aktuell sida">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicera vald post">
 
-<!ENTITY zotero.collections.name_column "Samlingar">
-
 <!ENTITY zotero.toolbar.newItem.label "Ny post">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mer">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Skapa ny post från aktuell sida">

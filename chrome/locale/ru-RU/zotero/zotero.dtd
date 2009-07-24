@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Прикрепить ссылку к текущей странице">
 <!ENTITY zotero.items.menu.duplicateItem "Сделать дубликат выбранного документа">
 
-<!ENTITY zotero.collections.name_column "Подборки">
-
 <!ENTITY zotero.toolbar.newItem.label "Новый документ">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Далее">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Создать новый документ с текущей страницы">

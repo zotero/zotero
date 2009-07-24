@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Pripni povezavo na trenutno stran">
 <!ENTITY zotero.items.menu.duplicateItem "Podvoji izbrani vnos">
 
-<!ENTITY zotero.collections.name_column "Zbirke">
-
 <!ENTITY zotero.toolbar.newItem.label "Nov vnos">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Dodatno">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Ustvari nov vnos iz trenutne strani">

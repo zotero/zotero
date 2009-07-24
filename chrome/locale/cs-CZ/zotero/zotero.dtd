@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Připoj odkaz k současné stránce">
 <!ENTITY zotero.items.menu.duplicateItem "Duplikuj vybranou položku">
 
-<!ENTITY zotero.collections.name_column "Kolekce">
-
 <!ENTITY zotero.toolbar.newItem.label "Nová položka">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Více">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Vytvoř novou položku z aktuální stránky">

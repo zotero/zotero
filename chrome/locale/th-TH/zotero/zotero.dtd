@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Attach Link to Current Page">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
 
-<!ENTITY zotero.collections.name_column "Collections">
-
 <!ENTITY zotero.toolbar.newItem.label "ไอเทมใหม่">
 <!ENTITY zotero.toolbar.moreItemTypes.label "มากกว่านั้น">
 <!ENTITY zotero.toolbar.newItemFromPage.label "สร้างไอเทมใหม่จากหน้าปัจจุบัน">

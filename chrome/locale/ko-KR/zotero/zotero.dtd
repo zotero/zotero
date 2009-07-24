@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "현재 페이지로 링크 첨부">
 <!ENTITY zotero.items.menu.duplicateItem "선택된 항목 복제">
 
-<!ENTITY zotero.collections.name_column "수집품">
-
 <!ENTITY zotero.toolbar.newItem.label "새 항목">
 <!ENTITY zotero.toolbar.moreItemTypes.label "더 보기">
 <!ENTITY zotero.toolbar.newItemFromPage.label "현재 페이지로부터 새 항목 생성">

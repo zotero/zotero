@@ -62,9 +62,9 @@
 							<treecols>
 								<treecol
 									id="zotero-collections-name-column"
-									label="&zotero.collections.name_column;"
 									flex="1"
-									primary="true"/>
+									primary="true"
+									hideheader="true"/>
 							</treecols>
 							<treechildren/>
 						</tree>

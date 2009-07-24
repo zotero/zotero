@@ -52,8 +52,6 @@
 <!ENTITY zotero.items.menu.attach.link "Dołącz odnośnik do aktywnej strony">
 <!ENTITY zotero.items.menu.duplicateItem "Duplikuj zaznaczony element">
 
-<!ENTITY zotero.collections.name_column "Kolekcje">
-
 <!ENTITY zotero.toolbar.newItem.label "Nowy element">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Więcej">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Utwórz nowy element z aktywnej strony">
