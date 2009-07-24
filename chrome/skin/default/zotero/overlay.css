@@ -182,22 +182,27 @@ window[active="true"] #zotero-pane[fullscreenmode="true"][platform="mac"]
 	list-style-image: url('chrome://zotero/skin/toolbar-note-add.png');
 }
 
-#zotero-tb-item-attachments-file
+#zotero-menuitem-note
+{
+	list-style-image: url('chrome://zotero/skin/treeitem-note.png');
+}
+
+#zotero-menuitem-attachments-file
 {
 	list-style-image: url('chrome://zotero/skin/treeitem-attachment-file.png');
 }
 
-#zotero-tb-item-attachments-link
+#zotero-menuitem-attachments-link
 {
 	list-style-image: url('chrome://zotero/skin/treeitem-attachment-link.png');
 }
 
-#zotero-tb-item-attachments-snapshot
+#zotero-menuitem-attachments-snapshot
 {
 	list-style-image: url('chrome://zotero/skin/treeitem-attachment-snapshot.png');
 }
 
-#zotero-tb-item-attachments-web-link
+#zotero-menuitem-attachments-web-link
 {
 	list-style-image: url('chrome://zotero/skin/treeitem-attachment-web-link.png');
 }

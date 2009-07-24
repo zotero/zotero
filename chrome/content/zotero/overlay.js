@@ -779,12 +779,10 @@ var ZoteroPane = new function()
 	
 	function toggleTagSelector(){
 		var zoteroPane = document.getElementById('zotero-pane');
-		var splitter = document.getElementById('zotero-tags-splitter');
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		
 		var showing = tagSelector.getAttribute('collapsed') == 'true';
 		tagSelector.setAttribute('collapsed', !showing);
-		splitter.setAttribute('collapsed', !showing);
 		this.updateTagSelectorSize();
 		
 		// If showing, set scope to items in current view
@@ -1669,21 +1667,20 @@ var ZoteroPane = new function()
 			showInLibrary: 0,
 			sep1: 1,
 			addNote: 2,
-			attachSnapshot: 3,
-			attachLink: 4,
-			sep2: 5,
-			duplicateItem: 6,
-			deleteItem: 7,
-			deleteFromLibrary: 8,
-			sep3: 9,
-			exportItems: 10,
-			createBib: 11,
-			loadReport: 12,
-			sep4: 13,
-			createParent: 14,
-			recognizePDF: 15,
-			renameAttachments: 16,
-			reindexItem: 17
+			addAttachments: 3,
+			sep2: 4,
+			duplicateItem: 5,
+			deleteItem: 6,
+			deleteFromLibrary: 7,
+			sep3: 8,
+			exportItems: 9,
+			createBib: 10,
+			loadReport: 11,
+			sep4: 12,
+			createParent: 13,
+			recognizePDF: 14,
+			renameAttachments: 15,
+			reindexItem: 16
 		};
 		
 		var menu = document.getElementById('zotero-itemmenu');
@@ -1698,15 +1695,15 @@ var ZoteroPane = new function()
 		}
 		
 		else if (this.itemsView && this.itemsView.selection.count > 0) {
-			enable.push(m.showInLibrary, m.addNote, m.attachSnapshot, m.attachLink,
+			enable.push(m.showInLibrary, m.addNote, m.addAttachments,
 				m.sep2, m.duplicateItem, m.deleteItem, m.deleteFromLibrary,
 				m.exportItems, m.createBib, m.loadReport);
 			
 			// Multiple items selected
 			if (this.itemsView.selection.count > 1) {
 				var multiple =  '.multiple';
-				hide.push(m.showInLibrary, m.sep1, m.addNote, m.attachSnapshot,
-					m.attachLink, m.sep2, m.duplicateItem);
+				hide.push(m.showInLibrary, m.sep1, m.addNote, m.addAttachments,
+					m.sep2, m.duplicateItem);
 				
 				// If all items can be reindexed, or all items can be recognized, show option
 				var items = this.getSelectedItems();
@@ -1797,11 +1794,11 @@ var ZoteroPane = new function()
 				
 				if (item.isRegularItem())
 				{
-					show.push(m.addNote, m.attachSnapshot, m.attachLink, m.sep2);
+					show.push(m.addNote, m.addAttachments, m.sep2);
 				}
 				else
 				{
-					hide.push(m.addNote, m.attachSnapshot, m.attachLink, m.sep2);
+					hide.push(m.addNote, m.addAttachments, m.sep2);
 				}
 				
 				if (item.isAttachment()) {
@@ -1878,7 +1875,7 @@ var ZoteroPane = new function()
 			
 			disable.push(m.showInLibrary, m.duplicateItem, m.deleteItem,
 				m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
-			hide.push(m.addNote, m.attachSnapshot, m.attachLink, m.sep2, m.sep4, m.reindexItem,
+			hide.push(m.addNote, m.addAttachments, m.sep2, m.sep4, m.reindexItem,
 				m.createParent, m.recognizePDF, m.renameAttachments);
 		}
 		
@@ -2273,6 +2270,7 @@ var ZoteroPane = new function()
 			}
 		}
 	}
+	
 	
 	function addTextToNote(text)
 	{
