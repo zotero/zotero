@@ -82,7 +82,7 @@ var ZoteroPane = new function()
 	this.displayErrorMessage = displayErrorMessage;
 	
 	const DEFAULT_ZPANE_HEIGHT = 300;
-	const COLLECTIONS_HEIGHT = 125; // minimum height of the collections pane and toolbar
+	const COLLECTIONS_HEIGHT = 32; // minimum height of the collections pane and toolbar
 	
 	var self = this;
 	var titlebarcolorState, toolbarCollapseState, titleState;
@@ -313,6 +313,11 @@ var ZoteroPane = new function()
 		}
 		
 		zoteroSplitter.setAttribute('hidden', !makeVisible);
+		
+		// Make sure tags splitter isn't missing for people upgrading from <2.0b7
+		if (makeVisible) {
+			document.getElementById('zotero-tags-splitter').collapsed = false;
+		}
 		
 		// Restore fullscreen mode if necessary
 		if (makeVisible && isFullScreen()) {
@@ -842,7 +847,7 @@ var ZoteroPane = new function()
 			}
 			// 121px seems to be enough room for the toolbar and collections
 			// tree at minimum height
-			height = height + 125;
+			height = height + COLLECTIONS_HEIGHT;
 		}
 		
 		//Zotero.debug('Setting Zotero pane minheight to ' + height);

@@ -42,7 +42,7 @@ window[active="true"] #zotero-pane[fullscreenmode="true"][platform="mac"]
 }
 
 #zotero-collections-tree {
-	min-height: 80px;
+	min-height: 5.2em;
 }
 
 #zotero-collections-tree treechildren::-moz-tree-image
