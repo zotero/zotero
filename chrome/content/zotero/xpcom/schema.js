@@ -57,6 +57,11 @@ Zotero.Schema = new function(){
 					"zotero-schema-upgrade", "chrome,centerscreen,modal", io);
 		
 		if (obj.data.e) {
+			if (obj.data.e.name && obj.data.e.name == "NS_ERROR_FAILURE" && obj.data.e.message.match(/nsIFile\.moveTo/)) {
+				Components.utils.reportError(obj.data.e);
+				return false;
+			}
+			
 			var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 					   .getService(Components.interfaces.nsIWindowWatcher);
 			var data = {
@@ -2396,6 +2401,21 @@ Zotero.Schema = new function(){
 				}
 			}
 			Zotero.DB.rollbackTransaction();
+			
+			// Display more helpful message on errors due to open files
+			//
+			// Conditional should be same as in showUpgradeWizard()
+			if (e.name && e.name == "NS_ERROR_FAILURE" && e.message.match(/nsIFile\.moveTo/)) {
+				// TODO: localize
+				var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+							.getService(Components.interfaces.nsIPrompt);
+				var title = "Upgrade Failed";
+				var couldNotMigrate = "Zotero could not migrate all necessary files.";
+				var closeAttachmentFiles = "Please close any open attachment files and restart Firefox to try the upgrade again.";
+				var restartYourComputer = "If you continue to receive this message, restart your computer.";
+				pr.alert(title, Zotero.localeJoin([couldNotMigrate, closeAttachmentFiles]) + "\n\n" + restartYourComputer);
+			}
+			
 			throw(e);
 		}
 		
