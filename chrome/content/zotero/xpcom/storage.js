@@ -1884,7 +1884,7 @@ Zotero.Sync.Storage = new function () {
 				return true;
 			
 			case Zotero.Sync.Storage.ERROR_NO_URL:
-				var errorMessage = "Please enter a URL.";
+				var errorMessage = "Please enter a WebDAV URL.";
 				break;
 			
 			case Zotero.Sync.Storage.ERROR_NO_PASSWORD:
@@ -1901,7 +1901,7 @@ Zotero.Sync.Storage = new function () {
 			
 			case Zotero.Sync.Storage.ERROR_AUTH_FAILED:
 				var errorTitle = "Permission denied";
-				var errorMessage = "The storage server did not accept the "
+				var errorMessage = "The WebDAV server did not accept the "
 					+ "username and password you entered." + " "
 					+ "Please check your storage settings "
 					+ "or contact your server administrator.";
@@ -1910,8 +1910,8 @@ Zotero.Sync.Storage = new function () {
 			case Zotero.Sync.Storage.ERROR_FORBIDDEN:
 				var errorTitle = "Permission denied";
 				var errorMessage = "You don't have permission to access "
-					+ uri.path + " on the storage server." + " "
-					+ "Please check your storage settings "
+					+ uri.path + " on the WebDAV server." + " "
+					+ "Please check your file sync settings "
 					+ "or contact your server administrator.";
 				break;
 			
@@ -1925,7 +1925,7 @@ Zotero.Sync.Storage = new function () {
 				var create = promptService.confirmEx(
 					window,
 					// TODO: localize
-					"Storage directory not found",
+					"Directory not found",
 					spec + " does not exist.\n\nDo you want to create it now?",
 					promptService.BUTTON_POS_0
 						* promptService.BUTTON_TITLE_IS_STRING
@@ -1946,7 +1946,7 @@ Zotero.Sync.Storage = new function () {
 								promptService.alert(
 									window,
 									"Server configuration verified",
-									"File storage is successfully set up."
+									"File sync is successfully set up."
 								);
 							}
 							Zotero.Prefs.set("sync.storage.verified", true);
@@ -1958,7 +1958,7 @@ Zotero.Sync.Storage = new function () {
 								+ "permission to create a Zotero directory "
 								+ "at the following address:" + "\n\n" + spec;
 							errorMessage += "\n\n"
-								+ "Please check your storage settings or "
+								+ "Please check your file sync settings or "
 								+ "contact your server administrator.";
 							break;
 					}
@@ -1973,14 +1973,16 @@ Zotero.Sync.Storage = new function () {
 				return false;
 		}
 		
-		if (!errorTitle) {
-			var errorTitle = Zotero.getString("general.error");
+		if (!skipSuccessMessage) {
+			if (!errorTitle) {
+				var errorTitle = Zotero.getString("general.error");
+			}
+			// TEMP
+			if (!errorMessage) {
+				var errorMessage = status;
+			}
+			promptService.alert(window, errorTitle, errorMessage);
 		}
-		// TEMP
-		if (!errorMessage) {
-			var errorMessage = status;
-		}
-		promptService.alert(window, errorTitle, errorMessage);
 		return false;
 	}
 	
