@@ -2585,7 +2585,7 @@ Zotero.Sync.Server.Data = new function() {
 	}
 	
 	
-	function _mergeCollection(localObj, remoteObj, childItems) {
+	function _mergeCollection(localObj, remoteObj, childItemStore) {
 		var diff = localObj.diff(remoteObj, false, true);
 		if (!diff) {
 			return false;
@@ -2645,7 +2645,7 @@ Zotero.Sync.Server.Data = new function() {
 			alert(msg);
 		}
 		
-		_removeChildItemsFromCollection(targetObj, childItems);
+		_removeChildItemsFromCollection(targetObj, childItemStore);
 		
 		targetObj.save();
 		return true;
@@ -3479,6 +3479,7 @@ Zotero.Sync.Server.Data = new function() {
 		conditionID++;
 		while (search.getSearchCondition(conditionID)) {
 			search.removeCondition(conditionID);
+			conditionID++;
 		}
 		
 		return search;
