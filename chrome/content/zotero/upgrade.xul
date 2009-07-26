@@ -64,7 +64,7 @@
 			
 			
 			function onChangeLogLinkClick() {
-				Zotero.initialURL = 'http://www.zotero.org/documentation/changelog';
+				Zotero.initialURL = 'http://zotero.org/support/changelog';
 				document.getElementById('zotero-schema-upgrade').getButton('finish').click();
 			}
 		}
