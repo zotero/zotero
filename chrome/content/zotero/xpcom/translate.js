@@ -1700,6 +1700,8 @@ Zotero.Translate.prototype._processCollection = function(collection, parentID) {
 	
 	this.newCollections.push(myID);
 	
+	var toAdd = [];
+	
 	for each(child in collection.children) {
 		if(child.type == "collection") {
 			// do recursive processing of collections
@@ -1707,12 +1709,16 @@ Zotero.Translate.prototype._processCollection = function(collection, parentID) {
 		} else {
 			// add mapped items to collection
 			if(this._IDMap[child.id]) {
-				Zotero.debug("Translate: Adding "+this._IDMap[child.id], 5);
-				newCollection.addItem(this._IDMap[child.id]);
+				toAdd.push(this._IDMap[child.id]);
 			} else {
 				Zotero.debug("Translate: Could not map "+child.id+" to an imported item", 2);
 			}
 		}
+	}
+	
+	if (toAdd.length) {
+		Zotero.debug("Translate: Adding " + toAdd, 5);
+		newCollection.addItems(toAdd);
 	}
 	
 	return newCollection;
