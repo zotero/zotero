@@ -763,6 +763,51 @@ function ChromeExtensionHandler() {
 			}
 		}
 	};
+	
+	/*
+		zotero://fullscreen
+	*/
+	var FullscreenExtension = new function() {
+		this.newChannel = newChannel;
+		
+		this.__defineGetter__('loadAsChrome', function () { return false; });
+		
+		function newChannel(uri) {
+			var Zotero = Components.classes["@zotero.org/Zotero;1"]
+				.getService(Components.interfaces.nsISupports)
+				.wrappedJSObject;
+				
+			generateContent: try {
+				var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					.getService(Components.interfaces.nsIWindowMediator)
+					.getMostRecentWindow("navigator:browser");
+				var zp = win.ZoteroPane;
+				
+				// When using fullscreen as home page, Zotero pane is reset to
+				// 0 height, so get saved height and set it below
+				var pane = win.document.getElementById('zotero-pane');
+				var height = pane.getAttribute('savedHeight');
+				
+				zp.fullScreen(true);
+				
+				if(!zp.isShowing()) {
+					zp.toggleDisplay();
+				}
+				
+				pane.setAttribute('height', height);
+				
+				// FIXME: The above should run in a callback after about:blank
+				// is loaded so that the window title is set correctly, but I
+				// can't get the event handlers to work. - D.S.
+				
+				win.loadURI("about:blank");
+			}
+			catch (e) {
+				Zotero.debug(e);
+				throw (e);
+			}
+		}
+	};
 
 	
 	var ReportExtensionSpec = ZOTERO_SCHEME + "://report"
@@ -776,6 +821,9 @@ function ChromeExtensionHandler() {
 	
 	var SelectExtensionSpec = ZOTERO_SCHEME + "://select"
 	this._extensions[SelectExtensionSpec] = SelectExtension;
+	
+	var FullscreenExtensionSpec = ZOTERO_SCHEME + "://fullscreen"
+	this._extensions[FullscreenExtensionSpec] = FullscreenExtension;
 }
 
 
