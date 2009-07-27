@@ -298,9 +298,7 @@ var Zotero_File_Interface = new function() {
 	 */
 	function _importDone(obj, worked) {
 		// add items to import collection
-		for each(var itemID in obj.newItems) {
-			_importCollection.addItem(itemID);
-		}
+		_importCollection.addItems(obj.newItems);
 		
 		Zotero.DB.commitTransaction();
 		
