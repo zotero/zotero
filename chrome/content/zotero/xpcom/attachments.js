@@ -995,13 +995,12 @@ Zotero.Attachments = new function(){
 	 * descriptor for files outside the storage directory
 	 */
 	function getPath(file, linkMode) {
+		file.QueryInterface(Components.interfaces.nsILocalFile);
 		if (linkMode == self.LINK_MODE_IMPORTED_URL ||
 				linkMode == self.LINK_MODE_IMPORTED_FILE) {
-			file.QueryInterface(Components.interfaces.nsILocalFile);
 			var fileName = file.getRelativeDescriptor(file.parent);
 			return 'storage:' + fileName;
 		}
-		
 		return file.persistentDescriptor;
 	}
 	
