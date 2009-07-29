@@ -2028,7 +2028,7 @@ Zotero.Translate.prototype._importConfigureIO = function(charset) {
 				var IOService = Components.classes['@mozilla.org/network/io-service;1']
 								.getService(Components.interfaces.nsIIOService);
 				if(this._storage) {
-					var baseURI = this.location ? this.location : null;
+					var baseURI = this.location ? this.location : "";
 				} else {
 					var fileHandler = IOService.getProtocolHandler("file")
 									  .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
@@ -2040,7 +2040,7 @@ Zotero.Translate.prototype._importConfigureIO = function(charset) {
 				
 				Zotero.debug("Translate: loading data");
 				var parser = new Zotero.RDF.AJAW.RDFParser(this._rdf);
-				parser.parse(xmlNodes, "");
+				parser.parse(xmlNodes, baseURI);
 			}
 			
 			// add RDF features to sandbox
