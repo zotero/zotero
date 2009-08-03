@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-05-05 15:45:00"
+	"lastUpdated":"2009-08-03 01:25:00"
 }
 
 function detectWeb(doc, url){
@@ -116,7 +116,7 @@ function doWeb(doc, url){
 			translator.translate();
 			
 			next();
-		});
+		}, null, 'iso-8859-1');
 	}
 	
 	var callbacks = [setupCallback, processCallback];
