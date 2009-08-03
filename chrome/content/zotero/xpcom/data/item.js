@@ -2288,7 +2288,7 @@ Zotero.Item.prototype.setNote = function(text) {
 	}
 	
 	if (typeof text != 'string') {
-		throw ("text must be a string in Zotero.Item.setNote()");
+		throw ("text must be a string in Zotero.Item.setNote() (was " + typeof text + ")");
 	}
 	
 	text = Zotero.Utilities.prototype.trim(text);
@@ -2900,6 +2900,101 @@ Zotero.Item.prototype.__defineGetter__('attachmentModificationTime', function ()
 	
 	return Math.round(file.lastModifiedTime / 1000);
 });
+
+
+/**
+ * Return plain text of attachment content
+ *
+ * - Currently works on HTML, PDF and plaintext attachments
+ * - Paragraph breaks will be lost in PDF content
+ * - For PDFs, will return empty string if Zotero.Fulltext.pdfConverterIsRegistered() is false
+ *
+ * @return	{String}	Attachment text, or empty string if unavailable
+ */
+Zotero.Item.prototype.__defineGetter__('attachmentText', function () {
+	if (!this.isAttachment()) {
+		return undefined;
+	}
+	
+	if (!this.id) {
+		return null;
+	}
+	
+	var file = this.getFile();
+	var cacheFile = Zotero.Fulltext.getItemCacheFile(this.id);
+	if (!file) {
+		if (cacheFile.exists()) {
+			var str = Zotero.File.getContents(cacheFile);
+			
+			// TODO: remove post-Fx3.0
+			if (!str.trim) {
+				return Zotero.Utilities.prototype.trim(str);
+			}
+			
+			return str.trim();
+		}
+		return '';
+	}
+	
+	var mimeType = this.attachmentMIMEType;
+	if (!mimeType) {
+		mimeType = Zotero.MIME.getMIMETypeFromFile(file);
+		if (mimeType) {
+			this.attachmentMIMEType = mimeType;
+			this.save();
+		}
+	}
+	
+	var str;
+	if (Zotero.Fulltext.isCachedMIMEType(mimeType)) {
+		var reindex = false;
+		
+		if (!cacheFile.exists()) {
+			Zotero.debug("Regenerating item " + this.id + " full-text cache file");
+			reindex = true;
+		}
+		// Fully index item if it's not yet
+		else if (!Zotero.Fulltext.isFullyIndexed(this.id)) {
+			Zotero.debug("Item " + this.id + " is not fully indexed -- caching now");
+			reindex = true;
+		}
+		
+		if (reindex) {
+			if (!Zotero.Fulltext.pdfConverterIsRegistered()) {
+				Zotero.debug("PDF converter is unavailable -- returning empty .attachmentText", 3);
+				return '';
+			}
+			Zotero.Fulltext.indexItems(this.id, false);
+		}
+		
+		if (!cacheFile.exists()) {
+			Zotero.debug("Cache file doesn't exist after indexing -- returning empty .attachmentText");
+			return '';
+		}
+		str = Zotero.File.getContents(cacheFile);
+	}
+	
+	else if (mimeType == 'text/html') {
+		str = Zotero.File.getContents(file);
+		str = Zotero.Utilities.prototype.unescapeHTML(str);
+	}
+	
+	else if (mimeType == 'text/plain') {
+		str = Zotero.File.getContents(file);
+	}
+	
+	else {
+		return '';
+	}
+	
+	// TODO: remove post-Fx3.0
+	if (!str.trim) {
+		return Zotero.Utilities.prototype.trim(str);
+	}
+	
+	return str.trim();
+});
+
 
 
 /**
