@@ -324,7 +324,14 @@ var Zotero = new function(){
 			}
 			catch (e) {
 				if (typeof e == 'string' && e.match('newer than SQL file')) {
-					_startupError = e;
+					// TODO: localize
+					var zoteroVersionIsOlder = "This version of Zotero is older than the version last used with your database.";
+					var upgradeToLatestVersion = "Please upgrade to the latest version from zotero.org.";
+					var currentVersion = "Current version: " + this.version;
+					var kbURL = "http://zotero.org/support/kb/newer_db_version";
+					var seeKB = "See " + kbURL + " for more information.";
+					var msg = Zotero.localeJoin([zoteroVersionIsOlder, upgradeToLatestVersion]) + "\n\n" + currentVersion + "\n\n" + seeKB;
+					_startupError = msg;
 				}
 				else {
 					_startupError = "Database upgrade error";
@@ -1836,6 +1843,7 @@ Zotero.Date = new function(){
 	// TODO: Allow negative multipart in DB and here with \-?
 	var _multipartRE = /^[0-9]{4}\-(0[0-9]|10|11|12)\-(0[0-9]|[1-2][0-9]|30|31) /;
 	var _sqldateRE = /^\-?[0-9]{4}\-(0[1-9]|10|11|12)\-(0[1-9]|[1-2][0-9]|30|31)$/;
+	var _sqldateWithZeroesRE = /^\-?[0-9]{4}\-(0[0-9]|10|11|12)\-(0[0-9]|[1-2][0-9]|30|31)$/;
 	var _sqldatetimeRE = /^\-?[0-9]{4}\-(0[1-9]|10|11|12)\-(0[1-9]|[1-2][0-9]|30|31) ([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])$/;
 	
 	/**
@@ -1884,7 +1892,10 @@ Zotero.Date = new function(){
 	}
 	
 	
-	function isSQLDate(str){
+	function isSQLDate(str, allowZeroes) {
+		if (allowZeroes) {
+			return _sqldateWithZeroesRE.test(str);
+		}
 		return _sqldateRE.test(str);
 	}
 	
@@ -1895,17 +1906,17 @@ Zotero.Date = new function(){
 	
 	
 	function sqlHasYear(sqldate){
-		return isSQLDate(sqldate) && sqldate.substr(0,4)!='0000';
+		return isSQLDate(sqldate, true) && sqldate.substr(0,4)!='0000';
 	}
 	
 	
 	function sqlHasMonth(sqldate){
-		return isSQLDate(sqldate) && sqldate.substr(5,2)!='00';
+		return isSQLDate(sqldate, true) && sqldate.substr(5,2)!='00';
 	}
 	
 	
 	function sqlHasDay(sqldate){
-		return isSQLDate(sqldate) && sqldate.substr(8,2)!='00';
+		return isSQLDate(sqldate, true) && sqldate.substr(8,2)!='00';
 	}
 	
 	

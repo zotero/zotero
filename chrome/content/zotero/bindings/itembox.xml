@@ -553,7 +553,7 @@
 				<body>
 				<![CDATA[
 					var url = this.item.getField('url');
-					return url && !url.match(/^file:|^zotero:/);
+					return url && url.match && !url.match(/^file:|^zotero:/);
 				]]>
 				</body>
 			</method>
