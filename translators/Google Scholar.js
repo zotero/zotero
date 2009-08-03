@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-07-13 19:15:00"
+	"lastUpdated":"2009-07-22 08:05:00"
 }
 
 function detectWeb(doc, url) {
@@ -47,6 +47,10 @@ function scrape(doc) {
 		i++;
 	}
 	
+	if (!items.length) {
+		if(Zotero.done) Zotero.done(true);
+		return;
+	}
 	items = Zotero.selectItems(items);
 	
 	if(!items) {
