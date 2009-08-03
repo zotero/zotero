@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+
+<window
+	id="test-window"
+	title="Last Modified Time Test"
+	orient="horizontal"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	style="padding:2em">
+	
+	<script src="../include.js"/>
+	<script src="modtime.js"/>
+	
+	<box/>
+</window>
