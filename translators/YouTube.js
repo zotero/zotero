@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-02-25 07:10:00"
+	"lastUpdated":"2009-08-04 04:40:00"
 }
 
 function detectWeb(doc, url){
@@ -93,30 +93,28 @@ function getData(ids, host){
 		uris.push(url+id);
 	}
 	Zotero.Utilities.HTTP.doGet(uris, function(text) {
-		// clean up header
+		// Strip XML header
 		text = text.replace(/<\?xml[^>]*\?>/, "");
-		text = text.replace(/<entry[^>]*>/, "<entry>");
-		// replace colons in XML tags
-		text = text.replace(/<media:/g, "<media_").replace(/<\/media:/g, "</media_");
-//		text = text.replace(/<yt:/g, "<yt_").replace(/<\/yt:/g, "</yt_");
-		text = text.replace(/yt:/g, "yt_");
-		text = text.replace(/<gd:/g, "<gd_").replace(/<\/gd:/g, "</gd_");
-		text = text.replace(/<\/?(georss|gml)[^>]+>/g, "");
+		
+		default xml namespace = "http://www.w3.org/2005/Atom"; with({});
+		var mediaNS = new Namespace("http://search.yahoo.com/mrss/");
+		var ytNS = new Namespace("http://gdata.youtube.com/schemas/2007");
+		
 		// pad xml
 		text = "<zotero>"+text+"</zotero>";
 		var xml = new XML(text);
 		var newItem = new Zotero.Item("videoRecording");
 		var title = "";
-		var title = xml..media_title[0].text().toString();
-		if (xml..media_title.length()){
-			var title = Zotero.Utilities.trimInternal(xml..media_title[0].text().toString());
+		var title = xml..mediaNS::title[0].text().toString();
+		if (xml..mediaNS::title.length()){
+			var title = Zotero.Utilities.trimInternal(xml..mediaNS::title[0].text().toString());
 			if (title == ""){
 				title = " ";
 			}
 			newItem.title = title;
 		}
-		if (xml..media_keywords.length()){
-			var keywords = xml..media_keywords[0].text().toString();
+		if (xml..mediaNS::keywords.length()){
+			var keywords = xml..mediaNS::keywords[0].text().toString();
 			keywords = keywords.split(",");
 			for each(var tag in keywords){
 				newItem.tags.push(Zotero.Utilities.trimInternal(tag));
@@ -128,19 +126,23 @@ function getData(ids, host){
 		}
 		if (xml..author.name.length()){
 			var author = xml..author.name[0].text().toString();
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "contributor", true));
+			var creator = Zotero.Utilities.cleanAuthor(author, "contributor", true);
+			if (!creator.firstName) {
+				creator.fieldMode = 1;
+			}
+			newItem.creators.push(creator);
 		}
-		if (xml..media_player.length()){
-			var url = xml..media_player[0].@url.toString();
+		if (xml..mediaNS::player.length()){
+			var url = xml..mediaNS::player[0].@url.toString();
 			newItem.url = url;
 			newItem.attachments.push({title:"YouTube Link", snapshot:false, mimeType:"text/html", url:url});
 		}
-		if (xml..yt_duration.length()){
-			var runningTime = xml..yt_duration[0].@seconds.toString();
+		if (xml..ytNS::duration.length()){
+			var runningTime = xml..ytNS::duration[0].@seconds.toString();
 			newItem.runningTime = runningTime + " seconds";
 		}
-		if (xml..media_description.length()){
-			newItem.abstractNote = xml..media_description[0].text().toString();
+		if (xml..mediaNS::description.length()){
+			newItem.abstractNote = xml..mediaNS::description[0].text().toString();
 		}
 		/*
 //temporary fix for downloads using techcrunch
