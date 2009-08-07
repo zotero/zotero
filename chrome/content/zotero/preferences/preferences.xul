@@ -258,7 +258,14 @@ To add a new preference:
 						</hbox>
 						
 						<separator class="thin"/>
-						<label value="Please note: Syncing of attachment files in group libraries is not currently supported."/>
+						<hbox align="center">
+							<label value="A" style="margin-right: 0"/>
+							<label value="WebDAV server" class="text-link" href="http://zotero.org/support/sync#file_syncing" style="margin-left: .25em; margin-right: .25em"/>
+							<label value="is currently required to sync attachment files." style="margin-left: 0"/>
+						</hbox>
+						
+						<separator class="thin"/>
+						<label value="Syncing of attachment files in group libraries is not currently supported."/>
 						
 						<separator/>
 						
