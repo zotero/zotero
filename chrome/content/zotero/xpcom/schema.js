@@ -2443,6 +2443,10 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID=itemID");
 				}
 				
+				if (i==61) {
+					Zotero.DB.query("UPDATE itemAttachments SET storageModTime=NULL WHERE storageModTime<0");
+				}
+				
 				Zotero.wait();
 			}
 			

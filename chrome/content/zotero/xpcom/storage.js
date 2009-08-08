@@ -343,6 +343,12 @@ Zotero.Sync.Storage = new function () {
 	 *												attachment item
 	 */
 	this.setSyncedModificationTime = function (itemID, mtime, updateItem) {
+		if (mtime < 0) {
+			Components.utils.reportError("Invalid file mod time " + mtime
+				+ " in Zotero.Storage.setSyncedModificationTime()");
+			mtime = 0;
+		}
+		
 		Zotero.DB.beginTransaction();
 		
 		var sql = "UPDATE itemAttachments SET storageModTime=? WHERE itemID=?";
