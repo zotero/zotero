@@ -80,10 +80,9 @@ Zotero_File_Exporter.prototype.save = function() {
 		translation.setHandler("done", this._exportDone);
 		Zotero.UnresponsiveScriptIndicator.disable();
 		Zotero_File_Interface.Progress.show(
-			Zotero.getString("fileInterface.itemsExported"),
-			function() {
-				translation.translate();
-		});
+			Zotero.getString("fileInterface.itemsExported")
+		);
+		translation.translate()
 	}
 	return false;
 }
@@ -269,13 +268,10 @@ var Zotero_File_Interface = new function() {
 			
 			// show progress indicator
 			Zotero_File_Interface.Progress.show(
-				Zotero.getString("fileInterface.itemsImported"),
-				function() {
-					Zotero.DB.beginTransaction();
-					
-					// translate
-					translation.translate();
-			});
+				Zotero.getString("fileInterface.itemsImported")
+			);
+			Zotero.DB.beginTransaction();
+			translation.translate();
 		} else {
 			var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
 							.getService(Components.interfaces.nsIPrompt);
@@ -569,50 +565,14 @@ var Zotero_File_Interface = new function() {
 
 // Handles the display of a progress indicator
 Zotero_File_Interface.Progress = new function() {
-	var _windowLoaded = false;
-	var _windowLoading = false;
-	var _progressWindow;
-	// keep track of all of these things in case they're called before we're
-	// done loading the progress window
-	var _loadHeadline, _loadNumber, _outOf, _callback;
-	
 	this.show = show;
 	this.close = close;
 	
-	function show(headline, callback) {
-		if(_windowLoading || _windowLoaded) {	// already loading or loaded
-			_progressWindow.focus();
-			return false;
-		}
-		_windowLoading = true;
-		
-		_loadHeadline = headline;
-		_loadNumber = 0;
-		_outOf = 0;
-		_callback = callback;
-		
-		_progressWindow = window.openDialog("chrome://zotero/content/fileProgress.xul", "", "chrome,resizable=no,close=no,dependent,dialog,centerscreen");
-		_progressWindow.addEventListener("pageshow", _onWindowLoaded, false);
-		
-		return true;
+	function show(headline) {
+		Zotero.showZoteroPaneProgressBar(headline)
 	}
 	
 	function close() {
-		_windowLoaded = false;
-		try {
-			_progressWindow.close();
-		} catch(ex) {}
-	}
-	
-	function _onWindowLoaded() {
-		_windowLoading = false;
-		_windowLoaded = true;
-		
-		// do things we delayed because the winodw was loading
-		_progressWindow.document.getElementById("progress-label").value = _loadHeadline;
-		
-		if(_callback) {
-			window.setTimeout(_callback, 1500);
-		}
+		Zotero.hideZoteroPaneOverlay();
 	}
 }

@@ -217,6 +217,11 @@ Zotero.DBConnection.prototype.columnQuery = function (sql,params) {
  *		[1,"hello",3] or [{'int':2},{'string':'foobar'}]
  */
 Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams) {
+	// TODO: limit to Zotero.DB, not all Zotero.DBConnections?
+	if (Zotero.waiting) {
+		throw ("Cannot access database layer during active Zotero.wait()");
+	}
+	
 	var db = this._getDBConnection();
 	
 	// First, determine the type of query using first word
@@ -414,6 +419,11 @@ Zotero.DBConnection.prototype.getLastErrorString = function () {
 
 
 Zotero.DBConnection.prototype.beginTransaction = function () {
+	// TODO: limit to Zotero.DB, not all Zotero.DBConnections?
+	if (Zotero.waiting) {
+		throw ("Cannot access database layer during active Zotero.wait()");
+	}
+	
 	var db = this._getDBConnection();
 	
 	if (db.transactionInProgress) {
@@ -790,6 +800,11 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 		if (numBackups > 24) {
 			numBackups = 24;
 		}
+	}
+	
+	if (Zotero.locked) {
+		this._debug("Zotero is locked -- skipping backup of DB '" + this._dbName + "'", 2);
+		return false;
 	}
 	
 	if (this.transactionInProgress()) {

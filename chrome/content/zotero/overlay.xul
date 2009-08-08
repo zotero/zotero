@@ -53,20 +53,23 @@
 	</toolbarpalette>
 	
 	<popup id="contentAreaContextMenu">
-		<menuseparator id="zotero-context-separator" hidden="true"/>
-		<menuitem id="zotero-context-add-to-current-note" class="menu-iconic"
-			label="&zotero.contextMenu.addTextToCurrentNote;" hidden="true"
-			oncommand="var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString(); ZoteroPane.addTextToNote(str)"/>
-		<menuitem id="zotero-context-add-to-new-note" class="menu-iconic"
-			label="&zotero.contextMenu.addTextToNewNote;" hidden="true"
-			oncommand="var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString(); var itemID = ZoteroPane.addItemFromPage(); ZoteroPane.newNote(false, itemID, str)"/>
-		<!-- TODO: localize and remove zotero.contextMenu.saveLinkAsItem/saveImageAsSnapshot -->
-		<menuitem id="zotero-context-save-link-as-item" class="menu-iconic"
-			label="Save Link as Zotero Item" hidden="true"
-			oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.linkURL, 'temporaryPDFHack')"/>
-		<menuitem id="zotero-context-save-image-as-item" class="menu-iconic"
-			label="Save Image as Zotero Item" hidden="true"
-			oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.onImage ? (window.gContextMenu.mediaURL ? window.gContextMenu.mediaURL : window.gContextMenu.imageURL) : window.gContextMenu.bgImageURL, 'artwork')"/>
+		<menu id="zotero-content-area-context-menu" label="Zotero">
+			<menupopup>
+				<menuitem id="zotero-context-add-to-current-note" class="menu-iconic"
+					label="&zotero.contextMenu.addTextToCurrentNote;" hidden="true"
+					oncommand="var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString(); ZoteroPane.addTextToNote(str)"/>
+				<menuitem id="zotero-context-add-to-new-note" class="menu-iconic"
+					label="&zotero.contextMenu.addTextToNewNote;" hidden="true"
+					oncommand="var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString(); var itemID = ZoteroPane.addItemFromPage(); ZoteroPane.newNote(false, itemID, str)"/>
+				<!-- TODO: localize and remove zotero.contextMenu.saveLinkAsItem/saveImageAsSnapshot -->
+				<menuitem id="zotero-context-save-link-as-item" class="menu-iconic"
+					label="Save Link as Zotero Item" hidden="true"
+					oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.linkURL, 'temporaryPDFHack')"/>
+				<menuitem id="zotero-context-save-image-as-item" class="menu-iconic"
+					label="Save Image as Zotero Item" hidden="true"
+					oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.onImage ? (window.gContextMenu.mediaURL ? window.gContextMenu.mediaURL : window.gContextMenu.imageURL) : window.gContextMenu.bgImageURL, 'artwork')"/>
+			</menupopup>
+		</menu>
 	</popup>
 	
 	<vbox id="appcontent">
@@ -74,7 +77,15 @@
 		<!-- onmouseup shouldn't be necessary but seems to help prevent tag selector from sometimes going off the screen -->
 		<splitter id="zotero-splitter" resizebefore="closest" resizeafter="closest" hidden="true"
 			onmouseup="ZoteroPane.updateTagSelectorSize()"/>
-		<hbox id="zotero-pane" persist="savedHeight" hidden="true"
+		
+		<stack id="zotero-pane-stack" persist="savedHeight" hidden="true">
+		
+		<!-- Barrier to prevent tabbing into Zotero pane when busy -->
+		<box id="zotero-pane-tab-catcher-top" hidden="true" align="center" pack="center" style="opacity: 0">
+			<checkbox/>
+		</box>
+		
+		<hbox id="zotero-pane"
 			onkeydown="ZoteroPane.handleKeyDown(event, this.id)"
 			onkeyup="ZoteroPane.handleKeyUp(event, this.id)"
 			chromedir="&locale.dir;">
@@ -401,6 +412,28 @@
 				</deck>
 			</vbox>
 		</hbox>
+		
+		<!-- Barrier to prevent tabbing into Zotero pane when busy -->
+		<box id="zotero-pane-tab-catcher-bottom" hidden="true" align="center" pack="center" style="opacity: 0">
+			<checkbox/>
+		</box>
+		
+		<stack id="zotero-pane-overlay" flex="1" hidden="true">
+			<box style="background: black; opacity: .3" flex="1"/>
+			
+			<deck id="zotero-pane-overlay-deck" flex="1">
+				<box id="zotero-pane-progress" flex="1" align="center" pack="center">
+					<box style="background: white; -moz-border-radius: 1px; -moz-box-shadow: gray 4px 6px 4px;" width="300" height="30">
+						<vbox style="padding:10px" flex="1">
+							<label id="zotero-pane-progress-label"/>
+							<progressmeter id="zotero-pane-progressmeter" mode="undetermined"/>
+						</vbox>
+					</box>
+				</box>
+			</deck>
+		</stack>
+		
+		</stack>
 		
 		<!-- Annotation Toolbar -->
 		<toolbar id="zotero-annotate-tb" crop="end" insertbefore="content" hidden="true">

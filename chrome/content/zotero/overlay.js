@@ -27,6 +27,7 @@ var ZoteroPane = new function()
 {
 	this.collectionsView = false;
 	this.itemsView = false;
+	this.__defineGetter__('loaded', function () _loaded);
 	
 	//Privileged methods
 	this.onLoad = onLoad;
@@ -85,6 +86,7 @@ var ZoteroPane = new function()
 	const COLLECTIONS_HEIGHT = 32; // minimum height of the collections pane and toolbar
 	
 	var self = this;
+	var _loaded = false;
 	var titlebarcolorState, toolbarCollapseState, titleState;
 	
 	// Also needs to be changed in collectionTreeView.js
@@ -98,6 +100,11 @@ var ZoteroPane = new function()
 		if (!Zotero || !Zotero.initialized) {
 			return;
 		}
+		
+		if (Zotero.locked) {
+			return;
+		}
+		_loaded = true;
 		
 		if(Zotero.Prefs.get("zoteroPaneOnTop"))
 		{
@@ -245,7 +252,7 @@ var ZoteroPane = new function()
 	 */
 	function onUnload()
 	{
-		if (!Zotero || !Zotero.initialized) {
+		if (!Zotero || !Zotero.initialized || !_loaded) {
 			return;
 		}
 		
@@ -262,7 +269,19 @@ var ZoteroPane = new function()
 	 */
 	function toggleDisplay()
 	{
-		var zoteroPane = document.getElementById('zotero-pane');
+		if (!ZoteroPane.loaded) {
+			if (Zotero.locked) {
+				var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+							.getService(Components.interfaces.nsIPrompt);
+				// TODO: localize
+				var msg = "Another Zotero operation is currently in progress.\n\nPlease wait until it has finished.";
+				pr.alert("", msg);
+				return;
+			}
+			ZoteroPane.onLoad();
+		}
+		
+		var zoteroPane = document.getElementById('zotero-pane-stack');
 		var zoteroSplitter = document.getElementById('zotero-splitter')
 		
 		if (zoteroPane.getAttribute('hidden') == 'true') {
@@ -383,7 +402,7 @@ var ZoteroPane = new function()
 	
 	
 	function isShowing() {
-		var zoteroPane = document.getElementById('zotero-pane');
+		var zoteroPane = document.getElementById('zotero-pane-stack');
 		return zoteroPane.getAttribute('hidden') != 'true' &&
 				zoteroPane.getAttribute('collapsed') != 'true';
 	}
@@ -391,21 +410,21 @@ var ZoteroPane = new function()
 	
 	function fullScreen(set)
 	{
-		var zPane = document.getElementById('zotero-pane');
+		var zoteroPane = document.getElementById('zotero-pane-stack');
 		
 		if (set != undefined) {
 			var makeFullScreen = !!set;
 		}
 		else {
-			var makeFullScreen = zPane.getAttribute('fullscreenmode') != 'true';
+			var makeFullScreen = zoteroPane.getAttribute('fullscreenmode') != 'true';
 		}
 		
 		// Turn Z-pane flex on to stretch to window in full-screen, but off otherwise so persist works
-		zPane.setAttribute('flex', makeFullScreen ? "1" : "0");
+		zoteroPane.setAttribute('flex', makeFullScreen ? "1" : "0");
 		document.getElementById('content').setAttribute('collapsed', makeFullScreen);
 		document.getElementById('zotero-splitter').setAttribute('hidden', makeFullScreen);
 		
-		zPane.setAttribute('fullscreenmode', makeFullScreen);
+		zoteroPane.setAttribute('fullscreenmode', makeFullScreen);
 		_setFullWindowMode(makeFullScreen);
 	}
 	
@@ -468,6 +487,11 @@ var ZoteroPane = new function()
 			Zotero.debug(e);
 		}
 		
+		if (Zotero.locked) {
+			event.preventDefault();
+			return;
+		}
+		
 		if (from == 'zotero-pane') {
 			// Highlight collections containing selected items
 			//
@@ -497,7 +521,7 @@ var ZoteroPane = new function()
 		}
 		
 		// Ignore keystrokes if Zotero pane is closed
-		var zoteroPane = document.getElementById('zotero-pane');
+		var zoteroPane = document.getElementById('zotero-pane-stack');
 		if (zoteroPane.getAttribute('hidden') == 'true' ||
 				zoteroPane.getAttribute('collapsed') == 'true') {
 			return;
@@ -783,7 +807,6 @@ var ZoteroPane = new function()
 	
 	
 	function toggleTagSelector(){
-		var zoteroPane = document.getElementById('zotero-pane');
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		
 		var showing = tagSelector.getAttribute('collapsed') == 'true';
@@ -805,7 +828,7 @@ var ZoteroPane = new function()
 	
 	function updateTagSelectorSize() {
 		//Zotero.debug('Updating tag selector size');
-		var zoteroPane = document.getElementById('zotero-pane');
+		var zoteroPane = document.getElementById('zotero-pane-stack');
 		var splitter = document.getElementById('zotero-tags-splitter');
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		
@@ -964,7 +987,6 @@ var ZoteroPane = new function()
 			Zotero.Prefs.set('lastViewedFolder', 'G' + itemgroup.ref.id);
 		}
 	}
-	
 	
 	
 	this.showDuplicates = function () {
@@ -2225,8 +2247,11 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		var separator = document.getElementById("zotero-context-separator");
-		separator.hidden = !showing;
+		// If Zotero is locked, disable menu items
+		var menu = document.getElementById('zotero-content-area-context-menu');
+		for each(var menuitem in menu.firstChild.childNodes) {
+			menuitem.disabled = Zotero.locked;
+		}
 	}
 	
 	
