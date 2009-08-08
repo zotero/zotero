@@ -38,8 +38,10 @@
 			<radiogroup id="formatUsing" orient="vertical">
 				<radio id="fields" selected="true"/>
 				<label class="radioDescription" id="fields-caption"/>
+				<label class="radioDescription" id="fields-file-format-notice"/>
 				<radio id="bookmarks" label="&zotero.integration.prefs.bookmarks.label;"/>
 				<description class="radioDescription" id="bookmarks-caption" style="white-space: pre;">&zotero.integration.prefs.bookmarks.caption;</description>
+				<description class="radioDescription" id="bookmarks-file-format-notice"/>
 			</radiogroup>
 		</groupbox>
 	</vbox>
