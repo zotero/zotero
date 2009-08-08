@@ -221,12 +221,15 @@ Zotero.Collection.prototype.loadFromRow = function(row) {
 	this._hasChildCollections = !!row.hasChildCollections;
 	this._childItemsLoaded = false;
 	this._hasChildItems = !!row.hasChildItems;
-	this._loadChildItems();
 }
 
 
 Zotero.Collection.prototype.isEmpty = function() {
-	return !(parseInt(this._hasChildCollections)) && !(parseInt(this._hasChildItems));
+	if (this._hasChildCollections == undefined) {
+		this.hasChildCollections();
+	}
+	
+	return !(this._hasChildCollections || this._hasChildItems);
 }
 
 Zotero.Collection.prototype.hasChildCollections = function() {
@@ -245,7 +248,7 @@ Zotero.Collection.prototype.hasChildCollections = function() {
 }
 
 Zotero.Collection.prototype.hasChildItems = function() {
-	return !!(parseInt(this._hasChildItems));
+	return !!this._hasChildItems;
 }
 
 /**
@@ -696,12 +699,16 @@ Zotero.Collection.prototype.addItems = function(itemIDs) {
 		catch(e) {
 			throw (e + ' [ERROR: ' + Zotero.DB.getLastErrorString() + ']');
 		}
+		
+		Zotero.Notifier.trigger('add', 'collection-item', this.id + '-' + itemID);
 	}
 	
 	sql = "UPDATE collections SET dateModified=?, clientDateModified=? WHERE collectionID=?";
 	Zotero.DB.query(sql, [Zotero.DB.transactionDateTime, Zotero.DB.transactionDateTime, this.id]);
 	
 	Zotero.DB.commitTransaction();
+	
+	Zotero.Collections.reload(this.id);
 }
 
 
@@ -717,6 +724,9 @@ Zotero.Collection.prototype.removeItem = function(itemID) {
 				+ this.id + " in Zotero.Collection.removeItem()");
 			return false;
 		}
+	}
+	else {
+		return false;
 	}
 	
 	Zotero.DB.beginTransaction();
