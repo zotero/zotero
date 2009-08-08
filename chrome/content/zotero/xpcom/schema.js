@@ -544,6 +544,12 @@ Zotero.Schema = new function(){
 			}
 		}
 		
+		if (Zotero.locked) {
+			Zotero.debug('Zotero is locked -- delaying repository check', 4);
+			_setRepositoryTimer(600);
+			return false;
+		}
+		
 		// If transaction already in progress, delay by ten minutes
 		if (Zotero.DB.transactionInProgress()){
 			Zotero.debug('Transaction in progress -- delaying repository check', 4)

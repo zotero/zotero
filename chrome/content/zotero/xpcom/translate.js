@@ -1680,6 +1680,9 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 	}
 	
 	delete item;
+	
+	// Allow progress meter to update
+	Zotero.wait(50);
 }
 
 /*

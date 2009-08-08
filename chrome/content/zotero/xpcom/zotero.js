@@ -119,6 +119,18 @@ var Zotero = new function(){
 		return key;
 	};
 	
+	/**
+	 * @property	{Boolean}	waiting		Whether Zotero is waiting for other
+	 *										main thread events to be processed
+	 */
+	this.__defineGetter__('waiting', function () _waiting);
+	
+	/**
+	 * @property	{Boolean}	locked		Whether all Zotero panes are locked
+	 *										with an overlay
+	 */
+	this.__defineGetter__('locked', function () _locked);
+	
 	
 	var _startupError;
 	var _startupErrorHandler;
@@ -129,6 +141,8 @@ var Zotero = new function(){
 	var _debugLastTime;
 	var _localizedStringBundle;
 	var _localUserKey;
+	var _waiting;
+	var _locked;
 	
 	/*
 	 * Initialize the extension
@@ -380,6 +394,10 @@ var Zotero = new function(){
 	 * Check if a DB transaction is open and, if so, disable Zotero
 	 */
 	function stateCheck() {
+		if (Zotero.locked) {
+			return true;
+		}
+		
 		if (Zotero.DB.transactionInProgress()) {
 			this.initialized = false;
 			this.skipLoading = true;
@@ -1030,6 +1048,117 @@ var Zotero = new function(){
 		// Move file to unique name
 		file.moveTo(newFile.parent, newName);
 		return file;
+	}
+	
+	
+	/**
+	 * Sleep for a given amount of time, allowing other events on main thread to be processed
+	 *
+	 * @param	{Integer}	wait			Milliseconds to wait
+	 */
+	this.sleep = function (ms) {
+		var tm = Components.classes["@mozilla.org/thread-manager;1"].getService();
+		var endTime = Date.now() + ms;
+		var mainThread = tm.mainThread;
+		do {
+			mainThread.processNextEvent(false);
+		} while (Date.now() < endTime);
+		
+		return;
+	};
+	
+	
+	/**
+	 * Allow other events (e.g., UI updates) on main thread to be processed if necessary
+	 *
+	 * @param	{Integer}	timeout			Maximum number of milliseconds to wait
+	 */
+	this.wait = function (timeout) {
+		var tm = Components.classes["@mozilla.org/thread-manager;1"].getService();
+		var endTime = Date.now() + timeout;
+		var mainThread = tm.mainThread;
+		var cycles = 0;
+		
+		_waiting = true;
+		
+		do {
+			mainThread.processNextEvent(false);
+			cycles++;
+		} while (mainThread.hasPendingEvents() && Date.now() < endTime);
+		
+		_waiting = false;
+		
+		//Zotero.debug("Waited " + cycles + " cycles");
+		return cycles;
+	};
+	
+	
+	/**
+	 * Show Zotero pane overlay and progress bar in all windows
+	 *
+	 * @param	{String}		msg
+	 * @param	{Boolean}		[determinate=false]
+	 * @return	{Element[]}		Array of XUL <progressmeter> elements
+	 */
+	this.showZoteroPaneProgressBar = function (msg, determinate) {
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					.getService(Components.interfaces.nsIWindowMediator);
+		var enumerator = wm.getEnumerator("navigator:browser");
+		var progressMeters = [];
+		while (enumerator.hasMoreElements()) {
+			var win = enumerator.getNext();
+			
+			win.document.getElementById('zotero-pane-progress-label').value = msg;
+			var progressMeter = win.document.getElementById('zotero-pane-progressmeter')
+			if (determinate) {
+				progressMeter.mode = 'determined';
+				progressMeter.value = 0;
+				progressMeter.max = 100;
+			}
+			else {
+				progressMeter.mode = 'undetermined';
+			}
+			
+			_showWindowZoteroPaneOverlay(win);
+			win.document.getElementById('zotero-pane-overlay-deck').selectedIndex = 0;
+			
+			progressMeters.push(progressMeter);
+		}
+		_locked = true;
+		return progressMeters;
+	}
+	
+	
+	/**
+	 * Hide Zotero pane overlay in all windows
+	 */
+	this.hideZoteroPaneOverlay = function () {
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					.getService(Components.interfaces.nsIWindowMediator);
+		var enumerator = wm.getEnumerator("navigator:browser");
+		while (enumerator.hasMoreElements()) {
+			var win = enumerator.getNext();
+			_hideWindowZoteroPaneOverlay(win);
+		}
+		_locked = false;
+	}
+	
+	
+	function _showWindowZoteroPaneOverlay(win) {
+		win.document.getElementById('zotero-collections-tree').disabled = true;
+		win.document.getElementById('zotero-items-tree').disabled = true;
+		win.document.getElementById('zotero-pane-tab-catcher-top').hidden = false;
+		win.document.getElementById('zotero-pane-tab-catcher-bottom').hidden = false;
+		win.document.getElementById('zotero-pane-overlay').hidden = false;
+	}
+	
+	
+	function _hideWindowZoteroPaneOverlay(win) {
+		win.document.getElementById('zotero-collections-tree').disabled = false;
+		win.document.getElementById('zotero-items-tree').disabled = false;
+		win.document.getElementById('zotero-pane-tab-catcher-top').hidden = true;
+		win.document.getElementById('zotero-pane-tab-catcher-bottom').hidden = true;
+		win.document.getElementById('zotero-pane-overlay').hidden = true;
 	}
 	
 	

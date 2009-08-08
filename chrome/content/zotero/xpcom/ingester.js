@@ -22,13 +22,23 @@
 
 Zotero.Ingester = new function() {
 	this.importHandler = function(string, uri) {
+		var frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
+			getService(Components.interfaces.nsIWindowWatcher).activeWindow;
+		
+		if (Zotero.locked) {
+			frontWindow.Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+			// TODO: localize
+			var desc = "A Zotero operation is currently in progress. Please wait until it finishes and try again.";
+			frontWindow.Zotero_Browser.progress.addDescription(desc);
+			frontWindow.Zotero_Browser.progress.show();
+			frontWindow.Zotero_Browser.progress.startCloseTimer(8000);
+			return;
+		}
+		
 		// attempt to import through Zotero.Translate
 		var translation = new Zotero.Translate("import");
 		translation.setLocation(uri);
 		translation.setString(string);
-		
-		var frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
-			getService(Components.interfaces.nsIWindowWatcher).activeWindow;
 		
 		frontWindow.Zotero_Browser.progress.show();
 		var libraryID = null;

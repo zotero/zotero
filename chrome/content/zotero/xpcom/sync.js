@@ -550,6 +550,11 @@ Zotero.Sync.Runner = new function () {
 					return;
 				}
 				
+				if (Zotero.locked) {
+					Zotero.debug('Zotero is locked -- skipping auto-sync', 4);
+					return;
+				}
+				
 				if (Zotero.Sync.Storage.syncInProgress) {
 					Zotero.debug('Storage sync already in progress -- skipping auto-sync', 4);
 					return;
