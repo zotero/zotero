@@ -310,7 +310,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		
 		// Select the last item even if there are no changes (e.g. if the tag
 		// selector is open and already refreshed the pane)
-		if (splitIDs.length > 0) {
+		if (splitIDs.length > 0 && (action == 'add' || action == 'modify')) {
 			var selectItem = splitIDs[splitIDs.length - 1];
 		}
 	}
