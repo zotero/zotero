@@ -86,7 +86,7 @@ function doWeb (doc, url) {
 		marc.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		marc.setString(text);
 		marc.setHandler("itemDone", function(obj, item) {
-			item.repository = "Myrlin Library Catalog";
+			item.repository = "Mirlyn Library Catalog";
 			item.complete();
 		});
 		marc.translate();
