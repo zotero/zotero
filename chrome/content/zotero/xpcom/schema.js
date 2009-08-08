@@ -102,6 +102,8 @@ Zotero.Schema = new function(){
 				Zotero.DB.backupDatabase(dbVersion);
 			}
 			
+			Zotero.wait(1000);
+			
 			Zotero.DB.beginTransaction();
 			
 			try {
@@ -122,8 +124,10 @@ Zotero.Schema = new function(){
 				}
 				
 				var up2 = _updateSchema('system');
+				Zotero.wait();
 				var up1 = _migrateUserDataSchema(dbVersion);
 				var up3 = _updateSchema('triggers');
+				Zotero.wait();
 				
 				Zotero.DB.commitTransaction();
 			}
@@ -388,6 +392,8 @@ Zotero.Schema = new function(){
 				else {
 					tmpFile.moveTo(hiddenDir, fileName);
 				}
+				
+				Zotero.wait();
 			}
 			zipReader.close();
 		}
@@ -481,6 +487,8 @@ Zotero.Schema = new function(){
 				catch (e) {
 					Components.utils.reportError("Error copying file " + fileName + ": " + e);
 				}
+				
+				Zotero.wait();
 			}
 		}
 		
@@ -1589,6 +1597,8 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE IF EXISTS userFields");
 					Zotero.DB.query("DROP TABLE IF EXISTS userItemTypeFields");
 					
+					Zotero.wait();
+					
 					// Index corruption can allow duplicate values
 					var wordIDs = Zotero.DB.columnQuery("SELECT GROUP_CONCAT(wordID) AS wordIDs FROM fulltextWords GROUP BY word HAVING COUNT(*)>1");
 					if (wordIDs.length) {
@@ -1605,8 +1615,12 @@ Zotero.Schema = new function(){
 					
 					Zotero.DB.query("DROP INDEX IF EXISTS fulltextWords_word");
 					
+					Zotero.wait();
+					
 					Zotero.DB.query("REINDEX");
 					Zotero.DB.transactionVacuum = true;
+					
+					Zotero.wait();
 					
 					// Set page cache size to 8MB
 					var pageSize = Zotero.DB.valueQuery("PRAGMA page_size");
@@ -1620,6 +1634,8 @@ Zotero.Schema = new function(){
 					// Create sync delete log
 					Zotero.DB.query("CREATE TABLE syncDeleteLog (\n    syncObjectTypeID INT NOT NULL,\n    objectID INT NOT NULL,\n    key TEXT NOT NULL,\n    timestamp INT NOT NULL,\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)\n);");
 					Zotero.DB.query("CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp);");
+					
+					Zotero.wait();
 					
 					// Note titles
 					Zotero.DB.query("ALTER TABLE itemNotes ADD COLUMN title TEXT");
@@ -1640,12 +1656,16 @@ Zotero.Schema = new function(){
 					}
 					Zotero.DB.query("DROP TABLE itemNoteTitles");
 					
+					Zotero.wait();
+					
 					// Creator data
 					Zotero.DB.query("CREATE TABLE creatorData (\n    creatorDataID INTEGER PRIMARY KEY,\n    firstName TEXT,\n    lastName TEXT,\n    shortName TEXT,\n    fieldMode INT,\n    birthYear INT\n)");
 					Zotero.DB.query("INSERT INTO creatorData SELECT DISTINCT NULL, firstName, lastName, NULL, fieldMode, NULL FROM creators WHERE creatorID IN (SELECT creatorID FROM itemCreators)");
 					Zotero.DB.query("CREATE TEMPORARY TABLE itemCreatorsTemp AS SELECT * FROM itemCreators NATURAL JOIN creators");
 					Zotero.DB.query("DROP TABLE creators");
 					Zotero.DB.query("CREATE TABLE creators (\n    creatorID INTEGER PRIMARY KEY,\n    creatorDataID INT,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL,\n    FOREIGN KEY (creatorDataID) REFERENCES creatorData(creatorDataID)\n);");
+					
+					Zotero.wait();
 					
 					var data = Zotero.DB.query("SELECT * FROM creatorData");
 					if (data) {
@@ -1672,6 +1692,8 @@ Zotero.Schema = new function(){
 					}
 					Zotero.DB.query("DROP TABLE itemCreatorsTemp");
 					Zotero.DB.query("CREATE INDEX creators_creatorDataID ON creators(creatorDataID)");
+					
+					Zotero.wait();
 					
 					// Items
 					Zotero.DB.query("ALTER TABLE items ADD COLUMN key TEXT");
@@ -1700,6 +1722,8 @@ Zotero.Schema = new function(){
 					statement.reset();
 					Zotero.DB.query("CREATE UNIQUE INDEX items_key ON items(key)");
 					
+					Zotero.wait();
+					
 					var rows = Zotero.DB.columnQuery("SELECT GROUP_CONCAT(valueID) FROM itemDataValues GROUP BY value HAVING COUNT(*) > 1");
 					for each(var row in rows) {
 						var ids = row.split(',');
@@ -1711,6 +1735,8 @@ Zotero.Schema = new function(){
 						Zotero.DB.query("DELETE FROM itemDataValues WHERE valueID IN (" + deleteIDs.map(function () '?').join() + ")", deleteIDs);
 					}
 					Zotero.DB.query("CREATE UNIQUE INDEX itemDataValues_value ON itemDataValues(value)");
+					
+					Zotero.wait();
 					
 					// Collections
 					var collections = Zotero.DB.query("SELECT * FROM collections");
@@ -1738,6 +1764,8 @@ Zotero.Schema = new function(){
 					}
 					statement.reset();
 					
+					Zotero.wait();
+					
 					// Saved searches
 					var searches = Zotero.DB.query("SELECT * FROM savedSearches");
 					Zotero.DB.query("DROP TABLE savedSearches");
@@ -1757,6 +1785,8 @@ Zotero.Schema = new function(){
 						}
 					}
 					statement.reset();
+					
+					Zotero.wait();
 					
 					// Tags
 					var tags = Zotero.DB.query("SELECT tagID, tag AS tag, tagType FROM tags");
@@ -1819,6 +1849,8 @@ Zotero.Schema = new function(){
 						}
 					}
 					
+					Zotero.wait();
+					
 					Zotero.DB.query("DROP TABLE tags");
 					Zotero.DB.query("CREATE TABLE tags (\n    tagID INTEGER PRIMARY KEY,\n    name TEXT COLLATE NOCASE,\n    type INT,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE,\n    UNIQUE (name, type)\n)");
 					var statement = Zotero.DB.getStatement("INSERT INTO tags (tagID, name, type, key) VALUES (?,?,?,?)");
@@ -1837,6 +1869,8 @@ Zotero.Schema = new function(){
 						}
 					}
 					statement.reset();
+					
+					Zotero.wait();
 					
 					// Migrate attachment folders to secondary keys
 					Zotero.DB.query("UPDATE itemAttachments SET path=REPLACE(path, itemID || '/', 'storage:') WHERE path REGEXP '^[0-9]+/'");
@@ -1901,6 +1935,8 @@ Zotero.Schema = new function(){
 						}
 						entries.close();
 						
+						Zotero.wait();
+						
 						if (orphanQueue.length) {
 							if (!orphaned.exists()) {
 								orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
@@ -1935,6 +1971,8 @@ Zotero.Schema = new function(){
 							}
 						}
 						
+						Zotero.wait();
+						
 						for each(var dir in renameQueue) {
 							Zotero.debug("Moving " + dir.file.leafName + " to " + dir.key);
 							dir.file.moveTo(null, dir.key);
@@ -1950,6 +1988,7 @@ Zotero.Schema = new function(){
 						}
 					}
 					
+					Zotero.wait();
 					
 					// Migrate big integers
 					var itemIDs = Zotero.DB.columnQuery("SELECT itemID FROM items WHERE itemID>16777215");
@@ -2021,6 +2060,7 @@ Zotero.Schema = new function(){
 							var str = metadataJSON + "\n\n" + (row.detectCode ? row.detectCode + "\n\n" : "") + row.code;
 							Zotero.debug("Extracting translator '" + row.label + "' from database");
 							Zotero.File.putContents(file, str);
+							Zotero.wait();
 						}
 						Zotero.Translators.init();
 					}
@@ -2040,6 +2080,7 @@ Zotero.Schema = new function(){
 							file.append(matches[1]);
 							Zotero.debug("Extracting styles '" + matches[1] + "' from database");
 							Zotero.File.putContents(file, row.csl);
+							Zotero.wait();
 						}
 						Zotero.Styles.init();
 					}
@@ -2073,6 +2114,7 @@ Zotero.Schema = new function(){
 							else {
 								Zotero.DB.query("UPDATE itemDataValues SET value=? WHERE valueID=?", [trimmed, row.valueID]);
 							}
+							Zotero.wait();
 						}
 					}
 					
@@ -2092,6 +2134,8 @@ Zotero.Schema = new function(){
 						}
 					}
 					
+					Zotero.wait();
+					
 					Zotero.DB.query("DELETE FROM itemTags WHERE tagID IN (SELECT tagID FROM tags WHERE name REGEXP '^\\s*$')");
 					Zotero.DB.query("DELETE FROM tags WHERE name REGEXP '^\\s*$'");
 					var rows = Zotero.DB.query("SELECT * FROM tags WHERE name REGEXP '(^\\s+|\\s+$)'");
@@ -2106,6 +2150,7 @@ Zotero.Schema = new function(){
 							else {
 								Zotero.DB.query("UPDATE tags SET name=? WHERE tagID=?", [trimmed, row.tagID]);
 							}
+							Zotero.wait();
 						}
 					}
 					
@@ -2177,6 +2222,8 @@ Zotero.Schema = new function(){
 						}
 						entries.close();
 						
+						Zotero.wait();
+						
 						if (orphanQueue.length) {
 							if (!orphaned.exists()) {
 								orphaned.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0755);
@@ -2211,6 +2258,8 @@ Zotero.Schema = new function(){
 							}
 						}
 						
+						Zotero.wait();
+						
 						for each(var dir in renameQueue) {
 							Zotero.debug("Moving " + dir.file.leafName + " to " + dir.key);
 							dir.file.moveTo(null, dir.key);
@@ -2241,15 +2290,21 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("ALTER TABLE savedSearches RENAME TO savedSearchesOld");
 					Zotero.DB.query("ALTER TABLE tags RENAME TO tagsOld");
 					
+					Zotero.wait();
+					
 					Zotero.DB.query("CREATE TABLE collections (\n    collectionID INTEGER PRIMARY KEY,\n    collectionName TEXT,\n    parentCollectionID INT,\n    dateAdded DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE,\n    FOREIGN KEY (parentCollectionID) REFERENCES collections(collectionID)\n);");
 					Zotero.DB.query("CREATE TABLE creators (\n    creatorID INTEGER PRIMARY KEY,\n    creatorDataID INT NOT NULL,\n    dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE,\n    FOREIGN KEY (creatorDataID) REFERENCES creatorData(creatorDataID)\n);");
 					Zotero.DB.query("CREATE TABLE savedSearches (\n    savedSearchID INTEGER PRIMARY KEY,\n    savedSearchName TEXT,\n    dateAdded DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE\n);");
 					Zotero.DB.query("CREATE TABLE tags (\n    tagID INTEGER PRIMARY KEY,\n    name TEXT COLLATE NOCASE,\n    type INT NOT NULL,\n    dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    dateModified DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    key TEXT NOT NULL UNIQUE,\n    UNIQUE (name, type)\n);");
 					
+					Zotero.wait();
+					
 					Zotero.DB.query("INSERT INTO collections SELECT collectionID, collectionName, parentCollectionID, dateModified, dateModified, key FROM collectionsOld");
 					Zotero.DB.query("INSERT INTO creators SELECT creatorID, creatorDataID, dateModified, dateModified, key FROM creatorsOld");
 					Zotero.DB.query("INSERT INTO savedSearches SELECT savedSearchID, savedSearchName, dateModified, dateModified, key FROM savedSearchesOld");
 					Zotero.DB.query("INSERT INTO tags SELECT tagID, name, type, dateModified, dateModified, key FROM tagsOld");
+					
+					Zotero.wait();
 					
 					Zotero.DB.query("CREATE INDEX creators_creatorDataID ON creators(creatorDataID);");
 					
@@ -2285,6 +2340,8 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("INSERT INTO savedSearches SELECT savedSearchID, savedSearchName, dateAdded, dateModified, dateModified, NULL, key FROM savedSearchesOld");
 					Zotero.DB.query("INSERT INTO tags SELECT tagID, name, type, dateAdded, dateModified, dateModified, NULL, key FROM tagsOld");
 					
+					Zotero.wait();
+					
 					Zotero.DB.query("CREATE INDEX creators_creatorDataID ON creators(creatorDataID);");
 					
 					Zotero.DB.query("DROP TABLE collectionsOld");
@@ -2304,6 +2361,8 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("INSERT INTO syncDeleteLog SELECT syncObjectTypeID, NULL, key, timestamp FROM syncDeleteLogOld");
 					Zotero.DB.query("CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp)");
 					Zotero.DB.query("DROP TABLE syncDeleteLogOld");
+					
+					Zotero.wait();
 					
 					Zotero.DB.query("ALTER TABLE storageDeleteLog RENAME TO storageDeleteLogOld");
 					Zotero.DB.query("DROP INDEX storageDeleteLog_timestamp");
@@ -2383,6 +2442,8 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE itemAttachments SET sourceItemID=NULL WHERE sourceItemID=itemID");
 					Zotero.DB.query("UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID=itemID");
 				}
+				
+				Zotero.wait();
 			}
 			
 			_updateDBVersion('userdata', toVersion);

@@ -32,8 +32,10 @@
 			function onAdvance() {
 				var wizard = document.getElementById('zotero-schema-upgrade');
 				wizard.getButton('cancel').setAttribute('disabled', true);
+				wizard.getButton('next').setAttribute('disabled', true);
 				wizard.canRewind = false;
 				wizard.getButton('finish').focus(); // prevent focusing of changelog link
+				Zotero.wait();
 			}
 			
 			
@@ -77,7 +79,7 @@
 		<description id="zotero-advance-message"/>
 	</wizardpage>
 	
-	<wizardpage onpageshow="setTimeout('Zotero_Schema_Upgrade.doUpgrade()', 100)">
+	<wizardpage onpageshow="Zotero_Schema_Upgrade.doUpgrade()">
 		<description>&zotero.upgrade.upgradeInProgress;</description>
 		<progressmeter mode="undetermined"/>
 	</wizardpage>
