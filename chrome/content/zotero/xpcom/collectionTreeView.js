@@ -281,6 +281,8 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 	var madeChanges = false;
 	
 	if (action == 'delete') {
+		var selectedIndex = this.selection.count ? this.selection.selectedIndex : 0;
+		
 		//Since a delete involves shifting of rows, we have to do it in order
 		
 		//sort the ids by row
@@ -323,6 +325,10 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 			}
 			
 			this._refreshHashMap();
+		}
+		
+		if (!this.selection.count) {
+			this.selection.select(selectedIndex)
 		}
 	}
 	else if(action == 'move')
