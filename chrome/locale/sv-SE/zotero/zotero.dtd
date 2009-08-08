@@ -158,7 +158,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Formattera med:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bokmärken">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmärken bevaras över Microsoft Word och OpenOffice.org, men kan ändras oavsiktligt.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmärken bevaras över Microsoft Word och OpenOffice, men kan ändras oavsiktligt.">
 
 <!ENTITY zotero.integration.references.label "Referenser i bibliografi">
 

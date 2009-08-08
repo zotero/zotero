@@ -158,7 +158,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Oblikuj z uporabo:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Zaznamki">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Zaznamki so načeloma ohranjeni v Microsoft Word in OpenOffice.org, vendar se lahko ponesreči spremenijo.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Zaznamki so načeloma ohranjeni v Microsoft Word in OpenOffice, vendar se lahko ponesreči spremenijo.">
 
 <!ENTITY zotero.integration.references.label "Sklici v bibliografiji">
 

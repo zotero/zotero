@@ -502,7 +502,7 @@ Zotero.Integration.Request.prototype.setDocPrefs = function() {
 		this.wrappedJSObject = this;
 	};
 	
-	io.openOffice = this.header.client.@agent == "OpenOffice.org"
+	io.openOffice = this.header.client.@agent == "OpenOffice";
 	
 	var oldStyle = io.style = this._session.styleID;
 	io.useEndnotes = this._session.prefs.useEndnotes;

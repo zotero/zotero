@@ -158,7 +158,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Formátuj s použitím:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Záložky">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Záložky jsou zachovány u Microsoft Word i OpenOffice.org, ale mohou být náhodně modifikovány.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Záložky jsou zachovány u Microsoft Word i OpenOffice, ale mohou být náhodně modifikovány.">
 
 <!ENTITY zotero.integration.references.label "Reference v bibliografii">
 

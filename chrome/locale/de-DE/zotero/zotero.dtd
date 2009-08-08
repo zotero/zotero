@@ -158,7 +158,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Formatieren unter Verwendung von:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Lesezeichen">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Lesezeichen werden zwischen Microsoft Word und OpenOffice.org erhalten, können sich aber versehentlich verändern.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Lesezeichen werden zwischen Microsoft Word und OpenOffice erhalten, können sich aber versehentlich verändern.">
 
 <!ENTITY zotero.integration.references.label "Literaturangaben in Bibliographie">
 

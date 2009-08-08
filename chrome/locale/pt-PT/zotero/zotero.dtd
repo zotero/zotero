@@ -158,7 +158,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Formatar Usando:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Marcadores">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Os marcadores são preservados entre o Microsoft Word e o OpenOffice.org, mas podem ser acidentalmente modificados.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Os marcadores são preservados entre o Microsoft Word e o OpenOffice, mas podem ser acidentalmente modificados.">
 
 <!ENTITY zotero.integration.references.label "Referências na Bibliografia">
 

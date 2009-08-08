@@ -158,7 +158,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "用以格式化：">
 <!ENTITY zotero.integration.prefs.bookmarks.label "書籤">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "書籤在微軟的 Word 與 OpenOffice.org 之間會被保留，但是可能會意外地被更動。">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "書籤在微軟的 Word 與 OpenOffice 之間會被保留，但是可能會意外地被更動。">
 
 <!ENTITY zotero.integration.references.label "參考書目中的參考文獻">
 

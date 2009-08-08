@@ -114,6 +114,9 @@ var Zotero_File_Interface_Bibliography = new function() {
 			}
 			document.getElementById("fields").label = Zotero.getString("integration."+formatOption+".label");
 			document.getElementById("fields-caption").textContent = Zotero.getString("integration."+formatOption+".caption");
+			document.getElementById("fields-caption").textContent = Zotero.getString("integration."+formatOption+".caption");
+			document.getElementById("fields-file-format-notice").textContent = Zotero.getString("integration."+formatOption+".fileFormatNotice");
+			document.getElementById("bookmarks-file-format-notice").textContent = Zotero.getString("integration.fields.fileFormatNotice");
 		}
 		
 		// Center citation popups manually after a delay when using a popup, since
