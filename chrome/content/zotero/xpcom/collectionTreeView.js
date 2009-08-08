@@ -995,10 +995,11 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 		if (dataType == 'zotero/item') {
 			var ids = data;
 			var items = Zotero.Items.get(ids);
+			var skip = true;
 			for each(var item in items) {
 				// Can only drag top-level items
-				if (!(item.isRegularItem() || !item.getSource())) {
-					continue;
+				if (!item.isTopLevelItem()) {
+					return false
 				}
 				
 				// TODO: for now, only allow regular items to be dragged to groups
@@ -1009,36 +1010,41 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 				
 				// TODO: for now, skip items that are already linked
 				if (itemGroup.isWithinGroup() && itemGroup.ref.libraryID != item.libraryID) {
-					if (item.getLinkedItem(itemGroup.ref.libraryID)) {
-						continue;
+					if (!item.getLinkedItem(itemGroup.ref.libraryID)) {
+						skip = false;
 					}
+					continue;
 				}
 				
 				if (itemGroup.isGroup()) {
 					// Don't allow drag onto library of same group
 					if (itemGroup.ref.libraryID == item.libraryID) {
-						continue;
+						return false;
 					}
-					return true;
+					continue;
 				}
 				
 				// Allow drag of group items to library
 				if (item.libraryID && (itemGroup.isLibrary()
 						|| itemGroup.isCollection() && !itemGroup.isWithinGroup())) {
 					// TODO: for now, skip items that are already linked
-					if (item.getLinkedItem()) {
-						continue;
+					if (!item.getLinkedItem()) {
+						skip = false;
 					}
-					return true;
+					continue;
 				}
 				
 				// Make sure there's at least one item that's not already
 				// in this collection
 				if (itemGroup.isCollection() && !itemGroup.ref.hasItem(item.id)) {
-					return true;
+					skip = false;
+					continue;
 				}
 			}
-			return false;
+			if (skip) {
+				return false;
+			}
+			return true;
 		}
 		else if (dataType == 'zotero/item-xml') {
 			var xml = new XML(data.data);
