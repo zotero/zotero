@@ -98,6 +98,16 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 	
 	// Generate the tree contents in a timer to allow message above to display
 	var paneLoader = function(obj) {
+		if (Zotero.locked) {
+			var msg = "Zotero is locked -- not loading items tree";
+			Zotero.debug(msg, 2);
+			
+			if (obj._ownerDocument.defaultView.ZoteroPane) {
+				obj._ownerDocument.defaultView.ZoteroPane.clearItemsPaneMessage();
+			}
+			return;
+		}
+		
 		// If a DB transaction is open, display error message and bail
 		if (!Zotero.stateCheck()) {
 			if (obj._ownerDocument.defaultView.ZoteroPane) {
