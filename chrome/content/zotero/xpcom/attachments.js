@@ -387,7 +387,10 @@ Zotero.Attachments = new function(){
 	/*
 	 * Create a link attachment from a URL
 	 *
-	 * Returns the itemID of the created attachment
+	 * @param	{String}		url
+	 * @param	{Integer}		sourceItemID	Parent item
+	 * @param	{String}		[mimeType]		MIME type of page
+	 * @param	{String}		[title]			Title to use for attachment
 	 */
 	function linkFromURL(url, sourceItemID, mimeType, title){
 		Zotero.debug('Linking attachment from URL');
@@ -412,37 +415,8 @@ Zotero.Attachments = new function(){
 			mimeType = 'application/pdf';
 		}
 		
-		// Disable the Notifier if we're going to do a HEAD for the MIME type
-		if (!mimeType) {
-			var disabled = Zotero.Notifier.disable();
-		}
-		
 		var itemID = _addToDB(null, url, title, this.LINK_MODE_LINKED_URL,
 			mimeType, null, sourceItemID);
-		
-		if (disabled) {
-			Zotero.Notifier.enable();
-		}
-		
-		if (!mimeType) {
-			// If we don't have the MIME type, do a HEAD request for it
-			Zotero.MIME.getMIMETypeFromURL(url, function (mimeType) {
-				if (mimeType) {
-					var disabled = Zotero.Notifier.disable();
-					
-					var item = Zotero.Items.get(itemID);
-					item.attachmentMIMEType = mimeType;
-					item.save();
-					
-					if (disabled) {
-						Zotero.Notifier.enable();
-					}
-				}
-				
-				Zotero.Notifier.trigger('add', 'item', itemID);
-			});
-		}
-		
 		return itemID;
 	}
 	
