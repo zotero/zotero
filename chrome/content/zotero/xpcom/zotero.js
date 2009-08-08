@@ -1071,9 +1071,12 @@ var Zotero = new function(){
 	/**
 	 * Allow other events (e.g., UI updates) on main thread to be processed if necessary
 	 *
-	 * @param	{Integer}	timeout			Maximum number of milliseconds to wait
+	 * @param	{Integer}	[timeout=50]		Maximum number of milliseconds to wait
 	 */
 	this.wait = function (timeout) {
+		if (!timeout) {
+			timeout = 50;
+		}
 		var tm = Components.classes["@mozilla.org/thread-manager;1"].getService();
 		var endTime = Date.now() + timeout;
 		var mainThread = tm.mainThread;
