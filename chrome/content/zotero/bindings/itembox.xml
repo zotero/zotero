@@ -452,7 +452,7 @@
 							label.setAttribute("onclick", "ZoteroPane.loadURI(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value, event)");
 							label.setAttribute("tooltiptext", Zotero.getString('pane.item.goToURL.online.tooltip'));
 						}
-						else if (fieldName == 'DOI' && val && typeof val == 'String') {
+						else if (fieldName == 'DOI' && val && typeof val == 'string') {
 							// Pull out DOI, in case there's a prefix
 							var doi = Zotero.Utilities.prototype.cleanDOI(val);
 							if (doi) {
