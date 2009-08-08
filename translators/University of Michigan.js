@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-08-08 10:15:00"
+	"lastUpdated":"2009-08-08 14:55:00"
 }
 
 var mirlyn2zoteroTypeMap = {
