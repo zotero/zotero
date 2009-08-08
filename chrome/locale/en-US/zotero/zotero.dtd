@@ -158,7 +158,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label		"Format Using:">
 <!ENTITY zotero.integration.prefs.bookmarks.label		"Bookmarks">
-<!ENTITY zotero.integration.prefs.bookmarks.caption		"Bookmarks are preserved across Microsoft Word and OpenOffice.org, but may be accidentaly modified. For &#xA;compatibility reasons, citations cannot be inserted into footnotes or endnotes when this option is selected.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption		"Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentaly modified. For &#xA;compatibility reasons, citations cannot be inserted into footnotes or endnotes when this option is selected.">
 
 <!ENTITY zotero.integration.references.label			"References in Bibliography">
 

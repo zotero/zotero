@@ -158,7 +158,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Định dạng đang sử dụng:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Các bookmarks được giữ nguyên giữa các tài liệu Microsoft Word và OpenOffice.org, nhưng đôi khi chúng có thể bị thay đổi một cách tình cờ.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Các bookmarks được giữ nguyên giữa các tài liệu Microsoft Word và OpenOffice, nhưng đôi khi chúng có thể bị thay đổi một cách tình cờ.">
 
 <!ENTITY zotero.integration.references.label "Các Tham khảo trong Thư tịch">
 

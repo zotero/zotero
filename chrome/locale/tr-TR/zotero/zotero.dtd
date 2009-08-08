@@ -158,7 +158,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Kullanılan Biçim:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Yer imleri">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Yerimleri Microsoft Word ve OpenOffice.org karşısında korunmuştur, fakat yanlışlıkla değiştirilebilir.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Yerimleri Microsoft Word ve OpenOffice karşısında korunmuştur, fakat yanlışlıkla değiştirilebilir.">
 
 <!ENTITY zotero.integration.references.label "Kaynakçadaki Kaynaklar">
 

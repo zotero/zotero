@@ -158,7 +158,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Formater en utilisant :">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Les marque-pages">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Les marque-pages sont conservés entre Microsoft Word et OpenOffice.org, mais peuvent être modifiés accidentellement.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Les marque-pages sont conservés entre Microsoft Word et OpenOffice, mais peuvent être modifiés accidentellement.">
 
 <!ENTITY zotero.integration.references.label "Références dans la bibliographie">
 

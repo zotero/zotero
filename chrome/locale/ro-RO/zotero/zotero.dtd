@@ -158,7 +158,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Formatare cu:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Repere (Bookmarks)">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Reperele (bookmarks) sunt protejate în Microsoft Word şi OpenOffice.org, dar pot fi accidental modificate.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Reperele (bookmarks) sunt protejate în Microsoft Word şi OpenOffice, dar pot fi accidental modificate.">
 
 <!ENTITY zotero.integration.references.label "Referinţe în bibliografie">
 
