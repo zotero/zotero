@@ -665,6 +665,8 @@ Zotero.Collection.prototype.addItems = function(itemIDs) {
 	sql = "INSERT OR IGNORE INTO collectionItems VALUES (?,?,?)";
 	var insertStatement = Zotero.DB.getStatement(sql);
 	
+	var notifierPairs = [];
+	
 	for (var i=0; i<itemIDs.length; i++) {
 		var itemID = itemIDs[i];
 		if (current && current.indexOf(itemID) != -1) {
@@ -700,7 +702,11 @@ Zotero.Collection.prototype.addItems = function(itemIDs) {
 			throw (e + ' [ERROR: ' + Zotero.DB.getLastErrorString() + ']');
 		}
 		
-		Zotero.Notifier.trigger('add', 'collection-item', this.id + '-' + itemID);
+		notifierPairs.push(this.id + '-' + itemID);
+		
+		if ((i % 25) == 0) {
+			Zotero.wait();
+		}
 	}
 	
 	sql = "UPDATE collections SET dateModified=?, clientDateModified=? WHERE collectionID=?";
@@ -709,6 +715,7 @@ Zotero.Collection.prototype.addItems = function(itemIDs) {
 	Zotero.DB.commitTransaction();
 	
 	Zotero.Collections.reload(this.id);
+	Zotero.Notifier.trigger('add', 'collection-item', notifierPairs);
 }
 
 
