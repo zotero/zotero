@@ -1073,13 +1073,14 @@ var ZoteroPane = new function()
 			else
 			{
 				document.getElementById('zotero-item-pane-content').selectedIndex = 1;
+				var pane = document.getElementById('zotero-view-tabbox').selectedIndex;
 				if (this.collectionsView.editable) {
-					ZoteroItemPane.viewItem(item.ref);
+					ZoteroItemPane.viewItem(item.ref, null, pane);
 					tabs.selectedIndex = document.getElementById('zotero-view-item').selectedIndex;
 				}
 				else {
-					document.getElementById('zotero-view-item').selectedIndex = 0;
-					ZoteroItemPane.viewItem(item.ref, 'view');
+					ZoteroItemPane.viewItem(item.ref, 'view', pane);
+					tabs.selectedIndex = document.getElementById('zotero-view-item').selectedIndex;
 				}
 			}
 		}
