@@ -569,7 +569,7 @@ Zotero_File_Interface.Progress = new function() {
 	this.close = close;
 	
 	function show(headline) {
-		Zotero.showZoteroPaneProgressBar(headline)
+		Zotero.showZoteroPaneProgressMeter(headline)
 	}
 	
 	function close() {
