@@ -28,6 +28,35 @@
 			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<binding id="seealso-box">
 		<implementation>
+			<!-- Modes are predefined settings groups for particular tasks -->
+			<field name="_mode">"view"</field>
+			<property name="mode" onget="return this._mode;">
+				<setter>
+				<![CDATA[
+					this.clickable = false;
+					this.editable = false;
+					
+					switch (val) {
+						case 'view':
+							break;
+						
+						case 'edit':
+							this.clickable = true;
+							this.editable = true;
+							//this.clickHandler = this.showEditor;
+							//this.blurHandler = this.hideEditor;
+							break;
+						
+						default:
+							throw ("Invalid mode '" + val + "' in relatedbox.xml");
+					}
+					
+					this._mode = val;
+					document.getAnonymousNodes(this)[0].setAttribute('mode', val);
+				]]>
+				</setter>
+			</property>
+			
 			<field name="itemRef"/>
 			<property name="item" onget="return this.itemRef;">
 				<setter>
@@ -60,6 +89,9 @@
 			<method name="reload">
 				<body>
 					<![CDATA[
+						var addButton = this.id('addButton');
+						addButton.hidden = !this.editable;
+						
 						var rows = this.id('seeAlsoRows');
 						while(rows.hasChildNodes())
 							rows.removeChild(rows.firstChild);
@@ -106,13 +138,15 @@
 									box.setAttribute('flex','1');
 									box.appendChild(icon);
 									box.appendChild(label);
-					
-									var remove = document.createElement("label");
-									remove.setAttribute('value','-');
-									remove.setAttribute('onclick',
-										"document.getBindingParent(this).remove('" + related[i].id + "');");
-									remove.setAttribute('class','zotero-clicky');
-							
+									
+									if (this.editable) {
+										var remove = document.createElement("label");
+										remove.setAttribute('value','-');
+										remove.setAttribute('onclick',
+											"document.getBindingParent(this).remove('" + related[i].id + "');");
+										remove.setAttribute('class','zotero-clicky');
+									}
+									
 									var row = document.createElement("row");
 									row.appendChild(box);
 									row.appendChild(remove);
@@ -246,7 +280,7 @@
 			<xul:vbox xbl:inherits="flex">
 				<xul:hbox align="center">
 					<xul:label id="seeAlsoNum"/>
-					<xul:button label="&zotero.item.add;" oncommand="this.parentNode.parentNode.parentNode.add();"/>
+					<xul:button id="addButton" label="&zotero.item.add;" oncommand="this.parentNode.parentNode.parentNode.add();" hidden="true"/>
 				</xul:hbox>
 				<xul:grid flex="1">
 					<xul:columns>
