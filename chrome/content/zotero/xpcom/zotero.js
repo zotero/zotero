@@ -142,7 +142,10 @@ var Zotero = new function(){
 	var _localizedStringBundle;
 	var _localUserKey;
 	var _waiting;
+	
 	var _locked;
+	var _progressMeters;
+	var _lastPercentage;
 	
 	/*
 	 * Initialize the extension
@@ -1098,9 +1101,9 @@ var Zotero = new function(){
 	 *
 	 * @param	{String}		msg
 	 * @param	{Boolean}		[determinate=false]
-	 * @return	{Element[]}		Array of XUL <progressmeter> elements
+	 * @return	void
 	 */
-	this.showZoteroPaneProgressBar = function (msg, determinate) {
+	this.showZoteroPaneProgressMeter = function (msg, determinate) {
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator);
 		var enumerator = wm.getEnumerator("navigator:browser");
@@ -1113,7 +1116,7 @@ var Zotero = new function(){
 			if (determinate) {
 				progressMeter.mode = 'determined';
 				progressMeter.value = 0;
-				progressMeter.max = 100;
+				progressMeter.max = 1000;
 			}
 			else {
 				progressMeter.mode = 'undetermined';
@@ -1125,7 +1128,30 @@ var Zotero = new function(){
 			progressMeters.push(progressMeter);
 		}
 		_locked = true;
-		return progressMeters;
+		_progressMeters = progressMeters;
+	}
+	
+	
+	/**
+	 * @param	{Number}	percentage		Percentage complete as integer or float
+	 */
+	this.updateZoteroPaneProgressMeter = function (percentage) {
+		if (percentage < 0 || percentage > 100) {
+			Zotero.debug("Invalid percentage value '" + percentage + "' in Zotero.updateZoteroPaneProgressMeter()");
+			return;
+		}
+		percentage = Math.round(percentage * 10);
+		if (percentage == _lastPercentage) {
+			return;
+		}
+		for each(var pm in _progressMeters) {
+			if (pm.mode == 'undetermined') {
+				pm.max = 1000;
+				pm.mode = 'determined';
+			}
+			pm.value = percentage;
+		}
+		_lastPercentage = percentage;
 	}
 	
 	
@@ -1141,6 +1167,8 @@ var Zotero = new function(){
 			_hideWindowZoteroPaneOverlay(win);
 		}
 		_locked = false;
+		_progressMeters = [];
+		_lastPercentage = null;
 	}
 	
 	
