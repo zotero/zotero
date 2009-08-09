@@ -2361,7 +2361,7 @@ Zotero.Browser = new function() {
 		hiddenBrowser.docShell.allowMetaRedirects = false;
 		hiddenBrowser.docShell.allowPlugins = false;
 		Zotero.debug("created hidden browser ("
-			+ win.document.getElementsByTagName('browser').length + ")");
+			+ (win.document.getElementsByTagName('browser').length - 1) + ")");
 		return hiddenBrowser;
 	}
 	
