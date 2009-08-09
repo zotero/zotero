@@ -212,32 +212,51 @@ Zotero.Annotate = new function() {
 	 * @return {Array} The node and offset
 	 */
 	function _getTextNode(container, offset, isStart) {
-		var childAttribute = isStart ? "firstChild" : "lastChild";
-		var siblingAttribute = isStart ? "nextSibling" : "lastSibling";
+		var firstTarget = isStart ? "firstChild" : "lastChild";
+		var secondTarget = isStart ? "nextSibling" : "previousSibling";
 		
 		container = Zotero.Annotate.dereferenceNodeOffset(container, offset);
 		if(container.nodeType == TEXT_TYPE) return [container, 0];
-			
+		
+		var seenArray = new Array();
 		var node = container;
 		while(node) {
-			if(node.nodeType == TEXT_TYPE) {
+			if ( !node ) {
+				// uh-oh
+				break;
+			}
+			if(node.nodeType == TEXT_TYPE ) {
 				container = node;
 				break;
+			}
+			if( node[firstTarget] && ! _seen(node[firstTarget],seenArray)) {
+				var node = node[firstTarget];
+			} else if( node[secondTarget] && ! _seen(node[secondTarget],seenArray)) {
+				var node = node[secondTarget];
 			} else {
-				if(node[childAttribute]) {
-					node = node[childAttribute];
-				} else if(node[siblingAttribute]) {
-					node = node[siblingAttribute];
-				} else {
-					node = node.parentNode;
-					if(node.isSameNode(container)) {
-						break;
-					}
-				}
+				var node = node.parentNode;
 			}
 		}
 		return [container, (!isStart && container.nodeType == TEXT_TYPE ? container.nodeValue.length : 0)];
 	}
+
+	/**
+	 * look for a node object in an array. return true if the node
+	 * is found in the array. otherwise push the node onto the array
+	 * and return false. used by _getTextNode.
+	 */
+	function _seen(node,array) {
+		var seen = false;
+		for (n in array) {
+			if (node.isSameNode(array[n])) {
+				var seen = true;
+			}
+		}
+		if ( !seen ) {
+			array.push(node);
+		}
+		return seen;
+	}		
 }
 
 /**
@@ -1449,7 +1468,7 @@ Zotero.Highlight.prototype._highlight = function() {
 		}
 		var span = this._highlightTextNode(highlightNode);
 	} else {
-		var span = this._highlightSpaceBetween(this.range.startContainer, this.range.startContainer);
+		var span = this._highlightSpaceBetween(this.range.startContainer, this.range.endContainer);
 	}
 	
 	this.range.setStart(span.firstChild, 0);
