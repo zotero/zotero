@@ -261,11 +261,6 @@ window[active="true"] #zotero-pane-stack[fullscreenmode="true"][platform="mac"]
 	list-style-image: url('chrome://zotero/skin/toolbar-fullscreen-bottom.png');
 }
 
-#zotero-tb-fullscreen[zoterotop="true"]
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-fullscreen-top.png');
-}
-
 #zotero-pane-stack[fullscreenmode="true"] #zotero-tb-fullscreen
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-fullscreen-top.png');
