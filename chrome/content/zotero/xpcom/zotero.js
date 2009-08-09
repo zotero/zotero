@@ -1966,6 +1966,16 @@ Zotero.Date = new function(){
 		var utils = new Zotero.Utilities();
 		
 		var parts = strToDate(str);
+		
+		// FIXME: Until we have a better BCE date solution,
+		// remove year value if not between 1 and 9999
+		if (parts.year) {
+			var year = parts.year + '';
+			if (!year.match(/^[0-9]{1,4}$/)) {
+				delete parts.year;
+			}
+		}
+		
 		parts.month = typeof parts.month != "undefined" ? parts.month + 1 : '';
 		
 		var multi = (parts.year ? utils.lpad(parts.year, '0', 4) : '0000') + '-'
