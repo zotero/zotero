@@ -21,18 +21,9 @@
 */
 
 var ZoteroItemPane = new function() {
-	var _itemBeingEdited;
-	
-	var _lastPane;
-	var _loaded;
-	
-	var _lastTabIndex;
-	var _tabDirection;
-	var _tabIndexMaxTagsFields = 0;
+	var _lastItem;
 	
 	this.onLoad = onLoad;
-	this.viewItem = viewItem;
-	this.loadPane = loadPane;
 	
 	
 	function onLoad()
@@ -46,95 +37,58 @@ var ZoteroItemPane = new function() {
 			return;
 		}
 		
-		_deck = document.getElementById('zotero-view-item');
 		_itemBox = document.getElementById('zotero-editpane-item-box');
 		_tagsBox = document.getElementById('zotero-editpane-tags');
 		_relatedBox = document.getElementById('zotero-editpane-related');
 	}
 	
+	
 	/*
-	 * Loads an item 
+	 * Load an item
 	 */
-	function viewItem(thisItem, mode) {
-		//Zotero.debug('Viewing item');
+	this.viewItem = function (item, mode, index) {
+		if (!index) {
+			index = 0;
+		}
+		
+		Zotero.debug('Viewing item in pane ' + index);
+		
+		switch (index) {
+			case 0:
+				var box = _itemBox;
+				break;
+				
+			case 1:
+				var box = _tagsBox;
+				break;
+			
+			case 2:
+				var box = _relatedBox;
+				break;
+		}
 		
 		// Force blur() when clicking off a textbox to another item in middle
 		// pane, since for some reason it's not being called automatically
-		if (_itemBeingEdited && _itemBeingEdited != thisItem) {
-			switch (_deck.selectedIndex) {
-				// Info
+		if (_lastItem && _lastItem != item) {
+			switch (index) {
 				case 0:
-					// TODO: fix
-					//var boxes = _itemBox.getElementsByTagName('textbox');
-					
-					// When coming from another element, scroll pane to top
-					//scrollToTop();
-					break;
-					
-				// Tags
-				case 3:
-					var boxes = document.getAnonymousNodes(_tagsBox)[0].getElementsByTagName('textbox');
+				case 1:
+					box.blurOpenField();
+					// DEBUG: Currently broken
+					//box.scrollToTop();
 					break;
 			}
-			
-			if (boxes && boxes.length == 1) {
-				//boxes[0].inputField.blur();
-			}
 		}
 		
-		_itemBeingEdited = thisItem;
-		_loaded = {};
+		_lastItem = item;
 		
-		loadPane(_deck.selectedIndex, mode);
-	}
-	
-	
-	function loadPane(index, mode) {
-		//Zotero.debug('Loading item pane ' + index);
-		
-		// Clear the tab index when switching panes
-		if (_lastPane!=index) {
-			_lastTabIndex = null;
+		if (mode) {
+			box.mode = mode;
 		}
-		_lastPane = index;
-		
-		if (_loaded[index]) {
-			return;
+		else {
+			box.mode = 'edit';
 		}
-		_loaded[index] = true;
-		
-		// Info pane
-		if (index == 0) {
-			// Hack to allow read-only mode in right pane -- probably a better
-			// way to allow access to this
-			if (mode) {
-				_itemBox.mode = mode;
-			}
-			else {
-				_itemBox.mode = 'edit';
-			}
-			_itemBox.item = _itemBeingEdited;
-		}
-		
-		
-		// Tags pane
-		else if (index == 1) {
-			if (mode) {
-				_tagsBox.mode = mode;
-			}
-			else {
-				_tagsBox.mode = 'edit';
-			}
-			
-			var focusMode = 'tags';
-			var focusBox = _tagsBox;
-			_tagsBox.item = _itemBeingEdited;
-		}
-		
-		// Related pane
-		else if (index == 2) {
-			_relatedBox.item = _itemBeingEdited;
-		}
+		box.item = item;
 	}
 }
 

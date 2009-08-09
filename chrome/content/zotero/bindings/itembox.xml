@@ -193,7 +193,6 @@
 			
 			<field name="_selectField"/>
 			<field name="_beforeRow"/>
-			<field name="_activeScrollbox"/>
 			<field name="_addCreatorRow"/>
 			<field name="_creatorCount"/>
 			
@@ -895,10 +894,10 @@
 			<method name="scrollToTop">
 				<body>
 				<![CDATA[
-					if (!this._activeScrollbox) {
-						return;
-					}
-					var sbo = this._activeScrollbox.boxObject;
+					// DEBUG: Valid nsIScrollBoxObject but methods return errors
+					return;
+					
+					var sbo = document.getAnonymousNodes(this)[0].boxObject;
 					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
 					sbo.scrollTo(0,0);
 				]]>
@@ -910,10 +909,10 @@
 				<parameter name="elem"/>
 				<body>
 				<![CDATA[
-					if (!this._activeScrollbox) {
-						return;
-					}
-					var sbo = this._activeScrollbox.boxObject;
+					// DEBUG: Valid nsIScrollBoxObject but methods return errors
+					return;
+					
+					var sbo = document.getAnonymousNodes(this)[0].boxObject;
 					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
 					sbo.ensureElementIsVisible(elem);
 				]]>
@@ -2119,6 +2118,19 @@
 				]]>
 				</body>
 			</method>
+			
+			
+			<method name="blurOpenField">
+				<body>
+				<![CDATA[
+					var textboxes = document.getAnonymousNodes(this)[0].getElementsByTagName('textbox');
+					if (textboxes && textboxes.length) {
+						textboxes[0].inputField.blur();
+					}
+				]]>
+				</body>
+			</method>
+			
 			
 			<method name="_id">
 				<parameter name="id"/>

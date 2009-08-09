@@ -640,6 +640,22 @@
 			</method>
 			
 			
+			<method name="scrollToTop">
+				<body>
+				<![CDATA[
+					Zotero.debug('SCROLL TO TOP');
+					if (!this._activeScrollbox) {
+						Zotero.debug('NO');
+						return;
+					}
+					var sbo = this._activeScrollbox.boxObject;
+					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
+					sbo.scrollTo(0,0);
+				]]>
+				</body>
+			</method>
+			
+			
 			<method name="ensureElementIsVisible">
 				<parameter name="elem"/>
 				<body>
@@ -648,6 +664,18 @@
 					var sbo = scrollbox.boxObject;
 					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
 					sbo.ensureElementIsVisible(elem);
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="blurOpenField">
+				<body>
+				<![CDATA[
+					var textboxes = document.getAnonymousNodes(this)[0].getElementsByTagName('textbox');
+					if (textboxes && textboxes.length) {
+						textboxes[0].inputField.blur();
+					}
 				]]>
 				</body>
 			</method>
