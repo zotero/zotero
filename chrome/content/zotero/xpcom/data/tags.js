@@ -287,28 +287,37 @@ Zotero.Tags = new function() {
 		Zotero.DB.beginTransaction();
 		
 		var tagObj = this.get(tagID);
-		var oldLibraryID = tagObj.libraryID;
+		var libraryID = tagObj.libraryID;
 		var oldName = tagObj.name;
 		var oldType = tagObj.type;
 		var notifierData = {};
 		notifierData[tagID] = { old: tagObj.serialize() };
 		
 		if (oldName == name) {
+			Zotero.debug("Tag name hasn't changed", 2);
 			Zotero.DB.commitTransaction();
 			return;
 		}
 		
-		var sql = "SELECT tagID FROM tags WHERE name=? AND type=0";
-		var existingTagID = Zotero.DB.valueQuery(sql, name);
+		var sql = "SELECT tagID, name FROM tags WHERE name=? AND type=0 AND libraryID=?";
+		var row = Zotero.DB.rowQuery(sql, [name, libraryID]);
+		if (row) {
+			var existingTagID = row.tagID;
+			var existingName = row.name;
+		}
 		// New tag already exists as manual tag
 		if (existingTagID
-				// Tag check is case-insensitive, so make sure we have a
-				// different tag
+				// Tag check is case-insensitive, so make sure we have a different tag
 				&& existingTagID != tagID) {
+			
+			var changed = false;
+			var itemsAdded = false;
+			
 			// Change case of existing manual tag before switching automatic
-			if (oldName.toLowerCase() == name.toLowerCase()) {
+			if (oldName.toLowerCase() == name.toLowerCase() || existingName != name) {
 				var sql = "UPDATE tags SET name=? WHERE tagID=?";
 				Zotero.DB.query(sql, [name, existingTagID]);
+				changed = true;
 			}
 			
 			var itemIDs = this.getTagItems(tagID);
@@ -322,8 +331,8 @@ Zotero.Tags = new function() {
 			// Manual purge of old tag
 			sql = "DELETE FROM tags WHERE tagID=?";
 			Zotero.DB.query(sql, tagID);
-			if (_tags[oldLibraryID] && _tags[oldLibraryID][oldType]) {
-				delete _tags[oldLibraryID][oldType]['_' + oldName];
+			if (_tags[libraryID] && _tags[libraryID][oldType]) {
+				delete _tags[libraryID][oldType]['_' + oldName];
 			}
 			delete this._objectCache[tagID];
 			Zotero.Notifier.trigger('delete', 'tag', tagID, notifierData);
@@ -336,22 +345,25 @@ Zotero.Tags = new function() {
 			Zotero.Notifier.trigger('remove', 'item-tag', itemTags);
 			
 			// And send tag add for new tag (except for those that already had it)
-			var changed = false;
 			var itemTags = [];
 			for (var i in itemIDs) {
 				if (!existingItemIDs || existingItemIDs.indexOf(itemIDs[i]) == -1) {
 					itemTags.push(itemIDs[i] + '-' + existingTagID);
-					changed = true;
+					itemsAdded = true;
 				}
 			}
 			
 			if (changed) {
-				Zotero.Notifier.trigger('add', 'item-tag', itemTags);
+				if (itemsAdded) {
+					Zotero.Notifier.trigger('add', 'item-tag', itemTags);
+				}
 				
-				// If any items were added to the existing tag, mark it as updated
-				sql = "UPDATE tags SET dateModified=CURRENT_TIMESTAMP WHERE tagID=?";
+				// Mark existing tag as updated
+				sql = "UPDATE tags SET dateModified=CURRENT_TIMESTAMP, "
+						+ "clientDateModified=CURRENT_TIMESTAMP WHERE tagID=?";
 				Zotero.DB.query(sql, existingTagID);
-				Zotero.Notifier.trigger('modify', 'tag', tagID);
+				Zotero.Notifier.trigger('modify', 'tag', existingTagID);
+				Zotero.Tags.reload(existingTagID);
 			}
 			
 			// TODO: notify linked items?
