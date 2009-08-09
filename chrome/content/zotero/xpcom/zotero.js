@@ -168,6 +168,8 @@ var Zotero = new function(){
 		_debugLevel = Zotero.Prefs.get('debug.level');
 		_debugTime = Zotero.Prefs.get('debug.time');
 		
+		this.mainThread = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
+		
 		// Load in the extension version from the extension manager
 		var nsIUpdateItem = Components.interfaces.nsIUpdateItem;
 		var gExtensionManager =
@@ -1050,12 +1052,11 @@ var Zotero = new function(){
 	/**
 	 * Sleep for a given amount of time, allowing other events on main thread to be processed
 	 *
-	 * @param	{Integer}	wait			Milliseconds to wait
+	 * @param	{Integer}	ms			Milliseconds to wait
 	 */
 	this.sleep = function (ms) {
-		var tm = Components.classes["@mozilla.org/thread-manager;1"].getService();
+		var mainThread = Zotero.mainThread;
 		var endTime = Date.now() + ms;
-		var mainThread = tm.mainThread;
 		do {
 			mainThread.processNextEvent(false);
 		} while (Date.now() < endTime);
@@ -1073,22 +1074,22 @@ var Zotero = new function(){
 		if (!timeout) {
 			timeout = 50;
 		}
-		var tm = Components.classes["@mozilla.org/thread-manager;1"].getService();
+		var mainThread = Zotero.mainThread;
 		var endTime = Date.now() + timeout;
-		var mainThread = tm.mainThread;
-		var cycles = 0;
+		var more;
+		//var cycles = 0;
 		
 		_waiting = true;
 		
 		do {
-			mainThread.processNextEvent(false);
-			cycles++;
-		} while (mainThread.hasPendingEvents() && Date.now() < endTime);
+			more = mainThread.processNextEvent(false);
+			//cycles++;
+		} while (more && Date.now() < endTime);
 		
 		_waiting = false;
 		
 		//Zotero.debug("Waited " + cycles + " cycles");
-		return cycles;
+		return;
 	};
 	
 	
