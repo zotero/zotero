@@ -106,38 +106,6 @@ var ZoteroPane = new function()
 		}
 		_loaded = true;
 		
-		if(Zotero.Prefs.get("zoteroPaneOnTop"))
-		{
-			var oldPane = document.getElementById('zotero-pane');
-			var oldSplitter = document.getElementById('zotero-splitter');
-			var appContent = document.getElementById('appcontent');
-			
-			var newPane = document.createElement('hbox');
-			newPane.setAttribute('id','zotero-pane');
-			newPane.setAttribute('persist','savedHeight');
-			newPane.setAttribute('hidden', true);
-			newPane.setAttribute('onkeydown', 'ZoteroPane.handleKeyDown(event, this.id)');
-			newPane.setAttribute('onkeyup', 'ZoteroPane.handleKeyUp(event, this.id)');
-			newPane.setAttribute('chromedir', '&locale.dir;');
-			
-			newPane.height = oldPane.height;
-			while(oldPane.hasChildNodes())
-				newPane.appendChild(oldPane.firstChild);
-			appContent.removeChild(oldPane);
-			appContent.insertBefore(newPane, document.getElementById('content'));
-			
-			var newSplitter = document.createElement('splitter');
-			newSplitter.setAttribute('id','zotero-splitter');
-			newSplitter.setAttribute('hidden', true);
-			newSplitter.setAttribute('resizebefore','closest');
-			newSplitter.setAttribute('resizeafter','closest');
-			newSplitter.setAttribute('onmouseup', 'ZoteroPane.updateTagSelectorSize()');
-			appContent.removeChild(oldSplitter);
-			appContent.insertBefore(newSplitter, document.getElementById('content'));
-			
-			document.getElementById('zotero-tb-fullscreen').setAttribute('zoterotop','true');
-		}
-		
 		Zotero.setFontSize(document.getElementById('zotero-pane'))
 		
 		if (Zotero.isMac) {
