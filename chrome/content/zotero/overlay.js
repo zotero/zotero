@@ -2965,7 +2965,7 @@ var ZoteroPane = new function()
 		var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 				   .getService(Components.interfaces.nsIWindowWatcher);
 		var data = {
-			msg: Zotero.getString('errorReport.followingErrors'),
+			msg: Zotero.getString('errorReport.followingErrors', Zotero.appName),
 			e: errors.join('\n\n'),
 			askForSteps: true
 		};
