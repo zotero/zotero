@@ -752,6 +752,79 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 }
 
 /**
+ * Gets the DOM document object corresponding to the page located at URL, but avoids locking the
+ * UI while the request is in process.
+ *
+ * @param {String} 		url		URL to load
+ * @return {Document} 			DOM document object
+ */
+Zotero.Utilities.Translate.prototype.retrieveDocument = function(url) {
+	if(this.translate.locationIsProxied) url = this._convertURL(url);
+	
+	var mainThread = Zotero.mainThread;
+	var loaded = false;
+	var listener =  function() {
+		loaded = hiddenBrowser.contentDocument.location.href != "about:blank";
+	}
+	
+	var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
+	hiddenBrowser.addEventListener("pageshow", listener, true);
+	hiddenBrowser.loadURI(url);
+	
+	// Use a timeout of 2 minutes. Without a timeout, a request to an IP at which no system is
+	// configured will continue indefinitely, and hang Firefox as it shuts down. No same request
+	// should ever take longer than 2 minutes. 
+	var endTime = Date.now() + 120000;
+	while(!loaded && Date.now() < endTime) {
+		mainThread.processNextEvent(true);
+	}
+	
+	hiddenBrowser.removeEventListener("pageshow", listener, true);
+	hiddenBrowser.contentWindow.setTimeout(function() {
+		Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+	}, 1);
+	
+	if(!loaded) throw "retrieveDocument failed: request timeout";
+	return hiddenBrowser.contentDocument;
+}
+
+/**
+ * Gets the source of the page located at URL, but avoids locking the UI while the request is in
+ * process.
+ *
+ * @param {String} 		url					URL to load
+ * @param {String}		[body=null]			Request body to POST to the URL; a GET request is
+ *											executed if no body is present
+ * @param {String}		[requestContentType=application/x-www-form-urlencoded]
+ *											Request content type for POST; ignored if no body
+ * @param {String} 		[responseCharset] 	Character set to force on the response
+ * @return {String} 						Request body
+ */
+Zotero.Utilities.Translate.prototype.retrieveSource = function(url, body, requestContentType, responseCharset) {
+	/* Apparently, a synchronous XMLHttpRequest would have the behavior of this routine in FF3, but
+	 * in FF3.5, synchronous XHR blocks all JavaScript on the thread. See 
+	 * http://hacks.mozilla.org/2009/07/synchronous-xhr/. */
+	if(this.translate.locationIsProxied) url = this._convertURL(url);
+	if(!requestContentType) requestContentType = null;
+	if(!responseCharset) responseCharset = null;
+	
+	var mainThread = Zotero.mainThread;
+	var xmlhttp = false;
+	var listener = function(aXmlhttp) { xmlhttp = aXmlhttp };
+	
+	if(body) {
+		Zotero.Utilities.HTTP.doPost(url, body, listener, requestContentType, responseCharset);
+	} else {
+		Zotero.Utilities.HTTP.doGet(url, listener, responseCharset);
+	}
+	
+	while(!xmlhttp) mainThread.processNextEvent(true);
+	if(xmlhttp.status >= 400) throw "retrieveSource failed: "+xmlhttp.status+" "+xmlhttp.statusText;
+	
+	return xmlhttp.responseText;
+}
+
+/**
 * Send an HTTP GET request via XMLHTTPRequest
 * 
 * @param {String|String[]} urls URL(s) to request
