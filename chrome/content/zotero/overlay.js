@@ -2222,10 +2222,16 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		// If Zotero is locked, disable menu items
+		// If Zotero is locked or library is read-only, disable menu items
 		var menu = document.getElementById('zotero-content-area-context-menu');
+		menu.hidden = !showing;
+		var disabled = Zotero.locked;
+		if (!disabled && self.collectionsView.selection && self.collectionsView.selection.count) {
+			var itemGroup = self.collectionsView._getItemAtRow(self.collectionsView.selection.currentIndex);
+			disabled = !itemGroup.isEditable()
+		}
 		for each(var menuitem in menu.firstChild.childNodes) {
-			menuitem.disabled = Zotero.locked;
+			menuitem.disabled = disabled;
 		}
 	}
 	
