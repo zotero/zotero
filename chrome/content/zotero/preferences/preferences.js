@@ -1118,7 +1118,8 @@ function runIntegrityCheck() {
 	
 	ps.alert(window,
 		Zotero.getString('general.' + str),
-		Zotero.getString('db.integrityCheck.' + str));
+		Zotero.getString('db.integrityCheck.' + str)
+		+ (!ok ? "\n\n" + Zotero.getString('db.integrityCheck.dbRepairTool') : ''));
 }
 
 
