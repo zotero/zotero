@@ -508,7 +508,8 @@
 					
 					// Place, in order of preference, after title, after type,
 					// or at beginning
-					var field = this._dynamicFields.getElementsByAttribute('fieldname', 'title').item(0);
+					var titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
+					var field = this._dynamicFields.getElementsByAttribute('fieldname', Zotero.ItemFields.getName(titleFieldID)).item(0);
 					if (!field) {
 						var field = this._dynamicFields.getElementsByAttribute('fieldname', 'itemType').item(0);
 					}
