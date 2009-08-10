@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-07-23 10:00:00"
+	"lastUpdated":"2009-08-10 12:00:00"
 }
 
 function detectWeb(doc, url){
@@ -22,7 +22,7 @@ function detectWeb(doc, url){
 		if (prefix == 'x') return namespace; else return null;
 	} : null;	
 	
-	var titles = doc.evaluate('//div[@class="resultListTextCell"]/div/label', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var titles = doc.evaluate('//div[@class="resultListTextCell"]//a', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if (titles.iterateNext()){
 		return "multiple";
 	}
@@ -34,6 +34,7 @@ function doWeb(doc, url){
 	var hostRegexp = new RegExp("^(https?://[^/]+)/");
 	var hMatch = hostRegexp.exec(url);
 	var host = hMatch[1];
+	var urlPrefix = url.indexOf("/uiu/") != -1 ? host + "/uiu/vwebv/exportRecord.do?bibId=" : host + "/vwebv/exportRecord.do?bibId=";
 	
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -43,20 +44,20 @@ function doWeb(doc, url){
 	var newUris = new Array();
 
 	if (m){ //single item
-		newUris.push(host + "/vwebv/exportRecord.do?bibId=" + m[1] + "&format=utf-8");
+		newUris.push(urlPrefix + m[1] + "&format=utf-8");
 	}
 	else { //search results
 		var items = new Object();
-		var titles = doc.evaluate('//div[@class="resultListTextCell"]/div/label', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//div[@class="resultListTextCell"]//a', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var title;
 		
 		while (title = titles.iterateNext()) {
-			var bibId = doc.evaluate('@for', title, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var bibId = title.href.match(/bibId=([0-9]+)/)[1];
 			items[bibId] = title.textContent;
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
-			newUris.push(host + "/vwebv/exportRecord.do?bibId=" + i + "&format=utf-8");
+			newUris.push(urlPrefix + i + "&format=utf-8");
 		}
 	}
 
