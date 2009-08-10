@@ -628,11 +628,15 @@
 					typeBox.setAttribute("typeid", typeID);
 					typeBox.setAttribute("popup", "creator-type-menu");
 					typeBox.setAttribute("fieldname", 'creator-' + this._creatorCount + '-typeID');
-					typeBox.className = 'creator-type-label zotero-clicky';
-					
-					var img = document.createElement('image');
-					img.setAttribute('src', 'chrome://zotero/skin/arrow-down.gif');
-					typeBox.appendChild(img);
+					if (this.editable) {
+						typeBox.className = 'creator-type-label zotero-clicky';
+						var img = document.createElement('image');
+						img.setAttribute('src', 'chrome://zotero/skin/arrow-down.gif');
+						typeBox.appendChild(img);
+					}
+					else {
+						typeBox.className = 'creator-type-label';
+					}
 					
 					var label = document.createElement("label");
 					label.setAttribute('value',

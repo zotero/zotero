@@ -889,6 +889,12 @@ var ZoteroPane = new function()
 		if (!tagSelector.getAttribute('collapsed') ||
 				tagSelector.getAttribute('collapsed') == 'false') {
 			Zotero.debug('Updating tag selector with current tags');
+			if (itemGroup.isEditable()) {
+				tagSelector.mode = 'edit';
+			}
+			else {
+				tagSelector.mode = 'view';
+			}
 			tagSelector.libraryID = itemGroup.ref.libraryID;
 			tagSelector.scope = itemGroup.getChildTags();
 		}
