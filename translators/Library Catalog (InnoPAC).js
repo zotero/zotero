@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"Library Catalog (InnoPAC)",
 	"creator":"Simon Kornblith and Michael Berkowitz",
-	"target":"(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF)",
+	"target":"(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+~S[0-9]|/search/q\\?)",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2008-10-28 02:50:00"
+	"lastUpdated":"2009-08-10 03:38:00"
 }
 
 function detectWeb(doc, url) {
@@ -16,6 +16,26 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
+
+
+//***********
+// URL MATCHING - translator should detect the following urls...
+// First page results
+// http://bearcat.baylor.edu/search~S7/?searchtype=t&searcharg=test&searchscope=7&sortdropdown=-&SORT=D&extended=0&SUBMIT=Search&searchlimits=&searchorigarg=tone+hundred+years+of+solitude
+// http://innopac.cooley.edu/search~S0/?searchtype=X&searcharg=test&SORT=DZ&extended=0&SUBMIT=Search&searchlimits=&searchorigarg=Xtest
+// TODO: get it working for this: http://opac.library.usyd.edu.au/search
+// n page results
+// http://bearcat.baylor.edu/search~S7?/ttest/ttest/1837%2C1838%2C2040%2CB/browse/indexsort=-
+// http://innopac.cooley.edu/search~S0?/Xtest&SORT=DZ/Xtest&SORT=DZ&SUBKEY=test/1%2C960%2C960%2CB/browse
+// Individual item from search
+// http://bearcat.baylor.edu/search~S7?/ttest/ttest/1837%2C1838%2C2040%2CB/frameset&FF=ttestteori+english&1%2C1%2C/indexsort=-
+// http://innopac.cooley.edu/search~S0?/Xtest&SORT=DZ/Xtest&SORT=DZ&SUBKEY=test/1%2C960%2C960%2CB/frameset&FF=Xtest&SORT=DZ&1%2C1%2C
+// Persistent URL for item
+// http://bearcat.baylor.edu/record=b1540169~S7
+// http://innopac.cooley.edu/record=b507916~S0
+// Specific search parameters
+// http://library.cooley.edu/search/q?author=shakespeare&title=hamlet
+//***********
 
 // Central Michigan University fix
 	var xpath = '//div[@class="bibRecordLink"]';
@@ -25,7 +45,7 @@ function detectWeb(doc, url) {
 	}
 
 // possibly disastrous edit to regular expression below	
-	if (!url.match(/SEARCH=/) && !url.match(/searchargs?=/) && !url.match(/&FF/)) return false;
+	if (!url.match(/SEARCH=/) && !url.match(/searchargs?=/) && !url.match(/&FF/) && !url.match(/search~S[0-9]/) && !url.match(/\/search\/q\?/)) return false;
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don't reveal the MARC button
 	var matchRegexp = new RegExp('^https?://[^/]+/search[^/]*\\??/[^/]+/[^/]+/[^/]+\%2C[^/]+/frameset(.+)$');
 	if(matchRegexp.test(doc.location.href)) {
