@@ -40,6 +40,35 @@
 			<field name="_empty">null</field>
 			<field name="selection"/>
 			
+			<!-- Modes are predefined settings groups for particular tasks -->
+			<field name="_mode">"view"</field>
+			<property name="mode" onget="return this._mode;">
+				<setter>
+				<![CDATA[
+					this.clickable = false;
+					this.editable = false;
+					
+					switch (val) {
+						case 'view':
+							break;
+						
+						case 'edit':
+							this.clickable = true;
+							this.editable = true;
+							//this.clickHandler = this.showEditor;
+							//this.blurHandler = this.hideEditor;
+							break;
+						
+						default:
+							throw ("Invalid mode '" + val + "' in tagselector.xml");
+					}
+					
+					this._mode = val;
+					document.getAnonymousNodes(this)[0].setAttribute('mode', val);
+				]]>
+				</setter>
+			</property>
+			
 			<field name="_libraryID"/>
 			<property name="libraryID" onget="return this._libraryID">
 				<setter>
@@ -182,6 +211,7 @@
 					var empty = true;
 					var tagsToggleBox = this.id('tags-toggle');
 					
+					
 					if (fetch || this._dirty) {
 						this._tags = Zotero.Tags.getAll(this._types, this.libraryID);
 						
@@ -189,8 +219,6 @@
 						while (tagsToggleBox.hasChildNodes()){
 							tagsToggleBox.removeChild(tagsToggleBox.firstChild);
 						}
-						
-						
 						
 						var i=0;
 						for (var tagID in this._tags) {
@@ -212,10 +240,12 @@
 							label.setAttribute('value', this._tags[tagID].name);
 							label.setAttribute('tagID', tagID);
 							label.setAttribute('tagType', this._tags[tagID].type);
-							label.setAttribute('context', 'tag-menu');
-							label.setAttribute('ondragover', 'nsDragAndDrop.dragOver(event, this.parentNode.parentNode.parentNode.dragObserver)');
-							label.setAttribute('ondragexit', 'nsDragAndDrop.dragExit(event, this.parentNode.parentNode.parentNode.dragObserver)');
-							label.setAttribute('ondragdrop', 'nsDragAndDrop.drop(event, this.parentNode.parentNode.parentNode.dragObserver)');
+							if (this.editable) {
+								label.setAttribute('context', 'tag-menu');
+								label.setAttribute('ondragover', 'nsDragAndDrop.dragOver(event, this.parentNode.parentNode.parentNode.dragObserver)');
+								label.setAttribute('ondragexit', 'nsDragAndDrop.dragExit(event, this.parentNode.parentNode.parentNode.dragObserver)');
+								label.setAttribute('ondragdrop', 'nsDragAndDrop.drop(event, this.parentNode.parentNode.parentNode.dragObserver)');
+							}
 							tagsToggleBox.appendChild(label);
 						}
 						i++;
