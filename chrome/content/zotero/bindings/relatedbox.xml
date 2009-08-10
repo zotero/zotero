@@ -127,7 +127,7 @@
 									icon.setAttribute('src','chrome://zotero/skin/treeitem-' + type + '.png');
 							
 									var label = document.createElement("label");
-									label.setAttribute('value', related[i].getField('title'));
+									label.setAttribute('value', related[i].getField('title', false, true));
 									label.setAttribute('crop','end');
 									label.setAttribute('flex','1');
 									
