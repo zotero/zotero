@@ -29,8 +29,8 @@ var _io = {};
 
 var Zotero_Preferences = {
 
-	onClose: function () {
-		Zotero_Preferences.DebugOutput.onClose();
+	onUnload: function () {
+		Zotero_Preferences.Debug_Output.onUnload();
 	}
 }
 
@@ -1268,7 +1268,7 @@ Zotero_Preferences.Debug_Output = {
 		document.getElementById('debug-output-submit').disabled = true;
 		document.getElementById('debug-output-submit-progress').hidden = false;
 		
-		var url = "http://www.zotero.org/utils/dev/repo/report?debug=1";
+		var url = "http://www.zotero.org/repo/report?debug=1";
 		var output = Zotero.Debug.get();
 		
 		var uploadCallback = function (xmlhttp) {
@@ -1407,10 +1407,11 @@ Zotero_Preferences.Debug_Output = {
 	
 	
 	updateLines: function () {
+		var enabled = Zotero.Debug.storing;
 		var lines = Zotero.Debug.count();
 		document.getElementById('debug-output-lines').value = lines;
 		var empty = lines == 0;
-		document.getElementById('debug-output-view').disabled = empty;
+		document.getElementById('debug-output-view').disabled = !enabled && empty;
 		document.getElementById('debug-output-clear').disabled = empty;
 		document.getElementById('debug-output-submit').disabled = empty;
 	},
@@ -1441,7 +1442,7 @@ Zotero_Preferences.Debug_Output = {
 	},
 	
 	
-	onClose: function () {
+	onUnload: function () {
 		if (this._timer) {
 			this._timer.cancel();
 		}

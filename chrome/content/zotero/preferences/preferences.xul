@@ -37,9 +37,8 @@ To add a new preference:
 		in Zotero.Prefs.observe()
 
 -->
-<prefwindow id="zotero-prefs" title="&zotero.preferences.title;" onload="moveToAlertPosition(); init()" onclose="Zotero_Preferences.onClose()"
-		windowtype="zotero:pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-		>
+<prefwindow id="zotero-prefs" title="&zotero.preferences.title;" onload="moveToAlertPosition(); init()" onunload="Zotero_Preferences.onUnload()"
+		windowtype="zotero:pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<prefpane id="zotero-prefpane-general"
 						label="&zotero.preferences.prefpane.general;"
