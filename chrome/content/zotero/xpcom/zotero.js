@@ -184,6 +184,7 @@ var Zotero = new function(){
 		var appInfo =
 			Components.classes["@mozilla.org/xre/app-info;1"].
 				getService(Components.interfaces.nsIXULAppInfo)
+		this.appName = appInfo.name;
 		this.isFx2 = appInfo.platformVersion.indexOf('1.8') === 0; // TODO: remove
 		this.isFx3 = appInfo.platformVersion.indexOf('1.9') === 0;
 		this.isFx30 = appInfo.platformVersion == '1.9'
