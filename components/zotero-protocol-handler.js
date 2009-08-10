@@ -808,11 +808,42 @@ function ChromeExtensionHandler() {
 			}
 		}
 	};
-
+	
+	
+	/*
+		zotero://debug/
+	*/
+	var DebugExtension = new function() {
+		this.newChannel = newChannel;
+		
+		this.__defineGetter__('loadAsChrome', function () { return false; });
+		
+		function newChannel(uri) {
+			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+				.getService(Components.interfaces.nsIIOService);
+			
+			var Zotero = Components.classes["@zotero.org/Zotero;1"]
+				.getService(Components.interfaces.nsISupports)
+				.wrappedJSObject;
+			
+			try {
+				var output = Zotero.Debug.get();
+				
+				var uriStr = 'data:text/plain,' + encodeURIComponent(output);
+				var extURI = ioService.newURI(uriStr, null, null);
+				return ioService.newChannelFromURI(extURI);
+			}
+			catch (e) {
+				Zotero.debug(e);
+				throw (e);
+			}
+		}
+	};
+	
 	
 	var ReportExtensionSpec = ZOTERO_SCHEME + "://report"
 	this._extensions[ReportExtensionSpec] = ReportExtension;
-
+	
 	var TimelineExtensionSpec = ZOTERO_SCHEME + "://timeline"
 	this._extensions[TimelineExtensionSpec] = TimelineExtension;
 	
@@ -824,6 +855,9 @@ function ChromeExtensionHandler() {
 	
 	var FullscreenExtensionSpec = ZOTERO_SCHEME + "://fullscreen"
 	this._extensions[FullscreenExtensionSpec] = FullscreenExtension;
+	
+	var DebugExtensionSpec = ZOTERO_SCHEME + "://debug"
+	this._extensions[DebugExtensionSpec] = DebugExtension;
 }
 
 

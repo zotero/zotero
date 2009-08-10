@@ -135,10 +135,6 @@ var Zotero = new function(){
 	var _startupError;
 	var _startupErrorHandler;
 	var _zoteroDirectory = false;
-	var _debugLogging;
-	var _debugLevel;
-	var _debugTime;
-	var _debugLastTime;
 	var _localizedStringBundle;
 	var _localUserKey;
 	var _waiting;
@@ -167,9 +163,7 @@ var Zotero = new function(){
 		// Load in the preferences branch for the extension
 		Zotero.Prefs.init();
 		
-		_debugLogging = Zotero.Prefs.get('debug.log');
-		_debugLevel = Zotero.Prefs.get('debug.level');
-		_debugTime = Zotero.Prefs.get('debug.time');
+		Zotero.Debug.init();
 		
 		this.mainThread = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
 		
@@ -606,41 +600,7 @@ var Zotero = new function(){
 	 * Defaults to log level 3 if level not provided
 	 */
 	function debug(message, level) {
-		if (!_debugLogging){
-			return false;
-		}
-		
-		if (typeof message!='string'){
-			message = Zotero.varDump(message);
-		}
-		
-		if (!level){
-			level = 3;
-		}
-		
-		// If level above debug.level value, don't display
-		if (level > _debugLevel){
-			return false;
-		}
-		
-		var deltaStr = '';
-		if (_debugTime) {
-			var delta = 0;
-			var d = new Date();
-			if (_debugLastTime) {
-				delta = d - _debugLastTime;
-			}
-			_debugLastTime = d;
-			
-			while (("" + delta).length < 7) {
-				delta = '0' + delta;
-			}
-			
-			deltaStr = '(+' + delta + ')';
-		}
-		
-		dump('zotero(' + level + ')' + deltaStr + ': ' + message + "\n\n");
-		return true;
+		Zotero.Debug.log(message, level);
 	}
 	
 	

@@ -40,6 +40,7 @@ var xpcomFiles = [
 	'data/tag',
 	'data/tags',
 	'db',
+	'debug',
 	'duplicate',
 	'enstyle',
 	'error',
