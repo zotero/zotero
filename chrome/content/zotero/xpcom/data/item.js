@@ -3921,6 +3921,13 @@ Zotero.Item.prototype.toArray = function (mode) {
 	}
 	
 	if (!arr.title) {
+		var titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.itemTypeID, 'title');
+		var titleFieldName = Zotero.ItemFields.getName(titleFieldID);
+		if (arr[titleFieldName]) {
+			arr.title = titleFieldName;
+			delete arr[titleFieldName];
+		}
+		
 		switch (this.typeID) {
 			case Zotero.ItemTypes.getID('note'):
 				break;
