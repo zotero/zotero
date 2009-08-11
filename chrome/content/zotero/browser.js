@@ -69,6 +69,10 @@ var Zotero_Browser = new function() {
 		"ad.yieldmanager.com"
 	];
 	
+	var _locationBlacklist = [
+		"zotero://debug/"
+	];
+	
 	var tools = {
 		'zotero-annotate-tb-add':{
 			cursor:"pointer",
@@ -337,6 +341,13 @@ var Zotero_Browser = new function() {
 			}
 			catch (e) {}
 		}
+		
+		try {
+			if (_locationBlacklist.indexOf(doc.location.href) != -1) {
+				return;
+			}
+		}
+		catch (e) {}
 		
 		// Figure out what browser this contentDocument is associated with
 		var browser;
