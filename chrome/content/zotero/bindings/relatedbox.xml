@@ -149,7 +149,9 @@
 									
 									var row = document.createElement("row");
 									row.appendChild(box);
-									row.appendChild(remove);
+									if (this.editable) {
+										row.appendChild(remove);
+									}
 									row.setAttribute('id', 'seealso-' + related[i].id);
 									rows.appendChild(row);		
 								}

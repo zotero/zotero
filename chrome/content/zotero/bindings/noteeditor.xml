@@ -89,6 +89,7 @@
 					
 					this._mode = val;
 					document.getAnonymousNodes(this)[0].setAttribute('mode', val);
+					this._id('links').mode = val;
 				]]>
 				</setter>
 			</property>
@@ -394,6 +395,14 @@
 						this.id('seeAlso').item = this.item;
 						this.updateSeeAlsoSummary();
 					]]>
+				</setter>
+			</property>
+			<property name="mode">
+				<setter>
+				<![CDATA[
+					this.id('seeAlso').mode = val;
+					this.id('tags').mode = val;
+				]]>
 				</setter>
 			</property>
 			<method name="tagsClick">
