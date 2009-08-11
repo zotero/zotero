@@ -34,7 +34,9 @@ function doWeb(doc, url){
 	var hostRegexp = new RegExp("^(https?://[^/]+)/");
 	var hMatch = hostRegexp.exec(url);
 	var host = hMatch[1];
-	var urlPrefix = url.indexOf("/uiu/") != -1 ? host + "/uiu/vwebv/exportRecord.do?bibId=" : host + "/vwebv/exportRecord.do?bibId=";
+	
+	var urlPrefix = url.match("https?://[^/]*(/[^/]*/)?/?vwebv/")[1] ? host + url.match("https?://[^/]*(/[^/]*/)?/?vwebv/")[1] + "/vwebv/exportRecord.do?bibId=" : host + "/vwebv/exportRecord.do?bibId=";
+
 	
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
