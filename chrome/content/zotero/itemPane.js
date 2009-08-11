@@ -21,22 +21,9 @@
 */
 
 var ZoteroItemPane = new function() {
-	var _itemBeingEdited;
-	
-	var _notesList;
-	var _linksBox;
-	var _notesLabel;
-	
-	var _lastPane;
-	var _loaded;
-	
-	var _lastTabIndex;
-	var _tabDirection;
-	var _tabIndexMaxTagsFields = 0;
+	var _lastItem;
 	
 	this.onLoad = onLoad;
-	this.viewItem = viewItem;
-	this.loadPane = loadPane;
 	this.removeNote = removeNote;
 	this.addNote = addNote;
 	this.removeAttachment = removeAttachment;
@@ -55,7 +42,6 @@ var ZoteroItemPane = new function() {
 			return;
 		}
 		
-		_deck = document.getElementById('zotero-view-item');
 		_itemBox = document.getElementById('zotero-editpane-item-box');
 		_notesList = document.getElementById('zotero-editpane-dynamic-notes');
 		_notesLabel = document.getElementById('zotero-editpane-notes-label');
@@ -65,193 +51,53 @@ var ZoteroItemPane = new function() {
 		_relatedBox = document.getElementById('zotero-editpane-related');
 	}
 	
+	
 	/*
-	 * Loads an item 
+	 * Load an item
 	 */
-	function viewItem(thisItem, mode) {
-		//Zotero.debug('Viewing item');
+	this.viewItem = function (item, mode, index) {
+		if (!index) {
+			index = 0;
+		}
+		
+		Zotero.debug('Viewing item in pane ' + index);
+		
+		switch (index) {
+			case 0:
+				var box = _itemBox;
+				break;
+				
+			case 1:
+				var box = _tagsBox;
+				break;
+			
+			case 2:
+				var box = _relatedBox;
+				break;
+		}
 		
 		// Force blur() when clicking off a textbox to another item in middle
 		// pane, since for some reason it's not being called automatically
-		if (_itemBeingEdited && _itemBeingEdited != thisItem) {
-			switch (_deck.selectedIndex) {
-				// Info
+		if (_lastItem && _lastItem != item) {
+			switch (index) {
 				case 0:
-					// TODO: fix
-					//var boxes = _itemBox.getElementsByTagName('textbox');
-					
-					// When coming from another element, scroll pane to top
-					//scrollToTop();
-					break;
-					
-				// Tags
-				case 3:
-					var boxes = document.getAnonymousNodes(_tagsBox)[0].getElementsByTagName('textbox');
+				case 1:
+					box.blurOpenField();
+					// DEBUG: Currently broken
+					//box.scrollToTop();
 					break;
 			}
-			
-			if (boxes && boxes.length == 1) {
-				//boxes[0].inputField.blur();
-			}
 		}
 		
-		_itemBeingEdited = thisItem;
-		_loaded = {};
+		_lastItem = item;
 		
-		loadPane(_deck.selectedIndex, mode);
-	}
-	
-	
-	function loadPane(index, mode) {
-		//Zotero.debug('Loading item pane ' + index);
-		
-		// Clear the tab index when switching panes
-		if (_lastPane!=index) {
-			_lastTabIndex = null;
+		if (mode) {
+			box.mode = mode;
 		}
-		_lastPane = index;
-		
-		if (_loaded[index]) {
-			return;
+		else {
+			box.mode = 'edit';
 		}
-		_loaded[index] = true;
-		
-		// Info pane
-		if (index == 0) {
-			// Hack to allow read-only mode in right pane -- probably a better
-			// way to allow access to this
-			if (mode) {
-				_itemBox.mode = mode;
-			}
-			else {
-				_itemBox.mode = 'edit';
-			}
-			_itemBox.item = _itemBeingEdited;
-		}
-		
-		// Notes pane
-		else if(index == 1)
-		{
-			while(_notesList.hasChildNodes())
-				_notesList.removeChild(_notesList.firstChild);
-				
-			var notes = Zotero.Items.get(_itemBeingEdited.getNotes());
-			if(notes.length)
-			{
-				for(var i = 0; i < notes.length; i++)
-				{
-					var icon = document.createElement('image');
-					icon.setAttribute('src','chrome://zotero/skin/treeitem-note.png');
-				
-					var label = document.createElement('label');
-					var title = Zotero.Notes.noteToTitle(notes[i].getNote());
-					title = title ? title : Zotero.getString('pane.item.notes.untitled');
-					label.setAttribute('value', title);
-					label.setAttribute('flex','1');	//so that the long names will flex smaller
-					label.setAttribute('crop','end');
-				
-					var box = document.createElement('box');
-					box.setAttribute('onclick',"ZoteroPane.selectItem(" + notes[i].id + ");");
-					box.setAttribute('class','zotero-clicky');
-					box.appendChild(icon);
-					box.appendChild(label);
-				
-					var removeButton = document.createElement('label');
-					removeButton.setAttribute("value","-");
-					removeButton.setAttribute("class","zotero-clicky");
-					removeButton.setAttribute("onclick","ZoteroItemPane.removeNote(" + notes[i].id + ")");
-				
-					var row = document.createElement('row');
-					row.appendChild(box);
-					row.appendChild(removeButton);
-				
-					_notesList.appendChild(row);
-				}
-			}
-		
-			_updateNoteCount();
-		}
-		
-		// Attachments pane
-		else if(index == 2)
-		{
-			while(_attachmentsList.hasChildNodes())
-				_attachmentsList.removeChild(_attachmentsList.firstChild);
-				
-			var attachments = Zotero.Items.get(_itemBeingEdited.getAttachments());
-			if(attachments.length)
-			{
-				for(var i = 0; i < attachments.length; i++)
-				{
-					var icon = document.createElement('image');
-					var linkMode = attachments[i].getAttachmentLinkMode();
-					var itemType = '';
-					if(linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE)
-					{
-						itemType = "-file";
-					}
-					else if(linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE)
-					{
-						itemType = "-link";
-					}
-					else if(linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL)
-					{
-						itemType = "-snapshot";
-					}
-					else if(linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL)
-					{
-						itemType = "-web-link";
-					}
-					icon.setAttribute('src','chrome://zotero/skin/treeitem-file'+itemType+'.png');
-				
-					var label = document.createElement('label');
-					label.setAttribute('value',attachments[i].getField('title'));
-					label.setAttribute('flex','1');	//so that the long names will flex smaller
-					label.setAttribute('crop','end');
-				
-					var box = document.createElement('box');
-					box.setAttribute('onclick',"ZoteroPane.selectItem('" + attachments[i].id + "')");
-					box.setAttribute('class','zotero-clicky');
-					box.appendChild(icon);
-					box.appendChild(label);
-				
-					var removeButton = document.createElement('label');
-					removeButton.setAttribute("value","-");
-					removeButton.setAttribute("class","zotero-clicky");
-					removeButton.setAttribute("onclick","ZoteroItemPane.removeAttachment(" + attachments[i].id + ")");
-				
-					var row = document.createElement('row');
-					row.appendChild(box);
-					row.appendChild(removeButton);
-				
-					_attachmentsList.appendChild(row);
-				}
-			}
-		
-			_updateAttachmentCount();
-			
-		}
-		
-		// Tags pane
-		else if(index == 3)
-		{
-			if (mode) {
-				_tagsBox.mode = mode;
-			}
-			else {
-				_tagsBox.mode = 'edit';
-			}
-			
-			var focusMode = 'tags';
-			var focusBox = _tagsBox;
-			_tagsBox.item = _itemBeingEdited;
-		}
-		
-		// Related pane
-		else if(index == 4)
-		{
-			_relatedBox.item = _itemBeingEdited;
-		}
+		box.item = item;
 	}
 	
 	

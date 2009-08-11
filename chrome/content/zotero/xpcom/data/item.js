@@ -2962,14 +2962,14 @@ Zotero.Item.prototype.getBestSnapshot = function() {
 	}
 	
 	var url = this.getField('url');
-	
 	if (!url) {
 		return false;
 	}
 	
 	var sql = "SELECT IA.itemID, value FROM itemAttachments IA NATURAL JOIN items I "
 		+ "LEFT JOIN itemData ID ON (IA.itemID=ID.itemID AND fieldID=1) "
-		+ "NATURAL JOIN itemDataValues WHERE sourceItemID=? AND linkMode NOT IN (?) "
+		+ "LEFT JOIN itemDataValues IDV ON (ID.valueID=IDV.valueID) "
+		+ "WHERE sourceItemID=? AND linkMode NOT IN (?) "
 		+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
 		+ "ORDER BY value=? DESC, mimeType='application/pdf' DESC, dateAdded ASC";
 		
@@ -3826,6 +3826,13 @@ Zotero.Item.prototype.toArray = function (mode) {
 	}
 	
 	if (!arr.title) {
+		var titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.itemTypeID, 'title');
+		var titleFieldName = Zotero.ItemFields.getName(titleFieldID);
+		if (arr[titleFieldName]) {
+			arr.title = titleFieldName;
+			delete arr[titleFieldName];
+		}
+		
 		switch (this.typeID) {
 			case Zotero.ItemTypes.getID('note'):
 				break;

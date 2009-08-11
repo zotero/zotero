@@ -70,7 +70,6 @@
 	</popup>
 	
 	<vbox id="appcontent">
-		<!-- Changes to attributes of zotero-splitter and zotero-pane must be mirrored on overlay.js's onLoad() function -->
 		<!-- onmouseup shouldn't be necessary but seems to help prevent tag selector from sometimes going off the screen -->
 		<splitter id="zotero-splitter" resizebefore="closest" resizeafter="closest" hidden="true"
 			onmouseup="ZoteroPane.updateTagSelectorSize()"/>
@@ -375,7 +374,7 @@
 					<groupbox pack="center" align="center">
 						<label id="zotero-view-selected-label"/>
 					</groupbox>
-					<tabbox id="zotero-view-tabbox" flex="1" oncommand="if (this.selectedIndex !== '') { ZoteroItemPane.loadPane(this.selectedIndex); }">
+					<tabbox id="zotero-view-tabbox" flex="1" onselect="if (!ZoteroPane.collectionsView.selection || event.originalTarget.localName != 'tabpanels') { return; }; ZoteroItemPane.viewItem(ZoteroPane.getSelectedItems()[0], ZoteroPane.collectionsView.editable ? 'edit' : 'view', this.selectedIndex)">
 						<tabs>
 							<tab label="&zotero.tabs.info.label;"/>
 							<tab label="&zotero.tabs.notes.label;"/>

@@ -37,7 +37,7 @@ To add a new preference:
 		in Zotero.Prefs.observe()
 
 -->
-<prefwindow id="zotero-prefs" title="&zotero.preferences.title;" onload="moveToAlertPosition(); init()"
+<prefwindow id="zotero-prefs" title="&zotero.preferences.title;" onload="moveToAlertPosition(); init()" onunload="Zotero_Preferences.onUnload()"
 		windowtype="zotero:pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<prefpane id="zotero-prefpane-general"
@@ -258,7 +258,14 @@ To add a new preference:
 						</hbox>
 						
 						<separator class="thin"/>
-						<label value="Please note: Syncing of attachment files in group libraries is not currently supported."/>
+						<hbox align="center">
+							<label value="A" style="margin-right: 0"/>
+							<label value="WebDAV server" class="text-link" href="http://zotero.org/support/sync#file_syncing" style="margin-left: .25em; margin-right: .25em"/>
+							<label value="is currently required to sync attachment files." style="margin-left: 0"/>
+						</hbox>
+						
+						<separator class="thin"/>
+						<label value="Syncing of attachment files in group libraries is not currently supported."/>
 						
 						<separator/>
 						
@@ -717,6 +724,7 @@ To add a new preference:
 			<preference id="pref-useDataDir" name="extensions.zotero.useDataDir" type="bool"/>
 			<preference id="pref-dataDir" name="extensions.zotero.dataDir" type="string"/>
 			<preference id="pref-export-displayCharsetOption" name="extensions.zotero.export.displayCharsetOption" type="bool"/>
+			<preference id="pref-debug-output-enableAfterRestart" name="extensions.zotero.debug.store" type="bool"/>
 			<preference id="pref-import-charset" name="extensions.zotero.import.charset" type="string"/>
 		</preferences>
 		
@@ -746,6 +754,30 @@ To add a new preference:
 			
 			<hbox>
 				<button label="&zotero.preferences.dbMaintenance.resetTranslatorsAndStyles;" oncommand="resetTranslatorsAndStyles()"/>
+			</hbox>
+		</groupbox>
+		
+		<groupbox>
+			<!-- TODO: localize -->
+			<caption label="Debug Output Logging"/>
+			
+			<!-- This doesn't wrap without an explicit width -->
+			<vbox>
+				<description width="45em">Debug output can help Zotero developers diagnose problems in Zotero. Debug logging will slow down Zotero, so you should generally leave it disabled unless a Zotero developer requests debug output.</description>
+			</vbox>
+			
+			<hbox align="center">
+				<button id="debug-output-enable" oncommand="Zotero_Preferences.Debug_Output.toggleStore()"/>
+				<label id="debug-output-lines" style="margin-right: 0"/>
+				<label value="lines logged"/>
+				<checkbox preference="pref-debug-output-enableAfterRestart" label="Enable after restart" style="margin-left: 1.5em"/>
+			</hbox>
+			
+			<hbox align="center">
+				<button id="debug-output-view" label="View Output" oncommand="Zotero_Preferences.Debug_Output.view()"/>
+				<button id="debug-output-clear" label="Clear Output" oncommand="Zotero_Preferences.Debug_Output.clear()"/>
+				<button id="debug-output-submit" label="Submit to Zotero Server" oncommand="Zotero_Preferences.Debug_Output.submit()"/>
+				<progressmeter id="debug-output-submit-progress" mode="undetermined" hidden="true"/>
 			</hbox>
 		</groupbox>
 		

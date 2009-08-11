@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Форматиране с:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Отметки">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Отметките се запазват при прехвърляне между Microsoft Word и OpenOffice.org, но могат да бъдат променени по грешка.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Отметките се запазват при прехвърляне между Microsoft Word и OpenOffice, но могат да бъдат променени по грешка.">
 
 <!ENTITY zotero.integration.references.label "Препратки в библиографията">
 

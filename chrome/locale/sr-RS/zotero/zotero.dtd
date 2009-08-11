@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Форматирај користећи:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Пречице">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Пречице су сачуване кроз Microsoft Word и OpenOffice.org, али могу бити нехотично промењене.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Пречице су сачуване кроз Microsoft Word и OpenOffice, али могу бити нехотично промењене.">
 
 <!ENTITY zotero.integration.references.label "Референце у библиографији">
 

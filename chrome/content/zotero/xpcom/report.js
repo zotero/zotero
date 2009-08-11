@@ -116,10 +116,10 @@ Zotero.Report = new function() {
 			}
 			
 			// Related
-			if (arr.reportSearchMatch && arr['seeAlso'] && arr['seeAlso'].length) {
+			if (arr.reportSearchMatch && arr.related && arr.related.length) {
 				content += '<h3 class="related">' + escapeXML(Zotero.getString('itemFields.related')) + '</h3>\n';
 				content += '<ul class="related">\n';
-				var relateds = Zotero.Items.get(arr['seeAlso']);
+				var relateds = Zotero.Items.get(arr.related);
 				for each(var related in relateds) {
 					content += '<li id="i' + related.getID() + '">';
 					content += escapeXML(related.getField('title'));
@@ -203,7 +203,7 @@ Zotero.Report = new function() {
 				case 'firstCreator':
 				case 'creators':
 				case 'tags':
-				case 'seeAlso':
+				case 'related':
 				case 'notes':
 				case 'note':
 				case 'attachments':

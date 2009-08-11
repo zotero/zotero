@@ -535,7 +535,7 @@ Zotero.Sync.Runner = new function () {
 		}
 		
 		if (_autoSyncTimer) {
-			Zotero.debug("CANCELLING");
+			Zotero.debug("Cancelling auto-sync timer");
 			_autoSyncTimer.cancel();
 		}
 		else {
@@ -570,6 +570,16 @@ Zotero.Sync.Runner = new function () {
 			);
 		}
 		else {
+			if (Zotero.Sync.Storage.syncInProgress) {
+				Zotero.debug('Storage sync in progress -- not setting auto-sync timeout', 4);
+				return;
+			}
+			
+			if (Zotero.Sync.Server.syncInProgress) {
+				Zotero.debug('Sync in progress -- not setting auto-sync timeout', 4);
+				return;
+			}
+			
 			Zotero.debug('Setting auto-sync timeout to ' + timeout + ' seconds');
 			_autoSyncTimer.initWithCallback(
 				callback, timeout * 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT
@@ -630,7 +640,7 @@ Zotero.Sync.Runner.EventListener = {
 		}
 		
 		if (Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Server.enabled) {
-			Zotero.Sync.Runner.setSyncTimeout();
+			Zotero.Sync.Runner.setSyncTimeout(false, false, true);
 		}
 	}
 }
@@ -848,13 +858,21 @@ Zotero.Sync.Server = new function () {
 		var url = _serverURL + "login";
 		
 		var username = Zotero.Sync.Server.username;
-		
 		if (!username) {
-			_error("Username not set in Zotero.Sync.Server.login()");
+			// TODO: localize
+			var e = new Zotero.Error("Username not set", "SYNC_USERNAME_NOT_SET");
+			_error(e);
 		}
 		
-		username = encodeURIComponent(Zotero.Sync.Server.username);
-		var password = encodeURIComponent(Zotero.Sync.Server.password);
+		var password = Zotero.Sync.Server.password;
+		if (!password) {
+			// TODO: localize
+			var e = new Zotero.Error("Password not set", "INVALID_SYNC_LOGIN");
+			_error(e);
+		}
+		
+		username = encodeURIComponent(username);
+		password = encodeURIComponent(password);
 		var body = _apiVersionComponent
 					+ "&username=" + username
 					+ "&password=" + password;
@@ -866,7 +884,9 @@ Zotero.Sync.Server = new function () {
 			
 			if (response.firstChild.tagName == 'error') {
 				if (response.firstChild.getAttribute('code') == 'INVALID_LOGIN') {
-					_error('Invalid login/pass');
+					// TODO: localize
+					var e = new Zotero.Error("Invalid login/pass", "INVALID_SYNC_LOGIN");
+					_error(e);
 				}
 				_error(response.firstChild.firstChild.nodeValue);
 			}
@@ -1702,6 +1722,46 @@ Zotero.Sync.Server = new function () {
 						Zotero.Sync.Server.resetClient();
 						Zotero.Sync.Server.canAutoResetClient = false;
 						Zotero.Sync.Runner.sync(background);
+					}, 1);
+					break;
+				
+				case Zotero.Error.ERROR_SYNC_USERNAME_NOT_SET:
+				case Zotero.Error.ERROR_INVALID_SYNC_LOGIN:
+					if (Zotero.Sync.Runner.background) {
+						break;
+					}
+					setTimeout(function () {
+						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+									.getService(Components.interfaces.nsIWindowMediator);
+						var win = wm.getMostRecentWindow("navigator:browser");
+						
+						var pr = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService);
+						var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
+											+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL);
+						// TODO: localize
+						if (e.error == Zotero.Error.ERROR_SYNC_USERNAME_NOT_SET) {
+							var title = "Username Not Set";
+							var msg = "You must enter your zotero.org username and password in the Zotero preferences to sync with the Zotero server."
+						}
+						else {
+							var title = "Invalid Username/Password";
+							var msg = "The Zotero sync server did not accept your username and password.\n\n"
+									+ "Please check that you have entered your zotero.org login information correctly in the Zotero sync preferences.";
+						}
+						var index = pr.confirmEx(
+							win,
+							title,
+							msg,
+							buttonFlags,
+							"Open Sync Preferences",
+							null, null, null, {}
+						);
+						
+						if (index == 0) {
+							win.ZoteroPane.openPreferences("zotero-prefpane-sync");
+							return;
+						}
 					}, 1);
 					break;
 			}

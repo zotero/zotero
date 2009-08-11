@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-02-25 07:10:00"
+	"lastUpdated":"2009-08-08 09:40:00"
 }
 
 function detectWeb(doc, url){
@@ -133,7 +133,6 @@ function getData(ids, host){
 		if (xml..media_player.length()){
 			var url = xml..media_player[0].@url.toString();
 			newItem.url = url;
-			newItem.attachments.push({title:"YouTube Link", snapshot:false, mimeType:"text/html", url:url});
 		}
 		if (xml..yt_duration.length()){
 			var runningTime = xml..yt_duration[0].@seconds.toString();

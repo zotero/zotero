@@ -310,7 +310,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		
 		// Select the last item even if there are no changes (e.g. if the tag
 		// selector is open and already refreshed the pane)
-		if (splitIDs.length > 0) {
+		if (splitIDs.length > 0 && (action == 'add' || action == 'modify')) {
 			var selectItem = splitIDs[splitIDs.length - 1];
 		}
 	}
@@ -924,6 +924,23 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		}
 		
 		switch (columnField) {
+			case 'date':
+				fieldA = a.getField('date', true, true).substr(0, 10);
+				fieldB = b.getField('date', true, true).substr(0, 10);
+				
+				// Display rows with empty values last
+				cmp = (fieldA == '' && fieldB != '') ? -1 :
+					(fieldA != '' && fieldB == '') ? 1 : 0;
+				if (cmp) {
+					return cmp;
+				}
+				
+				cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
+				if (cmp) {
+					return cmp;
+				}
+				break;
+			
 			case 'type':
 				var typeA = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(a.ref.itemTypeID));
 				var typeB = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(b.ref.itemTypeID));
@@ -978,7 +995,6 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				return cmp;
 			}
 			
-			//cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
 			cmp = collation.compareString(1, fieldB, fieldA);
 			if (cmp) {
 				return cmp;
@@ -986,8 +1002,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		}
 		
 		if (columnField != 'date') {
-			fieldA = a.getField('date', true, true);
-			fieldB = b.getField('date', true, true);
+			fieldA = a.getField('date', true, true).substr(0, 10);
+			fieldB = b.getField('date', true, true).substr(0, 10);
 			
 			// Display rows with empty values last
 			cmp = (fieldA == '' && fieldB != '') ? -1 :

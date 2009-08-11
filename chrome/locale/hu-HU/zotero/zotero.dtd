@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Formázás típusa:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Könyvjelzők">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "A könyvjelzők mind a Microsoft Word, mind az OpenOffice.org programokkal kompatibilisak, de könnyű véletlenül módosítani.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "A könyvjelzők mind a Microsoft Word, mind az OpenOffice programokkal kompatibilisak, de könnyű véletlenül módosítani.">
 
 <!ENTITY zotero.integration.references.label "Hivatkozások a bibliográfiában">
 

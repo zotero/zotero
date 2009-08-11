@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Gebruikt formaat:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks worden behouden tussen Microsoft Word en OpenOffice.org, maar kunnen per ongeluk worden gewijzigd.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks worden behouden tussen Microsoft Word en OpenOffice, maar kunnen per ongeluk worden gewijzigd.">
 
 <!ENTITY zotero.integration.references.label "Verwijzingen in bibliografie">
 

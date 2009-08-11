@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Formater etter:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bokmerker">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmerker kan utveksles mellom Microsoft Word og Openoffice.org, men er utsatt for utilsiktede endringer.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmerker kan utveksles mellom Microsoft Word og OpenOffice, men er utsatt for utilsiktede endringer.">
 
 <!ENTITY zotero.integration.references.label "Referanser i bibliografi">
 

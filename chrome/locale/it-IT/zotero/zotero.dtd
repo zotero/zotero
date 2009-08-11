@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Formato:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Segnalibri">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "I segnalibri vengono solitamente mantenuti passando da Microsoft Word a OpenOffice.org, ma potrebbero subire modifiche non previste.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "I segnalibri vengono solitamente mantenuti passando da Microsoft Word a OpenOffice, ma potrebbero subire modifiche non previste.">
 
 <!ENTITY zotero.integration.references.label "Citazioni bibliografiche">
 

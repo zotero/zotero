@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "スタイル：">
 <!ENTITY zotero.integration.prefs.bookmarks.label "ブックマーク">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "ブックマークはMicrosoft Word、OpenOffice.org双方で保存されますが、偶然に変更されてしまう場合があります。">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "ブックマークはMicrosoft Word、OpenOffice双方で保存されますが、偶然に変更されてしまう場合があります。">
 
 <!ENTITY zotero.integration.references.label "参照文献リストの中の参照文献">
 

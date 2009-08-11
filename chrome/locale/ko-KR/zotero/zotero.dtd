@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "사용 형식:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "북마크">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "책갈피는 Microsoft Word와 OpenOffice.org에서 알수 있도록 보존되지만, 우연히 변경될지도 모릅니다.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "책갈피는 Microsoft Word와 OpenOffice에서 알수 있도록 보존되지만, 우연히 변경될지도 모릅니다.">
 
 <!ENTITY zotero.integration.references.label "저서 목록 내 참조">
 

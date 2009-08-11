@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "تنسيق باستخدام:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "تأشيرات">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "التأشيرات تظل محفوظة في مايكروسوفت وورد و OpenOffice.org. ولكنها قد تكون عرضة للتغيير الغير مقصود.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "التأشيرات تظل محفوظة في مايكروسوفت وورد و OpenOffice. ولكنها قد تكون عرضة للتغيير الغير مقصود.">
 
 <!ENTITY zotero.integration.references.label "مراجع في قائمة المؤلفات">
 

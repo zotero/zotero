@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Format utilitzat:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Adreçes d&apos;interès">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Les adreces d&apos;interès es conserven entre Microsoft Word i OpenOffice.org però poden veure&apos;s accidentalment modificades.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Les adreces d&apos;interès es conserven entre Microsoft Word i OpenOffice però poden veure&apos;s accidentalment modificades.">
 
 <!ENTITY zotero.integration.references.label "Referències a la bibliografia">
 

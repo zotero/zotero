@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Utilizando o formato:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Marcapáxinas">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Os marcapáxinas consérvanse a través de Microsoft Word e OpenOffice.org, pero poden ser modificados accidentalmente.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Os marcapáxinas consérvanse a través de Microsoft Word e OpenOffice, pero poden ser modificados accidentalmente.">
 
 <!ENTITY zotero.integration.references.label "Referencias en Bibliografía">
 

@@ -123,10 +123,6 @@ var Zotero = new function(){
 	var _startupError;
 	var _startupErrorHandler;
 	var _zoteroDirectory = false;
-	var _debugLogging;
-	var _debugLevel;
-	var _debugTime;
-	var _debugLastTime;
 	var _localizedStringBundle;
 	var _localUserKey;
 	
@@ -150,9 +146,7 @@ var Zotero = new function(){
 		// Load in the preferences branch for the extension
 		Zotero.Prefs.init();
 		
-		_debugLogging = Zotero.Prefs.get('debug.log');
-		_debugLevel = Zotero.Prefs.get('debug.level');
-		_debugTime = Zotero.Prefs.get('debug.time');
+		Zotero.Debug.init();
 		
 		// Load in the extension version from the extension manager
 		var nsIUpdateItem = Components.interfaces.nsIUpdateItem;
@@ -165,6 +159,7 @@ var Zotero = new function(){
 		var appInfo =
 			Components.classes["@mozilla.org/xre/app-info;1"].
 				getService(Components.interfaces.nsIXULAppInfo)
+		this.appName = appInfo.name;
 		this.isFx2 = appInfo.platformVersion.indexOf('1.8') === 0; // TODO: remove
 		this.isFx3 = appInfo.platformVersion.indexOf('1.9') === 0;
 		this.isFx30 = appInfo.platformVersion == '1.9'
@@ -577,41 +572,7 @@ var Zotero = new function(){
 	 * Defaults to log level 3 if level not provided
 	 */
 	function debug(message, level) {
-		if (!_debugLogging){
-			return false;
-		}
-		
-		if (typeof message!='string'){
-			message = Zotero.varDump(message);
-		}
-		
-		if (!level){
-			level = 3;
-		}
-		
-		// If level above debug.level value, don't display
-		if (level > _debugLevel){
-			return false;
-		}
-		
-		var deltaStr = '';
-		if (_debugTime) {
-			var delta = 0;
-			var d = new Date();
-			if (_debugLastTime) {
-				delta = d - _debugLastTime;
-			}
-			_debugLastTime = d;
-			
-			while (("" + delta).length < 7) {
-				delta = '0' + delta;
-			}
-			
-			deltaStr = '(+' + delta + ')';
-		}
-		
-		dump('zotero(' + level + ')' + deltaStr + ': ' + message + "\n\n");
-		return true;
+		Zotero.Debug.log(message, level);
 	}
 	
 	
@@ -1828,6 +1789,16 @@ Zotero.Date = new function(){
 		var utils = new Zotero.Utilities();
 		
 		var parts = strToDate(str);
+		
+		// FIXME: Until we have a better BCE date solution,
+		// remove year value if not between 1 and 9999
+		if (parts.year) {
+			var year = parts.year + '';
+			if (!year.match(/^[0-9]{1,4}$/)) {
+				delete parts.year;
+			}
+		}
+		
 		parts.month = typeof parts.month != "undefined" ? parts.month + 1 : '';
 		
 		var multi = (parts.year ? utils.lpad(parts.year, '0', 4) : '0000') + '-'
@@ -2224,7 +2195,7 @@ Zotero.Browser = new function() {
 		hiddenBrowser.docShell.allowMetaRedirects = false;
 		hiddenBrowser.docShell.allowPlugins = false;
 		Zotero.debug("created hidden browser ("
-			+ win.document.getElementsByTagName('browser').length + ")");
+			+ (win.document.getElementsByTagName('browser').length - 1) + ")");
 		return hiddenBrowser;
 	}
 	

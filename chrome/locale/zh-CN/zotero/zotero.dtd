@@ -160,7 +160,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "格式化为:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "书签">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "书签会在Microsoft Word和OpenOffice.org中保留, 但在某些情况下可能会被改动.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "书签会在Microsoft Word和OpenOffice中保留, 但在某些情况下可能会被改动.">
 
 <!ENTITY zotero.integration.references.label "References in Bibliography">
 

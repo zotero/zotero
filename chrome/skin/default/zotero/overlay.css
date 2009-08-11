@@ -263,6 +263,7 @@ window[active="true"] #zotero-pane[fullscreenmode="true"][platform="mac"]
 
 #zotero-pane[fullscreenmode="true"] #zotero-tb-fullscreen
 {
+	list-style-image: url('chrome://zotero/skin/toolbar-fullscreen-top.png');
 	background: #666666;
 	-moz-border-radius: 6px;
 }

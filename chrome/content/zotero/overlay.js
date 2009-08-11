@@ -893,6 +893,12 @@ var ZoteroPane = new function()
 		if (!tagSelector.getAttribute('collapsed') ||
 				tagSelector.getAttribute('collapsed') == 'false') {
 			Zotero.debug('Updating tag selector with current tags');
+			if (itemGroup.isEditable()) {
+				tagSelector.mode = 'edit';
+			}
+			else {
+				tagSelector.mode = 'view';
+			}
 			tagSelector.libraryID = itemGroup.ref.libraryID;
 			tagSelector.scope = itemGroup.getChildTags();
 		}
@@ -1046,13 +1052,14 @@ var ZoteroPane = new function()
 			else
 			{
 				document.getElementById('zotero-item-pane-content').selectedIndex = 1;
+				var pane = document.getElementById('zotero-view-tabbox').selectedIndex;
 				if (this.collectionsView.editable) {
-					ZoteroItemPane.viewItem(item.ref);
+					ZoteroItemPane.viewItem(item.ref, null, pane);
 					tabs.selectedIndex = document.getElementById('zotero-view-item').selectedIndex;
 				}
 				else {
-					document.getElementById('zotero-view-item').selectedIndex = 0;
-					ZoteroItemPane.viewItem(item.ref, 'view');
+					ZoteroItemPane.viewItem(item.ref, 'view', pane);
+					tabs.selectedIndex = document.getElementById('zotero-view-item').selectedIndex;
 				}
 			}
 		}
@@ -2221,8 +2228,17 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		var separator = document.getElementById("zotero-context-separator");
-		separator.hidden = !showing;
+		// If Zotero is locked or library is read-only, disable menu items
+		var menu = document.getElementById('zotero-content-area-context-menu');
+		menu.hidden = !showing;
+		var disabled = Zotero.locked;
+		if (!disabled && self.collectionsView.selection && self.collectionsView.selection.count) {
+			var itemGroup = self.collectionsView._getItemAtRow(self.collectionsView.selection.currentIndex);
+			disabled = !itemGroup.isEditable()
+		}
+		for each(var menuitem in menu.firstChild.childNodes) {
+			menuitem.disabled = disabled;
+		}
 	}
 	
 	
@@ -2960,7 +2976,7 @@ var ZoteroPane = new function()
 		var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 				   .getService(Components.interfaces.nsIWindowWatcher);
 		var data = {
-			msg: Zotero.getString('errorReport.followingErrors'),
+			msg: Zotero.getString('errorReport.followingErrors', Zotero.appName),
 			e: errors.join('\n\n'),
 			askForSteps: true
 		};

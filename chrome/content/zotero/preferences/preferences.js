@@ -26,6 +26,14 @@ var proxies;
 var charsets;
 var _io = {};
 
+
+var Zotero_Preferences = {
+
+	onUnload: function () {
+		Zotero_Preferences.Debug_Output.onUnload();
+	}
+}
+
 function init()
 {
 	// Display the appropriate modifier keys for the platform
@@ -40,6 +48,7 @@ function init()
 	populateQuickCopyList();
 	updateQuickCopyInstructions();
 	initSearchPane();
+	Zotero_Preferences.Debug_Output.init();
 	
 	var charsetMenu = document.getElementById("zotero-import-charsetMenu");
 	var charsetMap = Zotero_Charset_Menu.populate(charsetMenu, false);
@@ -1118,7 +1127,8 @@ function runIntegrityCheck() {
 	
 	ps.alert(window,
 		Zotero.getString('general.' + str),
-		Zotero.getString('db.integrityCheck.' + str));
+		Zotero.getString('db.integrityCheck.' + str)
+		+ (!ok ? "\n\n" + Zotero.getString('db.integrityCheck.dbRepairTool') : ''));
 }
 
 
@@ -1204,6 +1214,240 @@ function resetStyles() {
 	}
 }
 
+
+Zotero_Preferences.Debug_Output = {
+	_timer: null,
+	
+	init: function () {
+		var storing = Zotero.Debug.storing;
+		this._updateButton();
+		this.updateLines();
+		if (storing) {
+			this._initTimer();
+		}
+	},
+	
+	
+	toggleStore: function () {
+		var storing = Zotero.Debug.storing;
+		Zotero.Debug.setStore(!storing);
+		if (!storing) {
+			this._initTimer();
+		}
+		else {
+			if (this._timerID) {
+				this._timer.cancel();
+				this._timerID = null;
+			}
+		}
+		this._updateButton();
+		this.updateLines();
+	},
+	
+	
+	view: function () {
+		var uri = "zotero://debug/";
+		var features = "menubar=yes,toolbar=no,location=no,scrollbars,centerscreen,resizable";
+		
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+		.getService(Components.interfaces.nsIWindowMediator);
+		var win = wm.getMostRecentWindow("navigator:browser");
+		if (win) {
+			win.open(uri, null, features);
+		}
+		else {
+			var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+						.getService(Components.interfaces.nsIWindowWatcher);
+			var win = ww.openWindow(null, uri, null, features + ",width=775,height=575", null);
+		}
+	},
+	
+	
+	// TODO: localize
+	submit: function () {
+		document.getElementById('debug-output-submit').disabled = true;
+		document.getElementById('debug-output-submit-progress').hidden = false;
+		
+		var url = "http://www.zotero.org/repo/report?debug=1";
+		var output = Zotero.Debug.get();
+		
+		var uploadCallback = function (xmlhttp) {
+			document.getElementById('debug-output-submit').disabled = false;
+			document.getElementById('debug-output-submit-progress').hidden = true;
+			
+			Zotero.debug(xmlhttp.responseText);
+			
+			var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+				.getService(Components.interfaces.nsIPrompt);
+			
+			if (!xmlhttp.responseXML) {
+				pr.alert(
+					Zotero.getString('general.error'),
+					'Invalid response from server'
+				);
+				return;
+			}
+			var reported = xmlhttp.responseXML.getElementsByTagName('reported');
+			if (reported.length != 1) {
+				pr.alert(
+					Zotero.getString('general.error'),
+					'The server returned an error. Please try again.'
+				);
+				return;
+			}
+			
+			var reportID = reported[0].getAttribute('reportID');
+			pr.alert(
+				"Submitted",
+				"Debug output has been sent to the Zotero server.\n\n"
+					+ "The Report ID is D" + reportID + "."
+			);
+		}
+		
+		var bufferUploader = function (data) {
+			var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+				.getService(Components.interfaces.nsIPrompt);
+			
+			var oldLen = output.length;
+			var newLen = data.length;
+			var savings = Math.round(((oldLen - newLen) / oldLen) * 100)
+			Zotero.debug("HTTP POST " + newLen + " bytes to " + url
+				+ " (gzipped from " + oldLen + " bytes; "
+				+ savings + "% savings)");
+			
+			if (Zotero.Utilities.HTTP.browserIsOffline()) {
+				pr.alert(
+					Zotero.getString(
+						'general.error',
+						Zotero.appName + " is in offline mode."
+					)
+				);
+				return false;
+			}
+			
+			var req =
+				Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
+					createInstance();
+			req.open('POST', url, true);
+			req.setRequestHeader('Content-Type', "application/octet-stream");
+			req.setRequestHeader('Content-Encoding', 'gzip');
+			
+			req.channel.notificationCallbacks = {
+				onProgress: function (request, context, progress, progressMax) {
+					var pm = document.getElementById('debug-output-submit-progress');
+					pm.mode = 'determined'
+					pm.value = progress;
+					pm.max = progressMax;
+				},
+				
+				// nsIInterfaceRequestor
+				getInterface: function (iid) {
+					try {
+						return this.QueryInterface(iid);
+					}
+					catch (e) {
+						throw Components.results.NS_NOINTERFACE;
+					}
+				},
+				
+				QueryInterface: function(iid) {
+					if (iid.equals(Components.interfaces.nsISupports) ||
+							iid.equals(Components.interfaces.nsIInterfaceRequestor) ||
+							iid.equals(Components.interfaces.nsIProgressEventSink)) {
+						return this;
+					}
+					throw Components.results.NS_NOINTERFACE;
+				},
+
+			}
+			req.onreadystatechange = function () {
+				if (req.readyState == 4) {
+					uploadCallback(req);
+				}
+			};
+			try {
+				req.sendAsBinary(data);
+			}
+			catch (e) {
+				pr.alert(
+					Zotero.getString('general.error'),
+					"An error occurred sending debug output."
+				);
+			}
+		}
+		
+		// Get input stream from debug output data
+		var unicodeConverter =
+			Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+				.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+		unicodeConverter.charset = "UTF-8";
+		var bodyStream = unicodeConverter.convertToInputStream(output);
+		
+		// Get listener for when compression is done
+		var listener = new Zotero.BufferedInputListener(bufferUploader);
+		
+		// Initialize stream converter
+		var converter =
+			Components.classes["@mozilla.org/streamconv;1?from=uncompressed&to=gzip"]
+				.createInstance(Components.interfaces.nsIStreamConverter);
+		converter.asyncConvertData("uncompressed", "gzip", listener, null);
+		
+		// Send input stream to stream converter
+		var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"].
+				createInstance(Components.interfaces.nsIInputStreamPump);
+		pump.init(bodyStream, -1, -1, 0, 0, true);
+		pump.asyncRead(converter, null);
+	},
+	
+	
+	clear: function () {
+		Zotero.Debug.clear();
+		this.updateLines();
+	},
+	
+	
+	updateLines: function () {
+		var enabled = Zotero.Debug.storing;
+		var lines = Zotero.Debug.count();
+		document.getElementById('debug-output-lines').value = lines;
+		var empty = lines == 0;
+		document.getElementById('debug-output-view').disabled = !enabled && empty;
+		document.getElementById('debug-output-clear').disabled = empty;
+		document.getElementById('debug-output-submit').disabled = empty;
+	},
+	
+	
+	_initTimer: function () {
+		this._timer = Components.classes["@mozilla.org/timer;1"].
+			createInstance(Components.interfaces.nsITimer);
+		this._timer.initWithCallback({
+			notify: function() {
+				Zotero_Preferences.Debug_Output.updateLines();
+			}
+		}, 10000, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
+	},
+	
+	
+	_updateButton: function () {
+		var storing = Zotero.Debug.storing
+		
+		var button = document.getElementById('debug-output-enable');
+		// TODO: localize
+		if (storing) {
+			button.label = "Disable";
+		}
+		else {
+			button.label = "Enable";
+		}
+	},
+	
+	
+	onUnload: function () {
+		if (this._timer) {
+			this._timer.cancel();
+		}
+	}
+}
 
 function onOpenURLSelected()
 {

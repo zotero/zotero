@@ -502,7 +502,7 @@ Zotero.Integration.Request.prototype.setDocPrefs = function() {
 		this.wrappedJSObject = this;
 	};
 	
-	io.openOffice = this.header.client.@agent == "OpenOffice.org"
+	io.openOffice = this.header.client.@agent == "OpenOffice";
 	
 	var oldStyle = io.style = this._session.styleID;
 	io.useEndnotes = this._session.prefs.useEndnotes;
@@ -990,7 +990,9 @@ Zotero.Integration.Session.prototype.completeCitation = function(object) {
 		// get Zotero item (dealing with reselected items along the way)
 		var zoteroItem = false;
 		if(citationItem.uri) {
-			zoteroItem = this.uriMap.getZoteroItemForURIs(citationItem.uri);
+			var needUpdate = false;
+			[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(citationItem.uri);
+			if(needUpdate) this.updateItemIDs[zoteroItem.id] = true;
 		} else {
 			if(citationItem.key) {
 				zoteroItem = Zotero.Items.getByKey(citationItem.key);
@@ -1179,13 +1181,15 @@ Zotero.Integration.Session.prototype.editCitation = function(index, citation) {
 	
 	// if there's already a citation, make sure we have item IDs in addition to keys
 	if(citation) {
+		var zoteroItem;
 		for each(var citationItem in citation.citationItems) {
 			var item = false;
 			if(!citationItem.itemID) {
+				zoteroItem = false;
 				if(citationItem.uri) {
-					var zoteroItem = this.uriMap.getZoteroItemForURIs(citationItem.uri);
+					[zoteroItem, ] = this.uriMap.getZoteroItemForURIs(citationItem.uri);
 				} else if(citationItem.key) {
-					var zoteroItem = Zotero.Items.getByKey(citationItem.key);
+					zoteroItem = Zotero.Items.getByKey(citationItem.key);
 				}
 				if(zoteroItem) citationItem.itemID = zoteroItem.id;
 			}
@@ -1510,9 +1514,11 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 	if(documentData.uncited) {
 		if(documentData.uncited[0]) {
 			// new style array of arrays with URIs
+			var zoteroItem, needUpdate;
 			for each(var uris in documentData.uncited) {
-				var zoteroItem = this.uriMap.getZoteroItemForURIs(uris);
+				[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(uris);
 				if(zoteroItem) this.uncitedItems[zoteroItem.id] = true;
+				if(needUpdate) this.bibliographyDataHasChanged = true;
 			}
 		} else {
 			for(var itemID in documentData.uncited) {
@@ -1534,9 +1540,11 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 	if(documentData.custom) {
 		if(documentData.custom[0]) {
 			// new style array of arrays with URIs
+			var zoteroItem, needUpdate;
 			for each(var custom in documentData.custom) {
-				var zoteroItem = this.uriMap.getZoteroItemForURIs(custom[0]);
+				[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(custom[0]);
 				if(!zoteroItem) continue;
+				if(needUpdate) this.bibliographyDataHasChanged = true;
 				
 				var item = this.itemSet.getItemsByIds([zoteroItem.id])[0];
 				if(!item) continue;
@@ -1710,12 +1718,25 @@ Zotero.Integration.URIMap.prototype.getURIsForItemID = function(id) {
  */
 Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
 	var zoteroItem = false;
-	for each(var uri in uris) {
+	var needUpdate = false;
+	
+	for(var i in uris) {
 		try {
-			zoteroItem = Zotero.URI.getURIItem(uri);
+			zoteroItem = Zotero.URI.getURIItem(uris[i]);	
 			if(zoteroItem) break;
 		} catch(e) {}
 	}
-	if(zoteroItem) this.itemIDURIs[zoteroItem.id] = uris;
-	return zoteroItem;
+	
+	if(zoteroItem) {
+		// make sure URI is up to date (in case user just began synching)
+		var newURI = Zotero.URI.getItemURI(zoteroItem);
+		if(newURI != uris[i]) {
+			uris[i] = newURI;
+			needUpdate = true;
+		}
+		// cache uris
+		this.itemIDURIs[zoteroItem.id] = uris;
+	}
+	
+	return [zoteroItem, needUpdate];
 }

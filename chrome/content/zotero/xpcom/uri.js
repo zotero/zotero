@@ -98,6 +98,8 @@ Zotero.URI = new function () {
 		
 		// If this is a local URI, compare to the local user key
 		if (itemURI.match(/\/users\/local\//)) {
+			// For now, at least, don't check local id
+			/*
 			var localUserURI = this.getLocalUserURI();
 			if (localUserURI) {
 				localUserURI += "/";
@@ -107,6 +109,9 @@ Zotero.URI = new function () {
 					var libraryTypeID = null;
 				}
 			}
+			*/
+			var libraryType = 'user';
+			var libraryTypeID = null;
 		}
 		
 		// If not found, try global URI

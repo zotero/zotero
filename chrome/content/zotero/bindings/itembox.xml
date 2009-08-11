@@ -193,7 +193,6 @@
 			
 			<field name="_selectField"/>
 			<field name="_beforeRow"/>
-			<field name="_activeScrollbox"/>
 			<field name="_addCreatorRow"/>
 			<field name="_creatorCount"/>
 			
@@ -452,7 +451,7 @@
 							label.setAttribute("onclick", "ZoteroPane.loadURI(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value, event)");
 							label.setAttribute("tooltiptext", Zotero.getString('pane.item.goToURL.online.tooltip'));
 						}
-						else if (fieldName == 'DOI' && val && typeof val == 'String') {
+						else if (fieldName == 'DOI' && val && typeof val == 'string') {
 							// Pull out DOI, in case there's a prefix
 							var doi = Zotero.Utilities.prototype.cleanDOI(val);
 							if (doi) {
@@ -509,7 +508,8 @@
 					
 					// Place, in order of preference, after title, after type,
 					// or at beginning
-					var field = this._dynamicFields.getElementsByAttribute('fieldname', 'title').item(0);
+					var titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
+					var field = this._dynamicFields.getElementsByAttribute('fieldname', Zotero.ItemFields.getName(titleFieldID)).item(0);
 					if (!field) {
 						var field = this._dynamicFields.getElementsByAttribute('fieldname', 'itemType').item(0);
 					}
@@ -629,11 +629,15 @@
 					typeBox.setAttribute("typeid", typeID);
 					typeBox.setAttribute("popup", "creator-type-menu");
 					typeBox.setAttribute("fieldname", 'creator-' + this._creatorCount + '-typeID');
-					typeBox.className = 'creator-type-label zotero-clicky';
-					
-					var img = document.createElement('image');
-					img.setAttribute('src', 'chrome://zotero/skin/arrow-down.gif');
-					typeBox.appendChild(img);
+					if (this.editable) {
+						typeBox.className = 'creator-type-label zotero-clicky';
+						var img = document.createElement('image');
+						img.setAttribute('src', 'chrome://zotero/skin/arrow-down.gif');
+						typeBox.appendChild(img);
+					}
+					else {
+						typeBox.className = 'creator-type-label';
+					}
 					
 					var label = document.createElement("label");
 					label.setAttribute('value',
@@ -895,10 +899,10 @@
 			<method name="scrollToTop">
 				<body>
 				<![CDATA[
-					if (!this._activeScrollbox) {
-						return;
-					}
-					var sbo = this._activeScrollbox.boxObject;
+					// DEBUG: Valid nsIScrollBoxObject but methods return errors
+					return;
+					
+					var sbo = document.getAnonymousNodes(this)[0].boxObject;
 					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
 					sbo.scrollTo(0,0);
 				]]>
@@ -910,10 +914,10 @@
 				<parameter name="elem"/>
 				<body>
 				<![CDATA[
-					if (!this._activeScrollbox) {
-						return;
-					}
-					var sbo = this._activeScrollbox.boxObject;
+					// DEBUG: Valid nsIScrollBoxObject but methods return errors
+					return;
+					
+					var sbo = document.getAnonymousNodes(this)[0].boxObject;
 					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
 					sbo.ensureElementIsVisible(elem);
 				]]>
@@ -2119,6 +2123,19 @@
 				]]>
 				</body>
 			</method>
+			
+			
+			<method name="blurOpenField">
+				<body>
+				<![CDATA[
+					var textboxes = document.getAnonymousNodes(this)[0].getElementsByTagName('textbox');
+					if (textboxes && textboxes.length) {
+						textboxes[0].inputField.blur();
+					}
+				]]>
+				</body>
+			</method>
+			
 			
 			<method name="_id">
 				<parameter name="id"/>

@@ -107,6 +107,9 @@
 					<![CDATA[
 						Zotero.debug('Reloading tags');
 						
+						var addButton = this.id('addButton');
+						addButton.hidden = !this.editable;
+						
 						var rows = this.id('tagRows');
 						while(rows.hasChildNodes())
 							rows.removeChild(rows.firstChild);
@@ -174,23 +177,27 @@
 						
 						var label = this.createValueElement(name, tabindex);
 						
-						var remove = document.createElement("label");
-						remove.setAttribute('value','-');
-						remove.setAttribute('class','zotero-clicky');
-						if (tagID)
-						{
-							remove.setAttribute('ztabindex', -1);
-							remove.setAttribute('onclick',"document.getBindingParent(this).remove('"+ tagID +"');");
-						}
-						else
-						{
-							remove.setAttribute('disabled', true);
+						if (this.editable) {
+							var remove = document.createElement("label");
+							remove.setAttribute('value','-');
+							remove.setAttribute('class','zotero-clicky');
+							if (tagID)
+							{
+								remove.setAttribute('ztabindex', -1);
+								remove.setAttribute('onclick',"document.getBindingParent(this).remove('"+ tagID +"');");
+							}
+							else
+							{
+								remove.setAttribute('disabled', true);
+							}
 						}
 						
 						var row = document.createElement("row");
 						row.appendChild(icon);
 						row.appendChild(label);
-						row.appendChild(remove);
+						if (this.editable) {
+							row.appendChild(remove);
+						}
 						
 						if (tagID)
 						{
@@ -640,6 +647,22 @@
 			</method>
 			
 			
+			<method name="scrollToTop">
+				<body>
+				<![CDATA[
+					Zotero.debug('SCROLL TO TOP');
+					if (!this._activeScrollbox) {
+						Zotero.debug('NO');
+						return;
+					}
+					var sbo = this._activeScrollbox.boxObject;
+					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
+					sbo.scrollTo(0,0);
+				]]>
+				</body>
+			</method>
+			
+			
 			<method name="ensureElementIsVisible">
 				<parameter name="elem"/>
 				<body>
@@ -648,6 +671,18 @@
 					var sbo = scrollbox.boxObject;
 					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
 					sbo.ensureElementIsVisible(elem);
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="blurOpenField">
+				<body>
+				<![CDATA[
+					var textboxes = document.getAnonymousNodes(this)[0].getElementsByTagName('textbox');
+					if (textboxes && textboxes.length) {
+						textboxes[0].inputField.blur();
+					}
 				]]>
 				</body>
 			</method>
@@ -666,8 +701,9 @@
 			<xul:scrollbox xbl:inherits="flex" orient="vertical" style="overflow:auto">
 				<xul:hbox align="center">
 					<xul:label id="tagsNum"/>
-					<xul:button label="&zotero.item.add;" oncommand="document.getBindingParent(this).new();"/>
+					<xul:button id="addButton" label="&zotero.item.add;" oncommand="document.getBindingParent(this).new();" hidden="true"/>
 				</xul:hbox>
+				<xul:separator class="thin"/>
 				<xul:grid>
 					<xul:columns>
 						<xul:column/>
