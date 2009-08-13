@@ -36,7 +36,7 @@ Zotero.CollectionTreeView = function()
 	this._treebox = null;
 	this.itemToSelect = null;
 	this._highlightedRows = {};
-	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search', 'share', 'group']);
+	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search', 'share', 'group', 'bucket']);
 	this.showDuplicates = false;
 }
 
@@ -226,7 +226,7 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 	}
 
 	var buckets = Zotero.Commons.buckets;
-	if(buckets.length) {
+	if(buckets) {
 		this._showItem(new Zotero.ItemGroup('separator', false));
 		var header = {
 			id: "commons-header",
@@ -410,6 +410,9 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 				// Groups can only be created during sync
 				this.rememberSelection(savedSelection);
 				break;
+
+			case 'bucket':
+				this.reload();
 		}
 	}
 	

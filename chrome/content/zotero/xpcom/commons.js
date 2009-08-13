@@ -20,13 +20,20 @@
     ***** END LICENSE BLOCK *****
 */
 
+//TODO localize
 Zotero.Commons = new function() {
+	this.createBucket = createBucket;
+	this.syncBucketList = syncBucketList;
+	this.removeBucket = removeBucket;
+	this._createAuthenticatedRequest = _createAuthenticatedRequest;
+	this._createUnauthenticatedRequest = _createUnauthenticatedRequest;
 
 	this.uri = 'http://www.archive.org/';
+	this.apiUrl = 'http://s3.us.archive.org';
 
 	this.__defineGetter__('buckets', function () {
 		if(!Zotero.Prefs.get("commons.enabled")) {
-			return [];
+			return false;
 		}
 
 		var accessKey = Zotero.Prefs.get("commons.accessKey");
@@ -40,6 +47,190 @@ Zotero.Commons = new function() {
 		}
 		return buckets;
 	});
+
+	function createBucket(bucketName) {
+		var accessKey = Zotero.Prefs.get("commons.accessKey");
+		var secretKey = Zotero.Prefs.get("commons.secretKey");
+
+		var req = this._createAuthenticatedRequest(
+			"PUT", "/" + bucketName, {}, accessKey, secretKey
+		);
+
+		req.onreadystatechange = function() {
+			if(req.readyState == 4) {
+				if(req.status < 400) {
+					// add bucketName to preference if isn't already there
+					var prefBucketNames = Zotero.Prefs.get("commons.buckets").split(',');
+					if(!Zotero.inArray(bucketName, prefBucketNames)) {
+						prefBucketNames.push(bucketName);
+						prefBucketNames.sort();
+						Zotero.Prefs.set("commons.buckets", prefBucketNames.join(','));
+						Zotero.Notifier.trigger('add', 'bucket', true);
+					}
+				}
+				else if(req.status == 403) {
+					alert("Bucket creation failed: authentication failed.");
+				}
+				else if(req.status == 409) {
+					alert("Bucket creation failed: bucket name already taken.");
+				}
+				else if(req.status == 503) {
+					alert("Bucket creation failed: server unavailable.");
+				}
+				else {
+					alert("Bucket creation failed: server error " + req.status);
+				}
+			}
+		}
+
+		req.send(null);
+	}
+
+	function syncBucketList() {
+		var accessKey = Zotero.Prefs.get("commons.accessKey");
+		var secretKey = Zotero.Prefs.get("commons.secretKey");
+
+		// get list of buckets from IA
+		var req = this._createAuthenticatedRequest(
+			"GET", "/", {}, accessKey, secretKey
+		);
+
+		req.onreadystatechange = function() {
+			if (req.readyState == 4) {
+				if(req.status < 400) {
+					var zu = new Zotero.Utilities;
+					var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
+						.getService(Components.interfaces.nsIPrompt);
+
+					var prefChanged = false;
+					var prefBuckets = Zotero.Prefs.get("commons.buckets");
+					var prefBucketNames = (prefBuckets) ? prefBuckets.split(',').sort() : [];
+					var newPrefBucketNames = [];
+					var iaBucketNames = [];
+					var buckets = req.responseXML.getElementsByTagName("Bucket");
+					for(var i = 0, len = buckets.length; i < len; i++) {
+						var bucketName = buckets[i].getElementsByTagName('Name')[0].textContent;
+						iaBucketNames.push(bucketName);
+						if(Zotero.inArray(bucketName, prefBucketNames)) {
+							newPrefBucketNames.push(bucketName);
+						}
+					}
+					iaBucketNames.sort();
+
+					// newPrefBucketNames currently contains intersection
+					// of prefBucketNames and iaBucketNames
+					var askToAddBuckets = zu.arrayDiff(newPrefBucketNames, iaBucketNames);
+					var askToRemoveBuckets = zu.arrayDiff(newPrefBucketNames, prefBucketNames);
+
+					// prompt user about adding buckets
+					for(var i = 0, len = askToAddBuckets.length; i < len; i++) {
+						var result = prompt.confirm("", "'" + askToAddBuckets[i] + "' is associated with "
+							+ "your IA account, but is not in the Zotero list of buckets\n\n"
+							+ "Add bucket '" + askToAddBuckets[i] + "'?");
+						if (result) {
+							newPrefBucketNames.push(askToAddBuckets[i]);
+							prefChanged = true;
+						}
+					}
+
+					// prompt user about removing buckets
+					for(var i = 0, len = askToRemoveBuckets.length; i < len; i++) {
+						var result = prompt.confirm("", "'" + askToRemoveBuckets[i] + "' is in your "
+							+ "Zotero list of buckets, but is not associated with your IA account\n\n"
+							+ "Remove bucket '" + askToRemoveBuckets[i] + "'?");
+						if (result) {
+							prefChanged = true;
+						}
+						else {
+							newPrefBucketNames.push(askToRemoveBuckets[i]);
+						}
+					}
+
+					newPrefBucketNames.sort();
+					Zotero.Prefs.set("commons.buckets", newPrefBucketNames.join(','));
+
+					// refresh left pane if local bucket list changed
+					if(prefChanged) {
+						Zotero.Notifier.trigger('add', 'bucket', true);
+					}
+
+					// give user feedback if no difference between lists
+					// (don't leave user wondering if nothing happened)
+					if(askToAddBuckets.length == 0 && askToRemoveBuckets.length == 0) {
+						alert("No differences between local bucket list and IA bucket list found.");
+					}
+				}
+				else if(req.status == 503) {
+					alert("Bucket list sync failed: server unavailable.");
+				}
+				else {
+					alert("Bucket list sync failed: server error " + req.status);
+				}
+			}
+		}
+
+		req.send(null);
+	}
+
+	// remove bucketName from preference, and refresh left pane in Zotero
+	function removeBucket(bucketName) {
+		var prefBucketNames = Zotero.Prefs.get("commons.buckets").split(',');
+		var newPrefBucketNames = [];
+		for(var i = 0, len = prefBucketNames.length; i < len; i++) {
+			if(bucketName != prefBucketNames[i]) {
+				newPrefBucketNames.push(prefBucketNames[i]);
+			}
+		}
+		newPrefBucketNames.sort();
+		Zotero.Prefs.set("commons.buckets", newPrefBucketNames.join(','));
+		Zotero.Notifier.trigger('add', 'bucket', true);
+	}
+
+	function _createAuthenticatedRequest(method, resource, headers, accessKey, secretKey) {
+		var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+			.createInstance(Components.interfaces.nsIXMLHttpRequest);
+		req.open(method, Zotero.Commons.apiUrl + resource, true);
+
+		var d = new Date();
+		headers["Date"] = d.toUTCString();
+
+		var signatureData = method + '\n' +
+			((headers['Content-MD5']) ? headers['Content-MD5'] : '') + '\n' +
+			((headers['Content-Type']) ? headers['Content-Type'] : '') + '\n' +
+			((headers['Date']) ? headers['Date'] : '') + '\n';
+
+		// add x-amz- headers in alphabetic order
+		var amz = [];
+		for(header in headers) {
+			if(header.indexOf("x-amz-") == 0) {
+				amz.push(header + ":" + headers[header] + '\n');
+			}
+		}
+		signatureData += amz.sort().join('');
+
+		signatureData += resource;
+		var signature = Zotero.Commons.SHA1.b64_hmac_sha1(secretKey, signatureData) + '=';
+		headers["Authorization"] = "AWS " + accessKey + ":" + signature;
+		//headers["Authorization"] = "LOW " + accessKey + ":" + secretKey;
+
+		for(var header in headers) {
+			req.setRequestHeader(header, headers[header]);
+		}
+
+		return req;
+	}
+
+	function _createUnauthenticatedRequest(method, resource, headers) {
+		var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+			.createInstance(Components.interfaces.nsIXMLHttpRequest);
+		req.open(method, Zotero.Commons.apiUrl + resource, true);
+
+		for(var header in headers) {
+			req.setRequestHeader(header, headers[header]);
+		}
+
+		return req;
+	}
 }
 
 
@@ -53,8 +244,6 @@ Zotero.Commons.Bucket = function(name, accessKey, secretKey) {
 	this._requestingItems = false;
 }
 
-
-Zotero.Commons.Bucket.prototype.apiUrl = 'http://s3.us.archive.org';
 
 Zotero.Commons.Bucket.prototype.RDF_TRANSLATOR = {
 	'label': 'Zotero RDF',
@@ -92,11 +281,7 @@ Zotero.Commons.Bucket.prototype.getItems = function() {
 	this._requestingItems = true;
 
 	// get a list of keys associated with this bucket
-	var method = "GET";
-	var resource = '/' + this.name + '/';
-	var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-		.createInstance(Components.interfaces.nsIXMLHttpRequest);
-	req.open(method, this.apiUrl + resource, true);
+	var req = Zotero.Commons._createUnauthenticatedRequest("GET", '/' + this.name + '/', {});
 	//req.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 
 	var self = this;
@@ -193,6 +378,7 @@ Zotero.Commons.Bucket.prototype._translateCallback = function(translation, succe
 		data.bucket._zipDirectory(data.bucket, dir, dir, zw);
 
 		data.uploadFile = zipFile;
+		data.mimetype = "application/zip";
 		// add observer so _putKey is called on zip completion
 		var observer = new Zotero.Commons.ZipWriterObserver(zw, data.bucket._putKey, data);
 		zw.processQueue(observer, null);
@@ -205,30 +391,20 @@ Zotero.Commons.Bucket.prototype._translateCallback = function(translation, succe
 // Does the put call to IA, puting data.uploadFile into the bucket
 Zotero.Commons.Bucket.prototype._putKey = function(data) {
 	var self = data.bucket;
-	var method = "PUT";
-	var mimeType = 'application/zip';
 	var key = data.uploadFile.leafName;
+	var method = "PUT";
 	var resource = '/' + self.name + '/' + key;
 	var content = self._readFileContents(data.uploadFile);
 
-	var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-		.createInstance(Components.interfaces.nsIXMLHttpRequest);
-	req.open(method, self.apiUrl + resource, true);
+	var headers = {
+		"Content-Type": data.mimeType,
+		"Content-Length": content.length,
+		"x-amz-meta-creator": "Zotero Commons"
+	};
 
-	var d = new Date();
-	var headers = {};
-	headers["Content-Type"] = mimeType;
-	headers["Content-Length"] = content.length;
-	headers["Date"] = d.toUTCString();
-	headers["x-amz-meta-creator"] = "Zotero Commons";
-
-	for(var header in headers) {
-		req.setRequestHeader(header, headers[header]);
-	}
-
-	var signature = self._generateSignature(method, resource, headers, self._secretKey);
-	req.setRequestHeader("Authorization", "AWS " + self._accessKey + ":" + signature);
-	//req.setRequestHeader("Authorization", "LOW " + self._accessKey + ":" + self._secretKey);
+	var req = Zotero.Commons._createAuthenticatedRequest(
+		method, resource, headers, self._accessKey, self._secretKey
+	);
 
 	req.onreadystatechange = function() {
 		if (req.readyState == 4) {
@@ -299,26 +475,6 @@ Zotero.Commons.Bucket.prototype._zipDirectory = function(self, rootDir, dir, zip
 			continue;
 		}
 	}
-}
-
-Zotero.Commons.Bucket.prototype._generateSignature = function(method, resource, headers, secretKey) {
-	var data = method + '\n' +
-		((headers['Content-MD5']) ? headers['Content-MD5'] : '') + '\n' +
-		((headers['Content-Type']) ? headers['Content-Type'] : '') + '\n' +
-		((headers['Date']) ? headers['Date'] : '') + '\n';
-
-	// add x-amz- headers in alphabetic order
-	var amz = [];
-	for(header in headers) {
-		if(header.indexOf("x-amz-") == 0) {
-			amz.push(header + ":" + headers[header] + '\n');
-		}
-	}
-	data += amz.sort().join('');
-
-	data += resource;
-
-	return Zotero.Commons.SHA1.b64_hmac_sha1(secretKey, data) + '=';
 }
 
 
