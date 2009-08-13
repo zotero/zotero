@@ -1983,7 +1983,16 @@ var ZoteroPane = new function()
 					ZoteroPane.loadURI(uri);
 					event.stopPropagation();
 				}
+				else if(itemGroup.ref.id == 'commons-header') {
+					ZoteroPane.loadURI(Zotero.Commons.uri);
+					event.stopPropagation();
+				}
 				return;
+			}
+
+			if (itemGroup.isBucket()) {
+				ZoteroPane.loadURI(itemGroup.ref.uri);
+				event.stopPropagation();
 			}
 		}
 		else if (tree.id == 'zotero-items-tree') {
