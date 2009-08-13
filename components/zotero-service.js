@@ -19,6 +19,7 @@ var xpcomFiles = [
 	'annotate',
 	'attachments',
 	'collectionTreeView',
+	'commons',
 	'csl',
 	'dataServer',
 	'data_access',

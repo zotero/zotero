@@ -49,7 +49,7 @@ Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 	this._dataItems = [];
 	this.rowCount = 0;
 	
-	this._unregisterID = Zotero.Notifier.registerObserver(this, ['item', 'collection-item', 'share-items']);
+	this._unregisterID = Zotero.Notifier.registerObserver(this, ['item', 'collection-item', 'share-items', 'bucket']);
 }
 
 
@@ -278,6 +278,11 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	if (action == 'refresh') {
 		if (type == 'share-items') {
 			if (itemGroup.isShare()) {
+				this.refresh();
+			}
+		}
+		else if (type == 'bucket') {
+			if (itemGroup.isBucket()) {
 				this.refresh();
 			}
 		}
