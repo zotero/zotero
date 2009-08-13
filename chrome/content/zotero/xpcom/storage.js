@@ -1315,7 +1315,7 @@ Zotero.Sync.Storage = new function () {
 						
 						var smtime = Zotero.Sync.Storage.getSyncedModificationTime(item.id);
 						if (smtime != mtime) {
-							var localData = { modTime: smtime };
+							var localData = { modTime: fmtime };
 							var remoteData = { modTime: mtime };
 							Zotero.Sync.Storage.QueueManager.addConflict(
 								request.name, localData, remoteData
