@@ -1300,7 +1300,7 @@ Zotero_Preferences.Debug_Output = {
 			pr.alert(
 				"Submitted",
 				"Debug output has been sent to the Zotero server.\n\n"
-					+ "The Report ID is D" + reportID + "."
+					+ "The Debug ID is D" + reportID + "."
 			);
 		}
 		
