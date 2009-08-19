@@ -118,7 +118,7 @@ Zotero.Sync = new function() {
 	}
 	
 	
-	/**
+	/**                                                          
 	 * @param	{Date}	lastSyncDate	JS Date object
 	 * @param	{Zotero.Sync.Server.ObjectKeySet}
 	 * @return	TRUE if found, FALSE if none, or -1 if last sync time is before start of log
@@ -170,6 +170,8 @@ Zotero.Sync = new function() {
 		for (var type in keys) {
 			objectKeySet.addLibraryKeyPairs(type, keys[type]);
 		}
+		
+		return true;
 	}
 	
 	
@@ -280,7 +282,11 @@ Zotero.Sync.ObjectKeySet.prototype.hasLibraryKey = function (type, libraryID, ke
 		libraryID = 0;
 	}
 	
-	return this[types] && this[types][libraryID] && this[types][libraryID][key];
+	if (this[types] && this[types][libraryID] && this[types][libraryID][key]) {
+		return true;
+	}
+	
+	return false;
 }
 
 
@@ -312,7 +318,6 @@ Zotero.Sync.EventListener = new function () {
 	
 	this.init = init;
 	this.ignoreDeletions = ignoreDeletions;
-	this.unignoreDeletions = unignoreDeletions;
 	this.notify = notify;
 	
 	var _deleteBlacklist = {};
@@ -343,22 +348,8 @@ Zotero.Sync.EventListener = new function () {
 		}
 	}
 	
-	
-	/**
-	 * Remove objects blacklisted from the sync delete log
-	 */
-	function unignoreDeletions(type, ids) {
-		if (!Zotero.Sync.syncObjects[type]) {
-			throw ("Invalid type '" + type +
-				"' in Zotero.Sync.EventListener.ignoreDeletions()");
-		}
-		
-		ids = Zotero.flattenArguments(ids);
-		for each(var id in ids) {
-			if (_deleteBlacklist[type][id]) {
-				delete _deleteBlacklist[type][id];
-			}
-		}
+	this.resetIgnored = function () {
+		_deleteBlacklist = {};
 	}
 	
 	
@@ -388,10 +379,11 @@ Zotero.Sync.EventListener = new function () {
 			var ts = Zotero.Date.getUnixTimestamp();
 			
 			for (var i=0, len=ids.length; i<len; i++) {
-				if (_deleteBlacklist[ids[i]]) {
+				if (_deleteBlacklist[type] && _deleteBlacklist[type][ids[i]]) {
 					Zotero.debug("Not logging blacklisted '"
 						+ type + "' id " + ids[i]
 						+ " in Zotero.Sync.EventListener.notify()", 4);
+					delete _deleteBlacklist[type][ids[i]];
 					continue;
 				}
 				
@@ -1056,6 +1048,7 @@ Zotero.Sync.Server = new function () {
 						}
 					});
 					Zotero.reloadDataObjects();
+					Zotero.Sync.EventListener.resetIgnored();
 					_syncInProgress = false;
 					return;
 				}
@@ -1783,6 +1776,7 @@ Zotero.Sync.Server = new function () {
 		_syncInProgress = false;
 		Zotero.DB.rollbackAllTransactions();
 		Zotero.reloadDataObjects();
+		Zotero.Sync.EventListener.resetIgnored();
 		
 		if (_sessionID && _sessionLock) {
 			Zotero.Sync.Server.unlock()
@@ -2492,12 +2486,10 @@ Zotero.Sync.Server.Data = new function() {
 					if (children.length) {
 						Zotero.Sync.EventListener.ignoreDeletions('item', children);
 						Zotero.Items.erase(children);
-						Zotero.Sync.EventListener.unignoreDeletions('item', children);
 					}
 					if (parents.length) {
 						Zotero.Sync.EventListener.ignoreDeletions('item', parents);
 						Zotero.Items.erase(parents);
-						Zotero.Sync.EventListener.unignoreDeletions('item', parents);
 					}
 					
 					// Unlock dateModified for deleted collections
@@ -2509,7 +2501,6 @@ Zotero.Sync.Server.Data = new function() {
 				else {
 					Zotero.Sync.EventListener.ignoreDeletions(type, toDelete);
 					Zotero[Types].erase(toDelete);
-					Zotero.Sync.EventListener.unignoreDeletions(type, toDelete);
 				}
 			}
 			
