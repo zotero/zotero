@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-05-05 07:15:00"
+	"lastUpdated":"2009-08-19 22:10:00"
 }
  
 function detectWeb(doc, url) {
@@ -32,6 +32,32 @@ function detectWeb(doc, url) {
 	}
 }
 
+
+Zotero.Utilities.processAsync = function (sets, callbacks, onDone) {
+	var currentSet;
+	var index = 0;
+	
+	var nextSet = function () {
+		if (!sets.length) {
+			onDone();
+			return;
+		}
+		index = 0;
+		currentSet = sets.shift();
+		callbacks[0](currentSet, nextCallback);
+	};
+	var nextCallback = function () {
+		index++;
+		callbacks[index](currentSet, nextCallback);
+	};
+	
+	// Add a final callback to proceed to the next set
+	callbacks[callbacks.length] = function () {
+		nextSet();
+	}
+	nextSet();
+}
+
 function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
@@ -46,11 +72,13 @@ function doWeb(doc, url) {
 	var allJids = new Array();
 	if (elmt && /jid=(\d+)/.test(elmt.href)) {
 	allJids.push(RegExp.$1);
+	var jid = RegExp.$1;
 	Zotero.debug("JID found 1 " + jid);
 	}
 	else if (/(?:pss|stable)\/(\d+)/.test(url)) {
 	Zotero.debug("URL " + url);
-	allJids.push(RegExp.$1);
+	jid = RegExp.$1;
+	allJids.push(jid);
 	Zotero.debug("JID found 2 " + jid);
 	} 
 	else {
@@ -83,66 +111,84 @@ function doWeb(doc, url) {
 	}
 	}
 	
-	for (var i in allJids) {
-	var downloadString = "&suffix="+allJids[i];
-	Zotero.Utilities.HTTP.doPost("http://"+host+"/action/downloadSingleCitation?format=refman&direct=true&singleCitation=true",downloadString,  function(text) {
-		// load translator for RIS
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
-			if(item.notes && item.notes[0]) {
-				// For some reason JSTOR exports abstract with 'AB' tag istead of 'N1'
-				item.abstractNote = item.notes[0].note;
-				
-				delete item.notes;
-				item.notes = undefined;
-			}
-			
-			// Don't save HTML snapshot from 'UR' tag
-			item.attachments = [];
-			
-			if (/stable\/(\d+)/.test(item.url)) {
-				var localJid = RegExp.$1;
-				
-				var doi = "10.2307/"+localJid;
-				checkDOI(item, doi);
-				
-				var pdfurl = "http://"+ host + "/stable/pdfplus/" + localJid + ".pdf";
-				item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
-			}
-			});
+	var sets = [];
+	for each(var jid in allJids) {
+		sets.push({ jid: jid });
+	}
+	
+	function first(set, next) {
+		var jid = set.jid;
+		var downloadString = "suffix=" + jid;
 		
-		translator.translate();
+		Zotero.Utilities.HTTP.doPost("http://"+host+"/action/downloadSingleCitation?format=refman&direct=true&singleCitation=true", downloadString, function(text) {
+			// load translator for RIS
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+			translator.setString(text);
+			translator.setHandler("itemDone", function(obj, item) {
+				if(item.notes && item.notes[0]) {
+					// For some reason JSTOR exports abstract with 'AB' tag istead of 'N1'
+					item.abstractNote = item.notes[0].note;
+					
+					delete item.notes;
+					item.notes = undefined;
+				}
+				
+				// Don't save HTML snapshot from 'UR' tag
+				item.attachments = [];
+				
+				set.doi = "10.2307/" + jid;
+				
+				if (/stable\/(\d+)/.test(item.url)) {
+					var pdfurl = "http://"+ host + "/stable/pdfplus/" + jid + ".pdf";
+					item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
+				}
+				
+				set.item = item;
+				
+				next();
+			});
+			
+			translator.translate();
 		});
 	}
-}
-
-function checkDOI(item, doi) {	
-	var crossrefURL = "http://www.crossref.org/openurl/?req_dat=zter:zter321&url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&rft_id=info%3Adoi/"+doi+"&noredirect=true&format=unixref";
-	var doiCheckGenerate = function(item) {
-		var closedItem = item;
-		var checker = function(responseText) {
-			responseText = responseText.replace(/<\?xml[^>]*\?>/, "");
+	
+	function second(set, next) {
+		var item = set.item;
+		
+		if (!set.doi) {
+			item.complete();
+			next();
+		}
+		
+		var doi = set.doi;
+		var crossrefURL = "http://www.crossref.org/openurl/?req_dat=zter:zter321&url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&rft_id=info%3Adoi/"+doi+"&noredirect=true&format=unixref";
+		
+		Zotero.Utilities.HTTP.doGet(crossrefURL, function (text) {
+			text = text.replace(/<\?xml[^>]*\?>/, "");
 			// parse XML with E4X
 			try {
-				var xml = new XML(responseText);
+				var xml = new XML(text);
 			} catch(e) {
-				return false;
+				item.complete();
+				next();
+				return;
 			}
 			
 			var doi = xml..doi;
 			
 			// ensure DOI is valid
 			if(!xml..error.length()) {
-				Zotero.debug("DOI is Valid.");
-				closedItem.DOI = doi;
+				Zotero.debug("DOI is valid");
+				item.DOI = doi;
 			}
 			
-		};
-		return checker;
-	};
+			item.complete();
+			next();
+		});
+	}
 	
-	var checkDOI = doiCheckGenerate(item);
-	Zotero.Utilities.HTTP.doGet(crossrefURL, checkDOI, function() { item.complete(); Zotero.done(); });
+	var callbacks = [first, second];
+	Zotero.Utilities.processAsync(sets, callbacks, function () { Zotero.done(); });
+	Zotero.wait();
 }
