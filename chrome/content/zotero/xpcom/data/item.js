@@ -2385,24 +2385,24 @@ Zotero.Item.prototype.isAttachment = function() {
 }
 
 
-Zotero.Item.prototype.isWebAttachment = function() {
-	if (!this.isAttachment()) {
-		return false;
-	}
-	var linkMode = this.attachmentLinkMode;
-	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE || linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-		return false;
-	}
-	return true;
-}
-
-
 Zotero.Item.prototype.isImportedAttachment = function() {
 	if (!this.isAttachment()) {
 		return false;
 	}
 	var linkMode = this.attachmentLinkMode;
 	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE || linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
+		return false;
+	}
+	return true;
+}
+
+
+Zotero.Item.prototype.isWebAttachment = function() {
+	if (!this.isAttachment()) {
+		return false;
+	}
+	var linkMode = this.attachmentLinkMode;
+	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE || linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 		return false;
 	}
 	return true;
