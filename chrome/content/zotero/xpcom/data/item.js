@@ -2397,6 +2397,18 @@ Zotero.Item.prototype.isWebAttachment = function() {
 }
 
 
+Zotero.Item.prototype.isImportedAttachment = function() {
+	if (!this.isAttachment()) {
+		return false;
+	}
+	var linkMode = this.attachmentLinkMode;
+	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE || linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
+		return false;
+	}
+	return true;
+}
+
+
 /**
  * Returns number of child attachments of item
  *
