@@ -569,8 +569,8 @@ Zotero.Utilities.prototype.processAsync = function (sets, callbacks, onDone) {
 		callbacks[0](currentSet, nextCallback);
 	};
 	var nextCallback = function () {
-		callbacks[index](currentSet, nextCallback);
 		index++;
+		callbacks[index](currentSet, nextCallback);
 	};
 	
 	// Add a final callback to proceed to the next set
