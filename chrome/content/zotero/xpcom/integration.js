@@ -1,9 +1,10 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
 	
-	Copyright (c) 2009  Center for History and New Media
+	Copyright (c) 2009  Zotero
+						Center for History and New Media
 						George Mason University, Fairfax, Virginia, USA
-						http://chnm.gmu.edu
+						http://zotero.org
 	
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -168,7 +169,7 @@ Zotero.Integration = new function() {
 				var proc = Components.classes["@mozilla.org/process/util;1"].
 						createInstance(Components.interfaces.nsIProcess);
 				proc.init(_osascriptFile);
-				proc.run(false, ['-e', 'tell application "Firefox" to activate'], 2);
+				proc.run(false, ['-e', 'tell application id "org.mozilla.firefox" to activate'], 2);
 			}
 		}
 	}
