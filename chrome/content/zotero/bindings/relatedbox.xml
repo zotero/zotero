@@ -39,6 +39,7 @@
 					switch (val) {
 						case 'view':
 						case 'merge':
+						case 'mergeedit':
 							break;
 						
 						case 'edit':
