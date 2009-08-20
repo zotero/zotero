@@ -1,0 +1,151 @@
+/*
+    ***** BEGIN LICENSE BLOCK *****
+	
+	Copyright (c) 2009  Zotero
+						Center for History and New Media
+						George Mason University, Fairfax, Virginia, USA
+						http://zotero.org
+	
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+	
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+*/
+
+#include "nsISupports.idl"
+#include "nsISimpleEnumerator.idl"
+
+[scriptable, uuid(aedb37a0-48bb-11de-8a39-0800200c9a66)]
+interface zoteroIntegrationField : nsISupports
+{
+  /**
+   * Deletes this field and its contents.
+   */
+  void delete();
+  
+  /**
+   * Selects this field.
+   */
+  void select();
+  
+  /**
+   * Removes this field, but maintains the field's contents.
+   */
+  void removeCode();
+  
+  /**
+   * Sets the text inside this field to a specified plain text string or pseudo-RTF formatted text
+   * string.
+   */
+  void setText(in wstring text, in boolean isRich);
+  
+  /**
+   * This field's code.
+   */
+  wstring getCode();
+  void setCode(in wstring code);
+  
+  /**
+   * This field's note index, if it is in a footnote or endnote; otherwise zero.
+   */
+  unsigned long getNoteIndex();
+  
+  /**
+   * Returns true if this field and the passed field are actually references to the same field.
+   */
+  boolean equals(in zoteroIntegrationField field);
+};
+
+/**
+ * The zoteroIntegrationDocument interface corresponds to a single word processing document.
+ */
+[scriptable, uuid(be1c5c1f-9ed2-4154-98fb-822d1fede569)]
+interface zoteroIntegrationDocument : nsISupports
+{ 
+  /**
+   * Displays a dialog in the word processing application
+   */
+  short displayAlert(in wstring dialogText, in unsigned short icon,
+             in unsigned short buttons);
+
+  /**
+   * Brings this document to the foreground (if necessary to return after displaying a dialog)
+   */
+  void activate();
+
+  /**
+   * Determines whether a field can be inserted at the current position.
+   */
+  boolean canInsertField(in string fieldType);
+
+  /**
+   * Returns the field in which the cursor resides, or NULL if none.
+   */
+  zoteroIntegrationField cursorInField(in string fieldType);
+
+  /**
+   * The document data property from the current document.
+   */
+  wstring getDocumentData();
+  void setDocumentData(in wstring data);
+
+  /**
+   * Inserts a field at the given position and initializes the field object.
+   */
+  zoteroIntegrationField insertField(in string fieldType, in unsigned short noteType);
+
+  /**
+   * Inserts an uninitialized field object at the given position
+   */
+  nsISimpleEnumerator getFields(in string fieldType);
+  
+  /**
+   * Converts all fields in a document to a different fieldType or noteType
+   */
+  void convert(in nsISimpleEnumerator fields, in string toFieldType,
+               [array, size_is(count)] in unsigned short toNoteType, in unsigned long count);
+  
+  /**
+   * Runs on function completion to clean up everything integration played with.
+   */
+  void cleanup();
+
+  const unsigned short DIALOG_ICON_STOP = 0;
+  const unsigned short DIALOG_ICON_NOTICE = 1;
+  const unsigned short DIALOG_ICON_CAUTION = 2;
+  
+  const unsigned short DIALOG_BUTTONS_OK = 0;
+  const unsigned short DIALOG_BUTTONS_OK_CANCEL = 1;
+  const unsigned short DIALOG_BUTTONS_YES_NO = 2;
+  const unsigned short DIALOG_BUTTONS_YES_NO_CANCEL = 3;
+  
+  const unsigned short NOTE_FOOTNOTE = 1;
+  const unsigned short NOTE_ENDNOTE = 2;
+};
+
+/**
+ * The zoteroIntegrationApplication interface corresponds to a word processing application.
+ */
+[scriptable, uuid(7b258e57-20cf-4a73-8420-5d06a538c25e)]
+interface zoteroIntegrationApplication : nsISupports
+{
+  readonly attribute ACString primaryFieldType;
+  readonly attribute ACString secondaryFieldType;
+  
+  /**
+   * The active document.
+   */
+  zoteroIntegrationDocument getActiveDocument();
+};
+
+///////////////////////////////////////////////////////////////////////////////
