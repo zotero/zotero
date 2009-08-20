@@ -106,14 +106,10 @@ var Zotero_File_Interface_Bibliography = new function() {
 			styleChanged(selectIndex);
 		}		
 		if(document.getElementById("formatUsing")) {
-			if(_io.useBookmarks && _io.useBookmarks == 1) document.getElementById("formatUsing").selectedIndex = 1;			
-			if(_io.openOffice) {
-				var formatOption = "referenceMarks";
-			} else {
-				var formatOption = "fields";
-			}
+			if(_io.fieldType == "Bookmarks") document.getElementById("formatUsing").selectedIndex = 1;	
+			Zotero.safeDebug(_io)
+			var formatOption = (_io.primaryFieldType == "ReferenceMark" ? "referenceMarks" : "fields");
 			document.getElementById("fields").label = Zotero.getString("integration."+formatOption+".label");
-			document.getElementById("fields-caption").textContent = Zotero.getString("integration."+formatOption+".caption");
 			document.getElementById("fields-caption").textContent = Zotero.getString("integration."+formatOption+".caption");
 			document.getElementById("fields-file-format-notice").textContent = Zotero.getString("integration."+formatOption+".fileFormatNotice");
 			document.getElementById("bookmarks-file-format-notice").textContent = Zotero.getString("integration.fields.fileFormatNotice");
@@ -170,7 +166,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		// ONLY FOR integrationDocPrefs.xul: collect displayAs
 		if(document.getElementById("displayAs")) {
 			_io.useEndnotes = document.getElementById("displayAs").selectedIndex;
-			_io.useBookmarks = document.getElementById("formatUsing").selectedIndex;
+			_io.fieldType = (document.getElementById("formatUsing").selectedIndex == 0 ? _io.primaryFieldType : _io.secondaryFieldType);
 		}
 		
 		// save style (this happens only for "Export Bibliography," or Word

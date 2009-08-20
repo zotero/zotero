@@ -50,6 +50,7 @@ var xpcomFiles = [
 	'id',
 	'ingester',
 	'integration',
+	'integration_compat',
 	'itemTreeView',
 	'mime',
 	'mimeTypeHandler',
