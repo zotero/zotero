@@ -2391,9 +2391,9 @@ Zotero.Item.prototype.isImportedAttachment = function() {
 	}
 	var linkMode = this.attachmentLinkMode;
 	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE || linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
-		return false;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 
