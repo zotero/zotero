@@ -130,10 +130,12 @@ Zotero.Integration = new function() {
 		try {
 			integration[command]();
 		} catch(e) {
-			integration._doc.displayAlert(Zotero.getString("integration.error.generic"),
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
-			throw e;
+			if(!(e instanceof Zotero.Integration.UserCancelledException)) {
+				integration._doc.displayAlert(Zotero.getString("integration.error.generic"),
+					Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
+					Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
+				throw e;
+			}
 		} finally {
 			integration.cleanup();
 		}
@@ -191,17 +193,20 @@ Zotero.Integration.MissingItemException = function(reselectKeys, reselectKeyType
 }
 Zotero.Integration.MissingItemException.prototype.name = "MissingItemException";
 Zotero.Integration.MissingItemException.prototype.message = "An item in this document is missing from your Zotero library.";
-Zotero.Integration.MissingItemException.prototype.toString = function() {
-	return this.name;
-}
+Zotero.Integration.MissingItemException.prototype.toString = function() { return this.name; };
+
+Zotero.Integration.UserCancelledException = function() {};
+Zotero.Integration.UserCancelledException.prototype.name = "UserCancelledException";
+Zotero.Integration.UserCancelledException.prototype.message = "User cancelled document update.";
+Zotero.Integration.UserCancelledException.prototype.toString = function() { return this.name; };
 
 
 // Field code for an item
-const ITEM_CODE = "ITEM"
+const ITEM_CODE = "ITEM";
 // Field code for a bibliography
-const BIBLIOGRAPHY_CODE = "BIBL"
+const BIBLIOGRAPHY_CODE = "BIBL";
 // Placeholder for an empty bibliography
-const BIBLIOGRAPHY_PLACEHOLDER = "{Bibliography}"
+const BIBLIOGRAPHY_PLACEHOLDER = "{Bibliography}";
 
 /**
  * 
@@ -231,7 +236,6 @@ Zotero.Integration.Document.prototype._createNewSession = function(data) {
  */
 Zotero.Integration.Document.prototype._getSession = function(require, dontRunSetDocPrefs) {
 	var dataString = this._doc.getDocumentData();
-	Zotero.debug(dataString);
 	if(!dataString) {
 		if(require) {
 			this._doc.displayAlert(Zotero.getString("integration.error.mustInsertCitation"),
@@ -248,6 +252,13 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			this._doc.setDocumentData(this._session.data.serializeXML());
 		}
 	} else {
+		if(dataString[0] != "<") {
+			var warning = this._doc.displayAlert(Zotero.getString("integration.upgradeWarning"),
+				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
+				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
+			if(!warning) throw new Zotero.Integration.UserCancelledException();
+		}
+		
 		var data = new Zotero.Integration.DocumentData(dataString);
 		if(Zotero.Integration.sessions[data.sessionID]) {
 			this._session = Zotero.Integration.sessions[data.sessionID];
@@ -365,7 +376,7 @@ Zotero.Integration.Document.prototype._updateSession = function(editField) {
 							field.select();
 							var result = this._doc.displayAlert(msg, 1, 3);
 							if(result == 0) {			// Cancel
-								throw "Integration update canceled by user";
+								throw new Zotero.Integration.UserCancelledException();
 							} else if(result == 1) {	// No
 								for each(var reselectKey in e.reselectKeys) {
 									deleteKeys[reselectKey] = true;
@@ -1535,14 +1546,14 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
  * Unserializes document-specific data, either as XML or as the string form used previously
  */
 Zotero.Integration.DocumentData.prototype.unserialize = function(input) {
-	if(input[0] == "<" || input[1] == "<") {
+	if(input[0] == "<") {
 		this.unserializeXML(input);
 	} else {
 		const splitRe = /(^|[^\:])\:([^\:]|$)/;
 		
-		var prefParameters = [];
-		var splitOutput = splitRe.split(input);
-		for(var i=0; i<splitOutput.length; i+=3) {
+		var splitOutput = input.split(splitRe);
+		var prefParameters = [splitOutput[0]+splitOutput[1]];
+		for(var i=2; i<splitOutput.length; i+=3) {
 			prefParameters.push((splitOutput[i]+splitOutput[i+1]+splitOutput[i+2]).replace("::", ":", "g"));
 		}
 		
