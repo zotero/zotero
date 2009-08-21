@@ -421,12 +421,13 @@ Zotero.Sync.EventListener = new function () {
 					}
 				}
 				catch(e) {
+					var errMsg = Zotero.DB.getLastErrorString();
 					syncStatement.reset();
 					if (storageEnabled) {
 						storageStatement.reset();
 					}
 					Zotero.DB.rollbackTransaction();
-					throw(Zotero.DB.getLastErrorString());
+					throw (errMsg + " in Zotero.Sync.EventListener.notify()");
 				}
 			}
 			
@@ -1841,6 +1842,8 @@ Zotero.Sync.Server.Session = function () {
 	this.uploadKeys = {};
 	this.uploadKeys.updated = new Zotero.Sync.ObjectKeySet;
 	this.uploadKeys.deleted = new Zotero.Sync.ObjectKeySet;
+	
+	this.suppressWarnings = false;
 }
 
 
@@ -2078,7 +2081,7 @@ Zotero.Sync.Server.Data = new function() {
 						}
 						// Mark other types for conflict resolution
 						else {
-							var reconcile = false;
+							var skipCR = false;
 							
 							// Skip item if dateModified is the only modified
 							// field (and no linked creators changed)
@@ -2127,15 +2130,18 @@ Zotero.Sync.Server.Data = new function() {
 										remoteObj = 'trashed';
 									}
 									*/
-									reconcile = true;
 									break;
 								
 								case 'collection':
-									var changed = _mergeCollection(obj, remoteObj, childItemStore);
+									// TODO: move childItemStore to syncSession
+									var changed = _mergeCollection(obj, remoteObj, childItemStore, syncSession);
 									if (!changed) {
 										syncSession.removeFromUpdated(obj);
+										continue;
 									}
-									continue;
+									// The merged collection needs to be saved
+									skipCR = true;
+									break;
 								
 								case 'tag':
 									var changed = _mergeTag(obj, remoteObj);
@@ -2145,22 +2151,16 @@ Zotero.Sync.Server.Data = new function() {
 									continue;
 							}
 							
-							if (!reconcile) {
-								Zotero.debug(obj);
-								Zotero.debug(remoteObj);
-								var msg = "Reconciliation unimplemented for " + types;
-								alert(msg);
-								throw(msg);
-							}
-							
 							// TODO: order reconcile by parent/child?
 							
-							toReconcile.push([
-								obj,
-								remoteObj
-							]);
-							
-							continue;
+							if (!skipCR) {
+								toReconcile.push([
+									obj,
+									remoteObj
+								]);
+								
+								continue;
+							}
 						}
 					}
 					else {
@@ -2641,7 +2641,7 @@ Zotero.Sync.Server.Data = new function() {
 	}
 	
 	
-	function _mergeCollection(localObj, remoteObj, childItemStore) {
+	function _mergeCollection(localObj, remoteObj, childItemStore, syncSession) {
 		var diff = localObj.diff(remoteObj, false, true);
 		if (!diff) {
 			return false;
@@ -2651,8 +2651,7 @@ Zotero.Sync.Server.Data = new function() {
 		Zotero.debug(diff);
 		
 		// Local is newer
-		if (diff[0].primary.dateModified >
-				diff[1].primary.dateModified) {
+		if (diff[0].primary.dateModified > diff[1].primary.dateModified) {
 			var remoteIsTarget = false;
 			var targetObj = localObj;
 			var targetDiff = diff[0];
@@ -2667,11 +2666,13 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		if (targetDiff.fields.name) {
-			var msg = _generateAutoChangeMessage(
-				'collection', diff[0].fields.name, diff[1].fields.name, remoteIsTarget
-			);
-			// TODO: log rather than alert
-			alert(msg);
+			if (!syncSession.suppressWarnings) {
+				var msg = _generateAutoChangeMessage(
+					'collection', diff[0].fields.name, diff[1].fields.name, remoteIsTarget
+				);
+				// TODO: log rather than alert
+				alert(msg);
+			}
 		}
 		
 		// Check for child collections in the other object
@@ -2692,18 +2693,17 @@ Zotero.Sync.Server.Data = new function() {
 				targetObj.childItems = otherDiff.childItems;
 			}
 			
-			var msg = _generateCollectionItemMergeMessage(
-				targetObj.name,
-				otherDiff.childItems,
-				remoteIsTarget
-			);
-			// TODO: log rather than alert
-			alert(msg);
+			if (!syncSession.suppressWarnings) {
+				var msg = _generateCollectionItemMergeMessage(
+					targetObj.name,
+					otherDiff.childItems,
+					remoteIsTarget
+				);
+				// TODO: log rather than alert
+				alert(msg);
+			}
 		}
 		
-		_removeChildItemsFromCollection(targetObj, childItemStore);
-		
-		targetObj.save();
 		return true;
 	}
 	

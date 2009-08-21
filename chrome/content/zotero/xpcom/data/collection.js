@@ -943,7 +943,7 @@ Zotero.Collection.prototype.serialize = function(nested) {
 		},
 		fields: {
 			name: this.name,
-			parent: this.parent,
+			parentKey: this.parentKey,
 		},
 		childCollections: childCollections ? childCollections : [],
 		childItems: childItems ? childItems : [],
