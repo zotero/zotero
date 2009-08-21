@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2009-07-04 05:00:00"
+	"lastUpdated":"2009-08-21 15:00:00"
 }
 
 Zotero.configure("dataMode", "block");
@@ -1811,7 +1811,7 @@ function writeField(field, value, isMacro) {
 	if(!isMacro) Zotero.write("{");
 	// url field is preserved, for use with \href and \url
 	// Other fields (DOI?) may need similar treatment
-	if(field != "url") {
+	if(!((field == "url") || (field == "doi"))) {
 		// I hope these are all the escape characters!
 		value = value.replace(/[|\<\>\~\^\\]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
