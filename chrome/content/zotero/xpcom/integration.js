@@ -568,7 +568,7 @@ Zotero.Integration.Document.prototype.editBibliography = function() {
 	// Make sure we have a bibliography
 	if(!this._getFields(true)) return false;
 	var haveBibliography = false;
-	for(var i=this._fields.length-1; i>=0; i++) {
+	for(var i=this._fields.length-1; i>=0; i--) {
 		if(this._fields[i].getCode().substr(0, BIBLIOGRAPHY_CODE.length) == BIBLIOGRAPHY_CODE) {
 			haveBibliography = true;
 			break;
