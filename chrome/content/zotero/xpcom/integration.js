@@ -263,6 +263,11 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 		if(Zotero.Integration.sessions[data.sessionID]) {
 			this._session = Zotero.Integration.sessions[data.sessionID];
 		} else {
+			if(data.prefs.fieldType == "Field" && this._app.primaryFieldType != "Field") {
+				// Converted OOo docs use ReferenceMarks, not fields
+				data.prefs.fieldType = "ReferenceMark";
+			}
+
 			this._session = this._createNewSession(data);
 			
 			// make sure style is defined
@@ -462,7 +467,7 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 		if(citation.properties["delete"]) {
 			// delete citation
 			this._deleteFields.push(i);
-		} else if(!this.haveMissing) {
+		} else {
 			var fieldCode = this._session.getCitationField(citation);
 			if(fieldCode != citation.properties.field) {
 				this._fields[citation.properties.index].setCode(ITEM_CODE+" "+fieldCode);
@@ -789,7 +794,6 @@ Zotero.Integration.Session.prototype.resetRequest = function() {
 	this.citationsByIndex = new Array();
 	this.uriMap = new Zotero.Integration.URIMap(this);
 	
-	this.haveMissing = false;
 	this.regenerateAll = false;
 	this.bibliographyHasChanged = false;
 	this.bibliographyDataHasChanged = false;
