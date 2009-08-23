@@ -26,7 +26,6 @@
 const Zotero_RecognizePDF_SUCCESS_IMAGE = "chrome://zotero/skin/tick.png";
 const Zotero_RecognizePDF_FAILURE_IMAGE = "chrome://zotero/skin/cross.png";
 const Zotero_RecognizePDF_LOADING_IMAGE = "chrome://global/skin/icons/loading_16.png";
-const DOIre = /doi:\s*(10\.[\w.]+\/[^\/\s]+)/i;
  
 /**
  * Front end for recognizing PDFs
@@ -316,9 +315,9 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, callback, ca
 	// look for DOI
 	var allText = lines.join("\n");
 	Zotero.debug(allText);
-	var m = DOIre.exec(allText);
+	var m = Zotero.Utilities.prototype.cleanDOI(allText);
 	if(m) {
-		this._DOI = m[1];
+		this._DOI = m[0];
 	}
 	
 	// get (not quite) median length
