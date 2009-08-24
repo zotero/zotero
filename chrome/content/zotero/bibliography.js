@@ -106,8 +106,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 			styleChanged(selectIndex);
 		}		
 		if(document.getElementById("formatUsing")) {
-			if(_io.fieldType == "Bookmarks") document.getElementById("formatUsing").selectedIndex = 1;	
-			Zotero.safeDebug(_io)
+			if(_io.fieldType == "Bookmark") document.getElementById("formatUsing").selectedIndex = 1;
 			var formatOption = (_io.primaryFieldType == "ReferenceMark" ? "referenceMarks" : "fields");
 			document.getElementById("fields").label = Zotero.getString("integration."+formatOption+".label");
 			document.getElementById("fields-caption").textContent = Zotero.getString("integration."+formatOption+".caption");
