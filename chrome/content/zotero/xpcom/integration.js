@@ -357,7 +357,7 @@ Zotero.Integration.Document.prototype._updateSession = function(editField) {
 			
 			if(fieldCode.substr(0, ITEM_CODE.length) == ITEM_CODE) {
 				try {
-					this._session.addCitation(i, fieldCode.substr(ITEM_CODE.length+1));
+					this._session.addCitation(i, field.getNoteIndex(), fieldCode.substr(ITEM_CODE.length+1));
 				} catch(e) {
 					if(e instanceof Zotero.Integration.MissingItemException) {
 						// First, check if we've already decided to remove field codes from these
@@ -392,7 +392,7 @@ Zotero.Integration.Document.prototype._updateSession = function(editField) {
 								Zotero.Integration.activate();
 								this._session.reselectItem(e);
 								// Now try again
-								this._session.addCitation(i, fieldCode.substr(ITEM_CODE.length+1));
+								this._session.addCitation(i, field.getNoteIndex(), fieldCode.substr(ITEM_CODE.length+1));
 								this._doc.activate();
 							}
 						}
@@ -423,17 +423,20 @@ Zotero.Integration.Document.prototype._updateSession = function(editField) {
 		var editCitation = editFieldCode ? this._session.unserializeCitation(editFieldCode, editFieldIndex) : null;
 		
 		Zotero.Integration.activate();
-		var added = this._session.editCitation(editFieldIndex, editCitation);
+		var editNoteIndex = editField.getNoteIndex();
+		var added = this._session.editCitation(editFieldIndex, editNoteIndex, editCitation);
 		this._doc.activate();
 		
 		if(!added) {
 			if(editFieldCode) {	// cancelled editing; just add as if nothing happened
-				this._session.addCitation(editFieldIndex, editCitation);
+				this._session.addCitation(editFieldIndex, editNoteIndex, editCitation);
 			} else {			// cancelled creation; delete the citation
 				this._session.deleteCitation(editFieldIndex);
 			}
 		}
 	}
+	
+	this._session.updateCitations();
 }
 
 /**
@@ -850,7 +853,7 @@ Zotero.Integration._oldCitationLocatorMap = {
 /**
  * Gets a Zotero.CSL.Citation object given a field name
  */
-Zotero.Integration.Session.prototype.addCitation = function(index, arg) {
+Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, arg) {
 	var index = parseInt(index, 10);
 	
 	if(typeof(arg) == "string") {	// text field
@@ -882,6 +885,7 @@ Zotero.Integration.Session.prototype.addCitation = function(index, arg) {
 	}
 	
 	citation.properties.index = index;
+	citation.properties.noteIndex = noteIndex;
 	this.citationsByIndex[index] = citation;
 }
 
@@ -1074,7 +1078,7 @@ Zotero.Integration.Session.prototype.previewCitation = function(citation) {
 /**
  * Brings up the addCitationDialog, prepopulated if a citation is provided
  */
-Zotero.Integration.Session.prototype.editCitation = function(index, citation) {
+Zotero.Integration.Session.prototype.editCitation = function(index, noteIndex, citation) {
 	var me = this;
 	var io = new function() { this.wrappedJSObject = this; }
 	
@@ -1117,7 +1121,7 @@ Zotero.Integration.Session.prototype.editCitation = function(index, citation) {
 	}
 	
 	if(io.citation.citationItems.length) {		// we have an item
-		this.addCitation(index, io.citation);
+		this.addCitation(index, noteIndex, io.citation);
 		this.updateIndices[index] = true;
 	}
 	
@@ -1145,6 +1149,10 @@ Zotero.Integration.Session.prototype.getCitationPositions = function(citation, u
 			&& previousCitation.citationItems.length == 1
 			// the previous citation must have been a citation of the same item
 			&& citation.citationItems[0].item == previousCitation.citationItems[0].item
+			// the previous citation must reside either in this note or the note before
+			&& ((!citation.properties.noteIndex && !previousCitation.properties.noteIndex) ||
+			(citation.properties.noteIndex == previousCitation.properties.noteIndex+1) ||
+			(citation.properties.noteIndex == previousCitation.properties.noteIndex))
 			// and if the previous citation had a locator (page number, etc.) 
 			// then this citation must have a locator, or else we should do the 
 			// full citation (see Chicago Manual of Style)
