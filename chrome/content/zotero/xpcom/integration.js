@@ -246,7 +246,9 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			this._session = this._createNewSession(new Zotero.Integration.DocumentData());
 			if(dontRunSetDocPrefs) return false;
 			
+			Zotero.Integration.activate();
 			var ret = this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
+			this._doc.activate();
 			if(!ret) return false;
 			// save doc prefs in doc
 			this._doc.setDocumentData(this._session.data.serializeXML());
@@ -272,7 +274,9 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			
 			// make sure style is defined
 			if(!this._session.style) {
+				Zotero.Integration.activate();
 				this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
+				this._doc.activate();
 			}
 			this._doc.setDocumentData(this._session.data.serializeXML());
 		}
@@ -625,7 +629,9 @@ Zotero.Integration.Document.prototype.removeCodes = function() {
  */
 Zotero.Integration.Document.prototype.setDocPrefs = function() {
 	if(this._getSession(false, true)) this._getFields();
+	Zotero.Integration.activate();
 	var oldData = this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
+	this._doc.activate();
 	if(oldData) {
 		this._doc.setDocumentData(this._session.data.serializeXML());
 		if(this._fields && this._fields.length) {
