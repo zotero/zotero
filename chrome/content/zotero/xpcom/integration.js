@@ -1330,12 +1330,9 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 		} else {
 			for(var itemID in documentData.uncited) {
 				// if not yet in item set, add to item set
-				if(typeof(itemID) == "string") {		// key			
-					var zoteroItem = Zotero.getItemByKey(itemID);
-					this.uncitedItems[zoteroItem.id] = true;
-				} else {								// item ID
-					this.uncitedItems[itemID] = true;
-				}
+				var zoteroItem = Zotero.Items.getByKey(itemID);
+				if(!zoteroItem) zoteroItem = Zotero.Items.get(itemID);
+				if(zoteroItem) this.uncitedItems[zoteroItem.id] = true;
 			}
 			this.bibliographyDataHasChanged = true;
 		}
@@ -1362,14 +1359,11 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 		} else {
 			// old style hash
 			for(var itemID in documentData.custom) {
-				if(typeof(itemID) == "string") {	// key;
-					var zoteroItem = Zotero.Items.getByKey(itemID);
-					if(!zoteroItem) continue;
-					
-					var item = this.itemSet.getItemsByIds([zoteroItem.id])[0];
-				} else {							// item
-					var item = this.itemSet.getItemsByIds([itemID])[0];
-				}
+				var zoteroItem = Zotero.Items.getByKey(itemID);
+				if(!zoteroItem) zoteroItem = Zotero.Items.get(itemID);
+				if(!zoteroItem) continue;
+				
+				var item = this.itemSet.getItemsByIds([zoteroItem.id])[0];
 				if (!item) continue;
 				item.setProperty("bibliography-Integration", documentData.custom[itemID]);
 				item.setProperty("bibliography-RTF", documentData.custom[itemID]);
