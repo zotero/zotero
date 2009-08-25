@@ -738,7 +738,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(primaryFieldType, se
 	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 		.getService(Components.interfaces.nsIWindowWatcher)
 		.openWindow(null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
-		'chrome,modal,centerscreen' + (Zotero.isWin ? ',popup' : ''), io, true);
+		'chrome,modal,centerscreen', io, true);
 	if(!io.style) return false;
 	
 	// set data
