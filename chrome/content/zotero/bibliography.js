@@ -113,15 +113,6 @@ var Zotero_File_Interface_Bibliography = new function() {
 			document.getElementById("fields-file-format-notice").textContent = Zotero.getString("integration."+formatOption+".fileFormatNotice");
 			document.getElementById("bookmarks-file-format-notice").textContent = Zotero.getString("integration.fields.fileFormatNotice");
 		}
-		
-		// Center citation popups manually after a delay when using a popup, since
-		// popups aren't resizable and there might be persisted positions
-		if (Zotero.Integration.usePopup) {
-			document.getElementsByTagName("dialog")[0].style.border = "1px solid black";
-			setTimeout(function () {
-				window.centerWindowOnScreen();
-			}, 1);
-		}
 	}
 	
 	/*
