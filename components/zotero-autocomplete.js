@@ -30,75 +30,9 @@ const Cr = Components.results;
 
 
 /*
- * Implements nsIAutoCompleteResult
- */
-function ZoteroAutoCompleteResult(searchString, searchResult, defaultIndex,
-	errorDescription, results, comments){
-		this._searchString = searchString;
-		this._searchResult = searchResult;
-		this._defaultIndex = defaultIndex;
-		this._errorDescription = errorDescription;
-		this._results = results;
-		this._comments = comments;
-}
-
-
-ZoteroAutoCompleteResult.prototype = {
-	_searchString: "",
-	_searchResult: 0,
-	_defaultIndex: 0,
-	_errorDescription: "",
-	_results: [],
-	_comments: [],
-	get searchString(){ return this._searchString; },
-	get searchResult(){ return this._searchResult; },
-	get defaultIndex(){ return this._defaultIndex; },
-	get errorDescription(){ return this._errorDescription; },
-	get matchCount(){ return this._results.length; }
-}
-
-
-ZoteroAutoCompleteResult.prototype.getCommentAt = function(index){
-	return this._comments[index];
-}
-
-
-ZoteroAutoCompleteResult.prototype.getImageAt = function(index) {
-	return null;
-}
-
-
-ZoteroAutoCompleteResult.prototype.getStyleAt = function(index){
-	return null;
-}
-
-
-ZoteroAutoCompleteResult.prototype.getValueAt = function(index){
-	return this._results[index];
-}
-
-
-ZoteroAutoCompleteResult.prototype.removeValueAt = function(index){
-	this._results.splice(index, 1);
-	this._comments.splice(index, 1);
-}
-
-
-ZoteroAutoCompleteResult.prototype.QueryInterface = function(iid){
-	if (!iid.equals(Ci.nsIAutoCompleteResult) &&
-		!iid.equals(Ci.nsISupports)){
-			throw Cr.NS_ERROR_NO_INTERFACE;
-		}
-	return this;
-}
-
-
-
-
-/*
  * Implements nsIAutoCompleteSearch
  */
-function ZoteroAutoComplete(){
+function ZoteroAutoComplete() {
 	// Get the Zotero object
 	this._zotero = Components.classes["@zotero.org/Zotero;1"]
 				.getService(Components.interfaces.nsISupports)
@@ -106,18 +40,22 @@ function ZoteroAutoComplete(){
 }
 
 
-ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
-		previousResult, listener){
+ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, previousResult, listener) {
+	var result = Cc["@mozilla.org/autocomplete/simple-result;1"]
+					.createInstance(Ci.nsIAutoCompleteSimpleResult);
+	result.setSearchString(searchString);
+	
+	this._result = result;
+	this._results = [];
+	this._listener = listener;
+	
+	this._zotero.debug("Starting autocomplete search of type '"
+		+ searchParam + "'" + " with string '" + searchString + "'");
 	
 	this.stopSearch();
 	
-	/*
-	this._zotero.debug("Starting autocomplete search of type '"
-		+ searchParam + "'" + " with string '" + searchString + "'");
-	*/
-	
-	var results = [];
-	var comments = [];
+	var self = this;
+	var statement;
 	
 	// Allow extra parameters to be passed in
 	var pos = searchParam.indexOf('/');
@@ -129,12 +67,12 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 	var searchParts = searchParam.split('-');
 	searchParam = searchParts[0];
 	
-	switch (searchParam){
+	switch (searchParam) {
 		case '':
 			break;
 		
 		case 'tag':
-			var sql = "SELECT DISTINCT name FROM tags WHERE name LIKE ?";
+			var sql = "SELECT DISTINCT name, NULL FROM tags WHERE name LIKE ?";
 			var sqlParams = [searchString + '%'];
 			if (extra){
 				sql += " AND name NOT IN (SELECT name FROM tags WHERE tagID IN ("
@@ -142,9 +80,10 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 				sqlParams.push(extra);
 			}
 			
-			var results = this._zotero.DB.columnQuery(sql, sqlParams);
-			if (results) {
-				var collation = this._zotero.getLocaleCollation();
+			statement = this._zotero.DB.getStatement(sql, sqlParams);
+			
+			var resultsCallback = function (results) {
+				var collation = self._zotero.getLocaleCollation();
 				results.sort(function(a, b) {
 					return collation.compareString(1, a, b);
 				});
@@ -161,7 +100,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 			if (fieldMode==2)
 			{
 				var sql = "SELECT DISTINCT CASE fieldMode WHEN 1 THEN lastName "
-					+ "WHEN 0 THEN firstName || ' ' || lastName END AS name "
+					+ "WHEN 0 THEN firstName || ' ' || lastName END AS name, NULL "
 					+ "FROM creators NATURAL JOIN creatorData WHERE CASE fieldMode "
 					+ "WHEN 1 THEN lastName "
 					+ "WHEN 0 THEN firstName || ' ' || lastName END "
@@ -213,37 +152,30 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 				sql += " ORDER BY name";
 			}
 			
-			var rows = this._zotero.DB.query(sql, sqlParams);
-			for each(var row in rows){
-				results.push(row['name']);
-				comments.push(row['creatorID'])
-			}
+			statement = this._zotero.DB.getStatement(sql, sqlParams);
 			break;
 		
 		case 'dateModified':
 		case 'dateAdded':
-			var sql = "SELECT DISTINCT DATE(" + searchParam + ", 'localtime') FROM items "
+			var sql = "SELECT DISTINCT DATE(" + searchParam + ", 'localtime'), NULL FROM items "
 				+ "WHERE " + searchParam + " LIKE ? ORDER BY " + searchParam;
-			var results = this._zotero.DB.columnQuery(sql, searchString + '%');
+			statement = this._zotero.DB.getStatement(sql, searchString + '%');
 			break;
 			
 		case 'accessDate':
 			var fieldID = this._zotero.ItemFields.getID('accessDate');
 			
-			var sql = "SELECT DISTINCT DATE(value, 'localtime') FROM itemData "
+			var sql = "SELECT DISTINCT DATE(value, 'localtime'), NULL FROM itemData "
 				+ "WHERE fieldID=? AND value LIKE ? ORDER BY value";
-			var results = this._zotero.DB.columnQuery(sql, [fieldID, searchString + '%']);
+			statement = this._zotero.DB.getStatement(sql, [fieldID, searchString + '%']);
 			break;
 		
 		default:
-			var sql = "SELECT fieldID FROM fields WHERE fieldName=?";
-			var fieldID = this._zotero.DB.valueQuery(sql, {string:searchParam});
-			
-			if (!fieldID){
+			var fieldID = this._zotero.ItemFields.getID(searchParam);
+			if (!fieldID) {
 				this._zotero.debug("'" + searchParam + "' is not a valid autocomplete scope", 1);
-				var results = [];
-				var resultCode = Ci.nsIAutoCompleteResult.RESULT_IGNORED;
-				break;
+				this.updateResults([], false, Ci.nsIAutoCompleteResult.RESULT_IGNORED);
+				return;
 			}
 			
 			// We don't use date autocomplete anywhere, but if we're not
@@ -251,8 +183,8 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 			// use the user part of the multipart field
 			var valueField = searchParam=='date' ? 'SUBSTR(value, 12, 100)' : 'value';
 			
-			var sql = "SELECT DISTINCT " + valueField
-				+ " FROM itemData NATURAL JOIN itemDataValues "
+			var sql = "SELECT DISTINCT " + valueField + ", NULL "
+				+ "FROM itemData NATURAL JOIN itemDataValues "
 				+ "WHERE fieldID=?1 AND " + valueField
 				+ " LIKE ?2 "
 			
@@ -263,26 +195,111 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam,
 				sqlParams.push(extra);
 			}
 			sql += "ORDER BY value";
-			var results = this._zotero.DB.columnQuery(sql, sqlParams);
+			statement = this._zotero.DB.getStatement(sql, sqlParams);
 	}
 	
-	if (!results || !results.length){
-		var results = [];
-		var resultCode = Ci.nsIAutoCompleteResult.RESULT_NOMATCH;
+	this.pendingStatement = statement.executeAsync({
+		handleResult: function (storageResultSet) {
+			self._zotero.debug("Handling autocomplete results");
+			
+			var results = [];
+			var comments = [];
+			
+			for (let row = storageResultSet.getNextRow();
+					row;
+					row = storageResultSet.getNextRow()) {
+				results.push(row.getResultByIndex(0));
+				let comment = row.getResultByIndex(1);
+				if (comment) {
+					comments.push(comment);
+				}
+			}
+			
+			if (resultsCallback) {
+				if (comments.length) {
+					throw ("Cannot sort results with comments in ZoteroAutoComplete.startSearch()");
+				}
+				resultsCallback(results);
+			}
+			
+			self.updateResults(results, comments, true);
+		},
+		
+		handleError: function (e) {
+			Components.utils.reportError(e.message);
+		},
+		
+		handleCompletion: function (reason) {
+			self.pendingStatement = null;
+			
+			if (reason != Ci.mozIStorageStatementCallback.REASON_FINISHED) {
+				var resultCode = Ci.nsIAutoCompleteResult.RESULT_FAILURE;
+			}
+			else {
+				var resultCode = null;
+			}
+			
+			self.updateResults(null, null, false, resultCode);
+			
+			if (resultCode) {
+				self._zotero.debug("Autocomplete query aborted");
+			}
+			else {
+				self._zotero.debug("Autocomplete query completed");
+			}
+		}
+	});
+}
+
+
+ZoteroAutoComplete.prototype.updateResults = function (results, comments, ongoing, resultCode) {
+	if (!results) {
+		results = [];
 	}
-	else if (typeof resultCode == 'undefined'){
-		var resultCode = Ci.nsIAutoCompleteResult.RESULT_SUCCESS;
+	if (!comments) {
+		comments = [];
 	}
 	
-	var result = new ZoteroAutoCompleteResult(searchString,
-		resultCode, 0, "", results, comments);
+	for (var i=0; i<results.length; i++) {
+		let result = results[i];
+		
+		if (this._results.indexOf(result) == -1) {
+			comment = comments[i] ? comments[i] : null;
+			this._zotero.debug("Appending autocomplete value '" + result + "'" + (comment ? " (" + comment + ")" : ""));
+			this._result.appendMatch(result, comment, null, null);
+			this._results.push(result);
+		}
+		else {
+			//this._zotero.debug("Skipping existing value '" + result + "'");
+		}
+	}
 	
-	listener.onSearchResult(this, result);
+	if (!resultCode) {
+		resultCode = "RESULT_";
+		if (!this._results.length) {
+			resultCode += "NOMATCH";
+		}
+		else {
+			resultCode += "SUCCESS";
+		}
+		if (ongoing) {
+			resultCode += "_ONGOING";
+		}
+		resultCode = Ci.nsIAutoCompleteResult[resultCode];
+	}
+	
+	this._result.setSearchResult(resultCode);
+	this._listener.onSearchResult(this, this._result);
 }
 
 
 ZoteroAutoComplete.prototype.stopSearch = function(){
-	//this._zotero.debug('Stopping autocomplete search');
+	if (this.pendingStatement) {
+		// DEBUG: This appears to take as long as letting the query complete
+		this._zotero.debug('Stopping autocomplete search');
+		this.pendingStatement.cancel();
+		this._zotero.debug('Search cancelled');
+	}
 }
 
 
