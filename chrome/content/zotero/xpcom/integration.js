@@ -30,10 +30,7 @@ Zotero.Integration = new function() {
 	var _fifoFile, _osascriptFile;
 	
 	this.sessions = {};
-	
-	this.__defineGetter__("usePopup", function () {
-		return Zotero.isWin && !Zotero.Prefs.get("integration.realWindow");
-	});
+	this.usePopup = false;
 	
 	/**
 	 * Initializes the pipe used for integration on non-Windows platforms.
