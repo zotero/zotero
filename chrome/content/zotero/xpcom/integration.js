@@ -118,19 +118,47 @@ Zotero.Integration = new function() {
 	 * Executes an integration command.
 	 */
 	this.execCommand = function execCommand(agent, command) {
-		var componentClass = "@zotero.org/Zotero/integration/application?agent="+agent+";1";
-		Zotero.debug("Integration: Instantiating "+componentClass+" for command "+command);
-		var application = Components.classes[componentClass]
-			.getService(Components.interfaces.zoteroIntegrationApplication);
-		var integration = new Zotero.Integration.Document(application);
+		// Try to load the appropriate Zotero component; otherwise display an error using the alert
+		// service
+		try {
+			var componentClass = "@zotero.org/Zotero/integration/application?agent="+agent+";1";
+			Zotero.debug("Integration: Instantiating "+componentClass+" for command "+command);
+			var application = Components.classes[componentClass]
+				.getService(Components.interfaces.zoteroIntegrationApplication);
+		} catch(e) {
+			Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+				.getService(Components.interfaces.nsIPromptService)
+				.alert(null, Zotero.getString("integration.error.title"),
+					Zotero.getString("integration.error.notInstalled"));
+			throw e;
+		}
+		
+		// Try to create a new document; otherwise display an error using the alert service
+		try {
+			var integration = new Zotero.Integration.Document(application);
+		} catch(e) {
+			Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+				.getService(Components.interfaces.nsIPromptService)
+				.alert(null, Zotero.getString("integration.error.title"),
+					Zotero.getString("integration.error.generic"));
+			throw e;
+		}
+		
+		// Try to execute the command; otherwise display an error in the word processor
 		try {
 			integration[command]();
 		} catch(e) {
 			if(!(e instanceof Zotero.Integration.UserCancelledException)) {
-				integration._doc.displayAlert(Zotero.getString("integration.error.generic"),
-					Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-					Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
-				throw e;
+				if(e instanceof Zotero.Integration.DisplayException) {
+					integration._doc.displayAlert(e.toString(),
+						Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
+						Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
+				} else {
+					integration._doc.displayAlert(Zotero.getString("integration.error.generic"),
+						Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
+						Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
+					throw e;
+				}
 			}
 		} finally {
 			integration.cleanup();
@@ -189,12 +217,15 @@ Zotero.Integration.MissingItemException = function(reselectKeys, reselectKeyType
 }
 Zotero.Integration.MissingItemException.prototype.name = "MissingItemException";
 Zotero.Integration.MissingItemException.prototype.message = "An item in this document is missing from your Zotero library.";
-Zotero.Integration.MissingItemException.prototype.toString = function() { return this.name; };
+Zotero.Integration.MissingItemException.prototype.toString = function() { return this.message; };
 
 Zotero.Integration.UserCancelledException = function() {};
 Zotero.Integration.UserCancelledException.prototype.name = "UserCancelledException";
 Zotero.Integration.UserCancelledException.prototype.message = "User cancelled document update.";
-Zotero.Integration.UserCancelledException.prototype.toString = function() { return this.name; };
+Zotero.Integration.UserCancelledException.prototype.toString = function() { return this.message; };
+
+Zotero.Integration.DisplayException = function(name) { this.name = name };
+Zotero.Integration.DisplayException.prototype.toString = function() { return Zotero.getString("integration.error."+this.name); };
 
 
 // Field code for an item
@@ -234,18 +265,18 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 	var dataString = this._doc.getDocumentData();
 	if(!dataString) {
 		if(require) {
-			this._doc.displayAlert(Zotero.getString("integration.error.mustInsertCitation"),
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
+			throw new Zotero.Integration.DisplayException("mustInsertCitation");
 		} else {
 			// Set doc prefs if no data string yet
 			this._session = this._createNewSession(new Zotero.Integration.DocumentData());
 			if(dontRunSetDocPrefs) return false;
 			
 			Zotero.Integration.activate();
-			var ret = this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
-			this._doc.activate();
-			if(!ret) return false;
+			try {
+				var ret = this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
+			} finally {
+				this._doc.activate();
+			}
 			// save doc prefs in doc
 			this._doc.setDocumentData(this._session.data.serializeXML());
 		}
@@ -271,24 +302,27 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			// make sure style is defined
 			if(!this._session.style) {
 				Zotero.Integration.activate();
-				this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
-				this._doc.activate();
+				try {
+					this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
+				} finally {
+					this._doc.activate();
+				}
 			}
 			this._doc.setDocumentData(this._session.data.serializeXML());
 		}
 	}
 	
 	this._session.resetRequest();
-	return true;
+	return !!dataString;
 }
 
 /**
  * Gets all fields for a document
  * @param require {Boolean} Whether an error should be thrown if no fields exist
  */
-Zotero.Integration.Document.prototype._getFields = function(require, onlyCheck) {
-	if(this._fields) return true;
-	if(!this._session && !this._getSession(require, true)) return false;
+Zotero.Integration.Document.prototype._getFields = function(require) {
+	if(this._fields) return;
+	if(!this._session && !this._getSession(require, true)) return;
 	
 	var fields = this._doc.getFields(this._session.data.prefs['fieldType']);
 	this._fields = [];
@@ -297,13 +331,10 @@ Zotero.Integration.Document.prototype._getFields = function(require, onlyCheck) 
 	}
 	
 	if(require && !this._fields.length) {
-		this._doc.displayAlert(Zotero.getString("integration.error.mustInsertCitation"),
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
-		return false;
+		throw new Zotero.Integration.DisplayException("mustInsertCitation");
 	}
 	
-	return true;
+	return;
 }
 
 /**
@@ -313,9 +344,7 @@ Zotero.Integration.Document.prototype._getFields = function(require, onlyCheck) 
 Zotero.Integration.Document.prototype._addField = function(note) {
 	// Get citation types if necessary
 	if(!this._doc.canInsertField(this._session.data.prefs['fieldType'])) {
-		this._doc.displayAlert(Zotero.getString("integration.error.cannotInsertHere"),
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK)
+		throw new Zotero.Integration.DisplayException("cannotInsertHere");
 		return false;
 	}
 	
@@ -510,7 +539,7 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
  * Adds a citation to the current document.
  */
 Zotero.Integration.Document.prototype.addCitation = function() {
-	if(!this._getSession()) return;
+	this._getSession();
 	
 	var field = this._addField(true);
 	if(!field) return;
@@ -523,14 +552,11 @@ Zotero.Integration.Document.prototype.addCitation = function() {
  * Edits the citation at the cursor position.
  */
 Zotero.Integration.Document.prototype.editCitation = function() {
-	if(!this._getSession(true)) return;
+	this._getSession(true);
 	
 	var field = this._doc.cursorInField(this._session.data.prefs['fieldType'])
 	if(!field) {
-		this._doc.displayAlert(Zotero.getString("integration.error.notInCitation"),
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
-		return;
+		throw new Zotero.Integration.DisplayException("notInCitation");
 	}
 	
 	this._updateSession(field);
@@ -541,18 +567,15 @@ Zotero.Integration.Document.prototype.editCitation = function() {
  * Adds a bibliography to the current document.
  */
 Zotero.Integration.Document.prototype.addBibliography = function() {
-	if(!this._getSession(true)) return;
+	this._getSession(true);
 
 	// Make sure we can have a bibliography
 	if(!this._session.style.hasBibliography) {
-		this._doc.displayAlert(Zotero.getString("integration.error.noBibliography"),
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
-		return;
+		throw new Zotero.Integration.DisplayException("noBibliography");
 	}
 	
 	// Make sure we have some citations
-	if(!this._getFields(true)) return;
+	this._getFields(true);
 	
 	var field = this._addField();
 	if(!field) return;
@@ -569,7 +592,7 @@ Zotero.Integration.Document.prototype.addBibliography = function() {
  */
 Zotero.Integration.Document.prototype.editBibliography = function() {
 	// Make sure we have a bibliography
-	if(!this._getFields(true)) return false;
+	this._getFields(true);
 	var haveBibliography = false;
 	for(var i=this._fields.length-1; i>=0; i--) {
 		if(this._fields[i].getCode().substr(0, BIBLIOGRAPHY_CODE.length) == BIBLIOGRAPHY_CODE) {
@@ -579,10 +602,7 @@ Zotero.Integration.Document.prototype.editBibliography = function() {
 	}
 	
 	if(!haveBibliography) {
-		this._doc.displayAlert(Zotero.getString("integration.error.mustInsertBibliography"),
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
-		return;
+		throw new Zotero.Integration.DisplayException("mustInsertBibliography");
 	}
 	
 	this._updateSession();
@@ -596,7 +616,7 @@ Zotero.Integration.Document.prototype.editBibliography = function() {
  * Updates the citation data for all citations and bibliography entries.
  */
 Zotero.Integration.Document.prototype.refresh = function() {
-	if(!this._getFields(true)) return false;
+	this._getFields(true);
 	
 	// Send request, forcing update of citations and bibliography
 	this._updateSession();
@@ -607,7 +627,7 @@ Zotero.Integration.Document.prototype.refresh = function() {
  * Deletes field codes.
  */
 Zotero.Integration.Document.prototype.removeCodes = function() {
-	if(!this._getFields(true)) return false;
+	this._getFields(true);
 
 	var result = this._doc.displayAlert(Zotero.getString("integration.removeCodesWarning"),
 				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
@@ -624,10 +644,14 @@ Zotero.Integration.Document.prototype.removeCodes = function() {
  * Displays a dialog to set document preferences (style, footnotes/endnotes, etc.)
  */
 Zotero.Integration.Document.prototype.setDocPrefs = function() {
-	if(this._getSession(false, true)) this._getFields();
+	this._getFields();
+	
 	Zotero.Integration.activate();
-	var oldData = this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
-	this._doc.activate();
+	try {
+		var oldData = this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
+	} finally {
+		this._doc.activate();
+	}
 	if(oldData) {
 		this._doc.setDocumentData(this._session.data.serializeXML());
 		if(this._fields && this._fields.length) {
@@ -738,7 +762,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(primaryFieldType, se
 		.getService(Components.interfaces.nsIWindowWatcher)
 		.openWindow(null, 'chrome://zotero/content/integrationDocPrefs.xul', '',
 		'chrome,modal,centerscreen', io, true);
-	if(!io.style) return false;
+	if(!io.style) throw new Zotero.Integration.UserCancelledException();
 	
 	// set data
 	var oldData = this.data;

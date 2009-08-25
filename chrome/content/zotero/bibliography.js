@@ -113,6 +113,9 @@ var Zotero_File_Interface_Bibliography = new function() {
 			document.getElementById("fields-file-format-notice").textContent = Zotero.getString("integration."+formatOption+".fileFormatNotice");
 			document.getElementById("bookmarks-file-format-notice").textContent = Zotero.getString("integration.fields.fileFormatNotice");
 		}
+		
+		// set style to false, in case this is cancelled
+		_io.style = false;
 	}
 	
 	/*
