@@ -126,6 +126,7 @@ Zotero.Integration = new function() {
 			var application = Components.classes[componentClass]
 				.getService(Components.interfaces.zoteroIntegrationApplication);
 		} catch(e) {
+			Zotero.Integration.activate();
 			Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 				.getService(Components.interfaces.nsIPromptService)
 				.alert(null, Zotero.getString("integration.error.title"),
@@ -137,6 +138,7 @@ Zotero.Integration = new function() {
 		try {
 			var integration = new Zotero.Integration.Document(application);
 		} catch(e) {
+			Zotero.Integration.activate();
 			Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 				.getService(Components.interfaces.nsIPromptService)
 				.alert(null, Zotero.getString("integration.error.title"),
@@ -327,11 +329,14 @@ Zotero.Integration.Document.prototype._getFields = function(require) {
 	if(this._fields) return;
 	if(!this._session && !this._getSession(require, true)) return;
 	
+	var getFieldsTime = (new Date()).getTime();
 	var fields = this._doc.getFields(this._session.data.prefs['fieldType']);
 	this._fields = [];
 	while(fields.hasMoreElements()) {
 		this._fields.push(fields.getNext().QueryInterface(Components.interfaces.zoteroIntegrationField));
 	}
+	var endTime = (new Date()).getTime();;
+	Zotero.debug("Got "+this._fields.length+" fields in "+(endTime-getFieldsTime)/1000+"; "+1000/((endTime-getFieldsTime)/this._fields.length)+" fields/second");
 	
 	if(require && !this._fields.length) {
 		throw new Zotero.Integration.DisplayException("mustInsertCitation");
