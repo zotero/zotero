@@ -48,6 +48,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 	this._result = result;
 	this._results = [];
 	this._listener = listener;
+	this._cancelled = false;
 	
 	this._zotero.debug("Starting autocomplete search of type '"
 		+ searchParam + "'" + " with string '" + searchString + "'");
@@ -72,7 +73,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 			break;
 		
 		case 'tag':
-			var sql = "SELECT DISTINCT name, NULL FROM tags WHERE name LIKE ?";
+			var sql = "SELECT DISTINCT name AS val, NULL AS comment FROM tags WHERE name LIKE ?";
 			var sqlParams = [searchString + '%'];
 			if (extra){
 				sql += " AND name NOT IN (SELECT name FROM tags WHERE tagID IN ("
@@ -100,18 +101,18 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 			if (fieldMode==2)
 			{
 				var sql = "SELECT DISTINCT CASE fieldMode WHEN 1 THEN lastName "
-					+ "WHEN 0 THEN firstName || ' ' || lastName END AS name, NULL "
+					+ "WHEN 0 THEN firstName || ' ' || lastName END AS val, NULL AS comment "
 					+ "FROM creators NATURAL JOIN creatorData WHERE CASE fieldMode "
 					+ "WHEN 1 THEN lastName "
 					+ "WHEN 0 THEN firstName || ' ' || lastName END "
-					+ "LIKE ? ORDER BY name";
+					+ "LIKE ? ORDER BY val";
 				var sqlParams = searchString + '%';
 			}
 			else
 			{
 				var sql = "SELECT DISTINCT ";
 				if (fieldMode==1){
-					sql += "lastName AS name, creatorID || '-1' AS creatorID";
+					sql += "lastName AS val, creatorID || '-1' AS comment";
 				}
 				// Retrieve the matches in the specified field
 				// as well as any full names using the name
@@ -123,10 +124,10 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 				// 		- 2 means it uses both
 				else {
 					sql += "CASE WHEN firstName='' OR firstName IS NULL THEN lastName "
-						+ "ELSE lastName || ', ' || firstName END AS name, "
+						+ "ELSE lastName || ', ' || firstName END AS val, "
 						+ "creatorID || '-' || CASE "
 						+ "WHEN (firstName = '' OR firstName IS NULL) THEN 1 "
-						+ "ELSE 2 END AS creatorID";
+						+ "ELSE 2 END AS comment";
 				}
 				
 				var fromSQL = " FROM creators NATURAL JOIN creatorData "
@@ -145,11 +146,11 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 				// as well (i.e. "Shakespeare"), and group to collapse repeats
 				if (fieldMode!=1){
 					sql = "SELECT * FROM (" + sql + " UNION SELECT DISTINCT "
-						+ searchParts[2] + " AS name, creatorID || '-1' AS creatorID"
-						+ fromSQL + ") GROUP BY name";
+						+ searchParts[2] + " AS val, creatorID || '-1' AS comment"
+						+ fromSQL + ") GROUP BY val";
 				}
 				
-				sql += " ORDER BY name";
+				sql += " ORDER BY val";
 			}
 			
 			statement = this._zotero.DB.getStatement(sql, sqlParams);
@@ -157,7 +158,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 		
 		case 'dateModified':
 		case 'dateAdded':
-			var sql = "SELECT DISTINCT DATE(" + searchParam + ", 'localtime'), NULL FROM items "
+			var sql = "SELECT DISTINCT DATE(" + searchParam + ", 'localtime') AS val, NULL AS comment FROM items "
 				+ "WHERE " + searchParam + " LIKE ? ORDER BY " + searchParam;
 			statement = this._zotero.DB.getStatement(sql, searchString + '%');
 			break;
@@ -165,7 +166,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 		case 'accessDate':
 			var fieldID = this._zotero.ItemFields.getID('accessDate');
 			
-			var sql = "SELECT DISTINCT DATE(value, 'localtime'), NULL FROM itemData "
+			var sql = "SELECT DISTINCT DATE(value, 'localtime') AS val, NULL AS comment FROM itemData "
 				+ "WHERE fieldID=? AND value LIKE ? ORDER BY value";
 			statement = this._zotero.DB.getStatement(sql, [fieldID, searchString + '%']);
 			break;
@@ -183,7 +184,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 			// use the user part of the multipart field
 			var valueField = searchParam=='date' ? 'SUBSTR(value, 12, 100)' : 'value';
 			
-			var sql = "SELECT DISTINCT " + valueField + ", NULL "
+			var sql = "SELECT DISTINCT " + valueField + " AS val, NULL AS comment "
 				+ "FROM itemData NATURAL JOIN itemDataValues "
 				+ "WHERE fieldID=?1 AND " + valueField
 				+ " LIKE ?2 "
@@ -197,6 +198,31 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 			sql += "ORDER BY value";
 			statement = this._zotero.DB.getStatement(sql, sqlParams);
 	}
+	
+	if (this._zotero.isFx30) {
+		var rows = this._zotero.DB.query(sql, sqlParams);
+		var results = [];
+		var comments = [];
+		for each(var row in rows) {
+			results.push(row.val);
+			let comment = row.comment;
+			if (comment) {
+				comments.push(comment);
+			}
+		}
+		this.updateResults(results, comments);
+		return;
+	}
+	
+	var self = this;
+	
+	this._zotero.DB._connection.setProgressHandler(5000, {
+		onProgress: function (connection) {
+			if (self._cancelled) {
+				return true;
+			}
+		}
+	});
 	
 	this.pendingStatement = statement.executeAsync({
 		handleResult: function (storageResultSet) {
@@ -226,7 +252,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 		},
 		
 		handleError: function (e) {
-			Components.utils.reportError(e.message);
+			//Components.utils.reportError(e.message);
 		},
 		
 		handleCompletion: function (reason) {
@@ -295,10 +321,11 @@ ZoteroAutoComplete.prototype.updateResults = function (results, comments, ongoin
 
 ZoteroAutoComplete.prototype.stopSearch = function(){
 	if (this.pendingStatement) {
-		// DEBUG: This appears to take as long as letting the query complete
 		this._zotero.debug('Stopping autocomplete search');
-		this.pendingStatement.cancel();
-		this._zotero.debug('Search cancelled');
+		// This appears to take as long as letting the query complete,
+		// so we flag instead and abort from the progress handler
+		//this.pendingStatement.cancel();
+		this._cancelled = true;
 	}
 }
 
