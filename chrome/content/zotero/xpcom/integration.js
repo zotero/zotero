@@ -374,7 +374,7 @@ Zotero.Integration.Document.prototype._addField = function(note) {
 /**
  * Loads existing citations and bibliographies out of a document, and creates or edits fields
  */
-Zotero.Integration.Document.prototype._updateSession = function(editField) {
+Zotero.Integration.Document.prototype._updateSession = function(newField, editField) {
 	var deleteKeys = {};
 	this._deleteFields = [];
 	this._removeCodeFields = [];
@@ -384,6 +384,7 @@ Zotero.Integration.Document.prototype._updateSession = function(editField) {
 	// first collect entire bibliography
 	this._getFields();
 	var editFieldIndex = false;
+	var collectFieldsTime = (new Date()).getTime();
 	for(var i in this._fields) {
 		var field = this._fields[i];
 		
@@ -393,8 +394,9 @@ Zotero.Integration.Document.prototype._updateSession = function(editField) {
 			var fieldCode = field.getCode();
 			
 			if(fieldCode.substr(0, ITEM_CODE.length) == ITEM_CODE) {
+				var noteIndex = (this._session.style.class == "note" ? field.getNoteIndex() : 0);
 				try {
-					this._session.addCitation(i, field.getNoteIndex(), fieldCode.substr(ITEM_CODE.length+1));
+					this._session.addCitation(i, noteIndex, fieldCode.substr(ITEM_CODE.length+1));
 				} catch(e) {
 					if(e instanceof Zotero.Integration.MissingItemException) {
 						// First, check if we've already decided to remove field codes from these
@@ -440,11 +442,20 @@ Zotero.Integration.Document.prototype._updateSession = function(editField) {
 			} else if(fieldCode.substr(0, BIBLIOGRAPHY_CODE.length) == BIBLIOGRAPHY_CODE) {
 				this._bibliographyFields.push(field);
 				if(!this._session.bibliographyData && !bibliographyData) {
-					bibliographyData = field.getCode().substr(BIBLIOGRAPHY_CODE.length+1);
+					bibliographyData = fieldCode.substr(BIBLIOGRAPHY_CODE.length+1);
+				}
+			} else if(fieldCode == "TEMP") {
+				if(newField) {
+					editFieldIndex = i;
+					editField = field;
+				} else {
+					this._deleteFields.push(i);
 				}
 			}
 		}
 	}
+	var endTime = (new Date()).getTime();
+	Zotero.debug("Collected "+this._fields.length+" fields in "+(endTime-collectFieldsTime)/1000+"; "+1000/((endTime-collectFieldsTime)/this._fields.length)+" fields/second");
 
 	// load uncited items from bibliography
 	if(bibliographyData && !this._session.bibliographyData) {
@@ -538,9 +549,11 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 	}
 	
 	// do this operations in reverse in case plug-ins care about order
+	this._deleteFields.sort();
 	for(var i=(this._deleteFields.length-1); i>=0; i--) {
 		this._fields[this._deleteFields[i]].delete();
 	}
+	this._removeCodeFields.sort();
 	for(var i=(this._removeCodeFields.length-1); i>=0; i--) {
 		this._fields[this._removeCodeFields[i]].removeCode();
 	}
@@ -553,9 +566,10 @@ Zotero.Integration.Document.prototype.addCitation = function() {
 	this._getSession();
 	
 	var field = this._addField(true);
+	field.setCode("TEMP");
 	if(!field) return;
 	
-	this._updateSession(field);
+	this._updateSession(true);
 	this._updateDocument();
 }
 	
@@ -570,7 +584,7 @@ Zotero.Integration.Document.prototype.editCitation = function() {
 		throw new Zotero.Integration.DisplayException("notInCitation");
 	}
 	
-	this._updateSession(field);
+	this._updateSession(false, field);
 	this._updateDocument(false, false);
 }
 
