@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"Sudoc",
 	"creator":"Sean Takats and Michael Berkowitz, updated by Sylvain Machefert",
-	"target":"^http://www\\.sudoc\\.abes\\.fr",
+	"target":"^http://(www|corail)\\.sudoc\\.abes\\.fr",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-04-28 09:15:00"
+	"lastUpdated":"2009-08-14 11:15:00"
 }
 
 
