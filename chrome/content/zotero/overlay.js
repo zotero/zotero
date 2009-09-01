@@ -1130,10 +1130,10 @@ var ZoteroPane = new function()
 		item.clone(false, newItem);
 		newItem.save();
 		
-		if (this.itemsView._itemGroup.isCollection()) {
+		if (this.itemsView._itemGroup.isCollection() && !newItem.getSource()) {
 			this.itemsView._itemGroup.ref.addItem(newItem.id);
-			this.selectItem(newItem.id);
 		}
+		this.selectItem(newItem.id);
 	}
 	
 	
