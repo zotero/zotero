@@ -1,4 +1,4 @@
--- 12
+-- 13
 
 -- Triggers to validate date field
 DROP TRIGGER IF EXISTS insert_date_field;
@@ -271,20 +271,20 @@ CREATE TRIGGER fku_collectionItems_itemID_sourceItemID
     WHERE NEW.itemID IN (SELECT itemID FROM itemAttachments WHERE sourceItemID IS NOT NULL UNION SELECT itemID FROM itemNotes WHERE sourceItemID IS NOT NULL);
   END;
 
+-- When making a standalone attachment a child, remove from any collections
 DROP TRIGGER IF EXISTS fku_itemAttachments_sourceItemID_collectionItems_itemID;
 CREATE TRIGGER fku_itemAttachments_sourceItemID_collectionItems_itemID
   BEFORE UPDATE OF sourceItemID ON itemAttachments
-  FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'update on table "itemAttachments" violates foreign key constraint "fku_itemAttachments_sourceItemID_collectionItems_itemID"')
-    WHERE NEW.sourceItemID IS NOT NULL AND (SELECT COUNT(*) FROM collectionItems WHERE itemID = NEW.itemID) > 0;
+  FOR EACH ROW WHEN OLD.sourceItemID IS NULL AND NEW.sourceItemID IS NOT NULL BEGIN
+    DELETE FROM collectionItems WHERE itemID = NEW.itemID;
   END;
 
+-- When making a standalone note a child, remove from any collections
 DROP TRIGGER IF EXISTS fku_itemNotes_sourceItemID_collectionItems_itemID;
 CREATE TRIGGER fku_itemNotes_sourceItemID_collectionItems_itemID
   BEFORE UPDATE OF sourceItemID ON itemNotes
   FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'update on table "itemNotes" violates foreign key constraint "fku_itemNotes_sourceItemID_collectionItems_itemID"')
-    WHERE NEW.sourceItemID IS NOT NULL AND (SELECT COUNT(*) FROM collectionItems WHERE itemID = NEW.itemID) > 0;
+    DELETE FROM collectionItems WHERE itemID = NEW.itemID;
   END;
 
 
@@ -634,10 +634,6 @@ CREATE TRIGGER fku_itemAttachments
     -- Make sure parent is a regular item
     SELECT RAISE(ABORT, 'parent is not a regular item') WHERE
     NEW.sourceItemID IS NOT NULL AND (SELECT itemTypeID FROM items WHERE itemID = NEW.sourceItemID) IN (1,14);
-    
-    -- If child, make sure attachment is not in a collection
-    SELECT RAISE(ABORT, 'collection item must be top level') WHERE
-    NEW.sourceItemID IS NOT NULL AND (SELECT COUNT(*) FROM collectionItems WHERE itemID=NEW.itemID)>0;
   END;
 
 -- itemAttachments/sourceItemID
@@ -992,10 +988,6 @@ CREATE TRIGGER fku_itemNotes
     -- Make sure parent is a regular item
     SELECT RAISE(ABORT, 'parent is not a regular item') WHERE
     NEW.sourceItemID IS NOT NULL AND (SELECT itemTypeID FROM items WHERE itemID = NEW.sourceItemID) IN (1,14);
-    
-    -- If child, make sure note is not in a collection
-    SELECT RAISE(ABORT, 'collection item must be top level') WHERE
-    NEW.sourceItemID IS NOT NULL AND (SELECT COUNT(*) FROM collectionItems WHERE itemID=NEW.itemID)>0;
   END;
 
 
