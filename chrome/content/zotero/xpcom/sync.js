@@ -3143,12 +3143,13 @@ Zotero.Sync.Server.Data = new function() {
 					var e = new Zotero.Error(msg, "MISSING_OBJECT");
 					throw (e);
 				}
-				var l = creator.@libraryID.toString();
-				l = l ? l : null;
+				
+				creator.creator.@libraryID = data.libraryID;
 				var creatorObj = Zotero.Sync.Server.Data.xmlToCreator(creator.creator);
-				if (l != creatorObj.libraryID || creator.@key.toString() != creatorObj.key) {
-					throw ("Creator id " + creatorObj.id + " does not match "
-						+ "item creator in Zotero.Sync.Server.Data.xmlToItem()");
+				
+				if (creator.@key.toString() != creatorObj.key) {
+					throw ("Creator does not match item creator in Zotero.Sync.Server.Data.xmlToItem() "
+						+ "(" + creator.@key.toString() + "!=" + creatorObj.key + ")");
 				}
 			}
 			item.setCreator(
