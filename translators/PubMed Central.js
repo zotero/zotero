@@ -27,7 +27,7 @@ function doWeb(doc, url) {
 					volume:"volume",
 					doi:"DOI",
 					fulltext_html_url:"url"
-				}
+				};
 	var URIs = new Array();
 	var items = new Object();
 	if (doc.title.indexOf("PMC Results") != -1) {
@@ -50,8 +50,7 @@ function doWeb(doc, url) {
 	} else {
 		URIs.push(url);
 	}
-	for each (var link in URIs) {
-		Zotero.Utilities.HTTP.doGet(link, function(text) {
+		Zotero.Utilities.HTTP.doGet(URIs, function(text) {
 			var tags = new Object();
 			var meta = text.match(/<meta[^>]*>/gi);
 			for (var i in meta) {
@@ -75,7 +74,7 @@ function doWeb(doc, url) {
 			}
 			newItem.url = tags["fulltext_html_url"];
 			if (!newItem.url) newItem.url = tags["abstract_html_url"];
-			newItem.extra = text.match(/PMC\d+/)[0];
+			newItem.extra = "PMCID:" + text.match(/PMCID: <\/span>(\d+)/)[1];
 			newItem.journalAbbreviation = text.match(/span class=\"citation-abbreviation\">([^<]+)</)[1];
 			newItem.pages = text.match(/span class=\"citation-flpages\">([^<]+)</)[1].replace(/[\.:\s]/g, "");
 			
@@ -86,7 +85,7 @@ function doWeb(doc, url) {
 			}
 			if (abstract) newItem.abstractNote = abstract;
 			newItem.complete();
-		});
-	}
+		}, function(){ Zotero.done();} 
+		);
 	Zotero.wait();
 }
