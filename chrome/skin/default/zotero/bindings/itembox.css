@@ -59,13 +59,20 @@ row label
 }
 
 /* creator type menu */
-.creator-type-label {
+.creator-type-label, .creator-type-value {
 	-moz-box-align: center;
 	-moz-box-pack: end;
+	height: 1.8em !important;
+	min-height: none !important;
+	max-height: 1.8em !important;
+	padding: 0;
+	margin: 0;
 }
+
  
-.creator-type-label image {
-	margin: 0 .5em 1px;
+.creator-type-label > image {
+	margin: 0 1em 1px;
+	list-style-image: url('chrome://zotero/skin/arrow-down.gif');
 }
 
 /* no space between last name and comma */
@@ -74,16 +81,15 @@ row hbox label:first-child
 	margin-right: 1px;
 }
 
-row hbox label.comma
+row label,
+row > vbox[fieldname=abstractNote],
+row > vbox[fieldname=extra]
 {
-	
-}
-
-row vbox[fieldname=abstractNote],
-row vbox[fieldname=extra]
-{
-	margin-top: 1px;
-	margin-left: 6px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	-moz-margin-start: 1px !important;
+	-moz-margin-end: 5px !important;
+	padding: 1px 1px 0 2px;
 }
 
 hbox.zotero-date-field-status
@@ -96,4 +102,56 @@ hbox.zotero-date-field-status label
 	font-weight: bold;
 	color: #666;
 	margin: 0 0 0 1px;
+}
+
+#item-type-menu
+{
+	-moz-appearance: none;
+	color: black;
+	height: 1.5em !important;
+	min-height: 1.5em !important;
+	padding: 0 0 0 2px !important;
+	margin: 1px 5px 0 0 !important;
+	max-height: 1.5em !important;
+	border: 1px solid transparent;	
+	-moz-border-top-colors: none;
+	-moz-border-right-colors: none;
+	-moz-border-bottom-colors: none;
+	-moz-border-left-colors: none;
+	background-color: transparent;
+}
+
+#item-type-menu > .menulist-label-box
+{
+	-moz-box-flex: 0 !important;
+}
+
+#item-type-menu > .menulist-label-box, #item-type-menu > .menulist-label-box > .menulist-label
+{
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+#item-type-menu > .menulist-dropmarker
+{
+	display: none;
+}
+
+.zotero-field-toggle
+{
+	color: transparent;
+	margin: 0px 5px 0px 0px !important;
+	width: 26px !important;
+	max-width: 26px !important;
+	min-width: 26px !important;
+}
+
+.zotero-field-toggle .toolbarbutton-text
+{	
+	visibility: hidden;
+}
+
+.zotero-field-toggle .toolbarbutton-icon
+{
+	margin: 0px !important;
 }

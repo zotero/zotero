@@ -146,27 +146,61 @@ zoteromergepane {
 .zotero-clicky
 {	
 	-moz-border-radius: 6px;
+	border: 1px solid transparent;
 }
 
 .zotero-clicky[value="-"], .zotero-clicky[value="+"]
 {
-	margin: 0px;
-	padding-left: 4px;
-	padding-right: 4px;
+	color: transparent !important;
+	padding: 0 !important;
+	margin: 0 5px 0 0 !important;
+	width: 19px;
+	height: 12px;
+}
+
+.zotero-clicky[value="-"] {
+	-moz-border-image: url('chrome://zotero/skin/minus.png') 0 0 0 0 stretch;
+	min-width: 18px;
+	min-height: 18px;
+	max-width: 18px;
+	max-height: 18px;
+}
+
+.zotero-clicky[value="+"] {
+	-moz-border-image: url('chrome://zotero/skin/plus.png') 0 0 0 0 stretch;
+	min-width: 18px;
+	min-height: 18px;
+	max-width: 18px;
+	max-height: 18px;
+}
+
+.zotero-clicky[value="+"][disabled=true] {
+	-moz-border-image: url('chrome://zotero/skin/plus.png') 0 0 0 0 stretch;
+	opacity: .5;
+}
+
+.zotero-clicky[value="+"]:not([disabled=true]):active {
+	-moz-border-image: url('chrome://zotero/skin/plus-active.png') 0 0 0 0 stretch;
+}
+
+.zotero-clicky[value="-"]:not([disabled=true]):active {
+	-moz-border-image: url('chrome://zotero/skin/minus-active.png') 0 0 0 0 stretch;
 }
 
 .zotero-clicky:not([disabled=true]):hover,
 .zotero-clicky:not([disabled=true]):hover .toolbarbutton-text
 {
-	color: white;
 	background: #666;
+	background: rgb(187, 206, 241);
+	border: 1px solid rgb(109, 149, 224) !important;
 }
 
 .zotero-clicky:not([disabled=true]):active,
-.zotero-clicky:not([disabled=true]):active .toolbarbutton-text
+.zotero-clicky:not([disabled=true]):active .toolbarbutton-text,
+.zotero-clicky[selected="true"]
 {
 	color: white;
-	background: #333;
+	background: rgb(89, 139, 236) !important;
 }
 
 

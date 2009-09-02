@@ -8,3 +8,25 @@
 #tagsPopup {
 	min-width: 300px;
 }
+
+linksbox
+{
+	margin-top: 4px;
+}
+
+row > label:first-child
+{
+	text-align: right;
+}
+
+row > label:first-child
+{
+	font-weight: bold;
+}
+
+label
+{
+	-moz-margin-start: 1px !important;
+	-moz-margin-end: 5px !important;
+	padding: 1px 1px 0 2px;
+}

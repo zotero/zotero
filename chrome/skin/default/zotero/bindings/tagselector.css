@@ -23,11 +23,7 @@ checkbox
 	margin-right: .2em;
 	padding: .15em .25em;
 	-moz-user-focus: ignore;
-}
-
-#tags-toggle label[selected="true"]
-{
-	background: #a9c6f0 !important;
+	max-width: 250px;
 }
 
 /* Visible out-of-scope tags should be grey */
@@ -84,4 +80,9 @@ toolbarbutton.zotero-clicky
 	margin:2px 5px 3px;
 	padding:1px;
 	height:1em;
+}
+
+#view-settings-menu .toolbarbutton-menu-dropmarker
+{
+	margin-left: -12px !important;
 }

@@ -490,7 +490,11 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 		
 		case 'collection':
 			// TODO: group collection
-			break;
+			return "chrome://zotero-platform/content/treesource-collection.png";
+ 		
+		case 'search':
+			// TODO: is this platform independent?
+			return "chrome://zotero-platform/content/treesource-search.png";
 		
 		case 'header':
 			if (source.ref.id == 'group-libraries-header') {

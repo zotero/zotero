@@ -31,6 +31,7 @@
 	<binding id="attachment-box">
 		<resources>
 			<stylesheet src="chrome://zotero/skin/bindings/attachmentbox.css"/>
+			<stylesheet src="chrome://zotero-platform/content/attachmentbox.css"/>
 		</resources>
 		
 		<implementation>
@@ -145,8 +146,8 @@
 					var showButton = this._id('show');
 					var fileNameRow = this._id('fileNameRow');
 					var urlField = this._id('url');
-					var accessed = this._id('accessed');
-					var pagesRow = this._id('pages');
+					var accessed = this._id('accessedRow');
+					var pagesRow = this._id('pagesRow');
 					var dateModifiedRow = this._id('dateModified');
 					var indexBox = this._id('index-box');
 					var selectButton = this._id('select-button');
@@ -235,13 +236,10 @@
 						
 						// Access date
 						if (this.displayAccessed) {
-							accessed.value = Zotero.localeJoin([
-								Zotero.getString('itemFields.accessDate'),
-								': ',
-								Zotero.Date.sqlToDate(
+							document.getElementById("accessed-label").value = Zotero.getString('itemFields.accessDate')+": ";
+							document.getElementById("accessed").value = Zotero.Date.sqlToDate(
 									this.item.getField('accessDate'), true
-								).toLocaleString()
-							], '');
+								).toLocaleString();
 							accessed.hidden = false;
 						}
 						else {
@@ -263,11 +261,8 @@
 						var file = this.item.getFile(false, true);
 						var fileName = file.leafName;
 						if (fileName) {
-							fileNameRow.value = Zotero.localeJoin([
-								'Filename', // TODO: localize
-								': ', // TODO: probably needs to be in localized string
-								fileName
-							], '');
+							document.getElementById("fileName-label").value = "Filename: ";
+							document.getElementById("fileName").value = fileName;
 							fileNameRow.hidden = false;
 						}
 						else {
@@ -286,12 +281,8 @@
 						var pages = Zotero.Fulltext.getPages(this.item.id);
 						var pages = pages ? pages.total : null;
 						if (pages) {
-							var str = Zotero.localeJoin([
-								Zotero.getString('itemFields.pages'),
-								': ',
-								pages
-							], '');
-							pagesRow.value = str;
+							document.getElementById("pages-label").value = Zotero.getString('itemFields.pages')+': ';
+							document.getElementById("pages").value = pages;
 							pagesRow.hidden = false;
 						}
 						else {
@@ -303,14 +294,10 @@
 					}
 					
 					if (this.displayDateModified) {
-						var str = Zotero.localeJoin([
-							Zotero.getString('itemFields.dateModified'),
-							': ',
-							Zotero.Date.sqlToDate(
+						document.getElementById("dateModified-label").value = Zotero.getString('itemFields.dateModified')+': ';
+						document.getElementById("dateModified").value = Zotero.Date.sqlToDate(
 								this.item.getField('dateModified'), true
-							).toLocaleString()
-						], '');
-						dateModifiedRow.value = str;
+							).toLocaleString();
 						dateModifiedRow.hidden = false;
 					}
 					else {
@@ -468,9 +455,8 @@
 							str = 'general.yes';
 							break;
 					}
-					str = Zotero.getString('fulltext.indexState.indexed') + ': ' +
-						Zotero.getString(str);
-					indexStatus.setAttribute('value', str);
+					document.getElementById("index-status-label").value = Zotero.getString('fulltext.indexState.indexed') + ': ';
+					indexStatus.value = Zotero.getString(str);
 					
 					// Reindex button tooltip (string stored in zotero.properties)
 					var str = Zotero.getString('pane.items.menu.reindexItem');
@@ -508,14 +494,39 @@
 					<button id="show" label="&zotero.item.attachment.file.show;" flex="1"/>
 				</hbox>
 				<label id="url" crop="end"/>
-				<label id="fileNameRow" crop="end"/>
-				<label id="accessed"/>
-				<label id="pages"/>
-				<label id="dateModified"/>
+				<grid>
+					<columns>
+						<column/>
+						<column flex="1"/>
+					</columns>
+					<rows>
+						<row id="fileNameRow">
+							<label id="fileName-label"/>
+							<label id="fileName" crop="end"/>
+						</row>
+						<row id="accessedRow">
+							<label id="accessed-label"/>
+							<label id="accessed"/>
+						</row>
+						<row id="pagesRow">
+							<label id="pages-label"/>
+							<label id="pages"/>
+						</row>
+						<row id="dateModifiedRow">
+							<label id="dateModified-label"/>
+							<label id="dateModified"/>
+						</row>
+						<row>
+							<label id="index-status-label"/>
+							<hbox>
+								<label id="index-status"/>
+								<toolbarbutton id="reindex" oncommand="this.hidden = true; setTimeout(function () { ZoteroPane.reindexItem(); }, 50)"/>
+							</hbox>
+						</row>
+					</rows>
+				</grid>
 				
 				<hbox id="index-box">
-					<label id="index-status"/>
-					<toolbarbutton id="reindex" oncommand="this.hidden = true; setTimeout(function () { ZoteroPane.reindexItem(); }, 50)"/>
 				</hbox>
 				
 				<zoteronoteeditor id="note-editor" notitle="1" flex="1"/>

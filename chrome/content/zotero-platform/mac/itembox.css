@@ -1,1 +1,35 @@
+row > label:first-child, .creator-type-label
+{
+	color: #7f7f7f;
+}
 
+.zotero-field-toggle
+{
+	color: transparent;
+	margin: 0px 5px 0px 0px !important;
+	width: 26px !important;
+	max-width: 26px !important;
+	min-width: 26px !important;
+}
+
+.zotero-field-toggle .toolbarbutton-text
+{	
+	visibility: hidden;
+}
+
+.zotero-field-toggle .toolbarbutton-icon
+{
+	margin: 0px !important;
+}
+
+*[zoteroFontSize=small] #item-box
+{
+	font-size: 10px;
+}
+
+.creator-type-label > image {
+	margin: 1px .2em 1px;
+	list-style-image: url('chrome://zotero/skin/mac/arrow-down.png');
+	max-width: 7px;
+	max-height: 7px;
+}

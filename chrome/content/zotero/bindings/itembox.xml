@@ -357,8 +357,8 @@
 					//
 					// Clear and rebuild metadata fields
 					//
-					while (this._dynamicFields.hasChildNodes()) {
-						this._dynamicFields.removeChild(this._dynamicFields.firstChild);
+					while (this._dynamicFields.childNodes.length > 1) {
+						this._dynamicFields.removeChild(this._dynamicFields.lastChild);
 					}
 					
 					var fieldNames = [];
@@ -632,7 +632,6 @@
 					if (this.editable) {
 						typeBox.className = 'creator-type-label zotero-clicky';
 						var img = document.createElement('image');
-						img.setAttribute('src', 'chrome://zotero/skin/arrow-down.gif');
 						typeBox.appendChild(img);
 					}
 					else {
@@ -645,6 +644,7 @@
 					typeBox.appendChild(label);
 					
 					var hbox = document.createElement("hbox");
+					hbox.className = 'creator-type-value';
 					
 					// Name
 					var firstlast = document.createElement("hbox");
@@ -685,7 +685,7 @@
 					var toggleButton = document.createElement('toolbarbutton');
 					toggleButton.setAttribute('fieldname',
 						'creator-' + this._creatorCount + '-fieldMode');
-					toggleButton.className = 'zotero-clicky';
+					toggleButton.className = 'zotero-field-toggle zotero-clicky';
 					hbox.appendChild(toggleButton);
 					
 					// Minus (-) button
@@ -2178,7 +2178,7 @@
 						</menu>
 					</popup>
 				</popupset>
-				<hbox id="go-buttons" align="center" hidden="true">
+				<hbox id="go-buttons" align="center">
 					<button id="view-button"
 						onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
 						oncommand="document.getBindingParent(this).onViewClick(this, event)" disabled="false"/>
@@ -2193,18 +2193,22 @@
 					</button>
 				</hbox>
 				<hbox align="center" hidden="true">
-					<menulist id="item-type-menu" oncommand="document.getBindingParent(this).changeTypeTo(this.value, this)" flex="1"
-						onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
-						onkeypress="if (event.keyCode == event.DOM_VK_TAB){ if (!event.shiftKey) { document.getBindingParent(this).focusFirstField('info'); event.preventDefault(); } }">
-						<menupopup/>
-					</menulist>
 				</hbox>
 				<grid flex="1">
 					<columns>
 						<column/>
 						<column flex="1"/>
 					</columns>
-					<rows id="dynamic-fields" flex="1"/>
+					<rows id="dynamic-fields" flex="1">
+						<row>
+							<label value="&zotero.items.itemType;:"/>
+							<menulist class="zotero-clicky" id="item-type-menu" oncommand="document.getBindingParent(this).changeTypeTo(this.value, this)" flex="1"
+								onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
+								onkeypress="if (event.keyCode == event.DOM_VK_TAB){ if (!event.shiftKey) { document.getBindingParent(this).focusFirstField('info'); event.preventDefault(); } }">
+								<menupopup/>
+							</menulist>
+						</row>
+					</rows>
 				</grid>
 			</scrollbox>
 		</content>

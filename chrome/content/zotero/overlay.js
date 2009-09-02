@@ -110,9 +110,9 @@ var ZoteroPane = new function()
 		
 		if (Zotero.isMac) {
 			//document.getElementById('zotero-tb-actions-zeroconf-update').setAttribute('hidden', false);
-			document.getElementById('zotero-pane').setAttribute('platform', 'mac');
+			document.getElementById('zotero-pane-stack').setAttribute('platform', 'mac');
 		} else if(Zotero.isWin) {
-			document.getElementById('zotero-pane').setAttribute('platform', 'win');
+			document.getElementById('zotero-pane-stack').setAttribute('platform', 'win');
 		}
 		
 		//Initialize collections view
@@ -211,6 +211,12 @@ var ZoteroPane = new function()
 		
 		if (Zotero.Prefs.get('debugShowDuplicates')) {
 			document.getElementById('zotero-tb-actions-showDuplicates').hidden = false;
+		}
+		
+		// use appropriate search box
+		if(Zotero.isFx30) {
+			document.getElementById("zotero-tb-search-label").hidden = false;
+			document.getElementById("zotero-tb-search").setAttribute("type", "conditional-timed");
 		}
 	}
 	
