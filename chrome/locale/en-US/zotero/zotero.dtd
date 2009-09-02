@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label						"Related">
 <!ENTITY zotero.notes.separate							"Edit in a separate window">
 
+<!ENTITY zotero.items.itemType							"Item Type">
 <!ENTITY zotero.items.type_column						"Type">
 <!ENTITY zotero.items.title_column						"Title">
 <!ENTITY zotero.items.creator_column					"Creator">
@@ -94,11 +95,11 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay			"No tags to display">
 <!ENTITY zotero.tagSelector.filter					"Filter:">
-<!ENTITY zotero.tagSelector.showAutomatic			"Show automatic">
-<!ENTITY zotero.tagSelector.displayAll				"Display all tags">
-<!ENTITY zotero.tagSelector.selectVisible			"Select visible">
-<!ENTITY zotero.tagSelector.clearVisible				"Deselect visible">
-<!ENTITY zotero.tagSelector.clearAll					"Deselect all">
+<!ENTITY zotero.tagSelector.showAutomatic			"Show Automatic">
+<!ENTITY zotero.tagSelector.displayAll				"Display All Tags">
+<!ENTITY zotero.tagSelector.selectVisible			"Select Visible">
+<!ENTITY zotero.tagSelector.clearVisible				"Deselect Visible">
+<!ENTITY zotero.tagSelector.clearAll					"Deselect All">
 <!ENTITY zotero.tagSelector.renameTag				"Rename Tag...">
 <!ENTITY zotero.tagSelector.deleteTag				"Delete Tag...">
 

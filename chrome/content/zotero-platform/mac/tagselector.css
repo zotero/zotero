@@ -1,0 +1,35 @@
+groupbox
+{
+	background-color: white;
+}
+
+groupbox > .groupbox-body
+{
+	-moz-appearance: none;
+	margin: 0;
+	padding: 0;
+}
+
+#tags-toggle
+{
+	font-size: 10px;
+}
+
+#view-settings-menu .toolbarbutton-menu-dropmarker
+{
+	margin-left: -12px !important;
+}
+
+#no-tags-box
+{
+	color: #7f7f7f;
+}
+
+#tag-controls
+{
+	background-color: rgb(240,240,240);
+	border-width: 1px 0 0 0;
+	border-style: solid;
+	border-color: rgb(220,220,220);
+	padding: 2px 2px 2px 5px;
+}

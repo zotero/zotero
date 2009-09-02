@@ -28,6 +28,7 @@
 	<binding id="note-editor">
 		<resources>
 			<stylesheet src="chrome://zotero/skin/bindings/noteeditor.css"/>
+			<stylesheet src="chrome://zotero-platform/content/noteeditor.css"/>
 		</resources>
 		
 		<implementation>
@@ -431,7 +432,8 @@
 							v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
 						}
 						
-						this.id('tagsLabel').value = Zotero.getString('pane.item.tags') + " " + v;
+						this.id('tagsLabel').value = Zotero.getString('pane.item.tags');
+						this.id('tagsClick').value = v;
 					]]>
 				</body>
 			</method>
@@ -465,7 +467,8 @@
 							v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
 						}
 						
-						this.id('seeAlsoLabel').value = Zotero.getString('pane.item.related') + " " + v;
+						this.id('seeAlsoLabel').value = Zotero.getString('pane.item.related');
+						this.id('seeAlsoClick').value = v;
 					]]>
 				</body>
 			</method>
@@ -479,9 +482,23 @@
 			</method>
 		</implementation>
 		<content>
-			<xul:vbox xbl:inherits="flex">
-				<xul:label id="seeAlsoLabel" class="zotero-clicky" crop="end" onclick="document.getBindingParent(this).seeAlsoClick();"/>
-				<xul:label id="tagsLabel" class="zotero-clicky" crop="end" onclick="document.getBindingParent(this).tagsClick();"/>
+			<xul:vbox id="note-editor" xbl:inherits="flex">
+				<xul:grid>
+					<xul:columns>
+						<xul:column/>
+						<xul:column flex="1"/>
+					</xul:columns>
+					<xul:rows>
+						<xul:row>
+							<xul:label id="seeAlsoLabel"/>
+							<xul:label id="seeAlsoClick" class="zotero-clicky" crop="end" onclick="document.getBindingParent(this).seeAlsoClick();"/>
+						</xul:row>
+						<xul:row>
+							<xul:label id="tagsLabel"/>
+							<xul:label id="tagsClick" class="zotero-clicky" crop="end" onclick="document.getBindingParent(this).tagsClick();"/>
+						</xul:row>
+					</xul:rows>
+				</xul:grid>
 				<xul:popupset>
 					<xul:popup id="seeAlsoPopup" width="300" onpopupshowing="this.firstChild.reload();">
 						<xul:seealsobox id="seeAlso" flex="1"/>

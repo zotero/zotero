@@ -1,0 +1,9 @@
+row > label:first-child
+{
+	color: #7f7f7f;
+}
+
+*[zoteroFontSize=small] #note-editor
+{
+	font-size: 10px;
+}

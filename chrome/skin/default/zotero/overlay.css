@@ -24,17 +24,6 @@
 	overflow: hidden;
 }
 
-/* these are hacks to display a window separator in full screen mode on OS X */
-window #zotero-pane-stack[fullscreenmode="true"][platform="mac"]
-{
-	border-top: 1px solid #A3A3A3;
-}
-
-window[active="true"] #zotero-pane-stack[fullscreenmode="true"][platform="mac"]
-{
-	border-top: 1px solid black;
-}
-
 #zotero-collections-pane
 {
 	min-width: 150px;
@@ -56,12 +45,16 @@ window[active="true"] #zotero-pane-stack[fullscreenmode="true"][platform="mac"]
 	background: #FFFF99;
 }
 
+#zotero-collections-tree treechildren::-moz-tree-cell-text(hover) {
+	text-decoration: none !important;
+	cursor: auto !important;
+}
 
 #zotero-pane splitter
 {
 	border: 0;
 	width: 10px;
-	background-color: transparent !important;
+	background-color: transparent;
 	background-image: none;
 }
 
@@ -112,7 +105,6 @@ window[active="true"] #zotero-pane-stack[fullscreenmode="true"][platform="mac"]
 #zotero-tb-collection-add
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-collection-add.png');
-	margin-top: -2px;
 }
 
 #zotero-tb-group-add
@@ -130,20 +122,6 @@ window[active="true"] #zotero-pane-stack[fullscreenmode="true"][platform="mac"]
 {
 	margin: 0;
 	padding: 0;
-}
-
-/* These fix a rendering bug in Fx2.0b2 */
-#zotero-pane toolbarbutton .toolbarbutton-text
-{
-	margin:0 2px;
-}
-#zotero-pane .toolbarbutton-menu-dropmarker
-{
-	margin-right:4px;
-}
-#zotero-tb-fullscreen .toolbarbutton-text, #zotero-editpane-dynamic-fields .toolbarbutton-text
-{
-	margin:0;
 }
 
 
@@ -274,7 +252,7 @@ window[active="true"] #zotero-pane-stack[fullscreenmode="true"][platform="mac"]
 	width: 150px;
 }
 
-#zotero-tb-search-cancel
+#zotero-tb-search[type=conditional-timed] > #zotero-tb-search-cancel
 {
 	width: 10px;
 	height: 10px;
@@ -285,7 +263,7 @@ window[active="true"] #zotero-pane-stack[fullscreenmode="true"][platform="mac"]
 	-moz-appearance: none !important; /* Fix rendering problems on Linux */
 }
 
-#zotero-tb-search-cancel:hover:active
+#zotero-tb-search[type=conditional-timed] > #zotero-tb-search-cancel:hover:active
 {
 	list-style-image: url('chrome://zotero/skin/search-cancel-active.png');
 }

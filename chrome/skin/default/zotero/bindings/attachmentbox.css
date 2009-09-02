@@ -34,3 +34,26 @@
 	font-size: .95em;
 	padding: 0;
 }
+
+row > label:first-child
+{
+	font-weight: bold;
+}
+
+label
+{
+	-moz-margin-start: 1px !important;
+	-moz-margin-end: 5px !important;
+	padding: 1px 1px 0 2px;
+}
+
+zoteronoteeditor
+{
+	margin: 2px 2px 0 2px;
+}
+
+#title
+{
+	font-size: 12px;
+	font-weight: bold;
+}

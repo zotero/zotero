@@ -21,6 +21,7 @@
     ***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 
 <!DOCTYPE overlay [
 	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
@@ -141,10 +142,10 @@
 						the tag selector to max height -->
 				<vbox flex="1">
 					<hbox class="toolbar">
-						<toolbarbutton id="zotero-tb-collection-add" tooltiptext="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
-						<toolbarbutton id="zotero-tb-group-add" tooltiptext="&zotero.toolbar.newGroup;" oncommand="ZoteroPane.newGroup()"/>
+						<toolbarbutton id="zotero-tb-collection-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
+						<toolbarbutton id="zotero-tb-group-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newGroup;" oncommand="ZoteroPane.newGroup()"/>
 						<spacer flex="1"/>
-						<toolbarbutton id="zotero-tb-actions-menu" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
+						<toolbarbutton id="zotero-tb-actions-menu" class="zotero-tb-button" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
 							<menupopup id="zotero-tb-actions-popup" onpopupshowing="document.getElementById('cmd_zotero_reportErrors').setAttribute('disabled', Zotero.getErrors().length == 0)">
 								<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
 								<menuitem id="zotero-tb-actions-import-clipboard" label="&zotero.toolbar.importFromClipboard;" oncommand="Zotero_File_Interface.importFromClipboard();" />
@@ -200,13 +201,14 @@
 					oncommand="ZoteroPane.updateTagFilter()"/>
 			</vbox>
 			
-			<splitter id="zotero-tree-splitter" resizebefore="closest" resizeafter="closest" collapse="before">
+			<splitter id="zotero-tree-splitter" resizebefore="closest" resizeafter="closest" collapse="before"
+				onmousemove="document.getElementById('zotero-items-toolbar').setAttribute('state', this.getAttribute('state'));">
 				<grippy/>
 			</splitter>
 			
 			<vbox id="zotero-items-pane" persist="width" flex="1">
-				<hbox class="toolbar" align="center">
-					<toolbarbutton id="zotero-tb-add" tooltiptext="&zotero.toolbar.newItem.label;" type="menu">
+				<hbox class="toolbar"  id="zotero-items-toolbar" align="center">
+					<toolbarbutton id="zotero-tb-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItem.label;" type="menu">
 						<!-- New Item drop-down built in overlay.js::onLoad() -->
 						<menupopup>
 							<menuseparator/>
@@ -218,14 +220,14 @@
 							</menu>
 						</menupopup>
 					</toolbarbutton>
-					<toolbarbutton id="zotero-tb-item-from-page" tooltiptext="&zotero.toolbar.newItemFromPage.label;" oncommand="ZoteroPane.addItemFromPage('temporaryPDFHack', event.shiftKey ? !Zotero.Prefs.get('automaticSnapshots') : null)"/>
-					<toolbarbutton id="zotero-tb-lookup" tooltiptext="&zotero.toolbar.lookup.label;" oncommand="ZoteroPane.openLookupWindow()"/>
-					<toolbarbutton id="zotero-tb-note-add" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane.newNote(event.shiftKey);"/>
+					<toolbarbutton id="zotero-tb-item-from-page" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItemFromPage.label;" oncommand="ZoteroPane.addItemFromPage('temporaryPDFHack', event.shiftKey ? !Zotero.Prefs.get('automaticSnapshots') : null)"/>
+					<toolbarbutton id="zotero-tb-lookup" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" oncommand="ZoteroPane.openLookupWindow()"/>
+					<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane.newNote(event.shiftKey);"/>
 					<toolbarseparator/>
-					<toolbarbutton id="zotero-tb-advanced-search" tooltiptext="&zotero.toolbar.advancedSearch;" oncommand="ZoteroPane.openAdvancedSearchWindow()"/>
+					<toolbarbutton id="zotero-tb-advanced-search" class="zotero-tb-button" tooltiptext="&zotero.toolbar.advancedSearch;" oncommand="ZoteroPane.openAdvancedSearchWindow()"/>
 					<spacer flex="1"/>
-					<label value="&zotero.toolbar.search.label;" control="zotero-tb-search"/>
-					<textbox id="zotero-tb-search" type="conditional-timed" timeout="250" command="cmd_zotero_search" dir="reverse"
+					<label id="zotero-tb-search-label" value="&zotero.toolbar.search.label;" control="zotero-tb-search" hidden="true"/>
+					<textbox id="zotero-tb-search" type="search" timeout="250" command="cmd_zotero_search" dir="reverse"
 						onkeypress="ZoteroPane.handleSearchKeypress(this, event)"
 						oninput="ZoteroPane.handleSearchInput(this, event)"
 						testcode="me.value.indexOf('&quot;') == -1"
@@ -373,7 +375,7 @@
 							</grid>
 						</tooltip>
 					</hbox>
-					<toolbarbutton id="zotero-tb-sync" class="zotero-small-progress-indicator" tooltip="_child"
+					<toolbarbutton id="zotero-tb-sync" class="zotero-tb-button" tooltip="_child"
 							oncommand="Zotero.Sync.Server.canAutoResetClient = true; Zotero.Sync.Runner.sync()">
 						<tooltip
 								onpopupshowing="ZoteroPane.setLastSyncStatus(this)"
@@ -384,8 +386,8 @@
 						</tooltip>
 					</toolbarbutton>
 					<toolbarseparator/>
-					<toolbarbutton id="zotero-tb-fullscreen" tooltiptext="&zotero.toolbar.fullscreen.tooltip;" oncommand="ZoteroPane.fullScreen();"/>
-					<toolbarbutton class="tabs-closebutton" oncommand="ZoteroPane.toggleDisplay()"/>
+					<toolbarbutton id="zotero-tb-fullscreen" tooltiptext="&zotero.toolbar.fullscreen.tooltip;" oncommand="ZoteroPane.fullScreen();" class="zotero-tb-button"/>
+					<toolbarbutton id="zotero-close-button" class="tabs-closebutton" oncommand="ZoteroPane.toggleDisplay()"/>
 				</hbox>
 				<!-- TODO: localize -->
 				<button id="zotero-item-restore-button" label="Restore to Library"

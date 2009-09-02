@@ -7,17 +7,6 @@ row > vbox
 	padding-bottom: 0 !important;
 }
 
-row > hbox > hbox
-{
-	-moz-box-align: center;
-}
-
-row hbox hbox label
-{
-	margin-top: 0;
-	margin-bottom: 0;
-}
-
 row vbox[fieldname=abstractNote],
 row vbox[fieldname=extra]
 {

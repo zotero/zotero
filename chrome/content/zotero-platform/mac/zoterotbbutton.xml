@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright (c) 2006  Center for History and New Media
+                        George Mason University, Fairfax, Virginia, USA
+                        http://chnm.gmu.edu
+    
+    Licensed under the Educational Community License, Version 1.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.opensource.org/licenses/ecl1.php
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+		  xmlns:xbl="http://www.mozilla.org/xbl" xmlns:svg="http://www.w3.org/2000/svg" 
+		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<binding id="zotero-tb-button" display="xul:button"
+           extends="chrome://global/content/bindings/button.xml#button-base">
+		<resources>
+			<stylesheet src="chrome://global/skin/toolbarbutton.css"/>
+		</resources>
+		<implementation>
+			<constructor>
+				<![CDATA[
+					var imageURL = document.defaultView.getComputedStyle(this, null).listStyleImage;
+					if(imageURL.substr(0, 4) == "url(") {
+						imageURL = imageURL.substring(4, imageURL.length-1);
+					} else if(imageURL.substr(0, 5) == "url('" || imageURL.substr(0, 5) == "url(\"") {
+						imageURL = imageURL.substring(5, imageURL.length-2);
+					}
+					document.getAnonymousElementByAttribute(this, "anonid", "tb-image")
+						.setAttributeNS("http://www.w3.org/1999/xlink", "href", imageURL);
+				]]>
+			</constructor>
+		</implementation>
+		<content>
+			<xul:stack>
+				<svg:svg class="zotero-tb-glow" xmlns="http://www.w3.org/2000/svg" width="18" height="24" version="1.1">
+					<svg:filter id="DropShadow">
+					   <svg:feGaussianBlur in="SourceAlpha" stdDeviation="1" result="MyBlur"/>
+					</svg:filter>
+					<svg:image anonid="tb-image" filter="url(#DropShadow)" x="1" y="4" width="16" height="16"/>	
+				</svg:svg>
+				<xul:image xbl:inherits="src=image" style="padding: 4px 1px 4px 1px;"/>
+			</xul:stack>
+		</content>
+	</binding>
+</bindings>
