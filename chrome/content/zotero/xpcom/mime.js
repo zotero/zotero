@@ -78,7 +78,8 @@ Zotero.MIME = new function(){
 	// Extensions of text files (generally XML) to force to be external
 	var _externalTextExtensions = {
 		graffle: true,
-		mm: true
+		mm: true,
+		opml: true
 	};
 	
 	
