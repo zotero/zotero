@@ -1,4 +1,4 @@
--- 61
+-- 62
 
 -- This file creates tables containing user-specific data for new users --
 -- any changes made here must be mirrored in transition steps in schema.js::_migrateSchema()
@@ -46,6 +46,7 @@ CREATE TABLE itemData (
     FOREIGN KEY (fieldID) REFERENCES fields(fieldID),
     FOREIGN KEY (valueID) REFERENCES itemDataValues(valueID)
 );
+CREATE INDEX itemData_fieldID ON itemData(fieldID);
 
 -- Note data for note and attachment items
 CREATE TABLE itemNotes (

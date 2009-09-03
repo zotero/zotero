@@ -2447,6 +2447,10 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE itemAttachments SET storageModTime=NULL WHERE storageModTime<0");
 				}
 				
+				if (i==62) {
+					Zotero.DB.query("CREATE INDEX IF NOT EXISTS itemData_fieldID ON itemData(fieldID)");
+				}
+				
 				Zotero.wait();
 			}
 			
