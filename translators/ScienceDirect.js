@@ -8,7 +8,7 @@
 	"maxVersion":null,
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-07-17 05:30:00"
+	"lastUpdated":"2009-09-04 07:45:00"
 }
 
 function detectWeb(doc, url) {
@@ -236,6 +236,10 @@ function doWeb(doc, url) {
 			if (voliss.match(/Issues?\s+[^,]+/)) item.issue = voliss.match(/Issues?\s+([^,]+)/)[1];
 			if (voliss.match(/(J|F|M|A|S|O|N|D)\w+\s+\d{4}/)) item.date = voliss.match(/(J|F|M|A|S|O|N|D)\w+\s+\d{4}/)[0];
 			if (voliss.match(/Pages?\s+[^,^\s]+/)) item.pages = voliss.match(/Pages?\s+([^,^\s]+)/)[1];
+			/*
+			
+			FIXME: pulling full article content
+			
 			var abspath = '//div[@class="articleHeaderInner"][@id="articleHeader"]/div[@class="articleText"]/p';
 			var absx = doc2.evaluate(abspath, doc2, nsResolver, XPathResult.ANY_TYPE, null);
 			var ab;
@@ -246,6 +250,7 @@ function doWeb(doc, url) {
 			if (item.abstractNote.substr(0, 7) == "Summary") {
 				item.abstractNote = item.abstractNote.substr(9);
 			}
+			*/
 			var tagpath = '//div[@class="articleText"]/p[strong[starts-with(text(), "Keywords:")]]';
 			if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 				if (doc2.evaluate(tagpath, doc2, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(":")[1]) {
@@ -255,7 +260,13 @@ function doWeb(doc, url) {
 					}
 				}
 			}
+			/*
+			
+			FIXME: producing empty pages
+			
 			item.attachments.push({url:doc2.location.href, title:"ScienceDirect Snapshot", mimeType:"text/html"});
+			
+			*/
 			
 			return item;
 		};
