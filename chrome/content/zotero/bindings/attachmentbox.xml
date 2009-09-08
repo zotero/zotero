@@ -64,6 +64,7 @@
 					this.displayDateModified = false;
 					this.displayIndexed = false;
 					this.displayNote = false;
+					this.displayNoteIfEmpty = false;
 					
 					switch (val) {
 						case 'view':
@@ -88,6 +89,7 @@
 							this.displayPages = true;
 							this.displayIndexed = true;
 							this.displayNote = true;
+							this.displayNoteIfEmpty = true;
 							this.displayDateModified = true;
 							break;
 						
@@ -106,6 +108,8 @@
 							this.displayFileName = true;
 							this.displayAccessed = true;
 							this.displayNote = true;
+							// Notes aren't currently editable in mergeedit pane
+							this.displayNoteIfEmpty = false;
 							this.displayDateModified = true;
 							break;
 						
@@ -149,7 +153,7 @@
 					var accessed = this._id('accessedRow');
 					var pagesRow = this._id('pagesRow');
 					var dateModifiedRow = this._id('dateModified');
-					var indexBox = this._id('index-box');
+					var indexStatusRow = this._id('indexStatusRow');
 					var selectButton = this._id('select-button');
 					
 					// DEBUG: this is annoying -- we really want to use an abstracted
@@ -236,8 +240,8 @@
 						
 						// Access date
 						if (this.displayAccessed) {
-							document.getElementById("accessed-label").value = Zotero.getString('itemFields.accessDate')+": ";
-							document.getElementById("accessed").value = Zotero.Date.sqlToDate(
+							this._id("accessed-label").value = Zotero.getString('itemFields.accessDate')+": ";
+							this._id("accessed").value = Zotero.Date.sqlToDate(
 									this.item.getField('accessDate'), true
 								).toLocaleString();
 							accessed.hidden = false;
@@ -258,11 +262,11 @@
 								!= Zotero.Attachments.LINK_MODE_LINKED_URL
 							&& this.displayFileName) {
 						// TODO: localize
-						var file = this.item.getFile(false, true);
-						var fileName = file.leafName;
+						var fileName = this.item.getFilename();
+						
 						if (fileName) {
-							document.getElementById("fileName-label").value = "Filename: ";
-							document.getElementById("fileName").value = fileName;
+							this._id("fileName-label").value = "Filename: ";
+							this._id("fileName").value = fileName;
 							fileNameRow.hidden = false;
 						}
 						else {
@@ -281,8 +285,9 @@
 						var pages = Zotero.Fulltext.getPages(this.item.id);
 						var pages = pages ? pages.total : null;
 						if (pages) {
-							document.getElementById("pages-label").value = Zotero.getString('itemFields.pages')+': ';
-							document.getElementById("pages").value = pages;
+							// TODO: localize colon
+							this._id("pages-label").value = Zotero.getString('itemFields.pages') + ': ';
+							this._id("pages").value = pages;
 							pagesRow.hidden = false;
 						}
 						else {
@@ -294,8 +299,8 @@
 					}
 					
 					if (this.displayDateModified) {
-						document.getElementById("dateModified-label").value = Zotero.getString('itemFields.dateModified')+': ';
-						document.getElementById("dateModified").value = Zotero.Date.sqlToDate(
+						this._id("dateModified-label").value = Zotero.getString('itemFields.dateModified')+': ';
+						this._id("dateModified").value = Zotero.Date.sqlToDate(
 								this.item.getField('dateModified'), true
 							).toLocaleString();
 						dateModifiedRow.hidden = false;
@@ -307,27 +312,29 @@
 					// Full-text index information
 					if (this.displayIndexed) {
 						this.updateItemIndexedState();
-						indexBox.hidden = false;
+						indexStatusRow.hidden = false;
 					}
 					else {
-						indexBox.hidden = true;
+						indexStatusRow.hidden = true;
 					}
 					
 					// Note editor
 					var noteEditor = this._id('note-editor');
 					if (this.displayNote) {
-						noteEditor.hidden = false;
-						
-						// Don't make note editable (at least for now)
-						if (this.mode == 'merge' || this.mode == 'mergeedit') {
-							noteEditor.mode = 'merge';
-							noteEditor.displayButton = false;
+						if (this.displayNoteIfEmpty || this.item.getNote() != '') {
+							noteEditor.hidden = false;
+							
+							// Don't make note editable (at least for now)
+							if (this.mode == 'merge' || this.mode == 'mergeedit') {
+								noteEditor.mode = 'merge';
+								noteEditor.displayButton = false;
+							}
+							else {
+								noteEditor.mode = this.mode;
+							}
+							noteEditor.parent = null;
+							noteEditor.item = this.item;
 						}
-						else {
-							noteEditor.mode = this.mode;
-						}
-						noteEditor.parent = null;
-						noteEditor.item = this.item;
 					}
 					else {
 						noteEditor.hidden = true;
@@ -435,7 +442,6 @@
 			<method name="updateItemIndexedState">
 				<body>
 				<![CDATA[
-					var indexBox = this._id('index-box');
 					var indexStatus = this._id('index-status');
 					var reindexButton = this._id('reindex');
 					
@@ -455,7 +461,7 @@
 							str = 'general.yes';
 							break;
 					}
-					document.getElementById("index-status-label").value = Zotero.getString('fulltext.indexState.indexed') + ': ';
+					this._id("index-status-label").value = Zotero.getString('fulltext.indexState.indexed') + ': ';
 					indexStatus.value = Zotero.getString(str);
 					
 					// Reindex button tooltip (string stored in zotero.properties)
@@ -516,7 +522,7 @@
 							<label id="dateModified-label"/>
 							<label id="dateModified"/>
 						</row>
-						<row>
+						<row id="indexStatusRow">
 							<label id="index-status-label"/>
 							<hbox>
 								<label id="index-status"/>
@@ -525,9 +531,6 @@
 						</row>
 					</rows>
 				</grid>
-				
-				<hbox id="index-box">
-				</hbox>
 				
 				<zoteronoteeditor id="note-editor" notitle="1" flex="1"/>
 				
