@@ -146,12 +146,11 @@ hbox.zotero-date-field-status label
 	min-width: 26px !important;
 }
 
-.zotero-field-toggle .toolbarbutton-text
+.zotero-field-toggle
 {	
-	visibility: hidden;
-}
-
-.zotero-field-toggle .toolbarbutton-icon
-{
-	margin: 0px !important;
+	width: 27px;
+	height: 14px;
+	padding: 0 !important;
+	margin: 0 5px 0 0 !important;
+	border-width: 3px !important;
 }
