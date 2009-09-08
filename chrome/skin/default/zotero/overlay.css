@@ -45,11 +45,6 @@
 	background: #FFFF99;
 }
 
-#zotero-collections-tree treechildren::-moz-tree-cell-text(hover) {
-	text-decoration: none !important;
-	cursor: auto !important;
-}
-
 #zotero-pane splitter
 {
 	border: 0;

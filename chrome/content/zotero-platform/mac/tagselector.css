@@ -10,7 +10,7 @@ groupbox > .groupbox-body
 	padding: 0;
 }
 
-#tags-toggle
+*[zoteroFontSize=small] #tags-toggle
 {
 	font-size: 10px;
 }

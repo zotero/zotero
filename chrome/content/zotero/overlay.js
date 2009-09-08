@@ -115,6 +115,9 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'win');
 		}
 		
+		if(Zotero.isFx30) document.documentElement.setAttribute("moz-version", "3.0");
+		if(Zotero.isFx35) document.documentElement.setAttribute("moz-version", "3.5");
+		
 		//Initialize collections view
 		this.collectionsView = new Zotero.CollectionTreeView();
 		var collectionsTree = document.getElementById('zotero-collections-tree');
