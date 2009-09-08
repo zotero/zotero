@@ -809,7 +809,7 @@
 					
 					// Switch to single-field mode
 					if (fieldMode == 1) {
-						button.style.MozBorderImage = 'url("chrome://zotero/skin/textfield-dual.png") 0 0 0 0 stretch';
+						button.style.backgroundImage = 'url("chrome://zotero/skin/textfield-dual.png")';
 						button.setAttribute('tooltiptext', Zotero.getString('pane.item.switchFieldMode.two'));
 						lastName.setAttribute('fieldMode', '1');
 						button.setAttribute('onclick', "document.getBindingParent(this).switchCreatorMode(Zotero.getAncestorByTagName(this, 'row'), 0)");
@@ -840,7 +840,7 @@
 					}
 					// Switch to two-field mode
 					else {
-						button.style.MozBorderImage = 'url("chrome://zotero/skin/textfield-single.png") 0 0 0 0 stretch';
+						button.style.backgroundImage = 'url("chrome://zotero/skin/textfield-single.png")';
 						button.setAttribute('tooltiptext', Zotero.getString('pane.item.switchFieldMode.one'));
 						lastName.setAttribute('fieldMode', '0');
 						button.setAttribute('onclick', "document.getBindingParent(this).switchCreatorMode(Zotero.getAncestorByTagName(this, 'row'), 1)");

@@ -159,24 +159,29 @@ zoteromergepane {
 }
 
 .zotero-clicky[value="-"] {
-	-moz-border-image: url('chrome://zotero/skin/minus.png') 0 0 0 0 stretch;
+	background-image: url('chrome://zotero/skin/minus.png') !important;
+	background-position: center !important;
+	background-repeat: no-repeat !important;
+	border: 0px !important;
 }
 
 .zotero-clicky[value="+"] {
-	-moz-border-image: url('chrome://zotero/skin/plus.png') 0 0 0 0 stretch;
+	background-image: url('chrome://zotero/skin/plus.png') !important;
+	background-position: center !important;
+	background-repeat: no-repeat !important;
+	border: 0px !important;
 }
 
 .zotero-clicky[value="+"][disabled=true] {
-	-moz-border-image: url('chrome://zotero/skin/plus.png') 0 0 0 0 stretch;
 	opacity: .5;
 }
 
 .zotero-clicky[value="+"]:not([disabled=true]):active {
-	-moz-border-image: url('chrome://zotero/skin/plus-active.png') 0 0 0 0 stretch;
+	background-image: url('chrome://zotero/skin/plus-active.png') !important;
 }
 
 .zotero-clicky[value="-"]:not([disabled=true]):active {
-	-moz-border-image: url('chrome://zotero/skin/minus-active.png') 0 0 0 0 stretch;
+	background-image: url('chrome://zotero/skin/minus-active.png') !important;
 }
 
 .zotero-clicky:not([disabled=true]):hover,

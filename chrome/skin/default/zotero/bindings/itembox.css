@@ -152,5 +152,8 @@ hbox.zotero-date-field-status label
 	height: 14px;
 	padding: 0 !important;
 	margin: 0 5px 0 0 !important;
-	border-width: 3px !important;
+	background-repeat: no-repeat !important;
+	background-position: center !important;
+	border-width: 0 !important;
+	-moz-border-radius: 4px !important;
 }
