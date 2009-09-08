@@ -2002,7 +2002,7 @@ Zotero.Item.prototype.getSource = function() {
 		}
 		var sourceItem = Zotero.Items.getByLibraryAndKey(this.libraryID, this._sourceItem);
 		if (!sourceItem) {
-			var msg = "Source item for keyed source doesn't exist in Zotero.Item.getSource()";
+			var msg = "Source item for keyed source doesn't exist in Zotero.Item.getSource() " + "(" + this._sourceItem + ")";
 			var e = new Zotero.Error(msg, "MISSING_OBJECT");
 			throw (e);
 		}
@@ -2534,6 +2534,39 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 	}
 	
 	return file;
+}
+
+
+/**
+ * _row_ is optional itemAttachments row if available to skip queries
+ */
+Zotero.Item.prototype.getFilename = function (row) {
+	if (!this.isAttachment()) {
+		throw ("getFileName() can only be called on attachment items in Zotero.Item.getFilename()");
+	}
+	
+	if (!row) {
+		var row = {
+			linkMode: this.attachmentLinkMode,
+			path: this.attachmentPath
+		};
+	}
+	
+	if (row.linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+		throw ("getFilename() cannot be called on link attachments in Zotero.Item.getFilename()");
+	}
+	
+	if (this.isImportedAttachment()) {
+		var matches = row.path.match("^storage:(.+)$");
+		return matches[1];
+	}
+	
+	var file = this.getFile();
+	if (!file) {
+		return false;
+	}
+	
+	return file.leafName;
 }
 
 
