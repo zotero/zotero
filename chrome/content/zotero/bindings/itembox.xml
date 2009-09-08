@@ -2178,7 +2178,7 @@
 						</menu>
 					</popup>
 				</popupset>
-				<hbox id="go-buttons" align="center">
+				<hbox id="go-buttons" align="center" hidden="true">
 					<button id="view-button"
 						onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
 						oncommand="document.getBindingParent(this).onViewClick(this, event)" disabled="false"/>

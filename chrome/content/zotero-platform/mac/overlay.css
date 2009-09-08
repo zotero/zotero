@@ -13,7 +13,10 @@
 }
 
 #zotero-pane .toolbar {
+	/* This will be ignored on FF <3.5 */
 	-moz-appearance: -moz-mac-unified-toolbar;
+	/* This will be ignored on FF >=3.5 */
+	background: url("chrome://zotero/skin/mac/toolbar-background.png") left center repeat-x;
 	margin-left: -1px;
 }
 
@@ -46,8 +49,12 @@
 .zotero-tb-button > .toolbarbutton-icon {
   -moz-binding: url('chrome://zotero-platform/content/zoterotbbutton.xml#zotero-tb-button');
   background: url("chrome://zotero/skin/mac/menubutton-start.png") left center no-repeat;
-  outline-color: black;
   -moz-padding-start: 10px;
+  padding-bottom: 2px;
+}
+
+#zotero-tb-sync > .toolbarbutton-icon {
+  -moz-padding-start: 8px;
 }
 
 .zotero-tb-button[open="true"] > .toolbarbutton-icon,
@@ -87,13 +94,17 @@
 	margin: none;
 }
 
-#zotero-view-tabbox {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox {
 	background-color: #fff;
 	padding: 0;
 	margin: 0;
 }
 
-#zotero-item-pane-content .groupbox-body {
+:root[moz-version="3.0"] #zotero-view-tabbox {
+	margin: 2px 0 0 0;
+}
+
+:root:not([moz-version="3.0"]) #zotero-item-pane-content .groupbox-body {
 	-moz-appearance: none;
 	background-color: #ffffff;
 }
@@ -102,28 +113,34 @@
 	color: #7f7f7f;
 }
 
-#zotero-view-tabbox tabpanels {
+#zotero-view-tabbox > tabpanels {
+	margin: 0;
+	padding: 0;
+}
+
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabpanels {
+	margin: 12px 0 0 0;
 	-moz-appearance: none;
 }
 
-#zotero-view-tabbox > tabs {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs {
   -moz-appearance: -moz-mac-unified-toolbar; 
   padding: 2px;
 }
 
-#zotero-view-tabbox > tabs > tab > hbox > .tab-icon {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab > hbox > .tab-icon {
 	display: none;
 }
 
-#zotero-view-tabbox > tabs > tab > hbox .tab-text {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab > hbox .tab-text {
   text-shadow: rgba(255, 255, 255, 0.4) 0 1px !important;
 }
-#zotero-view-tabbox > tabs > tab:active:hover > hbox > .tab-text,
-#zotero-view-tabbox > tabs > tab[selected=true] > hbox > .tab-text {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab:active:hover > hbox > .tab-text,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab[selected=true] > hbox > .tab-text {
   text-shadow: none !important;
 }
 
-#zotero-view-tabbox > tabs > tab {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab {
   -moz-box-orient: vertical;
   -moz-box-align: center;
   -moz-appearance: none;
@@ -135,114 +152,114 @@
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-middle.png") 0 4 0 5 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > tab:active:hover {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab:active:hover {
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-middle-down.png") 0 4 0 5 repeat stretch;
   text-shadow: none !important;
 }
 
-#zotero-view-tabbox > tabs > tab[selected=true] {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab[selected=true] {
   color: #FFF !important;
   text-shadow: rgba(0, 0, 0, 0.4) 0 1px;
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-middle-selected.png") 0 4 0 5 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > tab[selected=true]:active:hover {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab[selected=true]:active:hover {
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-middle-selected-down.png") 0 4 0 5 repeat stretch;
 }
 
-:root:not([active]) #zotero-view-tabbox > tabs > * {
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs > * {
   color: #7C7C7C !important; /* remove this when we support click-through */
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-middle-inactive.png") 0 4 0 5 repeat stretch;
 }
 
-:root:not([active]) #zotero-view-tabbox > tabs > tab[selected=true] {
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs > tab[selected=true] {
   color: #C5C5C5 !important; /* remove this when we support click-through */
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-middle-selected-inactive.png") 0 4 0 5 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > :first-child,
-#zotero-view-tabbox > tabs > [first-visible],
-#zotero-view-tabbox > tabs[chromedir=rtl] > :last-child,
-#zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > :first-child,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > [first-visible],
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > :last-child,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
   border-width: 0 4px 0 6px;
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-left.png") 0 4 0 6 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > :first-child:active:hover,
-#zotero-view-tabbox > tabs > [first-visible]:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > :last-child:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible]:active:hover {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > :first-child:active:hover,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > [first-visible]:active:hover,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > :last-child:active:hover,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible]:active:hover {
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-left-down.png") 0 4 0 6 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > tab:first-child[selected=true],
-#zotero-view-tabbox > tabs > tab[first-visible][selected=true],
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true],
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true] {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab:first-child[selected=true],
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab[first-visible][selected=true],
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true],
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true] {
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-left-selected.png") 0 4 0 6 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > tab:first-child[selected=true]:active:hover,
-#zotero-view-tabbox > tabs > tab[first-visible][selected=true]:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true]:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true]:active:hover, {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab:first-child[selected=true]:active:hover,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab[first-visible][selected=true]:active:hover,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true]:active:hover,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true]:active:hover, {
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-left-selected-down.png") 0 4 0 6 repeat stretch;
 }
 
-:root:not([active]) #zotero-view-tabbox > tabs > :first-child,
-:root:not([active]) #zotero-view-tabbox > tabs > [first-visible],
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > :last-child,
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs > :first-child,
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs > [first-visible],
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > :last-child,
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-left-inactive.png") 0 4 0 6 repeat stretch;
 }
 
-:root:not([active]) #zotero-view-tabbox > tabs > tab:first-child[selected=true],
-:root:not([active]) #zotero-view-tabbox > tabs > tab[first-visible][selected=true],
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true],
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true] {
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs > tab:first-child[selected=true],
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs > tab[first-visible][selected=true],
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true],
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true] {
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-left-selected-inactive.png") 0 4 0 6 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > :last-child,
-#zotero-view-tabbox > tabs > [last-visible],
-#zotero-view-tabbox > tabs[chromedir=rtl] > :first-child,
-#zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible] {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > :last-child,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > [last-visible],
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > :first-child,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible] {
   border-width: 0 6px 0 5px;
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-right.png") 0 6 0 5 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > :last-child:active:hover,
-#zotero-view-tabbox > tabs > [last-visible]:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > :first-child:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible]:active:hover {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > :last-child:active:hover,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > [last-visible]:active:hover,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > :first-child:active:hover,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible]:active:hover {
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-right-down.png") 0 6 0 5 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > tab:last-child[selected=true],
-#zotero-view-tabbox > tabs > tab[last-visible][selected=true],
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true],
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true] {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab:last-child[selected=true],
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab[last-visible][selected=true],
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true],
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true] {
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-right-selected.png") 0 6 0 5 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > tab:last-child[selected=true]:active:hover,
-#zotero-view-tabbox > tabs > tab[last-visible][selected=true]:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true]:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true]:active:hover {
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab:last-child[selected=true]:active:hover,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs > tab[last-visible][selected=true]:active:hover,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true]:active:hover,
+:root:not([moz-version="3.0"]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true]:active:hover {
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-right-selected-down.png") 0 6 0 5 repeat stretch;
 }
 
-:root:not([active]) #zotero-view-tabbox > tabs > :last-child,
-:root:not([active]) #zotero-view-tabbox > tabs > [last-visible],
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > :first-child,
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible] {
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs > :last-child,
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs > [last-visible],
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > :first-child,
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible] {
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-right-inactive.png") 0 6 0 5 repeat stretch;
 }
 
-:root:not([active]) #zotero-view-tabbox > tabs > tab:last-child[selected=true],
-:root:not([active]) #zotero-view-tabbox > tabs > tab[last-visible][selected=true],
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true],
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true] {
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs > tab:last-child[selected=true],
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs > tab[last-visible][selected=true],
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true],
+:root:not([moz-version="3.0"]) :root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true] {
   -moz-border-image: url("chrome://global/skin/toolbar/viewbutton-right-selected-inactive.png") 0 6 0 5 repeat stretch;
 }
 
@@ -276,20 +293,6 @@
   background-image: url("chrome://zotero/skin/mac/selected-focused-gradient.png");
   background-color: #8a8a8a !important;
   border-top: 1px solid #91a0c0;
-}
-
-#zotero-collections-tree treechildren::-moz-tree-cell(leaf) ,
-#zotero-collections-tree treechildren::-moz-tree-image(leaf) {
-  cursor: pointer;
-}
-
-#zotero-collections-tree treechildren::-moz-tree-cell-text(leaf, hover) {
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-#zotero-collections-tree treechildren::-moz-tree-cell(separator) {
-  cursor: default;
 }
 
 #zotero-collections-tree treechildren::-moz-tree-cell-text(selected) {  
