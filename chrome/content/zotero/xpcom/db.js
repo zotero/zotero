@@ -421,7 +421,9 @@ Zotero.DBConnection.prototype.getLastErrorString = function () {
 Zotero.DBConnection.prototype.beginTransaction = function () {
 	// TODO: limit to Zotero.DB, not all Zotero.DBConnections?
 	if (Zotero.waiting) {
-		throw ("Cannot access database layer during active Zotero.wait()");
+		var msg = "Cannot access database layer during active Zotero.wait()";
+		Zotero.debug(msg, 2);
+		throw (msg);
 	}
 	
 	var db = this._getDBConnection();

@@ -396,19 +396,51 @@ Zotero.Utilities.prototype.getSQLDataType = function(value) {
 
 
 /*
- * From http://developer.mozilla.org/en/docs/nsICryptoHash#Computing_the_Hash_of_a_String
+ * Adapted from http://developer.mozilla.org/en/docs/nsICryptoHash
+ *
+ * @param	{String|nsIFile}	strOrFile
+ * @param	{Boolean}			[base64=false]	Return as base-64-encoded string rather than hex string
+ * @return	{String}
  */
-Zotero.Utilities.prototype.md5 = function(str) {
-	var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
-		createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-	converter.charset = "UTF-8";
-	var result = {};
-	var data = converter.convertToByteArray(str, result);
-	var ch = Components.classes["@mozilla.org/security/hash;1"]
-		.createInstance(Components.interfaces.nsICryptoHash);
-	ch.init(ch.MD5);
-	ch.update(data, data.length);
-	var hash = ch.finish(false);
+Zotero.Utilities.prototype.md5 = function(strOrFile, base64) {
+	if (typeof strOrFile == 'string') {
+		var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
+			createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+		converter.charset = "UTF-8";
+		var result = {};
+		var data = converter.convertToByteArray(strOrFile, result);
+		var ch = Components.classes["@mozilla.org/security/hash;1"]
+			.createInstance(Components.interfaces.nsICryptoHash);
+		ch.init(ch.MD5);
+		ch.update(data, data.length);
+	}
+	else if (strOrFile instanceof Components.interfaces.nsIFile) {
+		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+						.createInstance(Components.interfaces.nsIFileInputStream);
+		// open for reading
+		istream.init(strOrFile, 0x01, 0444, 0);
+		var ch = Components.classes["@mozilla.org/security/hash;1"]
+					   .createInstance(Components.interfaces.nsICryptoHash);
+		// we want to use the MD5 algorithm
+		ch.init(ch.MD5);
+		// this tells updateFromStream to read the entire file
+		const PR_UINT32_MAX = 0xffffffff;
+		ch.updateFromStream(istream, PR_UINT32_MAX);
+	}
+	
+	// pass false here to get binary data back
+	var hash = ch.finish(base64);
+	
+	if (istream) {
+		istream.close();
+	}
+	
+	if (base64) {
+		return hash;
+	}
+	
+	/*
+	// This created 36-character hashes
 	
 	// return the two-digit hexadecimal code for a byte
 	function toHexString(charCode) {
@@ -417,6 +449,17 @@ Zotero.Utilities.prototype.md5 = function(str) {
 	
 	// convert the binary hash data to a hex string.
 	return [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
+	*/
+	
+	// From http://rcrowley.org/2007/11/15/md5-in-xulrunner-or-firefox-extensions/
+	var ascii = []; ii = hash.length;
+	for (var i = 0; i < ii; ++i) {
+		var c = hash.charCodeAt(i);
+		var ones = c % 16;
+		var tens = c >> 4;
+		ascii.push(String.fromCharCode(tens + (tens > 9 ? 87 : 48)) + String.fromCharCode(ones + (ones > 9 ? 87 : 48)));
+	}
+	return ascii.join('');
 }
 
 
@@ -795,17 +838,18 @@ Zotero.Utilities.Translate.prototype.retrieveDocument = function(url) {
  * @param {String} 		url					URL to load
  * @param {String}		[body=null]			Request body to POST to the URL; a GET request is
  *											executed if no body is present
- * @param {String}		[requestContentType=application/x-www-form-urlencoded]
- *											Request content type for POST; ignored if no body
+ * @param {Object}		[headers]			HTTP headers to include in request;
+ *											Content-Type defaults to application/x-www-form-urlencoded
+ *											for POST; ignored if no body
  * @param {String} 		[responseCharset] 	Character set to force on the response
  * @return {String} 						Request body
  */
-Zotero.Utilities.Translate.prototype.retrieveSource = function(url, body, requestContentType, responseCharset) {
+Zotero.Utilities.Translate.prototype.retrieveSource = function(url, body, headers, responseCharset) {
 	/* Apparently, a synchronous XMLHttpRequest would have the behavior of this routine in FF3, but
 	 * in FF3.5, synchronous XHR blocks all JavaScript on the thread. See 
 	 * http://hacks.mozilla.org/2009/07/synchronous-xhr/. */
 	if(this.translate.locationIsProxied) url = this._convertURL(url);
-	if(!requestContentType) requestContentType = null;
+	if(!headers) headers = null;
 	if(!responseCharset) responseCharset = null;
 	
 	var mainThread = Zotero.mainThread;
@@ -813,7 +857,7 @@ Zotero.Utilities.Translate.prototype.retrieveSource = function(url, body, reques
 	var listener = function(aXmlhttp) { xmlhttp = aXmlhttp };
 	
 	if(body) {
-		Zotero.Utilities.HTTP.doPost(url, body, listener, requestContentType, responseCharset);
+		Zotero.Utilities.HTTP.doPost(url, body, listener, headers, responseCharset);
 	} else {
 		Zotero.Utilities.HTTP.doGet(url, listener, responseCharset);
 	}
@@ -870,7 +914,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
  * Already documented in Zotero.Utilities.HTTP
  * @ignore
  */
-Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, requestContentType, responseCharset) {
+Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, headers, responseCharset) {
 	url = this._convertURL(url);
 	
 	var translate = this.translate;
@@ -880,7 +924,7 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, reques
 		} catch(e) {
 			translate.error(false, e);
 		}
-	}, requestContentType, responseCharset);
+	}, headers, responseCharset);
 }
 
 /**
@@ -936,7 +980,6 @@ Zotero.Utilities.HTTP = new function() {
 		}
 		else {
 			Zotero.debug("HTTP GET " + url);
-		
 		}
 		if (this.browserIsOffline()){
 			return false;
@@ -981,12 +1024,20 @@ Zotero.Utilities.HTTP = new function() {
 	* @param {String} url URL to request
 	* @param {String} body Request body
 	* @param {Function} onDone Callback to be executed upon request completion
-	* @param {String} requestContentType Request content type (usually
-	*	application/x-www-form-urlencoded)
+	* @param {String} headers Request HTTP headers
 	* @param {String} responseCharset Character set to force on the response
 	* @return {Boolean} True if the request was sent, or false if the browser is offline
 	*/
-	this.doPost = function(url, body, onDone, requestContentType, responseCharset) {
+	this.doPost = function(url, body, onDone, headers, responseCharset) {
+		if (url instanceof Components.interfaces.nsIURI) {
+			// Don't display password in console
+			var disp = url.clone();
+			if (disp.password) {
+				disp.password = "********";
+			}
+			url = url.spec;
+		}
+		
 		var bodyStart = body.substr(0, 1024);
 		// Don't display sync password or session id in console
 		bodyStart = bodyStart.replace(/password=[^&]+/, 'password=********');
@@ -995,7 +1046,7 @@ Zotero.Utilities.HTTP = new function() {
 		Zotero.debug("HTTP POST "
 			+ (body.length > 1024 ?
 				bodyStart + '... (' + body.length + ' chars)' : bodyStart)
-			+ " to " + url);
+			+ " to " + (disp ? disp.spec : url));
 		
 		
 		if (this.browserIsOffline()){
@@ -1025,7 +1076,27 @@ Zotero.Utilities.HTTP = new function() {
 		xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
 		xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
 		
-		xmlhttp.setRequestHeader("Content-Type", (requestContentType ? requestContentType : "application/x-www-form-urlencoded" ));
+		if (headers) {
+			if (typeof headers == 'string') {
+				var msg = "doPost() now takes a headers object rather than a requestContentType -- update your code";
+				Zotero.debug(msg, 2);
+				Components.utils.reportError(msg);
+				headers = {
+					"Content-Type": headers
+				};
+			}
+		}
+		else {
+			headers = {};
+		}
+		
+		if (!headers["Content-Type"]) {
+			headers["Content-Type"] = "application/x-www-form-urlencoded";
+		}
+		
+		for (var header in headers) {
+			xmlhttp.setRequestHeader(header, headers[header]);
+		}
 		
 		/** @ignore */
 		xmlhttp.onreadystatechange = function(){
@@ -1042,10 +1113,24 @@ Zotero.Utilities.HTTP = new function() {
 	*
 	* @param {String} url URL to request
 	* @param {Function} onDone Callback to be executed upon request completion
+	* @param {Object} requestHeaders HTTP headers to include with request
 	* @return {Boolean} True if the request was sent, or false if the browser is offline
 	*/
-	this.doHead = function(url, onDone) {
-		Zotero.debug("HTTP HEAD "+url);
+	this.doHead = function(url, onDone, requestHeaders) {
+		if (url instanceof Components.interfaces.nsIURI) {
+			// Don't display password in console
+			var disp = url.clone();
+			if (disp.password) {
+				disp.password = "********";
+			}
+			Zotero.debug("HTTP HEAD " + disp.spec);
+			url = url.spec;
+		}
+		else {
+			Zotero.debug("HTTP HEAD " + url);
+		
+		}
+		
 		if (this.browserIsOffline()){
 			return false;
 		}
@@ -1068,9 +1153,19 @@ Zotero.Utilities.HTTP = new function() {
 		ds.itemType = Ci.nsIDocShellTreeItem.typeContent;
 		var xmlhttp = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
 						createInstance(Ci.nsIXMLHttpRequest);
+		// Prevent certificate/authentication dialogs from popping up
+		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open("HEAD", url, true);
+		if (requestHeaders) {
+			for (var header in requestHeaders) {
+				xmlhttp.setRequestHeader(header, requestHeaders[header]);
+			}
+		}
 		xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
 		xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
+		
+		// Don't cache HEAD requests
+		xmlhttp.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE;
 		
 		/** @ignore */
 		xmlhttp.onreadystatechange = function(){

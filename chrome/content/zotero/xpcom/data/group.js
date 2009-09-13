@@ -286,6 +286,10 @@ Zotero.Group.prototype.save = function () {
 * Deletes group and all descendant objects
 **/
 Zotero.Group.prototype.erase = function() {
+	// Don't send notifications for items and other groups objects that are deleted,
+	// since we're really only removing the group from the client
+	var notifierDisabled = Zotero.Notifier.disable();
+	
 	Zotero.DB.beginTransaction();
 	
 	var sql, ids, obj;
@@ -331,6 +335,9 @@ Zotero.Group.prototype.erase = function() {
 	sql = "DELETE FROM syncDeleteLog WHERE libraryID=?";
 	Zotero.DB.query(sql, this.libraryID);
 	
+	var prefix = "groups/" + this.id;
+	Zotero.Relations.eraseByPathPrefix(prefix);
+	
 	// Delete group
 	sql = "DELETE FROM groups WHERE groupID=?";
 	ids = Zotero.DB.query(sql, this.id)
@@ -341,6 +348,10 @@ Zotero.Group.prototype.erase = function() {
 	notifierData[this.id] = this.serialize();
 	
 	Zotero.DB.commitTransaction();
+	
+	if (notifierDisabled) {
+		Zotero.Notifier.enable();
+	}
 	
 	Zotero.Notifier.trigger('delete', 'group', this.id, notifierData);
 }

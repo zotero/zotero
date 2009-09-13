@@ -1,5 +1,6 @@
 Zotero.URI = new function () {
 	var _baseURI = ZOTERO_CONFIG.BASE_URI;
+	var _apiURI = ZOTERO_CONFIG.API_URI;
 	
 	
 	/**
@@ -22,8 +23,11 @@ Zotero.URI = new function () {
 	 *
 	 * @return	{String}
 	 */
-	this.getCurrentUserURI = function () {
+	this.getCurrentUserURI = function (noLocal) {
 		var userID = Zotero.userID;
+		if (!userID && noLocal) {
+			throw new Exception("Local userID not available and noLocal set in Zotero.URI.getCurrentUserURI()");
+		}
 		if (userID) {
 			return _baseURI + "users/" + userID;
 		}
@@ -42,22 +46,44 @@ Zotero.URI = new function () {
 	
 	
 	this.getLibraryURI = function (libraryID) {
-		var libraryType = Zotero.Libraries.getType(libraryID);
+		var path = this.getLibraryPath(libraryID);
+		return _baseURI + path;
+	}
+	
+	
+	/**
+	 * Get path portion of library URI (e.g., users/6 or groups/1)
+	 */
+	this.getLibraryPath = function (libraryID) {
+		if (libraryID) {
+			var libraryType = Zotero.Libraries.getType(libraryID);
+		}
+		else {
+			libraryType = 'user';
+		}
 		switch (libraryType) {
+			case 'user':
+				var id = Zotero.userID;
+				if (!id) {
+					throw new Exception("User id not available in Zotero.URI.getLibraryPath()");
+				}
+				break;
+			
 			case 'group':
 				var id = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
 				break;
 			
-			case 'user':
-				throw ("User library ids are not supported in Zotero.URI.getLibraryURI");
-			
 			default:
-				throw ("Unsupported library type '" + libraryType + "' in Zotero.URI.getLibraryURI()");
+				throw ("Unsupported library type '" + libraryType + "' in Zotero.URI.getLibraryPath()");
 		}
-		return _baseURI + libraryType + "s/" + id;
+		
+		return libraryType + "s/" + id;
 	}
 	
 	
+	/**
+	 * Return URI of item, which might be a local URI if user hasn't synced
+	 */
 	this.getItemURI = function (item) {
 		if (item.libraryID) {
 			var baseURI = this.getLibraryURI(item.libraryID);
@@ -66,6 +92,14 @@ Zotero.URI = new function () {
 			var baseURI =  this.getCurrentUserURI();
 		}
 		return baseURI + "/items/" + item.key;
+	}
+	
+	
+	/**
+	 * Get path portion of item URI (e.g., users/6/items/ABCD1234 or groups/1/items/ABCD1234)
+	 */
+	this.getItemPath = function (item) {
+		return this.getLibraryPath(item.libraryID) + "/items/" + item.key;
 	}
 	
 	

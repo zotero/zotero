@@ -6,6 +6,7 @@ Zotero.Relations = new function () {
 		owl: 'http://www.w3.org/2002/07/owl#'
 	};
 	
+	var _prefix = "http://zotero.org/";
 	
 	this.get = function (id) {
 		if (typeof id != 'number') {
@@ -76,6 +77,37 @@ Zotero.Relations = new function () {
 	}
 	
 	
+	this.updateUser = function (fromUserID, fromLibraryID, toUserID, toLibraryID) {
+		if (!fromUserID) {
+			throw ("Invalid source userID " + fromUserID + " in Zotero.Relations.updateUserID");
+		}
+		if (!fromLibraryID) {
+			throw ("Invalid source libraryID " + fromLibraryID + " in Zotero.Relations.updateUserID");
+		}
+		if (!toUserID) {
+			throw ("Invalid target userID " + toUserID + " in Zotero.Relations.updateUserID");
+		}
+		if (!toLibraryID) {
+			throw ("Invalid target libraryID " + toLibraryID + " in Zotero.Relations.updateUserID");
+		}
+		
+		Zotero.DB.beginTransaction();
+		
+		var sql = "UPDATE relations SET libraryID=? WHERE libraryID=?";
+		Zotero.DB.query(sql, [fromLibraryID, toLibraryID]);
+		
+		sql = "UPDATE relations SET "
+				+ "subject=REPLACE(subject, 'zotero.org/users/" + fromUserID + "', "
+					+ "'zotero.org/users/" + toUserID + "'), "
+				+ "object=REPLACE(object, 'zotero.org/users/" + fromUserID + "', "
+					+ "'zotero.org/users/" + toUserID + "') "
+					+ "WHERE predicate='owl:sameAs'";
+		Zotero.DB.query(sql);
+		
+		Zotero.DB.commitTransaction();
+	}
+	
+	
 	this.add = function (libraryID, subject, predicate, object) {
 		predicate = _getPrefixAndValue(predicate).join(':');
 		
@@ -106,6 +138,13 @@ Zotero.Relations = new function () {
 		// TODO: log to syncDeleteLog
 		
 		Zotero.DB.commitTransaction();
+	}
+	
+	
+	this.eraseByPathPrefix = function (prefix) {
+		prefix = _prefix + prefix + '%';
+		sql = "DELETE FROM relations WHERE subject LIKE ? OR object LIKE ?";
+		Zotero.DB.query(sql, [prefix, prefix]);
 	}
 	
 	

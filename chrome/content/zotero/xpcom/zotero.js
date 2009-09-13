@@ -28,7 +28,8 @@ const ZOTERO_CONFIG = {
 	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
 	BASE_URI: 'http://zotero.org/',
 	WWW_BASE_URL: 'http://www.zotero.org/',
-	SYNC_URL: 'https://sync.zotero.org/'
+	SYNC_URL: 'https://sync.zotero.org/',
+	API_URL: 'https://api.zotero.org/'
 };
 
 /*
@@ -98,6 +99,17 @@ var Zotero = new function(){
 	this.__defineSetter__('libraryID', function (val) {
 		var sql = "REPLACE INTO settings VALUES ('account', 'libraryID', ?)";
 		Zotero.DB.query(sql, parseInt(val));
+	});
+	
+	this.__defineGetter__('username', function () {
+		var sql = "SELECT value FROM settings WHERE "
+					+ "setting='account' AND key='username'";
+		return Zotero.DB.valueQuery(sql);
+	});
+	
+	this.__defineSetter__('username', function (val) {
+		var sql = "REPLACE INTO settings VALUES ('account', 'username', ?)";
+		Zotero.DB.query(sql, val);
 	});
 	
 	this.getLocalUserKey = function (generate) {
@@ -1160,8 +1172,9 @@ var Zotero = new function(){
 		Zotero.Fulltext.purgeUnusedWords();
 		Zotero.Items.purge();
 		
-		if (!skipStoragePurge && Zotero.Sync.Storage.active && Zotero.Utilities.prototype.probability(10)) {
-			Zotero.Sync.Storage.purgeDeletedStorageFiles();
+		if (!skipStoragePurge && Zotero.Utilities.prototype.probability(10)) {
+			Zotero.Sync.Storage.purgeDeletedStorageFiles('zfs');
+			Zotero.Sync.Storage.purgeDeletedStorageFiles('webdav');
 		}
 	}
 	

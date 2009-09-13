@@ -43,7 +43,7 @@ Zotero.Attachments = new function(){
 	var self = this;
 	
 	
-	function importFromFile(file, sourceItemID){
+	function importFromFile(file, sourceItemID, libraryID) {
 		Zotero.debug('Importing attachment from file');
 		
 		var title = file.leafName;
@@ -60,6 +60,9 @@ Zotero.Attachments = new function(){
 			if (sourceItemID) {
 				var parentItem = Zotero.Items.get(sourceItemID);
 				attachmentItem.libraryID = parentItem.libraryID;
+			}
+			else if (libraryID) {
+				attachmentItem.libraryID = libraryID;
 			}
 			attachmentItem.setField('title', title);
 			attachmentItem.setSource(sourceItemID);
@@ -980,6 +983,54 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
+	 * Returns the number of files in the attachment directory
+	 *
+	 * Only counts if MIME type is text/html
+	 *
+	 * @param	{Zotero.Item}	item	Attachment item
+	 */
+	this.getNumFiles = function (item) {
+		var funcName = "Zotero.Attachments.getNumFiles()";
+		
+		if (!item.isAttachment()) {
+			throw ("Item is not an attachment in " + funcName);
+		}
+		
+		var linkMode = item.attachmentLinkMode;
+		switch (linkMode) {
+			case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
+			case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
+				break;
+			
+			default:
+				throw ("Invalid attachment link mode in " + funcName);
+		}
+		
+		if (item.attachmentMIMEType != 'text/html') {
+			return 1;
+		}
+		
+		var file = item.getFile();
+		if (!file) {
+			throw ("File not found in " + funcName);
+		}
+		
+		var numFiles = 0;
+		var parentDir = file.parent;
+		var files = parentDir.directoryEntries;
+		while (files.hasMoreElements()) {
+			file = files.getNext();
+			file.QueryInterface(Components.interfaces.nsIFile);
+			if (file.leafName.indexOf('.') == 0) {
+				continue;
+			}
+			numFiles++;
+		}
+		return numFiles;
+	}
+	
+	
+	/**
 	 * @param	{Zotero.Item}	item
 	 * @param	{Boolean}		[skipHidden=FALSE]	Don't count hidden files
 	 * @return	{Integer}							Total file size in bytes
@@ -1023,6 +1074,45 @@ Zotero.Attachments = new function(){
 			size += file.fileSize;
 		}
 		return size;
+	}
+	
+	
+	/**
+	 * Copy attachment item, including files, to another library
+	 */
+	this.copyAttachmentToLibrary = function (attachment, libraryID, sourceItemID) {
+		var linkMode = attachment.attachmentLinkMode;
+		
+		if (attachment.libraryID == libraryID) {
+			throw ("Attachment is already in library " + libraryID);
+		}
+		
+		var newAttachment = new Zotero.Item('attachment');
+		newAttachment.libraryID = libraryID;
+		// Link mode needs to be set when saving new attachment
+		newAttachment.attachmentLinkMode = linkMode;
+		if (attachment.isImportedAttachment()) {
+			// Attachment path isn't copied over by clone() if libraryID is different
+			newAttachment.attachmentPath = attachment.attachmentPath;
+		}
+		// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
+		var id = newAttachment.save();
+		newAttachment = Zotero.Items.get(id);
+		attachment.clone(false, newAttachment);
+		if (sourceItemID) {
+			newAttachment.setSource(sourceItemID);
+		}
+		newAttachment.save();
+		
+		// Copy over files
+		if (newAttachment.isImportedAttachment()) {
+			var dir = Zotero.Attachments.getStorageDirectory(attachment.id);
+			var newDir = Zotero.Attachments.createDirectoryForItem(newAttachment.id);
+			Zotero.File.copyDirectory(dir, newDir);
+		}
+		
+		attachment.addLinkedItem(newAttachment);
+		return newAttachment.id;
 	}
 	
 	
