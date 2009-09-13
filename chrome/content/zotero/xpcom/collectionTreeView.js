@@ -326,9 +326,14 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 					break;
 				
 				case 'group':
-					if (this._groupRowMap[ids[i]] != null) {
-						rows.push(this._groupRowMap[ids[i]]);
-					}
+					//if (this._groupRowMap[ids[i]] != null) {
+					//	rows.push(this._groupRowMap[ids[i]]);
+					//}
+					
+					// For now, just reload if a group is removed, since otherwise
+					// we'd have to remove collections too
+					this.reload();
+					this.rememberSelection(savedSelection);
 					break;
 			}
 		}
@@ -635,7 +640,7 @@ Zotero.CollectionTreeView.prototype.isSelectable = function (row, col) {
 
 
 Zotero.CollectionTreeView.prototype.__defineGetter__('editable', function () {
-	return this._getItemAtRow(this.selection.currentIndex).isEditable();
+	return this._getItemAtRow(this.selection.currentIndex).editable;
 });
 
 
@@ -1029,16 +1034,15 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 	{
 		var itemGroup = this._getItemAtRow(row); //the collection we are dragging over
 		
-		if (!itemGroup.isEditable()) {
+		if (!itemGroup.editable) {
 			return false;
 		}
 		
 		if (dataType == 'zotero/item') {
-
 			if(itemGroup.isBucket()) {
 				return true;
 			}
-
+			
 			var ids = data;
 			var items = Zotero.Items.get(ids);
 			var skip = true;
@@ -1048,10 +1052,13 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 					return false
 				}
 				
-				// TODO: for now, only allow regular items to be dragged to groups
-				if (itemGroup.isWithinGroup() && itemGroup.ref.libraryID != item.libraryID
-						&& !item.isRegularItem()) {
-					return false;
+				if (itemGroup.isWithinGroup() && item.isAttachment()) {
+					// Linked files can't be added to groups
+					if (item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+						return false;
+					}
+					skip = false;
+					continue;
 				}
 				
 				// TODO: for now, skip items that are already linked
@@ -1070,7 +1077,7 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 					continue;
 				}
 				
-				// Allow drag of group items to library
+				// Allow drag of group items to personal library
 				if (item.libraryID && (itemGroup.isLibrary()
 						|| itemGroup.isCollection() && !itemGroup.isWithinGroup())) {
 					// TODO: for now, skip items that are already linked
@@ -1106,10 +1113,17 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 			if (itemGroup.isSearch()) {
 				return false;
 			}
-			// Don't allow folder drag
-			if (dataType == 'application/x-moz-file' && data[0].isDirectory()) {
-				return false;
+			if (dataType == 'application/x-moz-file') {
+				// Don't allow folder drag
+				if (data[0].isDirectory()) {
+					return false;
+				}
+				// Don't allow drop if no permissions
+				if (!itemGroup.filesEditable) {
+					return false;
+				}
 			}
+			
 			return true;
 		}
 		else if (dataType == 'zotero/collection') {
@@ -1179,7 +1193,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		else {
 			var targetLibraryID = null;
 		}
-
+		
 		if(itemGroup.isBucket()) {
 			itemGroup.ref.uploadItems(ids);
 			return;
@@ -1263,12 +1277,19 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 					*/
 				}
 				
+				// Standalone attachment
+				if (item.isAttachment()) {
+					var id = Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
+					newIDs.push(id);
+					continue;
+				}
+				
 				// Create new unsaved clone item in target library
 				var newItem = new Zotero.Item(item.itemTypeID);
 				newItem.libraryID = targetLibraryID;
 				// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
 				var id = newItem.save();
-				var newItem = Zotero.Items.get(id);
+				newItem = Zotero.Items.get(id);
 				item.clone(false, newItem);
 				newItem.save();
 				//var id = newItem.save();
@@ -1277,6 +1298,62 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 				// Record link
 				item.addLinkedItem(newItem);
 				newIDs.push(id);
+				
+				if (item.isNote()) {
+					continue;
+				}
+				
+				// For regular items, add child items if prefs and permissions allow
+				
+				// Child notes
+				if (Zotero.Prefs.get('groups.copyChildNotes')) {
+					var noteIDs = item.getNotes();
+					var notes = Zotero.Items.get(noteIDs);
+					for each(var note in notes) {
+						var newNote = new Zotero.Item('note');
+						newNote.libraryID = targetLibraryID;
+						// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
+						var id = newNote.save();
+						newNote = Zotero.Items.get(id);
+						note.clone(false, newNote);
+						newNote.setSource(newItem.id);
+						newNote.save();
+						
+						note.addLinkedItem(newNote);
+					}
+				}
+				
+				// Child attachments
+				var copyChildLinks = Zotero.Prefs.get('groups.copyChildLinks');
+				var copyChildFileAttachments = Zotero.Prefs.get('groups.copyChildFileAttachments');
+				if (copyChildLinks || copyChildFileAttachments) {
+					var attachmentIDs = item.getAttachments();
+					var attachments = Zotero.Items.get(attachmentIDs);
+					for each(var attachment in attachments) {
+						var linkMode = attachment.attachmentLinkMode;
+						
+						// Skip linked files
+						if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+							continue;
+						}
+						
+						// Skip imported files if we don't have pref and permissions
+						if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+							if (!copyChildLinks) {
+								Zotero.debug("Skipping child link attachment on drag");
+								continue;
+							}
+						}
+						else {
+							if (!copyChildFileAttachments || !itemGroup.filesEditable) {
+								Zotero.debug("Skipping child file attachment on drag");
+								continue;
+							}
+						}
+						
+						var id = Zotero.Attachments.copyAttachmentToLibrary(attachment, targetLibraryID, newItem.id);
+					}
+				}
 			}
 			
 			if (toReconcile.length) {
@@ -1342,12 +1419,11 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		return;
 	}
 	else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
-		// FIXME: temporarily disable dragging in of files
-		if (dataType == 'application/x-moz-file' && itemGroup.isWithinGroup()) {
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-									.getService(Components.interfaces.nsIPromptService);
-			ps.alert(null, "", "Files cannot currently be added to group libraries.");
-			return;
+		if (itemGroup.isWithinGroup()) {
+			var targetLibraryID = itemGroup.ref.libraryID;
+		}
+		else {
+			var targetLibraryID = null;
 		}
 		
 		if (itemGroup.isCollection()) {
@@ -1398,7 +1474,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 				
 				try {
 					Zotero.DB.beginTransaction();
-					var itemID = Zotero.Attachments.importFromFile(file, false);
+					var itemID = Zotero.Attachments.importFromFile(file, false, targetLibraryID);
 					if (parentCollectionID) {
 						var col = Zotero.Collections.get(parentCollectionID);
 						if (col) {
@@ -1545,11 +1621,10 @@ Zotero.ItemGroup.prototype.isWithinGroup = function () {
 	return this.ref && !!this.ref.libraryID;
 }
 
-Zotero.ItemGroup.prototype.isEditable = function () {
+Zotero.ItemGroup.prototype.__defineGetter__('editable', function () {
 	if (this.isTrash() || this.isShare()) {
 		return false;
 	}
-	
 	if (!this.isWithinGroup()) {
 		return true;
 	}
@@ -1564,12 +1639,33 @@ Zotero.ItemGroup.prototype.isEditable = function () {
 			var group = Zotero.Groups.get(groupID);
 			return group.editable;
 		}
-		else {
-			throw ("Unknown library type '" + type + "' in Zotero.ItemGroup.isEditable()");
-		}
+		throw ("Unknown library type '" + type + "' in Zotero.ItemGroup.editable");
 	}
-}
+	return false;
+});
 
+Zotero.ItemGroup.prototype.__defineGetter__('filesEditable', function () {
+	if (this.isTrash() || this.isShare()) {
+		return false;
+	}
+	if (!this.isWithinGroup()) {
+		return true;
+	}
+	var libraryID = this.ref.libraryID;
+	if (this.isGroup()) {
+		return this.ref.filesEditable;
+	}
+	if (this.isCollection()) {
+		var type = Zotero.Libraries.getType(libraryID);
+		if (type == 'group') {
+			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
+			var group = Zotero.Groups.get(groupID);
+			return group.filesEditable;
+		}
+		throw ("Unknown library type '" + type + "' in Zotero.ItemGroup.filesEditable");
+	}
+	return false;
+});
 
 Zotero.ItemGroup.prototype.getName = function()
 {

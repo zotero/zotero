@@ -327,7 +327,7 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	
 	
 	this.editCheck = function (obj) {
-		if (!Zotero.Sync.Server.syncInProgress && !this.isEditable(obj)) {
+		if (!Zotero.Sync.Server.syncInProgress && !Zotero.Sync.Storage.syncInProgress && !this.isEditable(obj)) {
 			throw ("Cannot edit " + this._ZDO_object + " in read-only Zotero library");
 		}
 	}

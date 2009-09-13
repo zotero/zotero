@@ -1,4 +1,4 @@
--- 62
+-- 63
 
 -- This file creates tables containing user-specific data for new users --
 -- any changes made here must be mirrored in transition steps in schema.js::_migrateSchema()
@@ -70,6 +70,7 @@ CREATE TABLE itemAttachments (
     originalPath TEXT,
     syncState INT DEFAULT 0,
     storageModTime INT,
+    storageHash TEXT,
     FOREIGN KEY (itemID) REFERENCES items(itemID),
     FOREIGN KEY (sourceItemID) REFERENCES items(itemID)
 );

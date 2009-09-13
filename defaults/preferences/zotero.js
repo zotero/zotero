@@ -37,6 +37,10 @@ pref("extensions.zotero.sortAttachmentsChronologically", false);
 pref("extensions.zotero.showTrashWhenEmpty", true);
 pref("extensions.zotero.viewOnDoubleClick", true);
 
+pref("extensions.zotero.groups.copyChildLinks", true);
+pref("extensions.zotero.groups.copyChildFileAttachments", true);
+pref("extensions.zotero.groups.copyChildNotes", true);
+
 pref("extensions.zotero.backup.numBackups", 2);
 pref("extensions.zotero.backup.interval", 1440);
 
@@ -113,14 +117,16 @@ pref("extensions.zotero.annotations.warnOnClose", true);
 pref("extensions.zotero.sync.autoSync", true);
 pref("extensions.zotero.sync.server.username", '');
 pref("extensions.zotero.sync.server.compressData", true);
-pref("extensions.zotero.sync.storage.protocol", "webdavs");
-pref("extensions.zotero.sync.storage.enabled", false);
+pref("extensions.zotero.sync.storage.enabled", true);
+pref("extensions.zotero.sync.storage.protocol", "zotero");
 pref("extensions.zotero.sync.storage.verified", false);
+pref("extensions.zotero.sync.storage.scheme", 'https');
 pref("extensions.zotero.sync.storage.url", '');
 pref("extensions.zotero.sync.storage.username", '');
 pref("extensions.zotero.sync.storage.maxDownloads", 4);
 pref("extensions.zotero.sync.storage.maxUploads", 4);
 pref("extensions.zotero.sync.storage.deleteDelayDays", 30);
+pref("extensions.zotero.sync.storage.groups.enabled", true);
 
 // Proxy
 pref("extensions.zotero.proxies.transparent", true);

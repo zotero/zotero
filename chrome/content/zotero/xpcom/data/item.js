@@ -2540,28 +2540,16 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 /**
  * _row_ is optional itemAttachments row if available to skip queries
  */
-Zotero.Item.prototype.getFilename = function (row) {
+Zotero.Item.prototype.getFilename = function () {
 	if (!this.isAttachment()) {
 		throw ("getFileName() can only be called on attachment items in Zotero.Item.getFilename()");
 	}
 	
-	if (!row) {
-		var row = {
-			linkMode: this.attachmentLinkMode,
-			path: this.attachmentPath
-		};
-	}
-	
-	if (row.linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+	if (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 		throw ("getFilename() cannot be called on link attachments in Zotero.Item.getFilename()");
 	}
 	
-	if (this.isImportedAttachment()) {
-		var matches = row.path.match("^storage:(.+)$");
-		return matches[1];
-	}
-	
-	var file = this.getFile();
+	var file = this.getFile(null, true);
 	if (!file) {
 		return false;
 	}
@@ -2602,9 +2590,11 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 		}
 		
 		file.moveTo(null, newName);
-		// Update mod time so the file syncs
+		// Update mod time and clear hash so the file syncs
 		dest.lastModifiedTime = new Date();
 		this.relinkAttachmentFile(dest);
+		
+		Zotero.Sync.Storage.setSyncedHash(this.id, null, false);
 		
 		return true;
 	}
@@ -2944,6 +2934,32 @@ Zotero.Item.prototype.__defineGetter__('attachmentModificationTime', function ()
 	}
 	
 	return Math.round(file.lastModifiedTime / 1000);
+});
+
+
+/**
+ * MD5 hash of an attachment file
+ *
+ * Note: This is the hash of the file itself, not the last-known hash
+ * of the file on the storage server as stored in the database
+ *
+ * @return	{String}		MD5 hash of file as hex string
+ */
+Zotero.Item.prototype.__defineGetter__('attachmentHash', function () {
+	if (!this.isAttachment()) {
+		return undefined;
+	}
+	
+	if (!this.id) {
+		return undefined;
+	}
+	
+	var file = this.getFile();
+	if (!file) {
+		return undefined;
+	}
+	
+	return Zotero.Utilities.prototype.md5(file);
 });
 
 

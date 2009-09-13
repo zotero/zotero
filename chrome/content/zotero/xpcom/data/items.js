@@ -421,7 +421,6 @@ Zotero.Items = new function() {
 				var item = this.get(id);
 				if (!item) {
 					Zotero.debug('Item ' + id + ' does not exist in Items.erase()!', 1);
-					Zotero.Notifier.trigger('delete', 'item', id);
 					continue;
 				}
 				item.erase(eraseChildren); // calls unload()

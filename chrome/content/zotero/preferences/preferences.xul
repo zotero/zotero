@@ -38,7 +38,8 @@ To add a new preference:
 
 -->
 <prefwindow id="zotero-prefs" title="&zotero.preferences.title;" onload="moveToAlertPosition(); init()" onunload="Zotero_Preferences.onUnload()"
-		windowtype="zotero:pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+		windowtype="zotero:pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		style="min-height: 600px">
 	
 	<prefpane id="zotero-prefpane-general"
 						label="&zotero.preferences.prefpane.general;"
@@ -54,8 +55,10 @@ To add a new preference:
 			<preference id="pref-automaticSnapshots" name="extensions.zotero.automaticSnapshots" type="bool"/>
 			<preference id="pref-downloadAssociatedFiles" name="extensions.zotero.downloadAssociatedFiles" type="bool"/>
 			<preference id="pref-automaticTags" name="extensions.zotero.automaticTags" type="bool"/>
-			<preference id="pref-openURL-resolver" name="extensions.zotero.openURL.resolver" type="string"/>
-			<preference id="pref-openURL-version" name="extensions.zotero.openURL.version" type="string"/>
+			
+			<preference id="pref-groups-copyChildNotes" name="extensions.zotero.groups.copyChildNotes" type="bool"/>
+			<preference id="pref-groups-copyChildFileAttachments" name="extensions.zotero.groups.copyChildFileAttachments" type="bool"/>
+			<preference id="pref-groups-copyChildLinks" name="extensions.zotero.groups.copyChildLinks" type="bool"/>
 		</preferences>
 		
 		<groupbox>
@@ -138,31 +141,18 @@ To add a new preference:
 		</groupbox>
 		
 		<groupbox>
-			<caption label="&zotero.preferences.openurl.caption;"/>
+			<caption label="Groups"/>
 			
-			<button id="openURLSearchButton" label="&zotero.preferences.openurl.search;" oncommand="populateOpenURLResolvers()"/>
-			<menulist id="openURLMenu" oncommand="onOpenURLSelected();">
-				<menupopup>
-					<menuseparator/>
-					<menuitem label="&zotero.preferences.openurl.custom;" value="custom" selected="true"/>
-				</menupopup>
-			</menulist>
-			
-			<hbox align="center">
-				<label value="&zotero.preferences.openurl.server;"/>
-				<textbox id="openURLServerField" flex="1" oninput="onOpenURLCustomized();" preference="pref-openURL-resolver"/>
-			</hbox>
-		
-			<hbox align="center">
-				<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
-				<menulist id="openURLVersionMenu" oncommand="onOpenURLCustomized();" preference="pref-openURL-version">
-					<menupopup>
-						<menuitem label="0.1" value="0.1"/>
-						<menuitem label="1.0" value="1.0"/>
-					</menupopup>
-				</menulist>
-			</hbox>
+			<!-- TODO: localize -->
+			<label value="When copying items between libraries, include:"/>
+			<vbox style="margin-left: 2em">
+				<checkbox label="child notes" preference="pref-groups-copyChildNotes"/>
+				<checkbox label="child snapshots and imported files" preference="pref-groups-copyChildFileAttachments"/>
+				<checkbox label="child links" preference="pref-groups-copyChildLinks"/>
+			</vbox>
 		</groupbox>
+		
+		<separator/>
 	</prefpane>
 	
 	
@@ -174,10 +164,12 @@ To add a new preference:
 		<preferences>
 			<preference id="pref-sync-autosync" name="extensions.zotero.sync.autoSync" type="bool"/>
 			<preference id="pref-sync-username" name="extensions.zotero.sync.server.username" type="string" instantApply="true"/>
-			<preference id="pref-storage-protocol" name="extensions.zotero.sync.storage.protocol" type="string"/>
 			<preference id="pref-storage-enabled" name="extensions.zotero.sync.storage.enabled" type="bool"/>
+			<preference id="pref-storage-protocol" name="extensions.zotero.sync.storage.protocol" type="string" onchange="unverifyStorageServer()"/>
+			<preference id="pref-storage-scheme" name="extensions.zotero.sync.storage.scheme" type="string"/>
 			<preference id="pref-storage-url" name="extensions.zotero.sync.storage.url" type="string" instantApply="true"/>
 			<preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string" instantApply="true"/>
+			<preference id="pref-group-storage-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
 		</preferences>
 		
 		<!-- This doesn't wrap without an explicit width, for some reason -->
@@ -250,26 +242,26 @@ To add a new preference:
 					</groupbox>
 					
 					
+					<!-- TODO: localize -->
 					<groupbox>
-						<caption label="Storage Server"/>
+						<caption label="File Syncing"/>
 						
-						<hbox>
-							<checkbox label="Enable file syncing" preference="pref-storage-enabled"/>
+						<!-- My Library -->
+						<hbox style="margin: 0">
+							<checkbox label="Sync attachment files in My Library using" preference="pref-storage-enabled" oncommand="updateStorageSettings(this.checked, null)"/>
+							<menulist id="storage-protocol" style="margin-left: .5em" preference="pref-storage-protocol" oncommand="updateStorageSettings(null, this.value)">
+								<menupopup>
+									<menuitem label="Zotero" value="zotero"/>
+									<menuitem label="WebDAV" value="webdav"/>
+								</menupopup>
+							</menulist>
 						</hbox>
 						
-						<separator class="thin"/>
-						<hbox align="center">
-							<label value="A" style="margin-right: 0"/>
-							<label value="WebDAV server" class="text-link" href="http://zotero.org/support/sync#file_syncing" style="margin-left: .25em; margin-right: .25em"/>
-							<label value="is currently required to sync attachment files." style="margin-left: 0"/>
-						</hbox>
+						<stack id="storage-webdav-settings" style="margin-top: .5em; margin-bottom: .8em; border: 1px gray solid; -moz-border-radius: 3px">
+						<!-- Background shading -->
+						<box style="background: black; opacity:.03"/>
 						
-						<separator class="thin"/>
-						<label value="Syncing of attachment files in group libraries is not currently supported."/>
-						
-						<separator/>
-						
-						<grid id="storage-settings">
+						<grid style="padding: .7em .4em .7em 0">
 							<columns>
 								<column/>
 								<column flex="1"/>
@@ -277,23 +269,17 @@ To add a new preference:
 							
 							<rows>
 								<row>
-									<label value="Protocol:"/>
-									<hbox>
-										<menulist id="storage-url-protocol"
-												preference="pref-storage-protocol"
-												onsynctopreference="updateStorageSettings(this.value); unverifyStorageServer();">
-											<menupopup>
-												<menuitem label="WebDAV" value="webdav"/>
-												<!-- TODO: localize -->
-												<menuitem label="WebDAV (Secure)" value="webdavs"/>
-											</menupopup>
-										</menulist>
-									</hbox>
-								</row>
-								<row>
 									<label value="URL:"/>
 									<hbox>
-										<label id="storage-url-prefix"/>
+										<menulist id="storage-url-prefix"
+												preference="pref-storage-scheme"
+												onsynctopreference="unverifyStorageServer()" style="padding: 0; width: 7em">
+											<menupopup>
+												<menuitem label="http" value="http" style="padding: 0"/>
+												<menuitem label="https" value="https" style="padding: 0"/>
+											</menupopup>
+										</menulist>
+										<label value="://"/>
 										<textbox id="storage-url" flex="1"
 											preference="pref-storage-url"
 											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); verifyStorageServer(); }"
@@ -309,7 +295,7 @@ To add a new preference:
 											preference="pref-storage-username"
 											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout('verifyStorageServer();', 1); }"
 											onsynctopreference="unverifyStorageServer();"
-											onchange="var pass = document.getElementById('storage-password'); if (pass.value) { Zotero.Sync.Storage.password = pass.value; }"/>
+											onchange="var pass = document.getElementById('storage-password'); if (pass.value) { Zotero.Sync.Storage.Session.WebDAV.prototype.password = pass.value; }"/>
 									</hbox>
 								</row>
 								<row>
@@ -318,7 +304,7 @@ To add a new preference:
 										<textbox id="storage-password" flex="0" type="password"
 											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout('verifyStorageServer();', 1); }"
 											oninput="unverifyStorageServer()"
-											onchange="Zotero.Sync.Storage.password = this.value"/>
+											onchange="Zotero.Sync.Storage.Session.WebDAV.prototype.password = this.value"/>
 									</hbox>
 								</row>
 								<row>
@@ -333,6 +319,20 @@ To add a new preference:
 								</row>
 							</rows>
 						</grid>
+						
+						</stack>
+						
+						<separator id="storage-separator" class="thin"/>
+						
+						<!-- Group Libraries -->
+						<checkbox label="Sync attachment files in group libraries using Zotero File Storage"
+								preference="pref-group-storage-enabled"/>
+						
+						<separator class="thin"/>
+						
+						<hbox style="margin-top:.3em">
+							<label class="text-link" style="margin-left: 0" value="About File Syncing" href="http://zotero.org/support/file_sync"/>
+						</hbox>
 					</groupbox>
 				</tabpanel>
 				
@@ -377,7 +377,7 @@ To add a new preference:
 						</groupbox>
 						
 						<groupbox>
-							<caption label="Storage Server"/>
+							<caption label="File Syncing"/>
 							
 							<grid>
 								<columns>
@@ -404,6 +404,8 @@ To add a new preference:
 				</tabpanel>
 			</tabpanels>
 		</tabbox>
+		
+		<separator/>
 	</prefpane>
 	
 	
@@ -492,6 +494,8 @@ To add a new preference:
 				</rows>
 			</grid>
 		</groupbox>
+		
+		<separator/>
 	</prefpane>
 	
 	
@@ -499,20 +503,9 @@ To add a new preference:
 						label="&zotero.preferences.prefpane.export;"
 						image="chrome://zotero/skin/prefs-export.png">
 		<preferences>
-			<preference id="pref-export-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
 			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
 			<preference id="pref-quickCopy-dragLimit" name="extensions.zotero.export.quickCopy.dragLimit" type="int"/>
 		</preferences>
-		
-		<groupbox>
-			<caption label="&zotero.preferences.citationOptions.caption;"/>
-			
-			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="pref-export-citePaperJournalArticleURL"/>
-			<!-- This doesn't wrap without an explicit width, for some reason -->
-			<label id="export-citePaperJournalArticleURL" width="45em">
-				&zotero.preferences.export.citePaperJournalArticleURL.description;
-			</label>
-		</groupbox>
 		
 		<groupbox>
 			<caption label="&zotero.preferences.quickCopy.caption;"/>
@@ -548,23 +541,38 @@ To add a new preference:
 				<button label="+" onclick="showQuickCopySiteEditor()"/>
 			</hbox>
 			
-			<separator/>
-			
 			<!-- TODO: localize -->
 			<hbox align="center">
 				<label value="Disable Quick Copy when dragging more than"/>
 				<textbox preference="pref-quickCopy-dragLimit" size="3"/>
 				<label value="items" flex="1"/>
 			</hbox>
-			
-			<separator/>
 		</groupbox>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.charset;"/>
+			
+			<checkbox id="zotero-export-displayCharsetOption" label="&zotero.preferences.charset.displayExportOption;"
+				preference="pref-export-displayCharsetOption"/>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.charset.importCharset;:" control="zotero-import-charsetMenu"/>
+				<menulist id="zotero-import-charsetMenu" preference="pref-import-charset"/>
+			</hbox>
+		</groupbox>
+		
+		<separator/>
 	</prefpane>
 	
 	
 	<prefpane id="zotero-prefpane-styles"
 						label="&zotero.preferences.prefpane.styles;"
 						image="chrome://zotero/skin/prefs-styles.png">
+		
+		<preferences>
+			<preference id="pref-styles-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
+		</preferences>
+		
 		<groupbox flex="1">
 			<caption label="&zotero.preferences.styles.styleManager;"/>
 			
@@ -579,13 +587,24 @@ To add a new preference:
 				<treechildren id="styleManager-rows"/>
 			</tree>
 			<separator class="thin"/>
-			<hbox pack="end">
+			<hbox align="center" flex="1">
+				<label class="text-link" href="http://www.zotero.org/styles/" value="&zotero.preferences.export.getAdditionalStyles;" flex="1"/>
 				<button disabled="true" id="styleManager-delete" label="-" onclick="deleteStyle()"/>
 				<button label="+" onclick="addStyle()"/>
 			</hbox>
-			<separator/>
-			<label class="text-link" href="http://www.zotero.org/styles/" value="&zotero.preferences.export.getAdditionalStyles;"/>
 		</groupbox>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.citationOptions.caption;"/>
+			
+			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="pref-styles-citePaperJournalArticleURL"/>
+			<!-- This doesn't wrap without an explicit width, for some reason -->
+			<label id="export-citePaperJournalArticleURL" width="45em">
+				&zotero.preferences.export.citePaperJournalArticleURL.description;
+			</label>
+		</groupbox>
+		
+		<separator/>
 	</prefpane>
 	
 	
@@ -621,6 +640,8 @@ To add a new preference:
 				<button label="+" onclick="showProxyEditor()"/>
 			</hbox>
 		</groupbox>
+		
+		<separator/>
 	</prefpane>
 	
 	
@@ -714,6 +735,8 @@ To add a new preference:
 		<checkbox label="&zotero.preferences.keys.overrideGlobal;" preference="pref-keys-overrideGlobal"/>
 		
 		<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
+		
+		<separator/>
 	</prefpane>
 	
 	
@@ -726,6 +749,8 @@ To add a new preference:
 			<preference id="pref-export-displayCharsetOption" name="extensions.zotero.export.displayCharsetOption" type="bool"/>
 			<preference id="pref-debug-output-enableAfterRestart" name="extensions.zotero.debug.store" type="bool"/>
 			<preference id="pref-import-charset" name="extensions.zotero.import.charset" type="string"/>
+			<preference id="pref-openURL-resolver" name="extensions.zotero.openURL.resolver" type="string"/>
+			<preference id="pref-openURL-version" name="extensions.zotero.openURL.version" type="string"/>
 		</preferences>
 		
 		<groupbox>
@@ -750,9 +775,6 @@ To add a new preference:
 			
 			<hbox>
 				<button label="&zotero.preferences.dbMaintenance.integrityCheck;" oncommand="runIntegrityCheck()"/>
-			</hbox>
-			
-			<hbox>
 				<button label="&zotero.preferences.dbMaintenance.resetTranslatorsAndStyles;" oncommand="resetTranslatorsAndStyles()"/>
 			</hbox>
 		</groupbox>
@@ -782,16 +804,38 @@ To add a new preference:
 		</groupbox>
 		
 		<groupbox>
-			<caption label="&zotero.preferences.charset;"/>
-			
-			<checkbox id="zotero-export-displayCharsetOption" label="&zotero.preferences.charset.displayExportOption;"
-				preference="pref-export-displayCharsetOption"/>
+			<caption label="&zotero.preferences.openurl.caption;"/>
 			
 			<hbox align="center">
-				<label value="&zotero.preferences.charset.importCharset;:" control="zotero-import-charsetMenu"/>
-				<menulist id="zotero-import-charsetMenu" preference="pref-import-charset"/>
+				<!-- vbox prevents some weird vertical stretching of the menulist -->
+				<vbox flex="1">
+					<menulist id="openURLMenu" oncommand="onOpenURLSelected();">
+						<menupopup>
+							<menuseparator/>
+							<menuitem label="&zotero.preferences.openurl.custom;" value="custom" selected="true"/>
+						</menupopup>
+					</menulist>
+				</vbox>
+				<button id="openURLSearchButton" label="&zotero.preferences.openurl.search;" oncommand="populateOpenURLResolvers()"/>
+			</hbox>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.openurl.server;"/>
+				<textbox id="openURLServerField" flex="1" oninput="onOpenURLCustomized();" preference="pref-openURL-resolver"/>
+			</hbox>
+		
+			<hbox align="center">
+				<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
+				<menulist id="openURLVersionMenu" oncommand="onOpenURLCustomized();" preference="pref-openURL-version">
+					<menupopup>
+						<menuitem label="0.1" value="0.1"/>
+						<menuitem label="1.0" value="1.0"/>
+					</menupopup>
+				</menulist>
 			</hbox>
 		</groupbox>
+		
+		<separator/>
 	</prefpane>
 	
 	<!-- These mess up the prefwindow (more) if they come before the prefpanes

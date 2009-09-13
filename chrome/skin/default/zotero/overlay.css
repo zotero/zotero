@@ -205,9 +205,15 @@
 	font-weight: bold;
 }
 
-#zotero-tb-storage-sync
+#zotero-tb-sync-warning
 {
-	list-style-image: url(chrome://zotero/skin/drive_network.png);
+	list-style-image: url(chrome://zotero/skin/error.png);
+	margin-right: -5px;
+}
+
+#zotero-tb-sync-warning[error=true]
+{
+	list-style-image: url(chrome://zotero/skin/exclamation.png);
 }
 
 #zotero-tb-sync {
@@ -218,10 +224,6 @@
 
 #zotero-tb-sync[status=animate] {
 	list-style-image: url(chrome://zotero/skin/arrow_rotate_animated.png);
-}
-
-#zotero-tb-sync[status=error] {
-	list-style-image: url(chrome://zotero/skin/arrow_rotate_error.png);
 }
 
 #zotero-tb-sync #zotero-last-sync-time

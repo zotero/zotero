@@ -2218,21 +2218,20 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 		}
 	}
 	else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
-		// FIXME: temporarily disable dragging in of files
-		if (dataType == 'application/x-moz-file' && itemGroup.isWithinGroup()) {
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-									.getService(Components.interfaces.nsIPromptService);
-			ps.alert(null, "", "Files cannot currently be added to group libraries.");
-			return;
-		}
-		
 		// Disallow drop into read-only libraries
-		if (!itemGroup.isEditable()) {
+		if (!itemGroup.editable) {
 			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					   .getService(Components.interfaces.nsIWindowMediator);
 			var win = wm.getMostRecentWindow("navigator:browser");
 			win.ZoteroPane.displayCannotEditLibraryMessage();
 			return;
+		}
+		
+		if (itemGroup.isWithinGroup()) {
+			var targetLibraryID = itemGroup.ref.libraryID;
+		}
+		else {
+			var targetLibraryID = null;
 		}
 		
 		var sourceItemID = false;
@@ -2244,9 +2243,6 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 		}
 		else if (itemGroup.isCollection()) {
 			var parentCollectionID = itemGroup.ref.id;
-		}
-		else if (itemGroup.isLibrary(true)) {
-			var libraryID = itemGroup.ref.libraryID;
 		}
 		
 		var unlock = Zotero.Notifier.begin(true);
@@ -2278,15 +2274,10 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 					
 					// Still string, so remote URL
 					if (typeof file == 'string') {
-						if (sourceItemID) {
-							Zotero.Attachments.importFromURL(url, sourceItemID);
-						}
-						else {
-							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-									   .getService(Components.interfaces.nsIWindowMediator);
-							var win = wm.getMostRecentWindow("navigator:browser");
-							win.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack'); // TODO: don't do this
-						}
+						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								   .getService(Components.interfaces.nsIWindowMediator);
+						var win = wm.getMostRecentWindow("navigator:browser");
+						win.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack', row); // TODO: don't do this
 						continue;
 					}
 					
@@ -2295,7 +2286,7 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 				
 				try {
 					Zotero.DB.beginTransaction();
-					var itemID = Zotero.Attachments.importFromFile(file, sourceItemID);
+					var itemID = Zotero.Attachments.importFromFile(file, sourceItemID, targetLibraryID);
 					if (parentCollectionID) {
 						var col = Zotero.Collections.get(parentCollectionID);
 						if (col) {

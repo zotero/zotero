@@ -177,11 +177,25 @@ var ZoteroPane = new function()
 				);
 				
 				if (index == 0) {
-					Zotero.Sync.Server.sync(function () {
-						pr.alert(
-							"Restore Completed",
-							"The local Zotero database has been successfully restored."
-						);
+					Zotero.Sync.Server.sync({
+						onSuccess: function () {
+							Zotero.Sync.Runner.setSyncIcon();
+							
+							pr.alert(
+								"Restore Completed",
+								"The local Zotero database has been successfully restored."
+							);
+						},
+						
+						onError: function (msg) {
+							pr.alert(
+								"Restore Failed",
+								"An error occurred while restoring from the server:\n\n"
+									+ msg
+							);
+							
+							Zotero.Sync.Runner.error(msg);
+						}
 					});
 				}
 			}, 1000);
@@ -898,7 +912,7 @@ var ZoteroPane = new function()
 		if (!tagSelector.getAttribute('collapsed') ||
 				tagSelector.getAttribute('collapsed') == 'false') {
 			Zotero.debug('Updating tag selector with current tags');
-			if (itemGroup.isEditable()) {
+			if (itemGroup.editable) {
 				tagSelector.mode = 'edit';
 			}
 			else {
@@ -2281,7 +2295,7 @@ var ZoteroPane = new function()
 		var disabled = Zotero.locked;
 		if (!disabled && self.collectionsView.selection && self.collectionsView.selection.count) {
 			var itemGroup = self.collectionsView._getItemAtRow(self.collectionsView.selection.currentIndex);
-			disabled = !itemGroup.isEditable()
+			disabled = !itemGroup.editable;
 		}
 		for each(var menuitem in menu.firstChild.childNodes) {
 			menuitem.disabled = disabled;
@@ -2837,7 +2851,26 @@ var ZoteroPane = new function()
 		}
 		
 		var itemGroup = this.collectionsView._getItemAtRow(row);
-		return itemGroup.isEditable();
+		return itemGroup.editable;
+	}
+	
+	
+	/**
+	 * Test if the user can edit the currently selected library/collection,
+	 * and display an error if not
+	 *
+	 * @param	{Integer}	[row]
+	 *
+	 * @return	{Boolean}		TRUE if user can edit, FALSE if not
+	 */
+	this.canEditFiles = function (row) {
+		// Currently selected row
+		if (row === undefined) {
+			row = this.collectionsView.selection.currentIndex;
+		}
+		
+		var itemGroup = this.collectionsView._getItemAtRow(row);
+		return itemGroup.filesEditable;
 	}
 	
 	
@@ -2998,12 +3031,6 @@ var ZoteroPane = new function()
 	
 	this.setLastSyncStatus = function (tooltip) {
 		var label = tooltip.firstChild.nextSibling;
-		
-		var msg = Zotero.Sync.Runner.lastSyncError;
-		if (msg) {
-			label.value = 'Last error: ' + msg; // TODO: localize
-			return;
-		}
 		
 		var lastSyncTime = Zotero.Sync.Server.lastLocalSyncTime;
 		// TODO: localize
