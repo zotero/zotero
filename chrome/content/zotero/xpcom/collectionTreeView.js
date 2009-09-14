@@ -1057,6 +1057,9 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 					if (item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 						return false;
 					}
+					if (!itemGroup.filesEditable) {
+						return false;
+					}
 					skip = false;
 					continue;
 				}
