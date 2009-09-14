@@ -1118,6 +1118,55 @@ var ZoteroPane = new function()
 	}
 	
 	
+	this.updateNoteButtonMenu = function () {
+		var items = ZoteroPane.getSelectedItems();
+		var button = document.getElementById('zotero-tb-add-child-note');
+		button.disabled = this.canEdit() && !(items.length == 1
+				&& (items[0].isRegularItem() || !items[0].isTopLevelItem()));
+	}
+	
+	
+	this.updateAttachmentButtonMenu = function (popup) {
+		var items = ZoteroPane.getSelectedItems();
+		
+		var disabled = !this.canEdit() || !(items.length == 1 && items[0].isRegularItem());
+		
+		if (disabled) {
+			for each(var node in popup.childNodes) {
+				node.disabled = true;
+			}
+			return;
+		}
+		
+		var itemgroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+		var canEditFiles = this.canEditFiles();
+		
+		var prefix = "menuitem-iconic zotero-menuitem-attachments-";
+		
+		for (var i=0; i<popup.childNodes.length; i++) {
+			var node = popup.childNodes[i];
+			
+			switch (node.className) {
+				case prefix + 'link':
+					node.disabled = itemgroup.isWithinGroup();
+					break;
+				
+				case prefix + 'snapshot':
+				case prefix + 'file':
+					node.disabled = !canEditFiles;
+					break;
+				
+				case prefix + 'web-link':
+					node.disabled = false;
+					break;
+				
+				default:
+					throw ("Invalid class name '" + node.className + "' in ZoteroPane.updateAttachmentButtonMenu()");
+			}
+		}
+	}
+	
+	
 	function reindexItem() {
 		var items = this.getSelectedItems();
 		if (!items) {
@@ -1920,6 +1969,10 @@ var ZoteroPane = new function()
 					show.push(m.duplicateItem);
 					hide.push(m.recognizePDF, m.renameAttachments, m.reindexItem);
 				}
+				
+				// Update attachment submenu
+				var popup = document.getElementById('zotero-add-attachment-popup')
+				this.updateAttachmentButtonMenu(popup);
 			}
 		}
 		// No items selected
@@ -2468,6 +2521,11 @@ var ZoteroPane = new function()
 	
 	
 	this.addItemFromPage = function (itemType, saveSnapshot, row) {
+		if (!this.canEdit(row)) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+		
 		return this.addItemFromDocument(window.content.document, itemType, saveSnapshot, row);
 	}
 	
