@@ -47,7 +47,12 @@ row > label:first-child, .creator-type-label
 	text-align: right;
 	font-weight: bold;
 	margin-left: 5px !important;
-	margin-right: 3px !important;
+	margin-right: 0 !important;
+}
+
+row > label:first-child
+{
+	border: 1px solid transparent;
 }
 
 row label:first-child[isButton=true]:hover
@@ -64,13 +69,17 @@ row label
 .creator-type-label, .creator-type-value {
 	-moz-box-align: center;
 	-moz-box-pack: end;
-	height: 1.8em !important;
+	height: 18px !important;
 	min-height: none !important;
-	max-height: 1.8em !important;
-	padding: 0;
-	margin: 0;
+	max-height: 18px !important;
+	padding-right: 2px;
 }
 
+.creator-type-label > label
+{
+	margin: 0 !important;
+	padding: 0 !important;
+}
  
 .creator-type-label > image {
 	margin: 0 1em 1px;
@@ -88,8 +97,8 @@ row > vbox[fieldname=abstractNote],
 row > vbox[fieldname=extra]
 {
 	-moz-margin-start: 1px !important;
-	-moz-margin-end: 1px !important;
-	padding: 1px 2px;
+	-moz-margin-end: 5px !important;
+	padding: 0 2px 0 2px;
 }
 
 hbox.zotero-date-field-status
@@ -111,7 +120,7 @@ hbox.zotero-date-field-status label
 	height: 1.5em !important;
 	min-height: 1.5em !important;
 	padding: 0 0 0 2px !important;
-	margin: 1px 5px 0 1px !important;
+	margin: 1px 5px 0 0 !important;
 	max-height: 1.5em !important;
 	border: 1px solid transparent;	
 	-moz-border-top-colors: none;
