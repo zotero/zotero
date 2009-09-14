@@ -10,11 +10,6 @@ groupbox > .groupbox-body
 	padding: 0;
 }
 
-*[zoteroFontSize=small] #tags-toggle
-{
-	font-size: 10px;
-}
-
 #view-settings-menu .toolbarbutton-menu-dropmarker
 {
 	margin-left: -12px !important;

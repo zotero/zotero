@@ -88,8 +88,8 @@ row > vbox[fieldname=extra]
 	margin-top: 0px;
 	margin-bottom: 0px;
 	-moz-margin-start: 1px !important;
-	-moz-margin-end: 5px !important;
-	padding: 1px 1px 0 2px;
+	-moz-margin-end: 1px !important;
+	padding: 1px 1px 0 5px;
 }
 
 hbox.zotero-date-field-status
@@ -111,7 +111,7 @@ hbox.zotero-date-field-status label
 	height: 1.5em !important;
 	min-height: 1.5em !important;
 	padding: 0 0 0 2px !important;
-	margin: 1px 5px 0 0 !important;
+	margin: 1px 5px 0 4px !important;
 	max-height: 1.5em !important;
 	border: 1px solid transparent;	
 	-moz-border-top-colors: none;
