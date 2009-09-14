@@ -5,7 +5,7 @@ scrollbox
 
 row, tagsbox row
 {
-	margin: 0 0 1px;
+	margin: -1px 0 0 0;
 	min-height: 1em;
 }
 
@@ -90,11 +90,6 @@ row label
 row hbox label:first-child
 {
 	margin-right: 1px;
-}
-
-row
-{
-	margin-bottom: 0;
 }
 
 row label,
