@@ -172,7 +172,7 @@ zoteromergepane {
 	border: 0px !important;
 }
 
-.zotero-clicky[value="+"][disabled=true] {
+.zotero-clicky[value="+"][disabled=true], .zotero-clicky[value="-"][disabled=true] {
 	opacity: .5;
 }
 
