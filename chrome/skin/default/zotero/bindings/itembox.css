@@ -155,18 +155,10 @@ hbox.zotero-date-field-status label
 
 .zotero-field-toggle
 {
-	color: transparent;
-	margin: 0px 5px 0px 0px !important;
-	width: 26px !important;
-	max-width: 26px !important;
-	min-width: 26px !important;
-}
-
-.zotero-field-toggle
-{	
-	width: 27px;
+	width: 27px !important;
+	max-width: 27px !important;
+	min-width: 27px !important;
 	height: 14px;
-	padding: 0 !important;
 	margin: 0 5px 0 0 !important;
 	background-repeat: no-repeat !important;
 	background-position: center !important;
