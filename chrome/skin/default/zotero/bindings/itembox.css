@@ -96,9 +96,17 @@ row label,
 row > vbox[fieldname=abstractNote],
 row > vbox[fieldname=extra]
 {
+	margin-top: 0;
+	margin-bottom: 0;
+	-moz-box-pack: start;
 	-moz-margin-start: 1px !important;
 	-moz-margin-end: 5px !important;
 	padding: 0 2px 0 2px;
+}
+
+row > vbox > description
+{
+	margin: 1px 0 0 0 !important;
 }
 
 hbox.zotero-date-field-status
