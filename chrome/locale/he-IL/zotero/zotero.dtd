@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "Related">
 <!ENTITY zotero.notes.separate "Edit in a separate window">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "Type">
 <!ENTITY zotero.items.title_column "כותרת">
 <!ENTITY zotero.items.creator_column "יוצר">

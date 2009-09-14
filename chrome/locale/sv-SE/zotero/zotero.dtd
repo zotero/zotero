@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "Relaterade">
 <!ENTITY zotero.notes.separate "Redigera i ett separat fönster">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "Typ">
 <!ENTITY zotero.items.title_column "Titel">
 <!ENTITY zotero.items.creator_column "Skapare">

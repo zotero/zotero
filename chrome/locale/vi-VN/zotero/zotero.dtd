@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "Liên quan">
 <!ENTITY zotero.notes.separate "Soạn thảo trong một cửa sổ tách rời">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "Loại">
 <!ENTITY zotero.items.title_column "Nhan đề">
 <!ENTITY zotero.items.creator_column "Người tạo lập">

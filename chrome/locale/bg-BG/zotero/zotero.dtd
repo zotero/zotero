@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "Близки">
 <!ENTITY zotero.notes.separate "Редактиране в отделен прозорец">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "Тип">
 <!ENTITY zotero.items.title_column "Заглавие">
 <!ENTITY zotero.items.creator_column "Създател">

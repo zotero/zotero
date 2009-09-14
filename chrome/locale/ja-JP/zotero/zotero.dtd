@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "関連">
 <!ENTITY zotero.notes.separate "別画面で編集する">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "種類">
 <!ENTITY zotero.items.title_column "タイトル">
 <!ENTITY zotero.items.creator_column "作成者">

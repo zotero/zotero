@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "مواضيع مرتبطة">
 <!ENTITY zotero.notes.separate "حرر في نافذة منفصلة">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "النوع">
 <!ENTITY zotero.items.title_column "العنوان">
 <!ENTITY zotero.items.creator_column "الكاتب">

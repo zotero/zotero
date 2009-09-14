@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "相關的">
 <!ENTITY zotero.notes.separate "分出一個獨立視窗來編輯">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "類型">
 <!ENTITY zotero.items.title_column "標題">
 <!ENTITY zotero.items.creator_column "創作人">

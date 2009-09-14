@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "Relatert">
 <!ENTITY zotero.notes.separate "Rediger i separat vindu">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "Type">
 <!ENTITY zotero.items.title_column "Tittel">
 <!ENTITY zotero.items.creator_column "Navn">

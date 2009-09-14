@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "Gerelateerd">
 <!ENTITY zotero.notes.separate "In een nieuw venster bewerken">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "Type">
 <!ENTITY zotero.items.title_column "Titel">
 <!ENTITY zotero.items.creator_column "Maker">

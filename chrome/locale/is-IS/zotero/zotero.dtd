@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "Tengt">
 <!ENTITY zotero.notes.separate "Edit in a separate window">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "Tegund">
 <!ENTITY zotero.items.title_column "Titill">
 <!ENTITY zotero.items.creator_column "Höfundur">

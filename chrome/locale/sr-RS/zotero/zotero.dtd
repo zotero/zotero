@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "Сродно">
 <!ENTITY zotero.notes.separate "Уреди у одвојеном прозору">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "Врста">
 <!ENTITY zotero.items.title_column "Наслов">
 <!ENTITY zotero.items.creator_column "Аутор">

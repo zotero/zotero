@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "Zugehörig">
 <!ENTITY zotero.notes.separate "In einem neuen Fenster bearbeiten">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "Typ">
 <!ENTITY zotero.items.title_column "Titel">
 <!ENTITY zotero.items.creator_column "Ersteller">

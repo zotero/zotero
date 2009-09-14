@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "Kapcsolatok">
 <!ENTITY zotero.notes.separate "Szerkesztés külön ablakban">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "Típus">
 <!ENTITY zotero.items.title_column "Cím">
 <!ENTITY zotero.items.creator_column "Létrehozó">

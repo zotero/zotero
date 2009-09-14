@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "Collegamenti">
 <!ENTITY zotero.notes.separate "Modifica in una nuova finestra">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "Tipo">
 <!ENTITY zotero.items.title_column "Titolo">
 <!ENTITY zotero.items.creator_column "Autore">
