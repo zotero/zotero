@@ -22,11 +22,6 @@ row > label:first-child, .creator-type-label
 	margin: 0px !important;
 }
 
-*[zoteroFontSize=small] #item-box
-{
-	font-size: 10px;
-}
-
 .creator-type-label > image {
 	margin: 1px .2em 1px;
 	list-style-image: url('chrome://zotero/skin/mac/arrow-down.png');
