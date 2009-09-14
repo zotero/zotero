@@ -256,7 +256,7 @@ Zotero_RecognizePDF.Recognizer = function () {}
  *	(function will be passed image as URL and must return text of CAPTCHA)
  */
 Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, callback, captchaCallback) {
-	const MAX_PAGES = 2;
+	const MAX_PAGES = 3;
 	
 	const lineRe = /^\s*([^\s]+(?: [^\s]+)+)/;
 	
