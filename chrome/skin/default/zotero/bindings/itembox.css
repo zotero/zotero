@@ -46,6 +46,8 @@ row > label:first-child, .creator-type-label
 {
 	text-align: right;
 	font-weight: bold;
+	margin-left: 5px !important;
+	margin-right: 3px !important;
 }
 
 row label:first-child[isButton=true]:hover
@@ -85,11 +87,9 @@ row label,
 row > vbox[fieldname=abstractNote],
 row > vbox[fieldname=extra]
 {
-	margin-top: 0px;
-	margin-bottom: 0px;
 	-moz-margin-start: 1px !important;
 	-moz-margin-end: 1px !important;
-	padding: 1px 1px 0 5px;
+	padding: 1px 2px;
 }
 
 hbox.zotero-date-field-status
@@ -111,7 +111,7 @@ hbox.zotero-date-field-status label
 	height: 1.5em !important;
 	min-height: 1.5em !important;
 	padding: 0 0 0 2px !important;
-	margin: 1px 5px 0 4px !important;
+	margin: 1px 5px 0 1px !important;
 	max-height: 1.5em !important;
 	border: 1px solid transparent;	
 	-moz-border-top-colors: none;
