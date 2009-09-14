@@ -143,7 +143,6 @@ var Zotero = new function(){
 	 */
 	this.__defineGetter__('locked', function () _locked);
 	
-	
 	var _startupError;
 	var _startupErrorHandler;
 	var _zoteroDirectory = false;
@@ -152,6 +151,7 @@ var Zotero = new function(){
 	var _waiting;
 	
 	var _locked;
+	var _unlockCallbacks = [];
 	var _progressMeters;
 	var _lastPercentage;
 	
@@ -1132,6 +1132,14 @@ var Zotero = new function(){
 	 * Hide Zotero pane overlay in all windows
 	 */
 	this.hideZoteroPaneOverlay = function () {
+		// Run any queued callbacks
+		if (_unlockCallbacks.length) {
+			var func;
+			while (func = _unlockCallbacks.shift()) {
+				func();
+			}
+		}
+		
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator);
 		var enumerator = wm.getEnumerator("navigator:browser");
@@ -1142,6 +1150,20 @@ var Zotero = new function(){
 		_locked = false;
 		_progressMeters = [];
 		_lastPercentage = null;
+	}
+	
+	
+	/**
+	 * Adds a callback to be called when the Zotero pane overlay closes
+	 *
+	 * @param	{Boolean}	TRUE if added, FALSE if not locked
+	 */
+	this.addUnlockCallback = function (callback) {
+		if (!_locked) {
+			return false;
+		}
+		_unlockCallbacks.push(callback);
+		return true;
 	}
 	
 	

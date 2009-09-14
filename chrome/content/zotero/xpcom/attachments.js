@@ -1289,20 +1289,32 @@ Zotero.Attachments = new function(){
 			// ignore spurious about:blank loads
 			if(browser.contentDocument.location.href == "about:blank") return;
 			
-			var charsetID = Zotero.CharacterSets.getID(charset);
-			if (charsetID) {
-				var disabled = Zotero.Notifier.disable();
-				var item = Zotero.Items.get(itemID);
-				item.attachmentCharset = charsetID;
-				item.save();
-				if (disabled) {
-					Zotero.Notifier.enable();
+			var writeCallback = function () {
+				var charsetID = Zotero.CharacterSets.getID(charset);
+				if (charsetID) {
+					var disabled = Zotero.Notifier.disable();
+					
+					var item = Zotero.Items.get(itemID);
+					item.attachmentCharset = charsetID;
+					item.save();
+					
+					if (disabled) {
+						Zotero.Notifier.enable();
+					}
 				}
+				
+				// Chain fulltext indexer inside the charset callback,
+				// since it's asynchronous and a prerequisite
+				Zotero.Fulltext.indexDocument(browser.contentDocument, itemID);
 			}
 			
-			// Chain fulltext indexer inside the charset callback,
-			// since it's asynchronous and a prerequisite
-			Zotero.Fulltext.indexDocument(browser.contentDocument, itemID);
+			// Since the callback can be called during an import process that uses
+			// Zotero.wait(), try to queue the callback to run at the end,
+			// or run now if not queued
+			var queued = Zotero.addUnlockCallback(writeCallback);
+			if (!queued) {
+				writeCallback();
+			}
 		};
 		
 		Zotero.File.addCharsetListener(browser, callback, itemID);
