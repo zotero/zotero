@@ -92,6 +92,11 @@ row hbox label:first-child
 	margin-right: 1px;
 }
 
+row
+{
+	margin-bottom: 0;
+}
+
 row label,
 row > vbox[fieldname=abstractNote],
 row > vbox[fieldname=extra]
