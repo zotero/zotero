@@ -50,7 +50,7 @@ row > label:first-child, .creator-type-label
 	margin-right: 0 !important;
 }
 
-row > label:first-child
+row > label
 {
 	border: 1px solid transparent;
 }
@@ -120,7 +120,7 @@ hbox.zotero-date-field-status label
 	height: 1.5em !important;
 	min-height: 1.5em !important;
 	padding: 0 0 0 2px !important;
-	margin: 1px 5px 0 0 !important;
+	margin: 1px 5px 0 1px !important;
 	max-height: 1.5em !important;
 	border: 1px solid transparent;	
 	-moz-border-top-colors: none;
