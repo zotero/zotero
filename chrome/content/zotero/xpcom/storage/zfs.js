@@ -633,12 +633,12 @@ Zotero.Sync.Storage.Session.ZFS.prototype._updateItemFileInfo = function (item) 
 	
 	// Store file mod time
 	var mtime = item.attachmentModificationTime;
-	Zotero.Sync.Storage.setSyncedModificationTime(item.id, mtime, false);
+	Zotero.Sync.Storage.setSyncedModificationTime(item.id, mtime, true);
 	
 	// Store file hash of individual files
 	if (Zotero.Attachments.getNumFiles(item) == 1) {
 		var hash = item.attachmentHash;
-		Zotero.Sync.Storage.setSyncedHash(item.id, hash, true);
+		Zotero.Sync.Storage.setSyncedHash(item.id, hash);
 	}
 	
 	Zotero.DB.commitTransaction();

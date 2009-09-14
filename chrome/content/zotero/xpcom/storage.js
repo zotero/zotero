@@ -211,11 +211,8 @@ Zotero.Sync.Storage = new function () {
 		
 		if (updateItem) {
 			// Update item date modified so the new mod time will be synced
-			var item = Zotero.Items.get(itemID);
-			//var date = new Date(mtime * 1000);
-			//item.setField('dateModified', Zotero.Date.dateToSQL(date, true));
-			item.setField('dateModified', Zotero.DB.transactionDateTime);
-			item.save();
+			var sql = "UPDATE items SET clientDateModified=? WHERE itemID=?";
+			Zotero.DB.query(sql, [Zotero.DB.transactionDateTime, itemID]);
 		}
 		
 		Zotero.DB.commitTransaction();
@@ -254,10 +251,9 @@ Zotero.Sync.Storage = new function () {
 		Zotero.DB.valueQuery(sql, [hash, itemID]);
 		
 		if (updateItem) {
-			// Update item date modified so the new hash will be synced
-			var item = Zotero.Items.get(itemID);
-			item.setField('dateModified', Zotero.DB.transactionDateTime);
-			item.save();
+			// Update item date modified so the new mod time will be synced
+			var sql = "UPDATE items SET clientDateModified=? WHERE itemID=?";
+			Zotero.DB.query(sql, [Zotero.DB.transactionDateTime, itemID]);
 		}
 		
 		Zotero.DB.commitTransaction();

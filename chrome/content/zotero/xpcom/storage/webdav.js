@@ -515,7 +515,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._onUploadComplete = function (httpR
 		Zotero.Sync.Storage.setSyncedModificationTime(item.id, mtime, true);
 		
 		var hash = item.attachmentHash;
-		Zotero.Sync.Storage.setSyncedHash(item.id, hash, true);
+		Zotero.Sync.Storage.setSyncedHash(item.id, hash);
 		
 		Zotero.DB.commitTransaction();
 		
