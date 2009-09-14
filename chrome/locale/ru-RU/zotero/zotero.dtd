@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "Связанные">
 <!ENTITY zotero.notes.separate "Редактировать в отдельном окне">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "Тип">
 <!ENTITY zotero.items.title_column "Название">
 <!ENTITY zotero.items.creator_column "Создатель">

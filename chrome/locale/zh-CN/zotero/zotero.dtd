@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "相关条目">
 <!ENTITY zotero.notes.separate "独立窗口编辑">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "类型">
 <!ENTITY zotero.items.title_column "标题">
 <!ENTITY zotero.items.creator_column "作者">

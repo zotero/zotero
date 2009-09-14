@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "Powiązane">
 <!ENTITY zotero.notes.separate "Edytuj w oddzielnym oknie">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "Typ">
 <!ENTITY zotero.items.title_column "Tytuł">
 <!ENTITY zotero.items.creator_column "Twórca">

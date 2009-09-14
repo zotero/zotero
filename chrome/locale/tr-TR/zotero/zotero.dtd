@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "İligili">
 <!ENTITY zotero.notes.separate "Ayrı bir pencerede düzenle">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "Tür">
 <!ENTITY zotero.items.title_column "Başlık">
 <!ENTITY zotero.items.creator_column "Yaratan">

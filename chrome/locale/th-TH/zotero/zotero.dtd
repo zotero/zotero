@@ -29,6 +29,7 @@
 <!ENTITY zotero.tabs.related.label "Related">
 <!ENTITY zotero.notes.separate "Edit in a separate window">
 
+<!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "รูปแบบ">
 <!ENTITY zotero.items.title_column "ชื่อเรื่อง">
 <!ENTITY zotero.items.creator_column "ผู้สร้าง">
