@@ -691,12 +691,12 @@
 					// Minus (-) button
 					var removeButton = document.createElement('label');
 					removeButton.setAttribute("value","-");
+					removeButton.setAttribute("class","zotero-clicky");
 					// If default first row, don't let user remove it
 					if (defaultRow) {
 						this.disableButton(removeButton);
 					}
 					else {
-						removeButton.setAttribute("class","zotero-clicky");
 						removeButton.setAttribute("onclick",
 							"document.getBindingParent(this).removeCreator("
 							+ this._creatorCount
