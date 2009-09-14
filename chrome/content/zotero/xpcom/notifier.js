@@ -99,6 +99,7 @@ Zotero.Notifier = new function(){
 	**/
 	function trigger(event, type, ids, extraData, force){
 		if (_disabled){
+			Zotero.debug("Notifications are disabled");
 			return false;
 		}
 		
@@ -327,7 +328,7 @@ Zotero.Notifier = new function(){
 	}
 	
 	
-	function enable(enable) {
+	function enable() {
 		Zotero.debug('Enabling Notifier notifications');
 		_disabled = false; 
 	}

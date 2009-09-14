@@ -301,7 +301,10 @@ var Zotero_File_Interface = new function() {
 		Zotero_File_Interface.Progress.close();
 		Zotero.UnresponsiveScriptIndicator.enable();
 		
-		if(!worked) {
+		if (worked) {
+			Zotero.Notifier.trigger('refresh', 'collection', _importCollection.id);
+		}
+		else {
 			_importCollection.erase();
 			window.alert(Zotero.getString("fileInterface.importError"));
 		}
