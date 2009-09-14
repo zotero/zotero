@@ -81,6 +81,10 @@
 	opacity: .7;
 }
 
+#zotero-tb-attachment-add > .toolbarbutton-icon > stack > .zotero-tb-glow {
+	display: none;
+}
+
 #zotero-tb-sync > .toolbarbutton-icon {
 	-moz-binding: none !important;
 }
