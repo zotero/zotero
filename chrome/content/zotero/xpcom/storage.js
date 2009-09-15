@@ -79,7 +79,9 @@ Zotero.Sync.Storage = new function () {
 			return;
 		}
 		if (!_session.initFromPrefs()) {
-			_error("Module not initialized");
+			Zotero.debug(_session.name + " module not initialized");
+			_callbacks.onSkip();
+			return;
 		}
 		
 		if (!_session.active) {
@@ -639,10 +641,8 @@ Zotero.Sync.Storage = new function () {
 	
 	
 	this.checkServer = function (module, callback) {
-		_session = new Zotero.Sync.Storage.Session(module, { onError: _error });
-		if (!_session.initFromPrefs()) {
-			_error("Module not initialized");
-		}
+		_session = new Zotero.Sync.Storage.Session(module, { onError: callback });
+		_session.initFromPrefs();
 		_session.checkServer(callback);
 	}
 	
