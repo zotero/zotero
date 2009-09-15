@@ -238,7 +238,7 @@
 							}
 							
 							var label = document.createElement('label');
-							label.setAttribute('onclick', "this.parentNode.parentNode.parentNode.handleTagClick(event, this)");
+							label.setAttribute('onclick', "document.getBindingParent(this).handleTagClick(event, this)");
 							label.className = 'zotero-clicky';
 							
 							
@@ -247,9 +247,9 @@
 							label.setAttribute('tagType', this._tags[tagID].type);
 							if (this.editable) {
 								label.setAttribute('context', 'tag-menu');
-								label.setAttribute('ondragover', 'nsDragAndDrop.dragOver(event, this.parentNode.parentNode.parentNode.dragObserver)');
-								label.setAttribute('ondragexit', 'nsDragAndDrop.dragExit(event, this.parentNode.parentNode.parentNode.dragObserver)');
-								label.setAttribute('ondragdrop', 'nsDragAndDrop.drop(event, this.parentNode.parentNode.parentNode.dragObserver)');
+								label.setAttribute('ondragover', 'nsDragAndDrop.dragOver(event, document.getBindingParent(this).dragObserver)');
+								label.setAttribute('ondragexit', 'nsDragAndDrop.dragExit(event, document.getBindingParent(this).dragObserver)');
+								label.setAttribute('ondragdrop', 'nsDragAndDrop.drop(event, document.getBindingParent(this).dragObserver)');
 							}
 							tagsToggleBox.appendChild(label);
 						}
@@ -763,8 +763,8 @@
 		<content>
 			<xul:groupbox flex="1">
 				<xul:menupopup id="tag-menu">
-					<xul:menuitem label="&zotero.tagSelector.renameTag;" class="menuitem-non-iconic" oncommand="this.parentNode.parentNode.parentNode.rename(document.popupNode.getAttribute('tagID')); event.stopPropagation()"/>
-					<xul:menuitem label="&zotero.tagSelector.deleteTag;" class="menuitem-non-iconic" oncommand="this.parentNode.parentNode.parentNode.delete(document.popupNode.getAttribute('tagID')); event.stopPropagation()"/>
+					<xul:menuitem label="&zotero.tagSelector.renameTag;" class="menuitem-non-iconic" oncommand="document.getBindingParent(this).rename(document.popupNode.getAttribute('tagID')); event.stopPropagation()"/>
+					<xul:menuitem label="&zotero.tagSelector.deleteTag;" class="menuitem-non-iconic" oncommand="document.getBindingParent(this).delete(document.popupNode.getAttribute('tagID')); event.stopPropagation()"/>
 				</xul:menupopup>
 				
 				<xul:vbox id="no-tags-box" align="center" pack="center" flex="1">
@@ -796,16 +796,16 @@
 					<xul:hbox>
 						<xul:label id="tags-search-filter" value="&zotero.tagSelector.filter;" hidden="true"/>
 						<xul:textbox id="tags-search" flex="1" type="search" timeout="250" dir="reverse"
-							oncommand="this.parentNode.parentNode.parentNode.handleKeyPress(); event.stopPropagation()"
-							onkeypress="if (event.keyCode == event.DOM_VK_ESCAPE) { this.parentNode.parentNode.parentNode.parentNode.handleKeyPress(true); }">
+							oncommand="document.getBindingParent(this).handleKeyPress(); event.stopPropagation()"
+							onkeypress="if (event.keyCode == event.DOM_VK_ESCAPE) { document.getBindingParent(this).handleKeyPress(true); }">
 							<xul:toolbarbutton id="search-cancel"
-								oncommand="this.parentNode.focus(); this.parentNode.parentNode.parentNode.parentNode.parentNode.handleKeyPress(true)" hidden="true"/>
+								oncommand="this.parentNode.focus(); document.getBindingParent(this).handleKeyPress(true)" hidden="true"/>
 						</xul:textbox>
 						<xul:toolbarbutton id="view-settings-menu" tooltiptext="&zotero.toolbar.actions.label;"
 								image="chrome://zotero/skin/tag-selector-menu.png" type="menu">
 							<xul:menupopup id="view-settings-popup">
 								<xul:menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" autocheck="true" type="checkbox"
-									oncommand="var ts = this.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode; ts._dirty = true; ts.setAttribute('showAutomatic', this.getAttribute('checked') == 'true')"/>
+									oncommand="var ts = document.getBindingParent(this); ts._dirty = true; ts.setAttribute('showAutomatic', this.getAttribute('checked') == 'true')"/>
 							</xul:menupopup>
 						</xul:toolbarbutton>
 					</xul:hbox>
@@ -818,13 +818,13 @@
 						<!--
 						Disabled (at least) until there's an ANY search mode
 						<xul:toolbarbutton label="&zotero.tagSelector.selectVisible;"
-							oncommand="this.parentNode.parentNode.parentNode.parentNode.selectVisible()"/>
+							oncommand="document.getBindingParent(this).selectVisible()"/>
 						<xul:button label="&zotero.tagSelector.clearVisible;"
-							oncommand="this.parentNode.parentNode.parentNode.parentNode.clearVisible()"/> -->
+							oncommand="document.getBindingParent(this).clearVisible()"/> -->
 						<xul:toolbarseparator/>
 						<xul:hbox pack="center">
 							<xul:button label="&zotero.tagSelector.clearAll;"
-								oncommand="this.parentNode.parentNode.parentNode.parentNode.parentNode.clearAll(); event.stopPropagation();"/>
+								oncommand="document.getBindingParent(this).clearAll(); event.stopPropagation();"/>
 						</xul:hbox>
 					</xul:hbox>
 				</xul:vbox>
