@@ -163,6 +163,9 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.initFromPrefs = function () {
 	}
 	
 	var url = Zotero.Prefs.get('sync.storage.url');
+	if (!url) {
+		return false;
+	}
 	
 	url = scheme + '://' + url;
 	var dir = "zotero";
