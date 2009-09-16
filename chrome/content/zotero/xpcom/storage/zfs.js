@@ -715,10 +715,16 @@ Zotero.Sync.Storage.Session.ZFS.prototype.getLastSyncTime = function (callback) 
 			return;
 		}
 		
-		var ts = req.responseText;
-		var date = new Date(req.responseText * 1000);
-		Zotero.debug("Last successful storage sync was " + date);
-		self._lastSyncTime = ts;
+		if (req.status == 200) {
+			var ts = req.responseText;
+			var date = new Date(req.responseText * 1000);
+			Zotero.debug("Last successful storage sync was " + date);
+			self._lastSyncTime = ts;
+		}
+		else {
+			var ts = null;
+			self._lastSyncTime = null;
+		}
 		callback(ts);
 	});
 }
@@ -726,6 +732,13 @@ Zotero.Sync.Storage.Session.ZFS.prototype.getLastSyncTime = function (callback) 
 
 Zotero.Sync.Storage.Session.ZFS.prototype.setLastSyncTime = function (callback, useLastSyncTime) {
 	if (useLastSyncTime) {
+		if (!this._lastSyncTime) {
+			if (callback) {
+				callback();
+			}
+			return;
+		}
+		
 		var sql = "REPLACE INTO version VALUES ('storage_zfs', ?)";
 		Zotero.DB.query(sql, { int: this._lastSyncTime });
 		
