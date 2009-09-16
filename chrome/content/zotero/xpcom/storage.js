@@ -575,7 +575,13 @@ Zotero.Sync.Storage = new function () {
 		
 		var file = item.getFile();
 		if (!file) {
-			throw ("File not found for item " + item.id + " after processing download in " + funcName);
+			// This can happen if an HTML snapshot filename was changed and synced
+			// elsewhere but the renamed file wasn't synced, so the ZIP doesn't
+			// contain a file with the known name
+			var missingFile = item.getFile(null, true);
+			Components.utils.reportError("File '" + missingFile.leafName + "' not found after processing download "
+				+ item.libraryID + "/" + item.key + " in " + funcName);
+			return;
 		}
 		file.lastModifiedTime = syncModTime * 1000;
 		
