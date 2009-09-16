@@ -2274,10 +2274,22 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 					
 					// Still string, so remote URL
 					if (typeof file == 'string') {
-						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								   .getService(Components.interfaces.nsIWindowMediator);
-						var win = wm.getMostRecentWindow("navigator:browser");
-						win.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack', row); // TODO: don't do this
+						if (sourceItemID) {
+							if (!itemGroup.filesEditable) {
+								var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+										   .getService(Components.interfaces.nsIWindowMediator);
+								var win = wm.getMostRecentWindow("navigator:browser");
+								win.ZoteroPane.displayCannotEditLibraryFilesMessage();
+								return;
+							}
+							Zotero.Attachments.importFromURL(url, sourceItemID, false, false, null, null, targetLibraryID);
+						}
+						else {
+							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+									   .getService(Components.interfaces.nsIWindowMediator);
+							var win = wm.getMostRecentWindow("navigator:browser");
+							win.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack'); // TODO: don't do this
+						}
 						continue;
 					}
 					

@@ -240,7 +240,7 @@
 									createInstance(Components.interfaces.nsIURI);
 							
 							// First try to find a snapshot matching the item's URL field
-							var snapID = this.item.getBestSnapshot();
+							var snapID = this.item.getBestAttachment();
 							if (snapID) {
 								spec = Zotero.Items.get(snapID).getLocalFileURL();
 								uri.spec = spec;
