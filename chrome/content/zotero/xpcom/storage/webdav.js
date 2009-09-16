@@ -591,10 +591,15 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.getLastSyncTime = function (callbac
 					return;
 				}
 				
-				var lastModified = req.getResponseHeader("Last-Modified");
-				var date = new Date(lastModified);
-				Zotero.debug("Last successful storage sync was " + date);
-				ts = Zotero.Date.toUnixTimestamp(date);
+				if (req.status == 200) {
+					var lastModified = req.getResponseHeader("Last-Modified");
+					var date = new Date(lastModified);
+					Zotero.debug("Last successful storage sync was " + date);
+					ts = Zotero.Date.toUnixTimestamp(date);
+				}
+				else {
+					ts = null;
+				}
 			}
 			finally {
 				callback(ts);
