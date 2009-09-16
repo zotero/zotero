@@ -161,7 +161,7 @@ Zotero_RecognizePDF.ItemRecognizer.prototype._recognizeItem = function() {
 	if(file) {
 		var recognizer = new Zotero_RecognizePDF.Recognizer();
 		var me = this;
-		recognizer.recognize(file, function(newItem, error) { me._callback(newItem, error) });
+		recognizer.recognize(file, this._item.libraryID, function(newItem, error) { me._callback(newItem, error) });
 	} else {
 		this._callback(false, "recognizePDF.fileNotFound");
 	}
@@ -255,11 +255,12 @@ Zotero_RecognizePDF.Recognizer = function () {}
  * @param {Function} [captchaCallback] The function to be executed if a CAPTCHA is encountered
  *	(function will be passed image as URL and must return text of CAPTCHA)
  */
-Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, callback, captchaCallback) {
+Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, callback, captchaCallback) {
 	const MAX_PAGES = 3;
 	
 	const lineRe = /^\s*([^\s]+(?: [^\s]+)+)/;
 	
+	this._libraryID = libraryID;
 	this._callback = callback;
 	//this._captchaCallback = captchaCallback;
 	
@@ -369,7 +370,7 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 		translate.setHandler("itemDone", function(translate, item) { me._callback(item); });
 		translate.setHandler("select", function(translate, items) { return me._selectItems(translate, items) });
 		translate.setHandler("done", function(translate, success) { if(!success) me._queryGoogle(); });
-		translate.translate(true, false);
+		translate.translate(this._libraryID, false);
 		delete this._DOI;
 	} else {
 		// take the relevant parts of some lines (exclude hyphenated word)
@@ -449,7 +450,7 @@ Zotero_RecognizePDF.Recognizer.prototype._scrape = function(/**Zotero.Translate*
 	
 	this._hiddenBrowser.removeEventListener("pageshow", this._scrape.caller, true);
 	translate.setDocument(this._hiddenBrowser.contentDocument);
-	translate.translate(true, false);
+	translate.translate(this._libraryID, false);
 }
 
 /**
