@@ -2482,12 +2482,8 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		// FIXME: temporarily disable file attachment options for groups
-		var itemGroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
-		if (itemGroup.isWithinGroup()) {
-			var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-						.getService(Components.interfaces.nsIPrompt);
-			pr.alert("", "Files cannot currently be added to group libraries.");
+		if (!this.canEditFiles()) {
+			this.displayCannotEditLibraryFilesMessage();
 			return;
 		}
 		
@@ -2597,10 +2593,8 @@ var ZoteroPane = new function()
 				//
 				//
 				
-				if (libraryID) {
-					var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-								.getService(Components.interfaces.nsIPrompt);
-					pr.alert("", "Files cannot currently be added to group libraries.");
+				if (!this.canEditFiles(row)) {
+					this.displayCannotEditLibraryFilesMessage();
 					return;
 				}
 				
@@ -2611,7 +2605,7 @@ var ZoteroPane = new function()
 					var collectionID = false;
 				}
 				
-				Zotero.Attachments.importFromDocument(doc, false, false, collectionID);
+				Zotero.Attachments.importFromDocument(doc, false, false, collectionID, null, libraryID);
 				return;
 			}
 		}
@@ -2935,10 +2929,14 @@ var ZoteroPane = new function()
 	this.displayCannotEditLibraryMessage = function () {
 		var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
 					.getService(Components.interfaces.nsIPrompt);
-		pr.alert(
-			Zotero.getString('general.accessDenied'),
-			"You cannot make changes to the currently selected library."
-		);
+		pr.alert("", "You cannot make changes to the currently selected library.");
+	}
+	
+	
+	this.displayCannotEditLibraryFilesMessage = function () {
+		var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+					.getService(Components.interfaces.nsIPrompt);
+		pr.alert("", "You cannot add files to the currently selected library.");
 	}
 	
 	

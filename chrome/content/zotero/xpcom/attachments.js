@@ -475,7 +475,7 @@ Zotero.Attachments = new function(){
 	/*
 	 * Save a snapshot -- uses synchronous WebPageDump or asynchronous saveURI()
 	 */
-	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs, callback) {
+	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs, callback, libraryID) {
 		Zotero.debug('Importing attachment from document');
 		
 		if (sourceItemID && parentCollectionIDs) {
@@ -507,7 +507,10 @@ Zotero.Attachments = new function(){
 		try {
 			// Create a new attachment
 			var attachmentItem = new Zotero.Item('attachment');
-			if (sourceItemID) {
+			if (libraryID) {
+				attachmentItem.libraryID = libraryID;
+			}
+			else if (sourceItemID) {
 				var parentItem = Zotero.Items.get(sourceItemID);
 				attachmentItem.libraryID = parentItem.libraryID;
 			}
