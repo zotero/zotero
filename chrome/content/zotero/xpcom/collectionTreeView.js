@@ -1468,7 +1468,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 								   .getService(Components.interfaces.nsIWindowMediator);
 						var win = wm.getMostRecentWindow("navigator:browser");
-						win.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack', row); // TODO: don't do this
+						win.ZoteroPane.addItemFromURL(url, 'temporaryPDFHack', null, row); // TODO: don't do this
 						continue;
 					}
 					

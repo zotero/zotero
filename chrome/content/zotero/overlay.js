@@ -1121,8 +1121,8 @@ var ZoteroPane = new function()
 	this.updateNoteButtonMenu = function () {
 		var items = ZoteroPane.getSelectedItems();
 		var button = document.getElementById('zotero-tb-add-child-note');
-		button.disabled = this.canEdit() && !(items.length == 1
-				&& (items[0].isRegularItem() || !items[0].isTopLevelItem()));
+		button.disabled = !this.canEdit() ||
+			!(items.length == 1 && (items[0].isRegularItem() || !items[0].isTopLevelItem()));
 	}
 	
 	
@@ -2130,7 +2130,7 @@ var ZoteroPane = new function()
 						
 						var uri = Components.classes["@mozilla.org/network/standard-url;1"].
 								createInstance(Components.interfaces.nsIURI);
-						var snapID = item.getBestSnapshot();
+						var snapID = item.getBestAttachment();
 						if (snapID) {
 							spec = Zotero.Items.get(snapID).getLocalFileURL();
 							if (spec) {
@@ -2482,10 +2482,21 @@ var ZoteroPane = new function()
 			return;
 		}
 		
+		var itemGroup = ZoteroPane.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+		if (link && itemGroup.isWithinGroup()) {
+			var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+						.getService(Components.interfaces.nsIPrompt);
+			pr.alert("", "Linked files cannot be added to group libraries.");
+			return;
+		}
+		
+		// TODO: disable in menu
 		if (!this.canEditFiles()) {
 			this.displayCannotEditLibraryFilesMessage();
 			return;
 		}
+		
+		var libraryID = itemGroup.ref.libraryID;
 		
 		var nsIFilePicker = Components.interfaces.nsIFilePicker;
 		var fp = Components.classes["@mozilla.org/filepicker;1"]
@@ -2503,7 +2514,7 @@ var ZoteroPane = new function()
 				if(link)
 					attachmentID = Zotero.Attachments.linkFromFile(file, id);
 				else
-					attachmentID = Zotero.Attachments.importFromFile(file, id);
+					attachmentID = Zotero.Attachments.importFromFile(file, id, libraryID);
 			
 				if(attachmentID && !id)
 				{
@@ -2703,10 +2714,8 @@ var ZoteroPane = new function()
 						//
 						//
 						
-						if (libraryID) {
-							var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-										.getService(Components.interfaces.nsIPrompt);
-							pr.alert("", "Files cannot currently be added to group libraries.");
+						if (!ZoteroPane.canEditFiles(row)) {
+							ZoteroPane.displayCannotEditLibraryFilesMessage();
 							return;
 						}
 						
@@ -2717,7 +2726,7 @@ var ZoteroPane = new function()
 							var collectionID = false;
 						}
 						
-						Zotero.Attachments.importFromURL(url, false, false, false, collectionID);
+						Zotero.Attachments.importFromURL(url, false, false, false, collectionID, null, libraryID);
 						return;
 					}
 				}

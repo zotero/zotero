@@ -3108,27 +3108,34 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 }
 
 
+Zotero.Item.prototype.getBestSnapshot = function () {
+	var msg = "Zotero.Item.getBestSnapshot() is deprecated -- use getBestAttachment";
+	Zotero.debug(msg, 2);
+	Components.utils.reportError(msg);
+	return this.getBestAttachment();
+}
+
+
 /*
- * Returns the itemID of the latest child snapshot of this item with the
- * same URL as the item itself, or false if none
+ * Looks for attachment in the following order: oldest PDF attachment matching parent URL,
+ * oldest non-PDF attachment matching parent URL, oldest PDF attachment not matching URL,
+ * old non-PDF attachment not matching URL
+ *
+ * @return	{Integer}		itemID for attachment
  */
-Zotero.Item.prototype.getBestSnapshot = function() {
+Zotero.Item.prototype.getBestAttachment = function() {
 	if (!this.isRegularItem()) {
-		throw ("getBestSnapshot() can only be called on regular items");
+		throw ("getBestAttachment() can only be called on regular items");
 	}
 	
 	var url = this.getField('url');
-	if (!url) {
-		return false;
-	}
 	
-	var sql = "SELECT IA.itemID, value FROM itemAttachments IA NATURAL JOIN items I "
+	var sql = "SELECT IA.itemID FROM itemAttachments IA NATURAL JOIN items I "
 		+ "LEFT JOIN itemData ID ON (IA.itemID=ID.itemID AND fieldID=1) "
 		+ "LEFT JOIN itemDataValues IDV ON (ID.valueID=IDV.valueID) "
 		+ "WHERE sourceItemID=? AND linkMode NOT IN (?) "
 		+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
 		+ "ORDER BY value=? DESC, mimeType='application/pdf' DESC, dateAdded ASC";
-		
 	return Zotero.DB.valueQuery(sql, [this.id, Zotero.Attachments.LINK_MODE_LINKED_URL, url]);
 }
 
