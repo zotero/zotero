@@ -93,7 +93,7 @@ Zotero.MIME = new function(){
 	 * Check if file extension should be forced to open externally
 	 */
 	function isExternalTextExtension(ext){
-		return typeof _externalTextExtensions['ext'] != 'undefined';
+		return typeof _externalTextExtensions[ext] != 'undefined';
 	}
 	
 	
@@ -312,7 +312,7 @@ Zotero.MIME = new function(){
 	 * Determine if a MIME type can be handled natively
 	 * or if it needs to be passed off to a plugin or external helper app
 	 *
-	 * ext is an optional extension hint (only needed for text/plain files
+	 * ext is an optional extension hint (only needed for text files
 	 * that should be forced to open externally)
 	 *
 	 * Note: it certainly seems there should be a more native way of doing this
@@ -322,9 +322,9 @@ Zotero.MIME = new function(){
 	 * do what we need
 	 */
 	function hasNativeHandler(mimeType, ext) {
-		if (mimeType=='text/plain'){
+		if (mimeType.match(/^text\//)) {
 			if (isExternalTextExtension(ext)){
-				Zotero.debug('text/plain file has extension that should be handled externally');
+				Zotero.debug('text file has extension that should be handled externally');
 				return false;
 			}
 			return true;
