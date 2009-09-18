@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":90,
 	"inRepository":true,
-	"lastUpdated":"2009-07-16 09:20:00"
+	"lastUpdated":"2009-09-18 01:05:00"
 }
 
 function detectSearch(item) {
@@ -37,6 +37,10 @@ function processCrossRef(xmlOutput) {
 	} catch(e) {
 		return false;
 	}
+	
+	// "with ({});" needed to fix default namespace scope issue
+	// See https://bugzilla.mozilla.org/show_bug.cgi?id=330572
+	default xml namespace = "http://www.crossref.org/xschema/1.0"; with ({});
 	
 	// ensure status is valid
 	if(!xml.doi_record.length()) return false;
@@ -140,7 +144,7 @@ function doSearch(item) {
 		var co = Zotero.Utilities.createContextObject(item);
 	}
 	
-	Zotero.Utilities.HTTP.doGet("http://www.crossref.org/openurl?pid=zter:zter321&"+co+"&noredirect=true&format=unixref", function(responseText) {
+	Zotero.Utilities.HTTP.doGet("http://www.crossref.org/openurl/?pid=zter:zter321&"+co+"&noredirect=true&format=unixref", function(responseText) {
 		processCrossRef(responseText);
 		Zotero.done();
 	});
