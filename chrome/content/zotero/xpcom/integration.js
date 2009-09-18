@@ -229,6 +229,12 @@ Zotero.Integration.UserCancelledException.prototype.toString = function() { retu
 Zotero.Integration.DisplayException = function(name) { this.name = name };
 Zotero.Integration.DisplayException.prototype.toString = function() { return Zotero.getString("integration.error."+this.name); };
 
+Zotero.Integration.CorruptFieldException = function(corruptFieldString) {
+	this.corruptFieldString = corruptFieldString;
+}
+Zotero.Integration.CorruptFieldException.prototype.name = "CorruptFieldException";
+Zotero.Integration.CorruptFieldException.prototype.message = "A field code in this document is corrupted.";
+Zotero.Integration.CorruptFieldException.prototype.toString = function() { return this.message+" "+this.corruptFieldString.toSource(); }
 
 // Field code for an item
 const ITEM_CODE = "ITEM";
@@ -435,6 +441,27 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 								this._doc.activate();
 							}
 						}
+					} else if(e instanceof Zotero.Integration.CorruptFieldException) {
+						var msg = Zotero.getString("integration.corruptField")+'\n\n'+
+							      Zotero.getString('integration.corruptField.description');
+						field.select();
+						var result = this._doc.displayAlert(msg,
+							Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
+							Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_YES_NO_CANCEL);
+						
+						if(result == 0) {
+							throw e;
+						} else if(result == 1) {		// No
+							this._removeCodeFields.push(i);
+						} else {
+							// Display reselect edit citation dialog
+							var added = this._session.editCitation(i, field.getNoteIndex());
+							if(added) {
+								this._doc.activate();
+							} else {
+								throw new Zotero.Integration.UserCancelledException();
+							}
+						}
 					} else {
 						throw e;
 					}
@@ -456,19 +483,38 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 	}
 	var endTime = (new Date()).getTime();
 	Zotero.debug("Collected "+this._fields.length+" fields in "+(endTime-collectFieldsTime)/1000+"; "+1000/((endTime-collectFieldsTime)/this._fields.length)+" fields/second");
-
-	// load uncited items from bibliography
-	if(bibliographyData && !this._session.bibliographyData) {
-		this._session.loadBibliographyData(bibliographyData);
-	}
-	
-	this._session.updateItemSet();
 	
 	// if we are reloading this session, assume no item IDs to be updated except for edited items
 	if(this._reloadSession) {
 		this._session.updateItemIDs = {};
 		this._session.bibliographyHasChanged = false;
 	}
+
+	// load uncited items from bibliography
+	if(bibliographyData && !this._session.bibliographyData) {
+		try {
+			this._session.loadBibliographyData(bibliographyData);
+		} catch(e) {
+			if(e instanceof Zotero.Integration.CorruptFieldException) {
+				var msg = Zotero.getString("integration.corruptBibliography")+'\n\n'+
+						  Zotero.getString('integration.corruptBibliography.description');
+				var result = this._doc.displayAlert(msg, 
+							Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
+							Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
+				if(result == 0) {
+					throw e;
+				} else {
+					bibliographyData = "";
+					this._session.bibliographyHasChanged = true;
+					this._session.bibliographyDataHasChanged = true;
+				}
+			} else {
+				throw e;
+			}
+		}
+	}
+	
+	this._session.updateItemSet();
 	
 	// create new citation or edit existing citation
 	if(editFieldIndex) { 
@@ -566,8 +612,8 @@ Zotero.Integration.Document.prototype.addCitation = function() {
 	this._getSession();
 	
 	var field = this._addField(true);
-	field.setCode("TEMP");
 	if(!field) return;
+	field.setCode("TEMP");
 	
 	this._updateSession(true);
 	this._updateDocument();
@@ -1034,7 +1080,15 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) 
 		}
 		
 		// get JSON
-		var object = Zotero.JSON.unserialize(arg);
+		try {
+			var object = Zotero.JSON.unserialize(arg);
+		} catch(e) {
+			try {
+				var object = Zotero.JSON.unserialize(arg.substr(0, arg.length-1));
+			} catch(e) {
+				throw new Zotero.Integration.CorruptFieldException(arg);
+			}
+		}
 		
 		// Fix uppercase citation codes
 		if(object.CITATIONITEMS) {
@@ -1364,7 +1418,15 @@ Zotero.Integration.Session._rtfEscapeFunction = function(aChar) {
  * Loads document data from a JSON object
  */
 Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
-	var documentData = Zotero.JSON.unserialize(json);
+	try {
+		var documentData = Zotero.JSON.unserialize(json);
+	} catch(e) {
+		try {
+			var documentData = Zotero.JSON.unserialize(json.substr(0, json.length-1));
+		} catch(e) {
+			throw new Zotero.Integration.CorruptFieldException(json);
+		}
+	}
 	
 	// set uncited
 	if(documentData.uncited) {
