@@ -795,6 +795,11 @@ Zotero.Sync.Storage = new function () {
 				continue;
 			}
 			
+			// Make sure the new filename is valid, in case an invalid character
+			// for this OS somehow make it into the ZIP (e.g., from before we checked
+			// for them or if a user manually renamed and relinked a file on another OS)
+			fileName = Zotero.File.getValidFileName(fileName);
+			
 			Zotero.debug("Extracting " + fileName);
 			var destFile = parentDir.clone();
 			destFile.QueryInterface(Components.interfaces.nsILocalFile);
