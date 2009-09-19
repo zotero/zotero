@@ -567,13 +567,25 @@ Zotero.Sync.Storage = new function () {
 		// TODO: Test file hash
 		
 		if (data.compressed) {
-			_processZipDownload(item);
+			var newFile = _processZipDownload(item);
 		}
 		else {
-			_processDownload(item);
+			var newFile = _processDownload(item);
 		}
 		
+		// If |updated| is a file, it was renamed, so set item filename to that
+		// and mark for updated
 		var file = item.getFile();
+		if (newFile && file.leafName != newFile.leafName) {
+			item.relinkAttachmentFile(newFile);
+			file = item.getFile();
+			// TODO: use an integer counter instead of mod time for change detection
+			var useCurrentModTime = true;
+		}
+		else {
+			var useCurrentModTime = false;
+		}
+		
 		if (!file) {
 			// This can happen if an HTML snapshot filename was changed and synced
 			// elsewhere but the renamed file wasn't synced, so the ZIP doesn't
@@ -583,7 +595,6 @@ Zotero.Sync.Storage = new function () {
 				+ item.libraryID + "/" + item.key + " in " + funcName);
 			return;
 		}
-		file.lastModifiedTime = syncModTime * 1000;
 		
 		Zotero.DB.beginTransaction();
 		var syncState = Zotero.Sync.Storage.getSyncState(item.id);
@@ -592,13 +603,25 @@ Zotero.Sync.Storage = new function () {
 		var updateItem = syncState != 1;
 		var updateItem = false;
 		
-		
-		// Only save hash if file isn't compressed
-		if (!data.compressed) {
-			Zotero.Sync.Storage.setSyncedHash(item.id, syncHash, false);
+		if (useCurrentModTime) {
+			file.lastModifiedTime = new Date();
+			
+			// Reset hash and sync state
+			Zotero.Sync.Storage.setSyncedHash(item.id, null);
+			Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD);
+			Zotero.Sync.Storage.resyncOnFinish = true;
 		}
+		else {
+			file.lastModifiedTime = syncModTime * 1000;
+			
+			// Only save hash if file isn't compressed
+			if (!data.compressed) {
+				Zotero.Sync.Storage.setSyncedHash(item.id, syncHash, false);
+			}
+			Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
+		}
+		
 		Zotero.Sync.Storage.setSyncedModificationTime(item.id, syncModTime, updateItem);
-		Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
 		Zotero.DB.commitTransaction();
 		_changesMade = true;
 	}
@@ -738,9 +761,47 @@ Zotero.Sync.Storage = new function () {
 			throw ("Empty path for item " + item.key + " in " + funcName);
 		}
 		var newName = file.leafName;
+		var returnFile = null
 		
 		Zotero.debug("Moving download file " + tempFile.leafName + " into attachment directory");
-		tempFile.moveTo(parentDir, newName);
+		try {
+			tempFile.moveTo(parentDir, newName);
+		}
+		catch (e) {
+			var destFile = parentDir.clone();
+			destFile.append(newName);
+			
+			// Windows API only allows paths of 260 characters
+			if (e.name == "NS_ERROR_FILE_NOT_FOUND" && destFile.path.length > 255) {
+				var pathLength = destFile.path.length - destFile.leafName.length;
+				var newLength = 255 - pathLength;
+				// Require 40 available characters in path -- this is arbitrary,
+				// but otherwise filenames are going to end up being cut off
+				if (newLength < 40) {
+					throw ("Storage directory path is too long in " + funcName);
+				}
+				
+				// Shorten file if it's too long -- we don't relink it, but this should
+				// be pretty rare and probably only occurs on extraneous files with
+				// gibberish for filenames
+				var newName = destFile.leafName.substr(0, newLength);
+				var msg = "Shortening filename to '" + newName + "'";
+				Zotero.debug(msg, 2);
+				Components.utils.reportError(msg);
+				tempFile.moveTo(parentDir, newName);
+				
+				destFile = parentDir.clone();
+				destFile.append(newName);
+				
+				// processDownload() needs to know that we're renaming the file
+				returnFile = destFile;
+			}
+			else {
+				throw(e);
+			}
+		}
+		
+		return returnFile;
 	}
 	
 	
@@ -767,7 +828,7 @@ Zotero.Sync.Storage = new function () {
 			if (zipFile.exists()) {
 				zipFile.remove(false);
 			}
-			return;
+			return false;
 		}
 		
 		var parentDir = Zotero.Attachments.getStorageDirectory(item.id);
@@ -776,6 +837,8 @@ Zotero.Sync.Storage = new function () {
 		}
 		
 		_deleteExistingAttachmentFiles(item);
+		
+		var returnFile = null;
 		
 		var entries = zipReader.findEntries(null);
 		while (entries.hasMore()) {
@@ -811,7 +874,40 @@ Zotero.Sync.Storage = new function () {
 				Components.utils.reportError(msg + " in " + funcName);
 				continue;
 			}
-			destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+			try {
+				destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+			}
+			catch (e) {
+				// Windows API only allows paths of 260 characters
+				if (e.name == "NS_ERROR_FILE_NOT_FOUND" && destFile.path.length > 255) {
+					// Is this the main attachment file?
+					var primaryFile = item.getFile(null, true).leafName == destFile.leafName;
+					
+					var pathLength = destFile.path.length - destFile.leafName.length;
+					var newLength = 255 - pathLength;
+					// Require 40 available characters in path -- this is arbitrary,
+					// but otherwise filenames are going to end up being cut off
+					if (newLength < 40) {
+						throw ("Storage directory path is too long in " + funcName);
+					}
+					
+					// Shorten file if it's too long -- we don't relink it, but this should
+					// be pretty rare and probably only occurs on extraneous files with
+					// gibberish for filenames
+					var newName = destFile.leafName.substr(0, newLength);
+					Components.utils.reportError("Shortening filename to '" + newName + "'");
+					destFile.leafName = newName;
+					destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+					
+					// If we're renaming the main file, processDownload() needs to know
+					if (primaryFile) {
+						returnFile = destFile;
+					}
+				}
+				else {
+					throw(e);
+				}
+			}
 			zipReader.extract(entryName, destFile);
 			
 			var origPath = destFile.path;
@@ -828,6 +924,8 @@ Zotero.Sync.Storage = new function () {
 		}
 		zipReader.close();
 		zipFile.remove(false);
+		
+		return returnFile;
 	}
 	
 	

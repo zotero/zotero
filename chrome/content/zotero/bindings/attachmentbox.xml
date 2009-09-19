@@ -418,9 +418,20 @@
 								// start again
 								continue;
 							}
-							else if (renamed == -2 || !renamed) {
-								alert(Zotero.getString('pane.item.attachments.rename.error'));
+							else if (renamed == -2) {
+								nsIPS.alert(
+									window,
+									Zotero.getString('general.error'),
+									Zotero.getString('pane.item.attachments.rename.error')
+								);
 								return;
+							}
+							else if (!renamed) {
+								nsIPS.alert(
+									window,
+									Zotero.getString('pane.item.attachments.fileNotFound.title'),
+									Zotero.getString('pane.item.attachments.fileNotFound.text')
+								);
 							}
 						}
 						
