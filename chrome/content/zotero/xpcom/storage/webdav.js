@@ -203,11 +203,24 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._getStorageModificationTime = funct
 		
 		Zotero.debug(req.responseText);
 		
-		var mtime = req.responseText;
 		// No modification time set
-		if (!mtime) {
+		if (!req.responseText) {
 			callback(item, false);
 			return;
+		}
+		
+		try {
+			var xml = new XML(req.responseText);
+		}
+		catch (e) {
+			var xml = null;
+		}
+		if (xml && xml.childNodes.length()) {
+			// TODO: other stuff, but this makes us forward-compatible
+			mtime = xml.mtime.toString();
+		}
+		else {
+			mtime = req.responseText;
 		}
 		
 		var mdate = new Date(mtime * 1000);
