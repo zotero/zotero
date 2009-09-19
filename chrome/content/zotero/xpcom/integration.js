@@ -180,7 +180,7 @@ Zotero.Integration = new function() {
 						}
 					}
 					
-					if(!message && typeof(e) == "object" && e.message) message = "\n"+e.message;
+					if(!message && typeof(e) == "object" && e.message) message = "\n\n"+e.message;
 					
 					integration._doc.displayAlert(Zotero.getString("integration.error.generic")+message,
 						Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
@@ -1048,10 +1048,10 @@ Zotero.Integration.Session.prototype.completeCitation = function(object) {
 				var reselectKeys = citationItem.uri;
 				var reselectKeyType = RESELECT_KEY_URI;
 			} else if(citationItem.key) {
-				var reselectKeys = citationItem.key;
+				var reselectKeys = [citationItem.key];
 				var reselectKeyType = RESELECT_KEY_ITEM_KEY;
 			} else {
-				var reselectKeys = citationItem.itemID;
+				var reselectKeys = [citationItem.itemID];
 				var reselectKeyType = RESELECT_KEY_ITEM_ID;
 			}
 			
@@ -1059,6 +1059,7 @@ Zotero.Integration.Session.prototype.completeCitation = function(object) {
 			for each(var reselectKey in reselectKeys) {
 				if(this.reselectedItems[reselectKey]) {
 					zoteroItem = Zotero.Items.get(this.reselectedItems[reselectKey]);
+					citationItem.itemID = zoteroItem.id;
 					returnNeedUpdate = true;
 					break;
 				}
