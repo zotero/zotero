@@ -156,7 +156,33 @@ Zotero.Integration = new function() {
 						Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
 						Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
 				} else {
-					integration._doc.displayAlert(Zotero.getString("integration.error.generic"),
+					// check to see whether there's a pyxpcom error in the console, since it doesn't
+					// get thrown directly
+					var throwErr = true;
+					var message = "";
+					
+					var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
+						.getService(Components.interfaces.nsIConsoleService);
+					
+					var messages = {};
+					consoleService.getMessageArray(messages, {});
+					messages = messages.value;
+					if(messages && messages.length) {
+						var lastMessage = messages[messages.length-1];
+						try {
+							var error = lastMessage.QueryInterface(Components.interfaces.nsIScriptError);
+						} catch(e2) {
+							if(lastMessage.message && lastMessage.message.substr(0, 12) == "ERROR:xpcom:") {
+								// print just the last line of the message, but re-throw the rest
+								message = lastMessage.message.substr(0, lastMessage.message.length-1);
+								message = "\n"+message.substr(message.lastIndexOf("\n"))
+							}
+						}
+					}
+					
+					if(!message && typeof(e) == "object" && e.message) message = "\n"+e.message;
+					
+					integration._doc.displayAlert(Zotero.getString("integration.error.generic")+message,
 						Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
 						Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
 					throw e;
