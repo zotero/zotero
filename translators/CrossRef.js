@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":90,
 	"inRepository":true,
-	"lastUpdated":"2009-09-20 02:00:00"
+	"lastUpdated":"2009-09-20 04:55:00"
 }
 
 function detectSearch(item) {
@@ -119,9 +119,11 @@ function processCrossRef(xmlOutput) {
 		item.creators.push(creator);
 	}
 	
-	item.date = refXML.publication_date.year.toString();
-	if(refXML.publication_date.month.length()) {
-		item.date = refXML.publication_date.month.toString()+"/"+item.date;
+	if(refXML.publication_date.length()) {
+		item.date = refXML.publication_date[0].year.toString();
+		if(refXML.publication_date[0].month.length()) {
+			item.date = refXML.publication_date[0].month.toString()+"/"+item.date;
+		}
 	}
 	
 	if(refXML.pages.length()) {
