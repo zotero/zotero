@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-06-04 01:10:00"
+	"lastUpdated":"2009-09-20 03:15:00"
 }
 
 
@@ -97,7 +97,9 @@ function doWeb(doc, url) {
 		}
 		newItem.ISBN = ISBN;
 		
-		newItem.publisher = xml.publisher[0].toString();
+		if (xml.publisher[0]) {
+			newItem.publisher = xml.publisher[0].toString();
+		}
 		
 		newItem.title = xml.title[0].toString();
 		
