@@ -580,7 +580,11 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 	
 		var bibliographyText = this._session.getBibliography();
 		for each(var field in this._bibliographyFields) {
-			field.setText(bibliographyText, true);
+			if(bibliographyText) {
+				field.setText(bibliographyText, true);
+			} else {
+				field.setText("{Bibliography}", false);
+			}
 		}
 	}
 	
