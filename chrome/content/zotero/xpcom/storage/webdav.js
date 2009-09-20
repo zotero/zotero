@@ -38,7 +38,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.__defineGetter__('password', functi
 	var username = this.username;
 	
 	if (!username) {
-		Zotero.debug('Username not set before setting Zotero.Sync.Storage.password');
+		Zotero.debug('Username not set before getting Zotero.Sync.Storage.Session.WebDAV.password');
 		return '';
 	}
 	
@@ -60,7 +60,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.__defineGetter__('password', functi
 Zotero.Sync.Storage.Session.WebDAV.prototype.__defineSetter__('password', function (password) {
 	var username = this.username;
 	if (!username) {
-		Zotero.debug('Username not set before setting Zotero.Sync.Server.password');
+		Zotero.debug('Username not set before setting Zotero.Sync.Server.Session.WebDAV.password');
 		return;
 	}
 	
@@ -71,7 +71,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.__defineSetter__('password', functi
 	var logins = loginManager.findLogins({}, this._loginManagerHost, this._loginManagerURL, null);
 	
 	for (var i = 0; i < logins.length; i++) {
-		Zotero.debug('Clearing Zotero storage passwords');
+		Zotero.debug('Clearing WebDAV passwords');
 		loginManager.removeLogin(logins[i]);
 		break;
 	}
@@ -103,7 +103,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.__defineGetter__('parentURI', funct
 
 Zotero.Sync.Storage.Session.WebDAV.prototype.init = function (url, dir, username, password) {
 	if (!url) {
-		var msg = "Zotero storage URL not provided";
+		var msg = "WebDAV URL not provided";
 		Zotero.debug(msg);
 		throw ({
 			message: msg,
@@ -114,7 +114,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.init = function (url, dir, username
 	}
 	
 	if (username && !password) {
-		var msg = "Zotero storage password not provided";
+		var msg = "WebDAV password not provided";
 		Zotero.debug(msg);
 		throw ({
 			message: msg,
@@ -158,7 +158,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.initFromPrefs = function () {
 			break;
 		
 		default:
-			throw ("Invalid storage scheme '" + scheme
+			throw ("Invalid WebDAV scheme '" + scheme
 				+ "' in Zotero.Sync.Storage.Session.WebDAV.rootURI");
 	}
 	
