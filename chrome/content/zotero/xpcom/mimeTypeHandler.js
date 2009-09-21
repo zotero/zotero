@@ -49,6 +49,16 @@ Zotero.MIMETypeHandler = new function () {
 		if(Zotero.Prefs.get("parseEndNoteMIMETypes")) {
 			this.addHandler("application/x-endnote-refer", Zotero.Ingester.importHandler, true);
 			this.addHandler("application/x-research-info-systems", Zotero.Ingester.importHandler, true);
+			//
+			// And some non-standard ones
+			//
+			this.addHandler("text/x-research-info-systems", Zotero.Ingester.importHandler, true);
+			// Nature uses this one
+			this.addHandler("text/application/x-research-info-systems", Zotero.Ingester.importHandler, true);
+			// Cell uses this one
+			this.addHandler("text/ris", Zotero.Ingester.importHandler, true);
+			// Not even trying
+			this.addHandler("ris", Zotero.Ingester.importHandler, true);
 		}
 		this.addHandler("text/x-csl", function(a1, a2) { Zotero.Styles.install(a1, a2) });
 	}
