@@ -446,7 +446,7 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 							if(e.citationLength == 1) {
 								var msg = Zotero.getString("integration.missingItem.single");
 							} else {
-								var msg = Zotero.getString("integration.missingItem.multiple", e.citationIndex.toString());
+								var msg = Zotero.getString("integration.missingItem.multiple", (e.citationIndex+1).toString());
 							}
 							msg += '\n\n'+Zotero.getString('integration.missingItem.description');
 							field.select();
