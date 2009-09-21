@@ -778,7 +778,10 @@ Zotero.Sync.Storage = new function () {
 				// Require 40 available characters in path -- this is arbitrary,
 				// but otherwise filenames are going to end up being cut off
 				if (newLength < 40) {
-					throw ("Storage directory path is too long in " + funcName);
+					var msg = "Due to a Windows path length limitation, your Zotero data directory "
+							+ "is too deep in the filesystem for syncing to work reliably. "
+							+ "Please relocate your Zotero data to a higher directory.";
+					throw (msg);
 				}
 				
 				// Shorten file if it's too long -- we don't relink it, but this should
