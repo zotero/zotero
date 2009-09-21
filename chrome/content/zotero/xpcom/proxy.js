@@ -114,14 +114,42 @@ Zotero.Proxies = new function() {
 		if(webNav) {
 			var proxied = Zotero.Proxies.properToProxy(url, true);
 			if(proxied) {
-				channel.QueryInterface(Components.interfaces.nsIHttpChannel);
-				// If the referrer is a proxiable host, we already have access
-				// (e.g., we're on-campus) and shouldn't redirect
-				if (channel.referrer) {
-					if (Zotero.Proxies.properToProxy(channel.referrer.spec, true)) {
+				channel.QueryInterface(Components.interfaces.nsIHttpChannel);				
+				var proxiedURI = Components.classes["@mozilla.org/network/io-service;1"]
+										  .getService(Components.interfaces.nsIIOService)
+										  .newURI(proxied, null, null);
+				if(channel.referrer) {
+					// If the referrer is a proxiable host, we already have access (e.g., we're
+					// on-campus) and shouldn't redirect
+					if(Zotero.Proxies.properToProxy(channel.referrer.spec, true)) {
+						Zotero.debug("Zotero.Proxies: skipping redirect; referrer was proxiable");
+						return;
+					}
+					// If the referrer is the same host as we're about to redirect to, we shouldn't
+					// or we risk a loop
+					if(channel.referrer.host == proxiedURI.host) {
+						Zotero.debug("Zotero.Proxies: skipping redirect; redirect URI and referrer have same host");
 						return;
 					}
 				}
+				
+				if(channel.originalURI) {
+					// If the original URI was a proxied host, we also shouldn't redirect, since any
+					// links handed out by the proxy should already be proxied
+					if(Zotero.Proxies.proxyToProper(channel.originalURI.spec, true)) {
+						Zotero.debug("Zotero.Proxies: skipping redirect; original URI was proxied");
+						return;
+					}
+					// Finally, if the original URI is the same as the host we're about to redirect
+					// to, then we also risk a loop
+					if(channel.originalURI.host == proxiedURI.host) {
+						Zotero.debug("Zotero.Proxies: skipping redirect; redirect URI and original URI have same host");
+						return;
+					}
+				}
+				
+				// Otherwise, redirect. Note that we save the URI we're redirecting from as the
+				// referrer, since we can't make a proper redirect
 				webNav.loadURI(proxied, 0, channel.URI, null, null);
 			}
 		}
@@ -233,7 +261,8 @@ Zotero.Proxies = new function() {
 	 	 */
 		const hostBlacklist = [
 			/google\.com$/,
-			/wikipedia\.org$/
+			/wikipedia\.org$/,
+			/^[^.]*$/
 		];
 	 	/**
 	 	 * Regular expression patterns of hosts that should always be proxied, regardless of whether
@@ -630,15 +659,16 @@ Zotero.Proxies.Detectors.EZProxy = function(channel) {
 	var properURL = (m[1].toLowerCase() == "qurl" ? unescape(m[2]) : m[2]);
 	var properURI = Zotero.Proxies.Detectors.EZProxy.ios.newURI(properURL, null, null);
 	
+	var proxy = false;
 	if(channel.URI.host == proxiedURI.host && [channel.URI.port, 80, 443, -1].indexOf(proxiedURI.port) == -1) {
 		// Proxy by port
-		var proxy = new Zotero.Proxy();
+		proxy = new Zotero.Proxy();
 		proxy.multiHost = false;
 		proxy.scheme = proxiedURI.scheme+"://"+proxiedURI.hostPort+"/%p";
 		proxy.hosts = [properURI.hostPort];
 	} else if(proxiedURI.host != channel.URI.host && proxiedURI.hostPort.indexOf(properURI.host) != -1) {
 		// Proxy by host
-		var proxy = new Zotero.Proxy();
+		proxy = new Zotero.Proxy();
 		proxy.multiHost = proxy.autoAssociate = true;
 		proxy.scheme = proxiedURI.scheme+"://"+proxiedURI.hostPort.replace(properURI.host, "%h")+"/%p";
 		proxy.hosts = [properURI.hostPort];
