@@ -454,6 +454,13 @@ Zotero.Sync.Storage = new function () {
 			}
 			
 			// If file hash matches stored hash, only the mod time changed, so skip
+			var f = item.getFile();
+			if (f) {
+				Zotero.debug(f.path);
+			}
+			else {
+				Zotero.debug("File missing before getting hash");
+			}
 			var fileHash = item.attachmentHash;
 			if (attachmentData[item.id].hash && attachmentData[item.id].hash == fileHash) {
 				Zotero.debug("Mod time didn't match but hash did for " + file.leafName + " -- ignoring");
