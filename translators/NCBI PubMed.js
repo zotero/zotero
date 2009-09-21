@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-04-28 09:15:00"
+	"lastUpdated":"2009-09-21 21:55:00"
 }
 
 function detectWeb(doc, url) {
@@ -65,14 +65,6 @@ function lookupPMIDs(ids, doc) {
 			var PMID = citation.PMID.text().toString();
 			newItem.url = "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID;
 			newItem.extra = "PMID: "+PMID;
-			// add attachments
-			if(doc) {
-				newItem.attachments.push({document:doc, title:"PubMed Snapshot"});
-			} else {
-				var url = "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=pubmed&cmd=Retrieve&dopt=AbstractPlus&list_uids="+PMID;
-				newItem.attachments.push({url:url, title:"PubMed Snapshot",
-							 mimeType:"text/html"});
-			}
 
 			var article = citation.Article;
 			if(article.ArticleTitle.length()) {
