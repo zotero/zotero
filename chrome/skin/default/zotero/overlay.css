@@ -42,7 +42,7 @@
 /* Set by setHighlightedRows() and getRowProperties() in collectionTreeView.js) */
 #zotero-collections-tree treechildren::-moz-tree-row(highlighted)
 {
-	background: #FFFF99;
+	background: #FFFF99 !important;
 }
 
 #zotero-pane splitter
