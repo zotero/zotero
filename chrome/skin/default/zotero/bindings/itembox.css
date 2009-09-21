@@ -91,7 +91,7 @@ row hbox label:first-child
 	margin-right: 1px;
 }
 
-row label,
+row > label,
 row > vbox[fieldname=abstractNote],
 row > vbox[fieldname=extra]
 {
