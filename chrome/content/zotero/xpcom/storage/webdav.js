@@ -719,9 +719,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 	var self = this;
 	
 	// Test whether URL is WebDAV-enabled
-	var request = Zotero.Utilities.HTTP.doOptions(parentURI, function (req) {
-		Zotero.debug(req.status);
-		
+	var request = Zotero.Utilities.HTTP.doOptions(uri, function (req) {
 		// Timeout
 		if (req.status == 0) {
 			callback(uri, Zotero.Sync.Storage.ERROR_UNREACHABLE);
@@ -755,6 +753,10 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 			callback(uri, Zotero.Sync.Storage.ERROR_NOT_DAV);
 			return;
 		}
+		
+		// Get the Authorization header used in case we need to do a request
+		// on the parent below
+		var channelAuthorization = Zotero.Utilities.HTTP.getChannelAuthorization(req.channel);
 		
 		var headers = { Depth: 0 };
 		
@@ -840,6 +842,14 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 					return;
 				
 				case 404:
+					// Include Authorization header from /zotero request,
+					// since Firefox probably won't apply it to the parent request
+					var newHeaders = {};
+					for (var header in headers) {
+						newHeaders[header] = headers[header];
+					}
+					newHeaders["Authorization"] = channelAuthorization;
+					
 					// Zotero directory wasn't found, so see if at least
 					// the parent directory exists
 					Zotero.Utilities.HTTP.WebDAV.doProp("PROPFIND", parentURI, xmlstr,
@@ -870,7 +880,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 									callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
 									return;
 							}
-						},  headers);
+						},  newHeaders);
 					return;
 				
 				case 500:
