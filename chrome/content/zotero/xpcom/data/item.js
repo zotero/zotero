@@ -2563,7 +2563,7 @@ Zotero.Item.prototype.getFilename = function () {
  *
  * -1   		Destination file exists -- use _force_ to overwrite
  * -2		Error renaming
- * false		Attachment file not found or other error
+ * false		Attachment file not found
  */
 Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 	var file = this.getFile();
@@ -2591,10 +2591,16 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 		
 		file.moveTo(null, newName);
 		// Update mod time and clear hash so the file syncs
+		// TODO: use an integer counter instead of mod time for change detection
 		dest.lastModifiedTime = new Date();
 		this.relinkAttachmentFile(dest);
 		
+		Zotero.DB.beginTransaction();
+		
 		Zotero.Sync.Storage.setSyncedHash(this.id, null, false);
+		Zotero.Sync.Storage.setSyncState(this.id, Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD);
+		
+		Zotero.DB.commitTransaction();
 		
 		return true;
 	}

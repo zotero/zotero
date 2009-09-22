@@ -164,7 +164,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype.downloadFile = function (request) {
 					return;
 				}
 				// If not compressed, check hash, in case only timestamp changed
-				else if (!info.compressed && Zotero.Utilities.prototype.md5(file) == syncHash) {
+				else if (!info.compressed && item.attachmentHash == syncHash) {
 					Zotero.debug("File hash matches remote file -- skipping download");
 					
 					Zotero.DB.beginTransaction();

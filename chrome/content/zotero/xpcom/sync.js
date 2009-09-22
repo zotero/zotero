@@ -39,15 +39,23 @@ Zotero.Sync = new function() {
 	
 	
 	this.init = function () {
+		Zotero.DB.beginTransaction();
+		
 		var sql = "SELECT version FROM version WHERE schema='syncdeletelog'";
 		if (!Zotero.DB.valueQuery(sql)) {
 			sql = "SELECT COUNT(*) FROM syncDeleteLog";
 			if (Zotero.DB.valueQuery(sql)) {
 				throw ('syncDeleteLog not empty and no timestamp in Zotero.Sync.delete()');
 			}
+			
+			var syncInitTime = Zotero.DB.transactionDate;
+			syncInitTime = Zotero.Date.toUnixTimestamp(syncInitTime);
+			
 			sql = "INSERT INTO version VALUES ('syncdeletelog', ?)";
-			Zotero.DB.query(sql, Zotero.Date.getUnixTimestamp());
+			Zotero.DB.query(sql, syncInitTime);
 		}
+		
+		Zotero.DB.commitTransaction();
 		
 		this.EventListener.init();
 	}
@@ -136,6 +144,10 @@ Zotero.Sync = new function() {
 		}
 		
 		// Last sync time is before start of log
+		Zotero.debug('==============');
+		Zotero.debug(lastSyncDate);
+		Zotero.debug(lastSyncDate + '');
+		Zotero.debug(syncLogStart);
 		if (lastSyncDate && new Date(syncLogStart * 1000) > lastSyncDate) {
 			return -1;
 		}
@@ -716,7 +728,8 @@ Zotero.Sync.Runner = new function () {
 		if (e) {
 			if (e.error == Zotero.Error.ERROR_ZFS_OVER_QUOTA) {
 				// TODO: localize
-				message = "You have reached your Zotero File Storage quota. Some files were not synced.\n\n"
+				message = "You have reached your Zotero File Storage quota. Some files were not synced. "
+							+ "Other Zotero data will continue to sync to the server.\n\n"
 							+ "See your zotero.org account settings for additional storage options.";
 				
 				buttonText = "Open Account Settings";
