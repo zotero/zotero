@@ -206,6 +206,7 @@ var Zotero = new function(){
 		this.isMac = (this.platform.substr(0, 3) == "Mac");
 		this.isWin = (this.platform.substr(0, 3) == "Win");
 		this.isLinux = (this.platform.substr(0, 5) == "Linux");
+		this.oscpu = win.navigator.oscpu;
 		
 		// Locale		
 		var ph = Components.classes["@mozilla.org/network/protocol;1?name=http"].
@@ -716,6 +717,7 @@ var Zotero = new function(){
 		var info = {
 			version: Zotero.version,
 			platform: Zotero.platform,
+			oscpu: Zotero.oscpu,
 			locale: Zotero.locale,
 			appName: appInfo.name,
 			appVersion: appInfo.version,
