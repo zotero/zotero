@@ -8,21 +8,16 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-07-01 08:40:00"
+	"lastUpdated":"2009-09-22 07:05:00"
 }
 
 function detectWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-			if (prefix == 'x') return namespace; else return null;
-		} : null;
-	
 	// Skip private groups
 	if (url.match(/\/groups\/[0-9]+\/items/)) {
 		return false;
 	}
 	
-	var a = doc.evaluate('//li[@id="library-tab"]/a[text()="My Library"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var a = doc.evaluate('//li[@id="library-tab"]/a[text()="My Library"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	// Skip current user's library
 	if (a && url.indexOf(a.href.match(/(^.+)\/items/)[1]) == 0) {
 		return false;
@@ -37,6 +32,9 @@ function detectWeb(doc, url) {
 
 	// Individual item
 	else if (url.match(/\/items\/[0-9]+(\?.*)?$/)) {
+		// FIXME: temporarily broken
+		return false;
+		
 		// TODO: embed in page, because this is absurd
 		var typeMap = {
 			"Note": "note",
@@ -140,30 +138,16 @@ function xmlToItem(xmlItem) {
 
 
 function doWeb(doc, url) {
-	// User library
-	if (url.indexOf("/groups/") == -1) {
-		//var userID = url.match(/^http:\/\/[^\/]*zotero\.org\/[^\/]+\/([0-9]+)/)[1];
-		var userID = doc.getElementById('libraryUserID').getAttribute('title');
-		var apiPrefix = "https://api.zotero.org/users/" + userID + "/";
-		var itemRe = /^https?:\/\/[^\/]*zotero\.org\/[^\/]+\/items\/([0-9]+)/;
-	}
-	// Group library
-	else {
-		//var groupID = url.match(/^http:\/\/[^\/]*zotero\.org\/groups\/[^\/]+\/([0-9]+)/)[1];
-		var groupID = doc.getElementById('libraryGroupID').getAttribute('title');
-		var apiPrefix = "https://api.zotero.org/groups/" + groupID + "/";
-		var itemRe = /^https?:\/\/[^\/]*zotero\.org\/groups\/[^\/]+\/items\/([0-9]+)/;
-	}
-	
 	var nsAtom = new Namespace('http://www.w3.org/2005/Atom');
 	var nsZXfer = new Namespace('http://zotero.org/ns/transfer');
 	
 	if (detectWeb(doc, url) == "multiple") {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-				if (prefix == 'x') return namespace; else return null;
-			} : null;
-		var column = doc.evaluate('//table[@id="field-table"]//td[1][@class="title"][not(contains(./a, "Unpublished Note"))]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var itemRe = /^https?:\/\/[^\/]*zotero\.org\/(?:groups\/)?[^\/]+\/items\/([0-9]+)/;
+		
+		var link = doc.evaluate('//link[@type="application/atom+xml" and @rel="alternate"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+		var libraryURI = link.getAttribute('href');
+		
+		var column = doc.evaluate('//table[@id="field-table"]//td[1][@class="title"][not(contains(./a, "Unpublished Note"))]', doc, null, XPathResult.ANY_TYPE, null);
 		var elems = [], td;
 		while (td = column.iterateNext()) {
 			elems.push(td);
@@ -175,14 +159,14 @@ function doWeb(doc, url) {
 			return true;
 		}
 		
-		var apiURLs = [], itemID, apiURL;
+		var apiURIs = [], itemID, apiURI;
 		for (var url in items) {
 			itemID = url.match(itemRe)[1];
-			apiURL = apiPrefix + "items/" + itemID + "?content=full";
-			apiURLs.push(apiURL);
+			apiURI = libraryURI + "/" + itemID + "?content=full";
+			apiURIs.push(apiURI);
 		}
 		
-		Zotero.Utilities.HTTP.doGet(apiURLs, function(text) {
+		Zotero.Utilities.HTTP.doGet(apiURIs, function(text) {
 			// Strip XML declaration and convert to E4X
 			var entry = new XML(text.replace(/<\?xml.*\?>/, ''));
 			xmlToItem(entry.nsAtom::content.nsZXfer::item);
