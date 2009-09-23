@@ -262,7 +262,7 @@ function verifyStorageServer() {
 	var usernameField = document.getElementById("storage-username");
 	var passwordField = document.getElementById("storage-password");
 	
-	var callback = function (uri, status) {
+	var callback = function (uri, status, error) {
 		verifyButton.hidden = false;
 		abortButton.hidden = true;
 		progressMeter.hidden = true;
@@ -287,7 +287,7 @@ function verifyStorageServer() {
 				break;
 		}
 		
-		Zotero.Sync.Storage.checkServerCallback(uri, status, window);
+		Zotero.Sync.Storage.checkServerCallback(uri, status, window, false, error);
 	}
 	
 	verifyButton.hidden = true;

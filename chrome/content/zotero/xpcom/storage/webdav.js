@@ -188,6 +188,8 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._getStorageModificationTime = funct
 	var self = this;
 	
 	Zotero.Utilities.HTTP.doGet(uri, function (req) {
+		self._checkResponse(req, self);
+		
 		var funcName = "Zotero.Sync.Storage._getStorageModificationTime()";
 		
 		// mod_speling can return 300s for 404s with base name matches
@@ -575,6 +577,8 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.getLastSyncTime = function (callbac
 		var self = this;
 		
 		Zotero.Utilities.HTTP.doOptions(this.rootURI, function (req) {
+			self._checkResponse(req, self);
+			
 			if (req.status != 200) {
 				self.onError("Unexpected status code " + req.status + " caching "
 					+ "authentication credentials in Zotero.Sync.Storage.Session.WebDAV.getLastSyncTime()");
@@ -722,6 +726,8 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 	var request = Zotero.Utilities.HTTP.doOptions(uri, function (req) {
 		// Timeout
 		if (req.status == 0) {
+			self._checkResponse(req, self);
+			
 			callback(uri, Zotero.Sync.Storage.ERROR_UNREACHABLE);
 			return;
 		}
@@ -903,12 +909,22 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 }
 
 
-Zotero.Sync.Storage.Session.WebDAV.prototype.checkServerCallback = function (uri, status, window, skipSuccessMessage) {
+Zotero.Sync.Storage.Session.WebDAV.prototype.checkServerCallback = function (uri, status, window, skipSuccessMessage, e) {
 	var promptService =
 		Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 			createInstance(Components.interfaces.nsIPromptService);
 	if (uri) {
 		var spec = uri.scheme + '://' + uri.hostPort + uri.path;
+	}
+	
+	// If there's an error, just display that
+	if (e) {
+		promptService.alert(
+			window,
+			Zotero.getString('general.error'),
+			e.toString()
+		);
+		return false;
 	}
 	
 	switch (status) {
@@ -1409,24 +1425,36 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._deleteStorageFiles = function (fil
 
 
 /**
- * Unused
- *
- * @inner
- * @param	{XMLHTTPRequest}		req
- * @throws
+ * Checks for an invalid SSL certificate and displays a nice error
  */
-Zotero.Sync.Storage.Session.WebDAV.prototype._checkResponse = function (req) {
-	if (!req.responseText) {
-		this.onError('Empty response from server');
-		return;
+Zotero.Sync.Storage.Session.WebDAV.prototype._checkResponse = function (req, obj) {
+	var channel = req.channel;
+	if (!channel instanceof Ci.nsIChannel) {
+		obj.onError('No HTTPS channel available');
 	}
-	if (!req.responseXML ||
-			!req.responseXML.firstChild ||
-			!(req.responseXML.firstChild.namespaceURI == 'DAV:' &&
-				req.responseXML.firstChild.localName == 'multistatus') ||
-				!req.responseXML.childNodes[0].firstChild) {
-		Zotero.debug(req.responseText);
-		this.onError('Invalid response from storage server');
-		return;
+	var secInfo = channel.securityInfo;
+	if (secInfo instanceof Ci.nsITransportSecurityInfo) {
+		secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
+		if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE) == Ci.nsIWebProgressListener.STATE_IS_INSECURE) {
+			var host = 'host';
+			try {
+				host = channel.URI.host;
+			}
+			catch (e) {
+				Zotero.debug(e);
+			}
+			
+			var msg = "SSL certificate error connecting to " + host + ". "
+				+ "Load your WebDAV URL in your browser for more information.";
+			
+			obj.onError(msg);
+			return;
+		}
+		else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN) == Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
+			var msg = "SSL connection error connecting to " + host + ". "
+				+ "Load your WebDAV URL in your browser for more information.";
+			obj.onError(msg);
+			return;
+		}
 	}
 }

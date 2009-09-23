@@ -677,14 +677,23 @@ Zotero.Sync.Storage = new function () {
 	
 	
 	this.checkServer = function (module, callback) {
-		_session = new Zotero.Sync.Storage.Session(module, { onError: callback });
+		_session = new Zotero.Sync.Storage.Session(
+			module,
+			{
+				onError: function (e) {
+					Zotero.debug(e, 1);
+					callback(null, null, e);
+					throw (e);
+				}
+			}
+		);
 		_session.initFromPrefs();
 		_session.checkServer(callback);
 	}
 	
 	
-	this.checkServerCallback = function (uri, status, window, skipSuccessMessage) {
-		return _session.checkServerCallback(uri, status, window, skipSuccessMessage);
+	this.checkServerCallback = function (uri, status, window, skipSuccessMessage, e) {
+		return _session.checkServerCallback(uri, status, window, skipSuccessMessage, e);
 	}
 	
 	
