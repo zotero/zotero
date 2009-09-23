@@ -326,7 +326,18 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.downloadFile = function (request) {
 						request.onProgress(a, b, c)
 					},
 					onStop: function (request, status, response, data) {
-						if (status != 200) {
+						if (status == 404) {
+							var msg = "Remote ZIP file not found for item " + item.key;
+							Zotero.debug(msg, 2);
+							Components.utils.reportError(msg);
+							
+							// Delete the orphaned prop file
+							self._deleteStorageFiles([item.key + ".prop"], null, self);
+							
+							data.request.finish();
+							return;
+						}
+						else if (status != 200) {
 							self.onError("Unexpected status code " + status
 								+ " for request " + data.request.name + " in Zotero.Sync.Storage.Session.WebDAV.downloadFile()");
 							return;
@@ -511,6 +522,11 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._onUploadComplete = function (httpR
 		case 201:
 		case 204:
 			break;
+		
+		case 403:
+			this.onError("File upload failed. Please verify your WebDAV server "
+				+ "from the Sync pane of the Zotero preferences.");
+			return;
 		
 		default:
 			this.onError("Unexpected file upload status " + status
@@ -1312,7 +1328,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._getPropertyURIFromItemURI = functi
  *										'deleted', 'missing', and 'error',
  *										each containing filenames
  */
-Zotero.Sync.Storage.Session.WebDAV.prototype._deleteStorageFiles = function (files, callback) {
+Zotero.Sync.Storage.Session.WebDAV.prototype._deleteStorageFiles = function (files, callback, session) {
 	var results = {
 		deleted: [],
 		missing: [],
@@ -1326,14 +1342,18 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._deleteStorageFiles = function (fil
 		return;
 	}
 	
+	var self = session ? session : this;
+	
 	for (var i=0; i<files.length; i++) {
 		let last = (i == files.length - 1);
 		let fileName = files[i];
 		
-		let deleteURI = Zotero.Sync.Storage.rootURI;
+		let deleteURI = self.rootURI;
 		// This should never happen, but let's be safe
 		if (!deleteURI.spec.match(/\/$/)) {
-			callback(deleted);
+			if (callback) {
+				callback(deleted);
+			}
 			_error("Root URI does not end in slash in "
 				+ "Zotero.Sync.Storage._deleteStorageFiles()");
 		}
@@ -1366,7 +1386,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._deleteStorageFiles = function (fil
 			}
 			
 			// If an item file URI, get the property URI
-			var deletePropURI = _getPropertyURIFromItemURI(deleteURI);
+			var deletePropURI = self._getPropertyURIFromItemURI(deleteURI);
 			if (!deletePropURI) {
 				if (fileDeleted) {
 					results.deleted.push(fileName);
