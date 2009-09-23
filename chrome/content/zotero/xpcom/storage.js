@@ -99,7 +99,8 @@ Zotero.Sync.Storage = new function () {
 				}
 				else {
 					Zotero.debug(_session.name + " verification failed");
-					_callbacks.onSkip();
+					_callbacks.onError(_session.name + " verification failed. Verify your "
+						+ "WebDAV settings in the Sync pane of the Zotero preferences.");
 				}
 			}
 			

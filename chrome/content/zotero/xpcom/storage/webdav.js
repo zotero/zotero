@@ -1027,6 +1027,10 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServerCallback = function (uri
 			});
 			
 			return false;
+		
+		case Zotero.Sync.Storage.ERROR_UNKNOWN:
+			var errorMessage = "An unknown error occurred. Check your WebDAV settings and server configuration.";
+			break;
 	}
 	
 	if (!skipSuccessMessage) {

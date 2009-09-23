@@ -138,9 +138,9 @@ Zotero.Sync.Storage.Session.prototype.checkServer = function (callback) {
 	}
 }
 
-Zotero.Sync.Storage.Session.prototype.checkServerCallback = function (uri, status, authRequired, window, skipSuccessMessage) {
+Zotero.Sync.Storage.Session.prototype.checkServerCallback = function (uri, status, authRequired, window, skipSuccessMessage, error) {
 	try {
-		return this._session.checkServerCallback(uri, status, authRequired, window, skipSuccessMessage);
+		return this._session.checkServerCallback(uri, status, authRequired, window, skipSuccessMessage, error);
 	}
 	catch (e) {
 		this.onError(e);
