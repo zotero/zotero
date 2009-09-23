@@ -1191,7 +1191,7 @@ Zotero.Sync.Server = new function () {
 			
 			if (response.firstChild.tagName == 'error') {
 				var resetCallback = function () {
-					Zotero.Sync.Server.sync(callback);
+					Zotero.Sync.Server.sync(_callbacks);
 				};
 				if (_checkServerSessionLock(response.firstChild, resetCallback)) {
 					return;
