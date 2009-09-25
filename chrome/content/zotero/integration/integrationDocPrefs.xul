@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
+<?xml-stylesheet href="chrome://zotero/skin/bibliography.css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<dialog
+	id="zotero-doc-prefs-dialog"
+	orient="vertical"
+	buttons="accept"
+	title="&zotero.integration.docPrefs.title;"
+	onload="Zotero_File_Interface_Bibliography.init();"
+	ondialogaccept="Zotero_File_Interface_Bibliography.acceptSelection();"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	persist="screenX screenY">
+	
+	<script src="../include.js"/>
+	<script src="../bibliography.js"/>
+
+	<groupbox>
+		<caption label="&zotero.bibliography.style.label;"/>
+		<listbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
+	</groupbox>
+	
+	<groupbox>
+		<caption label="&zotero.integration.prefs.displayAs.label;"/>
+		<radiogroup id="displayAs" orient="horizontal">
+			<radio id="footnotes" label="&zotero.integration.prefs.footnotes.label;" selected="true"/>
+			<radio id="endnotes" label="&zotero.integration.prefs.endnotes.label;"/>
+		</radiogroup>
+	</groupbox>
+	
+	<groupbox>
+		<caption label="&zotero.integration.prefs.formatUsing.label;"/>
+		
+		<radiogroup id="formatUsing" orient="vertical">
+			<radio id="fields" selected="true"/>
+			<label class="radioDescription" id="fields-caption"/>
+			<label class="radioDescription" id="fields-file-format-notice"/>
+			<radio id="bookmarks" label="&zotero.integration.prefs.bookmarks.label;"/>
+			<description class="radioDescription" id="bookmarks-caption" style="white-space: pre;">&zotero.integration.prefs.bookmarks.caption;</description>
+			<description class="radioDescription" id="bookmarks-file-format-notice"/>
+		</radiogroup>
+	</groupbox>
+</dialog>

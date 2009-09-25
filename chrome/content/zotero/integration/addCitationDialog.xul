@@ -21,6 +21,7 @@
     ***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://global/skin/dialog.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
@@ -35,16 +36,18 @@
 	onunload="doUnload();"
 	ondialogaccept="return Zotero_Citation_Dialog.accept();"
 	ondialogcancel="Zotero_Citation_Dialog.cancel();"
-	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	style="padding: 0"
-	persist="screenX screenY width height">
+	persist="screenX screenY width height"
+	resizable="true"
+	buttons="extra1,extra2,accept,cancel"
+	ondialogextra2="Zotero_Citation_Dialog.toggleEditor()"
+	ondialogextra1="Zotero_Citation_Dialog.toggleMultipleSources()">
 	
-	<script src="include.js"/>
-	<script src="selectItemsDialog.js"/>
+	<script src="../include.js"/>
+	<script src="../selectItemsDialog.js"/>
 	<script src="addCitationDialog.js"/>
 	
-	<vbox id="zotero-select-items-container" flex="1" style="padding: 1em">
+	<vbox id="zotero-select-items-container" flex="1">
 		<vbox flex="1">
 			<hbox flex="1">
 				<vbox align="stretch" flex="1">
@@ -193,18 +196,5 @@
 		</vbox>
 		
 		<textbox id="editor" type="styled" mode="integration" hidden="true" flex="1"/>
-		
-		<hbox style="margin-top: 15px">
-			<hbox>
-				<button id="show-editor-button" oncommand="Zotero_Citation_Dialog.toggleEditor()"/>
-				<button id="multiple-sources-button" oncommand="Zotero_Citation_Dialog.toggleMultipleSources()"/>
-			</hbox>
-			<vbox flex="1" align="end">
-				<hbox>
-					<button dlgtype="cancel"/>
-					<button dlgtype="accept" disabled="true"/>
-				</hbox>
-			</vbox>
-		</hbox>
 	</vbox>
 </dialog>
