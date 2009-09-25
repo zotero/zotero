@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright (c) 2006  Center for History and New Media
+                        George Mason University, Fairfax, Virginia, USA
+                        http://chnm.gmu.edu
+    
+    Licensed under the Educational Community License, Version 1.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.opensource.org/licenses/ecl1.php
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/merge.dtd">
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+		  xmlns:xbl="http://www.mozilla.org/xbl"
+		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<binding id="resizabledialog" extends="chrome://global/content/bindings/dialog.xml#dialog">
+		<content style="padding: 0">
+			<xul:vbox class="box-inherit dialog-content-box" flex="1" style="padding:14px 14px 0 14px">
+				<children/>
+			</xul:vbox>
+			
+			<xul:stack>
+				<xul:hbox align="end" pack="end">
+					<xul:resizer dir="bottomright" style="-moz-appearance: resizer"/>
+				</xul:hbox>
+				<xul:hbox class="dialog-button-box" anonid="buttons"
+						xbl:inherits="pack=buttonpack,align=buttonalign,dir=buttondir,orient=buttonorient"
+						flex="1" style="padding: 10px 14px 14px 14px; margin: 0">
+					<xul:button dlgtype="disclosure" class="dialog-button" hidden="true"/>
+					<xul:button dlgtype="help" class="dialog-button" hidden="true"/>
+					<xul:button dlgtype="extra2" class="dialog-button" hidden="true"/>
+					<xul:button dlgtype="extra1" class="dialog-button" hidden="true"/>
+					<xul:spacer anonid="spacer" flex="1"/>
+					<xul:button dlgtype="cancel" class="dialog-button"/>
+					<xul:button dlgtype="accept" class="dialog-button" xbl:inherits="disabled=buttondisabledaccept"/>
+				</xul:hbox>
+			</xul:stack>
+		</content>
+	</binding>
+</bindings>
