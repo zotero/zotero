@@ -37,14 +37,14 @@
 	buttons="accept"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	style="padding: 0 5px 15px"
-	persist="screenX screenY width height">
+	persist="screenX screenY width height"
+	resizable="true">
 	
-	<script src="include.js"/>
-	<script src="selectItemsDialog.js"/>
+	<script src="../include.js"/>
+	<script src="../selectItemsDialog.js"/>
 	<script src="editBibliographyDialog.js"/>
 	
-	<vbox id="zotero-select-items-container" flex="1" style="padding: 1em">
+	<vbox id="zotero-select-items-container" flex="1">
 		<vbox flex="1">
 			<hbox flex="1">
 				<vbox align="stretch" flex="1">

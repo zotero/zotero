@@ -143,6 +143,11 @@ zoteromergepane {
 	-moz-binding: url('chrome://zotero/content/bindings/merge.xml#merge-pane');
 }
 
+dialog[resizable="true"]
+{
+	-moz-binding: url('chrome://zotero/content/bindings/resizabledialog.xml#resizabledialog');
+}
+
 .zotero-clicky
 {	
 	-moz-border-radius: 6px;

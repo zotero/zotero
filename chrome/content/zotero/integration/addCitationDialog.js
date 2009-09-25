@@ -57,8 +57,8 @@ var Zotero_Citation_Dialog = new function () {
 	 * initialize add citation dialog
 	 */
 	function load() {
-		document.getElementById("multiple-sources-button").label = Zotero.getString("citation.multipleSources");
-		document.getElementById("show-editor-button").label = Zotero.getString("citation.showEditor");
+		document.documentElement.getButton("extra1").label = Zotero.getString("citation.multipleSources");
+		document.documentElement.getButton("extra2").label = Zotero.getString("citation.showEditor");
 		
 		io = window.arguments[0].wrappedJSObject;
 		
@@ -145,7 +145,7 @@ var Zotero_Citation_Dialog = new function () {
 			// var itemDataID = itemID+"::"+0;
 			document.getElementById("multiple-sources").hidden = undefined;
 			document.getElementById("zotero-add-citation-dialog").width = "750";
-			document.getElementById("multiple-sources-button").label = Zotero.getString("citation.singleSource");			
+			document.documentElement.getButton("extra1").label = Zotero.getString("citation.singleSource");			
 			// move user field content to multiple before adding XXXXX
 			if (itemID) {
 				// _itemData[itemDataID] = new Object();
@@ -157,8 +157,6 @@ var Zotero_Citation_Dialog = new function () {
 					_itemData[itemID][box] = element[_preserveData[box]];
 				}
 			}
-			window.sizeToContent();
-			window.moveTo((window.screenX-75), window.screenY);
 			treeItemSelected();
 			// disable adding info until citation added
 			_itemSelected(false);
@@ -172,9 +170,7 @@ var Zotero_Citation_Dialog = new function () {
 		} else {
 			document.getElementById("multiple-sources").hidden = true;
 			document.getElementById("zotero-add-citation-dialog").width = "600";
-			document.getElementById("multiple-sources-button").label = Zotero.getString("citation.multipleSources");			
-			window.sizeToContent();
-			window.moveTo((window.screenX+75), window.screenY);
+			document.documentElement.getButton("extra1").label = Zotero.getString("citation.multipleSources");
 			
 			// enable all fields
 			for(var i in _preserveData) {
@@ -345,16 +341,14 @@ var Zotero_Citation_Dialog = new function () {
 		_previewShown = !_previewShown;
 		
 		if(_previewShown) {
-			document.getElementById("show-editor-button").label = Zotero.getString("citation.hideEditor");		
-			window.sizeToContent();
+			document.documentElement.getButton("extra2").label = Zotero.getString("citation.hideEditor");		
 			if(text) {
 				editor.value = text;
 			} else {
 				_updatePreview();
 			}
 		} else {
-			document.getElementById("show-editor-button").label = Zotero.getString("citation.showEditor");		
-			window.sizeToContent();
+			document.documentElement.getButton("extra2").label = Zotero.getString("citation.showEditor");		
 		}
 	}
 	
