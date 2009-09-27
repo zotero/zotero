@@ -46,8 +46,9 @@ var Zotero_Merge_Window = new function () {
 				break;
 			
 			default:
-				throw ("Unsupported merge object type '" + _mergeGroup.type
+				_error("Unsupported merge object type '" + _mergeGroup.type
 					+ "' in Zotero_Merge_Window.init()");
+				return;
 		}
 		
 		_mergeGroup.leftCaption = _io.dataIn.captions[0];
@@ -128,13 +129,8 @@ var Zotero_Merge_Window = new function () {
 			}
 		}
 		catch (e) {
-			Zotero.debug(e);
-			
-			var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
-							.createInstance(Components.interfaces.nsIPrompt);
-			prompt.alert(Zotero.getString('general.error'), e);
-			_wizard.getButton('cancel').click();
-			return false;
+			_error(e);
+			return;
 		}
 		
 		if (_mergeGroup.type == 'item') {
@@ -203,8 +199,9 @@ var Zotero_Merge_Window = new function () {
 	// Hack to support creator reconciliation via item view
 	function _updateChangedCreators() {
 		if (_mergeGroup.type != 'item') {
-			throw ("_updateChangedCreators called on non-item object in "
+			_error("_updateChangedCreators called on non-item object in "
 				+ "Zotero_Merge_Window._updateChangedCreators()");
+			return;
 		}
 		
 		if (_io.dataIn.changedCreators) {
@@ -227,5 +224,12 @@ var Zotero_Merge_Window = new function () {
 				_mergeGroup.mergepane.objectbox.refresh();
 			}
 		}
+	}
+	
+	
+	function _error(e) {
+		Zotero.debug(e);
+		_io.error = e;
+		_wizard.getButton('cancel').click();
 	}
 }

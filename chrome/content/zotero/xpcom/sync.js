@@ -144,10 +144,6 @@ Zotero.Sync = new function() {
 		}
 		
 		// Last sync time is before start of log
-		Zotero.debug('==============');
-		Zotero.debug(lastSyncDate);
-		Zotero.debug(lastSyncDate + '');
-		Zotero.debug(syncLogStart);
 		if (lastSyncDate && new Date(syncLogStart * 1000) > lastSyncDate) {
 			return -1;
 		}
@@ -2668,9 +2664,8 @@ Zotero.Sync.Server.Data = new function() {
 				
 				var mergeData = _reconcile(type, toReconcile, remoteCreatorStore);
 				if (!mergeData) {
-					// TODO: throw?
 					Zotero.DB.rollbackTransaction();
-					return false;
+					throw ("Merge error");
 				}
 				_processMergeData(
 					syncSession,
@@ -3205,7 +3200,9 @@ Zotero.Sync.Server.Data = new function() {
 				   .getService(Components.interfaces.nsIWindowMediator);
 		var lastWin = wm.getMostRecentWindow("navigator:browser");
 		lastWin.openDialog('chrome://zotero/content/merge.xul', '', 'chrome,modal,centerscreen', io);
-		
+		if (io.error) {
+			throw (io.error);
+		}
 		return io.dataOut;
 	}
 	
