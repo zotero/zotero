@@ -859,10 +859,11 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(primaryFieldType, se
 		io.secondaryFieldType = secondaryFieldType;
 	}
 	
-	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+	var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 		.getService(Components.interfaces.nsIWindowWatcher)
 		.openWindow(null, 'chrome://zotero/content/integration/integrationDocPrefs.xul', '',
-		'chrome,modal,centerscreen', io, true);
+			'chrome,centerscreen', io, true);
+	while(!window.closed) Zotero.mainThread.processNextEvent(true);
 	if(!io.style) throw new Zotero.Integration.UserCancelledException();
 	
 	// set data
@@ -895,10 +896,11 @@ Zotero.Integration.Session.prototype.reselectItem = function(exception) {
 	io.addBorder = Zotero.isWin;
 	io.singleSelection = true;
 	
-	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+	var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 		.getService(Components.interfaces.nsIWindowWatcher)
 		.openWindow(null,'chrome://zotero/content/selectItemsDialog.xul', '',
-		'chrome,modal,centerscreen,resizable', io, true);
+			'chrome,centerscreen,resizable', io, true);
+	while(!window.closed) Zotero.mainThread.processNextEvent(true);
 	
 	if(io.dataOut && io.dataOut.length) {
 		var itemID = io.dataOut[0];
@@ -1249,13 +1251,11 @@ Zotero.Integration.Session.prototype.editCitation = function(index, noteIndex, c
 		return me.previewCitation(io.citation);
 	}
 	
-	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-			.getService(Components.interfaces.nsIWindowWatcher)
-			.openWindow(
-				null, 'chrome://zotero/content/integration/addCitationDialog.xul', '',
-				'chrome,modal,centerscreen,resizable',
-				io
-			);
+	var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+		.getService(Components.interfaces.nsIWindowWatcher)
+		.openWindow(null, 'chrome://zotero/content/integration/addCitationDialog.xul', '',
+			'chrome,centerscreen,resizable', io);
+	while(!window.closed) Zotero.mainThread.processNextEvent(true);
 		
 	if(citation && !io.citation.citationItems.length) {
 		io.citation = citation;
@@ -1396,14 +1396,11 @@ Zotero.Integration.Session.prototype.editBibliography = function() {
 	
 	this.bibliographyDataHasChanged = this.bibliographyHasChanged = true;
 	
-	Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-			.getService(Components.interfaces.nsIWindowWatcher)
-			.openWindow(
-				null, 'chrome://zotero/content/integration/editBibliographyDialog.xul', '',
-				'chrome,modal,centerscreen,resizable',
-				io,
-				true
-			);
+	var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+		.getService(Components.interfaces.nsIWindowWatcher)
+		.openWindow(null, 'chrome://zotero/content/integration/editBibliographyDialog.xul', '',
+			'chrome,centerscreen,resizable', io, true);
+	while(!window.closed) Zotero.mainThread.processNextEvent(true);
 }
 
 /**
