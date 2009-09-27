@@ -189,13 +189,10 @@ Zotero.Sync.Storage.Session.ZFS.prototype.downloadFile = function (request) {
 			}
 			else {
 				destFile.append(item.key + '.tmp');
-				if (destFile.exists()) {
-					destFile.remove(false);
-				}
 			}
-			if (destFile.exists()) {
-				destFile.remove(false);
-			}
+			// saveURI() below appears not to create empty files for Content-Length: 0,
+			// so we create one here just in case
+			destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
 			
 			var listener = new Zotero.Sync.Storage.StreamListener(
 				{
@@ -255,8 +252,8 @@ Zotero.Sync.Storage.Session.ZFS.prototype.downloadFile = function (request) {
 			var wbp = Components
 				.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
 				.createInstance(nsIWBP);
-			wbp.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
-			
+			wbp.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE
+								| nsIWBP.PERSIST_FLAGS_REPLACE_EXISTING_FILES;
 			wbp.progressListener = listener;
 			wbp.saveURI(uri, null, null, null, null, destFile);
 		}
