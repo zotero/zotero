@@ -607,7 +607,7 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 				var citationText = citation.properties.custom;
 				// XML uses real RTF, rather than the format used for
 				// integration, so we have to escape things properly
-				citationText = citationText.replace(/[\x7F-\uFFFF]/g,
+				citationText = citationText.replace(/[{}\x7F-\uFFFF]/g,
 					Zotero.Integration.Session._rtfEscapeFunction).
 					replace("\t", "\\tab ", "g");
 			} else {
