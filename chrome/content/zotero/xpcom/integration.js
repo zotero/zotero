@@ -1686,12 +1686,12 @@ Zotero.Integration.DocumentData.prototype.unserialize = function(input) {
 	if(input[0] == "<") {
 		this.unserializeXML(input);
 	} else {
-		const splitRe = /(^|[^\:])\:([^\:]|$)/;
+		const splitRe = /(^|[^:]):(?!:)/;
 		
 		var splitOutput = input.split(splitRe);
-		var prefParameters = [splitOutput[0]+splitOutput[1]];
-		for(var i=2; i<splitOutput.length; i+=3) {
-			prefParameters.push((splitOutput[i]+splitOutput[i+1]+splitOutput[i+2]).replace("::", ":", "g"));
+		var prefParameters = [];
+		for(var i=0; i<splitOutput.length; i+=2) {
+			prefParameters.push((splitOutput[i]+(splitOutput[i+1] ? splitOutput[i+1] : "")).replace("::", ":", "g"));
 		}
 		
 		this.sessionID = prefParameters[0];
