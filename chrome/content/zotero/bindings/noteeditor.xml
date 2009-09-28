@@ -119,9 +119,9 @@
 					<![CDATA[
 						this._item = val;
 						
-						var parent = this.item.getSource();
+						var parent = this.item.getSourceKey();
 						if (parent) {
-							this.parent = Zotero.Items.get(parent);
+							this.parent = Zotero.Items.getByLibraryAndKey(this.item.libraryID, parent);
 						}
 						
 						this._id('links').item = this.item;
