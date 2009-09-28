@@ -1979,7 +1979,7 @@ Zotero.Item.prototype.isRegularItem = function() {
 
 
 Zotero.Item.prototype.isTopLevelItem = function () {
-	return this.isRegularItem() || !this.getSource();
+	return this.isRegularItem() || !this.getSourceKey();
 }
 
 
@@ -3689,9 +3689,9 @@ Zotero.Item.prototype.clone = function(includePrimary, newItem, unsaved) {
 	else {
 		newItem.setNote(this.getNote());
 		if (sameLibrary) {
-			var parent = this.getSource();
+			var parent = this.getSourceKey();
 			if (parent) {
-				newItem.setSource(parent);
+				newItem.setSourceKey(parent);
 			}
 		}
 		
