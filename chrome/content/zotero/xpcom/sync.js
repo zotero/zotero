@@ -749,6 +749,7 @@ Zotero.Sync.Runner = new function () {
 			icon.setAttribute('status', '');
 			warning.hidden = false;
 			warning.setAttribute('mode', status);
+			warning.setAttribute('error', status == 'error');
 			warning.tooltipText = "A sync error occurred. Click to view details.";
 			warning.onclick = function () {
 				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
@@ -1267,7 +1268,7 @@ Zotero.Sync.Server = new function () {
 					Zotero.debug("Sync cancelled");
 					Zotero.DB.rollbackTransaction();
 					Zotero.Sync.Server.unlock(function () {
-						_callbacks.onSkip();
+						_callbacks.onStop();
 					});
 					Zotero.reloadDataObjects();
 					Zotero.Sync.EventListener.resetIgnored();
@@ -1749,7 +1750,7 @@ Zotero.Sync.Server = new function () {
 							return;
 						}
 						if (!Zotero.Sync.Server.canAutoResetClient) {
-							Components.utils.reportError("Client has already been auto-reset in Zotero.Sync.Server._checkResponse() -- manual sync required");
+							Components.utils.reportError("Client has already been auto-reset in Zotero.Sync.Server._checkResponse()");
 							return;
 						}
 						
@@ -2403,6 +2404,7 @@ Zotero.Sync.Server.Data = new function() {
 									
 								case 'item':
 									var diff = obj.diff(remoteObj, false, ["dateModified"]);
+									Zotero.debug(diff);
 									if (!diff) {
 										// Check if creators changed
 										var creatorsChanged = false;
@@ -2429,6 +2431,17 @@ Zotero.Sync.Server.Data = new function() {
 											syncSession.removeFromUpdated(obj);
 											continue;
 										}
+									}
+									
+									// Always keep the parent item if there is one,
+									// regardless of which side is chosen during CR
+									var localParent = obj.getSourceKey();
+									var remoteParent = remoteObj.getSourceKey();
+									if (!localParent && remoteParent) {
+										obj.setSourceKey(remoteParent);
+									}
+									else if (localParent && !remoteParent) {
+										remoteObj.setSourceKey(localParent);
 									}
 									
 									/*
@@ -2659,13 +2672,13 @@ Zotero.Sync.Server.Data = new function() {
 			if (toReconcile.length) {
 				if (Zotero.Sync.Runner.background) {
 					// TODO: localize
-					throw ("Background sync resulted in conflict \u2014 manual sync required");
+					throw ("An automatic sync resulted in a conflict that requires manual intervention.\n\nClick the sync icon to sync manually.");
 				}
 				
 				var mergeData = _reconcile(type, toReconcile, remoteCreatorStore);
 				if (!mergeData) {
 					Zotero.DB.rollbackTransaction();
-					throw ("Merge error");
+					return false;
 				}
 				_processMergeData(
 					syncSession,
