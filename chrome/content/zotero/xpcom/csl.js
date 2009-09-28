@@ -2817,7 +2817,7 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 			}
 			
 			if(this.format == "RTF") {
-				string = string.replace(/[\x7F-\uFFFF]/g, Zotero.CSL.FormattedString._rtfEscapeFunction)
+				string = string.replace(/[{}\x7F-\uFFFF]/g, Zotero.CSL.FormattedString._rtfEscapeFunction)
 							.replace("\t", "\\tab ", "g");
 				
 				if(string.substr(string.length-5) == "\\tab ") {
