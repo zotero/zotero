@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-09-22 07:05:00"
+	"lastUpdated":"2009-09-29 23:15:00"
 }
 
 function detectWeb(doc, url) {
@@ -32,9 +32,6 @@ function detectWeb(doc, url) {
 
 	// Individual item
 	else if (url.match(/\/items\/[0-9]+(\?.*)?$/)) {
-		// FIXME: temporarily broken
-		return false;
-		
 		// TODO: embed in page, because this is absurd
 		var typeMap = {
 			"Note": "note",
@@ -74,7 +71,7 @@ function detectWeb(doc, url) {
 			"Encyclopedia Article":"encyclopediaArticle",
 			"Dictionary Entry": "dictionaryEntry"
 		};
-		var td = doc.evaluate('//div[@id="content"]/div[@class="major-col"]/table//tr[th[text()="Item Type"]]/td', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		var td = doc.evaluate('//div[@id="content"]/div[@class="major-col"]/table//tr[th[text()="Item Type"]]/td', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		return td ? typeMap[td.textContent] : "book";
 	}
 }
@@ -173,6 +170,17 @@ function doWeb(doc, url) {
 		}, function () { Zotero.done(); });
 	}
 	else {
+		if (url.indexOf("/groups/") == -1) {
+			var userID = doc.getElementById('libraryUserID').getAttribute('title');
+			var apiPrefix = "https://api.zotero.org/users/" + userID + "/";
+			var itemRe = /^https?:\/\/[^\/]*zotero\.org\/[^\/]+\/items\/([0-9]+)/;
+		}
+		// Group library
+		else {
+			var groupID = doc.getElementById('libraryGroupID').getAttribute('title');
+			var apiPrefix = "https://api.zotero.org/groups/" + groupID + "/";
+			var itemRe = /^https?:\/\/[^\/]*zotero\.org\/groups\/[^\/]+\/items\/([0-9]+)/;
+		}
 		var itemID = url.match(itemRe)[1];
 		var apiURL = apiPrefix + "items/" + itemID + "?content=full";
 		Zotero.Utilities.doGet(apiURL, function (text) {
