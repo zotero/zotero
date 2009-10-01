@@ -221,7 +221,6 @@
 #zotero-tb-sync-warning[error=true]
 {
 	list-style-image: url(chrome://zotero/skin/exclamation.png);
-	margin-bottom: 2px;
 }
 
 #zotero-tb-sync {

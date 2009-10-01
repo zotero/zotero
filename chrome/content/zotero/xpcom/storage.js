@@ -888,8 +888,7 @@ Zotero.Sync.Storage = new function () {
 			destFile.QueryInterface(Components.interfaces.nsILocalFile);
 			destFile.setRelativeDescriptor(parentDir, fileName);
 			if (destFile.exists()) {
-				var msg = "ZIP entry '" + fileName + "' "
-					+ " already exists";
+				var msg = "ZIP entry '" + fileName + "' " + "already exists";
 				Zotero.debug(msg, 2);
 				Components.utils.reportError(msg + " in " + funcName);
 				continue;
@@ -984,7 +983,22 @@ Zotero.Sync.Storage = new function () {
 			
 			if (file.isFile()) {
 				Zotero.debug("Deleting existing file " + file.leafName);
-				file.remove(false);
+				try {
+					file.remove(false);
+				}
+				catch (e) {
+					if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+						Zotero.debug(e);
+						
+						// TODO: localize
+						var msg = "The file '" + file.leafName + "' is in use and cannot "
+							+ "be updated. Please close the file or restart your computer "
+							+ "and try syncing again.";
+						throw (msg);
+					}
+					
+					throw (e);
+				}
 			}
 			else if (file.isDirectory()) {
 				Zotero.debug("Deleting existing directory " + file.leafName);

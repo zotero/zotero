@@ -57,6 +57,11 @@
   -moz-padding-start: 8px;
 }
 
+#zotero-tb-sync-warning[error=true]
+{
+	margin-bottom: 2px;
+}
+
 .zotero-tb-button[open="true"] > .toolbarbutton-icon,
 .zotero-tb-button:hover:active > .toolbarbutton-icon, 
 #zotero-pane-stack[fullscreenmode="true"] #zotero-tb-fullscreen > .toolbarbutton-icon {
