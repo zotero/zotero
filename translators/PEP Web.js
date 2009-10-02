@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":false,
-	"lastUpdated":"2009-09-26 00:15:00"
+	"lastUpdated":"2009-10-02 04:50:00"
 }
 
 //Only works for journal articles, and only for single entries.
