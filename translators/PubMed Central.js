@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-09-03 17:00:00"
+	"lastUpdated":"2009-10-01 23:22:00"
 }
 
 function detectWeb(doc, url) {
@@ -44,6 +44,7 @@ function doWeb(doc, url) {
 			next_link = links.iterateNext();
 		}
 		items = Zotero.selectItems(items);
+		if(!items) return true;
 		for (var i in items) {
 			URIs.push(i);
 		}
@@ -74,7 +75,11 @@ function doWeb(doc, url) {
 			}
 			newItem.url = tags["fulltext_html_url"];
 			if (!newItem.url) newItem.url = tags["abstract_html_url"];
-			newItem.extra = "PMCID:" + text.match(/PMCID: <\/span>(\d+)/)[1];
+			try {
+			  newItem.extra = "PMCID: " + text.match(/PMCID: <\/span>(PMC\d+)/)[1];
+			} catch(e){
+			  
+			}
 			newItem.journalAbbreviation = text.match(/span class=\"citation-abbreviation\">([^<]+)</)[1];
 			newItem.pages = text.match(/span class=\"citation-flpages\">([^<]+)</)[1].replace(/[\.:\s]/g, "");
 			
