@@ -8,14 +8,13 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-09-02 13:40:00"
+	"lastUpdated":"2009-10-07 16:30:00"
 }
 
 function detectWeb(doc, url) {
-
-	if(doc.location.href.match("results?")) {
+	if(url.match("searchResults\?")) {
         	return "multiple";
-        } else if (doc.location.href.match("textdoc")) {
+        } else if (doc.location.href.match("biblio")) {
 	        return "patent";
         }
   }
@@ -36,15 +35,17 @@ function doWeb(doc, url) {
 	
 		var next_title;
 		while (next_title = titles.iterateNext()) {
-			items[next_title.href] = next_title.textContent;
+			items[next_title.href] = Zotero.Utilities.trim(next_title.textContent);
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
 			articles.push(i);
 		}
+		
 	} else {
 		articles = [url];
 	}
+	if(articles.length == 0) return true;
 	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
 }
@@ -62,7 +63,7 @@ function scrape(doc,url) {
 	
 	
 	//Get title
-	var xpath = "/html/body/form/table[2]/tbody/tr[1]/td[3]/h2";
+	var xpath = "/html/body/table[2]/tbody/tr[1]/td[3]/h2";
 	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
 		var title = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
 		
