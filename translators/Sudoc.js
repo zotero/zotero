@@ -8,9 +8,8 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-09-03 17:00:00"
+	"lastUpdated":"2009-10-06 17:00:00"
 }
-
 
 function detectWeb(doc, url) {
 		var namespace = doc.documentElement.namespaceURI;
@@ -156,16 +155,30 @@ function scrape(doc) {
 									authorFunction = Zotero.Utilities.superCleanString(authorFunction);
 								}
 								var zoteroFunction = '';
+								
 								// TODO : Add other authotiry types
 								if (authorFunction == 'Traduction')
 								{
-									zoteroFunction = 'Translator';
+									zoteroFunction = 'translator';
+								}
+								else if ( (zoteroType == "thesis") && (authorFunction != 'Auteur') )
+								{
+									zoteroFunction = "contributor";
 								}
 								else
 								{
-									zoteroFunction = 'Author';
+									zoteroFunction = 'author';
 								}
-								newItem.creators.push(Zotero.Utilities.cleanAuthor(authorText, zoteroFunction, true));
+								
+								if (authorFunction == "Université de soutenance")
+								{
+									// If the author function is "université de soutenance"	it means that this author has to be in "university" field
+									newItem.university = authorText;
+								}
+								else
+								{
+									newItem.creators.push(Zotero.Utilities.cleanAuthor(authorText, zoteroFunction, true));
+								}
 							}
 						}
 						// The serie isn't in COinS
@@ -215,6 +228,27 @@ function scrape(doc) {
 							{
 								newItem.abstractNote = value;
 							}
+						}
+						else if ( (field == "Sujets"  ) || (field == "Subjects") )
+						{
+							var subjects = doc.evaluate('./td[2]/div', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
+							var subject_out = "";
+							
+							while (subject = subjects.iterateNext())
+							{
+								var subject_content = subject.textContent;
+								subject_content = subject_content.replace(/^\s*/, "");
+								subject_content = subject_content.replace(/\s*$/, "");
+								if (subject_content != "")
+								{
+									newItem.tags.push(Zotero.Utilities.trimInternal(subject_content));
+								}
+							}
+						}
+						else if ( (field == "Thèse") || (field == "Dissertation") )
+						{
+							var thesisType = value.split(/ ?:/)[0];
+							newItem.type = thesisType;
 						}
 					}
 					newItem.complete();
