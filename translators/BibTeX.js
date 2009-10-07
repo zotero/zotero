@@ -1815,7 +1815,7 @@ function writeField(field, value, isMacro) {
 		// I hope these are all the escape characters!
 		value = value.replace(/[|\<\>\~\^\\]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
-		if(!isMacro) value = value.replace(/([^\s]+[A-Z][^\s]*)/g, "{$1}");
+		if(!isMacro&&field != "pages") value = value.replace(/([^\s]+[A-Z][^\s]*)/g, "{$1}");
 	}
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
 		value = value.replace(/[\u0080-\uFFFF]/g, mapAccent);
