@@ -112,15 +112,14 @@ Zotero.Relations = new function () {
 		predicate = _getPrefixAndValue(predicate).join(':');
 		
 		var relation = new Zotero.Relation;
+		if (!libraryID) {
+			libraryID = Zotero.libraryID;
+		}
 		if (libraryID) {
 			relation.libraryID = parseInt(libraryID);
 		}
 		else {
-			libraryID = Zotero.libraryID;
-			if (!libraryID) {
-				libraryID = Zotero.getLocalUserKey(true);
-			}
-			relation.libraryID = parseInt(libraryID);
+			relation.libraryID = "local/" + Zotero.getLocalUserKey(true);
 		}
 		relation.subject = subject;
 		relation.predicate = predicate;
