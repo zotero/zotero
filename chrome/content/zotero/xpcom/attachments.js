@@ -1110,8 +1110,8 @@ Zotero.Attachments = new function(){
 		}
 		newAttachment.save();
 		
-		// Copy over files
-		if (newAttachment.isImportedAttachment()) {
+		// Copy over files if they exist
+		if (newAttachment.isImportedAttachment() && attachment.getFile()) {
 			var dir = Zotero.Attachments.getStorageDirectory(attachment.id);
 			var newDir = Zotero.Attachments.createDirectoryForItem(newAttachment.id);
 			Zotero.File.copyDirectory(dir, newDir);

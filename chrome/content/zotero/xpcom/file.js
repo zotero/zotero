@@ -184,6 +184,9 @@ Zotero.File = new function(){
 	 * Copies all files from dir into newDir
 	 */
 	this.copyDirectory = function (dir, newDir) {
+		if (!dir.exists()) {
+			throw ("Directory doesn't exist in Zotero.File.copyDirectory()");
+		}
 		var otherFiles = dir.directoryEntries;
 		while (otherFiles.hasMoreElements()) {
 			var file = otherFiles.getNext();
