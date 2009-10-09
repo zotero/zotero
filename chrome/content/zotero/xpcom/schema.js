@@ -2454,13 +2454,19 @@ Zotero.Schema = new function(){
 				if (i==63) {
 					Zotero.DB.query("ALTER TABLE itemAttachments ADD COLUMN storageHash TEXT");
 					
-					var protocol = Zotero.Prefs.get('sync.storage.protocol');
-					if (protocol == 'webdav') {
-						Zotero.Prefs.set('sync.storage.scheme', 'http');
+					var url = Zotero.Prefs.get('sync.storage.url');
+					if (url) {
+						var protocol = Zotero.Prefs.get('sync.storage.protocol');
+						if (protocol == 'webdav') {
+							Zotero.Prefs.set('sync.storage.scheme', 'http');
+						}
+						else {
+							Zotero.Prefs.set('sync.storage.protocol', 'webdav');
+							Zotero.Prefs.set('sync.storage.scheme', 'https');
+						}
 					}
 					else {
-						Zotero.Prefs.set('sync.storage.protocol', 'webdav');
-						Zotero.Prefs.set('sync.storage.scheme', 'https');
+						Zotero.Prefs.set('sync.storage.protocol', 'zotero');
 					}
 					
 					Zotero.DB.query("UPDATE version SET schema='storage_webdav' WHERE schema='storage'");
