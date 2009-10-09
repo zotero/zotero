@@ -790,6 +790,10 @@ Zotero.Sync.Storage = new function () {
 			
 			// Windows API only allows paths of 260 characters
 			if (e.name == "NS_ERROR_FILE_NOT_FOUND" && destFile.path.length > 255) {
+				// Preserve extension
+				var matches = destFile.leafName.match(/\.[a-z0-9]{0,8}$/);
+				var ext = matches ? matches[0] : "";
+				
 				var pathLength = destFile.path.length - destFile.leafName.length;
 				var newLength = 255 - pathLength;
 				// Require 40 available characters in path -- this is arbitrary,
@@ -804,10 +808,11 @@ Zotero.Sync.Storage = new function () {
 				// Shorten file if it's too long -- we don't relink it, but this should
 				// be pretty rare and probably only occurs on extraneous files with
 				// gibberish for filenames
-				var newName = destFile.leafName.substr(0, newLength);
+				var newName = destFile.leafName.substr(0, newLength - (ext.length + 1)) + ext;
 				var msg = "Shortening filename to '" + newName + "'";
 				Zotero.debug(msg, 2);
 				Components.utils.reportError(msg);
+				
 				tempFile.moveTo(parentDir, newName);
 				
 				destFile = parentDir.clone();
@@ -902,20 +907,45 @@ Zotero.Sync.Storage = new function () {
 					// Is this the main attachment file?
 					var primaryFile = item.getFile(null, true).leafName == destFile.leafName;
 					
+					// Preserve extension
+					var matches = destFile.leafName.match(/\.[a-z0-9]{0,8}$/);
+					var ext = matches ? matches[0] : "";
+					
 					var pathLength = destFile.path.length - destFile.leafName.length;
 					var newLength = 255 - pathLength;
 					// Require 40 available characters in path -- this is arbitrary,
 					// but otherwise filenames are going to end up being cut off
 					if (newLength < 40) {
-						throw ("Storage directory path is too long in " + funcName);
+						var msg = "Due to a Windows path length limitation, your Zotero data directory "
+								+ "is too deep in the filesystem for syncing to work reliably. "
+								+ "Please relocate your Zotero data to a higher directory.";
+						throw (msg);
 					}
 					
 					// Shorten file if it's too long -- we don't relink it, but this should
 					// be pretty rare and probably only occurs on extraneous files with
 					// gibberish for filenames
-					var newName = destFile.leafName.substr(0, newLength);
-					Components.utils.reportError("Shortening filename to '" + newName + "'");
-					destFile.leafName = newName;
+					//
+					// Shortened file could already exist if there was another file with a
+					// similar name that was also longer than the limit, so we do this in a
+					// loop, adding numbers if necessary
+					var step = 0;
+					do {
+						if (step == 0) {
+							var newName = destFile.leafName.substr(0, newLength - (ext.length + 1)) + ext;
+						}
+						else {
+							var newName = destFile.leafName.substr(0, newLength - (ext.length + 1)) + "-" + step + ext;
+						}
+						destFile.leafName = newName;
+						step++;
+					}
+					while (destFile.exists());
+					
+					var msg = "Shortening filename to '" + newName + "'";
+					Zotero.debug(msg, 2);
+					Components.utils.reportError(msg);
+					
 					destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
 					
 					// If we're renaming the main file, processDownload() needs to know
