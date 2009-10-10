@@ -209,8 +209,8 @@ var Zotero_Merge_Window = new function () {
 			var clonedCreators = _mergeGroup.rightpane.ref.getCreators();
 			var refresh = false;
 			for (var i in originalCreators) {
-				if (_io.dataIn.changedCreators[originalCreators[i].ref.id]) {
-					var changedCreator = _io.dataIn.changedCreators[originalCreators[i].ref.id];
+				var changedCreator = _io.dataIn.changedCreators[Zotero.Creators.getLibraryKeyHash(originalCreators[i].ref)];
+				if (changedCreator) {
 					_mergeGroup.rightpane.original.setCreator(
 						i, changedCreator, originalCreators[i].creatorTypeID
 					);
