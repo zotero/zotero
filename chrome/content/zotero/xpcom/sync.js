@@ -2420,13 +2420,8 @@ Zotero.Sync.Server.Data = new function() {
 											creators = creators.concat(remoteCreators);
 											for each(var creator in creators) {
 												var r = remoteCreatorStore[Zotero.Creators.getLibraryKeyHash(creator.ref)];
-												Zotero.debug('=============');
-												Zotero.debug(Zotero.Creators.getLibraryKeyHash(creator.ref));
-												Zotero.debug(r);
-												Zotero.debug(creator.ref);
 												// Doesn't include dateModified
 												if (r && !r.equals(creator.ref)) {
-													Zotero.debug("CREATORS CHANGED!");
 													creatorsChanged = true;
 													break;
 												}
