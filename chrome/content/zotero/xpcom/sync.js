@@ -2420,8 +2420,13 @@ Zotero.Sync.Server.Data = new function() {
 											creators = creators.concat(remoteCreators);
 											for each(var creator in creators) {
 												var r = remoteCreatorStore[Zotero.Creators.getLibraryKeyHash(creator.ref)];
+												Zotero.debug('=============');
+												Zotero.debug(Zotero.Creators.getLibraryKeyHash(creator.ref));
+												Zotero.debug(r);
+												Zotero.debug(creator.ref);
 												// Doesn't include dateModified
 												if (r && !r.equals(creator.ref)) {
+													Zotero.debug("CREATORS CHANGED!");
 													creatorsChanged = true;
 													break;
 												}
@@ -2476,6 +2481,7 @@ Zotero.Sync.Server.Data = new function() {
 							// TODO: order reconcile by parent/child?
 							
 							if (!skipCR) {
+								Zotero.debug("ADDING " + type + " TO CR");
 								toReconcile.push([
 									obj,
 									remoteObj
@@ -3190,9 +3196,6 @@ Zotero.Sync.Server.Data = new function() {
 	 * @param	{Array[]}	objectPairs	Array of arrays of pairs of Item, Collection, etc.
 	 */
 	function _reconcile(type, objectPairs, changedCreators) {
-		Zotero.debug('==================================');
-		Zotero.debug(objectPairs);
-		Zotero.debug(changedCreators);
 		var io = {
 			dataIn: {
 				type: type,
