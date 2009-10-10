@@ -1783,7 +1783,7 @@ Zotero.Sync.Server = new function () {
 							buttonFlags,
 							"Reset Group and Sync",
 							null, null, null, {}
-							);
+						);
 						
 						if (index == 0) {
 							group.erase();
@@ -3190,6 +3190,9 @@ Zotero.Sync.Server.Data = new function() {
 	 * @param	{Array[]}	objectPairs	Array of arrays of pairs of Item, Collection, etc.
 	 */
 	function _reconcile(type, objectPairs, changedCreators) {
+		Zotero.debug('==================================');
+		Zotero.debug(objectPairs);
+		Zotero.debug(changedCreators);
 		var io = {
 			dataIn: {
 				type: type,
