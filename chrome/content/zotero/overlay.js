@@ -3142,9 +3142,9 @@ var ZoteroPane = new function()
 		if (popup) {
 			var pw = new Zotero.ProgressWindow();
 			pw.changeHeadline(Zotero.getString('general.errorHasOccurred'));
-			var desc = Zotero.getString('general.restartFirefox') + ' '
+			var msg = Zotero.getString('general.restartFirefox') + ' '
 				+ reportInstructions;
-			pw.addDescription(desc);
+			pw.addDescription(msg);
 			pw.show();
 			pw.startCloseTimer(8000);
 		}
@@ -3155,6 +3155,7 @@ var ZoteroPane = new function()
 				+ reportInstructions;
 			self.setItemsPaneMessage(msg, true);
 		}
+		Zotero.debug(msg, 1);
 	}
 }
 
