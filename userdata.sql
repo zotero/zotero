@@ -1,4 +1,4 @@
--- 63
+-- 64
 
 -- This file creates tables containing user-specific data for new users --
 -- any changes made here must be mirrored in transition steps in schema.js::_migrateSchema()
@@ -258,10 +258,10 @@ CREATE INDEX fulltextItemWords_itemID ON fulltextItemWords(itemID);
 
 CREATE TABLE syncDeleteLog (
     syncObjectTypeID INT NOT NULL,
-    libraryID INT,
+    libraryID INT NOT NULL,
     key TEXT NOT NULL,
     timestamp INT NOT NULL,
-    UNIQUE (libraryID, key),
+    UNIQUE (syncObjectTypeID, libraryID, key),
     FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)
 );
 CREATE INDEX syncDeleteLog_timestamp ON syncDeleteLog(timestamp);
