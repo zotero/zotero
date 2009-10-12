@@ -2472,6 +2472,13 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE version SET schema='storage_webdav' WHERE schema='storage'");
 				}
 				
+				if (i==64) {
+					Zotero.DB.query("ALTER TABLE syncDeleteLog RENAME TO syncDeleteLogOld");
+					Zotero.DB.query("CREATE TABLE syncDeleteLog (\n    syncObjectTypeID INT NOT NULL,\n    libraryID INT NOT NULL,\n    key TEXT NOT NULL,\n    timestamp INT NOT NULL,\n    UNIQUE (syncObjectTypeID, libraryID, key),\n    FOREIGN KEY (syncObjectTypeID) REFERENCES syncObjectTypes(syncObjectTypeID)\n)");
+					Zotero.DB.query("INSERT INTO syncDeleteLog SELECT * FROM syncDeleteLogOld");
+					Zotero.DB.query("DROP TABLE syncDeleteLogOld");
+				}
+				
 				Zotero.wait();
 			}
 			

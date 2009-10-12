@@ -374,7 +374,7 @@ Zotero.Sync.EventListener = new function () {
 		Zotero.DB.beginTransaction();
 		
 		if (event == 'delete') {
-			var sql = "INSERT INTO syncDeleteLog VALUES (?, ?, ?, ?)";
+			var sql = "REPLACE INTO syncDeleteLog VALUES (?, ?, ?, ?)";
 			var syncStatement = Zotero.DB.getStatement(sql);
 			
 			if (isItem && Zotero.Sync.Storage.active) {
@@ -2337,6 +2337,7 @@ Zotero.Sync.Server.Data = new function() {
 				Zotero.debug("Processing remote " + type + " " + libraryID + "/" + key, 4);
 				var isNewObject;
 				var localDelete = false;
+				var skipCR = false;
 				
 				// Get local object with same library and key
 				var obj = Zotero[Types].getByLibraryAndKey(libraryID, key);
@@ -2391,8 +2392,6 @@ Zotero.Sync.Server.Data = new function() {
 						}
 						// Mark other types for conflict resolution
 						else {
-							var skipCR = false;
-							
 							// Skip item if dateModified is the only modified
 							// field (and no linked creators changed)
 							switch (type) {
@@ -2455,8 +2454,7 @@ Zotero.Sync.Server.Data = new function() {
 									break;
 								
 								case 'collection':
-									// TODO: move childItemStore to syncSession
-									var changed = _mergeCollection(obj, remoteObj, childItemStore, syncSession);
+									var changed = _mergeCollection(obj, remoteObj, syncSession);
 									if (!changed) {
 										syncSession.removeFromUpdated(obj);
 										continue;
@@ -2476,7 +2474,6 @@ Zotero.Sync.Server.Data = new function() {
 							// TODO: order reconcile by parent/child?
 							
 							if (!skipCR) {
-								Zotero.debug("ADDING " + type + " TO CR");
 								toReconcile.push([
 									obj,
 									remoteObj
@@ -2512,15 +2509,16 @@ Zotero.Sync.Server.Data = new function() {
 								localDelete = true;
 								break;
 							
-							// Auto-restore locally deleted tags that have
-							// changed remotely
+							// Auto-restore locally deleted tags and collections that
+							// have changed remotely
 							case 'tag':
+							case 'collection':
 								syncSession.removeFromDeleted(fakeObj);
 								var msg = _generateAutoChangeMessage(
 									type, null, xmlNode.@name.toString()
 								);
 								alert(msg);
-								continue;
+								break;
 							
 							default:
 								alert('Delete reconciliation unimplemented for ' + types);
@@ -2539,7 +2537,11 @@ Zotero.Sync.Server.Data = new function() {
 				}
 				
 				// Create or overwrite locally
-				obj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode, obj);
+				//
+				// If we skipped CR above, we already have an object to use
+				if (!skipCR) {
+					obj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode, obj);
+				}
 				
 				if (isNewObject && type == 'tag') {
 					// If a local tag matches the name of a different remote tag,
@@ -2653,6 +2655,7 @@ Zotero.Sync.Server.Data = new function() {
 							break;
 						
 						case 'tag':
+						case 'collection':
 							var msg = _generateAutoChangeMessage(
 								type, obj.name, null
 							);
@@ -2961,7 +2964,7 @@ Zotero.Sync.Server.Data = new function() {
 	}
 	
 	
-	function _mergeCollection(localObj, remoteObj, childItemStore, syncSession) {
+	function _mergeCollection(localObj, remoteObj, syncSession) {
 		var diff = localObj.diff(remoteObj, false, true);
 		if (!diff) {
 			return false;
@@ -2972,20 +2975,18 @@ Zotero.Sync.Server.Data = new function() {
 		
 		// Local is newer
 		if (diff[0].primary.dateModified > diff[1].primary.dateModified) {
+			Zotero.debug("Local is newer");
 			var remoteIsTarget = false;
 			var targetObj = localObj;
-			var targetDiff = diff[0];
-			var otherDiff = diff[1];
 		}
 		// Remote is newer
 		else {
+			Zotero.debug("Remote is newer");
 			var remoteIsTarget = true;
 			var targetObj = remoteObj;
-			var targetDiff = diff[1];
-			var otherDiff = diff[0];
 		}
 		
-		if (targetDiff.fields.name) {
+		if (diff[0].fields.name) {
 			if (!syncSession.suppressWarnings) {
 				var msg = _generateAutoChangeMessage(
 					'collection', diff[0].fields.name, diff[1].fields.name, remoteIsTarget
@@ -2997,27 +2998,26 @@ Zotero.Sync.Server.Data = new function() {
 		
 		// Check for child collections in the other object
 		// that aren't in the target one
-		if (otherDiff.childCollections.length) {
+		if (diff[1].childCollections.length) {
 			// TODO: log
 			// TODO: add
 			throw ("Collection hierarchy conflict resolution is unimplemented");
 		}
 		
-		// Add items in other object to target one
-		if (otherDiff.childItems.length) {
-			var childItems = targetObj.getChildItems(true);
+		// Add items to local object, which is what's saved
+		if (diff[1].childItems.length) {
+			var childItems = localObj.getChildItems(true);
 			if (childItems) {
-				targetObj.childItems = childItems.concat(otherDiff.childItems);
+				localObj.childItems = childItems.concat(diff[1].childItems);
 			}
 			else {
-				targetObj.childItems = otherDiff.childItems;
+				localObj.childItems = diff[1].childItems;
 			}
 			
 			if (!syncSession.suppressWarnings) {
 				var msg = _generateCollectionItemMergeMessage(
 					targetObj.name,
-					otherDiff.childItems,
-					remoteIsTarget
+					diff[0].childItems.concat(diff[1].childItems)
 				);
 				// TODO: log rather than alert
 				alert(msg);
@@ -3123,25 +3123,18 @@ Zotero.Sync.Server.Data = new function() {
 	/**
 	 * @param	{String}		collectionName
 	 * @param	{Integer[]}		addedItemIDs
-	 * @param	{Boolean}		remoteIsTarget
 	 */
-	function _generateCollectionItemMergeMessage(collectionName, addedItemIDs, remoteIsTarget) {
+	function _generateCollectionItemMergeMessage(collectionName, addedItemIDs) {
 		// TODO: localize
 		var introMsg = "Items in the collection '" + collectionName + "' have been "
 			+ "added and/or removed in multiple locations."
 		
-		introMsg += " ";
-		if (remoteIsTarget) {
-			introMsg += "The following items have been added to the remote collection:";
-		}
-		else {
-			introMsg += "The following items have been added to the local collection:";
-		}
+		introMsg += " The following items have been added to the collection:";
 		var itemText = [];
 		for each(var id in addedItemIDs) {
 			var item = Zotero.Items.get(id);
 			var title = item.getField('title');
-			var text = " - " + title;
+			var text = " \u2022 " + title;
 			var firstCreator = item.getField('firstCreator');
 			if (firstCreator) {
 				text += " (" + firstCreator + ")";
