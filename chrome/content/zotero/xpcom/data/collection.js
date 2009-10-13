@@ -704,7 +704,7 @@ Zotero.Collection.prototype.addItems = function(itemIDs) {
 		
 		notifierPairs.push(this.id + '-' + itemID);
 		
-		if ((i % 25) == 0) {
+		if ((i % 25) == 0 && Zotero.locked) {
 			Zotero.wait();
 		}
 	}
