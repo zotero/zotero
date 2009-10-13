@@ -1,4 +1,4 @@
-zoteroitembox
+#zotero-view-item > tabpanel > *
 {
 	overflow: auto;
 }
