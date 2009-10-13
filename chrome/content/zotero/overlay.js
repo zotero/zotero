@@ -2394,10 +2394,10 @@ var ZoteroPane = new function()
 			// TODO: _text_
 			var c = this.getSelectedCollection();
 			if (c) {
-				this.openNoteWindow(null, c.id);
+				this.openNoteWindow(null, c.id, parent);
 			}
 			else {
-				this.openNoteWindow();
+				this.openNoteWindow(null, null, parent);
 			}
 		}
 	}

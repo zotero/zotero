@@ -294,7 +294,7 @@
 			<method name="selectParent">
 				<body>
 				<![CDATA[
-					if (!this.item.id) {
+					if (!this.item || !this.item.id) {
 						return;
 					}
 					

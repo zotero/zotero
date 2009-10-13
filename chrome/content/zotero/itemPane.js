@@ -38,6 +38,9 @@ var ZoteroItemPane = new function() {
 		}
 		
 		_itemBox = document.getElementById('zotero-editpane-item-box');
+		_notesLabel = document.getElementById('zotero-editpane-notes-label');
+		_notesButton = document.getElementById('zotero-editpane-notes-add');
+		_notesList = document.getElementById('zotero-editpane-dynamic-notes');
 		_tagsBox = document.getElementById('zotero-editpane-tags');
 		_relatedBox = document.getElementById('zotero-editpane-related');
 	}
@@ -57,12 +60,12 @@ var ZoteroItemPane = new function() {
 			case 0:
 				var box = _itemBox;
 				break;
-				
-			case 1:
+			
+			case 2:
 				var box = _tagsBox;
 				break;
 			
-			case 2:
+			case 3:
 				var box = _relatedBox;
 				break;
 		}
@@ -72,7 +75,7 @@ var ZoteroItemPane = new function() {
 		if (_lastItem && _lastItem != item) {
 			switch (index) {
 				case 0:
-				case 1:
+				case 2:
 					box.blurOpenField();
 					// DEBUG: Currently broken
 					//box.scrollToTop();
@@ -82,6 +85,54 @@ var ZoteroItemPane = new function() {
 		
 		_lastItem = item;
 		
+		if (index == 1) {
+			var editable = ZoteroPane.canEdit();
+			_notesButton.hidden = !editable;
+			
+			while(_notesList.hasChildNodes()) {
+				_notesList.removeChild(_notesList.firstChild);
+			}
+			
+			var notes = Zotero.Items.get(item.getNotes());
+			if (notes.length) {
+				for(var i = 0; i < notes.length; i++) {
+					var icon = document.createElement('image');
+					icon.setAttribute('src','chrome://zotero/skin/treeitem-note.png');
+					
+					var label = document.createElement('label');
+					var title = Zotero.Notes.noteToTitle(notes[i].getNote());
+					title = title ? title : Zotero.getString('pane.item.notes.untitled');
+					label.setAttribute('value', title);
+					label.setAttribute('flex','1');	//so that the long names will flex smaller
+					label.setAttribute('crop','end');
+					
+					var box = document.createElement('box');
+					box.setAttribute('onclick',"ZoteroPane.selectItem(" + notes[i].id + ");");
+					box.setAttribute('class','zotero-clicky');
+					box.appendChild(icon);
+					box.appendChild(label);
+					
+					if (editable) {
+						var removeButton = document.createElement('label');
+						removeButton.setAttribute("value","-");
+						removeButton.setAttribute("class","zotero-clicky");
+						removeButton.setAttribute("onclick","ZoteroItemPane.removeNote(" + notes[i].id + ")");
+					}
+					
+					var row = document.createElement('row');
+					row.appendChild(box);
+					if (editable) {
+						row.appendChild(removeButton);
+					}
+					
+					_notesList.appendChild(row);
+				}
+			}
+			
+			_updateNoteCount();
+			return;
+		}
+		
 		if (mode) {
 			box.mode = mode;
 		}
@@ -90,6 +141,41 @@ var ZoteroItemPane = new function() {
 		}
 		box.item = item;
 	}
-}
+	
+	
+	this.addNote = function (popup) {
+		ZoteroPane.newNote(popup, _lastItem.id);
+	}
+	
+	
+	this.removeNote = function (id) {
+		var note = Zotero.Items.get(id);
+		var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+						.createInstance(Components.interfaces.nsIPrompt);
+		if (note && pr.confirm('', Zotero.getString('pane.item.notes.delete.confirm'))) {
+			note.erase();
+		}
+	}
+	
+	
+	function _updateNoteCount() {
+		var c = _notesList.childNodes.length;
+		
+		var str = 'pane.item.notes.count.';
+		switch (c){
+		case 0:
+			str += 'zero';
+			break;
+		case 1:
+			str += 'singular';
+			break;
+		default:
+			str += 'plural';
+			break;
+		}
+		
+		_notesLabel.value = Zotero.getString(str, [c]);
+	}
+}   
 
 addEventListener("load", function(e) { ZoteroItemPane.onLoad(e); }, false);
