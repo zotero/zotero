@@ -1457,13 +1457,11 @@ var ZoteroPane = new function()
 		if (event.keyCode == event.DOM_VK_ESCAPE) {
 			textbox.value = '';
 			ZoteroPane.setItemsPaneMessage(Zotero.getString('searchInProgress'));
-			setTimeout("document.getElementById('zotero-tb-search').doCommand('cmd_zotero_search'); ZoteroPane.clearItemsPaneMessage();", 1);
+			setTimeout("ZoteroPane.search(); ZoteroPane.clearItemsPaneMessage();", 1);
 		}
-		else if (event.keyCode == event.DOM_VK_RETURN ||
-			event.keyCode == event.DOM_VK_ENTER) {
-			textbox.skipTimeout = true;
+		else if (event.keyCode == event.DOM_VK_RETURN || event.keyCode == event.DOM_VK_ENTER) {
 			ZoteroPane.setItemsPaneMessage(Zotero.getString('searchInProgress'));
-			setTimeout("document.getElementById('zotero-tb-search').doCommand('cmd_zotero_search'); ZoteroPane.clearItemsPaneMessage();", 1);
+			setTimeout("ZoteroPane.search(true); ZoteroPane.clearItemsPaneMessage();", 1);
 		}
 	}
 	
@@ -1472,9 +1470,8 @@ var ZoteroPane = new function()
 		// This is the new length, except, it seems, when the change is a
 		// result of Undo or Redo
 		if (!textbox.value.length) {
-			textbox.skipTimeout = true;
 			ZoteroPane.setItemsPaneMessage(Zotero.getString('searchInProgress'));
-			setTimeout("document.getElementById('zotero-tb-search').doCommand('cmd_zotero_search'); ZoteroPane.clearItemsPaneMessage();", 1);
+			setTimeout("ZoteroPane.search(); ZoteroPane.clearItemsPaneMessage();", 1);
 		}
 		else if (textbox.value.indexOf('"') != -1) {
 			ZoteroPane.setItemsPaneMessage(Zotero.getString('advancedSearchMode'));
@@ -1482,10 +1479,14 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function search()
+	function search(runAdvanced)
 	{
 		if (this.itemsView) {
-			var searchVal = document.getElementById('zotero-tb-search').value;
+			var search = document.getElementById('zotero-tb-search');
+			if (!runAdvanced && search.value.indexOf('"') != -1) {
+				return;
+			}
+			var searchVal = search.value;
 			this.itemsView.setFilter('search', searchVal);
 			
 			document.getElementById('zotero-tb-search-cancel').hidden = searchVal == "";
