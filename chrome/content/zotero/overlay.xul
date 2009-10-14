@@ -243,10 +243,7 @@
 					<label id="zotero-tb-search-label" value="&zotero.toolbar.search.label;" control="zotero-tb-search" hidden="true"/>
 					<textbox id="zotero-tb-search" type="search" timeout="250" command="cmd_zotero_search" dir="reverse"
 						onkeypress="ZoteroPane.handleSearchKeypress(this, event)"
-						oninput="ZoteroPane.handleSearchInput(this, event)"
-						testcode="me.value.indexOf('&quot;') == -1"
-						prefire="ZoteroPane.clearItemsPaneMessage()"
-						ontestfail="ZoteroPane.setItemsPaneMessage(Zotero.getString('advancedSearchMode'))">
+						oninput="ZoteroPane.handleSearchInput(this, event)">
 						<toolbarbutton id="zotero-tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
 					</textbox>
 				</hbox>
