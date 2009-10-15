@@ -1489,7 +1489,9 @@ var ZoteroPane = new function()
 			var searchVal = search.value;
 			this.itemsView.setFilter('search', searchVal);
 			
-			document.getElementById('zotero-tb-search-cancel').hidden = searchVal == "";
+			if (Zotero.isFx30) {
+				document.getElementById('zotero-tb-search-cancel').hidden = searchVal == "";
+			}
 		}
 		
 	}
