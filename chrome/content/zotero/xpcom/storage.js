@@ -850,9 +850,11 @@ Zotero.Sync.Storage = new function () {
 		}
 		catch (e) {
 			Zotero.debug(zipFile.leafName + " is not a valid ZIP file", 2);
-			if (zipFile.exists()) {
-				zipFile.remove(false);
-			}
+			zipReader.close();
+			zipFile.remove(false);
+			
+			// TODO: Remove prop file to trigger reuploading, in case it was an upload error?
+			
 			return false;
 		}
 		
@@ -861,7 +863,13 @@ Zotero.Sync.Storage = new function () {
 			Zotero.Attachments.createDirectoryForItem(item.id);
 		}
 		
-		_deleteExistingAttachmentFiles(item);
+		try {
+			_deleteExistingAttachmentFiles(item);
+		}
+		catch (e) {
+			zipReader.close();
+			throw (e);
+		}
 		
 		var returnFile = null;
 		
@@ -916,6 +924,7 @@ Zotero.Sync.Storage = new function () {
 					// Require 40 available characters in path -- this is arbitrary,
 					// but otherwise filenames are going to end up being cut off
 					if (newLength < 40) {
+						zipReader.close();
 						var msg = "Due to a Windows path length limitation, your Zotero data directory "
 								+ "is too deep in the filesystem for syncing to work reliably. "
 								+ "Please relocate your Zotero data to a higher directory.";
@@ -954,6 +963,7 @@ Zotero.Sync.Storage = new function () {
 					}
 				}
 				else {
+					zipReader.close();
 					throw(e);
 				}
 			}
