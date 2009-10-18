@@ -1687,20 +1687,34 @@ Zotero.Item.prototype.save = function() {
 						+ ' set to true in Item.save()');
 				}
 				
-				sql = "REPLACE INTO itemNotes "
-						+ "(itemID, sourceItemID, note, title) VALUES (?,?,?,?)";
 				var parent = this.isNote() ? this.getSource() : null;
 				var noteText = this._noteText;
 				// Add <div> wrapper if not present
 				if (!noteText.match(/^<div class="zotero-note znv[0-9]+">[\s\S]*<\/div>$/)) {
 					noteText = '<div class="zotero-note znv1">' + noteText + '</div>';
 				}
-				var bindParams = [
-					this.id,
-					parent ? parent : null,
-					noteText,
-					this._noteTitle
-				];
+				
+				var sql = "SELECT COUNT(*) FROM itemNotes WHERE itemID=?";
+				if (Zotero.DB.valueQuery(sql, this.id)) {
+					sql = "UPDATE itemNotes SET sourceItemID=?, note=?, title=? WHERE itemID=?";
+					var bindParams = [
+						parent ? parent : null,
+						noteText,
+						this._noteTitle,
+						this.id
+					];
+				}
+				// Row might not yet exist for new embedded attachment notes
+				else {
+					sql = "INSERT INTO itemNotes "
+							+ "(itemID, sourceItemID, note, title) VALUES (?,?,?,?)";
+					var bindParams = [
+						this.id,
+						parent ? parent : null,
+						noteText,
+						this._noteTitle
+					];
+				}
 				Zotero.DB.query(sql, bindParams);
 			}
 			
