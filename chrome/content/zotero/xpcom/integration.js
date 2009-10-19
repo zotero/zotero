@@ -223,7 +223,12 @@ Zotero.Integration = new function() {
 				var proc = Components.classes["@mozilla.org/process/util;1"].
 						createInstance(Components.interfaces.nsIProcess);
 				proc.init(_osascriptFile);
-				proc.run(false, ['-e', 'tell application id "org.mozilla.firefox" to activate'], 2);
+				if(Zotero.oscpu == "PPC Mac OS X 10.4" || Zotero.oscpu == "Intel Mac OS X 10.4") {
+					// 10.4 doesn't support "tell application id"
+					proc.run(false, ['-e', 'tell application "Firefox" to activate'], 2);
+				} else {
+					proc.run(false, ['-e', 'tell application id "org.mozilla.firefox" to activate'], 2);
+				}
 			}
 		}
 	}
