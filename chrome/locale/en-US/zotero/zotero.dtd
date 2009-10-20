@@ -6,7 +6,7 @@
 <!ENTITY zotero.errorReport.submitted						"Your error report has been submitted.">
 <!ENTITY zotero.errorReport.reportID						"Report ID:">
 <!ENTITY zotero.errorReport.postToForums					"Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed					"Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.notReviewed					"Error reports are not reviewed unless referred to in the forums.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled				"You have installed a new version of Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired					"Your Zotero database must be upgraded to work with the new version.">
