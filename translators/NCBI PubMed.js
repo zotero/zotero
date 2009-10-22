@@ -3,12 +3,12 @@
 	"translatorType":12,
 	"label":"NCBI PubMed",
 	"creator":"Simon Kornblith, Michael Berkowitz and Rintze Zelle",
-	"target":"http://[^/]*(www|preview)\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)",
+	"target":"http://[^/]*(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-09-21 21:55:00"
+	"lastUpdated":"2009-10-22 19:00:00"
 }
 
 function detectWeb(doc, url) {
