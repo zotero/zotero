@@ -80,9 +80,13 @@ function doWeb(doc, url) {
 		  if (prefix == 'x') return namespace; else return null;
 		} : null;
 		var nonstandard = false;
+		var th = false;
 		var xpath;
 		if (newDoc.evaluate('//*[tr[td/text()="LDR"]]/tr[td[2]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			xpath = '//*[tr[td/text()="LDR"]]/tr[td[2]]';
+		} else if (newDoc.evaluate('//*[tr[th/text()="LDR"]]/tr[td[1]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		  xpath = '//*[tr[th/text()="LDR"]]/tr[td[1]]';
+		  th = true;
 		} else if (newDoc.evaluate('//tr[2]//table[2]//tr', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			xpath = '//tr[2]//table[2]//tr[td[2]]';
 			nonstandard = true;
@@ -97,14 +101,24 @@ function doWeb(doc, url) {
 		var elmt;
 		var record = new marc.record();
 		while(elmt = elmts.iterateNext()) {
-			if (nonstandard) {
-				var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./td[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-			} else {
-				var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./TD[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
-			}
-			var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./td[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+			if (th) {
+          var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./th', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+      } else {
+          var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./td[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+      }
+      // if (nonstandard) {
+      //     var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./td[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+      // } else {
+      //     var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./TD[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue);
+      // }
+     // var field = Zotero.Utilities.superCleanString(newDoc.evaluate('./td[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 			if(field) {
-				var value = newDoc.evaluate('./TD[2]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; //.split(/\n/)[1];
+				var value;
+				if (th) {
+				    value = newDoc.evaluate('./TD[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; //.split(/\n/)[1];
+				} else {
+				  value = newDoc.evaluate('./TD[2]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent; //.split(/\n/)[1];
+				}
 				if (value.split(/\n/)[1]) value = Zotero.Utilities.trimInternal(value.split(/\n/)[1]);
 				Zotero.debug(field + " : " + value);
 				if(field == "LDR") {
@@ -128,7 +142,7 @@ function doWeb(doc, url) {
 		var newItem = new Zotero.Item();
 		record.translate(newItem);
 		
-		var domain = url.match(/https?:\/\/([^/]+)/);
+		var domain = url.match(/https?:\/\/([^\/]+)/);
 		newItem.repository = domain[1]+" Library Catalog";
 
 		for (var i in newItem.creators) {
