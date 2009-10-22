@@ -2,8 +2,8 @@
 	"translatorID":"fcf41bed-0cbc-3704-85c7-8062a0068a7a",
 	"translatorType":12,
 	"label":"NCBI PubMed",
-	"creator":"Simon Kornblith and Michael Berkowitz",
-	"target":"http://[^/]*www\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",
+	"creator":"Simon Kornblith, Michael Berkowitz and Rintze Zelle",
+	"target":"http://[^/]*(www|preview)\.ncbi\.nlm\.nih\.gov[^/]*/(pubmed|sites/entrez|entrez/query\.fcgi\?.*db=PubMed)",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
@@ -16,9 +16,19 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
+	
+	var items = doc.evaluate('//input[@name="EntrezSystem2.PEntrez.Pubmed.Pubmed_ResultsPanel.Pubmed_ResultsController.ResultCount"]', doc,
+			nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if (items) {
+		if (items.value > 1) {
+			return "multiple";
+		} else if (items.value == 1) {
+			return "journalArticle";
+		}
+	}
 
 	var uids = doc.evaluate('//input[@type="checkbox" or @name="uid"]', doc,
-			       nsResolver, XPathResult.ANY_TYPE, null);
+			nsResolver, XPathResult.ANY_TYPE, null);
 	if(uids.iterateNext() && doc.title.indexOf("PMC Results") == -1) {
 		if (uids.iterateNext() && doc.title.indexOf("PMC Results") == -1){
 			return "multiple";
@@ -199,6 +209,14 @@ function doWeb(doc, url) {
 			lookupPMIDs(ids);
 		} else {
 			ids.push(uid.value);
+			lookupPMIDs(ids, doc);
+		}
+	} else {
+		var uids= doc.evaluate('//p[@class="pmid"]', doc,
+				nsResolver, XPathResult.ANY_TYPE, null);
+		var uid = uids.iterateNext();
+		if (uid) {
+			ids.push(uid.textContent.match(/\d+/)[0]);
 			lookupPMIDs(ids, doc);
 		}
 	}
