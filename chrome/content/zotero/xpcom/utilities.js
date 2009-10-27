@@ -203,6 +203,27 @@ Zotero.Utilities.prototype.unescapeHTML = function(/**String*/ str) {
 	return nsISUHTML.unescape(str);
 }
 
+
+/**
+ * Wrap URLs and DOIs in <a href=""> links in plain text
+ *
+ * Ignore URLs preceded by '>', just in case there are already links
+ */
+Zotero.Utilities.prototype.autoLink = function (str) {
+	// "http://www.google.com."
+	// "http://www.google.com. "
+	// "<http://www.google.com>" (and other characters, with or without a space after)
+	str = str.replace(/([^>])(https?:\/\/[^\s]+)([\."'>:\]\)](\s|$))/g, '$1<a href="$2">$2</a>$3');
+	// "http://www.google.com"
+	// "http://www.google.com "
+	str = str.replace(/([^">])(https?:\/\/[^\s]+)(\s|$)/g, '$1<a href="$2">$2</a>$3');
+	
+	// DOI
+	str = str.replace(/(doi:[ ]*)(10\.[^\s]+[0-9a-zA-Z])/g, '$1<a href="http://dx.doi.org/$2">$2</a>');
+	return str;
+}
+
+
 /**
  * Parses a text string for HTML/XUL markup and returns an array of parts. Currently only finds
  * HTML links (&lt;a&gt; tags)
