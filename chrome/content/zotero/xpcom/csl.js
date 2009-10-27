@@ -407,13 +407,11 @@ Zotero.CSL.prototype.formatBibliography = function(itemSet, format) {
 		if(format == "HTML") {
 			var coins = Zotero.OpenURL.createContextObject(item.zoteroItem, "1.0");
 			
-			// Wrap URLs in <a href=""> links, in a very unsophisticated manner
+			// Wrap URLs and DOIs in HTML links
 			//
-			// This should be done earlier when the data is still in variables
-			//
-			// Ignore URLs preceded by '>', since these are likely already links
-			string = string.replace(/([^>])(https?:\/\/[^\s]+)([\."'>:\]\)\s])/g, '$1<a href="$2">$2</a>$3');
-			string = string.replace(/(doi:[ ]*)(10\.[^\s]+[0-9a-zA-Z])/g, '$1<a href="http://dx.doi.org/$2">$2</a>');
+			// This should be handled when the values are still in variables
+			// (and presumably will be in the new engine)
+			string = Zotero.Utilities.prototype.autoLink(string);
 			
 			var span = (coins ? ' <span class="Z3988" title="'+coins.replace("&", "&amp;", "g")+'">&nbsp;</span>' : '');
 			
