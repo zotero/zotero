@@ -398,7 +398,7 @@ Zotero.Items = new function() {
 		Zotero.DB.beginTransaction();
 		var deletedIDs = this.getDeleted(true);
 		if (deletedIDs) {
-			this.erase(deletedIDs, true);
+			this.erase(deletedIDs);
 		}
 		Zotero.Notifier.trigger('refresh', 'collection', 0);
 		Zotero.DB.commitTransaction();
@@ -409,9 +409,8 @@ Zotero.Items = new function() {
 	 * Delete item(s) from database and clear from internal array
 	 *
 	 * @param	{Integer|Integer[]}	ids					Item ids
-	 * @param	{Boolean}			eraseChildren		Erase child items as well
 	 */
-	function erase(ids, eraseChildren) {
+	function erase(ids) {
 		ids = Zotero.flattenArguments(ids);
 		
 		var usiDisabled = Zotero.UnresponsiveScriptIndicator.disable();
@@ -423,7 +422,7 @@ Zotero.Items = new function() {
 					Zotero.debug('Item ' + id + ' does not exist in Items.erase()!', 1);
 					continue;
 				}
-				item.erase(eraseChildren); // calls unload()
+				item.erase(); // calls unload()
 				item = undefined;
 			}
 			Zotero.DB.commitTransaction();

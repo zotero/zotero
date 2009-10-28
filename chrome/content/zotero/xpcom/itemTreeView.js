@@ -1229,11 +1229,14 @@ Zotero.ItemTreeView.prototype.getSelectedItems = function(asIDs)
 /**
  * Delete the selection
  *
- * @param	{Boolean}	eraseChildren
- * @param	{Boolean}	force			Delete item even if removing from a collection
+ * @param	{Boolean}	[force=false]	Delete item even if removing from a collection
  */
-Zotero.ItemTreeView.prototype.deleteSelection = function(eraseChildren, force)
+Zotero.ItemTreeView.prototype.deleteSelection = function (force)
 {
+	if (arguments.length > 1) {
+		throw ("deleteSelection() no longer takes two parameters");
+	}
+	
 	if (this.selection.count == 0) {
 		return;
 	}
@@ -1261,17 +1264,17 @@ Zotero.ItemTreeView.prototype.deleteSelection = function(eraseChildren, force)
 	
 	var itemGroup = this._itemGroup;
 	
-	if (itemGroup.isGroup() || (force && itemGroup.isWithinGroup())) {
-		Zotero.Items.erase(ids, eraseChildren);
+	if (itemGroup.isTrash()) {
+		Zotero.Items.erase(ids);
+	}
+	else if (itemGroup.isGroup() || (force && itemGroup.isWithinGroup())) {
+		Zotero.Items.erase(ids);
 	}
 	else if (itemGroup.isLibrary() || force) {
 		Zotero.Items.trash(ids);
 	}
 	else if (itemGroup.isCollection()) {
 		itemGroup.ref.removeItems(ids);
-	}
-	else if (itemGroup.isTrash()) {
-		Zotero.Items.erase(ids, eraseChildren);
 	}
 	this._treebox.endUpdateBatch();
 }
