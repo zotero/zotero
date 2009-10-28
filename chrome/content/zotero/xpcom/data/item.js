@@ -3750,10 +3750,8 @@ Zotero.Item.prototype.clone = function(includePrimary, newItem, unsaved) {
  * Delete item from database and clear from Zotero.Items internal array
  *
  * Items.erase() should be used instead of this
- *
- * @param	{Boolean}			eraseChildren		Erase child items as well
  */
-Zotero.Item.prototype.erase = function(deleteChildren) {
+Zotero.Item.prototype.erase = function() {
 	if (!this.id) {
 		return false;
 	}
@@ -3832,7 +3830,7 @@ Zotero.Item.prototype.erase = function(deleteChildren) {
 	// Regular item
 	
 	// If flag given, delete child notes and files
-	else if (deleteChildren) {
+	else {
 		var sql = "SELECT itemID FROM itemNotes WHERE sourceItemID=?1 UNION "
 			+ "SELECT itemID FROM itemAttachments WHERE sourceItemID=?1";
 		var toDelete = Zotero.DB.columnQuery(sql, [this.id]);
@@ -3843,37 +3841,6 @@ Zotero.Item.prototype.erase = function(deleteChildren) {
 				obj.erase();
 			}
 		}
-	}
-	
-	// Otherwise just unlink any child notes or files without deleting
-	else {
-		// Notes
-		var sql = "SELECT itemID FROM itemNotes WHERE sourceItemID=" + this.id;
-		var childNotes = Zotero.DB.columnQuery(sql);
-		if (childNotes) {
-			for each(var id in childNotes) {
-				var i = Zotero.Items.get(id);
-				changedItemsNotifierData[i.id] = { old: i.serialize() };
-			}
-			changedItems.push(childNotes);
-		}
-		var sql = "UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID="
-			+ this.id;
-		Zotero.DB.query(sql);
-		
-		// Attachments
-		var sql = "SELECT itemID FROM itemAttachments WHERE sourceItemID=" + this.id;
-		var childAttachments = Zotero.DB.columnQuery(sql);
-		if (childAttachments) {
-			for each(var id in childAttachments) {
-				var i = Zotero.Items.get(id);
-				changedItemsNotifierData[i.id] = { old: i.serialize() };
-			}
-			changedItems.push(childAttachments);
-		}
-		var sql = "UPDATE itemAttachments SET sourceItemID=NULL WHERE sourceItemID="
-			+ this.id;
-		Zotero.DB.query(sql);
 	}
 	
 	// Flag related items for notification

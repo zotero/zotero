@@ -631,11 +631,12 @@ var ZoteroPane = new function()
 			}
 		}
 		else if (from == 'zotero-items-tree') {
-			if (event.keyCode == event.DOM_VK_BACK_SPACE ||
+			if ((event.keyCode == event.DOM_VK_BACK_SPACE && Zotero.isMac) ||
 					event.keyCode == event.DOM_VK_DELETE) {
-				// If Cmd or Ctrl delete, delete from Library (with prompt)
-				var fromDB = event.metaKey || (!Zotero.isMac && event.ctrlKey);
-				ZoteroPane.deleteSelectedItems(fromDB);
+				// If Cmd/Ctrl delete, use forced mode, which does different
+				// things depending on the context
+				var force = event.metaKey || (!Zotero.isMac && event.ctrlKey);
+				ZoteroPane.deleteSelectedItems(force);
 				event.preventDefault();
 				return;
 			}
@@ -1215,68 +1216,76 @@ var ZoteroPane = new function()
 	}
 	
 	/*
-	 *  _force_ deletes item from DB even if removing from a collection or search
+	 * Remove, trash, or delete item(s), depending on context
+	 *
+	 * @param	{Boolean}	[force=false]	Trash or delete even if in a collection or search,
+	 *										or trash without prompt in library
 	 */
 	this.deleteSelectedItems = function (force) {
-		if (this.itemsView && this.itemsView.selection.count > 0) {
-			var itemGroup = this.itemsView._itemGroup;
-			
-			if (!itemGroup.isTrash() && !this.canEdit()) {
-				this.displayCannotEditLibraryMessage();
+		if (!this.itemsView || !this.itemsView.selection.count) {
+			return;
+		}
+		var itemGroup = this.itemsView._itemGroup;
+		
+		if (!itemGroup.isTrash() && !this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+		
+		// TODO: localize
+		var toTrash = {
+			title: "Move to Trash",
+			text: "Are you sure you want to move the selected item"
+					+ (this.itemsView.selection.count>1 ? 's' : '') + " to the Trash?"
+		};
+		var toDelete = {
+			title: Zotero.getString('pane.items.delete.title'),
+			text: Zotero.getString(
+				'pane.items.delete' + (this.itemsView.selection.count > 1 ? '.multiple' : '')
+			)
+		};
+		
+		if (itemGroup.isLibrary()) {
+			// In library, don't prompt if meta key was pressed
+			var prompt = force ? false : toTrash;
+		}
+		else if (itemGroup.isCollection()) {
+			// In collection, only prompt if trashing
+			var prompt = force ? toTrash : false;
+		}
+		// This should be changed if/when groups get trash
+		else if (itemGroup.isGroup()) {
+			var prompt = toDelete;
+		}
+		else if (itemGroup.isSearch()) {
+			if (!force) {
 				return;
 			}
-			
-			if (!force){
-				if (itemGroup.isCollection()) {
-					var noPrompt = true;
-				}
-				// Do nothing in search and share views
-				else if (itemGroup.isSearch() || itemGroup.isShare()) {
-					return;
-				}
-				// Do nothing in trash view if any non-deleted items are selected
-				else if (itemGroup.isTrash()) {
-					var start = {};
-					var end = {};
-					for (var i=0, len=this.itemsView.selection.getRangeCount(); i<len; i++) {
-						this.itemsView.selection.getRangeAt(i, start, end);
-						for (var j=start.value; j<=end.value; j++) {
-							if (!this.itemsView._getItemAtRow(j).ref.deleted) {
-								return;
-							}
-						}
+			var prompt = toTrash;
+		}
+		// Do nothing in share views
+		else if (itemGroup.isShare()) {
+			return;
+		}
+		// Do nothing in trash view if any non-deleted items are selected
+		else if (itemGroup.isTrash()) {
+			var start = {};
+			var end = {};
+			for (var i=0, len=this.itemsView.selection.getRangeCount(); i<len; i++) {
+				this.itemsView.selection.getRangeAt(i, start, end);
+				for (var j=start.value; j<=end.value; j++) {
+					if (!this.itemsView._getItemAtRow(j).ref.deleted) {
+						return;
 					}
 				}
 			}
-			
-			var eraseChildren = {value: true};
-			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-                    						.getService(Components.interfaces.nsIPromptService);
-			var hasChildren;
-			
-			if (!this.getSelectedCollection()) {
-				var start = {};
-				var end = {};
-				for (var i=0, len=this.itemsView.selection.getRangeCount(); i<len; i++) {
-					this.itemsView.selection.getRangeAt(i, start, end);
-					for (var j=start.value; j<=end.value; j++) {
-						if (this.itemsView._getItemAtRow(j).numChildren()) {
-							hasChildren = true;
-							break;
-						}
-					}
-				}
-			}
-			
-			if (noPrompt || promptService.confirmCheck(
-				window,
-				Zotero.getString('pane.items.delete.title'),
-				Zotero.getString('pane.items.delete' + (this.itemsView.selection.count>1 ? '.multiple' : '')),
-				hasChildren ? Zotero.getString('pane.items.delete.attached') : '',
-				eraseChildren))
-			{
-				this.itemsView.deleteSelection(eraseChildren.value, force);
-			}
+			var prompt = toDelete;
+		}
+		
+		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+										.getService(Components.interfaces.nsIPromptService);
+		if (!prompt || promptService.confirm(window, prompt.title, prompt.text)) {
+			this.itemsView.deleteSelection(force);
 		}
 	}
 	
