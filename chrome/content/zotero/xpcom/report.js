@@ -267,12 +267,12 @@ Zotero.Report = new function() {
 						}
 						// Append '&...' to the end
 						if (shortened) {
-							 fieldText += "&<ZOTEROHELLIP/>";
+							fieldText += "&<ZOTEROHELLIP/>";
 						}
 					}
 				}
 				
-				if (i == 'url' && firstSpace == -1) {
+				if (i == 'url') {
 					fieldText = '<a href="' + escapeXML(arr[i]) + '">'
 						+ escapeXML(fieldText) + '</a>';
 				}
