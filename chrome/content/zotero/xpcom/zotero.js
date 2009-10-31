@@ -197,6 +197,7 @@ var Zotero = new function(){
 						|| appInfo.platformVersion.indexOf('1.9.0') === 0;
 		this.isFx35 = appInfo.platformVersion.indexOf('1.9.1') === 0;
 		this.isFx31 = this.isFx35;
+		this.isFx36 = appInfo.platformVersion.indexOf('1.9.2') === 0;
 		
 		// OS platform
 		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
