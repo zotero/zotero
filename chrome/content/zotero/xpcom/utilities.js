@@ -1012,28 +1012,35 @@ Zotero.Utilities.HTTP = new function() {
 			return false;
 		}
 		
-		/*
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-						.createInstance();
-		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open('GET', url, true);
-		*/
-		
 		// Workaround for "Accept third-party cookies" being off in Firefox 3.0.1
 		// https://www.zotero.org/trac/ticket/1070
-		const Cc = Components.classes;
-		const Ci = Components.interfaces;
-		var ds = Cc["@mozilla.org/webshell;1"].
-					createInstance(Components.interfaces.nsIDocShellTreeItem).
-					QueryInterface(Ci.nsIInterfaceRequestor);
-		ds.itemType = Ci.nsIDocShellTreeItem.typeContent;
-		var xmlhttp = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
-						createInstance(Ci.nsIXMLHttpRequest);
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open("GET", url, true);
-		xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
-		xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
+		if (Zotero.isFx30) {
+			const Cc = Components.classes;
+			const Ci = Components.interfaces;
+			var ds = Cc["@mozilla.org/webshell;1"].
+						createInstance(Components.interfaces.nsIDocShellTreeItem).
+						QueryInterface(Ci.nsIInterfaceRequestor);
+			ds.itemType = Ci.nsIDocShellTreeItem.typeContent;
+			var xmlhttp = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
+							createInstance(Ci.nsIXMLHttpRequest);
+			xmlhttp.mozBackgroundRequest = true;
+			xmlhttp.open("GET", url, true);
+			xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
+			xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
+		}
+		else {
+			var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+							.createInstance();
+			// Prevent certificate/authentication dialogs from popping up
+			xmlhttp.mozBackgroundRequest = true;
+			xmlhttp.open('GET', url, true);
+			// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
+			if (!Zotero.isFx35) {
+				var channel = xmlhttp.channel;
+				channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
+				channel.forceAllowThirdPartyCookie = true;
+			}
+		}
 		
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
@@ -1080,28 +1087,35 @@ Zotero.Utilities.HTTP = new function() {
 			return false;
 		}
 		
-		/*
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-					.createInstance();
-		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open('POST', url, true);
-		*/
-		
 		// Workaround for "Accept third-party cookies" being off in Firefox 3.0.1
 		// https://www.zotero.org/trac/ticket/1070
-		const Cc = Components.classes;
-		const Ci = Components.interfaces;
-		var ds = Cc["@mozilla.org/webshell;1"].
-					createInstance(Components.interfaces.nsIDocShellTreeItem).
-					QueryInterface(Ci.nsIInterfaceRequestor);
-		ds.itemType = Ci.nsIDocShellTreeItem.typeContent;
-		var xmlhttp = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
-						createInstance(Ci.nsIXMLHttpRequest);
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open("POST", url, true);
-		xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
-		xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
+		if (Zotero.isFx30) {
+			const Cc = Components.classes;
+			const Ci = Components.interfaces;
+			var ds = Cc["@mozilla.org/webshell;1"].
+						createInstance(Components.interfaces.nsIDocShellTreeItem).
+						QueryInterface(Ci.nsIInterfaceRequestor);
+			ds.itemType = Ci.nsIDocShellTreeItem.typeContent;
+			var xmlhttp = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
+							createInstance(Ci.nsIXMLHttpRequest);
+			xmlhttp.mozBackgroundRequest = true;
+			xmlhttp.open("POST", url, true);
+			xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
+			xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
+		}
+		else {
+			var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+						.createInstance();
+			// Prevent certificate/authentication dialogs from popping up
+			xmlhttp.mozBackgroundRequest = true;
+			xmlhttp.open('POST', url, true);
+			// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
+			if (!Zotero.isFx35) {
+				var channel = xmlhttp.channel;
+				channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
+				channel.forceAllowThirdPartyCookie = true;
+			}
+		}
 		
 		if (headers) {
 			if (typeof headers == 'string') {
@@ -1162,37 +1176,45 @@ Zotero.Utilities.HTTP = new function() {
 			return false;
 		}
 		
-		/*
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-						.createInstance();
-		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open('HEAD', url, true);
-		*/
-		
 		// Workaround for "Accept third-party cookies" being off in Firefox 3.0.1
 		// https://www.zotero.org/trac/ticket/1070
-		const Cc = Components.classes;
-		const Ci = Components.interfaces;
-		var ds = Cc["@mozilla.org/webshell;1"].
-					createInstance(Components.interfaces.nsIDocShellTreeItem).
-					QueryInterface(Ci.nsIInterfaceRequestor);
-		ds.itemType = Ci.nsIDocShellTreeItem.typeContent;
-		var xmlhttp = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
-						createInstance(Ci.nsIXMLHttpRequest);
-		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open("HEAD", url, true);
+		if (Zotero.isFx30) {
+			const Cc = Components.classes;
+			const Ci = Components.interfaces;
+			var ds = Cc["@mozilla.org/webshell;1"].
+						createInstance(Components.interfaces.nsIDocShellTreeItem).
+						QueryInterface(Ci.nsIInterfaceRequestor);
+			ds.itemType = Ci.nsIDocShellTreeItem.typeContent;
+			var xmlhttp = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
+							createInstance(Ci.nsIXMLHttpRequest);
+			// Prevent certificate/authentication dialogs from popping up
+			xmlhttp.mozBackgroundRequest = true;
+			xmlhttp.open("HEAD", url, true);
+			xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
+			xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
+		}
+		else {
+			var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+							.createInstance();
+			// Prevent certificate/authentication dialogs from popping up
+			xmlhttp.mozBackgroundRequest = true;
+			xmlhttp.open('HEAD', url, true);
+			// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
+			if (!Zotero.isFx35) {
+				var channel = xmlhttp.channel;
+				channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
+				channel.forceAllowThirdPartyCookie = true;
+			}
+		}
+		
 		if (requestHeaders) {
 			for (var header in requestHeaders) {
 				xmlhttp.setRequestHeader(header, requestHeaders[header]);
 			}
 		}
-		xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
-		xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
 		
 		// Don't cache HEAD requests
-		xmlhttp.channel.loadFlags |= Ci.nsIRequest.LOAD_BYPASS_CACHE;
+		xmlhttp.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 		
 		/** @ignore */
 		xmlhttp.onreadystatechange = function(){
