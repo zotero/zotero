@@ -8,11 +8,11 @@
 	"maxVersion":null,
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-09-04 07:45:00"
+	"lastUpdated":"2009-10-31 20:27:00"
 }
 
 function detectWeb(doc, url) {
-	if ((url.indexOf("_ob=DownloadURL") != -1) || doc.title == "ScienceDirect Login") {
+	if ((url.indexOf("_ob=DownloadURL") != -1) || doc.title == "ScienceDirect Login" || doc.title == "ScienceDirect - Dummy") {
 		return false;
 	}
 	if((!url.match("pdf") && url.indexOf("_ob=ArticleURL") == -1 && url.indexOf("/article/") == -1) || url.indexOf("/journal/") != -1) {
