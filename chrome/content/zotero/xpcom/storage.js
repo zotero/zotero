@@ -788,21 +788,37 @@ Zotero.Sync.Storage = new function () {
 			var destFile = parentDir.clone();
 			destFile.append(newName);
 			
+			var windowsLength = false;
+			var nameLength = false;
+			
 			// Windows API only allows paths of 260 characters
 			if (e.name == "NS_ERROR_FILE_NOT_FOUND" && destFile.path.length > 255) {
+				windowsLength = true;
+			}
+			// ext3/ext4/HFS+ have a filename length limit of ~254 characters
+			else if (e.name == "NS_ERROR_FAILURE" && destFile.leafName.length >= 254) {
+				nameLength = true;
+			}
+			
+			if (windowsLength || nameLength) {
 				// Preserve extension
 				var matches = destFile.leafName.match(/\.[a-z0-9]{0,8}$/);
 				var ext = matches ? matches[0] : "";
 				
-				var pathLength = destFile.path.length - destFile.leafName.length;
-				var newLength = 255 - pathLength;
-				// Require 40 available characters in path -- this is arbitrary,
-				// but otherwise filenames are going to end up being cut off
-				if (newLength < 40) {
-					var msg = "Due to a Windows path length limitation, your Zotero data directory "
-							+ "is too deep in the filesystem for syncing to work reliably. "
-							+ "Please relocate your Zotero data to a higher directory.";
-					throw (msg);
+				if (windowsLength) {
+					var pathLength = destFile.path.length - destFile.leafName.length;
+					var newLength = 255 - pathLength;
+					// Require 40 available characters in path -- this is arbitrary,
+					// but otherwise filenames are going to end up being cut off
+					if (newLength < 40) {
+						var msg = "Due to a Windows path length limitation, your Zotero data directory "
+								+ "is too deep in the filesystem for syncing to work reliably. "
+								+ "Please relocate your Zotero data to a higher directory.";
+						throw (msg);
+					}
+				}
+				else {
+					var newLength = 254;
 				}
 				
 				// Shorten file if it's too long -- we don't relink it, but this should
@@ -910,8 +926,19 @@ Zotero.Sync.Storage = new function () {
 				destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
 			}
 			catch (e) {
+				var windowsLength = false;
+				var nameLength = false;
+				
 				// Windows API only allows paths of 260 characters
 				if (e.name == "NS_ERROR_FILE_NOT_FOUND" && destFile.path.length > 255) {
+					windowsLength = true;
+				}
+				// ext3/ext4/HFS+ have a filename length limit of ~254 characters
+				else if (e.name == "NS_ERROR_FAILURE" && destFile.leafName.length >= 254) {
+					nameLength = true;
+				}
+				
+				if (windowsLength || nameLength) {
 					// Is this the main attachment file?
 					var primaryFile = item.getFile(null, true).leafName == destFile.leafName;
 					
@@ -919,16 +946,21 @@ Zotero.Sync.Storage = new function () {
 					var matches = destFile.leafName.match(/\.[a-z0-9]{0,8}$/);
 					var ext = matches ? matches[0] : "";
 					
-					var pathLength = destFile.path.length - destFile.leafName.length;
-					var newLength = 255 - pathLength;
-					// Require 40 available characters in path -- this is arbitrary,
-					// but otherwise filenames are going to end up being cut off
-					if (newLength < 40) {
-						zipReader.close();
-						var msg = "Due to a Windows path length limitation, your Zotero data directory "
-								+ "is too deep in the filesystem for syncing to work reliably. "
-								+ "Please relocate your Zotero data to a higher directory.";
-						throw (msg);
+					if (windowsLength) {
+						var pathLength = destFile.path.length - destFile.leafName.length;
+						var newLength = 255 - pathLength;
+						// Require 40 available characters in path -- this is arbitrary,
+						// but otherwise filenames are going to end up being cut off
+						if (newLength < 40) {
+							zipReader.close();
+							var msg = "Due to a Windows path length limitation, your Zotero data directory "
+									+ "is too deep in the filesystem for syncing to work reliably. "
+									+ "Please relocate your Zotero data to a higher directory.";
+							throw (msg);
+						}
+					}
+					else {
+						var newLength = 254;
 					}
 					
 					// Shorten file if it's too long -- we don't relink it, but this should
@@ -941,10 +973,10 @@ Zotero.Sync.Storage = new function () {
 					var step = 0;
 					do {
 						if (step == 0) {
-							var newName = destFile.leafName.substr(0, newLength - (ext.length + 1)) + ext;
+							var newName = destFile.leafName.substr(0, newLength - ext.length) + ext;
 						}
 						else {
-							var newName = destFile.leafName.substr(0, newLength - (ext.length + 1)) + "-" + step + ext;
+							var newName = destFile.leafName.substr(0, newLength - ext.length) + "-" + step + ext;
 						}
 						destFile.leafName = newName;
 						step++;
