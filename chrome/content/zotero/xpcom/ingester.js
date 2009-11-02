@@ -313,7 +313,7 @@ Zotero.OpenURL = new function() {
 					item.DOI = value.substr(9);
 				} else if(firstEight == "urn:isbn") {
 					item.ISBN = value.substr(9);
-				} else if(value.substr(0, 7) == "http://") {
+				} else if(value.match(/^https?:\/\//)) {
 					item.url = value;
 					item.accessDate = "";
 				}
