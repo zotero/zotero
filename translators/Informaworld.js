@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"lastUpdated":"2009-11-02 20:30:00"
 }
 
 function detectWeb(doc, url) {
@@ -36,7 +36,26 @@ function detectWeb(doc, url) {
 
 
 function doWeb(doc, url) {
-	var links = new Array();
+	// Scrape some data from page
+	var getDocumentData = function (newDoc, data) {
+		var xpath = '//div[@id="metahead"]/div';
+		var stuff = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
+		var thing = stuff.iterateNext();
+		while (thing) {
+			if (thing.textContent.match(/DOI/)) {
+				data.doi = Zotero.Utilities.trimInternal(thing.textContent).match(/:\s+(.*)/)[1];
+				break;
+			}
+			thing = stuff.iterateNext();
+		}
+		data.pdfurl = newDoc.evaluate('//div[@id="content"]/div/a[1]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var id = newDoc.location.href.match(/content=([\w\d]+)/);
+		var post = 'tab=citation&selecteditems=' + id[1].substr(1) + '&content=' + id[1] + '&citstyle=refworks&showabs=false&format=file';
+		data.postdata = post;
+	}
+	
+	
+	var sets = [];
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		if (doc.evaluate('//div[@id="quicksearch"]//tr/td/b/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -56,27 +75,40 @@ function doWeb(doc, url) {
 		}
 		items = Zotero.selectItems(items);
 		for (var i in items) {
-			links.push(i);
+			sets.push({ url: i });
 		}
 	} else {
-		links = [url];
-	}
-	Zotero.debug(links);
-	
-	Zotero.Utilities.processDocuments(links, function(newDoc) {
-		var xpath = '//div[@id="metahead"]/div';
-		var stuff = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
-		var thing = stuff.iterateNext() ;
-		while (thing) {
-			if (thing.textContent.match(/DOI/)) {
-				var doi = Zotero.Utilities.trimInternal(thing.textContent).match(/:\s+(.*)/)[1];
-			}
-			thing = stuff.iterateNext();
+		// If we're on the citation page, get back to the article page, which has the PDF link
+		var newurl = url.replace('~tab=citation', '~tab=content');
+		// If we're already on the main page, just pull out data here
+		if (newurl == url) {
+			sets[0] = {};
+			getDocumentData(doc, sets[0]);
+			// Dummy first callback, since we already have the data
+			var first = function (set, next) {
+				next();
+			};
 		}
-		var pdfurl = newDoc.evaluate('//div[@id="content"]/div/a[1]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
-		var id = newDoc.location.href.match(/content=([\w\d]+)/);
-		var post = 'tab=citation&selecteditems=' + id[1].substr(1) + '&content=' + id[1] + '&citstyle=refworks&showabs=false&format=file';
-		Zotero.Utilities.HTTP.doPost('http://www.informaworld.com/smpp/content', post, function(text) {
+		else {
+			sets.push({
+				url: newurl
+			});
+		}
+	}
+	
+	if (!first) {
+		var first = function (set, next) {
+			var url = set.url;
+			Zotero.Utilities.processDocuments(url, function(newDoc) {
+				getDocumentData(newDoc, set);
+				next();
+			});
+		};
+	}
+	
+	var second = function (set, next) {
+		Zotero.Utilities.HTTP.doPost('http://www.informaworld.com/smpp/content', set.postdata, function(text) {
+			Zotero.debug(text);
 			text = text.replace(/RT/, "TY");
 			text = text.replace(/VO/, "VL");
 			text = text.replace(/LK/, "UR");
@@ -94,14 +126,19 @@ function doWeb(doc, url) {
 				} else if (type == "Book, Section") {
 					item.itemType = "bookSection";
 				}
-				if (doi) {
-					item.DOI = doi;
+				if (set.doi) {
+					item.DOI = set.doi;
 				}
-				item.attachments.push({url:pdfurl, title:item.title, mimeType:'application/pdf'});
+				item.attachments.push({url:set.pdfurl, title:item.title, mimeType:'application/pdf'});
 				item.complete();
 			});
 			translator.translate();
 			
+			next();
 		});
-	}, function() {Zotero.done();});
+	}
+	
+	var callbacks = [first, second];
+	Zotero.Utilities.processAsync(sets, callbacks, function () { Zotero.done(); });
+	Zotero.wait();
 }
