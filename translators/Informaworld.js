@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-11-02 20:55:00"
+	"lastUpdated":"2009-11-02 21:10:00"
 }
 
 function detectWeb(doc, url) {
@@ -71,7 +71,10 @@ function doWeb(doc, url) {
 			var xpath = '//div[@id="browse"]//tbody/tr/td[2]/a[2]';
 		} else if (doc.evaluate('//div[@id="title"]//td[2]/div/strong/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			var xpath = '//div[@id="title"]//td[2]/div/strong/a';
+		} else if (doc.evaluate('//div[@id="title"]/table//tr[2]/td/table//tr/td[2]/b/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var xpath = '//div[@id="title"]/table//tr[2]/td/table//tr/td[2]/b/a';
 		}
+		
 		var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var title = titles.iterateNext();
 		while (title) {
