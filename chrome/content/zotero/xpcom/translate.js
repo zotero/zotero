@@ -697,7 +697,7 @@ Zotero.Translate.prototype._loadTranslator = function() {
  * @param 	{NULL|Integer|FALSE}	[libraryID=null]		Library in which to save items,
  *																or NULL for default library;
  *																if FALSE, don't save items
- * @param 	{Boolean}				[saveAttachments=true]
+ * @param 	{Boolean}				[saveAttachments=true]	Exclude attachments (e.g., snapshots) on import
  */
 Zotero.Translate.prototype.translate = function(libraryID, saveAttachments) {
 	/*
@@ -1682,6 +1682,8 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 	delete item;
 	
 	// Allow progress meter to update
+	//
+	// This can probably be re-enabled for web translators once badly asynced ones are fixed
 	if (this.type == 'import' || this.type == 'export') {
 		Zotero.wait();
 	}
