@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-11-02 20:30:00"
+	"lastUpdated":"2009-11-02 20:55:00"
 }
 
 function detectWeb(doc, url) {
@@ -50,6 +50,11 @@ function doWeb(doc, url) {
 		}
 		data.pdfurl = newDoc.evaluate('//div[@id="content"]/div/a[1]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
 		var id = newDoc.location.href.match(/content=([\w\d]+)/);
+		// If URL has DOI rather than id, use navbar link to get id
+		if (id[1] == 10) {
+			id = newDoc.evaluate('//table[@id="tabbar_table"]//td//a[@title = "Article"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+			id = id.match(/content=([\w\d]+)/);
+		}
 		var post = 'tab=citation&selecteditems=' + id[1].substr(1) + '&content=' + id[1] + '&citstyle=refworks&showabs=false&format=file';
 		data.postdata = post;
 	}
