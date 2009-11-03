@@ -1140,6 +1140,8 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.purgeOrphanedStorageFiles = functio
 	
 	var lastSyncDate = new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000);
 	
+	var self = this;
+	
 	Zotero.Utilities.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (req) {
 		Zotero.debug(req.responseText);
 			
@@ -1171,7 +1173,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.purgeOrphanedStorageFiles = functio
 					// character in the URL and the server (e.g., Sakai) is
 					// encoding the value
 					&& decodeURIComponent(href).indexOf(path) == -1) {
-				_error("DAV:href '" + href
+				self._error("DAV:href '" + href
 						+ "' does not begin with path '" + path + "' in " + funcName);
 			}
 			
@@ -1184,7 +1186,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.purgeOrphanedStorageFiles = functio
 			
 			var matches = href.match(/[^\/]+$/);
 			if (!matches) {
-				_error("Unexpected href '" + href + "' in " + funcName)
+				self._error("Unexpected href '" + href + "' in " + funcName)
 			}
 			var file = matches[0];
 			
@@ -1354,7 +1356,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._deleteStorageFiles = function (fil
 			if (callback) {
 				callback(deleted);
 			}
-			_error("Root URI does not end in slash in "
+			this._error("Root URI does not end in slash in "
 				+ "Zotero.Sync.Storage._deleteStorageFiles()");
 		}
 		deleteURI.QueryInterface(Components.interfaces.nsIURL);
@@ -1381,7 +1383,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._deleteStorageFiles = function (fil
 					var msg = "An error occurred attempting to delete "
 						+ "'" + fileName
 						+ "' (" + req.status + " " + req.statusText + ").";
-					_error(msg);
+					self._error(msg);
 					return;
 			}
 			
@@ -1440,7 +1442,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._deleteStorageFiles = function (fil
 					var msg = "An error occurred attempting to delete "
 						+ "'" + fileName
 						+ "' (" + req.status + " " + req.statusText + ").";
-					_error(msg);
+					self._error(msg);
 				}
 			});
 		});
