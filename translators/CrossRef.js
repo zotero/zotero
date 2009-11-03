@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":90,
 	"inRepository":true,
-	"lastUpdated":"2009-09-20 04:55:00"
+	"lastUpdated":"2009-11-03 10:25:00"
 }
 
 function detectSearch(item) {
@@ -62,7 +62,9 @@ function processCrossRef(xmlOutput) {
 		
 		item.ISSN = itemXML.journal_metadata.issn.toString();
 		item.publicationTitle = itemXML.journal_metadata.full_title.toString();
-		item.journalAbbreviation = itemXML.journal_metadata.abbrev_title.toString();
+		if (itemXML.journal_metadata.abbrev_title.length()) {
+			item.journalAbbreviation = itemXML.journal_metadata.abbrev_title[0].toString();
+		}
 		item.volume = itemXML.journal_issue.journal_volume.volume.toString();
 		item.issue = itemXML.journal_issue.issue.toString();
 	} else if(xml.doi_record[0].crossref.book.length()) {
@@ -135,7 +137,7 @@ function processCrossRef(xmlOutput) {
 	
 	item.DOI = refXML.doi_data.doi.toString();
 	item.url = refXML.doi_data.resource.toString();
-	item.title = refXML.titles.title.toString();
+	item.title = refXML.titles[0].title.toString();
 	
 	item.complete();
 	return true;
