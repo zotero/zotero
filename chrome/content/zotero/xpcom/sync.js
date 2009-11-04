@@ -1025,7 +1025,7 @@ Zotero.Sync.Server = new function () {
 		return Zotero.DB.valueQuery("SELECT version FROM version WHERE schema='lastremotesync'");
 	});
 	this.__defineSetter__("lastRemoteSyncTime", function (val) {
-		Zotero.DB.query("REPLACE INTO version VALUES ('lastremotesync', ?)", { int: val });
+		Zotero.DB.query("REPLACE INTO version VALUES ('lastremotesync', ?)", val);
 	});
 	this.__defineGetter__("lastLocalSyncTime", function () {
 		return Zotero.DB.valueQuery("SELECT version FROM version WHERE schema='lastlocalsync'");
@@ -2739,6 +2739,12 @@ Zotero.Sync.Server.Data = new function() {
 					var item = Zotero.Items.getByLibraryAndKey(lk.libraryID, lk.key);
 					for each(var relKey in relatedItemsStore[libraryKeyHash]) {
 						var relItem = Zotero.Items.getByLibraryAndKey(lk.libraryID, relKey);
+						if (!relItem) {
+							var msg = "Related item doesn't exist in Zotero.Sync.Server.Data.processUpdatedXML() "
+										+ "(" + lk.libraryID + "/" + relKey + ")";
+							var e = new Zotero.Error(msg, "MISSING_OBJECT");
+							throw (e);
+						}
 						item.addRelatedItem(relItem.id);
 					}
 					item.save();
