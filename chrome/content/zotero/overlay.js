@@ -1342,6 +1342,7 @@ var ZoteroPane = new function()
 			Zotero.getString('general.actionCannotBeUndone'));
 		if (result) {
 			Zotero.Items.emptyTrash();
+			Zotero.purgeDataObjects(true);
 		}
 	}
 
