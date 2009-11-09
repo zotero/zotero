@@ -23,7 +23,7 @@
 const ZOTERO_CONFIG = {
 	GUID: 'zotero@chnm.gmu.edu',
 	DB_REBUILD: false, // erase DB and recreate from schema
-	REPOSITORY_URL: 'http://www.zotero.org/repo',
+	REPOSITORY_URL: 'https://api.zotero.org/repo',
 	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
 	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
 	BASE_URI: 'http://zotero.org/',
