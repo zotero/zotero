@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-07-26 10:20:00"
+	"lastUpdated":"2009-11-12 07:20:00"
 }
 
 Zotero.configure("dataMode", "rdf");
@@ -118,6 +118,11 @@ function processCollection(node, collection) {
 			// for collections, process recursively
 			collection.children.push(processCollection(child));
 		} else {
+			if(isPart(child)) {
+				Zotero.debug("Not adding child item <" + Zotero.RDF.getResourceURI(child) + "> to collection", 2);
+				continue;
+			}
+			
 			// all other items are added by ID
 			collection.children.push({id:Zotero.RDF.getResourceURI(child), type:"item"});
 		}
