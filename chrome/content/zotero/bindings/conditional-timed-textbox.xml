@@ -28,38 +28,20 @@
 
 	<binding id="conditional-timed-textbox" extends="chrome://global/content/bindings/textbox.xml#timed-textbox">
 		<implementation>
-			<field name="skipTimeout"/>
-			<field name="testcode"/>
-			<field name="onbeforefire"/>
-			<field name="onafterfire"/>
-			<field name="ontestfail"/>
-			
 			<method name="_fireCommand">
 				<parameter name="me"/>
 				<body>
 				<![CDATA[
-					if (me.skipTimeout) {
-						me.skipTimeout = false;
-						return;
-					}
+					//
+					// This whole binding can be removed once Firefox 3.0 support is removed
+					//
+					this._timer = null;
 					
-					var code = me.getAttribute('testcode');
-					if (!code.length) {
-						code = true;
-					}
-					
-					if (eval(code)) {
-						if (me.getAttribute('onbeforefire')) {
-							eval(me.getAttribute('onbeforefire'));
-						}
-						me._timer = null;
-						me.doCommand();
-						if (me.getAttribute('onafterfire')) {
-							eval(me.getAttribute('onafterfire'));
-						}
+					if (me.value.indexOf('"') != -1) {
+						ZoteroPane.setItemsPaneMessage(Zotero.getString('advancedSearchMode'));
 					}
 					else {
-						eval(me.getAttribute('ontestfail'));
+						me.doCommand();
 					}
 				]]>
 				</body>
