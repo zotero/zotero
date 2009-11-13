@@ -836,7 +836,7 @@ tinymce.create('static tinymce.util.JSON', {
 
 	parse : function(s) {
 		try {
-			return eval('(' + s + ')');
+			throw ('evalremoved2');
 		} catch (ex) {
 			// Ignore
 		}
@@ -6568,7 +6568,7 @@ window.tinymce.dom.Sizzle = Sizzle;
 						error : t.settings.error,
 						async : false,
 						success : function(co) {
-							t.eval(co);
+							throw('evalremoved3');
 						}
 					});
 				} else
@@ -6617,9 +6617,9 @@ window.tinymce.dom.Sizzle = Sizzle;
 			// Evaluate script
 			if (!w.execScript) {
 				try {
-					eval.call(w, co);
+					throw('evalremoved1');
 				} catch (ex) {
-					eval(co, w); // Firefox 3.0a8
+					throw('evalremoved2');
 				}
 			} else
 				w.execScript(co); // IE
@@ -6668,18 +6668,6 @@ window.tinymce.dom.Sizzle = Sizzle;
 					done(o);
 					allDone();
 				});
-
-				/*
-				tinymce.util.XHR.send({
-					url : o.url,
-					error : t.settings.error,
-					success : function(co) {
-						t.eval(co);
-						done(o);
-						allDone();
-					}
-				});
-				*/
 			};
 
 			each(sc, function(o) {
