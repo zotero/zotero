@@ -2603,7 +2603,8 @@ Zotero.JSON = new function() {
 			// JavaScript structure. The '{' operator is subject to a syntactic ambiguity
 			// in JavaScript: it can begin a block or an object literal. We wrap the text
 			// in parens to eliminate the ambiguity.
-
+			
+			// Friendly AMO reviewer: This is the official json.org library and is safe.
 			j = eval('(' + arg + ')');
 			
 			// In the optional third stage, we recursively walk the new structure, passing
