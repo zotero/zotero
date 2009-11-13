@@ -156,7 +156,7 @@
 		</hbox>
 	   </hbox>
 	   <splitter/>
-	   <iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em; background:white;" overflow="auto"/>
+	   <iframe id="zotero-csl-preview-box" flex="1" style="padding: 0 1em; background:white;" overflow="auto" type="content"/>
 	</vbox>
 	
 </window>
