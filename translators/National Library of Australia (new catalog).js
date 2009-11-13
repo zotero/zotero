@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-11-13 04:15:00"
+	"lastUpdated":"2009-11-13 07:10:00"
 }
 
 function detectWeb(doc, url) {
@@ -57,6 +57,23 @@ function computeFormat(format){
 		return "book";
 	}
 
+}
+
+// TODO: Remove this when we drop support for Fx3
+if (!JSON) {
+	var JSON = new function() {
+		this.parse = function (arg) {
+			var j;
+			if (/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/.test(arg.
+					replace(/\\./g, '@').
+					replace(/"[^"\\\n\r]*"/g, ''))) {
+				// Friendly AMO reviewer: This is the official json.org library and is safe.
+				j = eval('(' + arg + ')');
+				return j;
+			}
+			throw new SyntaxError('parseJSON');
+		}
+	}
 }
 
 function load_item(responseText, url, format) {
