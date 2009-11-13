@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-06-04 00:00:00"
+	"lastUpdated":"2009-11-13 04:15:00"
 }
 
 function detectWeb(doc, url) {
@@ -60,8 +60,7 @@ function computeFormat(format){
 }
 
 function load_item(responseText, url, format) {
-	
-	var metadata = eval("(" + Zotero.Utilities.trimInternal(responseText) + ")");
+	var metadata = JSON.parse(Zotero.Utilities.trimInternal(responseText));
 	var bibid = url.match("^.*\/Record/([0-9]+)")[1];
 	var newItem = new Zotero.Item(format[bibid]);
 
