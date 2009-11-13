@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-02-08 22:10:00"
+	"lastUpdated":"2009-11-13 04:15:00"
 }
 
 function detectWeb(doc, url) {
@@ -133,7 +133,7 @@ function scrape(doc, url){
 	}
 	//this gets called when an object is selected in the dialog box, fires off a get on the service url
 	Zotero.Utilities.HTTP.doGet(urls, function(text) {
-		json = eval("(" + text + ")");
+		var json = JSON.parse(text);
 		var newArticle = new Zotero.Item('artwork');
 		for (var i=0; i<json.metaData.length; i++) {
 			child = json.metaData[i];
