@@ -2480,6 +2480,11 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DROP TABLE syncDeleteLogOld");
 				}
 				
+				if (i==65) {
+					Zotero.DB.query("UPDATE itemAttachments SET sourceItemID=NULL WHERE sourceItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (1,14))");
+					Zotero.DB.query("UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (1,14))");
+				}
+				
 				Zotero.wait();
 			}
 			
