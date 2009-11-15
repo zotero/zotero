@@ -133,8 +133,19 @@ Zotero.Relation.prototype.save = function () {
 		throw ("Missing object in Zotero.Relation.save()");
 	}
 	
-	var sql = "INSERT INTO relations (libraryID, subject, predicate, object) VALUES (?, ?, ?, ?)";
-	var insertID = Zotero.DB.query(sql, [this.libraryID, this.subject, this.predicate, this.object]);
+	var sql = "INSERT INTO relations "
+				+ "(libraryID, subject, predicate, object, clientDateModified) "
+				+ "VALUES (?, ?, ?, ?, ?)";
+	var insertID = Zotero.DB.query(
+		sql,
+		[
+			this.libraryID,
+			this.subject,
+			this.predicate,
+			this.object,
+			Zotero.DB.transactionDateTime
+		]
+	);
 	
 	return insertID;
 }
