@@ -843,6 +843,8 @@ Zotero.Schema = new function(){
 			Zotero.DB.commitTransaction();
 			
 			self.dbInitialized = true;
+			
+			Zotero.Schema.updateBundledFiles();
 		}
 		catch(e){
 			Zotero.debug(e, 1);
