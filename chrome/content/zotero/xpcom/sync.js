@@ -722,26 +722,22 @@ Zotero.Sync.Runner = new function () {
 		var buttonCallback;
 		
 		if (e) {
-			if (e.error == Zotero.Error.ERROR_ZFS_OVER_QUOTA) {
-				// TODO: localize
-				message = "You have reached your Zotero File Storage quota. Some files were not synced. "
-							+ "Other Zotero data will continue to sync to the server.\n\n"
-							+ "See your zotero.org account settings for additional storage options.";
-				
-				buttonText = "Open Account Settings";
-				buttonCallback = function () {
-					var url = "https://www.zotero.org/settings/storage";
-					
-					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								.getService(Components.interfaces.nsIWindowMediator);
-					var win = wm.getMostRecentWindow("navigator:browser");
-					var browser = win.getBrowser();
-					browser.selectedTab = browser.addTab(url);
+			if (e.data) {
+				if (e.data.dialogText) {
+					message = e.data.dialogText;
+				}
+				if (typeof e.data.dialogButtonText != 'undefined') {
+					buttonText = e.data.dialogButtonText;
+					buttonCallback = e.data.dialogButtonCallback;
 				}
 			}
-			
 			if (!message) {
-				message = e.message ? e.message : e;
+				if (e.message) {
+					message = e.message;
+				}
+				else {
+					message = e;
+				}
 			}
 		}
 		
@@ -764,7 +760,7 @@ Zotero.Sync.Runner = new function () {
 					
 					// If secondary button not specified, just use an alert
 					if (!buttonText) {
-						prompt.alert(title, message);
+						pr.alert(title, message);
 						return;
 					}
 					
@@ -791,6 +787,12 @@ Zotero.Sync.Runner = new function () {
 					// Probably not necessary, but let's be sure
 					if (!errorsLogged) {
 						Components.utils.reportError(message);
+					}
+					
+					// If secondary button is explicitly null, just use an alert
+					if (buttonText === null) {
+						pr.alert(title, message);
+						return;
 					}
 					
 					var buttonFlags = pr.BUTTON_POS_0 * pr.BUTTON_TITLE_OK
