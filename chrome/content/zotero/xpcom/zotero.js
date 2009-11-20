@@ -556,6 +556,7 @@ var Zotero = new function(){
 					if (file.directoryEntries.hasMoreElements()) {
 						var dbfile = file.clone();
 						dbfile.append('zotero.sqlite');
+						
 						// Warn if non-empty and no zotero.sqlite
 						if (!dbfile.exists()) {
 							var buttonFlags = ps.STD_YES_NO_BUTTONS;
@@ -570,6 +571,24 @@ var Zotero = new function(){
 							}
 						}
 					}
+					else {
+						var buttonFlags = ps.STD_YES_NO_BUTTONS;
+						var index = ps.confirmEx(win,
+							//Zotero.getString('dataDir.selectedDirEmpty.title'),
+							//Zotero.getString('dataDir.selectedDirEmpty.text'),
+							'Directory Empty',
+							'The directory you selected is empty. To move an existing Zotero data directory, '
+							+ 'you will need to manually copy files from the existing data directory to the new location. '
+							+ 'See http://zotero.org/support/zotero_data for more information.\n\nUse the new directory?',
+							
+							buttonFlags, null, null, null, null, {});
+						
+						// Not OK -- return to file picker
+						if (index == 1) {
+							continue;
+						}
+					}
+					
 					
 					// Set new data directory
 					Zotero.Prefs.set('dataDir', file.persistentDescriptor);

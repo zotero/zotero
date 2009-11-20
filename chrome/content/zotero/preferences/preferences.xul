@@ -754,7 +754,8 @@ To add a new preference:
 		</preferences>
 		
 		<groupbox>
-			<caption label="&zotero.preferences.dataDir;"/>
+			<!-- TODO: localize with &zotero.preferences.dataDir; -->
+			<caption label="Data Directory Location"/>
 			
 			<radiogroup id="dataDir" preference="pref-useDataDir" onsyncfrompreference="onDataDirLoad();" onsynctopreference="return onDataDirUpdate(event);">
 				<radio label="&zotero.preferences.dataDir.useProfile;" value="false"/>
