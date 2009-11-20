@@ -419,8 +419,47 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getFileUploadParameters = function (i
 				self.onError(e);
 			}
 			else {
+				// TODO: localize
+				
+				var text, buttonText = null, buttonCallback;
+				
+				// Group file
+				if (item.libraryID) {
+					var group = Zotero.Groups.getByLibraryID(item.libraryID);
+					text = "The group '" + group.name + "' has reached its "
+						+ "Zotero File Storage quota. Some files were not uploaded. "
+						+ "Other Zotero data will continue to sync to the server.\n\n"
+						+ "The group owner can increase the group's storage capacity "
+						+ "from the storage settings section on zotero.org.";
+				}
+				// Personal file
+				else {
+					text = "You have reached your Zotero File Storage quota. Some files were not uploaded. "
+						+ "Other Zotero data will continue to sync to the server.\n\n"
+						+ "See your zotero.org account settings for additional storage options.";
+					buttonText = "Open Account Settings";
+					buttonCallback = function () {
+						var url = "https://www.zotero.org/settings/storage";
+						
+						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+									.getService(Components.interfaces.nsIWindowMediator);
+						var win = wm.getMostRecentWindow("navigator:browser");
+						var browser = win.getBrowser();
+						browser.selectedTab = browser.addTab(url);
+					}
+				}
+				
 				Zotero.debug(req.responseText);
-				var e = new Zotero.Error("File would exceed Zotero File Storage quota", "ZFS_OVER_QUOTA");
+				
+				var e = new Zotero.Error(
+					"File would exceed Zotero File Storage quota",
+					"ZFS_OVER_QUOTA",
+					{
+						dialogText: text,
+						dialogButtonText: buttonText,
+						dialogButtonCallback: buttonCallback
+					}
+				);
 				self.onError(e);
 			}
 			return;
