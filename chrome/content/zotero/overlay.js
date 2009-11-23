@@ -2564,6 +2564,9 @@ var ZoteroPane = new function()
 		progressWin.show();
 		progressWin.startCloseTimer();
 		
+		// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
+		saveSnapshot = saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'));
+		
 		// TODO: this, needless to say, is a temporary hack
 		if (itemType == 'temporaryPDFHack') {
 			itemType = null;
@@ -2586,7 +2589,7 @@ var ZoteroPane = new function()
 				}
 			}
 			
-			if (isPDF) {
+			if (isPDF && saveSnapshot) {
 				//
 				// Duplicate newItem() checks here
 				//
@@ -2629,7 +2632,16 @@ var ZoteroPane = new function()
 					var collectionID = false;
 				}
 				
-				Zotero.Attachments.importFromDocument(doc, false, false, collectionID, null, libraryID);
+				var itemID = Zotero.Attachments.importFromDocument(doc, false, false, collectionID, null, libraryID);
+				
+				// importFromDocument() doesn't trigger the notifier for a second
+				//
+				// The one-second delay is weird but better than nothing
+				var self = this;
+				setTimeout(function () {
+					self.selectItem(itemID);
+				}, 1001);
+				
 				return;
 			}
 		}
@@ -2654,8 +2666,7 @@ var ZoteroPane = new function()
 			filesEditable = true;
 		}
 		
-		// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
-		if (saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'))) {
+		if (saveSnapshot) {
 			var link = false;
 			
 			if (link) {
