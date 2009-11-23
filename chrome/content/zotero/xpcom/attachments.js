@@ -644,6 +644,10 @@ Zotero.Attachments = new function(){
 				timer.initWithCallback({notify: f}, 1000,
 					Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 			}
+			
+			// Caution: Take care using this itemID. The notifier may not yet have been called,
+			// so the attachment may not be available in, for example, the items list
+			return itemID;
 		}
 		catch (e) {
 			Zotero.DB.rollbackTransaction();
