@@ -3046,9 +3046,6 @@ var ZoteroPane = new function()
 				continue;
 			}
 			
-			// If the attachment title was the same as the filename, change it too
-			var renameTitle = item.getField('title') == file.leafName;
-			
 			var parentItemID = item.getSource();
 			var newName = Zotero.Attachments.getFileBaseNameFromItem(parentItemID);
 			
@@ -3063,10 +3060,8 @@ var ZoteroPane = new function()
 				continue;
 			}
 			
-			if (renameTitle) {
-				item.setField('title', newName);
-				item.save();
-			}
+			item.setField('title', newName);
+			item.save();
 		}
 		
 		return true;
