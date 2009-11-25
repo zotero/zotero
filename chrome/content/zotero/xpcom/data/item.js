@@ -1373,7 +1373,8 @@ Zotero.Item.prototype.save = function() {
 				
 				if (!newSourceItem) {
 					// TODO: clear caches?
-					throw ("Cannot set source to invalid item " + this._sourceItem);
+					var msg = "Cannot set source to invalid item " + this._sourceItem;
+					var e = new Zotero.Error(msg, "MISSING_OBJECT");
 				}
 				
 				var newSourceItemNotifierData = {};
@@ -1759,7 +1760,9 @@ Zotero.Item.prototype.save = function() {
 					
 					if (!newSourceItem) {
 						// TODO: clear caches
-						throw ("Cannot set source to invalid item " + this._sourceItem);
+						var msg = "Cannot set source to invalid item " + this._sourceItem;
+						var e = new Zotero.Error(msg, "MISSING_OBJECT");
+						throw (e);
 					}
 					
 					var newSourceItemNotifierData = {};
