@@ -79,7 +79,8 @@ Zotero.MIME = new function(){
 	var _externalTextExtensions = {
 		graffle: true,
 		mm: true,
-		opml: true
+		opml: true,
+		bib: true
 	};
 	
 	
@@ -324,7 +325,7 @@ Zotero.MIME = new function(){
 	function hasNativeHandler(mimeType, ext) {
 		if (mimeType.match(/^text\//)) {
 			if (isExternalTextExtension(ext)){
-				Zotero.debug('text file has extension that should be handled externally');
+				Zotero.debug(mimeType + " file has extension '" + ext + "' that should be handled externally");
 				return false;
 			}
 			return true;

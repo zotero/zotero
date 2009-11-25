@@ -1799,7 +1799,8 @@ Zotero.Translate.prototype._importSniffCharacterSet = function(callback) {
 				var me = this;
 				Zotero.File.getCharsetFromFile(this.location, "text/plain",
 					function(charset) {
-						me._charset = charset;
+						// Default to UTF-8 if no charset available
+						me._charset = charset ? charset : "UTF-8";
 						me._importDoneSniffing(charset);
 					});
 			} else {
