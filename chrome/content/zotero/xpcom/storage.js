@@ -701,7 +701,8 @@ Zotero.Sync.Storage = new function () {
 	this.purgeDeletedStorageFiles = function (module, callback) {
 		_session = new Zotero.Sync.Storage.Session(module, { onError: _error });
 		if (!_session.initFromPrefs()) {
-			_error("Module not initialized");
+			Zotero.debug("Module '" + module + "' not initialized in Zotero.Sync.Storage.purgeDeletedStorageFiles()");
+			return;
 		}
 		_session.purgeDeletedStorageFiles(callback);
 	}
