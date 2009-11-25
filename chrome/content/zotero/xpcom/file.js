@@ -245,12 +245,14 @@ Zotero.File = new function(){
 	 */
 	function getCharsetFromFile(file, mimeType, callback, args){
 		if (!file || !file.exists()){
-			return false;
+			callback(false, args);
+			return;
 		}
 		
-		if (mimeType.substr(0, 5)!='text/' ||
-			!Zotero.MIME.hasInternalHandler(mimeType, this.getExtension(file))){
-			return false;
+		if (mimeType.substr(0, 5) != 'text/' ||
+				!Zotero.MIME.hasInternalHandler(mimeType, this.getExtension(file))) {
+			callback(false, args);
+			return;
 		}
 		
 		var browser = Zotero.Browser.createHiddenBrowser();
