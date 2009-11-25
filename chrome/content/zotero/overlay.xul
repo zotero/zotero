@@ -390,11 +390,13 @@
 					<toolbarbutton id="zotero-tb-sync" class="zotero-tb-button" tooltip="_child"
 							oncommand="Zotero.Sync.Server.canAutoResetClient = true; Zotero.Sync.Runner.sync()">
 						<tooltip
-								onpopupshowing="ZoteroPane.setLastSyncStatus(this)"
+								id="zotero-tb-sync-tooltip"
+								onpopupshowing="Zotero.Sync.Runner.registerSyncStatusLabel(this.firstChild.nextSibling)"
+								onpopuphiding="Zotero.Sync.Runner.registerSyncStatusLabel()"
 								noautohide="true">
 							<!-- TODO: localize -->
 							<label value="Sync with Zotero Server"/>
-							<label id="zotero-last-sync-time"/>
+							<label id="zotero-tb-sync-status"/>
 						</tooltip>
 					</toolbarbutton>
 					<toolbarseparator/>

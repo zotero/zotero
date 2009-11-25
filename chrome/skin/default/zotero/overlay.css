@@ -233,7 +233,7 @@
 	list-style-image: url(chrome://zotero/skin/arrow_rotate_animated.png);
 }
 
-#zotero-tb-sync #zotero-last-sync-time
+#zotero-tb-sync #zotero-tb-sync-status
 {
 	color: gray;
 }

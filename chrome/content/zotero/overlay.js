@@ -3113,23 +3113,6 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.setLastSyncStatus = function (tooltip) {
-		var label = tooltip.firstChild.nextSibling;
-		
-		var lastSyncTime = Zotero.Sync.Server.lastLocalSyncTime;
-		// TODO: localize
-		msg = 'Last sync: ';
-		if (lastSyncTime) {
-			var time = new Date(lastSyncTime * 1000);
-			msg += Zotero.Date.toRelativeDate(time);
-		}
-		else {
-			msg += 'Not yet synced';
-		}
-		label.value = msg;
-	}
-	
-	
 	function reportErrors() {
 		var errors = Zotero.getErrors(true);
 		var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
