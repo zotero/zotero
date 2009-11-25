@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"University of Michigan",
 	"creator":"Matt Burton",
-	"target":"http://mirlyn\\.lib\\.umich\\.edu",
+	"target":"http://mirlyn\\-classic\\.lib\\.umich\\.edu",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-08-08 15:20:00"
+	"lastUpdated":"2009-11-19 05:05:00"
 }
 
 var mirlyn2zoteroTypeMap = {
