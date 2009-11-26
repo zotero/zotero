@@ -1,4 +1,4 @@
--- 13
+-- 14
 
 -- Triggers to validate date field
 DROP TRIGGER IF EXISTS insert_date_field;
@@ -283,7 +283,7 @@ CREATE TRIGGER fku_itemAttachments_sourceItemID_collectionItems_itemID
 DROP TRIGGER IF EXISTS fku_itemNotes_sourceItemID_collectionItems_itemID;
 CREATE TRIGGER fku_itemNotes_sourceItemID_collectionItems_itemID
   BEFORE UPDATE OF sourceItemID ON itemNotes
-  FOR EACH ROW BEGIN
+  FOR EACH ROW WHEN OLD.sourceItemID IS NULL AND NEW.sourceItemID IS NOT NULL BEGIN
     DELETE FROM collectionItems WHERE itemID = NEW.itemID;
   END;
 
