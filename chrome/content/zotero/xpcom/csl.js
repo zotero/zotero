@@ -1643,7 +1643,7 @@ Zotero.CSL.Citation.prototype.remove = function(citationItems) {
  * copies a citation
  */
 Zotero.CSL.Citation.prototype.clone = function() {
-	var clone = new Zotero.CSL.Citation();
+	var clone = new Zotero.CSL.Citation(null, this._csl);
 	
 	// copy items
 	for(var i=0; i<this.citationItems.length; i++) {
