@@ -107,7 +107,13 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 				+ "Zotero." + this._ZDO_Objects + ".getOlder()")
 		}
 		
-		var sql = "SELECT ROWID FROM " + this._ZDO_table + " WHERE clientDateModified<?";
+		var sql = "SELECT ROWID FROM " + this._ZDO_table + " WHERE ";
+		if (this._ZDO_object == 'relation') {
+			sql += "clientDateModified<?";
+		}
+		else {
+			sql += "dateModified<?";
+		}
 		return Zotero.DB.columnQuery(sql, Zotero.Date.dateToSQL(date, true));
 	}
 	
