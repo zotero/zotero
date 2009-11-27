@@ -29,14 +29,18 @@ var ZoteroAdvancedSearch = new function() {
 		var itemGroup = {
 			isSearchMode: function() { return true; },
 			getChildItems: function () {
-				var search = _searchBox.search.clone();
+				//var search = _searchBox.search.clone();
+				
+				var s2 = new Zotero.Search();
+				s2.setScope(_searchBox.search);
+				
 				// FIXME: Hack to exclude group libraries for now
 				var groups = Zotero.Groups.getAll();
 				for each(var group in groups) {
-					search.addCondition('libraryID', 'isNot', group.libraryID);
+					s2.addCondition('libraryID', 'isNot', group.libraryID);
 				}
-				//var search = _searchBox.search;
-				var ids = search.search();
+				
+				var ids = s2.search();
 				return Zotero.Items.get(ids);
 			},
 			isLibrary: function () { return false; },
