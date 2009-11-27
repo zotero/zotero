@@ -1050,9 +1050,10 @@ Zotero.Sync.Storage = new function () {
 		
 		// Delete existing files
 		var otherFiles = parentDir.directoryEntries;
-		while (otherFiles.hasMoreElements()) {
-			var file = otherFiles.getNext();
-			file.QueryInterface(Components.interfaces.nsIFile);
+		otherFiles.QueryInterface(Components.interfaces.nsIDirectoryEnumerator);
+		var filesToDelete = [];
+		var file;
+		while (file = otherFiles.nextFile) {
 			if (file.leafName[0] == '.') {
 				continue;
 			}
@@ -1076,6 +1077,12 @@ Zotero.Sync.Storage = new function () {
 				continue;
 			}
 			
+			filesToDelete.push(file);
+		}
+		otherFiles.close();
+		
+		// Do deletes outside of the enumerator to avoid an access error on Windows
+		for each(var file in filesToDelete) {
 			if (file.isFile()) {
 				Zotero.debug("Deleting existing file " + file.leafName);
 				try {
