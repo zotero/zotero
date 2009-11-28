@@ -76,7 +76,10 @@ Zotero.OpenURL = new function() {
 	function resolve(itemObject) {
 		var co = createContextObject(itemObject, Zotero.Prefs.get("openURL.version"));
 		if(co) {
-			return Zotero.Prefs.get("openURL.resolver")+"?"+co;
+			var base = Zotero.Prefs.get("openURL.resolver");
+			// Add & if there's already a ?
+			var splice = base.indexOf("?") == -1 ? "?" : "&";
+			return base + splice + co;
 		}
 		return false;
 	}
