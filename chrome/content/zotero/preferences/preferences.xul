@@ -325,14 +325,19 @@ To add a new preference:
 						<separator id="storage-separator" class="thin"/>
 						
 						<!-- Group Libraries -->
-						<checkbox label="Sync attachment files in group libraries using Zotero File Storage"
-								preference="pref-group-storage-enabled"/>
+						<checkbox label="Sync attachment files in group libraries using Zotero storage"
+								preference="pref-group-storage-enabled" oncommand="setTimeout(function () { updateStorageTerms(); }, 1)"/>
 						
 						<separator class="thin"/>
 						
-						<hbox style="margin-top:.3em">
-							<label class="text-link" style="margin-left: 0" value="About File Syncing" href="http://zotero.org/support/file_sync"/>
-						</hbox>
+						<vbox>
+							<label class="text-link" style="margin-top:.3em; margin-left: 0" value="About File Syncing" href="http://zotero.org/support/file_sync"/>
+							<hbox id="storage-terms" style="margin-top: .4em" align="center">
+								<label>By using Zotero storage, you agree to become bound by its</label>
+								<label class="text-link" href="http://www.digitalscholar.org/z_terms" value="terms and conditions"/>
+								<label>.</label>
+							</hbox>
+						</vbox>
 					</groupbox>
 				</tabpanel>
 				

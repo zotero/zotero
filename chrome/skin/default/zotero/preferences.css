@@ -115,6 +115,22 @@ grid row hbox:first-child
 	min-width: 8em;
 }
 
+#storage-terms > label
+{
+	margin-left: 0;
+	font-size: .9em;
+}
+
+#storage-terms > label:first-child
+{
+	margin-right: .25em;
+}
+
+#storage-terms > label[class=text-link]
+{
+	margin-right: 0;
+}
+
 /* Reset tab */
 #zotero-reset row
 {
