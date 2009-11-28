@@ -1004,9 +1004,19 @@ Zotero.Search.prototype._buildQuery = function(){
 		}
 	}
 	
-	// Exclude deleted items by default
+	// Exclude deleted items (and their child items) by default
 	sql += " WHERE itemID " + (deleted ? "" : "NOT ") + "IN "
-			+ "(SELECT itemID FROM deletedItems)";
+			+ "("
+				+ "SELECT itemID FROM deletedItems "
+				+ "UNION "
+				+ "SELECT itemID FROM itemNotes "
+				+ "WHERE sourceItemID IS NOT NULL AND "
+				+ "sourceItemID IN (SELECT itemID FROM deletedItems) "
+				+ "UNION "
+				+ "SELECT itemID FROM itemAttachments "
+				+ "WHERE sourceItemID IS NOT NULL AND "
+				+ "sourceItemID IN (SELECT itemID FROM deletedItems) "
+			+ ")";
 	
 	if (noChildren){
 		sql += " AND (itemID NOT IN (SELECT itemID FROM itemNotes "
