@@ -887,7 +887,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype.purgeDeletedStorageFiles = function (c
  */
 Zotero.Sync.Storage.Session.ZFS.prototype._getItemURI = function (item) {
 	var uri = this.rootURI;
-	uri.spec += Zotero.URI.getItemPath(item) + '/file?auth=1';
+	uri.spec += Zotero.URI.getItemPath(item) + '/file?auth=1&key=1';
 	return uri;
 }
 
