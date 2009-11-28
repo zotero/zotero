@@ -243,6 +243,21 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 			}
 		}
 	}
+	
+	setTimeout(function () {
+		updateStorageTerms();
+	}, 1)
+}
+
+
+function updateStorageTerms() {
+	var terms = document.getElementById('storage-terms');
+	
+	var libraryEnabled = document.getElementById('pref-storage-enabled').value;
+	var storageProtocol = document.getElementById('pref-storage-protocol').value;
+	var groupsEnabled = document.getElementById('pref-group-storage-enabled').value;
+	
+	terms.hidden = !((libraryEnabled && storageProtocol == 'zotero') || groupsEnabled);
 }
 
 
