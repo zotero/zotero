@@ -2487,6 +2487,11 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (1,14))");
 				}
 				
+				if (i==66) {
+					Zotero.DB.query("DELETE FROM itemTags WHERE tagID IN (SELECT tagID FROM tags WHERE TRIM(name)='')");
+					Zotero.DB.query("DELETE FROM tags WHERE TRIM(name)=''");
+				}
+				
 				Zotero.wait();
 			}
 			

@@ -1,4 +1,4 @@
--- 14
+-- 15
 
 -- Triggers to validate date field
 DROP TRIGGER IF EXISTS insert_date_field;
@@ -1388,3 +1388,21 @@ CREATE TRIGGER fku_proxies_proxyID_proxyHosts_proxyID
     SELECT RAISE(ABORT, 'update on table "proxies" violates foreign key constraint "fku_proxies_proxyID_proxyHosts_proxyID"')
     WHERE (SELECT COUNT(*) FROM proxyHosts WHERE proxyID = OLD.proxyID) > 0;
   END;
+
+-- Make sure tags aren't empty
+DROP TRIGGER IF EXISTS fki_tags;
+CREATE TRIGGER fki_tags
+BEFORE INSERT ON tags
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'Tag cannot be blank')
+    WHERE TRIM(NEW.name)='';
+  END;
+
+DROP TRIGGER IF EXISTS fku_tags;
+CREATE TRIGGER fku_tags
+  BEFORE UPDATE OF name ON tags
+  FOR EACH ROW BEGIN
+      SELECT RAISE(ABORT, 'Tag cannot be blank')
+      WHERE TRIM(NEW.name)='';
+  END;
+
