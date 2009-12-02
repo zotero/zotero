@@ -3314,6 +3314,9 @@ Zotero.Sync.Server.Data = new function() {
 			var libraryID = item.creators[index].libraryID ? item.creators[index].libraryID : Zotero.libraryID;
 			var key = item.creators[index].key;
 			if (!key) {
+				Zotero.debug('==========');
+				Zotero.debug(index);
+				Zotero.debug(item);
 				throw ("Creator key not set for item in Zotero.Sync.Server.sync()");
 			}
 			newCreator.@libraryID = libraryID;
