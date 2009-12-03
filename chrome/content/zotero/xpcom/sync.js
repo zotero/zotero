@@ -1329,7 +1329,7 @@ Zotero.Sync.Server = new function () {
 				// Reconcile and save updated data from server and
 				// prepare local data to upload
 				var xmlstr = Zotero.Sync.Server.Data.processUpdatedXML(
-					xml.updated, lastLocalSyncDate, syncSession
+					xml.updated, lastLocalSyncDate, syncSession, libraryID
 				);
 				
 				//Zotero.debug(xmlstr);
@@ -2112,7 +2112,7 @@ Zotero.BufferedInputListener.prototype = {
  * @property	{Zotero.Sync.ObjectKeySet}	uploadKeys.updated
  * @property	{Zotero.Sync.ObjectKeySet}	uploadKeys.deleted
  */
-Zotero.Sync.Server.Session = function () {
+Zotero.Sync.Server.Session = function (defaultLibraryID) {
 	this.uploadKeys = {};
 	this.uploadKeys.updated = new Zotero.Sync.ObjectKeySet;
 	this.uploadKeys.deleted = new Zotero.Sync.ObjectKeySet;
@@ -2229,10 +2229,14 @@ Zotero.Sync.Server.Data = new function() {
 	}
 	
 	
-	function processUpdatedXML(xml, lastLocalSyncDate, syncSession) {
+	function processUpdatedXML(xml, lastLocalSyncDate, syncSession, defaultLibraryID) {
 		if (xml.children().length() == 0) {
 			Zotero.debug('No changes received from server');
 			return Zotero.Sync.Server.Data.buildUploadXML(syncSession);
+		}
+		
+		function _libID(libraryID) {
+			return _getLibraryID(libraryID, defaultLibraryID);
 		}
 		
 		Zotero.DB.beginTransaction();
@@ -2271,6 +2275,59 @@ Zotero.Sync.Server.Data = new function() {
 			}
 		}
 		
+		// Get unmodified creators embedded within items -- this is necessary if, say,
+		// a creator was deleted locally and appears in a new/modified item remotely
+		var embeddedCreators = {};
+		for each(var creatorNode in xml.items.item.creator.creator) {
+			var libraryID = _libID(creatorNode.@libraryID.toString());
+			var key = creatorNode.@key.toString();
+			
+			var creatorObj = Zotero.Creators.getByLibraryAndKey(libraryID, key);
+			// If creator exists locally, we don't need it
+			if (creatorObj) {
+				continue;
+			}
+			// Note which embedded creators are available
+			var lkh = Zotero.Creators.makeLibraryKeyHash(libraryID, key);
+			if (!embeddedCreators[lkh]) {
+				embeddedCreators[lkh] = true;
+			}
+		}
+		// Make sure embedded creators aren't already provided in the <creators> node
+		// This isn't necessary if the server data is correct
+		for each(var creatorNode in xml.creators.creator) {
+			var libraryID = _libID(creatorNode.@libraryID.toString());
+			var key = creatorNode.@key.toString();
+			var lkh = Zotero.Creators.makeLibraryKeyHash(libraryID, key);
+			if (embeddedCreators[lkh]) {
+				var msg = "Creator " + libraryID + "/" + key + " was unnecessarily embedded in server response "
+							+ "in Zotero.Sync.Server.Data.processUpdatedXML()";
+				Zotero.debug(msg, 2);
+				Components.utils.reportError(msg)
+				delete embeddedCreators[lkh];
+			}
+		}
+		// For any embedded creators that don't exist locally and aren't already
+		// included in the <creators> node, copy the node into <creators> for saving
+		var elementCreated = !!xml.creators.length();
+		for each(var creatorNode in xml.items.item.creator.creator) {
+			var libraryID = _libID(creatorNode.@libraryID.toString());
+			var key = creatorNode.@key.toString();
+			
+			var lkh = Zotero.Creators.makeLibraryKeyHash(libraryID, key);
+			if (embeddedCreators[lkh]) {
+				if (!elementCreated) {
+					xml.creators = new XML("<creators/>");
+					elementCreated = true;
+				}
+				
+				Zotero.debug("Adding embedded creator " + libraryID + "/" + key + " to <creators>");
+				
+				xml.creators.appendChild(creatorNode);
+				delete embeddedCreators[lkh];
+			}
+		}
+		
 		// Other objects
 		for each(var syncObject in Zotero.Sync.syncObjects) {
 			var Type = syncObject.singular; // 'Item'
@@ -2289,7 +2346,7 @@ Zotero.Sync.Server.Data = new function() {
 			
 			typeloop:
 			for each(var xmlNode in xml[types][type]) {
-				var libraryID = xmlNode.@libraryID.toString();
+				var libraryID = _libID(xmlNode.@libraryID.toString());
 				var key = xmlNode.@key.toString();
 				var objLibraryKeyHash = Zotero[Types].makeLibraryKeyHash(libraryID, key);
 				
@@ -2337,7 +2394,7 @@ Zotero.Sync.Server.Data = new function() {
 							Zotero.Sync.Server.Data.removeMissingRelatedItems(xmlNode);
 						}
 						
-						var remoteObj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode);
+						var remoteObj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode, null, null, defaultLibraryID);
 
 						// Some types we don't bother to reconcile
 						if (_noMergeTypes.indexOf(type) != -1) {
@@ -2499,7 +2556,7 @@ Zotero.Sync.Server.Data = new function() {
 				//
 				// If we skipped CR above, we already have an object to use
 				if (!skipCR) {
-					obj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode, obj);
+					obj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode, obj, null, defaultLibraryID);
 				}
 				
 				if (isNewObject && type == 'tag') {
@@ -2581,8 +2638,7 @@ Zotero.Sync.Server.Data = new function() {
 				Zotero.debug("Processing remotely deleted " + types);
 				
 				for each(var xmlNode in xml.deleted[types][type]) {
-					var libraryID = xmlNode.@libraryID.toString();
-					libraryID = libraryID ? parseInt(libraryID) : null;
+					var libraryID = _libID(xmlNode.@libraryID.toString());
 					var key = xmlNode.@key.toString();
 					var obj = Zotero[Types].getByLibraryAndKey(libraryID, key);
 					// Object can't be found
@@ -2592,8 +2648,8 @@ Zotero.Sync.Server.Data = new function() {
 						// caused its deletion during the sync
 						syncSession.removeFromDeleted({
 							objectType: type,
-							libraryID: parseInt(xmlNode.@libraryID),
-							key: xmlNode.@key.toString()
+							libraryID: libraryID,
+							key: key
 						});
 						continue;
 					}
@@ -3363,7 +3419,7 @@ Zotero.Sync.Server.Data = new function() {
 	 * @param	object	item			(Optional) Existing Zotero.Item to update
 	 * @param	bool	skipPrimary		(Optional) Ignore passed primary fields (except itemTypeID)
 	 */
-	function xmlToItem(xmlItem, item, skipPrimary) {
+	function xmlToItem(xmlItem, item, skipPrimary, defaultLibraryID) {
 		if (!item) {
 			item = new Zotero.Item;
 		}
@@ -3376,8 +3432,7 @@ Zotero.Sync.Server.Data = new function() {
 		
 		var data = {};
 		if (!skipPrimary) {
-			var libraryID = xmlItem.@libraryID.toString();
-			data.libraryID = libraryID ? parseInt(libraryID) : null;
+			data.libraryID = _getLibraryID(xmlItem.@libraryID.toString(), defaultLibraryID);
 			data.key = xmlItem.@key.toString();
 			data.dateAdded = xmlItem.@dateAdded.toString();
 			data.dateModified = xmlItem.@dateModified.toString();
@@ -3422,27 +3477,16 @@ Zotero.Sync.Server.Data = new function() {
 				throw ('No creator in position ' + i);
 			}
 			
-			var creatorObj = Zotero.Creators.getByLibraryAndKey(data.libraryID, creator.@key.toString());
-			// If creator doesn't exist locally (e.g., if it was deleted locally
-			// and appears in a new/modified item remotely), get it from within
-			// the item's creator block, where a copy should be provided
+			var libraryID = data.libraryID;
+			var key = creator.@key.toString();
+			var creatorObj = Zotero.Creators.getByLibraryAndKey(libraryID, key);
 			if (!creatorObj) {
-				if (creator.creator.length() == 0) {
-					var msg = "Data for missing local creator "
-						+ data.libraryID + "/" + creator.@key.toString()
-						+ " not provided in Zotero.Sync.Server.Data.xmlToItem()";
-					var e = new Zotero.Error(msg, "MISSING_OBJECT");
-					throw (e);
-				}
-				
-				creator.creator.@libraryID = data.libraryID;
-				var creatorObj = Zotero.Sync.Server.Data.xmlToCreator(creator.creator);
-				
-				if (creator.@key.toString() != creatorObj.key) {
-					throw ("Creator does not match item creator in Zotero.Sync.Server.Data.xmlToItem() "
-						+ "(" + creator.@key.toString() + "!=" + creatorObj.key + ")");
-				}
+				var msg = "Data for missing local creator " + libraryID + "/" + key
+					+ " not provided in Zotero.Sync.Server.Data.xmlToItem()";
+				var e = new Zotero.Error(msg, "MISSING_OBJECT");
+				throw (e);
 			}
+			
 			item.setCreator(
 				pos,
 				creatorObj,
@@ -3565,7 +3609,7 @@ Zotero.Sync.Server.Data = new function() {
 	 * @param	object	item		(Optional) Existing Zotero.Collection to update
 	 * @param	bool	skipPrimary		(Optional) Ignore passed primary fields (except itemTypeID)
 	 */
-	function xmlToCollection(xmlCollection, collection, skipPrimary) {
+	function xmlToCollection(xmlCollection, collection, skipPrimary, defaultLibraryID) {
 		if (!collection) {
 			collection = new Zotero.Collection;
 		}
@@ -3575,8 +3619,7 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		if (!skipPrimary) {
-			var libraryID = xmlCollection.@libraryID.toString();
-			collection.libraryID = libraryID ? parseInt(libraryID) : null;
+			collection.libraryID = _getLibraryID(xmlCollection.@libraryID.toString(), defaultLibraryID);
 			collection.key = xmlCollection.@key.toString();
 			var parentKey = xmlCollection.@parent.toString();
 			if (parentKey) {
@@ -3702,7 +3745,7 @@ Zotero.Sync.Server.Data = new function() {
 	 * @param	object	item		(Optional) Existing Zotero.Creator to update
 	 * @param	bool	skipPrimary	(Optional) Ignore passed primary fields (except itemTypeID)
 	 */
-	function xmlToCreator(xmlCreator, creator, skipPrimary) {
+	function xmlToCreator(xmlCreator, creator, skipPrimary, defaultLibraryID) {
 		if (!creator) {
 			creator = new Zotero.Creator;
 		}
@@ -3712,8 +3755,7 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		if (!skipPrimary) {
-			var libraryID = xmlCreator.@libraryID.toString();
-			creator.libraryID = libraryID ? parseInt(libraryID) : null;
+			creator.libraryID = _getLibraryID(xmlCreator.@libraryID.toString(), defaultLibraryID);
 			creator.key = xmlCreator.@key.toString();
 			creator.dateAdded = xmlCreator.@dateAdded.toString();
 			creator.dateModified = xmlCreator.@dateModified.toString();
@@ -3773,7 +3815,7 @@ Zotero.Sync.Server.Data = new function() {
 	 * @param	object	item		(Optional) Existing Zotero.Search to update
 	 * @param	bool	skipPrimary		(Optional) Ignore passed primary fields (except itemTypeID)
 	 */
-	function xmlToSearch(xmlSearch, search, skipPrimary) {
+	function xmlToSearch(xmlSearch, search, skipPrimary, defaultLibraryID) {
 		if (!search) {
 			search = new Zotero.Search;
 		}
@@ -3783,8 +3825,7 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		if (!skipPrimary) {
-			var libraryID = xmlSearch.@libraryID.toString();
-			search.libraryID = libraryID ? parseInt(libraryID) : null;
+			search.libraryID = _getLibraryID(xmlSearch.@libraryID.toString(), defaultLibraryID);
 			search.key = xmlSearch.@key.toString();
 			search.dateAdded = xmlSearch.@dateAdded.toString();
 			search.dateModified = xmlSearch.@dateModified.toString();
@@ -3863,7 +3904,7 @@ Zotero.Sync.Server.Data = new function() {
 	 * @param	object	tag				(Optional) Existing Zotero.Tag to update
 	 * @param	bool	skipPrimary		(Optional) Ignore passed primary fields
 	 */
-	function xmlToTag(xmlTag, tag, skipPrimary) {
+	function xmlToTag(xmlTag, tag, skipPrimary, defaultLibraryID) {
 		if (!tag) {
 			tag = new Zotero.Tag;
 		}
@@ -3873,8 +3914,7 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		if (!skipPrimary) {
-			var libraryID = xmlTag.@libraryID.toString();
-			tag.libraryID = libraryID ? parseInt(libraryID) : null;
+			tag.libraryID = _getLibraryID(xmlTag.@libraryID.toString(), defaultLibraryID);
 			tag.key = xmlTag.@key.toString();
 			tag.dateAdded = xmlTag.@dateAdded.toString();
 			tag.dateModified = xmlTag.@dateModified.toString();
@@ -3984,5 +4024,13 @@ Zotero.Sync.Server.Data = new function() {
 	
 	function _xmlize(str) {
 		return str.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/g, '\u2B1A');
+	}
+	
+	
+	function _getLibraryID(libraryID, defaultLibraryID) {
+		if (!libraryID) {
+			return null;
+		}
+		return libraryID == defaultLibraryID ? null : parseInt(libraryID);
 	}
 }
