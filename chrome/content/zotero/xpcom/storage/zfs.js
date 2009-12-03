@@ -315,8 +315,16 @@ Zotero.Sync.Storage.Session.ZFS.prototype._processUploadFile = function (data) {
 					// Local file time
 					var fmtime = item.attachmentModificationTime;
 					
-					if (fmtime == mtime) {
-						Zotero.debug("File mod time matches remote file -- skipping upload");
+					// Allow timestamp to be exactly one hour off to get around
+					// time zone issues -- there may be a proper way to fix this
+					if (fmtime == mtime || Math.abs(fmtime - mtime) == 3600) {
+						if (fmtime == mtime) {
+							Zotero.debug("File mod time matches remote file -- skipping upload");
+						}
+						else {
+							Zotero.debug("File mod time (" + fmtime + ") is exactly one hour off remote file (" + mtime + ") "
+								+ "-- assuming time zone issue and skipping upload");
+						}
 						
 						Zotero.debug(Zotero.Sync.Storage.getSyncedModificationTime(item.id));
 						
