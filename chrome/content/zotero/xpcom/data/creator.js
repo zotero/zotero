@@ -249,11 +249,23 @@ Zotero.Creator.prototype.save = function () {
 			key
 		];
 		
-		var sql = "REPLACE INTO creators (" + columns.join(', ') + ") VALUES ("
-			+ placeholders.join(', ') + ")";
-		var insertID = Zotero.DB.query(sql, sqlValues);
-		if (!creatorID) {
-			creatorID = insertID;
+		if (isNew) {
+			var sql = "INSERT INTO creators (" + columns.join(', ') + ") VALUES ("
+						+ placeholders.join(', ') + ")";
+			var insertID = Zotero.DB.query(sql, sqlValues);
+			if (!creatorID) {
+				creatorID = insertID;
+			}
+		}
+		else {
+			// Remove tagID from beginning
+			columns.shift();
+			sqlValues.shift();
+			sqlValues.push(creatorID);
+			
+			var sql = "UPDATE creators SET " + columns.join("=?, ") + "=?"
+				+ " WHERE creatorID=?";
+			Zotero.DB.query(sql, sqlValues);
 		}
 		
 		if (deleteDataID) {
