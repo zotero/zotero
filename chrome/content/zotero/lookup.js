@@ -3,9 +3,10 @@ const Zotero_Lookup = new function () {
 		document.getElementById("progress").setAttribute("status", "animate");
 		document.getElementById("accept-button").disabled = true;
 		var identifier = document.getElementById("lookup-textbox").value;
-		if(identifier.substr(0, 3) == "10.") {
-			// DOI
-			var item = {itemType:"journalArticle", DOI:identifier};
+		
+		var doi = Zotero.Utilities.prototype.cleanDOI(identifier);
+		if(doi) {
+			var item = {itemType:"journalArticle", DOI:doi};
 		} else {
 			identifier = identifier.replace("-", "", "g");
 			if(identifier.length == 10 || identifier.length == 13) {
