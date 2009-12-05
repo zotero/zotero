@@ -49,17 +49,17 @@ function ChromeExtensionHandler() {
 	 * Example URLs:
 	 *
 	 * zotero://report/    -- library
-	 * zotero://report/collection/12345
-	 * zotero://report/search/12345
-	 * zotero://report/items/12345-23456-34567
-	 * zotero://report/item/12345
+	 * zotero://report/collection/0_ABCD1234
+	 * zotero://report/search/0_ABCD1234
+	 * zotero://report/items/0_ABCD1234-0_BCDE2345-0_CDEF3456
+	 * zotero://report/item/0_ABCD1234
 	 *
-	 * Optional format can be specified after ids
+	 * Optional format can be specified after hashes
 	 *
-	 *  - 'html', 'rtf', 'csv'
+	 *  - 'html', 'rtf', 'csv' ['rtf' and 'csv' not yet supported]
 	 *  - defaults to 'html' if not specified
 	 *
-	 * e.g. zotero://report/collection/12345/rtf
+	 * e.g. zotero://report/collection/0_ABCD1234/rtf
 	 * 
 	 *
 	 * Sorting:
@@ -68,7 +68,11 @@ function ChromeExtensionHandler() {
 	 *  - format is field[/order] [, field[/order], ...]
 	 *  - order can be 'asc', 'a', 'desc' or 'd'; defaults to ascending order
 	 *
-	 *  zotero://report/collection/13245?sort=itemType/d,title
+	 *  zotero://report/collection/0_ABCD1234?sort=itemType/d,title
+	 *
+	 *
+	 * Also supports ids (e.g., zotero://report/collection/1234), but ids are not
+	 * guaranteed to be consistent across synced machines
 	 */
 	var ReportExtension = new function(){
 		this.newChannel = newChannel;
@@ -546,6 +550,54 @@ function ChromeExtensionHandler() {
 				}
 				
 				var pathParts = path.split('/');
+				if (pathParts[0] != 'data') {
+					var [type, id] = pathParts;
+				}
+				else {
+					var [, type, id] = pathParts;
+				}
+				
+				// Get the collection or search object
+				var collection, search;
+				switch (type) {
+					case 'collection':
+						var lkh = Zotero.Collections.parseLibraryKeyHash(id);
+						if (lkh) {
+							collection = Zotero.Collections.getByLibraryAndKey(lkh.libraryID, lkh.key);
+						}
+						else {
+							collection = Zotero.Collections.get(id);
+						}
+						if (!collection) {
+							mimeType = 'text/html';
+							content = 'Invalid collection ID or key';
+							break generateContent;
+						}
+						break;
+					
+					case 'search':
+						var lkh = Zotero.Searches.parseLibraryKeyHash(id);
+						if (lkh) {
+							var s = Zotero.Searches.getByLibraryAndKey(lkh.libraryID, lkh.key);
+						}
+						else {
+							var s = Zotero.Searches.get(id);
+						}
+						if (!s) {
+							mimeType = 'text/html';
+							content = 'Invalid search ID or key';
+							break generateContent;
+						}
+						
+						// FIXME: Hack to exclude group libraries for now
+						var search = new Zotero.Search();
+						search.setScope(s);
+						var groups = Zotero.Groups.getAll();
+						for each(var group in groups) {
+							search.addCondition('libraryID', 'isNot', group.libraryID);
+						}
+						break;
+				}
 				
 				if (pathParts[0] != 'data') {
 					//creates HTML file
@@ -580,12 +632,10 @@ function ChromeExtensionHandler() {
 					
 					theTemp = 'document.write("<title>';
 					if(type == 'collection') {
-						var theCollection = Zotero.Collections.get(id);
-						content = content.replace(theTemp, theTemp + theCollection.getName() + ' - ');
+						content = content.replace(theTemp, theTemp + collection.name + ' - ');
 					}
 					else if(type == 'search') {
-						var theSearch = Zotero.Searches.get(id);
-						content = content.replace(theTemp, theTemp + theSearch['name'] + ' - ');
+						content = content.replace(theTemp, theTemp + search.name + ' - ');
 					}
 					else {
 						content = content.replace(theTemp, theTemp + Zotero.getString('pane.collections.library') + ' - ');
@@ -614,32 +664,26 @@ function ChromeExtensionHandler() {
 
 					return extChannel;
 				}
+				// Create XML file
 				else {
-					//creates XML file
-					var [, type, ids] = pathParts;
-					
-					switch (type){
+					switch (type) {
 						case 'collection':
-							var col = Zotero.Collections.get(ids);
-							var results = col.getChildItems();
+							var results = collection.getChildItems();
 							break;
-
+						
 						case 'search':
-							var s = new Zotero.Search();
-							s.id = ids; 
-							var ids = s.search();
+							var ids = search.search();
+							var results = Zotero.Items.get(ids);
 							break;
-
+						
 						default:
 							type = 'library';
 							var s = new Zotero.Search();
 							s.addCondition('noChildren', 'true');
 							var ids = s.search();
+							var results = Zotero.Items.get(ids);
 					}
 
-					if (!results) {
-						var results = Zotero.Items.get(ids);
-					}
 					var items = [];
 					// Only include parent items
 					for (var i = 0; i < results.length; i++) {
@@ -647,21 +691,20 @@ function ChromeExtensionHandler() {
 							items.push(results[i]);
 						}
 					}
-
+					
 					if (!items) {
 						mimeType = 'text/html';
 						content = 'Invalid ID';
 						break generateContent;
 					}
-
+					
 					// Convert item objects to export arrays
 					for (var i = 0; i < items.length; i++) {
 						items[i] = items[i].toArray();
 					}
-
+					
 					mimeType = 'application/xml';
-
-				
+					
 					var theDateTypes = new Object();
 						theDateTypes['d'] = 'date';
 						theDateTypes['da'] = 'dateAdded';
@@ -671,15 +714,14 @@ function ChromeExtensionHandler() {
 					if (!dateType || !theDateTypes[dateType]) {
 						dateType = 'd';
 					}
-				
+					
 					content = Zotero.Timeline.generateXMLDetails(items, theDateTypes[dateType]);
-
 				}
 				
 				var uri_str = 'data:' + (mimeType ? mimeType + ',' : '') + encodeURIComponent(content);
 				var ext_uri = ioService.newURI(uri_str, null, null);
 				var extChannel = ioService.newChannelFromURI(ext_uri);
-
+				
 				return extChannel;
 			}
 			catch (e){
@@ -770,9 +812,10 @@ function ChromeExtensionHandler() {
 	};
 	
 	
-	/*
-		zotero://select/type/id
-	*/
+	/**
+	 * zotero://select/[type]/0_ABCD1234
+	 * zotero://select/[type]/1234 (not consistent across synced machines)
+	 */
 	var SelectExtension = new function(){
 		this.newChannel = newChannel;
 		
@@ -786,7 +829,7 @@ function ChromeExtensionHandler() {
 
 			generateContent:try {
 				var mimeType, content = '';
-	
+				
 				var [path, queryString] = uri.path.substr(1).split('?');
 				var [type, id] = path.split('/');
 				
@@ -799,7 +842,21 @@ function ChromeExtensionHandler() {
 					win.ZoteroPane.toggleDisplay();
 				}
 				
-				win.ZoteroPane.selectItem(id);
+				var lkh = Zotero.Items.parseLibraryKeyHash(id);
+				if (lkh) {
+					var item = Zotero.Items.getByLibraryAndKey(lkh.libraryID, lkh.key);
+				}
+				else {
+					var item = Zotero.Items.get(id);
+				}
+				if (!item) {
+					var msg = "Item " + id + " not found in zotero://select";
+					Zotero.debug(msg, 2);
+					Components.utils.reportError(msg);
+					return;
+				}
+				
+				win.ZoteroPane.selectItem(item.id);
 			}
 			catch (e){
 				Zotero.debug(e);
