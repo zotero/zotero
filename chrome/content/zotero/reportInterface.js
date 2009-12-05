@@ -33,23 +33,25 @@ var Zotero_Report_Interface = new function() {
 	function loadCollectionReport() {
 		var queryString = '';
 		
-		var id = ZoteroPane.getSelectedCollection(true);
+		var col = ZoteroPane.getSelectedCollection();
 		var sortColumn = ZoteroPane.getSortField();
 		var sortDirection = ZoteroPane.getSortDirection();
-		// See note re: 'ascending'/'descending' for ItemTreeView.getSortDirection()
-		if (sortColumn != 'title' || sortDirection != 'descending') {
-			queryString = '?sort=' + sortColumn +
-				(sortDirection != 'descending' ? '/d' : '');
+		if (sortColumn != 'title' || sortDirection != 'ascending') {
+			queryString = '?sort=' + sortColumn + (sortDirection != 'ascending' ? '' : '/d');
 		}
 		
-		if (id) {
-			window.loadURI('zotero://report/collection/' + id + '/html/report.html' + queryString);
+		if (col) {
+			window.loadURI('zotero://report/collection/'
+				+ Zotero.Collections.getLibraryKeyHash(col)
+				+ '/html/report.html' + queryString);
 			return;
 		}
 		
-		var id = ZoteroPane.getSelectedSavedSearch(true);
-		if (id) {
-			window.loadURI('zotero://report/search/' + id + '/html/report.html' + queryString);
+		var s = ZoteroPane.getSelectedSavedSearch();
+		if (s) {
+			window.loadURI('zotero://report/search/'
+				+ Zotero.Searches.getLibraryKeyHash(s)
+				+ '/html/report.html' + queryString);
 			return;
 		}
 		
@@ -61,13 +63,18 @@ var Zotero_Report_Interface = new function() {
 	 * Load a report for the currently selected items
 	 */
 	function loadItemReport() {
-		var items = ZoteroPane.getSelectedItems(true);
+		var items = ZoteroPane.getSelectedItems();
 		
 		if (!items || !items.length) {
 			throw ('No items currently selected');
 		}
 		
-		window.loadURI('zotero://report/items/' + items.join('-') + '/html/report.html');
+		var keyHashes = [];
+		for each(var item in items) {
+			keyHashes.push(Zotero.Items.getLibraryKeyHash(item));
+		}
+		
+		window.loadURI('zotero://report/items/' + keyHashes.join('-') + '/html/report.html');
 	}
 	
 	
