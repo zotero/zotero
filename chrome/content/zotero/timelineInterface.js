@@ -22,26 +22,24 @@
 
 
 var Zotero_Timeline_Interface = new function() {
-	this.loadTimeline = loadTimeline;
-	
 	/*
 	 * Load a timeline for the currently selected collection
 	 */
-	function loadTimeline() {
+	this.loadTimeline = function () {
 		var uri = 'zotero://timeline/';
-		var id = ZoteroPane.getSelectedCollection(true);
+		var col = ZoteroPane.getSelectedCollection();
 		
-		if (id) {
-			window.loadURI(uri + 'collection/' + id);
+		if (col) {
+			window.loadURI(uri + 'collection/' + Zotero.Collections.getLibraryKeyHash(col));
 			return;
 		}
 		
-		var id = ZoteroPane.getSelectedSavedSearch(true);
-		if (id) {
-			window.loadURI(uri + 'search/' + id);
+		var s = ZoteroPane.getSelectedSavedSearch();
+		if (s) {
+			window.loadURI(uri + 'search/' + Zotero.Searches.getLibraryKeyHash(s));
 			return;
 		}
 		
-		window.loadURI(uri);		
+		window.loadURI(uri);
 	}
 }
