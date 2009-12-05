@@ -41,6 +41,9 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	
 	this.parseLibraryKeyHash = function (libraryKey) {
 		var [libraryID, key] = libraryKey.split('_');
+		if (!key) {
+			return false;
+		}
 		libraryID = parseInt(libraryID);
 		return {
 			libraryID: libraryID ? libraryID : null,

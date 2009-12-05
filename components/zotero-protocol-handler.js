@@ -104,19 +104,72 @@ function ChromeExtensionHandler() {
 				
 				switch (type){
 					case 'collection':
-						var col = Zotero.Collections.get(ids);
+						var lkh = Zotero.Collections.parseLibraryKeyHash(ids);
+						if (lkh) {
+							var col = Zotero.Collections.getByLibraryAndKey(lkh.libraryID, lkh.key);
+						}
+						else {
+							var col = Zotero.Collections.get(ids);
+						}
+						if (!col) {
+							mimeType = 'text/html';
+							content = 'Invalid collection ID or key';
+							break generateContent;
+						}
 						var results = col.getChildItems();
 						break;
 					
 					case 'search':
-						var s = new Zotero.Search();
-						s.id = ids;
-						ids = s.search();
+						var lkh = Zotero.Searches.parseLibraryKeyHash(ids);
+						if (lkh) {
+							var s = Zotero.Searches.getByLibraryAndKey(lkh.libraryID, lkh.key);
+						}
+						else {
+							var s = Zotero.Searches.get(ids);
+						}
+						if (!s) {
+							mimeType = 'text/html';
+							content = 'Invalid search ID or key';
+							break generateContent;
+						}
+						
+						// FIXME: Hack to exclude group libraries for now
+						var s2 = new Zotero.Search();
+						s2.setScope(s);
+						var groups = Zotero.Groups.getAll();
+						for each(var group in groups) {
+							s2.addCondition('libraryID', 'isNot', group.libraryID);
+						}
+						var ids = s2.search();
+						
+						var results = Zotero.Items.get(ids);
 						break;
 					
 					case 'items':
 					case 'item':
 						ids = ids.split('-');
+						
+						// Keys
+						if (Zotero.Items.parseLibraryKeyHash(ids[0])) {
+							var results = [];
+							for each(var lkh in ids) {
+								var lkh = Zotero.Items.parseLibraryKeyHash(lkh);
+								var item = Zotero.Items.getByLibraryAndKey(lkh.libraryID, lkh.key);
+								if (item) {
+									results.push(item);
+								}
+							}
+						}
+						// IDs
+						else {
+							var results = Zotero.Items.get(ids);
+						}
+						
+						if (!results.length) {
+							mimeType = 'text/html';
+							content = 'Invalid ID';
+							break generateContent;
+						}
 						break;
 						
 					default:
@@ -140,16 +193,7 @@ function ChromeExtensionHandler() {
 						var s = new Zotero.Search();
 						s.addCondition('noChildren', 'true');
 						var ids = s.search();
-				}
-				
-				if (!results) {
-					var results = Zotero.Items.get(ids);
-					
-					if (!results) {
-						mimeType = 'text/html';
-						content = 'Invalid ID';
-						break generateContent;
-					}
+						var results = Zotero.Items.get(ids);
 				}
 				
 				var items = [];

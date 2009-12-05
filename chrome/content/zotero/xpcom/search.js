@@ -1560,20 +1560,28 @@ Zotero.Searches = new function(){
 	
 	
 	/*
-	 * Returns an array of saved searches with 'id' and 'name', ordered by name
+	 * Returns an array of saved searches, ordered by name
 	 */
 	function getAll(){
 		var sql = "SELECT savedSearchID AS id, savedSearchName AS name "
-			+ "FROM savedSearches ORDER BY name COLLATE NOCASE";
-		var searches = Zotero.DB.query(sql);
-		if (!searches) {
+				+ "FROM savedSearches ORDER BY name COLLATE NOCASE";
+		var rows = Zotero.DB.query(sql);
+		if (!rows) {
 			return [];
 		}
+		
 		// Do proper collation sort
 		var collation = Zotero.getLocaleCollation();
-		searches.sort(function (a, b) {
+		rows.sort(function (a, b) {
 			return collation.compareString(1, a.name, b.name);
 		});
+		
+		var searches = [];
+		for each(var row in rows) {
+			var search = new Zotero.Search;
+			search.id = row.id;
+			searches.push(search);
+		}
 		return searches;
 	}
 	
