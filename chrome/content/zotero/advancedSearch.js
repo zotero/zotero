@@ -96,7 +96,7 @@ var ZoteroAdvancedSearch = new function() {
 		}
 		
 		var s = _searchBox.search.clone();
-		s.setName(name.value);
+		s.name = name.value;
 		s.save();
 	}
 	

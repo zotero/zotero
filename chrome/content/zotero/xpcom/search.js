@@ -210,9 +210,9 @@ Zotero.Search.prototype.load = function() {
 		var [condition, mode] =
 			Zotero.SearchConditions.parseCondition(conditions[i]['condition']);
 		
-		if (!Zotero.SearchConditions.get(condition)){
-			Zotero.debug("Invalid saved search condition '"
-				+ condition + "' -- skipping", 2);
+		var cond = Zotero.SearchConditions.get(condition);
+		if (!cond || cond.noLoad) {
+			Zotero.debug("Invalid saved search condition '" + condition + "' -- skipping", 2);
 			continue;
 		}
 		
@@ -407,6 +407,30 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 		}
 		return false;
 	}
+	// Shortcut to add a collection
+	else if (condition == 'collectionID') {
+		var c = Zotero.Collections.get(value);
+		if (!c) {
+			var msg = "Collection " + value + " not found";
+			Zotero.debug(msg, 2);
+			Components.utils.reportError(msg);
+			return;
+		}
+		var lkh = Zotero.Collections.getLibraryKeyHash(c);
+		return this.addCondition('collection', operator, lkh, required);
+	}
+	// Shortcut to add a saved search
+	else if (condition == 'savedSearchID') {
+		var s = Zotero.Searches.get(value);
+		if (!s) {
+			var msg = "Saved search " + value + " not found";
+			Zotero.debug(msg, 2);
+			Components.utils.reportError(msg);
+			return;
+		}
+		var lkh = Zotero.Searches.getLibraryKeyHash(s);
+		return this.addCondition('savedSearch', operator, lkh, required);
+	}
 	
 	var searchConditionID = ++this._maxSearchConditionID;
 	
@@ -499,17 +523,16 @@ Zotero.Search.prototype.getSearchConditions = function(){
 		this.load();
 	}
 	var conditions = [];
-	var i = 1;
-	for each(var condition in this._conditions) {
-		conditions[i] = {
-			id: i,
+	for (var id in this._conditions) {
+		var condition = this._conditions[id];
+		conditions[id] = {
+			id: id,
 			condition: condition.condition,
 			mode: condition.mode,
 			operator: condition.operator,
 			value: condition.value,
 			required: condition.required
 		};
-		i++;
 	}
 	return conditions;
 }
@@ -938,7 +961,8 @@ Zotero.Search.prototype._buildQuery = function(){
 	for (var i in this._conditions){
 		var data = Zotero.SearchConditions.get(this._conditions[i]['condition']);
 		
-		if (data['table']){
+		// Has a table or explicitly unspecial
+		if (data.table || (!data.special && typeof data.special != 'undefined')) {
 			conditions.push({
 				name: data['name'],
 				alias: data['name']!=this._conditions[i]['condition']
@@ -1041,8 +1065,6 @@ Zotero.Search.prototype._buildQuery = function(){
 				//
 				if (condition['table']){
 					switch (condition['table']){
-						case 'savedSearches':
-							break;
 						default:
 							condSelectSQL += 'itemID '
 							switch (condition['operator']){
@@ -1093,19 +1115,26 @@ Zotero.Search.prototype._buildQuery = function(){
 						openParens++;
 						break;
 					
-					case 'collectionID':
+					case 'collection':
+						var col;
+						if (condition.value) {
+							var lkh = Zotero.Collections.parseLibraryKeyHash(condition.value);
+							if (lkh) {
+								col = Zotero.Collections.getByLibraryAndKey(lkh.libraryID, lkh.key);
+							}
+						}
+						if (!col) {
+							var msg = "Collection " + condition.value + " specified in saved search doesn't exist";
+							Zotero.debug(msg, 2);
+							Zotero.log(msg, 'warning', 'chrome://zotero/content/xpcom/search.js');
+							continue;
+						}
+						
 						var q = ['?'];
-						var p = [{int:condition['value']}];
+						var p = [col.id];
 						
 						// Search descendent collections if recursive search
 						if (recursive){
-							var col = Zotero.Collections.get(condition['value']);
-							if (!col) {
-								var msg = "Collection " + condition['value'] + " specified in saved search doesn't exist";
-								Zotero.debug(msg, 2);
-								Zotero.log(msg, 'warning', 'chrome://zotero/content/xpcom/search.js');
-								continue;
-							}
 							var descendents = col.getDescendents(false, 'collection');
 							if (descendents){
 								for (var k in descendents){
@@ -1121,14 +1150,26 @@ Zotero.Search.prototype._buildQuery = function(){
 						skipOperators = true;
 						break;
 					
-					case 'savedSearchID':
+					case 'savedSearch':
 						condSQL += "itemID ";
 						if (condition['operator']=='isNot'){
 							condSQL += "NOT ";
 						}
 						condSQL += "IN (";
-						var search = new Zotero.Search();
-						search.id = condition.value;
+						
+						var search;
+						if (condition.value) {
+							var lkh = Zotero.Searches.parseLibraryKeyHash(condition.value);
+							if (lkh) {
+								search = Zotero.Searches.getByLibraryAndKey(lkh.libraryID, lkh.key);
+							}
+						}
+						if (!search) {
+							var msg = "Search " + condition.value + " specified in saved search doesn't exist";
+							Zotero.debug(msg, 2);
+							Zotero.log(msg, 'warning', 'chrome://zotero/content/xpcom/search.js');
+							continue;
+						}
 						
 						// Check if there are any post-search filters
 						var hasFilter = search.hasPostSearchFilter();
@@ -1655,8 +1696,9 @@ Zotero.SearchConditions = new function(){
 	 * Define and set up the available advanced search conditions
 	 *
 	 * Flags:
-	 *  - special
-	 *  - template
+	 *  - special (don't show in search window menu)
+	 *  - template (special handling)
+	 *  - noLoad (can't load from saved search)
 	 */
 	function _init(){
 		var conditions = [
@@ -1724,18 +1766,6 @@ Zotero.SearchConditions = new function(){
 				}
 			},
 			
-			// Saved search to search within
-			{
-				name: 'savedSearchID',
-				operators: {
-					is: true,
-					isNot: true
-				},
-				table: 'savedSearches',
-				field: 'savedSearchID',
-				special: true
-			},
-			
 			{
 				name: 'quicksearch',
 				operators: {
@@ -1743,17 +1773,40 @@ Zotero.SearchConditions = new function(){
 					isNot: true,
 					contains: true,
 					doesNotContain: true
-				}
+				},
+				noLoad: true
 			},
 			
 			// Quicksearch block markers
 			{
-				name: 'blockStart'
+				name: 'blockStart',
+				noLoad: true
 			},
 			
 			{
-				name: 'blockEnd'
+				name: 'blockEnd',
+				noLoad: true
 			},
+			
+			// Shortcuts for adding collections and searches by id
+			{
+				name: 'collectionID',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				noLoad: true
+			},
+			
+			{
+				name: 'savedSearchID',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				noLoad: true
+			},
+
 			
 			//
 			// Standard conditions
@@ -1761,13 +1814,23 @@ Zotero.SearchConditions = new function(){
 			
 			// Collection id to search within
 			{
-				name: 'collectionID',
+				name: 'collection',
 				operators: {
 					is: true,
 					isNot: true
 				},
 				table: 'collectionItems',
 				field: 'collectionID'
+			},
+			
+			// Saved search to search within
+			{
+				name: 'savedSearch',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				special: false
 			},
 			
 			{
