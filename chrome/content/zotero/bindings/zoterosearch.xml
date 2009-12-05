@@ -44,6 +44,7 @@
 							conditionsBox.removeChild(conditionsBox.firstChild);
 						
 						var conditions = this.search.getSearchConditions();
+						
 						for(var id in conditions)
 						{
 							// Checkboxes
@@ -361,12 +362,10 @@
 					
 					// Generate drop-down menu instead of textbox for certain conditions
 					switch (conditionsMenu.value){
-						case 'collectionID':
-							var merged = [];
-							
+						case 'collection':
+							var rows = [];
 							var cols = Zotero.getCollections(false, true);
-							for (var i in cols)
-							{
+							for (var i in cols) {
 								// Indent subcollections
 								var indent = '';
 								if (cols[i].level) {
@@ -375,19 +374,20 @@
 									}
 									indent += '- ';
 								}
-								merged.push([indent + cols[i].getName(), 'C' + cols[i].getID()]);
+								rows.push([indent + cols[i].name, 'C' + Zotero.Collections.getLibraryKeyHash(cols[i])]);
 							}
-							
+							this.createValueMenu(rows);
+							break;
+						
+						case 'savedSearch':
+							var rows = [];
 							var searches = Zotero.Searches.getAll();
-							for (var i in searches)
-							{
-								if (searches[i]['id'] != this.parent.search.getID())
-								{
-									merged.push([searches[i]['name'], 'S' + searches[i]['id']]);
+							for (var i in searches) {
+								if (searches[i].id != this.parent.search.id) {
+									rows.push([searches[i].name, 'S' + Zotero.Searches.getLibraryKeyHash(searches[i])]);
 								}
 							}
-							
-							this.createValueMenu(merged);
+							this.createValueMenu(rows);
 							break;
 						
 						case 'itemTypeID':
@@ -446,7 +446,9 @@
 					var operatorsList = this.id('operatorsmenu');
 					
 					// Drop-down menu
-					if (conditionsMenu.value == 'collectionID' || conditionsMenu.value == 'itemTypeID'
+					if (conditionsMenu.value == 'collection'
+							|| conditionsMenu.value == 'savedSearch'
+							|| conditionsMenu.value == 'itemTypeID'
 							|| conditionsMenu.value == 'fileTypeID') {
 						this.id('valuefield').hidden = true;
 						this.id('valuemenu').hidden = false;
@@ -515,20 +517,17 @@
 							var prefix = '';
 							
 							// Handle special conditions
-							switch (condition['condition'])
-							{
-								case 'savedSearchID':
-									this.id('conditionsmenu').value = 'collectionID';
+							switch (condition.condition) {
+								case 'savedSearch':
 									prefix = 'S';
 									break;
 								
-								case 'collectionID':
+								case 'collection':
 									prefix = 'C';
-									// fall through
-									
-								default:
-									this.id('conditionsmenu').value = condition['condition'];
+									break;
 							}
+							
+							this.id('conditionsmenu').value = condition.condition;
 							
 							// Convert datetimes from UTC to localtime
 							if ((condition['condition']=='accessDate' ||
@@ -591,16 +590,16 @@
 							
 							// Handle special C1234 and S5678 form for
 							// collections and searches
-							else if (this.id('conditionsmenu').value=='collectionID')
+							else if (this.id('conditionsmenu').value == 'collection' || this.id('conditionsmenu').value == 'savedSearch')
 							{
 								var letter = this.id('valuemenu').value.substr(0,1);
 								if (letter=='C')
 								{
-									condition = 'collectionID';
+									condition = 'collection';
 								}
 								else if (letter=='S')
 								{
-									condition = 'savedSearchID';
+									condition = 'savedSearch';
 								}
 								var value = this.id('valuemenu').value.substr(1);
 							}

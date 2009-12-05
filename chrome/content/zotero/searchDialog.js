@@ -21,6 +21,13 @@ function doUnload()
 
 function doAccept()
 {
-	document.getElementById('search-box').search.setName(document.getElementById('search-name').value);
-	io.dataOut = document.getElementById('search-box').save();
+	document.getElementById('search-box').search.name = document.getElementById('search-name').value;
+	try {
+		io.dataOut = document.getElementById('search-box').save();
+	}
+	catch (e) {
+		Zotero.debug(e, 1);
+		Components.utils.reportError(e);
+		throw (e);
+	}
 }
