@@ -668,6 +668,12 @@ Zotero.Sync.Runner = new function () {
 					Zotero.debug('Sync already in progress -- skipping auto-sync', 4);
 					return;
 				}
+				
+				if (Zotero.Sync.Server.manualSyncRequired) {
+					Zotero.debug('Manual sync required -- skipping auto-sync', 4);
+					return;
+				}
+				
 				Zotero.Sync.Runner.sync(background);
 			}
 		}
@@ -1097,6 +1103,8 @@ Zotero.Sync.Server = new function () {
 	});
 	
 	
+	this.canAutoResetClient = true;
+	this.manualSyncRequired = false;
 	this.nextLocalSyncDate = false;
 	this.apiVersion = 6;
 	
@@ -1113,7 +1121,6 @@ Zotero.Sync.Server = new function () {
 	var _sessionID;
 	var _throttleTimeout;
 	var _checkTimer;
-	var _canAutoResetClient = true;
 	
 	var _callbacks = {
 		onSuccess: function () {
@@ -2690,6 +2697,8 @@ Zotero.Sync.Server.Data = new function() {
 			//
 			if (toReconcile.length) {
 				if (Zotero.Sync.Runner.background) {
+					Zotero.Sync.Server.manualSyncRequired = true;
+					
 					// TODO: localize
 					throw ("An automatic sync resulted in a conflict that requires manual intervention.\n\nClick the sync icon to sync manually.");
 				}
