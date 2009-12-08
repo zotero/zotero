@@ -205,10 +205,22 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 					
 					self._showItem(new Zotero.ItemGroup('group', groups[i]), 1, null, startOpen);
 					
+					var newRows = 0;
+					
 					// Add group collections
 					var collections = groups[i].getCollections();
 					for (var j=0; j<collections.length; j++) {
 						self._showItem(new Zotero.ItemGroup('collection', collections[j]), 2);
+						newRows++;
+					}
+					
+					// Add group searches
+					var savedSearches = Zotero.Searches.getAll(groups[i].libraryID);
+					if (savedSearches) {
+						for (var j=0; j<savedSearches.length; j++) {
+							self._showItem(new Zotero.ItemGroup('search', savedSearches[j]), 2);
+							newRows++;
+						}
 					}
 				}
 			}
@@ -608,14 +620,26 @@ Zotero.CollectionTreeView.prototype.toggleOpenState = function(row)
 			}
 			else {
 				if (itemGroup.isGroup()) {
-					var collections = itemGroup.ref.getCollections(); // Get child collections
+					var collections = itemGroup.ref.getCollections();
 				}
 				else {
-					var collections = Zotero.getCollections(itemGroup.ref.id); // Get child collections
+					var collections = Zotero.getCollections(itemGroup.ref.id);
 				}
+				// Add child collections
 				for (var i=0; i<collections.length; i++) {
-					this._showItem(new Zotero.ItemGroup('collection', collections[i]), thisLevel+1, row+i+1); //insert new row
+					this._showItem(new Zotero.ItemGroup('collection', collections[i]), thisLevel + 1, row + count + 1);
 					count++;
+				}
+				
+				// Add group searches
+				if (itemGroup.isGroup()) {
+					var savedSearches = Zotero.Searches.getAll(itemGroup.ref.libraryID);
+					if (savedSearches) {
+						for (var i=0; i<savedSearches.length; i++) {
+							this._showItem(new Zotero.ItemGroup('search', savedSearches[i]), thisLevel + 1, row + count + 1);
+							count;
+						}
+					}
 				}
 			}
 		}
@@ -1635,7 +1659,7 @@ Zotero.ItemGroup.prototype.__defineGetter__('editable', function () {
 	if (this.isGroup()) {
 		return this.ref.editable;
 	}
-	if (this.isCollection()) {
+	if (this.isCollection() || this.isSearch()) {
 		var type = Zotero.Libraries.getType(libraryID);
 		if (type == 'group') {
 			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
@@ -1720,9 +1744,15 @@ Zotero.ItemGroup.prototype.getChildItems = function()
 	
 	// FIXME: Hack to exclude group libraries for now
 	if (this.isSearch()) {
-		var groups = Zotero.Groups.getAll();
-		for each(var group in groups) {
-			s.addCondition('libraryID', 'isNot', group.libraryID);
+		var currentLibraryID = this.ref.libraryID;
+		if (currentLibraryID) {
+			s.addCondition('libraryID', 'is', currentLibraryID);
+		}
+		else {
+			var groups = Zotero.Groups.getAll();
+			for each(var group in groups) {
+				s.addCondition('libraryID', 'isNot', group.libraryID);
+			}
 		}
 	}
 	
