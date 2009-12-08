@@ -388,7 +388,7 @@
 					</hbox>
 					<toolbarbutton id="zotero-tb-sync-warning" hidden="true"/>
 					<toolbarbutton id="zotero-tb-sync" class="zotero-tb-button" tooltip="_child"
-							oncommand="Zotero.Sync.Server.canAutoResetClient = true; Zotero.Sync.Runner.sync()">
+							oncommand="Zotero.Sync.Server.canAutoResetClient = true; Zotero.Sync.Server.manualSyncRequired = false; Zotero.Sync.Runner.sync()">
 						<tooltip
 								id="zotero-tb-sync-tooltip"
 								onpopupshowing="Zotero.Sync.Runner.registerSyncStatusLabel(this.firstChild.nextSibling)"
