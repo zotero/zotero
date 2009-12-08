@@ -1578,7 +1578,6 @@ Zotero.Searches = new function(){
 	this.constructor.prototype = new Zotero.DataObjects();
 	
 	this.get = get;
-	this.getAll = getAll;
 	this.erase = erase;
 	
 	
@@ -1600,13 +1599,24 @@ Zotero.Searches = new function(){
 	}
 	
 	
-	/*
-	 * Returns an array of saved searches, ordered by name
+	/**
+	 * Returns an array of Zotero.Search objects, ordered by name
+	 *
+	 * @param	{Integer|null}	[libraryID=null]
 	 */
-	function getAll(){
+	this.getAll = function (libraryID) {
 		var sql = "SELECT savedSearchID AS id, savedSearchName AS name "
-				+ "FROM savedSearches ORDER BY name COLLATE NOCASE";
-		var rows = Zotero.DB.query(sql);
+				+ "FROM savedSearches WHERE libraryID";
+		if (libraryID) {
+			sql += "=?";
+			var params = [libraryID];
+		}
+		else {
+			sql += " IS NULL";
+			var params = null;
+		}
+		sql += " ORDER BY name COLLATE NOCASE";
+		var rows = Zotero.DB.query(sql, params);
 		if (!rows) {
 			return [];
 		}
@@ -2002,7 +2012,8 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'items',
 				field: 'libraryID',
-				special: true
+				special: true,
+				noLoad: true
 			},
 			
 			{

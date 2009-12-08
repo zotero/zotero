@@ -753,6 +753,7 @@ var ZoteroPane = new function()
 		}
 		
 		var s = new Zotero.Search();
+		s.libraryID = this.getSelectedLibraryID();
 		s.addCondition('title', 'contains', '');
 		
 		var untitled = Zotero.getString('pane.collections.untitled');
@@ -1745,7 +1746,7 @@ var ZoteroPane = new function()
 		}
 		// Group
 		else if (itemGroup.isGroup()) {
-			show = [m.newCollection];
+			show = [m.newCollection, m.newSavedSearch];
 		}
 		// Library
 		else
@@ -1754,8 +1755,8 @@ var ZoteroPane = new function()
 		}
 		
 		// Disable some actions if user doesn't have write access
-		var s = [m.editSelectedCollection, m.removeCollection, m.newCollection, m.newSavedSearch];
-		if (itemGroup.isGroup() && !itemGroup.ref.editable) {
+		var s = [m.editSelectedCollection, m.removeCollection, m.newCollection, m.newSavedSearch, m.newSubcollection];
+		if (itemGroup.isWithinGroup() && !itemGroup.editable) {
 			disable = disable.concat(s);
 		}
 		else {
