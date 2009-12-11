@@ -76,7 +76,7 @@
 				<body>
 					<![CDATA[
 						var conditionsBox = this.id('conditions');
-						var condition = document.createElement('searchcondition');
+						var condition = document.createElement('zoterosearchcondition');
 						condition.setAttribute('flex','1');
 						
 						conditionsBox.appendChild(condition);
