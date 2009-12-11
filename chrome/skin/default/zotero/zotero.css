@@ -115,7 +115,7 @@ zoterotagselector
 }
 
 
-searchcondition
+zoterosearchcondition
 {
 	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-condition');
 }
