@@ -61,7 +61,7 @@ Zotero.CSL.POSITION_IBID_WITH_LOCATOR = 3;
 
 Zotero.CSL._dateVariables = {
 	"issued":true,
-	"accessDate":true
+	"accessed":true
 }
 
 Zotero.CSL._namesVariables = {
