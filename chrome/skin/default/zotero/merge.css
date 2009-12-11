@@ -92,6 +92,6 @@ hbox:not([mergetype=note]) zoteromergepane:active[id=rightpane] groupbox caption
 	font-weight: bold;
 }
 
-zoteromergepane[id=mergepane] {
-	min-width: 30em;
+zoteromergepane {
+	min-width: 28em;
 }
