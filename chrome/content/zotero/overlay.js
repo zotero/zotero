@@ -1810,14 +1810,7 @@ var ZoteroPane = new function()
 		
 		var enable = [], disable = [], show = [], hide = [], multiple = '';
 		
-		// TODO: implement menu for remote items
-		if (!this.collectionsView.editable) {
-			for each(var pos in m) {
-				disable.push(pos);
-			}
-		}
-		
-		else if (this.itemsView && this.itemsView.selection.count > 0) {
+		if (this.itemsView && this.itemsView.selection.count > 0) {
 			enable.push(m.showInLibrary, m.addNote, m.addAttachments,
 				m.sep2, m.duplicateItem, m.deleteItem, m.deleteFromLibrary,
 				m.exportItems, m.createBib, m.loadReport);
@@ -2004,6 +1997,23 @@ var ZoteroPane = new function()
 				m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
 			hide.push(m.addNote, m.addAttachments, m.sep2, m.sep4, m.reindexItem,
 				m.createParent, m.recognizePDF, m.renameAttachments);
+		}
+		
+		// TODO: implement menu for remote items
+		if (!this.collectionsView.editable) {
+			for (var i in m) {
+				switch (i) {
+					case 'exportItems':
+					case 'createBib':
+					case 'loadReport':
+						continue;
+				}
+				disable.push(m[i]);
+				var index = enable.indexOf(m[i]);
+				if (index != -1) {
+					enable.splice(index, 1);
+				}
+			}
 		}
 		
 		// Remove from collection
