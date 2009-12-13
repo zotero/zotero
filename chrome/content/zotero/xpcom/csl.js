@@ -996,10 +996,9 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 						
 						variableString.append(string, newChild);
 					}
-					
-					newString.concat(variableString);
 				}
 				
+				newString.concat(variableString);
 				formattedString.concat(newString, child);
 			}
 			
