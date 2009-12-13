@@ -409,7 +409,11 @@
 						if (checkState.value) {
 							var renamed = item.renameAttachmentFile(newTitle.value);
 							if (renamed == -1) {
-								var confirmed = confirm(newTitle.value + ' exists. Overwrite existing file?');
+								var confirmed = nsIPS.confirm(
+									window,
+									'',
+									newTitle.value + ' exists. Overwrite existing file?'
+								);
 								if (confirmed) {
 									item.renameAttachmentFile(newTitle.value, true);
 									break;
