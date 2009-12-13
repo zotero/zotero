@@ -105,9 +105,14 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getStorageFileInfo = function (item, 
 		info.compressed = req.getResponseHeader('X-Zotero-Compressed') == 'Yes';
 		Zotero.debug(info);
 		
-		if (!info) {
-			callback(item, false);
-			return;
+		if (!info.hash) {
+			Zotero.debug('========');
+			Zotero.debug("Hash not found in HEAD response in " + funcName, 2);
+			Zotero.debug(req.status);
+			Zotero.debug(item.key);
+			Zotero.debug(req.responseText);
+			//callback(item, false);
+			//return;
 		}
 		
 		callback(item, info);
