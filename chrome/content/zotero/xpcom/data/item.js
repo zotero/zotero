@@ -2592,15 +2592,18 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 	try {
 		newName = Zotero.File.getValidFileName(newName);
 		
-		if (file.leafName == newName) {
-			return true;
-		}
-		
 		var dest = file.parent;
 		dest.append(newName);
 		
+		// Ignore if no change
+		//
+		// Note: Just comparing file.leafName to newName isn't reliable
+		if (file.leafName == dest.leafName) {
+			return true;
+		}
+		
 		if (overwrite) {
-			dest.remove(null);
+			dest.remove(false);
 		}
 		else if (dest.exists()) {
 			return -1;
@@ -2635,9 +2638,21 @@ Zotero.Item.prototype.relinkAttachmentFile = function(file) {
 		throw('Cannot relink linked URL in Zotero.Items.relinkAttachmentFile()');
 	}
 	
+	var newName = Zotero.File.getValidFileName(file.leafName);
+	if (!newName) {
+		throw ("No valid characters in filename after filtering in Zotero.Item.relinkAttachmentFile()");
+	}
+	
+	// Rename file to filtered name if necessary
+	if (file.leafName != newName) {
+		Zotero.debug("Renaming file '" + file.leafName + "' to '" + newName + "'");
+		file.moveTo(null, newName);
+	}
+	
 	var path = Zotero.Attachments.getPath(file, linkMode);
 	this.attachmentPath = path;
 	this.save();
+	return false;
 }
 
 
