@@ -652,6 +652,10 @@ Zotero.Sync.Storage.Session.ZFS.prototype._onUploadComplete = function (httpRequ
 		case 201:
 			break;
 		
+		case 500:
+			this.onError("File upload failed. Please try again.");
+			return;
+		
 		default:
 			this.onError("Unexpected file upload status " + status
 				+ " in Zotero.Sync.Storage._onUploadComplete()");
