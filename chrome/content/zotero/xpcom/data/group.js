@@ -321,9 +321,8 @@ Zotero.Group.prototype.erase = function() {
 	// Delete saved searches
 	sql = "SELECT savedSearchID FROM savedSearches WHERE libraryID=?";
 	ids = Zotero.DB.columnQuery(sql, this.libraryID);
-	for each(var id in ids) {
-		obj = Zotero.Searches.get(id);
-		obj.erase();
+	if (ids) {
+		Zotero.Searches.erase(ids);
 	}
 	
 	// Delete tags
