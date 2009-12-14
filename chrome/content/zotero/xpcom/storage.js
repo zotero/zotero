@@ -806,10 +806,9 @@ Zotero.Sync.Storage = new function () {
 			// ecrypt (on Ubuntu, at least) can result in a lower limit --
 			// not much we can do about this, but log a warning
 			else if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
-				var msg = "Error creating file '" + destFile.leafName + "' "
+				var e = "Error creating file '" + destFile.leafName + "' "
 					+ "(Are you using filesystem encryption such as ecrypt "
 					+ "that results in a filename length limit below 255 bytes?)";
-				Components.utils.reportError(msg);
 			}
 			
 			if (windowsLength || nameLength) {
