@@ -807,7 +807,7 @@ Zotero.Sync.Storage = new function () {
 			// not much we can do about this, but log a warning
 			else if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
 				var e = "Error creating file '" + destFile.leafName + "' "
-					+ "(Are you using filesystem encryption such as ecrypt "
+					+ "(Are you using filesystem encryption such as eCryptfs "
 					+ "that results in a filename length limit below 255 bytes?)";
 			}
 			
