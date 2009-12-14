@@ -805,8 +805,15 @@ Zotero.Sync.Runner = new function () {
 						Components.utils.reportError(message);
 					}
 					
+					if (typeof buttonText == 'undefined') {
+						// TODO: localize
+						buttonText = "Report Error...";
+						buttonCallback = function () {
+							win.ZoteroPane.reportErrors();
+						}
+					}
 					// If secondary button is explicitly null, just use an alert
-					if (buttonText === null) {
+					else if (buttonText === null) {
 						pr.alert(title, message);
 						return;
 					}
@@ -818,15 +825,12 @@ Zotero.Sync.Runner = new function () {
 						message,
 						buttonFlags,
 						"",
-						// TODO: localize
-						"Report Error...",
+						buttonText,
 						"", null, {}
 					);
 					
 					if (index == 1) {
-						win.setTimeout(function () {
-							win.ZoteroPane.reportErrors();
-						}, 1);
+						setTimeout(buttonCallback, 1);
 					}
 				}
 			}

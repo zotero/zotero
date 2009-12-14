@@ -99,8 +99,23 @@ Zotero.Sync.Storage = new function () {
 				}
 				else {
 					Zotero.debug(_session.name + " verification failed");
-					_callbacks.onError(_session.name + " verification failed. Verify your "
-						+ "WebDAV settings in the Sync pane of the Zotero preferences.");
+					
+					var e = new Zotero.Error(
+						_session.name + " verification failed. Verify your "
+							+ "WebDAV settings in the Sync pane of the Zotero preferences.",
+						0,
+						{
+							// TODO: localize
+							dialogButtonText: "Open Sync Preferences...",
+							dialogButtonCallback: function () {
+								var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+										   .getService(Components.interfaces.nsIWindowMediator);
+								var lastWin = wm.getMostRecentWindow("navigator:browser");
+								lastWin.ZoteroPane.openPreferences('zotero-prefpane-sync');
+							}
+						}
+					);
+					_callbacks.onError(e);
 				}
 			}
 			
