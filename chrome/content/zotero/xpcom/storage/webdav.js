@@ -264,9 +264,11 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._setStorageModificationTime = funct
  * @param	{Zotero.Sync.Storage.Request}	[request]
  */
 Zotero.Sync.Storage.Session.WebDAV.prototype.downloadFile = function (request) {
+	var funcName = "Zotero.Sync.Storage.Session.WebDAV.downloadFile()";
+	
 	var item = Zotero.Sync.Storage.getItemFromRequestName(request.name);
 	if (!item) {
-		throw ("Item '" + request.name + "' not found in Zotero.Sync.Storage.Session.WebDAV.downloadFile()");
+		throw ("Item '" + request.name + "' not found in " + funcName);
 	}
 	
 	var self = this;
@@ -280,13 +282,19 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.downloadFile = function (request) {
 		}
 		
 		if (!mdate) {
-			Zotero.debug("Remote file not found for item " + item.key);
+			Zotero.debug("Remote file not found for item " + Zotero.Items.getLibraryKeyHash(item));
 			request.finish();
 			return;
 		}
 		
 		try {
 			var syncModTime = Zotero.Date.toUnixTimestamp(mdate);
+			if (!syncModTime) {
+				var msg = "Invalid mod date '" + mdate + "' for item "
+					+ Zotero.Items.getLibraryKeyHash(item) + " in " + funcName;
+				Zotero.debug(msg, 1);
+				throw (msg);
+			}
 			
 			// Skip download if local file exists and matches mod time
 			var file = item.getFile();
