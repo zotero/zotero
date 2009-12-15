@@ -367,13 +367,17 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.downloadFile = function (request) {
 				}
 			);
 			
-			Zotero.debug('Saving with saveURI()');
+			// Don't display password in console
+			var disp = uri.clone();
+			if (disp.password) {
+				disp.password = '********';
+			}
+			Zotero.debug('Saving ' + disp.spec + ' with saveURI()');
 			const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
 			var wbp = Components
 				.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
 				.createInstance(nsIWBP);
 			wbp.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
-			
 			wbp.progressListener = listener;
 			wbp.saveURI(uri, null, null, null, null, destFile);
 		}

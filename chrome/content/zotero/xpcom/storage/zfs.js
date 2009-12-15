@@ -256,7 +256,6 @@ Zotero.Sync.Storage.Session.ZFS.prototype.downloadFile = function (request) {
 			if (disp.password) {
 				disp.password = "********";
 			}
-			
 			Zotero.debug('Saving ' + disp.spec + ' with saveURI()');
 			const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
 			var wbp = Components
