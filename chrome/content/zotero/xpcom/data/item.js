@@ -2492,6 +2492,19 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			}
 			// Strip "storage:"
 			var path = row.path.substr(8);
+			// setRelativeDescriptor() silently uses the parent directory on Windows
+			// if the filename contains certain characters, so strip them —
+			// but don't skip characters outside of XML range, since they may be
+			// correct in the opaque relative descriptor string
+			//
+			// This is a bad place for this, since the change doesn't make it
+			// back up to the sync server, but we do it to make sure we don't
+			// accidentally use the parent dir. Syncing to OS X, which doesn't
+			// exhibit this bug, will properly correct such filenames in
+			// storage.js and propagate the change
+			if (Zotero.isWin) {
+				path = Zotero.File.getValidFileName(path, true);
+			}
 			var file = Zotero.Attachments.getStorageDirectory(this.id);
 			file.QueryInterface(Components.interfaces.nsILocalFile);
 			file.setRelativeDescriptor(file, path);
@@ -2554,9 +2567,6 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 }
 
 
-/**
- * _row_ is optional itemAttachments row if available to skip queries
- */
 Zotero.Item.prototype.getFilename = function () {
 	if (!this.isAttachment()) {
 		throw ("getFileName() can only be called on attachment items in Zotero.Item.getFilename()");
@@ -2652,6 +2662,7 @@ Zotero.Item.prototype.relinkAttachmentFile = function(file) {
 	var path = Zotero.Attachments.getPath(file, linkMode);
 	this.attachmentPath = path;
 	this.save();
+	
 	return false;
 }
 

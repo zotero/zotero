@@ -639,7 +639,7 @@ Zotero.Sync.Storage = new function () {
 			
 			// Only save hash if file isn't compressed
 			if (!data.compressed) {
-				Zotero.Sync.Storage.setSyncedHash(item.id, syncHash, false);
+				Zotero.Sync.Storage.setSyncedHash(item.id, syncHash);
 			}
 			Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
 		}
@@ -793,16 +793,35 @@ Zotero.Sync.Storage = new function () {
 		if (!file) {
 			throw ("Empty path for item " + item.key + " in " + funcName);
 		}
-		var newName = file.leafName;
-		var returnFile = null
 		
-		Zotero.debug("Moving download file " + tempFile.leafName + " into attachment directory");
+		var itemFileName = item.getFilename();
+		var fileName = file.leafName;
+		var renamed = false;
+		
+		// If file doesn't match the known filename, use that name
+		if (itemFileName != fileName) {
+			Zotero.debug("Renaming file '" + fileName + "' to known filename '" + itemFileName + "'");
+			fileName = itemFileName;
+			renamed = true;
+		}
+		
+		// Make sure the new filename is valid, in case an invalid character made it over
+		// (e.g., from before we checked for them)
+		var filteredName = Zotero.File.getValidFileName(fileName);
+		if (filteredName != fileName) {
+			Zotero.debug("Filtering filename '" + fileName + "' to '" + filteredName + "'");
+			fileName = filteredName;
+			renamed = true;
+		}
+		
+		Zotero.debug("Moving download file " + tempFile.leafName + " into attachment directory as '" + fileName + "'");
 		try {
-			tempFile.moveTo(parentDir, newName);
+			tempFile.moveTo(parentDir, fileName);
 		}
 		catch (e) {
 			var destFile = parentDir.clone();
-			destFile.append(newName);
+			destFile.QueryInterface(Components.interfaces.nsILocalFile);
+			destFile.setRelativeDescriptor(parentDir, fileName);
 			
 			var windowsLength = false;
 			var nameLength = false;
@@ -818,8 +837,8 @@ Zotero.Sync.Storage = new function () {
 			else if (e.name == "NS_ERROR_FAILURE" && destFile.leafName.length >= 244) {
 				nameLength = true;
 			}
-			// ecrypt (on Ubuntu, at least) can result in a lower limit --
-			// not much we can do about this, but log a warning
+			// ecrypt (on Ubuntu, at least) can result in a lower limit —
+			// not much we can do about this, but throw a specific error
 			else if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
 				var e = "Error creating file '" + destFile.leafName + "' "
 					+ "(Are you using filesystem encryption such as eCryptfs "
@@ -850,22 +869,26 @@ Zotero.Sync.Storage = new function () {
 				// Shorten file if it's too long -- we don't relink it, but this should
 				// be pretty rare and probably only occurs on extraneous files with
 				// gibberish for filenames
-				var newName = destFile.leafName.substr(0, newLength - (ext.length + 1)) + ext;
-				var msg = "Shortening filename to '" + newName + "'";
+				var fileName = destFile.leafName.substr(0, newLength - (ext.length + 1)) + ext;
+				var msg = "Shortening filename to '" + fileName + "'";
 				Zotero.debug(msg, 2);
 				Components.utils.reportError(msg);
 				
-				tempFile.moveTo(parentDir, newName);
-				
-				destFile = parentDir.clone();
-				destFile.append(newName);
-				
-				// processDownload() needs to know that we're renaming the file
-				returnFile = destFile;
+				tempFile.moveTo(parentDir, fileName);
+				renamed = true;
 			}
 			else {
 				throw(e);
 			}
+		}
+		
+		var returnFile = null;
+		// processDownload() needs to know that we're renaming the file
+		if (renamed) {
+			destFile = parentDir.clone();
+			destFile.QueryInterface(Components.interfaces.nsILocalFile);
+			destFile.setRelativeDescriptor(parentDir, fileName);
+			returnFile = destFile;
 		}
 		
 		return returnFile;
@@ -914,9 +937,12 @@ Zotero.Sync.Storage = new function () {
 		}
 		
 		var returnFile = null;
+		var count = 0;
 		
 		var entries = zipReader.findEntries(null);
 		while (entries.hasMore()) {
+			var renamed = false;
+			count++;
 			var entryName = entries.getNext();
 			var b64re = /%ZB64$/;
 			if (entryName.match(b64re)) {
@@ -933,10 +959,30 @@ Zotero.Sync.Storage = new function () {
 				continue;
 			}
 			
+			var itemFileName = item.getFilename();
+			
+			// If only one file in zip and it doesn't match the known filename,
+			// take our chances and use that name
+			if (count == 1 && !entries.hasMore()) {
+				if (itemFileName != fileName) {
+					Zotero.debug("Renaming single file '" + fileName + "' in ZIP to known filename '" + itemFileName + "'");
+					fileName = itemFileName;
+					renamed = true;
+				}
+			}
+			
+			var primaryFile = itemFileName == fileName;
+			
 			// Make sure the new filename is valid, in case an invalid character
-			// for this OS somehow make it into the ZIP (e.g., from before we checked
-			// for them or if a user manually renamed and relinked a file on another OS)
-			fileName = Zotero.File.getValidFileName(fileName);
+			// somehow make it into the ZIP (e.g., from before we checked for them)
+			var filteredName = Zotero.File.getValidFileName(fileName);
+			if (filteredName != fileName) {
+				Zotero.debug("Filtering filename '" + fileName + "' to '" + filteredName + "'");
+				fileName = filteredName;
+				if (primaryFile) {
+					renamed = true;
+				}
+			}
 			
 			Zotero.debug("Extracting " + fileName);
 			var destFile = parentDir.clone();
@@ -976,9 +1022,6 @@ Zotero.Sync.Storage = new function () {
 				}
 				
 				if (windowsLength || nameLength) {
-					// Is this the main attachment file?
-					var primaryFile = item.getFile(null, true).leafName == destFile.leafName;
-					
 					// Preserve extension
 					var matches = destFile.leafName.match(/\.[a-z0-9]{0,8}$/);
 					var ext = matches ? matches[0] : "";
@@ -1026,9 +1069,8 @@ Zotero.Sync.Storage = new function () {
 					
 					destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
 					
-					// If we're renaming the main file, processDownload() needs to know
 					if (primaryFile) {
-						returnFile = destFile;
+						renamed = true;
 					}
 				}
 				else {
@@ -1049,6 +1091,11 @@ Zotero.Sync.Storage = new function () {
 				continue;
 			}
 			destFile.permissions = 0644;
+			
+			// If we're renaming the main file, processDownload() needs to know
+			if (renamed) {
+				returnFile = destFile;
+			}
 		}
 		zipReader.close();
 		zipFile.remove(false);
