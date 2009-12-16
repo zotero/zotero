@@ -225,6 +225,16 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._getStorageModificationTime = funct
 			mtime = req.responseText;
 		}
 		
+		// Delete invalid .prop files
+		if (!(mtime + '').match(/^[0-9]{10}$/)) {
+			var msg = "Invalid mod date '" + Zotero.Utilities.prototype.ellipsize(mtime, 20)
+				+ "' for item " + Zotero.Items.getLibraryKeyHash(item) + " in " + funcName;
+			Zotero.debug(msg, 1);
+			self._deleteStorageFiles([item.key + ".prop"], null, self);
+			self.onError(msg);
+			return;
+		}
+		
 		var mdate = new Date(mtime * 1000);
 		callback(item, mdate);
 	});
@@ -289,12 +299,6 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.downloadFile = function (request) {
 		
 		try {
 			var syncModTime = Zotero.Date.toUnixTimestamp(mdate);
-			if (!syncModTime) {
-				var msg = "Invalid mod date '" + mdate + "' for item "
-					+ Zotero.Items.getLibraryKeyHash(item) + " in " + funcName;
-				Zotero.debug(msg, 1);
-				throw (msg);
-			}
 			
 			// Skip download if local file exists and matches mod time
 			var file = item.getFile();
