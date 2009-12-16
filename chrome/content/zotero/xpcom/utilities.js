@@ -529,6 +529,24 @@ Zotero.Utilities.prototype.lpad = function(string, pad, length) {
 
 
 /**
+ * Shorten and add an ellipsis to a string if necessary
+ *
+ * @param	{String}	str
+ * @param	{Integer}	len
+ * @param	{Boolean}	[countChars=false]
+ */
+Zotero.Utilities.prototype.ellipsize = function (str, len, countChars) {
+	if (!len) {
+		throw ("Length not specified in Zotero.Utilities.ellipsize()");
+	}
+	if (str.length > len) {
+		return str.substr(0, len) + '...' + (countChars ? ' (' + str.length + ' chars)' : '');
+	}
+	return str;
+}
+
+
+/**
   * Port of PHP's number_format()
   *
   * MIT Licensed
