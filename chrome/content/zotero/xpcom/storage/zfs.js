@@ -93,8 +93,10 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getStorageFileInfo = function (item, 
 			return;
 		}
 		else if (req.status != 200) {
+			var msg = "Unexpected status code " + req.status + " in " + funcName;
+			Zotero.debug(msg + " (" + Zotero.Items.getLibraryKeyHash(item) + ")", 1);
 			Zotero.debug(req.responseText);
-			self.onError("Unexpected status code " + req.status + " in " + funcName);
+			self.onError(msg);
 			return;
 		}
 		
@@ -485,8 +487,10 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getFileUploadParameters = function (i
 			return;
 		}
 		else if (req.status != 200) {
+			var msg = "Unexpected status code " + req.status + " in " + funcName;
+			Zotero.debug(msg + " (" + Zotero.Items.getLibraryKeyHash(item) + ")", 1);
 			Zotero.debug(req.responseText);
-			self.onError("Unexpected status code " + req.status + " in " + funcName);
+			self.onError(msg);
 			return;
 		}
 		
@@ -668,11 +672,12 @@ Zotero.Sync.Storage.Session.ZFS.prototype._onUploadComplete = function (httpRequ
 	
 	// Register upload on server
 	Zotero.Utilities.HTTP.doPost(uri, body, function (req) {
-		Zotero.debug(req.responseText);
-		
 		if (req.status != 204) {
-			self.onError("Unexpected file registration status " + status
-				+ " in Zotero.Sync.Storage._onUploadComplete()");
+			var msg = "Unexpected file registration status " + status
+				+ " in Zotero.Sync.Storage._onUploadComplete()";
+			Zotero.debug(msg + " (" + Zotero.Items.getLibraryKeyHash(item) + ")", 1);
+			Zotero.debug(req.responseText);
+			self.onError(msg);
 			return;
 		}
 		
