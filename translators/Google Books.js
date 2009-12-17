@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-09-20 03:15:00"
+	"lastUpdated":"2009-12-17 08:15:00"
 }
 
 
@@ -39,8 +39,9 @@ function doWeb(doc, url) {
 	if(m) {
 		newUris.push("http://books.google.com/books/feeds/volumes/"+m[2]);
 	} else {
-		var items = getItemArrayGB(doc, doc, 'http://'+prefix+'\\.google\\.' + suffix + '/books\\?id=([^&]+)', '^(?:All matching pages|About this Book|Table of Contents|Index)');
+		var items = getItemArrayGB(doc, doc, 'google\\.' + suffix + '/books\\?id=([^&]+)', '^(?:All matching pages|About this Book|Table of Contents|Index)');
 		// Drop " - Page" thing
+		//Zotero.debug(items);
 		for(var i in items) {
 			items[i] = items[i].replace(/- Page [0-9]+\s*$/, "");
 		}
@@ -112,7 +113,7 @@ function doWeb(doc, url) {
 }
 
 /**
- * Grabs items based on URLs
+ * Grabs items based on URLs, modified for Google Books
  *
  * @param {Document} doc DOM document object
  * @param {Element|Element[]} inHere DOM element(s) to process
@@ -122,6 +123,11 @@ function doWeb(doc, url) {
  *	Zotero.selectItems from within a translator
  */
 function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == 'x') return namespace; else return null;
+		} : null;
+	
 	var availableItems = new Object();	// Technically, associative arrays are objects
 	
 	// Require link to match this
@@ -148,23 +154,45 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 	}
 	
 	for(var j=0; j<inHere.length; j++) {
-		var links = inHere[j].getElementsByTagName("a");
-		for(var i=0; i<links.length; i++) {
-			if(!urlRe || urlRegexp.test(links[i].href)) {
-				var text = links[i].textContent;
-				//Rintze Zelle: the three lines below are for compatibility with Google Books cover view
-				if(!text) {
-					var text = links[i].firstChild.alt;
-				}
-				if(text) {
-					text = Zotero.Utilities.trimInternal(text);
-					if(!rejectRe || !rejectRegexp.test(text)) {
-						if(availableItems[links[i].href]) {
-							if(text != availableItems[links[i].href]) {
-								availableItems[links[i].href] += " "+text;
+		var coverView = doc.evaluate('//div[@class="thumbotron"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();//Detect Cover view
+		if(coverView){
+			var links = inHere[j].getElementsByTagName("a");
+			for(var i=0; i<links.length; i++) {
+				if(!urlRe || urlRegexp.test(links[i].href)) {
+					var text = links[i].textContent;
+					if(!text) {
+						var text = links[i].firstChild.alt;
+					}
+					if(text) {
+						text = Zotero.Utilities.trimInternal(text);
+						if(!rejectRe || !rejectRegexp.test(text)) {
+							if(availableItems[links[i].href]) {
+								if(text != availableItems[links[i].href]) {
+									availableItems[links[i].href] += " "+text;
+								}
+							} else {
+								availableItems[links[i].href] = text;
 							}
-						} else {
-							availableItems[links[i].href] = text;
+						}
+					}
+				}
+			}
+		}
+		else {
+			var links = inHere[j].getElementsByTagName("img");//search for <img>-elements, scrape title from alt-attribute, href-link from parent <a>-element
+			for(var i=0; i<links.length; i++) {
+				if(!urlRe || urlRegexp.test(links[i].parentNode.href)) {
+					var text = links[i].alt;
+					if(text) {
+						text = Zotero.Utilities.trimInternal(text);
+						if(!rejectRe || !rejectRegexp.test(text)) {
+							if(availableItems[links[i].href]) {
+								if(text != availableItems[links[i].href]) {
+									availableItems[links[i].href] += " "+text;
+								}
+							} else {
+								availableItems[links[i].parentNode.href] = text;
+							}
 						}
 					}
 				}
