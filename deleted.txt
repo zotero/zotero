@@ -1,4 +1,4 @@
-2  # Increment number when modifying file
+3  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -13,3 +13,4 @@ e07e9b8c-0e98-4915-bb5a-32a08cb2f365  # Open WorldCat (Search)
 dd149efc-7f0e-43e4-b3df-b6d15e171717  # Persée
 8c1f42d5-02fa-437b-b2b2-73afc768eb07  # PNAS (replaced by HighWire 2.0)
 56ea09bc-57ee-4f50-976e-cf7cb1f6c6d8  # Royal Society Publishing (replaced by HighWire 2.0)
+83538f48-906f-40ef-bdb3-e94f63676307  # NAA RecordSearch (replaced by National Archives of Australia)
