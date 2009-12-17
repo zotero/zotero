@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-10-22 19:00:00"
+	"lastUpdated":"2009-12-17 08:10:00"
 }
 
 function detectWeb(doc, url) {
@@ -27,10 +27,10 @@ function detectWeb(doc, url) {
 		}
 	}
 
-	var uids = doc.evaluate('//input[@type="checkbox" or @name="uid"]', doc,
+	var uids = doc.evaluate('//input[@type="checkbox" and @name="EntrezSystem2.PEntrez.Pubmed.Pubmed_ResultsPanel.Pubmed_RVDocSum.uid"]', doc,
 			nsResolver, XPathResult.ANY_TYPE, null);
-	if(uids.iterateNext() && doc.title.indexOf("PMC Results") == -1) {
-		if (uids.iterateNext() && doc.title.indexOf("PMC Results") == -1){
+	if(uids.iterateNext()) {
+		if (uids.iterateNext()){
 			return "multiple";
 		}
 		return "journalArticle";
