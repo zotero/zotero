@@ -514,7 +514,8 @@
 					<button id="view" flex="1"/>
 					<button id="show" label="&zotero.item.attachment.file.show;" flex="1"/>
 				</hbox>
-				<label id="url" crop="end"/>
+				<label id="url" crop="end"
+					ondragstart="var dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
 				<grid>
 					<columns>
 						<column/>
