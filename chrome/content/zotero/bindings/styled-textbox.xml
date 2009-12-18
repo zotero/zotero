@@ -164,6 +164,28 @@
 							output = output.replace(needle, this._rtfMap[needle], "g"); 
 						}
 						
+						// Preserve small caps
+						var l = output.split(/(<\/?span[^>]*>)/);
+						var current_level = 0;
+						var tag_level = [];
+						for (var pos=1; pos<l.length; pos+=2) {
+							var tag = l[pos];
+							if (tag[1] == "/") {
+								current_level--;
+								if (current_level == tag_level[tag_level.length-1]) {
+									tag_level.pop();
+									l[pos] = "\\scaps0 ";
+								}
+							} else {
+								if (l[pos].match(/small-caps/)) {
+									l[pos] = "\\scaps ";
+									tag_level.push(current_level);
+								}
+								current_level++;
+							};
+						};
+						output = l.join("");
+						
 						output = output.replace("<p>", "", "g");
 						output = output.replace("</p>", "\\par ", "g");
 						output = output.replace(/<\/?div[^>]*>/g, "");
@@ -236,6 +258,10 @@
 								html = html.replace(this._rtfMap[needle], needle, "g");
 							}
 						}
+						
+						html = html.replace("\\scaps ", "<span style=\"font-variant:small-caps\">", "g");
+						html = html.replace("\\scaps0 ", "</span>", "g");
+						
 						html = '<div style="'+bodyStyle+'"><p>'+html.replace("\par ", "</p><p>")+"</p></div>";
 						Zotero.debug("setting content to "+html);
 					}
