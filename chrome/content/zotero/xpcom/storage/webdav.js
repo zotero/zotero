@@ -552,6 +552,10 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._onUploadComplete = function (httpR
 				+ "from the Sync pane of the Zotero preferences.");
 			return;
 		
+		case 507:
+			this.onError("A file upload failed due to insufficient space on the WebDAV server.");
+			return;
+		
 		default:
 			this.onError("Unexpected file upload status " + status
 				+ " in Zotero.Sync.Storage._onUploadComplete()");
