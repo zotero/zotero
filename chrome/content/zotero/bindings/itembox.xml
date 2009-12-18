@@ -502,6 +502,21 @@
 							menuitem.setAttribute("typeid", Zotero.CreatorTypes.getID(i));
 							this._creatorTypeMenu.appendChild(menuitem);
 						}
+						
+						var moveSep = document.createElement("menuseparator");
+						var moveUp = document.createElement("menuitem");
+						var moveDown = document.createElement("menuitem");
+						moveSep.id = "zotero-creator-move-sep";
+						moveUp.id = "zotero-creator-move-up";
+						moveDown.id = "zotero-creator-move-down";
+						moveUp.className = "zotero-creator-move";
+						moveDown.className = "zotero-creator-move";
+						// TODO: localize
+						moveUp.setAttribute("label", "Move Up");
+						moveDown.setAttribute("label", "Move Down");
+						this._creatorTypeMenu.appendChild(moveSep);
+						this._creatorTypeMenu.appendChild(moveUp);
+						this._creatorTypeMenu.appendChild(moveDown);
 					}
 					
 					// Creator rows
@@ -1974,6 +1989,33 @@
 				</body>
 			</method>
 			
+			
+			<method name="moveCreator">
+				<parameter name="index"/>
+				<parameter name="moveUp"/>
+				<body>
+				<![CDATA[
+					if (index == 0 && moveUp) {
+						Zotero.debug("Can't move up creator 0");
+						return;
+					}
+					else if (index + 1 == this.item.numCreators() && !moveUp) {
+						Zotero.debug("Can't move down last creator");
+						return;
+					}
+					
+					var newIndex = moveUp ? index - 1 : index + 1;
+					var creator = this.item.getCreator(index);
+					var swapCreator = this.item.getCreator(newIndex);
+					this.item.setCreator(newIndex, creator.ref, creator.creatorTypeID);
+					this.item.setCreator(index, swapCreator.ref, swapCreator.creatorTypeID);
+					if (this.saveOnEdit) {
+						this.item.save();
+					}
+				]]>
+				</body>
+			</method>
+			
 			<!--
 			/*
 			function modifyCreatorByID(index, creatorID, creatorTypeID) {
@@ -2152,10 +2194,31 @@
 				 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 				<popupset>
 					<popup id="creator-type-menu" position="after_start"
-						oncommand="var typeBox = document.popupNode.localName == 'hbox'
-								? document.popupNode : document.popupNode.parentNode;
-							var row = typeBox.parentNode;
+						onpopupshowing="var typeBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
+								var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
+								
+								var item = document.getBindingParent(this).item;
+								var exists = item.hasCreatorAt(index);
+								var moreCreators = item.numCreators() > index + 1;
+								
+								var hideMoveUp = !exists || index == 0;
+								var hideMoveDown = !exists || !moreCreators;
+								var hideMoveSep = hideMoveUp &amp;&amp; hideMoveDown;
+								
+								document.getElementById('zotero-creator-move-sep').setAttribute('hidden', hideMoveSep);
+								document.getElementById('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
+								document.getElementById('zotero-creator-move-down').setAttribute('hidden', hideMoveDown);"
+						oncommand="var typeBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
+							var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
+							
+							if (event.explicitOriginalTarget.className == 'zotero-creator-move') {
+								var up = event.explicitOriginalTarget.id == 'zotero-creator-move-up';
+								document.getBindingParent(this).moveCreator(index, up);
+								return;
+							}
+							
 							var typeID = event.explicitOriginalTarget.getAttribute('typeid');
+							var row = typeBox.parentNode;
 							var fields = document.getBindingParent(this).getCreatorFields(row);
 							fields.creatorTypeID = typeID;
 							typeBox.getElementsByTagName('label')[0].setAttribute(
@@ -2165,8 +2228,7 @@
 								) + ':'
 							);
 							typeBox.setAttribute('typeid', typeID);
-							var index = typeBox.getAttribute('fieldname').split('-')[1];
-							document.getBindingParent(this).modifyCreator(index, fields)"/>
+							document.getBindingParent(this).modifyCreator(index, fields);"/>
 					<popup id="field-menu">
 						<menu label="&zotero.item.textTransform;">
 							<menupopup>
