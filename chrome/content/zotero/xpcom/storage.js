@@ -2149,8 +2149,10 @@ Zotero.Sync.Storage.Request.prototype.isFinished = function () {
  */
 Zotero.Sync.Storage.Request.prototype.onProgress = function (channel, progress, progressMax) {
 	if (!this._running) {
-		throw ("Trying to update finished request " + this.name + " in "
-				+ "Zotero.Sync.Storage.Request.onProgress()");
+		Zotero.debug("Trying to update finished request " + this.name + " in "
+				+ "Zotero.Sync.Storage.Request.onProgress() "
+				+ "(" + progress + "/" + progressMax + ")", 2);
+		return;
 	}
 	
 	if (!this.channel) {
@@ -2205,7 +2207,7 @@ Zotero.Sync.Storage.Request.prototype.stop = function () {
 			Zotero.debug("No channel to stop for request " + this.name);
 		}
 	}
-	catch (e) { Zotero.debug(e); }
+	catch (e) {}
 	
 	if (!this._running || !this.channel || finishNow) {
 		this.finish();
