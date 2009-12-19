@@ -113,6 +113,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getStorageFileInfo = function (item, 
 			Zotero.debug(req.status);
 			Zotero.debug(item.key);
 			Zotero.debug(req.responseText);
+			Zotero.debug(req.getAllResponseHeaders());
 			//callback(item, false);
 			//return;
 		}
