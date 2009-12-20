@@ -58,7 +58,18 @@ Zotero.Annotate = new function() {
 	this.getAnnotationIDFromURL = function(url) {
 		const attachmentRe = /^zotero:\/\/attachment\/([0-9]+)\/$/;
 		var m = attachmentRe.exec(url);
-		return m ? m[1] : false;
+		if (m) {
+			var id = m[1];
+			var item = Zotero.Items.get(id);
+			var mimeType = item.attachmentMIMEType;
+			var file = item.getFile();
+			var ext = Zotero.File.getExtension(file);
+			if (mimeType == 'text/plain' || !Zotero.MIME.hasNativeHandler(mimeType, ext)) {
+				return false;
+			}
+			return id;
+		}
+		return false;
 	}
 	
 	/**
