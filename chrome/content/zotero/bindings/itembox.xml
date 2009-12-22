@@ -953,6 +953,20 @@
 					
 					// Generate list of localized field names for display in pop-up
 					if (fieldsToDelete) {
+						// Ignore warning for bookTitle when going from bookSection to book
+						// if there's not also a title, since the book title is transferred
+						// to title automatically in Zotero.Item.setType()
+						var bookTypeID = Zotero.ItemTypes.getID('book');
+						var bookSectionTypeID = Zotero.ItemTypes.getID('bookSection');
+						if (this.item.itemTypeID == bookSectionTypeID && itemTypeID == bookTypeID) {
+							var titleFieldID = Zotero.ItemFields.getID('title');
+							var bookTitleFieldID = Zotero.ItemFields.getID('bookTitle');
+							if (this.item.getField(bookTitleFieldID) && !this.item.getField(titleFieldID)) {
+								var index = fieldsToDelete.indexOf(bookTitleFieldID);
+								fieldsToDelete.splice(index, 1);
+							}
+						}
+						
 						var fieldNames = "";
 						for (var i=0; i<fieldsToDelete.length; i++) {
 							fieldNames += "\n - " +
@@ -963,7 +977,7 @@
 							.getService(Components.interfaces.nsIPromptService);
 					}
 					
-					if (!fieldsToDelete ||
+					if (!fieldsToDelete || fieldsToDelete.length == 0 ||
 							promptService.confirm(null,
 								Zotero.getString('pane.item.changeType.title'),
 								Zotero.getString('pane.item.changeType.text') + "\n" + fieldNames)) {
