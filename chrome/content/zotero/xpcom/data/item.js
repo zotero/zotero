@@ -423,13 +423,17 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		
 		var obsoleteFields = this.getFieldsNotInType(itemTypeID);
 		if (obsoleteFields) {
-			// Move bookTitle to title when going from bookSection to book
-			// if there's not also a title
+			// Move bookTitle to title and clear short title when going from
+			// bookSection to book if there's not also a title
 			if (this._itemTypeID == bookSectionTypeID && itemTypeID == bookTypeID) {
 				var titleFieldID = Zotero.ItemFields.getID('title');
 				var bookTitleFieldID = Zotero.ItemFields.getID('bookTitle');
+				var shortTitleFieldID = Zotero.ItemFields.getID('shortTitle');
 				if (this._itemData[bookTitleFieldID] && !this._itemData[titleFieldID]) {
 					copiedFields.push([titleFieldID, this._itemData[bookTitleFieldID]]);
+					if (this._itemData[shortTitleFieldID]) {
+						this.setField(shortTitleFieldID, false);
+					}
 				}
 			}
 			
@@ -460,13 +464,17 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 			}
 		}
 		
-		// Move title to bookTitle when going from book to bookSection
+		// Move title to bookTitle and clear shortTitle when going from book to bookSection
 		if (this._itemTypeID == bookTypeID && itemTypeID == bookSectionTypeID) {
 			var titleFieldID = Zotero.ItemFields.getID('title');
 			var bookTitleFieldID = Zotero.ItemFields.getID('bookTitle');
+			var shortTitleFieldID = Zotero.ItemFields.getID('shortTitle');
 			if (this._itemData[titleFieldID]) {
 				copiedFields.push([bookTitleFieldID, this._itemData[titleFieldID]]);
 				this.setField(titleFieldID, false);
+			}
+			if (this._itemData[shortTitleFieldID]) {
+				this.setField(shortTitleFieldID, false);
 			}
 		}
 		

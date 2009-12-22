@@ -951,19 +951,40 @@
 					
 					var fieldsToDelete = this.item.getFieldsNotInType(itemTypeID, true);
 					
+					// Special cases handled below
+					var bookTypeID = Zotero.ItemTypes.getID('book');
+					var bookSectionTypeID = Zotero.ItemTypes.getID('bookSection');
+					
+					// Add warning for shortTitle when moving from book to bookSection
+					// when title will be transferred
+					if (this.item.itemTypeID == bookTypeID && itemTypeID == bookSectionTypeID) {
+						var titleFieldID = Zotero.ItemFields.getID('title');
+						var bookTitleFieldID = Zotero.ItemFields.getID('bookTitle');
+						var shortTitleFieldID = Zotero.ItemFields.getID('shortTitle');
+						if (this.item.getField(titleFieldID) && this.item.getField(shortTitleFieldID)) {
+							if (!fieldsToDelete) {
+								fieldsToDelete = [];
+							}
+							fieldsToDelete.push(shortTitleFieldID);
+						}
+					}
+					
 					// Generate list of localized field names for display in pop-up
 					if (fieldsToDelete) {
 						// Ignore warning for bookTitle when going from bookSection to book
 						// if there's not also a title, since the book title is transferred
 						// to title automatically in Zotero.Item.setType()
-						var bookTypeID = Zotero.ItemTypes.getID('book');
-						var bookSectionTypeID = Zotero.ItemTypes.getID('bookSection');
 						if (this.item.itemTypeID == bookSectionTypeID && itemTypeID == bookTypeID) {
 							var titleFieldID = Zotero.ItemFields.getID('title');
 							var bookTitleFieldID = Zotero.ItemFields.getID('bookTitle');
+							var shortTitleFieldID = Zotero.ItemFields.getID('shortTitle');
 							if (this.item.getField(bookTitleFieldID) && !this.item.getField(titleFieldID)) {
 								var index = fieldsToDelete.indexOf(bookTitleFieldID);
 								fieldsToDelete.splice(index, 1);
+								// But warn for short title, which will be removed
+								if (this.item.getField(shortTitleFieldID)) {
+									fieldsToDelete.push(shortTitleFieldID);
+								}
 							}
 						}
 						
