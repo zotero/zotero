@@ -417,8 +417,22 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		
 		var copiedFields = [];
 		
+		// Special cases handled below
+		var bookTypeID = Zotero.ItemTypes.getID('book');
+		var bookSectionTypeID = Zotero.ItemTypes.getID('bookSection');
+		
 		var obsoleteFields = this.getFieldsNotInType(itemTypeID);
 		if (obsoleteFields) {
+			// Move bookTitle to title when going from bookSection to book
+			// if there's not also a title
+			if (this._itemTypeID == bookSectionTypeID && itemTypeID == bookTypeID) {
+				var titleFieldID = Zotero.ItemFields.getID('title');
+				var bookTitleFieldID = Zotero.ItemFields.getID('bookTitle');
+				if (this._itemData[bookTitleFieldID] && !this._itemData[titleFieldID]) {
+					copiedFields.push([titleFieldID, this._itemData[bookTitleFieldID]]);
+				}
+			}
+			
 			for each(var oldFieldID in obsoleteFields) {
 				// Try to get a base type for this field
 				var baseFieldID =
@@ -443,6 +457,16 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 				this._changedItemData[oldFieldID] = true;
 				*/
 				this.setField(oldFieldID, false);
+			}
+		}
+		
+		// Move title to bookTitle when going from book to bookSection
+		if (this._itemTypeID == bookTypeID && itemTypeID == bookSectionTypeID) {
+			var titleFieldID = Zotero.ItemFields.getID('title');
+			var bookTitleFieldID = Zotero.ItemFields.getID('bookTitle');
+			if (this._itemData[titleFieldID]) {
+				copiedFields.push([bookTitleFieldID, this._itemData[titleFieldID]]);
+				this.setField(titleFieldID, false);
 			}
 		}
 		
