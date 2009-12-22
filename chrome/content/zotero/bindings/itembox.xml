@@ -959,7 +959,6 @@
 					// when title will be transferred
 					if (this.item.itemTypeID == bookTypeID && itemTypeID == bookSectionTypeID) {
 						var titleFieldID = Zotero.ItemFields.getID('title');
-						var bookTitleFieldID = Zotero.ItemFields.getID('bookTitle');
 						var shortTitleFieldID = Zotero.ItemFields.getID('shortTitle');
 						if (this.item.getField(titleFieldID) && this.item.getField(shortTitleFieldID)) {
 							if (!fieldsToDelete) {
