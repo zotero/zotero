@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-12-22 08:00:00"
+	"lastUpdated":"2009-12-23 18:00:00"
 }
 
 function detectWeb(doc, url) {
@@ -32,7 +32,7 @@ function scrape(doc) {
 	var titles = doc.evaluate('//div[@class="gs_r"]/h3', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	
 	// changing .enw to .bib
-	var elmts = doc.evaluate('//a[contains(@href, ".bib")]',
+	var elmts = doc.evaluate('//a[contains(@href, "scholar.bib")]',
 				doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var title;
 	var i = 0;
@@ -90,7 +90,7 @@ function doWeb(doc, url) {
 	// first check for EndNote links
 	// changing to BibTeX since Google is dropping characters in enw and ris output
 	
-	haveEndNoteLinks = doc.evaluate('//a[contains(@href, ".bib")]', 
+	haveEndNoteLinks = doc.evaluate('//a[contains(@href, "scholar.bib")]', 
 			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(!haveEndNoteLinks) {
 			// SR:Commenting out this bit as code for retrieving citations from "Related" links is unreliable and unnecessary
