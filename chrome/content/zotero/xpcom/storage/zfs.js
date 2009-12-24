@@ -674,7 +674,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._onUploadComplete = function (httpRequ
 	// Register upload on server
 	Zotero.Utilities.HTTP.doPost(uri, body, function (req) {
 		if (req.status != 204) {
-			var msg = "Unexpected file registration status " + status
+			var msg = "Unexpected file registration status " + req.status
 				+ " in Zotero.Sync.Storage._onUploadComplete()";
 			Zotero.debug(msg + " (" + Zotero.Items.getLibraryKeyHash(item) + ")", 1);
 			Zotero.debug(req.responseText);
