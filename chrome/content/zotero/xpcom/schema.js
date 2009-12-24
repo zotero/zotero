@@ -1969,7 +1969,18 @@ Zotero.Schema = new function(){
 										target.remove(false);
 									}
 								}
-								orphan.file.moveTo(orphaned, newName);
+								try {
+									orphan.file.moveTo(orphaned, newName);
+								}
+								catch (e) {
+									if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+										throw ("Zotero cannot move orphaned file '" + orphan.file.path + "'");
+									}
+									else {
+										Components.utils.reportError("Error moving orphaned file '" + orphan.file.leafName + "'");
+										throw (e);
+									}
+								}
 								movedFiles37[orphan.id] = orphan.file;
 							}
 						}
@@ -2256,7 +2267,18 @@ Zotero.Schema = new function(){
 										target.remove(false);
 									}
 								}
-								orphan.file.moveTo(orphaned, newName);
+								try {
+									orphan.file.moveTo(orphaned, newName);
+								}
+								catch (e) {
+									if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+										throw ("Zotero cannot move orphaned file '" + orphan.file.path + "'");
+									}
+									else {
+										Components.utils.reportError("Error moving orphaned file '" + orphan.file.leafName + "'");
+										throw (e);
+									}
+								}
 								movedFiles46[orphan.id] = orphan.file;
 							}
 						}
