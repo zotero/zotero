@@ -96,6 +96,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getStorageFileInfo = function (item, 
 			var msg = "Unexpected status code " + req.status + " in " + funcName;
 			Zotero.debug(msg + " (" + Zotero.Items.getLibraryKeyHash(item) + ")", 1);
 			Zotero.debug(req.responseText);
+			Zotero.debug(req.getAllResponseHeaders());
 			self.onError(msg);
 			return;
 		}
@@ -491,6 +492,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getFileUploadParameters = function (i
 			var msg = "Unexpected status code " + req.status + " in " + funcName;
 			Zotero.debug(msg + " (" + Zotero.Items.getLibraryKeyHash(item) + ")", 1);
 			Zotero.debug(req.responseText);
+			Zotero.debug(req.getAllResponseHeaders());
 			self.onError(msg);
 			return;
 		}
@@ -678,6 +680,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._onUploadComplete = function (httpRequ
 				+ " in Zotero.Sync.Storage._onUploadComplete()";
 			Zotero.debug(msg + " (" + Zotero.Items.getLibraryKeyHash(item) + ")", 1);
 			Zotero.debug(req.responseText);
+			Zotero.debug(req.getAllResponseHeaders());
 			self.onError(msg);
 			return;
 		}
