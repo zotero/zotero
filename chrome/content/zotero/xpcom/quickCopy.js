@@ -165,31 +165,185 @@ Zotero.QuickCopy = new function() {
 			// If all notes, export full content
 			if (allNotes) {
 				var content = [];
-				for (var i=0; i<notes.length; i++) {
-					content.push(notes[i].getNote());
-				}
-				
 				default xml namespace = '';
-				var html = <div/>;
-				for (var i=0; i<content.length; i++) {
-					var p = <p>{content[i]}</p>;
-					p.@style = 'white-space: pre-wrap';
-					html.p += p;
+				XML.prettyPrinting = false;
+				XML.ignoreWhitespace = false;
+				var htmlXML = <div class="zotero-notes"/>;
+				for (var i=0; i<notes.length; i++) {
+					var noteContent = notes[i].getNote();
+					try {
+						var noteDiv = new XML('<div class="zotero-note">' + noteContent + '</div>');
+					}
+					catch (e) {
+						Zotero.debug(e);
+						Zotero.debug("Couldn't parse note as HTML -- try as CDATA", 2);
+						try {
+							var noteDiv = new XML('<div class="zotero-note"><pre><![CDATA[' + noteContent + ']]></pre></div>');
+						}
+						catch (e) {
+							Zotero.debug("Skipping note", 2);
+							continue;
+						}
+					}
+					
+					htmlXML.div += noteDiv;
 				}
 				
-				html = html.toXMLString();
+				// Raw HTML output
+				var html = htmlXML.toXMLString();
 				
-				// Don't copy HTML, since we don't have rich-text notes and
-				// copying HTML on Windows just loses newlines (due to
-				// unsupported white-space: pre-wrap in Word and OO).
-				/*
+				var textXML = htmlXML.copy();
+				
+				//
+				// Text-only adjustments
+				//
+				
+				if (Zotero.Prefs.get('export.quickCopy.quoteBlockquotes.plainText')) {
+					// Add quotes around blockquote paragraphs
+					var nodes = textXML..blockquote;
+					for (var i in nodes) {
+						for (var j=0, len=nodes[i].p.length(); j<len; j++) {
+							var children = nodes[i].p[j].children();
+							children[0] = '\u201c' + children[0];
+							// Add closing double quotes to final paragraph
+							if (j == len - 1) {
+								children[children.length()-1] +=  '\u201d';
+							}
+						}
+					}
+				}
+				
+				// Replace tags with characters, like Thunderbird
+				//
+				// (It'd be nice to use the OutputFormatted mode of the native
+				// plaintext serializer, which appears to be what TB uses,
+				// but I wasn't able to get it to work from JS.)
+				var map = {
+					strong: "*",
+					em: "/"
+				}
+				for (var tag in map) {
+					var nodes = textXML.descendants(tag);
+					for (var i in nodes) {
+						var children = nodes[i].children();
+						children[0] = map[tag] + children[0];
+						children[children.length()-1] += map[tag];
+					}
+				}
+				
+				// Replace span styles with characters
+				var spanStyleMap = [
+					{
+						re: /text-decoration:\s*underline/,
+						repl: "_"
+					}
+				];
+				for each(var style in spanStyleMap) {
+					var nodes = textXML..span.(style.re.test(@style));
+					for (var i in nodes) {
+						var children = nodes[i].children();
+						children[0] = style.repl + children[0];
+						children[children.length()-1] += style.repl;
+					}
+				}
+				
+				//
+				// And add spaces for indents
+				//
+				// Placeholder for 4 spaces in final output
+				var ztab = "%%ZOTEROTAB%%";
+				var p = textXML..p;
+				for (var i in p) {
+					var children = p[i].children();
+					// TODO: Be a bit smarter and more flexible about this
+					if (p[i].@style.indexOf("padding-left: 30px") != -1) {
+						children[0] = ztab + children[0];
+					}
+					else if (p[i].@style.indexOf("padding-left: 60px") != -1) {
+						children[0] = ztab + ztab + children[0];
+					}
+					else if (p[i].@style.indexOf("padding-left: 90px") != -1) {
+						children[0] = ztab + ztab + ztab + children[0];
+					}
+					else if (p[i].@style.indexOf("padding-left: 120px") != -1) {
+						children[0] = ztab + ztab + ztab + ztab + children[0];
+					}
+				}
+				
+				var text = Zotero.Utilities.prototype.unescapeHTML(textXML.toXMLString());
+				text = text.replace(new RegExp(ztab, "g"), "    ");
+				
+				if (text.trim) {
+					text = text.trim();
+				}
+				// TODO: Remove once >=Fx3.5
+				else {
+					text = Zotero.Utilities.prototype.trim()
+				}
+				
+				//
+				// Adjustments for the HTML copied to the clipboard
+				//
+				
+				// Everything seems to like margin-left better than padding-left
+				var p = htmlXML..p;
+				for (var i in p) {
+					var children = p[i].children();
+					if (p[i].@style.toString().indexOf("padding-left") != -1) {
+						p[i].@style = p[i].@style.toString().replace("padding-left", "margin-left");
+					}
+				}
+				
+				// Add quotes around blockquote paragraphs
+				if (Zotero.Prefs.get('export.quickCopy.quoteBlockquotes.richText')) {
+					var nodes = htmlXML..blockquote;
+					for (var i in nodes) {
+						for (var j=0, len=nodes[i].p.length(); j<len; j++) {
+							var children = nodes[i].p[j].children();
+							children[0] = '\u201c' + children[0];
+							// Add closing double quotes to final paragraph
+							if (j == len - 1) {
+								children[children.length()-1] +=  '\u201d';
+							}
+						}
+					}
+				}
+				
+				// Word and TextEdit don't indent blockquotes on their own and need this
+				//
+				// OO gets it right, so this results in an extra indent
+				if (Zotero.Prefs.get('export.quickCopy.compatibility.indentBlockquotes')) {
+					var p = htmlXML..blockquote.p;
+					for (var i in p) {
+						var children = p[i].children();
+						p[i].@style = "margin-left: 30px";
+					}
+				}
+				
+				// Add Word Normal style to paragraphs and add double-spacing
+				//
+				// OO inserts the conditional style code as a document comment
+				if (Zotero.Prefs.get('export.quickCopy.compatibility.word')) {
+					var nodes = htmlXML..p;
+					for (var i in nodes) {
+						nodes[i].@class = "msoNormal";
+					}
+					var copyHTML = "<!--[if gte mso 0]>"
+									+ "<style>"
+									+ "p { margin-top:.1pt;margin-right:0in;margin-bottom:.1pt;margin-left:0in; line-height: 200%; }"
+									+ "li { margin-top:.1pt;margin-right:0in;margin-bottom:.1pt;margin-left:0in; line-height: 200%; }"
+									+ "blockquote p { margin-left: 11px; margin-right: 11px }"
+									+ "</style>"
+									+ "<![endif]-->\n"
+									+ htmlXML.toXMLString();
+				}
+				else {
+					var copyHTML = htmlXML.toXMLString();
+				}
+				
 				var content = {
-					text: contentType == "html" ? html : content.join('\n\n\n'),
-					html: html
-				};
-				*/
-				var content = {
-					text: contentType == "html" ? html : content.join('\n\n\n')
+					text: contentType == "html" ? html : text,
+					html: copyHTML
 				};
 				
 				return content;
