@@ -4312,6 +4312,18 @@ Zotero.Item.prototype._loadCreators = function() {
  */
 Zotero.Item.prototype._loadItemData = function() {
 	if (!this.id) {
+		// Log backtrace and data
+		try {
+			asfasfsa();
+		}
+		catch (e) {
+			Zotero.debug(e);
+			Zotero.debug(this._itemTypeID);
+			Zotero.debug(this._libraryID);
+			Zotero.debug(this._key);
+			Zotero.debug(this._dateAdded);
+			Zotero.debug(this._dateModified);
+		}
 		throw ('ItemID not set for object before attempting to load data');
 	}
 	
