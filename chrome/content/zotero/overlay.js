@@ -1428,16 +1428,25 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		// Make sure at least one item is not a standalone note or attachment
-		var haveRegularItem = false;
+		// Make sure at least one item is a regular item
+		//
+		// DEBUG: We could copy notes via keyboard shortcut if we altered
+		// Z_F_I.copyItemsToClipboard() to use Z.QuickCopy.getContentFromItems(),
+		// but 1) we'd need to override that function's drag limit and 2) when I
+		// tried it the OS X clipboard seemed to be getting text vs. HTML wrong,
+		// automatically converting text/html to plaintext rather than using
+		// text/unicode. (That may be fixable, however.)
+		var canCopy = false;
 		for each(var item in items) {
 			if (item.isRegularItem()) {
-				haveRegularItem = true;
+				canCopy = true;
 				break;
 			}
 		}
-		if (!haveRegularItem) {
-			window.alert(Zotero.getString("fileInterface.noReferencesError"));
+		if (!canCopy) {
+			var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+						.getService(Components.interfaces.nsIPrompt);
+			pr.alert("", Zotero.getString("fileInterface.noReferencesError"));
 			return;
 		}
 		

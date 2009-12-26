@@ -198,6 +198,14 @@ Zotero.QuickCopy = new function() {
 				// Text-only adjustments
 				//
 				
+				// Add placeholders for newlines between notes
+				if (notes.length > 1) {
+					var divs = textXML.div;
+					for (var i=0, len=divs.length(); i<len-1; i++) {
+						divs[i].p += <p>--------------------------------------------------</p>;
+					}
+				}
+				
 				if (Zotero.Prefs.get('export.quickCopy.quoteBlockquotes.plainText')) {
 					// Add quotes around blockquote paragraphs
 					var nodes = textXML..blockquote;
@@ -294,6 +302,13 @@ Zotero.QuickCopy = new function() {
 					}
 				}
 				
+				if (notes.length > 1) {
+					var divs = htmlXML.div;
+					for (var i=0, len=divs.length(); i<len-1; i++) {
+						divs[i].p += <p>----------------------------------------------------------------------</p>;
+					}
+				}
+				
 				// Add quotes around blockquote paragraphs
 				if (Zotero.Prefs.get('export.quickCopy.quoteBlockquotes.richText')) {
 					var nodes = htmlXML..blockquote;
@@ -370,6 +385,7 @@ Zotero.QuickCopy = new function() {
 					html: csl.formatBibliography(itemSet, "HTML")
 				};
 			}
+			
 			return bibliography;
 		}
 		
