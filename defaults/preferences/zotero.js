@@ -95,6 +95,10 @@ pref("extensions.zotero.rtfScan.lastOutputFile", "");
 
 pref("extensions.zotero.export.quickCopy.setting", 'bibliography=http://www.zotero.org/styles/chicago-note');
 pref("extensions.zotero.export.quickCopy.dragLimit", 50);
+pref("extensions.zotero.export.quickCopy.quoteBlockquotes.plainText", true);
+pref("extensions.zotero.export.quickCopy.quoteBlockquotes.richText", true);
+pref("extensions.zotero.export.quickCopy.compatibility.indentBlockquotes", true);
+pref("extensions.zotero.export.quickCopy.compatibility.word", false);
 
 // Integration settings
 pref("extensions.zotero.integration.port", 50001);
