@@ -1186,13 +1186,7 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 	var rx = {
 		onFunctionCall: function (arg) {
 			var str = arg.getUTF8String(0);
-			str = Zotero.Utilities.prototype.htmlSpecialChars(str);
-			str = '<p>'
-					+ str.replace(/\n/g, '</p><p>')
-						.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
-						.replace(/  /g, '&nbsp;&nbsp;')
-				+ '</p>';
-			return str.replace(/<p>\s*<\/p>/g, '<p>&nbsp;</p>');
+			return Zotero.Utilities.prototype.text2html(str, true);
 		}
 	};
 	this._connection.createFunction('text2html', 1, rx);
