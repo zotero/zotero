@@ -153,6 +153,31 @@ Zotero.Utilities.prototype.cleanDOI = function(/**String**/ x) {
 }
 
 
+Zotero.Utilities.prototype.text2html = function (/**String**/ str, singleNewlineIsParagraph) {
+	str = Zotero.Utilities.prototype.htmlSpecialChars(str);
+	
+	// \n => <p>
+	if (singleNewlineIsParagraph) {
+		str = '<p>'
+				+ str.replace(/\n/g, '</p><p>')
+					.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+					.replace(/  /g, '&nbsp;&nbsp;')
+			+ '</p>';
+	}
+	// \n\n => <p>, \n => <br/>
+	else {
+		str = Zotero.Utilities.prototype.htmlSpecialChars(str);
+		str = '<p>'
+				+ str.replace(/\n\n/g, '</p><p>')
+					.replace(/\n/g, '<br/>')
+					.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+					.replace(/  /g, '&nbsp;&nbsp;')
+			+ '</p>';
+	}
+	return str.replace(/<p>\s*<\/p>/g, '<p>&nbsp;</p>');
+}
+
+
 /**
  * Encode special XML/HTML characters<br/>
  * <br/>

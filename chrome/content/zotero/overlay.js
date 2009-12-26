@@ -539,6 +539,9 @@ var ZoteroPane = new function()
 		
 		Zotero.debug(command);
 		
+		// Errors don't seem to make it out otherwise
+		try {
+		
 		switch (command) {
 			case 'openZotero':
 				try {
@@ -563,7 +566,9 @@ var ZoteroPane = new function()
 				break;
 			case 'newItem':
 				ZoteroPane.newItem(2); // book
-				document.getElementById('zotero-editpane-type-menu').focus();
+				var menu = document.getElementById('zotero-editpane-item-box').itemTypeMenu;
+				menu.focus();
+				document.getElementById('zotero-editpane-item-box').itemTypeMenu.menupopup.openPopup(menu, "before_start", 0, 0);
 				break;
 			case 'newNote':
 				// Use key that's not the modifier as the popup toggle
@@ -586,6 +591,12 @@ var ZoteroPane = new function()
 				break;
 			default:
 				throw ('Command "' + command + '" not found in ZoteroPane.handleKeyDown()');
+		}
+		
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
 		}
 		
 		event.preventDefault();
@@ -2380,7 +2391,7 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.newNote = function (popup, parent, text) {
+	this.newNote = function (popup, parent, text, citeURI) {
 		if (!Zotero.stateCheck()) {
 			this.displayErrorMessage(true);
 			return;
@@ -2396,6 +2407,12 @@ var ZoteroPane = new function()
 				text = '';
 			}
 			text = Zotero.Utilities.prototype.trim(text);
+			
+			if (text) {
+				text = '<blockquote'
+						+ (citeURI ? ' cite="' + citeURI + '"' : '')
+						+ '>' + Zotero.Utilities.prototype.text2html(text) + "</blockquote>";
+			}
 			
 			var item = new Zotero.Item('note');
 			item.libraryID = this.getSelectedLibraryID();
@@ -2427,37 +2444,36 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function addTextToNote(text)
+	function addTextToNote(text, citeURI)
 	{
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
 		
-		try {
-			// trim
-			text = text.replace(/^[\xA0\r\n\s]*(.*)[\xA0\r\n\s]*$/m, "$1");
-		}
-		catch (e){}
-		
-		if (!text || !text.length)
-		{
+		if (!text) {
 			return false;
 		}
+		
+		text = Zotero.Utilities.prototype.trim(text);
+		
+		if (!text.length) {
+			return false;
+		}
+		
+		text = '<blockquote'
+					+ (citeURI ? ' cite="' + citeURI + '"' : '')
+					+ '>' + Zotero.Utilities.prototype.text2html(text) + "</blockquote>";
 		
 		var items = this.getSelectedItems();
 		if (this.itemsView.selection.count == 1 && items[0] && items[0].isNote()) {
 			var note = items[0].getNote()
 			
-			items[0].setNote(note == '' ? text : note + "\n\n" + text);
+			items[0].setNote(note + text);
 			items[0].save();
 			
 			var noteElem = document.getElementById('zotero-note-editor')
 			noteElem.focus();
-			noteElem.noteField.inputField.editor.
-				selectionController.scrollSelectionIntoView(1,
-					1,
-					true);
 			return true;
 		}
 		

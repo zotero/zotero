@@ -185,10 +185,10 @@
 				</setter>
 			</property>
 			
+			<property name="itemTypeMenu" onget="return this._id('item-type-menu')"/>
 			
 			<!-- Private properties -->
 			<property name="_dynamicFields" onget="return this._id('dynamic-fields')"/>
-			<property name="_itemTypeMenu" onget="return this._id('item-type-menu')"/>
 			<property name="_creatorTypeMenu" onget="return this._id('creator-type-menu')"/>
 			
 			<field name="_selectField"/>
@@ -330,27 +330,27 @@
 					// Item type menu
 					if (this.showTypeMenu) {
 						// Build item type menu if it hasn't been built yet
-						if (!this._itemTypeMenu.firstChild.hasChildNodes()) {
+						if (!this.itemTypeMenu.firstChild.hasChildNodes()) {
 							var itemTypes = Zotero.ItemTypes.getTypes();
 							for (var i=0; i<itemTypes.length; i++) {
 								var name = itemTypes[i].name;
 								if (name != 'attachment' && name != 'note') {
-									this._itemTypeMenu.appendItem(Zotero.getString("itemTypes." + name), itemTypes[i].id);
+									this.itemTypeMenu.appendItem(Zotero.getString("itemTypes." + name), itemTypes[i].id);
 								}
 							}
 						}
 						
-						var listitems = this._itemTypeMenu.firstChild.childNodes;
+						var listitems = this.itemTypeMenu.firstChild.childNodes;
 						for (var i=0, len=listitems.length; i < len; i++) {
 							if (listitems[i].getAttribute('value') == this.item.itemTypeID) {
-								this._itemTypeMenu.selectedIndex = i;
+								this.itemTypeMenu.selectedIndex = i;
 							}
 						}
 						
-						this._itemTypeMenu.parentNode.hidden = false;
+						this.itemTypeMenu.parentNode.hidden = false;
 					}
 					else {
-						this._itemTypeMenu.parentNode.hidden = true;
+						this.itemTypeMenu.parentNode.hidden = true;
 					}
 					
 					
