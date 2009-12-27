@@ -366,10 +366,10 @@ Zotero.Utilities.prototype.isEmpty = function (obj) {
  * Compares an array with another and returns an array with
  *	the values from array2 that don't exist in array1
  *
- * @param	{Array}		array1			Array that will be checked
- * @param	{Array}		array2			Array that will be compared
+ * @param	{Array}		array1
+ * @param	{Array}		array2
  * @param	{Boolean}	useIndex		If true, return an array containing just
- *										the index of the comparator's elements;
+ *										the index of array2's elements;
  *										otherwise return the values
  */
 Zotero.Utilities.prototype.arrayDiff = function(array1, array2, useIndex) {
@@ -381,9 +381,9 @@ Zotero.Utilities.prototype.arrayDiff = function(array1, array2, useIndex) {
 	}
 	
 	var val, pos, vals = [];
-	for (var i=0; i<array2.length; i++) {
-		val = array2[i];
-		pos = array1.indexOf(val);
+	for (var i=0; i<array1.length; i++) {
+		val = array1[i];
+		pos = array2.indexOf(val);
 		if (pos == -1) {
 			vals.push(useIndex ? pos : val);
 		}

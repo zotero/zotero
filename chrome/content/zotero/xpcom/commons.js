@@ -119,8 +119,8 @@ Zotero.Commons = new function() {
 
 					// newPrefBucketNames currently contains intersection
 					// of prefBucketNames and iaBucketNames
-					var askToAddBuckets = zu.arrayDiff(newPrefBucketNames, iaBucketNames);
-					var askToRemoveBuckets = zu.arrayDiff(newPrefBucketNames, prefBucketNames);
+					var askToAddBuckets = zu.arrayDiff(iaBucketNames, newPrefBucketNames);
+					var askToRemoveBuckets = zu.arrayDiff(prefBucketNames, newPrefBucketNames);
 
 					// prompt user about adding buckets
 					for(var i = 0, len = askToAddBuckets.length; i < len; i++) {
