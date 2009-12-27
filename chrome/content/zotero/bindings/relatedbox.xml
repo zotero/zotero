@@ -78,7 +78,7 @@
 							if (related) {
 								related = Zotero.Items.get(related);
 								for(var i = 0; i < related.length; i++) {
-									r = r + related[i].getField('title') + ", ";
+									r = r + related[i].getDisplayTitle() + ", ";
 								}
 								r = r.substr(0,r.length-2);
 							}
@@ -129,7 +129,7 @@
 									icon.setAttribute('src','chrome://zotero/skin/treeitem-' + type + '.png');
 							
 									var label = document.createElement("label");
-									label.setAttribute('value', related[i].getField('title', false, true));
+									label.setAttribute('value', related[i].getDisplayTitle());
 									label.setAttribute('crop','end');
 									label.setAttribute('flex','1');
 									
