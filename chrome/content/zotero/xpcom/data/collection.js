@@ -820,16 +820,16 @@ Zotero.Collection.prototype.diff = function (collection, includeMatches, ignoreO
 	
 	// For the moment, just compare children and increase numDiffs if any differences
 	var d1 = Zotero.Utilities.prototype.arrayDiff(
-		otherData.childCollections, thisData.childCollections
-	);
-	var d2 = Zotero.Utilities.prototype.arrayDiff(
 		thisData.childCollections, otherData.childCollections
 	);
+	var d2 = Zotero.Utilities.prototype.arrayDiff(
+		otherData.childCollections, thisData.childCollections
+	);
 	var d3 = Zotero.Utilities.prototype.arrayDiff(
-		otherData.childItems, thisData.childItems
+		thisData.childItems, otherData.childItems
 	);
 	var d4 = Zotero.Utilities.prototype.arrayDiff(
-		thisData.childItems, otherData.childItems
+		otherData.childItems, thisData.childItems
 	);
 	numDiffs += d1.length + d2.length;
 	

@@ -2989,7 +2989,7 @@ Zotero.Sync.Server.Data = new function() {
 		if (!itemIDs) {
 			return false;
 		}
-		var newItemIDs = Zotero.Utilities.prototype.arrayDiff(childItems, itemIDs);
+		var newItemIDs = Zotero.Utilities.prototype.arrayDiff(itemIDs, childItems);
 		if (itemIDs.length == newItemIDs.length) {
 			return false;
 		}
