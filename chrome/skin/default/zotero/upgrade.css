@@ -2,6 +2,6 @@ description {
 	margin-bottom: 1.5em;
 }
 
-#zotero-change-log-link {
+description > label {
 	margin: 0;
 }

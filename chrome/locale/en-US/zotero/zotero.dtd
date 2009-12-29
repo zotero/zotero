@@ -11,6 +11,10 @@
 <!ENTITY zotero.upgrade.newVersionInstalled				"You have installed a new version of Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired					"Your Zotero database must be upgraded to work with the new version.">
 <!ENTITY zotero.upgrade.autoBackup							"Your existing database will be backed up automatically before any changes are made.">
+<!ENTITY zotero.upgrade.majorUpgrade						"This is a major upgrade.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink				"Be sure you have reviewed the">
+<!ENTITY zotero.upgrade.majorUpgradeLink					"upgrade instructions">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink				"before continuing.">
 <!ENTITY zotero.upgrade.upgradeInProgress					"Please wait for the upgrade process to finish. This may take a few minutes.">
 <!ENTITY zotero.upgrade.upgradeSucceeded					"Your Zotero database has been successfully upgraded.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink				"Please see">
