@@ -498,11 +498,6 @@
 			// since we need to reference it in script elsewhere
 			document.getElementById('zotero-tb-actions-reportErrors').setAttribute('label',
 				Zotero.getString('errorReport.reportErrors'));
-			
-			// Used for loading the changelog after upgrades
-			if (Zotero.initialURL) {
-				setTimeout("gBrowser.selectedTab = gBrowser.addTab(Zotero.initialURL); Zotero.initialURL = null;", 1);
-			}
 		}
 		else {
 			if (Zotero) {
@@ -526,6 +521,11 @@
 			icon.setAttribute('tooltiptext', errMsg);
 			icon.setAttribute('error', 'true');
 			icon.setAttribute('hidden', false);
+		}
+		
+		// Used for loading pages from upgrade wizard
+		if (Zotero.initialURL) {
+			setTimeout("gBrowser.selectedTab = gBrowser.addTab(Zotero.initialURL); Zotero.initialURL = null;", 1);
 		}
 	}, false);
 	
