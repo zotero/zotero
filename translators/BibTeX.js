@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2009-08-21 15:00:00"
+	"lastUpdated":"2009-12-28 01:50:00"
 }
 
 Zotero.configure("dataMode", "block");
@@ -762,6 +762,7 @@ var mappingTable = {
     "\u00C2":"\\^{A}", // LATIN CAPITAL LETTER A WITH CIRCUMFLEX
     "\u00C3":"\\~{A}", // LATIN CAPITAL LETTER A WITH TILDE
     "\u00C4":"\\\"{A}", // LATIN CAPITAL LETTER A WITH DIAERESIS
+    "\u00C5":"\\r{A}", // LATIN CAPITAL LETTER A WITH RING ABOVE
     "\u00C7":"\\c{C}", // LATIN CAPITAL LETTER C WITH CEDILLA
     "\u00C8":"\\`{E}", // LATIN CAPITAL LETTER E WITH GRAVE
     "\u00C9":"\\'{E}", // LATIN CAPITAL LETTER E WITH ACUTE
@@ -787,6 +788,7 @@ var mappingTable = {
     "\u00E2":"\\^{a}", // LATIN SMALL LETTER A WITH CIRCUMFLEX
     "\u00E3":"\\~{a}", // LATIN SMALL LETTER A WITH TILDE
     "\u00E4":"\\\"{a}", // LATIN SMALL LETTER A WITH DIAERESIS
+    "\u00E5":"\\r{a}", // LATIN SMALL LETTER A WITH RING ABOVE
     "\u00E7":"\\c{c}", // LATIN SMALL LETTER C WITH CEDILLA
     "\u00E8":"\\`{e}", // LATIN SMALL LETTER E WITH GRAVE
     "\u00E9":"\\'{e}", // LATIN SMALL LETTER E WITH ACUTE
@@ -1231,6 +1233,7 @@ var reversemappingTable = {
     "\\^{A}"                          : "\u00C2", // LATIN CAPITAL LETTER A WITH CIRCUMFLEX
     "\\~{A}"                          : "\u00C3", // LATIN CAPITAL LETTER A WITH TILDE
     "\\\"{A}"                         : "\u00C4", // LATIN CAPITAL LETTER A WITH DIAERESIS
+    "\\r{A}"                          : "\u00C5", // LATIN CAPITAL LETTER A WITH RING ABOVE
     "\\c{C}"                          : "\u00C7", // LATIN CAPITAL LETTER C WITH CEDILLA
     "\\`{E}"                          : "\u00C8", // LATIN CAPITAL LETTER E WITH GRAVE
     "\\'{E}"                          : "\u00C9", // LATIN CAPITAL LETTER E WITH ACUTE
@@ -1256,6 +1259,7 @@ var reversemappingTable = {
     "\\^{a}"                          : "\u00E2", // LATIN SMALL LETTER A WITH CIRCUMFLEX
     "\\~{a}"                          : "\u00E3", // LATIN SMALL LETTER A WITH TILDE
     "\\\"{a}"                         : "\u00E4", // LATIN SMALL LETTER A WITH DIAERESIS
+    "\\r{a}"                          : "\u00E5", // LATIN SMALL LETTER A WITH RING ABOVE
     "\\c{c}"                          : "\u00E7", // LATIN SMALL LETTER C WITH CEDILLA
     "\\`{e}"                          : "\u00E8", // LATIN SMALL LETTER E WITH GRAVE
     "\\'{e}"                          : "\u00E9", // LATIN SMALL LETTER E WITH ACUTE
@@ -1551,6 +1555,10 @@ function processField(item, field, value) {
 		// parse authors/editors/translators
 		var names = value.split(/ and /i); // now case insensitive
 		for each(var name in names) {
+			// skip empty names
+			if (Zotero.Utilities.trim(name) == '') {
+				continue;
+			}
 			item.creators.push(Zotero.Utilities.cleanAuthor(name, field,
 			                                  (name.indexOf(",") != -1)));
 		}
