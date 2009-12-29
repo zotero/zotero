@@ -1833,7 +1833,13 @@ var ZoteroPane = new function()
 		
 		var enable = [], disable = [], show = [], hide = [], multiple = '';
 		
-		if (this.itemsView && this.itemsView.selection.count > 0) {
+		if (!this.itemsView) {
+			return;
+		}
+		
+		if (this.itemsView.selection.count > 0) {
+			var itemGroup = this.itemsView._itemGroup;
+			
 			enable.push(m.showInLibrary, m.addNote, m.addAttachments,
 				m.sep2, m.duplicateItem, m.deleteItem, m.deleteFromLibrary,
 				m.exportItems, m.createBib, m.loadReport);
@@ -1914,8 +1920,31 @@ var ZoteroPane = new function()
 				else {
 					hide.push(m.sep4);
 				}
-
+				
+				// Block certain actions on files if no access and at least one item
+				// is an imported attachment
+				if (!itemGroup.filesEditable) {
+					var hasImportedAttachment = false;
+					for (var i=0; i<items.length; i++) {
+						var item = items[i];
+						if (item.isImportedAttachment()) {
+							hasImportedAttachment = true;
+							break;
+						}
+					}
+					if (hasImportedAttachment) {
+						var d = [m.deleteFromLibrary, m.createParent, m.renameAttachments];
+						for each(var val in d) {
+							disable.push(val);
+							var index = enable.indexOf(val);
+							if (index != -1) {
+								enable.splice(index, 1);
+							}
+						}
+					}
+				}
 			}
+			
 			// Single item selected
 			else
 			{
@@ -1924,7 +1953,7 @@ var ZoteroPane = new function()
 				menu.setAttribute('itemID', itemID);
 				
 				// Show in Library
-				if (!this.itemsView._itemGroup.isLibrary()) {
+				if (!itemGroup.isLibrary() && !itemGroup.isWithinGroup()) {
 					show.push(m.showInLibrary, m.sep1);
 				}
 				else {
@@ -2003,13 +2032,25 @@ var ZoteroPane = new function()
 				// Update attachment submenu
 				var popup = document.getElementById('zotero-add-attachment-popup')
 				this.updateAttachmentButtonMenu(popup);
+				
+				// Block certain actions on files if no access
+				if (item.isImportedAttachment() && !itemGroup.filesEditable) {
+					var d = [m.deleteFromLibrary, m.createParent, m.renameAttachments];
+					for each(var val in d) {
+						disable.push(val);
+						var index = enable.indexOf(val);
+						if (index != -1) {
+							enable.splice(index, 1);
+						}
+					}
+				}
 			}
 		}
 		// No items selected
 		else
 		{
 			// Show in Library
-			if (!this.itemsView._itemGroup.isLibrary()) {
+			if (!itemGroup.isLibrary()) {
 				show.push(m.showInLibrary, m.sep1);
 			}
 			else {
@@ -2023,7 +2064,7 @@ var ZoteroPane = new function()
 		}
 		
 		// TODO: implement menu for remote items
-		if (!this.collectionsView.editable) {
+		if (!itemGroup.editable) {
 			for (var i in m) {
 				switch (i) {
 					case 'exportItems':
