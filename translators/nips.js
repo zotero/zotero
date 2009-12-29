@@ -3,22 +3,25 @@
 	"translatorType":4,
 	"label":"Neural Information Processing Systems",
 	"creator":"Fei Qi",
-	"target":"http://books\\.nips\\.cc/nips\\d+\\.html",
+	"target":"^http://books.nips.cc/",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":false,
-	"lastUpdated":"2009-05-05 07:15:00"
+	"lastUpdated":"2009-12-26 06:00:00"
 }
 
 function detectWeb(doc, url) {
-	return "multiple";
+	var contRe = /(nips\d+)/;
+	var m = contRe.exec( url );
+	if (m) return "multiple";
+	return false;
 }
 
 function grabCitation( paper ) {
-	// Zotero.debug( paper.title );
-	// Zotero.debug( paper.pdf );
-	// Zotero.debug( paper.bib );
+	//Zotero.debug( paper.title );
+	//Zotero.debug( paper.pdf );
+	//Zotero.debug( paper.bib );
 	Zotero.Utilities.HTTP.doGet( paper.bib, function( text ) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
@@ -29,19 +32,15 @@ function grabCitation( paper ) {
 			item.complete();
 		} );
 		translator.translate();
-	}, function() {Zotero.done();}, null);
+	} );
 }
 
 function doWeb( doc, url ) {
 	var n = doc.documentElement.namespaceURI;
 	var ns = n ? function(prefix) {} : null;
-	// if( doc.title.match( "Search" ) ){
-	//	var titleRe = '//i';
-	//	var urlRe = '//a';
-	//} else {
-		var titleRe = '//table//td/b';
-		var urlRe = '//table//td/a';
-	//}
+	var titleRe = '//table//td/b';
+	var urlRe = '//table//td/a';
+
 	if (detectWeb(doc, url) == "multiple") {
 		// Retrive items
 		var items = new Object();
@@ -54,21 +53,18 @@ function doWeb( doc, url ) {
 			var idx = 0;
 			while( title && urls ) {
 				var art = new Object;
-				// Zotero.debug( title.textContent );
 				items[idx] = title.textContent;
 				art.title = items[idx];
-				var urlnum = 0;
-				while( urlnum < 2 && url ) {
-					if( 0 <= url.textContent.search( 'pdf' ) ) {
-						art.pdf = url.href;
-						urlnum++;
-					}
-					if( 0 <= url.textContent.search( 'bib' ) ) {
-						art.bib = url.href;
-						urlnum++;
-					}
+				while( 0 > url.textContent.search( 'bib' ) )
+				{
 					url = urls.iterateNext();
 				}
+				art.bib = url.href;
+				art.pdf = url.href.replace( 'bib', 'pdf' );
+				// Zotero.debug( art.title );
+				// Zotero.debug( art.pdf );
+				// Zotero.debug( art.bib );
+				// Zotero.debug( url.href );
 				arts.push( art );
 				idx++;
 				title = titles.iterateNext();
