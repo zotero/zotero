@@ -52,9 +52,24 @@ Zotero.Schema = new function(){
 		var dbVersion = _getDBVersion('userdata');
 		var schemaVersion = _getSchemaSQLVersion('userdata');
 		
+		// Upgrading from 1.0 or earlier
+		if (dbVersion <= 36) {
+			var integrityCheck = true;
+			var majorUpgrade = true;
+		}
+		else {
+			var integrityCheck = false;
+			var majorUpgrade = false;
+		}
+		
 		var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-				   .getService(Components.interfaces.nsIWindowWatcher);
-		var obj = { Zotero: Zotero, data: { success: false } };
+					.getService(Components.interfaces.nsIWindowWatcher);
+		var data = {
+			success: false,
+			majorUpgrade: majorUpgrade,
+			integrityCheck: integrityCheck
+		};
+		var obj = { Zotero: Zotero, data: data };
 		var io = { wrappedJSObject: obj };
 		var win = ww.openWindow(null, "chrome://zotero/content/upgrade.xul",
 					"zotero-schema-upgrade", "chrome,centerscreen,modal", io);

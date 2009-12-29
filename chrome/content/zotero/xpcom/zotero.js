@@ -71,7 +71,7 @@ var Zotero = new function(){
 	// Public properties
 	this.initialized = false;
 	this.skipLoading = false;
-	this.__defineGetter__("startupError", function() { return _startupError; });
+	this.startupError;
 	this.__defineGetter__("startupErrorHandler", function() { return _startupErrorHandler; });
 	this.version;
 	this.platform;
@@ -146,7 +146,6 @@ var Zotero = new function(){
 	 */
 	this.__defineGetter__('locked', function () _locked);
 	
-	var _startupError;
 	var _startupErrorHandler;
 	var _zoteroDirectory = false;
 	var _localizedStringBundle;
@@ -255,7 +254,7 @@ var Zotero = new function(){
 		catch (e) {
 			// Zotero dir not found
 			if (e.name == 'NS_ERROR_FILE_NOT_FOUND') {
-				_startupError = Zotero.getString('dataDir.notFound');
+				this.startupError = Zotero.getString('dataDir.notFound');
 				_startupErrorHandler = function() {
 					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 						.getService(Components.interfaces.nsIWindowMediator);
@@ -268,7 +267,7 @@ var Zotero = new function(){
 						+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 					var index = ps.confirmEx(win,
 						Zotero.getString('general.error'),
-						_startupError + '\n\n' +
+						this.startupError + '\n\n' +
 						Zotero.getString('dataDir.previousDir') + ' '
 							+ Zotero.Prefs.get('lastDataDir'),
 						buttonFlags, null,
@@ -332,7 +331,7 @@ var Zotero = new function(){
 					Zotero.getString('startupError.databaseCannotBeOpened'),
 					Zotero.getString('startupError.checkPermissions')
 				]);
-				_startupError = msg;
+				this.startupError = msg;
 			}
 			
 			Components.utils.reportError(e);
@@ -371,10 +370,10 @@ var Zotero = new function(){
 					var kbURL = "http://zotero.org/support/kb/newer_db_version";
 					var seeKB = "See " + kbURL + " for more information.";
 					var msg = Zotero.localeJoin([zoteroVersionIsOlder, upgradeToLatestVersion]) + "\n\n" + currentVersion + "\n\n" + seeKB;
-					_startupError = msg;
+					this.startupError = msg;
 				}
 				else {
-					_startupError = "Database upgrade error";
+					this.startupError = "Database upgrade error";
 				}
 				Components.utils.reportError(e);
 				return false;

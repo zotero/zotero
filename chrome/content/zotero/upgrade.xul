@@ -14,7 +14,6 @@
 			this.init = init;
 			this.onAdvance = onAdvance;
 			this.doUpgrade = doUpgrade;
-			this.onChangeLogLinkClick = onChangeLogLinkClick;
 			
 			var obj = window.arguments[0].wrappedJSObject;
 			var Zotero = obj.Zotero;
@@ -23,9 +22,18 @@
 			function init() {
 				var wizard = document.getElementById('zotero-schema-upgrade');
 				
-				var continueButtonName = wizard.getButton('next').getAttribute('label');
+				var continueButton = wizard.getButton('next');
+				continueButton.focus(); // prevent focusing upgrade instructions link
+				
+				// Use proper button name in text
+				var continueButtonName = continueButton.getAttribute('label');
 				var str = Zotero.getString('upgrade.advanceMessage', continueButtonName);
 				document.getElementById('zotero-advance-message').setAttribute('value', str);
+				
+				if (data.majorUpgrade) {
+					document.getElementById('zotero-major-upgrade').hidden = false;
+					document.getElementById('zotero-upgrade-required').hidden = true;
+				}
 			}
 			
 			
@@ -45,6 +53,28 @@
 				onAdvance();
 				
 				try {
+					if (data.integrityCheck) {
+						if (!Zotero.DB.integrityCheck()) {
+							var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+											.createInstance(Components.interfaces.nsIPrompt);
+							var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
+												+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL);
+							var index = pr.confirmEx(
+								Zotero.getString('general.error'),
+								Zotero.getString('upgrade.integrityCheckFailed'),
+								buttonFlags, Zotero.getString('upgrade.loadDBRepairTool'),
+								null, null, null, {});
+							
+							if (index == 0) {
+								Zotero.initialURL = 'https://www.zotero.org/utils/dbfix/';
+							}
+							
+							_setStartupError();
+							_clickCancel();
+							return;
+						}
+					}
+					
 					Zotero.Schema.updateSchema();
 				}
 				catch (e) {
@@ -53,9 +83,7 @@
 					
 					Components.utils.reportError(e);
 					
-					var cancelButton = wizard.getButton('cancel');
-					cancelButton.setAttribute('disabled', false);
-					cancelButton.click();
+					_clickCancel();
 					return;
 				}
 				
@@ -65,9 +93,30 @@
 			}
 			
 			
-			function onChangeLogLinkClick() {
+			this.onUpgradeInstructionsLinkClick = function () {
+				_setStartupError();
+				Zotero.initialURL = 'http://zotero.org/support/upgrade';
+				_clickCancel();
+			}
+			
+			
+			this.onChangeLogLinkClick = function () {
 				Zotero.initialURL = 'http://zotero.org/support/changelog';
 				document.getElementById('zotero-schema-upgrade').getButton('finish').click();
+			}
+			
+			
+			function _setStartupError() {
+				Zotero.startupError = Zotero.localeJoin([
+					Zotero.getString('upgrade.dbUpdateRequired'), Zotero.getString('general.restartFirefox')
+				]);
+			}
+			
+			
+			function _clickCancel() {
+				var cancelButton = document.getElementById('zotero-schema-upgrade').getButton('cancel');
+				cancelButton.setAttribute('disabled', false);
+				cancelButton.click();
 			}
 		}
 	]]>
@@ -75,7 +124,14 @@
 	
 	<wizardpage onpageshow="Zotero_Schema_Upgrade.init()">
 		<description>&zotero.upgrade.newVersionInstalled;</description>
-		<description>&zotero.upgrade.upgradeRequired; &zotero.upgrade.autoBackup;</description>
+		<description id="zotero-upgrade-required">&zotero.upgrade.upgradeRequired; &zotero.upgrade.autoBackup;</description>
+		<description id="zotero-major-upgrade" hidden="true">
+			<label value="&zotero.upgrade.majorUpgrade;" style="font-weight: bold"/>
+			&zotero.upgrade.majorUpgradeBeforeLink;
+			<label class="text-link" value="&zotero.upgrade.majorUpgradeLink;"
+				onclick="try { Zotero_Schema_Upgrade.onUpgradeInstructionsLinkClick(); } catch (e) { alert(e); }"/>
+			&zotero.upgrade.majorUpgradeAfterLink;
+		</description>
 		<description id="zotero-advance-message"/>
 	</wizardpage>
 	
@@ -88,7 +144,7 @@
 		<description>&zotero.upgrade.upgradeSucceeded;</description>
 		<description>
 			&zotero.upgrade.changeLogBeforeLink;
-			<label id="zotero-change-log-link" class="text-link" value="&zotero.upgrade.changeLogLink;"
+			<label class="text-link" value="&zotero.upgrade.changeLogLink;"
 				onclick="Zotero_Schema_Upgrade.onChangeLogLinkClick()"/>
 			&zotero.upgrade.changeLogAfterLink;
 		</description>
