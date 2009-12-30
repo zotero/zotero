@@ -160,7 +160,7 @@ Zotero.Items = new function() {
 			var ids = Zotero.DB.columnQuery(sql, libraryID);
 		}
 		else {
-			//sql += " AND libraryID IS NULL";
+			sql += " AND libraryID IS NULL";
 			var ids = Zotero.DB.columnQuery(sql);
 		}
 		
