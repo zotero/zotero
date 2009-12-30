@@ -1044,7 +1044,7 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 		return false;
 	}
 	
-	if (!dragData) {
+	if (!dragData || !dragData.data) {
 		var dragData = Zotero.DragDrop.getDragData(this);
 	}
 	if (!dragData) {
