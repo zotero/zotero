@@ -312,7 +312,7 @@ Zotero.QuickCopy = new function() {
 				}
 				// TODO: Remove once >=Fx3.5
 				else {
-					text = Zotero.Utilities.prototype.trim()
+					text = Zotero.Utilities.prototype.trim(text)
 				}
 				
 				//
