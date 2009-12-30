@@ -468,18 +468,14 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getFileUploadParameters = function (i
 				// Group file
 				if (item.libraryID) {
 					var group = Zotero.Groups.getByLibraryID(item.libraryID);
-					text = "The group '" + group.name + "' has reached its "
-						+ "Zotero File Storage quota. Some files were not uploaded. "
-						+ "Other Zotero data will continue to sync to the server.\n\n"
-						+ "The group owner can increase the group's storage capacity "
-						+ "from the storage settings section on zotero.org.";
+					text = Zotero.getString('sync.storage.error.zfs.groupQuotaReached1', group.name) + "\n\n"
+							Zotero.getString('sync.storage.error.zfs.groupQuotaReached2');
 				}
 				// Personal file
 				else {
-					text = "You have reached your Zotero File Storage quota. Some files were not uploaded. "
-						+ "Other Zotero data will continue to sync to the server.\n\n"
-						+ "See your zotero.org account settings for additional storage options.";
-					buttonText = "Open Account Settings";
+					text = Zotero.getString('sync.storage.error.zfs.personalQuotaReached1') + "\n\n"
+							Zotero.getString('sync.storage.error.zfs.personalQuotaReached2');
+					buttonText = Zotero.getString('sync.storage.openAccountSettings');
 					buttonCallback = function () {
 						var url = "https://www.zotero.org/settings/storage";
 						
