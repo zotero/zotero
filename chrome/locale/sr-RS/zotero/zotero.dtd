@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Додај назначено у Зотеро белешке">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Направи Зотеро ставку и белешку из назначеног">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Сачувај везу као Зотеро снимак">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Сачувај слику као Зотеро снимак">
 
 <!ENTITY zotero.tabs.info.label "Инфо">
 <!ENTITY zotero.tabs.notes.label "Белешке">

@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Добавяне избраното към бележка в Зотеро">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Създаване на обект и бележка в Зотеро от избраното.">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Запазване на копие на връзката в Зотеро">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Запазване на копие образа в Зотеро">
 
 <!ENTITY zotero.tabs.info.label "Информация">
 <!ENTITY zotero.tabs.notes.label "Бележки">

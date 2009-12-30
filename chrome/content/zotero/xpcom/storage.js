@@ -127,12 +127,10 @@ Zotero.Sync.Storage = new function () {
 					Zotero.debug(_session.name + " verification failed");
 					
 					var e = new Zotero.Error(
-						_session.name + " verification failed. Verify your "
-							+ "WebDAV settings in the Sync pane of the Zotero preferences.",
+						Zotero.getString('sync.storage.error.verificationFailed', _session.name),
 						0,
 						{
-							// TODO: localize
-							dialogButtonText: "Open Sync Preferences...",
+							dialogButtonText: Zotero.getString('sync.openSyncPreferences'),
 							dialogButtonCallback: function () {
 								var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 										   .getService(Components.interfaces.nsIWindowMediator);
@@ -1178,11 +1176,7 @@ Zotero.Sync.Storage = new function () {
 				catch (e) {
 					if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
 						Zotero.debug(e);
-						
-						// TODO: localize
-						var msg = "The file '" + file.leafName + "' is in use and cannot "
-							+ "be updated. Please close the file or restart your computer "
-							+ "and try syncing again.";
+						var msg = Zotero.getString('sync.storage.error.fileInUse', file.leafName);
 						throw (msg);
 					}
 					
@@ -1440,15 +1434,11 @@ Zotero.Sync.Storage = new function () {
 								+ pr.BUTTON_DELAY_ENABLE;
 				var index = pr.confirmEx(
 					Zotero.getString('general.warning'),
-					// TODO: localize
-					"You no longer have file editing access to the Zotero group '" + group.name + "', "
-						+ "and files you've added or edited cannot be synced to the server.\n\n"
-						+ "If you continue, your copy of the group will be reset to its state "
-						+ "on the server, and local modifications to items and files will be lost.\n\n"
-						+ "If you would like a chance to copy changed items and files elsewhere, "
-						+ "cancel the sync now.",
+					Zotero.getString('sync.storage.error.fileEditingAccessLost', group.name) + "\n\n"
+						+ Zotero.getString('sync.error.groupWillBeReset') + "\n\n"
+						+ Zotero.getString('sync.error.copyChangedItems'),
 					buttonFlags,
-					"Reset Group and Sync",
+					Zotero.getString('sync.resetGroupAndSync'),
 					null, null, null, {}
 					);
 				
@@ -1671,15 +1661,10 @@ Zotero.Sync.Storage.QueueManager = new function () {
 			Zotero.Utilities.prototype.numberFormat(remaining / 1024, 0)
 		);
 		var totalRequests = queue.totalRequests;
-		// TODO: localize
-		/*
 		var filesRemaining = Zotero.getString(
 			'sync.storage.filesRemaining',
 			[totalRequests - unfinishedRequests, totalRequests]
 		);
-		*/
-		var filesRemaining = (totalRequests - unfinishedRequests)
-								+ "/" + totalRequests + " files";
 		var status = Zotero.localeJoin([kbRemaining, '(' + filesRemaining + ')']);
 		return status;
 	}
@@ -1702,10 +1687,9 @@ Zotero.Sync.Storage.QueueManager = new function () {
 			dataIn: {
 				type: 'storagefile',
 				captions: [
-					// TODO: localize
-					'Local File',
-					'Remote File',
-					'Saved File'
+					Zotero.getString('sync.storage.localFile'),
+					Zotero.getString('sync.storage.RemoteFile'),
+					Zotero.getString('sync.storage.savedFile')
 				],
 				objects: objectPairs
 			}

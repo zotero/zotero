@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Thêm phần vừa chọn vào một ghi chép Zotero">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Tạo một biểu ghi và một ghi chép Zotero cho phần vừa chọn">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Lưu đường dẫn vào một bản lưu trang Web Zotero">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Lưu hình ảnh vào một bản lưu trang Web Zotero">
 
 <!ENTITY zotero.tabs.info.label "Thông tin">
 <!ENTITY zotero.tabs.notes.label "Ghi chép">

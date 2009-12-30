@@ -224,10 +224,9 @@ var Zotero_File_Interface = new function() {
 		var clip = Components.classes["@mozilla.org/widget/clipboard;1"]
 					.getService(Components.interfaces.nsIClipboard);
 		if (!clip.hasDataMatchingFlavors(["text/unicode"], 1, clip.kGlobalClipboard)) {
-			// TODO: localize
 			var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
 							.getService(Components.interfaces.nsIPrompt);
-			prompt.alert("", "No importable data could be read from the clipboard.");
+			prompt.alert("", Zotero.getString('fileInterface.importClipboardNoDataError'));
 			return;
 		}
 		var trans = Components.classes["@mozilla.org/widget/transferable;1"]

@@ -30,7 +30,7 @@ var Zotero_Long_Tag_Fixer = new function () {
 	
 	this.init = function () {
 		document.getElementById('zotero-old-tag').value = _oldTag;
-		document.getElementById('zotero-old-tag-delimiter').nextSibling.value = 'character'; // TODO: localize
+		document.getElementById('zotero-old-tag-delimiter').nextSibling.value = Zotero.getString('general.character.singular');
 		
 		var delimiter = Zotero.Prefs.get('lastLongTagDelimiter');
 		document.getElementById('zotero-old-tag-delimiter').value = delimiter;
@@ -47,27 +47,26 @@ var Zotero_Long_Tag_Fixer = new function () {
 		
 		document.getElementById('zotero-new-tag-actions').selectedIndex = index;
 		
-		// TODO: localize
 		switch (index) {
 			case 0:
-				var buttonLabel = "Save Tags";
+				var buttonLabel = "saveTags";
 				this.updateTagList();
 				document.getElementById('zotero-old-tag-delimiter').select();
 				break;
 				
 			case 1:
-				var buttonLabel = "Save Tag";
+				var buttonLabel = "saveTag";
 				document.getElementById('zotero-new-tag-editor').value = _oldTag;
 				this.updateEditLength(_oldTag.length)
 				break;
 				
 			case 2:
-				var buttonLabel = "Delete Tag";
+				var buttonLabel = "deleteTag";
 				dialog.getButton('accept').disabled = false;
 				break;
 		}
 		
-		document.getElementById('zotero-long-tag-fixer').getButton('accept').label = buttonLabel;
+		document.getElementById('zotero-long-tag-fixer').getButton('accept').label = Zotero.getString('sync.longTagFixer.' + buttonLabel);
 		window.sizeToContent();
 		Zotero.Prefs.set('lastLongTagMode', index);
 	}

@@ -1,44 +1,43 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/longTagFixer.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <dialog id="zotero-long-tag-fixer" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		buttons="accept,cancel"
 		onload="Zotero_Long_Tag_Fixer.init()"
 		ondialogcancel="Zotero_Long_Tag_Fixer.cancel()"
 		ondialogaccept="Zotero_Long_Tag_Fixer.save()"
-		title="Sync Error"> <!-- TODO: localize -->
+		title="&zotero.sync.error;">
 	
 	<script src="include.js"/>
 	<script src="longTagFixer.js"/>
 	
-	<!-- TODO: localize -->
-	<label value="The following tag in your Zotero library is too long to sync to the server:"/>
+	<label value="&zotero.sync.longTagFixer.followingTagTooLong;"/>
 	<groupbox>
 		<textbox id="zotero-old-tag" multiline="true" rows="4" readonly="true" class="plain"/>
 	</groupbox>
-	<label>Synced tags must be shorter than 256 characters.</label>
+	<label>&zotero.sync.longTagFixer.syncedTagSizeLimit;</label>
 	
 	<separator class="thin"/>
 	
-	<label value="You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it."/>
+	<label value="&zotero.sync.longTagFixer.splitEditDelete;"/>
 	
 	<separator/>
 	
 	<tabbox id="zotero-new-tag-actions">
 		<tabs oncommand="Zotero_Long_Tag_Fixer.switchMode(this.selectedIndex)">
-			<tab label="Split"/>
-			<tab label="Edit"/>
-			<tab label="Delete"/>
+			<tab label="&zotero.sync.longTagFixer.split;"/>
+			<tab label="&zotero.general.edit;"/>
+			<tab label="&zotero.general.delete;"/>
 		</tabs>
 		<tabpanels>
 			<!-- Split -->
 			<vbox>
 				<hbox align="center">
-					<label>Split at the </label>
-					<!--  // TODO: localize -->
+					<label>&zotero.sync.longTagFixer.splitAtThe;</label>
 					<textbox id="zotero-old-tag-delimiter" size="1"
-						oninput="this.nextSibling.value = this.value.length > 1  ? 'characters' : 'character'; Zotero_Long_Tag_Fixer.updateTagList();"/>
+						oninput="this.nextSibling.value = Zotero.getString('general.character.' + (this.value.length > 1  ? 'plural' : 'singular')); Zotero_Long_Tag_Fixer.updateTagList();"/>
 					<label/>
 				</hbox>
 				
@@ -48,11 +47,11 @@
 				
 				<separator class="thin"/>
 				
-				<label value="Unchecked tags will not be saved."/>
+				<label value="&zotero.sync.longTagFixer.uncheckedTagsNotSaved;"/>
 				
 				<hbox>
-					<button label="Deselect All" oncommand="Zotero_Long_Tag_Fixer.deselectAll()"/>
-					<button label="Select All" oncommand="Zotero_Long_Tag_Fixer.selectAll()"/>
+					<button label="&zotero.general.deselectAll;" oncommand="Zotero_Long_Tag_Fixer.deselectAll()"/>
+					<button label="&zotero.general.selectAll;" oncommand="Zotero_Long_Tag_Fixer.selectAll()"/>
 				</hbox>
 			</vbox>
 			
@@ -62,13 +61,13 @@
 					oninput="Zotero_Long_Tag_Fixer.updateEditLength(this.value.length)"/>
 				<hbox id="zotero-new-tag-characters">
 					<label id="zotero-new-tag-character-count"/>
-					<label value="characters"/>
+					<label value="&zotero.sync.longTagFixer.characters;"/>
 				</hbox>
 			</vbox>
 			
 			<!-- Delete -->
 			<vbox align="center" pack="center">
-				<label value="The tag will be deleted from all items."/>
+				<label value="&zotero.sync.longTagFixer.tagWillBeDeleted;"/>
 			</vbox>
 		</tabpanels>
 	</tabbox>

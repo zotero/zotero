@@ -267,8 +267,7 @@ var ZoteroPane = new function()
 			if (Zotero.locked) {
 				var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
 							.getService(Components.interfaces.nsIPrompt);
-				// TODO: localize
-				var msg = "Another Zotero operation is currently in progress.\n\nPlease wait until it has finished.";
+				var msg = Zotero.getString('general.operationInProgress') + '\n\n' + Zotero.getString('general.operationInProgress.waitUntilFinished');
 				pr.alert("", msg);
 				return;
 			}
@@ -1247,11 +1246,11 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		// TODO: localize
 		var toTrash = {
-			title: "Move to Trash",
-			text: "Are you sure you want to move the selected item"
-					+ (this.itemsView.selection.count>1 ? 's' : '') + " to the Trash?"
+			title: Zotero.getString('pane.items.trash.title'),
+			text: Zotero.getString(
+				'pane.items.trash' +  + (this.itemsView.selection.count > 1 ? '.multiple' : '')
+			)
 		};
 		var toDelete = {
 			title: Zotero.getString('pane.items.delete.title'),
@@ -2096,11 +2095,9 @@ var ZoteroPane = new function()
 		menu.childNodes[m.exportItems].setAttribute('label', Zotero.getString('pane.items.menu.export' + multiple));
 		menu.childNodes[m.createBib].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
 		menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
-		// TODO: localize
-		menu.childNodes[m.createParent].setAttribute('label', multiple ? "Create Parent Items from Selected Items" : "Create Parent Item from Selected Item");
+		menu.childNodes[m.createParent].setAttribute('label', Zotero.getString('pane.items.menu.createParent' + multiple));
 		menu.childNodes[m.recognizePDF].setAttribute('label', Zotero.getString('pane.items.menu.recognizePDF' + multiple));
-		// TODO: localize
-		menu.childNodes[m.renameAttachments].setAttribute('label', multiple ? "Rename Files from Parent Metadata" : "Rename File from Parent Metadata");
+		menu.childNodes[m.renameAttachments].setAttribute('label', Zotero.getString('pane.items.menu.renameAttachments' + multiple));
 		menu.childNodes[m.reindexItem].setAttribute('label', Zotero.getString('pane.items.menu.reindexItem' + multiple));
 		
 		for (var i in disable)

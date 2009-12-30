@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "A kijelölés hozzáadása a Zotero jegyzethez">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Zotero elem és jegyzet létrehozása a kijelölés alapján">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "A hivatkozás elmentése Zotero pillanatfelvételként">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "A kép elmentése Zotero pillanatfelvételként">
 
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Jegyzetek">

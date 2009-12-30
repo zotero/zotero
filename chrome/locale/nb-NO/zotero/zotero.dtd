@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Legg utvalg til Zotero-notat">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Lag notat og element i Zotero fra utvalget">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Lagre lenke som Zotero-snapshot">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Lagre bilde som Zotero-snapshot">
 
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Notater">

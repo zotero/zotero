@@ -53,8 +53,7 @@ var Zotero_Merge_Window = new function () {
 		// Set font size from pref
 		Zotero.setFontSize(_wizardPage);
 		
-		// TODO: localize
-		_wizard.getButton('cancel').setAttribute('label', "Cancel Sync")
+		_wizard.getButton('cancel').setAttribute('label', Zotero.getString('sync.cancel'));
 		
 		_io = window.arguments[0];
 		_objects = _io.dataIn.objects;

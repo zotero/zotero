@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Добавить выделенное к Заметкам Zotero">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Создать документ и заметку Zotero из выделенного">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Сохранить ссылку как снимок Zotero">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Сохранить изображение как снимок Zotero">
 
 <!ENTITY zotero.tabs.info.label "Информация">
 <!ENTITY zotero.tabs.notes.label "Заметки">

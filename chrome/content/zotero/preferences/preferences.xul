@@ -97,9 +97,8 @@ To add a new preference:
 					</row>
 					
 					<row>
-						<!-- TODO: localize -->
 						<hbox align="center">
-							<label value="Note font size:" control="noteFontSize"/>
+							<label value="&zotero.preferences.fontSize.notes;" control="noteFontSize"/>
 						</hbox>
 						<hbox>
 							<menulist id="noteFontSize" preference="pref-noteFontSize" editable="true">
@@ -144,14 +143,13 @@ To add a new preference:
 		</groupbox>
 		
 		<groupbox>
-			<caption label="Groups"/>
+			<caption label="&zotero.preferences.groups;"/>
 			
-			<!-- TODO: localize -->
-			<label value="When copying items between libraries, include:"/>
+			<label value="&zotero.preferences.groups.whenCopyingInclude;"/>
 			<vbox style="margin-left: 2em">
-				<checkbox label="child notes" preference="pref-groups-copyChildNotes"/>
-				<checkbox label="child snapshots and imported files" preference="pref-groups-copyChildFileAttachments"/>
-				<checkbox label="child links" preference="pref-groups-copyChildLinks"/>
+				<checkbox label="&zotero.preferences.groups.childNotes;" preference="pref-groups-copyChildNotes"/>
+				<checkbox label="&zotero.preferences.groups.childFiles;" preference="pref-groups-copyChildFileAttachments"/>
+				<checkbox label="&zotero.preferences.groups.childLinks;" preference="pref-groups-copyChildLinks"/>
 			</vbox>
 		</groupbox>
 		
@@ -159,9 +157,8 @@ To add a new preference:
 	</prefpane>
 	
 	
-	<!-- localize -->
 	<prefpane id="zotero-prefpane-sync"
-						label="Sync"
+						label="&zotero.preferences.prefpane.sync;"
 						onpaneload="document.getElementById('sync-password').value = Zotero.Sync.Server.password; document.getElementById('storage-password').value = Zotero.Sync.Storage.password;"
 						image="chrome://zotero/skin/prefs-sync.png">
 		<preferences>
@@ -196,7 +193,7 @@ To add a new preference:
 			<tabpanels>
 				<tabpanel orient="vertical">
 					<groupbox>
-						<caption label="Zotero Sync Server"/>
+						<caption label="&zotero.preferences.sync.syncServer;"/>
 						
 						<hbox>
 							<grid>
@@ -207,12 +204,12 @@ To add a new preference:
 								
 								<rows>
 									<row>
-										<label value="Username:"/>
+										<label value="&zotero.preferences.sync.username;"/>
 										<textbox preference="pref-sync-username"
 											onchange="Zotero.Prefs.set('sync.server.username', this.value); var pass = document.getElementById('sync-password'); if (pass.value) { Zotero.Sync.Server.password = pass.value; }"/>
 									</row>
 									<row>
-										<label value="Password:"/>
+										<label value="&zotero.preferences.sync.password;"/>
 										<textbox id="sync-password" type="password"
 											onchange="Zotero.Sync.Server.password = this.value"/>
 									</row>
@@ -231,27 +228,26 @@ To add a new preference:
 							<hbox style="width:2em"/>
 							
 							<vbox>
-								<label class="text-link" value="Create Account" href="http://zotero.org/user/register"/>
+								<label class="text-link" value="&zotero.preferences.sync.createAccount;" href="http://zotero.org/user/register"/>
 								<separator class="thin"/>
-								<label class="text-link" value="Lost Password?" href="http://zotero.org/user/lostpassword"/>
+								<label class="text-link" value="&zotero.preferences.sync.lostPassword;" href="http://zotero.org/user/lostpassword"/>
 							</vbox>
 						</hbox>
 						
 						<separator class="thin"/>
 						
 						<hbox>
-							<checkbox label="Sync automatically" preference="pref-sync-autosync"/>
+							<checkbox label="&zotero.preferences.sync.syncAutomatically;" preference="pref-sync-autosync"/>
 						</hbox>
 					</groupbox>
 					
 					
-					<!-- TODO: localize -->
 					<groupbox>
-						<caption label="File Syncing"/>
+						<caption label="&zotero.preferences.sync.fileSyncing;"/>
 						
 						<!-- My Library -->
 						<hbox style="margin: 0">
-							<checkbox label="Sync attachment files in My Library using" preference="pref-storage-enabled" oncommand="updateStorageSettings(this.checked, null)"/>
+							<checkbox label="&zotero.preferences.sync.fileSyncing.myLibrary;" preference="pref-storage-enabled" oncommand="updateStorageSettings(this.checked, null)"/>
 							<menulist id="storage-protocol" style="margin-left: .5em" preference="pref-storage-protocol" oncommand="updateStorageSettings(null, this.value)">
 								<menupopup>
 									<menuitem label="Zotero" value="zotero"/>
@@ -272,7 +268,7 @@ To add a new preference:
 							
 							<rows>
 								<row>
-									<label value="URL:"/>
+									<label value="&zotero.preferences.sync.fileSyncing.url;"/>
 									<hbox>
 										<menulist id="storage-url-prefix"
 												preference="pref-storage-scheme"
@@ -292,7 +288,7 @@ To add a new preference:
 									</hbox>
 								</row>
 								<row>
-									<label value="Username:"/>
+									<label value="&zotero.preferences.sync.username;"/>
 									<hbox>
 										<textbox id="storage-username"
 											preference="pref-storage-username"
@@ -302,7 +298,7 @@ To add a new preference:
 									</hbox>
 								</row>
 								<row>
-									<label value="Password:"/>
+									<label value="&zotero.preferences.sync.password;"/>
 									<hbox>
 										<textbox id="storage-password" flex="0" type="password"
 											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout('verifyStorageServer();', 1); }"
@@ -328,17 +324,17 @@ To add a new preference:
 						<separator id="storage-separator" class="thin"/>
 						
 						<!-- Group Libraries -->
-						<checkbox label="Sync attachment files in group libraries using Zotero storage"
+						<checkbox label="&zotero.preferences.sync.fileSyncing.groups;"
 								preference="pref-group-storage-enabled" oncommand="setTimeout(function () { updateStorageTerms(); }, 1)"/>
 						
 						<separator class="thin"/>
 						
 						<vbox>
-							<label class="text-link" style="margin-top:.3em; margin-left: 0" value="About File Syncing" href="http://zotero.org/support/file_sync"/>
+							<label class="text-link" style="margin-top:.3em; margin-left: 0" value="&zotero.preferences.sync.fileSyncing.about;" href="http://zotero.org/support/file_sync"/>
 							<hbox id="storage-terms" style="margin-top: .4em" align="center">
-								<label>By using Zotero storage, you agree to become bound by its</label>
-								<label class="text-link" href="http://www.digitalscholar.org/z_terms" value="terms and conditions"/>
-								<label>.</label>
+								<label>&zotero.preferences.sync.fileSyncing.tos1;</label>
+								<label class="text-link" href="http://www.digitalscholar.org/z_terms" value="&zotero.preferences.sync.fileSyncing.tos2;"/>
+								<label>&zotero.preferences.period;</label>
 							</hbox>
 						</vbox>
 					</groupbox>
@@ -347,8 +343,7 @@ To add a new preference:
 				<tabpanel id="zotero-reset" orient="vertical">
 					<radiogroup id="zotero-reset-sync-group" oncommand="handleSyncResetSelect(this)">
 						<groupbox>
-							<!-- TODO: localize -->
-							<caption label="Zotero Sync Server"/>
+							<caption label="&zotero.preferences.sync.syncServer;"/>
 							
 							<grid>
 								<columns>
@@ -360,24 +355,24 @@ To add a new preference:
 									<row id="zotero-full-sync">
 									<radio/>
 										<vbox onclick="this.previousSibling.click()">
-											<label value="Full Sync with Zotero Server"/>
-											<description>Merge local Zotero data with data from the sync server, ignoring sync history.</description>
+											<label value="&zotero.preferences.sync.reset.fullSync;"/>
+											<description>&zotero.preferences.sync.reset.fullSync.desc;</description>
 										</vbox>
 									</row>
 									
 									<row id="zotero-restore-from-server" selected="true">
 										<radio/>
 										<vbox onclick="this.previousSibling.click()">
-											<label value="Restore from Zotero Server"/>
-											<description>Erase all local Zotero data and restore from the sync server.</description>
+											<label value="&zotero.preferences.sync.reset.restoreFromServer;"/>
+											<description>&zotero.preferences.sync.reset.restoreFromServer.desc;</description>
 										</vbox>
 									</row>
 									
 									<row id="zotero-restore-to-server">
 										<radio/>
 										<vbox onclick="this.previousSibling.click()">
-											<label value="Restore to Zotero Server"/>
-											<description>Erase all server data and overwrite with local Zotero data.</description>
+											<label value="&zotero.preferences.sync.reset.restoreToServer;"/>
+											<description>&zotero.preferences.sync.reset.restoreToServer.desc;</description>
 										</vbox>
 									</row>
 								</rows>
@@ -385,7 +380,7 @@ To add a new preference:
 						</groupbox>
 						
 						<groupbox>
-							<caption label="File Syncing"/>
+							<caption label="&zotero.preferences.sync.fileSyncing;"/>
 							
 							<grid>
 								<columns>
@@ -397,8 +392,8 @@ To add a new preference:
 									<row id="zotero-reset-storage-history">
 									<radio/>
 										<vbox onclick="this.previousSibling.click()">
-											<label value="Reset File Sync History"/>
-											<description>Force checking of the storage server for all local attachment files.</description>
+											<label value="&zotero.preferences.sync.reset.resetFileSyncHistory;"/>
+											<description>&zotero.preferences.sync.reset.resetFileSyncHistory.desc;</description>
 										</vbox>
 									</row>
 								</rows>
@@ -407,7 +402,7 @@ To add a new preference:
 					</radiogroup>
 					
 					<hbox>
-						<button id="zotero-reset-button" label="Reset..." oncommand="handleSyncReset(document.getElementById('zotero-reset-sync-group').selectedItem.parentNode.id.substr(7))"/>
+						<button id="zotero-reset-button" label="&zotero.preferences.sync.reset.button;" oncommand="handleSyncReset(document.getElementById('zotero-reset-sync-group').selectedItem.parentNode.id.substr(7))"/>
 					</hbox>
 				</tabpanel>
 			</tabpanels>
@@ -549,11 +544,10 @@ To add a new preference:
 				<button label="+" onclick="showQuickCopySiteEditor()"/>
 			</hbox>
 			
-			<!-- TODO: localize -->
 			<hbox align="center">
-				<label value="Disable Quick Copy when dragging more than"/>
+				<label value="&zotero.preferences.quickCopy.dragLimit;"/>
 				<textbox preference="pref-quickCopy-dragLimit" size="3"/>
-				<label value="items" flex="1"/>
+				<label value="&zotero.preferences.items;" flex="1"/>
 			</hbox>
 		</groupbox>
 		
@@ -762,8 +756,7 @@ To add a new preference:
 		</preferences>
 		
 		<groupbox>
-			<!-- TODO: localize with &zotero.preferences.dataDir; -->
-			<caption label="Data Directory Location"/>
+			<caption label="&zotero.preferences.dataDir;"/>
 			
 			<radiogroup id="dataDir" preference="pref-useDataDir" onsyncfrompreference="onDataDirLoad();" onsynctopreference="return onDataDirUpdate(event);">
 				<radio label="&zotero.preferences.dataDir.useProfile;" value="false"/>
@@ -789,25 +782,24 @@ To add a new preference:
 		</groupbox>
 		
 		<groupbox>
-			<!-- TODO: localize -->
-			<caption label="Debug Output Logging"/>
+			<caption label="&zotero.preferences.debugOutputLogging;"/>
 			
 			<!-- This doesn't wrap without an explicit width -->
 			<vbox>
-				<description width="45em">Debug output can help Zotero developers diagnose problems in Zotero. Debug logging will slow down Zotero, so you should generally leave it disabled unless a Zotero developer requests debug output.</description>
+				<description width="45em">&zotero.preferences.debugOutputLogging.message;</description>
 			</vbox>
 			
 			<hbox align="center">
 				<button id="debug-output-enable" oncommand="Zotero_Preferences.Debug_Output.toggleStore()"/>
 				<label id="debug-output-lines" style="margin-right: 0"/>
-				<label value="lines logged"/>
-				<checkbox preference="pref-debug-output-enableAfterRestart" label="Enable after restart" style="margin-left: 1.5em"/>
+				<label value="&zotero.preferences.debugOutputLogging.linesLogged;"/>
+				<checkbox preference="pref-debug-output-enableAfterRestart" label="&zotero.preferences.debugOutputLogging.enableAfterRestart;" style="margin-left: 1.5em"/>
 			</hbox>
 			
 			<hbox align="center">
-				<button id="debug-output-view" label="View Output" oncommand="Zotero_Preferences.Debug_Output.view()"/>
-				<button id="debug-output-clear" label="Clear Output" oncommand="Zotero_Preferences.Debug_Output.clear()"/>
-				<button id="debug-output-submit" label="Submit to Zotero Server" oncommand="Zotero_Preferences.Debug_Output.submit()"/>
+				<button id="debug-output-view" label="&zotero.preferences.debugOutputLogging.viewOutput;" oncommand="Zotero_Preferences.Debug_Output.view()"/>
+				<button id="debug-output-clear" label="&zotero.preferences.debugOutputLogging.clearOutput;" oncommand="Zotero_Preferences.Debug_Output.clear()"/>
+				<button id="debug-output-submit" label="&zotero.preferences.debugOutputLogging.submitToServer;" oncommand="Zotero_Preferences.Debug_Output.submit()"/>
 				<progressmeter id="debug-output-submit-progress" mode="undetermined" hidden="true"/>
 			</hbox>
 		</groupbox>

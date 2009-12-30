@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Zotero 노트에 선택한 내용 추가">
 <!ENTITY zotero.contextMenu.addTextToNewNote "선택한 내용으로 Zotero 노트 생성">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Zotero 스냅샷을 링크로 저장">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Zotero 스냅샷을 그림으로 저장">
 
 <!ENTITY zotero.tabs.info.label "정보">
 <!ENTITY zotero.tabs.notes.label "노트">

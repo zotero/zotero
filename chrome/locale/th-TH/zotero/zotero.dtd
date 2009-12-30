@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Add Selection to Zotero Note">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Create Zotero Item and Note from Selection">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "บันทึกลิ้งค์เป็นโซแทโรสแนบช็อต">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "บันทึกภาพเป็นโซแทรโรสแนบช็อต">
 
 <!ENTITY zotero.tabs.info.label "ข้อมูล">
 <!ENTITY zotero.tabs.notes.label "โน้ต">
