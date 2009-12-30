@@ -1249,7 +1249,7 @@ var ZoteroPane = new function()
 		var toTrash = {
 			title: Zotero.getString('pane.items.trash.title'),
 			text: Zotero.getString(
-				'pane.items.trash' +  + (this.itemsView.selection.count > 1 ? '.multiple' : '')
+				'pane.items.trash' + (this.itemsView.selection.count > 1 ? '.multiple' : '')
 			)
 		};
 		var toDelete = {
