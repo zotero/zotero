@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "選択範囲をZoteroメモに追加">
 <!ENTITY zotero.contextMenu.addTextToNewNote "選択範囲からZoteroメモを作成">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "リンクをZoteroスナップショットとして保存">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "イメージをZoteroスナップショットとして保存">
 
 <!ENTITY zotero.tabs.info.label "情報">
 <!ENTITY zotero.tabs.notes.label "メモ">

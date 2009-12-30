@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "أضف التحديد لملاحظة زوتيرو.">
 <!ENTITY zotero.contextMenu.addTextToNewNote "انشئ عنصر وملاحظة من العنصر المحدد.">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "احفظ الرابط كلقطة فوتوغرافية">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "احفظ الصورة كلقطة فوتوغرافية">
 
 <!ENTITY zotero.tabs.info.label "معلومات">
 <!ENTITY zotero.tabs.notes.label "ملاحظات">

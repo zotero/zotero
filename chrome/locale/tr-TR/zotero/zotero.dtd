@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Seçileni Zotero Not&apos;a Ekle">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Seçimden Zotero öğesi ve Notu Yarat">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Bağlantıyı Zotero Enstantanesi olarak Kaydet">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Resmi Zotero Enstantanesi olarak Kaydet">
 
 <!ENTITY zotero.tabs.info.label "Bilgi">
 <!ENTITY zotero.tabs.notes.label "Notlar">

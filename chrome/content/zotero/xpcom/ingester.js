@@ -30,8 +30,9 @@ Zotero.Ingester = new function() {
 		
 		if (Zotero.locked) {
 			frontWindow.Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-			// TODO: localize
-			var desc = "A Zotero operation is currently in progress. Please wait until it finishes and try again.";
+			var desc = Zotero.localeJoin([
+				Zotero.getString('general.operationInProgress'), Zotero.getString('general.operationInProgress.waitUntilFinishedAndTryAgain')
+			]);
 			frontWindow.Zotero_Browser.progress.addDescription(desc);
 			frontWindow.Zotero_Browser.progress.show();
 			frontWindow.Zotero_Browser.progress.startCloseTimer(8000);

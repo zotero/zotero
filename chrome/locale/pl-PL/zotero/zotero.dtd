@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Dodaj zaznaczenie do notatki Zotero">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Utwórz element Zotero i notatkę z zaznaczenia">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Zapisz odnośnik jako zrzut ekranu Zotero">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Zapisz obraz jako zrzut ekranu Zotero">
 
 <!ENTITY zotero.tabs.info.label "Informacje">
 <!ENTITY zotero.tabs.notes.label "Notatki">

@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Selectie toevoegen aan Zotero-aantekening">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Zotero-object en -aantekening maken van selectie">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Koppeling opslaan als Zotero-snapshot">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Afbeelding opslaan als Zotero-snapshot">
 
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Aantekeningen">

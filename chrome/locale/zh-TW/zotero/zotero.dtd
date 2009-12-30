@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "把選取區加入 Zotero 筆記">
 <!ENTITY zotero.contextMenu.addTextToNewNote "以選取區建立 Zotero 項目與筆記">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "把鏈結存成 Zotero 快照">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "把影像存成 Zotero 快照">
 
 <!ENTITY zotero.tabs.info.label "資訊">
 <!ENTITY zotero.tabs.notes.label "筆記">

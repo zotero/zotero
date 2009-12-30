@@ -523,8 +523,7 @@ Zotero.Sync.Runner = new function () {
 		var storageSync = function () {
 			var syncNeeded = false;
 			
-			// TODO: localize
-			Zotero.Sync.Runner.setSyncStatus("Syncing files");
+			Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.syncingFiles'));
 			
 			Zotero.Sync.Storage.sync(
 				'webdav',
@@ -832,8 +831,7 @@ Zotero.Sync.Runner = new function () {
 					}
 					
 					if (typeof buttonText == 'undefined') {
-						// TODO: localize
-						buttonText = "Report Error...";
+						buttonText = Zotero.getString('errorReport.reportError');
 						buttonCallback = function () {
 							win.ZoteroPane.reportErrors();
 						}
@@ -910,15 +908,18 @@ Zotero.Sync.Runner = new function () {
 		// If no message, use last sync time
 		else {
 			var lastSyncTime = Zotero.Sync.Server.lastLocalSyncTime;
-			// TODO: localize
-			var msg = 'Last sync: ';
 			if (lastSyncTime) {
 				var time = new Date(lastSyncTime * 1000);
-				msg += Zotero.Date.toRelativeDate(time);
+				var msg = Zotero.Date.toRelativeDate(time);
 			}
 			else {
-				msg += 'Not yet synced';
+				var msg = Zotero.getString('sync.status.notYetSynced');
 			}
+			
+			msg = Zotero.localeJoin([
+				Zotero.getString('sync.status.lastSync'),
+				msg
+			]);
 		}
 		
 		_currentSyncStatusLabel.value = msg;
@@ -1059,12 +1060,8 @@ Zotero.Sync.Server = new function () {
 		}
 		catch (e) {
 			Zotero.debug(e);
-			// TODO: localize
-			var msg = "Zotero cannot access your login information, "
-						+ "likely due to a corrupted Firefox login manager database."
-						+ "\n\n"
-						+ "Close Firefox, back up and delete signons.* from your Firefox profile, "
-						+ "and re-enter your Zotero login information in the Sync pane of the Zotero preferences.";
+			var msg = Zotero.getString('sync.error.loginManagerCorrupted1') + "\n\n"
+						+ Zotero.getString('sync.error.loginManagerCorrupted2');
 			alert(msg);
 			return '';
 		}
@@ -1172,15 +1169,13 @@ Zotero.Sync.Server = new function () {
 		
 		var username = Zotero.Sync.Server.username;
 		if (!username) {
-			// TODO: localize
-			var e = new Zotero.Error("Username not set", "SYNC_USERNAME_NOT_SET");
+			var e = new Zotero.Error(Zotero.getString('sync.error.usernameNotSet'), "SYNC_USERNAME_NOT_SET");
 			_error(e);
 		}
 		
 		var password = Zotero.Sync.Server.password;
 		if (!password) {
-			// TODO: localize
-			var e = new Zotero.Error("Password not set", "INVALID_SYNC_LOGIN");
+			var e = new Zotero.Error(Zotero.getString('sync.error.passwordNotSet'), "INVALID_SYNC_LOGIN");
 			_error(e);
 		}
 		
@@ -1190,8 +1185,7 @@ Zotero.Sync.Server = new function () {
 					+ "&username=" + username
 					+ "&password=" + password;
 		
-		// TODO: localize
-		Zotero.Sync.Runner.setSyncStatus("Logging in to sync server");
+		Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.loggingIn'));
 		
 		Zotero.Utilities.HTTP.doPost(url, body, function (xmlhttp) {
 			_checkResponse(xmlhttp);
@@ -1200,8 +1194,7 @@ Zotero.Sync.Server = new function () {
 			
 			if (response.firstChild.tagName == 'error') {
 				if (response.firstChild.getAttribute('code') == 'INVALID_LOGIN') {
-					// TODO: localize
-					var e = new Zotero.Error("Invalid login/pass", "INVALID_SYNC_LOGIN");
+					var e = new Zotero.Error(Zotero.getString('sync.error.invalidLogin'), "INVALID_SYNC_LOGIN");
 					_error(e);
 				}
 				_error(response.firstChild.firstChild.nodeValue);
@@ -1249,8 +1242,10 @@ Zotero.Sync.Server = new function () {
 		
 		if (!restart) {
 			if (_syncInProgress) {
-				// TODO: localize
-				_error("A sync operation is already in progress. Wait for the previous sync to complete or restart Firefox.");
+				_error(Zotero.localeJoin([
+					Zotero.getString('sync.error.syncInProgress'),
+					Zotero.getString('sync.error.syncInProgress.wait')
+				]));
 			}
 			
 			Zotero.debug("Beginning server sync");
@@ -1273,8 +1268,7 @@ Zotero.Sync.Server = new function () {
 			body += '&upload=1';
 		}
 		
-		// TODO: localize
-		Zotero.Sync.Runner.setSyncStatus("Getting updated data from sync server");
+		Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.gettingUpdatedData'));
 		
 		Zotero.Utilities.HTTP.doPost(url, body, function (xmlhttp) {
 			Zotero.debug(xmlhttp.responseText);
@@ -1360,8 +1354,7 @@ Zotero.Sync.Server = new function () {
 				var nextLocalSyncTime = Zotero.Date.toUnixTimestamp(nextLocalSyncDate);
 				Zotero.Sync.Server.nextLocalSyncDate = nextLocalSyncDate;
 				
-				// TODO: localize
-				Zotero.Sync.Runner.setSyncStatus("Processing updated data");
+				Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.processingUpdatedData'));
 				
 				// Reconcile and save updated data from server and
 				// prepare local data to upload
@@ -1400,8 +1393,7 @@ Zotero.Sync.Server = new function () {
 				
 				Zotero.DB.commitTransaction();
 				
-				// TODO: localize
-				Zotero.Sync.Runner.setSyncStatus("Uploading data to sync server");
+				Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.uploadingData'));
 				
 				var url = _serverURL + 'upload';
 				var body = _apiVersionComponent
@@ -1431,8 +1423,7 @@ Zotero.Sync.Server = new function () {
 						switch (mode) {
 							// If the upload was queued, keep checking back
 							case 'queued':
-								// TODO: localize
-								Zotero.Sync.Runner.setSyncStatus("Upload accepted \u2014 waiting for sync server");
+								Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.uploadAccepted'));
 								
 								var url = _serverURL + 'uploadstatus';
 								var body = _apiVersionComponent
@@ -1705,7 +1696,6 @@ Zotero.Sync.Server = new function () {
 			else {
 				var timeStr = time.toLocaleString();
 			}
-			// TODO: localize
 			_error("Auto-syncing disabled until " + timeStr);
 		}
 		
@@ -1777,15 +1767,11 @@ Zotero.Sync.Server = new function () {
 										+ pr.BUTTON_DELAY_ENABLE;
 						var index = pr.confirmEx(
 							Zotero.getString('general.warning'),
-							// TODO: localize
-							"You no longer have write access to the Zotero group '" + group.name + "', "
-								+ "and changes you've made cannot be synced to the server.\n\n"
-								+ "If you continue, your copy of the group will be reset to its state "
-								+ "on the server, and your local modifications will be lost.\n\n"
-								+ "If you would like a chance to copy your changes elsewhere or to request "
-								+ "write access from a group administrator, cancel the sync now.",
+							Zotero.getString('sync.error.writeAccessLost', group.name) + "\n\n"
+								+ Zotero.getString('sync.error.groupWillBeReset') + "\n\n"
+								+ Zotero.getString('sync.error.copyChangedItems'),
 							buttonFlags,
-							"Reset Group and Sync",
+							Zotero.getString('sync.resetGroupAndSync'),
 							null, null, null, {}
 						);
 						
@@ -1939,7 +1925,7 @@ Zotero.Sync.Server = new function () {
 						+ "have synced with the '" + lastUsername + "' account before "
 						+ "syncing with the '" + username + "' account.";
 				
-				var syncButtonText = "Remove Groups and Sync";
+				var syncButtonText = Zotero.getString('sync.removeGroupsAndSync');
 			}
 			// If there are no local groups and the server is empty,
 			// don't bother prompting
@@ -1954,7 +1940,7 @@ Zotero.Sync.Server = new function () {
 					buttonFlags,
 					syncButtonText,
 					null,
-					"Open Sync Preferences",
+					Zotero.getString('sync.openSyncPreferences'),
 					null, {}
 				);
 				
@@ -2056,11 +2042,11 @@ Zotero.Sync.Server = new function () {
 											+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL);
 						// TODO: localize
 						if (e.error == Zotero.Error.ERROR_SYNC_USERNAME_NOT_SET) {
-							var title = "Username Not Set";
+							var title = Zotero.getString('sync.error.usernameNotSet');
 							var msg = "You must enter your zotero.org username and password in the Zotero preferences to sync with the Zotero server."
 						}
 						else {
-							var title = "Invalid Username/Password";
+							var title = Zotero.getString('sync.error.invalidLogin');
 							var msg = "The Zotero sync server did not accept your username and password.\n\n"
 									+ "Please check that you have entered your zotero.org login information correctly in the Zotero sync preferences.";
 						}
@@ -2069,7 +2055,7 @@ Zotero.Sync.Server = new function () {
 							title,
 							msg,
 							buttonFlags,
-							"Open Sync Preferences",
+							Zotero.getString('sync.openSyncPreferences'),
 							null, null, null, {}
 						);
 						
@@ -2729,8 +2715,11 @@ Zotero.Sync.Server.Data = new function() {
 				if (Zotero.Sync.Runner.background) {
 					Zotero.Sync.Server.manualSyncRequired = true;
 					
-					// TODO: localize
-					throw ("An automatic sync resulted in a conflict that requires manual intervention.\n\nClick the sync icon to sync manually.");
+					throw (
+						Zotero.getString('sync.error.manualInterventionRequired')
+						+ "\n\n"
+						+ Zotero.getString('sync.error.clickSyncIcon')
+					);
 				}
 				
 				var mergeData = _reconcile(type, toReconcile, remoteCreatorStore);
@@ -3248,10 +3237,9 @@ Zotero.Sync.Server.Data = new function() {
 			dataIn: {
 				type: type,
 				captions: [
-					// TODO: localize
-					'Local Object',
-					'Remote Object',
-					'Merged Object'
+					Zotero.getString('sync.localObject'),
+					Zotero.getString('sync.remoteObject'),
+					Zotero.getString('sync.mergedObject')
 				],
 				objects: objectPairs
 			}

@@ -2577,14 +2577,10 @@ Zotero.Schema = new function(){
 			//
 			// Conditional should be same as in showUpgradeWizard()
 			if (e.name && e.name == "NS_ERROR_FAILURE" && e.message.match(/nsIFile\.moveTo/)) {
-				// TODO: localize
 				var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
 							.getService(Components.interfaces.nsIPrompt);
-				var title = "Upgrade Failed";
-				var couldNotMigrate = "Zotero could not migrate all necessary files.";
-				var closeAttachmentFiles = "Please close any open attachment files and restart Firefox to try the upgrade again.";
-				var restartYourComputer = "If you continue to receive this message, restart your computer.";
-				pr.alert(title, Zotero.localeJoin([couldNotMigrate, closeAttachmentFiles]) + "\n\n" + restartYourComputer);
+				var title = Zotero.getString('upgrade.failed.title');
+				pr.alert(title, Zotero.getString('upgrade.couldNotMigrate') + "\n\n" + Zotero.getString('upgrade.couldNotMigrate.restart'));
 			}
 			
 			throw(e);

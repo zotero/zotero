@@ -67,12 +67,11 @@
 				<menuitem id="zotero-context-add-to-new-note" class="menu-iconic"
 					label="&zotero.contextMenu.addTextToNewNote;" hidden="true"
 					oncommand="var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString(); var uri = event.currentTarget.ownerDocument.popupNode.ownerDocument.location.href; var itemID = ZoteroPane.addItemFromPage(); ZoteroPane.newNote(false, itemID, str, uri)"/>
-				<!-- TODO: localize and remove zotero.contextMenu.saveLinkAsItem/saveImageAsSnapshot -->
 				<menuitem id="zotero-context-save-link-as-item" class="menu-iconic"
-					label="Save Link as Zotero Item" hidden="true"
+					label="&zotero.contextMenu.saveLinkAsItem;" hidden="true"
 					oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.linkURL, 'temporaryPDFHack')"/>
 				<menuitem id="zotero-context-save-image-as-item" class="menu-iconic"
-					label="Save Image as Zotero Item" hidden="true"
+					label="&zotero.contextMenu.saveImageAsItem;" hidden="true"
 					oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.onImage ? (window.gContextMenu.mediaURL ? window.gContextMenu.mediaURL : window.gContextMenu.imageURL) : window.gContextMenu.bgImageURL, 'artwork')"/>
 			</menupopup>
 		</menu>
@@ -117,13 +116,12 @@
 					<menuseparator/>
 					<!-- with icon: <menuitem class="menuitem-iconic" id="zotero-menuitem-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane.newNote(false, this.parentNode.getAttribute('itemID'))"/>-->
 					<menuitem label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane.newNote(false, this.parentNode.getAttribute('itemID'))"/>
-					<!-- TODO: localize -->
-					<menu label="Add Attachment">
+					<menu label="&zotero.items.menu.attach;">
 						<menupopup id="zotero-add-attachment-popup">
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-snapshot" label="&zotero.items.menu.attach.snapshot;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane.addAttachmentFromPage(false, itemID)"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane.addAttachmentFromPage(true, itemID)"/>
-							<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="Attach Stored Copy of File..." oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane.addAttachmentFromDialog(false, itemID);"/>
-							<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="Attach Link to File..." oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane.addAttachmentFromDialog(true, itemID);"/>
+							<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="&zotero.items.menu.attach.file;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane.addAttachmentFromDialog(false, itemID);"/>
+							<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane.addAttachmentFromDialog(true, itemID);"/>
 						</menupopup>
 					</menu>
 					<menuseparator/>
@@ -399,8 +397,7 @@
 								onpopupshowing="Zotero.Sync.Runner.registerSyncStatusLabel(this.firstChild.nextSibling)"
 								onpopuphiding="Zotero.Sync.Runner.registerSyncStatusLabel()"
 								noautohide="true">
-							<!-- TODO: localize -->
-							<label value="Sync with Zotero Server"/>
+							<label value="&zotero.sync.button;"/>
 							<label id="zotero-tb-sync-status"/>
 						</tooltip>
 					</toolbarbutton>

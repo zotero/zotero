@@ -326,7 +326,6 @@ var Zotero = new function(){
 		}
 		catch (e) {
 			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
-				// TODO: localize
 				var msg = Zotero.localeJoin([
 					Zotero.getString('startupError.databaseCannotBeOpened'),
 					Zotero.getString('startupError.checkPermissions')
@@ -363,17 +362,16 @@ var Zotero = new function(){
 			}
 			catch (e) {
 				if (typeof e == 'string' && e.match('newer than SQL file')) {
-					// TODO: localize
-					var zoteroVersionIsOlder = "This version of Zotero is older than the version last used with your database.";
-					var upgradeToLatestVersion = "Please upgrade to the latest version from zotero.org.";
-					var currentVersion = "Current version: " + this.version;
-					var kbURL = "http://zotero.org/support/kb/newer_db_version";
-					var seeKB = "See " + kbURL + " for more information.";
-					var msg = Zotero.localeJoin([zoteroVersionIsOlder, upgradeToLatestVersion]) + "\n\n" + currentVersion + "\n\n" + seeKB;
+					var msg = Zotero.localeJoin([
+							Zotero.getString('startupError.zoteroVersionIsOlder'),
+							Zotero.getString('startupError.zoteroVersionIsOlder.upgrade')
+						]) + "\n\n"
+						+ Zotero.getString('startupError.zoteroVersionIsOlder.current') + "\n\n"
+						+ Zotero.getString('general.seeForMoreInformation', kbURL);
 					this.startupError = msg;
 				}
 				else {
-					this.startupError = "Database upgrade error";
+					this.startupError = Zotero.getString('startupError.databaseUpgradeError');
 				}
 				Components.utils.reportError(e);
 				return false;
@@ -2139,8 +2137,6 @@ Zotero.Date = new function(){
 	 * @return	{String}
 	 */
 	this.toRelativeDate = function (date) {
-		// TODO: localize
-		
 		var str;
 		var now = new Date();
 		var timeSince = now.getTime() - date;
@@ -2150,47 +2146,54 @@ Zotero.Date = new function(){
 		var inDays = timeSince / 1000 / 60 / 60 / 24;
 		var inYears = timeSince / 1000 / 60 / 60 / 24 / 365;
 		
+		var n;
+		
 		// in seconds
 		if (Math.round(inSeconds) == 1) {
-			str = "1 second ago";
+			var key = "secondsAgo";
 		}
 		else if (inMinutes < 1.01) {
-			str = Math.round(inSeconds) + " seconds ago";
+			var key = "secondsAgo";
+			n = Math.round(inSeconds);
 		}
 		
 		// in minutes
 		else if (Math.round(inMinutes) == 1) {
-			str = "1 minute ago";
+			var key = "minutesAgo";
 		}
 		else if (inHours < 1.01) {
-			str = Math.round(inMinutes) + " minutes ago";
+			var key = "minutesAgo";
+			n = Math.round(inMinutes);
 		}
 		
 		// in hours
 		else if (Math.round(inHours) == 1) {
-			str = "1 hour ago";
+			var key = "hoursAgo";
 		}
 		else if (inDays < 1.01) {
-			str = Math.round(inHours) + " hours ago";
+			var key = "hoursAgo";
+			n = Math.round(inHours);
 		}
 		
 		// in days
 		else if (Math.round(inDays) == 1) {
-			str = "1 day ago";
+			var key = "daysAgo";
 		}
 		else if (inYears < 1.01) {
-			str = Math.round(inDays) + " days ago";
+			var key = "daysAgo";
+			n = Math.round(inDays);
 		}
 		
 		// in years
 		else if (Math.round(inYears) == 1) {
-			str = "1 year ago";
+			var key = "yearsAgo";
 		}
 		else {
-			str = Math.round(inYears) + " years ago";
+			var key = "yearsAgo";
+			var n = Math.round(inYears);
 		}
 		
-		return str;
+		return Zotero.getString("date.relative." + key + "." + (n ? "multiple" : "one"), n);
 	}
 	
 	

@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "将所选内容添至 Zotero 便笺">
 <!ENTITY zotero.contextMenu.addTextToNewNote "由所选内容创建 Zotero 便笺">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "将链接保存为 Zotero 快照">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "将图片保存为 Zotero 快照">
 
 <!ENTITY zotero.tabs.info.label "信息">
 <!ENTITY zotero.tabs.notes.label "便笺">

@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Přidat výběr do Zotero poznámky">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Vytvoř Zotero položku a Poznámku z výběru">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Ulož odkaz jako Zotero snapshot">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Ulož obraz jako Zotero snapshot">
 
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Poznámky">

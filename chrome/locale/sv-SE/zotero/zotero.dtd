@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Lägg till det valda som en Zotero-anteckning">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Skapa en Zotero-post och anteckning av det valda">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Spara länk som Zotero-snapshot">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Spara bild som Zotero-snapshot">
 
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Anteckningar">

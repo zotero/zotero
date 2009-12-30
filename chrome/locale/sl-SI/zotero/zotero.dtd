@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Dodaj izbor v opombo Zotero">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Ustvari vnos in opombo Zotero iz izbora">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Shrani povezavo kot posnetek Zotero">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Shrani sliko kot posnetek Zotero">
 
 <!ENTITY zotero.tabs.info.label "Podatki">
 <!ENTITY zotero.tabs.notes.label "Opombe">

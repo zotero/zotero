@@ -1492,12 +1492,11 @@ Zotero_Preferences.Debug_Output = {
 		var storing = Zotero.Debug.storing
 		
 		var button = document.getElementById('debug-output-enable');
-		// TODO: localize
 		if (storing) {
-			button.label = "Disable";
+			button.label = Zotero.getString('general.disable');
 		}
 		else {
-			button.label = "Enable";
+			button.label = Zotero.getString('general.enable');
 		}
 	},
 	

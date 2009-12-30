@@ -128,8 +128,10 @@ var Zotero_Browser = new function() {
 	function scrapeThisPage(libraryID, collectionID) {
 		if (Zotero.locked) {
 			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-			// TODO: localize
-			var desc = "A Zotero operation is currently in progress. Please wait until it finishes and try again.";
+			var desc = Zotero.localeJoin([
+				Zotero.getString('general.operationInProgress'),
+				Zotero.getString('general.operationInProgress.waitUntilFinishedAndTryAgain')
+			]);
 			Zotero_Browser.progress.addDescription(desc);
 			Zotero_Browser.progress.show();
 			Zotero_Browser.progress.startCloseTimer(8000);
@@ -139,7 +141,7 @@ var Zotero_Browser = new function() {
 		
 		if (!Zotero.stateCheck()) {
 			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-			var desc = Zotero.getString("ingester.scrapeError.transactionInProgress.previousError")
+			var desc = Zotero.getString("ingester.scrapeErrorDescription.previousError")
 				+ ' ' + Zotero.getString("general.restartFirefoxAndTryAgain");
 			Zotero_Browser.progress.addDescription(desc);
 			Zotero_Browser.progress.show();

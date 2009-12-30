@@ -19,8 +19,6 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Aggiungi la selezione alla nota di Zotero">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Crea elemento e nota in base alla selezione">
-<!ENTITY zotero.contextMenu.saveLinkAsSnapshot "Salva collegamento come istantanea di Zotero">
-<!ENTITY zotero.contextMenu.saveImageAsSnapshot "Salva immagine come istantanea di Zotero">
 
 <!ENTITY zotero.tabs.info.label "Informazioni">
 <!ENTITY zotero.tabs.notes.label "Note">
