@@ -881,7 +881,17 @@ Zotero.Translate.prototype._generateSandbox = function() {
 		var safeTranslator = new Object();
 		safeTranslator.setSearch = function(arg) { return translation.setSearch(arg) };
 		safeTranslator.setDocument = function(arg) { return translation.setDocument(arg) };
-		safeTranslator.setHandler = function(arg1, arg2) { translation.setHandler(arg1, arg2) };
+		safeTranslator.setHandler = function(arg1, arg2) {
+			translation.setHandler(arg1, 
+				function(obj, item) {
+					try {
+						arg2(obj, item);
+					} catch(e) {
+						me.error(false, e);
+					}
+				}
+			);
+		};
 		safeTranslator.setString = function(arg) { translation.setString(arg) };
 		safeTranslator.setTranslator = function(arg) { return translation.setTranslator(arg) };
 		safeTranslator.getTranslators = function() { return translation.getTranslators() };
