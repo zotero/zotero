@@ -306,11 +306,12 @@ Zotero.Collection.prototype.getChildCollections = function (asIDs) {
 /**
  * Returns child items of this collection
  *
- * @param	bool		asIDs		Return as itemIDs
- * @return	array				Array of Zotero.Item instances or itemIDs,
- *									or FALSE if none
+ * @param	{Boolean}	asIDs			Return as itemIDs
+ * @param	{Boolean}	includeDeleted	Include items in Trash
+ * @return	{Zotero.Item[]|Integer[]|FALSE}		Array of Zotero.Item instances or itemIDs,
+ *												or FALSE if none
  */
-Zotero.Collection.prototype.getChildItems = function (asIDs) {
+Zotero.Collection.prototype.getChildItems = function (asIDs, includeDeleted) {
 	if (!this._childItemsLoaded) {
 		this._loadChildItems();
 	}
@@ -319,10 +320,18 @@ Zotero.Collection.prototype.getChildItems = function (asIDs) {
 		return false;
 	}
 	
+	// Remove deleted items if necessary
+	var childItems = [];
+	for each(var item in this._childItems) {
+		if (includeDeleted || !item.deleted) {
+			childItems.push(item);
+		}
+	}
+	
 	// Return itemIDs
 	if (asIDs) {
 		var ids = [];
-		for each(var item in this._childItems) {
+		for each(var item in childItems) {
 			ids.push(item.id);
 		}
 		return ids;
@@ -330,7 +339,7 @@ Zotero.Collection.prototype.getChildItems = function (asIDs) {
 	
 	// Return Zotero.Item objects
 	var objs = [];
-	for each(var item in this._childItems) {
+	for each(var item in childItems) {
 		objs.push(item);
 	}
 	return objs;
@@ -546,6 +555,8 @@ Zotero.Collection.prototype.save = function () {
 
 					orderStatement.reset();
 					
+					Zotero.debug("Adding item " + itemID + " to collection " + collectionID, 4);
+					
 					insertStatement.bindInt32Parameter(0, collectionID);
 					insertStatement.bindInt32Parameter(1, itemID);
 					insertStatement.bindInt32Parameter(2,
@@ -702,7 +713,9 @@ Zotero.Collection.prototype.addItems = function(itemIDs) {
 			insertStatement.execute();
 		}
 		catch(e) {
-			throw (e + ' [ERROR: ' + Zotero.DB.getLastErrorString() + ']');
+			var errMsg = Zotero.DB.getLastErrorString()
+				+ " (" + this.id + "," + itemID + "," + nextOrderIndex + ")";
+			throw (e + ' [ERROR: ' + errMsg + ']');
 		}
 		
 		notifierPairs.push(this.id + '-' + itemID);
@@ -726,7 +739,7 @@ Zotero.Collection.prototype.addItems = function(itemIDs) {
 * Remove an item from the collection (does not delete item from library)
 **/
 Zotero.Collection.prototype.removeItem = function(itemID) {
-	var childItems = this.getChildItems(true);
+	var childItems = this.getChildItems(true, true);
 	if (childItems) {
 		var index = childItems.indexOf(itemID);
 		if (index == -1) {
@@ -873,12 +886,13 @@ Zotero.Collection.prototype.diff = function (collection, includeMatches, ignoreO
 Zotero.Collection.prototype.erase = function(deleteItems) {
 	Zotero.DB.beginTransaction();
 	
-	var descendents = this.getDescendents();
+	var descendents = this.getDescendents(false, null, true);
 	var collections = [this.id];
 	var items = [];
 	var notifierData = {};
 	notifierData[this.id] = { old: this.serialize() };
 	
+	var del = [];
 	for(var i=0, len=descendents.length; i<len; i++) {
 		// Descendent collections
 		if (descendents[i].type == 'collection') {
@@ -890,11 +904,14 @@ Zotero.Collection.prototype.erase = function(deleteItems) {
 		}
 		// Descendent items
 		else {
+			// Delete items from DB
 			if (deleteItems) {
-				// Delete items from DB
-				Zotero.Items.get(descendents[i].id).erase();
+				del.push(descendents[i].id);
 			}
 		}
+	}
+	if (del.length) {
+		Zotero.Items.erase(del);
 	}
 	
 	var placeholders = collections.map(function () '?').join();
@@ -959,15 +976,16 @@ Zotero.Collection.prototype.serialize = function(nested) {
 /**
  * Returns an array of descendent collections and items
  *
- * @param	bool		recursive	Descend into subcollections
- * @param	bool		nested		Return multidimensional array with 'children'
- *									nodes instead of flat array
- * @param	string	type			'item', 'collection', or FALSE for both
+ * @param	{Boolean}	[recursive=false]	Descend into subcollections
+ * @param	{Boolean}	[nested=false]		Return multidimensional array with 'children'
+ *											nodes instead of flat array
+ * @param	{String}	[type]				'item', 'collection', or NULL for both
+ * @param	{Boolean}	[includeDeletedItems=false]		Include items in Trash
  * @return	{Object[]}			Array of objects with 'id', 'key',
  *								'type' ('item' or 'collection'), 'parent',
  *								and, if collection, 'name' and the nesting 'level'
  */
-Zotero.Collection.prototype.getChildren = function(recursive, nested, type, level) {
+Zotero.Collection.prototype.getChildren = function(recursive, nested, type, includeDeletedItems, level) {
 	if (!this.id) {
 		throw ('Zotero.Collection.getChildren() cannot be called on an unsaved item');
 	}
@@ -978,14 +996,6 @@ Zotero.Collection.prototype.getChildren = function(recursive, nested, type, leve
 		level = 1;
 	}
 	
-	// 0 == collection
-	// 1 == item
-	var children = Zotero.DB.query('SELECT collectionID AS id, '
-		+ "0 AS type, collectionName AS collectionName, key "
-		+ 'FROM collections WHERE parentCollectionID=?1'
-		+ ' UNION SELECT itemID AS id, 1 AS type, NULL AS collectionName, key '
-		+ 'FROM collectionItems JOIN items USING (itemID) WHERE collectionID=?1', this.id);
-	
 	if (type) {
 		switch (type) {
 			case 'item':
@@ -995,6 +1005,20 @@ Zotero.Collection.prototype.getChildren = function(recursive, nested, type, leve
 				throw ("Invalid type '" + type + "' in Collection.getChildren()");
 		}
 	}
+	
+	// 0 == collection
+	// 1 == item
+	var sql = 'SELECT collectionID AS id, '
+		+ "0 AS type, collectionName AS collectionName, key "
+		+ 'FROM collections WHERE parentCollectionID=?1';
+	if (!type || type == 'item') {
+		sql += ' UNION SELECT itemID AS id, 1 AS type, NULL AS collectionName, key '
+				+ 'FROM collectionItems JOIN items USING (itemID) WHERE collectionID=?1';
+		if (!includeDeletedItems) {
+			sql += " AND itemID NOT IN (SELECT itemID FROM deletedItems)";
+		}
+	}
+	var children = Zotero.DB.query(sql, this.id);
 	
 	for(var i=0, len=children.length; i<len; i++) {
 		// This seems to not work without parseInt() even though
@@ -1017,7 +1041,7 @@ Zotero.Collection.prototype.getChildren = function(recursive, nested, type, leve
 				if (recursive) {
 					var descendents =
 						Zotero.Collections.get(children[i].id).
-							getChildren(true, nested, type, level+1);
+							getChildren(true, nested, type, includeDeletedItems, level+1);
 					
 					if (nested) {
 						toReturn[toReturn.length-1].children = descendents;
@@ -1050,8 +1074,8 @@ Zotero.Collection.prototype.getChildren = function(recursive, nested, type, leve
 /**
  * Alias for the recursive mode of getChildren()
  */
-Zotero.Collection.prototype.getDescendents = function(nested, type, level) {
-	return this.getChildren(true, nested, type);
+Zotero.Collection.prototype.getDescendents = function(nested, type, includeDeletedItems) {
+	return this.getChildren(true, nested, type, includeDeletedItems);
 }
 
 
