@@ -20,7 +20,7 @@ function detectWeb(doc, url) {
 }
 
 function parseRIS(getURL, pdfURL) {   
-    var newGet = getURL.replace(/EJ\/[^/]+/, "EJ/sview") + "?format=refmgr&submit=1";
+    var newGet = getURL.replace(/EJ\/[^/]+/, "EJ/sview").replace(/\?.*$/, '') + "?format=refmgr&submit=1";
     Zotero.Utilities.HTTP.doGet(newGet, function(text){
         // load translator for RIS
         var translator = Zotero.loadTranslator ("import");
