@@ -8,11 +8,11 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-07-31 11:15:00"
+	"lastUpdated":"2009-12-10 00:45:00"
 }
 
 function detectWeb(doc, url){
-	return "newspaperArticle"
+	return "newspaperArticle";
 }
 
 function getDatum(text, key){
@@ -25,10 +25,12 @@ function doWeb(doc, url){
 	var item = new Zotero.Item("newspaperArticle");
 	var metadata = text.match(/AT_VARS=({[^}]*})/)[1];
 	var authors = getDatum(text, "authors").split(',');
-	for each (var aut in authors) {
-		item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+	for each (var aut in authors) {	
+		if (aut.length > 0) {	
+			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+		}
 	}
-	item.publicationTitle = Zotero.Utilities.unescapeHTML(metadata.match(/publicationName:'([^'][^,]*)'/)[1]);
+	item.publicationTitle = "wsj.com";
 	item.date = getDatum(text, "publicationDate");
 	item.abstractNote = getDatum(text, "bodyText");
 	item.title = getDatum(text, "articleHeadline").replace("\\","");
