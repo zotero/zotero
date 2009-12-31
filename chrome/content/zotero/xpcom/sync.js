@@ -1700,6 +1700,15 @@ Zotero.Sync.Server = new function () {
 		}
 		
 		if (firstChild.localName == 'error') {
+			// Don't automatically retry 400 errors
+			if (xmlhttp.status >= 400 && xmlhttp.status < 500) {
+				Zotero.debug("Server returned " + xmlhttp.status + " -- manual sync required", 2);
+				Zotero.Sync.Server.manualSyncRequired = true;
+			}
+			else {
+				Zotero.debug("Server returned " + xmlhttp.status, 3);
+			}
+			
 			switch (firstChild.getAttribute('code')) {
 				case 'INVALID_UPLOAD_DATA':
 					// On the off-chance that this error is due to invalid characters
