@@ -88,8 +88,8 @@ function doWeb(doc, url) {
 			aut = aut.replace(/[^\w^\s^\.]/g, "").replace(/\d/g, "");
 			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 		}
-		item.date = doc.evaluate('//div[@class="abs-footer"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/date:\s+(.*)P/)[1];
-		item.DOI = Zotero.Utilities.trimInternal(doc.evaluate('//h1[@class="csc-firstHeader"]/span', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).match(/doi:\s+(.*)/)[1];
+		item.date = doc.evaluate('//div[@class="abs-footer"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/date:\s+(.*)/)[1];
+		item.DOI = Zotero.Utilities.trimInternal(doc.evaluate('//h1[@class="csc-firstHeader"]/span', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).match(/doi:\s*(.*)/)[1];
 		var tags = doc.evaluate('//div[@class="box"]/p/a', doc, null, XPathResult.ANY_TYPE, null);
 		var tag;
 		while (tag = tags.iterateNext()) {
