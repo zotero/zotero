@@ -75,13 +75,9 @@ function doWeb(doc, url) {
 		item.publicationTitle = journalNames[jour][0];
 		item.ISSN = journalNames[jour][1];
 		item.title = Zotero.Utilities.trimInternal(doc.evaluate('//h2[@class="title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		var authors = Zotero.Utilities.trimInternal(doc.evaluate('//p[@class="author"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		authors = authors.replace(/\d+/g, "");
-		authors = authors.split(/,\s+(and)?\s*/);
-		for each (var aut in authors) {
-			if ((aut != "") && (aut != "and")) {
-				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
-			}
+		var authors = doc.evaluate('//p[@class="author"]/a', doc, null, XPathResult.ANY_TYPE, null);
+		while (aut = authors.iterateNext()) {
+			item.creators.push(Zotero.Utilities.cleanAuthor(aut.textContent, "author"));
 		}
 
 		//get info
@@ -114,12 +110,16 @@ function doWeb(doc, url) {
 			item.tags = keys[a].split(/,\s+/);
 		}
 		item.DOI = keys[c];
-		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//p[@class="abstract"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		item.complete();
+		var abstracts = doc.evaluate('//p[@class="abstract"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+		if (abstracts) {
+			item.abstractNote = Zotero.Utilities.trimInternal(abstracts.textContent);
+		}
 		var pdfurl = doc.evaluate('//a[contains(text(), "PDF")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
 		item.attachments = [
-			{url:item.url, title:"IPAP Snapshot", mimeType:"text/html"}
+			{url:item.url, title:"IPAP Snapshot", mimeType:"text/html"},
+			{url:pdfurl, title:"Full Text PDF", mimeType:"application/pdf"}
 		];
+		item.complete();
 	}, function() {Zotero.done();});
 	Zotero.wait();
 }
