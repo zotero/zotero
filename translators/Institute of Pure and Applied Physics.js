@@ -12,7 +12,7 @@
 }
 
 function detectWeb(doc, url) {
-	if (doc.title.indexOf("Table of Contents") != -1 || doc.title.indexOf("search result") != -1) {
+	if (doc.title.indexOf("Table of Contents") != -1 || doc.title.indexOf("Search Result") != -1) {
 		return "multiple";
 	} else if (url.indexOf("link?") != -1) {
 		return "journalArticle";
@@ -34,13 +34,15 @@ function doWeb(doc, url) {
 				var titlesx = '//div[@id="contents"]/dl/dt';
 				var linksx = '//div[@id="contents"]/dl/dd/a[1]';
 			} else if (url.match(/jjap/)) {
-				var xpath = '/html/body/dt/a';
+				//var xpath = '/html/body/dt/a';
+				var titlesx = '//div[@id="contents"]//dl/dt/b';
+				var linksx = '//div[@id="contents"]//dl/dd/a[1]';
 			} else if (url.match(/jpsj/)) {
 				var xpath = '/html/body/dl/dt/a[contains(@href, "link")]';
 			}
 		} else if (doc.title.toLowerCase().indexOf("search result") != -1) {
 			var linksx = '/html/body//li/a';
-			var titlesx = '/html/body//li//b';
+			var titlesx = '/html/body//li//dt/b';
 		}
 		if (xpath) {
 			var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
@@ -58,6 +60,8 @@ function doWeb(doc, url) {
 			}
 		}
 		items = Zotero.selectItems(items);
+		if(!items) return true;
+		
 		for (var i in items) {
 			arts.push(i);
 		}
@@ -88,7 +92,7 @@ function doWeb(doc, url) {
 			voliss = voliss.match(/([^\d]+)(\d+)\s+\((\d+)\)\s+([\d\-]+)/);
 			var x = 4
 		} else {
-			voliss = voliss.match(/([^\d]+)(\d+)\s+\((\d+)\)\s+(pp\.)?\s+([\d\-]+)/);
+			voliss = voliss.match(/([^\d]+)(\d+)\s+\((\d+)\)\s+(pp\.)?\s+(\S+)/);
 			var x = 5
 		}
 		item.journalAbbreviation = Zotero.Utilities.trimInternal(voliss[1]);
