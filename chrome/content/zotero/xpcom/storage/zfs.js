@@ -388,7 +388,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._processUploadFile = function (data) {
 					}
 				}
 				else {
-					Zotero.debug("Remote file not found for item " + item.id);
+					Zotero.debug("Remote file not found for item " + item.libraryID + "/" + item.key);
 				}
 			}
 			
@@ -490,7 +490,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getFileUploadParameters = function (i
 				Zotero.debug(req.responseText);
 				
 				var e = new Zotero.Error(
-					"File would exceed Zotero File Storage quota",
+					"The file '" + filename + "' would exceed your Zotero File Storage quota",
 					"ZFS_OVER_QUOTA",
 					{
 						dialogText: text,
