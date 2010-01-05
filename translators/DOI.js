@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":300,
 	"inRepository":true,
-	"lastUpdated":"2009-04-07 15:48:00"
+	"lastUpdated":"2010-01-05 09:05:00"
 }
 
 var items = {};
@@ -16,7 +16,7 @@ var selectArray = {};
 
 // builds a list of DOIs
 function getDOIs(doc) {
-	const DOIre = /\b(10\.[\w.]+\/[^\/\s]+)\.?\b/igm;
+	const DOIre = /\b(10\.[\w.]+\/[^\s]+)\.?\b/igm;
 	const DOIXPath = "//text()[contains(., '10.')]";
 	
 	DOIre.lastMatch = 0;
