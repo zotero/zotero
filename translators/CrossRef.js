@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":90,
 	"inRepository":true,
-	"lastUpdated":"2009-11-03 10:25:00"
+	"lastUpdated":"2010-01-06 09:25:00"
 }
 
 function detectSearch(item) {
@@ -68,10 +68,22 @@ function processCrossRef(xmlOutput) {
 		item.volume = itemXML.journal_issue.journal_volume.volume.toString();
 		item.issue = itemXML.journal_issue.issue.toString();
 	} else if(xml.doi_record[0].crossref.book.length()) {
-		var item = new Zotero.Item("book");
-		var refXML = xml.doi_record[0].crossref.book.book_metadata;
-		var metadataXML = refXML;
-		var seriesXML = metadataXML.series_metadata;
+		// Book chapter
+		if(xml.doi_record[0].crossref.book.@book_type.length()
+				&& xml.doi_record[0].crossref.book.@book_type == 'edited_book') {
+			var item = new Zotero.Item("bookSection");
+			var refXML = xml.doi_record[0].crossref.book.content_item;
+			var metadataXML = xml.doi_record[0].crossref.book.book_series_metadata;
+			
+			item.publicationTitle = metadataXML.series_metadata.titles.title[0].toString();
+		}
+		// Book
+		else {
+			var item = new Zotero.Item("book");
+			var refXML = xml.doi_record[0].crossref.book.book_metadata;
+			var metadataXML = refXML;
+			var seriesXML = metadataXML.series_metadata;
+		}
 		
 		item.place = metadataXML.publisher.publisher_place.toString();
 	} else if(xml.doi_record[0].crossref.conference.length()) {
@@ -103,11 +115,11 @@ function processCrossRef(xmlOutput) {
 	
 	for each(var creatorXML in contributors) {
 		var creator = {creatorType:"author"};
-		if(creatorXML.contributor_role == "editor") {
+		if(creatorXML.@contributor_role == "editor") {
 			creator.creatorType = "editor";
-		} else if(creatorXML.contributor_role == "translator") {
+		} else if(creatorXML.@contributor_role == "translator") {
 			creator.creatorType = "translator";
-		} else if(creatorXML.contributor_role == "chair") {
+		} else if(creatorXML.@contributor_role == "chair") {
 			creator.creatorType = "contributor"; 
 		}
 		
@@ -121,10 +133,18 @@ function processCrossRef(xmlOutput) {
 		item.creators.push(creator);
 	}
 	
+	var pubDateNode;
 	if(refXML.publication_date.length()) {
-		item.date = refXML.publication_date[0].year.toString();
-		if(refXML.publication_date[0].month.length()) {
-			item.date = refXML.publication_date[0].month.toString()+"/"+item.date;
+		pubDateNode = refXML.publication_date;
+	}
+	// For book chapters, try metadataXML node
+	else if(metadataXML.publication_date.length()) {
+		pubDateNode = metadataXML.publication_date;
+	}
+	if(pubDateNode) {
+		item.date = pubDateNode[0].year.toString();
+		if(pubDateNode[0].month.length()) {
+			item.date = pubDateNode[0].month.toString()+"/"+item.date;
 		}
 	}
 	
