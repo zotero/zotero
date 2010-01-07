@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-12-23 18:00:00"
+	"lastUpdated":"2010-01-07 10:00:00"
 }
 
 function detectWeb(doc, url) {
@@ -17,16 +17,31 @@ function detectWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
-	var results = doc.evaluate('//div[@class="bibheader-resultsrange"]/b', doc, nsResolver,
-		XPathResult.ANY_TYPE, null).iterateNext();
-	
-	if(!doc.evaluate('//span[contains(./text(), "Results Manager")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	var rmXPath = '//span[';
+	var rmText = [
+		"Results Manager",
+		"Gestionnaire des résultats",
+		"Ergebnismanager",
+		"檢索結果管理員",
+		"Administrador de resultados",
+		"检索结果管理员"
+	];
+	var contains = [];
+	for each(var str in rmText) {
+		contains.push('contains(./text(), "' + str + '")');
+	}
+	rmXPath += contains.join(' or ') + ']'
+	if(!doc.evaluate(rmXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return false;
 	}
 	
-	if(results) {
-		results = Zotero.Utilities.trimInternal(results.textContent);
-		if(results.indexOf("-") != -1) {
+	var results = doc.evaluate('//div[@class="bibheader-resultsrange"]/b', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var first = results.iterateNext();
+	if(first) {
+		first = Zotero.Utilities.trimInternal(first.textContent);
+		var second = results.iterateNext();
+		second = Zotero.Utilities.trimInternal(second.textContent);
+		if(first.indexOf("-") != -1 || second.indexOf("-") != -1) {
 			return "multiple";
 		} else {
 			return "journalArticle";
@@ -185,6 +200,6 @@ function doWeb(doc, url) {
 		if(haveStarted) {
 			newItem.complete();
 		}
-	});
+	}, function () { Zotero.done(); });
 	Zotero.wait();
 }
