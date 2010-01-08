@@ -902,7 +902,9 @@ Zotero.Sync.Storage = new function () {
 				renamed = true;
 			}
 			else {
-				throw(e);
+				Components.utils.reportError(e);
+				var msg = Zotero.getString('sync.storage.error.fileNotCreated', parentDir.leafName + '/' + fileName);
+				throw(msg);
 			}
 		}
 		
@@ -1099,7 +1101,10 @@ Zotero.Sync.Storage = new function () {
 				}
 				else {
 					zipReader.close();
-					throw(e);
+					
+					Components.utils.reportError(e);
+					var msg = Zotero.getString('sync.storage.error.fileNotCreated', parentDir.leafName + '/' + fileName);
+					throw(msg);
 				}
 			}
 			zipReader.extract(entryName, destFile);
