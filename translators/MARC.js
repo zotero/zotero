@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-06-29 21:10:00"
+	"lastUpdated":"2010-01-12 11:50:00"
 }
 
 function detectImport() {
@@ -337,7 +337,7 @@ record.prototype.translate = function(item) {
 	// Extract year
 	this._associateDBField(item, "260", "c", "date", pullNumber);
 	// Extract pages
-	this._associateDBField(item, "300", "a", "pages", pullNumber);
+	this._associateDBField(item, "300", "a", "numPages", pullNumber);
 	// Extract series
 	this._associateDBField(item, "440", "a", "series");
 	// Extract series number

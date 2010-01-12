@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2009-12-28 01:50:00"
+	"lastUpdated":"2010-01-12 11:40:00"
 }
 
 Zotero.configure("dataMode", "block");
@@ -1600,7 +1600,12 @@ function processField(item, field, value) {
 			item.date = value;
 		}
 	} else if(field == "pages") {
-		item.pages = value.replace(/--/g, "-");
+		if (item.itemType == "book" || item.itemType == "thesis" || item.itemType == "manuscript") {
+			item.numPages = value;
+		}
+		else {
+			item.pages = value.replace(/--/g, "-");
+		}
 	} else if(field == "note") {
 		item.extra += "\n"+value;
 	} else if(field == "howpublished") {
@@ -2024,6 +2029,10 @@ function doExport() {
 		
 		if(item.pages) {
 			writeField("pages", item.pages.replace("-","--"));
+		}
+		
+		if(item.numPages) {
+			writeField("pages", item.numPages);
 		}
 		
 		if(item.itemType == "webpage") {

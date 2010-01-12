@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-12-17 08:15:00"
+	"lastUpdated":"2010-01-12 11:25:00"
 }
 
 
@@ -80,9 +80,9 @@ function doWeb(doc, url) {
 		var pagesRe = new RegExp(/(\d+)( pages)/);
 		var pagesMatch = pagesRe.exec(pages);
 		if (pagesMatch!=null) {
-			newItem.pages = pagesMatch[1];
+			newItem.numPages = pagesMatch[1];
 		} else {
-			newItem.pages = pages;
+			newItem.numPages = pages;
 		}
 		
 		var ISBN;
