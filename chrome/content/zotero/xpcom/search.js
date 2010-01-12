@@ -1314,7 +1314,35 @@ Zotero.Search.prototype._buildQuery = function(){
 						
 						if (parseDate){
 							var go = false;
-							var dateparts = Zotero.Date.strToDate(condition['value']);
+							// Allow 'today' or localized 'today'
+							var lc = (condition.value + '').toLowerCase();
+							if (lc == 'yesterday' || lc == Zotero.getString('date.yesterday')) {
+								var dateparts = Zotero.Date.strToDate(
+									Zotero.Date.dateToSQL(
+										new Date(new Date().getTime() - 86400000), true
+									)
+								);
+								dateparts.part = null;
+							}
+							else if (lc == 'today' || lc == Zotero.getString('date.today')) {
+								var dateparts = Zotero.Date.strToDate(
+									Zotero.Date.dateToSQL(
+										new Date(), true
+									)
+								);
+								dateparts.part = null;
+							}
+							else if (lc == 'tomorrow' || lc == Zotero.getString('date.tomorrow')) {
+								var dateparts = Zotero.Date.strToDate(
+									Zotero.Date.dateToSQL(
+										new Date(new Date().getTime() + 86400000), true
+									)
+								);
+								dateparts.part = null;
+							}
+							else {
+								var dateparts = Zotero.Date.strToDate(condition.value);
+							}
 							
 							// Search on SQL date -- underscore is
 							// single-character wildcard
@@ -1322,14 +1350,14 @@ Zotero.Search.prototype._buildQuery = function(){
 							// If isBefore or isAfter, month and day fall back
 							// to '00' so that a search for just a year works
 							// (and no year will just not find anything)
-							var sqldate = dateparts['year'] ?
-								utils.lpad(dateparts['year'], '0', 4) : '____';
+							var sqldate = dateparts.year ?
+								utils.lpad(dateparts.year, '0', 4) : '____';
 							sqldate += '-'
-							sqldate += dateparts['month'] ?
-								utils.lpad(dateparts['month'] + 1, '0', 2) : alt;
+							sqldate += dateparts.month || dateparts.month === 0 ?
+								utils.lpad(dateparts.month + 1, '0', 2) : alt;
 							sqldate += '-';
-							sqldate += dateparts['day'] ?
-								utils.lpad(dateparts['day'], '0', 2) : alt;
+							sqldate += dateparts.day ?
+								utils.lpad(dateparts.day, '0', 2) : alt;
 							
 							if (sqldate!='____-__-__'){
 								go = true;
