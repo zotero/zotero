@@ -163,7 +163,8 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 		case 'dateAdded':
 			var sql = "SELECT DISTINCT DATE(" + searchParam + ", 'localtime') AS val, NULL AS comment FROM items "
 				+ "WHERE " + searchParam + " LIKE ? ORDER BY " + searchParam;
-			statement = this._zotero.DB.getStatement(sql, searchString + '%');
+			var sqlParams = [searchString + '%'];
+			statement = this._zotero.DB.getStatement(sql, sqlParams);
 			break;
 			
 		case 'accessDate':
@@ -171,7 +172,8 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 			
 			var sql = "SELECT DISTINCT DATE(value, 'localtime') AS val, NULL AS comment FROM itemData "
 				+ "WHERE fieldID=? AND value LIKE ? ORDER BY value";
-			statement = this._zotero.DB.getStatement(sql, [fieldID, searchString + '%']);
+			var sqlParams = [fieldID, searchString + '%'];
+			statement = this._zotero.DB.getStatement(sql, sqlParams);
 			break;
 		
 		default:
