@@ -2323,7 +2323,7 @@ Zotero.Item.prototype.getNote = function() {
 		// Don't include <div> wrapper when returning value
 		var startLen = note.substr(0, 36).match(/^<div class="zotero-note znv[0-9]+">/)[0].length;
 		var endLen = 6; // "</div>".length
-		note = note.substr(startLen, note.length - endLen);
+		note = note.substr(startLen, note.length - startLen - endLen);
 	}
 	
 	this._noteText = note ? note : '';
