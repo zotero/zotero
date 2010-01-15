@@ -492,6 +492,12 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		var creators = this.getCreators();
 		if (creators) {
 			for (var i in creators) {
+				// Remove all creators if new item type doesn't have any
+				if (!Zotero.CreatorTypes.itemTypeHasCreators(itemTypeID)) {
+					this.removeCreator(i);
+					continue;
+				}
+				
 				if (!Zotero.CreatorTypes.isValidForItemType(creators[i].creatorTypeID, itemTypeID)) {
 					// Convert existing primary creator type to new item type's
 					// primary creator type, or contributor (creatorTypeID 2)
@@ -853,7 +859,7 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 			strParts.push(Zotero.getString('pane.items.' + itemTypeName + '.' + str, names));
 		}
 		else {
-			strParts.push(Zotero.getString('itemTypes.' + itemTypeName));
+			strParts.push(Zotero.ItemTypes.getLocalizedString(itemTypeID));
 		}
 		
 		if (includeAuthorAndDate) {

@@ -1,4 +1,4 @@
--- 67
+-- 68
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -339,3 +339,45 @@ CREATE TABLE proxyHosts (
     FOREIGN KEY (proxyID) REFERENCES proxies(proxyID)
 );
 CREATE INDEX proxyHosts_proxyID ON proxyHosts(proxyID);
+
+
+-- These shouldn't be used yet
+CREATE TABLE customItemTypes (
+    customItemTypeID INTEGER PRIMARY KEY,
+    typeName TEXT,
+    label TEXT,
+    display INT DEFAULT 1, -- 0 == hide, 1 == display, 2 == primary
+    icon TEXT
+);
+
+CREATE TABLE customFields (
+    customFieldID INTEGER PRIMARY KEY,
+    fieldName TEXT,
+    label TEXT
+);
+
+CREATE TABLE customItemTypeFields (
+    customItemTypeID INT NOT NULL,
+    fieldID INT,
+    customFieldID INT,
+    hide INT NOT NULL,
+    orderIndex INT NOT NULL,
+    PRIMARY KEY (customItemTypeID, orderIndex),
+    FOREIGN KEY (customItemTypeID) REFERENCES customItemTypes(customItemTypeID),
+    FOREIGN KEY (fieldID) REFERENCES fields(fieldID),
+    FOREIGN KEY (customFieldID) REFERENCES customFields(customFieldID)
+);
+CREATE INDEX customItemTypeFields_fieldID ON customItemTypeFields(fieldID);
+CREATE INDEX customItemTypeFields_customFieldID ON customItemTypeFields(customFieldID);
+
+CREATE TABLE customBaseFieldMappings (
+    customItemTypeID INT,
+    baseFieldID INT,
+    customFieldID INT,
+    PRIMARY KEY (customItemTypeID, baseFieldID, customFieldID),
+    FOREIGN KEY (customItemTypeID) REFERENCES customItemTypes(customItemTypeID),
+    FOREIGN KEY (baseFieldID) REFERENCES fields(fieldID),
+    FOREIGN KEY (customFieldID) REFERENCES fields(customFieldID)
+);
+CREATE INDEX customBaseFieldMappings_baseFieldID ON customBaseFieldMappings(baseFieldID);
+CREATE INDEX customBaseFieldMappings_customFieldID ON customBaseFieldMappings(customFieldID);

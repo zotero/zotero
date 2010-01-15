@@ -219,6 +219,14 @@ Zotero.Search.prototype.load = function() {
 			continue;
 		}
 		
+		// Convert itemTypeID to itemType
+		//
+		// TEMP: This can be removed at some point
+		if (condition == 'itemTypeID') {
+			condition = 'itemType';
+			conditions[i].value = Zotero.ItemTypes.getName(conditions[i].value);
+		}
+		
 		this._conditions[conditions[i]['searchConditionID']] = {
 			id: conditions[i]['searchConditionID'],
 			condition: condition,
@@ -1202,6 +1210,11 @@ Zotero.Search.prototype._buildQuery = function(){
 						skipOperators = true;
 						break;
 					
+					case 'itemType':
+						condSQL += "itemTypeID IN (SELECT itemTypeID FROM itemTypesCombined WHERE ";
+						openParens++;
+						break;
+					
 					case 'fileTypeID':
 						var ftSQL = 'SELECT mimeType FROM fileTypeMimeTypes '
 							+ 'WHERE fileTypeID IN ('
@@ -1314,35 +1327,7 @@ Zotero.Search.prototype._buildQuery = function(){
 						
 						if (parseDate){
 							var go = false;
-							// Allow 'today' or localized 'today'
-							var lc = (condition.value + '').toLowerCase();
-							if (lc == 'yesterday' || lc == Zotero.getString('date.yesterday')) {
-								var dateparts = Zotero.Date.strToDate(
-									Zotero.Date.dateToSQL(
-										new Date(new Date().getTime() - 86400000), true
-									)
-								);
-								dateparts.part = null;
-							}
-							else if (lc == 'today' || lc == Zotero.getString('date.today')) {
-								var dateparts = Zotero.Date.strToDate(
-									Zotero.Date.dateToSQL(
-										new Date(), true
-									)
-								);
-								dateparts.part = null;
-							}
-							else if (lc == 'tomorrow' || lc == Zotero.getString('date.tomorrow')) {
-								var dateparts = Zotero.Date.strToDate(
-									Zotero.Date.dateToSQL(
-										new Date(new Date().getTime() + 86400000), true
-									)
-								);
-								dateparts.part = null;
-							}
-							else {
-								var dateparts = Zotero.Date.strToDate(condition.value);
-							}
+							var dateparts = Zotero.Date.strToDate(condition.value);
 							
 							// Search on SQL date -- underscore is
 							// single-character wildcard
@@ -1847,7 +1832,7 @@ Zotero.SearchConditions = new function(){
 				},
 				noLoad: true
 			},
-
+			
 			
 			//
 			// Standard conditions
@@ -1900,6 +1885,7 @@ Zotero.SearchConditions = new function(){
 				field: 'dateModified'
 			},
 			
+			// Deprecated
 			{
 				name: 'itemTypeID',
 				operators: {
@@ -1907,7 +1893,18 @@ Zotero.SearchConditions = new function(){
 					isNot: true
 				},
 				table: 'items',
-				field: 'itemTypeID'
+				field: 'itemTypeID',
+				special: true
+			},
+			
+			{
+				name: 'itemType',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'items',
+				field: 'typeName'
 			},
 			
 			{
@@ -1998,7 +1995,7 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'itemData',
 				field: 'value',
-				aliases: Zotero.DB.columnQuery("SELECT fieldName FROM fields " +
+				aliases: Zotero.DB.columnQuery("SELECT fieldName FROM fieldsCombined " +
 					"WHERE fieldName NOT IN ('accessDate', 'date', 'pages', " +
 					"'section','seriesNumber','issue')"),
 				template: true // mark for special handling
@@ -2015,7 +2012,7 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'itemData',
 				field: 'value',
-				aliases: ['accessDate', 'date'],
+				aliases: ['accessDate', 'date', 'dateDue', 'accepted'], // TEMP - NSF
 				template: true // mark for special handling
 			},
 			
@@ -2087,6 +2084,14 @@ Zotero.SearchConditions = new function(){
 			_conditions[conditions[i]['name']] = conditions[i];
 			if (conditions[i]['aliases']) {
 				for (var j in conditions[i]['aliases']) {
+					// TEMP - NSF
+					switch (conditions[i]['aliases'][j]) {
+						case 'dateDue':
+						case 'accepted':
+							if (!Zotero.ItemTypes.getID('nsfReviewer')) {
+								continue;
+							}
+					}
 					_conditions[conditions[i]['aliases'][j]] = conditions[i];
 				}
 			}
@@ -2190,11 +2195,16 @@ Zotero.SearchConditions = new function(){
 	
 	
 	function getLocalizedName(str) {
+		// TEMP
+		if (str == 'itemType') {
+			str = 'itemTypeID';
+		}
+		
 		try {
 			return Zotero.getString('searchConditions.' + str)
 		}
 		catch (e) {
-			return Zotero.getString('itemFields.' + str);
+			return Zotero.ItemFields.getLocalizedString(null, str);
 		}
 	}
 	
@@ -2243,5 +2253,12 @@ Zotero.SearchConditions = new function(){
 		}
 		
 		return [condition, mode];
+	}
+	
+	
+	this.reload = function () {
+		_initialized = false;
+		_conditions = {};
+		_standardConditions = [];
 	}
 }

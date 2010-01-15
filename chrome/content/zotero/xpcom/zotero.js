@@ -358,7 +358,7 @@ var Zotero = new function(){
 		// If no userdata upgrade, still might need to process system/scrapers
 		else {
 			try {
-				Zotero.Schema.updateSchema();
+				var updated = Zotero.Schema.updateSchema();
 			}
 			catch (e) {
 				if (typeof e == 'string' && e.match('newer than SQL file')) {
@@ -380,6 +380,11 @@ var Zotero = new function(){
 		
 		Zotero.DB.startDummyStatement();
 		Zotero.Schema.updateFromRepository();
+		
+		// Populate combined tables for custom types and fields -- this is likely temporary
+		if (!upgraded && !updated) {
+			Zotero.Schema.updateCustomTables();
+		}
 		
 		// Initialize integration web server
 		Zotero.Integration.init();
@@ -1794,6 +1799,18 @@ Zotero.Date = new function(){
 	var _dayRe = null;
 	
 	function strToDate(string) {
+		// Parse 'yesterday'/'today'/'tomorrow'
+		var lc = (string + '').toLowerCase();
+		if (lc == 'yesterday' || lc == Zotero.getString('date.yesterday')) {
+			string = Zotero.Date.dateToSQL(new Date(new Date().getTime() - 86400000)).substr(0, 10);
+		}
+		else if (lc == 'today' || lc == Zotero.getString('date.today')) {
+			string = Zotero.Date.dateToSQL(new Date()).substr(0, 10);
+		}
+		else if (lc == 'tomorrow' || lc == Zotero.getString('date.tomorrow')) {
+			string = Zotero.Date.dateToSQL(new Date(new Date().getTime() + 86400000)).substr(0, 10);
+		}
+		
 		var date = new Object();
 		
 		// skip empty things

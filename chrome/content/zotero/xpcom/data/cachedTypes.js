@@ -53,6 +53,7 @@ Zotero.CachedTypes = function() {
 	this._nameCol = '';
 	this._table = '';
 	this._ignoreCase = false;
+	this._hasCustom = false;
 	
 	this.getName = getName;
 	this.getID = getID;
@@ -98,19 +99,38 @@ Zotero.CachedTypes = function() {
 	
 	function getTypes(where) {
 		return Zotero.DB.query('SELECT ' + this._idCol + ' AS id, '
-			+ this._nameCol + ' AS name FROM ' + this._table
-			+ (where ? ' ' + where : '') + ' ORDER BY ' + this._nameCol);
+			+ this._nameCol + ' AS name'
+			+ (this._hasCustom ? ', custom' : '')
+			+ ' FROM ' + this._table
+			+ (where ? ' ' + where : ''));
+	}
+	
+	
+	// Currently used only for item types
+	this.isCustom = function (idOrName) {
+		if (!_typesLoaded) {
+			_load();
+		}
+		
+		return _types['_' + idOrName] && _types['_' + idOrName].custom ? _types['_' + idOrName].custom : false;
+	}
+	
+	
+	this.reload = function () {
+		_typesLoaded = false;
 	}
 	
 	
 	function _load() {
-		var types = self.getTypes();
+		_types = [];
 		
+		var types = self.getTypes();
 		for (var i in types) {
 			// Store as both id and name for access by either
 			var typeData = {
 				id: types[i]['id'],
-				name: types[i]['name']
+				name: types[i]['name'],
+				custom: types[i].custom ? types[i].custom : false
 			}
 			_types['_' + types[i]['id']] = typeData;
 			if (self._ignoreCase) {
@@ -140,6 +160,7 @@ Zotero.CreatorTypes = new function() {
 	this._table = 'creatorTypes';
 	
 	var _primaryIDCache = {};
+	var _hasCreatorTypeCache = {};
 	
 	function getTypesForItemType(itemTypeID) {
 		var sql = "SELECT creatorTypeID AS id, creatorType AS name "
@@ -155,6 +176,15 @@ Zotero.CreatorTypes = new function() {
 		var sql = "SELECT COUNT(*) FROM itemTypeCreatorTypes "
 			+ "WHERE itemTypeID=? AND creatorTypeID=?";
 		return !!Zotero.DB.valueQuery(sql, [itemTypeID, creatorTypeID]);
+	}
+	
+	
+	this.itemTypeHasCreators = function (itemTypeID) {
+		if (typeof _hasCreatorTypeCache[itemTypeID] != 'undefined') {
+			return _hasCreatorTypeCache[itemTypeID];
+		}
+		_hasCreatorTypeCache[itemTypeID] = !!this.getTypesForItemType(itemTypeID).length;
+		return _hasCreatorTypeCache[itemTypeID];
 	}
 	
 	
@@ -184,11 +214,17 @@ Zotero.ItemTypes = new function() {
 	this.getLocalizedString = getLocalizedString;
 	this.getImageSrc = getImageSrc;
 	
+	this.customIDOffset = 10000;
+	
 	this._typeDesc = 'item type';
 	this._idCol = 'itemTypeID';
 	this._nameCol = 'typeName';
-	this._table = 'itemTypes';
-
+	this._table = 'itemTypesCombined';
+	this._hasCustom = true;
+	
+	var _customImages = {};
+	var _customLabels = {};
+	
 	function getPrimaryTypes() {
 		return this.getTypes('WHERE display=2');
 	}
@@ -201,12 +237,38 @@ Zotero.ItemTypes = new function() {
 		return this.getTypes('WHERE display=0');
 	}
 	
-	function getLocalizedString(typeIDOrName) {
-		var typeName = this.getName(typeIDOrName);
+	function getLocalizedString(idOrName) {
+		var typeName = this.getName(idOrName);
+		
+		// For custom types, use provided label
+		if (this.isCustom(idOrName)) {
+			var id = this.getID(idOrName) - this.customIDOffset;
+			if (_customLabels[id]) {
+				return _customLabels[id];
+			}
+			var sql = "SELECT label FROM customItemTypes WHERE customItemTypeID=?";
+			var label = Zotero.DB.valueQuery(sql, id);
+			_customLabels[id] = label;
+			return label;
+		}
+		
 		return Zotero.getString("itemTypes." + typeName);
 	}
 	
 	function getImageSrc(itemType) {
+		if (this.isCustom(itemType)) {
+			var id = this.getID(itemType) - this.customIDOffset;
+			if (_customImages[id]) {
+				return _customImages[id];
+			}
+			var sql = "SELECT icon FROM customItemTypes WHERE customItemTypeID=?";
+			var src = Zotero.DB.valueQuery(sql, id);
+			if (src) {
+				_customImages[id] = src;
+				return src;
+			}
+		}
+		
 		// DEBUG: only have icons for some types so far
 		switch (itemType) {
 			case 'attachment-file':

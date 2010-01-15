@@ -1,4 +1,4 @@
--- 25
+-- 26
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -33,6 +33,16 @@ CREATE TABLE itemTypes (
     display INT DEFAULT 1 -- 0 == hide, 1 == display, 2 == primary
 );
 
+-- Populated at startup from itemTypes and customItemTypes
+DROP TABLE IF EXISTS itemTypesCombined;
+CREATE TABLE itemTypesCombined (
+    itemTypeID INT NOT NULL,
+    typeName TEXT NOT NULL,
+    display INT DEFAULT 1 NOT NULL,
+    custom INT NOT NULL,
+    PRIMARY KEY (itemTypeID)
+);
+
 -- Describes various types of fields and their format restrictions,
 -- and indicates whether data should be stored as strings or integers
 --
@@ -53,6 +63,17 @@ CREATE TABLE fields (
     FOREIGN KEY (fieldFormatID) REFERENCES fieldFormats(fieldFormatID)
 );
 
+-- Populated at startup from fields and customFields
+DROP TABLE IF EXISTS fieldsCombined;
+CREATE TABLE fieldsCombined (
+    fieldID INT NOT NULL,
+    fieldName TEXT NOT NULL,
+    label TEXT,
+    fieldFormatID INT,
+    custom INT NOT NULL,
+    PRIMARY KEY (fieldID)
+);
+
 -- Defines valid fields for each itemType, their display order, and their default visibility
 DROP TABLE IF EXISTS itemTypeFields;
 CREATE TABLE itemTypeFields (
@@ -60,10 +81,24 @@ CREATE TABLE itemTypeFields (
     fieldID INT,
     hide INT,
     orderIndex INT,
-    PRIMARY KEY (itemTypeID, fieldID),
+    PRIMARY KEY (itemTypeID, orderIndex),
+    UNIQUE (itemTypeID, fieldID),
     FOREIGN KEY (itemTypeID) REFERENCES itemTypes(itemTypeID),
     FOREIGN KEY (fieldID) REFERENCES fields(fieldID)
 );
+CREATE INDEX itemTypeFields_fieldID ON itemTypeFields(fieldID);
+
+-- Populated at startup from itemTypeFields and customItemTypeFields
+DROP TABLE IF EXISTS itemTypeFieldsCombined;
+CREATE TABLE itemTypeFieldsCombined (
+    itemTypeID INT NOT NULL,
+    fieldID INT NOT NULL,
+    hide INT,
+    orderIndex INT NOT NULL,
+    PRIMARY KEY (itemTypeID, orderIndex),
+    UNIQUE (itemTypeID, fieldID)
+);
+CREATE INDEX itemTypeFieldsCombined_fieldID ON itemTypeFieldsCombined(fieldID);
 
 -- Maps base fields to type-specific fields (e.g. publisher to label in audioRecording)
 DROP TABLE IF EXISTS baseFieldMappings;
@@ -72,18 +107,29 @@ CREATE TABLE baseFieldMappings (
     baseFieldID INT,
     fieldID INT,
     PRIMARY KEY (itemTypeID, baseFieldID, fieldID),
+    FOREIGN KEY (itemTypeID) REFERENCES itemTypes(itemTypeID),
     FOREIGN KEY (baseFieldID) REFERENCES fields(fieldID),
     FOREIGN KEY (fieldID) REFERENCES fields(fieldID)
 );
-DROP INDEX IF EXISTS baseFieldMappings_baseFieldID;
 CREATE INDEX baseFieldMappings_baseFieldID ON baseFieldMappings(baseFieldID);
+CREATE INDEX baseFieldMappings_fieldID ON baseFieldMappings(fieldID);
+
+-- Populated at startup from baseFieldMappings and customBaseFieldMappings
+DROP TABLE IF EXISTS baseFieldMappingsCombined;
+CREATE TABLE baseFieldMappingsCombined (
+    itemTypeID INT,
+    baseFieldID INT,
+    fieldID INT,
+    PRIMARY KEY (itemTypeID, baseFieldID, fieldID)
+);
+CREATE INDEX baseFieldMappingsCombined_baseFieldID ON baseFieldMappingsCombined(baseFieldID);
+CREATE INDEX baseFieldMappingsCombined_fieldID ON baseFieldMappingsCombined(fieldID);
 
 DROP TABLE IF EXISTS charsets;
 CREATE TABLE charsets (
     charsetID INTEGER PRIMARY KEY,
     charset TEXT UNIQUE
 );
-DROP INDEX IF EXISTS charsets_charset;
 CREATE INDEX charsets_charset ON charsets(charset);
 
 DROP TABLE IF EXISTS fileTypes;
@@ -91,7 +137,6 @@ CREATE TABLE fileTypes (
     fileTypeID INTEGER PRIMARY KEY,
     fileType TEXT UNIQUE
 );
-DROP INDEX IF EXISTS fileTypes_fileType;
 CREATE INDEX fileTypes_fileType ON fileTypes(fileType);
 
 DROP TABLE IF EXISTS fileTypeMimeTypes;
@@ -101,7 +146,6 @@ CREATE TABLE fileTypeMimeTypes (
     PRIMARY KEY (fileTypeID, mimeType),
     FOREIGN KEY (fileTypeID) REFERENCES fileTypes(fileTypeID)
 );
-DROP INDEX IF EXISTS fileTypeMimeTypes_mimeType;
 CREATE INDEX fileTypeMimeTypes_mimeType ON fileTypeMimeTypes(mimeType);
 
 -- Defines the possible creator types (contributor, editor, author)
@@ -120,7 +164,8 @@ CREATE TABLE itemTypeCreatorTypes (
     FOREIGN KEY (itemTypeID) REFERENCES itemTypes(itemTypeID),
     FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID)
 );
-    
+CREATE INDEX itemTypeCreatorTypes_creatorTypeID ON itemTypeCreatorTypes(creatorTypeID);
+
 DROP TABLE IF EXISTS syncObjectTypes;
 CREATE TABLE syncObjectTypes (
     syncObjectTypeID INTEGER PRIMARY KEY,
@@ -142,7 +187,6 @@ CREATE TABLE transactions (
     context TEXT,
     action TEXT
 );
-DROP INDEX IF EXISTS transactions_transactionSetID;
 CREATE INDEX transactions_transactionSetID ON transactions(transactionSetID);
 
 DROP TABLE IF EXISTS transactionLog;

@@ -610,7 +610,7 @@ Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 	}
 	else if(column.id == "zotero-items-column-type")
 	{
-		val = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(obj.ref.itemTypeID));
+		val = Zotero.ItemTypes.getLocalizedString(obj.ref.itemTypeID);
 	}
 	// Year column is just date field truncated
 	else if (column.id == "zotero-items-column-year") {
@@ -960,8 +960,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				break;
 			
 			case 'type':
-				var typeA = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(a.ref.itemTypeID));
-				var typeB = Zotero.getString('itemTypes.'+Zotero.ItemTypes.getName(b.ref.itemTypeID));
+				var typeA = Zotero.ItemTypes.getLocalizedString(a.ref.itemTypeID);
+				var typeB = Zotero.ItemTypes.getLocalizedString(b.ref.itemTypeID);
 				
 				cmp = (typeA > typeB) ? -1 : (typeA < typeB) ? 1 : 0;
 				if (cmp) {

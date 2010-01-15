@@ -155,7 +155,7 @@ Zotero.Report = new function() {
 		content += '<th>'
 			+ escapeXML(Zotero.getString('itemFields.itemType'))
 			+ '</th>\n';
-		content += '<td>' + escapeXML(Zotero.getString('itemTypes.' + arr['itemType'])) + '</td>\n';
+		content += '<td>' + escapeXML(Zotero.ItemTypes.getLocalizedString(arr.itemType)) + '</td>\n';
 		content += '</tr>\n';
 		
 		// Creators
@@ -214,7 +214,7 @@ Zotero.Report = new function() {
 			}
 			
 			try {
-				var localizedFieldName = Zotero.getString('itemFields.' + i);
+				var localizedFieldName = Zotero.ItemFields.getLocalizedString(arr.itemType, i);
 			}
 			// Skip fields we don't have a localized string for
 			catch (e) {
