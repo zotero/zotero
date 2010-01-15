@@ -1,7 +1,7 @@
 <!ENTITY zotero.search.name "Име:">
 
 <!ENTITY zotero.search.joinMode.prefix "Съвпадение на">
-<!ENTITY zotero.search.joinMode.any "който и да е">
+<!ENTITY zotero.search.joinMode.any "каквото и да е">
 <!ENTITY zotero.search.joinMode.all "всички">
 <!ENTITY zotero.search.joinMode.suffix "от изброените:">
 

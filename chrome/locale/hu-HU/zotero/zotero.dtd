@@ -1,5 +1,9 @@
 <!ENTITY zotero.general.optional "(Nem kötelező)">
 <!ENTITY zotero.general.note "Jegyzet:">
+<!ENTITY zotero.general.selectAll "Minden kijelölése">
+<!ENTITY zotero.general.deselectAll "Kijelölés megszüntetése">
+<!ENTITY zotero.general.edit "Szerkesztés">
+<!ENTITY zotero.general.delete "Törlés">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "A hibanapló a Zoterohoz nem kapcsolódó bejegyzéseket is tartalmazhat">
 <!ENTITY zotero.errorReport.submissionInProgress "Várjon a hibajelentés elküldéséig.">
@@ -11,6 +15,10 @@
 <!ENTITY zotero.upgrade.newVersionInstalled "A Zotero új verziójának telepítése sikerült.">
 <!ENTITY zotero.upgrade.upgradeRequired "Frissíteni kell a Zotero adatbázist, hogy működjön az új verzióval.">
 <!ENTITY zotero.upgrade.autoBackup "Az adatbázisról a módosítás előtt biztonsági másolat készül.">
+<!ENTITY zotero.upgrade.majorUpgrade "Ez egy komoly frissítés.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Mindenképpen olvassa el a">
+<!ENTITY zotero.upgrade.majorUpgradeLink "frissítési útmutatót">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "mielőtt folytatná.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Várjon a frissítés befejezéséig. Ez akár percekig is eltarthat.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "A Zotero adatbázis frissítése sikerült.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Részletesen utánanézhet">
@@ -19,6 +27,8 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "A kijelölés hozzáadása a Zotero jegyzethez">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Zotero elem és jegyzet létrehozása a kijelölés alapján">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "A hivatkozás elmentése Zotero elemként">
+<!ENTITY zotero.contextMenu.saveImageAsItem "A kép elmentése Zotero elemként">
 
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Jegyzetek">
@@ -47,30 +57,34 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Megjelenítés a könyvtárban">
 <!ENTITY zotero.items.menu.attach.note "Jegyzet hozzáadása">
+<!ENTITY zotero.items.menu.attach "Csatolmány hozzáadása">
 <!ENTITY zotero.items.menu.attach.snapshot "Az aktuális oldal csatolása pillanatfelvételként">
 <!ENTITY zotero.items.menu.attach.link "Az aktuális oldal csatolása hivatkozásként">
+<!ENTITY zotero.items.menu.attach.file "Helyben tárolt példány csatolása">
+<!ENTITY zotero.items.menu.attach.fileLink "Fájlra mutató hivatkozás csatolása">
+
 <!ENTITY zotero.items.menu.duplicateItem "Kiválasztott elem duplikálása">
 
 <!ENTITY zotero.toolbar.newItem.label "Új elem">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Egyéb...">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Új elem létrehozása az aktuális oldal alapján">
-<!ENTITY zotero.toolbar.lookup.label "Add Item by Identifier">
+<!ENTITY zotero.toolbar.lookup.label "Elem hozzáadása azonosító alapján">
 <!ENTITY zotero.toolbar.removeItem.label "Elem törlése...">
 <!ENTITY zotero.toolbar.newCollection.label "Új gyűjtemény...">
-<!ENTITY zotero.toolbar.newGroup "New Group...">
+<!ENTITY zotero.toolbar.newGroup "Új csoport...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Új algyűjtemény...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Új mentett keresés...">
-<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
+<!ENTITY zotero.toolbar.emptyTrash.label "Kuka ürítése">
 <!ENTITY zotero.toolbar.tagSelector.label "Címkeválasztó mutatása/elrejtése">
 <!ENTITY zotero.toolbar.actions.label "Műveletek">
 <!ENTITY zotero.toolbar.import.label "Importálás...">
-<!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.toolbar.importFromClipboard "Importálás a vágólapról">
 <!ENTITY zotero.toolbar.export.label "Könyvtár exportálása...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF átvizsgálása...">
 <!ENTITY zotero.toolbar.timeline.label "Kronológia létrehozása">
-<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
+<!ENTITY zotero.toolbar.duplicate.label "Duplumok listázása">
 <!ENTITY zotero.toolbar.preferences.label "Beállítások...">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
+<!ENTITY zotero.toolbar.supportAndDocumentation "Támogatás és dokumentáció">
 <!ENTITY zotero.toolbar.about.label "Névjegy">
 <!ENTITY zotero.toolbar.advancedSearch "Haladó keresés">
 <!ENTITY zotero.toolbar.search.label "Keresés:">
@@ -85,7 +99,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Szókezdő">
 
 <!ENTITY zotero.toolbar.note.standalone "Új önálló jegyzet">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
+<!ENTITY zotero.toolbar.lookup "Keresés azonosító alapján...">
 <!ENTITY zotero.toolbar.attachment.linked "Fájlra mutató hivatkozás...">
 <!ENTITY zotero.toolbar.attachment.add "Helyi másolat tárolása...">
 <!ENTITY zotero.toolbar.attachment.weblink "Hivatkozás az aktuális oldalra">
@@ -96,19 +110,19 @@
 <!ENTITY zotero.tagSelector.showAutomatic "Automatikus címkék megjelenítése">
 <!ENTITY zotero.tagSelector.displayAll "Összes címke megjelenítése">
 <!ENTITY zotero.tagSelector.selectVisible "Látható címkék kiválasztása">
-<!ENTITY zotero.tagSelector.clearVisible "Látható címkék kiválasztásának megszűntetése">
+<!ENTITY zotero.tagSelector.clearVisible "Látható címkék kiválasztásának megszüntetése">
 <!ENTITY zotero.tagSelector.clearAll "Összes címke kiválasztásának megszüntetése">
 <!ENTITY zotero.tagSelector.renameTag "Címke átnevezése...">
 <!ENTITY zotero.tagSelector.deleteTag "Címke törlése...">
 
-<!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
+<!ENTITY zotero.lookup.description "Adja meg az ISBN, DOI vagy PMID azonosítót az alábbi dobozban.">
 
 <!ENTITY zotero.selectitems.title "Elemek kiválasztása">
 <!ENTITY zotero.selectitems.intro.label "A könyvtárhoz hozzáadni kíván elemek kiválasztása">
 <!ENTITY zotero.selectitems.cancel.label "Mégse">
 <!ENTITY zotero.selectitems.select.label "OK">
 
-<!ENTITY zotero.bibliography.title "Bibliográfia étrehozása">
+<!ENTITY zotero.bibliography.title "Bibliográfia létrehozása">
 <!ENTITY zotero.bibliography.style.label "Hivatkozási stílus:">
 <!ENTITY zotero.bibliography.output.label "Kimeneti formátum">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Mentés RTF-ként">
@@ -127,8 +141,8 @@
 <!ENTITY zotero.exportOptions.format.label "Formátum:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Adatkonverter beállításai">
 
-<!ENTITY zotero.charset.label "Character Encoding">
-<!ENTITY zotero.moreEncodings.label "More Encodings">
+<!ENTITY zotero.charset.label "Karakterkódolás">
+<!ENTITY zotero.moreEncodings.label "További karakterkódolások">
 
 <!ENTITY zotero.citation.keepSorted.label "Források sorbarendezése">
 
@@ -161,11 +175,23 @@
 
 <!ENTITY zotero.integration.references.label "Hivatkozások a bibliográfiában">
 
-<!ENTITY zotero.sync.storage.progress "Progress:">
-<!ENTITY zotero.sync.storage.downloads "Downloads:">
-<!ENTITY zotero.sync.storage.uploads "Uploads:">
+<!ENTITY zotero.sync.button "Szinkronizáció a Zotero szerverrel">
+<!ENTITY zotero.sync.error "Szinkronizációs hiba">
+<!ENTITY zotero.sync.storage.progress "Állapot:">
+<!ENTITY zotero.sync.storage.downloads "Letöltések:">
+<!ENTITY zotero.sync.storage.uploads "Letöltések:">
 
-<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "A következő címkék túl hosszúak">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "A szinkronizált címkék nem lehetnek 256 karakternél hosszabbak.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Három lehetőség közül választhat: feldarabolja a címkét, lerövidíti vagy kitöröli.">
+<!ENTITY zotero.sync.longTagFixer.split "Feldarabolás">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Feldarabolás ennél a pozíciónál">
+<!ENTITY zotero.sync.longTagFixer.character "karakter">
+<!ENTITY zotero.sync.longTagFixer.characters "karakter">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "A jelöletlenül hagyott címkék nem lesznek elmentve.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Ez a címke törölve lesz valamennyi elemről.">
+
+<!ENTITY zotero.proxy.recognized.title "Proxy felismerve">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
 <!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
@@ -185,7 +211,7 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
 <!ENTITY zotero.rtfScan.introPage.label "Introduction">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. The RTF Scan feature currently supports citations in variations upon the following formats:">
 <!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
 <!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">

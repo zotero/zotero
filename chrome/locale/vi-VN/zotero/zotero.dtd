@@ -1,5 +1,9 @@
 <!ENTITY zotero.general.optional "(Không bắt buộc)">
 <!ENTITY zotero.general.note "Chú ý:">
+<!ENTITY zotero.general.selectAll "Select All">
+<!ENTITY zotero.general.deselectAll "Deselect All">
+<!ENTITY zotero.general.edit "Edit">
+<!ENTITY zotero.general.delete "Delete">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Sổ nhật ký lỗi có thể chứa các thông báo lỗi không liên quan tới Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Xin vui lòng chờ trong khi báo cáo lỗi được gửi đi.">
@@ -11,6 +15,10 @@
 <!ENTITY zotero.upgrade.newVersionInstalled "Bạn đã cài đặt một phiên bản mới của Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Cơ sở dữ liệu Zotero của bạn phải được nâng cấp để có thể làm việc với phiên bản mới.">
 <!ENTITY zotero.upgrade.autoBackup "Cơ sở dữ liệu hiện tại của bạn sẽ được sao lưu dự phòng một cách tự động trước khi có bất kỳ một thay dổi nào.">
+<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
+<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Xin vui lòng chờ đến khi tiến trình cập nhật kết thúc. Tiến trình có thể sẽ kéo dài trong vài phút.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Cơ sở dữ liệu Zotero của bạn đã được cập nhật thành công.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Xin vui lòng xem">
@@ -19,6 +27,8 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Thêm phần vừa chọn vào một ghi chép Zotero">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Tạo một biểu ghi và một ghi chép Zotero cho phần vừa chọn">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
 
 <!ENTITY zotero.tabs.info.label "Thông tin">
 <!ENTITY zotero.tabs.notes.label "Ghi chép">
@@ -47,8 +57,12 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Hiển thị trong Thư viện">
 <!ENTITY zotero.items.menu.attach.note "Tạo một Ghi chép">
+<!ENTITY zotero.items.menu.attach "Add Attachment">
 <!ENTITY zotero.items.menu.attach.snapshot "Đính kèm Bản lưu trang Web của Trang hiện tại">
 <!ENTITY zotero.items.menu.attach.link "Đính kèm Đường dẫn tới Trang hiện tại">
+<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
+<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+
 <!ENTITY zotero.items.menu.duplicateItem "Sao chép Biểu ghi vừa chọn">
 
 <!ENTITY zotero.toolbar.newItem.label "Biểu ghi mới">
@@ -161,9 +175,21 @@
 
 <!ENTITY zotero.integration.references.label "Các Tham khảo trong Thư tịch">
 
+<!ENTITY zotero.sync.button "Sync with Zotero Server">
+<!ENTITY zotero.sync.error "Sync Error">
 <!ENTITY zotero.sync.storage.progress "Progress:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
+<!ENTITY zotero.sync.longTagFixer.split "Split">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
+<!ENTITY zotero.sync.longTagFixer.character "character">
+<!ENTITY zotero.sync.longTagFixer.characters "characters">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">

@@ -1,6 +1,8 @@
 <!ENTITY zotero.preferences.title "Preferencias de Zotero">
 
 <!ENTITY zotero.preferences.default "Por defecto:">
+<!ENTITY zotero.preferences.items "Elementos">
+<!ENTITY zotero.preferences.period ".">
 
 <!ENTITY zotero.preferences.prefpane.general "Xeral">
 
@@ -11,6 +13,7 @@
 <!ENTITY zotero.preferences.fontSize.small "Pequena">
 <!ENTITY zotero.preferences.fontSize.medium "Mediana">
 <!ENTITY zotero.preferences.fontSize.large "Grande">
+<!ENTITY zotero.preferences.fontSize.notes "Tamaño da fonte das Notas:">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscelanea">
 <!ENTITY zotero.preferences.autoUpdate "Comprobar automaticamente tradutores actualizados">
@@ -23,12 +26,43 @@
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Ao salvar os elementos adxuntar automaticamente os PDFs e outros arquivos asociados">
 <!ENTITY zotero.preferences.automaticTags "Etiquetar automaticamente os elementos con palabras crave e epígrafes temáticos">
 
+<!ENTITY zotero.preferences.groups "Grupos">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "Ao copiar elementos entre bibliotecas, incluir:">
+<!ENTITY zotero.preferences.groups.childNotes "notas fillas">
+<!ENTITY zotero.preferences.groups.childFiles "instantáneas fillas e arquivos importados">
+<!ENTITY zotero.preferences.groups.childLinks "ligazóns fillas">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
 <!ENTITY zotero.preferences.openurl.search "Procura de &quot;resolvers&quot;">
 <!ENTITY zotero.preferences.openurl.custom "Personalizar...">
 <!ENTITY zotero.preferences.openurl.server "&quot;Resolver&quot;:">
 <!ENTITY zotero.preferences.openurl.version "Versión:">
+
+<!ENTITY zotero.preferences.prefpane.sync "Sincronización">
+<!ENTITY zotero.preferences.sync.username "Usuario:">
+<!ENTITY zotero.preferences.sync.password "Contrasinal:">
+<!ENTITY zotero.preferences.sync.syncServer "Servidor de Sincronización de Zotero">
+<!ENTITY zotero.preferences.sync.createAccount "Crear Conta">
+<!ENTITY zotero.preferences.sync.lostPassword "Esqueceu o Contrasinal?">
+<!ENTITY zotero.preferences.sync.syncAutomatically "Sincronización automática">
+<!ENTITY zotero.preferences.sync.fileSyncing "Sincronizando arquivo">
+<!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sincronizar arquivos adxuntos en A Miña Biblioteca usando">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Sincronizar arquivos adxuntos en bibliotecas de grupo utilizando almacenamento Zotero">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "Sobre a Sincronización de Arquivos">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Ao usar almacenamento Zotero, vostede acepta estar obrigado polos seus">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "Termos e Condicións">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Sincronización Completa co Servidor de Zotero">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Unir os datos locais de Zotero cos datos do servidor de sincronización, ignorando o historial de sincronización.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurar a partir do Servidor de Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Borrar todos os datos locais de Zotero e restaurar a partir do servidor de sincronización.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaurar no Servidor de Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Borrar todos os datos do servidor e substituír con datos locais de Zotero.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reiniciar o Histórico de Sincronización de Arquivos">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Forzar a comprobación do servidor de almacenamento para todos os arquivos adxuntos locais.">
+<!ENTITY zotero.preferences.sync.reset.button "Reiniciar...">
+
 
 <!ENTITY zotero.preferences.prefpane.search "Procura">
 <!ENTITY zotero.preferences.search.fulltextCache "Memoria Oculta (Caché) de texto completo">
@@ -57,6 +91,8 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Dominio/Ruta">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(p. ej. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Formato de Saída">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "Inhabilitar Copia Rápida ao arrastrar máis de">
+
 
 <!ENTITY zotero.preferences.prefpane.styles "Styles">
 
@@ -118,3 +154,11 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Recuperar Tradutores e Estilos ...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Recuperar Tradutores ...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Recuperar Estilos ...">
+
+<!ENTITY zotero.preferences.debugOutputLogging "Depurar Saída de Rexistro">
+<!ENTITY zotero.preferences.debugOutputLogging.message "A saída de depuración pode axudar aos desenvolvedores de Zotero a diagnosticar problemas. A depuración do Rexistro desacelera Zotero, de xeito que, en xeral, ten que deixala desactivada a menos que un desenvolvedor lle solicite a saída de depuración.">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "liñas rexistradas">
+<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Habilitar tras o reinicio">
+<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Ver a Saída">
+<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Borrar a Saída">
+<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Enviar ao Servidor de Zotero">

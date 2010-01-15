@@ -7,17 +7,17 @@
 
 <!ENTITY zotero.search.recursive.label "Caută în subdosare">
 <!ENTITY zotero.search.noChildren "Arată doar înregistrările de nivel înalt">
-<!ENTITY zotero.search.includeParentsAndChildren "Include înregistrările părinte şi copil, dintre înregistrările care se potrivesc căutării">
+<!ENTITY zotero.search.includeParentsAndChildren "Include înregistrările părinte și copil, dintre înregistrările care se potrivesc căutării">
 
 <!ENTITY zotero.search.textModes.phrase "Expresie">
-<!ENTITY zotero.search.textModes.phraseBinary "Expresie (include fişierele binare)">
+<!ENTITY zotero.search.textModes.phraseBinary "Expresie (include fișierele binare)">
 <!ENTITY zotero.search.textModes.regexp "Regexp">
-<!ENTITY zotero.search.textModes.regexpCS "Regexp (diferenţiază între caracterele minuscule şi cele majuscule)">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (diferențiază între caracterele minuscule și cele majuscule)">
 
 <!ENTITY zotero.search.date.units.days "zile">
 <!ENTITY zotero.search.date.units.months "luni">
 <!ENTITY zotero.search.date.units.years "ani">
 
 <!ENTITY zotero.search.search "Caută">
-<!ENTITY zotero.search.clear "Şterge">
+<!ENTITY zotero.search.clear "Șterge">
 <!ENTITY zotero.search.saveSearch "Salvează căutarea">
