@@ -586,7 +586,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._onUploadComplete = function (httpR
 		
 		default:
 			this.onError("Unexpected file upload status " + status
-				+ " in Zotero.Sync.Storage._onUploadComplete()");
+				+ " in Zotero.Sync.Storage.WebDAV._onUploadComplete()");
 			return;
 	}
 	
