@@ -219,6 +219,11 @@
 				<![CDATA[
 					Zotero.debug('Refreshing item box');
 					
+					if (!this.item) {
+						Zotero.debug('No item to refresh', 2);
+						return;
+					}
+					
 					if (this.clickByItem) {
 						var itemBox = document.getAnonymousNodes(this)[0];
 						itemBox.setAttribute('onclick',
@@ -333,21 +338,11 @@
 					// Item type menu
 					if (this.showTypeMenu) {
 						// Build item type menu if it hasn't been built yet
-						if (!this.itemTypeMenu.firstChild.hasChildNodes()) {
-							var itemTypes = Zotero.ItemTypes.getTypes();
-							for (var i=0; i<itemTypes.length; i++) {
-								var name = itemTypes[i].name;
-								if (name != 'attachment' && name != 'note') {
-									this.itemTypeMenu.appendItem(Zotero.getString("itemTypes." + name), itemTypes[i].id);
-								}
-							}
+						if (this.itemTypeMenu.itemCount == 0) {
+							this.buildItemTypeMenu();
 						}
-						
-						var listitems = this.itemTypeMenu.firstChild.childNodes;
-						for (var i=0, len=listitems.length; i < len; i++) {
-							if (listitems[i].getAttribute('value') == this.item.itemTypeID) {
-								this.itemTypeMenu.selectedIndex = i;
-							}
+						else {
+							this.updateItemTypeMenuSelection();
 						}
 						
 						this.itemTypeMenu.parentNode.hidden = false;
@@ -420,9 +415,11 @@
 								? (i>0 ? this._tabIndexMinFields + i : 1) : 0;
 							this._tabIndexMaxInfoFields = Math.max(this._tabIndexMaxInfoFields, tabindex);
 							
-							if (fieldIsClickable &&
-									!Zotero.Items.isPrimaryField(fieldName) &&
-									Zotero.ItemFields.isFieldOfBase(Zotero.ItemFields.getID(fieldName), 'date')) {
+							if (fieldIsClickable
+									&& !Zotero.Items.isPrimaryField(fieldName)
+									&& Zotero.ItemFields.isFieldOfBase(Zotero.ItemFields.getID(fieldName), 'date')
+									// TEMP - NSF
+									&& fieldName != 'dateSent') {
 								this.addDateRow(fieldNames[i], this.item.getField(fieldName, true), tabindex);
 								continue;
 							}
@@ -448,7 +445,8 @@
 								Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, fieldName) + ":");
 						}
 						
-						if (fieldName == 'url' && val) {
+						// TEMP - NSF (homepage)
+						if ((fieldName == 'url' || fieldName == 'homepage') && val) {
 							label.setAttribute("isButton", true);
 							// TODO: make getFieldValue non-private and use below instead
 							label.setAttribute("onclick", "ZoteroPane.loadURI(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value, event)");
@@ -550,7 +548,7 @@
 							this._addCreatorRow = false;
 						}
 					}
-					else if (this.editable) {
+					else if (this.editable && Zotero.CreatorTypes.itemTypeHasCreators(this.item.itemTypeID)) {
 						// Add default row
 						this.addCreatorRow(false, false, true, true);
 					}
@@ -572,6 +570,58 @@
 				<![CDATA[
 					var url = this.item.getField('url');
 					return url && url.match && !url.match(/^file:|^zotero:/);
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="buildItemTypeMenu">
+				<body>
+				<![CDATA[
+					if (!this.item) {
+						return;
+					}
+					
+					this.itemTypeMenu.removeAllItems();
+					
+					var t = Zotero.ItemTypes.getTypes();
+							
+					// Sort by localized name
+					var itemTypes = [];
+					for (var i=0; i<t.length; i++) {
+						itemTypes.push({
+							id: t[i].id,
+							name: t[i].name,
+							localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
+						});
+					}
+					var collation = Zotero.getLocaleCollation();
+					itemTypes.sort(function(a, b) {
+						return collation.compareString(1, a.localized, b.localized);
+					});
+					
+					for (var i=0; i<itemTypes.length; i++) {
+						var name = itemTypes[i].name;
+						if (name != 'attachment' && name != 'note') {
+							this.itemTypeMenu.appendItem(itemTypes[i].localized, itemTypes[i].id);
+						}
+					}
+					
+					this.updateItemTypeMenuSelection();
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="updateItemTypeMenuSelection">
+				<body>
+				<![CDATA[
+					var listitems = this.itemTypeMenu.firstChild.childNodes;
+					for (var i=0, len=listitems.length; i < len; i++) {
+						if (listitems[i].getAttribute('value') == this.item.itemTypeID) {
+							this.itemTypeMenu.selectedIndex = i;
+						}
+					}
 				]]>
 				</body>
 			</method>
@@ -769,7 +819,7 @@
 				<body>
 				<![CDATA[
 					var label = document.createElement("label");
-					label.setAttribute("value", Zotero.getString("itemFields." + field) + ':');
+					label.setAttribute("value", Zotero.ItemFields.getLocalizedString(this.item.itemTypeID, field) + ':');
 					label.setAttribute("fieldname", field);
 					label.setAttribute("onclick", "this.nextSibling.firstChild.blur()");
 					
@@ -1151,10 +1201,13 @@
 					}
 					
 					// If an abstract, check last expand state
-					var abstractAsVbox = (fieldName == 'abstractNote') &&
-						Zotero.Prefs.get('lastAbstractExpand');
+					var abstractAsVbox = fieldName == 'abstractNote' && Zotero.Prefs.get('lastAbstractExpand');
 					
-					if (fieldName == 'extra' || abstractAsVbox) {
+					// Use a vbox for multiline fields (but Abstract only if it's expanded)
+					var useVbox = (fieldName != 'abstractNote' || abstractAsVbox)
+						&& Zotero.ItemFields.isMultiline(fieldName);
+					
+					if (useVbox) {
 						var valueElement = document.createElement("vbox");
 					}
 					else {
@@ -1190,13 +1243,25 @@
 						case 'dateAdded':
 						case 'dateModified':
 						case 'accessDate':
+						
+						// TEMP - NSF
+						case 'dateSent':
+						case 'dateDue':
+						case 'accepted':
 							if (valueText) {
 								var date = Zotero.Date.sqlToDate(valueText, true);
-								valueText = date ? date.toLocaleString() : '';
-								
-								// Don't show time for access date if none
-								if (fieldName == 'accessDate') {
-									valueText = valueText.replace('00:00:00 ', '');
+								if (date) {
+									// If no time, interpret as local, not UTC
+									if (Zotero.Date.isSQLDate(valueText)) {
+										date = Zotero.Date.sqlToDate(valueText);
+										valueText = date.toLocaleDateString();
+									}
+									else {
+										valueText = date.toLocaleString();
+									}
+								}
+								else {
+									valueText = '';
 								}
 							}
 							break;
@@ -1226,7 +1291,7 @@
 					
 					// To support newlines in 'extra' fields, we use multiple
 					// <description> elements inside a vbox
-					if (fieldName == 'extra' || abstractAsVbox) {
+					if (useVbox) {
 						var lines = valueText.split("\n");
 						for (var i = 0; i < lines.length; i++) {
 							var descriptionNode = document.createElement("description");
@@ -1311,9 +1376,27 @@
 						var itemID = this.item.id;
 						
 						// Access date needs to be converted from UTC
-						if (fieldName=='accessDate' && value!='') {
-							var localDate = Zotero.Date.sqlToDate(value, true);
-							var value = Zotero.Date.dateToSQL(localDate);
+						if (value != '') {
+							switch (fieldName) {
+								case 'accessDate':
+								
+								// TEMP - NSF
+								case 'dateSent':
+								case 'dateDue':
+								case 'accepted':
+									// If no time, interpret as local, not UTC
+									if (Zotero.Date.isSQLDate(value)) {
+										var localDate = Zotero.Date.sqlToDate(value);
+									}
+									else {
+										var localDate = Zotero.Date.sqlToDate(value, true);
+									}
+									var value = Zotero.Date.dateToSQL(localDate);
+									
+									// Don't show time in editor
+									value = value.replace(' 00:00:00', '');
+									break;
+							}
 						}
 					}
 					
@@ -1327,36 +1410,15 @@
 						t.setAttribute('fieldMode', elem.getAttribute('fieldMode'));
 					}
 					
-					if (['title', 'abstractNote', 'extra'].indexOf(fieldName) != -1) {
+					if (Zotero.ItemFields.isMultiline(fieldName) || Zotero.ItemFields.isLong(fieldName)) {
 						t.setAttribute('multiline', true);
 						t.setAttribute('rows', 8);
 					}
 					else {
-						var autoCompleteFields = [
-							'creator',
-							'journalAbbreviation',
-							'seriesTitle',
-							'seriesText',
-							'repository',
-							'callNumber',
-							'archiveLocation',
-							'language',
-							'rights',
-							'tag'
-						];
-						
-						// Add the type-specific versions of these base fields
-						var baseACFields = ['publisher', 'publicationTitle', 'type',
-							'medium', 'place'];
-						autoCompleteFields = autoCompleteFields.concat(baseACFields);
-						
-						for (var i=0; i<baseACFields.length; i++) {
-							var add = Zotero.ItemFields.getTypeFieldsFromBase(baseACFields[i], true)
-							autoCompleteFields = autoCompleteFields.concat(add);
-						}
-						
 						// Add auto-complete for certain fields
-						if (autoCompleteFields.indexOf(field) != -1) {
+						if (Zotero.ItemFields.isAutocompleteField(fieldName)
+								|| fieldName == 'creator'
+								|| fieldName == 'tag') {
 							t.setAttribute('type', 'autocomplete');
 							t.setAttribute('autocompletesearch', 'zotero');
 							var suffix = itemID ? itemID : '';
@@ -1473,9 +1535,7 @@
 						case event.DOM_VK_RETURN:
 							var fieldname = target.getAttribute('fieldname');
 							// Use shift-enter as the save action for the larger fields
-							if ((fieldname == 'abstractNote' || fieldname == 'extra')
-								&& !event.shiftKey)
-							{
+							if (Zotero.ItemFields.isMultiline(fieldname) && !event.shiftKey) {
 								break;
 							}
 							
@@ -1711,18 +1771,45 @@
 					// Fields
 					else {
 						// Access date needs to be parsed and converted to UTC
-						if (fieldName=='accessDate' && value!='') {
-							if (Zotero.Date.isSQLDate(value) || Zotero.Date.isSQLDateTime(value)) {
-								var localDate = Zotero.Date.sqlToDate(value);
-								value = Zotero.Date.dateToSQL(localDate, true);
-							}
-							else {
-								var d = Zotero.Date.strToDate(value);
-								value = null;
-								if (d.year && d.month != undefined && d.day) {
-									d = new Date(d.year, d.month, d.day);
-									value = Zotero.Date.dateToSQL(d, true);
-								}
+						if (value != '') {
+							switch (fieldName) {
+								case 'accessDate':
+									// If just date, don't convert to UTC
+									if (Zotero.Date.isSQLDate(value)) {
+										var localDate = Zotero.Date.sqlToDate(value);
+										value = Zotero.Date.dateToSQL(localDate).replace(' 00:00:00', '');
+									}
+									else if (Zotero.Date.isSQLDateTime(value)) {
+										var localDate = Zotero.Date.sqlToDate(value);
+										value = Zotero.Date.dateToSQL(localDate, true);
+									}
+									else {
+										var d = Zotero.Date.strToDate(value);
+										value = null;
+										if (d.year && d.month != undefined && d.day) {
+											d = new Date(d.year, d.month, d.day);
+											value = Zotero.Date.dateToSQL(d).replace(' 00:00:00', '');
+										}
+									}
+									break;
+								
+								// TEMP - NSF
+								case 'dateSent':
+								case 'dateDue':
+								case 'accepted':
+									if (Zotero.Date.isSQLDate(value)) {
+										var localDate = Zotero.Date.sqlToDate(value);
+										value = Zotero.Date.dateToSQL(localDate).replace(' 00:00:00', '');
+									}
+									else {
+										var d = Zotero.Date.strToDate(value);
+										value = null;
+										if (d.year && d.month != undefined && d.day) {
+											d = new Date(d.year, d.month, d.day);
+											value = Zotero.Date.dateToSQL(d).replace(' 00:00:00', '');
+										}
+									}
+									break;
 							}
 						}
 						

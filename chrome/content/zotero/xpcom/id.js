@@ -61,6 +61,8 @@ Zotero.ID_Tracker = function () {
 			case 'collections':
 			case 'savedSearches':
 			case 'tags':
+			case 'customItemTypes':
+			case 'customFields':
 				var id = _getNextAvailable(table);
 				if (!id && notNull) {
 					return _getNext(table);
@@ -144,6 +146,8 @@ Zotero.ID_Tracker = function () {
 			case 'items':
 			case 'savedSearches':
 			case 'tags':
+			case 'customItemTypes':
+			case 'customFields':
 				return table;
 				
 			default:
@@ -245,6 +249,8 @@ Zotero.ID_Tracker = function () {
 			
 			case 'collections':
 			case 'savedSearches':
+			case 'customItemTypes':
+			case 'customFields':
 				var maxToFind = 100;
 				break;
 			

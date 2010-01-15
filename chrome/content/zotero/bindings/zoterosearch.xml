@@ -272,7 +272,7 @@
 							if (!this.id(conditions[i]['name'] + '-tooltip')) {
 								var fieldName = null;
 								try {
-									fieldName = Zotero.getString('itemFields.' + conditions[i]['name']);
+									fieldName = Zotero.ItemFields.getLocalizedString(null, conditions[i].name);
 								}
 								catch (e) {}
 								
@@ -393,12 +393,26 @@
 							this.createValueMenu(rows);
 							break;
 						
-						case 'itemTypeID':
-							var types = Zotero.ItemTypes.getTypes();
-							for (var i in types)
-							{
-								types[i][0] = Zotero.getString('itemTypes.' + types[i]['name']);
-								types[i][1] = types[i]['id'];
+						case 'itemType':
+							var t = Zotero.ItemTypes.getTypes();
+							
+							// Sort by localized name
+							var types = [];
+							for (var i=0; i<t.length; i++) {
+								types.push({
+									id: t[i].id,
+									name: t[i].name,
+									localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
+								});
+							}
+							var collation = Zotero.getLocaleCollation();
+							types.sort(function(a, b) {
+								return collation.compareString(1, a.localized, b.localized);
+							});
+							
+							for (var i in types) {
+								types[i][0] = types[i].localized;
+								types[i][1] = types[i].name;
 								delete types[i]['name'];
 								delete types[i]['id'];
 							}
@@ -451,7 +465,7 @@
 					// Drop-down menu
 					if (conditionsMenu.value == 'collection'
 							|| conditionsMenu.value == 'savedSearch'
-							|| conditionsMenu.value == 'itemTypeID'
+							|| conditionsMenu.value == 'itemType'
 							|| conditionsMenu.value == 'fileTypeID') {
 						this.id('valuefield').hidden = true;
 						this.id('valuemenu').hidden = false;
@@ -571,12 +585,13 @@
 								var value = this.id('valuefield').value;
 								
 								// Convert datetimes to UTC before saving
-								if ((this.id('conditionsmenu').value=='accessDate' ||
-										this.id('conditionsmenu').value=='dateAdded' ||
-										this.id('conditionsmenu').value=='dateModified') &&
-										Zotero.Date.isSQLDateTime(value)){
-									
-									var value = Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(value), true);
+								switch (this.id('conditionsmenu').value) {
+									case 'accessDate':
+									case 'dateAdded':
+									case 'dateModified':
+										if (Zotero.Date.isSQLDateTime(value)) {
+											var value = Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(value), true);
+										}
 								}
 								
 								// Append mode to condition

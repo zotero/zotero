@@ -132,29 +132,7 @@ var ZoteroPane = new function()
 		itemsTree.controllers.appendController(new Zotero.ItemTreeCommandController(itemsTree));
 		itemsTree.addEventListener("click", ZoteroPane.onTreeClick, true);
 		
-		// Create the New Item (+) menu with each item type
-		var addMenu = document.getElementById('zotero-tb-add').firstChild;
-		var separator = document.getElementById('zotero-tb-add').firstChild.firstChild;
-		var moreMenu = document.getElementById('zotero-tb-add-more');
-		var itemTypes = Zotero.ItemTypes.getPrimaryTypes();
-		for(var i = 0; i<itemTypes.length; i++)
-		{
-			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("label", Zotero.getString("itemTypes."+itemTypes[i]['name']));
-			menuitem.setAttribute("oncommand","ZoteroPane.newItem("+itemTypes[i]['id']+")");
-			menuitem.setAttribute("tooltiptext", "");
-			addMenu.insertBefore(menuitem, separator);
-		}
-		// Create submenu for secondary item types
-		var itemTypes = Zotero.ItemTypes.getSecondaryTypes();
-		for(var i = 0; i<itemTypes.length; i++)
-		{
-			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("label", Zotero.getString("itemTypes."+itemTypes[i]['name']));
-			menuitem.setAttribute("oncommand","ZoteroPane.newItem("+itemTypes[i]['id']+")");
-			menuitem.setAttribute("tooltiptext", "");
-			moreMenu.appendChild(menuitem);
-		}
+		this.buildItemTypeMenus();
 		
 		var menu = document.getElementById("contentAreaContextMenu");
 		menu.addEventListener("popupshowing", ZoteroPane.contextPopupShowing, false);
@@ -211,8 +189,8 @@ var ZoteroPane = new function()
 		else if (Zotero.Schema.dbInitialized && Zotero.Prefs.get('firstRun')) {
 			/*
 			setTimeout(function () {
-				var url = "http://www.zotero.org/support/quick_start_guide";
-				gBrowser.selectedTab = gBrowser.addTab(url);/
+				var url = "http://zotero.org/start";
+				gBrowser.selectedTab = gBrowser.addTab(url);
 			}, 400);
 			Zotero.Prefs.set('firstRun', false);
 			*/
@@ -237,6 +215,77 @@ var ZoteroPane = new function()
 		if(Zotero.isFx30) {
 			document.getElementById("zotero-tb-search-label").hidden = false;
 			document.getElementById("zotero-tb-search").setAttribute("type", "conditional-timed");
+		}
+	}
+	
+	
+	this.buildItemTypeMenus = function () {
+		//
+		// Create the New Item (+) menu with each item type
+		//
+		var addMenu = document.getElementById('zotero-tb-add').firstChild;
+		var moreMenu = document.getElementById('zotero-tb-add-more');
+		
+		// Remove all nodes, in case we're reloading
+		var options = addMenu.getElementsByAttribute("class", "zotero-tb-add");
+		while (options.length) {
+			var p = options[0].parentNode;
+			p.removeChild(options[0]);
+		}
+		
+		var separator = addMenu.firstChild;
+		
+		// Sort by localized name
+		var t = Zotero.ItemTypes.getPrimaryTypes();
+		var itemTypes = [];
+		for (var i=0; i<t.length; i++) {
+			itemTypes.push({
+				id: t[i].id,
+				name: t[i].name,
+				localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
+			});
+		}
+		var collation = Zotero.getLocaleCollation();
+		itemTypes.sort(function(a, b) {
+			return collation.compareString(1, a.localized, b.localized);
+		});
+		
+		for (var i = 0; i<itemTypes.length; i++) {
+			var menuitem = document.createElement("menuitem");
+			menuitem.setAttribute("label", itemTypes[i].localized);
+			menuitem.setAttribute("oncommand","ZoteroPane.newItem("+itemTypes[i]['id']+")");
+			menuitem.setAttribute("tooltiptext", "");
+			menuitem.className = "zotero-tb-add";
+			addMenu.insertBefore(menuitem, separator);
+		}
+		
+		
+		//
+		// Create submenu for secondary item types
+		//
+		
+		// Sort by localized name
+		var t = Zotero.ItemTypes.getSecondaryTypes();
+		var itemTypes = [];
+		for (var i=0; i<t.length; i++) {
+			itemTypes.push({
+				id: t[i].id,
+				name: t[i].name,
+				localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
+			});
+		}
+		var collation = Zotero.getLocaleCollation();
+		itemTypes.sort(function(a, b) {
+			return collation.compareString(1, a.localized, b.localized);
+		});
+		
+		for (var i = 0; i<itemTypes.length; i++) {
+			var menuitem = document.createElement("menuitem");
+			menuitem.setAttribute("label", itemTypes[i].localized);
+			menuitem.setAttribute("oncommand","ZoteroPane.newItem("+itemTypes[i]['id']+")");
+			menuitem.setAttribute("tooltiptext", "");
+			menuitem.className = "zotero-tb-add";
+			moreMenu.appendChild(menuitem);
 		}
 	}
 	

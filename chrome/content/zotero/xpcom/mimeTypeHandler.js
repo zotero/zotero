@@ -64,12 +64,13 @@ Zotero.MIMETypeHandler = new function () {
 			this.addHandler("ris", Zotero.Ingester.importHandler, true);
 		}
 		this.addHandler("text/x-csl", function(a1, a2) { Zotero.Styles.install(a1, a2) });
+		this.addHandler("application/x-zotero-schema", Zotero.Schema.importSchema);
 	}
 	
 	/**
 	 * Adds a handler to handle a specific MIME type
 	 * @param {String} type MIME type to handle
-	 * @param {Function} fn Function to call to handle type
+	 * @param {Function} fn Function to call to handle type - fn(string, uri)
 	 * @param {Boolean} ignoreContentDisposition If true, ignores the Content-Disposition header,
 	 *	which is often used to force a file to download rather than let it be handled by the web
 	 *	browser

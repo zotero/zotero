@@ -107,7 +107,7 @@ Zotero.Schema = new function(){
 		if (!dbVersion && !_getDBVersion('schema') && !_getDBVersion('user')){
 			Zotero.debug('Database does not exist -- creating\n');
 			_initializeSchema();
-			return;
+			return true;
 		}
 		
 		var schemaVersion = _getSchemaSQLVersion('userdata');
@@ -145,6 +145,7 @@ Zotero.Schema = new function(){
 				Zotero.wait();
 				var up1 = _migrateUserDataSchema(dbVersion);
 				var up3 = _updateSchema('triggers');
+				this.updateCustomTables(up2);
 				Zotero.wait();
 				
 				Zotero.DB.commitTransaction();
@@ -198,7 +199,210 @@ Zotero.Schema = new function(){
 		finally {
 			Zotero.UnresponsiveScriptIndicator.enable();
 		}
-		return;
+		return up1 || up2 || up3 || up4;
+	}
+	
+	
+	// This is mostly temporary
+	// TEMP - NSF
+	this.importSchema = function (str, uri) {
+		var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
+						.createInstance(Components.interfaces.nsIPrompt);
+		
+		if (!uri.match(/https?:\/\/([^\.]+\.)?zotero.org\//)) {
+			Zotero.debug("Ignoring schema file from non-zotero.org domain");
+			return;
+		}
+		
+		str = Zotero.Utilities.prototype.trim(str);
+		
+		Zotero.debug(str);
+		
+		if (str == "%%%ZOTERO_NSF_TEMP_INSTALL%%%") {
+			Zotero.debug(Zotero.ItemTypes.getID("nsfReviewer"));
+			if (Zotero.ItemTypes.getID("nsfReviewer")) {
+				prompt.alert("Zotero Item Type Already Exists", "The 'NSF Reviewer' item type already exists in Zotero.");
+				Zotero.debug("nsfReviewer item type already exists");
+				return;
+			}
+			
+			Zotero.debug("Installing nsfReviewer item type");
+			
+			var itemTypeID = Zotero.ID.get('customItemTypes');
+			
+			Zotero.DB.beginTransaction();
+			
+			Zotero.DB.query("INSERT INTO customItemTypes VALUES (?, 'nsfReviewer', 'NSF Reviewer', 1, 'chrome://zotero/skin/report_user.png')", itemTypeID);
+			
+			var fields = [
+				['name', 'Name'],
+				['institution', 'Institution'],
+				['address', 'Address'],
+				['telephone', 'Telephone'],
+				['email', 'Email'],
+				['homepage', 'Webpage'],
+				['discipline', 'Discipline'],
+				['nsfID', 'NSF ID'],
+				['dateSent', 'Date Sent'],
+				['dateDue', 'Date Due'],
+				['accepted', 'Accepted'],
+				['programDirector', 'Program Director']
+			];
+			for (var i=0; i<fields.length; i++) {
+				var fieldID = Zotero.ItemFields.getID(fields[i][0]);
+				if (!fieldID) {
+					var fieldID = Zotero.ID.get('customFields');
+					Zotero.DB.query("INSERT INTO customFields VALUES (?, ?, ?)", [fieldID, fields[i][0], fields[i][1]]);
+					Zotero.DB.query("INSERT INTO customItemTypeFields VALUES (?, NULL, ?, 1, ?)", [itemTypeID, fieldID, i+1]);
+				}
+				else {
+					Zotero.DB.query("INSERT INTO customItemTypeFields VALUES (?, ?, NULL, 1, ?)", [itemTypeID, fieldID, i+1]);
+				}
+				
+				switch (fields[i][0]) {
+					case 'name':
+						var baseFieldID = 110; // title
+						break;
+					
+					case 'dateSent':
+						var baseFieldID = 14; // date
+						break;
+					
+					case 'homepage':
+						var baseFieldID = 1; // URL
+						break;
+					
+					default:
+						var baseFieldID = null;
+				}
+				
+				if (baseFieldID) {
+					Zotero.DB.query("INSERT INTO customBaseFieldMappings VALUES (?, ?, ?)", [itemTypeID, baseFieldID, fieldID]);
+				}
+			}
+			
+			Zotero.DB.commitTransaction();
+			
+			_reloadSchema();
+			
+			var s = new Zotero.Search;
+			s.name = "Overdue NSF Reviewers";
+			s.addCondition('itemType', 'is', 'nsfReviewer');
+			s.addCondition('dateDue', 'isBefore', 'today');
+			s.addCondition('tag', 'isNot', 'Completed');
+			s.save();
+			
+			prompt.alert("Zotero Item Type Added", "The 'NSF Reviewer' item type and 'Overdue NSF Reviewers' saved search have been installed.");
+		}
+		else if (str == "%%%ZOTERO_NSF_TEMP_UNINSTALL%%%") {
+			var itemTypeID = Zotero.ItemTypes.getID('nsfReviewer');
+			if (!itemTypeID) {
+				prompt.alert("Zotero Item Type Does Not Exist", "The 'NSF Reviewer' item type does not exist in Zotero.");
+				Zotero.debug("nsfReviewer item types doesn't exist", 2);
+				return;
+			}
+			
+			var s = new Zotero.Search;
+			s.addCondition('itemType', 'is', 'nsfReviewer');
+			var s2 = new Zotero.Search;
+			s2.addCondition('itemType', 'is', 'nsfReviewer');
+			s2.addCondition('deleted', 'true');
+			if (s.search() || s2.search()) {
+				prompt.alert("Error", "All 'NSF Reviewer' items must be deleted before the item type can be removed from Zotero.");
+				return;
+			}
+			
+			Zotero.debug("Uninstalling nsfReviewer item type");
+			Zotero.DB.beginTransaction();
+			Zotero.DB.query("DELETE FROM customItemTypes WHERE customItemTypeID=?", itemTypeID - Zotero.ItemTypes.customIDOffset);
+			var fields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
+			for each(var fieldID in fields) {
+				if (Zotero.ItemFields.isCustom(fieldID)) {
+					Zotero.DB.query("DELETE FROM customFields WHERE customFieldID=?", fieldID - Zotero.ItemTypes.customIDOffset);
+				}
+			}
+			Zotero.DB.commitTransaction();
+			
+			var searches = Zotero.Searches.getAll();
+			for each(var search in searches) {
+				if (search.name == 'Overdue NSF Reviewers') {
+					var id = search.id;
+					Zotero.Searches.erase(id);
+				}
+			}
+			
+			_reloadSchema();
+			
+			prompt.alert("Zotero Item Type Removed", "The 'NSF Reviewer' item type has been uninstalled.");
+		}
+	}
+	
+	function _reloadSchema() {
+		Zotero.Schema.updateCustomTables();
+		Zotero.ItemTypes.reload();
+		Zotero.ItemFields.reload();
+		Zotero.SearchConditions.reload();
+		
+		// Update item type menus in every open window
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]  
+					.getService(Components.interfaces.nsIWindowMediator);  
+		var enumerator = wm.getEnumerator("navigator:browser");
+		while (enumerator.hasMoreElements()) {
+			var win = enumerator.getNext();
+			win.ZoteroPane.buildItemTypeMenus();
+			win.document.getElementById('zotero-editpane-item-box').buildItemTypeMenu();
+		}
+	}
+	
+	
+	this.updateCustomTables = function (skipDelete, skipSystem) {
+		Zotero.debug("Updating custom tables");
+		
+		if (!skipDelete) {
+			Zotero.DB.query("DELETE FROM itemTypesCombined");
+			Zotero.DB.query("DELETE FROM fieldsCombined");
+			Zotero.DB.query("DELETE FROM itemTypeFieldsCombined");
+			Zotero.DB.query("DELETE FROM baseFieldMappingsCombined");
+		}
+		var offset = Zotero.ItemTypes.customIDOffset;
+		Zotero.DB.query(
+			"INSERT INTO itemTypesCombined "
+				+ (
+					skipSystem
+					? ""
+					: "SELECT itemTypeID, typeName, display, 0 AS custom FROM itemTypes UNION "
+				)
+				+ "SELECT customItemTypeID + " + offset + " AS itemTypeID, typeName, display, 1 AS custom FROM customItemTypes"
+		);
+		Zotero.DB.query(
+			"INSERT INTO fieldsCombined "
+				+ (
+					skipSystem
+					? ""
+					: "SELECT fieldID, fieldName, NULL AS label, fieldFormatID, 0 AS custom FROM fields UNION "
+				)
+				+ "SELECT customFieldID + " + offset + " AS fieldID, fieldName, label, NULL, 1 AS custom FROM customFields"
+		);
+		Zotero.DB.query(
+			"INSERT INTO itemTypeFieldsCombined "
+				+ (
+					skipSystem
+					? ""
+					: "SELECT itemTypeID, fieldID, hide, orderIndex FROM itemTypeFields UNION "
+				)
+				+ "SELECT customItemTypeID + " + offset + " AS itemTypeID, "
+					+ "COALESCE(fieldID, customFieldID + " + offset + ") AS fieldID, hide, orderIndex FROM customItemTypeFields"
+		);
+		Zotero.DB.query(
+			"INSERT INTO baseFieldMappingsCombined "
+				+ (
+					skipSystem
+					? ""
+					: "SELECT itemTypeID, baseFieldID, fieldID FROM baseFieldMappings UNION "
+				)
+				+ "SELECT customItemTypeID + " + offset + " AS itemTypeID, baseFieldID, "
+					+ "customFieldID + " + offset + " AS fieldID FROM customBaseFieldMappings"
+		);
 	}
 	
 	
@@ -827,6 +1031,7 @@ Zotero.Schema = new function(){
 			Zotero.DB.query(_getSchemaSQL('system'));
 			Zotero.DB.query(_getSchemaSQL('userdata'));
 			Zotero.DB.query(_getSchemaSQL('triggers'));
+			Zotero.Schema.updateCustomTables(true);
 			
 			_updateDBVersion('system', _getSchemaSQLVersion('system'));
 			_updateDBVersion('userdata', _getSchemaSQLVersion('userdata'));
@@ -834,16 +1039,14 @@ Zotero.Schema = new function(){
 			
 			if (!Zotero.Schema.skipDefaultData) {
 				/*
-				TODO: uncomment for release
-				var sql = "INSERT INTO items VALUES(1, 14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'AJ4PT6IT')";
+				// Quick Start Guide web page item
+				var sql = "INSERT INTO items VALUES(1, 13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'ABCD1234')";
 				Zotero.DB.query(sql);
-				var sql = "INSERT INTO itemAttachments VALUES (1, NULL, 3, 'text/html', 25, NULL, NULL)";
-				Zotero.DB.query(sql);
-				var sql = "INSERT INTO itemDataValues VALUES (?, ?)";
-				Zotero.DB.query(sql, [1, "Zotero - " + Zotero.getString('install.quickStartGuide')]);
+				var sql = "INSERT INTO itemDataValues VALUES (1, ?)";
+				Zotero.DB.query(sql, Zotero.localeJoin(["Zotero",  "\u2014", Zotero.getString('install.quickStartGuide')]));
 				var sql = "INSERT INTO itemData VALUES (1, 110, 1)";
 				Zotero.DB.query(sql);
-				var sql = "INSERT INTO itemDataValues VALUES (2, 'http://www.zotero.org/documentation/quick_start_guide')";
+				var sql = "INSERT INTO itemDataValues VALUES (2, 'http://www.zotero.org/support/quick_start_guide')";
 				Zotero.DB.query(sql);
 				var sql = "INSERT INTO itemData VALUES (1, 1, 2)";
 				Zotero.DB.query(sql);
@@ -851,11 +1054,27 @@ Zotero.Schema = new function(){
 				Zotero.DB.query(sql);
 				var sql = "INSERT INTO itemData VALUES (1, 27, 3)";
 				Zotero.DB.query(sql);
-				var sql = "INSERT INTO itemNotes (itemID, sourceItemID, note) VALUES (1, NULL, ?)";
-				var msg = Zotero.getString('install.quickStartGuide.message.welcome')
-					+ " " + Zotero.getString('install.quickStartGuide.message.clickViewPage')
-					+ "\n\n" + Zotero.getString('install.quickStartGuide.message.thanks');
-				Zotero.DB.query(sql, msg);
+				
+				// CHNM as creator
+				var sql = "INSERT INTO creatorData VALUES (1, '', 'Center for History and New Media', '', 1, NULL)";
+				Zotero.DB.query(sql);
+				var sql = "INSERT INTO creators VALUES (1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'ABCD1234')";
+				Zotero.DB.query(sql);
+				var sql = "INSERT INTO itemCreators VALUES (1, 1, 1, 0)";
+				Zotero.DB.query(sql);
+				
+				// Welcome note
+				var sql = "INSERT INTO items VALUES(2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'ABCD2345')";
+				Zotero.DB.query(sql);
+				var welcomeTitle = Zotero.getString('install.quickStartGuide.message.welcome');
+				var welcomeMsg = '<div class="zotero-note znv1"><p>' + Zotero.localeJoin([
+						welcomeTitle, Zotero.getString('install.quickStartGuide.message.clickViewPage')
+					])
+					+ '</p><p>'
+					+ Zotero.getString('install.quickStartGuide.message.thanks')
+					+ '</p></div>';
+				var sql = "INSERT INTO itemNotes VALUES (2, 1, ?, ?)";
+				Zotero.DB.query(sql, [welcomeMsg, welcomeTitle]);
 				*/
 			}
 			Zotero.DB.commitTransaction();
@@ -2545,6 +2764,20 @@ Zotero.Schema = new function(){
 						var newVal = c ? '0_' + c.key : null;
 						Zotero.DB.query("UPDATE savedSearchConditions SET condition='savedSearch', value=? WHERE savedSearchID=? AND searchConditionID=?", [newVal, row.savedSearchID, row.searchConditionID]);
 					}
+				}
+				
+				if (i==68) {
+					Zotero.DB.query("DROP TRIGGER IF EXISTS fkd_itemData_fieldID_fields_fieldID");
+					Zotero.DB.query("DROP TRIGGER IF EXISTS fku_fields_fieldID_itemData_fieldID");
+					Zotero.DB.query("UPDATE savedSearchConditions SET condition='itemType', value=(SELECT typeName FROM itemTypes WHERE itemTypeID=value) WHERE condition='itemTypeID'");
+					
+					Zotero.DB.query("CREATE TABLE customItemTypes (\n    customItemTypeID INTEGER PRIMARY KEY,\n    typeName TEXT,\n    label TEXT,\n    display INT DEFAULT 1,\n    icon TEXT\n)");
+					Zotero.DB.query("CREATE TABLE customFields (\n    customFieldID INTEGER PRIMARY KEY,\n    fieldName TEXT,\n    label TEXT\n)");
+					Zotero.DB.query("CREATE TABLE customItemTypeFields (\n    customItemTypeID INT NOT NULL,\n    fieldID INT,\n    customFieldID INT,\n    hide INT NOT NULL,\n    orderIndex INT NOT NULL,\n    PRIMARY KEY (customItemTypeID, orderIndex),\n    FOREIGN KEY (customItemTypeID) REFERENCES customItemTypes(customItemTypeID),\n    FOREIGN KEY (fieldID) REFERENCES fields(fieldID),\n    FOREIGN KEY (customFieldID) REFERENCES customFields(customFieldID)\n)");
+					Zotero.DB.query("CREATE INDEX customItemTypeFields_fieldID ON customItemTypeFields(fieldID)");
+					Zotero.DB.query("CREATE INDEX customItemTypeFields_customFieldID ON customItemTypeFields(customFieldID)");
+					Zotero.DB.query("CREATE TABLE customBaseFieldMappings (\n    customItemTypeID INT,\n    baseFieldID INT,\n    customFieldID INT,\n    PRIMARY KEY (customItemTypeID, baseFieldID, customFieldID),\n    FOREIGN KEY (customItemTypeID) REFERENCES customItemTypes(customItemTypeID),\n    FOREIGN KEY (baseFieldID) REFERENCES fields(fieldID),\n    FOREIGN KEY (customFieldID) REFERENCES fields(customFieldID)\n);\nCREATE INDEX customBaseFieldMappings_baseFieldID ON customBaseFieldMappings(baseFieldID)");
+					Zotero.DB.query("CREATE INDEX customBaseFieldMappings_customFieldID ON customBaseFieldMappings(customFieldID)");
 				}
 				
 				Zotero.wait();

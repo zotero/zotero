@@ -1,4 +1,4 @@
--- 15
+-- 16
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -340,6 +340,171 @@ CREATE TRIGGER fku_creatorData_creatorDataID_creators_creatorDataID
     SELECT RAISE(ABORT, 'update on table "creatorData" violates foreign key constraint "fku_creatorData_creatorDataID_creators_creatorDataID"')
     WHERE (SELECT COUNT(*) FROM creators WHERE creatorDataID = OLD.creatorDataID) > 0;
   END;
+
+
+-- customBaseFieldMappings/customItemTypeID
+DROP TRIGGER IF EXISTS fki_customBaseFieldMappings_customItemTypeID_customItemTypes_customItemTypeID;
+CREATE TRIGGER fki_customBaseFieldMappings_customItemTypeID_customItemTypes_customItemTypeID
+  BEFORE INSERT ON customBaseFieldMappings
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on table "customBaseFieldMappings" violates foreign key constraint "fki_customBaseFieldMappings_customItemTypeID_customItemTypes_customItemTypeID"')
+    WHERE NEW.customItemTypeID IS NOT NULL AND (SELECT COUNT(*) FROM customItemTypes WHERE customItemTypeID = NEW.customItemTypeID) = 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_customBaseFieldMappings_customItemTypeID_customItemTypes_customItemTypeID;
+CREATE TRIGGER fku_customBaseFieldMappings_customItemTypeID_customItemTypes_customItemTypeID
+  BEFORE UPDATE OF customItemTypeID ON customBaseFieldMappings
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'update on table "customBaseFieldMappings" violates foreign key constraint "fku_customBaseFieldMappings_customItemTypeID_customItemTypes_customItemTypeID"')
+    WHERE NEW.customItemTypeID IS NOT NULL AND (SELECT COUNT(*) FROM customItemTypes WHERE customItemTypeID = NEW.customItemTypeID) = 0;
+  END;
+
+DROP TRIGGER IF EXISTS fkd_customBaseFieldMappings_customItemTypeID_customItemTypes_customItemTypeID;
+CREATE TRIGGER fkd_customBaseFieldMappings_customItemTypeID_customItemTypes_customItemTypeID
+  BEFORE DELETE ON customItemTypes
+  FOR EACH ROW BEGIN
+    DELETE FROM customBaseFieldMappings WHERE customItemTypeID = OLD.customItemTypeID;
+  END;
+
+DROP TRIGGER IF EXISTS fku_customItemTypes_customItemTypeID_customBaseFieldMappings_customItemTypeID;
+CREATE TRIGGER fku_customItemTypes_customItemTypeID_customBaseFieldMappings_customItemTypeID
+  AFTER UPDATE OF customItemTypeID ON customItemTypes
+  FOR EACH ROW BEGIN
+    UPDATE customBaseFieldMappings SET customItemTypeID=NEW.customItemTypeID WHERE customItemTypeID=OLD.customItemTypeID;
+  END;
+
+
+-- customBaseFieldMappings/baseFieldID
+DROP TRIGGER IF EXISTS fki_customBaseFieldMappings_baseFieldID_fields_fieldID;
+CREATE TRIGGER fki_customBaseFieldMappings_baseFieldID_fields_fieldID
+  BEFORE INSERT ON customBaseFieldMappings
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on table "customBaseFieldMappings" violates foreign key constraint "fki_customBaseFieldMappings_baseFieldID_fields_fieldID"')
+    WHERE NEW.baseFieldID IS NOT NULL AND (SELECT COUNT(*) FROM fields WHERE fieldID = NEW.baseFieldID) = 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_customBaseFieldMappings_baseFieldID_fields_fieldID;
+CREATE TRIGGER fku_customBaseFieldMappings_baseFieldID_fields_fieldID
+  BEFORE UPDATE OF baseFieldID ON customBaseFieldMappings
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'update on table "customBaseFieldMappings" violates foreign key constraint "fku_customBaseFieldMappings_baseFieldID_fields_fieldID"')
+    WHERE NEW.baseFieldID IS NOT NULL AND (SELECT COUNT(*) FROM fields WHERE fieldID = NEW.baseFieldID) = 0;
+  END;
+
+
+-- customBaseFieldMappings/customFieldID
+DROP TRIGGER IF EXISTS fki_customBaseFieldMappings_customFieldID_customFields_customFieldID;
+CREATE TRIGGER fki_customBaseFieldMappings_customFieldID_customFields_customFieldID
+  BEFORE INSERT ON customBaseFieldMappings
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on table "customBaseFieldMappings" violates foreign key constraint "fki_customBaseFieldMappings_customFieldID_customFields_customFieldID"')
+    WHERE NEW.customFieldID IS NOT NULL AND (SELECT COUNT(*) FROM customFields WHERE customFieldID = NEW.customFieldID) = 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_customBaseFieldMappings_customFieldID_customFields_customFieldID;
+CREATE TRIGGER fku_customFields_customFieldID_customFields_customFieldID
+  BEFORE UPDATE OF customFieldID ON customBaseFieldMappings
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'update on table "customBaseFieldMappings" violates foreign key constraint "fku_customBaseFieldMappings_customFieldID_customFields_customFieldID"')
+    WHERE NEW.customFieldID IS NOT NULL AND (SELECT COUNT(*) FROM customFields WHERE customFieldID = NEW.customFieldID) = 0;
+  END;
+
+DROP TRIGGER IF EXISTS fkd_customBaseFieldMappings_customFieldID_customFields_customFieldID;
+CREATE TRIGGER fkd_customFields_customFieldID_customFields_customFieldID
+  BEFORE DELETE ON customFields
+  FOR EACH ROW BEGIN
+    DELETE FROM customBaseFieldMappings WHERE customFieldID = OLD.customFieldID;
+  END;
+
+DROP TRIGGER IF EXISTS fku_customFields_customFieldID_customBaseFieldMappings_customFieldID;
+CREATE TRIGGER fku_customFields_customFieldID_customBaseFieldMappings_customFieldID
+  AFTER UPDATE OF customFieldID ON customFields
+  FOR EACH ROW BEGIN
+    UPDATE customBaseFieldMappings SET customFieldID=NEW.customFieldID WHERE customFieldID=OLD.customFieldID;
+  END;
+
+
+-- customItemTypeFields/customItemTypeID
+DROP TRIGGER IF EXISTS fki_customItemTypeFields_customItemTypeID_customItemTypes_customItemTypeID;
+CREATE TRIGGER fki_customItemTypeFields_customItemTypeID_customItemTypes_customItemTypeID
+  BEFORE INSERT ON customItemTypeFields
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on table "customItemTypeFields" violates foreign key constraint "fki_customItemTypeFields_customItemTypeID_customItemTypes_customItemTypeID"')
+    WHERE NEW.customItemTypeID IS NOT NULL AND (SELECT COUNT(*) FROM customItemTypes WHERE customItemTypeID = NEW.customItemTypeID) = 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_customItemTypeFields_customItemTypeID_customItemTypes_customItemTypeID;
+CREATE TRIGGER fku_customItemTypeFields_customItemTypeID_customItemTypes_customItemTypeID
+  BEFORE UPDATE OF customItemTypeID ON customItemTypeFields
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'update on table "customItemTypeFields" violates foreign key constraint "fku_customItemTypeFields_customItemTypeID_customItemTypes_customItemTypeID"')
+    WHERE NEW.customItemTypeID IS NOT NULL AND (SELECT COUNT(*) FROM customItemTypes WHERE customItemTypeID = NEW.customItemTypeID) = 0;
+  END;
+
+DROP TRIGGER IF EXISTS fkd_customItemTypeFields_customItemTypeID_customItemTypes_customItemTypeID;
+CREATE TRIGGER fkd_customItemTypeFields_customItemTypeID_customItemTypes_customItemTypeID
+  BEFORE DELETE ON customItemTypes
+  FOR EACH ROW BEGIN
+    DELETE FROM customBaseFieldMappings WHERE customItemTypeID = OLD.customItemTypeID;
+  END;
+
+DROP TRIGGER IF EXISTS fku_customItemTypes_customItemTypeID_customItemTypeFields_customItemTypeID;
+CREATE TRIGGER fku_customItemTypes_customItemTypeID_customItemTypeFields_customItemTypeID
+  AFTER UPDATE OF customItemTypeID ON customItemTypes
+  FOR EACH ROW BEGIN
+    UPDATE customItemTypeFields SET customItemTypeID=NEW.customItemTypeID WHERE customItemTypeID=OLD.customItemTypeID;
+  END;
+
+
+-- customItemTypeFields/fieldID
+DROP TRIGGER IF EXISTS fki_customItemTypeFields_fieldID_fields_fieldID;
+CREATE TRIGGER fki_customItemTypeFields_fieldID_fields_fieldID
+  BEFORE INSERT ON customItemTypeFields
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on table "customItemTypeFields" violates foreign key constraint "fki_customItemTypeFields_fieldID_fields_fieldID"')
+    WHERE NEW.fieldID IS NOT NULL AND (SELECT COUNT(*) FROM fields WHERE fieldID = NEW.fieldID) = 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_customItemTypeFields_fieldID_fields_fieldID;
+CREATE TRIGGER fku_customItemTypeFields_fieldID_fields_fieldID
+  BEFORE UPDATE OF fieldID ON customItemTypeFields
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'update on table "customItemTypeFields" violates foreign key constraint "fku_customItemTypeFields_fieldID_fields_fieldID"')
+    WHERE NEW.fieldID IS NOT NULL AND (SELECT COUNT(*) FROM fields WHERE fieldID = NEW.fieldID) = 0;
+  END;
+
+
+-- customItemTypeFields/customFieldID
+DROP TRIGGER IF EXISTS fki_customItemTypeFields_customFieldID_customFields_customFieldID;
+CREATE TRIGGER fki_customItemTypeFields_customFieldID_customFields_customFieldID
+  BEFORE INSERT ON customItemTypeFields
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'insert on table "customItemTypeFields" violates foreign key constraint "fki_customItemTypeFields_customFieldID_customFields_customFieldID"')
+    WHERE NEW.customFieldID IS NOT NULL AND (SELECT COUNT(*) FROM customFields WHERE customFieldID = NEW.customFieldID) = 0;
+  END;
+
+DROP TRIGGER IF EXISTS fku_customItemTypeFields_customFieldID_customFields_customFieldID;
+CREATE TRIGGER fku_customItemTypeFields_customFieldID_customFields_customFieldID
+  BEFORE UPDATE OF customFieldID ON customItemTypeFields
+  FOR EACH ROW BEGIN
+    SELECT RAISE(ABORT, 'update on table "customItemTypeFields" violates foreign key constraint "fku_customItemTypeFields_customFieldID_customFields_customFieldID"')
+    WHERE NEW.customFieldID IS NOT NULL AND (SELECT COUNT(*) FROM customFields WHERE customFieldID = NEW.customFieldID) = 0;
+  END;
+
+DROP TRIGGER IF EXISTS fkd_customItemTypeFields_customFieldID_customFields_customFieldID;
+CREATE TRIGGER fkd_customItemTypeFields_customFieldID_customFields_customFieldID
+  BEFORE DELETE ON customFields
+  FOR EACH ROW BEGIN
+    DELETE FROM customItemTypeFields WHERE customFieldID = OLD.customFieldID;
+  END;
+
+DROP TRIGGER IF EXISTS fku_customFields_customFieldID_customItemTypeFields_customFieldID;
+CREATE TRIGGER fku_customFields_customFieldID_customItemTypeFields_customFieldID
+  AFTER UPDATE OF customFieldID ON customFields
+  FOR EACH ROW BEGIN
+    UPDATE customItemTypeFields SET customFieldID=NEW.customFieldID WHERE customFieldID=OLD.customFieldID;
+  END;
+
 
 -- fulltextItems/itemID
 DROP TRIGGER IF EXISTS fki_fulltextItems_itemID_items_itemID;
@@ -859,32 +1024,16 @@ DROP TRIGGER IF EXISTS fki_itemData_fieldID_fields_fieldID;
 CREATE TRIGGER fki_itemData_fieldID_fields_fieldID
   BEFORE INSERT ON itemData
   FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on table "itemData" violates foreign key constraint "fki_itemData_fieldID_fields_fieldID"')
-    WHERE NEW.fieldID IS NOT NULL AND (SELECT COUNT(*) FROM fields WHERE fieldID = NEW.fieldID) = 0;
+    SELECT RAISE(ABORT, 'insert on table "itemData" violates foreign key constraint "fki_itemData_fieldID_fieldsCombined_fieldID"')
+    WHERE NEW.fieldID IS NOT NULL AND (SELECT COUNT(*) FROM fieldsCombined WHERE fieldID = NEW.fieldID) = 0;
   END;
 
 DROP TRIGGER IF EXISTS fku_itemData_fieldID_fields_fieldID;
 CREATE TRIGGER fku_itemData_fieldID_fields_fieldID
   BEFORE UPDATE OF fieldID ON itemData
   FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'update on table "itemData" violates foreign key constraint "fku_itemData_fieldID_fields_fieldID"')
-    WHERE NEW.fieldID IS NOT NULL AND (SELECT COUNT(*) FROM fields WHERE fieldID = NEW.fieldID) = 0;
-  END;
-
-DROP TRIGGER IF EXISTS fkd_itemData_fieldID_fields_fieldID;
-CREATE TRIGGER fkd_itemData_fieldID_fields_fieldID
-  BEFORE DELETE ON FIELDS
-  FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'delete on table "fields" violates foreign key constraint "fkd_itemData_fieldID_fields_fieldID"')
-    WHERE (SELECT COUNT(*) FROM itemData WHERE fieldID = OLD.fieldID) > 0;
-  END;
-
-DROP TRIGGER IF EXISTS fku_fields_fieldID_itemData_fieldID;
-CREATE TRIGGER fku_fields_fieldID_itemData_fieldID
-  BEFORE UPDATE OF fieldID ON FIELDS
-  FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'update on table "fields" violates foreign key constraint "fku_fields_fieldID_itemData_fieldID"')
-    WHERE (SELECT COUNT(*) FROM itemData WHERE fieldID = OLD.fieldID) > 0;
+    SELECT RAISE(ABORT, 'update on table "itemData" violates foreign key constraint "fku_itemData_fieldID_fieldsCombined_fieldID"')
+    WHERE NEW.fieldID IS NOT NULL AND (SELECT COUNT(*) FROM fieldsCombined WHERE fieldID = NEW.fieldID) = 0;
   END;
 
 -- itemData/valueID
