@@ -1,6 +1,8 @@
 <!ENTITY zotero.preferences.title "Zotero voorkeuren">
 
 <!ENTITY zotero.preferences.default "Standaard:">
+<!ENTITY zotero.preferences.items "objecten">
+<!ENTITY zotero.preferences.period ".">
 
 <!ENTITY zotero.preferences.prefpane.general "Algemeen">
 
@@ -11,17 +13,24 @@
 <!ENTITY zotero.preferences.fontSize.small "Klein">
 <!ENTITY zotero.preferences.fontSize.medium "Middelgroot">
 <!ENTITY zotero.preferences.fontSize.large "Groot">
+<!ENTITY zotero.preferences.fontSize.notes "Tekengrootte aantekeningen:">
 
 <!ENTITY zotero.preferences.miscellaneous "Diversen">
 <!ENTITY zotero.preferences.autoUpdate "Automatisch zoeken naar nieuwe vertalers">
 <!ENTITY zotero.preferences.updateNow "Nu bijwerken">
 <!ENTITY zotero.preferences.reportTranslationFailure "Defecte webpagina-vertalers rapporteren">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Sta zotero.org toe om inhoud aan te passen aan de gebruikte versie van Zotero">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Indien aangezet zal de versie van Zotero worden toegevoegd aan naar zotero.org gerichtte HTTP requests.">
 <!ENTITY zotero.preferences.parseRISRefer "Gebruik Zotero voor gedownloade RIS/Refer-bestanden">
-<!ENTITY zotero.preferences.automaticSnapshots "Neem automatisch snapshots bij het maken van objecten van webpagina&apos;s">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Voeg automatisch bijbehorende PDF&apos;s en andere bestanden toe bij het opslaan van objecten">
+<!ENTITY zotero.preferences.automaticSnapshots "Neem automatisch snapshots bij het maken van objecten van webpagina's">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Voeg automatisch bijbehorende PDF's en andere bestanden toe bij het opslaan van objecten">
 <!ENTITY zotero.preferences.automaticTags "Objecten automatisch labelen met trefwoorden en onderwerpen">
+
+<!ENTITY zotero.preferences.groups "Groepen">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "Bij het kopiëren van objecten tussen bibliotheken, kopieer ook:">
+<!ENTITY zotero.preferences.groups.childNotes "bijbehorende aantekeningen">
+<!ENTITY zotero.preferences.groups.childFiles "bijbehorende snapshots en geïmporteerde bestanden">
+<!ENTITY zotero.preferences.groups.childLinks "bijbehorende koppelingen">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -30,82 +39,109 @@
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versie:">
 
+<!ENTITY zotero.preferences.prefpane.sync "Synchroniseren">
+<!ENTITY zotero.preferences.sync.username "Gebruikersnaam:">
+<!ENTITY zotero.preferences.sync.password "Wachtwoord:">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Synchronisatie Server">
+<!ENTITY zotero.preferences.sync.createAccount "Account aanmaken">
+<!ENTITY zotero.preferences.sync.lostPassword "Wachtwoord vergeten?">
+<!ENTITY zotero.preferences.sync.syncAutomatically "Automatisch synchroniseren">
+<!ENTITY zotero.preferences.sync.fileSyncing "Synchronisatie van bestanden">
+<!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synchroniseer bestanden in Mijn Bibliotheek met">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Synchroniseer bestanden in groepsbibliotheken met Zotero File Storage">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "Over bestandssynchronisatie">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Als u gebruikt maakt van Zotero File Storage, gaat u akkoord met de bijbehorende">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "termen en voorwaarden">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Volledige synchronisatie met de Zotero Server">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Lokale Zotero-gegevens samenvoegen met de gegevens op de Zotero Server (houdt geen rekening met synchronisatiegeschiedenis).">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Lokale Zotero-gegevens vervangen door de gegevens op de Zotero Server">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Alle lokale Zotero-gegevens wissen en vervangen door de gegevens van de synchronisatie server.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Gegevens op de Zotero Server vervangen door de lokale Zotero-gegevens">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Alle gegevens op de server wissen en vervangen door de lokale Zotero-gegevens.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Wis bestandssynchronisatiegeschiedenis">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Forceert een controle of alle lokale bestanden op de server aanwezig zijn.">
+<!ENTITY zotero.preferences.sync.reset.button "Terugzetten...">
+
+
 <!ENTITY zotero.preferences.prefpane.search "Zoeken">
 <!ENTITY zotero.preferences.search.fulltextCache "Volledige-tekst cache">
 <!ENTITY zotero.preferences.search.pdfIndexing "PDF-indexering">
-<!ENTITY zotero.preferences.search.indexStats "Indexstatistieken">
+<!ENTITY zotero.preferences.search.indexStats "Statistieken indexering">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "Geindexeerd:">
+<!ENTITY zotero.preferences.search.indexStats.indexed "Geïndexeerd:">
 <!ENTITY zotero.preferences.search.indexStats.partial "Gedeeltelijk:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "Niet geindexeerd:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Niet geïndexeerd:">
 <!ENTITY zotero.preferences.search.indexStats.words "Woorden:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximaal aantal tekens dat per bestand wordt geindexeerd:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximaal aantal pagina&apos;s dat per bestand wordt geindexeerd:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximaal aantal tekens dat per bestand wordt geïndexeerd:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximaal aantal pagina's dat per bestand wordt geïndexeerd:">
 
 <!ENTITY zotero.preferences.prefpane.export "Exporteren">
 
 <!ENTITY zotero.preferences.citationOptions.caption "Citatie opties">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Voeg URLs van atikelen toe aan referenties">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Als deze optie uitgeschakeld wordt zal Zotero de URLs van geciteerde tijdschrift-, magazine en krantenartikels enkel citeren indien van het artikel geen paginering gespecifieerd werd.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Voeg URLs van artikelen toe aan verwijzingen">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Als deze optie is uitgezet voegt Zotero alleen URLs toe van geciteerde tijdschrift-, magazine en krantenartikels als paginanummers ontbreken.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Snelle kopie">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Standaard uitvoerformaat:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopieer als HTML">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Let op: onder Mac OS X gaat hierbij de tekstopmaak verloren.">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Let op: onder MacOS X gaat de tekstopmaak verloren.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Webpagina-specifieke instellingen:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domein/Pad">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(b.v. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Uitvoerformaat">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "Snelle kopie uitzetten bij het verslepen van meer dan">
 
-<!ENTITY zotero.preferences.prefpane.styles "Styles">
 
-<!ENTITY zotero.preferences.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.prefpane.styles "Stijlen">
+
+<!ENTITY zotero.preferences.styles.styleManager "Stijlmanager">
+<!ENTITY zotero.preferences.styles.styleManager.title "Titel">
+<!ENTITY zotero.preferences.styles.styleManager.updated "Bijgewerkt">
 <!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Bijkomende stijlen ophalen...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Meer stijlen installeren...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Sneltoetsen">
 
 <!ENTITY zotero.preferences.keys.openZotero "Openen/Sluiten van Zotero-paneel">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Volledige Schermweergave">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Volledige schermweergave">
 <!ENTITY zotero.preferences.keys.library "Bibliotheek">
-<!ENTITY zotero.preferences.keys.quicksearch "Snel Zoeken">
+<!ENTITY zotero.preferences.keys.quicksearch "Snelzoeken">
 <!ENTITY zotero.preferences.keys.newItem "Nieuw object aanmaken">
 <!ENTITY zotero.preferences.keys.newNote "Nieuwe aantekening aanmaken">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Label-kiezer Weergeven">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Label-kiezer weergeven">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Verwijzingen van geselecteerde objecten naar klembord kopiëren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Geselecteerde objecten naar klembord kopiëren">
-<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Importeren vanaf klembord">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Probeer voorrang te krijgen bij conflicterende sneltoetsen">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Aanpassingen worden pas zichtbaar in nieuwe vensters">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 
-<!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
-<!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
-<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
-<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
-<!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
-<!ENTITY zotero.preferences.proxies.hostname "Hostname">
-<!ENTITY zotero.preferences.proxies.scheme "Scheme">
+<!ENTITY zotero.preferences.proxies.proxyOptions "Proxy opties">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero zal requests transparant omleiden door opgeslagen proxies. Zie de">
+<!ENTITY zotero.preferences.proxies.desc_link "proxy-documentatie">
+<!ENTITY zotero.preferences.proxies.desc_after_link "voor meer informatie.">
+<!ENTITY zotero.preferences.proxies.transparent "Gebruikte proxies automatisch opslaan">
+<!ENTITY zotero.preferences.proxies.configured "Ingestelde proxies">
+<!ENTITY zotero.preferences.proxies.hostname "Hostnaam">
+<!ENTITY zotero.preferences.proxies.scheme "Systeem">
 
-<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
-<!ENTITY zotero.preferences.proxies.autoAssociate "Automatically associate new hosts">
-<!ENTITY zotero.preferences.proxies.variables "You may use the following variables in your proxy scheme:">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - The hostname of the proxied site (e.g., www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - The path of the proxied page excluding the leading slash (e.g., about/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - The directory path (e.g., about/)">
-<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - The filename (e.g., index.html)">
-<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
+<!ENTITY zotero.preferences.proxies.multiSite "Multi-webpagina">
+<!ENTITY zotero.preferences.proxies.autoAssociate "Nieuwe hosts automatisch associëren">
+<!ENTITY zotero.preferences.proxies.variables "De volgende variabelen kunnen in het proxy-systeem worden gebruikt:">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - De originele hostnaam van de opgevraagde webpagina (b.v. www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Het pad van de via de proxy geleide webpagina zonder begin-slash (b.v. about/index.html)">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Het pad naar de map (b.v. about/)">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - De bestandsnaam (b.v. index.html)">
+<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Willekeurige tekenreeks">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Geavanceerd">
 
-<!ENTITY zotero.preferences.charset "Character Encoding">
-<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
-<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+<!ENTITY zotero.preferences.charset "Tekensetcodering">
+<!ENTITY zotero.preferences.charset.importCharset "Tekensetcodering importeren">
+<!ENTITY zotero.preferences.charset.displayExportOption "Tekensetcodering kiezen bij exporteren">
 
 <!ENTITY zotero.preferences.dataDir "Opslaglocatie">
 <!ENTITY zotero.preferences.dataDir.useProfile "Gebruik de profielmap van Firefox">
@@ -113,8 +149,16 @@
 <!ENTITY zotero.preferences.dataDir.choose "Kiezen...">
 <!ENTITY zotero.preferences.dataDir.reveal "Opslagmap tonen">
 
-<!ENTITY zotero.preferences.dbMaintenance "Database Onderhoud">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Controleer Integriteit Database">
+<!ENTITY zotero.preferences.dbMaintenance "Database-onderhoud">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Controleer database-integriteit">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Vertalers en stijlen opnieuw instellen...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Vertalers opnieuw instellen...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stijlen opnieuw instellen...">
+
+<!ENTITY zotero.preferences.debugOutputLogging "Debug-uitvoer bewaren">
+<!ENTITY zotero.preferences.debugOutputLogging.message "Debug-uitvoer kan Zotero-ontwikkelaars helpen met de diagnose van problemen met Zotero. Het bewaren van debug-uitvoer vertraagd Zotero, en kan geschakeld blijven totdat een Zotero-ontwikkelaar om debug-uitvoer vraagt.">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "regels bewaard">
+<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Aanzetten na herstart">
+<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Uitvoer bekijken">
+<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Uitvoer wissen">
+<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Naar Zotero Server opsturen">

@@ -1,27 +1,36 @@
-<!ENTITY zotero.preferences.title "Preferinţe Zotero">
+<!ENTITY zotero.preferences.title "Preferințe Zotero">
 
 <!ENTITY zotero.preferences.default "Implicite:">
+<!ENTITY zotero.preferences.items "itemi">
+<!ENTITY zotero.preferences.period ".">
 
 <!ENTITY zotero.preferences.prefpane.general "Generale">
 
-<!ENTITY zotero.preferences.userInterface "Interfaţă utilizator">
+<!ENTITY zotero.preferences.userInterface "Interfață utilizator">
 <!ENTITY zotero.preferences.statusBarIcon "Imaginea din bara de stare:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Niciuna">
 <!ENTITY zotero.preferences.fontSize "Mărime caractere:">
 <!ENTITY zotero.preferences.fontSize.small "Mici">
 <!ENTITY zotero.preferences.fontSize.medium "Medii">
 <!ENTITY zotero.preferences.fontSize.large "Mari">
+<!ENTITY zotero.preferences.fontSize.notes "Mărimea fontului pentru notă:">
 
 <!ENTITY zotero.preferences.miscellaneous "Diverse">
 <!ENTITY zotero.preferences.autoUpdate "Controlează automat dacă există traduceri actualizate">
 <!ENTITY zotero.preferences.updateNow "Actualizează acum">
 <!ENTITY zotero.preferences.reportTranslationFailure "Raportează site-uri cu legături rupte (la translatare)">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
-<!ENTITY zotero.preferences.parseRISRefer "Foloseşte Zotero pentru a descărca fişiere RIS/Refer">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Permite zotero.org să modifice conținutul pe bază versiunii curente de Zotero">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Dacă e activată, versiunea curentă de Zotero va fi adăugată la cererile HTTP de la zotero.org">
+<!ENTITY zotero.preferences.parseRISRefer "Folosește Zotero pentru a descărca fișiere RIS/Refer">
 <!ENTITY zotero.preferences.automaticSnapshots "Creează automat instantanee, atunci când sunt create înregistrări din paginile web">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Ataşează automat fişierele PDF asociate, precum şi alte fişiere, atunci când sunt salvate înregistrările">
-<!ENTITY zotero.preferences.automaticTags "Creează automat etichetele pentru înregistrări, împreună cu cuvintele cheie şi cu titlurile">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Anexează automat fișierele PDF asociate, precum și alte fișiere, atunci când sunt salvate înregistrările">
+<!ENTITY zotero.preferences.automaticTags "Creează automat etichetele pentru înregistrări, împreună cu cuvintele cheie și cu titlurile">
+
+<!ENTITY zotero.preferences.groups "Grupuri">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "Când se copiază itemii între biblioteci se vor include:">
+<!ENTITY zotero.preferences.groups.childNotes "note copil">
+<!ENTITY zotero.preferences.groups.childFiles "instantanee copil și fișiere importate">
+<!ENTITY zotero.preferences.groups.childLinks "legături copil">
 
 <!ENTITY zotero.preferences.openurl.caption "Deschide URL">
 
@@ -30,13 +39,38 @@
 <!ENTITY zotero.preferences.openurl.server "Rezolvator:">
 <!ENTITY zotero.preferences.openurl.version "Versiune:">
 
+<!ENTITY zotero.preferences.prefpane.sync "Sincronizare">
+<!ENTITY zotero.preferences.sync.username "Nume de utilizator:">
+<!ENTITY zotero.preferences.sync.password "Parolă:">
+<!ENTITY zotero.preferences.sync.syncServer "Server pentru sincronizare Zotero">
+<!ENTITY zotero.preferences.sync.createAccount "Creează cont">
+<!ENTITY zotero.preferences.sync.lostPassword "Ai uitat parola?">
+<!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizare automată">
+<!ENTITY zotero.preferences.sync.fileSyncing "Sincronizare fișier">
+<!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sincronizare fișiere anexate în Biblioteca mea folosind">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Sincronizare fișiere anexate într-un grup de biblioteci folosind depozitul Zotero">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "Despre sincronizarea fișierelor">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Dacă folosești depozitul Zotero, ești de acord să fii conectat la">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "termeni și condiții">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Sincronizare completă cu serverul Zotero">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Unește datele locale din Zotero cu datele de pe serverul de sincronizare, ignorând istoria sincronizărilor.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurare de pe serverul Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Șterge toate datele locale din Zotero și restaurează din serverul de sincronizare.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restaurare în serverul Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Șterge toate datele de pe server și suprascrie cu datele locale din Zotero.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Resetează istoria sincronizării fișierelor">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Forțează controlul serverului de stocare pentru toate fișierele locale anexate.">
+<!ENTITY zotero.preferences.sync.reset.button "Resetare...">
+
+
 <!ENTITY zotero.preferences.prefpane.search "Căutare">
 <!ENTITY zotero.preferences.search.fulltextCache "Căutare text complet">
 <!ENTITY zotero.preferences.search.pdfIndexing "Indexare PDF">
 <!ENTITY zotero.preferences.search.indexStats "Statistici index">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indexate:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Parţial:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Parțial:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Neindexate:">
 <!ENTITY zotero.preferences.search.indexStats.words "Cuvinte:">
 
@@ -45,9 +79,9 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Exportare">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Opţiuni citare">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URL-urile articolelor în referinţe">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Când această opţiune nu este funcţională, Zotero include URL-urile în timp ce citează articole de jurnale, reviste şi ziare doar dacă pentru articol nu a s-a specificat un interval de pagini.">
+<!ENTITY zotero.preferences.citationOptions.caption "Opțiuni citare">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URL-urile articolelor în referințe">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Când această opțiune nu este funcțională, Zotero include URL-urile în timp ce citează articole de jurnale, reviste și ziare doar dacă pentru articol nu a s-a specificat un interval de pagini.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Copiere rapidă">
 <!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Stil implicit de formatare:">
@@ -57,14 +91,16 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domeniu/Cale">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(ex. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Stil de formatare">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "Dezactivează Copierea rapidă în timpul tragerii a mai mult de">
 
-<!ENTITY zotero.preferences.prefpane.styles "Styles">
 
-<!ENTITY zotero.preferences.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.prefpane.styles "Stiluri">
+
+<!ENTITY zotero.preferences.styles.styleManager "Manager de stiluri">
+<!ENTITY zotero.preferences.styles.styleManager.title "Titlu">
+<!ENTITY zotero.preferences.styles.styleManager.updated "Actualizat">
 <!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Obţine stiluri suplimentare...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Obține stiluri suplimentare...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Scurtături de la tastatură">
 
@@ -74,47 +110,55 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Căutare rapidă">
 <!ENTITY zotero.preferences.keys.newItem "Creează o înregistrare nouă">
 <!ENTITY zotero.preferences.keys.newNote "Creează o notă nouă">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Afişează/ascunde selectorul de etichete">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Afișează/ascunde selectorul de etichete">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiază citările înregistrărilor selectate în memoria Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiază înregistrările selectate în memoria Clipboard">
-<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Importă din memoria Clipboard">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Încearcă să suprascrii scurtăturile care sunt în conflict">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Schimbările vor putea fi vizualizate doar într-o fereastră nouă">
 
-<!ENTITY zotero.preferences.prefpane.proxies "Proxies">
+<!ENTITY zotero.preferences.prefpane.proxies "Servere proxy">
 
-<!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
-<!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
-<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
-<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
-<!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
-<!ENTITY zotero.preferences.proxies.hostname "Hostname">
-<!ENTITY zotero.preferences.proxies.scheme "Scheme">
+<!ENTITY zotero.preferences.proxies.proxyOptions "Opțiuni pentru serverele proxy">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero va redirecționa cererile prin serverele proxy salvate. Vezi">
+<!ENTITY zotero.preferences.proxies.desc_link "documentația pentru serverele proxy">
+<!ENTITY zotero.preferences.proxies.desc_after_link "pentru mai multe informații.">
+<!ENTITY zotero.preferences.proxies.transparent "Reamintește automat resursele proxy">
+<!ENTITY zotero.preferences.proxies.configured "Servere proxy configurate">
+<!ENTITY zotero.preferences.proxies.hostname "Nume gazdă">
+<!ENTITY zotero.preferences.proxies.scheme "Schemă">
 
-<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
-<!ENTITY zotero.preferences.proxies.autoAssociate "Automatically associate new hosts">
-<!ENTITY zotero.preferences.proxies.variables "You may use the following variables in your proxy scheme:">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - The hostname of the proxied site (e.g., www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - The path of the proxied page excluding the leading slash (e.g., about/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - The directory path (e.g., about/)">
-<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - The filename (e.g., index.html)">
-<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
+<!ENTITY zotero.preferences.proxies.multiSite "Multi-site">
+<!ENTITY zotero.preferences.proxies.autoAssociate "Asoxiază automat noile gazde">
+<!ENTITY zotero.preferences.proxies.variables "Ai putea folosi următoarele variabile în schema serverului tău proxy:">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Numele gazdă pentru site-ul proxy (de ex., www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Calea paginii proxy, excluzând primele bare oblice (de ex., despre/index.html)">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Calea dosarului (de ex., despre/)">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Numele fișierului (de ex., index.html)">
+<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Orice șir">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avansate">
 
-<!ENTITY zotero.preferences.charset "Character Encoding">
-<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
-<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+<!ENTITY zotero.preferences.charset "Codificarea caracterelor">
+<!ENTITY zotero.preferences.charset.importCharset "Importă codificarea caracterelor">
+<!ENTITY zotero.preferences.charset.displayExportOption "Afișează la export opțiunea pentru codificarea caracterelor">
 
-<!ENTITY zotero.preferences.dataDir "Locaţie pentru stocare">
-<!ENTITY zotero.preferences.dataDir.useProfile "Foloseşte dosarul de profil din Firefox">
+<!ENTITY zotero.preferences.dataDir "Locație pentru stocare">
+<!ENTITY zotero.preferences.dataDir.useProfile "Folosește dosarul de profil din Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Personalizare:">
 <!ENTITY zotero.preferences.dataDir.choose "Alege...">
-<!ENTITY zotero.preferences.dataDir.reveal "Afişează directorul de date">
+<!ENTITY zotero.preferences.dataDir.reveal "Afișează directorul de date">
 
-<!ENTITY zotero.preferences.dbMaintenance "Întreţinerea bazei de date">
+<!ENTITY zotero.preferences.dbMaintenance "Întreținerea bazei de date">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Controlează integritatea bazei de date">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Resetează traducători şi stiluri...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Resetează traducători și stiluri...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Resetează traducători...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Resetează stiluri...">
+
+<!ENTITY zotero.preferences.debugOutputLogging "Depanare jurnal de ieșire">
+<!ENTITY zotero.preferences.debugOutputLogging.message "Depanarea ieșirii poate ajuta dezvoltatorii Zotero să diagnosticheze problemele din Zotero. Depanarea jurnalului va încetini Zotero, așa încât va trebui s-o păstrați dezactivată până când un dezvoltator Zotero cere depanarea ieșirii.">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "linii încuiate">
+<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Activare după restart">
+<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Vizualizare ieșire">
+<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Ștergere ieșire">
+<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Trimitere către serverul Zotero">

@@ -1,5 +1,9 @@
 <!ENTITY zotero.general.optional "（選用）">
 <!ENTITY zotero.general.note "注意：">
+<!ENTITY zotero.general.selectAll "全部選取">
+<!ENTITY zotero.general.deselectAll "取消所有選取">
+<!ENTITY zotero.general.edit "編輯">
+<!ENTITY zotero.general.delete "刪除">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "錯誤記錄可能包括了一些和 Zotero 不相關的訊息。">
 <!ENTITY zotero.errorReport.submissionInProgress "請等候錯誤報告送出。">
@@ -11,6 +15,10 @@
 <!ENTITY zotero.upgrade.newVersionInstalled "你已安裝了新版的 Zotero。">
 <!ENTITY zotero.upgrade.upgradeRequired "你的 Zotero 資料庫必須升級才能在新版本中使用。">
 <!ENTITY zotero.upgrade.autoBackup "在做出任何改變前，會自動備份你現存的資料庫。">
+<!ENTITY zotero.upgrade.majorUpgrade "這是一次主要的升級。">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "請確認您已檢閱過">
+<!ENTITY zotero.upgrade.majorUpgradeLink "升級指示">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "，在繼續之前。">
 <!ENTITY zotero.upgrade.upgradeInProgress "請等候升級程序完成。這可能會花幾分鐘的時間。">
 <!ENTITY zotero.upgrade.upgradeSucceeded "已經成功的升級你的 Zotero 資料庫。">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "請看">
@@ -19,6 +27,8 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "把選取區加入 Zotero 筆記">
 <!ENTITY zotero.contextMenu.addTextToNewNote "以選取區建立 Zotero 項目與筆記">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "將鏈結儲存成 Zotero 項目">
+<!ENTITY zotero.contextMenu.saveImageAsItem "將圖片儲存成 Zotero 項目">
 
 <!ENTITY zotero.tabs.info.label "資訊">
 <!ENTITY zotero.tabs.notes.label "筆記">
@@ -47,8 +57,12 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "在圖書館中顯示">
 <!ENTITY zotero.items.menu.attach.note "加入筆記">
+<!ENTITY zotero.items.menu.attach "新增附加檔案">
 <!ENTITY zotero.items.menu.attach.snapshot "附上目前網頁的快照">
 <!ENTITY zotero.items.menu.attach.link "附上目前網頁的鏈結">
+<!ENTITY zotero.items.menu.attach.file "附加已儲存的檔案拷貝……">
+<!ENTITY zotero.items.menu.attach.fileLink "附加鏈結到檔案……">
+
 <!ENTITY zotero.items.menu.duplicateItem "為選取的項目建立副本">
 
 <!ENTITY zotero.toolbar.newItem.label "新增項目">
@@ -161,9 +175,21 @@
 
 <!ENTITY zotero.integration.references.label "參考書目中的參考文獻">
 
+<!ENTITY zotero.sync.button "與 Zotero 伺服器同步">
+<!ENTITY zotero.sync.error "同步錯誤">
 <!ENTITY zotero.sync.storage.progress "Progress:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "您 Zotero 圖書館中以下的標籤太長而無法與伺服器同步：">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "同步的標籤必需少於 256 個字元。">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "您可以將過長的標籤切割成多個標籤，或手動編輯來讓它變短，或刪除它。">
+<!ENTITY zotero.sync.longTagFixer.split "分割">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "分割的位置在第">
+<!ENTITY zotero.sync.longTagFixer.character "個字元">
+<!ENTITY zotero.sync.longTagFixer.characters "個字元">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "未勾選的標籤將不會被儲存。">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "這個標籤將會從所有項目中被刪除。">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">

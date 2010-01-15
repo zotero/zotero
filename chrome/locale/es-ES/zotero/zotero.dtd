@@ -1,5 +1,9 @@
 <!ENTITY zotero.general.optional "(Opcional)">
 <!ENTITY zotero.general.note "Nota:">
+<!ENTITY zotero.general.selectAll "Seleccionar todo">
+<!ENTITY zotero.general.deselectAll "Deselect All">
+<!ENTITY zotero.general.edit "Editar">
+<!ENTITY zotero.general.delete "Borrar">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "El informe de errores puede incluir mensajes sin relación con Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Por favor, espera mientras se envía el informe de error.">
@@ -11,6 +15,10 @@
 <!ENTITY zotero.upgrade.newVersionInstalled "Has instalado una versión nueva de Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Tu base de datos de Zotero debe actualizarse para funcionar con la versión nueva.">
 <!ENTITY zotero.upgrade.autoBackup "Se hará una copia de seguridad de tu base de datos antes de hacer cambios.">
+<!ENTITY zotero.upgrade.majorUpgrade "Esta es una actualización mayor">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Asegúrate de haber revisado las">
+<!ENTITY zotero.upgrade.majorUpgradeLink "instrucciones de actualización">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "antes de continuar.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Por favor, espera a que finalice el proceso de actualización. Puede tardar algunos minutos.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Tu base de datos se ha actualizado correctamente.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Véase">
@@ -19,6 +27,8 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Añadir selección a una nota en Zotero">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Crear un ítem y nota de Zotero a partir de la selección">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Guardar el enlace como ítem Zotero">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Guardar la imagen como ítem Zotero">
 
 <!ENTITY zotero.tabs.info.label "Información">
 <!ENTITY zotero.tabs.notes.label "Notas">
@@ -47,8 +57,12 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Mostrar en la biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Añadir nota">
+<!ENTITY zotero.items.menu.attach "Añadir adjunto">
 <!ENTITY zotero.items.menu.attach.snapshot "Adjuntar una instantánea de la página actual">
 <!ENTITY zotero.items.menu.attach.link "Adjuntar un enlace hacia la página actual">
+<!ENTITY zotero.items.menu.attach.file "Añadir copia guardada del fichero...">
+<!ENTITY zotero.items.menu.attach.fileLink "Añadir enlace al fichero...">
+
 <!ENTITY zotero.items.menu.duplicateItem "Duplicar el ítem seleccionado">
 
 <!ENTITY zotero.toolbar.newItem.label "Nuevo ítem">
@@ -161,9 +175,21 @@
 
 <!ENTITY zotero.integration.references.label "Referencias en la bibliografía">
 
+<!ENTITY zotero.sync.button "Sync with Zotero Server">
+<!ENTITY zotero.sync.error "Sync Error">
 <!ENTITY zotero.sync.storage.progress "Progress:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
+<!ENTITY zotero.sync.longTagFixer.split "Split">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
+<!ENTITY zotero.sync.longTagFixer.character "character">
+<!ENTITY zotero.sync.longTagFixer.characters "characters">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">

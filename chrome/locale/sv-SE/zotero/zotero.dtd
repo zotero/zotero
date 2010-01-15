@@ -1,5 +1,9 @@
 <!ENTITY zotero.general.optional "(Valfritt)">
 <!ENTITY zotero.general.note "Anteckning:">
+<!ENTITY zotero.general.selectAll "Select All">
+<!ENTITY zotero.general.deselectAll "Deselect All">
+<!ENTITY zotero.general.edit "Edit">
+<!ENTITY zotero.general.delete "Delete">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Felloggen kan innehålla meddelanden som inte är relaterade till Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Var vänlig vänta medan felrapporten skickas.">
@@ -11,6 +15,10 @@
 <!ENTITY zotero.upgrade.newVersionInstalled "Du har installerat en ny version av Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "Din Zoterodatabas måste uppgraderas för att fungera med den nya versionen.">
 <!ENTITY zotero.upgrade.autoBackup "Din existerande databas kommer att säkerhetskopieras innan några ändringar görs.">
+<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
+<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Var vänlig vänta tills uppgraderingsprocessen avslutas. Det kan ta några minuter.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Din Zoterodatabas har uppgraderats med lyckat resultat.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Var vänlig se">
@@ -19,6 +27,8 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Lägg till det valda som en Zotero-anteckning">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Skapa en Zotero-post och anteckning av det valda">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
 
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Anteckningar">
@@ -47,8 +57,12 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Visa i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Lägg till anteckning">
+<!ENTITY zotero.items.menu.attach "Add Attachment">
 <!ENTITY zotero.items.menu.attach.snapshot "Bifoga snapshot av aktuell sida">
 <!ENTITY zotero.items.menu.attach.link "Bifoga länk till aktuell sida">
+<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
+<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+
 <!ENTITY zotero.items.menu.duplicateItem "Duplicera vald post">
 
 <!ENTITY zotero.toolbar.newItem.label "Ny post">
@@ -161,9 +175,21 @@
 
 <!ENTITY zotero.integration.references.label "Referenser i bibliografi">
 
+<!ENTITY zotero.sync.button "Sync with Zotero Server">
+<!ENTITY zotero.sync.error "Sync Error">
 <!ENTITY zotero.sync.storage.progress "Progress:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
+<!ENTITY zotero.sync.longTagFixer.split "Split">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
+<!ENTITY zotero.sync.longTagFixer.character "character">
+<!ENTITY zotero.sync.longTagFixer.characters "characters">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
