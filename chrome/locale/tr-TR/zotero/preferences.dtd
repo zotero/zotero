@@ -1,6 +1,8 @@
 <!ENTITY zotero.preferences.title "Zotero Tercihleri">
 
 <!ENTITY zotero.preferences.default "Varsayılan">
+<!ENTITY zotero.preferences.items "items">
+<!ENTITY zotero.preferences.period ".">
 
 <!ENTITY zotero.preferences.prefpane.general "Genel">
 
@@ -11,6 +13,7 @@
 <!ENTITY zotero.preferences.fontSize.small "Küçük">
 <!ENTITY zotero.preferences.fontSize.medium "Orta">
 <!ENTITY zotero.preferences.fontSize.large "Büyük">
+<!ENTITY zotero.preferences.fontSize.notes "Not yazıtipi boyutu:">
 
 <!ENTITY zotero.preferences.miscellaneous "Çeşitli">
 <!ENTITY zotero.preferences.autoUpdate "Güncel çevirmenler için otomatik kontrol yap">
@@ -18,17 +21,48 @@
 <!ENTITY zotero.preferences.reportTranslationFailure "Bozuk site çevirilerini raporla">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
-<!ENTITY zotero.preferences.parseRISRefer "İndirilmiş RIS/Refer dosyaları için Zotero&apos;yu kullan">
+<!ENTITY zotero.preferences.parseRISRefer "İndirilmiş RIS/Refer dosyaları için Zotero'yu kullan">
 <!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratılırken sayfa görünümü otomatik olarak kaydet">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Eserleri kaydederken birleşik PDF ve diğer dosyaları da otomatik olarak ekle">
 <!ENTITY zotero.preferences.automaticTags "Anahtar kelimeler ve konu başlıkları ile eserleri otomatik olarak etiketle">
 
+<!ENTITY zotero.preferences.groups "Gruplar">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "Kütüphaneler arası eserler kopyalanırken, ekle:">
+<!ENTITY zotero.preferences.groups.childNotes "child notes">
+<!ENTITY zotero.preferences.groups.childFiles "child snapshots and imported files">
+<!ENTITY zotero.preferences.groups.childLinks "child links">
+
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
-<!ENTITY zotero.preferences.openurl.search "Resolvers&apos;ler için ara">
-<!ENTITY zotero.preferences.openurl.custom "Özel">
+<!ENTITY zotero.preferences.openurl.search "Resolvers'ler için ara">
+<!ENTITY zotero.preferences.openurl.custom "Özel...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Sürüm:">
+
+<!ENTITY zotero.preferences.prefpane.sync "Eşle">
+<!ENTITY zotero.preferences.sync.username "Kullanıcı:">
+<!ENTITY zotero.preferences.sync.password "Şifre:">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Eşleme Sunucusu">
+<!ENTITY zotero.preferences.sync.createAccount "Hesap Yarat">
+<!ENTITY zotero.preferences.sync.lostPassword "Unutulan Şifre?">
+<!ENTITY zotero.preferences.sync.syncAutomatically "Kendiliğinden eşle">
+<!ENTITY zotero.preferences.sync.fileSyncing "Dosya Eşlemesi">
+<!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Kütüphanemde kullanılan ekli dosyaları eşle">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Zotero deposunu kullanan kütüphane gruplarının ekli dosyalarını eşle">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "Dosya Eşleme Hakkında">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "terms and conditions">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync with Zotero Server">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local Zotero data with data from the sync server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Zotero Server">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Erase all local Zotero data and restore from the sync server.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Zotero Server">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Erase all server data and overwrite with local Zotero data.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reset File Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Force checking of the storage server for all local attachment files.">
+<!ENTITY zotero.preferences.sync.reset.button "Reset...">
+
 
 <!ENTITY zotero.preferences.prefpane.search "Arama">
 <!ENTITY zotero.preferences.search.fulltextCache "Tüm-Metin Önbellek">
@@ -57,6 +91,8 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Etki alanı/Yol">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(ör. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Çıktı Biçimi">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "Disable Quick Copy when dragging more than">
+
 
 <!ENTITY zotero.preferences.prefpane.styles "Styles">
 
@@ -118,3 +154,11 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Çevirileri ve Stilleri Sıfırla">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Çevirileri Sıfırla...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stilleri Sıfırla...">
+
+<!ENTITY zotero.preferences.debugOutputLogging "Debug Output Logging">
+<!ENTITY zotero.preferences.debugOutputLogging.message "Debug output can help Zotero developers diagnose problems in Zotero. Debug logging will slow down Zotero, so you should generally leave it disabled unless a Zotero developer requests debug output.">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "lines logged">
+<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Enable after restart">
+<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "View Output">
+<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Clear Output">
+<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Submit to Zotero Server">

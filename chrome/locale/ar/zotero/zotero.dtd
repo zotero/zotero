@@ -1,5 +1,9 @@
 <!ENTITY zotero.general.optional "(اختياري)">
 <!ENTITY zotero.general.note "ملاحظة:">
+<!ENTITY zotero.general.selectAll "Select All">
+<!ENTITY zotero.general.deselectAll "Deselect All">
+<!ENTITY zotero.general.edit "Edit">
+<!ENTITY zotero.general.delete "Delete">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "سجل الأخطاء قد يحتوي رسائل ليس لها علاقة بزوتيرو.">
 <!ENTITY zotero.errorReport.submissionInProgress "فضلاً انتظر حتى يتم إرسال البلاغ.">
@@ -11,6 +15,10 @@
 <!ENTITY zotero.upgrade.newVersionInstalled "لقد قمتَ بتنصيب نسخة جديدة من زوتيرو.">
 <!ENTITY zotero.upgrade.upgradeRequired "يجب ترقية قاعدة بيانات زوتيرو كي تعمل مع النسخة الجديدة.">
 <!ENTITY zotero.upgrade.autoBackup "سيتم عمل نسخة احتياطية من قاعدة البيانات قبل إجراء أي تغييرات.">
+<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
+<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
 <!ENTITY zotero.upgrade.upgradeInProgress "فضلاً انتظر حتى تنتهي عملية الترقية. قد يستغرق ذلك عدة دقائق.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "تم ترقية قاعدة البيانات بنجاج.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "فضلا شاهد">
@@ -19,6 +27,8 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "أضف التحديد لملاحظة زوتيرو.">
 <!ENTITY zotero.contextMenu.addTextToNewNote "انشئ عنصر وملاحظة من العنصر المحدد.">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
 
 <!ENTITY zotero.tabs.info.label "معلومات">
 <!ENTITY zotero.tabs.notes.label "ملاحظات">
@@ -47,8 +57,12 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "عرض في المكتبة">
 <!ENTITY zotero.items.menu.attach.note "أضف ملاحظة">
+<!ENTITY zotero.items.menu.attach "Add Attachment">
 <!ENTITY zotero.items.menu.attach.snapshot "أرفق لقطة للصفحة الحالية">
 <!ENTITY zotero.items.menu.attach.link "ارفق رابط إلى الصفحة الحالية">
+<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
+<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+
 <!ENTITY zotero.items.menu.duplicateItem "استنسخ الموضوع المحدد">
 
 <!ENTITY zotero.toolbar.newItem.label "موضوع جديد">
@@ -161,9 +175,21 @@
 
 <!ENTITY zotero.integration.references.label "مراجع في قائمة المؤلفات">
 
+<!ENTITY zotero.sync.button "Sync with Zotero Server">
+<!ENTITY zotero.sync.error "Sync Error">
 <!ENTITY zotero.sync.storage.progress "Progress:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
+<!ENTITY zotero.sync.longTagFixer.split "Split">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
+<!ENTITY zotero.sync.longTagFixer.character "character">
+<!ENTITY zotero.sync.longTagFixer.characters "characters">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">

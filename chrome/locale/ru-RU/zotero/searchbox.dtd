@@ -5,7 +5,7 @@
 <!ENTITY zotero.search.joinMode.all "всеми">
 <!ENTITY zotero.search.joinMode.suffix "из нижеследующего:">
 
-<!ENTITY zotero.search.recursive.label "искать в подпапках">
+<!ENTITY zotero.search.recursive.label "Искать в подпапках">
 <!ENTITY zotero.search.noChildren "Показывать документы только верхнего уровня">
 <!ENTITY zotero.search.includeParentsAndChildren "Включать родительские и дочернии документы совпадающих с искомым">
 
@@ -20,4 +20,4 @@
 
 <!ENTITY zotero.search.search "Искать">
 <!ENTITY zotero.search.clear "Очистить">
-<!ENTITY zotero.search.saveSearch "Сохранить поиск">
+<!ENTITY zotero.search.saveSearch "Сохранить Поиск">

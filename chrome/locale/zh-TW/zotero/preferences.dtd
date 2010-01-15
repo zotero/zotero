@@ -1,6 +1,8 @@
 <!ENTITY zotero.preferences.title "Zotero 偏好設定">
 
 <!ENTITY zotero.preferences.default "預設：">
+<!ENTITY zotero.preferences.items "項目">
+<!ENTITY zotero.preferences.period "。">
 
 <!ENTITY zotero.preferences.prefpane.general "一般">
 
@@ -11,6 +13,7 @@
 <!ENTITY zotero.preferences.fontSize.small "小">
 <!ENTITY zotero.preferences.fontSize.medium "中">
 <!ENTITY zotero.preferences.fontSize.large "大">
+<!ENTITY zotero.preferences.fontSize.notes "筆記字型大小：">
 
 <!ENTITY zotero.preferences.miscellaneous "雜項">
 <!ENTITY zotero.preferences.autoUpdate "自動檢查更新的轉譯器">
@@ -23,12 +26,43 @@
 <!ENTITY zotero.preferences.downloadAssociatedFiles "儲存項目時自動附加相關的 PDF 檔與其他檔案">
 <!ENTITY zotero.preferences.automaticTags "自動以關鍵字與主標題作為項目的標籤">
 
+<!ENTITY zotero.preferences.groups "群組">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "在各圖書館之間複製項目時，包含：">
+<!ENTITY zotero.preferences.groups.childNotes "子筆記">
+<!ENTITY zotero.preferences.groups.childFiles "子快照與匯入的檔案">
+<!ENTITY zotero.preferences.groups.childLinks "子鏈結">
+
 <!ENTITY zotero.preferences.openurl.caption "開啟網址">
 
 <!ENTITY zotero.preferences.openurl.search "搜尋解析器">
 <!ENTITY zotero.preferences.openurl.custom "自訂…">
 <!ENTITY zotero.preferences.openurl.server "解析器：">
 <!ENTITY zotero.preferences.openurl.version "版本：">
+
+<!ENTITY zotero.preferences.prefpane.sync "同步">
+<!ENTITY zotero.preferences.sync.username "使用者名稱：">
+<!ENTITY zotero.preferences.sync.password "密碼：">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero 同步伺服器">
+<!ENTITY zotero.preferences.sync.createAccount "建立帳戶">
+<!ENTITY zotero.preferences.sync.lostPassword "遺失密碼？">
+<!ENTITY zotero.preferences.sync.syncAutomatically "自動同步">
+<!ENTITY zotero.preferences.sync.fileSyncing "檔案同步中">
+<!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "同步「我的圖書館」中的附加檔案時，採用">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "使用 Zotero storage 時，將圖書館中的附加檔案同步">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "關於檔案同步">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "使用 Zotero storage，您同意被它的">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "條款與條件 (terms and conditions) 所束縳">
+<!ENTITY zotero.preferences.sync.reset.fullSync "與 Zotero 伺服器完全同步">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "將本機的 Zotero 資料與來自同步伺服器的資料合併，忽略同步歷史。">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "從 Zotero 伺服器回復">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "刪除所有本機的 Zotero 資料，並從同步伺服器回復。">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "回復到 Zotero 伺服器">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "刪除所有伺服器上的資料，並以本機的 Zotero 資料覆蓋過去。">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重設檔案同步歷史">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "強制檢查儲存伺服器上所有本機附加的檔案">
+<!ENTITY zotero.preferences.sync.reset.button "重設……">
+
 
 <!ENTITY zotero.preferences.prefpane.search "搜尋">
 <!ENTITY zotero.preferences.search.fulltextCache "全文快取">
@@ -57,6 +91,8 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "網域／路徑">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "（例如 wikipedia.org）">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "輸出格式">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "拖放超過多少個項目時，停用快速複製：">
+
 
 <!ENTITY zotero.preferences.prefpane.styles "Styles">
 
@@ -118,3 +154,11 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "重設轉譯器與樣式…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重設轉譯器…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "重設樣式…">
+
+<!ENTITY zotero.preferences.debugOutputLogging "偵錯輸出紀錄">
+<!ENTITY zotero.preferences.debugOutputLogging.message "偵錯輸出可幫助 Zotero 開發人員診斷 Zotero 的問題。偵錯記錄會拖慢 Zotero，所以除非 Zotero 開發人員要求偵錯輸出，否則一般來說請關閉它。">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "行被紀錄了">
+<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "重新啟動後啟用">
+<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "檢視輸出">
+<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "清除輸出">
+<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "提交到 Zotero 伺服器">

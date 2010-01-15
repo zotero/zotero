@@ -1,5 +1,9 @@
 <!ENTITY zotero.general.optional "(Voliteľné)">
 <!ENTITY zotero.general.note "Poznámka:">
+<!ENTITY zotero.general.selectAll "Select All">
+<!ENTITY zotero.general.deselectAll "Deselect All">
+<!ENTITY zotero.general.edit "Edit">
+<!ENTITY zotero.general.delete "Delete">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Hlásenie o chybe môže obsahovať informácie nesúvisiace so Zoterom.">
 <!ENTITY zotero.errorReport.submissionInProgress "Prosím počkajte kým sa hlásenie o chybe neodošle.">
@@ -11,6 +15,10 @@
 <!ENTITY zotero.upgrade.newVersionInstalled "Nainštalovali ste novú verziu Zotera.">
 <!ENTITY zotero.upgrade.upgradeRequired "Na to, aby ste mohli pracovať s novou verziou je potrebné aktualizovať vašu Zotero databázu.">
 <!ENTITY zotero.upgrade.autoBackup "Pred tým, než budú vykonané zmeny, sa vaša súčasná databáza automaticky archivuje.">
+<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
+<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Prosím počkajte kým sa dokončí aktualizácia. Môže to trvať niekoľko minút.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Vaša Zotero databáza bola úspešne aktualizovaná.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Prosím prezrite si">
@@ -19,6 +27,8 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Pridajte výber do Zotera ako poznámku">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Pridajte výber do Zotera ako novú položku a poznámku">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
 
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Poznámky">
@@ -47,8 +57,12 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Zobraz v knižnici">
 <!ENTITY zotero.items.menu.attach.note "Pridaj poznámku">
+<!ENTITY zotero.items.menu.attach "Add Attachment">
 <!ENTITY zotero.items.menu.attach.snapshot "Pripoj snímku aktuálnej stránky">
 <!ENTITY zotero.items.menu.attach.link "Pripoj odkaz na aktuálnu stránku">
+<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
+<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+
 <!ENTITY zotero.items.menu.duplicateItem "Duplikuj vybranú položku">
 
 <!ENTITY zotero.toolbar.newItem.label "Nová položka">
@@ -161,9 +175,21 @@
 
 <!ENTITY zotero.integration.references.label "Referencie v bibliografii">
 
+<!ENTITY zotero.sync.button "Sync with Zotero Server">
+<!ENTITY zotero.sync.error "Sync Error">
 <!ENTITY zotero.sync.storage.progress "Progress:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
+<!ENTITY zotero.sync.longTagFixer.split "Split">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
+<!ENTITY zotero.sync.longTagFixer.character "character">
+<!ENTITY zotero.sync.longTagFixer.characters "characters">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">

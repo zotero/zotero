@@ -1,5 +1,9 @@
 <!ENTITY zotero.general.optional "(可选)">
 <!ENTITY zotero.general.note "便笺:">
+<!ENTITY zotero.general.selectAll "Select All">
+<!ENTITY zotero.general.deselectAll "Deselect All">
+<!ENTITY zotero.general.edit "Edit">
+<!ENTITY zotero.general.delete "Delete">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "错误日志里可能会包含一些与Zotero无关的信息.">
 <!ENTITY zotero.errorReport.submissionInProgress "正在提交错误报告, 请等待.">
@@ -11,6 +15,10 @@
 <!ENTITY zotero.upgrade.newVersionInstalled "您已经安装了一个新版本的Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "为了使用这个新版本您必须升级您的数据库.">
 <!ENTITY zotero.upgrade.autoBackup "在任何实质性的改动前, 您已有的数据库会被自动备份.">
+<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
+<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
 <!ENTITY zotero.upgrade.upgradeInProgress "请耐心等待升级过程结束. 这可能要花上几分钟了.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "您的Zotero数据库已被成功升级.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "请查看">
@@ -19,6 +27,8 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "将所选内容添至 Zotero 便笺">
 <!ENTITY zotero.contextMenu.addTextToNewNote "由所选内容创建 Zotero 便笺">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
 
 <!ENTITY zotero.tabs.info.label "信息">
 <!ENTITY zotero.tabs.notes.label "便笺">
@@ -47,8 +57,12 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "在书库中显示">
 <!ENTITY zotero.items.menu.attach.note "添加便笺">
+<!ENTITY zotero.items.menu.attach "Add Attachment">
 <!ENTITY zotero.items.menu.attach.snapshot "附加当前页的快照">
 <!ENTITY zotero.items.menu.attach.link "附加当前页的链接">
+<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
+<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+
 <!ENTITY zotero.items.menu.duplicateItem "生成所选条目复件">
 
 <!ENTITY zotero.toolbar.newItem.label "新建条目">
@@ -161,9 +175,21 @@
 
 <!ENTITY zotero.integration.references.label "References in Bibliography">
 
+<!ENTITY zotero.sync.button "Sync with Zotero Server">
+<!ENTITY zotero.sync.error "Sync Error">
 <!ENTITY zotero.sync.storage.progress "Progress:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
+<!ENTITY zotero.sync.longTagFixer.split "Split">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
+<!ENTITY zotero.sync.longTagFixer.character "character">
+<!ENTITY zotero.sync.longTagFixer.characters "characters">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">

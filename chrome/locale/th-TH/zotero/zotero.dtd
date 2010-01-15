@@ -1,5 +1,9 @@
 <!ENTITY zotero.general.optional "(Optional)">
 <!ENTITY zotero.general.note "โน๊ต:">
+<!ENTITY zotero.general.selectAll "Select All">
+<!ENTITY zotero.general.deselectAll "Deselect All">
+<!ENTITY zotero.general.edit "Edit">
+<!ENTITY zotero.general.delete "Delete">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "โปรดรอในระหว่างที่รายงานข้อผิดพลาดกำลังส่งอยู่">
@@ -11,6 +15,10 @@
 <!ENTITY zotero.upgrade.newVersionInstalled "ท่านได้ติดตั้งโซแทโรรุ่นใหม่แล้ว">
 <!ENTITY zotero.upgrade.upgradeRequired "ฐานข้อมูลโซแทโรของท่าน จำเป็นต้องอัพเกรดก่อนเพื่อให้ทำงานได้กับรุ่นใหม่">
 <!ENTITY zotero.upgrade.autoBackup "ฐานข้อมูลปัจจุบันของท่านจะได้รับการทำสำรองไว้โดยอัตโนมัติ ก่อนที่จะมีการเปลี่ยนแปลงใด ๆ เกิดขึ้น">
+<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
+<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
 <!ENTITY zotero.upgrade.upgradeInProgress "โปรดรอจนกว่าจะบวนการอัพเกรดจะเสร็จสิ้น ซึ่งอาจใช้เวลาหลายนาที">
 <!ENTITY zotero.upgrade.upgradeSucceeded "ฐานข้อมูลโซแทโรของท่านได้รับการอัพเกรดแล้ว">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "โปรดดู">
@@ -19,6 +27,8 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Add Selection to Zotero Note">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Create Zotero Item and Note from Selection">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
 
 <!ENTITY zotero.tabs.info.label "ข้อมูล">
 <!ENTITY zotero.tabs.notes.label "โน้ต">
@@ -47,8 +57,12 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "แสดงในไลบรารี่">
 <!ENTITY zotero.items.menu.attach.note "Add Note">
+<!ENTITY zotero.items.menu.attach "Add Attachment">
 <!ENTITY zotero.items.menu.attach.snapshot "Attach Snapshot of Current Page">
 <!ENTITY zotero.items.menu.attach.link "Attach Link to Current Page">
+<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
+<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+
 <!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
 
 <!ENTITY zotero.toolbar.newItem.label "ไอเทมใหม่">
@@ -161,9 +175,21 @@
 
 <!ENTITY zotero.integration.references.label "References in Bibliography">
 
+<!ENTITY zotero.sync.button "Sync with Zotero Server">
+<!ENTITY zotero.sync.error "Sync Error">
 <!ENTITY zotero.sync.storage.progress "Progress:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
+<!ENTITY zotero.sync.longTagFixer.split "Split">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
+<!ENTITY zotero.sync.longTagFixer.character "character">
+<!ENTITY zotero.sync.longTagFixer.characters "characters">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">

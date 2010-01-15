@@ -1,5 +1,9 @@
 <!ENTITY zotero.general.optional "（オプショナル）">
 <!ENTITY zotero.general.note "メモ：">
+<!ENTITY zotero.general.selectAll "Select All">
+<!ENTITY zotero.general.deselectAll "Deselect All">
+<!ENTITY zotero.general.edit "Edit">
+<!ENTITY zotero.general.delete "Delete">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "エラー･ログはZoteroとは関係していないメッセージを含んでいる可能性があります。">
 <!ENTITY zotero.errorReport.submissionInProgress "エラーレポートが送信されるまでお待ちください。">
@@ -11,6 +15,10 @@
 <!ENTITY zotero.upgrade.newVersionInstalled "Zoteroの新しいバージョンはインストールされました。">
 <!ENTITY zotero.upgrade.upgradeRequired "新しいバージョンを使用する前にZoteroのデータベースをアップグレードする必要があります。">
 <!ENTITY zotero.upgrade.autoBackup "変更が行われる前にデータベースはすべて自動的にバックアップされます。">
+<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
+<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
 <!ENTITY zotero.upgrade.upgradeInProgress "このアップグレードが終了するまでお待ちください。数分間かかる場合もあります。">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Zoteroデータベースは問題なくアップグレードされました。">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "新機能と改良点に関しては">
@@ -19,6 +27,8 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "選択範囲をZoteroメモに追加">
 <!ENTITY zotero.contextMenu.addTextToNewNote "選択範囲からZoteroメモを作成">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
 
 <!ENTITY zotero.tabs.info.label "情報">
 <!ENTITY zotero.tabs.notes.label "メモ">
@@ -47,8 +57,12 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "ライブラリーで表示">
 <!ENTITY zotero.items.menu.attach.note "メモを追加">
+<!ENTITY zotero.items.menu.attach "Add Attachment">
 <!ENTITY zotero.items.menu.attach.snapshot "現ページのスナップショットを添付">
 <!ENTITY zotero.items.menu.attach.link "現ページへのリンクを添付">
+<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
+<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+
 <!ENTITY zotero.items.menu.duplicateItem "選択されたアイテムを複製">
 
 <!ENTITY zotero.toolbar.newItem.label "新規アイテム">
@@ -161,9 +175,21 @@
 
 <!ENTITY zotero.integration.references.label "参照文献リストの中の参照文献">
 
+<!ENTITY zotero.sync.button "Sync with Zotero Server">
+<!ENTITY zotero.sync.error "Sync Error">
 <!ENTITY zotero.sync.storage.progress "Progress:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
+
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
+<!ENTITY zotero.sync.longTagFixer.split "Split">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
+<!ENTITY zotero.sync.longTagFixer.character "character">
+<!ENTITY zotero.sync.longTagFixer.characters "characters">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
