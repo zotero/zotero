@@ -2780,6 +2780,11 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("CREATE INDEX customBaseFieldMappings_customFieldID ON customBaseFieldMappings(customFieldID)");
 				}
 				
+				if (i==69) {
+					Zotero.DB.query("DROP TRIGGER IF EXISTS fku_customFields_customFieldID_customFields_customFieldID");
+					Zotero.DB.query("DROP TRIGGER IF EXISTS fkd_customFields_customFieldID_customFields_customFieldID");
+				}
+				
 				Zotero.wait();
 			}
 			
