@@ -40,7 +40,7 @@ Zotero.Utilities = function () {}
  * @return {Object} firstName, lastName, and creatorType
  */
 Zotero.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
-	const allCapsRe = /^[A-Z]+$/;
+	const allCapsRe = /^[A-Z\u0400-\u042f]+$/;
 	
 	if(typeof(author) != "string") {
 		throw "cleanAuthor: author must be a string";
