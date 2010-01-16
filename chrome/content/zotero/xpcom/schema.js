@@ -2782,7 +2782,6 @@ Zotero.Schema = new function(){
 				
 				if (i==69) {
 					Zotero.DB.query("DROP TRIGGER IF EXISTS fku_customFields_customFieldID_customFields_customFieldID");
-					Zotero.DB.query("DROP TRIGGER IF EXISTS fkd_customFields_customFieldID_customFields_customFieldID");
 				}
 				
 				Zotero.wait();
