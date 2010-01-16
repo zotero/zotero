@@ -1,4 +1,4 @@
--- 16
+-- 17
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -402,7 +402,7 @@ CREATE TRIGGER fki_customBaseFieldMappings_customFieldID_customFields_customFiel
   END;
 
 DROP TRIGGER IF EXISTS fku_customBaseFieldMappings_customFieldID_customFields_customFieldID;
-CREATE TRIGGER fku_customFields_customFieldID_customFields_customFieldID
+CREATE TRIGGER fku_customBaseFieldMappings_customFieldID_customFields_customFieldID
   BEFORE UPDATE OF customFieldID ON customBaseFieldMappings
   FOR EACH ROW BEGIN
     SELECT RAISE(ABORT, 'update on table "customBaseFieldMappings" violates foreign key constraint "fku_customBaseFieldMappings_customFieldID_customFields_customFieldID"')
@@ -410,7 +410,7 @@ CREATE TRIGGER fku_customFields_customFieldID_customFields_customFieldID
   END;
 
 DROP TRIGGER IF EXISTS fkd_customBaseFieldMappings_customFieldID_customFields_customFieldID;
-CREATE TRIGGER fkd_customFields_customFieldID_customFields_customFieldID
+CREATE TRIGGER fkd_customBaseFieldMappings_customFieldID_customFields_customFieldID
   BEFORE DELETE ON customFields
   FOR EACH ROW BEGIN
     DELETE FROM customBaseFieldMappings WHERE customFieldID = OLD.customFieldID;
@@ -445,7 +445,7 @@ DROP TRIGGER IF EXISTS fkd_customItemTypeFields_customItemTypeID_customItemTypes
 CREATE TRIGGER fkd_customItemTypeFields_customItemTypeID_customItemTypes_customItemTypeID
   BEFORE DELETE ON customItemTypes
   FOR EACH ROW BEGIN
-    DELETE FROM customBaseFieldMappings WHERE customItemTypeID = OLD.customItemTypeID;
+    DELETE FROM customItemTypeFields WHERE customItemTypeID = OLD.customItemTypeID;
   END;
 
 DROP TRIGGER IF EXISTS fku_customItemTypes_customItemTypeID_customItemTypeFields_customItemTypeID;
