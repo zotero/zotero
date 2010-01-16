@@ -7,12 +7,16 @@ row > vbox
 	padding-bottom: 0 !important;
 }
 
-row vbox[fieldname=abstractNote],
-row vbox[fieldname=extra]
+row vbox[fieldname],
 {
 	margin-left: 1px;
 }
 
 .creator-type-label image {
 	margin-bottom: 0;
+}
+
+textbox, tagsbox textbox
+{
+	margin-left: -2px;
 }

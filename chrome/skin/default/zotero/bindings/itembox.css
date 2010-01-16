@@ -10,8 +10,9 @@ row, tagsbox row
 
 textbox, tagsbox textbox
 {
-	margin-top: 0;
-	margin-bottom: -1px;
+	margin-top: -1px;
+	margin-bottom: -2px;
+	margin-left: 0;
 }
 
 #go-buttons button
@@ -91,9 +92,7 @@ row hbox label:first-child
 	margin-right: 1px;
 }
 
-row > label,
-row > vbox[fieldname=abstractNote],
-row > vbox[fieldname=extra]
+row label, row > vbox[fieldname]
 {
 	margin-top: 1px !important;
 	margin-bottom: 1px !important;
