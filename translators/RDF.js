@@ -32,6 +32,9 @@ var n = {
 	prism:"http://prismstandard.org/namespaces/1.2/basic/",
 	foaf:"http://xmlns.com/foaf/0.1/",
 	vcard:"http://nwalsh.com/rdf/vCard#",
+	vcard2:"http://www.w3.org/2006/vcard/ns#",	// currently used only for NSF, but is probably
+												// very similar to the nwalsh vcard ontology in a
+												// different namespace
 	link:"http://purl.org/rss/1.0/modules/link/",
 	z:"http://www.zotero.org/namespaces/export#"
 };
@@ -292,7 +295,7 @@ function importItem(newItem, node, type) {
 	}
 	
 	// title
-	newItem.title = getFirstResults(node, [n.dc+"title"], true);
+	newItem.title = getFirstResults(node, [n.dc+"title", n.vcard2+"fn"], true);
 	if(!newItem.itemType && !newItem.title) {			// require the title
 														// (if not a known type)
 		return false;
@@ -364,7 +367,7 @@ function importItem(newItem, node, type) {
 	newItem.artworkMedium = newItem.interviewMedium = getFirstResults(node, [n.dcterms+"medium"], true);
 	
 	// publisher
-	var publisher = getFirstResults(node, [n.dc+"publisher"]);
+	var publisher = getFirstResults(node, [n.dc+"publisher", n.vcard2+"org"]);
 	if(publisher) {
 		if(typeof(publisher[0]) == "string") {
 			newItem.publisher = publisher[0];
@@ -378,6 +381,8 @@ function importItem(newItem, node, type) {
 					if(place) {
 						newItem.place = getFirstResults(place[0], [n.vcard+"locality"]);
 					}
+				} else if(type == n.vcard2+"Organization") {
+					newItem.publisher = getFirstResults(publisher[0], [n.vcard2+"organization-name"], true);
 				}
 			}
 		}
@@ -387,7 +392,7 @@ function importItem(newItem, node, type) {
 	newItem.distributor = newItem.label = newItem.company = newItem.institution = newItem.publisher;
 	
 	// date
-	newItem.date = getFirstResults(node, [n.dc+"date"], true);
+	newItem.date = getFirstResults(node, [n.dc+"date", n.dcterms+"dateSubmitted"], true);
 	if (!newItem.date) {
 		newItem.date = getFirstResults(node, [n.dc+"date.issued"], true);
 		if (!newItem.date) {
@@ -398,7 +403,6 @@ function importItem(newItem, node, type) {
 	newItem.accessDate = getFirstResults(node, [n.dcterms+"dateSubmitted"], true);
 	// lastModified
 	newItem.lastModified = getFirstResults(node, [n.dcterms+"modified"], true);
-	
 	
 	// identifier
 	var identifiers = getFirstResults(node, [n.dc+"identifier"]);
@@ -439,6 +443,13 @@ function importItem(newItem, node, type) {
 		}
 	}
 	
+	if(!newItem.url) {
+		var url = getFirstResults(node, [n.vcard2+"url"]);
+		if(url) {
+			newItem.url = Zotero.RDF.getResourceURI(url[0]);
+		}
+	}
+	
 	// archiveLocation
 	newItem.archiveLocation = getFirstResults(node, [n.dc+"coverage"], true);
 	
@@ -472,6 +483,21 @@ function importItem(newItem, node, type) {
 	
 	// journalAbbreviation
 	newItem.journalAbbreviation = getFirstResults((container ? container : node), [n.dcterms+"alternative"], true);
+	
+	// address
+	var adr = getFirstResults(node, [n.vcard2+"adr"]);
+	if(adr) {
+		newItem.address = getFirstResults(adr[0], [n.vcard2+"label"], true);
+	}
+	
+	// telephone
+	newItem.telephone = getFirstResults(node, [n.vcard2+"tel"], true);
+	
+	// email
+	newItem.email = getFirstResults(node, [n.vcard2+"email"], true);
+	
+	// accepted
+	newItem.accepted = getFirstResults(node, [n.dcterms+"dateAccepted"], true);
 	
 	// see also
 	processSeeAlso(node, newItem);
