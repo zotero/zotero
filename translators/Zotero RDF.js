@@ -25,6 +25,9 @@ var n = {
 	prism:"http://prismstandard.org/namespaces/1.2/basic/",
 	foaf:"http://xmlns.com/foaf/0.1/",
 	vcard:"http://nwalsh.com/rdf/vCard#",
+	vcard2:"http://www.w3.org/2006/vcard/ns#",	// currently used only for NSF, but is probably
+												// very similar to the nwalsh vcard ontology in a
+												// different namespace
 	link:"http://purl.org/rss/1.0/modules/link/",
 	z:"http://www.zotero.org/namespaces/export#"
 };
@@ -175,9 +178,10 @@ function generateItem(item, zoteroType, resource) {
 	
 	// generate container
 	if(container) {
-		if(item.ISSN && !Zotero.RDF.getArcsIn("urn:issn:"+item.ISSN)) {
+		var testISSN = "urn:issn:"+encodeURI(item.ISSN);
+		if(item.ISSN && !Zotero.RDF.getArcsIn(testISSN)) {
 			// use ISSN as container URI if no other item is
-			containerElement = "urn:issn:"+item.ISSN;
+			containerElement = testISSN;
 		} else {
 			containerElement = Zotero.RDF.newResource();
 		}
@@ -197,12 +201,20 @@ function generateItem(item, zoteroType, resource) {
 	}
 	
 	// generate publisher
-	if(item.publisher || item.distributor || item.label || item.company || item.institution || item.place) {
+	// BEGIN NSF
+	if(zoteroType == "nsfReviewer") {
 		var organization = Zotero.RDF.newResource();
-		// set organization type
-		Zotero.RDF.addStatement(organization, rdf+"type", n.foaf+"Organization", false);
-		// add relationship to resource
-		Zotero.RDF.addStatement(resource, n.dc+"publisher", organization, false);
+		Zotero.RDF.addStatement(organization, rdf+"type", n.vcard2+"Organization", false);
+		Zotero.RDF.addStatement(resource, n.vcard2+"org", organization, false);
+	} else {
+	// END NSF
+		if(item.publisher || item.distributor || item.label || item.company || item.institution || item.place) {
+			var organization = Zotero.RDF.newResource();
+			// set organization type
+			Zotero.RDF.addStatement(organization, rdf+"type", n.foaf+"Organization", false);
+			// add relationship to resource
+			Zotero.RDF.addStatement(resource, n.dc+"publisher", organization, false);
+		}
 	}
 	
 	var typeProperties = ["reportType", "videoRecordingType", "letterType",
@@ -285,18 +297,30 @@ function generateItem(item, zoteroType, resource) {
 		if(!value) continue;
 		
 		if(property == "title") {					// title
-			Zotero.RDF.addStatement(resource, n.dc+"title", value, true);
+			// BEGIN NSF
+			if(zoteroType == "nsfReviewer") {
+				Zotero.RDF.addStatement(resource, n.vcard2+"fn", value, true);
+			} else {
+			// END NSF
+				Zotero.RDF.addStatement(resource, n.dc+"title", value, true);
+			}
 		} else if(property == "source") {			// authors/editors/contributors
 			Zotero.RDF.addStatement(resource, n.dc+"source", value, true);
 		} else if(property == "url") {				// url
-			// add url as identifier
-			var term = Zotero.RDF.newResource();
-			// set term type
-			Zotero.RDF.addStatement(term, rdf+"type", n.dcterms+"URI", false);
-			// set url value
-			Zotero.RDF.addStatement(term, rdf+"value", value, true);
-			// add relationship to resource
-			Zotero.RDF.addStatement(resource, n.dc+"identifier", term, false);
+			// BEGIN NSF
+			if(item.homepage) {
+				Zotero.RDF.addStatement(resource, n.vcard2+"url", value, false);
+			} else {
+			// END NSF
+				// add url as identifier
+				var term = Zotero.RDF.newResource();
+				// set term type
+				Zotero.RDF.addStatement(term, rdf+"type", n.dcterms+"URI", false);
+				// set url value
+				Zotero.RDF.addStatement(term, rdf+"value", value, true);
+				// add relationship to resource
+				Zotero.RDF.addStatement(resource, n.dc+"identifier", term, false);
+			}
 		} else if(property == "accessionNumber") {	// accessionNumber as generic ID
 			Zotero.RDF.addStatement(resource, n.dc+"identifier", value, true);
 		} else if(property == "rights") {			// rights
@@ -305,7 +329,11 @@ function generateItem(item, zoteroType, resource) {
 		          property == "version") {			// version
 			Zotero.RDF.addStatement(resource, n.prism+"edition", value, true);
 		} else if(property == "date") {				// date
-			Zotero.RDF.addStatement(resource, n.dc+"date", value, true);
+			if(item.dateSent) {
+				Zotero.RDF.addStatement(resource, n.dcterms+"dateSubmitted", value, true);
+			} else {
+				Zotero.RDF.addStatement(resource, n.dc+"date", value, true);
+			}
 		} else if(property == "accessDate") {		// accessDate
 			Zotero.RDF.addStatement(resource, n.dcterms+"dateSubmitted", value, true);
 		} else if(property == "issueDate") {		// issueDate
@@ -362,7 +390,13 @@ function generateItem(item, zoteroType, resource) {
 		          property == "label" ||			// label (audioRecording)
 		          property == "company" ||			// company (computerProgram)
 		          property == "institution") {		// institution (report)
-			Zotero.RDF.addStatement(organization, n.foaf+"name", value, true);
+		    // BEGIN NSF
+		    if(zoteroType == "nsfReviewer") {
+		    	Zotero.RDF.addStatement(organization, n.vcard2+"organization-name", value, true);
+		    } else {
+		    // END NSF
+				Zotero.RDF.addStatement(organization, n.foaf+"name", value, true);
+			}
 		} else if(property == "place") {			// place
 			var address = Zotero.RDF.newResource();
 			// set address type
@@ -395,6 +429,19 @@ function generateItem(item, zoteroType, resource) {
 					Zotero.RDF.addStatement(resource, rdf+"value", value, true);
 				}
 			}
+		// BEGIN NSF
+		} else if(property == "address") {
+			var address = Zotero.RDF.newResource();
+			Zotero.RDF.addStatement(address, rdf+"type", n.vcard2+"Address", false);
+			Zotero.RDF.addStatement(address, n.vcard2+"label", value, true);
+			Zotero.RDF.addStatement(resource, n.vcard2+"adr", address, false);
+		} else if(property == "telephone") {
+			Zotero.RDF.addStatement(resource, n.vcard2+"tel", value, true);
+		} else if(property == "email") {
+			Zotero.RDF.addStatement(resource, n.vcard2+"email", value, true);
+		} else if(property == "accepted") {
+			Zotero.RDF.addStatement(resource, n.dcterms+"dateAccepted", value, true);
+		// END NSF
 		// THIS CATCHES ALL REMAINING PROPERTIES
 		} else if(ignoreProperties.indexOf(property) == -1) {
 			Zotero.debug("Zotero RDF: using Zotero namespace for property "+property);
@@ -422,8 +469,9 @@ function doExport() {
 	while(item = Zotero.nextItem()) {
 		items.push(item);
 		
-		if(item.ISBN && !usedResources["urn:isbn:"+item.ISBN]) {
-			itemResources[item.itemID] = "urn:isbn:"+item.ISBN;
+		var testISBN = "urn:isbn:"+encodeURI(item.ISBN);
+		if(item.ISBN && !usedResources[testISBN]) {
+			itemResources[item.itemID] = testISBN;
 			usedResources[itemResources[item.itemID]] = true;
 		} else if(item.itemType != "attachment" && item.url && !usedResources[item.url]) {
 			itemResources[item.itemID] = item.url;
