@@ -4048,20 +4048,11 @@ Zotero.Item.prototype.toArray = function (mode) {
 		arr[Zotero.ItemFields.getName(i)] = this._itemData[i] ? this._itemData[i] + '': '';
 	}
 	
-	if (!arr.title) {
-		var titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.itemTypeID, 'title');
-		var titleFieldName = Zotero.ItemFields.getName(titleFieldID);
-		if (arr[titleFieldName]) {
-			arr.title = titleFieldName;
-			delete arr[titleFieldName];
-		}
-		
-		switch (this.typeID) {
-			case Zotero.ItemTypes.getID('note'):
-				break;
-			
-			default:
-				arr.title = this.getDisplayTitle(mode == 2) + '';
+	if (mode == 1 || mode == 2) {
+		if (!arr.title &&
+				(this.itemTypeID == Zotero.ItemTypes.getID('letter') ||
+				this.itemTypeID == Zotero.ItemTypes.getID('interview'))) {
+			arr.title = this.getDisplayTitle(mode == 2) + '';
 		}
 	}
 	
