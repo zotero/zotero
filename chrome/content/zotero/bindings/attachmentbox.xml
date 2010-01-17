@@ -191,15 +191,6 @@
 					// View and Show buttons
 					if (this.displayGoButtons) {
 						goButtons.hidden = false;
-						
-						var itemID = this.item.id;
-						var noLocateOnMissing = !this.editable;
-						viewButton.onclick = function (event) {
-							ZoteroPane.viewAttachment(itemID, event, noLocateOnMissing)
-						}
-						showButton.onclick = function (event) {
-							ZoteroPane.showAttachmentInFilesystem(itemID, noLocateOnMissing)
-						}
 					}
 					else {
 						goButtons.hidden = true;
@@ -454,6 +445,26 @@
 			</method>
 			
 			
+			<method name="onViewClick">
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+					ZoteroPane.viewAttachment(this.item.id, event.originalTarget, !this.editable);
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="onShowClick">
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+					ZoteroPane.showAttachmentInFilesystem(this.item.id, event.originalTarget, !this.editable);
+				]]>
+				</body>
+			</method>
+			
+			
 			<!--
 			 Update Indexed: (Yes|No|Partial) line
 			-->
@@ -514,8 +525,8 @@
 				 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 				<label id="title"/>
 				<hbox id="go-buttons">
-					<button id="view" flex="1"/>
-					<button id="show" label="&zotero.item.attachment.file.show;" flex="1"/>
+					<button id="view" flex="1" oncommand="document.getBindingParent(this).onViewClick(event)"/>
+					<button id="show" label="&zotero.item.attachment.file.show;" flex="1" oncommand="document.getBindingParent(this).onShowClick(event)"/>
 				</hbox>
 				<label id="url" crop="end"
 					ondragstart="var dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
