@@ -410,7 +410,7 @@
 								continue;
 							}
 							
-							// Start tabindex at 1000 after creators
+							// Start tabindex at 1001 after creators
 							var tabindex = fieldIsClickable
 								? (i>0 ? this._tabIndexMinFields + i : 1) : 0;
 							this._tabIndexMaxInfoFields = Math.max(this._tabIndexMaxInfoFields, tabindex);
@@ -2201,11 +2201,17 @@
 									return false;
 								
 								case this._tabIndexMinCreators:
-									var nextIndex = 1;
+									var nextIndex = 1; // Title field
 									break;
 								
 								case this._tabIndexMinFields:
-									var nextIndex = this._tabIndexMaxCreators;
+									// No creators
+									if (this._tabIndexMaxCreators == 0) {
+										var nextIndex = 1; // Title field
+									}
+									else {
+										var nextIndex = this._tabIndexMaxCreators;
+									}
 									break;
 								
 								default:
