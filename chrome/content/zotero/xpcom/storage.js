@@ -326,11 +326,9 @@ Zotero.Sync.Storage = new function () {
 			var syncHash = Zotero.Sync.Storage.getSyncedHash(itemID);
 			if (syncHash) {
 				var fileHash = item.attachmentHash;
-				Zotero.debug('================');
-				Zotero.debug(fileHash);
-				Zotero.debug(syncHash);
 				if (fileHash && fileHash == syncHash) {
-					Zotero.debug("Mod time didn't match but hash did for " + file.leafName + " -- ignoring");
+					Zotero.debug("Mod time didn't match (" + fileModTime + "!=" + syncModTime + ") "
+						+ "but hash did for " + file.leafName + " -- ignoring");
 					return false;
 				}
 			}
@@ -503,7 +501,8 @@ Zotero.Sync.Storage = new function () {
 			}
 			var fileHash = item.attachmentHash;
 			if (attachmentData[item.id].hash && attachmentData[item.id].hash == fileHash) {
-				Zotero.debug("Mod time didn't match but hash did for " + file.leafName + " -- ignoring");
+				Zotero.debug("Mod time didn't match (" + fileModTime + "!=" + attachmentData[item.id].mtime + ") "
+					+ "but hash did for " + file.leafName + " -- ignoring");
 				continue;
 			}
 			
