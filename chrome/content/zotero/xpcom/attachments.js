@@ -1159,9 +1159,10 @@ Zotero.Attachments = new function(){
 			nsIURL.fileBaseName = nsIURL.fileBaseName + '.' + tld;
 		}
 		
-		nsIURL.fileBaseName = Zotero.File.getValidFileName(nsIURL.fileBaseName);
+		// Pass unencoded name to getValidFileName() so that '%20' isn't stripped to '20'
+		nsIURL.fileBaseName = Zotero.File.getValidFileName(decodeURIComponent(nsIURL.fileBaseName));
 		
-		return nsIURL.fileName;
+		return decodeURIComponent(nsIURL.fileName);
 	}
 	
 	
