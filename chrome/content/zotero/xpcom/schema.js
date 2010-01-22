@@ -1038,15 +1038,14 @@ Zotero.Schema = new function(){
 			_updateDBVersion('triggers', _getSchemaSQLVersion('triggers'));
 			
 			if (!Zotero.Schema.skipDefaultData) {
-				/*
 				// Quick Start Guide web page item
-				var sql = "INSERT INTO items VALUES(1, 13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'ABCD1234')";
+				var sql = "INSERT INTO items VALUES(1, 13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'ABCD2345')";
 				Zotero.DB.query(sql);
 				var sql = "INSERT INTO itemDataValues VALUES (1, ?)";
-				Zotero.DB.query(sql, Zotero.localeJoin(["Zotero",  "\u2014", Zotero.getString('install.quickStartGuide')]));
+				Zotero.DB.query(sql, Zotero.getString('install.quickStartGuide'));
 				var sql = "INSERT INTO itemData VALUES (1, 110, 1)";
 				Zotero.DB.query(sql);
-				var sql = "INSERT INTO itemDataValues VALUES (2, 'http://www.zotero.org/support/quick_start_guide')";
+				var sql = "INSERT INTO itemDataValues VALUES (2, 'http://zotero.org/support/quick_start_guide')";
 				Zotero.DB.query(sql);
 				var sql = "INSERT INTO itemData VALUES (1, 1, 2)";
 				Zotero.DB.query(sql);
@@ -1058,24 +1057,20 @@ Zotero.Schema = new function(){
 				// CHNM as creator
 				var sql = "INSERT INTO creatorData VALUES (1, '', 'Center for History and New Media', '', 1, NULL)";
 				Zotero.DB.query(sql);
-				var sql = "INSERT INTO creators VALUES (1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'ABCD1234')";
+				var sql = "INSERT INTO creators VALUES (1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'ABCD2345')";
 				Zotero.DB.query(sql);
 				var sql = "INSERT INTO itemCreators VALUES (1, 1, 1, 0)";
 				Zotero.DB.query(sql);
 				
 				// Welcome note
-				var sql = "INSERT INTO items VALUES(2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'ABCD2345')";
+				var sql = "INSERT INTO items VALUES(2, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL, 'ABCD3456')";
 				Zotero.DB.query(sql);
 				var welcomeTitle = Zotero.getString('install.quickStartGuide.message.welcome');
-				var welcomeMsg = '<div class="zotero-note znv1"><p>' + Zotero.localeJoin([
-						welcomeTitle, Zotero.getString('install.quickStartGuide.message.clickViewPage')
-					])
-					+ '</p><p>'
-					+ Zotero.getString('install.quickStartGuide.message.thanks')
-					+ '</p></div>';
+				var welcomeMsg = '<div class="zotero-note znv1"><p><strong>' + welcomeTitle + '</strong></p>'
+					+ '<p>' + Zotero.getString('install.quickStartGuide.message.view') + '</p>'
+					+ '<p>' + Zotero.getString('install.quickStartGuide.message.thanks') + '</p></div>';
 				var sql = "INSERT INTO itemNotes VALUES (2, 1, ?, ?)";
 				Zotero.DB.query(sql, [welcomeMsg, welcomeTitle]);
-				*/
 			}
 			Zotero.DB.commitTransaction();
 			
