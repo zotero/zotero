@@ -1702,7 +1702,7 @@ Zotero.Date = new function(){
 				var seconds = date.getUTCSeconds();
 			}
 			else {
-				return date.toLocaleFormat('%Y-%m-%d %T');
+				return date.toLocaleFormat('%Y-%m-%d %H:%M:%S');
 			}
 			
 			var utils = new Zotero.Utilities();
