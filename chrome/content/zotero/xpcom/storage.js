@@ -1692,7 +1692,7 @@ Zotero.Sync.Storage.QueueManager = new function () {
 				type: 'storagefile',
 				captions: [
 					Zotero.getString('sync.storage.localFile'),
-					Zotero.getString('sync.storage.RemoteFile'),
+					Zotero.getString('sync.storage.remoteFile'),
 					Zotero.getString('sync.storage.savedFile')
 				],
 				objects: objectPairs
