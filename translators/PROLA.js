@@ -1,23 +1,24 @@
 {
 	"translatorID":"2c310a37-a4dd-48d2-82c9-bd29c53c1c76",
 	"translatorType":4,
-	"label":"PROLA",
-	"creator":"Eugeniy Mikhailov and Michael Berkowitz",
-	"target":"https?://(?:www\\.)?prola.aps.org/(toc|searchabstract|abstract)/",
+	"label":"PROLA","creator":"Eugeniy Mikhailov and Michael Berkowitz",
+	"target":"https?://(?:www\\.)?(prola|prl|prb|rmp|pra|prc|prd|pre|prst-ab|prst-per|)\\.aps\\.org[^/]*/(toc|forward|searchabstract|abstract)/",
 	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
+	"maxVersion":null,
 	"priority":100,
 	"inRepository":true,
 	"lastUpdated":"2009-12-26 23:15:00"
 }
+// Works for most journals at http://prola.aps.org/browse.html
 
 function detectWeb(doc, url) {
-	if (url.indexOf("toc") != -1) {
+	// toc indicates table of contents, forward is a "Citing articles" page
+	if (/\/toc\//.test(url) || (/\/forward\//.test(url))){
 		return "multiple";
 	} else {
 		return "journalArticle";
 	}
-}	
+}
 
 function doWeb(doc, url) {
     	var arts = new Array();
@@ -33,7 +34,8 @@ function doWeb(doc, url) {
     	
     	Zotero.Utilities.processDocuments(arts, function(newDoc) {
     		Zotero.debug(newDoc.title);
-    		var abs = Zotero.Utilities.trimInternal(newDoc.evaluate('//div[contains(@class, "aps-abstractbox")]/p', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		// Use abstract only if we have one
+		if (newDoc.evaluate('//div[contains(@class, "aps-abstractbox")]/p', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) var abs = Zotero.Utilities.trimInternal(newDoc.evaluate('//div[contains(@class, "aps-abstractbox")]/p', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
     		var urlRIS = newDoc.location.href;
 		// so far several more or less  identical url possible
 		// one is with "abstract" other with "searchabstract"
@@ -54,7 +56,7 @@ function doWeb(doc, url) {
 					{url:snapurl, title:"PROLA Snapshot", mimeType:"text/html"},
 					{url:pdfurl, title:"PROLA Full Text PDF", mimeType:"application/pdf"}
 				];
-				item.abstractNote = abs;
+				if (abs) item.abstractNote = abs;
 				item.complete();
 			});
 			translator.translate();
