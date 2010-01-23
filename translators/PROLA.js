@@ -7,7 +7,7 @@
 	"maxVersion":null,
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-12-26 23:15:00"
+	"lastUpdated":"2010-01-23 23:15:00"
 }
 // Works for most journals at http://prola.aps.org/browse.html
 
