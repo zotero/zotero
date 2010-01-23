@@ -3,69 +3,61 @@
 	"translatorType":4,
 	"label":"Nagoya University OPAC",
 	"creator":"Frank Bennett",
-	"target":"^http://opac.nul.nagoya-u.ac.jp/",
-	"minVersion":"1.0.0b4.r1",
+	"target":"^http://opac.nul.nagoya-u.ac.jp/webopac/(catdbl.do|ctlsrh.do)",
+	"minVersion":"2.0b7",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-11 02:17:07"
+	"lastUpdated":"2009-01-23 02:17:07"
 }
 
-function detectWeb(doc, url) {
-	if (url.match(/.*[^A-Za-z0-9]ID=[A-Z0-9].*$/)) {
-		var journal_test = doc.evaluate( '//td[contains(text(),"frequency of publication") or contains(text(),"巻次・年月次")]',  doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-		if (!journal_test) {
-			return "book";
-		}
-	}
-}
+// #######################
+// ##### Sample URLs #####
+// #######################
 
 /*
- * Set the texts used to find raw citation elements
+ * The site is session-based, with page content negotiated
+ * in POST calls.  The starting point for an OPAC search is
+ * the URL below.  In testing, I tried the following:
+ *
+ *   - A search listing of books
+ *   - A search listing of journals (no icon)
+ *   - A mixed search listing of books and journals
+ *   - A journal page (no icon)
+ *   - A book page
  */
-function setSpec() {
-	var spec = new Array();
-	spec['title'] = ['題および','title and statement'];	
-	spec['year'] = ['出版・頒布','publication,distribution'];
-	spec['isbn'] = ['国際標準図書','international standard book'];
-	spec['authors'] = ['著者標目','author link'];
-	spec['series'] = ['書誌構造','parent bibliography'];
-	return spec;
-}
+// http://opac.nul.nagoya-u.ac.jp/webopac/catsrk.do
+
+
+
+// #####################
+// ##### Constants #####
+// #####################
 
 /*
- * Extract raw string sets from the page.  This is the only function that uses
- * xpath.  The string sets retrieved for each label registered by setSpec is 
- * stored as a list, to cope with the possibility of multiple instances of the
- * same label with different data.
- */
-function getData(doc, spec) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	var data = new Object();
-	for (key in spec) {
-		var check = doc.evaluate("//td[contains(text(),'"+spec[key][0]+"') or contains(text(),'"+spec[key][1]+"')]/following-sibling::td", doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var c = check.iterateNext();
-		while (c) {
-			if (!data[key] ) {
-				data[key] = new Array();
-			}
-			data[key].push(Zotero.Utilities.cleanString(c.textContent));
-			c = check.iterateNext();
-		}
-	}
-	return data;
-}
+ * Strings corresponding to variables
+*/
+var pageStrings = {
+	title: ['タイトル / 著者','Title / Author'],
+	year: ['出版・頒布','Publication'],
+	isbn: ['ISBN','ISBN'],
+	authors: ['著者名リンク','Author link'],
+	series: ['シリーズ情報','Series information']
+};
+
+var itemUrlBase = "http://opac.nul.nagoya-u.ac.jp/webopac/catdbl.do";
+
+// ############################
+// ##### String functions #####
+// ############################
 
 /*
  * Chop a semicolon-delimited string of authors out of a raw title string,
-  * check it for Japanese characters, and save the raw string for each author
-  * to an array.  If no Japanese authors were found, save directly to the item 
-  * object. 
+ * check it for Japanese characters, and save the raw string for each author
+ * to an array.  If no Japanese authors were found, save directly to the item
+ * object.
  */
-parseRomanAuthors = function (item,data) {
+var parseRomanAuthors = function (item,data) {
 	var datastring = data['title'][0];
 	// don't bother if there is no author info
 	if ( ! datastring.match(/.*\/.*/) ) {
@@ -93,9 +85,9 @@ parseRomanAuthors = function (item,data) {
 		} else if ( authortypehint.match(/.*trans.*/) ) {
 			authortype = "translator";
 		}
-		author = authors[i].replace(/^[ a-z]*/, "").replace( /\.\.\..*/, "" );
+		var author = authors[i].replace(/^[ a-z]*/, "").replace( /\.\.\..*/, "" );
 		// need to test for length because the replacement of commas with semicolons
-		// can cause a short split at the end of a byline that originally ended in a comma 
+		// can cause a short split at the end of a byline that originally ended in a comma
 		if ( ! japanese_check && author.length ) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(author, authortype));
 		}
@@ -110,7 +102,7 @@ parseRomanAuthors = function (item,data) {
  * Clean out cruft, reverse the order of each name, and save
  * directly to the item object.
  */
-parseJapaneseAuthors = function ( item, data ) {
+var parseJapaneseAuthors = function (item, data) {
 	var authortype = author;
 	var authors = data['authors'];
 	for (i in authors ) {
@@ -128,7 +120,6 @@ parseJapaneseAuthors = function ( item, data ) {
 		// going to do.
 		for ( x in item.authorstrings ) {
 			var authorstring = item.authorstrings[x];
-			Zotero.debug(authorstring);
 			var name = author.split(" ");
 			name.reverse();
 			if ( authorstring.indexOf( name[0] ) > -1 && authorstring.match(/.*(訳|譯|譯註)$/) ) {
@@ -158,23 +149,90 @@ function splitTitle(data) {
 	data['title'] = titlestring.split(" . ");
 }
 
+// ##########################
+// ##### Page functions #####
+// ##########################
+
 /*
- * The scrape function brings the various parsing functions together
+ * When getlist argument is nil, return a value when the target
+ * index DOM contains at least one book entry, otherwise
+ * return false.
+ *
+ * When getlist argument is true, return a list of
+ * array items for book entries in the DOM.
  */
-function scrape(doc,url) {
+var sniffIndexPage = function(doc,getlist){
+	var check = doc.evaluate("//td[div[@class='lst_value' and contains(text(),'Books')]]/following-sibling::td",  doc, null, XPathResult.ANY_TYPE, null);
+	var node = check.iterateNext();
+	if (getlist){
+		var ret = new Object();
+		while (node){
+			var myitems = Zotero.Utilities.getItemArray(
+							  doc,
+							  node,
+							  "document\\.catsrhform\\.pkey.value=");
+			for (var r in myitems){
+				ret[r] = myitems[r];
+			}
+			node = check.iterateNext();
+		}
+		return ret;
+	} else {
+		return node;
+	}
+};
+
+/*
+ * Invoke sniffIndexPage to generate a list of book
+ * items in the target DOM.
+ */
+var getBookItems = function(doc){
+	return sniffIndexPage(doc,true);
+};
+
+/*
+ * Extract data from the DOM using the var-string pairs in
+ * pageStrings as a guide to navigation.
+ */
+var scrapePage = function(doc, spec) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == 'x') return namespace; else return null;
+	} : null;
+	var data = new Object();
+	for (key in spec) {
+		var check = doc.evaluate("//th[div[contains(text(),'"+spec[key][0]+"') or contains(text(),'"+spec[key][1]+"')]]/following-sibling::td/div", doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var c = check.iterateNext();
+		while (c) {
+			if (!data[key] ) {
+				data[key] = new Array();
+			}
+			data[key].push(Zotero.Utilities.trimInternal(c.textContent));
+			c = check.iterateNext();
+		}
+	}
+	return data;
+};
+
+/*
+ * Bring it all together.
+ */
+function scrapeAndParse(doc,url) {
+	if (!detectWeb(doc,url)){
+		return false;
+	}
 	var item = new Zotero.Item("book");
 	item.authorstrings = new Array();
-	var spec = setSpec();
-	var data = getData(doc, spec);
+	var data = scrapePage(doc, pageStrings);
 	splitTitle(data);
 
 	if (data['title']) {
 		var titles = new Array();
 		for (i in data['title']) {
-			titles.push( data['title'][i].replace(/\s*\/.*/, "") );
+			titles.push( data['title'][i].replace(/\s+\/.*/, "") );
 		}
 		item.title = titles.join(", ");
-		jse_authors = parseRomanAuthors( item, data );
+		var jse_authors = parseRomanAuthors( item, data );
 		if ( jse_authors ) {
 			parseJapaneseAuthors( item, data );
 		}
@@ -193,22 +251,50 @@ function scrape(doc,url) {
 			}
 		}
 	}
-	
+
 	if (data['series']) {
-		item.series = data['series'][0].replace(/<.*/, "");
+		item.series = data['series'][0].replace(/[/|<].*/, "");
 	}
-	
+
 	if (data['isbn']) {
 		item.ISBN = data['isbn'][0].replace(/[^0-9]*([0-9]+).*/, "$1");
 	}
-	
 	item.complete();
 }
 
+// #########################
+// ##### API functions #####
+// #########################
+
+function detectWeb(doc, url) {
+	if (url.match(/.*\/webopac\/catdbl.do/)) {
+		var journal_test = doc.evaluate( '//th[div[contains(text(),"Frequency of publication") or contains(text(),"刊行頻度") or contains(text(),"巻号") or contains(text(),"Volumes")]]',  doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+		if (!journal_test) {
+			return "book";
+		}
+	} else if (url.match(/.*\/webopac\/ctlsrh.do/)){
+		if (sniffIndexPage(doc)){
+			return "multiple";
+		}
+	}
+	return false;
+}
+
 function doWeb(doc, url) {
-	articles = [url];
-	Zotero.Utilities.processDocuments(articles, scrape, function() {
-		Zotero.done();
-	});
-	Zotero.wait();
+	var format = detectWeb(doc, url);
+	if (format == "multiple") {
+		var items = {};
+		for (var u in Zotero.selectItems( getBookItems(doc) )){
+			var m = u.match(/.*document\.catsrhform\.pkey\.value=\'([^\']+)\'.*/);
+			items[itemUrlBase+"?pkey="+m[1]+"&initFlg=_RESULT_SET_NOTBIB"] = true;
+		}
+		if (items.__count__){
+			for (var u in items){
+				var d = Zotero.Utilities.retrieveDocument(u);
+				scrapeAndParse(d, u);
+			}
+		}
+	} else if (format == "book"){
+		scrapeAndParse(doc, url);
+	}
 }
