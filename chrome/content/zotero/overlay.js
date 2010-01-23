@@ -1254,6 +1254,8 @@ var ZoteroPane = new function()
 		
 		var item = this.getSelectedItems()[0];
 		
+		Zotero.DB.beginTransaction();
+		
 		// Create new unsaved clone item in target library
 		var newItem = new Zotero.Item(item.itemTypeID);
 		newItem.libraryID = item.libraryID;
@@ -1267,6 +1269,9 @@ var ZoteroPane = new function()
 		if (this.itemsView._itemGroup.isCollection() && !newItem.getSource()) {
 			this.itemsView._itemGroup.ref.addItem(newItem.id);
 		}
+		
+		Zotero.DB.commitTransaction();
+		
 		this.selectItem(newItem.id);
 	}
 	
