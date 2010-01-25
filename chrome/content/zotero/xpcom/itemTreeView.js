@@ -387,6 +387,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 				var id = item.id;
 				
 				var row = this._itemRowMap[id];
+				
 				// Item already exists in this view
 				if( row != null)
 				{
@@ -762,21 +763,6 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function(row, skipItemMapRefresh
 			
 			for(var i = 0; i < newRows.length; i++)
 			{
-				// If item already exists elsewhere in the tree, we have to
-				// remove it -- this can happen when moving an item into a
-				// collection if the collection gets the modify event before
-				// the item
-				var existingRow = this._itemRowMap[newRows[i].id];
-				if (existingRow != null) {
-					/*
-					this._hideItem(existingRow);
-					this._treebox.rowCountChanged(existingRow + 1, -1);
-					if (existingRow < row) {
-						row--;
-					}
-					*/
-					throw ("Item already exists outside of collection in Zotero.ItemTreeView.toggleOpenRow()");
-				}
 				count++;
 				this._showItem(new Zotero.ItemTreeView.TreeRow(newRows[i], thisLevel + 1, false), row + i + 1); // item ref, before row
 			}
