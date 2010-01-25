@@ -109,7 +109,22 @@ Zotero.ItemFields = new function() {
 			throw (e);
 		}
 		
-		return _fields[field].label ? _fields[field].label : Zotero.getString("itemFields." + fieldName);
+		if (_fields[field].label) {
+			return _fields[field].label;
+		}
+		else {
+			try {
+				var loc = Zotero.getString("itemFields." + fieldName);
+			}
+			// If localized string not found, try base field
+			catch (e) {
+				Zotero.debug("Localized string not found for field '" + fieldName + "' -- trying base field");
+				var baseFieldID = this.getBaseIDFromTypeAndField(itemType, field);
+				fieldName = this.getName(baseFieldID);
+				var loc = Zotero.getString("itemFields." + fieldName);
+			}
+			return loc;
+		}
 	}
 	
 	
