@@ -8,7 +8,7 @@
 	"maxVersion":null,
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-10-31 20:35:00"
+	"lastUpdated":"2010-01-25 08:05:00"
 }
 
 function detectWeb(doc, url) {
@@ -29,10 +29,13 @@ function doWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-
-	if (doc.evaluate('//*[contains(@src, "exportarticle_a.gif")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	
+	if (doc.evaluate('//*[contains(@class, "icon_exportarticlesci_dir")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()
+			|| doc.evaluate('//*[contains(@src, "exportarticle_a.gif")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var articles = new Array();
 		if(detectWeb(doc, url) == "multiple") {
+			throw ("Multiple-item saving from ScienceDirect temporarily disabled due to a site update -- an updated Zotero translator will be available soon");
+			
 			//search page
 			var items = new Object();
 			var xpath;
@@ -71,9 +74,10 @@ function doWeb(doc, url) {
 		
 		var scrape = function(newDoc, set) {
 			var PDF;
-			var tempPDF = newDoc.evaluate('//a[@class="noul" and div/div[contains(text(), "PDF")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var tempPDF = newDoc.evaluate('//a[contains(@class, "noul") and contains(@class, "icon_pdf")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if (!tempPDF) { // PDF xpath failed, lets try another
-				tempPDF = newDoc.evaluate('//a[@class="noul" and contains(text(), "PDF")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				// TODO: others?
+				//tempPDF = newDoc.evaluate('//a[@class="noul" and contains(text(), "PDF")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				if (!tempPDF) { // second PDF xpath failed set PDF to null to avoid item.attachments
 					PDF = null;
 				} else {
@@ -83,7 +87,7 @@ function doWeb(doc, url) {
 				PDF = tempPDF.href; // first xpath succeeded, use that link
 			}
 			var url = newDoc.location.href;
-			var get = newDoc.evaluate('//a[img[contains(@src, "exportarticle_a.gif")]]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+			var get = newDoc.evaluate('//a[contains(@class, "icon_exportarticlesci_dir")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
 			// if the PDF is available make it an attachment otherwise only use snapshot.
 			var attachments;
 			if (PDF) {
@@ -190,6 +194,8 @@ function doWeb(doc, url) {
 		}
 		
 	} else {
+		throw ("Guest-mode saving from ScienceDirect temporarily disabled due to a site update -- an updated Zotero translator will be available soon");
+		
 		var sets = [];
 		var articles = new Array();
 		if (detectWeb(doc, url) == "multiple") {
