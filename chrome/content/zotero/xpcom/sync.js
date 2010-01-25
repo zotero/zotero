@@ -3474,6 +3474,12 @@ Zotero.Sync.Server.Data = new function() {
 			data.dateModified = xmlItem.@dateModified.toString();
 		}
 		data.itemTypeID = Zotero.ItemTypes.getID(xmlItem.@itemType.toString());
+		// TEMP - NSF
+		if (!data.itemTypeID) {
+			var msg = "Invalid item type '" + xmlItem.@itemType.toString() + "' in Zotero.Sync.Server.Data.xmlToItem()";
+			var e = new Zotero.Error(msg, "INVALID_ITEM_TYPE");
+			throw (e);
+		}
 		
 		var changedFields = {};
 		
