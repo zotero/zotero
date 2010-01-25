@@ -1133,7 +1133,7 @@ Zotero.Sync.Server = new function () {
 	this.canAutoResetClient = true;
 	this.manualSyncRequired = false;
 	this.nextLocalSyncDate = false;
-	this.apiVersion = 6;
+	this.apiVersion = 7;
 	
 	default xml namespace = '';
 	

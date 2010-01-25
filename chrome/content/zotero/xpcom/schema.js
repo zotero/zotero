@@ -142,10 +142,15 @@ Zotero.Schema = new function(){
 				}
 				
 				var up2 = _updateSchema('system');
+				// Update custom tables so that changes are in place before user data migration
+				this.updateCustomTables(up2);
 				Zotero.wait();
 				var up1 = _migrateUserDataSchema(dbVersion);
 				var up3 = _updateSchema('triggers');
-				this.updateCustomTables(up2);
+				if (up1) {
+					// Update custom tables again in case custom fields were changed during user data migration
+					this.updateCustomTables();
+				}
 				Zotero.wait();
 				
 				Zotero.DB.commitTransaction();
@@ -2777,6 +2782,13 @@ Zotero.Schema = new function(){
 				
 				if (i==69) {
 					Zotero.DB.query("DROP TRIGGER IF EXISTS fku_customFields_customFieldID_customFields_customFieldID");
+				}
+				
+				if (i==70) {
+					Zotero.DB.query("UPDATE itemData SET fieldID=118 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=7) AND fieldID=10");
+					Zotero.DB.query("UPDATE itemData SET fieldID=119 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=29) AND fieldID=28");
+					Zotero.DB.query("UPDATE itemData SET fieldID=119 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=30) AND fieldID=28");
+					Zotero.DB.query("UPDATE itemData SET fieldID=121 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=19) AND fieldID=14");
 				}
 				
 				Zotero.wait();

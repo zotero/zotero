@@ -1,4 +1,4 @@
--- 26
+-- 27
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -286,7 +286,7 @@ INSERT INTO fields VALUES (59,'artworkMedium',NULL);
 INSERT INTO fields VALUES (60,'number',NULL);
 INSERT INTO fields VALUES (61,'artworkSize',NULL);
 INSERT INTO fields VALUES (62,'repository',NULL);
-INSERT INTO fields VALUES (63,'videoRecordingType',NULL);
+INSERT INTO fields VALUES (63,'videoRecordingFormat',NULL);
 INSERT INTO fields VALUES (64,'interviewMedium',NULL);
 INSERT INTO fields VALUES (65,'letterType',NULL);
 INSERT INTO fields VALUES (66,'manuscriptType',NULL);
@@ -294,7 +294,7 @@ INSERT INTO fields VALUES (67,'mapType',NULL);
 INSERT INTO fields VALUES (68,'scale',NULL);
 INSERT INTO fields VALUES (69,'thesisType',NULL);
 INSERT INTO fields VALUES (70,'websiteType',NULL);
-INSERT INTO fields VALUES (71,'audioRecordingType',NULL);
+INSERT INTO fields VALUES (71,'audioRecordingFormat',NULL);
 INSERT INTO fields VALUES (72,'label',NULL);
 INSERT INTO fields VALUES (74,'presentationType',NULL);
 INSERT INTO fields VALUES (75,'meetingName',NULL);
@@ -340,6 +340,10 @@ INSERT INTO fields VALUES (115,'bookTitle',NULL);
 INSERT INTO fields VALUES (116,'shortTitle',NULL);
 INSERT INTO fields VALUES (117,'docketNumber',NULL);
 INSERT INTO fields VALUES (118,'numPages',NULL);
+INSERT INTO fields VALUES (119,'programTitle',NULL);
+INSERT INTO fields VALUES (120,'issuingAuthority',NULL);
+INSERT INTO fields VALUES (121,'filingDate',NULL);
+INSERT INTO fields VALUES (122,'genre',NULL);
 
 INSERT INTO itemTypeFields VALUES (2, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (2, 90, NULL, 2);
@@ -426,35 +430,37 @@ INSERT INTO itemTypeFields VALUES (5, 22, NULL, 17);
 INSERT INTO itemTypeFields VALUES (6, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (6, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (6, 12, NULL, 3);
-INSERT INTO itemTypeFields VALUES (6, 6, NULL, 4);
-INSERT INTO itemTypeFields VALUES (6, 14, NULL, 5);
-INSERT INTO itemTypeFields VALUES (6, 15, NULL, 6);
-INSERT INTO itemTypeFields VALUES (6, 10, NULL, 7);
-INSERT INTO itemTypeFields VALUES (6, 87, NULL, 8);
-INSERT INTO itemTypeFields VALUES (6, 116, NULL, 9);
-INSERT INTO itemTypeFields VALUES (6, 13, NULL, 10);
-INSERT INTO itemTypeFields VALUES (6, 1, NULL, 11);
-INSERT INTO itemTypeFields VALUES (6, 27, NULL, 12);
-INSERT INTO itemTypeFields VALUES (6, 18, NULL, 13);
-INSERT INTO itemTypeFields VALUES (6, 19, NULL, 14);
-INSERT INTO itemTypeFields VALUES (6, 62, NULL, 15);
-INSERT INTO itemTypeFields VALUES (6, 2, NULL, 16);
-INSERT INTO itemTypeFields VALUES (6, 22, NULL, 17);
+INSERT INTO itemTypeFields VALUES (6, 7, NULL, 4);
+INSERT INTO itemTypeFields VALUES (6, 6, NULL, 5);
+INSERT INTO itemTypeFields VALUES (6, 14, NULL, 6);
+INSERT INTO itemTypeFields VALUES (6, 15, NULL, 7);
+INSERT INTO itemTypeFields VALUES (6, 10, NULL, 8);
+INSERT INTO itemTypeFields VALUES (6, 87, NULL, 9);
+INSERT INTO itemTypeFields VALUES (6, 116, NULL, 10);
+INSERT INTO itemTypeFields VALUES (6, 13, NULL, 11);
+INSERT INTO itemTypeFields VALUES (6, 1, NULL, 12);
+INSERT INTO itemTypeFields VALUES (6, 27, NULL, 13);
+INSERT INTO itemTypeFields VALUES (6, 18, NULL, 14);
+INSERT INTO itemTypeFields VALUES (6, 19, NULL, 15);
+INSERT INTO itemTypeFields VALUES (6, 62, NULL, 16);
+INSERT INTO itemTypeFields VALUES (6, 2, NULL, 17);
+INSERT INTO itemTypeFields VALUES (6, 22, NULL, 18);
 INSERT INTO itemTypeFields VALUES (7, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (7, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (7, 69, NULL, 3);
 INSERT INTO itemTypeFields VALUES (7, 89, NULL, 4);
-INSERT INTO itemTypeFields VALUES (7, 14, NULL, 5);
-INSERT INTO itemTypeFields VALUES (7, 10, NULL, 6);
-INSERT INTO itemTypeFields VALUES (7, 87, NULL, 7);
-INSERT INTO itemTypeFields VALUES (7, 116, NULL, 8);
-INSERT INTO itemTypeFields VALUES (7, 1, NULL, 9);
-INSERT INTO itemTypeFields VALUES (7, 27, NULL, 10);
-INSERT INTO itemTypeFields VALUES (7, 18, NULL, 11);
-INSERT INTO itemTypeFields VALUES (7, 19, NULL, 12);
-INSERT INTO itemTypeFields VALUES (7, 62, NULL, 13);
-INSERT INTO itemTypeFields VALUES (7, 2, NULL, 14);
-INSERT INTO itemTypeFields VALUES (7, 22, NULL, 15);
+INSERT INTO itemTypeFields VALUES (7, 7, NULL, 5);
+INSERT INTO itemTypeFields VALUES (7, 14, NULL, 6);
+INSERT INTO itemTypeFields VALUES (7, 118, NULL, 7);
+INSERT INTO itemTypeFields VALUES (7, 87, NULL, 8);
+INSERT INTO itemTypeFields VALUES (7, 116, NULL, 9);
+INSERT INTO itemTypeFields VALUES (7, 1, NULL, 10);
+INSERT INTO itemTypeFields VALUES (7, 27, NULL, 11);
+INSERT INTO itemTypeFields VALUES (7, 18, NULL, 12);
+INSERT INTO itemTypeFields VALUES (7, 19, NULL, 13);
+INSERT INTO itemTypeFields VALUES (7, 62, NULL, 14);
+INSERT INTO itemTypeFields VALUES (7, 2, NULL, 15);
+INSERT INTO itemTypeFields VALUES (7, 22, NULL, 16);
 INSERT INTO itemTypeFields VALUES (8, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (8, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (8, 65, NULL, 3);
@@ -499,18 +505,19 @@ INSERT INTO itemTypeFields VALUES (10, 22, NULL, 13);
 INSERT INTO itemTypeFields VALUES (11, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (11, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (11, 21, NULL, 3);
-INSERT INTO itemTypeFields VALUES (11, 63, NULL, 4);
-INSERT INTO itemTypeFields VALUES (11, 14, NULL, 5);
-INSERT INTO itemTypeFields VALUES (11, 77, NULL, 6);
-INSERT INTO itemTypeFields VALUES (11, 87, NULL, 7);
-INSERT INTO itemTypeFields VALUES (11, 116, NULL, 8);
-INSERT INTO itemTypeFields VALUES (11, 1, NULL, 9);
-INSERT INTO itemTypeFields VALUES (11, 27, NULL, 10);
-INSERT INTO itemTypeFields VALUES (11, 18, NULL, 11);
-INSERT INTO itemTypeFields VALUES (11, 19, NULL, 12);
-INSERT INTO itemTypeFields VALUES (11, 62, NULL, 13);
-INSERT INTO itemTypeFields VALUES (11, 2, NULL, 14);
-INSERT INTO itemTypeFields VALUES (11, 22, NULL, 15);
+INSERT INTO itemTypeFields VALUES (11, 14, NULL, 4);
+INSERT INTO itemTypeFields VALUES (11, 122, NULL, 5);
+INSERT INTO itemTypeFields VALUES (11, 63, NULL, 6);
+INSERT INTO itemTypeFields VALUES (11, 77, NULL, 7);
+INSERT INTO itemTypeFields VALUES (11, 87, NULL, 8);
+INSERT INTO itemTypeFields VALUES (11, 116, NULL, 9);
+INSERT INTO itemTypeFields VALUES (11, 1, NULL, 10);
+INSERT INTO itemTypeFields VALUES (11, 27, NULL, 11);
+INSERT INTO itemTypeFields VALUES (11, 18, NULL, 12);
+INSERT INTO itemTypeFields VALUES (11, 19, NULL, 13);
+INSERT INTO itemTypeFields VALUES (11, 62, NULL, 14);
+INSERT INTO itemTypeFields VALUES (11, 2, NULL, 15);
+INSERT INTO itemTypeFields VALUES (11, 22, NULL, 16);
 INSERT INTO itemTypeFields VALUES (12, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (12, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (12, 59, NULL, 3);
@@ -610,21 +617,23 @@ INSERT INTO itemTypeFields VALUES (18, 22, NULL, 18);
 INSERT INTO itemTypeFields VALUES (19, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (19, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (19, 7, NULL, 3);
-INSERT INTO itemTypeFields VALUES (19, 48, NULL, 4);
-INSERT INTO itemTypeFields VALUES (19, 50, NULL, 5);
-INSERT INTO itemTypeFields VALUES (19, 14, NULL, 6);
-INSERT INTO itemTypeFields VALUES (19, 10, NULL, 7);
-INSERT INTO itemTypeFields VALUES (19, 103, NULL, 8);
-INSERT INTO itemTypeFields VALUES (19, 51, NULL, 9);
-INSERT INTO itemTypeFields VALUES (19, 52, NULL, 10);
-INSERT INTO itemTypeFields VALUES (19, 53, NULL, 11);
-INSERT INTO itemTypeFields VALUES (19, 54, NULL, 12);
-INSERT INTO itemTypeFields VALUES (19, 87, NULL, 13);
-INSERT INTO itemTypeFields VALUES (19, 116, NULL, 14);
-INSERT INTO itemTypeFields VALUES (19, 1, NULL, 15);
-INSERT INTO itemTypeFields VALUES (19, 27, NULL, 16);
-INSERT INTO itemTypeFields VALUES (19, 2, NULL, 17);
-INSERT INTO itemTypeFields VALUES (19, 22, NULL, 18);
+INSERT INTO itemTypeFields VALUES (19, 102, NULL, 4);
+INSERT INTO itemTypeFields VALUES (19, 48, NULL, 5);
+INSERT INTO itemTypeFields VALUES (19, 120, NULL, 6);
+INSERT INTO itemTypeFields VALUES (19, 50, NULL, 7);
+INSERT INTO itemTypeFields VALUES (19, 121, NULL, 8);
+INSERT INTO itemTypeFields VALUES (19, 10, NULL, 9);
+INSERT INTO itemTypeFields VALUES (19, 103, NULL, 10);
+INSERT INTO itemTypeFields VALUES (19, 51, NULL, 11);
+INSERT INTO itemTypeFields VALUES (19, 52, NULL, 12);
+INSERT INTO itemTypeFields VALUES (19, 53, NULL, 13);
+INSERT INTO itemTypeFields VALUES (19, 54, NULL, 14);
+INSERT INTO itemTypeFields VALUES (19, 87, NULL, 15);
+INSERT INTO itemTypeFields VALUES (19, 116, NULL, 16);
+INSERT INTO itemTypeFields VALUES (19, 1, NULL, 17);
+INSERT INTO itemTypeFields VALUES (19, 27, NULL, 18);
+INSERT INTO itemTypeFields VALUES (19, 2, NULL, 19);
+INSERT INTO itemTypeFields VALUES (19, 22, NULL, 20);
 INSERT INTO itemTypeFields VALUES (20, 112, NULL, 1);
 INSERT INTO itemTypeFields VALUES (20, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (20, 36, NULL, 3);
@@ -754,7 +763,7 @@ INSERT INTO itemTypeFields VALUES (28, 2, NULL, 19);
 INSERT INTO itemTypeFields VALUES (28, 22, NULL, 20);
 INSERT INTO itemTypeFields VALUES (29, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (29, 90, NULL, 2);
-INSERT INTO itemTypeFields VALUES (29, 28, NULL, 3);
+INSERT INTO itemTypeFields VALUES (29, 119, NULL, 3);
 INSERT INTO itemTypeFields VALUES (29, 105, NULL, 4);
 INSERT INTO itemTypeFields VALUES (29, 63, NULL, 5);
 INSERT INTO itemTypeFields VALUES (29, 7, NULL, 6);
@@ -772,7 +781,7 @@ INSERT INTO itemTypeFields VALUES (29, 2, NULL, 17);
 INSERT INTO itemTypeFields VALUES (29, 22, NULL, 18);
 INSERT INTO itemTypeFields VALUES (30, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (30, 90, NULL, 2);
-INSERT INTO itemTypeFields VALUES (30, 28, NULL, 3);
+INSERT INTO itemTypeFields VALUES (30, 119, NULL, 3);
 INSERT INTO itemTypeFields VALUES (30, 105, NULL, 4);
 INSERT INTO itemTypeFields VALUES (30, 71, NULL, 5);
 INSERT INTO itemTypeFields VALUES (30, 7, NULL, 6);
@@ -804,19 +813,20 @@ INSERT INTO itemTypeFields VALUES (32, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (32, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (32, 28, NULL, 3);
 INSERT INTO itemTypeFields VALUES (32, 81, NULL, 4);
-INSERT INTO itemTypeFields VALUES (32, 82, NULL, 5);
-INSERT INTO itemTypeFields VALUES (32, 7, NULL, 6);
-INSERT INTO itemTypeFields VALUES (32, 83, NULL, 7);
-INSERT INTO itemTypeFields VALUES (32, 88, NULL, 8);
-INSERT INTO itemTypeFields VALUES (32, 11, NULL, 9);
-INSERT INTO itemTypeFields VALUES (32, 116, NULL, 10);
-INSERT INTO itemTypeFields VALUES (32, 1, NULL, 11);
-INSERT INTO itemTypeFields VALUES (32, 2, NULL, 12);
-INSERT INTO itemTypeFields VALUES (32, 18, NULL, 13);
-INSERT INTO itemTypeFields VALUES (32, 19, NULL, 14);
-INSERT INTO itemTypeFields VALUES (32, 62, NULL, 15);
-INSERT INTO itemTypeFields VALUES (32, 27, NULL, 16);
-INSERT INTO itemTypeFields VALUES (32, 22, NULL, 17);
+INSERT INTO itemTypeFields VALUES (32, 14, NULL, 5);
+INSERT INTO itemTypeFields VALUES (32, 82, NULL, 6);
+INSERT INTO itemTypeFields VALUES (32, 7, NULL, 7);
+INSERT INTO itemTypeFields VALUES (32, 83, NULL, 8);
+INSERT INTO itemTypeFields VALUES (32, 88, NULL, 9);
+INSERT INTO itemTypeFields VALUES (32, 11, NULL, 10);
+INSERT INTO itemTypeFields VALUES (32, 116, NULL, 11);
+INSERT INTO itemTypeFields VALUES (32, 1, NULL, 12);
+INSERT INTO itemTypeFields VALUES (32, 2, NULL, 13);
+INSERT INTO itemTypeFields VALUES (32, 18, NULL, 14);
+INSERT INTO itemTypeFields VALUES (32, 19, NULL, 15);
+INSERT INTO itemTypeFields VALUES (32, 62, NULL, 16);
+INSERT INTO itemTypeFields VALUES (32, 27, NULL, 17);
+INSERT INTO itemTypeFields VALUES (32, 22, NULL, 18);
 INSERT INTO itemTypeFields VALUES (33, 110, NULL, 1);
 INSERT INTO itemTypeFields VALUES (33, 90, NULL, 2);
 INSERT INTO itemTypeFields VALUES (33, 14, NULL, 3);
@@ -899,8 +909,8 @@ INSERT INTO itemTypeFields VALUES (36, 22, NULL, 22);
 
 INSERT INTO baseFieldMappings VALUES (16, 4, 94); -- bill/volume/codeVolume
 INSERT INTO baseFieldMappings VALUES (17, 4, 97); -- case/volume/reporterVolume
-INSERT INTO baseFieldMappings VALUES (19, 7, 102); -- patent/place/country
 INSERT INTO baseFieldMappings VALUES (7, 8, 89); -- thesis/publisher/university
+INSERT INTO baseFieldMappings VALUES (7, 8, 21); -- film/publisher/distributor
 INSERT INTO baseFieldMappings VALUES (15, 8, 31); -- report/publisher/institution
 INSERT INTO baseFieldMappings VALUES (26, 8, 72); -- audioRecording/publisher/label
 INSERT INTO baseFieldMappings VALUES (28, 8, 76); -- videoRecording/publisher/studio
@@ -914,6 +924,8 @@ INSERT INTO baseFieldMappings VALUES (33, 12, 114); -- conferencePaper/publicati
 INSERT INTO baseFieldMappings VALUES (13, 12, 91); -- webpage/publicationTitle/websiteTitle
 INSERT INTO baseFieldMappings VALUES (23, 12, 107); -- blogPost/publicationTitle/blogTitle
 INSERT INTO baseFieldMappings VALUES (25, 12, 104); -- forumPost/publicationTitle/forumTitle
+INSERT INTO baseFieldMappings VALUES (29, 12, 119); -- tvBroadcast/publicationTitle/programTitle
+INSERT INTO baseFieldMappings VALUES (30, 12, 119); -- radioBroadcast/publicationTitle/programTitle
 INSERT INTO baseFieldMappings VALUES (35, 12, 85); -- encyclopediaEntry/publicationTitle/encyclopediaTitle
 INSERT INTO baseFieldMappings VALUES (36, 12, 86); -- dictionaryEntry/publicationTitle/dictionaryTitle
 INSERT INTO baseFieldMappings VALUES (17, 14, 96); -- case/date/dateDecided
@@ -931,20 +943,21 @@ INSERT INTO baseFieldMappings VALUES (31, 60, 105); -- podcast/number/episodeNum
 INSERT INTO baseFieldMappings VALUES (7, 108, 69); -- thesis/type/thesisType
 INSERT INTO baseFieldMappings VALUES (8, 108, 65); -- letter/type/letterType
 INSERT INTO baseFieldMappings VALUES (9, 108, 66); -- manuscript/type/manuscriptType
-INSERT INTO baseFieldMappings VALUES (11, 108, 63); -- film/type/videoRecordingType
+INSERT INTO baseFieldMappings VALUES (11, 108, 122); -- film/type/genre
 INSERT INTO baseFieldMappings VALUES (13, 108, 70); -- webpage/type/websiteType
 INSERT INTO baseFieldMappings VALUES (15, 108, 32); -- report/type/reportType
 INSERT INTO baseFieldMappings VALUES (22, 108, 67); -- map/type/mapType
 INSERT INTO baseFieldMappings VALUES (23, 108, 70); -- blogPost/type/websiteType
 INSERT INTO baseFieldMappings VALUES (25, 108, 79); -- forumPost/type/postType
-INSERT INTO baseFieldMappings VALUES (26, 108, 71); -- audioRecording/type/audioRecordingType
 INSERT INTO baseFieldMappings VALUES (27, 108, 74); -- presentation/type/presentationType
-INSERT INTO baseFieldMappings VALUES (28, 108, 63); -- videoRecording/type/videoRecodingType
-INSERT INTO baseFieldMappings VALUES (29, 108, 63); -- tvBroadcast/type/videoRecodingType
-INSERT INTO baseFieldMappings VALUES (30, 108, 71); -- radioBroadcast/type/audioRecordingType
-INSERT INTO baseFieldMappings VALUES (31, 108, 80); -- podcast/type/audioFileType
 INSERT INTO baseFieldMappings VALUES (10, 109, 64); -- interview/medium/interviewMedium
+INSERT INTO baseFieldMappings VALUES (11, 109, 63); -- film/medium/videoRecordingFormat
 INSERT INTO baseFieldMappings VALUES (12, 109, 59); -- artwork/medium/artworkMedium
+INSERT INTO baseFieldMappings VALUES (26, 109, 71); -- audioRecording/medium/audioRecordingFormat
+INSERT INTO baseFieldMappings VALUES (28, 109, 63); -- videoRecording/medium/videoRecordingFormat
+INSERT INTO baseFieldMappings VALUES (29, 109, 63); -- tvBroadcast/medium/videoRecodingMedium
+INSERT INTO baseFieldMappings VALUES (30, 109, 71); -- radioBroadcast/medium/audioRecordingFormat
+INSERT INTO baseFieldMappings VALUES (31, 109, 80); -- podcast/medium/audioFileType
 INSERT INTO baseFieldMappings VALUES (17, 110, 111); -- case/title/caseName
 INSERT INTO baseFieldMappings VALUES (20, 110, 112); -- statute/title/nameOfAct
 INSERT INTO baseFieldMappings VALUES (21, 110, 113); -- email/title/subject
@@ -976,6 +989,8 @@ INSERT INTO creatorTypes VALUES(24, "presenter");
 INSERT INTO creatorTypes VALUES(25, "guest");
 INSERT INTO creatorTypes VALUES(26, "podcaster");
 INSERT INTO creatorTypes VALUES(27, "reviewedAuthor");
+INSERT INTO creatorTypes VALUES(28, "cosponsor");
+INSERT INTO creatorTypes VALUES(29, "bookAuthor");
 
 INSERT INTO itemTypeCreatorTypes VALUES(2,1,1);
 INSERT INTO itemTypeCreatorTypes VALUES(2,2,0);
@@ -985,6 +1000,7 @@ INSERT INTO itemTypeCreatorTypes VALUES(2,5,0);
 INSERT INTO itemTypeCreatorTypes VALUES(3,1,1);
 INSERT INTO itemTypeCreatorTypes VALUES(3,2,0);
 INSERT INTO itemTypeCreatorTypes VALUES(3,3,0);
+INSERT INTO itemTypeCreatorTypes VALUES(3,29,0);
 INSERT INTO itemTypeCreatorTypes VALUES(3,4,0);
 INSERT INTO itemTypeCreatorTypes VALUES(3,5,0);
 INSERT INTO itemTypeCreatorTypes VALUES(4,1,1);
@@ -1026,8 +1042,10 @@ INSERT INTO itemTypeCreatorTypes VALUES(15,2,0);
 INSERT INTO itemTypeCreatorTypes VALUES(15,4,0);
 INSERT INTO itemTypeCreatorTypes VALUES(15,5,0);
 INSERT INTO itemTypeCreatorTypes VALUES(16,12,1);
+INSERT INTO itemTypeCreatorTypes VALUES(16,28,0);
 INSERT INTO itemTypeCreatorTypes VALUES(16,2,0);
-INSERT INTO itemTypeCreatorTypes VALUES(17,13,1);
+INSERT INTO itemTypeCreatorTypes VALUES(17,1,1);
+INSERT INTO itemTypeCreatorTypes VALUES(17,13,0);
 INSERT INTO itemTypeCreatorTypes VALUES(17,2,0);
 INSERT INTO itemTypeCreatorTypes VALUES(18,2,1);
 INSERT INTO itemTypeCreatorTypes VALUES(19,14,1);
