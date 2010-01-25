@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-01-07 10:00:00"
+	"lastUpdated":"2010-01-21 22:25:00"
 }
 
 function detectWeb(doc, url) {
@@ -200,6 +200,7 @@ function doWeb(doc, url) {
 		if(haveStarted) {
 			newItem.complete();
 		}
-	}, function () { Zotero.done(); });
+		Zotero.done();
+	});
 	Zotero.wait();
 }
