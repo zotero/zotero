@@ -1,4 +1,4 @@
--- 27
+-- 28
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -910,7 +910,7 @@ INSERT INTO itemTypeFields VALUES (36, 22, NULL, 22);
 INSERT INTO baseFieldMappings VALUES (16, 4, 94); -- bill/volume/codeVolume
 INSERT INTO baseFieldMappings VALUES (17, 4, 97); -- case/volume/reporterVolume
 INSERT INTO baseFieldMappings VALUES (7, 8, 89); -- thesis/publisher/university
-INSERT INTO baseFieldMappings VALUES (7, 8, 21); -- film/publisher/distributor
+INSERT INTO baseFieldMappings VALUES (11, 8, 21); -- film/publisher/distributor
 INSERT INTO baseFieldMappings VALUES (15, 8, 31); -- report/publisher/institution
 INSERT INTO baseFieldMappings VALUES (26, 8, 72); -- audioRecording/publisher/label
 INSERT INTO baseFieldMappings VALUES (28, 8, 76); -- videoRecording/publisher/studio
