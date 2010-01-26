@@ -216,7 +216,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._getStorageModificationTime = funct
 	Zotero.Utilities.HTTP.doGet(uri, function (req) {
 		self._checkResponse(req, self);
 		
-		var funcName = "Zotero.Sync.Storage._getStorageModificationTime()";
+		var funcName = "Zotero.Sync.Storage.WebDAV_getStorageModificationTime()";
 		
 		// mod_speling can return 300s for 404s with base name matches
 		if (req.status == 404 || req.status == 300) {
