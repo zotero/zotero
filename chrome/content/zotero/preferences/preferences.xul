@@ -172,18 +172,6 @@ To add a new preference:
 			<preference id="pref-group-storage-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
 		</preferences>
 		
-		<!-- This doesn't wrap without an explicit width, for some reason -->
-		<vbox style="margin-top: .75em; margin-bottom: 1.25em">
-			<description width="45em" style="font-size: 12px">
-				<label class="text-link" href="http://www.zotero.org/support/sync"
-					value="Sync functionality"/> is under active development.
-				We welcome you to participate in our testing by using Zotero Sync,
-				but we encourage you to
-				<label class="text-link" href="http://www.zotero.org/support/zotero_data"
-					value="back up your Zotero data"/> daily.
-			</description>
-		</vbox>
-		
 		<tabbox>
 			<tabs>
 				<tab label="Settings"/>
@@ -239,6 +227,8 @@ To add a new preference:
 						<hbox>
 							<checkbox label="&zotero.preferences.sync.syncAutomatically;" preference="pref-sync-autosync"/>
 						</hbox>
+						
+						<label class="text-link" style="margin-top:.7em; margin-left: 0" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
 					</groupbox>
 					
 					
