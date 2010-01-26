@@ -1,9 +1,9 @@
 <!ENTITY zotero.general.optional "（オプショナル）">
 <!ENTITY zotero.general.note "メモ：">
-<!ENTITY zotero.general.selectAll "Select All">
-<!ENTITY zotero.general.deselectAll "Deselect All">
-<!ENTITY zotero.general.edit "Edit">
-<!ENTITY zotero.general.delete "Delete">
+<!ENTITY zotero.general.selectAll "すべて選択">
+<!ENTITY zotero.general.deselectAll "選択を解除">
+<!ENTITY zotero.general.edit "編集">
+<!ENTITY zotero.general.delete "削除">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "エラー･ログはZoteroとは関係していないメッセージを含んでいる可能性があります。">
 <!ENTITY zotero.errorReport.submissionInProgress "エラーレポートが送信されるまでお待ちください。">
@@ -27,8 +27,8 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "選択範囲をZoteroメモに追加">
 <!ENTITY zotero.contextMenu.addTextToNewNote "選択範囲からZoteroメモを作成">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "りんくをZoteroのアイテムとして保存">
+<!ENTITY zotero.contextMenu.saveImageAsItem "がぞうをZoteroのアイテムとして保存">
 
 <!ENTITY zotero.tabs.info.label "情報">
 <!ENTITY zotero.tabs.notes.label "メモ">
@@ -57,11 +57,11 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "ライブラリーで表示">
 <!ENTITY zotero.items.menu.attach.note "メモを追加">
-<!ENTITY zotero.items.menu.attach "Add Attachment">
+<!ENTITY zotero.items.menu.attach "ファイルを添付する">
 <!ENTITY zotero.items.menu.attach.snapshot "現ページのスナップショットを添付">
 <!ENTITY zotero.items.menu.attach.link "現ページへのリンクを添付">
-<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
-<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+<!ENTITY zotero.items.menu.attach.file "ファイルの保存されたコピーを添付する">
+<!ENTITY zotero.items.menu.attach.fileLink "リンクをファイルに添付する">
 
 <!ENTITY zotero.items.menu.duplicateItem "選択されたアイテムを複製">
 

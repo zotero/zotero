@@ -46,6 +46,7 @@
 <!ENTITY zotero.preferences.sync.createAccount "Créer un compte">
 <!ENTITY zotero.preferences.sync.lostPassword "Mot de passe oublié ?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchroniser automatiquement">
+<!ENTITY zotero.preferences.sync.about "About Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronisation des fichiers">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Adresse :">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synchroniser les fichiers joints de Ma bibliothèque en utilisant">

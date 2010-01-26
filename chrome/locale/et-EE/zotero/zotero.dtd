@@ -1,50 +1,50 @@
-<!ENTITY zotero.general.optional "(Optional)">
-<!ENTITY zotero.general.note "Note:">
-<!ENTITY zotero.general.selectAll "Select All">
-<!ENTITY zotero.general.deselectAll "Deselect All">
-<!ENTITY zotero.general.edit "Edit">
-<!ENTITY zotero.general.delete "Delete">
+<!ENTITY zotero.general.optional "(Valikuline)">
+<!ENTITY zotero.general.note "Märkus:">
+<!ENTITY zotero.general.selectAll "Valida kõik">
+<!ENTITY zotero.general.deselectAll "Tühistada kõik valikud">
+<!ENTITY zotero.general.edit "Toimetada">
+<!ENTITY zotero.general.delete "Kustutada">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
-<!ENTITY zotero.errorReport.submissionInProgress "Please wait while the error report is submitted.">
-<!ENTITY zotero.errorReport.submitted "Your error report has been submitted.">
-<!ENTITY zotero.errorReport.reportID "Report ID:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Vealogi võib sisaldada teateid, mis ei puutu Zoterosse.">
+<!ENTITY zotero.errorReport.submissionInProgress "Palun oodake kuni veateadet saadetakse.">
+<!ENTITY zotero.errorReport.submitted "Teie veateada on saadetud.">
+<!ENTITY zotero.errorReport.reportID "Veateate ID:">
+<!ENTITY zotero.errorReport.postToForums "Palun postitage teade foorumisse (forums.zotero.org) koos veateate ID-ga ja kirjeldusega millisel asjaoludel probleem esineb ning mis seda iseloomustab.">
+<!ENTITY zotero.errorReport.notReviewed "Veateadetega, millest ei ole foorumites teada antud, üldjuhul ei tegeleta.">
 
-<!ENTITY zotero.upgrade.newVersionInstalled "You have installed a new version of Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Your Zotero database must be upgraded to work with the new version.">
-<!ENTITY zotero.upgrade.autoBackup "Your existing database will be backed up automatically before any changes are made.">
-<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
-<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
-<!ENTITY zotero.upgrade.upgradeInProgress "Please wait for the upgrade process to finish. This may take a few minutes.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Your Zotero database has been successfully upgraded.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "Please see">
-<!ENTITY zotero.upgrade.changeLogLink "the changelog">
-<!ENTITY zotero.upgrade.changeLogAfterLink "to find out what's new.">
+<!ENTITY zotero.upgrade.newVersionInstalled "Paigaldasite uue Zotero versiooni.">
+<!ENTITY zotero.upgrade.upgradeRequired "Et Zotero andmebaas töötaks uue versiooniga on seda tarvis uuendada.">
+<!ENTITY zotero.upgrade.autoBackup "Enne muudatuste tegemist varundatakse olemasolev andmebaas automaatselt.">
+<!ENTITY zotero.upgrade.majorUpgrade "Tegemist on olulise uuendusega.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Enne jätkamist palun">
+<!ENTITY zotero.upgrade.majorUpgradeLink "tutvuge kindlasti">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "uuenduste kirjeldusega.">
+<!ENTITY zotero.upgrade.upgradeInProgress "Palun oodake kuni uuendusi paigaldatakse. See võib võtta mõned minutid aega.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Teie Zotero andmebaas on edukalt uuendatud.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Programmis tehtud uuendused on">
+<!ENTITY zotero.upgrade.changeLogLink "muudatuste">
+<!ENTITY zotero.upgrade.changeLogAfterLink "nimekirjas.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Add Selection to Zotero Note">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Lisada valitud tekst Zotero märkusele">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Create Zotero Item and Note from Selection">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Salvestada link Zotero kirjena">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Salvestada pilt Zotero kirjena">
 
 <!ENTITY zotero.tabs.info.label "Info">
-<!ENTITY zotero.tabs.notes.label "Notes">
-<!ENTITY zotero.tabs.attachments.label "Attachments">
-<!ENTITY zotero.tabs.tags.label "Tags">
-<!ENTITY zotero.tabs.related.label "Related">
-<!ENTITY zotero.notes.separate "Edit in a separate window">
+<!ENTITY zotero.tabs.notes.label "Märkused">
+<!ENTITY zotero.tabs.attachments.label "Manused">
+<!ENTITY zotero.tabs.tags.label "Märksõnad">
+<!ENTITY zotero.tabs.related.label "Seotud">
+<!ENTITY zotero.notes.separate "Salvestada eraldi aknas">
 
-<!ENTITY zotero.items.itemType "Item Type">
-<!ENTITY zotero.items.type_column "Type">
-<!ENTITY zotero.items.title_column "Title">
-<!ENTITY zotero.items.creator_column "Creator">
-<!ENTITY zotero.items.date_column "Date">
-<!ENTITY zotero.items.year_column "Year">
-<!ENTITY zotero.items.publisher_column "Publisher">
-<!ENTITY zotero.items.publication_column "Publication">
+<!ENTITY zotero.items.itemType "Kire tüüp">
+<!ENTITY zotero.items.type_column "Tüüp">
+<!ENTITY zotero.items.title_column "Pealkiri">
+<!ENTITY zotero.items.creator_column "Autor">
+<!ENTITY zotero.items.date_column "Kuupäev">
+<!ENTITY zotero.items.year_column "Aasta">
+<!ENTITY zotero.items.publisher_column "Väljaandja">
+<!ENTITY zotero.items.publication_column "Teos">
 <!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "Language">
 <!ENTITY zotero.items.accessDate_column "Accessed">

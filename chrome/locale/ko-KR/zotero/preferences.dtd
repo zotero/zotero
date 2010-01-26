@@ -46,6 +46,7 @@
 <!ENTITY zotero.preferences.sync.createAccount "계정 생성">
 <!ENTITY zotero.preferences.sync.lostPassword "비밀번호를 분실하셨나요?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "자동 동기화">
+<!ENTITY zotero.preferences.sync.about "About Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing "파일 동기화">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">

@@ -46,6 +46,7 @@
 <!ENTITY zotero.preferences.sync.createAccount "Регистрация">
 <!ENTITY zotero.preferences.sync.lostPassword "Загубена парола?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Автоматично синхронизиране">
+<!ENTITY zotero.preferences.sync.about "About Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing "Синхронизиране на файловете">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Адрес:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Прекачените файлове в Моята Библиотека се синхронизират с">

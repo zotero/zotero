@@ -46,6 +46,7 @@
 <!ENTITY zotero.preferences.sync.createAccount "アカウントを作成">
 <!ENTITY zotero.preferences.sync.lostPassword "パスワードを忘れましたか？">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自動的にシンク">
+<!ENTITY zotero.preferences.sync.about "About Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing "ファイル・シンキング">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "マイ・ライブラリーにある添付ファイルをシンクするとき右のプログラムを使う：">

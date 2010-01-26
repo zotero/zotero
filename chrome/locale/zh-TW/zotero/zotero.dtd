@@ -16,14 +16,14 @@
 <!ENTITY zotero.upgrade.upgradeRequired "你的 Zotero 資料庫必須升級才能在新版本中使用。">
 <!ENTITY zotero.upgrade.autoBackup "在做出任何改變前，會自動備份你現存的資料庫。">
 <!ENTITY zotero.upgrade.majorUpgrade "這是一次主要的升級。">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "請確認您已檢閱過">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "請確認你已檢閱過">
 <!ENTITY zotero.upgrade.majorUpgradeLink "升級指示">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "，在繼續之前。">
 <!ENTITY zotero.upgrade.upgradeInProgress "請等候升級程序完成。這可能會花幾分鐘的時間。">
 <!ENTITY zotero.upgrade.upgradeSucceeded "已經成功的升級你的 Zotero 資料庫。">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "請看">
 <!ENTITY zotero.upgrade.changeLogLink "更新記錄">
-<!ENTITY zotero.upgrade.changeLogAfterLink "來知道有什麼新的。">
+<!ENTITY zotero.upgrade.changeLogAfterLink "來看看有什麼新鮮事兒。">
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "把選取區加入 Zotero 筆記">
 <!ENTITY zotero.contextMenu.addTextToNewNote "以選取區建立 Zotero 項目與筆記">
@@ -37,7 +37,7 @@
 <!ENTITY zotero.tabs.related.label "相關的">
 <!ENTITY zotero.notes.separate "分出一個獨立視窗來編輯">
 
-<!ENTITY zotero.items.itemType "Item Type">
+<!ENTITY zotero.items.itemType "項目類型">
 <!ENTITY zotero.items.type_column "類型">
 <!ENTITY zotero.items.title_column "標題">
 <!ENTITY zotero.items.creator_column "創作人">
@@ -68,23 +68,23 @@
 <!ENTITY zotero.toolbar.newItem.label "新增項目">
 <!ENTITY zotero.toolbar.moreItemTypes.label "更多">
 <!ENTITY zotero.toolbar.newItemFromPage.label "從目前的頁面建立新的項目">
-<!ENTITY zotero.toolbar.lookup.label "Add Item by Identifier">
+<!ENTITY zotero.toolbar.lookup.label "依標識符加入項目">
 <!ENTITY zotero.toolbar.removeItem.label "移除項目…">
 <!ENTITY zotero.toolbar.newCollection.label "新增收集…">
-<!ENTITY zotero.toolbar.newGroup "New Group...">
+<!ENTITY zotero.toolbar.newGroup "新增群組…">
 <!ENTITY zotero.toolbar.newSubcollection.label "新增子收集…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "新增存留搜尋…">
-<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
+<!ENTITY zotero.toolbar.emptyTrash.label "清除垃圾">
 <!ENTITY zotero.toolbar.tagSelector.label "顯示／隱藏標籤選擇器">
 <!ENTITY zotero.toolbar.actions.label "行動">
 <!ENTITY zotero.toolbar.import.label "匯入…">
-<!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.toolbar.importFromClipboard "從剪貼板輸入">
 <!ENTITY zotero.toolbar.export.label "匯出圖書館…">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF 掃描…">
 <!ENTITY zotero.toolbar.timeline.label "建立時序列表">
-<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
+<!ENTITY zotero.toolbar.duplicate.label "顯示重復的">
 <!ENTITY zotero.toolbar.preferences.label "偏好設定…">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
+<!ENTITY zotero.toolbar.supportAndDocumentation "支援及說明文件">
 <!ENTITY zotero.toolbar.about.label "關於 Zotero…">
 <!ENTITY zotero.toolbar.advancedSearch "進階搜尋">
 <!ENTITY zotero.toolbar.search.label "搜尋：">
@@ -99,7 +99,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "標題大小寫">
 
 <!ENTITY zotero.toolbar.note.standalone "新增獨立筆記">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
+<!ENTITY zotero.toolbar.lookup "以標識符查找…">
 <!ENTITY zotero.toolbar.attachment.linked "檔案鏈結…">
 <!ENTITY zotero.toolbar.attachment.add "儲存檔案副本…">
 <!ENTITY zotero.toolbar.attachment.weblink "儲存目前網頁鏈結">
@@ -115,7 +115,7 @@
 <!ENTITY zotero.tagSelector.renameTag "重新命名標籤…">
 <!ENTITY zotero.tagSelector.deleteTag "刪除標籤…">
 
-<!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
+<!ENTITY zotero.lookup.description "輸入 ISBN, DOI, 或 PMID 後在下面的方塊中尋找">
 
 <!ENTITY zotero.selectitems.title "選取項目">
 <!ENTITY zotero.selectitems.intro.label "選取要加到圖書館的項目">
@@ -141,10 +141,10 @@
 <!ENTITY zotero.exportOptions.format.label "格式：">
 <!ENTITY zotero.exportOptions.translatorOptions.label "轉譯器選項">
 
-<!ENTITY zotero.charset.label "Character Encoding">
-<!ENTITY zotero.moreEncodings.label "More Encodings">
+<!ENTITY zotero.charset.label "字元編碼">
+<!ENTITY zotero.moreEncodings.label "更多編碼">
 
-<!ENTITY zotero.citation.keepSorted.label "維持來源的排序">
+<!ENTITY zotero.citation.keepSorted.label "依序排列來源">
 
 <!ENTITY zotero.citation.page "頁">
 <!ENTITY zotero.citation.paragraph "段落">
@@ -171,19 +171,19 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "用以格式化：">
 <!ENTITY zotero.integration.prefs.bookmarks.label "書籤">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "書籤在微軟的 Word 與 OpenOffice 之間會被保留，但是可能會意外地被更動。">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified. For &#xA;compatibility reasons, citations cannot be inserted into footnotes or endnotes when this option is selected.">
 
 <!ENTITY zotero.integration.references.label "參考書目中的參考文獻">
 
 <!ENTITY zotero.sync.button "與 Zotero 伺服器同步">
 <!ENTITY zotero.sync.error "同步錯誤">
-<!ENTITY zotero.sync.storage.progress "Progress:">
-<!ENTITY zotero.sync.storage.downloads "Downloads:">
-<!ENTITY zotero.sync.storage.uploads "Uploads:">
+<!ENTITY zotero.sync.storage.progress "進度：">
+<!ENTITY zotero.sync.storage.downloads "下載：">
+<!ENTITY zotero.sync.storage.uploads "上傳：">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "您 Zotero 圖書館中以下的標籤太長而無法與伺服器同步：">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "你的 Zotero 圖書館中以下的標籤太長而無法與伺服器同步：">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "同步的標籤必需少於 256 個字元。">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "您可以將過長的標籤切割成多個標籤，或手動編輯來讓它變短，或刪除它。">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "你可以將過長的標籤切割成多個標籤，或手動編輯來讓它變短，或刪除它。">
 <!ENTITY zotero.sync.longTagFixer.split "分割">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "分割的位置在第">
 <!ENTITY zotero.sync.longTagFixer.character "個字元">
@@ -191,39 +191,39 @@
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "未勾選的標籤將不會被儲存。">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "這個標籤將會從所有項目中被刪除。">
 
-<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
-<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
-<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
+<!ENTITY zotero.proxy.recognized.title "代理伺服器已認定">
+<!ENTITY zotero.proxy.recognized.warning "僅加入你的圖書館，學校，或公司網站所連結的代理伺服器。">
+<!ENTITY zotero.proxy.recognized.warning.secondary "加入其他的代理伺服器會讓惡意網站偽裝成你所信任的網站。">
+<!ENTITY zotero.proxy.recognized.disable.label "不要自動由之前認定的代理伺服器重導請求。">
+<!ENTITY zotero.proxy.recognized.ignore.label "忽略">
 
-<!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
-<!ENTITY zotero.recognizePDF.cancel.label "Cancel">
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
-<!ENTITY zotero.recognizePDF.itemName.label "Item Name">
-<!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
+<!ENTITY zotero.recognizePDF.recognizing.label "取回詮釋資料中…">
+<!ENTITY zotero.recognizePDF.cancel.label "取消">
+<!ENTITY zotero.recognizePDF.pdfName.label "PDF 名稱">
+<!ENTITY zotero.recognizePDF.itemName.label "項目名稱">
+<!ENTITY zotero.recognizePDF.captcha.label "鍵入以下文字來繼續取回詮釋資料。">
 
-<!ENTITY zotero.rtfScan.title "RTF Scan">
-<!ENTITY zotero.rtfScan.cancel.label "Cancel">
-<!ENTITY zotero.rtfScan.citation.label "Citation">
-<!ENTITY zotero.rtfScan.itemName.label "Item Name">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
-<!ENTITY zotero.rtfScan.introPage.label "Introduction">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
-<!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
-<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
-<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
-<!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
-<!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
-<!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
-<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
-<!ENTITY zotero.rtfScan.inputFile.label "Input File">
-<!ENTITY zotero.rtfScan.outputFile.label "Output File">
+<!ENTITY zotero.rtfScan.title "RTF 掃描">
+<!ENTITY zotero.rtfScan.cancel.label "取消">
+<!ENTITY zotero.rtfScan.citation.label "參考文獻">
+<!ENTITY zotero.rtfScan.itemName.label "項目名稱">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "無對映的參考文獻">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "不明的參考文獻">
+<!ENTITY zotero.rtfScan.mappedCitations.label "有對映的參考文獻">
+<!ENTITY zotero.rtfScan.introPage.label "介紹">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero 可以自動的取出及重格式化參考文獻並插入參考書目到 RTF 檔中。RTF 檔掃描功能目前支援以下參考文獻格式的一些變化：">
+<!ENTITY zotero.rtfScan.introPage.description2 "要開始的話，在下方選一個 RTF 輸入檔及一個輸出檔：">
+<!ENTITY zotero.rtfScan.scanPage.label "掃描參考文獻">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero 在掃描你文件中的參考文獻。請耐心等候。">
+<!ENTITY zotero.rtfScan.citationsPage.label "查證引用的項目">
+<!ENTITY zotero.rtfScan.citationsPage.description "請檢閱下列辨識出的參考文獻來確定 Zotero 正確的選出了相關的項目。在進行到下一步前所有無對映或是不明的參考文獻都須被解決。">
+<!ENTITY zotero.rtfScan.stylePage.label "文件格式化">
+<!ENTITY zotero.rtfScan.formatPage.label "格式化參考文獻">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero 正在處理並格式化你的 RTF 檔。請耐心等候。">
+<!ENTITY zotero.rtfScan.completePage.label "RTF 掃描完畢">
+<!ENTITY zotero.rtfScan.completePage.description "你的文件已掃描及處理完畢。請確認它有正確的格式。">
+<!ENTITY zotero.rtfScan.inputFile.label "輸入檔案">
+<!ENTITY zotero.rtfScan.outputFile.label "輸出檔案">
 
-<!ENTITY zotero.file.choose.label "Choose File...">
-<!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.file.choose.label "選擇檔案…">
+<!ENTITY zotero.file.noneSelected.label "未選取檔案">
