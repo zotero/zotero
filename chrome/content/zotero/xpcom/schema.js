@@ -2756,14 +2756,14 @@ Zotero.Schema = new function(){
 				if (i==67) {
 					var rows = Zotero.DB.query("SELECT * FROM savedSearchConditions WHERE condition='collectionID'");
 					for each(var row in rows) {
-						var c = Zotero.Collections.get(row.value);
-						var newVal = c ? '0_' + c.key : null;
+						var key = Zotero.DB.valueQuery("SELECT key FROM collections WHERE collectionID=?", row.value);
+						var newVal = key ? '0_' + key : null;
 						Zotero.DB.query("UPDATE savedSearchConditions SET condition='collection', value=? WHERE savedSearchID=? AND searchConditionID=?", [newVal, row.savedSearchID, row.searchConditionID]);
 					}
 					var rows = Zotero.DB.query("SELECT * FROM savedSearchConditions WHERE condition='savedSearchID'");
 					for each(var row in rows) {
-						var c = Zotero.Searches.get(row.value);
-						var newVal = c ? '0_' + c.key : null;
+						var key = Zotero.DB.valueQuery("SELECT key FROM savedSearches WHERE savedSearchID=?", row.value);
+						var newVal = key ? '0_' + key : null;
 						Zotero.DB.query("UPDATE savedSearchConditions SET condition='savedSearch', value=? WHERE savedSearchID=? AND searchConditionID=?", [newVal, row.savedSearchID, row.searchConditionID]);
 					}
 				}
