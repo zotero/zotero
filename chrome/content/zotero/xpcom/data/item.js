@@ -211,7 +211,8 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 	
 	if (!unformatted) {
 		// Multipart date fields
-		if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date')) {
+		// TEMP - filingDate
+		if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || field == 'filingDate') {
 			value = Zotero.Date.multipartToStr(value);
 		}
 	}
@@ -753,7 +754,8 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	
 	if (!loadIn) {
 		// Save date field as multipart date
-		if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') &&
+		// TEMP - filingDate
+		if ((Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || field == 'filingDate') &&
 				!Zotero.Date.isMultipart(value)) {
 			value = Zotero.Date.strToMultipart(value);
 		}
