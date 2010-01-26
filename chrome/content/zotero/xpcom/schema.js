@@ -142,13 +142,15 @@ Zotero.Schema = new function(){
 				}
 				
 				var up2 = _updateSchema('system');
-				// Update custom tables so that changes are in place before user data migration
-				this.updateCustomTables(up2);
+				// Update custom tables if they exist so that changes are in place before user data migration
+				if (Zotero.DB.tableExists('customItemTypes')) {
+					this.updateCustomTables(up2);
+				}
 				Zotero.wait();
 				var up1 = _migrateUserDataSchema(dbVersion);
 				var up3 = _updateSchema('triggers');
+				// Update custom tables again in case custom fields were changed during user data migration
 				if (up1) {
-					// Update custom tables again in case custom fields were changed during user data migration
 					this.updateCustomTables();
 				}
 				Zotero.wait();

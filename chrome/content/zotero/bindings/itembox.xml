@@ -417,7 +417,9 @@
 							
 							if (fieldIsClickable
 									&& !Zotero.Items.isPrimaryField(fieldName)
-									&& Zotero.ItemFields.isFieldOfBase(Zotero.ItemFields.getID(fieldName), 'date')
+									&& (Zotero.ItemFields.isFieldOfBase(Zotero.ItemFields.getID(fieldName), 'date')
+										// TEMP - filingDate
+										|| fieldName == 'filingDate')
 									// TEMP - NSF
 									&& fieldName != 'dateSent') {
 								this.addDateRow(fieldNames[i], this.item.getField(fieldName, true), tabindex);
@@ -1269,7 +1271,8 @@
 					
 					if (fieldID) {
 						// Display the SQL date as a tooltip for date fields
-						if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date')) {
+						// TEMP - filingDate
+						if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || fieldName == 'filingDate') {
 							valueElement.setAttribute('tooltiptext',
 								Zotero.Date.multipartToSQL(this.item.getField(fieldName, true)));
 						}
