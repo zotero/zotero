@@ -769,11 +769,12 @@ Zotero.ItemTreeView.prototype.toggleOpenState = function(row, skipItemMapRefresh
 		}
 	}
 	
+	this._dataItems[row].isOpen = !this._dataItems[row].isOpen;
+	
 	if (!count) {
 		return;
 	}
 	
-	this._dataItems[row].isOpen = !this._dataItems[row].isOpen;
 	this._treebox.rowCountChanged(row+1, count); //tell treebox to repaint these
 	this._treebox.invalidateRow(row);
 	
