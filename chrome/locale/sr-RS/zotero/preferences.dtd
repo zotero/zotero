@@ -1,7 +1,7 @@
-<!ENTITY zotero.preferences.title "Зотеро поставке">
+<!ENTITY zotero.preferences.title "Подешавања Зотера">
 
 <!ENTITY zotero.preferences.default "Подразумевано:">
-<!ENTITY zotero.preferences.items "items">
+<!ENTITY zotero.preferences.items "ставке">
 <!ENTITY zotero.preferences.period ".">
 
 <!ENTITY zotero.preferences.prefpane.general "Опште">
@@ -13,10 +13,10 @@
 <!ENTITY zotero.preferences.fontSize.small "Мали">
 <!ENTITY zotero.preferences.fontSize.medium "Средњи">
 <!ENTITY zotero.preferences.fontSize.large "Велики">
-<!ENTITY zotero.preferences.fontSize.notes "Note font size:">
+<!ENTITY zotero.preferences.fontSize.notes "Величина фонта:">
 
 <!ENTITY zotero.preferences.miscellaneous "Разне поставке">
-<!ENTITY zotero.preferences.autoUpdate "Самостално провери за ажуриране преводиоце">
+<!ENTITY zotero.preferences.autoUpdate "Самостално провери ажуриране преводиоце">
 <!ENTITY zotero.preferences.updateNow "Ажурирај сада">
 <!ENTITY zotero.preferences.reportTranslationFailure "Извести о грешкама у „преводиоцу странице“">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
@@ -26,7 +26,7 @@
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Самостално приложи повезане PDF и друге датотека када чуваш ставке">
 <!ENTITY zotero.preferences.automaticTags "Самостално стави назнаку на ставке са кључним речима и насловом субјекта">
 
-<!ENTITY zotero.preferences.groups "Groups">
+<!ENTITY zotero.preferences.groups "Групе">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "When copying items between libraries, include:">
 <!ENTITY zotero.preferences.groups.childNotes "child notes">
 <!ENTITY zotero.preferences.groups.childFiles "child snapshots and imported files">
@@ -39,18 +39,19 @@
 <!ENTITY zotero.preferences.openurl.server "Разрешивач:">
 <!ENTITY zotero.preferences.openurl.version "Верзија:">
 
-<!ENTITY zotero.preferences.prefpane.sync "Sync">
-<!ENTITY zotero.preferences.sync.username "Username:">
-<!ENTITY zotero.preferences.sync.password "Password:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero Sync Server">
-<!ENTITY zotero.preferences.sync.createAccount "Create Account">
-<!ENTITY zotero.preferences.sync.lostPassword "Lost Password?">
-<!ENTITY zotero.preferences.sync.syncAutomatically "Sync automatically">
-<!ENTITY zotero.preferences.sync.fileSyncing "File Syncing">
+<!ENTITY zotero.preferences.prefpane.sync "Усклађивање">
+<!ENTITY zotero.preferences.sync.username "Корисничко има:">
+<!ENTITY zotero.preferences.sync.password "Лозинка:">
+<!ENTITY zotero.preferences.sync.syncServer "Зотеров сервер за усклађивање">
+<!ENTITY zotero.preferences.sync.createAccount "Направи налог">
+<!ENTITY zotero.preferences.sync.lostPassword "Изгубили сте лозинку?">
+<!ENTITY zotero.preferences.sync.syncAutomatically "Аутоматско усклађивање">
+<!ENTITY zotero.preferences.sync.about "About Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing "Усклађивање датотека">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Sync attachment files in group libraries using Zotero storage">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "О Зотеровом усклађивању">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "terms and conditions">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync with Zotero Server">

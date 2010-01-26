@@ -1,7 +1,7 @@
 <!ENTITY zotero.preferences.title "Zotero Preferences">
 
 <!ENTITY zotero.preferences.default "Default:">
-<!ENTITY zotero.preferences.items "items">
+<!ENTITY zotero.preferences.items "kirjed">
 <!ENTITY zotero.preferences.period ".">
 
 <!ENTITY zotero.preferences.prefpane.general "General">
@@ -13,7 +13,7 @@
 <!ENTITY zotero.preferences.fontSize.small "Small">
 <!ENTITY zotero.preferences.fontSize.medium "Medium">
 <!ENTITY zotero.preferences.fontSize.large "Large">
-<!ENTITY zotero.preferences.fontSize.notes "Note font size:">
+<!ENTITY zotero.preferences.fontSize.notes "Märkuse fondisuurus">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
@@ -26,11 +26,11 @@
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
 
-<!ENTITY zotero.preferences.groups "Groups">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "When copying items between libraries, include:">
-<!ENTITY zotero.preferences.groups.childNotes "child notes">
-<!ENTITY zotero.preferences.groups.childFiles "child snapshots and imported files">
-<!ENTITY zotero.preferences.groups.childLinks "child links">
+<!ENTITY zotero.preferences.groups "Grupid">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "Kirjete kopeerimisel raamatukoguse vahel lisada:">
+<!ENTITY zotero.preferences.groups.childNotes "seotud märkused">
+<!ENTITY zotero.preferences.groups.childFiles "seotud momentülesvõtted ja imporditud failid">
+<!ENTITY zotero.preferences.groups.childLinks "seotud lingid">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -39,29 +39,30 @@
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Version:">
 
-<!ENTITY zotero.preferences.prefpane.sync "Sync">
-<!ENTITY zotero.preferences.sync.username "Username:">
-<!ENTITY zotero.preferences.sync.password "Password:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero Sync Server">
-<!ENTITY zotero.preferences.sync.createAccount "Create Account">
-<!ENTITY zotero.preferences.sync.lostPassword "Lost Password?">
-<!ENTITY zotero.preferences.sync.syncAutomatically "Sync automatically">
-<!ENTITY zotero.preferences.sync.fileSyncing "File Syncing">
+<!ENTITY zotero.preferences.prefpane.sync "Sünkroonimine">
+<!ENTITY zotero.preferences.sync.username "Kasutajanimi:">
+<!ENTITY zotero.preferences.sync.password "Salasõna:">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero sünkroon-server">
+<!ENTITY zotero.preferences.sync.createAccount "Loo kasutaja">
+<!ENTITY zotero.preferences.sync.lostPassword "Salasõna kadunud?">
+<!ENTITY zotero.preferences.sync.syncAutomatically "Sünkroonida automaatselt">
+<!ENTITY zotero.preferences.sync.about "About Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing "Failide sünkroonimine">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Sync attachment files in group libraries using Zotero storage">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "terms and conditions">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync with Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local Zotero data with data from the sync server, ignoring sync history.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Erase all local Zotero data and restore from the sync server.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Erase all server data and overwrite with local Zotero data.">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reset File Sync History">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Force checking of the storage server for all local attachment files.">
-<!ENTITY zotero.preferences.sync.reset.button "Reset...">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Minu raamatukogus olevate lisade sünkroonimine kasutades">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Minu grupi raamatukogus olevate lisade sünkroonimine kasutades Zotero hoidlat">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "Failide sünkroonimise kohta">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Kasutades Zotero hoidlat, nõustute järgmiste">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "tingimuste ja piirangutega">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Zotero serveriga täissünkroonimine">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Liita kohalikele Zotero andmetele sünkroon-serveris olevad andmed, jättes tähelepanuta sünkroonimise ajaloo">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Taastada Zotero serverist">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Kustutada kõik kohalikud andmed ja taastada need sünkroon-serverist">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Taastada sünkroon-serveri andmed kohalikust hoidlast">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Kustutada kõik sünkroon-serveri andmed ja taastada need kohalikust hoidlast">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Algseadistada failide sünkroonimise ajalugu">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Rakendada hoidla serveri kontrolli kõigi kohalikele lisatud failidele.">
+<!ENTITY zotero.preferences.sync.reset.button "Algseadistada...">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Search">
@@ -91,7 +92,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output Format">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "Disable Quick Copy when dragging more than">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "Peatada kiirkopeerimine juhul kui lohistatakse rohkem kui">
 
 
 <!ENTITY zotero.preferences.prefpane.styles "Styles">
@@ -155,10 +156,10 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
 
-<!ENTITY zotero.preferences.debugOutputLogging "Debug Output Logging">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Debug output can help Zotero developers diagnose problems in Zotero. Debug logging will slow down Zotero, so you should generally leave it disabled unless a Zotero developer requests debug output.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "lines logged">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Enable after restart">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "View Output">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Clear Output">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Submit to Zotero Server">
+<!ENTITY zotero.preferences.debugOutputLogging "Veateadete logimine">
+<!ENTITY zotero.preferences.debugOutputLogging.message "Veateadete logimine aitab Zotero arendajatel diagnoosida Zoteroga esinevaid probleeme. Veateadete logimine aeglustab Zotero tegevust, niisiis ei ole seda üldjuhul tarvis sisse lülitada.">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "ridu logitud">
+<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Lülita pärast taaskäivitamist sisse">
+<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Vaata logi">
+<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Tühjenda logi">
+<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Saada Zotero serverisse">

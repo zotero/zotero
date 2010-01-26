@@ -19,8 +19,8 @@
 <!ENTITY zotero.preferences.autoUpdate "Comprobar automaticamente tradutores actualizados">
 <!ENTITY zotero.preferences.updateNow "Actualizar">
 <!ENTITY zotero.preferences.reportTranslationFailure "Informar de tradutores de sitio rotos">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Permitir que zotero.org personalice o contido coa versión actual do Zotero">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Se está activado, a versión actual de Zotero será engadida ás solicitudes HTTP feitas a zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Usar Zotero para arquivos RIS/Refer descargados">
 <!ENTITY zotero.preferences.automaticSnapshots "Tomar instantáneas automaticamente ao crear elementos a partir de páxinas da Rede">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Ao salvar os elementos adxuntar automaticamente os PDFs e outros arquivos asociados">
@@ -34,9 +34,9 @@
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
-<!ENTITY zotero.preferences.openurl.search "Procura de &quot;resolvers&quot;">
+<!ENTITY zotero.preferences.openurl.search "Procura de &quot;resolvedores&quot;">
 <!ENTITY zotero.preferences.openurl.custom "Personalizar...">
-<!ENTITY zotero.preferences.openurl.server "&quot;Resolver&quot;:">
+<!ENTITY zotero.preferences.openurl.server "&quot;resolvedor&quot;:">
 <!ENTITY zotero.preferences.openurl.version "Versión:">
 
 <!ENTITY zotero.preferences.prefpane.sync "Sincronización">
@@ -46,6 +46,7 @@
 <!ENTITY zotero.preferences.sync.createAccount "Crear Conta">
 <!ENTITY zotero.preferences.sync.lostPassword "Esqueceu o Contrasinal?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronización automática">
+<!ENTITY zotero.preferences.sync.about "About Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sincronizando arquivo">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sincronizar arquivos adxuntos en A Miña Biblioteca usando">
@@ -65,7 +66,7 @@
 
 
 <!ENTITY zotero.preferences.prefpane.search "Procura">
-<!ENTITY zotero.preferences.search.fulltextCache "Memoria Oculta (Caché) de texto completo">
+<!ENTITY zotero.preferences.search.fulltextCache "Memoria Oculta (Cache) de texto completo">
 <!ENTITY zotero.preferences.search.pdfIndexing "Indexación de PDF">
 <!ENTITY zotero.preferences.search.indexStats "Estadísticas do Índice">
 
@@ -74,7 +75,7 @@
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Non Indexado:">
 <!ENTITY zotero.preferences.search.indexStats.words "Palabras:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Número máximo de carácteres a indexar por arquivo:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Número máximo de caracteres a indexar por arquivo:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Número máximo de páxinas a indexar por arquivo:">
 
 <!ENTITY zotero.preferences.prefpane.export "Exportar">
@@ -94,17 +95,17 @@
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Inhabilitar Copia Rápida ao arrastrar máis de">
 
 
-<!ENTITY zotero.preferences.prefpane.styles "Styles">
+<!ENTITY zotero.preferences.prefpane.styles "Estilos">
 
-<!ENTITY zotero.preferences.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.styles.styleManager "Xestor de Estilos">
+<!ENTITY zotero.preferences.styles.styleManager.title "Titulo">
+<!ENTITY zotero.preferences.styles.styleManager.updated "Actualizado">
 <!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Obter máis estilos...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Teclas Rápidas">
 
-<!ENTITY zotero.preferences.keys.openZotero "Abrir/Cerrar Panel Zotero">
+<!ENTITY zotero.preferences.keys.openZotero "Abrir/Pechar Panel Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Cambiar a Modo de Pantalla Completa">
 <!ENTITY zotero.preferences.keys.library "Biblioteca">
 <!ENTITY zotero.preferences.keys.quicksearch "Procura Rápida">
@@ -113,35 +114,35 @@
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Alternar o selector de etiquetas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar as Citas do Elemento Seleccionado ao Portapapeis">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar os Elementos Seleccionados ao Portapapeis">
-<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Importar do portapapeis">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Trate de anular os accesos directos en conflito">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Os cambios só terán efecto en novas fiestras">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 
-<!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
-<!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
-<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
-<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
-<!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
-<!ENTITY zotero.preferences.proxies.hostname "Hostname">
-<!ENTITY zotero.preferences.proxies.scheme "Scheme">
+<!ENTITY zotero.preferences.proxies.proxyOptions "Opcións de Proxy">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero, redirixe con transparencia as solicitudes a través dos proxies gardados. Vexa a">
+<!ENTITY zotero.preferences.proxies.desc_link "documentación de proxy">
+<!ENTITY zotero.preferences.proxies.desc_after_link "para máis información.">
+<!ENTITY zotero.preferences.proxies.transparent "redirixe con transparencia as solicitudes a través dos proxies usados previamente">
+<!ENTITY zotero.preferences.proxies.configured "Proxies Configurados">
+<!ENTITY zotero.preferences.proxies.hostname "&quot;Hostname&quot;">
+<!ENTITY zotero.preferences.proxies.scheme "Esquema">
 
-<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
-<!ENTITY zotero.preferences.proxies.autoAssociate "Automatically associate new hosts">
-<!ENTITY zotero.preferences.proxies.variables "You may use the following variables in your proxy scheme:">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - The hostname of the proxied site (e.g., www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - The path of the proxied page excluding the leading slash (e.g., about/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - The directory path (e.g., about/)">
-<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - The filename (e.g., index.html)">
-<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
+<!ENTITY zotero.preferences.proxies.multiSite "Multi-Sitio">
+<!ENTITY zotero.preferences.proxies.autoAssociate "Asociar automaticamente novos &quot;hosts&quot;">
+<!ENTITY zotero.preferences.proxies.variables "Pode usar as seguintes variables no seu esquema de proxy:">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - O nome do host do sitio a través do proxy (por exemplo, www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - O camiño da páxina a través do proxy excluíndo a barra á esquerda (slash) (por exemplo, about/index.html)">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - A ruta do directorio (por exemplo, about/)">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - O nome do arquivo (por exemplo, index.html)">
+<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Calquera cadea">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avanzado">
 
-<!ENTITY zotero.preferences.charset "Character Encoding">
-<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
-<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+<!ENTITY zotero.preferences.charset "Codificación de caracteres">
+<!ENTITY zotero.preferences.charset.importCharset "Importación de codificación de caracteres">
+<!ENTITY zotero.preferences.charset.displayExportOption "Amosar opción de codificación de caracteres na exportación">
 
 <!ENTITY zotero.preferences.dataDir "Localización de almacenamento">
 <!ENTITY zotero.preferences.dataDir.useProfile "Usar o directorio de perfís de Firefox">

@@ -46,6 +46,7 @@
 <!ENTITY zotero.preferences.sync.createAccount "Új felhasználói fiók">
 <!ENTITY zotero.preferences.sync.lostPassword "Elveszett jelszó?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatikus szinkronizálás">
+<!ENTITY zotero.preferences.sync.about "About Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing "Fájlok szinkronizálása">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "A könyvtáramban található fájlok szinkronizálása">

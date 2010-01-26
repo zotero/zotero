@@ -7,7 +7,7 @@
 
 <!ENTITY zotero.search.recursive.label "Искать в подпапках">
 <!ENTITY zotero.search.noChildren "Показывать документы только верхнего уровня">
-<!ENTITY zotero.search.includeParentsAndChildren "Включать родительские и дочернии документы совпадающих с искомым">
+<!ENTITY zotero.search.includeParentsAndChildren "Включать родительские и дочерние документы совпадающие с искомым">
 
 <!ENTITY zotero.search.textModes.phrase "Фраза">
 <!ENTITY zotero.search.textModes.phraseBinary "Фраза (вкл. двоичные файлы)">
@@ -20,4 +20,4 @@
 
 <!ENTITY zotero.search.search "Искать">
 <!ENTITY zotero.search.clear "Очистить">
-<!ENTITY zotero.search.saveSearch "Сохранить Поиск">
+<!ENTITY zotero.search.saveSearch "Сохранить поиск">

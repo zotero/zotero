@@ -46,6 +46,7 @@
 <!ENTITY zotero.preferences.sync.createAccount "Hesap Yarat">
 <!ENTITY zotero.preferences.sync.lostPassword "Unutulan Şifre?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Kendiliğinden eşle">
+<!ENTITY zotero.preferences.sync.about "About Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing "Dosya Eşlemesi">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Kütüphanemde kullanılan ekli dosyaları eşle">
