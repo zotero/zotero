@@ -5,7 +5,8 @@
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
-<wizard id="zotero-schema-upgrade" title="Zotero"
+<!-- TODO: localize -->
+<wizard id="zotero-schema-upgrade" title="Zotero Upgrade Wizard"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<script>
@@ -122,7 +123,7 @@
 	]]>
 	</script>
 	
-	<wizardpage onpageshow="Zotero_Schema_Upgrade.init()">
+	<wizardpage onpageshow="Zotero_Schema_Upgrade.init()" label=" ">
 		<description>&zotero.upgrade.newVersionInstalled;</description>
 		<description id="zotero-upgrade-required">&zotero.upgrade.upgradeRequired; &zotero.upgrade.autoBackup;</description>
 		<description id="zotero-major-upgrade" hidden="true">
@@ -135,12 +136,12 @@
 		<description id="zotero-advance-message"/>
 	</wizardpage>
 	
-	<wizardpage onpageshow="Zotero_Schema_Upgrade.doUpgrade()">
+	<wizardpage onpageshow="Zotero_Schema_Upgrade.doUpgrade()" label=" ">
 		<description>&zotero.upgrade.upgradeInProgress;</description>
 		<progressmeter mode="undetermined"/>
 	</wizardpage>
 	
-	<wizardpage onpageshow="Zotero_Schema_Upgrade.onAdvance()">
+	<wizardpage onpageshow="Zotero_Schema_Upgrade.onAdvance()" label=" ">
 		<description>&zotero.upgrade.upgradeSucceeded;</description>
 		<description>
 			&zotero.upgrade.changeLogBeforeLink;
