@@ -682,6 +682,7 @@
 						}
 						
 						Zotero.Tags.erase(tagIDs);
+						Zotero.Tags.purge(tagIDs);
 						
 						Zotero.DB.commitTransaction()
 					}

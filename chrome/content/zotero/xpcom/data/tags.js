@@ -399,37 +399,54 @@ Zotero.Tags = new function() {
 	}
 	
 	
-	/*
+	/**
 	 * Delete obsolete tags from database and clear internal array entries
 	 *
-	 * Returns removed tagIDs on success
+	 * @param	[Integer[]|Integer]		[tagIDs]	tagID or array of tagIDs to purge
 	 */
-	function purge() {
-		if (!Zotero.Prefs.get('purge.tags')) {
+	function purge(tagIDs) {
+		if (!tagIDs && !Zotero.Prefs.get('purge.tags')) {
 			return;
+		}
+		
+		if (tagIDs) {
+			tagIDs = Zotero.flattenArguments(tagIDs);
 		}
 		
 		Zotero.UnresponsiveScriptIndicator.disable();
 		try {
 			Zotero.DB.beginTransaction();
 			
-			var sql = "CREATE TEMPORARY TABLE tagDelete AS "
-				+ "SELECT tagID FROM tags WHERE tagID "
-				+ "NOT IN (SELECT tagID FROM itemTags)";
-			Zotero.DB.query(sql);
-			
-			sql = "CREATE INDEX tagDelete_tagID ON tagDelete(tagID)";
-			Zotero.DB.query(sql);
-			
-			sql = "SELECT * FROM tagDelete";
-			var toDelete = Zotero.DB.columnQuery(sql);
-			
-			if (!toDelete) {
-				sql = "DROP TABLE tagDelete";
+			// Use given tags
+			if (tagIDs) {
+				var sql = "CREATE TEMPORARY TABLE tagDelete (tagID INT PRIMARY KEY)";
 				Zotero.DB.query(sql);
-				Zotero.DB.commitTransaction();
-				Zotero.Prefs.set('purge.tags', false);
-				return;
+				for each(var id in tagIDs) {
+					Zotero.DB.query("INSERT OR IGNORE INTO tagDelete VALUES (?)", id);
+				}
+				// Remove duplicates
+				var toDelete = Zotero.DB.columnQuery("SELECT * FROM tagDelete");
+			}
+			// Look for orphaned tags
+			else {
+				var sql = "CREATE TEMPORARY TABLE tagDelete AS "
+					+ "SELECT tagID FROM tags WHERE tagID "
+					+ "NOT IN (SELECT tagID FROM itemTags)";
+				Zotero.DB.query(sql);
+				
+				sql = "CREATE INDEX tagDelete_tagID ON tagDelete(tagID)";
+				Zotero.DB.query(sql);
+				
+				sql = "SELECT * FROM tagDelete";
+				var toDelete = Zotero.DB.columnQuery(sql);
+				
+				if (!toDelete) {
+					sql = "DROP TABLE tagDelete";
+					Zotero.DB.query(sql);
+					Zotero.DB.commitTransaction();
+					Zotero.Prefs.set('purge.tags', false);
+					return;
+				}
 			}
 			
 			var notifierData = {};
