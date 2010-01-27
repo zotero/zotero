@@ -972,8 +972,8 @@ Zotero.Search.prototype._buildQuery = function(){
 	for (var i in this._conditions){
 		var data = Zotero.SearchConditions.get(this._conditions[i]['condition']);
 		
-		// Has a table or explicitly unspecial
-		if (data.table || (!data.special && typeof data.special != 'undefined')) {
+		// Has a table (or 'savedSearch', which doesn't have a table but isn't special)
+		if (data.table || data.name == 'savedSearch') {
 			conditions.push({
 				name: data['name'],
 				alias: data['name']!=this._conditions[i]['condition']
