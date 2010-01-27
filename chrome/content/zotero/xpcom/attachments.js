@@ -1186,12 +1186,24 @@ Zotero.Attachments = new function(){
 		
 		dir = dir.clone();
 		
+		// If directory is empty or has only hidden files, delete it
 		var files = dir.directoryEntries;
 		files.QueryInterface(Components.interfaces.nsIDirectoryEnumerator);
-		if (!files.hasMoreElements()) {
-			dir.remove(false);
+		var empty = true;
+		while (files.hasMoreElements()) {
+			var file = files.getNext();
+			file.QueryInterface(Components.interfaces.nsIFile);
+			if (file.leafName[0] == '.') {
+				continue;
+			}
+			empty = false;
+			break;
 		}
 		files.close();
+		if (empty) {
+			dir.remove(true);
+			return;
+		}
 		
 		// Create orphaned-files directory if it doesn't exist
 		var orphaned = Zotero.getZoteroDirectory();
