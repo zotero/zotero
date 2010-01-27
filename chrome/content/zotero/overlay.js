@@ -1230,18 +1230,11 @@ var ZoteroPane = new function()
 	
 	
 	function reindexItem() {
-		var items = this.getSelectedItems();
-		if (!items) {
+		var itemIDs = this.getSelectedItems(true);
+		if (!itemIDs) {
 			return;
 		}
-		
-		for (var i=0; i<items.length; i++) {
-			if (!items[i].isAttachment()) {
-				continue;
-			}
-			var itemID = items[i].id;
-			Zotero.Fulltext.indexItems(itemID, true);
-		}
+		Zotero.Fulltext.indexItems(itemIDs, true);
 		document.getElementById('zotero-attachment-box').updateItemIndexedState();
 	}
 	
