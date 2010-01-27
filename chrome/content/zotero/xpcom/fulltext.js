@@ -463,7 +463,7 @@ Zotero.Fulltext = new function(){
 		
 		if (!cacheFile.exists()) {
 			var msg = file.leafName + " was not indexed";
-			if (!file.leafName.match(/^[\u0000-\u007F]$/)) {
+			if (!file.leafName.match(/^[\u0000-\u007F]+$/)) {
 				msg += " -- PDFs with filenames containing extended characters cannot currently be indexed due to a Firefox limitation";
 			}
 			Zotero.debug(msg, 2);
