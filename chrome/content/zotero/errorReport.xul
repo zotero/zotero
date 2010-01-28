@@ -5,8 +5,9 @@
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
+<!-- TODO: localize -->
 <wizard xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	id="zotero-error-report" title="Zotero">
+	id="zotero-error-report" title="Zotero Error Report">
 	
 	<script>
 	<![CDATA[
@@ -99,18 +100,18 @@
 	]]>
 	</script>
 	
-	<wizardpage onpageshow="Zotero_Error_Report.init()">
+	<wizardpage onpageshow="Zotero_Error_Report.init()" label=" ">
 		<description id="zotero-failure-message"/>
 		<textbox id="zotero-error-message" class="plain" readonly="true" multiline="true" rows="6"/>
 		<description id="zotero-unrelated-message">&zotero.general.note; &zotero.errorReport.unrelatedMessages;</description>
 		<description id="zotero-advance-message"/>
 	</wizardpage>
 	
-	<wizardpage onpageshow="Zotero_Error_Report.sendErrorReport()">
+	<wizardpage onpageshow="Zotero_Error_Report.sendErrorReport()" label=" ">
 		<description>&zotero.errorReport.submissionInProgress;</description>
 	</wizardpage>
 	
-	<wizardpage>
+	<wizardpage label=" ">
 		<description>&zotero.errorReport.submitted;</description>
 		<description id="zotero-report-result" hidden="true">
 			&zotero.errorReport.reportID;
