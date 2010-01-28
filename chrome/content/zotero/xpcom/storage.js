@@ -2282,6 +2282,13 @@ Zotero.Sync.Storage.ZipWriterObserver.prototype = {
 		var originalSize = 0;
 		for each(var fileName in this._data.files) {
 			var entry = this._zipWriter.getEntry(fileName);
+			if (!entry) {
+				var msg = "ZIP entry '" + fileName + "' not found for request '" + this._data.request.name + "'";
+				Zotero.debug(msg, 1);
+				this._zipWriter.close();
+				this._data.request.error(msg);
+				return;
+			}
 			originalSize += entry.realSize;
 		}
 		delete this._data.files;
