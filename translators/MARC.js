@@ -2,13 +2,13 @@
 	"translatorID":"a6ee60df-1ddc-4aae-bb25-45e0537be973",
 	"translatorType":1,
 	"label":"MARC",
-	"creator":"Simon Kornblith",
+	"creator":"Simon Kornblith, updated for unimarc by Sylvain Machefert",
 	"target":"marc",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-01-12 11:50:00"
+	"lastUpdated":"2010-01-27 11:50:00"
 }
 
 function detectImport() {
@@ -18,7 +18,7 @@ function detectImport() {
 		return true;
 	}
 }
-
+//test
 var fieldTerminator = "\x1E";
 var recordTerminator = "\x1D";
 var subfieldDelimiter = "\x1F";
@@ -260,9 +260,12 @@ record.prototype.translate = function(item) {
 		var marcType = this.leader[6];
 		if(marcType == "g") {
 			item.itemType = "film";
-		} else if(marcType == "k" || marcType == "e" || marcType == "f") {
+		} else if(marcType == "e" || marcType == "f") {
+			item.itemType = "map";
+		} else if(marcType == "k") {
 			item.itemType = "artwork";
-		} else if(marcType == "t") {
+		} else if(marcType == "t" || marcType == "b") {
+			// 20091210: in unimarc, the code for manuscript is b, unused in marc21.
 			item.itemType = "manuscript";
 		} else {
 			item.itemType = "book";
@@ -270,124 +273,229 @@ record.prototype.translate = function(item) {
 	} else {
 		item.itemType = "book";
 	}
-	
-	// Extract ISBNs
-	this._associateDBField(item, "020", "a", "ISBN", pullISBN);
-	// Extract ISSNs
-	this._associateDBField(item, "022", "a", "ISSN", pullISBN);
-	// Extract creators
-	this._associateDBField(item, "100", "a", "creator", author, "author", true);
-	this._associateDBField(item, "110", "a", "creator", corpAuthor, "author");
-	this._associateDBField(item, "111", "a", "creator", corpAuthor, "author");
-	this._associateDBField(item, "700", "a", "creator", author, "contributor", true);
-	this._associateDBField(item, "710", "a", "creator", corpAuthor, "contributor");
-	this._associateDBField(item, "711", "a", "creator", corpAuthor, "contributor");
-	if(item.itemType == "book" && !item.creators.length) {
-		// some LOC entries have no listed author, but have the author in the person subject field as the first entry
-		var field = this.getFieldSubfields("600");
-		if(field[0]) {
-			item.creators.push(Zotero.Utilities.cleanAuthor(field[0]["a"], "author", true));	
+
+	// Starting from there, we try to distinguish between unimarc and other marc flavours.
+	// In unimarc, the title is in the 200 field and this field isn't used in marc-21 (at least)
+	// In marc-21, the title is in the 245 field and this field isn't used in unimarc
+	// So if we have a 200 and no 245, we can think we are with an unimarc record. 
+	// Otherwise, we use the original association.
+	if ( (this.getFieldSubfields("200")[0]) && (!(this.getFieldSubfields("245")[0])) )
+	{
+		// If we've got a 328 field, we're on a thesis
+		if (this.getFieldSubfields("328")[0])
+		{
+			item.itemType = "thesis";
 		}
-	}
-	
-	// Extract tags
-	// personal
-	this._associateTags(item, "600", "aqtxyz");
-	// corporate
-	this._associateTags(item, "611", "abtxyz");
-	// meeting
-	this._associateTags(item, "630", "acetxyz");
-	// uniform title
-	this._associateTags(item, "648", "atxyz");
-	// chronological
-	this._associateTags(item, "650", "axyz");
-	// topical
-	this._associateTags(item, "651", "abcxyz");
-	// geographic
-	this._associateTags(item, "653", "axyz");
-	// uncontrolled
-	this._associateTags(item, "653", "a");
-	// faceted topical term (whatever that means)
-	this._associateTags(item, "654", "abcyz");
-	// genre/form
-	this._associateTags(item, "655", "abcxyz");
-	// occupation
-	this._associateTags(item, "656", "axyz");
-	// function
-	this._associateTags(item, "657", "axyz");
-	// curriculum objective
-	this._associateTags(item, "658", "ab");
-	// hierarchical geographic place name
-	this._associateTags(item, "662", "abcdfgh");
-	
-	// Extract title
-	this._associateDBField(item, "245", "ab", "title");
-	// Extract edition
-	this._associateDBField(item, "250", "a", "edition");
-	// Extract place info
-	this._associateDBField(item, "260", "a", "place");
-	
-	// Extract publisher/distributor
-	if(item.itemType == "film") {
-		this._associateDBField(item, "260", "b", "distributor");
-	} else {
-		this._associateDBField(item, "260", "b", "publisher");
-	}
-	
-	// Extract year
-	this._associateDBField(item, "260", "c", "date", pullNumber);
-	// Extract pages
-	this._associateDBField(item, "300", "a", "numPages", pullNumber);
-	// Extract series
-	this._associateDBField(item, "440", "a", "series");
-	// Extract series number
-	this._associateDBField(item, "440", "v", "seriesNumber");
-	// Extract call number
-	this._associateDBField(item, "084", "ab", "callNumber");
-	this._associateDBField(item, "082", "a", "callNumber");
-	this._associateDBField(item, "080", "ab", "callNumber");
-	this._associateDBField(item, "070", "ab", "callNumber");
-	this._associateDBField(item, "060", "ab", "callNumber");
-	this._associateDBField(item, "050", "ab", "callNumber");
-	this._associateDBField(item, "090", "a", "callNumber");
-	this._associateDBField(item, "099", "a", "callNumber");
-	
-	//German
-	if (!item.place) this._associateDBField(item, "410", "a", "place");
-	if (!item.publisher) this._associateDBField(item, "412", "a", "publisher");
-	if (!item.title) this._associateDBField(item, "331", "a", "title");
-	if (!item.title) this._associateDBField(item, "1300", "a", "title");
-	if (!item.date) this._associateDBField(item, "425", "a", "date", pullNumber);
-	if (!item.date) this._associateDBField(item, "595", "a", "date", pullNumber);
-	if (this.getFieldSubfields("104")[0]) this._associateDBField(item, "104", "a", "creator", author, "author", true);
-	if (this.getFieldSubfields("800")[0]) this._associateDBField(item, "800", "a", "creator", author, "author", true);
-	
-	//Spanish
-	if (!item.title) this._associateDBField(item, "200", "a", "title");
-	if (!item.place) this._associateDBField(item, "210", "a", "place");
-	if (!item.publisher) this._associateDBField(item, "210", "c", "publisher");
-	if (!item.date) this._associateDBField(item, "210", "d", "date");
-	if (!item.creators) {
-		for (var i = 700; i < 703; i++) {
-			if (this.getFieldSubfields(i)[0]) {
-				Zotero.debug(i + " is AOK");
-				Zotero.debug(this.getFieldSubfields(i.toString()));
-				var aut = this.getFieldSubfields(i)[0];
+		
+		// Extract ISBNs
+		this._associateDBField(item, "010", "a", "ISBN", pullISBN);
+		// Extract ISSNs
+		this._associateDBField(item, "011", "a", "ISSN", pullISBN);
+		
+		// Extract creators (700, 701 & 702)
+		for (var i = 700; i < 703; i++)
+		{
+			var authorTab = this.getFieldSubfields(i);
+			for (var j in authorTab) 
+			{
+				var aut = authorTab[j];
+				var authorText = "";
 				if (aut.b) {
-					aut = aut['b'].replace(/,\W+/g, "") + " " + aut['a'].replace(/,\s/g, "");
-				} else {
-					aut = aut['a'].split(", ").join(" ");
+					authorText = aut['a'] + ", " + aut['b'];
+				} 
+				else
+				{
+					authorText = aut['a'];
 				}
-				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+				
+				item.creators.push(Zotero.Utilities.cleanAuthor(authorText, "author", true));
 			}
 		}
+		
+		// Extract corporate creators (710, 711 & 712)
+		for (var i = 710; i < 713; i++)
+		{
+			var authorTab = this.getFieldSubfields(i);
+			for (var j in authorTab)
+			{
+				if (authorTab[j]['a'])
+				{
+					item.creators.push({lastName:authorTab[j]['a'], creatorType:"contributor", fieldMode:true});
+				}
+			}
+		}
+		
+		// Extract language. In the 101$a there's a 3 chars code, would be better to
+		// have a translation somewhere
+		this._associateDBField(item, "101", "a", "language");
+		
+		// Extract abstractNote
+		this._associateDBField(item, "328", "a", "abstractNote");
+		this._associateDBField(item, "330", "a", "abstractNote");
+		
+		// Extract tags
+		// TODO : Ajouter les autres champs en 6xx avec les autorit�s construites. 
+		// n�cessite de reconstruire les autorit�s
+		this._associateTags(item, "610", "a");
+		
+		// Extract scale (for maps)
+		this._associateDBField(item, "206", "a", "scale");
+		
+		// Extract title
+		this._associateDBField(item, "200", "ae", "title");
+		
+		// Extract edition
+		this._associateDBField(item, "205", "a", "edition");
+		
+		// Extract place info
+		this._associateDBField(item, "210", "a", "place");
+		
+		// Extract publisher/distributor
+		if(item.itemType == "film")
+		{
+			this._associateDBField(item, "210", "c", "distributor");
+		}
+		else
+		{
+			this._associateDBField(item, "210", "c", "publisher");
+		}
+		
+		// Extract year
+		this._associateDBField(item, "210", "d", "date", pullNumber);
+		// Extract pages. Not working well because 215$a often contains pages + volume informations : 1 vol ()
+		// this._associateDBField(item, "215", "a", "pages", pullNumber);
+		
+		// Extract series
+		this._associateDBField(item, "225", "a", "series");
+		// Extract series number
+		this._associateDBField(item, "225", "v", "seriesNumber");
+		
+		// Extract call number
+		this._associateDBField(item, "686", "ab", "callNumber");
+		this._associateDBField(item, "676", "a", "callNumber");
+		this._associateDBField(item, "675", "a", "callNumber");
+		this._associateDBField(item, "680", "ab", "callNumber");
 	}
-	if(item.title) {
-		item.title = Zotero.Utilities.capitalizeTitle(item.title);
+	else
+	{
+		// Extract ISBNs
+		this._associateDBField(item, "020", "a", "ISBN", pullISBN);
+		// Extract ISSNs
+		this._associateDBField(item, "022", "a", "ISSN", pullISBN);
+		// Extract creators
+		this._associateDBField(item, "100", "a", "creator", author, "author", true);
+		this._associateDBField(item, "110", "a", "creator", corpAuthor, "author");
+		this._associateDBField(item, "111", "a", "creator", corpAuthor, "author");
+		this._associateDBField(item, "700", "a", "creator", author, "contributor", true);
+		this._associateDBField(item, "710", "a", "creator", corpAuthor, "contributor");
+		this._associateDBField(item, "711", "a", "creator", corpAuthor, "contributor");
+		if(item.itemType == "book" && !item.creators.length) {
+			// some LOC entries have no listed author, but have the author in the person subject field as the first entry
+			var field = this.getFieldSubfields("600");
+			if(field[0]) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(field[0]["a"], "author", true));	
+			}
+		}
+		
+		// Extract tags
+		// personal
+		this._associateTags(item, "600", "aqtxyz");
+		// corporate
+		this._associateTags(item, "611", "abtxyz");
+		// meeting
+		this._associateTags(item, "630", "acetxyz");
+		// uniform title
+		this._associateTags(item, "648", "atxyz");
+		// chronological
+		this._associateTags(item, "650", "axyz");
+		// topical
+		this._associateTags(item, "651", "abcxyz");
+		// geographic
+		this._associateTags(item, "653", "axyz");
+		// uncontrolled
+		this._associateTags(item, "653", "a");
+		// faceted topical term (whatever that means)
+		this._associateTags(item, "654", "abcyz");
+		// genre/form
+		this._associateTags(item, "655", "abcxyz");
+		// occupation
+		this._associateTags(item, "656", "axyz");
+		// function
+		this._associateTags(item, "657", "axyz");
+		// curriculum objective
+		this._associateTags(item, "658", "ab");
+		// hierarchical geographic place name
+		this._associateTags(item, "662", "abcdfgh");
+		
+		// Extract title
+		this._associateDBField(item, "245", "ab", "title");
+		// Extract edition
+		this._associateDBField(item, "250", "a", "edition");
+		// Extract place info
+		this._associateDBField(item, "260", "a", "place");
+		
+		// Extract publisher/distributor
+		if(item.itemType == "film") {
+			this._associateDBField(item, "260", "b", "distributor");
+		} else {
+			this._associateDBField(item, "260", "b", "publisher");
+		}
+		
+		// Extract year
+		this._associateDBField(item, "260", "c", "date", pullNumber);
+		// Extract pages
+		this._associateDBField(item, "300", "a", "numPages", pullNumber);
+		// Extract series
+		this._associateDBField(item, "440", "a", "series");
+		// Extract series number
+		this._associateDBField(item, "440", "v", "seriesNumber");
+		// Extract call number
+		this._associateDBField(item, "084", "ab", "callNumber");
+		this._associateDBField(item, "082", "a", "callNumber");
+		this._associateDBField(item, "080", "ab", "callNumber");
+		this._associateDBField(item, "070", "ab", "callNumber");
+		this._associateDBField(item, "060", "ab", "callNumber");
+		this._associateDBField(item, "050", "ab", "callNumber");
+		this._associateDBField(item, "090", "a", "callNumber");
+		this._associateDBField(item, "099", "a", "callNumber");
+		
+		//German
+		if (!item.place) this._associateDBField(item, "410", "a", "place");
+		if (!item.publisher) this._associateDBField(item, "412", "a", "publisher");
+		if (!item.title) this._associateDBField(item, "331", "a", "title");
+		if (!item.title) this._associateDBField(item, "1300", "a", "title");
+		if (!item.date) this._associateDBField(item, "425", "a", "date", pullNumber);
+		if (!item.date) this._associateDBField(item, "595", "a", "date", pullNumber);
+		if (this.getFieldSubfields("104")[0]) this._associateDBField(item, "104", "a", "creator", author, "author", true);
+		if (this.getFieldSubfields("800")[0]) this._associateDBField(item, "800", "a", "creator", author, "author", true);
+		
+		//Spanish
+		if (!item.title) this._associateDBField(item, "200", "a", "title");
+		if (!item.place) this._associateDBField(item, "210", "a", "place");
+		if (!item.publisher) this._associateDBField(item, "210", "c", "publisher");
+		if (!item.date) this._associateDBField(item, "210", "d", "date");
+		if (!item.creators) {
+			for (var i = 700; i < 703; i++) {
+				if (this.getFieldSubfields(i)[0]) {
+					Zotero.debug(i + " is AOK");
+					Zotero.debug(this.getFieldSubfields(i.toString()));
+					var aut = this.getFieldSubfields(i)[0];
+					if (aut.b) {
+						aut = aut['b'].replace(/,\W+/g, "") + " " + aut['a'].replace(/,\s/g, "");
+					} else {
+						aut = aut['a'].split(", ").join(" ");
+					}
+					item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+				}
+			}
+		}
+		if(item.title) {
+			item.title = Zotero.Utilities.capitalizeTitle(item.title);
+		}
+		if (this.getFieldSubfields("335")[0]) {
+			item.title = item.title + ": " + this.getFieldSubfields("335")[0]['a'];
+		}
 	}
-	if (this.getFieldSubfields("335")[0]) {
-		item.title = item.title + ": " + this.getFieldSubfields("335")[0]['a'];
-	}	
 }
 
 function doImport() {
