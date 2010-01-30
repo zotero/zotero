@@ -449,7 +449,7 @@
 				<parameter name="event"/>
 				<body>
 				<![CDATA[
-					ZoteroPane.viewAttachment(this.item.id, event.originalTarget, !this.editable);
+					ZoteroPane.viewAttachment(this.item.id, event, !this.editable);
 				]]>
 				</body>
 			</method>
