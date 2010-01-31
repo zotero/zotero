@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-06-04 00:00:00"
+	"lastUpdated":"2010-01-30 00:00:00"
 }
 
 function detectWeb(doc, url) {
@@ -16,6 +16,18 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
+	
+	
+	
+		// The Scientific American Archive breaks this translator, disabling 
+		try {
+			var databases = doc.evaluate("//span[@class = 'selected-databases']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			if(databases.indexOf("Scientific American Archive Online") != -1) {
+				return false;
+			}
+		} catch(e) {
+		}
+	
 	
 	// See if this is a search results or folder results page
 	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver,
@@ -38,6 +50,10 @@ function detectWeb(doc, url) {
 		+' or starts-with(text(), "Bu kayda sürekli bağlantı")'
 		+' or starts-with(text(), "Μόνιμος σύνδεσμος σε αυτό το αρχείο")]';
 */
+
+
+	
+
 	var xpath = '//input[@id="ctl00_ctl00_MainContentArea_MainContentArea_topDeliveryControl_deliveryButtonControl_lnkExportImage"]';	
 	var persistentLink = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(persistentLink) {
@@ -87,6 +103,7 @@ function downloadFunction(text) {
 	
 	Zotero.Utilities.HTTP.doPost(host+"/ehost/"+deliveryURL,
 								 downloadString, function(text) {	// get marked records as RIS
+		Zotero.debug(text);
 		// load translator for RIS
 		var test = text.match(/UR\s+\-(.*)/g);
 		if (text.match(/AB\s\s\-/)) text = text.replace(/AB\s\s\-/, "N2  -");
@@ -128,7 +145,7 @@ function doWeb(doc, url) {
 	                                XPathResult.ANY_TYPE, null).iterateNext();                              
 
 	if(searchResult) {
-		var titlex = '//div[@class="result-list-record" or @class="folder-item-detail" or @class="image-result"]/span/a[@class = "title-link"]';
+		var titlex = '//a[@class = "title-link"]';
 		var titles = doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var items = new Object();
 		var title;
