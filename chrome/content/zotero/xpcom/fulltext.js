@@ -199,7 +199,7 @@ Zotero.Fulltext = new function(){
 		
 		var existing = [];
 		var done = 0;
-		var maxWords = 500;
+		var maxWords = 999; // compiled limit
 		var numWords = words.length;
 		
 		Zotero.DB.beginTransaction();
@@ -234,11 +234,17 @@ Zotero.Fulltext = new function(){
 		Zotero.DB.query("REPLACE INTO fulltextItems (itemID, version) VALUES (?,?)",
 			[itemID, FULLTEXT_VERSION]);
 		
+		
 		// Handle bound parameters manually for optimal speed
 		var statement1 = Zotero.DB.getStatement("INSERT INTO fulltextWords (word) VALUES (?)");
 		var statement2 = Zotero.DB.getStatement("INSERT OR IGNORE INTO fulltextItemWords VALUES (?,?)");
 		
 		for each(var word in origWords) {
+			// Skip words containing invalid characters
+			if (word.match(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/)) {
+				Zotero.debug("Skipping word '" + word + "' due to invalid characters");
+				continue;
+			}
 			if (existing['_' + word]){
 				var wordID = existing['_' + word];
 			}
