@@ -155,7 +155,7 @@
 					var urlField = this._id('url');
 					var accessed = this._id('accessedRow');
 					var pagesRow = this._id('pagesRow');
-					var dateModifiedRow = this._id('dateModified');
+					var dateModifiedRow = this._id('dateModifiedRow');
 					var indexStatusRow = this._id('indexStatusRow');
 					var selectButton = this._id('select-button');
 					
@@ -259,6 +259,7 @@
 						var fileName = this.item.getFilename();
 						
 						if (fileName) {
+							// TODO: localize
 							this._id("fileName-label").value = "Filename: ";
 							this._id("fileName").value = fileName;
 							fileNameRow.hidden = false;
@@ -294,9 +295,17 @@
 					
 					if (this.displayDateModified) {
 						this._id("dateModified-label").value = Zotero.getString('itemFields.dateModified')+': ';
-						this._id("dateModified").value = Zotero.Date.sqlToDate(
+						var mtime = this.item.attachmentModificationTime;
+						if (mtime) {
+							this._id("dateModified").value = new Date(mtime).toLocaleString();
+						}
+						// Use the item's mod time as a backup (e.g., when sync
+						// passes in the mod time for the nonexistent remote file)
+						else {
+							this._id("dateModified").value = Zotero.Date.sqlToDate(
 								this.item.getField('dateModified'), true
 							).toLocaleString();
+						}
 						dateModifiedRow.hidden = false;
 					}
 					else {
@@ -497,9 +506,7 @@
 					var str = Zotero.getString('pane.items.menu.reindexItem');
 					reindexButton.setAttribute('tooltiptext', str);
 					
-					if (this.editable &&
-							Zotero.Fulltext.pdfConverterIsRegistered() &&
-							Zotero.Fulltext.canReindex(this.item.id)) {
+					if (this.editable && Zotero.Fulltext.canReindex(this.item.id)) {
 						reindexButton.setAttribute('hidden', false);
 					}
 					else {

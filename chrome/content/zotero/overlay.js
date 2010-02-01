@@ -1229,11 +1229,57 @@ var ZoteroPane = new function()
 	}
 	
 	
+	this.checkPDFConverter = function () {
+		if (Zotero.Fulltext.pdfConverterIsRegistered()) {
+			return true;
+		}
+		
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+		var index = ps.confirmEx(
+			null,
+			// TODO: localize
+			"PDF Tools Not Installed",
+			"To use this feature, you must first install the PDF tools in "
+				+ "the Zotero preferences.",
+			buttonFlags,
+			"Open Preferences",
+			null, null, null, {}
+		);
+		if (index == 0) {
+			ZoteroPane.openPreferences('zotero-prefpane-search', 'pdftools-install');
+		}
+		return false;
+	}
+	
+	
 	function reindexItem() {
-		var itemIDs = this.getSelectedItems(true);
-		if (!itemIDs) {
+		var items = this.getSelectedItems();
+		if (!items) {
 			return;
 		}
+		
+		var itemIDs = [];
+		var checkPDF = false;
+		for (var i=0; i<items.length; i++) {
+			// If any PDFs, we need to make sure the converter is installed and
+			// prompt for installation if not
+			if (!checkPDF && items[i].attachmentMIMEType && items[i].attachmentMIMEType == "application/pdf") {
+				checkPDF = true;
+			}
+			itemIDs.push(items[i].id);
+		}
+		
+		if (checkPDF) {
+			var installed = this.checkPDFConverter();
+			if (!installed) {
+				document.getElementById('zotero-attachment-box').updateItemIndexedState();
+				return;
+			}
+		}
+		
 		Zotero.Fulltext.indexItems(itemIDs, true);
 		document.getElementById('zotero-attachment-box').updateItemIndexedState();
 	}

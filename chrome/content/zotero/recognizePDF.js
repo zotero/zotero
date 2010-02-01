@@ -51,24 +51,8 @@ var Zotero_RecognizePDF = new function() {
 	 * of the new items
 	 */
 	this.recognizeSelected = function() {
-		if (!Zotero.Fulltext.pdfConverterIsRegistered()) {
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-				.getService(Components.interfaces.nsIPromptService);
-			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
-			var index = ps.confirmEx(
-				null,
-				// TODO: localize
-				"PDF Tools Not Installed",
-				"To use this feature, you must first install the PDF tools in "
-					+ "the Zotero preferences.",
-				buttonFlags,
-				"Open Preferences",
-				null, null, null, {}
-			);
-			if (index == 0) {
-				ZoteroPane.openPreferences('zotero-prefpane-search', 'pdftools-install');
-			}
+		var installed = ZoteroPane.checkPDFConverter();
+		if (!installed) {
 			return;
 		}
 		
