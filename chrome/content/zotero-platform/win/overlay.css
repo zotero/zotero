@@ -1,0 +1,17 @@
+.zotero-tb-button:not(:first-child) {
+	margin-left: 5px;
+}
+
+#zotero-tb-sync {
+	margin-right: 1px;
+}
+
+#zotero-tb-fullscreen {
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+#zotero-view-tabbox tab {
+	padding-left: .7em;
+	padding-right: .7em;
+}
