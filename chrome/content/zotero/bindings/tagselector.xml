@@ -552,9 +552,11 @@
 						var textbox = this.id('tags-search');
 						var t = textbox.inputField;
 						
-						textbox.firstChild.hidden = (t.value == "");
+						if (Zotero.isFx30) {
+							textbox.firstChild.hidden = (t.value == "");
+						}
 						
-						if (clear != undefined){
+						if (typeof clear != 'undefined') {
 							if (clear){
 								t.value = '';
 								this.setFilterTags(false);
