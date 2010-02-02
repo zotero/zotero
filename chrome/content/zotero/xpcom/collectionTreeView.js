@@ -1091,30 +1091,40 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 					continue;
 				}
 				
-				// TODO: for now, skip items that are already linked
-				if (itemGroup.isWithinGroup() && itemGroup.ref.libraryID != item.libraryID) {
-					if (!item.getLinkedItem(itemGroup.ref.libraryID)) {
-						skip = false;
-					}
-					continue;
-				}
-				
-				if (itemGroup.isGroup()) {
-					// Don't allow drag onto library of same group
-					if (itemGroup.ref.libraryID == item.libraryID) {
+				// Cross-library drag
+				if (itemGroup.ref.libraryID != item.libraryID) {
+					// Only allow cross-library drag to root library and collections
+					if (!(itemGroup.isLibrary(true) || itemGroup.isCollection())) {
 						return false;
 					}
+					
+					var linkedItem = item.getLinkedItem(itemGroup.ref.libraryID);
+					if (linkedItem) {
+						// For drag to root, skip if linked item exists
+						if (itemGroup.isLibrary(true)) {
+							continue;
+						}
+						// For drag to collection
+						else if (itemGroup.isCollection()) {
+							// skip if linked item is already in it
+							if (itemGroup.ref.hasItem(linkedItem.id)) {
+								continue;
+							}
+							// or if linked item is a child item
+							else if (linkedItem.getSource()) {
+								continue;
+							}
+						}
+					}
+					skip = false;
 					continue;
 				}
 				
-				// Allow drag of group items to personal library
-				if (item.libraryID && (itemGroup.isLibrary()
-						|| itemGroup.isCollection() && !itemGroup.isWithinGroup())) {
-					// TODO: for now, skip items that are already linked
-					if (!item.getLinkedItem()) {
-						skip = false;
-					}
-					continue;
+				// Intra-library drag
+				
+				// Don't allow drag onto root of same library
+				if (itemGroup.isLibrary(true)) {
+					return false;
 				}
 				
 				// Make sure there's at least one item that's not already
@@ -1238,7 +1248,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		
 		var newItems = [];
 		var newIDs = [];
-		// DEBUG: support items coming from different sources?
+		// TODO: support items coming from different sources?
 		if (items[0].libraryID == targetLibraryID) {
 			var sameLibrary = true;
 		}
@@ -1266,8 +1276,11 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 				// Check if there's already a copy of this item in the library
 				var linkedItem = item.getLinkedItem(targetLibraryID);
 				if (linkedItem) {
-					Zotero.debug("Linked item already exists -- skipping");
-					continue;
+					// Add linked item to target collection rather than copying
+					if (itemGroup.isCollection()) {
+						itemGroup.ref.addItem(linkedItem.id);
+						continue;
+					}
 					
 					/*
 					// TODO: support tags, related, attachments, etc.
