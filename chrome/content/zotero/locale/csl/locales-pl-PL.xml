@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="pl">
+    <term name="at">at</term>
+    <term name="in">w</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">udostępniono</term>
+    <term name="retrieved">pobrano</term>
+    <term name="from">z</term>
+    <term name="forthcoming">w druku</term>
+    <term name="references">Referencje</term>
+    <term name="reference item">
+      <single>source</single>
+      <multiple>sources</multiple>
+    </term>
+    <term name="no date">bez daty</term>
+    <term name="and">i</term>
+    <term name="et-al">et al.</term>
+    <term name="interview">wywiad</term>
+    <term name="letter">list</term>
+    <term name="anonymous">anonim</term>
+    <term name="anonymous" form="short">anonim</term>
+    <term name="and others">i inni</term>
+    <term name="in press">w druku</term>
+    <term name="online">online</term>
+    <term name="cited">cytowane</term>
+    <term name="internet">internet</term>
+    <term name="presented at">zaprezentowano</term>
+    <term name="anthropology">antropologia</term>
+    <term name="astronomy">astronomia</term>
+    <term name="biology">biologia</term>
+    <term name="botany">botanika</term>
+    <term name="chemistry">chemia</term>
+    <term name="engineering">inżynieria</term>
+    <term name="generic-base">generic base</term>
+    <term name="geography">geografia</term>
+    <term name="geology">geologia</term>
+    <term name="history">historia</term>
+    <term name="humanities">humanistyka</term>
+    <term name="literature">literatura</term>
+    <term name="math">matematyka</term>
+    <term name="medicine">medycyna</term>
+    <term name="philosophy">filozofia</term>
+    <term name="physics">fizyka</term>
+    <term name="psychology">psychologia</term>
+    <term name="sociology">socjologia</term>
+    <term name="science">nauki ścisłe</term>
+    <term name="political_science">nauki polityczne</term>
+    <term name="social_science">nauki społeczne</term>
+    <term name="theology">teologia</term>
+    <term name="zoology">zoologia</term>
+    <term name="book">
+      <single>książka</single>
+      <multiple>książki</multiple>
+    </term>
+    <term name="chapter">
+      <single>rozdział</single>
+      <multiple>rozdziały</multiple>
+    </term>
+    <term name="column">
+      <single>kolumna</single>
+      <multiple>kolumny</multiple>
+    </term>
+    <term name="figure">
+      <single>rycina</single>
+      <multiple>ryciny</multiple>
+    </term>
+    <term name="folio">
+      <single>folio</single>
+      <multiple>folios</multiple>
+    </term>
+    <term name="issue">
+      <single>numer</single>
+      <multiple>numery</multiple>
+    </term>
+    <term name="line">
+      <single>wers</single>
+      <multiple>wersy</multiple>
+    </term>
+    <term name="note">
+      <single>notatka</single>
+      <multiple>notatki</multiple>
+    </term>
+    <term name="opus">
+      <single>opus</single>
+      <multiple>opera</multiple>
+    </term>
+    <term name="page">
+      <single>strona</single>
+      <multiple>strony</multiple>
+    </term>
+    <term name="paragraph">
+      <single>akapit</single>
+      <multiple>akapity</multiple>
+    </term>
+    <term name="part">
+      <single>część</single>
+      <multiple>części</multiple>
+    </term>
+    <term name="section">
+      <single>sekcja</single>
+      <multiple>sekcja</multiple>
+    </term>
+    <term name="volume">
+      <single>tom</single>
+      <multiple>tomy</multiple>
+    </term>
+    <term name="edition">
+      <single>wydanie</single>
+      <multiple>wydania</multiple>
+    </term>
+    <term name="verse">
+      <single>wers</single>
+      <multiple>wersy</multiple>
+    </term>
+    <term name="sub verbo">
+      <single>sub verbo</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="book" form="short">książka</term>
+    <term name="chapter" form="short">rozdz</term>
+    <term name="column" form="short">kolumna</term>
+    <term name="figure" form="short">ryc</term>
+    <term name="folio" form="short">folio</term>
+    <term name="issue" form="short">nr</term>
+    <term name="opus" form="short">op</term>
+    <term name="page" form="short">
+      <single>s</single>
+      <multiple>s</multiple>
+    </term>
+    <term name="paragraph" form="short">akapit</term>
+    <term name="part" form="short">część</term>
+    <term name="section" form="short">sekcja</term>
+    <term name="sub verbo" form="short">
+      <single>s.v</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="verse" form="short">
+      <single>wers</single>
+      <multiple>wersy</multiple>
+    </term>
+    <term name="volume" form="short">
+      <single>t</single>
+      <multiple>t</multiple>
+    </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">wyd</term>
+    <term name="paragraph" form="symbol">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§§</multiple>
+    </term>
+    <term name="author">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor">
+      <single>redaktor</single>
+      <multiple>redaktorzy</multiple>
+    </term>
+    <term name="translator">
+      <single>tłumacz</single>
+      <multiple>tłumacze</multiple>
+    </term>
+    <term name="author" form="short">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor" form="short">
+      <single>red</single>
+      <multiple>red</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>tłum</single>
+      <multiple>tłum</multiple>
+    </term>
+    <term name="editor" form="verb">zredagowane przez</term>
+    <term name="translator" form="verb">przetłumaczone przez</term>
+    <term name="recipient" form="verb">dla</term>
+    <term name="interviewer" form="verb">przeprowadzony przez</term>
+    <term name="editor" form="verb-short">red</term>
+    <term name="translator" form="verb-short">tłum</term>
+    <term name="month-01">styczeń</term>
+    <term name="month-02">luty</term>
+    <term name="month-03">marzec</term>
+    <term name="month-04">kwiecień</term>
+    <term name="month-05">maj</term>
+    <term name="month-06">czerwiec</term>
+    <term name="month-07">lipiec</term>
+    <term name="month-08">sierpień</term>
+    <term name="month-09">wrzesień</term>
+    <term name="month-10">październik</term>
+    <term name="month-11">listopad</term>
+    <term name="month-12">grudzień</term>
+    <term name="month-01" form="short">styczeń</term>
+    <term name="month-02" form="short">luty</term>
+    <term name="month-03" form="short">marzec</term>
+    <term name="month-04" form="short">kwiecień</term>
+    <term name="month-05" form="short">maj</term>
+    <term name="month-06" form="short">czerwiec</term>
+    <term name="month-07" form="short">lipiec</term>
+    <term name="month-08" form="short">sierpień</term>
+    <term name="month-09" form="short">wrzesień</term>
+    <term name="month-10" form="short">październik</term>
+    <term name="month-11" form="short">listopad</term>
+    <term name="month-12" form="short">grudzień</term>
+  </locale>
+</terms>

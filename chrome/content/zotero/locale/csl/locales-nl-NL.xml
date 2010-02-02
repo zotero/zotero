@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="nl">
+    <term name="at">bij</term>
+    <term name="in">in</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">bezocht</term>
+    <term name="retrieved">verkregen</term>
+    <term name="from">van</term>
+    <term name="forthcoming">in voorbereiding</term>
+    <term name="references">referenties</term>
+    <term name="reference item">
+      <single>referentie</single>
+      <multiple>referenties</multiple>
+    </term>
+    <term name="no date">geen datum</term>
+    <term name="and">en</term>
+    <term name="et-al">e.a.</term>
+    <term name="interview">interview</term>
+    <term name="letter">brief</term>
+    <term name="anonymous">anoniem</term>
+    <term name="anonymous" form="short">anon</term>
+    <term name="and others">en anderen</term>
+    <term name="in press">in druk</term>
+    <term name="online">online</term>
+    <term name="cited">geciteerd</term>
+    <term name="internet">internet</term>
+    <term name="presented at">gepresenteerd bij</term>
+    <term name="anthropology">anthropologie</term>
+    <term name="astronomy">astronomie</term>
+    <term name="biology">biologie</term>
+    <term name="botany">botanie</term>
+    <term name="chemistry">scheikunde</term>
+    <term name="engineering">techniek</term>
+    <term name="generic-base">generiek</term>
+    <term name="geography">geografie</term>
+    <term name="geology">geologie</term>
+    <term name="history">geschiedenis</term>
+    <term name="humanities">geesteswetenschappen</term>
+    <term name="literature">literatuur</term>
+    <term name="math">wiskunde</term>
+    <term name="medicine">medicijnen</term>
+    <term name="philosophy">filosofie</term>
+    <term name="physics">natuurkunde</term>
+    <term name="psychology">psychologie</term>
+    <term name="sociology">sociologie</term>
+    <term name="science">wetenschap</term>
+    <term name="political_science">politieke wetenschappen</term>
+    <term name="social_science">sociale wetenschappen</term>
+    <term name="theology">theologie</term>
+    <term name="zoology">zoologie</term>
+    <term name="book">
+      <single>boek</single>
+      <multiple>boeken</multiple>
+    </term>
+    <term name="chapter">
+      <single>hoofdstuk</single>
+      <multiple>hoofdstukken</multiple>
+    </term>
+    <term name="column">
+      <single>column</single>
+      <multiple>columns</multiple>
+    </term>
+    <term name="figure">
+      <single>figuur</single>
+      <multiple>figuren</multiple>
+    </term>
+    <term name="folio">
+      <single>folio</single>
+      <multiple>folio's</multiple>
+    </term>
+    <term name="issue">
+      <single>nummer</single>
+      <multiple>nummers</multiple>
+    </term>
+    <term name="line">
+      <single>regel</single>
+      <multiple>regels</multiple>
+    </term>
+    <term name="note">
+      <single>aantekening</single>
+      <multiple>aantekeningen</multiple>
+    </term>
+    <term name="opus">
+      <single>opus</single>
+      <multiple>opera</multiple>
+    </term>
+    <term name="page">
+      <single>pagina</single>
+      <multiple>pagina's</multiple>
+    </term>
+    <term name="paragraph">
+      <single>paragraaf</single>
+      <multiple>paragrafen</multiple>
+    </term>
+    <term name="part">
+      <single>deel</single>
+      <multiple>delen</multiple>
+    </term>
+    <term name="section">
+      <single>sectie</single>
+      <multiple>secties</multiple>
+    </term>
+    <term name="volume">
+      <single>volume</single>
+      <multiple>volumes</multiple>
+    </term>
+    <term name="edition">
+      <single>editie</single>
+      <multiple>edities</multiple>
+    </term>
+    <term name="verse">
+      <single>vers</single>
+      <multiple>versen</multiple>
+    </term>
+    <term name="sub verbo">
+      <single>sub verbo</single>
+      <multiple>sub verbis</multiple>
+    </term>
+    <term name="book" form="short">bk</term>
+    <term name="chapter" form="short">hfdst</term>
+    <term name="column" form="short">col</term>
+    <term name="figure" form="short">fig</term>
+    <term name="folio" form="short">f</term>
+    <term name="issue" form="short">nr</term>
+    <term name="opus" form="short">op</term>
+    <term name="page" form="short">
+      <single>p</single>
+      <multiple>pp</multiple>
+    </term>
+    <term name="paragraph" form="short">par</term>
+    <term name="part" form="short">deel</term>
+    <term name="section" form="short">sec</term>
+    <term name="sub verbo" form="short">
+      <single>s.v</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="verse" form="short">
+      <single>v</single>
+      <multiple>vv</multiple>
+    </term>
+    <term name="volume" form="short">
+      <single>vol</single>
+      <multiple>vols</multiple>
+    </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">ed</term>
+    <term name="paragraph" form="symbol">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§§</multiple>
+    </term>
+    <term name="author">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor">
+      <single>redacteur</single>
+      <multiple>redacteuren</multiple>
+    </term>
+    <term name="translator">
+      <single>vertaler</single>
+      <multiple>vertalers</multiple>
+    </term>
+    <term name="author" form="short">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor" form="short">
+      <single>red</single>
+      <multiple>red</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>vert</single>
+      <multiple>vert</multiple>
+    </term>
+    <term name="editor" form="verb">bewerkt door</term>
+    <term name="translator" form="verb">vertaald door</term>
+    <term name="recipient" form="verb">ontvangen door</term>
+    <term name="interviewer" form="verb">geinterviewd door</term>
+    <term name="editor" form="verb-short">red</term>
+    <term name="translator" form="verb-short">vert</term>
+    <term name="month-01">januari</term>
+    <term name="month-02">februari</term>
+    <term name="month-03">maart</term>
+    <term name="month-04">april</term>
+    <term name="month-05">mei</term>
+    <term name="month-06">juni</term>
+    <term name="month-07">juli</term>
+    <term name="month-08">augustus</term>
+    <term name="month-09">september</term>
+    <term name="month-10">oktober</term>
+    <term name="month-11">november</term>
+    <term name="month-12">december</term>
+    <term name="month-01" form="short">jan</term>
+    <term name="month-02" form="short">feb</term>
+    <term name="month-03" form="short">mrt</term>
+    <term name="month-04" form="short">apr</term>
+    <term name="month-05" form="short">mei</term>
+    <term name="month-06" form="short">jun</term>
+    <term name="month-07" form="short">jul</term>
+    <term name="month-08" form="short">aug</term>
+    <term name="month-09" form="short">sep</term>
+    <term name="month-10" form="short">okt</term>
+    <term name="month-11" form="short">nov</term>
+    <term name="month-12" form="short">dec</term>
+  </locale>
+</terms>

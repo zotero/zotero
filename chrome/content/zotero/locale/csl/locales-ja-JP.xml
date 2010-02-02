@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="ja">
+    <term name="at">at</term>
+    <term name="in"> </term>
+    <term name="ibid">前掲</term>
+    <term name="accessed">アクセス</term>
+    <term name="retrieved">読み込み</term>
+    <term name="from">から</term>
+    <term name="forthcoming">近刊</term>
+    <term name="references">参考文献</term>
+    <term name="reference item">
+      <single>source</single>
+      <multiple>sources</multiple>
+    </term>
+    <term name="no date">日付なし</term>
+    <term name="and">と</term>
+    <term name="et-al">他</term>
+    <term name="interview">interview</term>
+    <term name="letter">letter</term>
+    <term name="anonymous">anonymous</term>
+    <term name="anonymous" form="short">anon</term>
+    <term name="and others">and others</term>
+    <term name="in press">in press</term>
+    <term name="online">online</term>
+    <term name="cited">cited</term>
+    <term name="internet">internet</term>
+    <term name="presented at">presented at the</term>
+    <term name="anthropology">anthropology</term>
+    <term name="astronomy">astronomy</term>
+    <term name="biology">biology</term>
+    <term name="botany">botany</term>
+    <term name="chemistry">chemistry</term>
+    <term name="engineering">engineering</term>
+    <term name="generic-base">generic base</term>
+    <term name="geography">geography</term>
+    <term name="geology">geology</term>
+    <term name="history">history</term>
+    <term name="humanities">humanities</term>
+    <term name="literature">literature</term>
+    <term name="math">math</term>
+    <term name="medicine">medicine</term>
+    <term name="philosophy">philosophy</term>
+    <term name="physics">physics</term>
+    <term name="psychology">psychology</term>
+    <term name="sociology">sociology</term>
+    <term name="science">science</term>
+    <term name="political_science">political science</term>
+    <term name="social_science">social science</term>
+    <term name="theology">theology</term>
+    <term name="zoology">zoology</term>
+    <term name="book">
+      <single>book</single>
+      <multiple>books</multiple>
+    </term>
+    <term name="chapter">
+      <single>chapter</single>
+      <multiple>chapters</multiple>
+    </term>
+    <term name="column">
+      <single>column</single>
+      <multiple>columns</multiple>
+    </term>
+    <term name="figure">
+      <single>figure</single>
+      <multiple>figures</multiple>
+    </term>
+    <term name="folio">
+      <single>folio</single>
+      <multiple>folios</multiple>
+    </term>
+    <term name="issue">
+      <single>number</single>
+      <multiple>numbers</multiple>
+    </term>
+    <term name="line">
+      <single>行</single>
+      <multiple>行</multiple>
+    </term>
+    <term name="note">
+      <single>note</single>
+      <multiple>notes</multiple>
+    </term>
+    <term name="opus">
+      <single>opus</single>
+      <multiple>opera</multiple>
+    </term>
+    <term name="page">
+      <single>ページ</single>
+      <multiple>ページ</multiple>
+    </term>
+    <term name="paragraph">
+      <single>段落</single>
+      <multiple>段落</multiple>
+    </term>
+    <term name="part">
+      <single>part</single>
+      <multiple>parts</multiple>
+    </term>
+    <term name="section">
+      <single>section</single>
+      <multiple>sections</multiple>
+    </term>
+    <term name="volume">
+      <single>volume</single>
+      <multiple>volumes</multiple>
+    </term>
+    <term name="edition">
+      <single>edition</single>
+      <multiple>editions</multiple>
+    </term>
+    <term name="verse">
+      <single>verse</single>
+      <multiple>verses</multiple>
+    </term>
+    <term name="sub verbo">
+      <single>sub verbo</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="book" form="short">bk</term>
+    <term name="chapter" form="short">chap</term>
+    <term name="column" form="short">col</term>
+    <term name="figure" form="short">fig</term>
+    <term name="folio" form="short">f</term>
+    <term name="issue" form="short">号</term>
+    <term name="opus" form="short">op</term>
+    <term name="page" form="short">
+      <single>p</single>
+      <multiple>p</multiple>
+    </term>
+    <term name="paragraph" form="short">para</term>
+    <term name="part" form="short">pt</term>
+    <term name="section" form="short">sec</term>
+    <term name="sub verbo" form="short">
+      <single>s.v</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="verse" form="short">
+      <single>v</single>
+      <multiple>vv</multiple>
+    </term>
+    <term name="volume" form="short">
+      <single>vol</single>
+      <multiple>vols</multiple>
+    </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">ed</term>
+    <term name="paragraph" form="symbol">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§§</multiple>
+    </term>
+    <term name="author">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor">
+      <single>編集者</single>
+      <multiple>編集者</multiple>
+    </term>
+    <term name="translator">
+      <single>翻訳者</single>
+      <multiple>翻訳者</multiple>
+    </term>
+    <term name="author" form="short">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor" form="short">
+      <single>編集者</single>
+      <multiple>編集者</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>翻訳者</single>
+      <multiple>翻訳者</multiple>
+    </term>
+    <term name="editor" form="verb">編集者：</term>
+    <term name="translator" form="verb">翻訳者：</term>
+    <term name="recipient" form="verb">to</term>
+    <term name="interviewer" form="verb">interview by</term>
+    <term name="editor" form="verb-short">ed</term>
+    <term name="translator" form="verb-short">trans</term>
+    <term name="month-01">1月</term>
+    <term name="month-02">2月</term>
+    <term name="month-03">3月</term>
+    <term name="month-04">4月</term>
+    <term name="month-05">5月</term>
+    <term name="month-06">6月</term>
+    <term name="month-07">7月</term>
+    <term name="month-08">8月</term>
+    <term name="month-09">9月</term>
+    <term name="month-10">10月</term>
+    <term name="month-11">11月</term>
+    <term name="month-12">12月</term>
+    <term name="month-01" form="short">1月</term>
+    <term name="month-02" form="short">2月</term>
+    <term name="month-03" form="short">3月</term>
+    <term name="month-04" form="short">4月</term>
+    <term name="month-05" form="short">5月</term>
+    <term name="month-06" form="short">6月</term>
+    <term name="month-07" form="short">7月</term>
+    <term name="month-08" form="short">8月</term>
+    <term name="month-09" form="short">9月</term>
+    <term name="month-10" form="short">10月</term>
+    <term name="month-11" form="short">11月</term>
+    <term name="month-12" form="short">12月</term>
+  </locale>
+</terms>

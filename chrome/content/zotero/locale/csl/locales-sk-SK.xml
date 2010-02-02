@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="sk">
+    <term name="at">v</term>
+    <term name="in">v</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">cit</term>
+    <term name="retrieved">cit</term>
+    <term name="from">z</term>
+    <term name="forthcoming">nadchádzajúci</term>
+    <term name="references">referencie</term>
+    <term name="reference item">
+      <single>source</single>
+      <multiple>sources</multiple>
+    </term>
+    <term name="no date">n.d.</term>
+    <term name="and">a</term>
+    <term name="et-al">et al</term>
+    <term name="interview">osobná komunikácia</term>
+    <term name="letter">list</term>
+    <term name="anonymous">anonym</term>
+    <term name="anonymous" form="short">anon</term>
+    <term name="and others">and ďalší</term>
+    <term name="in press">v tlači</term>
+    <term name="online">online</term>
+    <term name="cited">cit</term>
+    <term name="internet">internet</term>
+    <term name="presented at">prezentované na</term>
+    <term name="anthropology">antropológia</term>
+    <term name="astronomy">astronómia</term>
+    <term name="biology">biológia</term>
+    <term name="botany">botanika</term>
+    <term name="chemistry">chémia</term>
+    <term name="engineering">strojárstvo/technika</term>
+    <term name="generic-base">všeobecný základ</term>
+    <term name="geography">geografia</term>
+    <term name="geology">geológia</term>
+    <term name="history">história</term>
+    <term name="humanities">humanitné vedy</term>
+    <term name="literature">literatúra</term>
+    <term name="math">matematika</term>
+    <term name="medicine">medicína</term>
+    <term name="philosophy">filozofia</term>
+    <term name="physics">fyzika</term>
+    <term name="psychology">psychológia</term>
+    <term name="sociology">sociológia</term>
+    <term name="science">veda</term>
+    <term name="political_science">politické vedy</term>
+    <term name="social_science">sociálne vedy</term>
+    <term name="theology">teológia</term>
+    <term name="zoology">zoológia</term>
+    <term name="book">
+      <single>kniha</single>
+      <multiple>knihy</multiple>
+    </term>
+    <term name="chapter">
+      <single>kapitola</single>
+      <multiple>kapitoly</multiple>
+    </term>
+    <term name="column">
+      <single>stĺpec</single>
+      <multiple>stĺpce</multiple>
+    </term>
+    <term name="figure">
+      <single>obrázok</single>
+      <multiple>obrázky</multiple>
+    </term>
+    <term name="folio">
+      <single>list</single>
+      <multiple>listy</multiple>
+    </term>
+    <term name="issue">
+      <single>číslo</single>
+      <multiple>čísla</multiple>
+    </term>
+    <term name="line">
+      <single>riadok</single>
+      <multiple>riadky</multiple>
+    </term>
+    <term name="note">
+      <single>poznámka</single>
+      <multiple>poznámky</multiple>
+    </term>
+    <term name="opus">
+      <single>opus</single>
+      <multiple>opera</multiple>
+    </term>
+    <term name="page">
+      <single>strana</single>
+      <multiple>strany</multiple>
+    </term>
+    <term name="paragraph">
+      <single>odstavec</single>
+      <multiple>odstavce</multiple>
+    </term>
+    <term name="part">
+      <single>časť</single>
+      <multiple>časti</multiple>
+    </term>
+    <term name="section">
+      <single>sekcia</single>
+      <multiple>sekcie</multiple>
+    </term>
+    <term name="volume">
+      <single>ročník</single>
+      <multiple>ročníky</multiple>
+    </term>
+    <term name="edition">
+      <single>vydanie</single>
+      <multiple>vydania</multiple>
+    </term>
+    <term name="verse">
+      <single>verš</single>
+      <multiple>verše</multiple>
+    </term>
+    <term name="sub verbo">
+      <single>sub verbo</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="book" form="short">k</term>
+    <term name="chapter" form="short">kap</term>
+    <term name="column" form="short">stĺp</term>
+    <term name="figure" form="short">obr</term>
+    <term name="folio" form="short">l</term>
+    <term name="issue" form="short">č</term>
+    <term name="opus" form="short">op</term>
+    <term name="page" form="short">
+      <single>s</single>
+      <multiple>s</multiple>
+    </term>
+    <term name="paragraph" form="short">par</term>
+    <term name="part" form="short">č</term>
+    <term name="section" form="short">sek</term>
+    <term name="sub verbo" form="short">
+      <single>s.v</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="verse" form="short">
+      <single>v</single>
+      <multiple>v</multiple>
+    </term>
+    <term name="volume" form="short">
+      <single>roč</single>
+      <multiple>roč</multiple>
+    </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">vyd</term>
+    <term name="paragraph" form="symbol">
+      <single>¶</single>
+      <multiple>¶</multiple>
+    </term>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§</multiple>
+    </term>
+    <term name="author">
+      <single>autor</single>
+      <multiple>autori</multiple>
+    </term>
+    <term name="editor">
+      <single>editor</single>
+      <multiple>editori</multiple>
+    </term>
+    <term name="translator">
+      <single>prekladateľ</single>
+      <multiple>prekladatelia</multiple>
+    </term>
+    <term name="author" form="short">
+      <single>aut</single>
+      <multiple>aut</multiple>
+    </term>
+    <term name="editor" form="short">
+      <single>ed</single>
+      <multiple>ed</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>prek</single>
+      <multiple>prek</multiple>
+    </term>
+    <term name="editor" form="verb">editoval</term>
+    <term name="translator" form="verb">preložil</term>
+    <term name="recipient" form="verb">adresát</term>
+    <term name="interviewer" form="verb">rozhovor urobil</term>
+    <term name="editor" form="verb-short">ed</term>
+    <term name="translator" form="verb-short">prel</term>
+    <term name="month-01">január</term>
+    <term name="month-02">február</term>
+    <term name="month-03">marec</term>
+    <term name="month-04">apríl</term>
+    <term name="month-05">máj</term>
+    <term name="month-06">jún</term>
+    <term name="month-07">júl</term>
+    <term name="month-08">august</term>
+    <term name="month-09">september</term>
+    <term name="month-10">október</term>
+    <term name="month-11">november</term>
+    <term name="month-12">december</term>
+    <term name="month-01" form="short">jan</term>
+    <term name="month-02" form="short">feb</term>
+    <term name="month-03" form="short">mar</term>
+    <term name="month-04" form="short">apr</term>
+    <term name="month-05" form="short">máj</term>
+    <term name="month-06" form="short">jún</term>
+    <term name="month-07" form="short">júl</term>
+    <term name="month-08" form="short">aug</term>
+    <term name="month-09" form="short">sep</term>
+    <term name="month-10" form="short">okt</term>
+    <term name="month-11" form="short">nov</term>
+    <term name="month-12" form="short">dec</term>
+  </locale>
+</terms>

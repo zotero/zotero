@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="fr">
+    <term name="at">à</term>
+    <term name="in">dans</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">accédé</term>
+    <term name="retrieved">retrouvé</term>
+    <term name="from">de</term>
+    <term name="forthcoming">à venir</term>
+    <term name="references">références</term>
+    <term name="reference item">
+      <single>source</single>
+      <multiple>sources</multiple>
+    </term>
+    <term name="no date">sans date</term>
+    <term name="and">et</term>
+    <term name="et-al">et al.</term>
+    <term name="interview">entrevue</term>
+    <term name="letter">lettre</term>
+    <term name="anonymous">anonyme</term>
+    <term name="anonymous" form="short">anon</term>
+    <term name="and others">et autres</term>
+    <term name="in press">sous presse</term>
+    <term name="online">en ligne</term>
+    <term name="cited">cité</term>
+    <term name="internet">Internet</term>
+    <term name="presented at">présenté au</term>
+    <term name="anthropology">anthropologie</term>
+    <term name="astronomy">astronomie</term>
+    <term name="biology">biologie</term>
+    <term name="botany">botanique</term>
+    <term name="chemistry">chimie</term>
+    <term name="engineering">ingénierie</term>
+    <term name="generic-base">base générique</term>
+    <term name="geography">géographie</term>
+    <term name="geology">géologie</term>
+    <term name="history">histoire</term>
+    <term name="humanities">lettres et sciences humaines</term>
+    <term name="literature">littérature</term>
+    <term name="math">mathématiques</term>
+    <term name="medicine">médecine</term>
+    <term name="philosophy">philosophie</term>
+    <term name="physics">physique</term>
+    <term name="psychology">psychologie</term>
+    <term name="sociology">sociologie</term>
+    <term name="science">sciences de la nature</term>
+    <term name="political_science">science politique</term>
+    <term name="social_science">sciences sociales</term>
+    <term name="theology">théologie</term>
+    <term name="zoology">zoologie</term>
+    <term name="book">
+      <single>livre</single>
+      <multiple>livres</multiple>
+    </term>
+    <term name="chapter">
+      <single>chapitre</single>
+      <multiple>chapitres</multiple>
+    </term>
+    <term name="column">
+      <single>colonne</single>
+      <multiple>colonnes</multiple>
+    </term>
+    <term name="figure">
+      <single>figure</single>
+      <multiple>figures</multiple>
+    </term>
+    <term name="folio">
+      <single>folio</single>
+      <multiple>folios</multiple>
+    </term>
+    <term name="issue">
+      <single>numéro</single>
+      <multiple>numéros</multiple>
+    </term>
+    <term name="line">
+      <single>ligne</single>
+      <multiple>lignes</multiple>
+    </term>
+    <term name="note">
+      <single>note</single>
+      <multiple>notes</multiple>
+    </term>
+    <term name="opus">
+      <single>opus</single>
+      <multiple>opus</multiple>
+    </term>
+    <term name="page">
+      <single>page</single>
+      <multiple>pages</multiple>
+    </term>
+    <term name="paragraph">
+      <single>paragraphe</single>
+      <multiple>paragraphes</multiple>
+    </term>
+    <term name="part">
+      <single>tome</single>
+      <multiple>tomes</multiple>
+    </term>
+    <term name="section">
+      <single>rubrique</single>
+      <multiple>rubriques</multiple>
+    </term>
+    <term name="volume">
+      <single>volume</single>
+      <multiple>volumes</multiple>
+    </term>
+    <term name="edition">
+      <single>édition</single>
+      <multiple>éditions</multiple>
+    </term>
+    <term name="verse">
+      <single>vers</single>
+      <multiple>vers</multiple>
+    </term>
+    <term name="sub verbo">
+      <single>sub verbo</single>
+      <multiple>sub verbo</multiple>
+    </term>
+    <term name="book" form="short">liv</term>
+    <term name="chapter" form="short">chap</term>
+    <term name="column" form="short">col</term>
+    <term name="figure" form="short">fig</term>
+    <term name="folio" form="short">f</term>
+    <term name="issue" form="short">n°</term>
+    <term name="opus" form="short">op</term>
+    <term name="page" form="short">
+      <single>p</single>
+      <multiple>p</multiple>
+    </term>
+    <term name="paragraph" form="short">paragr</term>
+    <term name="part" form="short">t</term>
+    <term name="section" form="short">rub</term>
+    <term name="sub verbo" form="short">
+      <single>s.v</single>
+      <multiple>s.v</multiple>
+    </term>
+    <term name="verse" form="short">
+      <single>v</single>
+      <multiple>v</multiple>
+    </term>
+    <term name="volume" form="short">
+      <single>vol</single>
+      <multiple>vol</multiple>
+    </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">éd</term>
+    <term name="paragraph" form="symbol">
+      <single>§</single>
+      <multiple>§</multiple>
+    </term>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§</multiple>
+    </term>
+    <term name="author">
+      <single>auteur</single>
+      <multiple>auteurs</multiple>
+    </term>
+    <term name="editor">
+      <single>éditeur</single>
+      <multiple>éditeurs</multiple>
+    </term>
+    <term name="translator">
+      <single>traducteur</single>
+      <multiple>traducteurs</multiple>
+    </term>
+    <term name="author" form="short">
+      <single>aut</single>
+      <multiple>aut</multiple>
+    </term>
+    <term name="editor" form="short">
+      <single>éd</single>
+      <multiple>éd</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>trad</single>
+      <multiple>trad</multiple>
+    </term>
+    <term name="editor" form="verb">édité par</term>
+    <term name="translator" form="verb">traduit par</term>
+    <term name="recipient" form="verb">vers</term>
+    <term name="interviewer" form="verb">entrevue par</term>
+    <term name="editor" form="verb-short">éd</term>
+    <term name="translator" form="verb-short">trad</term>
+    <term name="month-01">janvier</term>
+    <term name="month-02">février</term>
+    <term name="month-03">mars</term>
+    <term name="month-04">avril</term>
+    <term name="month-05">mai</term>
+    <term name="month-06">juin</term>
+    <term name="month-07">juillet</term>
+    <term name="month-08">août</term>
+    <term name="month-09">septembre</term>
+    <term name="month-10">octobre</term>
+    <term name="month-11">novembre</term>
+    <term name="month-12">décembre</term>
+    <term name="month-01" form="short">jan</term>
+    <term name="month-02" form="short">fév</term>
+    <term name="month-03" form="short">mar</term>
+    <term name="month-04" form="short">avr</term>
+    <term name="month-05" form="short">mai</term>
+    <term name="month-06" form="short">jun</term>
+    <term name="month-07" form="short">jul</term>
+    <term name="month-08" form="short">aoû</term>
+    <term name="month-09" form="short">sep</term>
+    <term name="month-10" form="short">oct</term>
+    <term name="month-11" form="short">nov</term>
+    <term name="month-12" form="short">déc</term>
+  </locale>
+</terms>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="sl">
+    <term name="at">pri</term>
+    <term name="in">v</term>
+    <term name="ibid">isto</term>
+    <term name="accessed">dostopano</term>
+    <term name="retrieved">pridobljeno</term>
+    <term name="from">od</term>
+    <term name="forthcoming">pred izidom</term>
+    <term name="references">sklici</term>
+    <term name="reference item">
+      <single>vir</single>
+      <multiple>viri</multiple>
+    </term>
+    <term name="no date">b.d.</term>
+    <term name="and">in</term>
+    <term name="et-al">idr.</term>
+    <term name="interview">intervju</term>
+    <term name="letter">pismo</term>
+    <term name="anonymous">anonimni</term>
+    <term name="anonymous" form="short">anon</term>
+    <term name="and others">in drugi</term>
+    <term name="in press">v tisku</term>
+    <term name="online">na spletu</term>
+    <term name="cited">citirano</term>
+    <term name="internet">internet</term>
+    <term name="presented at">predstavljeno na</term>
+    <term name="anthropology">antropologija</term>
+    <term name="astronomy">astronomija</term>
+    <term name="biology">biologija</term>
+    <term name="botany">botanika</term>
+    <term name="chemistry">kemija</term>
+    <term name="engineering">strojništvo</term>
+    <term name="generic-base">splošno</term>
+    <term name="geography">geografija</term>
+    <term name="geology">geologija</term>
+    <term name="history">zgodovina</term>
+    <term name="humanities">humanistika</term>
+    <term name="literature">literatura</term>
+    <term name="math">matematika</term>
+    <term name="medicine">medicina</term>
+    <term name="philosophy">filozofija</term>
+    <term name="physics">fizika</term>
+    <term name="psychology">psihologija</term>
+    <term name="sociology">sociologija</term>
+    <term name="science">znanost</term>
+    <term name="political_science">politologija</term>
+    <term name="social_science">družbene vede</term>
+    <term name="theology">teologija</term>
+    <term name="zoology">zoologija</term>
+    <term name="book">
+      <single>knjiga</single>
+      <multiple>knjige</multiple>
+    </term>
+    <term name="chapter">
+      <single>poglavje</single>
+      <multiple>poglavja</multiple>
+    </term>
+    <term name="column">
+      <single>stolpec</single>
+      <multiple>stolpci</multiple>
+    </term>
+    <term name="figure">
+      <single>slika</single>
+      <multiple>slike</multiple>
+    </term>
+    <term name="folio">
+      <single>folio</single>
+      <multiple>folii</multiple>
+    </term>
+    <term name="issue">
+      <single>številka</single>
+      <multiple>številke</multiple>
+    </term>
+    <term name="line">
+      <single>vrstica</single>
+      <multiple>vrstice</multiple>
+    </term>
+    <term name="note">
+      <single>opomba</single>
+      <multiple>opombe</multiple>
+    </term>
+    <term name="opus">
+      <single>opus</single>
+      <multiple>opera</multiple>
+    </term>
+    <term name="page">
+      <single>stran</single>
+      <multiple>strani</multiple>
+    </term>
+    <term name="paragraph">
+      <single>odstavek</single>
+      <multiple>odstavki</multiple>
+    </term>
+    <term name="part">
+      <single>del</single>
+      <multiple>deli</multiple>
+    </term>
+    <term name="section">
+      <single>odsek</single>
+      <multiple>odseki</multiple>
+    </term>
+    <term name="volume">
+      <single>letnik</single>
+      <multiple>letniki</multiple>
+    </term>
+    <term name="edition">
+      <single>izdaja</single>
+      <multiple>izdaje</multiple>
+    </term>
+    <term name="verse">
+      <single>verz</single>
+      <multiple>verzi</multiple>
+    </term>
+    <term name="sub verbo">
+      <single>sub verbo</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="book" form="short">knj</term>
+    <term name="chapter" form="short">pogl</term>
+    <term name="column" form="short">sto</term>
+    <term name="figure" form="short">sl</term>
+    <term name="folio" form="short">f</term>
+    <term name="issue" form="short">št</term>
+    <term name="opus" form="short">op</term>
+    <term name="page" form="short">
+      <single>str</single>
+      <multiple>str</multiple>
+    </term>
+    <term name="paragraph" form="short">odst</term>
+    <term name="part" form="short">del</term>
+    <term name="section" form="short">odsk</term>
+    <term name="sub verbo" form="short">
+      <single>s.v</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="verse" form="short">
+      <single>v</single>
+      <multiple>v</multiple>
+    </term>
+    <term name="volume" form="short">
+      <single>let</single>
+      <multiple>let</multiple>
+    </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">iz</term>
+    <term name="paragraph" form="symbol">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§§</multiple>
+    </term>
+    <term name="author">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor">
+      <single>urednik</single>
+      <multiple>uredniki</multiple>
+    </term>
+    <term name="translator">
+      <single>prevajalec</single>
+      <multiple>prevajalci</multiple>
+    </term>
+    <term name="author" form="short">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor" form="short">
+      <single>ur</single>
+      <multiple>ur</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>prev</single>
+      <multiple>prev</multiple>
+    </term>
+    <term name="editor" form="verb">uredil</term>
+    <term name="translator" form="verb">prevedel</term>
+    <term name="recipient" form="verb">za</term>
+    <term name="interviewer" form="verb">intervjuval</term>
+    <term name="editor" form="verb-short">ur</term>
+    <term name="translator" form="verb-short">prev</term>
+    <term name="month-01">januar</term>
+    <term name="month-02">februar</term>
+    <term name="month-03">marec</term>
+    <term name="month-04">april</term>
+    <term name="month-05">maj</term>
+    <term name="month-06">junij</term>
+    <term name="month-07">julij</term>
+    <term name="month-08">avgust</term>
+    <term name="month-09">september</term>
+    <term name="month-10">oktober</term>
+    <term name="month-11">november</term>
+    <term name="month-12">december</term>
+    <term name="month-01" form="short">jan</term>
+    <term name="month-02" form="short">feb</term>
+    <term name="month-03" form="short">mar</term>
+    <term name="month-04" form="short">apr</term>
+    <term name="month-05" form="short">maj</term>
+    <term name="month-06" form="short">jun</term>
+    <term name="month-07" form="short">jul</term>
+    <term name="month-08" form="short">avg</term>
+    <term name="month-09" form="short">sep</term>
+    <term name="month-10" form="short">okt</term>
+    <term name="month-11" form="short">nov</term>
+    <term name="month-12" form="short">dec</term>
+  </locale>
+</terms>

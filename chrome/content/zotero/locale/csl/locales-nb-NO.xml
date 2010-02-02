@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="nb">
+    <term name="at">på</term>
+    <term name="in">i</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">aksessert</term>
+    <term name="retrieved">hentet</term>
+    <term name="from">fra</term>
+    <term name="forthcoming">kommende</term>
+    <term name="references">referanser</term>
+    <term name="reference item">
+      <single>source</single>
+      <multiple>sources</multiple>
+    </term>
+    <term name="no date">udatert</term>
+    <term name="and">og</term>
+    <term name="et-al">mfl</term>
+    <term name="interview">intervju</term>
+    <term name="letter">brev</term>
+    <term name="anonymous">anonym</term>
+    <term name="anonymous" form="short">anon</term>
+    <term name="and others">med flere</term>
+    <term name="in press">i trykk</term>
+    <term name="online">online</term>
+    <term name="cited">cited</term>
+    <term name="internet">Internett</term>
+    <term name="presented at">presentert på</term>
+    <term name="anthropology">antropologi</term>
+    <term name="astronomy">astronomi</term>
+    <term name="biology">biologi</term>
+    <term name="botany">botanikk</term>
+    <term name="chemistry">kjemi</term>
+    <term name="engineering">ingeniørvitenskap</term>
+    <term name="generic-base">generic base</term>
+    <term name="geography">geografi</term>
+    <term name="geology">geologi</term>
+    <term name="history">historie</term>
+    <term name="humanities">humanistiske fag</term>
+    <term name="literature">litteratur</term>
+    <term name="math">matte</term>
+    <term name="medicine">medisin</term>
+    <term name="philosophy">filosofi</term>
+    <term name="physics">fysikk</term>
+    <term name="psychology">fysiologi</term>
+    <term name="sociology">sosiologi</term>
+    <term name="science">naturvitenskap</term>
+    <term name="political_science">political science</term>
+    <term name="social_science">sosialvitenskap</term>
+    <term name="theology">teologi</term>
+    <term name="zoology">zoologi</term>
+    <term name="book">
+      <single>bok</single>
+      <multiple>bøker</multiple>
+    </term>
+    <term name="chapter">
+      <single>kapittel</single>
+      <multiple>kapitler</multiple>
+    </term>
+    <term name="column">
+      <single>kolonne</single>
+      <multiple>kolenner</multiple>
+    </term>
+    <term name="figure">
+      <single>figur</single>
+      <multiple>figurer</multiple>
+    </term>
+    <term name="folio">
+      <single>folio</single>
+      <multiple>folioer</multiple>
+    </term>
+    <term name="issue">
+      <single>nummer</single>
+      <multiple>numre</multiple>
+    </term>
+    <term name="line">
+      <single>linje</single>
+      <multiple>linjer</multiple>
+    </term>
+    <term name="note">
+      <single>note</single>
+      <multiple>noter</multiple>
+    </term>
+    <term name="opus">
+      <single>opus</single>
+      <multiple>opus</multiple>
+    </term>
+    <term name="page">
+      <single>side</single>
+      <multiple>sider</multiple>
+    </term>
+    <term name="paragraph">
+      <single>avsnitt</single>
+      <multiple>avsnitt</multiple>
+    </term>
+    <term name="part">
+      <single>del</single>
+      <multiple>deler</multiple>
+    </term>
+    <term name="section">
+      <single>seksjon</single>
+      <multiple>seksjoner</multiple>
+    </term>
+    <term name="volume">
+      <single>bind</single>
+      <multiple>bind</multiple>
+    </term>
+    <term name="edition">
+      <single>utgave</single>
+      <multiple>utgaver</multiple>
+    </term>
+    <term name="verse">
+      <single>vers</single>
+      <multiple>vers</multiple>
+    </term>
+    <term name="sub verbo">
+      <single>sub verbo</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="book" form="short">b</term>
+    <term name="chapter" form="short">kap</term>
+    <term name="column" form="short">kol</term>
+    <term name="figure" form="short">fig</term>
+    <term name="folio" form="short">fol</term>
+    <term name="issue" form="short">nr</term>
+    <term name="opus" form="short">op</term>
+    <term name="page" form="short">
+      <single>s</single>
+      <multiple>s</multiple>
+    </term>
+    <term name="paragraph" form="short">avsn</term>
+    <term name="part" form="short">d</term>
+    <term name="section" form="short">sek</term>
+    <term name="sub verbo" form="short">
+      <single>s.v</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="verse" form="short">
+      <single>v</single>
+      <multiple>v</multiple>
+    </term>
+    <term name="volume" form="short">
+      <single>bd</single>
+      <multiple>bd</multiple>
+    </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">utg</term>
+    <term name="paragraph" form="symbol">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§§</multiple>
+    </term>
+    <term name="author">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor">
+      <single>redaktør</single>
+      <multiple>redaktører</multiple>
+    </term>
+    <term name="translator">
+      <single>oversetter</single>
+      <multiple>oversettere</multiple>
+    </term>
+    <term name="author" form="short">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor" form="short">
+      <single>red</single>
+      <multiple>red</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>overs</single>
+      <multiple>overs</multiple>
+    </term>
+    <term name="editor" form="verb">redigert av</term>
+    <term name="translator" form="verb">oversatt av</term>
+    <term name="recipient" form="verb">mottatt av</term>
+    <term name="interviewer" form="verb">intervjuet av</term>
+    <term name="editor" form="verb-short">utg</term>
+    <term name="translator" form="verb-short">overs</term>
+    <term name="month-01">Januar</term>
+    <term name="month-02">Februar</term>
+    <term name="month-03">Mars</term>
+    <term name="month-04">April</term>
+    <term name="month-05">Mai</term>
+    <term name="month-06">Juni</term>
+    <term name="month-07">Juli</term>
+    <term name="month-08">August</term>
+    <term name="month-09">September</term>
+    <term name="month-10">Oktober</term>
+    <term name="month-11">November</term>
+    <term name="month-12">Desember</term>
+    <term name="month-01" form="short">Jan</term>
+    <term name="month-02" form="short">Feb</term>
+    <term name="month-03" form="short">Mar</term>
+    <term name="month-04" form="short">Apr</term>
+    <term name="month-05" form="short">Mai</term>
+    <term name="month-06" form="short">Jun</term>
+    <term name="month-07" form="short">Jul</term>
+    <term name="month-08" form="short">Aug</term>
+    <term name="month-09" form="short">Sep</term>
+    <term name="month-10" form="short">Okt</term>
+    <term name="month-11" form="short">Nov</term>
+    <term name="month-12" form="short">Des</term>
+  </locale>
+</terms>
