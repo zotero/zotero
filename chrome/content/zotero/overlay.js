@@ -683,7 +683,7 @@ var ZoteroPane = new function()
 	
 	function handleKeyPress(event, from) {
 		if (from == 'zotero-collections-tree') {
-			if (event.keyCode == event.DOM_VK_BACK_SPACE ||
+			if ((event.keyCode == event.DOM_VK_BACK_SPACE && Zotero.isMac) ||
 					event.keyCode == event.DOM_VK_DELETE) {
 				ZoteroPane.deleteSelectedCollection();
 				event.preventDefault();
