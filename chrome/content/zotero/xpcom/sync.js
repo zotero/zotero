@@ -3377,7 +3377,17 @@ Zotero.Sync.Server.Data = new function() {
 			
 			if (item.attachment.linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
 				// Include paths for non-links
-				var path = <path>{item.attachment.path}</path>;
+				var path = item.attachment.path;
+				if (path != _xmlize(path)) {
+					var filename = item.attachment.path.substr(8);
+					// TODO: localize
+					var msg = "The filename '" + filename + "' contains invalid characters.\n\nRename the file and try again. "
+						+ "If you rename the file via the OS, you will need to relink it in Zotero.";
+					var e = new Zotero.Error(msg, 0, { dialogButtonText: null });
+					throw (e);
+
+				}
+				path = <path>{path}</path>;
 				xml.path += path;
 				
 				// Include storage sync time and hash for imported files
