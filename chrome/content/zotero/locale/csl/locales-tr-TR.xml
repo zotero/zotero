@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="tr">
+    <term name="at">de</term>
+    <term name="in">içinde</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">erişildi</term>
+    <term name="retrieved">erişildi</term>
+    <term name="from">den</term>
+    <term name="forthcoming">gelecek</term>
+    <term name="references">referans</term>
+    <term name="reference item">
+      <single>source</single>
+      <multiple>sources</multiple>
+    </term>
+    <term name="no date">tarih yok</term>
+    <term name="and">ve</term>
+    <term name="et-al">ve diğ.</term>
+    <term name="interview">interview</term>
+    <term name="letter">letter</term>
+    <term name="anonymous">isimsiz</term>
+    <term name="anonymous" form="short">isimsiz</term>
+    <term name="and others">ve diğ.</term>
+    <term name="in press">basımda</term>
+    <term name="online">çevrimiçi</term>
+    <term name="cited">kaynak</term>
+    <term name="internet">internet</term>
+    <term name="presented at">sunulan</term>
+    <term name="anthropology">antropoloji</term>
+    <term name="astronomy">astronomi</term>
+    <term name="biology">biyoloji</term>
+    <term name="botany">botanik</term>
+    <term name="chemistry">kimya</term>
+    <term name="engineering">mühendislik</term>
+    <term name="generic-base">generic-base</term>
+    <term name="geography">coğrafya</term>
+    <term name="geology">jeoloji</term>
+    <term name="history">tarih</term>
+    <term name="humanities">humanities</term>
+    <term name="literature">edebiyat</term>
+    <term name="math">matematik</term>
+    <term name="medicine">tıp</term>
+    <term name="philosophy">felsefe</term>
+    <term name="physics">fizik</term>
+    <term name="psychology">pisikoloji</term>
+    <term name="sociology">sosyoloji</term>
+    <term name="science">bilim</term>
+    <term name="political_science">siyaset bilimi</term>
+    <term name="social_science">sosyal bilimler</term>
+    <term name="theology">din bilimi</term>
+    <term name="zoology">hayvanbilimi</term>
+    <term name="book">
+      <single>kitap</single>
+      <multiple>kitaplar</multiple>
+    </term>
+    <term name="chapter">
+      <single>bölüm</single>
+      <multiple>bölümler</multiple>
+    </term>
+    <term name="column">
+      <single>sütun</single>
+      <multiple>sütunlar</multiple>
+    </term>
+    <term name="figure">
+      <single>şekil</single>
+      <multiple>şekiller</multiple>
+    </term>
+    <term name="folio">
+      <single>folyo</single>
+      <multiple>folyo</multiple>
+    </term>
+    <term name="issue">
+      <single>sayı</single>
+      <multiple>sayılar</multiple>
+    </term>
+    <term name="line">
+      <single>satır</single>
+      <multiple>satırlar</multiple>
+    </term>
+    <term name="note">
+      <single>not</single>
+      <multiple>notlar</multiple>
+    </term>
+    <term name="opus">
+      <single>opus</single>
+      <multiple>opera</multiple>
+    </term>
+    <term name="page">
+      <single>sayfa</single>
+      <multiple>sayfalar</multiple>
+    </term>
+    <term name="paragraph">
+      <single>paragraf</single>
+      <multiple>paragraflar</multiple>
+    </term>
+    <term name="part">
+      <single>kısım</single>
+      <multiple>kısımlar</multiple>
+    </term>
+    <term name="section">
+      <single>bölüm</single>
+      <multiple>bölümler</multiple>
+    </term>
+    <term name="volume">
+      <single>cilt</single>
+      <multiple>ciltler</multiple>
+    </term>
+    <term name="edition">
+      <single>edition</single>
+      <multiple>editions</multiple>
+    </term>
+    <term name="verse">
+      <single>dize</single>
+      <multiple>dizeler</multiple>
+    </term>
+    <term name="sub verbo">
+      <single>sub verbo</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="book" form="short">kit</term>
+    <term name="chapter" form="short">böl</term>
+    <term name="column" form="short">süt</term>
+    <term name="figure" form="short">şek</term>
+    <term name="folio" form="short">f</term>
+    <term name="issue" form="short">sayı</term>
+    <term name="opus" form="short">op</term>
+    <term name="page" form="short">
+      <single>s</single>
+      <multiple>ss</multiple>
+    </term>
+    <term name="paragraph" form="short">para</term>
+    <term name="part" form="short">kıs</term>
+    <term name="section" form="short">böl</term>
+    <term name="sub verbo" form="short">
+      <single>s.v</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="verse" form="short">
+      <single>v</single>
+      <multiple>vv</multiple>
+    </term>
+    <term name="volume" form="short">
+      <single>vol</single>
+      <multiple>vols</multiple>
+    </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">ed</term>
+    <term name="paragraph" form="symbol">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§§</multiple>
+    </term>
+    <term name="author">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor">
+      <single>editör</single>
+      <multiple>editörler</multiple>
+    </term>
+    <term name="translator">
+      <single>çevirmen</single>
+      <multiple>çevirmenler</multiple>
+    </term>
+    <term name="author" form="short">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor" form="short">
+      <single>ed</single>
+      <multiple>ed</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>çev</single>
+      <multiple>çev</multiple>
+    </term>
+    <term name="editor" form="verb">editör</term>
+    <term name="translator" form="verb">çeviren</term>
+    <term name="recipient" form="verb">to</term>
+    <term name="interviewer" form="verb">Röportaj yapan</term>
+    <term name="editor" form="verb-short">ed</term>
+    <term name="translator" form="verb-short">çev</term>
+    <term name="month-01">Ocak</term>
+    <term name="month-02">Şubat</term>
+    <term name="month-03">Mart</term>
+    <term name="month-04">Nisan</term>
+    <term name="month-05">Mayıs</term>
+    <term name="month-06">Haziran</term>
+    <term name="month-07">Temmuz</term>
+    <term name="month-08">Ağustos</term>
+    <term name="month-09">Eylül</term>
+    <term name="month-10">Ekim</term>
+    <term name="month-11">Kasım</term>
+    <term name="month-12">Aralık</term>
+    <term name="month-01" form="short">Oca</term>
+    <term name="month-02" form="short">Şub</term>
+    <term name="month-03" form="short">Mar</term>
+    <term name="month-04" form="short">Nis</term>
+    <term name="month-05" form="short">May</term>
+    <term name="month-06" form="short">Haz</term>
+    <term name="month-07" form="short">Tem</term>
+    <term name="month-08" form="short">Ağu</term>
+    <term name="month-09" form="short">Eyl</term>
+    <term name="month-10" form="short">Eki</term>
+    <term name="month-11" form="short">Kas</term>
+    <term name="month-12" form="short">Ara</term>
+  </locale>
+</terms>

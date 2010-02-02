@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="hu">
+    <term name="at"/>
+    <term name="in">in</term>
+    <term name="ibid">ibid</term>
+    <term name="accessed">elérés</term>
+    <term name="retrieved">elérés</term>
+    <term name="from">forrás</term>
+    <term name="forthcoming">megjelenés alatt</term>
+    <term name="references">hivatkozások</term>
+    <term name="reference item">
+      <single>source</single>
+      <multiple>sources</multiple>
+    </term>
+    <term name="no date">nd</term>
+    <term name="and">és</term>
+    <term name="et-al">et al.</term>
+    <term name="interview">interjú</term>
+    <term name="letter">levél</term>
+    <term name="anonymous">név nélkül</term>
+    <term name="anonymous" form="short">nn</term>
+    <term name="and others">és mások</term>
+    <term name="in press">nyomtatás alatt</term>
+    <term name="online">online</term>
+    <term name="cited">idézi</term>
+    <term name="internet">internet</term>
+    <term name="presented at">előadás</term>
+    <term name="anthropology">antropológia</term>
+    <term name="astronomy">csillagászat</term>
+    <term name="biology">biológia</term>
+    <term name="botany">botanika</term>
+    <term name="chemistry">kémia</term>
+    <term name="engineering">mérnöki tudományok</term>
+    <term name="generic-base">általános</term>
+    <term name="geography">földrajz</term>
+    <term name="geology">geológia</term>
+    <term name="history">történelem</term>
+    <term name="humanities">bölcsésztudományok</term>
+    <term name="literature">irodalom</term>
+    <term name="math">matematika</term>
+    <term name="medicine">orvostudomány</term>
+    <term name="philosophy">filozófia</term>
+    <term name="physics">fizika</term>
+    <term name="psychology">pszichológia</term>
+    <term name="sociology">szociológia</term>
+    <term name="science">tudomány</term>
+    <term name="political_science">politikatudomány</term>
+    <term name="social_science">társadalomtudomány</term>
+    <term name="theology">teológia</term>
+    <term name="zoology">zoológia</term>
+    <term name="book">
+      <single>könyv</single>
+      <multiple>könyv</multiple>
+    </term>
+    <term name="chapter">
+      <single>fejezet</single>
+      <multiple>fejezet</multiple>
+    </term>
+    <term name="column">
+      <single>oszlop</single>
+      <multiple>oszlop</multiple>
+    </term>
+    <term name="figure">
+      <single>ábra</single>
+      <multiple>ábra</multiple>
+    </term>
+    <term name="folio">
+      <single>fóliáns</single>
+      <multiple>fóliáns</multiple>
+    </term>
+    <term name="issue">
+      <single>szám</single>
+      <multiple>szám</multiple>
+    </term>
+    <term name="line">
+      <single>sor</single>
+      <multiple>sor</multiple>
+    </term>
+    <term name="note">
+      <single>jegyzet</single>
+      <multiple>jegyzet</multiple>
+    </term>
+    <term name="opus">
+      <single>opus</single>
+      <multiple>opera</multiple>
+    </term>
+    <term name="page">
+      <single>oldal</single>
+      <multiple>oldal</multiple>
+    </term>
+    <term name="paragraph">
+      <single>bekezdés</single>
+      <multiple>bekezdés</multiple>
+    </term>
+    <term name="part">
+      <single>rész</single>
+      <multiple>rész</multiple>
+    </term>
+    <term name="section">
+      <single>szakasz</single>
+      <multiple>szakasz</multiple>
+    </term>
+    <term name="volume">
+      <single>kötet</single>
+      <multiple>kötet</multiple>
+    </term>
+    <term name="edition">
+      <single>edition</single>
+      <multiple>editions</multiple>
+    </term>
+    <term name="verse">
+      <single>versszak</single>
+      <multiple>versszak</multiple>
+    </term>
+    <term name="sub verbo">
+      <single>sub verbo</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="book" form="short">könyv</term>
+    <term name="chapter" form="short">fej</term>
+    <term name="column" form="short">oszl</term>
+    <term name="figure" form="short">ábr</term>
+    <term name="folio" form="short">fol</term>
+    <term name="issue" form="short">sz</term>
+    <term name="opus" form="short">op</term>
+    <term name="page" form="short">
+      <single>o</single>
+      <multiple>o</multiple>
+    </term>
+    <term name="paragraph" form="short">bek</term>
+    <term name="part" form="short">rész</term>
+    <term name="section" form="short">szak</term>
+    <term name="sub verbo" form="short">
+      <single>s.v</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="verse" form="short">
+      <single>vsz</single>
+      <multiple>vsz</multiple>
+    </term>
+    <term name="volume" form="short">
+      <single>vol</single>
+      <multiple>vols</multiple>
+    </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">ed</term>
+    <term name="paragraph" form="symbol">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§§</multiple>
+    </term>
+    <term name="author">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor">
+      <single>szerkesztő</single>
+      <multiple>szerkesztő</multiple>
+    </term>
+    <term name="translator">
+      <single>fordító</single>
+      <multiple>fordító</multiple>
+    </term>
+    <term name="author" form="short">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor" form="short">
+      <single>szerk</single>
+      <multiple>szerk</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>ford</single>
+      <multiple>ford</multiple>
+    </term>
+    <term name="editor" form="verb">szerkesztette</term>
+    <term name="translator" form="verb">fordította</term>
+    <term name="recipient" form="verb">címzett</term>
+    <term name="interviewer" form="verb">interjúkészítő</term>
+    <term name="editor" form="verb-short">szerk</term>
+    <term name="translator" form="verb-short">ford</term>
+    <term name="month-01">január</term>
+    <term name="month-02">február</term>
+    <term name="month-03">március</term>
+    <term name="month-04">április</term>
+    <term name="month-05">május</term>
+    <term name="month-06">június</term>
+    <term name="month-07">július</term>
+    <term name="month-08">augusztus</term>
+    <term name="month-09">szeptember</term>
+    <term name="month-10">október</term>
+    <term name="month-11">november</term>
+    <term name="month-12">december</term>
+    <term name="month-01" form="short">jan</term>
+    <term name="month-02" form="short">febr</term>
+    <term name="month-03" form="short">márc</term>
+    <term name="month-04" form="short">ápr</term>
+    <term name="month-05" form="short">máj</term>
+    <term name="month-06" form="short">jún</term>
+    <term name="month-07" form="short">júl</term>
+    <term name="month-08" form="short">aug</term>
+    <term name="month-09" form="short">szept</term>
+    <term name="month-10" form="short">okt</term>
+    <term name="month-11" form="short">nov</term>
+    <term name="month-12" form="short">dec</term>
+  </locale>
+</terms>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="ru">
+    <term name="at">на</term>
+    <term name="in">в</term>
+    <term name="ibid">так же</term>
+    <term name="accessed">вызвано</term>
+    <term name="retrieved">извлечено</term>
+    <term name="from">от</term>
+    <term name="forthcoming">грядущие</term>
+    <term name="references">ссылки</term>
+    <term name="reference item">
+      <single>источник</single>
+      <multiple>источники</multiple>
+    </term>
+    <term name="no date">нет даты</term>
+    <term name="and">и</term>
+    <term name="et-al">и др.</term>
+    <term name="interview">интервью</term>
+    <term name="letter">письмо</term>
+    <term name="anonymous">анонимно</term>
+    <term name="anonymous" form="short">анон</term>
+    <term name="and others">и другие</term>
+    <term name="in press">в печати</term>
+    <term name="online">онлайн</term>
+    <term name="cited">цитированно</term>
+    <term name="internet">Интернет</term>
+    <term name="presented at">представлено на</term>
+    <term name="anthropology">антропология</term>
+    <term name="astronomy">астрономия</term>
+    <term name="biology">биология</term>
+    <term name="botany">ботаника</term>
+    <term name="chemistry">химия</term>
+    <term name="engineering">инженерное дело</term>
+    <term name="generic-base">общая основа</term>
+    <term name="geography">география</term>
+    <term name="geology">геология</term>
+    <term name="history">история</term>
+    <term name="humanities">гуманитарные науки</term>
+    <term name="literature">литература</term>
+    <term name="math">математика</term>
+    <term name="medicine">медицина</term>
+    <term name="philosophy">философия</term>
+    <term name="physics">физика</term>
+    <term name="psychology">психология</term>
+    <term name="sociology">социология</term>
+    <term name="science">естественные науки</term>
+    <term name="political_science">политология</term>
+    <term name="social_science">общественные науки</term>
+    <term name="theology">теология</term>
+    <term name="zoology">зоология</term>
+    <term name="book">
+      <single>книга</single>
+      <multiple>книги</multiple>
+    </term>
+    <term name="chapter">
+      <single>глава</single>
+      <multiple>главы</multiple>
+    </term>
+    <term name="column">
+      <single>колонка</single>
+      <multiple>колонки</multiple>
+    </term>
+    <term name="figure">
+      <single>рисунок</single>
+      <multiple>рисунки</multiple>
+    </term>
+    <term name="folio">
+      <single>лист</single>
+      <multiple>листы</multiple>
+    </term>
+    <term name="issue">
+      <single>номер</single>
+      <multiple>номера</multiple>
+    </term>
+    <term name="line">
+      <single>линия</single>
+      <multiple>линии</multiple>
+    </term>
+    <term name="note">
+      <single>запись</single>
+      <multiple>записи</multiple>
+    </term>
+    <term name="opus">
+      <single>опус</single>
+      <multiple>опусы</multiple>
+    </term>
+    <term name="page">
+      <single>страница</single>
+      <multiple>страницы</multiple>
+    </term>
+    <term name="paragraph">
+      <single>параграф</single>
+      <multiple>параграфы</multiple>
+    </term>
+    <term name="part">
+      <single>часть</single>
+      <multiple>части</multiple>
+    </term>
+    <term name="section">
+      <single>раздел</single>
+      <multiple>разделы</multiple>
+    </term>
+    <term name="volume">
+      <single>том</single>
+      <multiple>тома</multiple>
+    </term>
+    <term name="edition">
+      <single>издание</single>
+      <multiple>издания</multiple>
+    </term>
+    <term name="verse">
+      <single>стих</single>
+      <multiple>стихи</multiple>
+    </term>
+    <term name="sub verbo">
+      <single>под рубрикой</single>
+      <multiple>под рубриками</multiple>
+    </term>
+    <term name="book" form="short">кн</term>
+    <term name="chapter" form="short">гл</term>
+    <term name="column" form="short">кол</term>
+    <term name="figure" form="short">рис</term>
+    <term name="folio" form="short">л</term>
+    <term name="issue" form="short">ном</term>
+    <term name="opus" form="short">оп</term>
+    <term name="page" form="short">
+      <single>p</single>
+      <multiple>pp</multiple>
+    </term>
+    <term name="paragraph" form="short">пар</term>
+    <term name="part" form="short">ч</term>
+    <term name="section" form="short">разд</term>
+    <term name="sub verbo" form="short">
+      <single>s.v</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="verse" form="short">
+      <single>v</single>
+      <multiple>vv</multiple>
+    </term>
+    <term name="volume" form="short">
+      <single>vol</single>
+      <multiple>vols</multiple>
+    </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">изд</term>
+    <term name="paragraph" form="symbol">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§§</multiple>
+    </term>
+    <term name="author">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor">
+      <single>редактор</single>
+      <multiple>редакторы</multiple>
+    </term>
+    <term name="translator">
+      <single>переводчик</single>
+      <multiple>переводчики</multiple>
+    </term>
+    <term name="author" form="short">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor" form="short">
+      <single>ред-р</single>
+      <multiple>ред-ры</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>перев-к</single>
+      <multiple>перев-и</multiple>
+    </term>
+    <term name="editor" form="verb">отредактировано</term>
+    <term name="translator" form="verb">переведено</term>
+    <term name="recipient" form="verb"/>
+    <term name="interviewer" form="verb">интервью взято</term>
+    <term name="editor" form="verb-short">ред</term>
+    <term name="translator" form="verb-short">перев</term>
+    <term name="month-01">Январь</term>
+    <term name="month-02">Февраль</term>
+    <term name="month-03">Март</term>
+    <term name="month-04">Апрель</term>
+    <term name="month-05">Май</term>
+    <term name="month-06">Июнь</term>
+    <term name="month-07">Июль</term>
+    <term name="month-08">Август</term>
+    <term name="month-09">Сентябрь</term>
+    <term name="month-10">Октябрь</term>
+    <term name="month-11">Ноябрь</term>
+    <term name="month-12">Декабрь</term>
+    <term name="month-01" form="short">Янв</term>
+    <term name="month-02" form="short">Фев</term>
+    <term name="month-03" form="short">Мар</term>
+    <term name="month-04" form="short">Апр</term>
+    <term name="month-05" form="short">Май</term>
+    <term name="month-06" form="short">Июн</term>
+    <term name="month-07" form="short">Июл</term>
+    <term name="month-08" form="short">Авг</term>
+    <term name="month-09" form="short">Сен</term>
+    <term name="month-10" form="short">Окт</term>
+    <term name="month-11" form="short">Ноя</term>
+    <term name="month-12" form="short">Дек</term>
+  </locale>
+</terms>

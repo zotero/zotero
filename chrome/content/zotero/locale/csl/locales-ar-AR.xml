@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terms xmlns="http://purl.org/net/xbiblio/csl">
+  <locale xml:lang="ar">
+    <term name="at">عند</term>
+    <term name="in">في</term>
+    <term name="ibid">آيبيد</term>
+    <term name="accessed">زير</term>
+    <term name="retrieved">جلب</term>
+    <term name="from">من</term>
+    <term name="forthcoming">القادم</term>
+    <term name="references">مراجع</term>
+    <term name="reference item">
+      <single>source</single>
+      <multiple>sources</multiple>
+    </term>
+    <term name="no date"/>
+    <term name="and">و</term>
+    <term name="et-al">et al.</term>
+    <term name="interview">مقابلة</term>
+    <term name="letter">رسالة</term>
+    <term name="anonymous">مجهول</term>
+    <term name="anonymous" form="short">مجهول</term>
+    <term name="and others">وآخرون</term>
+    <term name="in press">تحت الطبع</term>
+    <term name="online">ربط مباشر</term>
+    <term name="cited">وثِّقَ</term>
+    <term name="internet">الإنترنت</term>
+    <term name="presented at">قُدَّم في</term>
+    <term name="anthropology">علم الإنسان</term>
+    <term name="astronomy">علم الفلك</term>
+    <term name="biology">علم الأحياء</term>
+    <term name="botany">علم النبات</term>
+    <term name="chemistry">علم الكيمياء</term>
+    <term name="engineering">الهندسة</term>
+    <term name="generic-base">أساس عام</term>
+    <term name="geography">جغرافيا</term>
+    <term name="geology">علم الأرض</term>
+    <term name="history">التاريخ</term>
+    <term name="humanities">الإنسانيات</term>
+    <term name="literature">الأدب</term>
+    <term name="math">الرياضيات</term>
+    <term name="medicine">الطب</term>
+    <term name="philosophy">الفلسفة</term>
+    <term name="physics">الفيزياء</term>
+    <term name="psychology">علم النفس</term>
+    <term name="sociology">علم الإجتماع</term>
+    <term name="science">العلوم</term>
+    <term name="political_science">العلوم السياسية</term>
+    <term name="social_science">العلوم الإجتماعية</term>
+    <term name="theology">العلوم الإلهية</term>
+    <term name="zoology">علم الحيوان</term>
+    <term name="book">
+      <single>كتاب</single>
+      <multiple>كُتُب</multiple>
+    </term>
+    <term name="chapter">
+      <single>فصل</single>
+      <multiple>فصول</multiple>
+    </term>
+    <term name="column">
+      <single>عمود</single>
+      <multiple>أعمدة</multiple>
+    </term>
+    <term name="figure">
+      <single>رسم توضيحي</single>
+      <multiple>رسوم توضيحية</multiple>
+    </term>
+    <term name="folio">
+      <single>ورقة</single>
+      <multiple>أوراق</multiple>
+    </term>
+    <term name="issue">
+      <single>عدد</single>
+      <multiple>أعداد</multiple>
+    </term>
+    <term name="line">
+      <single>سطر</single>
+      <multiple>أسطر</multiple>
+    </term>
+    <term name="note">
+      <single>ملاحظة</single>
+      <multiple>ملاحظات</multiple>
+    </term>
+    <term name="opus">
+      <single>قطعة موسيقية</single>
+      <multiple>أوبرا</multiple>
+    </term>
+    <term name="page">
+      <single>صفحة</single>
+      <multiple>صفحات</multiple>
+    </term>
+    <term name="paragraph">
+      <single>فقرة</single>
+      <multiple>فقرات</multiple>
+    </term>
+    <term name="part">
+      <single>جزء</single>
+      <multiple>أجزاء</multiple>
+    </term>
+    <term name="section">
+      <single>قسم</single>
+      <multiple>أقسام</multiple>
+    </term>
+    <term name="volume">
+      <single>مجلد</single>
+      <multiple>مجلدات</multiple>
+    </term>
+    <term name="edition">
+      <single>الطبعة</single>
+      <multiple>الطبعات</multiple>
+    </term>
+    <term name="verse">
+      <single>بيت</single>
+      <multiple>أبيات</multiple>
+    </term>
+    <term name="sub verbo">
+      <single>sub verbo</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="book" form="short">ك</term>
+    <term name="chapter" form="short">ف</term>
+    <term name="column" form="short">عم</term>
+    <term name="figure" form="short">ر</term>
+    <term name="folio" form="short">و</term>
+    <term name="issue" form="short">عد</term>
+    <term name="opus" form="short">مم</term>
+    <term name="page" form="short">
+      <single>ص</single>
+      <multiple>ص.ص</multiple>
+    </term>
+    <term name="paragraph" form="short">فق</term>
+    <term name="part" form="short">جز</term>
+    <term name="section" form="short">ق</term>
+    <term name="sub verbo" form="short">
+      <single>s.v</single>
+      <multiple>s.vv</multiple>
+    </term>
+    <term name="verse" form="short">
+      <single>ب</single>
+      <multiple>بب</multiple>
+    </term>
+    <term name="volume" form="short">
+      <single>مج</single>
+      <multiple>مجج</multiple>
+    </term>
+    <term name="edition">edition</term>
+    <term name="edition" form="short">ط</term>
+    <term name="paragraph" form="symbol">
+      <single>¶</single>
+      <multiple>¶¶</multiple>
+    </term>
+    <term name="section" form="symbol">
+      <single>§</single>
+      <multiple>§§</multiple>
+    </term>
+    <term name="author">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor">
+      <single>تحرير</single>
+      <multiple>تحرير</multiple>
+    </term>
+    <term name="translator">
+      <single>ترجمة</single>
+      <multiple>ترجمة</multiple>
+    </term>
+    <term name="author" form="short">
+      <single/>
+      <multiple/>
+    </term>
+    <term name="editor" form="short">
+      <single>مح</single>
+      <multiple>محح</multiple>
+    </term>
+    <term name="translator" form="short">
+      <single>تر</single>
+      <multiple>ترر</multiple>
+    </term>
+    <term name="editor" form="verb">حرره</term>
+    <term name="translator" form="verb">ترجمه</term>
+    <term name="recipient" form="verb">إلى</term>
+    <term name="interviewer" form="verb">مقابلة بواسطة</term>
+    <term name="editor" form="verb-short">مح</term>
+    <term name="translator" form="verb-short">مت</term>
+    <term name="month-01">يناير</term>
+    <term name="month-02">فبراير</term>
+    <term name="month-03">مارس</term>
+    <term name="month-04">ابريل</term>
+    <term name="month-05">مايو</term>
+    <term name="month-06">يونيو</term>
+    <term name="month-07">يوليو</term>
+    <term name="month-08">اغسطس</term>
+    <term name="month-09">سبتمبر</term>
+    <term name="month-10">اكتوبر</term>
+    <term name="month-11">نوفمبر</term>
+    <term name="month-12">ديسمبر</term>
+    <term name="month-01" form="short">يناير</term>
+    <term name="month-02" form="short">فبراير</term>
+    <term name="month-03" form="short">مارس</term>
+    <term name="month-04" form="short">ابريل</term>
+    <term name="month-05" form="short">مايو</term>
+    <term name="month-06" form="short">يونيو</term>
+    <term name="month-07" form="short">يوليو</term>
+    <term name="month-08" form="short">اغسطس</term>
+    <term name="month-09" form="short">سبتمبر</term>
+    <term name="month-10" form="short">اكتوبر</term>
+    <term name="month-11" form="short">نوفمبر</term>
+    <term name="month-12" form="short">ديسمبر</term>
+  </locale>
+</terms>
