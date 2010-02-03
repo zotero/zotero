@@ -26,7 +26,12 @@
 
 Zotero.Sync.Storage.Session.WebDAV = function (callbacks) {
 	this.onChangesMade = callbacks.onChangesMade ? callbacks.onChangesMade : function () {};
-	this.onError = callbacks.onError ? callbacks.onError : function () {};
+	this.onError = callbacks.onError ? function (e) {
+		if (!e) {
+			e = Zotero.Sync.Storage.Session.WebDAV.prototype.defaultError;
+		}
+		callbacks.onError(e);
+	} : function () {};
 	
 	this._parentURI;
 	this._rootURI;
@@ -40,6 +45,12 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.__defineGetter__('includeUserFiles'
 });
 
 Zotero.Sync.Storage.Session.WebDAV.prototype.includeGroupItems = false;
+
+// TEMP
+// TODO: localize
+Zotero.Sync.Storage.Session.WebDAV.prototype.defaultError = "A WebDAV file sync error occurred. Please try syncing again.\n\nIf the error persists, submit an error report and post the Report ID to a new thread in the Zotero Forums (forums.zotero.org).";
+Zotero.Sync.Storage.Session.WebDAV.prototype.defaultErrorRestart = "A WebDAV file sync error occurred. Please restart Firefox and try syncing again.\n\nIf the error persists, submit an error report and post the Report ID to a new thread in the Zotero Forums (forums.zotero.org).";
+
 
 Zotero.Sync.Storage.Session.WebDAV.prototype.__defineGetter__('enabled', function () {
 	return this.includeUserFiles;
@@ -277,12 +288,12 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._getStorageModificationTime = funct
 		
 		// Delete invalid .prop files
 		if (invalid) {
-			var msg = "An error occurred during file syncing. Try the sync again.\n\n"
-				+ "Invalid mod date '" + Zotero.Utilities.prototype.ellipsize(mtime, 20)
+			var msg = "Invalid mod date '" + Zotero.Utilities.prototype.ellipsize(mtime, 20)
 				+ "' for item " + Zotero.Items.getLibraryKeyHash(item);
 			Zotero.debug(msg, 1);
+			Components.utils.reportError(msg);
 			self._deleteStorageFiles([item.key + ".prop"], null, self);
-			self.onError(msg);
+			self.onError();
 			return;
 		}
 		
@@ -408,8 +419,11 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.downloadFile = function (request) {
 							return;
 						}
 						else if (status != 200) {
-							self.onError("Unexpected status code " + status
-								+ " for request " + data.request.name + " in Zotero.Sync.Storage.Session.WebDAV.downloadFile()");
+							var msg = "Unexpected status code " + status
+								+ " for request " + data.request.name + " in Zotero.Sync.Storage.Session.WebDAV.downloadFile()";
+							Zotero.debug(msg, 1);
+							Components.utils.reportError(msg);
+							self.onError();
 							return;
 						}
 						
@@ -620,6 +634,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._onUploadComplete = function (httpR
 			break;
 		
 		case 403:
+		case 500:
 			this.onError(Zotero.localeJoin([
 				Zotero.getString('sync.storage.error.fileUploadFailed'),
 				Zotero.getString('sync.storage.error.checkFileSyncSettings')
@@ -696,8 +711,11 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.getLastSyncTime = function (callbac
 			self._checkResponse(req, self);
 			
 			if (req.status != 200) {
-				self.onError("Unexpected status code " + req.status + " caching "
-					+ "authentication credentials in Zotero.Sync.Storage.Session.WebDAV.getLastSyncTime()");
+				var msg = "Unexpected status code " + req.status + " caching "
+					+ "authentication credentials in Zotero.Sync.Storage.Session.WebDAV.getLastSyncTime()";
+				Zotero.debug(msg, 1);
+				Components.utils.reportError(msg);
+				self.onError(Zotero.Sync.Storage.Session.WebDAV.prototype.defaultErrorRestart);
 				return;
 			}
 			self._cachedCredentials = true;
@@ -718,9 +736,17 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.getLastSyncTime = function (callbac
 				}
 				Zotero.debug(req.status);
 				
+				if (req.status == 403) {
+					Zotero.debug("Clearing WebDAV authentication credentials", 2);
+					self._cachedCredentials = false;
+				}
+				
 				if (req.status != 200 && req.status != 404) {
-					self.onError("Unexpected status code " + req.status + " getting "
-						+ "last file sync time");
+					var msg = "Unexpected status code " + req.status + " getting "
+						+ "last file sync time";
+					Zotero.debug(msg, 1);
+					Components.utils.reportError(msg);
+					self.onError();
 					return;
 				}
 				
