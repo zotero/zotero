@@ -1784,7 +1784,7 @@ Zotero.CSL.Item._zoteroFieldMap = {
 		"section":"section",
 		"genre":["type", "artworkSize"], /* artworkSize should move to SQL mapping tables, or added as a CSL variable */
 		"medium":"medium",
-		"archive":"repository",
+		"archive":"archive",
 		"archive_location":"archiveLocation",
 		"event":["meetingName", "conferenceName"], /* these should be mapped to the same base field in SQL mapping tables */
 		"event-place":"place",

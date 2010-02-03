@@ -2789,8 +2789,13 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE itemData SET fieldID=121 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=19) AND fieldID=14");
 				}
 				
+				// 2.0rc3
 				if (i==71) {
 					Zotero.DB.query("UPDATE itemAttachments SET storageModTime=storageModTime*1000 WHERE storageModTime<10000000000");
+				}
+				
+				if (i==72) {
+					Zotero.DB.query("UPDATE itemData SET fieldID=123 WHERE fieldID=62 AND itemID IN (SELECT itemID FROM items WHERE itemTypeID IN (SELECT itemTypeID FROM itemTypeFields WHERE fieldID=19) AND itemTypeID NOT IN (2,3,4,5,6,7))");
 				}
 				
 				Zotero.wait();
