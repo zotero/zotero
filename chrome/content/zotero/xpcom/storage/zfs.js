@@ -130,7 +130,8 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getStorageFileInfo = function (item, 
 		var info = {};
 		info.hash = req.getResponseHeader('ETag');
 		info.filename = req.getResponseHeader('X-Zotero-Filename');
-		info.mtime = req.getResponseHeader('X-Zotero-Modification-Time');
+		var mtime = req.getResponseHeader('X-Zotero-Modification-Time');
+		info.mtime = parseInt(mtime);
 		info.compressed = req.getResponseHeader('X-Zotero-Compressed') == 'Yes';
 		Zotero.debug(info);
 		
@@ -184,7 +185,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype.downloadFile = function (request) {
 			var file = item.getFile();
 			// Skip download if local file exists and matches mod time
 			if (file && file.exists()) {
-				if (syncModTime == Math.round(file.lastModifiedTime / 1000)) {
+				if (syncModTime == file.lastModifiedTime) {
 					Zotero.debug("File mod time matches remote file -- skipping download");
 					
 					Zotero.DB.beginTransaction();
@@ -346,20 +347,34 @@ Zotero.Sync.Storage.Session.ZFS.prototype._processUploadFile = function (data) {
 				if (info) {
 					// Remote mod time
 					var mtime = info.mtime;
+					
 					// Local file time
 					var fmtime = item.attachmentModificationTime;
 					
+					var same = false;
+					if (fmtime == mtime) {
+						same = true;
+						Zotero.debug("File mod time matches remote file -- skipping upload");
+					}
+					// Allow floored timestamps for filesystems that don't support
+					// millisecond precision (e.g., HFS+)
+					else if (Math.floor(mtime / 1000) * 1000 == fmtime || Math.floor(fmtime / 1000) * 1000 == mtime) {
+						same = true;
+						Zotero.debug("File mod times are within one-second precision (" + fmtime + " ≅ " + mtime + ") "
+							+ "-- skipping upload");
+					}
 					// Allow timestamp to be exactly one hour off to get around
 					// time zone issues -- there may be a proper way to fix this
-					if (fmtime == mtime || Math.abs(fmtime - mtime) == 3600) {
-						if (fmtime == mtime) {
-							Zotero.debug("File mod time matches remote file -- skipping upload");
-						}
-						else {
-							Zotero.debug("File mod time (" + fmtime + ") is exactly one hour off remote file (" + mtime + ") "
-								+ "-- assuming time zone issue and skipping upload");
-						}
-						
+					else if (Math.abs(fmtime - mtime) == 3600000
+							// And check with one-second precision as well
+							|| Math.abs(fmtime - Math.floor(mtime / 1000) * 1000) == 3600000
+							|| Math.abs(Math.floor(fmtime / 1000) * 1000 - mtime) == 3600000) {
+						same = true;
+						Zotero.debug("File mod time (" + fmtime + ") is exactly one hour off remote file (" + mtime + ") "
+							+ "-- assuming time zone issue and skipping upload");
+					}
+					
+					if (same) {
 						Zotero.debug(Zotero.Sync.Storage.getSyncedModificationTime(item.id));
 						
 						Zotero.DB.beginTransaction();
@@ -804,7 +819,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype.getLastSyncTime = function (callback) 
 		
 		if (req.status == 200) {
 			var ts = req.responseText;
-			var date = new Date(req.responseText * 1000);
+			var date = new Date(ts * 1000);
 			Zotero.debug("Last successful storage sync was " + date);
 			self._lastSyncTime = ts;
 		}
@@ -934,7 +949,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype.purgeDeletedStorageFiles = function (c
  */
 Zotero.Sync.Storage.Session.ZFS.prototype._getItemURI = function (item) {
 	var uri = this.rootURI;
-	uri.spec += Zotero.URI.getItemPath(item) + '/file?auth=1&iskey=1';
+	uri.spec += Zotero.URI.getItemPath(item) + '/file?auth=1&iskey=1&version=1';
 	return uri;
 }
 

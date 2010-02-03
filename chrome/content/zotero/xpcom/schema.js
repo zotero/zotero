@@ -1056,10 +1056,6 @@ Zotero.Schema = new function(){
 				Zotero.DB.query(sql);
 				var sql = "INSERT INTO itemData VALUES (1, 1, 2)";
 				Zotero.DB.query(sql);
-				var sql = "INSERT INTO itemDataValues VALUES (3, CURRENT_TIMESTAMP)";
-				Zotero.DB.query(sql);
-				var sql = "INSERT INTO itemData VALUES (1, 27, 3)";
-				Zotero.DB.query(sql);
 				
 				// CHNM as creator
 				var sql = "INSERT INTO creatorData VALUES (1, '', 'Center for History and New Media', '', 1, NULL)";
@@ -2791,6 +2787,10 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE itemData SET fieldID=119 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=29) AND fieldID=28");
 					Zotero.DB.query("UPDATE itemData SET fieldID=119 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=30) AND fieldID=28");
 					Zotero.DB.query("UPDATE itemData SET fieldID=121 WHERE itemID IN (SELECT itemID FROM items WHERE itemTypeID=19) AND fieldID=14");
+				}
+				
+				if (i==71) {
+					Zotero.DB.query("UPDATE itemAttachments SET storageModTime=storageModTime*1000 WHERE storageModTime<10000000000");
 				}
 				
 				Zotero.wait();
