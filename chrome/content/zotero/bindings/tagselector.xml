@@ -782,9 +782,7 @@
 				<xul:vbox id="tag-controls">
 					<xul:hbox>
 						<xul:hbox pack="start">
-							<!-- TODO: localize or change -->
-							<!-- <xul:checkbox id="display-all-tags" label="&zotero.tagSelector.displayAll;"-->
-							<xul:checkbox id="display-all-tags" label="Display all tags in this library"
+							<xul:checkbox id="display-all-tags" label="&zotero.tagSelector.displayAllInLibrary;"
 								oncommand="var ts = document.getBindingParent(this); ts.filterToScope = !this.checked; event.stopPropagation();">
 							</xul:checkbox>
 						</xul:hbox>
