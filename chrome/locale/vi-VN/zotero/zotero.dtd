@@ -108,6 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Không có thẻ nào để hiển thị">
 <!ENTITY zotero.tagSelector.filter "Bộ lọc:">
 <!ENTITY zotero.tagSelector.showAutomatic "Hiển thị tự động">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.selectVisible "Chọn các thẻ nhìn thấy được">
 <!ENTITY zotero.tagSelector.clearVisible "Bỏ lựa chọn các thẻ nhìn thấy được">
 <!ENTITY zotero.tagSelector.clearAll "Bỏ tất cả lựa chọn">

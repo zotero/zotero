@@ -7,10 +7,10 @@
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Hlásenie o chybe môže obsahovať informácie nesúvisiace so Zoterom.">
 <!ENTITY zotero.errorReport.submissionInProgress "Prosím počkajte, kým sa hlásenie o chybe neodošle.">
-<!ENTITY zotero.errorReport.submitted "Hlásenie o chybe bola odoslané.">
+<!ENTITY zotero.errorReport.submitted "Hlásenie o chybe bolo odoslané.">
 <!ENTITY zotero.errorReport.reportID "ID hlásenia:">
 <!ENTITY zotero.errorReport.postToForums "Prosím napíšte správu do diskusného fóra Zotero (forums.zotero.org) obsahujúcu toto ID, popis problému a kroky, ktoré sú potrebné k jeho reprodukovaniu.">
-<!ENTITY zotero.errorReport.notReviewed "Hlásenia o chybách nie sú preskúmané pokiaľ sa ne neodkazuje v diskusných fórach.">
+<!ENTITY zotero.errorReport.notReviewed "Hlásenia o chybách nie sú preskúmané, pokiaľ sa na ne neodkazuje v diskusných fórach.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Nainštalovali ste novú verziu Zotera.">
 <!ENTITY zotero.upgrade.upgradeRequired "Na to, aby ste mohli pracovať s novou verziou je potrebné aktualizovať vašu Zotero databázu.">
@@ -108,11 +108,12 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Žiadne značky na zobrazenie">
 <!ENTITY zotero.tagSelector.filter "Filter:">
 <!ENTITY zotero.tagSelector.showAutomatic "Zobrazovať automaticky">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.selectVisible "Označiť viditeľné">
 <!ENTITY zotero.tagSelector.clearVisible "Odznačiť viditeľné">
 <!ENTITY zotero.tagSelector.clearAll "Odznačiť všetky">
 <!ENTITY zotero.tagSelector.renameTag "Premenovať značku...">
-<!ENTITY zotero.tagSelector.deleteTag "Vymažať značku...">
+<!ENTITY zotero.tagSelector.deleteTag "Vymazať značku...">
 
 <!ENTITY zotero.lookup.description "Zadajte do poľa ISBN, DOI alebo PMID podľa ktorého chcete vyhľadávať.">
 

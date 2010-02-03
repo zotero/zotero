@@ -1,7 +1,7 @@
 <!ENTITY zotero.search.name "Name:">
 
 <!ENTITY zotero.search.joinMode.prefix "Ergebnisse finden mit">
-<!ENTITY zotero.search.joinMode.any "irgendeinem">
+<!ENTITY zotero.search.joinMode.any "beliebigem">
 <!ENTITY zotero.search.joinMode.all "allen">
 <!ENTITY zotero.search.joinMode.suffix "der folgenden:">
 

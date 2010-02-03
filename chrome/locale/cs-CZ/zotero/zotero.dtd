@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.delete "Smazat">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Záznam o chybách může obsahovat informace nesouvisející se Zoterem.">
-<!ENTITY zotero.errorReport.submissionInProgress "Čekejte, prosím, dokud nebude zpráva o chybách odeslána">
+<!ENTITY zotero.errorReport.submissionInProgress "Čekejte, prosím, dokud nebude zpráva o chybách odeslána.">
 <!ENTITY zotero.errorReport.submitted "Zpráva o chybách byla odeslána.">
 <!ENTITY zotero.errorReport.reportID "ID hlášení:">
 <!ENTITY zotero.errorReport.postToForums "Prosím, napište zprávu do Zotero fóra (forums.zotero.org). Napište ID hlášení, popis problému a postupné kroky k jeho reprodukování.">
@@ -16,7 +16,7 @@
 <!ENTITY zotero.upgrade.upgradeRequired "Databáze vašeho Zotera musí být aktualizována, aby mohla pracovat s novou verzí.">
 <!ENTITY zotero.upgrade.autoBackup "Vaše existující databáze bude zálohována předtím, než budou provedeny jakékoli změny.">
 <!ENTITY zotero.upgrade.majorUpgrade "Toto je významná aktualizace.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Než budete pokračovat zkontrolujte">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Než budete pokračovat, zkontrolujte">
 <!ENTITY zotero.upgrade.majorUpgradeLink "instrukce pro aktualizaci">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink ".">
 <!ENTITY zotero.upgrade.upgradeInProgress "Prosím počkejte, dokud neskončí proces aktualizace. Může zabrat až několik minut.">
@@ -59,7 +59,7 @@
 <!ENTITY zotero.items.menu.attach.note "Přidat poznámku">
 <!ENTITY zotero.items.menu.attach "Přidat přílohu">
 <!ENTITY zotero.items.menu.attach.snapshot "Připojit snímek současné stránky">
-<!ENTITY zotero.items.menu.attach.link "Připojit odkaz k současné stránce">
+<!ENTITY zotero.items.menu.attach.link "Připojit odkaz na současnou stránku">
 <!ENTITY zotero.items.menu.attach.file "Přiložit uloženou kopii souboru...">
 <!ENTITY zotero.items.menu.attach.fileLink "Přiložit odkaz na soubor...">
 
@@ -88,7 +88,7 @@
 <!ENTITY zotero.toolbar.about.label "O Zoteru">
 <!ENTITY zotero.toolbar.advancedSearch "Pokročilé vyhledávání">
 <!ENTITY zotero.toolbar.search.label "Hledat:">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "Tlačítko celoobrazového módu">
+<!ENTITY zotero.toolbar.fullscreen.tooltip "Tlačítko celoobrazovkového módu">
 <!ENTITY zotero.toolbar.openURL.label "Najít">
 <!ENTITY zotero.toolbar.openURL.tooltip "Najít prostřednictvím vaší místní knihovny">
 
@@ -107,14 +107,15 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Žádné štítky k zobrazení">
 <!ENTITY zotero.tagSelector.filter "Filtr:">
-<!ENTITY zotero.tagSelector.showAutomatic "Ukazovat automatické">
+<!ENTITY zotero.tagSelector.showAutomatic "Ukazovat automaticky přidané">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.selectVisible "Vybrat viditelné">
 <!ENTITY zotero.tagSelector.clearVisible "Zrušit výběr viditelných">
 <!ENTITY zotero.tagSelector.clearAll "Zrušit výběr všech">
 <!ENTITY zotero.tagSelector.renameTag "Přejmenovat štítek...">
 <!ENTITY zotero.tagSelector.deleteTag "Smazat štítek...">
 
-<!ENTITY zotero.lookup.description "Do políčka níže vložte ISBN, DOI nebo PMID podle kterého chcete vyhledávat.">
+<!ENTITY zotero.lookup.description "Do políčka níže vložte ISBN, DOI nebo PMID, podle kterého chcete vyhledávat.">
 
 <!ENTITY zotero.selectitems.title "Označit položky">
 <!ENTITY zotero.selectitems.intro.label "Označte položky, které byste rádi přidali do Vaší knihovny">
@@ -158,10 +159,10 @@
 <!ENTITY zotero.richText.superscript.label "Horní index">
 <!ENTITY zotero.richText.subscript.label "Spodní index">
 
-<!ENTITY zotero.annotate.toolbar.add.label "Přidej anotaci">
+<!ENTITY zotero.annotate.toolbar.add.label "Přidat anotaci">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Sbalit všechny anotace">
 <!ENTITY zotero.annotate.toolbar.expand.label "Rozbalit všechny anotace">
-<!ENTITY zotero.annotate.toolbar.highlight.label "Zvýrazniit text">
+<!ENTITY zotero.annotate.toolbar.highlight.label "Zvýraznit text">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Zrušit zvýraznění textu">
 
 <!ENTITY zotero.integration.prefs.displayAs.label "Zobrazit citaci jako:">
@@ -170,7 +171,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Formátovat použitím:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Záložky">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified. For &#xA;compatibility reasons, citations cannot be inserted into footnotes or endnotes when this option is selected.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Záložky jsou zachovány u Microsoft Word i OpenOffice, ale mohou být náhodně modifikovány. Kvůli kompatibilitě nemohou být citace vkládány do poznámek pod čarou nebo koncových poznámek, pokud je tato možnost zvolena.">
 
 <!ENTITY zotero.integration.references.label "Reference v bibliografii">
 
@@ -181,7 +182,7 @@
 <!ENTITY zotero.sync.storage.uploads "Nahrávání:">
 
 <!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Následující štítky ve vaší Zotero Knihovně jsou pro synchronizaci na server příliš dlouhé.">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synchronizované štítky musí být kratší, než 256 znaků.">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synchronizované štítky musí být kratší než 256 znaků.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Můžete štítek rozdělit do více štítků, pomocí editace ho zkrátit, nebo ho smazat.">
 <!ENTITY zotero.sync.longTagFixer.split "Rozdělit">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Rozdělit v">
@@ -191,8 +192,8 @@
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Štítky budou smazány ze všech položek.">
 
 <!ENTITY zotero.proxy.recognized.title "Rozpoznána proxy">
-<!ENTITY zotero.proxy.recognized.warning "Přidávejte pouze proxy ze stránek vaší knihovny, školy, nebo zaměstnání.">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Přidání jíných proxy může umožnit škodlivým stránkám vydávat se za stránky, kterým věříte.">
+<!ENTITY zotero.proxy.recognized.warning "Přidávejte pouze proxy ze stránek vaší knihovny, školy nebo zaměstnání.">
+<!ENTITY zotero.proxy.recognized.warning.secondary "Přidání jiných proxy může umožnit škodlivým stránkám vydávat se za stránky, kterým věříte.">
 <!ENTITY zotero.proxy.recognized.disable.label "Nepřesměrovávat požadavky skrze dříve rozpoznané proxy servery">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorovat">
 
@@ -210,7 +211,7 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Nejednoznačné citace">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Přiřazené citace">
 <!ENTITY zotero.rtfScan.introPage.label "Představení">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero může automaticky extrahovat, přeformávat a vložit bibliografii do RTF souborů. Začněte vybráním RTF souboru níže.">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero může automaticky extrahovat, přeformátovat a vložit bibliografii do RTF souborů. Začněte vybráním RTF souboru níže.">
 <!ENTITY zotero.rtfScan.introPage.description2 "Začnete vybráním RTF vstupního souboru a výstupního souboru níže:">
 <!ENTITY zotero.rtfScan.scanPage.label "Vyhledávají se citace">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero vyhledává v dokumentu citace. Prosím o chvilku strpení.">

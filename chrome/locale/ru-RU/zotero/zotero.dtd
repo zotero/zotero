@@ -108,6 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Нет тегов для отображения">
 <!ENTITY zotero.tagSelector.filter "Фильтр:">
 <!ENTITY zotero.tagSelector.showAutomatic "Показывать автоматически">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.selectVisible "Выбрать видимые">
 <!ENTITY zotero.tagSelector.clearVisible "Отменить выбор видимых">
 <!ENTITY zotero.tagSelector.clearAll "Отменить выбор">

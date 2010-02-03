@@ -108,6 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Brez značk za prikaz">
 <!ENTITY zotero.tagSelector.filter "Filter:">
 <!ENTITY zotero.tagSelector.showAutomatic "Pokaži samodejno">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.selectVisible "Izberi vidno">
 <!ENTITY zotero.tagSelector.clearVisible "Ne izberi vidno">
 <!ENTITY zotero.tagSelector.clearAll "Ne izberi ničesar">

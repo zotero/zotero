@@ -108,6 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "No hi ha etiquetes per mostrar">
 <!ENTITY zotero.tagSelector.filter "Filte:">
 <!ENTITY zotero.tagSelector.showAutomatic "Mostra automàtic">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.selectVisible "Selecciona les visibles">
 <!ENTITY zotero.tagSelector.clearVisible "Deselecciona les visibles">
 <!ENTITY zotero.tagSelector.clearAll "Deselecciona-ho tot">

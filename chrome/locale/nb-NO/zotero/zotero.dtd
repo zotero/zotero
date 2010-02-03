@@ -108,6 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Ingen tagger finnes">
 <!ENTITY zotero.tagSelector.filter "Filter:">
 <!ENTITY zotero.tagSelector.showAutomatic "Vis automatisk">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.selectVisible "Velg synlig">
 <!ENTITY zotero.tagSelector.clearVisible "Slipp synlig">
 <!ENTITY zotero.tagSelector.clearAll "Slipp alle">

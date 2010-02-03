@@ -7,7 +7,7 @@
 
 <!ENTITY zotero.search.recursive.label "Prohledat podsložky">
 <!ENTITY zotero.search.noChildren "Zobrazit pouze objekty nejvyšší úrovně">
-<!ENTITY zotero.search.includeParentsAndChildren "Zahrň rodičovské a dceřiné položky odpovídajících položek">
+<!ENTITY zotero.search.includeParentsAndChildren "Zahrnout rodičovské a dceřiné položky odpovídajících položek">
 
 <!ENTITY zotero.search.textModes.phrase "Fráze">
 <!ENTITY zotero.search.textModes.phraseBinary "Fráze (vč. binárních souborů)">
