@@ -3012,7 +3012,7 @@ Zotero.Item.prototype.__defineSetter__('attachmentSyncState', function (val) {
  * Note: This is the mod time of the file itself, not the last-known mod time
  * of the file on the storage server as stored in the database
  *
- * @return	{Number}		File modification time as UNIX timestamp
+ * @return	{Number}		File modification time as timestamp in milliseconds
  */
 Zotero.Item.prototype.__defineGetter__('attachmentModificationTime', function () {
 	if (!this.isAttachment()) {
@@ -3028,7 +3028,7 @@ Zotero.Item.prototype.__defineGetter__('attachmentModificationTime', function ()
 		return undefined;
 	}
 	
-	return Math.round(file.lastModifiedTime / 1000);
+	return file.lastModifiedTime;
 });
 
 
