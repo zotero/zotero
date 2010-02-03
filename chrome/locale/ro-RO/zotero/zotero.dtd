@@ -108,6 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Nicio etichetă pentru afişare">
 <!ENTITY zotero.tagSelector.filter "Filtru:">
 <!ENTITY zotero.tagSelector.showAutomatic "Arată automat">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.selectVisible "Selectează vedere">
 <!ENTITY zotero.tagSelector.clearVisible "Deselectează vedere">
 <!ENTITY zotero.tagSelector.clearAll "Deselectează totul">

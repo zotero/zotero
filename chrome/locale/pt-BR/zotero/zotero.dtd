@@ -1,67 +1,67 @@
-<!ENTITY zotero.general.optional "(Optional)">
-<!ENTITY zotero.general.note "Note:">
-<!ENTITY zotero.general.selectAll "Select All">
-<!ENTITY zotero.general.deselectAll "Deselect All">
-<!ENTITY zotero.general.edit "Edit">
-<!ENTITY zotero.general.delete "Delete">
+<!ENTITY zotero.general.optional "(Opcional)">
+<!ENTITY zotero.general.note "Nota:">
+<!ENTITY zotero.general.selectAll "Selecionar tudo">
+<!ENTITY zotero.general.deselectAll "Desmarcar tudo">
+<!ENTITY zotero.general.edit "Editar">
+<!ENTITY zotero.general.delete "Excluir">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
-<!ENTITY zotero.errorReport.submissionInProgress "Please wait while the error report is submitted.">
-<!ENTITY zotero.errorReport.submitted "Your error report has been submitted.">
-<!ENTITY zotero.errorReport.reportID "Report ID:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.unrelatedMessages "O registro de erro pode conter mensagens não relacionadas a Zotero.">
+<!ENTITY zotero.errorReport.submissionInProgress "Por favor, aguarde enquanto o relatório de erro é enviado.">
+<!ENTITY zotero.errorReport.submitted "Seu relatório de erro foi enviado.">
+<!ENTITY zotero.errorReport.reportID "Número de identificação do relatório:">
+<!ENTITY zotero.errorReport.postToForums "Por favor, envie uma mensagem para os fóruns Zotero (forums.zotero.org) com o número de identificação do relatório, uma descrição do problema, e quaiquer passos necessários para reproduzi-lo.">
+<!ENTITY zotero.errorReport.notReviewed "Relatórios de erro geralmente não são analisados a não ser que sejam mencionados nos fóruns.">
 
-<!ENTITY zotero.upgrade.newVersionInstalled "You have installed a new version of Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Your Zotero database must be upgraded to work with the new version.">
-<!ENTITY zotero.upgrade.autoBackup "Your existing database will be backed up automatically before any changes are made.">
-<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
-<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
-<!ENTITY zotero.upgrade.upgradeInProgress "Please wait for the upgrade process to finish. This may take a few minutes.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Your Zotero database has been successfully upgraded.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "Please see">
-<!ENTITY zotero.upgrade.changeLogLink "the changelog">
-<!ENTITY zotero.upgrade.changeLogAfterLink "to find out what's new.">
+<!ENTITY zotero.upgrade.newVersionInstalled "Você instalou uma versão nova de Zotero.">
+<!ENTITY zotero.upgrade.upgradeRequired "Seu banco de dados Zotero deve ser atualizado para funcionar com a nova versão.">
+<!ENTITY zotero.upgrade.autoBackup "Será feita uma cópia de segurança automática de seu banco de dados atual antes que qualquer alteração seja efetivada.">
+<!ENTITY zotero.upgrade.majorUpgrade "Esta é uma atualização extensa.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Certifique-se de ter revisado as">
+<!ENTITY zotero.upgrade.majorUpgradeLink "instruções de atualização">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "antes de continuar">
+<!ENTITY zotero.upgrade.upgradeInProgress "Por favor, aguarde o término do processo de atualização. Isso pode levar alguns minutos.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Seu banco de dados Zotero foi atualizado com sucesso.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Por favor, leia">
+<!ENTITY zotero.upgrade.changeLogLink "o registro de mudanças">
+<!ENTITY zotero.upgrade.changeLogAfterLink "para descobrir o que há de novo.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Adicionar seleção para nota do Zotero">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Criar item no Zotero e nota da seleção">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Adicionar seleção à nota Zotero">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Criar item e nota Zotero a partir da seleção">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Salvar link como item Zotero">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Salvar imagem como item Zotero">
 
 <!ENTITY zotero.tabs.info.label "Informação">
 <!ENTITY zotero.tabs.notes.label "Notas">
 <!ENTITY zotero.tabs.attachments.label "Anexos">
-<!ENTITY zotero.tabs.tags.label "Tags">
-<!ENTITY zotero.tabs.related.label "Relatados">
+<!ENTITY zotero.tabs.tags.label "Marcadores">
+<!ENTITY zotero.tabs.related.label "Relacionados">
 <!ENTITY zotero.notes.separate "Editar em uma janela separada">
 
-<!ENTITY zotero.items.itemType "Item Type">
+<!ENTITY zotero.items.itemType "Tipo do item">
 <!ENTITY zotero.items.type_column "Tipo">
 <!ENTITY zotero.items.title_column "Título">
 <!ENTITY zotero.items.creator_column "Criador">
-<!ENTITY zotero.items.date_column "Date">
-<!ENTITY zotero.items.year_column "Year">
-<!ENTITY zotero.items.publisher_column "Publisher">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
-<!ENTITY zotero.items.language_column "Language">
-<!ENTITY zotero.items.accessDate_column "Accessed">
-<!ENTITY zotero.items.callNumber_column "Call Number">
-<!ENTITY zotero.items.repository_column "Repository">
+<!ENTITY zotero.items.date_column "Data">
+<!ENTITY zotero.items.year_column "Ano">
+<!ENTITY zotero.items.publisher_column "Editor">
+<!ENTITY zotero.items.publication_column "Publicação">
+<!ENTITY zotero.items.journalAbbr_column "Periódico">
+<!ENTITY zotero.items.language_column "Idioma">
+<!ENTITY zotero.items.accessDate_column "Accesso em">
+<!ENTITY zotero.items.callNumber_column "Núm. chamada">
+<!ENTITY zotero.items.repository_column "Repositório">
 <!ENTITY zotero.items.rights_column "Direitos">
-<!ENTITY zotero.items.dateAdded_column "Data de adição">
-<!ENTITY zotero.items.dateModified_column "Data de modificação">
+<!ENTITY zotero.items.dateAdded_column "Adição em">
+<!ENTITY zotero.items.dateModified_column "Modificação em">
 <!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Mostrar na biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Adicionar nota">
-<!ENTITY zotero.items.menu.attach "Add Attachment">
+<!ENTITY zotero.items.menu.attach "Adicionar anexo">
 <!ENTITY zotero.items.menu.attach.snapshot "Anexar imagem de página corrente">
 <!ENTITY zotero.items.menu.attach.link "Anexar link para página corrente">
-<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
-<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+<!ENTITY zotero.items.menu.attach.file "Anexar cópia armazenada de arquivo...">
+<!ENTITY zotero.items.menu.attach.fileLink "Anexar link para arquivo...">
 
 <!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
 
@@ -108,6 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Não mostrar tags">
 <!ENTITY zotero.tagSelector.filter "Filtro:">
 <!ENTITY zotero.tagSelector.showAutomatic "Show automatic">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.selectVisible "Marcar visíveis">
 <!ENTITY zotero.tagSelector.clearVisible "Desmarcar visíveis">
 <!ENTITY zotero.tagSelector.clearAll "Desmarcar tudo">
@@ -174,21 +175,21 @@
 
 <!ENTITY zotero.integration.references.label "References in Bibliography">
 
-<!ENTITY zotero.sync.button "Sync with Zotero Server">
-<!ENTITY zotero.sync.error "Sync Error">
+<!ENTITY zotero.sync.button "Sincronizar com o servidor Zotero">
+<!ENTITY zotero.sync.error "Erro de sincronização">
 <!ENTITY zotero.sync.storage.progress "Progress:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
-<!ENTITY zotero.sync.longTagFixer.split "Split">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
-<!ENTITY zotero.sync.longTagFixer.character "character">
-<!ENTITY zotero.sync.longTagFixer.characters "characters">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "O seguinte marcador em sua biblioteca Zotero é longo demais para ser sincronizado com o servidor:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Marcadores sincronizados devem ter menos de 256 caracteres.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Você pode dividir o marcador em marcadores múltiplos, editar o marcador manualmente para torná-lo mais curto, ou excluí-lo">
+<!ENTITY zotero.sync.longTagFixer.split "Dividir">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Dividir no">
+<!ENTITY zotero.sync.longTagFixer.character "caractere">
+<!ENTITY zotero.sync.longTagFixer.characters "caracteres">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Marcadores desmarcados não serão salvos.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "O marcador será excluído de todos os itens.">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">

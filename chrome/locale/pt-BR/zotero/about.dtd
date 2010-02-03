@@ -3,8 +3,8 @@
 <!ENTITY zotero.directors "Diretores:">
 <!ENTITY zotero.developers "Desenvolvedores:">
 <!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.about.localizations "Localizations:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
+<!ENTITY zotero.about.localizations "Traduções:">
+<!ENTITY zotero.about.additionalSoftware "Software de terceiros e Padrões:">
 <!ENTITY zotero.executiveProducer "Produtor Executivo:">
 <!ENTITY zotero.thanks "Agradecimentos especiais:">
 <!ENTITY zotero.about.close "Fechar">

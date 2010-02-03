@@ -108,6 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "无标签可显示">
 <!ENTITY zotero.tagSelector.filter "过滤:">
 <!ENTITY zotero.tagSelector.showAutomatic "自动显示">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.selectVisible "选择可见的">
 <!ENTITY zotero.tagSelector.clearVisible "取消可见的选择">
 <!ENTITY zotero.tagSelector.clearAll "取消全部选择">

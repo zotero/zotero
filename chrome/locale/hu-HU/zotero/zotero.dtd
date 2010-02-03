@@ -108,6 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Nincsenek címkék">
 <!ENTITY zotero.tagSelector.filter "Szűrő:">
 <!ENTITY zotero.tagSelector.showAutomatic "Automatikus címkék megjelenítése">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.selectVisible "Látható címkék kiválasztása">
 <!ENTITY zotero.tagSelector.clearVisible "Látható címkék kiválasztásának megszüntetése">
 <!ENTITY zotero.tagSelector.clearAll "Összes címke kiválasztásának megszüntetése">

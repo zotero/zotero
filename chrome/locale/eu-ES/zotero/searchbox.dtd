@@ -1,0 +1,23 @@
+<!ENTITY zotero.search.name "Izena:">
+
+<!ENTITY zotero.search.joinMode.prefix "Bat etortzea">
+<!ENTITY zotero.search.joinMode.any "edozein">
+<!ENTITY zotero.search.joinMode.all "guztiak">
+<!ENTITY zotero.search.joinMode.suffix "horietatik:">
+
+<!ENTITY zotero.search.recursive.label "Bilatu azpi-karpetetan">
+<!ENTITY zotero.search.noChildren "Erakutsi lehen mailako itemak baino ez">
+<!ENTITY zotero.search.includeParentsAndChildren "Erakutsi item seme eta gurasoak">
+
+<!ENTITY zotero.search.textModes.phrase "Phrase">
+<!ENTITY zotero.search.textModes.phraseBinary "Phrase (incl. binary files)">
+<!ENTITY zotero.search.textModes.regexp "Regexp">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (case-sensitive)">
+
+<!ENTITY zotero.search.date.units.days "egun">
+<!ENTITY zotero.search.date.units.months "hilabete">
+<!ENTITY zotero.search.date.units.years "urte">
+
+<!ENTITY zotero.search.search "Bilatu">
+<!ENTITY zotero.search.clear "Garbitu">
+<!ENTITY zotero.search.saveSearch "Bilaketa gorde">

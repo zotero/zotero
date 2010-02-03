@@ -108,6 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Geen labels om te tonen">
 <!ENTITY zotero.tagSelector.filter "Filter:">
 <!ENTITY zotero.tagSelector.showAutomatic "Automatische labels tonen">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.selectVisible "Getoonde labels selecteren">
 <!ENTITY zotero.tagSelector.clearVisible "Selectie getoonde labels ongedaan maken">
 <!ENTITY zotero.tagSelector.clearAll "Niets selecteren">

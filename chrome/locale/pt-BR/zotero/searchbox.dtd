@@ -6,18 +6,18 @@
 <!ENTITY zotero.search.joinMode.suffix "do exemplo:">
 
 <!ENTITY zotero.search.recursive.label "Pesquisar subpastas">
-<!ENTITY zotero.search.noChildren "Only show top-level items">
-<!ENTITY zotero.search.includeParentsAndChildren "Include parent and child items of matching items">
+<!ENTITY zotero.search.noChildren "Mostrar apenas itens no nível mais alto">
+<!ENTITY zotero.search.includeParentsAndChildren "Incluir itens em níveis acima e abaixo dos items localizados">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (incluindo arquivos binários)">
-<!ENTITY zotero.search.textModes.regexp "Regexp">
-<!ENTITY zotero.search.textModes.regexpCS "Regexp (case-sensitive)">
+<!ENTITY zotero.search.textModes.regexp "Expressão regular">
+<!ENTITY zotero.search.textModes.regexpCS "Expressão regular (diferenciando maiúsculas e minúsculas)">
 
 <!ENTITY zotero.search.date.units.days "dias">
 <!ENTITY zotero.search.date.units.months "meses">
 <!ENTITY zotero.search.date.units.years "anos">
 
-<!ENTITY zotero.search.search "Search">
-<!ENTITY zotero.search.clear "Clear">
-<!ENTITY zotero.search.saveSearch "Save Search">
+<!ENTITY zotero.search.search "Pesquisar">
+<!ENTITY zotero.search.clear "Limpar">
+<!ENTITY zotero.search.saveSearch "Salvar pesquisa">
