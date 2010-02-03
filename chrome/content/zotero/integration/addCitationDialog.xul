@@ -199,5 +199,7 @@
 		</vbox>
 		
 		<textbox id="editor" type="styled" mode="integration" hidden="true" flex="1"/>
+		<!-- TODO: localize -->
+		<description id="zotero-editor-warning" style="margin: 9px 1px 0" hidden="true">Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.</description>
 	</vbox>
 </dialog>

@@ -339,7 +339,9 @@ var Zotero_Citation_Dialog = new function () {
 	 * Shows the edit pane
 	 */
 	function toggleEditor(text) {
+		var warning = document.getElementById('zotero-editor-warning');
 		var editor = document.getElementById('editor');
+		warning.hidden = _previewShown;
 		editor.hidden = _previewShown;
 		_previewShown = !_previewShown;
 		
