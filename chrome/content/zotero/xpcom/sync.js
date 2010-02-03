@@ -1133,7 +1133,7 @@ Zotero.Sync.Server = new function () {
 	this.canAutoResetClient = true;
 	this.manualSyncRequired = false;
 	this.nextLocalSyncDate = false;
-	this.apiVersion = 7;
+	this.apiVersion = 8;
 	
 	default xml namespace = '';
 	
@@ -2450,7 +2450,8 @@ Zotero.Sync.Server.Data = new function() {
 									continue;
 									
 								case 'item':
-									var diff = obj.diff(remoteObj, false, ["dateModified"]);
+									var diff = obj.diff(remoteObj, false, ["dateAdded", "dateModified"]);
+									Zotero.debug('Diff:');
 									Zotero.debug(diff);
 									if (!diff) {
 										// Check if creators changed
@@ -2655,6 +2656,11 @@ Zotero.Sync.Server.Data = new function() {
 							var mtime = xmlNode.@storageModTime.toString();
 							if (mtime) {
 								var lk = Zotero.Items.getLibraryKeyHash(obj)
+								// Convert previously used Unix timestamps to ms-based timestamps
+								if (mtime < 10000000000) {
+									Zotero.debug("Converting Unix timestamp '" + mtime + "' to milliseconds");
+									mtime = mtime * 1000;
+								}
 								itemStorageModTimes[lk] = parseInt(mtime);
 							}
 						}

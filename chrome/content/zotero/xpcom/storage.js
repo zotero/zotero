@@ -218,7 +218,7 @@ Zotero.Sync.Storage = new function () {
 	
 	/**
 	 * @param	{Integer}			itemID
-	 * @return	{Integer|NULL}					Mod time as Unix timestamp,
+	 * @return	{Integer|NULL}					Mod time as timestamp in ms,
 	 *												or NULL if never synced
 	 */
 	this.getSyncedModificationTime = function (itemID) {
@@ -235,7 +235,7 @@ Zotero.Sync.Storage = new function () {
 	/**
 	 * @param	{Integer}	itemID
 	 * @param	{Integer}	mtime				File modification time as
-	 *												Unix timestamp
+	 *												timestamp in ms
 	 * @param	{Boolean}	[updateItem=FALSE]	Update dateModified field of
 	 *												attachment item
 	 */
@@ -459,10 +459,10 @@ Zotero.Sync.Storage = new function () {
 				continue;
 			}
 			
-			var fileModTime = Math.round(file.lastModifiedTime / 1000);
+			var fmtime = file.lastModifiedTime;
 			
 			//Zotero.debug("Stored mtime is " + attachmentData[item.id].mtime);
-			//Zotero.debug("File mtime is " + fileModTime);
+			//Zotero.debug("File mtime is " + fmtime);
 			
 			// Download-marking mode
 			if (itemModTimes) {
@@ -481,8 +481,29 @@ Zotero.Sync.Storage = new function () {
 				continue;
 			}
 			
+			var mtime = attachmentData[item.id].mtime;
+			
 			// If stored time matches file, it hasn't changed
-			if (attachmentData[item.id].mtime == fileModTime) {
+			if (mtime == fmtime) {
+				continue;
+			}
+			
+			// Allow floored timestamps for filesystems that don't support
+			// millisecond precision (e.g., HFS+)
+			if (Math.floor(mtime / 1000) * 1000 == fmtime || Math.floor(fmtime / 1000) * 1000 == mtime) {
+				Zotero.debug("File mod times are within one-second precision (" + fmtime + " ≅ " + mtime + ") "
+					+ "for " + file.leafName + " -- ignoring");
+				continue;
+			}
+			
+			// Allow timestamp to be exactly one hour off to get around
+			// time zone issues -- there may be a proper way to fix this
+			if (Math.abs(fmtime - mtime) == 3600000
+					// And check with one-second precision as well
+					|| Math.abs(fmtime - Math.floor(mtime / 1000) * 1000) == 3600000
+					|| Math.abs(Math.floor(fmtime / 1000) * 1000 - mtime) == 3600000) {
+				Zotero.debug("File mod time (" + fmtime + ") is exactly one hour off remote file (" + mtime + ") "
+					+ "-- assuming time zone issue and skipping upload");
 				continue;
 			}
 			
@@ -501,13 +522,13 @@ Zotero.Sync.Storage = new function () {
 			}
 			var fileHash = item.attachmentHash;
 			if (attachmentData[item.id].hash && attachmentData[item.id].hash == fileHash) {
-				Zotero.debug("Mod time didn't match (" + fileModTime + "!=" + attachmentData[item.id].mtime + ") "
+				Zotero.debug("Mod time didn't match (" + fmtime + "!=" + mtime + ") "
 					+ "but hash did for " + file.leafName + " -- ignoring");
 				continue;
 			}
 			
 			Zotero.debug("Marking attachment " + item.id + " as changed ("
-				+ attachmentData[item.id].mtime + " != " + fileModTime + ")");
+				+ mtime + " != " + fmtime + ")");
 			updatedStates[item.id] = Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD;
 		}
 		
@@ -603,7 +624,7 @@ Zotero.Sync.Storage = new function () {
 		}
 		
 		if (!data.compressed && !data.syncHash) {
-			_error("|data.storageHash| is required if  |data.compressed| is false in " + funcName);
+			_error("|data.syncHash| is required if  |data.compressed| is false in " + funcName);
 		}
 		
 		var item = data.item;
@@ -658,12 +679,12 @@ Zotero.Sync.Storage = new function () {
 			Zotero.Sync.Storage.resyncOnFinish = true;
 		}
 		else {
-			file.lastModifiedTime = syncModTime * 1000;
-			
-			// Only save hash if file isn't compressed
-			if (!data.compressed) {
-				Zotero.Sync.Storage.setSyncedHash(item.id, syncHash);
+			file.lastModifiedTime = syncModTime;
+			// If hash not provided (e.g., WebDAV), calculate it now
+			if (!syncHash) {
+				syncHash = item.attachmentHash;
 			}
+			Zotero.Sync.Storage.setSyncedHash(item.id, syncHash);
 			Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
 		}
 		
@@ -817,16 +838,8 @@ Zotero.Sync.Storage = new function () {
 			throw ("Empty path for item " + item.key + " in " + funcName);
 		}
 		
-		var itemFileName = item.getFilename();
 		var fileName = file.leafName;
 		var renamed = false;
-		
-		// If file doesn't match the known filename, use that name
-		if (itemFileName != fileName) {
-			Zotero.debug("Renaming file '" + fileName + "' to known filename '" + itemFileName + "'");
-			fileName = itemFileName;
-			renamed = true;
-		}
 		
 		// Make sure the new filename is valid, in case an invalid character made it over
 		// (e.g., from before we checked for them)
@@ -834,6 +847,7 @@ Zotero.Sync.Storage = new function () {
 		if (filteredName != fileName) {
 			Zotero.debug("Filtering filename '" + fileName + "' to '" + filteredName + "'");
 			fileName = filteredName;
+			file.leafName = fileName;
 			renamed = true;
 		}
 		
@@ -842,9 +856,7 @@ Zotero.Sync.Storage = new function () {
 			tempFile.moveTo(parentDir, fileName);
 		}
 		catch (e) {
-			var destFile = parentDir.clone();
-			destFile.QueryInterface(Components.interfaces.nsILocalFile);
-			destFile.setRelativeDescriptor(parentDir, fileName);
+			var destFile = file.clone();
 			
 			var windowsLength = false;
 			var nameLength = false;
@@ -910,10 +922,7 @@ Zotero.Sync.Storage = new function () {
 		var returnFile = null;
 		// processDownload() needs to know that we're renaming the file
 		if (renamed) {
-			destFile = parentDir.clone();
-			destFile.QueryInterface(Components.interfaces.nsILocalFile);
-			destFile.setRelativeDescriptor(parentDir, fileName);
-			returnFile = destFile;
+			var returnFile = file.clone();
 		}
 		
 		return returnFile;
@@ -966,7 +975,6 @@ Zotero.Sync.Storage = new function () {
 		
 		var entries = zipReader.findEntries(null);
 		while (entries.hasMore()) {
-			var renamed = false;
 			count++;
 			var entryName = entries.getNext();
 			var b64re = /%ZB64$/;
@@ -984,35 +992,54 @@ Zotero.Sync.Storage = new function () {
 				continue;
 			}
 			
+			Zotero.debug("Extracting " + fileName);
+			
+			var primaryFile = false;
+			var filtered = false;
+			var renamed = false;
+			
+			// Get the old filename
 			var itemFileName = item.getFilename();
+			
+			// Make sure the new filename is valid, in case an invalid character
+			// somehow make it into the ZIP (e.g., from before we checked for them)
+			//
+			// Do this before trying to use the relative descriptor, since otherwise
+			// it might fail silently and select the parent directory
+			var filteredName = Zotero.File.getValidFileName(fileName);
+			if (filteredName != fileName) {
+				Zotero.debug("Filtering filename '" + fileName + "' to '" + filteredName + "'");
+				fileName = filteredName;
+				filtered = true;
+			}
+			
+			// Name in ZIP is a relative descriptor, so file has to be reconstructed
+			// using setRelativeDescriptor()
+			var destFile = parentDir.clone();
+			destFile.QueryInterface(Components.interfaces.nsILocalFile);
+			destFile.setRelativeDescriptor(parentDir, fileName);
+			
+			fileName = destFile.leafName;
 			
 			// If only one file in zip and it doesn't match the known filename,
 			// take our chances and use that name
 			if (count == 1 && !entries.hasMore()) {
+				// May not be necessary, but let's be safe
+				itemFileName = Zotero.File.getValidFileName(itemFileName);
 				if (itemFileName != fileName) {
-					Zotero.debug("Renaming single file '" + fileName + "' in ZIP to known filename '" + itemFileName + "'");
+					Zotero.debug("Renaming single file '" + fileName + "' in ZIP to known filename '" + itemFileName + "'", 2);
+					Components.utils.reportError("Renaming single file '" + fileName + "' in ZIP to known filename '" + itemFileName + "'");
 					fileName = itemFileName;
+					destFile.leafName = fileName;
 					renamed = true;
 				}
 			}
 			
 			var primaryFile = itemFileName == fileName;
-			
-			// Make sure the new filename is valid, in case an invalid character
-			// somehow make it into the ZIP (e.g., from before we checked for them)
-			var filteredName = Zotero.File.getValidFileName(fileName);
-			if (filteredName != fileName) {
-				Zotero.debug("Filtering filename '" + fileName + "' to '" + filteredName + "'");
-				fileName = filteredName;
-				if (primaryFile) {
-					renamed = true;
-				}
+			if (primaryFile && filtered) {
+				renamed = true;
 			}
 			
-			Zotero.debug("Extracting " + fileName);
-			var destFile = parentDir.clone();
-			destFile.QueryInterface(Components.interfaces.nsILocalFile);
-			destFile.setRelativeDescriptor(parentDir, fileName);
 			if (destFile.exists()) {
 				var msg = "ZIP entry '" + fileName + "' " + "already exists";
 				Zotero.debug(msg, 2);
@@ -1680,10 +1707,10 @@ Zotero.Sync.Storage.QueueManager = new function () {
 			var item = Zotero.Sync.Storage.getItemFromRequestName(conflict.name);
 			var item1 = item.clone(false, false, true);
 			item1.setField('dateModified',
-				Zotero.Date.dateToSQL(new Date(conflict.localData.modTime * 1000), true));
+				Zotero.Date.dateToSQL(new Date(conflict.localData.modTime), true));
 			var item2 = item.clone(false, false, true);
 			item2.setField('dateModified',
-				Zotero.Date.dateToSQL(new Date(conflict.remoteData.modTime * 1000), true));
+				Zotero.Date.dateToSQL(new Date(conflict.remoteData.modTime), true));
 			objectPairs.push([item1, item2]);
 		}
 		

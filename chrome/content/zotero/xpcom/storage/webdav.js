@@ -241,27 +241,52 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._getStorageModificationTime = funct
 			var xml = new XML(req.responseText);
 		}
 		catch (e) {
+			Zotero.debug(e);
 			var xml = null;
 		}
-		if (xml && xml.childNodes.length()) {
+		
+		if (xml) {
+			Zotero.debug(xml.children().length());
+		}
+		
+		if (xml && xml.children().length()) {
 			// TODO: other stuff, but this makes us forward-compatible
 			mtime = xml.mtime.toString();
+			var seconds = false;
 		}
 		else {
 			mtime = req.responseText;
+			var seconds = true;
+		}
+		
+		var invalid = false;
+		
+		// Unix timestamps need to be converted to ms-based timestamps
+		if (seconds) {
+			if (mtime.match(/^[0-9]{1,10}$/)) {
+				Zotero.debug("Converting Unix timestamp '" + mtime + "' to milliseconds");
+				mtime = mtime * 1000;
+			}
+			else {
+				invalid = true;
+			}
+		}
+		else if (!mtime.match(/^[0-9]{1,13}$/)) {
+			invalid = true;
 		}
 		
 		// Delete invalid .prop files
-		if (!(mtime + '').match(/^[0-9]{10}$/)) {
-			var msg = "Invalid mod date '" + Zotero.Utilities.prototype.ellipsize(mtime, 20)
-				+ "' for item " + Zotero.Items.getLibraryKeyHash(item) + " in " + funcName;
+		if (invalid) {
+			var msg = "An error occurred during file syncing. Try the sync again.\n\n"
+				+ "Invalid mod date '" + Zotero.Utilities.prototype.ellipsize(mtime, 20)
+				+ "' for item " + Zotero.Items.getLibraryKeyHash(item);
 			Zotero.debug(msg, 1);
 			self._deleteStorageFiles([item.key + ".prop"], null, self);
 			self.onError(msg);
 			return;
 		}
 		
-		var mdate = new Date(mtime * 1000);
+		var mdate = new Date(parseInt(mtime));
 		callback(item, mdate);
 	});
 }
@@ -271,12 +296,20 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._getStorageModificationTime = funct
  * Set mod time of file on storage server
  *
  * @param	{Zotero.Item}	item
- * @param	{Function}		callback		Callback f(item, mtime)
+ * @param	{Function}		callback		Callback f(item, props)
  */
 Zotero.Sync.Storage.Session.WebDAV.prototype._setStorageModificationTime = function (item, callback) {
 	var uri = this._getItemPropertyURI(item);
 	
-	Zotero.Utilities.HTTP.WebDAV.doPut(uri, item.attachmentModificationTime + '', function (req) {
+	var mtime = item.attachmentModificationTime;
+	var hash = item.attachmentHash;
+	
+	var prop = <properties version="1">
+		<mtime>{mtime}</mtime>
+		<hash>{hash}</hash>
+	</properties>;
+	
+	Zotero.Utilities.HTTP.WebDAV.doPut(uri, prop.toXMLString(), function (req) {
 		switch (req.status) {
 			case 200:
 			case 201:
@@ -288,7 +321,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._setStorageModificationTime = funct
 				throw ("Unexpected status code " + req.status + " in "
 					+ "Zotero.Sync.Storage._setStorageModificationTime()");
 		}
-		callback(item, item.attachmentModificationTime);
+		callback(item, { mtime: mtime, hash: hash });
 	});
 }
 
@@ -324,12 +357,11 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.downloadFile = function (request) {
 		}
 		
 		try {
-			var syncModTime = Zotero.Date.toUnixTimestamp(mdate);
+			var syncModTime = mdate.getTime();
 			
 			// Skip download if local file exists and matches mod time
 			var file = item.getFile();
-			if (file && file.exists()
-					&& syncModTime == Math.round(file.lastModifiedTime / 1000)) {
+			if (file && file.exists() && syncModTime == file.lastModifiedTime) {
 				Zotero.debug("File mod time matches remote file -- skipping download");
 				
 				Zotero.DB.beginTransaction();
@@ -461,21 +493,35 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._processUploadFile = function (data
 					!= Zotero.Sync.Storage.SYNC_STATE_FORCE_UPLOAD) {
 				if (mdate) {
 					// Remote prop time
-					var mtime = Zotero.Date.toUnixTimestamp(mdate);
+					var mtime = mdate.getTime();
+					
 					// Local file time
 					var fmtime = item.attachmentModificationTime;
 					
+					var same = false;
+					if (fmtime == mtime) {
+						same = true;
+						Zotero.debug("File mod time matches remote file -- skipping upload");
+					}
+					// Allow floored timestamps for filesystems that don't support
+					// millisecond precision (e.g., HFS+)
+					else if (Math.floor(mtime / 1000) * 1000 == fmtime || Math.floor(fmtime / 1000) * 1000 == mtime) {
+						same = true;
+						Zotero.debug("File mod times are within one-second precision (" + fmtime + " ≅ " + mtime + ") "
+							+ "-- skipping upload");
+					}
 					// Allow timestamp to be exactly one hour off to get around
 					// time zone issues -- there may be a proper way to fix this
-					if (fmtime == mtime || Math.abs(fmtime - mtime) == 3600) {
-						if (fmtime == mtime) {
-							Zotero.debug("File mod time matches remote file -- skipping upload");
-						}
-						else {
-							Zotero.debug("File mod time (" + fmtime + ") is exactly one hour off remote file (" + mtime + ") "
-								+ "-- assuming time zone issue and skipping upload");
-						}
-						
+					else if (Math.abs(fmtime - mtime) == 3600000
+							// And check with one-second precision as well
+							|| Math.abs(fmtime - Math.floor(mtime / 1000) * 1000) == 3600000
+							|| Math.abs(Math.floor(fmtime / 1000) * 1000 - mtime) == 3600000) {
+						same = true;
+						Zotero.debug("File mod time (" + fmtime + ") is exactly one hour off remote file (" + mtime + ") "
+							+ "-- assuming time zone issue and skipping upload");
+					}
+					
+					if (same) {
 						Zotero.DB.beginTransaction();
 						var syncState = Zotero.Sync.Storage.getSyncState(item.id);
 						Zotero.Sync.Storage.setSyncedModificationTime(item.id, fmtime, true);
@@ -592,7 +638,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._onUploadComplete = function (httpR
 	
 	var self = this;
 	
-	this._setStorageModificationTime(item, function (item, mtime) {
+	this._setStorageModificationTime(item, function (item, props) {
 		if (!request.isRunning()) {
 			Zotero.debug("Upload request '" + request.name
 				+ "' is no longer running after getting mod time");
@@ -602,10 +648,8 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._onUploadComplete = function (httpR
 		Zotero.DB.beginTransaction();
 		
 		Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
-		Zotero.Sync.Storage.setSyncedModificationTime(item.id, mtime, true);
-		
-		var hash = item.attachmentHash;
-		Zotero.Sync.Storage.setSyncedHash(item.id, hash);
+		Zotero.Sync.Storage.setSyncedModificationTime(item.id, props.mtime, true);
+		Zotero.Sync.Storage.setSyncedHash(item.id, props.hash);
 		
 		Zotero.DB.commitTransaction();
 		
