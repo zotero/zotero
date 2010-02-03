@@ -108,7 +108,6 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Žádné štítky k zobrazení">
 <!ENTITY zotero.tagSelector.filter "Filtr:">
 <!ENTITY zotero.tagSelector.showAutomatic "Ukazovat automatické">
-<!ENTITY zotero.tagSelector.displayAll "Zobrazit všechny štítky">
 <!ENTITY zotero.tagSelector.selectVisible "Vybrat viditelné">
 <!ENTITY zotero.tagSelector.clearVisible "Zrušit výběr viditelných">
 <!ENTITY zotero.tagSelector.clearAll "Zrušit výběr všech">

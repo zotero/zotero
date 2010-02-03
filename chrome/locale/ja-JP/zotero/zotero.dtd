@@ -108,7 +108,6 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "タグがありません">
 <!ENTITY zotero.tagSelector.filter "フィルター:">
 <!ENTITY zotero.tagSelector.showAutomatic "自動表示">
-<!ENTITY zotero.tagSelector.displayAll "すべてのタグを表示">
 <!ENTITY zotero.tagSelector.selectVisible "可視タグを選択">
 <!ENTITY zotero.tagSelector.clearVisible "可視タグの選択を解除">
 <!ENTITY zotero.tagSelector.clearAll "全選択の解除">

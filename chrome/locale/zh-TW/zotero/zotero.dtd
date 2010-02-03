@@ -108,7 +108,6 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "沒有標籤可顯示">
 <!ENTITY zotero.tagSelector.filter "篩選器：">
 <!ENTITY zotero.tagSelector.showAutomatic "顯示自動的">
-<!ENTITY zotero.tagSelector.displayAll "顯示所有標籤">
 <!ENTITY zotero.tagSelector.selectVisible "選取可見的">
 <!ENTITY zotero.tagSelector.clearVisible "取消可見的選取">
 <!ENTITY zotero.tagSelector.clearAll "取消全部的選取">

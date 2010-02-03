@@ -108,7 +108,6 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "لاتوجد اوسمة لعرضها">
 <!ENTITY zotero.tagSelector.filter "مرشِّح:">
 <!ENTITY zotero.tagSelector.showAutomatic "اعرض تلقائياً">
-<!ENTITY zotero.tagSelector.displayAll "اعرض جميع الأوسمة">
 <!ENTITY zotero.tagSelector.selectVisible "تحديد العناصر الظاهرة">
 <!ENTITY zotero.tagSelector.clearVisible "إلغاء تحديد العناصر الظاهرة">
 <!ENTITY zotero.tagSelector.clearAll "إلغاء تحديد الكل">
