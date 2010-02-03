@@ -1263,10 +1263,16 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 	}
 	
 	if(this.type == "web") {
-		// store repository if this item was captured from a website, and
-		// repository is truly undefined (not false or "")
-		if(!item.repository && item.repository !== false && item.repository !== "") {
-			item.repository = this.translator[0].label;
+		// store library catalog if this item was captured from a website, and
+		// libraryCatalog is truly undefined (not false or "")
+		if(typeof item.repository != 'undefined') {
+			Zotero.debug("Translate: 'repository' field is now 'libraryCatalog'; please fix your code", 2);
+			item.libraryCatalog = item.repository;
+			delete item.repository;
+		}
+		
+		if(typeof item.libraryCatalog == 'undefined') {
+			item.libraryCatalog = this.translator[0].label;
 		}
 	}
 	
