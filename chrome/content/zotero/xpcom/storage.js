@@ -50,6 +50,11 @@ Zotero.Sync.Storage = new function () {
 	this.ERROR_NOT_ALLOWED = -14;
 	this.ERROR_UNKNOWN = -15;
 	
+	// TEMP
+	// TODO: localize
+	this.defaultError = "A file sync error occurred. Please try syncing again.\n\nIf the error persists, submit an error report and post the Report ID to a new thread in the Zotero Forums (forums.zotero.org).";
+	this.defaultErrorRestart = "A file sync error occurred. Please restart Firefox and try syncing again.\n\nIf the error persists, submit an error report and post the Report ID to a new thread in the Zotero Forums (forums.zotero.org).";
+	
 	//
 	// Public properties
 	//
@@ -1447,7 +1452,12 @@ Zotero.Sync.Storage = new function () {
 		
 		Zotero.DB.rollbackAllTransactions();
 		
-		Zotero.debug(e, 1);
+		if (e) {
+			Zotero.debug(e, 1);
+		}
+		else {
+			e = Zotero.Sync.Storage.defaultError;
+		}
 		
 		// If we get a quota error, log and continue
 		if (e.error && e.error == Zotero.Error.ERROR_ZFS_OVER_QUOTA && _callbacks.onWarning) {
