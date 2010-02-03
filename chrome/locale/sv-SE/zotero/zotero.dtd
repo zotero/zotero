@@ -108,7 +108,6 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Inga etiketter att visa">
 <!ENTITY zotero.tagSelector.filter "Filter:">
 <!ENTITY zotero.tagSelector.showAutomatic "Visa automatiskt">
-<!ENTITY zotero.tagSelector.displayAll "Visa alla etiketter">
 <!ENTITY zotero.tagSelector.selectVisible "Välj synliga">
 <!ENTITY zotero.tagSelector.clearVisible "Välj bort synliga">
 <!ENTITY zotero.tagSelector.clearAll "Välj bort alla">

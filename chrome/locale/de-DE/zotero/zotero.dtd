@@ -108,7 +108,6 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Keine Tags vorhanden">
 <!ENTITY zotero.tagSelector.filter "Filter:">
 <!ENTITY zotero.tagSelector.showAutomatic "Automatisch anzeigen">
-<!ENTITY zotero.tagSelector.displayAll "Alle Tags anzeigen">
 <!ENTITY zotero.tagSelector.selectVisible "Sichtbare auswählen">
 <!ENTITY zotero.tagSelector.clearVisible "Sichtbare abwählen">
 <!ENTITY zotero.tagSelector.clearAll "Alle abwählen">

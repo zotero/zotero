@@ -108,7 +108,6 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Gösterilecek etiket yok">
 <!ENTITY zotero.tagSelector.filter "Süzgeç:">
 <!ENTITY zotero.tagSelector.showAutomatic "Otomatik göster">
-<!ENTITY zotero.tagSelector.displayAll "Tüm etiketleri göster">
 <!ENTITY zotero.tagSelector.selectVisible "Görülebiliri seçin">
 <!ENTITY zotero.tagSelector.clearVisible "Görülebiliri seçme">
 <!ENTITY zotero.tagSelector.clearAll "Hiçbirini seçme">

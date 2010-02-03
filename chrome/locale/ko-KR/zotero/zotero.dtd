@@ -108,7 +108,6 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "표시할 태그가 없음">
 <!ENTITY zotero.tagSelector.filter "필터:">
 <!ENTITY zotero.tagSelector.showAutomatic "자동 표시">
-<!ENTITY zotero.tagSelector.displayAll "모든 태그 표시">
 <!ENTITY zotero.tagSelector.selectVisible "보이는 것들 선택">
 <!ENTITY zotero.tagSelector.clearVisible "보이는 것들 선택 해제">
 <!ENTITY zotero.tagSelector.clearAll "선택 모두 해제">

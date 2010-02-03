@@ -108,7 +108,6 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Нема ознаке за приказ">
 <!ENTITY zotero.tagSelector.filter "Филтер:">
 <!ENTITY zotero.tagSelector.showAutomatic "Аутоматски прикажи">
-<!ENTITY zotero.tagSelector.displayAll "Прикажи све ознаке">
 <!ENTITY zotero.tagSelector.selectVisible "Изабери видљиве">
 <!ENTITY zotero.tagSelector.clearVisible "Избаци из избора видљиве">
 <!ENTITY zotero.tagSelector.clearAll "Избаци из избора све">
