@@ -985,7 +985,7 @@ Zotero.CSL.prototype._processElements = function(item, element, formattedString,
 									}
 								} else if(part == "day") {
 									string = string.toString();
-									if(form == "numeric-leading-zeros"
+									if(newForm == "numeric-leading-zeros"
 											&& string.length() == 1) {
 										string = "0" + string;
 									} else if (newForm == "ordinal") {
