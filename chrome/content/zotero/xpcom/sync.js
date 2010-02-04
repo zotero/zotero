@@ -2581,8 +2581,9 @@ Zotero.Sync.Server.Data = new function() {
 								break;
 							
 							default:
-								alert('Delete reconciliation unimplemented for ' + types);
-								throw ('Delete reconciliation unimplemented for ' + types);
+								var msg = 'Cannot reconcile delete conflict for ' + type;
+								var e = new Zotero.Error(msg, "FULL_SYNC_REQUIRED");
+								throw (e);
 						}
 					}
 				}
