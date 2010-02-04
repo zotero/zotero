@@ -197,12 +197,10 @@ var ZoteroPane = new function()
 		// Hide sync debugging menu by default
 		if (Zotero.Prefs.get('sync.debugMenu')) {
 			var sep = document.getElementById('zotero-tb-actions-sync-separator');
-			var menuitems = [];
+			sep.hidden = false;
 			sep.nextSibling.hidden = false;
 			sep.nextSibling.nextSibling.hidden = false;
 			sep.nextSibling.nextSibling.nextSibling.hidden = false;
-			sep.nextSibling.nextSibling.nextSibling.nextSibling.hidden = false;
-			sep.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.hidden = false;
 		}
 		
 		if (Zotero.Prefs.get('debugShowDuplicates')) {

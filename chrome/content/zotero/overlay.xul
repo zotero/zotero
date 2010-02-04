@@ -160,15 +160,10 @@
 								<menuitem id="zotero-tb-actions-timeline" label="&zotero.toolbar.timeline.label;" oncommand="Zotero_Timeline_Interface.loadTimeline()"/>
 								<!-- TODO: localize <menuitem id="zotero-tb-actions-duplicate" label="&zotero.toolbar.duplicate.label;" oncommand="ZoteroPane.showDuplicates()"/>-->
 								<menuitem id="zotero-tb-actions-showDuplicates" label="Show Duplicates" oncommand="ZoteroPane.showDuplicates()" hidden="true"/>
-								<menuseparator id="zotero-tb-actions-sync-separator"/>
-								<menuitem hidden="true" label="Sync Debugging" disabled="true"/>
-								<menuitem hidden="true" label="  Clear Server Data" oncommand="Zotero.Sync.Server.clear()"/>
-								<menuitem hidden="true" label="  Reset Server Lock" oncommand="Zotero.Sync.Server.resetServer()"/>
-								<menuitem hidden="true" label="  Reset Client" oncommand="Zotero.Sync.Server.resetClient()"/>
-								<menuitem label="Storage Debugging" disabled="true"/>
-								<menuitem hidden="true" label="  Reset Storage History" oncommand="Zotero.Sync.Storage.resetAllSyncStates()"/>
-								<menuitem label="  Purge Deleted Storage Files" oncommand="Zotero.Sync.Storage.purgeDeletedStorageFiles('webdav', function(results) { Zotero.debug(results); })"/>
-								<menuitem label="  Purge Orphaned Storage Files" oncommand="Zotero.Sync.Storage.purgeOrphanedStorageFiles('webdav', function(results) { Zotero.debug(results); })"/>
+								<menuseparator hidden="true" id="zotero-tb-actions-sync-separator"/>
+								<menuitem hidden="true" label="WebDAV Sync Debugging" disabled="true"/>
+								<menuitem hidden="true" label="  Purge Deleted Storage Files" oncommand="Zotero.Sync.Storage.purgeDeletedStorageFiles('webdav', function(results) { Zotero.debug(results); })"/>
+								<menuitem hidden="true"  label="  Purge Orphaned Storage Files" oncommand="Zotero.Sync.Storage.purgeOrphanedStorageFiles('webdav', function(results) { Zotero.debug(results); })"/>
 								<menuseparator id="zotero-tb-actions-separator"/>
 								<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;"
 									oncommand="ZoteroPane.openPreferences()"/>
