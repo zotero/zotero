@@ -49,7 +49,7 @@
 <!ENTITY zotero.items.language_column "Lingua">
 <!ENTITY zotero.items.accessDate_column "Consultato">
 <!ENTITY zotero.items.callNumber_column "Segnatura">
-<!ENTITY zotero.items.repository_column "Deposito">
+<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
 <!ENTITY zotero.items.rights_column "Diritti">
 <!ENTITY zotero.items.dateAdded_column "Data di aggiunta">
 <!ENTITY zotero.items.dateModified_column "Data ultima modifica">

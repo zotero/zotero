@@ -49,7 +49,7 @@
 <!ENTITY zotero.items.language_column "언어">
 <!ENTITY zotero.items.accessDate_column "접근일">
 <!ENTITY zotero.items.callNumber_column "호출 번호">
-<!ENTITY zotero.items.repository_column "저장소">
+<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
 <!ENTITY zotero.items.rights_column "권리">
 <!ENTITY zotero.items.dateAdded_column "날짜 추가">
 <!ENTITY zotero.items.dateModified_column "날짜 변경">

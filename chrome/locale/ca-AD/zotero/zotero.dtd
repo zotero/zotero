@@ -49,7 +49,7 @@
 <!ENTITY zotero.items.language_column "Llengua">
 <!ENTITY zotero.items.accessDate_column "Accedit">
 <!ENTITY zotero.items.callNumber_column "Codi de Catàleg">
-<!ENTITY zotero.items.repository_column "Repositori">
+<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
 <!ENTITY zotero.items.rights_column "Drets">
 <!ENTITY zotero.items.dateAdded_column "Data d&apos;incorporació">
 <!ENTITY zotero.items.dateModified_column "Data de modificació">

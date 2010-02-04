@@ -130,13 +130,13 @@
 									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
 								<treecol
-									id="zotero-items-column-callNumber" hidden="true"
-									label="&zotero.items.callNumber_column;"
+									id="zotero-items-column-libraryCatalog" hidden="true"
+									label="&zotero.items.libraryCatalog_column;"
 									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
 								<treecol
-									id="zotero-items-column-repository" hidden="true"
-									label="&zotero.items.repository_column;"
+									id="zotero-items-column-callNumber" hidden="true"
+									label="&zotero.items.callNumber_column;"
 									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
 								<treecol

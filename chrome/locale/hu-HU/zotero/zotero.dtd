@@ -49,7 +49,7 @@
 <!ENTITY zotero.items.language_column "Nyelv">
 <!ENTITY zotero.items.accessDate_column "Hozzáférés dátuma">
 <!ENTITY zotero.items.callNumber_column "Raktári jelzet">
-<!ENTITY zotero.items.repository_column "Gyűjtemény">
+<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
 <!ENTITY zotero.items.rights_column "Jogok">
 <!ENTITY zotero.items.dateAdded_column "Hozzáadás dátuma">
 <!ENTITY zotero.items.dateModified_column "Módosítás dátuma">

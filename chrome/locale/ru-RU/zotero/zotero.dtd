@@ -49,7 +49,7 @@
 <!ENTITY zotero.items.language_column "Язык">
 <!ENTITY zotero.items.accessDate_column "Дата доступа">
 <!ENTITY zotero.items.callNumber_column "Шифр">
-<!ENTITY zotero.items.repository_column "Хранилище">
+<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
 <!ENTITY zotero.items.rights_column "Права">
 <!ENTITY zotero.items.dateAdded_column "Дата добавления">
 <!ENTITY zotero.items.dateModified_column "Дата изменения">
