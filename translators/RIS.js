@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-07-16 10:35:00"
+	"lastUpdated":"2010-02-04 02:24:27"
 }
 
 Zotero.configure("dataMode", "line");
@@ -151,7 +151,10 @@ function processTag(item, tag, value) {
 		}
 		var names = value.split(/, ?/);
 		item.creators.push({lastName:names[0], firstName:names[1], creatorType:tempType});
-	} else if(tag == "A2" || tag == "ED") {
+	} else if(tag == "ED") {
+		var names = value.split(/, ?/);
+		item.creators.push({lastName:names[0], firstName:names[1], creatorType:"editor"});
+	} else if(tag == "A2") {
 		// contributing author (patent: assignee)
 		if (item.itemType == "patent") {
 			if (item.assignee) {
@@ -422,6 +425,8 @@ function doExport() {
 			// authors and inventors are primary creators
 			if (item.creators[j].creatorType == "author" || item.creators[j].creatorType == "inventor") {
 				risTag = "A1";
+			} else if (item.creators[j].creatorType == "editor") {
+				risTag = "ED";
 			} else {
 				risTag = "A2";
 			}
