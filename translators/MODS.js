@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":50,
 	"inRepository":true,
-	"lastUpdated":"2009-07-04 05:00:00"
+	"lastUpdated":"2010-02-04 02:38:25"
 }
 
 Zotero.addOption("exportNotes", true);
@@ -16,6 +16,9 @@ Zotero.configure("dataMode", "xml/e4x");
 
 function detectImport() {
 	var name = Zotero.getXML().name();
+	if (!name) {
+		return false;
+	}
 	return name.uri == "http://www.loc.gov/mods/v3" && (name.localName == "modsCollection" || name.localName == "mods");
 }
 
