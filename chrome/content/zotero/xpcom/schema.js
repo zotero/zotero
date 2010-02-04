@@ -2798,6 +2798,10 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE itemData SET fieldID=123 WHERE fieldID=62 AND itemID IN (SELECT itemID FROM items WHERE itemTypeID IN (SELECT itemTypeID FROM itemTypeFields WHERE fieldID=19) AND itemTypeID NOT IN (2,3,4,5,6,7))");
 				}
 				
+				if (i==73) {
+					Zotero.DB.query("UPDATE savedSearchConditions SET condition='libraryCatalog' WHERE condition='repository'");
+				}
+				
 				Zotero.wait();
 			}
 			
