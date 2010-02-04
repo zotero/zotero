@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-01-27 11:50:00"
+	"lastUpdated":"2010-02-04 02:00:00"
 }
 
 function detectImport() {
