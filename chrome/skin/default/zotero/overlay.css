@@ -212,15 +212,20 @@
 	font-weight: bold;
 }
 
-#zotero-tb-sync-warning
+#zotero-tb-sync-warning, #zotero-tb-sync-warning[mode=warning]
 {
 	list-style-image: url(chrome://zotero/skin/error.png);
 	margin-right: -5px;
 }
 
-#zotero-tb-sync-warning[error=true]
+#zotero-tb-sync-warning[mode=error]
 {
 	list-style-image: url(chrome://zotero/skin/exclamation.png);
+}
+
+#zotero-tb-sync-warning[mode=upgrade]
+{
+	list-style-image: url(chrome://zotero/skin/bell_error.png);
 }
 
 #zotero-tb-sync {

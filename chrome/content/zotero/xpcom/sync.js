@@ -785,9 +785,15 @@ Zotero.Sync.Runner = new function () {
 		if (status == 'warning' || status == 'error') {
 			icon.setAttribute('status', '');
 			warning.hidden = false;
-			warning.setAttribute('mode', status);
-			warning.setAttribute('error', status == 'error');
-			warning.tooltipText = "A sync error occurred. Click to view details.";
+			if (Zotero.Sync.Server.upgradeRequired) {
+				Zotero.Sync.Server.upgradeRequired = false;
+				warning.setAttribute('mode', 'upgrade');
+				buttonText = null;
+			}
+			else {
+				warning.setAttribute('mode', status);
+			}
+			warning.tooltipText = message;
 			warning.onclick = function () {
 				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 							.getService(Components.interfaces.nsIWindowMediator);
@@ -1132,6 +1138,7 @@ Zotero.Sync.Server = new function () {
 	
 	this.canAutoResetClient = true;
 	this.manualSyncRequired = false;
+	this.upgradeRequired = false;
 	this.nextLocalSyncDate = false;
 	this.apiVersion = 8;
 	
@@ -1822,6 +1829,10 @@ Zotero.Sync.Server = new function () {
 							}, 1);
 						}
 					}
+					break;
+				
+				case 'UPGRADE_REQUIRED':
+					Zotero.Sync.Server.upgradeRequired = true;
 					break;
 			}
 		}
