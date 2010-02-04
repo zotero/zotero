@@ -49,7 +49,7 @@
 <!ENTITY zotero.items.language_column "Језик">
 <!ENTITY zotero.items.accessDate_column "Приступљено">
 <!ENTITY zotero.items.callNumber_column "Сигнатура">
-<!ENTITY zotero.items.repository_column "Ризница">
+<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
 <!ENTITY zotero.items.rights_column "Права">
 <!ENTITY zotero.items.dateAdded_column "Датум додавања">
 <!ENTITY zotero.items.dateModified_column "Датум промене">
