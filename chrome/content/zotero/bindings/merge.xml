@@ -92,7 +92,7 @@
 						// TODO: Make sure object is the correct type
 						
 						// Check for note or attachment if not already set
-						if (this._leftpane.ref == 'deleted' && this.type == 'item') {
+						if (this._leftpane.ref == 'deleted' && val instanceof Zotero.Item) {
 							this.type = this._getTypeFromItem(val);
 						}
 						

@@ -3667,6 +3667,7 @@ Zotero.Item.prototype.clone = function(includePrimary, newItem, unsaved) {
 	
 	Zotero.DB.beginTransaction();
 	
+	// TODO: get rid of serialize() call
 	var obj = this.serialize();
 	
 	var itemTypeID = this.itemTypeID;
@@ -4146,7 +4147,7 @@ Zotero.Item.prototype.serialize = function(mode) {
 		if (!this._primaryDataLoaded) {
 			this.loadPrimaryData(true);
 		}
-		if (!this._itemDataLoaded) {
+		if (!this._itemDataLoaded && this.id) {
 			this._loadItemData();
 		}
 	}
