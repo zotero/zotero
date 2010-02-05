@@ -711,8 +711,8 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.getLastSyncTime = function (callbac
 			self._checkResponse(req, self);
 			
 			if (req.status != 200) {
-				var msg = "Unexpected status code " + req.status + " caching "
-					+ "authentication credentials in Zotero.Sync.Storage.Session.WebDAV.getLastSyncTime()";
+				var msg = "Unexpected status code " + req.status + " for OPTIONS request "
+					+ "in Zotero.Sync.Storage.Session.WebDAV.getLastSyncTime()";
 				Zotero.debug(msg, 1);
 				Components.utils.reportError(msg);
 				self.onError(Zotero.Sync.Storage.Session.WebDAV.prototype.defaultErrorRestart);
@@ -742,8 +742,8 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.getLastSyncTime = function (callbac
 				}
 				
 				if (req.status != 200 && req.status != 404) {
-					var msg = "Unexpected status code " + req.status + " getting "
-						+ "last file sync time";
+					var msg = "Unexpected status code " + req.status + " for HEAD request "
+						+ "in Zotero.Sync.Storage.Session.WebDAV.getLastSyncTime()";
 					Zotero.debug(msg, 1);
 					Components.utils.reportError(msg);
 					self.onError();
