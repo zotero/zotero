@@ -321,7 +321,11 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 		var uBound = medianLength + 4;
 		var lBound = medianLength - 4;
 		for (var i=0; i<lineLengthsLength; i++) {
-			if(lineLengths[i] > lBound && lineLengths[i] < uBound) this._goodLines.push(lines[i]);
+			if(lineLengths[i] > lBound && lineLengths[i] < uBound) {
+				// Strip quotation marks so they don't mess up search query quoting
+				var line = lines[i].replace('"', '');
+				this._goodLines.push(line);
+			}
 		}
 		
 		this._startLine = this._iteration = 0;
