@@ -580,6 +580,7 @@ __Serializer.prototype.statementsToXML = function(sts) {
     	var type = null;
     	
         var results = []
+        Zotero.debug(sz.toStr(subject));
         var sts = subjects[sz.toStr(subject)]; // relevant statements
         sts.sort();
         for (var i=0; i<sts.length; i++) {
@@ -604,9 +605,14 @@ __Serializer.prototype.statementsToXML = function(sts) {
             	
 				switch (st.object.termType) {
 					case 'bnode':
-						results = results.concat(['<'+qname(st.predicate)+'>', 
-							subjectXMLTree(st.object, subjects, true),
-							'</'+qname(st.predicate)+'>']);
+						if(sz.incoming[st.object].length == 1) {
+							results = results.concat(['<'+qname(st.predicate)+'>', 
+								subjectXMLTree(st.object, subjects, true),
+								'</'+qname(st.predicate)+'>']);
+						} else {
+							results = results.concat(['<'+qname(st.predicate)+' rdf:nodeID="'
+								+st.object.toNT().slice(2)+'"/>']);
+						}
 						break;
 					case 'symbol':
 						results = results.concat(['<'+qname(st.predicate)+' rdf:resource="'
@@ -636,7 +642,7 @@ __Serializer.prototype.statementsToXML = function(sts) {
         attrs = '';
         if (subject.termType == 'bnode') {
             if(!referenced || sz.incoming[subject].length != 1) { // not an anonymous bnode
-                attrs = ' rdf:ID="'+subject.toNT().slice(2)+'"';
+                attrs = ' rdf:nodeID="'+subject.toNT().slice(2)+'"';
             }
         } else {
             attrs = ' rdf:about="'+ relURI(subject)+'"';

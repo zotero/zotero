@@ -687,7 +687,7 @@ Zotero.Translate.prototype._loadTranslator = function() {
 	
 	// parse detect code for the translator
 	if(!this._parseCode(this.translator[0])) {
-		this._translationComplete(false);
+		this._translationComplete(false, "parse error");
 		return false;
 	}
 	
@@ -1148,7 +1148,7 @@ Zotero.Translate.prototype._reportTranslationFailure = function(errorData) {
 Zotero.Translate.prototype._closeStreams = function() {
 	// serialize RDF and unregister dataSource
 	if(this._rdf) {
-		if(this.type == "export" && this._streams.length) {
+		if(this.type == "export") {
 			// initialize serializer and add prefixes
 			var serializer = Serializer();
 			for(var prefix in this._rdf.namespaces) {
@@ -1162,12 +1162,17 @@ Zotero.Translate.prototype._closeStreams = function() {
 				var output = serializer.statementsToXML(this._rdf.statements);
 			}
 			
-			// write serialized data to file
-			var intlStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
-								   .createInstance(Components.interfaces.nsIConverterOutputStream);
-			intlStream.init(this._streams[0], "UTF-8", 4096, "?".charCodeAt(0));
-			this._streams.push(intlStream);
-			intlStream.writeString(output);
+			if(this._streams.length) {
+				Zotero.debug("writing to stream");
+				// write serialized data to file
+				var intlStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
+									   .createInstance(Components.interfaces.nsIConverterOutputStream);
+				intlStream.init(this._streams[0], "UTF-8", 4096, "?".charCodeAt(0));
+				this._streams.push(intlStream);
+				intlStream.writeString(output);
+			} else {
+				this.output = output;
+			}
 		}
 		
 		delete this._rdf;
@@ -1468,12 +1473,19 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 											// if field is in db
 					
 					// try to map from base field
+					Zotero.debug(Zotero.ItemFields.getFieldIDFromTypeAndBase(19, 7));
 					if(Zotero.ItemFields.isBaseField(fieldID)) {
 						var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, fieldID);
-						if(fieldID) Zotero.debug("Translate: Mapping "+field+" to "+Zotero.ItemFields.getName(fieldID), 5);
+						if(fieldID) {
+							Zotero.debug("Translate: Mapping "+field+" to "+Zotero.ItemFields.getName(fieldID), 5);
+						} else {
+						}
 					}
+					Zotero.debug(fieldID);
 					
 					// if field is valid for this type, set field
+					Zotero.debug(Zotero.ItemFields.getName(Zotero.ItemFields.getID(field)));
+					Zotero.debug("Translate: testing "+fieldID+" "+typeID);
 					if(fieldID && Zotero.ItemFields.isValidForType(fieldID, typeID)) {
 						newItem.setField(fieldID, data);
 					} else {
@@ -1889,7 +1901,7 @@ Zotero.Translate.prototype._importConfigureIO = function(charset) {
 		var sStream = null;
 		var bomLength = 0;
 		if(!charset && this._charset) charset = this._charset;
-		if(!charset || (charset && charset.length > 3 && charset.substr(0, 3) == "UTF")) {
+		if(!charset || (charset && charset.length > 3 && charset.substr(0, 3).toUpperCase() == "UTF")) {
 			// seek past BOM
 			var bomCharset = this._importGetBOM();
 			var bomLength = (bomCharset ? BOMs[bomCharset].length : 0);
@@ -2223,15 +2235,17 @@ Zotero.Translate.prototype._exportConfigureIO = function() {
 		fStream.init(this.location, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
 		// attach to stack of streams to close at the end
 		this._streams.push(fStream);
+	}
+	
+	if(this.configOptions.dataMode && (this.configOptions.dataMode == "rdf" || this.configOptions.dataMode == "rdf/n3")) {	// rdf io
+		// initialize data store
+		this._rdf = new Zotero.RDF.AJAW.RDFIndexedFormula();
 		
-		if(this.configOptions.dataMode && (this.configOptions.dataMode == "rdf" || this.configOptions.dataMode == "rdf/n3")) {	// rdf io
-			// initialize data store
-			this._rdf = new Zotero.RDF.AJAW.RDFIndexedFormula();
-			
-			// add RDF features to sandbox
-			this._sandbox.Zotero.RDF = new Zotero.Translate.RDF(this._rdf);
-		} else {
-			// regular io; write just writes to file
+		// add RDF features to sandbox
+		this._sandbox.Zotero.RDF = new Zotero.Translate.RDF(this._rdf);
+	} else {
+		// regular io; write just writes to file or string
+		if(this.location) {
 			var intlStream = null;
 			var writtenToStream = false;
 			var streamCharset = null;
@@ -2278,17 +2292,17 @@ Zotero.Translate.prototype._exportConfigureIO = function() {
 				
 				writtenToStream = true;
 			};
+		} else {
+			var me = this;
+			this.output = "";
+			
+			// dummy setCharacterSet function
+			this._sandbox.Zotero.setCharacterSet = function() {};
+			// write to string
+			this._sandbox.Zotero.write = function(data) {
+				me.output += data;
+			};
 		}
-	} else {
-		var me = this;
-		this.output = "";
-		
-		// dummy setCharacterSet function
-		this._sandbox.Zotero.setCharacterSet = function() {};
-		// write to string
-		this._sandbox.Zotero.write = function(data) {
-			me.output += data;
-		};
 	}
 }
 
@@ -2877,7 +2891,7 @@ Zotero.Translate.RDF.prototype.getArcsIn = function(resource) {
 Zotero.Translate.RDF.prototype.getArcsOut = function(resource) {
 	var statements = this._dataStore.subjectIndex[this._dataStore.canon(this._getResource(resource))];
 	if(!statements) return false;
-	return [s.predicate for each(s in statements)];
+	return [s.predicate.uri for each(s in statements)];
 }
 
 // gets source resources
@@ -2892,4 +2906,25 @@ Zotero.Translate.RDF.prototype.getTargets = function(resource, property) {
 	var statements = this._dataStore.statementsMatching(this._getResource(resource), this._getResource(property));
 	if(!statements.length) return false;
 	return [(s.object.termType == "literal" ? s.object.toString() : s.object) for each(s in statements)];
+}
+
+/**
+ * Gets statements matching a certain pattern
+ *
+ * @param	{String|Zotero.RDF.AJAW.RDFSymbol}	subj 		Subject
+ * @param	{String|Zotero.RDF.AJAW.RDFSymbol}	predicate	Predicate
+ * @param	{String|Zotero.RDF.AJAW.RDFSymbol}	obj			Object
+ * @param	{Boolean}							objLiteral	Whether the object is a literal (as
+ *															opposed to a URI)
+ * @param	{Boolean}							justOne		Whether to stop when a single result is
+ *															retrieved
+ */
+Zotero.Translate.RDF.prototype.getStatementsMatching = function(subj, pred, obj, objLiteral, justOne) {
+	var statements = this._dataStore.statementsMatching(
+		(subj ? this._getResource(subj) : undefined),
+		(pred ? this._getResource(pred) : undefined),
+		(obj ? (objLiteral ? objLiteral : this._getResource(obj)) : undefined),
+		undefined, justOne);
+	if(!statements.length) return false;
+	return [[s.subject, s.predicate, (s.object.termType == "literal" ? s.object.toString() : s.object)] for each(s in statements)];
 }
