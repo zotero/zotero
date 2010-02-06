@@ -130,22 +130,26 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getStorageFileInfo = function (item, 
 		
 		var info = {};
 		info.hash = req.getResponseHeader('ETag');
+		if (!info.hash) {
+			var msg = "Hash not found in HEAD response in " + funcName
+						+ " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
+			Zotero.debug(msg, 1);
+			Zotero.debug(req.responseText);
+			Components.utils.reportError(msg);
+			try {
+				Zotero.debug(req.getAllResponseHeaders());
+			}
+			catch (e) {
+				Zotero.debug("Response headers unavailable");
+			}
+			self.onError();
+			return;
+		}
 		info.filename = req.getResponseHeader('X-Zotero-Filename');
 		var mtime = req.getResponseHeader('X-Zotero-Modification-Time');
 		info.mtime = parseInt(mtime);
 		info.compressed = req.getResponseHeader('X-Zotero-Compressed') == 'Yes';
 		Zotero.debug(info);
-		
-		if (!info.hash) {
-			Zotero.debug('========');
-			Zotero.debug("Hash not found in HEAD response in " + funcName, 2);
-			Zotero.debug(req.status);
-			Zotero.debug(item.key);
-			Zotero.debug(req.responseText);
-			Zotero.debug(req.getAllResponseHeaders());
-			//callback(item, false);
-			//return;
-		}
 		
 		callback(item, info);
 	});
