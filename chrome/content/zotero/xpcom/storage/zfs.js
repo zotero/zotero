@@ -123,7 +123,6 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getStorageFileInfo = function (item, 
 				 		+ " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
 			Zotero.debug(msg, 1);
 			Zotero.debug(req.responseText);
-			Zotero.debug(req.getAllResponseHeaders());
 			Components.utils.reportError(msg);
 			self.onError();
 			return;
