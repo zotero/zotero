@@ -2,5 +2,5 @@
 // Zotero.RDF.AJAW namespace.
 var kb = new RDFIndexedFormula();
 var tabulator = {log:{debug:function(arg) {
-	Zotero.debug(arg);
+	Zotero.debug(arg, 4);
 }}};
