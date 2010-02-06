@@ -2048,9 +2048,27 @@ Zotero.Sync.Server = new function () {
 				
 				case Zotero.Error.ERROR_SYNC_USERNAME_NOT_SET:
 				case Zotero.Error.ERROR_INVALID_SYNC_LOGIN:
+					// TODO: the setTimeout() call below should just simulate a click on the sync error icon
+					// instead of creating its own dialog, but setSyncIcon() doesn't yet provide full control
+					// over dialog title and primary button text/action, which is why this version of the
+					// dialog is a bit uglier than the manual click version
 					if (Zotero.Sync.Runner.background) {
+						// TODO: localize and combine with below
+						var msg = "The Zotero sync server did not accept your username and password.\n\n"
+									+ "Please check that you have entered your zotero.org login information correctly in the Zotero sync preferences.";
+						e.data = {};
+						e.data.dialogText = msg;
+						e.data.dialogButtonText = Zotero.getString('sync.openSyncPreferences');
+						e.data.dialogButtonCallback = function () {
+							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+									.getService(Components.interfaces.nsIWindowMediator);
+							var win = wm.getMostRecentWindow("navigator:browser");
+							win.ZoteroPane.openPreferences("zotero-prefpane-sync");
+						};
 						break;
 					}
+					
+					// Manual click
 					setTimeout(function () {
 						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 									.getService(Components.interfaces.nsIWindowMediator);
