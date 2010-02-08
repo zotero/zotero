@@ -275,9 +275,25 @@ var Zotero_File_Interface = new function() {
 			Zotero.DB.beginTransaction();
 			translation.translate();
 		} else {
-			var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
-							.getService(Components.interfaces.nsIPrompt);
-			prompt.alert("", Zotero.getString("fileInterface.fileFormatUnsupported"));
+			// TODO: localize and remove fileInterface.fileFormatUnsupported string
+			var unsupportedFormat = "The selected file is not in a supported format.";
+			var viewSupportedFormats = "View Supported Formats...";
+			
+			var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+						.getService(Components.interfaces.nsIPrompt);
+			var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_OK)
+								+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_IS_STRING);
+			var index = pr.confirmEx(
+				"",
+				unsupportedFormat,
+				buttonFlags,
+				null,
+				viewSupportedFormats,
+				null, null, {}
+			);
+			if (index == 1) {
+				window.loadURI("http://zotero.org/support/kb/importing");
+			}
 		}
 	}
 	
