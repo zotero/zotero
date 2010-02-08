@@ -49,10 +49,16 @@ Zotero.Attachments = new function(){
 	function importFromFile(file, sourceItemID, libraryID) {
 		Zotero.debug('Importing attachment from file');
 		
-		var title = file.leafName;
+		// Try decoding URI entities, since we're going to strip '%'
+		var newName = file.leafName;
+		try {
+			newName = decodeURIComponent(file.leafName);
+		}
+		catch (e) {}
+		newName = Zotero.File.getValidFileName(newName);
 		
 		if (!file.isFile()) {
-			throw ("'" + title + "' must be a file in Zotero.Attachments.importFromFile()");
+			throw ("'" + file.leafName + "' must be a file in Zotero.Attachments.importFromFile()");
 		}
 		
 		Zotero.DB.beginTransaction();
@@ -67,7 +73,7 @@ Zotero.Attachments = new function(){
 			else if (libraryID) {
 				attachmentItem.libraryID = libraryID;
 			}
-			attachmentItem.setField('title', title);
+			attachmentItem.setField('title', newName);
 			attachmentItem.setSource(sourceItemID);
 			attachmentItem.attachmentLinkMode = this.LINK_MODE_IMPORTED_FILE;
 			var itemID = attachmentItem.save();
@@ -75,11 +81,11 @@ Zotero.Attachments = new function(){
 			
 			// Create directory for attachment files within storage directory
 			var destDir = this.createDirectoryForItem(itemID);
-			file.copyTo(destDir, null);
+			file.copyTo(destDir, newName);
 			
 			// Point to copied file
 			var newFile = destDir.clone();
-			newFile.append(title);
+			newFile.append(newName);
 			
 			var mimeType = Zotero.MIME.getMIMETypeFromFile(newFile);
 			
