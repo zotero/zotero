@@ -300,7 +300,7 @@ Zotero.ItemFields = new function() {
 			'journalAbbreviation',
 			'seriesTitle',
 			'seriesText',
-			'repository',
+			'libraryCatalog',
 			'callNumber',
 			'archiveLocation',
 			'language',
