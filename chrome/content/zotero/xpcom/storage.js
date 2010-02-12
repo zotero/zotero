@@ -528,7 +528,8 @@ Zotero.Sync.Storage = new function () {
 			var fileHash = item.attachmentHash;
 			if (attachmentData[item.id].hash && attachmentData[item.id].hash == fileHash) {
 				Zotero.debug("Mod time didn't match (" + fmtime + "!=" + mtime + ") "
-					+ "but hash did for " + file.leafName + " -- ignoring");
+					+ "but hash did for " + file.leafName + " -- updating file mod time");
+				file.lastModifiedTime = attachmentData[item.id].mtime;
 				continue;
 			}
 			
