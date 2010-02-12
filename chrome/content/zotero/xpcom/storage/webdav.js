@@ -48,8 +48,8 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.includeGroupItems = false;
 
 // TEMP
 // TODO: localize
-Zotero.Sync.Storage.Session.WebDAV.prototype.defaultError = "A WebDAV file sync error occurred. Please try syncing again.\n\nIf the error persists, submit an error report and post the Report ID to a new thread in the Zotero Forums (forums.zotero.org).";
-Zotero.Sync.Storage.Session.WebDAV.prototype.defaultErrorRestart = "A WebDAV file sync error occurred. Please restart Firefox and try syncing again.\n\nIf the error persists, submit an error report and post the Report ID to a new thread in the Zotero Forums (forums.zotero.org).";
+Zotero.Sync.Storage.Session.WebDAV.prototype.defaultError = "A WebDAV file sync error occurred. Please try syncing again.\n\nIf you receive this message repeatedly, submit an error report and post the Report ID to a new thread in the Zotero Forums.";
+Zotero.Sync.Storage.Session.WebDAV.prototype.defaultErrorRestart = "A WebDAV file sync error occurred. Please restart Firefox and try syncing again.\n\nIf you receive this message repeatedly, submit an error report and post the Report ID to a new thread in the Zotero Forums.";
 
 
 Zotero.Sync.Storage.Session.WebDAV.prototype.__defineGetter__('enabled', function () {

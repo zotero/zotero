@@ -52,8 +52,8 @@ Zotero.Sync.Storage = new function () {
 	
 	// TEMP
 	// TODO: localize
-	this.defaultError = "A file sync error occurred. Please try syncing again.\n\nIf the error persists, submit an error report and post the Report ID to a new thread in the Zotero Forums (forums.zotero.org).";
-	this.defaultErrorRestart = "A file sync error occurred. Please restart Firefox and try syncing again.\n\nIf the error persists, submit an error report and post the Report ID to a new thread in the Zotero Forums (forums.zotero.org).";
+	this.defaultError = "A file sync error occurred. Please try syncing again.\n\nIf you receive this message repeatedly, submit an error report and post the Report ID to a new thread in the Zotero Forums.";
+	this.defaultErrorRestart = "A file sync error occurred. Please restart Firefox and try syncing again.\n\nIf you receive this message repeatedly, submit an error report and post the Report ID to a new thread in the Zotero Forums.";
 	
 	//
 	// Public properties
