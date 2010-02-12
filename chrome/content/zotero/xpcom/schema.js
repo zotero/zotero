@@ -194,7 +194,13 @@ Zotero.Schema = new function(){
 				}
 			}
 			
-			var up4 = this.updateBundledFiles();
+			try {
+				var up4 = this.updateBundledFiles();
+			}
+			catch (e) {
+				Zotero.debug(e);
+				Components.utils.reportError(e);
+			}
 			
 			if (up2 || up3 || up4) {
 				// Run a manual scraper update if upgraded and pref set
@@ -1078,8 +1084,6 @@ Zotero.Schema = new function(){
 			Zotero.DB.commitTransaction();
 			
 			self.dbInitialized = true;
-			
-			Zotero.Schema.updateBundledFiles();
 		}
 		catch(e){
 			Zotero.debug(e, 1);
@@ -1087,6 +1091,15 @@ Zotero.Schema = new function(){
 			Zotero.DB.rollbackTransaction();
 			alert('Error initializing Zotero database');
 			throw(e);
+		}
+		
+		try {
+			Zotero.Schema.updateBundledFiles();
+		}
+		catch (e) {
+			Zotero.debug(e);
+			Components.utils.reportError(e);
+			alert('Error updating Zotero translators and styles');
 		}
 	}
 	
