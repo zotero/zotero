@@ -49,6 +49,7 @@ Zotero.Sync.Storage = new function () {
 	this.ERROR_ZOTERO_DIR_NOT_WRITABLE = -13;
 	this.ERROR_NOT_ALLOWED = -14;
 	this.ERROR_UNKNOWN = -15;
+	this.ERROR_FILE_MISSING_AFTER_UPLOAD = -16;
 	
 	// TEMP
 	// TODO: localize
