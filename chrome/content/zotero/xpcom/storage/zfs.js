@@ -533,6 +533,22 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getFileUploadParameters = function (i
 			self.onError(e);
 			return;
 		}
+		else if (req.status == 404) {
+			Components.utils.reportError("Unexpected status code 404 in " + funcName
+						 + " (" + Zotero.Items.getLibraryKeyHash(item) + ")");
+			if (Zotero.Prefs.get('sync.debugNoAutoResetClient')) {
+				Components.utils.reportError("Skipping automatic client reset due to debug pref");
+				return;
+			}
+			if (!Zotero.Sync.Server.canAutoResetClient) {
+				Components.utils.reportError("Client has already been auto-reset -- manual sync required");
+				return;
+			}
+			Zotero.Sync.Server.resetClient();
+			Zotero.Sync.Server.canAutoResetClient = false;
+			self.onError();
+			return;
+		}
 		else if (req.status != 200) {
 			var msg = "Unexpected status code " + req.status + " in " + funcName
 						 + " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
