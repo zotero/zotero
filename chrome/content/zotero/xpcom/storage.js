@@ -1030,7 +1030,7 @@ Zotero.Sync.Storage = new function () {
 			
 			// If only one file in zip and it doesn't match the known filename,
 			// take our chances and use that name
-			if (count == 1 && !entries.hasMore()) {
+			if (count == 1 && !entries.hasMore() && itemFileName) {
 				// May not be necessary, but let's be safe
 				itemFileName = Zotero.File.getValidFileName(itemFileName);
 				if (itemFileName != fileName) {
