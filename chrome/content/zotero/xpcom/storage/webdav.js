@@ -926,19 +926,43 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 							case 200:
 							case 201:
 							case 204:
-								// Delete test file
-								Zotero.Utilities.HTTP.WebDAV.doDelete(
+								Zotero.Utilities.HTTP.doHead(
 									testFileURI,
 									function (req) {
 										Zotero.debug(req.responseText);
 										Zotero.debug(req.status);
 										
 										switch (req.status) {
-											case 200: // IIS 5.1 and Sakai return 200
-											case 204:
-												callback(
-													uri,
-													Zotero.Sync.Storage.SUCCESS
+											case 200:
+												// Delete test file
+												Zotero.Utilities.HTTP.WebDAV.doDelete(
+													testFileURI,
+													function (req) {
+														Zotero.debug(req.responseText);
+														Zotero.debug(req.status);
+														
+														switch (req.status) {
+															case 200: // IIS 5.1 and Sakai return 200
+															case 204:
+																callback(
+																	uri,
+																	Zotero.Sync.Storage.SUCCESS
+																);
+																return;
+															
+															case 401:
+																callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
+																return;
+															
+															case 403:
+																callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
+																return;
+															
+															default:
+																callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
+																return;
+														}
+													}
 												);
 												return;
 											
@@ -948,6 +972,16 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 											
 											case 403:
 												callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
+												return;
+											
+											// IIS 6+ configured not to serve extensionless files or .prop files
+											// http://support.microsoft.com/kb/326965
+											case 404:
+												callback(uri, Zotero.Sync.Storage.ERROR_FILE_MISSING_AFTER_UPLOAD);
+												return;
+											
+											case 500:
+												callback(uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR);
 												return;
 											
 											default:
@@ -1166,6 +1200,20 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServerCallback = function (uri
 			});
 			
 			return false;
+		
+		case Zotero.Sync.Storage.ERROR_FILE_MISSING_AFTER_UPLOAD:
+			// TODO: localize
+			var errorTitle = "WebDAV Server Configuration Error";
+			var errorMessage = "Your WebDAV server must be configured to serve files without extensions "
+				+ "and files with .prop extensions in order to work with Zotero.";
+			break;
+		
+		case Zotero.Sync.Storage.ERROR_SERVER_ERROR:
+			// TODO: localize
+			var errorTitle = "WebDAV Server Configuration Error";
+			var errorMessage = "Your WebDAV server returned an internal error."
+				+ "\n\n" + Zotero.getString('sync.storage.error.checkFileSyncSettings');
+			break;
 		
 		case Zotero.Sync.Storage.ERROR_UNKNOWN:
 			var errorMessage = Zotero.localeJoin([
