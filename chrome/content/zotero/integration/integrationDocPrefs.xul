@@ -31,7 +31,7 @@
 <dialog
 	id="zotero-doc-prefs-dialog"
 	orient="vertical"
-	buttons="accept"
+	buttons="accept,cancel"
 	title="&zotero.integration.docPrefs.title;"
 	onload="Zotero_File_Interface_Bibliography.init();"
 	ondialogaccept="Zotero_File_Interface_Bibliography.acceptSelection();"
