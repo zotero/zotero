@@ -151,6 +151,16 @@ Zotero.Proxies = new function() {
 					}
 				}
 				
+				// make sure that the top two domains (e.g. gmu.edu in foo.bar.gmu.edu) of the
+				// channel and the site to which we're redirecting don't match, to prevent loops.
+				const top2DomainsRe = /[^\.]+\.[^\.]+$/;
+				top21 = top2DomainsRe.exec(channel.URI.host);
+				top22 = top2DomainsRe.exec(proxiedURI.host);
+				if(!top21 || !top22 || top21[0] == top22[0]) {
+					Zotero.debug("Zotero.Proxies: skipping redirect; redirect URI and URI have same top 2 domains");
+					return;
+				}
+				
 				// Otherwise, redirect. Note that we save the URI we're redirecting from as the
 				// referrer, since we can't make a proper redirect
 				webNav.loadURI(proxied, 0, channel.URI, null, null);
