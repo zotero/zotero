@@ -73,6 +73,7 @@ Zotero.CSL._namesVariables = {
 	"recipient":true,
 	"interviewer":true,
 	"collection-editor":true,
+	"container-author":true,
 	"author":true
 }
 
@@ -1728,7 +1729,8 @@ Zotero.CSL.Item.prototype._refreshItem = function() {
  * Mappings for names
  */
 Zotero.CSL.Item._zoteroNameMap = {
-	"collection-editor":"seriesEditor"
+	"collection-editor":"seriesEditor",
+	"container-author":"bookAuthor"
 }
 
 /*
@@ -2294,6 +2296,7 @@ Zotero.CSL.ItemSet.prototype.resort = function() {
 		if(!names) names = this.items[i].getNames("translator");
 		if(!names) names = this.items[i].getNames("recipient");
 		if(!names) names = this.items[i].getNames("interviewer");
+		if(!names) names = this.items[i].getNames("book-author");
 		if(!names) names = this.items[i].getNames("collection-editor");
 		if(!names) continue;
 		namesByItem[i] = names;
