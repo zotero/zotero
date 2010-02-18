@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "Tidsskriftsforkortelse">
 <!ENTITY zotero.items.language_column "Språk">
 <!ENTITY zotero.items.accessDate_column "Sist åpnet">
-<!ENTITY zotero.items.callNumber_column "Plass-signatur">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "Plass-signatur">
 <!ENTITY zotero.items.rights_column "Rettigheter">
 <!ENTITY zotero.items.dateAdded_column "Lagt til">
 <!ENTITY zotero.items.dateModified_column "Sist endret">

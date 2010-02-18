@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "Zkratka časopisu">
 <!ENTITY zotero.items.language_column "Jazyk">
 <!ENTITY zotero.items.accessDate_column "Přistoupeno">
-<!ENTITY zotero.items.callNumber_column "Signatura">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "Signatura">
 <!ENTITY zotero.items.rights_column "Práva">
 <!ENTITY zotero.items.dateAdded_column "Přidáno dne">
 <!ENTITY zotero.items.dateModified_column "Upraveno dne">

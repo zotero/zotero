@@ -1,9 +1,9 @@
 <!ENTITY zotero.general.optional "(Seçimli)">
 <!ENTITY zotero.general.note "Not:">
-<!ENTITY zotero.general.selectAll "Select All">
-<!ENTITY zotero.general.deselectAll "Deselect All">
-<!ENTITY zotero.general.edit "Edit">
-<!ENTITY zotero.general.delete "Delete">
+<!ENTITY zotero.general.selectAll "Hepsini Seç">
+<!ENTITY zotero.general.deselectAll "Hiçbirini Seçme">
+<!ENTITY zotero.general.edit "Düzenle">
+<!ENTITY zotero.general.delete "Sil">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "Hata kaydı Zotero ile ilgili olmayan iletileri de içerebilir.">
 <!ENTITY zotero.errorReport.submissionInProgress "Lütfen hata raporu gönderilene kadar bekleyiniz.">
@@ -12,23 +12,23 @@
 <!ENTITY zotero.errorReport.postToForums "Lütfen bu Rapor ile ilgili olarak Zotero forumlarına ileti gönderiniz, ayrıca iletinizde sorunun bir tanımı ve sorunu oluşturan adımları da yazınız.">
 <!ENTITY zotero.errorReport.notReviewed "Genellikle hata raporları forumlara gönderilmediği sürece incelenmez.">
 
-<!ENTITY zotero.upgrade.newVersionInstalled "Zotero&apos;nun yeni bir sürümünü kurdunuz.">
+<!ENTITY zotero.upgrade.newVersionInstalled "Zotero'nun yeni bir sürümünü kurdunuz.">
 <!ENTITY zotero.upgrade.upgradeRequired "Zotero veri tabanınız yeni sürüm ile birlikte çalışabilmesi için yükseltilmesi gerekir.">
 <!ENTITY zotero.upgrade.autoBackup "Herhangi bir değişiklik yapılmadan önce varolan veri tabanınız otomatik olarak yedeklenecektir.">
-<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
-<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
+<!ENTITY zotero.upgrade.majorUpgrade "Bu büyük bir yükseltmedir.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Gözden geçirdiğinize emin olunuz">
+<!ENTITY zotero.upgrade.majorUpgradeLink "yükseltme yönergeleri">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "devam etmeden önce.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Lütfen yükselmet işleni bitene kadar bekleyiniz. Bu bir miktar zaman alabilir.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Zotero veri tabanınız başarılı olarak yükseltilmiştir.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Lütfen bakınız">
 <!ENTITY zotero.upgrade.changeLogLink "değişiklik kaydı">
 <!ENTITY zotero.upgrade.changeLogAfterLink "yeni olanları öğrenmek için.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Seçileni Zotero Not&apos;a Ekle">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Seçileni Zotero Not'a Ekle">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Seçimden Zotero öğesi ve Notu Yarat">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Bağlantıyı Zotero öğesi olarak kaydet">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Resmi Zotero öğesi olarak kaydet">
 
 <!ENTITY zotero.tabs.info.label "Bilgi">
 <!ENTITY zotero.tabs.notes.label "Notlar">
@@ -37,7 +37,7 @@
 <!ENTITY zotero.tabs.related.label "İligili">
 <!ENTITY zotero.notes.separate "Ayrı bir pencerede düzenle">
 
-<!ENTITY zotero.items.itemType "Item Type">
+<!ENTITY zotero.items.itemType "Eser Türü">
 <!ENTITY zotero.items.type_column "Tür">
 <!ENTITY zotero.items.title_column "Başlık">
 <!ENTITY zotero.items.creator_column "Yaratan">
@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "Dergi Kısaltması">
 <!ENTITY zotero.items.language_column "Dil">
 <!ENTITY zotero.items.accessDate_column "Erişildi">
-<!ENTITY zotero.items.callNumber_column "Yer Numarası">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "Yer Numarası">
 <!ENTITY zotero.items.rights_column "Telif">
 <!ENTITY zotero.items.dateAdded_column "Eklendiği Tarih">
 <!ENTITY zotero.items.dateModified_column "Değiştirildiği Tarih">
@@ -57,34 +57,34 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Kitaplıkta Göster">
 <!ENTITY zotero.items.menu.attach.note "Not Ekle">
-<!ENTITY zotero.items.menu.attach "Add Attachment">
+<!ENTITY zotero.items.menu.attach "Eklenti Ekle">
 <!ENTITY zotero.items.menu.attach.snapshot "Geçerli Sayfanın Görünümünü Ekle">
 <!ENTITY zotero.items.menu.attach.link "Geçerli Sayfaya Bağlantı Ekle">
-<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
-<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+<!ENTITY zotero.items.menu.attach.file "Dosyanın Kaydedilen Kopyasını  Ekle">
+<!ENTITY zotero.items.menu.attach.fileLink "Dosyaya Bağlantı Ekle...">
 
 <!ENTITY zotero.items.menu.duplicateItem "Seçili Eseri Çoğalt">
 
 <!ENTITY zotero.toolbar.newItem.label "Yeni Eser">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Daha Fazla">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Geçerli Sayfadan Yeni Bir Eser Yarat">
-<!ENTITY zotero.toolbar.lookup.label "Add Item by Identifier">
+<!ENTITY zotero.toolbar.lookup.label "Belirteci ile Eser Ekle">
 <!ENTITY zotero.toolbar.removeItem.label "Eseri Kaldır...">
 <!ENTITY zotero.toolbar.newCollection.label "Yeni Derme...">
-<!ENTITY zotero.toolbar.newGroup "New Group...">
+<!ENTITY zotero.toolbar.newGroup "Yeni Grup...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Yeni Alt Derme...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Yeni Kaydedilen Arama...">
-<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
+<!ENTITY zotero.toolbar.emptyTrash.label "Çöpü Boşalt">
 <!ENTITY zotero.toolbar.tagSelector.label "Etiket Seçiciyi Göster/Gizle">
 <!ENTITY zotero.toolbar.actions.label "Olaylar">
 <!ENTITY zotero.toolbar.import.label "İçeri Aktar...">
-<!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.toolbar.importFromClipboard "Panodan İçeri Aktar">
 <!ENTITY zotero.toolbar.export.label "Kitaplığı Dışarı Aktar...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF Tarama...">
 <!ENTITY zotero.toolbar.timeline.label "Zaman Çizelgesi Yarat">
-<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
+<!ENTITY zotero.toolbar.duplicate.label "Çift Girişleri Göster">
 <!ENTITY zotero.toolbar.preferences.label "Tercihler...">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
+<!ENTITY zotero.toolbar.supportAndDocumentation "Destek ve Belgeleme">
 <!ENTITY zotero.toolbar.about.label "Zotero Hakkında">
 <!ENTITY zotero.toolbar.advancedSearch "Gelişmiş Arama">
 <!ENTITY zotero.toolbar.search.label "Arama:">
@@ -99,7 +99,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Başlık Biçimi">
 
 <!ENTITY zotero.toolbar.note.standalone "Yeni Bağımsız Not">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
+<!ENTITY zotero.toolbar.lookup "Belirteci ile Arama...">
 <!ENTITY zotero.toolbar.attachment.linked "Dosyaya Bağlantı...">
 <!ENTITY zotero.toolbar.attachment.add "Dosyanın bir Kopyasının Sakla">
 <!ENTITY zotero.toolbar.attachment.weblink "Geçerli Sayfaya Bağlantıyı Kaydet">
@@ -108,10 +108,10 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Gösterilecek etiket yok">
 <!ENTITY zotero.tagSelector.filter "Süzgeç:">
 <!ENTITY zotero.tagSelector.showAutomatic "Otomatik göster">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
-<!ENTITY zotero.tagSelector.selectVisible "Görülebiliri seçin">
-<!ENTITY zotero.tagSelector.clearVisible "Görülebiliri seçme">
-<!ENTITY zotero.tagSelector.clearAll "Hiçbirini seçme">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Bu kütüphane içindeki tüm etiketleri göster">
+<!ENTITY zotero.tagSelector.selectVisible "Görülebileni Seç">
+<!ENTITY zotero.tagSelector.clearVisible "Gürülebileni Seçme">
+<!ENTITY zotero.tagSelector.clearAll "Hiçbirini Seçme">
 <!ENTITY zotero.tagSelector.renameTag "Etiketi Yeniden Adlandır...">
 <!ENTITY zotero.tagSelector.deleteTag "Etiketi Sil...">
 
@@ -127,7 +127,7 @@
 <!ENTITY zotero.bibliography.output.label "Çıktı Formatı">
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF olarak Kaydet">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML olarak Kaydet">
-<!ENTITY zotero.bibliography.copyToClipboard.label "Pano&apos;ya Kopyala">
+<!ENTITY zotero.bibliography.copyToClipboard.label "Pano'ya Kopyala">
 <!ENTITY zotero.bibliography.macClipboardWarning "(Zengin-metin biçimi kaybedilecek)">
 <!ENTITY zotero.bibliography.print.label "Yazdır">
 
@@ -175,55 +175,55 @@
 
 <!ENTITY zotero.integration.references.label "Kaynakçadaki Kaynaklar">
 
-<!ENTITY zotero.sync.button "Sync with Zotero Server">
-<!ENTITY zotero.sync.error "Sync Error">
-<!ENTITY zotero.sync.storage.progress "Progress:">
-<!ENTITY zotero.sync.storage.downloads "Downloads:">
-<!ENTITY zotero.sync.storage.uploads "Uploads:">
+<!ENTITY zotero.sync.button "Zotero Sunucusu ile Eşle">
+<!ENTITY zotero.sync.error "Eşleme Hatası">
+<!ENTITY zotero.sync.storage.progress "İşlem:">
+<!ENTITY zotero.sync.storage.downloads "İndirilenler:">
+<!ENTITY zotero.sync.storage.uploads "Yüklenenler:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
-<!ENTITY zotero.sync.longTagFixer.split "Split">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
-<!ENTITY zotero.sync.longTagFixer.character "character">
-<!ENTITY zotero.sync.longTagFixer.characters "characters">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Zotero kütüphanenizde bulunan bu etiket sunucu için çok uzundur:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Eşlenecek etiketler 256 karakterden daha kısa olmalıdır.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Bir etiketi birden fazla etikete bölebilirsiniz. etiketi kısaltmak için düzenleyiniz veya siliniz.">
+<!ENTITY zotero.sync.longTagFixer.split "Böl">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Böl">
+<!ENTITY zotero.sync.longTagFixer.character "karaktere">
+<!ENTITY zotero.sync.longTagFixer.characters "karaktere">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Seçilmemiş etiketler kaydedilmeyecek.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etiket tüm eserlerden silinecek.">
 
-<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
-<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
-<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
+<!ENTITY zotero.proxy.recognized.title "Vekit Sunucu Onaylandı">
+<!ENTITY zotero.proxy.recognized.warning "Yalnızca kütüphane, okul veya kurumsal web siteniz tarafından bağlantı verilen vekil sunucuları ekleyiniz.">
+<!ENTITY zotero.proxy.recognized.warning.secondary "Başka vekil sunucuların eklenmesi kötü niyetli sitelere onaylanan site izni verebilir.">
+<!ENTITY zotero.proxy.recognized.disable.label "İsteği otomatik olarak bir önce onaylanan vekil sunucu üzerinden yönlendirme.">
+<!ENTITY zotero.proxy.recognized.ignore.label "Yoksay">
 
-<!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
-<!ENTITY zotero.recognizePDF.cancel.label "Cancel">
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
-<!ENTITY zotero.recognizePDF.itemName.label "Item Name">
-<!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
+<!ENTITY zotero.recognizePDF.recognizing.label "Üst Veriyi Alıyor...">
+<!ENTITY zotero.recognizePDF.cancel.label "İptal">
+<!ENTITY zotero.recognizePDF.pdfName.label "PDF Adı">
+<!ENTITY zotero.recognizePDF.itemName.label "Eser Adı">
+<!ENTITY zotero.recognizePDF.captcha.label "Üst veri alımı devam derken metni aşağıya girebilirsiniz.">
 
-<!ENTITY zotero.rtfScan.title "RTF Scan">
-<!ENTITY zotero.rtfScan.cancel.label "Cancel">
-<!ENTITY zotero.rtfScan.citation.label "Citation">
-<!ENTITY zotero.rtfScan.itemName.label "Item Name">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
-<!ENTITY zotero.rtfScan.introPage.label "Introduction">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
-<!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
-<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
-<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
-<!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
-<!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
-<!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
-<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
-<!ENTITY zotero.rtfScan.inputFile.label "Input File">
-<!ENTITY zotero.rtfScan.outputFile.label "Output File">
+<!ENTITY zotero.rtfScan.title "RTF Tarama">
+<!ENTITY zotero.rtfScan.cancel.label "İptal">
+<!ENTITY zotero.rtfScan.citation.label "Alıntı">
+<!ENTITY zotero.rtfScan.itemName.label "Eser Adı">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Eşlenmemiş Alıntı">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Belirsiz Alıntı">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Eşlenmiş Alıntı">
+<!ENTITY zotero.rtfScan.introPage.label "Giriş">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero alıntıları otomatik olarak çıkarabilir ve tekrar düzenleyerek RTF dosyası içine kaynakça olarak koyabilir. Başlamak için aşağıdan bir RTF dosyası seçiniz.">
+<!ENTITY zotero.rtfScan.introPage.description2 "Başlamak için bir RTF giriş dosyası ve altında bir çıkış dosyası seçiniz:">
+<!ENTITY zotero.rtfScan.scanPage.label "Alıntılar için Tarama">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero alıntılar için belgenizi tarıyor. Lütfen bekleyiniz.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Alıntıların Onaylanması">
+<!ENTITY zotero.rtfScan.citationsPage.description "Lütfen aşağıdaki listede bulunan tanınan alıntıları Zotero'nun doğru olarak eşleştirip eşleştirmediğini gözden geçiriniz. Bir sonraki adıma geçmeden önce eşleşmemiş veya belirsiz alıntılar çözülmelidir.">
+<!ENTITY zotero.rtfScan.stylePage.label "Belge Biçimlendirme">
+<!ENTITY zotero.rtfScan.formatPage.label "Alıntı Biçimlendirme">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero RTF dosyanızı biçimlendiriyor. Lütfen bekleyiniz.">
+<!ENTITY zotero.rtfScan.completePage.label "RTF Tarama Tamamlandı">
+<!ENTITY zotero.rtfScan.completePage.description "Belgeniz tarandı ve işlendi. Lütfnen biçimlendirmenin doğruluğunu kontrol ediniz.">
+<!ENTITY zotero.rtfScan.inputFile.label "Giriş Dosyası">
+<!ENTITY zotero.rtfScan.outputFile.label "Çıkış Dosyası">
 
-<!ENTITY zotero.file.choose.label "Choose File...">
-<!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.file.choose.label "Dosya Seçiniz...">
+<!ENTITY zotero.file.noneSelected.label "Dosya seçilmedi">

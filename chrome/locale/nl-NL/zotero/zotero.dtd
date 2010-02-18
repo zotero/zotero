@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "Tijdschrift-afkorting">
 <!ENTITY zotero.items.language_column "Taal">
 <!ENTITY zotero.items.accessDate_column "Laatst benaderd">
-<!ENTITY zotero.items.callNumber_column "Referentienummer">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "Referentienummer">
 <!ENTITY zotero.items.rights_column "Rechten">
 <!ENTITY zotero.items.dateAdded_column "Datum toegevoegd">
 <!ENTITY zotero.items.dateModified_column "Datum bewerkt">
@@ -108,7 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Geen labels om te tonen">
 <!ENTITY zotero.tagSelector.filter "Filter:">
 <!ENTITY zotero.tagSelector.showAutomatic "Automatische labels tonen">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Alle labels in deze bibliotheek tonen">
 <!ENTITY zotero.tagSelector.selectVisible "Getoonde labels selecteren">
 <!ENTITY zotero.tagSelector.clearVisible "Selectie getoonde labels ongedaan maken">
 <!ENTITY zotero.tagSelector.clearAll "Niets selecteren">

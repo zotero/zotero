@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "Abrev de Revista">
 <!ENTITY zotero.items.language_column "Lingua">
 <!ENTITY zotero.items.accessDate_column "Consultado">
-<!ENTITY zotero.items.callNumber_column "Número localización">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "Número localización">
 <!ENTITY zotero.items.rights_column "Dereitos">
 <!ENTITY zotero.items.dateAdded_column "Data Alta">
 <!ENTITY zotero.items.dateModified_column "Data Modificación">

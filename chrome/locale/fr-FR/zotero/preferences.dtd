@@ -46,7 +46,7 @@
 <!ENTITY zotero.preferences.sync.createAccount "Créer un compte">
 <!ENTITY zotero.preferences.sync.lostPassword "Mot de passe oublié ?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchroniser automatiquement">
-<!ENTITY zotero.preferences.sync.about "About Syncing">
+<!ENTITY zotero.preferences.sync.about "À propos de la synchronisation">
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronisation des fichiers">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Adresse :">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synchroniser les fichiers joints de Ma bibliothèque en utilisant">
@@ -118,22 +118,22 @@
 <!ENTITY zotero.preferences.keys.overrideGlobal "Essayer de gérer les conflits de raccourcis">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Les modifications ne prennent effet que dans les nouvelles fenêtres.">
 
-<!ENTITY zotero.preferences.prefpane.proxies "Mandataires (proxy)">
+<!ENTITY zotero.preferences.prefpane.proxies "Serveurs mandataires">
 
-<!ENTITY zotero.preferences.proxies.proxyOptions "Options des mandataires (proxy)">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero redirigera les requêtes de manière transparente à travers les mandataires sauvegardés. Consultez la">
-<!ENTITY zotero.preferences.proxies.desc_link "documentation concernant les mandataires">
+<!ENTITY zotero.preferences.proxies.proxyOptions "Options des serveurs mandataires">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero redirigera les requêtes de manière transparente à travers les serveurs mandataires enregistrés. Consultez la">
+<!ENTITY zotero.preferences.proxies.desc_link "documentation concernant les serveurs mandataires">
 <!ENTITY zotero.preferences.proxies.desc_after_link "pour plus d'information.">
-<!ENTITY zotero.preferences.proxies.transparent "Retenir automatiquement les ressources atteintes par l'entremise d'un mandataire">
-<!ENTITY zotero.preferences.proxies.configured "Mandataires configurés">
+<!ENTITY zotero.preferences.proxies.transparent "Retenir automatiquement les ressources atteintes par l'entremise d'un serveur mandataire">
+<!ENTITY zotero.preferences.proxies.configured "Serveurs mandataires configurés">
 <!ENTITY zotero.preferences.proxies.hostname "Adresse Internet">
 <!ENTITY zotero.preferences.proxies.scheme "Schéma">
 
 <!ENTITY zotero.preferences.proxies.multiSite "Multi-site">
 <!ENTITY zotero.preferences.proxies.autoAssociate "Associer automatiquement les nouveaux hôtes">
 <!ENTITY zotero.preferences.proxies.variables "Vous pouvez utiliser les variables suivantes dans votre schéma de mandataire :">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - L'adresse du site atteint par l'entremise d'un mandataire (ex. www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Le chemin vers la page mandatée en excluant la barre oblique initiale (ex. about/index.html)">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - L'adresse du site atteint via un serveur mandataire (ex. www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Le chemin vers la page transmise via un serveur mandataire en excluant la barre oblique initiale (ex. about/index.html)">
 <!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Le chemin du répertoire (ex. about/)">
 <!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Le nom du fichier (ex. index.html)">
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - N'importe quelle chaîne de caractère">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.dataDir "Emplacement du répertoire contenant les données">
 <!ENTITY zotero.preferences.dataDir.useProfile "Utiliser le répertoire de profil de Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Personnalisé :">
-<!ENTITY zotero.preferences.dataDir.choose "Choisir…">
+<!ENTITY zotero.preferences.dataDir.choose "Sélectionner…">
 <!ENTITY zotero.preferences.dataDir.reveal "Afficher le répertoire contenant les données">
 
 <!ENTITY zotero.preferences.dbMaintenance "Maintenance de la base de données">
@@ -157,7 +157,7 @@
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Réinitialiser les styles…">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Journalisation de la sortie de débogage">
-<!ENTITY zotero.preferences.debugOutputLogging.message "La sortie de débogage peut aider les développeurs de Zotero à diagnostiquer des problèmes au sein de l'extension. La journalisation du débogage ralentira Zotero, donc vous devriez la maintenir désactivée sauf si un développeur de Zotero demande une sortie de débogage.">
+<!ENTITY zotero.preferences.debugOutputLogging.message "La sortie de débogage peut aider les développeurs de Zotero à diagnostiquer des problèmes au sein de l'extension. La journalisation du débogage ralentira Zotero, il est donc préférable de la laisser désactivée sauf si un développeur de Zotero demande une sortie de débogage.">
 <!ENTITY zotero.preferences.debugOutputLogging.linesLogged "lignes consignées">
 <!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Activer après le redémarrage">
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Afficher la sortie">

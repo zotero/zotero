@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "Abrev. revistă">
 <!ENTITY zotero.items.language_column "Limbă">
 <!ENTITY zotero.items.accessDate_column "Data de acces">
-<!ENTITY zotero.items.callNumber_column "Număr de telefon">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "Număr de telefon">
 <!ENTITY zotero.items.rights_column "Drepturi">
 <!ENTITY zotero.items.dateAdded_column "Data adăugării">
 <!ENTITY zotero.items.dateModified_column "Data modificării">
@@ -108,7 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Nicio etichetă pentru afişare">
 <!ENTITY zotero.tagSelector.filter "Filtru:">
 <!ENTITY zotero.tagSelector.showAutomatic "Arată automat">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Afișează toate etichetele din această bibliotecă">
 <!ENTITY zotero.tagSelector.selectVisible "Selectează vedere">
 <!ENTITY zotero.tagSelector.clearVisible "Deselectează vedere">
 <!ENTITY zotero.tagSelector.clearAll "Deselectează totul">
