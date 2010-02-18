@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "Abkürzung der Zeitschrift">
 <!ENTITY zotero.items.language_column "Sprache">
 <!ENTITY zotero.items.accessDate_column "Zugriffsdatum">
-<!ENTITY zotero.items.callNumber_column "Signatur">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "Signatur">
 <!ENTITY zotero.items.rights_column "Rechte">
 <!ENTITY zotero.items.dateAdded_column "hinzugefügt am">
 <!ENTITY zotero.items.dateModified_column "geändert am">
@@ -108,7 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Keine Tags vorhanden">
 <!ENTITY zotero.tagSelector.filter "Filter:">
 <!ENTITY zotero.tagSelector.showAutomatic "Automatisch anzeigen">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Alle Tags dieser Bibliothek anzeigen">
 <!ENTITY zotero.tagSelector.selectVisible "Sichtbare auswählen">
 <!ENTITY zotero.tagSelector.clearVisible "Sichtbare abwählen">
 <!ENTITY zotero.tagSelector.clearAll "Alle abwählen">

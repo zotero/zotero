@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "اللغة">
 <!ENTITY zotero.items.accessDate_column "Accessed">
-<!ENTITY zotero.items.callNumber_column "رقم الإستدعاء">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "رقم الإستدعاء">
 <!ENTITY zotero.items.rights_column "الحقوق">
 <!ENTITY zotero.items.dateAdded_column "تاريخ الإضافة">
 <!ENTITY zotero.items.dateModified_column "تاريخ التعديل">

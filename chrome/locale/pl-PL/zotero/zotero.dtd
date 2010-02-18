@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
 <!ENTITY zotero.items.language_column "Język">
 <!ENTITY zotero.items.accessDate_column "Accessed">
-<!ENTITY zotero.items.callNumber_column "Numer klasyfikacyjny">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "Numer klasyfikacyjny">
 <!ENTITY zotero.items.rights_column "Prawa autorskie">
 <!ENTITY zotero.items.dateAdded_column "Data dodania">
 <!ENTITY zotero.items.dateModified_column "Data modyfikacji">

@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "Abrev. de la revista">
 <!ENTITY zotero.items.language_column "Idioma">
 <!ENTITY zotero.items.accessDate_column "Visto">
-<!ENTITY zotero.items.callNumber_column "Número de catálogo">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "Número de catálogo">
 <!ENTITY zotero.items.rights_column "Derechos">
 <!ENTITY zotero.items.dateAdded_column "Fecha de adición">
 <!ENTITY zotero.items.dateModified_column "Fecha de modificación">

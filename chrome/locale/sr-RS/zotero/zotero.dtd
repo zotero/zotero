@@ -1,7 +1,7 @@
 <!ENTITY zotero.general.optional "(произвољно)">
 <!ENTITY zotero.general.note "Белешка:">
 <!ENTITY zotero.general.selectAll "Изабери све">
-<!ENTITY zotero.general.deselectAll "Не бирај ништа">
+<!ENTITY zotero.general.deselectAll "Поништи изабрано">
 <!ENTITY zotero.general.edit "Уреди">
 <!ENTITY zotero.general.delete "Обриши">
 
@@ -32,7 +32,7 @@
 
 <!ENTITY zotero.tabs.info.label "Инфо">
 <!ENTITY zotero.tabs.notes.label "Белешке">
-<!ENTITY zotero.tabs.attachments.label "Прилозирмације">
+<!ENTITY zotero.tabs.attachments.label "Прилози">
 <!ENTITY zotero.tabs.tags.label "Ознаке">
 <!ENTITY zotero.tabs.related.label "Сродно">
 <!ENTITY zotero.notes.separate "Уреди у одвојеном прозору">
@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "Скраћеница за журнал">
 <!ENTITY zotero.items.language_column "Језик">
 <!ENTITY zotero.items.accessDate_column "Приступљено">
-<!ENTITY zotero.items.callNumber_column "Сигнатура">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "Сигнатура">
 <!ENTITY zotero.items.rights_column "Права">
 <!ENTITY zotero.items.dateAdded_column "Датум додавања">
 <!ENTITY zotero.items.dateModified_column "Датум промене">
@@ -98,8 +98,8 @@
 <!ENTITY zotero.item.textTransform.lowercase "мала слова">
 <!ENTITY zotero.item.textTransform.titlecase "Величина слова у наслову">
 
-<!ENTITY zotero.toolbar.note.standalone "Нова самостојећа белешка">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
+<!ENTITY zotero.toolbar.note.standalone "Нова самостална белешка">
+<!ENTITY zotero.toolbar.lookup "Потражи по идентификатору...">
 <!ENTITY zotero.toolbar.attachment.linked "Повежи са датотеком...">
 <!ENTITY zotero.toolbar.attachment.add "Сачувај копију датотеке...">
 <!ENTITY zotero.toolbar.attachment.weblink "Сачувај везу на тренутну страницу">
@@ -108,7 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Нема ознаке за приказ">
 <!ENTITY zotero.tagSelector.filter "Филтер:">
 <!ENTITY zotero.tagSelector.showAutomatic "Аутоматски прикажи">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Прикажи све ознаке у овој библиотеци">
 <!ENTITY zotero.tagSelector.selectVisible "Изабери видљиве">
 <!ENTITY zotero.tagSelector.clearVisible "Избаци из избора видљиве">
 <!ENTITY zotero.tagSelector.clearAll "Избаци из избора све">

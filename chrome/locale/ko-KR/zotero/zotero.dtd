@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "저널 약어">
 <!ENTITY zotero.items.language_column "언어">
 <!ENTITY zotero.items.accessDate_column "접근일">
-<!ENTITY zotero.items.callNumber_column "호출 번호">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "호출 번호">
 <!ENTITY zotero.items.rights_column "권리">
 <!ENTITY zotero.items.dateAdded_column "날짜 추가">
 <!ENTITY zotero.items.dateModified_column "날짜 변경">
@@ -108,7 +108,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "표시할 태그가 없음">
 <!ENTITY zotero.tagSelector.filter "필터:">
 <!ENTITY zotero.tagSelector.showAutomatic "자동 표시">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "이 라이브러리 내 모든 태그 표시">
 <!ENTITY zotero.tagSelector.selectVisible "보이는 것들 선택">
 <!ENTITY zotero.tagSelector.clearVisible "보이는 것들 선택 해제">
 <!ENTITY zotero.tagSelector.clearAll "선택 모두 해제">
@@ -188,8 +188,8 @@
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
 <!ENTITY zotero.sync.longTagFixer.character "글자">
 <!ENTITY zotero.sync.longTagFixer.characters "글자">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "체크되지 않은 태그는 저장되지 않습니다.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "해당 태그가 모든 항목으로부터 삭제되었습니다.">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
