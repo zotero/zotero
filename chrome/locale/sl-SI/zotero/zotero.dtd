@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "Okrajšava revije">
 <!ENTITY zotero.items.language_column "Jezik">
 <!ENTITY zotero.items.accessDate_column "Dostopano">
-<!ENTITY zotero.items.callNumber_column "Številka klica">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "Številka klica">
 <!ENTITY zotero.items.rights_column "Pravice">
 <!ENTITY zotero.items.dateAdded_column "Dodano dne">
 <!ENTITY zotero.items.dateModified_column "Datum spremembe">

@@ -46,7 +46,7 @@
 <!ENTITY zotero.preferences.sync.createAccount "アカウントを作成">
 <!ENTITY zotero.preferences.sync.lostPassword "パスワードを忘れましたか？">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自動的にシンク">
-<!ENTITY zotero.preferences.sync.about "About Syncing">
+<!ENTITY zotero.preferences.sync.about "同期（シンク）について">
 <!ENTITY zotero.preferences.sync.fileSyncing "ファイル・シンキング">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "マイ・ライブラリーにある添付ファイルをシンクするとき右のプログラムを使う：">
@@ -54,9 +54,9 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.about "ファイル・シンキング">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "terms and conditions">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync with Zotero Server">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Zoteroサーバーと完全に同期（シンク）させる">
 <!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local Zotero data with data from the sync server, ignoring sync history.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Zotero Server">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Zoteroサーバーから復元（リストア）する">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Erase all local Zotero data and restore from the sync server.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Zotero Server">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Erase all server data and overwrite with local Zotero data.">

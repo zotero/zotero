@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "Periódico">
 <!ENTITY zotero.items.language_column "Idioma">
 <!ENTITY zotero.items.accessDate_column "Accesso em">
-<!ENTITY zotero.items.callNumber_column "Núm. chamada">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "Núm. chamada">
 <!ENTITY zotero.items.rights_column "Direitos">
 <!ENTITY zotero.items.dateAdded_column "Adição em">
 <!ENTITY zotero.items.dateModified_column "Modificação em">

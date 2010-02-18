@@ -46,7 +46,7 @@
 <!ENTITY zotero.preferences.sync.createAccount "Account aanmaken">
 <!ENTITY zotero.preferences.sync.lostPassword "Wachtwoord vergeten?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatisch synchroniseren">
-<!ENTITY zotero.preferences.sync.about "About Syncing">
+<!ENTITY zotero.preferences.sync.about "Over synchroniseren">
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronisatie van bestanden">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synchroniseer bestanden in Mijn Bibliotheek met">

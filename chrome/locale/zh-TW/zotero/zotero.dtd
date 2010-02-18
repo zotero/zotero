@@ -48,8 +48,8 @@
 <!ENTITY zotero.items.journalAbbr_column "期刊簡寫">
 <!ENTITY zotero.items.language_column "語言">
 <!ENTITY zotero.items.accessDate_column "受使用的">
-<!ENTITY zotero.items.callNumber_column "索書號">
 <!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.callNumber_column "索書號">
 <!ENTITY zotero.items.rights_column "權利">
 <!ENTITY zotero.items.dateAdded_column "加入日期">
 <!ENTITY zotero.items.dateModified_column "修改日期">

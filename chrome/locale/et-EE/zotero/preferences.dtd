@@ -1,14 +1,14 @@
-<!ENTITY zotero.preferences.title "Zotero Preferences">
+<!ENTITY zotero.preferences.title "Zotero eelistused">
 
-<!ENTITY zotero.preferences.default "Default:">
+<!ENTITY zotero.preferences.default "Vaikimisi:">
 <!ENTITY zotero.preferences.items "kirjed">
 <!ENTITY zotero.preferences.period ".">
 
-<!ENTITY zotero.preferences.prefpane.general "General">
+<!ENTITY zotero.preferences.prefpane.general "Üldine">
 
-<!ENTITY zotero.preferences.userInterface "User Interface">
-<!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
-<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.userInterface "Kasutajaliides">
+<!ENTITY zotero.preferences.statusBarIcon "Staatusriba ikoon:">
+<!ENTITY zotero.preferences.statusBarIcon.none "Puudub">
 <!ENTITY zotero.preferences.fontSize "Font size:">
 <!ENTITY zotero.preferences.fontSize.small "Small">
 <!ENTITY zotero.preferences.fontSize.medium "Medium">

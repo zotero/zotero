@@ -1,10 +1,10 @@
-<!ENTITY zotero.version "version">
-<!ENTITY zotero.createdby "Created By:">
-<!ENTITY zotero.directors "Directors:">
-<!ENTITY zotero.developers "Developers:">
-<!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.about.localizations "Localizations:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
-<!ENTITY zotero.executiveProducer "Executive Producer:">
-<!ENTITY zotero.thanks "Special Thanks:">
-<!ENTITY zotero.about.close "Close">
+<!ENTITY zotero.version "versioon">
+<!ENTITY zotero.createdby "Loodud:">
+<!ENTITY zotero.directors "Juhatajad:">
+<!ENTITY zotero.developers "Arendajad:">
+<!ENTITY zotero.alumni "Kaastöötajad:">
+<!ENTITY zotero.about.localizations "Tõlked:">
+<!ENTITY zotero.about.additionalSoftware "Kolmandate osapoolte tarkvara ja standardid:">
+<!ENTITY zotero.executiveProducer "Vastutav produtsent:">
+<!ENTITY zotero.thanks "Tänud:">
+<!ENTITY zotero.about.close "Sulge">
