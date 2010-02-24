@@ -3,7 +3,7 @@
 // Add new user-adjustable hidden preferences to
 // http://www.zotero.org/documentation/hidden_prefs
 
-pref("extensions.zotero.firstRun", true);
+pref("extensions.zotero.firstRun2", true);
 pref("extensions.zotero@chnm.gmu.edu.description", "chrome://zotero/locale/zotero.properties");
 
 pref("extensions.zotero.useDataDir", false);

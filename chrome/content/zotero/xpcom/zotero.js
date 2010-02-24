@@ -1309,6 +1309,16 @@ Zotero.Prefs = new function(){
 	}
 	
 	
+	this.clear = function (pref) {
+		try {
+			this.prefBranch.clearUserPref(pref);
+		}
+		catch (e) {
+			throw ("Invalid preference '" + pref + "'");
+		}
+	}
+	
+	
 	//
 	// Methods to register a preferences observer
 	//
