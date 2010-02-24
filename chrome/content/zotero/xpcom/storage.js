@@ -530,7 +530,30 @@ Zotero.Sync.Storage = new function () {
 			if (attachmentData[item.id].hash && attachmentData[item.id].hash == fileHash) {
 				Zotero.debug("Mod time didn't match (" + fmtime + "!=" + mtime + ") "
 					+ "but hash did for " + file.leafName + " -- updating file mod time");
-				file.lastModifiedTime = attachmentData[item.id].mtime;
+				try {
+					file.lastModifiedTime = attachmentData[item.id].mtime;
+				}
+				catch (e) {
+					if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+						Zotero.debug(e);
+						// TODO: localize
+						var fileCannotBeUpdated = "The file '" + file.leafName
+							+ "' cannot be updated.";
+						var checkFileWindows = "Check that the file is not currently "
+							+ "in use and that it is not marked read-only.";
+						var checkFileOther = "Check that the file is not currently "
+							+ "in use and that its permissions allow write access.";
+						var msg = Zotero.localeJoin([
+							fileCannotBeUpdated,
+							Zotero.isWin ? checkFileWindows : checkFileOther
+						]) + "\n\n"
+							+ "Restarting your computer or disabling security "
+							+ "software may also help.";
+						throw (msg);
+					}
+					
+					throw (e);
+				}
 				continue;
 			}
 			
@@ -882,9 +905,9 @@ Zotero.Sync.Storage = new function () {
 			// ecrypt (on Ubuntu, at least) can result in a lower limit —
 			// not much we can do about this, but throw a specific error
 			else if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
-				var e = "Error creating file '" + destFile.leafName + "' "
-					+ "(Are you using filesystem encryption such as eCryptfs "
-					+ "that results in a filename length limit below 255 bytes?)";
+				var e = "Error creating file '" + destFile.leafName + "'\n\n"
+					+ "Check whether you are using a filesystem encryption such as eCryptfs "
+					+ "that results in a filename length limit below 255 bytes.";
 			}
 			
 			if (windowsLength || nameLength) {
@@ -1214,7 +1237,19 @@ Zotero.Sync.Storage = new function () {
 				catch (e) {
 					if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
 						Zotero.debug(e);
-						var msg = Zotero.getString('sync.storage.error.fileInUse', file.leafName);
+						// TODO: localize
+						var fileCannotBeUpdated = "The file '" + file.leafName
+						+ "' cannot be updated.";
+						var checkFileWindows = "Check that the file is not currently "
+							+ "in use and that it is not marked read-only.";
+						var checkFileOther = "Check that the file is not currently "
+							+ "in use and that its permissions allow write access.";
+						var msg = Zotero.localeJoin([
+							fileCannotBeUpdated,
+							Zotero.isWin ? checkFileWindows : checkFileOther
+						]) + "\n\n"
+							+ "Restarting your computer or disabling security "
+							+ "software may also help.";
 						throw (msg);
 					}
 					
@@ -1483,7 +1518,7 @@ Zotero.Sync.Storage = new function () {
 					buttonFlags,
 					Zotero.getString('sync.resetGroupAndSync'),
 					null, null, null, {}
-					);
+				);
 				
 				if (index == 0) {
 					group.erase();
