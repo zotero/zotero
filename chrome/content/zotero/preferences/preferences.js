@@ -423,7 +423,9 @@ function handleSyncReset(action) {
 				// TODO: localize
 				Zotero.getString('general.warning'),
 				"All data belonging to user '" + account + "' on the Zotero server "
-					+ "will be erased and replaced with data from this copy of Zotero.",
+					+ "will be erased and replaced with data from this copy of Zotero.\n\n"
+					+ "Depending on the size of your library, there may be a delay before "
+					+ "your data is available on the server.",
 				buttonFlags,
 				"Replace Server Data",
 				null, null, null, {}
@@ -433,11 +435,22 @@ function handleSyncReset(action) {
 				case 0:
 					// TODO: better error handling
 					Zotero.Sync.Server.clear(function () {
-						Zotero.Sync.Server.sync(function () {
-							pr.alert(
-								"Restore Completed",
-								"Data on the Zotero server has been successfully restored."
-							);
+						Zotero.Sync.Server.sync({
+							onSuccess: function () {
+								pr.alert(
+									"Restore Completed",
+									"Data on the Zotero server has been successfully restored."
+								);
+							},
+							onError: function () {
+								// TODO: combine with error dialog for regular syncs
+								pr.alert(
+									"Restore Failed",
+									"An error occurred uploading your data to the server.\n\n"
+										+ "Click the sync error icon in the Zotero toolbar "
+										+ "for further information."
+								);
+							}
 						});
 					});
 					break;
@@ -468,11 +481,22 @@ function handleSyncReset(action) {
 				case 0:
 					// TODO: better error handling
 					Zotero.Sync.Server.resetClient();
-					Zotero.Sync.Server.sync(function () {
-						pr.alert(
-							"Full Sync Completed",
-							"The local Zotero library has been merged with data from the Zotero server."
-						);
+					Zotero.Sync.Server.sync({
+						onSuccess: function () {
+							pr.alert(
+								"Full Sync Completed",
+								"The local Zotero library has been merged with data from the Zotero server."
+							);
+						},
+						onError: function () {
+							// TODO: combine with error dialog for regular syncs
+							pr.alert(
+								"Full Sync Failed",
+								"An error occurred while performing the full sync.\n\n"
+									+ "Click the sync error icon in the Zotero toolbar "
+									+ "for further information."
+							);
+						}
 					});
 					break;
 				
