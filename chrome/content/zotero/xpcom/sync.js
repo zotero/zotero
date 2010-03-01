@@ -505,12 +505,19 @@ Zotero.Sync.Runner = new function () {
 		
 		if (Zotero.Utilities.HTTP.browserIsOffline()){
 			this.clearSyncTimeout(); // DEBUG: necessary?
-			this.setSyncIcon('error', "Browser is offline");
+			var msg = "Zotero cannot sync while Firefox is in offline mode.";
+			var e = new Zotero.Error(msg, 0, { dialogButtonText: null })
+			this.setSyncIcon('error', e);
 			return false;
 		}
 		
 		if (_running) {
-			throw ("Sync already running in Zotero.Sync.Runner.sync()");
+			// TODO: show status in all windows
+			var msg = "A sync process is already running. To view progress, check "
+				+ "the window in which the sync began or restart Firefox.";
+			var e = new Zotero.Error(msg, 0, { dialogButtonText: null })
+			this.setSyncIcon('error', e);
+			return false;
 		}
 		
 		// Purge deleted objects so they don't cause sync errors (e.g., long tags)
@@ -1048,9 +1055,8 @@ Zotero.Sync.Server = new function () {
 	
 	this.__defineGetter__('password', function () {
 		var username = this.username;
-
+		
 		if (!username) {
-			Zotero.debug('Username not set before setting Zotero.Sync.Server.password');
 			return '';
 		}
 		
@@ -2760,11 +2766,11 @@ Zotero.Sync.Server.Data = new function() {
 				if (Zotero.Sync.Runner.background) {
 					Zotero.Sync.Server.manualSyncRequired = true;
 					
-					throw (
-						Zotero.getString('sync.error.manualInterventionRequired')
+					var msg = Zotero.getString('sync.error.manualInterventionRequired')
 						+ "\n\n"
-						+ Zotero.getString('sync.error.clickSyncIcon')
-					);
+						+ Zotero.getString('sync.error.clickSyncIcon');
+					var e = new Zotero.Error(msg, 0, { dialogButtonText: null });
+					throw (e);
 				}
 				
 				var mergeData = _reconcile(type, toReconcile, remoteCreatorStore);
