@@ -28,7 +28,8 @@ const RESELECT_KEY_ITEM_KEY = 2;
 const RESELECT_KEY_ITEM_ID = 3;
 
 Zotero.Integration = new function() {
-	var _fifoFile, _osascriptFile;
+	var _fifoFile = null;
+	var _osascriptFile;
 	
 	this.sessions = {};
 	
@@ -37,11 +38,33 @@ Zotero.Integration = new function() {
 	 */
 	this.init = function() {
 		if(!Zotero.isWin) {
-			// create a new file representing the pipe
-			_fifoFile = Components.classes["@mozilla.org/file/directory_service;1"].
-				getService(Components.interfaces.nsIProperties).
-				get("Home", Components.interfaces.nsIFile);
-			_fifoFile.append(".zoteroIntegrationPipe");
+			// determine directory to put the pipe in
+			if(Zotero.isMac) {
+				// on OS X, first try /Users/Shared for those who can't put pipes in their home
+				// directories
+				_fifoFile = Components.classes["@mozilla.org/file/local;1"].
+					createInstance(Components.interfaces.nsILocalFile);
+				_fifoFile.initWithPath("/Users/Shared");
+				
+				if(_fifoFile.isDirectory() && _fifoFile.isWritable()) {
+					var logname = Components.classes["@mozilla.org/process/environment;1"].
+						getService(Components.interfaces.nsIEnvironment).
+						get("LOGNAME");
+					_fifoFile.append(".zoteroIntegrationPipe_"+logname);
+				} else {
+					_fifoFile = null;
+				}
+			}
+			
+			if(!_fifoFile) {
+				// on other platforms, or as a fallback, use home directory
+				_fifoFile = Components.classes["@mozilla.org/file/directory_service;1"].
+					getService(Components.interfaces.nsIProperties).
+					get("Home", Components.interfaces.nsIFile);
+				_fifoFile.append(".zoteroIntegrationPipe");
+			}
+			
+			Zotero.debug("Initializing Zotero integration pipe at "+_fifoFile.path);
 			
 			// destroy old pipe, if one exists
 			if(_fifoFile.exists()) _fifoFile.remove(false);
