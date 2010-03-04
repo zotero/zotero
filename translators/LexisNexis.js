@@ -93,7 +93,7 @@ function doWeb(doc, url) {
 		var disb = text.match(/<input type="hidden" name="disb" value="([^"]+)">/);
 		poststring = "delRange="+delRange+"&selDocs=&disb="+disb[1]+"&initializationPage=0";
 		Zotero.Utilities.HTTP.doPost(uri, poststring, function(text) {
-			uri = text.match(/&amp;url=([^']+)'/)
+			uri = text.match(/url=([^']+)'/)
 			uri = decodeURIComponent(uri[1]);
 			uri = uri.replace(/http:\/\/[^/]*\//, host+"/");
 			var uris = new Array();
