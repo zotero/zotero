@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-03-04 01:30:00"
+	"lastUpdated":"2010-03-04 16:30:00"
 }
 
 function detectWeb(doc, url) {
@@ -38,7 +38,8 @@ function doWeb(doc, url) {
 	} : null;
 
 	// define results navigation frame doc for export buttons and hidden fields
-	var rfDoc = doc.defaultView.window.top.frames[1].document;
+	//var rfDoc = doc.importNode(doc.defaultView.window.top.frames[1].document, true);
+	var rfDoc = doc;
 	var xpath = '//img[@title="Export Bibliographic References"]';	
 
 	var elmt = doc.evaluate(xpath, rfDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -48,10 +49,19 @@ function doWeb(doc, url) {
 	var host = m[0];
 
 	var risb = doc.evaluate('//input[@name="risb"]', rfDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-	var cisb = doc.evaluate('//input[@name="cisb"]', rfDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-	var uri = host+"/us/lnacademic/results/listview/delPrep.do?cisb="+cisb+"&risb="+risb+"&mode=delivery_refworks";
-	var hiddenInputs = doc.evaluate('//form[@name="results_docview_DocumentForm"]//input[@type="hidden" and not(@name="tagData")]', rfDoc, nsResolver,
-		XPathResult.ANY_TYPE, null);
+	if (doc.title.substr(doc.title.length-8, 8) == "Document") {
+		var cisb = doc.evaluate('//input[@name="cisb"]', rfDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
+		var uri = host+"/us/lnacademic/results/listview/delPrep.do?cisb="+cisb+"&risb="+risb+"&mode=delivery_refworks";
+		var hiddenInputs = doc.evaluate('//form[@name="results_docview_DocumentForm"]//input[@type="hidden" and not(@name="tagData")', rfDoc, nsResolver,
+			XPathResult.ANY_TYPE, null);
+		
+	} else {
+		var cisb = doc.evaluate('//a[@target="_parent"]', rfDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.match(/cisb=([^&]+)/)[1];
+		var uri = host+"/us/lnacademic/results/listview/delPrep.do?cisb="+cisb+"&risb="+risb+"&mode=delivery_refworks";
+		var hiddenInputs = doc.evaluate('//input[@type="hidden" and not(@name="tagData") ]', rfDoc, nsResolver,
+			XPathResult.ANY_TYPE, null);
+		
+	}
 	var hiddenInput;
 	var poststring="";
 	while(hiddenInput = hiddenInputs.iterateNext()) {
@@ -86,7 +96,11 @@ function doWeb(doc, url) {
 		}
 		tagData = tagData.substr(1);
 		var delRange = "tag";
-		poststring = poststring + "&tagData=" + tagData + "&hiddensearchfield=Narrow+Search&reloadClassif=&selDomainID=4&format=GNBLIST&focusTerms=&sort=RELEVANCE&nextSteps=0";
+		// this is a violatin of human rights
+		poststring = "followlinks=false&tocLoad=results%2FpubtreeWaitMsg.do&listview=results%2Flistview%2Flistview.do&docview=results%2Fdocview%2Fdocview.do&searchurl=search%2FfocusSearch.do&treeMax=true&treeMod=true&treeWidth=0&pubTreeWidth=&sortId=RELEVANCE&pubTreeMax=false&exit=&startDocNo=1&docNo=&selRCDomainId=4&formatStr=GNBLIST&csi=0&offset=0&ftdividerload=&selTocNodeId=&nextOrPrevious=&curDocLni=null&tocCsiForSeqBrws=null&uri=&viewOptionChanged=false&prevFormat=GNBLIST&prevAction=null&sId=34888793&legVerSupported=false&nodeDisplayName=&unCheckedNodes=&checkedNodes=&grayedNodes=&pisb=&docsInCategory=0&backToBrowseKey=&formatType=LIST&minMaxURI=&docviewAccessed=false&showViewTagged=false&hitNo=0&pageorigin=results_listview_Listview&docTitleFull=&originalDocNo=&dtnAvailable=false&changeLocalePath=&alrtsRqstHndlrPath=&archiveURL=&selectedNodeId=&multipleNodes=&dtnDataHandlerUrl=results%2Fdocview%2FdtnDataHandler.do&totalDocsInResult=1000&fromDocNo=0&cartDocIds=&hiddensearchfield=Search+within+results&reloadClassif=&selDomainID=&urlApiUser=false&editSrchRtUrlPresent=false&showWidget=false&bookmarkUrl=&sourceName=Major+U.S.+and+World+Publications&permalinkNarrowSearchTerms=&prevSortOption=Relevance&format=GNBLIST&inlineLafnNarrow=false&focusTerms=&sort=RELEVANCE&nextSteps=0";
+		
+		poststring = poststring + "&tagData=" + tagData +"&risId=" + risb + "&cisbId=" + cisb + "&risb=" + risb + "&cisb=" + cisb + "&resultrisbId=" + risb;
+		//Zotero.debug(poststring);
 	} 
 	Zotero.Utilities.HTTP.doPost(uri, poststring, function(text) {
 		uri = host+"/us/lnacademic/delivery/refExport.do";
