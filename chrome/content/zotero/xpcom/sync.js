@@ -1683,14 +1683,16 @@ Zotero.Sync.Server = new function () {
 					_error("SSL connection error");
 				}
 			}
-			_error('Empty response from server');
+			// TODO: localize
+			_error('Empty response from server. Please try again in a few minutes.');
 		}
 		
 		if (!xmlhttp.responseXML || !xmlhttp.responseXML.childNodes[0] ||
 				xmlhttp.responseXML.childNodes[0].tagName != 'response' ||
 				!xmlhttp.responseXML.childNodes[0].firstChild) {
 			Zotero.debug(xmlhttp.responseText);
-			_error('Invalid response from server', xmlhttp.responseText);
+			// TODO: localize
+			_error('Invalid response from server. Please try again in a few minutes.', xmlhttp.responseText);
 		}
 		
 		var firstChild = xmlhttp.responseXML.firstChild.firstChild;
