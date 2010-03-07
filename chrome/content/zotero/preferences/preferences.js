@@ -437,12 +437,13 @@ function handleSyncReset(action) {
 					Zotero.Sync.Server.clear(function () {
 						Zotero.Sync.Server.sync({
 							onSuccess: function () {
+								Zotero.Sync.Runner.setSyncIcon();
 								pr.alert(
 									"Restore Completed",
 									"Data on the Zotero server has been successfully restored."
 								);
 							},
-							onError: function () {
+							onError: function (msg) {
 								// TODO: combine with error dialog for regular syncs
 								pr.alert(
 									"Restore Failed",
@@ -450,6 +451,7 @@ function handleSyncReset(action) {
 										+ "Click the sync error icon in the Zotero toolbar "
 										+ "for further information."
 								);
+								Zotero.Sync.Runner.error(msg);
 							}
 						});
 					});
@@ -483,12 +485,13 @@ function handleSyncReset(action) {
 					Zotero.Sync.Server.resetClient();
 					Zotero.Sync.Server.sync({
 						onSuccess: function () {
+							Zotero.Sync.Runner.setSyncIcon();
 							pr.alert(
 								"Full Sync Completed",
 								"The local Zotero library has been merged with data from the Zotero server."
 							);
 						},
-						onError: function () {
+						onError: function (msg) {
 							// TODO: combine with error dialog for regular syncs
 							pr.alert(
 								"Full Sync Failed",
@@ -496,6 +499,7 @@ function handleSyncReset(action) {
 									+ "Click the sync error icon in the Zotero toolbar "
 									+ "for further information."
 							);
+							Zotero.Sync.Runner.error(msg);
 						}
 					});
 					break;
