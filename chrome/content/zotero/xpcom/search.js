@@ -208,6 +208,9 @@ Zotero.Search.prototype.load = function() {
 		+ "WHERE savedSearchID=? ORDER BY searchConditionID";
 	var conditions = Zotero.DB.query(sql, this._id);
 	
+	// Reindex conditions, in case they're not contiguous in the DB
+	var conditionID = 1;
+	
 	for (var i in conditions) {
 		// Parse "condition[/mode]"
 		var [condition, mode] =
@@ -227,14 +230,16 @@ Zotero.Search.prototype.load = function() {
 			conditions[i].value = Zotero.ItemTypes.getName(conditions[i].value);
 		}
 		
-		this._conditions[conditions[i]['searchConditionID']] = {
-			id: conditions[i]['searchConditionID'],
+		this._conditions[conditionID] = {
+			id: conditionID,
 			condition: condition,
 			mode: mode,
 			operator: conditions[i]['operator'],
 			value: conditions[i]['value'],
 			required: conditions[i]['required']
 		};
+		
+		conditionID++;
 	}
 }
 
