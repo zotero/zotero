@@ -465,7 +465,7 @@ Zotero.Sync.Storage = new function () {
 				continue;
 			}
 			
-			var fmtime = file.lastModifiedTime;
+			var fmtime = item.attachmentModificationTime;
 			
 			//Zotero.debug("Stored mtime is " + attachmentData[item.id].mtime);
 			//Zotero.debug("File mtime is " + fmtime);
