@@ -509,7 +509,7 @@ var ZoteroPane = new function()
 	}
 	
 	function isFullScreen() {
-		return document.getElementById('zotero-pane').getAttribute('fullscreenmode') == 'true';
+		return document.getElementById('zotero-pane-stack').getAttribute('fullscreenmode') == 'true';
 	}
 	
 	
