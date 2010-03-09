@@ -3028,7 +3028,14 @@ Zotero.Item.prototype.__defineGetter__('attachmentModificationTime', function ()
 		return undefined;
 	}
 	
-	return file.lastModifiedTime;
+	var fmtime = file.lastModifiedTime;
+	
+	if (fmtime < 1) {
+		Zotero.debug("File mod time " + fmtime + " is less than 1 -- interpreting as 1", 2);
+		fmtime = 1;
+	}
+	
+	return fmtime;
 });
 
 
