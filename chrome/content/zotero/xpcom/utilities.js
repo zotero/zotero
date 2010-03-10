@@ -524,7 +524,7 @@ Zotero.Utilities.prototype.md5 = function(strOrFile, base64) {
  * @return {Integer[]} Start and end pages
  */
 Zotero.Utilities.prototype.getPageRange = function(pages) {
-	const pageRangeRegexp = /^\s*([0-9]+)-([0-9]+)\s*$/
+	const pageRangeRegexp = /^\s*([0-9]+) ?[-\u2013] ?([0-9]+)\s*$/
 	
 	var pageNumbers;
 	var m = pageRangeRegexp.exec(pages);
