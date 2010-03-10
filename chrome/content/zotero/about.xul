@@ -35,11 +35,13 @@
 					],
 					
 					"cs-CZ": [
-						"loyz",
-						"ffvii"
+						"Milan Janíček",
+						"ffvii",
+						"strepon"
 					],
 					
 					"da-DK": [
+						"madsjensen",
 						"Banta"
 					],
 					
@@ -58,8 +60,10 @@
 					],
 					
 					"el-GR": [
-						"geraki",
-						"sarandos"
+						"DeadAtHeaven",
+						"modestos",
+						"sarandos",
+						"geraki"
 					],
 					
 					"es-ES": [
@@ -67,7 +71,14 @@
 					],
 					
 					"et-EE": [
-						"brainbulb"
+						"aethralis",
+						"brainbulb",
+						"lagle"
+					],
+					
+					"eu-ES": [
+						"David Lindemann",
+						"Goofy"
 					],
 					
 					"fi-FI": [
@@ -75,6 +86,9 @@
 					],
 					
 					"fr-FR": [
+						"Marie Léger-St-Jean",
+						"locale_locker",
+						"fiuzzy",
 						"Pascal Pichon",
 						"Jojaba",
 						"La Luciole"
@@ -86,6 +100,10 @@
 					
 					"he-IL": [
 						"Doron Tilleman"
+					],
+					
+					"hr-HR": [
+						"Vukovic"
 					],
 					
 					"hu-HU": [
@@ -100,12 +118,14 @@
 					],
 					
 					"ja-JP": [
+						"himura",
 						"Andreas Bovens",
 						"Michael Schiltz",
 						"ehito"
 					],
 					
 					"ko-KR": [
+						"Moonseok Kim",
 						"wtspout"
 					],
 					
@@ -119,24 +139,26 @@
 					],
 					
 					"nl-NL": [
+						"Rintze Zelle",
 						"Andreas Bovens",
-						"Michael Schiltz",
-						"Rintze Zelle"
+						"Michael Schiltz"
 					],
 					
 					"pl-PL": [
+						"novacellus",
 						"Pawel Krzyworzeka",
 						"Trevor Owens"
 					],
 					
 					"pt-BR": [
+						"Fábio Baqueiro Figueiredo",
 						"Humberto Sartini"
 					],
 					
 					"pt-PT": [
 						"Manuel Menezes de Sequeira",
-						"gandrenf",
-						"tmfs"
+						"tmfs",
+						"gandrenf"
 					],
 					
 					"ro-RO": [
@@ -144,6 +166,7 @@
 					],
 					
 					"ru-RU": [
+						"Maxim Yurkin",
 						"Yaroslav"
 					],
 					
@@ -156,17 +179,18 @@
 					],
 					
 					"sr-RS": [
+						"DakSrbija",
 						"Igor Miletic"
 					],
 						
 					"sv-SE": [
 						"Erik Stattin"
 					],
-
+					
 					"th-TH": [
 						"chin"
 					],
-										
+					
 					"tr-TR": [
 						"Zeki Celikbas"
 					],
@@ -176,13 +200,14 @@
 					],
 					
 					"zh-CN": [
+						"santawort",
 						"Wenping Guo",
 						"liyan"
 					],
 					
 					"zh-TW": [
 						"Chun-Chung Chen",
-						"Alen Cheng"
+						"Alan Cheng"
 					]
 				};
 				
