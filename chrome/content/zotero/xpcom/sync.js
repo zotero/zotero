@@ -2768,9 +2768,10 @@ Zotero.Sync.Server.Data = new function() {
 				if (Zotero.Sync.Runner.background) {
 					Zotero.Sync.Server.manualSyncRequired = true;
 					
-					var msg = Zotero.getString('sync.error.manualInterventionRequired')
-						+ "\n\n"
-						+ Zotero.getString('sync.error.clickSyncIcon');
+					// TODO: localize again
+					//Zotero.getString('sync.error.manualInterventionRequired')
+					//Zotero.getString('sync.error.clickSyncIcon')
+					var msg = "Conflicts have suspended automatic syncing.\n\nClick the sync icon to resolve them.";
 					var e = new Zotero.Error(msg, 0, { dialogButtonText: null });
 					throw (e);
 				}
