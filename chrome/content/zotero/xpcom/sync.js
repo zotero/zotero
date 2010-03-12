@@ -515,7 +515,7 @@ Zotero.Sync.Runner = new function () {
 			// TODO: show status in all windows
 			var msg = "A sync process is already running. To view progress, check "
 				+ "the window in which the sync began or restart Firefox.";
-			var e = new Zotero.Error(msg, 0, { dialogButtonText: null })
+			var e = new Zotero.Error(msg, 0, { dialogButtonText: null, frontWindowOnly: true })
 			this.setSyncIcon('error', e);
 			return false;
 		}
@@ -526,6 +526,13 @@ Zotero.Sync.Runner = new function () {
 		_background = !!background;
 		_running = true;
 		this.setSyncIcon('animate');
+		
+		var finalCallbacks = {
+			onSuccess: Zotero.Sync.Runner.stop,
+			onSkip: Zotero.Sync.Runner.stop,
+			onStop: Zotero.Sync.Runner.stop,
+			onError: Zotero.Sync.Runner.error
+		};
 		
 		var storageSync = function () {
 			var syncNeeded = false;
@@ -546,21 +553,13 @@ Zotero.Sync.Runner = new function () {
 							{
 								// ZFS success
 								onSuccess: function () {
-									Zotero.Sync.Server.sync(
-										Zotero.Sync.Runner.stop,
-										Zotero.Sync.Runner.stop,
-										Zotero.Sync.Runner.error
-									)
+									Zotero.Sync.Server.sync(finalCallbacks);
 								},
 								
 								// ZFS skip
 								onSkip: function () {
 									if (syncNeeded) {
-										Zotero.Sync.Server.sync(
-											Zotero.Sync.Runner.stop,
-											Zotero.Sync.Runner.stop,
-											Zotero.Sync.Runner.error
-										)
+										Zotero.Sync.Server.sync(finalCallbacks);
 									}
 								},
 								
@@ -583,12 +582,7 @@ Zotero.Sync.Runner = new function () {
 							{
 								// ZFS success
 								onSuccess: function () {
-									Zotero.Sync.Server.sync({
-										onSuccess: Zotero.Sync.Runner.stop,
-										onSkip: Zotero.Sync.Runner.stop,
-										onStop: Zotero.Sync.Runner.stop,
-										onError: Zotero.Sync.Runner.error
-									})
+									Zotero.Sync.Server.sync(finalCallbacks);
 								},
 								
 								// ZFS skip
@@ -743,6 +737,11 @@ Zotero.Sync.Runner = new function () {
 	
 	
 	this.setSyncIcon = function (status, e) {
+		var message;
+		var buttonText;
+		var buttonCallback;
+		var frontWindowOnly = false;
+		
 		status = status ? status : '';
 		
 		switch (status) {
@@ -752,22 +751,10 @@ Zotero.Sync.Runner = new function () {
 			case 'error':
 				break;
 			
-		default:
-			throw ("Invalid sync icon status '" + status
-					+ "' in Zotero.Sync.Runner.setSyncIcon()");
+			default:
+				throw ("Invalid sync icon status '" + status
+						+ "' in Zotero.Sync.Runner.setSyncIcon()");
 		}
-		
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			.getService(Components.interfaces.nsIWindowMediator);
-		var win = wm.getMostRecentWindow('navigator:browser');
-		
-		var warning = win.document.getElementById('zotero-tb-sync-warning');
-		var icon = win.document.getElementById('zotero-tb-sync');
-		
-		
-		var message;
-		var buttonText;
-		var buttonCallback;
 		
 		if (e) {
 			if (e.data) {
@@ -777,6 +764,9 @@ Zotero.Sync.Runner = new function () {
 				if (typeof e.data.dialogButtonText != 'undefined') {
 					buttonText = e.data.dialogButtonText;
 					buttonCallback = e.data.dialogButtonCallback;
+				}
+				if (e.data.frontWindowOnly) {
+					frontWindowOnly = e.data.frontWindowOnly;
 				}
 			}
 			if (!message) {
@@ -789,97 +779,136 @@ Zotero.Sync.Runner = new function () {
 			}
 		}
 		
-		if (status == 'warning' || status == 'error') {
-			icon.setAttribute('status', '');
-			warning.hidden = false;
-			if (Zotero.Sync.Server.upgradeRequired) {
-				Zotero.Sync.Server.upgradeRequired = false;
-				warning.setAttribute('mode', 'upgrade');
-				buttonText = null;
-			}
-			else {
-				warning.setAttribute('mode', status);
-			}
-			warning.tooltipText = message;
-			warning.onclick = function () {
-				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-							.getService(Components.interfaces.nsIWindowMediator);
-				var win = wm.getMostRecentWindow("navigator:browser");
-				
-				var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-								.createInstance(Components.interfaces.nsIPrompt);
-				// Warning
-				if (status == 'warning') {
-					var title = Zotero.getString('general.warning');
-					
-					// If secondary button not specified, just use an alert
-					if (!buttonText) {
-						pr.alert(title, message);
-						return;
-					}
-					
-					var buttonFlags = pr.BUTTON_POS_0 * pr.BUTTON_TITLE_OK
-										+ pr.BUTTON_POS_1 * pr.BUTTON_TITLE_IS_STRING;
-					Zotero.debug(buttonFlags);
-					var index = pr.confirmEx(
-						title,
-						message,
-						buttonFlags,
-						"",
-						buttonText,
-						"", null, {}
-					);
-					
-					if (index == 1) {
-						setTimeout(buttonCallback, 1);
-					}
-				}
-				
-				// Error
-				else if (status == 'error') {
-					var errorsLogged = Zotero.getErrors().length > 0;
-					// Probably not necessary, but let's be sure
-					if (!errorsLogged) {
-						Components.utils.reportError(message);
-					}
-					
-					if (typeof buttonText == 'undefined') {
-						buttonText = Zotero.getString('errorReport.reportError');
-						buttonCallback = function () {
-							win.ZoteroPane.reportErrors();
-						}
-					}
-					// If secondary button is explicitly null, just use an alert
-					else if (buttonText === null) {
-						pr.alert(title, message);
-						return;
-					}
-					
-					var buttonFlags = pr.BUTTON_POS_0 * pr.BUTTON_TITLE_OK
-										+ pr.BUTTON_POS_1 * pr.BUTTON_TITLE_IS_STRING;
-					var index = pr.confirmEx(
-						Zotero.getString('general.error'),
-						message,
-						buttonFlags,
-						"",
-						buttonText,
-						"", null, {}
-					);
-					
-					if (index == 1) {
-						setTimeout(buttonCallback, 1);
-					}
-				}
-			}
-		}
-		else {
-			icon.setAttribute('status', status);
-			warning.hidden = true;
-			warning.onclick = null;
+		var upgradeRequired = false;
+		if (Zotero.Sync.Server.upgradeRequired) {
+			upgradeRequired = true;
+			Zotero.Sync.Server.upgradeRequired = false;
 		}
 		
-		// Disable button while spinning
-		icon.disabled = status == 'animate';
+		if (status == 'error') {
+			var errorsLogged = Zotero.getErrors().length > 0;
+		}
+		
+		if (frontWindowOnly) {
+			// Fake an nsISimpleEnumerator with just the topmost window
+			var enumerator = {
+				_returned: false,
+				hasMoreElements: function () {
+					return !this._returned;
+				},
+				getNext: function () {
+					if (this._returned) {
+						throw ("No more windows to return in Zotero.Sync.Runner.setSyncIcon()");
+					}
+					this._returned = true;
+					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								.getService(Components.interfaces.nsIWindowMediator);
+					return wm.getMostRecentWindow("navigator:browser");
+				}
+			};
+		}
+		// Update all windows
+		else {
+			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						.getService(Components.interfaces.nsIWindowMediator);
+			var enumerator = wm.getEnumerator('navigator:browser');
+		}
+		
+		while (enumerator.hasMoreElements()) {
+			var win = enumerator.getNext();
+			var warning = win.document.getElementById('zotero-tb-sync-warning');
+			var icon = win.document.getElementById('zotero-tb-sync');
+			
+			if (status == 'warning' || status == 'error') {
+				icon.setAttribute('status', '');
+				warning.hidden = false;
+				if (upgradeRequired) {
+					warning.setAttribute('mode', 'upgrade');
+					buttonText = null;
+				}
+				else {
+					warning.setAttribute('mode', status);
+				}
+				warning.tooltipText = message;
+				warning.onclick = function () {
+					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								.getService(Components.interfaces.nsIWindowMediator);
+					var win = wm.getMostRecentWindow("navigator:browser");
+					
+					var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+									.createInstance(Components.interfaces.nsIPrompt);
+					// Warning
+					if (status == 'warning') {
+						var title = Zotero.getString('general.warning');
+						
+						// If secondary button not specified, just use an alert
+						if (!buttonText) {
+							pr.alert(title, message);
+							return;
+						}
+						
+						var buttonFlags = pr.BUTTON_POS_0 * pr.BUTTON_TITLE_OK
+											+ pr.BUTTON_POS_1 * pr.BUTTON_TITLE_IS_STRING;
+						Zotero.debug(buttonFlags);
+						var index = pr.confirmEx(
+							title,
+							message,
+							buttonFlags,
+							"",
+							buttonText,
+							"", null, {}
+						);
+						
+						if (index == 1) {
+							setTimeout(buttonCallback, 1);
+						}
+					}
+					
+					// Error
+					else if (status == 'error') {
+						// Probably not necessary, but let's be sure
+						if (!errorsLogged) {
+							Components.utils.reportError(message);
+						}
+						
+						if (typeof buttonText == 'undefined') {
+							buttonText = Zotero.getString('errorReport.reportError');
+							buttonCallback = function () {
+								win.ZoteroPane.reportErrors();
+							}
+						}
+						// If secondary button is explicitly null, just use an alert
+						else if (buttonText === null) {
+							pr.alert(title, message);
+							return;
+						}
+						
+						var buttonFlags = pr.BUTTON_POS_0 * pr.BUTTON_TITLE_OK
+											+ pr.BUTTON_POS_1 * pr.BUTTON_TITLE_IS_STRING;
+						var index = pr.confirmEx(
+							Zotero.getString('general.error'),
+							message,
+							buttonFlags,
+							"",
+							buttonText,
+							"", null, {}
+						);
+						
+						if (index == 1) {
+							setTimeout(buttonCallback, 1);
+						}
+					}
+				}
+			}
+			else {
+				icon.setAttribute('status', status);
+				warning.hidden = true;
+				warning.onclick = null;
+			}
+			
+			// Disable button while spinning
+			icon.disabled = status == 'animate';
+		}
 		
 		// Clear tooltip
 		_tooltip = null;
@@ -1255,10 +1284,12 @@ Zotero.Sync.Server = new function () {
 		
 		if (!restart) {
 			if (_syncInProgress) {
-				_error(Zotero.localeJoin([
+				var msg = Zotero.localeJoin([
 					Zotero.getString('sync.error.syncInProgress'),
 					Zotero.getString('sync.error.syncInProgress.wait')
-				]));
+				]);
+				var e = new Zotero.Error(msg, 0, { dialogButtonText: null, frontWindowOnly: true });
+				_error(e);
 			}
 			
 			Zotero.debug("Beginning server sync");
@@ -1268,7 +1299,6 @@ Zotero.Sync.Server = new function () {
 		// Get updated data
 		var url = _serverURL + 'updated';
 		var lastsync = Zotero.Sync.Server.lastRemoteSyncTime;
-		// TODO: use full sync instead? or make this full sync?
 		if (!lastsync) {
 			lastsync = 1;
 		}
@@ -1478,6 +1508,15 @@ Zotero.Sync.Server = new function () {
 					//throw('break2');
 					
 					Zotero.DB.commitTransaction();
+					
+					// Check if any items were modified during /upload,
+					// and restart the sync if so
+					if (Zotero.Items.getNewer(nextLocalSyncDate)) {
+						Zotero.debug("Items were modified during upload -- restarting sync");
+						Zotero.Sync.Server.sync(_callbacks, true, true);
+						return;
+					}
+					
 					_syncInProgress = false;
 					_callbacks.onSuccess();
 				}
