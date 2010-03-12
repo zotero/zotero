@@ -424,7 +424,9 @@ var ZoteroPane = new function()
 			var d2 = new Date();
 			Zotero.debug("Purged data tables in " + (d2 - d) + " ms");
 			
-			if (Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Server.enabled) {
+			// Auto-sync on pane open
+			if (Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Server.enabled
+					&& !Zotero.Sync.Server.syncInProgress && !Zotero.Sync.Storage.syncInProgress) {
 				setTimeout(function () {
 					Zotero.Sync.Runner.sync(true);
 				}, 1000);
