@@ -622,8 +622,8 @@ var Zotero = new function(){
 		if (index == 0) {
 			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
 					.getService(Components.interfaces.nsIAppStartup);
-			appStartup.quit(Components.interfaces.nsIAppStartup.eRestart);
-			appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
+			appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit
+				| Components.interfaces.nsIAppStartup.eRestart);
 		}
 		
 		return useProfileDir ? true : file;

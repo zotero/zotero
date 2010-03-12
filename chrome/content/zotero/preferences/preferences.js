@@ -91,6 +91,11 @@ function onDataDirUpdate(event) {
 	if (event.originalTarget && event.originalTarget.tagName == 'button') {
 		return true;
 	}
+	// Fx3.6
+	else if (event.explicitOriginalTarget && event.explicitOriginalTarget.tagName == 'button') {
+		return true;
+	}
+	
 	// If directory not set or invalid, prompt for location
 	if (!getDataDirPath()) {
 		event.stopPropagation();
@@ -117,8 +122,8 @@ function onDataDirUpdate(event) {
 		Zotero.Prefs.set('useDataDir', useDataDir);
 		var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
 				.getService(Components.interfaces.nsIAppStartup);
-		appStartup.quit(Components.interfaces.nsIAppStartup.eRestart);
-		appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
+		appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit
+			| Components.interfaces.nsIAppStartup.eRestart);
 	}
 	
 	radiogroup.selectedIndex = useDataDir ? 1 : 0;
