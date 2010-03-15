@@ -1978,12 +1978,25 @@ Zotero.Schema = new function(){
 					var rows = Zotero.DB.columnQuery("SELECT GROUP_CONCAT(valueID) FROM itemDataValues GROUP BY value HAVING COUNT(*) > 1");
 					for each(var row in rows) {
 						var ids = row.split(',');
+						var id = parseInt(ids[0]);
 						var deleteIDs = [];
 						for (var j=1; j<ids.length; j++) {
 							deleteIDs.push(parseInt(ids[j]));
 						}
-						Zotero.DB.query("UPDATE itemData SET valueID=? WHERE valueID IN (" + deleteIDs.map(function () '?').join() + ")", [parseInt(ids[0])].concat(deleteIDs));
-						Zotero.DB.query("DELETE FROM itemDataValues WHERE valueID IN (" + deleteIDs.map(function () '?').join() + ")", deleteIDs);
+						
+						var done = 0;
+						var max = 998; // compiled limit
+						var num = deleteIDs.length;
+						
+						do {
+							var chunk = deleteIDs.splice(0, max);
+							
+							Zotero.DB.query("UPDATE itemData SET valueID=? WHERE valueID IN (" + chunk.map(function () '?').join() + ")", [id].concat(chunk));
+							Zotero.DB.query("DELETE FROM itemDataValues WHERE valueID IN (" + chunk.map(function () '?').join() + ")", chunk);
+							
+							done += chunk.length;
+						}
+						while (done < num);
 					}
 					Zotero.DB.query("CREATE UNIQUE INDEX itemDataValues_value ON itemDataValues(value)");
 					
