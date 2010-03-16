@@ -1091,6 +1091,7 @@ Zotero.Attachments = new function(){
 				continue;
 			}
 			size += file.fileSize;
+			Zotero.wait();
 		}
 		return size;
 	}
