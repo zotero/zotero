@@ -440,7 +440,12 @@ function handleSyncReset(action) {
 				case 0:
 					// TODO: better error handling
 					Zotero.Sync.Server.clear(function () {
-						Zotero.Sync.Server.sync({
+						Zotero.Sync.Server.sync(/*{
+							
+							// TODO: this doesn't work if the pref window is 
+							closed. fix, perhaps by making original callbacks
+							available to the custom callbacks
+							
 							onSuccess: function () {
 								Zotero.Sync.Runner.setSyncIcon();
 								pr.alert(
@@ -458,7 +463,7 @@ function handleSyncReset(action) {
 								);
 								Zotero.Sync.Runner.error(msg);
 							}
-						});
+						}*/);
 					});
 					break;
 				
@@ -488,7 +493,7 @@ function handleSyncReset(action) {
 				case 0:
 					// TODO: better error handling
 					Zotero.Sync.Server.resetClient();
-					Zotero.Sync.Server.sync({
+					Zotero.Sync.Server.sync(/*{
 						onSuccess: function () {
 							Zotero.Sync.Runner.setSyncIcon();
 							pr.alert(
@@ -506,7 +511,7 @@ function handleSyncReset(action) {
 							);
 							Zotero.Sync.Runner.error(msg);
 						}
-					});
+					}*/);
 					break;
 				
 				// Cancel
