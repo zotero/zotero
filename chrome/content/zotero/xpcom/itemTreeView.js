@@ -573,7 +573,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		this.selectItem(selectItem);
 	}
 	
-	if (Zotero.Sync.Server.syncInProgress) {
+	if (Zotero.suppressUIUpdates) {
 		this.rememberSelection(savedSelection);
 	}
 	
@@ -1112,7 +1112,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
  */
 Zotero.ItemTreeView.prototype.selectItem = function(id, expand, noRecurse)
 {
-	if (Zotero.Sync.Server.syncInProgress) {
+	// Don't change selection if UI updates are disabled (e.g., during sync)
+	if (Zotero.suppressUIUpdates) {
 		return;
 	}
 	

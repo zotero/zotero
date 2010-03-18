@@ -146,6 +146,11 @@ var Zotero = new function(){
 	 */
 	this.__defineGetter__('locked', function () _locked);
 	
+	/**
+	 * @property	{Boolean}	suppressUIUpdates	Don't update UI on Notifier triggers
+	 */
+	this.suppressUIUpdates = false;
+	
 	var _startupErrorHandler;
 	var _zoteroDirectory = false;
 	var _localizedStringBundle;

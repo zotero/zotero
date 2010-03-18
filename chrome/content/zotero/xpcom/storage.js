@@ -62,6 +62,7 @@ Zotero.Sync.Storage = new function () {
 	
 	
 	this.__defineGetter__("syncInProgress", function () _syncInProgress);
+	this.__defineGetter__("updatesInProgress", function () _updatesInProgress);
 	
 	this.compressionTracker = {
 		compressed: 0,
@@ -78,6 +79,7 @@ Zotero.Sync.Storage = new function () {
 	// Private properties
 	//
 	var _syncInProgress;
+	var _updatesInProgress;
 	var _changesMade;
 	
 	var _session;
@@ -694,7 +696,9 @@ Zotero.Sync.Storage = new function () {
 		// and mark for updated
 		var file = item.getFile();
 		if (newFile && file.leafName != newFile.leafName) {
+			_updatesInProgress = true;
 			item.relinkAttachmentFile(newFile);
+			_updatesInProgress = false;
 			file = item.getFile();
 			// TODO: use an integer counter instead of mod time for change detection
 			var useCurrentModTime = true;

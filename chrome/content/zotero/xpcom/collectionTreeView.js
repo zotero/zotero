@@ -409,7 +409,7 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 				}
 				
 				this.reload();
-				if (Zotero.Sync.Server.syncInProgress) {
+				if (Zotero.suppressUIUpdates) {
 					this.rememberSelection(savedSelection);
 					break;
 				}
@@ -418,7 +418,7 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 				
 			case 'search':
 				this.reload();
-				if (Zotero.Sync.Server.syncInProgress) {
+				if (Zotero.suppressUIUpdates) {
 					this.rememberSelection(savedSelection);
 					break;
 				}
@@ -730,8 +730,8 @@ Zotero.CollectionTreeView.prototype.collapseAllRows = function(treebox) {
  * @param	{Integer|null}		libraryID		Library to select, or null for local library
  */
 Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
-	if (Zotero.Sync.Server.syncInProgress) {
-		Zotero.debug("Sync in progress -- not changing library selection");
+	if (Zotero.suppressUIUpdates) {
+		Zotero.debug("UI updates suppressed -- not changing library selection");
 		return false;
 	}
 	

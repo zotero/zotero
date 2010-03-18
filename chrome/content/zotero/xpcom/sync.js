@@ -1154,6 +1154,7 @@ Zotero.Sync.Server = new function () {
 	});
 	
 	this.__defineGetter__("syncInProgress", function () _syncInProgress);
+	this.__defineGetter__("updatesInProgress", function () _updatesInProgress);
 	this.__defineGetter__("sessionIDComponent", function () {
 		return 'sessionid=' + _sessionID;
 	});
@@ -1187,6 +1188,7 @@ Zotero.Sync.Server = new function () {
 	var _apiVersionComponent = "version=" + this.apiVersion;
 	var _cachedCredentials = {};
 	var _syncInProgress;
+	var _updatesInProgress;
 	var _sessionID;
 	var _throttleTimeout;
 	var _checkTimer;
@@ -1401,9 +1403,19 @@ Zotero.Sync.Server = new function () {
 				
 				// Reconcile and save updated data from server and
 				// prepare local data to upload
-				var xmlstr = Zotero.Sync.Server.Data.processUpdatedXML(
-					xml.updated, lastLocalSyncDate, syncSession, libraryID
-				);
+				
+				Zotero.suppressUIUpdates = true;
+				_updatesInProgress = true;
+				
+				try {
+					var xmlstr = Zotero.Sync.Server.Data.processUpdatedXML(
+						xml.updated, lastLocalSyncDate, syncSession, libraryID
+					);
+				}
+				finally {
+					Zotero.suppressUIUpdates = false;
+					_updatesInProgress = false;
+				}
 				
 				//Zotero.debug(xmlstr);
 				//throw('break');
