@@ -6,7 +6,7 @@
 	"target":"rdf",
 	"minVersion":"2.0",
 	"maxVersion":"",
-	"priority":200,
+	"priority":50,
 	"inRepository":true,
 	"lastUpdated":"2009-06-29 22:16:41"
 }
