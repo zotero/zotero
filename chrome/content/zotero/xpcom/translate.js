@@ -236,55 +236,69 @@ Zotero.Translator = function(file) {
 	var cStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"].
 		createInstance(Components.interfaces.nsIConverterInputStream);
 	fStream.init(file, -1, -1, 0);
-	cStream.init(fStream, "UTF-8", 4096,
+	cStream.init(fStream, "UTF-8", 8192,
 		Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
 	
 	var str = {};
-	var infoString = cStream.readString(MAX_INFO_LENGTH, str);
-	var m = infoRe.exec(str.value);
-	if(!m) {
+	cStream.readString(MAX_INFO_LENGTH, str);
+	
+	// We assume lastUpdated is at the end to avoid running the regexp on more than necessary
+	var lastUpdatedIndex = str.value.indexOf('"lastUpdated"');
+	if (lastUpdatedIndex == -1) {
 		this.logError("Invalid or missing translator metadata JSON object");
-	} else {
-		try {
-			var info = Zotero.JSON.unserialize(m[0]);
-		} catch(e) {
-			this.logError("Invalid or missing translator metadata JSON object");
-		}
-		if(info) {
-			var haveMetadata = true;
-			// make sure we have all the properties
-			for each(var property in ["translatorID", "translatorType", "label", "creator", "target", "minVersion", "maxVersion", "priority", "lastUpdated", "inRepository"]) {
-				if(info[property] === undefined) {
-					this.logError('Missing property "'+property+'" in translator metadata JSON object');
-					haveMetadata = false;
-					break;
-				} else {
-					this[property] = info[property];
-				}
-			}
-			
-			if(haveMetadata) {
-				if(this.translatorType & TRANSLATOR_TYPES["import"]) {
-					// compile import regexp to match only file extension
-					this.importRegexp = this.target ? new RegExp("\\."+this.target+"$", "i") : null;
-				}
-				if(this.translatorType & TRANSLATOR_TYPES["web"]) {
-					// compile web regexp
-					this.webRegexp = this.target ? new RegExp(this.target, "i") : null;
-					
-					if(!this.target) {
-						// for translators used on every page, cache code in memory
-						var strs = [str.value];
-						var amountRead;
-						while(amountRead = cStream.readString(4096, str)) strs.push(str.value);
-						this._code = strs.join("");
-					}
-				}
-			}
-		}
+		return;
 	}
 	
-	fStream.close();
+	// Add 50 characters to clear lastUpdated timestamp and final "}"
+	var header = str.value.substr(0, lastUpdatedIndex + 50);
+	var m = infoRe.exec(header);
+	if (!m) {
+		this.logError("Invalid or missing translator metadata JSON object");
+		fStream.close();
+		return;
+	}
+	
+	try {
+		var info = Zotero.JSON.unserialize(m[0]);
+	} catch(e) {
+		this.logError("Invalid or missing translator metadata JSON object");
+		fStream.close();
+		return;
+	}
+	
+	var haveMetadata = true;
+	// make sure we have all the properties
+	for each(var property in ["translatorID", "translatorType", "label", "creator", "target", "minVersion", "maxVersion", "priority", "lastUpdated", "inRepository"]) {
+		if(info[property] === undefined) {
+			this.logError('Missing property "'+property+'" in translator metadata JSON object');
+			haveMetadata = false;
+			break;
+		} else {
+			this[property] = info[property];
+		}
+	}
+	if(!haveMetadata) {
+		fStream.close();
+		return;
+	}
+	
+	if(this.translatorType & TRANSLATOR_TYPES["import"]) {
+		// compile import regexp to match only file extension
+		this.importRegexp = this.target ? new RegExp("\\."+this.target+"$", "i") : null;
+	}
+	if(this.translatorType & TRANSLATOR_TYPES["web"]) {
+		// compile web regexp
+		this.webRegexp = this.target ? new RegExp(this.target, "i") : null;
+		
+		if(!this.target) {
+			// for translators used on every page, cache code in memory
+			var strs = [str.value];
+			var amountRead;
+			while(amountRead = cStream.readString(8192, str)) strs.push(str.value);
+			this._code = strs.join("");
+
+		}
+	}
 }
 
 
