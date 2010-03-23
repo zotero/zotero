@@ -222,12 +222,6 @@ Zotero.ProgressWindow = function(_window){
 					elem.setAttribute('class', 'text-link');
 					for (var i in part.attributes) {
 						elem.setAttribute(i, part.attributes[i]);
-						
-						if (i == 'href') {
-							// DEBUG: As of Fx2, 'mouseup' seems to be the only
-							// way to detect a click in a popup window
-							elem.addEventListener('mouseup', _handleLinkClick, false);
-						}
 					}
 				}
 				
@@ -307,7 +301,13 @@ Zotero.ProgressWindow = function(_window){
 	}
 	
 	function _disableTimeout() {
-		_progressWindow.clearTimeout(_timeoutID);
+		// FIXME: to prevent errors from translator saving (Create New Item appears to still work)
+		// This shouldn't be necessary, and mouseover isn't properly
+		// causing the popup to remain
+		try {
+			_progressWindow.clearTimeout(_timeoutID);
+		}
+		catch (e) {}
 		_timeoutID = false;
 	}
 	
@@ -337,21 +337,11 @@ Zotero.ProgressWindow = function(_window){
 			&& (e.screenY >= top) && e.screenY <= (top + this.outerHeight)) {
 				return;
 		}
-		
 		startCloseTimer();
 	}
 	
 	
 	function _onMouseUp(e) {
 		close();
-	}
-	
-	
-	/*
-	 * Open URL specified in target's href attribute in a new window
-	 */
-	function _handleLinkClick(event) {
-		_progressWindow.open(event.target.getAttribute('href'), 'zotero-loaded-page',
-			'menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes');
 	}
 }
