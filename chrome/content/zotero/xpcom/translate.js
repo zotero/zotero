@@ -246,6 +246,7 @@ Zotero.Translator = function(file) {
 	var lastUpdatedIndex = str.value.indexOf('"lastUpdated"');
 	if (lastUpdatedIndex == -1) {
 		this.logError("Invalid or missing translator metadata JSON object");
+		fStream.close();
 		return;
 	}
 	
@@ -299,6 +300,8 @@ Zotero.Translator = function(file) {
 
 		}
 	}
+	
+	fStream.close();
 }
 
 
