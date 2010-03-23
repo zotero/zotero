@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"Ovid",
 	"creator":"Simon Kornblith and Michael Berkowitz",
-	"target":"/(gw2|spa|spb|sp....)/ovidweb\\.cgi",
+	"target":"/(gw2|sp[^\\/]+)/ovidweb\\.cgi",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-01-21 22:25:00"
+	"lastUpdated":"2010-03-23 18:55:00"
 }
 
 function detectWeb(doc, url) {
