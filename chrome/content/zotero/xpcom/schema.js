@@ -2083,7 +2083,7 @@ Zotero.Schema = new function(){
 								continue;
 							}
 							
-							var counts = Zotero.DB.query("SELECT tag, COUNT(*) AS numItems FROM tags NATURAL JOIN itemTags WHERE tag LIKE ? GROUP BY tag ORDER BY numItems DESC", l);
+							var counts = Zotero.DB.query("SELECT tag, COUNT(*) AS numItems FROM tags NATURAL JOIN itemTags WHERE tag LIKE ? ESCAPE '`' GROUP BY tag ORDER BY numItems DESC", l.replace('_', '`_').replace('%', '`%'));
 							// If not associated with any items, use all lowercase
 							if (!counts) {
 								var newTag = l;
@@ -2094,14 +2094,14 @@ Zotero.Schema = new function(){
 							}
 							// Use earliest
 							else {
-								var newTag = Zotero.DB.valueQuery("SELECT tag FROM tags NATURAL JOIN itemTags WHERE tag IN (SELECT tag FROM tags NATURAL JOIN itemTags NATURAL JOIN items WHERE tag LIKE ? ORDER BY dateAdded LIMIT 1) GROUP BY tag", l);
+								var newTag = Zotero.DB.valueQuery("SELECT tag FROM tags NATURAL JOIN itemTags WHERE tag IN (SELECT tag FROM tags NATURAL JOIN itemTags NATURAL JOIN items WHERE tag LIKE ? ESCAPE '`' ORDER BY dateAdded LIMIT 1) GROUP BY tag", l.replace('_', '`_').replace('%', '`%'));
 							}
 							
 							// Point old to new
-							var types = Zotero.DB.columnQuery("SELECT DISTINCT tagType FROM tags WHERE tag LIKE ?", l);
+							var types = Zotero.DB.columnQuery("SELECT DISTINCT tagType FROM tags WHERE tag LIKE ? ESCAPE '`'", l.replace('_', '`_').replace('%', '`%'));
 							for each(var type in types) {
 								var newTagID = Zotero.DB.valueQuery("SELECT tagID FROM tags WHERE tag=? AND tagType=?", [newTag, type]);
-								var oldIDs = Zotero.DB.columnQuery("SELECT tagID FROM tags WHERE tag LIKE ? AND tag != ? AND tagType=?", [l, newTag, type]);
+								var oldIDs = Zotero.DB.columnQuery("SELECT tagID FROM tags WHERE tag LIKE ? ESCAPE '`' AND tag != ? AND tagType=?", [l.replace('_', '`_').replace('%', '`%'), newTag, type]);
 								if (oldIDs) {
 									if (!newTagID) {
 										newTagID = oldIDs[0];
