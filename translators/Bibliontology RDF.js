@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":50,
 	"inRepository":true,
-	"lastUpdated":"2010-03-27 00:26:50"
+	"lastUpdated":"2010-03-27 01:02:54"
 }
 
 Zotero.configure("getCollections", true);
@@ -101,13 +101,13 @@ var TYPES = {
 	"presentation":			[[[n.rdf+"type", n.bibo+"Slideshow"]],				null,								null],
 	"radioBroadcast":		[[[n.rdf+"type", n.po+"AudioDocument"],
 							  [n.rdf+"type", n.po+"Episode"],
-							  [n.po+"broadcast_on", n.po+"Radio"]],				null,								[n.rdf+"type", n.po+"Programme"]],
+							  [n.po+"broadcast_on", n.po+"Radio"]],				null,								[false, n.dcterms+"isPartOf", [[n.rdf+"type", n.po+"Programme"]]]],
 	"report":				[[[n.rdf+"type", n.bibo+"Report"]],					null,								null],
 	"statute":				[[[n.rdf+"type", n.bibo+"Statute"]],				null,								[false, n.dcterms+"isPartOf", [[n.rdf+"type", n.bibo+"Code"]]]],
 	"thesis":				[[[n.rdf+"type", n.bibo+"Thesis"]],					null,								null],
 	"tvBroadcast":			[[[n.rdf+"type", n.bibo+"AudioVisualDocument"],
 							  [n.rdf+"type", n.po+"Episode"],
-							  [n.po+"broadcast_on", n.po+"TV"]],				null,								[n.rdf+"type", n.po+"Programme"]],
+							  [n.po+"broadcast_on", n.po+"TV"]],				null,								[false, n.dcterms+"isPartOf", [[n.rdf+"type", n.po+"Programme"]]]],
 	"videoRecording":		[[[n.rdf+"type", n.bibo+"AudioVisualDocument"]], 	null,								null],
 	"webpage":				[[[n.rdf+"type", n.bibo+"Webpage"]],				null,								[false, n.dcterms+"isPartOf", [[n.rdf+"type", n.bibo+"Website"]]]]
 };
@@ -384,6 +384,7 @@ Type.prototype.getMatchScore = function(node) {
 Type.prototype._scoreNodeRelationship = function(node, definition, score) {
 	var subNode = null;
 	if(definition) {
+		Zotero.debug(definition);
 		statements = Zotero.RDF.getStatementsMatching(node, definition.predicate, null);
 		if(statements) {
 			var bestScore = -9999;
