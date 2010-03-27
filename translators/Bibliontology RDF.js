@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":50,
 	"inRepository":true,
-	"lastUpdated":"2009-06-29 22:16:41"
+	"lastUpdated":"2010-03-27 00:26:50"
 }
 
 Zotero.configure("getCollections", true);
@@ -851,7 +851,6 @@ function doImport() {
 		Zotero.debug("Got item of type "+bestType.zoteroType+" with score "+bestTypeScore);
 		nodes = bestNodes;
 		bestType.getItemSeriesNodes(nodes);
-		Zotero.debug([i+" = "+nodes[i].toString() for(i in nodes)]);
 		
 		// create item
 		var zoteroType = bestType.zoteroType;
@@ -869,7 +868,6 @@ function doImport() {
 				Zotero.debug("handling "+property);
 				
 				var propertyMappings = collapsedProperties[i][property];
-				Zotero.debug(propertyMappings);
 				if(propertyMappings) {
 					for each(var propertyMapping in propertyMappings) {
 						if(propertyMapping.mapToItem) {				// LiteralProperty
@@ -877,7 +875,6 @@ function doImport() {
 						} else if(propertyMapping.mapToCreator) {	// CreatorProperty
 							var creators, creatorNodes;
 							[creators, creatorNodes] = propertyMapping.mapToCreators(nodes[i], zoteroType);
-							Zotero.debug(creators);
 							if(creators.length) {
 								for(var j in creators) {
 									var creatorNodeURI = Zotero.RDF.getResourceURI(creatorNodes[j]);
@@ -897,10 +894,15 @@ function doImport() {
 			functionProperty.mapToItem(newItem, nodes);
 		}
 		
-		// get indicies of creators and add
+		// handle creators and tags
 		var creatorLists = {};
 		var creatorsAdded = {};
 		for(var i in nodes) {
+			var statements = Zotero.RDF.getStatementsMatching(nodes[i], n.dcterms+"subject", null);
+			for each(var stmt in statements) {
+				newItem.tags.push({tag:stmt[2], type:(i == USERITEM ? 0 : 1)});
+			}
+			
 			for(var j in CREATOR_LISTS) {
 				var statements = Zotero.RDF.getStatementsMatching(nodes[i], CREATOR_LISTS[j], null);
 				for each(var stmt in statements) {
@@ -942,7 +944,6 @@ function doImport() {
 			}
 		}
 		
-		Zotero.debug(newItem);
 		newItem.complete();
 	}
 }
@@ -964,11 +965,9 @@ function doExport() {
 	
 	// now that we've collected our items, start building the RDF
 	for each(var item in items) {
-		Zotero.debug(item);
 		// set type on item node
 		var type = new Type(item.itemType, TYPES[item.itemType]);
 		var nodes = type.createNodes(item);
-		Zotero.debug(nodes);
 		
 		// add fields
 		for(var field in item.uniqueFields) {
@@ -987,6 +986,12 @@ function doExport() {
 			property.mapFromCreator(item, creator, nodes);
 		}
 		Zotero.debug("creators added");
+		
+		// add tags
+		for each(var tag in item.tags) {
+			var tagNode = (tag.type == 0 ? nodes[USERITEM] : nodes[ITEM]);
+			Zotero.RDF.addStatement(tagNode, n.dcterms+"subject", tag.tag, true);
+		}
 		
 		type.addNodeRelations(nodes);
 		Zotero.debug("relations added");
