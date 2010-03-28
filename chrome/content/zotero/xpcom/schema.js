@@ -914,10 +914,7 @@ Zotero.Schema = new function(){
 			return _schemaVersions[schema];
 		}
 		
-		var file = Components.classes["@mozilla.org/extensions/manager;1"]
-                    .getService(Components.interfaces.nsIExtensionManager)
-                    .getInstallLocation(ZOTERO_CONFIG['GUID'])
-                    .getItemLocation(ZOTERO_CONFIG['GUID']); 
+		var file = Zotero.getInstallDirectory();
 		file.append(schemaFile);
 		
 		// Open an input stream from file
@@ -952,10 +949,7 @@ Zotero.Schema = new function(){
 		
 		// We pull the schema from an external file so we only have to process
 		// it when necessary
-		var file = Components.classes["@mozilla.org/extensions/manager;1"]
-                    .getService(Components.interfaces.nsIExtensionManager)
-                    .getInstallLocation(ZOTERO_CONFIG['GUID'])
-                    .getItemLocation(ZOTERO_CONFIG['GUID']); 
+		var file = Zotero.getInstallDirectory();
 		file.append(schemaFile);
 		
 		// Open an input stream from file
@@ -998,10 +992,7 @@ Zotero.Schema = new function(){
 		
 		// We pull the schema from an external file so we only have to process
 		// it when necessary
-		var file = Components.classes["@mozilla.org/extensions/manager;1"]
-                    .getService(Components.interfaces.nsIExtensionManager)
-                    .getInstallLocation(ZOTERO_CONFIG['GUID'])
-                    .getItemLocation(ZOTERO_CONFIG['GUID']); 
+		var file = Zotero.getInstallDirectory();
 		file.append(schemaFile);
 		
 		// Open an input stream from file

@@ -218,6 +218,11 @@ var ZoteroPane = new function()
 			document.getElementById("zotero-tb-search-label").hidden = false;
 			document.getElementById("zotero-tb-search").setAttribute("type", "conditional-timed");
 		}
+		
+		if(Zotero.isStandalone) {
+			this.toggleDisplay();
+			this.fullScreen(true);
+		}
 	}
 	
 	

@@ -475,49 +475,51 @@
 	<![CDATA[
 	window.addEventListener('load', function(e){
 		var icon = document.getElementById('zotero-status-bar-icon');
-		if (Zotero && Zotero.initialized){
-			switch (Zotero.Prefs.get('statusBarIcon')) {
-				case 2:
-					icon.setAttribute('hidden', false);
-					break;
-				case 1:
-					icon.setAttribute('hidden', false);
-					icon.setAttribute('compact', true);
-					break;
-			}
-			
-			// Set "Report Errors..." label via property rather than DTD entity,
-			// since we need to reference it in script elsewhere
-			document.getElementById('zotero-tb-actions-reportErrors').setAttribute('label',
-				Zotero.getString('errorReport.reportErrors'));
-		}
-		else {
-			if (Zotero) {
-				var errMsg = Zotero.startupError;
-			}
-			
-			// Use defaults if necessary
-			if (!errMsg) {
-				// Get the stringbundle manually
-				var src = 'chrome://zotero/locale/zotero.properties';
-				var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
-						getService(Components.interfaces.nsILocaleService);
-				var appLocale = localeService.getApplicationLocale();
-				var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
-					.getService(Components.interfaces.nsIStringBundleService);
-				var stringBundle = stringBundleService.createBundle(src, appLocale);
+		if(icon) {
+			if (Zotero && Zotero.initialized){
+				switch (Zotero.Prefs.get('statusBarIcon')) {
+					case 2:
+						icon.setAttribute('hidden', false);
+						break;
+					case 1:
+						icon.setAttribute('hidden', false);
+						icon.setAttribute('compact', true);
+						break;
+				}
 				
-				var errMsg = stringBundle.GetStringFromName('startupError');
+				// Set "Report Errors..." label via property rather than DTD entity,
+				// since we need to reference it in script elsewhere
+				document.getElementById('zotero-tb-actions-reportErrors').setAttribute('label',
+					Zotero.getString('errorReport.reportErrors'));
+			}
+			else {
+				if (Zotero) {
+					var errMsg = Zotero.startupError;
+				}
+				
+				// Use defaults if necessary
+				if (!errMsg) {
+					// Get the stringbundle manually
+					var src = 'chrome://zotero/locale/zotero.properties';
+					var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
+							getService(Components.interfaces.nsILocaleService);
+					var appLocale = localeService.getApplicationLocale();
+					var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
+						.getService(Components.interfaces.nsIStringBundleService);
+					var stringBundle = stringBundleService.createBundle(src, appLocale);
+					
+					var errMsg = stringBundle.GetStringFromName('startupError');
+				}
+				
+				icon.setAttribute('tooltiptext', errMsg);
+				icon.setAttribute('error', 'true');
+				icon.setAttribute('hidden', false);
 			}
 			
-			icon.setAttribute('tooltiptext', errMsg);
-			icon.setAttribute('error', 'true');
-			icon.setAttribute('hidden', false);
-		}
-		
-		// Used for loading pages from upgrade wizard
-		if (Zotero.initialURL) {
-			setTimeout("gBrowser.selectedTab = gBrowser.addTab(Zotero.initialURL); Zotero.initialURL = null;", 1);
+			// Used for loading pages from upgrade wizard
+			if (Zotero.initialURL) {
+				setTimeout("gBrowser.selectedTab = gBrowser.addTab(Zotero.initialURL); Zotero.initialURL = null;", 1);
+			}
 		}
 	}, false);
 	
