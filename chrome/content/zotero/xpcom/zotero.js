@@ -186,24 +186,31 @@ var Zotero = new function(){
 		
 		this.mainThread = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
 		
-		// Load in the extension version from the extension manager
-		var nsIUpdateItem = Components.interfaces.nsIUpdateItem;
-		var gExtensionManager =
-			Components.classes["@mozilla.org/extensions/manager;1"]
-				.getService(Components.interfaces.nsIExtensionManager);
-		this.version
-			= gExtensionManager.getItemForID(ZOTERO_CONFIG['GUID']).version;
-		
 		var appInfo =
 			Components.classes["@mozilla.org/xre/app-info;1"].
 				getService(Components.interfaces.nsIXULAppInfo)
-		this.appName = appInfo.name;
-		this.isFx2 = appInfo.platformVersion.indexOf('1.8') === 0; // TODO: remove
-		this.isFx3 = appInfo.platformVersion.indexOf('1.9') === 0;
-		this.isFx30 = appInfo.platformVersion == '1.9'
-						|| appInfo.platformVersion.indexOf('1.9.0') === 0;
-		this.isFx35 = appInfo.platformVersion.indexOf('1.9.1') === 0;
-		this.isFx31 = this.isFx35;
+		this.isStandalone = appInfo.ID == ZOTERO_CONFIG['GUID'];
+		Zotero.debug(this.isStandalone);
+		if(this.isStandalone) {
+			this.isFx35 = true;
+			this.version = appInfo.version;
+		} else {
+			this.appName = appInfo.name;
+			this.isFx2 = appInfo.platformVersion.indexOf('1.8') === 0; // TODO: remove
+			this.isFx3 = appInfo.platformVersion.indexOf('1.9') === 0;
+			this.isFx30 = appInfo.platformVersion == '1.9'
+							|| appInfo.platformVersion.indexOf('1.9.0') === 0;
+			this.isFx35 = appInfo.platformVersion.indexOf('1.9.1') === 0;
+			this.isFx31 = this.isFx35;
+			
+			// Load in the extension version from the extension manager
+			var nsIUpdateItem = Components.interfaces.nsIUpdateItem;
+			var gExtensionManager =
+				Components.classes["@mozilla.org/extensions/manager;1"]
+					.getService(Components.interfaces.nsIExtensionManager);
+			this.version
+				= gExtensionManager.getItemForID(ZOTERO_CONFIG['GUID']).version;
+		}
 		this.isFx36 = appInfo.platformVersion.indexOf('1.9.2') === 0;
 		
 		// OS platform
@@ -443,11 +450,18 @@ var Zotero = new function(){
 	
 	
 	function getInstallDirectory() {
-		var id = ZOTERO_CONFIG.GUID;
-		var em = Components.classes["@mozilla.org/extensions/manager;1"].
-					getService(Components.interfaces.nsIExtensionManager);
-		var installDir = em.getInstallLocation(id).getItemLocation(id);
-		return installDir;
+		if(this.isStandalone) {
+			var dir = Components.classes["@mozilla.org/file/directory_service;1"]
+				.getService(Components.interfaces.nsIProperties)
+				.get("CurProcD", Components.interfaces.nsILocalFile);
+			Zotero.debug(dir.path);
+			return dir;
+		} else {
+			var id = ZOTERO_CONFIG.GUID;
+			var em = Components.classes["@mozilla.org/extensions/manager;1"].
+						getService(Components.interfaces.nsIExtensionManager);
+			return em.getInstallLocation(id).getItemLocation(id);
+		}
 	}
 	
 	

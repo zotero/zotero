@@ -302,11 +302,11 @@ var Zotero_Browser = new function() {
 			var reset = document.getElementById('cmd_fullZoomReset');
 		}
 		
-		reduce.addEventListener("command",
+		if(reduce) reduce.addEventListener("command",
 			function(e) { Zotero_Browser.resize(e) }, false);
-		enlarge.addEventListener("command",
+		if(enlarge) enlarge.addEventListener("command",
 			function(e) { Zotero_Browser.resize(e) }, false);
-		reset.addEventListener("command",
+		if(reset) reset.addEventListener("command",
 			function(e) { Zotero_Browser.resize(e) }, false);
 	}
 	

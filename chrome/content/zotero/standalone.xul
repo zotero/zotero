@@ -1,0 +1,221 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xul-overlay href="chrome://global/content/editMenuOverlay.xul"?>
+
+<!DOCTYPE window [
+<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd">
+%globalDTD;
+<!ENTITY % globalRegionDTD SYSTEM "chrome://global-region/locale/region.dtd">
+%globalRegionDTD;
+<!ENTITY % charsetDTD SYSTEM "chrome://global/locale/charsetOverlay.dtd" >
+%charsetDTD;
+<!ENTITY % textcontextDTD SYSTEM "chrome://global/locale/textcontext.dtd" >
+%textcontextDTD;
+<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" >
+%standaloneDTD;
+]>
+
+<window id="main-window"
+				xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+				onload="window.sizeToContent()"
+				width="1100" height="700"
+				persist="screenX screenY width height sizemode"> 
+	<script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
+	<script type="application/x-javascript" src="chrome://global/content/viewZoomOverlay.js"/>
+	<script type="application/x-javascript" src="chrome://global/content/contentAreaUtils.js"/>
+	<script type="application/x-javascript" src="chrome://global/content/inlineSpellCheckUI.js"/>
+	<commandset id="mainCommandSet">
+		<command id="cmd_toggleTaskbar" oncommand="goToggleToolbar('status-bar','toggle_taskbar');"/>
+		<command id="cmd_quitApplication" oncommand="goQuitApplication()"/>
+		
+		<commandset id="editMenuCommands"/>
+		
+		<command id="cmd_find"
+				 oncommand="gFindBar.onFindCommand();"
+				 observes="isImage"/>
+		<command id="cmd_findAgain"
+				 oncommand="gFindBar.onFindAgainCommand(false);"
+				 observes="isImage"/>
+		<command id="cmd_findPrevious"
+				 oncommand="gFindBar.onFindAgainCommand(true);"
+				 observes="isImage"/>
+		
+		<command id="cmd_fullZoomReduce"  oncommand="FullZoom.reduce()"/>
+		<command id="cmd_fullZoomEnlarge" oncommand="FullZoom.enlarge()"/>
+		<command id="cmd_fullZoomReset"   oncommand="FullZoom.reset()"/>
+		<command id="cmd_fullZoomToggle"  oncommand="ZoomManager.toggleZoom();"/>
+	</commandset>
+	<popup id="contentAreaContextMenu">
+		<menuitem id="context-undo"
+				label="&undoCmd.label;"
+				accesskey="&undoCmd.accesskey;"
+				command="cmd_undo"/>
+		<menuseparator id="context-sep-undo"/>
+		<menuitem id="context-cut"
+				label="&cutCmd.label;"
+				accesskey="&cutCmd.accesskey;"
+				command="cmd_cut"/>
+		<menuitem id="context-copy"
+				label="&copyCmd.label;"
+				accesskey="&copyCmd.accesskey;"
+				command="cmd_copy"/>
+		<menuitem id="context-paste"
+				label="&pasteCmd.label;"
+				accesskey="&pasteCmd.accesskey;"
+				command="cmd_paste"/>
+		<menuitem id="context-delete"
+				label="&deleteCmd.label;"
+				accesskey="&deleteCmd.accesskey;"
+				command="cmd_delete"/>
+		<menuseparator id="context-sep-paste"/>
+		<menuitem id="context-selectall"
+				label="&selectAllCmd.label;"
+				accesskey="&selectAllCmd.accesskey;"
+				command="cmd_selectAll"/>
+	</popup>
+	<toolbox id="navigator-toolbox" class="toolbox-top" mode="icons" defaultmode="icons">
+		<!-- Menu -->
+		<toolbar type="menubar" id="toolbar-menubar" class="chromeclass-menubar" customizable="true"
+				defaultset="menubar-items"
+				mode="icons" iconsize="small" defaulticonsize="small"
+				context="toolbar-context-menu">
+			<toolbaritem id="menubar-items" align="center">
+				<menubar id="main-menubar"
+				style="border:0px;padding:0px;margin:0px;-moz-appearance:none">
+					<menu id="file-menu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
+						<menupopup id="menu_FilePopup">
+							<menuitem id="menu_close" label="&closeCmd.label;" key="key_close"
+									accesskey="&closeCmd.accesskey;" command="cmd_close"/>
+							<menuseparator/>
+							<menuitem id="menu_FileQuitItem" 
+									label="&quitApplicationCmdMac.label;"
+									key="key_quitApplication"
+									command="cmd_quitApplication"/>
+						</menupopup>
+					</menu>
+					
+					<menu id="edit-menu" label="&editMenu.label;" accesskey="&editMenu.accesskey;">
+						<menupopup id="menu_EditPopup">
+							<menuitem label="&undoCmd.label;"
+									id="menu_undo"
+									key="key_undo"
+									accesskey="&undoCmd.accesskey;"
+									command="cmd_undo"/>
+							<menuitem label="&redoCmd.label;"
+									id="menu_redo"
+									key="key_redo"
+									accesskey="&redoCmd.accesskey;"
+									command="cmd_redo"/>
+							<menuseparator/>
+							<menuitem label="&cutCmd.label;"
+									id="menu_cut"
+									key="key_cut"
+									accesskey="&cutCmd.accesskey;"
+									command="cmd_cut"/>
+							<menuitem label="&copyCmd.label;"
+									id="menu_copy"
+									key="key_copy"
+									accesskey="&copyCmd.accesskey;"
+									command="cmd_copy"/>
+							<menuitem label="&pasteCmd.label;"
+									id="menu_paste"
+									key="key_paste"
+									accesskey="&pasteCmd.accesskey;"
+									command="cmd_paste"/>
+							<menuitem label="&deleteCmd.label;"
+									id="menu_delete"
+									key="key_delete"
+									accesskey="&deleteCmd.accesskey;"
+									command="cmd_delete"/>
+							<menuseparator/>
+							<menuitem id="menu_selectAll"
+									label="&selectAllCmd.label;"
+									key="key_selectAll"
+									accesskey="&selectAllCmd.accesskey;"
+									command="cmd_selectAll"/>
+							<menuseparator/>
+							<menuitem id="menu_find" label="&findOnCmd.label;" accesskey="&findOnCmd.accesskey;" key="key_find" command="cmd_find"/>
+							<menuitem label="&findAgainCmd.label;" accesskey="&findAgainCmd.accesskey;" key="key_findAgain" command="cmd_findAgain"
+									id="menu_findAgain" />
+							<menuseparator hidden="true" id="textfieldDirection-separator"/>
+							<menuitem id="textfieldDirection-swap"
+									command="cmd_switchTextDirection"
+									key="key_switchTextDirection"
+									label="&bidiSwitchTextDirectionItem.label;"
+									accesskey="&bidiSwitchTextDirectionItem.accesskey;"
+									hidden="true"/>
+						</menupopup>
+					</menu>
+					
+					<menu id="windowMenu" />
+					<menu id="helpMenu" />
+				</menubar>
+			</toolbaritem>
+		</toolbar>
+	</toolbox>
+	<keyset id="mainKeyset">
+		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
+		<key id="key_undo"
+			 key="&undoCmd.key;"
+			 modifiers="accel"/>
+		<key id="key_redo" key="&undoCmd.key;" modifiers="accel,shift"/>
+		<key id="key_cut"
+			 key="&cutCmd.key;"
+			 modifiers="accel"/>
+		<key id="key_copy"
+			 key="&copyCmd.key;"
+			 modifiers="accel"/>
+		<key id="key_paste"
+			 key="&pasteCmd.key;"
+			 modifiers="accel"/>
+		<key id="key_delete" keycode="VK_DELETE" command="cmd_delete"/>
+		<key id="key_selectAll" key="&selectAllCmd.key;" modifiers="accel"/>
+		
+		<key id="key_find" key="&findOnCmd.commandkey;" command="cmd_find" modifiers="accel"/>
+		<key id="key_findAgain" key="&findAgainCmd.commandkey;" command="cmd_findAgain" modifiers="accel"/>
+		<key id="key_findPrevious" key="&findAgainCmd.commandkey;" command="cmd_findPrevious" modifiers="accel,shift"/>
+		<key keycode="&findAgainCmd.commandkey2;" command="cmd_findAgain"/>
+		<key keycode="&findAgainCmd.commandkey2;"  command="cmd_findPrevious" modifiers="shift"/>
+		
+		<key id="key_fullZoomReduce"  key="&fullZoomReduceCmd.commandkey;"   command="cmd_fullZoomReduce"  modifiers="accel"/>
+		<key                          key="&fullZoomReduceCmd.commandkey2;"  command="cmd_fullZoomReduce"  modifiers="accel"/>
+		<key id="key_fullZoomEnlarge" key="&fullZoomEnlargeCmd.commandkey;"  command="cmd_fullZoomEnlarge" modifiers="accel"/>
+		<key                          key="&fullZoomEnlargeCmd.commandkey2;" command="cmd_fullZoomEnlarge" modifiers="accel"/>
+		<key                          key="&fullZoomEnlargeCmd.commandkey3;" command="cmd_fullZoomEnlarge" modifiers="accel"/>
+		<key id="key_fullZoomReset"   key="&fullZoomResetCmd.commandkey;"    command="cmd_fullZoomReset"   modifiers="accel"/>
+		<key                          key="&fullZoomResetCmd.commandkey2;"   command="cmd_fullZoomReset"   modifiers="accel"/>
+		
+		<key id="key_switchTextDirection" key="&bidiSwitchTextDirectionItem.commandkey;" command="cmd_switchTextDirection" modifiers="accel,shift" />
+		<key id="key_quitApplication" key="&quitApplicationCmdMac.key;" command="cmd_quitApplication" modifiers="accel"/>	
+	</keyset>
+	<!--<toolbarpalette/>
+
+	<toolbar id="nav-bar" class="toolbar-primary chromeclass-toolbar"
+					 fullscreentoolbar="true" mode="icons" iconsize="large"
+					 customizable="true"
+					 defaultset="unified-back-forward-button,reload-button,stop-button,home-button,urlbar-container,search-container"
+					 context="toolbar-context-menu"/>
+
+	<toolbarset id="customToolbars" context="toolbar-context-menu"/>
+
+	<toolbar id="PersonalToolbar"
+					 mode="icons" iconsize="small" defaulticonsize="small"
+					 class="chromeclass-directories"
+					 context="toolbar-context-menu"
+					 defaultset="personal-bookmarks"
+					 customizable="true"/>-->
+
+	<hbox flex="1" id="browser">
+		<vbox id="appcontent" flex="1">
+			<tabbrowser id="content" disablehistory="true"
+									flex="1" contenttooltip="aHTMLTooltip"
+									contentcontextmenu="contentAreaContextMenu"
+									onnewtab="BrowserOpenTab();"
+									autocompletepopup="PopupAutoComplete"
+									ondrop="nsDragAndDrop.drop(event, contentAreaDNDObserver);"
+									onclick="return contentAreaClick(event, false);"/>
+		</vbox>
+	</hbox>
+	<keyset id="mainKeyset"/>
+</window>
