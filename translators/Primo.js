@@ -18,9 +18,9 @@ function detectWeb(doc, url) {
 			if (prefix == 'x') return namespace; else return null;
 		} : null;
 		
-		if (doc.evaluate('//span[contains(., "Results")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		if (doc.evaluate('//span[@class="results_corner EXLResultsTitleCorner"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
 			 return 'multiple';
-		} else if (doc.evaluate('//div/h2[contains(., "Details")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		} else if (doc.evaluate('//div[@class="results2 EXLFullResultsHeader"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) { 
 			return 'document';
 		}
 }
