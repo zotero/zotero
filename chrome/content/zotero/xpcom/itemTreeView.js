@@ -1267,6 +1267,9 @@ Zotero.ItemTreeView.prototype.deleteSelection = function (force)
 	else if (itemGroup.isCollection()) {
 		itemGroup.ref.removeItems(ids);
 	}
+	else if (itemGroup.isBucket()) {
+		itemGroup.ref.deleteItems(ids);
+	}
 	this._treebox.endUpdateBatch();
 }
 
