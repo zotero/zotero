@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"Internet Archive",
 	"creator":"Adam Crymble",
-	"target":"http://www.archive.org",
+	"target":"http://www.archive.org/",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
@@ -13,8 +13,21 @@
 
 function detectWeb(doc, url) {
 	var mediaType = "1";
-		
-	if (doc.evaluate('//h3', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+
+	// iterate through links under item/bucket name to check for zoterocommons (the collection name)
+	var links = doc.evaluate('//div/p/span/a', doc, null, XPathResult.ANY_TYPE, null);
+	var link = null;
+	while (next_link = links.iterateNext()) {
+		link = next_link.textContent;
+		if (link.match(/zoterocommons/)) {
+			mediaType  = "commons";
+			Zotero.debug("IA TRANS: scraping commons");
+		}
+	}
+	
+	if (mediaType == "commons") return "commons";
+	
+	else if (doc.evaluate('//h3', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		mediaType  = doc.evaluate('//h3', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		
 	} else if (doc.evaluate('//div[@class="box"][@id="spotlight"]/h1', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -36,10 +49,8 @@ function detectWeb(doc, url) {
 		return "audioRecording";
 	} else 	if (doc.location.href.match("search") && mediaType == "1") {
 		return "multiple"; 
-	}	
+	}		
 }
-
-//Internet Archive Translator. Code by Adam Crymble
 
 function associateData (newItem, dataTags, field, zoteroField) {
 	if (dataTags[field]) {
@@ -53,20 +64,22 @@ function scrape(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;	
-	
+
 	var dataTags = new Object();
-	
 	var tagsContent = new Array();
 	var fieldContents = new Array();
 	var fieldTitleLength;
-	
 	var fieldTitle;
 	var scrapeType = 0;
 	
 	var mediaType1 = detectWeb(doc, url);
-	
-	if (mediaType1 == "artwork") {
-		
+ 		
+	if (mediaType1 == "commons") {
+		doWeb(doc, url);
+		return;
+	}
+ 	
+ 	else if (mediaType1 == "artwork") {	
 		var newItem = new Zotero.Item("artwork");
 		
 		//split contents by linebreak and push into an array if it is not empty
@@ -125,6 +138,7 @@ function scrape(doc, url) {
 		var newItem = new Zotero.Item("audioRecording");
 		scrapeType = 1;
 	} 
+	
 	
 	if (scrapeType == 1) {
 		var xPathHeaders = '//div[@class="darkBorder roundbox"][@id="main"]/p[@class="content"]/span[@class="key"]';
@@ -218,15 +232,112 @@ function scrape(doc, url) {
 	newItem.complete();
 }
 
+
+function processRDFs(doc, url, articles) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == 'x') return namespace; else return null;
+	} : null;	
+		
+	var httpLink = doc.evaluate('//a[text()="HTTP"]/@href', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+
+	for (var i=0 ; i<articles.length; i++) {
+		rdfurl = articles[i];
+		Zotero.debug("IA TRANS: looking at RDF: " + rdfurl);
+		
+		var text = Zotero.Utilities.retrieveSource(rdfurl);
+
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f"); // RDF
+		//translator.setTranslator("14763d24-8ba0-45df-8f52-b8d1108e7ac9"); // Zotero RDF
+		translator.setString(text);
+		translator.waitForCompletion = true;
+		translator.setHandler("itemDone", function(obj, item) {
+
+			// get attachment filename from RDF
+			var re = /<rdf:resource rdf:resource.*/g;
+			var resources = text.match(re); 
+
+			// process all attachments
+			// TODO: do not add/keep attachment for regular PDF if full text version exists.
+			for (var j=0; j<resources.length; j++) {
+				Zotero.debug(resources[j]);
+				var sep = resources[j].lastIndexOf("/",resources[j].length-3);
+				var filename = resources[j].substr(sep+1,resources[j].length-sep-4).replace(/ /g,'-');
+				filename = filename.replace(/-+/g,'-');					
+				resourceURL = httpLink + "/" + filename;
+				Zotero.debug("IA TRANS: attachment: " + resourceURL);
+				item.attachments.push({url:resourceURL, title:filename});
+
+				// if attachment is pdf, add OCR'd version (allow to fail if no OCR version exists)
+				if (filename.match(/\.pdf/) && !filename.match(/_text/)) {
+					resourceURL = resourceURL.substr(0,resourceURL.length-4) + "_text.pdf";
+					filename = filename.substr(0,filename.length-4) + "_text.pdf";
+					Zotero.debug("IA TRANS: attachment: " + resourceURL);
+					item.attachments.push({url:resourceURL, title:filename, mimeType:"application/pdf"});
+				}
+				else { 
+						Zotero.debug("not PDF or already _text");
+				}
+			}
+
+			// item.DOI = item.url.match(/\.org\/(.*)$/)[1];
+			// add access date and url
+			item.accessDate = 'CURRENT_TIMESTAMP';
+			
+			// TODO: reference zip file, since bucket address could point to multiple items?
+			item.url = doc.location.href;
+			item.complete();
+		} ); // end itemDone handler
+		translator.translate();
+	} // end for each RDF link
+	function() {Zotero.done();};
+}
+
+
 function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
+	var items = new Object();
 	var articles = new Array();
+	var zipfile = null;
+	var commons = false;
+	var itemCount = 0;
 	
-	if (detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == "commons") {
+		commons = true;
+		var titles = doc.evaluate('/html/body/div[5]/div/table/tbody/tr/td[2]/span', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var httpLink = doc.evaluate('//a[text()="HTTP"]/@href', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+
+		// scrape the item titles and item keys off page for selection
+		// TODO: if called from scrape (ie getting a bucket from search result page), get all items automatically?
+		while(next_title = titles.iterateNext()) {
+			Zotero.debug("examining:" + next_title.textContent);
+			if (next_title.textContent.match(/\|/)) {
+				split = next_title.textContent.split('|');
+				zipfile = split[1].substr(0,split[1].length-4) + ".rdf";
+				zipfile = httpLink + "/" + zipfile;
+				items[zipfile] = split[0];
+				Zotero.debug("added: "+ zipfile + " = " + split[0]);
+				itemCount++;
+			}
+		}
+
+		if (itemCount > 1) {
+			items = Zotero.selectItems(items);
+			for (var i in items) {
+				articles.push(i);
+			}
+		}
+		else {
+			articles.push(zipfile)
+		}
+	} 
+	else if (detectWeb(doc, url) == "multiple") {
+		Zotero.debug("multiple");
 		var items = new Object();
 		
 		var titles = doc.evaluate('//td[2][@class="hitCell"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -259,6 +370,9 @@ function doWeb(doc, url) {
 	} else {
 		articles = [url];
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+
+	if (!commons)	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+	else processRDFs(doc,url, articles);
+	
 	Zotero.wait();
 }
