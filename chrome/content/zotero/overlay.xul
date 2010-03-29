@@ -107,9 +107,10 @@
 					<menuitem label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile()"/>
 					<menuitem oncommand="Zotero_Report_Interface.loadCollectionReport()"/>
 					<menuitem label="&zotero.toolbar.emptyTrash.label;" oncommand="ZoteroPane.emptyTrash();"/>
-					<menuitem label="Create Bucket" oncommand="ZoteroPane.createBucket();"/><!--TODO localize -->
+					<menuitem label="Create Bucket" oncommand="ZoteroPane.createCommonsBucket();"/><!--TODO localize -->
 					<menuitem label="Sync Bucket List with IA" oncommand="Zotero.Commons.syncBucketList();"/><!--TODO localize -->
-					<menuitem label="Remove Bucket from List" oncommand="ZoteroPane.removeBucket();"/><!--TODO localize -->
+					<menuitem label="Remove Bucket from List" oncommand="ZoteroPane.removeCommonsBucket();"/><!--TODO localize -->
+					<menuitem label="Refresh Bucket" oncommand="ZoteroPane.refreshCommonsBucket();"/><!--TODO localize -->
 				</popup>
 				<popup id="zotero-itemmenu" onpopupshowing="ZoteroPane.buildItemContextMenu();">
 					<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="ZoteroPane.selectItem(this.parentNode.getAttribute('itemID'), true)"/>
