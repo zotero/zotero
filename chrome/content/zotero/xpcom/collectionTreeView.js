@@ -387,7 +387,9 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 		this.rememberSelection(savedSelection);
 	}
 	else if (action == 'modify' || action == 'refresh') {
-		this.reload();
+		if (type != 'bucket') {
+			this.reload();
+		}
 		this.rememberSelection(savedSelection);
 	}
 	else if(action == 'add')
