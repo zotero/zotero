@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2007-08-04 23:15:00"
+	"lastUpdated":"2010-03-22 21:13:00"
 }
 
 var RECOGNIZABLE_FORMATS = ["mods", "marc", "endnote", "ris", "bibtex", "rdf"];
@@ -21,7 +21,7 @@ var FORMAT_GUIDS = {
 	"rdf":"5e3ad958-ac79-463d-812b-a86a9235c28f"
 };
 
-var unAPIResolver, unsearchedIds, foundIds, foundItems, foundFormat, foundFormatName;
+var unAPIResolver, unsearchedIds, foundIds, foundItems, foundFormat, foundFormatName, domain;
 
 function detectWeb(doc, url) {
 	// initialize variables
@@ -30,6 +30,9 @@ function detectWeb(doc, url) {
 	foundItems = [];
 	foundFormat = [];
 	foundFormatName = [];
+
+	// Set the domain we're scraping
+	domain = doc.location.href.match(/https?:\/\/([^/]+)/);
 	
 	var nsResolver = doc.createNSResolver(doc.documentElement);
 	
@@ -204,6 +207,8 @@ function getAllIds() {
 function getAllItems() {
 	if(foundItems.length == foundIds.length) {
 		if(foundItems.length == 1) {
+			// Set the item Repository to the domain
+			foundItems[0].repository = domain[1];
 			// if only one item, send complete()
 			foundItems[0].complete();
 		} else if(foundItems.length > 0) {
@@ -217,6 +222,8 @@ function getAllItems() {
 			if(!chosenItems) Zotero.done(true);
 			
 			for(var i in chosenItems) {
+				// Set the item Repository to the domain
+				foundItems[i].repository = domain[1];
 				foundItems[i].complete();
 			}
 		}
