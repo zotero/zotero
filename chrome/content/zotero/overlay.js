@@ -1462,7 +1462,7 @@ var ZoteroPane = new function()
 		}
 	}
 
-	this.createBucket = function() {
+	this.createCommonsBucket = function() {
 		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
 		
@@ -1477,7 +1477,20 @@ var ZoteroPane = new function()
 		}
 	}
 
-	this.removeBucket = function() {
+	this.refreshCommonsBucket = function() {
+		if (this.collectionsView
+				&& this.collectionsView.selection
+				&& this.collectionsView.selection.count > 0
+				&& this.collectionsView.selection.currentIndex != -1) {
+			var bucket = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+			if (bucket && bucket.isBucket()) {
+				this.itemsView._itemGroup.ref._items = null;
+				this.itemsView.refresh();				
+			}
+		}
+	}
+	
+	this.removeCommonsBucket = function() {
 		if (this.collectionsView
 				&& this.collectionsView.selection
 				&& this.collectionsView.selection.count > 0
@@ -1789,9 +1802,10 @@ var ZoteroPane = new function()
 			exportFile: 9,
 			loadReport: 10,
 			emptyTrash: 11,
-			createBucket: 12,
+			createCommonsBucket: 12,
 			syncBucketList: 13,
-			removeBucket: 14
+			removeCommonsBucket: 14,
+			refreshCommonsBucket: 15
 		};
 		
 		var itemGroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
@@ -1862,11 +1876,11 @@ var ZoteroPane = new function()
 		// Header
 		else if (itemGroup.isHeader()) {
 			if (itemGroup.ref.id == 'commons-header') {
-				show = [m.createBucket, m.syncBucketList];
+				show = [m.createCommonsBucket, m.syncBucketList];
 			}
 		}
 		else if (itemGroup.isBucket()) {
-			show = [m.removeBucket];
+			show = [m.removeCommonsBucket, m.refreshCommonsBucket];
 		}
 		// Group
 		else if (itemGroup.isGroup()) {
