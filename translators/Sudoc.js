@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-10-08 17:40:00"
+	"lastUpdated":"2010-02-20 14:40:00"
 }
 
 function detectWeb(doc, url) {
@@ -33,6 +33,10 @@ function detectWeb(doc, url) {
 						if (type.indexOf('article.gif') > 0)
 						{
 							return "journalArticle";
+						}
+						else if (type.indexOf('audiovisual.gif') > 0)
+						{
+							return "film";
 						}
 						else if (type.indexOf('book.gif') > 0)
 						{
@@ -67,7 +71,7 @@ function detectWeb(doc, url) {
 		}
 }
 
-function scrape(doc) {
+function scrape(doc, url) {
 		var namespace = doc.documentElement.namespaceURI;
 		var nsResolver = namespace ? function(prefix) {
 				if (prefix == 'x') return namespace; else return null;
@@ -83,50 +87,25 @@ function scrape(doc) {
 			newItem.repository = false;	// do not save repository
 			if(Zotero.Utilities.parseContextObject(coins, newItem)) 
 			{
+				// ppn is the national identifier, used to make a permalink on the record
+				var ppn = "";
 				if (newItem.title) 
 				{
-					// We use the same method as in detectWeb to find 
-					// the real type of document
-					var xpathimage = '/html/body/div[2]/div[4]/span/img';
-					if (elt = doc.evaluate(xpathimage, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
+					newItem.itemType = detectWeb(doc, url);
+					// The number of pages uses COinS field : rft.pages, even if the information
+					// concerns the number of pages.
+					if (newItem.pages != undefined)
 					{
-						var type = elt.getAttribute('src');
-						var ZoteroType = '';
-						if (type.indexOf('article.gif') > 0)
+						newItem.numPages = newItem.pages;
+						
+						var m = newItem.pages.match(/(\d*) vol\. \((.*) [pf]\./);
+						if (m)
 						{
-							zoteroType = 'journalArticle';
+							newItem.numberOfVolumes	= m[1];
+							newItem.numPages				= m[2];
 						}
-						else if (type.indexOf('book.gif') > 0)
-						{
-							zoteroType = 'book';
-						}
-						else if (type.indexOf('handwriting.gif') > 0)
-						{
-							zoteroType = 'manuscript';
-						}
-						else if (type.indexOf('sons.gif') > 0)
-						{
-							zoteroType = "audioRecording";
-						}
-						else if (type.indexOf('sound.gif') > 0)
-						{
-							zoteroType = "audioRecording";
-						}
-						else if (type.indexOf('thesis.gif') > 0)
-						{
-							zoteroType = "thesis";
-						}
-						else if (type.indexOf('map.gif') > 0)
-						{
-							zoteroType = "map";
-						}
-						else
-						{
-							zoteroType = "book";
-						}
-						newItem.itemType = zoteroType;
 					}
-					
+
 					// 	We need to correct some informations where COinS is wrong
 					var rowXpath = '//tr[td[@class="rec_lable"]]';
 					var tableRows = doc.evaluate(rowXpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -161,7 +140,7 @@ function scrape(doc) {
 								{
 									zoteroFunction = 'translator';
 								}
-								else if ( (zoteroType == "thesis") && (authorFunction != 'Auteur') )
+								else if ( (newItem.itemType == "thesis") && (authorFunction != 'Auteur') )
 								{
 									zoteroFunction = "contributor";
 								}
@@ -170,6 +149,8 @@ function scrape(doc) {
 									zoteroFunction = 'author';
 								}
 								
+								// We need to remove the author dates from reference
+								authorText = authorText.replace(/ \(.{4}\-.{4}\)$/, "")
 								if (authorFunction == "Université de soutenance")
 								{
 									// If the author function is "université de soutenance"	it means that this author has to be in "university" field
@@ -250,6 +231,15 @@ function scrape(doc) {
 							var thesisType = value.split(/ ?:/)[0];
 							newItem.type = thesisType;
 						}
+						else if ( (field == "Numéro\u00A0de\u00A0notice") || (field == "Record\u00A0number") )
+						{
+							ppn = value;
+						}
+					}
+					
+					if ( (newItem.url == undefined) && (ppn != "") )
+					{
+						newItem.url = 'http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=' + ppn;
 					}
 					newItem.complete();
 				}
@@ -291,7 +281,6 @@ function doWeb(doc, url) {
 					var uris = new Array();
 					for(var i in items) {
 							uris.push(newUrl + links[i]);
-							Zotero.debug(newUrl + links[i]);
 					}
 					Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
 							function() { Zotero.done(); }, null);
@@ -299,7 +288,7 @@ function doWeb(doc, url) {
 				}
 				else if ( (content == "Notice complète") || (content == 'title data') )
 				{
-					scrape(doc);
+					scrape(doc, url);
 				}
 		}
 }
