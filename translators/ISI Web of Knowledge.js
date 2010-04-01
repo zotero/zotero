@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-04-01 22:01:15"
+	"lastUpdated":"2010-04-01 22:50:00"
 }
 
 function detectWeb(doc, url) {
@@ -110,5 +110,4 @@ function doWeb(doc, url) {
 		item.attachments = [{url:item.url, title:"ISI Web of Knowledge Snapshot", mimeType:"text/html"}];
 		item.complete();
 	}
-	function() {Zotero.done();};
 }
