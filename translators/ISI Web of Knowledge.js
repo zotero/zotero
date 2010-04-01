@@ -4,7 +4,7 @@
 	"label":"ISI Web of Knowledge",
 	"creator":"Michael Berkowitz",
 	"target":"(WOS_GeneralSearch|product=WOS|product=CABI)",
-	"minVersion":"1.0.0b4.r5",
+	"minVersion":"2.0",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
