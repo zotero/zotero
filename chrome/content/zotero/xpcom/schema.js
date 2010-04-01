@@ -2343,10 +2343,16 @@ Zotero.Schema = new function(){
 							if (!matches) {
 								continue;
 							}
-							file.append(matches[1]);
-							Zotero.debug("Extracting styles '" + matches[1] + "' from database");
-							Zotero.File.putContents(file, row.csl);
-							Zotero.wait();
+							try {
+								Zotero.debug("Extracting styles '" + matches[1] + "' from database");
+								file.append(matches[1]);
+								Zotero.File.putContents(file, row.csl);
+								Zotero.wait();
+							}
+							catch (e) {
+								Zotero.debug(e);
+								Components.utils.reportError("Skipping style '" + matches[1] + "'");
+							}
 						}
 						Zotero.Styles.init();
 					}
