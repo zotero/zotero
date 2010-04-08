@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-12-17 08:10:00"
+	"lastUpdated":"2010-04-08 13:10:00"
 }
 
 function detectWeb(doc, url) {
@@ -218,6 +218,14 @@ function doWeb(doc, url) {
 		if (uid) {
 			ids.push(uid.textContent.match(/\d+/)[0]);
 			lookupPMIDs(ids, doc);
+		} else {
+			var uids= doc.evaluate('//meta[@name="ncbi_uidlist"]', doc,
+					nsResolver, XPathResult.ANY_TYPE, null);
+			var uid = uids.iterateNext()["content"].split(' ');
+			if (uid) {
+				ids.push(uid);
+				lookupPMIDs(ids, doc);
+			}
 		}
 	}
 }
