@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-04-08 13:10:00"
+	"lastUpdated":"2010-04-12 16:40:00"
 }
 
 function detectWeb(doc, url) {
@@ -36,6 +36,7 @@ function detectWeb(doc, url) {
 		return "journalArticle";
 	}
 }
+
 function getPMID(co) {
 	var coParts = co.split("&");
 	for each(part in coParts) {
@@ -212,9 +213,16 @@ function doWeb(doc, url) {
 			lookupPMIDs(ids, doc);
 		}
 	} else {
+		// Here, account for some articles and search results using spans for PMID
 		var uids= doc.evaluate('//p[@class="pmid"]', doc,
 				nsResolver, XPathResult.ANY_TYPE, null);
 		var uid = uids.iterateNext();
+		if (!uid) {
+			// Fall back on span 
+			uids = doc.evaluate('//span[@class="pmid"]', doc,
+					nsResolver, XPathResult.ANY_TYPE, null);
+			uid = uids.iterateNext();
+		}
 		if (uid) {
 			ids.push(uid.textContent.match(/\d+/)[0]);
 			lookupPMIDs(ids, doc);
