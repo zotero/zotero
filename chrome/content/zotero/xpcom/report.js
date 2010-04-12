@@ -199,6 +199,8 @@ Zotero.Report = new function() {
 				case 'reportSearchMatch':
 				case 'reportChildren':
 				
+				case 'libraryID':
+				case 'key':
 				case 'itemType':
 				case 'itemID':
 				case 'sourceItemID':
