@@ -367,7 +367,10 @@
 					switch (conditionsMenu.value){
 						case 'collection':
 							var rows = [];
-							var cols = Zotero.getCollections(false, true);
+							
+							var libraryID = this.parent.search.libraryID;
+							libraryID = libraryID ? libraryID : null;
+							var cols = Zotero.getCollections(false, true, libraryID);
 							for (var i in cols) {
 								// Indent subcollections
 								var indent = '';
@@ -384,7 +387,9 @@
 						
 						case 'savedSearch':
 							var rows = [];
-							var searches = Zotero.Searches.getAll();
+							var libraryID = this.parent.search.libraryID;
+							libraryID = libraryID ? libraryID : null;
+							var searches = Zotero.Searches.getAll(libraryID);
 							for (var i in searches) {
 								if (searches[i].id != this.parent.search.id) {
 									rows.push([searches[i].name, 'S' + Zotero.Searches.getLibraryKeyHash(searches[i])]);
