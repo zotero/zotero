@@ -33,7 +33,7 @@
  * Takes parent collectionID as optional parameter;
  * by default, returns root collections
  */
-Zotero.getCollections = function(parent, recursive) {
+Zotero.getCollections = function(parent, recursive, libraryID) {
 	var toReturn = new Array();
 	
 	if (!parent) {
@@ -42,10 +42,16 @@ Zotero.getCollections = function(parent, recursive) {
 	
 	var sql = "SELECT collectionID AS id, collectionName AS name FROM collections C "
 		+ "WHERE parentCollectionID " + (parent ? '=' + parent : 'IS NULL');
-	if (!parent) {
-		sql += " AND libraryID IS NULL";
+	if (libraryID) {
+		sql += " AND libraryID=?";
+		var children = Zotero.DB.query(sql, libraryID);
 	}
-	var children = Zotero.DB.query(sql);
+	else {
+		if (!parent) {
+			sql += " AND libraryID IS NULL";
+		}
+		var children = Zotero.DB.query(sql);
+	}
 	
 	if (!children) {
 		Zotero.debug('No child collections of collection ' + parent, 5);
