@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-03-04 16:30:00"
+	"lastUpdated":"2010-04-19 05:35:00"
 }
 
 function detectWeb(doc, url) {
@@ -52,7 +52,7 @@ function doWeb(doc, url) {
 	if (doc.title.substr(doc.title.length-8, 8) == "Document") {
 		var cisb = doc.evaluate('//input[@name="cisb"]', rfDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
 		var uri = host+"/us/lnacademic/results/listview/delPrep.do?cisb="+cisb+"&risb="+risb+"&mode=delivery_refworks";
-		var hiddenInputs = doc.evaluate('//form[@name="results_docview_DocumentForm"]//input[@type="hidden" and not(@name="tagData")', rfDoc, nsResolver,
+		var hiddenInputs = doc.evaluate('//form[@name="results_docview_DocumentForm"]//input[@type="hidden" and not(@name="tagData")]', rfDoc, nsResolver,
 			XPathResult.ANY_TYPE, null);
 		
 	} else {
