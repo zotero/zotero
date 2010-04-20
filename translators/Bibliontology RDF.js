@@ -7,8 +7,8 @@
 	"minVersion":"2.0",
 	"maxVersion":"",
 	"priority":50,
-	"inRepository":true,
-	"lastUpdated":"2010-03-27 01:02:54"
+	"inRepository":false,
+	"lastUpdated":"2010-04-20 23:02:43"
 }
 
 Zotero.configure("getCollections", true);
@@ -18,7 +18,8 @@ Zotero.addOption("exportFileData", false);
 
 var n = {
 	address:"http://schemas.talis.com/2005/address/schema#",	// could also use vcard?
-	bibo:"http://purl.org/ontology/biblio/",
+	bibo:"http://purl.org/ontology/bibo/",
+	ctag:"http://commontag.org/ns#",
 	dcterms:"http://purl.org/dc/terms/",
 	doap:"http://usefulinc.com/ns/doap#",
 	foaf:"http://xmlns.com/foaf/0.1/",
@@ -384,7 +385,6 @@ Type.prototype.getMatchScore = function(node) {
 Type.prototype._scoreNodeRelationship = function(node, definition, score) {
 	var subNode = null;
 	if(definition) {
-		Zotero.debug(definition);
 		statements = Zotero.RDF.getStatementsMatching(node, definition.predicate, null);
 		if(statements) {
 			var bestScore = -9999;
@@ -899,9 +899,32 @@ function doImport() {
 		var creatorLists = {};
 		var creatorsAdded = {};
 		for(var i in nodes) {
+			// take DC subjects as tags
 			var statements = Zotero.RDF.getStatementsMatching(nodes[i], n.dcterms+"subject", null);
 			for each(var stmt in statements) {
+				// if attached to the user item, it's a user tag; otherwise, an automatic tag
 				newItem.tags.push({tag:stmt[2], type:(i == USERITEM ? 0 : 1)});
+			}
+			
+			// also take ctags as tags
+			var statements = Zotero.RDF.getStatementsMatching(nodes[i], n.ctag+"tagged", null);
+			for each(var stmt in statements) {
+				var tag = {type:0};
+				
+				// AutoTags are automatic tags
+				var types = Zotero.RDF.getStatementsMatching(stmt[2], n.rdf+"type", null);
+				for each(var type in types) {
+					var uri = Zotero.RDF.getResourceURI(type[2]);
+					if([n.ctag+"AutoTag", n.ctag+"AuthorTag"].indexOf(uri) != -1) tag.type = 1;
+					break;
+				}
+				
+				// labels are tag content
+				var labels = Zotero.RDF.getStatementsMatching(stmt[2], n.ctag+"label", null);
+				if(labels.length) {
+					tag.tag = labels[0][2];
+					newItem.tags.push(tag);
+				}
 			}
 			
 			for(var j in CREATOR_LISTS) {
@@ -963,6 +986,8 @@ function doExport() {
 	while(item = Zotero.nextItem()) {
 		items[item.itemID] = item;
 	}
+	var autoTags = {};
+	var userTags = {};
 	
 	// now that we've collected our items, start building the RDF
 	for each(var item in items) {
@@ -990,8 +1015,19 @@ function doExport() {
 		
 		// add tags
 		for each(var tag in item.tags) {
-			var tagNode = (tag.type == 0 ? nodes[USERITEM] : nodes[ITEM]);
-			Zotero.RDF.addStatement(tagNode, n.dcterms+"subject", tag.tag, true);
+			var tagCollection = tag.type == 0 ? userTags : autoTags;
+			
+			if(tagCollection[tag.tag]) {
+				var tagNode = tagCollection[tag.tag];
+			} else {
+				var tagNode = Zotero.RDF.newResource();
+				Zotero.RDF.addStatement(tagNode, n.rdf+"type",
+					(tag.type == 0 ? n.ctag+"UserTag" : n.ctag+"AutoTag"), false);
+				Zotero.RDF.addStatement(tagNode, n.ctag+"label", tag.tag, true);
+				tagCollection[tag.tag] = tagNode;
+			}
+			
+			Zotero.RDF.addStatement(nodes[USERITEM], n.ctag+"tagged", tagNode, false);
 		}
 		
 		type.addNodeRelations(nodes);
