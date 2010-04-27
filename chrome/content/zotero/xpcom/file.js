@@ -137,6 +137,21 @@ Zotero.File = new function(){
 	}
 	
 	
+	
+	/**
+	 * Return the contents of a file as a byte array
+	 */
+	this.getBinaryContents = function (bfile) {
+		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+			.createInstance(Components.interfaces.nsIFileInputStream);
+		istream.init(bfile, -1, -1, false);
+		var bstream = Components.classes["@mozilla.org/binaryinputstream;1"]
+			.createInstance(Components.interfaces.nsIBinaryInputStream);
+		bstream.setInputStream(istream);
+		return bstream.readBytes(bstream.available());
+	}
+	
+	
 	/*
 	 * Return the contents of a URL as a string
 	 *

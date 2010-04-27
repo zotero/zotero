@@ -338,7 +338,7 @@ Zotero.Group.prototype.erase = function() {
 	Zotero.DB.query(sql, this.libraryID);
 	
 	var prefix = "groups/" + this.id;
-	Zotero.Relations.eraseByPathPrefix(prefix);
+	Zotero.Relations.eraseByURIPrefix(Zotero.URI.defaultPrefix + prefix);
 	
 	// Delete group
 	sql = "DELETE FROM groups WHERE groupID=?";

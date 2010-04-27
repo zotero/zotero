@@ -1033,6 +1033,8 @@ var Zotero = new function(){
 	 * Returns true if an object (or associative array) has at least one value
 	 */
 	function hasValues(obj) {
+		Zotero.debug("WARNING: Zotero.isEmpty() is deprecated! Use Zotero.Utilities.isEmpty(obj)", 2);
+		
 		for (var i in obj) {
 			return true;
 		}
@@ -1239,6 +1241,8 @@ var Zotero = new function(){
 		Zotero.Tags.purge();
 		Zotero.Fulltext.purgeUnusedWords();
 		Zotero.Items.purge();
+		// DEBUG: this might not need to be permanent
+		Zotero.Relations.purge();
 		
 		if (!skipStoragePurge && Zotero.Utilities.prototype.probability(10)) {
 			Zotero.Sync.Storage.purgeDeletedStorageFiles('zfs');

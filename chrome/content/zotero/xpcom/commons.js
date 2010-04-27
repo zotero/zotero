@@ -27,196 +27,515 @@
 Zotero.Commons = new function() {
 	this.uri = 'http://www.archive.org/';
 	this.apiUrl = 'http://s3.us.archive.org';
-
-	this.__defineGetter__('buckets', function () {
-		if(!Zotero.Prefs.get("commons.enabled")) {
-			return false;
-		}
-
-		var accessKey = Zotero.Prefs.get("commons.accessKey");
-		var secretKey = Zotero.Prefs.get("commons.secretKey");
-		var buckets = [];
-		var bucketNames = Zotero.Prefs.get("commons.buckets").split(',');
-		for(var i = 0, len = bucketNames.length; i < len; i++) {
-			if(bucketNames[i]) {
-				buckets.push(new Zotero.Commons.Bucket(bucketNames[i], accessKey, secretKey));
-			}
-		}
-		return buckets;
+	this.postCreateBucketDelay = 2000;
+	
+	this.__defineGetter__('enabled', function () {
+		return Zotero.Prefs.get("commons.enabled");
 	});
-
-	this.createBucket = function (bucketName) {
-		var accessKey = Zotero.Prefs.get("commons.accessKey");
-		var secretKey = Zotero.Prefs.get("commons.secretKey");
-
+	
+	this.__defineGetter__('userIdentifier', function () {
+		return Zotero.Prefs.get("commons.accessKey");
+	});
+	
+	this.__defineGetter__('accessKey', function () {
+		return Zotero.Prefs.get("commons.accessKey");
+	});
+	
+	this.__defineGetter__('secretKey', function () {
+		return Zotero.Prefs.get("commons.secretKey");
+	});
+	
+	this.RDF_TRANSLATOR = {
+		'label': 'Zotero RDF',
+		'target': 'rdf',
+		'translatorID': '14763d24-8ba0-45df-8f52-b8d1108e7ac9',
+		'displayOptions': {
+			'exportFileData': true,
+			'exportNotes': true
+		}
+	};
+	
+	this.RDF_IMPORT_TRANSLATOR = {
+		'translatorID': '5e3ad958-ac79-463d-812b-a86a9235c28f',
+	}
+	
+	this.ERROR_BUCKET_EXISTS = 1;
+	
+	this.refreshNeeded = true;
+	
+	var _buckets = {};
+	var _bucketsLoading = false;
+	var _requestingItems = false;
+	
+	
+	this.createBucket = function (item, onBucketQueued, onBucketCreated, waitForCreation) {
 		var headers = {
 			"x-archive-auto-make-bucket":"1",
 			"x-archive-meta01-collection":"scholarworkspaces",
 			"x-archive-meta02-collection":"zoterocommons",
-			"x-archive-meta-mediatype":"texts",
 			"x-archive-meta-sponsor":"Andrew W. Mellon Foundation",
 			"x-archive-meta01-language":"eng"
 		};
-
-		var callback = function (req) {
+		
+		var itemTitle = item.getDisplayTitle();
+		if (itemTitle) {
+			headers["x-archive-meta-title"] = itemTitle;
+		}
+		
+		var itemLanguage = item.getField('language');
+		// TODO: use proper language code?
+		if (itemLanguage) {
+			headers["x-archive-meta01-language"] = itemLanguage;
+		}
+		
+		var itemType = Zotero.ItemTypes.getName(item.itemTypeID);
+		switch (itemType) {
+			case 'artwork':
+			case 'map':
+				headers["x-archive-meta-mediatype"] = "image";
+				break;
+			
+			case 'radioBroadcast':
+			case 'audioRecording':
+				headers["x-archive-meta-mediatype"] = "audio";
+				break;
+			
+			case 'tvBroadcast':
+			case 'videoRecording':
+				headers["x-archive-meta-mediatype"] = "movies";
+				break;
+			
+			default:
+				headers["x-archive-meta-mediatype"] = "texts";
+		}
+		
+		var requestCallback = function (req, id, tries) {
+			Zotero.debug(req.status);
+			
 			if (req.status == 201) {
-				// add bucketName to preference if isn't already there
-				var prefBucketNames = Zotero.Prefs.get("commons.buckets").split(',');
-				if(!Zotero.inArray(bucketName, prefBucketNames)) {
-					prefBucketNames.push(bucketName);
-					prefBucketNames.sort();
-					Zotero.Prefs.set("commons.buckets", prefBucketNames.join(','));
-					Zotero.Notifier.trigger('add', 'bucket', true);
+				var bucket = new Zotero.Commons.Bucket(id);
+				
+				if (waitForCreation) {
+					Zotero.debug('Waiting for bucket creation');
+					
+					
+					Zotero.debug('-------');
+					Zotero.debug(setTimeout);
+					
+					setTimeout(function () {
+						var tries = 15;
+						bucket.exists(function (found) {
+							if (found == 1) {
+								onBucketCreated(bucket);
+							}
+							else if (!found) {
+								alert("Commons: Bucket " + bucket.name + " not found after creation");
+							}
+							else {
+								alert("Commons: Error checking for bucket " + bucket.name + " after creation");
+							}
+						}, tries);
+					}, Zotero.Commons.postCreateBucketDelay);
+					
+					if (onBucketQueued) {
+						onBucketQueued();
+					}
+				}
+				else {
+					if (onBucketQueued) {
+						onBucketQueued();
+					}
+					if (onBucketCreated) {
+						onBucketCreated(bucket);
+					}
 				}
 			}
 			else {
-				Zotero.debug(req.status);
 				Zotero.debug(req.responseText);
 				
-				if (req.status == 403) {
-					alert("Bucket creation failed: authentication failed.");
-				}
-				else if (req.status == 409) {
-					alert("Bucket creation failed: bucket name already taken.");
-				}
-				else if (req.status == 503) {
-					alert("Bucket creation failed: server unavailable.");
+				// DEBUG: What is this for?
+				if (req.status == 409) {
+					tries++;
+					// Max tries
+					if (tries > 3) {
+						alert("Upload failed");
+						return;
+					}
+					
+					id = Zotero.Commons.getNewBucketName();
+					Zotero.Commons.createAuthenticatedRequest(
+						"PUT", "/" + id, headers, this.accessKey, this.secretKey,
+						function (req) {
+							requestCallback(req, id, tries);
+						}
+					);
+					
 				}
 				else {
-					alert("Bucket creation failed: server error " + req.status);
+					Zotero.debug(req.status);
+					Zotero.debug(req.responseText);
+					
+					alert("Upload failed");
 				}
 			}
-		}
+		};
 		
-		var req = this.createAuthenticatedRequest(
-			"PUT", "/" + bucketName, headers, accessKey, secretKey, callback
+		var id = Zotero.Commons.getNewBucketName();
+		Zotero.Commons.createAuthenticatedRequest(
+			"PUT", "/" + id, headers, this.accessKey, this.secretKey,
+			function (req) {
+				requestCallback(req, id, 1);
+			}
 		);
 	}
-
-	this.syncBucketList = function () {
+	
+	
+	this.syncBucketList = function (callback) {
 		var accessKey = Zotero.Prefs.get("commons.accessKey");
 		var secretKey = Zotero.Prefs.get("commons.secretKey");
-
-		// get list of buckets from IA
-		var callback = function (req) {
+		
+		if (_bucketsLoading) {
+			Zotero.debug("Already loading buckets");
+			return;
+		}
+		
+		_bucketsLoading = true;
+		
+		var syncCallback = function (req) {
 			// Error
 			if (req.status != 200) {
 				Zotero.debug(req.status);
 				Zotero.debug(req.responseText);
 				
 				if (req.status == 503) {
-					alert("Bucket list sync failed: server unavailable.");
+					alert("Unable to retrieve items list from the Internet Archive: server unavailable.");
 				}
 				else {
-					alert("Bucket list sync failed: server error " + req.status);
+					alert("Unable to retrieve items list from the Internet Archive: server error " + req.status);
 				}
+				
+				_bucketsLoading = false;
 				
 				return;
 			}
 			
 			Zotero.debug(req.responseText);
 			
-			var zu = new Zotero.Utilities;
-			var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
-				.getService(Components.interfaces.nsIPrompt);
+			var currentBuckets = [];
+			var IABuckets = [];
 			
-			var prefChanged = false;
-			var prefBuckets = Zotero.Prefs.get("commons.buckets");
-			var prefBucketNames = prefBuckets ? prefBuckets.split(',').sort() : [];
+			for (var name in _buckets) {
+				currentBuckets.push(name);
+			}
+			currentBuckets.sort();
 			
-			// Remove any duplicate buckets that got into the pref somehow
-			var len = prefBucketNames.length;
-			var hash = {};
-			for each(var val in prefBucketNames) {
-				hash[val] = true;
-			}
-			for (var key in hash) {
-				prefBucketNames.push(key);
-			}
-			if (prefBucketNames.length != len) {
-				prefChanged = true;
-			}
+			Zotero.debug('==========');
+			Zotero.debug("CURRENT BUCKETS");
+			Zotero.debug(currentBuckets);
 			
-			var newPrefBucketNames = [];
-			var iaBucketNames = [];
+			
 			var buckets = req.responseXML.getElementsByTagName("Bucket");
-			for(var i = 0, len = buckets.length; i < len; i++) {
+			for (var i=0, len=buckets.length; i<len; i++) {
 				var bucketName = buckets[i].getElementsByTagName('Name')[0].textContent;
-				iaBucketNames.push(bucketName);
-				if (prefBucketNames.indexOf(bucketName) != -1) {
-					newPrefBucketNames.push(bucketName);
-				}
+				IABuckets.push(bucketName);
 			}
-			iaBucketNames.sort();
+			IABuckets.sort();
 			
-			// newPrefBucketNames currently contains intersection
-			// of prefBucketNames and iaBucketNames
-			var askToAddBuckets = zu.arrayDiff(prefBucketNames, iaBucketNames);
-			var askToRemoveBuckets = zu.arrayDiff(iaBucketNames, prefBucketNames);
+			Zotero.debug("IA BUCKETS");
+			Zotero.debug(IABuckets);
 			
-			// prompt user about adding buckets
-			for(var i = 0, len = askToAddBuckets.length; i < len; i++) {
-				var result = prompt.confirm("", "'" + askToAddBuckets[i] + "' is associated with "
-					+ "your IA account but is not in your list of buckets in Zotero.\n\n"
-					+ "Add bucket '" + askToAddBuckets[i] + "'?");
-				if (result) {
-					newPrefBucketNames.push(askToAddBuckets[i]);
-					prefChanged = true;
-				}
+			var addBuckets = Zotero.Utilities.prototype.arrayDiff(IABuckets, currentBuckets);
+			var removeBuckets = Zotero.Utilities.prototype.arrayDiff(currentBuckets, IABuckets);
+			
+			Zotero.debug("ADD");
+			Zotero.debug(addBuckets);
+			Zotero.debug("REMOVE");
+			Zotero.debug(removeBuckets);
+			
+			for each(var name in removeBuckets) {
+				delete _buckets[name];
 			}
 			
-			// prompt user about removing buckets
-			for(var i = 0, len = askToRemoveBuckets.length; i < len; i++) {
-				var result = prompt.confirm("", "'" + askToRemoveBuckets[i] + "' is in your "
-					+ "list of buckets in Zotero but is not associated with your IA account.\n\n"
-					+ "Remove bucket '" + askToRemoveBuckets[i] + "' from Zotero?");
-				if (result) {
-					prefChanged = true;
-				}
-				else {
-					newPrefBucketNames.push(askToRemoveBuckets[i]);
-				}
+			for each(var name in addBuckets) {
+				_buckets[name] = new Zotero.Commons.Bucket(name);
 			}
-			newPrefBucketNames.sort();
-			Zotero.Prefs.set("commons.buckets", newPrefBucketNames.join(','));
-
+			
 			// refresh left pane if local bucket list changed
-			if(prefChanged) {
-				Zotero.Notifier.trigger('add', 'bucket', true);
+			//if(prefChanged) {
+				//Zotero.Notifier.trigger('add', 'bucket', true);
+			//}
+			
+			_bucketsLoading = false;
+			
+			if (callback) {
+				callback();
 			}
-
-			// give user feedback if no difference between lists
-			// (don't leave user wondering if nothing happened)
-			if(askToAddBuckets.length == 0 && askToRemoveBuckets.length == 0) {
-				alert("Your list of buckets in Zotero is up-to-date.");
-			}
-		}
+		};
 		
 		var req = this.createAuthenticatedRequest(
-			"GET", "/", {}, accessKey, secretKey, callback
+			"GET", "/", {}, accessKey, secretKey, syncCallback, null, false, true
 		);
 	}
 	
 	
-	// remove bucketName from preference, and refresh left pane in Zotero
-	this.removeBucket = function (bucketName) {
-		var prefBucketNames = Zotero.Prefs.get("commons.buckets").split(',');
-		var newPrefBucketNames = [];
-		for(var i = 0, len = prefBucketNames.length; i < len; i++) {
-			if(bucketName != prefBucketNames[i]) {
-				newPrefBucketNames.push(prefBucketNames[i]);
-			}
-		}
-		newPrefBucketNames.sort();
-		Zotero.Prefs.set("commons.buckets", newPrefBucketNames.join(','));
-		Zotero.Notifier.trigger('add', 'bucket', true);
+	this.getNewBucketName = function () {
+		return "zc-" + this.accessKey + "-" + Zotero.ID.getBigInt(9999999999);
 	}
 	
 	
-	this.createAuthenticatedRequest = function (method, resource, headers, accessKey, secretKey, callback, data, sendAsBinary) {
+    this.getBucketFromItem = function (item) {
+    	return this.getBucketFromItemID(item.id);
+    }
+    
+    
+    this.getBucketFromItemID = function (itemID) {
+    	for each(var bucket in _buckets) {
+    		if (bucket.item.id == itemID) {
+    			return bucket;
+    		}
+    	}
+    	return false;
+    }
+    
+	
+	/**
+	 * Return an array of items belonging to this user
+	 */
+	this.getItems = function() {
+		Zotero.debug('========');
+		Zotero.debug('calling getItems()');
+		
+		if (!this.refreshNeeded) {
+			Zotero.debug("Commons: Buckets already loaded. Returing existing item set");
+			return _getItemsFromBuckets();
+		}
+		
+		if (_requestingItems) {
+			Zotero.debug("Commons: Already requesting items in Zotero.Commons.getItem()", 2);
+			return;
+		}
+		
+		_requestingItems = true;
+		
+		// First update the list of buckets
+		var req = this.syncBucketList(function () {
+			Zotero.Commons.refreshNeeded = false;
+			Zotero.Notifier.trigger('refresh', 'commons', []);
+			_requestingItems = false;
+		});
+		
+		// Browser offline
+		if (!req) {
+			_requestingItems = false;
+		}
+		
+		// List isn't yet available
+		return [];
+	}
+	
+	
+	this.syncFiles = function () {
+		if (Zotero.Commons.refreshNeeded) {
+			throw ("Buckets must be loaded before syncing files in Zotero.Commons.syncFiles()");
+		}
+		
+		Zotero.debug("Getting updated files from all buckets");
+		
+		var progressWin = null;
+		var icon = 'chrome://zotero/skin/treeitem-attachment-pdf.png';
+		
+		for each(var bucket in _buckets) {
+			bucket.syncFiles(function (attachment) {
+				if (!progressWin) {
+					progressWin = new Zotero.ProgressWindow();
+					progressWin.changeHeadline("Downloading OCRed PDFs"); // TODO: localize
+				}
+				progressWin.addLines([attachment.getField('title')], [icon]);
+				progressWin.show();
+				progressWin.startCloseTimer(8000);
+			});
+		}
+	}
+	
+	
+	this.uploadItems = function (ids) {
+		var items = Zotero.Items.get(ids);
+		if (!items) {
+			Zotero.debug("No items to upload");
+			return;
+		}
+		
+		var itemsToUpload = false;
+		for (var i=0, len=items.length; i<len; i++) {
+			if (items[i].isRegularItem()) {
+				itemsToUpload = true;
+				break;
+			}
+		}
+		
+		var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
+					.getService(Components.interfaces.nsIPrompt);
+		
+		if (!itemsToUpload) {
+			Zotero.debug("No regular items to upload");
+			pr.alert("", "Only items with bibliographic metadata can be added to the Zotero Commons.");
+			return;
+		}
+		
+		var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
+							+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL);
+		var index = pr.confirmEx(
+			"Zotero Commons Upload",
+			"By uploading items to Zotero Commons you agree to the terms of use at zotero.org and archive.org. "
+				+ "Please make sure metadata for your item(s) is set properly."
+				+ "\n\n "
+				+ "Continue to upload items to the Internet Archive?",
+			buttonFlags,
+			"Upload",
+			null, null, null, {}
+		);
+		
+		// if user chooses 'cancel', exit
+		if (index != 0) return;
+		
+		
+		var progressWin = new Zotero.ProgressWindow();
+		
+		var tmpDir = Zotero.getTempDirectory();
+		
+		// Create buckets one at a time, pulling items off a stack
+		var process = function (items) {
+			if (!items.length) {
+				Zotero.debug("Commons: No more items to upload");
+				return;
+			}
+			
+			let item = items.shift();
+			
+			// Skip notes and attachments
+			if (!item.isRegularItem()) {
+				process(items);
+				return;
+			}
+			
+			// TODO: check relations table to see if this item already has a bucket
+			
+			// TODO: localize
+			progressWin.changeHeadline("Uploading items to IA");
+			progressWin.addLines([item.getField('title')], [item.getImageSrc()]);
+			progressWin.show();
+			
+			Zotero.Commons.createBucket(
+				item,
+				// onBucketQueued
+				function () {
+					// Start next item while waiting for bucket creation
+					process(items);
+				},
+				// onBucketCreated
+				function (bucket) {
+					// Link item to new bucket
+					var url1 = Zotero.URI.getItemURI(item);
+					var predicate = bucket.relationPredicate;
+					var url2 = bucket.uri;
+					Zotero.Relations.add(null, url1, predicate, url2);
+					
+					//
+					// Export item and attachments to RDF and files
+					//
+					
+					var key = Zotero.ID.getKey();
+					
+					var outputDir = Zotero.getTempDirectory();
+					// TEMP
+					//outputDir.append(bucket.name);
+					outputDir.append(key);
+					
+					var translation = new Zotero.Translate("export");
+					translation.setItems([item]);
+					translation.setTranslator(Zotero.Commons.RDF_TRANSLATOR.translatorID);
+					translation.setDisplayOptions(Zotero.Commons.RDF_TRANSLATOR.displayOptions);
+					translation.setHandler("done", 	function (translation, success) {
+						if (!success) {
+							alert("Commons: Translation failed for " + translation);
+							return;
+						}
+						
+						try {
+							// Upload RDF file
+							var rdfFile = outputDir.clone();
+							// TEMP
+							//rdfFile.append(bucket.name + ".rdf");
+							rdfFile.append(key + ".rdf");
+							rdfFile.moveTo(null, bucket.name + ".rdf");
+							bucket.putFile(rdfFile, "application/rdf+xml", function (uri) {
+								// TEMP
+								rdfFile.moveTo(null, key + ".rdf");
+								
+								// Then create ZIP file from item
+								var zipFile = Zotero.getTempDirectory();
+								// TEMP
+								//zipFile.append(outputDir.leafName + '.zip');
+								zipFile.append(key + '.zip');
+								
+								var zw = Components.classes["@mozilla.org/zipwriter;1"]
+									.createInstance(Components.interfaces.nsIZipWriter);
+								zw.open(zipFile, 0x04 | 0x08 | 0x20); // open rw, create, truncate
+								
+								bucket.zipDirectory(outputDir, outputDir, zw);
+								
+								// Upload file after zipping
+								var observer = new Zotero.Commons.ZipWriterObserver(zw, function () {
+									bucket.putFile(zipFile, "application/zip", function (uri) {
+										// TODO: localize
+										Zotero.debug('-=-=-=-=-=');
+										Zotero.debug(items.length);
+										if (!items.length) {
+											progressWin.startCloseTimer(5000);
+										}
+										
+										Zotero.Commons.refreshNeeded = true;
+									});
+								});
+								zw.processQueue(observer, null);
+							});
+						}
+						catch (e) {
+							alert("Zotero Commons upload failed:\n\n" + e);
+						}
+					});
+					translation.setLocation(outputDir);
+					translation.translate(); // synchronous
+				},
+				true
+			);
+		}
+		
+		process(items);
+	}
+	
+	
+	this.deleteItems = function (ids) {
+		Zotero.debug("Unimplemented");
+		return;
+		
+		// TODO: Confirm
+		
+		for each(var id in ids) {
+			var bucket = this.getBucketFromItemID(id);
+			bucket.erase();
+		}
+	}
+	
+	
+	this.createAuthenticatedRequest = function (method, resource, headers, accessKey, secretKey, callback, data, sendAsBinary, noCache) {
+		var url = Zotero.Commons.apiUrl + resource;
+		
+		Zotero.debug("Commons HTTP " + method + ": " + url);
+		
 		var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 			.createInstance(Components.interfaces.nsIXMLHttpRequest);
-		req.open(method, Zotero.Commons.apiUrl + resource, true);
+		req.open(method, url, true);
 
 		var d = new Date();
 		headers["Date"] = d.toUTCString();
@@ -242,6 +561,10 @@ Zotero.Commons = new function() {
 
 		for(var header in headers) {
 			req.setRequestHeader(header, headers[header]);
+		}
+		
+		if (noCache) {
+			req.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 		}
 		
 		if (data) {
@@ -278,119 +601,360 @@ Zotero.Commons = new function() {
 
 		return req;
 	}
+	
+	
+	
+	function _getItemsFromBuckets() {
+		var items = [];
+		for (var name in _buckets) {
+			Zotero.debug('getting bucket ' + name);
+			var item = _buckets[name].item;
+			// Only return available items
+			if (item) {
+				Zotero.debug('found');
+				items.push(item);
+			}
+		}
+		return items;
+	}
+	
+	
+	/*
+	function _createUniqueBucket(name, callback) {
+		var uploadErrorMsg = "An error occurred uploading a file to the Internet Archive";
+		
+		var bucket = new Zotero.Commons.Bucket(name);
+		
+		bucket.create(function (success, error) {
+			if (success) {
+				callback(name);
+				return;
+			}
+			
+			if (error == Zotero.Commons.ERROR_BUCKET_EXISTS) {
+				var maxTries = 5;
+				
+				// Append suffixes until we find a unique name
+				var checkFunc = function (name, suffix, callback) {
+					var bucket = new Zotero.Commons.Bucket(name);
+					bucket.create(function (success, error) {
+						if (success) {
+							callback(name);
+							return;
+						}
+						
+						if (error == Zotero.Commons.ERROR_BUCKET_EXISTS) {
+							maxTries--;
+							// If we've exceeded maxTries, just use a random suffix
+							if (maxTries < 1) {
+								suffix = Zotero.ID.getKey();
+								name = name.replace(/\-[0-9]+$/, "-" + suffix);
+								callback(name);
+								return;
+							}
+							
+							suffix++;
+							name = name.replace(/\-[0-9]+$/, "-" + suffix);
+							checkFunc(name, suffix, callback);
+							return;
+						}
+						
+						alert(uploadErrorMsg);
+					});
+				}
+				
+				checkFunc(name + "-1", 1, callback);
+				return;
+			}
+			
+			alert(uploadErrorMsg);
+		});
+	}
+	*/
+	
+	
+	this.debug = function (message, level) {
+		Zotero.debug("Commons: " + message, level);
+	}
 }
 
 
-// accessKey and secretKey are passed to allow easy implementation
-// of using multiple accounts
-Zotero.Commons.Bucket = function(name, accessKey, secretKey) {
+Zotero.Commons.Bucket = function (name) {
 	this.name = name;
-	this.accessKey = accessKey;
-	this.secretKey = secretKey;
+	this.accessKey = Zotero.Prefs.get("commons.accessKey");
+	this.secretKey = Zotero.Prefs.get("commons.secretKey");
 	this._items = null;
 	this._requestingItems = false;
 	this._needRefresh = false;
+	
+	this._item = null;
+	this._metadataLoading = false;
+	this._itemDataLoaded = false;
+	this._itemDataLoading = false;
 }
 
 
-Zotero.Commons.Bucket.prototype.RDF_TRANSLATOR = {
-	'label': 'Zotero RDF',
-	'target': 'rdf',
-	'translatorID': '14763d24-8ba0-45df-8f52-b8d1108e7ac9',
-	'displayOptions': {
-		'exportFileData': true,
-		'exportNotes': true
+Zotero.Commons.Bucket.prototype.__defineGetter__('item', function () {
+	Zotero.debug("REQUESTING ITEM FOR " + this.name);
+	
+	if (this._item) {
+		Zotero.debug("RETURNING");
+		return this._item;
 	}
-};
+	
+/*	var item = new Zotero.Item('document');
+	item.setField('title', this.name);
+	return item;
+*/
+	
+	Zotero.debug("LOADING");
+	
+	this._loadMetadata(function () {
+		Zotero.debug("LOADED");
+		Zotero.Notifier.trigger('refresh', 'commons', []);
+	});
+	
+	return false;
+});
 
 
 Zotero.Commons.Bucket.prototype.__defineGetter__('uri', function () {
 	return 'http://www.archive.org/details/' + this.name;
 });
 
+Zotero.Commons.Bucket.prototype.__defineGetter__('downloadURI', function () {
+	return 'http://www.archive.org/download/' + this.name;
+});
 
-Zotero.Commons.Bucket.prototype.getKeyUrl = function(name, key) {
-	return 'http://' + name + '.s3.us.archive.org/' + key;
+Zotero.Commons.Bucket.prototype.__defineGetter__('metadataURI', function () {
+	return this.downloadURI + '/' + this.name + '_meta.xml';
+});
 
-}
+Zotero.Commons.Bucket.prototype.__defineGetter__('apiURI', function() {
+	return Zotero.Commons.apiUrl + '/' + this.name;
+});
+
+Zotero.Commons.Bucket.prototype.__defineGetter__('rdfURI', function() {
+	return Zotero.Commons.apiUrl + '/' + this.name + '/' + this.name + '.rdf';
+});
 
 
 Zotero.Commons.Bucket.prototype.relationPredicate = "owl:sameAs";
 
 
-// deletes selected items from IA. 
-Zotero.Commons.Bucket.prototype.deleteItems = function(ids) {
-	var method = "DELETE";
-
-	var headers = {
-		"x-archive-cascade-delete":"1"
-	};
-
-	Zotero.debug("Commons: called to delete: " + ids.toString());
-
-	var self = this;
-
-	// for each id passed in, issue delete request for <key>.ZIP file
-	var items = Zotero.Items.get(ids);
-
-	for(var i = 0, len = items.length; i < len; i++) {
-		var item = items[i];		
-		var zipName = item.key + ".zip";		
-
-		// since cascade delete is enabled, delete the ZIP and derived files should follow.
-		// this does not, however, delete the RDF file.
-		var resource = '/' + self.name + '/' + zipName; 
-		Zotero.debug("Commons: Deleting: " + resource);
-		
-		// Delete IA items
-		var callback = function (req) {
-			if (req.status == 204) {
-				Zotero.debug("Commons: " + resource + " was deleted successfully.");
-				this._needRefresh = true;
-				Zotero.Notifier.trigger('refresh', 'bucket', ids);
-				
-				//respecify metadata
-				self.updateMetadata(item.key,"delete",null);
-			}
-			else {
-				Zotero.debug(req.status);
-				Zotero.debug(req.responseText);
-				
-				if (req.status == 403) {
-					alert("Failed to delete " + resource + " at IA: authentication failed.");
-				}
-				else if (req.status == 503) {
-					alert("Failed to delete " + resource + " at IA: server unavailable.");
-				}
-				else {
-					alert("Failed to delete " + resource + " at IA.");
-					Zotero.debug("Commons: delete failed with status code: " + req.status);
-				}
-			}
-		};
-		
-		Zotero.Commons.createAuthenticatedRequest(
-			method, resource, headers, self.accessKey, self.secretKey, callback
-		);
-		
-		// Delete Zotero RDF file
-		zipName = item.key + ".rdf";		
-		resource = '/' + self.name + '/' + zipName; 
-		Zotero.debug("Commons: Deleting: " + resource);
-
-		Zotero.Commons.createAuthenticatedRequest(
-			method, resource, headers, self.accessKey, self.secretKey
-		);
+Zotero.Commons.Bucket.prototype.exists = function (callback, maxTries, tries) {
+	if (!tries) {
+		tries = 0;
 	}
+	
+	var self = this;
+	
+	Zotero.Utilities.HTTP.doHead(this.uri, function (xmlhttp) {
+		switch (xmlhttp.status) {
+			case 200:
+				callback(1);
+				return;
+			
+			case 404:
+			case 503: // IA returns this for missing buckets
+				tries++;
+				
+				if (tries >= maxTries) {
+					callback(0);
+					return;
+				}
+				
+				var delay = Zotero.Commons.postCreateBucketDelay * tries;
+				var seconds = delay / 1000;
+				Zotero.debug("Bucket " + self.name + " doesn't yet exist -- retrying in " + seconds + " seconds");
+				
+				Zotero.debug('---------');
+				Zotero.debug(setTimeout);
+				
+				setTimeout(function () {
+					self.exists(callback, maxTries, tries);
+				}, delay);
+				return;
+				
+			default:
+				Zotero.debug(xmlhttp.status);
+				Zotero.debug(xmlhttp.responseText);
+				callback(-1);
+				return;
+		}
+	});
 }
 
 
-Zotero.Commons.Bucket.prototype.updateMetadata = function(key, action, data) {
-	Zotero.debug("updating metadata...");
-	var method = "PUT";
-	self = this;
+/**
+ * Get OCRed PDFs from files in this bucket
+ *
+ * @param	{Function}	callback	Function to run after adding each file --
+ *									function is passed the new attachment item
+ *									(which due to a Zotero.Attachments.importFromURL()
+ *									limitation will still be downloading)
+ */
+Zotero.Commons.Bucket.prototype.syncFiles = function (callback) {
+	// Find local item if it exists
+	var rels = Zotero.Relations.getByURIs(null, this.relationPredicate, this.uri);
+	if (!rels.length) {
+		Zotero.debug("No local items linked to URI " + this.uri);
+		return;
+	}
+	if (rels.length > 1) {
+		throw ("Commons: More than one local item linked to remote bucket " + this.name);
+	}
+	var item = Zotero.URI.getURIItem(rels[0].subject);
+	if (!item) {
+		Zotero.debug("Linked local item not found for URI " + this.uri, 2);
+		return;
+	}
 	
-	var headers2 = {
+	// Get array of possible attachment names
+	var pdfFileNames = [];
+	var pdfTitles = [];
+	var ids = item.getAttachments();
+	for each(var id in ids) {
+		var attachment = Zotero.Items.get(id);
+		var fileName = attachment.getFilename();
+		if (!fileName || !fileName.match(/.+\.pdf$/)) {
+			continue;
+		}
+		pdfFileNames.push(fileName);
+		pdfTitles.push(attachment.getField('title'));
+	}
+	
+	if (this._requestingItems) {
+		throw ("Commons: Already requesting items for bucket");
+	}
+	
+	this._requestingItems = true;
+	
+	var self = this;
+	
+	// Check for a full-text ("derived" in IA terms) OCRed version of the PDF,
+	// and if found add it as an attachment to the corresponding Zotero client item
+	Zotero.Utilities.HTTP.doGet(this.apiURI, function(xmlhttp) {
+		if (xmlhttp.status != 200) {
+			Zotero.debug(xmlhttp.status);
+			Zotero.debug(xmlhttp.responseText);
+			alert("Error loading data from the Internet Archive");
+			self._requestingItems = false;
+			return;
+		}
+		
+		Zotero.debug(xmlhttp.responseText);
+		
+		// TODO: replace original PDF?
+		
+		var contents = xmlhttp.responseXML.getElementsByTagName("Contents");
+		
+		// loop through files listed in bucket contents file
+		for(var i=0, len=contents.length; i<len; i++) {
+			var IAFileName = contents[i].getElementsByTagName('Key')[0].textContent;
+			// We care only about OCRed PDFs
+			if (!IAFileName.match(/\_text.pdf$/)) {
+				Zotero.debug("Skipping file " + IAFileName);
+				continue;
+			}
+			
+			// Check if there's a relation for this PDF
+			
+			var IAFileURI = self.downloadURI + "/" + IAFileName;
+			var rels = Zotero.Relations.getByURIs(null, self.relationPredicate, IAFileURI);
+			if (rels.length) {
+				Zotero.debug("Commons: " + IAFileName + " has already been downloaded -- skipping");
+				continue;
+			}
+			
+			var title = null;
+			var baseName = null;
+			for (var i in pdfFileNames) {
+				var fn = pdfFileNames[i];
+				var n = IAFileName.replace("_text.pdf", ".pdf");
+				var pos = n.lastIndexOf(fn);
+				if (pos == -1) {
+					continue;
+				}
+				// Ignore if filename matches in the middle for some crazy reason
+				if (pos + fn.length != n.length) {
+					continue;
+				}
+				title = Zotero.localeJoin([pdfTitles[i], '(OCR)']);
+				baseName = fn.match(/(.+)\.pdf/)[1];
+				break;
+			}
+			
+			// If not, import PDF
+			var newAttachment = Zotero.Attachments.importFromURL(
+				IAFileURI, item.id, title, baseName, null, 'application/pdf'
+			);
+			if (!(newAttachment instanceof Zotero.Item)) {
+				throw (newAttachment + " is not a Zotero.Item in Zotero.Commons.Bucket.syncFiles()");
+			}
+			
+			// Add a relation linking the new attachment to the IA file
+			var uri = Zotero.URI.getItemURI(newAttachment);
+			Zotero.Relations.add(null, uri, self.relationPredicate, IAFileURI);
+			
+			callback(newAttachment);
+		}
+		
+		self._requestingItems = false;
+	});
+}
+
+
+// deletes selected items from IA. 
+Zotero.Commons.Bucket.prototype.erase = function () {
+	var method = "DELETE";
+	var headers = {
+		"x-archive-cascade-delete":"1"
+	};
+	
+	var resource = '/' + this.name;
+	var self = this;
+	
+	// Delete IA bucket
+	var callback = function (req) {
+		if (req.status == 204) {
+			Zotero.debug("Commons: " + resource + " was deleted successfully.");
+			this._needRefresh = true;
+			Zotero.Notifier.trigger('refresh', 'bucket', ids);
+			
+			//respecify metadata
+			self.updateMetadata(item.key,"delete",null);
+		}
+		else {
+			Zotero.debug(req.status);
+			Zotero.debug(req.responseText);
+			
+			if (req.status == 403) {
+				alert("Failed to delete " + resource + " at IA: authentication failed.");
+			}
+			else if (req.status == 503) {
+				alert("Failed to delete " + resource + " at IA: server unavailable.");
+			}
+			else {
+				alert("Failed to delete " + resource + " at IA.");
+				Zotero.debug("Commons: delete failed with status code: " + req.status);
+			}
+		}
+	};
+	
+	Zotero.Commons.createAuthenticatedRequest(
+		method, resource, headers, self.accessKey, self.secretKey, callback
+	);
+}
+
+
+// UNUSED
+Zotero.Commons.Bucket.prototype.updateMetadata = function(action, item, callback) {
+	Zotero.debug("Updating bucket metadata");
+	
+	var method = "PUT";
+	
+	var headers = {
 		"x-archive-ignore-preexisting-bucket":"1",
 		"x-archive-meta01-collection":"scholarworkspaces",
 		"x-archive-meta02-collection":"zoterocommons",
@@ -399,63 +963,43 @@ Zotero.Commons.Bucket.prototype.updateMetadata = function(key, action, data) {
 	};
 
 	var meta = null;
-	var resource3 = encodeURI('http://archive.org/download/' + self.name + '/' + self.name + '_meta.xml');
+	var resource = encodeURI('http://archive.org/download/' + this.name + '/' + this.name + '_meta.xml');
+	
+	var self = this;
 	
 	// get previous metadata. multiple language support difficult via IA s3.
-	Zotero.Utilities.HTTP.doGet(resource3, function(xmlHttp) { 
-
+	Zotero.Utilities.HTTP.doGet(resource, function (xmlhttp) {
+		if (xmlhttp.status == 404 || (xmlhttp.status == 200 && !xmlhttp.responseXML)) {
+			Zotero.Commons.error("Error updating bucket metadata");
+			return;
+		}
+		
+		if (itemTitle) {
+			headers["x-archive-meta-title"] = itemTitle;
+		}
+		
 		// recreate headers of languages already specified in metadata	  
- 		var languages = xmlHttp.responseXML.getElementsByTagName("metadata")[0].getElementsByTagName("language");
-
-		if (data && data.items[0]) {
-			var itemLanguage = data.items[0].getField('language');
-			var langSet = false;
-			
-			for(var i = 0, len = languages.length; i < len; i++) {
-				meta = "x-archive-meta0"+(i+1)+"-language";
-				headers2[meta] = languages[i].textContent;
-				if (languages[i].textContent == itemLanguage) langSet = true;
-			}
-	
-			// add language for item if not already specified
-			if (!langSet) {
-				meta = "x-archive-meta0"+(i+1)+"-language";
-				headers2[meta] = data.items[0].getField('language');
-			}
+ 		var languages = xmlhttp.responseXML.getElementsByTagName("metadata")[0].getElementsByTagName("language");
+		var itemLanguage = item.getField('language');
+		
+		for (var i = 0, len = languages.length; i < len; i++) {
+			meta = "x-archive-meta0"+(i+1)+"-language";
+			headers[meta] = languages[i].textContent;
 		}
 		
-		// preserve metatdate for old zotero items  
-	  var text = xmlHttp.responseText;
-		var zitem = text.match(/<zoterokey(.*)ZIP/g);
-		var zlen = 0;
-
-		if (zitem) Zotero.debug(zitem.length);
-		if (zitem) zlen = zitem.length;
+		Zotero.debug(headers);
+		resource = "/" + this.name;
 		
-		for(var i=0; i < zlen; i++) {
-				var zitemp = zitem[0].split('>');
-				meta = "x-archive-meta-" + zitemp[0].substr(1);
-				Zotero.debug("Commons: found old zotero key: " + meta + " = " + zitemp[1]);
-				
-				// if action is delete, don't add
-				if (action != "delete" && meta.substr(9).toUpperCase() != key)
-					headers2[meta] = zitemp[1];
-		}
-		
-		// adding headers in this way allows for easy scraping from zotero commons pages. 
-		if (action == "add") {
-			meta = "x-archive-meta-" + "zoterokey" + key;
-			headers2[meta] = data.items[0].getField('title')+"|"+key+".ZIP";
-		}
-		
-		Zotero.debug(headers2);
-		resource2 = '/' + self.name;
-		
-		var callback = function (req) {
+		var updateCallback = function (req) {
+			Zotero.debug('========');
+			Zotero.debug("UPDATE");
+			Zotero.debug(req.status);
 			if(req.status < 202) {
-				Zotero.debug("Commons: " + resource2 + " metadata updated successfully.");
-				// if adding item, upload file
-				data.bucket.putKeyCallback(data);
+				Zotero.debug("Commons: " + resource + " metadata updated successfully.");
+				
+				if (callback) {
+					callback();
+				}
 			}
 			else {
 				Zotero.debug(req.status);
@@ -474,286 +1018,25 @@ Zotero.Commons.Bucket.prototype.updateMetadata = function(key, action, data) {
 		};
 		
 		Zotero.Commons.createAuthenticatedRequest(
-			method, resource2, headers2, self.accessKey, self.secretKey, callback
+			method, resource, headers, self.accessKey, self.secretKey, updateCallback
 		);
 	});
 }
 
 
-// return an array of items currently stored in this bucket
-Zotero.Commons.Bucket.prototype.getItems = function() {
-	var method = "GET";
-	var resource = '/' + this.name;
-	
-	if(this._items && !this._needRefresh) {
-		Zotero.debug("Commons: items already set. Returing existing items set");	
-		return this._items;
-	} 
-	else {
-		Zotero.debug("Commons: items need refresh. re-getting...");	
-	}
-
-	// avoid multiple requests to IA
-	if(this._requestingItems) {
-		Zotero.debug("Commons: already requesting items");	
-		return [];
-	}
-
-	this._requestingItems = true;
-	var self = this;
-	self._items = [];
-	
-	// get a list of keys (files) associated with this bucket
-	var req = Zotero.Utilities.HTTP.doGet(Zotero.Commons.apiUrl + resource, function(xmlhttp) {
-		if (xmlhttp.status != 200) {
-			Zotero.debug(xmlhttp.status);
-			Zotero.debug(xmlhttp.responseText);
-			alert("Error loading data from the Internet Archive");
-			self._requestingItems = false;
-			return;
-		}
-		
-		Zotero.debug(xmlhttp.responseText);
-		
-		var itemIDs = [];
-		
-		// While looking for Zotero exported items in the bucket, 
-		// check for a full-text ("derived" in IA terms) OCR'd version of the PDF.
-		// If so, get it and add it as an attachment to the corresponding Zotero client item.
-		
-		// TODO: replace original PDF?
-						
-		var contents = null;
-		contents = xmlhttp.responseXML.getElementsByTagName("Contents");
-			
-		// loop through files listed in bucket contents file
-		for(var i = 0, len = contents.length; i < len; i++) {
-			var keyParts = contents[i].getElementsByTagName('Key')[0].textContent.split('.');
-			
-			// if key file is Zotero ZIP export item
-			// TODO: check to see if really a zotero item, not just a IA zip
-			if(keyParts.length == 2 && keyParts[1] == 'zip') {
-				var key = keyParts[0];
-				Zotero.debug("Commons: found key in IA response: " + key);
-	
-				// see if the ZIP item corresponds to a zotero item (ZIP name = item key)
-				// This of course only works for the creator of the bucket.
-				// Others will get Zotero items from the IA bucket via a translator.
-				var item = Zotero.Items.getByLibraryAndKey(null, key);
-				
-				if(item) {	
-					Zotero.debug("Commons: found item:" + item.id);
-					itemIDs.push(item.id);
-					this._needRefresh = false;	
-					
-					// loop through attachments of this item and look for missing OCR'd PDFs
-					var attachmentIDs = item.getAttachments();
-					for(var j = 0, len2 = attachmentIDs.length; j < len2; j++) {
-						var attachedItem = Zotero.Items.get(attachmentIDs[j]);
-						var fileName = attachedItem.getFilename();
-						
-						// Since we have to upload all files without spaces in the name (or they won't be OCR'd),
-						// we need to look for the hyphenated version of actual attachment name.
-						// A space next to a hyphen should be deleted, not repleaced with another hyphen
-						if (fileName && fileName.substr(fileName.length-9) != "_text.pdf") {
-							var haveOCRVersion = false;
-							var IAfileName = fileName.substr(0,fileName.length-4).replace(/ /g,'-') + "_text.pdf";
-							IAfileName = IAfileName.replace(/-+/g,'-');					
-							Zotero.debug("Commons: OCR'd file for this attachment would be: " + IAfileName);
-							
-							// check to see if we already have the OCR'd PDF attached to the zotero item
-							for(var k = 0, len3 = attachmentIDs.length; k < len3; k++) {
-								var attachedItem = Zotero.Items.get(attachmentIDs[k]);
-								if (attachedItem.getFilename() == IAfileName)
-									haveOCRVersion = true;
-							}
-		
-							// if we need to get the OCR version...
-							if (!haveOCRVersion) {
-					
-								// set up new attachment
-								var attachmentUri = "http://s3.us.archive.org/"+self.name+"/" + IAfileName;	
-								var mimeType = "application/pdf";
-																
-								// scan bucket contents to see if the OCR'd PDF is available
-								for(var con = 0, len = contents.length; con < len; con++) {
-									var keys = contents[con].getElementsByTagName("Key");
-							
-									for(var l = 0, len4 = keys.length; l < len4; l++) {
-										if (keys[l].textContent == IAfileName) {
-											Zotero.debug("Commons: about to get OCR file from: " + attachmentUri);														
-											Zotero.Attachments.importFromURL(attachmentUri, item.id, null, null, null, mimeType, null);
-										}
-										else {
-											//Zotero.debug("Commons: no OCR'd PDF of this attachment is available.");
-										}
-									} // for each key
-								} // for each contents		
-							} //  end if need to get PDF
-							else {
-								Zotero.debug("Commons: do not need OCR'd PDF for attachment  " + fileName);															
-							}
-						}
-					}
-					
-					self._items.push(item);	
-				}
-			}
-		}
-		
-		Zotero.Notifier.trigger('refresh', 'bucket', itemIDs);
-		
-		self._requestingItems = false;
-	});
-	
-	// Browser offline
-	if (!req) {
-		self._requestingItems = false;
-	}
-	
-	// List isn't yet available
-	return [];
-}
-
-
-// upload zipped Zotero RDF output of items to this bucket
-Zotero.Commons.Bucket.prototype.uploadItems = function(ids) {
-	this._items = null;
-	var items = Zotero.Items.get(ids);
-	
-	if (!items) {
-		Zotero.debug("No items to upload");
-		return;
-	}
-	
-	var itemsToUpload = false;
-	for (var i=0, len=items.length; i<len; i++) {
-		if (items[i].isRegularItem()) {
-			itemsToUpload = true;
-			break;
-		}
-	}
-	
-	var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-				.getService(Components.interfaces.nsIPrompt);
-	
-	if (!itemsToUpload) {
-		Zotero.debug("No regular items to upload");
-		pr.alert("", "Only items with bibliographic metadata can be added to the Zotero Commons.");
-		return;
-	}
-	
-	var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
-						+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL);
-	var index = pr.confirmEx(
-		"Zotero Commons Upload",
-		"By uploading items to Zotero Commons you agree to the terms of use at zotero.org and archive.org. "
-			+ "Please make sure metadata for your item(s) is set properly."
-			+ "\n\n "
-			+ "Continue to upload items to the Internet Archive?",
-		buttonFlags,
-		"Upload",
-		null, null, null, {}
-	);
-
-	// if user chooses 'cancel', exit.
-	if (index != 0) return;
-
-	var tmpDir = Zotero.getTempDirectory();
-
-	// export individual items through the Zotero RDF translation
-	for(var i = 0, len = items.length; i < len; i++) {
-		var item = items[i];
-		if(item.isRegularItem()) {
-			// generate file location for the export output
-			var rdfExportPath = Components.classes["@mozilla.org/file/local;1"]
-				.createInstance(Components.interfaces.nsILocalFile);
-			rdfExportPath.initWithFile(tmpDir);
-			rdfExportPath.append(item.key);
-
-			// initialize and run the translator for this item
-			var translation = new Zotero.Translate("export");
-			translation.setItems([item]);
-			translation.setTranslator(this.RDF_TRANSLATOR.translatorID);
-			translation.setDisplayOptions(this.RDF_TRANSLATOR.displayOptions);
-			translation.setHandler("done", this._translateCallback);
-			translation.setLocation(rdfExportPath);
-
-			// add some data to translator needed by _translateCallback
-			translation._bucketData = {bucket: this, items: [item]};
-
-			translation.translate(); // synchronous
-		}
-	}
-}
-
-
-// Zips the output of the translation and then calls putKey
-// Called after a translation is done.
-Zotero.Commons.Bucket.prototype._translateCallback = function(translation, success) {
-	if(!success) {
-		alert("Commons: translation failed for " + translation);
-		return;
-	}
-
-	var data = translation._bucketData;
-
-	try {
-		var dir = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
-		dir.initWithPath(translation.path);
-
-
-		// capture RDF file	because it needs to be sent along with all PDFs
-		var rdfPath = translation.path + "/" + dir.leafName + ".rdf";
-		var rdfFile = Components.classes["@mozilla.org/file/local;1"]
-			.createInstance(Components.interfaces.nsILocalFile);
-		rdfFile.initWithPath(rdfPath);
-		Zotero.debug("Commons: RDF: " + rdfFile.path);
-		
-		// send one copy of RDF file with name of zotero item key.
-		// this allows us to very easily roundtrip zotero items.
-		data.uploadFile = rdfFile;
-		data.mimetype = "application/rdf+xml";
-		data.bucket.putKeyCallback(data);
-
-		// create zip file	
-		var zipFile = Zotero.getTempDirectory();
-		zipFile.append(dir.leafName + '.zip');	
-		Zotero.debug("Commons: created zipFile: " + dir.leafName);
-		
-		var zw = Components.classes["@mozilla.org/zipwriter;1"]
-			.createInstance(Components.interfaces.nsIZipWriter);
-		zw.open(zipFile, 0x04 | 0x08 | 0x20); // open rw, create, truncate
-
-		data.bucket.zipDirectory(data.bucket, dir, dir, zw);
-		data.uploadFile = zipFile;
-		data.mimetype = "application/zip";
-
-		// add observer so putKey is called on zip completion
-		var observer = new Zotero.Commons.ZipWriterObserver(zw, data.bucket.putKey, data);
-		zw.processQueue(observer, null);				
-	}
-	catch (e) {
-		alert("Commons: Upload failed: " + e);
-	}
-}
-
-
-Zotero.Commons.Bucket.prototype.putKeyCallback = function(data) {
-	var self = data.bucket;
-	var keyHyphened = data.uploadFile.leafName.replace(/ /g,'-');
-	var key = data.uploadFile.leafName;
+Zotero.Commons.Bucket.prototype.putFile = function (file, mimeType, callback) {
+	var fileName = file.leafName;
+	var fileNameHyphened = fileName.replace(/ /g,'-');
 	var method = "PUT";
-	var resource = encodeURI('/' + self.name + '/' + keyHyphened);
-	var content = self.readFileContents(data.uploadFile);
+	var resource = encodeURI('/' + this.name + '/' + fileNameHyphened);
+	var content = Zotero.File.getBinaryContents(file);
 	var headers = {};
+	var self = this;
 	
-	Zotero.debug("Uploading: " + resource);
-	
-	var callback = function (req) {
+	var putCallback = function (req) {
+		// Success
 		if (req.status == 201) {
-			for (var i = 0, len = data.items.length; i < len; i++) {
+			/*for (var i = 0, len = data.items.length; i < len; i++) {
 				var url1 = Zotero.URI.getItemURI(data.items[i]);
 				var predicate = self.relationPredicate;
 				var url2 = self.getKeyUrl(self.name, keyHyphened);
@@ -764,58 +1047,43 @@ Zotero.Commons.Bucket.prototype.putKeyCallback = function(data) {
 					continue;
 				}
 				Zotero.Relations.add(null, url1, predicate, url2);
+			}*/
+			Zotero.debug("Commons: " + fileName + " was uploaded successfully.");
+			//this._needRefresh = true;
+			//Zotero.Notifier.trigger('refresh', 'bucket', null);
+			
+			if (callback) {
+				callback(req.channel.URI.spec);
 			}
-			Zotero.debug("Commons: " + key + " was uploaded successfully.");
-			this._needRefresh = true;
-			//Zotero.Notifier.trigger('refresh', 'bucket', null);				
+			return;
+		}
+		
+		// Error
+		Zotero.debug(req.status);
+		Zotero.debug(req.responseText);
+		
+		if (req.status == 404) {
+			alert("Failed to upload " + fileName + " to IA: bucket not found");
+		}
+		else if (req.status == 403) {
+			alert("Failed to upload " + fileName + " to IA: authentication failed.");
+		}
+		else if (req.status == 503) {
+			alert("Failed to upload " + fileName + " to IA: server unavailable.");
 		}
 		else {
-			Zotero.debug(req.status);
-			Zotero.debug(req.responseText);
-			
-			if (req.status == 403) {
-				alert("Failed to upload " + key + " to IA: authentication failed.");
-			}
-			else if (req.status == 503) {
-				alert("Failed to upload " + key + " to IA: server unavailable.");
-			}
-			else {
-				alert("Failed to upload " + key + " to IA. status is " + req.status);
-			}
+			alert("Failed to upload " + fileName + " to IA. status is " + req.status);
 		}
 	};
 	
 	Zotero.Commons.createAuthenticatedRequest(
-		method, resource, headers, self.accessKey, self.secretKey, callback, content, true
+		method, resource, headers, this.accessKey, this.secretKey, putCallback, content, true
 	);
-}
-
-// Does the put call to IA, puting data.uploadFile into the bucket
-// Changed to be a generic function to put something to IA
-Zotero.Commons.Bucket.prototype.putKey = function(data, skipMeta) {
-	var self = data.bucket;
-	var key = data.uploadFile.leafName.substr(0,data.uploadFile.leafName.length-4);
-	var action = "add";
-		
-	// updateMetadata calls putKeyCallback after metadata request is successful.
-	if (!skipMeta)	self.updateMetadata(key, action, data);	
-}
-
-
-// return the content of an input nsiFile
-Zotero.Commons.Bucket.prototype.readFileContents = function(bfile) {
-	var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-		.createInstance(Components.interfaces.nsIFileInputStream);
-	istream.init(bfile, -1, -1, false);
-	var bstream = Components.classes["@mozilla.org/binaryinputstream;1"]
-		.createInstance(Components.interfaces.nsIBinaryInputStream);
-	bstream.setInputStream(istream);
-	return bstream.readBytes(bstream.available());
 }
 
 
 // Recursively add files and directories to zipWriter
-Zotero.Commons.Bucket.prototype.zipDirectory = function(self, rootDir, dir, zipWriter) {
+Zotero.Commons.Bucket.prototype.zipDirectory = function(rootDir, dir, zipWriter) {
 	dir = dir.directoryEntries;
 	while(dir.hasMoreElements()) {
 		var file = dir.getNext();
@@ -836,19 +1104,98 @@ Zotero.Commons.Bucket.prototype.zipDirectory = function(self, rootDir, dir, zipW
 		);
 		
 		if(file.isDirectory()) {
-			self.zipDirectory(self, rootDir, file, zipWriter);
+			this.zipDirectory(rootDir, file, zipWriter);
 			continue;
 		}
 	}
 }
 
 
+Zotero.Commons.Bucket.prototype._loadMetadata = function (callback) {
+	if (this._metadataLoading) {
+		return;
+	}
+	
+	this._metadataLoading = true;
+	var self = this;
+	
+	Zotero.Utilities.HTTP.doGet(this.rdfURI, function (xmlhttp) {
+		// If RDF not available, use the bucket metadata
+		if (xmlhttp.status != 200) {
+			Zotero.debug("RDF for bucket " + self.name  + " not available");
+			
+			/*Zotero.Utilities.HTTP.doGet(self.metadataURI, function (xmlhttp) {
+				if (xmlhttp.status != 200) {
+					Zotero.debug(xmlhttp.status);
+					Zotero.debug(xmlhttp.responseText);
+					return;
+				}
+				
+				Zotero.debug(xmlhttp.responseText);
+				
+				// Strip XML declaration and convert to E4X
+				var xml = new XML(xmlhttp.responseText.replace(/<\?xml.*\?>/, ''));
+				var title = xml.title;
+				if (!self._item) {
+					self._item = new Zotero.Item("document");
+					self._item.id = Zotero.ID.getBigInt();
+				}
+				self._item.setField('title', title);
+				
+				self._metadataLoading = false;
+				
+				if (callback) {
+					callback();
+				}
+			});*/
+			return;
+		}
+		
+		Zotero.debug(xmlhttp.responseText);
+		
+		var translate = new Zotero.Translate("import");
+		translate.setString(xmlhttp.responseText);
+		translate.getTranslators()
+		translate.setTranslator(Zotero.Commons.RDF_IMPORT_TRANSLATOR.translatorID);
+		translate.setHandler("itemDone", function (translation, item) {
+			var typeID = Zotero.ItemTypes.getID(item.itemType);
+			var newItem = new Zotero.Item(typeID);
+			newItem.id = Zotero.ID.getBigInt();
+			
+			for (var field in item) {
+				// Skip empty fields
+				if (!item[field]) {
+					continue;
+				}
+				var fieldID = Zotero.ItemFields.getID(field);
+				if (!fieldID) {
+					continue;
+				}
+				Zotero.debug('setting field ' + fieldID + ' to ' + item[field]);
+				try {
+				newItem.setField(fieldID, item[field]);
+				}
+				catch(e) { Zotero.debug(e); }
+			}
+			
+			self._item = newItem;
+			self._metadataLoading = false;
+			
+			if (callback) {
+				callback();
+			}
+			return;
+		});
+		translate.translate(false, false);
+	});
+}
+
+
 
 // Implements nsIRequestObserver
-Zotero.Commons.ZipWriterObserver = function (zipWriter, callback, callbackData) {
+Zotero.Commons.ZipWriterObserver = function (zipWriter, callback) {
 	this._zipWriter = zipWriter;
 	this._callback = callback;
-	this._callbackData = callbackData;
 }
 
 Zotero.Commons.ZipWriterObserver.prototype = {
@@ -856,7 +1203,7 @@ Zotero.Commons.ZipWriterObserver.prototype = {
 
 	onStopRequest: function(req, context, status) {
 		this._zipWriter.close();
-		this._callback(this._callbackData);
+		this._callback();
 	}
 }
 
