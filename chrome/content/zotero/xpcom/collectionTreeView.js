@@ -39,7 +39,7 @@ Zotero.CollectionTreeView = function()
 	this._treebox = null;
 	this.itemToSelect = null;
 	this._highlightedRows = {};
-	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search', 'share', 'group', 'bucket']);
+	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search', 'share', 'group', 'commons']);
 	this.showDuplicates = false;
 }
 
@@ -194,7 +194,7 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 	
 	var groups = Zotero.Groups.getAll();
 	if (groups.length) {
-		this._showItem(new Zotero.ItemGroup('separator', false));
+		this._showItem(new Zotero.ItemGroup('separator'));
 		var header = {
 			id: "group-libraries-header",
 			label: "Group Libraries", // TODO: localize
@@ -234,30 +234,15 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 	
 	var shares = Zotero.Zeroconf.instances;
 	if (shares.length) {
-		this._showItem(new Zotero.ItemGroup('separator', false));
+		this._showItem(new Zotero.ItemGroup('separator'));
 		for each(var share in shares) {
 			this._showItem(new Zotero.ItemGroup('share', share));
 		}
 	}
 
-	var buckets = Zotero.Commons.buckets;
-	if(buckets) {
-		this._showItem(new Zotero.ItemGroup('separator', false));
-		var header = {
-			id: "commons-header",
-			label: "Commons", // TODO: localize
-			expand: function (buckets) {
-				if (!buckets) {
-					var buckets = Zotero.Commons.buckets;
-				}
-				
-				for(var i = 0, len = buckets.length; i < len; i++) {
-					self._showItem(new Zotero.ItemGroup('bucket', buckets[i]), 1);
-				}
-			}
-		};
-		this._showItem(new Zotero.ItemGroup('header', header), null, null, true);
-		header.expand(buckets);
+	if (Zotero.Commons.enabled) {
+		this._showItem(new Zotero.ItemGroup('separator'));
+		this._showItem(new Zotero.ItemGroup('commons'), null, null, true);
 	}
 	
 	this._refreshHashMap();
@@ -278,7 +263,11 @@ Zotero.CollectionTreeView.prototype.reload = function()
 	
 	for (var i=0; i<this.rowCount; i++) {
 		if (this.isContainer(i) && this.isContainerOpen(i)) {
-			openCollections.push(this._getItemAtRow(i).ref.id);
+			var itemGroup = this._getItemAtRow(i);
+			if (!itemGroup.isCollection()) {
+				continue;
+			}
+			openCollections.push(itemGroup.ref.id);
 		}
 	}
 	
@@ -387,7 +376,7 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 		this.rememberSelection(savedSelection);
 	}
 	else if (action == 'modify' || action == 'refresh') {
-		if (type != 'bucket') {
+		if (type != 'commons') {
 			this.reload();
 		}
 		this.rememberSelection(savedSelection);
@@ -433,7 +422,7 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 				this.rememberSelection(savedSelection);
 				break;
 
-			case 'bucket':
+			case 'commons':
 				this.reload();
 		}
 	}
@@ -522,13 +511,14 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 			if (source.ref.id == 'group-libraries-header') {
 				collectionType = 'groups';
 			}
-			else if (source.ref.id == 'commons-header') {
-				collectionType = 'commons';
-			}
 			break;
 		
 		case 'group':
 			collectionType = 'library';
+			break;
+		
+		case 'commons':
+			collectionType = 'commons';
 			break;
 	}
 	return "chrome://zotero/skin/treesource-" + collectionType + ".png";
@@ -537,7 +527,7 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 Zotero.CollectionTreeView.prototype.isContainer = function(row)
 {
 	var itemGroup = this._getItemAtRow(row);
-	return itemGroup.isLibrary(true) || itemGroup.isCollection() || itemGroup.isHeader() || itemGroup.isBucket();
+	return itemGroup.isLibrary(true) || itemGroup.isCollection() || itemGroup.isHeader() || itemGroup.isCommons();
 }
 
 Zotero.CollectionTreeView.prototype.isContainerOpen = function(row)
@@ -556,9 +546,6 @@ Zotero.CollectionTreeView.prototype.isContainerEmpty = function(row)
 	}
 	if (itemGroup.isHeader()) {
 		return false;
-	}
-	if (itemGroup.isBucket()) {
-		return true;
 	}
 	if (itemGroup.isGroup()) {
 		return !itemGroup.ref.hasCollections();
@@ -616,8 +603,6 @@ Zotero.CollectionTreeView.prototype.toggleOpenState = function(row)
 		
 		if (itemGroup.type == 'header') {
 			itemGroup.ref.expand();
-		}
-		else if(itemGroup.type == 'bucket') {
 		}
 		else {
 			if (itemGroup.isLibrary()) {
@@ -1063,12 +1048,14 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 	{
 		var itemGroup = this._getItemAtRow(row); //the collection we are dragging over
 		
-		if (!itemGroup.editable) {
+		if (!itemGroup.editable
+				// Commons can be dropped on but not edited
+				&& !itemGroup.isCommons()) {
 			return false;
 		}
 		
 		if (dataType == 'zotero/item') {
-			if(itemGroup.isBucket()) {
+			if(itemGroup.isCommons()) {
 				return true;
 			}
 			
@@ -1236,8 +1223,8 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 			var targetLibraryID = null;
 		}
 		
-		if(itemGroup.isBucket()) {
-			itemGroup.ref.uploadItems(ids);
+		if(itemGroup.isCommons()) {
+			Zotero.Commons.uploadItems(ids);
 			return;
 		}
 		
@@ -1638,9 +1625,9 @@ Zotero.ItemGroup.prototype.isShare = function()
 	return this.type == 'share';
 }
 
-Zotero.ItemGroup.prototype.isBucket = function()
+Zotero.ItemGroup.prototype.isCommons = function()
 {
-	return this.type == 'bucket';
+	return this.type == 'commons';
 }
 
 Zotero.ItemGroup.prototype.isTrash = function()
@@ -1667,7 +1654,7 @@ Zotero.ItemGroup.prototype.isWithinGroup = function () {
 }
 
 Zotero.ItemGroup.prototype.__defineGetter__('editable', function () {
-	if (this.isTrash() || this.isShare()) {
+	if (this.isTrash() || this.isShare() || this.isCommons()) {
 		return false;
 	}
 	if (!this.isWithinGroup()) {
@@ -1726,9 +1713,6 @@ Zotero.ItemGroup.prototype.getName = function()
 		
 		case 'share':
 			return this.ref.name;
-
-		case 'bucket':
-			return this.ref.name;
 		
 		case 'trash':
 			return Zotero.getString('pane.collections.trash');
@@ -1738,6 +1722,9 @@ Zotero.ItemGroup.prototype.getName = function()
 		
 		case 'header':
 			return this.ref.label;
+		
+		case 'commons':
+			return "Commons";
 		
 		default:
 			return "";
@@ -1751,8 +1738,8 @@ Zotero.ItemGroup.prototype.getChildItems = function()
 		case 'share':
 			return this.ref.getAll();
 
-		case 'bucket':
-			return this.ref.getItems();
+		case 'commons':
+			return Zotero.Commons.getItems();
 		
 		case 'header':
 			return [];
@@ -1865,7 +1852,7 @@ Zotero.ItemGroup.prototype.getChildTags = function() {
 		case 'share':
 			return false;
 
-		case 'bucket':
+		case 'commons':
 			return false;
 		
 		case 'header':

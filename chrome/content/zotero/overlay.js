@@ -1343,7 +1343,7 @@ var ZoteroPane = new function()
 		}
 		var itemGroup = this.itemsView._itemGroup;
 		
-		if (!itemGroup.isTrash() && !this.canEdit()) {
+		if (!itemGroup.isTrash() && !itemGroup.isCommons() && !this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -1382,6 +1382,9 @@ var ZoteroPane = new function()
 		// Do nothing in share views
 		else if (itemGroup.isShare()) {
 			return;
+		}
+		else if (itemGroup.isCommons()) {
+			var prompt = toDelete;
 		}
 		// Do nothing in trash view if any non-deleted items are selected
 		else if (itemGroup.isTrash()) {
@@ -1462,46 +1465,24 @@ var ZoteroPane = new function()
 		}
 	}
 
-	this.createCommonsBucket = function() {
-		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService);
-		
-		var bucketName = { value: '' };
-		// TODO localize
-		var result = promptService.prompt(window,
-			"New Bucket",
-			"Enter a name for this bucket:", bucketName, "", {});
-		
-		if (result && bucketName.value) {
-			Zotero.Commons.createBucket(bucketName.value);
-		}
-	}
-
-	this.refreshCommonsBucket = function() {
+	this.refreshCommons = function() {
 		if (this.collectionsView
 				&& this.collectionsView.selection
-				&& this.collectionsView.selection.count > 0
+				&& this.collectionsView.selection.count == 1
 				&& this.collectionsView.selection.currentIndex != -1) {
-			var bucket = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
-			if (bucket && bucket.isBucket()) {
-				this.itemsView._itemGroup.ref._items = null;
-				this.itemsView.refresh();				
+			var itemGroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+			if (itemGroup && itemGroup.isCommons()) {
+				var self = this;
+				Zotero.Commons.syncBucketList(function () {
+					self.itemsView.refresh();
+					self.itemsView.sort();
+					
+					// On a manual refresh, also check for new OCRed files
+					Zotero.Commons.syncFiles();
+				});
 			}
 		}
 	}
-	
-	this.removeCommonsBucket = function() {
-		if (this.collectionsView
-				&& this.collectionsView.selection
-				&& this.collectionsView.selection.count > 0
-				&& this.collectionsView.selection.currentIndex != -1) {
-			var bucket = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
-			if (bucket && bucket.isBucket()) {
-				Zotero.Commons.removeBucket(bucket.getName());
-			}
-		}
-	}
-	
 	
 	function editSelectedCollection()
 	{
@@ -1802,10 +1783,7 @@ var ZoteroPane = new function()
 			exportFile: 9,
 			loadReport: 10,
 			emptyTrash: 11,
-			createCommonsBucket: 12,
-			syncBucketList: 13,
-			removeCommonsBucket: 14,
-			refreshCommonsBucket: 15
+			refreshCommons: 12
 		};
 		
 		var itemGroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
@@ -1873,14 +1851,8 @@ var ZoteroPane = new function()
 		else if (itemGroup.isTrash()) {
 			show = [m.emptyTrash];
 		}
-		// Header
-		else if (itemGroup.isHeader()) {
-			if (itemGroup.ref.id == 'commons-header') {
-				show = [m.createCommonsBucket, m.syncBucketList];
-			}
-		}
-		else if (itemGroup.isBucket()) {
-			show = [m.removeCommonsBucket, m.refreshCommonsBucket];
+		else if (itemGroup.isCommons()) {
+			show = [m.refreshCommons];
 		}
 		// Group
 		else if (itemGroup.isGroup()) {
@@ -2261,7 +2233,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		if (tree.id == 'zotero-collections-tree') {
+		if (tree.id == 'zotero-collections-tree') {                                                    
 			// Ignore triple clicks for collections
 			if (event.detail != 2) {
 				return;
@@ -2295,15 +2267,12 @@ var ZoteroPane = new function()
 					ZoteroPane.loadURI(uri);
 					event.stopPropagation();
 				}
-				else if(itemGroup.ref.id == 'commons-header') {
-					ZoteroPane.loadURI(Zotero.Commons.uri);
-					event.stopPropagation();
-				}
 				return;
 			}
 
-			if (itemGroup.isBucket()) {
-				ZoteroPane.loadURI(itemGroup.ref.uri);
+			if (itemGroup.isCommons()) {
+				// TODO: take to a search of the user's buckets?
+				//ZoteroPane.loadURI(itemGroup.ref.uri);
 				event.stopPropagation();
 			}
 		}
@@ -2325,6 +2294,18 @@ var ZoteroPane = new function()
 				var item = ZoteroPane.getSelectedItems()[0];
 				if (item) {
 					if (item.isRegularItem()) {
+						// Double-click on Commons item should load IA page
+						var itemGroup = ZoteroPane.collectionsView._getItemAtRow(
+							ZoteroPane.collectionsView.selection.currentIndex
+						);
+						
+						if (itemGroup.isCommons()) {
+							var bucket = Zotero.Commons.getBucketFromItem(item);
+							ZoteroPane.loadURI(bucket.uri);
+							event.stopPropagation();
+							return;
+						}
+						
 						if (!viewOnDoubleClick) {
 							return;
 						}
@@ -2879,6 +2860,8 @@ var ZoteroPane = new function()
 			return this.addItemFromPage(itemType, saveSnapshot, row);
 		}
 		
+		var self = this;
+		
 		Zotero.MIME.getMIMETypeFromURL(url, function (mimeType, hasNativeHandler) {
 			// If native type, save using a hidden browser
 			if (hasNativeHandler) {
@@ -2943,7 +2926,16 @@ var ZoteroPane = new function()
 							var collectionID = false;
 						}
 						
-						Zotero.Attachments.importFromURL(url, false, false, false, collectionID, null, libraryID);
+						var attachmentItem = Zotero.Attachments.importFromURL(url, false, false, false, collectionID, mimeType, libraryID);
+						
+						// importFromURL() doesn't trigger the notifier until
+						// after download is complete
+						//
+						// TODO: add a callback to importFromURL()
+						setTimeout(function () {
+							self.selectItem(attachmentItem.id);
+						}, 1001);
+						
 						return;
 					}
 				}

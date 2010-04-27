@@ -52,7 +52,7 @@ Zotero.ItemTreeView = function(itemGroup, sourcesOnly)
 	this._dataItems = [];
 	this.rowCount = 0;
 	
-	this._unregisterID = Zotero.Notifier.registerObserver(this, ['item', 'collection-item', 'share-items', 'bucket']);
+	this._unregisterID = Zotero.Notifier.registerObserver(this, ['item', 'collection-item', 'share-items', 'commons']);
 }
 
 
@@ -260,6 +260,7 @@ Zotero.ItemTreeView.prototype.refresh = function()
  */
 Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 {
+	Zotero.debug('=============');
 	if (!this._treebox || !this._treebox.treeBody) {
 		Components.utils.reportError("Treebox didn't exist in itemTreeView.notify()");
 		return;
@@ -269,7 +270,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		Zotero.debug("Item row map didn't exist in itemTreeView.notify()");
 		return;
 	}
-	
+	Zotero.debug(1);
 	var itemGroup = this._itemGroup;
 	
 	var madeChanges = false;
@@ -284,9 +285,10 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 				this.refresh();
 			}
 		}
-		else if (type == 'bucket') {
-			if (itemGroup.isBucket()) {
+		else if (type == 'commons') {
+			if (itemGroup.isCommons()) {
 				this.refresh();
+				this.sort();
 			}
 		}
 		else if (savedSelection.length == 1 && savedSelection[0] == ids[0]) {
@@ -455,6 +457,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	}
 	else if(action == 'add')
 	{
+		Zotero.debug(2);
 		// If saved search or trash, just re-run search
 		if (itemGroup.isSearch() || itemGroup.isTrash()) {
 			this.refresh();
@@ -499,6 +502,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	
 	if(madeChanges)
 	{
+		Zotero.debug(3);
 		// If adding and this is the active window, select the item
 		if(action == 'add' && ids.length===1 && activeWindow)
 		{
@@ -511,7 +515,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 			
 			// Reset to Info tab
 			this._ownerDocument.getElementById('zotero-view-tabbox').selectedIndex = 0;
-			
+			Zotero.debug(4);
 			this.selectItem(ids[0]);
 		}
 		// If single item is selected and was modified
@@ -540,6 +544,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		}
 		else
 		{
+			Zotero.debug(4);
 			var previousRow = this._itemRowMap[ids[0]];
 			
 			if (sort) {
@@ -1112,6 +1117,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
  */
 Zotero.ItemTreeView.prototype.selectItem = function(id, expand, noRecurse)
 {
+	Zotero.debug('=============');
+	Zotero.debug(Zotero.suppressUIUpdates);
 	// Don't change selection if UI updates are disabled (e.g., during sync)
 	if (Zotero.suppressUIUpdates) {
 		return;
@@ -1267,8 +1274,8 @@ Zotero.ItemTreeView.prototype.deleteSelection = function (force)
 	else if (itemGroup.isCollection()) {
 		itemGroup.ref.removeItems(ids);
 	}
-	else if (itemGroup.isBucket()) {
-		itemGroup.ref.deleteItems(ids);
+	else if (itemGroup.isCommons()) {
+		Zotero.Commons.deleteItems(ids);
 	}
 	this._treebox.endUpdateBatch();
 }

@@ -741,7 +741,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	}
 	
 	if (!Zotero.ItemFields.isValidForType(fieldID, this.itemTypeID)) {
-		var msg = '"' + field + "' is not a valid field for type " + this.itemTypeID;
+		var msg = "'" + field + "' is not a valid field for type " + this.itemTypeID;
 		
 		if (loadIn) {
 			Zotero.debug(msg + " -- ignoring value '" + value + "'", 2);
@@ -1240,7 +1240,7 @@ Zotero.Item.prototype.save = function() {
 					
 					if (Zotero.ItemFields.getID('accessDate') == fieldID
 							&& this.getField(fieldID) == 'CURRENT_TIMESTAMP') {
-						value =  Zotero.DB.transactionDateTime;
+						value = Zotero.DB.transactionDateTime;
 					}
 					
 					var dataType = ZU.getSQLDataType(value);
@@ -3944,7 +3944,10 @@ Zotero.Item.prototype.erase = function() {
 		//Zotero.Fulltext.clearItemContent(this.id);
 	}
 	
-
+	// Remove relations
+	var relation = Zotero.URI.getItemURI(this);
+	Zotero.Relations.eraseByURIPrefix(relation);
+	
 	Zotero.DB.query('DELETE FROM annotations WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM highlights WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM deletedItems WHERE itemID=?', this.id);

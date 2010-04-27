@@ -31,8 +31,6 @@ Zotero.Relations = new function () {
 		owl: 'http://www.w3.org/2002/07/owl#'
 	};
 	
-	var _prefix = "http://zotero.org/";
-	
 	this.get = function (id) {
 		if (typeof id != 'number') {
 			throw ("id '" + id + "' must be an integer in Zotero.Relations.get()");
@@ -165,10 +163,37 @@ Zotero.Relations = new function () {
 	}
 	
 	
-	this.eraseByPathPrefix = function (prefix) {
-		prefix = _prefix + prefix + '%';
+	this.eraseByURIPrefix = function (prefix) {
+		prefix = prefix + '%';
 		sql = "DELETE FROM relations WHERE subject LIKE ? OR object LIKE ?";
 		Zotero.DB.query(sql, [prefix, prefix]);
+	}
+	
+	
+	this.eraseByURI = function (uri) {
+		sql = "DELETE FROM relations WHERE subject=? OR object=?";
+		Zotero.DB.query(sql, [uri, uri]);
+	}
+	
+	
+	this.purge = function () {
+		var sql = "SELECT subject FROM relations UNION SELECT object FROM relations";
+		var uris = Zotero.DB.columnQuery(sql);
+		if (uris) {
+			var prefix = Zotero.URI.defaultPrefix;
+			Zotero.DB.beginTransaction();
+			for each(var uri in uris) {
+				// Skip URIs that don't begin with the default prefix,
+				// since they don't correspond to local items
+				if (uri.indexOf(prefix) == -1) {
+					continue;
+				}
+				if (!Zotero.URI.getURIItem(uri)) {
+					this.eraseByURI(uri);
+				}
+			}
+			Zotero.DB.commitTransaction();
+		}
 	}
 	
 	
@@ -196,7 +221,7 @@ Zotero.Relations = new function () {
 		var [prefix, value] = uri.split(':');
 		if (prefix && value) {
 			if (!_namespaces[prefix]) {
-				throw ("Invalid prefix '" + prefix + "' in Zotero.Relations.add()");
+				throw ("Invalid prefix '" + prefix + "' in Zotero.Relations._getPrefixAndValue()");
 			}
 			return [prefix, value];
 		}
