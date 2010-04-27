@@ -92,8 +92,11 @@ Zotero.ID_Tracker = function () {
 	}
 	
 	
-	function getBigInt() {
-		return Math.floor(Math.random() * (9007199254740991)) + 1;
+	function getBigInt(max) {
+		if (!max) {
+			max = 9007199254740991;
+		}
+		return Math.floor(Math.random() * (max)) + 1;
 	}
 	
 	
