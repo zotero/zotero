@@ -228,7 +228,7 @@ Zotero.Translators = new function() {
  */
 Zotero.Translator = function(file) {
 	// Maximum length for the info JSON in a translator
-	const MAX_INFO_LENGTH = 1024;
+	const MAX_INFO_LENGTH = 4096;
 	const infoRe = /{(?:(?:"(?:[^"\r\n]*(?:\\")?)*")*[^}"]*)*}/;
 	
 	this.file = file;
