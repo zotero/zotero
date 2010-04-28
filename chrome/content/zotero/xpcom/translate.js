@@ -79,7 +79,6 @@ Zotero.Translators = new function() {
 				}
 			}
 			
-			Zotero.wait();
 			i++;
 		}
 		
