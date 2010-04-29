@@ -8,26 +8,13 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-07-24 05:30:00"
+	"lastUpdated":"2010-04-29 21:53:40"
 }
 
 function detectWeb(doc, url) {
 	var mediaType = "1";
-
-	// iterate through links under item/bucket name to check for zoterocommons (the collection name)
-	var links = doc.evaluate('//div/p/span/a', doc, null, XPathResult.ANY_TYPE, null);
-	var link = null;
-	while (next_link = links.iterateNext()) {
-		link = next_link.textContent;
-		if (link.match(/zoterocommons/)) {
-			mediaType  = "commons";
-			Zotero.debug("IA TRANS: scraping commons");
-		}
-	}
 	
-	if (mediaType == "commons") return "commons";
-	
-	else if (doc.evaluate('//h3', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (doc.evaluate('//h3', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		mediaType  = doc.evaluate('//h3', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		
 	} else if (doc.evaluate('//div[@class="box"][@id="spotlight"]/h1', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -57,6 +44,10 @@ function associateData (newItem, dataTags, field, zoteroField) {
 		newItem[zoteroField] = dataTags[field];
 	}
 }
+
+var detailsURL = 'http://www.archive.org/details';
+var downloadURL = 'http://www.archive.org/download';
+var apiURL = 'http://s3.us.archive.org';
 
 function scrape(doc, url) {
 
@@ -233,83 +224,125 @@ function scrape(doc, url) {
 }
 
 
-function processRDFs(doc, url, articles) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;	
-		
-	var httpLink = doc.evaluate('//a[text()="HTTP"]/@href', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+function processBuckets(doc, url, ids) {
+	var httpLink = doc.evaluate('//a[text()="HTTP"]/@href', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
-	for (var i=0 ; i<articles.length; i++) {
-		rdfurl = articles[i];
-		Zotero.debug("IA TRANS: looking at RDF: " + rdfurl);
+	for (var i=0; i<ids.length; i++) {
+		var id = ids[i];
+		var rdfURL = downloadURL + '/' + id + '/' + id + '.rdf';
 		
-		var text = Zotero.Utilities.retrieveSource(rdfurl);
-
+		var text = Zotero.Utilities.retrieveSource(rdfURL);
+		
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f"); // RDF
-		//translator.setTranslator("14763d24-8ba0-45df-8f52-b8d1108e7ac9"); // Zotero RDF
 		translator.setString(text);
 		translator.waitForCompletion = true;
 		translator.setHandler("itemDone", function(obj, item) {
-
-			// get attachment filename from RDF
-			var re = /<rdf:resource rdf:resource.*/g;
-			var resources = text.match(re); 
-
-			// process all attachments
-			// TODO: do not add/keep attachment for regular PDF if full text version exists.
-			for (var j=0; j<resources.length; j++) {
-				Zotero.debug(resources[j]);
-				var sep = resources[j].lastIndexOf("/",resources[j].length-3);
-				var filename = resources[j].substr(sep+1,resources[j].length-sep-4).replace(/ /g,'-');
-				filename = filename.replace(/-+/g,'-');					
-				resourceURL = httpLink + "/" + filename;
-				Zotero.debug("IA TRANS: attachment: " + resourceURL);
-				item.attachments.push({url:resourceURL, title:filename});
-
-				// if attachment is pdf, add OCR'd version (allow to fail if no OCR version exists)
-				if (filename.match(/\.pdf/) && !filename.match(/_text/)) {
-					resourceURL = resourceURL.substr(0,resourceURL.length-4) + "_text.pdf";
-					filename = filename.substr(0,filename.length-4) + "_text.pdf";
-					Zotero.debug("IA TRANS: attachment: " + resourceURL);
-					item.attachments.push({url:resourceURL, title:filename, mimeType:"application/pdf"});
-				}
-				else { 
-						Zotero.debug("not PDF or already _text");
-				}
+			// Don't set access date
+			if (!item.accessDate) {
+				item.accessDate = false;
 			}
-
-			// item.DOI = item.url.match(/\.org\/(.*)$/)[1];
-			// add access date and url
-			item.accessDate = 'CURRENT_TIMESTAMP';
 			
-			// TODO: reference zip file, since bucket address could point to multiple items?
-			item.url = doc.location.href;
+			// Don't set to "Internet Archive"
+			if (!item.libraryCatalog) {
+				item.libraryCatalog = false;
+			}
+			
+			// Clear any attachments from the RDF file
+			item.attachments = [];
+			
+			// TODO: get list of items in bucket
+			
+			var itemURL = downloadURL + '/' + id + '/' + id + '_files.xml';
+			
+			var xmlstr = Zotero.Utilities.retrieveSource(itemURL);
+			Zotero.debug(xmlstr);
+			
+			// Strip XML declaration and convert to E4X
+			var xml = new XML(xmlstr.replace(/<\?xml.*\?>/, ''));
+			var files = xml.file;
+			
+			var attachments = [];
+			var titles = [];
+			// loop through files listed in bucket contents file
+			for each(var f in files) {
+				var fileName = f.@name.toString();
+				
+				// Skip derivative files other than OCRed PDFs
+				if (f.@source.toString() != 'original' && !fileName.match(/_text\.pdf$/)) {
+					Zotero.debug("Skipping " + fileName);
+					continue;
+				}
+				
+				// Skip default files
+				if (fileName.indexOf(id) == 0) {
+					continue;
+				}
+				
+				// TEMP -- shouldn't be necessary after IA changes
+				if (fileName.match(/\.zip(_meta\.txt)?$/)) {
+					Zotero.debug("Skipping " + fileName);
+					continue;
+				}
+				
+				var title = f.title.toString();
+				if (!title) {
+					title = fileName;
+				}
+				
+				attachments.push(fileName);
+				titles.push(title);
+			}
+			
+			for (var i=0; i<attachments.length; i++) {
+				var fileName = attachments[i];
+				var title = titles[i];
+				
+				// Skip PDF if there's an OCRed version
+				if (fileName.match(/\.pdf$/) && !fileName.match(/_text\.pdf$/)) {
+					var n = fileName.replace(".pdf", "_text.pdf");
+					if (fileName.indexOf(n) != -1) {
+						Zotero.debug("Skipping " + fileName + " in favor of _text version");
+						continue;
+					}
+				}
+				
+				var resourceURL = downloadURL + '/' + id + '/' + fileName;
+				item.attachments.push({url:resourceURL, title:title});
+			}
+			
+			// item.DOI = item.url.match(/\.org\/(.*)$/)[1];
+			//item.url = doc.location.href;
+			
+			item.attachments.push({url:detailsURL + '/' + id, title:"Internet Archive Details Page", snapshot:false});
+			
 			item.complete();
-		} ); // end itemDone handler
+		});
 		translator.translate();
-	} // end for each RDF link
-	function() {Zotero.done();};
+	}
 }
 
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	var items = new Object();
-	var articles = new Array();
-	var zipfile = null;
-	var commons = false;
+	var items = {};
+	var articles = {};
 	var itemCount = 0;
 	
-	if (detectWeb(doc, url) == "commons") {
-		commons = true;
-		var titles = doc.evaluate('/html/body/div[5]/div/table/tbody/tr/td[2]/span', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	// iterate through links under item/bucket name to check for zoterocommons (the collection name)
+	var links = doc.evaluate('//div/p/span/a', doc, null, XPathResult.ANY_TYPE, null);
+	var commons = false;
+	while (nextLink = links.iterateNext()) {
+		if (nextLink.textContent.match(/zoterocommons/)) {
+			commons = true;
+		}
+	}
+	
+	if (commons) {
+		var buckets = [];
+		var id = url.match(/.+\/([^\?]+)[^\/]*$/)[1];
+		buckets.push(id);
+		
+		/*var titles = doc.evaluate('/html/body/div[5]/div/table/tbody/tr/td[2]/span', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var httpLink = doc.evaluate('//a[text()="HTTP"]/@href', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
 		// scrape the item titles and item keys off page for selection
@@ -334,14 +367,18 @@ function doWeb(doc, url) {
 		}
 		else {
 			articles.push(zipfile)
-		}
-	} 
-	else if (detectWeb(doc, url) == "multiple") {
+		}*/
+		
+		processBuckets(doc, url, buckets);
+		return;
+	}
+	
+	if (detectWeb(doc, url) == "multiple") {
 		Zotero.debug("multiple");
 		var items = new Object();
 		
-		var titles = doc.evaluate('//td[2][@class="hitCell"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var titlesCount = doc.evaluate('count (//td[2][@class="hitCell"]/a)', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var titles = doc.evaluate('//td[2][@class="hitCell"]/a', doc, null, XPathResult.ANY_TYPE, null);
+		var titlesCount = doc.evaluate('count (//td[2][@class="hitCell"]/a)', doc, null, XPathResult.ANY_TYPE, null);
 		
 		Zotero.debug(titlesCount.numberValue);
 		
@@ -371,8 +408,7 @@ function doWeb(doc, url) {
 		articles = [url];
 	}
 
-	if (!commons)	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	else processRDFs(doc,url, articles);
+	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	
 	Zotero.wait();
 }
