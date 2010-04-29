@@ -1425,7 +1425,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 		item.itemType = item.complete = undefined;
 		
 		// automatically set access date if URL is set
-		if(item.url && !item.accessDate && this.type == "web") {
+		if(item.url && typeof item.accessDate == 'undefined' && this.type == "web") {
 			item.accessDate = "CURRENT_TIMESTAMP";
 		}
 		
@@ -1633,7 +1633,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 									// if that fails, use document if possible
 									mimeType = attachment.document.contentType
 								}
-
+								
 								// same procedure for title as mime type
 								if(attachment.title) {
 									title = attachment.title;
