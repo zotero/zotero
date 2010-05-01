@@ -492,6 +492,7 @@ Zotero.Sync.Runner = new function () {
 	
 	var _lastSyncStatus;
 	var _currentSyncStatusLabel;
+	var _currentLastSyncLabel;
 	
 	var _warning = null;
 	
@@ -935,9 +936,10 @@ Zotero.Sync.Runner = new function () {
 	 *
 	 * @param	{Tooltip}	[label]
 	 */
-	this.registerSyncStatusLabel = function (label) {
-		_currentSyncStatusLabel = label;
-		if (label) {
+	this.registerSyncStatusLabel = function (statusLabel, lastSyncLabel) {
+		_currentSyncStatusLabel = statusLabel;
+		_currentLastSyncLabel = lastSyncLabel;
+		if (_currentSyncStatusLabel) {
 			_updateSyncStatusLabel();
 		}
 	}
@@ -945,26 +947,33 @@ Zotero.Sync.Runner = new function () {
 	
 	function _updateSyncStatusLabel() {
 		if (_lastSyncStatus) {
-			var msg = _lastSyncStatus;
+			_currentSyncStatusLabel.value = _lastSyncStatus;
+			_currentSyncStatusLabel.hidden = false;
 		}
-		// If no message, use last sync time
 		else {
-			var lastSyncTime = Zotero.Sync.Server.lastLocalSyncTime;
-			if (lastSyncTime) {
-				var time = new Date(lastSyncTime * 1000);
-				var msg = Zotero.Date.toRelativeDate(time);
-			}
-			else {
-				var msg = Zotero.getString('sync.status.notYetSynced');
-			}
-			
-			msg = Zotero.localeJoin([
-				Zotero.getString('sync.status.lastSync'),
-				msg
-			]);
+			_currentSyncStatusLabel.hidden = true;
 		}
 		
-		_currentSyncStatusLabel.value = msg;
+		// Always update last sync time
+		var lastSyncTime = Zotero.Sync.Server.lastLocalSyncTime;
+		if (lastSyncTime) {
+			var time = new Date(lastSyncTime * 1000);
+			var msg = Zotero.Date.toRelativeDate(time);
+		}
+		// Don't show "Not yet synced" if a sync is in progress
+		else if (_lastSyncStatus) {
+			_currentLastSyncLabel.hidden = true;
+			return;
+		}
+		else {
+			var msg = Zotero.getString('sync.status.notYetSynced');
+		}
+		
+		_currentLastSyncLabel.value = Zotero.localeJoin([
+			Zotero.getString('sync.status.lastSync'),
+			msg
+		]);
+		_currentLastSyncLabel.hidden = false;
 	}
 }
 
@@ -1616,7 +1625,7 @@ Zotero.Sync.Server = new function () {
 		if (!_sessionID) {
 			Zotero.debug("Session ID not available -- logging in");
 			Zotero.Sync.Server.login(function () {
-				Zotero.Sync.Server.clear();
+				Zotero.Sync.Server.clear(callback);
 			});
 			return;
 		}
