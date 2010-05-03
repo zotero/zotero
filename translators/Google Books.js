@@ -1,19 +1,36 @@
 {
 	"translatorID":"3e684d82-73a3-9a34-095f-19b112d88bbf",
-	"translatorType":4,
 	"label":"Google Books",
 	"creator":"Simon Kornblith, Michael Berkowitz and Rintze Zelle",
 	"target":"^http://(books|www)\\.google\\.[a-z]+(\\.[a-z]+)?/books\\?(.*id=.*|.*q=.*)",
-	"minVersion":"1.0.0b3.r1",
+	"minVersion":"2.0b7",
 	"maxVersion":"",
 	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-01-12 11:25:00"
+	"inRepository":"1",
+	"translatorType":4,
+	"lastUpdated":"2010-05-03 04:20:00"
 }
 
+/*
+The various types of Google Books URLs are:
+
+Search results - List view
+http://books.google.com/books?q=asimov&btnG=Search+Books
+
+Search results - Cover view
+http://books.google.com/books?q=asimov&btnG=Search%20Books&rview=1
+
+Single item - URL with "id"
+http://books.google.com/books?id=skf3LSyV_kEC&source=gbs_navlinks_s
+http://books.google.com/books?hl=en&lr=&id=Ct6FKwHhBSQC&oi=fnd&pg=PP9&dq=%22Peggy+Eaton%22&ots=KN-Z0-HAcv&sig=snBNf7bilHi9GFH4-6-3s1ySI9Q#v=onepage&q=%22Peggy%20Eaton%22&f=false
+
+Single item - URL with "vid" (see http://code.google.com/apis/books/docs/static-links.html)
+http://books.google.com/books?printsec=frontcover&vid=ISBN0684181355&vid=ISBN0684183951&vid=LCCN84026715#v=onepage&q&f=false
+
+*/
 
 function detectWeb(doc, url) {
-	var re = new RegExp('^http://(books|www)\\.google\\.[a-z]+(\.[a-z]+)?/books\\?id=([^&]+)', 'i');
+	var re = new RegExp('^http://(books|www)\\.google\\.[a-z]+(\.[a-z]+)?/books\\?(.*&)?(id|vid)=([^&]+)', 'i');
 	if(re.test(doc.location.href)) {
 		return "book";
 	} else {
@@ -34,9 +51,13 @@ function doWeb(doc, url) {
 	var uri = doc.location.href;
 	var newUris = new Array();
 	
-	var re = new RegExp('^http://(?:books|www)\\.google\\.[a-z]+(\.[a-z]+)?/books\\?id=([^&]+)', 'i');
+	var re = new RegExp('^http://(?:books|www)\\.google\\.[a-z]+(?:\.[a-z]+)?/books\\?(?:.*&)?(id|vid)=([^&]+)', 'i');
 	var m = re.exec(uri);
-	if(m) {
+	if(m && m[1] == "id") {
+		newUris.push("http://books.google.com/books/feeds/volumes/"+m[2]);
+	} else if (m && m[1] == "vid") {
+		var itemLinkWithID = doc.evaluate("/html/head/link", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var m = re.exec(itemLinkWithID);
 		newUris.push("http://books.google.com/books/feeds/volumes/"+m[2]);
 	} else {
 		var items = getItemArrayGB(doc, doc, 'google\\.' + suffix + '/books\\?id=([^&]+)', '^(?:All matching pages|About this Book|Table of Contents|Index)');
@@ -59,57 +80,66 @@ function doWeb(doc, url) {
 	
 	var itemUrlBase = "http://"+prefix+".google."+suffix+"/books?id=";
 	
-	Zotero.Utilities.HTTP.doGet(newUris, function(text) {
-		// Remove xml parse instruction and doctype
-		text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
+	for (var i in newUris) {
+		var d = Zotero.Utilities.retrieveSource(newUris[i]);
+		//Zotero.debug(d);
+		parseXML(d, itemUrlBase);
+	}
+}
+	
+function parseXML(text, itemUrlBase) {
+	// Remove xml parse instruction and doctype
+	text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
 
-		var xml = new XML(text);
+	var xml = new XML(text);
+	
+	default xml namespace = "http://purl.org/dc/terms"; with ({});
 		
-		default xml namespace = "http://purl.org/dc/terms"; with ({});
-		
-		var newItem = new Zotero.Item("book");
-		
-		var authors = xml.creator;
-		for (var i in authors) {
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i].toString(), "author"));
+	var newItem = new Zotero.Item("book");
+	
+	var authors = xml.creator;
+	for (var i in authors) {
+		newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i].toString(), "author"));
+	}
+	
+	newItem.date = xml.date.toString();
+
+	var pages = xml.format.toString();
+	var pagesRe = new RegExp(/(\d+)( pages)/);
+	var pagesMatch = pagesRe.exec(pages);
+	if (pagesMatch!=null) {
+		newItem.numPages = pagesMatch[1];
+	} else {
+		newItem.numPages = pages;
+	}
+	
+	var ISBN;
+	var ISBN10Re = new RegExp(/(ISBN:)(\w{10})$/);
+	var ISBN13Re = new RegExp(/(ISBN:)(\w{13})$/);
+	var identifiers = xml.identifier;
+	for (var i in identifiers) {
+		var ISBN10Match = ISBN10Re.exec(identifiers[i].toString());
+		var ISBN13Match = ISBN13Re.exec(identifiers[i].toString());
+		if (ISBN10Match != null) {
+			ISBN = ISBN10Match[2];
 		}
-		
-		newItem.date = xml.date.toString();
-		
-		var pages = xml.format.toString();
-		var pagesRe = new RegExp(/(\d+)( pages)/);
-		var pagesMatch = pagesRe.exec(pages);
-		if (pagesMatch!=null) {
-			newItem.numPages = pagesMatch[1];
-		} else {
-			newItem.numPages = pages;
+		if (ISBN13Match != null) {
+			ISBN = ISBN13Match[2];
 		}
+	}
+	newItem.ISBN = ISBN;
+	
+	if (xml.publisher[0]) {
+		newItem.publisher = xml.publisher[0].toString();
+	}
 		
-		var ISBN;
-		var identifiers = xml.identifier;
-		var identifiersRe = new RegExp(/(ISBN:)(\w+)/);
-		for (var i in identifiers) {
-			var identifierMatch = identifiersRe.exec(identifiers[i].toString());
-			if (identifierMatch!=null && !ISBN) {
-				ISBN = identifierMatch[2];
-			} else if (identifierMatch!=null){
-				ISBN = ISBN + ", " + identifierMatch[2];
-			}
-		}
-		newItem.ISBN = ISBN;
-		
-		if (xml.publisher[0]) {
-			newItem.publisher = xml.publisher[0].toString();
-		}
-		
-		newItem.title = xml.title[0].toString();
-		
-		var url = itemUrlBase + xml.identifier[0];
-		newItem.attachments = [{title:"Google Books Link", snapshot:false, mimeType:"text/html", url:url}];
-		
-		newItem.complete();
-	}, function() { Zotero.done(); }, null);
-	Zotero.wait();
+	newItem.title = xml.title[0].toString();
+
+	var url = itemUrlBase + xml.identifier[0];
+
+	newItem.attachments = [{title:"Google Books Link", snapshot:false, mimeType:"text/html", url:url}];
+	
+	newItem.complete();
 }
 
 /**
