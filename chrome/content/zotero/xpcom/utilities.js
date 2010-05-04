@@ -366,7 +366,7 @@ Zotero.Utilities.prototype.isEmpty = function (obj) {
 
 /**
  * Compares an array with another and returns an array with
- *	the values from array2 that don't exist in array1
+ *	the values from array1 that don't exist in array2
  *
  * @param	{Array}		array1
  * @param	{Array}		array2
