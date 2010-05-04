@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-12-23 18:00:00"
+	"lastUpdated":"2010-05-02 15:55:00"
 }
 
 function detectWeb(doc, url) {
@@ -29,7 +29,7 @@ function scrape(doc) {
 	var itemTypes = new Array();
 	var attachments = new Array();
 	
-	var titles = doc.evaluate('//div[@class="gs_r"]/h3', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var titles = doc.evaluate('//div[@class="gs_r"]//h3', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	
 	// changing .enw to .bib
 	var elmts = doc.evaluate('//a[contains(@href, "scholar.bib")]',
