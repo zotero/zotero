@@ -302,6 +302,7 @@ Zotero.ItemFields = new function() {
 			'seriesText',
 			'libraryCatalog',
 			'callNumber',
+			'archive',
 			'archiveLocation',
 			'language',
 			'rights',
