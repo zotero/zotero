@@ -1532,7 +1532,7 @@ Zotero.Sync.Server = new function () {
 					
 					// Check if any items were modified during /upload,
 					// and restart the sync if so
-					if (Zotero.Items.getNewer(nextLocalSyncDate)) {
+					if (Zotero.Items.getNewer(nextLocalSyncDate, true)) {
 						Zotero.debug("Items were modified during upload -- restarting sync");
 						Zotero.Sync.Server.sync(_callbacks, true, true);
 						return;
