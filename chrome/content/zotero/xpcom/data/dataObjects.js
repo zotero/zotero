@@ -147,7 +147,7 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	}
 	
 	
-	this.getNewer = function (date) {
+	this.getNewer = function (date, ignoreFutureDates) {
 		if (date && date.constructor.name != 'Date') {
 			throw ("date must be a JS Date in "
 				+ "Zotero." + this._ZDO_Objects + ".getNewer()")
@@ -156,6 +156,9 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 		var sql = "SELECT ROWID FROM " + this._ZDO_table;
 		if (date) {
 			sql += " WHERE clientDateModified>?";
+			if (ignoreFutureDates) {
+				sql += " AND clientDateModified<=CURRENT_TIMESTAMP";
+			}
 			return Zotero.DB.columnQuery(sql, Zotero.Date.dateToSQL(date, true));
 		}
 		return Zotero.DB.columnQuery(sql);
