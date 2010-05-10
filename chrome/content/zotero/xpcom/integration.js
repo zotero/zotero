@@ -67,7 +67,20 @@ Zotero.Integration = new function() {
 			Zotero.debug("Initializing Zotero integration pipe at "+_fifoFile.path);
 			
 			// destroy old pipe, if one exists
-			if(_fifoFile.exists()) _fifoFile.remove(false);
+			try {
+				if(_fifoFile.exists()) {
+					_fifoFile.remove(false);
+				}
+			}
+			catch (e) {
+				Zotero.debug("Could not remove old integration pipe", 1);
+				Components.utils.reportError(
+					"Zotero word processor integration initialization failed. "
+						+ "See http://forums.zotero.org/discussion/12054/#Item_10 "
+						+ "for instructions on correcting this problem."
+				);
+				return;
+			}
 			
 			// make a new pipe
 			var mkfifo = Components.classes["@mozilla.org/file/local;1"].
