@@ -1216,7 +1216,7 @@ Zotero.DBConnection.prototype._getTypedValue = function (statement, i) {
 		case statement.VALUE_TYPE_FLOAT:
 			return statement.getDouble(i);
 		case statement.VALUE_TYPE_BLOB:
-			return statement.getBlob(i);
+			return statement.getBlob(i, {});
 	}
 }
 
