@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-11-02 21:10:00"
+	"lastUpdated":"2010-05-18 17:30:00"
 }
 
 function detectWeb(doc, url) {
@@ -48,11 +48,18 @@ function doWeb(doc, url) {
 			}
 			thing = stuff.iterateNext();
 		}
-		data.pdfurl = newDoc.evaluate('//div[@id="content"]/div/a[1]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		// There seem to be multiple page structures
+		data.pdfurl = newDoc.evaluate('//div[@id="content"]/div/a[1]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext();
+		if (data.pdfurl !== null) {
+			data.pdfurl = data.pdfurl.href;
+		} else {
+		// If we didn't find the URL there, try elsewhere:
+			data.pdfurl = newDoc.evaluate('//a[@title="Download PDF"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		}
 		var id = newDoc.location.href.match(/content=([\w\d]+)/);
 		// If URL has DOI rather than id, use navbar link to get id
 		if (id[1] == 10) {
-			id = newDoc.evaluate('//table[@id="tabbar_table"]//td//a[@title = "Article"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+			id = newDoc.evaluate('//div[@id="contenttabs"]//a[@title = "Article"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
 			id = id.match(/content=([\w\d]+)/);
 		}
 		var post = 'tab=citation&selecteditems=' + id[1].substr(1) + '&content=' + id[1] + '&citstyle=refworks&showabs=false&format=file';
