@@ -1818,7 +1818,7 @@ function doImport() {
 // some fields are, in fact, macros.  If that is the case then we should not put the
 // data in the braces as it will cause the macros to not expand properly
 function writeField(field, value, isMacro) {
-	if(!value) return;
+	if(!value && typeof value != "number") return;
 	value = value + ""; // convert integers to strings
 	Zotero.write(",\n\t"+field+" = ");
 	if(!isMacro) Zotero.write("{");
@@ -2007,7 +2007,7 @@ function doExport() {
 		if(item.date) {
 			var date = Zotero.Utilities.strToDate(item.date);
 			// need to use non-localized abbreviation
-			if(date.month) {
+			if(typeof date.month == "number") {
 				writeField("month", months[date.month], true);
 			}
 			if(date.year) {
