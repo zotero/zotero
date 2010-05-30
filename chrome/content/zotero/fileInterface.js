@@ -379,11 +379,11 @@ var Zotero_File_Interface = new function() {
 						   createInstance(Components.interfaces.nsITransferable);
 		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
 							   getService(Components.interfaces.nsIClipboard);
-		var csl = Zotero.Styles.get(style).csl;
-		var itemSet = csl.createItemSet(items); 
+		var style = Zotero.Styles.get(style).csl;
+		style.updateItems([item.id for each(item in items)]);
 		
 		// add HTML
-		var bibliography = csl.formatBibliography(itemSet, "HTML");
+		var bibliography = Zotero.Cite.makeFormattedBibliography(style, "html");
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -391,7 +391,9 @@ var Zotero_File_Interface = new function() {
 		transferable.setTransferData("text/html", str, bibliography.length*2);
 		
 		// add text (or HTML source)
-		var bibliography = csl.formatBibliography(itemSet, asHTML ? 'HTML' : 'Text');
+		if(!asHTML) {
+			var bibliography = Zotero.Cite.makeFormattedBibliography(style, "text");
+		}
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -416,16 +418,13 @@ var Zotero_File_Interface = new function() {
 		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
 							   getService(Components.interfaces.nsIClipboard);
 		
-		var csl = Zotero.Styles.get(style).csl;
-		var itemSet = csl.createItemSet(items);
-		var itemIDs = [];
-		for (var i=0; i<items.length; i++) {
-			itemIDs.push(items[i].getID());
-		}
-		var citation = csl.createCitation(itemSet.getItemsByIds(itemIDs));
+		var style = Zotero.Styles.get(style).csl;
+		style.updateItems([item.id for each(item in items)]);
+		var citation = {"citationItems":[{id:item.id} for each(item in items)], properties:{}};
 		
 		// add HTML
-		var bibliography = csl.formatCitation(citation, "HTML");
+		style.setOutputFormat("html");
+		var bibliography = style.appendCitationCluster(citation, true)[0][1];
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -433,7 +432,10 @@ var Zotero_File_Interface = new function() {
 		transferable.setTransferData("text/html", str, bibliography.length*2);
 		
 		// add text (or HTML source)
-		var bibliography = csl.formatCitation(citation, asHTML ? 'HTML' : 'Text');
+		if(!asHTML) {
+			style.setOutputFormat("text");
+			var bibliography = style.appendCitationCluster(citation, true)[0][1];
+		}
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -467,9 +469,9 @@ var Zotero_File_Interface = new function() {
 		if(!io.output) return;
 		
 		// determine output format
-		var format = "HTML";
+		var format = "html";
 		if(io.output == "save-as-rtf") {
-			format = "RTF";
+			format = "rtf";
 		}
 		
 		// generate bibliography
@@ -479,9 +481,9 @@ var Zotero_File_Interface = new function() {
 				return;
 			}
 			else {
-				var csl = Zotero.Styles.get(io.style).csl;
-				var itemSet = csl.createItemSet(items); 
-				var bibliography = csl.formatBibliography(itemSet, format);
+				var style = Zotero.Styles.get(io.style).csl;
+				style.updateItems([item.id for each(item in items)]);
+				var bibliography = Zotero.Cite.makeFormattedBibliography(style, format);
 			}
 		} catch(e) {
 			window.alert(Zotero.getString("fileInterface.bibliographyGenerationError"));

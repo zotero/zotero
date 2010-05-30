@@ -1943,8 +1943,8 @@ Zotero.Date = new function(){
 			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
 				'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 			// If using a non-English bibliography locale, try those too
-			if (Zotero.CSL.Global.locale != 'en-US') {
-				months = months.concat(Zotero.CSL.Global.getMonthStrings("short"));
+			if (Zotero.locale != 'en-US') {
+				months = months.concat(Zotero.Cite.getMonthStrings("short"));
 			}
 			if(!_monthRe) {
 				_monthRe = new RegExp("^(.*)\\b("+months.join("|")+")[^ ]*(?: (.*)$|$)", "i");
@@ -2020,7 +2020,7 @@ Zotero.Date = new function(){
 				string += date.part+" ";
 			}
 			
-			var months = Zotero.CSL.Global.getMonthStrings("long");
+			var months = Zotero.Cite.getMonthStrings("long");
 			if(date.month != undefined && months[date.month]) {
 				// get short month strings from CSL interpreter
 				string += months[date.month];

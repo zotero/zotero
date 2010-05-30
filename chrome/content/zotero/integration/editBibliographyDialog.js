@@ -25,9 +25,9 @@
 
 var Zotero_Bibliography_Dialog = new function () {
 	var bibEditInterface;
-	var itemSet;
-	var _originalBibEntry;
-	var _lastSelectedItem;
+	var _lastSelectedItemID = false;
+	var _lastSelectedIndex = false;
+	var _lastSelectedValue = false;
 	
 	this.load = load;
 	this.treeItemSelected = treeItemSelected;
@@ -40,10 +40,9 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * initialize add citation dialog
 	 */
 	function load() {
-		document.getElementById('editor').format = "Integration";
+		document.getElementById('editor').format = "RTF";
 		
 		bibEditInterface = window.arguments[0].wrappedJSObject;
-		itemSet = bibEditInterface.getItemSet();
 		
 		// load (from selectItemsDialog.js)
 		doLoad();
@@ -56,10 +55,10 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * called when an item in the item selection tree is clicked
 	 */
 	function treeItemSelected() {
-		var items = itemsView.getSelectedItems(true); // treeview from selectItemsDialog.js
+		var selectedItems = itemsView.getSelectedItems(true); // treeview from selectItemsDialog.js
 		
 		// disable add if item already in itemSet
-		document.getElementById("add").disabled = !items.length || itemSet.getItemsByIds([items[0]])[0];
+		document.getElementById("add").disabled = selectedItems.length && bibEditInterface.bibliography[0].entry_ids.indexOf(selectedItems[0].id) !== -1;
 	}
 	
 	/*
@@ -72,9 +71,9 @@ var Zotero_Bibliography_Dialog = new function () {
 		document.getElementById("remove").disabled = !selectedListItem;
 		
 		if(selectedListItem) {
-			_updatePreview(itemSet.getItemsByIds([selectedListItem.value])[0]);
+			_updatePreview(selectedListItem.value);
 		} else {
-			_updatePreview(false);
+			_updatePreview();
 		}
 	}
 	
@@ -82,9 +81,10 @@ var Zotero_Bibliography_Dialog = new function () {
 	 * Adds a citation to the reference list
 	 */
 	function add() {
-		var item = itemsView.getSelectedItems()[0]; // treeview from selectItemsDialog.js
+		var selectedItem = itemsView.getSelectedItems()[0]; // treeview from selectItemsDialog.js
+		Zotero.debug(selectedItem);
 		
-		bibEditInterface.add(item);
+		bibEditInterface.add(selectedItem.id);
 		document.getElementById("add").disabled = true;
 		_loadItems();
 	}
@@ -94,10 +94,9 @@ var Zotero_Bibliography_Dialog = new function () {
 	 */
 	function remove() {
 		var selectedListItem = document.getElementById("item-list").getSelectedItem(0);
-		var itemID = selectedListItem.value;
-		var item = itemSet.getItemsByIds([itemID])[0];
+		var itemID = bibEditInterface.bibliography[0].entry_ids[selectedListItem.value];
 		
-		if(bibEditInterface.isCited(item)) {
+		if(bibEditInterface.isCited(itemID)) {
 			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 											.getService(Components.interfaces.nsIPromptService);
 			
@@ -113,13 +112,10 @@ var Zotero_Bibliography_Dialog = new function () {
 			if(regenerate != 0) return;
 		}
 		
-		bibEditInterface.remove(item);
+		bibEditInterface.remove(itemID);
 		_loadItems();
 	}
 	
-	/*
-	 * Called on "Accept" button
-	 */
 	function accept() {
 		_updatePreview();
 	}
@@ -127,23 +123,39 @@ var Zotero_Bibliography_Dialog = new function () {
 	/*
 	 * Updates the contents of the preview pane
 	 */
-	function _updatePreview(item) {
+	function _updatePreview(index) {
+		Zotero.debug("_updatePreview called");
 		var editor = document.getElementById('editor');
 		
-		if(_lastSelectedItem && editor.value != _originalBibEntry) {
-			Zotero.debug("setting bibliography for "+_lastSelectedItem.getID()+" to "+editor.value);
-			_lastSelectedItem.setProperty("bibliography-RTF", editor.value);
+		if(_lastSelectedItemID) {
+			var newValue = editor.value;
+			if(_lastSelectedValue != newValue) {
+				Zotero.debug("setting bibliography for "+_lastSelectedItemID+" to "+newValue);
+				bibEditInterface.setCustomText(_lastSelectedItemID, newValue);
+			}
 		}
 		
-		editor.readonly = !item;
-		editor.value = _originalBibEntry = (item ? bibEditInterface.preview(item) : "");
-		_lastSelectedItem = item;
+		editor.readonly = index === undefined;
+		if(index !== undefined) {
+			Zotero.debug("updating preview of "+index);
+			var itemID = bibEditInterface.bibliography[0].entry_ids[index];
+			editor.value = bibEditInterface.bibliography[1][index];
+			_lastSelectedIndex = index;
+			_lastSelectedItemID = itemID;
+			_lastSelectedValue = editor.value;
+		} else {
+			editor.value = "";
+			_lastSelectedIndex = _lastSelectedItemID = _lastSelectedValue = false;
+		}
 	}
 	
 	/*
 	 * loads items from itemSet
 	 */
 	function _loadItems() {
+		var itemIDs = bibEditInterface.bibliography[0].entry_ids;
+		var items = Zotero.Items.get(itemIDs);
+		
 		// delete all existing items from list
 		var itemList = document.getElementById("item-list");
 		while(itemList.firstChild) {
@@ -151,14 +163,12 @@ var Zotero_Bibliography_Dialog = new function () {
 		}
 		
 		// add new items
-		for(var i=0; i<itemSet.items.length; i++) {
-			var item = itemSet.items[i].zoteroItem;
-			
+		for(var i=0; i<items.length; i++) {
 			var itemNode = document.createElement("listitem");
-			itemNode.setAttribute("value", item.getID());
-			itemNode.setAttribute("label", item.getField("title"));
+			itemNode.setAttribute("value", i);
+			itemNode.setAttribute("label", items[i].getField("title"));
 			itemNode.setAttribute("class", "listitem-iconic");
-			itemNode.setAttribute("image", item.getImageSrc());
+			itemNode.setAttribute("image", items[i].getImageSrc());
 			itemList.appendChild(itemNode);
 		}
 		

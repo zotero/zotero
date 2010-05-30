@@ -61,7 +61,7 @@ Zotero.Styles = new function() {
 	
 	/**
 	 * Reads all styles from a given directory and caches their metadata
-	 * @privates
+	 * @private
 	 */
 	function _readStylesFromDirectory(dir, hidden) {
 		var i = 0;
@@ -156,7 +156,7 @@ Zotero.Styles = new function() {
 				var xml = enConverter.parse();
 			} else {
 				// CSL
-				var xml = new XML(Zotero.CSL.Global.cleanXML(style));
+				var xml = new XML(this.cleanXML(xml));
 			}
 		} catch(e) {
 			error = e;
@@ -280,6 +280,13 @@ Zotero.Styles = new function() {
 		
 		return false;
 	}
+
+	this.cleanXML = function(str) {
+		// this is where this should happen
+		str = str.replace(/\s*<\?[^>]*\?>\s*\n/g, "");
+		var ret = new XML(str);
+		return ret;
+	}
 	
 	/**
 	 * Finishes installing a style, copying the file, reloading the style cache, and refreshing the
@@ -346,20 +353,13 @@ Zotero.Style = function(file) {
 		
 		this.type = "csl";
 		
-		var xml = Zotero.CSL.Global.cleanXML(Zotero.File.getContents(file));
-		try {
-			xml = new XML(xml);
-		} catch(e) {
-			Zotero.log(e.toString(), "error",
-				Zotero.Styles.ios.newFileURI(this.file).spec, xml.split(/\r?\n/)[e.lineNumber-1],
-				e.lineNumber);
-			return;
-		}
+		var xml = Zotero.Styles.cleanXML(Zotero.File.getContents(file));
 					
 		this.styleID = xml.info.id.toString();
 		this.title = xml.info.title.toString();
 		this.updated = xml.info.updated.toString().replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
 		this._class = xml.@class.toString();
+		this._hasBibliography = !!xml.bibliography.length();
 		
 		this.source = null;
 		for each(var link in xml.info.link) {
@@ -381,22 +381,57 @@ Zotero.Style.prototype.__defineGetter__("csl",
  * @type Zotero.CSL
  */
 function() {
-	// cache last style
-	if(Zotero.Styles.cacheTranslatorData && Zotero.Styles.lastCSL && 
-			Zotero.Styles.lastCSL.styleID == this.styleID) {
-		return Zotero.Styles.lastCSL;
+	var locale = Zotero.Prefs.get('export.bibliographyLocale');
+	if(!locale) {
+		var locale = Zotero.locale;
+		if(!locale) {
+			var locale = 'en-US';
+		}
 	}
+	
+	return new Zotero.CiteProc.CSL.Engine(Zotero.Cite.System, this.getXML(), Zotero.locale);
+});
+
+Zotero.Style.prototype.__defineGetter__("class",
+/**
+ * Retrieves the style class, either from the metadata that's already loaded or by loading the file
+ * @type String
+ */
+function() {
+	if(!this._class) this.getXML();
+	return this._class;
+});
+
+Zotero.Style.prototype.__defineGetter__("hasBibliography",
+/**
+ * Determines whether or not this style has a bibliography, either from the metadata that's already\
+ * loaded or by loading the file
+ * @type String
+ */
+function() {
+	if(!this._hasBibliography) this.getXML();
+	return this._hasBibliography;
+});
+
+/**
+ * Retrieves the XML corresponding to this style
+ * @type String
+ */
+Zotero.Style.prototype.getXML = function() {
+	// "with ({});" needed to fix default namespace scope issue
+	// See https://bugzilla.mozilla.org/show_bug.cgi?id=330572
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with ({});
 	
 	if(this.type == "ens") {
 		// EN style
 		var string = Zotero.File.getBinaryContents(this.file);
 		var enConverter = new Zotero.ENConverter(string, null, this.title);
 		var xml = enConverter.parse();
-	} else {
-		// "with ({});" needed to fix default namespace scope issue
-		// See https://bugzilla.mozilla.org/show_bug.cgi?id=330572
-		default xml namespace = "http://purl.org/net/xbiblio/csl"; with ({});
+		this._class = xml.@class.toString();
+		this._hasBibliography = !!xml.bibliography.length();
 		
+		return XML.toXMLString();
+	} else {
 		if(this.source) {
 			// parent/child
 			var formatCSL = Zotero.Styles.get(this.source);
@@ -409,22 +444,9 @@ function() {
 			var file = this.file;
 		}
 		
-		var cslString = Zotero.File.getContents(file);
-		var xml = new XML(Zotero.CSL.Global.cleanXML(cslString));
+		return Zotero.File.getContents(file);
 	}
-	
-	return (Zotero.Styles.lastCSL = new Zotero.CSL(xml));
-});
-
-Zotero.Style.prototype.__defineGetter__("class",
-/**
- * Retrieves the style class, either from the metadata that's already loaded or by loading the file
- * @type String
- */
-function() {
-	if(this._class) return this._class;
-	return (this._class = this.csl.class);
-});
+};
 
 /**
  * Deletes a style

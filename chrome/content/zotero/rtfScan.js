@@ -495,58 +495,47 @@ var Zotero_RTFScan = new function() {
 	
 	function _formatRTF() {
 		// load style and create ItemSet with all items
-		var style = Zotero.Styles.get(document.getElementById("style-listbox").selectedItem.value).csl;
+		var zStyle = Zotero.Styles.get(document.getElementById("style-listbox").selectedItem.value)
+		var style = zStyle.csl;
+		style.setOutputFormat("rtf");
 		var isNote = style.class == "note";
-		var itemSet = style.createItemSet();
 		
 		// create citations
 		var k = 0;
 		var cslCitations = [];
+		var itemIDs = {};
 		var shouldBeSubsequent = {};
 		for(var i=0; i<citations.length; i++) {
 			var citation = citations[i];
-			var cslCitation = style.createCitation();
-			cslCitations.push(cslCitation);
+			var cslCitation = {"citationItems":[], "properties":{}};
+			if(isNote) {
+				cslCitation.properties.noteIndex = i;
+			}
 			
 			// create citation items
 			for(var j=0; j<citation.citationStrings.length; j++) {
-				var itemID = citationItemIDs[citation.citationStrings[j]];
-				var cslItem = itemSet.getItemsByIds(itemID)[0];
-				
-				// determine position
-				var position = Zotero.CSL.POSITION_SUBSEQUENT;
-				if(!cslItem) { // if item is not yet in item set, add it and mark as first citation
-					var position = Zotero.CSL.POSITION_FIRST;
-					var cslItem = itemSet.add(itemID)[0];
-				} else if(// this citation and previous citation only cite one item
-				          citation.citationStrings.length == citations[i-1].citationStrings.length == 1
-				          // this citation and previous citation cite the same item
-				          && citation.citationStrings[0] == citations[i-1].citationStrings[0]
-				          // either previous item had no locator, or this item has a locator
-				          && (!citations[i-1].pages[0] || citation.pages[0])) {
-					if(citation.pages[0] == citations[i-1].pages[0]) {
-						var position = Zotero.CSL.POSITION_IBID;
-					} else {
-						var position = Zotero.CSL.POSITION_IBID_WITH_LOCATOR;
-					}
-				}
-				
-				var cslCitationItem = new Zotero.CSL.CitationItem(cslItem);
-				cslCitation.add([cslCitationItem]);
-				cslCitationItem.position = position;
-				cslCitationItem.locator = citation.pages[j];
-				cslCitationItem.suppressAuthor = citation.suppressAuthor && !isNote;
+				var citationItem = {};
+				citationItem.id = citationItemIDs[citation.citationStrings[j]][0];
+				itemIDs[citationItem.id] = true;
+				citationItem.locator = citation.pages[j];
+				citationItem.label = "page";
+				citationItem["suppress-author"] = citation.suppressAuthor && !isNote;
+				cslCitation.citationItems.push(citationItem);
 			}
+			
+			cslCitations.push(cslCitation);
 		}
+		Zotero.debug(cslCitations);
 		
-		// sort item set, now that we have the indices
-		itemSet.resort();
+		itemIDs = [itemID for(itemID in itemIDs)];
+		Zotero.debug(itemIDs);
+		style.updateItems(itemIDs);
 		
 		// format citations
 		var contentArray = [];
 		var lastEnd = 0;
 		for(var i=0; i<citations.length; i++) {
-			var citation = style.formatCitation(cslCitations[i], "RTF");
+			var citation = style.appendCitationCluster(cslCitations[i], true)[0][1];
 			Zotero.debug("Formatted "+citation);
 			
 			// if using notes, we might have to move the note after the punctuation
@@ -576,10 +565,9 @@ var Zotero_RTFScan = new function() {
 		contents = contentArray.join("");
 		
 		// add bibliography
-		if(style.hasBibliography) {
-			var bibliography = style.formatBibliography(itemSet, "RTF");
-			// cut off initial font formatting 
-			bibliography = bibliography.substr(bibliography.indexOf("\r\n"));
+		if(zStyle.hasBibliography) {
+			var bibliography = Zotero.Cite.makeFormattedBibliography(style, "rtf");
+			bibliography = bibliography.substring(5, bibliography.length-1);
 			// fix line breaks
 			var linebreak = "\r\n";
 			if(contents.indexOf("\r\n") == -1) {
@@ -591,14 +579,14 @@ var Zotero_RTFScan = new function() {
 				contents = contents.replace(BIBLIOGRAPHY_PLACEHOLDER, bibliography);
 			} else {
 				// add two newlines before bibliography
-				bibliography = linebreak+"\\"+linebreak+"\\"+bibliography;
+				bibliography = linebreak+"\\"+linebreak+"\\"+linebreak+bibliography;
 				
 				// add bibliography automatically inside last set of brackets closed
 				const bracketRe = /^\{+/;
 				var m = bracketRe.exec(contents);
 				if(m) {
 					var closeBracketRe = new RegExp("(\\}{"+m[0].length+"}\\s*)$");
-					contents = contents.replace(closeBracketRe, bibliography+"\\1");
+					contents = contents.replace(closeBracketRe, bibliography+"$1");
 				} else {
 					contents += bibliography;
 				}
