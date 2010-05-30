@@ -346,7 +346,7 @@ Zotero.Style = function(file) {
 		this.styleID = Zotero.Styles.ios.newFileURI(this.file).spec;
 		this.title = file.leafName.substr(0, file.leafName.length-4);
 		this.updated = Zotero.Date.dateToSQL(new Date(file.lastModifiedTime));
-		this._versino = "0.8";
+		this._version = "0.8";
 	} else if(extension == ".csl") {
 		// "with ({});" needed to fix default namespace scope issue
 		// See https://bugzilla.mozilla.org/show_bug.cgi?id=330572
