@@ -346,6 +346,7 @@ Zotero.Style = function(file) {
 		this.styleID = Zotero.Styles.ios.newFileURI(this.file).spec;
 		this.title = file.leafName.substr(0, file.leafName.length-4);
 		this.updated = Zotero.Date.dateToSQL(new Date(file.lastModifiedTime));
+		this._versino = "0.8";
 	} else if(extension == ".csl") {
 		// "with ({});" needed to fix default namespace scope issue
 		// See https://bugzilla.mozilla.org/show_bug.cgi?id=330572
@@ -360,6 +361,8 @@ Zotero.Style = function(file) {
 		this.updated = xml.info.updated.toString().replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
 		this._class = xml.@class.toString();
 		this._hasBibliography = !!xml.bibliography.length();
+		this._version = xml.@version.toString();
+		if(this._version == "") this._version = "0.8";
 		
 		this.source = null;
 		for each(var link in xml.info.link) {
@@ -389,7 +392,40 @@ function() {
 		}
 	}
 	
-	return new Zotero.CiteProc.CSL.Engine(Zotero.Cite.System, this.getXML(), Zotero.locale);
+	if(this._version == "0.8") {
+		// get XSLT file
+		let updateXSLTFile = Zotero.getInstallDirectory();
+		updateXSLTFile.append("updateCSL.xsl");
+		
+		// read XSLT file as DOM XML
+		let xmlFiles = [];
+		let fis = Components.classes["@mozilla.org/network/file-input-stream;1"].
+			createInstance(Components.interfaces.nsIFileInputStream);
+		fis.init(updateXSLTFile, 0x01, 0664, 0);
+		let updateXSLT = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser)
+			.parseFromStream(fis, "UTF-8", updateXSLTFile.fileSize, "text/xml");
+		fis.close();
+		
+		// load XSLT file into XSLTProcessor
+		let xsltProcessor = Components.classes["@mozilla.org/document-transformer;1?type=xslt"]
+			.createInstance(Components.interfaces.nsIXSLTProcessor);
+		xsltProcessor.importStylesheet(updateXSLT);
+		
+		// read style file as DOM XML
+		let styleDOMXML = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser)
+			.parseFromString(this.getXML(), "text/xml");
+		
+		// apply XSLT and serialize output
+		let newDOMXML = xsltProcessor.transformToDocument(styleDOMXML);
+		var xml = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
+			.createInstance(Components.interfaces.nsIDOMSerializer).serializeToString(newDOMXML);
+	} else {
+		var xml = this.getXML();
+	}
+	
+	return new Zotero.CiteProc.CSL.Engine(Zotero.Cite.System, xml, Zotero.locale);
 });
 
 Zotero.Style.prototype.__defineGetter__("class",
@@ -413,6 +449,24 @@ function() {
 	return this._hasBibliography;
 });
 
+Zotero.Style.prototype.__defineGetter__("independentFile",
+/**
+ * Retrieves the file corresponding to the independent CSL
+ * (the parent if this style is dependent, or this style if it is not)
+ */
+function() {
+	if(this.source) {
+		// parent/child
+		var formatCSL = Zotero.Styles.get(this.source);
+		if(!formatCSL) {
+			throw(new Error('Style references '+this.source+', but this style is not installed',
+				Zotero.Styles.ios.newFileURI(this.file).spec, null));
+		}
+		return formatCSL.file;
+	}
+	return this.file;
+});
+
 /**
  * Retrieves the XML corresponding to this style
  * @type String
@@ -432,19 +486,7 @@ Zotero.Style.prototype.getXML = function() {
 		
 		return XML.toXMLString();
 	} else {
-		if(this.source) {
-			// parent/child
-			var formatCSL = Zotero.Styles.get(this.source);
-			if(!formatCSL) {
-				throw(new Error('Style references '+this.source+', but this style is not installed',
-					Zotero.Styles.ios.newFileURI(this.file).spec, null));
-			}
-			var file = formatCSL.file;
-		} else {
-			var file = this.file;
-		}
-		
-		return Zotero.File.getContents(file);
+		return Zotero.File.getContents(this.independentFile);
 	}
 };
 
