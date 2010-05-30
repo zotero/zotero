@@ -588,8 +588,7 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 		}
 	}
 	
-	//this._session.updateItems();
-	this._session.updateCitations();
+	this._session.updateCitations(true);
 	
 	// create new citation or edit existing citation
 	if(editFieldIndex) { 
@@ -609,35 +608,12 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 			}
 		}
 	}
-	this._session.updateItems();
 }
 
 /**
  * Updates bibliographies and fields within a document
  */
 Zotero.Integration.Document.prototype._updateDocument = function(forceCitations, forceBibliography) {
-	// update bibliographies
-	var output = new Array();
-	if(this._bibliographyFields.length	 				// if blbliography exists
-			&& (this._session.bibliographyHasChanged	// and bibliography changed
-			|| forceBibliography)) {					// or if we should generate regardless of changes
-		if(this._session.bibliographyDataHasChanged) {
-			var bibliographyData = this._session.getBibliographyData();
-			for each(var field in this._bibliographyFields) {
-				field.setCode(BIBLIOGRAPHY_CODE+" "+bibliographyData);
-			}
-		}
-	
-		var bibliographyText = this._session.getBibliography();
-		for each(var field in this._bibliographyFields) {
-			if(bibliographyText) {
-				field.setText(bibliographyText, true);
-			} else {
-				field.setText("{Bibliography}", false);
-			}
-		}
-	}
-	
 	// update citations
 	this._session.updateUpdateIndices(forceCitations);
 	this._deleteFields = this._deleteFields.concat(this._session.updateCitations());
@@ -662,6 +638,27 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 		} else {
 			// set text as plain
 			this._fields[citation.properties.index].setText(citationText, false);
+		}
+	}
+	
+	// update bibliographies
+	if(this._bibliographyFields.length	 				// if blbliography exists
+			&& (this._session.bibliographyHasChanged	// and bibliography changed
+			|| forceBibliography)) {					// or if we should generate regardless of changes
+		if(this._session.bibliographyDataHasChanged) {
+			var bibliographyData = this._session.getBibliographyData();
+			for each(var field in this._bibliographyFields) {
+				field.setCode(BIBLIOGRAPHY_CODE+" "+bibliographyData);
+			}
+		}
+	
+		var bibliographyText = this._session.getBibliography();
+		for each(var field in this._bibliographyFields) {
+			if(bibliographyText) {
+				field.setText(bibliographyText, true);
+			} else {
+				field.setText("{Bibliography}", false);
+			}
 		}
 	}
 	
@@ -944,7 +941,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(primaryFieldType, se
 	if(!oldData || oldData.style.styleID != data.style.styleID
 			|| oldData.prefs.noteType != data.prefs.noteType
 			|| oldData.prefs.fieldType != data.prefs.fieldType) {
-		this.regenerateAll = this.bibliographyHasChanged = true;
+		this.oldCitationIDs = {};
 	}
 	
 	return oldData ? oldData : true;
@@ -1238,10 +1235,10 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) 
  * marks a citation for removal
  */
 Zotero.Integration.Session.prototype.deleteCitation = function(index) {
-	var oldCitation = this.citationsByIndex[index];
+	var oldCitation = (this.citationsByIndex[index] ? this.citationsByIndex[index] : false);
 	this.citationsByIndex[index] = {properties:{"delete":true}};
 	
-	if(oldCitation.citationItems & oldCitation.properties.added) {
+	if(oldCitation && oldCitation.citationItems & oldCitation.properties.added) {
 		// clear out old citations if necessary
 		for each(var citationItem in oldCitation.citationItems) {
 			if(this.citationsByItemID[citationItem.id]) {
@@ -1254,8 +1251,9 @@ Zotero.Integration.Session.prototype.deleteCitation = function(index) {
 				}
 			}
 		}
+		
+		if(oldCitation.citationID) delete this.citationIDs[oldCitation.citationID];
 	}
-	if(oldCitation.citationID) delete this.citationIDs[oldCitation.citationID];
 	
 	this.updateIndices[index] = true;
 }
@@ -1269,42 +1267,10 @@ Zotero.Integration.Session.prototype.getBibliography = function() {
 }
 
 /**
- * Calls CSL.Engine.updateItems() to reconcile item list with current items in document
+ * Calls CSL.Engine.updateUncitedItems() to reconcile list of uncited items
  */
-Zotero.Integration.Session.prototype.updateItems = function() {
-	var items = [[i, this.citationsByItemID[i][0]] for(i in this.citationsByItemID)
-		if(this.citationsByItemID[i] && this.citationsByItemID[i].length &&
-		   this.citationsByItemID[i].some(function(citation) citation.properties && !citation.properties.delete))];
-	
-	items.sort(function(a, b) {
-		// if first citation of each in different citations, use citation index
-		if(a[1].properties.index != b[1].properties.index) {
-			return a[1].properties.index-b[1].properties.index;
-		}
-		
-		// if a and b were both first cited in the same citation, look for index in the citation
-		for each(var citationItem in a[1].citationItems) {
-			if(citationItem.id == a[0]) {
-				return -1;
-			} else if(citationItem.id == b[0]) {
-				return 1;
-			}
-		}
-		
-		// should never happen
-		Zotero.debug("WARNING: Zotero.Integration.Session.updateItems sort function returned 0");
-		return 0;
-	});
-	
-	// get rid of the second part of the items (the first citation, used for sort purposes)
-	// and also add in the uncited items
-	items = [parseInt(item[0]) for each(item in items)].concat([parseInt(i) for(i in this.uncitedItems)]);
-	
-	//Zotero.debug("items are ");
-	//Zotero.debug(items);
-	
-	// set items in the bibliography
-	this.style.updateItems(items);
+Zotero.Integration.Session.prototype.updateUncitedItems = function() {
+	this.style.updateUncitedItems([parseInt(i) for(i in this.uncitedItems)]);
 }
 
 /**
@@ -1314,6 +1280,7 @@ Zotero.Integration.Session.prototype.updateUpdateIndices = function(regenerateAl
 	if(regenerateAll || this.regenerateAll) {
 		// update all indices
 		for(var i=0; i<this.citationsByIndex.length; i++) {
+			this.newIndices[i] = true;
 			this.updateIndices[i] = true;
 		}
 	} else {
@@ -1333,7 +1300,6 @@ Zotero.Integration.Session.prototype.updateUpdateIndices = function(regenerateAl
  */
 Zotero.Integration.Session.prototype.formatCitation = function(index, citation) {
 	if(!this.citationText[index]) {
-		//this.updateItems();
 		var citationIndices = [];
 		var citationsPre = [];
 		for(var i=0; i<index; i++) {
@@ -1350,10 +1316,7 @@ Zotero.Integration.Session.prototype.formatCitation = function(index, citation) 
 				citationIndices.push(i);
 			}
 		}
-		//Zotero.debug(citation);
-		//Zotero.debug(citationsPre);
-		//Zotero.debug(citationsPost);
-		//Zotero.debug(this.style.registry.registry.toSource());
+		//Zotero.debug("style.processCitationCluster("+citation.toSource()+", "+citationsPre.toSource()+", "+citationsPost.toSource());
 		var newCitations = this.style.processCitationCluster(citation, citationsPre, citationsPost);
 		for each(var newCitation in newCitations) {
 			this.citationText[citationIndices[newCitation[0]]] = newCitation[1];
@@ -1367,15 +1330,41 @@ Zotero.Integration.Session.prototype.formatCitation = function(index, citation) 
 /**
  * Updates the list of citations to be serialized to the document
  */
-Zotero.Integration.Session.prototype.updateCitations = function() {
+Zotero.Integration.Session.prototype.updateCitations = function(force) {
+	var forcedUpdates = {};
+	if(force) {
+		// make sure at least one citation gets updated
+		var haveUpdates = false;
+		
+		updateLoop: for each(var indexList in [this.newIndices, this.updateIndices]) {
+			for(var i in indexList) {
+				if(!this.citationsByIndex[i].properties.delete) {
+					haveUpdates = true;
+					break updateLoop;
+				}
+			}
+		}
+		
+		if(!haveUpdates) {
+			for(i in this.citationsByIndex) {
+				if(this.citationsByIndex[i] && !this.citationsByIndex[i].properties.delete) {
+					forcedUpdates[i] = true;
+				}
+			}
+		}
+	}
+	
 	Zotero.debug("Zotero.Integration: indices of new citations");
 	Zotero.debug([key for(key in this.newIndices)]);
 	Zotero.debug("Zotero.Integration: indices of updated citations");
 	Zotero.debug([key for(key in this.updateIndices)]);
+
+	
 	var deleteCitations = [];
-	for each(var indexList in [this.newIndices, this.updateIndices]) {
+	for each(var indexList in [this.newIndices, this.updateIndices, forcedUpdates]) {
 		for(var index in indexList) {
-			index = parseInt(index, 10);
+			index = parseInt(index);
+			
 			var citation = this.citationsByIndex[index];
 			if(citation.properties.delete) {
 				deleteCitations.push(index);
@@ -1427,6 +1416,8 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 			}
 			this.bibliographyDataHasChanged = true;
 		}
+		
+		this.updateUncitedItems();
 	}
 	
 	// set custom bibliography entries
@@ -1492,10 +1483,15 @@ Zotero.Integration.Session.prototype.getBibliographyData = function() {
  */
 Zotero.Integration.Session.prototype.previewCitation = function(citation) {
 	// add citation items
-	this.addCitation(citation.properties.index, citation.properties.noteIndex, citation);
-	//this.updateItems();
-	this.formatCitation(citation.properties.index, citation);
-	this.deleteCitation(citation.properties.index);
+	try {
+		this.addCitation(citation.properties.index, citation.properties.noteIndex, citation);
+		this.formatCitation(citation.properties.index, citation);
+		this.deleteCitation(citation.properties.index);
+	} catch(e) {
+		Zotero.debug(e);
+		throw e;
+	}
+	
 	var citationText = this.citationText[citation.properties.index];
 	delete this.citationText[citation.properties.index];
 	return citationText;
@@ -1583,7 +1579,7 @@ Zotero.Integration.Session.BibliographyEditInterface = function(session) {
  * Updates stored bibliography
  */
 Zotero.Integration.Session.BibliographyEditInterface.prototype._update = function() {
-	this.session.updateItems();
+	this.session.updateUncitedItems();
 	this.session.style.setOutputFormat("rtf");
 	this.bibliography = this.session.style.makeBibliography();
 	for(var i in this.bibliography[0].entry_ids) {
@@ -1622,6 +1618,7 @@ Zotero.Integration.Session.BibliographyEditInterface.prototype.remove = function
 			citation.properties["delete"] = true;
 		}
 		delete this.session.citationsByItemID[itemID];
+		this.session.updateCitations(true);
 	}
 	
 	// delete uncited if neceessary
