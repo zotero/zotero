@@ -187,13 +187,13 @@
 				<separator flex="4"/>
 				<vbox flex="1">
 					<hbox align="stretch">
-						<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locatorType">
+						<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="label">
 							<menupopup id="locator-type-popup"/>
 						</menulist>
 						<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locator" flex="1"/>
 					</hbox>
 					<separator style="height: 2px" flex="1"/>
-					<checkbox oncommand="Zotero_Citation_Dialog.confirmRegenerate(true)" id="suppressAuthor" label="&zotero.citation.suppressAuthor.label;"/>
+					<checkbox oncommand="Zotero_Citation_Dialog.confirmRegenerate(true)" id="suppress-author" label="&zotero.citation.suppressAuthor.label;"/>
 				</vbox>
 			</hbox>
 		</vbox>

@@ -60,14 +60,29 @@
 					"<b>":"\\b ",
 					"</b>":"\\b0 ",
 					"<br />":"\x0B",
-					"<sup>":"\\super ",
-					"</sup>":"\\super0 ",
-					"<sub>":"\\sub ",
-					"</sub>":"\\sub0 ",
 					// there's no way to mimic a tab stop in CSS without
 					// tables, which wouldn't work here.
-					'<span class="tab">&nbsp;</span>':"\t"
+					'<span class="tab">&nbsp;</span>':"\\tab "
 				};
+				
+				this._rtfToHtmlMap = [
+					[/\\uc0\{?\\u([0-9]+)\}? ?/g, function(wholeStr, aCode) { return String.fromCharCode(aCode) }],
+					["\\t ", '<span class="tab">&nbsp;</span>'],
+					[/(?:\\par |\\\r?\n)/g, "</p><p>"],
+					[/\\super (.*?)\\nosupersub /g, "<sup>$1</sup>"],
+					[/\\sub (.*?)\\nosupersub /g, "<sub>$1</sub>"],
+				];
+				
+				this._htmlToRtfMap = [
+					[/[\x7F-\uFFFF]/g, function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+" " }],
+					["<p>", ""],
+					["</p>", "\\par "],
+					[/<\/?div[^>]*>/g, ""],
+					["<sup>", "\\super "],
+					["</sup>", "\\nosupersub "],
+					["<sub>", "\\sub "],
+					["</sub>", "\\nosupersub "],
+				];
 				
 				this._rtfRexMap = [
 					["<span style=\"font-variant:small-caps;\">",
@@ -117,7 +132,6 @@
 										break;
 									
 									case 'change':
-										Zotero.debug("Event type is " + event.type);
 										break;
 									
 									default:
@@ -163,16 +177,9 @@
 			<!-- Sets or returns contents of rich text box -->
 			<property name="value">
 				<getter><![CDATA[
-					var output = this._editor.getBody();
-					output = output.innerHTML;
-					Zotero.debug("RAW");
-					Zotero.debug(output);
-					
 					var output = this._editor.getContent();
-					Zotero.debug("XHTML");
-					Zotero.debug(output);
 					
-					if(this._format == "Integration" || this._format == "RTF") {
+					if(this._format == "RTF") {
 						// do appropriate replacement operations
 						for(var needle in this._rtfMap) {
 							output = output.replace(needle, this._rtfMap[needle], "g"); 
@@ -201,9 +208,9 @@
 							};
 							output = l.join("");
 						};
-						output = output.replace("<p>", "", "g");
-						output = output.replace("</p>", "\\par ", "g");
-						output = output.replace(/<\/?div[^>]*>/g, "");
+						for each(var entry in this._htmlToRtfMap) {
+							output = output.replace(entry[0], entry[1], "g");
+						}
 						output = Zotero.Utilities.prototype.trim(output);
 						output = output.replace(" ", "&nbsp;", "g");
 						output = Zotero.Utilities.prototype.unescapeHTML(output);
@@ -213,8 +220,6 @@
 					return output;
 				]]></getter>
 				<setter><![CDATA[
-					Zotero.debug("Setting value!");
-					
 					if (self._timer) {
 						clearTimeout(self._timer);
 					}
@@ -233,16 +238,8 @@
 						return ;
 					}
 					
-					if (this.value == val) {
-						Zotero.debug("Value hasn't changed!");
-						return;
-					}
-					
-					Zotero.debug("Value has changed");
-					
 					var html = val;
-					
-					if(this._format == "Integration" || this._format == "RTF") {
+					if(this._format == "RTF") {
 						var bodyStyle = "";
 						if(html.substr(0, 3) == "\\li") {
 							// try to show paragraph formatting
@@ -277,8 +274,10 @@
 							html = html.replace(tagspec[2], tagspec[0], "g");
 							html = html.replace(tagspec[3], "</span>", "g");
 						}
-						html = '<div style="'+bodyStyle+'"><p>'+html.replace("\par ", "</p><p>")+"</p></div>";
-						Zotero.debug("setting content to "+html);
+						for each(var entry in this._rtfToHtmlMap) {
+							html = html.replace(entry[0], entry[1], "g");
+						}
+						html = '<div style="'+bodyStyle+'"><p>'+html+"</p></div>";
 					}
 					
 					this._editor.setContent(html);

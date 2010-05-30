@@ -391,28 +391,21 @@ Zotero.QuickCopy = new function() {
 			}
 			
 			var csl = Zotero.Styles.get(format).csl;
-			var itemSet = csl.createItemSet(items);
+			csl.updateItems([item.id for each(item in items)]);
 			
 			// Copy citations if shift key pressed
 			if (modified) {
-				var itemIDs = [];
-				for (var i=0; i<items.length; i++) {
-					itemIDs.push(items[i].id);
-				}
-				var citation = csl.createCitation(itemSet.getItemsByIds(itemIDs));
-				var bibliography = {
-					text: csl.formatCitation(citation, contentType == "html" ? 'HTML' : 'Text'),
-					html: csl.formatCitation(citation, "HTML")
-				}
-			}
-			else {
-				var bibliography = {
-					text: csl.formatBibliography(itemSet, contentType == "html" ? "HTML" : "Text"),
-					html: csl.formatBibliography(itemSet, "HTML")
-				};
+				var citation = {citationItems:[{id:item.id} for each(item in items)], properties:{}};
+				this.session.style.setOutputFormat("html");
+				var html = csl.appendCitationCluster(citation, true)[0][1];
+				this.session.style.setOutputFormat("text");
+				var text = csl.appendCitationCluster(citation, true)[0][1];
+			} else {
+				var html = Zotero.Cite.makeFormattedBibliography(csl, "html");
+				var text = Zotero.Cite.makeFormattedBibliography(csl, "text");
 			}
 			
-			return bibliography;
+			return {text:(contentType == "html" ? html : text), html:html};
 		}
 		
 		throw ("Invalid mode '" + mode + "' in Zotero.QuickCopy.getContentFromItems()");

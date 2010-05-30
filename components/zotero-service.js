@@ -18,9 +18,9 @@ var xpcomFiles = [
 	'zotero',
 	'annotate',
 	'attachments',
+	'cite',
 	'collectionTreeView',
 	'commons',
-	'csl',
 	'dataServer',
 	'data_access',
 	'data/dataObjects',
@@ -74,7 +74,17 @@ var xpcomFiles = [
 	'zeroconf'
 ];
 
-for (var i=0; i<xpcomFiles.length; i++) {
+Cc["@mozilla.org/moz/jssubscript-loader;1"]
+	.getService(Ci.mozIJSSubScriptLoader)
+	.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFiles[0] + ".js");
+
+// Load CiteProc into Zotero.CiteProc namespace
+Zotero.CiteProc = {};
+Cc["@mozilla.org/moz/jssubscript-loader;1"]
+	.getService(Ci.mozIJSSubScriptLoader)
+	.loadSubScript("chrome://zotero/content/xpcom/citeproc.js", Zotero.CiteProc);
+
+for (var i=1; i<xpcomFiles.length; i++) {
 	try {
 		Cc["@mozilla.org/moz/jssubscript-loader;1"]
 			.getService(Ci.mozIJSSubScriptLoader)
@@ -106,7 +116,6 @@ for (var i=0; i<rdfXpcomFiles.length; i++) {
 		.getService(Ci.mozIJSSubScriptLoader)
 		.loadSubScript("chrome://zotero/content/xpcom/" + rdfXpcomFiles[i] + ".js", Zotero.RDF.AJAW);
 }
-
 
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)

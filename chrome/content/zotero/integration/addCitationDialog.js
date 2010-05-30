@@ -27,9 +27,9 @@ var Zotero_Citation_Dialog = new function () {
 	var _preserveData = {
 		"prefix":"value",
 		"suffix":"value",
-		"locatorType":"selectedIndex",
+		"label":"selectedIndex",
 		"locator":"value",
-		"suppressAuthor":"checked"
+		"suppress-author":"checked"
 	};
 	
 	var _itemData = new Object();
@@ -38,6 +38,7 @@ var Zotero_Citation_Dialog = new function () {
 	var _previewShown = false;
 	var _suppressNextTreeSelect = false;
 	var _locatorIndexArray = {};
+	var _locatorNameArray = {};
 	var _autoRegeneratePref;
 	var _acceptButton;
 	var _sortCheckbox;
@@ -78,20 +79,21 @@ var Zotero_Citation_Dialog = new function () {
 		}
 		
 		// load locators
-		var locators = Zotero.CSL.Global.getLocatorStrings();
-		var menu = document.getElementById("locatorType");
+		var locators = Zotero.Cite.labels;
+		var menu = document.getElementById("label");
 		var popup = document.getElementById("locator-type-popup");
 		var i = 0;
 		for(var value in locators) {
 			var locator = locators[value];
-			locator = locator[0].toUpperCase()+locator.substr(1);
+			var locatorLabel = locator[0].toUpperCase()+locator.substr(1);
 			// add to popup
 			var child = document.createElement("menuitem");
 			child.setAttribute("value", value);
-			child.setAttribute("label", locator);
+			child.setAttribute("label", locatorLabel);
 			popup.appendChild(child);
 			// add to array
-			_locatorIndexArray[value] = i;
+			_locatorIndexArray[locator] = i;
+			_locatorNameArray[i] = locator;
 			i++;
 		}
 		menu.selectedIndex = 0;
@@ -100,15 +102,15 @@ var Zotero_Citation_Dialog = new function () {
 		doLoad();
 		
 		// if we already have a citation, load data from it
-		document.getElementById('editor').format = "Integration";
+		document.getElementById('editor').format = "RTF";
 		if(io.citation.citationItems.length) {
 			if(io.citation.citationItems.length == 1) {
 				// single citation
 				_suppressNextTreeSelect = true;
-				itemsView.selectItem(io.citation.citationItems[0].itemID);	 // treeview from selectItemsDialog.js
+				itemsView.selectItem(io.citation.citationItems[0].id);	 // treeview from selectItemsDialog.js
 				for(var property in _preserveData) {
 					if(io.citation.citationItems[0][property]) {
-						if(property == "locatorType") {
+						if(property == "label") {
 							document.getElementById(property)[_preserveData[property]] = _locatorIndexArray[io.citation.citationItems[0][property]];
 						} else {
 							document.getElementById(property)[_preserveData[property]] = io.citation.citationItems[0][property];
@@ -119,10 +121,10 @@ var Zotero_Citation_Dialog = new function () {
 				// multiple citations
 				toggleMultipleSources();
 				for(var i=0; i<io.citation.citationItems.length; i++) {
-					var item = Zotero.Items.get(io.citation.citationItems[i].itemID);
+					var item = Zotero.Items.get(io.citation.citationItems[i].id);
 					if(item) {
 						_addItem(item);
-						_itemData[io.citation.citationItems[i].itemID] = io.citation.citationItems[i];
+						_itemData[io.citation.citationItems[i].id] = io.citation.citationItems[i];
 					}
 				}
 			}
@@ -288,7 +290,7 @@ var Zotero_Citation_Dialog = new function () {
 			
 			// add items back to list
 			for(var i=0; i<io.citation.citationItems.length; i++) {
-				var item = Zotero.Items.get(io.citation.citationItems[i].itemID);
+				var item = Zotero.Items.get(io.citation.citationItems[i].id);
 				_addItem(item);
 			}
 		}
@@ -361,7 +363,9 @@ var Zotero_Citation_Dialog = new function () {
 	 * called when accept button is clicked
 	 */
 	function accept() {
+		Zotero.debug("Trying to accept");
 		_getCitation();
+		Zotero.debug("got citation");
 		var isCustom = _previewShown && io.citation.citationItems.length	// if a citation is selected
 				&& document.getElementById('editor').value != _originalHTML	// and citation has been edited
 		
@@ -370,6 +374,7 @@ var Zotero_Citation_Dialog = new function () {
 		} else {
 			var citation = (io.citation.citationItems.length ? io.previewFunction() : "");
 		}
+		Zotero.debug("verified not custom");
 		
 		if(Zotero.Utilities.prototype.trim(citation) == "") {				
 			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
@@ -379,6 +384,7 @@ var Zotero_Citation_Dialog = new function () {
 				Zotero.getString("integration.emptyCitationWarning.body"));
 			if(!insert) return false;
 		}
+		Zotero.debug("verified not empty");
 		
 		if(isCustom) io.citation.properties.custom = citation;
 		
@@ -431,8 +437,8 @@ var Zotero_Citation_Dialog = new function () {
 			
 			// save property
 			if(_lastSelected) {
-				if(property == "locatorType") {
-					_itemData[_lastSelected][box] = domBox.selectedItem.value;
+				if(property == "label") {
+					_itemData[_lastSelected][box] = _locatorNameArray[domBox.selectedIndex];
 				} else {
 					_itemData[_lastSelected][box] = domBox[property];
 				}
@@ -441,7 +447,7 @@ var Zotero_Citation_Dialog = new function () {
 			if(itemID) {
 				domBox.disabled = false;
 				if(_itemData[itemID] && _itemData[itemID][box] !== undefined) {
-					if(property == "locatorType") {
+					if(property == "label") {
 						domBox[property] = _locatorIndexArray[_itemData[itemID][box]];
 					} else {
 						domBox[property] = _itemData[itemID][box];
@@ -463,7 +469,7 @@ var Zotero_Citation_Dialog = new function () {
 		io.citation.citationItems = new Array();
 		
 		// use to map selectedIndexes back to page/paragraph/line
-		var locatorTypeElements = document.getElementById("locatorType").getElementsByTagName("menuitem");
+		var locatorTypeElements = document.getElementById("label").getElementsByTagName("menuitem");
 		if(_multipleSourcesOn) {
 			_itemSelected();		// store locator info
 			
@@ -477,25 +483,25 @@ var Zotero_Citation_Dialog = new function () {
 					var itemID = citationList.childNodes[i].value;
 					
 					var citationItem = _itemData[itemID];
-					citationItem.itemID = itemID;
+					citationItem.id = itemID;
 					io.citation.citationItems.push(citationItem);
 				}
 			}
 		} else {
 			var items = itemsView.getSelectedItems(true); // treeview from selectItemsDialog.js
 			
-			var citationItem = new Zotero.CSL.CitationItem();
-			citationItem.itemID = items[0];
+			var citationItem = {};
+			citationItem.id = items[0];
 			for(var property in _preserveData) {
-				if(property == "locatorType") {
-					citationItem[property] = document.getElementById(property).selectedItem.value;
+				if(property == "label") {
+					citationItem[property] = _locatorNameArray[document.getElementById(property).selectedIndex];
 				} else {
 					citationItem[property] = document.getElementById(property)[_preserveData[property]];
 				}
 			}
 			
 			if(citationItem["locator"] == "") {
-				citationItem["locator"] = citationItem["locatorType"] = undefined;
+				citationItem["locator"] = citationItem["label"] = undefined;
 			}
 			
 			io.citation.citationItems = [citationItem];
