@@ -1384,7 +1384,7 @@ CSL.dateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, xmlmode) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.16";
+	this.processor_version = "1.0.17";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2176,7 +2176,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 		sortedItems.push(newitem);
 		citation.citationItems[pos].item = Item;
 	}
-	if (sortedItems && sortedItems.length > 1 && this.citation_sort.tokens.length > 0) {
+	if (!this[this.tmp.area].opt["citation-number-sort"] && sortedItems && sortedItems.length > 1 && this.citation_sort.tokens.length > 0) {
 		len = sortedItems.length;
 		for (pos = 0; pos < len; pos += 1) {
 			sortedItems[pos][1].sortkeys = CSL.getSortKeys.call(this, sortedItems[pos][0], "citation_sort");
@@ -2336,6 +2336,13 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 				}
 			}
 		}
+	}
+	if (this[this.tmp.area].opt["citation-number-sort"] && sortedItems && sortedItems.length > 1 && this.citation_sort.tokens.length > 0) {
+		len = sortedItems.length;
+		for (pos = 0; pos < len; pos += 1) {
+			sortedItems[pos][1].sortkeys = CSL.getSortKeys.call(this, sortedItems[pos][0], "citation_sort");
+		}
+		sortedItems.sort(this.citation.srt.compareCompositeKeys);
 	}
 	for (key in this.tmp.taintedItemIDs) {
 		if (this.tmp.taintedItemIDs.hasOwnProperty(key)) {
@@ -3175,6 +3182,9 @@ CSL.Node.key = {
 		target.push(start_key);
 		if (this.variables.length) {
 			variable = this.variables[0];
+			if (variable === "citation-number" && state.build.area === "citation_sort") {
+				state.citation.opt["citation-number-sort"] = true;
+			}
 			if (CSL.CREATORS.indexOf(variable) > -1) {
 				names_start_token = new CSL.Token("names", CSL.START);
 				names_start_token.tokentype = CSL.START;
@@ -6907,20 +6917,7 @@ CSL.Output.Formats.prototype.rtf = {
 			function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+" " })
 			.replace("\t", "\\tab ", "g");
 	},
-	"@font-style/italic": false,
-	"@font-style/oblique": false,
-	"@font-style/normal": false,
-	"@font-variant/small-caps": false,
 	"@passthrough/true": CSL.Output.Formatters.passthrough,
-	"@font-variant/normal": false,
-	"@font-weight/bold": false,
-	"@font-weight/normal": false,
-	"@font-weight/light": false,
-	"@text-decoration/none": false,
-	"@text-decoration/underline": false,
-	"@vertical-align/baseline": false,
-	"@vertical-align/sup": false,
-	"@vertical-align/sub": false,
 	"@strip-periods/true": CSL.Output.Formatters.strip_periods,
 	"@font-style/italic":"\\i %%STRING%%\\i0 ",
 	"@font-style/normal":false,
