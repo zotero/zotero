@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2010-01-12 11:40:00"
+	"lastUpdated":"2010-05-31 18:20:00"
 }
 
 Zotero.configure("dataMode", "block");
@@ -217,6 +217,8 @@ var mappingTable = {
     "\u2017":"{\\textunderscore}", // DOUBLE LOW LINE
     "\u2018":"{\\textquoteleft}", // LEFT SINGLE QUOTATION MARK
     "\u2019":"{\\textquoteright}", // RIGHT SINGLE QUOTATION MARK
+    "`" : "\u2018", // LEFT SINGLE QUOTATION MARK
+    "'" : "\u2019", // RIGHT SINGLE QUOTATION MARK
     "\u201A":"{\\quotesinglbase}", // SINGLE LOW-9 QUOTATION MARK
     "\u201B":"'", // SINGLE HIGH-REVERSED-9 QUOTATION MARK
     "\u201C":"{\\textquotedblleft}", // LEFT DOUBLE QUOTATION MARK
@@ -1687,14 +1689,14 @@ function getFieldValue(read) {
 	
 	if(value.length > 1) {
 		// replace accented characters (yucky slow)
-		value = value.replace(/{(\\[`"'^~=a-z])([A-Za-z])}/g, "$1{$2}");
+		value = value.replace(/{?(\\[`"'^~=a-z]){?\\?([A-Za-z])}/g, "$1{$2}");
 		for (var mapped in reversemappingTable) { // really really slow!
 			var unicode = reversemappingTable[mapped];
 			if (value.indexOf(mapped) != -1) {
 				Zotero.debug("Replace " + mapped + " in " + value + " with " + unicode);
 				value = value.replace(mapped, unicode, "g");
 			}
-			mapped = mapped.replace(/[{}]/, "");
+			mapped = mapped.replace(/[{}]/g, "");
 			if (value.indexOf(mapped) != -1) {
 				Zotero.debug("Replace(2) " + mapped + " in " + value + " with " + unicode);
 				value = value.replace(mapped, unicode, "g");
