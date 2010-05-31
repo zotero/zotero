@@ -8,7 +8,7 @@
 	"priority":100,
 	"inRepository":"1",
 	"translatorType":4,
-	"lastUpdated":"2010-05-03 04:20:00"
+	"lastUpdated":"2010-05-27 17:20:00"
 }
 
 /*
@@ -132,8 +132,13 @@ function parseXML(text, itemUrlBase) {
 	if (xml.publisher[0]) {
 		newItem.publisher = xml.publisher[0].toString();
 	}
-		
-	newItem.title = xml.title[0].toString();
+
+	var titleparts = xml.title;
+	var title = [];
+	for (var i in titleparts) {
+		title.push(titleparts[i].toString());
+	}
+	newItem.title = title.join(': ');
 
 	var url = itemUrlBase + xml.identifier[0];
 
