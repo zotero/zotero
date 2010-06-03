@@ -394,18 +394,11 @@ function() {
 	
 	if(this._version == "0.8") {
 		// get XSLT file
-		let updateXSLTFile = Zotero.getInstallDirectory();
-		updateXSLTFile.append("updateCSL.xsl");
-		
-		// read XSLT file as DOM XML
-		let xmlFiles = [];
-		let fis = Components.classes["@mozilla.org/network/file-input-stream;1"].
-			createInstance(Components.interfaces.nsIFileInputStream);
-		fis.init(updateXSLTFile, 0x01, 0664, 0);
-		let updateXSLT = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser)
-			.parseFromStream(fis, "UTF-8", updateXSLTFile.fileSize, "text/xml");
-		fis.close();
+		let xhr = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+		xhr.open("GET", "chrome://zotero/content/updateCSL.xsl", false);
+		xhr.overrideMimeType("text/xml");
+		xhr.send();
+		let updateXSLT = xhr.responseXML;
 		
 		// load XSLT file into XSLTProcessor
 		let xsltProcessor = Components.classes["@mozilla.org/document-transformer;1?type=xslt"]
