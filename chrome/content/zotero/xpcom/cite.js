@@ -203,8 +203,12 @@ Zotero.Cite.System.retrieveLocale = function(lang) {
 	var xhr = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
 	xhr.open("GET", "chrome://zotero/content/locale/csl/locales-"+lang+".xml", false);
 	xhr.overrideMimeType("application/octet-stream");
-	xhr.send();
-	return xhr.responseText;
+	try {
+		xhr.send();
+		return xhr.responseText;
+	} catch(e) {
+		return false;
+	}
 };
 
 Zotero.Cite.System.getAbbreviations = function() {
