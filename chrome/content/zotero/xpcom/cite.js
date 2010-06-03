@@ -199,26 +199,12 @@ Zotero.Cite.System.retrieveItem = function(item){
 	return cslItem;
 };
 
-Zotero.Cite.System.retrieveLocale = function(lang){
-	var localesDir = Zotero.getInstallDirectory();
-	[localesDir.append(dir) for each(dir in ["chrome", "content", "zotero", "locale", "csl"])];
-	
-	var base = "locales-"+lang;
-	
-	var localesFile = localesDir.clone();
-	localesFile.append(base+".xml");
-	if(!localesFile.exists()) {
-		var contents = localesDir.directoryEntries;
-		while(contents.hasMoreElements()) {
-			var file = contents.getNext().QueryInterface(Components.interfaces.nsIFile);
-			if(file.leafName.substr(0, base.length) == base && file.leafName.substr(-4) == ".xml") {
-				localesFile = file;
-				break;
-			}
-		}
-	}
-	
-	return Zotero.File.getContents(localesFile);
+Zotero.Cite.System.retrieveLocale = function(lang) {
+	var xhr = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+	xhr.open("GET", "chrome://zotero/content/locale/csl/locales-"+lang+".xml", false);
+	xhr.overrideMimeType("application/octet-stream");
+	xhr.send();
+	return xhr.responseText;
 };
 
 Zotero.Cite.System.getAbbreviations = function() {
@@ -292,8 +278,16 @@ Zotero.Cite.getMonthStrings = function(form, locale) {
 		if(!Zotero.CiteProc.CSL.locale[cslLocale.best]) {
 			let localexml = sys.xml.makeXml(Zotero.Cite.System.retrieveLocale(cslLocale.best));
 			if(!localexml) {
-				Zotero.log("No locale "+cslLocale.best+"; using en-US", "warning");
-				return Zotero.Cite.getMonthStrings(form, "en-US");
+				if(localexml == "en-US") {
+					throw "No locales.xml file could be found for the preferred locale or for en-US. "+
+					      "Please ensure that the locales directory exists and is properly populated";
+				} else {
+					let localexml = sys.xml.makeXml(Zotero.Cite.System.retrieveLocale(cslLocale.bare));
+					if(!localexml) {
+						Zotero.log("No locale "+cslLocale.best+"; using en-US", "warning");
+						return Zotero.Cite.getMonthStrings(form, "en-US");
+					}
+				}
 			}
 			Zotero.CiteProc.CSL.localeSet.call(Zotero.CiteProc.CSL, sys, localexml, cslLocale.best, cslLocale.best);
 		}
