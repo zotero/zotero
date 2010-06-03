@@ -1331,24 +1331,25 @@ Zotero.Integration.Session.prototype.formatCitation = function(index, citation) 
  * Updates the list of citations to be serialized to the document
  */
 Zotero.Integration.Session.prototype.updateCitations = function(force) {
+	var allUpdatesForced = false;
 	var forcedUpdates = {};
 	if(force) {
+		allUpdatesForced = true;
 		// make sure at least one citation gets updated
-		var haveUpdates = false;
-		
 		updateLoop: for each(var indexList in [this.newIndices, this.updateIndices]) {
 			for(var i in indexList) {
 				if(!this.citationsByIndex[i].properties.delete) {
-					haveUpdates = true;
+					allUpdatesForced = false;
 					break updateLoop;
 				}
 			}
 		}
 		
-		if(!haveUpdates) {
+		if(allUpdatesForced) {
 			for(i in this.citationsByIndex) {
 				if(this.citationsByIndex[i] && !this.citationsByIndex[i].properties.delete) {
 					forcedUpdates[i] = true;
+					break;
 				}
 			}
 		}
@@ -1358,7 +1359,8 @@ Zotero.Integration.Session.prototype.updateCitations = function(force) {
 	Zotero.debug([key for(key in this.newIndices)]);
 	Zotero.debug("Zotero.Integration: indices of updated citations");
 	Zotero.debug([key for(key in this.updateIndices)]);
-
+	Zotero.debug("Zotero.Integration: indices of forcedUpdates");
+	Zotero.debug([key for(key in forcedUpdates)]);
 	
 	var deleteCitations = [];
 	for each(var indexList in [this.newIndices, this.updateIndices, forcedUpdates]) {
@@ -1378,6 +1380,11 @@ Zotero.Integration.Session.prototype.updateCitations = function(force) {
 			}
 			delete this.newIndices[index];
 		}
+	}
+	
+	if(allUpdatesForced) {
+		this.newIndices = {};
+		this.updateIndices = {};
 	}
 	
 	return deleteCitations;
@@ -1492,9 +1499,9 @@ Zotero.Integration.Session.prototype.previewCitation = function(citation) {
 		throw e;
 	}
 	
-	var citationText = this.citationText[citation.properties.index];
-	delete this.citationText[citation.properties.index];
-	return citationText;
+	// we don't delete the citationText only because the add citation dialog always calls
+	// previewCitation before returning
+	return this.citationText[citation.properties.index];
 } 
 
 /**
