@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"Mainichi Daily News",
 	"creator":"Frank Bennett",
-	"target":"^http://(?:search\\.)*mdn\\.mainichi\\.jp/(?:$|result\?|mdnnews/|perspectives/|features/|arts/|travel/)",
+	"target":"^http://(?:search\\.)*mdn\\.mainichi\\.jp/(?:$|result\\?|mdnnews/|perspectives/|features/|arts/|travel/)",
 	"minVersion":"2.0b7",
 	"maxVersion":"",
 	"priority":100,
