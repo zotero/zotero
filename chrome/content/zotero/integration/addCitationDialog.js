@@ -132,7 +132,7 @@ var Zotero_Citation_Dialog = new function () {
 			// show user-editable edited citation
 			if(io.citation.properties.custom) {
 				toggleEditor(io.citation.properties.custom);
-				io.citation.properties.custom = undefined;
+				delete io.citation.properties.custom;
 			}
 			
 			_updateAccept();
@@ -370,7 +370,7 @@ var Zotero_Citation_Dialog = new function () {
 				&& document.getElementById('editor').value != _originalHTML	// and citation has been edited
 		
 		if(isCustom) {	
-			var citation = document.getElementById('editor').value
+			var citation = document.getElementById('editor').value;
 		} else {
 			var citation = (io.citation.citationItems.length ? io.previewFunction() : "");
 		}
@@ -407,7 +407,8 @@ var Zotero_Citation_Dialog = new function () {
 			_getCitation();
 			
 			editor.readonly = !io.citation.citationItems.length;
-			editor.value = _originalHTML = (io.citation.citationItems.length ? io.previewFunction() : "");
+			editor.value = (io.citation.citationItems.length ? io.previewFunction() : "");
+			_originalHTML = editor.value;
 		}
 	}
 	
