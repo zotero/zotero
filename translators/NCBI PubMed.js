@@ -2,13 +2,13 @@
 	"translatorID":"fcf41bed-0cbc-3704-85c7-8062a0068a7a",
 	"translatorType":12,
 	"label":"NCBI PubMed",
-	"creator":"Simon Kornblith, Michael Berkowitz and Rintze Zelle",
-	"target":"http://[^/]*(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",
+	"creator":"Simon Kornblith, Michael Berkowitz, Avram Lyon, and Rintze Zelle",
+	"target":"http://[^/]*(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-04-12 16:40:00"
+	"lastUpdated":"2010-06-04 16:40:00"
 }
 
 function detectWeb(doc, url) {
@@ -20,6 +20,7 @@ function detectWeb(doc, url) {
 	var items = doc.evaluate('//input[@name="EntrezSystem2.PEntrez.Pubmed.Pubmed_ResultsPanel.Pubmed_ResultsController.ResultCount"]', doc,
 			nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if (items) {
+		Zotero.debug("Have ResultCount " + items.value);
 		if (items.value > 1) {
 			return "multiple";
 		} else if (items.value == 1) {
@@ -173,7 +174,7 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 		} : null;
 	var ids = new Array();
-	var uids = doc.evaluate('//input[@type="checkbox" or @name="uid"]', doc, //edited for new PubMed
+	var uids = doc.evaluate('//input[@name="EntrezSystem2.PEntrez.Pubmed.Pubmed_ResultsPanel.Pubmed_RVDocSum.uid"]', doc, //edited for new PubMed
 			       nsResolver, XPathResult.ANY_TYPE, null);
 	var uid = uids.iterateNext();
 	if(uid) {
@@ -225,6 +226,7 @@ function doWeb(doc, url) {
 		}
 		if (uid) {
 			ids.push(uid.textContent.match(/\d+/)[0]);
+			Zotero.debug("Found PMID: " + ids[ids.length - 1]);
 			lookupPMIDs(ids, doc);
 		} else {
 			var uids= doc.evaluate('//meta[@name="ncbi_uidlist"]', doc,
@@ -232,6 +234,7 @@ function doWeb(doc, url) {
 			var uid = uids.iterateNext()["content"].split(' ');
 			if (uid) {
 				ids.push(uid);
+				Zotero.debug("Found PMID: " + ids[ids.length - 1]);
 				lookupPMIDs(ids, doc);
 			}
 		}
