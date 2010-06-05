@@ -1432,7 +1432,7 @@ CSL.dateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, xmlmode) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.20";
+	this.processor_version = "1.0.21";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2224,7 +2224,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 		sortedItems.push(newitem);
 		citation.citationItems[pos].item = Item;
 	}
-	if (!this[this.tmp.area].opt["citation-number-sort"] && sortedItems && sortedItems.length > 1 && this.citation_sort.tokens.length > 0) {
+	if (!this.citation.opt["citation-number-sort"] && sortedItems && sortedItems.length > 1 && this.citation_sort.tokens.length > 0) {
 		len = sortedItems.length;
 		for (pos = 0; pos < len; pos += 1) {
 			sortedItems[pos][1].sortkeys = CSL.getSortKeys.call(this, sortedItems[pos][0], "citation_sort");
@@ -2248,7 +2248,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 	}
 	this.registry.citationreg.citationByIndex = citationByIndex;
 	this.registry.citationreg.citationsByItemId = {};
-	if (this.opt.update_mode === CSL.POSITION || true) {
+	if (this.opt.update_mode === CSL.POSITION) {
 		textCitations = [];
 		noteCitations = [];
 	}
@@ -2267,7 +2267,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 				this.registry.citationreg.citationsByItemId[item[1].id].push(citationByIndex[pos]);
 			}
 		}
-		if (this.opt.update_mode === CSL.POSITION || true) {
+		if (this.opt.update_mode === CSL.POSITION) {
 			if (citationByIndex[pos].properties.noteIndex) {
 				noteCitations.push(citationByIndex[pos]);
 			} else {
@@ -2278,7 +2278,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 	if (!has_bibliography) {
 		this.updateItems(update_items);
 	}
-	if (this.opt.update_mode === CSL.POSITION || true) {
+	if (this.opt.update_mode === CSL.POSITION) {
 		for (pos = 0; pos < 2; pos += 1) {
 			citations = [textCitations, noteCitations][pos];
 			first_ref = {};
@@ -2385,7 +2385,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 			}
 		}
 	}
-	if (this[this.tmp.area].opt["citation-number-sort"] && sortedItems && sortedItems.length > 1 && this.citation_sort.tokens.length > 0) {
+	if (this.citation.opt["citation-number-sort"] && sortedItems && sortedItems.length > 1 && this.citation_sort.tokens.length > 0) {
 		len = sortedItems.length;
 		for (pos = 0; pos < len; pos += 1) {
 			sortedItems[pos][1].sortkeys = CSL.getSortKeys.call(this, sortedItems[pos][0], "citation_sort");
@@ -4188,7 +4188,9 @@ CSL.Node.text = {
 			}
 			if ("citation-number" === variable || "year-suffix" === variable || "citation-label" === variable) {
 				if (variable === "citation-number") {
-					state.opt.update_mode = CSL.NUMERIC;
+					if (state.build.area === "citation") {
+						state.opt.update_mode = CSL.NUMERIC;
+					}
 					if ("citation-number" === state[state.tmp.area].opt.collapse) {
 						this.range_prefix = "-";
 					}
@@ -7032,6 +7034,7 @@ CSL.Registry = function (state) {
 	this.uncited = [];
 	this.refreshes = {};
 	this.akeys = {};
+	this.oldseq = {};
 	this.ambigcites = {};
 	this.sorter = new CSL.Registry.Comparifier(state, "bibliography_sort");
 	this.modes = CSL.getModes.call(this.state);
@@ -7047,6 +7050,7 @@ CSL.Registry = function (state) {
 };
 CSL.Registry.prototype.init = function (myitems, uncited_flag) {
 	var len, pos;
+	this.oldseq = {};
 	if (uncited_flag && this.mylist && this.mylist.length) {
 		this.uncited = myitems;
 		for (pos = 0, len = myitems.length; pos < len; pos += 1) {
@@ -7139,6 +7143,7 @@ CSL.Registry.prototype.rebuildlist = function () {
 	for (pos = 0; pos < len; pos += 1) {
 		item = this.mylist[pos];
 		this.reflist.push(this.registry[item]);
+		this.oldseq[item] = this.registry[item].seq;
 		this.registry[item].seq = (pos + 1);
 	}
 };
@@ -7200,10 +7205,10 @@ CSL.Registry.prototype.renumber = function () {
 	len = this.reflist.length;
 	for (pos = 0; pos < len; pos += 1) {
 		item = this.reflist[pos];
-		if (this.state.opt.update_mode === CSL.NUMERIC && this.state.tmp.taintedItemIDs && item.seq !== (pos + 1)) {
+		item.seq = (pos + 1);
+		if (this.state.opt.update_mode === CSL.NUMERIC && this.state.tmp.taintedItemIDs && item.seq !== this.oldseq[item.id]) {
 			this.state.tmp.taintedItemIDs[item.id] = true;
 		}
-		item.seq = (pos + 1);
 	}
 };
 CSL.Registry.prototype.yearsuffix = function () {
