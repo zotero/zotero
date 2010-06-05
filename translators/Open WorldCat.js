@@ -3,12 +3,12 @@
 	"translatorType":12,
 	"label":"Open WorldCat",
 	"creator":"Simon Kornblith",
-	"target":"^http://www\.worldcat\.org/",
+	"target":"^http://www\\.worldcat\\.org/",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-04-15 07:12:45"
+	"lastUpdated":"2010-06-05 20:35:00"
 }
 
 /**

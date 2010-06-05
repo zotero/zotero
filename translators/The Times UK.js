@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"The Times UK",
 	"creator":"William Smith",
-	"target":"timesonline\.co\.uk/tol/.+ece$",
+	"target":"timesonline\\.co\\.uk/tol/.+ece$",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-12-12 00:45:00"
+	"lastUpdated":"2010-06-05 20:35:00"
 }
 
 

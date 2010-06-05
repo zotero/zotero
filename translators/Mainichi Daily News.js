@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"Mainichi Daily News",
 	"creator":"Frank Bennett",
-	"target":"^http://(?:search\\.)*mdn\\.mainichi\\.jp/(?:$|result\?|mdnnews/|perspectives/|features/|arts/|travel/)",
+	"target":"^http://(?:search\\.)*mdn\\.mainichi\\.jp/(?:$|result\\?|mdnnews/|perspectives/|features/|arts/|travel/)",
 	"minVersion":"2.0b7",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-23 02:17:09"
+	"lastUpdated":"2010-06-05 20:35:00"
 }
 
 // #################################
