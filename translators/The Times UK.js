@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"The Times UK",
 	"creator":"William Smith",
-	"target":"timesonline\.co\.uk/tol/.+ece$",
+	"target":"timesonline\\.co\\.uk/tol/.+ece$",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
