@@ -1432,7 +1432,7 @@ CSL.dateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, xmlmode) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.22";
+	this.processor_version = "1.0.24";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -7178,7 +7178,7 @@ CSL.Registry.prototype.dorefreshes = function () {
 	}
 };
 CSL.Registry.prototype.setdisambigs = function () {
-	var akey, leftovers, key, pos, len;
+	var akey, leftovers, key, pos, len, id;
 	this.leftovers = [];
 	for (akey in this.akeys) {
 		if (this.akeys.hasOwnProperty(akey)) {
@@ -7286,8 +7286,8 @@ CSL.Registry.prototype.registerAmbigToken = function (akey, id, ambig_config) {
 	if (!this.ambigcites[akey]) {
 		this.ambigcites[akey] = [];
 	}
-	if (this.ambigcites[akey].indexOf(id) === -1) {
-		this.ambigcites[akey].push(id);
+	if (this.ambigcites[akey].indexOf("" + id) === -1) {
+		this.ambigcites[akey].push("" + id);
 	}
 	this.registry[id].ambig = akey;
 	var dome = false;
@@ -7441,7 +7441,7 @@ CSL.Registry.NameReg = function (state) {
 	};
 	delitems = function (ids) {
 		var i, item, pos, len, posA, posB, id, fullkey, llen, ppos, otherid;
-		if ("string" === typeof ids) {
+		if ("string" === typeof ids || "number" === typeof ids) {
 			ids = [ids];
 		}
 		ret = {};
@@ -7457,6 +7457,9 @@ CSL.Registry.NameReg = function (state) {
 					pkey = key[0];
 					ikey = key[1];
 					skey = key[2];
+					if ("undefined" === typeof this.namereg[pkey]) {
+						continue;
+					}
 					posA = this.namereg[pkey].items.indexOf(posA);
 					items = this.namereg[pkey].items;
 					if (skey) {
