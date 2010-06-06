@@ -8,8 +8,13 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-05-28 18:30:00"
+	"lastUpdated":"2010-06-06 18:30:00"
 }
+
+/* Provides support for databases of Cambridge Scientific Abstracts
+    Tested with CSA Illumina, http://www.csa.com/
+   CSA does not provide stable URLs
+ */
 
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -115,9 +120,16 @@ function scrape(doc) {
 					newItem.publisher = m[2];
 				}
 			} else if(itemType == "bookSection") {
-				if(content.length > newItem.publicationTitle.length
-				   && content.substr(0, newItem.publicationTitle.length) == newItem.publicationTitle) {
-					var m = content.match(/\)\. ([^:]+): ([^,0-9]+)/);
+				if((content.length > newItem.publicationTitle.length
+				   && content.substr(0, newItem.publicationTitle.length) == newItem.publicationTitle)
+				   || content.indexOf(newItem.publicationTitle)) {
+					if (content.indexOf(newItem.publicationTitle) > 4) {
+						// This means we probably have a book author or editor first
+						var m = content.match(/^([^\.]+)\./);
+						if (m) newItem.creators.push(
+							Zotero.Utilities.cleanAuthor(m[1], "bookAuthor", true));
+					}
+					var m = content.match(/\)\. ([^:()]+): ([^,0-9]+)/);
 					if(m) {
 						newItem.place = m[1];
 						newItem.publisher = m[2];
@@ -154,6 +166,10 @@ function scrape(doc) {
 			if(newItem.itemType == "thesis") {
 				newItem.publisher = content;
 			}
+		} else if(heading == "pages") {	// This is for book sections
+			newItem.pages = content;
+		} else if(heading == "language") {
+			newItem.language = content;
 		}
 	}
 	
