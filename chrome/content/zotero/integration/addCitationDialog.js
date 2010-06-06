@@ -286,8 +286,8 @@ var Zotero_Citation_Dialog = new function () {
 		var item = itemsView.getSelectedItems()[0]; // treeview from selectItemsDialog.js
 		_itemSelected(item.getID());
 		_addItem(item);
-		_citationList.selectedIndex = _citationList.getRowCount()-1;
 		_citationList.focus();
+		_citationList.selectedIndex = _citationList.getRowCount()-1;
 		
 		// don't let someone select it again
 		document.getElementById("add").disabled = true;
