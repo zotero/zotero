@@ -56,7 +56,7 @@
 				<vbox align="stretch" flex="1">
 					<hbox align="center" pack="end">
 						<label value="&zotero.toolbar.search.label;" control="zotero-tb-search"/>
-						<textbox id="zotero-tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse"
+						<textbox id="zotero-tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse" tabindex="1"
 								onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { if (this.value == '') { cancelDialog(); return false; } this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;">
 							<toolbarbutton id="zotero-tb-search-cancel" oncommand="this.parentNode.value='';" hidden="true"/>
 						</textbox>
@@ -178,24 +178,24 @@
 				<vbox flex="1">
 					<hbox align="center">
 						<label value="&zotero.citation.prefix.label;"/>
-						<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" class="fix" id="prefix" align="stretch" flex="1"/>
+						<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" class="fix" id="prefix" align="stretch" flex="1" tabindex="3"/>
 					</hbox>
 					<hbox align="center">
 						<label value="&zotero.citation.suffix.label;"/>
-						<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" class="fix" id="suffix" align="stretch" flex="1"/>
+						<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" class="fix" id="suffix" align="stretch" flex="1" tabindex="4"/>
 					</hbox>
 					<spacer flex="1"/>
 				</vbox>
 				<separator flex="4"/>
 				<vbox flex="1">
 					<hbox align="stretch">
-						<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="label">
+						<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="label" tabindex="5">
 							<menupopup id="locator-type-popup"/>
 						</menulist>
-						<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locator" flex="1"/>
+						<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locator" tabindex="2" flex="1"/>
 					</hbox>
 					<separator style="height: 2px" flex="1"/>
-					<checkbox oncommand="Zotero_Citation_Dialog.confirmRegenerate(true)" id="suppress-author" label="&zotero.citation.suppressAuthor.label;"/>
+					<checkbox oncommand="Zotero_Citation_Dialog.confirmRegenerate(true)" id="suppress-author" label="&zotero.citation.suppressAuthor.label;" tabindex="6"/>
 				</vbox>
 			</hbox>
 		</vbox>
