@@ -1432,7 +1432,7 @@ CSL.dateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, xmlmode) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.21";
+	this.processor_version = "1.0.22";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2229,7 +2229,9 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 		for (pos = 0; pos < len; pos += 1) {
 			sortedItems[pos][1].sortkeys = CSL.getSortKeys.call(this, sortedItems[pos][0], "citation_sort");
 		}
-		sortedItems.sort(this.citation.srt.compareCompositeKeys);
+		if (!citation.properties.unsorted) {
+			sortedItems.sort(this.citation.srt.compareCompositeKeys);
+		}
 	}
 	citation.sortedItems = sortedItems;
 	citationByIndex = [];
@@ -2390,7 +2392,9 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 		for (pos = 0; pos < len; pos += 1) {
 			sortedItems[pos][1].sortkeys = CSL.getSortKeys.call(this, sortedItems[pos][0], "citation_sort");
 		}
-		sortedItems.sort(this.citation.srt.compareCompositeKeys);
+		if (!citation.properties.unsorted) {
+			sortedItems.sort(this.citation.srt.compareCompositeKeys);
+		}
 	}
 	for (key in this.tmp.taintedItemIDs) {
 		if (this.tmp.taintedItemIDs.hasOwnProperty(key)) {

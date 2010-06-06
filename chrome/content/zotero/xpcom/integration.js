@@ -984,7 +984,7 @@ Zotero.Integration.Session.prototype.reselectItem = function(exception) {
  * Generates a field from a citation object
  */
 Zotero.Integration.Session._acceptableTypes = ["string", "boolean", "number"];
-Zotero.Integration.Session._saveProperties = ["custom", "sort"];
+Zotero.Integration.Session._saveProperties = ["custom", "unsorted"];
 Zotero.Integration.Session._saveItems = ["locator", "label", "suppress-author", "author-only", "prefix", "suffix"];
 Zotero.Integration.Session.prototype.getCitationField = function(citation) {
 	var type;
@@ -1148,36 +1148,31 @@ Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, ar
  */
 Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) {
 	if(arg[0] == "{") {		// JSON field
-		// create citation
-		var citation = {};
-		
-		var saveCode = true;
 		// fix for corrupted fields
 		var lastBracket = arg.lastIndexOf("}");
 		if(lastBracket+1 != arg.length) {
-			saveCode = false;
 			this.updateIndices[index] = true;
 			arg = arg.substr(0, lastBracket+1);
 		}
 		
 		// get JSON
 		try {
-			var object = Zotero.JSON.unserialize(arg);
+			var citation = Zotero.JSON.unserialize(arg);
 		} catch(e) {
+			// fix for corrupted fields
 			try {
-				var object = Zotero.JSON.unserialize(arg.substr(0, arg.length-1));
+				var citation = Zotero.JSON.unserialize(arg.substr(0, arg.length-1));
 			} catch(e) {
 				throw new Zotero.Integration.CorruptFieldException(arg);
 			}
 		}
 		
 		// fix for uppercase citation codes
-		if(object.CITATIONITEMS) {
-			saveCode = false;
+		if(citation.CITATIONITEMS) {
 			this.updateIndices[index] = true;
-			object.citationItems = [];
-			for (var i=0; i<object.CITATIONITEMS.length; i++) {
-				for (var j in object.CITATIONITEMS[i]) {
+			citation.citationItems = [];
+			for (var i=0; i<citation.CITATIONITEMS.length; i++) {
+				for (var j in citation.CITATIONITEMS[i]) {
 					switch (j) {
 						case 'ITEMID':
 							var field = 'itemID';
@@ -1187,32 +1182,33 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) 
 						default:
 							var field = j.toLowerCase();
 					}
-					if (!object.citationItems[i]) {
-						object.citationItems[i] = {};
+					if (!citation.citationItems[i]) {
+						citation.citationItems[i] = {};
 					}
-					object.citationItems[i][field] = object.CITATIONITEMS[i][j];
+					citation.citationItems[i][field] = citation.CITATIONITEMS[i][j];
 				}
 			}
 		}
 		
 		if(!citation.properties) citation.properties = {};
-		// copy properties
-		for(var i in object) {
-			if(Zotero.Integration.Session._saveProperties.indexOf(i) != -1) {
-				citation.properties[i] = object[i];
-			} else if(i == "locatorType") {
-				citation["label"] = object["locatorType"];
-				this.updateIndices[index] = true;
-			} else if(i == "suppressAuthor") {
-				citation["suppress-author"] = object["suppressAuthor"];
-				this.updateIndices[index] = true;
-			} else {
-				citation[i] = object[i];
+		
+		// for upgrade from Zotero 2.0 or earlier
+		for each(var citationItem in citation.citationItems) {
+			if(citationItem.locatorType) {
+				citationItem.label = citationItem.locatorType;
+				delete citationItem.locatorType;
+			} else if(citationItem.suppressAuthor) {
+				citationItem["suppress-author"] = citationItem["suppressAuthor"];
+				delete citationItem.suppressAuthor;
 			}
+		}
+		if(citation.sort) {
+			citation.properties.unsorted = !citation.sort;
+			delete citation.sort;
 		}
 		
 		if(!citation.citationID) citation.citationID = Zotero.randomString();
-		if(saveCode) citation.properties.field = arg;
+		citation.properties.field = arg;
 	} else {				// ye olde style field
 		var underscoreIndex = arg.indexOf("_");
 		var itemIDs = arg.substr(0, underscoreIndex).split("|");
@@ -1547,6 +1543,8 @@ Zotero.Integration.Session.prototype.editCitation = function(index, noteIndex, c
 	io.previewFunction = function() {
 		return me.previewCitation(io.citation);
 	}
+	// determine whether citation is sortable in current style
+	io.sortable = !this.style.citation.opt["citation-number-sort"] && this.style.citation_sort.tokens.length > 0;
 	
 	var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 		.getService(Components.interfaces.nsIWindowWatcher)
