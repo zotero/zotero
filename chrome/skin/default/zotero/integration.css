@@ -1,3 +1,20 @@
+#up {
+	list-style-image: url('chrome://zotero/skin/citation-up.png');
+}
+
+#up[disabled="true"] {
+	list-style-image: url('chrome://zotero/skin/citation-up-gray.png');
+}
+
+#down {
+	list-style-image: url('chrome://zotero/skin/citation-down.png');
+}
+
+#down[disabled="true"] {
+	list-style-image: url('chrome://zotero/skin/citation-down-gray.png');
+}
+
+
 #add {
 	list-style-image: url('chrome://zotero/skin/citation-add.png');
 }
@@ -14,12 +31,17 @@
 	list-style-image: url('chrome://zotero/skin/citation-delete-gray.png');
 }
 
-#add .toolbarbutton-text, #remove .toolbarbutton-text
+#citation-buttons > toolbarbutton
+{
+	margin: 2px 0 2px 4px !important;
+	padding: 0 !important;
+}
+
+#citation-buttons > toolbarbutton > .toolbarbutton-text
 {
 	margin: 0 !important;
 	padding: 0 !important;
 }
-
 
 #prefix, #suffix {
 	width: 200px;

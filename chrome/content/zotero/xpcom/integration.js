@@ -616,10 +616,11 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 Zotero.Integration.Document.prototype._updateDocument = function(forceCitations, forceBibliography) {
 	// update citations
 	this._session.updateUpdateIndices(forceCitations);
-	this._deleteFields = this._deleteFields.concat(this._session.updateCitations());
-	for(var i in this._session.citationText) {
+	var deleteCitations = this._session.updateCitations();
+	this._deleteFields = this._deleteFields.concat([i for(i in deleteCitations)]);
+	for(var i in this._session.updateIndices) {
 		citation = this._session.citationsByIndex[i];
-		if(!citation) continue;
+		if(!citation || deleteCitations[i]) continue;
 		
 		var fieldCode = this._session.getCitationField(citation);
 		if(fieldCode != citation.properties.field) {
@@ -1370,14 +1371,14 @@ Zotero.Integration.Session.prototype.updateCitations = function() {
 	Zotero.debug("Zotero.Integration: indices of updated citations");
 	Zotero.debug([key for(key in this.updateIndices)]);
 	
-	var deleteCitations = [];
+	var deleteCitations = {};
 	for each(var indexList in [this.newIndices, this.updateIndices]) {
 		for(var index in indexList) {
 			index = parseInt(index);
 			
 			var citation = this.citationsByIndex[index];
 			if(citation.properties.delete) {
-				if(deleteCitations.indexOf(index) == -1) deleteCitations.push(index);
+				deleteCitations[index] = true;
 				continue;
 			}
 			if(this.formatCitation(index, citation)) {
