@@ -50,6 +50,8 @@ var Zotero_Citation_Dialog = new function () {
 	this.toggleEditor = toggleEditor;
 	this.treeItemSelected = treeItemSelected;
 	this.listItemSelected = listItemSelected;
+	this.up = up;
+	this.down = down;
 	this.add = add;
 	this.remove = remove;
 	this.sortCitation = sortCitation;
@@ -215,19 +217,63 @@ var Zotero_Citation_Dialog = new function () {
 			_updateAccept();
 			_updatePreview();
 		}
+		_configListPosition(document.getElementById("citation-list"), true);
 	}
 	
 	/*
 	 * called when an item in the selected items list is clicked
 	 */
 	function listItemSelected() {
-		var selectedListItem = document.getElementById("citation-list").getSelectedItem(0);
+		var itemList = document.getElementById("citation-list");
+		var selectedListItem = itemList.getSelectedItem(0);
 		var itemID = (selectedListItem ? selectedListItem.value : false);
 		_itemSelected(itemID);
+		_configListPosition(itemList, !itemID);
 		
 		document.getElementById("remove").disabled = !itemID;
 	}
 	
+	function _configListPosition(itemList,flag) {
+		var selectedIndex = itemList.selectedIndex;
+		if (selectedIndex > 0) {
+			document.getElementById("up").disabled = flag;
+		} else {
+			document.getElementById("up").disabled = true;
+		}
+		if (selectedIndex < (itemList.getRowCount() - 1)) {
+			document.getElementById("down").disabled = flag;
+		} else {
+			document.getElementById("down").disabled = true;
+		}
+	}
+
+	function _move(direction) {
+		var insertBeforeItem;
+		var itemList = document.getElementById("citation-list");
+		var selectedListItem = itemList.getSelectedItem(0);
+		var itemID = selectedListItem.value;
+		var selectedListIndex = itemList.selectedIndex;
+		if (direction === -1) {
+			insertBeforeItem = selectedListItem.previousSibling;
+		} else {
+			insertBeforeItem = selectedListItem.nextSibling.nextSibling;
+		}
+		var listItem = itemList.removeChild(selectedListItem);
+		itemList.insertBefore(listItem, insertBeforeItem);
+		itemList.selectedIndex = (selectedListIndex + direction);
+		_itemSelected(itemID);
+		_updatePreview();
+		_configListPosition(itemList, false);
+	}
+
+	function up() {
+		_move(-1);
+	}
+
+	function down() {
+		_move(1);
+	}
+
 	/*
 	 * Adds a citation to the multipleSources list
 	 */
@@ -514,11 +560,15 @@ var Zotero_Citation_Dialog = new function () {
 	 */
 	function _addItem(item) {
 		var itemNode = document.createElement("listitem");
+		var itemList = document.getElementById("citation-list");
 		itemNode.setAttribute("value", item.getID());
 		itemNode.setAttribute("label", item.getField("title"));
 		itemNode.setAttribute("class", "listitem-iconic");
 		itemNode.setAttribute("image", item.getImageSrc());
-		document.getElementById("citation-list").appendChild(itemNode);
+		itemList.appendChild(itemNode);
+		itemList.focus();
+		itemList.selectedIndex = itemList.childNodes.length-1;
+		_configListPosition(itemList, false);
 	}
 	
 	/*

@@ -159,15 +159,17 @@
 					</hbox>
 				</vbox>
 						
-				<hbox hidden="true" id="multiple-sources">
-					<vbox align="center" pack="center">
+				<hbox hidden="true" id="multiple-sources" align="stretch">
+					<vbox align="center" pack="center" id="citation-buttons">
+						<toolbarbutton id="up" oncommand="Zotero_Citation_Dialog.up()" disabled="true"/>
 						<toolbarbutton id="add" oncommand="Zotero_Citation_Dialog.add()" disabled="true"/>
 						<toolbarbutton id="remove" oncommand="Zotero_Citation_Dialog.remove()" disabled="true"/>
+						<toolbarbutton id="down" oncommand="Zotero_Citation_Dialog.down()" disabled="true"/>
 					</vbox>
-					<vbox>
+					<vbox align="left">
 						<checkbox id="keepSorted" hidden="true" checked="false" oncommand="Zotero_Citation_Dialog.sortCitation()" label="&zotero.citation.keepSorted.label;"/>
 						<listbox id="citation-list" flex="1" align="stretch" seltype="single"
-							onselect="Zotero_Citation_Dialog.listItemSelected();"></listbox>
+							onselect="Zotero_Citation_Dialog.listItemSelected();"/>
 					</vbox>
 				</hbox>
 			</hbox>
