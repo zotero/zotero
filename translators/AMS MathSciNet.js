@@ -1,14 +1,14 @@
 {
-	"translatorID":"a354331-981b-43de-a61-bc26dd1be3a9",
-	"translatorType":4,
-	"label":"AMS MathSciNet",
-	"creator":"Simon Kornblith",
-	"target":"^https?://www\\.ams\\.org[^/]*/mathscinet/search/(?:publications\\.html|publdoc\\.html)",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2007-03-24 22:20:00"
+        "translatorID":"a354331-981b-43de-a61-bc26dd1be3a9",
+        "label":"AMS MathSciNet",
+        "creator":"Simon Kornblith",
+        "target":"^https?://www\\.ams\\.org[^/]*/mathscinet/search/(?:publications\\.html|publdoc\\.html)",
+        "minVersion":"1.0.0b3.r1",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-06-06 19:00:50"
 }
 
 function detectWeb(doc, url) {
