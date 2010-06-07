@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-05-31 17:16:00"
+	"lastUpdated":"2010-06-06 18:16:00"
 }
 
 /*
