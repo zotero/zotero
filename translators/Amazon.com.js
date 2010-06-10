@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-08-18 06:20:00"
+	"lastUpdated":"2010-06-09 17:37:00"
 }
 
 function detectWeb(doc, url) { 
@@ -105,7 +105,7 @@ function doWeb(doc, url) {
 		
 		for(var i in items) {
 			var timestamp = encodeURIComponent(generateISODate());
-			var params = "AWSAccessKeyId=AKIAIPYIWJ24AGZJ64AA&ItemId=" + asins[i] + "&Operation=ItemLookup&ResponseGroup=ItemAttributes&Service=AWSECommerceService&Timestamp="+timestamp+"&Version=2006-06-28";
+			var params = "AWSAccessKeyId=AKIAIPYIWJ24AGZJ64AA&ItemId=" + asins[i].trim() + "&Operation=ItemLookup&ResponseGroup=ItemAttributes&Service=AWSECommerceService&Timestamp="+timestamp+"&Version=2006-06-28";
 			var signString = "GET\necs.amazonaws."+suffix+"\n/onca/xml\n"+params;
 			var signature = b64_hmac_sha256("054vk/Lt3LJMxch1srIHUbvI+2T/fZ6E5c0qwlbj", signString);
 			signature = encodeURIComponent(signature);
@@ -120,7 +120,7 @@ function doWeb(doc, url) {
 			var asin = elmt.value;
 		}
 		var timestamp = encodeURIComponent(generateISODate()); 
-		var params = "AWSAccessKeyId=AKIAIPYIWJ24AGZJ64AA&ItemId=" + asin + "&Operation=ItemLookup&ResponseGroup=ItemAttributes&Service=AWSECommerceService&Timestamp="+timestamp+"&Version=2006-06-28";
+		var params = "AWSAccessKeyId=AKIAIPYIWJ24AGZJ64AA&ItemId=" + asin.trim() + "&Operation=ItemLookup&ResponseGroup=ItemAttributes&Service=AWSECommerceService&Timestamp="+timestamp+"&Version=2006-06-28";
 		var signString = "GET\necs.amazonaws."+suffix+"\n/onca/xml\n"+params;
 		var signature = b64_hmac_sha256("054vk/Lt3LJMxch1srIHUbvI+2T/fZ6E5c0qwlbj", signString);
 		signature = encodeURIComponent(signature);		
