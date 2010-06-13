@@ -584,7 +584,7 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 	
 	// if we are reloading this session, assume no item IDs to be updated except for edited items
 	if(this._reloadSession) {
-		this._session.updateCitations();
+		this._session.restoreProcessorState();
 		this._session.updateIndices = {};
 		this._session.updateItemIDs = {};
 		this._session.bibliographyHasChanged = false;
@@ -1301,36 +1301,42 @@ Zotero.Integration.Session.prototype.updateUpdateIndices = function(regenerateAl
 }
 
 /**
+ * Returns citations before and after a given index
+ */
+Zotero.Integration.Session.prototype._getPrePost = function(index) {
+	var citationIndices = [];
+	var citationsPre = [];
+	for(var i=0; i<index; i++) {
+		if(this.citationsByIndex[i] && !this.newIndices[i] && !this.citationsByIndex[i].properties.delete) {
+			citationsPre.push([this.citationsByIndex[i].citationID, this.citationsByIndex[i].properties.noteIndex]);
+			citationIndices.push(i);
+		}
+	}
+	citationIndices.push(index);
+	var citationsPost = [];
+	for(var i=index+1; i<this.citationsByIndex.length; i++) {
+		if(this.citationsByIndex[i] && !this.newIndices[i] && !this.citationsByIndex[i].properties.delete) {
+			citationsPost.push([this.citationsByIndex[i].citationID, this.citationsByIndex[i].properties.noteIndex]);
+			citationIndices.push(i);
+		}
+	}
+	return [citationsPre, citationsPost, citationIndices];
+}
+
+/**
  * Returns a formatted citation
  */
 Zotero.Integration.Session.prototype.formatCitation = function(index, citation) {
 	if(!this.citationText[index]) {
-		var citationIndices = [];
-		var citationsPre = [];
-		for(var i=0; i<index; i++) {
-			if(this.citationsByIndex[i] && !this.newIndices[i] && !this.citationsByIndex[i].properties.delete) {
-				citationsPre.push([this.citationsByIndex[i].citationID, this.citationsByIndex[i].properties.noteIndex]);
-				citationIndices.push(i);
-			}
-		}
-		citationIndices.push(index);
-		var citationsPost = [];
-		for(var i=index+1; i<this.citationsByIndex.length; i++) {
-			if(this.citationsByIndex[i] && !this.newIndices[i] && !this.citationsByIndex[i].properties.delete) {
-				citationsPost.push([this.citationsByIndex[i].citationID, this.citationsByIndex[i].properties.noteIndex]);
-				citationIndices.push(i);
-			}
-		}
+		var citationsPre, citationsPost, citationIndices;
+		[citationsPre, citationsPost, citationIndices] = this._getPrePost(index);
 		//Zotero.debug("style.processCitationCluster("+citation.toSource()+", "+citationsPre.toSource()+", "+citationsPost.toSource());
 		var newCitations = this.style.processCitationCluster(citation, citationsPre, citationsPost);
-		for each(var newCitation in newCitations) {
-			Zotero.debug("Zotero.Integration: Citation "+citationIndices[newCitation[0]]+" needs to be updated");
+		for each(var newCitation in newCitations[1]) {
 			this.citationText[citationIndices[newCitation[0]]] = newCitation[1];
 			this.updateIndices[citationIndices[newCitation[0]]] = true;
 		}
-		// this is a heuristic: if other citations get updated, then we should update the
-		// bibliography. it would be nice if citeproc-js gave us a better hint about this
-		return (newCitations.length > 1);
+		return newCitations.bibchange;
 	}
 }
 
@@ -1393,6 +1399,20 @@ Zotero.Integration.Session.prototype.updateCitations = function() {
 	}*/
 	
 	return deleteCitations;
+}
+
+/**
+ * Updates the list of citations to be serialized to the document
+ */
+Zotero.Integration.Session.prototype.restoreProcessorState = function() {
+	var citations = [];
+	for(var i in this.citationsByIndex.length) {
+		if(this.citationsByIndex[i] && !this.newIndices[i] && !this.citationsByIndex[i].properties.delete) {
+			citations.push(this.citationsByIndex[i]);
+		}
+	}
+	
+	this.style.restoreProcessorState(citations);
 }
 
 /**
@@ -1494,21 +1514,14 @@ Zotero.Integration.Session.prototype.getBibliographyData = function() {
  * and position)
  */
 Zotero.Integration.Session.prototype.previewCitation = function(citation) {
-	// remove cached citation text
-	this.citationText = {};
-	this.addCitation(citation.properties.index, citation.properties.noteIndex, citation);
-
-	// add citation items
+	var citationsPre, citationsPost, citationIndices;
+	[citationsPre, citationsPost, citationIndices] = this._getPrePost(citation.properties.index);
 	try {
-		this.formatCitation(citation.properties.index, citation);
+		return this.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
 	} catch(e) {
 		Zotero.debug(e);
-		this.deleteCitation(citation.properties.index);
 		throw e;
 	}
-	this.deleteCitation(citation.properties.index);
-	
-	return this.citationText[citation.properties.index];
 } 
 
 /**
@@ -1544,7 +1557,7 @@ Zotero.Integration.Session.prototype.editCitation = function(index, noteIndex, c
 		return me.previewCitation(io.citation);
 	}
 	// determine whether citation is sortable in current style
-	io.sortable = !this.style.citation.opt["citation-number-sort"] && this.style.citation_sort.tokens.length > 0;
+	io.sortable = this.style.opt.sort_citations;
 	
 	var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 		.getService(Components.interfaces.nsIWindowWatcher)
