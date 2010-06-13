@@ -37,6 +37,7 @@ var Zotero_Citation_Dialog = new function () {
 	var _lastSelected = null;
 	var _previewShown = false;
 	var _suppressNextTreeSelect = false;
+	var _suppressNextListSelect = false;
 	var _locatorIndexArray = {};
 	var _locatorNameArray = {};
 	var _autoRegeneratePref;
@@ -212,35 +213,48 @@ var Zotero_Citation_Dialog = new function () {
 			var hasBeenAdded = itemID && _itemData[itemID] !== undefined;
 			// disable boxes if item not added; otherwise, enable
 			_itemSelected(hasBeenAdded ? itemID : false);
+			// turn off highlight in selected item list
+			_suppressNextListSelect = true;
+			document.getElementById("citation-list").selectedIndex = -1;
 			// disable adding nothing, or things already added
 			document.getElementById("add").disabled = !itemID || hasBeenAdded;
+			document.getElementById("remove").disabled = true;
+			document.getElementById("up").disabled = true;
+			document.getElementById("down").disabled = true;
 		} else {
 			_updateAccept();
 			_updatePreview();
 		}
-		_configListPosition(true);
 	}
 	
 	/*
 	 * called when an item in the selected items list is clicked
 	 */
 	function listItemSelected() {
+		if(_suppressNextListSelect) {
+			_suppressNextListSelect = false;
+			_updateAccept();
+			return;
+		}
 		var selectedListItem = _citationList.getSelectedItem(0);
+		var selectedListIndex = _citationList.selectedIndex;
 		var itemID = (selectedListItem ? selectedListItem.value : false);
 		_itemSelected(itemID);
-		_configListPosition(!itemID);
-		
+		// turn off highlight in item tree
+		_suppressNextTreeSelect = true;
+		document.getElementById("zotero-items-tree").view.selection.clearSelection();
 		document.getElementById("remove").disabled = !itemID;
+		document.getElementById("add").disabled = true;
+		_configListPosition(!itemID, selectedListIndex);
 	}
 	
-	function _configListPosition(flag) {
-		var selectedIndex = _citationList.selectedIndex;
-		if (selectedIndex > 0) {
+	function _configListPosition(flag, selectedListIndex) {
+		if (selectedListIndex > 0) {
 			document.getElementById("up").disabled = flag;
 		} else {
 			document.getElementById("up").disabled = true;
 		}
-		if (selectedIndex < (_citationList.getRowCount() - 1)) {
+		if (-1 < selectedListIndex && selectedListIndex < (_citationList.getRowCount() - 1)) {
 			document.getElementById("down").disabled = flag;
 		} else {
 			document.getElementById("down").disabled = true;
@@ -256,8 +270,8 @@ var Zotero_Citation_Dialog = new function () {
 		
 		var insertBeforeItem;
 		var selectedListItem = _citationList.getSelectedItem(0);
-		var itemID = selectedListItem.value;
 		var selectedListIndex = _citationList.selectedIndex;
+		var itemID = selectedListItem.value;
 		if (direction === -1) {
 			insertBeforeItem = selectedListItem.previousSibling;
 		} else {
@@ -268,7 +282,7 @@ var Zotero_Citation_Dialog = new function () {
 		_citationList.selectedIndex = (selectedListIndex + direction);
 		_itemSelected(itemID);
 		_updatePreview();
-		_configListPosition(false);
+		_configListPosition(false, (selectedListIndex + direction));
 	}
 
 	function up() {
@@ -286,8 +300,6 @@ var Zotero_Citation_Dialog = new function () {
 		var item = itemsView.getSelectedItems()[0]; // treeview from selectItemsDialog.js
 		_itemSelected(item.getID());
 		_addItem(item);
-		_citationList.focus();
-		_citationList.selectedIndex = _citationList.getRowCount()-1;
 		
 		// don't let someone select it again
 		document.getElementById("add").disabled = true;
@@ -303,6 +315,7 @@ var Zotero_Citation_Dialog = new function () {
 	 */
 	function remove() {
 		var selectedListItem = _citationList.getSelectedItem(0);
+		var selectedListIndex = _citationList.selectedIndex;
 		var itemID = selectedListItem.value;
 		
 		// remove from _itemData
@@ -310,19 +323,16 @@ var Zotero_Citation_Dialog = new function () {
 		_itemData[itemID] = undefined;
 		_lastSelected = null;
 		
-		// re-select currently selected in left pane
-		var itemIDs = itemsView.getSelectedItems(true); // treeview from selectItemsDialog.js
-		if(itemIDs.length) {
-			document.getElementById("zotero-items-tree").focus();
-			treeItemSelected();
-		}
-		
 		// remove from list
 		_citationList.removeChild(selectedListItem);
 		
+		if (selectedListIndex >= _citationList.getRowCount()) {
+			selectedListIndex = _citationList.getRowCount() - 1;
+		}
+		_citationList.selectedIndex = selectedListIndex;
+
 		_updateAccept();
 		_updatePreview();
-		treeItemSelected();
 	}
 	
 	/*
@@ -579,7 +589,6 @@ var Zotero_Citation_Dialog = new function () {
 		itemNode.setAttribute("class", "listitem-iconic");
 		itemNode.setAttribute("image", item.getImageSrc());
 		_citationList.appendChild(itemNode);
-		_configListPosition(false);
 	}
 	
 	/*
