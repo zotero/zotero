@@ -547,21 +547,25 @@ var Zotero_Citation_Dialog = new function () {
 		} else {
 			var items = itemsView.getSelectedItems(true); // treeview from selectItemsDialog.js
 			
-			var citationItem = {};
-			citationItem.id = items[0];
-			for(var property in _preserveData) {
-				if(property == "label") {
-					citationItem[property] = _locatorNameArray[document.getElementById(property).selectedIndex];
-				} else {
-					citationItem[property] = document.getElementById(property)[_preserveData[property]];
+			if(items.length) {
+				var citationItem = {};
+				citationItem.id = items[0];
+				for(var property in _preserveData) {
+					if(property == "label") {
+						citationItem[property] = _locatorNameArray[document.getElementById(property).selectedIndex];
+					} else {
+						citationItem[property] = document.getElementById(property)[_preserveData[property]];
+					}
 				}
+				
+				if(citationItem["locator"] == "") {
+					citationItem["locator"] = citationItem["label"] = undefined;
+				}
+				
+				io.citation.citationItems = [citationItem];
+			} else {
+				io.citation.citationItems = [];
 			}
-			
-			if(citationItem["locator"] == "") {
-				citationItem["locator"] = citationItem["label"] = undefined;
-			}
-			
-			io.citation.citationItems = [citationItem];
 		}
 	}
 	
