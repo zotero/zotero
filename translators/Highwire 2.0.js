@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-06-06 18:16:00"
+	"lastUpdated":"2010-06-13 17:16:00"
 }
 
 /*
@@ -20,7 +20,8 @@
 	http://joeg.oxfordjournals.org/content/10/3/331.abstract
 3. Hans Maes, “Intention, Interpretation, and Contemporary Visual Art,” Brit J Aesthetics 50, no. 2 (April 1, 2010): 121-138.
 	http://bjaesthetics.oxfordjournals.org/cgi/content/abstract/50/2/121
-
+4. M L Giger et al., “Pulmonary nodules: computer-aided detection in digital chest images.,” Radiographics 10, no. 1 (January 1990): 41-51.
+	http://radiographics.rsna.org/content/10/1/41.abstract
 */
 
 function detectWeb(doc, url) {
@@ -116,7 +117,8 @@ function doWeb(doc, url) {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
-			if (text.match(/N1(.*)\n/)) {
+			// Sometimes Highwire 2.0 has blank entries for N1
+			if (text.match(/N1\s+\-\s+(10\..*)\n/)) {
 				var doi = text.match(/N1\s+\-\s+(.*)\n/)[1];
 			}
 			translator.setHandler("itemDone", function(obj, item) {
