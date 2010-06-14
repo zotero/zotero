@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"PubMed Central",
 	"creator":"Michael Berkowitz and Rintze Zelle",
-	"target":"http://[^/]*.nih.gov/",
+	"target":"https?://[^/]*.nih.gov/",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-12-17 08:10:00"
+	"lastUpdated":"2010-06-14 11:55:00"
 }
 
 function detectWeb(doc, url) {

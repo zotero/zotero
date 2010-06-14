@@ -8,8 +8,21 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-05-31 17:16:00"
+	"lastUpdated":"2010-06-14 11:55:00"
 }
+
+/*
+ Translator for several Highwire journals. Example URLs:
+
+1. Ajay Agrawal, Iain Cockburn, and John McHale, “Gone but not forgotten: knowledge flows, labor mobility, and enduring social relationships,” Journal of Economic Geography 6, no. 5 (November 2006): 571-591.
+	http://joeg.oxfordjournals.org/content/6/5/571 :
+2. Gordon L. Clark, Roberto Durán-Fernández, and Kendra Strauss, “‘Being in the market’: the UK house-price bubble and the intended structure of individual pension investment portfolios,” Journal of Economic Geography 10, no. 3 (May 2010): 331-359.
+	http://joeg.oxfordjournals.org/content/10/3/331.abstract
+3. Hans Maes, “Intention, Interpretation, and Contemporary Visual Art,” Brit J Aesthetics 50, no. 2 (April 1, 2010): 121-138.
+	http://bjaesthetics.oxfordjournals.org/cgi/content/abstract/50/2/121
+4. M L Giger et al., “Pulmonary nodules: computer-aided detection in digital chest images.,” Radiographics 10, no. 1 (January 1990): 41-51.
+	http://radiographics.rsna.org/content/10/1/41.abstract
+*/
 
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -84,20 +97,28 @@ function doWeb(doc, url) {
 		return false;
 	}
 	Zotero.Utilities.HTTP.doGet(arts, function(text) {
-		var id = text.match(/=([^=]+)\">\s*Download to citation manager/)[1];
-		var newurl = newurls.shift();		
+		var id, match, newurl, pdfurl, get;
+		/* Here, we have to use two phrasings because they both occur, depending on
+		   the journal.*/
+		match = text.match(/=([^=]+)\">\s*Download citation/);
+		if (!match || match.length < 1) {
+			match = text.match(/=([^=]+)\">\s*Download to citation manager/);
+		}
+		id = match[1];
+		newurl = newurls.shift();		
 		if (newurl.match("cgi/content")) {
-			var pdfurl = newurl.replace(/cgi\/content\/abstract/, "content") + ".full.pdf";
+			pdfurl = newurl.replace(/cgi\/content\/abstract/, "content") + ".full.pdf";
 		} else {
 			// This is not ideal...todo: brew a regex that grabs the correct URL
-			var pdfurl = newurl.slice(0, newurl.lastIndexOf(".")) + ".full.pdf";
+			pdfurl = newurl.slice(0, newurl.lastIndexOf(".")) + ".full.pdf";
 		}
-		var get = host + 'citmgr?type=refman&gca=' + id;
+		get = host + 'citmgr?type=refman&gca=' + id;
 		Zotero.Utilities.HTTP.doGet(get, function(text) {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
-			if (text.match(/N1(.*)\n/)) {
+			// Sometimes Highwire 2.0 has blank entries for N1
+			if (text.match(/N1\s+\-\s+(10\..*)\n/)) {
 				var doi = text.match(/N1\s+\-\s+(.*)\n/)[1];
 			}
 			translator.setHandler("itemDone", function(obj, item) {
