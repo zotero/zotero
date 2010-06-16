@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":300,
 	"inRepository":true,
-	"lastUpdated":"2007-09-15 20:08:46"
+	"lastUpdated":"2010-06-16 18:15:00"
 }
 
 function detectWeb(doc, url) {
@@ -16,24 +16,18 @@ function detectWeb(doc, url) {
 	
 	var encounteredType = false;
 	
-	for(var i=0; i<spanTags.length; i++) {
-		var spanClass = spanTags[i].getAttribute("class");
-		if(spanClass) {
-			var spanClasses = spanClass.split(" ");
-			if(Zotero.Utilities.inArray("Z3988", spanClasses)) {
-				var spanTitle = spanTags[i].getAttribute("title");
-				
-				// determine if it's a valid type
-				var item = new Zotero.Item;
-				var success = Zotero.Utilities.parseContextObject(spanTitle, item);
-				
-				if(item.itemType) {
-					if(encounteredType) {
-						return "multiple";
-					} else {
-						encounteredType = item.itemType;
-					}
-				}
+	var spans = doc.evaluate('//span[contains(@class, " Z3988") or contains(@class, "Z3988 ") or @class="Z3988"][@title]', doc, null, XPathResult.ANY_TYPE, null);
+	var span;
+	while(span = spans.iterateNext()) {
+		// determine if it's a valid type
+		var item = new Zotero.Item;
+		var success = Zotero.Utilities.parseContextObject(span.title, item);
+		
+		if(item.itemType) {
+			if(encounteredType) {
+				return "multiple";
+			} else {
+				encounteredType = item.itemType;
 			}
 		}
 	}
@@ -147,33 +141,27 @@ function doWeb(doc, url) {
 	var needFullItems = new Array();
 	var couldUseFullItems = new Array();
 	
-	var spanTags = doc.getElementsByTagName("span");
-	
-	for(var i=0; i<spanTags.length; i++) {
-		var spanClass = spanTags[i].getAttribute("class");
-		if(spanClass) {
-			var spanClasses = spanClass.split(" ");
-			if(Zotero.Utilities.inArray("Z3988", spanClasses)) {
-				var spanTitle = spanTags[i].getAttribute("title");
-				var newItem = new Zotero.Item();
-				newItem.repository = false;	// do not save repository
-				if(Zotero.Utilities.parseContextObject(spanTitle, newItem)) {
-					if(newItem.title) {
-						if(!newItem.creators.length) {
-							// if we have a title but little other identifying
-							// information, say we'll get full item later
-							newItem.contextObject = spanTitle;
-							couldUseFullItems[newItems.length] = true;
-						}
-						
-						// title and creators are minimum data to avoid looking up
-						newItems.push(newItem);
-					} else {
-						// retrieve full item
-						newItem.contextObject = spanTitle;
-						needFullItems.push(newItem);
-					}
+	var spans = doc.evaluate('//span[contains(@class, " Z3988") or contains(@class, "Z3988 ") or @class="Z3988"][@title]', doc, null, XPathResult.ANY_TYPE, null);
+	var span;
+	while(span = spans.iterateNext()) {
+		var spanTitle = span.title;
+		var newItem = new Zotero.Item();
+		newItem.repository = false;	// do not save repository
+		if(Zotero.Utilities.parseContextObject(spanTitle, newItem)) {
+			if(newItem.title) {
+				if(!newItem.creators.length) {
+					// if we have a title but little other identifying
+					// information, say we'll get full item later
+					newItem.contextObject = spanTitle;
+					couldUseFullItems[newItems.length] = true;
 				}
+				
+				// title and creators are minimum data to avoid looking up
+				newItems.push(newItem);
+			} else {
+				// retrieve full item
+				newItem.contextObject = spanTitle;
+				needFullItems.push(newItem);
 			}
 		}
 	}
