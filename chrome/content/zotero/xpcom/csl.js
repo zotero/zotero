@@ -2787,7 +2787,11 @@ Zotero.CSL.FormattedString.prototype.append = function(string, element, dontDeli
 					for(var k in rtfAttributes[j]) {
 						if(element["@"+j] == k) {
 							addBefore += "\\"+rtfAttributes[j][k]+" ";
-							addAfter = "\\"+rtfAttributes[j][k]+"0 "+addAfter;
+							if (["sup", "sub"].indexOf(k) > -1) {
+								addAfter = "\\nosupersub "+addAfter;
+							} else {
+								addAfter = "\\"+rtfAttributes[j][k]+"0 "+addAfter;
+							}
 						}
 					}
 				}
