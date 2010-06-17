@@ -1081,11 +1081,9 @@ CSL.cloneAmbigConfig = function (config, oldconfig, itemID) {
 	ret = {};
 	ret.names = [];
 	ret.givens = [];
-	ret.year_suffix_citeform = false;
 	ret.year_suffix = false;
 	ret.disambiguate = false;
-	len = config.names.length;
-	for (pos = 0; pos < len; pos += 1) {
+	for (pos = 0, len = config.names.length; pos < len; pos += 1) {
 		param = config.names[pos];
 		if (oldconfig && oldconfig.names[pos] !== param) {
 			this.tmp.taintedItemIDs[itemID] = true;
@@ -1093,8 +1091,7 @@ CSL.cloneAmbigConfig = function (config, oldconfig, itemID) {
 		}
 		ret.names[pos] = param;
 	}
-	len = config.givens.length;
-	for (pos = 0; pos < len; pos += 1) {
+	for (pos = 0, len = config.givens.length; pos < len; pos += 1) {
 		param = [];
 		llen = config.givens[pos].length;
 		for (ppos = 0; ppos < llen; ppos += 1) {
@@ -1110,6 +1107,7 @@ CSL.cloneAmbigConfig = function (config, oldconfig, itemID) {
 		this.tmp.taintedItemIDs[itemID] = true;
 		oldconfig = false;
 	}
+	ret.year_suffix = config.year_suffix;
 	ret.disambiguate = config.disambiguate;
 	return ret;
 };
@@ -1464,7 +1462,7 @@ CSL.dateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, xmlmode) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.29";
+	this.processor_version = "1.0.34";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2282,14 +2280,68 @@ CSL.Engine.prototype.appendCitationCluster = function (citation) {
 	return this.processCitationCluster(citation, citationsPre, [], CSL.ASSUME_ALL_ITEMS_REGISTERED);
 };
 CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, citationsPost, flag) {
-	var sortedItems, new_citation, pos, len, item, citationByIndex, c, Item, newitem, k, textCitations, noteCitations, update_items, citations, first_ref, last_ref, ipos, ilen, cpos, onecitation, oldvalue, ibidme, suprame, useme, items, i, key, prev_locator, curr_locator, param, ret, obj, ppos, llen, lllen, pppos, ppppos, llllen, cids, note_distance, return_data;
+	var sortedItems, new_citation, pos, len, item, citationByIndex, c, Item, newitem, k, textCitations, noteCitations, update_items, citations, first_ref, last_ref, ipos, ilen, cpos, onecitation, oldvalue, ibidme, suprame, useme, items, i, key, prev_locator, curr_locator, param, ret, obj, ppos, llen, lllen, pppos, ppppos, llllen, cids, note_distance, return_data, lostItemId, lostItemList, lostItemData, otherLostPkeys;
+	this.debug = false;
+	if (this.is_running) {
+		return [{}, [[citation.properties.index, "Concurrency error or processor crash."]]];
+	}
+	this.is_running = true;
+	citationsPre = citationsPre.slice();
+	citationsPost = citationsPost.slice();
 	return_data = {"bibchange": false};
 	this.registry.return_data = return_data;
 	if (flag === CSL.PREVIEW) {
+		var lostItemReg = {};
+		var lostItemNameInd = {};
+		var lostItemNameIndPkeys = {};
+		var oldCitations = this.registry.citationreg.citationByIndex.slice();
 		var tmpItems = [];
 		for (pos = 0, len = citation.citationItems.length; pos < len; pos += 1) {
 			if (!this.registry.registry[citation.citationItems[pos].id]) {
 				tmpItems.push(citation.citationItems[pos].id);
+			}
+		}
+		var newCitationIds = citationsPre.concat([[citation.citationID, citation.properties.noteIndex]]).concat(citationsPost);
+		var newItemIds = {};
+		for (pos = 0, len = newCitationIds.length; pos < len; pos += 1) {
+			c = this.registry.citationreg.citationById[newCitationIds[pos][0]];
+			for (ppos = 0, llen = c.citationItems.length; ppos < llen; ppos += 1) {
+				newItemIds[c.citationItems[ppos].id] = true;
+			}
+		}
+		otherLostPkeys = [];
+		for (id in this.registry.registry) {
+			if (!newItemIds[id]) {
+				var nameind = this.registry.namereg.nameind[id];
+				var iclone = {};
+				for (key in nameind) {
+					iclone[key] = true;
+				}
+				var nameindpkeys = this.registry.namereg.nameindpkeys[id];
+				var clone = {};
+				for (pkey in nameindpkeys) {
+					clone[pkey] = {};
+					clone[pkey].items = nameindpkeys[pkey].items.slice();
+					otherLostPkeys.concat(clone[pkey].items);
+					clone[pkey].ikey = {};
+					for (ikey in nameindpkeys[pkey].ikey) {
+						clone[pkey].ikey[ikey] = {};
+						clone[pkey].ikey[ikey].items = nameindpkeys[pkey].ikey[ikey].items.slice();
+						otherLostPkeys.concat(clone[pkey].ikey[ikey].items);
+						clone[pkey].ikey[ikey].skey = {};
+						for (skey in nameindpkeys[pkey].ikey[ikey].skey) {
+							clone[pkey].ikey[ikey].skey[skey] = {};
+							clone[pkey].ikey[ikey].skey[skey].items = nameindpkeys[pkey].ikey[ikey].skey[skey].items.slice();
+							otherLostPkeys.concat(clone[pkey].ikey[ikey].skey[skey].items);
+						}
+					}
+				}
+				lostItemReg[id] = this.registry.registry[id];
+				lostItemNameInd[id] = iclone;
+				lostItemNameIndPkeys[id] = clone;
+				for (pos = 0, len < otherLostPkeys.length; pos < len; pos += 1) {
+					lostItemNameIndPkeys[otherLostPkeys[pos]] = clone;
+				}
 			}
 		}
 		var oldAmbigs = {};
@@ -2308,7 +2360,6 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 				}
 			}
 		}
-		this.updateItems(this.registry.mylist.concat(tmpItems));
 	}
 	this.tmp.taintedItemIDs = {};
 	this.tmp.taintedCitationIDs = {};
@@ -2375,7 +2426,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 			}
 		}
 	}
-	if (flag !== CSL.PREVIEW && flag !== CSL.ASSUME_ALL_ITEMS_REGISTERED) {
+	if (flag !== CSL.ASSUME_ALL_ITEMS_REGISTERED) {
 		this.updateItems(update_items);
 	}
 	if (this.opt.update_mode === CSL.POSITION) {
@@ -2497,15 +2548,31 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 	for (key in this.tmp.taintedItemIDs) {
 		if (this.tmp.taintedItemIDs.hasOwnProperty(key)) {
 			citations = this.registry.citationreg.citationsByItemId[key];
-			for (pos = 0, len = citations.length; pos < len; pos += 1) {
-				this.tmp.taintedCitationIDs[citations[pos].citationID] = true;
+			if (citations) {
+				for (pos = 0, len = citations.length; pos < len; pos += 1) {
+					this.tmp.taintedCitationIDs[citations[pos].citationID] = true;
+				}
 			}
 		}
 	}
 	ret = [];
 	if (flag === CSL.PREVIEW) {
 		ret = this.process_CitationCluster.call(this, citation.sortedItems);
+		this.registry.citationreg.citationByIndex = oldCitations;
+		this.registry.citationreg.citationById = {};
+		for (pos = 0, len = oldCitations.length; pos < len; pos += 1) {
+			this.registry.citationreg.citationById[oldCitations[pos].citationID] = oldCitations[pos];
+		}
 		this.registry.namereg.delitems(tmpItems);
+		for (key in lostItemReg) {
+			this.registry.registry[key] = lostItemReg[id];
+		}
+		for (key in lostItemNameInd) {
+			this.registry.namereg.nameind[key] = lostItemNameInd[key];
+		}
+		for (key in lostItemNameIndPkeys) {
+			this.registry.namereg.nameindpkeys[key] = lostItemNameIndPkeys[key];
+		}
 		for (pos = 0, len = oldAmbigData.length; pos < len; pos += 1) {
 			this.registry[oldAmbigData[pos][0]].disambig = oldAmbigData[pos][1];
 		}
@@ -2522,14 +2589,20 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 		for (pos = 0, len = tmpItems.length; pos < len; pos += 1) {
 			delete this.registry.registry[tmpItems[pos]];
 		}
+		this.updateItems([key for (key in this.registry.registry)]);
 	} else {
 		for (key in this.tmp.taintedCitationIDs) {
 			if (this.tmp.taintedCitationIDs.hasOwnProperty(key)) {
+				if (key === citation.citationID) {
+					continue;
+				}
 				obj = [];
 				citation = this.registry.citationreg.citationById[key];
-				obj.push(citation.properties.index);
-				obj.push(this.process_CitationCluster.call(this, citation.sortedItems));
-				ret.push(obj);
+				if (citation) {
+					obj.push(citation.properties.index);
+					obj.push(this.process_CitationCluster.call(this, citation.sortedItems));
+					ret.push(obj);
+				}
 			}
 		}
 		this.tmp.taintedItemIDs = false;
@@ -2548,6 +2621,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 			}
 		});
 	}
+	this.is_running = false;
 	return [return_data, ret];
 };
 CSL.Engine.prototype.process_CitationCluster = function (sortedItems) {
@@ -7417,10 +7491,11 @@ CSL.getSortKeys = function (Item, key_type) {
 	return this[key_type].keys;
 };
 CSL.Registry.NameReg = function (state) {
-	var pkey, ikey, skey, floor, ceiling, param, dagopt, gdropt, ret, pos, items, strip_periods, set_keys, evalname, delitems, addname, key;
+	var pkey, ikey, skey, floor, ceiling, param, dagopt, gdropt, ret, pos, items, strip_periods, set_keys, evalname, delitems, addname, key, myitems;
 	this.state = state;
 	this.namereg = {};
 	this.nameind = {};
+	this.nameindpkeys = {};
 	this.itemkeyreg = {};
 	strip_periods = function (str) {
 		if (!str) {
@@ -7561,39 +7636,31 @@ CSL.Registry.NameReg = function (state) {
 					posA = this.namereg[pkey].items.indexOf(posA);
 					items = this.namereg[pkey].items;
 					if (skey) {
-						posB = this.namereg[pkey].ikey[ikey].skey[skey].items.indexOf(id);
+						myitems = this.namereg[pkey].ikey[ikey].skey[skey].items;
+						posB = myitems.indexOf(id);
 						if (posB > -1) {
-							items = this.namereg[pkey].ikey[ikey].skey[skey].items.slice();
-							this.namereg[pkey].ikey[ikey].skey[skey].items = items.slice(0, posB).concat(items.slice([(posB + 1)], items.length));
+							this.namereg[pkey].ikey[ikey].skey[skey].items = myitems.slice(0, posB).concat(myitems.slice([(posB + 1)]));
 						}
-						if (this.namereg[pkey].ikey[ikey].skey[skey].items.length === 0) {
-							delete this.namereg[pkey].ikey[ikey].skey[skey];
-							this.namereg[pkey].ikey[ikey].count += -1;
-							if (this.namereg[pkey].ikey[ikey].count < 2) {
-								llen = this.namereg[pkey].ikey[ikey].items.length;
-								for (ppos = 0; ppos < llen; ppos += 1) {
-									otherid = this.namereg[pkey].ikey[ikey].items[ppos];
-									ret[otherid] = true;
-								}
-							}
+						if (this.namereg[pkey].ikey[ikey].skey[skey].items.length === 1) {
+							this.namereg[pkey].ikey[ikey].items.push(this.namereg[pkey].ikey[ikey].skey[skey].items[0]);
+							this.namereg[pkey].ikey[ikey].skey[skey].items = [];
+						}
+						for (ppos = 0, llen = this.namereg[pkey].ikey[ikey].skey[skey].items.length; ppos < llen; ppos += 1) {
+							ret[this.namereg[pkey].ikey[ikey].items[ppos]] = true;
 						}
 					}
 					if (ikey) {
 						posB = this.namereg[pkey].ikey[ikey].items.indexOf(id);
 						if (posB > -1) {
 							items = this.namereg[pkey].ikey[ikey].items.slice();
-							this.namereg[pkey].ikey[ikey].items = items.slice(0, posB).concat(items.slice([posB + 1], items.length));
+							this.namereg[pkey].ikey[ikey].items = items.slice(0, posB).concat(items.slice([posB + 1]));
 						}
-						if (this.namereg[pkey].ikey[ikey].items.length === 0) {
-							delete this.namereg[pkey].ikey[ikey];
-							this.namereg[pkey].count += -1;
-							if (this.namereg[pkey].count < 2) {
-								llen = this.namereg[pkey].items.length;
-								for (ppos = 0; ppos < llen; ppos += 1) {
-									otherid = this.namereg[pkey].items[ppos];
-									ret[otherid] = true;
-								}
-							}
+						if (this.namereg[pkey].ikey[ikey].items.length === 1) {
+							this.namereg[pkey].items.push(this.namereg[pkey].ikey[ikey].items[0]);
+							this.namereg[pkey].ikey[ikey].items = [];
+						}
+						for (ppos = 0, llen = this.namereg[pkey].ikey[ikey].items.length; ppos < llen; ppos += 1) {
+							ret[this.namereg[pkey].ikey[ikey].items[ppos]] = true;
 						}
 					}
 					if (pkey) {
@@ -7602,13 +7669,18 @@ CSL.Registry.NameReg = function (state) {
 							items = this.namereg[pkey].items.slice();
 							this.namereg[pkey].items = items.slice(0, posB).concat(items.slice([posB + 1], items.length));
 						}
-						if (this.namereg[pkey].items.length === 0) {
+						for (ppos = 0, llen = this.namereg[pkey].items.length; ppos < llen; ppos += 1) {
+							ret[this.namereg[pkey].items[ppos]] = true;
+						}
+						if (this.namereg[pkey].items.length < 2) {
 							delete this.namereg[pkey];
 						}
 					}
 					delete this.nameind[id][fullkey];
 				}
 			}
+			delete this.nameind[id];
+			delete this.nameindpkeys[id];
 		}
 		return ret;
 	};
@@ -7640,9 +7712,11 @@ CSL.Registry.NameReg = function (state) {
 		}
 		if ("undefined" === typeof this.nameind[item_id]) {
 			this.nameind[item_id] = {};
+			this.nameindpkeys[item_id] = {};
 		}
 		if (pkey) {
 			this.nameind[item_id][pkey + "::" + ikey + "::" + skey] = true;
+			this.nameindpkeys[item_id][pkey] = this.namereg[pkey];
 		}
 	};
 	this.addname = addname;
