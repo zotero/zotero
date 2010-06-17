@@ -30,6 +30,7 @@ const RESELECT_KEY_ITEM_ID = 3;
 Zotero.Integration = new function() {
 	var _fifoFile = null;
 	var _osascriptFile;
+	var _inProgress = false;
 	
 	this.sessions = {};
 	
@@ -155,6 +156,13 @@ Zotero.Integration = new function() {
 	 * Executes an integration command.
 	 */
 	this.execCommand = function execCommand(agent, command) {
+		if(_inProgress) {
+			Zotero.Integration.activate();
+			Zotero.debug("Integration: Request already in progress; not executing "+agent+" "+command);
+			return;
+		}
+		_inProgress = true;
+		
 		// Try to load the appropriate Zotero component; otherwise display an error using the alert
 		// service
 		try {
@@ -163,6 +171,7 @@ Zotero.Integration = new function() {
 			var application = Components.classes[componentClass]
 				.getService(Components.interfaces.zoteroIntegrationApplication);
 		} catch(e) {
+			_inProgress = false;
 			Zotero.Integration.activate();
 			Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 				.getService(Components.interfaces.nsIPromptService)
@@ -175,6 +184,7 @@ Zotero.Integration = new function() {
 		try {
 			var integration = new Zotero.Integration.Document(application);
 		} catch(e) {
+			_inProgress = false;
 			Zotero.Integration.activate();
 			Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 				.getService(Components.interfaces.nsIPromptService)
@@ -226,6 +236,7 @@ Zotero.Integration = new function() {
 				}
 			}
 		} finally {
+			_inProgress = false;
 			integration.cleanup();
 		}
 	}
