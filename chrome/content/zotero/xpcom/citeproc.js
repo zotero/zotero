@@ -1076,7 +1076,7 @@ CSL.compareAmbigConfig = function(a, b) {
 	}
 	return 0;
 };
-CSL.cloneAmbigConfig = function (config, oldconfig, itemID) {
+CSL.cloneAmbigConfig = function (config, oldconfig, itemID, tainters) {
 	var ret, param, pos, ppos, len, llen;
 	ret = {};
 	ret.names = [];
@@ -1086,7 +1086,9 @@ CSL.cloneAmbigConfig = function (config, oldconfig, itemID) {
 	for (pos = 0, len = config.names.length; pos < len; pos += 1) {
 		param = config.names[pos];
 		if (oldconfig && oldconfig.names[pos] !== param) {
-			this.tmp.taintedItemIDs[itemID] = true;
+			for (ppos = 0, llen = tainters.length; ppos < llen; ppos += 1) {
+				this.tmp.taintedItemIDs[tainters[ppos].id] = true;
+			}
 			oldconfig = false;
 		}
 		ret.names[pos] = param;
@@ -1096,7 +1098,9 @@ CSL.cloneAmbigConfig = function (config, oldconfig, itemID) {
 		llen = config.givens[pos].length;
 		for (ppos = 0; ppos < llen; ppos += 1) {
 			if (oldconfig && oldconfig.givens[pos] && oldconfig.givens[pos][ppos] !== config.givens[pos][ppos]) {
-				this.tmp.taintedItemIDs[itemID] = true;
+				for (ppos = 0, llen = tainters.length; ppos < llen; ppos += 1) {
+					this.tmp.taintedItemIDs[tainters[ppos].id] = true;
+				}
 				oldconfig = false;
 			}
 			param.push(config.givens[pos][ppos]);
@@ -1104,7 +1108,9 @@ CSL.cloneAmbigConfig = function (config, oldconfig, itemID) {
 		ret.givens.push(param);
 	}
 	if (oldconfig && oldconfig.year_suffix !== config.year_suffix) {
-		this.tmp.taintedItemIDs[itemID] = true;
+		for (pos = 0, len = tainters.length; pos < len; pos += 1) {
+			this.tmp.taintedItemIDs[tainters[pos].id] = true;
+		}
 		oldconfig = false;
 	}
 	ret.year_suffix = config.year_suffix;
@@ -1462,7 +1468,7 @@ CSL.dateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, xmlmode) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.35";
+	this.processor_version = "1.0.36";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -7240,6 +7246,7 @@ CSL.Registry.prototype.doinserts = function (mylist) {
 				"offset": 0,
 				"sortkeys": false,
 				"ambig": false,
+				"rendered": false,
 				"disambig": false
 			};
 			this.registry[item] = newitem;
@@ -7375,7 +7382,7 @@ CSL.Registry.prototype.compareRegistryTokens = function (a, b) {
 	}
 	return 0;
 };
-CSL.Registry.prototype.registerAmbigToken = function (akey, id, ambig_config) {
+CSL.Registry.prototype.registerAmbigToken = function (akey, id, ambig_config, tainters) {
 	if (!this.ambigcites[akey]) {
 		this.ambigcites[akey] = [];
 	}
@@ -7385,7 +7392,7 @@ CSL.Registry.prototype.registerAmbigToken = function (akey, id, ambig_config) {
 	this.registry[id].ambig = akey;
 	var dome = false;
 	if (this.state.tmp.taintedItemIDs) {
-		this.registry[id].disambig = CSL.cloneAmbigConfig.call(this.state, ambig_config, this.registry[id].disambig, id);
+		this.registry[id].disambig = CSL.cloneAmbigConfig.call(this.state, ambig_config, this.registry[id].disambig, id, tainters);
 	} else {
 		this.registry[id].disambig = CSL.cloneAmbigConfig(ambig_config);
 	}
@@ -7684,6 +7691,7 @@ CSL.Disambiguation.prototype.runDisambig = function () {
 CSL.Disambiguation.prototype.scanItems = function (list, phase) {
 	var pos, len, Item, otherItem, ItemCite, otherItemCite, ignore, base;
 	Item = list[1][0];
+	this.scanlist = list[1];
 	this.partners = [];
 	[this.base, this.maxvals, this.minval, ItemCite] = this.getItem(Item);
 	this.partners.push(Item);
@@ -7706,9 +7714,9 @@ CSL.Disambiguation.prototype.evalScan = function (ismax) {
 CSL.Disambiguation.prototype.disNames = function (ismax) {
 	var pos, len;
 	if (this.clashes[1] === 0) {
-		this.state.registry.registerAmbigToken(this.akey, this.partners[0].id, this.base);
+		this.state.registry.registerAmbigToken(this.akey, this.partners[0].id, this.base, this.scanlist);
 		if (this.nonpartners.length === 1) {
-			this.state.registry.registerAmbigToken(this.akey, this.nonpartners[0].id, this.base);
+			this.state.registry.registerAmbigToken(this.akey, this.nonpartners[0].id, this.base, this.scanlist);
 			this.lists[this.listpos] = [this.base,[]];
 		} else {
 			this.lists[this.listpos] = [this.base, this.nonpartners];
@@ -7716,14 +7724,14 @@ CSL.Disambiguation.prototype.disNames = function (ismax) {
 	} else if (this.clashes[1] < this.clashes[0]) {
 		this.lists[this.listpos] = [this.base, this.partners];
 		if (this.nonpartners.length === 1) {
-			this.state.registry.registerAmbigToken(this.akey, this.nonpartners[0].id, this.base);
+			this.state.registry.registerAmbigToken(this.akey, this.nonpartners[0].id, this.base, this.scanlist);
 		} else {
 			this.lists.push([this.base, this.nonpartners]);
 		}
 	} else {
 		if (ismax || this.advance_mode) {
 			for (pos = 0, len = this.partners.length; pos < len; pos += 1) {
-				this.state.registry.registerAmbigToken(this.akey, this.partners[pos].id, this.base);
+				this.state.registry.registerAmbigToken(this.akey, this.partners[pos].id, this.base, this.scanlist);
 			}
 			if (ismax) {
 				this.lists[this.listpos] = [this.base, this.nonpartners];
@@ -7737,9 +7745,9 @@ CSL.Disambiguation.prototype.disGivens = function (ismax) {
 	var pos, len;
 	if (this.clashes[1] === 0) {
 		this.base = this.decrementNames();
-		this.state.registry.registerAmbigToken(this.akey, this.partners[0].id, this.base);
+		this.state.registry.registerAmbigToken(this.akey, this.partners[0].id, this.base, this.scanlist);
 		if (this.nonpartners.length === 1) {
-			this.state.registry.registerAmbigToken(this.akey, this.nonpartners[0].id, this.base);
+			this.state.registry.registerAmbigToken(this.akey, this.nonpartners[0].id, this.base, this.scanlist);
 			this.lists[this.listpos] = [this.base,[]];
 		} else {
 			this.lists[this.listpos] = [this.base, this.nonpartners];
@@ -7747,7 +7755,7 @@ CSL.Disambiguation.prototype.disGivens = function (ismax) {
 	} else if (this.clashes[1] < this.clashes[0]) {
 		this.lists[this.listpos] = [this.base, this.partners];
 		if (this.nonpartners.length === 1) {
-			this.state.registry.registerAmbigToken(this.akey, this.nonpartners[0].id, this.base);
+			this.state.registry.registerAmbigToken(this.akey, this.nonpartners[0].id, this.base, this.scanlist);
 		} else {
 			this.lists.push([this.base, this.nonpartners]);
 		}
@@ -7755,7 +7763,7 @@ CSL.Disambiguation.prototype.disGivens = function (ismax) {
 		this.base = CSL.cloneAmbigConfig(this.oldbase);
 		if (ismax || this.advance_mode) {
 			for (pos = 0, len = this.partners.length; pos < len; pos += 1) {
-				this.state.registry.registerAmbigToken(this.akey, this.partners[pos].id, this.base);
+				this.state.registry.registerAmbigToken(this.akey, this.partners[pos].id, this.base, this.scanlist);
 			}
 			if (ismax) {
 				this.lists[this.listpos] = [this.base, this.nonpartners];
@@ -7768,9 +7776,9 @@ CSL.Disambiguation.prototype.disGivens = function (ismax) {
 CSL.Disambiguation.prototype.disExtraText = function () {
 	var pos, len;
 	if (this.clashes[1] === 0) {
-		this.state.registry.registerAmbigToken(this.akey, this.partners[0].id, this.base);
+		this.state.registry.registerAmbigToken(this.akey, this.partners[0].id, this.base, this.scanlist);
 		if (this.nonpartners.length === 1) {
-			this.state.registry.registerAmbigToken(this.akey, this.nonpartners[0].id, this.base);
+			this.state.registry.registerAmbigToken(this.akey, this.nonpartners[0].id, this.base, this.scanlist);
 			this.lists[this.listpos] = [this.base,[]];
 		} else {
 			this.lists[this.listpos] = [this.base, this.nonpartners];
@@ -7789,7 +7797,7 @@ CSL.Disambiguation.prototype.disYears = function () {
 	}
 	tokens.sort(this.state.registry.sorter.compareKeys);
 	for (pos = 0, len = tokens.length; pos < len; pos += 1) {
-		this.state.registry.registerAmbigToken(this.akey, tokens[pos].id, this.base);
+		this.state.registry.registerAmbigToken(this.akey, tokens[pos].id, this.base, this.scanlist);
 		tokens[pos].disambig.year_suffix = ""+pos;
 	}
 	this.lists[this.listpos] = [this.base, []];
