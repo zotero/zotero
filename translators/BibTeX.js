@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2010-05-31 18:20:00"
+	"lastUpdated":"2010-06-18 08:32:05"
 }
 
 Zotero.configure("dataMode", "block");
@@ -1847,9 +1847,33 @@ function mapAccent(character) {
 	return (mappingTable[character] ? mappingTable[character] : "?");
 }
 
+// a little substitution function for BibTeX keys, where we don't want LaTeX 
+// escaping, but we do want to preserve the base characters
+
+function tidyAccents(s) {
+                        var r=s.toLowerCase();
+                        r = r.replace(new RegExp("[ä]", 'g'),"ae");
+                        r = r.replace(new RegExp("[ö]", 'g'),"ae");
+                        r = r.replace(new RegExp("[ü]", 'g'),"ue");
+                        r = r.replace(new RegExp("[àáâãå]", 'g'),"a");
+                        r = r.replace(new RegExp("æ", 'g'),"ae");
+                        r = r.replace(new RegExp("ç", 'g'),"c");
+                        r = r.replace(new RegExp("[èéêë]", 'g'),"e");
+                        r = r.replace(new RegExp("[ìíîï]", 'g'),"i");
+                        r = r.replace(new RegExp("ñ", 'g'),"n");                            
+                        r = r.replace(new RegExp("[òóôõ]", 'g'),"o");
+                        r = r.replace(new RegExp("œ", 'g'),"oe");
+                        r = r.replace(new RegExp("[ùúû]", 'g'),"u");
+                        r = r.replace(new RegExp("[ýÿ]", 'g'),"y");
+                        return r;
+                };
+
 var numberRe = /^[0-9]+/;
-// this is a list of words that should not appear as part of the citation key
-var citeKeyTitleBannedRe = /(\s+|\b)(a|an|from|does|how|it\'s|its|on|some|the|this|why)(\s+|\b)/g;
+// Below is a list of words that should not appear as part of the citation key
+// in includes the indefinite articles of English, German, French and Spanish, as well as a small set of English prepositions whose 
+// force is more grammatical than lexical, i.e. which are likely to strike many as 'insignificant'.
+// The assumption is that most who want a title word in their key would prefer the first word of significance.
+var citeKeyTitleBannedRe = /\b(a|an|the|some|from|on|in|to|of|do|with|der|die|das|ein|eine|einer|eines|einem|einen|un|une|la|le|l\'|el|las|los|al|uno|una|unos|unas|de|des|del|d\')(\s+|\b)/g;
 var citeKeyConversionsRe = /%([a-zA-Z])/;
 var citeKeyCleanRe = /[^a-z0-9\!\$\&\*\+\-\.\/\:\;\<\>\?\[\]\^\_\`\|]+/g;
 
@@ -1862,7 +1886,7 @@ var citeKeyConversions = {
     },
     "t":function (flags, item) {
         if (item["title"]) {
-            return item["title"].toLowerCase().replace(citeKeyTitleBannedRe, "").split(" ")[0];
+            return item["title"].toLowerCase().replace(citeKeyTitleBannedRe, "").split(/\s+/g)[0];
         }
         return "";
     },
@@ -1913,7 +1937,9 @@ function buildCiteKey (item,citekeys) {
     //
     // no matter what, we want to make sure we exclude
     // " # % ' ( ) , = { } ~ and backslash
+    // however, we want to keep the base characters 
 
+    basekey = tidyAccents(basekey);
     basekey = basekey.replace(citeKeyCleanRe, "");
     var citekey = basekey;
     var i = 0;
@@ -2033,9 +2059,10 @@ function doExport() {
 			writeField("pages", item.pages.replace("-","--"));
 		}
 		
-		if(item.numPages) {
-			writeField("pages", item.numPages);
-		}
+                // Commented out, because we don't want a books number of pages in the BibTeX "pages" field for books.
+		//if(item.numPages) {
+		//	writeField("pages", item.numPages);
+		//}
 		
 		if(item.itemType == "webpage") {
 			writeField("howpublished", item.url);
