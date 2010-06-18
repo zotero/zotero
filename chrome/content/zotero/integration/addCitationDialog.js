@@ -298,8 +298,8 @@ var Zotero_Citation_Dialog = new function () {
 	 */
 	function add() {
 		var item = itemsView.getSelectedItems()[0]; // treeview from selectItemsDialog.js
-		_itemSelected(item.getID());
-		_addItem(item);
+		_itemSelected(item.id);
+		_citationList.ensureElementIsVisible(_addItem(item));
 		
 		// don't let someone select it again
 		document.getElementById("add").disabled = true;
@@ -307,7 +307,7 @@ var Zotero_Citation_Dialog = new function () {
 		// allow user to press OK
 		_updateAccept();
 		_updatePreview();
-		sortCitation();
+		sortCitation(item.id);
 	}
 	
 	/*
@@ -338,7 +338,7 @@ var Zotero_Citation_Dialog = new function () {
 	/*
 	 * Sorts the list of citations
 	 */
-	function sortCitation() {
+	function sortCitation(scrollToItemID) {
 		if(!_sortCheckbox) return;
 		if(!_sortCheckbox.checked) {
 			io.citation.properties.unsorted = true;
@@ -357,12 +357,16 @@ var Zotero_Citation_Dialog = new function () {
 		io.previewFunction();
 		
 		// add items back to list
+		var scrollTo = null;
 		for(var i=0; i<io.citation.sortedItems.length; i++) {
 			var itemID = io.citation.sortedItems[i][0].id;
 			var item = Zotero.Items.get(itemID);
-			_addItem(item);
+			var itemNode = _addItem(item);
 			if(itemID == selectedItemID) _citationList.selectedIndex = i;
+			if(scrollToItemID && itemID == scrollToItemID) scrollTo = itemNode;
 		}
+		
+		if(scrollTo) _citationList.ensureElementIsVisible(scrollTo);
 	}
 	
 	/*
@@ -542,12 +546,12 @@ var Zotero_Citation_Dialog = new function () {
 		var locatorTypeElements = document.getElementById("label").getElementsByTagName("menuitem");
 		if(_multipleSourcesOn) {
 			_itemSelected();		// store locator info
-			var listLength = _citationList.childNodes.length;
+			var listLength = _citationList.getRowCount();
 			var citationItems = new Array();
 			if(listLength) {
 				// generate citationItems
 				for(var i=0; i<listLength; i++) {
-					var itemID = _citationList.childNodes[i].value;
+					var itemID = _citationList.getItemAtIndex(i).getAttribute("value");
 					
 					var citationItem = _itemData[itemID];
 					citationItem.id = itemID;
@@ -584,11 +588,12 @@ var Zotero_Citation_Dialog = new function () {
 	 */
 	function _addItem(item) {
 		var itemNode = document.createElement("listitem");
-		itemNode.setAttribute("value", item.getID());
+		itemNode.setAttribute("value", item.id);
 		itemNode.setAttribute("label", item.getField("title"));
 		itemNode.setAttribute("class", "listitem-iconic");
 		itemNode.setAttribute("image", item.getImageSrc());
 		_citationList.appendChild(itemNode);
+		return itemNode;
 	}
 	
 	/*
