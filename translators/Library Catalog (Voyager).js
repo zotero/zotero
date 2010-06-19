@@ -24,7 +24,8 @@ function detectWeb(doc, url) {
 		|| export_options[i].text == 'UTF-8 MARC (Unicode)'
 		|| export_options[i].text == 'UTF8-Unicode'
 		|| export_options[i].text == 'MARC (non-Unicode/MARC-8)'
-		|| export_options[i].text == 'MARC communication format') {
+		|| export_options[i].text == 'MARC communication format'
+		|| export_options[i].text == 'MARC Record') {
 			// We have an exportable single record
 			if(doc.forms.namedItem('frm').elements.namedItem('RC')) {
 				return "multiple";
@@ -127,7 +128,8 @@ function doWeb(doc, url) {
 		|| export_options[i].text == 'UTF8-Unicode'
 		|| export_options[i].text == 'MARC UTF-8'
 		|| export_options[i].text == 'MARC (Unicode/UTF-8)'
-		|| export_options[i].text == 'MARC communication format') {
+		|| export_options[i].text == 'MARC communication format'
+		|| export_options[i].text == 'MARC Record') {
 			unicode = i;
 		}
 	}
