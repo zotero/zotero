@@ -183,8 +183,6 @@ Zotero.Integration = new function() {
 		
 		// Try to create a new document; otherwise display an error using the alert service
 		try {
-			Zotero.debug(application.getDocument);
-			Zotero.debug(docId);
 			var document = (application.getDocument && docId ? application.getDocument(docId) : application.getActiveDocument());
 			var integration = new Zotero.Integration.Document(application, document);
 		} catch(e) {
