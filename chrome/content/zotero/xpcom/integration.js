@@ -156,7 +156,7 @@ Zotero.Integration = new function() {
 	/**
 	 * Executes an integration command.
 	 */
-	this.execCommand = function execCommand(agent, command) {
+	this.execCommand = function execCommand(agent, command, docId) {
 		if(_inProgress) {
 			Zotero.Integration.activate();
 			Zotero.debug("Integration: Request already in progress; not executing "+agent+" "+command);
@@ -183,7 +183,10 @@ Zotero.Integration = new function() {
 		
 		// Try to create a new document; otherwise display an error using the alert service
 		try {
-			var integration = new Zotero.Integration.Document(application);
+			Zotero.debug(application.getDocument);
+			Zotero.debug(docId);
+			var document = (application.getDocument && docId ? application.getDocument(docId) : application.getActiveDocument());
+			var integration = new Zotero.Integration.Document(application, document);
 		} catch(e) {
 			_inProgress = false;
 			Zotero.Integration.activate();
@@ -330,9 +333,9 @@ const BIBLIOGRAPHY_PLACEHOLDER = "{Bibliography}";
 /**
  * 
  */
-Zotero.Integration.Document = function(app) {
+Zotero.Integration.Document = function(app, doc) {
 	this._app = app;
-	this._doc = app.getActiveDocument();
+	this._doc = doc;
 }
 
 /**

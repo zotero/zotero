@@ -35,13 +35,14 @@ const ZoteroIntegrationCommandLineHandler = {
 	handle : function(cmdLine) {
 		var agent = cmdLine.handleFlagWithParam("ZoteroIntegrationAgent", false);
 		var command = cmdLine.handleFlagWithParam("ZoteroIntegrationCommand", false);
+		var docId = cmdLine.handleFlagWithParam("ZoteroIntegrationDocument", false);
 		if(agent && command) {
 			if(!this.Zotero) this.Zotero = Components.classes["@zotero.org/Zotero;1"]
 				.getService(Components.interfaces.nsISupports).wrappedJSObject;
 			var Zotero = this.Zotero;
 			// Not quite sure why this is necessary to get the appropriate scoping
 			var timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
-			timer.initWithCallback({notify:function() { Zotero.Integration.execCommand(agent, command) }}, 0,
+			timer.initWithCallback({notify:function() { Zotero.Integration.execCommand(agent, command, docId) }}, 0,
 				Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 		}
 	},
