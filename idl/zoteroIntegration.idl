@@ -146,6 +146,11 @@ interface zoteroIntegrationApplication : nsISupports
    * The active document.
    */
   zoteroIntegrationDocument getActiveDocument();
+  
+  /**
+   * A document by some app-specific identifier.
+   */
+  zoteroIntegrationDocument getDocument(in wstring documentIdentifier);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
