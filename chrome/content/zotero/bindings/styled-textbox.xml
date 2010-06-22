@@ -70,10 +70,12 @@
 					["\\t ", '<span class="tab">&nbsp;</span>'],
 					[/(?:\\par |\\\r?\n)/g, "</p><p>"],
 					[/\\super (.*?)\\nosupersub /g, "<sup>$1</sup>"],
-					[/\\sub (.*?)\\nosupersub /g, "<sub>$1</sub>"],
+					[/\\sub (.*?)\\nosupersub /g, "<sub>$1</sub>"]
 				];
 				
 				this._htmlToRtfMap = [
+					[/"(\w)/, "“$1"],
+					[/([\w,.?!])"/, "$1”"],
 					[/[\x7F-\uFFFF]/g, function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+" " }],
 					["<p>", ""],
 					["</p>", "\\par "],
@@ -81,7 +83,7 @@
 					["<sup>", "\\super "],
 					["</sup>", "\\nosupersub "],
 					["<sub>", "\\sub "],
-					["</sub>", "\\nosupersub "],
+					["</sub>", "\\nosupersub "]
 				];
 				
 				this._rtfRexMap = [
