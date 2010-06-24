@@ -123,9 +123,9 @@ Zotero.Integration = new function() {
 						fifoStream.readLine(line);
 						fifoStream.close();
 						
-						var spaceIndex = line.value.indexOf(" ");
-						var agent = line.value.substr(0, spaceIndex);
-						var cmd = line.value.substr(spaceIndex+1);
+						var parts = line.value.split(" ");
+						var agent = parts[0];
+						var cmd = parts[1];
 						if(agent == "Zotero" && cmd == "shutdown") return;
 						main.dispatch(new mainThread(agent, cmd), background.DISPATCH_NORMAL);
 					}
