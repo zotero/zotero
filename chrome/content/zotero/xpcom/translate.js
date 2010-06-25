@@ -178,8 +178,15 @@ Zotero.Translators = new function() {
 		var destFile = Zotero.getTranslatorsDirectory();
 		destFile.append(fileName);
 		
-		var nsIJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
-		var metadataJSON = nsIJSON.encode(metadata);
+		var metadataJSON;
+		
+		// JSON.stringify (FF 3.5.4 and up) has the benefit of indenting JSON
+		if (typeof JSON != "undefined" && 'function' == typeof JSON.stringify) {
+			metadataJSON = JSON.stringify(metadata,null,8);
+		} else {
+			var nsIJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
+			metadataJSON = nsIJSON.encode(metadata);
+		}
 		
 		var str = metadataJSON + "\n\n" + code;
 		
@@ -812,7 +819,11 @@ Zotero.Translate.prototype._parseCode = function(translator) {
 		Components.utils.evalInSandbox("var translatorInfo = "+translator.code, this._sandbox);
 		return true;
 	} catch(e) {
-		translator.logError(e.toString());
+		if('function' == typeof translator.logError) {
+			translator.logError(e.toString());
+		} else {
+			Components.utils.reportError(e);
+		}
 		this._debug(e+' in parsing code for '+translator.label, 3);
 		return false;
 	}
@@ -1101,7 +1112,7 @@ Zotero.Translate.prototype._translationComplete = function(returnValue, error) {
 			
 			if(!returnValue) {
 				// report error to console
-				if(this.translator[0]) {
+				if(typeof this.translator[0] != "undefined" && 'function' == typeof this.translator[0].logError) {
 					this.translator[0].logError(error.toString(), "exception");
 				} else {
 					Components.utils.reportError(error);
