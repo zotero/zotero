@@ -112,9 +112,10 @@ Zotero.Proxies = new function() {
 		var webNav = null;
 		try {
 			webNav = channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIWebNavigation);
+			docShell = channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIDocShell);
 		} catch(e) {}
 		
-		if(webNav) {
+		if(webNav && docShell && docShell.allowMetaRedirects) {
 			var proxied = Zotero.Proxies.properToProxy(url, true);
 			if(proxied) {
 				channel.QueryInterface(Components.interfaces.nsIHttpChannel);				
@@ -273,6 +274,7 @@ Zotero.Proxies = new function() {
 	 	 * @const
 	 	 */
 		const hostBlacklist = [
+			/edu$/,
 			/google\.com$/,
 			/wikipedia\.org$/,
 			/^[^.]*$/
@@ -283,7 +285,8 @@ Zotero.Proxies = new function() {
 	 	 * @const
 	 	 */
 		const hostWhitelist = [
-			/^scholar\.google\.com$/
+			/^scholar\.google\.com$/,
+			/^muse\.jhu\.edu$/
 		]
 		
 		for each(var blackPattern in hostBlacklist) {
