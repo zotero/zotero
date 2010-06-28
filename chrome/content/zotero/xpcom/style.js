@@ -156,7 +156,7 @@ Zotero.Styles = new function() {
 				var xml = enConverter.parse();
 			} else {
 				// CSL
-				var xml = new XML(this.cleanXML(xml));
+				var xml = new XML(this.cleanXML(style));
 			}
 		} catch(e) {
 			error = e;
