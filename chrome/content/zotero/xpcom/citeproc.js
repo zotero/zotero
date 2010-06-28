@@ -1487,7 +1487,7 @@ CSL.dateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, xmlmode) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.37";
+	this.processor_version = "1.0.38";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2298,7 +2298,7 @@ CSL.Engine.prototype.appendCitationCluster = function (citation) {
 		c = this.registry.citationreg.citationByIndex[pos];
 		citationsPre.push([c.citationID, c.properties.noteIndex]);
 	}
-	return this.processCitationCluster(citation, citationsPre, [], CSL.ASSUME_ALL_ITEMS_REGISTERED);
+	return this.processCitationCluster(citation, citationsPre, [])[1];
 };
 CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, citationsPost, flag) {
 	var sortedItems, new_citation, pos, len, item, citationByIndex, c, Item, newitem, k, textCitations, noteCitations, update_items, citations, first_ref, last_ref, ipos, ilen, cpos, onecitation, oldvalue, ibidme, suprame, useme, items, i, key, prev_locator, curr_locator, param, ret, obj, ppos, llen, lllen, pppos, ppppos, llllen, cids, note_distance, return_data, lostItemId, lostItemList, lostItemData, otherLostPkeys, disambig, oldItemIds;
@@ -2623,7 +2623,7 @@ CSL.getSpliceDelimiter = function (last_collapsed) {
 	return this.tmp.splice_delimiter;
 };
 CSL.getCitationCluster = function (inputList, citationID) {
-	var delimiter, result, objects, myparams, len, pos, item, last_collapsed, params, empties, composite, compie, myblobs, Item, llen, ppos, obj;
+	var delimiter, result, objects, myparams, len, pos, item, last_collapsed, params, empties, composite, compie, myblobs, Item, llen, ppos, obj, preceding_item;
 	this.tmp.area = "citation";
 	delimiter = "";
 	result = "";
@@ -2655,6 +2655,17 @@ CSL.getCitationCluster = function (inputList, citationID) {
 		params.splice_delimiter = CSL.getSpliceDelimiter.call(this, last_collapsed);
 		if (item && item["author-only"]) {
 			this.tmp.suppress_decorations = true;
+		}
+		if (pos > 0) {
+			preceding_item = inputList[pos - 1][1];
+			if (preceding_item.suffix && pos > 0 && preceding_item.suffix.slice(-1) === ".") {
+				var spaceidx = params.splice_delimiter.indexOf(" ");
+				if (spaceidx > -1) {
+					params.splice_delimiter = params.splice_delimiter.slice(spaceidx);
+				} else {
+					params.splice_delimiter = "";
+				}
+			}
 		}
 		params.suppress_decorations = this.tmp.suppress_decorations;
 		params.have_collapsed = this.tmp.have_collapsed;
