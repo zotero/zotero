@@ -49,7 +49,8 @@ Zotero.Translators = new function() {
 	this.init = function() {
 		_initialized = true;
 		
-		var start = (new Date()).getTime()
+		var start = (new Date()).getTime();
+		var transactionStarted = false;
 		
 		_cache = {"import":[], "export":[], "web":[], "search":[]};
 		_translators = {};
@@ -104,6 +105,10 @@ Zotero.Translators = new function() {
 					
 					if(!dbCacheEntry) {
 						// Add cache misses to DB
+						if(!transactionStarted) {
+							transactionStarted = true;
+							Zotero.DB.beginTransaction();
+						}
 						Zotero.Translators.cacheInDB(leafName, translator.metadataString, translator.cacheCode ? translator.code : null, lastModifiedTime);
 						delete translator.metadataString;
 					}
@@ -118,6 +123,11 @@ Zotero.Translators = new function() {
 			if(!filesInCache[leafName]) {
 				Zotero.DB.query("DELETE FROM translatorCache WHERE leafName = ?", [leafName]);
 			}
+		}
+		
+		// Close transaction
+		if(transactionStarted) {
+			Zotero.DB.commitTransaction();
 		}
 		
 		// Sort by priority
