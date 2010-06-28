@@ -54,13 +54,38 @@ Zotero.Translators = new function() {
 		_cache = {"import":[], "export":[], "web":[], "search":[]};
 		_translators = {};
 		
+		var dbCacheResults = Zotero.DB.query("SELECT leafName, translatorJSON, "+
+			"code, lastModifiedTime FROM translatorCache");
+		var dbCache = {};
+		for each(var cacheEntry in dbCacheResults) {
+			dbCache[cacheEntry.leafName] = cacheEntry;
+		}
+		
 		var i = 0;
+		var filesInCache = {};
 		var contents = Zotero.getTranslatorsDirectory().directoryEntries;
 		while(contents.hasMoreElements()) {
 			var file = contents.getNext().QueryInterface(Components.interfaces.nsIFile);
-			if(!file.leafName || file.leafName[0] == ".") continue;
+			var leafName = file.leafName;
+			if(!leafName || leafName[0] == ".") continue;
+			var lastModifiedTime = file.lastModifiedTime;
 			
-			var translator = new Zotero.Translator(file);
+			var dbCacheEntry = false;
+			if(dbCache[leafName]) {
+				filesInCache[leafName] = true;
+				if(dbCache[leafName].lastModifiedTime == lastModifiedTime) {
+					dbCacheEntry = dbCache[file.leafName];
+				}
+			}
+			
+			if(dbCacheEntry) {
+				// get JSON from cache if possible
+				var translator = new Zotero.Translator(file, dbCacheEntry.translatorJSON, dbCacheEntry.code);
+				filesInCache[leafName] = true;
+			} else {
+				// otherwise, load from file
+				var translator = new Zotero.Translator(file);
+			}
 			
 			if(translator.translatorID) {
 				if(_translators[translator.translatorID]) {
@@ -76,10 +101,23 @@ Zotero.Translators = new function() {
 							_cache[type].push(translator);
 						}
 					}
+					
+					if(!dbCacheEntry) {
+						// Add cache misses to DB
+						Zotero.Translators.cacheInDB(leafName, translator.metadataString, translator.cacheCode ? translator.code : null, lastModifiedTime);
+						delete translator.metadataString;
+					}
 				}
 			}
 			
 			i++;
+		}
+		
+		// Remove translators from DB as necessary
+		for(var leafName in dbCache) {
+			if(!filesInCache[leafName]) {
+				Zotero.DB.query("DELETE FROM translatorCache WHERE leafName = ?", [leafName]);
+			}
 		}
 		
 		// Sort by priority
@@ -93,7 +131,7 @@ Zotero.Translators = new function() {
 			}
 			return collation.compareString(1, a.label, b.label);
 		}
-		for (var type in _cache) {
+		for(var type in _cache) {
 			_cache[type].sort(cmp);
 		}
 		
@@ -115,7 +153,6 @@ Zotero.Translators = new function() {
 		if(!_initialized) this.init();
 		return _cache[type].slice(0);
 	}
-	
 	
 	/**
 	 * @param	{String}		label
@@ -214,6 +251,11 @@ Zotero.Translators = new function() {
 		
 		return destFile;
 	}
+	
+	this.cacheInDB = function(fileName, metadataJSON, code, lastModifiedTime) {
+		Zotero.DB.query("REPLACE INTO translatorCache VALUES (?, ?, ?, ?)",
+			[fileName, metadataJSON, code, lastModifiedTime]);
+	}
 }
 
 /**
@@ -232,47 +274,54 @@ Zotero.Translators = new function() {
  * @property {String} lastUpdated SQL-style date and time of translator's last update
  * @property {String} code The executable JavaScript for the translator
  */
-Zotero.Translator = function(file) {
+Zotero.Translator = function(file, json, code) {
+	const codeGetterFunction = function() { return Zotero.File.getContents(this.file); }
 	// Maximum length for the info JSON in a translator
 	const MAX_INFO_LENGTH = 4096;
 	const infoRe = /{(?:(?:"(?:[^"\r\n]*(?:\\")?)*")*[^}"]*)*}/;
 	
 	this.file = file;
 	
-	var fStream = Components.classes["@mozilla.org/network/file-input-stream;1"].
-		createInstance(Components.interfaces.nsIFileInputStream);
-	var cStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"].
-		createInstance(Components.interfaces.nsIConverterInputStream);
-	fStream.init(file, -1, -1, 0);
-	cStream.init(fStream, "UTF-8", 8192,
-		Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
-	
-	var str = {};
-	cStream.readString(MAX_INFO_LENGTH, str);
-	
-	// We assume lastUpdated is at the end to avoid running the regexp on more than necessary
-	var lastUpdatedIndex = str.value.indexOf('"lastUpdated"');
-	if (lastUpdatedIndex == -1) {
-		this.logError("Invalid or missing translator metadata JSON object");
-		fStream.close();
-		return;
-	}
-	
-	// Add 50 characters to clear lastUpdated timestamp and final "}"
-	var header = str.value.substr(0, lastUpdatedIndex + 50);
-	var m = infoRe.exec(header);
-	if (!m) {
-		this.logError("Invalid or missing translator metadata JSON object");
-		fStream.close();
-		return;
-	}
-	
-	try {
-		var info = Zotero.JSON.unserialize(m[0]);
-	} catch(e) {
-		this.logError("Invalid or missing translator metadata JSON object");
-		fStream.close();
-		return;
+	if(json) {
+		var info = Zotero.JSON.unserialize(json);
+	} else {
+		var fStream = Components.classes["@mozilla.org/network/file-input-stream;1"].
+			createInstance(Components.interfaces.nsIFileInputStream);
+		var cStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"].
+			createInstance(Components.interfaces.nsIConverterInputStream);
+		fStream.init(file, -1, -1, 0);
+		cStream.init(fStream, "UTF-8", 8192,
+			Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+		
+		var str = {};
+		cStream.readString(MAX_INFO_LENGTH, str);
+		
+		// We assume lastUpdated is at the end to avoid running the regexp on more than necessary
+		var lastUpdatedIndex = str.value.indexOf('"lastUpdated"');
+		if (lastUpdatedIndex == -1) {
+			this.logError("Invalid or missing translator metadata JSON object");
+			fStream.close();
+			return;
+		}
+		
+		// Add 50 characters to clear lastUpdated timestamp and final "}"
+		var header = str.value.substr(0, lastUpdatedIndex + 50);
+		var m = infoRe.exec(header);
+		if (!m) {
+			this.logError("Invalid or missing translator metadata JSON object");
+			fStream.close();
+			return;
+		}
+		
+		this.metadataString = m[0];
+		
+		try {
+			var info = Zotero.JSON.unserialize(this.metadataString);
+		} catch(e) {
+			this.logError("Invalid or missing translator metadata JSON object");
+			fStream.close();
+			return;
+		}
 	}
 	
 	var haveMetadata = true;
@@ -291,38 +340,46 @@ Zotero.Translator = function(file) {
 		return;
 	}
 	
+	this.detectXPath = info["detectXPath"] ? info["detectXPath"] : null;
+	
+	/**
+	 * g = Gecko (Firefox)
+	 * c = Google Chrome (WebKit & V8)
+	 * s = Safari (WebKit & Nitro/Squirrelfish Extreme)
+	 * i = Internet Explorer
+	 * a = All
+	 */
+	this.browserSupport = info["browserSupport"] ? info["browserSupport"] : "g";
+	
 	if(this.translatorType & TRANSLATOR_TYPES["import"]) {
 		// compile import regexp to match only file extension
 		this.importRegexp = this.target ? new RegExp("\\."+this.target+"$", "i") : null;
 	}
+		
+	this.cacheCode = false;
 	if(this.translatorType & TRANSLATOR_TYPES["web"]) {
 		// compile web regexp
 		this.webRegexp = this.target ? new RegExp(this.target, "i") : null;
 		
 		if(!this.target) {
-			// for translators used on every page, cache code in memory
-			var strs = [str.value];
-			var amountRead;
-			while(amountRead = cStream.readString(8192, str)) strs.push(str.value);
-			this._code = strs.join("");
-
+			this.cacheCode = true;
+			
+			if(json) {
+				// if have JSON, also have code
+				this.code = code;
+			} else {
+				// for translators used on every page, cache code in memory
+				var strs = [str.value];
+				var amountRead;
+				while(amountRead = cStream.readString(8192, str)) strs.push(str.value);
+				this.code = strs.join("");
+			}
 		}
 	}
 	
-	fStream.close();
+	if(!this.cacheCode) this.__defineGetter__("code", codeGetterFunction);
+	if(!json) cStream.close();
 }
-
-
-Zotero.Translator.prototype.__defineGetter__("code",
-/**
- * Getter for "code" property
- * @return {String} Code of translator
- * @inner
- */
-function() {
-	if(this._code) return this._code;
-	return Zotero.File.getContents(this.file);
-});
 
 /**
  * Log a translator-related error
@@ -692,11 +749,14 @@ Zotero.Translate.prototype.getTranslators = function() {
 	// see which translators can translate
 	this._translatorSearch = new Zotero.Translate.TranslatorSearch(this, translators);
 	
-	// erroring should call complete
-	this.error = function(value, error) { this._translatorSearch.complete(value, error) };
-	
-	// return translators if asynchronous
-	if(!this._translatorSearch.asyncMode) return this._translatorSearch.foundTranslators;
+	if(this._translatorSearch.asyncMode) {	
+		// erroring should call complete
+		var me = this;
+		this.error = function(value, error) { me._translatorSearch.complete(value, error); };
+	} else {
+		// return translators if synchronous
+		return this._translatorSearch.foundTranslators;
+	}
 }
 
 /*
@@ -774,7 +834,8 @@ Zotero.Translate.prototype.translate = function(libraryID, saveAttachments) {
 	}
 	
 	// erroring should end
-	this.error = this._translationComplete;
+	var me = this;
+	this.error = function(value, error) { me._translationComplete(value, error); }
 	
 	if(!this._loadTranslator()) {
 		return;
@@ -901,7 +962,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 		var translation = new Zotero.Translate(type);
 		translation._parentTranslator = me;
 		
-		if(type == "export" && (this.type == "web" || this.type == "search")) {
+		if(type == "export" && (me.type == "web" || me.type == "search")) {
 			throw("for security reasons, web and search translators may not call export translators");
 		}
 		
@@ -2743,6 +2804,7 @@ Zotero.Translate.TranslatorSearch.prototype.complete = function(returnValue, err
 	// reset done function
 	this.translate._sandbox.Zotero.done = undefined;
 	this.translate.waitForCompletion = false;
+	this.asyncMode = false;
 	
 	if(returnValue) {
 		this.processReturnValue(this.currentTranslator, returnValue);
@@ -2753,7 +2815,6 @@ Zotero.Translate.TranslatorSearch.prototype.complete = function(returnValue, err
 	}
 	
 	this.currentTranslator = undefined;
-	this.asyncMode = false;
 		
 	// resume execution
 	this.execute();
