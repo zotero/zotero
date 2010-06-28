@@ -596,7 +596,10 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 	
 	// if we are reloading this session, assume no item IDs to be updated except for edited items
 	if(this._reloadSession) {
-		this._session.restoreProcessorState();
+		//this._session.restoreProcessorState(); TODO doesn't appear to be working properly
+		this._session.updateUpdateIndices();
+		var deleteCitations = this._session.updateCitations();
+		this._deleteFields = this._deleteFields.concat([i for(i in deleteCitations)]);
 		this._session.updateIndices = {};
 		this._session.updateItemIDs = {};
 		this._session.bibliographyHasChanged = false;
@@ -627,7 +630,7 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
  */
 Zotero.Integration.Document.prototype._updateDocument = function(forceCitations, forceBibliography) {
 	// update citations
-	this._session.updateUpdateIndices(forceCitations);
+	this._session.updateUpdateIndices();
 	var deleteCitations = this._session.updateCitations();
 	this._deleteFields = this._deleteFields.concat([i for(i in deleteCitations)]);
 	for(var i in this._session.updateIndices) {
@@ -658,7 +661,7 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 	if(this._bibliographyFields.length	 				// if blbliography exists
 			&& (this._session.bibliographyHasChanged	// and bibliography changed
 			|| forceBibliography)) {					// or if we should generate regardless of changes
-		if(this._session.bibliographyDataHasChanged) {
+		if(forceBibliography || this._session.bibliographyDataHasChanged) {
 			var bibliographyData = this._session.getBibliographyData();
 			for each(var field in this._bibliographyFields) {
 				field.setCode(BIBLIOGRAPHY_CODE+" "+bibliographyData);
@@ -865,6 +868,7 @@ Zotero.Integration.Document.JSEnumerator.prototype.getNext = function() {
 Zotero.Integration.Session = function() {
 	// holds items not in document that should be in bibliography
 	this.uncitedItems = new Object();
+	this.omittedItems = new Object();
 	this.customBibliographyText = new Object();
 	this.reselectedItems = new Object();
 	this.citationIDs = new Object();
@@ -1280,13 +1284,16 @@ Zotero.Integration.Session.prototype.deleteCitation = function(index) {
  */
 Zotero.Integration.Session.prototype.getBibliography = function() {
 	// use real RTF, but chop off the first \n
-	return Zotero.Cite.makeFormattedBibliography(this.style, "rtf", this.customBibliographyText);
+	this.updateUncitedItems();
+	return Zotero.Cite.makeFormattedBibliography(this.style, "rtf", this.customBibliographyText, this.omittedItems);
 }
 
 /**
  * Calls CSL.Engine.updateUncitedItems() to reconcile list of uncited items
  */
 Zotero.Integration.Session.prototype.updateUncitedItems = function() {
+	// There appears to be a bug somewhere here.
+	Zotero.debug("UPDATING UNCITED ITEMS WITH "+this.uncitedItems.toSource());
 	this.style.updateUncitedItems([parseInt(i) for(i in this.uncitedItems)]);
 }
 
@@ -1414,7 +1421,7 @@ Zotero.Integration.Session.prototype.updateCitations = function() {
 }
 
 /**
- * Updates the list of citations to be serialized to the document
+ * Restores processor state from document, without requesting citation updates
  */
 Zotero.Integration.Session.prototype.restoreProcessorState = function() {
 	var citations = [];
@@ -1423,7 +1430,6 @@ Zotero.Integration.Session.prototype.restoreProcessorState = function() {
 			citations.push(this.citationsByIndex[i]);
 		}
 	}
-	
 	this.style.restoreProcessorState(citations);
 }
 
@@ -1441,15 +1447,21 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 		}
 	}
 	
+	var needUpdate;
+	
 	// set uncited
 	if(documentData.uncited) {
 		if(documentData.uncited[0]) {
 			// new style array of arrays with URIs
-			var zoteroItem, needUpdate;
+			let zoteroItem, needUpdate;
 			for each(var uris in documentData.uncited) {
-				[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(uris);
-				if(zoteroItem) this.uncitedItems[zoteroItem.id] = true;
-				if(needUpdate) this.bibliographyDataHasChanged = true;
+				[zoteroItem, update] = this.uriMap.getZoteroItemForURIs(uris);
+				if(zoteroItem && !this.citationsByItemID[zoteroItem.id]) {
+					this.uncitedItems[zoteroItem.id] = true;
+				} else {
+					needUpdate = true;
+				}
+				this.bibliographyDataHasChanged |= needUpdate;
 			}
 		} else {
 			for(var itemID in documentData.uncited) {
@@ -1493,6 +1505,20 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 		}
 	}
 	
+	// set entries to be omitted from bibliography
+	if(documentData.omitted) {
+			let zoteroItem, needUpdate;
+			for each(var uris in documentData.omitted) {
+				[zoteroItem, update] = this.uriMap.getZoteroItemForURIs(uris);
+				if(zoteroItem && this.citationsByItemID[zoteroItem.id]) {
+					this.omittedItems[zoteroItem.id] = true;
+				} else {
+					needUpdate = true;
+				}
+				this.bibliographyDataHasChanged |= needUpdate;
+			}
+	}
+	
 	this.bibliographyData = json;
 }
 
@@ -1507,6 +1533,12 @@ Zotero.Integration.Session.prototype.getBibliographyData = function() {
 		if(item) {
 			if(!bibliographyData.uncited) bibliographyData.uncited = [];
 			bibliographyData.uncited.push(this.uriMap.getURIsForItemID(item));
+		}
+	}
+	for(var item in this.omittedItems) {
+		if(item) {
+			if(!bibliographyData.omitted) bibliographyData.omitted = [];
+			bibliographyData.omitted.push(this.uriMap.getURIsForItemID(item));
 		}
 	}
 	
@@ -1609,6 +1641,18 @@ Zotero.Integration.Session.prototype.editBibliography = function() {
  */
 Zotero.Integration.Session.BibliographyEditInterface = function(session) {
 	this.session = session;
+	
+	this._changed = {
+		"customBibliographyText":{},
+		"uncitedItems":{},
+		"omittedItems":{}
+	}
+	for(var list in this._changed) {
+		for(var key in this.session[list]) {
+			this._changed[list][key] = this.session[list][key];
+		}
+	}
+	
 	this._update();
 }
 
@@ -1619,18 +1663,70 @@ Zotero.Integration.Session.BibliographyEditInterface.prototype._update = functio
 	this.session.updateUncitedItems();
 	this.session.style.setOutputFormat("rtf");
 	this.bibliography = this.session.style.makeBibliography();
+	Zotero.Cite.removeFromBibliography(this.bibliography, this.session.omittedItems);
+	
 	for(var i in this.bibliography[0].entry_ids) {
-		if(this.session.customBibliographyText[this.bibliography[0].entry_ids[i]]) {
-			this.bibliography[1][i] = this.session.customBibliographyText[this.bibliography[0].entry_ids[i]];
+		if(this.bibliography[0].entry_ids[i].length != 1) continue;
+		var itemID = this.bibliography[0].entry_ids[i][0];
+		if(this.session.customBibliographyText[itemID]) {
+			this.bibliography[1][i] = this.session.customBibliographyText[itemID];
 		}
 	}
 }
 
 /**
- * Checks whether an item ID is cited in the bibliography being edited
+ * Reverts the text of an individual bibliography entry
+ */
+Zotero.Integration.Session.BibliographyEditInterface.prototype.revert = function(itemID) {
+	delete this.session.customBibliographyText[itemID];
+	this._update();
+}
+
+/**
+ * Reverts bibliography to condition in which no edits have been made
+ */
+Zotero.Integration.Session.BibliographyEditInterface.prototype.revertAll = function() {
+	for(var list in this._changed) {
+		this.session[list] = {};
+	}
+	this._update();
+}
+
+/**
+ * Reverts bibliography to condition before BibliographyEditInterface was opened
+ * Does not run _update automatically, since this will usually only happen with a cancel request
+ */
+Zotero.Integration.Session.BibliographyEditInterface.prototype.cancel = function() {
+	for(var list in this._changed) {
+		this.session[list] = this._changed[list];
+	}
+	this.session.updateUncitedItems();
+}
+
+/**
+ * Checks whether a given reference is cited within the main document text
  */
 Zotero.Integration.Session.BibliographyEditInterface.prototype.isCited = function(item) {
 	if(this.session.citationsByItemID[item]) return true;
+}
+
+/**
+ * Checks whether an item ID is cited in the bibliography being edited
+ */
+Zotero.Integration.Session.BibliographyEditInterface.prototype.isEdited = function(itemID) {
+	if(this.session.customBibliographyText[itemID]) return true;
+	return false;
+}
+
+/**
+ * Checks whether any citations in the bibliography have been edited
+ */
+Zotero.Integration.Session.BibliographyEditInterface.prototype.isAnyEdited = function() {
+	for(var list in this._changed) {
+		for(var a in this.session[list]) {
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -1638,8 +1734,11 @@ Zotero.Integration.Session.BibliographyEditInterface.prototype.isCited = functio
  * Adds an item to the bibliography
  */
 Zotero.Integration.Session.BibliographyEditInterface.prototype.add = function(itemID) {
-	// create new item
-	this.session.uncitedItems[itemID] = true;
+	if(this.session.omittedItems[itemID]) {
+		delete this.session.omittedItems[itemID];
+	} else {
+		this.session.uncitedItems[itemID] = true;
+	}
 	this._update();
 }
 
@@ -1647,19 +1746,11 @@ Zotero.Integration.Session.BibliographyEditInterface.prototype.add = function(it
  * Removes an item from the bibliography being edited
  */
 Zotero.Integration.Session.BibliographyEditInterface.prototype.remove = function(itemID) {
-	// delete citations if necessary
-	if(this.session.citationsByItemID[itemID]) {		
-		for(var j=0; j<this.session.citationsByItemID[itemID].length; j++) {
-			var citation = this.session.citationsByItemID[itemID][j];
-			this.session.updateIndices[citation.properties.index] = true;
-			citation.properties["delete"] = true;
-		}
-		delete this.session.citationsByItemID[itemID];
-		this.session.updateCitations();
+	if(this.session.uncitedItems[itemID]) {
+		delete this.session.uncitedItems[itemID];
+	} else {
+		this.session.omittedItems[itemID] = true;
 	}
-	
-	// delete uncited if neceessary
-	if(this.session.uncitedItems[itemID]) delete this.session.uncitedItems[itemID];
 	this._update();
 }
 
