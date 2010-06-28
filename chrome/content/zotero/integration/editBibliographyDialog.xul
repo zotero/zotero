@@ -35,13 +35,17 @@
 	title="&zotero.integration.editBibliography.title;"
 	width="750" height="450"
 	onload="Zotero_Bibliography_Dialog.load();"
-	onunload="doUnload();"
 	ondialogaccept="Zotero_Bibliography_Dialog.accept();"
-	buttons="accept" buttonpack="end"
+	ondialogcancel="Zotero_Bibliography_Dialog.close();"
+	onclose="Zotero_Bibliography_Dialog.close();"
+	onunload="doUnload();"
+	buttons="extra1,extra2,accept,cancel" buttonpack="end"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY width height"
-	resizable="true">
+	resizable="true"
+	ondialogextra1="Zotero_Bibliography_Dialog.revert()"
+	ondialogextra2="Zotero_Bibliography_Dialog.revertAll()">
 	
 	<script src="../include.js"/>
 	<script src="../selectItemsDialog.js"/>
@@ -72,7 +76,7 @@
 						</tree>
 					
 						<tree id="zotero-items-tree"
-							flex="1" hidecolumnpicker="true" seltype="single"
+							flex="1" hidecolumnpicker="true" seltype="multiple"
 							onselect="Zotero_Bibliography_Dialog.treeItemSelected();">
 							<treecols>
 								<treecol
@@ -101,14 +105,15 @@
 				</vbox>
 						
 				<hbox id="source-list">
-					<vbox align="center" pack="center">
+					<vbox align="center" pack="center" id="citation-buttons">
 						<toolbarbutton id="add" oncommand="Zotero_Bibliography_Dialog.add()" disabled="true"/>
 						<toolbarbutton id="remove" oncommand="Zotero_Bibliography_Dialog.remove()" disabled="true"/>
 					</vbox>
 					<vbox>
 						<label value="&zotero.integration.references.label;"/>
-						<listbox id="item-list" flex="1" align="stretch" seltype="single"
-							style="width: 250px;" onselect="Zotero_Bibliography_Dialog.listItemSelected();"/>
+						<listbox id="item-list" flex="1" align="stretch" seltype="multiple"
+							style="width: 250px;" onselect="Zotero_Bibliography_Dialog.listItemSelected();"
+							onchanged="Zotero_Bibliography_Dialog.textChanged()"/>
 					</vbox>
 				</hbox>
 			</hbox>

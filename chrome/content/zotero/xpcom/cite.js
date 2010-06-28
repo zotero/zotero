@@ -215,9 +215,27 @@ Zotero.Cite.System.getAbbreviations = function() {
 	return {};
 }
 
-Zotero.Cite.makeFormattedBibliography = function(cslEngine, format, customBibliographyText) {
+Zotero.Cite.removeFromBibliography = function(bib, itemsToRemove) {
+	var removeItems = [];
+	for(let i in bib[0].entry_ids) {
+		for(let j in bib[0].entry_ids[i]) {
+			if(itemsToRemove[bib[0].entry_ids[i][j]]) {
+				removeItems.push(i);
+				break;
+			}
+		}
+	}
+	for(let i=removeItems.length-1; i>=0; i--) {
+		bib[0].entry_ids.splice(removeItems[i], 1);
+		bib[1].splice(removeItems[i], 1);
+	}
+}
+
+Zotero.Cite.makeFormattedBibliography = function(cslEngine, format, customBibliographyText, omittedItems) {
 	if(format) cslEngine.setOutputFormat(format);
 	var bib = cslEngine.makeBibliography();
+	if(omittedItems) this.removeFromBibliography(bib, omittedItems);
+	
 	if(format == "html") {
 		// TODO CSS
 		return bib[0].bibstart+bib[1].join("")+bib[0].bibend;
