@@ -92,7 +92,7 @@ var CSL = {
 	CITE_FIELDS: ["first-reference-note-number", "locator"],
 	MINIMAL_NAME_FIELDS: ["literal", "family"],
 	SWAPPING_PUNCTUATION: [".", ",", ";", ":"],
-	TERMINAL_PUNCTUATION: [".", "!", "?", ":", "X", "Y"],
+	TERMINAL_PUNCTUATION: [".", "!", "?", ":"],
 	NONE: 0,
 	NUMERIC: 1,
 	POSITION: 2,
@@ -898,6 +898,25 @@ CSL.Output.Queue.appendPunctuationToSuffix = function (predecessor, punct) {
 		}
 	}
 };
+CSL.Output.Queue.quashDuplicateFinalPunctuation = function (myblobs, chr) {
+	if ("string" === typeof myblobs) {
+		if (chr === myblobs.slice(-1)) {
+			return myblobs.slice(0, -1);
+		} else {
+			return myblobs;
+		}
+	} else if (myblobs.length) {
+		var lastblob = myblobs.slice(-1)[0];
+		if (lastblob.strings.suffix && chr === lastblob.strings.suffix.slice(-1)) {
+			lastblob.strings.suffix = lastblob.strings.suffix.slice(0, -1);
+		} else if ("object" === typeof lastblob.blobs) {
+			return CSL.Output.Queue.quashDuplicateFinalPunctuation(lastblob.blobs, chr);
+		} else if ("string" === typeof lastblob.blobs) {
+			lastblob.blobs = CSL.Output.Queue.quashDuplicateFinalPunctuation(lastblob.blobs, chr);
+		}
+	}
+	return false;
+}
 CSL.localeResolve = function (langstr) {
 	var ret, langlst;
 	ret = {};
@@ -1468,7 +1487,7 @@ CSL.dateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, xmlmode) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.36";
+	this.processor_version = "1.0.37";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2282,7 +2301,7 @@ CSL.Engine.prototype.appendCitationCluster = function (citation) {
 	return this.processCitationCluster(citation, citationsPre, [], CSL.ASSUME_ALL_ITEMS_REGISTERED);
 };
 CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, citationsPost, flag) {
-	var sortedItems, new_citation, pos, len, item, citationByIndex, c, Item, newitem, k, textCitations, noteCitations, update_items, citations, first_ref, last_ref, ipos, ilen, cpos, onecitation, oldvalue, ibidme, suprame, useme, items, i, key, prev_locator, curr_locator, param, ret, obj, ppos, llen, lllen, pppos, ppppos, llllen, cids, note_distance, return_data, lostItemId, lostItemList, lostItemData, otherLostPkeys, disambig;
+	var sortedItems, new_citation, pos, len, item, citationByIndex, c, Item, newitem, k, textCitations, noteCitations, update_items, citations, first_ref, last_ref, ipos, ilen, cpos, onecitation, oldvalue, ibidme, suprame, useme, items, i, key, prev_locator, curr_locator, param, ret, obj, ppos, llen, lllen, pppos, ppppos, llllen, cids, note_distance, return_data, lostItemId, lostItemList, lostItemData, otherLostPkeys, disambig, oldItemIds;
 	this.debug = false;
 	return_data = {"bibchange": false};
 	this.registry.return_data = return_data;
@@ -2499,11 +2518,9 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 	for (key in this.tmp.taintedItemIDs) {
 		if (this.tmp.taintedItemIDs.hasOwnProperty(key)) {
 			citations = this.registry.citationreg.citationsByItemId[key];
-			if (citations) {
 				for (pos = 0, len = citations.length; pos < len; pos += 1) {
 					this.tmp.taintedCitationIDs[citations[pos].citationID] = true;
 				}
-			}
 		}
 	}
 	ret = [];
@@ -2514,7 +2531,11 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 		for (pos = 0, len = oldCitationList.length; pos < len; pos += 1) {
 			this.registry.citationreg.citationById[oldCitationList[pos].citationID] = oldCitationList[pos];
 		}
-		this.updateItems([oldItemList[pos].id for (pos in oldItemList)]);
+		oldItemIds = [];
+		for (pos = 0, len = oldItemList.length; pos < len; pos += 1) {
+			oldItemIds.push(oldItemList[pos].id);
+		}
+		this.updateItems(oldItemIds);
 		for (key in oldAmbigs) {
 			this.registry.registry[key].disambig = oldAmbigs[key];
 		}
@@ -2526,11 +2547,9 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 				}
 				obj = [];
 				citation = this.registry.citationreg.citationById[key];
-				if (citation) {
 					obj.push(citation.properties.index);
 					obj.push(this.process_CitationCluster.call(this, citation.sortedItems));
 					ret.push(obj);
-				}
 			}
 		}
 		this.tmp.taintedItemIDs = false;
@@ -2644,8 +2663,10 @@ CSL.getCitationCluster = function (inputList, citationID) {
 	this.parallel.PruneOutputQueue(this);
 	empties = 0;
 	myblobs = this.output.queue.slice();
-	len = myblobs.length;
-	for (pos = 0; pos < len; pos += 1) {
+	if (CSL.TERMINAL_PUNCTUATION.indexOf(this.citation.opt.layout_suffix) > -1) {
+		CSL.Output.Queue.quashDuplicateFinalPunctuation(myblobs, this.citation.opt.layout_suffix.slice(0, 1));
+	}
+	for (pos = 0, len = myblobs.length; pos < len; pos += 1) {
 		this.output.queue = [myblobs[pos]];
 		this.tmp.suppress_decorations = myparams[pos].suppress_decorations;
 		this.tmp.splice_delimiter = myparams[pos].splice_delimiter;
@@ -7290,9 +7311,8 @@ CSL.Registry.prototype.dorefreshes = function () {
 			regtoken.sortkeys = undefined;
 			regtoken.ambig = undefined;
 			Item = this.state.sys.retrieveItem(key);
-			old_akey = akey;
-			akey = CSL.getAmbiguousCite.call(this.state, Item);
-			if (this.state.tmp.taintedItemIDs && this.state.opt.update_mode !== CSL.NUMERIC && old_akey !== akey) {
+			if ("undefined" === typeof akey) {
+				CSL.getAmbiguousCite.call(this.state, Item);
 				this.state.tmp.taintedItemIDs[key] = true;
 			}
 			this.registry[key] = regtoken;
@@ -7896,7 +7916,9 @@ CSL.Disambiguation.prototype.initVars = function (akey) {
 	myItems = [];
 	myIds = this.ambigcites[akey];
 	if (myIds.length > 1) {
-		myItems = [this.sys.retrieveItem(myIds[p]) for (p in myIds)];
+		for (pos = 0, len = myIds.length; pos < len; pos += 1) {
+			myItems.push(this.sys.retrieveItem(myIds[pos]));
+		}
 		this.lists.push([this.base, myItems]);
 	}
 	this.modeindex = 0;
