@@ -37,6 +37,8 @@ Zotero.Proxies = new function() {
 	
 	var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 							  .getService(Components.interfaces.nsIIOService);
+	var windowMediator = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+							  .getService(Components.interfaces.nsIWindowMediator);
 	var lastRecognizedURI = false;
 	var lastButton = false;
 	
@@ -90,11 +92,18 @@ Zotero.Proxies = new function() {
 				// if no saved host and host is not blacklisted, auto associate
 				proxy.hosts.push(host);
 				proxy.save(true);
+				
+				var bw = _getBrowserAndWindow(channel.notificationCallbacks);
+				if(!bw) return;
+				_showNotification(bw,
+					Zotero.getString('proxies.notification.associated.label', [host, channel.URI.hostPort]),
+					"settings", function() { _prefsOpenCallback(bw[1]) });
 			}
 		} else {
 			// otherwise, try to detect a proxy
 			var proxy = false;
 			for each(var detector in Zotero.Proxies.Detectors) {
+				Zotero.debug("looking for proxy");
 				try {
 					proxy = detector(channel);
 				} catch(e) {
@@ -102,71 +111,89 @@ Zotero.Proxies = new function() {
 				}
 				
 				if(!proxy) continue;
-				var transparent = _showDialog(proxy.hosts[0], channel.URI.hostPort);
-				proxy.save(transparent);
+				
+				var bw = _getBrowserAndWindow(channel.notificationCallbacks);
+				if(!bw) return;
+				_showNotification(bw,
+					Zotero.getString('proxies.notification.recognized.label', [proxy.hosts[0], channel.URI.hostPort]),
+					"enable", function() { _showDialog(proxy.hosts[0], channel.URI.hostPort, proxy) });
+				
+				proxy.save();
 				break;
 			}
 		}
 		
 		// try to get an applicable proxy
 		var webNav = null;
+		var docShell = null;
 		try {
 			webNav = channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIWebNavigation);
 			docShell = channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIDocShell);
-		} catch(e) {}
+		} catch(e) {
+			Zotero.debug(e);
+		}
 		
-		if(webNav && docShell && docShell.allowMetaRedirects) {
-			var proxied = Zotero.Proxies.properToProxy(url, true);
-			if(proxied) {
-				channel.QueryInterface(Components.interfaces.nsIHttpChannel);				
-				var proxiedURI = Components.classes["@mozilla.org/network/io-service;1"]
-										  .getService(Components.interfaces.nsIIOService)
-										  .newURI(proxied, null, null);
-				if(channel.referrer) {
-					// If the referrer is a proxiable host, we already have access (e.g., we're
-					// on-campus) and shouldn't redirect
-					if(Zotero.Proxies.properToProxy(channel.referrer.spec, true)) {
-						Zotero.debug("Zotero.Proxies: skipping redirect; referrer was proxiable");
-						return;
-					}
-					// If the referrer is the same host as we're about to redirect to, we shouldn't
-					// or we risk a loop
-					if(channel.referrer.host == proxiedURI.host) {
-						Zotero.debug("Zotero.Proxies: skipping redirect; redirect URI and referrer have same host");
-						return;
-					}
-				}
-				
-				if(channel.originalURI) {
-					// If the original URI was a proxied host, we also shouldn't redirect, since any
-					// links handed out by the proxy should already be proxied
-					if(Zotero.Proxies.proxyToProper(channel.originalURI.spec, true)) {
-						Zotero.debug("Zotero.Proxies: skipping redirect; original URI was proxied");
-						return;
-					}
-					// Finally, if the original URI is the same as the host we're about to redirect
-					// to, then we also risk a loop
-					if(channel.originalURI.host == proxiedURI.host) {
-						Zotero.debug("Zotero.Proxies: skipping redirect; redirect URI and original URI have same host");
-						return;
-					}
-				}
-				
-				// make sure that the top two domains (e.g. gmu.edu in foo.bar.gmu.edu) of the
-				// channel and the site to which we're redirecting don't match, to prevent loops.
-				const top2DomainsRe = /[^\.]+\.[^\.]+$/;
-				top21 = top2DomainsRe.exec(channel.URI.host);
-				top22 = top2DomainsRe.exec(proxiedURI.host);
-				if(!top21 || !top22 || top21[0] == top22[0]) {
-					Zotero.debug("Zotero.Proxies: skipping redirect; redirect URI and URI have same top 2 domains");
-					return;
-				}
-				
-				// Otherwise, redirect. Note that we save the URI we're redirecting from as the
-				// referrer, since we can't make a proper redirect
-				webNav.loadURI(proxied, 0, channel.URI, null, null);
+		if(!docShell.allowMetaRedirects) return;
+		
+		var proxied = Zotero.Proxies.properToProxy(url, true);
+		if(!proxied) return;
+		
+		// try to find a corresponding browser object
+		var bw = _getBrowserAndWindow(channel.notificationCallbacks);
+		if(!bw) return;
+		var browser = bw[0];
+		var window = bw[1];
+	
+		channel.QueryInterface(Components.interfaces.nsIHttpChannel);				
+		var proxiedURI = Components.classes["@mozilla.org/network/io-service;1"]
+								  .getService(Components.interfaces.nsIIOService)
+								  .newURI(proxied, null, null);
+		if(channel.referrer) {
+			// If the referrer is a proxiable host, we already have access (e.g., we're
+			// on-campus) and shouldn't redirect
+			if(Zotero.Proxies.properToProxy(channel.referrer.spec, true)) {
+				Zotero.debug("Zotero.Proxies: skipping redirect; referrer was proxiable");
+				return;
+			}
+			// If the referrer is the same host as we're about to redirect to, we shouldn't
+			// or we risk a loop
+			if(channel.referrer.host == proxiedURI.host) {
+				Zotero.debug("Zotero.Proxies: skipping redirect; redirect URI and referrer have same host");
+				return;
 			}
 		}
+		
+		if(channel.originalURI) {
+			// If the original URI was a proxied host, we also shouldn't redirect, since any
+			// links handed out by the proxy should already be proxied
+			if(Zotero.Proxies.proxyToProper(channel.originalURI.spec, true)) {
+				Zotero.debug("Zotero.Proxies: skipping redirect; original URI was proxied");
+				return;
+			}
+			// Finally, if the original URI is the same as the host we're about to redirect
+			// to, then we also risk a loop
+			if(channel.originalURI.host == proxiedURI.host) {
+				Zotero.debug("Zotero.Proxies: skipping redirect; redirect URI and original URI have same host");
+				return;
+			}
+		}
+		
+		// make sure that the top two domains (e.g. gmu.edu in foo.bar.gmu.edu) of the
+		// channel and the site to which we're redirecting don't match, to prevent loops.
+		const top2DomainsRe = /[^\.]+\.[^\.]+$/;
+		top21 = top2DomainsRe.exec(channel.URI.host);
+		top22 = top2DomainsRe.exec(proxiedURI.host);
+		if(!top21 || !top22 || top21[0] == top22[0]) {
+			Zotero.debug("Zotero.Proxies: skipping redirect; redirect URI and URI have same top 2 domains");
+			return;
+		}
+		
+		// Otherwise, redirect. Note that we save the URI we're redirecting from as the
+		// referrer, since we can't make a proper redirect
+		_showNotification(bw,
+			Zotero.getString('proxies.notification.redirected.label', [channel.URI.hostPort, proxiedURI.hostPort]),
+			"settings", function() { _prefsOpenCallback(bw[1]) });
+		browser.loadURIWithFlags(proxied, 0, channel.URI, null, null);
 	}
 	
 	/**
@@ -310,9 +337,7 @@ Zotero.Proxies = new function() {
 	  * @param {String} proxyHost The host through which the given site would be redirected.
 	  * @returns {Boolean} True if proxy should be added; false if it should not be.
 	  */
-	 function _showDialog(proxiedHost, proxyHost) {
-		 if(!Zotero.Proxies.transparent) return false;
-		 
+	 function _showDialog(proxiedHost, proxyHost, proxy) {
 		// ask user whether to add this proxy
 		var io = {site:proxiedHost, proxy:proxyHost};
 		var window = Components.classes["@mozilla.org/appshell/window-mediator;1"]
@@ -325,7 +350,68 @@ Zotero.Proxies = new function() {
 			Zotero.Proxies.transparent = false;
 			Zotero.Prefs.set("proxies.transparent", false);
 		}
-		return io.add;
+		
+		if(io.add) {
+			proxy.erase();
+			proxy.save(true);
+		}
+	 }
+	 
+	 /**
+	  * Get browser and window from notificationCallbacks
+	  * @return	{Array} Array containing a browser object and a DOM window object
+	  */
+	 function _getBrowserAndWindow(notificationCallbacks) {
+		try {
+			var pageDOMDocument = notificationCallbacks.getInterface(Components.interfaces.nsIDOMWindow).top.document;
+			if(!pageDOMDocument) return false;
+			var enumerator = windowMediator.getZOrderDOMWindowEnumerator("navigator:browser", true);
+			while(enumerator.hasMoreElements()) {
+				var window = enumerator.getNext();
+				browser = window.gBrowser.getBrowserForDocument(pageDOMDocument);
+				if(browser) break;
+			}
+		} catch(e) {
+			Zotero.debug(e);
+		}
+		return [browser, window];
+	 }
+	 
+	 /**
+	  * Show a proxy-related notification
+	  * @param	{Array}		bw			output of _getBrowserWindow
+	  * @param	{String}	label		notification text
+	  * @param	{String}	button		button text ("settings" or "enable")
+	  * @param	{Function}	callback	callback to be executed if button is pressed
+	  */
+	 function _showNotification(bw, label, button, callback) {
+	 	var browser = bw[0];
+	 	var window = bw[1];
+	 	
+		var listener = function() {
+			var nb = window.gBrowser.getNotificationBox();
+			nb.appendNotification(label,
+				'zotero-proxy', 'chrome://browser/skin/Info.png', nb.PRIORITY_WARNING_MEDIUM,
+				[{
+					label:Zotero.getString('proxies.notification.'+button+'.button'),
+					callback:callback
+				}]);
+			browser.removeEventListener("pageshow", listener, false);
+		}
+		
+		browser.addEventListener("pageshow", listener, false);
+	 }
+	 
+	 /**
+	  * Opens preferences window
+	  */
+	 function _prefsOpenCallback(window) {
+	 	window.openDialog('chrome://zotero/content/preferences/preferences.xul',
+			'zotero-prefs',
+			'chrome,titlebar,toolbar,'
+				+ Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal',
+			{"pane":"zotero-prefpane-proxies"}
+		);
 	 }
 }
 
