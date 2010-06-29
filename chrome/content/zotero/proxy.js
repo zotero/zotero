@@ -54,7 +54,7 @@ var Zotero_Proxy_Dialog = new function() {
 	 * Called when "Add" button is pressed
 	 */
 	this.accept = function() {
-		window.arguments[0].disable = document.getElementById("disable").checked;
+		window.arguments[0].disable = false;//document.getElementById("disable").checked;
 		window.arguments[0].add = true;
 	}
 	
@@ -62,7 +62,7 @@ var Zotero_Proxy_Dialog = new function() {
 	 * Called when "Ignore" button is pressed
 	 */
 	this.cancel = function() {
-		window.arguments[0].disable = document.getElementById("disable").checked;
+		window.arguments[0].disable = false;//document.getElementById("disable").checked;
 		window.arguments[0].add = false;
 	}
 	
