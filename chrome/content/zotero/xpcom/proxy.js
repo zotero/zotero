@@ -103,7 +103,6 @@ Zotero.Proxies = new function() {
 			// otherwise, try to detect a proxy
 			var proxy = false;
 			for each(var detector in Zotero.Proxies.Detectors) {
-				Zotero.debug("looking for proxy");
 				try {
 					proxy = detector(channel);
 				} catch(e) {
@@ -129,9 +128,7 @@ Zotero.Proxies = new function() {
 		try {
 			webNav = channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIWebNavigation);
 			docShell = channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIDocShell);
-		} catch(e) {
-			Zotero.debug(e);
-		}
+		} catch(e) {}
 		
 		if(!docShell.allowMetaRedirects) return;
 		
@@ -371,9 +368,7 @@ Zotero.Proxies = new function() {
 				browser = window.gBrowser.getBrowserForDocument(pageDOMDocument);
 				if(browser) break;
 			}
-		} catch(e) {
-			Zotero.debug(e);
-		}
+		} catch(e) {}
 		return [browser, window];
 	 }
 	 
