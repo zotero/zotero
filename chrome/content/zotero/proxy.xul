@@ -21,6 +21,5 @@
 		</hbox>
 		<spacer flex="1"/>
 		<description id="description"> </description>
-		<checkbox id="disable" label="&zotero.proxy.recognized.disable.label;"/>
 	</vbox>
 </dialog>
