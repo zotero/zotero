@@ -167,7 +167,7 @@
 						<toolbarbutton id="down" oncommand="Zotero_Citation_Dialog.down()" disabled="true"/>
 					</vbox>
 					<vbox align="left">
-						<checkbox id="keepSorted" hidden="true" checked="false" oncommand="Zotero_Citation_Dialog.sortCitation()" label="&zotero.citation.keepSorted.label;"/>
+						<checkbox id="keepSorted" hidden="true" checked="false" oncommand="Zotero_Citation_Dialog.citationSortUnsort()" label="&zotero.citation.keepSorted.label;"/>
 						<listbox id="citation-list" flex="1" align="stretch" seltype="single"
 							onselect="Zotero_Citation_Dialog.listItemSelected();"/>
 					</vbox>
