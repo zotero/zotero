@@ -631,7 +631,7 @@ Zotero.Schema = new function(){
 					// extracting only what's necessary
 					var entry = index[translatorID];
 					if (!entry.extract) {
-						Zotero.debug("Not extracting '" + entry.label + "' -- same version already in cache");
+						//Zotero.debug("Not extracting '" + entry.label + "' -- same version already in cache");
 						continue;
 					}
 					
