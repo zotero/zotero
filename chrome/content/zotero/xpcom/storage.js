@@ -2315,9 +2315,6 @@ Zotero.Sync.Storage.Request.prototype.stop = function () {
 			Zotero.debug(this.channel.requestSucceeded);
 			finishNow = true;
 		}
-		else {
-			Zotero.debug("No channel to stop for request " + this.name);
-		}
 	}
 	catch (e) {}
 	
