@@ -607,12 +607,12 @@ var Zotero_Citation_Dialog = new function () {
 			// list.
 			if (_citationList.getRowCount() > 1) {
 				_multipleSourceButton.disabled = true;
-		} else {
+			} else {
 				_multipleSourceButton.disabled = false;
-		}
+			}
 		} else {
 			_acceptButton.disabled = !itemsView.getSelectedItems().length; // treeview from xpcom/itemTreeView.js
-	}
+		}
 	}
 	
 	/*
