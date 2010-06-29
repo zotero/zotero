@@ -155,13 +155,14 @@ Zotero.OpenURL = new function() {
 			var co = "";
 			
 			for each(identifier in identifiers) {
-				co += "&id="+escape(identifier);
+				co += "&id="+encodeURIComponent(identifier);
 			}
 		} else {
-			var co = "url_ver=Z39.88-2004&ctx_ver=Z39.88-2004";
+			var co = "url_ver=Z39.88-2004&ctx_ver=Z39.88-2004"+
+				     "&rfr_id="+encodeURIComponent("info:sid/zotero.org:"+Zotero.version);
 			
 			for each(identifier in identifiers) {
-				co += "&rft_id="+escape(identifier);
+				co += "&rft_id="+encodeURIComponent(identifier)
 			}
 		}
 		
