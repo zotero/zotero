@@ -565,6 +565,7 @@ Zotero.Schema = new function(){
 		var sql = "SELECT version FROM version WHERE schema=?";
 		var lastModTime = Zotero.DB.valueQuery(sql, modes);
 		
+		// XPI installation
 		if (zipFile.exists()) {
 			var modTime = Math.round(zipFile.lastModifiedTime / 1000);
 			
@@ -575,37 +576,84 @@ Zotero.Schema = new function(){
 			
 			Zotero.debug("Updating installed " + modes + " from " + modes + ".zip");
 			
+			if (mode == 'translator') {
+				// Parse translators.index
+				var indexFile = extDir.clone();
+				indexFile.append('translators.index');
+				if (!indexFile.exists()) {
+					Components.utils.reportError("translators.index not found in Zotero.Schema.updateBundledFiles()");
+					return false;
+				}
+				var indexFile = Zotero.File.getContents(indexFile);
+				indexFile = indexFile.split("\n");
+				var index = {};
+				for each(var line in indexFile) {
+					if (!line) {
+						continue;
+					}
+					var [fileName, translatorID, label, lastUpdated] = line.split(',');
+					if (!translatorID) {
+						Components.utils.reportError("Invalid translatorID '" + translatorID + "' in Zotero.Schema.updateBundledFiles()");
+						return false;
+					}
+					index[translatorID] = {
+						label: label,
+						lastUpdated: lastUpdated,
+						fileName: fileName, // Numbered JS file within ZIP
+						extract: true
+					};
+				}
+				
+				var sql = "SELECT translatorJSON FROM translatorCache";
+				var dbCache = Zotero.DB.columnQuery(sql);
+				// If there's anything in the cache, see what we actually need to extract
+				if (dbCache) {
+					var nsIJSON = Components.classes["@mozilla.org/dom/json;1"]
+						.createInstance(Components.interfaces.nsIJSON);
+					for each(var json in dbCache) {
+						var metadata = nsIJSON.decode(json);
+						var id = metadata.translatorID;
+						if (index[id] && index[id].lastUpdated == metadata.lastUpdated) {
+							index[id].extract = false;
+						}
+					}
+				}
+			}
+			
 			var zipReader = Components.classes["@mozilla.org/libjar/zip-reader;1"]
 					.getService(Components.interfaces.nsIZipReader);
 			zipReader.open(zipFile);
 			var tmpDir = Zotero.getTempDirectory();
-			var entries = zipReader.findEntries(null);
-			while (entries.hasMore()) {
-				var entry = entries.getNext();
-				
-				var tmpFile = tmpDir.clone();
-				tmpFile.append(entry);
-				if (tmpFile.exists()) {
-					tmpFile.remove(false);
-				}
-				zipReader.extract(entry, tmpFile);
-				var newObj = new Zotero[Mode](tmpFile);
-				
-				var existingObj = Zotero[Modes].get(newObj[mode + "ID"]);
-				if (!existingObj) {
-					Zotero.debug("Installing " + mode + " '" + newObj[titleField] + "'");
-				}
-				else {
-					Zotero.debug("Updating "
-						+ (existingObj.hidden ? "hidden " : "")
-						+ mode + " '" + existingObj[titleField] + "'");
-					if (existingObj.file.exists()) {
-						existingObj.file.remove(false);
+			
+			if (mode == 'translator') {
+				for (var translatorID in index) {
+					// Use index file and DB cache for translator entries,
+					// extracting only what's necessary
+					var entry = index[translatorID];
+					if (!entry.extract) {
+						Zotero.debug("Not extracting '" + entry.label + "' -- same version already in cache");
+						continue;
 					}
-				}
-				
-				if (mode == 'translator') {
-					var fileName = Zotero.File.getValidFileName(newObj[titleField]) + fileExt;
+					
+					var tmpFile = tmpDir.clone();
+					tmpFile.append(entry.fileName);
+					if (tmpFile.exists()) {
+						tmpFile.remove(false);
+					}
+					zipReader.extract(entry.fileName, tmpFile);
+					
+					var existingObj = Zotero.Translators.get(translatorID);
+					if (!existingObj) {
+						Zotero.debug("Installing translator '" + entry.label + "'");
+					}
+					else {
+						Zotero.debug("Updating translator '" + existingObj.label + "'");
+						if (existingObj.file.exists()) {
+							existingObj.file.remove(false);
+						}
+					}
+					
+					var fileName = Zotero.File.getValidFileName(entry.label) + fileExt;
 					
 					var destFile = destDir.clone();
 					destFile.append(fileName);
@@ -616,22 +664,55 @@ Zotero.Schema = new function(){
 						Components.utils.reportError(msg + " in Zotero.Schema.updateBundledFiles()");
 						destFile.remove(false);
 					}
-				}
-				else if (mode == 'style') {
-					var fileName = tmpFile.leafName;
-				}
-				
-				if (!existingObj || !existingObj.hidden) {
+					
 					tmpFile.moveTo(destDir, fileName);
+					
+					Zotero.wait();
 				}
-				else {
-					tmpFile.moveTo(hiddenDir, fileName);
-				}
-				
-				Zotero.wait();
 			}
+			// Styles
+			else {
+				var entries = zipReader.findEntries(null);
+				while (entries.hasMore()) {
+					var entry = entries.getNext();
+					
+					var tmpFile = tmpDir.clone();
+					tmpFile.append(entry);
+					if (tmpFile.exists()) {
+						tmpFile.remove(false);
+					}
+					zipReader.extract(entry, tmpFile);
+					var newObj = new Zotero[Mode](tmpFile);
+					
+					var existingObj = Zotero[Modes].get(newObj[mode + "ID"]);
+					if (!existingObj) {
+						Zotero.debug("Installing " + mode + " '" + newObj[titleField] + "'");
+					}
+					else {
+						Zotero.debug("Updating "
+							+ (existingObj.hidden ? "hidden " : "")
+							+ mode + " '" + existingObj[titleField] + "'");
+						if (existingObj.file.exists()) {
+							existingObj.file.remove(false);
+						}
+					}
+					
+					var fileName = tmpFile.leafName;
+					
+					if (!existingObj || !existingObj.hidden) {
+						tmpFile.moveTo(destDir, fileName);
+					}
+					else {
+						tmpFile.moveTo(hiddenDir, fileName);
+					}
+					
+					Zotero.wait();
+				}
+			}
+			
 			zipReader.close();
 		}
+		// SVN installation
 		else {
 			var sourceDir = extDir.clone();
 			sourceDir.append(modes);
