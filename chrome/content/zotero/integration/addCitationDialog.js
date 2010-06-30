@@ -732,7 +732,7 @@ var Zotero_Citation_Dialog = new function () {
 		}
 
 		itemNode.setAttribute("value", itemDataID);
-		itemNode.setAttribute("label", item.getField("title"));
+		itemNode.setAttribute("label", item.getDisplayTitle());
 		itemNode.setAttribute("class", "listitem-iconic");
 		itemNode.setAttribute("image", item.getImageSrc());
 		_citationList.appendChild(itemNode);
