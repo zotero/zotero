@@ -92,6 +92,7 @@ Zotero.Integration = new function() {
 						if(_fifoFile.exists()) return;
 					} catch(e) {
 						Zotero.debug(e);
+						return;
 					}
 				} else {
 					return;
