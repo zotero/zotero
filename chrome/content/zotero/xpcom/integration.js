@@ -303,7 +303,7 @@ Zotero.Integration = new function() {
 			var proc = Components.classes["@mozilla.org/process/util;1"].
 					createInstance(Components.interfaces.nsIProcess);
 			proc.init(_osascriptFile);
-			proc.run(block, ['-e', script], 2);
+			proc.run(!!block, ['-e', script], 2);
 		}
 	}
 }
