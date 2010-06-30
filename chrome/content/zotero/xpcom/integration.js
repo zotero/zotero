@@ -381,7 +381,7 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 		if(Zotero.Integration.sessions[data.sessionID]) {
 			this._session = Zotero.Integration.sessions[data.sessionID];
 		} else {
-			if(data.prefs.fieldType == "Field" && this._app.primaryFieldType != "Field") {
+			if(dataString[0] != "<" && data.prefs.fieldType == "Field" && this._app.primaryFieldType == "ReferenceMark") {
 				// Converted OOo docs use ReferenceMarks, not fields
 				data.prefs.fieldType = "ReferenceMark";
 			}
