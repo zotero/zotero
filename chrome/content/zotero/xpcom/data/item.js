@@ -875,6 +875,12 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 		title += Zotero.localeJoin(strParts, '; ');
 		title += ']';
 	}
+	else if (itemTypeID == 17 && title) { // 'case' itemTypeID
+		var reporter = this.getField('reporter');
+		if (reporter) { 
+			title = Zotero.localeJoin([title, '(' + reporter + ')']);
+		}
+	}
 	
 	return title;
 }
