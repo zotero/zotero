@@ -73,15 +73,29 @@ Zotero.Integration = new function() {
 				if(_fifoFile.exists()) {
 					_fifoFile.remove(false);
 				}
-			}
-			catch (e) {
-				Zotero.debug("Could not remove old integration pipe", 1);
+			} catch (e) {
+				Zotero.debug("Error removing old integration pipe", 1);
 				Components.utils.reportError(
 					"Zotero word processor integration initialization failed. "
 						+ "See http://forums.zotero.org/discussion/12054/#Item_10 "
 						+ "for instructions on correcting this problem."
 				);
-				return;
+				if(Zotero.isMac) {
+			 		try {
+						// can attempt to delete on OS X
+						var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+							.getService(Components.interfaces.nsIPromptService);
+						var deletePipe = promptService.confirm(null, Zotero.getString("integration.error.title"), Zotero.getString("integration.error.deletePipe"));
+						if(!deletePipe) return;
+						let escapedFifoFile = _fifoFile.path.replace("'", "'\\''");
+						_executeAppleScript("do shell script \"rmdir '"+escapedFifoFile+"'; rm -f '"+escapedFifoFile+"'\" with administrator privileges", true);
+						if(_fifoFile.exists()) return;
+					} catch(e) {
+						Zotero.debug(e);
+					}
+				} else {
+					return;
+				}
 			}
 			
 			// make a new pipe
@@ -263,24 +277,33 @@ Zotero.Integration = new function() {
 	 */
 	this.activate = function() {
 		if(Zotero.isMac) {
-			if(_osascriptFile === undefined) {
-				_osascriptFile = Components.classes["@mozilla.org/file/local;1"].
-					createInstance(Components.interfaces.nsILocalFile);
-				_osascriptFile.initWithPath("/usr/bin/osascript");
-				if(!_osascriptFile.exists()) _osascriptFile = false;
+			if(Zotero.oscpu == "PPC Mac OS X 10.4" || Zotero.oscpu == "Intel Mac OS X 10.4") {
+				// 10.4 doesn't support "tell application id"
+				_executeAppleScript('tell application "Firefox" to activate');
+			} else {
+				_executeAppleScript('tell application id "org.mozilla.firefox" to activate');
 			}
-			
-			if(_osascriptFile) {
-				var proc = Components.classes["@mozilla.org/process/util;1"].
-						createInstance(Components.interfaces.nsIProcess);
-				proc.init(_osascriptFile);
-				if(Zotero.oscpu == "PPC Mac OS X 10.4" || Zotero.oscpu == "Intel Mac OS X 10.4") {
-					// 10.4 doesn't support "tell application id"
-					proc.run(false, ['-e', 'tell application "Firefox" to activate'], 2);
-				} else {
-					proc.run(false, ['-e', 'tell application id "org.mozilla.firefox" to activate'], 2);
-				}
-			}
+		}
+	}
+	
+	/**
+	 * Runs an AppleScript on OS X
+	 *
+	 * @param script {String}
+	 * @param block {Boolean} Whether the script should block until the process is finished.
+	 */
+	function _executeAppleScript(script, block) {
+		if(_osascriptFile === undefined) {
+			_osascriptFile = Components.classes["@mozilla.org/file/local;1"].
+				createInstance(Components.interfaces.nsILocalFile);
+			_osascriptFile.initWithPath("/usr/bin/osascript");
+			if(!_osascriptFile.exists()) _osascriptFile = false;
+		}
+		if(_osascriptFile) {
+			var proc = Components.classes["@mozilla.org/process/util;1"].
+					createInstance(Components.interfaces.nsIProcess);
+			proc.init(_osascriptFile);
+			proc.run(block, ['-e', script], 2);
 		}
 	}
 }
