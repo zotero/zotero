@@ -397,9 +397,17 @@ Zotero.QuickCopy = new function() {
 			if (modified) {
 				var citation = {citationItems:[{id:item.id} for each(item in items)], properties:{}};
 				this.session.style.setOutputFormat("html");
-				var html = csl.appendCitationCluster(citation, true)[0][1];
+				var html = csl.processCitationCluster(
+					citation,
+					[], [],
+					CSL.ASSUME_ALL_ITEMS_REGISTERED
+				)[1][0][1];
 				this.session.style.setOutputFormat("text");
-				var text = csl.appendCitationCluster(citation, true)[0][1];
+				var text = csl.processCitationCluster(
+					citation,
+					[], [],
+					CSL.ASSUME_ALL_ITEMS_REGISTERED
+				)[1][0][1];
 			} else {
 				var html = Zotero.Cite.makeFormattedBibliography(csl, "html");
 				var text = Zotero.Cite.makeFormattedBibliography(csl, "text");
