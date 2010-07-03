@@ -1851,6 +1851,9 @@ var ZoteroPane = new function()
 		else if (itemGroup.isTrash()) {
 			show = [m.emptyTrash];
 		}
+		else if (itemGroup.isHeader()) {
+			// Don't show menu for headers
+		}
 		else if (itemGroup.isCommons()) {
 			show = [m.refreshCommons];
 		}
