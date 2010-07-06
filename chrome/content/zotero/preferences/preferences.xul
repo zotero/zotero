@@ -40,7 +40,7 @@ To add a new preference:
 		in Zotero.Prefs.observe()
 
 -->
-<prefwindow id="zotero-prefs" title="&zotero.preferences.title;" onload="moveToAlertPosition(); init()" onunload="Zotero_Preferences.onUnload()"
+<prefwindow id="zotero-prefs" title="&zotero.preferences.title;" onload="init()" onunload="Zotero_Preferences.onUnload()"
 		windowtype="zotero:pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		style="min-height: 600px">
 	
