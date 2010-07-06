@@ -396,11 +396,12 @@ function() {
 	if(this._version == "0.8") {
 		// get XSLT processor from updateCSL.xsl file
 		if(!Zotero.Styles.xsltProcessor) {
-			let xhr = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-			xhr.open("GET", "chrome://zotero/content/updateCSL.xsl", false);
-			xhr.overrideMimeType("text/xml");
-			xhr.send();
-			let updateXSLT = xhr.responseXML;
+			let protHandler = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
+				.createInstance(Components.interfaces.nsIProtocolHandler);
+			let channel = protHandler.newChannel(protHandler.newURI("chrome://zotero/content/updateCSL.xsl", "UTF-8", null));
+			let updateXSLT = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+				.createInstance(Components.interfaces.nsIDOMParser)
+				.parseFromStream(channel.open(), "UTF-8", 32768, "application/xml");
 			
 			// load XSLT file into XSLTProcessor
 			Zotero.Styles.xsltProcessor = Components.classes["@mozilla.org/document-transformer;1?type=xslt"]
