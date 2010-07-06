@@ -401,7 +401,7 @@ function() {
 			let channel = protHandler.newChannel(protHandler.newURI("chrome://zotero/content/updateCSL.xsl", "UTF-8", null));
 			let updateXSLT = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 				.createInstance(Components.interfaces.nsIDOMParser)
-				.parseFromStream(channel.open(), "UTF-8", 32768, "application/xml");
+				.parseFromStream(channel.open(), "UTF-8", channel.contentLength, "application/xml");
 			
 			// load XSLT file into XSLTProcessor
 			Zotero.Styles.xsltProcessor = Components.classes["@mozilla.org/document-transformer;1?type=xslt"]
