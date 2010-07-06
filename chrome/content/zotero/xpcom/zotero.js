@@ -206,7 +206,7 @@ var Zotero = new function(){
 			// Load in the extension version from the extension manager
 			if(this.isFx4) {
 				AddonManager.getAddonByID(ZOTERO_CONFIG['GUID'],
-					function(addon) { Zotero.version = addon.version });
+					function(addon) { Zotero.version = addon.version; Zotero.addon = addon; });
 			} else {
 				var gExtensionManager =
 					Components.classes["@mozilla.org/extensions/manager;1"]
@@ -467,18 +467,8 @@ var Zotero = new function(){
 			return dir;
 		} else {
 			if(this.isFx4) {
-				/* TODO:
-				   From https://developer.mozilla.org/en/Firefox_4_for_developers:
-				    nsIExtensionManager has been replaced by AddonManager. Since there is
-				    apparently no way at present to obtain the install location from a given
-				    extension ID, the closest workaround is to use the directory service to
-				    find the profile directory and append "extensions" to it (though this
-				    approach will not catch extensions outside of the profile directory or
-				    those which are aliased to another location). */
-				var profDir = getProfileDirectory();
-				profDir.append("extensions");
-				profDir.append(ZOTERO_CONFIG.GUID);
-				return profDir;
+				var resourceURI = Zotero.addon.getResourceURI();
+				return resourceURI.QueryInterface(Components.interfaces.nsIFileURL).file;
 			} else {
 				var id = ZOTERO_CONFIG.GUID;
 				var em = Components.classes["@mozilla.org/extensions/manager;1"].
