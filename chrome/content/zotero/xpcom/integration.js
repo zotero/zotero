@@ -213,7 +213,9 @@ Zotero.Integration = new function() {
 		// Try to execute the command; otherwise display an error in the word processor
 		try {
 			integration[command]();
+			integration.cleanup();
 		} catch(e) {
+			integration.cleanup();
 			if(!(e instanceof Zotero.Integration.UserCancelledException)) {
 				if(e instanceof Zotero.Integration.DisplayException) {
 					integration._doc.displayAlert(e.toString(),
@@ -255,7 +257,6 @@ Zotero.Integration = new function() {
 			}
 		} finally {
 			_inProgress = false;
-			integration.cleanup();
 		}
 	}
 	
