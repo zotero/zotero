@@ -7207,7 +7207,7 @@ CSL.Output.Formats.prototype.rtf = {
 	"bibend":"}",
 	"@display/block":"%%STRING%%\\line\r\n",
 	"@bibliography/entry": function(state,str){
-		return str+"\\\r\n";
+		return str;
 	},
 	"@display/left-margin": function(state,str){
 		return str+"\\tab ";
