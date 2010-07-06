@@ -463,10 +463,10 @@ var Zotero = new function(){
 			var dir = Components.classes["@mozilla.org/file/directory_service;1"]
 				.getService(Components.interfaces.nsIProperties)
 				.get("CurProcD", Components.interfaces.nsILocalFile);
-			Zotero.debug(dir.path);
 			return dir;
 		} else {
 			if(this.isFx4) {
+				while(!Zotero.addon) Zotero.mainThread.processNextEvent(true);
 				var resourceURI = Zotero.addon.getResourceURI();
 				return resourceURI.QueryInterface(Components.interfaces.nsIFileURL).file;
 			} else {
@@ -797,6 +797,7 @@ var Zotero = new function(){
 	 */
 	this.getInstalledExtensions = function () {
 		if(this.isFx4) {
+			while(!Zotero.addons) Zotero.mainThread.processNextEvent(true);
 			var installed = Zotero.addons;
 		} else {
 			var em = Components.classes["@mozilla.org/extensions/manager;1"].
