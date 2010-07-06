@@ -1,3 +1,32 @@
+/*
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2009 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+	
+	Based on nsChromeExtensionHandler example code by Ed Anuff at
+	http://kb.mozillazine.org/Dev_:_Extending_the_Chrome_Protocol
+	
+    ***** END LICENSE BLOCK *****
+*/
+
 const ZOTERO_CONTRACTID = '@zotero.org/Zotero;1';
 const ZOTERO_CLASSNAME = 'Zotero';
 const ZOTERO_CID = Components.ID('{e4c61080-ec2d-11da-8ad9-0800200c9a66}');
@@ -6,9 +35,16 @@ const ZOTERO_IID = Components.interfaces.chnmIZoteroService; //unused
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+
+var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
+                         getService(Components.interfaces.nsIXULAppInfo);
+if(appInfo.platformVersion[0] == 2) {
+	Components.utils.import("resource://gre/modules/AddonManager.jsm");
+}
+
 // Assign the global scope to a variable to passed via wrappedJSObject
 var ZoteroWrapped = this;
-
 
 /********************************************************************
 * Include the core objects to be stored within XPCOM
@@ -154,6 +190,7 @@ function ZoteroService(){
 /**
 * Convenience method to replicate window.alert()
 **/
+// TODO: is this still used? if so, move to zotero.js
 function alert(msg){
 	Cc["@mozilla.org/embedcomp/prompt-service;1"]
 		.getService(Ci.nsIPromptService)
@@ -163,6 +200,7 @@ function alert(msg){
 /**
 * Convenience method to replicate window.confirm()
 **/
+// TODO: is this still used? if so, move to zotero.js
 function confirm(msg){
 	return Cc["@mozilla.org/embedcomp/prompt-service;1"]
 		.getService(Ci.nsIPromptService)
@@ -173,6 +211,7 @@ function confirm(msg){
 /**
 * Convenience method to replicate window.setTimeout()
 **/
+// TODO: is this still used? if so, move to zotero.js
 function setTimeout(func, ms){
 	var timer = Components.classes["@mozilla.org/timer;1"].
 		createInstance(Components.interfaces.nsITimer);
@@ -186,64 +225,21 @@ function setTimeout(func, ms){
 //
 // XPCOM goop
 //
+
 ZoteroService.prototype = {
-	QueryInterface: function(iid){
-		if (!iid.equals(Components.interfaces.nsISupports) &&
-			!iid.equals(ZOTERO_IID)){ // interface unused
-			throw Components.results.NS_ERROR_NO_INTERFACE;
-		}
-		return this;
-	}
-};
+	contractID: ZOTERO_CONTRACTID,
+	classDescription: ZOTERO_CLASSNAME,
+	classID: ZOTERO_CID,
+	service: true,
+	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsISupports, ZOTERO_IID])
+}
 
-
-var ZoteroFactory = {
-	createInstance: function(outer, iid){
-		if (outer != null){
-			throw Components.results.NS_ERROR_NO_AGGREGATION;
-		}
-		return new ZoteroService().QueryInterface(iid);
-	}
-};
-
-
-var ZoteroModule = {
-	_firstTime: true,
-	
-	registerSelf: function(compMgr, fileSpec, location, type){
-		if (!this._firstTime){
-			throw Components.results.NS_ERROR_FACTORY_REGISTER_AGAIN;
-		}
-		this._firstTime = false;
-		
-		compMgr =
-			compMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-		
-		compMgr.registerFactoryLocation(ZOTERO_CID,
-										ZOTERO_CLASSNAME,
-										ZOTERO_CONTRACTID,
-										fileSpec,
-										location,
-										type);
-	},
-	
-	unregisterSelf: function(compMgr, location, type){
-		compMgr =
-			compMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-		compMgr.unregisterFactoryLocation(ZOTERO_CID, location);
-	},
-	
-	getClassObject: function(compMgr, cid, iid){
-		if (!cid.equals(ZOTERO_CID)){
-			throw Components.results.NS_ERROR_NO_INTERFACE;
-		}
-		if (!iid.equals(Components.interfaces.nsIFactory)){
-			throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
-		}
-		return ZoteroFactory;
-	},
-	
-	canUnload: function(compMgr){ return true; }
-};
-
-function NSGetModule(comMgr, fileSpec){ return ZoteroModule; }
+/**
+* XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
+* XPCOMUtils.generateNSGetModule is for Mozilla 1.9.2 (Firefox 3.6).
+*/
+if (XPCOMUtils.generateNSGetFactory) {
+	var NSGetFactory = XPCOMUtils.generateNSGetFactory([ZoteroService]);
+} else {
+	var NSGetModule = XPCOMUtils.generateNSGetModule([ZoteroService]);
+}

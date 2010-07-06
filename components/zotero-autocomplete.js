@@ -31,6 +31,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 /*
  * Implements nsIAutoCompleteSearch
@@ -335,68 +336,24 @@ ZoteroAutoComplete.prototype.stopSearch = function(){
 	}
 }
 
-
-ZoteroAutoComplete.prototype.QueryInterface = function(iid){
-    if (!iid.equals(Ci.nsIAutoCompleteSearch) &&
-        !iid.equals(Ci.nsIAutoCompleteObserver) &&
-        !iid.equals(Ci.nsISupports)){
-		  throw Cr.NS_ERROR_NO_INTERFACE;
-	}
-    return this;
-}
-
-
-
 //
 // XPCOM goop
 //
-var ZoteroAutoCompleteFactory = {
-	createInstance: function(outer, iid){
-		if (outer != null){
-			throw Components.results.NS_ERROR_NO_AGGREGATION;
-		}
-		return new ZoteroAutoComplete().QueryInterface(iid);
-	}
-};
 
+ZoteroAutoComplete.prototype.classDescription = ZOTERO_AC_CLASSNAME;
+ZoteroAutoComplete.prototype.classID = ZOTERO_AC_CID;
+ZoteroAutoComplete.prototype.contractID = ZOTERO_AC_CONTRACTID;
+ZoteroAutoComplete.prototype.QueryInterface = XPCOMUtils.generateQI([
+	Components.interfaces.nsIAutoCompleteSearch,
+	Components.interfaces.nsIAutoCompleteObserver,
+	Components.interfaces.nsISupports]);
 
-var ZoteroAutoCompleteModule = {
-	_firstTime: true,
-	
-	registerSelf: function(compMgr, fileSpec, location, type){
-		if (!this._firstTime){
-			throw Components.results.NS_ERROR_FACTORY_REGISTER_AGAIN;
-		}
-		this._firstTime = false;
-		
-		compMgr =
-			compMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-		
-		compMgr.registerFactoryLocation(ZOTERO_AC_CID,
-										ZOTERO_AC_CLASSNAME,
-										ZOTERO_AC_CONTRACTID,
-										fileSpec,
-										location,
-										type);
-	},
-	
-	unregisterSelf: function(compMgr, location, type){
-		compMgr =
-			compMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-		compMgr.unregisterFactoryLocation(ZOTERO_AC_CID, location);
-	},
-	
-	getClassObject: function(compMgr, cid, iid){
-		if (!cid.equals(ZOTERO_AC_CID)){
-			throw Components.results.NS_ERROR_NO_INTERFACE;
-		}
-		if (!iid.equals(Components.interfaces.nsIFactory)){
-			throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
-		}
-		return ZoteroAutoCompleteFactory;
-	},
-	
-	canUnload: function(compMgr){ return true; }
-};
-
-function NSGetModule(comMgr, fileSpec){ return ZoteroAutoCompleteModule; }
+/**
+* XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
+* XPCOMUtils.generateNSGetModule is for Mozilla 1.9.2 (Firefox 3.6).
+*/
+if (XPCOMUtils.generateNSGetFactory) {
+	var NSGetFactory = XPCOMUtils.generateNSGetFactory([ZoteroAutoComplete]);
+} else {
+	var NSGetModule = XPCOMUtils.generateNSGetModule([ZoteroAutoComplete]);
+}

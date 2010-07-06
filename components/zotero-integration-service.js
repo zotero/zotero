@@ -1,4 +1,33 @@
 /*
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2009 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+	
+	Based on nsChromeExtensionHandler example code by Ed Anuff at
+	http://kb.mozillazine.org/Dev_:_Extending_the_Chrome_Protocol
+	
+    ***** END LICENSE BLOCK *****
+*/
+
+/*
 	Based on nsICommandLineHandler example code at
 	https://developer.mozilla.org/en/Chrome/Command_Line
 */
@@ -15,12 +44,15 @@ const nsIWindowWatcher      = Components.interfaces.nsIWindowWatcher;
 const clh_contractID = "@mozilla.org/commandlinehandler/general-startup;1?type=zotero-integration";
 const clh_CID = Components.ID("{531828f8-a16c-46be-b9aa-14845c3b010f}");
 const clh_category = "m-zotero-integration";
+const clh_description = "Zotero Integration Command Line Handler";
+
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
  
 /**
  * The XPCOM component that implements nsICommandLineHandler.
- * It also implements nsIFactory to serve as its own singleton factory.
  */
-const ZoteroIntegrationCommandLineHandler = {
+function ZoteroIntegrationCommandLineHandler() {}
+ZoteroIntegrationCommandLineHandler.prototype = {
 	Zotero : null,
 	
 	/* nsISupports */
@@ -47,65 +79,21 @@ const ZoteroIntegrationCommandLineHandler = {
 		}
 	},
 	
-	/* nsIFactory */
-	createInstance : function(outer, iid) {
-		if (outer != null) throw Components.results.NS_ERROR_NO_AGGREGATION;
-		return this.QueryInterface(iid);
-	},
-	
-	lockFactory : function(lock) {
-		/* no-op */
-	}
+	classDescription: clh_description,
+	classID: clh_CID,
+	contractID: clh_contractID,
+	service: true,
+	_xpcom_categories: [{category:"command-line-handler", entry:clh_category}],
+	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsICommandLineHandler,
+	                                       Components.interfaces.nsISupports])
 };
 
 /**
- * The XPCOM glue that implements nsIModule
- */
-const ZoteroIntegrationModule = {
-	/* nsISupports */
-	QueryInterface : function(iid) {
-		if(iid.equals(nsIModule) || iid.equals(nsISupports)) return this;
-		throw Components.results.NS_ERROR_NO_INTERFACE;
-	},
-	
-	/* nsIModule */
-	getClassObject : function(compMgr, cid, iid) {
-		if(cid.equals(clh_CID)) return ZoteroIntegrationCommandLineHandler.QueryInterface(iid);
-		throw Components.results.NS_ERROR_NOT_REGISTERED;
-	},
-	
-	registerSelf : function(compMgr, fileSpec, location, type) {
-		compMgr.QueryInterface(nsIComponentRegistrar);
-		
-		compMgr.registerFactoryLocation(clh_CID,
-										"myAppHandler",
-										clh_contractID,
-										fileSpec,
-										location,
-										type);
-		
-		var catMan = Components.classes["@mozilla.org/categorymanager;1"].
-		  getService(nsICategoryManager);
-		catMan.addCategoryEntry("command-line-handler",
-								clh_category,
-								clh_contractID, true, true);
-	},
-	
-	unregisterSelf : function(compMgr, location, type) {
-		compMgr.QueryInterface(nsIComponentRegistrar);
-		compMgr.unregisterFactoryLocation(clh_CID, location);
-		
-		var catMan = Components.classes["@mozilla.org/categorymanager;1"].
-		  getService(nsICategoryManager);
-		catMan.deleteCategoryEntry("command-line-handler", clh_category);
-	},
-	
-	canUnload : function (compMgr) {
-		return true;
-	}
-};
-
-/* The NSGetModule function is the magic entry point that XPCOM uses to find what XPCOM objects
- * this component provides
- */
-function NSGetModule(comMgr, fileSpec){ return ZoteroIntegrationModule; }
+* XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
+* XPCOMUtils.generateNSGetModule is for Mozilla 1.9.2 (Firefox 3.6).
+*/
+if (XPCOMUtils.generateNSGetFactory) {
+	var NSGetFactory = XPCOMUtils.generateNSGetFactory([ZoteroIntegrationCommandLineHandler]);
+} else {
+	var NSGetModule = XPCOMUtils.generateNSGetModule([ZoteroIntegrationCommandLineHandler]);
+}
