@@ -7207,11 +7207,7 @@ CSL.Output.Formats.prototype.rtf = {
 	"bibend":"}",
 	"@display/block":"%%STRING%%\\line\r\n",
 	"@bibliography/entry": function(state,str){
-		var spacing = [];
-		for(var i=0; i<state.opt.entryspacing; i++) {
-			spacing.push("\\\r\n ");
-		}
-		return str+spacing.join("");
+		return str+"\\\r\n";
 	},
 	"@display/left-margin": function(state,str){
 		return str+"\\tab ";

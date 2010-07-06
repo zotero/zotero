@@ -231,10 +231,32 @@ Zotero.Cite.removeFromBibliography = function(bib, itemsToRemove) {
 	}
 }
 
-Zotero.Cite.makeFormattedBibliography = function(cslEngine, format, customBibliographyText, omittedItems) {
-	if(format) cslEngine.setOutputFormat(format);
+Zotero.Cite.getBibliographyFormatParameters = function(bib) {
+	var bibStyle = {"tabStops":[], "indent":0, "firstLineIndent":0,
+	                "lineSpacing":(240*bib[0].linespacing),
+	                "entrySpacing":(240*bib[0].entryspacing)};
+	if(bib[0].hangingindent) {
+		bibStyle.indent = 720;				// 720 twips = 0.5 in
+		bibStyle.firstLineIndent = -720;	// -720 twips = -0.5 in
+	} else if(bib[0]["second-field-align"]) {
+		// this is a really sticky issue. the below works for first fields that look like "[1]"
+		// and "1." otherwise, i have no idea. luckily, this will be good enough 99% of the time.
+		var alignAt = 24+bib[0].maxoffset*120;
+		bibStyle.firstLineIndent = -alignAt;
+		if(bib[0]["second-field-align"] == "margin") {
+			bibStyle.tabStops = [0];
+		} else {
+			bibStyle.indent = alignAt;
+			bibStyle.tabStops = [alignAt];
+		}
+	}
+	
+	return bibStyle;
+}
+
+Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
+	cslEngine.setOutputFormat(format);
 	var bib = cslEngine.makeBibliography();
-	if(omittedItems) this.removeFromBibliography(bib, omittedItems);
 	
 	if(format == "html") {
 		// TODO CSS
@@ -242,39 +264,12 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format, customBiblio
 	} else if(format == "text") {
 		return bib[0].bibstart+bib[1].join("")+bib[0].bibend;
 	} else if(format == "rtf") {
-		var tabStop = null;
-		var indent = 0;
-		var firstLineIndent = 0;
-		if(bib[0].hangingindent) {
-			indent = 720;			// 720 twips = 0.5 in
-			firstLineIndent = -720;	// -720 twips = -0.5 in
-		} else if(bib[0]["second-field-align"]) {
-			// this is a really sticky issue. the below works for first fields that look like "[1]"
-			// and "1." otherwise, i have no idea. luckily, this will be good enough 99% of the time.
-			var alignAt = 24+bib[0].maxoffset*120;
-			firstLineIndent = -alignAt;
-			if(bib[0]["second-field-align"] == "margin") {
-				tabStop = 0;
-			} else {
-				indent = alignAt;
-				tabStop = alignAt;
-			}
-		}
+		var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
 		
-		var preamble = "";
-		if(tabStop !== null) preamble += "\\tx"+tabStop+" ";
-		preamble += "\\li"+indent+" \\fi"+firstLineIndent+" ";
-		preamble += "\\sl"+(240*bib[0].linespacing)+" \\slmult1 ";
-		
-		if(customBibliographyText) {
-			// customBibliographyText is an optional map of strings to replace specific citations
-			// in the bibliography (values) to item IDs (keys)
-			for(var i in bib[0].entry_ids) {
-				if(customBibliographyText[bib[0].entry_ids[i]]) {
-					bib[1][i] = customBibliographyText[bib[0].entry_ids[i]];
-				}
-			}
-		}
+		var preamble = (tabStops.length ? "\\tx"+tabStops.join(" \\tx")+" " : "");
+		preamble += "\\li"+indent+" \\fi"+firstLineIndent+" "
+		           +"\\sl"+bibStyle.lineSpacing+" \\slmult1 "
+		           +"\\sa"+bibStyle.entrySpacing+" ";
 		
 		return bib[0].bibstart+preamble+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
 	} else {

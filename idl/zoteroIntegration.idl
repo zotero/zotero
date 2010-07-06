@@ -25,6 +25,10 @@
 #include "nsISupports.idl"
 #include "nsISimpleEnumerator.idl"
 
+/**
+ * The zoteroIntegrationField interface corresponds to a field containing an individual citation
+ * or bibliography.
+ */
 [scriptable, uuid(aedb37a0-48bb-11de-8a39-0800200c9a66)]
 interface zoteroIntegrationField : nsISupports
 {
@@ -114,6 +118,14 @@ interface zoteroIntegrationDocument : nsISupports
    */
   void convert(in nsISimpleEnumerator fields, in string toFieldType,
                [array, size_is(count)] in unsigned short toNoteType, in unsigned long count);
+  
+  /**
+   * Sets the bibliography style, overwriting the current values for this document
+   */
+  void setBibliographyStyle(in long firstLineIndent, in long bodyIndent,
+                            in unsigned long lineSpacing, in unsigned long entrySpacing,
+                            [array, size_is(tabStopCount)] in long tabStops,
+                            in unsigned long tabStopCount);
   
   /**
    * Runs on function completion to clean up everything integration played with.
