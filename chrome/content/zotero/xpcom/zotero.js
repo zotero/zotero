@@ -410,7 +410,7 @@ var Zotero = new function(){
 		
 		// Initialize various services
 		Zotero.Integration.init();
-		Zotero.Connector.init();
+		//Zotero.Connector.init();
 		
 		Zotero.Zeroconf.init();
 		
