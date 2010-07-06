@@ -2397,7 +2397,7 @@ var ZoteroPane = new function()
 		};
 		window.openDialog('chrome://zotero/content/preferences/preferences.xul',
 			'zotero-prefs',
-			'chrome,titlebar,toolbar,'
+			'chrome,titlebar,toolbar,centerscreen,'
 				+ Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal',
 			io
 		);
