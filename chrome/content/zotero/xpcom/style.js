@@ -32,6 +32,7 @@ Zotero.Styles = new function() {
 	var _initialized = false;
 	var _styles, _visibleStyles;
 	
+	this.xsltProcessor = null;
 	this.ios = Components.classes["@mozilla.org/network/io-service;1"].
 		getService(Components.interfaces.nsIIOService);
 	
@@ -393,17 +394,19 @@ function() {
 	}
 	
 	if(this._version == "0.8") {
-		// get XSLT file
-		let xhr = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-		xhr.open("GET", "chrome://zotero/content/updateCSL.xsl", false);
-		xhr.overrideMimeType("text/xml");
-		xhr.send();
-		let updateXSLT = xhr.responseXML;
-		
-		// load XSLT file into XSLTProcessor
-		let xsltProcessor = Components.classes["@mozilla.org/document-transformer;1?type=xslt"]
-			.createInstance(Components.interfaces.nsIXSLTProcessor);
-		xsltProcessor.importStylesheet(updateXSLT);
+		// get XSLT processor from updateCSL.xsl file
+		if(!Zotero.Styles.xsltProcessor) {
+			let xhr = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+			xhr.open("GET", "chrome://zotero/content/updateCSL.xsl", false);
+			xhr.overrideMimeType("text/xml");
+			xhr.send();
+			let updateXSLT = xhr.responseXML;
+			
+			// load XSLT file into XSLTProcessor
+			Zotero.Styles.xsltProcessor = Components.classes["@mozilla.org/document-transformer;1?type=xslt"]
+				.createInstance(Components.interfaces.nsIXSLTProcessor);
+			Zotero.Styles.xsltProcessor.importStylesheet(updateXSLT);
+		}
 		
 		// read style file as DOM XML
 		let styleDOMXML = Components.classes["@mozilla.org/xmlextras/domparser;1"]
@@ -411,7 +414,7 @@ function() {
 			.parseFromString(this.getXML(), "text/xml");
 		
 		// apply XSLT and serialize output
-		let newDOMXML = xsltProcessor.transformToDocument(styleDOMXML);
+		let newDOMXML = Zotero.Styles.xsltProcessor.transformToDocument(styleDOMXML);
 		var xml = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
 			.createInstance(Components.interfaces.nsIDOMSerializer).serializeToString(newDOMXML);
 	} else {
