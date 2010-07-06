@@ -177,7 +177,7 @@ Zotero.Cite.System.retrieveItem = function(item){
 			date = Zotero.Date.strToDate(date);
 			if(date.part && !date.month) {
 				// if there's a part but no month, interpret literally
-				cslItem[variable] = {"literal": date};
+				cslItem[variable] = {"literal": date.part};
 			} else {
 				// otherwise, use date-parts
 				var dateParts = [];
