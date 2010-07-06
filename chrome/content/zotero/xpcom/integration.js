@@ -401,6 +401,11 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 	} else {
 		var data = new Zotero.Integration.DocumentData(dataString);
 		if(data.dataVersion < DATA_VERSION) {
+			if(data.dataVersion == 1 && data.prefs.fieldType == "Field" && this._app.primaryFieldType == "ReferenceMark") {
+				// Converted OOo docs use ReferenceMarks, not fields
+				data.prefs.fieldType = "ReferenceMark";
+			}
+			
 			var warning = this._doc.displayAlert(Zotero.getString("integration.upgradeWarning"),
 				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
 				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
@@ -411,11 +416,6 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 		if(Zotero.Integration.sessions[data.sessionID]) {
 			this._session = Zotero.Integration.sessions[data.sessionID];
 		} else {
-			if(data.prefs.fieldType == "Field" && this._app.primaryFieldType != "Field") {
-				// Converted OOo docs use ReferenceMarks, not fields
-				data.prefs.fieldType = "ReferenceMark";
-			}
-
 			this._session = this._createNewSession(data);
 			
 			// make sure style is defined
@@ -691,8 +691,25 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 				field.setCode(BIBLIOGRAPHY_CODE+" "+bibliographyData);
 			}
 		}
-	
-		var bibliographyText = this._session.getBibliography();
+		
+		// get bibliography and format as RTF
+		var bib = this._session.getBibliography();
+		var bibliographyText = bib[0].bibstart+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
+		
+		// if bibliography style not set, set it
+		if(!this._session.data.bibliographyStyleHasBeenSet && this._doc.setBibliographyStyle) {
+			var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
+			
+			// set bibliography style
+			this._doc.setBibliographyStyle(bibStyle.firstLineIndent, bibStyle.indent,
+				bibStyle.lineSpacing, bibStyle.entrySpacing, bibStyle.tabStops, bibStyle.tabStops.length);
+			
+			// set bibliographyStyleHasBeenSet parameter to prevent further changes	
+			this._session.data.bibliographyStyleHasBeenSet = true;
+			this._doc.setDocumentData(this._session.data.serializeXML());
+		}
+		
+		// set bibliography text
 		for each(var field in this._bibliographyFields) {
 			if(bibliographyText) {
 				field.setText(bibliographyText, true);
@@ -1307,9 +1324,22 @@ Zotero.Integration.Session.prototype.deleteCitation = function(index) {
  * Gets integration bibliography
  */
 Zotero.Integration.Session.prototype.getBibliography = function() {
-	// use real RTF, but chop off the first \n
 	this.updateUncitedItems();
-	return Zotero.Cite.makeFormattedBibliography(this.style, "rtf", this.customBibliographyText, this.omittedItems);
+	
+	// generate bibliography
+	var bib = this.style.makeBibliography();
+	
+	// omit items
+	Zotero.Cite.removeFromBibliography(bib, this.omittedItems);	
+	
+	// replace items with their custom counterpars
+	for(var i in bib[0].entry_ids) {
+		if(this.customBibliographyText[bib[0].entry_ids[i]]) {
+			bib[1][i] = this.customBibliographyText[bib[0].entry_ids[i]];
+		}
+	}
+	
+	return bib;
 }
 
 /**
@@ -1661,7 +1691,7 @@ Zotero.Integration.Session.prototype.editBibliography = function() {
  * @class Interface for bibliography editor to alter document bibliography
  * @constructor
  * Creates a new bibliography editor interface
- * @param {Zotero.Integration.Session} session
+ * @param session {Zotero.Integration.Session}
  */
 Zotero.Integration.Session.BibliographyEditInterface = function(session) {
 	this.session = session;
@@ -1802,9 +1832,11 @@ Zotero.Integration.DocumentData = function(string) {
  * Serializes document-specific data as XML
  */
 Zotero.Integration.DocumentData.prototype.serializeXML = function() {
-	var xmlData = <data data-version={DATA_VERSION} zotero-version={Zotero.version}><session id={this.sessionID} />
-		<style id={this.style.styleID} hasBibliography={this.style.hasBibliography ? 1 : 0}/>
-		<prefs/>
+	var xmlData = <data data-version={DATA_VERSION} zotero-version={Zotero.version}>\
+			<session id={this.sessionID} />
+			<style id={this.style.styleID} hasBibliography={this.style.hasBibliography ? 1 : 0}
+				bibliographyStyleHasBeenSet={this.bibliographyStyleHasBeenSet ? 1 : 0}/>
+			<prefs/>
 		</data>;
 	
 	for(var pref in this.prefs) {
@@ -1828,7 +1860,8 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 	
 	this.sessionID = xmlData.session.@id.toString();
 	this.style = {"styleID":xmlData.style.@id.toString(),
-		"hasBibliography":(xmlData.style.@hasBibliography.toString() == 1)};
+		"hasBibliography":(xmlData.style.@hasBibliography.toString() == 1),
+		"bibliographyStyleHasBeenSet":(xmlData.style.@bibliographyStyleHasBeenSet.toString() == 1)};
 	this.prefs = {};
 	for each(var pref in xmlData.prefs.children()) {
 		this.prefs[pref.@name.toString()] = pref.@value.toString();
@@ -1854,7 +1887,8 @@ Zotero.Integration.DocumentData.prototype.unserialize = function(input) {
 		
 		this.sessionID = prefParameters[0];
 		this.style = {"styleID":prefParameters[1], 
-			"hasBibliography":(prefParameters[3] == "1" || prefParameters[3] == "True")};
+			"hasBibliography":(prefParameters[3] == "1" || prefParameters[3] == "True"),
+			"bibliographyStyleHasBeenSet":false};
 		this.prefs = {"fieldType":((prefParameters[5] == "1" || prefParameters[5] == "True") ? "Bookmark" : "Field")};
 		if(prefParameters[2] == "note") {
 			if(prefParameters[4] == "1" || prefParameters[4] == "True") {
