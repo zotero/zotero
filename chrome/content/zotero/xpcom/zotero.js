@@ -188,30 +188,33 @@ var Zotero = new function(){
 		
 		var appInfo =
 			Components.classes["@mozilla.org/xre/app-info;1"].
-				getService(Components.interfaces.nsIXULAppInfo)
+				getService(Components.interfaces.nsIXULAppInfo);
+		this.appName = appInfo.name;
+		this.isFx2 = appInfo.platformVersion.indexOf('1.8') === 0; // TODO: remove
+		this.isFx3 = appInfo.platformVersion.indexOf('1.9') === 0;
+		this.isFx30 = appInfo.platformVersion == '1.9'
+						|| appInfo.platformVersion.indexOf('1.9.0') === 0;
+		this.isFx35 = appInfo.platformVersion.indexOf('1.9.1') === 0;
+		this.isFx31 = this.isFx35;
+		this.isFx36 = appInfo.platformVersion.indexOf('1.9.2') === 0;
+		this.isFx4 = appInfo.platformVersion[0] == 2;
+		
 		this.isStandalone = appInfo.ID == ZOTERO_CONFIG['GUID'];
-		Zotero.debug(this.isStandalone);
 		if(this.isStandalone) {
-			this.isFx35 = true;
 			this.version = appInfo.version;
 		} else {
-			this.appName = appInfo.name;
-			this.isFx2 = appInfo.platformVersion.indexOf('1.8') === 0; // TODO: remove
-			this.isFx3 = appInfo.platformVersion.indexOf('1.9') === 0;
-			this.isFx30 = appInfo.platformVersion == '1.9'
-							|| appInfo.platformVersion.indexOf('1.9.0') === 0;
-			this.isFx35 = appInfo.platformVersion.indexOf('1.9.1') === 0;
-			this.isFx31 = this.isFx35;
-			
 			// Load in the extension version from the extension manager
-			var nsIUpdateItem = Components.interfaces.nsIUpdateItem;
-			var gExtensionManager =
-				Components.classes["@mozilla.org/extensions/manager;1"]
-					.getService(Components.interfaces.nsIExtensionManager);
-			this.version
-				= gExtensionManager.getItemForID(ZOTERO_CONFIG['GUID']).version;
+			if(this.isFx4) {
+				AddonManager.getAddonByID(ZOTERO_CONFIG['GUID'],
+					function(addon) { Zotero.version = addon.version });
+			} else {
+				var gExtensionManager =
+					Components.classes["@mozilla.org/extensions/manager;1"]
+						.getService(Components.interfaces.nsIExtensionManager);
+				this.version
+					= gExtensionManager.getItemForID(ZOTERO_CONFIG['GUID']).version;
+			}
 		}
-		this.isFx36 = appInfo.platformVersion.indexOf('1.9.2') === 0;
 		
 		// OS platform
 		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
@@ -222,6 +225,13 @@ var Zotero = new function(){
 		this.isWin = (this.platform.substr(0, 3) == "Win");
 		this.isLinux = (this.platform.substr(0, 5) == "Linux");
 		this.oscpu = win.navigator.oscpu;
+		
+		// Installed extensions (Fx4 only)
+		if(this.isFx4) {
+			AddonManager.getAllAddons(function(addonList) {
+				Zotero.addons = addonList;
+			});
+		}
 		
 		// Locale		
 		var ph = Components.classes["@mozilla.org/network/protocol;1?name=http"].
@@ -398,11 +408,10 @@ var Zotero = new function(){
 			Zotero.Schema.updateCustomTables();
 		}
 		
-		// Initialize integration web server
+		// Initialize various services
 		Zotero.Integration.init();
+		Zotero.Connector.init();
 		
-		// Initialize data web server
-		Zotero.DataServer.init();
 		Zotero.Zeroconf.init();
 		
 		Zotero.Sync.init();
@@ -457,10 +466,25 @@ var Zotero = new function(){
 			Zotero.debug(dir.path);
 			return dir;
 		} else {
-			var id = ZOTERO_CONFIG.GUID;
-			var em = Components.classes["@mozilla.org/extensions/manager;1"].
-						getService(Components.interfaces.nsIExtensionManager);
-			return em.getInstallLocation(id).getItemLocation(id);
+			if(this.isFx4) {
+				/* TODO:
+				   From https://developer.mozilla.org/en/Firefox_4_for_developers:
+				    nsIExtensionManager has been replaced by AddonManager. Since there is
+				    apparently no way at present to obtain the install location from a given
+				    extension ID, the closest workaround is to use the directory service to
+				    find the profile directory and append "extensions" to it (though this
+				    approach will not catch extensions outside of the profile directory or
+				    those which are aliased to another location). */
+				var profDir = getProfileDirectory();
+				profDir.append("extensions");
+				profDir.append(ZOTERO_CONFIG.GUID);
+				return profDir;
+			} else {
+				var id = ZOTERO_CONFIG.GUID;
+				var em = Components.classes["@mozilla.org/extensions/manager;1"].
+							getService(Components.interfaces.nsIExtensionManager);
+				return em.getInstallLocation(id).getItemLocation(id);
+			}
 		}
 	}
 	
@@ -782,11 +806,15 @@ var Zotero = new function(){
 	 * @return	{String[]}		Array of extension names and versions
 	 */
 	this.getInstalledExtensions = function () {
-		var em = Components.classes["@mozilla.org/extensions/manager;1"].
-					getService(Components.interfaces.nsIExtensionManager);
-		var installed = em.getItemList(
-			Components.interfaces.nsIUpdateItem.TYPE_ANY, {}
-		);
+		if(this.isFx4) {
+			var installed = Zotero.addons;
+		} else {
+			var em = Components.classes["@mozilla.org/extensions/manager;1"].
+						getService(Components.interfaces.nsIExtensionManager);
+			var installed = em.getItemList(
+				Components.interfaces.nsIUpdateItem.TYPE_ANY, {}
+			);
+		}
 		
 		var addons = [];
 		for each(var addon in installed) {

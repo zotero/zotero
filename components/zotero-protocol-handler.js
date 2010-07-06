@@ -27,11 +27,12 @@
     ***** END LICENSE BLOCK *****
 */
 
-
 const ZOTERO_SCHEME = "zotero";
 const ZOTERO_PROTOCOL_CID = Components.ID("{9BC3D762-9038-486A-9D70-C997AF848A7C}");
 const ZOTERO_PROTOCOL_CONTRACTID = "@mozilla.org/network/protocol;1?name=" + ZOTERO_SCHEME;
 const ZOTERO_PROTOCOL_NAME = "Zotero Chrome Extension Protocol";
+
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 // Dummy chrome URL used to obtain a valid chrome channel
 // This one was chosen at random and should be able to be substituted
@@ -943,7 +944,6 @@ function ChromeExtensionHandler() {
 		}
 	};
 	
-	
 	var ReportExtensionSpec = ZOTERO_SCHEME + "://report"
 	this._extensions[ReportExtensionSpec] = ReportExtension;
 	
@@ -1035,7 +1035,7 @@ ChromeExtensionHandler.prototype = {
 						extChannel.owner = this._systemPrincipal;
 					}
 					
-					extChannel.originalURI = uri;
+					if(!extChannel.originalURI) extChannel.originalURI = uri;
 					
 					return extChannel;
 				}
@@ -1057,62 +1057,23 @@ ChromeExtensionHandler.prototype = {
 		return newChannel;
 	},
 	
-	QueryInterface : function(iid) {
-		if (!iid.equals(Components.interfaces.nsIProtocolHandler) &&
-				!iid.equals(Components.interfaces.nsISupports)) {
-			throw Components.results.NS_ERROR_NO_INTERFACE;
-		}
-		return this;
-	}
+	contractID: ZOTERO_PROTOCOL_CONTRACTID,
+	classDescription: ZOTERO_PROTOCOL_NAME,
+	classID: ZOTERO_PROTOCOL_CID,
+	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsISupports,
+	                                       Components.interfaces.nsIProtocolHandler])
 };
-
 
 //
 // XPCOM goop
 //
 
-var ChromeExtensionModule = {
-	cid: ZOTERO_PROTOCOL_CID,
-	
-	contractId: ZOTERO_PROTOCOL_CONTRACTID,
-	
-	registerSelf : function(compMgr, fileSpec, location, type) {
-		compMgr = compMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
-		compMgr.registerFactoryLocation(
-			ZOTERO_PROTOCOL_CID, 
-			ZOTERO_PROTOCOL_NAME, 
-			ZOTERO_PROTOCOL_CONTRACTID, 
-			fileSpec, 
-			location,
-			type
-		);
-	},
-	
-	getClassObject : function(compMgr, cid, iid) {
-		if (!cid.equals(ZOTERO_PROTOCOL_CID)) {
-			throw Components.results.NS_ERROR_NO_INTERFACE;
-		}
-		if (!iid.equals(Components.interfaces.nsIFactory)) {
-			throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
-		}
-		return this.myFactory;
-	},
-	
-	canUnload : function(compMgr) {
-		return true;
-	},
-	
-	myFactory : {
-		createInstance : function(outer, iid) {
-			if (outer != null) {
-				throw Components.results.NS_ERROR_NO_AGGREGATION;
-			}
-			
-			return new ChromeExtensionHandler().QueryInterface(iid);
-		}
-	}
-};
-
-function NSGetModule(compMgr, fileSpec) {
-    return ChromeExtensionModule;
+/**
+* XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
+* XPCOMUtils.generateNSGetModule is for Mozilla 1.9.2 (Firefox 3.6).
+*/
+if (XPCOMUtils.generateNSGetFactory) {
+	var NSGetFactory = XPCOMUtils.generateNSGetFactory([ChromeExtensionHandler]);
+} else {
+	var NSGetModule = XPCOMUtils.generateNSGetModule([ChromeExtensionHandler]);
 }
