@@ -107,7 +107,7 @@
 					<menuitem label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile()"/>
 					<menuitem oncommand="Zotero_Report_Interface.loadCollectionReport()"/>
 					<menuitem label="&zotero.toolbar.emptyTrash.label;" oncommand="ZoteroPane.emptyTrash();"/>
-					<menuitem label="Refresh" oncommand="ZoteroPane.refreshCommons();"/><!--TODO localize -->
+					<menuitem label="Refresh" oncommand="ZoteroPane.refreshCommonsBucket();"/><!--TODO localize -->
 				</popup>
 				<popup id="zotero-itemmenu" onpopupshowing="ZoteroPane.buildItemContextMenu();">
 					<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="ZoteroPane.selectItem(this.parentNode.getAttribute('itemID'), true)"/>

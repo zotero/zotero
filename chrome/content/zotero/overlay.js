@@ -1343,7 +1343,7 @@ var ZoteroPane = new function()
 		}
 		var itemGroup = this.itemsView._itemGroup;
 		
-		if (!itemGroup.isTrash() && !itemGroup.isCommons() && !this.canEdit()) {
+		if (!itemGroup.isTrash() && !itemGroup.isBucket() && !this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -1383,7 +1383,7 @@ var ZoteroPane = new function()
 		else if (itemGroup.isShare()) {
 			return;
 		}
-		else if (itemGroup.isCommons()) {
+		else if (itemGroup.isBucket()) {
 			var prompt = toDelete;
 		}
 		// Do nothing in trash view if any non-deleted items are selected
@@ -1465,22 +1465,24 @@ var ZoteroPane = new function()
 		}
 	}
 
-	this.refreshCommons = function() {
-		if (this.collectionsView
-				&& this.collectionsView.selection
-				&& this.collectionsView.selection.count == 1
-				&& this.collectionsView.selection.currentIndex != -1) {
-			var itemGroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
-			if (itemGroup && itemGroup.isCommons()) {
-				var self = this;
-				Zotero.Commons.syncBucketList(function () {
-					self.itemsView.refresh();
-					self.itemsView.sort();
-					
-					// On a manual refresh, also check for new OCRed files
-					Zotero.Commons.syncFiles();
-				});
-			}
+	this.refreshCommonsBucket = function() {
+		if (!this.collectionsView
+				|| !this.collectionsView.selection
+				|| this.collectionsView.selection.count != 1
+				|| this.collectionsView.selection.currentIndex == -1) {
+			return false;
+		}
+		
+		var itemGroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+		if (itemGroup && itemGroup.isBucket()) {
+			var self = this;
+			itemGroup.ref.refreshItems(function () {
+				self.itemsView.refresh();
+				self.itemsView.sort();
+				
+				// On a manual refresh, also check for new OCRed files
+				//Zotero.Commons.syncFiles();
+			});
 		}
 	}
 	
@@ -1783,7 +1785,7 @@ var ZoteroPane = new function()
 			exportFile: 9,
 			loadReport: 10,
 			emptyTrash: 11,
-			refreshCommons: 12
+			refreshCommonsBucket: 12
 		};
 		
 		var itemGroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
@@ -1854,8 +1856,8 @@ var ZoteroPane = new function()
 		else if (itemGroup.isHeader()) {
 			// Don't show menu for headers
 		}
-		else if (itemGroup.isCommons()) {
-			show = [m.refreshCommons];
+		else if (itemGroup.isBucket()) {
+			show = [m.refreshCommonsBucket];
 		}
 		// Group
 		else if (itemGroup.isGroup()) {
@@ -2156,11 +2158,15 @@ var ZoteroPane = new function()
 		// TODO: implement menu for remote items
 		if (!itemGroup.editable) {
 			for (var i in m) {
-				switch (i) {
-					case 'exportItems':
-					case 'createBib':
-					case 'loadReport':
-						continue;
+				// Still show export/bib/report for non-editable views
+				// (other than Commons buckets, which aren't real items)
+				if (!itemGroup.isBucket()) {
+					switch (i) {
+						case 'exportItems':
+						case 'createBib':
+						case 'loadReport':
+							continue;
+					}
 				}
 				disable.push(m[i]);
 				var index = enable.indexOf(m[i]);
@@ -2273,9 +2279,8 @@ var ZoteroPane = new function()
 				return;
 			}
 
-			if (itemGroup.isCommons()) {
-				// TODO: take to a search of the user's buckets?
-				//ZoteroPane.loadURI(itemGroup.ref.uri);
+			if (itemGroup.isBucket()) {
+				ZoteroPane.loadURI(itemGroup.ref.uri);
 				event.stopPropagation();
 			}
 		}
@@ -2302,9 +2307,9 @@ var ZoteroPane = new function()
 							ZoteroPane.collectionsView.selection.currentIndex
 						);
 						
-						if (itemGroup.isCommons()) {
-							var bucket = Zotero.Commons.getBucketFromItem(item);
-							ZoteroPane.loadURI(bucket.uri);
+						if (itemGroup.isBucket()) {
+							var uri = itemGroup.ref.getItemURI(item);
+							ZoteroPane.loadURI(uri);
 							event.stopPropagation();
 							return;
 						}
