@@ -28,7 +28,7 @@ Zotero.Notifier = new function(){
 	var _disabled = false;
 	var _types = [
 		'collection', 'creator', 'search', 'share', 'share-items', 'item',
-		'collection-item', 'item-tag', 'tag', 'group', 'commons'
+		'collection-item', 'item-tag', 'tag', 'group', 'bucket'
 	];
 	var _inTransaction;
 	var _locked = false;
