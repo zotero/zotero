@@ -929,7 +929,16 @@ Zotero.Translate.prototype._generateSandbox = function() {
 	
 	// set up sandbox
 	this._sandbox = new Components.utils.Sandbox(sandboxLocation);
-	this._sandbox.Zotero = new Object();
+	Components.utils.evalInSandbox("var Zotero = {};"+
+	"Zotero.Item = function (itemType) {"+
+			"this.itemType = itemType;"+
+			"this.creators = [];"+
+			"this.notes = [];"+
+			"this.tags = [];"+
+			"this.seeAlso = [];"+
+			"this.attachments = [];"+
+	"};"+
+	"Zotero.Item.prototype.complete = function() { Zotero._itemDone(this); };", this._sandbox)
 	
 	// add utilities
 	this._sandbox.Zotero.Utilities = new Zotero.Utilities.Translate(this);
@@ -941,8 +950,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 		this._sandbox.Zotero.nextCollection = function() { return me._exportGetCollection() }
 	} else {
 		// copy routines to add new items
-		this._sandbox.Zotero.Item = Zotero.Translate.GenerateZoteroItemClass();
-		this._sandbox.Zotero.Item.prototype.complete = function() {me._itemDone(this)};
+		this._sandbox.Zotero._itemDone = function(a) {me._itemDone(a)};
 		
 		if(this.type == "import") {
 			// add routines to add new collections
