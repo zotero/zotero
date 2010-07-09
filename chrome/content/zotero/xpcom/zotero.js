@@ -367,6 +367,7 @@ var Zotero = new function(){
 			}
 			catch (e) {
 				if (typeof e == 'string' && e.match('newer than SQL file')) {
+					var kbURL = "http://zotero.org/support/kb/newer_db_version";
 					var msg = Zotero.localeJoin([
 							Zotero.getString('startupError.zoteroVersionIsOlder'),
 							Zotero.getString('startupError.zoteroVersionIsOlder.upgrade')
