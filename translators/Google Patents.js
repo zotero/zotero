@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-07-08 23:06:46"
+	"lastUpdated":"2010-07-09 07:46:31"
 }
 
 function detectWeb(doc, url) {
@@ -128,6 +128,7 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
+	Zotero.debug(doc.documentElement.innerHTML);
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
@@ -136,17 +137,16 @@ function doWeb(doc, url) {
 	var host = 'http://' + doc.location.host + "/";
 	
 	var articles = new Array();
-	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = Zotero.Utilities.getItemArray(doc, doc, /\/patents\/about\?id=/);
 		items = Zotero.selectItems(items);
 		if(!items) return true;
 		for (var i in items) {
 			articles.push(i);
-		}
-	
+		}	
+	} else {
+		articles.push(url);
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-	
+	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 }
