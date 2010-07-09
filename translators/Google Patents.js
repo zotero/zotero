@@ -34,30 +34,25 @@ function associateData (newItem, dataTags, field, zoteroField) {
 }
 
 function scrape(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;	
-	
 	var dataTags = new Object();
 	var newItem = new Zotero.Item("patent");
 
 	//Grab the patent_bibdata items and the text node directly next to them 
-	var xPathHeadings = doc.evaluate('//div[@class="patent_bibdata"]//b', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var xPathContents = doc.evaluate('//div[@class="patent_bibdata"]//b/following::text()[1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var xPathHeadings = doc.evaluate('//div[@class="patent_bibdata"]//b', doc, null, XPathResult.ANY_TYPE, null);
+	var xPathContents = doc.evaluate('//div[@class="patent_bibdata"]//b/following::text()[1]', doc, null, XPathResult.ANY_TYPE, null);
 	
 	// create an associative array of the items and their contents
 	var heading, content;
 	while( heading = xPathHeadings.iterateNext(), content = xPathContents.iterateNext()){
 		if(heading.textContent == 'Publication number'){
-			content = doc.evaluate('//div[@class="patent_bibdata"]//b[text()="Publication number"]/following::nobr[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			content = doc.evaluate('//div[@class="patent_bibdata"]//b[text()="Publication number"]/following::nobr[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		}
 		dataTags[heading.textContent] = content.textContent.replace(": ", '');;
 		//Zotero.debug(dataTags);
 	}
 	
-	if (doc.evaluate('//td[3]/p', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		newItem.abstractNote = (doc.evaluate('//td[3]/p', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Abstract", ''));
+	if (doc.evaluate('//td[3]/p', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		newItem.abstractNote = (doc.evaluate('//td[3]/p', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Abstract", ''));
 	}	
 	
 	
@@ -72,10 +67,10 @@ function scrape(doc, url) {
 	var splitContent = new Array();
 	splitContent = contents.split(/xxx/);
 	*/
- //associate headings with contents.
-
-//extra field\
-	newItem.extra = '';
+	//associate headings with contents.
+	
+	//extra field\
+	//newItem.extra = '';
 
 	for (fieldTitle in dataTags) {
 		Zotero.debug(fieldTitle);
@@ -121,19 +116,13 @@ function scrape(doc, url) {
 	associateData (newItem, dataTags, "Abstract", "abstractNote");
 	associateData (newItem, dataTags, "Application number", "applicationNumber");
 	
-	newItem.title = doc.evaluate('//h1[@class="title"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	newItem.title = doc.evaluate('//h1[@class="title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	newItem.url = doc.location.href;
 
 	newItem.complete();
 }
 
 function doWeb(doc, url) {
-	Zotero.debug(doc.documentElement.innerHTML);
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var host = 'http://' + doc.location.host + "/";
 	
 	var articles = new Array();
