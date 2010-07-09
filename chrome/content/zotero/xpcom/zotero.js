@@ -389,7 +389,7 @@ var Zotero = new function(){
 							Zotero.getString('startupError.zoteroVersionIsOlder'),
 							Zotero.getString('startupError.zoteroVersionIsOlder.upgrade')
 						]) + "\n\n"
-						+ Zotero.getString('startupError.zoteroVersionIsOlder.current') + "\n\n"
+						+ Zotero.getString('startupError.zoteroVersionIsOlder.current', Zotero.version) + "\n\n"
 						+ Zotero.getString('general.seeForMoreInformation', kbURL);
 					this.startupError = msg;
 				}
