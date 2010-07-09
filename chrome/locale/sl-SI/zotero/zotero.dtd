@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Podpora in dokumentacija">
 <!ENTITY zotero.toolbar.about.label "O Zoteru">
 <!ENTITY zotero.toolbar.advancedSearch "Napredno izkanje">
-<!ENTITY zotero.toolbar.search.label "Išči:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Vključi/izključi celozaslonski način">
 <!ENTITY zotero.toolbar.openURL.label "Najdi">
 <!ENTITY zotero.toolbar.openURL.tooltip "Poišči v krajevni knjižnici">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "Shrani kot RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Shrani kot HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Kopiraj na odložišče">
-<!ENTITY zotero.bibliography.macClipboardWarning "(Oblikovanje bo izgubljeno.)">
 <!ENTITY zotero.bibliography.print.label "Natisni">
 
 <!ENTITY zotero.integration.docPrefs.title "Lastnosti dokumenta">

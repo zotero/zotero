@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "Giới thiệu về Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Tìm kiếm Nâng cao">
-<!ENTITY zotero.toolbar.search.label "Tìm kiếm:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Bật/Tắt chế độ Toàn màn hình">
 <!ENTITY zotero.toolbar.openURL.label "Định vị">
 <!ENTITY zotero.toolbar.openURL.tooltip "Tìm trong thư viện cục bộ của bạn">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "Lưu dưới dạng RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Lưu dưới dạng HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Sao chép vào Clipboard">
-<!ENTITY zotero.bibliography.macClipboardWarning "(Định dạng rich-text sẽ bị mất.)">
 <!ENTITY zotero.bibliography.print.label "In">
 
 <!ENTITY zotero.integration.docPrefs.title "Các tùy chọn về Tài liệu">

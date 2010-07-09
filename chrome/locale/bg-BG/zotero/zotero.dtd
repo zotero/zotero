@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Подръжка и документация">
 <!ENTITY zotero.toolbar.about.label "За Зотеро">
 <!ENTITY zotero.toolbar.advancedSearch "Търсене за напреднали">
-<!ENTITY zotero.toolbar.search.label "Търси:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Превключва режим на цял екран">
 <!ENTITY zotero.toolbar.openURL.label "Открива">
 <!ENTITY zotero.toolbar.openURL.tooltip "Открива чрез вашата локална библиотека">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "Записва като RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Записва като HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Копира в клипборда">
-<!ENTITY zotero.bibliography.macClipboardWarning "(Богатото форматиране на текста ще бъде загубено.)">
 <!ENTITY zotero.bibliography.print.label "Печат">
 
 <!ENTITY zotero.integration.docPrefs.title "Настройки на докумета">

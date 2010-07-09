@@ -94,11 +94,6 @@ var Zotero_File_Interface_Bibliography = new function() {
 			// restore saved bibliographic settings
 			document.getElementById('output-radio').selectedItem =
 				document.getElementById(Zotero.Prefs.get("export.bibliographySettings"));
-			
-			// disable clipboard in Fx3.0 on the Mac, because it can't support formatted output
-			if(Zotero.isMac && Zotero.isFx30) {
-				document.getElementById("mac-clipboard-warning").hidden = false;
-			}
 		}
 		
 		// ONLY FOR integrationDocPrefs.xul: update status of displayAs, set

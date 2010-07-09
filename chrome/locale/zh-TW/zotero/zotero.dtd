@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "支援及說明文件">
 <!ENTITY zotero.toolbar.about.label "關於 Zotero…">
 <!ENTITY zotero.toolbar.advancedSearch "進階搜尋">
-<!ENTITY zotero.toolbar.search.label "搜尋：">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "切換全螢幕模式">
 <!ENTITY zotero.toolbar.openURL.label "找出">
 <!ENTITY zotero.toolbar.openURL.tooltip "用你本地的圖書館來尋找">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "儲存成 RTF 檔">
 <!ENTITY zotero.bibliography.saveAsHTML.label "儲存成 HTML 檔">
 <!ENTITY zotero.bibliography.copyToClipboard.label "複製到剪貼簿">
-<!ENTITY zotero.bibliography.macClipboardWarning "（會失去 rich-text 的格式。）">
 <!ENTITY zotero.bibliography.print.label "列印">
 
 <!ENTITY zotero.integration.docPrefs.title "文件的偏好設定">

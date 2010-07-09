@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Avancerad sök:">
-<!ENTITY zotero.toolbar.search.label "Sök:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Växla fullskärmsläge">
 <!ENTITY zotero.toolbar.openURL.label "Hitta">
 <!ENTITY zotero.toolbar.openURL.tooltip "Hitta genom ditt lokala bibliotek">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "Spara som RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Spara som HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Kopiera till klippbord">
-<!ENTITY zotero.bibliography.macClipboardWarning "(Rich-textformattering kommer att förloras.)">
 <!ENTITY zotero.bibliography.print.label "Skriv ut">
 
 <!ENTITY zotero.integration.docPrefs.title "Dokumentinställningar">

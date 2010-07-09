@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Laguntza eta dokumentazioa">
 <!ENTITY zotero.toolbar.about.label "Zotero-ri buruz">
 <!ENTITY zotero.toolbar.advancedSearch "Bilaketa aurreratua">
-<!ENTITY zotero.toolbar.search.label "Bilaketa:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Zotero paintaila osoan">
 <!ENTITY zotero.toolbar.openURL.label "Aurkitu">
 <!ENTITY zotero.toolbar.openURL.tooltip "Liburutegi publikoan bilatu">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF gisa gorde">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML gisa gorde">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Arbelera kopiatu">
-<!ENTITY zotero.bibliography.macClipboardWarning "(RTF formatua galdu egingo da.)">
 <!ENTITY zotero.bibliography.print.label "Inprimatu">
 
 <!ENTITY zotero.integration.docPrefs.title "Dokumentu honetako ezaugarriak">

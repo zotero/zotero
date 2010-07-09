@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "เกี่ยวกับโซแทโร">
 <!ENTITY zotero.toolbar.advancedSearch "Advanced Search">
-<!ENTITY zotero.toolbar.search.label "ค้นหา:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Toggle Fullscreen Mode">
 <!ENTITY zotero.toolbar.openURL.label "Locate">
 <!ENTITY zotero.toolbar.openURL.tooltip "Find through your local library">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "บันทึกเป็น RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "บันทึกเป็น HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "ทำสำเนาไปคลิปบอร์ด">
-<!ENTITY zotero.bibliography.macClipboardWarning "(Rich-text formatting will be lost.)">
 <!ENTITY zotero.bibliography.print.label "พิมพ์">
 
 <!ENTITY zotero.integration.docPrefs.title "Document Preferences">

@@ -1010,7 +1010,7 @@ Zotero.CollectionTreeCommandController.prototype.onEvent = function(evt)
 
 
 /**
- * Start a drag using nsDragAndDrop.js or HTML 5 Drag and Drop
+ * Start a drag using HTML 5 Drag and Drop
  */
 Zotero.CollectionTreeView.prototype.onDragStart = function(event, transferData, action) {
 	var itemGroup = this._getItemAtRow(this.selection.currentIndex);
@@ -1019,16 +1019,7 @@ Zotero.CollectionTreeView.prototype.onDragStart = function(event, transferData, 
 	}
 	var collectionID = itemGroup.ref.id;
 	
-	// Use nsDragAndDrop.js interface for Firefox 2 and Firefox 3.0
-	var oldMethod = Zotero.isFx2 || Zotero.isFx30;
-	
-	if (oldMethod) {
-		transferData.data = new TransferData();
-		transferData.data.addDataForFlavour("zotero/collection", collectionID);
-	}
-	else {
-		event.dataTransfer.setData("zotero/collection", collectionID);
-	}
+	event.dataTransfer.setData("zotero/collection", collectionID);
 }
 
 
@@ -1566,7 +1557,7 @@ Zotero.CollectionTreeView.prototype.onDragEnter = function (event) {
 
 
 /*
- * Called by nsDragAndDrop.js and HTML 5 Drag and Drop when dragging over the tree
+ * Called by HTML 5 Drag and Drop when dragging over the tree
  */
 Zotero.CollectionTreeView.prototype.onDragOver = function (event, dropdata, session) {
 	return false;
@@ -1574,7 +1565,7 @@ Zotero.CollectionTreeView.prototype.onDragOver = function (event, dropdata, sess
 
 
 /*
- * Called by nsDragAndDrop.js and HTML 5 Drag and Drop when dropping onto the tree
+ * Called by HTML 5 Drag and Drop when dropping onto the tree
  */
 Zotero.CollectionTreeView.prototype.onDrop = function (event, dropdata, session) {
 	return false;

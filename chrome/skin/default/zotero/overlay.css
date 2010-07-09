@@ -45,6 +45,11 @@
 	background: #FFFF99 !important;
 }
 
+/*#zotero-collections-tree treechildren::-moz-tree-row(separator)
+{
+	height: .25em;
+}*/
+
 #zotero-pane splitter
 {
 	border: 0;
@@ -259,22 +264,6 @@
 {
 	font-size: 11px !important; /* Keep font size in Linux within reason */
 	width: 150px;
-}
-
-#zotero-tb-search[type=conditional-timed] > #zotero-tb-search-cancel
-{
-	width: 10px;
-	height: 10px;
-	margin: 0;
-	padding: 0;
-	cursor: default;
-	list-style-image: url('chrome://zotero/skin/search-cancel.png');
-	-moz-appearance: none !important; /* Fix rendering problems on Linux */
-}
-
-#zotero-tb-search[type=conditional-timed] > #zotero-tb-search-cancel:hover:active
-{
-	list-style-image: url('chrome://zotero/skin/search-cancel-active.png');
 }
 
 #zotero-view-tabbox, #zotero-item-pane-content > groupbox

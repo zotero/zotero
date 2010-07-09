@@ -190,10 +190,7 @@ var Zotero = new function(){
 			Components.classes["@mozilla.org/xre/app-info;1"].
 				getService(Components.interfaces.nsIXULAppInfo);
 		this.appName = appInfo.name;
-		this.isFx2 = appInfo.platformVersion.indexOf('1.8') === 0; // TODO: remove
 		this.isFx3 = appInfo.platformVersion.indexOf('1.9') === 0;
-		this.isFx30 = appInfo.platformVersion == '1.9'
-						|| appInfo.platformVersion.indexOf('1.9.0') === 0;
 		this.isFx35 = appInfo.platformVersion.indexOf('1.9.1') === 0;
 		this.isFx31 = this.isFx35;
 		this.isFx36 = appInfo.platformVersion.indexOf('1.9.2') === 0;
@@ -2363,107 +2360,48 @@ Zotero.DragDrop = {
 			data: []
 		};
 		
-		// Use nsDragAndDrop.js interface for Firefox 2 and Firefox 3.0
-		var oldMethod = Zotero.isFx2 || Zotero.isFx30;
-		if (oldMethod) {
-			try {
-				var dataSet = nsTransferable.get(
-					element.getSupportedFlavours(),
-					nsDragAndDrop.getDragData,
-					true
-				);
-			}
-			catch (e) {
-				// A work around a limitation in nsDragAndDrop.js -- the mDragSession
-				// is not set until the drag moves over another control.
-				// (This will only happen if the first drag is from the item list.)
-				nsDragAndDrop.mDragSession = nsDragAndDrop.mDragService.getCurrentSession();
-				return false;
-			}
-			
-			var firstData = dataSet.first.first;
-			dragData.dataType = firstData.flavour.contentType;
-			
-			var dataList = dataSet.dataList;
-			var len = firstOnly ? 1 : dataList.length;
-			
-			//Zotero.debug("Drag data type is " + dragData.dataType);
-			
-			switch (dragData.dataType) {
-				case 'zotero/collection':
-				case 'zotero/item':
-					var ids = firstData.data.split(','); // ids of rows we are dragging in
-					dragData.data = ids;
-					break;
-				
-				case 'text/x-moz-url':
-					var urls = [];
-					for (var i=0; i<len; i++) {
-						var url = dataList[i].first.data.split("\n")[0];
-						urls.push(url);
-					}
-					dragData.data = urls;
-					break;
-					
-				case 'application/x-moz-file':
-					var files = [];
-					for (var i=0; i<len; i++) {
-						var file = dataList[i].first.data;
-						file.QueryInterface(Components.interfaces.nsIFile);
-						// Don't allow folder drag
-						if (file.isDirectory()) {
-							continue;
-						}
-						files.push(file);
-					}
-					dragData.data = files;
-					break;
-			}
+		var dt = this.currentDataTransfer;
+		if (!dt) {
+			Zotero.debug("Drag data not available");
+			return false;
 		}
-		// Firefox 3.1 and higher
-		else {
-			var dt = this.currentDataTransfer;
-			if (!dt) {
-				Zotero.debug("Drag data not available");
-				return false;
-			}
-			
-			var len = firstOnly ? 1 : dt.mozItemCount;
-			
-			if (dt.types.contains('zotero/collection')) {
-				dragData.dataType = 'zotero/collection';
-				var ids = dt.getData('zotero/collection').split(",");
-				dragData.data = ids;
-			}
-			else if (dt.types.contains('zotero/item')) {
-				dragData.dataType = 'zotero/item';
-				var ids = dt.getData('zotero/item').split(",");
-				dragData.data = ids;
-			}
-			else if (dt.types.contains('application/x-moz-file')) {
-				dragData.dataType = 'application/x-moz-file';
-				var files = [];
-				for (var i=0; i<len; i++) {
-					var file = dt.mozGetDataAt("application/x-moz-file", i);
-					file.QueryInterface(Components.interfaces.nsIFile);
-					// Don't allow folder drag
-					if (file.isDirectory()) {
-						continue;
-					}
-					files.push(file);
-				}
-				dragData.data = files;
-			}
-			else if (dt.types.contains('text/x-moz-url')) {
-				dragData.dataType = 'text/x-moz-url';
-				var urls = [];
-				for (var i=0; i<len; i++) {
-					var url = dt.getData("text/x-moz-url").split("\n")[0];
-					urls.push(url);
-				}
-				dragData.data = urls;
-			}
+		
+		var len = firstOnly ? 1 : dt.mozItemCount;
+		
+		if (dt.types.contains('zotero/collection')) {
+			dragData.dataType = 'zotero/collection';
+			var ids = dt.getData('zotero/collection').split(",");
+			dragData.data = ids;
 		}
+		else if (dt.types.contains('zotero/item')) {
+			dragData.dataType = 'zotero/item';
+			var ids = dt.getData('zotero/item').split(",");
+			dragData.data = ids;
+		}
+		else if (dt.types.contains('application/x-moz-file')) {
+			dragData.dataType = 'application/x-moz-file';
+			var files = [];
+			for (var i=0; i<len; i++) {
+				var file = dt.mozGetDataAt("application/x-moz-file", i);
+				file.QueryInterface(Components.interfaces.nsIFile);
+				// Don't allow folder drag
+				if (file.isDirectory()) {
+					continue;
+				}
+				files.push(file);
+			}
+			dragData.data = files;
+		}
+		else if (dt.types.contains('text/x-moz-url')) {
+			dragData.dataType = 'text/x-moz-url';
+			var urls = [];
+			for (var i=0; i<len; i++) {
+				var url = dt.getData("text/x-moz-url").split("\n")[0];
+				urls.push(url);
+			}
+			dragData.data = urls;
+		}
+		
 		return dragData;
 	}
 }

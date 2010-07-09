@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Podpora a dokumentácia">
 <!ENTITY zotero.toolbar.about.label "O Zotere">
 <!ENTITY zotero.toolbar.advancedSearch "Pokročilé vyhľadávanie">
-<!ENTITY zotero.toolbar.search.label "Hľadať:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Zväčšiť do celého okna">
 <!ENTITY zotero.toolbar.openURL.label "Nájsť">
 <!ENTITY zotero.toolbar.openURL.tooltip "Nájdi v miestnej knižnici">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "Uložiť ako RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Uložiť ako HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Skopírovať do schránky">
-<!ENTITY zotero.bibliography.macClipboardWarning "(Formátovanie textu sa nezachová)">
 <!ENTITY zotero.bibliography.print.label "Tlačiť">
 
 <!ENTITY zotero.integration.docPrefs.title "Vlastnosti dokumentu">

@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "Acerca de Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Búsqueda avanzada">
-<!ENTITY zotero.toolbar.search.label "Buscar:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Conmutar el modo de pantalla completa">
 <!ENTITY zotero.toolbar.openURL.label "Localizar">
 <!ENTITY zotero.toolbar.openURL.tooltip "Encontrar mediante tu biblioteca local">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "Guardar como RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Guardar como HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copiar al portapapeles">
-<!ENTITY zotero.bibliography.macClipboardWarning "(El formato especial se perderá)">
 <!ENTITY zotero.bibliography.print.label "Imprimir">
 
 <!ENTITY zotero.integration.docPrefs.title "Ajustes de documento">

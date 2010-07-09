@@ -118,7 +118,6 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'win');
 		}
 		
-		if(Zotero.isFx30) document.documentElement.setAttribute("moz-version", "3.0");
 		if(Zotero.isFx35) document.documentElement.setAttribute("moz-version", "3.5");
 		
 		//Initialize collections view
@@ -211,12 +210,6 @@ var ZoteroPane = new function()
 		
 		if (Zotero.Prefs.get('debugShowDuplicates')) {
 			document.getElementById('zotero-tb-actions-showDuplicates').hidden = false;
-		}
-		
-		// use appropriate search box
-		if(Zotero.isFx30) {
-			document.getElementById("zotero-tb-search-label").hidden = false;
-			document.getElementById("zotero-tb-search").setAttribute("type", "conditional-timed");
 		}
 		
 		if(Zotero.isStandalone) {
@@ -1619,12 +1612,7 @@ var ZoteroPane = new function()
 			}
 			var searchVal = search.value;
 			this.itemsView.setFilter('search', searchVal);
-			
-			if (Zotero.isFx30) {
-				document.getElementById('zotero-tb-search-cancel').hidden = searchVal == "";
-			}
 		}
-		
 	}
 	
 	
@@ -2363,34 +2351,21 @@ var ZoteroPane = new function()
 	
 	
 	this.startDrag = function (event, element) {
-		if (Zotero.isFx2 || Zotero.isFx30) {
-			nsDragAndDrop.startDrag(event, element);
-			return;
-		}
 		element.onDragStart(event);
 	}
 	
 	
 	this.dragEnter = function (event, element) {
-		if (Zotero.isFx2 || Zotero.isFx30) {
-			return;
-		}
 		return element.onDragEnter(event);
 	}
 	
 	
 	this.dragOver = function (event, element) {
-		if (Zotero.isFx2 || Zotero.isFx30) {
-			return nsDragAndDrop.dragOver(event, element);
-		}
 		return element.onDragOver(event);
 	}
 	
 	
 	this.dragDrop = function (event, element) {
-		if (Zotero.isFx2 || Zotero.isFx30) {
-			return nsDragAndDrop.drop(event, element);
-		}
 		return element.onDrop(event);
 	}
 	

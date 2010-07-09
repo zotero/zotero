@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "지원 및 문서">
 <!ENTITY zotero.toolbar.about.label "Zotero 정보">
 <!ENTITY zotero.toolbar.advancedSearch "고급 검색">
-<!ENTITY zotero.toolbar.search.label "검색:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "전체화면 모드 끄기/켜기">
 <!ENTITY zotero.toolbar.openURL.label "위치">
 <!ENTITY zotero.toolbar.openURL.tooltip "지역 라이브러리를 통해 검색">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF로 저장">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML로 저장">
 <!ENTITY zotero.bibliography.copyToClipboard.label "클립보드로 복사">
-<!ENTITY zotero.bibliography.macClipboardWarning "(Rich-text 형식을 잃을 겁니다.)">
 <!ENTITY zotero.bibliography.print.label "인쇄">
 
 <!ENTITY zotero.integration.docPrefs.title "문서 환경설정">

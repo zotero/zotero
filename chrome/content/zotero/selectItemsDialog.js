@@ -92,8 +92,6 @@ function onSearch()
 	{
 		var searchVal = document.getElementById('zotero-tb-search').value;
 		itemsView.setFilter('search', searchVal);
-		
-		document.getElementById('zotero-tb-search-cancel').hidden = searchVal == "";
 	}
 }
 
