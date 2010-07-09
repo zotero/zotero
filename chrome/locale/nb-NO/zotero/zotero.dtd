@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Avansert søk">
-<!ENTITY zotero.toolbar.search.label "Søk:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Velg fullskjermmodus">
 <!ENTITY zotero.toolbar.openURL.label "Lokaliser">
 <!ENTITY zotero.toolbar.openURL.tooltip "Finn gjennom ditt lokale bibliotek">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "Lagre som RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Lagre som HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Kopier til utklippstavle">
-<!ENTITY zotero.bibliography.macClipboardWarning "(Rik-tekst-formatering forsvinner)">
 <!ENTITY zotero.bibliography.print.label "Skriv ut">
 
 <!ENTITY zotero.integration.docPrefs.title "Dokumentegenskaper">

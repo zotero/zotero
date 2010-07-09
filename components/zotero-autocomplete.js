@@ -206,7 +206,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 	}
 	
 	// Disable asynchronous until we figure out the hangs
-	if (true || this._zotero.isFx30) {
+	if (true) {
 		var rows = this._zotero.DB.query(sql, sqlParams);
 		var results = [];
 		var comments = [];

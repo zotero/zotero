@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "Зотерогийн тухай">
 <!ENTITY zotero.toolbar.advancedSearch "Advanced Search">
-<!ENTITY zotero.toolbar.search.label "Хайх:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Toggle Fullscreen Mode">
 <!ENTITY zotero.toolbar.openURL.label "Locate">
 <!ENTITY zotero.toolbar.openURL.tooltip "Find through your local library">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF-р хадгалах">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML-р хадгалах">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copy to Clipboard">
-<!ENTITY zotero.bibliography.macClipboardWarning "(Rich-text formatting will be lost.)">
 <!ENTITY zotero.bibliography.print.label "Хэвлэх">
 
 <!ENTITY zotero.integration.docPrefs.title "Document Preferences">

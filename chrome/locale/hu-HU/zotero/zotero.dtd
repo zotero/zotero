@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Támogatás és dokumentáció">
 <!ENTITY zotero.toolbar.about.label "Névjegy">
 <!ENTITY zotero.toolbar.advancedSearch "Haladó keresés">
-<!ENTITY zotero.toolbar.search.label "Keresés:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Teljes képernyős üzemmód">
 <!ENTITY zotero.toolbar.openURL.label "Keresés">
 <!ENTITY zotero.toolbar.openURL.tooltip "Hol találom a helyi könyvtárban?">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "Mentés RTF-ként">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Mentés HTML-ként">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Másolás a vágólapra">
-<!ENTITY zotero.bibliography.macClipboardWarning "(A formázás elveszik.)">
 <!ENTITY zotero.bibliography.print.label "Nyomtatás">
 
 <!ENTITY zotero.integration.docPrefs.title "Dokumentum beállításai">

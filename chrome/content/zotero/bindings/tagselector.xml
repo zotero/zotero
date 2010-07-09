@@ -160,10 +160,6 @@
 					this.id('display-all-tags').setAttribute('checked', !this.filterToScope);
 					this.id('show-automatic').setAttribute('checked', this.showAutomatic);
 					this.dragObserver = new this._dragObserverConstructor;
-					if(Zotero.isFx30) {
-						this.id('tags-search-filter').hidden = false;
-						this.id('tags-search').setAttribute('type', 'timed');
-					}
 				]]>
 			</constructor>
 			
@@ -552,10 +548,6 @@
 						var textbox = this.id('tags-search');
 						var t = textbox.inputField;
 						
-						if (Zotero.isFx30) {
-							textbox.firstChild.hidden = (t.value == "");
-						}
-						
 						if (typeof clear != 'undefined') {
 							if (clear){
 								t.value = '';
@@ -798,13 +790,10 @@
 					</xul:hbox>
 						
 					<xul:hbox>
-						<xul:label id="tags-search-filter" value="&zotero.tagSelector.filter;" hidden="true"/>
+						<!-- TODO: &zotero.tagSelector.filter; is now unused -->
 						<xul:textbox id="tags-search" flex="1" type="search" timeout="250" dir="reverse"
 							oncommand="document.getBindingParent(this).handleKeyPress(); event.stopPropagation()"
-							onkeypress="if (event.keyCode == event.DOM_VK_ESCAPE) { document.getBindingParent(this).handleKeyPress(true); }">
-							<xul:toolbarbutton id="search-cancel"
-								oncommand="this.parentNode.focus(); document.getBindingParent(this).handleKeyPress(true)" hidden="true"/>
-						</xul:textbox>
+							onkeypress="if (event.keyCode == event.DOM_VK_ESCAPE) { document.getBindingParent(this).handleKeyPress(true); }"/>
 						<xul:toolbarbutton id="view-settings-menu" tooltiptext="&zotero.toolbar.actions.label;"
 								image="chrome://zotero/skin/tag-selector-menu.png" type="menu">
 							<xul:menupopup id="view-settings-popup">

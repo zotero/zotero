@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Destek ve Belgeleme">
 <!ENTITY zotero.toolbar.about.label "Zotero Hakkında">
 <!ENTITY zotero.toolbar.advancedSearch "Gelişmiş Arama">
-<!ENTITY zotero.toolbar.search.label "Arama:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Tam Ekran Moduna Geç">
 <!ENTITY zotero.toolbar.openURL.label "Yerini Belirle">
 <!ENTITY zotero.toolbar.openURL.tooltip "Yerel Kitaplığınızda Bul">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF olarak Kaydet">
 <!ENTITY zotero.bibliography.saveAsHTML.label "HTML olarak Kaydet">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Pano'ya Kopyala">
-<!ENTITY zotero.bibliography.macClipboardWarning "(Zengin-metin biçimi kaybedilecek)">
 <!ENTITY zotero.bibliography.print.label "Yazdır">
 
 <!ENTITY zotero.integration.docPrefs.title "Döküman Tercihleri">

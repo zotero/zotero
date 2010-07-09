@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Ondersteuning en documentatie">
 <!ENTITY zotero.toolbar.about.label "Over Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Uitgebreid zoeken">
-<!ENTITY zotero.toolbar.search.label "Zoeken:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Zotero schermvullend maken">
 <!ENTITY zotero.toolbar.openURL.label "Opzoeken">
 <!ENTITY zotero.toolbar.openURL.tooltip "Bij uw bibliotheek opzoeken">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "Bewaar als RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Bewaar als HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Naar klembord kopiëren">
-<!ENTITY zotero.bibliography.macClipboardWarning "(Tekstopmaak zal verloren gaan.)">
 <!ENTITY zotero.bibliography.print.label "Afdrukken">
 
 <!ENTITY zotero.integration.docPrefs.title "Documentvoorkeuren">

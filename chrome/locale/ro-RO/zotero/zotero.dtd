@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Suport și documentație">
 <!ENTITY zotero.toolbar.about.label "Despre Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Căutare avansată">
-<!ENTITY zotero.toolbar.search.label "Caută:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Extinde pe tot ecranul">
 <!ENTITY zotero.toolbar.openURL.label "Localizare">
 <!ENTITY zotero.toolbar.openURL.tooltip "Găsește în biblioteca ta locală">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "Salvează ca RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Salvează ca HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copiază în memoria clipboard">
-<!ENTITY zotero.bibliography.macClipboardWarning "(Formatările RTF vor fi pierdute.)">
 <!ENTITY zotero.bibliography.print.label "Imprimare">
 
 <!ENTITY zotero.integration.docPrefs.title "Preferințe document">

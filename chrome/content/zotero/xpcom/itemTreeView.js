@@ -805,7 +805,7 @@ Zotero.ItemTreeView.prototype.cycleHeader = function(column)
 		{
 			// If not yet selected, start with ascending
 			if (!col.element.getAttribute('sortActive')) {
-				col.element.setAttribute('sortDirection', Zotero.isFx30 ? 'descending' : 'ascending');
+				col.element.setAttribute('sortDirection', 'ascending');
 			}
 			else {
 				col.element.setAttribute('sortDirection', col.element.getAttribute('sortDirection') == 'descending' ? 'ascending' : 'descending');
@@ -860,13 +860,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	
 	var columnField = this.getSortField();
 	
-	// Firefox 3 is upside-down
-	if (Zotero.isFx30) {
-		var order = this.getSortDirection() == 'ascending';
-	}
-	else {
-		var order = this.getSortDirection() == 'descending';
-	}
+	var order = this.getSortDirection() == 'descending';
 	
 	var collation = Zotero.getLocaleCollation();
 	
@@ -1571,7 +1565,7 @@ Zotero.ItemTreeView.prototype.getSortField = function() {
 Zotero.ItemTreeView.prototype.getSortDirection = function() {
 	var column = this._treebox.columns.getSortedColumn();
 	if (!column) {
-		return Zotero.isFx30 ? 'descending' : 'ascending';
+		return 'ascending';
 	}
 	return column.element.getAttribute('sortDirection');
 }
@@ -1626,9 +1620,6 @@ Zotero.ItemTreeCommandController.prototype.onEvent = function(evt)
  * Start a drag using nsDragAndDrop.js or HTML 5 Drag and Drop
  */
 Zotero.ItemTreeView.prototype.onDragStart = function (event, transferData, action) {
-	// Use nsDragAndDrop.js interface for Firefox 2 and Firefox 3.0
-	var oldMethod = Zotero.isFx2 || Zotero.isFx30;
-	
 	// Quick implementation of dragging of XML item format
 	if (this._itemGroup.isShare()) {
 		var items = this.getSelectedItems();
@@ -1639,30 +1630,18 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event, transferData, actio
 			xml.items.item += xmlNode;
 		}
 		Zotero.debug(xml.toXMLString());
-		if (oldMethod) {
-			transferData.data = new TransferData();
-			transferData.data.addDataForFlavour("zotero/item-xml", xml.toXMLString());
-		}
-		else {
-			event.dataTransfer.setData("zotero/item-xml", xml.toXMLString());
-		}
+		event.dataTransfer.setData("zotero/item-xml", xml.toXMLString());
 		return;
 	}
 	
 	var itemIDs = this.saveSelection();
 	var items = Zotero.Items.get(itemIDs);
 	
-	if (oldMethod) {
-		transferData.data = new TransferData();
-		transferData.data.addDataForFlavour("zotero/item", itemIDs.join());
-	}
-	else {
-		event.dataTransfer.setData("zotero/item", itemIDs.join());
-	}
+	event.dataTransfer.setData("zotero/item", itemIDs.join());
 	
 	// Multi-file drag
-	//  - Doesn't work on Firefox >=3.0/Windows
-	if (Zotero.isFx2 || !Zotero.isWin) {
+	//  - Doesn't work on Windows
+	if (!Zotero.isWin) {
 		// If at least one file is a non-web-link attachment and can be found,
 		// enable dragging to file system
 		for (var i=0; i<items.length; i++) {
@@ -1671,26 +1650,16 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event, transferData, actio
 						!= Zotero.Attachments.LINK_MODE_LINKED_URL
 					&& items[i].getFile()) {
 				Zotero.debug("Adding file via x-moz-file-promise");
-				if (oldMethod) {
-					transferData.data.addDataForFlavour(
-						"application/x-moz-file-promise",
-						new Zotero.ItemTreeView.fileDragDataProvider(),
-						0,
-						Components.interfaces.nsISupports
-					);
-				}
-				else {
-					event.dataTransfer.mozSetDataAt(
-						"application/x-moz-file-promise",
-						new Zotero.ItemTreeView.fileDragDataProvider(),
-						0
-					);
-				}
+				event.dataTransfer.mozSetDataAt(
+					"application/x-moz-file-promise",
+					new Zotero.ItemTreeView.fileDragDataProvider(),
+					0
+				);
 				break;
 			}
 		}
 	}
-	// Copy first file on Firefox >=3.0 Windows
+	// Copy first file on Windows
 	else {
 		var index = 0;
 		for (var i=0; i<items.length; i++) {
@@ -1705,20 +1674,12 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event, transferData, actio
 							.createInstance(Components.interfaces.nsIFileProtocolHandler);
 				var uri = fph.getURLSpecFromFile(file);
 				
-				if (oldMethod) {
-					transferData.data.addDataForFlavour("text/x-moz-url", uri + "\n" + file.leafName);
-					transferData.data.addDataForFlavour("application/x-moz-file", file);
-					transferData.data.addDataForFlavour("application/x-moz-file-promise-url", uri);
-					break;
-				}
-				else {
-					event.dataTransfer.mozSetDataAt("text/x-moz-url", uri + "\n" + file.leafName, index);
-					event.dataTransfer.mozSetDataAt("application/x-moz-file", file, index);
-					event.dataTransfer.mozSetDataAt("application/x-moz-file-promise-url", uri, index);
-					// DEBUG: possible to drag multiple files without x-moz-file-promise?
-					break;
-					index++
-				}
+				event.dataTransfer.mozSetDataAt("text/x-moz-url", uri + "\n" + file.leafName, index);
+				event.dataTransfer.mozSetDataAt("application/x-moz-file", file, index);
+				event.dataTransfer.mozSetDataAt("application/x-moz-file-promise-url", uri, index);
+				// DEBUG: possible to drag multiple files without x-moz-file-promise?
+				break;
+				index++
 			}
 		}
 	}
@@ -1737,12 +1698,7 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event, transferData, actio
 		}
 		
 		var text = obj.output.replace(/\r\n/g, "\n");
-		if (oldMethod) {
-			transferData.data.addDataForFlavour("text/unicode", text);
-		}
-		else {
-			event.dataTransfer.setData("text/plain", text);
-		}
+		event.dataTransfer.setData("text/plain", text);
 	}
 	
 	try {
@@ -1753,18 +1709,10 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event, transferData, actio
 		else if (mode.indexOf('bibliography') == 0) {
 			var content = Zotero.QuickCopy.getContentFromItems(items, format, null, event.shiftKey);
 			if (content) {
-				if (oldMethod) {
-					if (content.html) {
-						transferData.data.addDataForFlavour("text/html", content.html);
-					}
-					transferData.data.addDataForFlavour("text/unicode", content.text);
+				if (content.html) {
+					event.dataTransfer.setData("text/html", content.html);
 				}
-				else {
-					if (content.html) {
-						event.dataTransfer.setData("text/html", content.html);
-					}
-					event.dataTransfer.setData("text/plain", content.text);
-				}
+				event.dataTransfer.setData("text/plain", content.text);
 			}
 		}
 		else {

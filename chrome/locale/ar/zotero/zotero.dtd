@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "حول زوتيرو">
 <!ENTITY zotero.toolbar.advancedSearch "بحث متقدم">
-<!ENTITY zotero.toolbar.search.label "بحث:">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "فعّل نمط الشاشة الكاملة">
 <!ENTITY zotero.toolbar.openURL.label "إيجاد الموضع">
 <!ENTITY zotero.toolbar.openURL.tooltip "ابحث في مكتبتك المحلية">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "حفظ كملف  RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "حفظ كملف  HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "نسخ للحافظة">
-<!ENTITY zotero.bibliography.macClipboardWarning "(ستخسر تنسيقات النص)">
 <!ENTITY zotero.bibliography.print.label "طباعة">
 
 <!ENTITY zotero.integration.docPrefs.title "تفضيلات المستند">

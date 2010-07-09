@@ -87,7 +87,6 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "About Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "חיפוש מתקדם">
-<!ENTITY zotero.toolbar.search.label ":חיפוש">
 <!ENTITY zotero.toolbar.fullscreen.tooltip "Toggle Fullscreen Mode">
 <!ENTITY zotero.toolbar.openURL.label "Locate">
 <!ENTITY zotero.toolbar.openURL.tooltip "Find through your local library">
@@ -128,7 +127,6 @@
 <!ENTITY zotero.bibliography.saveAsRTF.label "שמור כ-RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "שמור כ-HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "Copy to Clipboard">
-<!ENTITY zotero.bibliography.macClipboardWarning "(Rich-text formatting will be lost.)">
 <!ENTITY zotero.bibliography.print.label "הדפסה">
 
 <!ENTITY zotero.integration.docPrefs.title "Document Preferences">
