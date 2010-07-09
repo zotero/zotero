@@ -83,11 +83,8 @@ var Zotero_File_Interface_Bibliography = new function() {
 			selectIndex = 0;
 		}
 		
-		// Can't select below-the-fold listitems inline in Firefox 2, because that would be too easy
-		setTimeout(function () {
-			listbox.ensureIndexIsVisible(selectIndex);
-			listbox.selectedIndex = selectIndex;
-		}, 1);
+		listbox.ensureIndexIsVisible(selectIndex);
+		listbox.selectedIndex = selectIndex;
 		
 		// ONLY FOR bibliography.xul: export options
 		if(document.getElementById("save-as-rtf")) {
