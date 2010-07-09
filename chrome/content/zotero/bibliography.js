@@ -83,8 +83,11 @@ var Zotero_File_Interface_Bibliography = new function() {
 			selectIndex = 0;
 		}
 		
-		listbox.ensureIndexIsVisible(selectIndex);
-		listbox.selectedIndex = selectIndex;
+		// Has to be async to work properly
+		setTimeout(function () {
+			listbox.ensureIndexIsVisible(selectIndex);
+			listbox.selectedIndex = selectIndex;
+		});
 		
 		// ONLY FOR bibliography.xul: export options
 		if(document.getElementById("save-as-rtf")) {
