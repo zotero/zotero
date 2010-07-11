@@ -152,7 +152,7 @@ Zotero.OpenURL = new function() {
 		// rft_id=info:doi/<the-url-encoded-doi>
 		// rft_id=http://<the-rest-of-the-url-encoded-url>
 		if(version == "0.1") {
-			var co = "";
+			var co = "sid=Zotero:"+encodeURIComponent(Zotero.version);
 			
 			for each(identifier in identifiers) {
 				co += "&id="+encodeURIComponent(identifier);
@@ -245,11 +245,6 @@ Zotero.OpenURL = new function() {
 		if(item.pages) co += _mapTag(item.pages, "pages", version);
 		if(item.ISBN) co += _mapTag(item.ISBN, "isbn", version);
 		if(item.ISSN) co += _mapTag(item.ISSN, "issn", version);
-		
-		if(version == "0.1") {
-			// chop off leading & sign if version is 0.1
-			co = co.substr(1);
-		}
 		
 		return co;
 	}
