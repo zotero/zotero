@@ -459,6 +459,12 @@ function doImport() {
 			// dropping other title types so they don't overwrite the main title
 			// we have same behaviour in the MARC translator
 			if(!titleInfo.@type.toString()) { 
+				if (titleInfo.m::title.length()){
+					newItem.title = titleInfo.m::title.text().toString();
+					if (titleInfo.m::subTitle.length()) {
+						newItem.title = newItem.title + ": " + titleInfo.m::subTitle.text().toString();
+					}
+				} else {
 				newItem.title = titleInfo.*.text(); // including text from sub elements
 			} 
 		}
@@ -485,19 +491,7 @@ function doImport() {
 				}
 			}
 			
-			// check if this is an electronic resource
-			if(!newItem.itemType) {
-				for each(var form in mods.m::physicalDescription.m::form) {
-					if(form.@authority == "marcform" || form.@authority == "marc") {
-						if(form.text().toString() == "electronic") {
-							newItem.itemType = "webpage";
-							break;
-						}
-					}
-				}
-				
-				if(!newItem.itemType) newItem.itemType = "document";
-			}
+			if(!newItem.itemType) newItem.itemType = "document";
 		}
 		
 		var isPartialItem = Zotero.Utilities.inArray(newItem.itemType, partialItemTypes);
