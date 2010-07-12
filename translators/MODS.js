@@ -54,7 +54,7 @@ function doExport() {
 			marcGenre = "newspaper";
 		} else if(item.itemType == "thesis") {
 			modsType = "text";
-			marcGenre = "theses";
+			marcGenre = "thesis";
 		} else if(item.itemType == "letter") {
 			modsType = "text";
 			marcGenre = "letter";
@@ -332,14 +332,111 @@ function processIdentifiers(newItem, identifier) {
 
 function doImport() {
 	var marcGenres = {
+//		"abstract or summary":XXX,
+//		"abstract":XXX,
+//		"summary":XXX,
+		"art reproduction":"artwork",
+		"article":"journalArticle",
+		"autobiography":"book",
+		"bibliography":"book",
+		"biography":"book",
 		"book":"book",
+//		"calendar":XXX,
+//		"catalog":XXX,
+		"chart":"artwork",
+		"comic or graphic novel":"book",
+		"comic":"book",
+		"graphic novel":"book",
+		"comic strip":"artwork",
+		"conference publication":"conferencePaper",
+//		"database":XXX,
+		"dictionary":"dictionaryEntry",
+		"diorama":"artwork",
+//		"directory":XXX,
+		"drama":"book",
+		"encyclopedia":"encyclopediaArticle",
+//		"essay":XXX,
+		"festschrift":"book",
+		"fiction":"book",
+//		"filmography":XXX,
+		"filmstrip":"videoRecording",
+//		"findingaid":XXX,
+//		"flash card":XXX,
+		"folktale":"book",
+//		"font":XXX,
+//		"game":XXX,
+		"government publication":"book",
+		"graphic":"artwork",
+		"globe":"map",
+		"handbook":"book",
+		"history":"book",
+		"hymnal":"book",
+		"humor,satire":"book",
+		"humor":"book",
+		"satire":"book",
+//		"index":XXX,
+//		"instruction":XXX,
+//		"interview":XXX,
+//		"issue":XXX,
+		"journal":"journalArticle",
+		"kit":"artwork",
+//		"language instruction":XXX,
+		"law report or digest":"journalArticle",
+		"law report":"journalArticle",
+		"digest":"journalArticle",
+		"law digest":"journalArticle",
+		"legal article":"journalArticle",
+		"legal case and case notes":"case",
+		"legal case":"case",
+		"case notes":"case",
+		"legislation":"statute",
+		"loose-leaf":"manuscript",
+		"map":"map",
+		"memoir":"book",
+		"microscope slide":"artwork",
+		"model":"artwork",
+//		"multivolume monograph":XXX,
+		"novel":"book",
+//		"numeric data":XXX,
+//		"offprint":XXX,
+		"online system or service":"webpage",
+		"online system":"webpage",
+		"service":"webpage",
+		"online service":"webpage",
+		"patent":"patent",
 		"periodical":"journalArticle",
+		"picture":"artwork",
+//		"poetry":XXX,
+//		"programmed text":XXX,
+		"realia":"artwork",
+//		"rehearsal":XXX,
+//		"remote sensing image":XXX,
+//		"reporting":XXX,
+//		"review":XXX,
+		"script":"book",
+//		"series":XXX,
+//		"short story":XXX,
+		"slide":"artwork",
+		"sound":"audioRecording",
+		"speech":"audioRecording",
+//		"standard or specification":XXX,
+//		"standard":XXX,
+//		"specification":XXX,
+//		"statistics":XXX,
+//		"survey of literature":XXX,
+		"technical report":"report",
 		"newspaper":"newspaperArticle",
 		"theses":"thesis",
+		"thesis":"thesis",
+//		"toy":XXX,
+		"transparency":"artwork",
+//		"treaty":XXX,
+		"videorecording":"videoRecording",
 		"letter":"letter",
 		"motion picture":"film",
 		"art original":"artwork",
 		"web site":"webpage"
+		"yearbook":"book",
 	};
 	
 	// parse with E4X
@@ -399,7 +496,7 @@ function doImport() {
 					}
 				}
 				
-				if(!newItem.itemType) newItem.itemType = "book";
+				if(!newItem.itemType) newItem.itemType = "document";
 			}
 		}
 		
