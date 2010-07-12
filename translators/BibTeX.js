@@ -13,6 +13,7 @@
 
 Zotero.configure("dataMode", "block");
 Zotero.addOption("exportCharset", "UTF-8");
+Zotero.addOption("exportFileData", false);
 
 function detectImport() {
 	var maxChars = 1048576; // 1MB
@@ -2072,6 +2073,15 @@ function doExport() {
 				writeField("annote", note["note"]);
 			}
 		}		
+		
+		if(Zotero.getOption("exportFileData")) {
+			 if(item.attachments) {
+				for each(var attachment in item.attachments) {
+					writeField("file", 	":" + attachment.path + ":" + attachment.mimeType);
+				}
+			}
+		}
+		
 		Zotero.write("\n}");
 	}
 }
