@@ -111,12 +111,13 @@ Zotero.Integration = new function() {
 				var background = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(0);
 				
 				var me = this;
-				function mainThread(agent, cmd) {
+				function mainThread(agent, cmd, doc) {
 					this.agent = agent;
 					this.cmd = cmd;
+					this.document = doc;
 				}
 				mainThread.prototype.run = function() {
-					me.execCommand(this.agent, this.cmd);
+					me.execCommand(this.agent, this.cmd, this.document);
 				}
 				
 				function fifoThread() {}
@@ -141,8 +142,9 @@ Zotero.Integration = new function() {
 						var parts = line.value.split(" ");
 						var agent = parts[0];
 						var cmd = parts[1];
+						var document = parts.length >= 3 ? line.value.substr(agent.length+cmd.length+2) : null;
 						if(agent == "Zotero" && cmd == "shutdown") return;
-						main.dispatch(new mainThread(agent, cmd), background.DISPATCH_NORMAL);
+						main.dispatch(new mainThread(agent, cmd, document), background.DISPATCH_NORMAL);
 					}
 				}
 				
@@ -224,7 +226,6 @@ Zotero.Integration = new function() {
 				} else {
 					// check to see whether there's a pyxpcom error in the console, since it doesn't
 					// get thrown directly
-					var throwErr = true;
 					var message = "";
 					
 					var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
@@ -305,7 +306,9 @@ Zotero.Integration = new function() {
 			var proc = Components.classes["@mozilla.org/process/util;1"].
 					createInstance(Components.interfaces.nsIProcess);
 			proc.init(_osascriptFile);
-			proc.run(!!block, ['-e', script], 2);
+			try {
+				proc.run(!!block, ['-e', script], 2);
+			} catch(e) {}
 		}
 	}
 }
@@ -698,7 +701,7 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 		var bibliographyText = bib[0].bibstart+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
 		
 		// if bibliography style not set, set it
-		if(!this._session.data.bibliographyStyleHasBeenSet && this._doc.setBibliographyStyle) {
+		if(!this._session.data.bibliographyStyleHasBeenSet) {
 			var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
 			
 			// set bibliography style
