@@ -567,19 +567,23 @@ Zotero.Commons.Bucket = function (name) {
 
 
 Zotero.Commons.Bucket.prototype.__defineGetter__('uri', function () {
-	return 'http://www.archive.org/details/' + this.name;
+	return 'http://www.archive.org/details/' + encodeURIComponent(this.name);
 });
 
 Zotero.Commons.Bucket.prototype.__defineGetter__('downloadURI', function () {
-	return 'http://www.archive.org/download/' + this.name;
+	return 'http://www.archive.org/download/' + encodeURIComponent(this.name);
 });
 
 Zotero.Commons.Bucket.prototype.__defineGetter__('metadataURI', function () {
-	return this.downloadURI + '/' + this.name + '_meta.xml';
+	return this.downloadURI + '/' + encodeURIComponent(this.name) + '_meta.xml';
+});
+
+Zotero.Commons.Bucket.prototype.__defineGetter__('apiPath', function() {
+	return '/' + encodeURIComponent(this.name);
 });
 
 Zotero.Commons.Bucket.prototype.__defineGetter__('apiURI', function() {
-	return Zotero.Commons.apiUrl + '/' + this.name;
+	return Zotero.Commons.apiUrl + this.apiPath;
 });
 
 
@@ -1164,7 +1168,7 @@ Zotero.Commons.Bucket.prototype.deleteItems = function (ids) {
 	var bucket = this;
 	
 	for each(let key in keysToDelete) {
-		let path = resource + '/' + key;
+		let path = resource + '/' + encodeURIComponent(key);
 		
 		Zotero.Commons.createAuthenticatedRequest(
 			method, path, headers, this.accessKey, this.secretKey, function (req) {
@@ -1183,9 +1187,11 @@ Zotero.Commons.Bucket.prototype.deleteItems = function (ids) {
 						null, bucket.relationPredicate, uri
 					);
 					if (relations) {
+						Zotero.DB.beginTransaction();
 						for each(var relation in relations) {
-							relation.erase();
+							Zotero.Relations.erase(relation.id);
 						}
+						Zotero.DB.commitTransaction();
 					}
 					
 					delete bucket._items[key];
@@ -1293,7 +1299,7 @@ Zotero.Commons.Bucket.prototype.putFile = function (file, mimeType, callback) {
 	var fileName = file.leafName;
 	var fileNameHyphened = fileName.replace(/ /g,'-');
 	var method = "PUT";
-	var resource = encodeURI('/' + this.name + '/' + fileNameHyphened);
+	var resource = this.apiPath + '/' + encodeURIComponent(fileNameHyphened);
 	var content = Zotero.File.getBinaryContents(file);
 	var headers = {};
 	var self = this;
