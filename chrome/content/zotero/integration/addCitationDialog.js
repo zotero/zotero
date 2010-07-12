@@ -123,7 +123,14 @@ var Zotero_Citation_Dialog = new function () {
 				// single citation
 				toggleMultipleSources(false);
 				_suppressNextTreeSelect = true;
-				itemsView.selectItem(io.citation.citationItems[0].id);  // treeview from xpcom/itemTreeView.js
+				
+				// switch to library if item doesn't exist in current selection
+				if(!collectionsView.getSelectedCollection().hasItem(io.citation.citationItems[0].id)) { 
+					var item = Zotero.Items.get(io.citation.citationItems[0].id);
+					collectionsView.selectLibrary(item.libraryID);
+				}
+				itemsView.selectItem(io.citation.citationItems[0].id);
+				
 				for(var box in _preserveData) {
 					var property = _preserveData[box][0];
 					if(io.citation.citationItems[0][box]) {
