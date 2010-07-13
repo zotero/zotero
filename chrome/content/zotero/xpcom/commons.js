@@ -589,13 +589,21 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 				return;
 			}
 			
-			var rdfURI = self.downloadURI + '/' + zip.key;
+			var rdfURI = self.downloadURI + '/'
+				// Strip characters IA strips
+				+ zip.key.replace(/[^-A-Za-z0-9_.]/g, '-').replace(/-+/g, '-');
 			rdfURI = rdfURI.replace(/\.zip$/, "_zotero.rdf");
 			
 			Zotero.Utilities.HTTP.doGet(rdfURI, function (xmlhttp) {
 				// If RDF not available, skip item
 				if (xmlhttp.status != 200) {
 					Zotero.debug("RDF not found at " + xmlhttp.channel.originalURI.spec);
+					process(zips);
+					return;
+				}
+				
+				if (!xmlhttp.responseText) {
+					Zotero.debug("RDF file is empty at " + xmlhttp.channel.originalURI.spec);
 					process(zips);
 					return;
 				}
