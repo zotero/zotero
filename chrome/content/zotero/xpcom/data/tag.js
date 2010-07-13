@@ -394,11 +394,21 @@ Zotero.Tag.prototype.save = function (full) {
 			}
 			
 			if (removed.length) {
-				var sql = "DELETE FROM itemTags WHERE tagID=? "
-					+ "AND itemID IN ("
-					+ removed.map(function () '?').join()
-					+ ")";
-				Zotero.DB.query(sql, [tagID].concat(removed));
+				var done = 0;
+				var maxItems = 998; // stay below compiled limit
+				var numItems = removed.length;
+				var tempRemoved = removed;
+				
+				do {
+					var chunk = tempRemoved.splice(0, maxItems);
+					
+					var sql = "DELETE FROM itemTags WHERE tagID=? "
+						+ "AND itemID IN (" + chunk.map(function () '?').join() + ")";
+					Zotero.DB.query(sql, [tagID].concat(chunk));
+					
+					done += chunk.length;
+				}
+				while (done < numItems);
 			}
 			
 			if (newids.length) {
