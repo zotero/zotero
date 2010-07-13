@@ -56,8 +56,7 @@
 			<hbox flex="1">
 				<vbox align="stretch" flex="1">
 					<hbox align="center" pack="end">
-						<label value="&zotero.toolbar.search.label;" control="zotero-tb-search"/>
-						<textbox id="zotero-tb-search" type="timed" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;"/>
+						<textbox id="zotero-tb-search" type="search" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;"/>
 					</hbox>
 					<hbox flex="1" style="margin-top: 5px">
 						<tree id="zotero-collections-tree"
