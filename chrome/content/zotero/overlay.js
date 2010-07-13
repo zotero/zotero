@@ -417,6 +417,15 @@ var ZoteroPane = new function()
 			// Focus the quicksearch on pane open
 			setTimeout("document.getElementById('zotero-tb-search').inputField.select();", 1);
 			
+			// Auto-empty trashed items older than a certain number of days
+			var days = Zotero.Prefs.get('trashAutoEmptyDays');
+			if (days) {
+				var d = new Date();
+				var deleted = Zotero.Items.emptyTrash(days);
+				var d2 = new Date();
+				Zotero.debug("Emptied old items from trash in " + (d2 - d) + " ms");
+			}
+			
 			var d = new Date();
 			Zotero.purgeDataObjects();
 			var d2 = new Date();

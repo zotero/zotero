@@ -2906,6 +2906,11 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE savedSearchConditions SET condition='libraryCatalog' WHERE condition='repository'");
 				}
 				
+				// 2.1
+				if (i==74) {
+					Zotero.DB.query("CREATE INDEX deletedItems_dateDeleted ON deletedItems(dateDeleted)");
+				}
+				
 				Zotero.wait();
 			}
 			
