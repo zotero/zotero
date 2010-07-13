@@ -1,4 +1,4 @@
--- 73
+-- 74
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -212,6 +212,7 @@ CREATE TABLE deletedItems (
     itemID INTEGER PRIMARY KEY,
     dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+CREATE INDEX deletedItems_dateDeleted ON deletedItems(dateDeleted);
 
 CREATE TABLE relations (
     libraryID INT NOT NULL,

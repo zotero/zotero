@@ -130,8 +130,11 @@ Zotero.Items = new function() {
 	 *											Zotero.Item objects
 	 * @return	{Zotero.Item[]|Integer[]}
 	 */
-	this.getDeleted = function (asIDs) {
+	this.getDeleted = function (asIDs, days) {
 		var sql = "SELECT itemID FROM deletedItems";
+		if (days) {
+			sql += " WHERE dateDeleted<=DATE('NOW', '-" + parseInt(days) + " DAYS')";
+		}
 		var ids = Zotero.DB.columnQuery(sql);
 		if (asIDs) {
 			return ids;
@@ -397,14 +400,18 @@ Zotero.Items = new function() {
 	}
 	
 	
-	this.emptyTrash = function () {
+	/**
+	 * @param	{Integer}	days	Only delete items deleted more than this many days ago
+	 */
+	this.emptyTrash = function (days) {
 		Zotero.DB.beginTransaction();
-		var deletedIDs = this.getDeleted(true);
+		var deletedIDs = this.getDeleted(true, days);
 		if (deletedIDs) {
 			this.erase(deletedIDs);
+			Zotero.Notifier.trigger('refresh', 'collection', 0);
 		}
-		Zotero.Notifier.trigger('refresh', 'collection', 0);
 		Zotero.DB.commitTransaction();
+		return deletedIDs ? deletedIDs.length : 0;
 	}
 	
 	

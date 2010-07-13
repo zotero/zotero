@@ -35,6 +35,7 @@ pref("extensions.zotero.launchNonNativeFiles", false);
 pref("extensions.zotero.sortNotesChronologically", false);
 pref("extensions.zotero.sortAttachmentsChronologically", false);
 pref("extensions.zotero.showTrashWhenEmpty", true);
+pref("extensions.zotero.trashAutoEmptyDays", 30);
 pref("extensions.zotero.viewOnDoubleClick", true);
 
 pref("extensions.zotero.groups.copyChildLinks", true);
