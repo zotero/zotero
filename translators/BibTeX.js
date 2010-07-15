@@ -1638,14 +1638,16 @@ function processField(item, field, value) {
 	} else if (field == "sentelink") { // the reference manager 'Sente' has a unique file scheme in exported BibTeX
 			item.attachments = [{url:value.split(",")[0], mimeType:"application/pdf", downloadable:true}];
 	} else if (field == "file") {
-		var [filetitle, filepath, filetype] = value.split(":");
-		if (filetitle.length == 0) {
-			filetitle = "Attachment";
-		}
-		if (filetype.match(/pdf/i)) {
-			item.attachments = [{url:"file://"+filepath, mimeType:"application/pdf", title:filetitle, downloadable:true}];
-		} else {
-			item.attachments = [{url:"file://"+filepath, title:filetitle, downloadable:true}];
+		for each(var attachment in value.split(";")){
+			var [filetitle, filepath, filetype] = attachment.split(":");
+			if (filetitle.length == 0) {
+				filetitle = "Attachment";
+			}
+			if (filetype.match(/pdf/i)) {
+				item.attachments.push({url:"file://"+filepath, mimeType:"application/pdf", title:filetitle, downloadable:true});
+			} else {
+				item.attachments.push({url:"file://"+filepath, title:filetitle, downloadable:true});
+			}
 		}
 	}
 }
@@ -1827,7 +1829,7 @@ function writeField(field, value, isMacro) {
 	if(!isMacro) Zotero.write("{");
 	// url field is preserved, for use with \href and \url
 	// Other fields (DOI?) may need similar treatment
-	if(!((field == "url") || (field == "doi"))) {
+	if(!((field == "url") || (field == "doi") | (field == "file"))) {
 		// I hope these are all the escape characters!
 		value = value.replace(/[|\<\>\~\^\\]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
@@ -2075,10 +2077,12 @@ function doExport() {
 		}		
 		
 		if(Zotero.getOption("exportFileData")) {
-			 if(item.attachments) {
+			if(item.attachments) {
+				var attachmentString = "";
 				for each(var attachment in item.attachments) {
-					writeField("file", 	":" + attachment.path + ":" + attachment.mimeType);
+					attachmentString += ";" + attachment.title + ":" + attachment.path + ":" + attachment.mimeType;
 				}
+				writeField("file", attachmentString.substr(1));
 			}
 		}
 		
