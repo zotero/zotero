@@ -1087,6 +1087,9 @@ Zotero.Utilities.HTTP = new function() {
 			}
 		}
 		
+		// Don't cache GET requests
+		xmlhttp.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
+		
 		/** @ignore */
 		xmlhttp.onreadystatechange = function() {
 			_stateChange(xmlhttp, onDone, responseCharset);
