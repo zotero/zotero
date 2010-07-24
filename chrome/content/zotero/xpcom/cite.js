@@ -158,8 +158,8 @@ Zotero.Cite.System.retrieveItem = function(item){
 			var creatorType = Zotero.CreatorTypes.getName(creator.creatorTypeID);
 		}
 		
-		var creatorVariable = Zotero.Cite.System._zoteroNameMap[creatorType];
-		if(!creatorVariable) continue;
+		var creatorType = Zotero.Cite.System._zoteroNameMap[creatorType];
+		if(!creatorType) continue;
 		
 		var nameObj = {'family':creator.ref.lastName, 'given':creator.ref.firstName};
 		
