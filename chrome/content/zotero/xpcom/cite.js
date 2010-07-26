@@ -18,41 +18,36 @@ Zotero.Cite.System._zoteroNameMap = {
  * Mappings for text variables
  */
 Zotero.Cite.System._zoteroFieldMap = {
-	"long":{
-		"title":["title"],
-		"container-title":["publicationTitle",  "reporter", "code"], /* reporter and code should move to SQL mapping tables */
-		"collection-title":["seriesTitle", "series"],
-		"collection-number":["seriesNumber"],
-		"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
-		"publisher-place":["place"],
-		"authority":["court"],
-		"page":["pages"],
-		"volume":["volume"],
-		"issue":["issue"],
-		"number-of-volumes":["numberOfVolumes"],
-		"edition":["edition"],
-		"version":["version"],
-		"section":["section"],
-		"genre":["type", "artworkSize"], /* artworkSize should move to SQL mapping tables, or added as a CSL variable */
-		"medium":["medium"],
-		"archive":["archive"],
-		"archive_location":["archiveLocation"],
-		"event":["meetingName", "conferenceName"], /* these should be mapped to the same base field in SQL mapping tables */
-		"event-place":["place"],
-		"abstract":["abstractNote"],
-		"URL":["url"],
-		"DOI":["DOI"],
-		"ISBN":["ISBN"],
-		"call-number":["callNumber"],
-		"note":["extra"],
-		"number":["number"],
-		"references":["history"]
-	},
-	"short":{
-		"title":["shortTitle", "title"],
-		"container-title":["journalAbbreviation"],
-		"genre":["shortTitle", "type"] /* needed for subsequent citations of items with no title */ 
-	}
+	"title":["title"],
+	"container-title":["publicationTitle",  "reporter", "code"], /* reporter and code should move to SQL mapping tables */
+	"collection-title":["seriesTitle", "series"],
+	"collection-number":["seriesNumber"],
+	"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
+	"publisher-place":["place"],
+	"authority":["court"],
+	"page":["pages"],
+	"volume":["volume"],
+	"issue":["issue"],
+	"number-of-volumes":["numberOfVolumes"],
+	"edition":["edition"],
+	"version":["version"],
+	"section":["section"],
+	"genre":["type", "artworkSize"], /* artworkSize should move to SQL mapping tables, or added as a CSL variable */
+	"medium":["medium"],
+	"archive":["archive"],
+	"archive_location":["archiveLocation"],
+	"event":["meetingName", "conferenceName"], /* these should be mapped to the same base field in SQL mapping tables */
+	"event-place":["place"],
+	"abstract":["abstractNote"],
+	"URL":["url"],
+	"DOI":["DOI"],
+	"ISBN":["ISBN"],
+	"call-number":["callNumber"],
+	"note":["extra"],
+	"number":["number"],
+	"references":["history"],
+	"shortTitle":["shortTitle"],
+	"journalAbbreviation":["journalAbbreviation"]
 }
 
 Zotero.Cite.System._zoteroDateMap = {
@@ -132,8 +127,8 @@ Zotero.Cite.System.retrieveItem = function(item){
 	
 	// get all text variables (there must be a better way)
 	// TODO: does citeproc-js permit short forms?
-	for(var variable in Zotero.Cite.System._zoteroFieldMap["long"]) {
-		var fields = Zotero.Cite.System._zoteroFieldMap["long"][variable];
+	for(var variable in Zotero.Cite.System._zoteroFieldMap) {
+		var fields = Zotero.Cite.System._zoteroFieldMap[variable];
 		if(variable == "URL" && ignoreURL) continue;
 		for each(var field in fields) {
 			var value = zoteroItem.getField(field, false, true).toString();
