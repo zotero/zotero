@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":50,
 	"inRepository":true,
-	"lastUpdated":"2010-02-04 02:38:25"
+	"lastUpdated":"2010-07-26 03:29:21"
 }
 
 Zotero.addOption("exportNotes", true);
@@ -435,8 +435,8 @@ function doImport() {
 		"letter":"letter",
 		"motion picture":"film",
 		"art original":"artwork",
-		"web site":"webpage"
-		"yearbook":"book",
+		"web site":"webpage",
+		"yearbook":"book"
 	};
 	
 	// parse with E4X
@@ -459,14 +459,15 @@ function doImport() {
 			// dropping other title types so they don't overwrite the main title
 			// we have same behaviour in the MARC translator
 			if(!titleInfo.@type.toString()) { 
-				if (titleInfo.m::title.length()){
+				if(titleInfo.m::title.length()) {
 					newItem.title = titleInfo.m::title.text().toString();
-					if (titleInfo.m::subTitle.length()) {
+					if(titleInfo.m::subTitle.length()) {
 						newItem.title = newItem.title + ": " + titleInfo.m::subTitle.text().toString();
 					}
 				} else {
-				newItem.title = titleInfo.*.text(); // including text from sub elements
-			} 
+					newItem.title = titleInfo.*.text(); // including text from sub elements
+				}
+			}
 		}
 		// try to get genre from local genre
 		for each(var genre in mods.m::genre) {
