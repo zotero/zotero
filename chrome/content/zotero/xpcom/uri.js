@@ -168,12 +168,12 @@ Zotero.URI = new function () {
 				if (itemURI.indexOf(localUserURI) == 0) {
 					itemURI = itemURI.substr(localUserURI.length);
 					var libraryType = 'user';
-					var libraryID = null;
+					var id = null;
 				}
 			}
 			*/
 			var libraryType = 'user';
-			var libraryID = null;
+			var id = null;
 		}
 		
 		// If not found, try global URI
@@ -188,7 +188,7 @@ Zotero.URI = new function () {
 				throw ("Invalid library URI '" + itemURI + "' in Zotero.URI.getURIItem()");
 			}
 			var libraryType = matches[1].substr(0, matches[1].length-1);
-			var libraryID = matches[2];
+			var id = matches[2];
 			itemURI = itemURI.replace(typeRE, '');
 		}
 		
@@ -204,10 +204,10 @@ Zotero.URI = new function () {
 		}
 		
 		if (libraryType == 'group') {
-			if (!Zotero.Libraries.exists(libraryID)) {
+			if (!Zotero.Groups.get(id)) {
 				return false;
 			}
-			var libraryID = Zotero.Groups.getLibraryIDFromGroupID(libraryID);
+			var libraryID = Zotero.Groups.getLibraryIDFromGroupID(id);
 			return Zotero.Items.getByLibraryAndKey(libraryID, itemKey);
 		}
 	}
