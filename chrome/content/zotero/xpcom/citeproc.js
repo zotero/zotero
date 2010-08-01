@@ -1,3 +1,51 @@
+/*
+ * Copyright (c) 2009 and 2010 Frank G. Bennett, Jr. All Rights
+ * Reserved.
+ *
+ * The contents of this file are subject to the Common Public
+ * Attribution License Version 1.0 (the “License”); you may not use
+ * this file except in compliance with the License. You may obtain a
+ * copy of the License at:
+ *
+ * http://bitbucket.org/fbennett/citeproc-js/src/tip/LICENSE.
+ *
+ * The License is based on the Mozilla Public License Version 1.1 but
+ * Sections 14 and 15 have been added to cover use of software over a
+ * computer network and provide for limited attribution for the
+ * Original Developer. In addition, Exhibit A has been modified to be
+ * consistent with Exhibit B.
+ *
+ * Software distributed under the License is distributed on an “AS IS”
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See
+ * the License for the specific language governing rights and limitations
+ * under the License.
+ *
+ * The Original Code is the citation formatting software known as
+ * "citeproc-js" (an implementation of the Citation Style Language
+ * [CSL]), including the original test fixtures and software located
+ * under the ./std subdirectory of the distribution archive.
+ *
+ * The Original Developer is not the Initial Developer and is
+ * __________. If left blank, the Original Developer is the Initial
+ * Developer.
+ *
+ * The Initial Developer of the Original Code is Frank G. Bennett,
+ * Jr. All portions of the code written by Frank G. Bennett, Jr. are
+ * Copyright (c) 2009 and 2010 Frank G. Bennett, Jr. All Rights Reserved.
+ *
+ * Alternatively, the contents of this file may be used under the
+ * terms of the GNU Affero General Public License (the [AGPLv3]
+ * License), in which case the provisions of [AGPLv3] License are
+ * applicable instead of those above. If you wish to allow use of your
+ * version of this file only under the terms of the [AGPLv3] License
+ * and not to allow others to use your version of this file under the
+ * CPAL, indicate your decision by deleting the provisions above and
+ * replace them with the notice and other provisions required by the
+ * [AGPLv3] License. If you do not delete the provisions above, a
+ * recipient may use your version of this file under either the CPAL
+ * or the [AGPLv3] License.”
+ */
+
 if (!Array.indexOf) {
 	Array.prototype.indexOf = function (obj) {
 		var i, len;
@@ -566,8 +614,7 @@ CSL.Output.Queue.prototype.append = function (str, tokname) {
 	}
 };
 CSL.Output.Queue.prototype.string = function (state, myblobs, blob) {
-	var blobs, ret, blob_delimiter, i, params, blobjr, last_str, last_char, b, use_suffix, qres, addtoret, span_split, j, res, blobs_start, blobs_end, key, pos, len, ppos, llen, ttype, ltype, terminal, leading, delimiters, use_prefix, txt_esc;
-	txt_esc = CSL.Output.Formats[this.state.opt.mode].text_escape;
+	var blobs, ret, blob_delimiter, i, params, blobjr, last_str, last_char, b, use_suffix, qres, addtoret, span_split, j, res, blobs_start, blobs_end, key, pos, len, ppos, llen, ttype, ltype, terminal, leading, delimiters, use_prefix;
 	blobs = myblobs.slice();
 	ret = [];
 	if (blobs.length === 0) {
@@ -612,7 +659,7 @@ CSL.Output.Queue.prototype.string = function (state, myblobs, blob) {
 				b = qres[0];
 				use_suffix = qres[1];
 				if (b && b.length) {
-					b = txt_esc(blobjr.strings.prefix) + b + txt_esc(use_suffix);
+					b = blobjr.strings.prefix + b + use_suffix;
 					ret.push(b);
 				}
 			}
@@ -666,7 +713,7 @@ CSL.Output.Queue.prototype.string = function (state, myblobs, blob) {
 			if (CSL.TERMINAL_PUNCTUATION.indexOf(use_prefix.slice(-1)) > -1 && use_prefix.slice(-1) === b.slice(0, 1)) {
 				use_prefix = use_prefix.slice(0, -1);
 			}
-			b = txt_esc(use_prefix) + b + txt_esc(use_suffix);
+			b = use_prefix + b + use_suffix;
 		}
 		blobs_start = b;
 		if (!state.tmp.suppress_decorations) {
@@ -713,8 +760,7 @@ CSL.Output.Queue.prototype.clearlevel = function () {
 	}
 };
 CSL.Output.Queue.prototype.renderBlobs = function (blobs, delim) {
-	var state, ret, ret_last_char, use_delim, i, blob, pos, len, ppos, llen, pppos, lllen, res, str, params, txt_esc;
-	txt_esc = CSL.Output.Formats[this.state.opt.mode].text_escape;
+	var state, ret, ret_last_char, use_delim, i, blob, pos, len, ppos, llen, pppos, lllen, res, str, params;
 	if (!delim) {
 		delim = "";
 	}
@@ -753,7 +799,7 @@ CSL.Output.Queue.prototype.renderBlobs = function (blobs, delim) {
 					blob = blob.slice(1);
 				}
 			}
-			ret += txt_esc(use_delim);
+			ret += use_delim;
 			ret += blob;
 		} else if (blob.status !== CSL.SUPPRESS) {
 			str = blob.formatter.format(blob.num);
@@ -1454,7 +1500,7 @@ CSL.dateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, xmlmode) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.50";
+	this.processor_version = "1.0.49";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2636,8 +2682,7 @@ CSL.getSpliceDelimiter = function (last_collapsed) {
 	return this.tmp.splice_delimiter;
 };
 CSL.getCitationCluster = function (inputList, citationID) {
-	var delimiter, result, objects, myparams, len, pos, item, last_collapsed, params, empties, composite, compie, myblobs, Item, llen, ppos, obj, preceding_item, txt_esc;
-	txt_esc = CSL.Output.Formats[this.opt.mode].text_escape;
+	var delimiter, result, objects, myparams, len, pos, item, last_collapsed, params, empties, composite, compie, myblobs, Item, llen, ppos, obj, preceding_item;
 	this.tmp.area = "citation";
 	delimiter = "";
 	result = "";
@@ -2709,7 +2754,7 @@ CSL.getCitationCluster = function (inputList, citationID) {
 		}
 		if (objects.length && "string" === typeof composite[0]) {
 			composite.reverse();
-			objects.push(txt_esc(this.tmp.splice_delimiter) + composite.pop());
+			objects.push(this.tmp.splice_delimiter + composite.pop());
 		} else {
 			composite.reverse();
 			compie = composite.pop();
@@ -2722,7 +2767,7 @@ CSL.getCitationCluster = function (inputList, citationID) {
 		for (ppos = 0; ppos < llen; ppos += 1) {
 			obj = composite[ppos];
 			if ("string" === typeof obj) {
-				objects.push(txt_esc(this.tmp.splice_delimiter) + obj);
+				objects.push(this.tmp.splice_delimiter + obj);
 				continue;
 			}
 			compie = composite.pop();
@@ -2739,7 +2784,7 @@ CSL.getCitationCluster = function (inputList, citationID) {
 		if (result.slice(-1) === this.citation.opt.layout_suffix.slice(0)) {
 			result = result.slice(0, -1);
 		}
-		result = txt_esc(this.citation.opt.layout_prefix) + result + txt_esc(this.citation.opt.layout_suffix);
+		result = this.citation.opt.layout_prefix + result + this.citation.opt.layout_suffix;
 		if (!this.tmp.suppress_decorations) {
 			len = this.citation.opt.layout_decorations.length;
 			for (pos = 0; pos < len; pos += 1) {
