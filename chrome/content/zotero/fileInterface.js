@@ -493,33 +493,40 @@ var Zotero_File_Interface = new function() {
 		if(io.output == "print") {
 			// printable bibliography, using a hidden browser
 			var browser = Zotero.Browser.createHiddenBrowser(window);
-			browser.contentDocument.write(bibliography);
-			browser.contentDocument.close();
 			
-			// this is kinda nasty, but we have to temporarily modify the user's
-			// settings to eliminate the header and footer. the other way to do
-			// this would be to attempt to print with an embedded browser, but
-			// it's not even clear how to attempt to create one
-			var prefService = Components.classes["@mozilla.org/preferences-service;1"].
-			                  getService(Components.interfaces.nsIPrefBranch);
-			var prefsToClear = ["print.print_headerleft", "print.print_headercenter", 
-			                    "print.print_headerright", "print.print_footerleft", 
-			                    "print.print_footercenter", "print.print_footerright"];
-			var oldPrefs = new Array();
-			for(var i in prefsToClear) {
-				oldPrefs[i] = prefService.getCharPref(prefsToClear[i]);
-				prefService.setCharPref(prefsToClear[i], "");
+			var listener = function() {
+				if(browser.contentDocument.location.href == "about:blank") return;
+				browser.removeEventListener("pageshow", listener, false);
+				
+				// this is kinda nasty, but we have to temporarily modify the user's
+				// settings to eliminate the header and footer. the other way to do
+				// this would be to attempt to print with an embedded browser, but
+				// it's not even clear how to attempt to create one
+				var prefService = Components.classes["@mozilla.org/preferences-service;1"].
+								  getService(Components.interfaces.nsIPrefBranch);
+				var prefsToClear = ["print.print_headerleft", "print.print_headercenter", 
+									"print.print_headerright", "print.print_footerleft", 
+									"print.print_footercenter", "print.print_footerright"];
+				var oldPrefs = [];
+				for(var i in prefsToClear) {
+					oldPrefs[i] = prefService.getCharPref(prefsToClear[i]);
+					prefService.setCharPref(prefsToClear[i], "");
+				}
+				
+				// print
+				browser.contentWindow.print();
+				
+				// set the prefs back
+				for(var i in prefsToClear) {
+					prefService.setCharPref(prefsToClear[i], oldPrefs[i]);
+				}
+				
+				// TODO can't delete hidden browser object here or else print will fail...
 			}
 			
-			// print
-			browser.contentWindow.print();
-			
-			// set the prefs back
-			for(var i in prefsToClear) {
-				prefService.setCharPref(prefsToClear[i], oldPrefs[i]);
-			}
-			
-			Zotero.Browser.deleteHiddenBrowser(browser);
+			browser.addEventListener("pageshow", listener, false);
+			browser.loadURIWithFlags("data:text/html;charset=utf-8,"+encodeURI(bibliography),
+				Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, "utf-8", null);
 		} else if(io.output == "save-as-html") {
 			var fStream = _saveBibliography(name, "HTML");
 			
