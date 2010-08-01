@@ -1769,17 +1769,28 @@ function refreshProxyList() {
 	document.getElementById('proxyTree').currentIndex = -1;
 	document.getElementById('proxyTree-delete').disabled = true;
 	document.getElementById('zotero-proxies-transparent').checked = Zotero.Prefs.get("proxies.transparent");
+	document.getElementById('zotero-proxies-autoRecognize').checked = Zotero.Prefs.get("proxies.autoRecognize");
+	document.getElementById('zotero-proxies-disableByDomain-checkbox').checked = Zotero.Prefs.get("proxies.disableByDomain");
+	document.getElementById('zotero-proxies-disableByDomain-textbox').value = Zotero.Prefs.get("proxies.disableByDomainString");
 }
 
 /**
  * Updates proxy autoRecognize and transparent settings based on checkboxes
  */
 function updateProxyPrefs() {
-	Zotero.Prefs.set("proxies.transparent", document.getElementById('zotero-proxies-transparent').checked);
+	var transparent = document.getElementById('zotero-proxies-transparent').checked;
+	Zotero.Prefs.set("proxies.transparent", transparent);
+	Zotero.Prefs.set("proxies.autoRecognize", document.getElementById('zotero-proxies-autoRecognize').checked);	
+	Zotero.Prefs.set("proxies.disableByDomainString", document.getElementById('zotero-proxies-disableByDomain-textbox').value);
+	Zotero.Prefs.set("proxies.disableByDomain", document.getElementById('zotero-proxies-disableByDomain-checkbox').checked &&
+			document.getElementById('zotero-proxies-disableByDomain-textbox').value != "");
 	
-	var oldTransparent = Zotero.Prefs.get("proxies.transparent");
-	var newTransparent = document.getElementById('zotero-proxies-transparent').checked;
-	Zotero.Prefs.set("proxies.transparent", newTransparent);
+	Zotero.Proxies.init();
 	
-	Zotero.Proxies.init()
+	document.getElementById('proxyTree-add').disabled =
+		document.getElementById('proxyTree-delete').disabled =
+		document.getElementById('proxyTree').disabled = 
+		document.getElementById('zotero-proxies-autoRecognize').disabled = 
+		document.getElementById('zotero-proxies-disableByDomain-checkbox').disabled = 
+		document.getElementById('zotero-proxies-disableByDomain-textbox').disabled = !transparent;
 }

@@ -104,7 +104,9 @@ pref("extensions.zotero.export.quickCopy.compatibility.word", false);
 // Integration settings
 pref("extensions.zotero.integration.port", 50001);
 pref("extensions.zotero.integration.autoRegenerate", -1);	// -1 = ask; 0 = no; 1 = yes
-pref("extensions.zotero.integration.realWindow", false);
+
+// Connector settings
+pref("extensions.zotero.connector.port", 23119);	// ascii "ZO"
 
 // Zeroconf
 pref("extensions.zotero.zeroconf.server.enabled", false);
@@ -133,7 +135,10 @@ pref("extensions.zotero.sync.storage.deleteDelayDays", 30);
 pref("extensions.zotero.sync.storage.groups.enabled", true);
 
 // Proxy
+pref("extensions.zotero.proxies.autoRecognize", true);
 pref("extensions.zotero.proxies.transparent", true);
+pref("extensions.zotero.proxies.disableByDomain", false);
+pref("extensions.zotero.proxies.disableByDomainString", ".edu");
 
 // Data layer purging
 pref("extensions.zotero.purge.creators", false);
