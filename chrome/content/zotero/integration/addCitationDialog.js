@@ -125,11 +125,11 @@ var Zotero_Citation_Dialog = new function () {
 				_suppressNextTreeSelect = true;
 				
 				// switch to library if item doesn't exist in current selection
-				if(!collectionsView.getSelectedCollection().hasItem(io.citation.citationItems[0].id)) { 
+				if(collectionsView.getSelectedCollection() && !collectionsView.getSelectedCollection().hasItem(io.citation.citationItems[0].id)) { 
 					var item = Zotero.Items.get(io.citation.citationItems[0].id);
-					collectionsView.selectLibrary(item.libraryID);
+					collectionsView.wrappedJSObject.selectLibrary(item.libraryID);
 				}
-				itemsView.selectItem(io.citation.citationItems[0].id);
+				itemsView.wrappedJSObject.selectItem(io.citation.citationItems[0].id);
 				
 				for(var box in _preserveData) {
 					var property = _preserveData[box][0];
