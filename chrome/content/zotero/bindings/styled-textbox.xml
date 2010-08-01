@@ -76,7 +76,6 @@
 				this._htmlToRtfMap = [
 					[/"(\w)/, "“$1"],
 					[/([\w,.?!])"/, "$1”"],
-					[/[\x7F-\uFFFF]/g, function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+" " }],
 					["<p>", ""],
 					["</p>", "\\par "],
 					[/<\/?div[^>]*>/g, ""],
@@ -179,6 +178,7 @@
 			<!-- Sets or returns contents of rich text box -->
 			<property name="value">
 				<getter><![CDATA[
+					const highcharRe = /[\x7F-\uFFFF]/g;
 					var output = this._editor.getContent();
 					
 					if(this._format == "RTF") {
@@ -213,9 +213,12 @@
 						for each(var entry in this._htmlToRtfMap) {
 							output = output.replace(entry[0], entry[1], "g");
 						}
-						output = Zotero.Utilities.prototype.trim(output);
-						output = output.replace(" ", "&nbsp;", "g");
-						output = Zotero.Utilities.prototype.unescapeHTML(output);
+						output = Zotero.Utilities.prototype.trim(output)
+						output = Zotero.Utilities.prototype.unescapeHTML(
+								output.replace(" ", "&nbsp;", "g"))
+							.replace(highcharRe,
+								function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+" " });
+
 						if(output.substr(-4) == "\\par") output = output.substr(0, output.length-4);
 					}
 					
