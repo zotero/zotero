@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":50,
 	"inRepository":true,
-	"lastUpdated":"2010-07-26 03:29:21"
+	"lastUpdated":"2010-08-01 23:45:59"
 }
 
 Zotero.addOption("exportNotes", true);
@@ -135,7 +135,7 @@ function doExport() {
 		
 		// XML tag detail; object field volume
 		if(item.volume) {
-			if(Zotero.Utilities.isInt(item.volume)) {
+			if(parseInt(item.volume) == item.volume) {
 				part += <detail type="volume"><number>{item.volume}</number></detail>;
 			} else {
 				part += <detail type="volume"><text>{item.volume}</text></detail>;
@@ -144,7 +144,7 @@ function doExport() {
 		
 		// XML tag detail; object field number
 		if(item.issue) {
-			if(Zotero.Utilities.isInt(item.issue)) {
+			if(parseInt(item.issue) == item.issue) {
 				part += <detail type="issue"><number>{item.issue}</number></detail>;
 			} else {
 				part += <detail type="issue"><text>{item.issue}</text></detail>;
@@ -153,7 +153,7 @@ function doExport() {
 		
 		// XML tag detail; object field section
 		if(item.section) {
-			if(Zotero.Utilities.isInt(item.section)) {
+			if(parseInt(item.section) == item.section) {
 				part += <detail type="section"><number>{item.section}</number></detail>;
 			} else {
 				part += <detail type="section"><text>{item.section}</text></detail>;
