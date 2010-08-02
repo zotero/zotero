@@ -105,7 +105,15 @@ var Zotero_Citation_Dialog = new function () {
 			if(io.citation.citationItems.length == 1) {
 				// single citation
 				_suppressNextTreeSelect = true;
-				itemsView.selectItem(io.citation.citationItems[0].itemID);	 // treeview from selectItemsDialog.js
+				
+				var collection = collectionsView.getSelectedCollection();
+				if(collection && !collection.hasItem(io.citation.citationItems[0].id)) { 
+					var item = Zotero.Items.get(io.citation.citationItems[0].id);
+					collectionsView.selectLibrary(item.libraryID);
+				}
+				
+				itemsView.wrappedJSObject.selectItem(io.citation.citationItems[0].itemID);	 // treeview from selectItemsDialog.js
+				
 				for(var property in _preserveData) {
 					if(io.citation.citationItems[0][property]) {
 						if(property == "locatorType") {
@@ -508,7 +516,7 @@ var Zotero_Citation_Dialog = new function () {
 	function _addItem(item) {
 		var itemNode = document.createElement("listitem");
 		itemNode.setAttribute("value", item.getID());
-		itemNode.setAttribute("label", item.getField("title"));
+		itemNode.setAttribute("label", item.getDisplayTitle());
 		itemNode.setAttribute("class", "listitem-iconic");
 		itemNode.setAttribute("image", item.getImageSrc());
 		document.getElementById("citation-list").appendChild(itemNode);

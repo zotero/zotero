@@ -1964,6 +1964,8 @@ Zotero.CSL.Item._optionalTypeMap = {
 	magazineArticle:"article-magazine",
 	newspaperArticle:"article-newspaper",
 	thesis:"thesis",
+	encyclopediaArticle:"entry-encyclopedia",
+	dictionaryEntry:"entry-dictionary",
 	conferencePaper:"paper-conference",
 	letter:"personal_communication",
 	manuscript:"manuscript",

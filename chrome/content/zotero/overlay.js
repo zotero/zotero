@@ -1683,14 +1683,8 @@ var ZoteroPane = new function()
 	
 	
 	function getSelectedCollection(asID) {
-		if (this.collectionsView
-				&& this.collectionsView.selection
-				&& this.collectionsView.selection.count > 0
-				&& this.collectionsView.selection.currentIndex != -1) {
-			var collection = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
-			if (collection && collection.isCollection()) {
-				return asID ? collection.ref.id : collection.ref;
-			}
+		if (this.collectionsView) {
+			return this.collectionsView.getSelectedCollection(asID);
 		}
 		return false;
 	}
@@ -2394,7 +2388,7 @@ var ZoteroPane = new function()
 		};
 		window.openDialog('chrome://zotero/content/preferences/preferences.xul',
 			'zotero-prefs',
-			'chrome,titlebar,toolbar,'
+			'chrome,titlebar,toolbar,centerscreen,'
 				+ Zotero.Prefs.get('browser.preferences.instantApply', true) ? 'dialog=no' : 'modal',
 			io
 		);

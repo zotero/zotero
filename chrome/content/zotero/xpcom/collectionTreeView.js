@@ -929,6 +929,19 @@ Zotero.CollectionTreeView.prototype.rememberSelection = function(selection)
 			break;
 	}
 }
+	
+	
+Zotero.CollectionTreeView.prototype.getSelectedCollection = function(asID) {
+	if (this.selection
+			&& this.selection.count > 0
+			&& this.selection.currentIndex != -1) {
+		var collection = this._getItemAtRow(this.selection.currentIndex);
+		if (collection && collection.isCollection()) {
+			return asID ? collection.ref.id : collection.ref;
+		}
+	}
+	return false;
+}
 
 
 

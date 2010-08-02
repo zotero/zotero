@@ -156,7 +156,7 @@ var Zotero_Bibliography_Dialog = new function () {
 			
 			var itemNode = document.createElement("listitem");
 			itemNode.setAttribute("value", item.getID());
-			itemNode.setAttribute("label", item.getField("title"));
+			itemNode.setAttribute("label", items[i].getDisplayTitle());
 			itemNode.setAttribute("class", "listitem-iconic");
 			itemNode.setAttribute("image", item.getImageSrc());
 			itemList.appendChild(itemNode);

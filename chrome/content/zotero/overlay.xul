@@ -82,7 +82,7 @@
 		<splitter id="zotero-splitter" resizebefore="closest" resizeafter="closest" hidden="true"
 			onmouseup="ZoteroPane.updateTagSelectorSize()"/>
 		
-		<stack id="zotero-pane-stack" persist="savedHeight" hidden="true">
+		<stack id="zotero-pane-stack" persist="savedHeight,fullscreenmode" hidden="true">
 		
 		<!-- Barrier to prevent tabbing into Zotero pane when busy -->
 		<box id="zotero-pane-tab-catcher-top" hidden="true" align="center" pack="center" style="opacity: 0">
