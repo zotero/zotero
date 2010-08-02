@@ -716,20 +716,12 @@ Zotero.Utilities.Translate = function(translate) {
 	this.translate = translate;
 }
 
-Zotero.Utilities.Translate.prototype = new Zotero.Utilities();
-Zotero.Utilities.Translate.prototype.inArray = Zotero.inArray;
-Zotero.Utilities.Translate.prototype.formatDate = Zotero.Date.formatDate;
-Zotero.Utilities.Translate.prototype.strToDate = Zotero.Date.strToDate;
-Zotero.Utilities.Translate.prototype.strToISO = Zotero.Date.strToISO;
-Zotero.Utilities.Translate.prototype.createContextObject = Zotero.OpenURL.createContextObject;
-Zotero.Utilities.Translate.prototype.parseContextObject = Zotero.OpenURL.parseContextObject;
-
 /**
  * Gets the current Zotero version
  *
  * @type String
  */
-Zotero.Utilities.prototype.getVersion = function() {
+Zotero.Utilities.Translate.prototype.getVersion = function() {
 	return Zotero.version;
 }
 
@@ -1021,6 +1013,41 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 		return Components.classes["@mozilla.org/network/io-service;1"].
 			getService(Components.interfaces.nsIIOService).
 			newURI(this.translate.location, "", null).resolve(url);
+	}
+}
+
+/**
+ * Wrap all functions so that arguments are guaranteed safe
+ */
+borrowedFunctions = {
+	"inArray":Zotero.inArray,
+	"formatDate":Zotero.Date.formatDate,
+	"strToDate":Zotero.Date.strToDate,
+	"strToISO":Zotero.Date.strToISO,
+	"createContextObject":Zotero.OpenURL.createContextObject,
+	"parseContextObject":Zotero.OpenURL.parseContextObject
+};
+for each(var wrapArrayBad in [borrowedFunctions, Zotero.Utilities.prototype, Zotero.Utilities.Translate.prototype]) {
+	let wrapArray = wrapArrayBad;
+	for(var wrapFunctionBad in wrapArray) {
+		let wrapFunction = wrapFunctionBad;
+		if(!(wrapArray[wrapFunction] instanceof Function)) continue;
+		
+		let unwrappedFunction = wrapArray[wrapFunction];
+		
+		Zotero.Utilities.Translate.prototype[wrapFunction] = function() {
+			let args = [];
+			for(let i=0; i<arguments.length; i++) {
+				if(typeof arguments[i] != "object"
+						&& arguments[i] instanceof XPCSafeJSObjectWrapper
+						&& arguments[i] !== null) {
+					args.push(new XPCSafeJSObjectWrapper(arguments[i]));
+				} else {
+					args.push(arguments[i]);
+				}
+			}
+			return unwrappedFunction.apply(this, args);
+		}
 	}
 }
 

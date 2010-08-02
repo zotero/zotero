@@ -977,6 +977,11 @@ Zotero.Translate.prototype._generateSandbox = function() {
 
 	// for loading other translators and accessing their methods
 	this._sandbox.Zotero.loadTranslator = function(type) {
+		if(typeof type !== "string") {
+			Zotero.debug("loadTranslator: type must be a string");
+			return;
+		}
+		
 		var translation = new Zotero.Translate(type);
 		translation._parentTranslator = me;
 		
@@ -1089,6 +1094,14 @@ Zotero.Translate.prototype._setSandboxMode = function(mode) {
  *            children
  */
 Zotero.Translate.prototype._configure = function(option, value) {
+	if(typeof option !== "string") {
+		Zotero.debug ("configure: option must be a string");
+		return;
+	}
+	if(typeof value === "object" && value !== null) {
+		value = new XPCSafeJSObjectWrapper(value);
+	}
+	
 	this.configOptions[option] = value;
 	Zotero.debug("Translate: Setting configure option "+option+" to "+value, 4);
 }
@@ -1101,6 +1114,14 @@ Zotero.Translate.prototype._configure = function(option, value) {
  * current options are exportNotes and exportFileData
  */
 Zotero.Translate.prototype._addOption = function(option, value) {
+	if(typeof option !== "string") {
+		Zotero.debug ("addOption: option must be a string");
+		return;
+	}
+	if(typeof value === "object" && value !== null) {
+		value = new XPCSafeJSObjectWrapper(value);
+	}
+	
 	this.displayOptions[option] = value;
 	Zotero.debug("Translate: Setting display option "+option+" to "+value, 4);
 }
@@ -1112,6 +1133,10 @@ Zotero.Translate.prototype._addOption = function(option, value) {
  *
  */
 Zotero.Translate.prototype._getOption = function(option) {
+	if(typeof option !== "string") {
+		Zotero.debug ("getOption: option must be a string");
+		return;
+	}
 	return this.displayOptions[option];
 }
 
@@ -1124,13 +1149,26 @@ Zotero.Translate.prototype._getOption = function(option) {
 Zotero.Translate.prototype._enableAsynchronousDetect = function() {
 	var me = this;
 	this.waitForCompletion = true;
-	this._sandbox.Zotero.done = function(arg) { me._translatorSearch.complete(arg) };
+	this._sandbox.Zotero.done = function(arg) {
+		if(arg !== null && typeof arg === "object") {
+			Zotero.debug("done: argument must not be an object");
+			me._translatorSearch.complete(false);
+		} else {
+			me._translatorSearch.complete(arg);
+		}
+	};
 }
 
 Zotero.Translate.prototype._enableAsynchronousTranslate = function() {
 	var me = this;
 	this.waitForCompletion = true;
 	this._sandbox.Zotero.done = function(val, error) {
+		if(val !== null && typeof val === "object") {
+			val = new XPCSafeJSObjectWrapper(val);
+		}
+		if(error !== null && typeof error === "object") {
+			error = new XPCSafeJSObjectWrapper(error);
+		}
 		me._translationComplete(val == undefined ? true : val, (error ? error : ""))
 	};
 }
@@ -1141,6 +1179,10 @@ Zotero.Translate.prototype._enableAsynchronousTranslate = function() {
  * called as selectItems() in translator code
  */
 Zotero.Translate.prototype._selectItems = function(options) {
+	if(!options instanceof XPCSafeJSObjectWrapper) {
+		options = new XPCSafeJSObjectWrapper(options);
+	}
+	
 	// hack to see if there are options
 	var haveOptions = false;
 	for(var i in options) {
@@ -1373,6 +1415,11 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 	// warn if itemDone called after translation completed
 	if(this._complete) {
 		Zotero.debug("Translate: WARNING: Zotero.Item.complete() called after Zotero.done(); please fix your code", 2);
+	}
+	
+	// make item safe to access
+	if(!item instanceof XPCSafeJSObjectWrapper) {
+		item = new XPCSafeJSObjectWrapper(item);
 	}
 	
 	if(this.type == "web") {
@@ -1874,6 +1921,12 @@ Zotero.Translate.prototype._processCollection = function(collection, parentID) {
  * logs a debugging message
  */
 Zotero.Translate.prototype._debug = function(string, level) {
+	if(typeof string === "object") string = new XPCSafeJSObjectWrapper(string);
+	if(level !== undefined && typeof level !== "number") {
+		Zotero.debug("debug: level must be an integer");
+		return;
+	}
+	
 	// if handler does not return anything explicitly false, show debug
 	// message in console
 	if(this.runHandler("debug", string) !== false) {
@@ -1889,6 +1942,10 @@ Zotero.Translate.prototype._web = function() {
 	try {
 		this._sandbox.doWeb(this.document, this.location);
 	} catch(e) {
+		if(typeof e === "object" && e !== null) {
+			e = new XPCSafeJSObjectWrapper(e);
+		}
+		
 		if(this._parentTranslator) {
 			throw(e);
 		} else {
@@ -1907,6 +1964,10 @@ Zotero.Translate.prototype._search = function() {
 	try {
 		this._sandbox.doSearch(this.search);
 	} catch(e) {
+		if(typeof e === "object" && e !== null) {
+			e = new XPCSafeJSObjectWrapper(e);
+		}
+		
 		this._translationComplete(false, e);
 		return false;
 	}
@@ -1960,6 +2021,10 @@ Zotero.Translate.prototype._importDoneSniffing = function(charset) {
 	try {
 		this._sandbox.doImport();
 	} catch(e) {
+		if(typeof e === "object" && e !== null) {
+			e = new XPCSafeJSObjectWrapper(e);
+		}
+		
 		if(this._parentTranslator) {
 			throw(e);
 		} else {
@@ -2099,6 +2164,10 @@ Zotero.Translate.prototype._importConfigureIO = function(charset) {
 				
 				// allow translator to set charset
 				this._sandbox.Zotero.setCharacterSet = function(charset) {
+					if(typeof charset !== "string") {
+						throw "setCharacterSet: charset must be a string";
+					}
+					
 					// seek back to the beginning
 					me._inputStream.QueryInterface(Components.interfaces.nsISeekableStream)
 								 .seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, bomLength);
@@ -2109,7 +2178,7 @@ Zotero.Translate.prototype._importConfigureIO = function(charset) {
 						intlStream.init(me._inputStream, charset, 65535,
 							Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
 					} catch(e) {
-						throw "Text encoding not supported";
+						throw "setCharacterSet: text encoding not supported";
 					}
 					me._streams.push(intlStream);
 				}
@@ -2132,6 +2201,10 @@ Zotero.Translate.prototype._importConfigureIO = function(charset) {
 					}
 				} else {										// block reading
 					this._sandbox.Zotero.read = function(amount) {
+						if(typeof amount === "object") {
+							throw "read: amount must be an integer";
+						}
+						
 						if(intlStream) {
 							// read from international stream, if one is available
 							var amountRead = intlStream.readString(amount, str);
@@ -2324,6 +2397,10 @@ Zotero.Translate.prototype._export = function() {
 	try {
 		this._sandbox.doExport();
 	} catch(e) {
+		if(typeof e === "object" && e !== null) {
+			e = new XPCSafeJSObjectWrapper(e);
+		}
+		
 		this._translationComplete(false, e);
 		return false;
 	}
@@ -2360,6 +2437,10 @@ Zotero.Translate.prototype._exportConfigureIO = function() {
 			
 			// allow setting of character sets
 			this._sandbox.Zotero.setCharacterSet = function(charset) {
+				if(typeof charset !== "string") {
+					throw "setCharacterSet: charset must be a string";
+				}
+				
 				streamCharset = charset.toUpperCase();
 				intlStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
 									   .createInstance(Components.interfaces.nsIConverterOutputStream);
@@ -2373,6 +2454,8 @@ Zotero.Translate.prototype._exportConfigureIO = function() {
 			}
 			
 			this._sandbox.Zotero.write = function(data) {
+				if(typeof data === "object") data = new XPCSafeJSObjectWrapper(data);
+				
 				if(streamCharset) {
 					if(!writtenToStream && BOMs[streamCharset]) {
 						// If stream has not yet been written to, and a UTF type
@@ -2408,6 +2491,8 @@ Zotero.Translate.prototype._exportConfigureIO = function() {
 			this._sandbox.Zotero.setCharacterSet = function() {};
 			// write to string
 			this._sandbox.Zotero.write = function(data) {
+				if(typeof data === "object") data = new XPCSafeJSObjectWrapper(data);
+				
 				me.output += data;
 			};
 		}
@@ -2757,6 +2842,10 @@ Zotero.Translate.TranslatorSearch.prototype.runDetectCode = function(translator)
 				returnValue = this.translate._sandbox.detectImport();
 			}
 		} catch(e) {
+			if(typeof e === "object" && e !== null) {
+				e = new XPCSafeJSObjectWrapper(e);
+			}
+			
 			this.complete(returnValue, e);
 			return;
 		}
@@ -3035,4 +3124,28 @@ Zotero.Translate.RDF.prototype.getStatementsMatching = function(subj, pred, obj,
 		undefined, justOne);
 	if(!statements.length) return false;
 	return [[s.subject, s.predicate, (s.object.termType == "literal" ? s.object.toString() : s.object)] for each(s in statements)];
+}
+
+/*
+ * Wrap arguments to RDF functions in XPCSafeJSObjectWrappers
+ */
+for(var wrapFunctionBad in Zotero.Translate.RDF) {
+	let wrapFunction = wrapFunctionBad;
+	if(!(Zotero.Translate.RDF[wrapFunction] instanceof Function)) continue;
+	
+	let unwrappedFunction = Zotero.Translate.RDF[wrapFunction];
+	
+	Zotero.Translate.RDF.prototype[wrapFunction] = function() {
+		let args = [];
+		for(let i=0; i<arguments.length; i++) {
+			if(typeof arguments[i] != "object"
+					&& arguments[i] instanceof XPCSafeJSObjectWrapper
+					&& arguments[i] !== null) {
+				args.push(new XPCSafeJSObjectWrapper(arguments[i]));
+			} else {
+				args.push(arguments[i]);
+			}
+		}
+		return unwrappedFunction.apply(this, args);
+	}
 }
