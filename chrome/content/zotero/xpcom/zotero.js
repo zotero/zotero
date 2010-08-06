@@ -712,7 +712,7 @@ var Zotero = new function(){
 				'LibX:',
 				'function skype_',
 				'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
-				'potentially vulnerable to CVE-2009-3555'
+				'CVE-2009-3555'
 			];
 			
 			for (var i=0; i<blacklist.length; i++) {
