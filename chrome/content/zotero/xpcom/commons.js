@@ -173,8 +173,30 @@ Zotero.Commons = new function() {
 	};
 	
 	
-	// outdated
-	this.createBucket = function (item, onBucketQueued, onBucketCreated, waitForCreation) {
+	this.isValidBucketTitle = function (title) {
+		if (!title) {
+			return false;
+		}
+		if (title.constructor.name != 'String') {
+			return false;
+		}
+		return title.length <= 255;
+	}
+	
+	
+	this.isValidBucketName = function (name) {
+		if (!name) {
+			return false;
+		}
+		if (name.constructor.name != 'String') {
+			return false;
+		}
+		
+		return name.match(/^[a-z0-9_-]{0,32}$/); // TODO: check IA pattern
+	}
+	
+	
+	this.createBucket = function (name, title, onBucketCreated) {
 		var headers = {
 			"x-archive-auto-make-bucket":"1",
 			"x-archive-meta01-collection":"zoterocommons",
@@ -183,110 +205,48 @@ Zotero.Commons = new function() {
 			"x-archive-meta01-language":"eng"
 		};
 		
-		var itemTitle = item.getDisplayTitle();
-		if (itemTitle) {
-			headers["x-archive-meta-title"] = itemTitle;
+		if (!this.isValidBucketName(name)) {
+			throw ("Bucket name '" + name + "' must be ASCII in Zotero.Commons.createBucket()");
 		}
 		
-		var itemLanguage = item.getField('language');
+		if (!title) {
+			title = name;
+		}
+		
+		if (!this.isValidBucketTitle(title)) {
+			throw ("Invalid title '" + title + "' in Zotero.Commons.createBucket()");
+		}
+		
+		headers["x-archive-meta-title"] = title;
+		
 		// TODO: use proper language code?
-		if (itemLanguage) {
-			headers["x-archive-meta01-language"] = itemLanguage;
-		}
+		//if (itemLanguage) {
+		//	headers["x-archive-meta01-language"] = itemLanguage;
+		//}
 		
-		var itemType = Zotero.ItemTypes.getName(item.itemTypeID);
-		switch (itemType) {
-			case 'artwork':
-			case 'map':
-				headers["x-archive-meta-mediatype"] = "image";
-				break;
-			
-			case 'radioBroadcast':
-			case 'audioRecording':
-				headers["x-archive-meta-mediatype"] = "audio";
-				break;
-			
-			case 'tvBroadcast':
-			case 'videoRecording':
-				headers["x-archive-meta-mediatype"] = "movies";
-				break;
-			
-			default:
-				headers["x-archive-meta-mediatype"] = "texts";
-		}
+		headers["x-archive-meta-mediatype"] = "texts";
 		
-		var requestCallback = function (req, id, tries) {
-			Zotero.debug(req.status);
-			
-			if (req.status == 201) {
-				var bucket = new Zotero.Commons.Bucket(id);
+		Zotero.Commons.createAuthenticatedRequest(
+			"PUT", "/" + name, headers, this.accessKey, this.secretKey,
+			function (req) {
+				Zotero.debug(req.status);
 				
-				if (waitForCreation) {
-					Zotero.debug('Waiting for bucket creation');
+				if (req.status == 201) {
+					var bucket = new Zotero.Commons.Bucket(name);
+					_buckets[name] = bucket;
 					
-					setTimeout(function () {
-						var tries = 15;
-						bucket.exists(function (found) {
-							if (found == 1) {
-								onBucketCreated(bucket);
-							}
-							else if (!found) {
-								alert("Commons: Bucket " + bucket.name + " not found after creation");
-							}
-							else {
-								alert("Commons: Error checking for bucket " + bucket.name + " after creation");
-							}
-						}, tries);
-					}, Zotero.Commons.postCreateBucketDelay);
+					Zotero.Notifier.trigger('add', 'bucket', [name]);
 					
-					if (onBucketQueued) {
-						onBucketQueued();
-					}
-				}
-				else {
-					if (onBucketQueued) {
-						onBucketQueued();
-					}
 					if (onBucketCreated) {
-						onBucketCreated(bucket);
+						onBucketCreated();
 					}
-				}
-			}
-			else {
-				Zotero.debug(req.responseText);
-				
-				// DEBUG: What is this for?
-				if (req.status == 409) {
-					tries++;
-					// Max tries
-					if (tries > 3) {
-						alert("Upload failed");
-						return;
-					}
-					
-					id = Zotero.Commons.getNewBucketName();
-					Zotero.Commons.createAuthenticatedRequest(
-						"PUT", "/" + id, headers, this.accessKey, this.secretKey,
-						function (req) {
-							requestCallback(req, id, tries);
-						}
-					);
-					
 				}
 				else {
 					Zotero.debug(req.status);
 					Zotero.debug(req.responseText);
 					
-					alert("Upload failed");
+					Zotero.Commons.error("Error creating bucket '" + name + "'");
 				}
-			}
-		};
-		
-		var id = Zotero.Commons.getNewBucketName();
-		Zotero.Commons.createAuthenticatedRequest(
-			"PUT", "/" + id, headers, this.accessKey, this.secretKey,
-			function (req) {
-				requestCallback(req, id, 1);
 			}
 		);
 	}
@@ -358,11 +318,11 @@ Zotero.Commons = new function() {
 		var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 			.createInstance(Components.interfaces.nsIXMLHttpRequest);
 		req.open(method, Zotero.Commons.apiUrl + resource, false);
-
+		
 		for(var header in headers) {
 			req.setRequestHeader(header, headers[header]);
 		}
-
+		
 		return req;
 	}
 	
@@ -396,8 +356,11 @@ Zotero.Commons = new function() {
 	}
 	
 	
-	this.debug = function (message, level) {
-		Zotero.debug("Commons: " + message, level);
+	this.error = function (message) {
+		Components.utils.reportError(message);
+		var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
+					.createInstance(Components.interfaces.nsIPrompt);
+		prompt.alert("Zotero Commons Error", message);
 	}
 }
 
@@ -591,7 +554,7 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 			
 			var rdfURI = self.downloadURI + '/'
 				// Strip characters IA strips
-				+ zip.key.replace(/[^-A-Za-z0-9_.]/g, '-').replace(/-+/g, '-');
+				+ zip.key.replace(/[^-A-Za-z0-9_\.]/g, '-').replace(/-+/g, '-');
 			rdfURI = rdfURI.replace(/\.zip$/, "_zotero.rdf");
 			
 			Zotero.Utilities.HTTP.doGet(rdfURI, function (xmlhttp) {
@@ -673,14 +636,15 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 							
 							Zotero.debug("Downloading OCRed PDF " + iaFileName);
 							
-							var title = Zotero.localeJoin([child.title, '(OCR)']);
-							var baseName = child.key;
+							var baseName = child.title.replace(/\.pdf$/, '')
+							baseName += ' (OCR)';
+							var title = baseName + '.pdf';
 							
 							if (!progressWin) {
 								progressWin = new Zotero.ProgressWindow();
 								progressWin.changeHeadline("Downloading OCRed PDFs"); // TODO: localize
 							}
-							progressWin.addLines([child.title], [progressWinIcon]);
+							progressWin.addLines([title], [progressWinIcon]);
 							progressWin.show();
 							progressWin.startCloseTimer(8000);
 							
