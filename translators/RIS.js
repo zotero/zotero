@@ -197,7 +197,6 @@ function processTag(item, tag, value) {
 		// the secondary date field can mean two things, a secondary date, or an
 		// invalid EndNote-style date. let's see which one this is.
 		// patent: application (filing) date -- do not append to date field 
-		// for now. Zotero needs a filing date field added to make use of this.
 		var dateParts = value.split("/");
 		if(dateParts.length != 4 && item.itemType != "patent") {
 			// an invalid date and not a patent. 
@@ -207,6 +206,29 @@ function processTag(item, tag, value) {
 				value += " " + item.date;
 			}
 			item.date = value;
+		} else if (item.itemType == "patent") {
+				// Date-handling code copied from above
+			if(dateParts.length == 1) {
+				// technically, if there's only one date part, the file isn't valid
+				// RIS, but EndNote writes this, so we have to too
+				// Nick: RIS spec example records also only contain a single part
+				// even though it says the slashes are not optional (?)
+				item.filingDate = value;
+			} else {
+				// in the case that we have a year and other data, format that way
+
+				var month = parseInt(dateParts[1]);
+				if(month) {
+					month--;
+				} else {
+					month = undefined;
+				}
+
+				item.filingDate = Zotero.Utilities.formatDate({year:dateParts[0],
+								  month:month,
+								  day:dateParts[2],
+								  part:dateParts[3]});
+			}
 		} 
 		// ToDo: Handle correctly formatted Y2 fields (secondary date)
 	} else if(tag == "N1" || tag == "AB") {
@@ -243,6 +265,7 @@ function processTag(item, tag, value) {
 		}
 	} else if(tag == "SN") {
 		// ISSN/ISBN - just add both
+		// TODO We should be able to tell these apart
 		if(!item.ISBN) {
 			item.ISBN = value;
 		}
@@ -478,6 +501,28 @@ function doExport() {
 				string += date.part;
 			}
 			addTag("PY", string);
+		}
+		
+		// filingDate (patents)
+		if(item.filingDate) {
+			var date = Zotero.Utilities.strToDate(item.filingDate);
+			var string = date.year+"/";
+			if(date.month != undefined) {
+				// deal with javascript months
+				date.month++;
+				if(date.month < 10) string += "0";
+				string += date.month;
+			}
+			string += "/";
+			if(date.day != undefined) {
+				if(date.day < 10) string += "0";
+				string += date.day;
+			}
+			string += "/";
+			if(date.part != undefined) {
+				string += date.part;
+			}
+			addTag("Y2", string);
 		}
 
 		// notes
