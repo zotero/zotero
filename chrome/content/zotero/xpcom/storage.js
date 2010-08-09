@@ -1221,7 +1221,22 @@ Zotero.Sync.Storage = new function () {
 					throw(msg);
 				}
 			}
-			zipReader.extract(entryName, destFile);
+			try {
+				zipReader.extract(entryName, destFile);
+			}
+			catch (e) {
+				if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+					Zotero.debug(e);
+					// TODO: localize
+					var msg = "Zotero was unable to create a file during syncing."
+						+ "\n\n"
+						+ "Restarting your computer or disabling anti-virus/security "
+						+ "software may fix the problem.";
+					throw (msg);
+				}
+				
+				throw (e);
+			}
 			
 			var origPath = destFile.path;
 			var origFileName = destFile.leafName;
