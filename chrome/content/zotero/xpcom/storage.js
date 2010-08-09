@@ -542,7 +542,9 @@ Zotero.Sync.Storage = new function () {
 					file.lastModifiedTime = attachmentData[item.id].mtime;
 				}
 				catch (e) {
-					if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+					if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED'
+							// Shows up on some Windows systems
+							|| e.name == 'NS_ERROR_FAILURE') {
 						Zotero.debug(e);
 						// TODO: localize
 						var fileCannotBeUpdated = "The file '" + file.path
@@ -1004,7 +1006,39 @@ Zotero.Sync.Storage = new function () {
 		catch (e) {
 			Zotero.debug(zipFile.leafName + " is not a valid ZIP file", 2);
 			zipReader.close();
-			zipFile.remove(false);
+			
+			try {
+				zipFile.remove(false);
+			}
+			catch (e) {
+				if (e.name == 'NS_ERROR_FAILURE') {
+					Zotero.debug(e);
+					// TODO: localize
+					var msg = "Zotero could not delete the temporary sync file '"
+						+ zipFile.path + "'. Delete the file manually and try syncing again."
+						+ "\n\n"
+						+ "If you receive this message repeatedly, restarting your "
+						+ "computer or disabling security software may help.";
+					var e = new Zotero.Error(
+						msg,
+						0,
+						{
+							dialogButtonText: "Show File",
+							dialogButtonCallback: function () {
+								try {
+									zipFile.reveal();
+								}
+								// Unsupported on some platforms
+								catch (e3) {}
+							}
+						}
+					);
+					
+					throw (e);
+				}
+				
+				throw (e);
+			}
 			
 			// TODO: Remove prop file to trigger reuploading, in case it was an upload error?
 			
@@ -1259,7 +1293,9 @@ Zotero.Sync.Storage = new function () {
 					file.remove(false);
 				}
 				catch (e) {
-					if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+					if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED'
+							// Shows up on some Windows systems
+							|| e.name == 'NS_ERROR_FAILURE') {
 						Zotero.debug(e);
 						// TODO: localize
 						var fileCannotBeUpdated = "The file '" + file.leafName
