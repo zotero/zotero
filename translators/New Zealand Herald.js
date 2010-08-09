@@ -1,7 +1,7 @@
 {
 	"translatorID" : "c7830593-807e-48cb-99f2-c3bed2b148c2",
 	"label" : "New Zealand Herald",
-	"creator" : "Sopheak Hean (University of Waikato, Faculty of Education, New Zealand)",
+	"creator" : "Sopheak Hean, Michael Berkowitz",
 	"target" : "^http://www\\.nzherald\\.co\\.nz",
 	"minVersion" : "1.0",
 	"maxVersion" : "",
