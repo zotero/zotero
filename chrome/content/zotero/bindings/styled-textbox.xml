@@ -52,49 +52,52 @@
 				this._rtfMap = {
 					"\\":"\\\\",
 					"<em>":"\\i ",
-					"</em>":"\\i0 ",
+					"</em>":"\\i0{}",
 					"<i>":"\\i ",
-					"</i>":"\\i0 ",
+					"</i>":"\\i0{}",
 					"<strong>":"\\b ",
-					"</strong>":"\\b0 ",
+					"</strong>":"\\b0{}",
 					"<b>":"\\b ",
-					"</b>":"\\b0 ",
+					"</b>":"\\b0{}",
 					"<br />":"\x0B",
 					// there's no way to mimic a tab stop in CSS without
 					// tables, which wouldn't work here.
-					'<span class="tab">&nbsp;</span>':"\\tab "
+					'<span class="tab">&nbsp;</span>':"\\tab{}"
 				};
 				
 				this._rtfToHtmlMap = [
-					[/\\uc0\{?\\u([0-9]+)\}? ?/g, function(wholeStr, aCode) { return String.fromCharCode(aCode) }],
-					["\\t ", '<span class="tab">&nbsp;</span>'],
-					[/(?:\\par |\\\r?\n)/g, "</p><p>"],
-					[/\\super (.*?)\\nosupersub /g, "<sup>$1</sup>"],
-					[/\\sub (.*?)\\nosupersub /g, "<sub>$1</sub>"]
+					[/\\uc0\{?\\u([0-9]+)\}?(?:{}| )?/g, function(wholeStr, aCode) { return String.fromCharCode(aCode) }],
+					[/\\tab(?:\{\}| )/g, '<span class="tab">&nbsp;</span>'],
+					[/(?:\\par{}|\\\r?\n)/g, "</p><p>"],
+					[/\\super (.*?)\\nosupersub{}/g, "<sup>$1</sup>"],
+					[/\\sub (.*?)\\nosupersub{}/g, "<sub>$1</sub>"],
+					// for backwards compatibility with Zotero < 2.1
+					["\\i0 ", "</em>"],
+					["\\b0 ", "</strong>"]
 				];
 				
 				this._htmlToRtfMap = [
 					[/"(\w)/, "“$1"],
 					[/([\w,.?!])"/, "$1”"],
 					["<p>", ""],
-					["</p>", "\\par "],
+					//[/<\/p>(?!\s*$)/g, "\\par{}"],
 					[/<\/?div[^>]*>/g, ""],
 					["<sup>", "\\super "],
-					["</sup>", "\\nosupersub "],
+					["</sup>", "\\nosupersub{}"],
 					["<sub>", "\\sub "],
-					["</sub>", "\\nosupersub "]
+					["</sub>", "\\nosupersub{}"]
 				];
 				
 				this._rtfRexMap = [
 					["<span style=\"font-variant:small-caps;\">",
 					 /small-caps/,
 					 "\\scaps ",
-					 "\\scaps0 "
+					 "\\scaps0{}"
 					],
 					["<span style=\"text-decoration:underline;\">",
 					 /underline/,
 					 "\\ul ",
-					 "\\ul0 "
+					 "\\ul0{}"
 					]
 				]
 
@@ -182,6 +185,11 @@
 					var output = this._editor.getContent();
 					
 					if(this._format == "RTF") {
+						// strip divs
+						if(output.substr(0, 5) == "<div>" && output.substr(-6) == "</div>") {
+							output = output.substr(5, output.length-6);
+						}
+						
 						// do appropriate replacement operations
 						for(var needle in this._rtfMap) {
 							output = output.replace(needle, this._rtfMap[needle], "g"); 
@@ -209,17 +217,17 @@
 								};
 							};
 							output = l.join("");
-						};
+						}
+						
 						for each(var entry in this._htmlToRtfMap) {
 							output = output.replace(entry[0], entry[1], "g");
 						}
-						output = Zotero.Utilities.prototype.trim(output)
+						
 						output = Zotero.Utilities.prototype.unescapeHTML(
 								output.replace(" ", "&nbsp;", "g"))
 							.replace(highcharRe,
-								function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+" " });
-
-						if(output.substr(-4) == "\\par") output = output.substr(0, output.length-4);
+								function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+"{}" });
+						output = Zotero.Utilities.prototype.trim(output);
 					}
 					
 					return output;
