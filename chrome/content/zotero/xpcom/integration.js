@@ -698,19 +698,23 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 		
 		// get bibliography and format as RTF
 		var bib = this._session.getBibliography();
-		var bibliographyText = bib[0].bibstart+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
 		
-		// if bibliography style not set, set it
-		if(!this._session.data.bibliographyStyleHasBeenSet) {
-			var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
+		var bibliographyText = "";
+		if(bib) {
+			bibliographyText = bib[0].bibstart+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
 			
-			// set bibliography style
-			this._doc.setBibliographyStyle(bibStyle.firstLineIndent, bibStyle.indent,
-				bibStyle.lineSpacing, bibStyle.entrySpacing, bibStyle.tabStops, bibStyle.tabStops.length);
-			
-			// set bibliographyStyleHasBeenSet parameter to prevent further changes	
-			this._session.data.bibliographyStyleHasBeenSet = true;
-			this._doc.setDocumentData(this._session.data.serializeXML());
+			// if bibliography style not set, set it
+			if(!this._session.data.bibliographyStyleHasBeenSet) {
+				var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
+				
+				// set bibliography style
+				this._doc.setBibliographyStyle(bibStyle.firstLineIndent, bibStyle.indent,
+					bibStyle.lineSpacing, bibStyle.entrySpacing, bibStyle.tabStops, bibStyle.tabStops.length);
+				
+				// set bibliographyStyleHasBeenSet parameter to prevent further changes	
+				this._session.data.bibliographyStyleHasBeenSet = true;
+				this._doc.setDocumentData(this._session.data.serializeXML());
+			}
 		}
 		
 		// set bibliography text
@@ -1333,13 +1337,15 @@ Zotero.Integration.Session.prototype.getBibliography = function() {
 	// generate bibliography
 	var bib = this.style.makeBibliography();
 	
-	// omit items
-	Zotero.Cite.removeFromBibliography(bib, this.omittedItems);	
-	
-	// replace items with their custom counterpars
-	for(var i in bib[0].entry_ids) {
-		if(this.customBibliographyText[bib[0].entry_ids[i]]) {
-			bib[1][i] = this.customBibliographyText[bib[0].entry_ids[i]];
+	if(bib) {
+		// omit items
+		Zotero.Cite.removeFromBibliography(bib, this.omittedItems);	
+		
+		// replace items with their custom counterpars
+		for(var i in bib[0].entry_ids) {
+			if(this.customBibliographyText[bib[0].entry_ids[i]]) {
+				bib[1][i] = this.customBibliographyText[bib[0].entry_ids[i]];
+			}
 		}
 	}
 	
