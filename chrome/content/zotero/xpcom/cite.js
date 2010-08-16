@@ -98,11 +98,11 @@ Zotero.Cite.System._cache = new Object();
 
 Zotero.Cite.System.retrieveItem = function(item){
 	if(item instanceof Zotero.Item) {
-		if(this._cache[item.id]) return this._cache[item.id];
+		//if(this._cache[item.id]) return this._cache[item.id];
 		var zoteroItem = item;
 	} else {
 		// is an item ID
-		if(this._cache[item]) return this._cache[item];
+		//if(this._cache[item]) return this._cache[item];
 		var zoteroItem = Zotero.Items.get(item);
 	}
 
@@ -190,7 +190,7 @@ Zotero.Cite.System.retrieveItem = function(item){
 		}
 	}
 	
-	this._cache[zoteroItem.id] = cslItem;
+	//this._cache[zoteroItem.id] = cslItem;
 	return cslItem;
 };
 
