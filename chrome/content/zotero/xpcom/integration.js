@@ -1048,45 +1048,26 @@ Zotero.Integration.Session.prototype.reselectItem = function(exception) {
 /**
  * Generates a field from a citation object
  */
-Zotero.Integration.Session._acceptableTypes = ["string", "boolean", "number"];
-Zotero.Integration.Session._saveProperties = ["custom", "unsorted"];
-Zotero.Integration.Session._saveItems = ["locator", "label", "suppress-author", "author-only", "prefix", "suffix"];
 Zotero.Integration.Session.prototype.getCitationField = function(citation) {
+	const saveProperties = ["custom", "unsorted"];
+	const saveCitationItems = ["locator", "label", "suppress-author", "author-only", "prefix", "suffix", "uri"];
+	
 	var type;
 	var field = [];
 	
 	field.push('"citationID":'+uneval(citation.citationID));
-	var properties = [];
-	for(var j=0; j<Zotero.Integration.Session._saveProperties.length; j++) {
-		var property = Zotero.Integration.Session._saveProperties[j];
-		if(citation.properties[property] || citation.properties[property] === false) {
-			let propval = typeof citation.properties[property] == "object" ? 
-					Zotero.JSON.serialize(citation.properties[property]) :
-					uneval(citation.properties[property]);
-			properties.push('"'+property+'":'+propval);
-		}
+	
+	var properties = JSON.stringify(citation.properties, saveProperties);
+	if(properties != "{}") {
+		field.push('"properties":{'+properties+"}");
 	}
-	if(properties.length) field.push('"properties":{'+properties.join(",")+"}");
-
+	
 	var citationItems = [];
 	for(var j=0; j<citation.citationItems.length; j++) {
-		var citationItem = [];
+		var citationItem = citation.citationItems[j];
 		
-		// save citationItem properties
-		for(var k in citation.citationItems[j]) {
-			type = typeof(citation.citationItems[j][k]);
-			if(citation.citationItems[j][k] && Zotero.Integration.Session._saveItems.indexOf(k) !== -1
-			    && Zotero.Integration.Session._acceptableTypes.indexOf(type) !== -1) {
-			    let propval = typeof citation.citationItems[j][k] == "object" ?
-			    		Zotero.JSON.serialize(citation.citationItems[j][k]) :
-			    		uneval(citation.citationItems[j][k]);
-				citationItem.push('"'+k+'":'+propval);
-			}
-		}
-		
-		// save URI
-		citationItem.push('"uri":'+Zotero.JSON.serialize(this.uriMap.getURIsForItemID(citation.citationItems[j].id)));
-		citationItems.push("{"+citationItem.join(",")+"}");
+		citationItem.uri = this.uriMap.getURIsForItemID(citation.citationItems[j].id);
+		citationItems.push(JSON.stringify(citationItem, saveCitationItems));
 	}
 	field.push('"citationItems":['+citationItems.join(",")+"]");
 	
