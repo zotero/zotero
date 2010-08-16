@@ -658,7 +658,7 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
  */
 Zotero.Integration.Document.prototype._updateDocument = function(forceCitations, forceBibliography) {
 	// update citations
-	this._session.updateUpdateIndices();
+	this._session.updateUpdateIndices(forceCitations);
 	var deleteCitations = this._session.updateCitations();
 	this._deleteFields = this._deleteFields.concat([i for(i in deleteCitations)]);
 	for(var i in this._session.updateIndices) {
