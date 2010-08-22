@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-08-22 08:01:40"
+        "lastUpdated":"2010-08-22 08:32:02"
 }
 
  
@@ -141,7 +141,7 @@ function doWeb(doc, url) {
 				set.doi = "10.2307/" + jid;
 				
 				if (/stable\/(\d+)/.test(item.url)) {
-					var pdfurl = "http://"+ host + "/stable/pdfplus/" + jid + ".pdf";
+					var pdfurl = "http://"+ host + "/stable/pdfplus/" + jid + ".pdf?acceptTC=true";
 					item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
 				}
 				
