@@ -1,15 +1,16 @@
 {
-	"translatorID":"d921155f-0186-1684-615c-ca57682ced9b",
-	"translatorType":4,
-	"label":"JSTOR",
-	"creator":"Simon Kornblith, Sean Takats, Michael Berkowitz and Eli Osherovich",
-	"target":"https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/)",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-08-19 22:10:00"
+        "translatorID":"d921155f-0186-1684-615c-ca57682ced9b",
+        "label":"JSTOR",
+        "creator":"Simon Kornblith, Sean Takats, Michael Berkowitz and Eli Osherovich",
+        "target":"https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/)",
+        "minVersion":"1.0.0b4.r1",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-08-22 07:55:00"
 }
+
  
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -70,7 +71,7 @@ function doWeb(doc, url) {
 	var xpath = '//a[@id="favorites"]';
 	var elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 	var allJids = new Array();
-	if (elmt && /jid=(\d+)/.test(elmt.href)) {
+	if (elmt && /jid=10\.2307%2F(\d+)/.test(elmt.href)) {
 	allJids.push(RegExp.$1);
 	var jid = RegExp.$1;
 	Zotero.debug("JID found 1 " + jid);
@@ -88,7 +89,7 @@ function doWeb(doc, url) {
 		return true;
 	}
 
-	var allTitlesElmts = doc.evaluate('//li/ul/li/a[@class="title"]', resultsBlock, nsResolver,  XPathResult.ANY_TYPE, null);
+	var allTitlesElmts = doc.evaluate('//ul/li//a[@class="title"]', resultsBlock, nsResolver,  XPathResult.ANY_TYPE, null);
 	var currTitleElmt;
 	var availableItems = new Object();
 	while (currTitleElmt = allTitlesElmts.iterateNext()) {
@@ -140,7 +141,7 @@ function doWeb(doc, url) {
 				set.doi = "10.2307/" + jid;
 				
 				if (/stable\/(\d+)/.test(item.url)) {
-					var pdfurl = "http://"+ host + "/stable/pdfplus/" + jid + ".pdf";
+					var pdfurl = "http://"+ host + "/stable/pdfplus/" + jid + ".pdf?acceptTC=true";
 					item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
 				}
 				
