@@ -6,7 +6,7 @@
         "minVersion":"1.0",
         "maxVersion":"",
         "priority":100,
-        "inRepository":yes,
+        "inRepository":true,
         "translatorType":4,
         "lastUpdated":"2010-08-12 15:38:20"
 }
