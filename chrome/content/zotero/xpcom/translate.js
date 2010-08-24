@@ -309,7 +309,7 @@ Zotero.Translator = function(file, json, code) {
 		// We assume lastUpdated is at the end to avoid running the regexp on more than necessary
 		var lastUpdatedIndex = str.value.indexOf('"lastUpdated"');
 		if (lastUpdatedIndex == -1) {
-			this.logError("Invalid or missing translator metadata JSON object");
+			this.logError("Invalid or missing translator metadata JSON object in " + file.leafName);
 			fStream.close();
 			return;
 		}
@@ -318,7 +318,7 @@ Zotero.Translator = function(file, json, code) {
 		var header = str.value.substr(0, lastUpdatedIndex + 50);
 		var m = infoRe.exec(header);
 		if (!m) {
-			this.logError("Invalid or missing translator metadata JSON object");
+			this.logError("Invalid or missing translator metadata JSON object in " + file.leafName);
 			fStream.close();
 			return;
 		}
@@ -328,7 +328,7 @@ Zotero.Translator = function(file, json, code) {
 		try {
 			var info = Zotero.JSON.unserialize(this.metadataString);
 		} catch(e) {
-			this.logError("Invalid or missing translator metadata JSON object");
+			this.logError("Invalid or missing translator metadata JSON object in " + file.leafName);
 			fStream.close();
 			return;
 		}
@@ -338,7 +338,7 @@ Zotero.Translator = function(file, json, code) {
 	// make sure we have all the properties
 	for each(var property in ["translatorID", "translatorType", "label", "creator", "target", "minVersion", "maxVersion", "priority", "lastUpdated", "inRepository"]) {
 		if(info[property] === undefined) {
-			this.logError('Missing property "'+property+'" in translator metadata JSON object');
+			this.logError('Missing property "'+property+'" in translator metadata JSON object in ' + file.leafName);
 			haveMetadata = false;
 			break;
 		} else {
