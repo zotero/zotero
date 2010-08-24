@@ -672,7 +672,7 @@ var Zotero = new function(){
 			lineNumber != undefined ? lineNumber : null, 
 			columnNumber != undefined ? columnNumber : null,
 			flags,
-			'XUL javascript' // DEBUG: this doesn't seem to work
+			'component javascript'
 		);
 		consoleService.logMessage(scriptError);
 	}

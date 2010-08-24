@@ -47,7 +47,7 @@ Zotero.Integration = new function() {
 					createInstance(Components.interfaces.nsILocalFile);
 				_fifoFile.initWithPath("/Users/Shared");
 				
-				if(_fifoFile.isDirectory() && _fifoFile.isWritable()) {
+				if(_fifoFile.exists() && _fifoFile.isDirectory() && _fifoFile.isWritable()) {
 					var logname = Components.classes["@mozilla.org/process/environment;1"].
 						getService(Components.interfaces.nsIEnvironment).
 						get("LOGNAME");
