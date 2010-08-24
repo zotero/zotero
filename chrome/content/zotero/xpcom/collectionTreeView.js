@@ -32,7 +32,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
- *  Constructor the the CollectionTreeView object
+ *  Constructor for the CollectionTreeView object
  */
 Zotero.CollectionTreeView = function()
 {
@@ -41,6 +41,7 @@ Zotero.CollectionTreeView = function()
 	this._highlightedRows = {};
 	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search', 'share', 'group', 'bucket']);
 	this.showDuplicates = false;
+	this.showCommons = true;
 }
 
 /*
@@ -250,7 +251,7 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 		}
 	}
 	
-	if (Zotero.Commons.enabled) {
+	if (this.showCommons && Zotero.Commons.enabled) {
 		this._showItem(new Zotero.ItemGroup('separator', false));
 		var header = {
 			id: "commons-header",
@@ -860,13 +861,12 @@ Zotero.CollectionTreeView.prototype._hideItem = function(row)
 }
 
 /*
- *  Returns a reference to the collection at row (see Zotero.Collection in data_access.js)
+ * Returns Zotero.ItemGroup at row
  */
 Zotero.CollectionTreeView.prototype._getItemAtRow = function(row)
 {
 	return this._dataItems[row][0];
 }
-
 
 /*
  *  Saves the ids of the currently selected item for later
