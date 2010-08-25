@@ -1386,21 +1386,34 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 				Zotero.debug("Translate: Created attachment; id is "+myID, 4);
 				var newItem = Zotero.Items.get(myID);
 			} else {
+				var uri, file;
+				
 				// generate nsIFile
 				var IOService = Components.classes["@mozilla.org/network/io-service;1"].
 								getService(Components.interfaces.nsIIOService);
-				var uri = IOService.newURI(item.path, "", null);
-				var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
-				
-				if (file.path == '/') {
-					Zotero.debug("Translate: Ignoring attachment '" + item.path + "': error parsing path", 2);
-					return;
+				try {
+					var uri = IOService.newURI(item.path, "", null);
+				}
+				catch (e) {
+					Components.utils.reportError("Error parsing attachment path: " + item.path);
+					Zotero.debug("Translate: Error parsing attachment path '" + item.path + "'", 2);
 				}
 				
-				if (!file.exists()) {
+				if (uri) {
+					var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
+					
+					if (file.path == '/') {
+						Components.utils.reportError("Error parsing attachment path: " + item.path);
+						Zotero.debug("Translate: Error parsing attachment attachment '" + item.path + "'", 2);
+					}
+				}
+				
+				if (!file || !file.exists()) {
 					// use item title if possible, or else file leaf name
 					var title = item.title;
-					if(!title) title = file.leafName;
+					if(!title) {
+						title = file ? file.leafName : '';
+					}
 					
 					var myID = Zotero.Attachments.createMissingAttachment(
 						item.url ? Zotero.Attachments.LINK_MODE_IMPORTED_URL
