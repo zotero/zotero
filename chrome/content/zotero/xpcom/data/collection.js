@@ -571,7 +571,9 @@ Zotero.Collection.prototype.save = function () {
 						Zotero.debug("orderIndex: " + orderIndex);
 						var errmsg = Zotero.DB.getLastErrorString();
 						Zotero.debug(Zotero.DB.query("SELECT * FROM collections WHERE collectionID=?", collectionID));
-						Zotero.debug(Zotero.DB.query("SELECT * FROM collectionItems WHERE collectionID=?", collectionID));
+						Zotero.debug(Zotero.DB.query("SELECT * FROM items WHERE itemID=?", itemID));
+						Zotero.debug(Zotero.DB.query("SELECT * FROM itemAttachments WHERE itemID=?", itemID));
+						Zotero.debug(Zotero.DB.query("SELECT * FROM itemNotes WHERE itemID=?", itemID));
 						throw (e + ' [ERROR: ' + errmsg + ']');
 					}
 				}
