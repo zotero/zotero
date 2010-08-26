@@ -724,9 +724,12 @@ Zotero.Commons.Bucket.prototype.uploadItems = function (ids) {
 	var index = pr.confirmEx(
 		"Zotero Commons Upload",
 		"By uploading items to Zotero Commons you agree to the terms of use at zotero.org and archive.org. "
-			+ "Please make sure metadata for your item(s) is set properly."
-			+ "\n\n "
-			+ "Continue to upload items to the Internet Archive?",
+			+ "Please make sure metadata for your items are set properly."
+			+ "\n\n"
+			+ "Note that there may be a delay while the Internet Archive processes "
+			+ "your items before they appear in the Commons collection in Zotero."
+			+ "\n\n"
+			+ "Continue uploading items to Zotero Commons?",
 		buttonFlags,
 		"Upload",
 		null, null, null, {}
