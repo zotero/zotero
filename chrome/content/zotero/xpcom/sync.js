@@ -1351,8 +1351,10 @@ Zotero.Sync.Server = new function () {
 				_error(response.firstChild.firstChild.nodeValue);
 			}
 			
+			var xml = Zotero.Utilities.prototype.trim(xmlhttp.responseText.replace(/<\?xml.*\?>\s*/, ''));
+			
 			// Strip XML declaration and convert to E4X
-			var xml = new XML(xmlhttp.responseText.replace(/<\?xml.*\?>/, ''));
+			xml = new XML(xml);
 			
 			try {
 				var updateKey = xml.@updateKey.toString();
@@ -3741,7 +3743,7 @@ Zotero.Sync.Server.Data = new function() {
 						xml.collections + ' ' + child.id : child.id;
 				}
 				else */if (child.type == 'item') {
-					xml.items = xml.items ?
+					xml.items = xml.items.toString() ?
 						xml.items + ' ' + child.key : child.key;
 				}
 			}
