@@ -2763,6 +2763,61 @@ Zotero.Sync.Server.Data = new function() {
 						}
 					}
 				}
+				// Fix potential FK constraint error on fki_collectionItems_itemID_sourceItemID
+				//
+				// STR:
+				// 
+				// Create an empty note on A.
+				// Create an empty item on A.
+				// Create a collection on A.
+				// Drag item to collection on A.
+				// Sync A.
+				// Sync B.
+				// Drag note to collection on B.
+				// Sync B.
+				// Drag note under item on A.
+				// Sync A.
+				// 
+				// Explanation:
+				//
+				// Dragging note to collection on B doesn't modify the note
+				// and only sends the collection-items change.
+				// When sync on A tries to add the note to the collection,
+				// an error occurs, because the note is now a child note locally,
+				// and a child note can't belong to a collection.
+				//
+				// We fix this by removing child items from collections they
+				// would be in after saving, and we add their parents instead.
+				else if (type == 'collection') {
+					var childItems = obj.getChildItems(false, true);
+					var existing = [];
+					var toAdd = [];
+					var toRemove = [];
+					for each(var childItem in childItems) {
+						existing.push(childItem.id);
+						var parentItem = childItem.getSource();
+						if (parentItem) {
+							parentItem = Zotero.Items.get(parentItem);
+							// Add parent to collection
+							toAdd.push(parentItem.id);
+							// Remove child from collection
+							toRemove.push(childItem.id);
+						}
+					}
+					// Add
+					toAdd = Zotero.Utilities.prototype.arrayDiff(toAdd, existing);
+					var changed = toAdd.length > 0;
+					existing = existing.concat(toAdd);
+					var origLen = existing.length;
+					// Remove
+					existing = Zotero.Utilities.prototype.arrayDiff(existing, toRemove);
+					changed = changed || origLen != existing.length;
+					// Set
+					if (changed) {
+						obj.childItems = existing;
+						syncSession.addToUpdated(obj);
+					}
+				}
 			}
 			
 			
