@@ -24,10 +24,9 @@
 */
 
 var ZoteroItemPane = new function() {
-	var _lastItem;
-	
 	this.onLoad = onLoad;
 	
+	var _lastItem, _itemBox, _notesLabel, _notesButton, _notesList, _tagsBox, _relatedBox;
 	
 	function onLoad()
 	{
