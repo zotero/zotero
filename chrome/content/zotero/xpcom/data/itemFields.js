@@ -27,6 +27,7 @@
 Zotero.ItemFields = new function() {
 	// Private members
 	var _fields = {};
+	var _fieldsFormats = [];
 	var _fieldsLoaded;
 	var _fieldFormats = [];
 	var _itemTypeFields = [];
