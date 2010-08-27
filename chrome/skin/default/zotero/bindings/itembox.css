@@ -70,7 +70,7 @@ row label
 	-moz-box-align: center;
 	-moz-box-pack: end;
 	height: 18px !important;
-	min-height: none !important;
+	min-height: 0 !important;
 	max-height: 18px !important;
 	padding-right: 2px;
 }
