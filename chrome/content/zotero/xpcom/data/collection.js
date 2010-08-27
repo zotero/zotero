@@ -620,8 +620,10 @@ Zotero.Collection.prototype.save = function () {
 
 
 /**
-* Add an item to the collection
-**/
+ * Add an item to the collection
+ *
+ * Warning: Operates on DB directly without separate save()
+ */
 Zotero.Collection.prototype.addItem = function(itemID) {
 	var current = this.getChildItems(true);
 	if (current && current.indexOf(itemID) != -1) {
@@ -659,6 +661,8 @@ Zotero.Collection.prototype.addItem = function(itemID) {
 
 /**
  * Add multiple items to the collection in batch
+ *
+ * Warning: Operates on DB directly without separate save()
  */
 Zotero.Collection.prototype.addItems = function(itemIDs) {
 	if (!itemIDs || !itemIDs.length) {
@@ -736,8 +740,10 @@ Zotero.Collection.prototype.addItems = function(itemIDs) {
 
 
 /**
-* Remove an item from the collection (does not delete item from library)
-**/
+ * Remove an item from the collection (does not delete item from library)
+ *
+ * Warning: Operates on DB directly without separate save()
+ */
 Zotero.Collection.prototype.removeItem = function(itemID) {
 	var childItems = this.getChildItems(true, true);
 	if (childItems) {
@@ -775,6 +781,8 @@ Zotero.Collection.prototype.removeItem = function(itemID) {
 /**
  * Remove multiple items from the collection in batch
  * (does not delete item from library)
+ *
+ * Warning: Operates on DB directly without separate save()
  */
 Zotero.Collection.prototype.removeItems = function(itemIDs) {
 	if (!itemIDs || !itemIDs.length) {
