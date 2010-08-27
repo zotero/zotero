@@ -229,7 +229,7 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 	
 	// First, determine the type of query using first word
 	var matches = sql.match(/^[^\s\(]*/);
-	queryMethod = matches[0].toLowerCase();
+	var queryMethod = matches[0].toLowerCase();
 	
 	if (params) {
 		// If single scalar value or single non-array object, wrap in an array
