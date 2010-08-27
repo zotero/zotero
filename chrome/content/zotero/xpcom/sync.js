@@ -911,9 +911,6 @@ Zotero.Sync.Runner = new function () {
 			icon.disabled = status == 'animate';
 		}
 		
-		// Clear tooltip
-		_tooltip = null;
-		
 		// Clear status
 		Zotero.Sync.Runner.setSyncStatus();
 	}
