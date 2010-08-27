@@ -100,7 +100,7 @@
 }
 
 #zotero-tb-sync {
-	margin: none;
+	margin: 0;
 }
 
 #zotero-view-tabbox {
@@ -209,7 +209,7 @@
 #zotero-view-tabbox > tabs > tab:first-child[selected=true]:active:hover,
 #zotero-view-tabbox > tabs > tab[first-visible][selected=true]:active:hover,
 #zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true]:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true]:active:hover, {
+#zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true]:active:hover {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-selected-down.png") 0 4 0 6 repeat stretch;
 }
 
@@ -327,7 +327,7 @@
 	width: 8px !important;
 	background-image: url("chrome://zotero/skin/mac/vsplitter.png");
 	background-repeat: repeat-y;
-	padding: none;
+	padding: 0;
 }
 
 #zotero-tree-splitter[state=collapsed] > grippy
@@ -348,7 +348,7 @@
 	height: 8px;
 	background-image: url("chrome://zotero/skin/mac/hsplitter.png") !important;
 	background-repeat: repeat-x;
-	padding: none;
+	padding: 0;
 }
 
 #zotero-tags-splitter > grippy
