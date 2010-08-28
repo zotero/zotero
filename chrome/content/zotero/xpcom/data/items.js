@@ -148,7 +148,7 @@ Zotero.Items = new function() {
 	 *
 	 * If |onlyTopLevel|, don't include child items
 	 */
-	function getAll(onlyTopLevel, libraryID) {
+	function getAll(onlyTopLevel, libraryID, includeDeleted) {
 		var sql = 'SELECT A.itemID FROM items A';
 		if (onlyTopLevel) {
 			sql += ' LEFT JOIN itemNotes B USING (itemID) '
@@ -158,6 +158,9 @@ Zotero.Items = new function() {
 		else {
 			sql += " WHERE 1";
 		}
+		if (!includeDeleted) {
+			sql += " AND A.itemID NOT IN (SELECT itemID FROM deletedItems)";
+		}
 		if (libraryID) {
 			sql += " AND libraryID=?";
 			var ids = Zotero.DB.columnQuery(sql, libraryID);
@@ -166,7 +169,6 @@ Zotero.Items = new function() {
 			sql += " AND libraryID IS NULL";
 			var ids = Zotero.DB.columnQuery(sql);
 		}
-		
 		return this.get(ids);
 	}
 	
