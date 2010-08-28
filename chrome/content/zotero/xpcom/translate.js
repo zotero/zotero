@@ -1101,7 +1101,7 @@ Zotero.Translate.prototype._translationComplete = function(returnValue, error) {
 			              +this._generateErrorString(error), 3);
 			if(this.translator.length > 1) {
 				this.translator.shift();
-				this.translate();
+				this.translate(this.libraryID, this.saveAttachments);
 				return;
 			}
 			
