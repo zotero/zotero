@@ -1075,7 +1075,11 @@ var ZoteroPane = new function()
 			}
 		}
 	}
-
+	
+	this.getItemGroup = function () {
+		return this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+	}
+	
 
 	function itemSelected()
 	{
@@ -1096,6 +1100,7 @@ var ZoteroPane = new function()
 		
 		var tabs = document.getElementById('zotero-view-tabbox');
 		
+		// Single item selected
 		if (this.itemsView && this.itemsView.selection.count == 1 && this.itemsView.selection.currentIndex != -1)
 		{
 			var item = this.itemsView._getItemAtRow(this.itemsView.selection.currentIndex);
@@ -1142,10 +1147,23 @@ var ZoteroPane = new function()
 			}
 			
 			// Regular item
-			else
-			{
+			else {
+				var isCommons = this.getItemGroup().isBucket();
+				
 				document.getElementById('zotero-item-pane-content').selectedIndex = 1;
-				var pane = document.getElementById('zotero-view-tabbox').selectedIndex;
+				var tabBox = document.getElementById('zotero-view-tabbox');
+				var pane = tabBox.selectedIndex;
+				tabBox.firstChild.hidden = isCommons;
+				
+				var button = document.getElementById('zotero-item-show-original');
+				if (isCommons) {
+					button.hidden = false;
+					button.disabled = !this.getOriginalItem();
+				}
+				else {
+					button.hidden = true;
+				}
+				
 				if (this.collectionsView.editable) {
 					ZoteroItemPane.viewItem(item.ref, null, pane);
 					tabs.selectedIndex = document.getElementById('zotero-view-item').selectedIndex;
@@ -1156,8 +1174,8 @@ var ZoteroPane = new function()
 				}
 			}
 		}
-		else
-		{
+		// Zero or multiple items selected
+		else {
 			document.getElementById('zotero-item-pane-content').selectedIndex = 0;
 			
 			var label = document.getElementById('zotero-view-selected-label');
@@ -1436,6 +1454,25 @@ var ZoteroPane = new function()
 				}
 			}
 		}
+	}
+	
+	
+	// Currently used only for Commons to find original linked item
+	this.getOriginalItem = function () {
+		var item = this.getSelectedItems()[0];
+		var itemGroup = this.getItemGroup();
+		// TEMP: Commons buckets only
+		return itemGroup.ref.getLocalItem(item);
+	}
+	
+	
+	this.showOriginalItem = function () {
+		var item = this.getOriginalItem();
+		if (!item) {
+			Zotero.debug("Original item not found");
+			return;
+		}
+		this.selectItem(item.id);
 	}
 	
 	

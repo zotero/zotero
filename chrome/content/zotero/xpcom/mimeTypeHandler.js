@@ -65,6 +65,7 @@ Zotero.MIMETypeHandler = new function () {
 		}
 		this.addHandler("text/x-csl", function(a1, a2) { Zotero.Styles.install(a1, a2) });
 		this.addHandler("application/x-zotero-schema", Zotero.Schema.importSchema);
+		this.addHandler("application/x-zotero-settings", Zotero.Prefs.importSettings);
 	}
 	
 	/**
