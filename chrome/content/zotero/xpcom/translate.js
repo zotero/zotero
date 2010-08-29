@@ -52,97 +52,105 @@ Zotero.Translators = new function() {
 		var start = (new Date()).getTime();
 		var transactionStarted = false;
 		
-		_cache = {"import":[], "export":[], "web":[], "search":[]};
-		_translators = {};
+		Zotero.UnresponsiveScriptIndicator.disable();
 		
-		var dbCacheResults = Zotero.DB.query("SELECT leafName, translatorJSON, "+
-			"code, lastModifiedTime FROM translatorCache");
-		var dbCache = {};
-		for each(var cacheEntry in dbCacheResults) {
-			dbCache[cacheEntry.leafName] = cacheEntry;
-		}
-		
-		var i = 0;
-		var filesInCache = {};
-		var contents = Zotero.getTranslatorsDirectory().directoryEntries;
-		while(contents.hasMoreElements()) {
-			var file = contents.getNext().QueryInterface(Components.interfaces.nsIFile);
-			var leafName = file.leafName;
-			if(!leafName || leafName[0] == ".") continue;
-			var lastModifiedTime = file.lastModifiedTime;
+		// Use try/finally so that we always reset the unresponsive script warning
+		try {
+			_cache = {"import":[], "export":[], "web":[], "search":[]};
+			_translators = {};
 			
-			var dbCacheEntry = false;
-			if(dbCache[leafName]) {
-				filesInCache[leafName] = true;
-				if(dbCache[leafName].lastModifiedTime == lastModifiedTime) {
-					dbCacheEntry = dbCache[file.leafName];
+			var dbCacheResults = Zotero.DB.query("SELECT leafName, translatorJSON, "+
+				"code, lastModifiedTime FROM translatorCache");
+			var dbCache = {};
+			for each(var cacheEntry in dbCacheResults) {
+				dbCache[cacheEntry.leafName] = cacheEntry;
+			}
+			
+			var i = 0;
+			var filesInCache = {};
+			var contents = Zotero.getTranslatorsDirectory().directoryEntries;
+			while(contents.hasMoreElements()) {
+				var file = contents.getNext().QueryInterface(Components.interfaces.nsIFile);
+				var leafName = file.leafName;
+				if(!leafName || leafName[0] == ".") continue;
+				var lastModifiedTime = file.lastModifiedTime;
+				
+				var dbCacheEntry = false;
+				if(dbCache[leafName]) {
+					filesInCache[leafName] = true;
+					if(dbCache[leafName].lastModifiedTime == lastModifiedTime) {
+						dbCacheEntry = dbCache[file.leafName];
+					}
 				}
-			}
-			
-			if(dbCacheEntry) {
-				// get JSON from cache if possible
-				var translator = new Zotero.Translator(file, dbCacheEntry.translatorJSON, dbCacheEntry.code);
-				filesInCache[leafName] = true;
-			} else {
-				// otherwise, load from file
-				var translator = new Zotero.Translator(file);
-			}
-			
-			if(translator.translatorID) {
-				if(_translators[translator.translatorID]) {
-					// same translator is already cached
-					translator.logError('Translator with ID '+
-						translator.translatorID+' already loaded from "'+
-						_translators[translator.translatorID].file.leafName+'"');
+				
+				if(dbCacheEntry) {
+					// get JSON from cache if possible
+					var translator = new Zotero.Translator(file, dbCacheEntry.translatorJSON, dbCacheEntry.code);
+					filesInCache[leafName] = true;
 				} else {
-					// add to cache
-					_translators[translator.translatorID] = translator;
-					for(var type in TRANSLATOR_TYPES) {
-						if(translator.translatorType & TRANSLATOR_TYPES[type]) {
-							_cache[type].push(translator);
+					// otherwise, load from file
+					var translator = new Zotero.Translator(file);
+				}
+				
+				if(translator.translatorID) {
+					if(_translators[translator.translatorID]) {
+						// same translator is already cached
+						translator.logError('Translator with ID '+
+							translator.translatorID+' already loaded from "'+
+							_translators[translator.translatorID].file.leafName+'"');
+					} else {
+						// add to cache
+						_translators[translator.translatorID] = translator;
+						for(var type in TRANSLATOR_TYPES) {
+							if(translator.translatorType & TRANSLATOR_TYPES[type]) {
+								_cache[type].push(translator);
+							}
+						}
+						
+						if(!dbCacheEntry) {
+							// Add cache misses to DB
+							if(!transactionStarted) {
+								transactionStarted = true;
+								Zotero.DB.beginTransaction();
+							}
+							Zotero.Translators.cacheInDB(leafName, translator.metadataString, translator.cacheCode ? translator.code : null, lastModifiedTime);
+							delete translator.metadataString;
 						}
 					}
-					
-					if(!dbCacheEntry) {
-						// Add cache misses to DB
-						if(!transactionStarted) {
-							transactionStarted = true;
-							Zotero.DB.beginTransaction();
-						}
-						Zotero.Translators.cacheInDB(leafName, translator.metadataString, translator.cacheCode ? translator.code : null, lastModifiedTime);
-						delete translator.metadataString;
-					}
+				}
+				
+				i++;
+			}
+			
+			// Remove translators from DB as necessary
+			for(var leafName in dbCache) {
+				if(!filesInCache[leafName]) {
+					Zotero.DB.query("DELETE FROM translatorCache WHERE leafName = ?", [leafName]);
 				}
 			}
 			
-			i++;
-		}
-		
-		// Remove translators from DB as necessary
-		for(var leafName in dbCache) {
-			if(!filesInCache[leafName]) {
-				Zotero.DB.query("DELETE FROM translatorCache WHERE leafName = ?", [leafName]);
+			// Close transaction
+			if(transactionStarted) {
+				Zotero.DB.commitTransaction();
+			}
+			
+			// Sort by priority
+			var collation = Zotero.getLocaleCollation();
+			var cmp = function (a, b) {
+				if (a.priority > b.priority) {
+					return 1;
+				}
+				else if (a.priority < b.priority) {
+					return -1;
+				}
+				return collation.compareString(1, a.label, b.label);
+			}
+			for(var type in _cache) {
+				_cache[type].sort(cmp);
 			}
 		}
-		
-		// Close transaction
-		if(transactionStarted) {
-			Zotero.DB.commitTransaction();
-		}
-		
-		// Sort by priority
-		var collation = Zotero.getLocaleCollation();
-		var cmp = function (a, b) {
-			if (a.priority > b.priority) {
-				return 1;
-			}
-			else if (a.priority < b.priority) {
-				return -1;
-			}
-			return collation.compareString(1, a.label, b.label);
-		}
-		for(var type in _cache) {
-			_cache[type].sort(cmp);
+		finally {
+			Zotero.UnresponsiveScriptIndicator.enable();
 		}
 		
 		Zotero.debug("Cached "+i+" translators in "+((new Date()).getTime() - start)+" ms");
