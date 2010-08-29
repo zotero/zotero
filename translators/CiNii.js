@@ -2,19 +2,19 @@
 	"translatorID":"46291dc3-5cbd-47b7-8af4-d009078186f6",
 	"translatorType":4,
 	"label":"CiNii",
-	"creator":"Michael Berkowitz",
-	"target":"http://ci.nii.ac.jp/naid/",
+	"creator":"Michael Berkowitz and Mitsuo Yoshida",
+	"target":"http://ci.nii.ac.jp/",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"lastUpdated":"2010-05-20 04:00:00"
 }
 
 function detectWeb(doc, url) {
-	if (url.match(/(naid|QuotDisp)/)) {
+	if (url.match(/naid/)) {
 		return "journalArticle";
-	} else if (doc.evaluate('//a[contains(@href, "QuotDisp") or contains(@href, "/naid/")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate('//a[contains(@href, "/naid/")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	}
 }
@@ -27,7 +27,7 @@ function doWeb(doc, url) {
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		var links = doc.evaluate('//a[contains(@href, "QuotDisp") or contains(@href, "/naid/")]', doc, ns, XPathResult.ANY_TYPE, null);
+		var links = doc.evaluate('//a[contains(@href, "/naid/")]', doc, ns, XPathResult.ANY_TYPE, null);
 		var link;
 		while (link = links.iterateNext()) {
 			items[link.href] = Zotero.Utilities.trimInternal(link.textContent);
@@ -40,15 +40,19 @@ function doWeb(doc, url) {
 		arts = [url];
 	}
 	Zotero.Utilities.processDocuments(arts, function(doc) {
-		var biblink = doc.evaluate('//a[contains(text(), "BibTex")]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().href;
+		var biblink = 'http://ci.nii.ac.jp/export?fileType=2&docSelect=' + doc.evaluate('//input[@name="docSelect"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().value;
 		var newurl = doc.location.href;
 		var tags = new Array();
-		if (doc.evaluate('//a[@class="keyword"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var kws = doc.evaluate('//a[@class="keyword"]', doc, ns, XPathResult.ANY_TYPE, null);
+		if (doc.evaluate('//a[@rel="tag"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var kws = doc.evaluate('//a[@rel="tag"]', doc, ns, XPathResult.ANY_TYPE, null);
 			var kw;
 			while (kw = kws.iterateNext()) {
 				tags.push(Zotero.Utilities.trimInternal(kw.textContent));
 			}
+		}
+		var abstractNote;
+		if (doc.evaluate('//div[@class="abstract"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext()) {
+			abstractNote = doc.evaluate('//div[@class="abstract"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		}
 		Zotero.Utilities.HTTP.doGet(biblink, function(text) {
 			var trans = Zotero.loadTranslator("import");
@@ -58,7 +62,8 @@ function doWeb(doc, url) {
 				item.url = newurl;
 				item.attachments = [{url:item.url, title:item.title + " Snapshot", mimeType:"text/html"}];
 				item.tags = tags;
-				item.complete();	
+				item.abstractNote = abstractNote;
+				item.complete();
 			});
 			trans.translate();
 		});

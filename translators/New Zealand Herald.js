@@ -1,110 +1,154 @@
 {
-	"translatorID":"c7830593-807e-48cb-99f2-c3bed2b148c2",
+	"translatorID" : "c7830593-807e-48cb-99f2-c3bed2b148c2",
+	"label" : "New Zealand Herald",
+	"creator" : "Sopheak Hean, Michael Berkowitz",
+	"target" : "^http://www\\.nzherald\\.co\\.nz",
+	"minVersion" : "1.0",
+	"maxVersion" : "",
+	"priority" : 100,
+	"inRepository" : "1",
 	"translatorType":4,
-	"label":"New Zealand Herald",
-	"creator":"Michael Berkowitz",
-	"target":"^http://(www|search).nzherald.co.nz/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2007-08-14 22:15:00"
+	"lastUpdated":"2010-08-03 10:49:18"
 }
 
 function detectWeb(doc, url) {
-	if (doc.title.indexOf("Search Results") != -1) {
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+	if (prefix == "x" ) return namespace; else return null;
+	} : null;
+
+/* If the address bar has /news in it then its a newspaper article*/
+
+	if (doc.location.href.indexOf("/search/results.cfm") !=-1){
 		return "multiple";
-	} else if (doc.location.href.indexOf("story.cfm") != -1) {
+	} else if (doc.location.href.indexOf("/news/article.cfm") !=-1){
 		return "newspaperArticle";
 	}
 }
 
-function scrape(url) {
-	Zotero.Utilities.HTTP.doGet(url, function(text) {
-		var newItem = new Zotero.Item("newspaperArticle");
-		newItem.url = url;
-		newItem.publicationTitle = "New Zealand Herald";
-		
-		//author?
-		var aut = /<a href=\"\/author\/[^>]*>(.*)<\/a>/;
-		if (text.match(aut)) {
-			var author = text.match(aut)[1];
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
-		}
-		
-		//abstract
-		var a = /meta name=\"description\" content=\"([^&]*)/;
-		newItem.abstractNote = text.match(a)[1];
-		
-		//title and date
-		var t = /<title>(.*)<\/title>/;
-		var result = text.match(t)[1].split(" - ");
-		newItem.title = result[0];
-		newItem.date = result[1];
-		
-		//keywords
-		var k = /<meta name=\"keywords\" content=\"(.*)\"/;
-		var kwords = Zotero.Utilities.cleanString(text.match(k)[1]).split(", ");
-		for (var i = 0 ; i < kwords.length ; i++) {
-			newItem.tags.push(kwords[i]);
-		}
-		
-		//section
-		var s = /class=\"current\"><.*><span>(.*)<\/span>/;
-		newItem.section = text.match(s)[1];
-		
-		newItem.complete();
-		Zotero.debug(newItem);
-		
-		Zotero.done();
-	}, function() {});
+function associateData (newItem, items, field, zoteroField) {
+	if (items[field]){
+		newItem[zoteroField] = items[field];
+	}
 }
 
-function doWeb(doc, url) {
+function scrape(doc, url){
+	var authorTemp;
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == 'x') return namespace; else return null;
+	} : null;
+
+	var articleLanguage = "English";
+
+	var newItem = new Zotero.Item('newspaperArticle');
+	newItem.url = doc.location.href;
+
+	newItem.publicationTitle = "New Zealand Herald";
+	newItem.ISSN = "1170-0777";
+
+	//Get title of the news via xpath
+	var myXPath = '//h1';
+	var myXPathObject = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	var headers;
+	var items = new Object();
+	var authorsTemp;
+	var blankCell;
+	var contents;
+	var authorArray = new Array();
+
+	/*
+	 Get authors of the article
+	 Remove "By " then replace "and " with ", "
+
+	 Put the string into an array then split the array and loop all
+     authors then push author to Zotero.  Possible with more than 1 author
+     on an article.
+	*/
+	var authorXPath = '//span[@class="credits"]';
+	var authorXPathObject = doc.evaluate(authorXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+
+	if (authorXPathObject) {
+		var authorString = authorXPathObject.textContent.replace(/\bBy\W+/g, '');
+		if (authorString.match(/\W\band\W+/g)){
+			authorTemp = authorString.replace(/\W\band\W+/g, ', ');
+			authorArray = authorTemp.split(", ");
+		} else if (!authorString.match(/\W\band\W+/g)){
+			authorArray = authorString;
+		}
+		if( authorArray instanceof Array ) {
+			for (var i in authorArray){
+				var author;
+				author = authorArray[i];
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
+			}
+		} else {
+			if (authorString.match(/\W\bof\W+/g)){
+				authorTemp = authorString.replace (/\W\bof\W(.*)/g, '');
+				authorArray = authorTemp;
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(authorTemp, "author"));
+
+			}  else {
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(authorArray, "author"));
+			}
+		}
+	}
+	//date-Year
+	var dateXPath = '//div[@class="tools"]/span';
+	var dateXPathObject = doc.evaluate(dateXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\d{1,2}:\d{1,2} (AM|PM) (\w)+ /g, '');
+
+	//If the original Xpath1 is equal to Updated then go to XPath2
+	if ((dateXPathObject =="Updated")|| (dateXPathObject =="New")){
+		var dateXPath = '//div[@class="tools"]/span[2]';
+		var dateXPathObject = doc.evaluate(dateXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\d{1,2}:\d{1,2} (AM|PM) (\w)+ /g, '');
+		newItem.date = dateXPathObject ;
+	} else { //great found the date just push it to Zotero.
+		var dateXPath = '//div[@class="tools"]/span';
+		var dateXPathObject = doc.evaluate(dateXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/\d{1,2}:\d{1,2} (AM|PM) (\w)+ /g, '');
+		newItem.date = dateXPathObject ;
+	}
+
+	//Get Section of the news
+	var sectionXPath = '//div[@class="sectionHeader"]/span/a[1]';
+	var sectionXPathObject = doc.evaluate(sectionXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	newItem.section = sectionXPathObject;
+
+	//Get news title
+	headers =myXPathObject;
+	newItem.title = headers;
+
+	newItem.language= articleLanguage;
+
+	//grab abstract from meta data
+	var a= "//meta[@name='description']";
+	newItem.abstractNote = doc.evaluate(a, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().content;
+	newItem.complete();
+}
+
+function doWeb(doc, url){
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix){
+		if (prefix =='x')
+		return namespace; else return null;
+	} :null;
+
 	var articles = new Array();
-	var names = new Array();
-	if (doc.title.indexOf("Search Results:") != -1) {
-		var URLS = new Array();
-		var titles = new Array();
-		var xpath = '//p[@class="g"]/a';
-		var links = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-		var link = links.iterateNext();
-	
-		while (link) {
-			URLS.push(link.href);
-			titles.push(link.textContent);
-			link = links.iterateNext();
+	var items = new Object();
+	var nextTitle;
+
+	if (detectWeb(doc, url) == "multiple"){
+		var titles = doc.evaluate('//p[@class="results"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		while (nextTitle = titles.iterateNext()){
+			items[nextTitle.href] = nextTitle.textContent;
 		}
-		
-		Zotero.debug(titles);
-		Zotero.debug(URLS);
-		
-		var newItems = new Object();
-		
-		for (var i = 0 ; i < titles.length ; i++) {
-			newItems[URLS[i]] = titles[i];
-		}
-	
-		newItems = Zotero.selectItems(newItems);
-	
-		Zotero.debug(newItems);
-		
-		for (var i in newItems) {
+		items= Zotero.selectItems(items);
+		for (var i in items){
 			articles.push(i);
-			names.push(newItems[i]);
 		}
 	} else {
-		articles.push(doc.location.href);
-		names.push(Zotero.Utilities.cleanString(doc.title.split("-")[0]));
+		articles = [url];
 	}
 	
-	Zotero.debug(articles);
-	
-	Zotero.Utilities.HTTP.doPost(articles, "", function(text) {
-		for (var i = 0 ; i < articles.length ; i++) {
-			scrape(articles[i]);
-		}
-	});
-	
+	Zotero.Utilities.processDocuments(articles, scrape, function(){Zotero.done();});
 	Zotero.wait();
 }
