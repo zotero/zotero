@@ -33,6 +33,10 @@ Zotero.Commons = new function() {
 		return Zotero.Prefs.get("commons.enabled");
 	});
 	
+	this.__defineSetter__('enabled', function (val) {
+		return Zotero.Prefs.set("commons.enabled", !!val);
+	});
+	
 	this.__defineGetter__('userIdentifier', function () {
 		return Zotero.Prefs.get("commons.accessKey");
 	});
@@ -41,8 +45,17 @@ Zotero.Commons = new function() {
 		return Zotero.Prefs.get("commons.accessKey");
 	});
 	
+	this.__defineSetter__('accessKey', function (val) {
+		return Zotero.Prefs.set("commons.accessKey", val);
+	});
+	
 	this.__defineGetter__('secretKey', function () {
 		return Zotero.Prefs.get("commons.secretKey");
+	});
+	
+	this.__defineSetter__('secretKey', function (val) {
+		// TODO: use login manager
+		return Zotero.Prefs.set("commons.secretKey", val);
 	});
 	
 	this.RDF_TRANSLATOR = {
@@ -377,6 +390,7 @@ Zotero.Commons.Bucket = function (name) {
 	this._items = {};
 	this._itemsLoading = false;
 	this._itemsLoaded = false;
+	this._lastLoad = null;
 	
 	this._metadataLoading = false;
 	this._itemDataLoaded = false;
@@ -406,7 +420,7 @@ Zotero.Commons.Bucket.prototype.__defineGetter__('apiURI', function() {
 
 
 Zotero.Commons.Bucket.prototype.relationPredicate = "owl:sameAs";
-
+Zotero.Commons.Bucket.prototype.reloadSeconds = 60;
 
 Zotero.Commons.Bucket.prototype.exists = function (callback, maxTries, tries) {
 	if (!tries) {
@@ -450,9 +464,14 @@ Zotero.Commons.Bucket.prototype.exists = function (callback, maxTries, tries) {
 
 
 Zotero.Commons.Bucket.prototype.getItems = function (callback) {
-	if (this._itemsLoaded || this._itemsLoading) {
+	if (this._itemsLoading ||
+			// Reload if data is too old
+			(this._itemsLoaded && (!this._lastLoad || (new Date - this._lastLoad) < (this.reloadSeconds * 1000)))) {
+		Zotero.debug("Using cached items");
 		return this._getCachedItems();
 	}
+	
+	Zotero.debug("Loading items from IA");
 	
 	this._itemsLoading = true;
 	
@@ -527,6 +546,7 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 		
 		self._itemsLoading = false;
 		self._itemsLoaded = true;
+		self._lastLoad = new Date;
 		
 		Zotero.debug(zips);
 		
@@ -630,7 +650,7 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 							
 							var rels = Zotero.Relations.getByURIs(null, self.relationPredicate, iaFileURI);
 							if (rels.length) {
-								Zotero.debug("Commons: " + IAFileName + " has already been downloaded -- skipping");
+								Zotero.debug("Commons: " + iaFileName + " has already been downloaded -- skipping");
 								continue;
 							}
 							

@@ -1360,6 +1360,46 @@ Zotero.Prefs = new function(){
 	}
 	
 	
+	// Import settings bundles
+	this.importSettings = function (str, uri) {
+		var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
+						.createInstance(Components.interfaces.nsIPrompt);
+		
+		if (!uri.match(/https:\/\/([^\.]+\.)?zotero.org\//)) {
+			Zotero.debug("Ignoring settings file not from https://zotero.org");
+			return;
+		}
+		
+		str = Zotero.Utilities.prototype.trim(str);
+		
+		Zotero.debug(str);
+		
+		prompt.confirm(
+			"",
+			"Apply settings from zotero.org?"
+		);
+		
+		// Convert to DOM XML
+		var xml = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser)
+			.parseFromString(str, "text/xml");
+		
+		// TODO: allow arbitrary settings?
+		
+		var commonsEnable = xml.getElementById('commons-enable');
+		if (commonsEnable.nodeValue == 'true') {
+			Zotero.Commons.enabled = true;
+			Zotero.Commons.accessKey = xml.getElementById('commons-accessKey').nodeValue;
+			Zotero.Commons.secretKey = xml.getElementById('commons-secretKey').nodeValue;
+			ZoteroPane.collectionsView.refresh();
+		}
+		else if (commonsEnable == 'false') {
+			Zotero.Commons.enabled = false;
+			ZoteroPane.collectionsView.refresh();
+		}
+	}
+	
+	
 	//
 	// Methods to register a preferences observer
 	//

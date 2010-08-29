@@ -401,6 +401,9 @@
 				<!-- TODO: localize -->
 				<button id="zotero-item-restore-button" label="Restore to Library"
 					oncommand="ZoteroPane.restoreSelectedItems()" hidden="true"/>
+				<!-- TODO: localize -->
+				<button id="zotero-item-show-original" label="Show Original"
+					oncommand="ZoteroPane.showOriginalItem()" hidden="true"/>
 				<deck id="zotero-item-pane-content" selectedIndex="0" flex="1">
 					<groupbox pack="center" align="center">
 						<label id="zotero-view-selected-label"/>
