@@ -1974,7 +1974,7 @@ Zotero.SearchConditions = new function(){
 					doesNotContain: true
 				},
 				table: 'itemCreators',
-				field: "firstName || ' ' || lastName"
+				field: "TRIM(firstName || ' ' || lastName)"
 			},
 			
 			{
