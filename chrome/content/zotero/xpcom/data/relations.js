@@ -171,7 +171,7 @@ Zotero.Relations = new function () {
 	
 	
 	this.eraseByURI = function (uri) {
-		sql = "DELETE FROM relations WHERE subject=? OR object=?";
+		var sql = "DELETE FROM relations WHERE subject=? OR object=?";
 		Zotero.DB.query(sql, [uri, uri]);
 	}
 	
