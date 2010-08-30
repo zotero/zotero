@@ -251,6 +251,11 @@
 						return ;
 					}
 					
+					if (this.value == val) {
+						Zotero.debug("Textbox value hasn't changed");
+						return;
+					}
+					
 					var html = val;
 					if(this._format == "RTF") {
 						var bodyStyle = "";
