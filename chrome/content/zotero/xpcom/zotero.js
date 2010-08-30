@@ -1394,7 +1394,7 @@ Zotero.Prefs = new function(){
 		else if (commonsEnable == 'false') {
 			Zotero.Commons.enabled = false;
 			Zotero.Commons.accessKey = '';
-			Zotero.Commons.secretKey = ''
+			Zotero.Commons.secretKey = '';
 			ZoteroPane.collectionsView.refresh();
 		}
 	}
