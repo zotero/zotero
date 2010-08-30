@@ -1370,27 +1370,25 @@ Zotero.Prefs = new function(){
 			return;
 		}
 		
-		str = Zotero.Utilities.prototype.trim(str);
-		
+		str = Zotero.Utilities.prototype.trim(str.replace(/<\?xml.*\?>\s*/, ''));
 		Zotero.debug(str);
 		
-		prompt.confirm(
+		var confirm = prompt.confirm(
 			"",
 			"Apply settings from zotero.org?"
 		);
 		
-		// Convert to DOM XML
-		var xml = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser)
-			.parseFromString(str, "text/xml");
+		if (!confirm) {
+			return;
+		}
 		
-		// TODO: allow arbitrary settings?
+		var xml = new XML(str);
 		
-		var commonsEnable = xml.getElementById('commons-enable');
-		if (commonsEnable.nodeValue == 'true') {
+		var commonsEnable = xml.setting.(@id == 'commons-enable');
+		if (commonsEnable == 'true') {
 			Zotero.Commons.enabled = true;
-			Zotero.Commons.accessKey = xml.getElementById('commons-accessKey').nodeValue;
-			Zotero.Commons.secretKey = xml.getElementById('commons-secretKey').nodeValue;
+			Zotero.Commons.accessKey = xml.setting.(@id == 'commons-accessKey').toString();
+			Zotero.Commons.secretKey = xml.setting.(@id == 'commons-secretKey').toString();
 			ZoteroPane.collectionsView.refresh();
 		}
 		else if (commonsEnable == 'false') {
