@@ -165,7 +165,7 @@ Zotero.Relations = new function () {
 	
 	this.eraseByURIPrefix = function (prefix) {
 		prefix = prefix + '%';
-		sql = "DELETE FROM relations WHERE subject LIKE ? OR object LIKE ?";
+		var sql = "DELETE FROM relations WHERE subject LIKE ? OR object LIKE ?";
 		Zotero.DB.query(sql, [prefix, prefix]);
 	}
 	
