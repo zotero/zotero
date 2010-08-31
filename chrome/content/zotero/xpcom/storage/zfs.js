@@ -492,12 +492,12 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getFileUploadParameters = function (i
 				if (item.libraryID) {
 					var group = Zotero.Groups.getByLibraryID(item.libraryID);
 					text = Zotero.getString('sync.storage.error.zfs.groupQuotaReached1', group.name) + "\n\n"
-							Zotero.getString('sync.storage.error.zfs.groupQuotaReached2');
+							+ Zotero.getString('sync.storage.error.zfs.groupQuotaReached2');
 				}
 				// Personal file
 				else {
 					text = Zotero.getString('sync.storage.error.zfs.personalQuotaReached1') + "\n\n"
-							Zotero.getString('sync.storage.error.zfs.personalQuotaReached2');
+							+ Zotero.getString('sync.storage.error.zfs.personalQuotaReached2');
 					buttonText = Zotero.getString('sync.storage.openAccountSettings');
 					buttonCallback = function () {
 						var url = "https://www.zotero.org/settings/storage";
@@ -509,6 +509,9 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getFileUploadParameters = function (i
 						browser.selectedTab = browser.addTab(url);
 					}
 				}
+				
+				// TODO: localize
+				text += "\n\n" + filename + " (" + Math.round(file.fileSize / 1024) + "KB)";
 				
 				Zotero.debug(req.responseText);
 				
