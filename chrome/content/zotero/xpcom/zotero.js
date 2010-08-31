@@ -1389,14 +1389,14 @@ Zotero.Prefs = new function(){
 			Zotero.Commons.enabled = true;
 			Zotero.Commons.accessKey = xml.setting.(@id == 'commons-accessKey').toString();
 			Zotero.Commons.secretKey = xml.setting.(@id == 'commons-secretKey').toString();
-			ZoteroPane.collectionsView.refresh();
 		}
 		else if (commonsEnable == 'false') {
 			Zotero.Commons.enabled = false;
 			Zotero.Commons.accessKey = '';
 			Zotero.Commons.secretKey = '';
-			ZoteroPane.collectionsView.refresh();
 		}
+		// This is kind of a hack
+		Zotero.Notifier.trigger('refresh', 'collection', []);
 	}
 	
 	

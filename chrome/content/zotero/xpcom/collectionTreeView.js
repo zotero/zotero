@@ -315,7 +315,7 @@ Zotero.CollectionTreeView.prototype.reload = function()
  */
 Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 {
-	if (!ids || ids.length == 0) {
+	if ((!ids || ids.length == 0) && action != 'refresh') {
 		return;
 	}
 	
