@@ -1437,7 +1437,9 @@ Zotero.Sync.Storage = new function () {
 		}
 		
 		var sql = "SELECT itemID FROM itemAttachments JOIN items USING (itemID) "
-					+ "WHERE syncState IN (?,?)";
+					+ "WHERE syncState IN (?,?) "
+					// Skip attachments with empty path, which can't be saved
+					+ "AND path!=''";
 		if (includeUserFiles && !includeGroupFiles) {
 			sql += " AND libraryID IS NULL";
 		}
