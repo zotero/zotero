@@ -142,7 +142,11 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getStorageFileInfo = function (item, 
 			catch (e) {
 				Zotero.debug("Response headers unavailable");
 			}
-			self.onError();
+			// TODO: localize?
+			var msg = "A file sync error occurred. Please restart Firefox and/or your computer and try syncing again.\n\n"
+				+ "If the error persists, there may be a problem with either your computer or your network—security software, proxy server, VPN, etc. "
+				+ "Try disabling any security/firewall software you're using or, if this is a laptop, try from a different network.";
+			self.onError(msg);
 			return;
 		}
 		info.filename = req.getResponseHeader('X-Zotero-Filename');
