@@ -434,9 +434,14 @@ var ZoteroPane = new function()
 			// Auto-sync on pane open
 			if (Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Server.enabled
 					&& !Zotero.Sync.Server.syncInProgress && !Zotero.Sync.Storage.syncInProgress) {
-				setTimeout(function () {
-					Zotero.Sync.Runner.sync(true);
-				}, 1000);
+				if (Zotero.Sync.Server.manualSyncRequired) {
+					Zotero.debug('Manual sync required -- skipping auto-sync', 4);
+				}
+				else {
+					setTimeout(function () {
+						Zotero.Sync.Runner.sync(true);
+					}, 1000);
+				}
 			}
 		}
 		else {
