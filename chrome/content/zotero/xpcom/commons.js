@@ -739,6 +739,11 @@ Zotero.Commons.Bucket.prototype.uploadItems = function (ids) {
 	itemLoop:
 	for (var i=0, len=items.length; i<len; i++) {
 		if (items[i].isRegularItem()) {
+			// Item must have a title
+			if (!items[i].getField('title')) {
+				continue;
+			}
+			
 			var attachmentIDs = items[i].getAttachments();
 			if (!attachmentIDs) {
 				continue;
@@ -757,10 +762,31 @@ Zotero.Commons.Bucket.prototype.uploadItems = function (ids) {
 	var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
 				.getService(Components.interfaces.nsIPrompt);
 	
+	var validItemsMessage = "Only titled items with bibliographic metadata and at least one attached file can be added to the Zotero Commons.";
+	
 	if (itemsToUpload.length == 0) {
 		Zotero.debug("No regular items to upload");
-		pr.alert("", "Only items with bibliographic metadata and attached files can be added to the Zotero Commons.");
+		pr.alert("", validItemsMessage);
 		return;
+	}
+	
+	if (itemsToUpload.length != items.length) {
+		var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
+							+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL);
+		var index = pr.confirmEx(
+			"",
+			"Some of the dragged items will not be uploaded."
+				+ "\n\n"
+				+ validItemsMessage,
+			buttonFlags,
+			"Continue",
+			null, null, null, {}
+		);
+		
+		// If user chooses 'Cancel', exit
+		if (index != 0) {
+			return;
+		}
 	}
 	
 	var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
@@ -768,7 +794,7 @@ Zotero.Commons.Bucket.prototype.uploadItems = function (ids) {
 	var index = pr.confirmEx(
 		"Zotero Commons Upload",
 		"By uploading items to Zotero Commons you agree to the terms of use at zotero.org and archive.org. "
-			+ "Please make sure metadata for your items are set properly."
+			+ "Please make sure metadata for your items is set properly."
 			+ "\n\n"
 			+ "Note that there may be a delay while the Internet Archive processes "
 			+ "your items before they appear in the Commons collection in Zotero."
@@ -779,8 +805,10 @@ Zotero.Commons.Bucket.prototype.uploadItems = function (ids) {
 		null, null, null, {}
 	);
 	
-	// if user chooses 'cancel', exit
-	if (index != 0) return;
+	// If user chooses 'Cancel', exit
+	if (index != 0) {
+		return;
+	}
 	
 	var progressWin = new Zotero.ProgressWindow();
 	var tmpDir = Zotero.getTempDirectory();
