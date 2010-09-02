@@ -369,6 +369,11 @@ Zotero.Commons = new function() {
 	}
 	
 	
+	this.encodeURIComponent = function (str) {
+		return encodeURIComponent(str).replace("'", '%27');
+	}
+	
+	
 	this.error = function (message) {
 		Components.utils.reportError(message);
 		var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
@@ -507,6 +512,8 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 			var zipsXML = xml.file.(@source == 'original').(typeof format != 'undefined' && format == 'Zotero ZIP Item');
 		}
 		catch (e) {
+			alert("Invalid XML response retrieving file upload parameters");
+			this._itemsLoading = false;
 			return;
 		}
 		
@@ -728,20 +735,31 @@ Zotero.Commons.Bucket.prototype.uploadItems = function (ids) {
 		return;
 	}
 	
-	var itemsToUpload = false;
+	var itemsToUpload = [];
+	itemLoop:
 	for (var i=0, len=items.length; i<len; i++) {
 		if (items[i].isRegularItem()) {
-			itemsToUpload = true;
-			break;
+			var attachmentIDs = items[i].getAttachments();
+			if (!attachmentIDs) {
+				continue;
+			}
+			// Make sure there's at least one valid attachment
+			for each(var attachmentID in attachmentIDs) {
+				var attachment = Zotero.Items.get(attachmentID);
+				if (attachment && attachment.getFile()) {
+					itemsToUpload.push(items[i]);
+					continue itemLoop;
+				}
+			}
 		}
 	}
 	
 	var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
 				.getService(Components.interfaces.nsIPrompt);
 	
-	if (!itemsToUpload) {
+	if (itemsToUpload.length == 0) {
 		Zotero.debug("No regular items to upload");
-		pr.alert("", "Only items with bibliographic metadata can be added to the Zotero Commons.");
+		pr.alert("", "Only items with bibliographic metadata and attached files can be added to the Zotero Commons.");
 		return;
 	}
 	
@@ -777,12 +795,6 @@ Zotero.Commons.Bucket.prototype.uploadItems = function (ids) {
 		
 		let item = items.shift();
 		
-		// Skip notes and attachments
-		if (!item.isRegularItem()) {
-			process(items);
-			return;
-		}
-		
 		// TODO: check relations table to see if this item already has a bucket
 		
 		// TODO: localize
@@ -805,7 +817,7 @@ Zotero.Commons.Bucket.prototype.uploadItems = function (ids) {
 		);
 	}
 	
-	process(items);
+	process(itemsToUpload);
 }
 
 
@@ -905,7 +917,7 @@ Zotero.Commons.Bucket.prototype.deleteItems = function (ids) {
 	var bucket = this;
 	
 	for each(let key in keysToDelete) {
-		let path = resource + '/' + encodeURIComponent(key);
+		let path = resource + '/' + Zotero.Commons.encodeURIComponent(key);
 		
 		Zotero.Commons.createAuthenticatedRequest(
 			method, path, headers, this.accessKey, this.secretKey, function (req) {
@@ -1036,7 +1048,7 @@ Zotero.Commons.Bucket.prototype.putFile = function (file, mimeType, callback) {
 	var fileName = file.leafName;
 	var fileNameHyphened = fileName.replace(/ /g,'-');
 	var method = "PUT";
-	var resource = this.apiPath + '/' + encodeURIComponent(fileNameHyphened);
+	var resource = this.apiPath + '/' + Zotero.Commons.encodeURIComponent(fileNameHyphened);
 	var content = Zotero.File.getBinaryContents(file);
 	var headers = {};
 	var self = this;
@@ -1079,7 +1091,7 @@ Zotero.Commons.Bucket.prototype.putFile = function (file, mimeType, callback) {
 
 
 Zotero.Commons.Bucket.prototype.getItemURI = function (item) {
-	return this.uri + '#' + encodeURIComponent(item.getField('title'));
+	return this.uri + '#' + Zotero.Commons.encodeURIComponent(item.getField('title'));
 }
 
 
@@ -1087,13 +1099,19 @@ Zotero.Commons.Bucket.prototype.getLocalItem = function (item) {
 	var uri = this.getItemURI(item);
 	var rels = Zotero.Relations.getByURIs(null, this.relationPredicate, uri);
 	
+	if (!rels.length) {
+		Zotero.debug("No local item linked to remote URI " + uri, 2);
+		return false;
+	}
+	
 	if (rels.length > 1) {
-		throw ("Commons: More than one local item linked to remote item " + uri);
+		Zotero.debug("More than one local item linked to remote item " + uri, 2);
+		return false;
 	}
 	
 	var item = Zotero.URI.getURIItem(rels[0].subject);
 	if (!item) {
-		Zotero.debug("Linked local item not found for URI " + this.uri, 2);
+		Zotero.debug("Linked local item not found for remote URI " + uri, 2);
 		return false;
 	}
 	
