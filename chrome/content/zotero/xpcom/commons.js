@@ -499,10 +499,16 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 		}
 		catch (e) {
 			alert("Invalid response retrieving file upload parameters");
+			this._itemsLoading = false;
 			return;
 		}
 		
-		var zipsXML = xml.file.(@source == 'original').(format == 'Zotero ZIP Item');
+		try {
+			var zipsXML = xml.file.(@source == 'original').(typeof format != 'undefined' && format == 'Zotero ZIP Item');
+		}
+		catch (e) {
+			return;
+		}
 		
 		Zotero.debug(zipsXML);
 		
