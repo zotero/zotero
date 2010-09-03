@@ -1237,13 +1237,13 @@ Zotero.CSL.prototype._compareItem = function(a, b, context, cache) {
 	}
 	
 	// sort by old index (to make this a stable sort)
-	var aOldIndex = a.getProperty("oldIndex");
-	var bOldIndex = b.getProperty("oldIndex");
-	if(aOldIndex < bOldIndex) {
-		return -1;
-	} else if(aOldIndex != bOldIndex) {
-		return 1;
-	}
+	//var aOldIndex = a.getProperty("oldIndex");
+	//var bOldIndex = b.getProperty("oldIndex");
+	//if(aOldIndex < bOldIndex) {
+	//	return -1;
+	//} else if(aOldIndex != bOldIndex) {
+	//	return 1;
+	//}
 	
 	return 0;
 }
