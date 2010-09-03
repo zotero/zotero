@@ -1,5 +1,5 @@
 {
-        "translatorID":"386c7e75-eef4-47b1-b5a6-0faa3cfa4f44",
+        "translatorID":"631ff0c7-2e64-4279-a9c9-ad9518d40f2b",
         "label":"Stuff.co.nz",
         "creator":"Sopheak Hean (University of Waikato, Faculty of Education)",
         "target":"^http://(www\\.)?stuff\\.co\\.nz/",
