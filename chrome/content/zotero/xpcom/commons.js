@@ -58,6 +58,13 @@ Zotero.Commons = new function() {
 		return Zotero.Prefs.set("commons.secretKey", val);
 	});
 	
+	this.__defineGetter__('userNameSlug', function () {
+		if (!_userNameSlug) {
+			throw ("Username not set in Zotero.Commons.userNameSlug getter");
+		}
+		return _userNameSlug;
+	});
+	
 	this.RDF_TRANSLATOR = {
 		'label': 'Zotero RDF',
 		'target': 'rdf',
@@ -76,6 +83,8 @@ Zotero.Commons = new function() {
 	
 	this.refreshNeeded = true;
 	
+	var _userName;
+	var _userNameSlug;
 	var _buckets = {};
 	var _bucketsLoading = false;
 	var _bucketsLoaded = false;
@@ -84,19 +93,28 @@ Zotero.Commons = new function() {
 	
 	this.getBuckets = function (callback) {
 		if (!this.enabled) {
-			return _buckets;
+			if (callback) {
+				callback(_buckets);
+			}
+			return;
 		}
 		
 		var accessKey = this.accessKey;
 		var secretKey = this.secretKey;
 		
 		if (_bucketsLoaded) {
-			return _buckets;
+			if (callback) {
+				callback(_buckets);
+			}
+			return;
 		}
 		
 		if (_bucketsLoading) {
 			Zotero.debug("Already loading buckets");
-			return _buckets;
+			if (callback) {
+				callback(_buckets);
+			}
+			return;
 		}
 		
 		_bucketsLoading = true;
@@ -120,6 +138,9 @@ Zotero.Commons = new function() {
 			}
 			
 			Zotero.debug(req.responseText);
+			
+			_userName = req.responseXML.getElementsByTagName('DisplayName')[0].textContent;
+			_userNameSlug = Zotero.Commons.slugify(_userName);
 			
 			var currentBuckets = [];
 			var IABuckets = [];
@@ -174,15 +195,13 @@ Zotero.Commons = new function() {
 			}
 			
 			if (callback) {
-				callback();
+				callback(_buckets);
 			}
 		};
 		
-		var req = this.createAuthenticatedRequest(
+		this.createAuthenticatedRequest(
 			"GET", "/", {}, accessKey, secretKey, syncCallback, null, false, true
 		);
-		
-		return _buckets;
 	};
 	
 	
@@ -210,12 +229,16 @@ Zotero.Commons = new function() {
 	
 	
 	this.createBucket = function (name, title, onBucketCreated) {
+		if (!_userName) {
+			throw new Exception("Username not set in Zotero.Commons.createBucket()");
+		}
+		name = "zc-test-" + this.userSlug + "-" + name;
+		
 		var headers = {
 			"x-archive-auto-make-bucket":"1",
 			"x-archive-meta01-collection":"zoterocommons",
 			"x-archive-meta02-collection":"scholarworkspaces",
-			"x-archive-meta-sponsor":"Andrew W. Mellon Foundation",
-			"x-archive-meta01-language":"eng"
+			"x-archive-meta-sponsor":"Andrew W. Mellon Foundation"
 		};
 		
 		if (!this.isValidBucketName(name)) {
@@ -231,12 +254,6 @@ Zotero.Commons = new function() {
 		}
 		
 		headers["x-archive-meta-title"] = title;
-		
-		// TODO: use proper language code?
-		//if (itemLanguage) {
-		//	headers["x-archive-meta01-language"] = itemLanguage;
-		//}
-		
 		headers["x-archive-meta-mediatype"] = "texts";
 		
 		Zotero.Commons.createAuthenticatedRequest(
@@ -266,7 +283,8 @@ Zotero.Commons = new function() {
 	
 	
 	this.createAuthenticatedRequest = function (method, resource, headers, accessKey, secretKey, callback, data, sendAsBinary, noCache) {
-		var url = Zotero.Commons.apiUrl + resource;
+		var apiURL = Zotero.Commons.apiUrl;
+		var url = apiURL + resource;
 		
 		Zotero.debug("Commons HTTP " + method + ": " + url);
 		
@@ -291,7 +309,8 @@ Zotero.Commons = new function() {
 		}
 		signatureData += amz.sort().join('');
 
-		signatureData += resource;
+		signatureData += req.channel.URI.spec.substr(apiURL.length);
+		
 		var signature = Zotero.Commons.SHA1.b64_hmac_sha1(secretKey, signatureData) + '=';
 		headers["Authorization"] = "AWS " + accessKey + ":" + signature;
 		//headers["Authorization"] = "LOW " + accessKey + ":" + secretKey;
@@ -369,17 +388,22 @@ Zotero.Commons = new function() {
 	}
 	
 	
-	this.encodeURIComponent = function (str) {
-		return encodeURIComponent(str).replace("'", '%27');
-	}
-	
-	
 	this.error = function (message) {
 		Components.utils.reportError(message);
 		var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
 					.createInstance(Components.interfaces.nsIPrompt);
 		prompt.alert("Zotero Commons Error", message);
 	}
+	
+	
+	this.slugify = function (input) {
+        var slug = Zotero.Utilities.prototype.trim(input)
+        			.toLowerCase()
+        			.replace(/[^a-z0-9 ._-]/g, "")
+        			//.replace(/ /g, "_");
+        			.replace(/ /g, "-");
+        return slug;
+    }
 }
 
 
@@ -404,19 +428,19 @@ Zotero.Commons.Bucket = function (name) {
 
 
 Zotero.Commons.Bucket.prototype.__defineGetter__('uri', function () {
-	return 'http://www.archive.org/details/' + encodeURIComponent(this.name);
+	return 'http://www.archive.org/details/' + this.name;
 });
 
 Zotero.Commons.Bucket.prototype.__defineGetter__('downloadURI', function () {
-	return 'http://www.archive.org/download/' + encodeURIComponent(this.name);
+	return 'http://www.archive.org/download/' + this.name;
 });
 
 Zotero.Commons.Bucket.prototype.__defineGetter__('metadataURI', function () {
-	return this.downloadURI + '/' + encodeURIComponent(this.name) + '_meta.xml';
+	return this.downloadURI + '/' + this.name + '_meta.xml';
 });
 
 Zotero.Commons.Bucket.prototype.__defineGetter__('apiPath', function() {
-	return '/' + encodeURIComponent(this.name);
+	return '/' + this.name;
 });
 
 Zotero.Commons.Bucket.prototype.__defineGetter__('apiURI', function() {
@@ -521,7 +545,7 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 		
 		var zips = [];
 		
-		// Generate a list of extracted PDFs with OCRed equivalents
+		// Parse files XML to get RDF and OCRed PDFs
 		var ocrOriginals = {};
 		var ocrPDFXML = xml.file.(@source == 'derivative').(format == 'Additional Text PDF').@name;
 		for each(var pdf in ocrPDFXML) {
@@ -533,10 +557,18 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 			var key = zipXML.@name.toString();
 			var title = zipXML.title.toString();
 			
-			var childrenXML = xml.file.(typeof zipsource != 'undefined').(zipsource == key).(format != 'Zotero RDF');
+			var childrenXML = xml.file.(typeof zipsource != 'undefined').(zipsource == key);
+			var rdf;
 			var children = [];
 			for each(var childXML in childrenXML) {
 				var childKey = childXML.@name.toString();
+				
+				// Pull out RDF filename
+				if (childXML.format == 'Zotero RDF') {
+					rdf = childKey;
+					continue;
+				}
+				
 				children.push({
 					key: childKey,
 					title: childXML.title.toString(),
@@ -553,6 +585,7 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 			zips.push({
 				key: key,
 				title: title,
+				rdf: rdf,
 				children: children
 			});
 		}
@@ -585,10 +618,7 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 				return;
 			}
 			
-			var rdfURI = self.downloadURI + '/'
-				// Strip characters IA strips
-				+ zip.key.replace(/[^-A-Za-z0-9_\.]/g, '-').replace(/-+/g, '-');
-			rdfURI = rdfURI.replace(/\.zip$/, "_zotero.rdf");
+			var rdfURI = self.downloadURI + '/' + zip.rdf;
 			
 			Zotero.Utilities.HTTP.doGet(rdfURI, function (xmlhttp) {
 				// If RDF not available, skip item
@@ -945,7 +975,7 @@ Zotero.Commons.Bucket.prototype.deleteItems = function (ids) {
 	var bucket = this;
 	
 	for each(let key in keysToDelete) {
-		let path = resource + '/' + Zotero.Commons.encodeURIComponent(key);
+		let path = resource + '/' + key;
 		
 		Zotero.Commons.createAuthenticatedRequest(
 			method, path, headers, this.accessKey, this.secretKey, function (req) {
@@ -1076,7 +1106,7 @@ Zotero.Commons.Bucket.prototype.putFile = function (file, mimeType, callback) {
 	var fileName = file.leafName;
 	var fileNameHyphened = fileName.replace(/ /g,'-');
 	var method = "PUT";
-	var resource = this.apiPath + '/' + Zotero.Commons.encodeURIComponent(fileNameHyphened);
+	var resource = this.apiPath + '/' + fileName;
 	var content = Zotero.File.getBinaryContents(file);
 	var headers = {};
 	var self = this;
@@ -1086,7 +1116,7 @@ Zotero.Commons.Bucket.prototype.putFile = function (file, mimeType, callback) {
 		
 		// Success
 		if (req.status == 201) {
-			Zotero.debug("Commons: " + fileNameHyphened + " was uploaded successfully.");
+			Zotero.debug("Commons: " + fileName + " was uploaded successfully.");
 			
 			if (callback) {
 				callback(req.channel.URI.spec);
@@ -1119,7 +1149,7 @@ Zotero.Commons.Bucket.prototype.putFile = function (file, mimeType, callback) {
 
 
 Zotero.Commons.Bucket.prototype.getItemURI = function (item) {
-	return this.uri + '#' + Zotero.Commons.encodeURIComponent(item.getField('title'));
+	return this.uri + '#' + encodeURIComponent(item.getField('title'));
 }
 
 
