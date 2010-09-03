@@ -1510,105 +1510,105 @@ var ZoteroPane = new function()
 	}
 	
 	this.createCommonsBucket = function () {
-		var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
-						.createInstance(Components.interfaces.nsIPrompt);
-		
-		var invalid = false;
-		
-		while (true) {
-			if (invalid) {
-				// TODO: localize
-				prompt.alert("", "Invalid title. Please try again.");
-				invalid = false;
+		Zotero.Commons.getBuckets(function () {
+			var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
+							.createInstance(Components.interfaces.nsIPrompt);
+			
+			var invalid = false;
+			
+			while (true) {
+				if (invalid) {
+					// TODO: localize
+					prompt.alert("", "Invalid title. Please try again.");
+					invalid = false;
+				}
+				
+				var newTitle = {};
+				var result = prompt.prompt(
+					"",
+					// TODO: localize
+					"Enter a title for this Zotero Commons collection:",
+					newTitle,
+					"", {}
+				);
+				
+				if (!result) {
+					return;
+				}
+				
+				var title = Zotero.Utilities.prototype.trim(newTitle.value);
+				
+				if (!title) {
+					return;
+				}
+				
+				if (!Zotero.Commons.isValidBucketTitle(title)) {
+					invalid = true;
+					continue;
+				}
+				
+				break;
 			}
 			
-			var newTitle = {};
-			var result = prompt.prompt(
-				"",
-				// TODO: localize
-				"Enter a title for this Zotero Commons collection:",
-				newTitle,
-				"", {}
-			);
+			invalid = false;
 			
-			if (!result) {
-				return;
+			var origName = title.toLowerCase();
+			origName = origName.replace(/[^a-z0-9 ._-]/g, '');
+			origName = origName.replace(/ /g, '-');
+			origName = origName.substr(0, 32);
+			
+			while (true) {
+				if (invalid) {
+					// TODO: localize
+					var msg = "'" + name + "' is not a valid Zotero Commons collection identifier.\n\n"
+						+ "Collection identifiers can contain basic Latin letters, numbers,"
+						+ "hyphens, and underscores. Spaces and other characters are not allowed.";
+					prompt.alert("", msg);
+					invalid = false;
+				}
+				
+				var newName = { value: origName };
+				var result = prompt.prompt(
+					"",
+					// TODO: localize
+					"Enter an identifier for the collection '" + title + "'.\n\n"
+						+ "The identifier will form the collection's URL on archive.org "
+						+ "and can contain basic Latin letters, numbers, hyphens, and underscores. "
+						+ "Spaces and other characters are not allowed.\n\n"
+						+ '"zc-test-' + Zotero.Commons.userNameSlug + '-" '
+						+ "will be automatically prepended to your entry.",
+					newName,
+					"", {}
+				);
+				
+				if (!result) {
+					return;
+				}
+				
+				var name = Zotero.Utilities.prototype.trim(newName.value);
+				
+				if (!name) {
+					return;
+				}
+				
+				if (!Zotero.Commons.isValidBucketName(name)) {
+					invalid = true;
+					continue;
+				}
+				
+				break;
 			}
 			
-			var title = Zotero.Utilities.prototype.trim(newTitle.value);
+			// TODO: localize
+			var progressWin = new Zotero.ProgressWindow();
+			progressWin.changeHeadline("Creating Zotero Commons Collection");
+			var icon = this.collectionsView.getImageSrc(this.collectionsView.selection.currentIndex);
+			progressWin.addLines(title, icon)
+			progressWin.show();
 			
-			if (!title) {
-				return;
-			}
-			
-			if (!Zotero.Commons.isValidBucketTitle(title)) {
-				invalid = true;
-				continue;
-			}
-			
-			break;
-		}
-		
-		invalid = false;
-		
-		var origName = title.toLowerCase();
-		origName = origName.replace(/[^a-z0-9 ._-]/g, '');
-		origName = origName.replace(/ /g, '-');
-		origName = origName.substr(0, 32);
-		
-		while (true) {
-			if (invalid) {
-				// TODO: localize
-				var msg = "'" + name + "' is not a valid Zotero Commons collection identifier.\n\n"
-					+ "Collection identifiers can contain basic Latin letters, numbers,"
-					+ "hyphens, and underscores. Spaces and other characters are not allowed.";
-				prompt.alert("", msg);
-				invalid = false;
-			}
-			
-			var newName = { value: origName };
-			var result = prompt.prompt(
-				"",
-				// TODO: localize
-				"Enter an identifier for the collection '" + title + "'.\n\n"
-					+ "The identifier will form the collection's URL "
-					+ "(e.g., http://www.archive.org/details/" + origName + ") "
-					+ "and can contain basic Latin letters, numbers, hyphens, and underscores. "
-					+ "Spaces and other characters are not allowed.",
-				newName,
-				"", {}
-			);
-			
-			if (!result) {
-				return;
-			}
-			
-			var name = Zotero.Utilities.prototype.trim(newName.value);
-			
-			if (!name) {
-				return;
-			}
-			
-			if (!Zotero.Commons.isValidBucketName(name)) {
-				invalid = true;
-				continue;
-			}
-			
-			break;
-		}
-		
-		// TEMP
-		var name = "zc-test-" + name;
-		
-		// TODO: localize
-		var progressWin = new Zotero.ProgressWindow();
-		progressWin.changeHeadline("Creating Zotero Commons Collection");
-		var icon = this.collectionsView.getImageSrc(this.collectionsView.selection.currentIndex);
-		progressWin.addLines(title, icon)
-		progressWin.show();
-		
-		Zotero.Commons.createBucket(name, title, function () {
-			progressWin.startCloseTimer();
+			Zotero.Commons.createBucket(name, title, function () {
+				progressWin.startCloseTimer();
+			});
 		});
 	}
 	

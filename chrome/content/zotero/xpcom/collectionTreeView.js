@@ -257,12 +257,16 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 			id: "commons-header",
 			label: "Commons", // TODO: localize
 			expand: function (buckets) {
-				if (!buckets) {
-					var buckets = Zotero.Commons.getBuckets();
+				var show = function (buckets) {
+					for each(var bucket in buckets) {
+						self._showItem(new Zotero.ItemGroup('bucket', bucket), 1);
+					}
 				}
-				
-				for each(var bucket in buckets) {
-					self._showItem(new Zotero.ItemGroup('bucket', bucket), 1);
+				if (buckets) {
+					show(buckets);
+				}
+				else {
+					Zotero.Commons.getBuckets(show);
 				}
 			}
 		};
