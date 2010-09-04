@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"Library Catalog (InnoPAC)",
 	"creator":"Simon Kornblith and Michael Berkowitz",
-	"target":"(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+~S[0-9]|/search/q\\?)",
+	"target":"(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+~?S?[0-9]?|/search/q\\?)",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":200,
