@@ -24,8 +24,6 @@ var FORMAT_GUIDS = {
 var unAPIResolver, unsearchedIds, foundIds, foundItems, foundFormat, foundFormatName, domain;
 
 function detectWeb(doc, url) {
-	Zotero.debug("detecting unAPI");
-	
 	// initialize variables
 	unsearchedIds = [];
 	foundIds = [];
@@ -63,8 +61,6 @@ function detectWeb(doc, url) {
 	} else {
 		// if there's more than one, we should first see if the resolver gives metadata for all of them
 		Zotero.Utilities.HTTP.doGet(unAPIResolver, function(text) {
-			Zotero.debug(text);
-			
 			var format = checkFormats(text);
 			if(format) {
 				// move unsearchedIds to foundIds
@@ -145,9 +141,6 @@ function checkFormats(text) {
 			foundFormat["endnote"] = escape(name);
 		}
 	}
-	
-	Zotero.debug("FORMATS");
-	Zotero.debug(foundFormat);
 	
 	// loop through again, this time respecting preferences
 	for each(var format in RECOGNIZABLE_FORMATS) {
