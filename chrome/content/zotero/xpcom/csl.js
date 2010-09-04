@@ -1217,12 +1217,10 @@ Zotero.CSL.prototype._compareItem = function(a, b, context, cache) {
 			var compare = keyA.compare(keyB);
 			if(key.@sort == "descending") {	// the compare method sorts ascending
 											// so we sort descending by reversing it
-				if(compare < 1) return 1;
-				if(compare > 1) return -1;
+				if(compare < 0) return 1;
+				if(compare > 0) return -1;
 			} else if (compare != 0) {
 				return compare;
-			} else {
-				return 0;
 			}
 		}
 	}
