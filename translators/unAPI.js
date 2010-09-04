@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2010-03-22 21:13:00"
+	"lastUpdated":"2010-09-04 20:28:04"
 }
 
 var RECOGNIZABLE_FORMATS = ["mods", "marc", "endnote", "ris", "bibtex", "rdf"];
@@ -24,6 +24,8 @@ var FORMAT_GUIDS = {
 var unAPIResolver, unsearchedIds, foundIds, foundItems, foundFormat, foundFormatName, domain;
 
 function detectWeb(doc, url) {
+	Zotero.debug("detecting unAPI");
+	
 	// initialize variables
 	unsearchedIds = [];
 	foundIds = [];
@@ -50,16 +52,9 @@ function detectWeb(doc, url) {
 			unsearchedIds.push(escape(abbr.getAttribute("title")));
 		}
 	}
-	
 	if(!unsearchedIds.length) return false;
 	
 	// now we need to see if the server actually gives us bibliographic metadata.
-	
-	// one way to signal this is with a META tag
-	var zoteroMeta = doc.evaluate('//meta[@name="ZoteroItemType"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if(zoteroMeta) return zoteroMeta.getAttribute("content");
-	
-	// otherwise, things will be a bit more complicated, and we'll have to do some HTTP requests
 	Zotero.wait();
 	
 	if(unsearchedIds.length == 1) {
@@ -68,6 +63,8 @@ function detectWeb(doc, url) {
 	} else {
 		// if there's more than one, we should first see if the resolver gives metadata for all of them
 		Zotero.Utilities.HTTP.doGet(unAPIResolver, function(text) {
+			Zotero.debug(text);
+			
 			var format = checkFormats(text);
 			if(format) {
 				// move unsearchedIds to foundIds
@@ -148,6 +145,9 @@ function checkFormats(text) {
 			foundFormat["endnote"] = escape(name);
 		}
 	}
+	
+	Zotero.debug("FORMATS");
+	Zotero.debug(foundFormat);
 	
 	// loop through again, this time respecting preferences
 	for each(var format in RECOGNIZABLE_FORMATS) {
