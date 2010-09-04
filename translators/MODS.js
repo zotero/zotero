@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":50,
 	"inRepository":true,
-	"lastUpdated":"2010-02-04 02:38:25"
+	"lastUpdated":"2010-09-04 22:45:00"
 }
 
 Zotero.addOption("exportNotes", true);
@@ -135,7 +135,7 @@ function doExport() {
 		
 		// XML tag detail; object field volume
 		if(item.volume) {
-			if(Zotero.Utilities.isInt(item.volume)) {
+			if(parseInt(item.volume) == item.volume) {
 				part += <detail type="volume"><number>{item.volume}</number></detail>;
 			} else {
 				part += <detail type="volume"><text>{item.volume}</text></detail>;
@@ -144,7 +144,7 @@ function doExport() {
 		
 		// XML tag detail; object field number
 		if(item.issue) {
-			if(Zotero.Utilities.isInt(item.issue)) {
+			if(parseInt(item.issue) == item.issue) {
 				part += <detail type="issue"><number>{item.issue}</number></detail>;
 			} else {
 				part += <detail type="issue"><text>{item.issue}</text></detail>;
@@ -153,7 +153,7 @@ function doExport() {
 		
 		// XML tag detail; object field section
 		if(item.section) {
-			if(Zotero.Utilities.isInt(item.section)) {
+			if(parseInt(item.section) == item.section) {
 				part += <detail type="section"><number>{item.section}</number></detail>;
 			} else {
 				part += <detail type="section"><text>{item.section}</text></detail>;
@@ -435,8 +435,8 @@ function doImport() {
 		"letter":"letter",
 		"motion picture":"film",
 		"art original":"artwork",
-		"web site":"webpage"
-		"yearbook":"book",
+		"web site":"webpage",
+		"yearbook":"book"
 	};
 	
 	// parse with E4X
@@ -459,14 +459,15 @@ function doImport() {
 			// dropping other title types so they don't overwrite the main title
 			// we have same behaviour in the MARC translator
 			if(!titleInfo.@type.toString()) { 
-				if (titleInfo.m::title.length()){
+				if(titleInfo.m::title.length()) {
 					newItem.title = titleInfo.m::title.text().toString();
-					if (titleInfo.m::subTitle.length()) {
+					if(titleInfo.m::subTitle.length()) {
 						newItem.title = newItem.title + ": " + titleInfo.m::subTitle.text().toString();
 					}
 				} else {
-				newItem.title = titleInfo.*.text(); // including text from sub elements
-			} 
+					newItem.title = titleInfo.*.text(); // including text from sub elements
+				}
+			}
 		}
 		// try to get genre from local genre
 		for each(var genre in mods.m::genre) {
