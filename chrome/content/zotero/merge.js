@@ -46,9 +46,8 @@ var Zotero_Merge_Window = new function () {
 		_wizardPage = document.getElementsByTagName('wizardpage')[0];
 		_mergeGroup = document.getElementsByTagName('zoteromergegroup')[0];
 		
-		if (screen.width > 1000) {
-			_wizard.setAttribute('zoterowidescreen', 'true');
-		}
+		_wizard.setAttribute('width', Math.min(980, screen.width - 20));
+		_wizard.setAttribute('height', Math.min(718, screen.height - 30));
 		
 		// Set font size from pref
 		Zotero.setFontSize(_wizardPage);
@@ -109,8 +108,10 @@ var Zotero_Merge_Window = new function () {
 			_updateChangedCreators();
 		}
 		
+		var nextButton = _wizard.getButton("next");
+		
 		if (Zotero.isMac) {
-			_wizard.getButton("next").setAttribute("hidden", "false");
+			nextButton.setAttribute("hidden", "false");
 			_wizard.getButton("finish").setAttribute("hidden", "true");
 		}
 		else {
@@ -118,6 +119,8 @@ var Zotero_Merge_Window = new function () {
 			var deck = document.getAnonymousElementByAttribute(buttons, "anonid", "WizardButtonDeck");
 			deck.selectedIndex = 1;
 		}
+		
+		_setInstructionsString(nextButton.label);
 	}
 	
 	
@@ -163,8 +166,10 @@ var Zotero_Merge_Window = new function () {
 		
 		// On Windows the buttons don't move when one is hidden
 		if ((_pos + 1) != _objects.length) {
+			var nextButton = _wizard.getButton("next");
+			
 			if (Zotero.isMac) {
-				_wizard.getButton("next").setAttribute("hidden", "false");
+				nextButton.setAttribute("hidden", "false");
 				_wizard.getButton("finish").setAttribute("hidden", "true");
 			}
 			else {
@@ -172,12 +177,16 @@ var Zotero_Merge_Window = new function () {
 				var deck = document.getAnonymousElementByAttribute(buttons, "anonid", "WizardButtonDeck");
 				deck.selectedIndex = 1;
 			}
+			
+			_setInstructionsString(nextButton.label);
 		}
 		// Last object
 		else {
+			var finishButton = _wizard.getButton("finish");
+			
 			if (Zotero.isMac) {
 				_wizard.getButton("next").setAttribute("hidden", "true");
-				_wizard.getButton("finish").setAttribute("hidden", "false");
+				finishButton.setAttribute("hidden", "false");
 			}
 			// Windows uses a deck to switch between the Next and Finish buttons
 			// TODO: check Linux
@@ -186,6 +195,8 @@ var Zotero_Merge_Window = new function () {
 				var deck = document.getAnonymousElementByAttribute(buttons, "anonid", "WizardButtonDeck");
 				deck.selectedIndex = 0;
 			}
+			
+			_setInstructionsString(finishButton.label);
 		}
 		
 		return false;
@@ -248,6 +259,24 @@ var Zotero_Merge_Window = new function () {
 				_mergeGroup.mergepane.objectbox.refresh();
 			}
 		}
+	}
+	
+	
+	// TEMP
+	function _setInstructionsString(buttonName) {
+		switch (_mergeGroup.type) {
+			case 'storagefile':
+				var msg = "The following file has been changed in multiple locations.";
+				break;
+			
+			default:
+				// TODO: localize and maybe not always call it 'item'
+				var msg = "The following item has been changed in multiple locations.";
+		}
+		
+		msg += " Choose the version you would like to keep, and then click " + buttonName + ".";
+		
+		document.getElementById('zotero-merge-instructions').value = msg;
 	}
 	
 	
