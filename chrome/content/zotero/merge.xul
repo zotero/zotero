@@ -45,6 +45,7 @@
 			onpagerewound="Zotero_Merge_Window.onBack(); return false"
 			onpageadvanced="return Zotero_Merge_Window.onNext()"
 			label="Conflict Resolution">
+		<description id="zotero-merge-instructions"/>
 		<zoteromergegroup flex="1"/>
 		<separator class="thin"/>
 		<hbox id="zotero-step-count">

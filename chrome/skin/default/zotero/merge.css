@@ -4,18 +4,9 @@ wizard {
 	padding-right: 10px;
 }
 
-wizard {
-	height: 550px;
-}
-
 wizardpage {
-	min-width: 770px;
+	min-width: 762px;
 	min-height: 300px;
-}
-
-wizard[zoterowidescreen=true] {
-	height: 718px;
-	width: 974px;
 }
 
 wizard .wizard-header label.wizard-header-label {
@@ -36,6 +27,13 @@ wizard > hbox button:last-child {
 	margin-right: 0;
 }
 
+wizardpage > description {
+	margin-left: 10px;
+}
+
+#zotero-merge-button-name {
+	margin: 0;
+}
 
 wizard > deck {
 	margin: 0;
