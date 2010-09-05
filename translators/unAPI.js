@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2010-03-22 21:13:00"
+	"lastUpdated":"2010-09-04 20:28:04"
 }
 
 var RECOGNIZABLE_FORMATS = ["mods", "marc", "endnote", "ris", "bibtex", "rdf"];
@@ -50,16 +50,9 @@ function detectWeb(doc, url) {
 			unsearchedIds.push(escape(abbr.getAttribute("title")));
 		}
 	}
-	
 	if(!unsearchedIds.length) return false;
 	
 	// now we need to see if the server actually gives us bibliographic metadata.
-	
-	// one way to signal this is with a META tag
-	var zoteroMeta = doc.evaluate('//meta[@name="ZoteroItemType"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if(zoteroMeta) return zoteroMeta.getAttribute("content");
-	
-	// otherwise, things will be a bit more complicated, and we'll have to do some HTTP requests
 	Zotero.wait();
 	
 	if(unsearchedIds.length == 1) {
