@@ -1875,7 +1875,7 @@ Zotero.Sync.Server = new function () {
 							var tag = tag[0].firstChild.nodeValue;
 							setTimeout(function () {
 								var callback = function () {
-									var sql = "SELECT DISTINCT name FROM itemTags NATURAL JOIN tags WHERE LENGTH(name)>255 LIMIT 1";
+									var sql = "SELECT DISTINCT name FROM tags WHERE LENGTH(name)>255 LIMIT 1";
 									var tag = Zotero.DB.valueQuery(sql);
 									if (tag) {
 										var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
