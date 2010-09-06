@@ -63,21 +63,8 @@ Zotero.File = new function(){
 	/*
 	 * Get the first 128 bytes of the file as a string (multibyte-safe)
 	 */
-	function getSample(file){
-		var fis = Components.classes["@mozilla.org/network/file-input-stream;1"].
-			createInstance(Components.interfaces.nsIFileInputStream);
-		fis.init(file, 0x01, 0664, 0);
-		
-		const replacementChar
-			= Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
-		var is = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
-			.createInstance(Components.interfaces.nsIConverterInputStream);
-		is.init(fis, "UTF-8", 128, replacementChar);
-		var str = {};
-		var numChars = is.readString(128, str);
-		is.close();
-		
-		return str.value;
+	function getSample(file) {
+		return this.getContents(file, null, 128);
 	}
 	
 	
@@ -115,17 +102,19 @@ Zotero.File = new function(){
 		var is = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 			.createInstance(Components.interfaces.nsIConverterInputStream);
 		is.init(fis, charset, 4096, replacementChar);
-		var chars = 4096;
+		var chars = 0;
 		
 		var contents = [], str = {};
 		while (is.readString(4096, str) != 0) {
+			var strLen = str.value.length;
+			
 			if (maxLength) {
-				chars += 4096;
-				if (chars >= maxLength) {
-					Zotero.debug('Stopping at ' + (chars - 4096)
-						+ ' characters in File.getContents()');
+				if ((chars + strLen) > maxLength) {
+					var remainder = maxLength - chars;
+					contents.push(str.value.slice(0, remainder));
 					break;
 				}
+				chars += strLen;
 			}
 			
 			contents.push(str.value);
