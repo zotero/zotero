@@ -1210,7 +1210,18 @@ Zotero.Item.prototype.save = function() {
 			sql = sql.substring(0, sql.length-2) + ")";
 			
 			// Save basic data to items table
-			var insertID = Zotero.DB.query(sql, sqlValues);
+			try {
+				var insertID = Zotero.DB.query(sql, sqlValues);
+			}
+			catch (e) {
+				if (this.libraryID
+					&& ((e.indexOf && e.indexOf('fki_items_libraryID_libraries_libraryID') != -1)
+						|| (!Zotero.Libraries.exists(this.libraryID)))) {
+					var msg = "Library " + this.libraryID + " for item " + this.key;
+					var e = new Zotero.Error(msg, "MISSING_OBJECT");
+					throw (e);
+				}
+			}
 			if (!itemID) {
 				itemID = insertID;
 			}
