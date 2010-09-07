@@ -1223,7 +1223,7 @@ Zotero.Item.prototype.save = function() {
 				if (this.libraryID
 					&& ((e.indexOf && e.indexOf('fki_items_libraryID_libraries_libraryID') != -1)
 						|| (!Zotero.Libraries.exists(this.libraryID)))) {
-					var msg = "Library " + this.libraryID + " for item " + this.key;
+					var msg = "Library " + this.libraryID + " for item " + this.key + " not found";
 					var e = new Zotero.Error(msg, "MISSING_OBJECT");
 					throw (e);
 				}
