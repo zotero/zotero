@@ -1739,7 +1739,8 @@ Zotero.Sync.Server = new function () {
 					catch (e) {
 						Zotero.debug(e);
 					}
-					_error("SSL certificate error connecting to " + host);
+					// TODO: localize
+					_error("SSL certificate error connecting to " + host + "\n\nSee http://zotero.org/support/kb/ssl_certificate_error for more information.");
 				}
 				else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN) == Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
 					_error("SSL connection error");
