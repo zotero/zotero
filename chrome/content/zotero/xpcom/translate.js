@@ -1530,16 +1530,24 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 					var uri = IOService.newURI(item.path, "", null);
 				}
 				catch (e) {
-					Components.utils.reportError("Error parsing attachment path: " + item.path);
-					Zotero.debug("Translate: Error parsing attachment path '" + item.path + "'", 2);
+					var msg = "Error parsing attachment path: " + item.path;
+					Components.utils.reportError(msg);
+					Zotero.debug("Translate: " + msg, 2);
 				}
 				
 				if (uri) {
-					var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
-					
-					if (file.path == '/') {
-						Components.utils.reportError("Error parsing attachment path: " + item.path);
-						Zotero.debug("Translate: Error parsing attachment attachment '" + item.path + "'", 2);
+					try {
+						var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
+						if (file.path == '/') {
+							var msg = "Error parsing attachment path: " + item.path;
+							Components.utils.reportError(msg);
+							Zotero.debug("Translate: " + msg, 2);
+						}
+					}
+					catch (e) {
+						var msg = "Error getting file from attachment path: " + item.path;
+						Components.utils.reportError(msg);
+						Zotero.debug("Translate: " + msg, 2);
 					}
 				}
 				
