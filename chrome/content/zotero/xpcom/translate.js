@@ -1413,6 +1413,7 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 						var msg = "Error getting file from attachment path: " + item.path;
 						Components.utils.reportError(msg);
 						Zotero.debug("Translate: " + msg, 2);
+						throw (e);
 					}
 				}
 				
