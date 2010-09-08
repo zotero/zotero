@@ -1902,6 +1902,47 @@ Zotero.Sync.Server = new function () {
 					}
 					break;
 				
+				// We can't reproduce it, but we can fix it
+				case 'WRONG_LIBRARY_TAG_ITEM':
+					var background = Zotero.Sync.Runner.background;
+					setTimeout(function () {
+						var sql = "CREATE TEMPORARY TABLE tmpWrongLibraryTags AS "
+							+ "SELECT itemTags.ROWID AS tagRowID, tagID, name, itemID, "
+							+ "IFNULL(tags.libraryID,0) AS tagLibraryID, "
+							+ "IFNULL(items.libraryID,0) AS itemLibraryID FROM tags "
+							+ "NATURAL JOIN itemTags JOIN items USING (itemID) "
+							+ "WHERE IFNULL(tags.libraryID, 0)!=IFNULL(items.libraryID,0)";
+						Zotero.DB.query(sql);
+						
+						sql = "SELECT COUNT(*) FROM tmpWrongLibraryTags";
+						var badTags = !!Zotero.DB.valueQuery(sql);
+						
+						if (badTags) {
+							sql = "DELETE FROM itemTags WHERE ROWID IN (SELECT tagRowID FROM tmpWrongLibraryTags)";
+							Zotero.DB.query(sql);
+						}
+						
+						Zotero.DB.query("DROP TABLE tmpWrongLibraryTags");
+						
+						// If error was actually due to a missing item, do a Full Sync
+						if (!badTags) {
+							if (Zotero.Prefs.get('sync.debugNoAutoResetClient')) {
+								Components.utils.reportError("Skipping automatic client reset due to debug pref");
+								return;
+							}
+							if (!Zotero.Sync.Server.canAutoResetClient) {
+								Components.utils.reportError("Client has already been auto-reset in Zotero.Sync.Server._checkResponse()");
+								return;
+							}
+							
+							Zotero.Sync.Server.resetClient();
+							Zotero.Sync.Server.canAutoResetClient = false;
+						}
+						
+						Zotero.Sync.Runner.sync(background);
+					}, 1);
+					break;
+				
 				case 'UPGRADE_REQUIRED':
 					Zotero.Sync.Server.upgradeRequired = true;
 					break;
