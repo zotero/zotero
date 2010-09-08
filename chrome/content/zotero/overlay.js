@@ -1562,9 +1562,10 @@ var ZoteroPane = new function()
 			while (true) {
 				if (invalid) {
 					// TODO: localize
-					var msg = "'" + name + "' is not a valid Zotero Commons collection identifier.\n\n"
-						+ "Collection identifiers can contain basic Latin letters, numbers,"
-						+ "hyphens, and underscores. Spaces and other characters are not allowed.";
+					var msg = "'" + testName + "' is not a valid Zotero Commons collection identifier.\n\n"
+						+ "Collection identifiers can contain basic Latin letters, numbers, "
+						+ "hyphens, and underscores and must be no longer than 32 characters. "
+						+ "Spaces and other characters are not allowed.";
 					prompt.alert("", msg);
 					invalid = false;
 				}
@@ -1574,9 +1575,11 @@ var ZoteroPane = new function()
 					"",
 					// TODO: localize
 					"Enter an identifier for the collection '" + title + "'.\n\n"
-						+ "The identifier will form the collection's URL on archive.org "
-						+ "and can contain basic Latin letters, numbers, hyphens, and underscores. "
+						+ "The identifier will form the collection's URL on archive.org. "
+						+ "Identifiers can contain basic Latin letters, numbers, hyphens, and underscores "
+						+ "and must be no longer than 32 characters. "
 						+ "Spaces and other characters are not allowed.\n\n"
+						// TEMP
 						+ '"zc-test-' + Zotero.Commons.userNameSlug + '-" '
 						+ "will be automatically prepended to your entry.",
 					newName,
@@ -1593,7 +1596,9 @@ var ZoteroPane = new function()
 					return;
 				}
 				
-				if (!Zotero.Commons.isValidBucketName(name)) {
+				// TEMP
+				var testName = 'zc-test-' + Zotero.Commons.userNameSlug + '-' + name;
+				if (!Zotero.Commons.isValidBucketName(testName)) {
 					invalid = true;
 					continue;
 				}

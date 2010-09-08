@@ -232,6 +232,7 @@ Zotero.Commons = new function() {
 		if (!_userName) {
 			throw new Exception("Username not set in Zotero.Commons.createBucket()");
 		}
+		// TEMP
 		name = "zc-test-" + this.userNameSlug + "-" + name;
 		
 		var headers = {
