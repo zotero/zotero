@@ -232,7 +232,7 @@ Zotero.Commons = new function() {
 		if (!_userName) {
 			throw new Exception("Username not set in Zotero.Commons.createBucket()");
 		}
-		name = "zc-test-" + this.userSlug + "-" + name;
+		name = "zc-test-" + this.userNameSlug + "-" + name;
 		
 		var headers = {
 			"x-archive-auto-make-bucket":"1",
@@ -515,7 +515,7 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 		if (xmlhttp.status != 200) {
 			Zotero.debug(xmlhttp.status);
 			Zotero.debug(xmlhttp.responseText);
-			alert("Error loading data from the Internet Archive");
+			Zotero.debug("Commons: Error retrieving bucket contents", 2);
 			self._itemsLoading = false;
 			return;
 		}
@@ -527,7 +527,7 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 			var xml = new XML(xmlhttp.responseText.replace(/<\?xml.*\?>/, ''));
 		}
 		catch (e) {
-			alert("Invalid response retrieving file upload parameters");
+			Zotero.debug("Commons: Invalid response retrieving bucket contents", 2);
 			this._itemsLoading = false;
 			return;
 		}
@@ -536,7 +536,7 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 			var zipsXML = xml.file.(@source == 'original').(typeof format != 'undefined' && format == 'Zotero ZIP Item');
 		}
 		catch (e) {
-			alert("Invalid XML response retrieving file upload parameters");
+			Zotero.debug("Commons: Invalid XML retrieving bucket contents", 2);
 			this._itemsLoading = false;
 			return;
 		}

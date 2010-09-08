@@ -1510,6 +1510,8 @@ var ZoteroPane = new function()
 	}
 	
 	this.createCommonsBucket = function () {
+		var self = this;
+		
 		Zotero.Commons.getBuckets(function () {
 			var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
 							.createInstance(Components.interfaces.nsIPrompt);
@@ -1602,7 +1604,7 @@ var ZoteroPane = new function()
 			// TODO: localize
 			var progressWin = new Zotero.ProgressWindow();
 			progressWin.changeHeadline("Creating Zotero Commons Collection");
-			var icon = this.collectionsView.getImageSrc(this.collectionsView.selection.currentIndex);
+			var icon = self.collectionsView.getImageSrc(self.collectionsView.selection.currentIndex);
 			progressWin.addLines(title, icon)
 			progressWin.show();
 			
