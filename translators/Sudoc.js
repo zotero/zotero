@@ -2,13 +2,13 @@
 	"translatorID":"1b9ed730-69c7-40b0-8a06-517a89a3a278",
 	"translatorType":4,
 	"label":"Sudoc",
-	"creator":"Sean Takats and Michael Berkowitz, updated by Sylvain Machefert",
+	"creator":"Sean Takats, Michael Berkowitz, Sylvain Machefert",
 	"target":"^http://(www|corail)\\.sudoc\\.abes\\.fr",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-02-20 14:40:00"
+	"lastUpdated":"2010-09-03 14:40:00"
 }
 
 function detectWeb(doc, url) {
@@ -17,56 +17,53 @@ function detectWeb(doc, url) {
 				if (prefix == 'x') return namespace; else return null;
 		} : null;
 
-		var multxpath = '/html/body/div[2]/div/span';
+		var multxpath = "//span[@class='tab1']";
 		if (elt = doc.evaluate(multxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 				var content = elt.textContent;
-				if ( (content == "Résultats") || (content == "Results") )
+				if ( (content == "Liste des résultats") || (content == "shortlist") )
 				{
 					return "multiple";	
 				}
-				else if ( (content == "Notice complète") || (content == "title data") )
+				else if ( (content == "Notice détaillée") || (content == "title data") )
 				{
-					var xpathimage = '/html/body/div[2]/div[4]/span/img';
+					var xpathimage = "//span[@class='rec_mat_long']/img";
 					if (elt = doc.evaluate(xpathimage, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
 					{
 						var type = elt.getAttribute('src');
-						if (type.indexOf('article.gif') > 0)
+						if (type.indexOf('article.') > 0)
 						{
 							return "journalArticle";
 						}
-						else if (type.indexOf('audiovisual.gif') > 0)
+						else if (type.indexOf('audiovisual.') > 0)
 						{
 							return "film";
 						}
-						else if (type.indexOf('book.gif') > 0)
+						else if (type.indexOf('book.') > 0)
 						{
 							return "book";
 						}
-						else if (type.indexOf('handwriting.gif') > 0)
+						else if (type.indexOf('handwriting.') > 0)
 						{
 							return "manuscript";
 						}
-						else if (type.indexOf('sons.gif') > 0)
+						else if (type.indexOf('sons.') > 0)
 						{
 							return "audioRecording";
 						}
-						else if (type.indexOf('sound.gif') > 0)
+						else if (type.indexOf('sound.') > 0)
 						{
 							return "audioRecording";
 						}
-						else if (type.indexOf('thesis.gif') > 0)
+						else if (type.indexOf('thesis.') > 0)
 						{
 							return "thesis";
 						}
-						else if (type.indexOf('map.gif') > 0)
+						else if (type.indexOf('map.') > 0)
 						{
 							return "map";
 						}
-						else
-						{
-							return "book";
-						}
 					}
+					return "book";
 				}
 		}
 }
@@ -77,7 +74,7 @@ function scrape(doc, url) {
 				if (prefix == 'x') return namespace; else return null;
 		} : null;
 		
-		var zXpath = '/html/body/span[@class="Z3988"]';
+		var zXpath = '//span[@class="Z3988"]';
 		var eltCoins = doc.evaluate(zXpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		if (eltCoins = doc.evaluate(zXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext())
 		{
@@ -237,10 +234,8 @@ function scrape(doc, url) {
 						}
 					}
 					
-					if ( (newItem.url == undefined) && (ppn != "") )
-					{
-						newItem.url = 'http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=' + ppn;
-					}
+					// We store the original place of the record, using its ppn
+					newItem.attachments = [{url:'http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=' + ppn, title:"Notice sudoc", mimeType:"text/html", snapshot:false}];
 					newItem.complete();
 				}
 			}
@@ -253,42 +248,41 @@ function doWeb(doc, url) {
 				if (prefix == 'x') return namespace; else return null;
 		} : null;
 		
-		var multxpath = '/html/body/div[2]/div/span';
-		if (elt = doc.evaluate(multxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-				var content = elt.textContent;
-				if ( (content == "Résultats") || (content == "Results") )
-				{
-					var newUrl = doc.evaluate('//base/@href', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-					var xpath = '/html/body/div[2]/table/tbody/tr/td[3]/div/a';
-					var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-					var elmt = elmts.iterateNext();
-					var links = new Array();
-					var availableItems = new Array();
-					var i = 0;
-					do {
-						var link = doc.evaluate('./@href', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-						var searchTitle = elmt.textContent;
-						availableItems[i] = searchTitle;
-						links[i] = link;
-						i++;
-					} while (elmt = elmts.iterateNext());
-					var items = Zotero.selectItems(availableItems);
-
-					if(!items) {
-						return true;
-					}
-					
-					var uris = new Array();
-					for(var i in items) {
-							uris.push(newUrl + links[i]);
-					}
-					Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
-							function() { Zotero.done(); }, null);
-					Zotero.wait();		
-				}
-				else if ( (content == "Notice complète") || (content == 'title data') )
-				{
-					scrape(doc, url);
-				}
+		var type = detectWeb(doc, url);
+		if (type == "multiple")
+		{
+			// On va lister les titres
+			var newUrl = doc.evaluate('//base/@href', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+			var xpath = "//table[@summary='short title presentation']/tbody/tr//td[@class='rec_title']";
+			var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var elmt = elmts.iterateNext();
+			var links = new Array();
+			var availableItems = new Array();
+			
+			var i = 0;
+			do
+			{
+				var link = doc.evaluate(".//a/@href", elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+				var searchTitle  = doc.evaluate(".//a", elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+				
+				availableItems[i] = searchTitle ;
+				links[i] = link;
+				i++;
+			} while (elmt = elmts.iterateNext());
+			var items = Zotero.selectItems(availableItems);
+			if(!items) {
+				return true;
+			}
+			var uris = new Array();
+			for(var i in items) {
+					uris.push(newUrl + links[i]);
+			}
+			Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
+					function() { Zotero.done(); }, null);
+			Zotero.wait();		
+		}
+		else if (type != "")
+		{
+			scrape(doc, url);
 		}
 }
