@@ -259,6 +259,10 @@ Zotero.Sync.Storage.Session.ZFS.prototype.downloadFile = function (request) {
 					},
 					onStop: function (request, status, response, data) {
 						if (status != 200) {
+							try {
+								Zotero.debug(this._response);
+							}
+							catch (e) {}
 							var msg = "Unexpected status code " + status
 								+ " for request " + data.request.name + " in Zotero.Sync.Storage.Session.ZFS.downloadFile()";
 							Zotero.debug(msg, 1);
