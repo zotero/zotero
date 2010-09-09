@@ -169,6 +169,11 @@
 					}
 					var val = this.item.getField('title');
 					
+					if (!val.indexOf) {
+						Zotero.debug('========');
+						Zotero.debug(this.item.key);
+					}
+					
 					var firstSpace = val.indexOf(" ");
 					// Crop long uninterrupted text
 					if ((firstSpace == -1 && val.length > 29 ) || firstSpace > 29) {
