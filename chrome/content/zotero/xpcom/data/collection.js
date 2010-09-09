@@ -404,7 +404,7 @@ Zotero.Collection.prototype.save = function () {
 			}
 			
 			if (this.id && this.hasDescendent('collection', newParent.id)) {
-				throw ('Cannot move collection into one of its own descendents!');
+				throw ('Cannot move collection "' + this.name + '" into one of its own descendents');
 			}
 			
 			var parent = newParent.id;
