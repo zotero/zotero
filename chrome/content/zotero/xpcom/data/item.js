@@ -1210,17 +1210,22 @@ Zotero.Item.prototype.save = function() {
 			sql = sql.substring(0, sql.length-2) + ")";
 			
 			// Save basic data to items table
+			
 			try {
+				// Needed to work around startup crash in Fx3.5
+				var l = this.libraryID;
+				var k = this.key;
+				
 				var insertID = Zotero.DB.query(sql, sqlValues);
 			}
 			catch (e) {
-				if (this.libraryID
-					&& ((e.indexOf && e.indexOf('fki_items_libraryID_libraries_libraryID') != -1)
-						|| (!Zotero.Libraries.exists(this.libraryID)))) {
-					var msg = "Library " + this.libraryID + " for item " + this.key + " not found";
+				if (l &&
+					((e.indexOf && e.indexOf('fki_items_libraryID_libraries_libraryID') != -1)
+						|| (!Zotero.Libraries.exists(l)))) {
+					var msg = "Library " + l + " for item " + k + " not found";;
 					var e = new Zotero.Error(msg, "MISSING_OBJECT");
-					throw (e);
 				}
+				throw (e);
 			}
 			if (!itemID) {
 				itemID = insertID;
