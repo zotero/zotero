@@ -771,7 +771,7 @@ Zotero.Commons.Bucket.prototype.uploadItems = function (ids) {
 	for (var i=0, len=items.length; i<len; i++) {
 		if (items[i].isRegularItem()) {
 			// Item must have a title
-			if (!items[i].getField('title')) {
+			if (!items[i].getDisplayTitle()) {
 				continue;
 			}
 			
@@ -858,7 +858,7 @@ Zotero.Commons.Bucket.prototype.uploadItems = function (ids) {
 		
 		// TODO: localize
 		progressWin.changeHeadline("Uploading Items to IA");
-		progressWin.addLines([item.getField('title')], [item.getImageSrc()]);
+		progressWin.addLines([item.getDisplayTitle()], [item.getImageSrc()]);
 		progressWin.show();
 		
 		self.uploadItem(
@@ -909,7 +909,8 @@ Zotero.Commons.Bucket.prototype.uploadItem = function (item, callback) {
 			
 			// Then create ZIP file from item
 			var zipFile = Zotero.getTempDirectory();
-			zipFile.append(item.getField('title') + '-' + key + '.zip');
+			var title = Zotero.File.getValidFileName(item.getDisplayTitle());
+			zipFile.append(title + '-' + key + '.zip');
 			
 			var zw = Components.classes["@mozilla.org/zipwriter;1"]
 				.createInstance(Components.interfaces.nsIZipWriter);
@@ -1150,7 +1151,8 @@ Zotero.Commons.Bucket.prototype.putFile = function (file, mimeType, callback) {
 
 
 Zotero.Commons.Bucket.prototype.getItemURI = function (item) {
-	return this.uri + '#' + encodeURIComponent(item.getField('title'));
+	// TODO: this won't work for non-English systems
+	return this.uri + '#' + encodeURIComponent(item.getDisplayTitle());
 }
 
 
