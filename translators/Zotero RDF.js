@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":25,
 	"inRepository":true,
-	"lastUpdated":"2009-01-02 20:55:00"
+	"lastUpdated":"2010-10-10 02:07:05"
 }
 
 Zotero.configure("getCollections", true);
@@ -73,6 +73,41 @@ function generateCollection(collection) {
 			Zotero.RDF.addStatement(collectionResource, n.dcterms+"hasPart", itemResources[child.id], false);
 		}
 	}
+}
+
+/**
+ * Get display title
+ * Analogous to getDisplayTitle in item.js, but returns null if no display title distinct from
+ * title property
+ */
+function getDisplayTitle(item) {
+	if(!item.title && (item.itemType == "interview" || item.itemType == "letter")) {
+		var participants = [creator for each(creator in item.creators)
+			if (item.itemType == "letter" && creator.creatorType == "recipient" ||
+			   item.itemType == "interview" && creator.creatorType == "interviewer")];
+		
+		var displayTitle = "["+(item.itemType == "letter" ? "Letter" : "Interview");
+		if(participants.length) {
+			//var names = [creator.firstName ? creator.firstName+" "+creator.lastName : creator.lastName
+			var names = [creator.lastName
+				for each(creator in participants)];
+			
+			displayTitle += (item.itemType == "letter" ? " to " : " of ")+names[0];
+			
+			if(participants.length == 2) {
+				displayTitle += " and "+names[1];
+			} else if(participants.length == 3) {
+				displayTitle += ", "+names[1]+", and "+names[2];
+			} else if(participants.length > 3) {
+				displayTitle += " et al.";
+			}
+		}
+		
+		return displayTitle+"]";
+	} if (item.itemType == "case" && item.title && item.reporter) { // 'case' itemTypeID
+		return item.title+' (' + item.reporter + ')';
+	}
+	return null;
 }
 
 function generateItem(item, zoteroType, resource) {
@@ -448,6 +483,9 @@ function generateItem(item, zoteroType, resource) {
 			Zotero.RDF.addStatement(resource, n.z+property, value, true);
 		}
 	}
+	
+	var displayTitle = getDisplayTitle(item);
+	if(displayTitle) Zotero.RDF.addStatement(resource, n.z+"displayTitle", displayTitle, true);
 }
 
 function doExport() {
