@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"Library Catalog (InnoPAC)",
 	"creator":"Simon Kornblith and Michael Berkowitz",
-	"target":"(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+~?S?[0-9]?|/search/q\\?)",
+	"target":"(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+(~S[0-9])?|/search/q\\?)",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2009-08-10 03:38:00"
+	"lastUpdated":"2010-09-10 13:40:50"
 }
 
 function detectWeb(doc, url) {
