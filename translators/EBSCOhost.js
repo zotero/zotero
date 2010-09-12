@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-02-04 02:00:00"
+	"lastUpdated":"2010-09-12 20:20:12"
 }
 
 function detectWeb(doc, url) {
@@ -54,8 +54,8 @@ function detectWeb(doc, url) {
 
 	
 
-	var xpath = '//input[@id="ctl00_ctl00_MainContentArea_MainContentArea_topDeliveryControl_deliveryButtonControl_lnkExportImage"]';	
-	var persistentLink = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var xpath = '//input[@id="ctl00_ctl00_Column2_Column2_topDeliveryControl_deliveryButtonControl_lnkExport"]';
+	var persistentLink = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if(persistentLink) {
 		return "journalArticle";
 	}
@@ -73,18 +73,17 @@ function generateDeliverString(nsResolver, doc){
 	var hiddenInput;
 	var deliverString ="";
 	while(hiddenInput = hiddenInputs.iterateNext()) {
-		deliverString = deliverString+hiddenInput.name.replace(/\$/g, "%24")+"="+encodeURIComponent(hiddenInput.value) + "&";
+		if (hiddenInput.name !== "__EVENTTARGET" && hiddenInput.name !== "") {
+			deliverString = deliverString+hiddenInput.name.replace(/\$/g, "%24")+"="+encodeURIComponent(hiddenInput.value) + "&";
+		}
 	}
 	var otherHiddenInputs = doc.evaluate('//input[@type="hidden" and contains(@name, "folderHas")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	while(hiddenInput = otherHiddenInputs.iterateNext()) {
 		deliverString = deliverString+hiddenInput.name.replace(/\$/g, "%24")+"="+escape(hiddenInput.value).replace(/\//g, "%2F").replace(/%20/g, "+") + "&";
 	}
-
-
-	deliverString = deliverString
-		+"&ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24lnkExportImage.x=5"
-		+"&ctl00%24ctl00%24MainContentArea%24MainContentArea%24topDeliveryControl%24deliveryButtonControl%24lnkExportImage.y=14";
-			
+	
+	deliverString = "__EVENTTARGET=ctl00%24ctl00%24Column2%24Column2%24topDeliveryControl%24deliveryButtonControl%24lnkExport&" + deliverString;
+	
 	return deliverString;
 }
 
@@ -120,6 +119,7 @@ function downloadFunction(text) {
 				item.title = text.match(/T1\s+-\s*(.*)/)[1];
 			}
 			item.itemType = "journalArticle";
+			item.url = false;
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
 			item.attachments = [];
 			item.complete();
@@ -145,7 +145,7 @@ function doWeb(doc, url) {
 	                                XPathResult.ANY_TYPE, null).iterateNext();                              
 
 	if(searchResult) {
-		var titlex = '//a[@class = "title-link"]';
+		var titlex = '//a[@class = "title-link color-p4"]';
 		var titles = doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var items = new Object();
 		var title;
