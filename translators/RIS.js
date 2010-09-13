@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-02-04 02:24:27"
+	"lastUpdated":"2010-09-13 08:15:39"
 }
 
 Zotero.configure("dataMode", "line");
@@ -300,6 +300,9 @@ function processTag(item, tag, value) {
 		// Volume Number (patent: applicationNumber)
 		if (item.itemType == "patent") {
 			item.applicationNumber = value;
+		// Report Number (report: reportNumber)
+		} else if(item.itemType == "report") {
+			item.reportNumber = value;
 		} else {
 			item.volume = value;
 		}
@@ -462,9 +465,15 @@ function doExport() {
 			addTag("A2", item.assignee);
 		}
 		
-		// volume (patent: applicationNumber)
-		if(item.volume || item.applicationNumber) {
-			var value = (item.volume) ? item.volume : item.applicationNumber;
+		// volume (patent: applicationNumber, report: reportNumber)
+		if(item.volume || item.applicationNumber || item.reportNumber) {
+			if (item.volume) {
+				var value = item.volume;
+			} else if(item.applicationNumber) {
+				var value = item.applicationNumber;
+			} else if(item.reportNumber) {
+				var value = item.reportNumber;
+			}
 			addTag("VL", value);
 		}
 		
