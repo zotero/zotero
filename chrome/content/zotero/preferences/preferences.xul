@@ -331,6 +331,12 @@ To add a new preference:
 				</tabpanel>
 				
 				<tabpanel id="zotero-reset" orient="vertical">
+					<!-- TODO: localize -->
+					<!-- This doesn't wrap without an explicit width, for some reason -->
+					<description width="45em">The following operations are for use only in rare, specific situations and should not be used for general troubleshooting.
+					In many cases, resetting will cause additional problems.
+					See <label style="margin-left: 0; margin-right: 0" class="text-link" href="http://zotero.org/support/kb/sync_reset_options">Sync Reset Options</label> for more information.</description>
+					
 					<radiogroup id="zotero-reset-sync-group" oncommand="handleSyncResetSelect(this)">
 						<groupbox>
 							<caption label="&zotero.preferences.sync.syncServer;"/>
@@ -343,7 +349,7 @@ To add a new preference:
 								
 								<rows>
 									<row id="zotero-full-sync">
-									<radio/>
+										<radio/>
 										<vbox onclick="this.previousSibling.click()">
 											<label value="&zotero.preferences.sync.reset.fullSync;"/>
 											<description>&zotero.preferences.sync.reset.fullSync.desc;</description>
