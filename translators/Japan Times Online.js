@@ -166,6 +166,7 @@ var scrapeAndParse = function (url) {
 	mytxt = Zotero.Utilities.retrieveSource(url);
 
 	item.publicationTitle = "Japan Times Online";
+	item.ISSN = "0289-1956";
 	item.url = url;
 	val = getTagContent(mytxt, "id", "date");
 	if (val) {
