@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2010-09-04 20:28:04"
+	"lastUpdated":"2010-09-15 18:42:44"
 }
 
 var RECOGNIZABLE_FORMATS = ["mods", "marc", "endnote", "ris", "bibtex", "rdf"];
@@ -34,10 +34,16 @@ function detectWeb(doc, url) {
 	// Set the domain we're scraping
 	domain = doc.location.href.match(/https?:\/\/([^/]+)/);
 	
-	var nsResolver = doc.createNSResolver(doc.documentElement);
+	// This and the x: prefix in the XPath are to work around an issue with pages
+	// served as application/xhtml+xml
+	//
+	// https://developer.mozilla.org/en/Introduction_to_using_XPath_in_JavaScript#Implementing_a_default_namespace_for_XML_documents
+	function nsResolver() {
+		return 'http://www.w3.org/1999/xhtml';
+	}
 	
 	// look for a resolver
-	unAPIResolver = doc.evaluate('//link[@rel="unapi-server"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	unAPIResolver = doc.evaluate('//x:link[@rel="unapi-server"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(!unAPIResolver) return false;
 	unAPIResolver = unAPIResolver.getAttribute("href");
 	
