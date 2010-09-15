@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":300,
 	"inRepository":true,
-	"lastUpdated":"2010-06-16 18:15:00"
+	"lastUpdated":"2010-09-15 18:42:44"
 }
 
 function detectWeb(doc, url) {
@@ -16,7 +16,15 @@ function detectWeb(doc, url) {
 	
 	var encounteredType = false;
 	
-	var spans = doc.evaluate('//span[contains(@class, " Z3988") or contains(@class, "Z3988 ") or @class="Z3988"][@title]', doc, null, XPathResult.ANY_TYPE, null);
+	// This and the x: prefix in the XPath are to work around an issue with pages
+	// served as application/xhtml+xml
+	//
+	// https://developer.mozilla.org/en/Introduction_to_using_XPath_in_JavaScript#Implementing_a_default_namespace_for_XML_documents
+	function nsResolver() {
+		return 'http://www.w3.org/1999/xhtml';
+	}
+	
+	var spans = doc.evaluate('//x:span[contains(@class, " Z3988") or contains(@class, "Z3988 ") or @class="Z3988"][@title]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var span;
 	while(span = spans.iterateNext()) {
 		// determine if it's a valid type
@@ -141,7 +149,13 @@ function doWeb(doc, url) {
 	var needFullItems = new Array();
 	var couldUseFullItems = new Array();
 	
-	var spans = doc.evaluate('//span[contains(@class, " Z3988") or contains(@class, "Z3988 ") or @class="Z3988"][@title]', doc, null, XPathResult.ANY_TYPE, null);
+	
+	// See note in detectWeb()
+	function nsResolver() {
+		return 'http://www.w3.org/1999/xhtml';
+	}
+	
+	var spans = doc.evaluate('//x:span[contains(@class, " Z3988") or contains(@class, "Z3988 ") or @class="Z3988"][@title]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var span;
 	while(span = spans.iterateNext()) {
 		var spanTitle = span.title;
