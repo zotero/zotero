@@ -190,12 +190,14 @@ Zotero.Integration = new function() {
 					_inProgress = false;
 					_integrationVersionsOK = false;
 					Zotero.Integration.activate();
+					var msg = Zotero.getString(
+						"integration.error.incompatibleVersion2",
+						[Zotero.version, addon.name, INTEGRATION_MIN_VERSION]
+					);
 					Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 						.getService(Components.interfaces.nsIPromptService)
-						.alert(null, Zotero.getString("integration.error.title"),
-							Zotero.getString("integration.error.incompatibleVersion2", [Zotero.version, 
-								addon.name, INTEGRATION_MIN_VERSION]));
-					throw e;
+						.alert(null, Zotero.getString("integration.error.title"), msg);
+					throw msg;
 				}
 			}
 			_integrationVersionsOK = true;
