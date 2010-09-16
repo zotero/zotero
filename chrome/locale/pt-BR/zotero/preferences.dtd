@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.proxies.desc_link "documentação relativa a proxies">
 <!ENTITY zotero.preferences.proxies.desc_after_link "para maiores informações.">
 <!ENTITY zotero.preferences.proxies.transparent "Redirecionar requisições através de proxies usados previamente de forma transparente">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
 <!ENTITY zotero.preferences.proxies.configured "Proxies configurados">
 <!ENTITY zotero.preferences.proxies.hostname "Nome do host">
 <!ENTITY zotero.preferences.proxies.scheme "Esquema">

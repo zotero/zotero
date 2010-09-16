@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.proxies.desc_link "proxy leírást">
 <!ENTITY zotero.preferences.proxies.desc_after_link "további információkért.">
 <!ENTITY zotero.preferences.proxies.transparent "Emlékezzen a proxyn keresztül megtekintett erőforrásokra">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
 <!ENTITY zotero.preferences.proxies.configured "Proxyk">
 <!ENTITY zotero.preferences.proxies.hostname "Host neve">
 <!ENTITY zotero.preferences.proxies.scheme "Séma">

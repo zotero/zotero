@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.proxies.desc_link "documentația pentru serverele proxy">
 <!ENTITY zotero.preferences.proxies.desc_after_link "pentru mai multe informații.">
 <!ENTITY zotero.preferences.proxies.transparent "Reamintește automat resursele proxy">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
 <!ENTITY zotero.preferences.proxies.configured "Servere proxy configurate">
 <!ENTITY zotero.preferences.proxies.hostname "Nume gazdă">
 <!ENTITY zotero.preferences.proxies.scheme "Schemă">

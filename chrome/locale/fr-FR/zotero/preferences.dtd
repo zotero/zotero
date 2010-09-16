@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.proxies.desc_link "documentation concernant les serveurs mandataires">
 <!ENTITY zotero.preferences.proxies.desc_after_link "pour plus d'information.">
 <!ENTITY zotero.preferences.proxies.transparent "Retenir automatiquement les ressources atteintes par l'entremise d'un serveur mandataire">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
 <!ENTITY zotero.preferences.proxies.configured "Serveurs mandataires configurés">
 <!ENTITY zotero.preferences.proxies.hostname "Adresse Internet">
 <!ENTITY zotero.preferences.proxies.scheme "Schéma">
