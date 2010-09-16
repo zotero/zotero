@@ -751,7 +751,7 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 			bibliographyText = bib[0].bibstart+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
 			
 			// if bibliography style not set, set it
-			if(!this._session.data.bibliographyStyleHasBeenSet && this._doc.hasProperty("setBibliographyStyle")) {
+			if(!this._session.data.bibliographyStyleHasBeenSet) {
 				var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
 				
 				// set bibliography style
