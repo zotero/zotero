@@ -783,8 +783,6 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 	for(var i=(this._removeCodeFields.length-1); i>=0; i--) {
 		this._fields[this._removeCodeFields[i]].removeCode();
 	}
-	
-	Zotero.debug(this._session.citationsByIndex.toSource());
 }
 
 /**
