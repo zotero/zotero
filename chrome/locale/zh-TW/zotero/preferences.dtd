@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.proxies.desc_link "proxy 文件">
 <!ENTITY zotero.preferences.proxies.desc_after_link "以得到更多資訊。">
 <!ENTITY zotero.preferences.proxies.transparent "自動記住透過代理伺服器的資源 (proxied resources)">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
 <!ENTITY zotero.preferences.proxies.configured "已設定的 Proxies">
 <!ENTITY zotero.preferences.proxies.hostname "主機名稱">
 <!ENTITY zotero.preferences.proxies.scheme "Scheme">

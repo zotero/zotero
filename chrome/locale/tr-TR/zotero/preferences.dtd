@@ -125,6 +125,8 @@
 <!ENTITY zotero.preferences.proxies.desc_link "vekil sunucu belgeleri">
 <!ENTITY zotero.preferences.proxies.desc_after_link "daha fazla bilgi için">
 <!ENTITY zotero.preferences.proxies.transparent "Vekil sunucu kaynaklarını kendiliğinden hatırla">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
 <!ENTITY zotero.preferences.proxies.configured "Ayarlanmış Vekil Sunucular">
 <!ENTITY zotero.preferences.proxies.hostname "Ana Sunucu">
 <!ENTITY zotero.preferences.proxies.scheme "Tablo">
