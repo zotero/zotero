@@ -32,11 +32,12 @@ dialog
 .subcontent
 {
 	margin-left: 10px;
+	margin-bottom: 5px;
 }
 
 #zotero-translators-list {
 	margin: .3em 0;
-	height: 6.5em;
+	height: 7.3em;
 	overflow: -moz-scrollbars-vertical;
 }
 

@@ -233,7 +233,9 @@
 	
 	<vbox id="aboutcontent">
 		<label id="name" value="Zotero"/>
-		<label class="text-link" href="http://www.zotero.org" value="http://www.zotero.org"/>
+		<hbox>
+			<label class="text-link" href="http://zotero.org" value="http://zotero.org"/>
+		</hbox>
 		<label id="version" value="&zotero.version; "/>
 		<script>
 			document.getElementById('version').value += Zotero.version;
@@ -267,12 +269,15 @@
 				</vbox>
 			</vbox>
 			<vbox id="column2">
+				<label class="subhead" value="Citation &amp; Bibliography Processing"/>
+				<vbox class="subcontent">
+					<label class="text-link" href="http://citationstyles.org/" value="Citation Style Language"/>
+					<label class="text-link" href="http://bitbucket.org/fbennett/citeproc-js/" value="citeproc-js (Frank Bennett, Nagoya University)"/>
+				</vbox>
 				<label class="subhead" value="&zotero.about.additionalSoftware;"/>
 				<vbox class="subcontent">
-					<label class="text-link" href="http://citationstyles.org/" value="CitationStyles.org (Citation Style Language)"/>
-					<label class="text-link" href="http://gsl-nagoya-u.net/http/pub/citeproc-doc.html" value="citeproc-js (CSL processor)"/>
 					<label class="text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="famfamfam (small icons)"/>
-					<label class="text-link" href="http://appscript.sourceforge.net/py-appscript/index.html" value="py-appscript (MacWord plug-in IPC)"/>
+					<label class="text-link" href="http://appscript.sourceforge.net/py-appscript/" value="py-appscript (MacWord plug-in IPC)"/>
 					<label class="text-link" href="http://simile.mit.edu/timeline/" value="SIMILE Project (Timeline)"/>
 					<label class="text-link" href="http://www.w3.org/2005/ajar/tab" value="Tabulator (RDF parser)"/>
 					<label class="text-link" href="http://tango.freedesktop.org/Tango_Desktop_Project" value="Tango Desktop Project (pref icons)"/>
