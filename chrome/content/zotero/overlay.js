@@ -1579,8 +1579,7 @@ var ZoteroPane = new function()
 						+ "Identifiers can contain basic Latin letters, numbers, hyphens, and underscores "
 						+ "and must be no longer than 32 characters. "
 						+ "Spaces and other characters are not allowed.\n\n"
-						// TEMP
-						+ '"zc-test-' + Zotero.Commons.userNameSlug + '-" '
+						+ '"' + Zotero.Commons.userNameSlug + '-" '
 						+ "will be automatically prepended to your entry.",
 					newName,
 					"", {}
@@ -1596,8 +1595,7 @@ var ZoteroPane = new function()
 					return;
 				}
 				
-				// TEMP
-				var testName = 'zc-test-' + Zotero.Commons.userNameSlug + '-' + name;
+				var testName = Zotero.Commons.userNameSlug + '-' + name;
 				if (!Zotero.Commons.isValidBucketName(testName)) {
 					invalid = true;
 					continue;
