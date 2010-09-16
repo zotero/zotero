@@ -28,10 +28,16 @@ const RESELECT_KEY_ITEM_KEY = 2;
 const RESELECT_KEY_ITEM_ID = 3;
 const DATA_VERSION = 3;
 
+// this is used only for update checking
+const INTEGRATION_PLUGINS = ["zoteroMacWordIntegration@zotero.org",
+	"zoteroOpenOfficeIntegration@zotero.org", "zoteroWinWordIntegration@zotero.org"];
+const INTEGRATION_MIN_VERSION = "3.1a0";
+
 Zotero.Integration = new function() {
 	var _fifoFile = null;
 	var _osascriptFile;
 	var _inProgress = false;
+	var _integrationVersionsOK = null;
 	
 	this.sessions = {};
 	
@@ -171,9 +177,31 @@ Zotero.Integration = new function() {
 	}
 	
 	/**
-	 * Executes an integration command.
+	 * Executes an integration command, first checking to make sure that versions are compatible
 	 */
 	this.execCommand = function execCommand(agent, command, docId) {
+		var verComp = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
+			.getService(Components.interfaces.nsIVersionComparator);
+		function _checkAddons(addons) {
+			for each(var addon in addons) {
+				if(!addon) continue;
+				
+				if(verComp.compare(INTEGRATION_MIN_VERSION, addon.version) > 0) {
+					_inProgress = false;
+					_integrationVersionsOK = false;
+					Zotero.Integration.activate();
+					Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+						.getService(Components.interfaces.nsIPromptService)
+						.alert(null, Zotero.getString("integration.error.title"),
+							Zotero.getString("integration.error.incompatibleVersion2", [Zotero.version, 
+								addon.name, INTEGRATION_MIN_VERSION]));
+					throw e;
+				}
+			}
+			_integrationVersionsOK = true;
+			_callIntegration(agent, command, docId);
+		}
+		
 		if(_inProgress) {
 			Zotero.Integration.activate();
 			Zotero.debug("Integration: Request already in progress; not executing "+agent+" "+command);
@@ -181,6 +209,25 @@ Zotero.Integration = new function() {
 		}
 		_inProgress = true;
 		
+		// Check integration component versions
+		if(!_integrationVersionsOK) {
+			if(Zotero.isFx4) {
+				Components.utils.import("resource://gre/modules/AddonManager.jsm");
+				AddonManager.getAddonsByIDs(INTEGRATION_PLUGINS, _checkAddons);
+			} else {
+				var extMan = Components.classes['@mozilla.org/extensions/manager;1'].
+					getService(Components.interfaces.nsIExtensionManager);
+				_checkAddons([extMan.getItemForID(id) for each(id in INTEGRATION_PLUGINS)]);
+			}
+		} else {
+			_callIntegration(agent, command, docId);
+		}
+	}
+	
+	/**
+	 * Calls the Integration applicatoon
+	 */
+	function _callIntegration(agent, command, docId) {
 		// Try to load the appropriate Zotero component; otherwise display an error using the alert
 		// service
 		try {
@@ -704,7 +751,7 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 			bibliographyText = bib[0].bibstart+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
 			
 			// if bibliography style not set, set it
-			if(!this._session.data.bibliographyStyleHasBeenSet) {
+			if(!this._session.data.bibliographyStyleHasBeenSet && this._doc.hasProperty("setBibliographyStyle")) {
 				var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
 				
 				// set bibliography style
@@ -736,6 +783,8 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 	for(var i=(this._removeCodeFields.length-1); i>=0; i--) {
 		this._fields[this._removeCodeFields[i]].removeCode();
 	}
+	
+	Zotero.debug(this._session.citationsByIndex.toSource());
 }
 
 /**
