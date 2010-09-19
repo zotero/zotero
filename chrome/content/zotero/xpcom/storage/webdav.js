@@ -1645,7 +1645,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._checkResponse = function (req, obj
 			}
 			
 			var msg = Zotero.localeJoin([
-				Zotero.getString('sync.storage.error.webdav.sslCertificateError'),
+				Zotero.getString('sync.storage.error.webdav.sslCertificateError', host),
 				Zotero.getString('sync.storage.error.webdav.loadURLForMoreInfo')
 			]);
 			
@@ -1654,7 +1654,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._checkResponse = function (req, obj
 		}
 		else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN) == Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
 			var msg = Zotero.localeJoin([
-				Zotero.getString('sync.storage.error.webdav.sslConnectionError'),
+				Zotero.getString('sync.storage.error.webdav.sslConnectionError', host),
 				Zotero.getString('sync.storage.error.webdav.loadURLForMoreInfo')
 			]);
 			obj.onError(msg);
