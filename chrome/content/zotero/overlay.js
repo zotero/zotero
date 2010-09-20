@@ -142,11 +142,12 @@ var ZoteroPane = new function()
 			Zotero.restoreFromServer = false;
 			
 			setTimeout(function () {
-				var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-							.getService(Components.interfaces.nsIPrompt);
-				var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
-									+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL);
-				var index = pr.confirmEx(
+				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+										.getService(Components.interfaces.nsIPromptService);
+				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+									+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+				var index = ps.confirmEx(
+					null,
 					"Zotero Restore",
 					"The local Zotero database has been cleared."
 						+ " "
@@ -161,14 +162,16 @@ var ZoteroPane = new function()
 						onSuccess: function () {
 							Zotero.Sync.Runner.setSyncIcon();
 							
-							pr.alert(
+							ps.alert(
+								null,
 								"Restore Completed",
 								"The local Zotero database has been successfully restored."
 							);
 						},
 						
 						onError: function (msg) {
-							pr.alert(
+							ps.alert(
+								null,
 								"Restore Failed",
 								"An error occurred while restoring from the server:\n\n"
 									+ msg
@@ -314,10 +317,10 @@ var ZoteroPane = new function()
 	{
 		if (!ZoteroPane.loaded) {
 			if (Zotero.locked) {
-				var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-							.getService(Components.interfaces.nsIPrompt);
+				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+										.getService(Components.interfaces.nsIPromptService);
 				var msg = Zotero.getString('general.operationInProgress') + '\n\n' + Zotero.getString('general.operationInProgress.waitUntilFinished');
-				pr.alert("", msg);
+				ps.alert(null, "", msg);
 				return;
 			}
 			ZoteroPane.onLoad();
@@ -365,9 +368,9 @@ var ZoteroPane = new function()
 				// TODO: Add a better error page/window here with reporting
 				// instructions
 				// window.loadURI('chrome://zotero/content/error.xul');
-				var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-							.getService(Components.interfaces.nsIPrompt);
-				pr.alert("", errMsg);
+				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+										.getService(Components.interfaces.nsIPromptService);
+				ps.alert(null, "", errMsg);
 			}
 			
 			return;
@@ -1497,12 +1500,15 @@ var ZoteroPane = new function()
 	
 	
 	this.emptyTrash = function () {
-		var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
-								.getService(Components.interfaces.nsIPrompt);
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService);
 		
-		var result = prompt.confirm("",
-			Zotero.getString('pane.collections.emptyTrash') + "\n\n" +
-			Zotero.getString('general.actionCannotBeUndone'));
+		var result = ps.confirm(
+			null,
+			"",
+			Zotero.getString('pane.collections.emptyTrash') + "\n\n"
+				+ Zotero.getString('general.actionCannotBeUndone')
+		);
 		if (result) {
 			Zotero.Items.emptyTrash();
 			Zotero.purgeDataObjects(true);
@@ -1513,20 +1519,21 @@ var ZoteroPane = new function()
 		var self = this;
 		
 		Zotero.Commons.getBuckets(function () {
-			var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
-							.createInstance(Components.interfaces.nsIPrompt);
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService);
 			
 			var invalid = false;
 			
 			while (true) {
 				if (invalid) {
 					// TODO: localize
-					prompt.alert("", "Invalid title. Please try again.");
+					ps.alert(null, "", "Invalid title. Please try again.");
 					invalid = false;
 				}
 				
 				var newTitle = {};
 				var result = prompt.prompt(
+					null,
 					"",
 					// TODO: localize
 					"Enter a title for this Zotero Commons collection:",
@@ -1566,12 +1573,13 @@ var ZoteroPane = new function()
 						+ "Collection identifiers can contain basic Latin letters, numbers, "
 						+ "hyphens, and underscores and must be no longer than 32 characters. "
 						+ "Spaces and other characters are not allowed.";
-					prompt.alert("", msg);
+					ps.alert(null, "", msg);
 					invalid = false;
 				}
 				
 				var newName = { value: origName };
-				var result = prompt.prompt(
+				var result = ps.prompt(
+					null,
 					"",
 					// TODO: localize
 					"Enter an identifier for the collection '" + title + "'.\n\n"
@@ -1697,9 +1705,9 @@ var ZoteroPane = new function()
 			}
 		}
 		if (!canCopy) {
-			var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-						.getService(Components.interfaces.nsIPrompt);
-			pr.alert("", Zotero.getString("fileInterface.noReferencesError"));
+			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService);
+			ps.alert(null, "", Zotero.getString("fileInterface.noReferencesError"));
 			return;
 		}
 		
@@ -2811,9 +2819,9 @@ var ZoteroPane = new function()
 		
 		var itemGroup = ZoteroPane.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
 		if (link && itemGroup.isWithinGroup()) {
-			var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-						.getService(Components.interfaces.nsIPrompt);
-			pr.alert("", "Linked files cannot be added to group libraries.");
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService);
+			ps.alert(null, "", "Linked files cannot be added to group libraries.");
 			return;
 		}
 		
@@ -3285,16 +3293,16 @@ var ZoteroPane = new function()
 	
 	
 	this.displayCannotEditLibraryMessage = function () {
-		var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-					.getService(Components.interfaces.nsIPrompt);
-		pr.alert("", "You cannot make changes to the currently selected library.");
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService);
+		ps.alert(null, "", "You cannot make changes to the currently selected library.");
 	}
 	
 	
 	this.displayCannotEditLibraryFilesMessage = function () {
-		var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-					.getService(Components.interfaces.nsIPrompt);
-		pr.alert("", "You cannot add files to the currently selected library.");
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService);
+		ps.alert(null, "", "You cannot add files to the currently selected library.");
 	}
 	
 	

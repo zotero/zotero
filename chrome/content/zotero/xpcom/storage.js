@@ -1582,12 +1582,13 @@ Zotero.Sync.Storage = new function () {
 			setTimeout(function () {
 				var group = Zotero.Groups.get(e.data.groupID);
 				
-				var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-							.createInstance(Components.interfaces.nsIPrompt);
-				var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
-								+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL)
-								+ pr.BUTTON_DELAY_ENABLE;
-				var index = pr.confirmEx(
+				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+										.getService(Components.interfaces.nsIPromptService);
+				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+								+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+								+ ps.BUTTON_DELAY_ENABLE;
+				var index = ps.confirmEx(
+					null,
 					Zotero.getString('general.warning'),
 					Zotero.getString('sync.storage.error.fileEditingAccessLost', group.name) + "\n\n"
 						+ Zotero.getString('sync.error.groupWillBeReset') + "\n\n"

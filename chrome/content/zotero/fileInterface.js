@@ -224,9 +224,9 @@ var Zotero_File_Interface = new function() {
 		var clip = Components.classes["@mozilla.org/widget/clipboard;1"]
 					.getService(Components.interfaces.nsIClipboard);
 		if (!clip.hasDataMatchingFlavors(["text/unicode"], 1, clip.kGlobalClipboard)) {
-			var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
-							.getService(Components.interfaces.nsIPrompt);
-			prompt.alert("", Zotero.getString('fileInterface.importClipboardNoDataError'));
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService);
+			ps.alert(null, "", Zotero.getString('fileInterface.importClipboardNoDataError'));
 			return;
 		}
 		var trans = Components.classes["@mozilla.org/widget/transferable;1"]
@@ -279,11 +279,12 @@ var Zotero_File_Interface = new function() {
 			var unsupportedFormat = "The selected file is not in a supported format.";
 			var viewSupportedFormats = "View Supported Formats...";
 			
-			var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-						.getService(Components.interfaces.nsIPrompt);
-			var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_OK)
-								+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_IS_STRING);
-			var index = pr.confirmEx(
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService);
+			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
+								+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
+			var index = ps.confirmEx(
+				null,
 				"",
 				unsupportedFormat,
 				buttonFlags,

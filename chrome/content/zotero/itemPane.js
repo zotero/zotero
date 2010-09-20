@@ -152,9 +152,9 @@ var ZoteroItemPane = new function() {
 	
 	this.removeNote = function (id) {
 		var note = Zotero.Items.get(id);
-		var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-						.createInstance(Components.interfaces.nsIPrompt);
-		if (note && pr.confirm('', Zotero.getString('pane.item.notes.delete.confirm'))) {
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService);
+		if (note && ps.confirm(null, '', Zotero.getString('pane.item.notes.delete.confirm'))) {
 			note.erase();
 		}
 	}

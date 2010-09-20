@@ -390,9 +390,9 @@ Zotero.Commons = new function() {
 	
 	this.error = function (message) {
 		Components.utils.reportError(message);
-		var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
-					.createInstance(Components.interfaces.nsIPrompt);
-		prompt.alert("Zotero Commons Error", message);
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService);
+		ps.alert(null, "Zotero Commons Error", message);
 	}
 	
 	
@@ -789,21 +789,22 @@ Zotero.Commons.Bucket.prototype.uploadItems = function (ids) {
 		}
 	}
 	
-	var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-				.getService(Components.interfaces.nsIPrompt);
+	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+							.getService(Components.interfaces.nsIPromptService);
 	
 	var validItemsMessage = "Only titled items with bibliographic metadata and at least one attached file can be added to the Zotero Commons.";
 	
 	if (itemsToUpload.length == 0) {
 		Zotero.debug("No regular items to upload");
-		pr.alert("", validItemsMessage);
+		ps.alert(null, "", validItemsMessage);
 		return;
 	}
 	
 	if (itemsToUpload.length != items.length) {
-		var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
-							+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL);
-		var index = pr.confirmEx(
+		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+		var index = ps.confirmEx(
+			null,
 			"",
 			"Some of the dragged items will not be uploaded."
 				+ "\n\n"
@@ -819,9 +820,10 @@ Zotero.Commons.Bucket.prototype.uploadItems = function (ids) {
 		}
 	}
 	
-	var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
-						+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL);
-	var index = pr.confirmEx(
+	var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+	var index = ps.confirmEx(
+		null,
 		"Zotero Commons Upload",
 		"By uploading items to Zotero Commons you agree to the terms of use at zotero.org and archive.org. "
 			+ "Please make sure metadata for your items is set properly."
