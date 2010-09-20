@@ -32,7 +32,8 @@ const ZOTERO_CONFIG = {
 	BASE_URI: 'http://zotero.org/',
 	WWW_BASE_URL: 'http://www.zotero.org/',
 	SYNC_URL: 'https://sync.zotero.org/',
-	API_URL: 'https://api.zotero.org/'
+	API_URL: 'https://api.zotero.org/',
+	PREF_BRANCH: 'extensions.zotero.'
 };
 
 /*
@@ -303,12 +304,78 @@ var Zotero = new function(){
 						Zotero.chooseZoteroDirectory();
 					}
 				}
+				return;
+			} else if(e.name == "ZOTERO_DIR_MAY_EXIST") {
+				var app = Zotero.isStandalone ? Zotero.getString('app.standalone') : Zotero.getString('app.firefox');
+				var altApp = !Zotero.isStandalone ? Zotero.getString('app.standalone') : Zotero.getString('app.firefox');
+				
+				var message = Zotero.getString("dataDir.standaloneMigration.description", [app, altApp]);
+				if(e.multipleProfiles) {
+					message += "\n\n"+Zotero.getString("dataDir.standaloneMigration.multipleProfiles", [app, altApp]);
+				}
+				
+				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
+						createInstance(Components.interfaces.nsIPromptService);
+				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_YES)
+					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_NO)
+					+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
+				var index = ps.confirmEx(null, Zotero.getString("dataDir.standaloneMigration.title"), message,
+					buttonFlags, null, null,
+					Zotero.getString('dataDir.standaloneMigration.selectCustom'),
+					null, {});
+				
+				// Migrate data directory
+				if (index == 0) {
+					// copy prefs
+					var prefsFile = e.profile.clone();
+					prefsFile.append("prefs.js");
+					if(prefsFile.exists()) {
+						// build sandbox
+						var sandbox = new Components.utils.Sandbox("http://www.example.com/");
+						Components.utils.evalInSandbox(
+							"var prefs = {};"+
+							"function user_pref(key, val) {"+
+								"prefs[key] = val;"+
+							"}"
+						, sandbox);
+						
+						// remove comments
+						var prefsJs = Zotero.File.getContents(prefsFile);
+						prefsJs = prefsJs.replace(/^#[^\r\n]*$/mg, "");
+						
+						// evaluate
+						Components.utils.evalInSandbox(prefsJs, sandbox);
+						var prefs = new XPCSafeJSObjectWrapper(sandbox.prefs);
+						for(var key in prefs) {
+							if(key.substr(0, ZOTERO_CONFIG.PREF_BRANCH.length) == ZOTERO_CONFIG.PREF_BRANCH) {
+								Zotero.Prefs.set(key.substr(ZOTERO_CONFIG.PREF_BRANCH.length), prefs[key]);
+							}
+						}
+					}
+					
+					// also set data dir if no custom data dir is now defined
+					if(!Zotero.Prefs.get("useDataDir")) {
+						var dir = e.dir.QueryInterface(Components.interfaces.nsILocalFile);
+						Zotero.Prefs.set('dataDir', dir.persistentDescriptor);
+						Zotero.Prefs.set('lastDataDir', dir.path);
+						Zotero.Prefs.set('useDataDir', true);
+					}
+				}
+				// Create new data directory
+				else if (index == 1) {
+					Zotero.File.createDirectoryIfMissing(e.curDir);
+				}
+				// Locate new data directory
+				else if (index == 2) {
+					Zotero.chooseZoteroDirectory();
+				}
+				var dataDir = this.getZoteroDirectory();
 			}
 			// DEBUG: handle more startup errors
 			else {
 				throw (e);
+				return;
 			}
-			return;
 		}
 		
 		Zotero.VersionHeader.init();
@@ -408,7 +475,10 @@ var Zotero = new function(){
 		
 		// Initialize various services
 		Zotero.Integration.init();
-		//Zotero.Connector.init();
+		
+		if(Zotero.isStandalone) {
+			//Zotero.Connector.init();
+		}
 		
 		Zotero.Zeroconf.init();
 		
@@ -476,6 +546,48 @@ var Zotero = new function(){
 		}
 	}
 	
+	function getDefaultProfile(prefDir) {
+		// find profiles.ini file
+		var profilesIni = prefDir.clone();
+		profilesIni.append("profiles.ini");
+		if(!profilesIni.exists()) return false;
+		var iniContents = Zotero.File.getContents(profilesIni);
+		
+		// cheap and dirty ini parser
+		var curSection = null;
+		var defaultSection = null;
+		var nSections = 0;
+		for each(var line in iniContents.split(/(?:\r?\n|\r)/)) {
+			let tline = line.trim();
+			if(tline[0] == "[" && tline[tline.length-1] == "]") {
+				curSection = {};
+				if(tline != "[General]") nSections++;
+			} else if(curSection && tline != "") {
+				let equalsIndex = tline.indexOf("=");
+				let key = tline.substr(0, equalsIndex);
+				let val = tline.substr(equalsIndex+1);
+				curSection[key] = val;
+				if(key == "Default" && val == "1") {
+					defaultSection = curSection;
+				}
+			}
+		}
+		if(!defaultSection && curSection) defaultSection = curSection;
+		
+		// parse out ini to reveal profile
+		if(!defaultSection || !defaultSection.Path) return false;
+		if(defaultSection.IsRelative) {
+			var defaultProfile = prefDir.clone();
+			defaultProfile.QueryInterface(Components.interfaces.nsILocalFile).appendRelativePath(defaultSection.Path);
+		} else {
+			var defaultProfile = Components.classes["@mozilla.org/file/local;1"]
+				.createInstance(Components.interfaces.nsILocalFile);
+			defaultProfile.initWithPath(defaultSection.Path);
+		}
+		
+		if(!defaultProfile.exists()) return false;
+		return [defaultProfile, nSections > 1];
+	}
 	
 	function getZoteroDirectory(){
 		if (_zoteroDirectory != false) {
@@ -502,6 +614,32 @@ var Zotero = new function(){
 		else {
 			var file = Zotero.getProfileDirectory();
 			file.append('zotero');
+			
+			// if standalone and no directory yet, check Firefox directory
+			// or if in Firefox and no directory yet, check standalone Zotero directory
+			if(!file.exists()) {
+				// get Firefox directory
+				var prefDir = Components.classes["@mozilla.org/file/directory_service;1"]
+					.getService(Components.interfaces.nsIProperties)
+					.get("DefProfRt", Components.interfaces.nsILocalFile).parent.parent;
+				prefDir.append(Zotero.isStandalone ? "Firefox" : "Zotero");
+				
+				// get default profile
+				var defProfile = getDefaultProfile(prefDir);
+				if(defProfile) {
+					// get Zotero directory
+					var zoteroDir = defProfile[0].clone();
+					zoteroDir.append("zotero");
+					
+					if(zoteroDir.exists()) {
+						// if Zotero directory exists in default profile for alternative app, ask
+						// whether to use
+						var e = { name:"ZOTERO_DIR_MAY_EXIST", curDir:file, profile:defProfile[0], dir:zoteroDir, multipleProfiles:defProfile[1] };
+						throw (e);
+					}
+				}
+			}
+			
 			Zotero.File.createDirectoryIfMissing(file);
 		}
 		Zotero.debug("Using data directory " + file.path);
@@ -1295,7 +1433,7 @@ Zotero.Prefs = new function(){
 	function init(){
 		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
 						.getService(Components.interfaces.nsIPrefService);
-		this.prefBranch = prefs.getBranch("extensions.zotero.");
+		this.prefBranch = prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
 		
 		// Register observer to handle pref changes
 		this.register();
