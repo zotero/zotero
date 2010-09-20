@@ -8,7 +8,7 @@
 	"priority" : 100,
 	"inRepository" : true,
 	"translatorType" : 4,
-	"lastUpdated":"2010-08-03 10:30:20"
+	"lastUpdated":"2010-09-20 10:30:20"
 }
 
 function detectWeb(doc, url) {
@@ -200,7 +200,7 @@ function doWeb(doc, url){
 		for (var i in items){
 			articles.push(i);
 		}
-	} else if (detectWeb(doc,url) =="webpage"){
+	} else if (detectWeb(doc,url) =="newspaperArticle"){
 	articles = [url];
 	}
 	 else if (detectWeb(doc,url) =="tvBroadcast"){
