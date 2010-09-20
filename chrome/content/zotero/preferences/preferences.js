@@ -211,13 +211,14 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 	if (oldProtocol == 'zotero' && protocol == 'webdav') {
 		var sql = "SELECT COUNT(*) FROM version WHERE schema='storage_zfs'";
 		if (Zotero.DB.valueQuery(sql)) {
-			var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-						.getService(Components.interfaces.nsIPrompt);
-			var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
-								+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_IS_STRING)
-								+ pr.BUTTON_DELAY_ENABLE;
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService);
+			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+								+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
+								+ ps.BUTTON_DELAY_ENABLE;
 			var account = Zotero.Sync.Server.username;
-			var index = pr.confirmEx(
+			var index = ps.confirmEx(
+				null,
 				// TODO: localize
 				"Purge Attachment Files on Zotero Servers?",
 				
@@ -236,13 +237,15 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 				
 				Zotero.Sync.Storage.purgeDeletedStorageFiles('zfs', function (success) {
 					if (success) {
-						pr.alert(
+						ps.alert(
+							null,
 							Zotero.getString("general.success"),
 							"Attachment files from your personal library have been removed from the Zotero servers."
 						);
 					}
 					else {
-						pr.alert(
+						ps.alert(
+							null,
 							Zotero.getString("general.error"),
 							"An error occurred. Please try again later."
 						);
@@ -343,11 +346,12 @@ function handleSyncResetSelect(obj) {
 }
 
 function handleSyncReset(action) {
-	var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-				.getService(Components.interfaces.nsIPrompt);
+	var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+							.getService(Components.interfaces.nsIPromptService);
 	
 	if (!Zotero.Sync.Server.enabled) {
-		pr.alert(
+		ps.alert(
+			null,
 			Zotero.getString('general.error'),
 			// TODO: localize
 			"You must enter a username and password in the "
@@ -362,10 +366,11 @@ function handleSyncReset(action) {
 	
 	switch (action) {
 		case 'restore-from-server':
-			var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
-								+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL)
-								+ pr.BUTTON_POS_1_DEFAULT;
-			var index = pr.confirmEx(
+			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+								+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+								+ ps.BUTTON_POS_1_DEFAULT;
+			var index = ps.confirmEx(
+				null,
 				// TODO: localize
 				Zotero.getString('general.warning'),
 				"All data in this copy of Zotero will be erased and replaced with "
@@ -390,8 +395,9 @@ function handleSyncReset(action) {
 						file.append('restore-from-server');
 						Zotero.File.putContents(file, '');
 						
-						var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING);
-						var index = pr.confirmEx(
+						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING);
+						var index = ps.confirmEx(
+							null,
 							Zotero.getString('general.restartRequired'),
 							// TODO: localize
 							"Firefox must be restarted to complete the restore process.",
@@ -421,10 +427,11 @@ function handleSyncReset(action) {
 			break;
 		
 		case 'restore-to-server':
-			var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
-							+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL)
-							+ pr.BUTTON_POS_1_DEFAULT;
-			var index = pr.confirmEx(
+			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+							+ ps.BUTTON_POS_1_DEFAULT;
+			var index = ps.confirmEx(
+				null,
 				// TODO: localize
 				Zotero.getString('general.warning'),
 				"All data belonging to user '" + account + "' on the Zotero server "
@@ -448,14 +455,16 @@ function handleSyncReset(action) {
 							
 							onSuccess: function () {
 								Zotero.Sync.Runner.setSyncIcon();
-								pr.alert(
+								ps.alert(
+									null,
 									"Restore Completed",
 									"Data on the Zotero server has been successfully restored."
 								);
 							},
 							onError: function (msg) {
 								// TODO: combine with error dialog for regular syncs
-								pr.alert(
+								ps.alert(
+									null,
 									"Restore Failed",
 									"An error occurred uploading your data to the server.\n\n"
 										+ "Click the sync error icon in the Zotero toolbar "
@@ -475,10 +484,11 @@ function handleSyncReset(action) {
 			break;
 		
 		case 'full-sync':
-			var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
-							+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL)
-							+ pr.BUTTON_POS_1_DEFAULT;
-			var index = pr.confirmEx(
+			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+							+ ps.BUTTON_POS_1_DEFAULT;
+			var index = ps.confirmEx(
+				null,
 				// TODO: localize
 				Zotero.getString('general.warning'),
 				"The local Zotero library will be completely merged with data belonging to user '" + account + "' on the Zotero server. "
@@ -496,14 +506,16 @@ function handleSyncReset(action) {
 					Zotero.Sync.Server.sync(/*{
 						onSuccess: function () {
 							Zotero.Sync.Runner.setSyncIcon();
-							pr.alert(
+							ps.alert(
+								null,
 								"Full Sync Completed",
 								"The local Zotero library has been merged with data from the Zotero server."
 							);
 						},
 						onError: function (msg) {
 							// TODO: combine with error dialog for regular syncs
-							pr.alert(
+							ps.alert(
+								null,
 								"Full Sync Failed",
 								"An error occurred while performing the full sync.\n\n"
 									+ "Click the sync error icon in the Zotero toolbar "
@@ -522,10 +534,11 @@ function handleSyncReset(action) {
 			break;
 		
 		case 'reset-storage-history':
-			var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
-							+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL)
-							+ pr.BUTTON_POS_1_DEFAULT;
-			var index = pr.confirmEx(
+			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+							+ ps.BUTTON_POS_1_DEFAULT;
+			var index = ps.confirmEx(
+				null,
 				// TODO: localize
 				Zotero.getString('general.warning'),
 				"All file sync history will be cleared.\n\n"
@@ -538,7 +551,8 @@ function handleSyncReset(action) {
 			switch (index) {
 				case 0:
 					Zotero.Sync.Storage.resetAllSyncStates();
-					pr.alert(
+					ps.alert(
+						null,
 						"File Sync History Cleared",
 						"The file sync history has been cleared."
 					);
@@ -1375,11 +1389,12 @@ Zotero_Preferences.Debug_Output = {
 			
 			Zotero.debug(xmlhttp.responseText);
 			
-			var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-				.getService(Components.interfaces.nsIPrompt);
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService);
 			
 			if (!xmlhttp.responseXML) {
-				pr.alert(
+				ps.alert(
+					null,
 					Zotero.getString('general.error'),
 					'Invalid response from server'
 				);
@@ -1387,7 +1402,8 @@ Zotero_Preferences.Debug_Output = {
 			}
 			var reported = xmlhttp.responseXML.getElementsByTagName('reported');
 			if (reported.length != 1) {
-				pr.alert(
+				ps.alert(
+					null,
 					Zotero.getString('general.error'),
 					'The server returned an error. Please try again.'
 				);
@@ -1395,7 +1411,8 @@ Zotero_Preferences.Debug_Output = {
 			}
 			
 			var reportID = reported[0].getAttribute('reportID');
-			pr.alert(
+			ps.alert(
+				null,
 				"Submitted",
 				"Debug output has been sent to the Zotero server.\n\n"
 					+ "The Debug ID is D" + reportID + "."
@@ -1403,8 +1420,8 @@ Zotero_Preferences.Debug_Output = {
 		}
 		
 		var bufferUploader = function (data) {
-			var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-				.getService(Components.interfaces.nsIPrompt);
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService);
 			
 			var oldLen = output.length;
 			var newLen = data.length;
@@ -1414,7 +1431,8 @@ Zotero_Preferences.Debug_Output = {
 				+ savings + "% savings)");
 			
 			if (Zotero.Utilities.HTTP.browserIsOffline()) {
-				pr.alert(
+				ps.alert(
+					null,
 					Zotero.getString(
 						'general.error',
 						Zotero.appName + " is in offline mode."
@@ -1467,7 +1485,8 @@ Zotero_Preferences.Debug_Output = {
 				req.sendAsBinary(data);
 			}
 			catch (e) {
-				pr.alert(
+				ps.alert(
+					null,
 					Zotero.getString('general.error'),
 					"An error occurred sending debug output."
 				);

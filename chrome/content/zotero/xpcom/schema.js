@@ -219,8 +219,8 @@ Zotero.Schema = new function(){
 	// This is mostly temporary
 	// TEMP - NSF
 	this.importSchema = function (str, uri) {
-		var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
-						.createInstance(Components.interfaces.nsIPrompt);
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService);
 		
 		if (!uri.match(/https?:\/\/([^\.]+\.)?zotero.org\//)) {
 			Zotero.debug("Ignoring schema file from non-zotero.org domain");
@@ -234,7 +234,7 @@ Zotero.Schema = new function(){
 		if (str == "%%%ZOTERO_NSF_TEMP_INSTALL%%%") {
 			Zotero.debug(Zotero.ItemTypes.getID("nsfReviewer"));
 			if (Zotero.ItemTypes.getID("nsfReviewer")) {
-				prompt.alert("Zotero Item Type Already Exists", "The 'NSF Reviewer' item type already exists in Zotero.");
+				ps.alert(null, "Zotero Item Type Already Exists", "The 'NSF Reviewer' item type already exists in Zotero.");
 				Zotero.debug("nsfReviewer item type already exists");
 				return;
 			}
@@ -305,12 +305,12 @@ Zotero.Schema = new function(){
 			s.addCondition('tag', 'isNot', 'Completed');
 			s.save();
 			
-			prompt.alert("Zotero Item Type Added", "The 'NSF Reviewer' item type and 'Overdue NSF Reviewers' saved search have been installed.");
+			ps.alert(null, "Zotero Item Type Added", "The 'NSF Reviewer' item type and 'Overdue NSF Reviewers' saved search have been installed.");
 		}
 		else if (str == "%%%ZOTERO_NSF_TEMP_UNINSTALL%%%") {
 			var itemTypeID = Zotero.ItemTypes.getID('nsfReviewer');
 			if (!itemTypeID) {
-				prompt.alert("Zotero Item Type Does Not Exist", "The 'NSF Reviewer' item type does not exist in Zotero.");
+				ps.alert(null, "Zotero Item Type Does Not Exist", "The 'NSF Reviewer' item type does not exist in Zotero.");
 				Zotero.debug("nsfReviewer item types doesn't exist", 2);
 				return;
 			}
@@ -321,7 +321,7 @@ Zotero.Schema = new function(){
 			s2.addCondition('itemType', 'is', 'nsfReviewer');
 			s2.addCondition('deleted', 'true');
 			if (s.search() || s2.search()) {
-				prompt.alert("Error", "All 'NSF Reviewer' items must be deleted before the item type can be removed from Zotero.");
+				ps.alert(null, "Error", "All 'NSF Reviewer' items must be deleted before the item type can be removed from Zotero.");
 				return;
 			}
 			
@@ -346,7 +346,7 @@ Zotero.Schema = new function(){
 			
 			_reloadSchema();
 			
-			prompt.alert("Zotero Item Type Removed", "The 'NSF Reviewer' item type has been uninstalled.");
+			ps.alert(null, "Zotero Item Type Removed", "The 'NSF Reviewer' item type has been uninstalled.");
 		}
 	}
 	
@@ -2941,10 +2941,10 @@ Zotero.Schema = new function(){
 			//
 			// Conditional should be same as in showUpgradeWizard()
 			if (e.name && e.name == "NS_ERROR_FAILURE" && e.message.match(/nsIFile\.moveTo/)) {
-				var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-							.getService(Components.interfaces.nsIPrompt);
+				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+										.getService(Components.interfaces.nsIPromptService);
 				var title = Zotero.getString('upgrade.failed.title');
-				pr.alert(title, Zotero.getString('upgrade.couldNotMigrate') + "\n\n" + Zotero.getString('upgrade.couldNotMigrate.restart'));
+				ps.alert(null, title, Zotero.getString('upgrade.couldNotMigrate') + "\n\n" + Zotero.getString('upgrade.couldNotMigrate.restart'));
 			}
 			
 			throw(e);

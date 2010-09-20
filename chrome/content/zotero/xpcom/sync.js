@@ -836,22 +836,22 @@ Zotero.Sync.Runner = new function () {
 								.getService(Components.interfaces.nsIWindowMediator);
 					var win = wm.getMostRecentWindow("navigator:browser");
 					
-					var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-									.createInstance(Components.interfaces.nsIPrompt);
+					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+											.getService(Components.interfaces.nsIPromptService);
 					// Warning
 					if (status == 'warning') {
 						var title = Zotero.getString('general.warning');
 						
 						// If secondary button not specified, just use an alert
 						if (!buttonText) {
-							pr.alert(title, message);
+							ps.alert(null, title, message);
 							return;
 						}
 						
-						var buttonFlags = pr.BUTTON_POS_0 * pr.BUTTON_TITLE_OK
-											+ pr.BUTTON_POS_1 * pr.BUTTON_TITLE_IS_STRING;
-						Zotero.debug(buttonFlags);
-						var index = pr.confirmEx(
+						var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
+											+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+						var index = ps.confirmEx(
+							null,
 							title,
 							message,
 							buttonFlags,
@@ -880,13 +880,14 @@ Zotero.Sync.Runner = new function () {
 						}
 						// If secondary button is explicitly null, just use an alert
 						else if (buttonText === null) {
-							pr.alert(title, message);
+							ps.alert(null, title, message);
 							return;
 						}
 						
-						var buttonFlags = pr.BUTTON_POS_0 * pr.BUTTON_TITLE_OK
-											+ pr.BUTTON_POS_1 * pr.BUTTON_TITLE_IS_STRING;
-						var index = pr.confirmEx(
+						var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
+											+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+						var index = ps.confirmEx(
+							null,
 							Zotero.getString('general.error'),
 							message,
 							buttonFlags,
@@ -1844,12 +1845,13 @@ Zotero.Sync.Server = new function () {
 						var libraryID = parseInt(firstChild.getAttribute('libraryID'));
 						var group = Zotero.Groups.getByLibraryID(libraryID);
 						
-						var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-									.createInstance(Components.interfaces.nsIPrompt);
-						var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
-										+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL)
-										+ pr.BUTTON_DELAY_ENABLE;
-						var index = pr.confirmEx(
+						var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+												.getService(Components.interfaces.nsIPromptService);
+						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+										+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+										+ ps.BUTTON_DELAY_ENABLE;
+						var index = ps.confirmEx(
+							null,
 							Zotero.getString('general.warning'),
 							Zotero.getString('sync.error.writeAccessLost', group.name) + "\n\n"
 								+ Zotero.getString('sync.error.groupWillBeReset') + "\n\n"
@@ -2015,13 +2017,13 @@ Zotero.Sync.Server = new function () {
 		if (lastUserID && lastUserID != userID) {
 			var groups = Zotero.Groups.getAll();
 			
-			var pr = Components.classes["@mozilla.org/network/default-prompt;1"]
-						.createInstance(Components.interfaces.nsIPrompt);
-			var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
-			+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL)
-			+ (pr.BUTTON_POS_2) * (pr.BUTTON_TITLE_IS_STRING)
-			+ pr.BUTTON_POS_1_DEFAULT
-			+ pr.BUTTON_DELAY_ENABLE;
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService);
+			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
+			+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
+			+ ps.BUTTON_POS_1_DEFAULT
+			+ ps.BUTTON_DELAY_ENABLE;
 			
 			var msg = "This Zotero database was last synced with a different "
 					+ "zotero.org account ('" + lastUsername + "') from the "
@@ -2063,7 +2065,8 @@ Zotero.Sync.Server = new function () {
 			}
 			
 			if (!noPrompt) {
-				var index = pr.confirmEx(
+				var index = ps.confirmEx(
+					null,
 					Zotero.getString('general.warning'),
 					msg,
 					buttonFlags,
@@ -2183,10 +2186,10 @@ Zotero.Sync.Server = new function () {
 									.getService(Components.interfaces.nsIWindowMediator);
 						var win = wm.getMostRecentWindow("navigator:browser");
 						
-						var pr = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+						var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 									.getService(Components.interfaces.nsIPromptService);
-						var buttonFlags = (pr.BUTTON_POS_0) * (pr.BUTTON_TITLE_IS_STRING)
-											+ (pr.BUTTON_POS_1) * (pr.BUTTON_TITLE_CANCEL);
+						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+											+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 						// TODO: localize
 						if (e.error == Zotero.Error.ERROR_SYNC_USERNAME_NOT_SET) {
 							var title = Zotero.getString('sync.error.usernameNotSet');
@@ -2197,7 +2200,7 @@ Zotero.Sync.Server = new function () {
 							var msg = "The Zotero sync server did not accept your username and password.\n\n"
 									+ "Please check that you have entered your zotero.org login information correctly in the Zotero sync preferences.";
 						}
-						var index = pr.confirmEx(
+						var index = ps.confirmEx(
 							win,
 							title,
 							msg,

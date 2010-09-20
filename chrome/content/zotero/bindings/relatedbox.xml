@@ -183,9 +183,9 @@
 								var relItem = Zotero.Items.get(io.dataOut[0]);
 								if (relItem.libraryID != this.item.libraryID) {
 									// FIXME
-									var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
-															.getService(Components.interfaces.nsIPrompt);
-									prompt.alert("", "You cannot relate items in different libraries in this Zotero release.");
+									var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+															.getService(Components.interfaces.nsIPromptService);
+									ps.alert(null, "", "You cannot relate items in different libraries in this Zotero release.");
 									return;
 								}
 							}

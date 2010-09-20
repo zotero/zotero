@@ -1519,8 +1519,8 @@ Zotero.Prefs = new function(){
 	
 	// Import settings bundles
 	this.importSettings = function (str, uri) {
-		var prompt = Components.classes["@mozilla.org/network/default-prompt;1"]
-						.createInstance(Components.interfaces.nsIPrompt);
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService);
 		
 		if (!uri.match(/https:\/\/([^\.]+\.)?zotero.org\//)) {
 			Zotero.debug("Ignoring settings file not from https://zotero.org");
@@ -1530,7 +1530,8 @@ Zotero.Prefs = new function(){
 		str = Zotero.Utilities.prototype.trim(str.replace(/<\?xml.*\?>\s*/, ''));
 		Zotero.debug(str);
 		
-		var confirm = prompt.confirm(
+		var confirm = ps.confirm(
+			null,
 			"",
 			"Apply settings from zotero.org?"
 		);
