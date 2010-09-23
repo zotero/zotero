@@ -8,7 +8,8 @@
 	"maxVersion":"",
 	"priority":200,
 	"inRepository":true,
-	"lastUpdated":"2010-09-15 18:42:44"
+	"detectXPath":"//link[@rel='unapi-server']",
+	"lastUpdated":"2010-09-23 04:19:20"
 }
 
 var RECOGNIZABLE_FORMATS = ["mods", "marc", "endnote", "ris", "bibtex", "rdf"];

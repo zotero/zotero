@@ -8,7 +8,8 @@
 	"maxVersion":"",
 	"priority":400,
 	"inRepository":true,
-	"lastUpdated":"2009-05-27 08:06:05"
+	"detectXPath":"//meta[substring(@name, 1, 3)='dc.'] | //link[substring(@rel, 1, 7)='schema.']",
+	"lastUpdated":"2010-09-23 04:19:20"
 }
 
 var _prefix;
@@ -45,7 +46,7 @@ function detectWeb(doc, url) {
 	var metaTags = doc.getElementsByTagName("meta");
 	for(var i=0; i<metaTags.length; i++) {
 		var tag = metaTags[i].getAttribute("name");
-		if(tag && tag.substr(0, 3).toLowerCase() == prefix) {
+		if(tag && tag.substr(0, prefix.length).toLowerCase() == prefix) {
 			return "webpage";
 		}
 	}
