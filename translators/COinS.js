@@ -8,7 +8,8 @@
 	"maxVersion":"",
 	"priority":300,
 	"inRepository":true,
-	"lastUpdated":"2010-09-15 18:42:44"
+	"detectXPath":"//span[contains(@class, ' Z3988') or contains(@class, 'Z3988 ') or @class='Z3988'][@title]"
+	"lastUpdated":"2010-09-23 04:19:20"
 }
 
 function detectWeb(doc, url) {
