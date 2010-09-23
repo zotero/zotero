@@ -57,6 +57,7 @@ var xpcomFiles = [
 	'cite',
 	'collectionTreeView',
 	'commons',
+	'connector',
 	'dataServer',
 	'data_access',
 	'data/dataObjects',
