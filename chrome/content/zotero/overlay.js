@@ -495,6 +495,8 @@ var ZoteroPane = new function()
 	 */
 	function _setFullWindowMode(set) {
 		// hide or show navigation toolbars
+		if(Zotero.isStandalone) return;
+		
 		var toolbox = getNavToolbox();
 		if(set) {
 			// the below would be a good thing to do if the whole title bar (and not just the center
