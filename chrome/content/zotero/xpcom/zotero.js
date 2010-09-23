@@ -2617,6 +2617,11 @@ Zotero.Browser = new function() {
 			var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 							.getService(Components.interfaces.nsIWindowMediator)
 							.getMostRecentWindow("navigator:browser");
+			if(!win) {
+				var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								.getService(Components.interfaces.nsIWindowWatcher)
+								.activeWindow;
+			}
 		}
 		
 		// Create a hidden browser
