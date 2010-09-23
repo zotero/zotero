@@ -477,7 +477,7 @@ var Zotero = new function(){
 		Zotero.Integration.init();
 		
 		if(Zotero.isStandalone) {
-			//Zotero.Connector.init();
+			Zotero.Connector.init();
 		}
 		
 		Zotero.Zeroconf.init();

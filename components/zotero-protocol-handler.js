@@ -944,6 +944,105 @@ function ChromeExtensionHandler() {
 		}
 	};
 	
+	var ConnectorChannel = function(uri, data) {
+		var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
+			.getService(Components.interfaces.nsIScriptSecurityManager);
+		var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+			.getService(Components.interfaces.nsIIOService);
+		
+		this.name = uri;
+		this.URI = ioService.newURI(uri, "UTF-8", null);
+		this.owner = secMan.getCodebasePrincipal(this.URI);
+		this._isPending = true;
+		
+		var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
+			createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+		converter.charset = "UTF-8";
+		this._stream = converter.convertToInputStream(data);
+		this.contentLength = this._stream.available();
+	}
+	
+	ConnectorChannel.prototype.contentCharset = "UTF-8";
+	ConnectorChannel.prototype.contentType = "text/html";
+	ConnectorChannel.prototype.notificationCallbacks = {};
+	ConnectorChannel.prototype.securityInfo = null;
+	ConnectorChannel.prototype.status = 0;
+	ConnectorChannel.prototype.loadGroup = null;
+	ConnectorChannel.prototype.securityInfo = null;
+	ConnectorChannel.prototype.loadFlags = 393216;
+	
+	ConnectorChannel.prototype.__defineGetter__("originalURI", function() { return this.URI });
+	ConnectorChannel.prototype.__defineSetter__("originalURI", function() { });
+	
+	ConnectorChannel.prototype.asyncOpen = function(streamListener, context) {
+		streamListener.onStartRequest(this, context);
+		streamListener.onDataAvailable(this, context, this._stream, 0, this.contentLength);
+		streamListener.onStopRequest(this, context, this.status);
+		this._isPending = false;
+	}
+	
+	ConnectorChannel.prototype.isPending = function() {
+		return this._isPending;
+	}
+	
+	ConnectorChannel.prototype.cancel = function(status) {
+		this.status = status;
+		this._isPending = false;
+		if(this._stream) this._stream.close();
+	}
+	
+	ConnectorChannel.prototype.suspend = function(status) {
+		this.status = status;
+	}
+	
+	ConnectorChannel.prototype.resume = function(status) {
+		this.status = status;
+	}
+	
+	ConnectorChannel.prototype.open = function() {
+		return this._stream;
+	}
+	
+	ConnectorChannel.prototype.QueryInterface = function(iid) {
+		if (!iid.equals(Components.interfaces.nsIChannel) && !iid.equals(Components.interfaces.nsIRequest) &&
+				!iid.equals(Components.interfaces.nsISupports)) {
+			throw Components.results.NS_ERROR_NO_INTERFACE;
+		}
+		return this;
+	}
+	
+	/**
+	 * zotero://connector/
+	 *
+	 * URI spoofing for transferring page data across boundaries
+	 */
+	var ConnectorExtension = new function() {
+		this.loadAsChrome = false;
+		
+		this.newChannel = function(uri) {
+			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+				.getService(Components.interfaces.nsIIOService);
+			var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
+				.getService(Components.interfaces.nsIScriptSecurityManager);
+			var Zotero = Components.classes["@zotero.org/Zotero;1"]
+				.getService(Components.interfaces.nsISupports)
+				.wrappedJSObject;
+			
+			try {
+				var originalURI = uri.path;
+				originalURI = decodeURIComponent(originalURI.substr(originalURI.indexOf("/")+1));
+				if(!Zotero.Connector.Data[originalURI]) {
+					return null;
+				} else {
+					return new ConnectorChannel(originalURI, Zotero.Connector.Data[originalURI]);
+				}
+			} catch(e) {
+				Zotero.debug(e);
+				throw e;
+			}
+		}
+	};
+	
 	var ReportExtensionSpec = ZOTERO_SCHEME + "://report"
 	this._extensions[ReportExtensionSpec] = ReportExtension;
 	
@@ -961,6 +1060,9 @@ function ChromeExtensionHandler() {
 	
 	var DebugExtensionSpec = ZOTERO_SCHEME + "://debug"
 	this._extensions[DebugExtensionSpec] = DebugExtension;
+	
+	var ConnectorExtensionSpec = ZOTERO_SCHEME + "://connector"
+	this._extensions[ConnectorExtensionSpec] = ConnectorExtension;
 }
 
 
