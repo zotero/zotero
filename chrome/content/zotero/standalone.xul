@@ -19,6 +19,7 @@
 <window id="main-window"
 				xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 				onload="window.sizeToContent()"
+				windowtype="navigator:browser"
 				width="1100" height="700"
 				persist="screenX screenY width height sizemode"> 
 	<script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
