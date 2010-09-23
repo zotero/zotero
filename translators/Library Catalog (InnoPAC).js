@@ -1,14 +1,14 @@
 {
-	"translatorID":"4fd6b89b-2316-2dc4-fd87-61a97dd941e8",
-	"translatorType":4,
-	"label":"Library Catalog (InnoPAC)",
-	"creator":"Simon Kornblith and Michael Berkowitz",
-	"target":"(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+(~S[0-9])?|/search/q\\?)",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":200,
-	"inRepository":true,
-	"lastUpdated":"2010-09-10 13:40:50"
+        "translatorID":"4fd6b89b-2316-2dc4-fd87-61a97dd941e8",
+        "label":"Library Catalog (InnoPAC)",
+        "creator":"Simon Kornblith and Michael Berkowitz",
+        "target":"(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+(~S[0-9])?|/search/q\\?)",
+        "minVersion":"1.0.0b3.r1",
+        "maxVersion":"",
+        "priority":200,
+        "inRepository":true,
+        "translatorType":4,
+        "lastUpdated":"2010-08-24 23:04:19"
 }
 
 function detectWeb(doc, url) {
@@ -33,6 +33,8 @@ function detectWeb(doc, url) {
 // Persistent URL for item
 // http://bearcat.baylor.edu/record=b1540169~S7
 // http://innopac.cooley.edu/record=b507916~S0
+// Persistent URL for item, without suffix
+// http://luna.wellesley.edu/record=b2398784
 // Specific search parameters
 // http://library.cooley.edu/search/q?author=shakespeare&title=hamlet
 //***********
@@ -44,8 +46,8 @@ function detectWeb(doc, url) {
 		return "book";
 	}
 
-// possibly disastrous edit to regular expression below	
-	if (!url.match(/SEARCH=/) && !url.match(/searchargs?=/) && !url.match(/&FF/) && !url.match(/search~S[0-9]/) && !url.match(/\/search\/q\?/)) return false;
+	// Regular expression to reduce false positives
+	if (!url.match(/SEARCH=/) && !url.match(/searchargs?=/) && !url.match(/&FF/) && !url.match(/search~S[0-9]/) && !url.match(/\/search\/q\?/) && !url.match(/record=/)) return false;
 	// First, check to see if the URL alone reveals InnoPAC, since some sites don't reveal the MARC button
 	var matchRegexp = new RegExp('^https?://[^/]+/search[^/]*\\??/[^/]+/[^/]+/[^/]+\%2C[^/]+/frameset(.+)$');
 	if(matchRegexp.test(doc.location.href)) {
@@ -54,7 +56,7 @@ function detectWeb(doc, url) {
 		}
 	}
 	// Next, look for the MARC button	
-	xpath = '//a[img[@src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
+	xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
 	elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(elmt) {
 		return "book";
@@ -170,7 +172,8 @@ function doWeb(doc, url) {
 		if (m) {
 			newUri = uri.replace(/frameset/, "marc");
 		} else {
-			newUri = doc.evaluate('//a[contains(@href, "frameset")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href.replace(/frameset/, 'marc');
+			var xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
+			newUri = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.replace(/frameset/, "marc");;
 		}
 		pageByPage(marc, [newUri]);
 	} else {	// Search results page
