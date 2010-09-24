@@ -175,7 +175,7 @@
 
 <!ENTITY zotero.integration.references.label "Literaturangaben in Bibliographie">
 
-<!ENTITY zotero.sync.button "Synchronisierung mit Zotero-Sever">
+<!ENTITY zotero.sync.button "Synchronisierung mit Zotero-Server">
 <!ENTITY zotero.sync.error "Sync-Fehler">
 <!ENTITY zotero.sync.storage.progress "Fortschritt:">
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
