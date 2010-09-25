@@ -618,30 +618,33 @@ var Zotero = new function(){
 			// if standalone and no directory yet, check Firefox directory
 			// or if in Firefox and no directory yet, check standalone Zotero directory
 			if(!file.exists()) {
+				var prefDir = Components.classes["@mozilla.org/file/directory_service;1"]
+					.getService(Components.interfaces.nsIProperties)
+					.get("DefProfRt", Components.interfaces.nsILocalFile).parent.parent;
+				
 				if(Zotero.isStandalone) {
 					if(Zotero.isWin) {
-						var path = "../Mozilla/Firefox";
+						prefDir.append("Mozilla");
+						prefDir.append("Firefox");
 					} else if(Zotero.isMac) {
-						var path = "../Firefox";
+						prefDir.append("Firefox");
 					} else {
-						var path = "../.mozilla/firefox";
+						prefDir.append(".mozilla");
+						prefDir.append("firefox");
 					}
 				} else {
 					if(Zotero.isWin) {
-						var path = "../../Zotero";
+						prefDir = prefDir.parent;
+						prefDir.append("Zotero");
 					} else if(Zotero.isMac) {
-						var path = "../Zotero";
+						prefDir.append("Zotero");
 					} else {
-						var path = "../../.zotero";
+						prefDir = prefDir.parent;
+						prefDir.append(".zotero");
 					}
 				}
 				
-				// get Firefox directory
-				var prefDir = Components.classes["@mozilla.org/file/directory_service;1"]
-					.getService(Components.interfaces.nsIProperties)
-					.get("DefProfRt", Components.interfaces.nsILocalFile).parent
-					.QueryInterface(Components.interfaces.nsILocalFile);
-				prefDir.appendRelativePath(path);
+				Zotero.debug("Looking for existing profile in "+prefDir.path);
 				
 				// get default profile
 				var defProfile = getDefaultProfile(prefDir);
