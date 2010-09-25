@@ -624,11 +624,13 @@ var Zotero = new function(){
 				
 				if(Zotero.isStandalone) {
 					if(Zotero.isWin) {
+						prefDir = prefDir.parent;
 						prefDir.append("Mozilla");
 						prefDir.append("Firefox");
 					} else if(Zotero.isMac) {
 						prefDir.append("Firefox");
 					} else {
+						prefDir = prefDir.parent;
 						prefDir.append(".mozilla");
 						prefDir.append("firefox");
 					}
@@ -642,6 +644,7 @@ var Zotero = new function(){
 					} else {
 						prefDir = prefDir.parent;
 						prefDir.append(".zotero");
+						prefDir.append("zotero");
 					}
 				}
 				
