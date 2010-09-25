@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":300,
 	"inRepository":true,
-	"detectXPath":"//span[contains(@class, ' Z3988') or contains(@class, 'Z3988 ') or @class='Z3988'][@title]"
+	"detectXPath":"//span[contains(@class, ' Z3988') or contains(@class, 'Z3988 ') or @class='Z3988'][@title]",
 	"lastUpdated":"2010-09-23 04:19:20"
 }
 
