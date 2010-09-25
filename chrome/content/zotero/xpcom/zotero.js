@@ -636,6 +636,7 @@ var Zotero = new function(){
 					if(Zotero.isWin) {
 						prefDir = prefDir.parent;
 						prefDir.append("Zotero");
+						prefDir.append("Zotero");
 					} else if(Zotero.isMac) {
 						prefDir.append("Zotero");
 					} else {
