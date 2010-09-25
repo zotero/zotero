@@ -576,9 +576,11 @@ var Zotero = new function(){
 		
 		// parse out ini to reveal profile
 		if(!defaultSection || !defaultSection.Path) return false;
+		
+		
 		if(defaultSection.IsRelative) {
 			var defaultProfile = prefDir.clone();
-			defaultProfile.QueryInterface(Components.interfaces.nsILocalFile).appendRelativePath(defaultSection.Path);
+			[defaultProfile.append(dir) for each(dir in defaultSection.Path.split("/"))];
 		} else {
 			var defaultProfile = Components.classes["@mozilla.org/file/local;1"]
 				.createInstance(Components.interfaces.nsILocalFile);
