@@ -272,7 +272,7 @@
 				<label class="subhead" value="Citation &amp; Bibliography Processing"/>
 				<vbox class="subcontent">
 					<label class="text-link" href="http://citationstyles.org/" value="Citation Style Language"/>
-					<label class="text-link" href="http://bitbucket.org/fbennett/citeproc-js/" value="citeproc-js (Frank Bennett, Nagoya University)"/>
+					<label class="text-link" href="http://bitbucket.org/fbennett/citeproc-js/" value="citeproc-js (Frank Bennett)"/>
 				</vbox>
 				<label class="subhead" value="&zotero.about.additionalSoftware;"/>
 				<vbox class="subcontent">
