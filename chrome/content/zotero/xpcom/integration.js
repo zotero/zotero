@@ -753,7 +753,7 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 			bibliographyText = bib[0].bibstart+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
 			
 			// if bibliography style not set, set it
-			if(!this._session.data.bibliographyStyleHasBeenSet) {
+			if(!this._session.data.style.bibliographyStyleHasBeenSet) {
 				var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
 				
 				// set bibliography style
@@ -761,7 +761,7 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 					bibStyle.lineSpacing, bibStyle.entrySpacing, bibStyle.tabStops, bibStyle.tabStops.length);
 				
 				// set bibliographyStyleHasBeenSet parameter to prevent further changes	
-				this._session.data.bibliographyStyleHasBeenSet = true;
+				this._session.data.style.bibliographyStyleHasBeenSet = true;
 				this._doc.setDocumentData(this._session.data.serializeXML());
 			}
 		}
@@ -1446,7 +1446,7 @@ Zotero.Integration.Session.prototype.formatCitation = function(index, citation) 
 	if(!this.citationText[index]) {
 		var citationsPre, citationsPost, citationIndices;
 		[citationsPre, citationsPost, citationIndices] = this._getPrePost(index);
-		//Zotero.debug("style.processCitationCluster("+citation.toSource()+", "+citationsPre.toSource()+", "+citationsPost.toSource());
+		Zotero.debug("style.processCitationCluster("+citation.toSource()+", "+citationsPre.toSource()+", "+citationsPost.toSource());
 		var newCitations = this.style.processCitationCluster(citation, citationsPre, citationsPost);
 		for each(var newCitation in newCitations[1]) {
 			this.citationText[citationIndices[newCitation[0]]] = newCitation[1];
@@ -1878,7 +1878,7 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
 	var xmlData = <data data-version={DATA_VERSION} zotero-version={Zotero.version}>\
 			<session id={this.sessionID} />
 			<style id={this.style.styleID} hasBibliography={this.style.hasBibliography ? 1 : 0}
-				bibliographyStyleHasBeenSet={this.bibliographyStyleHasBeenSet ? 1 : 0}/>
+				bibliographyStyleHasBeenSet={this.style.bibliographyStyleHasBeenSet ? 1 : 0}/>
 			<prefs/>
 		</data>;
 	
