@@ -261,8 +261,8 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 	} else if(format == "rtf") {
 		var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
 		
-		var preamble = (tabStops.length ? "\\tx"+tabStops.join(" \\tx")+" " : "");
-		preamble += "\\li"+indent+" \\fi"+firstLineIndent+" "
+		var preamble = (bibStyle.tabStops.length ? "\\tx"+bibStyle.tabStops.join(" \\tx")+" " : "");
+		preamble += "\\li"+bibStyle.indent+" \\fi"+bibStyle.firstLineIndent+" "
 		           +"\\sl"+bibStyle.lineSpacing+" \\slmult1 "
 		           +"\\sa"+bibStyle.entrySpacing+" ";
 		
