@@ -1875,7 +1875,7 @@ Zotero.Integration.DocumentData = function(string) {
  * Serializes document-specific data as XML
  */
 Zotero.Integration.DocumentData.prototype.serializeXML = function() {
-	var xmlData = <data data-version={DATA_VERSION} zotero-version={Zotero.version}>\
+	var xmlData = <data data-version={DATA_VERSION} zotero-version={Zotero.version}>
 			<session id={this.sessionID} />
 			<style id={this.style.styleID} hasBibliography={this.style.hasBibliography ? 1 : 0}
 				bibliographyStyleHasBeenSet={this.style.bibliographyStyleHasBeenSet ? 1 : 0}/>
