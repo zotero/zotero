@@ -571,7 +571,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getFileUploadParameters = function (i
 		
 		try {
 			// Strip XML declaration and convert to E4X
-			var xml = new XML(req.responseText.replace(/<\?xml.*\?>/, ''));
+			var xml = new XML(Zotero.Utilities.prototype.trim(req.responseText.replace(/<\?xml.*\?>/, '')));
 		}
 		catch (e) {
 			self.onError("Invalid response retrieving file upload parameters");
