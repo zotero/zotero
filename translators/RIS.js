@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-09-13 08:15:39"
+	"lastUpdated":"2010-09-28 21:40:00"
 }
 
 Zotero.configure("dataMode", "line");
@@ -109,7 +109,10 @@ function processTag(item, tag, value) {
 		item[inputFieldMap[tag]] = value;
 	} else if(tag == "TY") {
 		// look for type
-
+		
+		// trim the whitespace that some providers (e.g. ProQuest) include
+		value = Zotero.Utilities.trim(value);
+		
 		// first check typeMap
 		for(var i in typeMap) {
 			if(value == typeMap[i]) {
