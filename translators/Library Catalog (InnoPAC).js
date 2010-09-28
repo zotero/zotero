@@ -1,14 +1,14 @@
 {
-        "translatorID":"4fd6b89b-2316-2dc4-fd87-61a97dd941e8",
-        "label":"Library Catalog (InnoPAC)",
-        "creator":"Simon Kornblith and Michael Berkowitz",
-        "target":"(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+(~S[0-9])?|/search/q\\?)",
-        "minVersion":"1.0.0b3.r1",
-        "maxVersion":"",
-        "priority":200,
-        "inRepository":true,
-        "translatorType":4,
-        "lastUpdated":"2010-08-24 23:04:19"
+	"translatorID":"4fd6b89b-2316-2dc4-fd87-61a97dd941e8",
+	"label":"Library Catalog (InnoPAC)",
+	"creator":"Simon Kornblith and Michael Berkowitz",
+	"target":"(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+(~S[0-9])?|/search/q\\?)",
+	"minVersion":"1.0.0b3.r1",
+	"maxVersion":"",
+	"priority":200,
+	"inRepository":true,
+	"translatorType":4,
+	"lastUpdated":"2010-09-28 06:55:00"
 }
 
 function detectWeb(doc, url) {
