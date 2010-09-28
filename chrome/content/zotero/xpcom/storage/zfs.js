@@ -107,11 +107,11 @@ Zotero.Sync.Storage.Session.ZFS.prototype.initFromPrefs = function () {
  * @param	{Function}		callback		Callback f(item, etag)
  */
 Zotero.Sync.Storage.Session.ZFS.prototype._getStorageFileInfo = function (item, callback) {
-	var uri = this._getItemURI(item);
+	var uri = this._getItemInfoURI(item);
 	
 	var self = this;
 	
-	Zotero.Utilities.HTTP.doHead(uri, function (req) {
+	Zotero.Utilities.HTTP.doGet(uri, function (req) {
 		var funcName = "Zotero.Sync.Storage.Session.ZFS._getStorageFileInfo()";
 		
 		if (req.status == 404) {
@@ -131,7 +131,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getStorageFileInfo = function (item, 
 		var info = {};
 		info.hash = req.getResponseHeader('ETag');
 		if (!info.hash) {
-			var msg = "Hash not found in HEAD response in " + funcName
+			var msg = "Hash not found in info response in " + funcName
 						+ " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
 			Zotero.debug(msg, 1);
 			Zotero.debug(req.responseText);
@@ -832,7 +832,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype.getLastSyncTime = function (callback) 
 		var uri = this.rootURI;
 		// TODO: move to root uri
 		uri.spec += "?auth=1";
-		Zotero.Utilities.HTTP.doHead(uri, function (req) {
+		Zotero.Utilities.HTTP.doGet(uri, function (req) {
 			if (req.status != 200) {
 				var msg = "Unexpected status code " + req.status + " caching "
 					+ "authentication credentials in Zotero.Sync.Storage.Session.ZFS.getLastSyncTime()";
@@ -1002,7 +1002,22 @@ Zotero.Sync.Storage.Session.ZFS.prototype.purgeDeletedStorageFiles = function (c
  */
 Zotero.Sync.Storage.Session.ZFS.prototype._getItemURI = function (item) {
 	var uri = this.rootURI;
+	// Be sure to mirror parameter changes to _getItemInfoURI below
 	uri.spec += Zotero.URI.getItemPath(item) + '/file?auth=1&iskey=1&version=1';
+	return uri;
+}
+
+
+/**
+ * Get the storage info URI for an item
+ *
+ * @inner
+ * @param	{Zotero.Item}
+ * @return	{nsIURI}					URI of file on storage server with info flag
+ */
+Zotero.Sync.Storage.Session.ZFS.prototype._getItemInfoURI = function (item) {
+	var uri = this.rootURI;
+	uri.spec += Zotero.URI.getItemPath(item) + '/file?auth=1&iskey=1&version=1&info=1';
 	return uri;
 }
 
