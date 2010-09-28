@@ -11,6 +11,9 @@
         "lastUpdated":"2010-09-20 18:12:01"
 }
 
+/* Translator for Biblioteca Online de Ciências da Comunicação (BOCC,
+Communication Science Online Library, http://www.bocc.ubi.pt/) */
+
 /*
 	BOCC Translator - Parses BOCC indexes and creates Zotero-based metadata.
 	Copyright (C) 2010 José Antonio Meira da Rocha
@@ -28,7 +31,6 @@
 	You should have received a copy of the GNU General Public License
 	along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-
 
 // Standard  Zotero function
 function detectWeb(doc, url) {
