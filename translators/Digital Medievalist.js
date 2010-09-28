@@ -2,7 +2,7 @@
 	"translatorID":"5e684d82-73a3-9a34-095f-19b112d77bbe",
 	"label":"Digital Medievalist",
 	"creator":"Fred Gibbs",
-	"target":"digitalmedievalist.org\/(index.html)?($|journal\/?$|(journal\/[3-9]))",
+	"target":"digitalmedievalist\\.org\/(index\\.html)?($|journal\/?$|(journal\/[3-9]))",
 	"minVersion":"2.0b7",
 	"maxVersion":"",
 	"priority":100,
