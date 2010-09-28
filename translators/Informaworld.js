@@ -1,14 +1,14 @@
 {
-        "translatorID":"1885b93c-cf37-4b25-aef5-283f42eada9d",
-        "label":"Informaworld",
-        "creator":"Michael Berkowitz",
-        "target":"^http://www\\.informaworld\\.com",
-        "minVersion":"1.0.0b4.r5",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":true,
-        "translatorType":4,
-        "lastUpdated":"2010-09-28 09:28:40"
+	"translatorID":"1885b93c-cf37-4b25-aef5-283f42eada9d",
+	"label":"Informaworld",
+	"creator":"Michael Berkowitz",
+	"target":"^http://www\\.informaworld\\.com",
+	"minVersion":"1.0.0b4.r5",
+	"maxVersion":"",
+	"priority":100,
+	"inRepository":true,
+	"translatorType":4,
+	"lastUpdated":"2010-09-28 06:45:00"
 }
 
 /* Test URLs
