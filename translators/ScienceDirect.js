@@ -1,14 +1,14 @@
 {
-	"translatorID":"b6d0a7a-d076-48ae-b2f0-b6de28b194e",
-	"translatorType":4,
-	"label":"ScienceDirect",
-	"creator":"Michael Berkowitz",
-	"target":"https?://[^/]*science-?direct\\.com[^/]*/science(\\/article)?(\\?(?:.+\\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":null,
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-01-25 08:05:00"
+        "translatorID":"b6d0a7a-d076-48ae-b2f0-b6de28b194e",
+        "label":"ScienceDirect",
+        "creator":"Michael Berkowitz",
+        "target":"https?://[^/]*science-?direct\\.com[^/]*/science(\\/article)?(\\?(?:.+\\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?",
+        "minVersion":"1.0.0b3.r1",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":true,
+        "translatorType":4,
+        "lastUpdated":"2010-09-28 19:51:15"
 }
 
 function detectWeb(doc, url) {
@@ -74,7 +74,7 @@ function doWeb(doc, url) {
 		
 		var scrape = function(newDoc, set) {
 			var PDF;
-			var tempPDF = newDoc.evaluate('//a[contains(@class, "noul") and contains(@class, "icon_pdf")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var tempPDF = newDoc.evaluate('//a[contains(@class, "icon_pdf")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if (!tempPDF) { // PDF xpath failed, lets try another
 				// TODO: others?
 				//tempPDF = newDoc.evaluate('//a[@class="noul" and contains(text(), "PDF")]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
