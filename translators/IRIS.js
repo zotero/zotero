@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-09-03 00:45:00"
+	"lastUpdated":"2010-09-28 06:40:00"
 }
 
 function detectWeb(doc, url) {
@@ -163,9 +163,7 @@ function scrape(doc) {
 				newItem.callNumber = callNumber.nodeValue;
 			}
 
-			var domain = doc.location.href.match(/https?:\/\/([^/]+)/);
-			newItem.repository = domain[1]+" Library Catalog";
-			newItem.accessed = Date();
+			newItem.libraryCatalog = "IRIS";
 			newItem.complete();
 			return true;
 		}//END try
@@ -317,8 +315,8 @@ function scrape(doc) {
 					}//end FOR
 					var newItem = new Zotero.Item();
 					record.translate(newItem);
-					var domain = url.match(/https?:\/\/([^/]+)/);
-					newItem.repository = domain[1]+" Library Catalog";
+					
+					newItem.libraryCatalog = "IRIS";
 					newItem.complete();
 				}//end FOR
 			Zotero.done();
