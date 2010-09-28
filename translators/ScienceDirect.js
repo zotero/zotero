@@ -1,14 +1,14 @@
 {
-        "translatorID":"b6d0a7a-d076-48ae-b2f0-b6de28b194e",
-        "label":"ScienceDirect",
-        "creator":"Michael Berkowitz",
-        "target":"https?://[^/]*science-?direct\\.com[^/]*/science(\\/article)?(\\?(?:.+\\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?",
-        "minVersion":"1.0.0b3.r1",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":true,
-        "translatorType":4,
-        "lastUpdated":"2010-09-28 19:51:15"
+	"translatorID":"b6d0a7a-d076-48ae-b2f0-b6de28b194e",
+	"label":"ScienceDirect",
+	"creator":"Michael Berkowitz",
+	"target":"https?://[^/]*science-?direct\\.com[^/]*/science(\\/article)?(\\?(?:.+\\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?",
+	"minVersion":"1.0.0b3.r1",
+	"maxVersion":"",
+	"priority":100,
+	"inRepository":true,
+	"translatorType":4,
+	"lastUpdated":"2010-09-28 16:45:00"
 }
 
 function detectWeb(doc, url) {
@@ -16,7 +16,9 @@ function detectWeb(doc, url) {
 		return false;
 	}
 	if((!url.match("pdf") && url.indexOf("_ob=ArticleURL") == -1 && url.indexOf("/article/") == -1) || url.indexOf("/journal/") != -1) {
-		return "multiple";
+		// TEMP: disabled
+		//return "multiple";
+		return false;
 	} else if (!url.match("pdf")) {
 		return "journalArticle";
 	}
@@ -34,8 +36,6 @@ function doWeb(doc, url) {
 			|| doc.evaluate('//*[contains(@src, "exportarticle_a.gif")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 		var articles = new Array();
 		if(detectWeb(doc, url) == "multiple") {
-			throw ("Multiple-item saving from ScienceDirect temporarily disabled due to a site update -- an updated Zotero translator will be available soon");
-			
 			//search page
 			var items = new Object();
 			var xpath;
