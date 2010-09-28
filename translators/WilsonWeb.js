@@ -1,14 +1,14 @@
 {
-        "translatorID":"af1af8fa-19dc-486f-a8cc-107acb849101",
-        "label":"WilsonWeb",
-        "creator":"Brinda Shah",
-        "target":"^http://(vnweb|webbeta|verityqa|verityqa2|atg-dev05)\\.hwwilsonweb\\.com/hww/results/",
-        "minVersion":"1.0",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"0",
-        "translatorType":4,
-        "lastUpdated":"2010-09-23 18:11:06"
+	"translatorID":"af1af8fa-19dc-486f-a8cc-107acb849101",
+	"label":"WilsonWeb",
+	"creator":"Brinda Shah",
+	"target":"^http://(vnweb|webbeta|verityqa|verityqa2|atg-dev05)\\.hwwilsonweb\\.com/hww/results/",
+	"minVersion":"1.0",
+	"maxVersion":"",
+	"priority":100,
+	"inRepository":"0",
+	"translatorType":4,
+	"lastUpdated":"2010-09-28 07:00:00"
 }
 
 var dispType='brief';
