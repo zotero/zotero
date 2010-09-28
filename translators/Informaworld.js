@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":true,
         "translatorType":4,
-        "lastUpdated":"2010-09-28 09:08:13"
+        "lastUpdated":"2010-09-28 09:28:40"
 }
 
 /* Test URLs
@@ -68,7 +68,7 @@ function doWeb(doc, url) {
 		var id = newDoc.location.href.match(/content=([\w\d]+)/);
 		// If URL has DOI rather than id, use navbar link to get id
 		if (id[1] == 10) {
-			id = newDoc.evaluate('//table[@id="tabbar_table"]//td//a[@title = "Article"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+			id = newDoc.evaluate('//div[@id="contenttabs"]//a[@title = "Article"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
 			id = id.match(/content=([\w\d]+)/);
 		}
 		var post = 'tab=citation&selecteditems=' + id[1].substr(1) + '&content=' + id[1] + '&citstyle=refworks&showabs=false&format=file';
@@ -89,7 +89,9 @@ function doWeb(doc, url) {
 			var xpath = '//div[@id="title"]//td[2]/div/strong/a';
 		} else if (doc.evaluate('//div[@id="title"]/table//tr[2]/td/table//tr/td[2]/b/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			var xpath = '//div[@id="title"]/table//tr[2]/td/table//tr/td[2]/b/a';
-		}
+		} else if (doc.evaluate('//a[@title="Click to view this record"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+            		var xpath = '//a[@title="Click to view this record"]';
+        	}
 		
 		var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var title = titles.iterateNext();
