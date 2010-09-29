@@ -297,8 +297,8 @@ Zotero.Fulltext = new function(){
 		
 		Zotero.debug("Indexing document '" + document.title + "'");
 		
-		if (document.contentType.indexOf('text/') !== 0) {
-			Zotero.debug('File is not text in indexDocument()', 2);
+		if (!document.body) {
+			Zotero.debug("Cannot index " + document.contentType + " file in indexDocument()", 2);
 			return false;
 		}
 		
