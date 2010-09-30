@@ -2559,10 +2559,17 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	
 	// nsIChannelEventSink
 	onChannelRedirect: function (oldChannel, newChannel, flags) {
-		Zotero.debug('onRedirect');
+		Zotero.debug('onChannelRedirect');
 		
 		// if redirecting, store the new channel
 		this._channel = newChannel;
+	},
+	
+	asyncOnChannelRedirect: function (oldChan, newChan, flags, redirectCallback) {
+		Zotero.debug('asyncOnRedirect');
+		
+		this.onChannelRedirect(oldChan, newChan, flags);
+		redirectCallback.onRedirectVerifyCallback(0);
 	},
 	
 	// nsIHttpEventSink
