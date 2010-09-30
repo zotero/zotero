@@ -1096,8 +1096,8 @@ Zotero.Sync.Server = new function () {
 			return '';
 		}
 		
-		if (_cachedCredentials[username]) {
-			return _cachedCredentials[username];
+		if (_cachedCredentials.username == username && _cachedCredentials.password) {
+			return _cachedCredentials.password;
 		}
 		
 		Zotero.debug('Getting Zotero sync password');
@@ -1117,7 +1117,10 @@ Zotero.Sync.Server = new function () {
 		// Find user from returned array of nsILoginInfo objects
 		for (var i = 0; i < logins.length; i++) {
 			if (logins[i].username == username) {
-				_cachedCredentials[username] = logins[i].password;
+				_cachedCredentials = {
+					username: username,
+					password: logins[i].password
+				};
 				return logins[i].password;
 			}
 		}
@@ -1128,24 +1131,21 @@ Zotero.Sync.Server = new function () {
 	this.__defineSetter__('password', function (password) {
 		_sessionID = null;
 		
+		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
+								.getService(Components.interfaces.nsILoginManager);
+		var logins = loginManager.findLogins({}, _loginManagerHost, _loginManagerURL, null);
+		for (var i = 0; i < logins.length; i++) {
+			Zotero.debug('Clearing Zotero sync credentials');
+			loginManager.removeLogin(logins[i]);
+			break;
+		}
+		
+		_cachedCredentials = {};
+		
 		var username = this.username;
 		
 		if (!username) {
-			Zotero.debug('Username not set before setting Zotero.Sync.Server.password');
 			return;
-		}
-		
-		delete _cachedCredentials[username];
-		
-		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
-								.getService(Components.interfaces.nsILoginManager);
-		
-		var logins = loginManager.findLogins({}, _loginManagerHost, _loginManagerURL, null);
-		
-		for (var i = 0; i < logins.length; i++) {
-			Zotero.debug('Clearing Zotero sync passwords');
-			loginManager.removeLogin(logins[i]);
-			break;
 		}
 		
 		if (password) {
@@ -1156,7 +1156,10 @@ Zotero.Sync.Server = new function () {
 			var loginInfo = new nsLoginInfo(_loginManagerHost, _loginManagerURL,
 				null, username, password, "", "");
 			loginManager.addLogin(loginInfo);
-			_cachedCredentials[username] = password;
+			_cachedCredentials = {
+				username: username,
+				password: password
+			};
 		}
 	});
 	
