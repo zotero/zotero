@@ -125,7 +125,7 @@ Zotero.Report = new function() {
 				var relateds = Zotero.Items.get(arr.related);
 				for each(var related in relateds) {
 					content += '<li id="i' + related.getID() + '">';
-					content += escapeXML(related.getField('title'));
+					content += escapeXML(related.getDisplayTitle());
 					content += '</li>\n';
 				}
 				content += '</ul>\n';
