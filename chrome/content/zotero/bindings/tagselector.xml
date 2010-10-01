@@ -734,15 +734,40 @@
 					
 					
 					function onDrop(event, dropData, session) {
-						event.target.setAttribute('draggedOver', false);
+						var node = event.target;
+						node.setAttribute('draggedOver', false);
+						
+						Zotero.DB.beginTransaction();
 						
 						var ids = dropData.data.split(',');
 						var items = Zotero.Items.get(ids);
-						var unlock = Zotero.Notifier.begin(true);
-						for each(var item in items) {
-							item.addTagByID(event.target.getAttribute('tagID'));
+						
+						// Find a manual tag if there is one
+						var tagID = null;
+						var tagIDs = node.getAttribute('tagID').split(/\-/);
+						var tagTypes = node.getAttribute('tagType').split(/\-/);
+						for (var i=0; i<tagIDs.length; i++) {
+							if (tagTypes[i] == 0) {
+								tagID = Zotero.Tags.get(tagIDs[i]).id
+								break;
+							}
 						}
-						Zotero.Notifier.commit(unlock);
+						
+						// Otherwise use value
+						if (!tagID) {
+							var value = node.getAttribute('value');
+						}
+						
+						for each(var item in items) {
+							if (tagID) {
+								item.addTagByID(tagID);
+							}
+							else {
+								item.addTag(value);
+							}
+						}
+						
+						Zotero.DB.commitTransaction();
 					}
 					
 					
