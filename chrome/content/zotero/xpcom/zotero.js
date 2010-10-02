@@ -797,8 +797,6 @@ var Zotero = new function(){
 					Zotero.Prefs.set('lastDataDir', file.path);
 					Zotero.Prefs.set('useDataDir', true);
 					
-					// Enable connector by default, even if it was disabled
-					Zotero.Prefs.set('connector.enabled', true);
 					break;
 				}
 				else {
