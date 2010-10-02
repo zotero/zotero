@@ -2214,9 +2214,10 @@ Zotero.Date = new function(){
 		// clean up date part
 		if(date.part) {
 			date.part = date.part.replace(/^[^A-Za-z0-9]+/, "").replace(/[^A-Za-z0-9]+$/, "");
-			if(!date.part.length) {
-				date.part = undefined;
-			}
+		}
+		
+		if(date.part === "" || date.part == undefined) {
+			delete date.part;
 		}
 		
 		return date;
