@@ -476,7 +476,7 @@ var Zotero = new function(){
 		// Initialize various services
 		Zotero.Integration.init();
 		
-		if(Zotero.isStandalone) {
+		if(Zotero.Prefs.get("connector.enabled")) {
 			Zotero.Connector.init();
 		}
 		
@@ -796,6 +796,9 @@ var Zotero = new function(){
 					Zotero.Prefs.set('dataDir', file.persistentDescriptor);
 					Zotero.Prefs.set('lastDataDir', file.path);
 					Zotero.Prefs.set('useDataDir', true);
+					
+					// Enable connector by default, even if it was disabled
+					Zotero.Prefs.set('connector.enabled', true);
 					break;
 				}
 				else {
