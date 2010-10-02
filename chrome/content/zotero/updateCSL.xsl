@@ -285,21 +285,44 @@
     </xsl:choose>
   </xsl:template>
 
-  <!-- The class attribute on cs:group has been removed in favor of the display
-       attribute. -->
+  <!-- * The class attribute on cs:group has been removed in favor of the
+         display attribute.
+       * The " by " prefix on cs:group is removed if the element encloses a
+         cs:names element calling the container-author variable and including a
+         label. This is done to prevent duplication of "by" as a result of the
+         new verb-short container-author term in CSL 1.0 locale files. -->
   <xsl:template match="cs:group">
     <xsl:copy>
-      <xsl:copy-of select="@*[not(name()='class')]"/>
+      <xsl:choose>
+        <xsl:when test="@prefix=' by ' and cs:names/@variable='container-author' and cs:names/cs:label">
+          <xsl:copy-of select="@*[not(name()='class' or name()='prefix')]"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:copy-of select="@*[not(name()='class')]"/>
+        </xsl:otherwise>
+      </xsl:choose>
       <xsl:apply-templates/>
     </xsl:copy>
   </xsl:template>
 
-  <!-- The text-case attribute can no longer be used on cs:name. In cases
-       where text-case was used on cs:name, the attribute and its value are
-       transferred to the "family" and "given" cs:name-part children. -->
+  <!-- * The text-case attribute can no longer be used on cs:name. In cases
+         where text-case was used on cs:name, the attribute and its value are
+         transferred to the "family" and "given" cs:name-part children.
+       * The Zotero and Mendeley CSL 0.8.1 processors ignored name-as-sort-order
+         when sort-separator was not set. In CSL 1.0, name-as-sort-order always
+         takes effect, with a default value of ", " for sort-separator. To
+         correct for this change in behavior, the name-as-sort-order attribute
+         is dropped from cs:name when sort-separator was absent. -->
   <xsl:template match="cs:name">
     <xsl:copy>
-      <xsl:copy-of select="@*[not(name()='text-case')]"/>
+      <xsl:choose>
+        <xsl:when test="@name-as-sort-order and not(@sort-separator)">
+          <xsl:copy-of select="@*[not(name()='text-case' or name()='name-as-sort-order')]"/>
+        </xsl:when>
+	<xsl:otherwise>
+          <xsl:copy-of select="@*[not(name()='text-case')]"/>
+	</xsl:otherwise>
+      </xsl:choose>
       <xsl:choose>
         <xsl:when test="@text-case">
           <xsl:element name="name-part">
@@ -346,7 +369,7 @@
 
   <!-- The "event" date variable has been renamed to "event-date" to eliminate
        the name conflict with the 'standard' "event" variable. -->
-  <xsl:template  match="cs:date">
+  <xsl:template match="cs:date">
      <xsl:copy>
       <xsl:copy-of select="@*"/>
       <xsl:choose>
@@ -384,6 +407,11 @@
          attribute. For the conversion, strip-periods is set to "true" for any
          cs:text element with form="short" or "verb-short", except when
          include-period was set to "true".
+       * A special case is the "ibid" term. "ibid" is not defined as a
+         short-form term, but is an abbreviation, and should carry a period
+         ("ibid."). This period, absent in CSL 0.8 locale files, will be
+         included in CSL 1.0 locale files. To prevent double periods, suffix="."
+         will be removed from any cs:text element calling the "ibid" term.
        * The CSL 0.8 en-US locale file only included the "long" form of the
          "no date" term, with a value of "n.d.". In the CSL 1.0 locale file, the
          value has been changed to "no date", and a "short" form ("n.d.") has
@@ -391,20 +419,29 @@
          the "long" form of the "no date" term will now call the "short" form,
          unless the "long" form had been redefined in the style. -->
   <xsl:template match="cs:text">
-    <xsl:copy>
-      <xsl:copy-of select="@*[not(name()='include-period')]"/>
-      <xsl:choose>
-        <xsl:when
-          test="(@form='short' or @form='verb-short') and not(@include-period='true') and @term">
-          <xsl:attribute name="strip-periods">true</xsl:attribute>
-        </xsl:when>
-      </xsl:choose>
-      <xsl:choose>
-        <xsl:when test="@term='no date' and not(/cs:style/cs:terms/cs:locale/cs:term/@name='no date')">
-          <xsl:attribute name="form">short</xsl:attribute>
-        </xsl:when>
-      </xsl:choose>
-    </xsl:copy>
+    <xsl:choose>
+      <xsl:when test="@term='ibid' and @suffix='.'">
+        <xsl:copy>
+          <xsl:copy-of select="@*[not(name()='suffix')]"/>
+        </xsl:copy>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:copy>
+          <xsl:copy-of select="@*[not(name()='include-period')]"/>
+          <xsl:choose>
+            <xsl:when
+              test="(@form='short' or @form='verb-short') and not(@include-period='true') and @term">
+              <xsl:attribute name="strip-periods">true</xsl:attribute>
+            </xsl:when>
+          </xsl:choose>
+          <xsl:choose>
+            <xsl:when test="@term='no date' and not(/cs:style/cs:terms/cs:locale/cs:term/@name='no date')">
+              <xsl:attribute name="form">short</xsl:attribute>
+            </xsl:when>
+          </xsl:choose>
+        </xsl:copy>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
 </xsl:stylesheet>
