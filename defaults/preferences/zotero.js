@@ -106,13 +106,11 @@ pref("extensions.zotero.integration.port", 50001);
 pref("extensions.zotero.integration.autoRegenerate", -1);	// -1 = ask; 0 = no; 1 = yes
 
 // Connector settings
+pref("extensions.zotero.connector.enabled", false);
 pref("extensions.zotero.connector.port", 23119);	// ascii "ZO"
 
 // Zeroconf
 pref("extensions.zotero.zeroconf.server.enabled", false);
-
-// Connector
-pref("extensions.zotero.connector.enabled", false);
 
 // Zotero Commons
 pref("extensions.zotero.commons.enabled", false);
