@@ -2906,9 +2906,15 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE savedSearchConditions SET condition='libraryCatalog' WHERE condition='repository'");
 				}
 				
-				// 2.1
+				// 2.1b1
 				if (i==74) {
 					Zotero.DB.query("CREATE INDEX deletedItems_dateDeleted ON deletedItems(dateDeleted)");
+				}
+				
+				// 2.1b2
+				if (i==75) {
+					Zotero.DB.query("DROP TABLE IF EXISTS translatorCache");
+					Zotero.DB.query("CREATE TABLE translatorCache (\n	leafName TEXT PRIMARY KEY,\n	translatorJSON TEXT,\n	code TEXT,\n	lastModifiedTime INT\n)");
 				}
 				
 				Zotero.wait();

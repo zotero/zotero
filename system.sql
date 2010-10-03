@@ -198,14 +198,6 @@ CREATE TABLE transactionLog (
     FOREIGN KEY (transactionID) REFERENCES transactions(transactionID)
 );
 
-DROP TABLE IF EXISTS translatorCache;
-CREATE TABLE translatorCache (
-	leafName TEXT PRIMARY KEY,
-	translatorJSON TEXT,
-	code TEXT,
-	lastModifiedTime INT
-);
-
 -- unused
 INSERT INTO "fieldFormats" VALUES(1, '.*', 0);
 INSERT INTO "fieldFormats" VALUES(2, '[0-9]*', 1);
