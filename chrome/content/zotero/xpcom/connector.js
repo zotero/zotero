@@ -84,7 +84,7 @@ Zotero.Connector = new function() {
 	/**
 	 * Decodes application/x-www-form-urlencoded data
 	 *
-	 * @param	{String}	postData	application/x-www-form-urlencoded data, as sent in a POST request
+	 * @param	{String}	postData	application/x-www-form-urlencoded data, as sent in a g request
 	 * @return	{Object}	data in object form
 	 */
 	this.decodeURLEncodedData = function(postData) {
@@ -253,7 +253,7 @@ Zotero.Connector.DataListener.prototype._headerFinished = function() {
 	if(method[1] == "HEAD" || method[1] == "OPTIONS") {
 		this._requestFinished(Zotero.Connector.generateResponse(200));
 	} else if(method[1] == "GET") {
-		this._requestFinished(this._processEndpoint(method[3]));
+		this._requestFinished(this._processEndpoint("GET", method[3]));
 	} else if(method[1] == "POST") {
 		const contentLengthRe = /[\r\n]Content-Length: *([0-9]+)/i;
 		
@@ -273,8 +273,7 @@ Zotero.Connector.DataListener.prototype._headerFinished = function() {
 }
 
 /*
- * checks to see if Content-Length bytes of body have been read and, if they
- * have, processes the body
+ * checks to see if Content-Length bytes of body have been read and, if so, processes the body
  */
 Zotero.Connector.DataListener.prototype._bodyData = function() {
 	if(this.body.length >= this.bodyLength) {
@@ -294,21 +293,21 @@ Zotero.Connector.DataListener.prototype._bodyData = function() {
 		}		
 		
 		// handle envelope
-		this._processEndpoint(this.body);
+		this._processEndpoint("POST", this.body);
 	}
 }
 
 /**
  * Generates a response based on calling the function associated with the endpoint
  */
-Zotero.Connector.DataListener.prototype._processEndpoint = function(postData) {
+Zotero.Connector.DataListener.prototype._processEndpoint = function(method, postData) {
 	try {
 		var endpoint = new this.endpoint;
 		var me = this;
-		endpoint.return = function(code, contentType, arg) {
+		var sendResponseCallback = function(code, contentType, arg) {
 			me._requestFinished(Zotero.Connector.generateResponse(code, contentType, arg));
 		}
-		endpoint.init(postData ? postData : undefined);
+		endpoint.init(method, postData ? postData : undefined, sendResponseCallback);
 	} catch(e) {
 		Zotero.debug(e);
 		this._requestFinished(Zotero.Connector.generateResponse(500));
@@ -343,40 +342,26 @@ Zotero.Connector.Data = {};
 
 Zotero.Connector.Translate = function() {};
 Zotero.Connector.Translate._waitingForSelection = {};
-Zotero.Connector.Translate.constructTranslateInstance = function(postData, browser, translate) {
-	Zotero.Connector.Data[postData["uri"]] = "<html>"+postData["html"]+"</html>";
-	
-	var ioService = Components.classes["@mozilla.org/network/io-service;1"]  
-							  .getService(Components.interfaces.nsIIOService);  
-	var uri = ioService.newURI(postData["uri"], "UTF-8", null); 
-	
-	var pageShowCalled = false;
-	browser.addEventListener("DOMContentLoaded", function() {
-		try {
-			if(browser.contentDocument.location.href == "about:blank") return;
-			if(pageShowCalled) return;
-			pageShowCalled = true;
-			delete Zotero.Connector.Data[postData["uri"]];
-			browser.contentDocument.cookie = postData["cookie"];
-			
-			// get translators
-			translate.setDocument(browser.contentDocument);
-			translate.getTranslators();
-		} catch(e) {
-			Zotero.debug(e);
-			throw e;
-		}
-	}, false);
-	
-	browser.loadURI("zotero://connector/"+encodeURIComponent(postData["uri"]));
-}
+
 
 /**
  * Lists all available translators, including code for translators that should be run on every page
  */
 Zotero.Connector.Translate.List = function() {};
+
 Zotero.Connector.Translate.List.prototype = {
-	"init":function(postData) {
+	/**
+	 * Gets available translator list
+	 * @param {String} method "GET" or "POST"
+	 * @param {String} data POST data or GET query string
+	 * @param {Function} sendResponseCallback function to send HTTP response
+	 */
+	"init":function(method, data, sendResponseCallback) {
+		if(method != "POST") {
+			sendResponseCallback(400);
+			return;
+		}
+		
 		var translators = Zotero.Translators.getAllForType("web");
 		var jsons = [];
 		for each(var translator in translators) {
@@ -384,7 +369,7 @@ Zotero.Connector.Translate.List.prototype = {
 			for each(var key in ["translatorID", "label", "creator", "target", "priority", "detectXPath"]) {
 				json[key] = translator[key];
 			}
-			json["localExecution"] = translator.browserSupport.indexOf(postData["browser"]) !== -1;
+			json["localExecution"] = translator.browserSupport.indexOf(data["browser"]) !== -1;
 			
 			// Do not pass targetless translators that do not support this browser (since that
 			// would mean passing each page back to Zotero)
@@ -393,27 +378,69 @@ Zotero.Connector.Translate.List.prototype = {
 			}
 		}
 		
-		this.return(200, "application/json", JSON.stringify(jsons));
+		sendResponseCallback(200, "application/json", JSON.stringify(jsons));
 	}
 }
 
 /**
- * Checks whether there is a translator available to handle the current page
+ * Detects whether there is an available translator to handle a given page
  */
 Zotero.Connector.Translate.Detect = function() {};
-Zotero.Connector.Translate.Detect.prototype = {
-	"init":function(postData) {
-		var postData = JSON.parse(postData);
-		
-		// get data into a browser
-		var translate = new Zotero.Translate("web");
-		var me = this;
-		translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
 
-		this._browser = Zotero.Browser.createHiddenBrowser();
-		Zotero.Connector.Translate.constructTranslateInstance(postData, this._browser, translate);
+Zotero.Connector.Translate.Detect.prototype = {
+	/**
+	 * Loads HTML into a hidden browser and initiates translator detection
+	 * @param {String} method "GET" or "POST"
+	 * @param {String} data POST data or GET query string
+	 * @param {Function} sendResponseCallback function to send HTTP response
+	 */
+	"init":function(method, data, sendResponseCallback) {
+		if(method != "POST") {
+			sendResponseCallback(400);
+			return;
+		}
 		
+		this.sendResponse = sendResponseCallback;
+		this._parsedPostData = JSON.parse(data);
+		
+		this._translate = new Zotero.Translate("web");
+		this._translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
+		
+		Zotero.Connector.Data[this._parsedPostData["uri"]] = "<html>"+this._parsedPostData["html"]+"</html>";
+		this._browser = Zotero.Browser.createHiddenBrowser();
+		
+		var ioService = Components.classes["@mozilla.org/network/io-service;1"]  
+								  .getService(Components.interfaces.nsIIOService);  
+		var uri = ioService.newURI(this._parsedPostData["uri"], "UTF-8", null); 
+		
+		var pageShowCalled = false;
+		var me = this;
+		this._browser.addEventListener("DOMContentLoaded", function() {
+			try {
+				if(me._browser.contentDocument.location.href == "about:blank") return;
+				if(pageShowCalled) return;
+				pageShowCalled = true;
+				delete Zotero.Connector.Data[me._parsedPostData["uri"]];
+				me._browser.contentDocument.cookie = me._parsedPostData["cookie"];
+				
+				// get translators
+				me._translate.setDocument(me._browser.contentDocument);
+				me._translate.getTranslators();
+			} catch(e) {
+				Zotero.debug(e);
+				throw e;
+			}
+		}, false);
+		
+		me._browser.loadURI("zotero://connector/"+encodeURIComponent(this._parsedPostData["uri"]));
 	},
+
+	/**
+	 * Callback to be executed when list of translators becomes available. Sends response with
+	 * item types, translator IDs, labels, and icons for available translators.
+	 * @param {Zotero.Translate} translate
+	 * @param {Zotero.Translator[]} translators
+	 */
 	"_translatorsAvailable":function(obj, translators) {
 		var jsons = [];
 		for each(var translator in translators) {
@@ -427,62 +454,34 @@ Zotero.Connector.Translate.Detect.prototype = {
 				"label":translator.label, "icon":icon}
 			jsons.push(json);
 		}
-		this.return(200, "application/json", JSON.stringify(jsons));
+		this.sendResponse(200, "application/json", JSON.stringify(jsons));
 		
 		Zotero.Browser.deleteHiddenBrowser(this._browser);
 	}
 }
 
 /**
- * Perform translation
+ * Performs translation of a given page
  */
 Zotero.Connector.Translate.Save = function() {};
 Zotero.Connector.Translate.Save.prototype = {
-	"init":function(postData) {
-		var postData = JSON.parse(postData);
-		
-		// get data into a browser
-		this._uri = postData.url;
-		this._browser = Zotero.Browser.createHiddenBrowser();
-		var translate = new Zotero.Translate("web");
-		var me = this;
-		
-		var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-						.getService(Components.interfaces.nsIWindowMediator)
-						.getMostRecentWindow("navigator:browser");
-		
-		var progressWindow = win.Zotero_Browser.progress;
-		if(Zotero.locked) {
-			progressWindow.changeHeadline(Zotero.getString("ingester.scrapeError"));
-			var desc = Zotero.localeJoin([
-				Zotero.getString('general.operationInProgress'), Zotero.getString('general.operationInProgress.waitUntilFinishedAndTryAgain')
-			]);
-			progressWindow.addDescription(desc);
-			progressWindow.show();
-			progressWindow.startCloseTimer(8000);
-			return;
-		}
-		
-		progressWindow.show();
-		this._libraryID = null;
-		var collection = null;
-		try {
-			this._libraryID = win.ZoteroPane.getSelectedLibraryID();
-			collection = win.ZoteroPane.getSelectedCollection();
-		} catch(e) {}
-		translate.setHandler("select", function(obj, item) { return me._selectItems(obj, item, progressWindow) });
-		translate.setHandler("itemDone", function(obj, item) { win.Zotero_Browser.itemDone(obj, item, collection) });
-		translate.setHandler("done", function(obj, item) { win.Zotero_Browser.finishScraping(obj, item, collection); me.return(201); })
-		translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item, postData.translatorID) });
-		
-		Zotero.Connector.Translate.constructTranslateInstance(postData, this._browser, translate);
-	},
-	"_selectItems":function(translate, itemList, progressWindow) {
+	/**
+	 * Init method inherited from Zotero.Connector.Translate.Detect
+	 * @borrows Zotero.Connector.Translate.Detect as this.init
+	 */
+	"init":Zotero.Connector.Translate.Detect.prototype.init,
+
+	/**
+	 * Callback to be executed when items must be selected
+	 * @param {Zotero.Translate} translate
+	 * @param {Object} itemList ID=>text pairs representing available items
+	 */
+	"_selectItems":function(translate, itemList) {
 		var instanceID = Zotero.randomString();
 		Zotero.Connector.Translate._waitingForSelection[instanceID] = this;
 		
 		// Send "Multiple Choices" HTTP response
-		this.return(300, "application/json", JSON.stringify({"items":itemList, "instanceID":instanceID, "uri":this._uri}));
+		this.sendResponse(300, "application/json", JSON.stringify({"items":itemList, "instanceID":instanceID, "uri":this._parsedPostData.uri}));
 		
 		// We need this to make sure that we won't stop Firefox from quitting, even if the user
 		// didn't close the selectItems window
@@ -500,17 +499,58 @@ Zotero.Connector.Translate.Save.prototype = {
 		}
 		
 		observerService.removeObserver(quitObserver, "quit-application");
-		if(!this.selectedItems) progressWindow.close();
+		if(!this.selectedItems) this._progressWindow.close();
 		return this.selectedItems;
 	},
-	"_translatorsAvailable":function(translate, translators, translatorID) {
-		if(translators.length) {
-			translate.setTranslator(translatorID);
-			translate.translate(this._libraryID);
-		} else {
+
+	/**
+	 * Callback to be executed when list of translators becomes available. Opens progress window,
+	 * selects specified translator, and initiates translation.
+	 * @param {Zotero.Translate} translate
+	 * @param {Zotero.Translator[]} translators
+	 */
+	"_translatorsAvailable":function(translate, translators) {
+		// make sure translatorsAvailable succeded
+		if(!translators.length) {
 			Zotero.Browser.deleteHiddenBrowser(this._browser);
-			this.return(500);
+			this.sendResponse(500);
+			return;
 		}
+		
+		// set up progress window
+		var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						.getService(Components.interfaces.nsIWindowMediator)
+						.getMostRecentWindow("navigator:browser");
+		
+		this._progressWindow = win.Zotero_Browser.progress;
+		if(Zotero.locked) {
+			this._progressWindow.changeHeadline(Zotero.getString("ingester.scrapeError"));
+			var desc = Zotero.localeJoin([
+				Zotero.getString('general.operationInProgress'), Zotero.getString('general.operationInProgress.waitUntilFinishedAndTryAgain')
+			]);
+			pthis._rogressWindow.addDescription(desc);
+			this._progressWindow.show();
+			this._progressWindow.startCloseTimer(8000);
+			return;
+		}
+		
+		this._progressWindow.show();
+		
+		// set save callbacks
+		this._libraryID = null;
+		var collection = null;
+		try {
+			this._libraryID = win.ZoteroPane.getSelectedLibraryID();
+			collection = win.ZoteroPane.getSelectedCollection();
+		} catch(e) {}
+		var me = this;
+		translate.setHandler("select", function(obj, item) { return me._selectItems(obj, item) });
+		translate.setHandler("itemDone", function(obj, item) { win.Zotero_Browser.itemDone(obj, item, collection) });
+		translate.setHandler("done", function(obj, item) { win.Zotero_Browser.finishScraping(obj, item, collection); me.sendResponse(201); })
+		
+		// set translator and translate
+		translate.setTranslator(this._parsedPostData.translatorID);
+		translate.translate(this._libraryID);
 	}
 }
 
@@ -519,11 +559,21 @@ Zotero.Connector.Translate.Save.prototype = {
  */
 Zotero.Connector.Translate.Select = function() {};
 Zotero.Connector.Translate.Select.prototype = {
-	"init":function(postData) {
-		Zotero.debug(postData);
+	/**
+	 * Finishes up translation when item selection is complete
+	 * @param {String} method "GET" or "POST"
+	 * @param {String} data POST data or GET query string
+	 * @param {Function} sendResponseCallback function to send HTTP response
+	 */
+	"init":function(method, postData, sendResponseCallback) {
+		if(method != "POST") {
+			sendResponseCallback(400);
+			return;
+		}
+		
 		var postData = JSON.parse(postData);
 		var saveInstance = Zotero.Connector.Translate._waitingForSelection[postData.instanceID];
-		saveInstance.return = this.return;
+		saveInstance.sendResponse = sendResponseCallback;
 		
 		saveInstance.selectedItems = false;
 		for(var i in postData.items) {
@@ -535,6 +585,14 @@ Zotero.Connector.Translate.Select.prototype = {
 
 /**
  * Endpoints for the Connector HTTP server
+ *
+ * Each endpoint should take the form of an object. The init() method of this object will be passed:
+ *     method - the method of the request ("GET" or "POST")
+ *     data - the query string (for a "GET" request) or POST data (for a "POST" request)
+ *     sendResponseCallback - a function to send a response to the HTTP request. This can be passed
+ *                            a response code alone (e.g., sendResponseCallback(404)) or a response
+ *                            code, MIME type, and response body
+ *                            (e.g., sendResponseCallback(200, "text/plain", "Hello World!"))
  */
 Zotero.Connector.Endpoints = {
 	"/translate/list":Zotero.Connector.Translate.List,
