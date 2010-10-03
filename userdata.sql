@@ -1,4 +1,4 @@
--- 74
+-- 75
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -382,3 +382,10 @@ CREATE TABLE customBaseFieldMappings (
 );
 CREATE INDEX customBaseFieldMappings_baseFieldID ON customBaseFieldMappings(baseFieldID);
 CREATE INDEX customBaseFieldMappings_customFieldID ON customBaseFieldMappings(customFieldID);
+
+CREATE TABLE translatorCache (
+	leafName TEXT PRIMARY KEY,
+	translatorJSON TEXT,
+	code TEXT,
+	lastModifiedTime INT
+);
