@@ -134,7 +134,7 @@ function doWeb(doc, url) {
 				{
 					var detail = doc.evaluate('.//div[@class="notice"]', item_element, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	
-					var iconType = doc.evaluate('.//div[@class="picto"]/img', item_element, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+					var iconType = doc.evaluate('.//span[@class="picto"]/img', item_element, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 					var docType = getDoctypeGallica(iconType.getAttribute('src'));
 					
 					var docUrl = doc.evaluate('.//div[@class="liens"]/a', item_element, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
