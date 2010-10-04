@@ -922,10 +922,14 @@ Zotero.Utilities.Translate.prototype.retrieveSource = function(url, body, header
 	var listener = function(aXmlhttp) { xmlhttp = aXmlhttp };
 	
 	if(body) {
-		Zotero.Utilities.HTTP.doPost(url, body, listener, headers, responseCharset);
+		var xhr = Zotero.Utilities.HTTP.doPost(url, body, listener, headers, responseCharset, true);
 	} else {
-		Zotero.Utilities.HTTP.doGet(url, listener, responseCharset);
+		var xhr = Zotero.Utilities.HTTP.doGet(url, listener, responseCharset, true);
 	}
+	
+	if(this.translate.cookieManager) this.translate.cookieManager.attachToXHR(xhr);
+	
+	xhr.send(body ? body : null);
 	
 	while(!xmlhttp) mainThread.processNextEvent(true);
 	if(xmlhttp.status >= 400) throw "retrieveSource failed: "+xmlhttp.status+" "+xmlhttp.statusText;
@@ -956,7 +960,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 	
 	var me = this;
 	
-	Zotero.Utilities.HTTP.doGet(url, function(xmlhttp) {
+	var xhr = Zotero.Utilities.HTTP.doGet(url, function(xmlhttp) {
 		try {
 			if(processor) {
 				processor(xmlhttp.responseText, xmlhttp, url);
@@ -972,7 +976,10 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 		} catch(e) {
 			me.translate.error(false, e);
 		}
-	}, responseCharset);
+	}, responseCharset, true);
+	
+	if(this.translate.cookieManager) this.translate.cookieManager.attachToXHR(xhr);
+	xhr.send(null);
 }
 
 /**
@@ -983,13 +990,16 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
 	url = this._convertURL(url);
 	
 	var translate = this.translate;
-	Zotero.Utilities.HTTP.doPost(url, body, function(xmlhttp) {
+	var xhr = Zotero.Utilities.HTTP.doPost(url, body, function(xmlhttp) {
 		try {
 			onDone(xmlhttp.responseText, xmlhttp);
 		} catch(e) {
 			translate.error(false, e);
 		}
-	}, headers, responseCharset);
+	}, headers, responseCharset, true);
+	
+	if(this.translate.cookieManager) this.translate.cookieManager.attachToXHR(xhr);
+	xhr.send(body);
 }
 
 /**
@@ -1064,11 +1074,13 @@ Zotero.Utilities.HTTP = new function() {
 	* Send an HTTP GET request via XMLHTTPRequest
 	* 
 	* @param {nsIURI|String}	url				URL to request
-	* @param {Function} 		onDone			Callback to be executed upon request completion
-	* @param {String} 		responseCharset	Character set to force on the response
+	* @param {Function} 		onDone			Callback to be executed upon request completion.
+	*                                           If false, XHR is returned unsent.
+	* @param {String} 			responseCharset	Character set to force on the response
+	* @param {Boolean}			dontSend		Don't send XHR before returning
 	* @return {Boolean} True if the request was sent, or false if the browser is offline
 	*/
-	this.doGet = function(url, onDone, responseCharset) {
+	this.doGet = function(url, onDone, responseCharset, dontSend) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
 			var disp = url.clone();
@@ -1105,7 +1117,9 @@ Zotero.Utilities.HTTP = new function() {
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
-		xmlhttp.send(null);
+		if(!dontSend) {
+			xmlhttp.send(null);
+		}
 		
 		return xmlhttp;
 	}
@@ -1113,14 +1127,15 @@ Zotero.Utilities.HTTP = new function() {
 	/**
 	* Send an HTTP POST request via XMLHTTPRequest
 	*
-	* @param {String} url URL to request
-	* @param {String} body Request body
-	* @param {Function} onDone Callback to be executed upon request completion
-	* @param {String} headers Request HTTP headers
-	* @param {String} responseCharset Character set to force on the response
+	* @param {String} 	url URL to request
+	* @param {String} 	body 				Request body
+	* @param {Function} onDone 				Callback to be executed upon request completion.
+	* @param {String} 	headers 			Request HTTP headers
+	* @param {String} 	responseCharset		Character set to force on the response
+	* @param {Boolean}	dontSend			Don't send XHR before returning
 	* @return {Boolean} True if the request was sent, or false if the browser is offline
 	*/
-	this.doPost = function(url, body, onDone, headers, responseCharset) {
+	this.doPost = function(url, body, onDone, headers, responseCharset, dontSend) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
 			var disp = url.clone();
@@ -1184,7 +1199,9 @@ Zotero.Utilities.HTTP = new function() {
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
-		xmlhttp.send(body);
+		if(!dontSend) {
+			xmlhttp.send(body);
+		}
 		
 		return xmlhttp;
 	}

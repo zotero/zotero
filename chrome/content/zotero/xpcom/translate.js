@@ -553,6 +553,16 @@ Zotero.Translate.prototype.setItems = function(items) {
 }
 
 /*
+ * Sets a Zotero.Connector.CookieManager to handle cookie management for XHRs initiated from this
+ * translate instance
+ *
+ * @param {Zotero.Connector.CookieManager} cookieManager
+ */
+Zotero.Translate.prototype.setCookieManager = function(cookieManager) {
+	this.cookieManager = cookieManager;
+}
+
+/*
  * sets the collection to be used for export (overrides setItems)
  */
 Zotero.Translate.prototype.setCollection = function(collection) {
@@ -1725,15 +1735,17 @@ Zotero.Translate.prototype._itemDone = function(item, attachedTo) {
 			for each(var note in item.notes) {
 				var myNote = new Zotero.Item('note');
 				myNote.libraryID = this.libraryID ? this.libraryID : null;
-				myNote.setNote(note.note);
+				myNote.setNote(typeof note == "object" ? note.note : note);
 				if (myID) {
 					myNote.setSource(myID);
 				}
 				var noteID = myNote.save();
 				
-				// handle see also
-				myNote = Zotero.Items.get(noteID);
-				this._itemTagsAndSeeAlso(note, myNote);
+				if(typeof note == "object") {
+					// handle see also
+					myNote = Zotero.Items.get(noteID);
+					this._itemTagsAndSeeAlso(note, myNote);
+				}
 			}
 		}
 		
