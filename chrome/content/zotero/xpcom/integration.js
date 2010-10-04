@@ -331,9 +331,9 @@ Zotero.Integration = new function() {
 		if(Zotero.isMac) {
 			if(Zotero.oscpu == "PPC Mac OS X 10.4" || Zotero.oscpu == "Intel Mac OS X 10.4") {
 				// 10.4 doesn't support "tell application id"
-				_executeAppleScript('tell application "Firefox" to activate');
+				_executeAppleScript('tell application "'+(Zotero.isStandalone ? "Zotero" : "Firefox")+'" to activate');
 			} else {
-				_executeAppleScript('tell application id "org.mozilla.firefox" to activate');
+				_executeAppleScript('tell application id "'+(Zotero.isStandalone ? "org.zotero.zotero" : "org.mozilla.firefox")+'" to activate');
 			}
 		}
 	}
