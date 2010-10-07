@@ -64,7 +64,7 @@
 					var item = cslList.appendItem(style.title, style.styleID);
 				}
 				var pageList = document.getElementById('zotero-csl-page-type');
-				var locators = Zotero.CSL.Global.getLocatorStrings();
+				var locators = Zotero.Cite.labels;
 				for each(var type in locators) {
 					var locator = type;
 					locator = locator[0].toUpperCase()+locator.substr(1);
@@ -76,7 +76,7 @@
 			}
 			function refresh() {
 				var editor = document.getElementById('zotero-csl-editor')
-				generateBibliography(editor.value)
+				generateBibliography(editor.cslID)
 
 			}
 			
@@ -93,12 +93,14 @@
 				var editor = document.getElementById('zotero-csl-editor')
 				var style = Zotero.Styles.get(cslID);
 				editor.value = Zotero.File.getContents(style.file);
+				editor.cslID = cslID;
 				editor.doCommand();
 				document.getElementById('zotero-csl-list').value = cslID;
 			}
 			
 			
 			function generateBibliography(str) {
+				var editor = document.getElementById('zotero-csl-editor')
 				var iframe = document.getElementById('zotero-csl-preview-box');
 				
 				var items = mainWindow.ZoteroPane.getSelectedItems();
@@ -106,7 +108,7 @@
 					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No references selected in Zotero.</p></body></html>';
 					return;
 				}
-				var csl;
+				var styleObject, styleEngine;
 				if (str.indexOf("<defaults") != -1) {
 					iframe.contentDocument.documentElement.innerHTML = 
 						'<div>'
@@ -115,13 +117,24 @@
 					return;
 				}
 				else {
-					csl = new Zotero.CSL(str);
+					var cslFile = Zotero.Styles.get(editor.cslID).file;
+					styleObject = new Zotero.Style(cslFile);
+					styleEngine = styleObject.csl;
 				}
 				
-				var itemSet = csl.createItemSet(items);
-				
+				var itemIds = [items[i].id for (i in items)];
+
+				styleEngine.updateItems(itemIds);
+
 				// Generate multiple citations
-				var citation = csl.createCitation(itemSet.items);
+				var citation = {};
+				citation.citationItems = [];
+				citation.properties = {};
+				citation.properties.noteIndex = 1;
+				for (var i = 0, ilen = items.length; i < ilen; i += 1) {
+					citation.citationItems.push({id:itemIds[i]});
+				}
+
 				// Generate single citations
 				var author = document.getElementById("preview-suppress-author").checked;
 				var search = document.getElementById('preview-pages');
@@ -129,20 +142,25 @@
 				var pos = document.getElementById('zotero-ref-position').selectedItem.value;
 				var citations = '<h1>Single Citations</h1>';
 				for (var i=0; i<citation.citationItems.length; i++) {
-					citation.citationItems[i].suppressAuthor = author;
+					citation.citationItems[i]['suppress-author'] = author;
 					if (search.value != '') {
 						citation.citationItems[i].locator = search.value;
-						citation.citationItems[i].locatorType = loc.selectedItem.value;
+						citation.citationItems[i].label = loc.selectedItem.value;
 					}
-					citation.citationItems[i].position = pos;
-					citations += csl.formatCitation(csl.createCitation([citation.citationItems[i]]), "HTML") + '<br />';
+					citation.citationItems[i].position = parseInt(pos, 10);
+					var subcitation = [citation.citationItems[i]];
+					citations += styleEngine.makeCitationCluster(subcitation) + '<br />';
 				}
-				var multCitations = '<hr><h1>Multi Citations</h1>' +
-					csl.formatCitation(citation, "HTML");
+				
+				var multCitations = '<hr><h1>Multi Citations <span style="font-size:smaller;">(all with position "first")</span></h1>' +
+					styleEngine.previewCitationCluster(citation, [], [], "html");
 
 				// Generate bibliography
+				styleEngine.updateItems(itemIds);
+				var bibData = styleEngine.makeBibliography();
 				var bibliography = '<hr/><h1>Bibliography</h1>' + 
-					csl.formatBibliography(itemSet, "HTML");
+					bibData[0].bibstart + bibData[1].join("") + bibData[0].bibend;
+
 				iframe.contentDocument.documentElement.innerHTML = 
 					'<div style="white-space: pre-wrap">'
 					+ citations + multCitations + bibliography
