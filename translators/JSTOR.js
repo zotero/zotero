@@ -1,14 +1,14 @@
 {
         "translatorID":"d921155f-0186-1684-615c-ca57682ced9b",
         "label":"JSTOR",
-        "creator":"Simon Kornblith, Sean Takats, Michael Berkowitz and Eli Osherovich",
+        "creator":"Simon Kornblith, Sean Takats, Michael Berkowitz, and Eli Osherovich",
         "target":"https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/)",
         "minVersion":"1.0.0b4.r1",
         "maxVersion":"",
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-08-22 07:55:00"
+        "lastUpdated":"2010-10-07 01:00:00"
 }
 
  
@@ -89,7 +89,7 @@ function doWeb(doc, url) {
 		return true;
 	}
 
-	var allTitlesElmts = doc.evaluate('//ul/li//a[@class="title"]', resultsBlock, nsResolver,  XPathResult.ANY_TYPE, null);
+	var allTitlesElmts = doc.evaluate('//li//a[@class="title"]', resultsBlock, nsResolver,  XPathResult.ANY_TYPE, null);
 	var currTitleElmt;
 	var availableItems = new Object();
 	while (currTitleElmt = allTitlesElmts.iterateNext()) {
