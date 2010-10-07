@@ -129,7 +129,7 @@ var BnfClass = function() {
 		//Default
 		case "205":
 		default:
-			return "contibutor";
+			return "contributor";
 		}
 	};
 
