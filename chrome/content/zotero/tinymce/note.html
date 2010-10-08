@@ -38,7 +38,28 @@
 		theme_advanced_buttons2 : "formatselect,|,justifyleft,justifycenter,justifyright,|,bullist,numlist,outdent,indent,|,removeformat,code",
 		theme_advanced_buttons3 : "",
 		theme_advanced_toolbar_location : "top",
-		theme_advanced_toolbar_align : "left"
+		theme_advanced_toolbar_align : "left",
+		
+		// More restrictive version of default set, with JS/etc. removed
+		/*valid_elements : "@[id|class|style|title|dir<ltr?rtl|lang|xml::lang],"
+			+ "a[rel|rev|charset|hreflang|tabindex|accesskey|type|"
+			+ "name|href|target|title|class],strong/b,em/i,strike,u,"
+			+ "#p,-ol[type|compact],-ul[type|compact],-li,br,img[longdesc|usemap|"
+			+ "src|border|alt=|title|hspace|vspace|width|height|align],-sub,-sup,"
+			+ "-blockquote,-table[border=0|cellspacing|cellpadding|width|frame|rules|"
+			+ "height|align|summary|bgcolor|background|bordercolor],-tr[rowspan|width|"
+			+ "height|align|valign|bgcolor|background|bordercolor],tbody,thead,tfoot,"
+			+ "#td[colspan|rowspan|width|height|align|valign|bgcolor|background|bordercolor"
+			+ "|scope],#th[colspan|rowspan|width|height|align|valign|scope],caption,-div,"
+			+ "-span,-code,-pre,address,-h1,-h2,-h3,-h4,-h5,-h6,hr[size|noshade],-font[face"
+			+ "|size|color],dd,dl,dt,cite,abbr,acronym,del[datetime|cite],ins[datetime|cite],"
+			+ "param[name|value|_value],"
+			+ "map[name],area[shape|coords|href|alt|target],bdo,"
+			+ "button,col[align|char|charoff|span|valign|width],colgroup[align|char|charoff|span|"
+			+ "valign|width],dfn,fieldset,"
+			+ "kbd,label[for],legend,optgroup[label|disabled],option[disabled|label|selected|value],"
+			+ "q[cite],samp,select[disabled|multiple|name|size],small,"
+			+ "textarea[cols|rows|disabled|name|readonly],tt,var,big"*/
 	});
 	tinyMCE.execCommand("mceAddControl", true, "tinymce");
 </script>
