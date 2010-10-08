@@ -1367,7 +1367,7 @@ var ZoteroPane = new function()
 		}
 		else if (itemGroup.isCollection()) {
 			// In collection, only prompt if trashing
-			var prompt = force ? toTrash : false;
+			var prompt = force ? (itemGroup.isWithinGroup() ? toDelete : toTrash) : false;
 		}
 		// This should be changed if/when groups get trash
 		else if (itemGroup.isGroup()) {
