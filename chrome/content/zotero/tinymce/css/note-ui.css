@@ -30,3 +30,6 @@ td.mceIframeContainer {
 	width: 100% !important;
 }
 
+#tinymce_formatselect_text {
+	width: 65px;
+}
