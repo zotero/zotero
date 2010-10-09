@@ -4,7 +4,6 @@
 	<title>{#advanced_dlg.anchor_title}</title>
 	<script type="text/javascript" src="../../tiny_mce_popup.js"></script>
 	<script type="text/javascript" src="js/anchor.js"></script>
-	<base target="_self" />
 </head>
 <body style="display: none">
 <form onsubmit="AnchorDialog.update();return false;" action="#">
@@ -13,19 +12,14 @@
 			<td colspan="2" class="title">{#advanced_dlg.anchor_title}</td>
 		</tr>
 		<tr>
-			<td nowrap="nowrap">{#advanced_dlg.anchor_name}:</td>
+			<td class="nowrap">{#advanced_dlg.anchor_name}:</td>
 			<td><input name="anchorName" type="text" class="mceFocus" id="anchorName" value="" style="width: 200px" /></td>
 		</tr>
 	</table>
 
 	<div class="mceActionPanel">
-		<div style="float: left">
-			<input type="submit" id="insert" name="insert" value="{#update}" />
-		</div>
-
-		<div style="float: right">
-			<input type="button" id="cancel" name="cancel" value="{#cancel}" onclick="tinyMCEPopup.close();" />
-		</div>
+		<input type="submit" id="insert" name="insert" value="{#update}" />
+		<input type="button" id="cancel" name="cancel" value="{#cancel}" onclick="tinyMCEPopup.close();" />
 	</div>
 </form>
 </body>
