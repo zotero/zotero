@@ -537,21 +537,26 @@ tinymce.create('tinymce.util.Dispatcher', {
 				return;
 			}
 
+			// Added by Dan S./Zotero
+			u = u.replace("jar:file", "jarfile");
+			u = u.replace("zotero@chnm.gmu.edu", "zotero.chnm.gmu.edu");
+			
 			// Absolute path with no host, fake host and protocol
 			if (u.indexOf('/') === 0 && u.indexOf('//') !== 0)
 				u = (s.base_uri ? s.base_uri.protocol || 'http' : 'http') + '://mce_host' + u;
 
 			// Relative path http:// or protocol relative //path
 			if (!/^\w*:?\/\//.test(u))
-				u = (s.base_uri.protocol || 'http') + '://mce_host' + t.toAbsPath(s.base_uri.path, u);
+				// Modified by Dan S./Zotero
+				//u = (s.base_uri.protocol || 'http') + '://mce_host' + t.toAbsPath(s.base_uri.path, u);
+				u = s.base_uri.protocol + '://' + s.base_uri.path + '/' + u;
+
+			// Added by Dan S./Zotero
+			u = u.replace("jar:file", "jarfile");
+			u = u.replace("zotero@chnm.gmu.edu", "zotero.chnm.gmu.edu");
 
 			// Parse URL (Credits goes to Steave, http://blog.stevenlevithan.com/archives/parseuri)
 			u = u.replace(/@@/g, '(mce_at)'); // Zope 3 workaround, they use @@something
-			
-			// Added by Dan S./Zotero 
-			u = u.replace("jar:file", "jarfile"); 
-			u = u.replace("zotero@chnm.gmu.edu", "zotero.chnm.gmu.edu"); 
-			
 			u = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*):?([^:@]*))?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/.exec(u);
 			each(["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"], function(v, i) {
 				var s = u[i];
