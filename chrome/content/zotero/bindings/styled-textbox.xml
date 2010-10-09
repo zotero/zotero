@@ -408,6 +408,11 @@
 						if (self._eventHandler) {
 							self._iframe.contentWindow.wrappedJSObject.handleEvent = self._eventHandler;
 						}
+						
+						// Run Cut/Copy/Paste with chrome privileges
+						self._iframe.contentWindow.wrappedJSObject.zoteroExecCommand = function (doc, command, ui, value) {
+							return doc.execCommand(command, ui, value);
+						}
 					};
 					this._iframe.addEventListener("DOMContentLoaded", listener, false);
 					
