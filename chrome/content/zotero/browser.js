@@ -350,6 +350,11 @@ var Zotero_Browser = new function() {
 			if (_locationBlacklist.indexOf(doc.location.href) != -1) {
 				return;
 			}
+			
+			// Ignore TinyMCE popups
+			if (!doc.location.host && doc.location.href.indexOf("tinymce/themes/advanced") != -1) {
+				return;
+			}
 		}
 		catch (e) {}
 		
