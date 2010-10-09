@@ -2557,6 +2557,11 @@ var ZoteroPane = new function()
 	 *  shift-click == new window, no modifier == frontmost tab
 	 */
 	function loadURI(uri, event, data) {
+		// Ignore javascript: and data: URIs
+		if (uri.match(/^(javascript|data):/)) {
+			return;
+		}
+		
 		if (Zotero.isStandalone && uri.match(/^https?/)) {
 			var io = Components.classes['@mozilla.org/network/io-service;1']
 						.getService(Components.interfaces.nsIIOService);
