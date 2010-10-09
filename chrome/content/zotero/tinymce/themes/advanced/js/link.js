@@ -53,6 +53,7 @@ var LinkDialog = {
 
 		// Create new anchor elements
 		if (e == null) {
+			ed.getDoc().execCommand("unlink", false, null);
 			tinyMCEPopup.execCommand("CreateLink", false, "#mce_temp_url#", {skip_undo : 1});
 
 			tinymce.each(ed.dom.select("a"), function(n) {
@@ -62,8 +63,8 @@ var LinkDialog = {
 					ed.dom.setAttribs(e, {
 						href : f.href.value,
 						title : f.linktitle.value,
-						target : f.target_list ? f.target_list.options[f.target_list.selectedIndex].value : null,
-						'class' : f.class_list ? f.class_list.options[f.class_list.selectedIndex].value : null
+						target : f.target_list ? getSelectValue(f, "target_list") : null,
+						'class' : f.class_list ? getSelectValue(f, "class_list") : null
 					});
 				}
 			});
@@ -71,8 +72,8 @@ var LinkDialog = {
 			ed.dom.setAttribs(e, {
 				href : f.href.value,
 				title : f.linktitle.value,
-				target : f.target_list ? f.target_list.options[f.target_list.selectedIndex].value : null,
-				'class' : f.class_list ? f.class_list.options[f.class_list.selectedIndex].value : null
+				target : f.target_list ? getSelectValue(f, "target_list") : null,
+				'class' : f.class_list ? getSelectValue(f, "class_list") : null
 			});
 		}
 
@@ -92,7 +93,7 @@ var LinkDialog = {
 		if (n.value && Validator.isEmail(n) && !/^\s*mailto:/i.test(n.value) && confirm(tinyMCEPopup.getLang('advanced_dlg.link_is_email')))
 			n.value = 'mailto:' + n.value;
 
-		if (/^\s*www./i.test(n.value) && confirm(tinyMCEPopup.getLang('advanced_dlg.link_is_external')))
+		if (/^\s*www\./i.test(n.value) && confirm(tinyMCEPopup.getLang('advanced_dlg.link_is_external')))
 			n.value = 'http://' + n.value;
 	},
 

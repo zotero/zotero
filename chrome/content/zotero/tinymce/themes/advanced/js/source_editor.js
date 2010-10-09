@@ -2,7 +2,7 @@ tinyMCEPopup.requireLangPack();
 tinyMCEPopup.onInit.add(onLoadInit);
 
 function saveContent() {
-	tinyMCEPopup.editor.setContent(document.getElementById('htmlSource').value);
+	tinyMCEPopup.editor.setContent(document.getElementById('htmlSource').value, {source_view : true});
 	tinyMCEPopup.close();
 }
 
@@ -13,7 +13,7 @@ function onLoadInit() {
 	if (tinymce.isGecko)
 		document.body.spellcheck = tinyMCEPopup.editor.getParam("gecko_spellcheck");
 
-	document.getElementById('htmlSource').value = tinyMCEPopup.editor.getContent();
+	document.getElementById('htmlSource').value = tinyMCEPopup.editor.getContent({source_view : true});
 
 	if (tinyMCEPopup.editor.getParam("theme_advanced_source_editor_wrap", true)) {
 		setWrap('soft');
@@ -44,19 +44,13 @@ function toggleWordWrap(elm) {
 		setWrap('off');
 }
 
-var wHeight=0, wWidth=0, owHeight=0, owWidth=0;
-
 function resizeInputs() {
-	var el = document.getElementById('htmlSource');
+	var vp = tinyMCEPopup.dom.getViewPort(window), el;
 
-	if (!tinymce.isIE) {
-		 wHeight = self.innerHeight - 65;
-		 wWidth = self.innerWidth - 16;
-	} else {
-		 wHeight = document.body.clientHeight - 70;
-		 wWidth = document.body.clientWidth - 16;
+	el = document.getElementById('htmlSource');
+
+	if (el) {
+		el.style.width  = (vp.w - 20) + 'px';
+		el.style.height = (vp.h - 65) + 'px';
 	}
-
-	el.style.height = Math.abs(wHeight) + 'px';
-	el.style.width  = Math.abs(wWidth) + 'px';
 }
