@@ -2406,6 +2406,11 @@ var ZoteroPane = new function()
 	 *  shift-click == new window, no modifier == frontmost tab
 	 */
 	function loadURI(uri, event, data) {
+		// Ignore javascript: and data: URIs
+		if (uri.match(/^(javascript|data):/)) {
+			return;
+		}
+		
 		// Open in new tab
 		if (event && (event.metaKey || (!Zotero.isMac && event.ctrlKey))) {
 			var tab = gBrowser.addTab(uri);
