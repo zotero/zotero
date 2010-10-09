@@ -2,8 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <link type="text/css" rel="stylesheet" href="css/note-ui.css"/>
-<script type="text/javascript" src="tiny_mce.js"></script>
-<script type="text/javascript">
+<script type="text/javascript;version=1.8" src="tiny_mce.js"></script>
+<script type="text/javascript;version=1.8">
 	tinyMCE.init({
 		// General options
 		body_id : "zotero-tinymce-note",
@@ -25,6 +25,16 @@
 			var event = { type: 'change' };
 			if (handleEvent) {
 				handleEvent(event);
+			}
+		},
+		
+		setup : function (ed) {
+			var commands = ["Cut", "Copy", "Paste"];
+			for each(var command in commands) {
+				let cmd = command;
+				ed.addCommand(command, function (ui, value) {
+					zoteroExecCommand(ed.getDoc(), cmd, ui, value);
+				});
 			}
 		},
 		
