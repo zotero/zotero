@@ -335,13 +335,24 @@
 						getService(Components.interfaces.nsIIOService);
 					var uri = ios.newURI("chrome://zotero/content/tinymce/" + htmlFile + ".html", null, null);
 					
+					var cr = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
+							.getService(Components.interfaces.nsIChromeRegistry);
+					uri = cr.convertChromeURL(uri);
+					
 					Zotero.debug("Loading " + uri.spec);
 					
 					// Register handler for deferred setting of content
 					var self = this;
 					var listener = function() {
+						var SJOW = self._iframe.contentWindow.wrappedJSObject;
+						
+						var editor = SJOW.tinyMCE.get("tinymce");
+						if (!editor) {
+							// Not ready yet
+							return;
+						}
+						
 						self._iframe.removeEventListener("DOMContentLoaded", listener, false);
-						var editor = self._iframe.contentWindow.tinyMCE.get("tinymce");
 						
 						editor.onInit.add(function() {
 							self._editor = editor;
@@ -379,7 +390,7 @@
 						});
 						
 						if (self._eventHandler) {
-							self._iframe.contentWindow.handleEvent = self._eventHandler;
+							self._iframe.contentWindow.wrappedJSObject.handleEvent = self._eventHandler;
 						}
 					};
 					this._iframe.addEventListener("DOMContentLoaded", listener, false);
@@ -393,7 +404,7 @@
 		</implementation>
 		
 		<content>
-			<xul:iframe flex="1" anonid="rt-view" class="rt-view"
+			<xul:iframe flex="1" anonid="rt-view" class="rt-view" type="content"
 				xbl:inherits="onfocus,onblur,flex,width,height,hidden"
 				style="overflow: hidden"/>
 		</content>
