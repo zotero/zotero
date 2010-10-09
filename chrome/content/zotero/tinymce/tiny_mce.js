@@ -1,3 +1,5 @@
+// Contains modifications by Dan S./Zotero
+
 (function(win) {
 	var whiteSpaceRe = /^\s*|\s*$/g,
 		undefined, isRegExpBroken = 'B'.replace(/A(.)|B/, '$1') === '$1';
@@ -11120,7 +11122,7 @@ tinymce.create('tinymce.ui.Toolbar:tinymce.ui.Container', {
 
 			if (value === undefined)
 				value = null;
-
+			
 			return editor.getDoc().execCommand(command, ui, value);
 		};
 
@@ -12739,6 +12741,8 @@ tinymce.create('tinymce.ui.Toolbar:tinymce.ui.Container', {
 				// Ignore
 			}
 			
+			// Added by Dan S./Zotero
+			zoteroFixWindow(w);
 
 			if (!w)
 				alert(t.editor.getLang('popup_blocked'));

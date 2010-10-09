@@ -406,12 +406,17 @@
 						});
 						
 						if (self._eventHandler) {
-							self._iframe.contentWindow.wrappedJSObject.handleEvent = self._eventHandler;
+							self._iframe.contentWindow.wrappedJSObject.zoteroHandleEvent = self._eventHandler;
 						}
 						
 						// Run Cut/Copy/Paste with chrome privileges
 						self._iframe.contentWindow.wrappedJSObject.zoteroExecCommand = function (doc, command, ui, value) {
 							return doc.execCommand(command, ui, value);
+						}
+						
+						self._iframe.contentWindow.wrappedJSObject.zoteroFixWindow = function (win) {
+							win.locationbar.visible = false;
+							win.statusbar.visible = false;
 						}
 					};
 					this._iframe.addEventListener("DOMContentLoaded", listener, false);

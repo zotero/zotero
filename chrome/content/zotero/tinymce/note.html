@@ -16,16 +16,12 @@
 		gecko_spellcheck : true,
 		
 		handle_event_callback : function (event) {
-			if (handleEvent) {
-				handleEvent(event);
-			}
+			zoteroHandleEvent(event);
 		},
 		
 		onchange_callback : function () {
 			var event = { type: 'change' };
-			if (handleEvent) {
-				handleEvent(event);
-			}
+			zoteroHandleEvent(event);
 		},
 		
 		setup : function (ed) {
