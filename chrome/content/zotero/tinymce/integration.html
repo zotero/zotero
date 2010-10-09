@@ -1,7 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-
 <style>
 html, body {
 	height: 100%;
@@ -18,6 +17,11 @@ html, body {
 	width: 100% !important;
 }
 
+#noScriptWarning {
+	padding: 10px 8px 4px;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
 </style>
 
 <script type="text/javascript" src="tiny_mce.js"></script>
@@ -40,6 +44,6 @@ html, body {
 </script>
 </head>
 <body>
-<div id="tinymce"></div>
+<div id="tinymce"><div id="noScriptWarning"/></div>
 </body>
 </html>

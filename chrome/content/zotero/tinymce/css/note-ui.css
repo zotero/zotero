@@ -33,3 +33,9 @@ td.mceIframeContainer {
 #tinymce_formatselect_text {
 	width: 65px;
 }
+
+#noScriptWarning {
+	padding: 4px;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}

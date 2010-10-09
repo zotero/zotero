@@ -344,7 +344,23 @@
 					// Register handler for deferred setting of content
 					var self = this;
 					var listener = function() {
+						var win = self._iframe.contentWindow;
 						var SJOW = self._iframe.contentWindow.wrappedJSObject;
+						
+						if (!SJOW.tinyMCE) {
+							var exts = Zotero.getInstalledExtensions();
+							for each(var ext in exts) {
+								if (ext.indexOf('NoScript') != -1) {
+									var warning = win.document.getElementById('noScriptWarning');
+									var str = "The NoScript extension is preventing Zotero "
+										+ "from displaying notes. To use NoScript and Zotero together, "
+										+ "whitelist the 'file://' scheme in the NoScript preferences.";
+									warning.appendChild(document.createTextNode(str));
+									break;
+								}
+							}
+							return;
+						}
 						
 						var editor = SJOW.tinyMCE.get("tinymce");
 						if (!editor) {
