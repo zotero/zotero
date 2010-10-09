@@ -129,7 +129,12 @@ function detectInString(text) {
  * specification.
  */
 function contextObjectXMLToCOinS (text) {
-	var doc = new XML(text);
+	try {
+		var doc = new XML(text);
+	}
+	catch (e) {
+		return [];
+	}
 	
 	/* Here and elsewhere, we are using the E4X syntax for XML */
 	var objects = doc..*::["context-object"];
