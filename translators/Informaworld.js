@@ -1,21 +1,31 @@
 {
 	"translatorID":"1885b93c-cf37-4b25-aef5-283f42eada9d",
-	"translatorType":4,
 	"label":"Informaworld",
 	"creator":"Michael Berkowitz",
-	"target":"http://www.informaworld.com",
+	"target":"^http://www\\.informaworld\\.com",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-11-02 21:10:00"
+	"translatorType":4,
+	"lastUpdated":"2010-09-28 06:45:00"
 }
+
+/* Test URLs
+Book section:
+Book:
+  http://www.informaworld.com/smpp/title~db=all~content=t777453493
+Journal article:
+  http://www.informaworld.com/smpp/content~content=a903855250&db=all
+Journal issue ToC:
+  http://www.informaworld.com/smpp/title~db=all~content=g921992177
+*/
 
 function detectWeb(doc, url) {
 	if (url.indexOf("quicksearch") != -1) {
 		return "multiple";
 	} else if (doc.evaluate('//a[substring(text(), 2, 8) = "Download"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		if (doc.evaluate('//div[@id="metahead"]/div/strong[text() = "Published in:"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+		if (doc.evaluate('//img[substring(@title, 1, 17) = "Publication type:"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			var pubtype = doc.evaluate('//img[substring(@title, 1, 17) = "Publication type:"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().title;
 			if (pubtype.match("journal")) {
 				return "journalArticle";
@@ -48,11 +58,17 @@ function doWeb(doc, url) {
 			}
 			thing = stuff.iterateNext();
 		}
-		data.pdfurl = newDoc.evaluate('//div[@id="content"]/div/a[1]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+		// There seem to be multiple page structures
+		data.pdfurl = newDoc.evaluate('//div[@id="content"]/div/a[1]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext();
+		if (data.pdfurl == null) {
+		// If we didn't find the URL there, try elsewhere:
+			data.pdfurl = newDoc.evaluate('//a[@title="Download PDF"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext();
+		}
+		data.pdfurl = data.pdfurl ? data.pdfurl.href : null; // Don't break on missing PDF
 		var id = newDoc.location.href.match(/content=([\w\d]+)/);
 		// If URL has DOI rather than id, use navbar link to get id
 		if (id[1] == 10) {
-			id = newDoc.evaluate('//table[@id="tabbar_table"]//td//a[@title = "Article"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
+			id = newDoc.evaluate('//div[@id="contenttabs"]//a[@title = "Article"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
 			id = id.match(/content=([\w\d]+)/);
 		}
 		var post = 'tab=citation&selecteditems=' + id[1].substr(1) + '&content=' + id[1] + '&citstyle=refworks&showabs=false&format=file';
@@ -73,7 +89,9 @@ function doWeb(doc, url) {
 			var xpath = '//div[@id="title"]//td[2]/div/strong/a';
 		} else if (doc.evaluate('//div[@id="title"]/table//tr[2]/td/table//tr/td[2]/b/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			var xpath = '//div[@id="title"]/table//tr[2]/td/table//tr/td[2]/b/a';
-		}
+		} else if (doc.evaluate('//a[@title="Click to view this record"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+            		var xpath = '//a[@title="Click to view this record"]';
+        	}
 		
 		var titles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var title = titles.iterateNext();

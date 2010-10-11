@@ -8,11 +8,27 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":false,
-	"lastUpdated":"2010-06-05 20:30:00"
+	"lastUpdated":"2010-10-09 07:21:37"
 }
 
 /*
- * This translator imports OpenURL ContextObjects encapsulated in XML
+   Radio Liberty Translator
+   Copyright (C) 2010 Avram Lyon, ajlyon@gmail.com
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ /*This translator imports OpenURL ContextObjects encapsulated in XML
  * documents, as described at:
  *  http://alcme.oclc.org/openurl/servlet/OAIHandler?verb=GetRecord&metadataPrefix=oai_dc&identifier=info:ofi/fmt:xml:xsd:ctx
  * The schema for such XML documents is at:
@@ -129,7 +145,12 @@ function detectInString(text) {
  * specification.
  */
 function contextObjectXMLToCOinS (text) {
-	var doc = new XML(text);
+	try {
+		var doc = new XML(text);
+	}
+	catch (e) {
+		return [];
+	}
 	
 	/* Here and elsewhere, we are using the E4X syntax for XML */
 	var objects = doc..*::["context-object"];

@@ -3,19 +3,39 @@
 	"translatorType":4,
 	"label":"Japan Times Online",
 	"creator":"Frank Bennett",
-	"target":"^http://(?:www|search)\\.japantimes\\.co\\.jp/(?:cgi-bin|gsearch|features|entertainment|sports|life|news)",
+	"target":"^http://(?:www|search)\\.japantimes\\.co\\.jp/(?:cgi-bin|gsearch|features|entertainment|sports|life|news|rss)",
 	"minVersion":"2.0b7",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-23 02:17:09"
+	"lastUpdated":"2010-09-28 07:00:00"
 }
+
+
+/*
+   Japan Times Online Translator
+   Copyright (C) 2009-2010 Frank Bennett, biercenator@gmail.com
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 
 // #################################
 // #### Local utility functions ####
 // #################################
 
-var itemRe = new RegExp('^http://search\.japantimes\.co\.jp/cgi-bin/[a-z]{2}[0-9]{8}[a-z0-9]{2}\.html');
+var itemRe = new RegExp('^http://search\.japantimes\.co\.jp/(?:cgi-bin|gsearch|features|entertainment|sports|life|news|rss)/[a-z]{2}[0-9]{8}[a-z0-9]{2}\.html');
 
 var getResolver = function (doc) {
 	var namespace, resolver;
@@ -146,6 +166,7 @@ var scrapeAndParse = function (url) {
 	mytxt = Zotero.Utilities.retrieveSource(url);
 
 	item.publicationTitle = "Japan Times Online";
+	item.ISSN = "0289-1956";
 	item.url = url;
 	val = getTagContent(mytxt, "id", "date");
 	if (val) {

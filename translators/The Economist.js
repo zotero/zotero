@@ -1,20 +1,22 @@
 {
-	"translatorID":"6ec8008d-b206-4a4c-8d0a-8ef33807703b",
-	"translatorType":4,
-	"label":"The Economist",
-	"creator":"Michael Berkowitz",
-	"target":"^http://(www.)?economist.com/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-12 23:40:00"
+        "translatorID":"6ec8008d-b206-4a4c-8d0a-8ef33807703b",
+        "label":"The Economist",
+        "creator":"Michael Berkowitz",
+        "target":"^http://(www\\.)?economist\\.com/",
+        "minVersion":"1.0.0b4.r5",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":true,
+        "translatorType":4,
+        "lastUpdated":"2010-10-03 13:27:34"
 }
 
 function detectWeb(doc, url) {
        if (doc.location.href.indexOf("search") != -1) {
-               return "multiple";
-       } else if (doc.location.href.toLowerCase().indexOf("displaystory") != -1 || doc.location.href.indexOf("cityPage") != -1) {
+		/* Multiple article download disabled-- broken.
+		TODO Fix multiple article download. */
+               //return "multiple";
+       } else if (doc.location.href.toLowerCase().indexOf("node") != -1) {
                return "magazineArticle";
        }
 }
@@ -52,6 +54,7 @@ function scrape(doc, url) {
                newItem.extra =  "(Subscription only)";
        }
 
+	if (newItem.extra == "(Subscription only)"){ newItem.complete(); return;}
        //get abstract
        if (doc.evaluate('//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/h2', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
                newItem.abstractNote = doc.evaluate('//div[@id="content"]/div[@class="clear top-border"]/div[@class="col-left"]/h2', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -62,8 +65,8 @@ function scrape(doc, url) {
        }
        if (newItem.abstractNote) newItem.abstractNote = Zotero.Utilities.trimInternal(newItem.abstractNote);
        //get date and extra stuff
-       if (doc.evaluate('//div[@class="col-left"]/p[@class="info"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
-               newItem.date = doc.evaluate('//div[@class="col-left"]/p[@class="info"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(0,13);
+   if (doc.evaluate('//p[@class="ec-article-info"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext() ) {
+               newItem.date = Zotero.Utilities.trim(doc.evaluate('//p[@class="ec-article-info"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.split("|")[0]);
        }
 	
 	var url = doc.location.href;
@@ -91,14 +94,15 @@ function doWeb(doc, url) {
                while (headline) {
                        items.push(headline.textContent);
                        uris.push(headline.href);
+                       Zotero.debug(headline.href);
                        headline = results.iterateNext();
                }
 
                var newItems = new Object();
                for (var i = 0 ; i <items.length ; i++) {
-                       newItems[items[i]] = uris[i];
+                       newItems[uris[i]] = items[i];
                }
-               var newItems  = Zotero.Utilities.getItemArray(doc, doc, '^http://(www.)*economist.com/(.*/)*(displaystory.cfm|cityPage.cfm)');
+
                newItems = Zotero.selectItems(newItems);
                if (!newItems) {
                        return true;
@@ -107,7 +111,7 @@ function doWeb(doc, url) {
                for (var i in newItems) {
                        urls.push(i);
                }
-       } else if (doc.location.href.toLowerCase().indexOf("displaystory") != -1) {
+       } else if (doc.location.href.toLowerCase().indexOf("node") != -1) {
                scrape(doc, url);
                return;
        }
