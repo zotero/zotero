@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-07-29 06:35:00"
+	"lastUpdated":"2010-07-09 07:46:31"
 }
 
 function detectWeb(doc, url) {
@@ -17,9 +17,9 @@ function detectWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
-	if (doc.evaluate('//font[contains(./text(), "Result")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if(doc.location.href.match(/[?&]q=/)) {
 		return "multiple";
-	} else if (doc.location.href.match("id")) {
+	} else if(doc.location.href.match(/[?&]id=/)) {
 		return "patent";
 	}
 	
@@ -123,32 +123,19 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
 	var host = 'http://' + doc.location.host + "/";
 	
 	var articles = new Array();
-	
 	if (detectWeb(doc, url) == "multiple") {
-		var iterator = doc.evaluate('//a[@class = "big"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var links = [];
-		var element = iterator.iterateNext();
-		var items = new Object();
-		while(element) {
-			items[element.href] = element.textContent;
-			element = iterator.iterateNext(); 
-		}
+		var items = Zotero.Utilities.getItemArray(doc, doc, /\/patents\/about\?id=/);
 		items = Zotero.selectItems(items);
 		if(!items) return true;
 		for (var i in items) {
 			articles.push(i);
-		}
-	
+		}	
+	} else {
+		articles.push(url);
 	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	Zotero.wait();
-	
+	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 }

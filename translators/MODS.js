@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":50,
 	"inRepository":true,
-	"lastUpdated":"2010-09-04 22:45:00"
+	"lastUpdated":"2010-09-10 01:22:13"
 }
 
 Zotero.addOption("exportNotes", true);
@@ -97,16 +97,23 @@ function doExport() {
 				roleTerm = "aut";
 			} else if(item.creators[j].creatorType == "editor") {
 				roleTerm = "edt";
-			} else if(item.creators[j].creatorType == "creator") {
+			} else {
 				roleTerm = "ctb";
 			}
 			
 			// FIXME - currently all names are personal
-			mods.name += <name type="personal">
-				<namePart type="family">{item.creators[j].lastName}</namePart>
-				<namePart type="given">{item.creators[j].firstName}</namePart>
-				<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
-				</name>;
+			if(item.creators[j].fieldMode == 1) {
+				mods.name += <name type="personal">
+					<namePart>{item.creators[j].lastName}</namePart>
+					<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+					</name>;
+			} else {
+				mods.name += <name type="personal">
+					<namePart type="family">{item.creators[j].lastName}</namePart>
+					<namePart type="given">{item.creators[j].firstName}</namePart>
+					<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+					</name>;
+			}
 		}
 		
 		// XML tag recordInfo.recordOrigin; used to store our generator note
@@ -439,6 +446,37 @@ function doImport() {
 		"yearbook":"book"
 	};
 	
+	var dctGenres = {
+		//"collection":XXX,
+		//"dataset":XXX,
+		//"event":XXX,
+		"image":"artwork",
+		"interactiveresource":"webpage",
+		//"model":XXX,
+		"movingimage":"videoRecording",
+		//"physical object":XXX,
+		//"place":XXX,
+		//"resource":XXX,
+		//"service":XXX,
+		"software":"computerProgram",
+		"sound":"audioRecording",
+		"stillimage":"artwork"
+		//"text":XXX
+	};
+
+	var modsTypeOfResources = {
+		//"text":XXX,
+		"cartographic":"map",
+		//"notated music":XXX,
+		"sound recording-musical":"audioRecording",
+		"sound recording-nonmusical":"audioRecording",
+		"sound recording":"audioRecording",
+		"still image":"artwork",
+		"moving image":"videoRecording",
+		//"three dimensional object":XXX,
+		"software, multimedia":"computerProgram"
+	};
+
 	// parse with E4X
 	var m = new Namespace("http://www.loc.gov/mods/v3");
 	// why does this default namespace declaration not work!?
@@ -476,22 +514,31 @@ function doImport() {
 			} else if(!newItem.itemType && (genre.@authority == "marcgt" || genre.@authority == "marc")) {
 				// otherwise, look at the marc genre
 				newItem.itemType = marcGenres[genre.text().toString()];
+			} else if(!newItem.itemType && (genre.@authority == "dct")) {
+				// otherwise, look at the dct genre
+				newItem.itemType = dctGenres[genre.text().toString().replace(/\s+/g,"")];
 			}
 		}
 		
 		if(!newItem.itemType) {
-			// try to get genre data from host
-			for each(var relatedItem in mods.m::relatedItem) {
-				if(relatedItem.@type == "host") {
-					for each(var genre in relatedItem.m::genre) {
-						if(genre.@authority == "marcgt" || genre.@authority == "marc") {
-							newItem.itemType = marcGenres[genre.text().toString()];
-							break;
+			//try to get type information from typeOfResource
+			for each(var typeOfResource in mods.m::typeOfResource) {
+				newItem.itemType = modsTypeOfResources[typeOfResource.text().toString()];
+			}
+			if(!newItem.itemType) {
+				// try to get genre data from host
+				for each(var relatedItem in mods.m::relatedItem) {
+					if(relatedItem.@type == "host") {
+						for each(var genre in relatedItem.m::genre) {
+							if(genre.@authority == "marcgt" || genre.@authority == "marc") {
+								newItem.itemType = marcGenres[genre.text().toString()];
+								break;
+							}
 						}
 					}
 				}
 			}
-			
+				
 			if(!newItem.itemType) newItem.itemType = "document";
 		}
 		
@@ -512,14 +559,14 @@ function doImport() {
 					creator.lastName = namePart.text().toString();
 				} else if(namePart.@type == "date" || namePart.@type == "termsOfAddress") {
 					// ignore these non name types for now
-				}
-				else {
+				} else {
 					var backupName = namePart.text().toString();
 				}
 			}
 			
 			if(backupName && !creator.firstName && !creator.lastName) {
 				creator = Zotero.Utilities.cleanAuthor(backupName, "author", true);
+				creator.fieldMode = 1;
 			}
 			
 			// look for roles
