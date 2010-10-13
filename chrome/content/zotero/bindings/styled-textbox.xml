@@ -354,7 +354,8 @@
 									var warning = win.document.getElementById('noScriptWarning');
 									var str = "The NoScript extension is preventing Zotero "
 										+ "from displaying notes. To use NoScript and Zotero together, "
-										+ "whitelist the 'file://' scheme in the NoScript preferences.";
+										+ "whitelist the 'file:' scheme in the NoScript preferences "
+										+ "and restart Firefox.";
 									warning.appendChild(document.createTextNode(str));
 									break;
 								}
