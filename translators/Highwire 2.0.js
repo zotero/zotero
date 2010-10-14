@@ -1,14 +1,14 @@
 {
-	"translatorID":"8c1f42d5-02fa-437b-b2b2-73afc768eb07",
-	"translatorType":4,
-	"label":"Highwire 2.0",
-	"creator":"Matt Burton",
-	"target":"(content/([0-9]+/[0-9]+|current|firstcite)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-06-14 11:55:00"
+        "translatorID":"8c1f42d5-02fa-437b-b2b2-73afc768eb07",
+        "label":"Highwire 2.0",
+        "creator":"Matt Burton",
+        "target":"(content/([0-9]+/[0-9]+|current|firstcite)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
+        "minVersion":"1.0.0b4.r5",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-10-14 22:14:30"
 }
 
 /*
@@ -22,6 +22,8 @@
 	http://bjaesthetics.oxfordjournals.org/cgi/content/abstract/50/2/121
 4. M L Giger et al., “Pulmonary nodules: computer-aided detection in digital chest images.,” Radiographics 10, no. 1 (January 1990): 41-51.
 	http://radiographics.rsna.org/content/10/1/41.abstract
+5. Mitch Leslie, "CLIP catches enzymes in the act," The Journal of Cell Biology 191, no. 1 (October 4, 2010): 2.
+	http://jcb.rupress.org/content/191/1/2.2.short
 */
 
 function detectWeb(doc, url) {
@@ -97,12 +99,17 @@ function doWeb(doc, url) {
 		return false;
 	}
 	Zotero.Utilities.HTTP.doGet(arts, function(text) {
+	// FIXME This function should be redone with XPath to speed things up
 		var id, match, newurl, pdfurl, get;
-		/* Here, we have to use two phrasings because they both occur, depending on
+		/* Here, we have to use three phrasings because they all occur, depending on
 		   the journal.*/
 		match = text.match(/=([^=]+)\">\s*Download citation/);
 		if (!match || match.length < 1) {
 			match = text.match(/=([^=]+)\">\s*Download to citation manager/);
+			if (!match || match.length < 1) {
+				// Journal of Cell Biology
+          			match = text.match(/=([^=]+)\">\s*Add to Citation Manager/);
+        		}
 		}
 		id = match[1];
 		newurl = newurls.shift();		
