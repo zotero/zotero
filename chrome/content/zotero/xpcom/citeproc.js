@@ -1132,7 +1132,7 @@ CSL.cloneAmbigConfig = function (config, oldconfig, itemID, tainters) {
 	ret.disambiguate = false;
 	for (pos = 0, len = config.names.length; pos < len; pos += 1) {
 		param = config.names[pos];
-		if (oldconfig && oldconfig.names[pos] !== param) {
+		if (oldconfig && (!oldconfig.names[pos] || oldconfig.names[pos] !== param)) {
 			for (ppos = 0, llen = tainters.length; ppos < llen; ppos += 1) {
 				this.tmp.taintedItemIDs[tainters[ppos].id] = true;
 			}
@@ -1515,7 +1515,7 @@ CSL.dateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, xmlmode) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.61";
+	this.processor_version = "1.0.65";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2132,6 +2132,9 @@ CSL.Engine.prototype.restoreProcessorState = function (citations) {
 	var pos, len, ppos, llen, item, Item, newitem, citationList, itemList, sortedItems;
 	citationList = [];
 	itemList = [];
+	if (!citations) {
+		citations = [];
+	}
 	for (pos = 0, len = citations.length; pos < len; pos += 1) {
 		sortedItems = [];
 		for (ppos = 0, len = citations[pos].citationItems.length; ppos < llen; ppos += 1) {
@@ -2152,6 +2155,9 @@ CSL.Engine.prototype.restoreProcessorState = function (citations) {
 	this.updateItems(itemList);
 	if (citations && citations.length) {
 		this.processCitationCluster(citations[0], [], citationList.slice(1));
+	} else {
+		this.registry = new CSL.Registry(this);
+		this.tmp = new CSL.Engine.Tmp();
 	}
 };
 CSL.Engine.prototype.updateItems = function (idList, nosort) {
@@ -4356,7 +4362,9 @@ CSL.Node.names = {
 							param = 2;
 						} else if (state.tmp.disambig_request) {
 							val = state.tmp.disambig_settings.givens[state.tmp.nameset_counter][ppos];
-							if (val === 1 && "undefined" === typeof this.strings["initialize-with"]) {
+							if (val === 1 && 
+								state.opt["givenname-disambiguation-rule"] === "by-cite" && 
+								"undefined" === typeof this.strings["initialize-with"]) {
 								val = 2;
 							}
 							param = val;
@@ -4893,6 +4901,8 @@ CSL.Attributes["@variable"] = function (state, arg) {
 						variable = "shortTitle";
 					} else if (variable === "container-title") {
 						variable = "journalAbbreviation";
+					} else if (variable === "page-first") {
+						variable = "page";
 					}
 				}
 				if (CSL.DATE_VARIABLES.indexOf(variable) > -1) {
@@ -6375,6 +6385,9 @@ CSL.Util.Names.initializeWith = function (state, name, terminator) {
 	if (!name) {
 		return "";
 	}
+	if (!terminator) {
+		terminator = "";
+	}
 	namelist = name;
 	if (state.opt["initialize-with-hyphen"] === false) {
 		namelist = namelist.replace(/\-/g, " ");
@@ -7822,9 +7835,6 @@ CSL.Registry.NameReg = function (state) {
 	};
 	evalname = function (item_id, nameobj, namenum, request_base, form, initials) {
 		var pos, len, items, param;
-		if ((!form || 'long' == form) && 'string' !== typeof initials) {
-			return 2;
-		}
 		set_keys(this.state, item_id, nameobj);
 		if ("undefined" === typeof this.namereg[pkey] || "undefined" === typeof this.namereg[pkey].ikey[ikey]) {
 			return request_base;
@@ -8283,7 +8293,7 @@ CSL.Disambiguation.prototype.initVars = function (akey) {
 	this.akey = akey;
 	myItems = [];
 	myIds = this.ambigcites[akey];
-	if (myIds.length > 1) {
+	if (myIds && myIds.length > 1) {
 		for (pos = 0, len = myIds.length; pos < len; pos += 1) {
 			myItems.push(this.state.retrieveItem(myIds[pos]));
 		}
