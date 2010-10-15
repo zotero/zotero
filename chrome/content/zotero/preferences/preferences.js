@@ -46,6 +46,7 @@ function init()
 	}
 	
 	updateStorageSettings(null, null, true);
+	updateWordProcessorInstructions();
 	refreshStylesList();
 	refreshProxyList();
 	populateQuickCopyList();
@@ -1812,4 +1813,13 @@ function updateProxyPrefs() {
 		document.getElementById('zotero-proxies-autoRecognize').disabled = 
 		document.getElementById('zotero-proxies-disableByDomain-checkbox').disabled = 
 		document.getElementById('zotero-proxies-disableByDomain-textbox').disabled = !transparent;
+}
+
+/**
+ * Determines if there are word processors, and if not, enables no word processor message
+ */
+function updateWordProcessorInstructions() {
+	if(document.getElementById("wordProcessors").childNodes.length == 2) {
+		document.getElementById("wordProcessors-noWordProcessorPluginsInstalled").hidden = undefined;
+	}
 }
