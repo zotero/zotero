@@ -564,45 +564,59 @@ To add a new preference:
 	
 	
 	<prefpane id="zotero-prefpane-styles"
-						label="&zotero.preferences.prefpane.styles;"
+						label="&zotero.preferences.prefpane.cite;"
 						image="chrome://zotero/skin/prefs-styles.png">
 		
 		<preferences>
 			<preference id="pref-styles-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
 		</preferences>
 		
-		<groupbox flex="1">
-			<caption label="&zotero.preferences.styles.styleManager;"/>
-			
-			<tree flex="1" id="styleManager" hidecolumnpicker="true" rows="6"
-					onselect="document.getElementById('styleManager-delete').disabled = undefined"
-					onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { deleteSelectedStyle(); }">
-				<treecols>
-					<treecol id="styleManager-title" label="&zotero.preferences.styles.styleManager.title;" flex="3"/>
-					<treecol id="styleManager-updated" label="&zotero.preferences.styles.styleManager.updated;" flex="1"/>
-					<treecol id="styleManager-csl" label="&zotero.preferences.styles.styleManager.csl;"/>
-				</treecols>
-				<treechildren id="styleManager-rows"/>
-			</tree>
-			<separator class="thin"/>
-			<hbox align="center" flex="1">
-				<label class="text-link" href="http://www.zotero.org/styles/" value="&zotero.preferences.export.getAdditionalStyles;" flex="1"/>
-				<button disabled="true" id="styleManager-delete" label="-" onclick="deleteStyle()"/>
-				<button label="+" onclick="addStyle()"/>
-			</hbox>
-		</groupbox>
-		
-		<groupbox>
-			<caption label="&zotero.preferences.citationOptions.caption;"/>
-			
-			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="pref-styles-citePaperJournalArticleURL"/>
-			<!-- This doesn't wrap without an explicit width, for some reason -->
-			<label id="export-citePaperJournalArticleURL" width="45em">
-				&zotero.preferences.export.citePaperJournalArticleURL.description;
-			</label>
-		</groupbox>
-		
-		<separator/>
+		<tabbox>
+			<tabs>
+				<tab label="&zotero.preferences.cite.wordProcessors;"/>
+				<tab label="&zotero.preferences.cite.styles;"/>
+			</tabs>
+			<tabpanels>
+				<tabpanel orient="vertical" id="wordProcessors">
+					<label id="wordProcessors-noWordProcessorPluginsInstalled" width="45em" hidden="true">
+							&zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled;
+					</label>
+					<label class="text-link" href="http://www.zotero.org/support/word_processor_plugin_installation#word_processor_plugins_for_zotero_2.0" value="&zotero.preferences.cite.wordProcessors.getPlugins;"/>
+				</tabpanel>
+				<tabpanel orient="vertical" id="styles">
+					<groupbox flex="1">
+						<caption label="&zotero.preferences.cite.styles.styleManager;"/>
+						
+						<tree flex="1" id="styleManager" hidecolumnpicker="true" rows="6"
+								onselect="document.getElementById('styleManager-delete').disabled = undefined"
+								onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { deleteSelectedStyle(); }">
+							<treecols>
+								<treecol id="styleManager-title" label="&zotero.preferences.cite.styles.styleManager.title;" flex="3"/>
+								<treecol id="styleManager-updated" label="&zotero.preferences.cite.styles.styleManager.updated;" flex="1"/>
+								<treecol id="styleManager-csl" label="&zotero.preferences.cite.styles.styleManager.csl;"/>
+							</treecols>
+							<treechildren id="styleManager-rows"/>
+						</tree>
+						<separator class="thin"/>
+						<hbox align="center" flex="1" height="40">
+							<label class="text-link" href="http://www.zotero.org/styles/" value="&zotero.preferences.export.getAdditionalStyles;" flex="1"/>
+							<button disabled="true" id="styleManager-delete" label="-" onclick="deleteStyle()"/>
+							<button label="+" onclick="addStyle()"/>
+						</hbox>
+					</groupbox>
+					
+					<groupbox>
+						<caption label="&zotero.preferences.citationOptions.caption;"/>
+						
+						<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="pref-styles-citePaperJournalArticleURL"/>
+						<!-- This doesn't wrap without an explicit width, for some reason -->
+						<label id="export-citePaperJournalArticleURL" width="45em">
+							&zotero.preferences.export.citePaperJournalArticleURL.description;
+						</label>
+					</groupbox>
+				</tabpanel>
+			</tabpanels>
+		</tabbox>
 	</prefpane>
 	
 	
