@@ -563,11 +563,11 @@ To add a new preference:
 	</prefpane>
 	
 	
-	<prefpane id="zotero-prefpane-styles"
+	<prefpane id="zotero-prefpane-cite"
 						label="&zotero.preferences.prefpane.cite;"
 						image="chrome://zotero/skin/prefs-styles.png">
 		
-		<preferences>
+		<preferences id="zotero-preferences-cite">
 			<preference id="pref-styles-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
 		</preferences>
 		
