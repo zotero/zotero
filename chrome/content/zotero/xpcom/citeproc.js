@@ -7497,7 +7497,7 @@ CSL.Output.Formats.prototype.text = {
 };
 CSL.Output.Formats.prototype.rtf = {
 	"text_escape": function (text) {
-		return text.replace("\\", "\\\\", "g").replace(/[\x7F-\uFFFF]/g,
+		return text.replace(/\\/, "\\\\", "g").replace(/[\x7F-\uFFFF]/g,
 			function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+"{}" })
 			.replace("\t", "\\tab{}", "g");
 	},
