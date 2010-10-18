@@ -359,8 +359,9 @@ Zotero.Connector.CookieManager = function(browser, uri, cookieData) {
 	var splitCookies = cookieData.split(/; ?/);
 	this._cookies = {};
 	for each(var cookie in splitCookies) {
-		var splitCookie = cookie.split("=");
-		this._cookies[decodeURIComponent(splitCookie[0])] = decodeURIComponent(splitCookie[1]);
+		var key = cookie.substr(0, cookie.indexOf("="));
+		var value = cookie.substr(cookie.indexOf("=")+1);
+		this._cookies[key] = value;
 	}
 	
 	[this._observerService.addObserver(this, topic, false) for each(topic in this._observerTopics)];
@@ -419,7 +420,7 @@ Zotero.Connector.CookieManager.prototype = {
 				}
 				
 				// add cookies to be sent to this domain
-				var cookies = [encodeURIComponent(key)+"="+encodeURIComponent(this._cookies[key])
+				var cookies = [key+"="+this._cookies[key]
 						for(key in this._cookies)].join("; ");
 				channel.setRequestHeader("Cookie", cookies, false);
 				Zotero.debug("Zotero.Connector.CookieManager: added cookies for request to "+channel.URI.spec);
@@ -444,10 +445,11 @@ Zotero.Connector.CookieManager.prototype = {
 					var cookies = cookieHeader.split(/; ?/);
 					var newCookies = {};
 					for each(var cookie in cookies) {
-						var splitCookie = cookie.split("=");
-						var lcCookie = splitCookie[0].toLowerCase();
+						var key = cookie.substr(0, cookie.indexOf("="));
+						var value = cookie.substr(cookie.indexOf("=")+1);
+						var lcCookie = key.toLowerCase();
 						
-						if(["comment", "domain", "max-age", "path", "version"].indexOf(lcCookie) != -1) {
+						if(["comment", "domain", "max-age", "path", "version", "expires"].indexOf(lcCookie) != -1) {
 							// ignore cookie parameters; we are only holding cookies for a few minutes
 							// with a single domain, and the path attribute doesn't allow any additional
 							// security anyway
@@ -457,7 +459,7 @@ Zotero.Connector.CookieManager.prototype = {
 							newCookies = {};
 							break;
 						} else {
-							newCookies[decodeURIComponent(splitCookie[0])] = decodeURIComponent(splitCookie[1]);
+							newCookies[key] = value;
 						}
 					}
 					[this._cookies[key] = newCookies[key] for(key in newCookies)];
