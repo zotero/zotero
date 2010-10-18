@@ -1043,6 +1043,40 @@ function ChromeExtensionHandler() {
 		}
 	};
 	
+	/**
+	 * zotero://preferences
+	 * zotero://preferences/zotero-prefpane-cite
+	 */
+	var PreferencesExtension = new function(){
+		this.newChannel = newChannel;
+		
+		this.__defineGetter__('loadAsChrome', function () { return true; });
+		
+		function newChannel(uri) {
+			var Zotero = Components.classes["@zotero.org/Zotero;1"]
+				.getService(Components.interfaces.nsISupports)
+				.wrappedJSObject;
+				
+			var data = {};
+			var s = uri.path.split('/');
+			if(s.length == 2) {
+				data.pane = s[1];
+			}
+			
+			if(Zotero.isFx4) {
+				var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					.getService(Components.interfaces.nsIWindowMediator)
+					.getMostRecentWindow("navigator:browser");
+				win.close();
+			}
+			
+			Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+				.getService(Components.interfaces.nsIWindowWatcher)
+				.openWindow(null, 'chrome://zotero/content/preferences/preferences.xul', '',
+				'chrome,titlebar,toolbar', data);
+		}
+	};
+	
 	var ReportExtensionSpec = ZOTERO_SCHEME + "://report"
 	this._extensions[ReportExtensionSpec] = ReportExtension;
 	
@@ -1063,6 +1097,9 @@ function ChromeExtensionHandler() {
 	
 	var ConnectorExtensionSpec = ZOTERO_SCHEME + "://connector"
 	this._extensions[ConnectorExtensionSpec] = ConnectorExtension;
+	
+	var PreferencesExtensionSpec = ZOTERO_SCHEME + "://preferences"
+	this._extensions[PreferencesExtensionSpec] = PreferencesExtension;
 }
 
 
