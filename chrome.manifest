@@ -57,7 +57,7 @@ component	{06a2ed11-d0a4-4ff0-a56f-a44545eee6ea}			components/zotero-autocomplet
 contract	@mozilla.org/autocomplete/search;1?name=zotero 	{06a2ed11-d0a4-4ff0-a56f-a44545eee6ea}
 
 component	{9BC3D762-9038-486A-9D70-C997AF848A7C}			components/zotero-protocol-handler.js
-contract	@mozilla.org/network/protocol;1?name=Zotero 	{9BC3D762-9038-486A-9D70-C997AF848A7C}
+contract	@mozilla.org/network/protocol;1?name=zotero 	{9BC3D762-9038-486A-9D70-C997AF848A7C}
 
 component	{531828f8-a16c-46be-b9aa-14845c3b010f}	components/zotero-integration-service.js
 contract	@mozilla.org/commandlinehandler/general-startup;1?type=zotero-integration 	{531828f8-a16c-46be-b9aa-14845c3b010f}
