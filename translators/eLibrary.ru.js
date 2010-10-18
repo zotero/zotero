@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-10-13 21:41:03"
+        "lastUpdated":"2010-10-18 10:01:42"
 }
 
 /*
@@ -64,50 +64,110 @@ function doWeb(doc, url){
 	}
 	
 	Zotero.Utilities.processDocuments(articles, function(doc) {
+
 		var datablock = doc.evaluate('//td[@align="right" and @width="100%" and @valign="top"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
 		
-		// Some pages have no author information, so our count of tables will be incorrect
-		var tableCount = doc.evaluate('count(./table)', datablock, ns, XPathResult.ANY_TYPE, null).numberValue;
-		var authorMissing = (tableCount < 3);		
-		var titleBlock =  (authorMissing) ? 
-           	 	doc.evaluate('./table[1]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext()
-           	 	: doc.evaluate('./table[1]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
-		var metaBlock =  (authorMissing) ? 
-           	 	doc.evaluate('./table[2]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext()
-           	 	: doc.evaluate('./table[3]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
-		var abstractBlock =  (authorMissing) ? 
-           	 	doc.evaluate('./table[3]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext()
-           	 	: doc.evaluate('./table[4]', datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
-		
+		var tableLabels = doc.evaluate('./table/tbody/tr[1]/td[@bgcolor="#dddddd"][1]|./table//table[1]//tr[1]/td[@bgcolor="#dddddd"][1]', datablock, ns, XPathResult.ANY_TYPE, null);
+
+		var titleBlock, authorBlock, publicationBlock, metaBlock, codeBlock, keywordBlock,  abstractBlock, referenceBlock;
+		var t = 0,  label;	// Table number and label
+		while ((label =  tableLabels.iterateNext()) !== null) {
+			t++;
+			label = label.textContent;
+
+			switch (label) {
+				case "Названиепубликации":
+					titleBlock = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				case "Авторы":
+					authorBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				case "Журнал":
+					metaBlock = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				case "Коды":
+					codeBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				case "Ключевыеслова":
+					keywordBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				case "Аннотация":
+					abstractBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				case "Коды":
+					codeBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				case "Списоклитературы":
+					referenceBlock  = doc.evaluate('./table['+t+']',  datablock, ns, XPathResult.ANY_TYPE, null).iterateNext();
+					break;
+				case "Переводнаяверсия":
+				default:
+					Zotero.debug("Unknown/unsupported block: "+ label);
+					break;
+			}
+		}
 		var type = doc.evaluate('.//table[2]//tr[5]/td[4]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		
 		switch (type) {
 			case "научная статья":
+			        type = "journalArticle";
+			        break;
+			case "учебное пособие":
+			case "монография":
+			        type = "book";
+			        break;
 			default:
+		                Zotero.debug("Unknown type: "+type+". Using 'journalArticle'");
 				type = "journalArticle";
 				break;
 		}
 		
-		item = new Zotero.Item(type);
+		var item = new Zotero.Item(type);
+		
+		// Now see if we have a free PDF to download
+		var pdfImage = doc.evaluate('//a/img[@src="/images/pdf_green.gif"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+		if (pdfImage) {
+			var attachments = [];
+			// A green PDF is a free one. We need to construct the POST request
+			var postData = [], postField;
+			var postNode = doc.evaluate('//form[@name="results"]/input', doc, ns, XPathResult.ANY_TYPE, null);
+			while ((postField = postNode.iterateNext()) !== null) {
+				postData.push(postField.name + "=" +postField.value);
+			}
+			postData = postData.join("&");
+			Zotero.debug(postData + postNode.iterateNext());
+			Zotero.Utilities.HTTP.doPost('http://elibrary.ru/full_text.asp', postData, function(text) {
+				var href = text.match(/http:\/\/elibrary.ru\/download\/.*?\.pdf/)[0];
+				attachments.push({url:href, title:"eLibrary.ru полный текст", mimeType:"application/pdf"});
+			});
+		}
 
 		item.title = doc.title.match(/eLIBRARY.RU - (.*)/)[1];
-		var author = doc.evaluate('./table[2]//td[2]/font/a', datablock, ns, XPathResult.ANY_TYPE, null);
-
-		if ((author = author.iterateNext()) !== null) {
-			author = author.textContent;
-			var cleaned = Zotero.Utilities.cleanAuthor(author, "author");
-			// If we have only one name, set the author to one-name mode
-			if (cleaned.firstName == "") {
-				cleaned["fieldMode"] = true;
-			} else {
-				// We can check for all lower-case and capitalize if necessary
-				// All-uppercase is handled by cleanAuthor
-				cleaned.firstName = (cleaned.firstName == cleaned.firstName.toLowerCase()) ?
-					Zotero.Utilities.capitalizeTitle(cleaned.firstName, true) : cleaned.firstName;
-				cleaned.lastName = (cleaned.lastName == cleaned.lastName.toLowerCase()) ?
-					Zotero.Utilities.capitalizeTitle(cleaned.lastName, true) : cleaned.lastName;
-			}
-			item.creators.push(cleaned);
+		
+		if (authorBlock) {
+		var authorNode = doc.evaluate('.//td[2]/font/a', authorBlock, ns, XPathResult.ANY_TYPE, null);
+		while ((author = authorNode.iterateNext()) !== null) {
+			if (!author.href.match(/org_about\.asp/)) { // Remove organizations
+				author = author.textContent;
+				var authors = author.split(",");
+				for (var i = 0; i < authors.length; i++) {
+					var cleaned = Zotero.Utilities.cleanAuthor(authors[i], "author");
+					// If we have only one name, set the author to one-name mode
+					if (cleaned.firstName == "") {
+						cleaned["fieldMode"] = true;
+					} else {
+						// We can check for all lower-case and capitalize if necessary
+						// All-uppercase is handled by cleanAuthor
+						cleaned.firstName = (cleaned.firstName == cleaned.firstName.toLowerCase()) ?
+							Zotero.Utilities.capitalizeTitle(cleaned.firstName, true) : cleaned.firstName;
+						cleaned.lastName = (cleaned.lastName == cleaned.lastName.toLowerCase()) ?
+							Zotero.Utilities.capitalizeTitle(cleaned.lastName, true) : cleaned.lastName;
+					}
+					// Skip entries with an @ sign-- email addresses slip in otherwise
+					if (cleaned.lastName.indexOf("@") === -1) item.creators.push(cleaned);
+				}
+			} else { Zotero.debug("Skipping presumed affiliation: " + author.textContent) ; } 
+		}
 		}
 
 		item.publicationTitle = doc.evaluate('.//table[1]//tr[1]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -120,6 +180,26 @@ function doWeb(doc, url){
 		item.language = doc.evaluate('.//table[2]//tr[5]/td[2]', metaBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		if (abstractBlock)
 			item.abstractNote = doc.evaluate('./tbody/tr/td[2]/table/tbody/tr/td/font', abstractBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		/*if (referenceBlock) {
+			var note = Zotero.Utilities.cleanString(
+							doc.evaluate('./tbody/tr/td[2]/table', referenceBlock, ns, XPathResult.ANY_TYPE, null)
+							.iterateNext().textContent);
+			Zotero.debug(note);
+			item.notes.push(note);
+		}*/
+		if (codeBlock) {
+			item.extra = doc.evaluate('.//td[2]', codeBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+ 			var doi = item.extra.match(/DOI: (10\..+?) /);
+ 			if (doi) item.DOI = doi[1];
+ 		}
+		
+		if (keywordBlock) {
+			var tag, tagNode = doc.evaluate('.//td[2]/a', keywordBlock, ns, XPathResult.ANY_TYPE, null);
+			while ((tag = tagNode.iterateNext()) !== null)
+					item.tags.push(tag.textContent);
+		}
+
+		item.attachments = attachments.shift();
 		
 		item.complete();
 	}, function() {Zotero.done();});
