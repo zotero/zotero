@@ -856,7 +856,8 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 		}
 	}
 	
-	Zotero.Utilities.HTTP.processDocuments(urls, processor, done, exception);
+	var hiddenBrowser = Zotero.Utilities.HTTP.processDocuments(urls, processor, done, exception);
+	if(this.translate.cookieManager) this.translate.cookieManager.attachToBrowser(hiddenBrowser);
 }
 
 /**
@@ -876,6 +877,7 @@ Zotero.Utilities.Translate.prototype.retrieveDocument = function(url) {
 	}
 	
 	var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
+	if(this.translate.cookieManager) this.translate.cookieManager.attachToBrowser(hiddenBrowser);
 	hiddenBrowser.addEventListener("pageshow", listener, true);
 	hiddenBrowser.loadURI(url);
 	
@@ -1588,6 +1590,7 @@ Zotero.Utilities.HTTP = new function() {
 		hiddenBrowser.addEventListener(loadEvent, onLoad, true);
 		
 		doLoad();
+		return hiddenBrowser;
 	}
 	
 	/**
