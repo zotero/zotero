@@ -1,14 +1,14 @@
 {
-	"translatorID":"176948f7-9df8-4afc-ace7-4c1c7318d426",
-	"translatorType":4,
-	"label":"ESpacenet",
-	"creator":"Gilles Poulain",
-	"target":"http://v3.espacenet.com/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-10-08 17:40:00"
+        "translatorID":"176948f7-9df8-4afc-ace7-4c1c7318d426",
+        "label":"ESpacenet",
+        "creator":"Gilles Poulain and Rintze Zelle",
+        "target":"http://v3.espacenet.com/",
+        "minVersion":"1.0.0b4.r5",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-10-17 10:38:50"
 }
 
 function detectWeb(doc, url) {
@@ -83,7 +83,7 @@ function scrape(doc,url) {
 	//Get Applicant
 	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[4]/td[2]";
 	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
-		var applicant = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+		var applicantField = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
 	}
 
 	//Get application number
@@ -133,43 +133,53 @@ function scrape(doc,url) {
 	//Get Creators
 	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[3]/td[2]";
 	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
-		var author = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+		var inventorField = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
 	}
 
 	//Create Zotero Ref
 	var newArticle = new Zotero.Item('patent');
-		newArticle.url = doc.location.href;
-		newArticle.title = title;
-		newArticle.date = date;
-		newArticle.abstractNote = abstract;
+	newArticle.url = doc.location.href;
+	newArticle.title = title;
+	newArticle.date = date;
+	newArticle.abstractNote = abstract;
+	newArticle.patentNumber = pnumber;
+	newArticle.priorityNumbers = prnumber;
+	newArticle.applicationNumber = anumber;
+	newArticle.extra = "CIB: " + CIBnumber + "\nECLA: " + ECLAnumber
+
+	if (applicantField) {
+		var applicant = reorganizeNames(applicantField).join("; ");
 		newArticle.assignee = applicant;
-		newArticle.patentNumber = pnumber;
-		newArticle.priorityNumbers = prnumber;
-		newArticle.applicationNumber = anumber;
-		newArticle.extra = "CIB: " + CIBnumber + "\nECLA: " + ECLAnumber
-
-	var author1 = author.split("; ");
-;
-	for (var m = 0; m< author1.length; m++) {
-		
-		if (author1[m].match(/\(/)) {
-			author1[m] = author1[m].substr(0, author1[m].length-5);
-		}
-		words = author1[m].split(/\s/);
-
-		for (var j in words) {
-			words[j] = words[j][0].toUpperCase() + words[j].substr(1).toLowerCase();
-		}
-
-		var inventor = '';
-		for (var k = 1; k < words.length; k++) {
-			inventor = inventor +words[k] + " ";
-			if (k == words.length-1) {
-				inventor = inventor +words[0];
-				newArticle.creators.push(Zotero.Utilities.cleanAuthor(inventor, "inventor"));
-			}
-		}
+	}
+	
+	var inventors = reorganizeNames(inventorField);
+	for (var m = 0; m< inventors.length; m++) {
+		newArticle.creators.push(Zotero.Utilities.cleanAuthor(inventors[m], "inventor", true));
 	}
 
 	 newArticle.complete();
+}
+
+function reorganizeNames(nameField) {
+	var nameCollection = nameField.split("(")[1].split(")")[0];
+	var nameParts = nameCollection.split(" ");
+	for (var j in nameParts) {
+		nameParts[j] = nameParts[j][0].toUpperCase() + nameParts[j].substr(1).toLowerCase();
+        }
+        nameCollection = nameParts.join(" ");
+	
+	var nameArray = nameCollection.split(", ; ");
+
+	for (var m = 0; m< nameArray.length; m++) {
+		if (nameArray[m].match(",")) {
+			var nameParts = "";
+			nameParts =  nameArray[m].split(", ");
+			nameParts[0] = nameParts[0].concat(",");
+			nameArray[m] = nameParts.join(" ");
+		} else {
+			nameArray[m] = nameArray[m].replace(" ", ", ");
+		}
+	}
+
+    return nameArray;
 }
