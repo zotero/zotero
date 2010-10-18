@@ -349,6 +349,7 @@ Zotero.Connector.DataListener.prototype._requestFinished = function(response) {
 Zotero.Connector.CookieManager = function(browser, uri, cookieData) {
 	this._webNav = browser.webNavigation;
 	this._browser = browser;
+	this._watchedBrowsers = [browser];
 	this._observerService = Components.classes["@mozilla.org/observer-service;1"].
 		getService(Components.interfaces.nsIObserverService);
 	
@@ -381,7 +382,11 @@ Zotero.Connector.CookieManager.prototype = {
 			channel.QueryInterface(Components.interfaces.nsIHttpChannel);
 			var isTracked = null;
 			try {
-				isTracked = channel.notificationCallbacks.getInterface(Components.interfaces.nsIDOMWindow).top.document == this._browser.contentDocument;
+				var topDoc = channel.notificationCallbacks.getInterface(Components.interfaces.nsIDOMWindow).top.document;
+				for each(var browser in this._watchedBrowsers) {
+					isTracked = topDoc == browser.contentDocument;
+					if(isTracked) break;
+				}
 			} catch(e) {}
 			if(isTracked === null) {
 				try {
@@ -468,6 +473,14 @@ Zotero.Connector.CookieManager.prototype = {
 				Zotero.debug("Zotero.Connector.CookieManager: slurped cookies from "+channel.URI.spec);
 			}
 		}
+	},
+	
+	/**
+	 * Attach CookieManager to a specific XMLHttpRequest
+	 * @param {XMLHttpRequest} xhr
+	 */
+	"attachToBrowser": function(browser) {
+		this._watchedBrowsers.push(browser);
 	},
 	
 	/**
