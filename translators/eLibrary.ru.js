@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-10-18 10:01:42"
+        "lastUpdated":"2010-10-19 21:02:57"
 }
 
 /*
@@ -59,12 +59,19 @@ function doWeb(doc, url){
 		for (var i in items) {
 			articles.push(i);
 		}
+		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 	} else {
-		articles = [url];
+		scrape(doc);
 	}
 	
-	Zotero.Utilities.processDocuments(articles, function(doc) {
+	Zotero.wait();
+}
 
+function scrape (doc) {
+	    var n = doc.documentElement.namespaceURI;
+    var ns = n ? function(prefix) {
+        if (prefix == 'x') return n; else return null;
+    } : null;
 		var datablock = doc.evaluate('//td[@align="right" and @width="100%" and @valign="top"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
 		
 		var tableLabels = doc.evaluate('./table/tbody/tr[1]/td[@bgcolor="#dddddd"][1]|./table//table[1]//tr[1]/td[@bgcolor="#dddddd"][1]', datablock, ns, XPathResult.ANY_TYPE, null);
@@ -123,11 +130,10 @@ function doWeb(doc, url){
 		}
 		
 		var item = new Zotero.Item(type);
-		
+		/*var pdf = false;
 		// Now see if we have a free PDF to download
 		var pdfImage = doc.evaluate('//a/img[@src="/images/pdf_green.gif"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
 		if (pdfImage) {
-			var attachments = [];
 			// A green PDF is a free one. We need to construct the POST request
 			var postData = [], postField;
 			var postNode = doc.evaluate('//form[@name="results"]/input', doc, ns, XPathResult.ANY_TYPE, null);
@@ -138,9 +144,9 @@ function doWeb(doc, url){
 			Zotero.debug(postData + postNode.iterateNext());
 			Zotero.Utilities.HTTP.doPost('http://elibrary.ru/full_text.asp', postData, function(text) {
 				var href = text.match(/http:\/\/elibrary.ru\/download\/.*?\.pdf/)[0];
-				attachments.push({url:href, title:"eLibrary.ru полный текст", mimeType:"application/pdf"});
+				pdf = {url:href, title:"eLibrary.ru полный текст", mimeType:"application/pdf"};
 			});
-		}
+		}*/
 
 		item.title = doc.title.match(/eLIBRARY.RU - (.*)/)[1];
 		
@@ -199,9 +205,7 @@ function doWeb(doc, url){
 					item.tags.push(tag.textContent);
 		}
 
-		item.attachments = attachments.shift();
+		//if(pdf) item.attachments.push(pdf);
 		
 		item.complete();
-	}, function() {Zotero.done();});
-	Zotero.wait();
 }
