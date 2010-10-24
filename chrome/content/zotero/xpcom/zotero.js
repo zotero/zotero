@@ -36,6 +36,11 @@ const ZOTERO_CONFIG = {
 	PREF_BRANCH: 'extensions.zotero.'
 };
 
+// Fx4.0b8+ use implicit SJOWs; no creation necessary
+if(!XPCSafeJSObjectWrapper) {
+	var XPCSafeJSObjectWrapper = function(arg) { return arg };
+}
+
 /*
  * Core functions
  */
