@@ -271,11 +271,11 @@ Zotero.OpenURL = new function() {
 					item.itemType = "journalArticle";
 					break;
 				} else if(format == "info:ofi/fmt:kev:mtx:book") {
-					if(Zotero.inArray("rft.genre=bookitem", coParts)) {
+					if(coParts.indexOf("rft.genre=bookitem") !== -1) {
 						item.itemType = "bookSection";
-					} else if(Zotero.inArray("rft.genre=conference", coParts) || Zotero.inArray("rft.genre=proceeding", coParts)) {
+					} else if(coParts.indexOf("rft.genre=conference") !== -1 || coParts.indexOf("rft.genre=proceeding") !== -1) {
 						item.itemType = "conferencePaper";
-					} else if(Zotero.inArray("rft.genre=report", coParts)) {
+					} else if(coParts.indexOf("rft.genre=report") !== -1) {
 						item.itemType = "report";
 					} else {
 						item.itemType = "book";

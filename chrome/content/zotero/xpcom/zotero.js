@@ -67,8 +67,6 @@ var Zotero = new function(){
 	this.flattenArguments = flattenArguments;
 	this.getAncestorByTagName = getAncestorByTagName;
 	this.join = join;
-	this.inArray = inArray;
-	this.arraySearch = arraySearch;
 	this.arrayToHash = arrayToHash;
 	this.hasValues = hasValues;
 	this.randomString = randomString;
@@ -1177,34 +1175,6 @@ var Zotero = new function(){
 			a.push(obj[i]);
 		}
 		return a.join(delim);
-	}
-	
-	
-	/*
-	 * PHP's in_array() for JS -- returns true if a value is contained in
-	 * an array, false otherwise
-	 */
-	function inArray(needle, haystack){
-		for (var i in haystack){
-			if (haystack[i]==needle){
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	
-	/*
-	 * PHP's array_search() for JS -- searches an array for a value and
-	 * returns the key if found, false otherwise
-	 */
-	function arraySearch(needle, haystack){
-		for (var i in haystack){
-			if (haystack[i]==needle){
-				return i;
-			}
-		}
-		return false;
 	}
 	
 	

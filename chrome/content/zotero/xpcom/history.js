@@ -332,7 +332,7 @@ Zotero.History = new function(){
 				var cols = Zotero.DB.getColumns(table);
 				for (var i in cols){
 					// If column is not part of the key, log it
-					if (!Zotero.inArray(cols[i], context['keys'])){
+					if (!context['keys'].indexOf(cols[i]) === -1){
 						var sql = "INSERT INTO transactionLog "
 							+ "SELECT " + transactionID + ", '" + cols[i]
 							+ "', " + cols[i] + fromClause;
@@ -390,7 +390,7 @@ Zotero.History = new function(){
 					var cols = Zotero.DB.getColumns(context['table']);
 					for (var i in cols){
 						// If column is not part of the key, log it
-						if (!Zotero.inArray(cols[i], context['keys'])){
+						if (!context['keys'].indexOf(cols[i]) === -1){
 							var sql = "INSERT INTO transactionLog "
 								+ "SELECT " + transactionID + ", '" + cols[i]
 								+ "', " + cols[i] + fromClause;
@@ -425,7 +425,7 @@ Zotero.History = new function(){
 					
 					// Update log with new values for later redo
 					for (var i in newValues){
-						if (!Zotero.inArray(i, context['keys'])){
+						if (context['keys'].indexOf(i) === -1){
 							var sql = "UPDATE transactionLog SET "
 								+ "value=? WHERE transactionID=? AND field=?";
 							Zotero.DB.query(sql, [i, newValues[i], transactionID]);
