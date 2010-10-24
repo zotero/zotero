@@ -1016,7 +1016,20 @@ Zotero.Translate.prototype._generateSandbox = function() {
 			translation.setHandler(arg1, 
 				function(obj, item) {
 					try {
-						arg2(obj, item);
+						if(Zotero.isFx4) {
+							// item is wrapped in an XPCCrossOriginWrapper that we can't get rid of
+							// except by making a deep copy. seems to be due to
+							// https://bugzilla.mozilla.org/show_bug.cgi?id=580128
+							// hear that? that's the sound of me banging my head against the wall.
+							// if there is no better way to do this soon, i am going to need a 
+							// brain transplant...
+							var unwrappedItem = JSON.parse(JSON.stringify(item));
+							unwrappedItem.complete = item.complete;
+						} else {
+							var unwrappedItem = item;
+						}
+						
+						arg2(obj, unwrappedItem);
 					} catch(e) {
 						me.error(false, e);
 					}
