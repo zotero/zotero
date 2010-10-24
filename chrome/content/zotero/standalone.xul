@@ -14,13 +14,16 @@
 %textcontextDTD;
 <!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" >
 %standaloneDTD;
+<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd" >
+%brandDTD;
 ]>
 
 <window id="main-window"
 				xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 				onload="window.sizeToContent()"
 				windowtype="navigator:browser"
-				width="1100" height="700"
+				title="&brandShortName;"
+				width="900" height="500"
 				persist="screenX screenY width height sizemode"> 
 	<script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
 	<script type="application/x-javascript" src="chrome://global/content/viewZoomOverlay.js"/>
