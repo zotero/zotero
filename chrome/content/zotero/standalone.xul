@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/standalone.css" type="text/css"?>
 <?xul-overlay href="chrome://global/content/editMenuOverlay.xul"?>
 
 <!DOCTYPE window [
