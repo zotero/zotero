@@ -1016,7 +1016,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 			translation.setHandler(arg1, 
 				function(obj, item) {
 					try {
-						if(Zotero.isFx4 && (me.type == "web" || me.type == "search")) {
+						if(Zotero.isFx4 && (type == "web" || type == "search")) {
 							// item is wrapped in an XPCCrossOriginWrapper that we can't get rid of
 							// except by making a deep copy. seems to be due to
 							// https://bugzilla.mozilla.org/show_bug.cgi?id=580128
