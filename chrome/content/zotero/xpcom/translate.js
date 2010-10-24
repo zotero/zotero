@@ -929,21 +929,20 @@ Zotero.Translate.prototype._generateSandbox = function() {
 	var sandboxLocation = "http://www.example.com/";
 	if(this.type == "web") {
 		// use real URL, not proxied version, to create sandbox
-		sandboxLocation = this.document.defaultView;
-		Zotero.debug("Translate: Binding sandbox to "+this.document.location.href, 4);
-	} else {
-		if (this.type == "search") {
-			// generate sandbox for search by extracting domain from translator target
-			if(this.translator && this.translator[0] && this.translator[0].target) {
-				// so that web translators work too
-				const searchSandboxRe = /^http:\/\/[\w.]+\//;
-				var tempURL = this.translator[0].target.replace(/\\/g, "").replace(/\^/g, "");
-				var m = searchSandboxRe.exec(tempURL);
-				if(m) sandboxLocation = m[0];
-			}
+		var sandboxLocation = this.document.defaultView;
+	} else if(this.type == "search") {
+		// generate sandbox for search by extracting domain from translator target
+		if(this.translator && this.translator[0] && this.translator[0].target) {
+			// so that web translators work too
+			const searchSandboxRe = /^http:\/\/[\w.]+\//;
+			var tempURL = this.translator[0].target.replace(/\\/g, "").replace(/\^/g, "");
+			var m = searchSandboxRe.exec(tempURL);
+			if(m) sandboxLocation = m[0];
 		}
-		Zotero.debug("Translate: Binding sandbox to "+sandboxLocation, 4);
+	} else if(this._sandboxLocation) {
+		sandboxLocation = this._sandboxLocation;
 	}
+	Zotero.debug("Translate: Binding sandbox to "+(typeof sandboxLocation == "object" ? sandboxLocation.document.location : sandboxLocation), 4);
 	
 	// set up sandbox
 	this._sandbox = new Components.utils.Sandbox(sandboxLocation);
@@ -1002,6 +1001,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 		
 		var translation = new Zotero.Translate(type);
 		translation._parentTranslator = me;
+		translation._sandboxLocation = sandboxLocation;
 		
 		if(type == "export" && (me.type == "web" || me.type == "search")) {
 			throw("for security reasons, web and search translators may not call export translators");
@@ -1016,7 +1016,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 			translation.setHandler(arg1, 
 				function(obj, item) {
 					try {
-						if(Zotero.isFx4) {
+						if(Zotero.isFx4 && (me.type == "web" || me.type == "search")) {
 							// item is wrapped in an XPCCrossOriginWrapper that we can't get rid of
 							// except by making a deep copy. seems to be due to
 							// https://bugzilla.mozilla.org/show_bug.cgi?id=580128
