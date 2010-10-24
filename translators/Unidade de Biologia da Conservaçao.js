@@ -44,8 +44,8 @@ function doWeb(doc, url) {
 function scrape(doc,url) {
        var xpath = "/html/body/div/div/div[3]/div[3]/table/tbody/tr/td"
        var xpathurl ="/html/body/div/div/div[3]/div[3]/table/tbody/tr/td/a[1]"
-       var allRefText = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-       var allRefTexturl = Zotero.Utilities.cleanString(doc.evaluate(xpathurl, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+       var allRefText = Zotero.Utilities.trimInternal(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+       var allRefTexturl = Zotero.Utilities.trimInternal(doc.evaluate(xpathurl, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 
 
 

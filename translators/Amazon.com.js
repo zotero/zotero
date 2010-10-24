@@ -136,17 +136,17 @@ function doWeb(doc, url) {
 	
 		if (!xml..Errors.length()) {
 			if (xml..Publisher.length()){
-				publisher = Zotero.Utilities.cleanString(xml..Publisher[0].text().toString());
+				publisher = Zotero.Utilities.trimInternal(xml..Publisher[0].text().toString());
 			}
 			
 			var binding = "";
 			if (xml..Binding.length()){
-				binding = Zotero.Utilities.cleanString(xml..Binding[0].text().toString());
+				binding = Zotero.Utilities.trimInternal(xml..Binding[0].text().toString());
 			}
 			
 			var productGroup = "";
 			if (xml..ProductGroup.length()){
-				productGroup = Zotero.Utilities.cleanString(xml..ProductGroup[0].text().toString());
+				productGroup = Zotero.Utilities.trimInternal(xml..ProductGroup[0].text().toString());
 			}
 				
 			if (productGroup=="Book") {
@@ -178,7 +178,7 @@ function doWeb(doc, url) {
 			}
 			
 			if(xml..RunningTime.length()){
-				newItem.runningTime = Zotero.Utilities.cleanString(xml..RunningTime[0].text().toString());
+				newItem.runningTime = Zotero.Utilities.trimInternal(xml..RunningTime[0].text().toString());
 			}
 			
 			// Retrieve authors and other creators
@@ -192,31 +192,31 @@ function doWeb(doc, url) {
 			}
 			
 			if (xml..PublicationDate.length()){
-				newItem.date = Zotero.Utilities.cleanString(xml..PublicationDate[0].text().toString());
+				newItem.date = Zotero.Utilities.trimInternal(xml..PublicationDate[0].text().toString());
 			} else if (xml..ReleaseDate.length()){
-				newItem.date = Zotero.Utilities.cleanString(xml..ReleaseDate[0].text().toString());
+				newItem.date = Zotero.Utilities.trimInternal(xml..ReleaseDate[0].text().toString());
 			}
 			if (xml..Edition.length()){
-				newItem.edition = Zotero.Utilities.cleanString(xml..Edition[0].text().toString());
+				newItem.edition = Zotero.Utilities.trimInternal(xml..Edition[0].text().toString());
 			}
 			if (xml..ISBN.length()){
-				newItem.ISBN = Zotero.Utilities.cleanString(xml..ISBN[0].text().toString());
+				newItem.ISBN = Zotero.Utilities.trimInternal(xml..ISBN[0].text().toString());
 			}
 //			Uncomment when numPages field is added to schema
 //			if (xml..NumberOfPages.length()){
-//				newItem.numPages = Zotero.Utilities.cleanString(xml..NumberOfPages[0].text().toString());
+//				newItem.numPages = Zotero.Utilities.trimInternal(xml..NumberOfPages[0].text().toString());
 //			}
-			var title = Zotero.Utilities.cleanString(xml..Title[0].text().toString());
+			var title = Zotero.Utilities.trimInternal(xml..Title[0].text().toString());
 			if(title.lastIndexOf("(") != -1 && title.lastIndexOf(")") == title.length-1) {
 				title = title.substring(0, title.lastIndexOf("(")-1);
 			}
 			if (xml..ASIN.length()){
-				var url = "http://www.amazon." + suffix + "/dp/" + Zotero.Utilities.cleanString(xml..ASIN[0].text().toString());
+				var url = "http://www.amazon." + suffix + "/dp/" + Zotero.Utilities.trimInternal(xml..ASIN[0].text().toString());
 				newItem.attachments.push({title:"Amazon.com Link", snapshot:false, mimeType:"text/html", url:url});
 			}
 			
 			if (xml..OriginalReleaseDate.length()){
-				newItem.extra = Zotero.Utilities.cleanString(xml..OriginalReleaseDate[0].text().toString());
+				newItem.extra = Zotero.Utilities.trimInternal(xml..OriginalReleaseDate[0].text().toString());
 			}
 			
 			newItem.title = title;

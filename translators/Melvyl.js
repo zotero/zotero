@@ -56,7 +56,7 @@ function doWeb(doc, url) {
 			do {
 				elmt = doc.evaluate(xpath, reviewRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				titleElmt = doc.evaluate(titleXpath, reviewRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				items[elmt.href] = Zotero.Utilities.cleanString(titleElmt.textContent);
+				items[elmt.href] = Zotero.Utilities.trimInternal(titleElmt.textContent);
 			} while (reviewRow = reviewRows.iterateNext());
 
 		} else {
@@ -67,7 +67,7 @@ function doWeb(doc, url) {
 			var titleElmts = doc.evaluate(titleXpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var titleElmt;
 			while ((elmt = elmts.iterateNext()) && (titleElmt = titleElmts.iterateNext())){
-				items[elmt.href] = Zotero.Utilities.cleanString(titleElmt.textContent);
+				items[elmt.href] = Zotero.Utilities.trimInternal(titleElmt.textContent);
 			}
 		}
 			

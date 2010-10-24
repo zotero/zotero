@@ -44,7 +44,7 @@ function doWeb(doc, url) {
 		var title;
 		do {
 			title = doc.evaluate('../../..//a[1]',multid, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			items[multid.value] = Zotero.Utilities.cleanString(title.textContent);
+			items[multid.value] = Zotero.Utilities.trimInternal(title.textContent);
 		} while (multid =multids.iterateNext());
 		
 		items = Zotero.selectItems(items);

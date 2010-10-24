@@ -73,7 +73,7 @@ function scrape(doc) {
 	while(font = fonts.iterateNext()) {
 		var pageRe = /([^;]+);(?:[\xA0 ]+Pages?[\xA0 ]+([A-Z0-9\-]+))?/
 		// grab pages and date
-		Zotero.debug(Zotero.Utilities.cleanString(font.nodeValue));
+		Zotero.debug(Zotero.Utilities.trimInternal(font.nodeValue));
 		var m = pageRe.exec(font.nodeValue);
 		if(m) {
 			newItem.date = m[1];

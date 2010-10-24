@@ -30,7 +30,7 @@ function detectWeb(doc, url)
               var row;
               while(row=rows.iterateNext())
               {
-		if(Zotero.Utilities.cleanString(row.textContent.toLowerCase())=="travel")
+		if(Zotero.Utilities.trimInternal(row.textContent.toLowerCase())=="travel")
                               {return "newspaperArticle";}
               }
 
@@ -124,14 +124,14 @@ function scrape(doc,url)
       if(!test)
               {xpath='//p[@class="by-author"]';}
       var info=doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE,null).iterateNext().textContent;
-      info=Zotero.Utilities.cleanString(info);
+      info=Zotero.Utilities.trimInternal(info);
       var date=findDate(info);
       if(date)
       {
               newItem.date=date;
               info=info.replace(date,'');
       }
-      info=Zotero.Utilities.cleanString(info);
+      info=Zotero.Utilities.trimInternal(info);
       if(info.indexOf(", ")>-1)
       {
               var phrases=info.split(", ");
@@ -177,7 +177,7 @@ function doWeb(doc, url)
       var row;
       while(row=rows.iterateNext())
       {
-              if(Zotero.Utilities.cleanString(row.textContent.toLowerCase())=="travel")
+              if(Zotero.Utilities.trimInternal(row.textContent.toLowerCase())=="travel")
                       {scrape(doc,url); return true;}
       }
 
@@ -214,7 +214,7 @@ function doWeb(doc, url)
                               if(count==0)
                                       {break;}
                               if(row.href.indexOf("/travel/")<0)
-				{items[row.href]=Zotero.Utilities.cleanString(row.textContent);}
+				{items[row.href]=Zotero.Utilities.trimInternal(row.textContent);}
                               count--;
                       }
 

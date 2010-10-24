@@ -62,7 +62,7 @@ function doWeb(doc, url) {
 			id = doc.evaluate('./@id', listElt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			link = host + "/export/ris/" + id;
 			title = doc.evaluate('.//p[@class="title"]', listElt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			items[link] = Zotero.Utilities.cleanString(title);
+			items[link] = Zotero.Utilities.trimInternal(title);
 		} 
 
 		items = Zotero.selectItems(items);

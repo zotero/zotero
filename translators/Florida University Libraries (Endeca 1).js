@@ -43,7 +43,7 @@ function doWeb(doc, url){
 		// search page
 		var items = new Array();
 		do {
-			items[elmt.href] = Zotero.Utilities.cleanString(elmt.textContent);
+			items[elmt.href] = Zotero.Utilities.trimInternal(elmt.textContent);
 		} while (elmt = elmts.iterateNext());
 		
 		items = Zotero.selectItems(items);

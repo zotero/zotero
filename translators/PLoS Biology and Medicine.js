@@ -42,7 +42,7 @@ function doWeb(doc, url) {
 		var articles = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var next_article = articles.iterateNext();
 		while (next_article) {
-			items[next_article.href] = Zotero.Utilities.cleanString(next_article.textContent);
+			items[next_article.href] = Zotero.Utilities.trimInternal(next_article.textContent);
 			next_article = articles.iterateNext();
 		}
 		items = Zotero.selectItems(items);

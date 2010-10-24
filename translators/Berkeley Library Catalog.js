@@ -69,7 +69,7 @@ function doWeb(doc, url) {
 				record.leader = "00000"+value;
 			} else {
 				var ind = value[3]+value[5];
-				if (value.match(/^\d{1,2}\s{3}/)) value = Zotero.Utilities.cleanString(value.replace(/^\d{1,2}\s{3}/, ""));
+				if (value.match(/^\d{1,2}\s{3}/)) value = Zotero.Utilities.trimInternal(value.replace(/^\d{1,2}\s{3}/, ""));
 				value = value.replace(/\$([a-z0-9]) /g, marc.subfieldDelimiter+"$1");
 				if(value[0] != marc.subfieldDelimiter) {
 					value = marc.subfieldDelimiter+"a"+value;

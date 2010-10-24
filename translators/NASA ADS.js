@@ -62,7 +62,7 @@ function doWeb(doc, url) {
 
 		do {
 			titleElmt = titleElmts.iterateNext(); //iterate a second time to avoid score
-			items[bibElmt.value] = Zotero.Utilities.cleanString(titleElmt.textContent);
+			items[bibElmt.value] = Zotero.Utilities.trimInternal(titleElmt.textContent);
 		} while((bibElmt = bibElmts.iterateNext()) && (titleElmt = titleElmts.iterateNext()));
 		items = Zotero.selectItems(items);
 		if(!items) return true;

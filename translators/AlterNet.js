@@ -19,14 +19,14 @@ function detectWeb(doc, url) {
 	if (index != -1) {
 		// ordinary aritcle
 		var id = url.toString().substr(index + 1, 5);
-		Zotero.Utilities.cleanString(id);
+		Zotero.Utilities.trimInternal(id);
 		if (Number(id)) {
 			return "magazineArticle";
 		}
 		//columnist or blog article
 		index += url.toString().substr(index + 1).indexOf('/');
 		id = url.toString().substr(index + 2, 5);
-		Zotero.Utilities.cleanString(id);
+		Zotero.Utilities.trimInternal(id);
 		if  (Number(id) && url.toString().search('blog') == -1) {
 			return "magazineArticle";
 		}
@@ -44,14 +44,14 @@ function scrape(doc, url, title) {
 	     if (index != -1) {
 		     // ordinary aritcle
 		     var id = url.toString().substr(index + 1, 5);
-		     Zotero.Utilities.cleanString(id);
+		     Zotero.Utilities.trimInternal(id);
 		     if (Number(id)) { 
 			     var newItem = new Zotero.Item("magazineArticle");
 		     }
 		     //columnist or blog article
 		     index += url.toString().substr(index + 1).indexOf('/');
 		     id = url.toString().substr(index + 2, 5);
-		     Zotero.Utilities.cleanString(id);
+		     Zotero.Utilities.trimInternal(id);
 		     if  (Number(id) && url.toString().search('blog') == -1) {
 			     var newItem = new Zotero.Item("magazineArticle");
 		     }
@@ -154,7 +154,7 @@ function scrape(doc, url, title) {
 		     else {
 		     	     index += url.toString().substr(index + 1).indexOf('/');
 		     	     id = url.toString().substr(index + 2, 5);
-		     	     Zotero.Utilities.cleanString(id);
+		     	     Zotero.Utilities.trimInternal(id);
 		     	     if  (Number(id)) {
 				     printurl = "http://www.alternet.org/module/printversion/" + id;
 				     if (newItem.itemType == "blogPost") {

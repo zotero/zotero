@@ -58,7 +58,7 @@ function scrape(doc, url) {
 
 
         if (metaTags["Authors"]) {
-              var author = Zotero.Utilities.cleanString(metaTags["Authors"]);
+              var author = Zotero.Utilities.trimInternal(metaTags["Authors"]);
               if (author.substr(0,3).toLowerCase() == "by ") {
                       author = author.substr(3);
               }

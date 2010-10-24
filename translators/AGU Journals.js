@@ -45,7 +45,7 @@ function fixCaps(s)
 {
        if(s!='')
        {
-               words=Zotero.Utilities.cleanString(s).toLowerCase().split(" ");
+               words=Zotero.Utilities.trimInternal(s).toLowerCase().split(" ");
                for (var j = 0 ; j < words.length ; j++)
                {
                        if (j==0||(words[j][0] ==words[j][0].toLowerCase()&&words[j]!="or"&&words[j]!="and"&&words[j]!="of"&&words[j]!="in"))
@@ -80,7 +80,7 @@ function scrape(doc,url)
        temp=doc.evaluate(xpath, doc, nsResolver,XPathResult.ANY_TYPE,null).iterateNext();
        if(temp)
        {
-               temp=Zotero.Utilities.cleanString(temp.textContent).split(" ");;
+               temp=Zotero.Utilities.trimInternal(temp.textContent).split(" ");;
                newItem.date=temp[1]+" "+temp[0]+", "+temp[2];
        }
 
@@ -98,14 +98,14 @@ function scrape(doc,url)
        {
                for(var n=0;n<(3+2*count);n++)
                        {temp2=temp.iterateNext();}
-               newItem.abstractNote=Zotero.Utilities.cleanString(temp2.textContent);
+               newItem.abstractNote=Zotero.Utilities.trimInternal(temp2.textContent);
        }
 
        xpath='//p[@id="runhead"]';
        temp=doc.evaluate(xpath, doc, nsResolver,XPathResult.ANY_TYPE,null).iterateNext();
        if(temp)
        {
-               temp=Zotero.Utilities.cleanString(temp.textContent).split(", ");
+               temp=Zotero.Utilities.trimInternal(temp.textContent).split(", ");
                newItem.publicationTitle=fixCaps(temp[0]);
                for(var n=1;temp[n];n++)
                {
@@ -124,7 +124,7 @@ function scrape(doc,url)
        temp=doc.evaluate(xpath, doc, nsResolver,XPathResult.ANY_TYPE,null).iterateNext();
        if(temp)
        {
-               temp=Zotero.Utilities.cleanString(temp.textContent.replace('Keywords:',''));
+               temp=Zotero.Utilities.trimInternal(temp.textContent.replace('Keywords:',''));
                newItem.tags=temp.replace('.','').split('; ');
        }
        xpath='//p[@id="citation"]/span[@id="journal"]';
@@ -225,7 +225,7 @@ function doWeb(doc,url)
                        while(citerow=citerows.iterateNext())
                        {
                                linkrow=linkrows.iterateNext();
-                               items[linkrow.href]=Zotero.Utilities.cleanString(citerow.textContent);
+                               items[linkrow.href]=Zotero.Utilities.trimInternal(citerow.textContent);
                        }
                        return processList(items);
                }

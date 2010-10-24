@@ -217,7 +217,7 @@ function doWeb(doc, url) {
 			}
 			link = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&fh=0&h="+recid;
 			name = doc.evaluate('.//span[@class="srchHit"]', listElt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			items[link] = Zotero.Utilities.cleanString(name);
+			items[link] = Zotero.Utilities.trimInternal(name);
 		} 
 
 		items = Zotero.selectItems(items);

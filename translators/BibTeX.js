@@ -1729,7 +1729,7 @@ function getFieldValue(read) {
 }
 
 function beginRecord(type, closeChar) {
-	type = Zotero.Utilities.cleanString(type.toLowerCase());
+	type = Zotero.Utilities.trimInternal(type.toLowerCase());
 	if(type != "string") {
 		var zoteroType = bibtex2zoteroTypeMap[type];
 		if (!zoteroType) {

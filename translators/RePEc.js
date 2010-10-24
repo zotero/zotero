@@ -118,7 +118,7 @@ function doWeb(doc, url) {
                    		}
                 		)
 				
-				items[bibcode] = Zotero.Utilities.cleanString(titleElmt.textContent);
+				items[bibcode] = Zotero.Utilities.trimInternal(titleElmt.textContent);
 
 			} while((bibElmt = bibElmts.iterateNext()) && (titleElmt = titleElmts.iterateNext()));
 

@@ -113,14 +113,14 @@ function doWeb(doc, url) {
 		var newItem = new Zotero.Item("artwork");
 		var title = "";
 		if (xml..title.length()){
-			var title = Zotero.Utilities.cleanString(xml..title[0].text().toString());
+			var title = Zotero.Utilities.trimInternal(xml..title[0].text().toString());
 			if (title == ""){
 				title = " ";
 			}
 			newItem.title = title;
 		}
 		for(var i=0; i<xml..tag.length(); i++) {
-			newItem.tags.push(Zotero.Utilities.cleanString(xml..tag[i].text().toString()));
+			newItem.tags.push(Zotero.Utilities.trimInternal(xml..tag[i].text().toString()));
 		}
 		if (xml..dates.length()){
 			var date = xml..dates[0].@taken.toString();

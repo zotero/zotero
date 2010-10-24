@@ -24,7 +24,7 @@ function detectWeb(doc, url) {
 		var genre = doc.evaluate('//comment()[substring(., 1, 6) = " Genre"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		
 		if(genre) {
-			var value = Zotero.Utilities.cleanString(genre.nodeValue.substr(7));
+			var value = Zotero.Utilities.trimInternal(genre.nodeValue.substr(7));
 			if(value == "article") {
 				return "journalArticle";
 			} else if(value == "book") {

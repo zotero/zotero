@@ -187,7 +187,7 @@ function scrape (doc) {
 		if (abstractBlock)
 			item.abstractNote = doc.evaluate('./tbody/tr/td[2]/table/tbody/tr/td/font', abstractBlock, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		/*if (referenceBlock) {
-			var note = Zotero.Utilities.cleanString(
+			var note = Zotero.Utilities.trimInternal(
 							doc.evaluate('./tbody/tr/td[2]/table', referenceBlock, ns, XPathResult.ANY_TYPE, null)
 							.iterateNext().textContent);
 			Zotero.debug(note);

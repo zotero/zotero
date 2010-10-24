@@ -78,7 +78,7 @@ function doWeb(doc, url) {
 				if(tagRegexp.test(links[j].href)) {
 					var text = links[j].textContent;
 					if(text) {
-						text = Zotero.Utilities.cleanString(text);
+						text = Zotero.Utilities.trimInternal(text);
 						if(!rejectRegexp.test(text)) {
 							if(availableItems[i]) {
 								availableItems[i] += " "+text;
@@ -91,7 +91,7 @@ function doWeb(doc, url) {
 			}
 			// if no title, pull from second td
 			if(!availableItems[i]) {
-				availableItems[i] = Zotero.Utilities.cleanString(doc.evaluate('./td[2]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+				availableItems[i] = Zotero.Utilities.trimInternal(doc.evaluate('./td[2]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 			}
 		}
 		

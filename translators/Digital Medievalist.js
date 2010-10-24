@@ -100,7 +100,7 @@ function parseXML(text, itemUrlBase, doc) {
 		newItem.tags[i] = kwords[i];
 	} 
 
-	//newItem.abstractNote = Zotero.Utilities.cleanString(xml..text.front.argument.(@n == "abstract").p.text().toString());
+	//newItem.abstractNote = Zotero.Utilities.trimInternal(xml..text.front.argument.(@n == "abstract").p.text().toString());
 	newItem.attachments.push({document:doc, title:doc.title});
 	
 	newItem.complete();

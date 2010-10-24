@@ -67,7 +67,7 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
-	var results = Zotero.Utilities.cleanString(doc.evaluate('//div[@class="bibheader-resultsrange"]/b', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	var results = Zotero.Utilities.trimInternal(doc.evaluate('//div[@class="bibheader-resultsrange"]/b', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 	var post = "S="+doc.evaluate('.//input[@name="S"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
 
 	if(results.indexOf("-") != -1) {
@@ -83,7 +83,7 @@ function doWeb(doc, url) {
 		while(tableRow = tableRows.iterateNext()) {
 			var id = doc.evaluate('.//input[@name="R"]', tableRow, nsResolver, XPathResult.ANY_TYPE,
 				null).iterateNext().value;
-			items[id] = Zotero.Utilities.cleanString(doc.evaluate('.//span[@class="titles-title"]', tableRow,
+			items[id] = Zotero.Utilities.trimInternal(doc.evaluate('.//span[@class="titles-title"]', tableRow,
 				nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		}
 		
@@ -132,7 +132,7 @@ function doWeb(doc, url) {
 				newItem = new Zotero.Item("journalArticle");
 			} else if(lines[i].substr(2, 4) == "  - " && haveStarted) {
 				var fieldCode = lines[i].substr(0, 2);
-				var fieldContent = Zotero.Utilities.cleanString(lines[i].substr(6));
+				var fieldContent = Zotero.Utilities.trimInternal(lines[i].substr(6));
 				if(fieldCode == "TI") {
 					newItem.title = fieldContent.replace(/\. \[\w+\]$/, "");
 				} else if(fieldCode == "AU") {
