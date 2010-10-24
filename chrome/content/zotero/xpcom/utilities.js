@@ -407,19 +407,6 @@ Zotero.Utilities.prototype.rand = function (min, max) {
 
 
 /**
- * Return true according to a given probability
- *
- * @param	{Integer}	x		Will return true every x times on average
- * @return	{Boolean}			On average, TRUE every x times
- *									the function is called
- */
-Zotero.Utilities.prototype.probability = function (x) {
-	return this.rand(1, x) == this.rand(1, x);
-}
-
-
-
-/**
  * Determine the necessary data type for SQLite parameter binding
  *
  * @return	int		0 for string, 32 for int32, 64 for int64

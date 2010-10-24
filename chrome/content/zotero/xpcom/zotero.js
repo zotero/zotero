@@ -1377,7 +1377,7 @@ var Zotero = new function(){
 		// DEBUG: this might not need to be permanent
 		Zotero.Relations.purge();
 		
-		if (!skipStoragePurge && Zotero.Utilities.prototype.probability(10)) {
+		if (!skipStoragePurge && Math.random() < 1/10) {
 			Zotero.Sync.Storage.purgeDeletedStorageFiles('zfs');
 			Zotero.Sync.Storage.purgeDeletedStorageFiles('webdav');
 		}
