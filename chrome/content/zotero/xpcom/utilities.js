@@ -1033,7 +1033,6 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
  * Wrap all functions so that arguments are guaranteed safe
  */
 borrowedFunctions = {
-	"inArray":Zotero.inArray,
 	"formatDate":Zotero.Date.formatDate,
 	"strToDate":Zotero.Date.strToDate,
 	"strToISO":Zotero.Date.strToISO,
