@@ -67,8 +67,6 @@ var Zotero = new function(){
 	this.flattenArguments = flattenArguments;
 	this.getAncestorByTagName = getAncestorByTagName;
 	this.join = join;
-	this.arrayToHash = arrayToHash;
-	this.hasValues = hasValues;
 	this.randomString = randomString;
 	this.moveToUnique = moveToUnique;
 	
@@ -1175,31 +1173,6 @@ var Zotero = new function(){
 			a.push(obj[i]);
 		}
 		return a.join(delim);
-	}
-	
-	
-	function arrayToHash(array){
-		var hash = {};
-		
-		for each(var val in array){
-			hash[val] = true;
-		}
-		
-		return hash;
-	}
-	
-	
-	/*
-	 * Returns true if an object (or associative array) has at least one value
-	 */
-	function hasValues(obj) {
-		Zotero.debug("WARNING: Zotero.isEmpty() is deprecated! Use Zotero.Utilities.isEmpty(obj)", 2);
-		
-		for (var i in obj) {
-			return true;
-		}
-		
-		return false;
 	}
 	
 	

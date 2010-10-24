@@ -971,7 +971,7 @@ var ZoteroPane = new function()
 	
 	
 	function clearTagSelection() {
-		if (Zotero.hasValues(this.getTagSelection())) {
+		if (!Zotero.Utilities.prototype.isEmpty(this.getTagSelection())) {
 			var tagSelector = document.getElementById('zotero-tag-selector');
 			tagSelector.clearAll();
 		}
