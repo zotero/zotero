@@ -80,7 +80,7 @@ Zotero.Debug = new function () {
 			dump('zotero(' + level + ')' + (_time ? deltaStr : '') + ': ' + message + "\n\n");
 		}
 		if (_store) {
-			if (Zotero.Utilities.prototype.probability(1000)) {
+			if (Math.random() < 1/1000) {
 				// Remove initial lines if over limit
 				var overage = this.count() - Zotero.Prefs.get('debug.store.limit');
 				if (overage > 0) {
