@@ -39,7 +39,7 @@ function scrape(doc, url) {
 	}
 	
 	if (metaTags["description"]) {
-		newItem.abstractNote = Zotero.Utilities.cleanString(Zotero.Utilities.cleanTags(metaTags["description"]));
+		newItem.abstractNote = Zotero.Utilities.trimInternal(Zotero.Utilities.cleanTags(metaTags["description"]));
 	}
 	
 	if (metaTags["date"]) {
@@ -80,7 +80,7 @@ function scrape(doc, url) {
 	}
 	
 	if (doc.evaluate('//span[@class="postedby"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var byline = Zotero.Utilities.cleanString(doc.evaluate('//span[@class="postedby"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var byline = Zotero.Utilities.trimInternal(doc.evaluate('//span[@class="postedby"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		if (byline.substr(0,9).toLowerCase() == "posted by") {
 			byline = byline.substr(10).split(" ");
 		} else {

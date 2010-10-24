@@ -46,7 +46,7 @@ function doWeb(doc, url){
 		var availableItems = new Array();
 		var i = 0;
 		while (searchElmt = searchElmts.iterateNext()){
-			availableItems[i] = Zotero.Utilities.cleanString(searchElmt.textContent);
+			availableItems[i] = Zotero.Utilities.trimInternal(searchElmt.textContent);
 			var docID = doc.evaluate('./@title', searchElmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 			links.push("http://vlp.mpiwg-berlin.mpg.de/library/meta?id=" + docID);
 			i++;

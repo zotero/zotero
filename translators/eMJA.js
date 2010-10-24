@@ -52,9 +52,9 @@ function doWeb(doc, url) {
 			var title = titles.iterateNext();
 			var link = links.iterateNext();
 			while (title) {
-				//Zotero.debug(Zotero.Utilities.cleanString(title.textContent));
-				//Zotero.debug(Zotero.Utilities.cleanString(link.textContent));
-				items[Zotero.Utilities.cleanString(link.textContent)] = Zotero.Utilities.cleanString(title.textContent).substring(6);
+				//Zotero.debug(Zotero.Utilities.trimInternal(title.textContent));
+				//Zotero.debug(Zotero.Utilities.trimInternal(link.textContent));
+				items[Zotero.Utilities.trimInternal(link.textContent)] = Zotero.Utilities.trimInternal(title.textContent).substring(6);
 				title = titles.iterateNext();
 				link = links.iterateNext();
 			}
@@ -63,7 +63,7 @@ function doWeb(doc, url) {
 			var things = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 			var next_thing = things.iterateNext();
 			while (next_thing) {
-				items[next_thing.href] = senCase(Zotero.Utilities.cleanString(next_thing.textContent));
+				items[next_thing.href] = senCase(Zotero.Utilities.trimInternal(next_thing.textContent));
 				next_thing = things.iterateNext();
 			}
 		}

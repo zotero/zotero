@@ -70,7 +70,7 @@ function doWeb(doc, url) {
 						var value = doc.evaluate('./td', field, nsResolver,
 					    	XPathResult.ANY_TYPE, null).iterateNext();
 						if(value) {
-							items[url] = Zotero.Utilities.cleanString(value.textContent);
+							items[url] = Zotero.Utilities.trimInternal(value.textContent);
 						}
 					}
 				}

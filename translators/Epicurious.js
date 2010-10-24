@@ -71,7 +71,7 @@ function scrape(doc){
 	xpath = '//div[@id="recipe_intro"]/p';
 	if (elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		var abstract = elmt.textContent;
-		abstract = Zotero.Utilities.cleanString(abstract);
+		abstract = Zotero.Utilities.trimInternal(abstract);
 		newItem.abstractNote = abstract;		
 	}
 

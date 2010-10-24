@@ -56,7 +56,7 @@ function doWeb(doc, url) {
 			doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var tableRow, fulltextLink;
 		while((tableRow = tableRows.iterateNext()) && (fulltextLink = fulltextLinks.iterateNext())) {
-			items[fulltextLink.href] = Zotero.Utilities.cleanString(tableRow.textContent);
+			items[fulltextLink.href] = Zotero.Utilities.trimInternal(tableRow.textContent);
 		}
 		
 		items = Zotero.selectItems(items);

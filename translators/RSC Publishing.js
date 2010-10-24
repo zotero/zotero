@@ -63,7 +63,7 @@ function doChap(newItem, chaptext)	{
 		if(chapdata[pos].indexOf("Editors")!=-1)	{
 			var editors=chapdata[pos].split(",");
 			for(var i=0; i<=editors.length-1; i++)	{
-				editors[i]=Zotero.Utilities.cleanString(editors[i]);
+				editors[i]=Zotero.Utilities.trimInternal(editors[i]);
 				var names=editors[i].split(" ");
 				var creators=new Array();
 				if(i==0)
@@ -78,7 +78,7 @@ function doChap(newItem, chaptext)	{
 		if(chapdata[pos].indexOf("Authors")!=-1)	{
 			var authors=chapdata[pos].split(",");
 			for(var i=0; i<=authors.length-1; i++)	{
-				authors[i]=Zotero.Utilities.cleanString(authors[i]);
+				authors[i]=Zotero.Utilities.trimInternal(authors[i]);
 				var names=authors[i].split(" ");
 				var creators=new Array();
 				if(i==0)
@@ -107,7 +107,7 @@ function doBook(newItem, bookdata)	{
 				vol=fields[pos].substring(i+1);
 			else
 				vol=fields[pos].substring(fields[pos].lastIndexOf(" "));
-			newItem.volume=Zotero.Utilities.cleanString(vol);
+			newItem.volume=Zotero.Utilities.trimInternal(vol);
 		}
 		if(fields[pos].indexOf("Edition")!=-1)	{
 			var i=fields[pos].lastIndexOf(";");
@@ -115,7 +115,7 @@ function doBook(newItem, bookdata)	{
 				ed=fields[pos].substring(i+1);
 			else
 				ed=fields[pos].substring(fields[pos].lastIndexOf(" "));
-			newItem.edition=Zotero.Utilities.cleanString(ed);
+			newItem.edition=Zotero.Utilities.trimInternal(ed);
 		}
 		if(fields[pos].indexOf("Copyright")!=-1)	{
 			var i=fields[pos].lastIndexOf(";");
@@ -124,7 +124,7 @@ function doBook(newItem, bookdata)	{
 				date=fields[pos].substring(i+1);
 			else
 				date=fields[pos].substring(fields[pos].indexOf(":")+2);
-			newItem.date=Zotero.Utilities.cleanString(date);
+			newItem.date=Zotero.Utilities.trimInternal(date);
 		}
 		if(fields[pos].indexOf("ISBN")!=-1&&fields[pos].indexOf("print")!=-1)	{
 			var i=fields[pos].lastIndexOf(";");
@@ -133,12 +133,12 @@ function doBook(newItem, bookdata)	{
 				isbn=fields[pos].substring(i+1);
 			else
 				isbn=fields[pos].substring(fields[pos].indexOf(":")+2);
-			newItem.ISBN=Zotero.Utilities.cleanString(isbn);
+			newItem.ISBN=Zotero.Utilities.trimInternal(isbn);
 		}
 		if(fields[pos].indexOf("Author")!=-1||fields[pos].indexOf("Editor")!=-1)	{
 			var authors=fields[pos].split(",");
 			for(var i=0; i<=authors.length-1; i++)	{
-				authors[i]=Zotero.Utilities.cleanString(authors[i]);
+				authors[i]=Zotero.Utilities.trimInternal(authors[i]);
 				var names=authors[i].split(" ");
 				var creators=new Array();
 				creators.firstName=names[0];
@@ -170,7 +170,7 @@ function doWeb(doc, url)	{
 			var items=new Array();
 			var doi;
 			while(doi=dois.iterateNext())
-				items[doi.nodeValue]=Zotero.Utilities.cleanString(titles.iterateNext().textContent);
+				items[doi.nodeValue]=Zotero.Utilities.trimInternal(titles.iterateNext().textContent);
 			items=Zotero.selectItems(items);
 			var string="http://www.rsc.org/delivery/_ArticleLinking/refdownload.asp?";
 			for(var codes in items)	{
@@ -257,7 +257,7 @@ function doWeb(doc, url)	{
 		var authors=auth.split(",");
 		if(newItem.title.indexOf("Interview")==-1)
 			for(var i=0; i<=authors.length-1; i++)	{
-				authors[i]=Zotero.Utilities.cleanString(authors[i]);
+				authors[i]=Zotero.Utilities.trimInternal(authors[i]);
 				var names=authors[i].split(" ");
 				var creator=new Array();
 				creator.firstName=names[0];

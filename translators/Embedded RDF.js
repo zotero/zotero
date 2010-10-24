@@ -76,7 +76,7 @@ function doWeb(doc, url) {
 	for(var i=0; i<metaTags.length; i++) {
 		var tag = metaTags[i].getAttribute("name");
 		var value = metaTags[i].getAttribute("content");
-		if(tag && value && tag.substr(0, 3).toLowerCase() == prefix) {
+		if(tag && value && tag.substr(0, prefix.length).toLowerCase() == prefix) {
 			if(tag == "dc.title") {
 				foundTitle = true;
 			}

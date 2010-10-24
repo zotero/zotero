@@ -74,7 +74,7 @@ function doWeb(doc, url) {
 				newID = newID.replace(/arXiv:/, "");
 				newID = newID.replace(/\//g, "%2F");
 				newID = newID.replace(/v\d*/, ""); //remove version number 
-				availableItems[i] = Zotero.Utilities.cleanString(title.textContent.replace(/^\s*Title:\s+/, "")); 
+				availableItems[i] = Zotero.Utilities.trimInternal(title.textContent.replace(/^\s*Title:\s+/, "")); 
 				arXivIDs[i] = newID;
 				i++;
 			} while ((elmt = elmts.iterateNext()) && (title = titles.iterateNext()));
@@ -123,7 +123,7 @@ function doWeb(doc, url) {
 		var test = xml..responseDate.text().toString();
 
 		if (citation.dc_title.length()){
-			title = Zotero.Utilities.cleanString(citation.dc_title.text().toString());
+			title = Zotero.Utilities.trimInternal(citation.dc_title.text().toString());
 			newItem.title = title;
 		}
 		Zotero.debug("article title: " + title);
@@ -137,26 +137,26 @@ function doWeb(doc, url) {
 		}
 		if (citation.dc_date.length()) {
 			var dates = citation.dc_date;
-			newItem.date = Zotero.Utilities.cleanString(dates[0].text().toString());
+			newItem.date = Zotero.Utilities.trimInternal(dates[0].text().toString());
 		}
 		if (citation.dc_description.length()) {
 			var descriptions = citation.dc_description;
 			for (var j=0; j<descriptions.length(); j++) {
-				var noteStr = Zotero.Utilities.cleanString(descriptions[j].text().toString());
+				var noteStr = Zotero.Utilities.trimInternal(descriptions[j].text().toString());
 				newItem.notes.push({note:noteStr});
 			}
 		}
 		if (citation.dc_subject.length()) {
 			var subjects = citation.dc_subject;
 			for (var j=0; j<subjects.length(); j++) { 
-				var subjectValue = Zotero.Utilities.cleanString(subjects[j].text().toString());
+				var subjectValue = Zotero.Utilities.trimInternal(subjects[j].text().toString());
 				newItem.tags.push(subjectValue);
 			}
 		}
 		if (citation.dc_identifier.length()) {
 			var identifiers = citation.dc_identifier;
 			for (var j=0; j<identifiers.length(); j++) {
-				var identifier = Zotero.Utilities.cleanString(identifiers[j].text().toString());
+				var identifier = Zotero.Utilities.trimInternal(identifiers[j].text().toString());
 				if (identifier.substr(0, 4) == "doi:") {
 					newItem.DOI = identifier;
 				}

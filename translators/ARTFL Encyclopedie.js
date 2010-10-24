@@ -113,13 +113,13 @@ function scrape (doc){
 			 	var tagstring = m[1].replace("&amp;", "&", "g");
 				var tags = tagstring.split(";")
 				for(var j in tags) {
-					newItem.tags.push(Zotero.Utilities.cleanString(tags[j]));
+					newItem.tags.push(Zotero.Utilities.trimInternal(tags[j]));
 				}
 			}
 			var authorRe = new RegExp('>'+title+'</a>,([^,]*),', "i");
 			var m = authorRe.exec(text);
 			var author = m[1];
-			author = Zotero.Utilities.cleanString(author);
+			author = Zotero.Utilities.trimInternal(author);
 			// reconcile author
 			author = reconcileAuthor(author);	
 			if (author!="NA"){ // ignore unknown authors

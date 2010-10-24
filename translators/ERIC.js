@@ -73,7 +73,7 @@ function doWeb(doc, url)	{
 				title = doc.evaluate('./td[2]/a', row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 				id = doc.evaluate('./td[6]', row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 				Zotero.debug(title + id);
-				items[id] = Zotero.Utilities.cleanTags(Zotero.Utilities.cleanString(title));
+				items[id] = Zotero.Utilities.cleanTags(Zotero.Utilities.trimInternal(title));
 			}
 		} else {
 			// We have normal search results
@@ -83,7 +83,7 @@ function doWeb(doc, url)	{
 			var titlerows=doc.evaluate(titlpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var id;
 			while(id=ids.iterateNext())
-				items[id.id]=Zotero.Utilities.cleanTags(Zotero.Utilities.cleanString(titlerows.iterateNext().textContent));
+				items[id.id]=Zotero.Utilities.cleanTags(Zotero.Utilities.trimInternal(titlerows.iterateNext().textContent));
 		}
 		items=Zotero.selectItems(items);
 		if (!items) return false;

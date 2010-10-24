@@ -53,7 +53,7 @@ function scrape(doc, url) {
 	associateMeta(newItem, metaTags, "Owner", "extra");
 	
 	if (metaTags["Author"]) {
-		var author = Zotero.Utilities.cleanString(metaTags["Author"]);
+		var author = Zotero.Utilities.trimInternal(metaTags["Author"]);
 		if (author.substr(0,3).toLowerCase() == "by ") {
 			author = author.substr(3);
 		}
@@ -78,7 +78,7 @@ function scrape(doc, url) {
 		Zotero.debug(newItem.tags);
 		for (var i in newItem.tags) {
 			if (newItem.tags[i] != "") {
-				newItem.tags[i] = Zotero.Utilities.cleanString(newItem.tags[i].replace("  ", ", "));
+				newItem.tags[i] = Zotero.Utilities.trimInternal(newItem.tags[i].replace("  ", ", "));
 				var words = newItem.tags[i].split(" ");
 				for (var j = 0 ; j < words.length ; j++) {
 					if (words[j][0] == words[j][0].toLowerCase()) {

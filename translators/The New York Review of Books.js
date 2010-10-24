@@ -27,7 +27,7 @@ function detectWeb(doc, url) {
 
 function associateMeta(newItem, metaTags, field, zoteroField) {
 	if(metaTags.namedItem(field)) {
-		newItem[zoteroField] = Zotero.Utilities.cleanString(metaTags.namedItem(field).getAttribute("content"));
+		newItem[zoteroField] = Zotero.Utilities.trimInternal(metaTags.namedItem(field).getAttribute("content"));
 	}
 }
 
@@ -59,7 +59,7 @@ function scrape(doc) {
 			newItem.date = newItem.date.textContent;
 		}
 		
-		info = Zotero.Utilities.cleanString(info.textContent);
+		info = Zotero.Utilities.trimInternal(info.textContent);
 		
 		// get volume and issue
 		var infoRe = /Volume ([0-9]+), Number ([0-9]+)/;

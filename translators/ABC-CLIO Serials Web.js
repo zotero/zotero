@@ -43,7 +43,7 @@ function doWeb(doc, url) {
 		                         elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
 		if(title, checkbox) {
 			checkbox = checkbox.name;
-			availableItems[checkbox] = Zotero.Utilities.cleanString(title.textContent).substr(6);
+			availableItems[checkbox] = Zotero.Utilities.trimInternal(title.textContent).substr(6);
 			
 			var links = doc.evaluate('./tbody/tr/td[b/text() = "Fulltext: ["]/a',
 									 elmt, nsResolver, XPathResult.ANY_TYPE, null);
@@ -51,7 +51,7 @@ function doWeb(doc, url) {
 			
 			var attach = new Array();
 			while(link = links.iterateNext()) {
-				attach.push({url:link.href, title:Zotero.Utilities.cleanString(link.textContent)+" Full Text",
+				attach.push({url:link.href, title:Zotero.Utilities.trimInternal(link.textContent)+" Full Text",
 				             mimeType:"text/html"});
 			}
 			availableAttachments[checkbox] = attach;

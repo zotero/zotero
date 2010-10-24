@@ -81,10 +81,10 @@ function processURLs(urls) {
 							}
 						}
 					} else {
-						newItem.creators.push(Zotero.Utilities.cleanString(match[2]));
+						newItem.creators.push(Zotero.Utilities.trimInternal(match[2]));
 					}
 				} else if(match[1] == 'Publication') {
-					match[2] = Zotero.Utilities.cleanString(match[2]);
+					match[2] = Zotero.Utilities.trimInternal(match[2]);
 					if(match[2].substring(match[2].length-1) == ',') {
 						match[2] = match[2].substring(0, match[2].length-1);
 					}
@@ -113,7 +113,7 @@ function processURLs(urls) {
 					
 					var tags = match[2].split("--");
 					for(var j in tags) {
-						newItem.tags.push(Zotero.Utilities.cleanString(tags[j]));
+						newItem.tags.push(Zotero.Utilities.trimInternal(tags[j]));
 					}
 				} else if(match[1] == "Accession No") {
 					newItem.accessionNumber = Zotero.Utilities.superCleanString(match[2]);

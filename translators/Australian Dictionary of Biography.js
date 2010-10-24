@@ -52,10 +52,10 @@ function doWeb(doc, url) {
 	}
 	Zotero.Utilities.processDocuments(records, function(doc) {
 		var item = new Zotero.Item("bookSection");
-		var author = Zotero.Utilities.cleanString(doc.evaluate('//div[@id="content"]/p[strong="Author"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().lastChild.textContent);
+		var author = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="content"]/p[strong="Author"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().lastChild.textContent);
 		item.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
-		item.title = Zotero.Utilities.cleanString(doc.evaluate('//h1', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-		var pubdetails = Zotero.Utilities.cleanString(doc.evaluate('//div[@id="content"]/p[strong="Print Publication Details"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		item.title = Zotero.Utilities.trimInternal(doc.evaluate('//h1', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var pubdetails = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="content"]/p[strong="Print Publication Details"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		pubdetails = pubdetails.match(/Volume (\d+), ([\w ]+), (\d{4}), p+\.*\s+([\d-]+)/);
 		item.volume = RegExp.$1;
 		item.publisher = RegExp.$2;

@@ -36,7 +36,7 @@ function detectWeb(doc, url) {
 		var type = doc.evaluate('//tr[td[1][@class="data_heading"]/text() = "Publication Type"]/td[3]',
 			doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if(type) {
-			type = Zotero.Utilities.cleanString(type.textContent);
+			type = Zotero.Utilities.trimInternal(type.textContent);
 			if(type == "Book Chapter") {
 				return "bookSection";
 			} else if(type.substr(0, 4) == "Book") {

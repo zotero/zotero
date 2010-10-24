@@ -65,7 +65,7 @@ function scrape(doc,url) {
 	//Get title
 	var xpath = "/html/body/table[2]/tbody/tr[1]/td[3]/h2";
 	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
-		var title = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+		var title = Zotero.Utilities.trimInternal(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
 		
 		var title1 = title.split(" ");		 
 		for (var j in title1) {
@@ -77,37 +77,37 @@ function scrape(doc,url) {
 	//Get Abstract
 	var xpath = '//td[@id="abCell"]';
 	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
-		var abstract = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+		var abstract = Zotero.Utilities.trimInternal(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
 	}
 	
 	//Get Applicant
 	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[4]/td[2]";
 	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
-		var applicantField = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+		var applicantField = Zotero.Utilities.trimInternal(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
 	}
 
 	//Get application number
 	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[8]/td[2]";
 	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
-		var anumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+		var anumber = Zotero.Utilities.trimInternal(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
 	}
 	
 	//Get patent number
 	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[1]/td[2]";
 	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
-		var pnumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+		var pnumber = Zotero.Utilities.trimInternal(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
 	}
 	
 	//Get CIB
 	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[6]/td[2]";
 	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
-		var CIBnumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+		var CIBnumber = Zotero.Utilities.trimInternal(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
 	}
 	
 	//Get ECLA
 	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[7]/td[2]";
 	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
-		var tmpECLAnumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);		
+		var tmpECLAnumber = Zotero.Utilities.trimInternal(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);		
 		tmpECLAnumber = tmpECLAnumber.substr(24);
 		tmpECLAnumber = tmpECLAnumber.replace(/\)+/g, '; ');
 		var aus = tmpECLAnumber.split("; ");
@@ -120,20 +120,20 @@ function scrape(doc,url) {
 	//Get priority number
 	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[9]/td[2]";
 	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
-		var prnumber = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+		var prnumber = Zotero.Utilities.trimInternal(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 	}	
 
 	
 	//Get date
 	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[2]/td[2]";
 	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
-		var date = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+		var date = Zotero.Utilities.trimInternal(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
 	}
 	
 	//Get Creators
 	var xpath = "//table[1]/tbody/tr/td[1]/table/tbody/tr[3]/td[2]";
 	if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
-		var inventorField = Zotero.Utilities.cleanString(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
+		var inventorField = Zotero.Utilities.trimInternal(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);	
 	}
 
 	//Create Zotero Ref

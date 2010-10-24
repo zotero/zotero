@@ -41,7 +41,7 @@ function doWeb(doc, url) {
 		var hdl = doc.evaluate('.//input[@name="hdl"]', tableRow, nsResolver, XPathResult.ANY_TYPE,
 			null).iterateNext().value;
 		if(!singlePage){
-			items[hdl] = Zotero.Utilities.cleanString(tableRow.getElementsByTagName("a")[0].textContent);
+			items[hdl] = Zotero.Utilities.trimInternal(tableRow.getElementsByTagName("a")[0].textContent);
 		} else {
 			var m = doc.evaluate('.//td[@class="count"]', tableRow, nsResolver, XPathResult.ANY_TYPE, 
 				null).iterateNext().textContent.match(/[0-9]+/);
@@ -99,14 +99,14 @@ function doWeb(doc, url) {
 			var article = ppsarticle.article;
 			var newItem = new Zotero.Item("newspaperArticle");
 			
-			newItem.title = Zotero.Utilities.cleanString(article.headline.paragraph.text().toString());
-			newItem.publicationTitle = Zotero.Utilities.cleanString(article.sourceName.text().toString());
+			newItem.title = Zotero.Utilities.trimInternal(article.headline.paragraph.text().toString());
+			newItem.publicationTitle = Zotero.Utilities.trimInternal(article.sourceName.text().toString());
 			for each(var tag in article..name) {
 				newItem.tags.push(tag.text().toString());
 			}
 			newItem.date = Zotero.Utilities.formatDate(Zotero.Utilities.strToDate(article.publicationDate.date.text().toString()));
 			if(article.byline.length()) {
-				var byline = Zotero.Utilities.cleanString(article.byline.text().toString().replace(/By/i, ""));
+				var byline = Zotero.Utilities.trimInternal(article.byline.text().toString().replace(/By/i, ""));
 				var authors = byline.split(/ (?:\&|and) /i);
 				for each(var author in authors) {
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));

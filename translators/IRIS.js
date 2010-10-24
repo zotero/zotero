@@ -252,7 +252,7 @@ function scrape(doc) {
 					// Collect title
 					var title = doc.evaluate("./td[2]", elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 					if(checkbox && title) {
-						items[checkbox.name] = Zotero.Utilities.cleanString(title);
+						items[checkbox.name] = Zotero.Utilities.trimInternal(title);
 					}
 				} while(elmt = elmts.iterateNext());
 					items = Zotero.selectItems(items);

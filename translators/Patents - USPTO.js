@@ -45,7 +45,7 @@ function scrape(doc) {
 			tmpTitle = tmpTitle + " - " + fontTags[i].innerHTML;
 		}
 	}
-	tmpTitle = Zotero.Utilities.cleanString(tmpTitle);
+	tmpTitle = Zotero.Utilities.trimInternal(tmpTitle);
 	tmpTitle = tmpTitle.replace(/<[^>]+>/g, "");
 	newItem.title = tmpTitle;
 	

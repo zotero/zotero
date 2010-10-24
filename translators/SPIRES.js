@@ -47,7 +47,7 @@ function doWeb(doc, url) {
 		// search page
 		var items = new Object();		
 		do {
-			items[citation.href] = Zotero.Utilities.cleanString(title.textContent);
+			items[citation.href] = Zotero.Utilities.trimInternal(title.textContent);
 		} while((citation=citations.iterateNext()) && (title=titles.iterateNext()))
 		
 		items = Zotero.selectItems(items);

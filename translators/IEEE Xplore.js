@@ -51,7 +51,7 @@ function doWeb(doc, url) {
 				}
 			}
 			
-			items[link] = Zotero.Utilities.cleanString(title);
+			items[link] = Zotero.Utilities.trimInternal(title);
 		}
 		
 		items = Zotero.selectItems(items);

@@ -30,8 +30,8 @@ function detectWeb(doc, url) {
 }
 
 function extractCitation(type, citation) {
-	type = Zotero.Utilities.cleanString(type).toLowerCase();
-	citation = Zotero.Utilities.cleanString(citation);
+	type = Zotero.Utilities.trimInternal(type).toLowerCase();
+	citation = Zotero.Utilities.trimInternal(citation);
 	
 	if(type == "book article") {
 		var item = new Zotero.Item("bookSection");

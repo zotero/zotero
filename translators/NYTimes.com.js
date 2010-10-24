@@ -88,7 +88,7 @@ function scrape(doc, url) {
 	associateMeta(newItem, metaTags, "articleid", "accessionNumber");
 	
 	if(metaTags["byl"]) {
-		var author = Zotero.Utilities.cleanString(metaTags["byl"]);
+		var author = Zotero.Utilities.trimInternal(metaTags["byl"]);
 		if(author.substr(0, 3).toLowerCase() == "by ") {
 			author = author.substr(3);
 		}

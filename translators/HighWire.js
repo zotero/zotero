@@ -145,7 +145,7 @@ function doWeb(doc, url) {
 				var links = doc.evaluate('.//a', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
 				while(link = links.iterateNext()) {
 					// prefer Full Text snapshots, but take abstracts
-					var textContent = Zotero.Utilities.cleanString(link.textContent);
+					var textContent = Zotero.Utilities.trimInternal(link.textContent);
 					if((textContent.substr(0, 8) == "Abstract" && !snapshot) || textContent.substr(0, 9) == "Full Text") {
 						snapshot = link.href;
 					} else if(textContent.substr(0, 3) == "PDF") {
@@ -157,7 +157,7 @@ function doWeb(doc, url) {
 			snapshots[gca] = snapshot;
 			pdfs[gca] = pdf;
 			
-			items[gca] = Zotero.Utilities.cleanString(title);
+			items[gca] = Zotero.Utilities.trimInternal(title);
 		}
 		
 		items = Zotero.selectItems(items);
