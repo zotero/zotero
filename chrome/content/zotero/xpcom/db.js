@@ -1010,6 +1010,30 @@ Zotero.DBConnection.prototype.stopDummyStatement = function () {
 }
 
 
+/**
+ * Determine the necessary data type for SQLite parameter binding
+ *
+ * @return	int		0 for string, 32 for int32, 64 for int64
+ */
+Zotero.DBConnection.prototype.getSQLDataType = function(value) {
+	var strVal = value + '';
+	if (strVal.match(/^[1-9]+[0-9]*$/)) {
+		// These upper bounds also specified in Zotero.DB
+		//
+		// Store as 32-bit signed integer
+		if (value <= 2147483647) {
+			return 32;
+		}
+		// Store as 64-bit signed integer
+		// 2^53 is JS's upper-bound for decimal integers
+		else if (value < 9007199254740992) {
+			return 64;
+		}
+	}
+	return 0;
+}
+
+
 /////////////////////////////////////////////////////////////////
 //
 // Private methods
