@@ -847,14 +847,13 @@ function updatePDFToolsStatus() {
 	
 	// If we haven't already generated the required and documentation messages
 	if (!converterIsRegistered && !requiredLabel.hasChildNodes()) {
-		var utils = new Zotero.Utilities();
 		
 		// Xpdf link
 		var str = Zotero.getString('zotero.preferences.search.pdf.toolsRequired',
 			[Zotero.Fulltext.pdfConverterName, Zotero.Fulltext.pdfInfoName,
 			'<a href="' + Zotero.Fulltext.pdfToolsURL + '">'
 			+ Zotero.Fulltext.pdfToolsName + '</a>']);
-		var parts = utils.parseMarkup(str);
+		var parts = Zotero.Utilities.parseMarkup(str);
 		for (var i=0; i<parts.length; i++) {
 			var part = parts[i];
 			if (part.type == 'text') {
@@ -883,7 +882,7 @@ function updatePDFToolsStatus() {
 			+ Zotero.getString('zotero.preferences.search.pdf.documentationLink')
 			+ '</a>';
 		var str = Zotero.getString('zotero.preferences.search.pdf.advancedUsers', link);
-		var parts = utils.parseMarkup(str);
+		var parts = Zotero.Utilities.parseMarkup(str);
 		
 		for (var i=0; i<parts.length; i++) {
 			var part = parts[i];
@@ -953,7 +952,7 @@ function checkPDFToolsDownloadVersion() {
 				+ Zotero.platform.replace(' ', '-') + '.latest';
 	
 	// Find latest version for this platform
-	var sent = Zotero.Utilities.HTTP.doGet(url, function (xmlhttp) {
+	var sent = Zotero.HTTP.doGet(url, function (xmlhttp) {
 		try {
 			if (xmlhttp.status == 200) {
 				var converterIsRegistered = Zotero.Fulltext.pdfConverterIsRegistered();
@@ -1082,7 +1081,7 @@ function installPDFTools(installVersions) {
 	}
 	
 	// Find latest version for this platform
-	var sent = Zotero.Utilities.HTTP.doHead(url, function (xmlhttp) {
+	var sent = Zotero.HTTP.doHead(url, function (xmlhttp) {
 		try {
 			if (xmlhttp.status == 200) {
 				// If doing both and on converter, chain pdfinfo
@@ -1431,7 +1430,7 @@ Zotero_Preferences.Debug_Output = {
 				+ " (gzipped from " + oldLen + " bytes; "
 				+ savings + "% savings)");
 			
-			if (Zotero.Utilities.HTTP.browserIsOffline()) {
+			if (Zotero.HTTP.browserIsOffline()) {
 				ps.alert(
 					null,
 					Zotero.getString(

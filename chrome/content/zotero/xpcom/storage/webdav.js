@@ -224,7 +224,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._getStorageModificationTime = funct
 	
 	var self = this;
 	
-	Zotero.Utilities.HTTP.doGet(uri, function (req) {
+	Zotero.HTTP.doGet(uri, function (req) {
 		self._checkResponse(req, self);
 		
 		var funcName = "Zotero.Sync.Storage.WebDAV_getStorageModificationTime()";
@@ -288,7 +288,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._getStorageModificationTime = funct
 		
 		// Delete invalid .prop files
 		if (invalid) {
-			var msg = "Invalid mod date '" + Zotero.Utilities.prototype.ellipsize(mtime, 20)
+			var msg = "Invalid mod date '" + Zotero.Utilities.ellipsize(mtime, 20)
 				+ "' for item " + Zotero.Items.getLibraryKeyHash(item);
 			Zotero.debug(msg, 1);
 			Components.utils.reportError(msg);
@@ -320,7 +320,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._setStorageModificationTime = funct
 		<hash>{hash}</hash>
 	</properties>;
 	
-	Zotero.Utilities.HTTP.WebDAV.doPut(uri, prop.toXMLString(), function (req) {
+	Zotero.HTTP.WebDAV.doPut(uri, prop.toXMLString(), function (req) {
 		switch (req.status) {
 			case 200:
 			case 201:
@@ -707,7 +707,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.getLastSyncTime = function (callbac
 	if (!this._cachedCredentials) {
 		var self = this;
 		
-		Zotero.Utilities.HTTP.doOptions(this.rootURI, function (req) {
+		Zotero.HTTP.doOptions(this.rootURI, function (req) {
 			self._checkResponse(req, self);
 			
 			if (req.status != 200) {
@@ -728,7 +728,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.getLastSyncTime = function (callbac
 		var uri = this.rootURI;
 		var successFileURI = uri.clone();
 		successFileURI.spec += "lastsync";
-		Zotero.Utilities.HTTP.doHead(successFileURI, function (req) {
+		Zotero.HTTP.doHead(successFileURI, function (req) {
 			var ts = undefined;
 			try {
 				if (req.responseText) {
@@ -783,7 +783,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.setLastSyncTime = function (callbac
 		
 		var self = this;
 		
-		Zotero.Utilities.HTTP.WebDAV.doPut(successFileURI, " ", function (req) {
+		Zotero.HTTP.WebDAV.doPut(successFileURI, " ", function (req) {
 			Zotero.debug(req.responseText);
 			Zotero.debug(req.status);
 			
@@ -865,7 +865,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 	var self = this;
 	
 	// Test whether URL is WebDAV-enabled
-	var request = Zotero.Utilities.HTTP.doOptions(uri, function (req) {
+	var request = Zotero.HTTP.doOptions(uri, function (req) {
 		// Timeout
 		if (req.status == 0) {
 			self._checkResponse(req, self);
@@ -904,12 +904,12 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 		
 		// Get the Authorization header used in case we need to do a request
 		// on the parent below
-		var channelAuthorization = Zotero.Utilities.HTTP.getChannelAuthorization(req.channel);
+		var channelAuthorization = Zotero.HTTP.getChannelAuthorization(req.channel);
 		
 		var headers = { Depth: 0 };
 		
 		// Test whether Zotero directory exists
-		Zotero.Utilities.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (req) {
+		Zotero.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (req) {
 			Zotero.debug(req.responseText);
 			Zotero.debug(req.status);
 			
@@ -918,7 +918,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 					// Test if Zotero directory is writable
 					var testFileURI = uri.clone();
 					testFileURI.spec += "zotero-test-file";
-					Zotero.Utilities.HTTP.WebDAV.doPut(testFileURI, " ", function (req) {
+					Zotero.HTTP.WebDAV.doPut(testFileURI, " ", function (req) {
 						Zotero.debug(req.responseText);
 						Zotero.debug(req.status);
 						
@@ -926,7 +926,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 							case 200:
 							case 201:
 							case 204:
-								Zotero.Utilities.HTTP.doHead(
+								Zotero.HTTP.doHead(
 									testFileURI,
 									function (req) {
 										Zotero.debug(req.responseText);
@@ -935,7 +935,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 										switch (req.status) {
 											case 200:
 												// Delete test file
-												Zotero.Utilities.HTTP.WebDAV.doDelete(
+												Zotero.HTTP.WebDAV.doDelete(
 													testFileURI,
 													function (req) {
 														Zotero.debug(req.responseText);
@@ -1034,7 +1034,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 					
 					// Zotero directory wasn't found, so see if at least
 					// the parent directory exists
-					Zotero.Utilities.HTTP.WebDAV.doProp("PROPFIND", parentURI, xmlstr,
+					Zotero.HTTP.WebDAV.doProp("PROPFIND", parentURI, xmlstr,
 						function (req) {
 							Zotero.debug(req.responseText);
 							Zotero.debug(req.status);
@@ -1316,7 +1316,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.purgeOrphanedStorageFiles = functio
 	
 	var self = this;
 	
-	Zotero.Utilities.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (req) {
+	Zotero.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (req) {
 		Zotero.debug(req.responseText);
 			
 		var funcName = "Zotero.Sync.Storage.purgeOrphanedStorageFiles()";
@@ -1413,7 +1413,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.purgeOrphanedStorageFiles = functio
  */
 Zotero.Sync.Storage.Session.WebDAV.prototype._createServerDirectory = function (callback) {
 	var uri = this.rootURI;
-	Zotero.Utilities.HTTP.WebDAV.doMkCol(uri, function (req) {
+	Zotero.HTTP.WebDAV.doMkCol(uri, function (req) {
 		Zotero.debug(req.responseText);
 		Zotero.debug(req.status);
 		
@@ -1536,7 +1536,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._deleteStorageFiles = function (fil
 		deleteURI.QueryInterface(Components.interfaces.nsIURL);
 		deleteURI.fileName = files[i];
 		deleteURI.QueryInterface(Components.interfaces.nsIURI);
-		Zotero.Utilities.HTTP.WebDAV.doDelete(deleteURI, function (req) {
+		Zotero.HTTP.WebDAV.doDelete(deleteURI, function (req) {
 			switch (req.status) {
 				case 204:
 				// IIS 5.1 and Sakai return 200
@@ -1586,7 +1586,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._deleteStorageFiles = function (fil
 			}
 			
 			// Delete property file
-			Zotero.Utilities.HTTP.WebDAV.doDelete(deletePropURI, function (req) {
+			Zotero.HTTP.WebDAV.doDelete(deletePropURI, function (req) {
 				switch (req.status) {
 					case 204:
 					// IIS 5.1 and Sakai return 200

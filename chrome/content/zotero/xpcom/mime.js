@@ -281,7 +281,7 @@ Zotero.MIME = new function(){
 	
 	
 	this.getMIMETypeFromURL = function (url, callback) {
-		Zotero.Utilities.HTTP.doHead(url, function(xmlhttp) {
+		Zotero.HTTP.doHead(url, function(xmlhttp) {
 			if (xmlhttp.status != 200 && xmlhttp.status != 204) {
 				Zotero.debug("Attachment HEAD request returned with status code "
 					+ xmlhttp.status + " in Zotero.MIME.getMIMETypeFromURL()", 2);

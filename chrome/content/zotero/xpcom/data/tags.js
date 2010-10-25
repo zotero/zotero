@@ -77,7 +77,7 @@ Zotero.Tags = new function() {
 	 * Returns the tagID matching given tag and type
 	 */
 	function getID(name, type, libraryID) {
-		name = Zotero.Utilities.prototype.trim(name);
+		name = Zotero.Utilities.trim(name);
 		var lcname = name.toLowerCase();
 		
 		if (!libraryID) {
@@ -119,7 +119,7 @@ Zotero.Tags = new function() {
 	 * Returns all tagIDs for this tag (of all types)
 	 */
 	function getIDs(name, libraryID) {
-		name = Zotero.Utilities.prototype.trim(name);
+		name = Zotero.Utilities.trim(name);
 		var sql = "SELECT tagID FROM tags WHERE name=? AND libraryID";
 		var params = [name];
 		if (libraryID) {
@@ -137,7 +137,7 @@ Zotero.Tags = new function() {
 	 * Returns an array of tag types for tags matching given tag
 	 */
 	function getTypes(name, libraryID) {
-		name = Zotero.Utilities.prototype.trim(name);
+		name = Zotero.Utilities.trim(name);
 		var sql = "SELECT type FROM tags WHERE name=? AND libraryID";
 		var params = [name];
 		if (libraryID) {
@@ -285,7 +285,7 @@ Zotero.Tags = new function() {
 	function rename(tagID, name) {
 		Zotero.debug('Renaming tag', 4);
 		
-		name = Zotero.Utilities.prototype.trim(name);
+		name = Zotero.Utilities.trim(name);
 		
 		Zotero.DB.beginTransaction();
 		

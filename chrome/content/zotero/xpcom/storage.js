@@ -1067,7 +1067,7 @@ Zotero.Sync.Storage = new function () {
 			var entryName = entries.getNext();
 			var b64re = /%ZB64$/;
 			if (entryName.match(b64re)) {
-				var fileName = Zotero.Utilities.Base64.decode(
+				var fileName = Zotero.Utilities.Internal.Base64.decode(
 					entryName.replace(b64re, '')
 				);
 			}
@@ -1410,7 +1410,7 @@ Zotero.Sync.Storage = new function () {
 			
 			//Zotero.debug("Adding file " + fileName);
 			
-			fileName = Zotero.Utilities.Base64.encode(fileName) + "%ZB64";
+			fileName = Zotero.Utilities.Internal.Base64.encode(fileName) + "%ZB64";
 			zipWriter.addEntryFile(
 				fileName,
 				Components.interfaces.nsIZipWriter.COMPRESSION_DEFAULT,
@@ -1814,7 +1814,7 @@ Zotero.Sync.Storage.QueueManager = new function () {
 		
 		var kbRemaining = Zotero.getString(
 			'sync.storage.kbRemaining',
-			Zotero.Utilities.prototype.numberFormat(remaining / 1024, 0)
+			Zotero.Utilities.numberFormat(remaining / 1024, 0)
 		);
 		var totalRequests = queue.totalRequests;
 		var filesRemaining = Zotero.getString(

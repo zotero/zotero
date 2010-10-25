@@ -111,7 +111,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getStorageFileInfo = function (item, 
 	
 	var self = this;
 	
-	Zotero.Utilities.HTTP.doGet(uri, function (req) {
+	Zotero.HTTP.doGet(uri, function (req) {
 		var funcName = "Zotero.Sync.Storage.Session.ZFS._getStorageFileInfo()";
 		
 		if (req.status == 404) {
@@ -467,7 +467,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getFileUploadParameters = function (i
 	}
 	
 	var mtime = item.attachmentModificationTime;
-	var hash = Zotero.Utilities.prototype.md5(file);
+	var hash = Zotero.Utilities.Internal.md5(file);
 	
 	var body = "md5=" + hash + "&filename=" + encodeURIComponent(filename)
 				+ "&filesize=" + file.fileSize + "&mtime=" + mtime;
@@ -477,7 +477,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getFileUploadParameters = function (i
 	
 	var self = this;
 	
-	Zotero.Utilities.HTTP.doPost(uri, body, function (req) {
+	Zotero.HTTP.doPost(uri, body, function (req) {
 		var funcName = "Zotero.Sync.Storage.Session.ZFS._getFileUploadParameters()";
 		
 		if (req.status == 413) {
@@ -571,7 +571,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._getFileUploadParameters = function (i
 		
 		try {
 			// Strip XML declaration and convert to E4X
-			var xml = new XML(Zotero.Utilities.prototype.trim(req.responseText.replace(/<\?xml.*\?>/, '')));
+			var xml = new XML(Zotero.Utilities.trim(req.responseText.replace(/<\?xml.*\?>/, '')));
 		}
 		catch (e) {
 			self.onError("Invalid response retrieving file upload parameters");
@@ -748,7 +748,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._onUploadComplete = function (httpRequ
 	var self = this;
 	
 	// Register upload on server
-	Zotero.Utilities.HTTP.doPost(uri, body, function (req) {
+	Zotero.HTTP.doPost(uri, body, function (req) {
 		if (req.status != 204) {
 			var msg = "Unexpected file registration status " + req.status
 				+ " in Zotero.Sync.Storage._onUploadComplete()"
@@ -832,7 +832,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype.getLastSyncTime = function (callback) 
 		var uri = this.rootURI;
 		// TODO: move to root uri
 		uri.spec += "?auth=1";
-		Zotero.Utilities.HTTP.doGet(uri, function (req) {
+		Zotero.HTTP.doGet(uri, function (req) {
 			if (req.status != 200) {
 				var msg = "Unexpected status code " + req.status + " caching "
 					+ "authentication credentials in Zotero.Sync.Storage.Session.ZFS.getLastSyncTime()";
@@ -847,7 +847,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype.getLastSyncTime = function (callback) 
 		return;
 	}
 	
-	Zotero.Utilities.HTTP.doGet(successFileURI, function (req) {
+	Zotero.HTTP.doGet(successFileURI, function (req) {
 		if (req.responseText) {
 			Zotero.debug(req.responseText);
 		}
@@ -910,7 +910,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype.setLastSyncTime = function (callback, 
 	
 	var self = this;
 	
-	Zotero.Utilities.HTTP.doPost(successFileURI, "", function (req) {
+	Zotero.HTTP.doPost(successFileURI, "", function (req) {
 		Zotero.debug(req.responseText);
 		Zotero.debug(req.status);
 		
@@ -971,7 +971,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype.purgeDeletedStorageFiles = function (c
 	
 	var self = this;
 	
-	Zotero.Utilities.HTTP.doPost(uri, "", function (xmlhttp) {
+	Zotero.HTTP.doPost(uri, "", function (xmlhttp) {
 		if (xmlhttp.status != 204) {
 			if (callback) {
 				callback(false);

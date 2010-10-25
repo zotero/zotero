@@ -113,7 +113,7 @@ Zotero.Collection.prototype._set = function (field, val) {
 			return;
 		
 		case 'name':
-			val = Zotero.Utilities.prototype.trim(val);
+			val = Zotero.Utilities.trim(val);
 			break;
 	}
 	
@@ -843,16 +843,16 @@ Zotero.Collection.prototype.diff = function (collection, includeMatches, ignoreO
 	var numDiffs = Zotero.Collections.diff(thisData, otherData, diff, includeMatches);
 	
 	// For the moment, just compare children and increase numDiffs if any differences
-	var d1 = Zotero.Utilities.prototype.arrayDiff(
+	var d1 = Zotero.Utilities.arrayDiff(
 		thisData.childCollections, otherData.childCollections
 	);
-	var d2 = Zotero.Utilities.prototype.arrayDiff(
+	var d2 = Zotero.Utilities.arrayDiff(
 		otherData.childCollections, thisData.childCollections
 	);
-	var d3 = Zotero.Utilities.prototype.arrayDiff(
+	var d3 = Zotero.Utilities.arrayDiff(
 		thisData.childItems, otherData.childItems
 	);
-	var d4 = Zotero.Utilities.prototype.arrayDiff(
+	var d4 = Zotero.Utilities.arrayDiff(
 		otherData.childItems, thisData.childItems
 	);
 	numDiffs += d1.length + d2.length;

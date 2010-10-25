@@ -210,8 +210,7 @@ Zotero.ProgressWindow = function(_window){
 			newHB.setAttribute("class", "zotero-progress-item-hbox");
 			var newDescription = _progressWindow.document.createElement("description");
 			
-			var utils = new Zotero.Utilities();
-			var parts = utils.parseMarkup(text);
+			var parts = Zotero.Utilities.parseMarkup(text);
 			for each(var part in parts) {
 				if (part.type == 'text') {
 					var elem = _progressWindow.document.createTextNode(part.text);

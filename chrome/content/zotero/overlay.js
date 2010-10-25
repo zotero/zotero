@@ -971,7 +971,7 @@ var ZoteroPane = new function()
 	
 	
 	function clearTagSelection() {
-		if (!Zotero.Utilities.prototype.isEmpty(this.getTagSelection())) {
+		if (!Zotero.Utilities.isEmpty(this.getTagSelection())) {
 			var tagSelector = document.getElementById('zotero-tag-selector');
 			tagSelector.clearAll();
 		}
@@ -1547,7 +1547,7 @@ var ZoteroPane = new function()
 					return;
 				}
 				
-				var title = Zotero.Utilities.prototype.trim(newTitle.value);
+				var title = Zotero.Utilities.trim(newTitle.value);
 				
 				if (!title) {
 					return;
@@ -1599,7 +1599,7 @@ var ZoteroPane = new function()
 					return;
 				}
 				
-				var name = Zotero.Utilities.prototype.trim(newName.value);
+				var name = Zotero.Utilities.trim(newName.value);
 				
 				if (!name) {
 					return;
@@ -2492,7 +2492,7 @@ var ZoteroPane = new function()
 							var doi = item.getField('DOI');
 							if (doi) {
 								// Pull out DOI, in case there's a prefix
-								doi = Zotero.Utilities.prototype.cleanDOI(doi);
+								doi = Zotero.Utilities.cleanDOI(doi);
 								if (doi) {
 									uri = "http://dx.doi.org/" + encodeURIComponent(doi);
 								}
@@ -2720,12 +2720,12 @@ var ZoteroPane = new function()
 			if (!text) {
 				text = '';
 			}
-			text = Zotero.Utilities.prototype.trim(text);
+			text = Zotero.Utilities.trim(text);
 			
 			if (text) {
 				text = '<blockquote'
 						+ (citeURI ? ' cite="' + citeURI + '"' : '')
-						+ '>' + Zotero.Utilities.prototype.text2html(text) + "</blockquote>";
+						+ '>' + Zotero.Utilities.text2html(text) + "</blockquote>";
 			}
 			
 			var item = new Zotero.Item('note');
@@ -2769,7 +2769,7 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		text = Zotero.Utilities.prototype.trim(text);
+		text = Zotero.Utilities.trim(text);
 		
 		if (!text.length) {
 			return false;
@@ -2777,7 +2777,7 @@ var ZoteroPane = new function()
 		
 		text = '<blockquote'
 					+ (citeURI ? ' cite="' + citeURI + '"' : '')
-					+ '>' + Zotero.Utilities.prototype.text2html(text) + "</blockquote>";
+					+ '>' + Zotero.Utilities.text2html(text) + "</blockquote>";
 		
 		var items = this.getSelectedItems();
 		if (this.itemsView.selection.count == 1 && items[0] && items[0].isNote()) {
@@ -3042,7 +3042,7 @@ var ZoteroPane = new function()
 					Zotero.debug(e);
 				}
 				
-				Zotero.Utilities.HTTP.processDocuments([url], processor, done, exception);
+				Zotero.HTTP.processDocuments([url], processor, done, exception);
 			}
 			// Otherwise create placeholder item, attach attachment, and update from that
 			else {

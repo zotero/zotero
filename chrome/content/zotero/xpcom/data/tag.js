@@ -96,7 +96,7 @@ Zotero.Tag.prototype._set = function (field, val) {
 			return;
 		
 		case 'name':
-			val = Zotero.Utilities.prototype.trim(val);
+			val = Zotero.Utilities.trim(val);
 			break;
 	}
 	
@@ -372,8 +372,8 @@ Zotero.Tag.prototype.save = function (full) {
 				var sql = "SELECT itemID FROM itemTags WHERE tagID=?";
 				var dbItemIDs = Zotero.DB.columnQuery(sql, tagID);
 				if (dbItemIDs) {
-					removed = Zotero.Utilities.prototype.arrayDiff(dbItemIDs, currentIDs);
-					newids = Zotero.Utilities.prototype.arrayDiff(currentIDs, dbItemIDs);
+					removed = Zotero.Utilities.arrayDiff(dbItemIDs, currentIDs);
+					newids = Zotero.Utilities.arrayDiff(currentIDs, dbItemIDs);
 				}
 				else {
 					newids = currentIDs;
@@ -381,10 +381,10 @@ Zotero.Tag.prototype.save = function (full) {
 			}
 			else {
 				if (this._previousData.linkedItems) {
-					removed = Zotero.Utilities.prototype.arrayDiff(
+					removed = Zotero.Utilities.arrayDiff(
 						this._previousData.linkedItems, currentIDs
 					);
-					newids = Zotero.Utilities.prototype.arrayDiff(
+					newids = Zotero.Utilities.arrayDiff(
 						currentIDs, this._previousData.linkedItems
 					);
 				}
@@ -483,10 +483,10 @@ Zotero.Tag.prototype.diff = function (tag, includeMatches, ignoreOnlyDateModifie
 	var numDiffs = Zotero.Tags.diff(thisData, otherData, diff, includeMatches);
 	
 	// For the moment, just compare linked items and increase numDiffs if any differences
-	var d1 = Zotero.Utilities.prototype.arrayDiff(
+	var d1 = Zotero.Utilities.arrayDiff(
 		otherData.linkedItems, thisData.linkedItems
 	);
-	var d2 = Zotero.Utilities.prototype.arrayDiff(
+	var d2 = Zotero.Utilities.arrayDiff(
 		thisData.linkedItems, otherData.linkedItems
 	);
 	numDiffs += d1.length + d2.length;

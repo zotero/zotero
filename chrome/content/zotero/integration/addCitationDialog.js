@@ -568,7 +568,7 @@ var Zotero_Citation_Dialog = new function () {
 		}
 		Zotero.debug("verified not custom");
 		
-		if(Zotero.Utilities.prototype.trim(citation) == "") {				
+		if(Zotero.Utilities.trim(citation) == "") {				
 			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 						.getService(Components.interfaces.nsIPromptService);
 			var insert = promptService.confirm(window,

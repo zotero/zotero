@@ -39,7 +39,7 @@ Zotero.Connector = new function() {
 	 * initializes a very rudimentary web server
 	 */
 	this.init = function() {
-		if (Zotero.Utilities.HTTP.browserIsOffline()) {
+		if (Zotero.HTTP.browserIsOffline()) {
 			Zotero.debug('Browser is offline -- not initializing connector HTTP server');
 			_registerOnlineObserver();
 			return;

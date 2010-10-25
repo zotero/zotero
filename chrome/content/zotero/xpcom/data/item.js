@@ -631,7 +631,7 @@ Zotero.Item.prototype.inCollection = function(collectionID) {
  */
 Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	if (typeof value == 'string') {
-		value = Zotero.Utilities.prototype.trim(value);
+		value = Zotero.Utilities.trim(value);
 	}
 	
 	this._disabledCheck();
@@ -1154,8 +1154,6 @@ Zotero.Item.prototype.save = function() {
 		}
 		lastPos++;
 	}
-	
-	var ZU = new Zotero.Utilities;
 	
 	Zotero.DB.beginTransaction();
 	
@@ -2339,7 +2337,7 @@ Zotero.Item.prototype.getNote = function() {
 	// Convert non-HTML notes on-the-fly
 	if (note) {
 		if (!note.substr(0, 36).match(/^<div class="zotero-note znv[0-9]+">/)) {
-			note = Zotero.Utilities.prototype.htmlSpecialChars(note);
+			note = Zotero.Utilities.htmlSpecialChars(note);
 			note = '<div class="zotero-note znv1"><p>'
 					+ note.replace(/\n/g, '</p><p>')
 						.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
@@ -2376,7 +2374,7 @@ Zotero.Item.prototype.setNote = function(text) {
 		throw ("text must be a string in Zotero.Item.setNote() (was " + typeof text + ")");
 	}
 	
-	text = Zotero.Utilities.prototype.trim(text);
+	text = Zotero.Utilities.trim(text);
 	
 	var oldText = this.getNote();
 	if (text == oldText) {
@@ -3083,7 +3081,7 @@ Zotero.Item.prototype.__defineGetter__('attachmentHash', function () {
 		return undefined;
 	}
 	
-	return Zotero.Utilities.prototype.md5(file);
+	return Zotero.Utilities.Internal.md5(file);
 });
 
 
@@ -3113,7 +3111,7 @@ Zotero.Item.prototype.__defineGetter__('attachmentText', function () {
 			
 			// TODO: remove post-Fx3.0
 			if (!str.trim) {
-				return Zotero.Utilities.prototype.trim(str);
+				return Zotero.Utilities.trim(str);
 			}
 			
 			return str.trim();
@@ -3161,7 +3159,7 @@ Zotero.Item.prototype.__defineGetter__('attachmentText', function () {
 	
 	else if (mimeType == 'text/html') {
 		str = Zotero.File.getContents(file);
-		str = Zotero.Utilities.prototype.unescapeHTML(str);
+		str = Zotero.Utilities.unescapeHTML(str);
 	}
 	
 	else if (mimeType == 'text/plain') {
@@ -3174,7 +3172,7 @@ Zotero.Item.prototype.__defineGetter__('attachmentText', function () {
 	
 	// TODO: remove post-Fx3.0
 	if (!str.trim) {
-		return Zotero.Utilities.prototype.trim(str);
+		return Zotero.Utilities.trim(str);
 	}
 	
 	return str.trim();
@@ -3274,7 +3272,7 @@ Zotero.Item.prototype.addTag = function(name, type) {
 		throw ('Cannot add tag to unsaved item in Item.addTag()');
 	}
 	
-	name = Zotero.Utilities.prototype.trim(name);
+	name = Zotero.Utilities.trim(name);
 	
 	if (!name) {
 		Zotero.debug('Not saving empty tag in Item.addTag()', 2);
@@ -3426,7 +3424,7 @@ Zotero.Item.prototype.replaceTag = function(oldTagID, newTag) {
 		throw ('Cannot replace tag on unsaved item');
 	}
 	
-	newTag = Zotero.Utilities.prototype.trim(newTag);
+	newTag = Zotero.Utilities.trim(newTag);
 	
 	if (!newTag) {
 		Zotero.debug('Not replacing with empty tag', 2);

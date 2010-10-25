@@ -402,9 +402,9 @@ Zotero.OpenURL = new function() {
 				}
 				
 				if(value.indexOf(",") !== -1) {
-					item.creators.push(Zotero.Utilities.prototype.cleanAuthor(value, type, true));
+					item.creators.push(Zotero.Utilities.cleanAuthor(value, type, true));
 				} else {
-					item.creators.push(Zotero.Utilities.prototype.cleanAuthor(value, type, false));
+					item.creators.push(Zotero.Utilities.cleanAuthor(value, type, false));
 				}
 			} else if(key == "rft.aucorp") {
 				complexAu.push({lastName:value, isInstitution:true});

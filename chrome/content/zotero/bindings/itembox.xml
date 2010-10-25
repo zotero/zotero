@@ -272,7 +272,7 @@
 								var doi = this.item.getField('DOI');
 								if (doi && typeof val == 'String') {
 									// Pull out DOI, in case there's a prefix
-									doi = Zotero.Utilities.prototype.cleanDOI(doi);;
+									doi = Zotero.Utilities.cleanDOI(doi);;
 									if (doi) {
 										spec = "http://dx.doi.org/" + encodeURIComponent(doi);
 									}
@@ -456,7 +456,7 @@
 						}
 						else if (fieldName == 'DOI' && val && typeof val == 'string') {
 							// Pull out DOI, in case there's a prefix
-							var doi = Zotero.Utilities.prototype.cleanDOI(val);
+							var doi = Zotero.Utilities.cleanDOI(val);
 							if (doi) {
 								doi = "http://dx.doi.org/" + encodeURIComponent(doi);
 								label.setAttribute("isButton", true);
@@ -1466,10 +1466,16 @@
 				<parameter name="textbox"/>
 				<body>
 				<![CDATA[
-					var comment = Zotero.Utilities.AutoComplete.getResultComment(textbox);
-					if (!comment)
+					var comment = false;
+					var controller = textbox.controller;
+					
+					for (var i=0; i<controller.matchCount; i++)
 					{
-						return;
+						if (controller.getValueAt(i) == textbox.value)
+						{
+							comment = controller.getCommentAt(i);
+							break;
+						}
 					}
 					
 					var [creatorID, numFields] = comment.split('-');
@@ -1941,8 +1947,7 @@
 							var newVal = val.toLowerCase();
 							break;
 						case 'title':
-							var utils = new Zotero.Utilities();
-							var newVal = utils.capitalizeTitle(val.toLowerCase(), true);
+							var newVal = Zotero.Utilities.capitalizeTitle(val.toLowerCase(), true);
 							break;
 						default:
 							throw ("Invalid transform mode '" + mode + "' in zoteroitembox.textTransform()");

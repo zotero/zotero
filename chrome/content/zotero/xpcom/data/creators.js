@@ -332,8 +332,8 @@ Zotero.Creators = new function() {
 		for each(var field in Zotero.Creators.fields) {
 			hashFields.push(fields[field]);
 		}
-		var ZU = new Zotero.Utilities;
-		return ZU.md5(hashFields.join('_'));
+		
+		return Zotero.Utilities.Internal.md5(hashFields.join('_'));
 	}
 	
 	

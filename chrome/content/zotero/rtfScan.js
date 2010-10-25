@@ -334,7 +334,7 @@ var Zotero_RTFScan = new function() {
 		
 		// make sure first name matches, if it exists
 		if(creator.length > lowerLast.length) {
-			var firstName = Zotero.Utilities.prototype.trim(creator.substr(0, creator.length-lowerLast.length));
+			var firstName = Zotero.Utilities.trim(creator.substr(0, creator.length-lowerLast.length));
 			if(firstName.length) {
 				// check to see whether the first name is all initials
 				const initialRe = /^(?:[A-Z]\.? ?)+$/;

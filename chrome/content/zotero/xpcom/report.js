@@ -36,7 +36,7 @@ Zotero.Report = new function() {
 	
 	var escapeXML = function (str) {
 		str = str.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/g, '\u2B1A');
-		return Zotero.Utilities.prototype.htmlSpecialChars(str);
+		return Zotero.Utilities.htmlSpecialChars(str);
 	}
 	
 	
@@ -224,7 +224,7 @@ Zotero.Report = new function() {
 				continue;
 			}
 			
-			arr[i] = Zotero.Utilities.prototype.trim(arr[i] + '');
+			arr[i] = Zotero.Utilities.trim(arr[i] + '');
 			
 			// Skip empty fields
 			if (!arr[i]) {

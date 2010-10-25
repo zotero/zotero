@@ -304,7 +304,7 @@ Zotero.QuickCopy = new function() {
 					}
 				}
 				
-				var text = Zotero.Utilities.prototype.unescapeHTML(textXML.toXMLString());
+				var text = Zotero.Utilities.unescapeHTML(textXML.toXMLString());
 				text = text.replace(new RegExp(ztab, "g"), "    ");
 				
 				if (text.trim) {
@@ -312,7 +312,7 @@ Zotero.QuickCopy = new function() {
 				}
 				// TODO: Remove once >=Fx3.5
 				else {
-					text = Zotero.Utilities.prototype.trim(text)
+					text = Zotero.Utilities.trim(text)
 				}
 				
 				//
