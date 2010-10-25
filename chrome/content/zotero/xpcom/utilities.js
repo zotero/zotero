@@ -325,21 +325,6 @@ Zotero.Utilities.prototype.levenshtein = function (a, b) {
 
 
 /**
- * Test if a string is an integer
- *
- * @deprecated Use isNaN(parseInt(x))
- * @type Boolean
- */
-Zotero.Utilities.prototype.isInt = function(x) {
-	if(parseInt(x) == x) {
-		return true;
-	}
-	return false;
-}
-
-
-
-/**
  * Test if an object is empty
  *
  * @param	{Object}
