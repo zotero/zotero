@@ -43,7 +43,7 @@ Zotero.Integration.Compat = new function() {
 	function init() {
 		this.env = new Namespace("http://schemas.xmlsoap.org/soap/envelope/");
 		
-		if (Zotero.Utilities.HTTP.browserIsOffline()) {
+		if (Zotero.HTTP.browserIsOffline()) {
 			Zotero.debug('Browser is offline -- not initializing integration HTTP server');
 			_registerOnlineObserver()
 			return;

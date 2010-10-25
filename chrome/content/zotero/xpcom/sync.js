@@ -395,8 +395,6 @@ Zotero.Sync.EventListener = new function () {
 		
 		var isItem = Zotero.Sync.getObjectTypeName(objectTypeID) == 'item';
 		
-		var ZU = new Zotero.Utilities;
-		
 		Zotero.DB.beginTransaction();
 		
 		if (event == 'delete') {
@@ -504,7 +502,7 @@ Zotero.Sync.Runner = new function () {
 	this.sync = function (background) {
 		_warning = null;
 		
-		if (Zotero.Utilities.HTTP.browserIsOffline()){
+		if (Zotero.HTTP.browserIsOffline()){
 			this.clearSyncTimeout(); // DEBUG: necessary?
 			var msg = "Zotero cannot sync while Firefox is in offline mode.";
 			var e = new Zotero.Error(msg, 0, { dialogButtonText: null })
@@ -1241,7 +1239,7 @@ Zotero.Sync.Server = new function () {
 		
 		Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.loggingIn'));
 		
-		Zotero.Utilities.HTTP.doPost(url, body, function (xmlhttp) {
+		Zotero.HTTP.doPost(url, body, function (xmlhttp) {
 			_checkResponse(xmlhttp);
 			
 			var response = xmlhttp.responseXML.childNodes[0];
@@ -1325,7 +1323,7 @@ Zotero.Sync.Server = new function () {
 		
 		Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.gettingUpdatedData'));
 		
-		Zotero.Utilities.HTTP.doPost(url, body, function (xmlhttp) {
+		Zotero.HTTP.doPost(url, body, function (xmlhttp) {
 			Zotero.debug(xmlhttp.responseText);
 			
 			_checkResponse(xmlhttp);
@@ -1352,7 +1350,7 @@ Zotero.Sync.Server = new function () {
 				_error(response.firstChild.firstChild.nodeValue);
 			}
 			
-			var xml = Zotero.Utilities.prototype.trim(xmlhttp.responseText.replace(/<\?xml.*\?>\s*/, ''));
+			var xml = Zotero.Utilities.trim(xmlhttp.responseText.replace(/<\?xml.*\?>\s*/, ''));
 			
 			// Strip XML declaration and convert to E4X
 			xml = new XML(xml);
@@ -1495,7 +1493,7 @@ Zotero.Sync.Server = new function () {
 								var url = _serverURL + 'uploadstatus';
 								var body = _apiVersionComponent
 											+ '&' + Zotero.Sync.Server.sessionIDComponent;
-								Zotero.Utilities.HTTP.doPost(url, body, function (xmlhttp) {
+								Zotero.HTTP.doPost(url, body, function (xmlhttp) {
 									uploadCallback(xmlhttp);
 								});
 								break;
@@ -1559,7 +1557,7 @@ Zotero.Sync.Server = new function () {
 							+ " (gzipped from " + oldLen + " bytes; "
 							+ savings + "% savings)");
 						
-						if (Zotero.Utilities.HTTP.browserIsOffline()) {
+						if (Zotero.HTTP.browserIsOffline()) {
 							Zotero.debug('Browser is offline');
 							return false;
 						}
@@ -1609,7 +1607,7 @@ Zotero.Sync.Server = new function () {
 				
 				// Don't compress upload data
 				else {
-					Zotero.Utilities.HTTP.doPost(url, body, uploadCallback);
+					Zotero.HTTP.doPost(url, body, uploadCallback);
 				}
 			}
 			catch (e) {
@@ -1637,7 +1635,7 @@ Zotero.Sync.Server = new function () {
 		var body = _apiVersionComponent
 					+ '&' + Zotero.Sync.Server.sessionIDComponent;
 		
-		Zotero.Utilities.HTTP.doPost(url, body, function (xmlhttp) {
+		Zotero.HTTP.doPost(url, body, function (xmlhttp) {
 			if (_invalidSession(xmlhttp)) {
 				Zotero.debug("Invalid session ID -- logging in");
 				_sessionID = false;
@@ -1698,7 +1696,7 @@ Zotero.Sync.Server = new function () {
 		
 		_sessionID = null;
 		
-		Zotero.Utilities.HTTP.doPost(url, body, function (xmlhttp) {
+		Zotero.HTTP.doPost(url, body, function (xmlhttp) {
 			_checkResponse(xmlhttp);
 			Zotero.debug(xmlhttp.responseText);
 			
@@ -2223,7 +2221,7 @@ Zotero.Sync.Server = new function () {
 		
 		if (extraInfo) {
 			// Server errors will generally be HTML
-			extraInfo = Zotero.Utilities.prototype.unescapeHTML(extraInfo);
+			extraInfo = Zotero.Utilities.unescapeHTML(extraInfo);
 			Components.utils.reportError(extraInfo);
 		}
 		
@@ -2853,12 +2851,12 @@ Zotero.Sync.Server.Data = new function() {
 						}
 					}
 					// Add
-					toAdd = Zotero.Utilities.prototype.arrayDiff(toAdd, existing);
+					toAdd = Zotero.Utilities.arrayDiff(toAdd, existing);
 					var changed = toAdd.length > 0;
 					existing = existing.concat(toAdd);
 					var origLen = existing.length;
 					// Remove
-					existing = Zotero.Utilities.prototype.arrayDiff(existing, toRemove);
+					existing = Zotero.Utilities.arrayDiff(existing, toRemove);
 					changed = changed || origLen != existing.length;
 					// Set
 					if (changed) {
@@ -3220,7 +3218,7 @@ Zotero.Sync.Server.Data = new function() {
 		if (!itemIDs) {
 			return false;
 		}
-		var newItemIDs = Zotero.Utilities.prototype.arrayDiff(itemIDs, childItems);
+		var newItemIDs = Zotero.Utilities.arrayDiff(itemIDs, childItems);
 		if (itemIDs.length == newItemIDs.length) {
 			return false;
 		}
@@ -3462,7 +3460,7 @@ Zotero.Sync.Server.Data = new function() {
 		};
 		
 		if (type == 'item') {
-			if (!Zotero.Utilities.prototype.isEmpty(changedCreators)) {
+			if (!Zotero.Utilities.isEmpty(changedCreators)) {
 				io.dataIn.changedCreators = changedCreators;
 			}
 		}

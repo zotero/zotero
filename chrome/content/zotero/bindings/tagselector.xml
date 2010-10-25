@@ -105,7 +105,7 @@
 				<parameter name="skipRefresh"/>
 				<body>
 				<![CDATA[
-					if (!Zotero.Utilities.prototype.isEmpty(val)) {
+					if (!Zotero.Utilities.isEmpty(val)) {
 						this._hasFilter = true;
 						this._filter = val;
 					}
@@ -126,7 +126,7 @@
 			<property name="scope" onget="return this._scope">
 				<setter>
 				<![CDATA[
-					if (!Zotero.Utilities.prototype.isEmpty(val)) {
+					if (!Zotero.Utilities.isEmpty(val)) {
 						this._hasScope = true;
 						this._scope = val;
 					}

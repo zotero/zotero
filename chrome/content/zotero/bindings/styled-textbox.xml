@@ -223,11 +223,11 @@
 							output = output.replace(entry[0], entry[1], "g");
 						}
 						
-						output = Zotero.Utilities.prototype.unescapeHTML(
+						output = Zotero.Utilities.unescapeHTML(
 								output.replace(" ", "&nbsp;", "g"))
 							.replace(highcharRe,
 								function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+"{}" });
-						output = Zotero.Utilities.prototype.trim(output);
+						output = Zotero.Utilities.trim(output);
 					}
 					
 					return output;

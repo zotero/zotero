@@ -29,609 +29,483 @@
 /**
  * @class Functions for text manipulation and other miscellaneous purposes
  */
-Zotero.Utilities = function () {}
-
-/**
- * Cleans extraneous punctuation off a creator name and parse into first and last name
- *
- * @param {String} author Creator string
- * @param {String} type Creator type string (e.g., "author" or "editor")
- * @param {Boolean} useComma Whether the creator string is in inverted (Last, First) format
- * @return {Object} firstName, lastName, and creatorType
- */
-Zotero.Utilities.prototype.cleanAuthor = function(author, type, useComma) {
-	const allCapsRe = /^[A-Z\u0400-\u042f]+$/;
-	
-	if(typeof(author) != "string") {
-		throw "cleanAuthor: author must be a string";
-	}
-	
-	author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
-	author = author.replace(/[\s\,\/\[\]\:\.]+$/, '');
-	author = author.replace(/  +/, ' ');
-	if(useComma) {
-		// Add spaces between periods
-		author = author.replace(/\.([^ ])/, ". $1");
+Zotero.Utilities = {
+	/**
+	 * Cleans extraneous punctuation off a creator name and parse into first and last name
+	 *
+	 * @param {String} author Creator string
+	 * @param {String} type Creator type string (e.g., "author" or "editor")
+	 * @param {Boolean} useComma Whether the creator string is in inverted (Last, First) format
+	 * @return {Object} firstName, lastName, and creatorType
+	 */
+	"cleanAuthor":function(author, type, useComma) {
+		const allCapsRe = /^[A-Z\u0400-\u042f]+$/;
 		
-		var splitNames = author.split(/, ?/);
-		if(splitNames.length > 1) {
-			var lastName = splitNames[0];
-			var firstName = splitNames[1];
+		if(typeof(author) != "string") {
+			throw "cleanAuthor: author must be a string";
+		}
+		
+		author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
+		author = author.replace(/[\s\,\/\[\]\:\.]+$/, '');
+		author = author.replace(/  +/, ' ');
+		if(useComma) {
+			// Add spaces between periods
+			author = author.replace(/\.([^ ])/, ". $1");
+			
+			var splitNames = author.split(/, ?/);
+			if(splitNames.length > 1) {
+				var lastName = splitNames[0];
+				var firstName = splitNames[1];
+			} else {
+				var lastName = author;
+			}
 		} else {
-			var lastName = author;
+			var spaceIndex = author.lastIndexOf(" ");
+			var lastName = author.substring(spaceIndex+1);
+			var firstName = author.substring(0, spaceIndex);
 		}
-	} else {
-		var spaceIndex = author.lastIndexOf(" ");
-		var lastName = author.substring(spaceIndex+1);
-		var firstName = author.substring(0, spaceIndex);
-	}
-	
-	if(firstName && allCapsRe.test(firstName) &&
-			firstName.length < 4 &&
-			(firstName.length == 1 || lastName.toUpperCase() != lastName)) {
-		// first name is probably initials
-		var newFirstName = "";
-		for(var i=0; i<firstName.length; i++) {
-			newFirstName += " "+firstName[i]+".";
+		
+		if(firstName && allCapsRe.test(firstName) &&
+				firstName.length < 4 &&
+				(firstName.length == 1 || lastName.toUpperCase() != lastName)) {
+			// first name is probably initials
+			var newFirstName = "";
+			for(var i=0; i<firstName.length; i++) {
+				newFirstName += " "+firstName[i]+".";
+			}
+			firstName = newFirstName.substr(1);
 		}
-		firstName = newFirstName.substr(1);
-	}
+		
+		return {firstName:firstName, lastName:lastName, creatorType:type};
+	},
 	
-	return {firstName:firstName, lastName:lastName, creatorType:type};
-}
-
-/**
- * Removes leading and trailing whitespace from a string
- * @type String
- */
-Zotero.Utilities.prototype.trim = function(/**String*/ s) {
-	if (typeof(s) != "string") {
-		Zotero.debug(s);
-		throw "trim: argument must be a string";
-	}
-	
-	s = s.replace(/^\s+/, "");
-	return s.replace(/\s+$/, "");
-}
-
-/**
- * Cleans whitespace off a string and replaces multiple spaces with one
- * @type String
- */
-Zotero.Utilities.prototype.trimInternal = function(/**String*/ s) {
-	if (typeof(s) != "string") {
-		throw "trimInternal: argument must be a string";
-	}
-	
-	s = s.replace(/[\xA0\r\n\s]+/g, " ");
-	return this.trim(s);
-}
-
-/**
- * Cleans whitespace off a string and replaces multiple spaces with one
- *
- * @deprecated Use trimInternal
- * @see Zotero.Utilities#trimInternal
- * @type String
- */
-Zotero.Utilities.prototype.cleanString = function(/**String*/ s) {
-	Zotero.debug("cleanString() is deprecated; use trimInternal() instead", 2);
-	return this.trimInternal(s);
-}
-
-/**
- * Cleans any non-word non-parenthesis characters off the ends of a string
- * @type String
- */
-Zotero.Utilities.prototype.superCleanString = function(/**String*/ x) {
-	if(typeof(x) != "string") {
-		throw "superCleanString: argument must be a string";
-	}
-	
-	var x = x.replace(/^[\x00-\x27\x29-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]+/, "");
-	return x.replace(/[\x00-\x28\x2A-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]+$/, "");
-}
-
-/**
- * Eliminates HTML tags, replacing &lt;br&gt;s with newlines
- * @type String
- */
-Zotero.Utilities.prototype.cleanTags = function(/**String*/ x) {
-	if(typeof(x) != "string") {
-		throw "cleanTags: argument must be a string";
-	}
-	
-	x = x.replace(/<br[^>]*>/gi, "\n");
-	return x.replace(/<[^>]+>/g, "");
-}
-
-
-Zotero.Utilities.prototype.cleanDOI = function(/**String**/ x) {
-	if(typeof(x) != "string") {
-		throw "cleanDOI: argument must be a string";
-	}
-	
-	return x.match(/10\.[^\s\/]+\/[^\s]+/);
-}
-
-
-Zotero.Utilities.prototype.text2html = function (/**String**/ str, singleNewlineIsParagraph) {
-	str = Zotero.Utilities.prototype.htmlSpecialChars(str);
-	
-	// \n => <p>
-	if (singleNewlineIsParagraph) {
-		str = '<p>'
-				+ str.replace(/\n/g, '</p><p>')
-					.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
-					.replace(/  /g, '&nbsp;&nbsp;')
-			+ '</p>';
-	}
-	// \n\n => <p>, \n => <br/>
-	else {
-		str = Zotero.Utilities.prototype.htmlSpecialChars(str);
-		str = '<p>'
-				+ str.replace(/\n\n/g, '</p><p>')
-					.replace(/\n/g, '<br/>')
-					.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
-					.replace(/  /g, '&nbsp;&nbsp;')
-			+ '</p>';
-	}
-	return str.replace(/<p>\s*<\/p>/g, '<p>&nbsp;</p>');
-}
-
-
-/**
- * Encode special XML/HTML characters<br/>
- * <br/>
- * Certain entities can be inserted manually:<br/>
- * <pre> &lt;ZOTEROBREAK/&gt; =&gt; &lt;br/&gt;
- * &lt;ZOTEROHELLIP/&gt; =&gt; &amp;#8230;</pre>
- * @type String
- */
-Zotero.Utilities.prototype.htmlSpecialChars = function(/**String*/ str) {
-	if (typeof str != 'string') {
-		throw "Argument '" + str + "' must be a string in Zotero.Utilities.htmlSpecialChars()";
-	}
-	
-	if (!str) {
-		return '';
-	}
-	
-	var chars = ['&', '"',"'",'<','>'];
-	var entities = ['amp', 'quot', 'apos', 'lt', 'gt'];
-	
-	var newString = str;
-	for (var i = 0; i < chars.length; i++) {
-		var re = new RegExp(chars[i], 'g');
-		newString = newString.replace(re, '&' + entities[i] + ';');
-	}
-	
-	newString = newString.replace(/&lt;ZOTERO([^\/]+)\/&gt;/g, function (str, p1, offset, s) {
-		switch (p1) {
-			case 'BREAK':
-				return '<br/>';
-			case 'HELLIP':
-				return '&#8230;';
-			default:
-				return p1;
+	/**
+	 * Removes leading and trailing whitespace from a string
+	 * @type String
+	 */
+	"trim":function(/**String*/ s) {
+		if (typeof(s) != "string") {
+			Zotero.debug(s);
+			throw "trim: argument must be a string";
 		}
-	});
+		
+		s = s.replace(/^\s+/, "");
+		return s.replace(/\s+$/, "");
+	},
+
+	/**
+	 * Cleans whitespace off a string and replaces multiple spaces with one
+	 * @type String
+	 */
+	"trimInternal":function(/**String*/ s) {
+		if (typeof(s) != "string") {
+			throw "trimInternal: argument must be a string";
+		}
+		
+		s = s.replace(/[\xA0\r\n\s]+/g, " ");
+		return this.trim(s);
+	},
+
+	/**
+	 * Cleans any non-word non-parenthesis characters off the ends of a string
+	 * @type String
+	 */
+	"superCleanString":function(/**String*/ x) {
+		if(typeof(x) != "string") {
+			throw "superCleanString: argument must be a string";
+		}
+		
+		var x = x.replace(/^[\x00-\x27\x29-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]+/, "");
+		return x.replace(/[\x00-\x28\x2A-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]+$/, "");
+	},
 	
-	return newString;
-}
+	/**
+	 * Eliminates HTML tags, replacing &lt;br&gt;s with newlines
+	 * @type String
+	 */
+	"cleanTags":function(/**String*/ x) {
+		if(typeof(x) != "string") {
+			throw "cleanTags: argument must be a string";
+		}
+		
+		x = x.replace(/<br[^>]*>/gi, "\n");
+		return x.replace(/<[^>]+>/g, "");
+	},
 
-/**
- * Decodes HTML entities within a string, returning plain text
- * @type String
- */
-Zotero.Utilities.prototype.unescapeHTML = function(/**String*/ str) {
-	var nsISUHTML = Components.classes["@mozilla.org/feed-unescapehtml;1"]
-		.getService(Components.interfaces.nsIScriptableUnescapeHTML);
-	return nsISUHTML.unescape(str);
-}
+	/**
+	 * Strip info:doi prefix and any suffixes from a DOI
+	 * @type String
+	 */
+	"cleanDOI":function(/**String**/ x) {
+		if(typeof(x) != "string") {
+			throw "cleanDOI: argument must be a string";
+		}
+		
+		return x.match(/10\.[^\s\/]+\/[^\s]+/);
+	},
 
+	/**
+	 * Convert plain text to HTML by replacing special characters and replacing newlines with BRs or
+	 * P tags
+	 * @param {String} str Plain text string
+	 * @param {Boolean} singleNewlineIsParagraph Whether single newlines should be considered as
+	 *     paragraphs. If true, each newline is replaced with a P tag. If false, double newlines
+	 *     are replaced with P tags, while single newlines are replaced with BR tags.
+	 * @type String
+	 */
+	"text2html":function (/**String**/ str, /**Boolean**/ singleNewlineIsParagraph) {
+		str = Zotero.Utilities.htmlSpecialChars(str);
+		
+		// \n => <p>
+		if (singleNewlineIsParagraph) {
+			str = '<p>'
+					+ str.replace(/\n/g, '</p><p>')
+						.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+						.replace(/  /g, '&nbsp;&nbsp;')
+				+ '</p>';
+		}
+		// \n\n => <p>, \n => <br/>
+		else {
+			str = Zotero.Utilities.htmlSpecialChars(str);
+			str = '<p>'
+					+ str.replace(/\n\n/g, '</p><p>')
+						.replace(/\n/g, '<br/>')
+						.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+						.replace(/  /g, '&nbsp;&nbsp;')
+				+ '</p>';
+		}
+		return str.replace(/<p>\s*<\/p>/g, '<p>&nbsp;</p>');
+	},
 
-/**
- * Wrap URLs and DOIs in <a href=""> links in plain text
- *
- * Ignore URLs preceded by '>', just in case there are already links
- */
-Zotero.Utilities.prototype.autoLink = function (str) {
-	// "http://www.google.com."
-	// "http://www.google.com. "
-	// "<http://www.google.com>" (and other characters, with or without a space after)
-	str = str.replace(/([^>])(https?:\/\/[^\s]+)([\."'>:\]\)](\s|$))/g, '$1<a href="$2">$2</a>$3');
-	// "http://www.google.com"
-	// "http://www.google.com "
-	str = str.replace(/([^">])(https?:\/\/[^\s]+)(\s|$)/g, '$1<a href="$2">$2</a>$3');
+	/**
+	 * Encode special XML/HTML characters<br/>
+	 * <br/>
+	 * Certain entities can be inserted manually:<br/>
+	 * <pre> &lt;ZOTEROBREAK/&gt; =&gt; &lt;br/&gt;
+	 * &lt;ZOTEROHELLIP/&gt; =&gt; &amp;#8230;</pre>
+	 * @type String
+	 */
+	 "htmlSpecialChars":function(/**String*/ str) {
+		if (typeof str != 'string') {
+			throw "Argument '" + str + "' must be a string in Zotero.Utilities.htmlSpecialChars()";
+		}
+		
+		if (!str) {
+			return '';
+		}
+		
+		var chars = ['&', '"',"'",'<','>'];
+		var entities = ['amp', 'quot', 'apos', 'lt', 'gt'];
+		
+		var newString = str;
+		for (var i = 0; i < chars.length; i++) {
+			var re = new RegExp(chars[i], 'g');
+			newString = newString.replace(re, '&' + entities[i] + ';');
+		}
+		
+		newString = newString.replace(/&lt;ZOTERO([^\/]+)\/&gt;/g, function (str, p1, offset, s) {
+			switch (p1) {
+				case 'BREAK':
+					return '<br/>';
+				case 'HELLIP':
+					return '&#8230;';
+				default:
+					return p1;
+			}
+		});
+		
+		return newString;
+	},
+
+	/**
+	 * Decodes HTML entities within a string, returning plain text
+	 * @type String
+	 */
+	"unescapeHTML":function(/**String*/ str) {
+		var nsISUHTML = Components.classes["@mozilla.org/feed-unescapehtml;1"]
+			.getService(Components.interfaces.nsIScriptableUnescapeHTML);
+		return nsISUHTML.unescape(str);
+	},
 	
-	// DOI
-	str = str.replace(/(doi:[ ]*)(10\.[^\s]+[0-9a-zA-Z])/g, '$1<a href="http://dx.doi.org/$2">$2</a>');
-	return str;
-}
-
-
-/**
- * Parses a text string for HTML/XUL markup and returns an array of parts. Currently only finds
- * HTML links (&lt;a&gt; tags)
- *
- * @return {Array} An array of objects with the following form:<br>
- * <pre>   {
- *         type: 'text'|'link',
- *         text: "text content",
- *         [ attributes: { key1: val [ , key2: val, ...] }
- *    }</pre>
- */
-Zotero.Utilities.prototype.parseMarkup = function(/**String*/ str) {
-	var parts = [];
-	var splits = str.split(/(<a [^>]+>[^<]*<\/a>)/);
+	/**
+	 * Wrap URLs and DOIs in <a href=""> links in plain text
+	 *
+	 * Ignore URLs preceded by '>', just in case there are already links
+	 * @type String
+	 */
+	"autoLink":function (/**String**/ str) {
+		// "http://www.google.com."
+		// "http://www.google.com. "
+		// "<http://www.google.com>" (and other characters, with or without a space after)
+		str = str.replace(/([^>])(https?:\/\/[^\s]+)([\."'>:\]\)](\s|$))/g, '$1<a href="$2">$2</a>$3');
+		// "http://www.google.com"
+		// "http://www.google.com "
+		str = str.replace(/([^">])(https?:\/\/[^\s]+)(\s|$)/g, '$1<a href="$2">$2</a>$3');
+		
+		// DOI
+		str = str.replace(/(doi:[ ]*)(10\.[^\s]+[0-9a-zA-Z])/g, '$1<a href="http://dx.doi.org/$2">$2</a>');
+		return str;
+	},
 	
-	for each(var split in splits) {
-		// Link
-		if (split.indexOf('<a ') == 0) {
-			var matches = split.match(/<a ([^>]+)>([^<]*)<\/a>/);
-			if (matches) {
-				// Attribute pairs
-				var attributes = {};
-				var pairs = matches[1].match(/([^ =]+)="([^"]+")/g);
-				for each (var pair in pairs) {
-					var [key, val] = pair.split(/=/);
-					attributes[key] = val.substr(1, val.length - 2);
+	/**
+	 * Parses a text string for HTML/XUL markup and returns an array of parts. Currently only finds
+	 * HTML links (&lt;a&gt; tags)
+	 *
+	 * @return {Array} An array of objects with the following form:<br>
+	 * <pre>   {
+	 *         type: 'text'|'link',
+	 *         text: "text content",
+	 *         [ attributes: { key1: val [ , key2: val, ...] }
+	 *    }</pre>
+	 */
+	"parseMarkup":function(/**String*/ str) {
+		var parts = [];
+		var splits = str.split(/(<a [^>]+>[^<]*<\/a>)/);
+		
+		for each(var split in splits) {
+			// Link
+			if (split.indexOf('<a ') == 0) {
+				var matches = split.match(/<a ([^>]+)>([^<]*)<\/a>/);
+				if (matches) {
+					// Attribute pairs
+					var attributes = {};
+					var pairs = matches[1].match(/([^ =]+)="([^"]+")/g);
+					for each (var pair in pairs) {
+						var [key, val] = pair.split(/=/);
+						attributes[key] = val.substr(1, val.length - 2);
+					}
+					
+					parts.push({
+						type: 'link',
+						text: matches[2],
+						attributes: attributes
+					});
+					continue;
 				}
-				
-				parts.push({
-					type: 'link',
-					text: matches[2],
-					attributes: attributes
-				});
-				continue;
+			}
+			
+			parts.push({
+				type: 'text',
+				text: split
+			});
+		}
+		
+		return parts;
+	},
+	
+	/**
+	 * Calculates the Levenshtein distance between two strings
+	 * @type Number
+	 */
+	"levenshtein":function (/**String*/ a, /**String**/ b) {
+		var aLen = a.length;
+		var bLen = b.length;
+		
+		var arr = new Array(aLen+1);
+		var i, j, cost;
+		
+		for (i = 0; i <= aLen; i++) {
+			arr[i] = new Array(bLen);
+			arr[i][0] = i;
+		}
+		
+		for (j = 0; j <= bLen; j++) {
+			arr[0][j] = j;
+		}
+		
+		for (i = 1; i <= aLen; i++) {
+			for (j = 1; j <= bLen; j++) {
+				cost = (a[i-1] == b[j-1]) ? 0 : 1;
+				arr[i][j] = Math.min(arr[i-1][j] + 1, Math.min(arr[i][j-1] + 1, arr[i-1][j-1] + cost));
 			}
 		}
 		
-		parts.push({
-			type: 'text',
-			text: split
-		});
-	}
+		return arr[aLen][bLen];
+	},
 	
-	return parts;
-}
-
-Zotero.Utilities.prototype.levenshtein = function (a, b) {
-	var aLen = a.length;
-	var bLen = b.length;
-	
-	var arr = new Array(aLen+1);
-	var i, j, cost;
-	
-	for (i = 0; i <= aLen; i++) {
-		arr[i] = new Array(bLen);
-		arr[i][0] = i;
-	}
-	
-	for (j = 0; j <= bLen; j++) {
-		arr[0][j] = j;
-	}
-	
-	for (i = 1; i <= aLen; i++) {
-		for (j = 1; j <= bLen; j++) {
-			cost = (a[i-1] == b[j-1]) ? 0 : 1;
-			arr[i][j] = Math.min(arr[i-1][j] + 1, Math.min(arr[i][j-1] + 1, arr[i-1][j-1] + cost));
+	/**
+	 * Test if an object is empty
+	 *
+	 * @param {Object} obj
+	 * @type Boolean
+	 */
+	"isEmpty":function (obj) {
+		for (var i in obj) {
+			return false;
 		}
-	}
-	
-	return arr[aLen][bLen];
-}
+		return true;
+	},
 
-
-/**
- * Test if an object is empty
- *
- * @param	{Object}
- */
-Zotero.Utilities.prototype.isEmpty = function (obj) {
-    for (var i in obj) {
-        return false;
-    }
-    return true;
-}
-
-
-/**
- * Compares an array with another and returns an array with
- *	the values from array1 that don't exist in array2
- *
- * @param	{Array}		array1
- * @param	{Array}		array2
- * @param	{Boolean}	useIndex		If true, return an array containing just
- *										the index of array2's elements;
- *										otherwise return the values
- */
-Zotero.Utilities.prototype.arrayDiff = function(array1, array2, useIndex) {
-	if (array1.constructor.name != 'Array') {
-		throw ("array1 is not an array in Zotero.Utilities.arrayDiff() (" + array1 + ")");
-	}
-	if (array2.constructor.name != 'Array') {
-		throw ("array2 is not an array in Zotero.Utilities.arrayDiff() (" + array2 + ")");
-	}
-	
-	var val, pos, vals = [];
-	for (var i=0; i<array1.length; i++) {
-		val = array1[i];
-		pos = array2.indexOf(val);
-		if (pos == -1) {
-			vals.push(useIndex ? pos : val);
+	/**
+	 * Compares an array with another and returns an array with
+	 *	the values from array1 that don't exist in array2
+	 *
+	 * @param	{Array}		array1
+	 * @param	{Array}		array2
+	 * @param	{Boolean}	useIndex		If true, return an array containing just
+	 *										the index of array2's elements;
+	 *										otherwise return the values
+	 */
+	"arrayDiff":function(array1, array2, useIndex) {
+		if (array1.constructor.name != 'Array') {
+			throw ("array1 is not an array in Zotero.Utilities.arrayDiff() (" + array1 + ")");
 		}
-	}
-	return vals;
-}
-
-
-/**
- * Generate a random integer between min and max inclusive
- *
- * @param	{Integer}	min
- * @param	{Integer}	max
- * @return	{Integer}
- */
-Zotero.Utilities.prototype.rand = function (min, max) {
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-
-/*
- * Adapted from http://developer.mozilla.org/en/docs/nsICryptoHash
- *
- * @param	{String|nsIFile}	strOrFile
- * @param	{Boolean}			[base64=false]	Return as base-64-encoded string rather than hex string
- * @return	{String}
- */
-Zotero.Utilities.prototype.md5 = function(strOrFile, base64) {
-	if (typeof strOrFile == 'string') {
-		var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
-			createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
-		converter.charset = "UTF-8";
-		var result = {};
-		var data = converter.convertToByteArray(strOrFile, result);
-		var ch = Components.classes["@mozilla.org/security/hash;1"]
-			.createInstance(Components.interfaces.nsICryptoHash);
-		ch.init(ch.MD5);
-		ch.update(data, data.length);
-	}
-	else if (strOrFile instanceof Components.interfaces.nsIFile) {
-		// Otherwise throws (NS_ERROR_NOT_AVAILABLE) [nsICryptoHash.updateFromStream]
-		if (!strOrFile.fileSize) {
-			// MD5 for empty string
-			return "d41d8cd98f00b204e9800998ecf8427e";
+		if (array2.constructor.name != 'Array') {
+			throw ("array2 is not an array in Zotero.Utilities.arrayDiff() (" + array2 + ")");
 		}
 		
-		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-						.createInstance(Components.interfaces.nsIFileInputStream);
-		// open for reading
-		istream.init(strOrFile, 0x01, 0444, 0);
-		var ch = Components.classes["@mozilla.org/security/hash;1"]
-					   .createInstance(Components.interfaces.nsICryptoHash);
-		// we want to use the MD5 algorithm
-		ch.init(ch.MD5);
-		// this tells updateFromStream to read the entire file
-		const PR_UINT32_MAX = 0xffffffff;
-		ch.updateFromStream(istream, PR_UINT32_MAX);
-	}
-	
-	// pass false here to get binary data back
-	var hash = ch.finish(base64);
-	
-	if (istream) {
-		istream.close();
-	}
-	
-	if (base64) {
-		return hash;
-	}
-	
-	/*
-	// This created 36-character hashes
-	
-	// return the two-digit hexadecimal code for a byte
-	function toHexString(charCode) {
-		return ("0" + charCode.toString(16)).slice(-2);
-	}
-	
-	// convert the binary hash data to a hex string.
-	return [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
-	*/
-	
-	// From http://rcrowley.org/2007/11/15/md5-in-xulrunner-or-firefox-extensions/
-	var ascii = [];
-	var ii = hash.length;
-	for (var i = 0; i < ii; ++i) {
-		var c = hash.charCodeAt(i);
-		var ones = c % 16;
-		var tens = c >> 4;
-		ascii.push(String.fromCharCode(tens + (tens > 9 ? 87 : 48)) + String.fromCharCode(ones + (ones > 9 ? 87 : 48)));
-	}
-	return ascii.join('');
-}
-
-
-/**
- * Parse a page range
- *
- * @param {String} Page range to parse
- * @return {Integer[]} Start and end pages
- */
-Zotero.Utilities.prototype.getPageRange = function(pages) {
-	const pageRangeRegexp = /^\s*([0-9]+) ?[-\u2013] ?([0-9]+)\s*$/
-	
-	var pageNumbers;
-	var m = pageRangeRegexp.exec(pages);
-	if(m) {
-		// A page range
-		pageNumbers = [m[1], m[2]];
-	} else {
-		// Assume start and end are the same
-		pageNumbers = [pages, pages];
-	}
-	return pageNumbers;
-}
-
-/**
- * Pads a number or other string with a given string on the left
- *
- * @param {String} string String to pad
- * @param {String} pad String to use as padding
- * @length {Integer} length Length of new padded string
- * @type String
- */
-Zotero.Utilities.prototype.lpad = function(string, pad, length) {
-	string = string ? string + '' : '';
-	while(string.length < length) {
-		string = pad + string;
-	}
-	return string;
-}
-
-
-/**
- * Shorten and add an ellipsis to a string if necessary
- *
- * @param	{String}	str
- * @param	{Integer}	len
- * @param	{Boolean}	[countChars=false]
- */
-Zotero.Utilities.prototype.ellipsize = function (str, len, countChars) {
-	if (!len) {
-		throw ("Length not specified in Zotero.Utilities.ellipsize()");
-	}
-	if (str.length > len) {
-		return str.substr(0, len) + '...' + (countChars ? ' (' + str.length + ' chars)' : '');
-	}
-	return str;
-}
-
-
-/**
-  * Port of PHP's number_format()
-  *
-  * MIT Licensed
-  *
-  * From http://kevin.vanzonneveld.net
-  * +   original by: Jonas Raoni Soares Silva (http://www.jsfromhell.com)
-  * +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-  * +     bugfix by: Michael White (http://getsprink.com)
-  * +     bugfix by: Benjamin Lupton
-  * +     bugfix by: Allan Jensen (http://www.winternet.no)
-  * +    revised by: Jonas Raoni Soares Silva (http://www.jsfromhell.com)
-  * +     bugfix by: Howard Yeend
-  * *     example 1: number_format(1234.5678, 2, '.', '');
-  * *     returns 1: 1234.57
- */
-Zotero.Utilities.prototype.numberFormat = function (number, decimals, dec_point, thousands_sep) {
-    var n = number, c = isNaN(decimals = Math.abs(decimals)) ? 2 : decimals;
-    var d = dec_point == undefined ? "." : dec_point;
-    var t = thousands_sep == undefined ? "," : thousands_sep, s = n < 0 ? "-" : "";
-    var i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "", j = (j = i.length) > 3 ? j % 3 : 0;
-    
-    return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
-}
-
-
-/**
- * Tests if an item type exists
- *
- * @param {String} type Item type
- * @type Boolean
- */
-Zotero.Utilities.prototype.itemTypeExists = function(type) {
-	if(Zotero.ItemTypes.getID(type)) {
-		return true;
-	} else {
-		return false;
-	}
-}
-
-/**
- * Find valid creator types for a given item type
- *
- * @param {String} type Item type
- * @return {String[]} Creator types
- */
-Zotero.Utilities.prototype.getCreatorsForType = function(type) {
-	var types = Zotero.CreatorTypes.getTypesForItemType(Zotero.ItemTypes.getID(type));
-	var cleanTypes = new Array();
-	for each(var type in types) {
-		cleanTypes.push(type.name);
-	}
-	return cleanTypes;
-}
-
-/**
- * Gets a creator type name, localized to the current locale
- *
- * @param {String} type Creator type
- * @param {String} Localized creator type
- * @type Boolean
- */
-Zotero.Utilities.prototype.getLocalizedCreatorType = function(type) {
-	try {
-		return Zotero.getString("creatorTypes."+type);
-	} catch(e) {
-		return false;
-	}
-}
-
-/**
- * Cleans a title, converting it to title case and replacing " :" with ":"
- *
- * @param {String} string
- * @param {Boolean} force Forces title case conversion, even if the capitalizeTitles pref is off
- * @type String
- */
-Zotero.Utilities.prototype.capitalizeTitle = function(string, force) {
-	string = this.trimInternal(string);
-	if(Zotero.Prefs.get('capitalizeTitles') || force) {
-		// fix colons
-		string = string.replace(" : ", ": ", "g");
-		string = Zotero.Text.titleCase(string.replace(/ : /g, ": "));
-	}
-	return string;
-}
-
-
-/**
- * Run sets of data through multiple asynchronous callbacks
- *
- * Each callback is passed the current set and a callback to call when done
- *
- * @param	{Object[]}		sets			Sets of data
- * @param	{Function[]}	callbacks
- * @param	{Function}		onDone			Function to call when done
- */
-Zotero.Utilities.prototype.processAsync = function (sets, callbacks, onDone) {
-	var currentSet;
-	var index = 0;
-	
-	var nextSet = function () {
-		if (!sets.length) {
-			onDone();
-			return;
+		var val, pos, vals = [];
+		for (var i=0; i<array1.length; i++) {
+			val = array1[i];
+			pos = array2.indexOf(val);
+			if (pos == -1) {
+				vals.push(useIndex ? pos : val);
+			}
 		}
-		index = 0;
-		currentSet = sets.shift();
-		callbacks[0](currentSet, nextCallback);
-	};
-	var nextCallback = function () {
-		index++;
-		callbacks[index](currentSet, nextCallback);
-	};
+		return vals;
+	},
+
+	/**
+	 * Generate a random integer between min and max inclusive
+	 *
+	 * @param	{Integer}	min
+	 * @param	{Integer}	max
+	 * @return	{Integer}
+	 */
+	"rand":function (min, max) {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	},
+
+	/**
+	 * Parse a page range
+	 *
+	 * @param {String} Page range to parse
+	 * @return {Integer[]} Start and end pages
+	 */
+	"getPageRange":function(pages) {
+		const pageRangeRegexp = /^\s*([0-9]+) ?[-\u2013] ?([0-9]+)\s*$/
+		
+		var pageNumbers;
+		var m = pageRangeRegexp.exec(pages);
+		if(m) {
+			// A page range
+			pageNumbers = [m[1], m[2]];
+		} else {
+			// Assume start and end are the same
+			pageNumbers = [pages, pages];
+		}
+		return pageNumbers;
+	},
+
+	/**
+	 * Pads a number or other string with a given string on the left
+	 *
+	 * @param {String} string String to pad
+	 * @param {String} pad String to use as padding
+	 * @length {Integer} length Length of new padded string
+	 * @type String
+	 */
+	"lpad":function(string, pad, length) {
+		string = string ? string + '' : '';
+		while(string.length < length) {
+			string = pad + string;
+		}
+		return string;
+	},
+
+	/**
+	 * Shorten and add an ellipsis to a string if necessary
+	 *
+	 * @param	{String}	str
+	 * @param	{Integer}	len
+	 * @param	{Boolean}	[countChars=false]
+	 */
+	"ellipsize":function (str, len, countChars) {
+		if (!len) {
+			throw ("Length not specified in Zotero.Utilities.ellipsize()");
+		}
+		if (str.length > len) {
+			return str.substr(0, len) + '...' + (countChars ? ' (' + str.length + ' chars)' : '');
+		}
+		return str;
+	},
 	
-	// Add a final callback to proceed to the next set
-	callbacks[callbacks.length] = function () {
+	/**
+	  * Port of PHP's number_format()
+	  *
+	  * MIT Licensed
+	  *
+	  * From http://kevin.vanzonneveld.net
+	  * +   original by: Jonas Raoni Soares Silva (http://www.jsfromhell.com)
+	  * +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	  * +     bugfix by: Michael White (http://getsprink.com)
+	  * +     bugfix by: Benjamin Lupton
+	  * +     bugfix by: Allan Jensen (http://www.winternet.no)
+	  * +    revised by: Jonas Raoni Soares Silva (http://www.jsfromhell.com)
+	  * +     bugfix by: Howard Yeend
+	  * *     example 1: number_format(1234.5678, 2, '.', '');
+	  * *     returns 1: 1234.57
+	 */
+	"numberFormat":function (number, decimals, dec_point, thousands_sep) {
+		var n = number, c = isNaN(decimals = Math.abs(decimals)) ? 2 : decimals;
+		var d = dec_point == undefined ? "." : dec_point;
+		var t = thousands_sep == undefined ? "," : thousands_sep, s = n < 0 ? "-" : "";
+		var i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "", j = (j = i.length) > 3 ? j % 3 : 0;
+		
+		return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
+	},
+
+	/**
+	 * Cleans a title, converting it to title case and replacing " :" with ":"
+	 *
+	 * @param {String} string
+	 * @param {Boolean} force Forces title case conversion, even if the capitalizeTitles pref is off
+	 * @type String
+	 */
+	"capitalizeTitle":function(string, force) {
+		string = this.trimInternal(string);
+		string = string.replace(" : ", ": ", "g");
+		if(Zotero.Prefs.get('capitalizeTitles') || force) {
+			// fix colons
+			string = Zotero.Text.titleCase(string);
+		}
+		return string;
+	},
+
+	/**
+	 * Run sets of data through multiple asynchronous callbacks
+	 *
+	 * Each callback is passed the current set and a callback to call when done
+	 *
+	 * @param	{Object[]}		sets			Sets of data
+	 * @param	{Function[]}	callbacks
+	 * @param	{Function}		onDone			Function to call when done
+	 */
+	 "processAsync":function (sets, callbacks, onDone) {
+		var currentSet;
+		var index = 0;
+		
+		var nextSet = function () {
+			if (!sets.length) {
+				onDone();
+				return;
+			}
+			index = 0;
+			currentSet = sets.shift();
+			callbacks[0](currentSet, nextCallback);
+		};
+		var nextCallback = function () {
+			index++;
+			callbacks[index](currentSet, nextCallback);
+		};
+		
+		// Add a final callback to proceed to the next set
+		callbacks[callbacks.length] = function () {
+			nextSet();
+		}
 		nextSet();
 	}
-	nextSet();
 }
-
 
 /**
  * @class All functions accessible from within Zotero.Utilities namespace inside sandboxed
@@ -645,13 +519,22 @@ Zotero.Utilities.prototype.processAsync = function (sets, callbacks, onDone) {
  * @borrows Zotero.Date.strToISO as this.strToISO
  * @borrows Zotero.OpenURL.createContextObject as this.createContextObject
  * @borrows Zotero.OpenURL.parseContextObject as this.parseContextObject
- * @borrows Zotero.Utilities.HTTP.processDocuments as this.processDocuments
- * @borrows Zotero.Utilities.HTTP.doPost as this.doPost
+ * @borrows Zotero.HTTP.processDocuments as this.processDocuments
+ * @borrows Zotero.HTTP.doPost as this.doPost
  * @param {Zotero.Translate} translate
  */
 Zotero.Utilities.Translate = function(translate) {
 	this.translate = translate;
 }
+
+var tmp = function() {};
+tmp.prototype = Zotero.Utilities;
+Zotero.Utilities.Translate.prototype = new tmp();
+Zotero.Utilities.Translate.prototype.formatDate = Zotero.Date.formatDate;
+Zotero.Utilities.Translate.prototype.strToDate = Zotero.Date.strToDate;
+Zotero.Utilities.Translate.prototype.strToISO = Zotero.Date.strToISO;
+Zotero.Utilities.Translate.prototype.createContextObject = Zotero.OpenURL.createContextObject;
+Zotero.Utilities.Translate.prototype.parseContextObject = Zotero.OpenURL.parseContextObject;
 
 /**
  * Gets the current Zotero version
@@ -769,7 +652,7 @@ Zotero.Utilities.Translate.prototype.loadDocument = function(url, succeeded, fai
 }
 
 /**
- * Already documented in Zotero.Utilities.HTTP
+ * Already documented in Zotero.HTTP
  * @ignore
  */
 Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor, done, exception) {
@@ -792,8 +675,7 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 		}
 	}
 	
-	var hiddenBrowser = Zotero.Utilities.HTTP.processDocuments(urls, processor, done, exception);
-	if(this.translate.cookieManager) this.translate.cookieManager.attachToBrowser(hiddenBrowser);
+	Zotero.HTTP.processDocuments(urls, processor, done, exception);
 }
 
 /**
@@ -813,7 +695,6 @@ Zotero.Utilities.Translate.prototype.retrieveDocument = function(url) {
 	}
 	
 	var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
-	if(this.translate.cookieManager) this.translate.cookieManager.attachToBrowser(hiddenBrowser);
 	hiddenBrowser.addEventListener("pageshow", listener, true);
 	hiddenBrowser.loadURI(url);
 	
@@ -860,14 +741,10 @@ Zotero.Utilities.Translate.prototype.retrieveSource = function(url, body, header
 	var listener = function(aXmlhttp) { xmlhttp = aXmlhttp };
 	
 	if(body) {
-		var xhr = Zotero.Utilities.HTTP.doPost(url, body, listener, headers, responseCharset, true);
+		Zotero.HTTP.doPost(url, body, listener, headers, responseCharset);
 	} else {
-		var xhr = Zotero.Utilities.HTTP.doGet(url, listener, responseCharset, true);
+		Zotero.HTTP.doGet(url, listener, responseCharset);
 	}
-	
-	if(this.translate.cookieManager) this.translate.cookieManager.attachToXHR(xhr);
-	
-	xhr.send(body ? body : null);
 	
 	while(!xmlhttp) mainThread.processNextEvent(true);
 	if(xmlhttp.status >= 400) throw "retrieveSource failed: "+xmlhttp.status+" "+xmlhttp.statusText;
@@ -898,7 +775,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 	
 	var me = this;
 	
-	var xhr = Zotero.Utilities.HTTP.doGet(url, function(xmlhttp) {
+	Zotero.HTTP.doGet(url, function(xmlhttp) {
 		try {
 			if(processor) {
 				processor(xmlhttp.responseText, xmlhttp, url);
@@ -914,30 +791,68 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 		} catch(e) {
 			me.translate.error(false, e);
 		}
-	}, responseCharset, true);
-	
-	if(this.translate.cookieManager) this.translate.cookieManager.attachToXHR(xhr);
-	xhr.send(null);
+	}, responseCharset);
 }
 
 /**
- * Already documented in Zotero.Utilities.HTTP
+ * Already documented in Zotero.HTTP
  * @ignore
  */
 Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, headers, responseCharset) {
 	url = this._convertURL(url);
 	
 	var translate = this.translate;
-	var xhr = Zotero.Utilities.HTTP.doPost(url, body, function(xmlhttp) {
+	Zotero.HTTP.doPost(url, body, function(xmlhttp) {
 		try {
 			onDone(xmlhttp.responseText, xmlhttp);
 		} catch(e) {
 			translate.error(false, e);
 		}
-	}, headers, responseCharset, true);
-	
-	if(this.translate.cookieManager) this.translate.cookieManager.attachToXHR(xhr);
-	xhr.send(body);
+	}, headers, responseCharset);
+}
+
+/**
+ * Tests if an item type exists
+ *
+ * @param {String} type Item type
+ * @type Boolean
+ */
+Zotero.Utilities.Translate.prototype.itemTypeExists = function(type) {
+	if(Zotero.ItemTypes.getID(type)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/**
+ * Find valid creator types for a given item type
+ *
+ * @param {String} type Item type
+ * @return {String[]} Creator types
+ */
+Zotero.Utilities.Translate.prototype.getCreatorsForType = function(type) {
+	var types = Zotero.CreatorTypes.getTypesForItemType(Zotero.ItemTypes.getID(type));
+	var cleanTypes = new Array();
+	for each(var type in types) {
+		cleanTypes.push(type.name);
+	}
+	return cleanTypes;
+}
+
+/**
+ * Gets a creator type name, localized to the current locale
+ *
+ * @param {String} type Creator type
+ * @param {String} Localized creator type
+ * @type Boolean
+ */
+Zotero.Utilities.Translate.prototype.getLocalizedCreatorType = function(type) {
+	try {
+		return Zotero.getString("creatorTypes."+type);
+	} catch(e) {
+		return false;
+	}
 }
 
 /**
@@ -966,628 +881,88 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 }
 
 /**
- * Wrap all functions so that arguments are guaranteed safe
+ * @class Utility functions not made available to translators
  */
-borrowedFunctions = {
-	"formatDate":Zotero.Date.formatDate,
-	"strToDate":Zotero.Date.strToDate,
-	"strToISO":Zotero.Date.strToISO,
-	"createContextObject":Zotero.OpenURL.createContextObject,
-	"parseContextObject":Zotero.OpenURL.parseContextObject
-};
-for each(var wrapArrayBad in [borrowedFunctions, Zotero.Utilities.prototype, Zotero.Utilities.Translate.prototype]) {
-	let wrapArray = wrapArrayBad;
-	for(var wrapFunctionBad in wrapArray) {
-		let wrapFunction = wrapFunctionBad;
-		if(!(wrapArray[wrapFunction] instanceof Function)) continue;
-		
-		let unwrappedFunction = wrapArray[wrapFunction];
-		
-		Zotero.Utilities.Translate.prototype[wrapFunction] = function() {
-			let args = [];
-			for(let i=0; i<arguments.length; i++) {
-				if(typeof arguments[i] != "object"
-						&& arguments[i] instanceof XPCSafeJSObjectWrapper
-						&& arguments[i] !== null) {
-					args.push(new XPCSafeJSObjectWrapper(arguments[i]));
-				} else {
-					args.push(arguments[i]);
-				}
-			}
-			return unwrappedFunction.apply(this, args);
+Zotero.Utilities.Internal = {
+	 /*
+	 * Adapted from http://developer.mozilla.org/en/docs/nsICryptoHash
+	 *
+	 * @param	{String|nsIFile}	strOrFile
+	 * @param	{Boolean}			[base64=false]	Return as base-64-encoded string rather than hex string
+	 * @return	{String}
+	 */
+	"md5":function(strOrFile, base64) {
+		if (typeof strOrFile == 'string') {
+			var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
+				createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+			converter.charset = "UTF-8";
+			var result = {};
+			var data = converter.convertToByteArray(strOrFile, result);
+			var ch = Components.classes["@mozilla.org/security/hash;1"]
+				.createInstance(Components.interfaces.nsICryptoHash);
+			ch.init(ch.MD5);
+			ch.update(data, data.length);
 		}
+		else if (strOrFile instanceof Components.interfaces.nsIFile) {
+			// Otherwise throws (NS_ERROR_NOT_AVAILABLE) [nsICryptoHash.updateFromStream]
+			if (!strOrFile.fileSize) {
+				// MD5 for empty string
+				return "d41d8cd98f00b204e9800998ecf8427e";
+			}
+			
+			var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+							.createInstance(Components.interfaces.nsIFileInputStream);
+			// open for reading
+			istream.init(strOrFile, 0x01, 0444, 0);
+			var ch = Components.classes["@mozilla.org/security/hash;1"]
+						   .createInstance(Components.interfaces.nsICryptoHash);
+			// we want to use the MD5 algorithm
+			ch.init(ch.MD5);
+			// this tells updateFromStream to read the entire file
+			const PR_UINT32_MAX = 0xffffffff;
+			ch.updateFromStream(istream, PR_UINT32_MAX);
+		}
+		
+		// pass false here to get binary data back
+		var hash = ch.finish(base64);
+		
+		if (istream) {
+			istream.close();
+		}
+		
+		if (base64) {
+			return hash;
+		}
+		
+		/*
+		// This created 36-character hashes
+		
+		// return the two-digit hexadecimal code for a byte
+		function toHexString(charCode) {
+			return ("0" + charCode.toString(16)).slice(-2);
+		}
+		
+		// convert the binary hash data to a hex string.
+		return [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
+		*/
+		
+		// From http://rcrowley.org/2007/11/15/md5-in-xulrunner-or-firefox-extensions/
+		var ascii = []; ii = hash.length;
+		for (var i = 0; i < ii; ++i) {
+			var c = hash.charCodeAt(i);
+			var ones = c % 16;
+			var tens = c >> 4;
+			ascii.push(String.fromCharCode(tens + (tens > 9 ? 87 : 48)) + String.fromCharCode(ones + (ones > 9 ? 87 : 48)));
+		}
+		return ascii.join('');
 	}
 }
-
-/**
- * Functions for performing HTTP requests, both via XMLHTTPRequest and using a hidden browser
- * @namespace
- */
-Zotero.Utilities.HTTP = new function() {
-	this.WebDAV = {};
-	
-	
-	/**
-	* Send an HTTP GET request via XMLHTTPRequest
-	* 
-	* @param {nsIURI|String}	url				URL to request
-	* @param {Function} 		onDone			Callback to be executed upon request completion.
-	*                                           If false, XHR is returned unsent.
-	* @param {String} 			responseCharset	Character set to force on the response
-	* @param {Boolean}			dontSend		Don't send XHR before returning
-	* @return {Boolean} True if the request was sent, or false if the browser is offline
-	*/
-	this.doGet = function(url, onDone, responseCharset, dontSend) {
-		if (url instanceof Components.interfaces.nsIURI) {
-			// Don't display password in console
-			var disp = url.clone();
-			if (disp.password) {
-				disp.password = "********";
-			}
-			Zotero.debug("HTTP GET " + disp.spec);
-			url = url.spec;
-		}
-		else {
-			Zotero.debug("HTTP GET " + url);
-		}
-		if (this.browserIsOffline()){
-			return false;
-		}
-		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-						.createInstance();
-		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open('GET', url, true);
-		// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
-		if (!Zotero.isFx35) {
-			var channel = xmlhttp.channel;
-			channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
-			channel.forceAllowThirdPartyCookie = true;
-		}
-		
-		// Don't cache GET requests
-		xmlhttp.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
-		
-		/** @ignore */
-		xmlhttp.onreadystatechange = function() {
-			_stateChange(xmlhttp, onDone, responseCharset);
-		};
-		
-		if(!dontSend) {
-			xmlhttp.send(null);
-		}
-		
-		return xmlhttp;
-	}
-	
-	/**
-	* Send an HTTP POST request via XMLHTTPRequest
-	*
-	* @param {String} 	url URL to request
-	* @param {String} 	body 				Request body
-	* @param {Function} onDone 				Callback to be executed upon request completion.
-	* @param {String} 	headers 			Request HTTP headers
-	* @param {String} 	responseCharset		Character set to force on the response
-	* @param {Boolean}	dontSend			Don't send XHR before returning
-	* @return {Boolean} True if the request was sent, or false if the browser is offline
-	*/
-	this.doPost = function(url, body, onDone, headers, responseCharset, dontSend) {
-		if (url instanceof Components.interfaces.nsIURI) {
-			// Don't display password in console
-			var disp = url.clone();
-			if (disp.password) {
-				disp.password = "********";
-			}
-			url = url.spec;
-		}
-		
-		var bodyStart = body.substr(0, 1024);
-		// Don't display sync password or session id in console
-		bodyStart = bodyStart.replace(/password=[^&]+/, 'password=********');
-		bodyStart = bodyStart.replace(/sessionid=[^&]+/, 'sessionid=********');
-		
-		Zotero.debug("HTTP POST "
-			+ (body.length > 1024 ?
-				bodyStart + '... (' + body.length + ' chars)' : bodyStart)
-			+ " to " + (disp ? disp.spec : url));
-		
-		
-		if (this.browserIsOffline()){
-			return false;
-		}
-		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-					.createInstance();
-		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open('POST', url, true);
-		// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
-		if (!Zotero.isFx35) {
-			var channel = xmlhttp.channel;
-			channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
-			channel.forceAllowThirdPartyCookie = true;
-		}
-		
-		if (headers) {
-			if (typeof headers == 'string') {
-				var msg = "doPost() now takes a headers object rather than a requestContentType -- update your code";
-				Zotero.debug(msg, 2);
-				Components.utils.reportError(msg);
-				headers = {
-					"Content-Type": headers
-				};
-			}
-		}
-		else {
-			headers = {};
-		}
-		
-		if (!headers["Content-Type"]) {
-			headers["Content-Type"] = "application/x-www-form-urlencoded";
-		}
-		
-		for (var header in headers) {
-			xmlhttp.setRequestHeader(header, headers[header]);
-		}
-		
-		/** @ignore */
-		xmlhttp.onreadystatechange = function(){
-			_stateChange(xmlhttp, onDone, responseCharset);
-		};
-		
-		if(!dontSend) {
-			xmlhttp.send(body);
-		}
-		
-		return xmlhttp;
-	}
-	
-	/**
-	* Send an HTTP HEAD request via XMLHTTPRequest
-	*
-	* @param {String} url URL to request
-	* @param {Function} onDone Callback to be executed upon request completion
-	* @param {Object} requestHeaders HTTP headers to include with request
-	* @return {Boolean} True if the request was sent, or false if the browser is offline
-	*/
-	this.doHead = function(url, onDone, requestHeaders) {
-		if (url instanceof Components.interfaces.nsIURI) {
-			// Don't display password in console
-			var disp = url.clone();
-			if (disp.password) {
-				disp.password = "********";
-			}
-			Zotero.debug("HTTP HEAD " + disp.spec);
-			url = url.spec;
-		}
-		else {
-			Zotero.debug("HTTP HEAD " + url);
-		
-		}
-		
-		if (this.browserIsOffline()){
-			return false;
-		}
-		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-						.createInstance();
-		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open('HEAD', url, true);
-		// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
-		if (!Zotero.isFx35) {
-			var channel = xmlhttp.channel;
-			channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
-			channel.forceAllowThirdPartyCookie = true;
-		}
-		
-		if (requestHeaders) {
-			for (var header in requestHeaders) {
-				xmlhttp.setRequestHeader(header, requestHeaders[header]);
-			}
-		}
-		
-		// Don't cache HEAD requests
-		xmlhttp.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
-		
-		/** @ignore */
-		xmlhttp.onreadystatechange = function(){
-			_stateChange(xmlhttp, onDone);
-		};
-		
-		xmlhttp.send(null);
-		
-		return xmlhttp;
-	}
-	
-	/**
-	 * Send an HTTP OPTIONS request via XMLHTTPRequest
-	 *
-	 * @param	{nsIURI}		url
-	 * @param	{Function}	onDone
-	 * @return	{XMLHTTPRequest}
-	 */
-	this.doOptions = function (uri, callback) {
-		// Don't display password in console
-		var disp = uri.clone();
-		if (disp.password) {
-			disp.password = "********";
-		}
-		Zotero.debug("HTTP OPTIONS for " + disp.spec);
-		
-		if (Zotero.Utilities.HTTP.browserIsOffline()){
-			return false;
-		}
-		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-					.createInstance();
-		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open('OPTIONS', uri.spec, true);
-		/** @ignore */
-		xmlhttp.onreadystatechange = function() {
-			_stateChange(xmlhttp, callback);
-		};
-		xmlhttp.send(null);
-		return xmlhttp;
-	}
-	
-	//
-	// WebDAV methods
-	//
-	
-	/**
-	* Send a WebDAV PROP* request via XMLHTTPRequest
-	*
-	* Returns false if browser is offline
-	*
-	* @param		{String}		method			PROPFIND or PROPPATCH
-	* @param		{nsIURI}		uri
-	* @param		{String}		body				XML string
-	* @param		{Function}	callback
-	* @param		{Object}		requestHeaders	e.g. { Depth: 0 }
-	*/
-	this.WebDAV.doProp = function (method, uri, body, callback, requestHeaders) {
-		switch (method) {
-			case 'PROPFIND':
-			case 'PROPPATCH':
-				break;
-			
-			default:
-				throw ("Invalid method '" + method
-					+ "' in Zotero.Utilities.HTTP.doProp");
-		}
-		
-		if (requestHeaders && requestHeaders.depth != undefined) {
-			var depth = requestHeaders.depth;
-		}
-		
-		// Don't display password in console
-		var disp = uri.clone();
-		if (disp.password) {
-			disp.password = "********";
-		}
-		
-		var bodyStart = body.substr(0, 1024);
-		Zotero.debug("HTTP " + method + " "
-			+ (depth != undefined ? "(depth " + depth + ") " : "")
-			+ (body.length > 1024 ?
-				bodyStart + "... (" + body.length + " chars)" : bodyStart)
-			+ " to " + disp.spec);
-		
-		if (Zotero.Utilities.HTTP.browserIsOffline()) {
-			Zotero.debug("Browser is offline", 2);
-			return false;
-		}
-		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-						.createInstance();
-		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open(method, uri.spec, true);
-		
-		if (requestHeaders) {
-			for (var header in requestHeaders) {
-				xmlhttp.setRequestHeader(header, requestHeaders[header]);
-			}
-		}
-		
-		xmlhttp.setRequestHeader("Content-Type", 'text/xml; charset="utf-8"');
-		
-		xmlhttp.onreadystatechange = function() {
-			_stateChange(xmlhttp, callback);
-		};
-		
-		xmlhttp.send(body);
-		return xmlhttp;
-	}
-	
-	
-	/**
-	 * Send a WebDAV MKCOL request via XMLHTTPRequest
-	 *
-	 * @param	{nsIURI}		url
-	 * @param	{Function}	onDone
-	 * @return	{XMLHTTPRequest}
-	 */
-	this.WebDAV.doMkCol = function (uri, callback) {
-		// Don't display password in console
-		var disp = uri.clone();
-		if (disp.password) {
-			disp.password = "********";
-		}
-		Zotero.debug("HTTP MKCOL " + disp.spec);
-		
-		if (Zotero.Utilities.HTTP.browserIsOffline()) {
-			return false;
-		}
-		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-					.createInstance();
-		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open('MKCOL', uri.spec, true);
-		xmlhttp.onreadystatechange = function() {
-			_stateChange(xmlhttp, callback);
-		};
-		xmlhttp.send(null);
-		return xmlhttp;
-	}
-	
-	
-	/**
-	 * Send a WebDAV PUT request via XMLHTTPRequest
-	 *
-	 * @param	{nsIURI}		url
-	 * @param	{String}		body			String body to PUT
-	 * @param	{Function}	onDone
-	 * @return	{XMLHTTPRequest}
-	 */
-	this.WebDAV.doPut = function (uri, body, callback) {
-		// Don't display password in console
-		var disp = uri.clone();
-		if (disp.password) {
-			disp.password = "********";
-		}
-		
-		var bodyStart = "'" + body.substr(0, 1024) + "'";
-		Zotero.debug("HTTP PUT "
-			+ (body.length > 1024 ?
-				bodyStart + "... (" + body.length + " chars)" : bodyStart)
-			+ " to " + disp.spec);
-		
-		if (Zotero.Utilities.HTTP.browserIsOffline()) {
-			return false;
-		}
-		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-					.createInstance();
-		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open("PUT", uri.spec, true);
-		// Some servers (e.g., Jungle Disk DAV) return a 200 response code
-		// with Content-Length: 0, which triggers a "no element found" error
-		// in Firefox, so we override to text
-		xmlhttp.overrideMimeType("text/plain");
-		xmlhttp.onreadystatechange = function() {
-			_stateChange(xmlhttp, callback);
-		};
-		xmlhttp.send(body);
-		return xmlhttp;
-	}
-	
-	
-	/**
-	 * Send a WebDAV PUT request via XMLHTTPRequest
-	 *
-	 * @param	{nsIURI}		url
-	 * @param	{Function}	onDone
-	 * @return	{XMLHTTPRequest}
-	 */
-	this.WebDAV.doDelete = function (uri, callback) {
-		// Don't display password in console
-		var disp = uri.clone();
-		if (disp.password) {
-			disp.password = "********";
-		}
-		
-		Zotero.debug("WebDAV DELETE to " + disp.spec);
-		
-		if (Zotero.Utilities.HTTP.browserIsOffline()) {
-			return false;
-		}
-		
-		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-					.createInstance();
-		// Prevent certificate/authentication dialogs from popping up
-		xmlhttp.mozBackgroundRequest = true;
-		xmlhttp.open("DELETE", uri.spec, true);
-		// Firefox 3 throws a "no element found" error even with a
-		// 204 ("No Content") response, so we override to text
-		xmlhttp.overrideMimeType("text/plain");
-		xmlhttp.onreadystatechange = function() {
-			_stateChange(xmlhttp, callback);
-		};
-		xmlhttp.send(null);
-		return xmlhttp;
-	}
-	
-	
-	/**
-	 * Get the Authorization header used by a channel
-	 *
-	 * As of Firefox 3.0.1 subsequent requests to higher-level directories
-	 * seem not to authenticate properly and just return 401s, so this
-	 * can be used to manually include the Authorization header in a request
-	 *
-	 * It can also be used to check whether a request was forced to
-	 * use authentication
-	 *
-	 * @param	{nsIChannel}		channel
-	 * @return	{String|FALSE}				Authorization header, or FALSE if none
-	 */
-	this.getChannelAuthorization = function (channel) {
-		try {
-			channel.QueryInterface(Components.interfaces.nsIHttpChannel);
-			var authHeader = channel.getRequestHeader("Authorization");
-			return authHeader;
-		}
-		catch (e) {
-			Zotero.debug(e);
-			return false;
-		}
-	}
-	
-	
-	/**
-	 * Checks if the browser is currently in "Offline" mode
-	 *
-	 * @type Boolean
-	 */
-	this.browserIsOffline = function() { 
-		return Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService).offline;
-	}
-	
-	/**
-	 * Load one or more documents in a hidden browser
-	 *
-	 * @param {String|String[]} urls URL(s) of documents to load
-	 * @param {Function} processor Callback to be executed for each document loaded
-	 * @param {Function} done Callback to be executed after all documents have been loaded
-	 * @param {Function} exception Callback to be executed if an exception occurs
-	 */
-	this.processDocuments = function(urls, processor, done, exception) {
-		/**
-		 * Removes event listener for the load event and deletes the hidden browser
-		 */
-		var removeListeners = function() {
-			hiddenBrowser.removeEventListener(loadEvent, onLoad, true);
-			Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-		}
-		
-		/**
-		 * Loads the next page
-		 * @inner
-		 */
-		var doLoad = function() {
-			if(urls.length) {
-				var url = urls.shift();
-				try {
-					Zotero.debug("loading "+url);
-					hiddenBrowser.loadURI(url);
-				} catch(e) {
-					removeListeners();
-					if(exception) {
-						exception(e);
-						return;
-					} else {
-						throw(e);
-					}
-				}
-			} else {
-				removeListeners();
-				if(done) done();
-			}
-		};
-		
-		/**
-		 * Callback to be executed when a page load completes
-		 * @inner
-		 */
-		var onLoad = function() {
-			if(hiddenBrowser.contentDocument.location.href == "about:blank") return;
-			Zotero.debug(hiddenBrowser.contentDocument.location.href+" has been loaded");
-			if(hiddenBrowser.contentDocument.location.href != prevUrl) {	// Just in case it fires too many times
-				prevUrl = hiddenBrowser.contentDocument.location.href;
-				try {
-					processor(hiddenBrowser.contentDocument);
-				} catch(e) {
-					removeListeners();
-					if(exception) {
-						exception(e);
-						return;
-					} else {
-						throw(e);
-					}
-				}
-				doLoad();
-			}
-		};
-		
-		if(typeof(urls) == "string") urls = [urls];
-		
-		var prevUrl;
-		var loadEvent = "pageshow";
-		
-		var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
-		hiddenBrowser.addEventListener(loadEvent, onLoad, true);
-		
-		doLoad();
-		return hiddenBrowser;
-	}
-	
-	/**
-	 * Handler for XMLHttpRequest state change
-	 *
-	 * @param {nsIXMLHttpRequest} XMLHttpRequest whose state just changed
-	 * @param {Function} [onDone] Callback for request completion
-	 * @param {String} [responseCharset] Character set to force on the response
-	 * @private
-	 */
-	function _stateChange(xmlhttp, callback, responseCharset, data) {
-		switch (xmlhttp.readyState){
-			// Request not yet made
-			case 1:
-				break;
-			
-			case 2:
-				break;
-			
-			// Called multiple times while downloading in progress
-			case 3:
-				break;
-			
-			// Download complete
-			case 4:
-				if (callback) {
-					// Override the content charset
-					if (responseCharset) {
-						xmlhttp.channel.contentCharset = responseCharset;
-					}
-					callback(xmlhttp, data);
-				}
-			break;
-		}
-	}
-}
-
-/**
- * @namespace
- */
-// This would probably be better as a separate XPCOM service
-Zotero.Utilities.AutoComplete = new function() {
-	this.getResultComment = function (textbox){
-		var controller = textbox.controller;
-		
-		for (var i=0; i<controller.matchCount; i++)
-		{
-			if (controller.getValueAt(i) == textbox.value)
-			{
-				return controller.getCommentAt(i);
-			}
-		}
-		return false;
-	}
-}
-
 
 /**
  *  Base64 encode / decode
  *  From http://www.webtoolkit.info/
  */
-Zotero.Utilities.Base64 = {
+Zotero.Utilities.Internal.Base64 = {
 	 // private property
 	 _keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
 	 

@@ -227,7 +227,7 @@ Zotero.Schema = new function(){
 			return;
 		}
 		
-		str = Zotero.Utilities.prototype.trim(str);
+		str = Zotero.Utilities.trim(str);
 		
 		Zotero.debug(str);
 		
@@ -906,7 +906,7 @@ Zotero.Schema = new function(){
 			}
 		}
 		
-		var get = Zotero.Utilities.HTTP.doGet(url, function (xmlhttp) {
+		var get = Zotero.HTTP.doGet(url, function (xmlhttp) {
 			var updated = _updateFromRepositoryCallback(xmlhttp, !!force);
 			if (callback) {
 				callback(xmlhttp, updated)
@@ -1448,8 +1448,6 @@ Zotero.Schema = new function(){
 		}
 		
 		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
-		
-		var ZU = new Zotero.Utilities;
 		
 		Zotero.DB.beginTransaction();
 		
@@ -2458,7 +2456,7 @@ Zotero.Schema = new function(){
 					var rows = Zotero.DB.query("SELECT * FROM itemDataValues WHERE value REGEXP '(^\\s+|\\s+$)'");
 					if (rows) {
 						for each(var row in rows) {
-							var trimmed = Zotero.Utilities.prototype.trim(row.value);
+							var trimmed = Zotero.Utilities.trim(row.value);
 							var valueID = Zotero.DB.valueQuery("SELECT valueID FROM itemDataValues WHERE value=?", trimmed);
 							if (valueID) {
 								Zotero.DB.query("UPDATE OR REPLACE itemData SET valueID=? WHERE valueID=?", [valueID, row.valueID]);
@@ -2494,7 +2492,7 @@ Zotero.Schema = new function(){
 					var rows = Zotero.DB.query("SELECT * FROM tags WHERE name REGEXP '(^\\s+|\\s+$)'");
 					if (rows) {
 						for each(var row in rows) {
-							var trimmed = Zotero.Utilities.prototype.trim(row.name);
+							var trimmed = Zotero.Utilities.trim(row.name);
 							var tagID = Zotero.DB.valueQuery("SELECT tagID FROM tags WHERE name=?", trimmed);
 							if (tagID) {
 								Zotero.DB.query("UPDATE OR REPLACE itemTags SET tagID=? WHERE tagID=?", [tagID, row.tagID]);

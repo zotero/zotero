@@ -1190,11 +1190,10 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 	
 	// Levenshtein distance UDF
 	var lev = {
-		ZU: new Zotero.Utilities,
 		onFunctionCall: function (arg) {
 			var a = arg.getUTF8String(0);
 			var b = arg.getUTF8String(1);
-			return this.ZU.levenshtein(a, b);
+			return Zotero.Utilities.levenshtein(a, b);
 		}
 	};
 	this._connection.createFunction('levenshtein', 2, lev);
@@ -1213,7 +1212,7 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 	var rx = {
 		onFunctionCall: function (arg) {
 			var str = arg.getUTF8String(0);
-			return Zotero.Utilities.prototype.text2html(str, true);
+			return Zotero.Utilities.text2html(str, true);
 		}
 	};
 	this._connection.createFunction('text2html', 1, rx);

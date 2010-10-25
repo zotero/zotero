@@ -253,7 +253,7 @@ Zotero.Styles = new function() {
 			if(source && !_styles[source]) {
 				// need to fetch source
 				if(source.substr(0, 7) == "http://" || source.substr(0, 8) == "https://") {
-					Zotero.Utilities.HTTP.doGet(source, function(xmlhttp) {
+					Zotero.HTTP.doGet(source, function(xmlhttp) {
 						var success = false;
 						var error = null;
 						try {

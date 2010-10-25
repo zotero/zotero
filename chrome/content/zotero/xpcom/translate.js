@@ -959,7 +959,7 @@ Zotero.Translate.prototype._generateSandbox = function() {
 	
 	// add utilities
 	this._sandbox.Zotero.Utilities = new Zotero.Utilities.Translate(this);
-	this._sandbox.Zotero.Utilities.HTTP = this._sandbox.Zotero.Utilities;
+	this._sandbox.Zotero.HTTP = this._sandbox.Zotero.Utilities;
 	
 	if(this.type == "export") {
 		// add routines to retrieve items and collections
@@ -1319,7 +1319,7 @@ Zotero.Translate.prototype._reportTranslationFailure = function(errorData) {
 					   "&lastUpdated=" + encodeURIComponent(this.translator[0].lastUpdated) +
 					   "&diagnostic=" + encodeURIComponent(Zotero.getSystemInfo()) +
 					   "&errorData=" + encodeURIComponent(errorData);
-		Zotero.Utilities.HTTP.doPost("http://www.zotero.org/repo/report", postBody);
+		Zotero.HTTP.doPost("http://www.zotero.org/repo/report", postBody);
 	}
 }
 

@@ -114,7 +114,7 @@ Zotero.Search.prototype._set = function (field, val) {
 			return;
 		
 		case 'name':
-			val = Zotero.Utilities.prototype.trim(val);
+			val = Zotero.Utilities.trim(val);
 			break;
 	}
 	
@@ -964,8 +964,6 @@ Zotero.Search.prototype._idsToTempTable = function (ids) {
  * Build the SQL query for the search
  */
 Zotero.Search.prototype._buildQuery = function(){
-	var utils = new Zotero.Utilities();
-	
 	var sql = 'SELECT itemID FROM items';
 	var sqlParams = [];
 	// Separate ANY conditions for 'required' condition support
@@ -1341,13 +1339,13 @@ Zotero.Search.prototype._buildQuery = function(){
 							// to '00' so that a search for just a year works
 							// (and no year will just not find anything)
 							var sqldate = dateparts.year ?
-								utils.lpad(dateparts.year, '0', 4) : '____';
+								Zotero.Utilities.lpad(dateparts.year, '0', 4) : '____';
 							sqldate += '-'
 							sqldate += dateparts.month || dateparts.month === 0 ?
-								utils.lpad(dateparts.month + 1, '0', 2) : alt;
+								Zotero.Utilities.lpad(dateparts.month + 1, '0', 2) : alt;
 							sqldate += '-';
 							sqldate += dateparts.day ?
-								utils.lpad(dateparts.day, '0', 2) : alt;
+								Zotero.Utilities.lpad(dateparts.day, '0', 2) : alt;
 							
 							if (sqldate!='____-__-__'){
 								go = true;

@@ -165,8 +165,8 @@ Zotero.Commons = new function() {
 			Zotero.debug("IA BUCKETS");
 			Zotero.debug(IABuckets);
 			
-			var addBuckets = Zotero.Utilities.prototype.arrayDiff(IABuckets, currentBuckets);
-			var removeBuckets = Zotero.Utilities.prototype.arrayDiff(currentBuckets, IABuckets);
+			var addBuckets = Zotero.Utilities.arrayDiff(IABuckets, currentBuckets);
+			var removeBuckets = Zotero.Utilities.arrayDiff(currentBuckets, IABuckets);
 			
 			Zotero.debug("ADD");
 			Zotero.debug(addBuckets);
@@ -397,7 +397,7 @@ Zotero.Commons = new function() {
 	
 	
 	this.slugify = function (input) {
-        var slug = Zotero.Utilities.prototype.trim(input)
+        var slug = Zotero.Utilities.trim(input)
         			.toLowerCase()
         			.replace(/[^a-z0-9 ._-]/g, "")
         			//.replace(/ /g, "_");
@@ -458,7 +458,7 @@ Zotero.Commons.Bucket.prototype.exists = function (callback, maxTries, tries) {
 	
 	var self = this;
 	
-	Zotero.Utilities.HTTP.doHead(this.uri, function (xmlhttp) {
+	Zotero.HTTP.doHead(this.uri, function (xmlhttp) {
 		switch (xmlhttp.status) {
 			case 200:
 				callback(1);
@@ -511,7 +511,7 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 	var progressWin = null;
 	var progressWinIcon = 'chrome://zotero/skin/treeitem-attachment-pdf.png';
 	
-	var req = Zotero.Utilities.HTTP.doGet(uri, function (xmlhttp) {
+	var req = Zotero.HTTP.doGet(uri, function (xmlhttp) {
 		if (xmlhttp.status != 200) {
 			Zotero.debug(xmlhttp.status);
 			Zotero.debug(xmlhttp.responseText);
@@ -620,7 +620,7 @@ Zotero.Commons.Bucket.prototype.getItems = function (callback) {
 			
 			var rdfURI = self.downloadURI + '/' + zip.rdf;
 			
-			Zotero.Utilities.HTTP.doGet(rdfURI, function (xmlhttp) {
+			Zotero.HTTP.doGet(rdfURI, function (xmlhttp) {
 				// If RDF not available, skip item
 				if (xmlhttp.status != 200) {
 					Zotero.debug("RDF not found at " + xmlhttp.channel.originalURI.spec);
@@ -1049,7 +1049,7 @@ Zotero.Commons.Bucket.prototype.updateMetadata = function(action, item, callback
 	var self = this;
 	
 	// get previous metadata. multiple language support difficult via IA s3.
-	Zotero.Utilities.HTTP.doGet(resource, function (xmlhttp) {
+	Zotero.HTTP.doGet(resource, function (xmlhttp) {
 		if (xmlhttp.status == 404 || (xmlhttp.status == 200 && !xmlhttp.responseXML)) {
 			Zotero.Commons.error("Error updating bucket metadata");
 			return;

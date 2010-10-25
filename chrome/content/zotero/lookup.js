@@ -30,7 +30,7 @@ const Zotero_Lookup = new function () {
 		document.getElementById("accept-button").disabled = true;
 		var identifier = document.getElementById("lookup-textbox").value;
 		
-		var doi = Zotero.Utilities.prototype.cleanDOI(identifier);
+		var doi = Zotero.Utilities.cleanDOI(identifier);
 		if(doi) {
 			var item = {itemType:"journalArticle", DOI:doi};
 		} else {

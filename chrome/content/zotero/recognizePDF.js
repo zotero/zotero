@@ -303,7 +303,7 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 	// look for DOI
 	var allText = lines.join("\n");
 	Zotero.debug(allText);
-	var m = Zotero.Utilities.prototype.cleanDOI(allText);
+	var m = Zotero.Utilities.cleanDOI(allText);
 	if(m) {
 		this._DOI = m[0];
 	}

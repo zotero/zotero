@@ -84,6 +84,7 @@ var xpcomFiles = [
 	'error',
 	'file',
 	'fulltext',
+	'http',
 	'id',
 	'ingester',
 	'integration',

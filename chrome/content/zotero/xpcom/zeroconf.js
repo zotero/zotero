@@ -336,7 +336,7 @@ Zotero.Zeroconf.RemoteLibrary.prototype.load = function () {
 
 Zotero.Zeroconf.RemoteLibrary.prototype.loadItems = function (self, noNotify) {
 	var url = "http://" + this._host + ':' + this._port;
-	Zotero.Utilities.HTTP.doPost(url, '', function (xmlhttp) {
+	Zotero.HTTP.doPost(url, '', function (xmlhttp) {
 		Zotero.debug(xmlhttp.responseText);
 		
 		self._items = [];

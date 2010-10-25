@@ -29,8 +29,7 @@ Zotero.Timeline = new function () {
 	this.generateXMLList = generateXMLList;
 
 	function generateXMLDetails(items, dateType) {
-		var ZU = new Zotero.Utilities();
-		var escapeXML = ZU.htmlSpecialChars;
+		var escapeXML = Zotero.Utilities.htmlSpecialChars;
 	
 		var content = '<data>\n';
 		for each(var arr in items) {

@@ -46,7 +46,7 @@ Zotero.DataServer = new function () {
 			return;
 		}
 		
-		if (Zotero.Utilities.HTTP.browserIsOffline()) {
+		if (Zotero.HTTP.browserIsOffline()) {
 			Zotero.debug('Browser is offline -- not initializing data HTTP server');
 			_registerOnlineObserver()
 			return;

@@ -1445,7 +1445,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 				
 				/*
 				if (type == 'item') {
-					if (!Zotero.Utilities.prototype.isEmpty(changedCreators)) {
+					if (!Zotero.Utilities.isEmpty(changedCreators)) {
 						io.dataIn.changedCreators = changedCreators;
 					}
 				}

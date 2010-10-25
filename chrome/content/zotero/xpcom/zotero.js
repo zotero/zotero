@@ -1485,7 +1485,7 @@ Zotero.Prefs = new function(){
 			return;
 		}
 		
-		str = Zotero.Utilities.prototype.trim(str.replace(/<\?xml.*\?>\s*/, ''));
+		str = Zotero.Utilities.trim(str.replace(/<\?xml.*\?>\s*/, ''));
 		Zotero.debug(str);
 		
 		var confirm = ps.confirm(
@@ -1912,13 +1912,12 @@ Zotero.Date = new function(){
 				return date.toLocaleFormat('%Y-%m-%d %H:%M:%S');
 			}
 			
-			var utils = new Zotero.Utilities();
-			year = utils.lpad(year, '0', 4);
-			month = utils.lpad(month + 1, '0', 2);
-			day = utils.lpad(day, '0', 2);
-			hours = utils.lpad(hours, '0', 2);
-			minutes = utils.lpad(minutes, '0', 2);
-			seconds = utils.lpad(seconds, '0', 2);
+			year = Zotero.Utilities.lpad(year, '0', 4);
+			month = Zotero.Utilities.lpad(month + 1, '0', 2);
+			day = Zotero.Utilities.lpad(day, '0', 2);
+			hours = Zotero.Utilities.lpad(hours, '0', 2);
+			minutes = Zotero.Utilities.lpad(minutes, '0', 2);
+			seconds = Zotero.Utilities.lpad(seconds, '0', 2);
 			
 			return year + '-' + month + '-' + day + ' '
 				+ hours + ':' + minutes + ':' + seconds;
@@ -1945,13 +1944,12 @@ Zotero.Date = new function(){
 		var minutes = date.getUTCMinutes();
 		var seconds = date.getUTCSeconds();
 		
-		var utils = new Zotero.Utilities();
-		year = utils.lpad(year, '0', 4);
-		month = utils.lpad(month + 1, '0', 2);
-		day = utils.lpad(day, '0', 2);
-		hours = utils.lpad(hours, '0', 2);
-		minutes = utils.lpad(minutes, '0', 2);
-		seconds = utils.lpad(seconds, '0', 2);
+		year = Zotero.Utilities.lpad(year, '0', 4);
+		month = Zotero.Utilities.lpad(month + 1, '0', 2);
+		day = Zotero.Utilities.lpad(day, '0', 2);
+		hours = Zotero.Utilities.lpad(hours, '0', 2);
+		minutes = Zotero.Utilities.lpad(minutes, '0', 2);
+		seconds = Zotero.Utilities.lpad(seconds, '0', 2);
 		
 		return year + '-' + month + '-' + day + 'T'
 			+ hours + ':' + minutes + ':' + seconds + 'Z';
@@ -2217,11 +2215,11 @@ Zotero.Date = new function(){
 		var date = Zotero.Date.strToDate(str);
 		
 		if(date.year) {
-			var dateString = Zotero.Utilities.prototype.lpad(date.year, "0", 4);
+			var dateString = Zotero.Utilities.lpad(date.year, "0", 4);
 			if(date.month) {
-				dateString += "-"+Zotero.Utilities.prototype.lpad(date.month+1, "0", 2);
+				dateString += "-"+Zotero.Utilities.lpad(date.month+1, "0", 2);
 				if(date.day) {
-					dateString += "-"+Zotero.Utilities.prototype.lpad(date.day, "0", 2);
+					dateString += "-"+Zotero.Utilities.lpad(date.day, "0", 2);
 				}
 			}
 			return dateString;
@@ -2233,8 +2231,6 @@ Zotero.Date = new function(){
 		if (!str){
 			return '';
 		}
-		
-		var utils = new Zotero.Utilities();
 		
 		var parts = strToDate(str);
 		
@@ -2249,9 +2245,9 @@ Zotero.Date = new function(){
 		
 		parts.month = typeof parts.month != "undefined" ? parts.month + 1 : '';
 		
-		var multi = (parts.year ? utils.lpad(parts.year, '0', 4) : '0000') + '-'
-			+ utils.lpad(parts.month, '0', 2) + '-'
-			+ (parts.day ? utils.lpad(parts.day, '0', 2) : '00')
+		var multi = (parts.year ? Zotero.Utilities.lpad(parts.year, '0', 4) : '0000') + '-'
+			+ Zotero.Utilities.lpad(parts.month, '0', 2) + '-'
+			+ (parts.day ? Zotero.Utilities.lpad(parts.day, '0', 2) : '00')
 			+ ' '
 			+ str;
 		return multi;
