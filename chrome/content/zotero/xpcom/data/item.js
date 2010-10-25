@@ -1265,7 +1265,7 @@ Zotero.Item.prototype.save = function() {
 						value = Zotero.DB.transactionDateTime;
 					}
 					
-					var dataType = ZU.getSQLDataType(value);
+					var dataType = Zotero.DB.getSQLDataType(value);
 					
 					switch (dataType) {
 						case 32:
@@ -1598,7 +1598,7 @@ Zotero.Item.prototype.save = function() {
 						value = Zotero.DB.transactionDateTime;
 					}
 					
-					var dataType = ZU.getSQLDataType(value);
+					var dataType = Zotero.DB.getSQLDataType(value);
 					
 					switch (dataType) {
 						case 32:
