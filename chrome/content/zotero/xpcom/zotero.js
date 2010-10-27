@@ -36,9 +36,13 @@ const ZOTERO_CONFIG = {
 	PREF_BRANCH: 'extensions.zotero.'
 };
 
-// Fx4.0b8+ use implicit SJOWs; no creation necessary
-if(!XPCSafeJSObjectWrapper) {
-	var XPCSafeJSObjectWrapper = function(arg) { return arg };
+// Fx4.0b8+ use implicit SJOWs and get rid of explicit XPCSafeJSObjectWrapper constructor
+// Ugly hack to get around this until we can just kill the XPCSafeJSObjectWrapper calls (when we
+// drop Fx3.6 support)
+try {
+	XPCSafeJSObjectWrapper;
+} catch(e) {
+	eval("var XPCSafeJSObjectWrapper = function(arg) { return arg }");
 }
 
 /*
@@ -214,6 +218,8 @@ var Zotero = new function(){
 					= gExtensionManager.getItemForID(ZOTERO_CONFIG['GUID']).version;
 			}
 		}
+		
+		this.isConnector = false;
 		
 		// OS platform
 		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
