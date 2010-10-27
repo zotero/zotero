@@ -50,18 +50,18 @@ Zotero.MIMETypeHandler = new function () {
 		_observers = [];
 		
 		if(Zotero.Prefs.get("parseEndNoteMIMETypes")) {
-			this.addHandler("application/x-endnote-refer", Zotero.Ingester.importHandler, true);
-			this.addHandler("application/x-research-info-systems", Zotero.Ingester.importHandler, true);
+			this.addHandler("application/x-endnote-refer", _importHandler, true);
+			this.addHandler("application/x-research-info-systems", _importHandler, true);
 			//
 			// And some non-standard ones
 			//
-			this.addHandler("text/x-research-info-systems", Zotero.Ingester.importHandler, true);
+			this.addHandler("text/x-research-info-systems", _importHandler, true);
 			// Nature uses this one
-			this.addHandler("text/application/x-research-info-systems", Zotero.Ingester.importHandler, true);
+			this.addHandler("text/application/x-research-info-systems", _importHandler, true);
 			// Cell uses this one
-			this.addHandler("text/ris", Zotero.Ingester.importHandler, true);
+			this.addHandler("text/ris", _importHandler, true);
 			// Not even trying
-			this.addHandler("ris", Zotero.Ingester.importHandler, true);
+			this.addHandler("ris", _importHandler, true);
 		}
 		this.addHandler("text/x-csl", function(a1, a2) { Zotero.Styles.install(a1, a2) });
 		this.addHandler("application/x-zotero-schema", Zotero.Schema.importSchema);
@@ -86,6 +86,55 @@ Zotero.MIMETypeHandler = new function () {
 	 */
 	this.addObserver = function(fn) {
 		_observers.push(fn);
+	}
+	
+	
+	/**
+	 * Handles Refer/RIS MIME types
+	 * @param {String} string The Refer/RIS formatted records
+	 * @param {String} uri The URI from which the Refer/RIS formatted records were downloaded
+	 */
+	function _importHandler(string, uri) {
+		var frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
+			getService(Components.interfaces.nsIWindowWatcher).activeWindow;
+		
+		if (Zotero.locked) {
+			frontWindow.Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+			var desc = Zotero.localeJoin([
+				Zotero.getString('general.operationInProgress'), Zotero.getString('general.operationInProgress.waitUntilFinishedAndTryAgain')
+			]);
+			frontWindow.Zotero_Browser.progress.addDescription(desc);
+			frontWindow.Zotero_Browser.progress.show();
+			frontWindow.Zotero_Browser.progress.startCloseTimer(8000);
+			return;
+		}
+		
+		// attempt to import through Zotero.Translate
+		var translation = new Zotero.Translate("import");
+		translation.setLocation(uri);
+		translation.setString(string);
+		
+		frontWindow.Zotero_Browser.progress.show();
+		var libraryID = null;
+		var collection = null;
+		try {
+			libraryID = frontWindow.ZoteroPane.getSelectedLibraryID();
+			collection = frontWindow.ZoteroPane.getSelectedCollection();
+		} catch(e) {}
+		translation.setHandler("itemDone", function(obj, item) { frontWindow.Zotero_Browser.itemDone(obj, item, collection) });
+		translation.setHandler("done", function(obj, item) { frontWindow.Zotero_Browser.finishScraping(obj, item, collection) });
+		
+		// attempt to retrieve translators
+		var translators = translation.getTranslators();
+		if(!translators.length) {
+			// we lied. we can't really translate this file.
+			frontWindow.Zotero_Browser.progress.close();
+			throw "No translator found for handled RIS or Refer file"
+		}
+		
+		// translate using first available
+		translation.setTranslator(translators[0]);
+		translation.translate(libraryID);
 	}
 	
 	/**

@@ -939,8 +939,8 @@ Zotero.Translate.prototype._generateSandbox = function() {
 			var m = searchSandboxRe.exec(tempURL);
 			if(m) sandboxLocation = m[0];
 		}
-	} else if(this._sandboxLocation) {
-		sandboxLocation = this._sandboxLocation;
+	//} else if(this._sandboxLocation) {
+	//	sandboxLocation = this._sandboxLocation;
 	}
 	Zotero.debug("Translate: Binding sandbox to "+(typeof sandboxLocation == "object" ? sandboxLocation.document.location : sandboxLocation), 4);
 	
