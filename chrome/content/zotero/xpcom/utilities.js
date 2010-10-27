@@ -261,17 +261,17 @@ Zotero.Utilities = {
 		var parts = [];
 		var splits = str.split(/(<a [^>]+>[^<]*<\/a>)/);
 		
-		for each(var split in splits) {
+		for(var i=0; i<splits.length; i++) {
 			// Link
-			if (split.indexOf('<a ') == 0) {
-				var matches = split.match(/<a ([^>]+)>([^<]*)<\/a>/);
+			if (splits[i].indexOf('<a ') == 0) {
+				var matches = splits[i].match(/<a ([^>]+)>([^<]*)<\/a>/);
 				if (matches) {
 					// Attribute pairs
 					var attributes = {};
 					var pairs = matches[1].match(/([^ =]+)="([^"]+")/g);
-					for each (var pair in pairs) {
-						var [key, val] = pair.split(/=/);
-						attributes[key] = val.substr(1, val.length - 2);
+					for(var j=0; j<pairs.length; j++) {
+						var keyVal = pairs[j].split(/=/);
+						attributes[keyVal[0]] = val.substr(1, keyVal[1].length - 2);
 					}
 					
 					parts.push({
@@ -503,6 +503,50 @@ Zotero.Utilities = {
 			nextSet();
 		}
 		nextSet();
+	},
+	
+	/**
+	 * Tests if an item type exists
+	 *
+	 * @param {String} type Item type
+	 * @type Boolean
+	 */
+	"itemTypeExists":function(type) {
+		if(Zotero.ItemTypes.getID(type)) {
+			return true;
+		} else {
+			return false;
+		}
+	},
+	
+	/**
+	 * Find valid creator types for a given item type
+	 *
+	 * @param {String} type Item type
+	 * @return {String[]} Creator types
+	 */
+	"getCreatorsForType":function(type) {
+		var types = Zotero.CreatorTypes.getTypesForItemType(Zotero.ItemTypes.getID(type));
+		var cleanTypes = new Array();
+		for(var i=0; i<types.length; i++) {
+			cleanTypes.push(types[i].name);
+		}
+		return cleanTypes;
+	},
+	
+	/**
+	 * Gets a creator type name, localized to the current locale
+	 *
+	 * @param {String} type Creator type
+	 * @param {String} Localized creator type
+	 * @type Boolean
+	 */
+	"getLocalizedCreatorType":function(type) {
+		try {
+			return Zotero.getString("creatorTypes."+type);
+		} catch(e) {
+			return false;
+		}
 	}
 }
 
@@ -808,50 +852,6 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
 			translate.error(false, e);
 		}
 	}, headers, responseCharset);
-}
-
-/**
- * Tests if an item type exists
- *
- * @param {String} type Item type
- * @type Boolean
- */
-Zotero.Utilities.Translate.prototype.itemTypeExists = function(type) {
-	if(Zotero.ItemTypes.getID(type)) {
-		return true;
-	} else {
-		return false;
-	}
-}
-
-/**
- * Find valid creator types for a given item type
- *
- * @param {String} type Item type
- * @return {String[]} Creator types
- */
-Zotero.Utilities.Translate.prototype.getCreatorsForType = function(type) {
-	var types = Zotero.CreatorTypes.getTypesForItemType(Zotero.ItemTypes.getID(type));
-	var cleanTypes = new Array();
-	for each(var type in types) {
-		cleanTypes.push(type.name);
-	}
-	return cleanTypes;
-}
-
-/**
- * Gets a creator type name, localized to the current locale
- *
- * @param {String} type Creator type
- * @param {String} Localized creator type
- * @type Boolean
- */
-Zotero.Utilities.Translate.prototype.getLocalizedCreatorType = function(type) {
-	try {
-		return Zotero.getString("creatorTypes."+type);
-	} catch(e) {
-		return false;
-	}
 }
 
 /**

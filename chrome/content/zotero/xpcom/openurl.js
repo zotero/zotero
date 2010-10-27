@@ -109,15 +109,15 @@ Zotero.OpenURL = new function() {
 		if(version == "0.1") {
 			var co = "sid=Zotero:"+encodeURIComponent(Zotero.version);
 			
-			for each(identifier in identifiers) {
-				co += "&id="+encodeURIComponent(identifier);
+			for(var i=0; i<identifiers.length; i++) {
+				co += "&id="+encodeURIComponent(identifiers[i]);
 			}
 		} else {
 			var co = "url_ver=Z39.88-2004&ctx_ver=Z39.88-2004"+
 				     "&rfr_id="+encodeURIComponent("info:sid/zotero.org:"+Zotero.version);
 			
-			for each(identifier in identifiers) {
-				co += "&rft_id="+encodeURIComponent(identifier)
+			for(var i=0; i<identifiers.length; i++) {
+				co += "&rft_id="+encodeURIComponent(identifiers[i])
 			}
 		}
 		
@@ -189,8 +189,8 @@ Zotero.OpenURL = new function() {
 			}
 			
 			// encode subsequent creators as au
-			for each(creator in item.creators) {
-				co += _mapTag((creator.firstName ? creator.firstName+" " : "")+creator.lastName, (item.itemType == "patent" ? "inventor" : "au"), version);
+			for(var i=0; i<identifiers.length; i++) {
+				co += _mapTag((creators[i].firstName ? creators[i].firstName+" " : "")+creators[i].lastName, (item.itemType == "patent" ? "inventor" : "au"), version);
 			}
 		}
 		
@@ -219,9 +219,9 @@ Zotero.OpenURL = new function() {
 		var coParts = co.split("&");
 		
 		// get type
-		for each(var part in coParts) {
-			if(part.substr(0, 12) == "rft_val_fmt=") {
-				var format = decodeURIComponent(part.substr(12));
+		for(var i=0; i<coParts.length; i++) {
+			if(coParts[i].substr(0, 12) == "rft_val_fmt=") {
+				var format = decodeURIComponent(coParts[i].substr(12));
 				if(format == "info:ofi/fmt:kev:mtx:journal") {
 					item.itemType = "journalArticle";
 					break;
@@ -257,8 +257,8 @@ Zotero.OpenURL = new function() {
 		// keep track of "aucorp," "aufirst," "aulast"
 		var complexAu = new Array();
 		
-		for each(var part in coParts) {
-			var keyVal = part.split("=");
+		for(var i=0; i<coParts.length; i++) {
+			var keyVal = coParts[i].split("=");
 			var key = keyVal[0];
 			var value = decodeURIComponent(keyVal[1].replace(/\+|%2[bB]/g, " "));
 			if(!value) {
@@ -411,7 +411,7 @@ Zotero.OpenURL = new function() {
 				}  else if(key == "rft.subject") {
 					item.tags.push(value);
 				} else if(key == "rft.type") {
-					if(Zotero.ItemTypes.getID(value)) item.itemType = value;
+					if(Zotero.Utilities.itemTypeExists(value)) item.itemType = value;
 				} else if(key == "rft.source") {
 					item.publicationTitle = value;
 				}
@@ -419,16 +419,16 @@ Zotero.OpenURL = new function() {
 		}
 		
 		// combine two lists of authors, eliminating duplicates
-		for each(var au in complexAu) {
+		for(var i=0; i<complexAu.length; i++) {
 			var pushMe = true;
-			for each(var pAu in item.creators) {
+			for(var j=0; j<item.creators.length; j++) {
 				// if there's a plain author that is close to this author (the
 				// same last name, and the same first name up to a point), keep
 				// the plain author, since it might have a middle initial
-				if(pAu.lastName == au.lastName &&
-				   (pAu.firstName == au.firstName == "" ||
-				   (pAu.firstName.length >= au.firstName.length &&
-				   pAu.firstName.substr(0, au.firstName.length) == au.firstName))) {
+				if(item.creators[j].lastName == complexAu[i].lastName &&
+				   (item.creators[j].firstName == complexAu[i].firstName == "" ||
+				   (item.creators[j].firstName.length >= complexAu[i].firstName.length &&
+				   item.creators[j].firstName.substr(0, complexAu[i].firstName.length) == complexAu[i].firstName))) {
 					pushMe = false;
 					break;
 				}

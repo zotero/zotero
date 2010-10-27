@@ -174,13 +174,24 @@
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-selected-down.png") 0 4 0 5 repeat stretch;
 }
 
-:root:not([active]) #zotero-view-tabbox > tabs > * {
-  color: #7C7C7C !important; /* remove this when we support click-through */
+#zotero-view-tabbox:-moz-window-inactive > tabs > * {
+  color: #7C7C7C !important;
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-inactive.png") 0 4 0 5 repeat stretch;
 }
 
-:root:not([active]) #zotero-view-tabbox > tabs > tab[selected=true] {
-  color: #C5C5C5 !important; /* remove this when we support click-through */
+#zotero-view-tabbox:-moz-window-inactive > tabs > tab[selected=true] {
+  color: #C5C5C5 !important;
+  -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-selected-inactive.png") 0 4 0 5 repeat stretch;
+}
+
+/* Since Fx4 doesn't recognize the -moz-window-inactive pseudoclass as valid, these have to be separate (duplicate) rules to be parsed */
+:root:not([active]) #zotero-pane:not([isFx4]) > #zotero-item-pane > #zotero-item-pane-content > #zotero-view-tabbox > tabs > * {
+  color: #7C7C7C !important;
+  -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-inactive.png") 0 4 0 5 repeat stretch;
+}
+
+:root:not([active]) #zotero-pane:not([isFx4]) > #zotero-item-pane > #zotero-item-pane-content > #zotero-view-tabbox > tabs > tab[selected=true] {
+  color: #C5C5C5 !important;
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-selected-inactive.png") 0 4 0 5 repeat stretch;
 }
 
@@ -219,6 +230,15 @@
 :root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-inactive.png") 0 4 0 6 repeat stretch;
 }
+
+/* Since Fx4 doesn't recognize the -moz-window-inactive pseudoclass as valid, these have to be separate (duplicate) rules to be parsed */
+
+:root:not([active]) #zotero-view-tabbox > tabs > :first-child,
+:root:not([active]) #zotero-view-tabbox > tabs > [first-visible],
+:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > :last-child,
+:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
+  -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-inactive.png") 0 4 0 6 repeat stretch;
+}  
 
 :root:not([active]) #zotero-view-tabbox > tabs > tab:first-child[selected=true],
 :root:not([active]) #zotero-view-tabbox > tabs > tab[first-visible][selected=true],
