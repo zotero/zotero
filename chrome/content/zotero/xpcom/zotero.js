@@ -219,8 +219,6 @@ var Zotero = new function(){
 			}
 		}
 		
-		this.isConnector = false;
-		
 		// OS platform
 		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
 			   .getService(Components.interfaces.nsIAppShellService)
