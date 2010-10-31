@@ -1,14 +1,14 @@
 {
-	"translatorID":"af1af8fa-19dc-486f-a8cc-107acb849101",
-	"label":"WilsonWeb",
-	"creator":"Brinda Shah",
-	"target":"^http://(vnweb|webbeta|verityqa|verityqa2|atg-dev05)\\.hwwilsonweb\\.com/hww/results/",
-	"minVersion":"1.0",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":"0",
-	"translatorType":4,
-	"lastUpdated":"2010-09-28 07:00:00"
+        "translatorID":"af1af8fa-19dc-486f-a8cc-107acb849101",
+        "label":"WilsonWeb",
+        "creator":"Brinda Shah",
+        "target":"^http://(vnweb|webbeta|verityqa|verityqa2|atg-dev05)\\.hwwilsonweb\\.com/hww/results/",
+        "minVersion":"1.0",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-10-27 10:24:13"
 }
 
 var dispType='brief';
@@ -261,7 +261,7 @@ function associateBIBLData(doc,newArticle,t) {
 		}
 	}
 	
-	var pdfURL;
+	var pdfURL='';
 	var pdfLink = getXPath(dispType,'pdfLink',t);
 	if(pdfLink != '') {
 		var pdfObj = doc.evaluate(pdfLink, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
@@ -273,7 +273,7 @@ function associateBIBLData(doc,newArticle,t) {
 		}
 	}
 	
-	var snapShotURL;
+	var snapShotURL='';
 	var recid = getXPath(dispType,'recid',t);
 	if(recid != '') {
 		var recObj= doc.evaluate(recid, doc,  nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
