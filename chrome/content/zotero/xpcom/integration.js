@@ -234,7 +234,7 @@ Zotero.Integration = new function() {
 		// service
 		try {
 			var componentClass = "@zotero.org/Zotero/integration/application?agent="+agent+";1";
-			Zotero.debug("Integration: Instantiating "+componentClass+" for command "+command);
+			Zotero.debug("Integration: Instantiating "+componentClass+" for command "+command+(docId ? " with doc "+docId : ""));
 			var application = Components.classes[componentClass]
 				.getService(Components.interfaces.zoteroIntegrationApplication);
 		} catch(e) {
@@ -1113,7 +1113,7 @@ Zotero.Integration.Session.prototype.getCitationField = function(citation) {
 	
 	var properties = JSON.stringify(citation.properties, saveProperties);
 	if(properties != "{}") {
-		field.push('"properties":'+properties);
+		field.push('"properties":{'+properties+"}");
 	}
 	
 	var citationItems = [];
