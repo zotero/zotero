@@ -7,14 +7,11 @@
 	"minVersion":"2.0",
 	"maxVersion":"",
 	"priority":50,
+	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
+	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":false,
 	"lastUpdated":"2010-04-20 23:02:43"
 }
-
-Zotero.configure("getCollections", true);
-Zotero.configure("dataMode", "rdf");
-Zotero.addOption("exportNotes", true);
-Zotero.addOption("exportFileData", false);
 
 var n = {
 	address:"http://schemas.talis.com/2005/address/schema#",	// could also use vcard?

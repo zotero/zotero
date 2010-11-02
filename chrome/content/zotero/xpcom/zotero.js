@@ -60,6 +60,7 @@ var Zotero = new function(){
 	this.chooseZoteroDirectory = chooseZoteroDirectory;
 	this.debug = debug;
 	this.log = log;
+	this.logError = logError;
 	this.getErrors = getErrors;
 	this.getSystemInfo = getSystemInfo;
 	this.varDump = varDump;
@@ -196,6 +197,7 @@ var Zotero = new function(){
 			Components.classes["@mozilla.org/xre/app-info;1"].
 				getService(Components.interfaces.nsIXULAppInfo);
 		this.appName = appInfo.name;
+		this.isFx = true;
 		this.isFx3 = appInfo.platformVersion.indexOf('1.9') === 0;
 		this.isFx35 = appInfo.platformVersion.indexOf('1.9.1') === 0;
 		this.isFx31 = this.isFx35;
@@ -874,6 +876,15 @@ var Zotero = new function(){
 		consoleService.logMessage(scriptError);
 	}
 	
+	/**
+	 * Log a JS error to the Mozilla JS error console.
+	 * @param {Exception} err
+	 */
+	function logError(err) {
+		log(err.message ? err.message : err.toString, "error",
+			err.fileName ? err.fileName : null, null,
+			err.lineNumber ? err.lineNumber : null, null);
+	}
 	
 	function getErrors(asStrings) {
 		var errors = [];

@@ -7,6 +7,7 @@
 	"minVersion":"2.0",
 	"maxVersion":"",
 	"priority":100,
+	"configOptions":{"getCollections":"true", "dataMode":"line"},
 	"inRepository":false,
 	"lastUpdated":"2010-10-09 07:21:37"
 }
@@ -69,8 +70,6 @@
  * The approach we will take is to convert this into COinS, so that we can
  * piggy-back off of the perhaps more robust support in the core Zotero code.
  */
-
-Zotero.configure("dataMode", "line");
 
 function detectWeb(doc, url) {
 	var texts = [], text = "";

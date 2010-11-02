@@ -7,12 +7,11 @@
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
+	"configOptions":{"dataMode":"line"},
+	"displayOptions":{"exportCharset":"UTF-8"},
 	"inRepository":true,
 	"lastUpdated":"2009-07-17 20:20:00"
 }
-
-Zotero.configure("dataMode", "line");
-Zotero.addOption("exportCharset", "UTF-8");
 
 function detectImport() {
 	var lineRe = /%[A-Z0-9\*\$] .+/;

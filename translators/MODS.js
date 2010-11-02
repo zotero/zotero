@@ -7,12 +7,11 @@
 	"minVersion":"2.0b6.3",
 	"maxVersion":"",
 	"priority":50,
+	"configOptions":{"dataMode":"dom/xml"},
+	"displayOptions":{"exportNotes":true},
 	"inRepository":true,
 	"lastUpdated":"2010-09-10 01:22:13"
 }
-
-Zotero.addOption("exportNotes", true);
-Zotero.configure("dataMode", "xml/e4x");
 
 function detectImport() {
 	var name = Zotero.getXML().name();
@@ -30,7 +29,7 @@ function doExport() {
 	
 	var item;
 	while(item = Zotero.nextItem()) {
-		var isPartialItem = Zotero.Utilities.inArray(item.itemType, partialItemTypes);
+		var isPartialItem = partialItemTypes.indexOf(item.itemType) !== -1;
 		
 		var mods = <mods />;
 		
@@ -197,10 +196,10 @@ function doExport() {
 			originInfo += <publisher>{item.distributor}</publisher>;
 		}
 		if(item.date) {
-			if(Zotero.Utilities.inArray(item.itemType, ["book", "bookSection"])) {
+			if(["book", "bookSection"].indexOf(item.itemType) !== -1) {
 				// Assume year is copyright date
 				var dateType = "copyrightDate";
-			} else if(Zotero.Utilities.inArray(item.itemType, ["journalArticle", "magazineArticle", "newspaperArticle"])) {
+			} else if(["journalArticle", "magazineArticle", "newspaperArticle"].indexOf(item.itemType) !== -1) {
 				// Assume date is date issued
 				var dateType = "dateIssued";
 			} else {
@@ -542,7 +541,7 @@ function doImport() {
 			if(!newItem.itemType) newItem.itemType = "document";
 		}
 		
-		var isPartialItem = Zotero.Utilities.inArray(newItem.itemType, partialItemTypes);
+		var isPartialItem = partialItemTypes.indexOf(newItem.itemType) !== -1;
 		
 		// TODO: thesisType, type
 		

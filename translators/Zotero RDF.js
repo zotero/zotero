@@ -7,14 +7,11 @@
 	"minVersion":"1.0.0b4.r1",
 	"maxVersion":"",
 	"priority":25,
+	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
+	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":true,
 	"lastUpdated":"2010-10-10 02:07:05"
 }
-
-Zotero.configure("getCollections", true);
-Zotero.configure("dataMode", "rdf");
-Zotero.addOption("exportNotes", true);
-Zotero.addOption("exportFileData", false);
 
 var rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 

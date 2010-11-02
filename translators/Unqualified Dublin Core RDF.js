@@ -7,11 +7,10 @@
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
+	"configOptions":{"dataMode":"rdf/xml"},
 	"inRepository":true,
 	"lastUpdated":"2006-10-02 17:00:00"
 }
-
-Zotero.configure("dataMode", "rdf");
 
 function doExport() {
 	var dc = "http://purl.org/dc/elements/1.1/";
