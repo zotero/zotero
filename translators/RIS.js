@@ -8,12 +8,10 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
+	"configOptions":{"dataMode":"block"},
+	"displayOptions":{"exportCharset":"UTF-8", "exportNotes":true},
 	"lastUpdated":"2010-09-28 21:40:00"
 }
-
-Zotero.configure("dataMode", "line");
-Zotero.addOption("exportNotes", true);
-Zotero.addOption("exportCharset", "UTF-8");
 
 function detectImport() {
 	var line;

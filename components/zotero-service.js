@@ -107,7 +107,10 @@ var xpcomFiles = [
 	'storage/zfs',
 	'storage/webdav',
 	'timeline',
-	'translate',
+	'translation/translator',
+	'translation/translate',
+	'translation/browser_firefox',
+	'translation/item_local',
 	'uri',
 	'utilities',
 	'zeroconf'

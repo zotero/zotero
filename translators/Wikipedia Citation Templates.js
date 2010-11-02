@@ -7,11 +7,10 @@
 	"minVersion":"1.0.0b4.r1",
 	"maxVersion":"",
 	"priority":100,
+	"displayOptions":{"exportCharset":"UTF-8"},
 	"inRepository":true,
 	"lastUpdated":"2008-07-17 22:05:00"
 }
-
-Zotero.addOption("exportCharset", "UTF-8");
 
 var fieldMap = {
 	edition:"edition",

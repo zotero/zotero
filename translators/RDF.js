@@ -7,11 +7,10 @@
 	"minVersion":"1.0.0b4.r1",
 	"maxVersion":"",
 	"priority":100,
+	"configOptions":{"dataMode":"rdf/xml"},
 	"inRepository":true,
 	"lastUpdated":"2009-11-12 07:20:00"
 }
-
-Zotero.configure("dataMode", "rdf");
 
 function detectImport() {
 	// unfortunately, Mozilla will let you create a data source from any type

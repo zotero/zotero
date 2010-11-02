@@ -85,6 +85,7 @@ Zotero.Utilities = {
 	 */
 	"trim":function(/**String*/ s) {
 		if (typeof(s) != "string") {
+		a()
 			throw "trim: argument must be a string";
 		}
 		
@@ -271,7 +272,7 @@ Zotero.Utilities = {
 					var pairs = matches[1].match(/([^ =]+)="([^"]+")/g);
 					for(var j=0; j<pairs.length; j++) {
 						var keyVal = pairs[j].split(/=/);
-						attributes[keyVal[0]] = val.substr(1, keyVal[1].length - 2);
+						attributes[keyVal[0]] = keyVal[1].substr(1, keyVal[1].length - 2);
 					}
 					
 					parts.push({
@@ -285,7 +286,7 @@ Zotero.Utilities = {
 			
 			parts.push({
 				type: 'text',
-				text: split
+				text: splits[i]
 			});
 		}
 		
@@ -512,10 +513,14 @@ Zotero.Utilities = {
 	 * @type Boolean
 	 */
 	"itemTypeExists":function(type) {
-		if(Zotero.ItemTypes.getID(type)) {
-			return true;
+		if(Zotero.isConnector) {
+			return !!Zotero.Connector.Data.itemTypes[type];
 		} else {
-			return false;
+			if(Zotero.ItemTypes.getID(type)) {
+				return true;
+			} else {
+				return false;
+			}
 		}
 	},
 	
@@ -526,12 +531,30 @@ Zotero.Utilities = {
 	 * @return {String[]} Creator types
 	 */
 	"getCreatorsForType":function(type) {
-		var types = Zotero.CreatorTypes.getTypesForItemType(Zotero.ItemTypes.getID(type));
-		var cleanTypes = new Array();
-		for(var i=0; i<types.length; i++) {
-			cleanTypes.push(types[i].name);
+		if(Zotero.isConnector) {
+			return Zotero.Connector.Data.itemTypes[type].creatorTypes.slice(0);
+		} else {
+			var types = Zotero.CreatorTypes.getTypesForItemType(Zotero.ItemTypes.getID(type));
+			var cleanTypes = new Array();
+			for(var i=0; i<types.length; i++) {
+				cleanTypes.push(types[i].name);
+			}
+			return cleanTypes;
 		}
-		return cleanTypes;
+	},
+	
+	/**
+	 * Find valid creator types for a given item type
+	 *
+	 * @param {String} type Item type
+	 * @return {String[]} Creator types
+	 */
+	"fieldIsValidForType":function(field, type) {
+		if(Zotero.isConnector) {
+			return Zotero.Connector.Data.itemTypes[type].fields.slice(0);
+		} else {
+			return Zotero.ItemFields.isValidForType(field, Zotero.ItemTypes.getID(type));
+		}
 	},
 	
 	/**
@@ -542,10 +565,14 @@ Zotero.Utilities = {
 	 * @type Boolean
 	 */
 	"getLocalizedCreatorType":function(type) {
-		try {
-			return Zotero.getString("creatorTypes."+type);
-		} catch(e) {
-			return false;
+		if(Zotero.isConnector) {
+			return Zotero.Connector.Data.creatorTypes[type].localizedString;
+		} else {
+			try {
+				return Zotero.getString("creatorTypes."+type);
+			} catch(e) {
+				return false;
+			}
 		}
 	}
 }
@@ -556,7 +583,6 @@ Zotero.Utilities = {
  *
  * @constructor
  * @augments Zotero.Utilities
- * @borrows Zotero.inArray as this.inArray
  * @borrows Zotero.Date.formatDate as this.formatDate
  * @borrows Zotero.Date.strToDate as this.strToDate
  * @borrows Zotero.Date.strToISO as this.strToISO
@@ -567,7 +593,7 @@ Zotero.Utilities = {
  * @param {Zotero.Translate} translate
  */
 Zotero.Utilities.Translate = function(translate) {
-	this.translate = translate;
+	this._translate = translate;
 }
 
 var tmp = function() {};
@@ -699,7 +725,7 @@ Zotero.Utilities.Translate.prototype.loadDocument = function(url, succeeded, fai
  * @ignore
  */
 Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor, done, exception) {
-	if(this.translate.locationIsProxied) {
+	if(this._translate.locationIsProxied) {
 		if(typeof(urls) == "string") {
 			urls = [this._convertURL(urls)];
 		} else {
@@ -712,9 +738,9 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	// Unless the translator has proposed some way to handle an error, handle it
 	// by throwing a "scraping error" message
 	if(!exception) {
-		var translate = this.translate;
+		var translate = this._translate;
 		var exception = function(e) {
-			translate.error(false, e);
+			translate.complete(false, e);
 		}
 	}
 	
@@ -729,7 +755,7 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
  * @return {Document} 			DOM document object
  */
 Zotero.Utilities.Translate.prototype.retrieveDocument = function(url) {
-	if(this.translate.locationIsProxied) url = this._convertURL(url);
+	if(this._translate.locationIsProxied) url = this._convertURL(url);
 	
 	var mainThread = Zotero.mainThread;
 	var loaded = false;
@@ -775,7 +801,7 @@ Zotero.Utilities.Translate.prototype.retrieveSource = function(url, body, header
 	/* Apparently, a synchronous XMLHttpRequest would have the behavior of this routine in FF3, but
 	 * in FF3.5, synchronous XHR blocks all JavaScript on the thread. See 
 	 * http://hacks.mozilla.org/2009/07/synchronous-xhr/. */
-	if(this.translate.locationIsProxied) url = this._convertURL(url);
+	if(this._translate.locationIsProxied) url = this._convertURL(url);
 	if(!headers) headers = null;
 	if(!responseCharset) responseCharset = null;
 	
@@ -832,7 +858,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 				}
 			}
 		} catch(e) {
-			me.translate.error(false, e);
+			me._translate.complete(false, e);
 		}
 	}, responseCharset);
 }
@@ -844,12 +870,12 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, headers, responseCharset) {
 	url = this._convertURL(url);
 	
-	var translate = this.translate;
+	var translate = this._translate;
 	Zotero.HTTP.doPost(url, body, function(xmlhttp) {
 		try {
 			onDone(xmlhttp.responseText, xmlhttp);
 		} catch(e) {
-			translate.error(false, e);
+			translate.complete(false, e);
 		}
 	}, headers, responseCharset);
 }
@@ -866,7 +892,7 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 	const protocolRe = /^(?:(?:http|https|ftp):)/i;
 	const fileRe = /^[^:]*/;
 	
-	if(this.translate.locationIsProxied) {
+	if(this._translate.locationIsProxied) {
 		url = Zotero.Proxies.properToProxy(url);
 	}
 	if(protocolRe.test(url)) return url;
@@ -875,7 +901,14 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 	} else {
 		return Components.classes["@mozilla.org/network/io-service;1"].
 			getService(Components.interfaces.nsIIOService).
-			newURI(this.translate.location, "", null).resolve(url);
+			newURI(this._translate.location, "", null).resolve(url);
+	}
+}
+
+Zotero.Utilities.Translate.prototype.__exposedProps__ = [];
+for(var j in Zotero.Utilities.Translate.prototype) {
+	if(typeof Zotero.Utilities.Translate.prototype[j] === "function" && j[0] !== "_" && j != "Translate") {
+		Zotero.Utilities.Translate.prototype.__exposedProps__.push(j);
 	}
 }
 

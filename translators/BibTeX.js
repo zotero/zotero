@@ -7,13 +7,11 @@
 	"minVersion":"1.0.0b4.r1",
 	"maxVersion":"",
 	"priority":200,
+	"configOptions":{"dataMode":"block"},
+	"displayOptions":{"exportCharset":"UTF-8", "exportFileData":false},
 	"inRepository":true,
 	"lastUpdated":"2010-06-18 08:32:05"
 }
-
-Zotero.configure("dataMode", "block");
-Zotero.addOption("exportCharset", "UTF-8");
-Zotero.addOption("exportFileData", false);
 
 function detectImport() {
 	var maxChars = 1048576; // 1MB
