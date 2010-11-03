@@ -300,7 +300,7 @@ Zotero.Translate.Sandbox = {
 		 * @param {String} [error] The error string, if an error occurred.
 		 */
 		"done":function(translate, val, error) {
-			me.complete(typeof val === "undefined" ? true : val, (error ? error : "No error message specified"));
+			translate.complete(typeof val === "undefined" ? true : val, (error ? error : "No error message specified"));
 		},
 		
 		/**
@@ -427,6 +427,11 @@ Zotero.Translate.Sandbox = {
 	"Export":{
 		"nextItem":function(translate) {
 			var item = translate._itemGetter.nextItem();
+			
+			if(translate._displayOptions.hasOwnProperty("exportTags") && !translate._displayOptions["exportTags"]) {
+				item.tags = [];
+			}
+			
 			translate._runHandler("itemDone", item);
 			Zotero.wait();
 			return item;
