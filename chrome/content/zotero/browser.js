@@ -269,7 +269,7 @@ var Zotero_Browser = new function() {
 			}, false);
 		gBrowser.tabContainer.addEventListener("TabSelect",
 			function(e) {
-				Zotero.debug("TabSelect");
+				//Zotero.debug("TabSelect");
 				Zotero_Browser.updateStatus();
 			}, false);
 		// this is for pageshow, for updating the status of the book icon
