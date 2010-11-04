@@ -257,19 +257,19 @@ var Zotero_Browser = new function() {
 	 * When chrome loads, register our event handlers with the appropriate interfaces
 	 */
 	function chromeLoad() {
-		this.tabbrowser = document.getElementById("content");
+		this.tabbrowser = gBrowser;
 		this.appcontent = document.getElementById("appcontent");
 		this.statusImage = document.getElementById("zotero-status-image");
 		
 		// this gives us onLocationChange, for updating when tabs are switched/created
-		this.tabbrowser.addEventListener("TabClose",
+		gBrowser.tabContainer.addEventListener("TabClose",
 			function(e) {
 				//Zotero.debug("TabClose");
 				Zotero_Browser.tabClose(e);
 			}, false);
-		this.tabbrowser.addEventListener("TabSelect",
+		gBrowser.tabContainer.addEventListener("TabSelect",
 			function(e) {
-				//Zotero.debug("TabSelect");
+				Zotero.debug("TabSelect");
 				Zotero_Browser.updateStatus();
 			}, false);
 		// this is for pageshow, for updating the status of the book icon
