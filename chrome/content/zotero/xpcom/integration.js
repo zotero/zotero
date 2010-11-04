@@ -1113,7 +1113,7 @@ Zotero.Integration.Session.prototype.getCitationField = function(citation) {
 	
 	var properties = JSON.stringify(citation.properties, saveProperties);
 	if(properties != "{}") {
-		field.push('"properties":{'+properties+"}");
+		field.push('"properties":'+properties);
 	}
 	
 	var citationItems = [];
