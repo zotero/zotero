@@ -1,4 +1,4 @@
-3  # Increment number when modifying file
+4  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -15,3 +15,4 @@ dd149efc-7f0e-43e4-b3df-b6d15e171717  # Persée
 56ea09bc-57ee-4f50-976e-cf7cb1f6c6d8  # Royal Society Publishing (replaced by HighWire 2.0)
 83538f48-906f-40ef-bdb3-e94f63676307  # NAA RecordSearch (replaced by National Archives of Australia)
 dbb5d4bc-3b21-47a2-9751-5dcbb65b902a  # AMS Online Journals - Allenpress (replaced with DOI for now)
+d2416f31-4f24-4e18-8c66-06122af5bc2c  # Women in Judaism (replaced with COinS)
