@@ -179,6 +179,11 @@ Zotero.CreatorTypes = new function() {
 	}
 	
 	
+	this.getLocalizedString = function(idOrName) {
+		return Zotero.getString("creatorTypes."+this.getName(idOrName));
+	}
+	
+	
 	this.itemTypeHasCreators = function (itemTypeID) {
 		if (typeof _hasCreatorTypeCache[itemTypeID] != 'undefined') {
 			return _hasCreatorTypeCache[itemTypeID];
