@@ -1259,11 +1259,16 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) 
 		try {
 			var citation = Zotero.JSON.unserialize(arg);
 		} catch(e) {
-			// fix for corrupted fields
+			// fix for corrupted fields (corrupted by Word, somehow)
 			try {
 				var citation = Zotero.JSON.unserialize(arg.substr(0, arg.length-1));
 			} catch(e) {
-				throw new Zotero.Integration.CorruptFieldException(arg);
+				// another fix for corrupted fields (corrupted by 2.1b1)
+				try {
+					var citation = Zotero.JSON.unserialize(arg.replace(/{{((?:\s*,?"unsorted":(?:true|false)|\s*,?"custom":"(?:(?:\\")?[^"]*\s*)*")*)}}/, "{$1}"));
+				} catch(e) {
+					throw new Zotero.Integration.CorruptFieldException(arg);
+				}
 			}
 		}
 		
