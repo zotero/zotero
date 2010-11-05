@@ -816,7 +816,10 @@ Zotero.Translate.Base.prototype = {
 		"Zotero.Collection = function () {};"+
 		"Zotero.Collection.prototype.complete = function() { Zotero._collectionDone(this); };"+
 		// https://bugzilla.mozilla.org/show_bug.cgi?id=609143 - can't pass E4X to sandbox in Fx4
-		"Zotero.getXML = function() { return new XML(Zotero._getXML()); }"
+		"Zotero.getXML = function() {"+
+			"var xml = Zotero._getXML();"+
+			"if(typeof xml == 'string') return new XML(xml);"+
+		"}"
 		);
 		
 		this._sandboxManager.importObject(this.Sandbox, this);
