@@ -814,7 +814,10 @@ Zotero.Translate.Base.prototype = {
 		"};"+
 		"Zotero.Item.prototype.complete = function() { Zotero._itemDone(this); };"+
 		"Zotero.Collection = function () {};"+
-		"Zotero.Collection.prototype.complete = function() { Zotero._collectionDone(this); };");
+		"Zotero.Collection.prototype.complete = function() { Zotero._collectionDone(this); };"+
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=609143 - can't pass E4X to sandbox in Fx4
+		"Zotero.getXML = function() { return new XML(Zotero._getXML()); }"
+		);
 		
 		this._sandboxManager.importObject(this.Sandbox, this);
 		this._sandboxManager.importObject({"Utilities":new Zotero.Utilities.Translate(this)});
@@ -1312,7 +1315,7 @@ Zotero.Translate.IO.String = function(string, uri, mode) {
 }
 
 Zotero.Translate.IO.String.prototype = {
-	"__exposedProps__":["getXML", "RDF", "read", "write", "setCharacterSet", "getXML"],
+	"__exposedProps__":["RDF", "read", "write", "setCharacterSet", "_getXML"],
 	
 	"_initRDF":function() {
 		Zotero.debug("Translate: Initializing RDF data store");
@@ -1375,11 +1378,11 @@ Zotero.Translate.IO.String.prototype = {
 		this.string.length += data.length;
 	},
 	
-	"getXML":function() {
+	"_getXML":function() {
 		if(this._mode == "xml/dom") {
 			return Zotero.Translate.IO.parseDOMXML(this.string);
 		} else {
-			return new XML(this.string.replace(/<\?xml[^>]+\?>/, ""));
+			return this.string.replace(/<\?xml[^>]+\?>/, "");
 		}
 	},
 	

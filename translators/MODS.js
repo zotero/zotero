@@ -508,7 +508,7 @@ function doImport() {
 		}
 		// try to get genre from local genre
 		for each(var genre in mods.m::genre) {
-			if(genre.@authority == "local" && Zotero.Utilities.itemTypeExists(genre)) {
+			if(genre.@authority == "local" && Zotero.Utilities.itemTypeExists(genre.text().toString())) {
 				newItem.itemType = genre.text().toString();
 			} else if(!newItem.itemType && (genre.@authority == "marcgt" || genre.@authority == "marc")) {
 				// otherwise, look at the marc genre
