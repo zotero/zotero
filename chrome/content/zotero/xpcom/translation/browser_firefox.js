@@ -238,7 +238,7 @@ Zotero.Translate.IO.Read = function(file, mode) {
 }
 
 Zotero.Translate.IO.Read.prototype = {
-	"__exposedProps__":["getXML", "RDF", "read", "setCharacterSet"],
+	"__exposedProps__":["_getXML", "RDF", "read", "setCharacterSet"],
 	
 	"_seekToStart":function() {
 		this._rawStream.QueryInterface(Components.interfaces.nsISeekableStream)
@@ -309,11 +309,11 @@ Zotero.Translate.IO.Read.prototype = {
 		}
 	},
 	
-	"getXML":function() {
+	"_getXML":function() {
 		if(this._mode == "xml/dom") {
 			return Zotero.Translate.IO.parseDOMXML(this._rawStream, this._charset, this.file.fileSize);
 		} else {
-			return new XML(this._readToString().replace(/<\?xml[^>]+\?>/, ""));
+			return this._readToString().replace(/<\?xml[^>]+\?>/, "");
 		}
 	},
 	
