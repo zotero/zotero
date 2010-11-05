@@ -513,14 +513,10 @@ Zotero.Utilities = {
 	 * @type Boolean
 	 */
 	"itemTypeExists":function(type) {
-		if(Zotero.isConnector) {
-			return !!Zotero.Connector.Data.itemTypes[type];
+		if(Zotero.ItemTypes.getID(type)) {
+			return true;
 		} else {
-			if(Zotero.ItemTypes.getID(type)) {
-				return true;
-			} else {
-				return false;
-			}
+			return false;
 		}
 	},
 	
@@ -531,16 +527,12 @@ Zotero.Utilities = {
 	 * @return {String[]} Creator types
 	 */
 	"getCreatorsForType":function(type) {
-		if(Zotero.isConnector) {
-			return Zotero.Connector.Data.itemTypes[type].creatorTypes.slice(0);
-		} else {
-			var types = Zotero.CreatorTypes.getTypesForItemType(Zotero.ItemTypes.getID(type));
-			var cleanTypes = new Array();
-			for(var i=0; i<types.length; i++) {
-				cleanTypes.push(types[i].name);
-			}
-			return cleanTypes;
+		var types = Zotero.CreatorTypes.getTypesForItemType(Zotero.ItemTypes.getID(type));
+		var cleanTypes = new Array();
+		for(var i=0; i<types.length; i++) {
+			cleanTypes.push(types[i].name);
 		}
+		return cleanTypes;
 	},
 	
 	/**
@@ -550,11 +542,7 @@ Zotero.Utilities = {
 	 * @return {String[]} Creator types
 	 */
 	"fieldIsValidForType":function(field, type) {
-		if(Zotero.isConnector) {
-			return Zotero.Connector.Data.itemTypes[type].fields.slice(0);
-		} else {
-			return Zotero.ItemFields.isValidForType(field, Zotero.ItemTypes.getID(type));
-		}
+		return Zotero.ItemFields.isValidForType(field, Zotero.ItemTypes.getID(type));
 	},
 	
 	/**
@@ -565,14 +553,10 @@ Zotero.Utilities = {
 	 * @type Boolean
 	 */
 	"getLocalizedCreatorType":function(type) {
-		if(Zotero.isConnector) {
-			return Zotero.Connector.Data.creatorTypes[type].localizedString;
-		} else {
-			try {
-				return Zotero.getString("creatorTypes."+type);
-			} catch(e) {
-				return false;
-			}
+		try {
+			return Zotero.CreatorTypes.getLocalizedString(type);
+		} catch(e) {
+			return false;
 		}
 	}
 }
