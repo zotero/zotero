@@ -264,12 +264,16 @@ Zotero.Translate.Sandbox = {
 				return translation.translate(false);
 			};
 			safeTranslator.getTranslatorObject = function() {
-				translation._loadTranslator();
+				translation._loadTranslator(translation.translator[0]);
+				if(translate._sandboxLocation != translation._sandboxLocation) {
+					throw "Translate: getTranslatorObject() may not be called from web or search "+
+						"translators to web or search translators with different URIs.";
+				}
 				translation._prepareTranslation();
 				setDefaultHandlers(translate, translation);
 				
 				// return sandbox
-				return translation.sandboxManager.sandbox;
+				return translation._sandboxManager.sandbox;
 			};
 			
 			// TODO security is not super-tight here, as someone could pass something into arg
