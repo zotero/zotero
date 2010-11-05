@@ -265,10 +265,25 @@ Zotero.Translate.Sandbox = {
 			};
 			safeTranslator.getTranslatorObject = function() {
 				translation._loadTranslator(translation.translator[0]);
-				if(translate._sandboxLocation != translation._sandboxLocation) {
-					throw "Translate: getTranslatorObject() may not be called from web or search "+
-						"translators to web or search translators with different URIs.";
+				
+				if(this.isFx) {
+					// do same origin check
+					var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
+						.getService(Components.interfaces.nsIScriptSecurityManager);
+					var ioService = Components.classes["@mozilla.org/network/io-service;1"] 
+						.getService(Components.interfaces.nsIIOService);
+					
+					var outerSandboxURI = ioService.newURI(typeof translate._sandboxLocation === "object" ?
+						translate._sandboxLocation.location : translate._sandboxLocation, null, null);
+					var innerSandboxURI = ioService.newURI(typeof translation._sandboxLocation === "object" ?
+						translation._sandboxLocation.location : translation._sandboxLocation, null, null);
+					
+					if(!secMan.checkSameOriginURI(outerSandboxURI, innerSandboxURI, false)) {
+						throw "Translate: getTranslatorObject() may not be called from web or search "+
+							"translators to web or search translators from different origins.";
+					}
 				}
+				
 				translation._prepareTranslation();
 				setDefaultHandlers(translate, translation);
 				
