@@ -231,13 +231,6 @@ var Zotero = new function(){
 		this.isLinux = (this.platform.substr(0, 5) == "Linux");
 		this.oscpu = win.navigator.oscpu;
 		
-		// Installed extensions (Fx4 only)
-		if(this.isFx4) {
-			AddonManager.getAllAddons(function(addonList) {
-				Zotero.addons = addonList;
-			});
-		}
-		
 		// Locale		
 		var ph = Components.classes["@mozilla.org/network/protocol;1?name=http"].
 					getService(Components.interfaces.nsIHttpProtocolHandler);
@@ -978,7 +971,10 @@ var Zotero = new function(){
 	 */
 	this.getInstalledExtensions = function () {
 		if(this.isFx4) {
-			while(!Zotero.addons) Zotero.mainThread.processNextEvent(true);
+			if(!Zotero.addons) {
+				AddonManager.getAllAddons(function(addonList) { Zotero.addons = addonList; });
+				while(!Zotero.addons) Zotero.mainThread.processNextEvent(true);
+			}
 			var installed = Zotero.addons;
 		} else {
 			var em = Components.classes["@mozilla.org/extensions/manager;1"].
