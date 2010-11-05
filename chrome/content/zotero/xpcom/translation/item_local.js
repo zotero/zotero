@@ -319,23 +319,8 @@ Zotero.Translate.ItemSaver.prototype = {
 				// (in which case downloadAssociatedFiles applies)
 				} else if(this._saveFiles && (automaticSnapshots || !attachment.mimeType
 						|| attachment.mimeType != "text/html")) {
-					var mimeType = null;
-					var title = null;
-
-					if(attachment.mimeType) {
-						// first, try to extract mime type from mimeType attribute
-						mimeType = attachment.mimeType;
-					} else if(attachment.document && attachment.document.contentType) {
-						// if that fails, use document if possible
-						mimeType = attachment.document.contentType
-					}
-					
-					// same procedure for title as mime type
-					if(attachment.title) {
-						title = attachment.title;
-					} else if(attachment.document && attachment.document.title) {
-						title = attachment.document.title;
-					}
+					var mimeType = (attachment.mimeType ? attachment.mimeType : null);
+					var title = (attachment.title ? attachment.title : null);
 
 					var fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentID);
 					try {
@@ -491,10 +476,10 @@ Zotero.Translate.ItemSaver.prototype = {
 							var tagType = 0;
 						}
 						
-						if(!tagsToAdd[tag.type]) {
-							tagsToAdd[tag.type] = [];
+						if(!tagsToAdd[tagType]) {
+							tagsToAdd[tagType] = [];
 						}
-						tagsToAdd[tag.type].push(tag.tag);
+						tagsToAdd[tagType].push(tag.tag ? tag.tag : tag.name);
 					}
 				}
 			}
