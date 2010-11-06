@@ -369,15 +369,13 @@ Zotero.Translate.ItemSaver.prototype = {
 			var creator = item.creators[i];
 			
 			// try to assign correct creator type
+			var creatorTypeID = 1;
 			if(creator.creatorType) {
 				try {
 					var creatorTypeID = Zotero.CreatorTypes.getID(creator.creatorType);
 				} catch(e) {
 					Zotero.debug("Translate: Invalid creator type "+creator.creatorType+" for creator index "+j, 2);
 				}
-			}
-			if(!creatorTypeID) {
-				var creatorTypeID = 1;
 			}
 			
 			// Single-field mode
