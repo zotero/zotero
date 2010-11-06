@@ -61,7 +61,7 @@ var typeMap = {
 	artwork:"ART",
 	report:"RPRT",
 	bill:"BILL",
-	case:"CASE",
+	"case":"CASE",
 	hearing:"HEAR",
 	patent:"PAT",
 	statute:"STAT",
@@ -545,9 +545,9 @@ function doExport() {
 		if(item.abstractNote) {
 			addTag("N2", item.abstractNote.replace(/(?:\r\n?|\n)/g, "\r\n"));
 		}
-		else if(item.abstract) {
+		else if(item["abstract"]) {
 			// patent type has abstract
-			addTag("N2", item.abstract.replace(/(?:\r\n?|\n)/g, "\r\n"));
+			addTag("N2", item["abstract"].replace(/(?:\r\n?|\n)/g, "\r\n"));
 		}
 
 		// tags
