@@ -4,39 +4,34 @@
 <!ENTITY zotero.general.deselectAll "Tühistada kõik valikud">
 <!ENTITY zotero.general.edit "Toimetada">
 <!ENTITY zotero.general.delete "Kustutada">
-
 <!ENTITY zotero.errorReport.unrelatedMessages "Vealogi võib sisaldada teateid, mis ei puutu Zoterosse.">
 <!ENTITY zotero.errorReport.submissionInProgress "Palun oodake kuni veateadet saadetakse.">
 <!ENTITY zotero.errorReport.submitted "Teie veateada on saadetud.">
 <!ENTITY zotero.errorReport.reportID "Veateate ID:">
 <!ENTITY zotero.errorReport.postToForums "Palun postitage teade foorumisse (forums.zotero.org) koos veateate ID-ga ja kirjeldusega millisel asjaoludel probleem esineb ning mis seda iseloomustab.">
 <!ENTITY zotero.errorReport.notReviewed "Veateadetega, millest ei ole foorumites teada antud, üldjuhul ei tegeleta.">
-
 <!ENTITY zotero.upgrade.newVersionInstalled "Paigaldasite uue Zotero versiooni.">
 <!ENTITY zotero.upgrade.upgradeRequired "Et Zotero andmebaas töötaks uue versiooniga on seda tarvis uuendada.">
 <!ENTITY zotero.upgrade.autoBackup "Enne muudatuste tegemist varundatakse olemasolev andmebaas automaatselt.">
 <!ENTITY zotero.upgrade.majorUpgrade "Tegemist on olulise uuendusega.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Enne jätkamist palun">
-<!ENTITY zotero.upgrade.majorUpgradeLink "tutvuge kindlasti">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink "uuenduste kirjeldusega.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Enne jätkamist palun tutvuge kindlasti">
+<!ENTITY zotero.upgrade.majorUpgradeLink "uuenduste kirjeldusega">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink ".">
 <!ENTITY zotero.upgrade.upgradeInProgress "Palun oodake kuni uuendusi paigaldatakse. See võib võtta mõned minutid aega.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Teie Zotero andmebaas on edukalt uuendatud.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Programmis tehtud uuendused on">
 <!ENTITY zotero.upgrade.changeLogLink "muudatuste">
 <!ENTITY zotero.upgrade.changeLogAfterLink "nimekirjas.">
-
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Lisada valitud tekst Zotero märkusele">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Create Zotero Item and Note from Selection">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Luua valikust Zotero kirje ja märkus">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "Salvestada link Zotero kirjena">
 <!ENTITY zotero.contextMenu.saveImageAsItem "Salvestada pilt Zotero kirjena">
-
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Märkused">
 <!ENTITY zotero.tabs.attachments.label "Manused">
 <!ENTITY zotero.tabs.tags.label "Märksõnad">
 <!ENTITY zotero.tabs.related.label "Seotud">
 <!ENTITY zotero.notes.separate "Salvestada eraldi aknas">
-
 <!ENTITY zotero.items.itemType "Kire tüüp">
 <!ENTITY zotero.items.type_column "Tüüp">
 <!ENTITY zotero.items.title_column "Pealkiri">
@@ -45,183 +40,159 @@
 <!ENTITY zotero.items.year_column "Aasta">
 <!ENTITY zotero.items.publisher_column "Väljaandja">
 <!ENTITY zotero.items.publication_column "Teos">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
-<!ENTITY zotero.items.language_column "Language">
-<!ENTITY zotero.items.accessDate_column "Accessed">
-<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
-<!ENTITY zotero.items.callNumber_column "Call Number">
-<!ENTITY zotero.items.rights_column "Rights">
-<!ENTITY zotero.items.dateAdded_column "Date Added">
-<!ENTITY zotero.items.dateModified_column "Date Modified">
+<!ENTITY zotero.items.journalAbbr_column "Ajakirja lühend">
+<!ENTITY zotero.items.language_column "Keel">
+<!ENTITY zotero.items.accessDate_column "Vaadatud">
+<!ENTITY zotero.items.callNumber_column "Kohaviit">
+<!ENTITY zotero.items.repository_column "Repositoorium">
+<!ENTITY zotero.items.rights_column "Õigused">
+<!ENTITY zotero.items.dateAdded_column "Lisamise kuupäev">
+<!ENTITY zotero.items.dateModified_column "Muutmise kuupäev">
 <!ENTITY zotero.items.numChildren_column "+">
-
-<!ENTITY zotero.items.menu.showInLibrary "Show in Library">
-<!ENTITY zotero.items.menu.attach.note "Add Note">
-<!ENTITY zotero.items.menu.attach "Add Attachment">
-<!ENTITY zotero.items.menu.attach.snapshot "Attach Snapshot of Current Page">
-<!ENTITY zotero.items.menu.attach.link "Attach Link to Current Page">
-<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
-<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
-
-<!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
-
-<!ENTITY zotero.toolbar.newItem.label "New Item">
-<!ENTITY zotero.toolbar.moreItemTypes.label "More">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Create New Item from Current Page">
-<!ENTITY zotero.toolbar.lookup.label "Add Item by Identifier">
-<!ENTITY zotero.toolbar.removeItem.label "Remove Item...">
-<!ENTITY zotero.toolbar.newCollection.label "New Collection...">
-<!ENTITY zotero.toolbar.newGroup "New Group...">
-<!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "New Saved Search...">
-<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
-<!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
-<!ENTITY zotero.toolbar.actions.label "Actions">
+<!ENTITY zotero.items.menu.showInLibrary "Näidata raamatukogus">
+<!ENTITY zotero.items.menu.attach.note "Märkuse lisamine">
+<!ENTITY zotero.items.menu.attach "Manuse lisamine">
+<!ENTITY zotero.items.menu.attach.snapshot "Lisada käesoleva lehekülje momentülesvõte">
+<!ENTITY zotero.items.menu.attach.link "Lisada link käesolevale leheküljele">
+<!ENTITY zotero.items.menu.attach.file "Lisada faili salvestatud koopia">
+<!ENTITY zotero.items.menu.attach.fileLink "Lisada link failile">
+<!ENTITY zotero.items.menu.duplicateItem "Valitud kirje duplitseerimine">
+<!ENTITY zotero.toolbar.newItem.label "Uus kirje">
+<!ENTITY zotero.toolbar.moreItemTypes.label "Veel">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Uue kirje loomine käesolevast leheküljest">
+<!ENTITY zotero.toolbar.lookup.label "Identifitseerija abil uue kirje loomine">
+<!ENTITY zotero.toolbar.removeItem.label "Kirje eemaldamine...">
+<!ENTITY zotero.toolbar.newCollection.label "Uus kollektsioon...">
+<!ENTITY zotero.toolbar.newGroup "Uus grupp...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Uus alamkollektsioon...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Uus salvestatud otsing...">
+<!ENTITY zotero.toolbar.emptyTrash.label "Prügikasti tühjendamine">
+<!ENTITY zotero.toolbar.tagSelector.label "Lipikusirvija olek">
+<!ENTITY zotero.toolbar.actions.label "Tegevused">
 <!ENTITY zotero.toolbar.import.label "Import...">
-<!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.toolbar.export.label "Export Library...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
-<!ENTITY zotero.toolbar.timeline.label "Create Timeline">
-<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
-<!ENTITY zotero.toolbar.preferences.label "Preferences...">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
-<!ENTITY zotero.toolbar.about.label "About Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Advanced Search">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "Toggle Fullscreen Mode">
-<!ENTITY zotero.toolbar.openURL.label "Locate">
-<!ENTITY zotero.toolbar.openURL.tooltip "Find through your local library">
-
-<!ENTITY zotero.item.add "Add">
-<!ENTITY zotero.item.attachment.file.show "Show File">
-<!ENTITY zotero.item.textTransform "Transform Text">
-<!ENTITY zotero.item.textTransform.lowercase "lower case">
-<!ENTITY zotero.item.textTransform.titlecase "Title Case">
-
-<!ENTITY zotero.toolbar.note.standalone "New Standalone Note">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
-<!ENTITY zotero.toolbar.attachment.linked "Link to File...">
-<!ENTITY zotero.toolbar.attachment.add "Store Copy of File...">
-<!ENTITY zotero.toolbar.attachment.weblink "Save Link to Current Page">
-<!ENTITY zotero.toolbar.attachment.snapshot "Take Snapshot of Current Page">
-
-<!ENTITY zotero.tagSelector.noTagsToDisplay "No tags to display">
+<!ENTITY zotero.toolbar.importFromClipboard "Lõikepuhvrist importimine">
+<!ENTITY zotero.toolbar.export.label "Raamatukogu eksport...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF otsing...">
+<!ENTITY zotero.toolbar.timeline.label "Ajajoone loomine">
+<!ENTITY zotero.toolbar.duplicate.label "Näidata duplikaate">
+<!ENTITY zotero.toolbar.preferences.label "Eelistused...">
+<!ENTITY zotero.toolbar.supportAndDocumentation "Abi ja dokumentatsioon">
+<!ENTITY zotero.toolbar.about.label "Zotero kohta">
+<!ENTITY zotero.toolbar.advancedSearch "Täpsem otsing">
+<!ENTITY zotero.toolbar.search.label "Otsing:">
+<!ENTITY zotero.toolbar.fullscreen.tooltip "Täisekraan režiim">
+<!ENTITY zotero.toolbar.openURL.label "Otsida">
+<!ENTITY zotero.toolbar.openURL.tooltip "Otsida kohalikus raamatukogus">
+<!ENTITY zotero.item.add "Lisada">
+<!ENTITY zotero.item.attachment.file.show "Faili näitamine">
+<!ENTITY zotero.item.textTransform "Teksti muutmine">
+<!ENTITY zotero.item.textTransform.lowercase "väiketähtedeks">
+<!ENTITY zotero.item.textTransform.titlecase "Suurteks Algustähtedeks">
+<!ENTITY zotero.toolbar.note.standalone "Uus sõltumatu märkus">
+<!ENTITY zotero.toolbar.lookup "Identifitseerija abil otsida...">
+<!ENTITY zotero.toolbar.attachment.linked "Link failile...">
+<!ENTITY zotero.toolbar.attachment.add "Faili koopia salvestamine...">
+<!ENTITY zotero.toolbar.attachment.weblink "Salvestada link käesolevale leheküljele">
+<!ENTITY zotero.toolbar.attachment.snapshot "Teha käesolevast leheküljest momentülesvõte">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "Lipikud puuduvad">
 <!ENTITY zotero.tagSelector.filter "Filter:">
-<!ENTITY zotero.tagSelector.showAutomatic "Show automatic">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
-<!ENTITY zotero.tagSelector.selectVisible "Select visible">
-<!ENTITY zotero.tagSelector.clearVisible "Deselect visible">
-<!ENTITY zotero.tagSelector.clearAll "Deselect all">
-<!ENTITY zotero.tagSelector.renameTag "Rename Tag...">
-<!ENTITY zotero.tagSelector.deleteTag "Delete Tag...">
-
-<!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
-
-<!ENTITY zotero.selectitems.title "Select Items">
-<!ENTITY zotero.selectitems.intro.label "Select which items you'd like to add to your library">
-<!ENTITY zotero.selectitems.cancel.label "Cancel">
+<!ENTITY zotero.tagSelector.showAutomatic "Automaatselt näidata">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Näidata kõiki lipikuid raamatukogus">
+<!ENTITY zotero.tagSelector.selectVisible "Valida nähtav">
+<!ENTITY zotero.tagSelector.clearVisible "Nähtava valiku eemaldamine">
+<!ENTITY zotero.tagSelector.clearAll "Ära vali midagi">
+<!ENTITY zotero.tagSelector.renameTag "Lipiku ümbernimetamine...">
+<!ENTITY zotero.tagSelector.deleteTag "Lipiku kustutamine...">
+<!ENTITY zotero.lookup.description "Sisestada otsitava ISBN, DOI või PMID allolevasse lahtrisse.">
+<!ENTITY zotero.selectitems.title "Kirjete valimine">
+<!ENTITY zotero.selectitems.intro.label "Valida millised kirjeid soovite lisada raamatukokku">
+<!ENTITY zotero.selectitems.cancel.label "Tühistada">
 <!ENTITY zotero.selectitems.select.label "OK">
-
-<!ENTITY zotero.bibliography.title "Create Bibliography">
-<!ENTITY zotero.bibliography.style.label "Citation Style:">
-<!ENTITY zotero.bibliography.output.label "Output Format">
-<!ENTITY zotero.bibliography.saveAsRTF.label "Save as RTF">
-<!ENTITY zotero.bibliography.saveAsHTML.label "Save as HTML">
-<!ENTITY zotero.bibliography.copyToClipboard.label "Copy to Clipboard">
-<!ENTITY zotero.bibliography.print.label "Print">
-
-<!ENTITY zotero.integration.docPrefs.title "Document Preferences">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
-
+<!ENTITY zotero.bibliography.title "Bibliograafia loomine">
+<!ENTITY zotero.bibliography.style.label "Viite stiil:">
+<!ENTITY zotero.bibliography.output.label "Väljundformaat">
+<!ENTITY zotero.bibliography.saveAsRTF.label "Salvestada RTF-ina">
+<!ENTITY zotero.bibliography.saveAsHTML.label "Salvestada HTML-ina">
+<!ENTITY zotero.bibliography.copyToClipboard.label "Lõikepuhvrisse kopeerimine">
+<!ENTITY zotero.bibliography.macClipboardWarning "(RTF formateering läheb kaotsi.)">
+<!ENTITY zotero.bibliography.print.label "Trükkida">
+<!ENTITY zotero.integration.docPrefs.title "Dokumendi sätted">
+<!ENTITY zotero.integration.addEditCitation.title "Lisa/toimeta viidet">
+<!ENTITY zotero.integration.editBibliography.title "Toimeta bibliograafiat">
 <!ENTITY zotero.progress.title "Progress">
-
-<!ENTITY zotero.exportOptions.title "Export...">
-<!ENTITY zotero.exportOptions.format.label "Format:">
-<!ENTITY zotero.exportOptions.translatorOptions.label "Translator Options">
-
-<!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.exportOptions.title "Eksport...">
+<!ENTITY zotero.exportOptions.format.label "Formaat:">
+<!ENTITY zotero.exportOptions.translatorOptions.label "Tõlkija seaded">
+<!ENTITY zotero.charset.label "Märgikodeering">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
-
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
-
-<!ENTITY zotero.citation.page "Page">
-<!ENTITY zotero.citation.paragraph "Paragraph">
-<!ENTITY zotero.citation.line "Line">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
-
-<!ENTITY zotero.richText.italic.label "Italic">
-<!ENTITY zotero.richText.bold.label "Bold">
-<!ENTITY zotero.richText.underline.label "Underline">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
-
-<!ENTITY zotero.annotate.toolbar.add.label "Add Annotation">
-<!ENTITY zotero.annotate.toolbar.collapse.label "Collapse All Annotations">
-<!ENTITY zotero.annotate.toolbar.expand.label "Expand All Annotations">
-<!ENTITY zotero.annotate.toolbar.highlight.label "Highlight Text">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "Unhighlight Text">
-
-<!ENTITY zotero.integration.prefs.displayAs.label "Display Citations As:">
-<!ENTITY zotero.integration.prefs.footnotes.label "Footnotes">
-<!ENTITY zotero.integration.prefs.endnotes.label "Endnotes">
-
-<!ENTITY zotero.integration.prefs.formatUsing.label "Format Using:">
-<!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified.">
-
-<!ENTITY zotero.integration.references.label "References in Bibliography">
-
-<!ENTITY zotero.sync.button "Sync with Zotero Server">
-<!ENTITY zotero.sync.error "Sync Error">
+<!ENTITY zotero.citation.keepSorted.label "Hoida allikad sorteeritud">
+<!ENTITY zotero.citation.page "Lehekülg">
+<!ENTITY zotero.citation.paragraph "Paragrahv">
+<!ENTITY zotero.citation.line "Rida">
+<!ENTITY zotero.citation.suppressAuthor.label "Peida autor">
+<!ENTITY zotero.citation.prefix.label "Prefiks:">
+<!ENTITY zotero.citation.suffix.label "Sufiks:">
+<!ENTITY zotero.richText.italic.label "Kaldkiri">
+<!ENTITY zotero.richText.bold.label "Rasvane">
+<!ENTITY zotero.richText.underline.label "Allajoonitud">
+<!ENTITY zotero.richText.superscript.label "Ülaindeks">
+<!ENTITY zotero.richText.subscript.label "Alaindeks">
+<!ENTITY zotero.annotate.toolbar.add.label "Annotatsiooni lisamine">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Annotatsioonide peitmine">
+<!ENTITY zotero.annotate.toolbar.expand.label "Annotatsioonide näitamine">
+<!ENTITY zotero.annotate.toolbar.highlight.label "Teksti esiletõstmine">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "Esiletõste eemaldamine">
+<!ENTITY zotero.integration.prefs.displayAs.label "Näidata viiteid:">
+<!ENTITY zotero.integration.prefs.footnotes.label "Joonealustena">
+<!ENTITY zotero.integration.prefs.endnotes.label "Lõppmärkustena">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Vorminda kasutades:">
+<!ENTITY zotero.integration.prefs.bookmarks.label "Järjehoidjaid">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Järjehoidjad toimivad nii MS Wordi kui ka OpenOffice puhul, kuid võib juhtuda, et neid kogemata muudetakse. Ühilduvuse huvides ei ole võimalik lisada viiteid allmärkustele ja lõppmärkustele, kui see võimalus on aktiveeritud.">
+<!ENTITY zotero.integration.references.label "Referentsid bibliograafias">
+<!ENTITY zotero.sync.button "Zotero serveriga sünkroniseerimine">
+<!ENTITY zotero.sync.error "Sünkroniseerimisviga">
 <!ENTITY zotero.sync.storage.progress "Progress:">
-<!ENTITY zotero.sync.storage.downloads "Downloads:">
-<!ENTITY zotero.sync.storage.uploads "Uploads:">
-
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
-<!ENTITY zotero.sync.longTagFixer.split "Split">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
-<!ENTITY zotero.sync.longTagFixer.character "character">
-<!ENTITY zotero.sync.longTagFixer.characters "characters">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
-
-<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
-<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
-<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
-<!ENTITY zotero.recognizePDF.cancel.label "Cancel">
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
-<!ENTITY zotero.recognizePDF.itemName.label "Item Name">
-<!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
-
-<!ENTITY zotero.rtfScan.title "RTF Scan">
-<!ENTITY zotero.rtfScan.cancel.label "Cancel">
-<!ENTITY zotero.rtfScan.citation.label "Citation">
-<!ENTITY zotero.rtfScan.itemName.label "Item Name">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
-<!ENTITY zotero.rtfScan.introPage.label "Introduction">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
-<!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
-<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
-<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
-<!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
-<!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
-<!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
-<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
-<!ENTITY zotero.rtfScan.inputFile.label "Input File">
-<!ENTITY zotero.rtfScan.outputFile.label "Output File">
-
-<!ENTITY zotero.file.choose.label "Choose File...">
-<!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.sync.storage.downloads "Allalaadimised:">
+<!ENTITY zotero.sync.storage.uploads "Üleslaadimised:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Järgnev lipik Zotero raamatukogus on liiga pikk selleks, et seda sünkroniseerida:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Sünkroniseerimiseks peavad lipikud olema lühemad kui 256 märki.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Võite selle lipiku jagada mitmeks lipikuks, lühendada seda käsitsi või selle hoopis kustutada.">
+<!ENTITY zotero.sync.longTagFixer.split "Jagada">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Jagada">
+<!ENTITY zotero.sync.longTagFixer.character "märgi juurest">
+<!ENTITY zotero.sync.longTagFixer.characters "märkide juurest">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Valimata lipikuid ei salvestata.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Lipik kustutatakse kõigilt kirjetelt.">
+<!ENTITY zotero.proxy.recognized.title "Proksi omaks võetud.">
+<!ENTITY zotero.proxy.recognized.warning "Lisage vaid oma raamatukogust, koolist või firmast lähtuvaid proksisid">
+<!ENTITY zotero.proxy.recognized.warning.secondary "Teiste prokside lisamine võib kujutada turvariski.">
+<!ENTITY zotero.proxy.recognized.disable.label "Mitte suunata automaatselt eelevalt tuvastatud proksi kaudu">
+<!ENTITY zotero.proxy.recognized.ignore.label "Ignoreerida">
+<!ENTITY zotero.recognizePDF.recognizing.label "Metaandmete laadimine...">
+<!ENTITY zotero.recognizePDF.cancel.label "Tühistada">
+<!ENTITY zotero.recognizePDF.pdfName.label "PDFi nimi">
+<!ENTITY zotero.recognizePDF.itemName.label "Kirje nimi">
+<!ENTITY zotero.recognizePDF.captcha.label "Jätkamiseks sisestage allolev tekst.">
+<!ENTITY zotero.rtfScan.title "RTF Skänn">
+<!ENTITY zotero.rtfScan.cancel.label "Tühistada">
+<!ENTITY zotero.rtfScan.citation.label "Viide">
+<!ENTITY zotero.rtfScan.itemName.label "Kirje nimi">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Paigutamata viited">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ebamäärased viited">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Paigutatud viited">
+<!ENTITY zotero.rtfScan.introPage.label "Sissejuhatus">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero suudab automaatselt RTF failidest viiteid lugeda ja ümber formateerida ja ka neisse bibliograafiat salvestada. Alustamiseks valige allpool RTF fail.">
+<!ENTITY zotero.rtfScan.introPage.description2 "Alustamiseks valige allpool RTF sisend ja väljundfail:">
+<!ENTITY zotero.rtfScan.scanPage.label "Viidete otsimine">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero otsib dokumendist viiteid. Palun kannatust.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Viitekirjete kontroll">
+<!ENTITY zotero.rtfScan.citationsPage.description "Et kindlaks teha, kas Zotero sorteeris kirjed õigesti, palun kontrollida tuvastatud viidete nimekirja. Kõik paigutamata või ebamäärastest viidetest tulenevad probleemid peaks enne järgmist sammu lahendama.">
+<!ENTITY zotero.rtfScan.stylePage.label "Dokumendi formateering">
+<!ENTITY zotero.rtfScan.formatPage.label "Viidete formateering">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero töötleb RTF dokumenti. Palun kannatust.">
+<!ENTITY zotero.rtfScan.completePage.label "RTF otsing lõppenud">
+<!ENTITY zotero.rtfScan.completePage.description "Dokument on töödeldud. Palun kontrollida formateeringut.">
+<!ENTITY zotero.rtfScan.inputFile.label "Sisendfail">
+<!ENTITY zotero.rtfScan.outputFile.label "Väljundfail">
+<!ENTITY zotero.file.choose.label "Faili valimine...">
+<!ENTITY zotero.file.noneSelected.label "Faili ei ole valitud">
