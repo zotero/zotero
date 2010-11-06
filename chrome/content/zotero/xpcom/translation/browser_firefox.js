@@ -403,8 +403,7 @@ Zotero.Translate.IO.Write.prototype = {
 	"close":function() {
 		if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1) {
 			this.write(this.RDF.serialize());
-		} else {
-			this.outputStream.close();
 		}
+		this.outputStream.close();
 	}
 }
