@@ -199,16 +199,10 @@ Zotero.Translate.Sandbox = {
 		 */	 
 		"loadTranslator":function(translate, type) {
 			const setDefaultHandlers = function(translate, translation) {
-				var noHandlers = true;
-				for(var i in translation._handlers) {
-					noHandlers = false;
-					break;
-				}
-				if(noHandlers) {
-					if(!(translation instanceof Zotero.Translate.Export)) {
+				if(Zotero.Utilities.isEmpty(translation._handlers)) {
+					if(type === "export") {
 						translation.setHandler("itemDone", function(obj, item) { item.complete() });
-					}
-					if(translation instanceof Zotero.Translate.Web) {
+					} else if(type === "web") {
 						translation.setHandler("selectItems", translate._handlers["selectItems"]);
 					}
 				}
@@ -302,7 +296,7 @@ Zotero.Translate.Sandbox = {
 		 * @param {Zotero.Translate} translate
 		 */
 		"wait":function(translate) {
-			if(translate._currentState == "translate" || translate instanceof Zotero.Translate.Web) {
+			if(translate._currentState == "translate") {
 				translate._waitForCompletion = true;
 			} else {
 				throw "Translate: cannot call Zotero.wait() in detectCode of non-web translators";
@@ -420,6 +414,14 @@ Zotero.Translate.Sandbox = {
 			
 			// call super
 			Zotero.Translate.Sandbox.Base._itemDone(translate, item);
+		},
+		
+		/**
+		 * Overloads {@link Zotero.Sandbox.Base.wait} to allow asynchronous detect
+		 * @param {Zotero.Translate} translate
+		 */
+		"wait":function(translate) {
+			translate._waitForCompletion = true;
 		}
 	},
 
@@ -474,7 +476,7 @@ Zotero.Translate.Sandbox = {
 		 * @borrows Zotero.Translate.Sandbox.Web._itemDone as this._itemDone
 		 */
 		"_itemDone":function(translate, item) {
-			Zotero.Translate.Sandbox.Web.itemDone(translate, item);
+			Zotero.Translate.Sandbox.Web._itemDone(translate, item);
 		}
 	}
 }
@@ -677,7 +679,7 @@ Zotero.Translate.Base.prototype = {
 		
 		// translate
 		try {
-			this._sandboxManager.sandbox["do"+this._entryFunctionSuffix](this.document, this.location);
+			this._sandboxManager.sandbox["do"+this._entryFunctionSuffix].apply(this.null, this._getParameters());
 		} catch(e) {
 			if(this._parentTranslator) {
 				throw(e);
@@ -762,7 +764,7 @@ Zotero.Translate.Base.prototype = {
 		this._prepareDetection();
 		
 		try {
-			var returnValue = this._sandboxManager.sandbox["detect"+this._entryFunctionSuffix](this.document, this.location);
+			var returnValue = this._sandboxManager.sandbox["detect"+this._entryFunctionSuffix].apply(null, this._getParameters());
 		} catch(e) {
 			this.complete(false, e);
 			return;
@@ -775,7 +777,11 @@ Zotero.Translate.Base.prototype = {
 	 * Loads the translator into its sandbox
 	 */
 	"_loadTranslator":function(translator) {
-		if(!this._sandboxManager) this._generateSandbox();
+		var sandboxLocation = this._getSandboxLocation();
+		if(!this._sandboxLocation || sandboxLocation != this._sandboxLocation) {
+			this._sandboxLocation = sandboxLocation;
+			this._generateSandbox();
+		}
 		this._waitForCompletion = false;
 		
 		Zotero.debug("Translate: Parsing code for "+translator.label, 4);
@@ -801,27 +807,8 @@ Zotero.Translate.Base.prototype = {
 	 * Generates a sandbox for scraping/scraper detection
 	 */
 	"_generateSandbox":function() {
-		var sandboxLocation = "http://www.example.com/";
-		
-		if(this instanceof Zotero.Translate.Web) {
-			// use real URL, not proxied version, to create sandbox
-			sandboxLocation = this.document.defaultView;
-		} else if(this instanceof Zotero.Translate.Search) {
-			// generate sandbox for search by extracting domain from translator target
-			if(this.translator && this.translator[0] && this.translator[0].target) {
-				// so that web translators work too
-				const searchSandboxRe = /^http:\/\/[\w.]+\//;
-				var tempURL = this.translator[0].target.replace(/\\/g, "").replace(/\^/g, "");
-				var m = searchSandboxRe.exec(tempURL);
-				if(m) sandboxLocation = m[0];
-			}
-		} else if(this._parentTranslator) {
-			sandboxLocation = this._parentTranslator._sandboxLocation;
-		}
-		
-		Zotero.debug("Translate: Binding sandbox to "+(typeof sandboxLocation == "object" ? sandboxLocation.document.location : sandboxLocation), 4);
-		this._sandboxLocation = sandboxLocation;
-		this._sandboxManager = new Zotero.Translate.SandboxManager(this, sandboxLocation);
+		Zotero.debug("Translate: Binding sandbox to "+(typeof this._sandboxLocation == "object" ? this._sandboxLocation.document.location : this._sandboxLocation), 4);
+		this._sandboxManager = new Zotero.Translate.SandboxManager(this, this._sandboxLocation);
 		this._sandboxManager.eval("var Zotero = {};"+
 		"Zotero.Item = function (itemType) {"+
 				"this.itemType = itemType;"+
@@ -881,6 +868,18 @@ Zotero.Translate.Base.prototype = {
 			+ "\nautomaticSnapshots => "+Zotero.Prefs.get("automaticSnapshots");
 		return errorString.substr(1);
 	},
+	
+	/**
+	 * Determines the location where the sandbox should be bound
+	 */
+	"_getSandboxLocation":function() {
+		return (this._parentTranslator ? this._parentTranslator._sandboxLocation : "http://www.example.com/");
+	},
+	
+	/**
+	 * Gets parameters to be passed to detect* and do* functions
+	 */
+	"_getParameters":function() { return []; },
 	
 	/**
 	 * No-op for preparing detection
@@ -960,6 +959,18 @@ Zotero.Translate.Web.prototype._getPotentialTranslators = function() {
 	
 	return potentialTranslators;
 }
+
+/**
+ * Bind sandbox to document being translated
+ */
+Zotero.Translate.Web.prototype._getSandboxLocation = function() {
+	return this.document.defaultView;
+}
+
+/**
+ * Pass document and location to detect* and do* functions
+ */
+Zotero.Translate.Web.prototype._getParameters = function() { return [this.document, this.location]; }
 
 /**
  * Prepare translation
@@ -1232,7 +1243,7 @@ Zotero.Translate.Search.prototype.setCookieManager = Zotero.Translate.Web.protot
  * @param {Object} item An item, with as many fields as desired, in the format returned by
  *     {@link Zotero.Item#serialize}
  */
-Zotero.Translate.Search.prototype.setSearch = function(item) {
+Zotero.Translate.Search.prototype.setSearch = function(search) {
 	this.search = search;
 }
 
@@ -1280,12 +1291,23 @@ Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
 }
 
 /**
- * Loads the translator into its sandbox. We overload this to make sure that the sandbox is
- * bound to the correct URI.
+ * Pass search item to detect* and do* functions
  */
-Zotero.Translate.Search.prototype._loadTranslator = function() {
-	this._generateSandbox();
-	Zotero.Translate.Base.prototype._loadTranslator.apply(this);
+Zotero.Translate.Search.prototype._getParameters = function() { return [this.search]; };
+
+/**
+ * Extract sandbox location from translator target
+ */
+Zotero.Translate.Search.prototype._getSandboxLocation = function() {
+	// generate sandbox for search by extracting domain from translator target
+	if(this.translator && this.translator[0] && this.translator[0].target) {
+		// so that web translators work too
+		const searchSandboxRe = /^http:\/\/[\w.]+\//;
+		var tempURL = this.translator[0].target.replace(/\\/g, "").replace(/\^/g, "");
+		var m = searchSandboxRe.exec(tempURL);
+		if(m) return m[0];
+	}
+	return Zotero.Translate.Base.prototype._getSandboxLocation.call(this);
 }
 
 Zotero.Translate.Search.prototype._prepareTranslation = Zotero.Translate.Web.prototype._prepareTranslation;
