@@ -417,7 +417,6 @@ Zotero.Translate.ItemSaver.prototype = {
 	},
 	
 	"_saveNotes":function(item, parentID) {
-		Zotero.debug(item.notes);
 		for(var i=0; i<item.notes.length; i++) {
 			var note = item.notes[i];
 			Zotero.debug(note);
