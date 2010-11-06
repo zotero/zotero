@@ -289,6 +289,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			if(attachment.snapshot === false || !this._saveFiles) {
 				// if snapshot is explicitly set to false, attach as link
 				if(attachment.document) {
+					Zotero.debug("mime type is "+attachment.document.contentType);
 					Zotero.Attachments.linkFromURL(attachment.document.location.href, parentID,
 							(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
 							(attachment.title ? attachment.title : attachment.document.title));
@@ -444,7 +445,8 @@ Zotero.Translate.ItemSaver.prototype = {
 		
 		// add see alsos
 		if(item.seeAlso) {
-			for each(var seeAlso in item.seeAlso) {
+			for(var i=0; i<item.seeAlso.length; i++) {
+				var seeAlso = item.seeAlso[i];
 				if(this._IDMap[seeAlso]) {
 					newItem.addRelatedItem(this._IDMap[seeAlso]);
 				}
