@@ -200,11 +200,10 @@ Zotero.Translate.Sandbox = {
 		"loadTranslator":function(translate, type) {
 			const setDefaultHandlers = function(translate, translation) {
 				if(Zotero.Utilities.isEmpty(translation._handlers)) {
-					if(type === "export") {
+					if(type !== "export") {
 						translation.setHandler("itemDone", function(obj, item) { item.complete() });
-					} else if(type === "web") {
-						translation.setHandler("selectItems", translate._handlers["selectItems"]);
 					}
+					translation.setHandler("selectItems", translate._handlers["selectItems"]);
 				}
 			}
 			
