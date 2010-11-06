@@ -623,10 +623,6 @@ Zotero.Translate.ItemGetter.prototype = {
 	 * Converts an item to array format
 	 */
 	"_itemToArray":function(returnItem) {
-		const makeGetter = function(returnItemArray, fieldName) {
-			return function() { return returnItemArray[fieldName] };
-		}
-		
 		// TODO use Zotero.Item#serialize()
 		var returnItemArray = returnItem.toArray();
 		
@@ -652,10 +648,10 @@ Zotero.Translate.ItemGetter.prototype = {
 				}
 				
 				if(baseName) {
-					returnItemArray.__defineGetter__(baseName, makeGetter(returnItemArray, fieldName));
-					returnItemArray.uniqueFields.__defineGetter__(baseName, makeGetter(returnItemArray, fieldName));
+					returnItemArray[baseName] = returnItemArray[fieldName];
+					returnItemArray.uniqueFields[baseName] = returnItemArray[fieldName];
 				} else {
-					returnItemArray.uniqueFields.__defineGetter__(fieldName, makeGetter(returnItemArray, fieldName));
+					returnItemArray.uniqueFields[fieldName] = returnItemArray[fieldName];
 				}
 			}
 		}
