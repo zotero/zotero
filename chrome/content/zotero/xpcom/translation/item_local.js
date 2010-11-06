@@ -289,7 +289,6 @@ Zotero.Translate.ItemSaver.prototype = {
 			if(attachment.snapshot === false || !this._saveFiles) {
 				// if snapshot is explicitly set to false, attach as link
 				if(attachment.document) {
-					Zotero.debug("mime type is "+attachment.document.contentType);
 					Zotero.Attachments.linkFromURL(attachment.document.location.href, parentID,
 							(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
 							(attachment.title ? attachment.title : attachment.document.title));
