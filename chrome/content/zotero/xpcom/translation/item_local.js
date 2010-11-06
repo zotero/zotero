@@ -417,12 +417,15 @@ Zotero.Translate.ItemSaver.prototype = {
 	},
 	
 	"_saveNotes":function(item, parentID) {
-		for each(var note in item.notes) {
+		Zotero.debug(item.notes);
+		for(var i=0; i<item.notes.length; i++) {
+			var note = item.notes[i];
+			Zotero.debug(note);
 			var myNote = new Zotero.Item('note');
 			myNote.libraryID = this._libraryID;
 			myNote.setNote(typeof note == "object" ? note.note : note);
-			if (myID) {
-				myNote.setSource(myID);
+			if(parentID) {
+				myNote.setSource(parentID);
 			}
 			var noteID = myNote.save();
 			
@@ -456,18 +459,20 @@ Zotero.Translate.ItemSaver.prototype = {
 			tagsToAdd[0] = []; // user tags
 			tagsToAdd[1] = []; // automatic tags
 			
-			for each(var tag in item.tags) {
+			for(var i=0; i<item.tags.length; i++) {
+				var tag = item.tags[i];
+				
 				if(typeof(tag) == "string") {
 					// accept strings in tag array as automatic tags, or, if
 					// importing, as non-automatic tags
 					if(this._forceTagType) {
 						tagsToAdd[this._forceTagType].push(tag);
 					} else {
-						tagsToAdd[1].push(tag);
+						tagsToAdd[0].push(tag);
 					}
 				} else if(typeof(tag) == "object") {
 					// also accept objects
-					if(tag.tag) {
+					if(tag.tag || tag.name) {
 						if(this._forceTagType) {
 							var tagType = this._forceTagType;
 						} else if(tag.type) { 
@@ -475,16 +480,12 @@ Zotero.Translate.ItemSaver.prototype = {
 						} else {
 							var tagType = 0;
 						}
-						
-						if(!tagsToAdd[tagType]) {
-							tagsToAdd[tagType] = [];
-						}
 						tagsToAdd[tagType].push(tag.tag ? tag.tag : tag.name);
 					}
 				}
 			}
 			
-			for (var type in tagsToAdd) {
+			for (var type in [0, 1]) {
 				if (tagsToAdd[type].length) {
 					newItem.addTags(tagsToAdd[type], type);
 				}
