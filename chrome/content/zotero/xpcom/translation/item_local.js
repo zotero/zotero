@@ -132,7 +132,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		var parentIDs = [null];
 		var topLevelCollection;
 		
-		while(collectionsToProcess) {
+		while(collectionsToProcess.length) {
 			var collection = collectionsToProcess.shift();
 			var parentID = parentIDs.shift();
 			
@@ -143,8 +143,9 @@ Zotero.Translate.ItemSaver.prototype = {
 			
 			var toAdd = [];
 			
-			for each(child in collection.children) {
-				if(child.type == "collection") {
+			for(var i=0; i<collection.children.length; i++) {
+				var child = collection.children[i];
+				if(child.type === "collection") {
 					// do recursive processing of collections
 					collectionsToProcess.push(child);
 					parentIDs.push(newCollection.id);
@@ -417,7 +418,6 @@ Zotero.Translate.ItemSaver.prototype = {
 	"_saveNotes":function(item, parentID) {
 		for(var i=0; i<item.notes.length; i++) {
 			var note = item.notes[i];
-			Zotero.debug(note);
 			var myNote = new Zotero.Item('note');
 			myNote.libraryID = this._libraryID;
 			myNote.setNote(typeof note == "object" ? note.note : note);
@@ -516,7 +516,7 @@ Zotero.Translate.ItemGetter.prototype = {
 			
 			if(this._collectionsLeft.length) {
 				// only include parent collection if there are actually children
-				this._collectionsLeft.unshift(getChildren);
+				this._collectionsLeft.unshift(collection);
 			}
 			
 			// get items in child collections
@@ -705,7 +705,7 @@ Zotero.Translate.ItemGetter.prototype = {
 	},
 	
 	"nextCollection":function() {
-		if(!this._collectionsLeft || !this._collectionsLeft.length == 0) return false;
+		if(!this._collectionsLeft || this._collectionsLeft.length == 0) return false;
 	
 		var returnItem = this._collectionsLeft.shift();
 		var obj = returnItem.serialize(true);

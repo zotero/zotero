@@ -435,8 +435,8 @@ Zotero.Translate.Sandbox = {
 		 * @param {Object} collection
 		 */
 		"_collectionDone":function(translate, collection) {
-			var collection = translate._itemSaver.saveCollection(collection);
-			translate._runHandler("collectionDone", collection);
+			var newCollection = translate._itemSaver.saveCollection(collection);
+			translate._runHandler("collectionDone", newCollection);
 		}
 	},
 
@@ -1189,7 +1189,7 @@ Zotero.Translate.Export.prototype._detect = function() {
 Zotero.Translate.Export.prototype._prepareTranslation = function(libraryID, saveAttachments) {
 	// initialize ItemGetter
 	this._itemGetter = new Zotero.Translate.ItemGetter();
-	var getCollections = this._displayOptions.getCollections ? this._displayOptions.getCollections : false;
+	var getCollections = this.translator[0].configOptions.getCollections ? this.translator[0].configOptions.getCollections : false;
 	if(this._collection) {
 		this._itemGetter.setCollection(this._collection, getCollections);
 		delete this._collection;
