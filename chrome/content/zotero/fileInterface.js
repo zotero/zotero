@@ -258,9 +258,21 @@ var Zotero_File_Interface = new function() {
 	
 	function _importTranslatorsAvailable(translation, translators) {
 		if(translators.length) {
+			if(translation.location instanceof Components.interfaces.nsIFile) {
+				var collectionName = translation.location.leafName.substr(0, translation.location.leafName.lastIndexOf("."));
+				var allCollections = Zotero.getCollections();
+				for(var i=0; i<allCollections.length; i++) {
+					if(allCollections[i].name == collectionName) {
+						collectionName += " "+(new Date()).toLocaleString();
+						break;
+					}
+				}
+			} else {
+				var collectionName = Zotero.getString("fileInterface.imported")+" "+(new Date()).toLocaleString();
+			}
+			
 			// create a new collection to take in imported items
-			var date = new Date();
-			_importCollection = Zotero.Collections.add(Zotero.getString("fileInterface.imported")+" "+date.toLocaleString());
+			_importCollection = Zotero.Collections.add(collectionName);
 			
 			// import items
 			translation.setTranslator(translators[0]);
