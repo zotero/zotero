@@ -668,7 +668,7 @@ Zotero.Translate.Base.prototype = {
 		if(!this._loadTranslator(this.translator[0])) return;
 		
 		// set display options to default if they don't exist
-		if(!this._displayOptions) this._displayOptions = this.translator[0]._displayOptions;
+		if(!this._displayOptions) this._displayOptions = this.translator[0].displayOptions;
 		
 		// prepare translation
 		this._prepareTranslation(libraryID, typeof saveAttachments === "undefined" ? true : saveAttachments);
@@ -975,10 +975,11 @@ Zotero.Translate.Web.prototype._prepareTranslation = function(libraryID, saveAtt
  */
 Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 	// call super
+	var oldState = this._currentState;
 	var errorString = Zotero.Translate.Base.prototype.complete.apply(this, [returnValue, error]);
 	
 	// Report translaton failure if we failed
-	if(this._currentState == "translate" && errorString && this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
+	if(oldState == "translate" && errorString && this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
 		// Don't report failure if in private browsing mode
 		var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
 					.getService(Components.interfaces.nsIPrivateBrowsingService);
@@ -1128,7 +1129,7 @@ Zotero.Translate.Export.prototype.setItems = function(items) {
 	delete this._collection;
 }
 
-/*
+/**
  * Sets the collection to be exported (overrides setItems)
  * @param {Zotero.Collection[]} collection
  */
@@ -1196,7 +1197,8 @@ Zotero.Translate.Export.prototype._prepareTranslation = function(libraryID, save
 	
 	// initialize IO
 	if(!this.location) {
-		this._io = new Zotero.Translate.IO.String(null, this.path ? this.path : "", this.translator[0].configOptions["dataMode"]);
+		var io = this._io = new Zotero.Translate.IO.String(null, this.path ? this.path : "", this.translator[0].configOptions["dataMode"]);
+		this.__defineGetter__("string", function() { return io.string; });
 	} else if(!Zotero.Translate.IO.Write) {
 		throw "Translate: Writing to files is not supported in this build of Zotero.";
 	} else {
@@ -1331,9 +1333,9 @@ Zotero.Translate.IO = {
 
 Zotero.Translate.IO.String = function(string, uri, mode) {
 	if(string && typeof string === "string") {
-		this.string = string;
+		this._string = string;
 	} else {
-		this.string = "";
+		this._string = "";
 	}
 	this._stringPointer = 0;
 	this._uri = uri;
@@ -1350,9 +1352,9 @@ Zotero.Translate.IO.String.prototype = {
 		Zotero.debug("Translate: Initializing RDF data store");
 		this._dataStore = new Zotero.RDF.AJAW.RDFIndexedFormula();
 		
-		if(this.string.length) {
+		if(this._string.length) {
 			var parser = new Zotero.RDF.AJAW.RDFParser(this._dataStore);
-			parser.parse(Zotero.Translate.IO.parseDOMXML(this.string), this._uri);
+			parser.parse(Zotero.Translate.IO.parseDOMXML(this._string), this._uri);
 		}
 		
 		this.RDF = new Zotero.Translate.IO._RDFSandbox(this._dataStore);
@@ -1363,55 +1365,54 @@ Zotero.Translate.IO.String.prototype = {
 	"read":function(bytes) {
 		// if we are reading in RDF data mode and no string is set, serialize current RDF to the
 		// string
-		if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1 && this.string === "") {
-			this.string = this.RDF.serialize();
+		if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1 && this._string === "") {
+			this._string = this.RDF.serialize();
 		}
 		
 		// return false if string has been read
-		if(this._stringPointer >= this.string.length) {
+		if(this._stringPointer >= this._string.length) {
 			return false;
 		}
 		
 		if(bytes !== undefined) {
-			if(this._stringPointer >= this.string.length) return false;
+			if(this._stringPointer >= this._string.length) return false;
 			var oldPointer = this._stringPointer;
 			this._stringPointer += bytes;
-			return this.string.substr(oldPointer, bytes);
+			return this._string.substr(oldPointer, bytes);
 		} else {
 			// bytes not specified; read a line
 			var oldPointer = this._stringPointer;
-			var lfIndex = this.string.indexOf("\n", this._stringPointer);
+			var lfIndex = this._string.indexOf("\n", this._stringPointer);
 			
 			if(lfIndex != -1) {
 				// in case we have a CRLF
 				this._stringPointer = lfIndex+1;
-				if(this.string.length > lfIndex && this.string[lfIndex-1] == "\r") {
+				if(this._string.length > lfIndex && this._string[lfIndex-1] == "\r") {
 					lfIndex--;
 				}
-				return this.string.substr(oldPointer, lfIndex-oldPointer);					
+				return this._string.substr(oldPointer, lfIndex-oldPointer);					
 			}
 			
-			var crIndex = this.string.indexOf("\r", this._stringPointer);
+			var crIndex = this._string.indexOf("\r", this._stringPointer);
 			if(crIndex != -1) {
 				this._stringPointer = crIndex+1;
-				return this.string.substr(oldPointer, crIndex-oldPointer-1);
+				return this._string.substr(oldPointer, crIndex-oldPointer-1);
 			}
 			
-			this._stringPointer = this.string.length;
-			return this.string.substr(oldPointer);
+			this._stringPointer = this._string.length;
+			return this._string.substr(oldPointer);
 		}
 	},
 	
 	"write":function(data) {
-		this.string += data;
-		this.string.length += data.length;
+		this._string += data;
 	},
 	
 	"_getXML":function() {
 		if(this._mode == "xml/dom") {
-			return Zotero.Translate.IO.parseDOMXML(this.string);
+			return Zotero.Translate.IO.parseDOMXML(this._string);
 		} else {
-			return this.string.replace(/<\?xml[^>]+\?>/, "");
+			return this._string.replace(/<\?xml[^>]+\?>/, "");
 		}
 	},
 	
@@ -1426,6 +1427,18 @@ Zotero.Translate.IO.String.prototype = {
 	
 	"close":function() {}
 }
+Zotero.Translate.IO.String.prototype.__defineGetter__("string",
+function() {
+	if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1) {
+		return this.RDF.serialize();
+	} else {
+		return this._string;
+	}
+});
+Zotero.Translate.IO.String.prototype.__defineSetter__("string",
+function(string) {
+	this._string = string;
+});
 
 /****** RDF DATA MODE ******/
 
