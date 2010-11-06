@@ -1526,8 +1526,6 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	 *     (false)
 	 */
 	"addStatement":function(about, relation, value, literal) {
-		this
-		
 		if(literal) {
 			// zap chars that Mozilla will mangle
 			value = value.toString().replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');

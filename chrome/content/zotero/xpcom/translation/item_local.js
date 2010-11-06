@@ -505,7 +505,9 @@ Zotero.Translate.ItemGetter.prototype = {
 	
 	"setCollection":function(collection, getChildCollections) {
 		// get items in this collection
+		var haveItems = {};
 		this._itemsLeft = collection.getChildItems();
+		for each(var item in this._itemsLeft) haveItems[item.id] = true;
 		if(!this._itemsLeft) {
 			this._itemsLeft = [];
 		}
@@ -514,16 +516,16 @@ Zotero.Translate.ItemGetter.prototype = {
 			// get child collections
 			this._collectionsLeft = Zotero.getCollections(collection.id, true);
 			
-			if(this._collectionsLeft.length) {
-				// only include parent collection if there are actually children
-				this._collectionsLeft.unshift(collection);
-			}
-			
 			// get items in child collections
 			for each(var collection in this._collectionsLeft) {
 				var childItems = collection.getChildItems();
 				if(childItems) {
-					this._itemsLeft = this._itemsLeft.concat(childItems);
+					for each(var item in childItems) {
+						if(!haveItems[item.id]) {
+							haveItems[item.id] = true;
+							this._itemsLeft.push(item);;
+						}
+					}
 				}
 			}
 		}
@@ -679,7 +681,7 @@ Zotero.Translate.ItemGetter.prototype = {
 				var returnItemArray = this._attachmentToArray(returnItem);
 				if(returnItemArray) return returnItemArray;
 			} else {
-				returnItemArray = this._itemToArray(returnItem);
+				var returnItemArray = this._itemToArray(returnItem);
 				
 				// get attachments, although only urls will be passed if exportFileData
 				// is off
