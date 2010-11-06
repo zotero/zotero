@@ -963,7 +963,8 @@ Zotero.Utilities.Internal = {
 		*/
 		
 		// From http://rcrowley.org/2007/11/15/md5-in-xulrunner-or-firefox-extensions/
-		var ascii = []; ii = hash.length;
+		var ascii = [];
+		var ii = hash.length;
 		for (var i = 0; i < ii; ++i) {
 			var c = hash.charCodeAt(i);
 			var ones = c % 16;
