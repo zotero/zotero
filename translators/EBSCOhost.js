@@ -16,9 +16,6 @@ function detectWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-	
-	
-	
 		// The Scientific American Archive breaks this translator, disabling 
 		try {
 			var databases = doc.evaluate("//span[@class = 'selected-databases']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -50,10 +47,6 @@ function detectWeb(doc, url) {
 		+' or starts-with(text(), "Bu kayda sürekli bağlantı")'
 		+' or starts-with(text(), "Μόνιμος σύνδεσμος σε αυτό το αρχείο")]';
 */
-
-
-	
-
 	var xpath = '//input[@id="ctl00_ctl00_Column2_Column2_topDeliveryControl_deliveryButtonControl_lnkExport"]';
 	var persistentLink = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if(persistentLink) {
@@ -112,16 +105,16 @@ function downloadFunction(text) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
-			if (text.match("L3")) {
-				item.DOI = text.match(/L3\s+\-\s*(.*)/)[1];
+			if (text.match(/^L3\s+-\s*(.*)/m)) {
+				item.DOI = text.match(/^L3\s+\-\s*(.*)/m)[1];
 			}
-			if (text.match("DO")) {
-				item.DOI = text.match(/DO\s+\-\s*(.*)/)[1];
+			if (text.match(/^DO\s+-\s*(.*)/m)) {
+				item.DOI = text.match(/^DO\s+-\s*(.*)/m)[1];
 			}
-			if (text.match("T1")) {
-				item.title = text.match(/T1\s+-\s*(.*)/)[1];
+			if (text.match(/^T1\s+-/m)) {
+				item.title = text.match(/^T1\s+-\s*(.*)/m)[1];
 			}
-			item.itemType = "journalArticle";
+			//item.itemType = "journalArticle";
 			item.url = false;
 			// RIS translator tries to download the link in "UR" this leads to unhappyness
 			item.attachments = [];
