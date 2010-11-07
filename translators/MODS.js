@@ -10,7 +10,7 @@
 	"configOptions":{"dataMode":"dom/xml"},
 	"displayOptions":{"exportNotes":true},
 	"inRepository":true,
-	"lastUpdated":"2010-09-10 01:22:13"
+	"lastUpdated":"2010-11-07 03:10:59"
 }
 
 function detectImport() {
