@@ -507,6 +507,23 @@ Zotero.Utilities = {
 	},
 	
 	/**
+	 * Performs a deep copy of a JavaScript object
+	 * @param {Object} obj
+	 * @return {Object}
+	 */
+	"deepCopy":function(obj) {
+		var obj2 = {};
+		for(var i in obj) {
+			if(typeof obj[i] === "object") {
+				obj2[i] = Zotero.Utilities.deepCopy(obj[i]);
+			} else {
+				obj2[i] = obj[i];
+			}
+		}
+		return obj2;
+	},
+	
+	/**
 	 * Tests if an item type exists
 	 *
 	 * @param {String} type Item type

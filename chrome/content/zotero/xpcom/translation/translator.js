@@ -356,8 +356,8 @@ Zotero.Translator = function(file, json, code) {
 		return;
 	}
 	
-	this.configOptions = info["configOptions"] ? info["configOptions"] : {};
-	this.displayOptions = info["displayOptions"] ? info["displayOptions"] : {};
+	this._configOptions = info["configOptions"] ? info["configOptions"] : {};
+	this._displayOptions = info["displayOptions"] ? info["displayOptions"] : {};
 	this.browserSupport = info["browserSupport"] ? info["browserSupport"] : "g";
 	
 	if(this.translatorType & TRANSLATOR_TYPES["import"]) {
@@ -389,6 +389,13 @@ Zotero.Translator = function(file, json, code) {
 	if(!this.cacheCode) this.__defineGetter__("code", codeGetterFunction);
 	if(!json) cStream.close();
 }
+
+Zotero.Translator.prototype.__defineGetter__("displayOptions", function() {
+	return Zotero.Utilities.deepCopy(this._displayOptions);
+});
+Zotero.Translator.prototype.__defineGetter__("configOptions", function() {
+	return Zotero.Utilities.deepCopy(this._configOptions);
+});
 
 /**
  * Log a translator-related error

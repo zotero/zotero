@@ -74,43 +74,46 @@ Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE = 2;
 Zotero.Translate.ItemSaver.prototype = {
 	"saveItem":function(item) {
 		// Get typeID, defaulting to "webpage"
+		var newItem;
 		var type = (item.itemType ? item.itemType : "webpage");
 		
 		if(type == "note") {			// handle notes differently
-			var newItem = new Zotero.Item('note');
+			newItem = new Zotero.Item('note');
 			newItem.libraryID = this._libraryID;
 			newItem.setNote(item.note);
 			var myID = newItem.save();
-			var newItem = Zotero.Items.get(myID);
+			newItem = Zotero.Items.get(myID);
 		} else {
 			if(type == "attachment") {	// handle attachments differently
-				var newItem = this._saveAttachment(item);
+				newItem = this._saveAttachment(item);
+				var myID = newItem.id;
 			} else {
 				var typeID = Zotero.ItemTypes.getID(type);
-				var newItem = new Zotero.Item(typeID);
+				newItem = new Zotero.Item(typeID);
 				newItem._libraryID = this._libraryID;
-			}
 			
-			this._saveFields(item, newItem);
+				this._saveFields(item, newItem);
+				
+				// handle creators
+				if(item.creators) {
+					this._saveCreators(item, newItem);
+				}
+				
+				// save item
+				var myID = newItem.save();
+				newItem = Zotero.Items.get(myID);
+				
+				// handle notes
+				if(item.notes) {
+					this._saveNotes(item, myID);
+				}
 			
-			// handle creators
-			if(item.creators) {
-				this._saveCreators(item, newItem);
-			}
-			
-			// save item
-			var myID = newItem.save();
-			newItem = Zotero.Items.get(myID);
-			
-			// handle notes
-			if(item.notes) {
-				this._saveNotes(item, myID);
-			}
-			
-			// handle attachments
-			if(item.attachments) {
-				for(var i=0; i<item.attachments.length; i++) {
-					this._saveAttachment(item.attachments[i], myID);
+				// handle attachments
+				if(item.attachments) {
+					for(var i=0; i<item.attachments.length; i++) {
+						var newAttachment = this._saveAttachment(item.attachments[i], myID);
+						if(newAttachment) this._saveTags(item.attachments[i], newAttachment);
+					}
 				}
 			}
 		}
@@ -267,7 +270,6 @@ Zotero.Translate.ItemSaver.prototype = {
 		}
 		
 		newItem.save();
-		newItem = Zotero.Items.get(myID);
 		
 		return newItem;
 	},
@@ -539,11 +541,11 @@ Zotero.Translate.ItemGetter.prototype = {
 		}
 	},
 	
-	"exportFiles":function(dir) {
+	"exportFiles":function(dir, extension) {
 		// generate directory
 		var directory = Components.classes["@mozilla.org/file/local;1"].
 		                createInstance(Components.interfaces.nsILocalFile);
-		directory.initWithFile(this.location.parent);
+		directory.initWithFile(dir.parent);
 		
 		// delete this file if it exists
 		if(dir.exists()) {
@@ -551,7 +553,7 @@ Zotero.Translate.ItemGetter.prototype = {
 		}
 		
 		// get name
-		var name = this.location.leafName;
+		var name = dir.leafName;
 		directory.append(name);
 		
 		// create directory
@@ -562,7 +564,7 @@ Zotero.Translate.ItemGetter.prototype = {
 		var location = Components.classes["@mozilla.org/file/local;1"].
 		                createInstance(Components.interfaces.nsILocalFile);
 		location.initWithFile(directory);
-		location.append(name+"."+this.translator[0].target);
+		location.append(name+"."+extension);
 		
 		// create files directory
 		this._exportFileDirectory = Components.classes["@mozilla.org/file/local;1"].
@@ -683,8 +685,7 @@ Zotero.Translate.ItemGetter.prototype = {
 			} else {
 				var returnItemArray = this._itemToArray(returnItem);
 				
-				// get attachments, although only urls will be passed if exportFileData
-				// is off
+				// get attachments, although only urls will be passed if exportFileData is off
 				returnItemArray.attachments = new Array();
 				var attachments = returnItem.getAttachments();
 				for each(var attachmentID in attachments) {

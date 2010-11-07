@@ -58,7 +58,7 @@ Zotero_File_Exporter.prototype.save = function() {
 	fp.init(window, Zotero.getString("fileInterface.export"), nsIFilePicker.modeSave);
 	
 	// set file name and extension
-	if(io.selectedTranslator.displayOptions.exportFileData) {
+	if(io.displayOptions.exportFileData) {
 		// if the result will be a folder, don't append any extension or use
 		// filters
 		fp.defaultString = this.name;
@@ -80,6 +80,7 @@ Zotero_File_Exporter.prototype.save = function() {
 		
 		translation.setLocation(fp.file);
 		translation.setTranslator(io.selectedTranslator);
+		translation.setDisplayOptions(io.displayOptions);
 		translation.setHandler("done", this._exportDone);
 		Zotero.UnresponsiveScriptIndicator.disable();
 		Zotero_File_Interface.Progress.show(
@@ -259,7 +260,8 @@ var Zotero_File_Interface = new function() {
 	function _importTranslatorsAvailable(translation, translators) {
 		if(translators.length) {
 			if(translation.location instanceof Components.interfaces.nsIFile) {
-				var collectionName = translation.location.leafName.substr(0, translation.location.leafName.lastIndexOf("."));
+				var collectionName = (translation.location.isDirectory() ? translation.location.leafName
+					: translation.location.leafName.substr(0, translation.location.leafName.lastIndexOf(".")));
 				var allCollections = Zotero.getCollections();
 				for(var i=0; i<allCollections.length; i++) {
 					if(allCollections[i].name == collectionName) {

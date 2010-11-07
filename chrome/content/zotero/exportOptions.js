@@ -194,16 +194,17 @@ var Zotero_File_Interface_Export = new function() {
 		// set options on selected translator and generate optionString
 		var optionString = "";
 		var optionsAvailable = window.arguments[0].selectedTranslator.displayOptions;
+		var displayOptions = window.arguments[0].displayOptions = {};
 		for(var option in optionsAvailable) {
 			var defValue = optionsAvailable[option];
 			var element = document.getElementById(OPTION_PREFIX+option);
 			
 			if(option == "exportCharset") {
 				if(_charsets) {
-					optionsAvailable[option] = element.selectedItem.value;
+					displayOptions[option] = element.selectedItem.value;
 				}
 			} else if(typeof(defValue) == "boolean") {
-				optionsAvailable[option] = !!element.checked;
+				displayOptions[option] = !!element.checked;
 			}
 		}
 		

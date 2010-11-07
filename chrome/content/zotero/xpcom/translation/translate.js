@@ -1165,7 +1165,7 @@ Zotero.Translate.Export.prototype.setTranslator = function(translator) {
  * Sets translator display options. you can also pass a translator (not ID) to
  * setTranslator that includes a displayOptions argument
  */
-Zotero.Translate.prototype.setDisplayOptions = function(displayOptions) {
+Zotero.Translate.Export.prototype.setDisplayOptions = function(displayOptions) {
 	this._displayOptions = displayOptions;
 }
 
@@ -1202,7 +1202,7 @@ Zotero.Translate.Export.prototype._prepareTranslation = function(libraryID, save
 	
 	// export file data, if requested
 	if(this._displayOptions["exportFileData"]) {
-		this.location = this._itemGetter.exportFiles(this.location);
+		this.location = this._itemGetter.exportFiles(this.location, this.translator[0].target);
 	}
 	
 	// initialize IO
