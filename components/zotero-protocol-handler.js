@@ -1062,8 +1062,9 @@ function ChromeExtensionHandler() {
 			if(s.length == 2) {
 				data.pane = s[1];
 			}
+			data.wrappedJSObject = data;
 			
-			if(Zotero.isFx4) {
+			if(Zotero.isFx4 || !Zotero.isMac) {
 				var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator)
 					.getMostRecentWindow("navigator:browser");
