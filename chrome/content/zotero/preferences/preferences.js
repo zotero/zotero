@@ -62,7 +62,6 @@ function init()
 	
 	if(window.arguments) {
 		_io = window.arguments[0];
-		if(_io.wrappedJSObject) _io = _io.wrappedJSObject;
 		
 		if(_io.pane) {
 			var pane = document.getElementById(_io.pane);
@@ -72,6 +71,8 @@ function init()
 				checkPDFToolsDownloadVersion();
 			}
 		}
+	} else if(document.location.hash == "#cite") {
+		document.getElementById('zotero-prefs').showPane(document.getElementById("zotero-prefpane-cite"));
 	}
 }
 
