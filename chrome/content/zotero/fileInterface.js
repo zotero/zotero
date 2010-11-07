@@ -260,8 +260,9 @@ var Zotero_File_Interface = new function() {
 	function _importTranslatorsAvailable(translation, translators) {
 		if(translators.length) {
 			if(translation.location instanceof Components.interfaces.nsIFile) {
-				var collectionName = (translation.location.isDirectory() ? translation.location.leafName
-					: translation.location.leafName.substr(0, translation.location.leafName.lastIndexOf(".")));
+				var leafName = translation.location.leafName;
+				var collectionName = (translation.location.isDirectory() || leafName.indexOf(".") === -1 ? leafName
+					: leafName.substr(0, leafName.lastIndexOf(".")));
 				var allCollections = Zotero.getCollections();
 				for(var i=0; i<allCollections.length; i++) {
 					if(allCollections[i].name == collectionName) {
