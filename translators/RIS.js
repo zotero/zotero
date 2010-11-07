@@ -4,13 +4,13 @@
 	"label":"RIS",
 	"creator":"Simon Kornblith",
 	"target":"ris",
-	"minVersion":"1.0.2",
+	"minVersion":"2.1b2",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
 	"configOptions":{"dataMode":"block"},
 	"displayOptions":{"exportCharset":"UTF-8", "exportNotes":true},
-	"lastUpdated":"2010-09-28 21:40:00"
+	"lastUpdated":"2010-11-07 03:10:59"
 }
 
 function detectImport() {

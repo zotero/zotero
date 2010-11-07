@@ -9,7 +9,7 @@
 	"priority":100,
 	"configOptions":{"dataMode":"rdf/xml"},
 	"inRepository":true,
-	"lastUpdated":"2009-11-12 07:20:00"
+	"lastUpdated":"2010-11-07 03:10:59"
 }
 
 function detectImport() {

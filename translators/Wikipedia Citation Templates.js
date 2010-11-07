@@ -9,7 +9,7 @@
 	"priority":100,
 	"displayOptions":{"exportCharset":"UTF-8"},
 	"inRepository":true,
-	"lastUpdated":"2008-07-17 22:05:00"
+	"lastUpdated":"2010-11-07 03:10:59"
 }
 
 var fieldMap = {

@@ -10,7 +10,7 @@
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2010-10-10 02:07:05"
+	"lastUpdated":"2010-11-07 03:10:59"
 }
 
 var rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
@@ -503,6 +503,7 @@ function doExport() {
 	// first, map each ID to a resource
 	while(item = Zotero.nextItem()) {
 		items.push(item);
+		Zotero.debug(item);
 		
 		var testISBN = "urn:isbn:"+encodeURI(item.ISBN);
 		if(item.ISBN && !usedResources[testISBN]) {

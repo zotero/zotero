@@ -9,7 +9,7 @@
 	"priority":100,
 	"configOptions":{"getCollections":"true", "dataMode":"line"},
 	"inRepository":false,
-	"lastUpdated":"2010-10-09 07:21:37"
+	"lastUpdated":"2010-11-07 03:10:59"
 }
 
 /*
