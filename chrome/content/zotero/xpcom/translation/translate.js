@@ -23,84 +23,11 @@
     ***** END LICENSE BLOCK *****
 */
 
-// Byte order marks for various character sets
-
-/*
- * Zotero.Translate: a class for translation of Zotero metadata from and to
- * other formats
- *
- * type can be: 
- * export
- * import
- * web
- * search
- *
- * a typical export process:
- * var translatorObj = new Zotero.Translate();
- * var possibleTranslators = translatorObj.getTranslators();
- * // do something involving nsIFilePicker; remember, each possibleTranslator
- * // object has properties translatorID, label, and targetID
- * translatorObj.setLocation(myNsILocalFile);
- * translatorObj.setTranslator(possibleTranslators[x]); // also accepts only an ID
- * translatorObj.setHandler("done", _translationDone);
- * translatorObj.translate();
- *
- *
- * PUBLIC PROPERTIES:
- * @property {Zotero.Connector.CookieManager} cookieManager
- *		A CookieManager to manage cookies for this Translate instance.
- * @property {String} type The type of translator. This is deprecated; use instanceof instead.
- * translator - the translator currently in use (read-only; set with
- *               setTranslator)
- * location - the location of the target (read-only; set with setLocation)
- *            for import/export - this is an instance of nsILocalFile
- *            for web - this is a URL
- * items - items (in Zotero.Item format) to be exported. if this is empty,
- *         Zotero will export all items in the library (read-only; set with
- *         setItems). setting items disables export of collections.
- * @property {String} path The path or URI of the target
- * @property {String} libraryID libraryID (e.g., of a group) of saved database items. null for local
- *    items or false if items should not be saved at all. defaults to null; set using second
- *    argument of constructor.
- * @property {String} newItems Items created when translate() was called
- * @property {String} newCollections Collections created when translate() was called
- * @property {Boolean} saveAttachments Whether attachments should be saved
- * @property {Boolean} saveFiles Whether files should be saved
- *
- * PSEUDO-PRIVATE PROPERTIES (used only by other objects in this file):
- *
- * waitForCompletion - whether to wait for asynchronous completion, or return
- *                     immediately when script has finished executing
- * configOptions - options set by translator modifying behavior of
- *                  Zotero.Translate
- * displayOptions - options available to user for this specific translator
- *
- * PRIVATE PROPERTIES:
- * 
- * _charset - character set
- * _numericTypes - possible numeric types as a comma-delimited string
- * _handlers - handlers for various events (see setHandler)
- * _sandbox - sandbox in which translators will be executed
- * _streams - streams that need to be closed when execution is complete
- * _IDMap - a map from IDs as specified in Zotero.Item() to IDs of actual items
- * _parentTranslator - set when a translator is called from another translator. 
- *                     among other things, disables passing of the translate
- *                     object to handlers and modifies complete() function on 
- *                     returned items
- * @param _storage - the stored string to be treated as input
- * _storageLength - the length of the stored string
- * _exportFileDirectory - the directory to which files will be exported
- *
- * WEB-ONLY PROPERTIES:
- *
- * locationIsProxied - whether the URL being scraped is going through
- *                      an EZProxy
- * _downloadAssociatedFiles - whether to download content, according to
- *                            preferences
- *
- * EXPORT-ONLY PROPERTIES:
- *
- * output - export output (if no location has been specified)
+/**
+ * @class
+ * Deprecated class for creating new Zotero.Translate instances
+ * New code should use Zotero.Translate.Web, Zotero.Translate.Import, Zotero.Translate.Export, or
+ * Zotero.Translate.Search
  */
 Zotero.Translate = function(type) {
 	Zotero.debug("Translate: WARNING: new Zotero.Translate() is deprecated; please don't use this if you don't have to");
@@ -113,11 +40,17 @@ Zotero.Translate = function(type) {
 	this.__proto__ = translate.__proto__;
 }
 
+/**
+ * Create a new translator by a string type
+ */
 Zotero.Translate.new = function(type) {
 	return new Zotero.Translate[type[0].toUpperCase()+type.substr(1).toLowerCase()];
 }
 
 Zotero.Translate.Sandbox = {
+	/**
+	 * Combines a sandbox with the base sandbox
+	 */
 	"_inheritFromBase":function(sandboxToMerge) {
 		var newSandbox = {};
 		
@@ -132,9 +65,14 @@ Zotero.Translate.Sandbox = {
 		return newSandbox;
 	},
 	
+	/**
+	 * Base sandbox. These methods are available to all translators.
+	 */
 	"Base": {
 		/**
 		 * Called as Zotero.Item#complete() from translators to save items to the database.
+		 * @param {Zotero.Translate} translate
+		 * @param {SandboxItem} An item created using the Zotero.Item class from the sandbox
 		 */
 		"_itemDone":function(translate, item) {
 			Zotero.debug("Translate: Saving item");
@@ -179,6 +117,7 @@ Zotero.Translate.Sandbox = {
 		/**
 		 * Gets translator options that were defined in displayOptions in translator header
 		 *
+		 * @param {Zotero.Translate} translate
 		 * @param {String} option Option to be retrieved
 		 */
 		"getOption":function(translate, option) {
@@ -334,6 +273,8 @@ Zotero.Translate.Sandbox = {
 	"Web":{
 		/**
 		 * Lets user pick which items s/he wants to put in his/her library
+		 * @param {Zotero.Translate} translate
+		 * @param {Object} options An set of id => name pairs in object format
 		 */
 		"selectItems":function(translate, options) {
 			// hack to see if there are options
@@ -355,7 +296,11 @@ Zotero.Translate.Sandbox = {
 		},
 		
 		/**
-		 * Overloads {@link Zotero.Translate.Sandbox.Base._itemDone}
+		 * Overloads {@link Zotero.Translate.Sandbox.Base._itemDone} to ensure that no standalone
+		 * items are saved, that an item type is specified, and to add a libraryCatalog and 
+		 * shortTitle if relevant.
+		 * @param {Zotero.Translate} translate
+		 * @param {SandboxItem} An item created using the Zotero.Item class from the sandbox
 		 */
 		 "_itemDone":function(translate, item) {
 			if(!item.itemType) {
@@ -431,8 +376,9 @@ Zotero.Translate.Sandbox = {
 	"Import":{
 		/**
 		 * Saves a collection to the DB
-		 * Called as collection.complete() from the sandbox
-		 * @param {Object} collection
+		 * Called as Zotero.Collection#complete() from the sandbox
+		 * @param {Zotero.Translate} translate
+		 * @param {SandboxCollection} collection
 		 */
 		"_collectionDone":function(translate, collection) {
 			var newCollection = translate._itemSaver.saveCollection(collection);
@@ -445,6 +391,11 @@ Zotero.Translate.Sandbox = {
 	 * @namespace
 	 */
 	"Export":{
+		/**
+		 * Retrieves the next item to be exported
+		 * @param {Zotero.Translate} translate
+		 * @return {SandboxItem}
+		 */
 		"nextItem":function(translate) {
 			var item = translate._itemGetter.nextItem();
 			
@@ -457,6 +408,11 @@ Zotero.Translate.Sandbox = {
 			return item;
 		},
 		
+		/**
+		 * Retrieves the next collection to be exported
+		 * @param {Zotero.Translate} translate
+		 * @return {SandboxCollection}
+		 */
 		"nextCollection":function(translate) {
 			if(!translate.translator[0].configOptions.getCollections) {
 				throw("Translate: getCollections configure option not set; cannot retrieve collection");
@@ -481,10 +437,21 @@ Zotero.Translate.Sandbox = {
 }
 
 /**
- * @class Base class for all translators
+ * @class Base class for all translation types
+ *
+ * @property {String} type The type of translator. This is deprecated; use instanceof instead.
+ * @property {Zotero.Translator[]} translator The translator currently in use. Usually, only the
+ *     first entry of the Zotero.Translator array is populated; subsequent entries represent
+ *     translators to be used if the first fails.
+ * @property {String} path The path or URI string of the target
+ * @property {String} newItems Items created when translate() was called
+ * @property {String} newCollections Collections created when translate() was called
  */
 Zotero.Translate.Base = function() {}
 Zotero.Translate.Base.prototype = {
+	/**
+	 * Initializes a Zotero.Translate instance
+	 */
 	"init":function() {
 		this._handlers = [];
 		this._currentState = null;
@@ -631,6 +598,8 @@ Zotero.Translate.Base.prototype = {
 	 * For import, you should call this after setLocation; otherwise, you'll just get a list of all
 	 * import filters, not filters equipped to handle a specific file
 	 *
+	 * @param {Boolean} [getAllTranslators] Whether all applicable translators should be returned,
+	 *     rather than just the first available.
 	 * @return {Zotero.Translator[]} An array of {@link Zotero.Translator} objects
 	 */
 	"getTranslators":function(getAllTranslators) {
@@ -650,7 +619,9 @@ Zotero.Translate.Base.prototype = {
 	},
 
 	/**
-	 * does the actual translation
+	 * Begins the actual translation. At present, this returns immediately for import/export
+	 * translators, but new code should use {@link Zotero.Translate.Base#setHandler} to register a 
+	 * "done" handler to determine when execution of web/search translators is complete.
 	 *
 	 * @param 	{NULL|Integer|FALSE}	[libraryID=null]		Library in which to save items,
 	 *																or NULL for default library;
@@ -693,9 +664,11 @@ Zotero.Translate.Base.prototype = {
 	
 	/**
 	 * Executed on translator completion, either automatically from a synchronous scraper or as
-	 * done() from an asynchronous scraper
-	 *
-	 * Finishes things up and calls callback function(s)
+	 * done() from an asynchronous scraper. Finishes things up and calls callback function(s).
+	 * @param {Boolean|String} returnValue An item type or a boolean true or false
+	 * @param {String|Exception} [error] An error that occurred during translation.
+	 * @returm {String|NULL} The exception serialized to a string, or null if translation
+	 *     completed successfully.
 	 */
 	"complete":function(returnValue, error) {
 		// Make sure this isn't called twice
@@ -774,6 +747,8 @@ Zotero.Translate.Base.prototype = {
 	
 	/**
 	 * Loads the translator into its sandbox
+	 * @param {Zotero.Translator} translator
+	 * @return {Boolean} Whether the translator could be successfully loaded
 	 */
 	"_loadTranslator":function(translator) {
 		var sandboxLocation = this._getSandboxLocation();
@@ -834,6 +809,8 @@ Zotero.Translate.Base.prototype = {
 	
 	/**
 	 * Logs a debugging message
+	 * @param {String} string Debug string to log
+	 * @param {Integer} level Log level (1-5, higher numbers are higher priority)
 	 */
 	"_debug":function(string, level) {
 		if(typeof string === "object") string = new XPCSafeJSObjectWrapper(string);
@@ -850,6 +827,10 @@ Zotero.Translate.Base.prototype = {
 		}
 	},
 	
+	/**
+	 * Generates a string from an exception
+	 * @param {String|Exception} error
+	 */
 	"_generateErrorString":function(error) {
 		var errorString = "";
 		if(typeof(error) == "string") {
@@ -870,6 +851,7 @@ Zotero.Translate.Base.prototype = {
 	
 	/**
 	 * Determines the location where the sandbox should be bound
+	 * @return {String|document} The location to which to bind the sandbox
 	 */
 	"_getSandboxLocation":function() {
 		return (this._parentTranslator ? this._parentTranslator._sandboxLocation : "http://www.example.com/");
@@ -877,6 +859,7 @@ Zotero.Translate.Base.prototype = {
 	
 	/**
 	 * Gets parameters to be passed to detect* and do* functions
+	 * @return {Array} A list of parameters
 	 */
 	"_getParameters":function() { return []; },
 	
@@ -892,6 +875,7 @@ Zotero.Translate.Base.prototype = {
 	
 	/**
 	 * Get all potential translators
+	 * @return {Zotero.Translator[]}
 	 */
 	"_getPotentialTranslators":function() {
 		return Zotero.Translators.getAllForType(this.type);
@@ -900,6 +884,8 @@ Zotero.Translate.Base.prototype = {
 
 /**
  * @property {Document} document The document object to be used for web scraping (set with setDocument)
+ * @property {Zotero.Connector.CookieManager} cookieManager A CookieManager to manage cookies for
+ *     this Translate instance.
  */
 Zotero.Translate.Web = function() {
 	this.init();
@@ -1247,6 +1233,13 @@ Zotero.Translate.Search.prototype.setSearch = function(search) {
 }
 
 /**
+ * Overloads {@link Zotero.Translate.Base#getTranslators} to always return all potential translators
+ */
+Zotero.Translate.Search.prototype.getTranslators = function() {
+	return Zotero.Translate.Base.prototype.getTranslators.call(this, true);
+}
+
+/**
  * Sets the translator or translators to be used for search
  *
  * @param {Zotero.Translator|string} Translator object or ID
@@ -1275,13 +1268,16 @@ Zotero.Translate.Search.prototype.setTranslator = function(translator) {
  * translation fails
  */
 Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
-	if(this._currentState == "translate" && !returnValue) {
-		Zotero.debug("Translate: Could not find a result using "+this.translator[0].label+": \n"
-					  +this._generateErrorString(error), 3);
-		if(this.translator.length > 1) {
-			this.translator.shift();
-			this.translate(this._libraryID, this.saveAttachments);
-			return;
+	if(this._currentState == "translate") {
+		if(!this.newItems.length) returnValue = false;
+		if(!returnValue) {
+			Zotero.debug("Translate: Could not find a result using "+this.translator[0].label+": \n"
+						  +this._generateErrorString(error), 3);
+			if(this.translator.length > 1) {
+				this.translator.shift();
+				this.translate(this._libraryID, this.saveAttachments);
+				return;
+			}
 		}
 	}
 	
