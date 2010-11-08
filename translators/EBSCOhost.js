@@ -97,9 +97,8 @@ function downloadFunction(text) {
 								 downloadString, function(text) {	// get marked records as RIS
 		Zotero.debug(text);
 		// load translator for RIS
-		var test = text.match(/UR\s+\-(.*)/g);
-		if (text.match(/AB\s\s\-/)) text = text.replace(/AB\s\s\-/, "N2  -");
-		if (!text.match(/TY\s\s-/)) text = text+"\nTY  - JOUR\n"; 
+		if (text.match(/^AB\s\s\-/m)) text = text.replace(/^AB\s\s\-/m, "N2  -");
+		if (!text.match(/^TY\s\s-/m)) text = text+"\nTY  - JOUR\n"; 
 		// load translator for RIS
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -107,6 +106,9 @@ function downloadFunction(text) {
 		translator.setHandler("itemDone", function(obj, item) {
 			if (text.match(/^L3\s+-\s*(.*)/m)) {
 				item.DOI = text.match(/^L3\s+\-\s*(.*)/m)[1];
+			}
+			if (text.match(/^M3\s+-\s*(.*)/m)) {
+				if (item.DOI == text.match(/^M3\s+\-\s*(.*)/m)[1]) item.DOI = "";
 			}
 			if (text.match(/^DO\s+-\s*(.*)/m)) {
 				item.DOI = text.match(/^DO\s+-\s*(.*)/m)[1];
