@@ -2915,6 +2915,10 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("CREATE TABLE translatorCache (\n	leafName TEXT PRIMARY KEY,\n	translatorJSON TEXT,\n	code TEXT,\n	lastModifiedTime INT\n)");
 				}
 				
+				if (i==76) {
+					Zotero.DB.query("DELETE FROM itemTags WHERE tagID IS NULL");
+				}
+				
 				Zotero.wait();
 			}
 			
