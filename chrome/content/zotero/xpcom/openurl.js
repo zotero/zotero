@@ -433,7 +433,7 @@ Zotero.OpenURL = new function() {
 					break;
 				}
 			}
-			if(pushMe) item.creators.push(au);
+			if(pushMe) item.creators.push(complexAu[i]);
 		}
 		
 		return item;
