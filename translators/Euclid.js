@@ -1,14 +1,14 @@
 {
-    "translatorID":"2e1c09a0-3006-11de-8c30-0800200c9a66",
-	"translatorType":4,
-	"label":"Project Euclid",
-	"creator":"Guy Freeman",
-	"target":"https?://[^/]*projecteuclid\\.org[^/]*/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-05-05 07:15:00"
+	"translatorID":"2e1c09a0-3006-11de-8c30-0800200c9a66",
+        "label":"Project Euclid",
+        "creator":"Guy Freeman and Avram Lyon",
+        "target":"^https?://[^/]*projecteuclid\\.org[^/]*/",
+        "minVersion":"1.0",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-11-09 11:49:57"
 }
 
 function detectWeb(doc, url){
@@ -16,7 +16,6 @@ function detectWeb(doc, url){
     var nsResolver = namespace ? function(prefix) {
 	if (prefix == 'x') return namespace; else return null;
     } : null;
-    
     
     var xpath = '//div[@class="abstract-text"]';
     Zotero.debug(xpath);
@@ -45,7 +44,7 @@ function doWeb(doc, url){
     Zotero.debug(titleitem);
     newItem.title = titleitem;
 
-    var authorXPath = '//div[@id="main-text"]/p[@class="bold"]';
+    var authorXPath = '//div[@class="abs-page-text-bold"]/span';
     var authoritem = doc.evaluate(authorXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^\s*|\s*$/g, '');
     if (authoritem.search(/\sand\s/) == -1) {
 	var authoritem2 = "";
@@ -68,47 +67,75 @@ function doWeb(doc, url){
     var abstractitem = doc.evaluate(abstractXPath, doc, nsResolver,XPathResult.ANY_TYPE, null).iterateNext().textContent;
     newItem.abstractNote = abstractitem;
 
-    var journalXPath = '//div[@id="secondary-content-plain"]/h2';
-    var journalitem = doc.evaluate(journalXPath, doc, nsResolver,XPathResult.ANY_TYPE, null).iterateNext().textContent;
+    var journalXPath = '//div[@id="main-image"]/img';
+    var journalitem = doc.evaluate(journalXPath, doc, nsResolver,XPathResult.ANY_TYPE, null).iterateNext()["alt"];
     newItem.publicationTitle = journalitem;
 
-    var journalabbXPath = '//div[@id="main-text"]/p[2]/a';
-    var journalabbitem = doc.evaluate(journalXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-    newItem.journalAbbr = journalabbitem;
+    var journalabbXPath = '//div[@class="abs-page-text"]/a';
+    var journalabbitem = doc.evaluate(journalabbXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+    newItem.journalAbbreviation = journalabbitem;
 
-    var volumeetcXPath = '//div[@id="main-text"]/p[2]/text()';
+    var idXPath = '//div[@id="identifier"]/p';
+    var idresult = doc.evaluate(idXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().innerHTML;
+    var idrows = idresult.split('<br>');
+    var idrow, pieces;
+    var identifiers = [];
+    newItem.extra="";
+    for each (idrow in idrows) {
+	    pieces = idrow.match(/\s*([^:]+)\s*:\s*(.+)/);
+	    if (pieces && pieces[1] && pieces[2]) {
+	    	switch (pieces[1]) {
+		    	case "Digital Object Identifier":
+		    		newItem.DOI = pieces[2].match(/^\s*doi:(.*)/)[1];
+		    		break;
+		    	case "Mathematical Reviews number (MathSciNet)":
+		    	case "Zentralblatt MATH identifier":
+		    		identifiers.push(pieces[1] + ": " + pieces[2].match(/>(.*?)</)[1]);
+		    		break;
+		    	case "Permanent link to this document":
+		    		newItem.url = pieces[2];
+		    		break;
+		    	default:
+		    		Zotero.debug("Discarding identifier: " + pieces[1] + ": " + pieces[2] );
+		    		break;
+	    	}
+	    	pieces = null;
+	    }
+	    newItem.extra = identifiers.join("; ");
+    }
+
+    var volumeetcXPath = '//div[@class="abs-page-text"]/text()';
     //var volumeetcitem = doc.evaluate(volumeetcXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().childNodes[2].textContent;
     var volumeetcitem = doc.evaluate(volumeetcXPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	Zotero.debug("volumeetcitem="+volumeetcitem);
     var volumeetcitemarray = volumeetcitem.replace(/\s+/g," ").split(/\s/);
     if (volumeetcitemarray[3].search(/Number/) == -1) {
-	var volumeitem = volumeetcitemarray[2].match(/\d+/);
-	var yearitem = volumeetcitemarray[3].match(/\d+/);
-	var pagesitem = volumeetcitemarray[4].match(/[^\.]+/);
+	var volumeitem = volumeetcitemarray[2].match(/\d+/)[0];
+	var yearitem = volumeetcitemarray[3].match(/\d+/)[0];
+	var pagesitem = volumeetcitemarray[4].match(/[^\.]+/)[0];
 	newItem.volume = volumeitem;
 	newItem.pages = pagesitem;
 	newItem.date = yearitem;
     } else {
-	var volumeitem = volumeetcitemarray[2].match(/\d+/);
-	var issueitem = volumeetcitemarray[4].match(/\d+/);
-	var yearitem = volumeetcitemarray[5].match(/\d+/);
-	var pagesitem = volumeetcitemarray[6].match(/[^\.]+/);
+	var volumeitem = volumeetcitemarray[2].match(/\d+/)[0];
+	var issueitem = volumeetcitemarray[4].match(/\d+/)[0];
+	var yearitem = volumeetcitemarray[5].match(/\d+/)[0];
+	var pagesitem = volumeetcitemarray[6].match(/[^\.]+/)[0];
 	newItem.volume = volumeitem;
 	newItem.pages = pagesitem;
 	newItem.issue = issueitem;
 	newItem.date = yearitem;
     }
 
-    var doixpath = '//div[@id="identifier"]/p';
-	try {
-    	var doi = doc.evaluate(doixpath,doc,nsResolver,XPathResult.ANY_TYPE,null).iterateNext().childNodes[2].textContent.match(/\d.*/);
-    	newItem.DOI = doi;
-	} catch (e) {
-		// no doi, do nothing
-	}
-    var pdfurlxpath = '//div[@id="download-section"]/div/a';
-    if (doc.evaluate(pdfurlxpath,doc,nsResolver,XPathResult.ANY_TYPE,null).iterateNext().textContent.search(/pdf/i) != -1) {
-	var pdfurl = doc.evaluate(pdfurlxpath,doc,nsResolver,XPathResult.ANY_TYPE,null).iterateNext().href;
+   // From META tags
+   newItem.publisher = doc.evaluate('//meta[@name="citation_publisher"]',doc,nsResolver,XPathResult.ANY_TYPE,null).iterateNext().content;
+   newItem.date = doc.evaluate('//meta[@name="citation_date"]',doc,nsResolver,XPathResult.ANY_TYPE,null).iterateNext().content;
+   newItem.ISSN = doc.evaluate('//meta[@name="citation_issn"]',doc,nsResolver,XPathResult.ANY_TYPE,null).iterateNext().content;
+   newItem.language = doc.evaluate('//meta[@name="citation_language"]',doc,nsResolver,XPathResult.ANY_TYPE,null).iterateNext().content;
+   
+    var pdfurlxpath = '//meta[@name="citation_pdf_url"]';
+    if (doc.evaluate(pdfurlxpath,doc,nsResolver,XPathResult.ANY_TYPE,null).iterateNext()) {
+	var pdfurl = doc.evaluate(pdfurlxpath,doc,nsResolver,XPathResult.ANY_TYPE,null).iterateNext().content;
 	newItem.attachments.push({url:pdfurl, title:"Euclid Project PDF", mimeType:"application/pdf"});
     }
 
