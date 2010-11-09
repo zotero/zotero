@@ -92,7 +92,7 @@ row hbox label:first-child
 	margin-right: 1px;
 }
 
-row label, row > vbox[fieldname]
+row > label, row > vbox[fieldname]
 {
 	margin-top: 1px !important;
 	margin-bottom: 1px !important;
