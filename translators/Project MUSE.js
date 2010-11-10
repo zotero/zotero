@@ -1,14 +1,14 @@
 {
-        "translatorID":"c54d1932-73ce-dfd4-a943-109380e06574",
-        "label":"Project MUSE",
-        "creator":"Simon Kornblith, Avram Lyon",
-        "target":"https?://[^/]*muse\\.jhu\\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\\.html|search/results)",
-        "minVersion":"1.0.0b4.r1",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2010-11-05 22:03:33"
+	"translatorID":"c54d1932-73ce-dfd4-a943-109380e06574",
+	"label":"Project MUSE",
+	"creator":"Simon Kornblith, Avram Lyon",
+	"target":"https?://[^/]*muse\\.jhu\\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\\.html|search/results)",
+	"minVersion":"1.0.0b4.r1",
+	"maxVersion":"",
+	"priority":100,
+	"inRepository":"1",
+	"translatorType":4,
+	"lastUpdated":"2010-11-10 10:15:00"
 }
 
 function detectWeb(doc, url) {
