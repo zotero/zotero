@@ -29,6 +29,7 @@ Zotero.Cite.System._zoteroFieldMap = {
 	"volume":["volume"],
 	"issue":["issue"],
 	"number-of-volumes":["numberOfVolumes"],
+	"number-of-pages":["numPages"],
 	"edition":["edition"],
 	"version":["version"],
 	"section":["section"],
