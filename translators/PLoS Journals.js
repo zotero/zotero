@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"PLoS Journals",
 	"creator":"Michael Berkowitz And Rintze Zelle",
-	"target":"http://www\\.plos(one|ntds|compbiol|pathogens|genetics|medicine|biology)\\.org/(search|article)/",
+	"target":"^http://www\\.plos(one|ntds|compbiol|pathogens|genetics|medicine|biology)\\.org/(search|article)/",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
@@ -50,6 +50,7 @@ function doWeb(doc, url) {
 	var risLinks = new Array();
 	for (var i in texts) {
 		texts[i]=texts[i].replace(/;jsessionid[^;]+/, "");//Strip sessionID string
+		texts[i]=texts[i].replace(/\?.*/, "");//Strip referrer messes
 		var risLink = texts[i].replace("info", "getRisCitation.action?articleURI=info");
 		risLinks.push(risLink);
 	}
