@@ -19,6 +19,7 @@
     <em:iconURL>chrome://zotero/skin/zotero_z_32px.png</em:iconURL>
     <em:updateURL>https://www.zotero.org/download/update-svn.rdf</em:updateURL>
     <em:type>2</em:type> <!-- type=extension --> 
+	<em:unpack>true</em:unpack>
     
     <!-- Firefox -->
     <em:targetApplication>
