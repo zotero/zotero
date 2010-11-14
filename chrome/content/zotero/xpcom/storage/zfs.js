@@ -237,7 +237,20 @@ Zotero.Sync.Storage.Session.ZFS.prototype.downloadFile = function (request) {
 			}
 			
 			if (destFile.exists()) {
-				destFile.remove(false);
+				try {
+					destFile.remove(false);
+				}
+				catch (e) {
+					// TODO: localize
+					var msg = "Zotero was unable to delete a temporary file in "
+						+ destFile.parent.path + " during syncing."
+						+ "\n\n"
+						+ "Restarting your computer or disabling anti-virus/security "
+						+ "software may fix the problem.";
+					Zotero.debug(e, 1);
+					Components.utils.reportError(e);
+					self.onError(msg);
+				}
 			}
 			
 			// saveURI() below appears not to create empty files for Content-Length: 0,
