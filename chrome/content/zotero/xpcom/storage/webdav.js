@@ -1347,7 +1347,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.purgeOrphanedStorageFiles = functio
 					// character in the URL and the server (e.g., Sakai) is
 					// encoding the value
 					&& decodeURIComponent(href).indexOf(path) == -1) {
-				self._error("DAV:href '" + href
+				self.onError("DAV:href '" + href
 						+ "' does not begin with path '" + path + "' in " + funcName);
 			}
 			
@@ -1360,7 +1360,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.purgeOrphanedStorageFiles = functio
 			
 			var matches = href.match(/[^\/]+$/);
 			if (!matches) {
-				self._error("Unexpected href '" + href + "' in " + funcName)
+				self.onError("Unexpected href '" + href + "' in " + funcName)
 			}
 			var file = matches[0];
 			
@@ -1530,7 +1530,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._deleteStorageFiles = function (fil
 			if (callback) {
 				callback(deleted);
 			}
-			this._error("Root URI does not end in slash in "
+			this.onError("Root URI does not end in slash in "
 				+ "Zotero.Sync.Storage._deleteStorageFiles()");
 		}
 		deleteURI.QueryInterface(Components.interfaces.nsIURL);
@@ -1557,7 +1557,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._deleteStorageFiles = function (fil
 					var msg = "An error occurred attempting to delete "
 						+ "'" + fileName
 						+ "' (" + req.status + " " + req.statusText + ").";
-					self._error(msg);
+					self.onError(msg);
 					return;
 			}
 			
@@ -1616,7 +1616,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._deleteStorageFiles = function (fil
 					var msg = "An error occurred attempting to delete "
 						+ "'" + fileName
 						+ "' (" + req.status + " " + req.statusText + ").";
-					self._error(msg);
+					self.onError(msg);
 				}
 			});
 		});
