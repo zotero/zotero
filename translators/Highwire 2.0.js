@@ -1,14 +1,14 @@
 {
-	"translatorID":"8c1f42d5-02fa-437b-b2b2-73afc768eb07",
-	"label":"Highwire 2.0",
-	"creator":"Matt Burton",
-	"target":"(content/([0-9]+/[0-9]+|current|firstcite)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":"1",
-	"translatorType":4,
-	"lastUpdated":"2010-11-10 10:20:00"
+        "translatorID":"8c1f42d5-02fa-437b-b2b2-73afc768eb07",
+        "label":"Highwire 2.0",
+        "creator":"Matt Burton",
+        "target":"(content/([0-9]+/[0-9]+|current|firstcite)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
+        "minVersion":"1.0.0b4.r5",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-11-11 21:19:55"
 }
 
 /*
@@ -23,7 +23,7 @@
 4. M L Giger et al., “Pulmonary nodules: computer-aided detection in digital chest images.,” Radiographics 10, no. 1 (January 1990): 41-51.
 	http://radiographics.rsna.org/content/10/1/41.abstract
 5. Mitch Leslie, "CLIP catches enzymes in the act," The Journal of Cell Biology 191, no. 1 (October 4, 2010): 2.
-	http://jcb.rupress.org/content/191/1/2.2.short
+       http://jcb.rupress.org/content/191/1/2.2.short
 */
 
 function detectWeb(doc, url) {
@@ -64,8 +64,10 @@ function doWeb(doc, url) {
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		if (doc.title.match("Table of Contents") || doc.title.match("Early Edition") || url.match("content/firstcite")) {
-			var searchx = '//li[contains(@class, "cit toc-cit") and not(ancestor::div/h2/a/text() = "Correction" or ancestor::div/h2/a/text() = "Corrections")]'; 
+		if (doc.title.match("Table of Contents")
+			|| doc.title.match("Early Edition")
+			|| url.match("content/firstcite")) {
+			var searchx = '//li[contains(@class, "toc-cit") and not(ancestor::div/h2/a/text() = "Correction" or ancestor::div/h2/a/text() = "Corrections")]'; 
 			var titlex = './/h4';
 		} else if (url.match("content/by/section") || url.match("cgi/collection/.+")) {
 			var searchx = '//li[contains(@class, "results-cit cit")]'; 
@@ -99,7 +101,6 @@ function doWeb(doc, url) {
 		return false;
 	}
 	Zotero.Utilities.HTTP.doGet(arts, function(text) {
-	// FIXME This function should be redone with XPath to speed things up
 		var id, match, newurl, pdfurl, get;
 		/* Here, we have to use three phrasings because they all occur, depending on
 		   the journal.*/
