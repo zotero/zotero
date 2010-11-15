@@ -2032,6 +2032,8 @@ Zotero.Item.prototype.save = function() {
 		Zotero.Notifier.trigger('modify', 'item', this.id, { old: this._previousData });
 	}
 	
+	this._previousData = null;
+	
 	if (isNew) {
 		var id = this.id;
 		this._disabled = true;
