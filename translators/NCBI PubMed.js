@@ -4,11 +4,11 @@
 	"label":"NCBI PubMed",
 	"creator":"Simon Kornblith, Michael Berkowitz, Avram Lyon, and Rintze Zelle",
 	"target":"https?://[^/]*(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",
-	"minVersion":"1.0.0b3.r1",
+	"minVersion":"2.1b1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-11-10 10:15:00"
+	"lastUpdated":"2010-11-17 10:15:00"
 }
 
 function detectWeb(doc, url) {
@@ -142,7 +142,11 @@ function lookupPMIDs(ids, doc) {
 					var lastName = authors[j].LastName.text().toString();
 					var firstName = authors[j].FirstName.text().toString();
 					if(firstName == "") {
-						var firstName = authors[j].ForeName.text().toString();
+						firstName = authors[j].ForeName.text().toString();
+					}
+					var suffix = authors[j].Suffix.text().toString();
+					if(suffix && firstName != "") {
+						firstName += ", " + authors[j].Suffix.text().toString();
 					}
 					if(firstName || lastName) {
 						newItem.creators.push({lastName:lastName, firstName:firstName});
