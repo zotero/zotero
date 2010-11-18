@@ -1,14 +1,14 @@
 {
-	"translatorID":"96b9f483-c44d-5784-cdad-ce21b984fe01",
-	"translatorType":4,
-	"label":"Amazon.com",
-	"creator":"Sean Takats and Michael Berkowitz",
-	"target":"^https?://(?:www\\.)?amazon",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-06-10 02:55:00"
+        "translatorID":"96b9f483-c44d-5784-cdad-ce21b984fe01",
+        "label":"Amazon.com",
+        "creator":"Sean Takats and Michael Berkowitz",
+        "target":"^https?://(?:www\\.)?amazon",
+        "minVersion":"1.0.0b4.r1",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-11-17 23:22:50"
 }
 
 function detectWeb(doc, url) { 
@@ -79,7 +79,7 @@ function doWeb(doc, url) {
 		} else if (doc.location.href.match(/\/lm\//)) { // Show selector for Lists
 			var xpath = '//span[@id="lm_asinlink95"]//a'
 		} else { // Show selector for Search results
-			var xpath = '//div[@class="productTitle"]/a | //a[span[@class="srTitle"]]';
+			var xpath = '//div[@class="productTitle"]/a | //a[span[@class="srTitle"]] | //div[@class="title"]/a[@class="title"]';
 		}
 		var elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var elmt = elmts.iterateNext();

@@ -1,16 +1,15 @@
 {
-	"translatorID":"57a00950-f0d1-4b41-b6ba-44ff0fc30289",
-	"translatorType":4,
-	"label":"Google Scholar",
-	"creator":"Simon Kornblith, Frank Bennett",
-	"target":"http://scholar\\.google\\.(?:com|com?\\.[a-z]{2}|[a-z]{2}|co\\.[a-z]{2})/scholar(?:_case)*",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-08-23 08:50:00"
+        "translatorID":"57a00950-f0d1-4b41-b6ba-44ff0fc30289",
+        "label":"Google Scholar",
+        "creator":"Simon Kornblith, Frank Bennett",
+        "target":"http://scholar\\.google\\.(?:com|com?\\.[a-z]{2}|[a-z]{2}|co\\.[a-z]{2})/scholar(?:_case)*",
+        "minVersion":"1.0.0b3.r1",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-11-18 00:17:10"
 }
-
 
 /*
  * Test pages
@@ -70,8 +69,13 @@ function doWeb(doc, url) {
 		if(!haveBibTexLinks) {
 			url = url.replace (/hl\=[^&]*&?/, "");
 			url = url.replace("scholar?", "scholar_setprefs?hl=en&scis=yes&scisf=4&submit=Save+Preferences&");
-			haveBibTexLinks = true;
+			var scisigDoc = Zotero.Utilities.retrieveDocument(url);
+			var scisig = scisigDoc.evaluate('//input[@name="scisig"]',
+				scisigDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			url = url + "&scisig="+scisig.value;
 			doc = Zotero.Utilities.retrieveDocument(url);
+			haveBibTexLinks = true;
+			Zotero.debug(url);
 		}
 		scrapeListing(doc);
 	}
