@@ -133,7 +133,7 @@ Zotero.OpenURL = new function() {
 			if(item.journalAbbreviation) co += _mapTag(item.journalAbbreviation, "stitle", version);
 			if(item.volume) co += _mapTag(item.volume, "volume", version);
 			if(item.issue) co += _mapTag(item.issue, "issue", version);
-		} else if(item.itemType == "book" || item.itemType == "bookSection") {
+		} else if(item.itemType == "book" || item.itemType == "bookSection" || item.itemType == "conferencePaper") {
 			if(version == "0.1") {
 				co += "&genre=book";
 			} else {
@@ -143,6 +143,10 @@ Zotero.OpenURL = new function() {
 			if(item.itemType == "book") {
 				co += "&rft.genre=book";
 				if(item.title) co += _mapTag(item.title, (version == "0.1" ? "title" : "btitle"), version);
+			} else if (item.itemType == "conferencePaper") {
+				co += "&rft.genre=proceeding";
+				if(item.title) co += _mapTag(item.title, "atitle", version)		
+				if(item.proceedingsTitle) co += _mapTag(item.proceedingsTitle, (version == "0.1" ? "title" : "btitle"), version);
 			} else {
 				co += "&rft.genre=bookitem";
 				if(item.title) co += _mapTag(item.title, "atitle", version)		
@@ -198,6 +202,7 @@ Zotero.OpenURL = new function() {
 			co += _mapTag(Zotero.Date.strToISO(item.date), (item.itemType == "patent" ? "appldate" : "date"), version);
 		}
 		if(item.pages) co += _mapTag(item.pages, "pages", version);
+		if(item.numPages) co += _mapTag(item.numPages, "tpages", version);
 		if(item.ISBN) co += _mapTag(item.ISBN, "isbn", version);
 		if(item.ISSN) co += _mapTag(item.ISSN, "issn", version);
 		
@@ -369,6 +374,8 @@ Zotero.OpenURL = new function() {
 				item.publisher = value;
 			} else if(key == "rft.place") {
 				item.place = value;
+			} else if(key == "rft.tpages") {
+				item.numPages = value;
 			} else if(key == "rft.edition") {
 				item.edition = value;
 			} else if(key == "rft.series") {
