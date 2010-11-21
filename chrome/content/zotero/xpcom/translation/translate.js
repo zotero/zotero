@@ -86,18 +86,6 @@ Zotero.Translate.Sandbox = {
 			// just return the item array
 			if(translate._libraryID === false || translate._parentTranslator) {
 				translate.newItems.push(item);
-				
-				// if a parent sandbox exists, use complete() function from that sandbox
-				if(translate._parentTranslator) {
-					if(Zotero.isFx4) {
-						// XOWs would break this otherwise
-						item.complete = function() { translate._parentTranslator.Sandbox._itemDone(translate._parentTranslator, item) };
-					} else {
-						// SecurityManager vetos the Fx4 in Fx3.6 code for reasons I don't understand
-						item.complete = translate._parentTranslator._sandboxManager.sandbox.Zotero.Item.prototype.complete;
-					}
-					Zotero.debug("Translate: Calling itemDone from parent sandbox", 4);
-				}
 				translate._runHandler("itemDone", item);
 				return;
 			}
@@ -162,26 +150,22 @@ Zotero.Translate.Sandbox = {
 			// for security reasons, safeTranslator wraps the translator object.
 			// note that setLocation() is not allowed
 			var safeTranslator = new Object();
-			safeTranslator.setSearch = function(arg) { return translation.setSearch(arg) };
+			safeTranslator.setSearch = function(arg) {
+				if(Zotero.isFx4) arg = JSON.parse(JSON.stringify(arg));
+				return translation.setSearch(arg);
+			};
 			safeTranslator.setDocument = function(arg) { return translation.setDocument(arg) };
 			safeTranslator.setHandler = function(arg1, arg2) {
 				translation.setHandler(arg1, 
 					function(obj, item) {
 						try {
-							if(Zotero.isFx4 && (this instanceof Zotero.Translate.Web || this instanceof Zotero.Translate.Search)) {
-								// item is wrapped in an XPCCrossOriginWrapper that we can't get rid of
-								// except by making a deep copy. seems to be due to
-								// https://bugzilla.mozilla.org/show_bug.cgi?id=580128
-								// hear that? that's the sound of me banging my head against the wall.
-								// if there is no better way to do this soon, i am going to need a 
-								// brain transplant...
-								var unwrappedItem = JSON.parse(JSON.stringify(item));
-								unwrappedItem.complete = item.complete;
-							} else {
-								var unwrappedItem = item;
+							// necessary to get around object wrappers
+							if(Zotero.isFx && arg1 == "itemDone"
+							   && (translate instanceof Zotero.Translate.Web
+							   || translate instanceof Zotero.Translate.Search)) {
+								item = translate._sandboxManager.sandbox.Zotero._transferItem(JSON.stringify(item));
 							}
-							
-							arg2(obj, unwrappedItem);
+							arg2(obj, item);
 						} catch(e) {
 							translate.complete(false, e);
 						}
@@ -198,7 +182,7 @@ Zotero.Translate.Sandbox = {
 			safeTranslator.getTranslatorObject = function() {
 				translation._loadTranslator(translation.translator[0]);
 				
-				if(this.isFx) {
+				if(Zotero.isFx) {
 					// do same origin check
 					var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
 						.getService(Components.interfaces.nsIScriptSecurityManager);
@@ -209,8 +193,12 @@ Zotero.Translate.Sandbox = {
 						translate._sandboxLocation.location : translate._sandboxLocation, null, null);
 					var innerSandboxURI = ioService.newURI(typeof translation._sandboxLocation === "object" ?
 						translation._sandboxLocation.location : translation._sandboxLocation, null, null);
+					Zotero.debug(outerSandboxURI.spec);
+					Zotero.debug(innerSandboxURI.spec);
 					
-					if(!secMan.checkSameOriginURI(outerSandboxURI, innerSandboxURI, false)) {
+					try {
+						secMan.checkSameOriginURI(outerSandboxURI, innerSandboxURI, false);
+					} catch(e) {
 						throw "Translate: getTranslatorObject() may not be called from web or search "+
 							"translators to web or search translators from different origins.";
 					}
@@ -799,7 +787,12 @@ Zotero.Translate.Base.prototype = {
 		"Zotero.getXML = function() {"+
 			"var xml = Zotero._getXML();"+
 			"if(typeof xml == 'string') return new XML(xml);"+
-		"}"
+		"};"+
+		"Zotero._transferItem = function(itemString) {"+
+			"var item = JSON.parse(itemString);"+
+			"item.complete = Zotero.Item.prototype.complete;"+
+			"return item;"+
+		"};"
 		);
 		
 		this._sandboxManager.importObject(this.Sandbox, this);
@@ -1070,17 +1063,19 @@ Zotero.Translate.Import.prototype._loadTranslator = function(translator) {
 			err = e;
 		}
 	} else {
-		if(this._string) {
+		if(this.location) {
+			if(!Zotero.Translate.IO.Read) {
+				throw "Translate: reading from files is not supported in this build of Zotero. Use setString() to perform import.";
+			}
+			
 			try {
-				this._io = new Zotero.Translate.IO.String(this._string, this.path ? this.path : "", dataMode);
+				this._io = new Zotero.Translate.IO.Read(this.location, dataMode);
 			} catch(e) {
 				err = e;
 			}
-		} else if(this.location && !Zotero.Translate.IO.Read) {
-			throw "Translate: reading from files is not supported in this build of Zotero. Use setString() to perform import.";
 		} else {
 			try {
-				this._io = new Zotero.Translate.IO.Read(this.location, dataMode);
+				this._io = new Zotero.Translate.IO.String(this._string, this.path ? this.path : "", dataMode);
 			} catch(e) {
 				err = e;
 			}
@@ -1088,7 +1083,8 @@ Zotero.Translate.Import.prototype._loadTranslator = function(translator) {
 	}
 	
 	if(err) {
-		Zotero.debug("Translate: Preparing IO for "+translator.label+" failed: "+err);
+		Zotero.debug("Translate: Preparing IO for "+translator.label+" failed: ");
+		Zotero.debug(err);
 		return false;
 	}
 	
