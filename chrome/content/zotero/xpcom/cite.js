@@ -262,11 +262,11 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 			return html;
 		}
 		
-		Zotero.debug("maxoffset: " + bib[0].maxoffset);
-		Zotero.debug("entryspacing: " + bib[0].entryspacing);
-		Zotero.debug("linespacing: " + bib[0].linespacing);
-		Zotero.debug("hangingindent: " + bib[0].hangingindent);
-		Zotero.debug("second-field-align: " + bib[0]["second-field-align"]);
+		//Zotero.debug("maxoffset: " + bib[0].maxoffset);
+		//Zotero.debug("entryspacing: " + bib[0].entryspacing);
+		//Zotero.debug("linespacing: " + bib[0].linespacing);
+		//Zotero.debug("hangingindent: " + bib[0].hangingindent);
+		//Zotero.debug("second-field-align: " + bib[0]["second-field-align"]);
 		
 		var maxOffset = parseInt(bib[0].maxoffset);
 		var entrySpacing = parseInt(bib[0].entryspacing);
@@ -290,7 +290,15 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 		// TODO: second-field-align
 		
 		// div.csl-bib-body
-		xml.@style = "padding-top: 0.5em; padding-bottom: 0.5em;";
+		//xml.@style = "padding-top: 0.5em; padding-bottom: 0.5em;";
+		
+		if(lineSpacing) {
+			xml.@style += "line-height: " + lineSpacing + "; ";
+		}
+		
+		if(hangingIndent) {
+			xml.@style += "margin-left: " + hangingIndent + "em; text-indent: -" + hangingIndent + "em; ";
+		}
 		
 		// csl-entry
 		var divs = xml..div.(@class == "csl-entry");
@@ -306,15 +314,7 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 				}
 			}
 			
-			if(lineSpacing) {
-				div.@style += "line-height: " + lineSpacing + ";";
-			}
-			
 			i++;
-		}
-		
-		if(hangingIndent) {
-			xml.@style += "margin-left: " + hangingIndent + "em; text-indent: -" + hangingIndent + "em; ";
 		}
 		
 		// Padding on the label column, which we need to include when
@@ -325,7 +325,7 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 		
 		// div.csl-left-margin
 		for each(var div in xml..div.(@class == "csl-left-margin")) {
-			div.@style = "width: " + adjMaxOffset + "em; text-align: right; float: left; padding-right: " + rightPadding + "em;";
+			div.@style = "float: left; width: " + adjMaxOffset + "em; text-align: right; padding-right: " + rightPadding + "em;";
 		}
 		
 		// div.csl-right-inline
