@@ -422,7 +422,12 @@ function() {
 		var xml = this.getXML();
 	}
 	
-	return new Zotero.CiteProc.CSL.Engine(Zotero.Cite.System, xml, Zotero.locale);
+	try {
+		return new Zotero.CiteProc.CSL.Engine(Zotero.Cite.System, xml, locale);
+	} catch(e) {
+		Zotero.logError(e);
+		throw e;
+	}
 });
 
 Zotero.Style.prototype.__defineGetter__("class",

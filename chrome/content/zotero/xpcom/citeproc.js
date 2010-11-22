@@ -286,12 +286,6 @@ var CSL = {
 };
 CSL.TERMINAL_PUNCTUATION_REGEXP = new RegExp("^([" + CSL.TERMINAL_PUNCTUATION.slice(0, -1).join("") + "])(.*)");
 CSL.CLOSURES = new RegExp(".*[\\]\\)]");
-CSL.debug = function (str) {
-	Zotero.debug("CSL: " + str);
-};
-CSL.error = function (str) {
-	throw "CSL error: " + str;
-};
 var CSL_E4X = function () {};
 CSL_E4X.prototype.clean = function (xml) {
 	xml = xml.replace(/<\?[^?]+\?>/g, "");
@@ -439,7 +433,12 @@ CSL_E4X.prototype.addInstitutionNodes = function(myxml) {
 		}
 	}
 };
-CSL.error = Zotero.debug;
+CSL.error = function (str) {
+	Zotero.log("CSL: " + str, "error");
+};
+CSL.debug = function (str) {
+	Zotero.debug("CSL: " + str);
+};
 CSL.Output = {};
 CSL.Output.Queue = function (state) {
 	this.levelname = ["top"];
@@ -1054,19 +1053,18 @@ CSL.Output.Queue.adjustPunctuation = function (state, myblobs, stk, finish) {
 CSL.localeResolve = function (langstr) {
 	var ret, langlst;
 	ret = {};
-	if ("undefined" === typeof langstr) {
-		langstr = "en_US";
-	}
 	langlst = langstr.split(/[\-_]/);
 	ret.base = CSL.LANG_BASES[langlst[0]];
 	if ("undefined" === typeof ret.base) {
-        throw "Locale not found \"" + langlst[0] + "\"";
+		CSL.error("unknown locale "+langstr+", setting to en-US");
+		return {base:"en-US", best:"en-US", bare:"en"};
 	}
 	if (langlst.length === 1 || langlst[1] === "x") {
 		ret.best = ret.base.replace("_", "-");
 	} else {
 		ret.best = langlst.slice(0, 2).join("-");
 	}
+	ret.base = ret.base.replace("_", "-");
 	ret.bare = langlst[0];
 	return ret;
 };
@@ -1086,12 +1084,10 @@ CSL.localeSet = function (sys, myxml, lang_in, lang_out) {
 	} else {
 		nodes = sys.xml.getNodesByName(myxml, "locale");
 		for (pos = 0, len = sys.xml.numberofnodes(nodes); pos < len; pos += 1) {
-			if (true) {
-				blob = nodes[pos];
-				if (sys.xml.getAttributeValue(blob, 'lang', 'xml') === lang_in) {
-					locale = blob;
-					break;
-				}
+			blob = nodes[pos];
+			if (sys.xml.getAttributeValue(blob, 'lang', 'xml') === lang_in) {
+				locale = blob;
+				break;
 			}
 		}
 	}
@@ -1435,14 +1431,14 @@ CSL.dateParser = function (txt) {
 	rexdash = new RegExp(rex.replace(/%%NUMD%%/g, "-").replace(/%%DATED%%/g, "-"));
 	rexdashslash = new RegExp(rex.replace(/%%NUMD%%/g, "-").replace(/%%DATED%%/g, "\/"));
 	rexslashdash = new RegExp(rex.replace(/%%NUMD%%/g, "\/").replace(/%%DATED%%/g, "-"));
-	seasonstrs = ["spr", "sum", "fal", "win"];
+	seasonstrs = [];
 	seasonrexes = [];
 	len = seasonstrs.length;
 	for (pos = 0; pos < len; pos += 1) {
 		seasonrex = new RegExp(seasonstrs[pos] + ".*");
 		seasonrexes.push(seasonrex);
 	}
-	monthstrs = "jan feb mar apr may jun jul aug sep oct nov dec";
+	monthstrs = "jan feb mar apr may jun jul aug sep oct nov dec spr sum fal win spr sum";
 	monthstrs = monthstrs.split(" ");
 	monthrexes = [];
 	len = monthstrs.length;
@@ -1651,9 +1647,9 @@ CSL.dateParser = function (txt) {
 		}
 	};
 };
-CSL.Engine = function (sys, style, lang, xmlmode) {
+CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.76";
+	this.processor_version = "1.0.81";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -1692,17 +1688,47 @@ CSL.Engine = function (sys, style, lang, xmlmode) {
 	this.setStyleAttributes();
 	CSL.Util.Names.initNameSlices(this);
 	this.opt.xclass = sys.xml.getAttributeValue(this.cslXml, "class");
-	lang = this.opt["default-locale"][0];
+	if (lang) {
+		lang = lang.replace("_", "-");
+	}
+	if (this.opt["default-locale"][0]) {
+		this.opt["default-locale"][0] = this.opt["default-locale"][0].replace("_", "-");
+	}
+	if (lang && forceLang) {
+		this.opt["default-locale"] = [lang];
+	}
+	if (lang && !forceLang && this.opt["default-locale"][0]) {
+		lang = this.opt["default-locale"][0];
+	}
+	if (this.opt["default-locale"].length === 0) {
+		if (!lang) {
+			lang = "en-US";
+		}
+		this.opt["default-locale"].push("en-US");
+	}
+	if (!lang) {
+		lang = this.opt["default-locale"][0];
+	}
 	langspec = CSL.localeResolve(lang);
 	this.opt.lang = langspec.best;
+	this.opt["default-locale"][0] = langspec.best;
 	this.locale = {};
-	if (!this.locale[langspec.best]) {
+	localexml = sys.xml.makeXml(sys.retrieveLocale("en-US"));
+	CSL.localeSet.call(this, sys, localexml, "en-US", langspec.best);
+	if (langspec.best !== "en-US") {
+		if (langspec.base !== langspec.best) {
+			localexml = sys.xml.makeXml(sys.retrieveLocale(langspec.base));
+			CSL.localeSet.call(this, sys, localexml, langspec.base, langspec.best);
+		}
 		localexml = sys.xml.makeXml(sys.retrieveLocale(langspec.best));
-		CSL.localeSet.call(this, sys, localexml, langspec.best, langspec.best);
+		CSL.localeSet.call(this, sys, localexml, langspec.best, langspec.best);		
 	}
-		CSL.localeSet.call(this, sys, this.cslXml, "", langspec.best);
-		CSL.localeSet.call(this, sys, this.cslXml, langspec.bare, langspec.best);
-		CSL.localeSet.call(this, sys, this.cslXml, langspec.best, langspec.best);
+	CSL.localeSet.call(this, sys, this.cslXml, "", langspec.best);
+	CSL.localeSet.call(this, sys, this.cslXml, langspec.bare, langspec.best);
+	if (langspec.base !== langspec.best) {
+		CSL.localeSet.call(this, sys, this.cslXml, langspec.base, langspec.best);
+	}
+	CSL.localeSet.call(this, sys, this.cslXml, langspec.best, langspec.best);
 	this.buildTokenLists("citation");
 	this.buildTokenLists("bibliography");
 	this.configureTokenLists();
@@ -2126,7 +2152,7 @@ CSL.Engine.Opt = function () {
 	this["locale-pri"] = [];
 	this["locale-sec"] = [];
 	this["locale-name"] = [];
-	this["default-locale"] = ["en"];
+	this["default-locale"] = [];
 	this["noun-genders"] = {};
 	this.update_mode = CSL.NONE;
 	this.bib_mode = CSL.NONE;
@@ -3441,7 +3467,7 @@ CSL.Node["date-part"] = {
 		};
 		this.execs.push(func);
 		if ("undefined" === typeof this.strings["range-delimiter"]) {
-			this.strings["range-delimiter"] = "-";
+			this.strings["range-delimiter"] = "\u2013";
 		}
 		target.push(this);
 	}
@@ -5793,7 +5819,7 @@ CSL.Transform = function (state) {
 		return value;
 	}
 	function getTextSubField(value, locale_type, use_default) {
-		var m, lst, opt, o, pos, key, ret, len, myret;
+		var m, lst, opt, o, oo, pos, key, ret, len, myret;
 		if (!value) {
 			return "";
 		}
@@ -5817,8 +5843,12 @@ CSL.Transform = function (state) {
 		}
 		for (key in opt) {
 			if (opt.hasOwnProperty(key)) {
-				o = opt[key];
-				if (o && lst.indexOf(o) > -1 && lst.indexOf(o) % 2) {
+				oo = opt[key];
+				o = oo.split(/[-_]/)[0];
+				if (oo && lst.indexOf(oo) > -1 && lst.indexOf(oo) % 2) {
+					ret = lst[(lst.indexOf(oo) + 1)];
+					break;
+				} else if (o && lst.indexOf(o) > -1 && lst.indexOf(o) % 2) {
 					ret = lst[(lst.indexOf(o) + 1)];
 					break;
 				}
@@ -6828,29 +6858,59 @@ CSL.Util.Dates.year.numeric = function (state, num) {
 };
 CSL.Util.Dates.month = {};
 CSL.Util.Dates.month.numeric = function (state, num) {
-	var ret = num.toString();
+	if (num) {
+		num = parseInt(num, 10);
+		if (num > 12) {
+			num = "";
+		}
+	}
+	var ret = "" + num;
 	return ret;
 };
 CSL.Util.Dates.month["numeric-leading-zeros"] = function (state, num) {
 	if (!num) {
 		num = 0;
 	}
-	num = num.toString();
+	num = parseInt(num, 10);
+	if (num > 12) {
+		num = 0;
+	}
+	num = "" + num;
 	while (num.length < 2) {
 		num = "0" + num;
 	}
 	return num.toString();
 };
 CSL.Util.Dates.month["long"] = function (state, num) {
-	num = num.toString();
+	var stub = "month-";
+	num = parseInt(num, 10);
+	if (num > 12) {
+		stub = "season-";
+		if (num > 16) {
+			num = num - 16;
+		} else {
+			num = num - 12;
+		}
+	}
+	num = "" + num;
 	while (num.length < 2) {
 		num = "0" + num;
 	}
-	num = "month-" + num;
+	num = stub + num;
 	return state.getTerm(num, "long", 0);
 };
 CSL.Util.Dates.month["short"] = function (state, num) {
-	num = num.toString();
+	var stub = "month-";
+	num = parseInt(num, 10);
+	if (num > 12) {
+		stub = "season-";
+		if (num > 16) {
+			num = num - 16;
+		} else {
+			num = num - 12;
+		}
+	}
+	num = "" + num;
 	while (num.length < 2) {
 		num = "0" + num;
 	}

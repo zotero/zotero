@@ -874,7 +874,7 @@ var Zotero = new function(){
 	 * @param {Exception} err
 	 */
 	function logError(err) {
-		log(err.message ? err.message : err.toString, "error",
+		log(err.message ? err.message : err.toString(), "error",
 			err.fileName ? err.fileName : null, null,
 			err.lineNumber ? err.lineNumber : null, null);
 	}
