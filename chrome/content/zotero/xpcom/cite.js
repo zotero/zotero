@@ -338,7 +338,7 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 			div.@style = "margin: .5em 0 0 2em; padding: 0 0 .2em .5em; border-left: 5px solid #ccc;";
 		}
 		
-		Zotero.debug(xml);
+		//Zotero.debug(xml);
 		
 		return xml.toXMLString();
 	} else if(format == "text") {
