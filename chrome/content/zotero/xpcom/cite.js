@@ -374,18 +374,6 @@ Zotero.Cite.getMonthStrings = function(form, locale) {
 		var cslLocale = Zotero.CiteProc.CSL.localeResolve(Zotero.locale);
 		if(!Zotero.CiteProc.CSL.locale[cslLocale.best]) {
 			let localexml = sys.xml.makeXml(Zotero.Cite.System.retrieveLocale(cslLocale.best));
-			if(!localexml) {
-				if(localexml == "en-US") {
-					throw "No locales.xml file could be found for the preferred locale or for en-US. "+
-					      "Please ensure that the locales directory exists and is properly populated";
-				} else {
-					let localexml = sys.xml.makeXml(Zotero.Cite.System.retrieveLocale(cslLocale.bare));
-					if(!localexml) {
-						Zotero.log("No locale "+cslLocale.best+"; using en-US", "warning");
-						return Zotero.Cite.getMonthStrings(form, "en-US");
-					}
-				}
-			}
 			Zotero.CiteProc.CSL.localeSet.call(Zotero.CiteProc.CSL, sys, localexml, cslLocale.best, cslLocale.best);
 		}
 		
