@@ -255,8 +255,92 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 	var bib = cslEngine.makeBibliography();
 	
 	if(format == "html") {
-		// TODO CSS
-		return bib[0].bibstart+bib[1].join("")+bib[0].bibend;
+		var html = bib[0].bibstart+bib[1].join("")+bib[0].bibend;
+		
+		var inlineCSS = true;
+		if (!inlineCSS) {
+			return html;
+		}
+		
+		Zotero.debug("maxoffset: " + bib[0].maxoffset);
+		Zotero.debug("entryspacing: " + bib[0].entryspacing);
+		Zotero.debug("linespacing: " + bib[0].linespacing);
+		Zotero.debug("hangingindent: " + bib[0].hangingindent);
+		Zotero.debug("second-field-align: " + bib[0]["second-field-align"]);
+		
+		var maxOffset = parseInt(bib[0].maxoffset);
+		var entrySpacing = parseInt(bib[0].entryspacing);
+		var lineSpacing = parseInt(bib[0].linespacing);
+		var hangingIndent = !!bib[0].hangingindent;
+		var secondFieldAlign = bib[0]["second-field-align"];
+		
+		// Validate input
+		if(maxOffset == NaN) throw "Invalid maxoffset";
+		if(entrySpacing == NaN) throw "Invalid entryspacing";
+		if(lineSpacing == NaN) throw "Invalid linespacing";
+		
+		// Force a minimum line height
+		if(lineSpacing <= 1.35) lineSpacing = 1.35;
+		
+		default xml namespace = '';
+		XML.prettyPrinting = false;
+		XML.ignoreWhitespace = false;
+		var xml = new XML(html);
+		
+		// TODO: second-field-align
+		
+		// div.csl-bib-body
+		xml.@style = "padding-top: 0.5em; padding-bottom: 0.5em;";
+		
+		// csl-entry
+		var divs = xml..div.(@class == "csl-entry");
+		var num = divs.length();
+		var i = 0;
+		for each(var div in divs) {
+			var first = i == 0;
+			var last = i == num - 1;
+			
+			if(entrySpacing) {
+				if(!last) {
+					div.@style += "margin-bottom: " + entrySpacing + "em;";
+				}
+			}
+			
+			if(lineSpacing) {
+				div.@style += "line-height: " + lineSpacing + ";";
+			}
+			
+			i++;
+		}
+		
+		if(hangingIndent) {
+			xml.@style += "margin-left: " + hangingIndent + "em; text-indent: -" + hangingIndent + "em; ";
+		}
+		
+		// Padding on the label column, which we need to include when
+		// calculating offset of right column
+		var rightPadding = .7;
+		// One of the characters is usually a period, so we can adjust this down a bit
+		var adjMaxOffset = Math.max(1, maxOffset - 2);
+		
+		// div.csl-left-margin
+		for each(var div in xml..div.(@class == "csl-left-margin")) {
+			div.@style = "width: " + adjMaxOffset + "em; text-align: right; float: left; padding-right: " + rightPadding + "em;";
+		}
+		
+		// div.csl-right-inline
+		for each(var div in xml..div.(@class == "csl-right-inline")) {
+			div.@style = "margin: 0 .4em 0 " + (adjMaxOffset + rightPadding) + "em;";
+		}
+		
+		// div.csl-indent
+		for each(var div in xml..div.(@class == "csl-indent")) {
+			div.@style = "margin: .5em 0 0 2em; padding: 0 0 .2em .5em; border-left: 5px solid #ccc;";
+		}
+		
+		Zotero.debug(xml);
+		
+		return xml.toXMLString();
 	} else if(format == "text") {
 		return bib[0].bibstart+bib[1].join("")+bib[0].bibend;
 	} else if(format == "rtf") {
