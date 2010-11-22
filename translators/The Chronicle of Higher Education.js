@@ -1,14 +1,14 @@
 {
-	"translatorID":"1e6d1529-246f-4429-84e2-1f1b180b250d",
-	"translatorType":4,
-	"label":"The Chronicle of Higher Education",
-	"creator":"Simon Kornblith, Avram Lyon",
-	"target":"^http://chronicle\\.com/",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-05-27 17:30:00"
+        "translatorID":"1e6d1529-246f-4429-84e2-1f1b180b250d",
+        "label":"The Chronicle of Higher Education",
+        "creator":"Simon Kornblith, Avram Lyon",
+        "target":"^http://chronicle\\.com/",
+        "minVersion":"1.0.0b3.r1",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-11-22 22:19:41"
 }
 
 /*
@@ -38,7 +38,7 @@ function detectWeb(doc, url) {
 	/* The /daily/ and /weekly/ sections are leftover from the previous version
 	   of the translator; they don't appear to still be on the Chronicle site, but
 	   they might persist in older URLs. */
-	var articleRegexp = /^http:\/\/chronicle\.com\/(daily|weekly|article|blogPost)\/[^/]+\// ;
+	var articleRegexp = /^http:\/\/chronicle\.com\/(daily|weekly|article|blogPost|blogs\/\w+)\/[^/]+\// ;
 	if(articleRegexp.test(url)) {
 		var section = url.match(articleRegexp);
 		switch (section[1]) {
@@ -49,6 +49,8 @@ function detectWeb(doc, url) {
 			case "blogPost":
 				return "blogPost";
 			default:
+				if (section[1].indexOf("blogs") !== -1)
+					return "blogPost";
 				return false;
 		}
 	} else {
@@ -73,7 +75,7 @@ function doWeb (doc, url) {
 		var items = {};
 		var aTags = doc.getElementsByTagName("a");
 		for(var i=0; i<aTags.length; i++) {
-			var articleRegexp = /^http:\/\/chronicle\.com\/(daily|weekly|article|blogPost)\/[^/]+\//;
+			var articleRegexp = /^http:\/\/chronicle\.com\/(daily|weekly|article|blogPost|blogs\/\w+)\/[^/]+\//;
 			if(articleRegexp.test(aTags[i].href)) {
 				items[aTags[i].href] = aTags[i].textContent;
 			}
@@ -110,7 +112,7 @@ function doWeb (doc, url) {
 			if (dateline !== null) {
 				item.date = dateline.textContent;
 			}
-			item.title = doc.evaluate('//div[@class="blog-mod"]/h1[@class="title"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			item.title = doc.evaluate('//div[@class="blog-mod"]//h1[@class="entry-title"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 
 			// We keep the Chronicle as the Website Type, for lack of a better place
 			item.websiteType = item.publicationTitle;
