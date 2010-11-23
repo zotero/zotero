@@ -296,12 +296,14 @@ var wpdDOMSaver = {
       aNode.StopPlay();                   
       dump ("ready! \n");
     } catch (e) {}     */
-    try {  
-      var container = aNode.QueryInterface(Components.interfaces.nsIImageLoadingContent)
-                  .getRequest(Components.interfaces.nsIImageLoadingContent.CURRENT_REQUEST)
-                  .image;
-      container.animationMode = Components.interfaces.imgIContainer.kDontAnimMode;
-    } catch(e) {}
+	if(!Zotero.isFx4) {
+		try {  
+			var container = aNode.QueryInterface(Components.interfaces.nsIImageLoadingContent)
+					  .getRequest(Components.interfaces.nsIImageLoadingContent.CURRENT_REQUEST)
+					  .image;
+			container.animationMode = Components.interfaces.imgIContainer.kDontAnimMode;
+		} catch(e) {}
+	}
   },            
 
   // get the node value of aNode directly from the actual DOM tree (WPD_CLONENODEBUG)
