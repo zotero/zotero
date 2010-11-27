@@ -279,25 +279,29 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 		if(entrySpacing == NaN) throw "Invalid entryspacing";
 		if(lineSpacing == NaN) throw "Invalid linespacing";
 		
-		// Force a minimum line height
-		if(lineSpacing <= 1.35) lineSpacing = 1.35;
-		
 		default xml namespace = '';
 		XML.prettyPrinting = false;
 		XML.ignoreWhitespace = false;
 		var xml = new XML(html);
 		
-		// TODO: second-field-align
+		var multiField = !!xml..div.(@class == "csl-left-margin").length();
 		
-		// div.csl-bib-body
-		//xml.@style = "padding-top: 0.5em; padding-bottom: 0.5em;";
+		// One of the characters is usually a period, so we can adjust this down a bit
+		maxOffset = Math.max(1, maxOffset - 2);
 		
-		if(lineSpacing) {
-			xml.@style += "line-height: " + lineSpacing + "; ";
-		}
+		// Force a minimum line height
+		if(lineSpacing <= 1.35) lineSpacing = 1.35;
+		
+		xml.@style += "line-height: " + lineSpacing + "; ";
 		
 		if(hangingIndent) {
-			xml.@style += "margin-left: " + hangingIndent + "em; text-indent: -" + hangingIndent + "em; ";
+			if (multiField && !secondFieldAlign) {
+				throw ("second-field-align=false and hangingindent=true combination is not currently supported");
+			}
+			// If only one field, apply hanging indent on root
+			else if (!multiField) {
+				xml.@style += "padding-left: " + hangingIndent + "em; text-indent:-" + hangingIndent + "em;";
+			}
 		}
 		
 		// csl-entry
@@ -319,18 +323,27 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 		
 		// Padding on the label column, which we need to include when
 		// calculating offset of right column
-		var rightPadding = .7;
-		// One of the characters is usually a period, so we can adjust this down a bit
-		var adjMaxOffset = Math.max(1, maxOffset - 2);
+		var rightPadding = .5;
 		
 		// div.csl-left-margin
 		for each(var div in xml..div.(@class == "csl-left-margin")) {
-			div.@style = "float: left; width: " + adjMaxOffset + "em; text-align: right; padding-right: " + rightPadding + "em;";
+			div.@style = "float: left; padding-right: " + rightPadding + "em;";
+			
+			// Right-align the labels if aligning second line, since it looks
+			// better and we don't need the second line of text to align with
+			// the left edge of the label
+			if (secondFieldAlign) {
+				div.@style += "text-align: right; width: " + maxOffset + "em;";
+			}
 		}
 		
 		// div.csl-right-inline
 		for each(var div in xml..div.(@class == "csl-right-inline")) {
-			div.@style = "margin: 0 .4em 0 " + (adjMaxOffset + rightPadding) + "em;";
+			div.@style = "margin: 0 .4em 0 " + (secondFieldAlign ? maxOffset + rightPadding : "0") + "em;";
+			
+			if (hangingIndent) {
+				div.@style += "padding-left: " + hangingIndent + "em; text-indent:-" + hangingIndent + "em;";
+			}
 		}
 		
 		// div.csl-indent
