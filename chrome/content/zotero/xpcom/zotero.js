@@ -417,7 +417,7 @@ var Zotero = new function(){
 					Zotero.getString('startupError.checkPermissions')
 				]);
 				this.startupError = msg;
-			} else if(e.name == "NS_ERROR_STORAGE_BUSY") {
+			} else if(e.name == "NS_ERROR_STORAGE_BUSY" || e.result == 2153971713) {
 				var msg = Zotero.localeJoin([
 					Zotero.getString('startupError.databaseInUse'),
 					Zotero.getString(Zotero.isStandalone ? 'startupError.closeFirefox' : 'startupError.closeStandalone')

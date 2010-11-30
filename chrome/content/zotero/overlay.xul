@@ -512,9 +512,11 @@
 					var errMsg = stringBundle.GetStringFromName('startupError');
 				}
 				
-				icon.setAttribute('tooltiptext', errMsg);
-				icon.setAttribute('error', 'true');
-				icon.setAttribute('hidden', false);
+				if(icon) {
+					icon.setAttribute('tooltiptext', errMsg);
+					icon.setAttribute('error', 'true');
+					icon.setAttribute('hidden', false);
+				}
 			}
 			
 			// Used for loading pages from upgrade wizard
