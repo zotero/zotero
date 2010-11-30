@@ -40,6 +40,16 @@ var fieldMap = {
 	M3:"DOI"
 };
 
+var bookSectionFieldMap = {
+	ID:"itemID",
+	T1:"title",
+	T3:"series",
+	T2:"bookTitle",
+	CY:"place",
+	JA:"journalAbbreviation",
+	M3:"DOI"
+};
+
 var inputFieldMap = {
 	TI:"title",
 	CT:"title",
@@ -250,6 +260,9 @@ function processTag(item, tag, value) {
 		// start page
 		if(!item.pages) {
 			item.pages = value;
+			// EndNote uses SP without EP for number of pages
+			// Save as numPages only if there were no previous pages tags
+			if (item.itemType == "book") item.numPages = value;
 		} else if(item.pages[0] == "-") {       // already have ending page
 			item.pages = value + item.pages;
 		} else {	// multiple ranges? hey, it's a possibility
@@ -262,6 +275,9 @@ function processTag(item, tag, value) {
 				item.pages = value;
 			} else if(value != item.pages) {
 				item.pages += "-"+value;
+				// EndNote uses SP without EP for number of pages
+				// Here, clear numPages if we have an EP != SP
+				if (item.itemType == "book") item.numPages = undefined;
 			}
 		}
 	} else if(tag == "SN") {
@@ -441,8 +457,14 @@ function doExport() {
 		addTag("TY", typeMap[item.itemType] ? typeMap[item.itemType] : "GEN");
 
 		// use field map
-		for(var j in fieldMap) {
-			if(item[fieldMap[j]]) addTag(j, item[fieldMap[j]]);
+		if (item.itemType == "bookSection" || item.itemType == "conferencePaper") {
+			for(var j in bookSectionFieldMap) {
+				if(item[bookSectionFieldMap[j]]) addTag(j, item[bookSectionFieldMap[j]]);
+			}
+		} else {
+			for(var j in fieldMap) {
+				if(item[fieldMap[j]]) addTag(j, item[fieldMap[j]]);
+			}
 		}
 
 		// creators
@@ -458,7 +480,11 @@ function doExport() {
 				risTag = "A2";
 			}
 
-			addTag(risTag, item.creators[j].lastName+","+item.creators[j].firstName);
+			var names = [];
+			if (item.creators[j].lastName) names.push(item.creators[j].lastName);
+			if (item.creators[j].firstName) names.push(item.creators[j].firstName);
+
+			addTag(risTag, names.join(","));
 		}
 		
 		// assignee (patent)
