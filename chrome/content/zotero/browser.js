@@ -100,17 +100,15 @@ var Zotero_Browser = new function() {
 	//////////////////////////////////////////////////////////////////////////////
 	
 	
-	/*
-	 * Initialize some variables and prepare event listeners for when chrome is done
-	 * loading
+	/**
+	 * Initialize some variables and prepare event listeners for when chrome is done loading
 	 */
 	function init() {
-		if (!Zotero || !Zotero.initialized) {
+		if (!Zotero || !Zotero.initialized || Zotero.isStandalone) {
 			return;
 		}
 		
 		Zotero_Browser.browserData = new Object();
-		Zotero_Browser._scrapePopupShowing = false;
 		
 		window.addEventListener("load",
 			function(e) { Zotero_Browser.chromeLoad(e) }, false);

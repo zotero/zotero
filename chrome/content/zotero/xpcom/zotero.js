@@ -417,6 +417,12 @@ var Zotero = new function(){
 					Zotero.getString('startupError.checkPermissions')
 				]);
 				this.startupError = msg;
+			} else if(e.name == "NS_ERROR_STORAGE_BUSY") {
+				var msg = Zotero.localeJoin([
+					Zotero.getString('startupError.databaseInUse'),
+					Zotero.getString(Zotero.isStandalone ? 'startupError.closeFirefox' : 'startupError.closeStandalone')
+				]);
+				this.startupError = msg;
 			}
 			
 			Components.utils.reportError(e);
