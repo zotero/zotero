@@ -100,8 +100,14 @@ var ZoteroPane = new function()
 	 */
 	function onLoad()
 	{
-		if (!Zotero || !Zotero.initialized) {
-			return;
+		if (!Zotero) return;
+		if (!Zotero.initialized) {
+			if(Zotero.isStandalone) {
+				_loaded = true;
+				this.toggleDisplay();
+			} else {
+				return;
+			}
 		}
 		
 		if (Zotero.locked) {
@@ -214,11 +220,6 @@ var ZoteroPane = new function()
 		if (Zotero.Prefs.get('debugShowDuplicates')) {
 			document.getElementById('zotero-tb-actions-showDuplicates').hidden = false;
 		}
-		
-		if(Zotero.isStandalone) {
-			this.toggleDisplay(true);
-			this.fullScreen(true);
-		}
 	}
 	
 	
@@ -313,7 +314,7 @@ var ZoteroPane = new function()
 	/*
 	 * Hides/displays the Zotero interface
 	 */
-	function toggleDisplay(forceVisible)
+	function toggleDisplay()
 	{
 		if (!ZoteroPane.loaded) {
 			if (Zotero.locked) {
@@ -336,7 +337,9 @@ var ZoteroPane = new function()
 			var isCollapsed = true;
 		}
 		
-		var makeVisible = forceVisible || isHidden || isCollapsed;
+		if (isHidden || isCollapsed || Zotero.isStandalone) {
+			var makeVisible = true;
+		}
 		
 		// If Zotero not initialized, try to get the error handler
 		// or load the default error page
@@ -364,7 +367,6 @@ var ZoteroPane = new function()
 			}
 			else {
 				if(Zotero.isStandalone) window.close();
-				
 				// TODO: Add a better error page/window here with reporting
 				// instructions
 				// window.loadURI('chrome://zotero/content/error.xul');
