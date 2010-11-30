@@ -105,9 +105,8 @@ var ZoteroPane = new function()
 			if(Zotero.isStandalone) {
 				_loaded = true;
 				this.toggleDisplay();
-			} else {
-				return;
 			}
+			return;
 		}
 		
 		if (Zotero.locked) {
@@ -219,6 +218,11 @@ var ZoteroPane = new function()
 		
 		if (Zotero.Prefs.get('debugShowDuplicates')) {
 			document.getElementById('zotero-tb-actions-showDuplicates').hidden = false;
+		}
+		
+		if(Zotero.isStandalone) {
+			this.toggleDisplay(true);
+			this.fullScreen(true);
 		}
 	}
 	
