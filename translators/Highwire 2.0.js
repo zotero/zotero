@@ -2,7 +2,7 @@
         "translatorID":"8c1f42d5-02fa-437b-b2b2-73afc768eb07",
         "label":"Highwire 2.0",
         "creator":"Matt Burton",
-        "target":"(content/([0-9]+/[0-9]+|current|firstcite)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
+        "target":"(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
         "minVersion":"1.0.0b4.r5",
         "maxVersion":"",
         "priority":100,
@@ -47,7 +47,7 @@ function detectWeb(doc, url) {
 			url.match("content/firstcite") 
 		) {
 			return "multiple";
-		} else if (url.match("content/[0-9]+")) {
+		} else if (url.match("content/(early/)?[0-9]+")) {
 			return "journalArticle";
 		}
 	}
