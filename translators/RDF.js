@@ -4,12 +4,12 @@
 	"label":"RDF",
 	"creator":"Simon Kornblith",
 	"target":"rdf",
-	"minVersion":"1.0.0b4.r1",
+	"minVersion":"2.1b2",
 	"maxVersion":"",
 	"priority":100,
 	"configOptions":{"dataMode":"rdf/xml"},
 	"inRepository":true,
-	"lastUpdated":"2010-11-07 03:10:59"
+	"lastUpdated":"2010-12-10 00:15:26"
 }
 
 function detectImport() {
@@ -544,7 +544,7 @@ function importItem(newItem, node, type) {
 			var type = Zotero.RDF.getTargets(subject, rdf+"type");
 			if(type) {
 				type = Zotero.RDF.getResourceURI(type[0]);
-				if(Zotero.Utilities.inArray(type, callNumberTypes)) {
+				if(callNumberTypes.indexOf(type) !== -1) {
 					newItem.callNumber = getFirstResults(subject, [rdf+"value"], true);
 				} else if(type == n.z+"AutomaticTag") {
 					newItem.tags.push({tag:getFirstResults(subject, [rdf+"value"], true), type:1});
