@@ -121,7 +121,7 @@ Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFiles[0] + ".js");
 
 // Load CiteProc into Zotero.CiteProc namespace
-Zotero.CiteProc = {};
+Zotero.CiteProc = {"Zotero":Zotero};
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
 	.loadSubScript("chrome://zotero/content/xpcom/citeproc.js", Zotero.CiteProc);
