@@ -333,9 +333,9 @@ Zotero.Date = new function(){
 			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
 				'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 			// If using a non-English bibliography locale, try those too
-			//if (Zotero.locale != 'en-US') {
+			if (Zotero.locale != 'en-US') {
 				months = months.concat(Zotero.Date.months.short);
-			//}
+			}
 			if(!_monthRe) {
 				_monthRe = new RegExp("^(.*)\\b("+months.join("|")+")[^ ]*(?: (.*)$|$)", "i");
 			}
