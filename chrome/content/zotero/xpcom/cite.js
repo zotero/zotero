@@ -373,38 +373,3 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 Zotero.Cite.labels = ["page", "book", "chapter", "column", "figure", "folio",
 		"issue", "line", "note", "opus", "paragraph", "part", "section", "sub verbo",
 		"volume", "verse"];
-
-Zotero.Cite._monthStrings = false;
-Zotero.Cite.getMonthStrings = function(form, locale) {
-	if(Zotero.Cite._monthStrings){ 
-		return Zotero.Cite._monthStrings[form];
-	} else {
-		Zotero.Cite._monthStrings = {"long":[], "short":[]};
-		
-		var sys = {'xml':new Zotero.CiteProc.CSL.System.Xml.Parsing()};
-		if(!locale) locale = Zotero.locale;
-		
-		var cslLocale = Zotero.CiteProc.CSL.localeResolve(Zotero.locale);
-		if(!Zotero.CiteProc.CSL.locale[cslLocale.best]) {
-			let localexml = sys.xml.makeXml(Zotero.Cite.System.retrieveLocale(cslLocale.best));
-			Zotero.CiteProc.CSL.localeSet.call(Zotero.CiteProc.CSL, sys, localexml, cslLocale.best, cslLocale.best);
-		}
-		
-		var locale = Zotero.CiteProc.CSL.locale[cslLocale.best];
-		if(!locale) {
-			Zotero.log("No locale "+cslLocale.best+"; using en-US", "warning");
-			return Zotero.Cite.getMonthStrings(form, "en-US");
-		}
-		
-		for(let i=1; i<=12; i++) {
-			let term = locale.terms["month-"+(i<10 ? "0" : "")+i];
-			if(term) {
-				Zotero.Cite._monthStrings["long"][i-1] = term["long"];
-				Zotero.Cite._monthStrings["short"][i-1] = (term["short"] ? term["short"].replace(".", "", "g") : term["long"]);
-			} else {
-				Zotero.log("No month "+i+" specified for locale "+cslLocale.best, "warning");
-			}
-		}
-		return Zotero.Cite._monthStrings[form];
-	}
-}
