@@ -45,7 +45,35 @@ Zotero.Date = new function(){
 	this.getLocaleDateOrder = getLocaleDateOrder;
 	
 	var _localeDateOrder = null;
+	var _months = null;
 	
+	/**
+	 * Load dateFormat bundle into _dateFormatsBundle
+	 */
+	function _loadDateFormatsBundle() {
+		var src = 'chrome://global/locale/dateFormat.properties';
+		var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
+							getService(Components.interfaces.nsILocaleService);
+		var appLocale = localeService.getApplicationLocale();
+		
+		var bundle =
+			Components.classes["@mozilla.org/intl/stringbundle;1"]
+			.getService(Components.interfaces.nsIStringBundleService).createBundle(src, appLocale);
+		
+		_months = {"short":[], "long":[]};
+		for(let i=1; i<=12; i++) {
+			_months.short.push(bundle.GetStringFromName("month."+i+".Mmm"));
+			_months.long.push(bundle.GetStringFromName("month."+i+".name"));
+		}
+	}
+	
+	/**
+	 * Lazy getter for reading month strings from dateFormat.properties
+	 */
+	this.__defineGetter__("months", function() {
+		if(!_months) _loadDateFormatsBundle();
+		return _months;
+	});
 	
 	/**
 	* Convert an SQL date in the form '2006-06-13 11:03:05' into a JS Date object
@@ -305,9 +333,9 @@ Zotero.Date = new function(){
 			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
 				'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 			// If using a non-English bibliography locale, try those too
-			if (Zotero.locale != 'en-US') {
-				months = months.concat(Zotero.Cite.getMonthStrings("short"));
-			}
+			//if (Zotero.locale != 'en-US') {
+				months = months.concat(Zotero.Date.months.short);
+			//}
 			if(!_monthRe) {
 				_monthRe = new RegExp("^(.*)\\b("+months.join("|")+")[^ ]*(?: (.*)$|$)", "i");
 			}
@@ -383,7 +411,7 @@ Zotero.Date = new function(){
 				string += date.part+" ";
 			}
 			
-			var months = Zotero.Cite.getMonthStrings("long");
+			var months = Zotero.Date.months.long;
 			if(date.month != undefined && months[date.month]) {
 				// get short month strings from CSL interpreter
 				string += months[date.month];
