@@ -110,15 +110,10 @@ Zotero.Translate.IO.Read = function(file, mode) {
 	var charset = null;
 	
 	// look for a BOM in the document
-	if(Zotero.isFx4) {
-		var first4 = NetUtil.readInputStreamToString(this._rawStream, 4);
-	} else {
-		var binStream = Components.classes["@mozilla.org/binaryinputstream;1"].
-								   createInstance(Components.interfaces.nsIBinaryInputStream);
-		binStream.setInputStream(this._rawStream);
-		var first4 = binStream.readByteArray(4);
-		first4 = String.fromCharCode.apply(null, first4);
-	}
+	var binStream = Components.classes["@mozilla.org/binaryinputstream;1"].
+								createInstance(Components.interfaces.nsIBinaryInputStream);
+	binStream.setInputStream(this._rawStream);
+	var first4 = binStream.readBytes(4);
 
 	for(var possibleCharset in BOMs) {
 		if(first4.substr(0, BOMs[possibleCharset].length) == BOMs[possibleCharset]) {
@@ -184,6 +179,7 @@ Zotero.Translate.IO.Read = function(file, mode) {
 			// Check whether the user has specified a charset preference
 			var charsetPref = Zotero.Prefs.get("import.charset");
 			if(charsetPref == "auto") {
+				Zotero.debug("Translate: Checking whether file is UTF-8");
 				// For auto-detect, we are basically going to check if the file could be valid
 				// UTF-8, and if this is true, we will treat it as UTF-8. Prior likelihood of
 				// UTF-8 is very high, so this should be a reasonable strategy.
@@ -205,27 +201,35 @@ Zotero.Translate.IO.Read = function(file, mode) {
 				// Read all currently available bytes from file. I'm not sure how many this is
 				// but it's a safe bet that we don't want to try to read any more than this, since
 				// it would slow things down considerably.
-				if(Zotero.isFx4) {
-					var fileContents = NetUtil.readInputStreamToString(this._rawStream, this._rawStream.available());
-				} else {
-					var fileContents = binStream.readByteArray(this._rawStream.available());
-					fileContents = String.fromCharCode.apply(null, fileContents);
+				this._charset = "UTF-8";
+				let bytesAvailable;
+				while(bytesAvailable = this._rawStream.available()) {
+					// read 131072 bytes
+					let fileContents = binStream.readBytes(Math.min(131072, bytesAvailable));
+					
+					// on failure, try reading up to 3 more bytes and see if that makes this
+					// valid (since we have chunked it)
+					let isUTF8;
+					for(let i=1; !(isUTF8 = UTF8Regex.test(fileContents)) && i <= 3; i++) {
+						if(this._rawStream.available()) {
+							fileContents += binStream.readBytes(1);
+						}
+					}
+					
+					// if the regexp continues to fail, this is not UTF-8
+					if(!isUTF8) {
+						// Can't be UTF-8; see if a default charset is defined
+						this._charset = Zotero.Prefs.get("intl.charset.default", true);
+						
+						// ISO-8859-1 by default
+						if(!this._charset) this._charset = "ISO-8859-1";
+						
+						break;
+					}
 				}
 				
 				// Seek back to beginning of file
 				this._seekToStart();
-				
-				// See whether this could be UTF-8
-				if(UTF8Regex.test(fileContents)) {
-					// Assume this is UTF-8
-					this._charset = "UTF-8";
-				} else {
-					// Can't be UTF-8; see if a default charset is defined
-					this._charset = Zotero.Prefs.get("intl.charset.default", true);
-					
-					// ISO-8859-1 by default
-					if(!this._charset) this._charset = "ISO-8859-1";
-				}
 			} else {
 				// No need to auto-detect; user has specified a charset
 				this._charset = charsetPref;
