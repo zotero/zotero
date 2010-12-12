@@ -198,9 +198,8 @@ Zotero.Translate.IO.Read = function(file, mode) {
 					  '|\xF4[\x80-\x8F][\x80-\xBF]{2}' + // plane 16
 					')*$');
 				
-				// Read all currently available bytes from file. I'm not sure how many this is
-				// but it's a safe bet that we don't want to try to read any more than this, since
-				// it would slow things down considerably.
+				// Read all currently available bytes from file. This seems to be the entire file,
+				// since the IO is blocking anyway.
 				this._charset = "UTF-8";
 				let bytesAvailable;
 				while(bytesAvailable = this._rawStream.available()) {
