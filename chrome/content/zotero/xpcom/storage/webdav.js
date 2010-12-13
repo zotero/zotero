@@ -728,7 +728,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.getLastSyncTime = function (callbac
 		var uri = this.rootURI;
 		var successFileURI = uri.clone();
 		successFileURI.spec += "lastsync";
-		Zotero.HTTP.doHead(successFileURI, function (req) {
+		Zotero.HTTP.doGet(successFileURI, function (req) {
 			var ts = undefined;
 			try {
 				if (req.responseText) {
@@ -926,7 +926,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 							case 200:
 							case 201:
 							case 204:
-								Zotero.HTTP.doHead(
+								Zotero.HTTP.doGet(
 									testFileURI,
 									function (req) {
 										Zotero.debug(req.responseText);
