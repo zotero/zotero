@@ -77,7 +77,7 @@ Zotero.DBConnection = function(dbName) {
 /////////////////////////////////////////////////////////////////
 
 /**
- * Test a connection to the database, throwing any errors that occur
+ * Test a read-only connection to the database, throwing any errors that occur
  *
  * @return	void
  */
