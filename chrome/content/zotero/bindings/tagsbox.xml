@@ -133,7 +133,7 @@
 							return tags.length;
 						}
 						
-						this.updateCount();
+						this.updateCount(0);
 						return 0;
 					]]>
 				</body>
@@ -529,6 +529,7 @@
 				<body>
 					<![CDATA[
 						this.item.removeTag(id);
+						this.reload();
 					]]>
 				</body>
 			</method>
@@ -538,8 +539,7 @@
 				<parameter name="count"/>
 				<body>
 					<![CDATA[
-						if(count == null)
-						{
+						if(count === null) {
 							var tags = this.item.getTags();
 							if(tags)
 								count = tags.length;
