@@ -522,8 +522,7 @@ Zotero.Items = new function() {
 			
 			// Then try editors
 			"CASE (" +
-				"SELECT COUNT(*) FROM itemCreators " +
-				"NATURAL JOIN creatorTypes WHERE itemID=I.itemID AND creatorTypeID IN (3)" +
+				"SELECT COUNT(*) FROM itemCreators WHERE itemID=I.itemID AND creatorTypeID IN (3)" +
 			") " +
 			"WHEN 0 THEN NULL " +
 			"WHEN 1 THEN (" +
@@ -549,8 +548,7 @@ Zotero.Items = new function() {
 			
 			// Then try contributors
 			"CASE (" +
-				"SELECT COUNT(*) FROM itemCreators " +
-				"NATURAL JOIN creatorTypes WHERE itemID=I.itemID AND creatorTypeID IN (2)" +
+				"SELECT COUNT(*) FROM itemCreators WHERE itemID=I.itemID AND creatorTypeID IN (2)" +
 			") " +
 			"WHEN 0 THEN NULL " +
 			"WHEN 1 THEN (" +
