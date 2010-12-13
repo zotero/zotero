@@ -503,9 +503,9 @@
 					</xul:rows>
 				</xul:grid>
 				<xul:popupset>
-					<xul:popup id="seeAlsoPopup" width="300" onpopupshowing="this.firstChild.reload();">
+					<xul:menupopup id="seeAlsoPopup" width="300" onpopupshowing="this.firstChild.reload();">
 						<xul:seealsobox id="seeAlso" flex="1"/>
-					</xul:popup>
+					</xul:menupopup>
 					<!-- The onpopup* stuff is an ugly hack to keep track of when the
 					popup is open (and not the descendent autocomplete popup, which also
 					seems to get triggered by these events for reasons that are less than
@@ -515,11 +515,11 @@
 					Note: Code in tagsbox.xml is dependent on the DOM path between the
 					tagsbox and tagsLabel above, so be sure to update fixPopup() if it changes
 					-->
-					<xul:popup id="tagsPopup" ignorekeys="true"
+					<xul:menupopup id="tagsPopup" ignorekeys="true"
 							onpopupshown="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ /* DEBUG: it would be nice to make this work -- if (this.firstChild.count==0){ this.firstChild.new(); } */ this.setAttribute('showing', 'true'); }"
 							onpopuphidden="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ this.setAttribute('showing', 'false'); }">
 						<xul:tagsbox id="tags" flex="1" mode="edit"/>
-					</xul:popup>
+					</xul:menupopup>
 				</xul:popupset>
 			</xul:vbox>
 		</content>
