@@ -173,7 +173,6 @@ grid row hbox:first-child
 }
 
 
-
 /*
  * Search pane
  */
@@ -212,7 +211,13 @@ grid row hbox:first-child
 	min-height: 1.5em; /* Fix collapse on Windows */
 }
 
-/* Styles pane */
+/*
+ * Cite pane
+ */
+#wordProcessors > label:not(:first-child) {
+	margin-top: 10px;
+}
+
 #styleManager
 {
 	height: 250px;
