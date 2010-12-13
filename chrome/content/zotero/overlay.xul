@@ -94,7 +94,7 @@
 			onkeyup="ZoteroPane.handleKeyUp(event, this.id)"
 			chromedir="&locale.dir;">
 			<popupset>
-				<popup id="zotero-collectionmenu" onpopupshowing="ZoteroPane.buildCollectionContextMenu();">
+				<menupopup id="zotero-collectionmenu" onpopupshowing="ZoteroPane.buildCollectionContextMenu();">
 					<menuitem label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.newCollection()"/>
 					<menuitem label="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch()"/>
 					<menuitem label="&zotero.toolbar.newSubcollection.label;" oncommand="ZoteroPane.newCollection(ZoteroPane.getSelectedCollection().id)"/>
@@ -109,8 +109,8 @@
 					<menuitem label="&zotero.toolbar.emptyTrash.label;" oncommand="ZoteroPane.emptyTrash();"/>
 					<menuitem label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane.createCommonsBucket();"/><!--TODO localize -->
 					<menuitem label="Refresh" oncommand="ZoteroPane.refreshCommonsBucket();"/><!--TODO localize -->
-				</popup>
-				<popup id="zotero-itemmenu" onpopupshowing="ZoteroPane.buildItemContextMenu();">
+				</menupopup>
+				<menupopup id="zotero-itemmenu" onpopupshowing="ZoteroPane.buildItemContextMenu();">
 					<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="ZoteroPane.selectItem(this.parentNode.getAttribute('itemID'), true)"/>
 					<menuseparator/>
 					<!-- with icon: <menuitem class="menuitem-iconic" id="zotero-menuitem-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane.newNote(false, this.parentNode.getAttribute('itemID'))"/>-->
@@ -136,7 +136,7 @@
 					<menuitem oncommand="Zotero_RecognizePDF.recognizeSelected();"/>
 					<menuitem oncommand="ZoteroPane.renameSelectedAttachmentsFromParents()"/>
 					<menuitem oncommand="ZoteroPane.reindexItem();"/>
-				</popup>
+				</menupopup>
 			</popupset>
 			
 			<vbox id="zotero-collections-pane" persist="width" flex="1">
