@@ -408,7 +408,33 @@ var Zotero = new function(){
 		}
 		
 		try {
+			// Test read access
 			Zotero.DB.test();
+			
+			var dbfile = Zotero.getZoteroDatabase();
+			
+			// Test write access on Zotero data directory
+			if (!dbfile.parent.isWritable()) {
+				var msg = 'Cannot write to ' + dbfile.parent.path + '/';
+			}
+			// Test write access on Zotero database
+			else if (!dbfile.isWritable()) {
+				var msg = 'Cannot write to ' + dbfile.path;
+			}
+			else {
+				var msg = false;
+			}
+			
+			if (msg) {
+				var e = {
+					name: 'NS_ERROR_FILE_ACCESS_DENIED',
+					message: msg,
+					toString: function () {
+						return this.name + ': ' + this.message; 
+					}
+				};
+				throw (e);
+			}
 		}
 		catch (e) {
 			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
