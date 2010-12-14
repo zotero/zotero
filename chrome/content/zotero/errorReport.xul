@@ -53,7 +53,7 @@
 					body += key + '=' + encodeURIComponent(parts[key]) + '&';
 				}
 				body = body.substr(0, body.length - 1);
-				Zotero.Utilities.HTTP.doPost("http://www.zotero.org/repo/report", body,
+				Zotero.HTTP.doPost("http://www.zotero.org/repo/report", body,
 					_sendErrorReportCallback);
 			}
 			
