@@ -49,7 +49,7 @@ onmessage = function(event) {
 		var fd = open(path, 0);
 		
 		// read from fifo and close it
-		read(fd, buf, BUFFER_SIZE);
+		read(fd, buf, BUFFER_SIZE-1);
 		close(fd);
 		
 		// extract message
