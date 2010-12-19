@@ -196,7 +196,6 @@ var Zotero = new function(){
 		var appInfo =
 			Components.classes["@mozilla.org/xre/app-info;1"].
 				getService(Components.interfaces.nsIXULAppInfo);
-		this.appName = appInfo.name;
 		this.isFx = true;
 		this.isFx3 = appInfo.platformVersion.indexOf('1.9') === 0;
 		this.isFx35 = appInfo.platformVersion.indexOf('1.9.1') === 0;
@@ -242,16 +241,20 @@ var Zotero = new function(){
 		}
 		
 		// Load in the localization stringbundle for use by getString(name)
-		var src = 'chrome://zotero/locale/zotero.properties';
+		var stringBundleService =
+			Components.classes["@mozilla.org/intl/stringbundle;1"]
+			.getService(Components.interfaces.nsIStringBundleService);
 		var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
 							getService(Components.interfaces.nsILocaleService);
 		var appLocale = localeService.getApplicationLocale();
 		
-		var stringBundleService =
-			Components.classes["@mozilla.org/intl/stringbundle;1"]
-			.getService(Components.interfaces.nsIStringBundleService);
+		_localizedStringBundle = stringBundleService.createBundle(
+			"chrome://zotero/locale/zotero.properties", appLocale);
 		
-		_localizedStringBundle = stringBundleService.createBundle(src, appLocale);
+		// Also load the brand as appName
+		var brandBundle = stringBundleService.createBundle(
+			"chrome://branding/locale/brand.properties", appLocale);
+		this.appName = brandBundle.GetStringFromName("brandShortName");
 		
 		// Set the locale direction to Zotero.dir
 		// DEBUG: is there a better way to get the entity from JS?
