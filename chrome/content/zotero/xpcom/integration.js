@@ -111,8 +111,12 @@ Zotero.Integration = new function() {
 		}
 		
 		// try to initialize pipe
-		var pipeInitialized = (Zotero.isFx4 ? _initializeIntegrationPipeFx4(_fifoFile) :
-			_initializeIntegrationPipeFx36(_fifoFile));
+		try {
+			var pipeInitialized = (Zotero.isFx4 ? _initializeIntegrationPipeFx4(_fifoFile) :
+				_initializeIntegrationPipeFx36(_fifoFile));
+		} catch(e) {
+			Components.utils.reportError(e);
+		}
 		
 		if(pipeInitialized) {
 			var me = this;
@@ -183,7 +187,7 @@ Zotero.Integration = new function() {
 			.getService(Components.interfaces.nsIVersionComparator);
 		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
 			getService(Components.interfaces.nsIXULAppInfo);
-		if(verComp.compare("2.0b9", appInfo.version) > 0) {
+		if(verComp.compare("2.0b9pre", appInfo.version) > 0) {
 			Components.utils.reportError("Zotero word processor integration requires "+
 				"Firefox 4.0b9 or later. Please update to the latest Firefox 4.0 beta.");
 			return false;
