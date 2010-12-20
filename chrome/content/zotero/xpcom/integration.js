@@ -305,61 +305,73 @@ Zotero.Integration = new function() {
 			throw e;
 		}
 		
-		// Try to create a new document; otherwise display an error using the alert service
+		// Try to execute the command; otherwise display an error in alert service or word processor
+		// (depending on what is possible)
+		var integration, document;
 		try {
-			var document = (application.getDocument && docId ? application.getDocument(docId) : application.getActiveDocument());
-			var integration = new Zotero.Integration.Document(application, document);
-		} catch(e) {
-			_inProgress = false;
-			Zotero.Integration.activate();
-			Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-				.getService(Components.interfaces.nsIPromptService)
-				.alert(null, Zotero.getString("integration.error.title"),
-					Zotero.getString("integration.error.generic"));
-			throw e;
-		}
-		
-		// Try to execute the command; otherwise display an error in the word processor
-		try {
+			document = (application.getDocument && docId ? application.getDocument(docId) : application.getActiveDocument());
+			integration = new Zotero.Integration.Document(application, document);
 			integration[command]();
 			integration.cleanup();
 		} catch(e) {
-			integration.cleanup();
+			if(integration) {
+				try {
+					integration.cleanup();
+				} catch(e) {
+					Components.utils.reportError(e);
+				}
+			}
+			
 			if(!(e instanceof Zotero.Integration.UserCancelledException)) {
-				if(e instanceof Zotero.Integration.DisplayException) {
-					integration._doc.displayAlert(e.toString(),
-						Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-						Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
-				} else {
-					// check to see whether there's a pyxpcom error in the console, since it doesn't
-					// get thrown directly
-					var message = "";
-					
-					var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
-						.getService(Components.interfaces.nsIConsoleService);
-					
-					var messages = {};
-					consoleService.getMessageArray(messages, {});
-					messages = messages.value;
-					if(messages && messages.length) {
-						var lastMessage = messages[messages.length-1];
-						try {
-							var error = lastMessage.QueryInterface(Components.interfaces.nsIScriptError);
-						} catch(e2) {
-							if(lastMessage.message && lastMessage.message.substr(0, 12) == "ERROR:xpcom:") {
-								// print just the last line of the message, but re-throw the rest
-								message = lastMessage.message.substr(0, lastMessage.message.length-1);
-								message = "\n"+message.substr(message.lastIndexOf("\n"))
+				try {
+					var displayError = null;
+					if(e instanceof Zotero.Integration.DisplayException) {
+						displayError = e.toString();
+					} else {
+						// check to see whether there's a pyxpcom error in the console, since it doesn't
+						// get thrown directly
+						var message = "";
+						
+						var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
+							.getService(Components.interfaces.nsIConsoleService);
+						
+						var messages = {};
+						consoleService.getMessageArray(messages, {});
+						messages = messages.value;
+						if(messages && messages.length) {
+							var lastMessage = messages[messages.length-1];
+							try {
+								var error = lastMessage.QueryInterface(Components.interfaces.nsIScriptError);
+							} catch(e2) {
+								if(lastMessage.message && lastMessage.message.substr(0, 12) == "ERROR:xpcom:") {
+									// print just the last line of the message, but re-throw the rest
+									message = lastMessage.message.substr(0, lastMessage.message.length-1);
+									message = "\n"+message.substr(message.lastIndexOf("\n"))
+								}
 							}
 						}
+						
+						if(!message && typeof(e) == "object" && e.message) message = "\n\n"+e.message;
+						
+						if(message != "\n\nExceptionAlreadyDisplayed") {
+							displayError = Zotero.getString("integration.error.generic")+message;
+						}
+						Zotero.debug(e);
 					}
 					
-					if(!message && typeof(e) == "object" && e.message) message = "\n\n"+e.message;
-					
-					integration._doc.displayAlert(Zotero.getString("integration.error.generic")+message,
-						Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-						Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
-					Zotero.debug(e);
+					if(displayError) {
+						if(integration) {
+							integration._doc.displayAlert(displayError,
+									Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
+									Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
+						} else {
+							Zotero.Integration.activate();
+							Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService)
+								.alert(null, Zotero.getString("integration.error.title"), displayError);
+						}
+					}
+				} finally {
 					throw e;
 				}
 			}
