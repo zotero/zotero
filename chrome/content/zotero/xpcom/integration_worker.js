@@ -52,7 +52,7 @@ onmessage = function(event) {
 		close(fd);
 		
 		// extract message
-		string = buf.readString();
+		var string = buf.readString();
 		var parts = string.match(/^([^ \n]*) ([^ \n]*)(?: ([^\n]*))?\n?$/);
 		if(!parts) {
 			postMessage(["Exception", "Integration Worker: Invalid input received: "+string]);
