@@ -193,9 +193,32 @@ Zotero.Integration = new function() {
 		} else {		
 			Components.utils.import("resource://gre/modules/ctypes.jsm");
 			
-			// initialize library
-			var libc = Zotero.isMac ? "/usr/lib/libc.dylib" : "libc.so";
-			var lib = ctypes.open(libc);
+			// get possible names for libc
+			if(Zotero.isMac) {
+				var possibleLibcs = ["/usr/lib/libc.dylib"];
+			} else {
+				var possibleLibcs = [
+					"libc.so.6",
+					"libc.so.6.1",
+					"libc.so"
+				];
+			}
+			
+			// try all possibilities
+			while(possibleLibcs.length) {
+				var libc = possibleLibcs.shift();
+				try {
+					var lib = ctypes.open(libc);
+					break;
+				} catch(e) {}
+			}
+			
+			// throw appropriate error on failure
+			if(!lib) {
+				throw "libc could not be loaded. Please post on the Zotero Forums so we can add "+
+					"support for your operating system.";
+			}
+			
 			// int mkfifo(const char *path, mode_t mode);
 			var mkfifo = lib.declare("mkfifo", ctypes.default_abi, ctypes.int, ctypes.char.ptr, ctypes.unsigned_int);
 			
