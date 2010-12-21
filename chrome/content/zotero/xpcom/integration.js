@@ -119,11 +119,10 @@ Zotero.Integration = new function() {
 		}
 		
 		if(pipeInitialized) {
-			var me = this;
 			// if initialization succeeded, add an observer so that we don't hang shutdown
 			var observerService = Components.classes["@mozilla.org/observer-service;1"]
 				.getService(Components.interfaces.nsIObserverService);
-			observerService.addObserver({ observe: me.destroy }, "quit-application", false);
+			observerService.addObserver({ observe: Zotero.Integration.destroy }, "quit-application", false);
 		}
 	}
 	
@@ -210,7 +209,13 @@ Zotero.Integration = new function() {
 				.createInstance(Components.interfaces.nsIWorkerFactory)
 				.newChromeWorker("chrome://zotero/content/xpcom/integration_worker.js");
 			worker.onmessage = function(event) {
-				Zotero.Integration.execCommand(event.data[0], event.data[1], event.data[2]);
+				if(event.data[0] == "Exception") {
+					throw event.data[1];
+				} else if(event.data[0] == "Debug") {
+					Zotero.debug(event.data[1]);
+				} else {
+					Zotero.Integration.execCommand(event.data[0], event.data[1], event.data[2]);
+				}
 			}
 			worker.postMessage({"path":_fifoFile.path, "libc":libc});
 			
