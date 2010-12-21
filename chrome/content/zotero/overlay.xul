@@ -394,7 +394,7 @@
 							<label id="zotero-tb-sync-last-sync"/>
 						</tooltip>
 					</toolbarbutton>
-					<toolbarseparator/>
+					<toolbarseparator id="zotero-fullscreen-close-separator"/>
 					<toolbarbutton id="zotero-tb-fullscreen" tooltiptext="&zotero.toolbar.fullscreen.tooltip;" oncommand="ZoteroPane.fullScreen();" class="zotero-tb-button"/>
 					<toolbarbutton id="zotero-close-button" class="tabs-closebutton" oncommand="ZoteroPane.toggleDisplay()"/>
 				</hbox>
