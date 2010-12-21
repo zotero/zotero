@@ -91,6 +91,7 @@ var CSL = {
 	MINIMAL_NAME_FIELDS: ["literal", "family"],
 	SWAPPING_PUNCTUATION: [".", "!", "?", ":",",",";"],
 	TERMINAL_PUNCTUATION: [".", "!", "?", ":", " "],
+	SPLICE_PUNCTUATION: [".", "!", "?", ":", ";", ","],
 	NONE: 0,
 	NUMERIC: 1,
 	POSITION: 2,
@@ -397,7 +398,7 @@ CSL_E4X.prototype.getNodesByName = function (myxml,name,nameattrval) {
 CSL_E4X.prototype.nodeNameIs = function (myxml,name) {
 	var xml;
 	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-	if (myxml.localName().toString() == name){
+	if (myxml.localName() && myxml.localName().toString() == name){
 		return true;
 	}
 	return false;
@@ -644,6 +645,9 @@ CSL.Output.Queue.prototype.string = function (state, myblobs, blob) {
 	} else {
 		blob_delimiter = blob.strings.delimiter;
 	}
+	if (blob && blob.new_locale) {
+		state.opt.lang = blob.new_locale;
+	}
 	for (pos = 0, len = blobs.length; pos < len; pos += 1) {
 		blobjr = blobs[pos];
 		if ("string" === typeof blobjr.blobs) {
@@ -737,6 +741,9 @@ CSL.Output.Queue.prototype.string = function (state, myblobs, blob) {
 		}
 	} else if ("boolean" === typeof blob) {
 		ret = state.output.renderBlobs(ret);
+	}
+	if (blob && blob.new_locale) {
+		state.opt.lang = blob.old_locale;
 	}
 	if (blob) {
 		return ret;
@@ -1335,9 +1342,9 @@ CSL.XmlToToken = function (state, tokentype) {
 	attributes = state.sys.xml.attributes(this);
 	decorations = CSL.setDecorations.call(this, state, attributes);
 	token = new CSL.Token(name, tokentype);
-	if (tokentype !== CSL.END || name === "if" || name === "else-if") {
+	if (tokentype !== CSL.END || name === "if" || name === "else-if" || name === "layout") {
 		for (key in attributes) {
-			if (tokentype === CSL.END && key !== "@language") {
+			if (tokentype === CSL.END && key !== "@language" && key !== "@locale") {
 				continue;
 			}
 			if (attributes.hasOwnProperty(key)) {
@@ -1357,8 +1364,8 @@ CSL.XmlToToken = function (state, tokentype) {
 	target = state[state.build.area].tokens;
 	CSL.Node[name].build.call(token, state, target);
 };
-CSL.dateParser = function (txt) {
-	var jiy_list, jiy, jiysplitter, jy, jmd, jr, pos, key, val, yearlast, yearfirst, number, rangesep, fuzzychar, chars, rex, rexdash, rexdashslash, rexslashdash, seasonstrs, seasonrexes, seasonstr, monthstrs, monthstr, monthrexes, seasonrex, len, jiymatchstring, jiymatcher;
+CSL.DateParser = function (txt) {
+	var jiy_list, jiy, jiysplitter, jy, jmd, jr, pos, key, val, yearlast, yearfirst, number, rangesep, fuzzychar, chars, rex, rexdash, rexdashslash, rexslashdash, seasonstrs, seasonrexes, seasonstr, monthstrs, monthstr, mrexes, seasonrex, len, jiymatchstring, jiymatcher;
 	jiy_list = [
 		["\u660E\u6CBB", 1867],
 		["\u5927\u6B63", 1911],
@@ -1402,17 +1409,97 @@ CSL.dateParser = function (txt) {
 		seasonrex = new RegExp(seasonstrs[pos] + ".*");
 		seasonrexes.push(seasonrex);
 	}
-	monthstrs = "jan feb mar apr may jun jul aug sep oct nov dec spr sum fal win spr sum";
-	monthstrs = monthstrs.split(" ");
-	monthrexes = [];
-	len = monthstrs.length;
-	for (pos = 0; pos < len; pos += 1) {
-		monthstr = monthstrs[pos];
-		rex = new RegExp(monthstr);
-		monthrexes.push(rex);
+	this.mstrings = "january february march april may june july august september october november december spring summer fall winter spring summer";
+	this.mstrings = this.mstrings.split(" ");
+	this.setOrderDayMonth = function() {
+		this.monthguess = 1;
+		this.dayguess = 0;
+	}
+	this.setOrderMonthDay = function() {
+		this.monthguess = 0;
+		this.dayguess = 1;
+	}
+	this.setOrderMonthDay();
+	this.resetMonths = function() {
+		this.msets = [];
+		for (var i = 0, ilen = this.mstrings.length; i < ilen; i += 1) {
+			this.msets.push([this.mstrings[i]]);
+		}
+		this.mabbrevs = [];
+		for (var i = 0, ilen = this.msets.length; i < ilen; i += 1) {
+			this.mabbrevs.push([]);
+			for (var j = 0, jlen = this.msets[i].length; j < jlen; j += 1) {
+				this.mabbrevs[i].push(this.msets[i][0].slice(0, 3));
+			}
+		}
+		this.mrexes = [];
+		for (var i = 0, ilen = this.mabbrevs.length; i < ilen; i += 1) {
+			this.mrexes.push(new RegExp("(?:" + this.mabbrevs[i].join("|") + ")"));
+		}
+	}
+	this.resetMonths();
+	this.addMonths = function(lst) {
+		if ("string" === typeof lst) {
+			lst = lst.split(/\s+/);
+		}
+		if (lst.length !== 12 && lst.length !== 16) {
+			CSL.debug("month [+season] list of "+lst.length+", expected 12 or 16. Ignoring.");
+			return;
+		}
+		var othermatch = [];
+		var thismatch = [];
+		for (var i = 0, ilen = lst.length; i < ilen; i += 1) {
+			var abbrevlen = false;
+			var skip = false;
+			var insert = 3;
+			var extend = {};
+			for (var j = 0, jlen = this.mabbrevs.length; j < jlen; j += 1) {
+				extend[j] = {};
+				if (j === i) {
+					for (var k = 0, klen = this.mabbrevs[i].length; k < klen; k += 1) {
+						if (this.mabbrevs[i][k] === lst[i].slice(0, this.mabbrevs[i][k].length)) {
+							skip = true;
+							break;
+						}
+					}
+				} else {
+					for (var k = 0, klen = this.mabbrevs[j].length; k < klen; k += 1) {
+						abbrevlen = this.mabbrevs[j][k].length;
+						if (this.mabbrevs[j][k] === lst[i].slice(0, abbrevlen)) {
+							while (this.msets[j][k].slice(0, abbrevlen) === lst[i].slice(0, abbrevlen)) {
+								if (abbrevlen > lst[i].length || abbrevlen > this.msets[j][k].length) {
+									CSL.debug("unable to disambiguate month string in date parser: "+lst[i]);
+									break;
+								} else {
+									abbrevlen += 1;
+								}
+							}
+							insert = abbrevlen;
+							extend[j][k] = abbrevlen;
+						}
+					}
+				}
+				for (var j in extend) {
+					j = parseInt(j, 10);
+					for (var k in extend[j]) {
+						k = parseInt(k, 10);
+						abbrevlen = extend[j][k];
+						this.mabbrevs[j][k] = this.msets[j][k].slice(0, abbrevlen);
+					}
+				}
+			}
+			if (!skip) {
+				this.msets[i].push(lst[i]);
+				this.mabbrevs[i].push(lst[i].slice(0, insert));
+			}
+		}
+		this.mrexes = [];
+		for (var i = 0, ilen = this.mabbrevs.length; i < ilen; i += 1) {
+			this.mrexes.push(new RegExp("(?:" + this.mabbrevs[i].join("|") + ")"));
+		}
 	}
 	this.parse = function (txt) {
-		var slash, dash, lst, l, m, number, note, thedate, slashcount, range_delim, date_delim, ret, delim_pos, delims, isrange, suff, date, breakme, item, pos, delim, ppos, element, pppos, len, llen, lllen, mm, slst, mmpos;
+		var slash, dash, lst, l, m, number, note, thedate, slashcount, range_delim, date_delim, ret, delim_pos, delims, isrange, suff, date, breakme, item, delim, element, mm, slst, mmpos, i, ilen, j, jlen, k, klen;
 		m = txt.match(jmd);
 		if (m) {
 			txt = txt.replace(jy, "");
@@ -1492,13 +1579,11 @@ CSL.dateParser = function (txt) {
 			delims.push([0, ret.length]);
 		}
 		suff = "";
-		len = delims.length;
-		for (pos = 0; pos < len; pos += 1) {
-			delim = delims[pos];
+		for (i = 0, ilen = delims.length; i < ilen; i += 1) {
+			delim = delims[i];
 			date = ret.slice(delim[0], delim[1]);
-			llen = date.length;
-			for (ppos = 0; ppos < llen; ppos += 1) {
-				element = date[ppos];
+			for (j = 0, jlen = date.length; j < jlen; j += 1) {
+				element = date[j];
 				if (element.indexOf(date_delim) > -1) {
 					this.parseNumericDate(thedate, date_delim, suff, element);
 					continue;
@@ -1508,10 +1593,9 @@ CSL.dateParser = function (txt) {
 					continue;
 				}
 				breakme = false;
-				lllen = monthrexes.length;
-				for (pppos = 0; pppos < lllen; pppos += 1) {
-					if (element.toLocaleLowerCase().match(monthrexes[pppos])) {
-						thedate[("month" + suff)] = "" + (parseInt(pppos, 10) + 1);
+				for (k = 0, klen = this.mrexes.length; k < klen; k += 1) {
+					if (element.toLocaleLowerCase().match(this.mrexes[k])) {
+						thedate[("month" + suff)] = "" + (parseInt(k, 10) + 1);
 						breakme = true;
 						break;
 					}
@@ -1534,9 +1618,9 @@ CSL.dateParser = function (txt) {
 				}
 				breakme = false;
 				lllen = seasonrexes.length;
-				for (pppos = 0; pppos < lllen; pppos += 1) {
-					if (element.toLocaleLowerCase().match(seasonrexes[pppos])) {
-						thedate[("season" + suff)] = "" + (parseInt(pppos, 10) + 1);
+				for (k = 0, klen = seasonrexes.length; k < klen; k += 1) {
+					if (element.toLocaleLowerCase().match(seasonrexes[k])) {
+						thedate[("season" + suff)] = "" + (parseInt(k, 10) + 1);
 						breakme = true;
 						break;
 					}
@@ -1545,7 +1629,7 @@ CSL.dateParser = function (txt) {
 					continue;
 				}
 				if (element === "~" || element === "?" || element === "c" || element.match(/^cir/)) {
-					thedate.fuzzy = "" + 1;
+					thedate.circa = "" + 1;
 					continue;
 				}
 				if (element.toLocaleLowerCase().match(/(?:mic|tri|hil|eas)/) && !thedate[("season" + suff)]) {
@@ -1564,9 +1648,8 @@ CSL.dateParser = function (txt) {
 			suff = "_end";
 		}
 		if (isrange) {
-			len = CSL.DATE_PARTS_ALL.length;
-			for (pos = 0; pos < len; pos += 1) {
-				item = CSL.DATE_PARTS_ALL[pos];
+			for (j = 0, jlen = CSL.DATE_PARTS_ALL.length; j < jlen; j += 1) {
+				item = CSL.DATE_PARTS_ALL[j];
 				if (thedate[item] && !thedate[(item + "_end")]) {
 					thedate[(item + "_end")] = thedate[item];
 				} else if (!thedate[item] && thedate[(item + "_end")]) {
@@ -1577,43 +1660,72 @@ CSL.dateParser = function (txt) {
 		if (!thedate.year) {
 			thedate = { "literal": txt };
 		}
+		if (this.use_array) {
+			this.toArray(thedate);			
+		}
 		return thedate;
 	};
+	this.returnAsArray = function () {
+		this.use_array = true;
+	}
+	this.returnAsKeys = function () {
+		this.use_array = false;
+	}
+	this.toArray = function (thedate) {
+		thedate["date-parts"] = [];
+		thedate["date-parts"].push([]);
+		var slicelen = 0;
+		for (var i = 0, ilen = 3; i < ilen; i += 1) {
+			var part = ["year", "month", "day"][i];
+			if (!thedate[part]) {
+				break;
+			}
+			slicelen += 1;
+			thedate["date-parts"][0].push(thedate[part]);
+			delete thedate[part];
+		}
+		for (var i = 0, ilen = slicelen; i < ilen; i += 1) {
+			var part = ["year_end", "month_end", "day_end"][i];
+			if (thedate[part] && thedate["date-parts"].length === 1) {
+				thedate["date-parts"].push([]);
+			}
+			thedate["date-parts"][1].push(thedate[part]);
+			delete thedate[part];
+		}
+	}
 	this.parseNumericDate = function (ret, delim, suff, txt) {
 		var lst, pos, len;
 		lst = txt.split(delim);
-		len = lst.length;
-		for (pos = 0; pos < len; pos += 1) {
-			if (lst[pos].length === 4) {
-				ret[("year" + suff)] = lst[pos].replace(/^0*/, "");
-				if (!pos) {
+		for (i = 0, ilen = lst.length; i < ilen; i += 1) {
+			if (lst[i].length === 4) {
+				ret[("year" + suff)] = lst[i].replace(/^0*/, "");
+				if (!i) {
 					lst = lst.slice(1);
 				} else {
-					lst = lst.slice(0, pos);
+					lst = lst.slice(0, i);
 				}
 				break;
 			}
 		}
-		len = lst.length;
-		for (pos = 0; pos < len; pos += 1) {
-			lst[pos] = parseInt(lst[pos], 10);
+		for (i = 0, ilen = lst.length; i < ilen; i += 1) {
+			lst[i] = parseInt(lst[i], 10);
 		}
 		if (lst.length === 1) {
 			ret[("month" + suff)] = "" + lst[0];
 		} else if (lst.length === 2) {
-			if (lst[0] > 12) {
-				ret[("month" + suff)] = "" + lst[1];
-				ret[("day" + suff)] = "" + lst[0];
+			if (lst[this.monthguess] > 12) {
+				ret[("month" + suff)] = "" + lst[this.dayguess];
+				ret[("day" + suff)] = "" + lst[this.monthguess];
 			} else {
-				ret[("month" + suff)] = "" + lst[0];
-				ret[("day" + suff)] = "" + lst[1];
+				ret[("month" + suff)] = "" + lst[this.monthguess];
+				ret[("day" + suff)] = "" + lst[this.dayguess];
 			}
 		}
 	};
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.88";
+	this.processor_version = "1.0.93";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -1684,7 +1796,7 @@ CSL.Engine = function (sys, style, lang, forceLang) {
 	this.registry = new CSL.Registry(this);
 	this.disambiguate = new CSL.Disambiguation(this);
 	this.splice_delimiter = false;
-	this.fun.dateparser = new CSL.dateParser();
+	this.fun.dateparser = new CSL.DateParser();
 	this.fun.flipflopper = new CSL.Util.FlipFlopper(this);
 	this.setCloseQuotesArray();
 	this.fun.ordinalizer.init(this);
@@ -2147,6 +2259,8 @@ CSL.Engine.Tmp = function () {
 	this.suffix = new CSL.Stack("", CSL.LITERAL);
 	this.delimiter = new CSL.Stack("", CSL.LITERAL);
 	this.names_cut = {};
+	this.cite_locales = [];
+	this.cite_affixes = false;
 };
 CSL.Engine.Fun = function () {
 	this.match = new  CSL.Util.Match();
@@ -2855,9 +2969,14 @@ CSL.getAmbiguousCite = function (Item, disambig) {
 	this.parallel.use_parallels = use_parallels;
 	return ret;
 };
-CSL.getSpliceDelimiter = function (last_collapsed) {
+CSL.getSpliceDelimiter = function (last_collapsed, pos) {
 	if (last_collapsed && ! this.tmp.have_collapsed && this.citation.opt["after-collapse-delimiter"]) {
 		this.tmp.splice_delimiter = this.citation.opt["after-collapse-delimiter"];
+	} else if (this.tmp.cite_locales[pos - 1]) {
+		var alt_affixes = this.tmp.cite_affixes[this.tmp.cite_locales[pos - 1]];
+		if (alt_affixes && alt_affixes.delimiter) {
+			this.tmp.splice_delimiter = alt_affixes.delimiter;
+		}
 	}
 	return this.tmp.splice_delimiter;
 };
@@ -2871,6 +2990,7 @@ CSL.getCitationCluster = function (inputList, citationID) {
 	this.tmp.last_names_used = [];
 	this.tmp.last_years_used = [];
 	this.tmp.backref_index = [];
+	this.tmp.cite_locales = [];
 	if (citationID) {
 		this.registry.citationreg.citationById[citationID].properties.backref_index = false;
 		this.registry.citationreg.citationById[citationID].properties.backref_citation = false;
@@ -2902,7 +3022,7 @@ CSL.getCitationCluster = function (inputList, citationID) {
 		if (pos === (inputList.length - 1)) {
 			this.parallel.ComposeSet();
 		}
-		params.splice_delimiter = CSL.getSpliceDelimiter.call(this, last_collapsed);
+		params.splice_delimiter = CSL.getSpliceDelimiter.call(this, last_collapsed, pos);
 		if (item && item["author-only"]) {
 			this.tmp.suppress_decorations = true;
 		}
@@ -2931,16 +3051,18 @@ CSL.getCitationCluster = function (inputList, citationID) {
 		}
 	};
 	var suffix = this.citation.opt.layout_suffix;
-	if (CSL.TERMINAL_PUNCTUATION.slice(0, -1).indexOf(suffix) > -1) {
-		suffix = this.citation.opt.layout_suffix.slice(0, 1);
-	} else {
-		suffix = "";
+	var last_locale = this.tmp.cite_locales[this.tmp.cite_locales.length - 1];
+	if (last_locale 
+		&& this.tmp.cite_affixes[last_locale]
+		&& this.tmp.cite_affixes[last_locale].suffix) {
+		suffix = this.tmp.cite_affixes[last_locale].suffix;
+	}
+	if (CSL.TERMINAL_PUNCTUATION.slice(0, -1).indexOf(suffix.slice(0, 1)) > -1) {
+		suffix = suffix.slice(0, 1);
 	}
 	var delimiter = this.citation.opt.layout_delimiter;
-	if (CSL.TERMINAL_PUNCTUATION.slice(0, -1).indexOf(delimiter) > -1) {
-		delimiter = this.citation.opt.layout_delimiter.slice(0, 1);
-	} else {
-		delimiter = "";
+	if (CSL.TERMINAL_PUNCTUATION.slice(0, -1).indexOf(delimiter.slice(0, 1)) > -1) {
+		delimiter = delimiter.slice(0, 1);
 	}
 	var mystk = [
 		{
@@ -2949,7 +3071,7 @@ CSL.getCitationCluster = function (inputList, citationID) {
 			blob: fakeblob
 		}
 	];
-	var use_layout_suffix = this.citation.opt.layout_suffix;
+	var use_layout_suffix = suffix;
 	for (pos = 0, len = myblobs.length; pos < len; pos += 1) {
 		CSL.Output.Queue.purgeEmptyBlobs(this.output.queue, true);
 	}
@@ -3051,13 +3173,14 @@ CSL.citeStart = function (Item) {
 	this.tmp.nameset_counter = 0;
 	this.tmp.years_used = [];
 	this.tmp.names_max.clear();
-	this.tmp.splice_delimiter = this[this.tmp.area].opt.delimiter;
+	this.tmp.splice_delimiter = this[this.tmp.area].opt.layout_delimiter;
 	this.bibliography_sort.keys = [];
 	this.citation_sort.keys = [];
 	this.tmp.count_offset_characters = false;
 	this.tmp.offset_characters = 0;
 	this.tmp.has_done_year_suffix = false;
 	CSL.Util.Names.initNameSlices(this);
+	this.tmp.last_cite_locale = false;
 };
 CSL.citeEnd = function (Item) {
 	if (this.tmp.last_suffix_used && this.tmp.last_suffix_used.match(/[\-.,;:]$/)) {
@@ -3076,6 +3199,7 @@ CSL.citeEnd = function (Item) {
 	if (!this.tmp.suppress_decorations && this.tmp.offset_characters) {
 		this.registry.registry[Item.id].offset = this.tmp.offset_characters;
 	}
+	this.tmp.cite_locales.push(this.tmp.last_cite_locale);
 };
 CSL.Node = {};
 CSL.Node.bibliography = {
@@ -3309,15 +3433,10 @@ CSL.Node.date = {
 						date_obj = {"date-parts": [[0]] };
 					}
 					if (date_obj.raw) {
-						state.tmp.date_object = state.fun.dateparser.parse(date_obj.raw);
-					} else if (date_obj["date-parts"]) {
-						state.tmp.date_object = state.dateParseArray(date_obj);
-					} else if ("object" === typeof date_obj) {
-					    state.tmp.date_object = state.dateParseArray(date_obj);
+						date_obj = state.fun.dateparser.parse(date_obj.raw);
 					}
+					state.tmp.date_object = state.dateParseArray(date_obj);
 					len = this.dateparts.length;
-					for (pos = 0; pos < len; pos += 1) {
-					}
 					for (pos = 0; pos < len; pos += 1) {
 						part = this.dateparts[pos];
 						if ("undefined" !== typeof state.tmp.date_object[(part +  "_end")]) {
@@ -3565,6 +3684,8 @@ CSL.Node["else-if"] = {
 		if (this.tokentype === CSL.END || this.tokentype === CSL.SINGLETON) {
 			func = function (state, Item) {
 				if (this.locale_default) {
+					state.output.current.value().old_locale = this.locale_default;
+					state.output.closeLevel("empty");
 					state.opt.lang = this.locale_default;
 				}
 				var next = this[state.tmp.jump.value()];
@@ -3687,6 +3808,8 @@ CSL.Node["if"] = {
 		if (this.tokentype === CSL.END || this.tokentype === CSL.SINGLETON) {
 			func = function (state, Item) {
 				if (this.locale_default) {
+					state.output.current.value().old_locale = this.locale_default;
+					state.output.closeLevel("empty");
 					state.opt.lang = this.locale_default;
 				}
 				var next = this[state.tmp.jump.value()];
@@ -4038,10 +4161,7 @@ CSL.evaluateStringPluralism = function (str) {
 CSL.Node.layout = {
 	build: function (state, target) {
 		var func, prefix_token, suffix_token;
-		if (this.tokentype === CSL.START) {
-			state.build.layout_flag = true;
-			state[state.tmp.area].opt.topdecor = [this.decorations];
-			state[(state.tmp.area + "_sort")].opt.topdecor = [this.decorations];
+		if (this.tokentype === CSL.START && !state.tmp.cite_affixes) {
 			func = function (state, Item) {
 				state.tmp.done_vars = [];
 				state.tmp.rendered_name = false;
@@ -4059,10 +4179,6 @@ CSL.Node.layout = {
 				state.tmp.nameset_counter = 0;
 			};
 			this.execs.push(func);
-			state[state.build.area].opt.layout_prefix = this.strings.prefix;
-			state[state.build.area].opt.layout_suffix = this.strings.suffix;
-			state[state.build.area].opt.layout_delimiter = this.strings.delimiter;
-			state[state.build.area].opt.layout_decorations = this.decorations;
 			func = function (state, Item) {
 				state.output.openLevel("empty");
 				state.tmp.citeblob = state.output.queue[state.output.queue.length - 1];
@@ -4085,33 +4201,96 @@ CSL.Node.layout = {
 				target.push(prefix_token);
 			}
 		}
-		if (this.tokentype === CSL.END) {
-			state.build.layout_flag = false;
-			if (state.build.area === "citation") {
-				suffix_token = new CSL.Token("text", CSL.SINGLETON);
-				func = function (state, Item, item) {
-					var sp;
-					if (item && item.suffix) {
-						sp = "";
-						if (item.suffix.match(CSL.ROMANESQUE_REGEXP)) {
-							sp = " ";
-						}
-						state.output.append((sp + item.suffix), this);
-					}
-				};
-				suffix_token.execs.push(func);
-				target.push(suffix_token);
+		if (this.locale_raw) {
+			var my_tok = new CSL.Token("dummy", CSL.START);
+			my_tok.locale = this.locale_raw;
+			my_tok.strings.delimiter = this.strings.delimiter;
+			my_tok.strings.suffix = this.strings.suffix;
+			if (!state.tmp.cite_affixes) {
+				state.tmp.cite_affixes = {};
 			}
-			func = function (state, Item) {
-				if (state.tmp.area === "bibliography") {
-					if (state.bibliography.opt["second-field-align"]) {
-						state.output.endTag();
-					}
+		}
+		if (this.tokentype === CSL.START) {
+			state.build.layout_flag = true;
+			if (!this.locale_raw) {
+				state[state.tmp.area].opt.topdecor = [this.decorations];
+				state[(state.tmp.area + "_sort")].opt.topdecor = [this.decorations];
+				state[state.build.area].opt.layout_prefix = this.strings.prefix;
+				state[state.build.area].opt.layout_suffix = this.strings.suffix;
+				state[state.build.area].opt.layout_delimiter = this.strings.delimiter;
+				state[state.build.area].opt.layout_decorations = this.decorations;
+				if (state.tmp.cite_affixes) {
+					tok = new CSL.Token("else", CSL.START);
+					CSL.Node["else"].build.call(tok, state, target);
 				}
-				state.output.closeLevel();
-			};
-			this.execs.push(func);
-			target.push(this);
+			} // !this.locale_raw
+			if (this.locale_raw) {
+				if (!state.build.layout_locale_flag) {
+					var choose_tok = new CSL.Token("choose", CSL.START);
+					CSL.Node.choose.build.call(choose_tok, state, target);
+					my_tok.name = "if";
+					CSL.Attributes["@locale"].call(my_tok, state, this.locale_raw);
+					CSL.Node["if"].build.call(my_tok, state, target);
+				} else {
+					my_tok.name = "else-if";
+					CSL.Attributes["@locale"].call(my_tok, state, this.locale_raw);
+					CSL.Node["else-if"].build.call(my_tok, state, target);
+				}
+				state.tmp.cite_affixes[my_tok.locale] = {};
+				state.tmp.cite_affixes[my_tok.locale].delimiter = this.strings.delimiter;
+				state.tmp.cite_affixes[my_tok.locale].suffix = this.strings.suffix;
+			}
+		}
+		if (this.tokentype === CSL.END) {
+			if (this.locale_raw) {
+				if (!state.build.layout_locale_flag) {
+					my_tok.name = "if";
+					my_tok.tokentype = CSL.END;
+					CSL.Attributes["@locale"].call(my_tok, state, this.locale_raw);
+					CSL.Node["if"].build.call(my_tok, state, target);
+					state.build.layout_locale_flag = true;
+				} else {
+					my_tok.name = "else-if";
+					my_tok.tokentype = CSL.END;
+					CSL.Attributes["@locale"].call(my_tok, state, this.locale_raw);
+					CSL.Node["else-if"].build.call(my_tok, state, target);
+				}
+			}
+			if (!this.locale_raw) {
+				if (state.tmp.cite_affixes) {
+					tok = new CSL.Token("else", CSL.END);
+					CSL.Node["else"].build.call(tok, state, target);
+					tok = new CSL.Token("choose", CSL.END);
+					CSL.Node.choose.build.call(tok, state, target);
+				}
+				state.build_layout_locale_flag = true;
+				if (state.build.area === "citation") {
+					suffix_token = new CSL.Token("text", CSL.SINGLETON);
+					func = function (state, Item, item) {
+						var sp;
+						if (item && item.suffix) {
+							sp = "";
+							if (item.suffix.match(CSL.ROMANESQUE_REGEXP)) {
+								sp = " ";
+							}
+							state.output.append((sp + item.suffix), this);
+						}
+					};
+					suffix_token.execs.push(func);
+					target.push(suffix_token);
+				}
+				func = function (state, Item) {
+					if (state.tmp.area === "bibliography") {
+						if (state.bibliography.opt["second-field-align"]) {
+							state.output.endTag();
+						}
+					}
+					state.output.closeLevel();
+				};
+				this.execs.push(func);
+				target.push(this);
+				state.build.layout_flag = false;
+			} // !this.layout_raw
 		}
 	}
 };
@@ -4802,8 +4981,8 @@ CSL.Node.number = {
 				var all_with_spaces = true;
 				for (var i = 1, ilen = prefixes.length - 1; i < ilen; i += 1) {
 				    if (prefixes[i].indexOf(" ") === -1) {
-					all_with_spaces = false;
-					break;
+						all_with_spaces = false;
+						break;
 				    }
 				}
 				if (state.tmp.area !== "citation_sort"
@@ -4863,7 +5042,7 @@ CSL.Node.number = {
 				} else if (!all_with_spaces || prefixes.length > 2) {
 				    state.output.append(num, this);
 				} else {
-					m = num.match(/\s*([0-9]+)/);
+					m = num.match(/\s*([0-9]+)(?:[^-]* |[^-]*$)/);
 					if (m) {
 						num = parseInt(m[1], 10);
 						number = new CSL.NumericBlob(num, this);
@@ -5368,30 +5547,55 @@ CSL.Attributes["@variable"] = function (state, arg) {
 };
 CSL.Attributes["@lingo"] = function (state, arg) {
 }
-CSL.Attributes["@language"] = function (state, arg) {
-	var func, ret, len, pos, variable, myitem, x, langspec, lang;
-	lang = CSL.localeParse(arg);
-	langspec = CSL.localeResolve(lang);
-	state.localeConfigure(langspec);
-	this.locale_default = state.opt["default-locale"][0];
-	this.locale_base = langspec.base;
-	this.locale = langspec.best;
-	func = function (state, Item, item) {
-		var key;
-		ret = [];
-		x = false;
-		if (Item.language) {
-			lang = CSL.localeParse(Item.language);
+CSL.Attributes["@locale"] = function (state, arg) {
+	var func, ret, len, pos, variable, myitem, langspec, lang, lst, i, ilen, fallback;
+	if (this.name === "layout") {
+		this.locale_raw = arg;
+	} else {
+		lst = arg.split(/\s+/);
+		this.locale_bases = [];
+		for (i = 0, ilen = lst.length; i < ilen; i += 1) {
+			lang = CSL.localeParse(lst[i]);
 			langspec = CSL.localeResolve(lang);
-			if (langspec.base === this.locale_base) {
-				state.opt.lang = this.locale;
-				x = true;
-				ret.push(x);
+			if (lst[i].length === 2) {
+				this.locale_bases.push(langspec.base);
 			}
+			state.localeConfigure(langspec);
+			lst[i] = langspec;
 		}
-		return ret;
+		this.locale_default = state.opt["default-locale"][0];
+		this.locale = lst[0].best;
+		this.locale_list = lst.slice();
+		func = function (state, Item, item) {
+			var key, res;
+			ret = [];
+			if (Item.language) {
+				lang = CSL.localeParse(Item.language);
+				langspec = CSL.localeResolve(lang);
+				res = false;
+				for (i = 0, ilen = this.locale_list.length; i < ilen; i += 1) {
+					if (langspec.best === this.locale_list[i].best) {
+						state.opt.lang = this.locale;
+						state.tmp.last_cite_locale = this.locale;
+						state.output.openLevel("empty");
+						state.output.current.value().new_locale = this.locale;
+						res = true;
+						break;
+					}
+				}
+				if (!res && this.locale_bases.indexOf(langspec.base) > -1) {
+					state.opt.lang = this.locale;
+					state.tmp.last_cite_locale = this.locale;
+					state.output.openLevel("empty");
+					state.output.current.value().new_locale = this.locale;
+					res = true;
+				}
+			}
+			ret.push(res);
+			return ret;
+		};
+		this.tests.push(func);
 	};
-	this.tests.push(func);
 };
 CSL.Attributes["@suffix"] = function (state, arg) {
 	this.strings.suffix = arg;
@@ -6813,9 +7017,7 @@ CSL.Util.Names.getCommonTerm = function (state, namesets) {
 	}
 	base_nameset = namesets[0];
 	varnames = [];
-	if (varnames.indexOf(base_nameset.variable) === -1) {
 		varnames.push(base_nameset.variable);
-	}
 	short_namesets = namesets.slice(1);
 	len = short_namesets.length;
 	for (pos = 0; pos < len; pos += 1) {
@@ -7285,7 +7487,7 @@ CSL.Util.Ordinalizer.prototype.format = function (num, gender) {
 	var str;
 	num = parseInt(num, 10);
 	str = num.toString();
-	if ((num / 10) % 10 === 1) {
+	if ((num / 10) % 10 === 1 || (num > 10 && num < 20)) {
 		str += this.suffixes[gender][3];
 	} else if (num % 10 === 1) {
 		str += this.suffixes[gender][0];

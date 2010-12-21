@@ -20,6 +20,7 @@
         </xsl:when>
       </xsl:choose>
       <xsl:attribute name="version">1.0</xsl:attribute>
+      <xsl:attribute name="demote-non-dropping-particle">sort-only</xsl:attribute>
       <xsl:apply-templates/>
     </xsl:copy>
   </xsl:template>
