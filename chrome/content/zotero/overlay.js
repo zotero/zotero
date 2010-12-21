@@ -123,7 +123,16 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'win');
 		}
 		
-		if(Zotero.isFx35) document.documentElement.setAttribute("moz-version", "3.5");
+		if(Zotero.isFx4) {
+			// hack, since Fx 4 no longer sets active, and the reverse in polarity of the preferred
+			// property makes things painful to handle otherwise
+			// DEBUG: remove this once we only support Fx 4
+			document.documentElement.setAttribute("active", "true");
+			window.addEventListener("focus",
+				function() { document.documentElement.setAttribute("active", "true") }, false);
+			window.addEventListener("blur",
+				function() { document.documentElement.removeAttribute("active") }, false);
+		}
 		
 		//Initialize collections view
 		this.collectionsView = new Zotero.CollectionTreeView();
