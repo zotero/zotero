@@ -1,14 +1,14 @@
 {
         "translatorID":"fc353b26-8911-4c34-9196-f6f567c93901",
         "label":"Douban",
-        "creator":"Ace Strong <acestrong@gmail.com>",
-        "target":"^https?://(www|book)\\.douban\\.com/subject",
+        "creator":"Ace Strong<acestrong@gmail.com>",
+        "target":"^https?://(?:www|book).douban.com/(?:subject|doulist|people/[a-zA-Z._]*/(?:do|wish|collect)|.*?status=(?:do|wish|collect)|group/[0-9]*?/collection|tag)",
         "minVersion":"2.0rc1",
         "maxVersion":"",
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-10-10 00:23:10"
+        "lastUpdated":"2010-12-19 20:09:43"
 }
 
 /*
@@ -39,6 +39,10 @@
  *
  *   - A search listing of books
  *   - A book page
+ *   - A doulist page
+ *   - A do page
+ *   - A wish page
+ *   - A collect page
  */
 // http://book.douban.com/
 
@@ -70,10 +74,10 @@ function scrapeAndParse(url) {
 	newItem.url = url;
 
 	// 标题
-	pattern = /<h1>(.*?)<\/h1>/;
+	pattern = /<h1>([\s\S]*?)<\/h1>/;
 	if (pattern.test(page)) {
 		var title = pattern.exec(page)[1];
-		newItem.title = title;
+		newItem.title = Zotero.Utilities.trim(trimTags(title));
 //		Zotero.debug("title: "+title);
 	}
 	
@@ -169,7 +173,7 @@ function scrapeAndParse(url) {
 	}
 	
 	// 简介
-	pattern = /<h2[^>]*?>简介[\s\S]*?<\/h2>([\s\S]*?)<\/div>/;
+	pattern = /<h2[^>]*?>(?:内容)?简介[\s\S]*?<\/h2>([\s\S]*?)<\/div>/;
 	if (pattern.test(page)) {
 		var intro = pattern.exec(page)[1];
 		intro = trimTags(intro.replace(/(<br\/>)/g, "\n"));
@@ -218,6 +222,23 @@ function scrapeAndParse(url) {
 		}
 //		Zotero.debug("abstractNote: "+newItem.abstractNote);
 	}
+	
+	// 标签
+	pattern = /<h2\s*?>豆瓣成员常用的标签([\s\S]*?)<\/div>/;
+	if (pattern.test(page)) {
+		var labels = pattern.exec(page)[1];
+		pattern = /<a [^>]*?>(.*?)<\/a>/g;
+
+		var result = labels.match(pattern);
+		for (var i=0; i<result.length; i++) {
+			var label = trimTags(result[i]);
+			
+			if (label) {
+				newItem.tags.push(label);
+			}
+//			Zotero.debug(label);
+		}
+	}
 
 	newItem.complete();
 }
@@ -227,7 +248,7 @@ function scrapeAndParse(url) {
 // #########################
 
 function detectWeb(doc, url) {
-	var pattern = /subject_search/;
+	var pattern = /subject_search|doulist|people\/[a-zA-Z._]*?\/(?:do|wish|collect)|.*?status=(?:do|wish|collect)|group\/[0-9]*?\/collection|tag/;
 
 	if (pattern.test(url)) {
 		return "multiple";
@@ -244,22 +265,64 @@ function doWeb(doc, url) {
 
 	if(detectWeb(doc, url) == "multiple") {
 //		Zotero.debug("Enter multiple.");
-		// search page
+		// selected results
 		var items = new Array();
 
-		pattern = /<a class="nbg"\s*([^>]*?)>/g;
-		if (pattern.test(page)) {
-			var result = page.match(pattern);
-//			Zotero.debug(result.length);
-//			Zotero.debug(result[1]);
-
-			pattern = /href="(.*?)".*?title="(.*?)"/;
-			for (var i=0; i<result.length; i++) {
-				var res = pattern.exec(result[i]);
-				if(res[1]) {
-					items[res[1]] = res[2];
+		pattern = /doulist/;
+		if (pattern.test(url)) {
+			// fetch items from doulist
+			pattern = /<table ([\s\S]*?)<\/table>/g;
+			if (pattern.test(page)) {
+				var result = page.match(pattern);
+//				Zotero.debug(result.length);
+//				Zotero.debug(result[1]);
+	
+				pattern = /<div (?:[\s\S]*?)<a href="(.*?)">(.*?)<\/a>\s*?<\/div>/;
+				for (var i=0; i<result.length; i++) {
+					var res = pattern.exec(result[i]);
+					if(res[1]) {
+						items[res[1]] = res[2];
+					}
 				}
 			}
+		} else {
+			pattern = /(?:do|wish|collect)$/;
+			
+			if (pattern.test(url)) {
+				// fetch items from do/wish/collect list
+				pattern = /<a href="(?:.*?)">\s*<em>(?:.*?)<\/em>\s*<\/a>/g;
+				if (pattern.test(page)) {
+					var result = page.match(pattern);
+//					Zotero.debug(result.length);
+//					Zotero.debug(result[0]);
+		
+					pattern = /<a href="(.*?)">\s*<em>(.*?)<\/em>\s*<\/a>/;
+					for (var i=0; i<result.length; i++) {
+						var res = pattern.exec(result[i]);
+						if(res[1]) {
+							items[res[1]] = res[2];
+						}
+					}
+				}
+			} else {
+				// fetch items from search result or collection or tag
+				pattern = /<a class="nbg"\s*([^>]*?)>/g;
+				if (pattern.test(page)) {
+					var result = page.match(pattern);
+//					Zotero.debug(result.length);
+//					Zotero.debug(result[1]);
+		
+					pattern = /href="(.*?)".*?title="(.*?)"/;
+					for (var i=0; i<result.length; i++) {
+						var res = pattern.exec(result[i]);
+						if(res[1]) {
+							items[res[1]] = res[2];
+						}
+					}
+				}
+			}
+			
+
 		}
 
 		// 让用户选择要保存哪些文献

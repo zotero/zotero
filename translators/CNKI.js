@@ -2,13 +2,13 @@
         "translatorID":"5c95b67b-41c5-4f55-b71a-48d5d7183063",
         "label":"CNKI",
         "creator":"Ace Strong <acestrong@gmail.com> and Heromyth <zxpmyth@yahoo.com.cn>",
-        "target":"^https?://(?:(?:(dlib|epub|acad|apj1|law1)\\.cnki\\.net)|(?:[0-9\\.]+))/(?:grid2008|kns50|Kns55|kcms)",
+        "target":"^https?://(?:(?:(dlib|epub|acad|apj1|law1|www)\\.cnki\\.net)|(?:[0-9\\.]+))/(?:grid2008|kns50|Kns55|kcms)",
         "minVersion":"2.0rc1",
         "maxVersion":"",
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-10-12 15:25:46"
+        "lastUpdated":"2010-12-10 14:32:46"
 }
 
 /*
@@ -56,11 +56,23 @@
 // #################################
 
 function detectCode(url) {
-	var pattern = /(?:dbcode|dbname)=([A-Z]{4})/i;
+	var pattern = /(?:dbcode|dbname)=([A-Za-z]{4})/i;
 	if (pattern.test(url)) {
 		var code = pattern.exec(url)[1];
 		return code;
+	} else {
+		// parse from source page
+		var page = Zotero.Utilities.retrieveSource(url);
+		pattern = /id="nowdbname"[^>]*?>(.*?)<\/SPAN>/i;
+		if (pattern.test(page)) {
+			var dbname = pattern.exec(page)[1];
+//			Zotero.debug(dbname);
+			if (dbname == "中国期刊全文数据库") {
+				return "CJFD";
+			}
+		}
 	}
+	return "NONE";
 }
 
 function getResolver(doc) {
@@ -108,7 +120,7 @@ function scrapeAndParse1(url) {
 //		Zotero.debug(url);
 		newItem.url = url;
 	
-		// 标题
+		// 标题/Title
 		pattern = /<span (?:id="chTitle"|class='datatitle')>(.*?)<\/span>/;
 		if (pattern.test(page)) {
 			var title = trimTags(pattern.exec(page)[1]);
@@ -116,7 +128,7 @@ function scrapeAndParse1(url) {
 //			Zotero.debug("title: "+title);
 		}
 		
-		// 作者
+		// 作者/Authors
 		var authorNames;
 		pattern = /【作者】(?:[\s\S]*?)GetLinkListEx\('(.*?);','/;
 		if (pattern.test(page)) {
@@ -139,7 +151,7 @@ function scrapeAndParse1(url) {
 //			Zotero.debug("authorNames:\n"+authorNames);
 		}
 		
-		// 摘要
+		// 摘要/Abstract
 		var abst;
 		pattern = /【摘要】\s*<[^>]*>(.*?)<\/span>/;
 		if (pattern.test(page)) {
@@ -154,6 +166,7 @@ function scrapeAndParse1(url) {
 //			Zotero.debug("abstract:\n"+abst);
 			newItem.abstractNote = Zotero.Utilities.trim(abst);
 		}
+		
 		pattern = /【Abstract】\s*<[^>]*>(.*?)<\/span>/;
 		if (pattern.test(page)) {
 			abst = trimTags(pattern.exec(page)[1]);
@@ -174,13 +187,13 @@ function scrapeAndParse1(url) {
 		}
 //		Zotero.debug(newItem.abstractNote);
 		
-		// 关键词
+		// 关键词/Keywords
 		var tags;
 		pattern = /【关键词】(?:[\s\S]*?)KeywordFilter\('(.*?)'\),'kw'/;
 		if (pattern.test(page)) {
 			tags = pattern.exec(page)[1].split(";");
 		} else {
-			pattern = /【中文关键词】([\s\S]*?)<\/tr>/;
+			pattern = /【(?:中文)?关键词】([\s\S]*?)<\/tr>/;
 			if (pattern.test(page)) {
 				tags = trimTags(pattern.exec(page)[1]).split(";");
 			}
@@ -214,7 +227,7 @@ function scrapeAndParse1(url) {
 		}
 		
 		// 文献出处 & DOI & 出版时间
-		pattern = /【文献出处】([\s\S]*?)<\/a>/;
+		pattern = /【(?:文献出处|刊名)】([\s\S]*?)<\/a>/;
 		if (pattern.test(page)) {
 			var publicationTitle = trimTags(pattern.exec(page)[1]);
 			newItem.publicationTitle = Zotero.Utilities.trim(publicationTitle);
@@ -234,7 +247,7 @@ function scrapeAndParse1(url) {
 			newItem.DOI = Zotero.Utilities.trim(doi);
 //			Zotero.debug("doi: "+doi);
 		}
-		pattern = /【文献出处】(?:[\s\S]*?)(\d{4})年\s*(\d{2})(卷|期)/;
+		pattern = /【(?:文献出处|刊名)】(?:[\s\S]*?)(\d{4})年\s*([0-9A-Z]{2})(卷|期)/;
 		if (pattern.test(page)) {
 			var date = pattern.exec(page)[1];
 			newItem.date = date;
@@ -274,7 +287,7 @@ function scrapeAndParse2(url) {
 //		Zotero.debug(newItem.thesisType);
 		
 	
-		// 标题
+		// 标题/Title
 		pattern = /<span (?:id="chTitle"|class='datatitle')>(.*?)<\/span>/;
 		if (pattern.test(page)) {
 			var title = pattern.exec(page)[1];
@@ -284,7 +297,7 @@ function scrapeAndParse2(url) {
 //			Zotero.debug("title: "+title);
 		}
 		
-		// 作者
+		// 作者/Author
 		pattern = /【作者】([\s\S]*?)<\/a>/;
 		if (pattern.test(page)) {
 			var authorNames = trimTags(pattern.exec(page)[1]).split(";");
@@ -296,7 +309,7 @@ function scrapeAndParse2(url) {
 //			Zotero.debug("authorNames:\n"+authorNames);
 		}
 		
-		// 导师
+		// 导师/Tutors
 		pattern = /【导师】([\s\S]*?)<\/a>/;
 		if (pattern.test(page)) {
 			var directors = trimTags(pattern.exec(page)[1]).split(";");
@@ -308,7 +321,7 @@ function scrapeAndParse2(url) {
 //			Zotero.debug("directors: "+directors);
 		}
 	
-		// 摘要
+		// 摘要/Abstract
 		var abst;
 		pattern = /ReplaceFont\('ChDivSummary','(.*?)(?='\);ReplaceFont)/;
 		if (pattern.test(page)) {
@@ -343,7 +356,7 @@ function scrapeAndParse2(url) {
 		}
 //		Zotero.debug(newItem.abstractNote);
 		
-		// 关键词
+		// 关键词/Keywords
 		var tags;
 		pattern = /【关键词】\s*<span[^>]*>(.*?)<\/a>*<\/span>/;
 		if (pattern.test(page)) {
@@ -384,26 +397,26 @@ function scrapeAndParse2(url) {
 //		Zotero.debug(newItem.tags);
 		
 		// 出版学校 & DOI & 出版时间
-		var publisher;
+		var university;
 		pattern = /【网络出版投稿人】\s*<a[^>]*>(.*?)<\/a>/;
 		if (pattern.test(page)) {
-			publisher = pattern.exec(page)[1];
+			university = pattern.exec(page)[1];
 		} else {
 			pattern = /【网络出版投稿人】([\s\S]*?)<\/tr>/;
 			if (pattern.test(page)) {
-				publisher = Zotero.Utilities.trim(
+				university = Zotero.Utilities.trim(
 					trimTags(pattern.exec(page)[1]));
 			}
 		}
-		if (publisher) {
+		if (university) {
 			pattern = /(.*?)（(.*?)）/;
-			if (pattern.test(publisher)) {
-				newItem.publisher = pattern.exec(publisher)[1];
-				newItem.place = pattern.exec(publisher)[2];
+			if (pattern.test(university)) {
+				newItem.university = pattern.exec(university)[1];
+				newItem.place = pattern.exec(university)[2];
 			} else {
-				newItem.publisher = publisher;
+				newItem.publisher = university;
 			}
-//			Zotero.debug("publisher: "+publisher);
+//			Zotero.debug("university: "+university);
 		}
 		var doi;
 		pattern = /【DOI】(.*?)<\/li>/;
@@ -450,7 +463,7 @@ function scrapeAndParse3(url) {
 //		Zotero.debug(url);
 		newItem.url = url;
 	
-		// 标题
+		// 标题/Title
 		pattern = /<span id="chTitle">(.*?)<\/span>/;
 		if (pattern.test(page)) {
 			var title = trimTags(pattern.exec(page)[1]);
@@ -458,7 +471,7 @@ function scrapeAndParse3(url) {
 //			Zotero.debug("title: "+title);
 		}
 		
-		// 作者
+		// 作者/Authors
 		pattern = /【作者】(.*?)<\/p>/;
 		if (pattern.test(page)) {
 			var authorNames = trimTags(pattern.exec(page)[1]).split(";");
@@ -471,7 +484,7 @@ function scrapeAndParse3(url) {
 //			Zotero.debug("authorNames:\n"+authorNames);
 		}
 	
-		// 摘要
+		// 摘要/Abstract
 		var abst;
 		pattern = /ReplaceFont\('ChDivSummary','(.*?)(?='\);ReplaceFont)/;
 		if (pattern.test(page)) {
@@ -502,7 +515,7 @@ function scrapeAndParse3(url) {
 		}
 //		Zotero.debug("abst:\n"+newItem.abstractNote);
 		
-		// 关键词
+		// 关键词/Keywords
 		pattern = /【关键词】\s*<span[^>]*>(.*?)<\/a>*<\/span>/;
 		if (pattern.test(page)) {
 			var tags = trimTags(pattern.exec(page)[1]).split(";");
@@ -569,7 +582,7 @@ function scrapeAndParse4(url) {
 //		Zotero.debug(url);
 		newItem.url = url;
 	
-		// 标题
+		// 标题/Title
 		pattern = /<span id="chTitle">(.*?)<\/span>/;
 		if (pattern.test(page)) {
 			var title = trimTags(pattern.exec(page)[1]);
@@ -587,7 +600,7 @@ function scrapeAndParse4(url) {
 		}
 //		Zotero.debug(newItem.shortTitle);
 	
-		// 作者
+		// 作者/Authors
 		pattern = /【作\s*者】(.*?)<\/p>/;
 		if (pattern.test(page)) {
 			var authorNames = trimTags(pattern.exec(page)[1]).split(";");
@@ -600,7 +613,7 @@ function scrapeAndParse4(url) {
 //			Zotero.debug("authorNames:\n"+authorNames);
 		}
 		
-		// 正文快照
+		// 正文快照/Abstract
 		var abst;
 		pattern = /<p>【正文快照】(.*?)(?=<\/p>)/;
 		if (pattern.test(page)) {
@@ -654,7 +667,7 @@ function detectWeb(doc, url) {
 	var pattern = /detail.aspx/;
 
 	if (pattern.test(url)) {
-		var code = detectCode(url);
+		var code = detectCode(url).toUpperCase();
 //		Zotero.debug(code);
 		if (code == "CJFQ" || code == "CJFD") {
 			return "journalArticle";
@@ -666,9 +679,11 @@ function detectWeb(doc, url) {
 			return "conferencePaper";
 		} else if (code == "CCND") {
 			return "newspaperArticle";
+		} else if (code == "NONE") {
+			Zotero.debug("Not support yet.");
 		}
 	}
-	
+
 	pattern = /brief/;
 	if (pattern.test(url)) {
 		return "multiple"
