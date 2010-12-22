@@ -2348,7 +2348,7 @@
 			<scrollbox id="item-box" flex="1" orient="vertical"
 				 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 				<popupset>
-					<popup id="creator-type-menu" position="after_start"
+					<menupopup id="creator-type-menu" position="after_start"
 						onpopupshowing="var typeBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
 								var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 								
@@ -2384,7 +2384,7 @@
 							);
 							typeBox.setAttribute('typeid', typeID);
 							document.getBindingParent(this).modifyCreator(index, fields);"/>
-					<popup id="field-menu">
+					<menupopup id="field-menu">
 						<menu label="&zotero.item.textTransform;">
 							<menupopup>
 								<menuitem label="&zotero.item.textTransform.lowercase;" class="menuitem-non-iconic"
@@ -2393,7 +2393,7 @@
 									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'title')"/>
 							</menupopup>
 						</menu>
-					</popup>
+					</menupopup>
 				</popupset>
 				<hbox id="go-buttons" align="center" hidden="true">
 					<button id="view-button"
