@@ -1030,7 +1030,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			return 0;
 		}
 		
-		var cmp = strcmp(fieldA, fieldB);
+		var cmp = strcmp(fieldA, fieldB, true);
 		if (cmp) {
 			return cmp
 		}
@@ -1042,7 +1042,6 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		var bCreators = b.ref.getCreators();
 		var aNumCreators = a.ref.numCreators();
 		var bNumCreators = b.ref.numCreators();
-		var maxCreators = Math.max(aNumCreators, bNumCreators);
 		
 		var aPrimary = Zotero.CreatorTypes.getPrimaryIDForType(a.ref.itemTypeID);
 		var bPrimary = Zotero.CreatorTypes.getPrimaryIDForType(b.ref.itemTypeID);
@@ -1128,14 +1127,14 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			// Compare names
 			fieldA = Zotero.Items.getSortTitle(aCreators[aPos].ref.lastName);
 			fieldB = Zotero.Items.getSortTitle(bCreators[bPos].ref.lastName);
-			var cmp = strcmp(fieldA, fieldB);
+			var cmp = strcmp(fieldA, fieldB, true);
 			if (cmp) {
 				return cmp;
 			}
 			
 			fieldA = Zotero.Items.getSortTitle(aCreators[aPos].ref.firstName);
 			fieldB = Zotero.Items.getSortTitle(bCreators[bPos].ref.firstName);
-			var cmp = strcmp(fieldA, fieldB);
+			var cmp = strcmp(fieldA, fieldB, true);
 			if (cmp) {
 				return cmp;
 			}
