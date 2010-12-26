@@ -216,7 +216,6 @@
 									contentcontextmenu="contentAreaContextMenu"
 									onnewtab="BrowserOpenTab();"
 									autocompletepopup="PopupAutoComplete"
-									ondrop="nsDragAndDrop.drop(event, contentAreaDNDObserver);"
 									onclick="return contentAreaClick(event, false);"/>
 		</vbox>
 	</hbox>

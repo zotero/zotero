@@ -2532,26 +2532,6 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.startDrag = function (event, element) {
-		element.onDragStart(event);
-	}
-	
-	
-	this.dragEnter = function (event, element) {
-		return element.onDragEnter(event);
-	}
-	
-	
-	this.dragOver = function (event, element) {
-		return element.onDragOver(event);
-	}
-	
-	
-	this.dragDrop = function (event, element) {
-		return element.onDrop(event);
-	}
-	
-	
 	this.openPreferences = function (paneID, action) {
 		var io = {
 			pane: paneID,
