@@ -4212,8 +4212,15 @@ Zotero.Sync.Server.Data = new function() {
 	function _deleteConflictingTag(syncSession, name, type, libraryID) {
 		var tagID = Zotero.Tags.getID(name, type, libraryID);
 		if (tagID) {
-			Zotero.debug("Deleting conflicting local tag " + tagID);
+			Zotero.debug("Deleting conflicting local '" + name + "' tag " + tagID);
 			var tag = Zotero.Tags.get(tagID);
+			// Tag has already been deleted, which can happen if the server has
+			// two new tags that differ only in case, and one matches a local tag
+			// with a different key, causing that tag to be deleted already.
+			if (!tag) {
+				Zotero.debug("Local tag " + tagID + " doesn't exist");
+				return false;
+			}
 			var linkedItems = tag.getLinkedItems(true);
 			Zotero.Tags.erase(tagID);
 			Zotero.Tags.purge();
