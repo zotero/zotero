@@ -58,6 +58,7 @@ To add a new preference:
 			<preference id="pref-automaticSnapshots" name="extensions.zotero.automaticSnapshots" type="bool"/>
 			<preference id="pref-downloadAssociatedFiles" name="extensions.zotero.downloadAssociatedFiles" type="bool"/>
 			<preference id="pref-automaticTags" name="extensions.zotero.automaticTags" type="bool"/>
+			<preference id="pref-trashAutoEmptyDays" name="extensions.zotero.trashAutoEmptyDays" type="int"/>
 			
 			<preference id="pref-groups-copyChildNotes" name="extensions.zotero.groups.copyChildNotes" type="bool"/>
 			<preference id="pref-groups-copyChildFileAttachments" name="extensions.zotero.groups.copyChildFileAttachments" type="bool"/>
@@ -140,6 +141,12 @@ To add a new preference:
 			<checkbox label="&zotero.preferences.automaticSnapshots;" preference="pref-automaticSnapshots"/>
 			<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
 			<checkbox label="&zotero.preferences.automaticTags;" preference="pref-automaticTags"/>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.trashAutoEmptyDaysPre;"/>
+				<textbox size="2" preference="pref-trashAutoEmptyDays"/>
+				<label value="&zotero.preferences.trashAutoEmptyDaysPost;"/>
+			</hbox>
 		</groupbox>
 		
 		<groupbox>
