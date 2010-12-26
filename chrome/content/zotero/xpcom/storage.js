@@ -816,10 +816,27 @@ Zotero.Sync.Storage = new function () {
 	this.purgeDeletedStorageFiles = function (module, callback) {
 		_session = new Zotero.Sync.Storage.Session(module, { onError: _error });
 		if (!_session.initFromPrefs()) {
-			Zotero.debug("Module '" + module + "' not initialized in Zotero.Sync.Storage.purgeDeletedStorageFiles()");
 			return;
 		}
 		_session.purgeDeletedStorageFiles(callback);
+	}
+	
+	
+	this.purgeOrphanedStorageFiles = function (module, callback) {
+		_session = new Zotero.Sync.Storage.Session(module, { onError: _error });
+		if (!_session.initFromPrefs()) {
+			return;
+		}
+		_session.purgeOrphanedStorageFiles(callback);
+	}
+	
+	
+	this.isActive = function (module) {
+		_session = new Zotero.Sync.Storage.Session(module, { onError: _error });
+		if (!_session.initFromPrefs()) {
+			return;
+		}
+		return _session.active;
 	}
 	
 	

@@ -1427,6 +1427,10 @@ var Zotero = new function(){
 			Zotero.Sync.Storage.purgeDeletedStorageFiles('zfs');
 			Zotero.Sync.Storage.purgeDeletedStorageFiles('webdav');
 		}
+		
+		if (!skipStoragePurge) {
+			Zotero.Sync.Storage.purgeOrphanedStorageFiles('webdav');
+		}
 	}
 	
 	
@@ -1494,7 +1498,7 @@ Zotero.Prefs = new function(){
 	/**
 	* Set a preference
 	**/
-	function set(pref, value){
+	function set(pref, value) {
 		try {
 			switch (this.prefBranch.getPrefType(pref)){
 				case this.prefBranch.PREF_BOOL:
@@ -1503,6 +1507,22 @@ Zotero.Prefs = new function(){
 					return this.prefBranch.setCharPref(pref, value);
 				case this.prefBranch.PREF_INT:
 					return this.prefBranch.setIntPref(pref, value);
+				
+				// If not an existing pref, create appropriate type automatically
+				case 0:
+					if (typeof value == 'boolean') {
+						Zotero.debug("Creating boolean pref '" + pref + "'");
+						return this.prefBranch.setBoolPref(pref, value);
+					}
+					if (parseInt(value) == value) {
+						Zotero.debug("Creating integer pref '" + pref + "'");
+						return this.prefBranch.setIntPref(pref, value);
+					}
+					if (typeof value == 'string') {
+						Zotero.debug("Creating string pref '" + pref + "'");
+						return this.prefBranch.setCharPref(pref, value);
+					}
+					throw ("Invalid preference value '" + value + "' for pref '" + pref + "'");
 			}
 		}
 		catch (e){

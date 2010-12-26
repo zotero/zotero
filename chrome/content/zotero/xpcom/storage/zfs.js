@@ -950,6 +950,9 @@ Zotero.Sync.Storage.Session.ZFS.prototype.setLastSyncTime = function (callback, 
 }
 
 
+/**
+ * Remove all synced files from the server
+ */
 Zotero.Sync.Storage.Session.ZFS.prototype.purgeDeletedStorageFiles = function (callback) {
 	// If we don't have a user id we've never synced and don't need to bother
 	if (!Zotero.userID) {
@@ -966,12 +969,13 @@ Zotero.Sync.Storage.Session.ZFS.prototype.purgeDeletedStorageFiles = function (c
 	
 	var uri = this.userURI;
 	uri.spec += "removestoragefiles?";
+	// Unused
 	for each(var value in values) {
 		switch (value) {
 			case 'user':
 				uri.spec += "user=1&";
 				break;
-				
+			
 			case 'group':
 				uri.spec += "group=1&";
 				break;
