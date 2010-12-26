@@ -163,11 +163,6 @@ var ZoteroAdvancedSearch = new function() {
 	}
 	
 	
-	this.startDrag = function (event, element) {
-		element.onDragStart(event);
-	}
-	
-	
 	function onUnload() {
 		// Unregister search from Notifier
 		if (this.itemsView) {

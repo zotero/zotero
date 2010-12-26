@@ -37,7 +37,7 @@
 	
 	<tree id="zotero-items-tree" flex="1" hidecolumnpicker="true" seltype="multiple"
 			ondblclick="ZoteroAdvancedSearch.onDblClick(event, this)"
-			ondragstart="if (event.target.localName == 'treechildren') { ZoteroAdvancedSearch.startDrag(event, ZoteroAdvancedSearch.itemsView); }">
+			ondragstart="if (event.target.localName == 'treechildren') { ZoteroAdvancedSearch.itemsView.onDragStart(event); }">
 		<treecols>
 			<treecol
 				id="zotero-items-column-title" primary="true"

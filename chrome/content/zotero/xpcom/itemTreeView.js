@@ -1775,7 +1775,7 @@ Zotero.ItemTreeCommandController.prototype.onEvent = function(evt)
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Start a drag using nsDragAndDrop.js or HTML 5 Drag and Drop
+ * Start a drag using HTML 5 Drag and Drop
  */
 Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 	// Quick implementation of dragging of XML item format
@@ -2106,24 +2106,9 @@ Zotero.ItemTreeView.fileDragDataProvider.prototype = {
 }
 
 
-/**
- * Returns the supported drag flavours
- *
- * Called by nsDragAndDrop.js
- */
-Zotero.ItemTreeView.prototype.getSupportedFlavours = function () {
-	var flavors = new FlavourSet();
-	flavors.appendFlavour("zotero/item");
-	flavors.appendFlavour("zotero/item-xml");
-	flavors.appendFlavour("text/x-moz-url");
-	flavors.appendFlavour("application/x-moz-file", "nsIFile");
-	return flavors; 
-}
-
-
 Zotero.ItemTreeView.prototype.canDrop = function(row, orient, dragData)
 {
-	//Zotero.debug("Row is " + row + "; orient is " + orient);
+	Zotero.debug("Row is " + row + "; orient is " + orient);
 	
 	if (row == -1 && orient == -1) {
 		//return true;
@@ -2133,6 +2118,7 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient, dragData)
 		var dragData = Zotero.DragDrop.getDragData(this);
 	}
 	if (!dragData) {
+		Zotero.debug("No drag data");
 		return false;
 	}
 	var dataType = dragData.dataType;
@@ -2143,45 +2129,6 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient, dragData)
 	}
 	
 	var itemGroup = this._itemGroup;
-	
-	// workaround... two different services call canDrop
-	// (nsDragAndDrop, and the tree) -- this is for the former,
-	// used when dragging between windows
-	if (typeof row == 'object')
-	{
-		// If drag to different window
-		if (nsDragAndDrop.mDragSession.sourceNode!=row.target)
-		{
-			if (dataType == 'zotero/item') {
-				var items = Zotero.Items.get(ids);
-				
-				// Check if at least one item (or parent item for children) doesn't
-				// already exist in target
-				for each(var item in items) {
-					// Skip non-top-level items
-					if (!item.isTopLevelItem()) {
-						continue;
-					}
-					
-					// TODO: For now, disable cross-window cross-library drag
-					if (itemGroup.ref.libraryID != item.libraryID) {
-						return false;
-					}
-					
-					if (itemGroup.ref && !itemGroup.ref.hasItem(item.id)) {
-						return true;
-					}
-				}
-			}
-			else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
-				if (itemGroup.isSearch()) {
-					return false;
-				}
-				return true;
-			}
-		}
-		return false;
-	}
 	
 	if (orient == 0) {
 		var rowItem = this._getItemAtRow(row).ref; // the item we are dragging over
@@ -2423,26 +2370,26 @@ Zotero.ItemTreeView.prototype.drop = function(row, orient)
 }
 
 Zotero.ItemTreeView.prototype.onDragEnter = function (event) {
-	Zotero.debug("Storing current drag data");
+	//Zotero.debug("Storing current drag data");
 	Zotero.DragDrop.currentDataTransfer = event.dataTransfer;
 }
 
 /*
- * Called by nsDragAndDrop.js and HTML 5 Drag and Drop when dragging over the tree
+ * Called by HTML 5 Drag and Drop when dragging over the tree
  */
 Zotero.ItemTreeView.prototype.onDragOver = function (event, dropdata, session) {
 	return false;
 }
 
 /*
- * Called by nsDragAndDrop.js and HTML 5 Drag and Drop when dropping onto the tree
+ * Called by HTML 5 Drag and Drop when dropping onto the tree
  */
 Zotero.ItemTreeView.prototype.onDrop = function (event, dropdata, session) {
 	return false;
 }
 
 Zotero.ItemTreeView.prototype.onDragExit = function (event) {
-	Zotero.debug("Clearing drag data");
+	//Zotero.debug("Clearing drag data");
 	Zotero.DragDrop.currentDataTransfer = null;
 }
 

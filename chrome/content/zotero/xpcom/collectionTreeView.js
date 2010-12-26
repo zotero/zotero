@@ -1021,38 +1021,20 @@ Zotero.CollectionTreeCommandController.prototype.onEvent = function(evt)
 ///
 ///  Drag-and-drop functions:
 ///		canDrop() and drop() are for nsITreeView
-///		onDragStart(), getSupportedFlavours(), and onDrop() for nsDragAndDrop.js
+///		onDragStart() and onDrop() are for HTML 5 Drag and Drop
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
 
-/**
+/*
  * Start a drag using HTML 5 Drag and Drop
  */
-Zotero.CollectionTreeView.prototype.onDragStart = function(event, transferData, action) {
+Zotero.CollectionTreeView.prototype.onDragStart = function(event) {
 	var itemGroup = this._getItemAtRow(this.selection.currentIndex);
 	if (!itemGroup.isCollection()) {
-		return false;
+		return;
 	}
-	var collectionID = itemGroup.ref.id;
-	
-	event.dataTransfer.setData("zotero/collection", collectionID);
-}
-
-
-/**
- * Returns the supported drag flavors
- *
- * Called by nsDragAndDrop.js
- */
-Zotero.CollectionTreeView.prototype.getSupportedFlavours = function () {
-	var flavors = new FlavourSet();
-	flavors.appendFlavour("zotero/collection");
-	flavors.appendFlavour("zotero/item");
-	flavors.appendFlavour("zotero/item-xml");
-	flavors.appendFlavour("text/x-moz-url");
-	flavors.appendFlavour("application/x-moz-file", "nsIFile");
-	return flavors; 
+	event.dataTransfer.setData("zotero/collection", itemGroup.ref.id);
 }
 
 
@@ -1062,12 +1044,6 @@ Zotero.CollectionTreeView.prototype.getSupportedFlavours = function () {
 Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 {
 	//Zotero.debug("Row is " + row + "; orient is " + orient);
-	
-	// Two different services call canDrop, nsDragAndDrop and the tree
-	// This is for the former, used when dragging between windows
-	if (typeof row == 'object') {
-		return false;
-	}
 	
 	if (!dragData || !dragData.data) {
 		var dragData = Zotero.DragDrop.getDragData(this);
