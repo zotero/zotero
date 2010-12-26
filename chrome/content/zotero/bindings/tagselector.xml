@@ -246,9 +246,9 @@
 							label.setAttribute('tagType', this._tags[tagID].type);
 							if (this.editable) {
 								label.setAttribute('context', 'tag-menu');
-								label.setAttribute('ondragover', 'nsDragAndDrop.dragOver(event, document.getBindingParent(this).dragObserver)');
-								label.setAttribute('ondragexit', 'nsDragAndDrop.dragExit(event, document.getBindingParent(this).dragObserver)');
-								label.setAttribute('ondragdrop', 'nsDragAndDrop.drop(event, document.getBindingParent(this).dragObserver)');
+								label.setAttribute('ondragover', 'return document.getBindingParent(this).dragObserver.onDragOver(event)');
+								label.setAttribute('ondragexit', 'return document.getBindingParent(this).dragObserver.onDragExit(event)');
+								label.setAttribute('ondrop', 'return document.getBindingParent(this).dragObserver.onDrop(event)');
 							}
 							tagsToggleBox.appendChild(label);
 						}
@@ -697,41 +697,44 @@
 			<method name="_dragObserverConstructor">
 				<body>
 				<![CDATA[
-					this.onDragOver = onDragOver;
-					this.onDragExit = onDragExit;
-					this.onDrop = onDrop;
-					this.getSupportedFlavours = getSupportedFlavours;
-					
-					
-					function onDragOver(event, flavour, session) {
+					this.onDragOver = function (event) {
+						if (!event.dataTransfer.getData('zotero/item')) {
+							return true;
+						}
+						
 						/*
 						// TODO: get drop data
 						var ids = dropData.data.split(',');
 						var items = Zotero.Items.get(ids);
 						for (var i=0; i<items.length; i++) {
 							if (!Zotero.Items.isEditable(items[i])) {
-								return false;
+								return true;
 							}
 						}
 						*/
 						
 						event.target.setAttribute('draggedOver', true);
-						return true;
+						return false;
 					}
 					
-					function onDragExit(event, session) {
+					this.onDragExit = function (event) {
 						event.target.setAttribute('draggedOver', false);
-						return true;
 					}
 					
 					
-					function onDrop(event, dropData, session) {
+					this.onDrop = function (event) {
 						var node = event.target;
 						node.setAttribute('draggedOver', false);
 						
+						var dt = event.dataTransfer;
+						var ids = dt.getData('zotero/item');
+						if (!ids) {
+							return;
+						}
+						
 						Zotero.DB.beginTransaction();
 						
-						var ids = dropData.data.split(',');
+						ids = ids.split(',');
 						var items = Zotero.Items.get(ids);
 						
 						// Find a manual tag if there is one
@@ -760,13 +763,6 @@
 						}
 						
 						Zotero.DB.commitTransaction();
-					}
-					
-					
-					function getSupportedFlavours() {
-						var flavours = new FlavourSet();
-						flavours.appendFlavour("zotero/item");
-						return flavours;
 					}
 				]]>
 				</body>
