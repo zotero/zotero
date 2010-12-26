@@ -101,7 +101,7 @@ Zotero.Sync.Storage.Session.prototype.__defineSetter__('password', function (val
 });
 
 
-Zotero.Sync.Storage.Session.prototype.initFromPrefs = function () {
+Zotero.Sync.Storage.Session.prototype.init = function () {
 	try {
 		return this._session.init();
 	}
@@ -157,7 +157,7 @@ Zotero.Sync.Storage.Session.prototype.setLastSyncTime = function (callback, useL
 
 Zotero.Sync.Storage.Session.prototype.checkServer = function (callback) {
 	try {
-		this._session.checkServer(callback);
+		return this._session.checkServer(callback);
 	}
 	catch (e) {
 		this.onError(e);
