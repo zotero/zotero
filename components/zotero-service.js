@@ -1,7 +1,7 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2009 Center for History and New Media
+    Copyright Â© 2009 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
     
@@ -162,10 +162,6 @@ for (var i=0; i<rdfXpcomFiles.length; i++) {
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
 	.loadSubScript("chrome://global/content/nsTransferable.js");
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://global/content/nsDragAndDrop.js");
 
 /********************************************************************/
 
