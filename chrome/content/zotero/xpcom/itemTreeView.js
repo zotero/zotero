@@ -1777,7 +1777,7 @@ Zotero.ItemTreeCommandController.prototype.onEvent = function(evt)
 /**
  * Start a drag using nsDragAndDrop.js or HTML 5 Drag and Drop
  */
-Zotero.ItemTreeView.prototype.onDragStart = function (event, transferData, action) {
+Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 	// Quick implementation of dragging of XML item format
 	if (this._itemGroup.isShare()) {
 		var items = this.getSelectedItems();
