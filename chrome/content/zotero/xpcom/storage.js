@@ -804,7 +804,7 @@ Zotero.Sync.Storage = new function () {
 			}
 		);
 		_session.initFromPrefs();
-		_session.checkServer(callback);
+		return _session.checkServer(callback);
 	}
 	
 	
