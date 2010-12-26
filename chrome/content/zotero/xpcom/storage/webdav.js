@@ -1298,7 +1298,19 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.purgeDeletedStorageFiles = function
 Zotero.Sync.Storage.Session.WebDAV.prototype.purgeOrphanedStorageFiles = function (callback) {
 	const daysBeforeSyncTime = 1;
 	
+	if (!this.active) {
+		return;
+	}
+	
+	var lastpurge = Zotero.Prefs.get('lastWebDAVOrphanPurge');
+	var days = 10;
+	// Already purged within the last week
+	if (lastpurge && new Date(lastpurge * 1000) > (new Date() - (1000 * 60 * 60 * 24 * days))) {
+		return;
+	}
+	
 	Zotero.debug("Purging orphaned storage files");
+	
 	var uri = this.rootURI;
 	var path = uri.path;
 	
@@ -1390,19 +1402,17 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.purgeOrphanedStorageFiles = functio
 			// Delete files older than a day before last sync time
 			var days = (lastSyncDate - lastModified) / 1000 / 60 / 60 / 24;
 			
-			// DEBUG!!!!!!!!!!!!
-			//
-			// For now, delete all orphaned files immediately
-			if (true) {
-				deleteFiles.push(file);
-			} else
-			
 			if (days > daysBeforeSyncTime) {
 				deleteFiles.push(file);
 			}
 		}
 		
-		this._deleteStorageFiles(deleteFiles, callback);
+		self._deleteStorageFiles(deleteFiles, function (results) {
+			Zotero.Prefs.set("lastWebDAVOrphanPurge", Math.round(new Date().getTime() / 1000))
+			if (callback) {
+				callback(results);
+			}
+		});
 	},
 	{ Depth: 1 });
 }
