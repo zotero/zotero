@@ -3,7 +3,7 @@
 	"translatorType":5,
 	"label":"CTX",
 	"creator":"Avram Lyon and Simon Kornblith",
-	"target":"^http://freecite.library.brown.edu",
+	"target":"^http://freecite\\.library\\.brown\\.edu",
 	"minVersion":"2.0",
 	"maxVersion":"",
 	"priority":100,
