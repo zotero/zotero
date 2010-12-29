@@ -1,14 +1,14 @@
 {
-	"translatorID":"af1af8fa-19dc-486f-a8cc-107acb849101",
-	"label":"WilsonWeb",
-	"creator":"Brinda Shah",
-	"target":"^http://(vnweb|webbeta|verityqa|verityqa2|atg-dev05)\\.hwwilsonweb\\.com/hww/results/",
-	"minVersion":"1.0",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":"1",
-	"translatorType":4,
-	"lastUpdated":"2010-11-10 10:15:00"
+        "translatorID":"af1af8fa-19dc-486f-a8cc-107acb849101",
+        "label":"WilsonWeb",
+        "creator":"Brinda Shah",
+        "target":"^http://(vnweb|webbeta|verityqa|verityqa2|atg-dev05)\\.hwwilsonweb\\.com/hww/results/",
+        "minVersion":"1.0",
+        "maxVersion":"",
+        "priority":100,
+        "inRepository":"1",
+        "translatorType":4,
+        "lastUpdated":"2010-11-23 14:12:32"
 }
 
 var dispType='brief';
@@ -43,14 +43,13 @@ function detectWeb(doc, url) {
 			cxpath = getXPath(dispType, 'cxpath1');			
 			tClassObj = doc.evaluate(cxpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		}
-		var tClass = tClassObj.textContent;
-		
+		var tClass = tClassObj.textContent;		
 		if(tClass.match("BIBL"))
 			resultType = "journalArticle";		
 		else if(tClass.match("BOOK"))
 			resultType = "book";
 		else if(tClass.match("ART"))
-			resultType = "artwork";		
+			resultType = "artwork";			
 							
 		var xpath = '//input[@name="pageSize"]';
 		var eleObj = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
@@ -89,10 +88,9 @@ function doWeb(doc, url) {
 			var nextTitle;
 			var c = 0;
 			
-			var titles = doc.evaluate(getXPath(dispType,'ti'), doc, nsResolver, XPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate(getXPath(dispType,'ti'), doc, nsResolver, XPathResult.ANY_TYPE, null);			
 			while (nextTitle= titles.iterateNext()) {	
-				c++;
-				//Zotero.debug(nextTitle.textContent);
+				c++;				
 				titleObj[c] = nextTitle.textContent;					
 			}		
 			titleObj = Zotero.selectItems(titleObj);
@@ -146,8 +144,8 @@ function associateBIBLData(doc,newArticle,t) {
 	}		
 	
 	//journal		
-	var journalPath = getXPath(dispType, 'jn', t);
-	var journalObj = doc.evaluate(journalPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+	var journalPath = getXPath(dispType, 'jn', t);	
+ 	var journalObj = doc.evaluate(journalPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
 	if(journalObj ) {
 		associateFieldData(newArticle, journalObj, 'journalAbbreviation');			
 	}
@@ -163,7 +161,7 @@ function associateBIBLData(doc,newArticle,t) {
 	
 	//subject	
 	var tagsContent = new Array();
-	var suPath = getXPath(dispType, 'su', t);	
+	var suPath = getXPath(dispType, 'su', t);		
 	if(suPath != '') {
 		var suObj = doc.evaluate(suPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();		
 		if(suObj) {
@@ -234,6 +232,7 @@ function associateBIBLData(doc,newArticle,t) {
 	
 	//note
 	var ntPath = getXPath(dispType, 'nt', t);
+	Zotero.debug("ntPath : " + ntPath);
 	if(ntPath != '') {
 		var ntObj = doc.evaluate(ntPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
 		if(ntObj) {
@@ -242,8 +241,7 @@ function associateBIBLData(doc,newArticle,t) {
 	}
 	
 	//date entered
-	var dtPath = getXPath(dispType, 'der', t);
-	Zotero.debug(dtPath);
+	var dtPath = getXPath(dispType, 'der', t);	
 	if(dtPath != '') {
 		var dtObj = doc.evaluate(dtPath, doc, nsResolver,  XPathResult.ANY_TYPE, null).iterateNext();
 		if(dtObj) {
@@ -252,8 +250,7 @@ function associateBIBLData(doc,newArticle,t) {
 	}
 	
 	//date updated
-	var udtPath = getXPath(dispType, 'ud', t);
-	Zotero.debug(udtPath);
+	var udtPath = getXPath(dispType, 'ud', t);	
 	if(dtPath != '') {
 		var udtObj = doc.evaluate(udtPath, doc, nsResolver,  XPathResult.ANY_TYPE, null).iterateNext();
 		if(udtObj) {
@@ -266,20 +263,18 @@ function associateBIBLData(doc,newArticle,t) {
 	if(pdfLink != '') {
 		var pdfObj = doc.evaluate(pdfLink, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
 		if(pdfObj ) {
-			var pdf = pdfObj.textContent;
-			Zotero.debug("pdf : " + pdf);
+			var pdf = pdfObj.textContent;			
 			pdfURL =pdf.match(/https?:[/]+([-\w\.]+)+(:\d+)?([/]([\w/_\.]*(\?\S+)?)?)?/);
 			//Zotero.debug("pdfURL :" + pdfURL[0]);			
 		}
 	}
 	
 	var snapShotURL='';
-	var recid = getXPath(dispType,'recid',t);
+	var recid = getXPath(dispType,'recid',t);	
 	if(recid != '') {
 		var recObj= doc.evaluate(recid, doc,  nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if(recObj) {
-			
-			var rec =  recObj.value;				
+			var rec =  recObj.value;			
 			snapShotURL =  'http://' + host + '/hww/jumpstart.jhtml?recid=' + rec + '&fmt=S&DT=full';
 			//Zotero.debug("snapShotURL :" + snapShotURL );		
 					
@@ -378,19 +373,26 @@ function associateBookData( doc, newArticle, t) {
 	}
 	
 	//note	
-	var ntPath = getXPath(dispType, 'nt', t);	
-	Zotero.debug(ntPath);
+	/*var noteContent = new Array();
+	var ntPath = getXPath(dispType, 'nt', t);		
+	Zotero.debug("ntPath : " + ntPath);
 	if(ntPath != '') {
 		var ntObj = doc.evaluate(ntPath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
 		if(ntObj) {
+			var notes = ntObj.textContent.split(';');
+			for(var i in notes) {
+				noteContent.push(notes[i]);
+			}
+			for (var i=0; i<noteContent.length; i++) {
+				newArticle.notes[i] = noteContent[i];
+			}
 			//associateFieldData(newArticle, ntObj, 'notes');	
-			newArticle.notes[0] = ntObj.textContent;	
+			//newArticle.notes = ntObj.textContent;	
 		}
-	}
+	}*/
 	
 	//date entered
-	var dtPath = getXPath(dispType, 'der', t);
-	Zotero.debug(dtPath);
+	var dtPath = getXPath(dispType, 'der', t);	
 	if(dtPath != '') {
 		var dtObj = doc.evaluate(dtPath, doc, nsResolver,  XPathResult.ANY_TYPE, null).iterateNext();
 		if(dtObj) {
@@ -399,8 +401,7 @@ function associateBookData( doc, newArticle, t) {
 	}
 	
 	//date updated
-	var udtPath = getXPath(dispType, 'ud', t);
-	Zotero.debug(udtPath);
+	var udtPath = getXPath(dispType, 'ud', t);	
 	if(dtPath != '') {
 		var udtObj = doc.evaluate(udtPath, doc, nsResolver,  XPathResult.ANY_TYPE, null).iterateNext();
 		if(udtObj) {
@@ -409,8 +410,7 @@ function associateBookData( doc, newArticle, t) {
 	}
 	
 	//series
-	var seriesPath = getXPath(dispType, 'TSN', t);
-	Zotero.debug(seriesPath );
+	var seriesPath = getXPath(dispType, 'TSN', t);	
 	if(seriesPath != '') {
 		var seriesObj = doc.evaluate(seriesPath, doc, nsResolver,  XPathResult.ANY_TYPE, null).iterateNext();
 		if(seriesObj) {
@@ -456,7 +456,6 @@ function associateBookData( doc, newArticle, t) {
 }
 
 function associateArtData(doc, newArticle,t) {
-	Zotero.debug("associateData...");
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? 
 	function(prefix) {
@@ -573,7 +572,7 @@ function associateSourceData(zoteroItem, zoteroObj) {
 }
 
 function associateFieldData(zoteroItem, zoteroObj, zoteroField) {
-	var fieldValue = zoteroObj.textContent;	
+	var fieldValue = zoteroObj.textContent.replace(/^\s*|\s*$/g, '');	
 	zoteroItem[zoteroField] = fieldValue;
 	//Zotero.debug(zoteroField + " - " + fieldValue);
 }
@@ -590,9 +589,9 @@ function getXPath(dispType,field,p) {
 		
 		switch(field){
 						
-			case 'cxpath1' : xPath = '//div[@id="results"]//table[2]//table/@class';
+			case 'cxpath1' : xPath = '//div[@id="results"]//table[contains(@class,"rectable")]/tbody/tr/td[2]/table/@class';
 						break;
-			case 'cxpath' : xPath = '//div[@id="results"]/table[1]/tbody/tr[1]/td[2]/table/tbody/tr/td/p/@class';
+			case 'cxpath' : xPath = '//div[@id="results"]/table[contains(@class,"rectable")]/tbody/tr/td[2]/p/@class';
 						break;
 			case 'chk' : xPath = '//input[@name="checkbox"][@type="checkbox"]';
 						break;
@@ -600,7 +599,7 @@ function getXPath(dispType,field,p) {
 					break;
 			case 'au': xPath =  '//table[@class="rectable"]'+ pos +'//span[contains(@class,"au")]';
 					break;
-			case 'jn': xPath =  '//table[@class="rectable"]'+ pos +'/tbody/tr/td[2]/table/tbody/tr/td/p/table[1]/tbody/tr/td/span[@class="so"]/span[contains(@class,"jn")]';
+			case 'jn': xPath =  '//table[@class="rectable"]'+ pos +'//span[contains(@class,"jn")]';
 					break;
 			case 'so' : xPath = '//table[@class="rectable"]'+ pos +'/tbody/tr/td[2]/table/tbody/tr/td/p/table[1]/tbody/tr/td/span[contains(@class,"so")]';
 						break;
