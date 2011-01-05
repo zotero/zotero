@@ -1,14 +1,14 @@
 {
-        "translatorID":"8c1f42d5-02fa-437b-b2b2-73afc768eb07",
-        "label":"Highwire 2.0",
-        "creator":"Matt Burton",
-        "target":"(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
-        "minVersion":"1.0.0b4.r5",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2010-12-23 09:58:55"
+	"translatorID":"8c1f42d5-02fa-437b-b2b2-73afc768eb07",
+	"label":"Highwire 2.0",
+	"creator":"Matt Burton",
+	"target":"(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
+	"minVersion":"1.0.0b4.r5",
+	"maxVersion":"",
+	"priority":100,
+	"inRepository":"1",
+	"translatorType":4,
+	"lastUpdated":"2011-01-05 17:05:00"
 }
 
 /*
