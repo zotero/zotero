@@ -37,7 +37,7 @@ Zotero.MIME = new function(){
 	
 	// Magic numbers
 	var _snifferEntries = [
-		["%PDF-", "application/pdf", 0],
+		["%PDF-", "application/pdf"],
 		["%!PS-Adobe-", 'application/postscript', 0],
 		["%! PS-Adobe-", 'application/postscript', 0],
 		["\uFFFD\uFFFD\x11\u0871\x1A\uFFFD\x00\x00", "application/msword", 0],
