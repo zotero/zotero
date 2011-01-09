@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":90,
 	"inRepository":true,
-	"lastUpdated":"2010-01-06 09:25:00"
+	"lastUpdated":"2011-01-09 18:20:00"
 }
 
 function detectSearch(item) {
@@ -46,7 +46,7 @@ function processCrossRef(xmlOutput) {
 		// Fall back to older namespace
 		default xml namespace = "http://www.crossref.org/xschema/1.0";
 		if(!xml.doi_record.length()) {
-			return false;
+			default xml namespace = "";
 		}
 	}
 	// ensure this isn't an error
@@ -60,7 +60,7 @@ function processCrossRef(xmlOutput) {
 		var refXML = itemXML.journal_article;
 		var metadataXML = itemXML.journal_metadata;
 		
-		item.ISSN = itemXML.journal_metadata.issn.toString();
+		item.ISSN = itemXML.journal_metadata.issn[0].toString();
 		item.publicationTitle = itemXML.journal_metadata.full_title.toString();
 		if (itemXML.journal_metadata.abbrev_title.length()) {
 			item.journalAbbreviation = itemXML.journal_metadata.abbrev_title[0].toString();
