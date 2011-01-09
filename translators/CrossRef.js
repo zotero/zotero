@@ -3,7 +3,7 @@
 	"translatorType":8,
 	"label":"CrossRef",
 	"creator":"Simon Kornblith",
-	"target":"http://partneraccess.oclc.org/",
+	"target":"^http://partneraccess\\.oclc\\.org/",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":90,
