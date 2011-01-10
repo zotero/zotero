@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"Old Bailey Online",
 	"creator":"Adam Crymble",
-	"target":"http://www.oldbaileyonline.org/",
+	"target":"^http://www\\.oldbaileyonline\\.org/",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
