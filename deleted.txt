@@ -16,3 +16,4 @@ dd149efc-7f0e-43e4-b3df-b6d15e171717  # Persée
 83538f48-906f-40ef-bdb3-e94f63676307  # NAA RecordSearch (replaced by National Archives of Australia)
 dbb5d4bc-3b21-47a2-9751-5dcbb65b902a  # AMS Online Journals - Allenpress (replaced with DOI for now)
 d2416f31-4f24-4e18-8c66-06122af5bc2c  # Women in Judaism (replaced with COinS)
+bc39e05b-141a-4322-85f0-a5b86edf896b  # Hindawi
