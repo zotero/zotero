@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-08-11 20:40:00"
+	"lastUpdated":"2011-01-10 20:40:00"
 }
 
 function detectWeb(doc, url) {
@@ -18,8 +18,6 @@ function detectWeb(doc, url) {
 		return "case";
 	}
 }
-
-//Old Bailey Online translator. Code by Adam Crymble
 
 function scrape(doc, url) {
 
@@ -65,14 +63,14 @@ function scrape(doc, url) {
 			if (fieldTitle != "ReferenceNumber:") {
 				tagsContent.push(contentsArray[j]);
 			} else {
-				newItem.extra = contentsArray[j];
+				refNum = contentsArray[j];
+				newItem.extra = refNum;
 			}
 			j++;
 		}
 	} else {
 
 		if (oneHeader.match("Reference")) {
-			
 			newItem.extra = contents;
 		} else {
 			newItem.tags = contents;
@@ -99,6 +97,7 @@ function doWeb(doc, url) {
 	} : null;
 	
 	var articles = new Array();
+	var onlyResultSet = false;
 	
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
@@ -109,22 +108,76 @@ function doWeb(doc, url) {
 		while (next_title = titles.iterateNext()) {
 			items[next_title.href] = next_title.textContent;
 		}
+		// add option to save search URL as single item
+		items["resultSet"] = "Save search URL as item";
+
 		items = Zotero.selectItems(items);
+		
 		for (var i in items) {
 			articles.push(i);
 		}
-	} else if (doc.evaluate('//div[@id="main2"]/p/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		// if option to save result set is selected
+		if (items["resultSet"]) {
+			if (articles.length == 1) {
+				onlyResultSet = true;
+			}
+			var newItem = new Zotero.Item("case");
+			
+			newItem.title = 'Old Bailey Search Result Set';
+			
+			var searchURL = doc.location.href;
+			newItem.url = searchURL;
+	
+			// define dictionary for easier reading
+			var defs = {
+			"_divs_fulltext": "Keywords",
+			"_persNames_surname": "Surname",
+			"_persNames_given": "Given name",
+			"_persNames_alias": "Alias",
+			"_offences_offenceCategory_offenceSubcategory": "Offence",
+			"_verdicts_verdictCategory_verdictSubcategory": "Verdicts",
+			"_punishments_punishmentCategory_punishmentSubcategory": "Punishment",
+			"_divs_div0Type_div1Type": "Corpus",
+			"fromMonth": "From month",
+			"fromYear": "From year",
+			"toMonth": "To month",
+			"toYear": "To year"
+			};
+	
+			// parse URL into human-readable elements
+			var noteText = '<b>Search Parameters</b><br/>';
+			var re  = /(?:\?|&(?:amp;)?)([^=]+)=?([^&]*)?/g;
+			var match;
+			var key='';
+			while (match = re.exec(searchURL)) {
+				if (defs[match[1]] != null) {
+					key = defs[match[1]];
+					noteText += key + ": " + unescape(match[2]) + "<br/>";
+				}
+			}
+			
+			// save them in the notes field
+			newItem.notes.push({note: noteText});
+			newItem.complete();
+			
+			// remove dummy url for result set from articles list 
+			articles.pop();
+		}
+	}
+	else if (doc.evaluate('//div[@id="main2"]/p/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 
 		var xmlOrText = doc.evaluate('//div[@id="main2"]/p/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-
+	
 		if (xmlOrText.textContent.match("Text")) {
-			articles = [xmlOrText.href];
-
-		} else {
+			articles = [xmlOrText.href];	
+		} 
+		else {
 			articles = [url];
 		}
 	}
-
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();	
+		
+	if (!onlyResultSet) {
+		Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+		Zotero.wait();	
+	}	
 }
