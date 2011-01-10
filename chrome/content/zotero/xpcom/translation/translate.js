@@ -664,11 +664,14 @@ Zotero.Translate.Base.prototype = {
 			Zotero.debug("Translate: WARNING: Zotero.done() called after translation completion; please fix your code");
 			return;
 		}
+		var oldState = this._currentState;
+		this._currentState = null;
+		this._waitForCompletion = false;
 		
 		var errorString = null;
 		if(!returnValue) errorString = this._generateErrorString(error);
 		
-		if(this._currentState === "detect") {
+		if(oldState === "detect") {
 			if(this._potentialTranslators.length) {
 				var lastTranslator = this._potentialTranslators.shift();
 				
@@ -708,8 +711,6 @@ Zotero.Translate.Base.prototype = {
 			this._runHandler("done", returnValue);
 		}
 		
-		this._waitForCompletion = false;
-		this._currentState = null;
 		return errorString;
 	},
 	
