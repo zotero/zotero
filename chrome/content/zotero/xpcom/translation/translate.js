@@ -971,7 +971,7 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 	// Report translaton failure if we failed
 	if(oldState == "translate" && errorString && this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
 		// Don't report failure if in private browsing mode
-		if(Zotero.isFx) {
+		if(Zotero.isFx && !Zotero.isStandalone) {
 			var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
 						.getService(Components.interfaces.nsIPrivateBrowsingService);
 			if (pbs.privateBrowsingEnabled) {
