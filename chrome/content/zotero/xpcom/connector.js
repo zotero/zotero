@@ -712,7 +712,7 @@ Zotero.Connector.Translate.Save.prototype = {
 		translate.setHandler("done", function(obj, item) {
 			win.Zotero_Browser.finishScraping(obj, item, collection);			
 			me._translate.cookieManager.destroy();
-			Zotero.Browser.deleteHiddenBrowser(this._browser);
+			Zotero.Browser.deleteHiddenBrowser(me._browser);
 			me.sendResponse(201);
 		});
 		
