@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"NYTimes.com",
 	"creator":"Simon Kornblith",
-	"target":"^http://(?:query\\.nytimes\\.com/search/query|(?:select\\.|www\\.)?nytimes\\.com/.)",
+	"target":"^https?://(?:query\\.nytimes\\.com/search/query|(?:select\\.|www\\.)?nytimes\\.com/.)",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-04-18 08:55:00"
+	"lastUpdated":"2010-01-11 04:26:00"
 }
 
 function detectWeb(doc, url) {
