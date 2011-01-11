@@ -971,10 +971,12 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 	// Report translaton failure if we failed
 	if(oldState == "translate" && errorString && this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
 		// Don't report failure if in private browsing mode
-		var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
-					.getService(Components.interfaces.nsIPrivateBrowsingService);
-		if (pbs.privateBrowsingEnabled) {
-			return;
+		if(Zotero.isFx) {
+			var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
+						.getService(Components.interfaces.nsIPrivateBrowsingService);
+			if (pbs.privateBrowsingEnabled) {
+				return;
+			}
 		}
 		
 		var postBody = "id=" + encodeURIComponent(this.translator[0].translatorID) +
