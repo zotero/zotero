@@ -2,18 +2,18 @@
         "translatorID":"cb9e794e-7a65-47cd-90f6-58cdd191e8b0",
         "label":"Frontiers",
         "creator":"Jason Friedman",
-        "target":"^http://www.frontiersin.org.*/",
-        "minVersion":"1.0",
+        "target":"^https?://www\\.frontiersin\\.org.*/",
+        "minVersion":"2.0.10",
         "maxVersion":"",
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-12-28 23:21:54"
+        "lastUpdated":"2011-01-11 23:21:54"
 }
 
 /*
    Frontiers translator 
-   Copyright (C) 2009-2010 Jason Friedman, write.to.jason@gmail.com
+   Copyright (C) 2009-2011 Jason Friedman, write.to.jason@gmail.com
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -273,13 +273,11 @@ function scrape(doc,url) {
 	
 	var matches = doc.body.innerHTML.match(/downloadfile.aspx.fileid=([^']*)/);
 
-// The attachments are being rejected as PDF files because the first line does not contain 
-// %PDF (although the second line does)
 	if (matches!=null) {
 		var pdfurl = 'http://www.frontiersin.org/journal/downloadfile.aspx?fileid=' + matches[1];
-//		newItem.attachments = [
-//	  	{url:pdfurl, title:"Full text PDF", mimeType:"application/pdf"}
-//	  	];
+		newItem.attachments = [
+		  {url:pdfurl, title:"Full text PDF", mimeType:"application/pdf"}
+	  	];
 	}	
 	newItem.complete();
 }
