@@ -345,8 +345,7 @@ Zotero.Item.prototype.loadFromRow = function(row, reload) {
 		this._init();
 	}
 	
-	// If necessary or reloading, set the type, initialize this._itemData,
-	// and reset _itemDataLoaded
+	// If necessary or reloading, set the type and reinitialize this._itemData
 	if (reload || (!this._itemTypeID && row.itemTypeID)) {
 		this.setType(row.itemTypeID, true);
 	}

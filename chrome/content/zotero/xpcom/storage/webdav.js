@@ -1302,9 +1302,9 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.purgeOrphanedStorageFiles = functio
 		return;
 	}
 	
+	// If recently purged, skip
 	var lastpurge = Zotero.Prefs.get('lastWebDAVOrphanPurge');
 	var days = 10;
-	// Already purged within the last week
 	if (lastpurge && new Date(lastpurge * 1000) > (new Date() - (1000 * 60 * 60 * 24 * days))) {
 		return;
 	}
