@@ -25,6 +25,8 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Neem automatisch snapshots bij het maken van objecten van webpagina's">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Voeg automatisch bijbehorende PDF's en andere bestanden toe bij het opslaan van objecten">
 <!ENTITY zotero.preferences.automaticTags "Objecten automatisch labelen met trefwoorden en onderwerpen">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
 
 <!ENTITY zotero.preferences.groups "Groepen">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Bij het kopiëren van objecten tussen bibliotheken, kopieer ook:">
@@ -94,13 +96,16 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Uitvoerformaat">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Snelle kopie uitzetten bij het verslepen van meer dan">
 
+<!ENTITY zotero.preferences.prefpane.cite "Cite">
+<!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
 
-<!ENTITY zotero.preferences.prefpane.styles "Stijlen">
-
-<!ENTITY zotero.preferences.styles.styleManager "Stijlmanager">
-<!ENTITY zotero.preferences.styles.styleManager.title "Titel">
-<!ENTITY zotero.preferences.styles.styleManager.updated "Bijgewerkt">
-<!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Meer stijlen installeren...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Sneltoetsen">

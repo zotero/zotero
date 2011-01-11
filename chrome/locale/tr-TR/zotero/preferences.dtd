@@ -25,6 +25,8 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratılırken sayfa görünümü otomatik olarak kaydet">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Eserleri kaydederken birleşik PDF ve diğer dosyaları da otomatik olarak ekle">
 <!ENTITY zotero.preferences.automaticTags "Anahtar kelimeler ve konu başlıkları ile eserleri otomatik olarak etiketle">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
 
 <!ENTITY zotero.preferences.groups "Gruplar">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Kütüphaneler arası eserler kopyalanırken, ekle:">
@@ -94,13 +96,16 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Çıktı Biçimi">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "defadan daha fazla sürüklendiğinde Çauk Kopyalamayı seçilemez kıl">
 
+<!ENTITY zotero.preferences.prefpane.cite "Cite">
+<!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
 
-<!ENTITY zotero.preferences.prefpane.styles "Biçimler">
-
-<!ENTITY zotero.preferences.styles.styleManager "Biçim Yöneticisi">
-<!ENTITY zotero.preferences.styles.styleManager.title "Başlık">
-<!ENTITY zotero.preferences.styles.styleManager.updated "Güncellendi">
-<!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Ek sitiller indir...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Kısayol Tuşları">

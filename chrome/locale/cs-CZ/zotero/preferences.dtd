@@ -25,6 +25,8 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Automaticky udělat snímek při vytváření položky z internetových stránek">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automaticky připojit propojené PDF a ostatní soubory při ukládání položek">
 <!ENTITY zotero.preferences.automaticTags "Automaticky oštítkovat položky na základě klíčových slov a předmětových hesel">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
 
 <!ENTITY zotero.preferences.groups "Skupiny">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Při kopírování položek mezi knihovnami zahrnout:">
@@ -94,13 +96,16 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Výstupní formát">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Vypnout Rychlé kopírování, pokud je označeno více než">
 
+<!ENTITY zotero.preferences.prefpane.cite "Cite">
+<!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
 
-<!ENTITY zotero.preferences.prefpane.styles "Styly">
-
-<!ENTITY zotero.preferences.styles.styleManager "Správa stylů">
-<!ENTITY zotero.preferences.styles.styleManager.title "Název">
-<!ENTITY zotero.preferences.styles.styleManager.updated "Změněn">
-<!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Získat další styly...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Klávesové zkratky">

@@ -25,6 +25,8 @@
 <!ENTITY zotero.preferences.automaticSnapshots "從網頁建立項目時自動拍攝快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "儲存項目時自動附加相關的 PDF 檔與其他檔案">
 <!ENTITY zotero.preferences.automaticTags "自動以關鍵字與主標題作為項目的標籤">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
 
 <!ENTITY zotero.preferences.groups "群組">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "在各圖書館之間複製項目時，包含：">
@@ -94,13 +96,16 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "輸出格式">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "拖放超過多少個項目時，停用快速複製：">
 
+<!ENTITY zotero.preferences.prefpane.cite "Cite">
+<!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
 
-<!ENTITY zotero.preferences.prefpane.styles "樣式">
-
-<!ENTITY zotero.preferences.styles.styleManager "樣式管理員">
-<!ENTITY zotero.preferences.styles.styleManager.title "標題">
-<!ENTITY zotero.preferences.styles.styleManager.updated "Updated">
-<!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "獲取額外的樣式…">
 
 <!ENTITY zotero.preferences.prefpane.keys "快速鍵">
