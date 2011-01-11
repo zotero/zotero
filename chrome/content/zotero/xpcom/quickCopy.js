@@ -167,7 +167,7 @@ Zotero.QuickCopy = new function() {
 		var [mode, contentType] = mode.split('/');
 		
 		if (mode == 'export') {
-			var translation = new Zotero.Translate("export");
+			var translation = new Zotero.Translate.Export;
 			translation.setItems(items);
 			translation.setTranslator(format);
 			translation.setHandler("done", callback);
@@ -411,7 +411,7 @@ Zotero.QuickCopy = new function() {
 	
 	
 	function _init() {
-		var translation = new Zotero.Translate("export");
+		var translation = new Zotero.Translate.Export;
 		var translators = translation.getTranslators();
 		
 		// add styles to list
