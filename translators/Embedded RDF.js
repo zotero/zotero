@@ -9,7 +9,7 @@
 	"priority":400,
 	"inRepository":true,
 	"detectXPath":"//meta[substring(@name, 1, 3)='dc.'] | //link[substring(@rel, 1, 7)='schema.']",
-	"lastUpdated":"2010-09-23 04:19:20"
+	"lastUpdated":"2011-01-11 04:31:00"
 }
 
 var _prefix;

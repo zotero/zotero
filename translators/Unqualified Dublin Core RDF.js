@@ -9,7 +9,7 @@
 	"priority":100,
 	"configOptions":{"dataMode":"rdf/xml"},
 	"inRepository":true,
-	"lastUpdated":"2010-11-07 03:10:59"
+	"lastUpdated":"2011-01-11 04:31:00"
 }
 
 function doExport() {

@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-10-17 10:38:50"
+        "lastUpdated":"2011-01-11 04:31:00"
 }
 
 function detectWeb(doc, url) {
