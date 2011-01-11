@@ -25,6 +25,8 @@
 <!ENTITY zotero.preferences.automaticSnapshots "웹 페이지로 항목을 생성시 자동으로 스냅샷을 찍습니다">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "항목 저장시 PDF와 다른 파일의 조합을 자동으로 첨부합니다">
 <!ENTITY zotero.preferences.automaticTags "핵심어와 표제를 가진 자동 태그 항목">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
 
 <!ENTITY zotero.preferences.groups "그룹">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "When copying items between libraries, include:">
@@ -94,13 +96,16 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "출력 형식">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "다음 이상 끌을 경우 빠른 복사 동작 안함:">
 
+<!ENTITY zotero.preferences.prefpane.cite "Cite">
+<!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
 
-<!ENTITY zotero.preferences.prefpane.styles "Styles">
-
-<!ENTITY zotero.preferences.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.styles.styleManager.title "제목">
-<!ENTITY zotero.preferences.styles.styleManager.updated "갱신됨">
-<!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "추가 스타일 받기...">
 
 <!ENTITY zotero.preferences.prefpane.keys "단축키">

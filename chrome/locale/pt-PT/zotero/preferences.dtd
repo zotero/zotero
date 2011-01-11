@@ -25,6 +25,8 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Capturar automaticamente ao criar itens a partir de páginas Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Anexar automaticamente arquivos PDF e de outros tipos associados a um item quando este é guardado">
 <!ENTITY zotero.preferences.automaticTags "Etiquetar automaticamente os itens com as palavras-chave e cabeçalhos de assunto">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
 
 <!ENTITY zotero.preferences.groups "Grupos">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Ao copiar itens entre bibliotecas incluir:">
@@ -94,13 +96,16 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Formato de Saída">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Desactivar a Cópia Rápida ao arrastar mais do que">
 
+<!ENTITY zotero.preferences.prefpane.cite "Cite">
+<!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
 
-<!ENTITY zotero.preferences.prefpane.styles "Estilos">
-
-<!ENTITY zotero.preferences.styles.styleManager "Gestor de Estilos">
-<!ENTITY zotero.preferences.styles.styleManager.title "Título">
-<!ENTITY zotero.preferences.styles.styleManager.updated "Actualizado">
-<!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Obter estilos adicionais...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Teclas de Atalho">

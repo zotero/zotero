@@ -25,6 +25,8 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Scatta un&apos;istantanea degli elementi estratti dalle pagine web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Allega automaticamente file PDF o di altro tipo durante il salvataggio degli elementi">
 <!ENTITY zotero.preferences.automaticTags "Identifica automaticamente gli elementi attraverso parole chiave e oggetto">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
 
 <!ENTITY zotero.preferences.groups "Groups">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "When copying items between libraries, include:">
@@ -94,13 +96,16 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Formato di output">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Disable Quick Copy when dragging more than">
 
+<!ENTITY zotero.preferences.prefpane.cite "Cite">
+<!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
 
-<!ENTITY zotero.preferences.prefpane.styles "Styles">
-
-<!ENTITY zotero.preferences.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.styles.styleManager.updated "Updated">
-<!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Scarica ulteriori stili...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Scorciatoie da tastiera">

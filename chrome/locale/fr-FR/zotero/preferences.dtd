@@ -25,6 +25,8 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Faire une capture automatique de la page lors de la création d'éléments à partir de pages Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Joindre automatiquement les fichers PDF associés lors de l'enregistrement d'un élément">
 <!ENTITY zotero.preferences.automaticTags "Ajouter automatiquement aux éléments des marqueurs grâce aux mots-clés et aux sujets">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
 
 <!ENTITY zotero.preferences.groups "Groupes">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "En copiant des éléments entre des bibliothèques, inclure :">
@@ -94,13 +96,16 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Format de sortie">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Désactiver la copie rapide lorsqu'on fait glisser plus de">
 
+<!ENTITY zotero.preferences.prefpane.cite "Cite">
+<!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
 
-<!ENTITY zotero.preferences.prefpane.styles "Styles">
-
-<!ENTITY zotero.preferences.styles.styleManager "Gestionnaire de styles">
-<!ENTITY zotero.preferences.styles.styleManager.title "Titre">
-<!ENTITY zotero.preferences.styles.styleManager.updated "Mis à jour">
-<!ENTITY zotero.preferences.styles.styleManager.csl "Bibliothèque des services d'appel (CSL en anglais)">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Obtenir des styles supplémentaires…">
 
 <!ENTITY zotero.preferences.prefpane.keys "Raccourcis clavier">

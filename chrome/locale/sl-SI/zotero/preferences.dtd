@@ -25,6 +25,8 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Samodejno naredi posnetek pri ustvarjanju vnosov s spletnih strani">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Samodejno pripni pridružene PDF-je in druge datoteke pri shranjevanju vnosov">
 <!ENTITY zotero.preferences.automaticTags "Samodejno označi vnose s ključnimi besedami in predmetnimi naslovi">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
 
 <!ENTITY zotero.preferences.groups "Skupine">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Pri kopiranju med knjižnicami vključi:">
@@ -94,13 +96,16 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Izhodna oblika">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Onemogoči Hitro kopiranje, če vlečem več kot">
 
+<!ENTITY zotero.preferences.prefpane.cite "Cite">
+<!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
 
-<!ENTITY zotero.preferences.prefpane.styles "Slogi">
-
-<!ENTITY zotero.preferences.styles.styleManager "Upravljalnik slogov">
-<!ENTITY zotero.preferences.styles.styleManager.title "Naslov">
-<!ENTITY zotero.preferences.styles.styleManager.updated "Posodobljen">
-<!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Dobi dodatne sloge ...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Tipke za bližnjice">
