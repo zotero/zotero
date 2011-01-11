@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-06-06 18:30:00"
+	"lastUpdated":"2011-01-11 04:31:00"
 }
 
 /* Provides support for databases of Cambridge Scientific Abstracts

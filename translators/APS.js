@@ -8,7 +8,7 @@
 	"maxVersion":null,
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-02-04 02:10:00"
+	"lastUpdated":"2011-01-11 04:31:00"
 }
 // Works for all APS journals: http://publish.aps.org/
 

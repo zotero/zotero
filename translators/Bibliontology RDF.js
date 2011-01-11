@@ -10,7 +10,7 @@
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":false,
-	"lastUpdated":"2010-11-07 03:10:59"
+	"lastUpdated":"2011-01-11 04:31:00"
 }
 
 var n = {

@@ -10,7 +10,7 @@
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2010-11-07 03:10:59"
+	"lastUpdated":"2011-01-11 04:31:00"
 }
 
 var rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
