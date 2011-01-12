@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-10-07 01:00:00"
+        "lastUpdated":"2011-01-12 19:22:04"
 }
 
  
@@ -176,7 +176,7 @@ function doWeb(doc, url) {
 				return;
 			}
 			
-			var doi = xml..doi;
+			var doi = xml..doi.toString();
 			
 			// ensure DOI is valid
 			if(!xml..error.length()) {
