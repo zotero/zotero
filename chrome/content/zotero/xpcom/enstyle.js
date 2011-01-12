@@ -24,7 +24,7 @@
 */
 
 /**
- * Constructor for EndNote converter
+ * Constructor for EN converter
  * @constructor
  **/
 Zotero.ENConverter = function(styleData, date, fileTitle) {
@@ -279,7 +279,7 @@ Zotero.ENConverter.prototype.parseInt = function(binaryData) {
 }
 
 /**
- * Parses a commonly used string format found in these EndNote files, which
+ * Parses a commonly used string format found in these EN files, which
  * is padded by 8 bytes at the beginning and contains an \xFB\xFB
  *
  * @param {String} string The unparsed string
@@ -377,8 +377,8 @@ Zotero.ENConverter.prototype.applyFormattingAttributes = function(element, forma
 /**
  * Parses format to create a hierarchical data structure
  *
- * @param {String} styleData The EndNote style file, as binary data
- * @returns An array of objects representing the structure of the EndNote file
+ * @param {String} styleData The EN style file, as binary data
+ * @returns An array of objects representing the structure of the EN file
  * @type Array
  **/
 Zotero.ENConverter.prototype.parseFormat = function(styleData) {
@@ -814,7 +814,7 @@ Zotero.ENConverter.prototype.convertFromUTF16 = function(text) {
 
 /**
  * Handles plural terms inside of <text/> fields (indicated by a caret, as in
- * the EndNote editor)
+ * the EN editor)
  *
  * @param {XML} The <text/> fields
  * @type {String} The type, as a string with the nulls trimmed
@@ -1260,7 +1260,7 @@ Zotero.ENConverter.prototype.parseCitation = function() {
 			var ibidTerm = this.parseFormattedString(this.findField(repeatRules.subfields, "\xC4")[0].data);
 			positions.ibid = <text value={ibidTerm}/>;
 		}
-		// TODO: EndNote has an "omit repeated data" feature that doesn't
+		// TODO: EN has an "omit repeated data" feature that doesn't
 		// seem to make any sense, since this just suggests there isn't
 		// supposed to be a footnote. Need to figure out what this means
 		
@@ -1317,7 +1317,7 @@ Zotero.ENConverter.prototype.parseCitation = function() {
 		if(delimiter !== "") this.xml.citation.layout.@delimiter = delimiter;
 		
 		// determine whether to collapse numbers, since we need to know whether
-		// there's a number first (because EndNote stupidly allows both collapse
+		// there's a number first (because EN stupidly allows both collapse
 		// on author and on number, which seems impossible)
 		if(this.numberCollapse && citationXML..variable.(@text == "citation-number").length()) {
 			if(this.xml.citation.option.(@name == "collapse").length()) {
@@ -1344,7 +1344,7 @@ Zotero.ENConverter.prototype.parseBibliography = function() {
 	var prefixFields = this.findField(references.subfields, ["$", "\x90"]);
 	this.xml.bibliography.layout.appendChild(this.parseFields(prefixFields, true));
 	
-	// contains a record for each type within EndNote
+	// contains a record for each type within EN
 	var referenceDescriptions = this.findField(references.subfields, ["#", "\xA0"]);
 	this.xml.bibliography.layout.appendChild(this.parseReferences(referenceDescriptions, true));
 	
