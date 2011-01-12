@@ -41,9 +41,10 @@ onmessage = function(event) {
 	
 	// define buffer for reading from fifo
 	const BUFFER_SIZE = 4096;
-	var buf = ctypes.char.array(BUFFER_SIZE)("");
 	
 	while(true) {
+		var buf = ctypes.char.array(BUFFER_SIZE)("");
+		
 		// open fifo (this will block until something writes to it)
 		var fd = open(path, 0);
 		
