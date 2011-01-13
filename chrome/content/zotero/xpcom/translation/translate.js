@@ -573,6 +573,7 @@ Zotero.Translate.Base.prototype = {
 						// otherwise, fail silently, so as not to interfere with
 						// interface cleanup
 						Zotero.debug("Translate: "+e+' in handler '+i+' for '+type, 5);
+						Zotero.logError(e);
 					}
 				}
 			}
@@ -772,16 +773,14 @@ Zotero.Translate.Base.prototype = {
 	"_generateSandbox":function() {
 		Zotero.debug("Translate: Binding sandbox to "+(typeof this._sandboxLocation == "object" ? this._sandboxLocation.document.location : this._sandboxLocation), 4);
 		this._sandboxManager = new Zotero.Translate.SandboxManager(this, this._sandboxLocation);
-		this._sandboxManager.eval("var Zotero = {};"+
+		const createArrays = "['creators', 'notes', 'tags', 'seeAlso', 'attachments']";
+		var src = "var Zotero = {};"+
 		"Zotero.Item = function (itemType) {"+
 				"this.itemType = itemType;"+
-				"this.creators = [];"+
-				"this.notes = [];"+
-				"this.tags = [];"+
-				"this.seeAlso = [];"+
-				"this.attachments = [];"+
+				"for each(var array in "+createArrays+") {"+
+					"this[array] = [];"+
+				"}"+
 		"};"+
-		"Zotero.Item.prototype.complete = function() { Zotero._itemDone(this); };"+
 		"Zotero.Collection = function () {};"+
 		"Zotero.Collection.prototype.complete = function() { Zotero._collectionDone(this); };"+
 		// https://bugzilla.mozilla.org/show_bug.cgi?id=609143 - can't pass E4X to sandbox in Fx4
@@ -793,9 +792,28 @@ Zotero.Translate.Base.prototype = {
 			"var item = JSON.parse(itemString);"+
 			"item.complete = Zotero.Item.prototype.complete;"+
 			"return item;"+
-		"};"
-		);
+		"};"+
+		"Zotero.Item.prototype.complete = function() { ";
+		if(Zotero.isFx) {
+			// workaround for inadvertant attempts to pass E4X back from sandbox
+			src += "for(var key in this) {"+
+				"if("+createArrays+".indexOf(key) !== -1) {"+
+					"for each(var item in this[key]) {"+
+						"for(var key2 in item[key2]) {"+
+							"if(typeof item[key2] === 'xml') {"+
+								"item[key2] = item[key2].toString();"+
+							"}"+
+						"}"+
+					"}"+
+				"} else if(typeof this[key] === 'xml') {"+
+					"this[key] = this[key].toString();"+
+				"}"+
+			"}";
+		}
+		src += "Zotero._itemDone(this);"+
+		"}";
 		
+		this._sandboxManager.eval(src);
 		this._sandboxManager.importObject(this.Sandbox, this);
 		this._sandboxManager.importObject({"Utilities":new Zotero.Utilities.Translate(this)});
 		this._sandboxManager.sandbox.Zotero.Utilities.HTTP = this._sandboxManager.sandbox.Zotero.Utilities;
