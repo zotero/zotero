@@ -24,11 +24,6 @@
 */
 
 Zotero.Schema = new function(){
-	this.userDataUpgradeRequired = userDataUpgradeRequired;
-	this.showUpgradeWizard = showUpgradeWizard;
-	this.updateSchema = updateSchema;
-	this.stopRepositoryTimer = stopRepositoryTimer;
-	
 	this.skipDefaultData = false;
 	this.dbInitialized = false;
 	this.goToChangeLog = false;
@@ -40,16 +35,34 @@ Zotero.Schema = new function(){
 	
 	var self = this;
 	
-	function userDataUpgradeRequired() {
-		var dbVersion = _getDBVersion('userdata');
+	/*
+	 * Retrieve the DB schema version
+	 */
+	this.getDBVersion = function (schema) {
+		if (_dbVersions[schema]){
+			return _dbVersions[schema];
+		}
+		
+		if (Zotero.DB.tableExists('version')){
+			var dbVersion = Zotero.DB.valueQuery("SELECT version FROM "
+				+ "version WHERE schema='" + schema + "'");
+			_dbVersions[schema] = dbVersion;
+			return dbVersion;
+		}
+		return false;
+	}
+	
+	
+	this.userDataUpgradeRequired = function () {
+		var dbVersion = this.getDBVersion('userdata');
 		var schemaVersion = _getSchemaSQLVersion('userdata');
 		
 		return dbVersion && (dbVersion < schemaVersion);
 	}
 	
 	
-	function showUpgradeWizard() {
-		var dbVersion = _getDBVersion('userdata');
+	this.showUpgradeWizard = function () {
+		var dbVersion = this.getDBVersion('userdata');
 		var schemaVersion = _getSchemaSQLVersion('userdata');
 		
 		// Upgrading from 1.0 or earlier
@@ -99,12 +112,12 @@ Zotero.Schema = new function(){
 	/*
 	 * Checks if the DB schema exists and is up-to-date, updating if necessary
 	 */
-	function updateSchema(){
-		var dbVersion = _getDBVersion('userdata');
+	this.updateSchema = function () {
+		var dbVersion = this.getDBVersion('userdata');
 		
 		// 'schema' check is for old (<= 1.0b1) schema system,
 		// 'user' is for pre-1.0b2 'user' table
-		if (!dbVersion && !_getDBVersion('schema') && !_getDBVersion('user')){
+		if (!dbVersion && !this.getDBVersion('schema') && !this.getDBVersion('user')){
 			Zotero.debug('Database does not exist -- creating\n');
 			_initializeSchema();
 			return true;
@@ -128,7 +141,7 @@ Zotero.Schema = new function(){
 				// Old schema system
 				if (!dbVersion){
 					// Check for pre-1.0b2 'user' table
-					 var user = _getDBVersion('user');
+					 var user = this.getDBVersion('user');
 					 if (user)
 					 {
 						 dbVersion = user;
@@ -834,7 +847,7 @@ Zotero.Schema = new function(){
 		// Little hack to manually update CSLs from repo on upgrades
 		if (!force && Zotero.Prefs.get('automaticScraperUpdates')) {
 			var syncTargetVersion = 3; // increment this when releasing new version that requires it
-			var syncVersion = _getDBVersion('sync');
+			var syncVersion = this.getDBVersion('sync');
 			if (syncVersion < syncTargetVersion) {
 				force = true;
 				var forceCSLUpdate = true;
@@ -855,7 +868,7 @@ Zotero.Schema = new function(){
 			
 			// Determine the earliest local time that we'd query the repository again
 			var nextCheck = new Date();
-			nextCheck.setTime((parseInt(_getDBVersion('lastcheck'))
+			nextCheck.setTime((parseInt(this.getDBVersion('lastcheck'))
 				+ ZOTERO_CONFIG['REPOSITORY_CHECK_INTERVAL']) * 1000); // JS uses ms
 			var now = new Date();
 			
@@ -882,7 +895,7 @@ Zotero.Schema = new function(){
 		}
 		
 		// Get the last timestamp we got from the server
-		var lastUpdated = _getDBVersion('repository');
+		var lastUpdated = this.getDBVersion('repository');
 		
 		var url = ZOTERO_CONFIG['REPOSITORY_URL'] + '/updated?'
 			+ (lastUpdated ? 'last=' + lastUpdated + '&' : '')
@@ -921,7 +934,7 @@ Zotero.Schema = new function(){
 	}
 	
 	
-	function stopRepositoryTimer(){
+	this.stopRepositoryTimer = function () {
 		if (_repositoryTimer){
 			Zotero.debug('Stopping repository check timer');
 			_repositoryTimer.cancel();
@@ -962,24 +975,6 @@ Zotero.Schema = new function(){
 	// Private methods
 	//
 	/////////////////////////////////////////////////////////////////
-	
-	/*
-	 * Retrieve the DB schema version
-	 */
-	function _getDBVersion(schema){
-		if (_dbVersions[schema]){
-			return _dbVersions[schema];
-		}
-		
-		if (Zotero.DB.tableExists('version')){
-			var dbVersion = Zotero.DB.valueQuery("SELECT version FROM "
-				+ "version WHERE schema='" + schema + "'");
-			_dbVersions[schema] = dbVersion;
-			return dbVersion;
-		}
-		return false;
-	}
-	
 	
 	/*
 	 * Retrieve the version from the top line of the schema SQL file
@@ -1187,7 +1182,7 @@ Zotero.Schema = new function(){
 	
 	
 	function _updateSchema(schema){
-		var dbVersion = _getDBVersion(schema);
+		var dbVersion = Zotero.Schema.getDBVersion(schema);
 		var schemaVersion = _getSchemaSQLVersion(schema);
 		
 		if (dbVersion == schemaVersion){

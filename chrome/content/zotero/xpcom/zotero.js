@@ -370,7 +370,7 @@ var Zotero = new function(){
 				}
 				// Locate new data directory
 				else if (index == 2) {
-					Zotero.chooseZoteroDirectory();
+					Zotero.chooseZoteroDirectory(true);
 				}
 				var dataDir = this.getZoteroDirectory();
 			}
@@ -456,7 +456,6 @@ var Zotero = new function(){
 			
 			Components.utils.reportError(e);
 			this.skipLoading = true;
-			Zotero.DB.skipBackup = true;
 			return;
 		}
 		
@@ -467,16 +466,67 @@ var Zotero = new function(){
 		
 		Zotero.Fulltext.init();
 		
+		// Require >=2.1b3 database to ensure proper locking
+		if (this.isStandalone && Zotero.Schema.getDBVersion('system') > 0 && Zotero.Schema.getDBVersion('system') < 31) {
+			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
+					.getService(Components.interfaces.nsIAppStartup);
+			
+			var zs = Zotero.getString('app.standalone');
+			var zf = Zotero.getString('app.firefox');
+			// TODO: localize
+			var msg = zs + " can share a data directory only with "
+					+ zf + " 2.1b3 or later. Upgrade to the latest "
+					+ "version of " + zf + " or select a different data "
+					+ "directory for use with " + zs + ".";
+					
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+						.createInstance(Components.interfaces.nsIPromptService);
+			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
+				+ ps.BUTTON_POS_1_DEFAULT;
+			var index = ps.confirmEx(
+				null,
+				// TODO: localize
+				"Incompatible Database Version",
+				msg,
+				buttonFlags,
+				Zotero.getString('dataDir.standaloneMigration.selectCustom'),
+				"Quit " + zs,
+				null,
+				null,
+				{}
+			);
+			
+			var quit = false;
+			
+			// Select new data directory
+			if (index == 0) {
+				var dir = Zotero.chooseZoteroDirectory(true);
+				if (!dir) {
+					quit = true;
+				}
+			}
+			else {
+				quit = true;
+			}
+			
+			if (quit) {
+				appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
+			}
+			
+			this.skipLoading = true;
+			return false;
+		}
+		
 		// Trigger updating of schema and scrapers
 		if (Zotero.Schema.userDataUpgradeRequired()) {
 			var upgraded = Zotero.Schema.showUpgradeWizard();
 			if (!upgraded) {
 				this.skipLoading = true;
-				Zotero.DB.skipBackup = true;
 				return false;
 			}
 		}
-		// If no userdata upgrade, still might need to process system/scrapers
+		// If no userdata upgrade, still might need to process system
 		else {
 			try {
 				var updated = Zotero.Schema.updateSchema();
@@ -495,6 +545,7 @@ var Zotero = new function(){
 				else {
 					this.startupError = Zotero.getString('startupError.databaseUpgradeError');
 				}
+				this.skipLoading = true;
 				Components.utils.reportError(e);
 				return false;
 			}
@@ -797,7 +848,7 @@ var Zotero = new function(){
 						// Warn if non-empty and no zotero.sqlite
 						if (!dbfile.exists()) {
 							var buttonFlags = ps.STD_YES_NO_BUTTONS;
-							var index = ps.confirmEx(win,
+							var index = ps.confirmEx(null,
 								Zotero.getString('dataDir.selectedDirNonEmpty.title'),
 								Zotero.getString('dataDir.selectedDirNonEmpty.text'),
 								buttonFlags, null, null, null, null, {});
@@ -810,7 +861,7 @@ var Zotero = new function(){
 					}
 					else {
 						var buttonFlags = ps.STD_YES_NO_BUTTONS;
-						var index = ps.confirmEx(win,
+						var index = ps.confirmEx(null,
 							//Zotero.getString('dataDir.selectedDirEmpty.title'),
 							//Zotero.getString('dataDir.selectedDirEmpty.text'),
 							'Directory Empty',
@@ -844,9 +895,10 @@ var Zotero = new function(){
 		if (!forceRestartNow) {
 			buttonFlags += (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
 		}
-		var index = ps.confirmEx(win,
+		var app = Zotero.isStandalone ? Zotero.getString('app.standalone') : Zotero.getString('app.firefox');
+		var index = ps.confirmEx(null,
 			Zotero.getString('general.restartRequired'),
-			Zotero.getString('general.restartRequiredForChange'),
+			Zotero.getString('general.restartRequiredForChange', app),
 			buttonFlags,
 			Zotero.getString('general.restartNow'),
 			forceRestartNow ? null : Zotero.getString('general.restartLater'),

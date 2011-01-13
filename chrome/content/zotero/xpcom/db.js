@@ -799,7 +799,7 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 	
 	var corruptMarker = Zotero.getZoteroDatabase(this._dbName, 'is.corrupt').exists();
 	
-	if (this.skipBackup) {
+	if (this.skipBackup || Zotero.skipLoading) {
 		this._debug("Skipping backup of database '" + this._dbName + "'", 1);
 		return false;
 	}
