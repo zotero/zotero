@@ -717,32 +717,12 @@ Zotero.DBConnection.prototype.getNextName = function (table, field, name)
 
 
 /*
- * Shutdown observer -- implements nsIObserver
+ * Implements nsIObserver
  */
 Zotero.DBConnection.prototype.observe = function(subject, topic, data) {
 	switch (topic) {
 		case 'idle':
 			this.backupDatabase();
-			break;
-		
-		case 'xpcom-shutdown':
-			if (this._shutdown) {
-				this._debug('XPCOM already shut down in Zotero.DBConnection.observe()');
-				return;
-			}
-			
-			// NOTE: disabled
-			//var level = this.commitAllTransactions();
-			var level = this.rollbackAllTransactions()
-			if (level) {
-				level = level === true ? '0' : level;
-				this._debug("A transaction in DB '" + this._dbName + "' was still open! (level " + level + ")", 2);
-			}
-			
-			this._shutdown = true;
-			this.closeDatabase();
-			this.backupDatabase();
-			
 			break;
 	}
 }
@@ -813,7 +793,7 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 	}
 	
 	if (this.transactionInProgress()) {
-		this._debug("Transaction in progress--skipping backup of DB '" + this._dbName + "'", 2);
+		//this._debug("Transaction in progress--skipping backup of DB '" + this._dbName + "'", 2);
 		return false;
 	}
 	
@@ -836,7 +816,6 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 		if (backupFile.exists()) {
 			var currentDBTime = file.lastModifiedTime;
 			var lastBackupTime = backupFile.lastModifiedTime;
-			
 			if (currentDBTime == lastBackupTime) {
 				//Zotero.debug("Database '" + this._dbName + "' hasn't changed -- skipping backup");
 				return;
@@ -870,7 +849,15 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 		}
 	}
 	
+	// Turn off DB locking before backup and reenable after, since otherwise
+	// the lock is lost
+	var dbLockExclusive = Zotero.Prefs.get('dbLockExclusive');
 	try {
+		if (dbLockExclusive) {
+			Zotero.DB.query("PRAGMA locking_mode=NORMAL");
+		}
+		Zotero.DB.stopDummyStatement();
+		
 		var store = Components.classes["@mozilla.org/storage/service;1"].
 			getService(Components.interfaces.mozIStorageService);
 		store.backupDatabaseFile(file, tmpFile.leafName, file.parent);
@@ -879,6 +866,12 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 		Zotero.debug(e);
 		Components.utils.reportError(e);
 		return false;
+	}
+	finally {
+		if (dbLockExclusive) {
+			Zotero.DB.query("PRAGMA locking_mode=EXCLUSIVE");
+		}
+		Zotero.DB.startDummyStatement();
 	}
 	
 	// Opened database files can't be moved on Windows, so we have to skip
@@ -940,7 +933,7 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 		backupFile.remove(false);
 	}
 	
-	Zotero.debug("Saving " + backupFile.leafName);
+	Zotero.debug("Backed up to " + backupFile.leafName);
 	tmpFile.moveTo(tmpFile.parent, backupFile.leafName);
 	
 	return true;
@@ -1177,13 +1170,8 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 	// Register idle and shutdown handlers to call this.observe() for DB backup
 	var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
 			.getService(Components.interfaces.nsIIdleService);
-	idleService.addIdleObserver(this, 10); // 10 minutes
+	idleService.addIdleObserver(this, 60);
 	idleService = null;
-	
-	var observerService = Components.classes["@mozilla.org/observer-service;1"]
-		.getService(Components.interfaces.nsIObserverService);
-	observerService.addObserver(this, "xpcom-shutdown", false);
-	observerService = null;
 	
 	// User-defined functions
 	// TODO: move somewhere else?
