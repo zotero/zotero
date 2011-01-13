@@ -471,36 +471,53 @@ var Zotero = new function(){
 			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
 					.getService(Components.interfaces.nsIAppStartup);
 			
+			var dir = Zotero.getProfileDirectory();
+			dir.append('zotero');
+			
 			var zs = Zotero.getString('app.standalone');
 			var zf = Zotero.getString('app.firefox');
 			// TODO: localize
-			var msg = zs + " can share a data directory only with "
-					+ zf + " 2.1b3 or later. Upgrade to the latest "
-					+ "version of " + zf + " or select a different data "
-					+ "directory for use with " + zs + ".";
+			var msg = "The currently selected data directory is not compatible "
+					+ "with " + zs + ", which can share a database only with "
+					+ zf + " 2.1b3 or later."
+					+ "\n\n"
+					+ "Upgrade to the latest version of " + zf + " first or select a "
+					+ "different data directory for use with " + zs + ".";
 					
 			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 						.createInstance(Components.interfaces.nsIPromptService);
 			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-				+ ps.BUTTON_POS_1_DEFAULT;
+				+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
+				+ ps.BUTTON_POS_2_DEFAULT;
 			var index = ps.confirmEx(
 				null,
 				// TODO: localize
 				"Incompatible Database Version",
 				msg,
 				buttonFlags,
+				"Use Default",
 				Zotero.getString('dataDir.standaloneMigration.selectCustom'),
-				"Quit " + zs,
-				null,
+				"Quit",
 				null,
 				{}
 			);
 			
 			var quit = false;
 			
-			// Select new data directory
+			// Default location
 			if (index == 0) {
+				Zotero.File.createDirectoryIfMissing(dir);
+				
+				Zotero.Prefs.set("useDataDir", false)
+				
+				appStartup.quit(
+					Components.interfaces.nsIAppStartup.eAttemptQuit
+						| Components.interfaces.nsIAppStartup.eRestart
+				);
+			}
+			// Select new data directory
+			else if (index == 1) {
 				var dir = Zotero.chooseZoteroDirectory(true);
 				if (!dir) {
 					quit = true;
