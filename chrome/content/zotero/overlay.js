@@ -838,8 +838,7 @@ var ZoteroPane = new function()
 		if (this.isFullScreen()) {
 			this.toggleDisplay();
 		}
-		
-		window.loadURI(Zotero.Groups.addGroupURL);
+		this.loadURI(Zotero.Groups.addGroupURL);
 	}
 	
 	
