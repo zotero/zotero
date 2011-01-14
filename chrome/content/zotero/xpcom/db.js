@@ -852,11 +852,14 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 	// Turn off DB locking before backup and reenable after, since otherwise
 	// the lock is lost
 	var dbLockExclusive = Zotero.Prefs.get('dbLockExclusive');
+	var hadDummyStatement = !!this._dummyStatement;
 	try {
 		if (dbLockExclusive) {
 			Zotero.DB.query("PRAGMA locking_mode=NORMAL");
 		}
-		Zotero.DB.stopDummyStatement();
+		if (hadDummyStatement) {
+			Zotero.DB.stopDummyStatement();
+		}
 		
 		var store = Components.classes["@mozilla.org/storage/service;1"].
 			getService(Components.interfaces.mozIStorageService);
@@ -871,7 +874,9 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 		if (dbLockExclusive) {
 			Zotero.DB.query("PRAGMA locking_mode=EXCLUSIVE");
 		}
-		Zotero.DB.startDummyStatement();
+		if (hadDummyStatement) {
+			Zotero.DB.startDummyStatement();
+		}
 	}
 	
 	// Opened database files can't be moved on Windows, so we have to skip
