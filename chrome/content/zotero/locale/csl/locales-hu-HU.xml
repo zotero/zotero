@@ -30,7 +30,7 @@
       <term name="et-al">et al.</term>
       <term name="forthcoming">megjelenés alatt</term>
       <term name="from">forrás</term>
-      <term name="ibid">ibid</term>
+      <term name="ibid">ibid.</term>
       <term name="in">in</term>
       <term name="in press">nyomtatás alatt</term>
       <term name="internet">internet</term>
@@ -159,7 +159,7 @@
       </term>
       <term name="sub verbo">
          <single>sub verbo</single>
-         <multiple>s.vv</multiple>
+         <multiple>sub verbis</multiple>
       </term>
       <term name="verse">
          <single>versszak</single>
@@ -186,8 +186,8 @@
       <term name="part" form="short">rész</term>
       <term name="section" form="short">szak</term>
       <term name="sub verbo" form="short">
-         <single>s.v</single>
-         <multiple>s.vv</multiple>
+         <single>s.v.</single>
+         <multiple>s.vv.</multiple>
       </term>
       <term name="verse" form="short">
          <single>vsz</single>

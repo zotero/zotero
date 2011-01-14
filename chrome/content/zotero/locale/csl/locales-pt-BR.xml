@@ -159,7 +159,7 @@
       </term>
       <term name="sub verbo">
          <single>sub verbo</single>
-         <multiple>s.vv</multiple>
+         <multiple>sub verbis</multiple>
       </term>
       <term name="verse">
          <single>verso</single>
@@ -186,8 +186,8 @@
       <term name="part" form="short">pt</term>
       <term name="section" form="short">seç</term>
       <term name="sub verbo" form="short">
-         <single>s.v</single>
-         <multiple>s.vv</multiple>
+         <single>s.v.</single>
+         <multiple>s.vv.</multiple>
       </term>
       <term name="verse" form="short">
          <single>v</single>

@@ -30,7 +30,7 @@
       <term name="et-al">и остали</term>
       <term name="forthcoming">долазећи</term>
       <term name="from">од</term>
-      <term name="ibid">ibid</term>
+      <term name="ibid">ibid.</term>
       <term name="in">у</term>
       <term name="in press">у штампи</term>
       <term name="internet">Интернет</term>
@@ -159,7 +159,7 @@
       </term>
       <term name="sub verbo">
          <single>sub verbo</single>
-         <multiple>s.vv</multiple>
+         <multiple>sub verbis</multiple>
       </term>
       <term name="verse">
          <single>строфа</single>
@@ -186,8 +186,8 @@
       <term name="part" form="short">део</term>
       <term name="section" form="short">од.</term>
       <term name="sub verbo" form="short">
-         <single>s.v</single>
-         <multiple>s.vv</multiple>
+         <single>s.v.</single>
+         <multiple>s.vv.</multiple>
       </term>
       <term name="verse" form="short">
          <single>стр.</single>

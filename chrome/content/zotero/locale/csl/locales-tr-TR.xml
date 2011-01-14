@@ -30,7 +30,7 @@
       <term name="et-al">ve diğ.</term>
       <term name="forthcoming">gelecek</term>
       <term name="from">den</term>
-      <term name="ibid">ibid</term>
+      <term name="ibid">ibid.</term>
       <term name="in">içinde</term>
       <term name="in press">basımda</term>
       <term name="internet">internet</term>
@@ -159,7 +159,7 @@
       </term>
       <term name="sub verbo">
          <single>sub verbo</single>
-         <multiple>s.vv</multiple>
+         <multiple>sub verbis</multiple>
       </term>
       <term name="verse">
          <single>dize</single>
@@ -186,8 +186,8 @@
       <term name="part" form="short">kıs</term>
       <term name="section" form="short">böl</term>
       <term name="sub verbo" form="short">
-         <single>s.v</single>
-         <multiple>s.vv</multiple>
+         <single>s.v.</single>
+         <multiple>s.vv.</multiple>
       </term>
       <term name="verse" form="short">
          <single>v</single>
