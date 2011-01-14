@@ -473,10 +473,14 @@
 		var iconPref = Components.classes["@mozilla.org/preferences-service;1"]
 							.getService(Components.interfaces.nsIPrefService)
 							.getBranch('extensions.zotero.').getIntPref('statusBarIcon');
-		var isFx36 = Components.classes["@mozilla.org/xre/app-info;1"]
-						.getService(Components.interfaces.nsIXULAppInfo)
-						.platformVersion.indexOf('1.9') === 0;
+		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
+						.getService(Components.interfaces.nsIXULAppInfo);
 		
+		// no need to add to any status bars in standalone
+		var isStandalone = appInfo.ID === "zotero@chnm.gmu.edu";
+		if(isStandalone) return;
+		
+		var isFx36 = appInfo.platformVersion.indexOf('1.9') === 0;
 		// Status bar in Fx3.6
 		if (isFx36) {
 			var icon = document.getElementById('zotero-status-bar-icon');
@@ -495,10 +499,6 @@
 					setToolbarVisibility(addonBar, true);
 				}
 			}
-		}
-		
-		if (!icon) {
-			return;
 		}
 		
 		if (Zotero && Zotero.initialized){
