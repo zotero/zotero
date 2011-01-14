@@ -470,15 +470,26 @@
 	<script>
 	<![CDATA[
 	window.addEventListener('load', function(e){
+		// Set label for "Report Errors..."
+		if(Zotero && Zotero.initialized) {
+			// Set "Report Errors..." label via property rather than DTD entity,
+			// since we need to reference it in script elsewhere
+			document.getElementById('zotero-tb-actions-reportErrors').setAttribute('label',
+				Zotero.getString('errorReport.reportErrors'));
+		}
+		
+		// Check whether standalone is running, and return if so
+		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
+						.getService(Components.interfaces.nsIXULAppInfo);
+		var isStandalone = appInfo.ID === "zotero@chnm.gmu.edu";
+		if(isStandalone) return;
+		
+		// THE FOLLOWING CODE IS NOT APPLIED IN STANDALONE
+		// (It relates almost entirely to the Zotero icon)
+		
 		var iconPref = Components.classes["@mozilla.org/preferences-service;1"]
 							.getService(Components.interfaces.nsIPrefService)
 							.getBranch('extensions.zotero.').getIntPref('statusBarIcon');
-		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
-						.getService(Components.interfaces.nsIXULAppInfo);
-		
-		// no need to add to any status bars in standalone
-		var isStandalone = appInfo.ID === "zotero@chnm.gmu.edu";
-		if(isStandalone) return;
 		
 		var isFx36 = appInfo.platformVersion.indexOf('1.9') === 0;
 		// Status bar in Fx3.6
@@ -511,11 +522,6 @@
 					icon.setAttribute('compact', true);
 					break;
 			}
-			
-			// Set "Report Errors..." label via property rather than DTD entity,
-			// since we need to reference it in script elsewhere
-			document.getElementById('zotero-tb-actions-reportErrors').setAttribute('label',
-				Zotero.getString('errorReport.reportErrors'));
 		}
 		else {
 			if (Zotero) {
@@ -536,11 +542,9 @@
 				var errMsg = stringBundle.GetStringFromName('startupError');
 			}
 			
-			if(icon) {
-				icon.setAttribute('tooltiptext', errMsg);
-				icon.setAttribute('error', 'true');
-				icon.setAttribute('hidden', false);
-			}
+			icon.setAttribute('tooltiptext', errMsg);
+			icon.setAttribute('error', 'true');
+			icon.setAttribute('hidden', false);
 		}
 		
 		// Used for loading pages from upgrade wizard
