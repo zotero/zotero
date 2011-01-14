@@ -1823,4 +1823,7 @@ function updateWordProcessorInstructions() {
 	if(document.getElementById("wordProcessors").childNodes.length == 2) {
 		document.getElementById("wordProcessors-noWordProcessorPluginsInstalled").hidden = undefined;
 	}
+	if(Zotero.isStandalone) {
+		document.getElementById("wordProcessors-getWordProcessorPlugins").hidden = true;
+	}
 }
