@@ -1733,6 +1733,8 @@ function deleteProxy() {
  * Refreshes the proxy pane
  */
 function refreshProxyList() {
+	if(!document.getElementById("zotero-prefpane-proxies")) return;
+	
 	// get and sort proxies
 	proxies = Zotero.Proxies.proxies.slice();
 	for(var i=0; i<proxies.length; i++) {

@@ -60,7 +60,7 @@ Zotero.Proxies = new function() {
 			}
 		}
 		
-		Zotero.Proxies.transparent = Zotero.Prefs.get("proxies.transparent");
+		Zotero.Proxies.transparent = !Zotero.isConnector && Zotero.Prefs.get("proxies.transparent");
 		Zotero.Proxies.autoRecognize = Zotero.Proxies.transparent && Zotero.Prefs.get("proxies.autoRecognize");
 		
 		var disableByDomainPref = Zotero.Prefs.get("proxies.disableByDomain");
