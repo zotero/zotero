@@ -84,6 +84,7 @@ Zotero.Translate.SandboxManager.prototype = {
 					
 					return object[localKey].apply(object, args);
 				};
+				attachTo[localKey].name = localKey;
 				
 				// attach members
 				if(!(object instanceof Components.interfaces.nsISupports)) {
@@ -347,7 +348,7 @@ Zotero.Translate.IO.Write = function(file, mode, charset) {
 		.createInstance(Components.interfaces.nsIFileOutputStream);
 	this._rawStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
 	this._writtenToStream = false;
-	if(mode) this.reset(mode, charset);
+	if(mode || charset) this.reset(mode, charset);
 }
 
 Zotero.Translate.IO.Write.prototype = {
@@ -372,6 +373,8 @@ Zotero.Translate.IO.Write.prototype = {
 	},
 	
 	"write":function(data) {
+		if(!this._charset) this.setCharacterSet("UTF-8");
+		
 		if(!this._writtenToStream && this._charset.substr(this._charset.length-4) == "xBOM"
 		   && BOMs[this._charset.substr(0, this._charset.length-4).toUpperCase()]) {
 			// If stream has not yet been written to, and a UTF type has been selected, write BOM
