@@ -666,7 +666,6 @@ Zotero.Translate.Base.prototype = {
 			return;
 		}
 		var oldState = this._currentState;
-		this._currentState = null;
 		this._waitForCompletion = false;
 		
 		var errorString = null;
@@ -689,9 +688,12 @@ Zotero.Translate.Base.prototype = {
 				// more translators to try; proceed to next translator
 				this._detect();
 			} else {
+				this._currentState = null;
 				this._runHandler("translators", this._foundTranslators ? this._foundTranslators : false);
 			}
-		} else {		
+		} else {
+			this._currentState = null;
+			
 			if(returnValue) {
 				this._debug("Translation successful");
 			} else {
