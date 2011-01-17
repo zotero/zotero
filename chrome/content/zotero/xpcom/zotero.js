@@ -735,7 +735,6 @@ var Zotero = new function(){
 					} else if(Zotero.isMac) {
 						prefDir.append("Firefox");
 					} else {
-						prefDir = prefDir.parent;
 						prefDir.append(".mozilla");
 						prefDir.append("firefox");
 					}
@@ -747,7 +746,6 @@ var Zotero = new function(){
 					} else if(Zotero.isMac) {
 						prefDir.append("Zotero");
 					} else {
-						prefDir = prefDir.parent;
 						prefDir.append(".zotero");
 						prefDir.append("zotero");
 					}
