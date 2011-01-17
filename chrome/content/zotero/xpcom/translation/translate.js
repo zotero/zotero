@@ -1022,6 +1022,7 @@ Zotero.Translate.Import.prototype.Sandbox = Zotero.Translate.Sandbox._inheritFro
  */
 Zotero.Translate.Import.prototype.setString = function(string) {
 	this._string = string;
+	this._io = false;
 }
 
 /**
