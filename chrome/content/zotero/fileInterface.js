@@ -65,9 +65,9 @@ Zotero_File_Exporter.prototype.save = function() {
 		fp.appendFilters(Components.interfaces.nsIFilePicker.filterAll);
 	} else {
 		// if the result will be a file, append an extension and use filters
-		fp.defaultString = this.name+"."+io.selectedTranslator.target;
+		fp.defaultString = this.name+(io.selectedTranslator.target ? "."+io.selectedTranslator.target : "");
 		fp.defaultExtension = io.selectedTranslator.target;
-		fp.appendFilter(io.selectedTranslator.label, "*."+io.selectedTranslator.target);
+		fp.appendFilter(io.selectedTranslator.label, "*."+(io.selectedTranslator.target ? io.selectedTranslator.target : "*"));
 	}
 	
 	var rv = fp.show();
