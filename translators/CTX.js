@@ -13,7 +13,7 @@
 }
 
 /*
-   Radio Liberty Translator
+   ContextObjects in XML Translator
    Copyright (C) 2010 Avram Lyon, ajlyon@gmail.com
 
    This program is free software: you can redistribute it and/or modify
