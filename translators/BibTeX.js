@@ -1854,7 +1854,7 @@ function mapAccent(character) {
 function tidyAccents(s) {
                         var r=s.toLowerCase();
                         r = r.replace(new RegExp("[ä]", 'g'),"ae");
-                        r = r.replace(new RegExp("[ö]", 'g'),"ae");
+                        r = r.replace(new RegExp("[ö]", 'g'),"oe");
                         r = r.replace(new RegExp("[ü]", 'g'),"ue");
                         r = r.replace(new RegExp("[àáâãå]", 'g'),"a");
                         r = r.replace(new RegExp("æ", 'g'),"ae");
