@@ -156,7 +156,7 @@ var ZoteroPane = new function()
 			Zotero.restoreFromServer = false;
 			
 			setTimeout(function () {
-				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 										.getService(Components.interfaces.nsIPromptService);
 				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 									+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
