@@ -76,8 +76,8 @@ function doWeb(doc, url) {
 	var jid = RegExp.$1;
 	Zotero.debug("JID found 1 " + jid);
 	}
-	// Sometimes JSTOR uses DOIs as JID
-	else if (/(?:pss|stable)\/(10\.\d+\/.+)/.test(url)) {
+	// Sometimes JSTOR uses DOIs as JID; here we exclude "?" characters, since it's a URL
+	else if (/(?:pss|stable)\/(10\.\d+\/.+)(?:\?.*)/.test(url)) {
 	Zotero.debug("URL " + url);
 	jid = RegExp.$1;
 	allJids.push(jid);
