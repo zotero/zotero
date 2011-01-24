@@ -235,6 +235,11 @@ var ZoteroPane = new function()
 		if(_isStandaloneOrTab) {
 			this.toggleDisplay(true);
 			this.fullScreen(true);
+		} else {		
+			// Hide browser chrome on Zotero tab
+			if(Zotero.isFx4) {
+				XULBrowserWindow.inContentWhitelist.push("chrome://zotero/content/tab.xul");
+			}
 		}
 	}
 	
