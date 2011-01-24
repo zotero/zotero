@@ -90,6 +90,7 @@ var ZoteroPane = new function()
 	
 	var self = this;
 	var _loaded = false;
+	var _isStandaloneOrTab = false;
 	var titlebarcolorState, toolbarCollapseState, titleState;
 	
 	// Also needs to be changed in collectionTreeView.js
@@ -100,9 +101,11 @@ var ZoteroPane = new function()
 	 */
 	function onLoad()
 	{
+		_isStandaloneOrTab = Zotero.isStandalone || document.getElementById('zotero-tab');
+		
 		if (!Zotero) return;
 		if (!Zotero.initialized) {
-			if(Zotero.isStandalone) {
+			if(_isStandaloneOrTab) {
 				_loaded = true;
 				this.toggleDisplay();
 			}
@@ -229,7 +232,7 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-tb-actions-showDuplicates').hidden = false;
 		}
 		
-		if(Zotero.isStandalone) {
+		if(_isStandaloneOrTab) {
 			this.toggleDisplay(true);
 			this.fullScreen(true);
 		}
@@ -350,7 +353,7 @@ var ZoteroPane = new function()
 			var isCollapsed = true;
 		}
 		
-		if (isHidden || isCollapsed || Zotero.isStandalone) {
+		if (isHidden || isCollapsed || _isStandaloneOrTab) {
 			var makeVisible = true;
 		}
 		
@@ -510,7 +513,7 @@ var ZoteroPane = new function()
 	 */
 	function _setFullWindowMode(set) {
 		// hide or show navigation toolbars
-		if(Zotero.isStandalone) return;
+		if(_isStandaloneOrTab) return;
 		
 		var toolbox = getNavToolbox();
 		if(set) {

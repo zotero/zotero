@@ -104,7 +104,12 @@ var Zotero_Browser = new function() {
 	 * Initialize some variables and prepare event listeners for when chrome is done loading
 	 */
 	function init() {
-		if (!Zotero || !Zotero.initialized || Zotero.isStandalone) {
+		try {
+			var gb = gBrowser;
+		} catch(e) {
+			return;
+		}
+		if (!Zotero || !Zotero.initialized || !gb) {
 			return;
 		}
 		
