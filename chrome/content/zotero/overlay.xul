@@ -478,11 +478,11 @@
 				Zotero.getString('errorReport.reportErrors'));
 		}
 		
+		var fx36Icon = document.getElementById('zotero-status-bar-icon');
+		var addonBar = document.getElementById('addon-bar');
+		
 		// Check whether standalone is running, and return if so
-		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
-						.getService(Components.interfaces.nsIXULAppInfo);
-		var isStandalone = appInfo.ID === "zotero@chnm.gmu.edu";
-		if(isStandalone) return;
+		if(!addonBar && !fx36Icon) return;
 		
 		// THE FOLLOWING CODE IS NOT APPLIED IN STANDALONE
 		// (It relates almost entirely to the Zotero icon)
@@ -491,10 +491,12 @@
 							.getService(Components.interfaces.nsIPrefService)
 							.getBranch('extensions.zotero.').getIntPref('statusBarIcon');
 		
+		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
+						.getService(Components.interfaces.nsIXULAppInfo);
 		var isFx36 = appInfo.platformVersion.indexOf('1.9') === 0;
 		// Status bar in Fx3.6
 		if (isFx36) {
-			var icon = document.getElementById('zotero-status-bar-icon');
+			var icon = fx36Icon;
 		}
 		// In >=Fx4, add to add-on bar
 		else {
@@ -502,7 +504,6 @@
 			icon.id = 'zotero-addon-bar-icon';
 			icon.setAttribute('oncommand', 'ZoteroPane.toggleDisplay()');
 			icon.setAttribute('hidden', true);
-			var addonBar = document.getElementById('addon-bar');
 			addonBar.appendChild(icon);
 			if (addonBar.collapsed) {
 				// If no Zotero or icon isn't set to hidden, show add-on bar
