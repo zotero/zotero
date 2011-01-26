@@ -7,6 +7,7 @@
 	"minVersion":"1.0.0b4.r1",
 	"maxVersion":"",
 	"priority":100,
+	"displayOptions":{"exportCharset":"UTF-8"},
 	"inRepository":true,
 	"lastUpdated":"2011-01-11 04:31:00"
 }
