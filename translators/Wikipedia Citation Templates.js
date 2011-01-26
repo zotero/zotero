@@ -3,11 +3,10 @@
 	"translatorType":2,
 	"label":"Wikipedia Citation Templates",
 	"creator":"Simon Kornblith",
-	"target":null,
+	"target":"txt",
 	"minVersion":"1.0.0b4.r1",
 	"maxVersion":"",
 	"priority":100,
-	"displayOptions":{"exportCharset":"UTF-8"},
 	"inRepository":true,
 	"lastUpdated":"2011-01-11 04:31:00"
 }
