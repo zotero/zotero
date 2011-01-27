@@ -7,7 +7,7 @@
 	"minVersion":"2.1b3",
 	"maxVersion":"",
 	"priority":50,
-	"configOptions":{"dataMode":"dom/xml"},
+	"configOptions":{"dataMode":"xml/e4x"},
 	"displayOptions":{"exportNotes":true},
 	"inRepository":true,
 	"lastUpdated":"2011-01-27 19:35:57"
