@@ -4,13 +4,13 @@
 	"label":"MODS",
 	"creator":"Simon Kornblith",
 	"target":"xml",
-	"minVersion":"2.0b6.3",
+	"minVersion":"2.1b3",
 	"maxVersion":"",
 	"priority":50,
 	"configOptions":{"dataMode":"dom/xml"},
 	"displayOptions":{"exportNotes":true},
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-01-27 19:35:57"
 }
 
 function detectImport() {
@@ -569,7 +569,7 @@ function doImport() {
 			}
 			
 			// look for roles
-			for(var role in name.m::role.m::roleTerm) {
+			for each(var role in name.m::role.m::roleTerm) {
 				if(role.@type == "code" && role.@authority == "marcrelator") {
 					if(role == "edt") {
 						creator.creatorType = "editor";
