@@ -86,6 +86,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		} else {
 			if(type == "attachment") {	// handle attachments differently
 				newItem = this._saveAttachment(item);
+				if(!newItem) return;
 				var myID = newItem.id;
 			} else {
 				var typeID = Zotero.ItemTypes.getID(type);
@@ -357,7 +358,6 @@ Zotero.Translate.ItemSaver.prototype = {
 				}
 				
 				// if field is valid for this type, set field
-				Zotero.debug("Translate: Testing "+fieldID+" "+typeID);
 				if(fieldID && Zotero.ItemFields.isValidForType(fieldID, typeID)) {
 					newItem.setField(fieldID, item[field]);
 				} else {
