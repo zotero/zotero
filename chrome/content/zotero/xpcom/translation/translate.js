@@ -1087,11 +1087,7 @@ Zotero.Translate.Import.prototype._loadTranslator = function(translator) {
 			err = e;
 		}
 	} else {
-		if(this.location) {
-			if(!Zotero.Translate.IO.Read) {
-				throw "Translate: reading from files is not supported in this build of Zotero. Use setString() to perform import.";
-			}
-			
+		if(Zotero.Translate.IO.Read && this.location && this.location instanceof Components.interfaces.nsIFile) {
 			try {
 				this._io = new Zotero.Translate.IO.Read(this.location, dataMode);
 			} catch(e) {
