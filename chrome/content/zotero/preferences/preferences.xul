@@ -355,14 +355,6 @@ To add a new preference:
 								</columns>
 								
 								<rows>
-									<row id="zotero-full-sync">
-										<radio/>
-										<vbox onclick="this.previousSibling.click()">
-											<label value="&zotero.preferences.sync.reset.fullSync;"/>
-											<description>&zotero.preferences.sync.reset.fullSync.desc;</description>
-										</vbox>
-									</row>
-									
 									<row id="zotero-restore-from-server" selected="true">
 										<radio/>
 										<vbox onclick="this.previousSibling.click()">
@@ -380,6 +372,10 @@ To add a new preference:
 									</row>
 								</rows>
 							</grid>
+							
+							<hbox>
+								<button label="&zotero.preferences.sync.reset.button;" oncommand="handleSyncReset(document.getElementById('zotero-reset-sync-group').selectedItem.parentNode.id.substr(7))"/>
+							</hbox>
 						</groupbox>
 						
 						<groupbox>
@@ -401,12 +397,12 @@ To add a new preference:
 									</row>
 								</rows>
 							</grid>
+							
+							<hbox>
+								<button label="&zotero.preferences.sync.reset.button;" oncommand="handleSyncReset(document.getElementById('zotero-reset-sync-group').selectedItem.parentNode.id.substr(7))"/>
+							</hbox>
 						</groupbox>
 					</radiogroup>
-					
-					<hbox>
-						<button id="zotero-reset-button" label="&zotero.preferences.sync.reset.button;" oncommand="handleSyncReset(document.getElementById('zotero-reset-sync-group').selectedItem.parentNode.id.substr(7))"/>
-					</hbox>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>

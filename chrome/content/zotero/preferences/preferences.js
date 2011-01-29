@@ -486,55 +486,6 @@ function handleSyncReset(action) {
 			
 			break;
 		
-		case 'full-sync':
-			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
-							+ ps.BUTTON_POS_1_DEFAULT;
-			var index = ps.confirmEx(
-				null,
-				// TODO: localize
-				Zotero.getString('general.warning'),
-				"The local Zotero library will be completely merged with data belonging to user '" + account + "' on the Zotero server. "
-					+ "Any unsynced changes will appear as conflicts.\n\n"
-					+ "This option should generally be used only for troubleshooting sync errors.",
-				buttonFlags,
-				"Sync",
-				null, null, null, {}
-			);
-			
-			switch (index) {
-				case 0:
-					// TODO: better error handling
-					Zotero.Sync.Server.resetClient();
-					Zotero.Sync.Server.sync(/*{
-						onSuccess: function () {
-							Zotero.Sync.Runner.setSyncIcon();
-							ps.alert(
-								null,
-								"Full Sync Completed",
-								"The local Zotero library has been merged with data from the Zotero server."
-							);
-						},
-						onError: function (msg) {
-							// TODO: combine with error dialog for regular syncs
-							ps.alert(
-								null,
-								"Full Sync Failed",
-								"An error occurred while performing the full sync.\n\n"
-									+ "Click the sync error icon in the Zotero toolbar "
-									+ "for further information."
-							);
-							Zotero.Sync.Runner.error(msg);
-						}
-					}*/);
-					break;
-				
-				// Cancel
-				case 1:
-					return;
-			}
-			
-			break;
 		
 		case 'reset-storage-history':
 			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
