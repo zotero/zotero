@@ -171,7 +171,7 @@ function scrape(doc) {
 		}
 		// If the URL is just a DOI, clear it.
 		if (newItem.url.match(/^http:\/\/doi\.acm\.org\//)) newItem.url = "";
-		newItem.DOI = newItem.DOI.replace(/^http:\/\/doi\.acm\.org\//, '');
+		if (newItem.DOI) newItem.DOI = newItem.DOI.replace(/^http:\/\/doi\.acm\.org\//, '');
 		var acmid = bibtex.match(/acmid = {(\d+)}/);
 		if(acmid) newItem.extra = "ACM ID: "+ acmid[1];
 		//Complete the parsing of the page
