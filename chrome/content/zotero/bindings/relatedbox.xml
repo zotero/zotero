@@ -223,7 +223,7 @@
 							var p;
 							if(window.ZoteroPane)
 							{
-								p = window.ZoteroPane;
+								p = window.ZoteroPane.getActiveZoteroPane();
 							}
 							else
 							{
@@ -242,10 +242,10 @@
 										return;
 								}
 								
-								p = win.ZoteroPane;
+								p = win.ZoteroPane.getActiveZoteroPane();
 							}
-								
-							p.selectItem(id);
+							
+							if(p) p.selectItem(id);
 						}
 					]]>
 				</body>
