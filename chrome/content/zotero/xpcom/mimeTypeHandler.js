@@ -118,8 +118,9 @@ Zotero.MIMETypeHandler = new function () {
 		var libraryID = null;
 		var collection = null;
 		try {
-			libraryID = frontWindow.ZoteroPane.getSelectedLibraryID();
-			collection = frontWindow.ZoteroPane.getSelectedCollection();
+			var zp = frontWindow.ZoteroPane.getActiveZoteroPane();
+			libraryID = zp.getSelectedLibraryID();
+			collection = zp.getSelectedCollection();
 		} catch(e) {}
 		translation.setHandler("itemDone", function(obj, item) { frontWindow.Zotero_Browser.itemDone(obj, item, collection) });
 		translation.setHandler("done", function(obj, item) { frontWindow.Zotero_Browser.finishScraping(obj, item, collection) });

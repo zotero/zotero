@@ -68,8 +68,9 @@ const Zotero_Lookup = new function () {
 		var libraryID = null;
 		var collection = false;
 		try {
-			libraryID = window.opener.ZoteroPane.getSelectedLibraryID();
-			collection = window.opener.ZoteroPane.getSelectedCollection();
+			var zp = window.opener.ZoteroPane.getActiveZoteroPane();
+			libraryID = zp.getSelectedLibraryID();
+			collection = zp.getSelectedCollection();
 		} catch(e) {}
 		translate.setHandler("itemDone", function(obj, item) {
 			if(collection) collection.addItem(item.id);

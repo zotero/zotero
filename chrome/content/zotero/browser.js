@@ -153,8 +153,8 @@ var Zotero_Browser = new function() {
 		var libraryID, collectionID;
 		var pane = ZoteroOverlay.getActiveZoteroPane();
 		if(pane) {
-			libraryID = ZoteroPane.getSelectedLibraryID();
-			collectionID = ZoteroPane.getSelectedCollection(true);
+			libraryID = pane.getSelectedLibraryID();
+			collectionID = pane.getSelectedCollection(true);
 		} else {
 			libraryID = collectionID = null;
 		}
