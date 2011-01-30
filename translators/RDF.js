@@ -68,10 +68,17 @@ function handleCreators(newItem, creators, creatorType) {
 		return;
 	}
 	
-	if(typeof(creators[0]) != "string") {	// see if creators are in a container
+	if(typeof(creators[0]) != "string") {
+		// see if creators are in a container, but if they don't seem to be,
+		// then we don't attempt to extract them.
 		try {
-			var creators = Zotero.RDF.getContainerElements(creators[0]);
-		} catch(e) {}
+			var newCreators = Zotero.RDF.getContainerElements(creators[0]);
+		} catch (e) {
+			Zotero.debug("Exception caught in Zotero.RDF.getContainerElements");
+		}
+		if (creators.length === newCreators.length) {
+			creators = newCreators;
+		}
 	}
 	
 	if(typeof(creators[0]) == "string") {	// support creators encoded as strings
