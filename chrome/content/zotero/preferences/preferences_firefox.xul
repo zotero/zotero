@@ -42,6 +42,39 @@ To add a new preference:
 -->
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<prefwindow id="zotero-prefs">
+		<prefpane id="zotero-prefpane-general"
+							label="&zotero.preferences.prefpane.general;"
+							image="chrome://zotero/skin/prefs-general.png">			
+			<preferences id="zotero-prefpane-general-preferences">
+				<preference id="pref-showIn" name="extensions.zotero.showIn" type="int"/>
+				<preference id="pref-statusBarIcon" name="extensions.zotero.statusBarIcon" type="int"/>
+			</preferences>
+			<groupbox id="zotero-prefpane-general-groupbox">
+				<grid id="zotero-prefpane-general-grid">
+					<rows id="zotero-prefpane-general-rows">
+						<row position="1">
+							<hbox align="center">
+								<label value="&zotero.preferences.showIn;" control="showAs"/>
+							</hbox>
+							<radiogroup id="showIn" orient="horizontal" preference="pref-showIn" oncommand="handleShowInPreferenceChange()">
+								<radio id="zotero-prefpane-general-showIn-browserPane" label="&zotero.preferences.showIn.browserPane;" value="1"/>
+								<radio id="zotero-prefpane-general-showIn-separateTab" label="&zotero.preferences.showIn.separateTab;" value="2"/>
+							</radiogroup>
+						</row>
+						<row position="2" id="zotero-prefpane-general-statusBarIcon-row">
+							<hbox align="center">
+								<label id="statusBarIcon-label" value="&zotero.preferences.statusBarIcon;" control="statusBarIcon"/>
+							</hbox>
+							<radiogroup id="statusBarIcon" orient="horizontal" preference="pref-statusBarIcon">
+								<radio id="statusBarIcon-full" src="chrome://zotero/skin/zotero_status_bar.png" value="2"/>
+								<radio id="statusBarIcon-compact" src="chrome://zotero/skin/zotero_status_bar_compact.png" value="1"/>
+								<radio id="statusBarIcon-none" label="&zotero.preferences.statusBarIcon.none;" value="0"/>
+							</radiogroup>
+						</row>
+					</rows>
+				</grid>
+			</groupbox>
+		</prefpane>
 		<prefpane id="zotero-prefpane-proxies"
 							label="&zotero.preferences.prefpane.proxies;"
 							image="chrome://zotero/skin/prefs-proxies.png" position="6">

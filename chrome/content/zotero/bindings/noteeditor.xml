@@ -318,7 +318,7 @@
 						}
 						
 						if (lastWin.document.getElementById('zotero-pane').getAttribute('hidden') == 'true') {
-							lastWin.ZoteroPane.toggleDisplay();
+							lastWin.ZoteroOverlay.toggleDisplay();
 							
 							// DEBUG: The actions below seem to crash Firefox 2.0.0.1 on OS X if
 							// the Z pane isn't already open, so we don't try

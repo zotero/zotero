@@ -62,6 +62,10 @@ grid row hbox:first-child
 {
 	width: 90px;
 }
+#showIn radio
+{
+	width: 135px;
+}
 
 #fontSize radio .radio-icon, #statusBarIcon radio .radio-icon
 {

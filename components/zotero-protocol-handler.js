@@ -840,10 +840,7 @@ function ChromeExtensionHandler() {
 				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator);
 				var win = wm.getMostRecentWindow(null);
-				
-				if(!win.ZoteroPane.isShowing()){
-					win.ZoteroPane.toggleDisplay();
-				}
+				win.ZoteroPane.show();
 				
 				var lkh = Zotero.Items.parseLibraryKeyHash(id);
 				if (lkh) {
@@ -859,7 +856,7 @@ function ChromeExtensionHandler() {
 					return;
 				}
 				
-				win.ZoteroPane.selectItem(item.id);
+				win.ZoteroPane.getActiveZoteroPane().selectItem(item.id);
 			}
 			catch (e){
 				Zotero.debug(e);
@@ -885,26 +882,7 @@ function ChromeExtensionHandler() {
 				var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator)
 					.getMostRecentWindow("navigator:browser");
-				var zp = win.ZoteroPane;
-				
-				// When using fullscreen as home page, Zotero pane is reset to
-				// 0 height, so get saved height and set it below
-				var pane = win.document.getElementById('zotero-pane');
-				var height = pane.getAttribute('savedHeight');
-				
-				zp.fullScreen(true);
-				
-				if(!zp.isShowing()) {
-					zp.toggleDisplay();
-				}
-				
-				pane.setAttribute('height', height);
-				
-				// FIXME: The above should run in a callback after about:blank
-				// is loaded so that the window title is set correctly, but I
-				// can't get the event handlers to work. - D.S.
-				
-				win.loadURI("about:blank");
+				win.loadURI("chrome://zotero/content/tab.xul");
 			}
 			catch (e) {
 				Zotero.debug(e);

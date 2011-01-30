@@ -122,13 +122,10 @@ var Zotero_Browser = new function() {
 	}
 	
 	/**
-	 * Scrapes a page (called when the capture icon is clicked)
-	 *
-	 * @param	{Integer}	libraryID
-	 * @param	{Integer}	collectionID
+	 * Scrapes a page (called when the capture icon is clicked
 	 * @return	void
 	 */
-	function scrapeThisPage(libraryID, collectionID) {
+	function scrapeThisPage(/*libraryID, collectionID*/) {
 		if (Zotero.locked) {
 			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
 			var desc = Zotero.localeJoin([
@@ -151,6 +148,18 @@ var Zotero_Browser = new function() {
 			Zotero_Browser.progress.startCloseTimer(8000);
 			return;
 		}
+		
+		// get libraryID and collectionID
+		var libraryID, collectionID;
+		var pane = ZoteroOverlay.getActiveZoteroPane();
+		if(pane) {
+			libraryID = ZoteroPane.getSelectedLibraryID();
+			collectionID = ZoteroPane.getSelectedCollection(true);
+		} else {
+			libraryID = collectionID = null;
+		}
+		
+		// translate into specified library and collection
 		_getTabObject(this.tabbrowser.selectedBrowser).translate(libraryID, collectionID);
 	}
 	

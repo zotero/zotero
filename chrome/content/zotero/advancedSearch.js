@@ -153,7 +153,7 @@ var ZoteroAdvancedSearch = new function() {
 				}
 				
 				if (lastWin.document.getElementById('zotero-pane').getAttribute('hidden') == 'true') {
-					lastWin.ZoteroPane.toggleDisplay();
+					lastWin.ZoteroOverlay.toggleDisplay();
 				}
 				
 				lastWin.ZoteroPane.selectItem(item.getID(), false, true);
