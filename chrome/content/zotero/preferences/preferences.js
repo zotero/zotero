@@ -1780,3 +1780,19 @@ function updateWordProcessorInstructions() {
 		document.getElementById("wordProcessors-getWordProcessorPlugins").hidden = true;
 	}
 }
+
+/**
+ * Sets "Status bar icon" to "None" if Zotero is set to load in separate tab on Fx 4
+ */
+function handleShowInPreferenceChange() {
+	var showInSeparateTab = document.getElementById("zotero-prefpane-general-showIn-separateTab");
+	if(Zotero.isFx4) {
+		if(showInSeparateTab.selected) {
+			document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-none');
+			Zotero.Prefs.set("statusBarIcon", 0);
+		} else if(Zotero.isFx4) {
+			document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-full');
+			Zotero.Prefs.set("statusBarIcon", 2);
+		}
+	}
+}

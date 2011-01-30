@@ -23,26 +23,21 @@
     ***** END LICENSE BLOCK *****
 */
 
-
-var Zotero_Timeline_Interface = new function() {
-	/*
-	 * Load a timeline for the currently selected collection
-	 */
-	this.loadTimeline = function () {
-		var uri = 'zotero://timeline/';
-		var col = ZoteroPane.getSelectedCollection();
-		
-		if (col) {
-			ZoteroPane.loadURI(uri + 'collection/' + Zotero.Collections.getLibraryKeyHash(col));
-			return;
-		}
-		
-		var s = ZoteroPane.getSelectedSavedSearch();
-		if (s) {
-			ZoteroPane.loadURI(uri + 'search/' + Zotero.Searches.getLibraryKeyHash(s));
-			return;
-		}
-		
-		ZoteroPane.loadURI(uri);
+/*
+ * This object contains the various functions for the interface
+ */
+var ZoteroStandalone = new function()
+{
+	this.onLoad = function() {
+		ZoteroPane.init();
+		var success = ZoteroPane.makeVisible();
+		if(!success) window.close();
+	}
+	
+	this.onUnload = function() {
+		ZoteroPane.destroy();
 	}
 }
+
+window.addEventListener("load", function(e) { ZoteroStandalone.onLoad(e); }, false);
+window.addEventListener("unload", function(e) { ZoteroStandalone.onUnload(e); }, false);

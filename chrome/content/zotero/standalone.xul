@@ -4,7 +4,7 @@
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/standalone.css" type="text/css"?>
 <?xul-overlay href="chrome://global/content/editMenuOverlay.xul"?>
-<?xul-overlay href="chrome://zotero/content/overlay.xul"?>
+<?xul-overlay href="chrome://zotero/content/zoteroPane.xul"?>
 <?xul-overlay href="chrome://zotero/content/itemPane.xul"?>
 
 <!DOCTYPE window [
@@ -23,14 +23,15 @@
 <window id="main-window"
 				xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 				onload="window.sizeToContent()"
-				windowtype="navigator:browser"
+				windowtype="navigator:browser" 
 				title="&brandShortName;"
 				width="900" height="500"
 				persist="screenX screenY width height sizemode"> 
-	<script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
-	<script type="application/x-javascript" src="chrome://global/content/viewZoomOverlay.js"/>
-	<script type="application/x-javascript" src="chrome://global/content/contentAreaUtils.js"/>
-	<script type="application/x-javascript" src="chrome://global/content/inlineSpellCheckUI.js"/>
+	<script type="application/javascript" src="standalone.js"/>
+	<script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
+	<script type="application/javascript" src="chrome://global/content/viewZoomOverlay.js"/>
+	<script type="application/javascript" src="chrome://global/content/contentAreaUtils.js"/>
+	<script type="application/javascript" src="chrome://global/content/inlineSpellCheckUI.js"/>
 	<commandset id="mainCommandSet">
 		<command id="cmd_toggleTaskbar" oncommand="goToggleToolbar('status-bar','toggle_taskbar');"/>
 		<command id="cmd_quitApplication" oncommand="goQuitApplication()"/>
@@ -214,12 +215,7 @@
 
 	<hbox flex="1" id="browser">
 		<vbox id="appcontent" flex="1">
-			<tabbrowser id="content" disablehistory="true"
-									flex="1" contenttooltip="aHTMLTooltip"
-									contentcontextmenu="contentAreaContextMenu"
-									onnewtab="BrowserOpenTab();"
-									autocompletepopup="PopupAutoComplete"
-									onclick="return contentAreaClick(event, false);"/>
+			<stack id="zotero-pane-stack" fullscreenmode="true" flex="1"/>
 		</vbox>
 	</hbox>
 	<keyset id="mainKeyset"/>

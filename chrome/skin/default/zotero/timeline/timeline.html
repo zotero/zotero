@@ -83,10 +83,8 @@
 					.getService(Components.interfaces.nsIWindowMediator);
 				var win = wm.getMostRecentWindow('navigator:browser');
 				var zp = win.ZoteroPane;
-				if (!zp.isShowing()) {
-					zp.toggleDisplay();
-				}
-				zp.selectItem(evt.getDescription());
+				zp.show();
+				zp.getActiveZoteroPane().selectItem(evt.getDescription());
 			}
 			
 			document.write("<title>" + getString("general.title") + "</title>");

@@ -47,10 +47,9 @@ To add a new preference:
 	<prefpane id="zotero-prefpane-general"
 						label="&zotero.preferences.prefpane.general;"
 						image="chrome://zotero/skin/prefs-general.png">
-		<preferences>
+		<preferences id="zotero-prefpane-general-preferences">
 			<preference id="pref-fontSize" name="extensions.zotero.fontSize" type="string"/>
 			<preference id="pref-noteFontSize" name="extensions.zotero.note.fontSize" type="string"/>
-			<preference id="pref-statusBarIcon" name="extensions.zotero.statusBarIcon" type="int"/>
 			<preference id="pref-automaticScraperUpdates" name="extensions.zotero.automaticScraperUpdates" type="bool"/>
 			<preference id="pref-reportTranslationFailure" name="extensions.zotero.reportTranslationFailure" type="bool"/>
 			<preference id="pref-zoteroDotOrgVersionHeader" name="extensions.zotero.zoteroDotOrgVersionHeader" type="bool"/>
@@ -65,27 +64,16 @@ To add a new preference:
 			<preference id="pref-groups-copyChildLinks" name="extensions.zotero.groups.copyChildLinks" type="bool"/>
 		</preferences>
 		
-		<groupbox>
+		<groupbox id="zotero-prefpane-general-groupbox">
 			<caption label="&zotero.preferences.userInterface;"/>
 			
-			<grid>
+			<grid id="zotero-prefpane-general-grid">
 				<columns>
 					<column/>
 					<column flex="1"/>
 				</columns>
 			
-				<rows>
-					<row>
-						<hbox align="center">
-							<label value="&zotero.preferences.statusBarIcon;" control="statusBarIcon"/>
-						</hbox>
-						<radiogroup id="statusBarIcon" orient="horizontal" preference="pref-statusBarIcon">
-							<radio src="chrome://zotero/skin/zotero_status_bar.png" value="2"/>
-							<radio src="chrome://zotero/skin/zotero_status_bar_compact.png" value="1"/>
-							<radio label="&zotero.preferences.statusBarIcon.none;" value="0"/>
-						</radiogroup>
-					</row>
-					
+				<rows id="zotero-prefpane-general-rows">
 					<row>
 						<hbox align="center">
 							<label value="&zotero.preferences.fontSize;" control="fontSize"/>

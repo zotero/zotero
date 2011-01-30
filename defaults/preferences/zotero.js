@@ -18,6 +18,7 @@ pref("extensions.zotero.debug.time", false);
 pref("extensions.zotero.automaticScraperUpdates",true);
 pref("extensions.zotero.zoteroDotOrgVersionHeader", true);
 pref("extensions.zotero.cacheTranslatorData",true);
+pref("extensions.zotero.showIn", 1);
 pref("extensions.zotero.statusBarIcon", 2);
 pref("extensions.zotero.browserContentContextMenu", true);
 pref("extensions.zotero.openURL.resolver","http://worldcatlibraries.org/registry/gateway");

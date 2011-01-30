@@ -2,8 +2,7 @@
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero/skin/standalone.css" type="text/css"?>
-<?xul-overlay href="chrome://zotero/content/overlay.xul"?>
+<?xul-overlay href="chrome://zotero/content/zoteroPane.xul"?>
 <?xul-overlay href="chrome://zotero/content/itemPane.xul"?>
 
 <!DOCTYPE window [
@@ -19,9 +18,16 @@
 %brandDTD;
 ]>
 
-<window id="zotero-tab" title="Zotero"
-				xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-				flex="1"> 
+<page id="zotero-tab" title="Zotero" role="application"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:xhtml="http://www.w3.org/1999/xhtml" disablefastfind="true"
+		flex="1"> 
+	
+	<script type="application/javascript" src="standalone.js"/>
+	<script type="application/javascript"
+		src="chrome://global/content/contentAreaUtils.js"/>
+	<xhtml:link rel="shortcut icon"
+		href="chrome://zotero/skin/zotero-z-16px.png" style="display:none"/>
 	<popup id="contentAreaContextMenu">
 		<menuitem id="context-undo"
 				label="&undoCmd.label;"
@@ -52,13 +58,8 @@
 	</popup>
 	<hbox flex="1" id="browser">
 		<vbox id="appcontent" flex="1">
-			<tabbrowser id="content" disablehistory="true"
-									flex="1" contenttooltip="aHTMLTooltip"
-									contentcontextmenu="contentAreaContextMenu"
-									onnewtab="BrowserOpenTab();"
-									autocompletepopup="PopupAutoComplete"
-									onclick="return contentAreaClick(event, false);"/>
+			<stack id="zotero-pane-stack" fullscreenmode="true" flex="1"/>
 		</vbox>
 	</hbox>
 	<keyset id="mainKeyset"/>
-</window>
+</page>
