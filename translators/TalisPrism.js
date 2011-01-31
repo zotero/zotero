@@ -1,14 +1,14 @@
 {
-        "translatorID":"53f8d182-4edc-4eab-b5a1-141698a20202",
-        "label":"TalisPrism",
-        "creator":"William Smith and Emma Reisz",
-        "target":"/TalisPrism/(browseResults|doSearch)",
-        "minVersion":"1.0.0b4.r5",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2010-11-15 11:35:54"
+	"translatorID":"53f8d182-4edc-4eab-b5a1-141698a20202",
+	"label":"TalisPrism",
+	"creator":"William Smith and Emma Reisz",
+	"target":"/TalisPrism/(browseResults|doSearch)",
+	"minVersion":"1.0.0b4.r5",
+	"maxVersion":"",
+	"priority":100,
+	"inRepository":"1",
+	"translatorType":4,
+	"lastUpdated":"2011-01-31 19:10:00"
 }
 
 /* TalisPrism translator.
