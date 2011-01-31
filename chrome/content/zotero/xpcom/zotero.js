@@ -122,6 +122,13 @@ var Zotero = new function(){
 		Zotero.DB.query(sql, val);
 	});
 	
+	this.getActiveZoteroPane = function() {
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+			.getService(Components.interfaces.nsIWindowMediator);
+		var win = wm.getMostRecentWindow("navigator:browser");
+		return win.getActiveZoteroPane();
+	};
+	
 	this.getLocalUserKey = function (generate) {
 		if (_localUserKey) {
 			return _localUserKey;
