@@ -447,7 +447,22 @@ Zotero.Style.prototype.__defineGetter__("hasBibliography",
  * @type String
  */
 function() {
-	if(!this._hasBibliography) this.getXML();
+	if(this.source) {
+		// use hasBibliography from source style
+		var parentStyle = Zotero.Styles.get(this.source);
+		if(!parentStyle) {
+			throw(new Error('Style references '+this.source+', but this style is not installed',
+				Zotero.Styles.ios.newFileURI(this.file).spec, null));
+		}
+		return parentStyle.hasBibliography;
+	}
+	
+	if(!this._hasBibliography) {
+		// if we don't know whether this style has a bibliography, it's because it's an ens style
+		// and we have to parse it to know
+		this.getXML();
+	}
+	
 	return this._hasBibliography;
 });
 
