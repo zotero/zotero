@@ -199,7 +199,11 @@ Zotero.Cite.System.retrieveLocale = function(lang) {
 	let protHandler = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
 		.createInstance(Components.interfaces.nsIProtocolHandler);
 	let channel = protHandler.newChannel(protHandler.newURI("chrome://zotero/content/locale/csl/locales-"+lang+".xml", "UTF-8", null));
-	let rawStream = channel.open();
+	try {
+		let rawStream = channel.open();
+	} catch(e) {
+		return false;
+	}
 	let converterStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 						   .createInstance(Components.interfaces.nsIConverterInputStream);
 	converterStream.init(rawStream, "UTF-8", 65535,
