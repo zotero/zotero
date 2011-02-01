@@ -69,14 +69,7 @@
 	<hbox id="urlbar-icons">
 		<image src="chrome://zotero/skin/treeitem-book.png" id="zotero-status-image" onclick="Zotero_Browser.scrapeThisPage()" position="1" hidden="true"/>
 	</hbox>
-	
-	<script>
-	<![CDATA[
-	// Make sure open progress windows are fading
-	document.getElementById('appcontent').addEventListener('mousemove', Zotero.ProgressWindowSet.updateTimers, false);
-	]]>
-	</script>
-	
+		
 	<menupopup id="menu_ToolsPopup">
 		<menuseparator id="zoteroSeparator" insertbefore="devToolsSeparator"/>
 		<menuitem id="tools-zotero" insertbefore="devToolsSeparator"

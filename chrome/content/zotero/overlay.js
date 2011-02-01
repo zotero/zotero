@@ -98,6 +98,7 @@ var ZoteroOverlay = new function()
 		}
 		
 		if (Zotero && Zotero.initialized){
+			document.getElementById('appcontent').addEventListener('mousemove', Zotero.ProgressWindowSet.updateTimers, false);
 			switch (iconPref) {
 				case 2:
 					icon.setAttribute('hidden', false);
