@@ -587,7 +587,7 @@ var Zotero = new function(){
 		Zotero.Integration.init();
 		
 		if(Zotero.Prefs.get("connector.enabled")) {
-			Zotero.Server.init();
+			Zotero.Connector.init();
 		}
 		
 		Zotero.Zeroconf.init();
