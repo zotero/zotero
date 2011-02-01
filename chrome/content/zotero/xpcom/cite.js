@@ -196,15 +196,18 @@ Zotero.Cite.System.retrieveItem = function(item){
 };
 
 Zotero.Cite.System.retrieveLocale = function(lang) {
-	var xhr = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-	xhr.open("GET", "chrome://zotero/content/locale/csl/locales-"+lang+".xml", false);
-	xhr.overrideMimeType("application/octet-stream");
-	try {
-		xhr.send();
-		return xhr.responseText;
-	} catch(e) {
-		return false;
-	}
+	let protHandler = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
+		.createInstance(Components.interfaces.nsIProtocolHandler);
+	let channel = protHandler.newChannel(protHandler.newURI("chrome://zotero/content/locale/csl/locales-"+lang+".xml", "UTF-8", null));
+	let rawStream = channel.open();
+	let converterStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+						   .createInstance(Components.interfaces.nsIConverterInputStream);
+	converterStream.init(rawStream, "UTF-8", 65535,
+		Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+	let str = {};
+	converterStream.readString(channel.contentLength, str);
+	converterStream.close();
+	return str.value;
 };
 
 Zotero.Cite.System.getAbbreviations = function() {
