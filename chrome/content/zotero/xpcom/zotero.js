@@ -586,8 +586,8 @@ var Zotero = new function(){
 		// Initialize various services
 		Zotero.Integration.init();
 		
-		if(Zotero.Prefs.get("connector.enabled")) {
-			Zotero.Connector.init();
+		if(Zotero.Prefs.get("httpServer.enabled")) {
+			Zotero.Server.init();
 		}
 		
 		Zotero.Zeroconf.init();
@@ -1747,15 +1747,17 @@ Zotero.Keys = new function() {
 		var useShift = Zotero.isMac;
 		
 		// Zotero pane shortcut
-		var zKey = Zotero.Prefs.get('keys.openZotero');
 		var keyElem = document.getElementById('key_openZotero');
-		// Only override the default with the pref if the <key> hasn't been manually changed
-		// and the pref has been
-		if (keyElem.getAttribute('key') == 'Z' && keyElem.getAttribute('modifiers') == 'accel alt'
-				&& (zKey != 'Z' || useShift)) {
-			keyElem.setAttribute('key', zKey);
-			if (useShift) {
-				keyElem.setAttribute('modifiers', 'accel shift');
+		if(keyElem) {
+			var zKey = Zotero.Prefs.get('keys.openZotero');
+			// Only override the default with the pref if the <key> hasn't been manually changed
+			// and the pref has been
+			if (keyElem.getAttribute('key') == 'Z' && keyElem.getAttribute('modifiers') == 'accel alt'
+					&& (zKey != 'Z' || useShift)) {
+				keyElem.setAttribute('key', zKey);
+				if (useShift) {
+					keyElem.setAttribute('modifiers', 'accel shift');
+				}
 			}
 		}
 		
