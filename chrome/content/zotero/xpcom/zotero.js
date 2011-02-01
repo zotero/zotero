@@ -586,7 +586,7 @@ var Zotero = new function(){
 		// Initialize various services
 		Zotero.Integration.init();
 		
-		if(Zotero.Prefs.get("httpServer.enabled")) {
+		if(Zotero.Prefs.get("connector.enabled")) {
 			Zotero.Server.init();
 		}
 		
