@@ -150,6 +150,16 @@ Zotero.Translate.Sandbox = {
 			// for security reasons, safeTranslator wraps the translator object.
 			// note that setLocation() is not allowed
 			var safeTranslator = new Object();
+			safeTranslator.__exposedProps__ = {
+				"setSearch":"r",
+				"setDocument":"r",
+				"setHandler":"r",
+				"setString":"r",
+				"setTranslator":"r",
+				"getTranslators":"r",
+				"translate":"r",
+				"getTranslatorObject":"r"
+			};
 			safeTranslator.setSearch = function(arg) {
 				if(Zotero.isFx4) arg = JSON.parse(JSON.stringify(arg));
 				return translation.setSearch(arg);
@@ -1379,7 +1389,13 @@ Zotero.Translate.IO.String = function(string, uri, mode) {
 }
 
 Zotero.Translate.IO.String.prototype = {
-	"__exposedProps__":["RDF", "read", "write", "setCharacterSet", "_getXML"],
+	"__exposedProps__":{
+		"RDF":"r",
+		"read":"r",
+		"write":"r",
+		"setCharacterSet":"r",
+		"_getXML":"r"
+	},
 	
 	"_initRDF":function() {
 		Zotero.debug("Translate: Initializing RDF data store");
@@ -1488,9 +1504,21 @@ Zotero.Translate.IO._RDFSandbox = function(dataStore) {
 
 Zotero.Translate.IO._RDFSandbox.prototype = {
 	"_containerCounts":[],
-	"__exposedProps__":["addStatement", "newResource", "newContainer", "addContainerElement",
-		"getContainerElements", "addNamespace", "getAllResources", "getResourceURI", "getArcsIn",
-		"getArcsOut", "getSources", "getTargets", "getStatementsMatching"],
+	"__exposedProps__":{
+		"addStatement":"r",
+		"newResource":"r",
+		"newContainer":"r",
+		"addContainerElement":"r",
+		"getContainerElements":"r",
+		"addNamespace":"r",
+		"getAllResources":"r",
+		"getResourceURI":"r",
+		"getArcsIn":"r",
+		"getArcsOut":"r",
+		"getSources":"r",
+		"getTargets":"r",
+		"getStatementsMatching":"r"
+	},
 	
 	/**
 	 * Gets a resource as a Zotero.RDF.AJAW.RDFSymbol, rather than a string

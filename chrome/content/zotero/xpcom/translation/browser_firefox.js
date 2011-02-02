@@ -64,13 +64,11 @@ Zotero.Translate.SandboxManager.prototype = {
 	 */
 	"importObject":function(object, passAsFirstArgument, attachTo) {
 		if(!attachTo) attachTo = this.sandbox.Zotero;
-		for(var key in (object.__exposedProps__ ? object.__exposedProps__ : object)) {
-			let localKey;
-			if(object.__exposedProps__) {
-				localKey = object.__exposedProps__[key];
-			} else {
-				localKey = key;
-			}
+		var newExposedProps = false;
+		if(!object.__exposedProps__) newExposedProps = {};
+		for(var key in (newExposedProps ? object : object.__exposedProps__)) {
+			let localKey = key;
+			if(newExposedProps) newExposedProps[localKey] = "r";
 			
 			// magical XPCSafeJSObjectWrappers for sandbox
 			if(typeof object[localKey] === "function" || typeof object[localKey] === "object") {
@@ -90,8 +88,14 @@ Zotero.Translate.SandboxManager.prototype = {
 					this.importObject(object[localKey], passAsFirstArgument ? passAsFirstArgument : null, attachTo[localKey]);
 				}
 			} else {
-				object[localKey] = object[localKey];
+				attachTo[localKey] = object[localKey];
 			}
+		}
+		
+		if(newExposedProps) {
+			attachTo.__exposedProps__ = newExposedProps;
+		} else {
+			attachTo.__exposedProps__ = object.__exposedProps__;
 		}
 	}
 }
@@ -243,7 +247,12 @@ Zotero.Translate.IO.Read = function(file, mode) {
 }
 
 Zotero.Translate.IO.Read.prototype = {
-	"__exposedProps__":["_getXML", "RDF", "read", "setCharacterSet"],
+	"__exposedProps__":{
+		"_getXML":"r",
+		"RDF":"r",
+		"read":"r",
+		"setCharacterSet":"r"
+	},
 	
 	"_seekToStart":function() {
 		this._rawStream.QueryInterface(Components.interfaces.nsISeekableStream)
@@ -351,7 +360,11 @@ Zotero.Translate.IO.Write = function(file, mode, charset) {
 }
 
 Zotero.Translate.IO.Write.prototype = {
-	"__exposedProps__":["RDF", "write", "setCharacterSet"],
+	"__exposedProps__":{
+		"RDF":"r",
+		"write":"r",
+		"setCharacterSet":"r"
+	},
 	
 	"_initRDF":function() {
 		Zotero.debug("Translate: Initializing RDF data store");
