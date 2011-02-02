@@ -286,79 +286,84 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 		if(entrySpacing == NaN) throw "Invalid entryspacing";
 		if(lineSpacing == NaN) throw "Invalid linespacing";
 		
-		default xml namespace = '';
-		XML.prettyPrinting = false;
-		XML.ignoreWhitespace = false;
-		var xml = new XML(html);
-		
-		var multiField = !!xml..div.(@class == "csl-left-margin").length();
-		
-		// One of the characters is usually a period, so we can adjust this down a bit
-		maxOffset = Math.max(1, maxOffset - 2);
-		
-		// Force a minimum line height
-		if(lineSpacing <= 1.35) lineSpacing = 1.35;
-		
-		xml.@style += "line-height: " + lineSpacing + "; ";
-		
-		if(hangingIndent) {
-			if (multiField && !secondFieldAlign) {
-				throw ("second-field-align=false and hangingindent=true combination is not currently supported");
-			}
-			// If only one field, apply hanging indent on root
-			else if (!multiField) {
-				xml.@style += "padding-left: " + hangingIndent + "em; text-indent:-" + hangingIndent + "em;";
-			}
-		}
-		
-		// csl-entry
-		var divs = xml..div.(@class == "csl-entry");
-		var num = divs.length();
-		var i = 0;
-		for each(var div in divs) {
-			var first = i == 0;
-			var last = i == num - 1;
+		default xml namespace = ''; with({});
+		try {			
+			XML.prettyPrinting = false;
+			XML.ignoreWhitespace = false;
+			var xml = new XML(html);
 			
-			if(entrySpacing) {
-				if(!last) {
-					div.@style += "margin-bottom: " + entrySpacing + "em;";
+			var multiField = !!xml..div.(@class == "csl-left-margin").length();
+			
+			// One of the characters is usually a period, so we can adjust this down a bit
+			maxOffset = Math.max(1, maxOffset - 2);
+			
+			// Force a minimum line height
+			if(lineSpacing <= 1.35) lineSpacing = 1.35;
+			
+			xml.@style += "line-height: " + lineSpacing + "; ";
+			
+			if(hangingIndent) {
+				if (multiField && !secondFieldAlign) {
+					throw ("second-field-align=false and hangingindent=true combination is not currently supported");
+				}
+				// If only one field, apply hanging indent on root
+				else if (!multiField) {
+					xml.@style += "padding-left: " + hangingIndent + "em; text-indent:-" + hangingIndent + "em;";
 				}
 			}
 			
-			i++;
-		}
-		
-		// Padding on the label column, which we need to include when
-		// calculating offset of right column
-		var rightPadding = .5;
-		
-		// div.csl-left-margin
-		for each(var div in xml..div.(@class == "csl-left-margin")) {
-			div.@style = "float: left; padding-right: " + rightPadding + "em;";
-			
-			// Right-align the labels if aligning second line, since it looks
-			// better and we don't need the second line of text to align with
-			// the left edge of the label
-			if (secondFieldAlign) {
-				div.@style += "text-align: right; width: " + maxOffset + "em;";
+			// csl-entry
+			var divs = xml..div.(@class == "csl-entry");
+			var num = divs.length();
+			var i = 0;
+			for each(var div in divs) {
+				var first = i == 0;
+				var last = i == num - 1;
+				
+				if(entrySpacing) {
+					if(!last) {
+						div.@style += "margin-bottom: " + entrySpacing + "em;";
+					}
+				}
+				
+				i++;
 			}
-		}
-		
-		// div.csl-right-inline
-		for each(var div in xml..div.(@class == "csl-right-inline")) {
-			div.@style = "margin: 0 .4em 0 " + (secondFieldAlign ? maxOffset + rightPadding : "0") + "em;";
 			
-			if (hangingIndent) {
-				div.@style += "padding-left: " + hangingIndent + "em; text-indent:-" + hangingIndent + "em;";
+			// Padding on the label column, which we need to include when
+			// calculating offset of right column
+			var rightPadding = .5;
+			
+			// div.csl-left-margin
+			for each(var div in xml..div.(@class == "csl-left-margin")) {
+				div.@style = "float: left; padding-right: " + rightPadding + "em;";
+				
+				// Right-align the labels if aligning second line, since it looks
+				// better and we don't need the second line of text to align with
+				// the left edge of the label
+				if (secondFieldAlign) {
+					div.@style += "text-align: right; width: " + maxOffset + "em;";
+				}
 			}
+			
+			// div.csl-right-inline
+			for each(var div in xml..div.(@class == "csl-right-inline")) {
+				div.@style = "margin: 0 .4em 0 " + (secondFieldAlign ? maxOffset + rightPadding : "0") + "em;";
+				
+				if (hangingIndent) {
+					div.@style += "padding-left: " + hangingIndent + "em; text-indent:-" + hangingIndent + "em;";
+				}
+			}
+			
+			// div.csl-indent
+			for each(var div in xml..div.(@class == "csl-indent")) {
+				div.@style = "margin: .5em 0 0 2em; padding: 0 0 .2em .5em; border-left: 5px solid #ccc;";
+			}
+			
+			//Zotero.debug(xml);
+		} finally {
+			XML.prettyPrinting = true;
+			XML.ignoreWhitespace = true;
 		}
-		
-		// div.csl-indent
-		for each(var div in xml..div.(@class == "csl-indent")) {
-			div.@style = "margin: .5em 0 0 2em; padding: 0 0 .2em .5em; border-left: 5px solid #ccc;";
-		}
-		
-		//Zotero.debug(xml);
 		
 		return xml.toXMLString();
 	} else if(format == "text") {
