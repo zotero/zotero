@@ -100,6 +100,13 @@ Zotero.Translate.SandboxManager.prototype = {
 	}
 }
 
+/**
+ * This variable holds a reference to all open nsIInputStreams and nsIOutputStreams in the global  
+ * scope at all times. Otherwise, our streams might get garbage collected when we allow other code
+ * to run during Zotero.wait().
+ */
+Zotero.Translate.IO.streamsToKeepOpen = [];
+
 /******* (Native) Read support *******/
 
 Zotero.Translate.IO.Read = function(file, mode) {
@@ -108,6 +115,7 @@ Zotero.Translate.IO.Read = function(file, mode) {
 	// open file
 	this._rawStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
 							  .createInstance(Components.interfaces.nsIFileInputStream);
+	Zotero.Translate.IO.streamsToKeepOpen.push(this._rawStream);
 	this._rawStream.init(file, 0x01, 0664, 0);
 	
 	// start detecting charset
@@ -290,9 +298,7 @@ Zotero.Translate.IO.Read.prototype = {
 		// seek back to the beginning
 		this._seekToStart();
 		
-		if(this._allowCharsetOverride) {	
-			this.inputStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
-								   .createInstance(Components.interfaces.nsIConverterInputStream);
+		if(this._allowCharsetOverride) {
 			try {
 				this.inputStream.init(this._rawStream, charset, 65535,
 					Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
@@ -333,8 +339,12 @@ Zotero.Translate.IO.Read.prototype = {
 	
 	"reset":function(newMode) {
 		this._seekToStart();
-		this.inputStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
-			.createInstance(Components.interfaces.nsIConverterInputStream);
+		
+		if(!this.inputStream) {
+			this.inputStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+				.createInstance(Components.interfaces.nsIConverterInputStream);
+			Zotero.Translate.IO.streamsToKeepOpen.push(this.inputStream);
+		}
 		this.inputStream.init(this._rawStream, this._charset, 65535,
 			Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
 		
@@ -345,7 +355,12 @@ Zotero.Translate.IO.Read.prototype = {
 	},
 	
 	"close":function() {
-		this.inputStream.close();
+		Zotero.Translate.IO.streamsToKeepOpen.splice(Zotero.Translate.IO.streamsToKeepOpen.indexOf(this._rawStream), 1);
+		if(this.inputStream) {
+			Zotero.Translate.IO.streamsToKeepOpen.splice(Zotero.Translate.IO.streamsToKeepOpen.indexOf(this.inputStream), 1);
+		}
+		
+		this._rawStream.close();
 	}
 }
 
@@ -354,6 +369,7 @@ Zotero.Translate.IO.Read.prototype = {
 Zotero.Translate.IO.Write = function(file, mode, charset) {
 	this._rawStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
 		.createInstance(Components.interfaces.nsIFileOutputStream);
+	Zotero.Translate.IO.streamsToKeepOpen.push(this._rawStream);
 	this._rawStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
 	this._writtenToStream = false;
 	if(mode || charset) this.reset(mode, charset);
@@ -377,8 +393,12 @@ Zotero.Translate.IO.Write.prototype = {
 			throw "Translate: setCharacterSet: charset must be a string";
 		}
 		
-		this.outputStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
-							   .createInstance(Components.interfaces.nsIConverterOutputStream);
+		if(!this.outputStream) {
+			this.outputStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
+								   .createInstance(Components.interfaces.nsIConverterOutputStream);
+			Zotero.Translate.IO.streamsToKeepOpen.push(this.outputStream);
+		}
+		
 		if(charset == "UTF-8xBOM") charset = "UTF-8";
 		this.outputStream.init(this._rawStream, charset, 1024, "?".charCodeAt(0));
 		this._charset = charset;
@@ -424,6 +444,12 @@ Zotero.Translate.IO.Write.prototype = {
 		if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1) {
 			this.write(this.RDF.serialize());
 		}
-		this.outputStream.close();
+		
+		Zotero.Translate.IO.streamsToKeepOpen.splice(Zotero.Translate.IO.streamsToKeepOpen.indexOf(this._rawStream), 1);
+		if(this.outputStream) {
+			Zotero.Translate.IO.streamsToKeepOpen.splice(Zotero.Translate.IO.streamsToKeepOpen.indexOf(this.outputStream), 1);
+		}
+		
+		this._rawStream.close();
 	}
 }
