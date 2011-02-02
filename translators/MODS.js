@@ -10,7 +10,7 @@
 	"configOptions":{"dataMode":"xml/e4x"},
 	"displayOptions":{"exportNotes":true},
 	"inRepository":true,
-	"lastUpdated":"2011-01-27 19:35:57"
+	"lastUpdated":"2011-02-02 05:01:48"
 }
 
 function detectImport() {
@@ -59,7 +59,7 @@ function doExport() {
 			marcGenre = "letter";
 		} else if(item.itemType == "manuscript") {
 			modsType = "text";
-			modsType.@manuscript = "yes";
+			mods.typeOfResource.@manuscript = "yes";
 		} else if(item.itemType == "interview") {
 			modsType = "text";
 			marcGenre = "interview";
