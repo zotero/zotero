@@ -302,9 +302,10 @@ var ZoteroOverlay = new function()
 	/**
 	 * Toggle between Zotero as a tab and Zotero as a pane
 	 */
-	this.toggleTab = function() {
+	this.toggleTab = function(setMode) {
 		var tab = this.findZoteroTab();
 		if(tab) {		// Zotero is running in a tab
+			if(setMode) return;
 			// don't do anything if Zotero tab is the only tab
 			if(tab && gBrowser.tabs.length === 1) return;
 			
@@ -316,6 +317,7 @@ var ZoteroOverlay = new function()
 			this.isTab = false;
 			this.toggleDisplay();
 		} else {		// Zotero is running in the pane
+			if(setMode === false) return;
 			// close Zotero pane
 			this.toggleDisplay();
 			
