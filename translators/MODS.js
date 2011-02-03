@@ -10,7 +10,7 @@
 	"configOptions":{"dataMode":"xml/e4x"},
 	"displayOptions":{"exportNotes":true},
 	"inRepository":true,
-	"lastUpdated":"2011-02-02 05:01:48"
+	"lastUpdated":"2011-02-03 07:00:12"
 }
 
 function detectImport() {
@@ -484,10 +484,13 @@ function doImport() {
 	
 	if(xml.m::mods.length()) {
 		var modsElements = xml.m::mods;
+		var nModsElements = modsElements.length();
 	} else {
 		var modsElements = [xml];
+		var nModsElements = 1;
 	}
 	
+	var i = 0;
 	for each(var mods in modsElements) {
 		var newItem = new Zotero.Item();
 		
@@ -746,8 +749,7 @@ function doImport() {
 		// join the list separated by semicolons & add it to zotero item
 		newItem.language = languages.join('; ');
 		
-		Zotero.debug(newItem);
-		
+		Zotero.setProgress(i++/nModsElements*100);
 		newItem.complete();
 	}
 }

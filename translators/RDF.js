@@ -9,7 +9,7 @@
 	"priority":100,
 	"configOptions":{"dataMode":"rdf/xml"},
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-02-03 07:00:12"
 }
 
 function detectImport() {
@@ -578,6 +578,7 @@ function importItem(newItem, node, type) {
 }
 
 function doImport() {
+	Zotero.setProgress(null);
 	var nodes = Zotero.RDF.getAllResources();
 	if(!nodes) {
 		return false;
@@ -586,6 +587,7 @@ function doImport() {
 	// keep track of collections while we're looping through
 	var collections = new Array();
 	
+	var i = 0;
 	for each(var node in nodes) {
 		var newItem = new Zotero.Item();
 		newItem.itemID = Zotero.RDF.getResourceURI(node);
@@ -618,6 +620,8 @@ function doImport() {
 		if(importItem(newItem, node, type)) {
 			newItem.complete();
 		}
+		
+		Zotero.setProgress(i++/nodes.length*100);
 	}
 	
 	/* COLLECTIONS */

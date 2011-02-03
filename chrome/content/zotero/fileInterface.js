@@ -41,7 +41,7 @@ var Zotero_File_Exporter = function() {
  * Performs the actual export operation
  **/
 Zotero_File_Exporter.prototype.save = function() {
-	var translation = new Zotero.Translate("export");
+	var translation = new Zotero.Translate.Export();
 	var translators = translation.getTranslators();
 	
 	// present options dialog
@@ -81,6 +81,7 @@ Zotero_File_Exporter.prototype.save = function() {
 		translation.setLocation(fp.file);
 		translation.setTranslator(io.selectedTranslator);
 		translation.setDisplayOptions(io.displayOptions);
+		translation.setHandler("itemDone", Zotero_File_Interface.updateProgress);
 		translation.setHandler("done", this._exportDone);
 		Zotero.UnresponsiveScriptIndicator.disable();
 		Zotero_File_Interface.Progress.show(
@@ -171,7 +172,7 @@ var Zotero_File_Interface = new function() {
 	 * exports items to clipboard
 	 */
 	function exportItemsToClipboard(items, translatorID) {
-		var translation = new Zotero.Translate("export");
+		var translation = new Zotero.Translate.Export();
 		translation.setItems(items);
 		translation.setTranslator(translatorID);
 		translation.setHandler("done", _copyToClipboard);
@@ -195,7 +196,7 @@ var Zotero_File_Interface = new function() {
 	 * Creates Zotero.Translate instance and shows file picker for file import
 	 */
 	function importFile() {
-		var translation = new Zotero.Translate("import");
+		var translation = new Zotero.Translate.Import();
 		var translators = translation.getTranslators();
 		
 		const nsIFilePicker = Components.interfaces.nsIFilePicker;
@@ -248,7 +249,7 @@ var Zotero_File_Interface = new function() {
 			return;
 		}
 		
-		var translate = new Zotero.Translate("import");
+		var translate = new Zotero.Translate.Import();
 		translate.setString(str);
 		translate.setHandler("translators", function(obj, item) {
 			_importTranslatorsAvailable(obj, item) 
@@ -280,6 +281,7 @@ var Zotero_File_Interface = new function() {
 			// import items
 			translation.setTranslator(translators[0]);
 			translation.setHandler("collectionDone", _importCollectionDone);
+			translation.setHandler("itemDone", Zotero_File_Interface.updateProgress);
 			translation.setHandler("done", _importDone);
 			Zotero.UnresponsiveScriptIndicator.disable();
 			
@@ -603,6 +605,13 @@ var Zotero_File_Interface = new function() {
 		} else {
 			return false;
 		}
+	}
+	
+	/**
+	 * Updates progress indicators based on current progress of translation
+	 */
+	this.updateProgress = function(translate) {
+		Zotero.updateZoteroPaneProgressMeter(translate.progress);
 	}
 }
 

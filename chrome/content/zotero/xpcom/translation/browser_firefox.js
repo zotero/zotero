@@ -265,6 +265,7 @@ Zotero.Translate.IO.Read.prototype = {
 	"_seekToStart":function() {
 		this._rawStream.QueryInterface(Components.interfaces.nsISeekableStream)
 			.seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, this._bomLength);
+		this.bytesRead = this._bomLength;
 	},
 	
 	"_readToString":function() {
@@ -323,6 +324,7 @@ Zotero.Translate.IO.Read.prototype = {
 		}
 					
 		if(amountRead) {
+			this.bytesRead += amountRead;
 			return str.value;
 		} else {
 			return false;
@@ -363,6 +365,11 @@ Zotero.Translate.IO.Read.prototype = {
 		this._rawStream.close();
 	}
 }
+
+Zotero.Translate.IO.String.prototype.__defineGetter__("contentLength",
+function() {
+	return this.file.fileSize;
+});
 
 /******* Write support *******/
 
