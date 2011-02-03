@@ -395,7 +395,6 @@ Zotero.Translate.Sandbox = {
 			} else {
 				translate._progress = value;
 			}
-			Zotero.debug("setting progress to "+value);
 		}
 	},
 
@@ -1164,7 +1163,6 @@ Zotero.Translate.Import.prototype.__defineGetter__("progress",
  * Return the progress of the import operation, or null if progress cannot be determined
  */
 function() {
-	Zotero.debug("progress is "+this._progress);
 	if(this._progress !== undefined) return this._progress;
 	if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1 || this._mode === "xml/e4x" || this._mode == "xml/dom" || !this._io) {
 		return null;
