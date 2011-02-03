@@ -3394,22 +3394,6 @@ var ZoteroPane = new function()
 	}
 	
 	/**
-	 * Gets the ZoteroPane object that is currently active in this window. Should be used for
-	 * determining the active collection for scraping, etc.
-	 */
-	this.getActiveZoteroPane = function() {
-		if(ZoteroOverlay && ZoteroOverlay.isTab) {
-			// If a Zotero tab is open, return the pane for the tab
-			var tab = ZoteroOverlay.findZoteroTab();
-			if(!tab) return null;
-			return gBrowser.getBrowserForTab(tab).contentWindow.ZoteroPane;
-		} else {
-			// Otherwise, return the pane for this tab
-			return ZoteroPane;
-		}
-	}
-	
-	/**
 	 * Shows the Zotero pane, making it visible if it is not and switching to the appropriate tab
 	 * if necessary.
 	 */

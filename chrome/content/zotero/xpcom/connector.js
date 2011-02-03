@@ -703,9 +703,8 @@ Zotero.Connector.Translate.Save.prototype = {
 		this._libraryID = null;
 		var collection = null;
 		try {
-			var zp =  win.ZoteroPane.getActiveZoteroPane();
-			this._libraryID = zp.getSelectedLibraryID();
-			collection = zp.getSelectedCollection();
+			this._libraryID = win.ZoteroPane.getSelectedLibraryID();
+			collection = win.ZoteroPane.getSelectedCollection();
 		} catch(e) {}
 		var me = this;
 		translate.setHandler("select", function(obj, item) { return me._selectItems(obj, item) });

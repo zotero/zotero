@@ -44,7 +44,7 @@ var Zotero_Report_Interface = new function() {
 		}
 		
 		if (col) {
-			window.loadURI('zotero://report/collection/'
+			ZoteroPane.loadURI('zotero://report/collection/'
 				+ Zotero.Collections.getLibraryKeyHash(col)
 				+ '/html/report.html' + queryString);
 			return;
@@ -52,7 +52,7 @@ var Zotero_Report_Interface = new function() {
 		
 		var s = ZoteroPane.getSelectedSavedSearch();
 		if (s) {
-			window.loadURI('zotero://report/search/'
+			ZoteroPane.loadURI('zotero://report/search/'
 				+ Zotero.Searches.getLibraryKeyHash(s)
 				+ '/html/report.html' + queryString);
 			return;
@@ -77,7 +77,7 @@ var Zotero_Report_Interface = new function() {
 			keyHashes.push(Zotero.Items.getLibraryKeyHash(item));
 		}
 		
-		window.loadURI('zotero://report/items/' + keyHashes.join('-') + '/html/report.html');
+		ZoteroPane.loadURI('zotero://report/items/' + keyHashes.join('-') + '/html/report.html');
 	}
 	
 	
@@ -89,6 +89,6 @@ var Zotero_Report_Interface = new function() {
 			throw ('No itemIDs provided to loadItemReportByIds()');
 		}
 		
-		window.loadURI('zotero://report/items/' + ids.join('-') + '/html/report.html');
+		ZoteroPane.loadURI('zotero://report/items/' + ids.join('-') + '/html/report.html');
 	}
 }

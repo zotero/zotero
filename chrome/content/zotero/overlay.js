@@ -138,6 +138,7 @@ var ZoteroOverlay = new function()
 			setTimeout("gBrowser.selectedTab = gBrowser.addTab(Zotero.initialURL); Zotero.initialURL = null;", 1);
 		}
 		
+		ZoteroPane_Overlay = ZoteroPane;
 		ZoteroPane.init();
 		
 		// Hide browser chrome on Zotero tab
@@ -159,9 +160,9 @@ var ZoteroOverlay = new function()
 	/**
 	 * Hides/displays the Zotero interface
 	 */
-	this.toggleDisplay = function()
+	this.toggleDisplay = function(makeVisible)
 	{
-		if(this.isTab) {
+		if(this.isTab && (makeVisible || makeVisible === undefined)) {
 			// If in separate tab mode, just open the tab
 			this.loadZoteroTab();
 			return;
@@ -172,7 +173,7 @@ var ZoteroOverlay = new function()
 		var isHidden = zoteroPane.getAttribute('hidden') == 'true';
 		var isCollapsed = zoteroPane.getAttribute('collapsed') == 'true';
 		
-		var makeVisible = isHidden || isCollapsed;
+		if(makeVisible === undefined) makeVisible = isHidden || isCollapsed;
 		
 		zoteroSplitter.setAttribute('hidden', !makeVisible);
 		zoteroPane.setAttribute('hidden', false);
@@ -306,6 +307,9 @@ var ZoteroOverlay = new function()
 		if(tab) {		// Zotero is running in a tab
 			// don't do anything if Zotero tab is the only tab
 			if(tab && gBrowser.tabs.length === 1) return;
+			
+			// swap ZoteroPane object
+			ZoteroPane = ZoteroPane_Overlay;
 			
 			// otherwise, close Zotero tab and open Zotero pane
 			gBrowser.removeTab(tab);

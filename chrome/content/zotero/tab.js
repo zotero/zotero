@@ -40,18 +40,24 @@ var ZoteroTab = new function()
 		}
 		if(browserIndex === -1) return;
 		
+		// initialize ZoteroPane and swap out old window ZoteroPane object
+		ZoteroPane.init();
+		
+		// swap window ZoteroPane with ZoteroPane from tab
+		window.ZoteroPane_Overlay = window.ZoteroPane;
+		window.ZoteroPane_Tab = ZoteroPane;
+		window.ZoteroPane = ZoteroPane;
+		
 		// get tab for browser
 		var tab = window.gBrowser.tabs[browserIndex];
 		if(window.gBrowser.selectedTab === tab) {
 			// if tab is already selected, init now
-			ZoteroPane.init();
 			ZoteroPane.makeVisible();
 		} else {
 			// otherwise, add a handler to wait until this tab is selected
 			var listener = function(event) {
 				if(event.target !== tab) return;
 				window.gBrowser.tabContainer.removeEventListener("TabSelect", listener, false);
-				ZoteroPane.init();
 				ZoteroPane.makeVisible();
 			}
 			window.gBrowser.tabContainer.addEventListener("TabSelect", listener, false);
@@ -59,6 +65,10 @@ var ZoteroTab = new function()
 	}
 	
 	this.onUnload = function() {
+		if(window.ZoteroPane === window.ZoteroPane_Tab) {
+			window.ZoteroPane = window.ZoteroPane_Overlay;
+		}
+		delete window.ZoteroPane_Tab;
 		ZoteroPane.destroy();
 	}
 }
