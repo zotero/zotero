@@ -840,6 +840,7 @@ function ChromeExtensionHandler() {
 				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator);
 				var win = wm.getMostRecentWindow(null);
+				
 				win.ZoteroPane.show();
 				
 				var lkh = Zotero.Items.parseLibraryKeyHash(id);
@@ -856,7 +857,7 @@ function ChromeExtensionHandler() {
 					return;
 				}
 				
-				win.ZoteroPane.getActiveZoteroPane().selectItem(item.id);
+				win.ZoteroPane.selectItem(item.id);
 			}
 			catch (e){
 				Zotero.debug(e);
@@ -882,7 +883,7 @@ function ChromeExtensionHandler() {
 				var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator)
 					.getMostRecentWindow("navigator:browser");
-				win.loadURI("chrome://zotero/content/tab.xul");
+				win.ZoteroOverlay.toggleTab(true);
 			}
 			catch (e) {
 				Zotero.debug(e);
