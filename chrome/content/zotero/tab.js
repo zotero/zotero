@@ -47,7 +47,7 @@ var ZoteroTab = new function()
 			
 			var currentBrowser = window.gBrowser.browsers[index];
 			if(currentBrowser && ZOTERO_TAB_URL == currentBrowser.currentURI.spec) {
-				window.gBrowser.removeTab(window.gBrowser.tabs[index]);
+				window.gBrowser.removeTab((window.gBrowser.tabs ? window.gBrowser.tabs : window.gBrowser.mTabs)[index]);
 			}
 		}
 		
@@ -64,15 +64,16 @@ var ZoteroTab = new function()
 			}, false);
 		}
 		
-		var browser = window.gBrowser.getBrowserForDocument(document);
-		if(window.gBrowser.selectedBrowser === browser) {
+		// get tab for browser
+		var tab = (window.gBrowser.tabs ? window.gBrowser.tabs : window.gBrowser.mTabs)[browserIndex];
+		if(window.gBrowser.selectedTab === tab) {
 			// if tab is already selected, init now
 			ZoteroPane.init();
 			ZoteroPane.makeVisible();
 		} else {
 			// otherwise, add a handler to wait until this tab is selected
 			var listener = function(event) {
-				if(window.gBrowser.getBrowserForTab(event.target) !== browser) return;
+				if(event.target !== tab) return;
 				window.gBrowser.tabContainer.removeEventListener("TabSelect", listener, false);
 				ZoteroPane.init();
 				ZoteroPane.makeVisible();
@@ -81,7 +82,6 @@ var ZoteroTab = new function()
 		}
 		
 		if(Zotero && Zotero.isFx4) {
-			var tab = window.gBrowser.tabs[browserIndex];
 			// on Fx 4, add an event listener so the pinned tab isn't restored on close
 			var pinnedTabCloser = function() {
 				try {
