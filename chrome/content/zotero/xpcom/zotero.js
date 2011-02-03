@@ -126,7 +126,7 @@ var Zotero = new function(){
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 			.getService(Components.interfaces.nsIWindowMediator);
 		var win = wm.getMostRecentWindow("navigator:browser");
-		return win.getActiveZoteroPane();
+		return win.ZoteroPane;
 	};
 	
 	this.getLocalUserKey = function (generate) {
@@ -1378,15 +1378,19 @@ var Zotero = new function(){
 	 * @return	void
 	 */
 	this.showZoteroPaneProgressMeter = function (msg, determinate) {
+		Zotero.debug("showing progress meter");
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator);
 		var enumerator = wm.getEnumerator("navigator:browser");
 		var progressMeters = [];
 		while (enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
+			Zotero.debug("win found");
+			if(!win.ZoteroPane) continue;
+			Zotero.debug("win has pane");
 			
-			win.document.getElementById('zotero-pane-progress-label').value = msg;
-			var progressMeter = win.document.getElementById('zotero-pane-progressmeter')
+			win.ZoteroPane.document.getElementById('zotero-pane-progress-label').value = msg;
+			var progressMeter = win.ZoteroPane.document.getElementById('zotero-pane-progressmeter')
 			if (determinate) {
 				progressMeter.mode = 'determined';
 				progressMeter.value = 0;
@@ -1396,10 +1400,11 @@ var Zotero = new function(){
 				progressMeter.mode = 'undetermined';
 			}
 			
-			_showWindowZoteroPaneOverlay(win);
-			win.document.getElementById('zotero-pane-overlay-deck').selectedIndex = 0;
+			_showWindowZoteroPaneOverlay(win.ZoteroPane.document);
+			win.ZoteroPane.document.getElementById('zotero-pane-overlay-deck').selectedIndex = 0;
 			
 			progressMeters.push(progressMeter);
+			Zotero.debug("added meter for win");
 		}
 		_locked = true;
 		_progressMeters = progressMeters;
@@ -1410,20 +1415,26 @@ var Zotero = new function(){
 	 * @param	{Number}	percentage		Percentage complete as integer or float
 	 */
 	this.updateZoteroPaneProgressMeter = function (percentage) {
-		if (percentage < 0 || percentage > 100) {
-			Zotero.debug("Invalid percentage value '" + percentage + "' in Zotero.updateZoteroPaneProgressMeter()");
-			return;
+		if(percentage !== null) {
+			if (percentage < 0 || percentage > 100) {
+				Zotero.debug("Invalid percentage value '" + percentage + "' in Zotero.updateZoteroPaneProgressMeter()");
+				return;
+			}
+			percentage = Math.round(percentage * 10);
 		}
-		percentage = Math.round(percentage * 10);
-		if (percentage == _lastPercentage) {
+		if (percentage === _lastPercentage) {
 			return;
 		}
 		for each(var pm in _progressMeters) {
-			if (pm.mode == 'undetermined') {
-				pm.max = 1000;
-				pm.mode = 'determined';
+			if (percentage !== null) {
+				if (pm.mode == 'undetermined') {
+					pm.max = 1000;
+					pm.mode = 'determined';
+				}
+				pm.value = percentage;
+			} else if(pm.mode === 'determined') {
+				pm.mode = 'undetermined';
 			}
-			pm.value = percentage;
 		}
 		_lastPercentage = percentage;
 	}
@@ -1446,7 +1457,9 @@ var Zotero = new function(){
 		var enumerator = wm.getEnumerator("navigator:browser");
 		while (enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
-			_hideWindowZoteroPaneOverlay(win);
+			if(win.ZoteroPane && win.ZoteroPane.document) {
+				_hideWindowZoteroPaneOverlay(win.ZoteroPane.document);
+			}
 		}
 		_locked = false;
 		_progressMeters = [];
@@ -1468,21 +1481,21 @@ var Zotero = new function(){
 	}
 	
 	
-	function _showWindowZoteroPaneOverlay(win) {
-		win.document.getElementById('zotero-collections-tree').disabled = true;
-		win.document.getElementById('zotero-items-tree').disabled = true;
-		win.document.getElementById('zotero-pane-tab-catcher-top').hidden = false;
-		win.document.getElementById('zotero-pane-tab-catcher-bottom').hidden = false;
-		win.document.getElementById('zotero-pane-overlay').hidden = false;
+	function _showWindowZoteroPaneOverlay(doc) {
+		doc.getElementById('zotero-collections-tree').disabled = true;
+		doc.getElementById('zotero-items-tree').disabled = true;
+		doc.getElementById('zotero-pane-tab-catcher-top').hidden = false;
+		doc.getElementById('zotero-pane-tab-catcher-bottom').hidden = false;
+		doc.getElementById('zotero-pane-overlay').hidden = false;
 	}
 	
 	
-	function _hideWindowZoteroPaneOverlay(win) {
-		win.document.getElementById('zotero-collections-tree').disabled = false;
-		win.document.getElementById('zotero-items-tree').disabled = false;
-		win.document.getElementById('zotero-pane-tab-catcher-top').hidden = true;
-		win.document.getElementById('zotero-pane-tab-catcher-bottom').hidden = true;
-		win.document.getElementById('zotero-pane-overlay').hidden = true;
+	function _hideWindowZoteroPaneOverlay(doc) {
+		doc.getElementById('zotero-collections-tree').disabled = false;
+		doc.getElementById('zotero-items-tree').disabled = false;
+		doc.getElementById('zotero-pane-tab-catcher-top').hidden = true;
+		doc.getElementById('zotero-pane-tab-catcher-bottom').hidden = true;
+		doc.getElementById('zotero-pane-overlay').hidden = true;
 	}
 	
 	

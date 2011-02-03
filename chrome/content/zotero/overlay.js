@@ -28,7 +28,6 @@
  */
 var ZoteroOverlay = new function()
 {
-	const ZOTERO_TAB_URL = "chrome://zotero/content/tab.xul";
 	const DEFAULT_ZPANE_HEIGHT = 300;
 	var toolbarCollapseState, isFx36, showInPref;
 	
@@ -47,12 +46,9 @@ var ZoteroOverlay = new function()
 		if(!isFx36) {
 			var observerService = Components.classes["@mozilla.org/observer-service;1"]
 				.getService(Components.interfaces.nsIObserverService);
-			var zoteroObserver = {"observe":function(subject, topic, data) {
+			var zoteroObserver = function(subject, topic, data) {
 				if(subject != window) return;
 				observerService.removeObserver(this, "browser-delayed-startup-finished");
-				Zotero.wait(1000);	// there ought to be a better way to determine when the tab
-									// will have a reasonable URI instead of returning about:blank,
-									// but I'm not sure what it is
 				if(showInPref === 2) {
 					var tabbar = document.getElementById("TabsToolbar");
 					if(tabbar && window.getComputedStyle(tabbar).display !== "none") {
@@ -64,7 +60,7 @@ var ZoteroOverlay = new function()
 					var zoteroTab = ZoteroOverlay.findZoteroTab();
 					if(zoteroTab) gBrowser.removeTab(zoteroTab);
 				}
-			}};
+			};
 			
 			observerService.addObserver(zoteroObserver, "browser-delayed-startup-finished", false);
 		}
@@ -138,6 +134,7 @@ var ZoteroOverlay = new function()
 			setTimeout("gBrowser.selectedTab = gBrowser.addTab(Zotero.initialURL); Zotero.initialURL = null;", 1);
 		}
 		
+		ZoteroPane_Overlay = ZoteroPane;
 		ZoteroPane.init();
 		
 		// Hide browser chrome on Zotero tab
@@ -159,9 +156,9 @@ var ZoteroOverlay = new function()
 	/**
 	 * Hides/displays the Zotero interface
 	 */
-	this.toggleDisplay = function()
+	this.toggleDisplay = function(makeVisible)
 	{
-		if(this.isTab) {
+		if(this.isTab && (makeVisible || makeVisible === undefined)) {
 			// If in separate tab mode, just open the tab
 			this.loadZoteroTab();
 			return;
@@ -172,7 +169,7 @@ var ZoteroOverlay = new function()
 		var isHidden = zoteroPane.getAttribute('hidden') == 'true';
 		var isCollapsed = zoteroPane.getAttribute('collapsed') == 'true';
 		
-		var makeVisible = isHidden || isCollapsed;
+		if(makeVisible === undefined) makeVisible = isHidden || isCollapsed;
 		
 		zoteroSplitter.setAttribute('hidden', !makeVisible);
 		zoteroPane.setAttribute('hidden', false);
@@ -301,17 +298,22 @@ var ZoteroOverlay = new function()
 	/**
 	 * Toggle between Zotero as a tab and Zotero as a pane
 	 */
-	this.toggleTab = function() {
+	this.toggleTab = function(setMode) {
 		var tab = this.findZoteroTab();
 		if(tab) {		// Zotero is running in a tab
+			if(setMode) return;
 			// don't do anything if Zotero tab is the only tab
 			if(tab && gBrowser.tabs.length === 1) return;
+			
+			// swap ZoteroPane object
+			ZoteroPane = ZoteroPane_Overlay;
 			
 			// otherwise, close Zotero tab and open Zotero pane
 			gBrowser.removeTab(tab);
 			this.isTab = false;
 			this.toggleDisplay();
 		} else {		// Zotero is running in the pane
+			if(setMode === false) return;
 			// close Zotero pane
 			this.toggleDisplay();
 			

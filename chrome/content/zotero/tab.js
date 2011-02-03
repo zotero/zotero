@@ -40,6 +40,30 @@ var ZoteroTab = new function()
 		}
 		if(browserIndex === -1) return;
 		
+		// if we somehow ended up with other Zotero tabs in the window, close them
+		var numTabs = window.gBrowser.browsers.length;
+		for(var index = 0; index < numTabs; index++) {
+			if(index === browserIndex) continue;
+			
+			var currentBrowser = window.gBrowser.browsers[index];
+			if(currentBrowser && ZOTERO_TAB_URL == currentBrowser.currentURI.spec) {
+				window.gBrowser.removeTab(window.gBrowser.tabs[index]);
+			}
+		}
+		
+		// initialize ZoteroPane and swap out old window ZoteroPane object
+		if(window.ZoteroPane) {
+			window.ZoteroPane_Overlay = window.ZoteroPane;
+			window.ZoteroPane_Tab = ZoteroPane;
+			window.ZoteroPane = ZoteroPane;
+		} else {
+			window.addEventListener("load", function() {
+				window.ZoteroPane_Overlay = window.ZoteroPane;
+				window.ZoteroPane_Tab = ZoteroPane;
+				window.ZoteroPane = ZoteroPane;
+			}, false);
+		}
+		
 		// get tab for browser
 		var tab = window.gBrowser.tabs[browserIndex];
 		if(window.gBrowser.selectedTab === tab) {
@@ -56,9 +80,26 @@ var ZoteroTab = new function()
 			}
 			window.gBrowser.tabContainer.addEventListener("TabSelect", listener, false);
 		}
+		
+		if(Zotero && Zotero.isFx4) {
+			// on Fx 4, add an event listener so the pinned tab isn't restored on close
+			var pinnedTabCloser = function() {
+				try {
+					window.gBrowser.removeTab(tab);
+				} catch(e) {}
+			}
+			var observerService = Components.classes["@mozilla.org/observer-service;1"]
+				.getService(Components.interfaces.nsIObserverService);
+			observerService.addObserver(pinnedTabCloser, "quit-application-requested", false);
+			window.addEventListener("close", pinnedTabCloser, false);
+		}
 	}
 	
 	this.onUnload = function() {
+		if(window.ZoteroPane === window.ZoteroPane_Tab) {
+			window.ZoteroPane = window.ZoteroPane_Overlay;
+		}
+		delete window.ZoteroPane_Tab;
 		ZoteroPane.destroy();
 	}
 }

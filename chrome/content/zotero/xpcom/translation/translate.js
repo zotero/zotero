@@ -96,6 +96,7 @@ Zotero.Translate.Sandbox = {
 			//
 			// This can probably be re-enabled for web translators once badly asynced ones are fixed
 			if (translate instanceof Zotero.Translate.Import || translate instanceof Zotero.Translate.Export) {
+				Zotero.debug("waiting");
 				Zotero.wait();
 			}
 			
@@ -381,6 +382,19 @@ Zotero.Translate.Sandbox = {
 		"_collectionDone":function(translate, collection) {
 			var newCollection = translate._itemSaver.saveCollection(collection);
 			translate._runHandler("collectionDone", newCollection);
+		},
+		
+		/**
+		 * Sets the value of the progress indicator associated with export as a percentage
+		 * @param {Zotero.Translate} translate
+		 * @param {Number} value
+		 */
+		"setProgress":function(translate, value) {
+			if(typeof value !== "number") {
+				translate._progress = null;
+			} else {
+				translate._progress = value;
+			}
 		}
 	},
 
@@ -417,6 +431,13 @@ Zotero.Translate.Sandbox = {
 			}
 			
 			return translate._itemGetter.nextCollection();
+		},
+		
+		/**
+		 * @borrows Zotero.Translate.Sandbox.Import.setProgress as this.setProgress
+		 */
+		"setProgress":function(translate, value) {
+			Zotero.Translate.Sandbox.Import.setProgress(translate, value);
 		}
 	},
 	
@@ -1039,7 +1060,10 @@ Zotero.Translate.Import.prototype.setString = function(string) {
  * Overload {@link Zotero.Translate.Base#complete} to close file
  */
 Zotero.Translate.Import.prototype.complete = function(returnValue, error) {
-	if(this._currentState == "translate" && this._io) this._io.close();
+	if(this._currentState == "translate" && this._io) {
+		this._progress = null;
+		this._io.close();
+	}
 	
 	// call super
 	Zotero.Translate.Base.prototype.complete.apply(this, [returnValue, error]);
@@ -1127,11 +1151,24 @@ Zotero.Translate.Import.prototype._loadTranslator = function(translator) {
  * Prepare translation
  */
 Zotero.Translate.Import.prototype._prepareTranslation = function(libraryID, saveAttachments) {
+	this._progress = undefined;
 	this._itemSaver = new Zotero.Translate.ItemSaver(libraryID,
 		Zotero.Translate.ItemSaver[(saveAttachments ? "ATTACHMENT_MODE_FILE" : "ATTACHMENT_MODE_IGNORE")]);
 	this.newItems = this._itemSaver.newItems;
 	this.newCollections = this._itemSaver.newCollections;
 }
+
+Zotero.Translate.Import.prototype.__defineGetter__("progress",
+/**
+ * Return the progress of the import operation, or null if progress cannot be determined
+ */
+function() {
+	if(this._progress !== undefined) return this._progress;
+	if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1 || this._mode === "xml/e4x" || this._mode == "xml/dom" || !this._io) {
+		return null;
+	}
+	return this._io.bytesRead/this._io.contentLength*100;
+});
 	
 
 Zotero.Translate.Export = function() {
@@ -1199,6 +1236,8 @@ Zotero.Translate.Export.prototype._detect = function() {
  * Does the actual export, after code has been loaded and parsed
  */
 Zotero.Translate.Export.prototype._prepareTranslation = function(libraryID, saveAttachments) {
+	this._progress = undefined;
+	
 	// initialize ItemGetter
 	this._itemGetter = new Zotero.Translate.ItemGetter();
 	var getCollections = this.translator[0].configOptions.getCollections ? this.translator[0].configOptions.getCollections : false;
@@ -1231,6 +1270,18 @@ Zotero.Translate.Export.prototype._prepareTranslation = function(libraryID, save
 	
 	this._sandboxManager.importObject(this._io);
 }
+
+Zotero.Translate.Export.prototype.__defineGetter__("progress",
+/**
+ * Return the progress of the import operation, or null if progress cannot be determined
+ */
+function() {
+	if(this._progress !== undefined) return this._progress;
+	if(!this._itemGetter) {
+		return null;
+	}
+	return (1-this._itemGetter.numItemsRemaining/this._itemGetter.numItems)*100;
+});
 
 /**
  * @property {Array[]} search Item (in {@link Zotero.Item#serialize} format) to extrapolate data
@@ -1487,6 +1538,14 @@ function() {
 Zotero.Translate.IO.String.prototype.__defineSetter__("string",
 function(string) {
 	this._string = string;
+});
+Zotero.Translate.IO.String.prototype.__defineGetter__("bytesRead",
+function() {
+	return this._stringPointer;
+});
+Zotero.Translate.IO.String.prototype.__defineGetter__("contentLength",
+function() {
+	return this._string.length;
 });
 
 /****** RDF DATA MODE ******/

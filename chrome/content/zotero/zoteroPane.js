@@ -22,6 +22,7 @@
     
     ***** END LICENSE BLOCK *****
 */
+const ZOTERO_TAB_URL = "chrome://zotero/content/tab.xul";
 
 /*
  * This object contains the various functions for the interface
@@ -98,6 +99,7 @@ var ZoteroPane = new function()
 	 */
 	function init()
 	{	
+		this.document = document;
 		if(!Zotero || !Zotero.initialized) return;
 		
 		// Set "Report Errors..." label via property rather than DTD entity,
@@ -509,7 +511,7 @@ var ZoteroPane = new function()
 				catch (e) {
 					Zotero.debug(e);
 				}
-				if(ZoteroOverlay) ZoteroOverlay.toggleDisplay()
+				if(window.ZoteroOverlay) window.ZoteroOverlay.toggleDisplay()
 				break;
 			case 'library':
 				document.getElementById('zotero-collections-tree').focus();
@@ -3394,27 +3396,11 @@ var ZoteroPane = new function()
 	}
 	
 	/**
-	 * Gets the ZoteroPane object that is currently active in this window. Should be used for
-	 * determining the active collection for scraping, etc.
-	 */
-	this.getActiveZoteroPane = function() {
-		if(ZoteroOverlay && ZoteroOverlay.isTab) {
-			// If a Zotero tab is open, return the pane for the tab
-			var tab = ZoteroOverlay.findZoteroTab();
-			if(!tab) return null;
-			return gBrowser.getBrowserForTab(tab).contentWindow.ZoteroPane;
-		} else {
-			// Otherwise, return the pane for this tab
-			return ZoteroPane;
-		}
-	}
-	
-	/**
 	 * Shows the Zotero pane, making it visible if it is not and switching to the appropriate tab
 	 * if necessary.
 	 */
 	this.show = function() {
-		if(ZoteroOverlay) {
+		if(window.ZoteroOverlay) {
 			if(ZoteroOverlay.isTab) {
 				ZoteroOverlay.loadZoteroTab();
 			} else if(!this.isShowing()) {

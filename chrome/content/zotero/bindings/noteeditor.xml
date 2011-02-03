@@ -317,8 +317,11 @@
 							return;
 						}
 						
-						lastWin.ZoteroPane.show();
-						var zp = lastWin.ZoteroPane.getActiveZoteroPane();
+						if (lastWin.ZoteroOverlay) {
+							lastWin.ZoteroOverlay.toggleDisplay(true);
+						}
+						
+						var zp = lastWin.ZoteroPane;
 					}
 					
 					var parentID = this.item.getSource();
