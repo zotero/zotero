@@ -34,6 +34,9 @@ var ZoteroOverlay = new function()
 	this.isTab = false;
 	
 	this.onLoad = function() {
+		ZoteroPane_Overlay = ZoteroPane;
+		ZoteroPane.init();
+		
 		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
 						.getService(Components.interfaces.nsIXULAppInfo);
 		isFx36 = appInfo.platformVersion.indexOf('1.9') === 0;
@@ -133,9 +136,6 @@ var ZoteroOverlay = new function()
 		if (Zotero && Zotero.initialURL) {
 			setTimeout("gBrowser.selectedTab = gBrowser.addTab(Zotero.initialURL); Zotero.initialURL = null;", 1);
 		}
-		
-		ZoteroPane_Overlay = ZoteroPane;
-		ZoteroPane.init();
 		
 		// Hide browser chrome on Zotero tab
 		if(Zotero.isFx4) {
@@ -272,7 +272,7 @@ var ZoteroOverlay = new function()
 		for(var index = 0; index < numTabs; index++) {
 			var currentBrowser = gBrowser.getBrowserAtIndex(index);
 			if(ZOTERO_TAB_URL == currentBrowser.currentURI.spec) {
-				tab = gBrowser.tabs[index];
+				tab = (gBrowser.tabs ? gBrowser.tabs : gBrowser.mTabs)[index];
 				break;
 			}
 		}
@@ -303,7 +303,7 @@ var ZoteroOverlay = new function()
 		if(tab) {		// Zotero is running in a tab
 			if(setMode) return;
 			// don't do anything if Zotero tab is the only tab
-			if(tab && gBrowser.tabs.length === 1) return;
+			if(tab && (gBrowser.tabs ? gBrowser.tabs : gBrowser.mTabs).length === 1) return;
 			
 			// swap ZoteroPane object
 			ZoteroPane = ZoteroPane_Overlay;
