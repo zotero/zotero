@@ -64,16 +64,15 @@ var ZoteroTab = new function()
 			}, false);
 		}
 		
-		// get tab for browser
-		var tab = window.gBrowser.tabs[browserIndex];
-		if(window.gBrowser.selectedTab === tab) {
+		var browser = window.gBrowser.getBrowserForDocument(document);
+		if(window.gBrowser.selectedBrowser === browser) {
 			// if tab is already selected, init now
 			ZoteroPane.init();
 			ZoteroPane.makeVisible();
 		} else {
 			// otherwise, add a handler to wait until this tab is selected
 			var listener = function(event) {
-				if(event.target !== tab) return;
+				if(window.gBrowser.getBrowserForTab(event.target) !== browser) return;
 				window.gBrowser.tabContainer.removeEventListener("TabSelect", listener, false);
 				ZoteroPane.init();
 				ZoteroPane.makeVisible();
@@ -82,6 +81,7 @@ var ZoteroTab = new function()
 		}
 		
 		if(Zotero && Zotero.isFx4) {
+			var tab = window.gBrowser.tabs[browserIndex];
 			// on Fx 4, add an event listener so the pinned tab isn't restored on close
 			var pinnedTabCloser = function() {
 				try {
