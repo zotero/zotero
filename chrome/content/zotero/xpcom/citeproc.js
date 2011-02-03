@@ -407,6 +407,11 @@ CSL_E4X.prototype.nodeNameIs = function (myxml,name) {
 }
 CSL_E4X.prototype.makeXml = function (myxml) {
 	var xml;
+	XML.ignoreComments = true;
+	XML.ignoreProcessingInstructions = true;
+ 	XML.ignoreWhitespace = true;
+	XML.prettyPrinting = true;
+	XML.prettyIndent = 2;
 	if ("xml" == typeof myxml){
 		myxml = myxml.toXMLString();
 	};
@@ -1727,7 +1732,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.105";
+	this.processor_version = "1.0.106";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3922,17 +3927,7 @@ CSL.Node.key = {
 							num = Item[variable];
 						}
 						if (num) {
-							m = num.match(/\s*(-{0,1}[0-9]+)/);
-							if (m) {
-								num = parseInt(m[1], 10);
-								if (num < 0) {
-									num = 99999999999999999999 + num;
-								}
-								num = "" + num;
-								while (num.length < 20) {
-									num = "0" + num;
-								}
-							}
+							num = CSL.Util.padding(num);
 						}
 						state.output.append(num, this);
 					};
@@ -3980,6 +3975,13 @@ CSL.Node.key = {
 								state.output.append(CSL.Util.Dates[e]["numeric-leading-zeros"](state, value));
 							}
 						}
+						if (state.registry.registry[Item.id].disambig.year_suffix) {
+							num = state.registry.registry[Item.id].disambig.year_suffix.toString();
+							num = CSL.Util.padding(num);
+						} else {
+							num = CSL.Util.padding("0");
+						}
+						state.output.append("S"+num)
 					};
 				} else if ("title" === variable) {
 					state.transform.init("empty", "title");
@@ -7508,6 +7510,20 @@ CSL.Util.substituteEnd = function (state, target) {
 		this.execs.push(func);
 	}
 };
+CSL.Util.padding = function (num) {
+	m = num.match(/\s*(-{0,1}[0-9]+)/);
+	if (m) {
+		num = parseInt(m[1], 10);
+		if (num < 0) {
+			num = 99999999999999999999 + num;
+		}
+		num = "" + num;
+		while (num.length < 20) {
+			num = "0" + num;
+		}
+	}
+	return num;
+}
 CSL.Util.LongOrdinalizer = function () {};
 CSL.Util.LongOrdinalizer.prototype.init = function (state) {
 	this.state = state;
@@ -8912,7 +8928,7 @@ CSL.Disambiguation.prototype.scanItems = function (list, phase) {
 	Item = list[1][0];
 	this.scanlist = list[1];
 	this.partners = [];
-    var tempResult = this.getItem(Item);
+    var tempResult = this.getItemDesc(Item);
     this.base = tempResult[0];
     this.maxvals = tempResult[1];
     this.minval = tempResult[2];
@@ -8922,7 +8938,9 @@ CSL.Disambiguation.prototype.scanItems = function (list, phase) {
 	this.nonpartners = [];
 	for (pos = 1, len = list[1].length; pos < len; pos += 1) {
 		otherItem = list[1][pos];
-		otherItemCite = this.getItem(otherItem)[3];
+		otherItemData = this.getItemDesc(otherItem);
+		otherItemCite = otherItemData[3];
+		otherItemBase = otherItemData[0];
 		if (ItemCite === otherItemCite) {
 			this.clashes[phase] += 1;
 			this.partners.push(otherItem);
@@ -8967,7 +8985,9 @@ CSL.Disambiguation.prototype.disNames = function (ismax) {
 CSL.Disambiguation.prototype.disGivens = function (ismax) {
 	var pos, len;
 	if (this.clashes[1] === 0) {
-		this.base = this.decrementNames();
+		if (this.clashes[0] === 1) {
+			this.base = this.decrementNames();
+		}
 		this.state.registry.registerAmbigToken(this.akey, "" + this.partners[0].id, this.base);
 		if (this.nonpartners.length === 1) {
 			this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, this.base);
@@ -9106,7 +9126,7 @@ CSL.Disambiguation.prototype.incrementDisambig = function () {
 	}
 	return maxed;
 };
-CSL.Disambiguation.prototype.getItem = function (Item) {
+CSL.Disambiguation.prototype.getItemDesc = function (Item, forceMax) {
 	var str, maxvals, minval, base;
 	str = CSL.getAmbiguousCite.call(this.state, Item, this.base);
 	maxvals = CSL.getMaxVals.call(this.state);
@@ -9116,15 +9136,31 @@ CSL.Disambiguation.prototype.getItem = function (Item) {
 };
 CSL.Disambiguation.prototype.initVars = function (akey) {
 	var pos, len;
-	var myIds, myItems;
+	var myIds, myItemBundles, myItems;
 	this.lists = [];
 	this.base = false;
 	this.akey = akey;
-	myItems = [];
+	myItemBundles = [];
 	myIds = this.ambigcites[akey];
 	if (myIds && myIds.length > 1) {
-		for (pos = 0, len = myIds.length; pos < len; pos += 1) {
-			myItems.push(this.state.retrieveItem("" + myIds[pos]));
+		for (var i = 0, ilen = myIds.length; i < ilen; i += 1) {
+			var myItem = this.state.retrieveItem("" + myIds[i]);
+			myItemBundles.push([this.getItemDesc(myItem), myItem]);
+		}
+		myItemBundles.sort(
+ 			function (a, b) {
+   				if (a[0][1] > b[0][1]) {
+					return 1;
+				} else if (a[0][1] < b[0][1]) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}
+ 		);
+		var myItems = [];
+		for (var i = 0, ilen = myItemBundles.length; i < ilen; i += 1) {
+			myItems.push(myItemBundles[i][1]);
 		}
 		this.lists.push([this.base, myItems]);
 	}
