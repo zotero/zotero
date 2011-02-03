@@ -126,7 +126,7 @@ var Zotero = new function(){
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 			.getService(Components.interfaces.nsIWindowMediator);
 		var win = wm.getMostRecentWindow("navigator:browser");
-		return win.getActiveZoteroPane();
+		return win.ZoteroPane;
 	};
 	
 	this.getLocalUserKey = function (generate) {
