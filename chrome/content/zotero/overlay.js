@@ -28,7 +28,6 @@
  */
 var ZoteroOverlay = new function()
 {
-	const ZOTERO_TAB_URL = "chrome://zotero/content/tab.xul";
 	const DEFAULT_ZPANE_HEIGHT = 300;
 	var toolbarCollapseState, isFx36, showInPref;
 	
@@ -47,12 +46,9 @@ var ZoteroOverlay = new function()
 		if(!isFx36) {
 			var observerService = Components.classes["@mozilla.org/observer-service;1"]
 				.getService(Components.interfaces.nsIObserverService);
-			var zoteroObserver = {"observe":function(subject, topic, data) {
+			var zoteroObserver = function(subject, topic, data) {
 				if(subject != window) return;
 				observerService.removeObserver(this, "browser-delayed-startup-finished");
-				Zotero.wait(1000);	// there ought to be a better way to determine when the tab
-									// will have a reasonable URI instead of returning about:blank,
-									// but I'm not sure what it is
 				if(showInPref === 2) {
 					var tabbar = document.getElementById("TabsToolbar");
 					if(tabbar && window.getComputedStyle(tabbar).display !== "none") {
@@ -64,7 +60,7 @@ var ZoteroOverlay = new function()
 					var zoteroTab = ZoteroOverlay.findZoteroTab();
 					if(zoteroTab) gBrowser.removeTab(zoteroTab);
 				}
-			}};
+			};
 			
 			observerService.addObserver(zoteroObserver, "browser-delayed-startup-finished", false);
 		}

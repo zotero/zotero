@@ -22,6 +22,7 @@
     
     ***** END LICENSE BLOCK *****
 */
+const ZOTERO_TAB_URL = "chrome://zotero/content/tab.xul";
 
 /*
  * This object contains the various functions for the interface
