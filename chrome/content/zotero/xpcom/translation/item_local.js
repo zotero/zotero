@@ -503,6 +503,7 @@ Zotero.Translate.ItemGetter = function() {
 Zotero.Translate.ItemGetter.prototype = {
 	"setItems":function(items) {
 		this._itemsLeft = items;
+		this.numItems = this._itemsLeft.length;
 	},
 	
 	"setCollection":function(collection, getChildCollections) {
@@ -531,6 +532,8 @@ Zotero.Translate.ItemGetter.prototype = {
 				}
 			}
 		}
+		
+		this.numItems = this._itemsLeft.length;
 	},
 	
 	"setAll":function(getChildCollections) {
@@ -539,6 +542,8 @@ Zotero.Translate.ItemGetter.prototype = {
 		if(getChildCollections) {
 			this._collectionsLeft = Zotero.getCollections();
 		}
+		
+		this.numItems = this._itemsLeft.length;
 	},
 	
 	"exportFiles":function(dir, extension) {
@@ -713,3 +718,4 @@ Zotero.Translate.ItemGetter.prototype = {
 		return obj;
 	}
 }
+Zotero.Translate.ItemGetter.prototype.__defineGetter__("numItemsRemaining", function() { return this._itemsLeft.length });

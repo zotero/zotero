@@ -98,6 +98,7 @@ var ZoteroPane = new function()
 	 */
 	function init()
 	{	
+		this.document = document;
 		if(!Zotero || !Zotero.initialized) return;
 		
 		// Set "Report Errors..." label via property rather than DTD entity,
@@ -509,7 +510,7 @@ var ZoteroPane = new function()
 				catch (e) {
 					Zotero.debug(e);
 				}
-				if(ZoteroOverlay) ZoteroOverlay.toggleDisplay()
+				if(window.ZoteroOverlay) window.ZoteroOverlay.toggleDisplay()
 				break;
 			case 'library':
 				document.getElementById('zotero-collections-tree').focus();
@@ -3398,7 +3399,7 @@ var ZoteroPane = new function()
 	 * if necessary.
 	 */
 	this.show = function() {
-		if(ZoteroOverlay) {
+		if(window.ZoteroOverlay) {
 			if(ZoteroOverlay.isTab) {
 				ZoteroOverlay.loadZoteroTab();
 			} else if(!this.isShowing()) {
