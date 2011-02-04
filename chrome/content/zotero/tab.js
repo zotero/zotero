@@ -68,7 +68,7 @@ var ZoteroTab = new function()
 		}
 		
 		// get tab for browser
-		var tab = window.gBrowser.tabs[browserIndex];
+		var tab = (window.gBrowser.tabs ? window.gBrowser.tabs : window.gBrowser.mTabs)[browserIndex];
 		if(window.gBrowser.selectedTab === tab) {
 			// if tab is already selected, init now
 			ZoteroPane.init();
