@@ -363,7 +363,7 @@ var Zotero_Browser = new function() {
 			}
 			
 			// Ignore TinyMCE popups
-			if (!doc.location.host && doc.location.href.indexOf("tinymce/themes/advanced") != -1) {
+			if (!doc.location.host && doc.location.href.indexOf("tinymce/") != -1) {
 				return;
 			}
 		}
