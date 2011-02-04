@@ -343,9 +343,15 @@
 					
 					// Register handler for deferred setting of content
 					var self = this;
-					var listener = function() {
+					var matchTo = null;
+					var listener = function(e) {
 						var win = self._iframe.contentWindow;
 						var SJOW = self._iframe.contentWindow.wrappedJSObject;
+						
+						// only fire if the target matches, or _zoteroMatchTo, which we set last
+						// time the target matched, matches
+						if(e.target !== self._iframe.contentDocument
+							&& (!SJOW._zoteroMatchTo || SJOW._zoteroMatchTo !== matchTo)) return;
 						
 						if (!SJOW.tinyMCE) {
 							var exts = Zotero.getInstalledExtensions();
@@ -365,13 +371,24 @@
 						
 						var editor = SJOW.tinyMCE.get("tinymce");
 						if (!editor) {
+							Zotero.debug("editor not ready");
+							
+							// this is a hack; I'm not sure why we can't identify the event target
+							// next time without it, but apparently we can't
+							matchTo = Zotero.randomString();
+							SJOW._zoteroMatchTo = matchTo;
+							
 							// Not ready yet
 							return;
 						}
 						
-						self._iframe.removeEventListener("DOMContentLoaded", listener, false);
+						if(window.ZoteroTab) {
+							ZoteroTab.containerWindow.gBrowser.removeEventListener("DOMContentLoaded", listener, true);
+						} else {
+							self._iframe.removeEventListener("DOMContentLoaded", listener, false);
+						}
 						
-						editor.onInit.add(function() {
+						var onInitFunction = function() {
 							self._editor = editor;
 							if (self._value) {
 								self.value = self._value;
@@ -404,7 +421,9 @@
 								style.innerHTML = css;
 								head.appendChild(style);
 							}
-						});
+						};
+						onInitFunction.__exposedProps__ = {"apply":"r"};
+						editor.onInit.add(onInitFunction);
 						
 						if (self._eventHandler) {
 							self._iframe.contentWindow.wrappedJSObject.zoteroHandleEvent = self._eventHandler;
@@ -420,7 +439,14 @@
 							win.statusbar.visible = false;
 						}
 					};
-					this._iframe.addEventListener("DOMContentLoaded", listener, false);
+					
+					if(window.ZoteroTab) {
+						// I'm not sure why it's necessary to attach the event listener to the 
+						// container window to get it to fire on the tab, but apparently it is...
+						ZoteroTab.containerBrowser.addEventListener("DOMContentLoaded", listener, true);
+					} else {
+						this._iframe.addEventListener("DOMContentLoaded", listener, false);
+					}
 					
 					this._iframe.webNavigation.loadURI(uri.spec,
 						Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, null, null);

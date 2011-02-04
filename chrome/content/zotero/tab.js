@@ -40,6 +40,9 @@ var ZoteroTab = new function()
 		}
 		if(browserIndex === -1) return;
 		
+		this.containerWindow = window;
+		this.containerBrowser = window.gBrowser.browsers[browserIndex];
+		
 		// if we somehow ended up with other Zotero tabs in the window, close them
 		var numTabs = window.gBrowser.browsers.length;
 		for(var index = 0; index < numTabs; index++) {
@@ -47,7 +50,7 @@ var ZoteroTab = new function()
 			
 			var currentBrowser = window.gBrowser.browsers[index];
 			if(currentBrowser && ZOTERO_TAB_URL == currentBrowser.currentURI.spec) {
-				window.gBrowser.removeTab(window.gBrowser.tabs[index]);
+				window.gBrowser.removeTab((window.gBrowser.tabs ? window.gBrowser.tabs : window.gBrowser.mTabs)[index]);
 			}
 		}
 		
@@ -65,7 +68,7 @@ var ZoteroTab = new function()
 		}
 		
 		// get tab for browser
-		var tab = window.gBrowser.tabs[browserIndex];
+		var tab = (window.gBrowser.tabs ? window.gBrowser.tabs : window.gBrowser.mTabs)[browserIndex];
 		if(window.gBrowser.selectedTab === tab) {
 			// if tab is already selected, init now
 			ZoteroPane.init();
