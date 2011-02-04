@@ -1350,7 +1350,7 @@ Zotero.Sync.Server = new function () {
 				_error(response.firstChild.firstChild.nodeValue);
 			}
 			
-			var xml = Zotero.Utilities.trim(xmlhttp.responseText.replace(/<\?xml.*\?>\s*/, ''));
+			var xml = xmlhttp.responseText.replace(/^\s*<\?xml.*\?>\s*/, '').trim();
 			
 			// Strip XML declaration and convert to E4X
 			xml = new XML(xml);
