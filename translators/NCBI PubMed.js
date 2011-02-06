@@ -9,7 +9,7 @@
 	"priority":100,
 	"configOptions":{"dataMode":"block"},
 	"inRepository":true,
-	"lastUpdated":"2011-01-27 10:15:00"
+	"lastUpdated":"2011-02-05 10:15:00"
 }
 
 function detectWeb(doc, url) {
@@ -195,7 +195,9 @@ function doImportFromText(text) {
 				newItem.tags.push(keywords[k].DescriptorName.text().toString());
 			}
 		}
+		// We use a regex to remove the section labels
 		newItem.abstractNote = article.Abstract.AbstractText.toString()
+				.replace(/<\/?AbstractText\s*(?:Label=")?([^">]+)?[^>]*>/g, "$1\n");
 
 			newItem.DOI = xml.PubmedArticle[i].PubmedData.ArticleIdList.ArticleId.(@IdType == "doi" ).text().toString();
 		newItem.publicationTitle = Zotero.Utilities.capitalizeTitle(newItem.publicationTitle);
