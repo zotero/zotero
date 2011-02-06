@@ -190,7 +190,7 @@ Zotero.Translate.Sandbox = {
 				setDefaultHandlers(translate, translation);
 				return translation.translate(false);
 			};
-			safeTranslator.getTranslatorObject = function() {
+			safeTranslator.getTranslatorObject = function(callback) {
 				translation._loadTranslator(translation.translator[0]);
 				
 				if(Zotero.isFx) {
@@ -219,6 +219,7 @@ Zotero.Translate.Sandbox = {
 				setDefaultHandlers(translate, translation);
 				
 				// return sandbox
+				if(callback) callback(translation._sandboxManager.sandbox);
 				return translation._sandboxManager.sandbox;
 			};
 			
@@ -275,7 +276,7 @@ Zotero.Translate.Sandbox = {
 		 * @param {Zotero.Translate} translate
 		 * @param {Object} options An set of id => name pairs in object format
 		 */
-		"selectItems":function(translate, options) {
+		"selectItems":function(translate, options, callback) {
 			// hack to see if there are options
 			var haveOptions = false;
 			for(var i in options) {
@@ -288,10 +289,11 @@ Zotero.Translate.Sandbox = {
 			}
 			
 			if(translate._handlers.select) {
-				return translate._runHandler("select", options);
-			} else {	// no handler defined; assume they want all of them
-				return options;
+				options = translate._runHandler("select", options);
 			}
+			
+			if(callback) callback(options);
+			return options;
 		},
 		
 		/**
