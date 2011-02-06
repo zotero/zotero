@@ -32,12 +32,15 @@ var ZoteroTab = new function()
 		// find window this tab is loaded in
 		var windowMediator = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 									   .getService(Components.interfaces.nsIWindowMediator);
-		var enumerator = windowMediator.getZOrderDOMWindowEnumerator("navigator:browser", true);
+		var enumerator = windowMediator.getXULWindowEnumerator("navigator:browser");
 		while(enumerator.hasMoreElements()) {
-			var window = enumerator.getNext();
+			var xulwin = enumerator.getNext().QueryInterface(Components.interfaces.nsIXULWindow);
+			var window = xulwin.docShell.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+					.getInterface(Components.interfaces.nsIDOMWindow);
 			var browserIndex = window.gBrowser.getBrowserIndexForDocument(document);
 			if(browserIndex !== -1) break;
 		}
+		
 		if(browserIndex === -1) return;
 		
 		this.containerWindow = window;
