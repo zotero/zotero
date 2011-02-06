@@ -4,6 +4,6 @@
 	
 	<statusbar id="status-bar">
 		<statusbarpanel id="zotero-status-bar-icon" hidden="true"
-			class="statusbarpanel-iconic" onclick="ZoteroPane.toggleDisplay();"/>
+			class="statusbarpanel-iconic" onclick="ZoteroOverlay.toggleDisplay();"/>
 	</statusbar>
 </overlay>
