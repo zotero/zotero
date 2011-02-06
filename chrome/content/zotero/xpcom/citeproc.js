@@ -1732,7 +1732,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.108";
+	this.processor_version = "1.0.109";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -8215,7 +8215,7 @@ CSL.Output.Formatters.serializeItemAsRdfA = function (Item) {
 CSL.Output.Formats = function () {};
 CSL.Output.Formats.prototype.html = {
 	"text_escape": function (text) {
-		return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace("  ", "&nbsp; ", "g");
+		return text.replace(/&/g, "&#38;").replace(/</g, "&#60;").replace(/>/g, "&#62;").replace("  ", "&#160; ", "g");
 	},
 	"bibstart": "<div class=\"csl-bib-body\">\n",
 	"bibend": "</div>",
