@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType) {
+Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType, disableReentrancy) {
 	// initialize constants
 	this.newItems = [];
 	this.newCollections = [];
@@ -73,6 +73,16 @@ Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE = 2;
 
 Zotero.Translate.ItemSaver.prototype = {
 	"saveItem":function(item) {
+		// if no open transaction, open a transaction and add a timer call to close it
+		if(!Zotero.DB.transactionInProgress()) {
+			Zotero.debug("Translate: Beginning transaction");
+			Zotero.DB.beginTransaction();
+			
+			this._timer = Components.classes["@mozilla.org/timer;1"].
+				createInstance(Components.interfaces.nsITimer);
+			this._timer.initWithCallback(this, 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+		}
+		
 		// Get typeID, defaulting to "webpage"
 		var newItem;
 		var type = (item.itemType ? item.itemType : "webpage");
@@ -491,6 +501,20 @@ Zotero.Translate.ItemSaver.prototype = {
 				}
 			}
 		}
+	},
+	
+	/**
+	 * Implements nsITimer.notify, closing the transaction when the current code block finishes
+	 * executing.
+	 */
+	"notify":function() {
+		if(Zotero.waiting) {
+			this._timer.initWithCallback(this, 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+			return;
+		}
+		
+		Zotero.debug("Translate: Closing transaction");
+		Zotero.DB.commitTransaction();
 	}
 }
 
