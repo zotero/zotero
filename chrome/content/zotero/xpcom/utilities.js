@@ -905,7 +905,7 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 	}
 }
 
-Zotero.Utilities.Translate.prototype.__exposedProps__ = {};
+Zotero.Utilities.Translate.prototype.__exposedProps__ = {"HTTP":"r"};
 for(var j in Zotero.Utilities.Translate.prototype) {
 	if(typeof Zotero.Utilities.Translate.prototype[j] === "function" && j[0] !== "_" && j != "Translate") {
 		Zotero.Utilities.Translate.prototype.__exposedProps__[j] = "r";
