@@ -46,17 +46,21 @@ Zotero.Translate.SandboxManager = function(translate, sandboxLocation) {
 	// import functions missing from global scope into Fx sandbox
 	this.sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
 	this.sandbox.DOMParser = function() {
-		// get principal
-		if(typeof sandboxLocation !== "string") {	// if sandbox specified by DOM document
-			var principal = sandboxLocation.nodePrincipal;
-		} else {									// if sandbox specified by URI
-			var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
-					.getService(Components.interfaces.nsIScriptSecurityManager);
-			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-				.getService(Components.interfaces.nsIIOService);
-			var uri = ioService.newURI(sandboxLocation, "UTF-8", null);
-			var principal = secMan.getCodebasePrincipal(uri);
+		// get URI
+		// DEBUG: In Fx 4 we can just use document.nodePrincipal, but in Fx 3.6 this doesn't work
+		if(typeof sandboxLocation === "string") {	// if sandbox specified by URI
+			var uri = sandboxLocation;
+		} else {									// if sandbox specified by DOM document
+			var uri = sandboxLocation.location.toString();
 		}
+		
+		// get principal from URI
+		var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
+				.getService(Components.interfaces.nsIScriptSecurityManager);
+		var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+			.getService(Components.interfaces.nsIIOService);
+		uri = ioService.newURI(uri, "UTF-8", null);
+		var principal = secMan.getCodebasePrincipal(uri);
 		
 		// initialize DOM parser
 		var _DOMParser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
