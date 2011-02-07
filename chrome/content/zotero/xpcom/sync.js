@@ -1350,12 +1350,12 @@ Zotero.Sync.Server = new function () {
 				_error(response.firstChild.firstChild.nodeValue);
 			}
 			
-			var xml = xmlhttp.responseText.replace(/^\s*<\?xml.*\?>\s*/, '').trim();
-			
-			// Strip XML declaration and convert to E4X
-			xml = new XML(xml);
-			
 			try {
+				var xml = xmlhttp.responseText.replace(/^\s*<\?xml.*\?>\s*/, '').trim();
+				
+				// Strip XML declaration and convert to E4X
+				xml = new XML(xml);
+				
 				var updateKey = xml.@updateKey.toString();
 				
 				// If no earliest date is provided by the server, the server
@@ -2217,6 +2217,10 @@ Zotero.Sync.Server = new function () {
 					}, 1);
 					break;
 			}
+		}
+		
+		if (e.message == 'script stack space quota is exhausted') {
+			var e = "Firefox 4.0 or higher is required to process sync operations of this size.";
 		}
 		
 		if (extraInfo) {
