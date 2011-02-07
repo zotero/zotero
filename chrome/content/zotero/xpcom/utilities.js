@@ -85,7 +85,6 @@ Zotero.Utilities = {
 	 */
 	"trim":function(/**String*/ s) {
 		if (typeof(s) != "string") {
-		a()
 			throw "trim: argument must be a string";
 		}
 		
