@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType, disableReentrancy) {
+Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType) {
 	// initialize constants
 	this.newItems = [];
 	this.newCollections = [];
