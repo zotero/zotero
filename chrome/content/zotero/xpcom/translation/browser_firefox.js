@@ -45,24 +45,30 @@ Zotero.Translate.SandboxManager = function(translate, sandboxLocation) {
 	
 	// import functions missing from global scope into Fx sandbox
 	this.sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
-	this.sandbox.DOMParser = Zotero.Translate.SandboxManager.DOMParserWrapper;
-}
-
-/**
- * A wrapper to make new DOMParser work in the sandbox
- */
-Zotero.Translate.SandboxManager.DOMParserWrapper = function() {
-	this._DOMParser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-		.createInstance(Components.interfaces.nsIDOMParser);
-	
-}
-Zotero.Translate.SandboxManager.DOMParserWrapper.__exposedProps__ = {"prototype":"r"};
-Zotero.Translate.SandboxManager.DOMParserWrapper.prototype.__exposedProps__ = {"parseFromString":"r"};
-Zotero.Translate.SandboxManager.DOMParserWrapper.prototype.parseFromString = function(str, contentType) {
-	var doc = this._DOMParser.parseFromString(str, contentType);
-	doc.documentElement;	// Ugh. without this line, Firefox throws NS_ERROR_UNEXPECTED when one
-							// tries to access the documentElement.
-	return doc;
+	this.sandbox.DOMParser = function() {
+		// get principal
+		if(typeof sandboxLocation !== "string") {	// if sandbox specified by DOM document
+			var principal = sandboxLocation.nodePrincipal;
+		} else {									// if sandbox specified by URI
+			var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
+					.getService(Components.interfaces.nsIScriptSecurityManager);
+			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+				.getService(Components.interfaces.nsIIOService);
+			var uri = ioService.newURI(sandboxLocation, "UTF-8", null);
+			var principal = secMan.getCodebasePrincipal(uri);
+		}
+		
+		// initialize DOM parser
+		var _DOMParser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser);
+		_DOMParser.init(principal, uri, uri);
+		
+		// expose parseFromString
+		this.__exposedProps__ = {"parseFromString":"r"};
+		this.parseFromString = function(str, contentType) _DOMParser.parseFromString(str, contentType);
+	}
+	this.sandbox.DOMParser.__exposedProps__ = {"prototype":"r"};
+	this.sandbox.DOMParser.prototype = {};
 }
 
 Zotero.Translate.SandboxManager.prototype = {
