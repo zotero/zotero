@@ -307,13 +307,7 @@ Zotero.QuickCopy = new function() {
 				var text = Zotero.Utilities.unescapeHTML(textXML.toXMLString());
 				text = text.replace(new RegExp(ztab, "g"), "    ");
 				
-				if (text.trim) {
-					text = text.trim();
-				}
-				// TODO: Remove once >=Fx3.5
-				else {
-					text = Zotero.Utilities.trim(text)
-				}
+				text = text.trim();
 				
 				//
 				// Adjustments for the HTML copied to the clipboard
