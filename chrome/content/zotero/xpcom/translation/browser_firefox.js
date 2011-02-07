@@ -45,6 +45,24 @@ Zotero.Translate.SandboxManager = function(translate, sandboxLocation) {
 	
 	// import functions missing from global scope into Fx sandbox
 	this.sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
+	this.sandbox.DOMParser = Zotero.Translate.SandboxManager.DOMParserWrapper;
+}
+
+/**
+ * A wrapper to make new DOMParser work in the sandbox
+ */
+Zotero.Translate.SandboxManager.DOMParserWrapper = function() {
+	this._DOMParser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+		.createInstance(Components.interfaces.nsIDOMParser);
+	
+}
+Zotero.Translate.SandboxManager.DOMParserWrapper.__exposedProps__ = {"prototype":"r"};
+Zotero.Translate.SandboxManager.DOMParserWrapper.prototype.__exposedProps__ = {"parseFromString":"r"};
+Zotero.Translate.SandboxManager.DOMParserWrapper.prototype.parseFromString = function(str, contentType) {
+	var doc = this._DOMParser.parseFromString(str, contentType);
+	doc.documentElement;	// Ugh. without this line, Firefox throws NS_ERROR_UNEXPECTED when one
+							// tries to access the documentElement.
+	return doc;
 }
 
 Zotero.Translate.SandboxManager.prototype = {
@@ -72,6 +90,7 @@ Zotero.Translate.SandboxManager.prototype = {
 			
 			// magical XPCSafeJSObjectWrappers for sandbox
 			if(typeof object[localKey] === "function" || typeof object[localKey] === "object") {
+				if(attachTo == this.sandbox) Zotero.debug(localKey);
 				attachTo[localKey] = function() {
 					var args = (passAsFirstArgument ? [passAsFirstArgument] : []);
 					for(var i=0; i<arguments.length; i++) {
