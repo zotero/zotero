@@ -1732,7 +1732,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.109";
+	this.processor_version = "1.0.110";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -4498,10 +4498,8 @@ CSL.Node.names = {
 							}
 						}
 					}
-					len = namesets.length;
-					for (pos = 0; pos < len; pos += 1) {
+					for (pos = 0, len = namesets.length; pos < len; pos += 1) {
 						state.tmp.names_max.push(namesets[pos].names.length);
-						state.tmp.names_used.push(namesets[pos]);
 					}
 					state.tmp.value = namesets.slice();
 				}
@@ -4670,18 +4668,6 @@ CSL.Node.names = {
 					if (label && state.output.getToken("label").strings.label_position === CSL.BEFORE) {
 						state.output.append(label, "label");
 					}
-					if (!state.tmp.suppress_decorations && (state[state.tmp.area].opt.collapse === "year" || state[state.tmp.area].opt.collapse === "year-suffix" || state[state.tmp.area].opt.collapse === "year-suffix-ranged")) {
-						if (state.tmp.last_names_used.length === state.tmp.names_used.length) {
-							lastones = state.tmp.last_names_used[state.tmp.nameset_counter];
-							currentones = state.tmp.names_used[state.tmp.nameset_counter];
-							compset = [currentones, lastones];
-							if (CSL.Util.Names.getCommonTerm(state, compset)) {
-								continue;
-							} else {
-								state.tmp.have_collapsed = false;
-							}
-						}
-					}
 					if (!state.tmp.disambig_request) {
 						state.tmp.disambig_settings.givens[state.tmp.nameset_counter] = [];
 					}
@@ -4779,6 +4765,19 @@ CSL.Node.names = {
 					}
 					state.tmp.disambig_settings.names[state.tmp.nameset_counter] = display_names.length;
 					local_count += display_names.length;
+					state.tmp.names_used.push({names:display_names,etal:et_al});
+					if (!state.tmp.suppress_decorations && (state[state.tmp.area].opt.collapse === "year" || state[state.tmp.area].opt.collapse === "year-suffix" || state[state.tmp.area].opt.collapse === "year-suffix-ranged")) {
+						if (state.tmp.last_names_used.length === state.tmp.names_used.length) {
+							lastones = state.tmp.last_names_used[state.tmp.nameset_counter];
+							currentones = state.tmp.names_used[state.tmp.nameset_counter];
+							compset = [currentones, lastones];
+							if (CSL.Util.Names.compareNamesets(lastones,currentones)) {
+								continue;
+							} else {
+								state.tmp.have_collapsed = false;
+							}
+						}
+					}
 					llen = nameset.names.length;
 					for (ppos = 0; ppos < llen; ppos += 1) {
 						state.registry.namereg.addname("" + Item.id, nameset.names[ppos], ppos);
@@ -7103,7 +7102,7 @@ CSL.Util.Names.getCommonTerm = function (state, namesets) {
 };
 CSL.Util.Names.compareNamesets = function (base_nameset, nameset) {
 	var name, pos, len, part, ppos, llen;
-	if (!base_nameset.names || !nameset.names || base_nameset.names.length !== nameset.names.length) {
+	if (!base_nameset.names || !nameset.names || base_nameset.names.length !== nameset.names.length || base_nameset.etal !== nameset.etal) {
 		return false;
 	}
 	len = nameset.names.length;
