@@ -665,7 +665,9 @@ Zotero.Translate.Base.prototype = {
 		if(!this._displayOptions) this._displayOptions = this.translator[0].displayOptions;
 		
 		// prepare translation
-		this._prepareTranslation(libraryID, typeof saveAttachments === "undefined" ? true : saveAttachments);
+		this._libraryID = libraryID;
+		this._saveAttachments = typeof saveAttachments === "undefined" ? true : saveAttachments;
+		this._prepareTranslation();
 		
 		Zotero.debug("Translate: Beginning translation with "+this.translator[0].label);
 		
@@ -1007,9 +1009,9 @@ Zotero.Translate.Web.prototype._getParameters = function() { return [this.docume
 /**
  * Prepare translation
  */
-Zotero.Translate.Web.prototype._prepareTranslation = function(libraryID, saveAttachments) {
-	this._itemSaver = new Zotero.Translate.ItemSaver(libraryID,
-		Zotero.Translate.ItemSaver[(saveAttachments ? "ATTACHMENT_MODE_DOWNLOAD" : "ATTACHMENT_MODE_IGNORE")], 1);
+Zotero.Translate.Web.prototype._prepareTranslation = function() {
+	this._itemSaver = new Zotero.Translate.ItemSaver(this._libraryID,
+		Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_DOWNLOAD" : "ATTACHMENT_MODE_IGNORE")], 1);
 	this.newItems = this._itemSaver.newItems;
 }
 
@@ -1152,10 +1154,10 @@ Zotero.Translate.Import.prototype._loadTranslator = function(translator) {
 /**
  * Prepare translation
  */
-Zotero.Translate.Import.prototype._prepareTranslation = function(libraryID, saveAttachments) {
+Zotero.Translate.Import.prototype._prepareTranslation = function() {
 	this._progress = undefined;
-	this._itemSaver = new Zotero.Translate.ItemSaver(libraryID,
-		Zotero.Translate.ItemSaver[(saveAttachments ? "ATTACHMENT_MODE_FILE" : "ATTACHMENT_MODE_IGNORE")]);
+	this._itemSaver = new Zotero.Translate.ItemSaver(this._libraryID,
+		Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_FILE" : "ATTACHMENT_MODE_IGNORE")]);
 	this.newItems = this._itemSaver.newItems;
 	this.newCollections = this._itemSaver.newCollections;
 }
@@ -1237,7 +1239,7 @@ Zotero.Translate.Export.prototype._detect = function() {
 /**
  * Does the actual export, after code has been loaded and parsed
  */
-Zotero.Translate.Export.prototype._prepareTranslation = function(libraryID, saveAttachments) {
+Zotero.Translate.Export.prototype._prepareTranslation = function() {
 	this._progress = undefined;
 	
 	// initialize ItemGetter
@@ -1354,7 +1356,7 @@ Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
 						  +this._generateErrorString(error), 3);
 			if(this.translator.length > 1) {
 				this.translator.shift();
-				this.translate(this._libraryID, this.saveAttachments);
+				this.translate(this._libraryID, this._saveAttachments);
 				return;
 			}
 		}

@@ -1133,7 +1133,7 @@ Zotero.Integration.Session.prototype._displayDialog = function(url, options, io)
 	if(this.doc) this.doc.cleanup();
 	var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 		.getService(Components.interfaces.nsIWindowWatcher)
-		.openWindow(null, url, '', 'chrome,centerscreen'+(options ? options : ""), (io ? io : null));
+		.openWindow(null, url, '', 'chrome,centerscreen'+(options ? ','+options : ""), (io ? io : null));
 	while(!window.closed) Zotero.mainThread.processNextEvent(true);
 }
 
