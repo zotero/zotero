@@ -23,8 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-var openURLServerField;
-var openURLVersionMenu;
+var openURLResolvers;
 var proxies;
 var charsets;
 var _io = {};
@@ -155,12 +154,14 @@ function getDataDirPath() {
 function populateOpenURLResolvers() {
 	var openURLMenu = document.getElementById('openURLMenu');
 	
-	var openURLResolvers = Zotero.OpenURL.discoverResolvers();
+	openURLResolvers = Zotero.OpenURL.discoverResolvers();
+	var i = 0;
 	for each(var r in openURLResolvers) {
 		openURLMenu.insertItemAt(i, r.name);
 		if (r.url == Zotero.Prefs.get('openURL.resolver') && r.version == Zotero.Prefs.get('openURL.version')) {
 			openURLMenu.selectedIndex = i;
 		}
+		i++;
 	}
 	
 	var button = document.getElementById('openURLSearchButton');
@@ -1520,6 +1521,8 @@ Zotero_Preferences.Debug_Output = {
 
 function onOpenURLSelected()
 {
+	var openURLServerField = document.getElementById('openURLServerField');
+	var openURLVersionMenu = document.getElementById('openURLVersionMenu');
 	var openURLMenu = document.getElementById('openURLMenu');
 	
 	if(openURLMenu.value == "custom")
@@ -1530,6 +1533,8 @@ function onOpenURLSelected()
 	{
 		openURLServerField.value = openURLResolvers[openURLMenu.selectedIndex]['url'];
 		openURLVersionMenu.value = openURLResolvers[openURLMenu.selectedIndex]['version'];
+		Zotero.Prefs.set("openURL.resolver", openURLResolvers[openURLMenu.selectedIndex]['url']);
+		Zotero.Prefs.set("openURL.version", openURLResolvers[openURLMenu.selectedIndex]['version']);
 	}
 }
 
