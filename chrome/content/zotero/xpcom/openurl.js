@@ -210,8 +210,8 @@ Zotero.OpenURL = new function() {
 		}
 		if(item.pages) {
 			_mapTag(item.pages, "pages");
-			var pages = item.pages.split("-");
-			if(pages.length >= 1) {
+			var pages = item.pages.split(/[-–]/);
+			if(pages.length > 1) {
 				_mapTag(pages[0], "spage");
 				if(pages.length >= 2) _mapTag(pages[1], "epage");
 			}
