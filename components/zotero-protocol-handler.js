@@ -880,10 +880,10 @@ function ChromeExtensionHandler() {
 				.wrappedJSObject;
 				
 			generateContent: try {
-				var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-					.getService(Components.interfaces.nsIWindowMediator)
-					.getMostRecentWindow("navigator:browser");
-				win.ZoteroOverlay.toggleTab(true);
+				var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+					.getService(Components.interfaces.nsIWindowWatcher)
+					.openWindow(null, 'chrome://zotero/content/standalone.xul', '',
+						'chrome,centerscreen,resizable', null);
 			}
 			catch (e) {
 				Zotero.debug(e);
