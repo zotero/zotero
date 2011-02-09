@@ -1,0 +1,277 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2009 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
+<?xml-stylesheet href="chrome://zotero/skin/preferences.css"?>
+
+<!--
+
+To add a new preference:
+	1) Add a new <preference> to <preferences>
+	2) Add a XUL control with a 'preference' attribute
+	3) (Optional) Add additional setup/change logic to preferences.js
+	4) (Optional) To add an observer for a preference change,
+		add an appropriate case in the switch statement
+		in Zotero.Prefs.observe()
+
+-->
+<prefwindow id="zotero-locate-manager-prefs" title="&zotero.preferences.title;" onload="refreshLocateEnginesList()"
+		windowtype="zotero:pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+		
+	<prefpane id="zotero-prefpane-locate"
+						label="&zotero.preferences.prefpane.locate;"
+						image="chrome://zotero/skin/prefs-styles.png">
+		<!-- TODO: pic for locate pane -->
+		<!-- TODO: create labels in dtd -->
+		
+		<preferences>
+			<preference id="pref-locate-activeEngines" name="extensions.zotero.locate.activeEngines" type="string"/>
+		</preferences>
+		
+		<groupbox flex="1">
+			<caption label="&zotero.preferences.locate.locateEngineManager;"/>
+			
+			<label id="locateEngineDescription" width="45em" style="font-size: 10px">
+				&zotero.preferences.locate.locateEnginedescription;
+			</label>
+			
+			<separator class="thin"/>
+			
+			<hbox>
+				<tree flex="1" id="locateManager" hidecolumnpicker="true" rows="10"
+						onselect="document.getElementById('locateManager-delete').disabled = undefined"
+						editable="false">
+					<treecols>
+						<treecol type="checkbox" id="locateManager-checkbox" editable="true" flex="0.5"/>
+						<treecol id="locateManager-name" label="&zotero.preferences.locate.name;" flex="1"/>
+						<treecol id="locateManager-description" label="&zotero.preferences.locate.description;" flex="2"/>
+					</treecols>
+					<treechildren id="locateManager-rows"/>
+				</tree>
+			</hbox>
+			
+			<separator class="thin"/>
+			
+			<hbox align="center">
+				<hbox pack="start" flex="1">
+					<button label="Toggle" onclick="toggleLocateEngines()" flex="1"/>
+					<button id="locateManager-restoreDefaults" label="&zotero.preferences.locate.restoreDefaults;" onclick="restoreDefaultLocateEngines()" flex="1"/>
+				</hbox>
+				<hbox pack="end" flex="2">
+					<button disabled="true" id="locateManager-delete" label="-" onclick="deleteLocateEngine()" flex="0.5"/>
+				</hbox>
+			</hbox>
+		
+			<separator class="thin"/>
+			
+			<label id="addLocateEngineDescription" style="font-size: 10px; width: 45em; height: 6em">
+				&zotero.preferences.locate.addDescription;
+			</label>
+		</groupbox>
+	</prefpane>
+	
+	<script src="chrome://zotero/content/include.js"></script>
+	<script type="application/javascript">
+	<![CDATA[
+		function treeClick(event) {
+			// We only care about primary button double and triple clicks
+			if (!event || (event.detail != 2 && event.detail != 3) || event.button != 0) {
+				return;
+			}
+			var t = event.originalTarget;
+			
+			if (t.localName != 'treechildren') {
+				return;
+			}
+			
+			var tree = t.parentNode;
+			
+			var row = {}, col = {}, obj = {};
+			var cell = tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
+			
+			var treechildren = document.getElementById('locateManager-rows');
+			var treeitem = treechildren.children[row.value];
+			
+			treeitem.engine.hidden = !treeitem.engine.hidden;
+
+			refreshLocateEnginesList()
+		}
+
+		/**
+		 * Refreshes the list of locate engines in the locate pane
+		 * @param {String} name of locate engine to select
+		 */
+		function refreshLocateEnginesList() {
+			var tree = document.getElementById('locateManager');
+			var treechildren = document.getElementById('locateManager-rows');
+			
+			// add click listener
+			tree.addEventListener("click", treeClick, false);
+			
+			// store ranges
+			var nRanges = tree.view.selection.getRangeCount();
+			var start = {};
+			var end = {};
+			var ranges = [];
+			for(var i=0; i<nRanges; i++) {
+				tree.view.selection.getRangeAt(i, start, end);
+				ranges.push([start.value, end.value]);
+			}
+
+			// clear tree
+			while (treechildren.hasChildNodes()) {
+				treechildren.removeChild(treechildren.firstChild);
+			}
+			
+			// repopulate tree with available engines
+			var engines = Zotero.LocateManager.getEngines();
+			var i = 0;
+			for each(var engine in engines) {
+				var treeitem = document.createElement('treeitem');
+				var treerow = document.createElement('treerow');
+				var checkboxCell = document.createElement('treecell');
+				var nameCell = document.createElement('treecell');
+				var descriptionCell = document.createElement('treecell');
+				
+				treeitem.engine = engine;
+				nameCell.setAttribute('label', engine.name);
+				descriptionCell.setAttribute('label', engine.description);
+				if( !engine.hidden ) {
+					checkboxCell.setAttribute('value', 'true');
+				}
+
+				treerow.appendChild(checkboxCell);
+				treerow.appendChild(nameCell);
+				treerow.appendChild(descriptionCell);
+				treeitem.appendChild(treerow);
+				treechildren.appendChild(treeitem);
+				
+				i++;
+			}
+			
+			// restore ranges
+			for each(var range in ranges) {
+				if(range[1] <= engines.length-1) {
+					tree.view.selection.rangedSelect(range[0], range[1], true);
+				}
+			}
+		}
+
+		/**
+		 * Adds a new Locate Engine to the locate pane
+		 **/
+		/*
+		function addLocateEngine() {
+			// alert(Zotero.LocateManager.activeLocateEngines.join(" || "));
+			var textbox = document.getElementById('locate-add-textbox');
+			Zotero.LocateManager.addLocateEngine(textbox.value);
+
+			refreshLocateEnginesList();
+		}
+		*/
+
+		function toggleLocateEngines() {
+			// get selected engines names
+			var tree = document.getElementById('locateManager');
+			var treeItems = tree.lastChild.childNodes;
+			var engineNames = [];
+			var start = {};
+			var end = {};
+			var nRanges = tree.view.selection.getRangeCount();
+			var numStatuses = 0;
+			var engineStatusesSum = 0;
+			for(var i=0; i<nRanges; i++) {
+				tree.view.selection.getRangeAt(i, start, end);
+				for(var j=start.value; j<=end.value; j++) {
+					var engineStatus = treeItems[j].engine.hidden ? 0 : 1;
+					numStatuses += 1;
+					engineStatusesSum += engineStatus;
+				}
+			}
+			
+			var hidden;
+			switch( engineStatusesSum ) {
+				case 0:
+				// all off, turn all on
+				hidden = false;
+				break;
+
+				case numStatuses:
+				// all on, turn all off
+				hidden = true;
+				break;
+
+				default:
+				// some on, some off. turn all on
+				hidden = false;
+			}
+			
+			[engine.hidden = hidden for each(engine in Zotero.LocateManager.getEngines())];
+
+			refreshLocateEnginesList();
+		}
+
+		/**
+		 * Deletes selected Locate Engines from the locate pane
+		 **/
+		function deleteLocateEngine() {
+			// get selected engines names
+			var tree = document.getElementById('locateManager');
+			var treeItems = tree.lastChild.childNodes;
+			var engineNames = [];
+			var start = {};
+			var end = {};
+			var nRanges = tree.view.selection.getRangeCount();
+			for(var i=0; i<nRanges; i++) {
+				tree.view.selection.getRangeAt(i, start, end);
+				for(var j=start.value; j<=end.value; j++) {
+					Zotero.LocateManager.removeEngine(treeItems[j].engine);
+				}
+			}
+
+			for(var i=0; i<engineNames.length; i++) {
+				Zotero.LocateManager.removeLocateEngine(engineNames[i]);
+			}
+			
+			tree.view.selection.clearSelection();
+			refreshLocateEnginesList();
+		}
+
+		/**
+		 * Restores Default Locate Engines
+		 **/
+		function restoreDefaultLocateEngines() {
+			Zotero.LocateManager.restoreDefaultLocateEngines();
+			refreshLocateEnginesList();
+		}
+
+
+		
+	]]>
+	</script>
+</prefwindow>

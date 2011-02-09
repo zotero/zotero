@@ -43,6 +43,7 @@
 	<script src="timelineInterface.js"/>
 	<script src="recognizePDF.js"/>
 	<script src="browser.js"/>
+	<script src="locateMenu.js"/>
 	
 	<commandset id="mainCommandSet">
 		<command id="cmd_zotero_search" oncommand="ZoteroPane.search();"/>
@@ -334,38 +335,45 @@
 			<splitter id="zotero-view-splitter" resizebefore="closest" resizeafter="closest"/>
 			
 			<vbox id="zotero-item-pane" persist="width">
-				<hbox class="toolbar" align="center" pack="end">
-					<hbox id="zotero-tb-sync-progress-box" hidden="true" align="center">
-						<toolbarbutton id="zotero-tb-sync-storage-cancel"
-							tooltiptext="Cancel Storage Sync"
-							oncommand="Zotero.Sync.Storage.QueueManager.cancel()"/>
-						<progressmeter id="zotero-tb-sync-progress" mode="determined"
-							value="0" tooltip="zotero-tb-sync-progress-tooltip">
-						</progressmeter>
-						<tooltip id="zotero-tb-sync-progress-tooltip" noautohide="true">
-							<grid>
-								<columns>
-									<column/>
-									<column/>
-								</columns>
-								<rows>
-									<row>
-										<label value="&zotero.sync.storage.progress;"/>
-										<label id="zotero-tb-sync-progress-tooltip-progress"/>
-									</row>
-									<row>
-										<label value="&zotero.sync.storage.downloads;"/>
-										<label
-											id="zotero-tb-sync-progress-tooltip-downloads"/>
-									</row>
-									<row>
-										<label value="&zotero.sync.storage.uploads;"/>
-										<label
-											id="zotero-tb-sync-progress-tooltip-uploads"/>
-									</row>
-								</rows>
-							</grid>
-						</tooltip>
+				<hbox class="toolbar" align="center">
+					<hbox align="center" pack="start" flex="1">
+						<toolbarbutton id="zotero-tb-locate" class="zotero-tb-button" tooltiptext="&zotero.toolbar.openURL.label;" type="menu">
+							<menupopup id="zotero-tb-locate-menu" onpopupshowing="Zotero_LocateMenu.buildLocateMenu()"/>
+						</toolbarbutton>
+					</hbox>
+					<hbox align="center" pack="end">
+						<hbox id="zotero-tb-sync-progress-box" hidden="true" align="center">
+							<toolbarbutton id="zotero-tb-sync-storage-cancel"
+								tooltiptext="Cancel Storage Sync"
+								oncommand="Zotero.Sync.Storage.QueueManager.cancel()"/>
+							<progressmeter id="zotero-tb-sync-progress" mode="determined"
+								value="0" tooltip="zotero-tb-sync-progress-tooltip">
+							</progressmeter>
+							<tooltip id="zotero-tb-sync-progress-tooltip" noautohide="true">
+								<grid>
+									<columns>
+										<column/>
+										<column/>
+									</columns>
+									<rows>
+										<row>
+											<label value="&zotero.sync.storage.progress;"/>
+											<label id="zotero-tb-sync-progress-tooltip-progress"/>
+										</row>
+										<row>
+											<label value="&zotero.sync.storage.downloads;"/>
+											<label
+												id="zotero-tb-sync-progress-tooltip-downloads"/>
+										</row>
+										<row>
+											<label value="&zotero.sync.storage.uploads;"/>
+											<label
+												id="zotero-tb-sync-progress-tooltip-uploads"/>
+										</row>
+									</rows>
+								</grid>
+							</tooltip>
+						</hbox>
 					</hbox>
 					<toolbarbutton id="zotero-tb-sync-warning" hidden="true"/>
 					<toolbarbutton id="zotero-tb-sync" class="zotero-tb-button" tooltip="_child"

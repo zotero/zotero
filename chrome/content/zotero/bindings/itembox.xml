@@ -44,7 +44,6 @@
 			<field name="clickable">false</field>
 			<field name="editable">false</field>
 			<field name="saveOnEdit">false</field>
-			<field name="displayGoButtons">false</field>
 			<field name="showTypeMenu">false</field>
 			<field name="hideEmptyFields">false</field>
 			<field name="clickByRow">false</field> <!-- Click entire row rather than just field value -->
@@ -61,7 +60,6 @@
 					this.clickable = false;
 					this.editable = false;
 					this.saveOnEdit = false;
-					this.displayGoButtons = false;
 					this.showTypeMenu = false;
 					this.hideEmptyFields = false;
 					this.clickByRow = false;
@@ -75,7 +73,6 @@
 							this.clickable = true;
 							this.editable = true;
 							this.saveOnEdit = true
-							this.displayGoButtons = true;
 							this.showTypeMenu = true;
 							this.clickHandler = this.showEditor;
 							this.blurHandler = this.hideEditor;
@@ -90,7 +87,6 @@
 							this.clickable = true;
 							this.editable = true;
 							this.saveOnEdit = false;
-							this.displayGoButtons = false;
 							this.showTypeMenu = true;
 							this.clickHandler = this.showEditor;
 							this.blurHandler = this.hideEditor;
@@ -230,111 +226,6 @@
 							'document.getBindingParent(this).clickHandler(this)');
 					}
 					
-					if (this.displayGoButtons) {
-						// Enable/disable "View =>" button
-						testView: try {
-							var viewButton = document.getElementById('view-button');
-							
-							viewButton.removeAttribute('viewSnapshot');
-							viewButton.removeAttribute('viewURL');
-							viewButton.setAttribute('label',
-								Zotero.getString('pane.item.goToURL.online.label'));
-							viewButton.setAttribute('tooltiptext',
-								Zotero.getString('pane.item.goToURL.online.tooltip'));
-							
-							var spec = false, validURI = false;
-							
-							var uri = Components.classes["@mozilla.org/network/standard-url;1"].
-									createInstance(Components.interfaces.nsIURI);
-							
-							// First try to find a snapshot matching the item's URL field
-							var snapID = this.item.getBestAttachment();
-							if (snapID) {
-								spec = Zotero.Items.get(snapID).getLocalFileURL();
-								uri.spec = spec;
-								if (!uri.scheme || uri.scheme != 'file') {
-									snapID = false;
-									spec = false;
-								}
-							}
-							
-							// If that fails, try the URL field itself
-							if (!spec) {
-								spec = this.item.getField('url');
-								uri.spec = spec;
-								if (!(uri.scheme && (uri.host || uri.scheme == 'file'))) {
-									spec = false;
-								}
-							}
-							
-							// If that fails, try the DOI field
-							if (!spec) {
-								var doi = this.item.getField('DOI');
-								if (doi && typeof val == 'String') {
-									// Pull out DOI, in case there's a prefix
-									doi = Zotero.Utilities.cleanDOI(doi);;
-									if (doi) {
-										spec = "http://dx.doi.org/" + encodeURIComponent(doi);
-									}
-								}
-							}
-							
-							if (!spec) {
-								break testView;
-							}
-							
-							validURI = true;
-							
-							if (snapID) {
-								viewButton.setAttribute('label',
-									Zotero.getString('pane.item.goToURL.snapshot.label'));
-								viewButton.setAttribute('tooltiptext',
-									Zotero.getString('pane.item.goToURL.snapshot.tooltip'));
-								viewButton.setAttribute('viewSnapshot', snapID);
-							}
-							else {
-								viewButton.setAttribute('viewURL', spec);
-							}
-						}
-						catch (e) {
-							Zotero.debug(e);
-						}
-						viewButton.setAttribute('disabled', !validURI);
-						
-						// Enable/disable "Locate =>" button
-						switch (this.item.itemTypeID) {
-							// DEBUG: handle descendents of these types as well?
-							case Zotero.ItemTypes.getID('book'):
-							case Zotero.ItemTypes.getID('bookSection'):
-							case Zotero.ItemTypes.getID('journalArticle'):
-							case Zotero.ItemTypes.getID('thesis'):
-								var openURL = true;
-								break;
-							
-							default:
-								var openURL = false;
-						}
-						
-						var locateButton = document.getElementById('locate-button');
-						
-						// TODO: move Locate service logic to separate interface
-						var wayback = this._itemHasURL();
-						if (wayback) {
-							locateButton.setAttribute('type', 'menu');
-							locateButton.setAttribute('disabled', false);
-							document.getElementById('locate-service-openurl').disabled = !openURL;
-						}
-						else {
-							locateButton.removeAttribute('type');
-							locateButton.disabled = !openURL;
-						}
-						
-						this._id('go-buttons').hidden = false;
-					}
-					else {
-						this._id('go-buttons').hidden = true;
-					}
-					
 					// Item type menu
 					if (this.showTypeMenu) {
 						// Build item type menu if it hasn't been built yet
@@ -452,7 +343,7 @@
 							label.setAttribute("isButton", true);
 							// TODO: make getFieldValue non-private and use below instead
 							label.setAttribute("onclick", "ZoteroPane.loadURI(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value, event)");
-							label.setAttribute("tooltiptext", Zotero.getString('pane.item.goToURL.online.tooltip'));
+							label.setAttribute("tooltiptext", Zotero.getString('locate.online.tooltip'));
 						}
 						else if (fieldName == 'DOI' && val && typeof val == 'string') {
 							// Pull out DOI, in case there's a prefix
@@ -461,7 +352,7 @@
 								doi = "http://dx.doi.org/" + encodeURIComponent(doi);
 								label.setAttribute("isButton", true);
 								label.setAttribute("onclick", "ZoteroPane.loadURI('" + doi + "', event)");
-								label.setAttribute("tooltiptext", Zotero.getString('pane.item.goToURL.online.tooltip'));
+								label.setAttribute("tooltiptext", Zotero.getString('locate.online.tooltip'));
 							}
 						}
 						else if (fieldName == 'abstractNote') {
@@ -562,16 +453,6 @@
 					this._focusNextField('info', this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
 					}
 
-				]]>
-				</body>
-			</method>
-			
-			
-			<method name="_itemHasURL">
-				<body>
-				<![CDATA[
-					var url = this.item.getField('url');
-					return url && url.match && !url.match(/^file:|^zotero:/);
 				]]>
 				</body>
 			</method>
@@ -1074,56 +955,6 @@
 					}
 					
 					return false;
-				]]>
-				</body>
-			</method>
-			
-			
-			<method name="onViewClick">
-				<parameter name="button"/>
-				<parameter name="event"/>
-				<body>
-				<![CDATA[
-					if (button.getAttribute('viewURL')) {
-						ZoteroPane.loadURI(button.getAttribute('viewURL'), event);
-					}
-					else if (button.getAttribute('viewSnapshot')) {
-						ZoteroPane.viewAttachment(button.getAttribute('viewSnapshot'), event);
-					}
-				]]>
-				</body>
-			</method>
-			
-			
-			<method name="onLocateClick">
-				<parameter name="event"/>
-				<body>
-				<![CDATA[
-					// Default OpenURL button
-					if (event.originalTarget.id == 'locate-button') {
-						var url = Zotero.OpenURL.resolve(this.item);
-						if (url) {
-							ZoteroPane.loadURI(url, event);
-						}
-						return;
-					}
-					
-					// Menu options
-					switch (event.originalTarget.id) {
-						case 'locate-service-openurl':
-							var url = Zotero.OpenURL.resolve(this.item);
-							if (url) {
-								ZoteroPane.loadURI(url, event);
-							}
-							break;
-						
-						case 'locate-service-wayback':
-							var prefix = "http://web.archive.org/web/*/";
-							var url = this.item.getField('url');
-							url = prefix + url;
-							ZoteroPane.loadURI(url, event);
-							break;
-					}
 				]]>
 				</body>
 			</method>
@@ -2395,29 +2226,13 @@
 						</menu>
 					</menupopup>
 				</popupset>
-				<hbox id="go-buttons" align="center" hidden="true">
-					<button id="view-button"
-						onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
-						oncommand="document.getBindingParent(this).onViewClick(this, event)" disabled="false"/>
-					<button id="locate-button" label="&zotero.toolbar.openURL.label;"
-							onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
-							type="menu"
-							oncommand="document.getBindingParent(this).onLocateClick(event)">
-						<menupopup>
-							<menuitem id="locate-service-openurl" label="Library Lookup" tooltiptext="&zotero.toolbar.openURL.tooltip;"/>
-							<menuitem id="locate-service-wayback" label="Wayback Machine"/>
-						</menupopup>
-					</button>
-				</hbox>
-				<hbox align="center" hidden="true">
-				</hbox>
 				<grid flex="1">
 					<columns>
 						<column/>
 						<column flex="1"/>
 					</columns>
 					<rows id="dynamic-fields" flex="1">
-						<row>
+						<row class="zotero-item-first-row">
 							<label value="&zotero.items.itemType;:"/>
 							<menulist class="zotero-clicky" id="item-type-menu" oncommand="document.getBindingParent(this).changeTypeTo(this.value, this)" flex="1"
 								onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"

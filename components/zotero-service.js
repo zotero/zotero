@@ -90,6 +90,7 @@ var xpcomFiles = [
 	'integration',
 	'integration_compat',
 	'itemTreeView',
+	'locateManager',
 	'mime',
 	'mimeTypeHandler',
 	'notifier',

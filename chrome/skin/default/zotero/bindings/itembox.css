@@ -15,24 +15,6 @@ textbox, tagsbox textbox
 	margin-left: 0;
 }
 
-#go-buttons button
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow.png');
-	-moz-box-direction: reverse;
-	-moz-box-flex: 1;
-}
-
-#go-buttons button#locate-button
-{
-	-moz-box-direction: normal;
-}
-
-
-#go-buttons button[disabled=true]
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow-disabled.png');
-}
-
 
 /* DEBUG: this doesn't seem to work, unfortunately
 label[singleField=false]:after

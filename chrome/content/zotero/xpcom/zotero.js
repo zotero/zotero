@@ -601,6 +601,9 @@ var Zotero = new function(){
 		// Initialize keyboard shortcuts
 		Zotero.Keys.init();
 		
+		// Initialize Locate Manager
+		Zotero.LocateManager.init();
+		
 		this.initialized = true;
 		Zotero.debug("Initialized in "+((new Date()).getTime() - start)+" ms");
 		
