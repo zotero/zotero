@@ -89,89 +89,95 @@ Zotero.OpenURL = new function() {
 	/*
 	 * Generates an OpenURL ContextObject from an item
 	 */
-	function createContextObject(item, version) {
+	function createContextObject(item, version, asObj) {
+		var entries = (asObj ? {} : []);
+		
+		function _mapTag(data, tag, dontAddPrefix) {
+			if(!data) return;
+			
+			if(version === "1.0" && !dontAddPrefix) tag = "rft."+tag;
+			
+			if(asObj) {
+				if(!entries[tag]) entries[tag] = [];
+				entries[tag].push(data);
+			} else {
+				entries.push(tag+"="+encodeURIComponent(data));
+			}
+		}
+		
 		if(item.toArray) {
 			item = item.toArray();
 		}
 		
-		var identifiers = new Array();
-		if(item.DOI) {
-			identifiers.push("info:doi/"+item.DOI);
-		}
-		if(item.ISBN) {
-			identifiers.push("urn:isbn:"+item.ISBN);
-		}
+		// find pmid
+		const pmidRe = /(?:\n|^)PMID:\s*(\d+)/g;
+		var pmid = pmidRe.exec(item.extra);
+		if(pmid) pmid = pmid[1];
 		
-		// encode ctx_ver (if available) and identifiers
-		// TODO identifiers may need to be encoded as follows:
-		// rft_id=info:doi/<the-url-encoded-doi>
-		// rft_id=http://<the-rest-of-the-url-encoded-url>
+		// encode ctx_ver (if available) and encode identifiers
 		if(version == "0.1") {
-			var co = "sid=Zotero:"+encodeURIComponent(Zotero.version);
-			
-			for(var i=0; i<identifiers.length; i++) {
-				co += "&id="+encodeURIComponent(identifiers[i]);
-			}
+			_mapTag("Zotero:2", "sid", true);
+			if(item.DOI) _mapTag("doi:"+item.DOI, "id", true);
+			if(item.ISBN) _mapTag(item.ISBN, "isbn", true);
+			if(pmid) _mapTag("pmid:"+pmid, "id", true);
 		} else {
-			var co = "url_ver=Z39.88-2004&ctx_ver=Z39.88-2004"+
-				     "&rfr_id="+encodeURIComponent("info:sid/zotero.org:"+Zotero.version);
-			
-			for(var i=0; i<identifiers.length; i++) {
-				co += "&rft_id="+encodeURIComponent(identifiers[i])
-			}
+			_mapTag("Z39.88-2004", "url_ver", true);
+			_mapTag("Z39.88-2004", "ctx_ver", true);
+			_mapTag("info:sid/zotero.org:2", "rfr_id", true);
+			if(item.DOI) _mapTag("info:doi/"+item.DOI, "rft_id", true);
+			if(item.ISBN) _mapTag("urn:isbn:"+item.ISBN, "rft_id", true);
+			if(pmid) _mapTag("info:pmid/"+pmid, "rft_id", true);
 		}
 		
 		// encode genre and item-specific data
 		if(item.itemType == "journalArticle") {
-			if(version == "0.1") {
-				co += "&genre=article";
-			} else {
-				co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&rft.genre=article";
+			if(version === "1.0") {
+				_mapTag("info:ofi/fmt:kev:mtx:journal", "rft_val_fmt", true);
 			}
-			if(item.title) co += _mapTag(item.title, "atitle", version)		
-			if(item.publicationTitle) co += _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "jtitle"), version)		
-			if(item.journalAbbreviation) co += _mapTag(item.journalAbbreviation, "stitle", version);
-			if(item.volume) co += _mapTag(item.volume, "volume", version);
-			if(item.issue) co += _mapTag(item.issue, "issue", version);
+			_mapTag("article", "genre");
+			
+			if(item.title) _mapTag(item.title, "atitle")		
+			if(item.publicationTitle) _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "jtitle"))		
+			if(item.journalAbbreviation) _mapTag(item.journalAbbreviation, "stitle");
+			if(item.volume) _mapTag(item.volume, "volume");
+			if(item.issue) _mapTag(item.issue, "issue");
 		} else if(item.itemType == "book" || item.itemType == "bookSection" || item.itemType == "conferencePaper") {
-			if(version == "0.1") {
-				co += "&genre=book";
-			} else {
-				co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook";
+			if(version === "1.0") {
+				_mapTag("info:ofi/fmt:kev:mtx:book", "rft_val_fmt", true);
 			}
 			
 			if(item.itemType == "book") {
-				co += "&rft.genre=book";
-				if(item.title) co += _mapTag(item.title, (version == "0.1" ? "title" : "btitle"), version);
+				_mapTag("book", "genre");
+				if(item.title) _mapTag(item.title, (version == "0.1" ? "title" : "btitle"));
 			} else if (item.itemType == "conferencePaper") {
-				co += "&rft.genre=proceeding";
-				if(item.title) co += _mapTag(item.title, "atitle", version)		
-				if(item.proceedingsTitle) co += _mapTag(item.proceedingsTitle, (version == "0.1" ? "title" : "btitle"), version);
+				_mapTag("proceeding", "genre");
+				if(item.title) _mapTag(item.title, "atitle")		
+				if(item.proceedingsTitle) _mapTag(item.proceedingsTitle, (version == "0.1" ? "title" : "btitle"));
 			} else {
-				co += "&rft.genre=bookitem";
-				if(item.title) co += _mapTag(item.title, "atitle", version)		
-				if(item.publicationTitle) co += _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "btitle"), version);
+				_mapTag("bookitem", "genre");
+				if(item.title) _mapTag(item.title, "atitle")		
+				if(item.publicationTitle) _mapTag(item.publicationTitle, (version == "0.1" ? "title" : "btitle"));
 			}
 			
-			if(item.place) co += _mapTag(item.place, "place", version);
-			if(item.publisher) co += _mapTag(item.publisher, "publisher", version)		
-			if(item.edition) co += _mapTag(item.edition, "edition", version);
-			if(item.series) co += _mapTag(item.series, "series", version);
+			if(item.place) _mapTag(item.place, "place");
+			if(item.publisher) _mapTag(item.publisher, "publisher")		
+			if(item.edition) _mapTag(item.edition, "edition");
+			if(item.series) _mapTag(item.series, "series");
 		} else if(item.itemType == "thesis" && version == "1.0") {
-			co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Adissertation";
+			_mapTag("info:ofi/fmt:kev:mtx:dissertation", "rft_val_fmt", true);
 			
-			if(item.title) co += _mapTag(item.title, "title", version);
-			if(item.publisher) co += _mapTag(item.publisher, "inst", version);
-			if(item.type) co += _mapTag(item.type, "degree", version);
+			if(item.title) _mapTag(item.title, "title");
+			if(item.publisher) _mapTag(item.publisher, "inst");
+			if(item.type) _mapTag(item.type, "degree");
 		} else if(item.itemType == "patent" && version == "1.0") {
-			co += "&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Apatent";
+			_mapTag("info:ofi/fmt:kev:mtx:patent", "rft_val_fmt", true);
 			
-			if(item.title) co += _mapTag(item.title, "title", version);
-			if(item.assignee) co += _mapTag(item.assignee, "assignee", version);
-			if(item.patentNumber) co += _mapTag(item.patentNumber, "number", version);
+			if(item.title) _mapTag(item.title, "title");
+			if(item.assignee) _mapTag(item.assignee, "assignee");
+			if(item.patentNumber) _mapTag(item.patentNumber, "number");
 			
 			if(item.issueDate) {
-				co += _mapTag(Zotero.Date.strToISO(item.issueDate), "date", version);
+				_mapTag(Zotero.Date.strToISO(item.issueDate), "date");
 			}
 		} else {
 			return false;
@@ -181,32 +187,41 @@ Zotero.OpenURL = new function() {
 			// encode first author as first and last
 			var firstCreator = item.creators[0];
 			if(item.itemType == "patent") {
-				co += _mapTag(firstCreator.firstName, "invfirst", version);
-				co += _mapTag(firstCreator.lastName, "invlast", version);
+				_mapTag(firstCreator.firstName, "invfirst");
+				_mapTag(firstCreator.lastName, "invlast");
 			} else {
 				if(firstCreator.isInstitution) {
-					co += _mapTag(firstCreator.lastName, "aucorp", version);
+					_mapTag(firstCreator.lastName, "aucorp");
 				} else {
-					co += _mapTag(firstCreator.firstName, "aufirst", version);
-					co += _mapTag(firstCreator.lastName, "aulast", version);
+					_mapTag(firstCreator.firstName, "aufirst");
+					_mapTag(firstCreator.lastName, "aulast");
 				}
 			}
 			
 			// encode subsequent creators as au
-			for(var i=0; i<identifiers.length; i++) {
-				co += _mapTag((creators[i].firstName ? creators[i].firstName+" " : "")+creators[i].lastName, (item.itemType == "patent" ? "inventor" : "au"), version);
+			for(var i=0; i<item.creators.length; i++) {
+				_mapTag((item.creators[i].firstName ? item.creators[i].firstName+" " : "")+
+					item.creators[i].lastName, (item.itemType == "patent" ? "inventor" : "au"));
 			}
 		}
 		
 		if(item.date) {
-			co += _mapTag(Zotero.Date.strToISO(item.date), (item.itemType == "patent" ? "appldate" : "date"), version);
+			_mapTag(Zotero.Date.strToISO(item.date), (item.itemType == "patent" ? "appldate" : "date"));
 		}
-		if(item.pages) co += _mapTag(item.pages, "pages", version);
-		if(item.numPages) co += _mapTag(item.numPages, "tpages", version);
-		if(item.ISBN) co += _mapTag(item.ISBN, "isbn", version);
-		if(item.ISSN) co += _mapTag(item.ISSN, "issn", version);
+		if(item.pages) {
+			_mapTag(item.pages, "pages");
+			var pages = item.pages.split("-");
+			if(pages.length >= 1) {
+				_mapTag(pages[0], "spage");
+				if(pages.length >= 2) _mapTag(pages[1], "epage");
+			}
+		}
+		if(item.numPages) _mapTag(item.numPages, "tpages");
+		if(item.ISBN) _mapTag(item.ISBN, "isbn");
+		if(item.ISSN) _mapTag(item.ISSN, "issn");
 		
-		return co;
+		if(asObj) return entries;
+		return entries.join("&");
 	}
 	
 	/*
@@ -444,20 +459,5 @@ Zotero.OpenURL = new function() {
 		}
 		
 		return item;
-	}
-	
-	/*
-	 * Used to map tags for generating OpenURL contextObjects
-	 */
-	function _mapTag(data, tag, version) {
-		if(data) {
-			if(version == "0.1") {
-				return "&"+tag+"="+encodeURIComponent(data);
-			} else {
-				return "&rft."+tag+"="+encodeURIComponent(data);
-			}
-		} else {
-			return "";
-		}
 	}
 }

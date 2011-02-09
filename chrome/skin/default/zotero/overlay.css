@@ -204,6 +204,11 @@
 	list-style-image: url('chrome://zotero/skin/toolbar-advanced-search.png');
 }
 
+#zotero-tb-locate
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow.png');
+}
+
 #zotero-tb-sync-storage-cancel
 {
 	list-style-image: url(chrome://zotero/skin/control_stop_blue.png);
