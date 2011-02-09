@@ -293,7 +293,8 @@ Zotero.LocateManager = new function() {
 			return [encodeURIComponent(val) for each(val in itemOpenURL[OPENURL_CONTEXT_MAPPINGS[param]])];
 		} else if(ns === "http://www.zotero.org/namespaces/openSearch#") {
 			if(param === "openURL") {
-				return [Zotero.OpenURL.createContextObject(item, "1.0")];
+				var ctx = Zotero.OpenURL.createContextObject(item, "1.0");
+				return (ctx ? [ctx] : false);
 			} else if(param === "year") {
 				return (itemOpenURL["rft.date"] ? [itemOpenURL["rft.date"][0].substr(0, 4)] : false);
 			} else {
