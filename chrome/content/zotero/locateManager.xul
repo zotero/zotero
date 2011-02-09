@@ -266,7 +266,7 @@ To add a new preference:
 		 * Restores Default Locate Engines
 		 **/
 		function restoreDefaultLocateEngines() {
-			Zotero.LocateManager.restoreDefaultLocateEngines();
+			Zotero.LocateManager.restoreDefaultEngines();
 			refreshLocateEnginesList();
 		}
 
