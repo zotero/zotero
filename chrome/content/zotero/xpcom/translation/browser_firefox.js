@@ -313,9 +313,14 @@ Zotero.Translate.IO.Read.prototype = {
 	
 	"_readToString":function() {
 		var str = {};
+		var stringBits = [];
 		this.inputStream.QueryInterface(Components.interfaces.nsIUnicharInputStream);
-		this.inputStream.readString(this.file.fileSize, str);
-		return str.value;
+		while(1) {
+			var read = this.inputStream.readString(32768, str);
+			if(!read) break;
+			stringBits.push(str.value);
+		}
+		return stringBits.join("");
 	},
 	
 	"_initRDF":function() {
