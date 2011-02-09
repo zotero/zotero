@@ -134,17 +134,17 @@ Zotero.Translate.SandboxManager.prototype = {
  * scope at all times. Otherwise, our streams might get garbage collected when we allow other code
  * to run during Zotero.wait().
  */
-Zotero.Translate.IO.streamsToKeepOpen = [];
+Zotero.Translate.IO.maintainedInstances = [];
 
 /******* (Native) Read support *******/
 
 Zotero.Translate.IO.Read = function(file, mode) {
+	Zotero.Translate.IO.maintainedInstances.push(this);
 	this.file = file;
 	
 	// open file
 	this._rawStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
 							  .createInstance(Components.interfaces.nsIFileInputStream);
-	Zotero.Translate.IO.streamsToKeepOpen.push(this._rawStream);
 	this._rawStream.init(file, 0x01, 0664, 0);
 	
 	// start detecting charset
@@ -166,7 +166,8 @@ Zotero.Translate.IO.Read = function(file, mode) {
 	if(this._charset) {
 		// BOM found; store its length and go back to the beginning of the file
 		this._bomLength = BOMs[this._charset].length;
-		this._seekToStart();
+		this._rawStream.QueryInterface(Components.interfaces.nsISeekableStream)
+			.seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, this._bomLength);
 	} else {
 		// look for an XML parse instruction
 		this._bomLength = 0;
@@ -212,7 +213,8 @@ Zotero.Translate.IO.Read = function(file, mode) {
 		// If we managed to get a charset here, then translators shouldn't be able to override it,
 		// since it's almost certainly correct. Otherwise, we allow override.
 		this._allowCharsetOverride = !!this._charset;		
-		this._seekToStart();
+		this._rawStream.QueryInterface(Components.interfaces.nsISeekableStream)
+			.seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, this._bomLength);
 		
 		if(!this._charset) {
 			// No XML parse instruction or BOM.
@@ -267,9 +269,6 @@ Zotero.Translate.IO.Read = function(file, mode) {
 						break;
 					}
 				}
-				
-				// Seek back to beginning of file
-				this._seekToStart();
 			} else {
 				// No need to auto-detect; user has specified a charset
 				this._charset = charsetPref;
@@ -291,14 +290,30 @@ Zotero.Translate.IO.Read.prototype = {
 		"setCharacterSet":"r"
 	},
 	
-	"_seekToStart":function() {
+	"_openRawStream":function() {
+		this._rawStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+								  .createInstance(Components.interfaces.nsIFileInputStream);
+		this._rawStream.init(this.file, 0x01, 0664, 0);
+	},
+	
+	"_seekToStart":function(charset) {
+		this._rawStream.close();
+		this._openRawStream();
+		
+		this._linesExhausted = false;
 		this._rawStream.QueryInterface(Components.interfaces.nsISeekableStream)
 			.seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, this._bomLength);
 		this.bytesRead = this._bomLength;
+	
+		this.inputStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+			.createInstance(Components.interfaces.nsIConverterInputStream);
+		this.inputStream.init(this._rawStream, charset, 32768,
+			Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
 	},
 	
 	"_readToString":function() {
 		var str = {};
+		this.inputStream.QueryInterface(Components.interfaces.nsIUnicharInputStream);
 		this.inputStream.readString(this.file.fileSize, str);
 		return str.value;
 	},
@@ -326,16 +341,9 @@ Zotero.Translate.IO.Read.prototype = {
 		}
 		
 		// seek back to the beginning
-		this._seekToStart();
+		this._seekToStart(this._allowCharsetOverride ? this._allowCharsetOverride : this._charset);
 		
-		if(this._allowCharsetOverride) {
-			try {
-				this.inputStream.init(this._rawStream, charset, 65535,
-					Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
-			} catch(e) {
-				throw "Translate: setCharacterSet: text encoding not supported";
-			}
-		} else {
+		if(!_allowCharsetOverride) {
 			Zotero.debug("Translate: setCharacterSet: translate charset override ignored due to BOM or XML parse instruction");
 		}
 	},
@@ -345,19 +353,19 @@ Zotero.Translate.IO.Read.prototype = {
 		
 		if(bytes) {
 			// read number of bytes requested
+			this.inputStream.QueryInterface(Components.interfaces.nsIUnicharInputStream);
 			var amountRead = this.inputStream.readString(bytes, str);
+			if(!amountRead) return false;
+			this.bytesRead += amountRead;
 		} else {
 			// bytes not specified; read a line
 			this.inputStream.QueryInterface(Components.interfaces.nsIUnicharLineInputStream);
-			var amountRead = this.inputStream.readLine(str);
+			if(this._linesExhausted) return false;
+			this._linesExhausted = !this.inputStream.readLine(str);
+			this.bytesRead += str.value.length+1; // only approximate
 		}
-					
-		if(amountRead) {
-			this.bytesRead += amountRead;
-			return str.value;
-		} else {
-			return false;
-		}
+		
+		return str.value;
 	},
 	
 	"_getXML":function() {
@@ -369,15 +377,7 @@ Zotero.Translate.IO.Read.prototype = {
 	},
 	
 	"reset":function(newMode) {
-		this._seekToStart();
-		
-		if(!this.inputStream) {
-			this.inputStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
-				.createInstance(Components.interfaces.nsIConverterInputStream);
-			Zotero.Translate.IO.streamsToKeepOpen.push(this.inputStream);
-		}
-		this.inputStream.init(this._rawStream, this._charset, 65535,
-			Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+		this._seekToStart(this._charset);
 		
 		this._mode = newMode;
 		if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1 && !this.RDF) {
@@ -386,16 +386,13 @@ Zotero.Translate.IO.Read.prototype = {
 	},
 	
 	"close":function() {
-		Zotero.Translate.IO.streamsToKeepOpen.splice(Zotero.Translate.IO.streamsToKeepOpen.indexOf(this._rawStream), 1);
-		if(this.inputStream) {
-			Zotero.Translate.IO.streamsToKeepOpen.splice(Zotero.Translate.IO.streamsToKeepOpen.indexOf(this.inputStream), 1);
-		}
+		var myIndex = Zotero.Translate.IO.maintainedInstances.indexOf(this);
+		if(myIndex !== -1) Zotero.Translate.IO.maintainedInstances.splice(myIndex, 1);
 		
 		this._rawStream.close();
 	}
 }
-
-Zotero.Translate.IO.String.prototype.__defineGetter__("contentLength",
+Zotero.Translate.IO.Read.prototype.__defineGetter__("contentLength",
 function() {
 	return this.file.fileSize;
 });
@@ -403,9 +400,9 @@ function() {
 /******* Write support *******/
 
 Zotero.Translate.IO.Write = function(file, mode, charset) {
+	Zotero.Translate.IO.maintainedInstances.push(this);
 	this._rawStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
 		.createInstance(Components.interfaces.nsIFileOutputStream);
-	Zotero.Translate.IO.streamsToKeepOpen.push(this._rawStream);
 	this._rawStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
 	this._writtenToStream = false;
 	if(mode || charset) this.reset(mode, charset);
@@ -432,7 +429,6 @@ Zotero.Translate.IO.Write.prototype = {
 		if(!this.outputStream) {
 			this.outputStream = Components.classes["@mozilla.org/intl/converter-output-stream;1"]
 								   .createInstance(Components.interfaces.nsIConverterOutputStream);
-			Zotero.Translate.IO.streamsToKeepOpen.push(this.outputStream);
 		}
 		
 		if(charset == "UTF-8xBOM") charset = "UTF-8";
@@ -481,10 +477,8 @@ Zotero.Translate.IO.Write.prototype = {
 			this.write(this.RDF.serialize());
 		}
 		
-		Zotero.Translate.IO.streamsToKeepOpen.splice(Zotero.Translate.IO.streamsToKeepOpen.indexOf(this._rawStream), 1);
-		if(this.outputStream) {
-			Zotero.Translate.IO.streamsToKeepOpen.splice(Zotero.Translate.IO.streamsToKeepOpen.indexOf(this.outputStream), 1);
-		}
+		var myIndex = Zotero.Translate.IO.maintainedInstances.indexOf(this);
+		if(myIndex !== -1) Zotero.Translate.IO.maintainedInstances.splice(myIndex, 1);
 		
 		this._rawStream.close();
 	}
