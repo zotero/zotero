@@ -315,7 +315,7 @@ var ZoteroOverlay = new function()
 		} else {		// Zotero is running in the pane
 			if(setMode === false) return;
 			// close Zotero pane
-			this.toggleDisplay();
+			this.toggleDisplay(false);
 			
 			// open Zotero tab
 			this.isTab = true;

@@ -104,6 +104,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors	"Word Processors">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins	"Get word processor plug-ins...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url	"http://www.zotero.org/support/word_processor_plugin_installation">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager				"Style Manager">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title		"Title">
