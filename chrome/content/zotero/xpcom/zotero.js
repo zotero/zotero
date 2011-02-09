@@ -601,6 +601,9 @@ var Zotero = new function(){
 		// Initialize keyboard shortcuts
 		Zotero.Keys.init();
 		
+		// Initialize Locate Manager
+		Zotero.LocateManager.init();
+		
 		this.initialized = true;
 		Zotero.debug("Initialized in "+((new Date()).getTime() - start)+" ms");
 		
@@ -644,7 +647,7 @@ var Zotero = new function(){
 			return dir;
 		} else {
 			if(this.isFx4) {
-				while(!Zotero.addon) Zotero.mainThread.processNextEvent(true);
+				while(Zotero.addon === undefined) Zotero.mainThread.processNextEvent(true);
 				var resourceURI = Zotero.addon.getResourceURI();
 				return resourceURI.QueryInterface(Components.interfaces.nsIFileURL).file;
 			} else {
@@ -1082,7 +1085,7 @@ var Zotero = new function(){
 		if(this.isFx4) {
 			if(!Zotero.addons) {
 				AddonManager.getAllAddons(function(addonList) { Zotero.addons = addonList; });
-				while(!Zotero.addons) Zotero.mainThread.processNextEvent(true);
+				while(Zotero.addons === undefined) Zotero.mainThread.processNextEvent(true);
 			}
 			var installed = Zotero.addons;
 		} else {

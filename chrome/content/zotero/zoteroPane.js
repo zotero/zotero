@@ -2416,51 +2416,57 @@ var ZoteroPane = new function()
 	 *  (e.g. meta-click == new background tab, meta-shift-click == new front tab,
 	 *  shift-click == new window, no modifier == frontmost tab
 	 */
-	function loadURI(uri, event, data) {
-		// Ignore javascript: and data: URIs
-		if (uri.match(/^(javascript|data):/)) {
-			return;
+	function loadURI(uris, event, data) {
+		if(typeof uris === "string") {
+			uris = [uris];
 		}
 		
-		if (Zotero.isStandalone && uri.match(/^https?/)) {
-			var io = Components.classes['@mozilla.org/network/io-service;1']
-						.getService(Components.interfaces.nsIIOService);
-			var uri = io.newURI(uri, null, null);
-			var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
-						.getService(Components.interfaces.nsIExternalProtocolService)
-						.getProtocolHandlerInfo('http');
-			handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
-			handler.launchWithURI(uri, null);
-			return;
-		}
-		
-		// Open in new tab
-		var openInNewTab = event && (event.metaKey || (!Zotero.isMac && event.ctrlKey));
-		if (event && event.shiftKey) {
-			window.open(uri, "zotero-loaded-page",
-				"menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes");
-		}
-		else if (openInNewTab || !window.loadURI) {
-			// if no gBrowser, find it
-			if(!gBrowser) {
-				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								   .getService(Components.interfaces.nsIWindowMediator);
-				var browserWindow = wm.getMostRecentWindow("navigator:browser");
-				var gBrowser = browserWindow.gBrowser;
+		for each(var uri in uris) {
+			// Ignore javascript: and data: URIs
+			if (uri.match(/^(javascript|data):/)) {
+				return;
 			}
 			
-			// load in a new tab
-			var tab = gBrowser.addTab(uri);
-			var browser = gBrowser.getBrowserForTab(tab);
-			
-			if (event && event.shiftKey || !openInNewTab) {
-				// if shift key is down, or we are opening in a new tab because there is no loadURI,
-				// select new tab
-				gBrowser.selectedTab = tab;
+			if (Zotero.isStandalone && uri.match(/^https?/)) {
+				var io = Components.classes['@mozilla.org/network/io-service;1']
+							.getService(Components.interfaces.nsIIOService);
+				var uri = io.newURI(uri, null, null);
+				var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
+							.getService(Components.interfaces.nsIExternalProtocolService)
+							.getProtocolHandlerInfo('http');
+				handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
+				handler.launchWithURI(uri, null);
+				return;
 			}
-		}
-		else {
-			window.loadURI(uri);
+			
+			// Open in new tab
+			var openInNewTab = event && (event.metaKey || (!Zotero.isMac && event.ctrlKey));
+			if (event && event.shiftKey && !openInNewTab) {
+				window.open(uri, "zotero-loaded-page",
+					"menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes");
+			}
+			else if (openInNewTab || !window.loadURI || uris.length > 1) {
+				// if no gBrowser, find it
+				if(!gBrowser) {
+					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+									   .getService(Components.interfaces.nsIWindowMediator);
+					var browserWindow = wm.getMostRecentWindow("navigator:browser");
+					var gBrowser = browserWindow.gBrowser;
+				}
+				
+				// load in a new tab
+				var tab = gBrowser.addTab(uri);
+				var browser = gBrowser.getBrowserForTab(tab);
+				
+				if (event && event.shiftKey || !openInNewTab) {
+					// if shift key is down, or we are opening in a new tab because there is no loadURI,
+					// select new tab
+					gBrowser.selectedTab = tab;
+				}
+			}
+			else {
+				window.loadURI(uri);
+			}
 		}
 	}
 	
@@ -3351,7 +3357,6 @@ var ZoteroPane = new function()
 					"zotero-error-report", "chrome,centerscreen,modal", io);
 	}
 	
-	
 	/*
 	 * Display an error message saying that an error has occurred and Firefox
 	 * needs to be restarted.
@@ -3408,4 +3413,5 @@ var ZoteroPane = new function()
 			}
 		}
 	}
+	
 }
