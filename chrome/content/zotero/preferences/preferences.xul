@@ -572,7 +572,7 @@ To add a new preference:
 					<label id="wordProcessors-noWordProcessorPluginsInstalled" width="45em" hidden="true">
 							&zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled;
 					</label>
-					<label id="wordProcessors-getWordProcessorPlugins" class="text-link" href="http://www.zotero.org/support/word_processor_plugin_installation#word_processor_plugins_for_zotero_2.0" value="&zotero.preferences.cite.wordProcessors.getPlugins;"/>
+					<label id="wordProcessors-getWordProcessorPlugins" class="text-link" href="&zotero.preferences.cite.wordProcessor.getPlugins.url;" value="&zotero.preferences.cite.wordProcessors.getPlugins;"/>
 				</tabpanel>
 				<tabpanel orient="vertical" id="styles">
 					<groupbox flex="1">
