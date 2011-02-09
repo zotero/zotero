@@ -100,7 +100,7 @@ var Zotero_LocateMenu = new function() {
 	 */
 	function _getInstallableLocateEngines() {
 		var locateEngines = [];
-		if(!Zotero_Browser) return locateEngines;
+		if(!window.Zotero_Browser || !window.Zotero_Browser.tabbrowser) return locateEngines;
 		
 		var links = Zotero_Browser.tabbrowser.selectedBrowser.contentDocument.getElementsByTagName("link");
 		for each(var link in links) {
