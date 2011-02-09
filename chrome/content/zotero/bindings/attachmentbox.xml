@@ -42,7 +42,6 @@
 				Public properties
 			-->
 			<field name="editable">false</field>
-			<field name="displayGoButtons">false</field>
 			<field name="clickableLink">false</field>
 			<field name="displayButton">false</field>
 			<field name="displayNote">false</field>
@@ -58,7 +57,6 @@
 					Zotero.debug("Setting mode to '" + val + "'");
 					
 					this.editable = false;
-					this.displayGoButtons = false;
 					this.displayURL = false;
 					this.displayFileName = false;
 					this.clickableLink = false;
@@ -71,7 +69,6 @@
 					
 					switch (val) {
 						case 'view':
-							this.displayGoButtons = true;
 							this.displayURL = true;
 							this.displayFileName = true;
 							this.clickableLink = true;
@@ -84,7 +81,6 @@
 						
 						case 'edit':
 							this.editable = true;
-							this.displayGoButtons = true;
 							this.displayURL = true;
 							this.displayFileName = true;
 							this.clickableLink = true;
@@ -148,9 +144,6 @@
 					
 					var attachmentBox = document.getAnonymousNodes(this)[0];
 					var title = this._id('title');
-					var goButtons = this._id('go-buttons');
-					var viewButton = this._id('view');
-					var showButton = this._id('show');
 					var fileNameRow = this._id('fileNameRow');
 					var urlField = this._id('url');
 					var accessed = this._id('accessedRow');
@@ -188,14 +181,6 @@
 						title.addEventListener('click', this.editTitle, false);
 					}
 					
-					// View and Show buttons
-					if (this.displayGoButtons) {
-						goButtons.hidden = false;
-					}
-					else {
-						goButtons.hidden = true;
-					}
-					
 					var isImportedURL = this.item.attachmentLinkMode ==
 											Zotero.Attachments.LINK_MODE_IMPORTED_URL;
 					
@@ -209,8 +194,6 @@
 						else {
 							var str = Zotero.getString('pane.item.attachments.view.link');
 						}
-						
-						showButton.hidden = !isImportedURL;
 						
 						// URL
 						if (this.displayURL) {
@@ -247,7 +230,6 @@
 					// Metadata for files
 					else {
 						var str = Zotero.getString('pane.item.attachments.view.file');
-						showButton.hidden = false;
 						urlField.hidden = true;
 						accessed.hidden = true;
 					}
@@ -271,9 +253,6 @@
 					else {
 						fileNameRow.hidden = true;
 					}
-
-					
-					viewButton.setAttribute('label', str);
 					
 					// Page count
 					if (this.displayPages) {
@@ -531,10 +510,6 @@
 			<vbox id="attachment-box" flex="1" orient="vertical"
 				 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 				<label id="title"/>
-				<hbox id="go-buttons">
-					<button id="view" flex="1" oncommand="document.getBindingParent(this).onViewClick(event)"/>
-					<button id="show" label="&zotero.item.attachment.file.show;" flex="1" oncommand="document.getBindingParent(this).onShowClick(event)"/>
-				</hbox>
 				<label id="url" crop="end"
 					ondragstart="var dt = event.dataTransfer; dt.setData('text/x-moz-url', this.value); dt.setData('text/uri-list', this.value); dt.setData('text/plain', this.value);"/>
 				<grid>

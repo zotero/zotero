@@ -164,11 +164,14 @@ var Zotero_LocateMenu = new function() {
 				menuitem.addEventListener("command", this.openItemURL, false);
 			}
 			
-			// add library lookup to any item
-			var menuitem = _createMenuItem(Zotero.getString("locate.libraryLookup.label"),
-				"zotero-locate-service-openurl", Zotero.getString("locate.libraryLookup.tooltip"));
-			locateMenu.appendChild(menuitem);
-			menuitem.addEventListener("command", this.lookupItem, false);
+			// add library lookup to regular items
+			var regularItems = [item for each(item in selectedItems) if(item.isRegularItem())];
+			if(regularItems.length) {
+				var menuitem = _createMenuItem(Zotero.getString("locate.libraryLookup.label"),
+					"zotero-locate-service-openurl", Zotero.getString("locate.libraryLookup.tooltip"));
+				locateMenu.appendChild(menuitem);
+				menuitem.addEventListener("command", this.lookupItem, false);
+			}
 			
 			// add wayback if there are real URLs
 			if(realURLs.length) {
@@ -259,6 +262,7 @@ var Zotero_LocateMenu = new function() {
 	this.lookupItem = function(event) {
 		var urls = [];
 		for each(var item in ZoteroPane.getSelectedItems()) {
+			if(!item.isRegularItem()) continue;
 			var url = Zotero.OpenURL.resolve(item);
 			if(url) urls.push(url);
 		}
