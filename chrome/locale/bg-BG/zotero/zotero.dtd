@@ -87,7 +87,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Подръжка и документация">
 <!ENTITY zotero.toolbar.about.label "За Зотеро">
 <!ENTITY zotero.toolbar.advancedSearch "Търсене за напреднали">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "Превключва режим на цял екран">
+<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
 <!ENTITY zotero.toolbar.openURL.label "Открива">
 <!ENTITY zotero.toolbar.openURL.tooltip "Открива чрез вашата локална библиотека">
 

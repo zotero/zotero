@@ -87,7 +87,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Abi ja dokumentatsioon">
 <!ENTITY zotero.toolbar.about.label "Zotero kohta">
 <!ENTITY zotero.toolbar.advancedSearch "Täpsem otsing">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "Täisekraan režiim">
+<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
 <!ENTITY zotero.toolbar.openURL.label "Otsida">
 <!ENTITY zotero.toolbar.openURL.tooltip "Otsida kohalikus raamatukogus">
 

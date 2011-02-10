@@ -87,7 +87,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Destek ve Belgeleme">
 <!ENTITY zotero.toolbar.about.label "Zotero Hakkında">
 <!ENTITY zotero.toolbar.advancedSearch "Gelişmiş Arama">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "Tam Ekran Moduna Geç">
+<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
 <!ENTITY zotero.toolbar.openURL.label "Yerini Belirle">
 <!ENTITY zotero.toolbar.openURL.tooltip "Yerel Kitaplığınızda Bul">
 

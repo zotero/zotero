@@ -87,7 +87,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "Zoteroについて">
 <!ENTITY zotero.toolbar.advancedSearch "詳細検索">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "全画面表示">
+<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
 <!ENTITY zotero.toolbar.openURL.label "所在確認">
 <!ENTITY zotero.toolbar.openURL.tooltip "あなたのローカル図書館を通して発見">
 
