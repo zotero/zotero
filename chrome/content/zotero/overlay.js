@@ -164,6 +164,11 @@ var ZoteroOverlay = new function()
 			return;
 		}
 		
+		if(!Zotero || !Zotero.initialized) {
+			ZoteroPane.displayStartupError();
+			return;
+		}
+		
 		var zoteroPane = document.getElementById('zotero-pane-stack');
 		var zoteroSplitter = document.getElementById('zotero-splitter');
 		var isHidden = zoteroPane.getAttribute('hidden') == 'true';
