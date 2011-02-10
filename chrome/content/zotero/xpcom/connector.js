@@ -643,6 +643,16 @@ Zotero.Connector.Translate.Save.prototype = {
 		var instanceID = Zotero.randomString();
 		Zotero.Connector.Translate._waitingForSelection[instanceID] = this;
 		
+		// Fix for translators that don't create item lists as objects
+		if(itemList.push && typeof itemList.push === "function") {
+			var newItemList = {};
+			for(var item in itemList) {
+				Zotero.debug(item);
+				newItemList[item] = itemList[item];
+			}
+			itemList = newItemList;
+		}
+		
 		// Send "Multiple Choices" HTTP response
 		this.sendResponse(300, "application/json", JSON.stringify({"items":itemList, "instanceID":instanceID, "uri":this._parsedPostData.uri}));
 		
