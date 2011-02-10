@@ -87,7 +87,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "حول زوتيرو">
 <!ENTITY zotero.toolbar.advancedSearch "بحث متقدم">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "فعّل نمط الشاشة الكاملة">
+<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
 <!ENTITY zotero.toolbar.openURL.label "إيجاد الموضع">
 <!ENTITY zotero.toolbar.openURL.tooltip "ابحث في مكتبتك المحلية">
 

@@ -87,7 +87,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Podpora a dokumentace">
 <!ENTITY zotero.toolbar.about.label "O Zoteru">
 <!ENTITY zotero.toolbar.advancedSearch "Pokročilé vyhledávání">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "Tlačítko celoobrazovkového módu">
+<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
 <!ENTITY zotero.toolbar.openURL.label "Najít">
 <!ENTITY zotero.toolbar.openURL.tooltip "Najít prostřednictvím vaší místní knihovny">
 

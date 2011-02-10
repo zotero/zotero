@@ -87,7 +87,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Laguntza eta dokumentazioa">
 <!ENTITY zotero.toolbar.about.label "Zotero-ri buruz">
 <!ENTITY zotero.toolbar.advancedSearch "Bilaketa aurreratua">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "Zotero paintaila osoan">
+<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
 <!ENTITY zotero.toolbar.openURL.label "Aurkitu">
 <!ENTITY zotero.toolbar.openURL.tooltip "Liburutegi publikoan bilatu">
 
