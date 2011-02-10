@@ -32,6 +32,7 @@ var ZoteroStandalone = new function()
 		if(!Zotero || !Zotero.initialized) {
 			ZoteroPane.displayStartupError();
 			window.close();
+			return;
 		}
 		ZoteroPane.init();
 		ZoteroPane.makeVisible();
