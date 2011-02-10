@@ -87,7 +87,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "支援及說明文件">
 <!ENTITY zotero.toolbar.about.label "關於 Zotero…">
 <!ENTITY zotero.toolbar.advancedSearch "進階搜尋">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "切換全螢幕模式">
+<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
 <!ENTITY zotero.toolbar.openURL.label "找出">
 <!ENTITY zotero.toolbar.openURL.tooltip "用你本地的圖書館來尋找">
 

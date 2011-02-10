@@ -87,7 +87,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "Giới thiệu về Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Tìm kiếm Nâng cao">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "Bật/Tắt chế độ Toàn màn hình">
+<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
 <!ENTITY zotero.toolbar.openURL.label "Định vị">
 <!ENTITY zotero.toolbar.openURL.tooltip "Tìm trong thư viện cục bộ của bạn">
 

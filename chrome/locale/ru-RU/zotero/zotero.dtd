@@ -87,7 +87,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Поддержка и документация">
 <!ENTITY zotero.toolbar.about.label "О Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Расширенный поиск">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "Переключение полноэкранного Режима">
+<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
 <!ENTITY zotero.toolbar.openURL.label "Найти">
 <!ENTITY zotero.toolbar.openURL.tooltip "Найти через местную библиотеку">
 

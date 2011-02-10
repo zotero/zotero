@@ -87,7 +87,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Avancerad sök:">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "Växla fullskärmsläge">
+<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
 <!ENTITY zotero.toolbar.openURL.label "Hitta">
 <!ENTITY zotero.toolbar.openURL.tooltip "Hitta genom ditt lokala bibliotek">
 
