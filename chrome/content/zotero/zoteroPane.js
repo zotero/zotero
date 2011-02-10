@@ -335,7 +335,7 @@ var ZoteroPane = new function()
 				ps.alert(null, "", msg);
 				return false;
 			}
-			ZoteroPane.onLoad();
+			ZoteroPane.init();
 		}
 		
 		// If Zotero could not be initialized, display an error message and return
