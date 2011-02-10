@@ -89,7 +89,6 @@ var ZoteroPane = new function()
 	
 	var self = this;
 	var _loaded = false;
-	var _onVisibleHandlers = [];
 	var titlebarcolorState, titleState;
 	
 	// Also needs to be changed in collectionTreeView.js
@@ -115,7 +114,6 @@ var ZoteroPane = new function()
 		}
 		_loaded = true;
 		
-		ZoteroPane.restoreSavedState();
 		Zotero.setFontSize(document.getElementById('zotero-pane'))
 		
 		if (Zotero.isMac) {
@@ -313,8 +311,6 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		this.saveCurrentState();
-		
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		tagSelector.unregister();
 		
@@ -339,7 +335,7 @@ var ZoteroPane = new function()
 				ps.alert(null, "", msg);
 				return false;
 			}
-			ZoteroPane.init();
+			ZoteroPane.onLoad();
 		}
 		
 		// If Zotero could not be initialized, display an error message and return
@@ -408,8 +404,6 @@ var ZoteroPane = new function()
 				}, 1000);
 			}
 		}
-		
-		for each(var handler in _onVisibleHandlers) handler();
 		
 		return true;
 	}
@@ -3420,49 +3414,4 @@ var ZoteroPane = new function()
 		}
 	}
 	
-	/**
-	 * Saves all attributes labeled as zotero-persist
-	 */
-	this.restoreSavedState = function() {
-		// load all z-persist attributes
-		var savedData = Zotero.Prefs.get("overlay.persist");
-		if(savedData != "") {
-			savedData = JSON.parse(savedData);
-			for(var id in savedData) {
-				var el = document.getElementById(id);
-				if(el) {
-					var savedDataEl = savedData[id];
-					for(var attr in savedDataEl) {
-						Zotero.debug(attr+" = "+savedDataEl[attr]);
-						try {
-							el.setAttribute(attr, savedDataEl[attr]);
-						} catch(e) {}
-					}
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Restores all attributes labeled as zotero-persist
-	 */
-	this.saveCurrentState = function() {
-		var data = {};
-		
-		var zPersists = document.evaluate('//*[@zotero-persist]', document.getElementById('zotero-pane'), null,
-			XPathResult.ANY_TYPE, null);
-		var el;
-		while(el = zPersists.iterateNext()) {
-			var id = el.getAttribute('id');
-			if(id) {
-				data[id] = {};
-				
-				for each(var attr in el.getAttribute("zotero-persist").split(/[\s,]/)) {
-					data[id][attr] = el.getAttribute(attr);
-				}
-			}
-		}
-		
-		Zotero.Prefs.set("overlay.persist", JSON.stringify(data));
-	}
 }
