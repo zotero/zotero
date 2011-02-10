@@ -340,36 +340,7 @@ var ZoteroPane = new function()
 		
 		// If Zotero could not be initialized, display an error message and return
 		if(!Zotero || !Zotero.initialized) {
-			if (Zotero) {
-				var errMsg = Zotero.startupError;
-				var errFunc = Zotero.startupErrorHandler;
-			}
-			
-			if (!errMsg) {
-				// Get the stringbundle manually
-				var src = 'chrome://zotero/locale/zotero.properties';
-				var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
-						getService(Components.interfaces.nsILocaleService);
-				var appLocale = localeService.getApplicationLocale();
-				var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
-					.getService(Components.interfaces.nsIStringBundleService);
-				var stringBundle = stringBundleService.createBundle(src, appLocale);
-				
-				var errMsg = stringBundle.GetStringFromName('startupError');
-			}
-			
-			if (errFunc) {
-				errFunc();
-			}
-			else {
-				// TODO: Add a better error page/window here with reporting
-				// instructions
-				// window.loadURI('chrome://zotero/content/error.xul');
-				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-										.getService(Components.interfaces.nsIPromptService);
-				ps.alert(null, "", errMsg);
-			}
-			
+			this.displayStartupError();
 			return false;
 		}
 		
@@ -3387,6 +3358,44 @@ var ZoteroPane = new function()
 			self.setItemsPaneMessage(msg, true);
 		}
 		Zotero.debug(msg, 1);
+	}
+	
+	this.displayStartupError = function(asPaneMessage) {
+		if(!Zotero || !Zotero.initialized) {
+			if (Zotero) {
+				var errMsg = Zotero.startupError;
+				var errFunc = Zotero.startupErrorHandler;
+			}
+			
+			if (!errMsg) {
+				// Get the stringbundle manually
+				var src = 'chrome://zotero/locale/zotero.properties';
+				var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
+						getService(Components.interfaces.nsILocaleService);
+				var appLocale = localeService.getApplicationLocale();
+				var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
+					.getService(Components.interfaces.nsIStringBundleService);
+				var stringBundle = stringBundleService.createBundle(src, appLocale);
+				
+				var errMsg = stringBundle.GetStringFromName('startupError');
+			}
+			
+			if (errFunc) {
+				errFunc();
+			}
+			else {
+				// TODO: Add a better error page/window here with reporting
+				// instructions
+				// window.loadURI('chrome://zotero/content/error.xul');
+				//if(asPaneMessage) {
+				//	ZoteroPane.setItemsPaneMessage(errMsg, true);
+				//} else {
+					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+											.getService(Components.interfaces.nsIPromptService);
+					ps.alert(null, "", errMsg);
+				//}
+			}
+		}
 	}
 	
 	/**

@@ -29,9 +29,12 @@
 var ZoteroStandalone = new function()
 {
 	this.onLoad = function() {
+		if(!Zotero || !Zotero.initialized) {
+			ZoteroPane.displayStartupError();
+			window.close();
+		}
 		ZoteroPane.init();
-		var success = ZoteroPane.makeVisible();
-		if(!success) window.close();
+		ZoteroPane.makeVisible();
 	}
 	
 	this.onUnload = function() {
