@@ -87,7 +87,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Avansert søk">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "Velg fullskjermmodus">
+<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
 <!ENTITY zotero.toolbar.openURL.label "Lokaliser">
 <!ENTITY zotero.toolbar.openURL.tooltip "Finn gjennom ditt lokale bibliotek">
 

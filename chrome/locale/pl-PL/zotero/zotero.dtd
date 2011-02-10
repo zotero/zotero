@@ -87,7 +87,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "Zotero - informacje">
 <!ENTITY zotero.toolbar.advancedSearch "Wyszukiwanie zaawansowane">
-<!ENTITY zotero.toolbar.fullscreen.tooltip "Maksymalizuj/Minimalizuj">
+<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
 <!ENTITY zotero.toolbar.openURL.label "Wyszukaj lokalnie">
 <!ENTITY zotero.toolbar.openURL.tooltip "Wyszukuje w katalogu lokalnej biblioteki">
 
