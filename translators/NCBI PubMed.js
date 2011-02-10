@@ -9,7 +9,7 @@
 	"priority":100,
 	"configOptions":{"dataMode":"block"},
 	"inRepository":true,
-	"lastUpdated":"2011-02-05 10:15:00"
+	"lastUpdated":"2011-02-10 00:28:19"
 }
 
 function detectWeb(doc, url) {
@@ -216,7 +216,7 @@ function doWeb(doc, url) {
 	var uid = uids.iterateNext();
 	if(uid) {
 		if (uids.iterateNext()){
-			var items = new Array();
+			var items = {};
 			var tablex = '//div[@class="rprt"]';
 			if (!doc.evaluate(tablex, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 				var tablex = '//div[@class="ResultSet"]/dl';
