@@ -81,10 +81,6 @@ var ZoteroTab = new function()
 			var listener = function(event) {
 				if(event.target !== tab) return;
 				window.gBrowser.tabContainer.removeEventListener("TabSelect", listener, false);
-				if(!Zotero || !Zotero.initialized) {
-					ZoteroPane.displayStartupError(true);
-					return;
-				}
 				ZoteroPane.init();
 				ZoteroPane.makeVisible();
 			}
@@ -106,10 +102,10 @@ var ZoteroTab = new function()
 	}
 	
 	this.onUnload = function() {
-		if(window.ZoteroPane === window.ZoteroPane_Tab) {
-			window.ZoteroPane = window.ZoteroPane_Overlay;
+		if(this.containerWindow.ZoteroPane === this.containerWindow.ZoteroPane_Tab) {
+			this.containerWindow.ZoteroPane = this.containerWindow.ZoteroPane_Overlay;
 		}
-		delete window.ZoteroPane_Tab;
+		delete this.containerWindow.ZoteroPane_Tab;
 		ZoteroPane.destroy();
 	}
 }
