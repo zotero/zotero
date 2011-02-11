@@ -311,14 +311,14 @@ var ZoteroPane = new function()
 			return;
 		}
 		
+		_serializePersist();
+		
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		tagSelector.unregister();
 		
 		this.collectionsView.unregister();
 		if (this.itemsView)
 			this.itemsView.unregister();
-		
-		_serializePersist();
 	}
 	
 	/**
@@ -347,6 +347,13 @@ var ZoteroPane = new function()
 		}
 		
 		_unserializePersist();
+		
+		var containerWindow = (window.ZoteroTab ? window.ZoteroTab.containerWindow : window);
+		if(containerWindow.zoteroSavedSelection) {
+			Zotero.debug("ZoteroPane: Remembering selection");
+			this.itemsView.rememberSelection(containerWindow.zoteroSavedSelection);
+			delete containerWindow.zoteroSavedSelection;
+		}
 		
 		this.updateTagSelectorSize();
 		
@@ -3451,7 +3458,12 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		if(this.itemsView) this.itemsView.sort();
+		if(this.itemsView) {
+			// may not yet be initialized
+			try {
+				this.itemsView.sort();
+			} catch(e) {};
+		}
 	}
 
 	/**
