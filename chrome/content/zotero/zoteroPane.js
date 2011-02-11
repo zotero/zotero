@@ -3029,7 +3029,7 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function viewAttachment(itemID, event, noLocateOnMissing) {
+	function viewAttachment(itemID, event, noLocateOnMissing, forceExternalViewer) {
 		var attachment = Zotero.Items.get(itemID);
 		if (!attachment.isAttachment()) {
 			throw ("Item " + itemID + " is not an attachment in ZoteroPane.viewAttachment()");
@@ -3042,22 +3042,24 @@ var ZoteroPane = new function()
 		
 		var file = attachment.getFile();
 		if (file) {
-			var mimeType = attachment.getAttachmentMIMEType();
-			// If no MIME type specified, try to detect again (I guess in case
-			// we've gotten smarter since the file was imported?)
-			if (!mimeType) {
-				var mimeType = Zotero.MIME.getMIMETypeFromFile(file);
+			if(forceExternalViewer !== undefined) {
+				var externalViewer = forceExternalViewer;
+			} else {
+				var mimeType = attachment.getAttachmentMIMEType();
+				// If no MIME type specified, try to detect again (I guess in case
+				// we've gotten smarter since the file was imported?)
+				if (!mimeType) {
+					mimeType = Zotero.MIME.getMIMETypeFromFile(file);
+					
+					// TODO: update DB with new info
+				}
+				
 				var ext = Zotero.File.getExtension(file);
-				
-				// TODO: update DB with new info
+				var externalViewer = Zotero.isStandalone || (!Zotero.MIME.hasNativeHandler(mimeType, ext) &&
+					(!Zotero.MIME.hasInternalHandler(mimeType, ext) || Zotero.Prefs.get('launchNonNativeFiles')));
 			}
-			var ext = Zotero.File.getExtension(file);
-			var isNative = Zotero.MIME.hasNativeHandler(mimeType, ext);
-			var internal = Zotero.MIME.hasInternalHandler(mimeType, ext);
 			
-			if (isNative ||
-					(internal && !Zotero.Prefs.get('launchNonNativeFiles'))) {
-				
+			if (!forceExternalViewer) {
 				var url = 'zotero://attachment/' + itemID + '/';
 				this.loadURI(url, event, { attachmentID: itemID});
 			}

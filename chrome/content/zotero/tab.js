@@ -81,6 +81,10 @@ var ZoteroTab = new function()
 			var listener = function(event) {
 				if(event.target !== tab) return;
 				window.gBrowser.tabContainer.removeEventListener("TabSelect", listener, false);
+				if(!Zotero || !Zotero.initialized) {
+					ZoteroPane.displayStartupError(true);
+					return;
+				}
 				ZoteroPane.init();
 				ZoteroPane.makeVisible();
 			}
