@@ -76,27 +76,28 @@ var Zotero_LocateMenu = new function() {
 			
 			// check for custom locate engines
 			var customEngines = Zotero.LocateManager.getVisibleEngines();
-			if(customEngines.length) {
+			var availableEngines = [];
+			
+			// check which engines can translate an item
+			for each(var engine in customEngines) {
+				// require a submission for at least one selected item
+				for each(var item in selectedItems) {
+					if(engine.getItemSubmission(item)) {
+						availableEngines.push(engine);
+						break;
+					}
+				}
+			}
+			
+			// add engines that are available for selected items
+			if(availableEngines.length) {
 				locateMenu.appendChild(document.createElement("menuseparator"));
-				
-				// add engines to menu
-				for each(var engine in customEngines) {
-					// require a submission for at least one selected item
-					var canSubmit = false;
-					for each(var item in selectedItems) {
-						if(engine.getItemSubmission(item)) {
-							canSubmit = true;
-							break;
-						}
-					}
-					
-					if(canSubmit) {
-						var menuitem = _createMenuItem(engine.name, null, engine.description);
-						menuitem.setAttribute("class", "menuitem-iconic");
-						menuitem.setAttribute("image", engine.icon);
-						locateMenu.appendChild(menuitem);
-						menuitem.addEventListener("command", _locateItem, false);
-					}
+				for each(var engine in availableEngines) {
+					var menuitem = _createMenuItem(engine.name, null, engine.description);
+					menuitem.setAttribute("class", "menuitem-iconic");
+					menuitem.setAttribute("image", engine.icon);
+					locateMenu.appendChild(menuitem);
+					menuitem.addEventListener("command", _locateItem, false);
 				}
 			}
 		} else {
