@@ -147,3 +147,6 @@ pref("extensions.zotero.purge.creators", false);
 pref("extensions.zotero.purge.fulltext", false);
 pref("extensions.zotero.purge.items", false);
 pref("extensions.zotero.purge.tags", false);
+
+// Zotero pane persistent data
+pref("extensions.zotero.pane.persist", '');

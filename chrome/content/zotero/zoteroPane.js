@@ -317,6 +317,8 @@ var ZoteroPane = new function()
 		this.collectionsView.unregister();
 		if (this.itemsView)
 			this.itemsView.unregister();
+		
+		_serializePersist();
 	}
 	
 	/**
@@ -343,6 +345,8 @@ var ZoteroPane = new function()
 			this.displayStartupError();
 			return false;
 		}
+		
+		_unserializePersist();
 		
 		this.updateTagSelectorSize();
 		
@@ -379,6 +383,12 @@ var ZoteroPane = new function()
 		return true;
 	}
 	
+	/**
+	 * Function to be called before ZoteroPane is hidden. Does not actually hide the Zotero pane.
+	 */
+	this.makeHidden = function() {
+		_serializePersist();
+	}
 	
 	function isShowing() {
 		var zoteroPane = document.getElementById('zotero-pane-stack');
@@ -3424,5 +3434,42 @@ var ZoteroPane = new function()
 			}
 		}
 	}
-	
+		
+	/**
+	 * Unserializes zotero-persist elements from preferences
+	 */
+	function _unserializePersist() {
+		var serializedValues = Zotero.Prefs.get("pane.persist");
+		if(!serializedValues) return;
+		serializedValues = JSON.parse(serializedValues);
+		for(var id in serializedValues) {
+			var el = document.getElementById(id);
+			if(!el) return;
+			var elValues = serializedValues[id];
+			for(var attr in elValues) {
+				el.setAttribute(attr, elValues[attr]);
+			}
+		}
+		
+		if(this.itemsView) this.itemsView.sort();
+	}
+
+	/**
+	 * Serializes zotero-persist elements to preferences
+	 */
+	function _serializePersist() {
+		var serializedValues = {};
+		for each(var el in document.getElementsByAttribute("zotero-persist", "*")) {
+			if(!el.getAttribute) continue;
+			var id = el.getAttribute("id");
+			if(!id) continue;
+			var elValues = {};
+			for each(var attr in el.getAttribute("zotero-persist").split(/[\s,]+/)) {
+				var attrValue = el.getAttribute(attr);
+				elValues[attr] = attrValue;
+			}
+			serializedValues[id] = elValues;
+		}
+		Zotero.Prefs.set("pane.persist", JSON.stringify(serializedValues));
+	}
 }
