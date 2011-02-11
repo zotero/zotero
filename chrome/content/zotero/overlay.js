@@ -212,6 +212,8 @@ var ZoteroOverlay = new function()
 			// Make sure tags splitter isn't missing for people upgrading from <2.0b7
 			document.getElementById('zotero-tags-splitter').collapsed = false;
 		} else {
+			ZoteroPane.makeHidden();
+			
 			// Collapse pane
 			zoteroPane.setAttribute('collapsed', true);
 			zoteroPane.height = 0;
