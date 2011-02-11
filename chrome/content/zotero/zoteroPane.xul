@@ -43,7 +43,7 @@
 	<script src="timelineInterface.js"/>
 	<script src="recognizePDF.js"/>
 	<script src="browser.js"/>
-	<script src="locateMenu.js"/>
+	<script src="locateMenu.js" type="application/javascript;version=1.7"/>
 	
 	<commandset id="mainCommandSet">
 		<command id="cmd_zotero_search" oncommand="ZoteroPane.search();"/>

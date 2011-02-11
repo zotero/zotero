@@ -3195,7 +3195,7 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 	if (!this.id) {
 		return [];
 	}
-	
+	 
 	var sql = "SELECT A.itemID, value AS title FROM itemAttachments A "
 		+ "NATURAL JOIN items I LEFT JOIN itemData ID "
 		+ "ON (fieldID=110 AND A.itemID=ID.itemID) "
@@ -3250,6 +3250,20 @@ Zotero.Item.prototype.getBestAttachment = function() {
 	if (!this.isRegularItem()) {
 		throw ("getBestAttachment() can only be called on regular items");
 	}
+	return this.getBestAttachments()[0];
+}
+
+/*
+ * Looks for attachment in the following order: oldest PDF attachment matching parent URL,
+ * oldest non-PDF attachment matching parent URL, oldest PDF attachment not matching URL,
+ * old non-PDF attachment not matching URL
+ *
+ * @return	{Array}		itemIDs for attachments
+ */
+Zotero.Item.prototype.getBestAttachments = function() {
+	if (!this.isRegularItem()) {
+		throw ("getBestAttachments() can only be called on regular items");
+	}
 	
 	var url = this.getField('url');
 	
@@ -3259,7 +3273,7 @@ Zotero.Item.prototype.getBestAttachment = function() {
 		+ "WHERE sourceItemID=? AND linkMode NOT IN (?) "
 		+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
 		+ "ORDER BY value=? DESC, mimeType='application/pdf' DESC, dateAdded ASC";
-	return Zotero.DB.valueQuery(sql, [this.id, Zotero.Attachments.LINK_MODE_LINKED_URL, url]);
+	return Zotero.DB.columnQuery(sql, [this.id, Zotero.Attachments.LINK_MODE_LINKED_URL, url]);
 }
 
 
