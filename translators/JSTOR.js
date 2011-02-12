@@ -1,14 +1,14 @@
 {
-        "translatorID":"d921155f-0186-1684-615c-ca57682ced9b",
-        "label":"JSTOR",
-        "creator":"Simon Kornblith, Sean Takats, Michael Berkowitz, and Eli Osherovich",
-        "target":"https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/)",
-        "minVersion":"1.0.0b4.r1",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2011-01-12 19:22:04"
+	"translatorID":"d921155f-0186-1684-615c-ca57682ced9b",
+	"label":"JSTOR",
+	"creator":"Simon Kornblith, Sean Takats, Michael Berkowitz, and Eli Osherovich",
+	"target":"https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/)",
+	"minVersion":"1.0.0b4.r1",
+	"maxVersion":"",
+	"priority":100,
+	"inRepository":"1",
+	"translatorType":4,
+	"lastUpdated":"2011-02-12 18:35:00"
 }
 
  
