@@ -450,22 +450,12 @@ treechilren::-moz-tree-twisty(active) {
 }
 */
 
-#zotero-pane:not(:-moz-window-inactive) treechildren::-moz-tree-twisty(selected) {
+tree:focus treechildren::-moz-tree-twisty(selected) {
 	-moz-appearance: none;
 	list-style-image: url("chrome://zotero/skin/mac/twisty-selected.png");
 }
 
-:root[active] treechildren::-moz-tree-twisty(selected) {
-	-moz-appearance: none;
-	list-style-image: url("chrome://zotero/skin/mac/twisty-selected.png");
-}
-
-#zotero-pane:not(:-moz-window-inactive) treechildren::-moz-tree-twisty(selected, open) {
-	-moz-appearance: none;
-	list-style-image: url("chrome://zotero/skin/mac/twisty-selected-open.png");
-}
-
-:root[active] treechildren::-moz-tree-twisty(selected, open) {
+tree:focus treechildren::-moz-tree-twisty(selected, open) {
 	-moz-appearance: none;
 	list-style-image: url("chrome://zotero/skin/mac/twisty-selected-open.png");
 }
