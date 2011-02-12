@@ -114,7 +114,8 @@ var ZoteroPane = new function()
 		}
 		_loaded = true;
 		
-		Zotero.setFontSize(document.getElementById('zotero-pane'))
+		var zp = document.getElementById('zotero-pane');
+		Zotero.setFontSize(zp)
 		
 		if (Zotero.isMac) {
 			//document.getElementById('zotero-tb-actions-zeroconf-update').setAttribute('hidden', false);
@@ -127,11 +128,7 @@ var ZoteroPane = new function()
 			// hack, since Fx 4 no longer sets active, and the reverse in polarity of the preferred
 			// property makes things painful to handle otherwise
 			// DEBUG: remove this once we only support Fx 4
-			document.documentElement.setAttribute("active", "true");
-			window.addEventListener("focus",
-				function() { document.documentElement.setAttribute("active", "true") }, false);
-			window.addEventListener("blur",
-				function() { document.documentElement.removeAttribute("active") }, false);
+			zp.setAttribute("isFx4", "true");
 		}
 		
 		//Initialize collections view
