@@ -230,6 +230,37 @@ var Zotero_LocateMenu = new function() {
 	var ViewOptions = {};
 	
 	/**
+	 * "View PDF" option
+	 *
+	 * Should appear only when the item is a PDF, or a linked or attached file or web attachment is
+	 * a PDF
+	 */
+	ViewOptions.pdf = new function() {
+		this.icon = "chrome://zotero/skin/treeitem-attachment-pdf.png";
+		this._mimeTypes = ["application/pdf"];
+		this.canHandleItem = function(item) !!_getFirstAttachmentWithMIMEType(item, this._mimeTypes);
+		
+		this.handleItems = function(items, event) {
+			for each(var item in items) {
+				var attachment = _getFirstAttachmentWithMIMEType(item, this._mimeTypes);
+				if(attachment) {
+					ZoteroPane.viewAttachment(attachment.id, event);
+					return;
+				}
+			}
+		}
+		
+		function _getFirstAttachmentWithMIMEType(item, mimeTypes) {
+			var attachments = (item.isAttachment() ? [item] : Zotero.Items.get(item.getBestAttachments()));
+			for each(var attachment in attachments) {
+				if(mimeTypes.indexOf(attachment.attachmentMIMEType) !== -1
+					&& item.linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) return attachment;
+			}
+			return false;
+		}
+	};
+	
+	/**
 	 * "View Online" option
 	 *
 	 * Should appear only when an item or an attachment has a URL
@@ -273,37 +304,6 @@ var Zotero_LocateMenu = new function() {
 				}
 			}
 			
-			return false;
-		}
-	};
-	
-	/**
-	 * "View PDF" option
-	 *
-	 * Should appear only when the item is a PDF, or a linked or attached file or web attachment is
-	 * a PDF
-	 */
-	ViewOptions.pdf = new function() {
-		this.icon = "chrome://zotero/skin/treeitem-attachment-pdf.png";
-		this._mimeTypes = ["application/pdf"];
-		this.canHandleItem = function(item) !!_getFirstAttachmentWithMIMEType(item, this._mimeTypes);
-		
-		this.handleItems = function(items, event) {
-			for each(var item in items) {
-				var attachment = _getFirstAttachmentWithMIMEType(item, this._mimeTypes);
-				if(attachment) {
-					ZoteroPane.viewAttachment(attachment.id, event);
-					return;
-				}
-			}
-		}
-		
-		function _getFirstAttachmentWithMIMEType(item, mimeTypes) {
-			var attachments = (item.isAttachment() ? [item] : Zotero.Items.get(item.getBestAttachments()));
-			for each(var attachment in attachments) {
-				if(mimeTypes.indexOf(attachment.attachmentMIMEType) !== -1
-					&& item.linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) return attachment;
-			}
 			return false;
 		}
 	};
