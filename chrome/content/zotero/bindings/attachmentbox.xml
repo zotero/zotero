@@ -187,13 +187,6 @@
 					// Metadata for URL's
 					if (this.item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL
 							|| isImportedURL) {
-						// "View Page"/"View Snapshot" label
-						if (isImportedURL) {
-							var str = Zotero.getString('pane.item.attachments.view.snapshot');
-						}
-						else {
-							var str = Zotero.getString('pane.item.attachments.view.link');
-						}
 						
 						// URL
 						if (this.displayURL) {
@@ -229,7 +222,6 @@
 					}
 					// Metadata for files
 					else {
-						var str = Zotero.getString('pane.item.attachments.view.file');
 						urlField.hidden = true;
 						accessed.hidden = true;
 					}

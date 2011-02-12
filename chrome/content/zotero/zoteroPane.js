@@ -3073,7 +3073,7 @@ var ZoteroPane = new function()
 					(!Zotero.MIME.hasInternalHandler(mimeType, ext) || Zotero.Prefs.get('launchNonNativeFiles')));
 			}
 			
-			if (!forceExternalViewer) {
+			if (!externalViewer) {
 				var url = 'zotero://attachment/' + itemID + '/';
 				this.loadURI(url, event, { attachmentID: itemID});
 			}
