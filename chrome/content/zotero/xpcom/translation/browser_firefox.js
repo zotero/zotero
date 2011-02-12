@@ -324,6 +324,9 @@ Zotero.Translate.IO.Read.prototype = {
 	},
 	
 	"_initRDF":function() {
+		// call Zotero.wait() to do UI repaints
+		Zotero.wait();
+		
 		// get URI
 		var IOService = Components.classes['@mozilla.org/network/io-service;1']
 						.getService(Components.interfaces.nsIIOService);

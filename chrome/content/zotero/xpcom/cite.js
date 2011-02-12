@@ -257,9 +257,69 @@ Zotero.Cite.getBibliographyFormatParameters = function(bib) {
 	return bibStyle;
 }
 
+/**
+ * Makes a formatted bibliography, if the style defines one; otherwise makes a formatted list of
+ * items
+ * @param {Zotero.Style} style The style to use
+ * @param {Zotero.Item[]} items An array of items
+ * @param {String} format The format of the output
+ */
+Zotero.Cite.makeFormattedBibliographyOrCitationList = function(style, items, format) {
+	var cslEngine = style.csl;
+	cslEngine.setOutputFormat(format);
+	cslEngine.updateItems([item.id for each(item in items)]);
+	
+	var bibliography = Zotero.Cite.makeFormattedBibliography(cslEngine, format);
+	if(bibliography) return bibliography;
+	
+	var styleClass = style.class;
+	var citations = [cslEngine.appendCitationCluster({"citationItems":[{"id":item.id}], "properties":{}}, true)[0][1]
+		for each(item in items)];
+	
+	if(styleClass == "note") {
+		if(format == "html") {
+			return "<ol>\n\t<li>"+citations.join("</li>\n\t<li>")+"</li>\n</ol>";
+		} else if(format == "text") {
+			var output = [];
+			for(var i=0; i<citations.length; i++) {
+				output.push((i+1)+". "+citations[i]+"\r\n");
+			}
+			return output.join("");
+		} else if(format == "rtf") {
+			var output = ["{\\rtf \n{\\*\\listtable{\\list\\listtemplateid1\\listhybrid{\\listlevel"+
+				"\\levelnfc0\\levelnfcn0\\leveljc0\\leveljcn0\\levelfollow0\\levelstartat1"+
+				"\\levelspace360\\levelindent0{\\*\\levelmarker \\{decimal\\}.}{\\leveltext"+
+				"\\leveltemplateid1\\'02\\'00.;}{\\levelnumbers\\'01;}\\fi-360\\li720\\lin720 }"+
+				"{\\listname ;}\\listid1}}\n{\\*\\listoverridetable{\\listoverride\\listid1"+
+				"\\listoverridecount0\\ls1}}\n\\tx720\\li720\\fi-480\\ls1\\ilvl0\n"];
+			for(var i=0; i<citations.length; i++) {
+				output.push("{\\listtext "+(i+1)+".	}"+citations[i]+"\\\n");
+			}
+			output.push("}");
+			return output.join("");
+		} else {
+			throw "Unimplemented bibliography format "+format;
+		}
+	} else {
+		if(format == "html") {
+			return citations.join("<br />");
+		} else if(format == "text") {
+			return citations.join("\r\n");
+		} else if(format == "rtf") {
+			return "<\\rtf \n"+citations.join("\\\n")+"\n}";
+		}
+	}
+}
+
+/**
+ * Makes a formatted bibliography
+ * @param {Zotero.Style} style The style
+ * @param {Zotero.Item[]} items An array of items
+ */
 Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 	cslEngine.setOutputFormat(format);
 	var bib = cslEngine.makeBibliography();
+	if(!bib) return false;
 	
 	if(format == "html") {
 		var html = bib[0].bibstart+bib[1].join("")+bib[0].bibend;
