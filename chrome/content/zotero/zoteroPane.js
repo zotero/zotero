@@ -114,7 +114,8 @@ var ZoteroPane = new function()
 		}
 		_loaded = true;
 		
-		Zotero.setFontSize(document.getElementById('zotero-pane'))
+		var zp = document.getElementById('zotero-pane');
+		Zotero.setFontSize(zp)
 		
 		if (Zotero.isMac) {
 			//document.getElementById('zotero-tb-actions-zeroconf-update').setAttribute('hidden', false);
@@ -127,11 +128,7 @@ var ZoteroPane = new function()
 			// hack, since Fx 4 no longer sets active, and the reverse in polarity of the preferred
 			// property makes things painful to handle otherwise
 			// DEBUG: remove this once we only support Fx 4
-			document.documentElement.setAttribute("active", "true");
-			window.addEventListener("focus",
-				function() { document.documentElement.setAttribute("active", "true") }, false);
-			window.addEventListener("blur",
-				function() { document.documentElement.removeAttribute("active") }, false);
+			zp.setAttribute("isFx4", "true");
 		}
 		
 		//Initialize collections view
@@ -311,6 +308,8 @@ var ZoteroPane = new function()
 			return;
 		}
 		
+		_serializePersist();
+		
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		tagSelector.unregister();
 		
@@ -342,6 +341,15 @@ var ZoteroPane = new function()
 		if(!Zotero || !Zotero.initialized) {
 			this.displayStartupError();
 			return false;
+		}
+		
+		_unserializePersist();
+		
+		var containerWindow = (window.ZoteroTab ? window.ZoteroTab.containerWindow : window);
+		if(containerWindow.zoteroSavedSelection) {
+			Zotero.debug("ZoteroPane: Remembering selection");
+			this.itemsView.rememberSelection(containerWindow.zoteroSavedSelection);
+			delete containerWindow.zoteroSavedSelection;
 		}
 		
 		this.updateTagSelectorSize();
@@ -379,6 +387,12 @@ var ZoteroPane = new function()
 		return true;
 	}
 	
+	/**
+	 * Function to be called before ZoteroPane is hidden. Does not actually hide the Zotero pane.
+	 */
+	this.makeHidden = function() {
+		_serializePersist();
+	}
 	
 	function isShowing() {
 		var zoteroPane = document.getElementById('zotero-pane-stack');
@@ -3029,7 +3043,7 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function viewAttachment(itemID, event, noLocateOnMissing) {
+	function viewAttachment(itemID, event, noLocateOnMissing, forceExternalViewer) {
 		var attachment = Zotero.Items.get(itemID);
 		if (!attachment.isAttachment()) {
 			throw ("Item " + itemID + " is not an attachment in ZoteroPane.viewAttachment()");
@@ -3042,22 +3056,24 @@ var ZoteroPane = new function()
 		
 		var file = attachment.getFile();
 		if (file) {
-			var mimeType = attachment.getAttachmentMIMEType();
-			// If no MIME type specified, try to detect again (I guess in case
-			// we've gotten smarter since the file was imported?)
-			if (!mimeType) {
-				var mimeType = Zotero.MIME.getMIMETypeFromFile(file);
+			if(forceExternalViewer !== undefined) {
+				var externalViewer = forceExternalViewer;
+			} else {
+				var mimeType = attachment.getAttachmentMIMEType();
+				// If no MIME type specified, try to detect again (I guess in case
+				// we've gotten smarter since the file was imported?)
+				if (!mimeType) {
+					mimeType = Zotero.MIME.getMIMETypeFromFile(file);
+					
+					// TODO: update DB with new info
+				}
+				
 				var ext = Zotero.File.getExtension(file);
-				
-				// TODO: update DB with new info
+				var externalViewer = Zotero.isStandalone || (!Zotero.MIME.hasNativeHandler(mimeType, ext) &&
+					(!Zotero.MIME.hasInternalHandler(mimeType, ext) || Zotero.Prefs.get('launchNonNativeFiles')));
 			}
-			var ext = Zotero.File.getExtension(file);
-			var isNative = Zotero.MIME.hasNativeHandler(mimeType, ext);
-			var internal = Zotero.MIME.hasInternalHandler(mimeType, ext);
 			
-			if (isNative ||
-					(internal && !Zotero.Prefs.get('launchNonNativeFiles'))) {
-				
+			if (!forceExternalViewer) {
 				var url = 'zotero://attachment/' + itemID + '/';
 				this.loadURI(url, event, { attachmentID: itemID});
 			}
@@ -3422,5 +3438,47 @@ var ZoteroPane = new function()
 			}
 		}
 	}
-	
+		
+	/**
+	 * Unserializes zotero-persist elements from preferences
+	 */
+	function _unserializePersist() {
+		var serializedValues = Zotero.Prefs.get("pane.persist");
+		if(!serializedValues) return;
+		serializedValues = JSON.parse(serializedValues);
+		for(var id in serializedValues) {
+			var el = document.getElementById(id);
+			if(!el) return;
+			var elValues = serializedValues[id];
+			for(var attr in elValues) {
+				el.setAttribute(attr, elValues[attr]);
+			}
+		}
+		
+		if(this.itemsView) {
+			// may not yet be initialized
+			try {
+				this.itemsView.sort();
+			} catch(e) {};
+		}
+	}
+
+	/**
+	 * Serializes zotero-persist elements to preferences
+	 */
+	function _serializePersist() {
+		var serializedValues = {};
+		for each(var el in document.getElementsByAttribute("zotero-persist", "*")) {
+			if(!el.getAttribute) continue;
+			var id = el.getAttribute("id");
+			if(!id) continue;
+			var elValues = {};
+			for each(var attr in el.getAttribute("zotero-persist").split(/[\s,]+/)) {
+				var attrValue = el.getAttribute(attr);
+				elValues[attr] = attrValue;
+			}
+			serializedValues[id] = elValues;
+		}
+		Zotero.Prefs.set("pane.persist", JSON.stringify(serializedValues));
+	}
 }

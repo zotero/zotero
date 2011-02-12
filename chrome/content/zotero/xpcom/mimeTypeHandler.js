@@ -94,7 +94,45 @@ Zotero.MIMETypeHandler = new function () {
 	 * @param {String} string The Refer/RIS formatted records
 	 * @param {String} uri The URI from which the Refer/RIS formatted records were downloaded
 	 */
-	function _importHandler(string, uri) {
+	function _importHandler(string, uri, contentType, channel) {
+		var win = channel.notificationCallbacks.getInterface(Components.interfaces.nsIDOMWindow).top;
+		if(!win) throw "Attempt to import from a channel without an attached document refused";
+		
+		var hostPort = channel.URI.hostPort.replace(";", "_", "g");
+		
+		var allowedSitesString = Zotero.Prefs.get("ingester.allowedSites");
+		allowedSites = allowedSitesString.split(";");
+		
+		if(allowedSites.indexOf(hostPort) === -1) {
+			var title = Zotero.getString("ingester.importReferRISDialog.title");
+			var text = Zotero.getString("ingester.importReferRISDialog.text", channel.URI.hostPort)+"\n\n";
+			var checkMsg = Zotero.getString("ingester.importReferRISDialog.checkMsg");
+			var checkValue = {"value":false};
+			
+			// make tab-modal dialog (https://developer.mozilla.org/en/Using_tab-modal_prompts)
+			if(Zotero.isFx4) {
+				var prompt = Components.classes["@mozilla.org/prompter;1"]
+					 .getService(Components.interfaces.nsIPromptFactory)
+					 .getPrompt(win, Components.interfaces.nsIPrompt);
+				
+				var bag = prompt.QueryInterface(Components.interfaces.nsIWritablePropertyBag2);
+				bag.setPropertyAsBool("allowTabModal", true);
+			
+				var continueDownload = prompt.confirmCheck(title, text, checkMsg, checkValue);
+			} else {
+				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+						.getService(Components.interfaces.nsIPromptService);
+			
+				var continueDownload = ps.confirmCheck(win, title, text, checkMsg, checkValue);
+			}
+			
+			if(!continueDownload) return;
+			if(checkValue.value) {
+				// add to allowed sites if desired
+				Zotero.Prefs.set("ingester.allowedSites", allowedSitesString+";"+hostPort);
+			}
+		}
+		
 		var frontWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
 			getService(Components.interfaces.nsIWindowWatcher).activeWindow;
 		
@@ -280,7 +318,7 @@ Zotero.MIMETypeHandler = new function () {
 		
 		try {
 			_typeHandlers[this._contentType](readString, (this._request.name ? this._request.name : null),
-				this._contentType);
+				this._contentType, channel);
 		} catch(e) {
 			// if there was an error, handle using nsIExternalHelperAppService
 			var externalHelperAppService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"].

@@ -463,6 +463,10 @@ Zotero.Translate.ItemSaver.prototype = {
 			newItem.save();
 		}
 		
+		// if all tags are automatic and automatic tags pref is on, return immediately
+		var tagPref = Zotero.Prefs.get("automaticTags");
+		if(this._forceTagType == 1 && !tagPref) return;
+		
 		// add tags
 		if(item.tags) {
 			var tagsToAdd = {};
@@ -486,6 +490,8 @@ Zotero.Translate.ItemSaver.prototype = {
 						if(this._forceTagType) {
 							var tagType = this._forceTagType;
 						} else if(tag.type) { 
+							// skip automatic tags during import too (?)
+							if(tag.type == 1 && !tagPref) continue;
 							var tagType = tag.type;
 						} else {
 							var tagType = 0;

@@ -204,14 +204,11 @@ var ZoteroOverlay = new function()
 			// Make visible
 			ZoteroPane.makeVisible();
 			
-			// Restore fullscreen mode if necessary
-			if (ZoteroPane.isFullScreen()) {
-				this.fullScreen(true);
-			}
-						
 			// Make sure tags splitter isn't missing for people upgrading from <2.0b7
 			document.getElementById('zotero-tags-splitter').collapsed = false;
 		} else {
+			ZoteroPane.makeHidden();
+			
 			// Collapse pane
 			zoteroPane.setAttribute('collapsed', true);
 			zoteroPane.height = 0;
@@ -305,6 +302,7 @@ var ZoteroOverlay = new function()
 	 */
 	this.toggleTab = function(setMode) {
 		var tab = this.findZoteroTab();
+		window.zoteroSavedSelection = ZoteroPane.itemsView.saveSelection();
 		if(tab) {		// Zotero is running in a tab
 			if(setMode) return;
 			// don't do anything if Zotero tab is the only tab

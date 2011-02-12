@@ -182,7 +182,7 @@
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-selected-inactive.png") 0 4 0 5 repeat stretch;
 }
 
-/* Since Fx4 doesn't recognize the -moz-window-inactive pseudoclass as valid, these have to be separate (duplicate) rules to be parsed */
+/* Since Fx < 4 doesn't recognize the -moz-window-inactive pseudoclass as valid, these have to be separate (duplicate) rules to be parsed */
 :root:not([active]) #zotero-pane:not([isFx4]) > #zotero-item-pane > #zotero-item-pane-content > #zotero-view-tabbox > tabs > * {
   color: #7C7C7C !important;
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-inactive.png") 0 4 0 5 repeat stretch;
@@ -222,26 +222,33 @@
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-selected-down.png") 0 4 0 6 repeat stretch;
 }
 
-:root:not([active]) #zotero-view-tabbox > tabs > :first-child,
-:root:not([active]) #zotero-view-tabbox > tabs > [first-visible],
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > :last-child,
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
+#zotero-view-tabbox:-moz-window-inactive > tabs > :first-child,
+#zotero-view-tabbox:-moz-window-inactive > tabs > [first-visible],
+#zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > :last-child,
+#zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > [last-visible] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-inactive.png") 0 4 0 6 repeat stretch;
 }
 
 /* Since Fx4 doesn't recognize the -moz-window-inactive pseudoclass as valid, these have to be separate (duplicate) rules to be parsed */
 
-:root:not([active]) #zotero-view-tabbox > tabs > :first-child,
-:root:not([active]) #zotero-view-tabbox > tabs > [first-visible],
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > :last-child,
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > :first-child,
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > [first-visible],
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > :last-child,
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-inactive.png") 0 4 0 6 repeat stretch;
 }  
 
-:root:not([active]) #zotero-view-tabbox > tabs > tab:first-child[selected=true],
-:root:not([active]) #zotero-view-tabbox > tabs > tab[first-visible][selected=true],
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true],
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true] {
+#zotero-view-tabbox:-moz-window-inactive > tabs > tab:first-child[selected=true],
+#zotero-view-tabbox:-moz-window-inactive > tabs > tab[first-visible][selected=true],
+#zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > tab:last-child[selected=true],
+#zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > tab[last-visible][selected=true] {
+  -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-selected-inactive.png") 0 4 0 6 repeat stretch;
+}
+
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > tab:first-child[selected=true],
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > tab[first-visible][selected=true],
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true],
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-selected-inactive.png") 0 4 0 6 repeat stretch;
 }
 
@@ -274,17 +281,30 @@
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-selected-down.png") 0 6 0 5 repeat stretch;
 }
 
-:root:not([active]) #zotero-view-tabbox > tabs > :last-child,
-:root:not([active]) #zotero-view-tabbox > tabs > [last-visible],
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > :first-child,
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible] {
+#zotero-view-tabbox:-moz-window-inactive > tabs > :last-child,
+#zotero-view-tabbox:-moz-window-inactive > tabs > [last-visible],
+#zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > :first-child,
+#zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > [first-visible] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-inactive.png") 0 6 0 5 repeat stretch;
 }
 
-:root:not([active]) #zotero-view-tabbox > tabs > tab:last-child[selected=true],
-:root:not([active]) #zotero-view-tabbox > tabs > tab[last-visible][selected=true],
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true],
-:root:not([active]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true] {
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > :last-child,
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > [last-visible],
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > :first-child,
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible] {
+  -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-inactive.png") 0 6 0 5 repeat stretch;
+}
+
+#zotero-view-tabbox:-moz-window-inactive > tabs > tab:last-child[selected=true],
+#zotero-view-tabbox:-moz-window-inactive > tabs > tab[last-visible][selected=true],
+#zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > tab:first-child[selected=true],
+#zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > tab[first-visible][selected=true] {
+  -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-selected-inactive.png") 0 6 0 5 repeat stretch;
+}
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > tab:last-child[selected=true],
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > tab[last-visible][selected=true],
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true],
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-selected-inactive.png") 0 6 0 5 repeat stretch;
 }
 
@@ -297,7 +317,11 @@
 	background-color: #d2d8e2;
 }
 
-:root:not([active="true"]) #zotero-collections-tree {
+#zotero-collections-tree:-moz-window-inactive {
+	background-color: rgb(232, 232, 232);
+}
+
+:root:not([active]) #zotero-pane:not([isFx4]) #zotero-collections-tree {
 	background-color: rgb(232, 232, 232);
 }
 
@@ -426,9 +450,19 @@ treechilren::-moz-tree-twisty(active) {
 }
 */
 
+#zotero-pane:not(:-moz-window-inactive) treechildren::-moz-tree-twisty(selected) {
+	-moz-appearance: none;
+	list-style-image: url("chrome://zotero/skin/mac/twisty-selected.png");
+}
+
 :root[active] treechildren::-moz-tree-twisty(selected) {
 	-moz-appearance: none;
 	list-style-image: url("chrome://zotero/skin/mac/twisty-selected.png");
+}
+
+#zotero-pane:not(:-moz-window-inactive) treechildren::-moz-tree-twisty(selected, open) {
+	-moz-appearance: none;
+	list-style-image: url("chrome://zotero/skin/mac/twisty-selected-open.png");
 }
 
 :root[active] treechildren::-moz-tree-twisty(selected, open) {
