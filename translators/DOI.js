@@ -16,7 +16,14 @@ var selectArray = {};
 
 // builds a list of DOIs
 function getDOIs(doc) {
-	const DOIre = /\b(10\.[\w.]+\/[^\s]+)\.?\b/igm;
+	// TODO Detect DOIs more correctly.
+	// The actual rules for DOIs are very lax-- but we're more strict.
+	// Specifically, we should allow space characters, and all Unicode
+	// characters except for control characters. Here, we're cheating
+	// by not allowing ampersands, to fix an issue with getting DOIs
+	// out of URLs.
+	// Description at: http://www.doi.org/handbook_2000/appendix_1.html#A1-4
+	const DOIre = /\b(10\.[\w.]+\/[^\s&]+)\.?\b/igm;
 	const DOIXPath = "//text()[contains(., '10.')]";
 	
 	DOIre.lastMatch = 0;
