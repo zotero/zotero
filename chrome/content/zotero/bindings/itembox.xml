@@ -706,12 +706,12 @@
 					label.setAttribute("fieldname", field);
 					label.setAttribute("onclick", "this.nextSibling.firstChild.blur()");
 					
-					var hbox = document.createElement("hbox");
 					var elem = this.createValueElement(
 						Zotero.Date.multipartToStr(value),
 						field,
 						tabindex
 					);
+					elem.setAttribute('flex', 1);
 					
 					// y-m-d status indicator
 					var datebox = document.createElement('hbox');
@@ -735,6 +735,7 @@
 					
 					var hbox = document.createElement('hbox');
 					hbox.setAttribute('flex', 1);
+					hbox.className = "date-box";
 					hbox.appendChild(elem);
 					hbox.appendChild(datebox);
 					
