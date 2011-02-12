@@ -397,11 +397,10 @@ var Zotero_File_Interface = new function() {
 						   createInstance(Components.interfaces.nsITransferable);
 		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
 							   getService(Components.interfaces.nsIClipboard);
-		var style = Zotero.Styles.get(style).csl;
-		style.updateItems([item.id for each(item in items)]);
+		var style = Zotero.Styles.get(style);
 		
 		// add HTML
-		var bibliography = Zotero.Cite.makeFormattedBibliography(style, "html");
+		var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, "html");
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = bibliography;
@@ -410,7 +409,7 @@ var Zotero_File_Interface = new function() {
 		
 		// add text (or HTML source)
 		if(!asHTML) {
-			var bibliography = Zotero.Cite.makeFormattedBibliography(style, "text");
+			var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, "text");
 		}
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
@@ -496,9 +495,8 @@ var Zotero_File_Interface = new function() {
 				return;
 			}
 			else {
-				var style = Zotero.Styles.get(io.style).csl;
-				style.updateItems([item.id for each(item in items)]);
-				var bibliography = Zotero.Cite.makeFormattedBibliography(style, format);
+				var style = Zotero.Styles.get(io.style);
+				var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, format);
 			}
 		} catch(e) {
 			window.alert(Zotero.getString("fileInterface.bibliographyGenerationError"));
