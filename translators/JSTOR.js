@@ -19,10 +19,14 @@ function detectWeb(doc, url) {
 	} : null;
 	
 	// See if this is a seach results page or Issue content
-	if (doc.title == "JSTOR: Search Results" || url.match(/\/i\d+/)) {
-	return "multiple";
+	if (doc.title == "JSTOR: Search Results" || url.match(/\/i\d+/) ||
+		(url.match(/stable|pss/) // Issues with DOIs can't be identified by URL
+		 && doc.evaluate('//form[@id="toc"]', doc, nsResolver,
+			XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue)
+	   ) {
+		return "multiple";
 	} else if(url.indexOf("/search/") != -1) {
-	return false;
+		return false;
 	}
 	
 	// If this is a view page, find the link to the citation
@@ -77,13 +81,18 @@ function doWeb(doc, url) {
 	Zotero.debug("JID found 1 " + jid);
 	}
 	// Sometimes JSTOR uses DOIs as JID; here we exclude "?" characters, since it's a URL
-	else if (/(?:pss|stable)\/(10\.\d+\/.+)(?:\?.*)/.test(url)) {
+	// And exclude TOC for journal issues that have their own DOI
+	else if (/(?:pss|stable)\/(10\.\d+\/.+)(?:\?.*)?/.test(url)
+		 && !doc.evaluate('//form[@id="toc"]', doc, nsResolver,
+			XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue) {
 	Zotero.debug("URL " + url);
 	jid = RegExp.$1;
 	allJids.push(jid);
 	Zotero.debug("JID found 2 " + jid);
 	} 
-	else if (/(?:pss|stable)\/(\d+)/.test(url)) {
+	else if (/(?:pss|stable)\/(\d+)/.test(url)
+		 && !doc.evaluate('//form[@id="toc"]', doc, nsResolver,
+			XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue) {
 	Zotero.debug("URL " + url);
 	jid = RegExp.$1;
 	allJids.push(jid);
@@ -101,9 +110,13 @@ function doWeb(doc, url) {
 	var availableItems = new Object();
 	while (currTitleElmt = allTitlesElmts.iterateNext()) {
 		var title = currTitleElmt.textContent;
-		var jid = currTitleElmt.href.match(/stable\/([a-z]*?\d+)/)[1];
+		// Sometimes JSTOR uses DOIs as JID; here we exclude "?" characters, since it's a URL
+		if (/(?:pss|stable)\/(10\.\d+\/.+)(?:\?.*)?/.test(currTitleElmt.href))
+			var jid = RegExp.$1;
+		else
+			var jid = currTitleElmt.href.match(/(?:stable|pss)\/([a-z]*?\d+)/)[1];
 		if (jid) {
-		availableItems[jid] = title;
+			availableItems[jid] = title;
 		}
 		Zotero.debug("Found title " + title+jid);
 	}
