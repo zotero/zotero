@@ -29,76 +29,81 @@
 var ZoteroTab = new function()
 {
 	this.onLoad = function() {
+		var me = this;
+		
 		// find window this tab is loaded in
-		var windowMediator = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-									   .getService(Components.interfaces.nsIWindowMediator);
-		var enumerator = windowMediator.getXULWindowEnumerator("navigator:browser");
-		while(enumerator.hasMoreElements()) {
-			var xulwin = enumerator.getNext().QueryInterface(Components.interfaces.nsIXULWindow);
-			var window = xulwin.docShell.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-					.getInterface(Components.interfaces.nsIDOMWindow);
-			var browserIndex = window.gBrowser.getBrowserIndexForDocument(document);
-			if(browserIndex !== -1) break;
-		}
+		this.containerWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+		   .getInterface(Components.interfaces.nsIWebNavigation)
+		   .QueryInterface(Components.interfaces.nsIDocShell)
+		   .chromeEventHandler.ownerDocument.defaultView;
+		if(!this.containerWindow) return;
 		
-		if(browserIndex === -1) return;
+		var tabs = (this.containerWindow.gBrowser.tabs
+					? this.containerWindow.gBrowser.tabs : this.containerWindow.gBrowser.mTabs);
 		
-		this.containerWindow = window;
-		this.containerBrowser = window.gBrowser.browsers[browserIndex];
-		
-		// if we somehow ended up with other Zotero tabs in the window, close them
-		var numTabs = window.gBrowser.browsers.length;
-		for(var index = 0; index < numTabs; index++) {
-			if(index === browserIndex) continue;
+		// loop over all browsers in this window
+		var containerTab, containerBrowser;
+		for(var i=0; i<this.containerWindow.gBrowser.browsers.length; i++) {
+			var currentBrowser = this.containerWindow.gBrowser.browsers[i];
+			if(currentBrowser.contentWindow == window) {
+				// find containerBrowser and containerTab
+				this.containerBrowser = currentBrowser;
+				this.containerTab = tabs[i];
+				continue;
+			}
 			
-			var currentBrowser = window.gBrowser.browsers[index];
+			// if we somehow ended up with other Zotero tabs in the window, close them
 			if(currentBrowser && ZOTERO_TAB_URL == currentBrowser.currentURI.spec) {
-				window.gBrowser.removeTab((window.gBrowser.tabs ? window.gBrowser.tabs : window.gBrowser.mTabs)[index]);
+				this.containerWindow.gBrowser.removeTab(tabs[i]);
 			}
 		}
 		
 		// initialize ZoteroPane and swap out old window ZoteroPane object
-		if(window.ZoteroPane) {
-			window.ZoteroPane_Overlay = window.ZoteroPane;
-			window.ZoteroPane_Tab = ZoteroPane;
-			window.ZoteroPane = ZoteroPane;
+		if(this.containerWindow.ZoteroPane) {
+			this._swapZoteroPane();
 		} else {
-			window.addEventListener("load", function() {
-				window.ZoteroPane_Overlay = window.ZoteroPane;
-				window.ZoteroPane_Tab = ZoteroPane;
-				window.ZoteroPane = ZoteroPane;
-			}, false);
+			this.containerWindow.addEventListener("load", function() { this._swapZoteroPane() }, false);
 		}
 		
 		// get tab for browser
-		var tab = (window.gBrowser.tabs ? window.gBrowser.tabs : window.gBrowser.mTabs)[browserIndex];
-		if(window.gBrowser.selectedTab === tab) {
+		if(this.containerWindow.gBrowser.selectedTab === this.containerTab) {
 			// if tab is already selected, init now
 			ZoteroPane.init();
 			ZoteroPane.makeVisible();
 		} else {
 			// otherwise, add a handler to wait until this tab is selected
 			var listener = function(event) {
-				if(event.target !== tab) return;
-				window.gBrowser.tabContainer.removeEventListener("TabSelect", listener, false);
+				if(event.target !== me.containerTab) return;
+				me.containerWindow.gBrowser.tabContainer.removeEventListener("TabSelect", listener, false);
 				ZoteroPane.init();
 				ZoteroPane.makeVisible();
 			}
-			window.gBrowser.tabContainer.addEventListener("TabSelect", listener, false);
+			this.containerWindow.gBrowser.tabContainer.addEventListener("TabSelect", listener, false);
 		}
 		
 		if(Zotero && Zotero.isFx4) {
 			// on Fx 4, add an event listener so the pinned tab isn't restored on close
 			var pinnedTabCloser = function() {
 				try {
-					window.gBrowser.removeTab(tab);
+					me.containerWindow.gBrowser.removeTab(me.containerTab);
 				} catch(e) {}
 			}
 			var observerService = Components.classes["@mozilla.org/observer-service;1"]
 				.getService(Components.interfaces.nsIObserverService);
 			observerService.addObserver(pinnedTabCloser, "quit-application-requested", false);
-			window.addEventListener("close", pinnedTabCloser, false);
+			this.containerWindow.addEventListener("close", pinnedTabCloser, false);
 		}
+	}
+	
+	this._swapZoteroPane = function() {
+		if(!this.containerWindow.ZoteroOverlay.isTab) {
+			window.close();
+			return;
+		}
+		
+		this.containerWindow.ZoteroPane_Overlay = this.containerWindow.ZoteroPane;
+		this.containerWindow.ZoteroPane_Tab = ZoteroPane;
+		this.containerWindow.ZoteroPane = ZoteroPane;
 	}
 	
 	this.onUnload = function() {
