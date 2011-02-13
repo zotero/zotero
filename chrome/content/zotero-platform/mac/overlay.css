@@ -38,14 +38,14 @@
 }
 
 .zotero-tb-button > .toolbarbutton-icon {
-  -moz-binding: url('chrome://zotero-platform/content/zoterotbbutton.xml#zotero-tb-button');
+  /*-moz-binding: url('chrome://zotero-platform/content/zoterotbbutton.xml#zotero-tb-button');*/
   background: url("chrome://zotero/skin/mac/menubutton-start.png") left center no-repeat;
-  -moz-padding-start: 10px;
-  padding-bottom: 2px;
+  padding: 5px 1px 5px 11px;
 }
 
 #zotero-tb-sync > .toolbarbutton-icon {
   -moz-padding-start: 8px;
+  padding-top: 1px;
 }
 
 #zotero-tb-sync-warning[error=true]
@@ -82,6 +82,7 @@
 
 #zotero-tb-sync > .toolbarbutton-icon {
 	-moz-binding: none !important;
+	padding: 2px 0px 2px 8px !important;
 }
 
 #zotero-close-button {
@@ -450,4 +451,19 @@ tree:focus treechildren::-moz-tree-twisty(selected, open) {
 treechildren::-moz-tree-image {
 	height: 16px;
 	padding-bottom: 1px;
+}
+
+#zotero-tb-advanced-search
+{
+	list-style-image: url('chrome://zotero/skin/mac/toolbar-advanced-search.png');
+}
+
+#zotero-tb-note-add
+{
+	list-style-image: url('chrome://zotero/skin/mac/toolbar-note-add.png');
+}
+
+#zotero-tb-actions-menu
+{
+	list-style-image: url('chrome://zotero/skin/mac/cog.png');
 }
