@@ -183,12 +183,12 @@
 }
 
 /* Since Fx < 4 doesn't recognize the -moz-window-inactive pseudoclass as valid, these have to be separate (duplicate) rules to be parsed */
-:root:not([active]) #zotero-pane:not([isFx4]) > #zotero-item-pane > #zotero-item-pane-content > #zotero-view-tabbox > tabs > * {
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) > #zotero-item-pane > #zotero-item-pane-content > #zotero-view-tabbox > tabs > * {
   color: #7C7C7C !important;
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-inactive.png") 0 4 0 5 repeat stretch;
 }
 
-:root:not([active]) #zotero-pane:not([isFx4]) > #zotero-item-pane > #zotero-item-pane-content > #zotero-view-tabbox > tabs > tab[selected=true] {
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) > #zotero-item-pane > #zotero-item-pane-content > #zotero-view-tabbox > tabs > tab[selected=true] {
   color: #C5C5C5 !important;
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-selected-inactive.png") 0 4 0 5 repeat stretch;
 }
@@ -231,10 +231,10 @@
 
 /* Since Fx4 doesn't recognize the -moz-window-inactive pseudoclass as valid, these have to be separate (duplicate) rules to be parsed */
 
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > :first-child,
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > [first-visible],
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > :last-child,
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > :first-child,
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > [first-visible],
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > :last-child,
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-inactive.png") 0 4 0 6 repeat stretch;
 }  
 
@@ -245,10 +245,10 @@
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-selected-inactive.png") 0 4 0 6 repeat stretch;
 }
 
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > tab:first-child[selected=true],
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > tab[first-visible][selected=true],
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true],
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true] {
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab:first-child[selected=true],
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab[first-visible][selected=true],
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true],
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-selected-inactive.png") 0 4 0 6 repeat stretch;
 }
 
@@ -288,10 +288,10 @@
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-inactive.png") 0 6 0 5 repeat stretch;
 }
 
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > :last-child,
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > [last-visible],
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > :first-child,
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible] {
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > :last-child,
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > [last-visible],
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > :first-child,
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-inactive.png") 0 6 0 5 repeat stretch;
 }
 
@@ -301,10 +301,10 @@
 #zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > tab[first-visible][selected=true] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-selected-inactive.png") 0 6 0 5 repeat stretch;
 }
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > tab:last-child[selected=true],
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs > tab[last-visible][selected=true],
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true],
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true] {
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab:last-child[selected=true],
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab[last-visible][selected=true],
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true],
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-selected-inactive.png") 0 6 0 5 repeat stretch;
 }
 
@@ -321,7 +321,7 @@
 	background-color: rgb(232, 232, 232);
 }
 
-:root:not([active]) #zotero-pane:not([isFx4]) #zotero-collections-tree {
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-collections-tree {
 	background-color: rgb(232, 232, 232);
 }
 
