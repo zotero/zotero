@@ -1,10 +1,15 @@
 #title
 {
-	font-size: 11px;
 	font-weight: bold;
-	padding: .3em .25em 0;
+	margin: 4px 5px 1px 5px !important;
+	padding: 0 2px 0 2px;
 	/* Don't collapse blank attachment titles, since it prevents renaming */
-	min-height: 1.25em;
+}
+
+#url
+{
+	margin: 1px 5px 2px 5px !important;
+	padding: 0 2px 0 2px !important;
 }
 
 #index-box
