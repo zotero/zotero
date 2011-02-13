@@ -102,16 +102,7 @@
 			<property name="parent" onget="return this._parent;">
 				<setter>
 					<![CDATA[
-						this._parent = val;
-						
-						var citeLabel = this._id('citeLabel');
-						if (citeLabel.firstChild) {
-							citeLabel.removeChild(citeLabel.firstChild);
-						}
-						
-						if (this.parent && !this.getAttribute('notitle') == '1') {
-							citeLabel.appendChild(document.createTextNode(this.parent.getDisplayTitle(true)));
-						}
+						this._parent = this._id('links').parent = val;
 					]]>
 				</setter>
 			</property>
@@ -137,10 +128,14 @@
 			<property name="linksOnTop">
 				<setter>
 					<![CDATA[
-						var links = this._id('linksbox');
-						var parent = links.parentNode;
-						parent.removeChild(links);
-						parent.insertBefore(links, this._id(val ? 'citeLabel' : 'goButton'));
+						if(val) {
+							var links = this._id('linksbox');
+							var parent = links.parentNode;
+							var sib = links.nextSibling;
+							while(parent.firstChild !== links) {
+								parent.insertBefore(parent.removeChild(parent.firstChild), sib);
+							}
+						}
 					]]>
 				</setter>
 			</property>
@@ -160,7 +155,6 @@
 				<![CDATA[
 					Zotero.debug('Refreshing note editor');
 					
-					var parentbox = this._id('citeLabel');
 					var textbox = this._id('noteField');
 					var textboxReadOnly = this._id('noteFieldReadOnly');
 					var button = this._id('goButton');
@@ -185,14 +179,6 @@
 					//textbox.inputField.scrollTop = scrollPos;
 					
 					this._id('linksbox').hidden = !(this.displayTags && this.displayRelated);
-					
-					if (this.parentClickHandler) {
-						parentbox.setAttribute('onclick',
-							'document.getBindingParent(this).parentClickHandler()');
-					}
-					else {
-						parentbox.removeAttribute('onclick');
-					}
 					
 					if (this.keyDownHandler) {
 						textbox.setAttribute('onkeydown',
@@ -305,43 +291,6 @@
 				</body>
 			</method>
 			
-			<method name="selectParent">
-				<body>
-				<![CDATA[
-					if (!this.item || !this.item.id) {
-						return;
-					}
-					
-					if (document.getElementById('zotero-pane')) {
-						var zp = ZoteroPane;
-					}
-					else {
-						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-									   .getService(Components.interfaces.nsIWindowMediator);
-						
-						var lastWin = wm.getMostRecentWindow("navigator:browser");
-						
-						if (!lastWin) {
-							window.open();
-							var newWindow = wm.getMostRecentWindow("navigator:browser");
-							var b = newWindow.getBrowser();
-							return;
-						}
-						
-						if (lastWin.ZoteroOverlay) {
-							lastWin.ZoteroOverlay.toggleDisplay(true);
-						}
-						
-						var zp = lastWin.ZoteroPane;
-					}
-					
-					var parentID = this.item.getSource();
-					zp.clearQuicksearch();
-					zp.selectItem(parentID);
-				]]>
-				</body>
-			</method>
-			
 			<method name="disableUndo">
 				<body>
 				<![CDATA[
@@ -379,13 +328,12 @@
 		
 		<content>
 			<xul:vbox xbl:inherits="flex">
-				<xul:label id="citeLabel" hidden="true"/>
 				<xul:textbox id="noteField" type="styled" mode="note"
 					timeout="1000" flex="1" hidden="true"/>
 				<xul:textbox id="noteFieldReadOnly" type="styled" mode="note"
 					readonly="true" flex="1" hidden="true"/>
 				<xul:hbox id="linksbox" hidden="true">
-					<xul:linksbox id="links" flex="1"/>
+					<xul:linksbox id="links" flex="1" xbl:inherits="notitle"/>
 				</xul:hbox>
 				<xul:button id="goButton" hidden="true"/>
 			</xul:vbox>
@@ -394,7 +342,7 @@
 	
 	
 	<binding id="links-box">
-		<implementation>
+		<implementation> 
 			<field name="itemRef"/>
 			<property name="item" onget="return this.itemRef;">
 				<setter>
@@ -416,19 +364,32 @@
 				]]>
 				</setter>
 			</property>
+			<field name="_parent"/>
+			<property name="parent" onget="return this._parent;">
+				<setter>
+				<![CDATA[
+					this._parent = val;
+					
+					var parentText = this.id('parentText');
+					if (parentText.firstChild) {
+						parentText.removeChild(parentText.firstChild);
+					}
+					
+					if (this._parent && this.getAttribute('notitle') != '1') {
+						this.id('parent-row').hidden = undefined;
+						this.id('parentLabel').value = Zotero.getString('pane.item.parentItem');
+						parentText.appendChild(document.createTextNode(this._parent.getDisplayTitle(true)));
+					}
+				]]>
+				</setter>
+			</property>
 			<method name="tagsClick">
 				<body>
 					<![CDATA[
 						this.id('tags').reload();
-						if (this.id('tagsPopup').openPopupAtScreen) {
-							var x = this.boxObject.screenX;
-							var y = this.boxObject.screenY;
-							this.id('tagsPopup').openPopupAtScreen(x, y, false);
-						}
-						// Deprecated method for Firefox 2
-						else {
-							this.id('tagsPopup').showPopup(this.id('tagsLabel'), -1, -1, 'popup');
-						}
+						var x = this.boxObject.screenX;
+						var y = this.boxObject.screenY;
+						this.id('tagsPopup').openPopupAtScreen(x, y, false);
 					]]>
 				</body>
 			</method>
@@ -452,15 +413,9 @@
 					<![CDATA[
 						var relatedList = this.item.relatedItemsBidirectional;
 						if (relatedList.length > 0) {
-							if (this.id('seeAlsoPopup').openPopupAtScreen) {
-								var x = this.boxObject.screenX;
-								var y = this.boxObject.screenY;
-								this.id('seeAlsoPopup').openPopupAtScreen(x, y, false);
-							}
-							// Deprecated method for Firefox 2
-							else {
-								this.id('seeAlsoPopup').showPopup(this.id('seeAlsoLabel'), -1, -1, 'popup');
-							}
+							var x = this.boxObject.screenX;
+							var y = this.boxObject.screenY;
+							this.id('seeAlsoPopup').openPopupAtScreen(x, y, false);
 						}
 						else {
 							this.id('seeAlso').add();
@@ -482,6 +437,39 @@
 					]]>
 				</body>
 			</method>
+			<method name="parentClick">
+				<body>
+				<![CDATA[
+					if (!this.item || !this.item.id) {
+						return;
+					}
+					
+					if (document.getElementById('zotero-pane')) {
+						var zp = ZoteroPane;
+					}
+					else {
+						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+									   .getService(Components.interfaces.nsIWindowMediator);
+						
+						var lastWin = wm.getMostRecentWindow("navigator:browser");
+						
+						if (!lastWin) {
+							var lastWin = window.open();
+						}
+						
+						if (lastWin.ZoteroOverlay && !lastWin.ZoteroPane.isShowing()) {
+							lastWin.ZoteroOverlay.toggleDisplay(true);
+						}
+						
+						var zp = lastWin.ZoteroPane;
+					}
+					
+					var parentID = this.item.getSource();
+					zp.clearQuicksearch();
+					zp.selectItem(parentID);
+				]]>
+				</body>
+			</method>
 			<method name="id">
 				<parameter name="id"/>
 				<body>
@@ -499,6 +487,10 @@
 						<xul:column flex="1"/>
 					</xul:columns>
 					<xul:rows>
+						<xul:row id="parent-row" hidden="true">
+							<xul:label id="parentLabel"/>
+							<xul:label id="parentText" class="zotero-clicky" crop="end" onclick="document.getBindingParent(this).parentClick();"/>
+						</xul:row>
 						<xul:row>
 							<xul:label id="seeAlsoLabel"/>
 							<xul:label id="seeAlsoClick" class="zotero-clicky" crop="end" onclick="document.getBindingParent(this).seeAlsoClick();"/>

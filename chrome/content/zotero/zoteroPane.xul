@@ -421,7 +421,7 @@
 						</tabbox>
 						<!-- Note info pane -->
 						<groupbox id="zotero-view-note" flex="1">
-							<zoteronoteeditor id="zotero-note-editor" flex="1"/>
+							<zoteronoteeditor id="zotero-note-editor" flex="1" notitle="1"/>
 							<button id="zotero-view-note-button" label="&zotero.notes.separate;" oncommand="ZoteroPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ZoteroPane.selectItem(this.getAttribute('sourceID'));"/>
 						</groupbox>
 						<!-- Attachment info pane -->
