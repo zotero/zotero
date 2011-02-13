@@ -67,11 +67,11 @@ row label
 
 .comma
 {
-	margin: 0 !important;
+	margin: 1px 0 1px -3px !important;
 	padding: 0 !important;
 }
 
-.creator-name-box > label, .date-box > label
+.creator-name-box > label:not(.comma), .date-box > label
 {
 	margin: 1px 0 1px 1px !important;
 	padding-left: 2px !important;
