@@ -96,7 +96,6 @@
 #zotero-view-tabbox {
 	background-color: #fff;
 	padding: 0;
-	margin: 0;
 }
 
 #zotero-item-pane-content .groupbox-body {
@@ -109,12 +108,8 @@
 }
 
 #zotero-view-tabbox > tabpanels {
-	margin: 0;
-	padding: 0;
-}
-
-#zotero-view-tabbox > tabpanels {
 	margin: 12px 0 0 0;
+	padding: 0;
 	-moz-appearance: none;
 }
 

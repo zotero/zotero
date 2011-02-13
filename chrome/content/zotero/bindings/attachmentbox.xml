@@ -210,7 +210,7 @@
 						
 						// Access date
 						if (this.displayAccessed) {
-							this._id("accessed-label").value = Zotero.getString('itemFields.accessDate')+": ";
+							this._id("accessed-label").value = Zotero.getString('itemFields.accessDate')+":";
 							this._id("accessed").value = Zotero.Date.sqlToDate(
 									this.item.getField('accessDate'), true
 								).toLocaleString();
@@ -234,7 +234,7 @@
 						
 						if (fileName) {
 							// TODO: localize
-							this._id("fileName-label").value = "Filename: ";
+							this._id("fileName-label").value = "Filename:";
 							this._id("fileName").value = fileName;
 							fileNameRow.hidden = false;
 						}
@@ -252,7 +252,7 @@
 						var pages = pages ? pages.total : null;
 						if (pages) {
 							// TODO: localize colon
-							this._id("pages-label").value = Zotero.getString('itemFields.pages') + ': ';
+							this._id("pages-label").value = Zotero.getString('itemFields.pages') + ':';
 							this._id("pages").value = pages;
 							pagesRow.hidden = false;
 						}
@@ -265,7 +265,7 @@
 					}
 					
 					if (this.displayDateModified) {
-						this._id("dateModified-label").value = Zotero.getString('itemFields.dateModified')+': ';
+						this._id("dateModified-label").value = Zotero.getString('itemFields.dateModified')+':';
 						var mtime = this.item.attachmentModificationTime;
 						if (mtime) {
 							this._id("dateModified").value = new Date(mtime).toLocaleString();
@@ -296,6 +296,8 @@
 					var noteEditor = this._id('note-editor');
 					if (this.displayNote) {
 						if (this.displayNoteIfEmpty || this.item.getNote() != '') {
+							Zotero.debug("setting links on top");
+							noteEditor.linksOnTop = true;
 							noteEditor.hidden = false;
 							
 							// Don't make note editable (at least for now)
@@ -470,7 +472,7 @@
 							str = 'general.yes';
 							break;
 					}
-					this._id("index-status-label").value = Zotero.getString('fulltext.indexState.indexed') + ': ';
+					this._id("index-status-label").value = Zotero.getString('fulltext.indexState.indexed') + ':';
 					indexStatus.value = Zotero.getString(str);
 					
 					// Reindex button tooltip (string stored in zotero.properties)
