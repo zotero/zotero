@@ -124,11 +124,11 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'win');
 		}
 		
-		if(Zotero.isFx4) {
+		if(Zotero.isFx4 || window.ZoteroTab) {
 			// hack, since Fx 4 no longer sets active, and the reverse in polarity of the preferred
 			// property makes things painful to handle otherwise
 			// DEBUG: remove this once we only support Fx 4
-			zp.setAttribute("isFx4", "true");
+			zp.setAttribute("ignoreActiveAttribute", "true");
 		}
 		
 		//Initialize collections view
