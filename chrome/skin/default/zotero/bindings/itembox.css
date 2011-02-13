@@ -95,7 +95,7 @@ row > vbox > description
 
 hbox.zotero-date-field-status
 {
-	margin-right: 7px; !important
+	margin-right: 7px !important;
 }
 
 hbox.zotero-date-field-status > label
