@@ -212,7 +212,6 @@
 					 context="toolbar-context-menu"
 					 defaultset="personal-bookmarks"
 					 customizable="true"/>-->
-
 	<hbox flex="1" id="browser">
 		<vbox id="appcontent" flex="1">
 			<stack id="zotero-pane-stack" fullscreenmode="true" flex="1"/>

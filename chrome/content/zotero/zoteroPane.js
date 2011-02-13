@@ -115,7 +115,9 @@ var ZoteroPane = new function()
 		_loaded = true;
 		
 		var zp = document.getElementById('zotero-pane');
-		Zotero.setFontSize(zp)
+		Zotero.setFontSize(zp);
+		ZoteroPane.updateToolbarPosition();
+		window.addEventListener("resize", this.updateToolbarPosition, false);
 		
 		if (Zotero.isMac) {
 			//document.getElementById('zotero-tb-actions-zeroconf-update').setAttribute('hidden', false);
@@ -3480,5 +3482,19 @@ var ZoteroPane = new function()
 			serializedValues[id] = elValues;
 		}
 		Zotero.Prefs.set("pane.persist", JSON.stringify(serializedValues));
+	}
+	
+	/**
+	 * Moves around the toolbar when the user moves around the pane
+	 */
+	this.updateToolbarPosition = function() {
+	const PANES = ["collections", "items"];
+		for each(var paneName in PANES) {
+			var pane = document.getElementById("zotero-"+paneName+"-pane");
+			var toolbar = document.getElementById("zotero-"+paneName+"-toolbar");
+			
+			computedStyle = window.getComputedStyle(pane, null);
+			toolbar.style.width = computedStyle.getPropertyValue("width");
+		}
 	}
 }
