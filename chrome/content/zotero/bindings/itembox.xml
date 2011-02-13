@@ -766,6 +766,8 @@
 						lastName.setAttribute('fieldMode', '1');
 						button.setAttribute('onclick', "document.getBindingParent(this).switchCreatorMode(Zotero.getAncestorByTagName(this, 'row'), 0)");
 						lastName.setAttribute('flex', '1');
+						delete lastName.style.width;
+						delete lastName.style.maxWidth;
 						
 						// Remove firstname field from tabindex
 						var tab = parseInt(firstName.getAttribute('ztabindex'));
@@ -797,6 +799,34 @@
 						lastName.setAttribute('fieldMode', '0');
 						button.setAttribute('onclick', "document.getBindingParent(this).switchCreatorMode(Zotero.getAncestorByTagName(this, 'row'), 1)");
 						lastName.setAttribute('flex', '0');
+						
+						// appropriately truncate lastName
+						
+						// get item box width
+						var computedStyle = window.getComputedStyle(this);
+						var boxWidth = computedStyle.getPropertyValue('width');
+						// get field label width
+						var computedStyle = window.getComputedStyle(row.firstChild);
+						var leftHboxWidth = computedStyle.getPropertyValue('width');
+						// get last name width
+						computedStyle = window.getComputedStyle(lastName);
+						var lastNameWidth = computedStyle.getPropertyValue('width');
+						if(boxWidth.substr(-2) === 'px'
+								&& leftHboxWidth.substr(-2) === 'px'
+								&& lastNameWidth.substr(-2) === "px") {
+							// compute a maximum width
+							boxWidth = parseInt(boxWidth);
+							leftHboxWidth = parseInt(leftHboxWidth);
+							lastNameWidth = parseInt(lastNameWidth);
+							var maxWidth = boxWidth-leftHboxWidth-140;
+							if(lastNameWidth > maxWidth) {
+								lastName.style.width = maxWidth+"px";
+								lastName.style.maxWidth = maxWidth+"px";
+							} else {
+								delete lastName.style.width;
+								delete lastName.style.maxWidth;
+							}
+						}
 						
 						// Add firstname field to tabindex
 						var tab = parseInt(lastName.getAttribute('ztabindex'));
