@@ -134,6 +134,17 @@
 				</setter>
 			</property>
 			
+			<property name="linksOnTop">
+				<setter>
+					<![CDATA[
+						var links = this._id('linksbox');
+						var parent = links.parentNode;
+						parent.removeChild(links);
+						parent.insertBefore(links, this._id(val ? 'citeLabel' : 'goButton'));
+					]]>
+				</setter>
+			</property>
+			
 			<property name="note"
 				onget="Zotero.debug('Getting note with .note deprecated -- use .item in zoteronoteeditor'); return this._item"
 				onset="Zotero.debug('Setting note with .note deprecated -- use .item in zoteronoteeditor'); this.item = val"/>
@@ -368,7 +379,7 @@
 		
 		<content>
 			<xul:vbox xbl:inherits="flex">
-				<xul:label id="citeLabel"/>
+				<xul:label id="citeLabel" hidden="true"/>
 				<xul:textbox id="noteField" type="styled" mode="note"
 					timeout="1000" flex="1" hidden="true"/>
 				<xul:textbox id="noteFieldReadOnly" type="styled" mode="note"

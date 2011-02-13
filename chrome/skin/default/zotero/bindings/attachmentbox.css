@@ -25,8 +25,10 @@
 
 #reindex .toolbarbutton-icon
 {
-	margin: 0;
+	margin: 0 0 0 2px;
 	padding: 0;
+	width: 14px;
+	height: 14px;
 }
 
 #index-box > button
@@ -35,25 +37,42 @@
 	padding: 0;
 }
 
-row > label:first-child
-{
-	font-weight: bold;
-}
-
-label
-{
-	-moz-margin-start: 1px !important;
-	-moz-margin-end: 5px !important;
-	padding: 1px 1px 0 2px;
-}
-
-zoteronoteeditor
-{
-	margin: 2px 2px 0 2px;
-}
-
 #title
 {
 	font-size: 12px;
 	font-weight: bold;
+}
+
+row label
+{
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+row > label, row > hbox
+{
+	margin-top: 1px !important;
+	margin-bottom: 1px !important;
+	-moz-box-pack: start;
+	-moz-margin-start: 1px !important;
+	-moz-margin-end: 5px !important;
+	padding: 0 2px 0 2px !important;
+	-moz-border-radius: 6px;
+	border: 1px solid transparent;
+}
+
+row > hbox
+{
+	-moz-box-align: center;
+}
+
+row > label:first-child
+{
+	text-align: right;
+	font-weight: bold;
+	-moz-margin-start: 5px !important;
+	-moz-margin-end: 0 !important;
+	width: 62px;
+	text-align: right;
+	font-weight:bold;
 }
