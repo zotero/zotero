@@ -4,6 +4,7 @@
 	margin: 4px 5px 1px 5px !important;
 	padding: 0 2px 0 2px;
 	/* Don't collapse blank attachment titles, since it prevents renaming */
+	min-height: 1.25em;
 }
 
 #url
