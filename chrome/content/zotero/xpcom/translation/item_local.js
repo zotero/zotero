@@ -617,12 +617,12 @@ Zotero.Translate.ItemGetter.prototype = {
 	"_attachmentToArray":function(attachment) {
 		var attachmentArray = this._itemToArray(attachment);
 		
-		var linkMode = attachment.getAttachmentLinkMode();
+		var linkMode = attachment.attachmentLinkMode;
 		
 		// get mime type
-		attachmentArray.mimeType = attachmentArray.uniqueFields.mimeType = attachment.getAttachmentMIMEType();
+		attachmentArray.mimeType = attachmentArray.uniqueFields.mimeType = attachment.attachmentMIMEType;
 		// get charset
-		attachmentArray.charset = attachmentArray.uniqueFields.charset = attachment.getAttachmentCharset();
+		attachmentArray.charset = attachmentArray.uniqueFields.charset = attachment.attachmentCharset;
 		
 		if(linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL && this._exportFileDirectory) {
 			// add path and filename if not an internet link
