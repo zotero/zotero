@@ -1,6 +1,6 @@
 scrollbox
 {
-	overflow: visible;
+	overflow: auto;
 }
 
 row, tagsbox row

@@ -896,9 +896,6 @@
 				<parameter name="elem"/>
 				<body>
 				<![CDATA[
-					// DEBUG: Valid nsIScrollBoxObject but methods return errors
-					return;
-					
 					var sbo = document.getAnonymousNodes(this)[0].boxObject;
 					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
 					sbo.ensureElementIsVisible(elem);
