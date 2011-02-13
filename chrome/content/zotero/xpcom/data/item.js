@@ -792,7 +792,6 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	return true;
 }
 
-
 /*
  * Get the title for an item for display in the interface
  *
@@ -874,10 +873,35 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
 		title += Zotero.localeJoin(strParts, '; ');
 		title += ']';
 	}
-	else if (itemTypeID == 17 && title) { // 'case' itemTypeID
-		var reporter = this.getField('reporter');
-		if (reporter) { 
-			title = Zotero.localeJoin([title, '(' + reporter + ')']);
+	else if (itemTypeID == 17) { // 'case' itemTypeID
+		if (title) { // common law cases always have case names
+			var reporter = this.getField('reporter');
+			if (reporter) { 
+				title = Zotero.localeJoin([title, '(' + reporter + ')']);
+			}
+		}
+		else { // civil law cases have only shortTitle as case name
+			var strParts = [];
+			var caseinfo = "";
+			
+			var part = this.getField('court');
+			if (part) {
+				strParts.push(part);
+			}
+			
+			part = Zotero.Date.multipartToSQL(this.getField('date', true, true));
+			if (part) {
+				strParts.push(part);
+			}
+			
+			var creators = this.getCreators();
+			if (creators.length && creators[0].creatorTypeID === 1) {
+				strParts.push(creators[0].ref.lastName);
+			}
+			
+			title = '[';
+			title += Zotero.localeJoin(strParts, ', ');
+			title += ']';
 		}
 	}
 	
