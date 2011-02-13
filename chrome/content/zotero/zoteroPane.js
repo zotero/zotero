@@ -116,8 +116,9 @@ var ZoteroPane = new function()
 		
 		var zp = document.getElementById('zotero-pane');
 		Zotero.setFontSize(zp);
-		ZoteroPane.updateToolbarPosition();
+		this.updateToolbarPosition();
 		window.addEventListener("resize", this.updateToolbarPosition, false);
+		window.setTimeout(this.updateToolbarPosition, 0);
 		
 		if (Zotero.isMac) {
 			//document.getElementById('zotero-tb-actions-zeroconf-update').setAttribute('hidden', false);
