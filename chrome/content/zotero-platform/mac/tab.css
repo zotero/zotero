@@ -1,0 +1,4 @@
+#zotero-pane .toolbar {
+	-moz-appearance: none !important;
+	background-color: -moz-mac-chrome-active !important;
+}
