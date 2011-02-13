@@ -1522,14 +1522,6 @@
 							fieldName,
 							tabindex
 						);
-						
-						// Reset creator mode settings
-						if (otherFields.fieldMode) {
-							this.switchCreatorMode(row, 1, true);
-						}
-						else {
-							this.switchCreatorMode(row, 0, true);
-						}
 					}
 					
 					// Tags
@@ -1682,6 +1674,11 @@
 					
 					var box = textbox.parentNode;
 					box.replaceChild(elem,textbox);
+					
+					if(field === 'creator') {
+						// Reset creator mode settings here so that flex attribute gets reset
+						this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
+					}
 					
 					if (this._tabDirection) {
 						if (!focusMode) {
