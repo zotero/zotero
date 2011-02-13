@@ -3062,7 +3062,7 @@ var ZoteroPane = new function()
 			if(forceExternalViewer !== undefined) {
 				var externalViewer = forceExternalViewer;
 			} else {
-				var mimeType = attachment.getAttachmentMIMEType();
+				var mimeType = attachment.attachmentMIMEType;
 				// If no MIME type specified, try to detect again (I guess in case
 				// we've gotten smarter since the file was imported?)
 				if (!mimeType) {
@@ -3075,7 +3075,6 @@ var ZoteroPane = new function()
 				var externalViewer = Zotero.isStandalone || (!Zotero.MIME.hasNativeHandler(mimeType, ext) &&
 					(!Zotero.MIME.hasInternalHandler(mimeType, ext) || Zotero.Prefs.get('launchNonNativeFiles')));
 			}
-			
 			if (!externalViewer) {
 				var url = 'zotero://attachment/' + itemID + '/';
 				this.loadURI(url, event, { attachmentID: itemID});
