@@ -12,14 +12,6 @@
 	background-image: none;
 }
 
-#zotero-pane .toolbar {
-	/* This will be ignored on FF <3.5 */
-	-moz-appearance: -moz-mac-unified-toolbar;
-	/* This will be ignored on FF >=3.5 */
-	background: url("chrome://zotero/skin/mac/toolbar-background.png") left center repeat-x;
-	margin-left: -1px;
-}
-
 #zotero-items-toolbar[state=collapsed]
 {
 	margin-left: -8px !important;

@@ -803,13 +803,13 @@
 						// appropriately truncate lastName
 						
 						// get item box width
-						var computedStyle = window.getComputedStyle(this);
+						var computedStyle = window.getComputedStyle(this, null);
 						var boxWidth = computedStyle.getPropertyValue('width');
 						// get field label width
-						var computedStyle = window.getComputedStyle(row.firstChild);
+						var computedStyle = window.getComputedStyle(row.firstChild, null);
 						var leftHboxWidth = computedStyle.getPropertyValue('width');
 						// get last name width
-						computedStyle = window.getComputedStyle(lastName);
+						computedStyle = window.getComputedStyle(lastName, null);
 						var lastNameWidth = computedStyle.getPropertyValue('width');
 						if(boxWidth.substr(-2) === 'px'
 								&& leftHboxWidth.substr(-2) === 'px'

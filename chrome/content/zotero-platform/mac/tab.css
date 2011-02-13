@@ -1,4 +1,4 @@
-#zotero-pane .toolbar {
+#zotero-toolbar {
 	-moz-appearance: none !important;
-	background-color: -moz-mac-chrome-active !important;
+	background: url("chrome://zotero/skin/mac/toolbar-background.png") left center repeat-x;
 }
