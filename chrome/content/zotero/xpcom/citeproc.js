@@ -1732,7 +1732,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.111";
+	this.processor_version = "1.0.112";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3167,7 +3167,8 @@ CSL.citeEnd = function (Item) {
 	this.tmp.last_names_used = this.tmp.names_used.slice();
 	this.tmp.cut_var = false;
 	if (this.tmp.disambig_restore && this.registry.registry[Item.id]) {
-		this.registry.registry[Item.id].disambig = this.tmp.disambig_restore;
+		this.registry.registry[Item.id].disambig.names = this.tmp.disambig_restore.names;
+		this.registry.registry[Item.id].disambig.givens = this.tmp.disambig_restore.givens;
 	}
 	this.tmp.disambig_request = false;
 	if (!this.tmp.suppress_decorations && this.tmp.offset_characters) {
