@@ -264,3 +264,7 @@ dialog[resizable="true"]
 .zotero-small-progress-indicator[status=animate] {
 	list-style-image: url(chrome://global/skin/icons/loading_16.png);
 }
+
+#zotero-note-window {
+	padding-bottom: 4px;
+}
