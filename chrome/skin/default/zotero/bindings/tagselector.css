@@ -20,8 +20,8 @@ checkbox
 
 #tags-toggle label
 {
-	margin: .15em !important;
-	padding: 0 .15em 0 .15em !important;
+	margin: .15em .05em .15em .3em !important;
+	padding: 0 .25em 0 .25em !important;
 	-moz-user-focus: ignore;
 	max-width: 250px;
 }
