@@ -1,0 +1,4 @@
+#zotero-toolbar {
+	-moz-appearance: none !important;
+	background: url("chrome://zotero/skin/mac/toolbar-background.png") left center repeat-x;
+}

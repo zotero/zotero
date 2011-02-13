@@ -346,6 +346,7 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 		if(entrySpacing == NaN) throw "Invalid entryspacing";
 		if(lineSpacing == NaN) throw "Invalid linespacing";
 		
+		var str;
 		default xml namespace = ''; with({});
 		try {			
 			XML.prettyPrinting = false;
@@ -420,12 +421,13 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 			}
 			
 			//Zotero.debug(xml);
+			str = xml.toXMLString();
 		} finally {
 			XML.prettyPrinting = true;
 			XML.ignoreWhitespace = true;
 		}
 		
-		return xml.toXMLString();
+		return str;
 	} else if(format == "text") {
 		return bib[0].bibstart+bib[1].join("")+bib[0].bibend;
 	} else if(format == "rtf") {

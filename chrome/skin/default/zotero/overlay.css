@@ -276,9 +276,10 @@
 	width: 150px;
 }
 
-#zotero-view-tabbox, #zotero-item-pane-content > groupbox
+#zotero-view-tabbox, #zotero-item-pane-content > groupbox, #zotero-item-pane-content > groupbox > .groupbox-body
 {
-	margin: 0;
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 #zotero-view-tabbox tabs tab

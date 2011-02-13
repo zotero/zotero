@@ -1,6 +1,6 @@
 scrollbox
 {
-	overflow: visible;
+	overflow: auto;
 }
 
 row, tagsbox row
@@ -48,19 +48,16 @@ row label
 }
 
 /* creator type menu */
+
 .creator-type-label, .creator-type-value {
 	-moz-box-align: center;
 	-moz-box-pack: end;
-	height: 18px !important;
-	min-height: 0 !important;
-	max-height: 18px !important;
-	padding-right: 2px;
 }
 
 .creator-type-label > label
 {
-	margin-right: 0 !important;
-	padding-right: 0 !important;
+	margin: 1px 0 1px 0 !important;
+	padding-right: 2px !important;
 }
  
 .creator-type-label > image {
@@ -68,10 +65,17 @@ row label
 	list-style-image: url('chrome://zotero/skin/arrow-down.gif');
 }
 
-/* no space between last name and comma */
-row hbox label:first-child
+.comma
 {
-	margin-right: 1px;
+	margin: 1px 0 1px -3px !important;
+	padding: 0 !important;
+}
+
+.creator-name-box > label:not(.comma), .date-box > label
+{
+	margin: 1px 0 1px 1px !important;
+	padding-left: 2px !important;
+	padding-right: 2px !important;
 }
 
 row > label, row > vbox[fieldname]
@@ -91,14 +95,15 @@ row > vbox > description
 
 hbox.zotero-date-field-status
 {
-	margin-right: 5px;
+	margin-right: 7px; !important
 }
 
-hbox.zotero-date-field-status label
+hbox.zotero-date-field-status > label
 {
 	font-weight: bold;
 	color: #666;
-	margin: 0 0 0 1px;
+	margin: 0 0 0 1px !important;
+	padding: 0 1px 0 1px !important;
 }
 
 #item-type-menu

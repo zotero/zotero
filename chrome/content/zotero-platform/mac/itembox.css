@@ -1,3 +1,8 @@
+scrollbox
+{
+	padding-top: 3px;
+}
+
 row > label:first-child, .creator-type-label
 {
 	color: #7f7f7f;

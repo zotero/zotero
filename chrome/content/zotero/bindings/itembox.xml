@@ -706,12 +706,12 @@
 					label.setAttribute("fieldname", field);
 					label.setAttribute("onclick", "this.nextSibling.firstChild.blur()");
 					
-					var hbox = document.createElement("hbox");
 					var elem = this.createValueElement(
 						Zotero.Date.multipartToStr(value),
 						field,
 						tabindex
 					);
+					elem.setAttribute('flex', 1);
 					
 					// y-m-d status indicator
 					var datebox = document.createElement('hbox');
@@ -735,6 +735,7 @@
 					
 					var hbox = document.createElement('hbox');
 					hbox.setAttribute('flex', 1);
+					hbox.className = "date-box";
 					hbox.appendChild(elem);
 					hbox.appendChild(datebox);
 					
@@ -765,6 +766,8 @@
 						lastName.setAttribute('fieldMode', '1');
 						button.setAttribute('onclick', "document.getBindingParent(this).switchCreatorMode(Zotero.getAncestorByTagName(this, 'row'), 0)");
 						lastName.setAttribute('flex', '1');
+						delete lastName.style.width;
+						delete lastName.style.maxWidth;
 						
 						// Remove firstname field from tabindex
 						var tab = parseInt(firstName.getAttribute('ztabindex'));
@@ -796,6 +799,34 @@
 						lastName.setAttribute('fieldMode', '0');
 						button.setAttribute('onclick', "document.getBindingParent(this).switchCreatorMode(Zotero.getAncestorByTagName(this, 'row'), 1)");
 						lastName.setAttribute('flex', '0');
+						
+						// appropriately truncate lastName
+						
+						// get item box width
+						var computedStyle = window.getComputedStyle(this, null);
+						var boxWidth = computedStyle.getPropertyValue('width');
+						// get field label width
+						var computedStyle = window.getComputedStyle(row.firstChild, null);
+						var leftHboxWidth = computedStyle.getPropertyValue('width');
+						// get last name width
+						computedStyle = window.getComputedStyle(lastName, null);
+						var lastNameWidth = computedStyle.getPropertyValue('width');
+						if(boxWidth.substr(-2) === 'px'
+								&& leftHboxWidth.substr(-2) === 'px'
+								&& lastNameWidth.substr(-2) === "px") {
+							// compute a maximum width
+							boxWidth = parseInt(boxWidth);
+							leftHboxWidth = parseInt(leftHboxWidth);
+							lastNameWidth = parseInt(lastNameWidth);
+							var maxWidth = boxWidth-leftHboxWidth-140;
+							if(lastNameWidth > maxWidth) {
+								lastName.style.width = maxWidth+"px";
+								lastName.style.maxWidth = maxWidth+"px";
+							} else {
+								delete lastName.style.width;
+								delete lastName.style.maxWidth;
+							}
+						}
 						
 						// Add firstname field to tabindex
 						var tab = parseInt(lastName.getAttribute('ztabindex'));
@@ -865,9 +896,6 @@
 				<parameter name="elem"/>
 				<body>
 				<![CDATA[
-					// DEBUG: Valid nsIScrollBoxObject but methods return errors
-					return;
-					
 					var sbo = document.getAnonymousNodes(this)[0].boxObject;
 					sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
 					sbo.ensureElementIsVisible(elem);
@@ -1521,14 +1549,6 @@
 							fieldName,
 							tabindex
 						);
-						
-						// Reset creator mode settings
-						if (otherFields.fieldMode) {
-							this.switchCreatorMode(row, 1, true);
-						}
-						else {
-							this.switchCreatorMode(row, 0, true);
-						}
 					}
 					
 					// Tags
@@ -1681,6 +1701,11 @@
 					
 					var box = textbox.parentNode;
 					box.replaceChild(elem,textbox);
+					
+					if(field === 'creator') {
+						// Reset creator mode settings here so that flex attribute gets reset
+						this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
+					}
 					
 					if (this._tabDirection) {
 						if (!focusMode) {

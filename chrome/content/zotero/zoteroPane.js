@@ -115,7 +115,10 @@ var ZoteroPane = new function()
 		_loaded = true;
 		
 		var zp = document.getElementById('zotero-pane');
-		Zotero.setFontSize(zp)
+		Zotero.setFontSize(zp);
+		this.updateToolbarPosition();
+		window.addEventListener("resize", this.updateToolbarPosition, false);
+		window.setTimeout(this.updateToolbarPosition, 0);
 		
 		if (Zotero.isMac) {
 			//document.getElementById('zotero-tb-actions-zeroconf-update').setAttribute('hidden', false);
@@ -124,11 +127,11 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'win');
 		}
 		
-		if(Zotero.isFx4) {
+		if(Zotero.isFx4 || window.ZoteroTab) {
 			// hack, since Fx 4 no longer sets active, and the reverse in polarity of the preferred
 			// property makes things painful to handle otherwise
 			// DEBUG: remove this once we only support Fx 4
-			zp.setAttribute("isFx4", "true");
+			zp.setAttribute("ignoreActiveAttribute", "true");
 		}
 		
 		//Initialize collections view
@@ -3073,7 +3076,7 @@ var ZoteroPane = new function()
 					(!Zotero.MIME.hasInternalHandler(mimeType, ext) || Zotero.Prefs.get('launchNonNativeFiles')));
 			}
 			
-			if (!forceExternalViewer) {
+			if (!externalViewer) {
 				var url = 'zotero://attachment/' + itemID + '/';
 				this.loadURI(url, event, { attachmentID: itemID});
 			}
@@ -3480,5 +3483,19 @@ var ZoteroPane = new function()
 			serializedValues[id] = elValues;
 		}
 		Zotero.Prefs.set("pane.persist", JSON.stringify(serializedValues));
+	}
+	
+	/**
+	 * Moves around the toolbar when the user moves around the pane
+	 */
+	this.updateToolbarPosition = function() {
+	const PANES = ["collections", "items"];
+		for each(var paneName in PANES) {
+			var pane = document.getElementById("zotero-"+paneName+"-pane");
+			var toolbar = document.getElementById("zotero-"+paneName+"-toolbar");
+			
+			computedStyle = window.getComputedStyle(pane, null);
+			toolbar.style.width = computedStyle.getPropertyValue("width");
+		}
 	}
 }

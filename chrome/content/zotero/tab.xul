@@ -2,6 +2,8 @@
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/tab.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/tab.css" type="text/css"?>
 <?xul-overlay href="chrome://zotero/content/zoteroPane.xul"?>
 <?xul-overlay href="chrome://zotero/content/itemPane.xul"?>
 
