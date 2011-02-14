@@ -503,12 +503,11 @@ Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 			return "chrome://zotero-platform/content/treesource-collection.png";
  		
 		case 'search':
-			var str = "chrome://zotero-platform/content/treesource-search";
 			if ((source.ref.id + "").match(/^8634533000/)) { // 'UNFILED000'
-				str += '-virtual';
+				collectionType = "search-virtual";
+				break;
 			}
-			str += ".png";
-			return str;
+			return "chrome://zotero-platform/content/treesource-search.png";
 		
 		case 'header':
 			if (source.ref.id == 'group-libraries-header') {
