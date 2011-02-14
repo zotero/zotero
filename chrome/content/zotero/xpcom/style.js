@@ -337,16 +337,22 @@ Zotero.Styles = new function() {
  * @property {Boolean} hidden True if this style is hidden in style selection dialogs, false if it
  *	is not
  */
-Zotero.Style = function(file) {
-	this.file = file;
+Zotero.Style = function(arg) {
+	if(typeof arg === "string") {
+		this.string = arg;
+	} else if(typeof arg === "object") {
+		this.file = arg;
+	} else {
+		throw "Invalid argument passed to Zotero.Style";
+	}
 	
-	var extension = file.leafName.substr(-4).toLowerCase();
+	var extension = (typeof arg === "string" ? ".csl" : arg.leafName.substr(-4).toLowerCase());
 	if(extension == ".ens") {
 		this.type = "ens";
 		
 		this.styleID = Zotero.Styles.ios.newFileURI(this.file).spec;
-		this.title = file.leafName.substr(0, file.leafName.length-4);
-		this.updated = Zotero.Date.dateToSQL(new Date(file.lastModifiedTime));
+		this.title = this.file.leafName.substr(0, this.file.leafName.length-4);
+		this.updated = Zotero.Date.dateToSQL(new Date(this.file.lastModifiedTime));
 		this._version = "0.8";
 	} else if(extension == ".csl") {
 		// "with ({});" needed to fix default namespace scope issue
@@ -355,7 +361,7 @@ Zotero.Style = function(file) {
 		
 		this.type = "csl";
 		
-		var xml = Zotero.Styles.cleanXML(Zotero.File.getContents(file));
+		var xml = Zotero.Styles.cleanXML(typeof arg === "string" ? arg : Zotero.File.getContents(arg));
 					
 		this.styleID = xml.info.id.toString();
 		this.title = xml.info.title.toString();
@@ -480,8 +486,10 @@ function() {
 				Zotero.Styles.ios.newFileURI(this.file).spec, null));
 		}
 		return formatCSL.file;
+	} else if(this.file) {
+		return this.file;
 	}
-	return this.file;
+	return null;
 });
 
 /**
@@ -503,7 +511,9 @@ Zotero.Style.prototype.getXML = function() {
 		
 		return XML.toXMLString();
 	} else {
-		return Zotero.File.getContents(this.independentFile);
+		var indepFile = this.independentFile;
+		if(indepFile) return Zotero.File.getContents(indepFile);
+		return this.string;
 	}
 };
 
@@ -511,6 +521,10 @@ Zotero.Style.prototype.getXML = function() {
  * Deletes a style
  */
 Zotero.Style.prototype.remove = function() {
+	if(!this.file) {
+		throw "Cannot delete a style with no associated file."
+	}
+	
 	// make sure no styles depend on this one
 	var dependentStyles = false;
 	var styles = Zotero.Styles.getAll();
