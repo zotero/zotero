@@ -74,75 +74,12 @@ Zotero.CollectionTreeView.prototype.setTree = function(treebox)
 	
 	this.refresh();
 	
-	// Select the last-viewed collection
-	var lastViewedFolder = Zotero.Prefs.get('lastViewedFolder');
-	var matches = lastViewedFolder.match(/^(?:(C|S|G)([0-9]+)|L)$/);
-	var select = 0;
-	if (matches) {
-		if (matches[1] == 'C') {
-			if (this._collectionRowMap[matches[2]]) {
-				select = this._collectionRowMap[matches[2]];
-			}
-			// Search recursively
-			else {
-				var path = [];
-				var failsafe = 10; // Only go up ten levels
-				var lastCol = matches[2];
-				do {
-					failsafe--;
-					var col = Zotero.Collections.get(lastCol);
-					if (!col) {
-						var msg = "Last-viewed collection not found";
-						Zotero.debug(msg);
-						path = [];
-						break;
-					}
-					var par = col.getParent();
-					if (!par) {
-						var msg = "Parent collection not found in "
-							+ "Zotero.CollectionTreeView.setTree()";
-						Zotero.debug(msg, 1);
-						Components.utils.reportError(msg);
-						path = [];
-						break;
-					}
-					lastCol = par;
-					path.push(lastCol);
-				}
-				while (!this._collectionRowMap[lastCol] && failsafe > 0)
-				if (path.length) {
-					for (var i=path.length-1; i>=0; i--) {
-						var id = path[i];
-						var row = this._collectionRowMap[id];
-						if (!row) {
-							var msg = "Collection not found in tree in "
-								+ "Zotero.CollectionTreeView.setTree()";
-							Zotero.debug(msg, 1);
-							Components.utils.reportError(msg);
-							break;
-						}
-						if (!this.isContainerOpen(row)) {
-							this.toggleOpenState(row);
-							if (this._collectionRowMap[matches[2]]) {
-								select = this._collectionRowMap[matches[2]];
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-		else if (matches[1] == 'S' && this._searchRowMap[matches[2]]) {
-			select = this._searchRowMap[matches[2]];
-		}
-		else if (matches[1] == 'G' && this._groupRowMap[matches[2]]) {
-			select = this._groupRowMap[matches[2]];
-		}
-	}
-	
 	this.selection.currentColumn = this._treebox.columns.getFirstColumn();
-	this.selection.select(select);
+	
+	var row = this.getLastViewedRow();
+	this.selection.select(row);
 }
+
 
 /*
  *  Reload the rows from the data access methods
@@ -164,6 +101,13 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 	var oldCount = this.rowCount;
 	this._dataItems = [];
 	this.rowCount = 0;
+	
+	try {
+		var unfiledLibraries = Zotero.Prefs.get('unfiledLibraries').split(',');
+	}
+	catch (e) {
+		unfiledLibraries = [];
+	}
 	
 	var self = this;
 	var library = {
@@ -188,6 +132,18 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 					self._showItem(new Zotero.ItemGroup('search', savedSearches[i]), 1, newRows+1);
 					newRows++;
 				}
+			}
+			
+			// Unfiled items
+			if (unfiledLibraries.indexOf('0') != -1) {
+				var s = new Zotero.Search;
+				// Give virtual search an id so it can be reselected automatically
+				s.id = 86345330000; // 'UNFILED' + '000' + libraryID
+				s.name = Zotero.getString('pane.collections.unfiled');
+				s.addCondition('libraryID', 'is', null);
+				s.addCondition('unfiled', 'true');
+				self._showItem(new Zotero.ItemGroup('search', s), 1, newRows+1);
+				newRows++;
 			}
 			
 			var deletedItems = Zotero.Items.getDeleted();
@@ -236,6 +192,18 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 							newRows++;
 						}
 					}
+					
+					// Unfiled items
+					if (unfiledLibraries.indexOf(groups[i].libraryID + '') != -1) {
+						var s = new Zotero.Search;
+						s.id = parseInt('8634533000' + groups[i].libraryID); // 'UNFILED' + '000' + libraryID
+						s.libraryID = groups[i].libraryID;
+						s.name = Zotero.getString('pane.collections.unfiled');
+						s.addCondition('libraryID', 'is', groups[i].libraryID);
+						s.addCondition('unfiled', 'true');
+						self._showItem(new Zotero.ItemGroup('search', s), 2);
+						newRows++;
+					}
 				}
 			}
 		};
@@ -270,8 +238,6 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 				}
 			}
 		};
-		Zotero.debug('=============');
-		Zotero.debug(commonsExpand);
 		this._showItem(new Zotero.ItemGroup('header', header), null, null, commonsExpand);
 		if (commonsExpand) {
 			header.expand();
@@ -779,6 +745,78 @@ Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
 	}
 	
 	return false;
+}
+
+/**
+ * Select the last-viewed source
+ */
+Zotero.CollectionTreeView.prototype.getLastViewedRow = function () {
+	var lastViewedFolder = Zotero.Prefs.get('lastViewedFolder');
+	var matches = lastViewedFolder.match(/^(?:(C|S|G)([0-9]+)|L)$/);
+	var select = 0;
+	if (matches) {
+		if (matches[1] == 'C') {
+			if (this._collectionRowMap[matches[2]]) {
+				select = this._collectionRowMap[matches[2]];
+			}
+			// Search recursively
+			else {
+				var path = [];
+				var failsafe = 10; // Only go up ten levels
+				var lastCol = matches[2];
+				do {
+					failsafe--;
+					var col = Zotero.Collections.get(lastCol);
+					if (!col) {
+						var msg = "Last-viewed collection not found";
+						Zotero.debug(msg);
+						path = [];
+						break;
+					}
+					var par = col.getParent();
+					if (!par) {
+						var msg = "Parent collection not found in "
+							+ "Zotero.CollectionTreeView.setTree()";
+						Zotero.debug(msg, 1);
+						Components.utils.reportError(msg);
+						path = [];
+						break;
+					}
+					lastCol = par;
+					path.push(lastCol);
+				}
+				while (!this._collectionRowMap[lastCol] && failsafe > 0)
+				if (path.length) {
+					for (var i=path.length-1; i>=0; i--) {
+						var id = path[i];
+						var row = this._collectionRowMap[id];
+						if (!row) {
+							var msg = "Collection not found in tree in "
+								+ "Zotero.CollectionTreeView.setTree()";
+							Zotero.debug(msg, 1);
+							Components.utils.reportError(msg);
+							break;
+						}
+						if (!this.isContainerOpen(row)) {
+							this.toggleOpenState(row);
+							if (this._collectionRowMap[matches[2]]) {
+								select = this._collectionRowMap[matches[2]];
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (matches[1] == 'S' && this._searchRowMap[matches[2]]) {
+			select = this._searchRowMap[matches[2]];
+		}
+		else if (matches[1] == 'G' && this._groupRowMap[matches[2]]) {
+			select = this._groupRowMap[matches[2]];
+		}
+	}
+	
+	return select;
 }
 
 
@@ -1790,6 +1828,7 @@ Zotero.ItemGroup.prototype.getChildItems = function()
 		Zotero.debug(e, 2);
 		throw (e);
 	}
+	
 	return Zotero.Items.get(ids);
 }
 
@@ -1826,7 +1865,7 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 		s.addCondition('deleted', 'true');
 	}
 	else if (this.isSearch()) {
-		s.id = this.ref.id;
+		var s = this.ref;
 	}
 	else {
 		throw ('Invalid search mode in Zotero.ItemGroup.getSearchObject()');
