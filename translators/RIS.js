@@ -4,13 +4,12 @@
 	"label":"RIS",
 	"creator":"Simon Kornblith",
 	"target":"ris",
-	"minVersion":"2.1b2",
+	"minVersion":"2.1b6",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"configOptions":{"dataMode":"block"},
 	"displayOptions":{"exportCharset":"UTF-8", "exportNotes":true},
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-02-13 03:10:59"
 }
 
 function detectImport() {
@@ -107,8 +106,8 @@ var inputTypeMap = {
 };
 
 function processTag(item, tag, value) {
-	if (Zotero.Utilities.unescapeHTML) {
-		value = Zotero.Utilities.unescapeHTML(value.replace("\n", "<br>", "g"));
+	if (tag != "N1" && tag != "AB" && Zotero.Utilities.unescapeHTML) {
+		value = Zotero.Utilities.unescapeHTML(value);
 	}
     
 	if(fieldMap[tag]) {
@@ -245,7 +244,18 @@ function processTag(item, tag, value) {
 	} else if(tag == "N1" || tag == "AB") {
 		// notes
 		if(value != item.title) {       // why does EndNote do this!?
-			item.notes.push({note:value});
+			var clean = Zotero.Utilities.cleanTags(value);
+			if (clean == value) {
+				// \n\n => <p>, \n => <br/>
+				//str = Zotero.Utilities.htmlSpecialChars(str);
+				value = '<p>'
+					+ value.replace(/\n\n/g, '</p><p>')
+						.replace(/\n/g, '<br/>')
+						.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+						.replace(/  /g, '&nbsp;&nbsp;')
+					+ '</p>';
+				item.notes.push({note:value});
+			} else item.notes.push({note:value});
 		}
 	} else if(tag == "N2") {
 		// abstract

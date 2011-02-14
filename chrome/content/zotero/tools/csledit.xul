@@ -76,7 +76,7 @@
 			}
 			function refresh() {
 				var editor = document.getElementById('zotero-csl-editor')
-				generateBibliography(editor.cslID)
+				generateBibliography(editor.value);
 
 			}
 			
@@ -117,9 +117,14 @@
 					return;
 				}
 				else {
-					var cslFile = Zotero.Styles.get(editor.cslID).file;
-					styleObject = new Zotero.Style(cslFile);
-					styleEngine = styleObject.csl;
+					try {
+						styleObject = new Zotero.Style(str);
+						styleEngine = styleObject.csl;
+					} catch(e) {
+						iframe.contentDocument.documentElement.innerHTML = '<div>Error parsing '+
+							'style: </div><div>'+e+'</div>';
+						throw e;
+					}
 				}
 				
 				var itemIds = [items[i].id for (i in items)];
@@ -152,19 +157,24 @@
 					citations += styleEngine.makeCitationCluster(subcitation) + '<br />';
 				}
 				
-				var multCitations = '<hr><h1>Multi Citations <span style="font-size:smaller;">(all with position "first")</span></h1>' +
-					styleEngine.previewCitationCluster(citation, [], [], "html");
-
-				// Generate bibliography
-				styleEngine.updateItems(itemIds);
-				var bibData = styleEngine.makeBibliography();
-				var bibliography = '<hr/><h1>Bibliography</h1>' + 
-					bibData[0].bibstart + bibData[1].join("") + bibData[0].bibend;
-
-				iframe.contentDocument.documentElement.innerHTML = 
-					'<div style="white-space: pre-wrap">'
-					+ citations + multCitations + bibliography
-					+ '</div>';
+				try {
+					var multCitations = '<hr><h1>Multi Citations <span style="font-size:smaller;">(all with position "first")</span></h1>' +
+						styleEngine.previewCitationCluster(citation, [], [], "html");
+	
+					// Generate bibliography
+					styleEngine.updateItems(itemIds);
+					var bibliography = '<hr/><h1>Bibliography</h1>' + 
+						Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
+	
+					iframe.contentDocument.documentElement.innerHTML = 
+						'<div style="white-space: pre-wrap">'
+						+ citations + multCitations + bibliography
+						+ '</div>';
+				} catch(e) {
+						iframe.contentDocument.documentElement.innerHTML = '<div>Error generating citations '+
+							'and bibliography: </div><div>'+e+'</div>';
+						throw e;
+				}
 			}
 			
 			

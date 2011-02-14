@@ -1,14 +1,16 @@
-/* Don't collapse blank attachment titles, since it prevents renaming */
 #title
 {
+	font-weight: bold;
+	margin: 4px 5px 1px 5px !important;
+	padding: 0 2px 0 2px;
+	/* Don't collapse blank attachment titles, since it prevents renaming */
 	min-height: 1.25em;
 }
 
-#view, #show
+#url
 {
-	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow.png');
-	-moz-box-direction: reverse;
-	-moz-box-flex: 1;
+	margin: 1px 5px 2px 5px !important;
+	padding: 0 2px 0 2px !important;
 }
 
 #index-box
@@ -37,10 +39,9 @@
 	padding: 0;
 }
 
-#title
+#linksbox
 {
-	font-size: 12px;
-	font-weight: bold;
+	margin-bottom: 4px;
 }
 
 row label

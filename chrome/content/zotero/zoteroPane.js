@@ -56,7 +56,6 @@ var ZoteroPane = new function()
 	this.itemSelected = itemSelected;
 	this.reindexItem = reindexItem;
 	this.duplicateSelectedItem = duplicateSelectedItem;
-	this.deleteSelectedCollection = deleteSelectedCollection;
 	this.editSelectedCollection = editSelectedCollection;
 	this.copySelectedItemsToClipboard = copySelectedItemsToClipboard;
 	this.clearQuicksearch = clearQuicksearch;
@@ -714,6 +713,55 @@ var ZoteroPane = new function()
 		window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
 	}
 	
+	this.setUnfiled = function (libraryID, show) {
+		try {
+			var ids = Zotero.Prefs.get('unfiledLibraries').split(',');
+		}
+		catch (e) {
+			var ids = [];
+		}
+		
+		if (!libraryID) {
+			libraryID = 0;
+		}
+		
+		var newids = [];
+		for each(var id in ids) {
+			id = parseInt(id);
+			if (isNaN(id)) {
+				continue;
+			}
+			// Remove current library if hiding
+			if (id == libraryID && !show) {
+				continue;
+			}
+			// Remove libraryIDs that no longer exist
+			if (id != 0 && !Zotero.Libraries.exists(id)) {
+				continue;
+			}
+			newids.push(id);
+		}
+		
+		// Add the current library if it's not already set
+		if (show && newids.indexOf(libraryID) == -1) {
+			newids.push(libraryID);
+		}
+		
+		newids.sort();
+		
+		Zotero.Prefs.set('unfiledLibraries', newids.join());
+		
+		if (show) {
+			// 'UNFILED' + '000' + libraryID
+			Zotero.Prefs.set('lastViewedFolder', 'S' + '8634533000' + libraryID);
+		}
+		
+		this.collectionsView.refresh();
+		
+		// Select new row
+		var row = this.collectionsView.getLastViewedRow();
+		this.collectionsView.selection.select(row);
+	}
 	
 	this.openLookupWindow = function () {
 		if (!Zotero.stateCheck()) {
@@ -1306,17 +1354,20 @@ var ZoteroPane = new function()
 		}
 	}
 	
-	function deleteSelectedCollection()
-	{
+	this.deleteSelectedCollection = function () {
+		// Remove virtual Unfiled search
+		var row = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+		if (row.isSearch() && (row.ref.id + "").match(/^8634533000/)) { // 'UNFILED000'
+			this.setUnfiled(row.ref.libraryID, false);
+			return;
+		}
+		
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
 		
 		if (this.collectionsView.selection.count == 1) {
-			var row =
-				this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
-			
 			if (row.isCollection())
 			{
 				if (confirm(Zotero.getString('pane.collections.delete')))
@@ -1797,16 +1848,17 @@ var ZoteroPane = new function()
 			newSavedSearch: 1,
 			newSubcollection: 2,
 			sep1: 3,
-			editSelectedCollection: 4,
-			removeCollection: 5,
-			sep2: 6,
-			exportCollection: 7,
-			createBibCollection: 8,
-			exportFile: 9,
-			loadReport: 10,
-			emptyTrash: 11,
-			createCommonsBucket: 12,
-			refreshCommonsBucket: 13
+			showUnfiled: 4,
+			editSelectedCollection: 5,
+			removeCollection: 6,
+			sep2: 7,
+			exportCollection: 8,
+			createBibCollection: 9,
+			exportFile: 10,
+			loadReport: 11,
+			emptyTrash: 12,
+			createCommonsBucket: 13,
+			refreshCommonsBucket: 14
 		};
 		
 		var itemGroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
@@ -1846,14 +1898,27 @@ var ZoteroPane = new function()
 		}
 		// Saved Search
 		else if (itemGroup.isSearch()) {
-			show = [
-				m.editSelectedCollection,
-				m.removeCollection,
-				m.sep2,
-				m.exportCollection,
-				m.createBibCollection,
-				m.loadReport
-			];
+			// Unfiled items view
+			if ((itemGroup.ref.id + "").match(/^8634533000/)) { // 'UNFILED000'
+				show = [
+					m.removeCollection
+				];
+				
+				menu.childNodes[m.removeCollection].setAttribute('label', Zotero.getString('general.remove'));
+			}
+			// Normal search view
+			else {
+				show = [
+					m.editSelectedCollection,
+					m.removeCollection,
+					m.sep2,
+					m.exportCollection,
+					m.createBibCollection,
+					m.loadReport
+				];
+				
+				menu.childNodes[m.removeCollection].setAttribute('label', Zotero.getString('pane.collections.menu.remove.savedSearch'));
+			}
 			
 			var s = [m.exportCollection, m.createBibCollection, m.loadReport];
 			if (this.itemsView.rowCount>0) {
@@ -1865,7 +1930,6 @@ var ZoteroPane = new function()
 			
 			// Adjust labels
 			menu.childNodes[m.editSelectedCollection].setAttribute('label', Zotero.getString('pane.collections.menu.edit.savedSearch'));
-			menu.childNodes[m.removeCollection].setAttribute('label', Zotero.getString('pane.collections.menu.remove.savedSearch'));
 			menu.childNodes[m.exportCollection].setAttribute('label', Zotero.getString('pane.collections.menu.export.savedSearch'));
 			menu.childNodes[m.createBibCollection].setAttribute('label', Zotero.getString('pane.collections.menu.createBib.savedSearch'));
 			menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.collections.menu.generateReport.savedSearch'));
@@ -1884,12 +1948,12 @@ var ZoteroPane = new function()
 		}
 		// Group
 		else if (itemGroup.isGroup()) {
-			show = [m.newCollection, m.newSavedSearch];
+			show = [m.newCollection, m.newSavedSearch, m.sep1, m.showUnfiled];
 		}
 		// Library
 		else
 		{
-			show = [m.newCollection, m.newSavedSearch, m.sep1, m.exportFile];
+			show = [m.newCollection, m.newSavedSearch, m.sep1, m.showUnfiled, m.sep2, m.exportFile];
 		}
 		
 		// Disable some actions if user doesn't have write access
@@ -2282,6 +2346,10 @@ var ZoteroPane = new function()
 			}
 			
 			if (itemGroup.isSearch()) {
+				// Don't do anything on double-click of Unfiled Items
+				if ((itemGroup.ref.id + "").match(/^8634533000/)) { // 'UNFILED000'
+					return;
+				}
 				ZoteroPane.editSelectedCollection();
 				return;
 			}
@@ -3062,7 +3130,7 @@ var ZoteroPane = new function()
 			if(forceExternalViewer !== undefined) {
 				var externalViewer = forceExternalViewer;
 			} else {
-				var mimeType = attachment.getAttachmentMIMEType();
+				var mimeType = attachment.attachmentMIMEType;
 				// If no MIME type specified, try to detect again (I guess in case
 				// we've gotten smarter since the file was imported?)
 				if (!mimeType) {
@@ -3075,7 +3143,6 @@ var ZoteroPane = new function()
 				var externalViewer = Zotero.isStandalone || (!Zotero.MIME.hasNativeHandler(mimeType, ext) &&
 					(!Zotero.MIME.hasInternalHandler(mimeType, ext) || Zotero.Prefs.get('launchNonNativeFiles')));
 			}
-			
 			if (!externalViewer) {
 				var url = 'zotero://attachment/' + itemID + '/';
 				this.loadURI(url, event, { attachmentID: itemID});

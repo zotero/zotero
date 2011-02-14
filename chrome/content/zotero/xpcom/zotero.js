@@ -1604,13 +1604,13 @@ Zotero.Prefs = new function(){
 						Zotero.debug("Creating boolean pref '" + pref + "'");
 						return this.prefBranch.setBoolPref(pref, value);
 					}
-					if (parseInt(value) == value) {
-						Zotero.debug("Creating integer pref '" + pref + "'");
-						return this.prefBranch.setIntPref(pref, value);
-					}
 					if (typeof value == 'string') {
 						Zotero.debug("Creating string pref '" + pref + "'");
 						return this.prefBranch.setCharPref(pref, value);
+					}
+					if (parseInt(value) == value) {
+						Zotero.debug("Creating integer pref '" + pref + "'");
+						return this.prefBranch.setIntPref(pref, value);
 					}
 					throw ("Invalid preference value '" + value + "' for pref '" + pref + "'");
 			}

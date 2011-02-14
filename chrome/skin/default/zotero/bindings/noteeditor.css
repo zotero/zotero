@@ -50,3 +50,9 @@ vbox > hbox:first-child > linksbox {
 vbox > hbox:not(:first-child) > linksbox {
 	margin-top: 4px;
 }
+
+textbox[type="styled"] {
+	border-width: 0 1px 0 1px;
+	border-style: solid;
+	border-color: rgb(204, 204, 204);
+}

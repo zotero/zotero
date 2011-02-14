@@ -216,6 +216,7 @@
 					<menuitem label="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch()"/>
 					<menuitem label="&zotero.toolbar.newSubcollection.label;" oncommand="ZoteroPane.newCollection(ZoteroPane.getSelectedCollection().id)"/>
 					<menuseparator/>
+					<menuitem label="&zotero.collections.showUnfiledItems;" oncommand="ZoteroPane.setUnfiled(ZoteroPane.getSelectedLibraryID(), true)"/>
 					<menuitem oncommand="ZoteroPane.editSelectedCollection();"/>
 					<menuitem oncommand="ZoteroPane.deleteSelectedCollection();"/>
 					<menuseparator/>
@@ -421,7 +422,7 @@
 						</tabbox>
 						<!-- Note info pane -->
 						<groupbox id="zotero-view-note" flex="1">
-							<zoteronoteeditor id="zotero-note-editor" flex="1"/>
+							<zoteronoteeditor id="zotero-note-editor" flex="1" notitle="1"/>
 							<button id="zotero-view-note-button" label="&zotero.notes.separate;" oncommand="ZoteroPane.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ZoteroPane.selectItem(this.getAttribute('sourceID'));"/>
 						</groupbox>
 						<!-- Attachment info pane -->

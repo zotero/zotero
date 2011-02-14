@@ -6,7 +6,7 @@
 <!ENTITY zotero.search.joinMode.suffix		"of the following:">
 
 <!ENTITY zotero.search.recursive.label		"Search subfolders">
-<!ENTITY zotero.search.noChildren			"Only show top-level items">
+<!ENTITY zotero.search.noChildren			"Show only top-level items">
 <!ENTITY zotero.search.includeParentsAndChildren	"Include parent and child items of matching items">
 
 <!ENTITY zotero.search.textModes.phrase	"Phrase">
