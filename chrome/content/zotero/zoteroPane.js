@@ -2346,6 +2346,10 @@ var ZoteroPane = new function()
 			}
 			
 			if (itemGroup.isSearch()) {
+				// Don't do anything on double-click of Unfiled Items
+				if ((itemGroup.ref.id + "").match(/^8634533000/)) { // 'UNFILED000'
+					return;
+				}
 				ZoteroPane.editSelectedCollection();
 				return;
 			}
