@@ -106,7 +106,9 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 		var unfiledLibraries = Zotero.Prefs.get('unfiledLibraries').split(',');
 	}
 	catch (e) {
-		unfiledLibraries = [];
+		// Add to personal library by default
+		Zotero.Prefs.set('unfiledLibraries', '0');
+		unfiledLibraries = ['0'];
 	}
 	
 	var self = this;
