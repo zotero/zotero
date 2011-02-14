@@ -37,6 +37,8 @@
 <!ENTITY zotero.tabs.related.label "관련 페이지">
 <!ENTITY zotero.notes.separate "분리 창으로 편집">
 
+<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+
 <!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "형식">
 <!ENTITY zotero.items.title_column "제목">

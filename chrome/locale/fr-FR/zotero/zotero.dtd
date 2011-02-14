@@ -37,6 +37,8 @@
 <!ENTITY zotero.tabs.related.label "Connexe">
 <!ENTITY zotero.notes.separate "Éditer dans une nouvelle fenêtre">
 
+<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+
 <!ENTITY zotero.items.itemType "Type de document">
 <!ENTITY zotero.items.type_column "Type">
 <!ENTITY zotero.items.title_column "Titre">

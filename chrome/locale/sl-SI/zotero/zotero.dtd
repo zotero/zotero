@@ -37,6 +37,8 @@
 <!ENTITY zotero.tabs.related.label "Sorodno">
 <!ENTITY zotero.notes.separate "Uredi v ločenem oknu">
 
+<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+
 <!ENTITY zotero.items.itemType "Vrsta vnosa">
 <!ENTITY zotero.items.type_column "Vrsta">
 <!ENTITY zotero.items.title_column "Naslov">

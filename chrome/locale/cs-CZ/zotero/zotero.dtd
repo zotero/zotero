@@ -37,6 +37,8 @@
 <!ENTITY zotero.tabs.related.label "Související">
 <!ENTITY zotero.notes.separate "Upravit v samostatném okně">
 
+<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+
 <!ENTITY zotero.items.itemType "Typ položky">
 <!ENTITY zotero.items.type_column "Typ">
 <!ENTITY zotero.items.title_column "Název">
