@@ -37,6 +37,8 @@
 <!ENTITY zotero.tabs.related.label "Súvisiace">
 <!ENTITY zotero.notes.separate "Upraviť v samostatnom okne">
 
+<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+
 <!ENTITY zotero.items.itemType "Typ položky">
 <!ENTITY zotero.items.type_column "Typ">
 <!ENTITY zotero.items.title_column "Názov">

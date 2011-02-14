@@ -37,6 +37,8 @@
 <!ENTITY zotero.tabs.related.label "Близки">
 <!ENTITY zotero.notes.separate "Редактира в отделен прозорец">
 
+<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+
 <!ENTITY zotero.items.itemType "Вид запис">
 <!ENTITY zotero.items.type_column "Вид">
 <!ENTITY zotero.items.title_column "Заглавие">

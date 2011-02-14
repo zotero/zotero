@@ -37,6 +37,8 @@
 <!ENTITY zotero.tabs.related.label "Zerikusia">
 <!ENTITY zotero.notes.separate "Editatu lehio berri batean">
 
+<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+
 <!ENTITY zotero.items.itemType "Item mota">
 <!ENTITY zotero.items.type_column "Mota">
 <!ENTITY zotero.items.title_column "Izenburua">

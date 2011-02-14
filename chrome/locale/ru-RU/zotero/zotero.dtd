@@ -37,6 +37,8 @@
 <!ENTITY zotero.tabs.related.label "Связанные">
 <!ENTITY zotero.notes.separate "Редактировать в отдельном окне">
 
+<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+
 <!ENTITY zotero.items.itemType "Тип документа">
 <!ENTITY zotero.items.type_column "Тип">
 <!ENTITY zotero.items.title_column "Название">

@@ -37,6 +37,8 @@
 <!ENTITY zotero.tabs.related.label "مواضيع مرتبطة">
 <!ENTITY zotero.notes.separate "حرر في نافذة منفصلة">
 
+<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+
 <!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.type_column "النوع">
 <!ENTITY zotero.items.title_column "العنوان">

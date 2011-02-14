@@ -37,6 +37,8 @@
 <!ENTITY zotero.tabs.related.label "Relații">
 <!ENTITY zotero.notes.separate "Editează într-o fereastră separată">
 
+<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+
 <!ENTITY zotero.items.itemType "Tip item">
 <!ENTITY zotero.items.type_column "Tip">
 <!ENTITY zotero.items.title_column "Titlu">

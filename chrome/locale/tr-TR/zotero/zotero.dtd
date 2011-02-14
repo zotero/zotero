@@ -37,6 +37,8 @@
 <!ENTITY zotero.tabs.related.label "İligili">
 <!ENTITY zotero.notes.separate "Ayrı bir pencerede düzenle">
 
+<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+
 <!ENTITY zotero.items.itemType "Eser Türü">
 <!ENTITY zotero.items.type_column "Tür">
 <!ENTITY zotero.items.title_column "Başlık">

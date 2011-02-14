@@ -7,6 +7,9 @@
 <!ENTITY zotero.preferences.prefpane.general "Allmänt">
 
 <!ENTITY zotero.preferences.userInterface "Användargränssnitt">
+<!ENTITY zotero.preferences.showIn "Load Zotero in:">
+<!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
+<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
 <!ENTITY zotero.preferences.statusBarIcon "Ikon i statusfält:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Ingen">
 <!ENTITY zotero.preferences.fontSize "Teckenstorlek:">
@@ -25,6 +28,8 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Ta automatiskt lokala kopior när källor skapas av hemsidor">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Bifoga automatiskt associerade PDF- och andra filer när källor sparas">
 <!ENTITY zotero.preferences.automaticTags "Källor förses automatiskt med nyckelord och ämnesord">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
 
 <!ENTITY zotero.preferences.groups "Grupper">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "När källor kopieras mellan bibliotek, ta med:">
@@ -94,13 +99,17 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Utdataformat">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Stäng av snabbkopiering om fler än ... filer är markerade.">
 
+<!ENTITY zotero.preferences.prefpane.cite "Cite">
+<!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
 
-<!ENTITY zotero.preferences.prefpane.styles "Stilar">
-
-<!ENTITY zotero.preferences.styles.styleManager "Stilhanterare">
-<!ENTITY zotero.preferences.styles.styleManager.title "Titel">
-<!ENTITY zotero.preferences.styles.styleManager.updated "Uppdaterad">
-<!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Skaffa ytterligare stilar...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Genvägsknappar">
@@ -125,6 +134,8 @@
 <!ENTITY zotero.preferences.proxies.desc_link "manualen om proxyservrar">
 <!ENTITY zotero.preferences.proxies.desc_after_link "för mer information.">
 <!ENTITY zotero.preferences.proxies.transparent "Skicka frågor transparent genom tidigare använda proxyservrar">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
 <!ENTITY zotero.preferences.proxies.configured "Inställda proxyservrar">
 <!ENTITY zotero.preferences.proxies.hostname "Hostnamn">
 <!ENTITY zotero.preferences.proxies.scheme "Inställningar">
@@ -139,6 +150,14 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Vilken sträng som helst">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avancerat">
+
+<!ENTITY zotero.preferences.prefpane.locate "Locate">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
+<!ENTITY zotero.preferences.locate.description "Description">
+<!ENTITY zotero.preferences.locate.name "Name">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
+<!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
 
 <!ENTITY zotero.preferences.charset "Teckenkod">
 <!ENTITY zotero.preferences.charset.importCharset "Importera teckenkod">
