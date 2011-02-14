@@ -1,7 +1,7 @@
 <!ENTITY zotero.search.name "Namn:">
 
-<!ENTITY zotero.search.joinMode.prefix "Matcha">
-<!ENTITY zotero.search.joinMode.any "any">
+<!ENTITY zotero.search.joinMode.prefix "Hitta">
+<!ENTITY zotero.search.joinMode.any "vilken som helst">
 <!ENTITY zotero.search.joinMode.all "alla">
 <!ENTITY zotero.search.joinMode.suffix "av följande:">
 

@@ -37,6 +37,8 @@
 <!ENTITY zotero.tabs.related.label "Сродно">
 <!ENTITY zotero.notes.separate "Уреди у одвојеном прозору">
 
+<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+
 <!ENTITY zotero.items.itemType "Тип ставке">
 <!ENTITY zotero.items.type_column "Врста">
 <!ENTITY zotero.items.title_column "Наслов">
