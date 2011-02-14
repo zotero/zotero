@@ -1015,6 +1015,11 @@ Zotero.Search.prototype._buildQuery = function(){
 					var includeChildren = this._conditions[i]['operator'] == 'true';
 					continue;
 				
+				case 'unfiled':
+					this._conditions[i]['operator']
+					var unfiled = this._conditions[i]['operator'] == 'true';
+					continue;
+				
 				// Search subfolders
 				case 'recursive':
 					var recursive = this._conditions[i]['operator']=='true';
@@ -1061,6 +1066,15 @@ Zotero.Search.prototype._buildQuery = function(){
 			+ "WHERE sourceItemID IS NOT NULL) AND itemID NOT IN "
 			+ "(SELECT itemID FROM itemAttachments "
 			+ "WHERE sourceItemID IS NOT NULL))";
+	}
+	
+	if (unfiled) {
+		sql += " AND (itemID NOT IN (SELECT itemID FROM collectionItems) "
+			// Exclude children
+			+ "AND itemID NOT IN "
+			+ "(SELECT itemID FROM itemAttachments WHERE sourceItemID IS NOT NULL "
+			+ "UNION SELECT itemID FROM itemNotes WHERE sourceItemID IS NOT NULL)"
+			+ ")";
 	}
 	
 	if (this._hasPrimaryConditions) {
@@ -1754,6 +1768,14 @@ Zotero.SearchConditions = new function(){
 			},
 			
 			{
+				name: 'unfiled',
+				operators: {
+					true: true,
+					false: true
+				}
+			},
+			
+			{
 				name: 'includeParentsAndChildren',
 				operators: {
 					true: true,
@@ -2070,7 +2092,6 @@ Zotero.SearchConditions = new function(){
 				},
 				special: true
 			},
-			
 			
 			{
 				name: 'fulltextContent',

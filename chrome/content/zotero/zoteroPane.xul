@@ -216,6 +216,7 @@
 					<menuitem label="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane.newSearch()"/>
 					<menuitem label="&zotero.toolbar.newSubcollection.label;" oncommand="ZoteroPane.newCollection(ZoteroPane.getSelectedCollection().id)"/>
 					<menuseparator/>
+					<menuitem label="&zotero.collections.showUnfiledItems;" oncommand="ZoteroPane.setUnfiled(ZoteroPane.getSelectedLibraryID(), true)"/>
 					<menuitem oncommand="ZoteroPane.editSelectedCollection();"/>
 					<menuitem oncommand="ZoteroPane.deleteSelectedCollection();"/>
 					<menuseparator/>
