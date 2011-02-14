@@ -227,6 +227,12 @@ var CSL = {
 		"@vertical-align",
 		"@quotes"
 	],
+	INSTITUTION_KEYS: [
+		"font-style",
+		"font-variant",
+		"font-weight",
+		"text-decoration"
+	],
 	SUFFIX_CHARS: "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z",
 	ROMAN_NUMERALS: [
 		[ "", "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix" ],
@@ -434,7 +440,7 @@ CSL_E4X.prototype.insertChildNodeAfter = function (parent,node,pos,datexml) {
 	return parent;
 };
 CSL_E4X.prototype.addInstitutionNodes = function(myxml) {
-	var institution_long, institution_short, children, node, xml;
+	var institution_long, institution_short, name_part, children, node, xml;
 	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
 	institution_long = <institution
 		institution-parts="long"
@@ -446,10 +452,24 @@ CSL_E4X.prototype.addInstitutionNodes = function(myxml) {
 		delimiter=", "
 		substitute-use-first="1"
 		use-last="1"/>;
+	name_part = <name-part />;
 	for each (node in myxml..names) {
 		if ("xml" == typeof node && node.elements("name").length() > 0) {
 			if (!node.institution.toString()) {
 				node.name += institution_long;
+				for each (var attr in CSL.INSTITUTION_KEYS) {
+						if (node.name.@[attr].toString()) {
+							node.institution.@[attr] = node.name.@[attr].toString();
+						}
+					}
+				if (node.name['name-part'] && node.name['name-part'].@name.toString() === 'family') {
+					node.name += name_part;
+					for each (var attr in CSL.INSTITUTION_KEYS) {
+							if (node.name['name-part'].@[attr].toString()) {
+								node.institution.@[attr] = node.name['name-part'].@[attr].toString();
+							}
+						}
+				}
 			}
 		}
 	}
@@ -1732,7 +1752,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.112";
+	this.processor_version = "1.0.113";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
