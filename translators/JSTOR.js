@@ -3,7 +3,7 @@
 	"label":"JSTOR",
 	"creator":"Simon Kornblith, Sean Takats, Michael Berkowitz, and Eli Osherovich",
 	"target":"https?://[^/]*jstor\\.org[^/]*/(action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/)",
-	"minVersion":"1.0.0b4.r1",
+	"minVersion":"2.1b6",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":"1",
@@ -35,32 +35,6 @@ function detectWeb(doc, url) {
 	if(elmt || url.match(/pss/)) {
 	return "journalArticle";
 	}
-}
-
-
-Zotero.Utilities.processAsync = function (sets, callbacks, onDone) {
-	var currentSet;
-	var index = 0;
-	
-	var nextSet = function () {
-		if (!sets.length) {
-			onDone();
-			return;
-		}
-		index = 0;
-		currentSet = sets.shift();
-		callbacks[0](currentSet, nextCallback);
-	};
-	var nextCallback = function () {
-		index++;
-		callbacks[index](currentSet, nextCallback);
-	};
-	
-	// Add a final callback to proceed to the next set
-	callbacks[callbacks.length] = function () {
-		nextSet();
-	}
-	nextSet();
 }
 
 function doWeb(doc, url) {
