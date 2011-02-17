@@ -3279,8 +3279,8 @@ Zotero.Item.prototype.getBestAttachment = function() {
 
 /*
  * Looks for attachment in the following order: oldest PDF attachment matching parent URL,
- * oldest non-PDF attachment matching parent URL, oldest PDF attachment not matching URL,
- * old non-PDF attachment not matching URL
+ * oldest PDF attachment not matching parent URL, oldest non-PDF attachment matching parent URL,
+ * old non-PDF attachment not matching parent URL
  *
  * @return	{Array}		itemIDs for attachments
  */
@@ -3296,7 +3296,7 @@ Zotero.Item.prototype.getBestAttachments = function() {
 		+ "LEFT JOIN itemDataValues IDV ON (ID.valueID=IDV.valueID) "
 		+ "WHERE sourceItemID=? AND linkMode NOT IN (?) "
 		+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
-		+ "ORDER BY value=? DESC, mimeType='application/pdf' DESC, dateAdded ASC";
+		+ "ORDER BY mimeType='application/pdf' DESC, value=? DESC, dateAdded ASC";
 	return Zotero.DB.columnQuery(sql, [this.id, Zotero.Attachments.LINK_MODE_LINKED_URL, url]);
 }
 
