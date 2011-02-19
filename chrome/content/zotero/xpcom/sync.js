@@ -815,8 +815,9 @@ Zotero.Sync.Runner = new function () {
 		
 		while (enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
-			var warning = win.document.getElementById('zotero-tb-sync-warning');
-			var icon = win.document.getElementById('zotero-tb-sync');
+			if(!win.ZoteroPane) continue;
+			var warning = win.ZoteroPane.document.getElementById('zotero-tb-sync-warning');
+			var icon = win.ZoteroPane.document.getElementById('zotero-tb-sync');
 			
 			if (status == 'warning' || status == 'error') {
 				icon.setAttribute('status', '');
