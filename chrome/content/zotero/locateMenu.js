@@ -34,7 +34,7 @@ var Zotero_LocateMenu = new function() {
   	/**
   	 * Clear and build the locate menu
   	 */
-	this.buildLocateMenu = function(menu, useIcons, ) {
+	this.buildLocateMenu = function() {
 		var locateMenu = document.getElementById('zotero-tb-locate-menu');
 		
 		// clear menu
@@ -51,7 +51,6 @@ var Zotero_LocateMenu = new function() {
 			for each(var item in selectedItems) {
 				for(var viewOption in ViewOptions) {
 					if(!optionsToShow[viewOption]) {
-						Zotero.debug("testing "+viewOption);
 						optionsToShow[viewOption] = ViewOptions[viewOption].canHandleItem(item);
 					}
 				}
@@ -64,7 +63,6 @@ var Zotero_LocateMenu = new function() {
 				var menuitem = _createMenuItem(Zotero.getString("locate."+viewOption+".label"),
 					null, Zotero.getString("locate."+viewOption+".tooltip"));
 				menuitem.setAttribute("class", "menuitem-iconic");
-				Zotero.debug("icon is "+ViewOptions[viewOption].icon);
 				menuitem.setAttribute("image", ViewOptions[viewOption].icon);
 				locateMenu.appendChild(menuitem);
 				
