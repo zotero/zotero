@@ -1,41 +1,41 @@
 <!ENTITY zotero.preferences.title "Inställningar i Zotero">
 
-<!ENTITY zotero.preferences.default "Standard:">
+<!ENTITY zotero.preferences.default "Standardinställningar">
 <!ENTITY zotero.preferences.items "Källor">
 <!ENTITY zotero.preferences.period ".">
 
 <!ENTITY zotero.preferences.prefpane.general "Allmänt">
 
 <!ENTITY zotero.preferences.userInterface "Användargränssnitt">
-<!ENTITY zotero.preferences.showIn "Load Zotero in:">
-<!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
-<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
+<!ENTITY zotero.preferences.showIn "Ladda Zotero i:">
+<!ENTITY zotero.preferences.showIn.browserPane "Webbläsarfönstret">
+<!ENTITY zotero.preferences.showIn.separateTab "Separat tab">
 <!ENTITY zotero.preferences.statusBarIcon "Ikon i statusfält:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Ingen">
+<!ENTITY zotero.preferences.statusBarIcon.none "Ingen ikon">
 <!ENTITY zotero.preferences.fontSize "Teckenstorlek:">
 <!ENTITY zotero.preferences.fontSize.small "Liten">
-<!ENTITY zotero.preferences.fontSize.medium "Medium">
+<!ENTITY zotero.preferences.fontSize.medium "Mellan">
 <!ENTITY zotero.preferences.fontSize.large "Stor">
-<!ENTITY zotero.preferences.fontSize.notes "Notstorlek:">
+<!ENTITY zotero.preferences.fontSize.notes "Storlek på anteckningar">
 
 <!ENTITY zotero.preferences.miscellaneous "Blandat">
 <!ENTITY zotero.preferences.autoUpdate "Kolla automatiskt efter nya källfångare">
 <!ENTITY zotero.preferences.updateNow "Uppdatera nu">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapportera felaktiga källfångare">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillåt zotero.org att justera innehåll beroende på nuvarande Zoteroversion">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Tillåt zotero.org att justera innehåll beroende på installerad Zoteroversion">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Visa för zotero.org vilken version av programmet jag använder">
 <!ENTITY zotero.preferences.parseRISRefer "Använd Zotero för att ladda ner RIS/Refer-filer">
 <!ENTITY zotero.preferences.automaticSnapshots "Ta automatiskt lokala kopior när källor skapas av hemsidor">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Bifoga automatiskt associerade PDF- och andra filer när källor sparas">
 <!ENTITY zotero.preferences.automaticTags "Källor förses automatiskt med nyckelord och ämnesord">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Radera automatiskt källor i papperskorgen som raderats för mer än">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dagar sen">
 
 <!ENTITY zotero.preferences.groups "Grupper">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "När källor kopieras mellan bibliotek, ta med:">
-<!ENTITY zotero.preferences.groups.childNotes "underliggande anteckningar">
-<!ENTITY zotero.preferences.groups.childFiles "underliggande sparade hemsidor och lokala filer">
-<!ENTITY zotero.preferences.groups.childLinks "underliggande länkar">
+<!ENTITY zotero.preferences.groups.childNotes "tillhörande anteckningar">
+<!ENTITY zotero.preferences.groups.childFiles "tillhörande sparade hemsidor och lokala filer">
+<!ENTITY zotero.preferences.groups.childLinks "tillhörande länkar">
 
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
 
@@ -58,11 +58,11 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Synkronisera bifogade filer i gruppens bibliotek med Zotero storage">
 <!ENTITY zotero.preferences.sync.fileSyncing.about "Om filsynkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Genom att använda Zotero Storage går du med på deras">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "villkor">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "affärsvillkor">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Komplett synkronisering med Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Sätt ihop Zoterodata med data från synkroniseringsservern, utan att ta hänsyn till historik.">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Sätt ihop lokala Zoterodata med data från synkroniseringsservern, utan att ta hänsyn till historik.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Återställ från Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Radera alla lokal Zoterodata och återställ från synkroniseringsservern.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Radera alla lokala Zoterodata och återställ från synkroniseringsservern.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Återställ till Zotero Server">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Byt ut allt innehåll på Zotero Server mot lokala Zoterodata.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Återställ filsynkroniseringshistorik">
@@ -76,7 +76,7 @@
 <!ENTITY zotero.preferences.search.indexStats "Index-statistik">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indexerat:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Ofullständigt:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Delvis:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Ej indexerat:">
 <!ENTITY zotero.preferences.search.indexStats.words "Ord:">
 
@@ -85,12 +85,12 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Exportera">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Inställningar för citeringar">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Länka till papperstidningars webbadresser i källförteckningen">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "När detta är bortvalt lägger Zotero bara till länken om papperstidningen inte har ett sidintervall specificerat.">
+<!ENTITY zotero.preferences.citationOptions.caption "Inställningar för källhänvisningar">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Länka till papperstidningars webbsida i källförteckningen">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "När detta är bortvalt lägger Zotero bara till webblänken om artikeln inte har ett sidintervall specificerat.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Snabbkopiera">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Utdataformat som standard">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Standardformat på utdata">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopiera som HTML">
 <!ENTITY zotero.preferences.quickCopy.macWarning "OBS: Rich-text-format försvinner i Mac OS X.">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Webbplats-specifika inställningar:">
@@ -99,32 +99,32 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Utdataformat">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Stäng av snabbkopiering om fler än ... filer är markerade.">
 
-<!ENTITY zotero.preferences.prefpane.cite "Cite">
-<!ENTITY zotero.preferences.cite.styles "Styles">
-<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
+<!ENTITY zotero.preferences.prefpane.cite "Källhänvisa">
+<!ENTITY zotero.preferences.cite.styles "Stilar">
+<!ENTITY zotero.preferences.cite.wordProcessors "Ordbehandlare">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Inget insticksprogram för ordbehandlare är installerat.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Hämtar insticksprogram för ordbehandlare...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/sv/word_processor_plugin_installation">
 
-<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Stilhanterare">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Uppdaterad">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Skaffa ytterligare stilar...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Lägg till ytterligare stilar...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Genvägsknappar">
 
-<!ENTITY zotero.preferences.keys.openZotero "Öppns/Stäng Zotero-rutan">
+<!ENTITY zotero.preferences.keys.openZotero "Öppna/Stäng Zotero-panelen">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Växla fullskärmsläge">
 <!ENTITY zotero.preferences.keys.library "Bibliotek">
 <!ENTITY zotero.preferences.keys.quicksearch "Snabbsökning">
-<!ENTITY zotero.preferences.keys.newItem "Skapa en ny post">
+<!ENTITY zotero.preferences.keys.newItem "Lagra en ny källa">
 <!ENTITY zotero.preferences.keys.newNote "Skapa en ny anteckning">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Växla etikettväljare">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiera valda källanteckningar till urklipp">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiera valda källor till urklipp">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Klistra in från urklipp">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Försök kringgå motsägelsefulla genvägar">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Försök kringgå motsägelsefulla genvägsknappar">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Ändringar gäller bara i nya fönster">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proxyservrar">
@@ -133,8 +133,8 @@
 <!ENTITY zotero.preferences.proxies.desc_before_link "Zotero skickar frågor genomsynligt genom sparade proxyservrar. Läs">
 <!ENTITY zotero.preferences.proxies.desc_link "manualen om proxyservrar">
 <!ENTITY zotero.preferences.proxies.desc_after_link "för mer information.">
-<!ENTITY zotero.preferences.proxies.transparent "Skicka frågor transparent genom tidigare använda proxyservrar">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
+<!ENTITY zotero.preferences.proxies.transparent "Kom ihåg tidigare proxyservrar automatiskt">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Upptäck proxytjänster automatiskt">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
 <!ENTITY zotero.preferences.proxies.configured "Inställda proxyservrar">
 <!ENTITY zotero.preferences.proxies.hostname "Hostnamn">
@@ -151,13 +151,13 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avancerat">
 
-<!ENTITY zotero.preferences.prefpane.locate "Locate">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
-<!ENTITY zotero.preferences.locate.description "Description">
+<!ENTITY zotero.preferences.prefpane.locate "Hitta">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Hantera sökjänst för artiklar">
+<!ENTITY zotero.preferences.locate.description "Beskrivning">
 <!ENTITY zotero.preferences.locate.name "Name">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
-<!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "En söktjänst förbättrar funktionerna i Hitta-menyn ovanför Infofliken. Genom att aktivera söktjänsterna nedan läggs de till Hitta-menyn och kan användas för att hitta källor på ditt bibliotek eller på nätet.">
+<!ENTITY zotero.preferences.locate.addDescription "För att lägga till en söktjänst som inte finns på listan, gå till söktjänstens hemsida  och lägg till den i Firefox sökruta. När du öppnar den här sidan igen kommer den nya söktjänsten att finnas med på listan.">
+<!ENTITY zotero.preferences.locate.restoreDefaults "Återställ till standard">
 
 <!ENTITY zotero.preferences.charset "Teckenkod">
 <!ENTITY zotero.preferences.charset.importCharset "Importera teckenkod">
@@ -170,14 +170,14 @@
 <!ENTITY zotero.preferences.dataDir.reveal "Visa datakatalog">
 
 <!ENTITY zotero.preferences.dbMaintenance "Databasunderhåll">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Undersök databasintegritet">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Undersök om databasen är oskadd">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Återställ källfångare och stilar...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Återställ källfångare...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Återställ stilar...">
 
 <!ENTITY zotero.preferences.debugOutputLogging "Skapa logg för Zoteros interna tillstånd">
 <!ENTITY zotero.preferences.debugOutputLogging.message "En logg kan hjälpa Zoteros utvecklare att diagnosticera problem i Zotero. Att skapa loggar kommer att sakta ner Zotero, så det bör inte vara påslaget om man inte vill felsöka Zotero.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "rader i loggen">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "loggade rader">
 <!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Sätt på efter omstart">
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Visa internt tillstånd">
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Radera info om internt tillstånd">
