@@ -1,54 +1,54 @@
-<!ENTITY fileMenu.label "File">
+<!ENTITY fileMenu.label "Fil">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY closeCmd.label "Close">
+<!ENTITY closeCmd.label "Stäng">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY quitApplicationCmdWin.label "Exit">
+<!ENTITY quitApplicationCmdWin.label "Gå ur">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
-<!ENTITY quitApplicationCmd.label "Quit">
+<!ENTITY quitApplicationCmd.label "Avsluta">
 <!ENTITY quitApplicationCmd.accesskey "Q">
-<!ENTITY quitApplicationCmdMac.label "Quit Zotero">
+<!ENTITY quitApplicationCmdMac.label "Avsluta Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-<!ENTITY editMenu.label "Edit">
+<!ENTITY editMenu.label "Redigera">
 <!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Undo">
+<!ENTITY undoCmd.label "Ångra">
 <!ENTITY undoCmd.key "Z">
 <!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Redo">
+<!ENTITY redoCmd.label "Gör om">
 <!ENTITY redoCmd.key "Y">
 <!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Cut">
+<!ENTITY cutCmd.label "Klipp ut">
 <!ENTITY cutCmd.key "X">
 <!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Copy">
+<!ENTITY copyCmd.label "Kopiera">
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.accesskey "C">
-<!ENTITY pasteCmd.label "Paste">
+<!ENTITY pasteCmd.label "Klistra in">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Delete">
+<!ENTITY deleteCmd.label "Radera">
 <!ENTITY deleteCmd.key "D">
 <!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Select All">
+<!ENTITY selectAllCmd.label "Välj alla">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Options…">
+<!ENTITY preferencesCmd.label "Val…">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Preferences">
+<!ENTITY preferencesCmdUnix.label "Inställningar">
 <!ENTITY preferencesCmdUnix.accesskey "n">
 
-<!ENTITY findOnCmd.label "Find in This Page…">
+<!ENTITY findOnCmd.label "Sök på denna sida…">
 <!ENTITY findOnCmd.accesskey "F">
 <!ENTITY findOnCmd.commandkey "f">
-<!ENTITY findAgainCmd.label "Find Again">
+<!ENTITY findAgainCmd.label "Hitta igen">
 <!ENTITY findAgainCmd.accesskey "g">
 <!ENTITY findAgainCmd.commandkey "g">
 <!ENTITY findAgainCmd.commandkey2 "VK_F3">
 
-<!ENTITY bidiSwitchPageDirectionItem.label "Switch Page Direction">
+<!ENTITY bidiSwitchPageDirectionItem.label "Växla sidans läge">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
-<!ENTITY bidiSwitchTextDirectionItem.label "Switch Text Direction">
+<!ENTITY bidiSwitchTextDirectionItem.label "Växla textflöde">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
@@ -58,23 +58,23 @@
 
 
 
-<!ENTITY fullZoomEnlargeCmd.label "Zoom In">
+<!ENTITY fullZoomEnlargeCmd.label "Zooma in">
 <!ENTITY fullZoomEnlargeCmd.accesskey "I">
 <!ENTITY fullZoomEnlargeCmd.commandkey "+">
 
 
 
-<!ENTITY fullZoomReduceCmd.label "Zoom Out">
+<!ENTITY fullZoomReduceCmd.label "Zooma ut">
 <!ENTITY fullZoomReduceCmd.accesskey "O">
 <!ENTITY fullZoomReduceCmd.commandkey "-">
 
 
-<!ENTITY fullZoomResetCmd.label "Reset">
+<!ENTITY fullZoomResetCmd.label "Återställ">
 <!ENTITY fullZoomResetCmd.accesskey "R">
 
 
 
-<!ENTITY fullZoomToggleCmd.label "Zoom Text Only">
+<!ENTITY fullZoomToggleCmd.label "Zooma endast text">
 <!ENTITY fullZoomToggleCmd.accesskey "T">
 <!ENTITY fullZoom.label "Zoom">
 <!ENTITY fullZoom.accesskey "Z">

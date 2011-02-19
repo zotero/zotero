@@ -9,7 +9,7 @@
 <!ENTITY zotero.errorReport.submissionInProgress "Var vänlig vänta medan felrapporten skickas.">
 <!ENTITY zotero.errorReport.submitted "Felrapporten har skickats.">
 <!ENTITY zotero.errorReport.reportID "Rapport-ID:">
-<!ENTITY zotero.errorReport.postToForums "Skriv ett meddelande på Zoteros forum (forums.zotero.org) med detta Rapport-ID, en beskrivning av problemet, och vad man behöver göra för att få samma fel igen.">
+<!ENTITY zotero.errorReport.postToForums "Skriv ett meddelande på Zoteros forum (forums.zotero.org) med detta rapport-ID, en beskrivning av problemet, och vad man behöver göra för att få samma fel igen.">
 <!ENTITY zotero.errorReport.notReviewed "Felrapporter brukar inte kontrolleras om ingen skriver om dem på forumen.">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "Du har installerat en ny version av Zotero.">
@@ -20,24 +20,24 @@
 <!ENTITY zotero.upgrade.majorUpgradeLink "uppgraderingsinstruktionerna">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "innan du fortsätter.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Var vänlig vänta tills uppgraderingsprocessen avslutas. Det kan ta några minuter.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Din Zoterodatabas har uppgraderats med lyckat resultat.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "Var vänlig se">
-<!ENTITY zotero.upgrade.changeLogLink "ändringsloggen">
-<!ENTITY zotero.upgrade.changeLogAfterLink "för att se vad som är nytt.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Zotero lyckades uppdatera databasen">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Gå till">
+<!ENTITY zotero.upgrade.changeLogLink "Changelog">
+<!ENTITY zotero.upgrade.changeLogAfterLink "för att se vad som är nytt eller ändrat.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Lägg till det valda som en Zotero-anteckning">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Skapa en Zotero-post och anteckning av det valda">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Lägg till det valda till en Zotero-anteckning">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Skapa en Zotero-anteckning av det valda">
 <!ENTITY zotero.contextMenu.saveLinkAsItem "Spara länk som en Zotero-källa">
 <!ENTITY zotero.contextMenu.saveImageAsItem "Spara bild som en Zotero-källa">
 
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Anteckningar">
-<!ENTITY zotero.tabs.attachments.label "Bifogade dokument">
+<!ENTITY zotero.tabs.attachments.label "Bilagor">
 <!ENTITY zotero.tabs.tags.label "Etiketter">
-<!ENTITY zotero.tabs.related.label "Besläktade">
+<!ENTITY zotero.tabs.related.label "Liknande källor">
 <!ENTITY zotero.notes.separate "Redigera i ett separat fönster">
 
-<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.collections.showUnfiledItems "Visa oregistererade källor">
 
 <!ENTITY zotero.items.itemType "Källtyp">
 <!ENTITY zotero.items.type_column "Typ">
@@ -46,16 +46,16 @@
 <!ENTITY zotero.items.date_column "Datum">
 <!ENTITY zotero.items.year_column "År">
 <!ENTITY zotero.items.publisher_column "Förlag">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.publication_column "Tidskriftens namn">
+<!ENTITY zotero.items.journalAbbr_column "Tidskriftens förkortning">
 <!ENTITY zotero.items.language_column "Språk">
-<!ENTITY zotero.items.accessDate_column "Hämtad">
+<!ENTITY zotero.items.accessDate_column "Hämtdatum">
 <!ENTITY zotero.items.libraryCatalog_column "Bokkatalog">
 <!ENTITY zotero.items.callNumber_column "Hyllkod">
 <!ENTITY zotero.items.rights_column "Rättigheter">
 <!ENTITY zotero.items.dateAdded_column "Tillagt datum">
 <!ENTITY zotero.items.dateModified_column "Ändrat datum">
-<!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.numChildren_column "Visa/dölj underordnade">
 
 <!ENTITY zotero.items.menu.showInLibrary "Visa i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Lägg till anteckning">
@@ -82,22 +82,22 @@
 <!ENTITY zotero.toolbar.import.label "Importera...">
 <!ENTITY zotero.toolbar.importFromClipboard "Importera från urklipp">
 <!ENTITY zotero.toolbar.export.label "Exportera bibliotek...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
+<!ENTITY zotero.toolbar.rtfScan.label "Läs in RTF...">
 <!ENTITY zotero.toolbar.timeline.label "Skapa tidslinje">
 <!ENTITY zotero.toolbar.duplicate.label "Visa dubletter">
 <!ENTITY zotero.toolbar.preferences.label "Inställningar...">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Support och dokumentation">
+<!ENTITY zotero.toolbar.supportAndDocumentation "Hjälp och dokumentation">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Avancerad sök:">
-<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
+<!ENTITY zotero.toolbar.advancedSearch "Avancerad sökning">
+<!ENTITY zotero.toolbar.tab.tooltip "Växla tabläge">
 <!ENTITY zotero.toolbar.openURL.label "Hitta">
-<!ENTITY zotero.toolbar.openURL.tooltip "Hitta genom ditt lokala bibliotek">
+<!ENTITY zotero.toolbar.openURL.tooltip "Hitta på ditt lokala bibliotek">
 
 <!ENTITY zotero.item.add "Lägg till">
 <!ENTITY zotero.item.attachment.file.show "Visa fil">
 <!ENTITY zotero.item.textTransform "Omvandla text">
 <!ENTITY zotero.item.textTransform.lowercase "gemener">
-<!ENTITY zotero.item.textTransform.titlecase "Titelstilkast">
+<!ENTITY zotero.item.textTransform.titlecase "engelsk titelskrivning">
 
 <!ENTITY zotero.toolbar.note.standalone "Ny fristående anteckning">
 <!ENTITY zotero.toolbar.lookup "Sök med registreringsnummer...">
@@ -123,8 +123,8 @@
 <!ENTITY zotero.selectitems.cancel.label "Ångra">
 <!ENTITY zotero.selectitems.select.label "OK">
 
-<!ENTITY zotero.bibliography.title "Skapa bibliografi">
-<!ENTITY zotero.bibliography.style.label "Citeringsstil">
+<!ENTITY zotero.bibliography.title "Skapa källförteckning">
+<!ENTITY zotero.bibliography.style.label "Referensstil">
 <!ENTITY zotero.bibliography.output.label "Utdataformat">
 <!ENTITY zotero.bibliography.saveAsRTF.label "Spara som RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "Spara som HTML">
@@ -132,8 +132,8 @@
 <!ENTITY zotero.bibliography.print.label "Skriv ut">
 
 <!ENTITY zotero.integration.docPrefs.title "Dokumentinställningar">
-<!ENTITY zotero.integration.addEditCitation.title "Lägg till/redigera citering">
-<!ENTITY zotero.integration.editBibliography.title "Redigera bibliografi">
+<!ENTITY zotero.integration.addEditCitation.title "Lägg till/redigera källhänvisning">
+<!ENTITY zotero.integration.editBibliography.title "Redigera källförteckning">
 
 <!ENTITY zotero.progress.title "Förlopp">
 
@@ -156,16 +156,16 @@
 <!ENTITY zotero.richText.italic.label "Kursiv">
 <!ENTITY zotero.richText.bold.label "Fet">
 <!ENTITY zotero.richText.underline.label "Understrykning">
-<!ENTITY zotero.richText.superscript.label "Upphöjt läge">
-<!ENTITY zotero.richText.subscript.label "Nedsänkt läge">
+<!ENTITY zotero.richText.superscript.label "Upphöjd">
+<!ENTITY zotero.richText.subscript.label "Nedsänkt">
 
-<!ENTITY zotero.annotate.toolbar.add.label "Lägg till annotering">
-<!ENTITY zotero.annotate.toolbar.collapse.label "Göm alla annoteringar">
-<!ENTITY zotero.annotate.toolbar.expand.label "Visa alla annoteringar">
-<!ENTITY zotero.annotate.toolbar.highlight.label "Markera text">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "Avmarkera text">
+<!ENTITY zotero.annotate.toolbar.add.label "Lägg till anteckning">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Göm alla anteckningar">
+<!ENTITY zotero.annotate.toolbar.expand.label "Visa alla anteckningar">
+<!ENTITY zotero.annotate.toolbar.highlight.label "Framhäv text">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "Sluta framhäv text">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "Visa referens som:">
+<!ENTITY zotero.integration.prefs.displayAs.label "Visa källor som:">
 <!ENTITY zotero.integration.prefs.footnotes.label "Fotnoter">
 <!ENTITY zotero.integration.prefs.endnotes.label "Slutnoter">
 
@@ -173,7 +173,7 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bokmärken">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmärken sparas i Microsoft Word och OpenOffice, men kan ändras av misstag.">
 
-<!ENTITY zotero.integration.references.label "Referenser i bibliografi">
+<!ENTITY zotero.integration.references.label "Innehåll i källförteckningen">
 
 <!ENTITY zotero.sync.button "Synkronisera med Zoteros server">
 <!ENTITY zotero.sync.error "Synkroniseringsfel">
@@ -181,19 +181,19 @@
 <!ENTITY zotero.sync.storage.downloads "Nedladdningar:">
 <!ENTITY zotero.sync.storage.uploads "Uppladdningar:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Följande etikett i ditt Zoterobibliotek är för långt för att synkronisera med servern:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Följande etikett i ditt Zoterobibliotek är för lång för att synkronisera med servern:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synkroniserade etiketter måste vara kortare än 256 tecken.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Du kan antingen dela upp etiketten i flera etiketter, förkorta etiketten, eller radera den.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Du kan antingen dela upp etiketten i flera etiketter, förkorta den, eller radera den.">
 <!ENTITY zotero.sync.longTagFixer.split "Dela">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Dela vid det">
 <!ENTITY zotero.sync.longTagFixer.character "tecknet">
 <!ENTITY zotero.sync.longTagFixer.characters "tecknen">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Okryssade etiketter kommer inte att sparas.">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Omarkerade etiketter kommer inte att sparas.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etiketten kommer att raderas från alla källor.">
 
 <!ENTITY zotero.proxy.recognized.title "Proxy hittad">
-<!ENTITY zotero.proxy.recognized.warning "Lägg bara till proxies från ditt bibliotek, din skola, eller ett känt företag">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Andra proxies kan låtsas vara hemsidor du litar på.">
+<!ENTITY zotero.proxy.recognized.warning "Lägg bara till proxies från ditt bibliotek, din skola, eller från ett känt företag">
+<!ENTITY zotero.proxy.recognized.warning.secondary "Andra proxies kan innehålla ond kod och låtsas vara hemsidor du litar på.">
 <!ENTITY zotero.proxy.recognized.disable.label "Skicka inte automatiskt vidare frågor genom tidigare funna proxies">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorera">
 
@@ -207,21 +207,21 @@
 <!ENTITY zotero.rtfScan.cancel.label "Ångra">
 <!ENTITY zotero.rtfScan.citation.label "Referens">
 <!ENTITY zotero.rtfScan.itemName.label "Källnamn">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Överblivna referingar">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Mångtydiga referingar">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Kopplade referingar">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Överblivna källhänvisningar">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Mångtydiga källhänvisningar">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Källhänvisningar kopplade till källa">
 <!ENTITY zotero.rtfScan.introPage.label "Introduktion">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero kan automatiskt läsa av och omformatera referenser och sätta in en bibliografi i RTF-filer. Välj en RTF-fil nedan för att börja.">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero kan automatiskt läsa av och omformatera hänvisningar och sätta in en bibliografi i RTF-filer. Välj en RTF-fil nedan för att börja.">
 <!ENTITY zotero.rtfScan.introPage.description2 "Välj en RTF-fil nedan att ladda in och en att spara till:">
-<!ENTITY zotero.rtfScan.scanPage.label "Letar efter refereringar">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero letar i ditt dokument efter refereringar.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Bekräfta refererade källor">
-<!ENTITY zotero.rtfScan.citationsPage.description "Gå igenom listan nedan över igenkända refereringar för att försäkra dig om att Zotero har valt motsvarnde källor korrekt. Eventuella överblivna eller mångtydiga refereringar måste åtgärdas innan nästa steg.">
+<!ENTITY zotero.rtfScan.scanPage.label "Letar efter hänvisningar">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero letar i ditt dokument efter hänvisningar.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Bekräfta hänvisade källor">
+<!ENTITY zotero.rtfScan.citationsPage.description "Gå igenom listan nedan över igenkända källhänvisningar för att försäkra dig om att Zotero har valt motsvarande källor korrekt. Eventuella överblivna eller mångtydiga källhänvisningar måste åtgärdas innan nästa steg.">
 <!ENTITY zotero.rtfScan.stylePage.label "Dokumentformat">
-<!ENTITY zotero.rtfScan.formatPage.label "Justerar refereringar">
+<!ENTITY zotero.rtfScan.formatPage.label "Justerar källhänvisningar">
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero bearbetar och justerar din RTF-fil. ">
 <!ENTITY zotero.rtfScan.completePage.label "RTF-scanning färdig">
-<!ENTITY zotero.rtfScan.completePage.description "Ditt dokument har blivit bearbetat.Försäkra dig om att det är korrekt formaterat.">
+<!ENTITY zotero.rtfScan.completePage.description "Ditt dokument har blivit bearbetat. Försäkra dig om att det är korrekt formaterat.">
 <!ENTITY zotero.rtfScan.inputFile.label "Infil">
 <!ENTITY zotero.rtfScan.outputFile.label "Utfil">
 
