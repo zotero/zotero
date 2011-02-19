@@ -51,7 +51,6 @@ var Zotero_LocateMenu = new function() {
 			for each(var item in selectedItems) {
 				for(var viewOption in ViewOptions) {
 					if(!optionsToShow[viewOption]) {
-						Zotero.debug("testing "+viewOption);
 						optionsToShow[viewOption] = ViewOptions[viewOption].canHandleItem(item);
 					}
 				}
@@ -64,7 +63,6 @@ var Zotero_LocateMenu = new function() {
 				var menuitem = _createMenuItem(Zotero.getString("locate."+viewOption+".label"),
 					null, Zotero.getString("locate."+viewOption+".tooltip"));
 				menuitem.setAttribute("class", "menuitem-iconic");
-				Zotero.debug("icon is "+ViewOptions[viewOption].icon);
 				menuitem.setAttribute("image", ViewOptions[viewOption].icon);
 				locateMenu.appendChild(menuitem);
 				
@@ -275,24 +273,26 @@ var Zotero_LocateMenu = new function() {
 		
 		function _getURL(item) {
 			// try url field for item and for attachments
-			var urlFields = [item.getField('url')];
+			var urlField = item.getField('url');
+			if(urlField) {
+				return urlField;
+			}
+			
 			if(item.isRegularItem()) {
 				var attachments = item.getAttachments();
 				if(attachments) {
-					urlFields = urlFields.concat([attachment.getField('url')
-						for each(attachment in Zotero.Items.get(attachments))]);
-				}
-			}
-			
-			// look through url fields for non-file:/// attachments
-			for each(var urlField in urlFields) {
-				try {
-					Zotero.debug(urlField);
-					var uri = Zotero_LocateMenu.ios.newURI(urlField, null, null);
-					if(uri && uri.host && uri.scheme !== 'file') {
-						return urlField;
+					// look through url fields for non-file:/// attachments
+					for each(var attachment in Zotero.Items.get(attachments)) {
+						try {
+							Zotero.debug(urlField);
+							var uri = Zotero_LocateMenu.ios.newURI(urlField, null, null);
+							if(uri && uri.host && uri.scheme !== 'file') {
+								return urlField;
+							}
+						} catch(e) {};
 					}
-				} catch(e) {};
+					
+				}
 			}
 			
 			// if no url field, try DOI field
