@@ -273,24 +273,22 @@ var Zotero_LocateMenu = new function() {
 		
 		function _getURL(item) {
 			// try url field for item and for attachments
-			var urlFields = [item.getField('url')];
+			var urlField = item.getField('url');
+			if(urlField) {
+				var uri = Zotero_LocateMenu.ios.newURI(urlField, null, null);
+				if(uri && uri.host && uri.scheme !== 'file') return urlField;
+			}
+			
 			if(item.isRegularItem()) {
 				var attachments = item.getAttachments();
 				if(attachments) {
-					urlFields = urlFields.concat([attachment.getField('url')
-						for each(attachment in Zotero.Items.get(attachments))]);
-				}
-			}
-			
-			// look through url fields for non-file:/// attachments
-			for each(var urlField in urlFields) {
-				try {
-					Zotero.debug(urlField);
-					var uri = Zotero_LocateMenu.ios.newURI(urlField, null, null);
-					if(uri && uri.host && uri.scheme !== 'file') {
-						return urlField;
+					// look through url fields for non-file:/// attachments
+					for each(var attachment in Zotero.Items.get(attachments)) {
+						var urlField = attachment.getField('url');
+						if(urlField) return urlField;
 					}
-				} catch(e) {};
+					
+				}
 			}
 			
 			// if no url field, try DOI field
