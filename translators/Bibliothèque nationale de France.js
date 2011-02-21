@@ -8,7 +8,7 @@
         "priority":100,
         "inRepository":true,
         "translatorType":4,
-        "lastUpdated":"2010-10-03 16:10:08"
+        "lastUpdated":"2011-02-21 16:10:08"
 }
 
 /*
@@ -437,7 +437,7 @@ var BnfClass = function() {
 
 		//Store perennial url from 009 as attachment and accession number
 		var url = record.getField("009");
-		if(url && url[0][1]) {
+		if(url && url.length > 0 && url[0][1]) {
 			newItem.accessionNumber = url[0][1];
 			newItem.attachments = [
 				{
