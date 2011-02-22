@@ -15,6 +15,12 @@ textbox, tagsbox textbox
 	margin-left: 0;
 }
 
+.textbox-input-box
+{
+	margin-left: 0px;
+	margin-right: 0px;
+}
+
 
 /* DEBUG: this doesn't seem to work, unfortunately
 label[singleField=false]:after
