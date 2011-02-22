@@ -1,14 +1,14 @@
 {
-        "translatorID":"47533cd7-ccaa-47a7-81bb-71c45e68a74d",
-        "label":"Bibliothèque nationale de France",
-        "creator":"Florian Ziche",
-        "target":"^https?://[^/]*catalogue\\.bnf\\.fr",
-        "minVersion":"2.0",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":true,
-        "translatorType":4,
-        "lastUpdated":"2011-02-21 16:10:08"
+	"translatorID":"47533cd7-ccaa-47a7-81bb-71c45e68a74d",
+	"label":"Bibliothèque nationale de France",
+	"creator":"Florian Ziche",
+	"target":"^https?://[^/]*catalogue\\.bnf\\.fr",
+	"minVersion":"2.0",
+	"maxVersion":"",
+	"priority":100,
+	"inRepository":true,
+	"translatorType":4,
+	"lastUpdated":"2011-02-22 09:55:00"
 }
 
 /*
