@@ -310,7 +310,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		_serializePersist();
+		this.serializePersist();
 		
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		tagSelector.unregister();
@@ -345,7 +345,7 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		_unserializePersist();
+		this.unserializePersist();
 		
 		var containerWindow = (window.ZoteroTab ? window.ZoteroTab.containerWindow : window);
 		if(containerWindow.zoteroSavedSelection) {
@@ -393,7 +393,7 @@ var ZoteroPane = new function()
 	 * Function to be called before ZoteroPane is hidden. Does not actually hide the Zotero pane.
 	 */
 	this.makeHidden = function() {
-		_serializePersist();
+		this.serializePersist();
 	}
 	
 	function isShowing() {
@@ -3515,7 +3515,7 @@ var ZoteroPane = new function()
 	/**
 	 * Unserializes zotero-persist elements from preferences
 	 */
-	function _unserializePersist() {
+	this.unserializePersist = function() {
 		var serializedValues = Zotero.Prefs.get("pane.persist");
 		if(!serializedValues) return;
 		serializedValues = JSON.parse(serializedValues);
@@ -3539,7 +3539,7 @@ var ZoteroPane = new function()
 	/**
 	 * Serializes zotero-persist elements to preferences
 	 */
-	function _serializePersist() {
+	this.serializePersist = function() {
 		var serializedValues = {};
 		for each(var el in document.getElementsByAttribute("zotero-persist", "*")) {
 			if(!el.getAttribute) continue;
