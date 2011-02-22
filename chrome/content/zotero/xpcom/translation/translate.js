@@ -95,8 +95,7 @@ Zotero.Translate.Sandbox = {
 			// Allow progress meter to update
 			//
 			// This can probably be re-enabled for web translators once badly asynced ones are fixed
-			if (translate instanceof Zotero.Translate.Import || translate instanceof Zotero.Translate.Export) {
-				Zotero.debug("waiting");
+			if(!translate.noWait && (translate instanceof Zotero.Translate.Import || translate instanceof Zotero.Translate.Export)) {
 				Zotero.wait();
 			}
 			
@@ -418,7 +417,6 @@ Zotero.Translate.Sandbox = {
 			}
 			
 			translate._runHandler("itemDone", item);
-			Zotero.wait();
 			return item;
 		},
 		

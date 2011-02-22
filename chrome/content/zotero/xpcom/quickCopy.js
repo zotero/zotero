@@ -151,7 +151,7 @@ Zotero.QuickCopy = new function() {
 	 *
 	 * |callback| is only necessary if using an export format and should be
 	 * a function suitable for Zotero.Translate.setHandler, taking parameters
-	 * |obj| and |worked|. The generated content should be placed in obj.output
+	 * |obj| and |worked|. The generated content should be placed in obj.string
 	 * and |worked| should be true if the operation is successful.
 	 *
 	 * If bibliography format, the process is synchronous and an object
@@ -168,6 +168,7 @@ Zotero.QuickCopy = new function() {
 		
 		if (mode == 'export') {
 			var translation = new Zotero.Translate.Export;
+			translation.noWait = true;	// needed not to break drags
 			translation.setItems(items);
 			translation.setTranslator(format);
 			translation.setHandler("done", callback);

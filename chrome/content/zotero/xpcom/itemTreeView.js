@@ -1869,7 +1869,7 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 			return;
 		}
 		
-		var text = obj.output.replace(/\r\n/g, "\n");
+		var text = obj.string.replace(/\r\n/g, "\n");
 		event.dataTransfer.setData("text/plain", text);
 	}
 	
