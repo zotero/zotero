@@ -45,58 +45,13 @@ var Zotero_LocateMenu = new function() {
 		var selectedItems = [item for each(item in ZoteroPane.getSelectedItems()) if(!item.isNote())];
 		
 		if(selectedItems.length) {
-			var optionsToShow = {};
+			_addViewOptions(locateMenu, selectedItems, true);
 			
-			// check which view options are available
-			for each(var item in selectedItems) {
-				for(var viewOption in ViewOptions) {
-					if(!optionsToShow[viewOption]) {
-						optionsToShow[viewOption] = ViewOptions[viewOption].canHandleItem(item);
-					}
-				}
-			}
-			
-			// add available view options to menu
-			for(var viewOption in optionsToShow) {
-				if(!optionsToShow[viewOption]) continue;
-				
-				var menuitem = _createMenuItem(Zotero.getString("locate."+viewOption+".label"),
-					null, Zotero.getString("locate."+viewOption+".tooltip"));
-				menuitem.setAttribute("class", "menuitem-iconic");
-				menuitem.setAttribute("image", ViewOptions[viewOption].icon);
-				locateMenu.appendChild(menuitem);
-				
-				let myViewOption = viewOption;
-				menuitem.addEventListener("command", function(event) {
-					ViewOptions[myViewOption].handleItems(selectedItems, event);
-				}, false)
-			}
-			
-			// check for custom locate engines
-			var customEngines = Zotero.LocateManager.getVisibleEngines();
-			var availableEngines = [];
-			
-			// check which engines can translate an item
-			for each(var engine in customEngines) {
-				// require a submission for at least one selected item
-				for each(var item in selectedItems) {
-					if(engine.getItemSubmission(item)) {
-						availableEngines.push(engine);
-						break;
-					}
-				}
-			}
-			
+			var availableEngines = _getAvailableLocateEngines(selectedItems);
 			// add engines that are available for selected items
 			if(availableEngines.length) {
 				locateMenu.appendChild(document.createElement("menuseparator"));
-				for each(var engine in availableEngines) {
-					var menuitem = _createMenuItem(engine.name, null, engine.description);
-					menuitem.setAttribute("class", "menuitem-iconic");
-					menuitem.setAttribute("image", engine.icon);
-					locateMenu.appendChild(menuitem);
-					menuitem.addEventListener("command", _locateItem, false);
-				}
+				_addLocateEngines(locateMenu, availableEngines, true);
 			}
 		} else {
 			// add "no items selected"
@@ -134,6 +89,129 @@ var Zotero_LocateMenu = new function() {
 		menuitem = _createMenuItem(Zotero.getString("locate.manageLocateEngines"), "zotero-manage-locate-menu");
 		menuitem.addEventListener("command", _openLocateEngineManager, false);
 		locateMenu.appendChild(menuitem);
+	}
+	
+	/**
+	 * Clear the bottom part of the context menu and add locate options
+	 * @param {menupopup} menu The menu to add context menu items to
+	 */
+	this.buildContextMenu = function(menu) {
+		// remove old menu items
+		while(menu.lastChild && menu.lastChild.getAttribute("zotero-locate")) {
+			menu.removeChild(menu.lastChild);
+		}
+		
+		// get selected items
+		var selectedItems = [item for each(item in ZoteroPane.getSelectedItems()) if(!item.isNote())];
+		
+		// if no items selected, stop now
+		if(!selectedItems.length) return;
+		
+		// add view options
+		_addViewOptions(menu, selectedItems, false, true);
+		
+		/*// look for locate engines
+		var availableEngines = _getAvailableLocateEngines(selectedItems);
+		if(availableEngines.length) {
+			// if locate engines are available, make a new submenu
+			var submenu = document.createElement("menu");
+			submenu.setAttribute("zotero-locate", "true");
+			submenu.setAttribute("label", Zotero.getString("locate.locateEngines"));
+			
+			// add locate engines to the submenu
+			_addLocateEngines(submenuPopup, availableEngines, true);
+			
+			submenu.appendChild(submenuPopup);
+			menu.appendChild(submenu);
+		}*/
+	}
+	
+	/**
+	 * Add view options to a menu
+	 * @param {menupopup} locateMenu The menu to add menu items to
+	 * @param {Zotero.Item[]} selectedItems The items to create view options based upon
+	 * @param {Boolean} showIcons Whether menu items should have associated icons
+	 * @param {Boolean} addSeparator Whether a separator should be added before any menu items
+	 */
+	function _addViewOptions(locateMenu, selectedItems, showIcons, addSeparator) {
+		var optionsToShow = {};
+		var haveItems = false;
+		
+		// check which view options are available
+		for each(var item in selectedItems) {
+			for(var viewOption in ViewOptions) {
+				if(!optionsToShow[viewOption]) {
+					optionsToShow[viewOption] = ViewOptions[viewOption].canHandleItem(item);
+					haveItems = true;
+				}
+			}
+		}
+		
+		if(haveItems && addSeparator) {		
+			var sep = document.createElement("menuseparator");
+			sep.setAttribute("zotero-locate", "true");
+			locateMenu.appendChild(sep);
+		}
+		
+		// add available view options to menu
+		for(var viewOption in optionsToShow) {
+			if(!optionsToShow[viewOption]) continue;
+			
+			var menuitem = _createMenuItem(Zotero.getString("locate."+viewOption+".label"),
+				null, Zotero.getString("locate."+viewOption+".tooltip"));
+			if(showIcons) {
+				menuitem.setAttribute("class", "menuitem-iconic");
+				menuitem.setAttribute("image", ViewOptions[viewOption].icon);
+			}
+			menuitem.setAttribute("zotero-locate", "true");
+			locateMenu.appendChild(menuitem);
+			
+			let myViewOption = viewOption;
+			menuitem.addEventListener("command", function(event) {
+				ViewOptions[myViewOption].handleItems(selectedItems, event);
+			}, false)
+		}
+	}
+	
+	/**
+	 * Get available locate engines that can handle a set of items 
+	 * @param {Zotero.Item[]} selectedItems The items to look or locate engines for
+	 * @return {Zotero.LocateManater.LocateEngine[]} An array of locate engines capable of handling
+	 *	the given items
+	 */
+	function _getAvailableLocateEngines(selectedItems) {
+		// check for custom locate engines
+		var customEngines = Zotero.LocateManager.getVisibleEngines();
+		var availableEngines = [];
+		
+		// check which engines can translate an item
+		for each(var engine in customEngines) {
+			// require a submission for at least one selected item
+			for each(var item in selectedItems) {
+				if(engine.getItemSubmission(item)) {
+					availableEngines.push(engine);
+					break;
+				}
+			}
+		}
+		
+		return availableEngines;
+	}
+	
+	/**
+	 * Add locate engine options to a menu
+	 * @param {menupopup} menu The menu to add menu items to
+	 * @param {Zotero.LocateManater.LocateEngine[]} engines The list of engines to add to the menu
+	 * @param {Boolean} showIcons Whether menu items should have associated icons
+	 */
+	function _addLocateEngines(menu, engines, showIcons) {
+		for each(var engine in engines) {
+			var menuitem = _createMenuItem(engine.name, null, engine.description);
+			menuitem.setAttribute("class", "menuitem-iconic");
+			menuitem.setAttribute("image", engine.icon);
+			menu.appendChild(menuitem);
+			menuitem.addEventListener("command", _locateItem, false);
+		}
 	}
 	
 	/**
