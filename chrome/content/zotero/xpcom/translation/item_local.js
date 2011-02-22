@@ -707,9 +707,15 @@ Zotero.Translate.ItemGetter.prototype = {
 			}
 		}
 		
+		// add URI
+		returnItemArray.uri = Zotero.URI.getItemURI(returnItem);
+		
 		return returnItemArray;
 	},
 	
+	/**
+	 * Retrieves the next available item
+	 */
 	"nextItem":function() {
 		while(this._itemsLeft.length != 0) {
 			var returnItem = this._itemsLeft.shift();

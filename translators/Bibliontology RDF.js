@@ -482,7 +482,7 @@ Type.prototype.addNodeRelations = function(nodes) {
  */
 Type.prototype.createNodes = function(item) {
 	var nodes = {};
-	nodes[USERITEM] = "#item_"+item.itemID;
+	nodes[USERITEM] = (item.uri ? item.uri : "#item_"+item.itemID);
 	
 	// come up with an item node URI
 	nodes[ITEM] = null;
