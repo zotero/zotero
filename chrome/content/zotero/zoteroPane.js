@@ -2303,6 +2303,9 @@ var ZoteroPane = new function()
 		{
 			menu.childNodes[show[i]].setAttribute('hidden', false);
 		}
+		
+		// add locate menu options
+		Zotero_LocateMenu.buildContextMenu(menu);
 	}
 	
 	
