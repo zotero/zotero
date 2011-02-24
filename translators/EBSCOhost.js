@@ -1,14 +1,14 @@
 {
-	"translatorID":"d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
-	"translatorType":4,
-	"label":"EBSCOhost",
-	"creator":"Simon Kornblith and Michael Berkowitz",
-	"target":"https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-11-10 10:10:00"
+        "translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
+        "label": "EBSCOhost",
+        "creator": "Simon Kornblith and Michael Berkowitz",
+        "target": "https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)",
+        "minVersion": "1.0.0b3.r1",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": "1",
+        "translatorType": 4,
+        "lastUpdated": "2011-02-24 23:44:28"
 }
 
 function detectWeb(doc, url) {
@@ -87,7 +87,7 @@ function generateDeliverString(nsResolver, doc){
 function downloadFunction(text) {
 	
 	//Zotero.debug("POSTTEXT="+text);
-	var postLocation = /<form (?:autocomplete="o(?:ff|n)" )?name="aspnetForm" method="post" action="([^"]+)"/
+	var postLocation = /<form method="post" action="([^"]+)"[^><]*id="aspnetForm"/
 	var postMatch = postLocation.exec(text);
 	var deliveryURL = postMatch[1].replace(/&amp;/g, "&");
 	postMatch = customViewStateMatch.exec(text);
@@ -162,7 +162,7 @@ function doWeb(doc, url) {
 		}
 		
 		Zotero.Utilities.processDocuments(uris, function(newDoc){
-			var postURL = newDoc.evaluate('//form[@name="aspnetForm"]/@action', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var postURL = newDoc.evaluate('//form[@id="aspnetForm"]/@action', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			postURL = host+"/ehost/"+postURL.nodeValue;
 			var deliverString = generateDeliverString(nsResolver, newDoc);
 			Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
@@ -171,7 +171,7 @@ function doWeb(doc, url) {
 		//This is a hack, generateDeliveryString is acting up for single pages, but it works on the plink url
 		var link = [doc.evaluate("//input[@id ='pLink']/@value", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue];
 		Zotero.Utilities.processDocuments(link, function(newDoc){			
-			var postURL = newDoc.evaluate('//form[@name="aspnetForm"]/@action', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var postURL = newDoc.evaluate('//form[@id="aspnetForm"]/@action', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			postURL = host+"/ehost/"+postURL.nodeValue;
 			var deliverString = generateDeliverString(nsResolver, newDoc);
 			Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
