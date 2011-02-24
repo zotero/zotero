@@ -42,7 +42,6 @@ var ZoteroTab = new function()
 					? this.containerWindow.gBrowser.tabs : this.containerWindow.gBrowser.mTabs);
 		
 		// loop over all browsers in this window
-		var containerTab, containerBrowser;
 		for(var i=0; i<this.containerWindow.gBrowser.browsers.length; i++) {
 			var currentBrowser = this.containerWindow.gBrowser.browsers[i];
 			if(currentBrowser.contentWindow == window) {
@@ -57,6 +56,9 @@ var ZoteroTab = new function()
 				this.containerWindow.gBrowser.removeTab(tabs[i]);
 			}
 		}
+		
+		// stop drop events from propagating
+		this.containerBrowser.addEventListener("drop", _dropPropagationKiller, true);
 		
 		// initialize ZoteroPane and swap out old window ZoteroPane object
 		if(this.containerWindow.ZoteroPane) {
@@ -107,11 +109,21 @@ var ZoteroTab = new function()
 	}
 	
 	this.onUnload = function() {
+		// remove drop propagation killer
+		this.containerBrowser.removeEventListener("drop", _dropPropagationKiller, true);
+		
+		// replace window ZoteroPane
 		if(this.containerWindow.ZoteroPane === this.containerWindow.ZoteroPane_Tab) {
 			this.containerWindow.ZoteroPane = this.containerWindow.ZoteroPane_Overlay;
 		}
 		delete this.containerWindow.ZoteroPane_Tab;
+		
+		// destroy pane
 		ZoteroPane.destroy();
+	}
+	
+	function _dropPropagationKiller(event) {
+		event.stopPropagation();
 	}
 }
 
