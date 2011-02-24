@@ -275,8 +275,10 @@ var Zotero_LocateMenu = new function() {
 		var postDatas = [];
 		for each(var item in selectedItems) {
 			var submission = selectedEngine.getItemSubmission(item);
-			urls.push(submission.uri.spec);
-			postDatas.push(submission.postData);
+			if(submission) {
+				urls.push(submission.uri.spec);
+				postDatas.push(submission.postData);
+			}
 		}
 		
 		Zotero.debug("Loading using "+selectedEngine.name);
@@ -346,7 +348,8 @@ var Zotero_LocateMenu = new function() {
 		this.canHandleItem = function(item) _getURL(item) !== false;
 		
 		this.handleItems = function(items, event) {
-			ZoteroPane.loadURI([_getURL(item) for each(item in items)], event);
+			var urls = [_getURL(item) for each(item in items)];
+			ZoteroPane.loadURI([url for each(url in urls) if(url)], event);
 		}
 		
 		function _getURL(item) {
