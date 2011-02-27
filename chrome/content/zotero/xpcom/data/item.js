@@ -4129,7 +4129,7 @@ Zotero.Item.prototype.toArray = function (mode) {
 	
 	// Item metadata
 	for (var i in this._itemData) {
-		arr[Zotero.ItemFields.getName(i)] = this._itemData[i] ? this._itemData[i] + '': '';
+		arr[Zotero.ItemFields.getName(i)] = this.getField(i) + '';
 	}
 	
 	if (mode == 1 || mode == 2) {
@@ -4266,7 +4266,7 @@ Zotero.Item.prototype.serialize = function(mode) {
 	
 	// Item metadata
 	for (var i in this._itemData) {
-		arr.fields[Zotero.ItemFields.getName(i)] = this._itemData[i] ? this._itemData[i] + '' : '';
+		arr.fields[Zotero.ItemFields.getName(i)] = this.getField(i) + '';
 	}
 	
 	if (mode == 1 || mode == 2) {
