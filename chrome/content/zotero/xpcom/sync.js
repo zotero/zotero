@@ -4255,7 +4255,7 @@ Zotero.Sync.Server.Data = new function() {
 			}
 			var linkedItems = tag.getLinkedItems(true);
 			Zotero.Tags.erase(tagID);
-			Zotero.Tags.purge();
+			Zotero.Tags.purge(tagID);
 			
 			syncSession.removeFromUpdated(tag);
 			//syncSession.addToDeleted(tag);
