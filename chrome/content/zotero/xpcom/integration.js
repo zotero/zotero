@@ -449,7 +449,6 @@ Zotero.Integration = new function() {
 				if(!_winUser32) {
 					Components.utils.import("resource://gre/modules/ctypes.jsm");
 					var lib = ctypes.open("user32.dll");
-					Zotero.debug([i for(i in ctypes)]);
 					_winUser32 = new function() {
 						this.FindWindow = lib.declare("FindWindowW", ctypes.default_abi, ctypes.int32_t,
 													ctypes.ustring, ctypes.ustring);
