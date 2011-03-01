@@ -6,18 +6,18 @@
 <!ENTITY zotero.search.joinMode.suffix "av följande:">
 
 <!ENTITY zotero.search.recursive.label "Sök i undermappar">
-<!ENTITY zotero.search.noChildren "Visa bara poster på högst nivå">
+<!ENTITY zotero.search.noChildren "Visa bara poster på högsta nivå">
 <!ENTITY zotero.search.includeParentsAndChildren "Inkludera över- och underordnade poster för matchande poster">
 
 <!ENTITY zotero.search.textModes.phrase "Fras">
 <!ENTITY zotero.search.textModes.phraseBinary "Fras (inkl. binära filer)">
 <!ENTITY zotero.search.textModes.regexp "Reguljärt uttryck">
-<!ENTITY zotero.search.textModes.regexpCS "Reguljärt uttryck (tecken-känsligt)">
+<!ENTITY zotero.search.textModes.regexpCS "Reguljärt uttryck (matcha gemener/VERSALER)">
 
 <!ENTITY zotero.search.date.units.days "dagar">
 <!ENTITY zotero.search.date.units.months "månader">
 <!ENTITY zotero.search.date.units.years "år">
 
 <!ENTITY zotero.search.search "Sök">
-<!ENTITY zotero.search.clear "Sudda">
+<!ENTITY zotero.search.clear "Radera">
 <!ENTITY zotero.search.saveSearch "Spara sökning">

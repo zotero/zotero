@@ -8,7 +8,7 @@
 	"priority":100,
 	"inRepository":"1",
 	"translatorType":4,
-	"lastUpdated":"2011-01-10 21:10:00"
+	"lastUpdated":"2011-02-24 23:30:00"
 }
 
 /**
@@ -114,14 +114,13 @@ function scrapeMulti(doc, url, nsResolver, type) {
 		default:
 			var resultPath= doc.evaluate(searchResultX, doc, null, XPathResult.ANY_TYPE, null);
 	}
-	Zotero.debug("hi"+resultPath.iterateNext().textContent);
 
 	//Count how mange pages have been scraped
 	var node;
 	var urls = {};
 	//Iterate through all the results
 	while(node= resultPath.iterateNext()) {
-		urls[node.href] = node.textContent;
+		urls[node.href + '&preflayout=flat'] = node.textContent;
 	}
 	
 	var items = Zotero.selectItems(urls);
@@ -283,7 +282,7 @@ function scrapeAttachments(doc, url) {
  */
 function scrapeAbstract(doc) {
 	Zotero.debug("Scraping abstract");
-	var text = getText('//div[@style="display: inline;"]', doc);
+	var text = getText('//div[@class="flatbody" or @class="tabbody"]', doc);
 	return text;
 }
 

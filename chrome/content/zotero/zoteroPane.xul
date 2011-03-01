@@ -305,6 +305,7 @@
 							ondragenter="return ZoteroPane.itemsView.onDragEnter(event)"
 							ondragover="return ZoteroPane.itemsView.onDragOver(event)"
 							ondragdrop="return ZoteroPane.itemsView.onDrop(event)"
+							oncommand="ZoteroPane.serializePersist()"
 							flex="1">
 							<treecols>
 								<treecol

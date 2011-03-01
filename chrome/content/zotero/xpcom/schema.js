@@ -965,7 +965,75 @@ Zotero.Schema = new function(){
 		
 		// Run a manual update from repository if pref set
 		if (Zotero.Prefs.get('automaticScraperUpdates')) {
-			this.updateFromRepository(2, callback);
+			this.updateFromRepository(2, function () {
+				if (callback) {
+					callback();
+				}
+			});
+		}
+		
+		if (callback) {
+			callback();
+		}
+	}
+	
+	
+	this.resetTranslators = function (callback, skipUpdate) {
+		Zotero.debug("Resetting translators");
+		
+		var sql = "DELETE FROM version WHERE schema IN "
+			+ "('translators', 'repository', 'lastcheck')";
+		Zotero.DB.query(sql);
+		_dbVersions.repository = null;
+		_dbVersions.lastcheck = null;
+		
+		var translatorsDir = Zotero.getTranslatorsDirectory();
+		translatorsDir.remove(true);
+		Zotero.getTranslatorsDirectory(); // recreate directory
+		Zotero.Translators.init();
+		this.updateBundledFiles('translators');
+		
+		// Run a manual update from repository if pref set
+		if (Zotero.Prefs.get('automaticScraperUpdates')) {
+			this.updateFromRepository(2, function () {
+				if (callback) {
+					callback();
+				}
+			});
+		}
+		
+		if (callback) {
+			callback();
+		}
+	}
+	
+	
+	this.resetStyles = function (callback) {
+		Zotero.debug("Resetting translators and styles");
+		
+		var sql = "DELETE FROM version WHERE schema IN "
+			+ "('styles', 'repository', 'lastcheck')";
+		Zotero.DB.query(sql);
+		_dbVersions.repository = null;
+		_dbVersions.lastcheck = null;
+		
+		var stylesDir = Zotero.getStylesDirectory();
+		stylesDir.remove(true);
+		Zotero.getStylesDirectory(); // recreate directory
+		Zotero.Styles.init();
+		this.updateBundledFiles('styles');
+		
+		// Run a manual update from repository if pref set
+		if (Zotero.Prefs.get('automaticScraperUpdates')) {
+			this.updateFromRepository(2, function () {
+				if (callback) {
+					callback();
+				}
+			});
+		}
+		
+		if (callback) {
+			callback();
 		}
 	}
 	

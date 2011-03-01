@@ -10,7 +10,7 @@
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":false,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-02-22 00:39:57"
 }
 
 var n = {
@@ -482,7 +482,7 @@ Type.prototype.addNodeRelations = function(nodes) {
  */
 Type.prototype.createNodes = function(item) {
 	var nodes = {};
-	nodes[USERITEM] = "#item_"+item.itemID;
+	nodes[USERITEM] = (item.uri ? item.uri : "#item_"+item.itemID);
 	
 	// come up with an item node URI
 	nodes[ITEM] = null;

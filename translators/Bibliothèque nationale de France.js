@@ -1,14 +1,14 @@
 {
-        "translatorID":"47533cd7-ccaa-47a7-81bb-71c45e68a74d",
-        "label":"Bibliothèque nationale de France",
-        "creator":"Florian Ziche",
-        "target":"^https?://[^/]*catalogue\\.bnf\\.fr",
-        "minVersion":"2.0",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":true,
-        "translatorType":4,
-        "lastUpdated":"2010-10-03 16:10:08"
+	"translatorID":"47533cd7-ccaa-47a7-81bb-71c45e68a74d",
+	"label":"Bibliothèque nationale de France",
+	"creator":"Florian Ziche",
+	"target":"^https?://[^/]*catalogue\\.bnf\\.fr",
+	"minVersion":"2.0",
+	"maxVersion":"",
+	"priority":100,
+	"inRepository":true,
+	"translatorType":4,
+	"lastUpdated":"2011-02-22 09:55:00"
 }
 
 /*
@@ -437,7 +437,7 @@ var BnfClass = function() {
 
 		//Store perennial url from 009 as attachment and accession number
 		var url = record.getField("009");
-		if(url && url[0][1]) {
+		if(url && url.length > 0 && url[0][1]) {
 			newItem.accessionNumber = url[0][1];
 			newItem.attachments = [
 				{

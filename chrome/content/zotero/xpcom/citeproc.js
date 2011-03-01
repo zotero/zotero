@@ -86,7 +86,7 @@ var CSL = {
 	MARK_TRAILING_NAMES: true,
 	POSITION_TEST_VARS: ["position", "first-reference-note-number", "near-note"],
 	AREAS: ["citation", "citation_sort", "bibliography", "bibliography_sort"],
-	MULTI_FIELDS: ["publisher", "publisher-place", "title", "container-title", "collection-title", "institution", "authority"],
+	MULTI_FIELDS: ["publisher", "publisher-place", "title","container-title", "collection-title", "institution", "authority","edition"],
 	CITE_FIELDS: ["first-reference-note-number", "locator"],
 	MINIMAL_NAME_FIELDS: ["literal", "family"],
 	SWAPPING_PUNCTUATION: [".", "!", "?", ":",",",";"],
@@ -1752,7 +1752,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.113";
+	this.processor_version = "1.0.118";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3182,14 +3182,10 @@ CSL.citeEnd = function (Item) {
 	} else if (this.tmp.prefix.value() && this.tmp.prefix.value().match(/^[.,:;a-z]/)) {
 		this.tmp.splice_delimiter = " ";
 	}
-	this.tmp.last_suffix_used = this.tmp.suffix.value();
+ 	this.tmp.last_suffix_used = this.tmp.suffix.value();
 	this.tmp.last_years_used = this.tmp.years_used.slice();
 	this.tmp.last_names_used = this.tmp.names_used.slice();
 	this.tmp.cut_var = false;
-	if (this.tmp.disambig_restore && this.registry.registry[Item.id]) {
-		this.registry.registry[Item.id].disambig.names = this.tmp.disambig_restore.names;
-		this.registry.registry[Item.id].disambig.givens = this.tmp.disambig_restore.givens;
-	}
 	this.tmp.disambig_request = false;
 	if (!this.tmp.suppress_decorations && this.tmp.offset_characters) {
 		this.registry.registry[Item.id].offset = this.tmp.offset_characters;
@@ -4286,6 +4282,7 @@ CSL.Node.layout = {
 				this.execs.push(func);
 				target.push(this);
 				state.build.layout_flag = false;
+				state.build.layout_locale_flag = false;
 			} // !this.layout_raw
 		}
 	}
@@ -4833,7 +4830,7 @@ CSL.Node.names = {
 						} else {
 							param = paramx;
 						}
-						if (!state.tmp.just_looking && item && item.position === CSL.POSITION_FIRST) {
+						if (!state.tmp.disambig_restore && !state.tmp.just_looking && item && item.position === CSL.POSITION_FIRST) {
 							state.tmp.disambig_restore = CSL.cloneAmbigConfig(state.tmp.disambig_settings);
 							param = paramx;
 						}
@@ -4928,6 +4925,11 @@ CSL.Node.names = {
 				state.tmp.use_ellipsis = false;
 				state.tmp.can_block_substitute = false;
 				state.tmp.forceEtAl = false;
+				if (state.tmp.disambig_restore && state.registry.registry[Item.id]) {
+					state.registry.registry[Item.id].disambig.names = state.tmp.disambig_restore.names;
+					state.registry.registry[Item.id].disambig.givens = state.tmp.disambig_restore.givens;
+				}
+				state.tmp.disambig_restore = false;
 			};
 			this.execs.push(func);
 			state.build.names_flag = false;
@@ -5272,7 +5274,7 @@ CSL.Node.text = {
 								state.transform.setAlternativeVariableName("journalAbbreviation");
 							} else if (this.variables[0] === "title") {
 								state.transform.setAlternativeVariableName("shortTitle");
-							} else if (["publisher", "publisher-place"].indexOf(this.variables[0]) > -1) {
+							} else if (["publisher", "publisher-place", "edition"].indexOf(this.variables[0]) > -1) {
 								state.transform.setTransformLocale("default-locale");
 							}
 							func = state.transform.getOutputFunction();
@@ -5283,7 +5285,7 @@ CSL.Node.text = {
 						} else {
 							state.transform.setTransformLocale("locale-pri");
 							state.transform.setTransformFallback(true);
-							if (["publisher", "publisher-place"].indexOf(this.variables[0]) > -1) {
+							if (["publisher", "publisher-place", "edition"].indexOf(this.variables[0]) > -1) {
 								state.transform.setTransformLocale("default-locale");
 							}
 							func = state.transform.getOutputFunction();
@@ -7106,7 +7108,7 @@ CSL.Util.Names.getCommonTerm = function (state, namesets) {
 	}
 	base_nameset = namesets[0];
 	varnames = [];
-		varnames.push(base_nameset.variable);
+	varnames.push(base_nameset.variable);
 	short_namesets = namesets.slice(1);
 	len = short_namesets.length;
 	for (pos = 0; pos < len; pos += 1) {
@@ -7119,7 +7121,12 @@ CSL.Util.Names.getCommonTerm = function (state, namesets) {
 		}
 	}
 	varnames.sort();
-	return varnames.join("");
+	var combined_terms = varnames.join("");
+	if (state.locale[state.opt.lang].terms[combined_terms]) {
+		return varnames.join("");
+	} else {
+		return false;
+	}
 };
 CSL.Util.Names.compareNamesets = function (base_nameset, nameset) {
 	var name, pos, len, part, ppos, llen;
@@ -7464,7 +7471,7 @@ CSL.Util.substituteStart = function (state, target) {
 	}
 };
 CSL.Util.substituteEnd = function (state, target) {
-	var func, bib_first_end, bib_other, if_end, choose_end, toplevel, hasval, author_substitute, printing, str;
+	var func, bib_first_end, bib_other, if_end, choose_end, toplevel, hasval, author_substitute, str;
 	state.build.render_nesting_level += -1;
 	if (state.build.render_nesting_level === 0) {
 		if (state.build.cls) {
@@ -7510,13 +7517,14 @@ CSL.Util.substituteEnd = function (state, target) {
 	if (toplevel && hasval) {
 		author_substitute = new CSL.Token("text", CSL.SINGLETON);
 		func = function (state, Item) {
-			printing = !state.tmp.suppress_decorations;
+			var text_esc = CSL.Output.Formats[state.opt.mode].text_escape;
+			var printing = !state.tmp.suppress_decorations;
 			if (printing) {
 				if (!state.tmp.rendered_name) {
 					state.tmp.rendered_name = state.output.string(state, state.tmp.name_node.blobs, false);
 					if (state.tmp.rendered_name) {
 						if (state.tmp.rendered_name === state.tmp.last_rendered_name) {
-							str = new CSL.Blob(false, state[state.tmp.area].opt["subsequent-author-substitute"]);
+							str = new CSL.Blob(false, text_esc(state[state.tmp.area].opt["subsequent-author-substitute"]));
 							state.tmp.name_node.blobs = [str];
 						}
 						state.tmp.last_rendered_name = state.tmp.rendered_name;

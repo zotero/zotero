@@ -553,10 +553,8 @@ Zotero.Sync.Storage = new function () {
 							+ "in use and that it is not marked read-only.";
 						var checkFileOther = "Check that the file is not currently "
 							+ "in use and that its permissions allow write access.";
-						var msg = Zotero.localeJoin([
-							fileCannotBeUpdated,
-							Zotero.isWin ? checkFileWindows : checkFileOther
-						]) + "\n\n"
+						var msg = fileCannotBeUpdated + " "
+							+ (Zotero.isWin ? checkFileWindows : checkFileOther) + "\n\n"
 							+ "Restarting your computer or disabling security "
 							+ "software may also help.";
 						var e = new Zotero.Error(
@@ -573,7 +571,6 @@ Zotero.Sync.Storage = new function () {
 								}
 							}
 						);
-						throw (e);
 					}
 					
 					throw (e);
@@ -726,22 +723,58 @@ Zotero.Sync.Storage = new function () {
 		var updateItem = syncState != 1;
 		var updateItem = false;
 		
-		if (useCurrentModTime) {
-			file.lastModifiedTime = new Date();
-			
-			// Reset hash and sync state
-			Zotero.Sync.Storage.setSyncedHash(item.id, null);
-			Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD);
-			Zotero.Sync.Storage.resyncOnFinish = true;
-		}
-		else {
-			file.lastModifiedTime = syncModTime;
-			// If hash not provided (e.g., WebDAV), calculate it now
-			if (!syncHash) {
-				syncHash = item.attachmentHash;
+		try {
+			if (useCurrentModTime) {
+				file.lastModifiedTime = new Date();
+				
+				// Reset hash and sync state
+				Zotero.Sync.Storage.setSyncedHash(item.id, null);
+				Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_TO_UPLOAD);
+				Zotero.Sync.Storage.resyncOnFinish = true;
 			}
-			Zotero.Sync.Storage.setSyncedHash(item.id, syncHash);
-			Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
+			else {
+				file.lastModifiedTime = syncModTime;
+				// If hash not provided (e.g., WebDAV), calculate it now
+				if (!syncHash) {
+					syncHash = item.attachmentHash;
+				}
+				Zotero.Sync.Storage.setSyncedHash(item.id, syncHash);
+				Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
+			}
+		}
+		catch (e) {
+			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED'
+					// Shows up on some Windows systems
+					|| e.name == 'NS_ERROR_FAILURE') {
+				Zotero.debug(e);
+				// TODO: localize
+				var fileCannotBeUpdated = "The file '" + file.path
+					+ "' cannot be updated.";
+				var checkFileWindows = "Check that the file is not currently "
+					+ "in use and that it is not marked read-only.";
+				var checkFileOther = "Check that the file is not currently "
+					+ "in use and that its permissions allow write access.";
+				var msg = fileCannotBeUpdated + " "
+					+ (Zotero.isWin ? checkFileWindows : checkFileOther) + "\n\n"
+					+ "Restarting your computer or disabling security "
+					+ "software may also help.";
+				var e = new Zotero.Error(
+					msg,
+					0,
+					{
+						dialogButtonText: "Show File",
+						dialogButtonCallback: function () {
+							try {
+								file.reveal();
+							}
+							// Unsupported on some platforms
+							catch (e) {}
+						}
+					}
+				);
+			}
+			
+			throw (e);
 		}
 		
 		Zotero.Sync.Storage.setSyncedModificationTime(item.id, syncModTime, updateItem);

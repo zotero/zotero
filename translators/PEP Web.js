@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"PEP Web",
 	"creator":"Akilesh Ayyar",
-	"target":"^http?://www.pep-web.org",
+	"target":"^https?://www\\.pep-web\\.org",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":false,
-	"lastUpdated":"2009-10-02 04:50:00"
+	"lastUpdated":"2011-02-15 04:50:00"
 }
 
 //Only works for journal articles, and only for single entries.
@@ -36,9 +36,9 @@ function scrape(doc, url) {
 	var newItem = new Zotero.Item("journalArticle");
 	newItem.url = doc.location.href;
 		
-	var xPathString = "/html/body/table/tbody/tr[3]/td/table/tbody/tr/td/table/tbody/tr/td[1]/span[@id='maincite']";
+	var xPathString = "//span[@id='maincite']";
 
-	var xPathString2 = "/html/body/table/tbody/tr[3]/td/table/tbody/tr/td/div/p[3]/a";
+	var xPathString2 = '//p[@class="title"]/a';
 	
 	var myXPathObject = doc.evaluate(xPathString, doc, nsResolver, XPathResult.ANY_TYPE, null); 
 	var myXPathObject2 = doc.evaluate(xPathString2, doc, nsResolver, XPathResult.ANY_TYPE, null);
