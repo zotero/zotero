@@ -1068,7 +1068,7 @@ Zotero.Translate.Import.prototype.setString = function(string) {
  * Overload {@link Zotero.Translate.Base#complete} to close file
  */
 Zotero.Translate.Import.prototype.complete = function(returnValue, error) {
-	if(this._currentState == "translate" && this._io) {
+	if(this._io) {
 		this._progress = null;
 		this._io.close();
 	}
