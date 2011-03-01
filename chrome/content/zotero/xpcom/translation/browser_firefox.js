@@ -143,9 +143,7 @@ Zotero.Translate.IO.Read = function(file, mode) {
 	this.file = file;
 	
 	// open file
-	this._rawStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-							  .createInstance(Components.interfaces.nsIFileInputStream);
-	this._rawStream.init(file, 0x01, 0664, 0);
+	this._openRawStream();
 	
 	// start detecting charset
 	var charset = null;
@@ -297,7 +295,7 @@ Zotero.Translate.IO.Read.prototype = {
 	},
 	
 	"_seekToStart":function(charset) {
-		this._rawStream.close();
+		if(this._rawStream) this._rawStream.close();
 		this._openRawStream();
 		
 		this._linesExhausted = false;
@@ -398,6 +396,7 @@ Zotero.Translate.IO.Read.prototype = {
 		if(myIndex !== -1) Zotero.Translate.IO.maintainedInstances.splice(myIndex, 1);
 		
 		this._rawStream.close();
+		delete this._rawStream;
 	}
 }
 Zotero.Translate.IO.Read.prototype.__defineGetter__("contentLength",
