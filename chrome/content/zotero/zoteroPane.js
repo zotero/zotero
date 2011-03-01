@@ -2010,6 +2010,11 @@ var ZoteroPane = new function()
 		
 		var menu = document.getElementById('zotero-itemmenu');
 		
+		// remove old locate menu items
+		while(menu.firstChild && menu.firstChild.getAttribute("zotero-locate")) {
+			menu.removeChild(menu.firstChild);
+		}
+		
 		var enable = [], disable = [], show = [], hide = [], multiple = '';
 		
 		if (!this.itemsView) {

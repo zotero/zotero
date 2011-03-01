@@ -45,13 +45,17 @@ var Zotero_LocateMenu = new function() {
 		var selectedItems = [item for each(item in ZoteroPane.getSelectedItems()) if(!item.isNote())];
 		
 		if(selectedItems.length) {
-			_addViewOptions(locateMenu, selectedItems, true);
+			_addViewOptions(locateMenu, selectedItems, true, true);
 			
 			var availableEngines = _getAvailableLocateEngines(selectedItems);
 			// add engines that are available for selected items
 			if(availableEngines.length) {
-				locateMenu.appendChild(document.createElement("menuseparator"));
 				_addLocateEngines(locateMenu, availableEngines, true);
+			}
+			
+			// add separator at end if necessary
+			if(locateMenu.lastChild.tagName !== "menuseparator") {
+				locateMenu.appendChild(document.createElement("menuseparator"));
 			}
 		} else {
 			// add "no items selected"
@@ -82,9 +86,6 @@ var Zotero_LocateMenu = new function() {
 			}
 		}
 		
-		// add manage menu item
-		locateMenu.appendChild(document.createElement("menuseparator"));
-		
 		var menuitem = document.createElement("menuitem");
 		menuitem = _createMenuItem(Zotero.getString("locate.manageLocateEngines"), "zotero-manage-locate-menu");
 		menuitem.addEventListener("command", _openLocateEngineManager, false);
@@ -96,11 +97,6 @@ var Zotero_LocateMenu = new function() {
 	 * @param {menupopup} menu The menu to add context menu items to
 	 */
 	this.buildContextMenu = function(menu) {
-		// remove old menu items
-		while(menu.lastChild && menu.lastChild.getAttribute("zotero-locate")) {
-			menu.removeChild(menu.lastChild);
-		}
-		
 		// get selected items
 		var selectedItems = [item for each(item in ZoteroPane.getSelectedItems()) if(!item.isNote())];
 		
@@ -108,7 +104,7 @@ var Zotero_LocateMenu = new function() {
 		if(!selectedItems.length) return;
 		
 		// add view options
-		_addViewOptions(menu, selectedItems, false, true);
+		_addViewOptions(menu, selectedItems);
 		
 		/*// look for locate engines
 		var availableEngines = _getAvailableLocateEngines(selectedItems);
@@ -126,50 +122,62 @@ var Zotero_LocateMenu = new function() {
 		}*/
 	}
 	
+	function _addViewOption(selectedItems, optionName, optionObject, showIcons) {
+		var menuitem = _createMenuItem(Zotero.getString("locate."+optionName+".label"),
+			null, Zotero.getString("locate."+optionName+".tooltip"));
+		if(showIcons) {
+			menuitem.setAttribute("class", "menuitem-iconic");
+			menuitem.setAttribute("image", optionObject.icon);
+		}
+		menuitem.setAttribute("zotero-locate", "true");
+		
+		menuitem.addEventListener("command", function(event) {
+			optionObject.handleItems(selectedItems, event);
+		}, false)
+		return menuitem;
+	}
+	
 	/**
 	 * Add view options to a menu
 	 * @param {menupopup} locateMenu The menu to add menu items to
 	 * @param {Zotero.Item[]} selectedItems The items to create view options based upon
 	 * @param {Boolean} showIcons Whether menu items should have associated icons
-	 * @param {Boolean} addSeparator Whether a separator should be added before any menu items
+	 * @param {Boolean} addExtraOptions Whether to add options that start with "_" below the separator
 	 */
-	function _addViewOptions(locateMenu, selectedItems, showIcons, addSeparator) {
+	function _addViewOptions(locateMenu, selectedItems, showIcons, addExtraOptions) {
 		var optionsToShow = {};
-		var haveItems = false;
 		
 		// check which view options are available
 		for each(var item in selectedItems) {
 			for(var viewOption in ViewOptions) {
 				if(!optionsToShow[viewOption]) {
 					optionsToShow[viewOption] = ViewOptions[viewOption].canHandleItem(item);
-					haveItems = true;
 				}
 			}
 		}
 		
-		if(haveItems && addSeparator) {		
-			var sep = document.createElement("menuseparator");
-			sep.setAttribute("zotero-locate", "true");
-			locateMenu.appendChild(sep);
+		// add available view options to menu
+		var lastNode = locateMenu.hasChildNodes() ? locateMenu.firstChild : null;
+		var haveOptions = false;
+		for(var viewOption in optionsToShow) {
+			if(viewOption[0] === "_" || !optionsToShow[viewOption]) continue;
+			locateMenu.insertBefore(_addViewOption(selectedItems, viewOption,
+				ViewOptions[viewOption], showIcons), lastNode);
+			haveOptions = true;
 		}
 		
-		// add available view options to menu
-		for(var viewOption in optionsToShow) {
-			if(!optionsToShow[viewOption]) continue;
-			
-			var menuitem = _createMenuItem(Zotero.getString("locate."+viewOption+".label"),
-				null, Zotero.getString("locate."+viewOption+".tooltip"));
-			if(showIcons) {
-				menuitem.setAttribute("class", "menuitem-iconic");
-				menuitem.setAttribute("image", ViewOptions[viewOption].icon);
+		if(haveOptions) {
+			var sep = document.createElement("menuseparator");
+			sep.setAttribute("zotero-locate", "true");
+			locateMenu.insertBefore(sep, lastNode);
+		}
+		
+		if(addExtraOptions) {
+			for each(var viewOption in [key for(key in optionsToShow) if(key[0] === "_")]) {
+				if(viewOption[0] !== "_" || !optionsToShow[viewOption]) continue;
+				locateMenu.insertBefore(_addViewOption(selectedItems, viewOption.substr(1),
+					ViewOptions[viewOption], showIcons), lastNode);
 			}
-			menuitem.setAttribute("zotero-locate", "true");
-			locateMenu.appendChild(menuitem);
-			
-			let myViewOption = viewOption;
-			menuitem.addEventListener("command", function(event) {
-				ViewOptions[myViewOption].handleItems(selectedItems, event);
-			}, false)
 		}
 	}
 	
@@ -332,7 +340,7 @@ var Zotero_LocateMenu = new function() {
 			var attachments = (item.isAttachment() ? [item] : Zotero.Items.get(item.getBestAttachments()));
 			for each(var attachment in attachments) {
 				if(mimeTypes.indexOf(attachment.attachmentMIMEType) !== -1
-					&& item.linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) return attachment;
+					&& attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) return attachment;
 			}
 			return false;
 		}
@@ -423,7 +431,7 @@ var Zotero_LocateMenu = new function() {
 			for each(var attachment in attachments) {
 				if(!ViewOptions.snapshot.canHandleItem(attachment)
 						&& !ViewOptions.pdf.canHandleItem(attachment)
-						&& item.linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
+						&& attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) {
 					return attachment;
 				}
 			}
@@ -459,15 +467,16 @@ var Zotero_LocateMenu = new function() {
 		function _getBestNonNativeAttachment(item) {
 			var attachments = (item.isAttachment() ? [item] : Zotero.Items.get(item.getBestAttachments()));
 			for each(var attachment in attachments) {
-				if(attachment.linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
+				if(attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) {
 					var file = attachment.getFile();
 					if(file) {
 						var ext = Zotero.File.getExtension(file);
-						if(!attachment.attachmentMIMEType) continue;
-						if(!Zotero.MIME.hasNativeHandler(attachment.attachmentMIMEType, ext) &&
-								Zotero.MIME.hasInternalHandler(attachment.attachmentMIMEType, ext)) {
-							return attachment;
+						if(!attachment.attachmentMIMEType || 
+							Zotero.MIME.hasNativeHandler(attachment.attachmentMIMEType, ext) ||
+							!Zotero.MIME.hasInternalHandler(attachment.attachmentMIMEType, ext)) {
+							return false;
 						}
+						return attachment;
 					}
 				}
 			}
@@ -514,7 +523,7 @@ var Zotero_LocateMenu = new function() {
 		
 		function _getBestFile(item) {
 			if(item.isAttachment()) {
-				if(item.linkMode === Zotero.Attachments.LINK_MODE_LINKED_URL) return false
+				if(item.attachmentLinkMode === Zotero.Attachments.LINK_MODE_LINKED_URL) return false;
 				return item;
 			} else {
 				return Zotero.Items.get(item.getBestAttachment());
@@ -527,7 +536,7 @@ var Zotero_LocateMenu = new function() {
 	 *
 	 * Should appear only for regular items
 	 */
-	ViewOptions.libraryLookup = new function() {
+	ViewOptions._libraryLookup = new function() {
 		this.icon = "chrome://zotero/skin/locate-library-lookup.png";
 		this.canHandleItem = function(item) item.isRegularItem();
 		this.handleItems = function(items, event) {
