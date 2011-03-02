@@ -653,7 +653,7 @@ Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
 		// get translators
 		var me = this;
 		
-		var translate = new Zotero.Translate("web");
+		var translate = new Zotero.Translate.Web();
 		translate.setDocument(doc);
 		translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
 		translate.getTranslators();
@@ -707,7 +707,7 @@ Zotero_Browser.Tab.prototype._attemptLocalFileImport = function(doc) {
 									.getFileFromURLSpec(doc.documentURI);
 		
 		var me = this;
-		var translate = new Zotero.Translate("import");
+		var translate = new Zotero.Translate.Import();
 		translate.setLocation(file);
 		translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
 		translate.getTranslators();
