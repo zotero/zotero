@@ -1539,7 +1539,7 @@ Zotero.Integration.Session.prototype.updateUncitedItems = function() {
 Zotero.Integration.Session.prototype.updateUpdateIndices = function(regenerateAll) {
 	if(regenerateAll || this.regenerateAll) {
 		// update all indices
-		for(var i=0; i<this.citationsByIndex.length; i++) {
+		for(var i in this.citationsByIndex) {
 			this.newIndices[i] = true;
 			this.updateIndices[i] = true;
 		}
@@ -1661,7 +1661,7 @@ Zotero.Integration.Session.prototype.updateCitations = function() {
  */
 Zotero.Integration.Session.prototype.restoreProcessorState = function() {
 	var citations = [];
-	for(var i in this.citationsByIndex.length) {
+	for(var i in this.citationsByIndex) {
 		if(this.citationsByIndex[i] && !this.newIndices[i] && !this.citationsByIndex[i].properties.delete) {
 			citations.push(this.citationsByIndex[i]);
 		}
