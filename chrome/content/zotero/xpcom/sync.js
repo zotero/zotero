@@ -3363,6 +3363,7 @@ Zotero.Sync.Server.Data = new function() {
 			var linkedItems = targetObj.getLinkedItems(true);
 			targetObj.linkedItems = linkedItems.concat(otherDiff.linkedItems);
 			
+			/*
 			var msg = _generateTagItemMergeMessage(
 				targetObj.name,
 				otherDiff.linkedItems,
@@ -3370,6 +3371,7 @@ Zotero.Sync.Server.Data = new function() {
 			);
 			// TODO: log rather than alert
 			alert(msg);
+			*/
 		}
 		
 		targetObj.save();
