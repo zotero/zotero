@@ -104,16 +104,9 @@ var Zotero_Browser = new function() {
 	 * Initialize some variables and prepare event listeners for when chrome is done loading
 	 */
 	function init() {
-		try {
-			var gb = gBrowser;
-		} catch(e) {
+		if (!Zotero || !Zotero.initialized || !window.hasOwnProperty("gBrowser")) {
 			return;
 		}
-		if (!Zotero || !Zotero.initialized || !gb) {
-			return;
-		}
-		
-		Zotero_Browser.browserData = new Object();
 		
 		window.addEventListener("load",
 			function(e) { Zotero_Browser.chromeLoad(e) }, false);
@@ -322,10 +315,9 @@ var Zotero_Browser = new function() {
 	}
 	
 	/*
-	 * When chrome unloads, delete our document objects
+	 * Called when chrome is unloaded
 	 */
 	function chromeUnload() {
-		delete Zotero_Browser.browserData;
 	}
 	
 	/*
@@ -661,7 +653,7 @@ Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
 		// get translators
 		var me = this;
 		
-		var translate = new Zotero.Translate("web");
+		var translate = new Zotero.Translate.Web();
 		translate.setDocument(doc);
 		translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
 		translate.getTranslators();
@@ -715,7 +707,7 @@ Zotero_Browser.Tab.prototype._attemptLocalFileImport = function(doc) {
 									.getFileFromURLSpec(doc.documentURI);
 		
 		var me = this;
-		var translate = new Zotero.Translate("import");
+		var translate = new Zotero.Translate.Import();
 		translate.setLocation(file);
 		translate.setHandler("translators", function(obj, item) { me._translatorsAvailable(obj, item) });
 		translate.getTranslators();

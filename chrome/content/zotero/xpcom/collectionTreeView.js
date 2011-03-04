@@ -868,10 +868,16 @@ Zotero.CollectionTreeView.prototype.deleteSelection = function()
 	}
 	this._treebox.endUpdateBatch();
 	
-	if(end.value < this.rowCount)
+	if (end.value < this.rowCount) {
+		var row = this._getItemAtRow(end.value);
+		if (row.isSeparator()) {
+			return;
+		}
 		this.selection.select(end.value);
-	else
+	}
+	else {
 		this.selection.select(this.rowCount-1);
+	}
 }
 
 /*
