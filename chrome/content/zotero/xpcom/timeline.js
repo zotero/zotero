@@ -30,17 +30,19 @@ Zotero.Timeline = new function () {
 
 	function generateXMLDetails(items, dateType) {
 		var escapeXML = Zotero.Utilities.htmlSpecialChars;
-	
+		
 		var content = '<data>\n';
-		for each(var arr in items) {
-			if (arr[dateType]) {
-				var item = Zotero.Items.get(arr.itemID);
-				var theDate =(dateType == 'date') ? Zotero.Date.multipartToSQL(arr[dateType]):arr[dateType];
-				content += '<event start="' + Zotero.Date.sqlToDate(theDate) + '" ';
-				content += 'title=" ' + (arr.title ? escapeXML(arr.title) : '') + '" ';
+		for each(var item in items) {
+			var date = item.getField(dateType, true);
+			if (date) {
+				var sqlDate = (dateType == 'date') ? Zotero.Date.multipartToSQL(date) : date;
+				sqlDate = sqlDate.replace("00-00", "01-01");
+				content += '<event start="' + Zotero.Date.sqlToDate(sqlDate) + '" ';
+				var title = item.getField('title');
+				content += 'title=" ' + (title ? escapeXML(title) : '') + '" ';
 				content += 'icon="' + item.getImageSrc() + '" ';			
 				content += 'color="black">';
-				content += arr.itemID;
+				content += item.id;
 				content += '</event>\n';
 			}
 		}

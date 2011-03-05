@@ -701,11 +701,6 @@ function ChromeExtensionHandler() {
 						break generateContent;
 					}
 					
-					// Convert item objects to export arrays
-					for (var i = 0; i < items.length; i++) {
-						items[i] = items[i].toArray();
-					}
-					
 					mimeType = 'application/xml';
 					
 					var theDateTypes = new Object();
@@ -1060,8 +1055,8 @@ ChromeExtensionHandler.prototype = {
 		// extensions that modify data are added
 		//  - https://www.zotero.org/trac/ticket/1156
 		//
-		//Components.interfaces.nsIProtocolHandler.URI_IS_LOCAL_FILE,
-		Components.interfaces.nsIProtocolHandler.URI_LOADABLE_BY_ANYONE,
+		Components.interfaces.nsIProtocolHandler.URI_IS_LOCAL_FILE,
+		//Components.interfaces.nsIProtocolHandler.URI_LOADABLE_BY_ANYONE,
 		
 	allowPort : function(port, scheme) {
 		return false;
