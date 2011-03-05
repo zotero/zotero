@@ -43,6 +43,12 @@ var Zotero_Timeline_Interface = new function() {
 			return;
 		}
 		
+		var l = ZoteroPane.getSelectedLibraryID();
+		if (l) {
+			ZoteroPane.loadURI(uri + 'library/' + l);
+			return;
+		}
+		
 		ZoteroPane.loadURI(uri);
 	}
 }
