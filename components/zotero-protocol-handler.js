@@ -608,7 +608,7 @@ function ChromeExtensionHandler() {
 					mimeType = 'text/html';
 					
 					var [type, id] = pathParts;
-										
+					
 					if(!timelineDate){
 						timelineDate=Date();
 						var dateParts=timelineDate.toString().split(' ');
@@ -648,7 +648,7 @@ function ChromeExtensionHandler() {
 					var d = '';
 					//passes information (type,ids, dateType) for when the XML is created
 					if(!type || (type != 'collection' && type != 'search')) {
-						d += 'library';
+						d += 'library' + (id ? "/" + id : "");
 					}
 					else {
 						d += type + '/' + id;
@@ -682,6 +682,7 @@ function ChromeExtensionHandler() {
 						default:
 							type = 'library';
 							var s = new Zotero.Search();
+							s.addCondition('libraryID', 'is', id ? id : null);
 							s.addCondition('noChildren', 'true');
 							var ids = s.search();
 							var results = Zotero.Items.get(ids);
