@@ -1,18 +1,18 @@
 {
-	"translatorID":"c54d1932-73ce-dfd4-a943-109380e06574",
-	"label":"Project MUSE",
-	"creator":"Simon Kornblith, Avram Lyon",
-	"target":"https?://[^/]*muse\\.jhu\\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\\.html|search/results)",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":"1",
-	"translatorType":4,
-	"lastUpdated":"2010-11-10 10:15:00"
+	"translatorID": "c54d1932-73ce-dfd4-a943-109380e06574",
+	"label": "Project MUSE",
+	"creator": "Simon Kornblith, Avram Lyon",
+	"target": "^https?://[^/]*muse\\.jhu\\.edu[^/]*/(?:journals/[^/]+/[^/]+/[^/]+\\.html|search/results)",
+	"minVersion": "1.0.0b4.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": "1",
+	"translatorType": 4,
+	"lastUpdated": "2011-03-02 23:38:17"
 }
 
 function detectWeb(doc, url) {
-	var searchRe = new RegExp("(^https?://[^/]+/search/results|/toc/)");
+	var searchRe = new RegExp("(^https?://[^/]+/search/results|/search/save|/toc/)");
 	if(searchRe.test(url)) {
 		return "multiple";
 	} else {
@@ -26,7 +26,7 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
-	var searchRe = new RegExp("^https?://[^/]+/search/results");
+	var searchRe = new RegExp("^https?://[^/]+/search/results|/search/save");
 	if(detectWeb(doc, url) == "multiple") {
 		var items = new Array();
 		var attachments = new Array();
@@ -34,15 +34,15 @@ function doWeb(doc, url) {
 		var htmlRe = /HTML/;
 		if (searchRe.test(url)) { 
 			// Search results
-			var tableRows = doc.evaluate('//div[@id="advancedsearch"]/save_form/table//tr',
+			var tableRows = doc.evaluate('//save_form//tr[@class="resultsrow"]',
 		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var tableRow;
 			// Go through table rows
 			while(tableRow = tableRows.iterateNext()) {
-				var input = doc.evaluate('.//input[@name="aid"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				var input = doc.evaluate('.//div[@class="links"]//a[last()]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				var title = doc.evaluate('.//div[@class="title"]', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-				if(input && input.value && title && title.textContent) {
-					items[input.value] = title.textContent;
+				if(input && input.href && title && title.textContent) {
+					items[input.href] = title.textContent;
 				}
 			}
 		} else if (url.match(/\/toc\//)) {
@@ -52,13 +52,28 @@ function doWeb(doc, url) {
 			var result; 
 			while(result =  results.iterateNext()) {
 				//Zotero.debug(result.textContent);
-				var link = doc.evaluate('.//div[@class="links"]/p//a[3]', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				var link = doc.evaluate('.//div[@class="links"]/p//a[last()]', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				var title = doc.evaluate('.//div[@class="title"]', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 				//Zotero.debug(link.textContent);
 				if(link && link.href && title && title.textContent) {
 					items[link.href] = title.textContent;
 					//Zotero.debug(link.href);
 				}
+			}
+			// Some journals have old-style TOCs for back issues
+			// Ex. http://muse.jhu.edu/journals/eighteenth-century_studies/toc/ecs33.4.html
+			if (items.length == 0) {
+				var articles = doc.evaluate('//ul', doc, nsResolver, XPathResult.ANY_TYPE, null);
+				var article;
+				while (article = articles.iterateNext()) {
+					var link = doc.evaluate('./li/a[contains(@href,".html")]', article, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+					var title = doc.evaluate('./li/i', article, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+					//Zotero.debug(link.textContent);
+					if(link && link.href && title && title.textContent) {
+						items[link.href] = title.textContent;
+						//Zotero.debug(link.href);
+					}
+				} 
 			}
 		}
 		items = Zotero.selectItems(items);
@@ -67,9 +82,9 @@ function doWeb(doc, url) {
 		}
 		var i;
 		var urls = [];
-		for (i in items) urls.push(i);
+		for (i in items) {urls.push(i);};
 		
-		Zotero.Utilities.processDocuments(urls, scrapeOne);		
+		Zotero.Utilities.processDocuments(urls, scrapeOne, function() {Zotero.done();});		
 	} else scrapeOne(doc);
 	Zotero.wait();
 }
@@ -77,6 +92,7 @@ function doWeb(doc, url) {
 // Given an article page, get the RIS and open it
 function scrapeOne(doc) {
 	var url = doc.location.href;
+	//Zotero.debug("scrapeOne has "+doc.location.href)
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
