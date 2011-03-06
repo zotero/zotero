@@ -246,9 +246,9 @@
 							label.setAttribute('tagType', this._tags[tagID].type);
 							if (this.editable) {
 								label.setAttribute('context', 'tag-menu');
-								label.setAttribute('ondragover', 'return document.getBindingParent(this).dragObserver.onDragOver(event)');
-								label.setAttribute('ondragexit', 'return document.getBindingParent(this).dragObserver.onDragExit(event)');
-								label.setAttribute('ondrop', 'return document.getBindingParent(this).dragObserver.onDrop(event)');
+								label.addEventListener('dragover', this.dragObserver.onDragOver, false);
+								label.addEventListener('dragexit', this.dragObserver.onDragExit, false);
+								label.addEventListener('drop', this.dragObserver.onDrop, true);
 							}
 							tagsToggleBox.appendChild(label);
 						}
@@ -698,8 +698,9 @@
 				<body>
 				<![CDATA[
 					this.onDragOver = function (event) {
+						Zotero.debug(event.dataTransfer.mozTypesAt(0));
 						if (!event.dataTransfer.getData('zotero/item')) {
-							return true;
+							return;
 						}
 						
 						/*
@@ -714,7 +715,8 @@
 						*/
 						
 						event.target.setAttribute('draggedOver', true);
-						return false;
+						event.preventDefault();
+						event.effectAllowed = event.dropEffect = "link";
 					}
 					
 					this.onDragExit = function (event) {
