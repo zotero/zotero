@@ -227,3 +227,5 @@
 
 <!ENTITY zotero.file.choose.label			"Choose File...">
 <!ENTITY zotero.file.noneSelected.label			"No file selected">
+
+<!ENTITY zotero.downloadManager.label			"Save to Zotero">
