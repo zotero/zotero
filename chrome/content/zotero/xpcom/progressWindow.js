@@ -139,7 +139,9 @@ Zotero.ProgressWindow = function(_window){
 					getService(Components.interfaces.nsIWindowWatcher);
 		
 		if (!_window){
-			_window = ww.activeWindow;
+			_window = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+				.getService(Components.interfaces.nsIWindowMediator)
+				.getMostRecentWindow("navigator:browser");
 		}
 		
 		if (_window) {

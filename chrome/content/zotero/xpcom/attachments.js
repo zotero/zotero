@@ -199,7 +199,8 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	function importFromURL(url, sourceItemID, forceTitle, forceFileBaseName, parentCollectionIDs, mimeType, libraryID) {
+	function importFromURL(url, sourceItemID, forceTitle, forceFileBaseName, parentCollectionIDs,
+			mimeType, libraryID, callback) {
 		Zotero.debug('Importing attachment from URL');
 		
 		if (sourceItemID && parentCollectionIDs) {
@@ -232,12 +233,13 @@ Zotero.Attachments = new function(){
 				if (imported) {
 					return;
 				}
-				var callback = function () {
+				var importCallback = function (item) {
 					browser.removeEventListener("pageshow", onpageshow, false);
 					Zotero.Browser.deleteHiddenBrowser(browser);
+					callback(item);
 				};
 				Zotero.Attachments.importFromDocument(browser.contentDocument,
-					sourceItemID, forceTitle, parentCollectionIDs, callback, libraryID);
+					sourceItemID, forceTitle, parentCollectionIDs, importCallback, libraryID);
 				imported = true;
 			};
 			browser.addEventListener("pageshow", onpageshow, false);
@@ -355,6 +357,8 @@ Zotero.Attachments = new function(){
 							.createInstance(Components.interfaces.nsIURL);
 				nsIURL.spec = url;
 				wbp.saveURI(nsIURL, null, null, null, null, file);
+				
+				callback(attachmentItem);
 				
 				return attachmentItem;
 			}
