@@ -1752,7 +1752,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.120";
+	this.processor_version = "1.0.122";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3139,12 +3139,12 @@ CSL.getCite = function (Item, item, prevItemID) {
 	var next, error_object;
 	this.tmp.cite_renders_content = false;
 	this.parallel.StartCite(Item, item, prevItemID);
-	CSL.citeStart.call(this, Item);
+	CSL.citeStart.call(this, Item, item);
 	next = 0;
 	while (next < this[this.tmp.area].tokens.length) {
 		next = CSL.tokenExec.call(this, this[this.tmp.area].tokens[next], Item, item);
     }
-	CSL.citeEnd.call(this, Item);
+	CSL.citeEnd.call(this, Item, item);
 	this.parallel.CloseCite(this);
 	if (!this.tmp.cite_renders_content && !this.tmp.just_looking) {
 		if (this.tmp.area === "bibliography") {
@@ -3158,7 +3158,7 @@ CSL.getCite = function (Item, item, prevItemID) {
 	}
 	return "" + Item.id;
 };
-CSL.citeStart = function (Item) {
+CSL.citeStart = function (Item, item) {
 	this.tmp.lastchr = "";
 	this.tmp.have_collapsed = true;
 	this.tmp.render_seen = false;
@@ -3182,8 +3182,16 @@ CSL.citeStart = function (Item) {
 	this.tmp.has_done_year_suffix = false;
 	CSL.Util.Names.initNameSlices(this);
 	this.tmp.last_cite_locale = false;
+	if (!this.tmp.just_looking && item && !item.position && this.registry.registry[Item.id]) {
+		this.tmp.disambig_restore = CSL.cloneAmbigConfig(this.registry.registry[Item.id].disambig);
+	}
 };
-CSL.citeEnd = function (Item) {
+CSL.citeEnd = function (Item, item) {
+	if (this.tmp.disambig_restore) {
+		this.registry.registry[Item.id].disambig.names = this.tmp.disambig_restore.names;
+		this.registry.registry[Item.id].disambig.givens = this.tmp.disambig_restore.givens;
+	}
+	this.tmp.disambig_restore = false;
 	if (this.tmp.last_suffix_used && this.tmp.last_suffix_used.match(/[\-.,;:]$/)) {
 		this.tmp.splice_delimiter = " ";
 	} else if (this.tmp.prefix.value() && this.tmp.prefix.value().match(/^[.,:;a-z]/)) {
@@ -4441,7 +4449,7 @@ CSL.Node.names = {
 									nameset.variable = variable;
 									nameset.species = "pers";
 									nameset.names.push(name);
-									if (rawlist.length === (ppos + 1) || rawlist[ppos + 1].literal) {
+									if (rawlist.length === (ppos + 1) || rawlist[ppos + 1].literal || (rawlist[ppos + 1].family && !rawlist[ppos + 1].given)) {
 										tnamesets.push(nameset);
 										nameset = {names: []};
 									}
@@ -4837,8 +4845,7 @@ CSL.Node.names = {
 						} else {
 							param = paramx;
 						}
-						if (!state.tmp.disambig_restore && !state.tmp.just_looking && item && item.position === CSL.POSITION_FIRST) {
-							state.tmp.disambig_restore = CSL.cloneAmbigConfig(state.tmp.disambig_settings);
+						if (!state.tmp.just_looking && item && item.position === CSL.POSITION_FIRST) {
 							param = paramx;
 						}
 						if (!state.tmp.sort_key_flag) {
@@ -4932,11 +4939,6 @@ CSL.Node.names = {
 				state.tmp.use_ellipsis = false;
 				state.tmp.can_block_substitute = false;
 				state.tmp.forceEtAl = false;
-				if (state.tmp.disambig_restore && state.registry.registry[Item.id]) {
-					state.registry.registry[Item.id].disambig.names = state.tmp.disambig_restore.names;
-					state.registry.registry[Item.id].disambig.givens = state.tmp.disambig_restore.givens;
-				}
-				state.tmp.disambig_restore = false;
 			};
 			this.execs.push(func);
 			state.build.names_flag = false;
