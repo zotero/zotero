@@ -20,9 +20,6 @@
     You should have received a copy of the GNU General Public License
     along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
     
-    
-    Based on code from Greasemonkey and PiggyBank
-    
     ***** END LICENSE BLOCK *****
 */
 var Zotero_DownloadOverlay = new function() {
