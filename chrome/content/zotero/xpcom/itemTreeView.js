@@ -304,11 +304,8 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	this.selection.selectEventsSuppressed = true;
 	
 	// See if we're in the active window
-	var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-		.getService(Components.interfaces.nsIWindowMediator);
-	if (wm.getMostRecentWindow("navigator:browser") == this._ownerDocument.defaultView){
-		var activeWindow = true;
-	}
+	var zp = Zotero.getActiveZoteroPane();
+	var activeWindow = zp && zp.itemsView == this;
 	
 	var quicksearch = this._ownerDocument.getElementById('zotero-tb-search');
 	
@@ -1537,21 +1534,7 @@ Zotero.ItemTreeView.prototype.saveSelection = function()
  *  Sets the selection based on saved selection ids (see above)
  */
 Zotero.ItemTreeView.prototype.rememberSelection = function(selection)
-{
-	// if itemRowMap not yet defined, remember once it is
-	if(!this._itemRowMap) {
-		var me = this;
-		var callback = function() {
-			// remember selection
-			me.rememberSelection(selection);
-			
-			// remove callback
-			me._callbacks.splice(me._callbacks.indexOf(callback), 1);
-		}
-		this.addCallback(callback);
-		return;
-	}
-	
+{	
 	this.selection.clearSelection();
 	
 	for(var i=0; i < selection.length; i++)
