@@ -27,6 +27,6 @@ row > label:first-child, .creator-type-label
 
 textbox
 {
-	margin-top: -1px 0 -2px 0;
+	margin: -1px 5px -1px 0;
 	padding: 0;
 }
