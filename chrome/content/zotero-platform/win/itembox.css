@@ -15,3 +15,9 @@ row vbox[fieldname],
 .creator-type-label image {
 	margin-bottom: 0;
 }
+
+textbox
+{
+	padding: 2px 2px 2px 2px;
+	margin: -1px 0 -1px 1px;
+}
