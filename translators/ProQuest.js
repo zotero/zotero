@@ -1,15 +1,34 @@
 {
-	"translatorID":"a77690cf-c5d1-8fc4-110f-d1fc765dcf88",
-	"translatorType":4,
-	"label":"ProQuest",
-	"creator":"Simon Kornblith",
-	"target":"^https?://[^/]+/pqdweb\\?((?:.*\\&)?did=.*&Fmt=[0-9]|(?:.*\\&)Fmt=[0-9].*&did=|(?:.*\\&)searchInterface=|(?:.*\\&)TS=[0-9])",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-07-24 07:55:00"
+        "translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
+        "label": "ProQuest 2",
+        "creator": "Avram Lyon",
+        "target": "^https?://search\\.proquest\\.com[^/]*(/pqrl)?/(docview|publication|publicationissue)",
+        "minVersion": "2.0",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": "1",
+        "translatorType": 4,
+        "lastUpdated": "2011-03-05 13:30:02"
 }
+
+/*
+   ProQuest Translator
+   Copyright (C) 2011 Avram Lyon, ajlyon@gmail.com
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
@@ -17,86 +36,15 @@ function detectWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
-	if(doc.evaluate('//img[substring(@src, string-length(@src)-32) = "/images/common/logo_proquest.gif" or substring(@src, string-length(@src)-38) = "/images/common/logo_proquest_small.gif"]',
-	                doc, nsResolver, XPathResult.ANY_TYPE, null)) {    
-		
-		
-		var xpath = '//table[@id="tableIndexTerms"]/tbody/tr/td[@class="textSmall"]';
-		var data= doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var aitem;
-		var source;
-		while(aitem = data.iterateNext()) {
-			source=aitem.textContent;
-			if(source=="Source type:") {
-				source=data.iterateNext().textContent;
-				Zotero.debug("Item Source Type: "+source);
-				break;
-			}
-		}
-		
-		if(doc.title.match("Results")) {
-			return "multiple";
-		} else if(doc.title.match("Document View")) {
-			switch (source) {
-				case 'Dissertation':
-					return "thesis";
-				
-				case 'Historical Newspaper':
-				case 'Newspaper':
-					return "newspaperArticle";
-				
-				default:
-					return "journalArticle";
-			}
-			
-		}
+	var record_rows = doc.evaluate('//div[@class="display_record_indexing_row"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	if (record_rows.iterateNext()) {
+		return "journalArticle";	
 	}
-}
-
-//^https?://[^/]+/pqdweb\?((?:.*\&)?did=.*&Fmt=[0-9]|(?:.*\&)Fmt=[0-9].*&did=|(?:.*\&)searchInterface=)
-
-function parseRIS(uris) {
-	Zotero.Utilities.HTTP.doGet(uris, function(text, xmlhttp, url){	
-		// load translator for RIS
-		if(url.match("exportFormat=1")=="exportFormat=1") {
-			var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			
-			// Put AB note in abstract field
-			text = text.replace(/^AB  \-/gm, 'N2  -');
-			
-			// Strip lines with just whitespace, which mess up RIS parsing
-			text = text.replace(/^\s*$\n/gm, '');
-			
-			translator.setString(text);
-			
-			//Set Handler fixes anomaly in Proquest RIS format. Properly formats author name as [last name], [first name]
-			translator.setHandler("itemDone", function(obj, item) {
-				var cre = new Array();
-				cre = item.creators;
-				
-				for each(var e in cre) {
-					
-					if(!e['firstName']) {
-						// Rather than parse, change creator to a single field.
-						e.fieldMode = 1;
-					}
-				}
-				
-				if (item.publicationTitle) item.publicationTitle = Zotero.Utilities.trimInternal(item.publicationTitle.replace(/\([\d\-]+\)/g, ""));
-				
-				// Don't save database page as URL
-				item.url = undefined;
-				
-				item.complete();
-			});
-			
-			translator.translate();
-			Zotero.done();
-		}
-		
-	}, function() {});
-	Zotero.wait();
+	var resultitem = doc.evaluate('//li[@class="resultItem"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	if (resultitem.iterateNext()) {
+		return "multiple";
+	}
+	return false;
 }
 
 function doWeb(doc, url) {
@@ -105,114 +53,191 @@ function doWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
-	var hostRegexp = new RegExp("^(https?://[^/]+)/");
-	var hMatch = hostRegexp.exec(url);
-	var host = hMatch[1];
+	var detected = detectWeb(doc,url);
+	if (detected && detected != "multiple") {
+		scrape(doc,url);
+	} else if (detected) {
+		var articles = new Array();
+		var results = doc.evaluate('//li[@class="resultItem"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var items = new Array();
+		var result;
+		while(result = results.iterateNext()) {
+			var link = doc.evaluate('.//a[contains(@class,"previewTitle") or contains(@class,"resultTitle")]', result, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			var title = link.textContent;
+			var url = link.href;
+			items[url] = title;
+		}
+		items = Zotero.selectItems(items);
+		if(!items) return true;
+		for (var i in items) {
+			articles.push(i);
+		}
+		Zotero.Utilities.processDocuments(articles, scrape, function () {Zotero.done();});
+		Zotero.wait();
+	}
+}
+
+function scrape (doc) {
+	var url = doc.location.href;
+	var namespace = doc.documentElement.namespaceURI;
+	var nsResolver = namespace ? function(prefix) {
+		if (prefix == 'x') return namespace; else return null;
+	} : null;
 	
-
+	// ProQuest provides us with two different data sources; we can pull the RIS
+	// (which is nicely embedded in each page!), or we can scrape the Display Record section
+	// We're going to prefer the latter, since it gives us richer data.
+	// But since we have it without an additional request, we'll see about falling back on RIS for missing data
 	
-	if(doc.evaluate('//img[substring(@src, string-length(@src)-32) = "/images/common/logo_proquest.gif" or substring(@src, string-length(@src)-38) = "/images/common/logo_proquest_small.gif"]',
-		                doc, nsResolver, XPathResult.ANY_TYPE, null)) {
-			if(doc.title.match("Results")) {
-				
-				//Get Client ID
-				var xpath = '//a';
-				var data= doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-				var aitem;
-				var clientID;
-				while(aitem = data.iterateNext()) {
-					clientID=aitem.href;
-					if(clientID.indexOf("clientId")!=-1) {
-						clientID = clientID.substr(clientID.indexOf("clientId")+9,clientID.length);
-						break;
-					}
-				}		
-				
-				var multXpath = '//input[@name="chk"][@type="checkbox"]';
-				var titleXpath = '//a[@class="bold"]';
-				var mInfos = doc.evaluate(multXpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-				var titleElmts = doc.evaluate(titleXpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-				var titleElmt;
-				var mInfo;
-				mInfo = mInfos.iterateNext();
-				titleElmt = titleElmts.iterateNext();
-
-				var items = new Array();
-
-				do {
-					//Get item ID
-					
-					var str= mInfo.value;
-					str= str.replace("retrieveGroup", "sid");
-					var url = host+"/pqdweb?RQT=530&markedListInfo="+str+"1";
-					items[url] = Zotero.Utilities.trimInternal(titleElmt.textContent);
-
-				} while((mInfo = mInfos.iterateNext()) && (titleElmt = titleElmts.iterateNext()));
-
-				items = Zotero.selectItems(items);
-				if(!items) return true;
-
-				
-				//Array of URLs for the doGet
-				var uris = new Array();
-				
-				//Clear Basket
-				uris.push(host+"/pqdweb?RQT=531&clientId="+clientID);
-				uris.push(host+"/pqdweb?RQT=532&clientId="+clientID);
-				
-				//Add URLS to the basket
-				for(var bibcode in items) {
-					uris.push(bibcode);
-				}
-					
-				//Export basket as a RIS file
-				uris.push(host+"/pqdweb?RQT=532&clientId="+clientID);
-				uris.push(host+"/pqdweb?RQT=562&MRR=M&clientId="+clientID);
-				uris.push(host+"/pqdweb?RQT=562&exportFormat=1&clientId="+clientID);
-				
-				parseRIS(uris);
-				
-			} else {
-
-				//Get Client ID
-				var xpath = '//a';
-				var data= doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-				var aitem;
-				var clientID;
-				while(aitem = data.iterateNext()) {
-					clientID=aitem.href;
-					if(clientID.indexOf("clientId")!=-1) {
-						clientID = clientID.substr(clientID.indexOf("clientId")+9,clientID.length);
-						break;
-					}
-				}		
-				
-				//Get item ID
-				var xpath = '//input[@name="marked"][@type="checkbox"]';
-				var str= doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-				str= str.replace("retrieveGroup", "sid");
-				
-				//Array of URLs for the doGet
-				var uris = new Array();
-				
-				//Clear Basket
-				uris.push(host+"/pqdweb?RQT=531&clientId="+clientID);
-				uris.push(host+"/pqdweb?RQT=532&clientId="+clientID);
-				
-				//Create URL to add item to basket
-				url = host+"/pqdweb?RQT=530&markedListInfo="+str+"1";
-				Zotero.debug("RIS URL: "+url);
-				
-				uris.push(url);
-					
-				//Export basket as a RIS file
-				uris.push(host+"/pqdweb?RQT=532&clientId="+clientID);
-				uris.push(host+"/pqdweb?RQT=562&MRR=M&clientId="+clientID);
-				uris.push(host+"/pqdweb?RQT=562&exportFormat=1&clientId="+clientID);
-				
-				parseRIS(uris);
-				
+	var item = new Zotero.Item();
+	var record_rows = doc.evaluate('//div[@class="display_record_indexing_row"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	var record_row;
+	item.place = [];
+	item.thesisType = [];
+	var account_id;
+	while (record_row = record_rows.iterateNext()) {
+		var field = doc.evaluate('./div[@class="display_record_indexing_fieldname"]', record_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.trim();
+		var value = doc.evaluate('./div[@class="display_record_indexing_data"]', record_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.trim();
+		// Separate values in a single field are generally wrapped in <a> nodes; pull a list of them
+		var valueAResult = doc.evaluate('./div[@class="display_record_indexing_data"]/a', record_row, nsResolver, XPathResult.ANY_TYPE, null);
+		var valueA;
+		var valueAArray = [];
+		// We would like to get an array of the text for each <a> node
+		if (valueAResult) {
+			while(valueA = valueAResult.iterateNext()) {
+				valueAArray.push(valueA.textContent);
 			}
 		}
+		switch (field) {
+			case "Title":
+					item.title = value; break;
+			case "Authors":
+					item.creators = valueAArray.map(
+							function(author) {
+								return Zotero.Utilities.cleanAuthor(author,
+									"author",
+									author.indexOf(',') !== -1); // useComma
+							});
+					break;
+			case "Publication title":
+					item.publicationTitle = value; break;
+			case "Volume":
+					item.volume = value; break;
+			case "Issue":
+					item.issue = value; break;
+			case "Pages":
+			case "First Page":
+					item.pages = value; break;
+			case "Number of pages":
+					item.numPages = value; break;
+			case "Publication year": 
+			case "Year":
+					item.date = (item.date) ? item.date : value; break;
+			case "Publication Date":
+					item.date = value; break;
+			case "Publisher":
+					item.publisher = value; break;
+			case "Place of Publication": // TODO Change to publisher-place when schema changes
+					item.place[0] = value; break;
+			case "Dateline":	// TODO Change to event-place when schema changes
+					item.place[0] = value; break;
+			case "School location":	// TODO Change to publisher-place when schema changes
+					item.place[0] = value; break;
+			// blacklisting country-- ProQuest regularly gives us Moscow, United States
+			//case "Country of publication":
+			//		item.place[1] = value; break;
+			case "ISSN":
+					item.ISSN = value; break;
+			case "ISBN":
+					item.ISBN = value; break;
+			case "DOI":
+					item.DOI = value; break;
+			case "School":
+					item.university = value; break;
+			case "Degree":
+					item.thesisType[0] = value; break;
+			case "Department":
+					item.thesisType[1] = value; break;
+			case "Advisor":		// TODO Map when exists in Zotero
+					break;
+			case "Source type":
+			case "Document Type":
+					item.itemType = (mapToZotero(value)) ? mapToZotero(value) : item.itemType; break;
+			case "Copyright":
+					item.rights = value; break;
+			case "Database":
+					item.libraryCatalog = value; break;
+			case "Language of Publication":
+					item.language = value; break;
+			case "Section":
+					item.section = value; break;
+			case "Identifiers / Keywords":
+					item.tags = value.split(', '); break;
+			case "Subjects":
+					item.tags = valueAArray; break;
+			default: Zotero.debug("Discarding unknown field '"+field+"' => '" +value+ "'");
+		}
+	}
+	
+	var abs = doc.evaluate('//div[@id="abstract_field"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if (abs) {
+		item.abstractNote = abs.textContent
+					.replace(/^.*\[\s*Show all\s*\]/,"")
+					.replace(/\[\s*Show less\s*\]/,"")
+					.replace(/\[\s*PUBLICATION ABSTRACT\s*\]/,"")
+					.trim();
+	}
+	
+	
+	// Ok, now we'll pull the RIS and run it through the translator. And merge with the temporary item.
+	// RIS LOGIC GOES HERE
+	
+	// Sometimes the PDF is right on this page
+	var realLink = doc.evaluate('//div[@id="pdffailure"]/div[@class="body"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if (realLink) {
+		item.attachments.push({url:realLink.href, title:"ProQuest PDF", mimeType:"application/pdf"});
+	} else {
+		// The PDF link requires two requests-- we fetch the PDF full text page
+		var pdf = doc.evaluate('//a[@class="formats_base_sprite format_pdf"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if (pdf) {
+			var pdfDoc = Zotero.Utilities.retrieveDocument(pdf.href);
+			// This page gives a beautiful link directly to the PDF, right in the HTML
+			realLink = pdfDoc.evaluate('//div[@id="pdffailure"]/div[@class="body"]/a', pdfDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			if (realLink) {
+				item.attachments.push({url:realLink.href, title:"ProQuest PDF", mimeType:"application/pdf"});
+			}
+		} else {
+				// If no PDF, we'll save at least something. This might be fulltext, but we're not sure.
+				item.attachments.push({url:url, title:"ProQuest HTML", mimeType:"text/html"});
+		}
+	}
+	
+	item.place = item.place.join(', ');
+	item.thesisType = item.thesisType.join(', ');
+	
+	item.proceedingsTitle = item.publicationTitle;
+	
+	if(!item.itemType) item.itemType="journalArticle";
+	item.complete();
+}
 
+// This map is not complete. See debug output to catch unassigned types
+function mapToZotero (type) {
+	var map = {
+	"Scholarly Journals" : "journalArticle",
+	"Book Review-Mixed" : false, // FIX AS NECESSARY
+	"Reports" : "report",
+	"REPORT" : "report",
+	"Newspapers" : "newspaperArticle",
+	//"News" : "newspaperArticle",	// Otherwise Foreign Policy is treated as a newspaper http://search.proquest.com/docview/840433348
+	"Magazines" : "magazineArticle",
+	"Dissertations & Theses" : "thesis",
+	"Dissertation/Thesis" : "thesis",
+	"Conference Papers & Proceedings" : "conferencePaper",
+	"Wire Feeds": "newspaperArticle", // Good enough?
+	"WIRE FEED": "newspaperArticle" // Good enough?
+	}
+	if (map[type]) return map[type];
+	Zotero.debug("No mapping for type: "+type);
+	return false;
 }
