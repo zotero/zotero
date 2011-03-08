@@ -58,7 +58,7 @@ var ZoteroTab = new function()
 		}
 		
 		// stop drop events from propagating
-		this.containerBrowser.addEventListener("drop", _dropPropagationKiller, true);
+		this.containerBrowser.addEventListener("drop", _dropPropagationKiller, false);
 		
 		// initialize ZoteroPane and swap out old window ZoteroPane object
 		if(this.containerWindow.ZoteroPane) {
@@ -110,7 +110,7 @@ var ZoteroTab = new function()
 	
 	this.onUnload = function() {
 		// remove drop propagation killer
-		this.containerBrowser.removeEventListener("drop", _dropPropagationKiller, true);
+		this.containerBrowser.removeEventListener("drop", _dropPropagationKiller, false);
 		
 		// replace window ZoteroPane
 		if(this.containerWindow.ZoteroPane === this.containerWindow.ZoteroPane_Tab) {
@@ -124,6 +124,7 @@ var ZoteroTab = new function()
 	
 	function _dropPropagationKiller(event) {
 		event.stopPropagation();
+		event.preventDefault();
 	}
 }
 

@@ -16,7 +16,14 @@ row vbox[fieldname],
 	margin-bottom: 0;
 }
 
-textbox, tagsbox textbox
+textbox
 {
-	margin-left: -2px;
+	padding: 2px 2px 2px 2px;
+	margin: -1px 0 -1px 1px;
+}
+
+#item-type-menu
+{
+	padding: 0 0 0 1px !important;
+	margin: 0 5px 0 1px !important;
 }

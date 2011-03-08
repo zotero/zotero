@@ -8,19 +8,6 @@ row, tagsbox row
 	min-height: 1em;
 }
 
-textbox, tagsbox textbox
-{
-	margin-top: -1px;
-	margin-bottom: -2px;
-	margin-left: 0;
-}
-
-.textbox-input-box
-{
-	margin-left: 0px;
-	margin-right: 0px;
-}
-
 
 /* DEBUG: this doesn't seem to work, unfortunately
 label[singleField=false]:after
@@ -28,6 +15,11 @@ label[singleField=false]:after
 	content:",";
 }
 */
+
+textbox .textbox-input-box
+{
+	margin: 0;
+}
 
 /* metadata field names */
 row > label:first-child, .creator-type-label
