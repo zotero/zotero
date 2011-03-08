@@ -15,8 +15,3 @@ row vbox[fieldname],
 .creator-type-label image {
 	margin-bottom: 0;
 }
-
-textbox, tagsbox textbox
-{
-	margin-left: -2px;
-}
