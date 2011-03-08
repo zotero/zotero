@@ -846,7 +846,13 @@ Zotero.Sync.Storage.Session.ZFS.prototype.getLastSyncTime = function (callback) 
 		// TODO: move to root uri
 		uri.spec += "?auth=1";
 		Zotero.HTTP.doGet(uri, function (req) {
-			if (req.status != 200) {
+			if (req.status == 401) {
+				// TODO: localize
+				var msg = "File sync login failed\n\nCheck your username and password in the Sync pane of the Zotero preferences.";
+				self.onError(msg);
+				return;
+			}
+			else if (req.status != 200) {
 				var msg = "Unexpected status code " + req.status + " caching "
 					+ "authentication credentials in Zotero.Sync.Storage.Session.ZFS.getLastSyncTime()";
 				Zotero.debug(msg, 1);
@@ -866,7 +872,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype.getLastSyncTime = function (callback) 
 		}
 		Zotero.debug(req.status);
 		
-		if (req.status == 403) {
+		if (req.status == 401 || req.status == 403) {
 			Zotero.debug("Clearing ZFS authentication credentials", 2);
 			self._cachedCredentials = false;
 		}
