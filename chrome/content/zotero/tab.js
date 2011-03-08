@@ -38,6 +38,11 @@ var ZoteroTab = new function()
 		   .chromeEventHandler.ownerDocument.defaultView;
 		if(!this.containerWindow) return;
 		
+		if(this.containerWindow.ZoteroPane && this.containerWindow.ZoteroPane.itemsView) {
+			this.containerWindow.ZoteroPane.itemsView.unregister();
+			delete this.containerWindow.ZoteroPane.itemsView;
+		}
+		
 		var tabs = (this.containerWindow.gBrowser.tabs
 					? this.containerWindow.gBrowser.tabs : this.containerWindow.gBrowser.mTabs);
 		
