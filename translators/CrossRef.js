@@ -3,7 +3,7 @@
 	"translatorType":8,
 	"label":"CrossRef",
 	"creator":"Simon Kornblith",
-	"target":"^http://partneraccess\\.oclc\\.org/",
+	"target":"^https?://partneraccess\\.oclc\\.org/",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":90,
@@ -67,6 +67,18 @@ function processCrossRef(xmlOutput) {
 		}
 		item.volume = itemXML.journal_issue.journal_volume.volume.toString();
 		item.issue = itemXML.journal_issue.issue.toString();
+       } else if(xml.doi_record[0].crossref["report-paper"].length()) {
+               // Report Paper
+               // Example: doi: 10.4271/2010-01-0907
+               // http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&rft_id=info%3Adoi/10.4271/2010-01-0907&rft_val_fmt=info%3A
+               var itemXML = xml.doi_record[0].crossref["report-paper"];
+               var refXML = itemXML["report-paper_metadata"];
+               var metadataXML = itemXML["report-paper_metadata"];
+               var item = new Zotero.Item("report");
+               if (metadataXML.publisher_item.item_number.toString())
+                       item.reportNumber = metadataXML.publisher_item.item_number.toString();
+               item.institution = metadataXML.publisher.publisher_name.toString();
+               item.place = metadataXML.publisher.publisher_place.toString();
 	} else if(xml.doi_record[0].crossref.book.length()) {
 		// Book chapter
 		if(xml.doi_record[0].crossref.book.@book_type.length()
@@ -186,7 +198,7 @@ function processCrossRef(xmlOutput) {
 	
 	item.DOI = refXML.doi_data.doi.toString();
 	item.url = refXML.doi_data.resource.toString();
-	item.title = refXML.titles[0].title.toString();
+	item.title = refXML.titles[0].title.toString().replace(/^<title>/, "").replace(/<\/title>$/,"");
 	
 	item.complete();
 	return true;
