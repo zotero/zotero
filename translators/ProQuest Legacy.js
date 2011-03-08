@@ -1,7 +1,7 @@
 {
 	"translatorID":"a77690cf-c5d1-8fc4-110f-d1fc765dcf88",
 	"translatorType":4,
-	"label":"ProQuest",
+	"label":"ProQuest Legacy",
 	"creator":"Simon Kornblith",
 	"target":"^https?://[^/]+/pqdweb\\?((?:.*\\&)?did=.*&Fmt=[0-9]|(?:.*\\&)Fmt=[0-9].*&did=|(?:.*\\&)searchInterface=|(?:.*\\&)TS=[0-9])",
 	"minVersion":"1.0.0b3.r1",
