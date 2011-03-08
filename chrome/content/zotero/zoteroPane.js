@@ -310,7 +310,9 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		this.serializePersist();
+		if(this.isShowing()) {
+			this.serializePersist();
+		}
 		
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		tagSelector.unregister();
@@ -349,9 +351,14 @@ var ZoteroPane = new function()
 		
 		var containerWindow = (window.ZoteroTab ? window.ZoteroTab.containerWindow : window);
 		if(containerWindow.zoteroSavedSelection) {
-			Zotero.debug("ZoteroPane: Remembering selection");
-			this.itemsView.rememberSelection(containerWindow.zoteroSavedSelection);
-			delete containerWindow.zoteroSavedSelection;
+			var me = this;
+			// hack to restore saved selection after itemTreeView finishes loading
+			window.setTimeout(function() {
+				if(containerWindow.zoteroSavedSelection) {
+					me.itemsView.rememberSelection(containerWindow.zoteroSavedSelection)
+					delete containerWindow.zoteroSavedSelection;
+				}
+			}, 51);
 		}
 		
 		this.updateTagSelectorSize();
