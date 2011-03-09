@@ -736,13 +736,13 @@ Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
 	
 	// Already selected
 	var itemGroup = this._getItemAtRow(this.selection.currentIndex);
-	if (itemGroup.ref.libraryID == libraryID) {
+	if (itemGroup.isLibrary(true) && itemGroup.ref.libraryID == libraryID) {
 		return true;
 	}
 	
 	// Find library
-	for (var i=0, rows=this.rowCount; i<rows.length; i++) {
-		var itemGroup = this._getItemAtRow(this.selection.currentIndex);
+	for (var i=0, rows=this.rowCount; i<rows; i++) {
+		var itemGroup = this._getItemAtRow(i);
 		if (itemGroup.ref && itemGroup.ref.libraryID == libraryID) {
 			this.selection.select(i);
 			return true;

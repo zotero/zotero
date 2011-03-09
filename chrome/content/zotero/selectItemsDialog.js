@@ -47,7 +47,6 @@ function doLoad()
 	// Don't show Commons when citing
 	collectionsView.showCommons = false;
 	document.getElementById('zotero-collections-tree').view = collectionsView;
-	if(io.select) itemsView.selectItem(io.select);
 }
 
 function doUnload()

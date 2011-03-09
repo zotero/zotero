@@ -1296,8 +1296,10 @@ Zotero.ItemTreeView.prototype.selectItem = function(id, expand, noRecurse)
 			
 			// Clear the quicksearch and tag selection and try again (once)
 			if (!noRecurse) {
-				this._ownerDocument.defaultView.ZoteroPane.clearQuicksearch();
-				this._ownerDocument.defaultView.ZoteroPane.clearTagSelection();
+				if (this._ownerDocument.defaultView.ZoteroPane) {
+					this._ownerDocument.defaultView.ZoteroPane.clearQuicksearch();
+					this._ownerDocument.defaultView.ZoteroPane.clearTagSelection();
+				}
 				return this.selectItem(id, expand, true);
 			}
 			
