@@ -3428,15 +3428,22 @@ Zotero.Sync.Server.Data = new function() {
 		
 		introMsg += " The following items have been added to the collection:";
 		var itemText = [];
-		for each(var id in addedItemIDs) {
+		var max = addedItemIDs.length;
+		for (var i=0; i<max; i++) {
+			var id = addedItemIDs[i];
 			var item = Zotero.Items.get(id);
-			var title = item.getField('title');
+			var title = item.getDisplayTitle();
 			var text = " \u2022 " + title;
 			var firstCreator = item.getField('firstCreator');
 			if (firstCreator) {
 				text += " (" + firstCreator + ")";
 			}
 			itemText.push(text);
+			
+			if (i == 19 && max > 20) {
+				itemText.push(" \u2022 ...");
+				break;
+			}
 		}
 		return introMsg + "\n\n" + itemText.join("\n");
 	}
