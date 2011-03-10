@@ -367,7 +367,7 @@ Zotero.MIME = new function(){
 			}
 		}
 		
-		Zotero.debug('MIME type ' + mimeType + ' cannot be handled natively');
+		Zotero.debug('MIME type ' + mimeType + ' cannot be handled internally');
 		return false;
 	}
 	
