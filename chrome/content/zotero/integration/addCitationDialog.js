@@ -124,13 +124,20 @@ var Zotero_Citation_Dialog = new function () {
 				toggleMultipleSources(false);
 				_suppressNextTreeSelect = true;
 				
-				// switch to library if item doesn't exist in current selection
-				var collection = collectionsView.getSelectedCollection();
-				if(collection && !collection.hasItem(io.citation.citationItems[0].id)) { 
-					var item = Zotero.Items.get(io.citation.citationItems[0].id);
+				// If we're in a different library, switch libraries
+				var id = io.citation.citationItems[0].id;
+				var itemGroup = collectionsView._getItemAtRow(collectionsView.selection.currentIndex);
+				var item = Zotero.Items.get(id);
+				if(item.libraryID != itemGroup.ref.libraryID) {
 					collectionsView.selectLibrary(item.libraryID);
 				}
-				itemsView.wrappedJSObject.selectItem(io.citation.citationItems[0].id);
+				var selected = itemsView.selectItem(id);
+				if(!selected) {
+					// If item wasn't found in current view, select library root
+					// and try again (in case we were in a collection of correct library)
+					collectionsView.selectLibrary(item.libraryID);
+					itemsView.selectItem(id);
+				}
 				
 				for(var box in _preserveData) {
 					var property = _preserveData[box][0];
