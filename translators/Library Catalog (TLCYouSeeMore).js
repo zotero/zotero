@@ -1,14 +1,14 @@
 {
-	"translatorID":"0f9fc2fc-306e-5204-1117-25bca009dffc",
-	"translatorType":4,
-	"label":"Library Catalog (TLC/YouSeeMore)",
-	"creator":"Simon Kornblith",
-	"target":"TLCScripts/interpac\\.dll\\?(?:.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2006-12-15 15:11:00"
+        "translatorID": "0f9fc2fc-306e-5204-1117-25bca009dffc",
+        "label": "Library Catalog (TLC/YouSeeMore)",
+        "creator": "Simon Kornblith",
+        "target": "TLCScripts/interpac\\.dll\\?(?:.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)",
+        "minVersion": "1.0.0b3.r1",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": "1",
+        "translatorType": 4,
+        "lastUpdated": "2011-03-11 08:58:37"
 }
 
 function detectWeb(doc, url) {
@@ -64,13 +64,13 @@ function doWeb(doc, url) {
 		var tag, ind, content, elmt;
 		
 		while(elmt = elmts.iterateNext()) {
-			tag = newDoc.evaluate('./td[2]/tt[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
-			var inds = newDoc.evaluate('./td[3]/tt[1]/text()[1]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
+			tag = newDoc.evaluate('./td[2]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+			var inds = newDoc.evaluate('./td[3]', elmt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			
 			tag = tag.replace(/[\r\n]/g, "");
 			inds = inds.replace(/[\r\n\xA0]/g, "");
 			
-			var children = newDoc.evaluate('./td[4]/tt[1]//text()', elmt, nsResolver,
+			var children = newDoc.evaluate('./td[4]//text()', elmt, nsResolver,
 			                               XPathResult.ANY_TYPE, null);
 			var subfield = children.iterateNext();
 			var fieldContent = children.iterateNext();
