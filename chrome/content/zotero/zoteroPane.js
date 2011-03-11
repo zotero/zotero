@@ -3163,14 +3163,14 @@ var ZoteroPane = new function()
 				this.loadURI(url, event, { attachmentID: itemID});
 			}
 			else {
-				var fileURL = attachment.getLocalFileURL();
-				
 				// Some platforms don't have nsILocalFile.launch, so we just load it and
 				// let the Firefox external helper app window handle it
 				try {
 					file.launch();
 				}
 				catch (e) {
+					Zotero.debug("launch() not supported -- passing file to loadURI()");
+					var fileURL = attachment.getLocalFileURL();
 					window.loadURI(fileURL);
 				}
 			}
