@@ -1,14 +1,14 @@
 {
-	"translatorID":"d75381ee-7d8d-4a3b-a595-b9190a06f43f",
-	"translatorType":4,
-	"label":"Scitation",
-	"creator":"Eugeniy Mikhailov",
-	"target":"^https?://(?:www\\.)?scitation.aip.org",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+        "translatorID": "d75381ee-7d8d-4a3b-a595-b9190a06f43f",
+        "label": "Scitation",
+        "creator": "Eugeniy Mikhailov",
+        "target": "^https?://(?:www\\.)?scitation.aip.org",
+        "minVersion": "1.0.0b3.r1",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": "1",
+        "translatorType": 4,
+        "lastUpdated": "2011-03-12 12:50:18"
 }
 
 function detectWeb(doc, url) {
@@ -67,13 +67,13 @@ function doWeb(doc, url) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
-			var doi = text.match(/ER\s{2}\-\s.*org\/(.*)\n/)[1];
-			if (doi) item.DOI = doi;
+			var doi = text.match(/[E|U]R\s{2}\-\s.*org\/(10\..*)\n/);
+			if (doi) item.DOI = doi[1];
 			item.complete();
 		});
 		translator.translate();
 
 		Zotero.done();
-    });
+	});
 	Zotero.wait();
 }
