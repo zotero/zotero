@@ -385,17 +385,17 @@ Zotero.QuickCopy = new function() {
 				return content;
 			}
 			
-			var csl = Zotero.Styles.get(format).csl;
-			csl.updateItems([item.id for each(item in items)]);
-			
 			// Copy citations if shift key pressed
 			if (modified) {
+				var csl = Zotero.Styles.get(format).csl;
+				csl.updateItems([item.id for each(item in items)]);
 				var citation = {citationItems:[{id:item.id} for each(item in items)], properties:{}};
 				var html = csl.previewCitationCluster(citation, [], [], "html"); 
 				var text = csl.previewCitationCluster(citation, [], [], "text"); 
 			} else {
-				var html = Zotero.Cite.makeFormattedBibliography(csl, "html");
-				var text = Zotero.Cite.makeFormattedBibliography(csl, "text");
+				var style = Zotero.Styles.get(format);
+				var html = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, "html");
+				var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(style, items, "text");
 			}
 			
 			return {text:(contentType == "html" ? html : text), html:html};
