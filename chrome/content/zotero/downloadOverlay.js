@@ -23,6 +23,27 @@
     ***** END LICENSE BLOCK *****
 */
 var Zotero_DownloadOverlay = new function() {
+	const PDF_MIME_TYPE = "application/pdf";
+	const ALLOW_LIST = [
+		"application/pdf",
+		"application/postscript",
+		"application/xhtml+xml",
+		"text/html",
+		"text/plain",
+		/^audio\//,
+		/^image\//,
+		/^video\//,
+		/^application\/vnd\.oasis\.opendocument\./,
+		/^application\/vnd\.ms-/,
+		/^application\/vnd\.openxmlformats-officedocument/,
+		/^application\/vnd\.lotus-/,
+		/^application\/vnd\.wolfram\./,
+		"application/vnd.wordperfect",
+		"application/wordperfect5.1",
+		"application/msword",
+		"application/x-latex"
+	];
+	
 	/**
 	 * Saves this item, if we are supposed to save it.
 	 *
@@ -31,8 +52,10 @@ var Zotero_DownloadOverlay = new function() {
 	this.handleSave = function() {
 		if(!document.getElementById('zotero-radio').selected) return false;
 		
+		var retrieveMetadata = document.getElementById('zotero-recognizePDF').selected;
+		
 		var url = dialog.mLauncher.source.spec;
-		Zotero.debug("Downloading from "+url);
+		Zotero.debug("Zotero_DownloadOverlay: Downloading from "+url);
 		
 		// set up progress window
 		var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
@@ -41,12 +64,29 @@ var Zotero_DownloadOverlay = new function() {
 		var libraryID = (win ? win.ZoteroPane.getSelectedLibraryID() : false);
 		var collection = (win ? win.ZoteroPane.getSelectedCollection() : false);
 		
+		var recognizePDF = document.getElementById('zotero-recognizePDF').checked
+				&& !document.getElementById('zotero-recognizePDF').hidden;
+		
 		// set up callback
 		var callback = function(item) {
 			if(!win) return;
 			
 			if(item) win.Zotero_Browser.itemDone(null, item);
 			win.Zotero_Browser.finishScraping(null, !!item);
+			
+			if(recognizePDF) {
+				var timer = Components.classes["@mozilla.org/timer;1"]
+					.createInstance(Components.interfaces.nsITimer);
+				timer.init(function() {
+					try {
+					if(item.getFile()) {
+						timer.cancel();
+						var recognizer = new win.Zotero_RecognizePDF.ItemRecognizer();
+						recognizer.recognizeItems([item]);
+					}
+					} catch(e) { dump(e.toSource()) };
+				}, 1000, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
+			}
 		};
 		
 		// show progress dialog
@@ -67,14 +107,36 @@ var Zotero_DownloadOverlay = new function() {
 	 * Called when mode in dialog has been changed
 	 */
 	this.modeChanged = function() {
-		Zotero.debug("rememberChoice");
-		document.getElementById('rememberChoice').disabled = document.getElementById('zotero-radio').selected;
+		var zoteroSelected = document.getElementById('zotero-radio').selected;
+		
+		// don't allow user to remember Zotero option for file type; i'm not sure anyone wants this
+		// to happen automatically
+		if(zoteroSelected) document.getElementById('rememberChoice').selected = false;
+		document.getElementById('rememberChoice').disabled = zoteroSelected;
+		
+		// disable recognizePDF checkbox as necessary
+		document.getElementById('zotero-recognizePDF').disabled = !zoteroSelected;
 	};
 	
 	/**
 	 * Called when the save dialog is opened
 	 */
 	this.init = function() {
+		// Disable for filetypes people probably don't want to save
+		var show = false;
+		var mimeType = dialog.mLauncher.MIMEInfo.MIMEType.toLowerCase();
+		for each(var elem in ALLOW_LIST) {
+			if(typeof elem === "string") {
+				if(elem === mimeType) {
+					document.getElementById('zotero-container').hidden = false;
+					break;
+				}
+			} else if(elem.test(mimeType)) {
+				document.getElementById('zotero-container').hidden = false;
+				break;
+			}
+		}
+		
 		// Hook in event listener to ondialogaccept
 		document.documentElement.setAttribute('ondialogaccept',
 			'if(!Zotero_DownloadOverlay.handleSave()) { '
@@ -84,6 +146,14 @@ var Zotero_DownloadOverlay = new function() {
 		// Hook in event listener for mode change
 		var radios = document.getElementById('mode').
 			addEventListener("command", Zotero_DownloadOverlay.modeChanged, false);
+		
+		// Set label on retrieve PDF option
+		if(mimeType === PDF_MIME_TYPE) {
+			var recognizePDF = document.getElementById('zotero-recognizePDF');
+			recognizePDF.label = Zotero.getString("pane.items.menu.recognizePDF");
+			recognizePDF.hidden = false;
+			recognizePDF.disabled = true;
+		}
 	};
 }
 
