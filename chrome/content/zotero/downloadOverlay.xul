@@ -38,8 +38,11 @@
 	<script type="application/x-javascript" src="include.js"/>
 	<script type="application/x-javascript" src="downloadOverlay.js"/>
 	<radiogroup id="mode">
-		<vbox insertbefore="save" id="zotero-container" flex="1">
+		<vbox insertbefore="save" id="zotero-container" flex="1" hidden="true">
 			<radio id="zotero-radio" label="&zotero.downloadManager.label;"/>
+			<vbox style="margin-left: 10px">
+				<checkbox id="zotero-recognizePDF" hidden="true" persist="checked"/>
+			</vbox>
 		</vbox>
 	</radiogroup>
 </overlay>
