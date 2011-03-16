@@ -13,7 +13,7 @@
     (at your option) any later version.
     
     Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    but WITHOUT ANY WARRANTY; without even the implied warranty ofc
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
     
@@ -289,13 +289,13 @@ Zotero.Translate.IO.Read.prototype = {
 	},
 	
 	"_openRawStream":function() {
+		if(this._rawStream) this._rawStream.close();
 		this._rawStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
 								  .createInstance(Components.interfaces.nsIFileInputStream);
 		this._rawStream.init(this.file, 0x01, 0664, 0);
 	},
 	
 	"_seekToStart":function(charset) {
-		if(this._rawStream) this._rawStream.close();
 		this._openRawStream();
 		
 		this._linesExhausted = false;
@@ -335,10 +335,15 @@ Zotero.Translate.IO.Read.prototype = {
 		Zotero.debug("Translate: Initializing RDF data store");
 		this._dataStore = new Zotero.RDF.AJAW.RDFIndexedFormula();
 		var parser = new Zotero.RDF.AJAW.RDFParser(this._dataStore);
-		var nodes = Zotero.Translate.IO.parseDOMXML(this._rawStream, this._charset, this.file.fileSize);
-		parser.parse(nodes, baseURI);
-		
-		this.RDF = new Zotero.Translate.IO._RDFSandbox(this._dataStore);
+		try {
+			var nodes = Zotero.Translate.IO.parseDOMXML(this._rawStream, this._charset, this.file.fileSize);
+			parser.parse(nodes, baseURI);
+			
+			this.RDF = new Zotero.Translate.IO._RDFSandbox(this._dataStore);
+		} catch(e) {
+			this.close();
+			throw "Translate: No RDF found";
+		}
 	},
 	
 	"setCharacterSet":function(charset) {
