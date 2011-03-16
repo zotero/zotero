@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2011-02-10 04:31:00"
+	"lastUpdated":"2011-03-16 23:24:54"
 }
 
 /*
@@ -48,13 +48,15 @@
 </DL>
   */
 
+const MAX_DETECT_LINES = 150;
 
 function detectImport() {
 	var text = "";
 	var line;
 	var match;
 	var re = /<DT>\s*<A[^>]*HREF="([^"]+)"[^>]*>([^<\n]+)/gi;
-	while((line = Zotero.read()) !== false) {
+	var i = 0;
+	while((line = Zotero.read()) !== false && (i++ < MAX_DETECT_LINES)) {
 		text += line;
 		match = re.exec(text);
 		if (match) {
