@@ -13,7 +13,7 @@
     (at your option) any later version.
     
     Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    but WITHOUT ANY WARRANTY; without even the implied warranty ofc
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
     
@@ -289,13 +289,13 @@ Zotero.Translate.IO.Read.prototype = {
 	},
 	
 	"_openRawStream":function() {
+		if(this._rawStream) this._rawStream.close();
 		this._rawStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
 								  .createInstance(Components.interfaces.nsIFileInputStream);
 		this._rawStream.init(this.file, 0x01, 0664, 0);
 	},
 	
 	"_seekToStart":function(charset) {
-		if(this._rawStream) this._rawStream.close();
 		this._openRawStream();
 		
 		this._linesExhausted = false;
