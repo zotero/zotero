@@ -139,6 +139,8 @@ Zotero.Translate.IO.maintainedInstances = [];
 /******* (Native) Read support *******/
 
 Zotero.Translate.IO.Read = function(file, mode) {
+	Zotero.Translate.IO.maintainedInstances.push(this);
+	
 	this.file = file;
 	
 	// open file
