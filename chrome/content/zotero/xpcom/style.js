@@ -182,7 +182,7 @@ Zotero.Styles = new function() {
 			
 			// look for a parent
 			for each(var link in xml.info.link) {
-				if(link.@rel == "source") {
+				if(link.@rel == "source" || link.@rel == "independent-parent") {
 					source = link.@href.toString();
 					if(source == styleID) {
 						if(!hidden) alert(Zotero.getString('styles.installError', loadURI));
