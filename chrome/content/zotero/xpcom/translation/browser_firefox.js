@@ -140,6 +140,7 @@ Zotero.Translate.IO.maintainedInstances = [];
 
 Zotero.Translate.IO.Read = function(file, mode) {
 	Zotero.Translate.IO.maintainedInstances.push(this);
+	
 	this.file = file;
 	
 	// open file
@@ -388,6 +389,9 @@ Zotero.Translate.IO.Read.prototype = {
 	},
 	
 	"reset":function(newMode) {
+		if(Zotero.Translate.IO.maintainedInstances.indexOf(this) === -1) {
+			Zotero.Translate.IO.maintainedInstances.push(this);
+		}
 		this._seekToStart(this._charset);
 		
 		this._mode = newMode;
@@ -400,8 +404,10 @@ Zotero.Translate.IO.Read.prototype = {
 		var myIndex = Zotero.Translate.IO.maintainedInstances.indexOf(this);
 		if(myIndex !== -1) Zotero.Translate.IO.maintainedInstances.splice(myIndex, 1);
 		
-		this._rawStream.close();
-		delete this._rawStream;
+		if(this._rawStream) {
+			this._rawStream.close();
+			delete this._rawStream;
+		}
 	}
 }
 Zotero.Translate.IO.Read.prototype.__defineGetter__("contentLength",

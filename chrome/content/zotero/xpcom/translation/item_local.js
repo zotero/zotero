@@ -229,29 +229,30 @@ Zotero.Translate.ItemSaver.prototype = {
 				var msg = "Error parsing attachment path: " + attachment.path;
 				Zotero.logError(msg);
 				Zotero.debug("Translate: " + msg, 2);
+				return;
 			}
 			
-			if (uri) {
-				try {
-					var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
-					if (file.path == '/') {
-						var msg = "Error parsing attachment path: " + attachment.path;
-						Zotero.logError(msg);
-						Zotero.debug("Translate: " + msg, 2);
-					}
-				}
-				catch (e) {
-					var msg = "Error getting file from attachment path: " + attachment.path;
+			try {
+				var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
+				if (file.path == '/') {
+					var msg = "Error parsing attachment path: " + attachment.path;
 					Zotero.logError(msg);
 					Zotero.debug("Translate: " + msg, 2);
+					return;
 				}
 			}
+			catch (e) {
+				var msg = "Error getting file from attachment path: " + attachment.path;
+				Zotero.logError(msg);
+				Zotero.debug("Translate: " + msg, 2);
+				return;
+			}
 			
-			if (!file || !file.exists()) {
+			if (!file.exists()) {
 				// use attachment title if possible, or else file leaf name
 				var title = attachment.title;
 				if(!title) {
-					title = file ? file.leafName : '';
+					title = file.leafName;
 				}
 				
 				var myID = Zotero.Attachments.createMissingAttachment(
