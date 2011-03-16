@@ -139,7 +139,6 @@ Zotero.Translate.IO.maintainedInstances = [];
 /******* (Native) Read support *******/
 
 Zotero.Translate.IO.Read = function(file, mode) {
-	Zotero.Translate.IO.maintainedInstances.push(this);
 	this.file = file;
 	
 	// open file
@@ -388,6 +387,9 @@ Zotero.Translate.IO.Read.prototype = {
 	},
 	
 	"reset":function(newMode) {
+		if(Zotero.Translate.IO.maintainedInstances.indexOf(this) === -1) {
+			Zotero.Translate.IO.maintainedInstances.push(this);
+		}
 		this._seekToStart(this._charset);
 		
 		this._mode = newMode;
