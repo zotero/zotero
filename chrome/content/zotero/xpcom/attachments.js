@@ -236,7 +236,7 @@ Zotero.Attachments = new function(){
 				var importCallback = function (item) {
 					browser.removeEventListener("pageshow", onpageshow, false);
 					Zotero.Browser.deleteHiddenBrowser(browser);
-					callback(item);
+					if(callback) callback(item);
 				};
 				Zotero.Attachments.importFromDocument(browser.contentDocument,
 					sourceItemID, forceTitle, parentCollectionIDs, importCallback, libraryID);
@@ -358,7 +358,7 @@ Zotero.Attachments = new function(){
 				nsIURL.spec = url;
 				wbp.saveURI(nsIURL, null, null, null, null, file);
 				
-				callback(attachmentItem);
+				if(callback) callback(attachmentItem);
 				
 				return attachmentItem;
 			}
