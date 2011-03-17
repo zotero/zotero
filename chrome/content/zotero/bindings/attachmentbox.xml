@@ -162,6 +162,10 @@
 					}
 					var val = this.item.getField('title');
 					
+					if (typeof val != 'string') {
+						val += "";
+					}
+					
 					var firstSpace = val.indexOf(" ");
 					// Crop long uninterrupted text
 					if ((firstSpace == -1 && val.length > 29 ) || firstSpace > 29) {
