@@ -608,7 +608,7 @@ function ChromeExtensionHandler() {
 					mimeType = 'text/html';
 					
 					var [type, id] = pathParts;
-										
+					
 					if(!timelineDate){
 						timelineDate=Date();
 						var dateParts=timelineDate.toString().split(' ');
@@ -648,7 +648,7 @@ function ChromeExtensionHandler() {
 					var d = '';
 					//passes information (type,ids, dateType) for when the XML is created
 					if(!type || (type != 'collection' && type != 'search')) {
-						d += 'library';
+						d += 'library' + (id ? "/" + id : "");
 					}
 					else {
 						d += type + '/' + id;
@@ -682,6 +682,7 @@ function ChromeExtensionHandler() {
 						default:
 							type = 'library';
 							var s = new Zotero.Search();
+							s.addCondition('libraryID', 'is', id ? id : null);
 							s.addCondition('noChildren', 'true');
 							var ids = s.search();
 							var results = Zotero.Items.get(ids);
@@ -699,11 +700,6 @@ function ChromeExtensionHandler() {
 						mimeType = 'text/html';
 						content = 'Invalid ID';
 						break generateContent;
-					}
-					
-					// Convert item objects to export arrays
-					for (var i = 0; i < items.length; i++) {
-						items[i] = items[i].toArray();
 					}
 					
 					mimeType = 'application/xml';
@@ -1060,8 +1056,8 @@ ChromeExtensionHandler.prototype = {
 		// extensions that modify data are added
 		//  - https://www.zotero.org/trac/ticket/1156
 		//
-		//Components.interfaces.nsIProtocolHandler.URI_IS_LOCAL_FILE,
-		Components.interfaces.nsIProtocolHandler.URI_LOADABLE_BY_ANYONE,
+		Components.interfaces.nsIProtocolHandler.URI_IS_LOCAL_FILE,
+		//Components.interfaces.nsIProtocolHandler.URI_LOADABLE_BY_ANYONE,
 		
 	allowPort : function(port, scheme) {
 		return false;
