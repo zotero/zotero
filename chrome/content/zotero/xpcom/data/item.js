@@ -3679,7 +3679,18 @@ Zotero.Item.prototype.diff = function (item, includeMatches, ignoreFields) {
 	}
 	
 	if (thisData.note != undefined) {
-		changed = thisData.note != otherData.note;
+		// replace() keeps Windows newlines from triggering erroneous conflicts,
+		// though this should really be fixed at the data layer level
+		//
+		// Using a try/catch to avoid unexpected errors in 2.1 Final
+		try {
+			changed = thisData.note.replace(/\r\n/g, "\n") != otherData.note.replace(/\r\n/g, "\n");
+		}
+		catch (e) {
+			Zotero.debug(e);
+			Components.utils.reportError(e);
+			changed = thisData.note != otherData.note;
+		}
 		if (includeMatches || changed) {
 			diff[0].note = thisData.note;
 			diff[1].note = otherData.note;
