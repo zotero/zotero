@@ -330,12 +330,14 @@ Zotero.Date = new function(){
 		// MONTH
 		if(!date.month) {
 			// compile month regular expression
-			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
-				'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+			var months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul',
+				'aug', 'sep', 'oct', 'nov', 'dec'];
 			// If using a non-English bibliography locale, try those too
 			if (Zotero.locale != 'en-US') {
-				months = months.concat(Zotero.Date.months.short);
+				months = months.concat(Zotero.Date.months.short).concat(Zotero.Date.months.long);
+				for(var i in months) months[i] = months[i].toLowerCase();
 			}
+			
 			if(!_monthRe) {
 				_monthRe = new RegExp("^(.*)\\b("+months.join("|")+")[^ ]*(?: (.*)$|$)", "i");
 			}
@@ -343,7 +345,7 @@ Zotero.Date = new function(){
 			var m = _monthRe.exec(date.part);
 			if(m) {
 				// Modulo 12 in case we have multiple languages
-				date.month = months.indexOf(m[2][0].toUpperCase()+m[2].substr(1).toLowerCase()) % 12;
+				date.month = months.indexOf(m[2].toLowerCase()) % 12;
 				date.part = m[1]+m[3];
 				Zotero.debug("DATE: got month ("+date.month+", "+date.part+")");
 			}
