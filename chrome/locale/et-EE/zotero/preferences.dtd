@@ -156,7 +156,7 @@
 <!ENTITY zotero.preferences.locate.description "Kirjeldus">
 <!ENTITY zotero.preferences.locate.name "Nimi">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Otsingumootor laiendab Otsingu rippmenüü võimalusi infopaneelil. Otsingumootorite rakendamine lisab võimaluse teie raamatukogus leiduvate kirjete otsimiseks webist.">
-<!ENTITY zotero.preferences.locate.addDescription "Otsingumootori lisamiseks külastage vastavat otsingumootorit brauseris ja valige Firefoxi otsinguribalt "Lisa". Kui te järgmisel korral avate Zotero eelistused, siis on siinsamas dialoogis olemas võimalus seda otsingumootorit rakendada.">
+<!ENTITY zotero.preferences.locate.addDescription "Otsingumootori lisamiseks külastage vastavat otsingumootorit brauseris ja valige Firefoxi otsinguribalt &#37;Lisa&#37;. Kui te järgmisel korral avate Zotero eelistused, siis on siinsamas dialoogis olemas võimalus seda otsingumootorit rakendada.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Algseaded taastada">
 
 <!ENTITY zotero.preferences.charset "Tähtede kodeering">
