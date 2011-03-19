@@ -1,14 +1,14 @@
 {
-	"translatorID":"d3b1d34c-f8a1-43bb-9dd6-27aa6403b217",
-	"translatorType":4,
-	"label":"YouTube",
-	"creator":"Sean Takats and Michael Berkowitz and Matt Burton",
-	"target":"https?://[^/]*youtube\\.com\\/",
-	"minVersion":"1.0.0rc4",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-08-08 09:40:00"
+        "translatorID": "d3b1d34c-f8a1-43bb-9dd6-27aa6403b217",
+        "label": "YouTube",
+        "creator": "Sean Takats and Michael Berkowitz and Matt Burton",
+        "target": "https?://[^/]*youtube\\.com\\/",
+        "minVersion": "1.0.0rc4",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": "1",
+        "translatorType": 4,
+        "lastUpdated": "2011-03-20 03:10:43"
 }
 
 function detectWeb(doc, url){
@@ -18,12 +18,15 @@ function detectWeb(doc, url){
 		} : null;
 	
 	
-	var xpath = '//input[@type="hidden" and @name="video_id"]';
+	/*var xpath = '//input[@type="hidden" and @name="video_id"]';
 	if(doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
+		return "videoRecording";
+	}*/
+	if (url.match(/\/watch\?(?:.*)v=([0-9a-zA-Z]+)/)) {
 		return "videoRecording";
 	}
 	//Search results
-	if (doc.evaluate('//div[@class="video-long-title"]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+	if (doc.evaluate('//div[@class="result-item-main-content"]//a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
 		return "multiple";
 	}
 	//playlists
@@ -44,22 +47,17 @@ function doWeb(doc, url){
 		} : null;
 	var host = doc.location.host;
 	var video_ids = new Array();
-	var xpath = '//input[@type="hidden" and @name="video_id"]';
-	var elmts;
-	var elmt;
-	elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
-	elmt = elmts.iterateNext();
-	if(elmt) {
+	var elmt, video_id;
+	var videoRe = /\/watch\?(?:.*)v=([0-9a-zA-Z_-]+)/;
+	if(video_id = videoRe.exec(url)) {
 		//single video
-		var video_id = elmt.value;
-		video_ids.push(video_id);
+		video_ids.push(video_id[1]);
 	} else {
 		// multiple videos
 		var items = new Object();
-		var videoRe = /\/watch\?v=([a-zA-Z0-9-_]+)/;
 // search results and community/user pages
-		if (elmt = doc.evaluate('//div[@class="video-long-title"]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
-			elmts = doc.evaluate('//div[@class="video-long-title"]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		if (elmt = doc.evaluate('//div[@class="result-item-main-content"]//a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
+			elmts = doc.evaluate('//div[@class="result-item-main-content"]//a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		} 
 		// playlists
 		else if (doc.evaluate('//div[starts-with(@class, "title")]/a[contains(@href, "/watch?v=")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()){
@@ -73,6 +71,7 @@ function doWeb(doc, url){
 			var title = elmt.textContent;
 			title = Zotero.Utilities.trimInternal(title);
 			var link = elmt.href;
+			Zotero.debug(link);
 			var m = videoRe(link);
 			var video_id = m[1];
 			items[video_id] = title;
