@@ -226,6 +226,7 @@ Zotero.Integration = new function() {
 				Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
 			var out = {};
 			converterInputStream.readString(count, out);
+			inputStream.close();
 			
 			_parseIntegrationPipeCommand(out.value);
 	}};
