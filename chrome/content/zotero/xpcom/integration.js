@@ -116,7 +116,7 @@ Zotero.Integration = new function() {
 		
 		// try to initialize pipe
 		try {
-			var pipeInitialized = _initializeIntegration();
+			var pipeInitialized = _initializeIntegrationPipe();
 		} catch(e) {
 			Components.utils.reportError(e);
 		}
@@ -183,19 +183,9 @@ Zotero.Integration = new function() {
 	}
 	
 	/**
-	 * Reads from the temp file set up to handle integration pipe and executes the appropriate
-	 * integration command
+	 * Parses a command received from the integration pipe
 	 */
-	var _integrationPipeObserver = {"observe":function(subject) {
-		// if we had an error reading from the pipe, return immediately, because trying to read
-		// again will probably just cause us to loop
-		if(subject.exitValue !== 0) {
-			Components.utils.reportError("Zotero: An error occurred reading from integration pipe");
-			return;
-		}
-		
-		// read from pipe
-		var string = Zotero.File.getContents(_tmpFile);
+	function _parseIntegrationPipeCommand(string) {
 		if(string != "") {
 			// exec command if possible
 			var parts = string.match(/^([^ \n]*) ([^ \n]*)(?: ([^\n]*))?\n?$/);
@@ -205,34 +195,84 @@ Zotero.Integration = new function() {
 				
 				// return if we were told to shutdown
 				if(agent === "Zotero" && cmd === "shutdown") return;
-		
-				// set up another process to read from the pipe
-				_shProc.runAsync(_shCmd, _shCmd.length, _integrationPipeObserver);
+				
+				_initializePipeStreamPump();
 				
 				var document = parts[3] ? parts[3].toString() : null;
 				Zotero.Integration.execCommand(agent, cmd, document);
 			} else {
-				// set up another process to read from the pipe
-				_shProc.runAsync(_shCmd, _shCmd.length, _integrationPipeObserver);
+				_initializePipeStreamPump();
 				Components.utils.reportError("Zotero: Invalid integration input received: "+string);
 			}
 		} else {
-			// set up another process to read from the pipe
-			_shProc.runAsync(_shCmd, _shCmd.length, _integrationPipeObserver);
+			_initializePipeStreamPump();
 		}
+	}
+	
+	/**
+	 * Reads from the temp file set up to handle integration pipe and executes the appropriate
+	 * integration command
+	 */
+	var _integrationPipeListenerFx4 = {
+		"onStartRequest":function() {},
+		"onStopRequest":function() {},
+		
+		"onDataAvailable":function(request, context, inputStream, offset, count) {
+			// read from pipe
+			var converterInputStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+				.createInstance(Components.interfaces.nsIConverterInputStream);
+			converterInputStream.init(inputStream, "UTF-8", 4096,
+				Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+			var out = {};
+			converterInputStream.readString(count, out);
+			
+			_parseIntegrationPipeCommand(out.value);
 	}};
+	
+	/**
+	 * Reads from the temp file set up to handle integration pipe and executes the appropriate
+	 * integration command
+	 */
+	var _integrationPipeObserverFx36 = {"observe":function(subject) {
+		// if we had an error reading from the pipe, return immediately, because trying to read
+		// again will probably just cause us to loop
+		if(subject.exitValue !== 0) {
+			Components.utils.reportError("Zotero: An error occurred reading from integration pipe");
+			return;
+		}
+		
+		// read from pipe
+		var string = Zotero.File.getContents(_tmpFile);
+		
+		_parseIntegrationPipeCommand(string);
+	}};
+	
+	/**
+	 * Initializes the nsIInputStream and nsIInputStreamPump to read from _fifoFile
+	 */
+	function _initializePipeStreamPump() {
+		if(Zotero.isFx4) {
+			// Fx 4 supports deferred open; no need to use sh
+			var fifoStream = Components.classes["@mozilla.org/network/file-input-stream;1"].
+				createInstance(Components.interfaces.nsIFileInputStream);
+			fifoStream.QueryInterface(Components.interfaces.nsIFileInputStream);
+			// 16 = open as deferred so that we don't block on open
+			fifoStream.init(_fifoFile, -1, 0, 16);
+			
+			var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"].
+				createInstance(Components.interfaces.nsIInputStreamPump);
+			pump.init(fifoStream, -1, -1, 4096, 1, true);
+			pump.asyncRead(_integrationPipeListenerFx4, null);
+		} else {
+			// Fx 3.6 doesn't support deferred open
+			_shProc.runAsync(_shCmd, _shCmd.length, _integrationPipeObserverFx36);
+		}
+	}
 	
 	/**
 	 * Initializes the Zotero Integration Pipe in Firefox 3.6
 	 */
-	function _initializeIntegration() {
-		// make a tmp file
-		_tmpFile = Components.classes["@mozilla.org/file/directory_service;1"].
-				   getService(Components.interfaces.nsIProperties).
-				   get("TmpD", Components.interfaces.nsIFile);
-		_tmpFile.append("zoteroIntegrationTmp");
-		_tmpFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
-		
+	function _initializeIntegrationPipe() {
 		// make a new pipe
 		var mkfifo = Components.classes["@mozilla.org/file/local;1"].
 			createInstance(Components.interfaces.nsILocalFile);
@@ -253,15 +293,25 @@ Zotero.Integration = new function() {
 			proc.run(true, [_fifoFile.path], 1);
 			
 			if(_fifoFile.exists()) {
-				// begin reading from named pipe
-				_shCmd = ["-c", "cat '"+_fifoFile.path.replace("'", "'\\''")+"' > '"+
-					_tmpFile.path.replace("'", "'\\''")+"'"];
-				Zotero.debug("Calling sh "+_shCmd.join(" "));
+				if(Zotero.isFx36) {
+					// make a tmp file
+					_tmpFile = Components.classes["@mozilla.org/file/directory_service;1"].
+							   getService(Components.interfaces.nsIProperties).
+							   get("TmpD", Components.interfaces.nsIFile);
+					_tmpFile.append("zoteroIntegrationTmp");
+					_tmpFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
 					
-				_shProc = Components.classes["@mozilla.org/process/util;1"].
-						createInstance(Components.interfaces.nsIProcess);
-				_shProc.init(sh);
-				_shProc.runAsync(_shCmd, _shCmd.length, _integrationPipeObserver);
+					// begin reading from named pipe
+					_shCmd = ["-c", "cat '"+_fifoFile.path.replace("'", "'\\''")+"' > '"+
+						_tmpFile.path.replace("'", "'\\''")+"'"];
+					Zotero.debug("Calling sh "+_shCmd.join(" "));
+					
+					_shProc = Components.classes["@mozilla.org/process/util;1"].
+							createInstance(Components.interfaces.nsIProcess);
+					_shProc.init(sh);
+				}
+				
+				_initializePipeStreamPump();
 				
 				return true;
 			}
@@ -382,7 +432,7 @@ Zotero.Integration = new function() {
 		oStream.write(cmd, cmd.length);
 		oStream.close();
 		_fifoFile.remove(false);
-		_tmpFile.remove(false);
+		if(Zotero.isFx36) _tmpFile.remove(false);
 	}
 	
 	/**
