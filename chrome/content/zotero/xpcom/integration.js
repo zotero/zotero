@@ -186,29 +186,40 @@ Zotero.Integration = new function() {
 	 * Reads from the temp file set up to handle integration pipe and executes the appropriate
 	 * integration command
 	 */
-	var _integrationPipeObserver = {"observe":function() {
-		var string = Zotero.File.getContents(_tmpFile);
+	var _integrationPipeObserver = {"observe":function(subject) {
+		// if we had an error reading from the pipe, return immediately, because trying to read
+		// again will probably just cause us to loop
+		if(subject.exitValue !== 0) {
+			Components.utils.reportError("Zotero: An error occurred reading from integration pipe");
+			return;
+		}
 		
+		// read from pipe
+		var string = Zotero.File.getContents(_tmpFile);
 		if(string != "") {
+			// exec command if possible
 			var parts = string.match(/^([^ \n]*) ([^ \n]*)(?: ([^\n]*))?\n?$/);
 			if(parts) {
 				var agent = parts[1].toString();
 				var cmd = parts[2].toString();
+				
+				// return if we were told to shutdown
+				if(agent === "Zotero" && cmd === "shutdown") return;
+		
+				// set up another process to read from the pipe
+				_shProc.runAsync(_shCmd, _shCmd.length, _integrationPipeObserver);
+				
 				var document = parts[3] ? parts[3].toString() : null;
-				
-				// remove temp file and halt reading on shutdown
-				if(agent === "Zotero" && cmd === "shutdown") {
-					_tmpFile.remove();
-					return;
-				}
-				
 				Zotero.Integration.execCommand(agent, cmd, document);
 			} else {
-				Components.utils.reportError("Integration Worker: Invalid input received: "+string);
+				// set up another process to read from the pipe
+				_shProc.runAsync(_shCmd, _shCmd.length, _integrationPipeObserver);
+				Components.utils.reportError("Zotero: Invalid integration input received: "+string);
 			}
+		} else {
+			// set up another process to read from the pipe
+			_shProc.runAsync(_shCmd, _shCmd.length, _integrationPipeObserver);
 		}
-		
-		_shProc.runAsync(_shCmd, _shCmd.length, _integrationPipeObserver);
 	}};
 	
 	/**
@@ -371,6 +382,7 @@ Zotero.Integration = new function() {
 		oStream.write(cmd, cmd.length);
 		oStream.close();
 		_fifoFile.remove(false);
+		_tmpFile.remove(false);
 	}
 	
 	/**
