@@ -210,8 +210,9 @@ Zotero.Integration = new function() {
 	}
 	
 	/**
-	 * Reads from the temp file set up to handle integration pipe and executes the appropriate
-	 * integration command
+	 * Listens asynchronously for data on the integration pipe and reads it when available
+	 * 
+	 * Used to read from the integration pipe on Fx 4
 	 */
 	var _integrationPipeListenerFx4 = {
 		"onStartRequest":function() {},
@@ -232,6 +233,8 @@ Zotero.Integration = new function() {
 	/**
 	 * Reads from the temp file set up to handle integration pipe and executes the appropriate
 	 * integration command
+	 * 
+	 * Used to read from the integration pipe on Fx 3.6
 	 */
 	var _integrationPipeObserverFx36 = {"observe":function(subject) {
 		// if we had an error reading from the pipe, return immediately, because trying to read
@@ -270,7 +273,7 @@ Zotero.Integration = new function() {
 	}
 	
 	/**
-	 * Initializes the Zotero Integration Pipe in Firefox 3.6
+	 * Initializes the Zotero Integration Pipe
 	 */
 	function _initializeIntegrationPipe() {
 		// make a new pipe
@@ -294,6 +297,8 @@ Zotero.Integration = new function() {
 			
 			if(_fifoFile.exists()) {
 				if(Zotero.isFx36) {
+					// no deferred open capability, so we need to use the sh/tmpfile hack
+					
 					// make a tmp file
 					_tmpFile = Components.classes["@mozilla.org/file/directory_service;1"].
 							   getService(Components.interfaces.nsIProperties).
