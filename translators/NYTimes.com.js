@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"NYTimes.com",
 	"creator":"Simon Kornblith",
-	"target":"^https?://(?:query\\.nytimes\\.com/search/query|(?:select\\.|www\\.)?nytimes\\.com/.)",
+	"target":"^https?://(?:query\\.nytimes\\.com/search/(?:alternate/)?query|(?:select\\.|www\\.)?nytimes\\.com/.)",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-03-21 20:48:32"
 }
 
 function detectWeb(doc, url) {
@@ -38,6 +38,11 @@ function associateMeta(newItem, metaTags, field, zoteroField) {
 }
 
 function scrape(doc, url) {
+	var namespace = null;
+	var nsResolver = namespace ? function(prefix) {
+			if (prefix == 'x') return namespace; else return null;
+	} : null;
+	
 	var newItem = new Zotero.Item("newspaperArticle");
 	newItem.publicationTitle = "The New York Times";
 	newItem.ISSN = "0362-4331";
@@ -65,8 +70,8 @@ function scrape(doc, url) {
 		if(!metaTags["hdl"]) {
 			return;
 		}
-		
-		newItem.attachments.push({url:url, title:"New York Times Snapshot",
+		// We want to get everything on one page
+		newItem.attachments.push({url:url.replace(/\.html\??([^/]*)(pagewanted=[^&]*)?([^/]*)$/,".html?pagewanted=all&$1$2"), title:"New York Times Snapshot",
 	 	                          mimeType:"text/html"});
 	} else {
 		newItem.url = doc.location.href;
@@ -78,14 +83,26 @@ function scrape(doc, url) {
 				metaTags[key] = value;
 			}
 		}
-	
-		newItem.attachments.push({document:doc, title:"New York Times Snapshot"});
+		// Get everything on one page is possible
+		var singlePage = false;
+		if (!newItem.url.match(/\?pagewanted=all/)
+				&& (singlePage = doc.evaluate('//ul[@id="toolsList"]/li[@class="singlePage"]/a', doc, nsResolver,
+		             XPathResult.ANY_TYPE, null).iterateNext())) {
+			newItem.attachments.push({url:singlePage.href, title:"New York Times Snapshot",
+	 		                          mimeType:"text/html"});
+		} else {
+			newItem.attachments.push({document:doc, title:"New York Times Snapshot"});
+		}
 	}
 	
 	associateMeta(newItem, metaTags, "dat", "date");
 	associateMeta(newItem, metaTags, "hdl", "title");
 	associateMeta(newItem, metaTags, "dsk", "section");
 	associateMeta(newItem, metaTags, "articleid", "accessionNumber");
+	
+	if (metaTags["pdate"]) {
+		newItem.date = metaTags["pdate"].replace(/(\d{4})(\d{2})(\d{2})/,"$1-$2-$3");
+	}
 	
 	if(metaTags["byl"]) {
 		var author = Zotero.Utilities.trimInternal(metaTags["byl"]);
@@ -117,6 +134,9 @@ function scrape(doc, url) {
 			newItem.tags[i] = newItem.tags[i].replace("  ", ", ");
 		}
 	}
+	
+	// Remove pagewanted from URL in item (keeping other pieces, in case they might matter)
+	newItem.url = newItem.url.replace(/\?([^/]*)pagewanted=[^&]*/,'');
 	
 	newItem.complete();
 }

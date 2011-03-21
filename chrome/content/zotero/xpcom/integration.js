@@ -35,9 +35,13 @@ const INTEGRATION_MIN_VERSION = "3.1a0";
 
 Zotero.Integration = new function() {
 	var _fifoFile = null;
+	var _tmpFile = null;
+	var _shCmd = null;
+	var _shProc = null;
 	var _osascriptFile;
 	var _inProgress = false;
 	var _integrationVersionsOK = null;
+	var _useDeferredOpenForIntegrationPipe = false;
 	var _winUser32;
 	
 	this.sessions = {};
@@ -113,8 +117,7 @@ Zotero.Integration = new function() {
 		
 		// try to initialize pipe
 		try {
-			var pipeInitialized = (Zotero.isFx4 ? _initializeIntegrationPipeFx4(_fifoFile) :
-				_initializeIntegrationPipeFx36(_fifoFile));
+			var pipeInitialized = _initializeIntegrationPipe();
 		} catch(e) {
 			Components.utils.reportError(e);
 		}
@@ -181,79 +184,102 @@ Zotero.Integration = new function() {
 	}
 	
 	/**
-	 * Initializes the Zotero Integration Pipe in Firefox 4+
+	 * Parses a command received from the integration pipe
 	 */
-	function _initializeIntegrationPipeFx4(_fifoFile) {
-		// ensure Firefox 4.0b9 or later, since earlier versions do not support ChromeWorkers
-		// from XPCOM			
-		var verComp = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
-			.getService(Components.interfaces.nsIVersionComparator);
-		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
-			getService(Components.interfaces.nsIXULAppInfo);
-		if(verComp.compare("2.0b9pre", appInfo.version) > 0) {
-			Components.utils.reportError("Zotero word processor integration requires "+
-				"Firefox 4.0b9 or later. Please update to the latest Firefox 4.0 beta.");
-			return false;
-		} else {		
-			Components.utils.import("resource://gre/modules/ctypes.jsm");
-			
-			// get possible names for libc
-			if(Zotero.isMac) {
-				var possibleLibcs = ["/usr/lib/libc.dylib"];
+	function _parseIntegrationPipeCommand(string) {
+		if(string != "") {
+			// exec command if possible
+			var parts = string.match(/^([^ \n]*) ([^ \n]*)(?: ([^\n]*))?\n?$/);
+			if(parts) {
+				var agent = parts[1].toString();
+				var cmd = parts[2].toString();
+				
+				// return if we were told to shutdown
+				if(agent === "Zotero" && cmd === "shutdown") return;
+				
+				_initializePipeStreamPump();
+				
+				var document = parts[3] ? parts[3].toString() : null;
+				Zotero.Integration.execCommand(agent, cmd, document);
 			} else {
-				var possibleLibcs = [
-					"libc.so.6",
-					"libc.so.6.1",
-					"libc.so"
-				];
+				_initializePipeStreamPump();
+				Components.utils.reportError("Zotero: Invalid integration input received: "+string);
 			}
-			
-			// try all possibilities
-			while(possibleLibcs.length) {
-				var libc = possibleLibcs.shift();
-				try {
-					var lib = ctypes.open(libc);
-					break;
-				} catch(e) {}
-			}
-			
-			// throw appropriate error on failure
-			if(!lib) {
-				throw "libc could not be loaded. Please post on the Zotero Forums so we can add "+
-					"support for your operating system.";
-			}
-			
-			// int mkfifo(const char *path, mode_t mode);
-			var mkfifo = lib.declare("mkfifo", ctypes.default_abi, ctypes.int, ctypes.char.ptr, ctypes.unsigned_int);
-			
-			// make pipe
-			var ret = mkfifo(_fifoFile.path, 0600);
-			if(!_fifoFile.exists()) return false;
-			lib.close();
-			
-			// set up worker
-			var worker = Components.classes["@mozilla.org/threads/workerfactory;1"]  
-				.createInstance(Components.interfaces.nsIWorkerFactory)
-				.newChromeWorker("chrome://zotero/content/xpcom/integration_worker.js");
-			worker.onmessage = function(event) {
-				if(event.data[0] == "Exception") {
-					throw event.data[1];
-				} else if(event.data[0] == "Debug") {
-					Zotero.debug(event.data[1]);
-				} else {
-					Zotero.Integration.execCommand(event.data[0], event.data[1], event.data[2]);
-				}
-			}
-			worker.postMessage({"path":_fifoFile.path, "libc":libc});
-			
-			return true;
+		} else {
+			_initializePipeStreamPump();
 		}
 	}
 	
 	/**
-	 * Initializes the Zotero Integration Pipe in Firefox 3.6
+	 * Listens asynchronously for data on the integration pipe and reads it when available
+	 * 
+	 * Used to read from the integration pipe on Fx 4
 	 */
-	function _initializeIntegrationPipeFx36(_fifoFile) {
+	var _integrationPipeListenerFx4 = {
+		"onStartRequest":function() {},
+		"onStopRequest":function() {},
+		
+		"onDataAvailable":function(request, context, inputStream, offset, count) {
+			// read from pipe
+			var converterInputStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
+				.createInstance(Components.interfaces.nsIConverterInputStream);
+			converterInputStream.init(inputStream, "UTF-8", 4096,
+				Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+			var out = {};
+			converterInputStream.readString(count, out);
+			inputStream.close();
+			
+			_parseIntegrationPipeCommand(out.value);
+	}};
+	
+	/**
+	 * Reads from the temp file set up to handle integration pipe and executes the appropriate
+	 * integration command
+	 * 
+	 * Used to read from the integration pipe on Fx 3.6
+	 */
+	var _integrationPipeObserverFx36 = {"observe":function(subject) {
+		// if we had an error reading from the pipe, return immediately, because trying to read
+		// again will probably just cause us to loop
+		if(subject.exitValue !== 0) {
+			Components.utils.reportError("Zotero: An error occurred reading from integration pipe");
+			return;
+		}
+		
+		// read from pipe
+		var string = Zotero.File.getContents(_tmpFile);
+		
+		_parseIntegrationPipeCommand(string);
+	}};
+	
+	/**
+	 * Initializes the nsIInputStream and nsIInputStreamPump to read from _fifoFile
+	 */
+	function _initializePipeStreamPump() {
+		if(_useDeferredOpenForIntegrationPipe) {
+			// Fx 4 supports deferred open; no need to use sh
+			var fifoStream = Components.classes["@mozilla.org/network/file-input-stream;1"].
+				createInstance(Components.interfaces.nsIFileInputStream);
+			fifoStream.QueryInterface(Components.interfaces.nsIFileInputStream);
+			// 16 = open as deferred so that we don't block on open
+			fifoStream.init(_fifoFile, -1, 0, 16);
+			
+			var pump = Components.classes["@mozilla.org/network/input-stream-pump;1"].
+				createInstance(Components.interfaces.nsIInputStreamPump);
+			pump.init(fifoStream, -1, -1, 4096, 1, true);
+			pump.asyncRead(_integrationPipeListenerFx4, null);
+		} else {
+			// Fx 3.6 doesn't support deferred open
+			_shProc.runAsync(_shCmd, _shCmd.length, _integrationPipeObserverFx36);
+		}
+	}
+	
+	/**
+	 * Initializes the Zotero Integration Pipe
+	 */
+	function _initializeIntegrationPipe() {
+		_useDeferredOpenForIntegrationPipe = Zotero.isMac && Zotero.isFx4;
+		
 		// make a new pipe
 		var mkfifo = Components.classes["@mozilla.org/file/local;1"].
 			createInstance(Components.interfaces.nsILocalFile);
@@ -261,57 +287,48 @@ Zotero.Integration = new function() {
 		if(!mkfifo.exists()) mkfifo.initWithPath("/bin/mkfifo");
 		if(!mkfifo.exists()) mkfifo.initWithPath("/usr/local/bin/mkfifo");
 		
-		if(mkfifo.exists()) {
-			var main = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
-			var background = Components.classes["@mozilla.org/thread-manager;1"].getService().newThread(0);
+		// get sh
+		var sh = Components.classes["@mozilla.org/file/local;1"].
+			createInstance(Components.interfaces.nsILocalFile);
+		sh.initWithPath("/bin/sh");
+		
+		if(mkfifo.exists() && sh.exists()) {
+			// create named pipe
+			var proc = Components.classes["@mozilla.org/process/util;1"].
+					createInstance(Components.interfaces.nsIProcess);
+			proc.init(mkfifo);
+			proc.run(true, [_fifoFile.path], 1);
 			
-			function mainThread(agent, cmd, doc) {
-				this.agent = agent;
-				this.cmd = cmd;
-				this.document = doc;
-			}
-			mainThread.prototype.run = function() {
-				Zotero.Integration.execCommand(this.agent, this.cmd, this.document);
-			}
-			
-			function fifoThread() {}
-			fifoThread.prototype.run = function() {
-				var proc = Components.classes["@mozilla.org/process/util;1"].
-						createInstance(Components.interfaces.nsIProcess);
-				proc.init(mkfifo);
-				proc.run(true, [_fifoFile.path], 1);
-				
-				if(!_fifoFile.exists()) Zotero.debug("Could not initialize Zotero integration pipe");
-				
-				var fifoStream = Components.classes["@mozilla.org/network/file-input-stream;1"].
-					createInstance(Components.interfaces.nsIFileInputStream);
-				var line = {};
-				while(true) {
-					fifoStream.QueryInterface(Components.interfaces.nsIFileInputStream);
-					fifoStream.init(_fifoFile, -1, 0, 0);
-					fifoStream.QueryInterface(Components.interfaces.nsILineInputStream);
-					fifoStream.readLine(line);
-					fifoStream.close();
+			if(_fifoFile.exists()) {
+				if(!_useDeferredOpenForIntegrationPipe) {
+					// no deferred open capability, so we need to use the sh/tmpfile hack
 					
-					var parts = line.value.split(" ");
-					var agent = parts[0];
-					var cmd = parts[1];
-					var document = parts.length >= 3 ? line.value.substr(agent.length+cmd.length+2) : null;
-					if(agent == "Zotero" && cmd == "shutdown") return;
-					main.dispatch(new mainThread(agent, cmd, document), background.DISPATCH_NORMAL);
+					// make a tmp file
+					_tmpFile = Components.classes["@mozilla.org/file/directory_service;1"].
+							   getService(Components.interfaces.nsIProperties).
+							   get("TmpD", Components.interfaces.nsIFile);
+					_tmpFile.append("zoteroIntegrationTmp");
+					_tmpFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
+					
+					// begin reading from named pipe
+					_shCmd = ["-c", "cat '"+_fifoFile.path.replace("'", "'\\''")+"' > '"+
+						_tmpFile.path.replace("'", "'\\''")+"'"];
+					Zotero.debug("Calling sh "+_shCmd.join(" "));
+					
+					_shProc = Components.classes["@mozilla.org/process/util;1"].
+							createInstance(Components.interfaces.nsIProcess);
+					_shProc.init(sh);
 				}
+				
+				_initializePipeStreamPump();
+				
+				return true;
 			}
 			
-			fifoThread.prototype.QueryInterface = mainThread.prototype.QueryInterface = function(iid) {
-				if (iid.equals(Components.interfaces.nsIRunnable) ||
-					iid.equals(Components.interfaces.nsISupports)) return this;
-				throw Components.results.NS_ERROR_NO_INTERFACE;
-			}
-			
-			background.dispatch(new fifoThread(), background.DISPATCH_NORMAL);
-			return true;
+			Components.utils.reportError("Zotero: mkfifo failed -- not initializing integration pipe");
+			return false;
 		} else {
-			Zotero.debug("mkfifo not found -- not initializing integration pipe");
+			Components.utils.reportError("Zotero: mkfifo or sh not found -- not initializing integration pipe");
 			return false;
 		}
 	}
@@ -424,6 +441,7 @@ Zotero.Integration = new function() {
 		oStream.write(cmd, cmd.length);
 		oStream.close();
 		_fifoFile.remove(false);
+		if(!__useDeferredOpenForIntegrationPipe) _tmpFile.remove(false);
 	}
 	
 	/**

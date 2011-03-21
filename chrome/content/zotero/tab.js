@@ -99,7 +99,14 @@ var ZoteroTab = new function()
 	
 	this._swapZoteroPane = function() {
 		if(!this.containerWindow.ZoteroOverlay.isTab) {
-			window.close();
+			var tabs = (this.containerWindow.gBrowser.tabs
+						? this.containerWindow.gBrowser.tabs : this.containerWindow.gBrowser.mTabs);
+			if(tabs.length > 1) {
+				window.close();
+			} else {
+				if(Zotero.isFx4) this.containerWindow.gBrowser.unpinTab(tabs[0]);
+				document.location.replace(this.containerWindow.gHomeButton.getHomePage());
+			}
 			return;
 		}
 		
