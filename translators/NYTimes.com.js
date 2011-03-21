@@ -3,7 +3,7 @@
 	"translatorType":4,
 	"label":"NYTimes.com",
 	"creator":"Simon Kornblith",
-	"target":"^https?://(?:query\\.nytimes\\.com/search/query|(?:select\\.|www\\.)?nytimes\\.com/.)",
+	"target":"^https?://(?:query\\.nytimes\\.com/search/(alternate/)?)query|(?:select\\.|www\\.)?nytimes\\.com/.)",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
