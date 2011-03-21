@@ -41,6 +41,7 @@ Zotero.Integration = new function() {
 	var _osascriptFile;
 	var _inProgress = false;
 	var _integrationVersionsOK = null;
+	var _useDeferredOpenForIntegrationPipe = false;
 	var _winUser32;
 	
 	this.sessions = {};
@@ -255,7 +256,7 @@ Zotero.Integration = new function() {
 	 * Initializes the nsIInputStream and nsIInputStreamPump to read from _fifoFile
 	 */
 	function _initializePipeStreamPump() {
-		if(Zotero.isFx4) {
+		if(_useDeferredOpenForIntegrationPipe) {
 			// Fx 4 supports deferred open; no need to use sh
 			var fifoStream = Components.classes["@mozilla.org/network/file-input-stream;1"].
 				createInstance(Components.interfaces.nsIFileInputStream);
@@ -277,6 +278,8 @@ Zotero.Integration = new function() {
 	 * Initializes the Zotero Integration Pipe
 	 */
 	function _initializeIntegrationPipe() {
+		_useDeferredOpenForIntegrationPipe = Zotero.isMac && Zotero.isFx4;
+		
 		// make a new pipe
 		var mkfifo = Components.classes["@mozilla.org/file/local;1"].
 			createInstance(Components.interfaces.nsILocalFile);
@@ -297,7 +300,7 @@ Zotero.Integration = new function() {
 			proc.run(true, [_fifoFile.path], 1);
 			
 			if(_fifoFile.exists()) {
-				if(Zotero.isFx36) {
+				if(!_useDeferredOpenForIntegrationPipe) {
 					// no deferred open capability, so we need to use the sh/tmpfile hack
 					
 					// make a tmp file
@@ -438,7 +441,7 @@ Zotero.Integration = new function() {
 		oStream.write(cmd, cmd.length);
 		oStream.close();
 		_fifoFile.remove(false);
-		if(Zotero.isFx36) _tmpFile.remove(false);
+		if(!__useDeferredOpenForIntegrationPipe) _tmpFile.remove(false);
 	}
 	
 	/**
