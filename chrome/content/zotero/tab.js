@@ -99,7 +99,13 @@ var ZoteroTab = new function()
 	
 	this._swapZoteroPane = function() {
 		if(!this.containerWindow.ZoteroOverlay.isTab) {
-			window.close();
+			var tabs = (this.containerWindow.gBrowser.tabs
+						? this.containerWindow.gBrowser.tabs : this.containerWindow.gBrowser.mTabs);
+			if(tabs.length > 1) {
+				window.close();
+			} else {
+				this.containerWindow.BrowserGoHome();
+			}
 			return;
 		}
 		
