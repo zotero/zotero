@@ -298,12 +298,13 @@ Zotero.Translator = function(file, json, code) {
 	
 	this.file = file;
 	
+	var fStream, cStream;
 	if(json) {
 		var info = Zotero.JSON.unserialize(json);
 	} else {
-		var fStream = Components.classes["@mozilla.org/network/file-input-stream;1"].
+		fStream = Components.classes["@mozilla.org/network/file-input-stream;1"].
 			createInstance(Components.interfaces.nsIFileInputStream);
-		var cStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"].
+		cStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"].
 			createInstance(Components.interfaces.nsIConverterInputStream);
 		fStream.init(file, -1, -1, 0);
 		cStream.init(fStream, "UTF-8", 8192,
@@ -352,7 +353,7 @@ Zotero.Translator = function(file, json, code) {
 		}
 	}
 	if(!haveMetadata) {
-		fStream.close();
+		if(fStream) fStream.close();
 		return;
 	}
 	
@@ -362,13 +363,28 @@ Zotero.Translator = function(file, json, code) {
 	
 	if(this.translatorType & TRANSLATOR_TYPES["import"]) {
 		// compile import regexp to match only file extension
-		this.importRegexp = this.target ? new RegExp("\\."+this.target+"$", "i") : null;
+		try {
+			this.importRegexp = this.target ? new RegExp("\\."+this.target+"$", "i") : null;
+		} catch(e) {
+			this.logError("Invalid target in " + file.leafName);
+			this.importRegexp = null;
+			if(fStream) fStream.close();
+			return;
+		}
 	}
 		
 	this.cacheCode = false;
 	if(this.translatorType & TRANSLATOR_TYPES["web"]) {
 		// compile web regexp
-		this.webRegexp = this.target ? new RegExp(this.target, "i") : null;
+		try {
+			this.webRegexp = this.target ? new RegExp(this.target, "i") : null;
+		} catch(e) {
+			if(fStream) fStream.close();
+			this.logError("Invalid target in " + file.leafName);
+			this.webRegexp = null;
+			if(fStream) fStream.close();
+			return;
+		}
 		
 		if(!this.target) {
 			this.cacheCode = true;
