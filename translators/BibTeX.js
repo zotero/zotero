@@ -10,7 +10,7 @@
 	"configOptions":{"dataMode":"block"},
 	"displayOptions":{"exportCharset":"UTF-8", "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-03-22 21:31:21"
 }
 
 function detectImport() {
@@ -1786,6 +1786,8 @@ function beginRecord(type, closeChar) {
 		} else if(read == closeChar) {
 			if(item) {
 				if(item.extra) item.extra = item.extra.substr(1); // chop \n
+				// hack for Zotero 2.1.1 bug (fixed in 2.1.2)
+				for each(var attachment in item.attachments) attachment.itemType = "attachment";
 				item.complete();
 			}
 			return;
