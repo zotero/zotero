@@ -9,7 +9,7 @@
 	"priority":100,
 	"inRepository":true,
 	"displayOptions":{"exportCharset":"UTF-8", "exportNotes":true},
-	"lastUpdated":"2011-02-13 03:10:59"
+	"lastUpdated":"2011-03-22 21:29:46"
 }
 
 function detectImport() {
@@ -363,6 +363,8 @@ function completeItem(item) {
 	if(item.journalAbbreviation && !item.publicationTitle){
 		item.publicationTitle = item.journalAbbreviation;
 	}
+	// hack for Zotero 2.1.1 bug (fixed in 2.1.2)
+	for each(var attachment in item.attachments) attachment.itemType = "attachment";
 	item.complete();
 }
 
