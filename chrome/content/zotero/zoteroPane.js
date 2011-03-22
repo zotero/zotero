@@ -1737,15 +1737,18 @@ var ZoteroPane = new function()
 		var currentLibraryID = this.getSelectedLibraryID();
 		// If in a different library
 		if (item.libraryID != currentLibraryID) {
+			Zotero.debug("Library ID differs; switching library");
 			this.collectionsView.selectLibrary(item.libraryID);
 		}
 		// Force switch to library view
 		else if (!this.itemsView._itemGroup.isLibrary() && inLibrary) {
+			Zotero.debug("Told to select in library; switching to library");
 			this.collectionsView.selectLibrary(item.libraryID);
 		}
 		
 		var selected = this.itemsView.selectItem(itemID, expand);
 		if (!selected) {
+			Zotero.debug("Item was not selected; switching to library");
 			this.collectionsView.selectLibrary(item.libraryID);
 			this.itemsView.selectItem(itemID, expand);
 		}
