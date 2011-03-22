@@ -278,7 +278,7 @@ Zotero.Integration = new function() {
 	 * Initializes the Zotero Integration Pipe
 	 */
 	function _initializeIntegrationPipe() {
-		_useDeferredOpenForIntegrationPipe = Zotero.isMac && Zotero.isFx4;
+		_useDeferredOpenForIntegrationPipe = false;	// this will only work with Gecko 2.0.1
 		
 		// make a new pipe
 		var mkfifo = Components.classes["@mozilla.org/file/local;1"].
