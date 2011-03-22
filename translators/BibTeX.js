@@ -10,7 +10,7 @@
 	"configOptions":{"dataMode":"block"},
 	"displayOptions":{"exportCharset":"UTF-8", "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2011-03-22 21:31:21"
+	"lastUpdated":"2011-03-22 22:50:00"
 }
 
 function detectImport() {
