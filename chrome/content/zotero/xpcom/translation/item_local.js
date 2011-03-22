@@ -274,6 +274,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		var newItem = Zotero.Items.get(myID);
 		
 		// save fields
+		attachment.itemType = "attachment";
 		this._saveFields(attachment, newItem);
 		
 		// add note if necessary
