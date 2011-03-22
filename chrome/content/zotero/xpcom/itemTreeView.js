@@ -1263,6 +1263,7 @@ Zotero.ItemTreeView.prototype.selectItem = function(id, expand, noRecurse)
 {
 	// Don't change selection if UI updates are disabled (e.g., during sync)
 	if (Zotero.suppressUIUpdates) {
+		Zotero.debug("Sync is running; not selecting item");
 		return;
 	}
 	
@@ -1271,6 +1272,7 @@ Zotero.ItemTreeView.prototype.selectItem = function(id, expand, noRecurse)
 	if (!this._itemRowMap) {
 		if (this._itemGroup) {
 			this._itemGroup.itemToSelect = { id: id, expand: expand };
+			Zotero.debug("_itemRowMap not yet set; not selecting item");
 			return false;
 		}
 		
@@ -1303,6 +1305,7 @@ Zotero.ItemTreeView.prototype.selectItem = function(id, expand, noRecurse)
 				return this.selectItem(id, expand, true);
 			}
 			
+			Zotero.debug("Could not find row for item; not selecting item");
 			return false;
 		}
 		
