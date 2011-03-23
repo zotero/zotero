@@ -181,6 +181,8 @@ Zotero.Translators = new function() {
 	 * @param	{String|Null}	metadata.target				Target regexp
 	 * @param	{String|Null}	metadata.minVersion
 	 * @param	{String}		metadata.maxVersion
+	 * @param	{String|undefined}	metadata.configOptions
+	 * @param	{String|undefined}	metadata.displayOptions
 	 * @param	{Integer}		metadata.priority
 	 * @param	{Boolean}		metadata.inRepository
 	 * @param	{String}		metadata.lastUpdated		SQL date
@@ -225,15 +227,8 @@ Zotero.Translators = new function() {
 		var destFile = Zotero.getTranslatorsDirectory();
 		destFile.append(fileName);
 		
-		var metadataJSON;
-		
 		// JSON.stringify (FF 3.5.4 and up) has the benefit of indenting JSON
-		if (typeof JSON != "undefined" && 'function' == typeof JSON.stringify) {
-			metadataJSON = JSON.stringify(metadata,null,8);
-		} else {
-			var nsIJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
-			metadataJSON = nsIJSON.encode(metadata);
-		}
+		var metadataJSON = JSON.stringify(metadata,null,8);
 		
 		var str = metadataJSON + "\n\n" + code;
 		
