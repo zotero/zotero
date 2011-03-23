@@ -192,7 +192,6 @@ var Zotero_File_Interface_Export = new function() {
 		Zotero.Prefs.set("export.lastTranslator", window.arguments[0].translators[index].translatorID);
 		
 		// set options on selected translator and generate optionString
-		var optionString = "";
 		var optionsAvailable = window.arguments[0].selectedTranslator.displayOptions;
 		var displayOptions = window.arguments[0].displayOptions = {};
 		for(var option in optionsAvailable) {
@@ -209,7 +208,7 @@ var Zotero_File_Interface_Export = new function() {
 		}
 		
 		// save options
-		optionString = Zotero.JSON.serialize(optionsAvailable);
+		var optionString = Zotero.JSON.serialize(displayOptions);
 		Zotero.Prefs.set("export.translatorSettings", optionString);
 	}
 	

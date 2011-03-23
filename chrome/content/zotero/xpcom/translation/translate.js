@@ -1273,7 +1273,7 @@ Zotero.Translate.Export.prototype._prepareTranslation = function() {
 	} else {
 		this._io = new Zotero.Translate.IO.Write(this.location,
 			this.translator[0].configOptions["dataMode"],
-			this.translator[0].displayOptions["exportCharset"] ? this.translator[0].displayOptions["exportCharset"] : null);
+			this._displayOptions["exportCharset"] ? this._displayOptions["exportCharset"] : null);
 	}
 	
 	this._sandboxManager.importObject(this._io);
