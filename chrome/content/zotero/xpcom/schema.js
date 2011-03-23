@@ -72,7 +72,7 @@ Zotero.Schema = new function(){
 		}
 		else {
 			var integrityCheck = false;
-			var majorUpgrade = false;
+			var majorUpgrade = dbVersion <= 73;
 		}
 		
 		var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
