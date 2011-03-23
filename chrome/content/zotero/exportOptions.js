@@ -201,6 +201,8 @@ var Zotero_File_Interface_Export = new function() {
 			if(option == "exportCharset") {
 				if(_charsets) {
 					displayOptions[option] = element.selectedItem.value;
+				} else {
+					displayOptions[option] = optionsAvailable[option];
 				}
 			} else if(typeof(defValue) == "boolean") {
 				displayOptions[option] = !!element.checked;
