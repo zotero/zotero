@@ -9,7 +9,7 @@
 	"priority":100,
 	"inRepository":true,
 	"displayOptions":{"exportCharset":"UTF-8", "exportNotes":true},
-	"lastUpdated":"2011-03-22 22:45:00"
+	"lastUpdated":"2011-03-23 00:32:48"
 }
 
 function detectImport() {
@@ -102,7 +102,12 @@ var inputTypeMap = {
 	PAMP:"manuscript",
 	SER:"book",
 	SLIDE:"artwork",
-	UNBILL:"manuscript"
+	UNBILL:"manuscript",
+	CPAPER:"conferencePaper",
+	WEB:"webpage",
+	EDBOOK:"book",
+	MANSCPT:"manuscript",
+	GOVDOC:"document"
 };
 
 function processTag(item, tag, value) {
@@ -131,8 +136,8 @@ function processTag(item, tag, value) {
 			if(inputTypeMap[value]) {
 				item.itemType = inputTypeMap[value];
 			} else {
-				// default to generic from inputTypeMap
-				item.itemType = inputTypeMap["GEN"];
+				// default to document
+				item.itemType = "document";
 			}
 		}
 	} else if(tag == "JO") {
