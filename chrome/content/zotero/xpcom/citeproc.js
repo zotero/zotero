@@ -1752,7 +1752,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.125";
+	this.processor_version = "1.0.127";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3170,6 +3170,11 @@ CSL.citeStart = function (Item, item) {
 	} else {
 		this.tmp.disambig_settings = new CSL.AmbigConfig();
 	}
+	if (this.tmp.area === 'bibliography' && this.opt["disambiguate-add-names"] && this.registry.registry[Item.id] && this.tmp.disambig_override) {
+		this.tmp.disambig_request = this.tmp.disambig_settings;
+		this.tmp.disambig_request.names = this.registry.registry[Item.id].disambig.names.slice();
+		this.tmp.disambig_settings.names = this.registry.registry[Item.id].disambig.names.slice();
+	}
 	this.tmp.names_used = [];
 	this.tmp.nameset_counter = 0;
 	this.tmp.years_used = [];
@@ -3658,7 +3663,7 @@ CSL.Node["date-part"] = {
 				}
 			}
 			state.tmp.value = [];
-			if (!state.opt.has_year_suffix && "year" === this.strings.name && !state.tmp.just_looking) {
+			if ((value || state.tmp.have_collapsed) && !state.opt.has_year_suffix && "year" === this.strings.name && !state.tmp.just_looking) {
 				if (state.registry.registry[Item.id] && state.registry.registry[Item.id].disambig.year_suffix !== false && !state.tmp.has_done_year_suffix) {
 					state.tmp.has_done_year_suffix = true;
 					num = parseInt(state.registry.registry[Item.id].disambig.year_suffix, 10);
@@ -4750,6 +4755,9 @@ CSL.Node.names = {
 							} else if (display_names.length >= state.tmp["et-al-min"]) {
 								discretionary_names_length = state.tmp["et-al-use-first"];
 							}
+							if (state.tmp["et-al-use-last"] && discretionary_names_length > (state.tmp["et-al-min"] - 2)) {
+								discretionary_names_length = state.tmp["et-al-min"] - 2;
+							}
 						}
 						overlength = display_names.length > discretionary_names_length;
 						if (discretionary_names_length > display_names.length) {
@@ -4822,7 +4830,11 @@ CSL.Node.names = {
 							} else {
 								state.tmp.have_collapsed = false;
 							}
+						} else {
+							state.tmp.have_collapsed = false;
 						}
+					} else {
+						state.tmp.have_collapsed = false;
 					}
 					llen = nameset.names.length;
 					for (ppos = 0; ppos < llen; ppos += 1) {
@@ -4957,7 +4969,9 @@ CSL.Node.names = {
 				state.tmp["has-first-person"] = false;
 				state.tmp["et-al-min"] = false;
 				state.tmp["et-al-use-first"] = false;
-				state.tmp["et-al-use-last"] = false;
+				if (!state.tmp["et-al-use-last"]) {
+					state.tmp["et-al-use-last"] = false;
+				}
 				state.tmp.use_ellipsis = false;
 				state.tmp.can_block_substitute = false;
 				state.tmp.forceEtAl = false;
@@ -5724,7 +5738,7 @@ CSL.Attributes["@names-use-first"] = function (state, arg) {
 	this.strings["et-al-use-first"] = parseInt(arg, 10);
 };
 CSL.Attributes["@names-use-last"] = function (state, arg) {
-    	if (arg === "true") {
+	if (arg === "true") {
 		this.strings["et-al-use-last"] = true;
 	} else {
 		this.strings["et-al-use-last"] = false;
