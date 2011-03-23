@@ -2470,7 +2470,6 @@ Zotero.Schema = new function(){
 							Zotero.File.putContents(file, str);
 							Zotero.wait();
 						}
-						Zotero.Translators.init();
 					}
 					var styles = Zotero.DB.query("SELECT * FROM csl");
 					if (styles) {
