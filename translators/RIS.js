@@ -9,7 +9,7 @@
 	"priority":100,
 	"inRepository":true,
 	"displayOptions":{"exportCharset":"UTF-8", "exportNotes":true},
-	"lastUpdated":"2011-03-23 00:32:48"
+	"lastUpdated":"2011-03-23 00:40:00"
 }
 
 function detectImport() {
