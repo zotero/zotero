@@ -339,7 +339,8 @@ Zotero.Proxies = new function() {
 			/edu$/,
 			/google\.com$/,
 			/wikipedia\.org$/,
-			/^[^.]*$/
+			/^[^.]*$/,
+			/doubleclick\.net$/
 		];
 	 	/**
 	 	 * Regular expression patterns of hosts that should always be proxied, regardless of whether
