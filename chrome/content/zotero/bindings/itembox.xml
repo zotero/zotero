@@ -342,7 +342,7 @@
 						if ((fieldName == 'url' || fieldName == 'homepage') && val) {
 							label.setAttribute("isButton", true);
 							// TODO: make getFieldValue non-private and use below instead
-							label.setAttribute("onclick", "ZoteroPane.loadURI(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value, event)");
+							label.setAttribute("onclick", "ZoteroPane_Local.loadURI(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value, event)");
 							label.setAttribute("tooltiptext", Zotero.getString('locate.online.tooltip'));
 						}
 						else if (fieldName == 'DOI' && val && typeof val == 'string') {
@@ -351,7 +351,7 @@
 							if (doi) {
 								doi = "http://dx.doi.org/" + encodeURIComponent(doi);
 								label.setAttribute("isButton", true);
-								label.setAttribute("onclick", "ZoteroPane.loadURI('" + doi + "', event)");
+								label.setAttribute("onclick", "ZoteroPane_Local.loadURI('" + doi + "', event)");
 								label.setAttribute("tooltiptext", Zotero.getString('locate.online.tooltip'));
 							}
 						}
