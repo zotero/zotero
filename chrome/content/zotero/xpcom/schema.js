@@ -1433,8 +1433,18 @@ Zotero.Schema = new function(){
 				xmlnode.getElementsByTagName('priority')[0].firstChild.nodeValue
 			),
 			inRepository: true,
-			lastUpdated: xmlnode.getAttribute('lastUpdated')
 		};
+		
+		for each(var attr in ["configOptions", "displayOptions"]) {
+			try {
+				metadata[attr] = JSON.parse(xmlnode.getAttribute(attr));
+			} catch(e) {
+				Zotero.logError("Invalid JSON for "+attr+" in new version of "+metadata.label+" ("+translatorID+") from repository");
+				return;
+			}
+		}
+		
+		metadata.lastUpdated = xmlnode.getAttribute('lastUpdated');
 		
 		// detectCode can not exist or be empty
 		var detectCode = (xmlnode.getElementsByTagName('detectCode').item(0) &&

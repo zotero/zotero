@@ -693,7 +693,7 @@ Zotero_Browser.Tab.prototype._searchFrames = function(rootDoc, searchDoc) {
  * Attempts import of a file; to be run on local files only
  */
 Zotero_Browser.Tab.prototype._attemptLocalFileImport = function(doc) {
-	if(doc.documentURI.match(/\.csl(\.xml)?$/i)) {
+	if(doc.documentURI.match(/\.csl(\.xml|\.txt)?$/i)) {
 		// read CSL string
 		var csl = Zotero.File.getContentsFromURL(doc.documentURI);
 		if(csl.indexOf("http://purl.org/net/xbiblio/csl") != -1) {

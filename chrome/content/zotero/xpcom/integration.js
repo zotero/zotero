@@ -688,6 +688,35 @@ Zotero.Integration.Document.prototype._addField = function(note) {
 }
 
 /**
+ * Shows an error if a field code is corrupted
+ * @param {Exception} e The exception thrown
+ * @param {Field} field The Zotero field object
+ * @param {Integer} i The field index
+ */
+Zotero.Integration.Document.prototype._showCorruptFieldError = function(e, field, i) {
+	var msg = Zotero.getString("integration.corruptField")+'\n\n'+
+			  Zotero.getString('integration.corruptField.description');
+	field.select();
+	var result = this._doc.displayAlert(msg,
+		Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
+		Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_YES_NO_CANCEL);
+	
+	if(result == 0) {
+		throw e;
+	} else if(result == 1) {		// No
+		this._removeCodeFields.push(i);
+	} else {
+		// Display reselect edit citation dialog
+		var added = this._session.editCitation(i, field.getNoteIndex());
+		if(added) {
+			this._doc.activate();
+		} else {
+			throw new Zotero.Integration.UserCancelledException();
+		}
+	}
+}
+
+/**
  * Loads existing citations and bibliographies out of a document, and creates or edits fields
  */
 Zotero.Integration.Document.prototype._updateSession = function(newField, editField) {
@@ -707,7 +736,11 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 		if(editField && field.equals(editField)) {
 			editFieldIndex = i;
 		} else {
-			var fieldCode = field.getCode();
+			try {
+				var fieldCode = field.getCode();
+			} catch(e) {
+				this._showCorruptFieldError(e, field, i);
+			}
 			
 			if(fieldCode.substr(0, ITEM_CODE.length) == ITEM_CODE) {
 				var noteIndex = (this._session.styleClass == "note" ? field.getNoteIndex() : 0);
@@ -752,26 +785,7 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 							}
 						}
 					} else if(e instanceof Zotero.Integration.CorruptFieldException) {
-						var msg = Zotero.getString("integration.corruptField")+'\n\n'+
-							      Zotero.getString('integration.corruptField.description');
-						field.select();
-						var result = this._doc.displayAlert(msg,
-							Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
-							Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_YES_NO_CANCEL);
-						
-						if(result == 0) {
-							throw e;
-						} else if(result == 1) {		// No
-							this._removeCodeFields.push(i);
-						} else {
-							// Display reselect edit citation dialog
-							var added = this._session.editCitation(i, field.getNoteIndex());
-							if(added) {
-								this._doc.activate();
-							} else {
-								throw new Zotero.Integration.UserCancelledException();
-							}
-						}
+						this._showCorruptFieldError(e, field, i);
 					} else {
 						throw e;
 					}
