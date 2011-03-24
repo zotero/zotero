@@ -36,23 +36,23 @@ var Zotero_Report_Interface = new function() {
 	function loadCollectionReport() {
 		var queryString = '';
 		
-		var col = ZoteroPane.getSelectedCollection();
-		var sortColumn = ZoteroPane.getSortField();
-		var sortDirection = ZoteroPane.getSortDirection();
+		var col = ZoteroPane_Local.getSelectedCollection();
+		var sortColumn = ZoteroPane_Local.getSortField();
+		var sortDirection = ZoteroPane_Local.getSortDirection();
 		if (sortColumn != 'title' || sortDirection != 'ascending') {
 			queryString = '?sort=' + sortColumn + (sortDirection != 'ascending' ? '' : '/d');
 		}
 		
 		if (col) {
-			ZoteroPane.loadURI('zotero://report/collection/'
+			ZoteroPane_Local.loadURI('zotero://report/collection/'
 				+ Zotero.Collections.getLibraryKeyHash(col)
 				+ '/html/report.html' + queryString);
 			return;
 		}
 		
-		var s = ZoteroPane.getSelectedSavedSearch();
+		var s = ZoteroPane_Local.getSelectedSavedSearch();
 		if (s) {
-			ZoteroPane.loadURI('zotero://report/search/'
+			ZoteroPane_Local.loadURI('zotero://report/search/'
 				+ Zotero.Searches.getLibraryKeyHash(s)
 				+ '/html/report.html' + queryString);
 			return;
@@ -66,7 +66,7 @@ var Zotero_Report_Interface = new function() {
 	 * Load a report for the currently selected items
 	 */
 	function loadItemReport() {
-		var items = ZoteroPane.getSelectedItems();
+		var items = ZoteroPane_Local.getSelectedItems();
 		
 		if (!items || !items.length) {
 			throw ('No items currently selected');
@@ -77,7 +77,7 @@ var Zotero_Report_Interface = new function() {
 			keyHashes.push(Zotero.Items.getLibraryKeyHash(item));
 		}
 		
-		ZoteroPane.loadURI('zotero://report/items/' + keyHashes.join('-') + '/html/report.html');
+		ZoteroPane_Local.loadURI('zotero://report/items/' + keyHashes.join('-') + '/html/report.html');
 	}
 	
 	
@@ -89,6 +89,6 @@ var Zotero_Report_Interface = new function() {
 			throw ('No itemIDs provided to loadItemReportByIds()');
 		}
 		
-		ZoteroPane.loadURI('zotero://report/items/' + ids.join('-') + '/html/report.html');
+		ZoteroPane_Local.loadURI('zotero://report/items/' + ids.join('-') + '/html/report.html');
 	}
 }

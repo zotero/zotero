@@ -95,8 +95,8 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 	
 	this._treebox = treebox;
 	
-	if (this._ownerDocument.defaultView.ZoteroPane) {
-		this._ownerDocument.defaultView.ZoteroPane.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+	if (this._ownerDocument.defaultView.ZoteroPane_Local) {
+		this._ownerDocument.defaultView.ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 	}
 	
 	// Generate the tree contents in a timer to allow message above to display
@@ -105,16 +105,16 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 			var msg = "Zotero is locked -- not loading items tree";
 			Zotero.debug(msg, 2);
 			
-			if (obj._ownerDocument.defaultView.ZoteroPane) {
-				obj._ownerDocument.defaultView.ZoteroPane.clearItemsPaneMessage();
+			if (obj._ownerDocument.defaultView.ZoteroPane_Local) {
+				obj._ownerDocument.defaultView.ZoteroPane_Local.clearItemsPaneMessage();
 			}
 			return;
 		}
 		
 		// If a DB transaction is open, display error message and bail
 		if (!Zotero.stateCheck()) {
-			if (obj._ownerDocument.defaultView.ZoteroPane) {
-				obj._ownerDocument.defaultView.ZoteroPane.displayErrorMessage();
+			if (obj._ownerDocument.defaultView.ZoteroPane_Local) {
+				obj._ownerDocument.defaultView.ZoteroPane_Local.displayErrorMessage();
 			}
 			return;
 		}
@@ -149,8 +149,8 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 		//Zotero.debug('Running callbacks in itemTreeView.setTree()', 4);
 		obj._runCallbacks();
 		
-		if (obj._ownerDocument.defaultView.ZoteroPane) {
-			obj._ownerDocument.defaultView.ZoteroPane.clearItemsPaneMessage();
+		if (obj._ownerDocument.defaultView.ZoteroPane_Local) {
+			obj._ownerDocument.defaultView.ZoteroPane_Local.clearItemsPaneMessage();
 		}
 		
 		// Select a queued item from selectItem()
@@ -1298,9 +1298,9 @@ Zotero.ItemTreeView.prototype.selectItem = function(id, expand, noRecurse)
 			
 			// Clear the quicksearch and tag selection and try again (once)
 			if (!noRecurse) {
-				if (this._ownerDocument.defaultView.ZoteroPane) {
-					this._ownerDocument.defaultView.ZoteroPane.clearQuicksearch();
-					this._ownerDocument.defaultView.ZoteroPane.clearTagSelection();
+				if (this._ownerDocument.defaultView.ZoteroPane_Local) {
+					this._ownerDocument.defaultView.ZoteroPane_Local.clearQuicksearch();
+					this._ownerDocument.defaultView.ZoteroPane_Local.clearTagSelection();
 				}
 				return this.selectItem(id, expand, true);
 			}

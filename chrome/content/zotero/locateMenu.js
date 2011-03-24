@@ -42,7 +42,7 @@ var Zotero_LocateMenu = new function() {
 			locateMenu.removeChild(locateMenu.firstChild);
 		}
 		
-		var selectedItems = [item for each(item in ZoteroPane.getSelectedItems()) if(!item.isNote())];
+		var selectedItems = [item for each(item in ZoteroPane_Local.getSelectedItems()) if(!item.isNote())];
 		
 		if(selectedItems.length) {
 			_addViewOptions(locateMenu, selectedItems, true, true);
@@ -98,7 +98,7 @@ var Zotero_LocateMenu = new function() {
 	 */
 	this.buildContextMenu = function(menu) {
 		// get selected items
-		var selectedItems = [item for each(item in ZoteroPane.getSelectedItems()) if(!item.isNote())];
+		var selectedItems = [item for each(item in ZoteroPane_Local.getSelectedItems()) if(!item.isNote())];
 		
 		// if no items selected, stop now
 		if(!selectedItems.length) return;
@@ -273,7 +273,7 @@ var Zotero_LocateMenu = new function() {
 	 * Locate selected items
 	 */
 	function _locateItem(event) {
-		var selectedItems = ZoteroPane.getSelectedItems();
+		var selectedItems = ZoteroPane_Local.getSelectedItems();
 		
 		// find selected engine
 		var selectedEngine = Zotero.LocateManager.getEngineByName(event.target.label);
@@ -291,7 +291,7 @@ var Zotero_LocateMenu = new function() {
 		
 		Zotero.debug("Loading using "+selectedEngine.name);
 		Zotero.debug(urls);
-		ZoteroPane.loadURI(urls, event, postDatas);
+		ZoteroPane_Local.loadURI(urls, event, postDatas);
 	}
 	
   	/**
@@ -330,7 +330,7 @@ var Zotero_LocateMenu = new function() {
 			for each(var item in items) {
 				var attachment = _getFirstAttachmentWithMIMEType(item, this._mimeTypes);
 				if(attachment) {
-					ZoteroPane.viewAttachment(attachment.id, event);
+					ZoteroPane_Local.viewAttachment(attachment.id, event);
 					return;
 				}
 			}
@@ -357,7 +357,7 @@ var Zotero_LocateMenu = new function() {
 		
 		this.handleItems = function(items, event) {
 			var urls = [_getURL(item) for each(item in items)];
-			ZoteroPane.loadURI([url for each(url in urls) if(url)], event);
+			ZoteroPane_Local.loadURI([url for each(url in urls) if(url)], event);
 		}
 		
 		function _getURL(item) {
@@ -420,7 +420,7 @@ var Zotero_LocateMenu = new function() {
 			for each(var item in items) {
 				var attachment = _getFile(item);
 				if(attachment) {
-					ZoteroPane.viewAttachment(attachment.id, event);
+					ZoteroPane_Local.viewAttachment(attachment.id, event);
 					return;
 				}
 			}
@@ -458,7 +458,7 @@ var Zotero_LocateMenu = new function() {
 			for each(var item in items) {
 				var attachment = _getBestNonNativeAttachment(item);
 				if(attachment) {
-					ZoteroPane.viewAttachment(attachment.id, event, false, this.useExternalViewer);
+					ZoteroPane_Local.viewAttachment(attachment.id, event, false, this.useExternalViewer);
 					return;
 				}
 			}
@@ -515,7 +515,7 @@ var Zotero_LocateMenu = new function() {
 			for each(var item in items) {
 				var attachment = _getBestFile(item);
 				if(attachment) {
-					ZoteroPane.showAttachmentInFilesystem(attachment.id);
+					ZoteroPane_Local.showAttachmentInFilesystem(attachment.id);
 					return;
 				}
 			}
@@ -546,7 +546,7 @@ var Zotero_LocateMenu = new function() {
 				var url = Zotero.OpenURL.resolve(item);
 				if(url) urls.push(url);
 			}
-			ZoteroPane.loadURI(urls, event);
+			ZoteroPane_Local.loadURI(urls, event);
 		}
 	};
 }

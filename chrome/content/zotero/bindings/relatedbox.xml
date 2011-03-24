@@ -221,9 +221,9 @@
 						if(id)
 						{
 							var p;
-							if(window.ZoteroPane)
+							if(window.ZoteroPane_Local)
 							{
-								p = window.ZoteroPane;
+								p = window.ZoteroPane_Local;
 							}
 							else
 							{
