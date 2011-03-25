@@ -302,7 +302,8 @@ var ZoteroOverlay = new function()
 	 */
 	this.toggleTab = function(setMode) {
 		var tab = this.findZoteroTab();
-		window.zoteroSavedSelection = ZoteroPane.itemsView.saveSelection();
+		window.zoteroSavedItemSelection = ZoteroPane.itemsView.saveSelection();
+		window.zoteroSavedCollectionSelection = ZoteroPane.collectionsView.saveSelection();
 		if(tab) {		// Zotero is running in a tab
 			if(setMode) return;
 			// don't do anything if Zotero tab is the only tab
