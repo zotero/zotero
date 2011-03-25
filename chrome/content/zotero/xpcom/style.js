@@ -510,7 +510,7 @@ Zotero.Style.prototype.getXML = function() {
 		this._class = xml.@class.toString();
 		this._hasBibliography = !!xml.bibliography.length();
 		
-		return XML.toXMLString();
+		return xml.toXMLString();
 	} else {
 		var indepFile = this.independentFile;
 		if(indepFile) return Zotero.File.getContents(indepFile);
