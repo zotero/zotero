@@ -111,9 +111,8 @@
 					Zotero.debug("CSL IGNORE IN-TEXT one");
 					return '';
 				}
-				var xmlinfo = style.csl._csl.info;
 				var terms = new Object();
-				for each(var cat in xmlinfo.category.@term) {
+				for each(var cat in style.categories) {
 					Zotero.debug("TERM is " + cat.toString());
 					terms[cat.toString()] = true;
 				}
@@ -125,15 +124,22 @@
 					Zotero.debug("CSL IGNORE this AD");
 					return '';
 				}
-				var itemSet = style.csl.createItemSet(items);
+				var styleEngine = style.csl;
 				
 				// Generate multiple citations
-				var citation = style.csl.createCitation(itemSet.items);
-				var citations = style.csl.formatCitation(citation, "HTML");
+				var citations = styleEngine.previewCitationCluster(
+					{"citationItems":[{"id":item.id} for each(item in items)], "properties":{}},
+					[], [], "html");
 			
 				// Generate bibliography
-				var bibliography = '<p>' + style.csl.formatBibliography(itemSet, "HTML");
-				return '<div style="white-space: pre-wrap">' +
+				if(!style.hasBibliography) {
+					var bibliography = '';
+				} else {
+					styleEngine.updateItems([item.id for each(item in items)]);
+					var bibliography = '<p>' + Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
+				}
+				
+				return '<div>' +
 					citations + bibliography + '</div>';
 			}
 			
