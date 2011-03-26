@@ -137,17 +137,17 @@ var Zotero_File_Interface = new function() {
 	function exportCollection() {
 		var exporter = new Zotero_File_Exporter();
 	
-		var collection = ZoteroPane.getSelectedCollection();
+		var collection = ZoteroPane_Local.getSelectedCollection();
 		if(collection) {
 			exporter.name = collection.getName();
 			exporter.collection = collection;
 		} else {
 			// find sorted items
-			exporter.items = ZoteroPane.getSortedItems();
+			exporter.items = ZoteroPane_Local.getSortedItems();
 			if(!exporter.items) throw ("No items to save");
 			
 			// find name
-			var search = ZoteroPane.getSelectedSavedSearch();
+			var search = ZoteroPane_Local.getSelectedSavedSearch();
 			if(search) {
 				exporter.name = search.name;
 			}
@@ -162,7 +162,7 @@ var Zotero_File_Interface = new function() {
 	function exportItems() {
 		var exporter = new Zotero_File_Exporter();
 		
-		exporter.items = ZoteroPane.getSelectedItems();
+		exporter.items = ZoteroPane_Local.getSelectedItems();
 		if(!exporter.items || !exporter.items.length) throw("no items currently selected");
 		
 		exporter.save();
@@ -351,17 +351,17 @@ var Zotero_File_Interface = new function() {
 	 */
 	function bibliographyFromCollection() {
 		// find sorted items
-		var items = Zotero.Items.get(ZoteroPane.getSortedItems(true));
+		var items = Zotero.Items.get(ZoteroPane_Local.getSortedItems(true));
 		if(!items) return;
 		
 		// find name
 		var name = false;
 		
-		var collection = ZoteroPane.getSelectedCollection();
+		var collection = ZoteroPane_Local.getSelectedCollection();
 		if(collection) {
 			name = collection.getName();
 		} else {
-			var searchRef = ZoteroPane.getSelectedSavedSearch();
+			var searchRef = ZoteroPane_Local.getSelectedSavedSearch();
 			if(searchRef) {
 				var search = new Zotero.Search();
 				search.id = searchRef.id;
@@ -379,7 +379,7 @@ var Zotero_File_Interface = new function() {
 	 * Creates a bibliography from a items
 	 */
 	function bibliographyFromItems() {
-		var items = ZoteroPane.getSelectedItems();
+		var items = ZoteroPane_Local.getSelectedItems();
 		if(!items || !items.length) throw("no items currently selected");
 		
 		_doBibliographyOptions(Zotero.getString("fileInterface.untitledBibliography"), items);

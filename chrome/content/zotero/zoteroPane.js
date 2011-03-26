@@ -347,21 +347,28 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		this.unserializePersist();
+		this.updateTagSelectorSize();
 		
+		// restore saved row selection (for tab switching)
 		var containerWindow = (window.ZoteroTab ? window.ZoteroTab.containerWindow : window);
-		if(containerWindow.zoteroSavedSelection) {
+		if(containerWindow.zoteroSavedCollectionSelection) {
+			this.collectionsView.rememberSelection(containerWindow.zoteroSavedCollectionSelection);
+			delete containerWindow.zoteroSavedCollectionSelection;
+		}
+		
+		// restore saved item selection (for tab switching)
+		if(containerWindow.zoteroSavedItemSelection) {
 			var me = this;
 			// hack to restore saved selection after itemTreeView finishes loading
 			window.setTimeout(function() {
-				if(containerWindow.zoteroSavedSelection) {
-					me.itemsView.rememberSelection(containerWindow.zoteroSavedSelection)
-					delete containerWindow.zoteroSavedSelection;
+				if(containerWindow.zoteroSavedItemSelection) {
+					me.itemsView.rememberSelection(containerWindow.zoteroSavedItemSelection);
+					delete containerWindow.zoteroSavedItemSelection;
 				}
 			}, 51);
 		}
 		
-		this.updateTagSelectorSize();
+		this.unserializePersist();
 		
 		// Focus the quicksearch on pane open
 		setTimeout("document.getElementById('zotero-tb-search').inputField.select();", 1);

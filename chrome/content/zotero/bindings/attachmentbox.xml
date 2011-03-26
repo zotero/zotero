@@ -199,7 +199,7 @@
 							urlField.setAttribute('hidden', false);
 							if (this.clickableLink) {
 								 urlField.onclick = function (event) {
-									ZoteroPane.loadURI(this.value, event)
+									ZoteroPane_Local.loadURI(this.value, event)
 								};
 								urlField.className = 'text-link';
 							}
@@ -435,7 +435,7 @@
 				<parameter name="event"/>
 				<body>
 				<![CDATA[
-					ZoteroPane.viewAttachment(this.item.id, event, !this.editable);
+					ZoteroPane_Local.viewAttachment(this.item.id, event, !this.editable);
 				]]>
 				</body>
 			</method>
@@ -445,7 +445,7 @@
 				<parameter name="event"/>
 				<body>
 				<![CDATA[
-					ZoteroPane.showAttachmentInFilesystem(this.item.id, event.originalTarget, !this.editable);
+					ZoteroPane_Local.showAttachmentInFilesystem(this.item.id, event.originalTarget, !this.editable);
 				]]>
 				</body>
 			</method>
@@ -536,7 +536,7 @@
 							<label id="index-status-label"/>
 							<hbox>
 								<label id="index-status"/>
-								<toolbarbutton id="reindex" oncommand="this.hidden = true; setTimeout(function () { ZoteroPane.reindexItem(); }, 50)"/>
+								<toolbarbutton id="reindex" oncommand="this.hidden = true; setTimeout(function () { ZoteroPane_Local.reindexItem(); }, 50)"/>
 							</hbox>
 						</row>
 					</rows>

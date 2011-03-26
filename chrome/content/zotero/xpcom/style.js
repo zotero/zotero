@@ -366,6 +366,7 @@ Zotero.Style = function(arg) {
 		this.styleID = xml.info.id.toString();
 		this.title = xml.info.title.toString();
 		this.updated = xml.info.updated.toString().replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
+		this.categories = [category.@term.toString() for each(category in xml.info) if(category.@term.length())];
 		this._class = xml.@class.toString();
 		this._hasBibliography = !!xml.bibliography.length();
 		this._version = xml.@version.toString();
@@ -509,7 +510,7 @@ Zotero.Style.prototype.getXML = function() {
 		this._class = xml.@class.toString();
 		this._hasBibliography = !!xml.bibliography.length();
 		
-		return XML.toXMLString();
+		return xml.toXMLString();
 	} else {
 		var indepFile = this.independentFile;
 		if(indepFile) return Zotero.File.getContents(indepFile);
