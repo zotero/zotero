@@ -1039,6 +1039,11 @@ var ZoteroPane = new function()
 		
 		var tabs = document.getElementById('zotero-view-tabbox');
 		
+		// save note when switching from a note
+		if(document.getElementById('zotero-item-pane-content').selectedIndex == 2) {
+			document.getElementById('zotero-note-editor').save();
+		}
+		
 		// Single item selected
 		if (this.itemsView && this.itemsView.selection.count == 1 && this.itemsView.selection.currentIndex != -1)
 		{
