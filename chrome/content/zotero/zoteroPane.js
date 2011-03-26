@@ -347,6 +347,7 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
+		this.unserializePersist();
 		this.updateTagSelectorSize();
 		
 		// restore saved row selection (for tab switching)
@@ -367,8 +368,6 @@ var ZoteroPane = new function()
 				}
 			}, 51);
 		}
-		
-		this.unserializePersist();
 		
 		// Focus the quicksearch on pane open
 		setTimeout("document.getElementById('zotero-tb-search').inputField.select();", 1);
