@@ -364,7 +364,10 @@ var Zotero_LocateMenu = new function() {
 			// try url field for item and for attachments
 			var urlField = item.getField('url');
 			if(urlField) {
-				var uri = Zotero_LocateMenu.ios.newURI(urlField, null, null);
+				var uri;
+				try {
+					uri = Zotero_LocateMenu.ios.newURI(urlField, null, null);
+				} catch(e) {};
 				if(uri && uri.host && uri.scheme !== 'file') return urlField;
 			}
 			
