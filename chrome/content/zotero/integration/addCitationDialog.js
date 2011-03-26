@@ -212,7 +212,9 @@ var Zotero_Citation_Dialog = new function () {
 		if(_multipleSourcesOn) {
 			_multipleSourceButton.label = Zotero.getString("citation.singleSource");
 			document.getElementById("multiple-sources").setAttribute("hidden", false);
-			popup.resizeTo(750, dialog.getAttribute("height"));
+			if(dialog.getAttribute("width") <= 600) {
+				popup.resizeTo(750, dialog.getAttribute("height"));
+			}
 			//popup.moveBy((600 - 750)/2, 0);
 
 			serial_number = 0;
@@ -226,7 +228,7 @@ var Zotero_Citation_Dialog = new function () {
 		} else {
 			_multipleSourceButton.label = Zotero.getString("citation.multipleSources");
 			document.getElementById("multiple-sources").setAttribute("hidden", true);
-			popup.resizeTo(600, dialog.getAttribute("height"));
+			//popup.resizeTo(600, dialog.getAttribute("height"));
 			//popup.moveBy((750 - 600)/2, 0);
 			
 			// enable all fields

@@ -52,16 +52,16 @@ var Zotero_LocateMenu = new function() {
 			if(availableEngines.length) {
 				_addLocateEngines(locateMenu, availableEngines, true);
 			}
-			
-			// add separator at end if necessary
-			if(locateMenu.lastChild.tagName !== "menuseparator") {
-				locateMenu.appendChild(document.createElement("menuseparator"));
-			}
 		} else {
 			// add "no items selected"
 			menuitem = _createMenuItem(Zotero.getString("pane.item.selected.zero"), "no-items-selected");
 			locateMenu.appendChild(menuitem);
 			menuitem.disabled = true;
+		}
+					
+		// add separator at end if necessary
+		if(locateMenu.lastChild.tagName !== "menuseparator") {
+			locateMenu.appendChild(document.createElement("menuseparator"));
 		}
 		
 		// add installable locate menus, if there are any
@@ -72,8 +72,6 @@ var Zotero_LocateMenu = new function() {
 		}
 		
 		if(installableLocateEngines.length) {
-			locateMenu.appendChild(document.createElement("menuseparator"));
-			
 			for each(var locateEngine in installableLocateEngines) {
 				var menuitem = document.createElement("menuitem");
 				menuitem.setAttribute("label", locateEngine.label);
@@ -364,7 +362,10 @@ var Zotero_LocateMenu = new function() {
 			// try url field for item and for attachments
 			var urlField = item.getField('url');
 			if(urlField) {
-				var uri = Zotero_LocateMenu.ios.newURI(urlField, null, null);
+				var uri;
+				try {
+					uri = Zotero_LocateMenu.ios.newURI(urlField, null, null);
+				} catch(e) {};
 				if(uri && uri.host && uri.scheme !== 'file') return urlField;
 			}
 			

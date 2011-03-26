@@ -170,23 +170,27 @@ Zotero.Cite.System.retrieveItem = function(item){
 	for(var variable in Zotero.Cite.System._zoteroDateMap) {
 		var date = zoteroItem.getField(Zotero.Cite.System._zoteroDateMap[variable], false, true);
 		if(date) {
-			date = Zotero.Date.strToDate(date);
-			if(date.part && !date.month) {
-				// if there's a part but no month, interpret literally
-				cslItem[variable] = {"literal": date.part};
-			} else {
-				// otherwise, use date-parts
-				var dateParts = [];
-				if(date.year) {
-					dateParts.push(date.year);
-					if(date.month) {
-						dateParts.push(date.month+1);
-						if(date.day) {
-							dateParts.push(date.day);
-						}
+			var dateObj = Zotero.Date.strToDate(date);
+			// otherwise, use date-parts
+			var dateParts = [];
+			if(dateObj.year) {
+				// add year, month, and day, if they exist
+				dateParts.push(dateObj.year);
+				if(dateObj.month) {
+					dateParts.push(dateObj.month+1);
+					if(dateObj.day) {
+						dateParts.push(dateObj.day);
 					}
 				}
 				cslItem[variable] = {"date-parts":[dateParts]};
+				
+				// if no month, use season as month
+				if(dateObj.part && !dateObj.month) {
+					cslItem[variable].season = dateObj.part;
+				}
+			} else {
+				// if no year, pass date literally
+				cslItem[variable] = {"literal":date};
 			}
 		}
 	}
