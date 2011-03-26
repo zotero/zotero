@@ -138,7 +138,7 @@ var CSL = {
 	NAME_INITIAL_REGEXP: /^([A-Z\u0080-\u017f\u0400-\u042f])([a-zA-Z\u0080-\u017f\u0400-\u052f]*|)/,
 	ROMANESQUE_REGEXP: /[a-zA-Z\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe]/,
 	STARTSWITH_ROMANESQUE_REGEXP: /^[&a-zA-Z\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe]/,
-	ENDSWITH_ROMANESQUE_REGEXP: /[&a-zA-Z\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe]$/,
+	ENDSWITH_ROMANESQUE_REGEXP: /[.;:&a-zA-Z\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe]$/,
 	ALL_ROMANESQUE_REGEXP: /^[a-zA-Z\u0080-\u017f\u0400-\u052f\u0386-\u03fb\u1f00-\u1ffe]+$/,
 	VIETNAMESE_SPECIALS: /[\u00c0-\u00c3\u00c8-\u00ca\u00cc\u00cd\u00d2-\u00d5\u00d9\u00da\u00dd\u00e0-\u00e3\u00e8-\u00ea\u00ec\u00ed\u00f2-\u00f5\u00f9\u00fa\u00fd\u0101\u0103\u0110\u0111\u0128\u0129\u0168\u0169\u01a0\u01a1\u01af\u01b0\u1ea0-\u1ef9]/,
 	VIETNAMESE_NAMES: /^(?:(?:[.AaBbCcDdEeGgHhIiKkLlMmNnOoPpQqRrSsTtUuVvXxYy \u00c0-\u00c3\u00c8-\u00ca\u00cc\u00cd\u00d2-\u00d5\u00d9\u00da\u00dd\u00e0-\u00e3\u00e8-\u00ea\u00ec\u00ed\u00f2-\u00f5\u00f9\u00fa\u00fd\u0101\u0103\u0110\u0111\u0128\u0129\u0168\u0169\u01a0\u01a1\u01af\u01b0\u1ea0-\u1ef9]{2,6})(\s+|$))+$/,
@@ -217,7 +217,7 @@ var CSL = {
 		ret[ret.length - 1] += str;
 		return ret;
 	},
-	SKIP_WORDS: ["a", "the", "an"],
+	SKIP_WORDS: ["but", "or", "yet", "so", "for", "and", "nor", "a", "an", "the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up", "down", "as", "via", "onto", "over", "till"],
 	FORMAT_KEY_SEQUENCE: [
 		"@strip-periods",
 		"@font-style",
@@ -231,7 +231,8 @@ var CSL = {
 		"font-style",
 		"font-variant",
 		"font-weight",
-		"text-decoration"
+		"text-decoration",
+		"text-case"
 	],
 	SUFFIX_CHARS: "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z",
 	ROMAN_NUMERALS: [
@@ -446,29 +447,26 @@ CSL_E4X.prototype.addInstitutionNodes = function(myxml) {
 		institution-parts="long"
 		delimiter=", "
 		substitute-use-first="1"
-		use-last="1"/>;
-	institution_short = <institution
-		institution-parts="long"
-		delimiter=", "
-		substitute-use-first="1"
-		use-last="1"/>;
-	name_part = <name-part />;
+		use-last="1"/>
+	institution_part = <institution-part name="long"/>;
 	for each (node in myxml..names) {
 		if ("xml" == typeof node && node.elements("name").length() > 0) {
 			if (!node.institution.toString()) {
 				node.name += institution_long;
 				for each (var attr in CSL.INSTITUTION_KEYS) {
-						if (node.name.@[attr].toString()) {
-							node.institution.@[attr] = node.name.@[attr].toString();
-						}
+					if (node.name.@[attr].toString()) {
+						node.institution.@[attr] = node.name.@[attr].toString();
 					}
-				if (node.name['name-part'] && node.name['name-part'].@name.toString() === 'family') {
-					node.name += name_part;
-					for each (var attr in CSL.INSTITUTION_KEYS) {
-							if (node.name['name-part'].@[attr].toString()) {
-								node.institution.@[attr] = node.name['name-part'].@[attr].toString();
-							}
+				}
+				node.institution[0].appendChild(institution_part)
+				for each (var namepartnode in node.name['name-part']) {
+	   				if (namepartnode.@name.toString() === 'family') {
+						for each (var attr in CSL.INSTITUTION_KEYS) {
+		   					if (namepartnode.@[attr].toString()) {
+								node.institution['institution-part'][0].@[attr] = namepartnode.@[attr].toString();
+		   					}
 						}
+	   				}
 				}
 			}
 		}
@@ -854,7 +852,7 @@ CSL.Output.Queue.purgeEmptyBlobs = function (myblobs, endOnly) {
 		return;
 	}
 	for (var i = myblobs.length - 1; i > -1; i += -1) {
-		CSL.Output.Queue.purgeEmptyBlobs(myblobs[i].blobs);		
+		CSL.Output.Queue.purgeEmptyBlobs(myblobs[i].blobs, endOnly);
 	}
 	for (var i = myblobs.length - 1; i > -1; i += -1) {
 		if (!myblobs[i].blobs.length) {
@@ -865,7 +863,8 @@ CSL.Output.Queue.purgeEmptyBlobs = function (myblobs, endOnly) {
 			for (j = 0, jlen = tmpblobs.length; j < jlen; j += 1) {
 				myblobs.push(tmpblobs[j]);
 			}
-		} else if (endOnly) {
+		}
+		if (endOnly) {
 			break;
 		}
 	}
@@ -927,7 +926,8 @@ CSL.Output.Queue.adjustPunctuation = function (state, myblobs, stk, finish) {
 		if (suffix) {
 			if (blob && 
 				TERMS.indexOf(myblobs.slice(-1)) > -1 &&
-				TERMS.indexOf(suffix) > -1) {
+				TERMS.indexOf(suffix) > -1 &&
+				blob.strings.suffix !== " ") {
 					blob.strings.suffix = blob.strings.suffix.slice(1);
 			}
 		}
@@ -1752,7 +1752,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.127";
+	this.processor_version = "1.0.131";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3004,7 +3004,7 @@ CSL.getCitationCluster = function (inputList, citationID) {
 		last_collapsed = this.tmp.have_collapsed;
 		params = {};
 		if (pos > 0) {
-			CSL.getCite.call(this, Item, item, "" + inputList[(pos - 1)][1].id);
+			CSL.getCite.call(this, Item, item, "" + inputList[(pos - 1)][0].id);
 		} else {
 			this.tmp.term_predecessor = false;
 			CSL.getCite.call(this, Item, item);
@@ -3197,11 +3197,6 @@ CSL.citeEnd = function (Item, item) {
 		this.registry.registry[Item.id].disambig.givens = this.tmp.disambig_restore.givens;
 	}
 	this.tmp.disambig_restore = false;
-	if (this.tmp.last_suffix_used && this.tmp.last_suffix_used.match(/[\-.,;:]$/)) {
-		this.tmp.splice_delimiter = " ";
-	} else if (this.tmp.prefix.value() && this.tmp.prefix.value().match(/^[.,:;a-z]/)) {
-		this.tmp.splice_delimiter = " ";
-	}
  	this.tmp.last_suffix_used = this.tmp.suffix.value();
 	this.tmp.last_years_used = this.tmp.years_used.slice();
 	this.tmp.last_names_used = this.tmp.names_used.slice();
@@ -4203,7 +4198,7 @@ CSL.Node.layout = {
 					var sp;
 					if (item && item.prefix) {
 						sp = "";
-						if (item.prefix.match(CSL.ROMANESQUE_REGEXP)) {
+						if (item.prefix.match(CSL.ENDSWITH_ROMANESQUE_REGEXP)) {
 							sp = " ";
 						}
 						state.output.append((item.prefix + sp), this);
@@ -4282,7 +4277,7 @@ CSL.Node.layout = {
 						var sp;
 						if (item && item.suffix) {
 							sp = "";
-							if (item.suffix.match(CSL.ROMANESQUE_REGEXP)) {
+							if (item.suffix.match(CSL.STARTSWITH_ROMANESQUE_REGEXP)) {
 								sp = " ";
 							}
 							state.output.append((sp + item.suffix), this);
@@ -6525,7 +6520,7 @@ CSL.Parallel.prototype.StartVariable = function (variable) {
 		this.data.value = "";
 		this.data.blobs = [];
 		var is_mid = this.isMid(variable);
-		if (this.target === "front" && is_mid) {
+		if (this.target === "front" && is_mid && this.cite.front.length && (this.cite.front.length > 1 || this.cite.front.indexOf("names") === -1)) {
 			this.target = "mid";
 		} else if (this.target === "mid" && !is_mid && this.cite.Item.title) {
 			this.target = "back";
@@ -6678,6 +6673,10 @@ CSL.Parallel.prototype.ComposeSet = function (next_output_in_progress) {
 								this.state.registry.registry[cite.itemId].parallel = this.state.registry.registry[cite.prevItemID].parallel;
 							}
 							this.state.registry.registry[cite.itemId].siblings = this.state.registry.registry[cite.prevItemID].siblings;
+							if (!this.state.registry.registry[cite.itemId].siblings) {
+								this.state.registry.registry[cite.itemId].siblings = [];
+								CSL.debug("WARNING: adding missing siblings array to registry object");
+							}
 							this.state.registry.registry[cite.itemId].siblings.push(cite.itemId);
 						}
 					}
@@ -7874,6 +7873,7 @@ CSL.Util.FlipFlopper = function (state) {
 	var tagdefs, pos, len, p, entry, allTags, ret, def, esc, makeHashes, closeTags, flipTags, openToClose, openToDecorations, okReverse, hashes, allTagsLst, lst;
 	this.state = state;
 	this.blob = false;
+	this.quotechars = ["'", '"'];
 	tagdefs = [
 		["<i>", "</i>", "italics", "@font-style", ["italic", "normal","normal"], true],
 		["<b>", "</b>", "bold", "@font-weight", ["bold", "normal","normal"], true],
@@ -7888,8 +7888,12 @@ CSL.Util.FlipFlopper = function (state) {
 	for (pos = 0; pos < 2; pos += 1) {
 		p = ["-", "-inner-"][pos];
 		entry = [];
-		entry.push(state.getTerm(("open" + p + "quote")));
-		entry.push(state.getTerm(("close" + p + "quote")));
+		var openq = state.getTerm(("open" + p + "quote"));
+		entry.push(openq);
+		this.quotechars.push(openq);
+		var closeq = state.getTerm(("close" + p + "quote"));
+		entry.push(closeq);
+		this.quotechars.push(closeq);
 		entry.push(("quote" + "s"));
 		entry.push(("@" + "quote" + "s"));
 		if ("-" === p) {
@@ -8051,7 +8055,7 @@ CSL.Util.FlipFlopper.prototype.getSplitStrings = function (str) {
 		head = strs.slice(0, (badTagPos - 1));
 		tail = strs.slice((badTagPos + 2));
 		sep = strs[badTagPos];
-		if (sep.length && sep[0] !== "<" && this.openToDecorations[sep]) {
+		if (sep.length && sep[0] !== "<" && this.openToDecorations[sep] && this.quotechars.indexOf(sep) === -1) {
 			params = this.openToDecorations[sep];
 			sep = this.state.fun.decorate[params[0]][params[1][0]](this.state);
 		}
@@ -8248,7 +8252,7 @@ CSL.Output.Formatters.title = function (state, string) {
 					skipword = CSL.SKIP_WORDS[ppos];
 					idx = lowerCaseVariant.indexOf(skipword);
 					if (idx > -1) {
-						tmp = lowerCaseVariant.slice(0, idx, idx + lowerCaseVariant.slice(skipword.length));
+						tmp = lowerCaseVariant.slice(0, idx) + lowerCaseVariant.slice(idx + skipword.length);
 						if (!tmp.match(/[a-zA-Z]/)) {
 							skip = true;
 						}
