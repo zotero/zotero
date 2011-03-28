@@ -198,10 +198,10 @@
 			<field name="_lastTabIndex"/>
 			<field name="_tabDirection"/>
 			<field name="_tabIndexMinCreators" readonly="true">10</field>
-			<field name="_tabIndexMaxCreators" readonly="true">0</field>
+			<field name="_tabIndexMaxCreators">0</field>
 			<field name="_tabIndexMinFields" readonly="true">1000</field>
-			<field name="_tabIndexMaxInfoFields" readonly="true">0</field>
-			<field name="_tabIndexMaxTagsFields" readonly="true">0</field>
+			<field name="_tabIndexMaxInfoFields">0</field>
+			<field name="_tabIndexMaxTagsFields">0</field>
 			
 			<property name="_defaultFirstName"
 				onget="return '(' + Zotero.getString('pane.item.defaultFirstName') + ')'"/>
@@ -450,7 +450,7 @@
 					// Move to next or previous field if (shift-)tab was pressed
 					if (this._lastTabIndex && this._tabDirection)
 					{
-					this._focusNextField('info', this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
+						this._focusNextField('info', this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
 					}
 
 				]]>
@@ -1490,6 +1490,23 @@
 			</method>
 			
 			
+			<method name="itemTypeMenuTab">
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+					if (!event.shiftKey) {
+						this.focusFirstField('info');
+						event.preventDefault();
+					}
+					// Shift-tab
+					else {
+						this._tabDirection = false;
+					}
+				]]>
+				</body>
+			</method>
+			
+			
 			<method name="hideEditor">
 				<parameter name="textbox"/>
 				<body>
@@ -2070,6 +2087,7 @@
 				<body>
 				<![CDATA[
 					tabindex = parseInt(tabindex);
+					
 					if (back)
 					{
 						if (mode=='info')
@@ -2261,7 +2279,7 @@
 							<label value="&zotero.items.itemType;:"/>
 							<menulist class="zotero-clicky" id="item-type-menu" oncommand="document.getBindingParent(this).changeTypeTo(this.value, this)" flex="1"
 								onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
-								onkeypress="if (event.keyCode == event.DOM_VK_TAB){ if (!event.shiftKey) { document.getBindingParent(this).focusFirstField('info'); event.preventDefault(); } }">
+								onkeypress="if (event.keyCode == event.DOM_VK_TAB) { document.getBindingParent(this).itemTypeMenuTab(event); }">
 								<menupopup/>
 							</menulist>
 						</row>
