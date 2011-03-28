@@ -768,7 +768,11 @@ Zotero.Integration.Document.prototype._getFields = function(require) {
 		this._fields.push(fields.getNext().QueryInterface(Components.interfaces.zoteroIntegrationField));
 	}
 	var endTime = (new Date()).getTime();
-	Zotero.debug("Got "+this._fields.length+" fields in "+(endTime-getFieldsTime)/1000+"; "+1000/((endTime-getFieldsTime)/this._fields.length)+" fields/second");
+	if(Zotero.Debug.enabled) {
+		Zotero.debug("Integration: got "+this._fields.length+" fields in "+
+			(endTime-getFieldsTime)/1000+"; "+
+			1000/((endTime-getFieldsTime)/this._fields.length)+" fields/second");
+	}
 	
 	if(require && !this._fields.length) {
 		throw new Zotero.Integration.DisplayException("mustInsertCitation");
@@ -922,8 +926,12 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 		}
 	}
 	var endTime = (new Date()).getTime();
-	Zotero.debug("Collected "+this._fields.length+" fields in "+(endTime-collectFieldsTime)/1000+"; "+1000/((endTime-collectFieldsTime)/this._fields.length)+" fields/second");
-
+	if(Zotero.Debug.enabled) {
+		Zotero.debug("Integration: collected "+this._fields.length+" fields in "+
+			(endTime-collectFieldsTime)/1000+"; "+
+			1000/((endTime-collectFieldsTime)/this._fields.length)+" fields/second");
+	}
+	
 	// load uncited items from bibliography
 	if(bibliographyData && !this._session.bibliographyData) {
 		try {
@@ -1511,13 +1519,13 @@ Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, ar
 	var needNewID = !citation.citationID || this.citationIDs[citation.citationID];
 	if(needNewID || !this.oldCitationIDs[citation.citationID]) {
 		if(needNewID) {
-			Zotero.debug("Zotero.Integration: "+citation.citationID+" ("+index+") needs new citationID");
+			Zotero.debug("Integration: "+citation.citationID+" ("+index+") needs new citationID");
 			citation.citationID = Zotero.randomString();
 		}
 		this.newIndices[index] = true;
 		this.updateIndices[index] = true;
 	}
-	Zotero.debug("Zotero.Integration: adding citationID "+citation.citationID);
+	Zotero.debug("Integration: adding citationID "+citation.citationID);
 	this.citationIDs[citation.citationID] = true;
 }
 /**
@@ -1591,8 +1599,12 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) 
 			citation.properties.unsorted = !citation.sort;
 			delete citation.sort;
 		}
-		
+		if(citation.custom) {
+			citation.properties.custom = citation.custom;
+			delete citation.custom;
+		}
 		if(!citation.citationID) citation.citationID = Zotero.randomString();
+		
 		citation.properties.field = arg;
 	} else {				// ye olde style field
 		var underscoreIndex = arg.indexOf("_");
@@ -1642,7 +1654,7 @@ Zotero.Integration.Session.prototype.deleteCitation = function(index) {
 			}
 		}
 	}
-	Zotero.debug("Zotero.Integration: deleting old citationID "+oldCitation.citationID);
+	Zotero.debug("Integration: Deleting old citationID "+oldCitation.citationID);
 	if(oldCitation.citationID) delete this.citationIDs[oldCitation.citationID];
 	
 	this.updateIndices[index] = true;
@@ -1677,7 +1689,7 @@ Zotero.Integration.Session.prototype.getBibliography = function() {
  */
 Zotero.Integration.Session.prototype.updateUncitedItems = function() {
 	// There appears to be a bug somewhere here.
-	Zotero.debug("UPDATING UNCITED ITEMS WITH "+this.uncitedItems.toSource());
+	if(Zotero.Debug.enabled) Zotero.debug("Integration: style.updateUncitedItems("+this.uncitedItems.toSource()+")");
 	this.style.updateUncitedItems([parseInt(i) for(i in this.uncitedItems)]);
 }
 
@@ -1733,7 +1745,9 @@ Zotero.Integration.Session.prototype.formatCitation = function(index, citation) 
 	if(!this.citationText[index]) {
 		var citationsPre, citationsPost, citationIndices;
 		[citationsPre, citationsPost, citationIndices] = this._getPrePost(index);
-		Zotero.debug("style.processCitationCluster("+citation.toSource()+", "+citationsPre.toSource()+", "+citationsPost.toSource());
+		if(Zotero.debug.enabled) {
+			Zotero.debug("Integration: style.processCitationCluster("+citation.toSource()+", "+citationsPre.toSource()+", "+citationsPost.toSource());
+		}
 		var newCitations = this.style.processCitationCluster(citation, citationsPre, citationsPost);
 		for each(var newCitation in newCitations[1]) {
 			this.citationText[citationIndices[newCitation[0]]] = newCitation[1];
@@ -1771,10 +1785,12 @@ Zotero.Integration.Session.prototype.updateCitations = function() {
 		}
 	}*/
 	
-	Zotero.debug("Zotero.Integration: indices of new citations");
-	Zotero.debug([key for(key in this.newIndices)]);
-	Zotero.debug("Zotero.Integration: indices of updated citations");
-	Zotero.debug([key for(key in this.updateIndices)]);
+	if(Zotero.Debug.enabled) {
+		Zotero.debug("Integration: Indices of new citations");
+		Zotero.debug([key for(key in this.newIndices)]);
+		Zotero.debug("Integration: Indices of updated citations");
+		Zotero.debug([key for(key in this.updateIndices)]);
+	}
 	
 	var deleteCitations = {};
 	for each(var indexList in [this.newIndices, this.updateIndices]) {
