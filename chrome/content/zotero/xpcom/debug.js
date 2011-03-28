@@ -26,6 +26,7 @@
 
 Zotero.Debug = new function () {
 	this.__defineGetter__('storing', function () _store);
+	this.__defineGetter__('enabled', function () _console || store);
 	
 	var _console;
 	var _store;
