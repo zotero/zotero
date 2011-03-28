@@ -176,7 +176,7 @@ Zotero.Cite.System.retrieveItem = function(item){
 			if(dateObj.year) {
 				// add year, month, and day, if they exist
 				dateParts.push(dateObj.year);
-				if(dateObj.month) {
+				if(dateObj.month !== undefined) {
 					dateParts.push(dateObj.month+1);
 					if(dateObj.day) {
 						dateParts.push(dateObj.day);
