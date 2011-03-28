@@ -1739,7 +1739,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.133";
+	this.processor_version = "1.0.134";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -5501,13 +5501,14 @@ CSL.Attributes["@variable"] = function (state, arg) {
 			len = this.variables.length;
 			for (pos = 0; pos < len; pos += 1) {
 				variable = this.variables[pos];
+				if (variable === "page-first") {
+					variable = "page";
+				}
 				if (this.strings.form === "short" && !Item[variable]) {
 					if (variable === "title") {
 						variable = "shortTitle";
 					} else if (variable === "container-title") {
 						variable = "journalAbbreviation";
-					} else if (variable === "page-first") {
-						variable = "page";
 					}
 				}
 				if (CSL.DATE_VARIABLES.indexOf(variable) > -1) {
@@ -5529,27 +5530,27 @@ CSL.Attributes["@variable"] = function (state, arg) {
 						}
 						if (varlen >= needlen) {
 							output = true;
-							break;
 						}
+						break;
 					}
 				} else if ("locator" === variable) {
 					if (item && item.locator) {
 						output = true;
-						break;
 					}
+					break;
 				} else if ("citation-number" === variable) {
 					output = true;
 					break;
 				} else if ("first-reference-note-number" === variable) {
 					if (item && item["first-reference-note-number"]) {
 						output = true;
-						break;
 					}
+					break;
 				} else if ("object" === typeof Item[variable]) {
 					if (Item[variable].length) {
 						output = true;
-						break;
 					}
+					break;
 				} else if ("string" === typeof Item[variable] && Item[variable]) {
 					output = true;
 					break;
