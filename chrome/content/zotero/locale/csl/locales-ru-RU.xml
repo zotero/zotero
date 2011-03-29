@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <locale xmlns="http://purl.org/net/xbiblio/csl" version="1.0" xml:lang="ru">
+<!-- Translation by Alexei Kouprianov alexei.kouprianov@gmail.com -->
    <style-options punctuation-in-quote="false"/>
    <date form="text">
       <date-part name="day" suffix=" "/>
@@ -12,34 +13,35 @@
       <date-part name="year"/>
    </date>
    <terms>
-      <term name="accessed">вызвано</term>
+      <term name="accessed">просмотрено</term>
       <term name="and">и</term>
-      <term name="and others">and others</term>
-      <term name="anonymous">anonymous</term>
-      <term name="anonymous" form="short">anon</term>
-      <term name="at">at</term>
-      <term name="by">by</term>
+      <term name="and others">и др.</term>
+      <term name="anonymous">аноним</term>
+      <term name="anonymous" form="short">анон.</term>
+      <term name="at">на</term>
+      <term name="by" />
       <term name="circa">circa</term>
-      <term name="circa" form="short">c.</term>
-      <term name="cited">cited</term>
+      <term name="circa" form="short">ca.</term>
+      <term name="cited">цитируется по</term>
+      <term name="cited" form="short">цит. по</term>
       <term name="edition">
-         <single>edition</single>
-         <multiple>editions</multiple>
+         <single>издание</single>
+         <multiple>издания</multiple>
       </term>
-      <term name="edition" form="short">ed</term>
+      <term name="edition" form="short">изд.</term>
       <term name="et-al">и др.</term>
-      <term name="forthcoming">грядущие</term>
+      <term name="forthcoming">ожидается</term>
       <term name="from">от</term>
-      <term name="ibid">так же</term>
+      <term name="ibid">там же</term>
       <term name="in">в</term>
-      <term name="in press">in press</term>
-      <term name="internet">internet</term>
-      <term name="interview">interview</term>
-      <term name="letter">letter</term>
-      <term name="no date">no date</term>
-      <term name="no date" form="short">нет даты</term>
+      <term name="in press">в печати</term>
+      <term name="internet">Интернет</term>
+      <term name="interview">интервью</term>
+      <term name="letter">письмо</term>
+      <term name="no date">без даты</term>
+      <term name="no date" form="short">б. д.</term>
       <term name="online">online</term>
-      <term name="presented at">presented at the</term>
+      <term name="presented at">представлено на</term>
       <term name="reference">
          <single>reference</single>
          <multiple>references</multiple>
@@ -51,98 +53,98 @@
       <term name="retrieved">извлечено</term>
 
       <!-- ANNO DOMINI; BEFORE CHRIST -->
-      <term name="ad">AD</term>
-      <term name="bc">BC</term>
+      <term name="ad">н. э.</term>
+      <term name="bc">до н. э.</term>
 
       <!-- QUOTES -->
-      <term name="open-quote">“</term>
-      <term name="close-quote">”</term>
-      <term name="open-inner-quote">‘</term>
-      <term name="close-inner-quote">’</term>
+      <term name="open-quote">«</term>
+      <term name="close-quote">»</term>
+      <term name="open-inner-quote">„</term>
+      <term name="close-inner-quote">“</term>
 
       <!-- ORDINALS -->
-      <term name="ordinal-01">st</term>
-      <term name="ordinal-02">nd</term>
-      <term name="ordinal-03">rd</term>
-      <term name="ordinal-04">th</term>
+      <term name="ordinal-01">й</term>
+      <term name="ordinal-02">й</term>
+      <term name="ordinal-03">й</term>
+      <term name="ordinal-04">й</term>
 
       <!-- LONG ORDINALS -->
-      <term name="long-ordinal-01">first</term>
-      <term name="long-ordinal-02">second</term>
-      <term name="long-ordinal-03">third</term>
-      <term name="long-ordinal-04">fourth</term>
-      <term name="long-ordinal-05">fifth</term>
-      <term name="long-ordinal-06">sixth</term>
-      <term name="long-ordinal-07">seventh</term>
-      <term name="long-ordinal-08">eighth</term>
-      <term name="long-ordinal-09">ninth</term>
-      <term name="long-ordinal-10">tenth</term>
+      <term name="long-ordinal-01">первый</term>
+      <term name="long-ordinal-02">второй</term>
+      <term name="long-ordinal-03">третий</term>
+      <term name="long-ordinal-04">четвертый</term>
+      <term name="long-ordinal-05">пятый</term>
+      <term name="long-ordinal-06">шестой</term>
+      <term name="long-ordinal-07">седьмой</term>
+      <term name="long-ordinal-08">восьмой</term>
+      <term name="long-ordinal-09">девятый</term>
+      <term name="long-ordinal-10">десятый</term>
 
       <!-- CATEGORIES -->
-      <term name="anthropology">anthropology</term>
-      <term name="astronomy">astronomy</term>
-      <term name="biology">biology</term>
-      <term name="botany">botany</term>
-      <term name="chemistry">chemistry</term>
-      <term name="engineering">engineering</term>
-      <term name="generic-base">generic base</term>
-      <term name="geography">geography</term>
-      <term name="geology">geology</term>
-      <term name="history">history</term>
-      <term name="humanities">humanities</term>
-      <term name="linguistics">linguistics</term>
-      <term name="literature">literature</term>
-      <term name="math">math</term>
-      <term name="medicine">medicine</term>
-      <term name="philosophy">philosophy</term>
-      <term name="physics">physics</term>
-      <term name="psychology">psychology</term>
-      <term name="sociology">sociology</term>
-      <term name="science">science</term>
-      <term name="political_science">political science</term>
-      <term name="social_science">social science</term>
-      <term name="theology">theology</term>
-      <term name="zoology">zoology</term>
+      <term name="anthropology">антропология</term>
+      <term name="astronomy">астрономия</term>
+      <term name="biology">биология</term>
+      <term name="botany">ботаника</term>
+      <term name="chemistry">химия</term>
+      <term name="engineering">инженерное дело</term>
+      <term name="generic-base">общий</term>
+      <term name="geography">география</term>
+      <term name="geology">геология</term>
+      <term name="history">история</term>
+      <term name="humanities">гуманитарные науки</term>
+      <term name="linguistics">лингвистика</term>
+      <term name="literature">литературоведение</term>
+      <term name="math">математика</term>
+      <term name="medicine">медицина</term>
+      <term name="philosophy">философия</term>
+      <term name="physics">физика</term>
+      <term name="psychology">психология</term>
+      <term name="sociology">социология</term>
+      <term name="science">естественные науки</term>
+      <term name="political_science">политические науки</term>
+      <term name="social_science">социальные науки</term>
+      <term name="theology">теология</term>
+      <term name="zoology">зоология</term>
 
       <!-- LONG LOCATOR FORMS -->
       <term name="book">
-         <single>book</single>
-         <multiple>books</multiple>
+         <single>книга</single>
+         <multiple>книги</multiple>
       </term>
       <term name="chapter">
-         <single>chapter</single>
-         <multiple>chapters</multiple>
+         <single>глава</single>
+         <multiple>главы</multiple>
       </term>
       <term name="column">
-         <single>column</single>
-         <multiple>columns</multiple>
+         <single>столбец</single>
+         <multiple>столбцы</multiple>
       </term>
       <term name="figure">
-         <single>figure</single>
-         <multiple>figures</multiple>
+         <single>рисунок</single>
+         <multiple>рисунки</multiple>
       </term>
       <term name="folio">
-         <single>folio</single>
-         <multiple>folios</multiple>
+         <single>лист</single>
+         <multiple>листы</multiple>
       </term>
       <term name="issue">
-         <single>number</single>
-         <multiple>numbers</multiple>
+         <single>выпуск</single>
+         <multiple>выпуски</multiple>
       </term>
       <term name="line">
-         <single>линия</single>
-         <multiple>линии</multiple>
+         <single>строка</single>
+         <multiple>строки</multiple>
       </term>
       <term name="note">
-         <single>note</single>
-         <multiple>notes</multiple>
+         <single>примечание</single>
+         <multiple>примечания</multiple>
       </term>
       <term name="opus">
-         <single>opus</single>
-         <multiple>opera</multiple>
+         <single>сочинение</single>
+         <multiple>сочинения</multiple>
       </term>
       <term name="page">
-         <single>страницы</single>
+         <single>страница</single>
          <multiple>страницы</multiple>
       </term>
       <term name="paragraph">
@@ -150,52 +152,52 @@
          <multiple>параграфы</multiple>
       </term>
       <term name="part">
-         <single>part</single>
-         <multiple>parts</multiple>
+         <single>часть</single>
+         <multiple>части</multiple>
       </term>
       <term name="section">
-         <single>section</single>
-         <multiple>sections</multiple>
+         <single>раздел</single>
+         <multiple>разделы</multiple>
       </term>
       <term name="sub verbo">
-         <single>sub verbo</single>
-         <multiple>sub verbis</multiple>
+         <single>смотри</single>
+         <multiple>смотри</multiple>
       </term>
       <term name="verse">
-         <single>verse</single>
-         <multiple>verses</multiple>
+         <single>стих</single>
+         <multiple>стихи</multiple>
       </term>
       <term name="volume">
-         <single>volume</single>
-         <multiple>volumes</multiple>
+         <single>том</single>
+         <multiple>тома</multiple>
       </term>
 
       <!-- SHORT LOCATOR FORMS -->
-      <term name="book" form="short">bk</term>
-      <term name="chapter" form="short">chap</term>
-      <term name="column" form="short">col</term>
-      <term name="figure" form="short">fig</term>
-      <term name="folio" form="short">f</term>
-      <term name="issue" form="short">ном</term>
-      <term name="opus" form="short">op</term>
+      <term name="book" form="short">кн.</term>
+      <term name="chapter" form="short">гл.</term>
+      <term name="column" form="short">стб.</term>
+      <term name="figure" form="short">рис.</term>
+      <term name="folio" form="short">л.</term>
+      <term name="issue" form="short">№</term>
+      <term name="opus" form="short">соч.</term>
       <term name="page" form="short">
-         <single>стр-а</single>
-         <multiple>стр-ы</multiple>
+         <single>с.</single>
+         <multiple>с.</multiple>
       </term>
-      <term name="paragraph" form="short">para</term>
-      <term name="part" form="short">pt</term>
-      <term name="section" form="short">sec</term>
+      <term name="paragraph" form="short">пара.</term>
+      <term name="part" form="short">ч.</term>
+      <term name="section" form="short">разд.</term>
       <term name="sub verbo" form="short">
-         <single>s.v.</single>
-         <multiple>s.vv.</multiple>
+         <single>см.</single>
+         <multiple>см.</multiple>
       </term>
       <term name="verse" form="short">
-         <single>v</single>
-         <multiple>vv</multiple>
+         <single>ст.</single>
+         <multiple>ст.</multiple>
       </term>
       <term name="volume" form="short">
-         <single>vol</single>
-         <multiple>vols</multiple>
+         <single>т.</single>
+         <multiple>тт.</multiple>
       </term>
 
       <!-- SYMBOL LOCATOR FORMS -->
@@ -218,16 +220,16 @@
          <multiple>редакторы</multiple>
       </term>
       <term name="editorial-director">
-         <single>editor</single>
-         <multiple>editors</multiple>
+         <single>ответственный редактор</single>
+         <multiple>ответственные редакторы</multiple>
       </term>
       <term name="translator">
          <single>переводчик</single>
          <multiple>переводчики</multiple>
       </term>
       <term name="editortranslator">
-         <single>editor &amp; translator</single>
-         <multiple>editors &amp; translators</multiple>
+         <single>редактор и переводчик</single>
+         <multiple>редакторы и переводчики</multiple>
       </term>
 
       <!-- SHORT ROLE FORMS -->
@@ -236,69 +238,69 @@
          <multiple/>
       </term>
       <term name="editor" form="short">
-         <single>ред-р</single>
-         <multiple>ред-ры</multiple>
+         <single>ред.</single>
+         <multiple>ред.</multiple>
       </term>
       <term name="editorial-director" form="short">
-         <single>ed.</single>
-         <multiple>eds.</multiple>
+         <single>отв. ред.</single>
+         <multiple>отв. ред.</multiple>
       </term>
       <term name="translator" form="short">
-         <single>перев-к</single>
-         <multiple>перев-и</multiple>
+         <single>перев.</single>
+         <multiple>перев.</multiple>
       </term>
       <term name="editortranslator" form="short">
-         <single>ed. &amp; tran.</single>
-         <multiple>eds. &amp; trans.</multiple>
+         <single>ред. и перев.</single>
+         <multiple>ред. и перев.</multiple>
       </term>
 
       <!-- VERB ROLE FORMS -->
       <term name="editor" form="verb">отредактировано</term>
-      <term name="editorial-director" form="verb">edited by</term>
+      <term name="editorial-director" form="verb">отредактировано</term>
       <term name="translator" form="verb">переведено</term>
-      <term name="editortranslator" form="verb">edited &amp; translated by</term>
-      <term name="recipient" form="verb">to</term>
-      <term name="interviewer" form="verb">interview by</term>
+      <term name="editortranslator" form="verb">отредактировано и переведено</term>
+      <term name="recipient" form="verb">к</term>
+      <term name="interviewer" form="verb">интервью</term>
 
       <!-- SHORT VERB ROLE FORMS -->
-      <term name="container-author" form="verb-short">by</term>
-      <term name="editor" form="verb-short">ред</term>
-      <term name="editorial-director" form="verb-short">ed.</term>
-      <term name="translator" form="verb-short">перев</term>
-      <term name="editortranslator" form="verb-short">ed. &amp; trans. by</term>
+      <term name="container-author" form="verb-short" />
+      <term name="editor" form="verb-short">ред.</term>
+      <term name="editorial-director" form="verb-short">отв. ред.</term>
+      <term name="translator" form="verb-short">перев.</term>
+      <term name="editortranslator" form="verb-short">ред. и перев.</term>
 
       <!-- LONG MONTH FORMS -->
-      <term name="month-01">Январь</term>
-      <term name="month-02">Февраль</term>
-      <term name="month-03">Март</term>
-      <term name="month-04">Апрель</term>
-      <term name="month-05">Май</term>
-      <term name="month-06">Июнь</term>
-      <term name="month-07">Июль</term>
-      <term name="month-08">Август</term>
-      <term name="month-09">Сентябрь</term>
-      <term name="month-10">Октябрь</term>
-      <term name="month-11">Ноябрь</term>
-      <term name="month-12">Декабрь</term>
+      <term name="month-01">январь</term>
+      <term name="month-02">февраль</term>
+      <term name="month-03">март</term>
+      <term name="month-04">апрель</term>
+      <term name="month-05">май</term>
+      <term name="month-06">июнь</term>
+      <term name="month-07">июль</term>
+      <term name="month-08">август</term>
+      <term name="month-09">сентябрь</term>
+      <term name="month-10">октябрь</term>
+      <term name="month-11">ноябрь</term>
+      <term name="month-12">декабрь</term>
 
       <!-- SHORT MONTH FORMS -->
-      <term name="month-01" form="short">Янв</term>
-      <term name="month-02" form="short">Фев</term>
-      <term name="month-03" form="short">Мар</term>
-      <term name="month-04" form="short">Апр</term>
-      <term name="month-05" form="short">Май</term>
-      <term name="month-06" form="short">Июн</term>
-      <term name="month-07" form="short">Июл</term>
-      <term name="month-08" form="short">Авг</term>
-      <term name="month-09" form="short">Сен</term>
-      <term name="month-10" form="short">Окт</term>
-      <term name="month-11" form="short">Ноя</term>
-      <term name="month-12" form="short">Дек</term>
+      <term name="month-01" form="short">янв.</term>
+      <term name="month-02" form="short">фев.</term>
+      <term name="month-03" form="short">мар.</term>
+      <term name="month-04" form="short">апр.</term>
+      <term name="month-05" form="short">май</term>
+      <term name="month-06" form="short">июн.</term>
+      <term name="month-07" form="short">июл.</term>
+      <term name="month-08" form="short">авг.</term>
+      <term name="month-09" form="short">сен.</term>
+      <term name="month-10" form="short">окт.</term>
+      <term name="month-11" form="short">ноя.</term>
+      <term name="month-12" form="short">дек.</term>
 
       <!-- SEASONS -->
-      <term name="season-01">Spring</term>
-      <term name="season-02">Summer</term>
-      <term name="season-03">Autumn</term>
-      <term name="season-04">Winter</term>
+      <term name="season-01">весна</term>
+      <term name="season-02">лета</term>
+      <term name="season-03">осень</term>
+      <term name="season-04">зима</term>
    </terms>
 </locale>
