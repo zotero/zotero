@@ -917,7 +917,6 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 				}
 			} else if(fieldCode == "TEMP") {
 				if(newField) {
-					Zotero.debug("Edit Field index "+i);
 					editFieldIndex = i;
 					editField = field;
 				} else {
@@ -996,7 +995,6 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 	this._session.updateUpdateIndices(forceCitations);
 	var deleteCitations = this._session.updateCitations();
 	this._deleteFields = this._deleteFields.concat([i for(i in deleteCitations)]);
-	Zotero.debug(this._session.updateIndices);
 	for(var i in this._session.updateIndices) {
 		var citation = this._session.citationsByIndex[i];
 		if(!citation || deleteCitations[i]) continue;
