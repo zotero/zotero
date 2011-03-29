@@ -55,6 +55,8 @@
       <term name="bc">π.Χ.</term>
 
       <!-- QUOTES -->
+	  <!-- http://en.wikipedia.org/wiki/Non-English_usage_of_quotation_marks differs,
+           but the characters below are directly from a Greek-speaking style author -->
       <term name="open-quote">‘</term>
       <term name="close-quote">’</term>
       <term name="open-inner-quote">'</term>
