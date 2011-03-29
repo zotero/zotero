@@ -1739,7 +1739,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.134";
+	this.processor_version = "1.0.135";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3663,6 +3663,8 @@ CSL.Node["date-part"] = {
 					state.tmp.has_done_year_suffix = true;
 					num = parseInt(state.registry.registry[Item.id].disambig.year_suffix, 10);
 					number = new CSL.NumericBlob(num, this);
+					this.successor_prefix = state[state.build.area].opt.layout_delimiter;
+					this.splice_prefix = state[state.build.area].opt.layout_delimiter;
 					formatter = new CSL.Util.Suffixator(CSL.SUFFIX_CHARS);
 					number.setFormatter(formatter);
 					if (state[state.tmp.area].opt.collapse === "year-suffix-ranged") {
