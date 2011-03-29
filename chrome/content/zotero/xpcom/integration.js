@@ -1745,7 +1745,7 @@ Zotero.Integration.Session.prototype.formatCitation = function(index, citation) 
 	if(!this.citationText[index]) {
 		var citationsPre, citationsPost, citationIndices;
 		[citationsPre, citationsPost, citationIndices] = this._getPrePost(index);
-		if(Zotero.debug.enabled) {
+		if(Zotero.Debug.enabled) {
 			Zotero.debug("Integration: style.processCitationCluster("+citation.toSource()+", "+citationsPre.toSource()+", "+citationsPost.toSource());
 		}
 		var newCitations = this.style.processCitationCluster(citation, citationsPre, citationsPost);
