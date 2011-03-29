@@ -916,7 +916,7 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 					bibliographyData = fieldCode.substr(BIBLIOGRAPHY_CODE.length+1);
 				}
 			} else if(fieldCode == "TEMP") {
-				if(newField) {
+				if(newField && newField.equals(field)) {
 					editFieldIndex = i;
 					editField = field;
 				} else {
@@ -1082,7 +1082,7 @@ Zotero.Integration.Document.prototype.addCitation = function() {
 	if(!field) return;
 	field.setCode("TEMP");
 	
-	this._updateSession(true);
+	this._updateSession(field);
 	this._updateDocument();
 }
 	
