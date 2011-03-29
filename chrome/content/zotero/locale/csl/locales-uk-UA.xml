@@ -55,8 +55,10 @@
       <term name="bc">BC</term>
 
       <!-- QUOTES -->
-      <term name="open-quote">“</term>
-      <term name="close-quote">”</term>
+	  <!-- Source: http://en.wikipedia.org/wiki/Non-English_usage_of_quotation_marks -->
+      <!-- (Single quote added without authority) -->
+      <term name="open-quote">«</term>
+      <term name="close-quote">»</term>
       <term name="open-inner-quote">‘</term>
       <term name="close-inner-quote">’</term>
 
