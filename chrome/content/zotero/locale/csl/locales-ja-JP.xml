@@ -3,13 +3,13 @@
    <style-options punctuation-in-quote="false"/>
    <date form="text">
       <date-part name="year" suffix="&#24180;"/>
-      <date-part name="month" form="numeric" prefix=" " suffix="&#26376;"/>
-      <date-part name="day" prefix=" " suffix="&#26085;"/>
+      <date-part name="month" form="numeric" suffix="&#26376;"/>
+      <date-part name="day" suffix="&#26085;"/>
    </date>
    <date form="numeric">
       <date-part name="year" suffix="&#24180;"/>
-      <date-part name="month" form="numeric" prefix=" " suffix="&#26376;"/>
-      <date-part name="day" prefix=" " suffix="&#26085;"/>
+      <date-part name="month" form="numeric" suffix="&#26376;"/>
+      <date-part name="day" suffix="&#26085;"/>
    </date>
    <terms>
       <term name="accessed">アクセス</term>
