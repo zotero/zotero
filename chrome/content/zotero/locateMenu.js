@@ -365,8 +365,8 @@ var Zotero_LocateMenu = new function() {
 				var uri;
 				try {
 					uri = Zotero_LocateMenu.ios.newURI(urlField, null, null);
+					if(uri && uri.host && uri.scheme !== 'file') return urlField;
 				} catch(e) {};
-				if(uri && uri.host && uri.scheme !== 'file') return urlField;
 			}
 			
 			if(item.isRegularItem()) {
