@@ -159,8 +159,7 @@ Zotero.Utilities = {
 		if (singleNewlineIsParagraph) {
 			str = '<p>'
 					+ str.replace(/\n/g, '</p><p>')
-						.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
-						.replace(/  /g, '&nbsp;&nbsp;')
+						.replace(/  /g, '&nbsp; ')
 				+ '</p>';
 		}
 		// \n\n => <p>, \n => <br/>
@@ -169,8 +168,7 @@ Zotero.Utilities = {
 			str = '<p>'
 					+ str.replace(/\n\n/g, '</p><p>')
 						.replace(/\n/g, '<br/>')
-						.replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
-						.replace(/  /g, '&nbsp;&nbsp;')
+						.replace(/  /g, '&nbsp; ')
 				+ '</p>';
 		}
 		return str.replace(/<p>\s*<\/p>/g, '<p>&nbsp;</p>');
