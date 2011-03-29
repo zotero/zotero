@@ -3679,21 +3679,42 @@ Zotero.Item.prototype.diff = function (item, includeMatches, ignoreFields) {
 	}
 	
 	if (thisData.note != undefined) {
-		// replace() keeps Windows newlines from triggering erroneous conflicts,
-		// though this should really be fixed at the data layer level
+		// Whitespace normalization
 		//
-		// Using a try/catch to avoid unexpected errors in 2.1 Final
+		// Ideally this would all be fixed elsewhere so we didn't have to
+		// convert on every sync diff
+		//
+		// TEMP: Using a try/catch to avoid unexpected errors in 2.1 releases
 		try {
-			changed = thisData.note.replace(/\r\n/g, "\n") != otherData.note.replace(/\r\n/g, "\n");
+			var thisNote = thisData.note;
+			var otherNote = otherData.note;
+			
+			// Stop Windows newlines from triggering erroneous conflicts
+			thisNote = thisNote.replace(/\r\n/g, "\n");
+			otherNote = otherNote.replace(/\r\n/g, "\n");
+			
+			// Normalize multiple spaces (due to differences TinyMCE, Z.U.text2html(),
+			// and the server)
+			var re = /(&nbsp; |&nbsp;&nbsp;|\u00a0 |\u00a0\u00a0)/g;
+			thisNote = thisNote.replace(re, "  ");
+			otherNote = otherNote.replace(re, "  ");
+			
+			// Normalize new paragraphs
+			var re = /<p>(&nbsp;|\u00a0)<\/p>/g;
+			thisNote = thisNote.replace(re, "<p> </p>");
+			otherNote = otherNote.replace(re, "<p> </p>");
+			
+			changed = thisNote != otherNote;
 		}
 		catch (e) {
 			Zotero.debug(e);
 			Components.utils.reportError(e);
-			changed = thisData.note != otherData.note;
+			changed = thisNote != otherNote;
 		}
+		
 		if (includeMatches || changed) {
-			diff[0].note = thisData.note;
-			diff[1].note = otherData.note;
+			diff[0].note = thisNote;
+			diff[1].note = otherNote;
 		}
 		
 		if (changed) {
