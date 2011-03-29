@@ -996,12 +996,12 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 	var deleteCitations = this._session.updateCitations();
 	this._deleteFields = this._deleteFields.concat([i for(i in deleteCitations)]);
 	for(var i in this._session.updateIndices) {
-		citation = this._session.citationsByIndex[i];
+		var citation = this._session.citationsByIndex[i];
 		if(!citation || deleteCitations[i]) continue;
 		
 		var fieldCode = this._session.getCitationField(citation);
 		if(fieldCode != citation.properties.field) {
-			this._fields[citation.properties.index].setCode(ITEM_CODE+" "+fieldCode);
+			this._fields[i].setCode(ITEM_CODE+" "+fieldCode);
 		}
 		
 		if(citation.properties.custom) {
@@ -1012,10 +1012,10 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 		
 		if(citationText.indexOf("\\") !== -1) {
 			// need to set text as RTF
-			this._fields[citation.properties.index].setText("{\\rtf "+citationText+"}", true);
+			this._fields[i].setText("{\\rtf "+citationText+"}", true);
 		} else {
 			// set text as plain
-			this._fields[citation.properties.index].setText(citationText, false);
+			this._fields[i].setText(citationText, false);
 		}
 	}
 	
@@ -1493,7 +1493,7 @@ Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, ar
 	}
 	
 	citation.properties.added = true;
-	citation.properties.index = index;
+	citation.properties.zoteroIndex = index;
 	citation.properties.noteIndex = noteIndex;
 	this.citationsByIndex[index] = citation;
 	
@@ -1505,12 +1505,12 @@ Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, ar
 			this.bibliographyHasChanged = true;
 		} else {
 			var byItemID = this.citationsByItemID[citationItem.id];
-			if(byItemID[byItemID.length-1].properties.index < index) {
+			if(byItemID[byItemID.length-1].properties.zoteroIndex < index) {
 				// if index is greater than the last index, add to end
 				byItemID.push(citation);
 			} else {
 				// otherwise, splice in at appropriate location
-				for(var j=0; byItemID[j].properties.index < index && j<byItemID.length-1; j++) {}
+				for(var j=0; byItemID[j].properties.zoteroIndex < index && j<byItemID.length-1; j++) {}
 				byItemID.splice(j++, 0, citation);
 			}
 		}
@@ -1708,7 +1708,7 @@ Zotero.Integration.Session.prototype.updateUpdateIndices = function(regenerateAl
 		for(var i in this.updateItemIDs) {
 			if(this.citationsByItemID[i] && this.citationsByItemID[i].length) {
 				for(var j=0; j<this.citationsByItemID[i].length; j++) {
-					this.updateIndices[this.citationsByItemID[i][j].properties.index] = true;
+					this.updateIndices[this.citationsByItemID[i][j].properties.zoteroIndex] = true;
 				}
 			}
 		}
@@ -1745,7 +1745,7 @@ Zotero.Integration.Session.prototype.formatCitation = function(index, citation) 
 	if(!this.citationText[index]) {
 		var citationsPre, citationsPost, citationIndices;
 		[citationsPre, citationsPost, citationIndices] = this._getPrePost(index);
-		if(Zotero.debug.enabled) {
+		if(Zotero.Debug.enabled) {
 			Zotero.debug("Integration: style.processCitationCluster("+citation.toSource()+", "+citationsPre.toSource()+", "+citationsPost.toSource());
 		}
 		var newCitations = this.style.processCitationCluster(citation, citationsPre, citationsPost);
@@ -1959,7 +1959,7 @@ Zotero.Integration.Session.prototype.getBibliographyData = function() {
  */
 Zotero.Integration.Session.prototype.previewCitation = function(citation) {
 	var citationsPre, citationsPost, citationIndices;
-	[citationsPre, citationsPost, citationIndices] = this._getPrePost(citation.properties.index);
+	[citationsPre, citationsPost, citationIndices] = this._getPrePost(citation.properties.zoteroIndex);
 	try {
 		return this.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
 	} catch(e) {
@@ -1994,7 +1994,7 @@ Zotero.Integration.Session.prototype.editCitation = function(index, noteIndex, c
 	
 	// create object to hold citation
 	io.citation = (citation ? Zotero.JSON.unserialize(Zotero.JSON.serialize(citation)) : {"citationItems":{}, "properties":{}});
-	io.citation.properties.index = parseInt(index, 10);
+	io.citation.properties.zoteroIndex = parseInt(index, 10);
 	io.citation.properties.noteIndex = parseInt(noteIndex, 10);
 	// assign preview function
 	io.previewFunction = function() {
