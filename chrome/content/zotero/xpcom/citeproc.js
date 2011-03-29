@@ -465,6 +465,44 @@ CSL_E4X.prototype.addInstitutionNodes = function(myxml) {
 		}
 	}
 };
+CSL.getSortCompare = function () {
+	try {
+		var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
+			.getService(Components.interfaces.nsILocaleService);
+		var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
+			.getService(Components.interfaces.nsICollationFactory);
+		var collation = collationFactory.CreateCollation(localeService.getApplicationLocale());
+		var strcmp = function(a, b) {
+			return collation.compareString(1, a, b);
+		}
+		CSL.debug("XXX Using collation");
+	} catch (e) {
+		var strcmp = function (a, b) {
+			return a.localeCompare(b);
+		}
+	}
+	var isKana = /^[\u3040-\u309f\u30a0-\u30ff]/;
+	var sortCompare = function (a, b) {
+		var ak = isKana.exec(a);
+		var bk = isKana.exec(b);
+		if (ak || bk) {
+			if (!ak) {
+				return -1;
+			} else if (!bk) {
+				return 1;
+			} else if (a < b) {
+				return -1;
+			} else if (a > b) {
+				return 1;
+			} else {
+				return 0;
+			}
+		} else {
+			return strcmp(a, b);
+		}
+	}
+	return sortCompare;
+}
 CSL.Output = {};
 CSL.Output.Queue = function (state) {
 	this.levelname = ["top"];
@@ -1739,7 +1777,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.135";
+	this.processor_version = "1.0.136";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -8695,6 +8733,7 @@ CSL.Registry.prototype.sorttokens = function () {
 };
 CSL.Registry.Comparifier = function (state, keyset) {
 	var sort_directions, len, pos, compareKeys;
+	var sortCompare = CSL.getSortCompare();
 	sort_directions = state[keyset].opt.sort_directions;
     this.compareKeys = function (a, b) {
 		len = a.sortkeys.length;
@@ -8707,7 +8746,7 @@ CSL.Registry.Comparifier = function (state, keyset) {
 			} else if ("undefined" === typeof b.sortkeys[pos]) {
 				cmp = sort_directions[pos][0];
 			} else {
-				cmp = a.sortkeys[pos].localeCompare(b.sortkeys[pos]);
+				cmp = sortCompare(a.sortkeys[pos], b.sortkeys[pos]);
 			}
 			if (0 < cmp) {
 				return sort_directions[pos][1];
