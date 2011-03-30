@@ -405,6 +405,16 @@ var ZoteroPane = new function()
 			}, 1000);
 		}
 		
+		// Set sync icon to spinning or not
+		//
+		// We don't bother setting an error state at open
+		if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
+			Zotero.Sync.Runner.setSyncIcon('animate');
+		}
+		else {
+			Zotero.Sync.Runner.setSyncIcon();
+		}
+		
 		return true;
 	}
 	
