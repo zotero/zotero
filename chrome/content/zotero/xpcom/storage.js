@@ -1804,7 +1804,8 @@ Zotero.Sync.Storage.QueueManager = new function () {
 		var enumerator = wm.getEnumerator("navigator:browser");
 		while (enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
-			var doc = win.document;
+			if (!win.ZoteroPane) continue;
+			var doc = win.ZoteroPane.document;
 			
 			//
 			// TODO: Move to overlay.js?
