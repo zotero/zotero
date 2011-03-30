@@ -1585,10 +1585,7 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) 
 		// for upgrade from Zotero 2.0 or earlier
 		for each(var citationItem in citation.citationItems) {
 			if(citationItem.locatorType) {
-				const locatorTypeTerms = ["page", "book", "chapter", "column", "figure", "folio",
-					"issue", "line", "note", "opus", "paragraph", "part", "section", "sub verbo",
-					"volume", "verse"];
-				citationItem.label = locatorTypeTerms[citationItem.locatorType];
+				citationItem.label = citationItem.locatorType;
 				delete citationItem.locatorType;
 			} else if(citationItem.suppressAuthor) {
 				citationItem["suppress-author"] = citationItem["suppressAuthor"];
