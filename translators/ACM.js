@@ -8,7 +8,7 @@
 	"priority":100,
 	"inRepository":"1",
 	"translatorType":4,
-	"lastUpdated":"2011-02-24 23:30:00"
+	"lastUpdated":"2011-03-24 23:30:00"
 }
 
 /**
@@ -254,7 +254,7 @@ function scrapeAttachments(doc, url) {
 	attachments.push({title:"ACM Snapshot", mimeType:"text/html", url:url});
 	
 	//XPath for the full text links
-	var textPath = doc.evaluate('//a[@name="FullTextPdf" or @name="FullTextHtml" or @name="FullText Html"]', doc, null, XPathResult.ANY_TYPE, null);
+	var textPath = doc.evaluate('//a[@name="FullTextPdf" or @name="FullTextHtml" or @name="FullText Html"][not(ancestor::div[@class="flatbody"])]', doc, null, XPathResult.ANY_TYPE, null);
 	
 	var textNode;
 	//Iterate through all the links
