@@ -193,7 +193,7 @@ function scrape(doc,url)
 	// Abstracts don't seem to come with
 	if (!newItem.abstractNote) {
 		var abstractNode = doc.evaluate('//a[@name="Abstract"]/following-sibling::p[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		if (abstractNode) newItem.abstractNote = abstractNode.textContent;
+		if (abstractNode) newItem.abstractNote = Zotero.Utilities.trimInternal(abstractNode.textContent);
 	}
        newItem.complete();
 }
