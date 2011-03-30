@@ -431,7 +431,7 @@
           <xsl:copy-of select="@*[not(name()='include-period')]"/>
           <xsl:choose>
             <xsl:when
-              test="(@form='short' or @form='verb-short') and not(@include-period='true') and @term">
+              test="(@form='short' or @form='verb-short') and not(@include-period='true' or @term='no date') and @term">
               <xsl:attribute name="strip-periods">true</xsl:attribute>
             </xsl:when>
           </xsl:choose>
