@@ -361,7 +361,31 @@ Zotero.Utilities = {
 		}
 		return vals;
 	},
-
+	
+	/**
+	 * Return new array with duplicate values removed
+	 *
+	 * From the JSLab Standard Library (JSL)
+	 * Copyright 2007 - 2009 Tavs Dokkedahl
+	 * Contact: http://www.jslab.dk/contact.php
+	 *
+	 * @param	{Array}		array
+	 * @return	{Array}
+	 */
+	"arrayUnique":function(arr) {
+		var a = [];
+		var l = arr.length;
+		for(var i=0; i<l; i++) {
+			for(var j=i+1; j<l; j++) {
+				// If this[i] is found later in the array
+				if (arr[i] === arr[j])
+					j = ++i;
+			}
+			a.push(arr[i]);
+		}
+		return a;
+	},
+	
 	/**
 	 * Generate a random integer between min and max inclusive
 	 *
