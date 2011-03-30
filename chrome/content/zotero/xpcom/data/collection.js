@@ -534,6 +534,13 @@ Zotero.Collection.prototype.save = function () {
 			}
 			
 			if (newids.length) {
+				// TEMP: Remove duplicates, which shouldn't be necessary
+				var len1 = newids.length;
+				newids = Zotero.Utilities.arrayUnique(newids);
+				if (len1 != newids.length) {
+					Zotero.debug("newids was not unique in Zotero.Collection.save()", 2);
+				}
+				
 				var sql = "SELECT IFNULL(MAX(orderIndex)+1, 0) "
 					+ "FROM collectionItems WHERE collectionID=?"
 				var orderStatement = Zotero.DB.getStatement(sql);
