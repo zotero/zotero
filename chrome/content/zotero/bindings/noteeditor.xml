@@ -107,11 +107,15 @@
 				</setter>
 			</property>
 			
+			<field name="_mtime"/>
+			
 			<field name="_item"/>
 			<property name="item" onget="return this._item;">
 				<setter>
 					<![CDATA[
 						this._item = val;
+						// TODO: use clientDateModified instead
+						this._mtime = val.getField('dateModified');
 						
 						var parent = this.item.getSourceKey();
 						if (parent) {
@@ -216,6 +220,15 @@
 						
 						// Update note
 						if (this.item) {
+							// If note is reselected automatically after save
+							// from external note window, don't overwrite content
+							//
+							// TODO: use clientDateModified instead
+							if (this.item.getField('dateModified') != this._mtime) {
+								Zotero.debug("Note has already been changed", 4);
+								return;
+							}
+							
 							this.item.setNote(noteField.value);
 							if (this.saveOnEdit) {
 								this.item.save();
