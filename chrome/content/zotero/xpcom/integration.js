@@ -31,7 +31,7 @@ const DATA_VERSION = 3;
 // this is used only for update checking
 const INTEGRATION_PLUGINS = ["zoteroMacWordIntegration@zotero.org",
 	"zoteroOpenOfficeIntegration@zotero.org", "zoteroWinWordIntegration@zotero.org"];
-const INTEGRATION_MIN_VERSION = "3.1a0";
+const INTEGRATION_MIN_VERSIONS = ["3.1.2", "3.1b1", "3.1b1"];
 
 Zotero.Integration = new function() {
 	var _fifoFile = null;
@@ -41,7 +41,10 @@ Zotero.Integration = new function() {
 	var _integrationVersionsOK = null;
 	var _pipeMode = false;
 	var _winUser32;
+	
+	// these need to be global because of GC
 	var _timer;
+	var _updateTimer;
 	
 	this.sessions = {};
 	
@@ -127,6 +130,55 @@ Zotero.Integration = new function() {
 				.getService(Components.interfaces.nsIObserverService);
 			observerService.addObserver({ observe: Zotero.Integration.destroy }, "quit-application", false);
 		}
+		
+		_updateTimer = Components.classes["@mozilla.org/timer;1"].
+			createInstance(Components.interfaces.nsITimer);
+		_updateTimer.initWithCallback({"notify":_checkPluginVersions}, 1000,
+			Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+	}
+	
+	function _checkPluginVersions() {
+		if(_updateTimer) _updateTimer = undefined;
+		
+		var verComp = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
+			.getService(Components.interfaces.nsIVersionComparator);
+		var addonsChecked = false;
+		var success = true;
+		function _checkAddons(addons) {
+			addonsChecked = true;
+			for(var i in addons) {
+				var addon = addons[i];
+				if(!addon) continue;
+				if(addon.userDisabled) continue;
+				
+				if(verComp.compare(INTEGRATION_MIN_VERSIONS[i], addon.version) > 0) {
+					_integrationVersionsOK = false;
+					Zotero.Integration.activate();
+					var msg = Zotero.getString(
+						"integration.error.incompatibleVersion2",
+						[Zotero.version, addon.name, INTEGRATION_MIN_VERSIONS[i]]
+					);
+					Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+						.getService(Components.interfaces.nsIPromptService)
+						.alert(null, Zotero.getString("integration.error.title"), msg);
+					success = false;
+					throw msg;
+				}
+			}
+			_integrationVersionsOK = true;
+		}
+	
+		if(Zotero.isFx4) {
+			Components.utils.import("resource://gre/modules/AddonManager.jsm");
+			AddonManager.getAddonsByIDs(INTEGRATION_PLUGINS, _checkAddons);
+			while(!addonsChecked) Zotero.mainThread.processNextEvent(true);
+		} else {
+			var extMan = Components.classes['@mozilla.org/extensions/manager;1'].
+				getService(Components.interfaces.nsIExtensionManager);
+			_checkAddons([extMan.getItemForID(id) for each(id in INTEGRATION_PLUGINS)]);
+		}
+		
+		return success;
 	}
 	
 	/**
@@ -141,44 +193,10 @@ Zotero.Integration = new function() {
 		_inProgress = true;
 		
 		// Check integration component versions
-		if(!_integrationVersionsOK) {
-			var verComp = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
-				.getService(Components.interfaces.nsIVersionComparator);
-			var addonsChecked = false;
-			function _checkAddons(addons) {
-				addonsChecked = true;
-				for each(var addon in addons) {
-					if(!addon) continue;
-				
-					if(verComp.compare(INTEGRATION_MIN_VERSION, addon.version) > 0) {
-						_inProgress = false;
-						_integrationVersionsOK = false;
-						Zotero.Integration.activate();
-						var msg = Zotero.getString(
-							"integration.error.incompatibleVersion2",
-							[Zotero.version, addon.name, INTEGRATION_MIN_VERSION]
-						);
-						Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-							.getService(Components.interfaces.nsIPromptService)
-							.alert(null, Zotero.getString("integration.error.title"), msg);
-						throw msg;
-					}
-				}
-				_integrationVersionsOK = true;
-				_callIntegration(agent, command, docId);
-			}
-		
-			if(Zotero.isFx4) {
-				Components.utils.import("resource://gre/modules/AddonManager.jsm");
-				AddonManager.getAddonsByIDs(INTEGRATION_PLUGINS, _checkAddons);
-				while(!addonsChecked) Zotero.mainThread.processNextEvent(true);
-			} else {
-				var extMan = Components.classes['@mozilla.org/extensions/manager;1'].
-					getService(Components.interfaces.nsIExtensionManager);
-				_checkAddons([extMan.getItemForID(id) for each(id in INTEGRATION_PLUGINS)]);
-			}
-		} else {
+		if(_checkPluginVersions()) {
 			_callIntegration(agent, command, docId);
+		} else {
+			inProgress = false;
 		}
 	}
 	
