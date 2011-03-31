@@ -227,6 +227,18 @@ Zotero.Styles = new function() {
 			}
 		}
 		
+		// also look for an existing style with the same title
+		if(!existingFile) {
+			var styleTitle = xml.info.title.toString();
+			for each(var existingStyle in this.getAll()) {
+				if(styleTitle === existingStyle.title) {
+					existingFile = existingStyle.file;
+					existingTitle = existingStyle.title;
+					break;
+				}
+			}
+		}
+		
 		// display a dialog to tell the user we're about to install the style
 		if(hidden) {
 			destFile = destFileHidden;
