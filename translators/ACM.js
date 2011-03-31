@@ -80,7 +80,6 @@ function detectWeb(doc, url) {
  * @param url The URL of the page being scanned
  */
 function doWeb(doc, url) {
-	Zotero.debug("test do");
 	var nsResolver = getNsResolver(doc, url);
 	
 	//If there are multiple pages
@@ -145,6 +144,7 @@ function scrape(doc) {
 	var tags = scrapeKeywords(doc);
 	var attachments = scrapeAttachments(doc, url);
 	var abs = scrapeAbstract(doc);
+	// Type not used, since it was less reliable than BibTeX
 	var type = getArticleType(doc, url, nsResolver);
 	var journal = getText("//meta[@name='citation_journal_title']/@content",doc, nsResolver);	
 	//Get the bibtex reference for this document as a string
@@ -163,7 +163,9 @@ function scrape(doc) {
 		if(abs) newItem.abstractNote = abs;
 		newItem.tags = tags;
 		newItem.attachments = attachments;
-		newItem.itemType= type;
+		// There were issues with grabbing type from the page;
+		// see http://forums.zotero.org/discussion/17246/
+		//newItem.itemType= type;
 		if (journal && journal != newItem.publicationTitle) {
 			newItem.journalAbbreviation = newItem.publicationTitle;
 			newItem.publicationTitle = journal;
@@ -283,7 +285,7 @@ function scrapeAttachments(doc, url) {
 function scrapeAbstract(doc) {
 	Zotero.debug("Scraping abstract");
 	var text = getText('//div[@class="flatbody" or @class="tabbody"]', doc);
-	return text;
+	return Zotero.Utilities.trimInternal(text);
 }
 
 /**
@@ -312,7 +314,6 @@ function scrapeBibtex(url, nsResolver) {
 		Zotero.debug("\nref : " + (ref == null ? "null":ref));
 		ref = Zotero.Utilities.trimInternal(ref);
 		ref = Zotero.Utilities.trim(ref);
-		
 		return ref;
 	}
 	return null;
