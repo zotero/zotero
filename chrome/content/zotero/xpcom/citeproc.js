@@ -90,7 +90,7 @@ var CSL = {
 	CITE_FIELDS: ["first-reference-note-number", "locator"],
 	MINIMAL_NAME_FIELDS: ["literal", "family"],
 	SWAPPING_PUNCTUATION: [".", "!", "?", ":",",",";"],
-	TERMINAL_PUNCTUATION: [".", "!", "?", ":", " "],
+	TERMINAL_PUNCTUATION: [":", ".", "!", "?", " "],
 	SPLICE_PUNCTUATION: [".", "!", "?", ":", ";", ","],
 	NONE: 0,
 	NUMERIC: 1,
@@ -436,20 +436,22 @@ CSL_E4X.prototype.insertChildNodeAfter = function (parent,node,pos,datexml) {
 CSL_E4X.prototype.addInstitutionNodes = function(myxml) {
 	var institution_long, institution_short, name_part, children, node, xml;
 	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-	institution_long = <institution
-		institution-parts="long"
-		delimiter=", "
-		substitute-use-first="1"
-		use-last="1"/>
-	institution_part = <institution-part name="long"/>;
 	for each (node in myxml..names) {
 		if ("xml" == typeof node && node.elements("name").length() > 0) {
 			if (!node.institution.toString()) {
+				institution_long = <institution
+					institution-parts="long"
+					substitute-use-first="1"
+					use-last="1"/>
+				institution_part = <institution-part name="long"/>;
 				node.name += institution_long;
 				for each (var attr in CSL.INSTITUTION_KEYS) {
 					if (node.name.@[attr].toString()) {
 						node.institution.@[attr] = node.name.@[attr].toString();
 					}
+				}
+				if (node.name.@and.toString()) {
+					institution_long.@and = "text";
 				}
 				node.institution[0].appendChild(institution_part)
 				for each (var namepartnode in node.name['name-part']) {
@@ -951,7 +953,7 @@ CSL.Output.Queue.adjustPunctuation = function (state, myblobs, stk, finish) {
 		if (suffix) {
 			if (blob && 
 				TERMS.indexOf(myblobs.slice(-1)) > -1 &&
-				TERMS.indexOf(suffix) > -1 &&
+				TERMS.slice(1).indexOf(suffix) > -1 &&
 				blob.strings.suffix !== " ") {
 					blob.strings.suffix = blob.strings.suffix.slice(1);
 			}
@@ -1049,7 +1051,7 @@ CSL.Output.Queue.adjustPunctuation = function (state, myblobs, stk, finish) {
 			if (i === (myblobs.length - 1)) {
 				if (suffix) {
 					if (doblob.strings.suffix && 
-						 (TERMS.indexOf(suffix) > -1 &&
+						(TERMS.slice(1).indexOf(suffix) > -1 &&
 						  TERMS.indexOf(doblob.strings.suffix.slice(-1)) > -1)) {
 							blob.strings.suffix = blob.strings.suffix.slice(1);
 					}
@@ -1777,7 +1779,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.138";
+	this.processor_version = "1.0.140";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3474,7 +3476,9 @@ CSL.Node.date = {
 				state.tmp.donesies = [];
 				state.tmp.dateparts = [];
 				dp = [];
-				if (this.variables.length) {
+				if (this.variables.length
+					&& !(state.tmp.just_looking
+						 && this.variables[0] !== "issued")) {
 					state.parallel.StartVariable(this.variables[0]);
 					date_obj = Item[this.variables[0]];
 					if ("undefined" === typeof date_obj) {
@@ -3563,6 +3567,9 @@ CSL.Node["date-part"] = {
 		}
 		state.build.date_parts.push(this.strings.name);
 		func = function (state, Item) {
+			if (!state.tmp.date_object) {
+				return;
+			}
 			first_date = true;
 			value = "";
 			value_end = "";
@@ -5554,6 +5561,10 @@ CSL.Attributes["@variable"] = function (state, arg) {
 					} else if (variable === "container-title") {
 						variable = "journalAbbreviation";
 					}
+				}
+                if (variable === "year-suffix") {
+					output = true;
+					break;
 				}
 				if (CSL.DATE_VARIABLES.indexOf(variable) > -1) {
 					if (Item[variable] && Item[variable].raw) {
@@ -8311,6 +8322,15 @@ CSL.Output.Formatters.title = function (state, string) {
 		if (words[pos].length !== 0 && (words[pos].length !== 1 || !/\s+/.test(words[pos]))) {
 			upperCaseVariant = words[pos].toUpperCase();
 			lowerCaseVariant = words[pos].toLowerCase();
+			var totallyskip = false;
+			if (!isUpperCase || (words.length === 1 && words[pos].length < 4)) {
+				for (var j = 0, jlen = lowerCaseVariant.length; j < jlen; j += 1) {
+					if (lowerCaseVariant[j] !== upperCaseVariant[j] 
+						&& words[pos][j] === upperCaseVariant[j]) {
+						  totallyskip = true;
+					}
+				}
+			}
 			if (isUpperCase || words[pos] === lowerCaseVariant) {
 				skip = false;
 				len = CSL.SKIP_WORDS.length;
@@ -8331,10 +8351,12 @@ CSL.Output.Formatters.title = function (state, string) {
 				} else {
 					aftercolon = false;
 				}
-				if (skip && notfirst && notlast && (firstword || aftercolon)) {
-					words[pos] = lowerCaseVariant;
-				} else {
-					words[pos] = upperCaseVariant.slice(0, 1) + lowerCaseVariant.substr(1);
+				if (!totallyskip) {
+					if (skip && notfirst && notlast && (firstword || aftercolon)) {
+						words[pos] = lowerCaseVariant;
+					} else {
+						words[pos] = upperCaseVariant.slice(0, 1) + lowerCaseVariant.substr(1);
+					}
 				}
 			}
 			previousWordIndex = pos;
