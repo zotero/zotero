@@ -8,7 +8,7 @@
 	"priority":100,
 	"inRepository":"1",
 	"translatorType":4,
-	"lastUpdated":"2011-02-17 18:55:00"
+	"lastUpdated":"2011-04-01 22:08:33"
 }
 
  
@@ -85,7 +85,7 @@ function doWeb(doc, url) {
 	while (currTitleElmt = allTitlesElmts.iterateNext()) {
 		var title = currTitleElmt.textContent;
 		// Sometimes JSTOR uses DOIs as JID; here we exclude "?" characters, since it's a URL
-		if (/(?:pss|stable)\/(10\.\d+\/.+)(?:\?.*)?/.test(currTitleElmt.href))
+		if (/(?:pss|stable)\/(10\.\d+\/[^?]+)(?:\?.*)?/.test(currTitleElmt.href))
 			var jid = RegExp.$1;
 		else
 			var jid = currTitleElmt.href.match(/(?:stable|pss)\/([a-z]*?\d+)/)[1];
@@ -124,7 +124,7 @@ function doWeb(doc, url) {
 				if(item.notes && item.notes[0]) {
 					// For some reason JSTOR exports abstract with 'AB' tag istead of 'N1'
 					item.abstractNote = item.notes[0].note;
-					
+					item.abstractNote = item.abstractNote.replace(/^<p>ABSTRACT /,'').replace(/<\/p>$/,'');
 					delete item.notes;
 					item.notes = undefined;
 				}
@@ -138,7 +138,12 @@ function doWeb(doc, url) {
 					var pdfurl = "http://"+ host + "/stable/pdfplus/" + jid + ".pdf?acceptTC=true";
 					item.attachments.push({url:pdfurl, title:"JSTOR Full Text PDF", mimeType:"application/pdf"});
 				}
-				
+
+				var matches;
+				if (matches = item.ISSN.match(/([0-9]{4})([0-9]{3}[0-9Xx])/)) {
+					item.ISSN = matches[1] + '-' + matches[2];
+				}
+
 				set.item = item;
 				
 				next();
