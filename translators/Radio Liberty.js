@@ -8,12 +8,12 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2010-08-23 00:45:00"
+	"lastUpdated":"2011-04-01 00:45:00"
 }
 
 /*
    Radio Liberty Translator
-   Copyright (C) 2009-2010 Avram Lyon, ajlyon@gmail.com
+   Copyright (C) 2009-2011 Avram Lyon, ajlyon@gmail.com
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -59,8 +59,11 @@
 	Moldovan:	http://www.europalibera.org/ (Romanian)
 	Ukrainian:	http://www.radiosvoboda.org/
  
- This translator does not yet attempt to work with the audio and video files that Radio Liberty
+ This translator does not yet attempt to work with the video files that Radio Liberty
  hosts and produces; work with them must be left for a future revision.
+
+ It does try to save linked audio files for stories-- still nothing
+ for video content.
 
  Another future improvement would be the facility to import from the front page and subject
  pages. This is not yet possible.
@@ -201,7 +204,18 @@ function doWeb(doc, url){
 		*/
 		item.attachments.push({url:url, title: (item.publicationTitle + " Snapshot"), mimeType:"text/html"});
 
-		item.complete();
+		var listenLink = doc.evaluate('//li[@class="listenlink"]/a', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+		if (listenLink) {
+				Zotero.Utilities.doGet(listenLink.href, addAudio, null);
+		} else item.complete();
+
 	}, function() {Zotero.done();});
 	Zotero.wait();
+}
+
+function addAudio(text) {
+	// http://realaudio.rferl.org/TB/2011/03/29/20110329-183936-TB-clip.mp3
+	var audio = text.match(/http:\/\/realaudio\.rferl\.org[^"]*\.mp3/);
+	if (audio) item.attachments.push({url:audio[0], mimeType:"application/octet-stream", title:"RFE/RL Audio"})
+	item.complete();
 }
