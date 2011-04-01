@@ -1437,7 +1437,10 @@ Zotero.Schema = new function(){
 		
 		for each(var attr in ["configOptions", "displayOptions"]) {
 			try {
-				metadata[attr] = JSON.parse(xmlnode.getAttribute(attr));
+				var tags = xmlnode.getElementsByTagName(attr);
+				if(tags.length && tags[0].firstChild) {
+					metadata[attr] = JSON.parse(tags[0].firstChild.nodeValue);
+				}
 			} catch(e) {
 				Zotero.logError("Invalid JSON for "+attr+" in new version of "+metadata.label+" ("+translatorID+") from repository");
 				return;
