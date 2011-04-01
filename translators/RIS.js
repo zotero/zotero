@@ -4,7 +4,7 @@
 	"label":"RIS",
 	"creator":"Simon Kornblith",
 	"target":"ris",
-	"minVersion":"2.1b6",
+	"minVersion":"2.1.3",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
@@ -368,8 +368,6 @@ function completeItem(item) {
 	if(item.journalAbbreviation && !item.publicationTitle){
 		item.publicationTitle = item.journalAbbreviation;
 	}
-	// hack for Zotero 2.1.1 bug (fixed in 2.1.2)
-	for each(var attachment in item.attachments) attachment.itemType = "attachment";
 	item.complete();
 }
 
