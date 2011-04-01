@@ -4,7 +4,7 @@
 	"label":"BibTeX",
 	"creator":"Simon Kornblith and Richard Karnesky",
 	"target":"bib",
-	"minVersion":"1.0.0b4.r1",
+	"minVersion":"2.1.3",
 	"maxVersion":"",
 	"priority":200,
 	"configOptions":{"dataMode":"block"},
@@ -1536,6 +1536,7 @@ var strings = {};
 var keyRe = /[a-zA-Z0-9\-]/;
 
 function processField(item, field, value) {
+	if(Zotero.Utilities.trim(value) == '') return null;
 	if(fieldMap[field]) {
 		item[fieldMap[field]] = value;
 	} else if(inputFieldMap[field]) {
@@ -1786,8 +1787,6 @@ function beginRecord(type, closeChar) {
 		} else if(read == closeChar) {
 			if(item) {
 				if(item.extra) item.extra = item.extra.substr(1); // chop \n
-				// hack for Zotero 2.1.1 bug (fixed in 2.1.2)
-				for each(var attachment in item.attachments) attachment.itemType = "attachment";
 				item.complete();
 			}
 			return;

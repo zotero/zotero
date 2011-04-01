@@ -3,7 +3,7 @@
         "label": "Readability",
         "creator": "Avram Lyon",
         "target": "^https?://www\\.readability\\.com/articles",
-        "minVersion": "1.0",
+        "minVersion": "2.1.3",
         "maxVersion": "",
         "priority": 100,
         "inRepository": "0",
@@ -74,7 +74,6 @@ function doWeb(doc, url){
 	if(time) item.date = time.textContent;
 
 	// We snapshot the page, using the existing document
-	// TODO Eliminate the itemType:"attachment" when Z 2.1.2 is released
-	item.attachments = [{itemType:"attachment", document:doc, title:"Readability Snapshot"}]
+	item.attachments = [{document:doc, title:"Readability Snapshot"}]
 	item.complete();
 }
