@@ -73,6 +73,9 @@ function doWeb(doc, url) {
 				} else if (field == "TI") {
 					item.title = content;
 				} else if (field == "SO") {
+					// People say ISI is bad about being all-caps; let's try this for now
+					// http://forums.zotero.org/discussion/17316
+					if (content.toUpperCase() == content) Zotero.Utilities.capitalizeTitle(content.toLowerCase(), true);
 					item.publicationTitle = content;
 				} else if (field == "SN") {
 					item.ISSN = content;
