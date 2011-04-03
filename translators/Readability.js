@@ -8,7 +8,7 @@
         "priority": 100,
         "inRepository": "0",
         "translatorType": 4,
-        "lastUpdated": "2011-03-26 17:16:55"
+        "lastUpdated": "2011-04-03 17:16:55"
 }
 
 /*
@@ -64,6 +64,9 @@ function doWeb(doc, url){
 	if (author) {
 		var auts = author.textContent.split(" and ");
 		for (var i in auts) {
+			if(auts[i].toUpperCase() == auts[i]) {
+				auts[i] = Zotero.Utilities.capitalizeTitle(auts[i].toLowerCase(), true)
+			}
 			item.creators.push(Zotero.Utilities.cleanAuthor(auts[i],"author"));
 		}
 	}
