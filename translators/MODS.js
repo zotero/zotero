@@ -10,7 +10,7 @@
 	"configOptions":{"dataMode":"xml/e4x"},
 	"displayOptions":{"exportNotes":true},
 	"inRepository":true,
-	"lastUpdated":"2011-02-03 07:00:12"
+	"lastUpdated":"2011-02-04 15:00:05"
 }
 
 function detectImport() {
@@ -713,7 +713,7 @@ function doImport() {
 			if (url.@access == "raw object") {
 				var filetitle;
 				if (url.@displayLabel){
-					filetitle = url.@displayLabel;
+					filetitle = url.@displayLabel.toString();
 				} else {
 					filetitle = "Attachment";
 				}
