@@ -105,14 +105,13 @@ function addIdentifier(identifier, item) {
 	}
 }
 
-function scrape(doc,url)
-{
+function scrape(doc,url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
        
-	var newItem=new Zotero.Item("journalArticle");
+       var newItem=new Zotero.Item("journalArticle");
        var temp;
        var xpath;
        var row;
@@ -183,8 +182,6 @@ function scrape(doc,url)
 				Zotero.debug("Ignoring meta tag: " + tag + " => " + value);
 		}
 	}
-	
-	if (pdf) newItem.attachments = [{url:pdf, title:"IEEE Xplore Full Text PDF", mimeType:"application/pdf"}];
 	if (html) newItem.attachments = [{url:html, title:"IEEE Xplore Full Text HTML"}];
 	
 	if (pages[0] && pages[1]) newItem.pages = pages.join('-')
@@ -195,7 +192,21 @@ function scrape(doc,url)
 		var abstractNode = doc.evaluate('//a[@name="Abstract"]/following-sibling::p[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if (abstractNode) newItem.abstractNote = Zotero.Utilities.trimInternal(abstractNode.textContent);
 	}
-       newItem.complete();
+	
+	if (pdf) {
+		Zotero.Utilities.processDocuments([pdf], function (doc, url) {
+				var namespace = doc.documentElement.namespaceURI;
+				var nsResolver = namespace ? function(prefix) {
+				if (prefix == 'x') return namespace; else return null;
+				} : null;
+
+				var pdfFrame = doc.evaluate('//frame[2]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				if (pdfFrame) newItem.attachments = [{url:pdfFrame.src, title:"IEEE Xplore Full Text PDF", mimeType:"application/pdf"}];
+				newItem.complete();
+		}, null);
+        } else {
+		newItem.complete();
+	}
 }
 
 // Implementation of ISBN and ISSN check-digit verification
