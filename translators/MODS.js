@@ -10,7 +10,7 @@
 	"configOptions":{"dataMode":"xml/e4x"},
 	"displayOptions":{"exportNotes":true},
 	"inRepository":true,
-	"lastUpdated":"2011-02-04 15:00:05"
+	"lastUpdated":"2011-04-04 16:00:00"
 }
 
 function detectImport() {
