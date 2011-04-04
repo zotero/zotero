@@ -81,6 +81,8 @@ Zotero.Translate.ItemSaver.prototype = {
 			this._timer = Components.classes["@mozilla.org/timer;1"].
 				createInstance(Components.interfaces.nsITimer);
 			this._timer.initWithCallback(this, 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+			
+			Zotero.showZoteroPaneProgressMeter(Zotero.getString("ingester.scraping"), false);
 		}
 		
 		// Get typeID, defaulting to "webpage"
@@ -522,6 +524,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		}
 		
 		Zotero.debug("Translate: Closing transaction");
+		Zotero.hideZoteroPaneOverlay();
 		Zotero.DB.commitTransaction();
 	}
 }
