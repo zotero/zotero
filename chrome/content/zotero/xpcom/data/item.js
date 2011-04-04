@@ -3679,7 +3679,7 @@ Zotero.Item.prototype.diff = function (item, includeMatches, ignoreFields) {
 	}
 	
 	if (thisData.note != undefined) {
-		// Whitespace normalization
+		// Whitespace and entity normalization
 		//
 		// Ideally this would all be fixed elsewhere so we didn't have to
 		// convert on every sync diff
@@ -3703,6 +3703,18 @@ Zotero.Item.prototype.diff = function (item, includeMatches, ignoreFields) {
 			var re = /<p>(&nbsp;|\u00a0)<\/p>/g;
 			thisNote = thisNote.replace(re, "<p> </p>");
 			otherNote = otherNote.replace(re, "<p> </p>");
+			
+			// Unencode XML entities
+			thisNote = thisNote.replace(/&amp;/g, "&");
+			otherNote = otherNote.replace(/&amp;/g, "&");
+			thisNote = thisNote.replace(/&apos;/g, "'");
+			otherNote = otherNote.replace(/&apos;/g, "'");
+			thisNote = thisNote.replace(/&quot;/g, '"');
+			otherNote = otherNote.replace(/&quot;/g, '"');
+			thisNote = thisNote.replace(/&lt;/g, "<");
+			otherNote = otherNote.replace(/&lt;/g, "<");
+			thisNote = thisNote.replace(/&gt;/g, ">");
+			otherNote = otherNote.replace(/&gt;/g, ">");
 			
 			changed = thisNote != otherNote;
 		}
