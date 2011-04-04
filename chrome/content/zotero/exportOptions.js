@@ -52,6 +52,7 @@ var Zotero_File_Interface_Export = new function() {
 		var addedOptions = new Object();
 		
 		var translators = window.arguments[0].translators;
+		translators.sort(function(a, b) { return a.label.localeCompare(b.label) });
 		
 		// get format popup
 		var formatPopup = document.getElementById("format-popup");
