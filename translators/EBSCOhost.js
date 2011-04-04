@@ -2,13 +2,13 @@
 	"translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
 	"label": "EBSCOhost",
 	"creator": "Simon Kornblith and Michael Berkowitz",
-	"target": "https?://[^/]+/(?:bsi|ehost)/(?:results|detail|folder)",
+	"target": "^https?://[^/]+/(?:eds|bsi|ehost)/(?:results|detail|folder)",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": "1",
 	"translatorType": 4,
-	"lastUpdated": "2011-02-24 23:30:00"
+	"lastUpdated": "2011-03-24 23:30:00"
 }
 
 function detectWeb(doc, url) {

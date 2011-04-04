@@ -8,7 +8,7 @@
 	"priority":100,
 	"inRepository":true,
 	"translatorType":4,
-	"lastUpdated":"2010-09-28 06:45:00"
+	"lastUpdated":"2011-04-04 06:45:00"
 }
 
 /* Test URLs
@@ -33,7 +33,8 @@ function detectWeb(doc, url) {
 				return "bookSection";
 			}
 		} else {
-			return "book";
+			// Default to journal article
+			return "journalArticle";
 		}
 	} else if (url.indexOf("content=g") != -1 || 
 			doc.evaluate('//div[@id="browse"]//tbody/tr/td[2]/a[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ||
@@ -154,6 +155,19 @@ function doWeb(doc, url) {
 				}
 				if (set.doi) {
 					item.DOI = set.doi;
+				}
+				
+				// Remove the existing attachment that the RIS translator gives us
+				item.attachments = [];
+				
+				// Make URLs into DOIs if needed
+				if (item.url.match(/10\..*/) && !item.DOI) {
+					item.DOI = item.url.match(/10\..*/)[0];
+					item.url = "";
+				} else {
+					// Otherwise make a _link_ and remove the URL from the item
+					item.attachments.push({url:item.url, title:"Informaworld Link", snapshot:false});
+					item.url = "";
 				}
 				item.attachments.push({url:set.pdfurl, title:item.title, mimeType:'application/pdf'});
 				item.complete();

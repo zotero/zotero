@@ -372,11 +372,11 @@ Zotero.Sync.Storage.Session.ZFS.prototype._processUploadFile = function (data) {
 				if (info) {
 					// Remote mod time
 					var mtime = info.mtime;
-					
 					// Local file time
 					var fmtime = item.attachmentModificationTime;
 					
 					var same = false;
+					var useLocal = false;
 					if (fmtime == mtime) {
 						same = true;
 						Zotero.debug("File mod time matches remote file -- skipping upload");
@@ -398,6 +398,11 @@ Zotero.Sync.Storage.Session.ZFS.prototype._processUploadFile = function (data) {
 						Zotero.debug("File mod time (" + fmtime + ") is exactly one hour off remote file (" + mtime + ") "
 							+ "-- assuming time zone issue and skipping upload");
 					}
+					// Ignore maxed-out 32-bit ints, from brief problem after switch to 32-bit servers
+					else if (mtime == 2147483647) {
+						Zotero.debug("Remote mod time is invalid -- uploading local file version");
+						useLocal = true;
+					}
 					
 					if (same) {
 						Zotero.debug(Zotero.Sync.Storage.getSyncedModificationTime(item.id));
@@ -414,7 +419,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._processUploadFile = function (data) {
 					}
 					
 					var smtime = Zotero.Sync.Storage.getSyncedModificationTime(item.id);
-					if (smtime != mtime) {
+					if (!useLocal && smtime != mtime) {
 						var localData = { modTime: fmtime };
 						var remoteData = { modTime: mtime };
 						Zotero.Sync.Storage.QueueManager.addConflict(
