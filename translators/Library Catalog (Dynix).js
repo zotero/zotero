@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-12-10 07:10:00"
+	"lastUpdated":"2011-04-04 07:10:00"
 }
 
 
@@ -144,7 +144,7 @@ function doWeb(doc, url) {
 			{
 				permalink = permalink + "&" + profile[1];
 			}
-			newItem.url = permalink;
+			newItem.attachments = [{url:permalink, title:"Original record", mimeType:"text/html", snapshot:false}];
 		}
 		else
 		{
