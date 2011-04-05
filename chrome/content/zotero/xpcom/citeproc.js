@@ -438,7 +438,7 @@ CSL_E4X.prototype.addInstitutionNodes = function(myxml) {
 	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
 	for each (node in myxml..names) {
 		if ("xml" == typeof node && node.elements("name").length() > 0) {
-			if (!node.institution.toString()) {
+			if (!node.institution.toXMLString()) {
 				institution_long = <institution
 					institution-parts="long"
 					substitute-use-first="1"
@@ -450,6 +450,7 @@ CSL_E4X.prototype.addInstitutionNodes = function(myxml) {
 						node.institution.@[attr] = node.name.@[attr].toString();
 					}
 				}
+				node.institution.@delimiter = node.name.@delimiter.toString();
 				if (node.name.@and.toString()) {
 					institution_long.@and = "text";
 				}
@@ -646,6 +647,7 @@ CSL.Output.Queue.prototype.append = function (str, tokname) {
 		throw "CSL processor error: unknown format token name: " + tokname;
 	}
 	if ("string" === typeof str && str.length) {
+		str = str.replace(/ ([:;?!\u00bb])/g, "\u202f$1").replace(/\u00ab /g, "«\u202f");
 		this.last_char_rendered = str.slice(-1);
 		str = str.replace(/\s+'/g, "  \'").replace(/^'/g, " \'");
 		this.state.tmp.term_predecessor = true;
@@ -1779,7 +1781,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.143";
+	this.processor_version = "1.0.144";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -7982,6 +7984,11 @@ CSL.Util.FlipFlopper = function (state) {
 			entry.push(["inner", "true"]);
 		}
 		entry.push(true);
+		if ("-" === p) {
+			entry.push(state.getTerm(("close-inner-quote")));
+		} else {
+			entry.push(state.getTerm(("close-quote")));
+		}
 		tagdefs.push(entry);
 	}
 	allTags = function (tagdefs) {
@@ -8138,7 +8145,7 @@ CSL.Util.FlipFlopper.prototype.getSplitStrings = function (str) {
 		sep = strs[badTagPos];
 		if (sep.length && sep[0] !== "<" && this.openToDecorations[sep] && this.quotechars.indexOf(sep.replace(/\s+/g,"")) === -1) {
 			params = this.openToDecorations[sep];
-			sep = this.state.fun.decorate[params[0]][params[1]](this.state);
+			sep = this.state.fun.decorate[params[0]][params[1][0]](this.state);
 		}
 		resplice = strs[(badTagPos - 1)] + sep + strs[(badTagPos + 1)];
 		head.push(resplice);
@@ -8882,6 +8889,11 @@ CSL.Registry.NameReg = function (state) {
 		}
 	};
 	evalname = function (item_id, nameobj, namenum, request_base, form, initials) {
+		if (state.tmp.area === "bibliography"
+			&& !form
+			&& "string" !== typeof initials) {
+			  return 2;
+		}
 		var pos, len, items, param;
 		var nameobj = state.transform.name(state, nameobj, state.opt["locale-pri"]);
 		set_keys(this.state, "" + item_id, nameobj);
