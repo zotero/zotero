@@ -81,7 +81,7 @@
 			onkeyup="ZoteroPane_Local.handleKeyUp(event, this.id)"
 			chromedir="&locale.dir;">
 			
-			<toolbar id="zotero-toolbar" class="toolbar" fullscreentoolbar="true">
+			<hbox id="zotero-toolbar" class="toolbar">
 				<hbox id="zotero-collections-toolbar">
 					<toolbarbutton id="zotero-tb-collection-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.newCollection()"/>
 					<toolbarbutton id="zotero-tb-group-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
@@ -208,7 +208,7 @@
 					<toolbarbutton id="zotero-tb-fullscreen" tooltiptext="&zotero.toolbar.tab.tooltip;" oncommand="ZoteroPane_Local.toggleTab();" class="zotero-tb-button"/>
 					<toolbarbutton id="zotero-close-button" class="tabs-closebutton" oncommand="ZoteroOverlay.toggleDisplay()"/>
 				</hbox>
-			</toolbar>
+			</hbox>
 			
 			<popupset>
 				<menupopup id="zotero-collectionmenu" onpopupshowing="ZoteroPane_Local.buildCollectionContextMenu();">
