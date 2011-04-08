@@ -1592,6 +1592,14 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) 
 			} else if(citationItem.suppressAuthor) {
 				citationItem["suppress-author"] = citationItem["suppressAuthor"];
 				delete citationItem.suppressAuthor;
+			} 
+			
+			// fix for improper upgrade from Zotero 2.1 in <2.1.5
+			if(parseInt(citationItem.label) == citationItem.label) {
+				const locatorTypeTerms = ["page", "book", "chapter", "column", "figure", "folio",
+					"issue", "line", "note", "opus", "paragraph", "part", "section", "sub verbo",
+					"volume", "verse"];
+				citationItem.label = locatorTypeTerms[parseInt(citationItem.label)];
 			}
 		}
 		if(citation.sort) {
