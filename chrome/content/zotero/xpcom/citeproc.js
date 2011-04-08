@@ -1781,7 +1781,7 @@ CSL.DateParser = function (txt) {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.144";
+	this.processor_version = "1.0.147";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3016,7 +3016,9 @@ CSL.getAmbiguousCite = function (Item, disambig) {
 	return ret;
 };
 CSL.getSpliceDelimiter = function (last_collapsed, pos) {
-	if (last_collapsed && ! this.tmp.have_collapsed && this.citation.opt["after-collapse-delimiter"]) {
+	if (this.tmp.same_author_as_previous_cite && this.opt.xclass === "in-text") {
+		this.tmp.splice_delimiter = ", ";
+	} else if (last_collapsed && ! this.tmp.have_collapsed && this.citation.opt["after-collapse-delimiter"]) {
 		this.tmp.splice_delimiter = this.citation.opt["after-collapse-delimiter"];
 	} else if (this.tmp.cite_locales[pos - 1]) {
 		var alt_affixes = this.tmp.cite_affixes[this.tmp.cite_locales[pos - 1]];
@@ -3206,6 +3208,7 @@ CSL.getCite = function (Item, item, prevItemID) {
 	return "" + Item.id;
 };
 CSL.citeStart = function (Item, item) {
+	this.tmp.same_author_as_previous_cite = false;
 	this.tmp.lastchr = "";
 	this.tmp.have_collapsed = true;
 	this.tmp.render_seen = false;
@@ -4458,7 +4461,7 @@ CSL.Node.names = {
 				if (state.tmp.value.length === 0) {
 					namesets = [];
 					len = this.variables.length;
-					if (len && state.opt.xclass === "in-text") {
+					if (len && state.opt.xclass === "in-text" && state.tmp.area === 'citation') {
 						len = 1;
 					}
 					for (pos = 0; pos < len; pos += 1) {
@@ -4479,7 +4482,8 @@ CSL.Node.names = {
 							llen = rawlist.length;
 							for (ppos = 0; ppos < llen; ppos += 1) {
 								name = rawlist[ppos];
-								if (name.literal || (name.family && !name.given)) {
+								if (name.literal 
+									|| (!name.given && name.family && name.isInstitution)) {
 									nameset.variable = variable;
 									nameset.species = "org";
 									if (name.literal) {
@@ -4494,7 +4498,11 @@ CSL.Node.names = {
 									}
 									lllen = lllst.length;
 									for (pppos = 0; pppos < lllen; pppos += 1) {
-										name = {literal: lllst[pppos], family:'', given:''};
+										name = {
+											literal: lllst[pppos],
+											family:'',
+											given:''
+										};
 										nameset.names.push(name);
 									}
 									tnamesets.push(nameset);
@@ -4503,7 +4511,7 @@ CSL.Node.names = {
 									nameset.variable = variable;
 									nameset.species = "pers";
 									nameset.names.push(name);
-									if (rawlist.length === (ppos + 1) || rawlist[ppos + 1].literal || (rawlist[ppos + 1].family && !rawlist[ppos + 1].given)) {
+									if (rawlist.length === (ppos + 1) || rawlist[ppos + 1].literal || (rawlist[ppos + 1].family && !rawlist[ppos + 1].given && rawlist[ppos + 1].isInstitution)) {
 										tnamesets.push(nameset);
 										nameset = {names: []};
 									}
@@ -4607,10 +4615,11 @@ CSL.Node.names = {
 				var common_term, nameset, name, local_count, withtoken, namesetIndex, lastones, currentones, compset, display_names, suppress_min, suppress_condition, sane, discretionary_names_length, overlength, et_al, and_term, outer_and_term, use_first, append_last, delim, param, paramx, val, s, myform, myinitials, termname, form, namepart, namesets, llen, ppos, label, plural, last_variable, cutinfo, obj, et_al_pers, et_al_org, and_pers, and_org, with_term, chk, apply_ellipsis;
 				namesets = [];
 				common_term = CSL.Util.Names.getCommonTerm(state, state.tmp.value);
-				if (common_term) {
+				if (common_term && state.getTerm(common_term, "long", 0)) {
 					namesets = state.tmp.value.slice(0, 1);
 				} else {
 					namesets = state.tmp.value;
+					common_term = false;
 				}
 				len = namesets.length;
 				if (namesets.length && (state.tmp.area === "bibliography" || state.tmp.area === "bibliography_sort" || (state.tmp.area && state.opt.xclass === "note"))) {
@@ -4752,6 +4761,7 @@ CSL.Node.names = {
 				state.output.addToken("suffix", false, state.output.getToken("family"));
 				state.output.getToken("suffix").decorations = [];
 				state.output.openLevel("term-join");
+				var set_nameset_delimiter = false;
 				len = namesets.length;
 				for  (namesetIndex = 0; namesetIndex < len; namesetIndex += 1) {
 					nameset = namesets[namesetIndex];
@@ -4764,6 +4774,10 @@ CSL.Node.names = {
 							termname = nameset.variable;
 						}
 						label = CSL.evaluateLabel(labelnode, state, Item, item, termname, nameset.variable);
+					}
+					if (namesetIndex > 0 && nameset.variable !== last_variable) {
+						state.output.closeLevel("term-join");
+						state.output.openLevel("term-join");
 					}
 					if (label && state.output.getToken("label").strings.label_position === CSL.BEFORE) {
 						state.output.append(label, "label");
@@ -4869,16 +4883,19 @@ CSL.Node.names = {
 					state.tmp.disambig_settings.names[state.tmp.nameset_counter] = display_names.length;
 					local_count += display_names.length;
 					state.tmp.names_used.push({names:display_names,etal:et_al});
+					if (!state.tmp.suppress_decorations
+						&& state.tmp.last_names_used.length === state.tmp.names_used.length
+						&& state.tmp.area === "citation") {
+						lastones = state.tmp.last_names_used[state.tmp.nameset_counter];
+						currentones = state.tmp.names_used[state.tmp.nameset_counter];
+						compset = [currentones, lastones];
+						if (CSL.Util.Names.compareNamesets(lastones,currentones)) {
+							state.tmp.same_author_as_previous_cite = true;
+						}
+					}
 					if (!state.tmp.suppress_decorations && (state[state.tmp.area].opt.collapse === "year" || state[state.tmp.area].opt.collapse === "year-suffix" || state[state.tmp.area].opt.collapse === "year-suffix-ranged")) {
-						if (state.tmp.last_names_used.length === state.tmp.names_used.length) {
-							lastones = state.tmp.last_names_used[state.tmp.nameset_counter];
-							currentones = state.tmp.names_used[state.tmp.nameset_counter];
-							compset = [currentones, lastones];
-							if (CSL.Util.Names.compareNamesets(lastones,currentones)) {
-								continue;
-							} else {
-								state.tmp.have_collapsed = false;
-							}
+						if (state.tmp.same_author_as_previous_cite) {
+							continue;
 						} else {
 							state.tmp.have_collapsed = false;
 						}
@@ -4925,12 +4942,6 @@ CSL.Node.names = {
 						if (!state.tmp.sort_key_flag) {
 							state.tmp.disambig_settings.givens[state.tmp.nameset_counter][ppos] = param;
 						}
-					}
-					if (namesetIndex > 0 && nameset.variable !== last_variable) {
-						state.output.closeLevel("term-join");
-					}
-					if (namesetIndex > 0 && nameset.variable !== last_variable) {
-						state.output.openLevel("term-join");
 					}
 					if (nameset.trailers3_start) {
 						state.output.openLevel("trailing-names", state.tmp.cut_var);
@@ -4994,6 +5005,10 @@ CSL.Node.names = {
 						}
 					}
 					state.tmp.nameset_counter += 1;
+					set_nameset_delimiter = false;
+					if (last_variable && last_variable === nameset.variable) {
+						set_nameset_delimiter = true;
+					}
 					last_variable = nameset.variable;
 				}
 				state.output.closeLevel("term-join");
@@ -8143,9 +8158,11 @@ CSL.Util.FlipFlopper.prototype.getSplitStrings = function (str) {
 		head = strs.slice(0, (badTagPos - 1));
 		tail = strs.slice((badTagPos + 2));
 		sep = strs[badTagPos];
+		CSL.debug("sep [1] is: ("+sep+") for badTagPos: ("+badTagPos+") in strs ("+strs+")");
 		if (sep.length && sep[0] !== "<" && this.openToDecorations[sep] && this.quotechars.indexOf(sep.replace(/\s+/g,"")) === -1) {
 			params = this.openToDecorations[sep];
 			sep = this.state.fun.decorate[params[0]][params[1][0]](this.state);
+			CSL.debug("sep [2] is: ("+sep+") from params[0] ("+params[0]+") and params[1][0] ("+params[1][0]+") -- params is ("+params+")");
 		}
 		resplice = strs[(badTagPos - 1)] + sep + strs[(badTagPos + 1)];
 		head.push(resplice);
@@ -8153,7 +8170,7 @@ CSL.Util.FlipFlopper.prototype.getSplitStrings = function (str) {
 	}
 	len = strs.length;
 	for (pos = 0; pos < len; pos += 2) {
-		strs[pos] = strs[pos].replace("'", "\u2019");
+		strs[pos] = strs[pos].replace("'", "\u2019", "g");
 		strs[pos] = this.txt_esc(strs[pos]);
 	}
 	return strs;
