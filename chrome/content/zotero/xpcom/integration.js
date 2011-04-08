@@ -580,26 +580,6 @@ Zotero.Integration = new function() {
 			} else {
 				_executeAppleScript('tell application id "'+BUNDLE_IDS[Zotero.appName]+'" to activate');
 			}
-		} else if(Zotero.isWin) {
-			try {
-				if(!_winUser32) {
-					Components.utils.import("resource://gre/modules/ctypes.jsm");
-					var lib = ctypes.open("user32.dll");
-					_winUser32 = new function() {
-						this.FindWindow = lib.declare("FindWindowW", ctypes.default_abi, ctypes.int32_t,
-													ctypes.ustring, ctypes.ustring);
-						this.SetForegroundWindow = lib.declare("SetForegroundWindow", ctypes.default_abi, ctypes.bool,
-												ctypes.int32_t);
-					}
-				}
-				
-				var thWnd = _winUser32.FindWindow(Zotero.appName+"MessageWindow", null);
-				if(thWnd) _winUser32.SetForegroundWindow(thWnd);
-			} catch(e) {
-				// Don't throw if we don't succeed
-				Components.utils.reportError(e);
-				return;
-			}
 		}
 	}
 	
