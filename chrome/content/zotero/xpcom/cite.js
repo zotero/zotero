@@ -8,10 +8,12 @@ Zotero.Cite.System = function(){};
  */
 Zotero.Cite.System._zoteroNameMap = {
 	"author":"author",
+	"bookAuthor":"container-author",
 	"editor":"editor",
-	"translator":"translator",
+	"interviewer":"interviewer",
+	"recipient":"recipient",
 	"seriesEditor":"collection-editor",
-	"bookAuthor":"container-author"
+	"translator":"translator"
 }
 
 /**
