@@ -237,14 +237,12 @@ var Zotero = new function(){
 		this.isLinux = (this.platform.substr(0, 5) == "Linux");
 		this.oscpu = win.navigator.oscpu;
 		
-		// Locale		
-		var ph = Components.classes["@mozilla.org/network/protocol;1?name=http"].
-					getService(Components.interfaces.nsIHttpProtocolHandler);
-		if (ph.language.length == 2) {
-			this.locale = ph.language + '-' + ph.language.toUpperCase();
-		}
-		else {
-			this.locale = ph.language;
+		// Locale
+		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
+						.getService(Components.interfaces.nsIPrefService);
+		this.locale = prefs.getBranch("general.useragent.").getCharPref("locale");
+		if (this.locale.length == 2) {
+			this.locale = this.locale + '-' + this.locale.toUpperCase();
 		}
 		
 		// Load in the localization stringbundle for use by getString(name)
