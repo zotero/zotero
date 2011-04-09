@@ -9,6 +9,7 @@ Zotero.Cite.System = function(){};
 Zotero.Cite.System._zoteroNameMap = {
 	"author":"author",
 	"bookAuthor":"container-author",
+	"composer":"composer",
 	"editor":"editor",
 	"interviewer":"interviewer",
 	"recipient":"recipient",
