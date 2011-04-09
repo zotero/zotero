@@ -247,7 +247,7 @@ Zotero.Date = new function(){
 		// first, directly inspect the string
 		var m = _slashRe.exec(string);
 		if(m &&
-		  (!m[5] || m[3] == m[5] || (m[3] == "\u5e74" && m[5] == "\u6708")) &&	// require sane separators
+		  ((!m[5] || !m[3]) || m[3] == m[5] || (m[3] == "\u5e74" && m[5] == "\u6708")) &&	// require sane separators
 		  ((m[2] && m[4] && m[6]) || (!m[1] && !m[7]))) {						// require that either all parts are found,
 		  																		// or else this is the entire date field
 			// figure out date based on parts
