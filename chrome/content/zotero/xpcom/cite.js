@@ -8,10 +8,13 @@ Zotero.Cite.System = function(){};
  */
 Zotero.Cite.System._zoteroNameMap = {
 	"author":"author",
+	"bookAuthor":"container-author",
+	"composer":"composer",
 	"editor":"editor",
-	"translator":"translator",
+	"interviewer":"interviewer",
+	"recipient":"recipient",
 	"seriesEditor":"collection-editor",
-	"bookAuthor":"container-author"
+	"translator":"translator"
 }
 
 /**
@@ -326,7 +329,25 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 	if(!bib) return false;
 	
 	if(format == "html") {
-		var html = bib[0].bibstart+bib[1].join("")+bib[0].bibend;
+		var output = [bib[0].bibstart];
+		for(var i in bib[1]) {
+			output.push(bib[1][i]);
+			
+			// add COinS
+			for each(var itemID in bib[0].entry_ids[i]) {
+				try {
+					var co = Zotero.OpenURL.createContextObject(Zotero.Items.get(itemID));
+					if(!co) continue;
+					output.push('  <span class="Z3988" title="'+
+						co.replace("&", "&amp;", "g").replace("<", "&lt;", "g").replace(">", "&gt;", "g")+
+						'"/>\n');
+				} catch(e) {
+					Zotero.logError(e);
+				}
+			}
+		}
+		output.push(bib[0].bibend);
+		var html = output.join("");
 		
 		var inlineCSS = true;
 		if (!inlineCSS) {
