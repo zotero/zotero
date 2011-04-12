@@ -417,9 +417,16 @@ function ChromeExtensionHandler() {
 							valA = Zotero.Items.getSortTitle(valA);
 							valB = Zotero.Items.getSortTitle(valB);
 						}
+						// Use multipart date -- would be better just to get
+						// the unformatted date value directly, but toArray(),
+						// which we currently use above, doesn't do that
+						else if (sorts[index].field == 'date') {
+							valA = Zotero.Date.strToMultipart(a[sorts[index].field]);
+							valB = Zotero.Date.strToMultipart(b[sorts[index].field]);
+						}
 						else {
-							var valA = a[sorts[index].field];
-							var valB = b[sorts[index].field];
+							valA = a[sorts[index].field];
+							valB = b[sorts[index].field];
 						}
 						
 						// Put empty values last
