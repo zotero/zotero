@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":90,
 	"inRepository":true,
-	"lastUpdated":"2011-01-09 18:20:00"
+	"lastUpdated":"2011-04-13 17:19:11"
 }
 
 function detectSearch(item) {
