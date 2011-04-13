@@ -1604,7 +1604,7 @@ function addStyle() {
 	fp.init(window, Zotero.getString("zotero.preferences.styles.addStyle"), nsIFilePicker.modeOpen);
 	
 	fp.appendFilter("CSL Style", "*.csl");
-	fp.appendFilter("EndNote Style", "*.ens");
+	fp.appendFilter("ENS Style", "*.ens");
 	
 	var rv = fp.show();
 	if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
