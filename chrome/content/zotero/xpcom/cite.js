@@ -336,7 +336,7 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 			// add COinS
 			for each(var itemID in bib[0].entry_ids[i]) {
 				try {
-					var co = Zotero.OpenURL.createContextObject(Zotero.Items.get(itemID));
+					var co = Zotero.OpenURL.createContextObject(Zotero.Items.get(itemID), "1.0");
 					if(!co) continue;
 					output.push('  <span class="Z3988" title="'+
 						co.replace("&", "&amp;", "g").replace("<", "&lt;", "g").replace(">", "&gt;", "g")+
