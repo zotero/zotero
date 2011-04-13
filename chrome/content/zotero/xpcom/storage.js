@@ -542,38 +542,7 @@ Zotero.Sync.Storage = new function () {
 					file.lastModifiedTime = attachmentData[item.id].mtime;
 				}
 				catch (e) {
-					if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED'
-							// Shows up on some Windows systems
-							|| e.name == 'NS_ERROR_FAILURE') {
-						Zotero.debug(e);
-						// TODO: localize
-						var fileCannotBeUpdated = "The file '" + file.path
-							+ "' cannot be updated.";
-						var checkFileWindows = "Check that the file is not currently "
-							+ "in use and that it is not marked read-only.";
-						var checkFileOther = "Check that the file is not currently "
-							+ "in use and that its permissions allow write access.";
-						var msg = fileCannotBeUpdated + " "
-							+ (Zotero.isWin ? checkFileWindows : checkFileOther) + "\n\n"
-							+ "Restarting your computer or disabling security "
-							+ "software may also help.";
-						var e = new Zotero.Error(
-							msg,
-							0,
-							{
-								dialogButtonText: "Show File",
-								dialogButtonCallback: function () {
-									try {
-										file.reveal();
-									}
-									// Unsupported on some platforms
-									catch (e) {}
-								}
-							}
-						);
-					}
-					
-					throw (e);
+					Zotero.File.checkFileAccessError(e, file, 'update');
 				}
 				continue;
 			}
@@ -743,38 +712,7 @@ Zotero.Sync.Storage = new function () {
 			}
 		}
 		catch (e) {
-			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED'
-					// Shows up on some Windows systems
-					|| e.name == 'NS_ERROR_FAILURE') {
-				Zotero.debug(e);
-				// TODO: localize
-				var fileCannotBeUpdated = "The file '" + file.path
-					+ "' cannot be updated.";
-				var checkFileWindows = "Check that the file is not currently "
-					+ "in use and that it is not marked read-only.";
-				var checkFileOther = "Check that the file is not currently "
-					+ "in use and that its permissions allow write access.";
-				var msg = fileCannotBeUpdated + " "
-					+ (Zotero.isWin ? checkFileWindows : checkFileOther) + "\n\n"
-					+ "Restarting your computer or disabling security "
-					+ "software may also help.";
-				var e = new Zotero.Error(
-					msg,
-					0,
-					{
-						dialogButtonText: "Show File",
-						dialogButtonCallback: function () {
-							try {
-								file.reveal();
-							}
-							// Unsupported on some platforms
-							catch (e) {}
-						}
-					}
-				);
-			}
-			
-			throw (e);
+			Zotero.File.checkFileAccessError(e, file, 'update');
 		}
 		
 		Zotero.Sync.Storage.setSyncedModificationTime(item.id, syncModTime, updateItem);
@@ -1061,33 +999,7 @@ Zotero.Sync.Storage = new function () {
 				zipFile.remove(false);
 			}
 			catch (e) {
-				if (e.name == 'NS_ERROR_FAILURE') {
-					Zotero.debug(e);
-					// TODO: localize
-					var msg = "Zotero could not delete the temporary sync file '"
-						+ zipFile.path + "'. Delete the file manually and try syncing again."
-						+ "\n\n"
-						+ "If you receive this message repeatedly, restarting your "
-						+ "computer or disabling security software may help.";
-					var e = new Zotero.Error(
-						msg,
-						0,
-						{
-							dialogButtonText: "Show File",
-							dialogButtonCallback: function () {
-								try {
-									zipFile.reveal();
-								}
-								// Unsupported on some platforms
-								catch (e3) {}
-							}
-						}
-					);
-					
-					throw (e);
-				}
-				
-				throw (e);
+				Zotero.File.checkFileAccessError(e, zipFile, 'delete');
 			}
 			
 			// TODO: Remove prop file to trigger reuploading, in case it was an upload error?
@@ -1275,17 +1187,7 @@ Zotero.Sync.Storage = new function () {
 				zipReader.extract(entryName, destFile);
 			}
 			catch (e) {
-				if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
-					Zotero.debug(e);
-					// TODO: localize
-					var msg = "Zotero was unable to create a file during syncing."
-						+ "\n\n"
-						+ "Restarting your computer or disabling anti-virus/security "
-						+ "software may fix the problem.";
-					throw (msg);
-				}
-				
-				throw (e);
+				Zotero.File.checkFileAccessError(e, destFile, 'create');
 			}
 			
 			var origPath = destFile.path;
@@ -1358,27 +1260,7 @@ Zotero.Sync.Storage = new function () {
 					file.remove(false);
 				}
 				catch (e) {
-					if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED'
-							// Shows up on some Windows systems
-							|| e.name == 'NS_ERROR_FAILURE') {
-						Zotero.debug(e);
-						// TODO: localize
-						var fileCannotBeUpdated = "The file '" + file.leafName
-						+ "' cannot be updated.";
-						var checkFileWindows = "Check that the file is not currently "
-							+ "in use and that it is not marked read-only.";
-						var checkFileOther = "Check that the file is not currently "
-							+ "in use and that its permissions allow write access.";
-						var msg = Zotero.localeJoin([
-							fileCannotBeUpdated,
-							Zotero.isWin ? checkFileWindows : checkFileOther
-						]) + "\n\n"
-							+ "Restarting your computer or disabling security "
-							+ "software may also help.";
-						throw (msg);
-					}
-					
-					throw (e);
+					Zotero.File.checkFileAccessError(e, file, 'delete');
 				}
 			}
 			else if (file.isDirectory()) {
