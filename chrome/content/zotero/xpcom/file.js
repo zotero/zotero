@@ -323,4 +323,92 @@ Zotero.File = new function(){
 		
 		browser.addEventListener("pageshow", onpageshow, false);
 	}
+	
+	
+	// TODO: localize
+	this.checkFileAccessError = function (e, file, operation) {
+		if (file) {
+			var str = "The file '" + file.path + "' ";
+		}
+		else {
+			var str = "A file ";
+		}
+		
+		switch (operation) {
+			case 'create':
+				var opWord = "created";
+				break;
+				
+			case 'update':
+				var opWord = "updated";
+				break;
+				
+			case 'delete':
+				var opWord = "deleted";
+				break;
+				
+			default:
+				var opWord = "updated";
+		}
+		
+		if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED'
+				// Shows up on some Windows systems
+				|| e.name == 'NS_ERROR_FAILURE') {
+			Zotero.debug(e);
+			// TODO: localize
+			str = str + "cannot be " + opWord + ".";
+			var checkFileWindows = "Check that the file is not currently "
+				+ "in use and that it is not marked as read-only. To check "
+				+ "all files in your Zotero data directory, right-click on "
+				+ "the 'zotero' directory, click Properties, and ensure that "
+				+ "the Read-Only checkbox is empty.";
+			var checkFileOther = "Check that the file is not currently "
+				+ "in use and that its permissions allow write access.";
+			var msg = str + " "
+					+ (!Zotero.isWin ? checkFileWindows : checkFileOther)
+					+ "\n\n"
+					+ "Restarting your computer or disabling security "
+					+ "software may also help.";
+			
+			if (operation == 'create') {
+				var e = new Zotero.Error(
+					msg,
+					0,
+					{
+						dialogButtonText: "Show Parent Directory",
+						dialogButtonCallback: function () {
+							try {
+								file.parent.QueryInterface(Components.interfaces.nsILocalFile).reveal();
+							}
+							// Unsupported on some platforms
+							catch (e2) {
+								Zotero.debug(e2);
+							}
+						}
+					}
+				);
+			}
+			else {
+				var e = new Zotero.Error(
+					msg,
+					0,
+					{
+						dialogButtonText: "Show File",
+						dialogButtonCallback: function () {
+							try {
+								file.QueryInterface(Components.interfaces.nsILocalFile);
+								file.reveal();
+							}
+							// Unsupported on some platforms
+							catch (e2) {
+								Zotero.debug(e2);
+							}
+						}
+					}
+				);
+			}
+		}
+		
+		throw (e);
+	}
 }
