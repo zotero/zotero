@@ -2246,7 +2246,7 @@ Zotero.SearchConditions = new function(){
 		
 		for (var i in parts) {
 			var part = parts[i];
-			if (!part.length) {
+			if (!part || !part.length) {
 				continue;
 			}
 			
