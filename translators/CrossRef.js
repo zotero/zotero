@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":90,
 	"inRepository":true,
-	"lastUpdated":"2011-01-09 18:20:00"
+	"lastUpdated":"2011-04-13 17:19:11"
 }
 
 function detectSearch(item) {
@@ -118,11 +118,15 @@ function processCrossRef(xmlOutput) {
 		// Example: doi: 10.1002/14651858.CD002966.pub3
 		// http://www.crossref.org/openurl/?url_ver=Z39.88-2004&req_dat=usr:pwd&rft_id=info:doi/10.1002/14651858.CD002966.pub3&format=unixref&redirect=false
 		} else if(xml.doi_record[0].crossref.book.@book_type.length()
-				&& xml.doi_record[0].crossref.book.@book_type == 'reference'
-				&& xml.doi_record[0].crossref.book.content_item.@component_type == 'reference_entry') {
+				&& (xml.doi_record[0].crossref.book.@book_type == 'reference'
+					|| xml.doi_record[0].crossref.book.@book_type == 'other')
+				&& (xml.doi_record[0].crossref.book.content_item.@component_type == "chapter"
+					|| xml.doi_record[0].crossref.book.content_item.@component_type == 'reference_entry')) {
 			var item = new Zotero.Item("bookSection");
 			var refXML = xml.doi_record[0].crossref.book.content_item;
-			var metadataXML = xml.doi_record[0].crossref.book.book_metadata;
+			var metadataXML = (xml.doi_record[0].crossref.book.book_metadata.length() ? 
+				xml.doi_record[0].crossref.book.book_metadata :
+				xml.doi_record[0].crossref.book.book_series_metadata);
 			item.bookTitle = metadataXML.titles.title[0].toString();
 			
 			// Handle book authors
