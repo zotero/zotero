@@ -954,11 +954,15 @@ Zotero.Fulltext = new function(){
 			case 'application/pdf':
 				var cacheFile = this.getItemCacheFile(itemID);
 				if (cacheFile.exists()) {
-					cacheFile.remove(false);
+					try {
+						cacheFile.remove(false);
+					}
+					catch (e) {
+						Zotero.File.checkFileAccessError(e, cacheFile, 'delete');
+					}
 				}
 				break;
 		}
-
 	}
 	
 	
