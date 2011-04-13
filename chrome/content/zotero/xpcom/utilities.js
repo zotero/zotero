@@ -164,7 +164,6 @@ Zotero.Utilities = {
 		}
 		// \n\n => <p>, \n => <br/>
 		else {
-			str = Zotero.Utilities.htmlSpecialChars(str);
 			str = '<p>'
 					+ str.replace(/\n\n/g, '</p><p>')
 						.replace(/\n/g, '<br/>')
