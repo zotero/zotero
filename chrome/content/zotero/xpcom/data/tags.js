@@ -32,6 +32,7 @@ Zotero.Tags = new function() {
 	this.constructor.prototype = new Zotero.DataObjects();
 	
 	var _tags = {}; // indexed by tag text
+	var _colorsByItem = {};
 	
 	this.get = get;
 	this.getName = getName;
@@ -385,6 +386,76 @@ Zotero.Tags = new function() {
 	}
 	
 	
+	this.getColor = function (name) {
+		var tagColors = this.getColors();
+		return tagColors[name] ? tagColors[name] : '#000000';
+	}
+	
+	
+	this.getColors = function (name) {
+		var tagColors = Zotero.Prefs.get('tagColors');
+		return tagColors ? JSON.parse(tagColors) : {};
+	}
+	
+	
+	this.getItemColor = function (itemID) {
+		var item = Zotero.Items.get(itemID);
+		if (!item) {
+			return false;
+		}
+		
+		// Init library tag colors if not yet done
+		var libraryID = item.libraryID ? item.libraryID : 0;
+		if (!_colorsByItem[libraryID]) {
+			_colorsByItem[libraryID] = {};
+			var tagColors = this.getColors();
+			for (var name in tagColors) {
+				var color = tagColors[name];
+				var tagIDs = Zotero.Tags.getIDs(name, libraryID);
+				if (!tagIDs) {
+					continue;
+				}
+				for each(var tagID in tagIDs) {
+					var tag = Zotero.Tags.get(tagID);
+					var itemIDs = tag.getLinkedItems(true);
+					if (!itemIDs) {
+						continue;
+					}
+					for each(var id in itemIDs) {
+						_colorsByItem[libraryID][id] = color;
+					}
+				}
+			}
+		}
+		
+		return _colorsByItem[libraryID][itemID] ? _colorsByItem[libraryID][itemID] : false;
+	}
+	
+	
+	this.setColor = function (name, color) {
+		var tagColors = this.getColors();
+		
+		// Unset
+		if (!color || color == '#000000') {
+			delete tagColors[name];
+		}
+		else {
+			tagColors[name] = color;
+		}
+		
+		tagColors = JSON.stringify(tagColors);
+		Zotero.Prefs.set('tagColors', tagColors);
+		
+		_reloadTagColors()
+		Zotero.Notifier.trigger('redraw', 'item', []);
+	}
+	
+	
+	function _reloadTagColors() {
+		_colorsByItem = {};
+	}
+	
+	
 	function erase(ids) {
 		ids = Zotero.flattenArguments(ids);
 		
@@ -488,6 +559,7 @@ Zotero.Tags = new function() {
 	 */
 	this._reload = function (ids) {
 		_tags = {};
+		_reloadTagColors();
 	}
 	
 	
