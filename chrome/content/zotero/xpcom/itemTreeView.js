@@ -277,6 +277,12 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	
 	var savedSelection = this.saveSelection();
 	
+	// Redraw the tree (for tag color changes)
+	if (action == 'redraw') {
+		this._treebox.invalidate();
+		return;
+	}
+	
 	// If refreshing a single item, just unselect and reselect it
 	if (action == 'refresh') {
 		if (type == 'share-items') {
@@ -2410,11 +2416,19 @@ Zotero.ItemTreeView.prototype.onDragExit = function (event) {
 
 Zotero.ItemTreeView.prototype.isSeparator = function(row) 						{ return false; }
 Zotero.ItemTreeView.prototype.getRowProperties = function(row, prop) { }
-Zotero.ItemTreeView.prototype.getColumnProperties = function(col, prop) 		{ }
-
-/* Mark items not matching search as context rows, displayed in gray */
+Zotero.ItemTreeView.prototype.getColumnProperties = function(col, prop) { }
 Zotero.ItemTreeView.prototype.getCellProperties = function(row, col, prop) {
-	if (this._searchMode && !this._searchItemIDs[this._getItemAtRow(row).ref.id]) {
+	var itemID = this._getItemAtRow(row).ref.id;
+	
+	// Set tag colors
+	if (color = Zotero.Tags.getItemColor(itemID)) {
+		var aServ = Components.classes["@mozilla.org/atom-service;1"].
+			getService(Components.interfaces.nsIAtomService);
+		prop.AppendElement(aServ.getAtom("color" + color.substr(1)));
+	}
+	
+	// Mark items not matching search as context rows, displayed in gray
+	if (this._searchMode && !this._searchItemIDs[itemID]) {
 		var aServ = Components.classes["@mozilla.org/atom-service;1"].
 			getService(Components.interfaces.nsIAtomService);
 		prop.AppendElement(aServ.getAtom("contextRow"));

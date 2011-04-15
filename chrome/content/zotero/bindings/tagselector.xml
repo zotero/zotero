@@ -258,6 +258,7 @@
 					
 					// Set attributes
 					var labels = tagsToggleBox.getElementsByTagName('label');
+					var tagColors = Zotero.Tags.getColors();
 					for (var i=0; i<labels.length; i++){
 						var tagIDs = labels[i].getAttribute('tagID').split('-');
 						
@@ -332,6 +333,13 @@
 							
 							labels[i].setAttribute('hidden', false);
 							empty = false;
+						}
+						
+						if (color = tagColors[labels[i].value]) {
+							labels[i].setAttribute('style', 'color:' + color);
+						}
+						else {
+							labels[i].removeAttribute('style');
 						}
 					}
 					
@@ -684,6 +692,31 @@
 				</body>
 			</method>
 			
+			<method name="getColor">
+				<parameter name="tagIDs"/>
+				<body>
+				<![CDATA[
+					tagIDs = tagIDs.split('-');
+					var name = Zotero.Tags.getName(tagIDs[0]);
+					return Zotero.Tags.getColor(name);
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="setColor">
+				<parameter name="tagIDs"/>
+				<parameter name="color"/>
+				<body>
+				<![CDATA[
+					tagIDs = tagIDs.split('-');
+					var name = Zotero.Tags.getName(tagIDs[0]);
+					Zotero.Tags.setColor(name, color);
+					this.refresh();
+				]]>
+				</body>
+			</method>
+			
 			<method name="focusTextbox">
 				<body>
 					<![CDATA[
@@ -784,8 +817,14 @@
 		<content>
 			<xul:groupbox flex="1">
 				<xul:menupopup id="tag-menu">
-					<xul:menuitem label="&zotero.tagSelector.renameTag;" class="menuitem-non-iconic" oncommand="document.getBindingParent(this).rename(document.popupNode.getAttribute('tagID')); event.stopPropagation()"/>
-					<xul:menuitem label="&zotero.tagSelector.deleteTag;" class="menuitem-non-iconic" oncommand="document.getBindingParent(this).delete(document.popupNode.getAttribute('tagID')); event.stopPropagation()"/>
+					<xul:menuitem label="&zotero.tagSelector.renameTag;" oncommand="document.getBindingParent(this).rename(document.popupNode.getAttribute('tagID')); event.stopPropagation()"/>
+					<xul:menuitem label="&zotero.tagSelector.deleteTag;" oncommand="document.getBindingParent(this).delete(document.popupNode.getAttribute('tagID')); event.stopPropagation()"/>
+					<!-- TODO: localized -->
+					<xul:menu label="Assign Color">
+						<xul:menupopup onpopupshowing="var color = document.getBindingParent(this).getColor(document.popupNode.getAttribute('tagID')); this.children[0].color = color">
+							<xul:colorpicker onclick="document.getBindingParent(this).setColor(document.popupNode.getAttribute('tagID'), event.originalTarget.getAttribute('color')); document.getBindingParent(this).id('tag-menu').hidePopup(); event.stopPropagation()"/>
+						</xul:menupopup>
+					</xul:menu>
 				</xul:menupopup>
 				
 				<xul:vbox id="no-tags-box" align="center" pack="center" flex="1">
