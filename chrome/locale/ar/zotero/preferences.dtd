@@ -1,184 +1,184 @@
-<!ENTITY zotero.preferences.title "تفضيلات زوتيرو">
+<!ENTITY zotero.preferences.title						"تفضيلات زوتيرو">
 
-<!ENTITY zotero.preferences.default "الإفتراضي:">
-<!ENTITY zotero.preferences.items "items">
-<!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.default					"الإفتراضي:">
+<!ENTITY zotero.preferences.items						 "عناصر">
+<!ENTITY zotero.preferences.period						 ".">
 
-<!ENTITY zotero.preferences.prefpane.general "عام">
+<!ENTITY zotero.preferences.prefpane.general				"عام">
 
-<!ENTITY zotero.preferences.userInterface "واجهة المستخدم">
-<!ENTITY zotero.preferences.showIn "Load Zotero in:">
-<!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
-<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
-<!ENTITY zotero.preferences.statusBarIcon "ايقونة شريط الحالة:">
-<!ENTITY zotero.preferences.statusBarIcon.none "لاشيء">
-<!ENTITY zotero.preferences.fontSize "حجم الخط">
-<!ENTITY zotero.preferences.fontSize.small "صغير">
-<!ENTITY zotero.preferences.fontSize.medium "متوسط">
-<!ENTITY zotero.preferences.fontSize.large "كبير">
-<!ENTITY zotero.preferences.fontSize.notes "Note font size:">
+<!ENTITY zotero.preferences.userInterface				"واجهة المستخدم">
+<!ENTITY zotero.preferences.showIn						"عرض زوتيرو في:">
+<!ENTITY zotero.preferences.showIn.browserPane					"جزء التصفح">
+<!ENTITY zotero.preferences.showIn.separateTab					"تبويب منفصل">
+<!ENTITY zotero.preferences.statusBarIcon				"أيقونة شريط الحالة:">
+<!ENTITY zotero.preferences.statusBarIcon.none			"بدون أيقونة">
+<!ENTITY zotero.preferences.fontSize						"حجم الخط:">
+<!ENTITY zotero.preferences.fontSize.small				"صغير">
+<!ENTITY zotero.preferences.fontSize.medium				"متوسط">
+<!ENTITY zotero.preferences.fontSize.large				"كبير">
+<!ENTITY zotero.preferences.fontSize.notes				"حجم خط الملاحظات:">
 
-<!ENTITY zotero.preferences.miscellaneous "أخرى">
-<!ENTITY zotero.preferences.autoUpdate "تأكد تلقائياً من وجود مترجـِمات محدَّثة">
-<!ENTITY zotero.preferences.updateNow "تحديث الآن">
-<!ENTITY zotero.preferences.reportTranslationFailure "ابلغ عن ترجمة غير صحيحة">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
-<!ENTITY zotero.preferences.parseRISRefer "استخدم زوتيرو لملفات آراياس(RIS) أو Refer">
-<!ENTITY zotero.preferences.automaticSnapshots "أخذ لقطات تلقائية عند إنشاء عناصر من صفحة ويب">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "ارفق ملفات PDF و الملفات الأخرى عند حفظ العناصر">
-<!ENTITY zotero.preferences.automaticTags "اضف اوسمة تلقائية بالكلمات المفتاحية وعناوين الموضوع">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
+<!ENTITY zotero.preferences.miscellaneous				"أخرى">
+<!ENTITY zotero.preferences.autoUpdate					"التأكد التلقائي من وجود مترجمات مواقع محدثة">
+<!ENTITY zotero.preferences.updateNow					"التحديث الآن">
+<!ENTITY zotero.preferences.reportTranslationFailure		"الإبلاغ عن مترجمات مواقع معطلة">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader			"السماح لموقع زوتيرو بتخصيص المحتوى بناء على الاصدار الحالي لزوتيرو">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip	"السماح لموقع زوتيرو بالتعرف على الاصدار الحالي لزوتيرو">
+<!ENTITY zotero.preferences.parseRISRefer				"استخدم زوتيرو لتشغيل الملفات المحملة بصيغ RIS/Refer">
+<!ENTITY zotero.preferences.automaticSnapshots			"أخذ لقطات تلقائية عند إنشاء العناصر من صفحات الويب">
+<!ENTITY zotero.preferences.downloadAssociatedFiles		"الارفاق التلقائي لملفات PDF والملفات الاخرى عند اضافة عنصر جديد من صفحة ويب">
+<!ENTITY zotero.preferences.automaticTags				"اضف اوسمة  تلقائية للعناصر بالكلمات المفتاحية ورؤوس الموضوعات">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre		"الافراغ التلقائي لسلة المحذوفات. ازالة اللملفات المحذوفة منذ">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost		"يوم">
 
-<!ENTITY zotero.preferences.groups "Groups">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "When copying items between libraries, include:">
-<!ENTITY zotero.preferences.groups.childNotes "child notes">
-<!ENTITY zotero.preferences.groups.childFiles "child snapshots and imported files">
-<!ENTITY zotero.preferences.groups.childLinks "child links">
+<!ENTITY zotero.preferences.groups						"المجموعات">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude	"عند نسخ العناصر بين المكتبات، يجب ان تتضمن العناصر على:">
+<!ENTITY zotero.preferences.groups.childNotes			"الملاحظات الفرعية">
+<!ENTITY zotero.preferences.groups.childFiles			"اللقطات الفرعية والملفات المستوردة">
+<!ENTITY zotero.preferences.groups.childLinks			"الروابط الفرعية">
 
-<!ENTITY zotero.preferences.openurl.caption "افتح رابط">
+<!ENTITY zotero.preferences.openurl.caption				"الرابط المفتوح">
 
-<!ENTITY zotero.preferences.openurl.search "بحث عن رابط للمرجع">
-<!ENTITY zotero.preferences.openurl.custom "تخصيص...">
-<!ENTITY zotero.preferences.openurl.server "معالجة الأخطاء:">
-<!ENTITY zotero.preferences.openurl.version "إصدارة">
+<!ENTITY zotero.preferences.openurl.search				"البحث عن مقرر">
+<!ENTITY zotero.preferences.openurl.custom				"تخصيص...">
+<!ENTITY zotero.preferences.openurl.server				"رابط المقرر:">
+<!ENTITY zotero.preferences.openurl.version				"الإصدار:">
 
-<!ENTITY zotero.preferences.prefpane.sync "Sync">
-<!ENTITY zotero.preferences.sync.username "Username:">
-<!ENTITY zotero.preferences.sync.password "Password:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero Sync Server">
-<!ENTITY zotero.preferences.sync.createAccount "Create Account">
-<!ENTITY zotero.preferences.sync.lostPassword "Lost Password?">
-<!ENTITY zotero.preferences.sync.syncAutomatically "Sync automatically">
-<!ENTITY zotero.preferences.sync.about "About Syncing">
-<!ENTITY zotero.preferences.sync.fileSyncing "File Syncing">
-<!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Sync attachment files in group libraries using Zotero storage">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "terms and conditions">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync with Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local Zotero data with data from the sync server, ignoring sync history.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Erase all local Zotero data and restore from the sync server.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Erase all server data and overwrite with local Zotero data.">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reset File Sync History">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Force checking of the storage server for all local attachment files.">
-<!ENTITY zotero.preferences.sync.reset.button "Reset...">
+<!ENTITY zotero.preferences.prefpane.sync							"التزامن">
+<!ENTITY zotero.preferences.sync.username							"اسم المستخدم:">
+<!ENTITY zotero.preferences.sync.password							"كلمة المرور:">
+<!ENTITY zotero.preferences.sync.syncServer						"خادم زوتيرو للتزامن">
+<!ENTITY zotero.preferences.sync.createAccount						"تسجيل اشتراك جديد">
+<!ENTITY zotero.preferences.sync.lostPassword						"نسيت كلمة المرور؟">
+<!ENTITY zotero.preferences.sync.syncAutomatically					"التزامن التلقائي">
+<!ENTITY zotero.preferences.sync.about								"نبذة عن التزامن">
+<!ENTITY zotero.preferences.sync.fileSyncing						"تزامن الملفات">
+<!ENTITY zotero.preferences.sync.fileSyncing.url					"الرابط:">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary				"قم بمزامنة الملفات المرفقة في مكتبتي باستخدام">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups				"قم بمزامنة الملفات المرفقة في مجموعة المكتبات باستخدام مساحة تخزين زوتيرو">
+<!ENTITY zotero.preferences.sync.fileSyncing.about					"نبذة عن تزامن الملفات">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1					"باستخدامك مساحة تخزين زوتيرو، فإنك توافق على الالتزام بكافة">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2					"الشروط والأحكام">
+<!ENTITY zotero.preferences.sync.reset.fullSync					"التزامن الكامل مع خادم زوتيرو">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc				"دمج بيانات زوتيرو المحلية مع البيانات من خادم التزامن، مع تجاهل سجل التزامن.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer			"الاسترجاع من خادم زوتيرو">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc		"حذف جميع بيانات زوتيرو المحلية والاسترجاع من خادم التزامن.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer				"الاسترجاع إلى خادم زوتيرو">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc		"حذف جميع بيانات الخادم وإحلال بيانات زوتيرو المحلية على الخادم.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory		"إعادة تعيين ملف سجل المزامنة">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc	"تنفيذ عملية التحقق من الخادم لتخزين جميع الملفات المحلية المرفقة.">
+<!ENTITY zotero.preferences.sync.reset.button						"إعادة التعيين...">
 
 
-<!ENTITY zotero.preferences.prefpane.search "بحث">
-<!ENTITY zotero.preferences.search.fulltextCache "نسخ كاش للنص كاملاً">
-<!ENTITY zotero.preferences.search.pdfIndexing "فهرسة PDF">
-<!ENTITY zotero.preferences.search.indexStats "أحصائيات الفهرسة">
+<!ENTITY zotero.preferences.prefpane.search				"بحث">
+<!ENTITY zotero.preferences.search.fulltextCache			"الذاكرة المخبأة للنص الكامل">
+<!ENTITY zotero.preferences.search.pdfIndexing				"تكشيف ملفات PDF">
+<!ENTITY zotero.preferences.search.indexStats				"احصائيات التكشيف">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "مفهرس:">
-<!ENTITY zotero.preferences.search.indexStats.partial "مفهرس جزئياً:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "غير مفهرس:">
-<!ENTITY zotero.preferences.search.indexStats.words "كلمات:">
+<!ENTITY zotero.preferences.search.indexStats.indexed		"مكشف:">
+<!ENTITY zotero.preferences.search.indexStats.partial		"مكشف جزئياً:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed	"غير مكشف:">
+<!ENTITY zotero.preferences.search.indexStats.words		"الكلمات:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "الحد الأقصى لعدد الحروف عند فهرسة ملف">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "الحد الأقصى لعدد الصفحات عند فهرسة ملف:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength			"الحد الاقصى من الاحرف المكشفة للملف الواحد:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages			"الحد الاقصى من الصفحات المكشفة للملف الواحد:">
 
-<!ENTITY zotero.preferences.prefpane.export "تصدير">
+<!ENTITY zotero.preferences.prefpane.export				"تصدير">
 
-<!ENTITY zotero.preferences.citationOptions.caption "خيارات التوثيق">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "تضمين روابط المقالات البحثية في المراجع">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "عند تعطيل هذا الخيار, يقوم زوتيرو بإدراج الروابط ،فقط عند توثيق المجلات العلمية، والمجلات، ومقالات الجرائد التي لم يعين لها مدى للصفحات.">
+<!ENTITY zotero.preferences.citationOptions.caption			"خيارات الاستشهاد">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "تضمين روابط الويب للمقالات البحثية في المراجع">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "عند تعطيل هذه الخاصية، يقوم زوتيرو بتضمين روابط الويب فقط عند توثيق مقالات (الدوريات أو المجلات أو الجرائد) التي لم يعين لها مدى للصفحات.">
 
-<!ENTITY zotero.preferences.quickCopy.caption "نسخ سريع">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "شكل المخرجات الإفتراضي:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "نسخ كترميز هتمل">
-<!ENTITY zotero.preferences.quickCopy.macWarning "ملاحظة: التنسيق الغني للنصوص سيفقد عند استخدام نظام ماكنتوش.">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "إعدادات خاصة حسب الموقع:">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "المجال/المسار">
+<!ENTITY zotero.preferences.quickCopy.caption				"النسخ السريع">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat	"الصياغة الافتراضية للمخرجات:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML			"نسخ كترميز HTML">
+<!ENTITY zotero.preferences.quickCopy.macWarning			"ملاحظة: التنسيق الغني للنصوص سيفقد عند استخدام نظام ماكنتوش.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings 	"إعدادات خاصة حسب الموقع:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "نطاق الانترنت/المسار">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(مثال: wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "شكل المخرجات">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "Disable Quick Copy when dragging more than">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "صياغة المخرجات">
+<!ENTITY zotero.preferences.quickCopy.dragLimit			 "تعطيل النسخ السريع عند السحب بالماوس لأكثر من">
 
-<!ENTITY zotero.preferences.prefpane.cite "Cite">
-<!ENTITY zotero.preferences.cite.styles "Styles">
-<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
+<!ENTITY zotero.preferences.prefpane.cite					"استشهاد">
+<!ENTITY zotero.preferences.cite.styles			"الأنماط">
+<!ENTITY zotero.preferences.cite.wordProcessors	"معالجات النصوص">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "الوظائف الاضافية لمعالجات النصوص غير مثبته حالياً">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins	"أحصل على الوظائف الاضافية لمعالجات النصوص...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url	"http://www.zotero.org/support/word_processor_plugin_installation">
 
-<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
-<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "احصل على أشكال إضافية...">
+<!ENTITY zotero.preferences.cite.styles.styleManager				"مدير الانماط">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title		"اسم النمط">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated		"آخر تحديث">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl		"CSL">
+<!ENTITY zotero.preferences.export.getAdditionalStyles			"احصل على انماط اضافية...">
 
-<!ENTITY zotero.preferences.prefpane.keys "اختصارات">
+<!ENTITY zotero.preferences.prefpane.keys				"اختصارات">
 
-<!ENTITY zotero.preferences.keys.openZotero "فتح/إغلاق نافذة زوتيرو">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "تنشيط نمط الشاشة الكاملة">
-<!ENTITY zotero.preferences.keys.library "المكتبة">
-<!ENTITY zotero.preferences.keys.quicksearch "بحث سريع">
-<!ENTITY zotero.preferences.keys.newItem "انشئ عنصر جديد">
-<!ENTITY zotero.preferences.keys.newNote "انشئ ملاحظة جديدة">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "تنشيط منقي الأوسمة">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "نسخ توثيقات العنصر المختار إلى الحافظة">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "انسخ العناصر المحددة للذاكرة">
-<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.preferences.keys.overrideGlobal "حاول تجنب الإختصارات المتعارضة">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "التغييرات يتم تفعيلها في النوافذ الجديدة فقط">
+<!ENTITY zotero.preferences.keys.openZotero				"فتح/إغلاق نافذة زوتيرو">
+<!ENTITY zotero.preferences.keys.toggleFullscreen			"التنشيط لوضع ملء الشاشة">
+<!ENTITY zotero.preferences.keys.library					"المكتبة">
+<!ENTITY zotero.preferences.keys.quicksearch				"البحث السريع">
+<!ENTITY zotero.preferences.keys.newItem					"انشئ عنصر جديد">
+<!ENTITY zotero.preferences.keys.newNote					"انشئ ملاحظة جديدة">
+<!ENTITY zotero.preferences.keys.toggleTagSelector		"تنشيط محدد الأوسمة">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard		"نسخ استشهادات العنصر المختار للحافظة">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard		"انسخ العناصر المحددة للحافظة">
+<!ENTITY zotero.preferences.keys.importFromClipboard		"الاستيراد من الحافظة">
+<!ENTITY zotero.preferences.keys.overrideGlobal			"حاول تجنب الإختصارات المتعارضة">
+<!ENTITY zotero.preferences.keys.changesTakeEffect		"يتم تفعيل التغييرات في النوافذ الجديدة فقط">
 
-<!ENTITY zotero.preferences.prefpane.proxies "Proxies">
+<!ENTITY zotero.preferences.prefpane.proxies				"الوكيل">
 
-<!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
-<!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
-<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
-<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
-<!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
-<!ENTITY zotero.preferences.proxies.hostname "Hostname">
-<!ENTITY zotero.preferences.proxies.scheme "Scheme">
+<!ENTITY zotero.preferences.proxies.proxyOptions			"خيارات الوكيل">
+<!ENTITY zotero.preferences.proxies.desc_before_link		"سيقوم زوتيرو بتوجيه الطلبات عن طريق الوكلاء المخزنين.اطلع على">
+<!ENTITY zotero.preferences.proxies.desc_link				"معلومات عن الوكيل">
+<!ENTITY zotero.preferences.proxies.desc_after_link 		"لمزيد من المعلومات.">
+<!ENTITY zotero.preferences.proxies.transparent				"اعادة التوجيه عن طريق الوكلاء المستخدمين مسبقا">
+<!ENTITY zotero.preferences.proxies.autoRecognize			"التعرف التلقائي على الوكلاء">
+<!ENTITY zotero.preferences.proxies.disableByDomain			"تعطيل اعادة توجيه الوكيل عندما يحتوي اسم النطاق على ">
+<!ENTITY zotero.preferences.proxies.configured				"الوكلاء المخزنين">
+<!ENTITY zotero.preferences.proxies.hostname				"المضيف">
+<!ENTITY zotero.preferences.proxies.scheme					"المخطط">
 
-<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
-<!ENTITY zotero.preferences.proxies.autoAssociate "Automatically associate new hosts">
-<!ENTITY zotero.preferences.proxies.variables "You may use the following variables in your proxy scheme:">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - The hostname of the proxied site (e.g., www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - The path of the proxied page excluding the leading slash (e.g., about/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - The directory path (e.g., about/)">
-<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - The filename (e.g., index.html)">
-<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
+<!ENTITY zotero.preferences.proxies.multiSite				"مواقع متعددة">
+<!ENTITY zotero.preferences.proxies.autoAssociate			"الاضافة التلقائية للمضيفات الجديدة">
+<!ENTITY zotero.preferences.proxies.variables				"يمكنك استخدام المتغيرات التالية في مخطط الوكيل لديك:">
+<!ENTITY zotero.preferences.proxies.h_variable				"&#37;h - اسم المضيف لموقع الوكيل (مثل، www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable				"&#37;p - مسار الصفحة (مثل، about/index.html)">
+<!ENTITY zotero.preferences.proxies.d_variable				"&#37;d - مسار المجلد (مثل، about/)">
+<!ENTITY zotero.preferences.proxies.f_variable				"&#37;f - اسم الملف (مثل، index.html)">
+<!ENTITY zotero.preferences.proxies.a_variable				"&#37;a - لأي سلسلة حرفية">
 
-<!ENTITY zotero.preferences.prefpane.advanced "متقدم">
+<!ENTITY zotero.preferences.prefpane.advanced				"متقدم">
 
-<!ENTITY zotero.preferences.prefpane.locate "Locate">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
-<!ENTITY zotero.preferences.locate.description "Description">
-<!ENTITY zotero.preferences.locate.name "Name">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
-<!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
+<!ENTITY zotero.preferences.prefpane.locate					"تحديد موقع المقتنى">
+<!ENTITY zotero.preferences.locate.locateEngineManager		"إدارة محرك البحث">
+<!ENTITY zotero.preferences.locate.description				"الوصف">
+<!ENTITY zotero.preferences.locate.name						"الاسم">
+<!ENTITY zotero.preferences.locate.locateEnginedescription	"خاصية محرك البحث تمد القائمة المنسدلة لتحديد الموقع الموجودة بالنافذة الرئيسية للبرنامج. بتفعيل محركات البحث في القائمة التالية سيتم اضافة محرك البحث للقائمة النسدلة ويمكن استخدامها للبحث وتحديد موقع المصادر بمكتبتك على الويب.">
+<!ENTITY zotero.preferences.locate.addDescription			"لاضافة محرك بحث غير موجود بالقائمة، قم بزيارة محرك البحث المطلوب في المتصفح واختار 'اضافة' من شريط البحث لفايرفوكس. عند اعادة فتح نافذة التفضيلات الحالية مرة اخرى سيكون لديك الخيار لتمكين محرك البحث الجديد.">
+<!ENTITY zotero.preferences.locate.restoreDefaults			"استعادة الاعدادات الافتراضية">
 
-<!ENTITY zotero.preferences.charset "Character Encoding">
-<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
-<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+<!ENTITY zotero.preferences.charset							"ترميز الحروف">
+<!ENTITY zotero.preferences.charset.importCharset			"استيراد ترميز الحروف">
+<!ENTITY zotero.preferences.charset.displayExportOption		"اظهار خطائص ترميز الحروف عند التصدير">
 
-<!ENTITY zotero.preferences.dataDir "موقع التخزين">
-<!ENTITY zotero.preferences.dataDir.useProfile "استخدم مجلد فايرفوكس الجانبي">
-<!ENTITY zotero.preferences.dataDir.custom "تخصيص:">
-<!ENTITY zotero.preferences.dataDir.choose "اختر...">
-<!ENTITY zotero.preferences.dataDir.reveal "عرض مجلد البيانات">
+<!ENTITY zotero.preferences.dataDir						"مكان تخزين البيانات">
+<!ENTITY zotero.preferences.dataDir.useProfile			"استخدم مجلد الملف الشخصي لفايرفوكس">
+<!ENTITY zotero.preferences.dataDir.custom				"تخصيص:">
+<!ENTITY zotero.preferences.dataDir.choose				"اختر...">
+<!ENTITY zotero.preferences.dataDir.reveal				"عرض مجلد البيانات">
 
-<!ENTITY zotero.preferences.dbMaintenance "صيانة قاعدة البيانات">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "التأكد من سلامة قاعدة البيانات">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "تنظيف المترجـِمات والأشكال...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "تنظيف المترجـِمات...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "تنظيف الأشكال...">
+<!ENTITY zotero.preferences.dbMaintenance							"صيانة قاعدة البيانات">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck			"التأكد من سلامة قاعدة البيانات">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles	"اعادة تعيين المترجمات والانماط...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators				"اعادة تعيين المترجمات...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles					"اعادة تعيين الانماط">
 
-<!ENTITY zotero.preferences.debugOutputLogging "Debug Output Logging">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Debug output can help Zotero developers diagnose problems in Zotero. Debug logging will slow down Zotero, so you should generally leave it disabled unless a Zotero developer requests debug output.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "lines logged">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Enable after restart">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "View Output">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Clear Output">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Submit to Zotero Server">
+<!ENTITY zotero.preferences.debugOutputLogging							"تسجيل اخطاء تشغيل البرنامج">
+<!ENTITY zotero.preferences.debugOutputLogging.message					"سجل اخطاء تشغيل البرنامج تساعد المطورين للتعرف على المشاكل في برنامج زوتيرو. سجل اخطاء تشغيل البرنامج سوف تبطئ عمل برنامج زوتيرو، لذا يجب عليك تركها معطلة مالم يطلب منك احد المطورين سجل الاخطاء لديك.">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged				"عدد سطور سجل الاخطاء">
+<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart		"التمكين بعد اعادة التشغيل">
+<!ENTITY zotero.preferences.debugOutputLogging.viewOutput				"عرض سجل اخطاء البرنامج">
+<!ENTITY zotero.preferences.debugOutputLogging.clearOutput				"مسح سجل اخطاء البرنامج">
+<!ENTITY zotero.preferences.debugOutputLogging.submitToServer			"ارسال سجل الاخطاء لخادم زوتيرو">

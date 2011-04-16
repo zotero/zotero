@@ -1,229 +1,231 @@
-<!ENTITY zotero.general.optional "(اختياري)">
-<!ENTITY zotero.general.note "ملاحظة:">
-<!ENTITY zotero.general.selectAll "Select All">
-<!ENTITY zotero.general.deselectAll "Deselect All">
-<!ENTITY zotero.general.edit "Edit">
-<!ENTITY zotero.general.delete "Delete">
+<!ENTITY zotero.general.optional							"(اختياري)">
+<!ENTITY zotero.general.note								"ملاحظة:">
+<!ENTITY zotero.general.selectAll							"تحديد الكل">
+<!ENTITY zotero.general.deselectAll						"إلغاء تحديد الكل">
+<!ENTITY zotero.general.edit								"تحرير">
+<!ENTITY zotero.general.delete 								"حذف">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "سجل الأخطاء قد يحتوي رسائل ليس لها علاقة بزوتيرو.">
-<!ENTITY zotero.errorReport.submissionInProgress "فضلاً انتظر حتى يتم إرسال البلاغ.">
-<!ENTITY zotero.errorReport.submitted "تم إرسال البلاغ.">
-<!ENTITY zotero.errorReport.reportID "رقم التقرير:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.unrelatedMessages				"قد يتضمن سجل الاخطاء على رسائل ليس لها علاقة بزوتيرو.">
+<!ENTITY zotero.errorReport.submissionInProgress			"برجاء الانتظار لحين الانتهاء من ارسال التقرير عن الخطأ.">
+<!ENTITY zotero.errorReport.submitted						"تم ارسال التقرير عن الخطأ.">
+<!ENTITY zotero.errorReport.reportID						"رقم التقرير:">
+<!ENTITY zotero.errorReport.postToForums					"برجاء كتابة رسالة في منتديات زوتيرو (forums.zotero.org) تتضمن رقم التقرير، ووصف للمشكلة، والخطوات التي تؤدي لظهورها.">
+<!ENTITY zotero.errorReport.notReviewed					"لن يتم مراجعة تقارير الخطأ ما لم يكن مشار إليها في المنتديات.">
 
-<!ENTITY zotero.upgrade.newVersionInstalled "لقد قمتَ بتنصيب نسخة جديدة من زوتيرو.">
-<!ENTITY zotero.upgrade.upgradeRequired "يجب ترقية قاعدة بيانات زوتيرو كي تعمل مع النسخة الجديدة.">
-<!ENTITY zotero.upgrade.autoBackup "سيتم عمل نسخة احتياطية من قاعدة البيانات قبل إجراء أي تغييرات.">
-<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
-<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
-<!ENTITY zotero.upgrade.upgradeInProgress "فضلاً انتظر حتى تنتهي عملية الترقية. قد يستغرق ذلك عدة دقائق.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "تم ترقية قاعدة البيانات بنجاج.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "فضلا شاهد">
-<!ENTITY zotero.upgrade.changeLogLink "سجل التغييرات">
-<!ENTITY zotero.upgrade.changeLogAfterLink "لمعرفة الجديد.">
+<!ENTITY zotero.upgrade.newVersionInstalled				"لقد قمتَ بتنصيب نسخة جديدة من زوتيرو.">
+<!ENTITY zotero.upgrade.upgradeRequired					"يجب ترقية قاعدة بيانات زوتيرو لكي تعمل مع النسخة الجديدة.">
+<!ENTITY zotero.upgrade.autoBackup							"سيتم عمل نسخة احتياطية من قاعدة البيانات قبل إجراء أي تغييرات.">
+<!ENTITY zotero.upgrade.majorUpgrade						"هذه عملية تحديث كلي للبرنامج.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink				"تأكد من أنك قمت بمراجعة">
+<!ENTITY zotero.upgrade.majorUpgradeLink					"إرشادات الترقية">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink				"قبل المتابعة.">
+<!ENTITY zotero.upgrade.upgradeInProgress					"فضلاً انتظر حتى تنتهي عملية الترقية. قد يستغرق ذلك عدة دقائق.">
+<!ENTITY zotero.upgrade.upgradeSucceeded					"تم ترقية قاعدة البيانات بنجاح.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink				"برجاء مراجعة">
+<!ENTITY zotero.upgrade.changeLogLink						"سجل التغييرات">
+<!ENTITY zotero.upgrade.changeLogAfterLink					"لمعرفة الجديد.">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "أضف التحديد لملاحظة زوتيرو.">
-<!ENTITY zotero.contextMenu.addTextToNewNote "انشئ عنصر وملاحظة من العنصر المحدد.">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote		"اضافة التحديد لملاحظة زوتيرو">
+<!ENTITY zotero.contextMenu.addTextToNewNote			"إنشاء عنصر وملاحظة زوتيرو من التحديد">
+<!ENTITY zotero.contextMenu.saveLinkAsItem			"حفظ الرابط كعنصر زوتيرو">
+<!ENTITY zotero.contextMenu.saveImageAsItem		"حفظ الصورة كعنصر زوتيرو">
 
-<!ENTITY zotero.tabs.info.label "معلومات">
-<!ENTITY zotero.tabs.notes.label "ملاحظات">
-<!ENTITY zotero.tabs.attachments.label "مرفقات">
-<!ENTITY zotero.tabs.tags.label "أوسمة">
-<!ENTITY zotero.tabs.related.label "مواضيع مرتبطة">
-<!ENTITY zotero.notes.separate "حرر في نافذة منفصلة">
+<!ENTITY zotero.tabs.info.label						"معلومات">
+<!ENTITY zotero.tabs.notes.label						"ملاحظات">
+<!ENTITY zotero.tabs.attachments.label					"مرفقات">
+<!ENTITY zotero.tabs.tags.label						"أوسمة">
+<!ENTITY zotero.tabs.related.label						"عناصر ذات صلة">
+<!ENTITY zotero.notes.separate							"التحرير في نافذة منفصلة">
 
-<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.collections.showUnfiledItems			"عرض العناصر غير المصنفة">
 
-<!ENTITY zotero.items.itemType "Item Type">
-<!ENTITY zotero.items.type_column "النوع">
-<!ENTITY zotero.items.title_column "العنوان">
-<!ENTITY zotero.items.creator_column "الكاتب">
-<!ENTITY zotero.items.date_column "التاريخ">
-<!ENTITY zotero.items.year_column "السنة">
-<!ENTITY zotero.items.publisher_column "الناشر">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
-<!ENTITY zotero.items.language_column "اللغة">
-<!ENTITY zotero.items.accessDate_column "Accessed">
-<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
-<!ENTITY zotero.items.callNumber_column "رقم الإستدعاء">
-<!ENTITY zotero.items.rights_column "الحقوق">
-<!ENTITY zotero.items.dateAdded_column "تاريخ الإضافة">
-<!ENTITY zotero.items.dateModified_column "تاريخ التعديل">
-<!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.itemType							"نوع العنصر">
+<!ENTITY zotero.items.type_column						"النوع">
+<!ENTITY zotero.items.title_column						"العنوان">
+<!ENTITY zotero.items.creator_column					"المؤلف">
+<!ENTITY zotero.items.date_column						"التاريخ">
+<!ENTITY zotero.items.year_column						"السنة">
+<!ENTITY zotero.items.publisher_column					"الناشر">
+<!ENTITY zotero.items.publication_column				"النشر">
+<!ENTITY zotero.items.journalAbbr_column				"اختصار دورية">
+<!ENTITY zotero.items.language_column					"اللغة">
+<!ENTITY zotero.items.accessDate_column				"تاريخ الدخول">
+<!ENTITY zotero.items.libraryCatalog_column				"فهرس المكتبة">
+<!ENTITY zotero.items.callNumber_column					"الرقم العام">
+<!ENTITY zotero.items.rights_column						"الملكية الفكرية">
+<!ENTITY zotero.items.dateAdded_column					"تاريخ الإضافة">
+<!ENTITY zotero.items.dateModified_column				"تاريخ التعديل">
+<!ENTITY zotero.items.numChildren_column				"+">
 
-<!ENTITY zotero.items.menu.showInLibrary "عرض في المكتبة">
-<!ENTITY zotero.items.menu.attach.note "أضف ملاحظة">
-<!ENTITY zotero.items.menu.attach "Add Attachment">
-<!ENTITY zotero.items.menu.attach.snapshot "أرفق لقطة للصفحة الحالية">
-<!ENTITY zotero.items.menu.attach.link "ارفق رابط إلى الصفحة الحالية">
-<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
-<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+<!ENTITY zotero.items.menu.showInLibrary					"عرض في المكتبة">
+<!ENTITY zotero.items.menu.attach.note					"اضافة ملاحظة">
+<!ENTITY zotero.items.menu.attach						"اضافة مرفق">
+<!ENTITY zotero.items.menu.attach.snapshot				"إرفاق لقطة للصفحة الحالية">
+<!ENTITY zotero.items.menu.attach.link					"إرفاق رابط للصفحة الحالية">
+<!ENTITY zotero.items.menu.attach.file					"إرفاق نسخة من ملف مخزن...">
+<!ENTITY zotero.items.menu.attach.fileLink				"إرفاق ارتباط لملف...">
 
-<!ENTITY zotero.items.menu.duplicateItem "استنسخ الموضوع المحدد">
+<!ENTITY zotero.items.menu.duplicateItem					"تكرار العنصر المحدد">
 
-<!ENTITY zotero.toolbar.newItem.label "موضوع جديد">
-<!ENTITY zotero.toolbar.moreItemTypes.label "المزيد">
-<!ENTITY zotero.toolbar.newItemFromPage.label "انشئ موضوع جديد من الصفحة الحالية">
-<!ENTITY zotero.toolbar.lookup.label "Add Item by Identifier">
-<!ENTITY zotero.toolbar.removeItem.label "احذف الموضوع...">
-<!ENTITY zotero.toolbar.newCollection.label "مجموعة جديدة...">
-<!ENTITY zotero.toolbar.newGroup "New Group...">
-<!ENTITY zotero.toolbar.newSubcollection.label "مجموعة فرعية جديدة...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "بحث محفوظ جديد...">
-<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
-<!ENTITY zotero.toolbar.tagSelector.label "اعرض/اخفي منتقي الأوسمة">
-<!ENTITY zotero.toolbar.actions.label "أدوات">
-<!ENTITY zotero.toolbar.import.label "استيراد...">
-<!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.toolbar.export.label "تصدير للمكتبة...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
-<!ENTITY zotero.toolbar.timeline.label "انشئ خط زمني">
-<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
-<!ENTITY zotero.toolbar.preferences.label "التفضيلات...">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
-<!ENTITY zotero.toolbar.about.label "حول زوتيرو">
-<!ENTITY zotero.toolbar.advancedSearch "بحث متقدم">
-<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
-<!ENTITY zotero.toolbar.openURL.label "إيجاد الموضع">
-<!ENTITY zotero.toolbar.openURL.tooltip "ابحث في مكتبتك المحلية">
+<!ENTITY zotero.toolbar.newItem.label					"عنصر جديد">
+<!ENTITY zotero.toolbar.moreItemTypes.label			"المزيد">
+<!ENTITY zotero.toolbar.newItemFromPage.label			"إنشاء عنصر جديد من الصفحة الحالية">
+<!ENTITY zotero.toolbar.lookup.label				"إضافة العنصر بواسطة معرف">
+<!ENTITY zotero.toolbar.removeItem.label				"حذف العنصر...">
+<!ENTITY zotero.toolbar.newCollection.label			"مجموعة عناصر جديدة...">
+<!ENTITY zotero.toolbar.newGroup						"مجموعة مشاركة جديدة...">
+<!ENTITY zotero.toolbar.newSubcollection.label			"مجموعة عناصر فرعية جديدة...">
+<!ENTITY zotero.toolbar.newSavedSearch.label			"بحث محفوظ جديد...">
+<!ENTITY zotero.toolbar.emptyTrash.label				"افراغ سلة المحذوفات">
+<!ENTITY zotero.toolbar.tagSelector.label			"عرض/اخفاء محدد الأوسمة">
+<!ENTITY zotero.toolbar.actions.label					"عمليات">
+<!ENTITY zotero.toolbar.import.label					"استيراد...">
+<!ENTITY zotero.toolbar.importFromClipboard			"استيراد من الحافظة">
+<!ENTITY zotero.toolbar.export.label					"تصدير المكتبة...">
+<!ENTITY zotero.toolbar.rtfScan.label					"فحص ملف RTF...">
+<!ENTITY zotero.toolbar.timeline.label				"إنشاء خط زمني">
+<!ENTITY zotero.toolbar.duplicate.label				"عرض التكرارات">
+<!ENTITY zotero.toolbar.preferences.label				"التفضيلات...">
+<!ENTITY zotero.toolbar.supportAndDocumentation		"الدعم و الوثائق">
+<!ENTITY zotero.toolbar.about.label					"حول زوتيرو">
+<!ENTITY zotero.toolbar.advancedSearch				"البحث المتقدم">
+<!ENTITY zotero.toolbar.tab.tooltip					"تبديل وضع التبويب">
+<!ENTITY zotero.toolbar.openURL.label					"تحديد موقع العنصر">
+<!ENTITY zotero.toolbar.openURL.tooltip				"البحث في مكتبتك المحلية">
 
-<!ENTITY zotero.item.add "اضف">
-<!ENTITY zotero.item.attachment.file.show "اعرض ملف">
-<!ENTITY zotero.item.textTransform "تحويل نص">
-<!ENTITY zotero.item.textTransform.lowercase "حروف صغيرة">
-<!ENTITY zotero.item.textTransform.titlecase "حروف كبيرة">
+<!ENTITY zotero.item.add								"اضافة">
+<!ENTITY zotero.item.attachment.file.show				"عرض الملف">
+<!ENTITY zotero.item.textTransform						"تغيير حالة النص">
+<!ENTITY zotero.item.textTransform.lowercase			"الأحرف الصغيرة">
+<!ENTITY zotero.item.textTransform.titlecase			"حرف كبير في بداية كل كلمة">
 
-<!ENTITY zotero.toolbar.note.standalone "ملاحظة منفصلة جديدة">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
-<!ENTITY zotero.toolbar.attachment.linked "وصلة إلى ملف...">
-<!ENTITY zotero.toolbar.attachment.add "خزن نسخة من الملف...">
-<!ENTITY zotero.toolbar.attachment.weblink "احفظ رابط للصفحة الحالية">
-<!ENTITY zotero.toolbar.attachment.snapshot "خذ لقطة من الصفحة الحالية">
+<!ENTITY zotero.toolbar.note.standalone				"ملاحظة جديدة مستقلة بذاتها">
+<!ENTITY zotero.toolbar.lookup						"بحث بواسطة معرف العنصر...">
+<!ENTITY zotero.toolbar.attachment.linked				"ارتباط تشعبي لملف...">
+<!ENTITY zotero.toolbar.attachment.add					"تخزين نسخة من ملف...">
+<!ENTITY zotero.toolbar.attachment.weblink				"حفظ رابط للصفحة الحالية">
+<!ENTITY zotero.toolbar.attachment.snapshot			"اخذ لقطة من الصفحة الحالية">
 
-<!ENTITY zotero.tagSelector.noTagsToDisplay "لاتوجد اوسمة لعرضها">
-<!ENTITY zotero.tagSelector.filter "مرشِّح:">
-<!ENTITY zotero.tagSelector.showAutomatic "اعرض تلقائياً">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
-<!ENTITY zotero.tagSelector.selectVisible "تحديد العناصر الظاهرة">
-<!ENTITY zotero.tagSelector.clearVisible "إلغاء تحديد العناصر الظاهرة">
-<!ENTITY zotero.tagSelector.clearAll "إلغاء تحديد الكل">
-<!ENTITY zotero.tagSelector.renameTag "تغيير اسم الوسم...">
-<!ENTITY zotero.tagSelector.deleteTag "حذف الوسم...">
+<!ENTITY zotero.tagSelector.noTagsToDisplay			"لاتوجد اوسمة لعرضها">
+<!ENTITY zotero.tagSelector.filter					"تصفية:">
+<!ENTITY zotero.tagSelector.showAutomatic			"عرض تلقائي">
+<!ENTITY zotero.tagSelector.displayAllInLibrary	"عرض جميع الاوسمة في هذه المكتبة">
+<!ENTITY zotero.tagSelector.selectVisible			"تحديد العناصر الظاهرة">
+<!ENTITY zotero.tagSelector.clearVisible				"إلغاء تحديد العناصر الظاهرة">
+<!ENTITY zotero.tagSelector.clearAll					"إلغاء تحديد الكل">
+<!ENTITY zotero.tagSelector.renameTag				"تغيير اسم الوسم...">
+<!ENTITY zotero.tagSelector.deleteTag				"حذف الوسم...">
 
-<!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
+<!ENTITY zotero.lookup.description				"ادخل الترقيم الدولي الموحد للكتاب او معرف مقالات الميدلاين او معرف الوثيقة الرقمية.">
 
-<!ENTITY zotero.selectitems.title "اختر العناصر">
-<!ENTITY zotero.selectitems.intro.label "حدد المواضيع التي تريد إضافتها لمكتبتك">
-<!ENTITY zotero.selectitems.cancel.label "إلغاء">
-<!ENTITY zotero.selectitems.select.label "موافق">
+<!ENTITY zotero.selectitems.title						"تحديد العناصر">
+<!ENTITY zotero.selectitems.intro.label				"حدد العناصر التي تريد إضافتها لمكتبتك">
+<!ENTITY zotero.selectitems.cancel.label				"إلغاء">
+<!ENTITY zotero.selectitems.select.label				"موافق">
 
-<!ENTITY zotero.bibliography.title "انشئ مرجعاً">
-<!ENTITY zotero.bibliography.style.label "اسلوب التوثيق:">
-<!ENTITY zotero.bibliography.output.label "شكل المخرجات">
-<!ENTITY zotero.bibliography.saveAsRTF.label "حفظ كملف  RTF">
-<!ENTITY zotero.bibliography.saveAsHTML.label "حفظ كملف  HTML">
-<!ENTITY zotero.bibliography.copyToClipboard.label "نسخ للحافظة">
-<!ENTITY zotero.bibliography.print.label "طباعة">
+<!ENTITY zotero.bibliography.title						"إنشاء ببليوجرافية">
+<!ENTITY zotero.bibliography.style.label				"نمط الاستشهاد:">
+<!ENTITY zotero.bibliography.output.label				"شكل المخرجات">
+<!ENTITY zotero.bibliography.saveAsRTF.label			"حفظ كملف  RTF">
+<!ENTITY zotero.bibliography.saveAsHTML.label			"حفظ كملف  HTML">
+<!ENTITY zotero.bibliography.copyToClipboard.label		"نسخ للحافظة">
+<!ENTITY zotero.bibliography.print.label				"طباعة">
 
-<!ENTITY zotero.integration.docPrefs.title "تفضيلات المستند">
-<!ENTITY zotero.integration.addEditCitation.title "إضافة/تحرير توثيق">
-<!ENTITY zotero.integration.editBibliography.title "تحرير قائمة المؤلفات">
+<!ENTITY zotero.integration.docPrefs.title				"تفضيلات المستند">
+<!ENTITY zotero.integration.addEditCitation.title		"اضافة/تحرير استشهاد مرجعي">
+<!ENTITY zotero.integration.editBibliography.title		"تحرير ببليوجرافية">
 
-<!ENTITY zotero.progress.title "التقدم">
+<!ENTITY zotero.progress.title							"التقدم">
 
-<!ENTITY zotero.exportOptions.title "تصدير...">
-<!ENTITY zotero.exportOptions.format.label "الشكل:">
-<!ENTITY zotero.exportOptions.translatorOptions.label "خيارات المترجم">
+<!ENTITY zotero.exportOptions.title						"تصدير...">
+<!ENTITY zotero.exportOptions.format.label				"الصياغة:">
+<!ENTITY zotero.exportOptions.translatorOptions.label	"خيارات المترجم">
 
-<!ENTITY zotero.charset.label "Character Encoding">
-<!ENTITY zotero.moreEncodings.label "More Encodings">
+<!ENTITY zotero.charset.label							"ترميز الأحرف">
+<!ENTITY zotero.moreEncodings.label						"المزيد من الترميزات">
 
-<!ENTITY zotero.citation.keepSorted.label "الاحتفاظ بمصادر مرتبة">
+<!ENTITY zotero.citation.keepSorted.label				"الحفاظ على المصادر مرتبة">
 
-<!ENTITY zotero.citation.page "الصفحة">
-<!ENTITY zotero.citation.paragraph "الفقرة">
-<!ENTITY zotero.citation.line "السطر">
-<!ENTITY zotero.citation.suppressAuthor.label "طمس المؤلف">
-<!ENTITY zotero.citation.prefix.label "سابقة">
-<!ENTITY zotero.citation.suffix.label "لاحقة">
+<!ENTITY zotero.citation.page							"صفحة">
+<!ENTITY zotero.citation.paragraph						"فقرة">
+<!ENTITY zotero.citation.line							"سطر">
+<!ENTITY zotero.citation.suppressAuthor.label			"عدم اضافة المؤلف">
+<!ENTITY zotero.citation.prefix.label					"بادئة:">
+<!ENTITY zotero.citation.suffix.label					"لاحقة:">
 
-<!ENTITY zotero.richText.italic.label "خط مائل">
-<!ENTITY zotero.richText.bold.label "خط ثخين">
-<!ENTITY zotero.richText.underline.label "تسطير">
-<!ENTITY zotero.richText.superscript.label "حرف مرتفع">
-<!ENTITY zotero.richText.subscript.label "حرف منخفض">
+<!ENTITY zotero.richText.italic.label					"مائل">
+<!ENTITY zotero.richText.bold.label						"غامق">
+<!ENTITY zotero.richText.underline.label				"تسطير">
+<!ENTITY zotero.richText.superscript.label				"مرتفع">
+<!ENTITY zotero.richText.subscript.label				"منخفض">
 
-<!ENTITY zotero.annotate.toolbar.add.label "إضافة حاشية">
-<!ENTITY zotero.annotate.toolbar.collapse.label "تقليص جميع الحواشي">
-<!ENTITY zotero.annotate.toolbar.expand.label "توسيع جميع الحواشي">
-<!ENTITY zotero.annotate.toolbar.highlight.label "تحديد نص">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "إلغاء تحديد نص">
+<!ENTITY zotero.annotate.toolbar.add.label				"إضافة تعليق">
+<!ENTITY zotero.annotate.toolbar.collapse.label			"طي جميع التعليقات">
+<!ENTITY zotero.annotate.toolbar.expand.label			"بسط جميع التعليقات">
+<!ENTITY zotero.annotate.toolbar.highlight.label		"تمييز النص">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label		"إلغاء تمييز النص">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "اعرض التوثيقات كـ:">
-<!ENTITY zotero.integration.prefs.footnotes.label "تعليقات ذيلية">
-<!ENTITY zotero.integration.prefs.endnotes.label "تعليقات ختامية">
+<!ENTITY zotero.integration.prefs.displayAs.label		"عرض الاستشهادات المرجعية كـ:">
+<!ENTITY zotero.integration.prefs.footnotes.label		"حواشي سفلية">
+<!ENTITY zotero.integration.prefs.endnotes.label		"تعليقات ختامية">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "تنسيق باستخدام:">
-<!ENTITY zotero.integration.prefs.bookmarks.label "تأشيرات">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "التأشيرات تظل محفوظة في مايكروسوفت وورد و OpenOffice. ولكنها قد تكون عرضة للتغيير الغير مقصود.">
+<!ENTITY zotero.integration.prefs.formatUsing.label		"الصياغة باستخدام:">
+<!ENTITY zotero.integration.prefs.bookmarks.label		"الاشارات المرجعية">
+<!ENTITY zotero.integration.prefs.bookmarks.caption		"الاشارات المرجعية هي خاصية متاحة عبر مايكروسوفت وورد و اوبن اوفيس ولكنها قد تكون عرضة للتغيير الغير مقصود. ولأسباب تتعلق &#xA;بالتوافق، فالاستشهادات المرجعية لا يمكن ادراجها في الحواشي السفلية او التعليقات الختامية عند تحديد هذا الخيار.">
 
-<!ENTITY zotero.integration.references.label "مراجع في قائمة المؤلفات">
+<!ENTITY zotero.integration.references.label			"المراجع الواردة في قائمة المراجع المستشهد بها">
 
-<!ENTITY zotero.sync.button "Sync with Zotero Server">
-<!ENTITY zotero.sync.error "Sync Error">
-<!ENTITY zotero.sync.storage.progress "Progress:">
-<!ENTITY zotero.sync.storage.downloads "Downloads:">
-<!ENTITY zotero.sync.storage.uploads "Uploads:">
+<!ENTITY zotero.sync.button							"التزامن مع خادم زوتيرو">
+<!ENTITY zotero.sync.error							"خطأ في التزامن">
+<!ENTITY zotero.sync.storage.progress				"التقدم:">
+<!ENTITY zotero.sync.storage.downloads				"التحميل:">
+<!ENTITY zotero.sync.storage.uploads					"الرفع:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
-<!ENTITY zotero.sync.longTagFixer.split "Split">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
-<!ENTITY zotero.sync.longTagFixer.character "character">
-<!ENTITY zotero.sync.longTagFixer.characters "characters">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong		"السمة التالية في مكتبة زوتيرو الخاص بك طويلة جدا لمزامنتها إلى الخادم:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit		"الاوسمة المراد مزامنتها يجب ان تكون اقل من 256 حرف.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete			"يمكنك تقسيم الوسم إلى اوسمة متعددة، او تحرير الوسم يدويا لتقصيره، أو حذفه.">
+<!ENTITY zotero.sync.longTagFixer.split					"تقسيم">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe				"التقسيم بعد">
+<!ENTITY zotero.sync.longTagFixer.character				"حرف">
+<!ENTITY zotero.sync.longTagFixer.characters				"احرف">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved	"لن يتم حفظ الاوسمة الغير محددة.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted			"سيتم حذف الوسم من جميع العناصر.">
 
-<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
-<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
-<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
+<!ENTITY zotero.proxy.recognized.title					"التعرف على الوكيل">
+<!ENTITY zotero.proxy.recognized.warning				"قم فقط بإضافة الوكلاء التي لها وصلات على موقع مكتبتك او مدرستك او شركتك">
+<!ENTITY zotero.proxy.recognized.warning.secondary		"إضافة وكلاء أخرين يسمح للمواقع الضارة بالتنكر كمواقع موثوق بها."> 
+<!ENTITY zotero.proxy.recognized.disable.label			"لا تقم بدعم طلبات الانتقال التلقائي عن طريق الوكلاء المعرفين من قبل">
+<!ENTITY zotero.proxy.recognized.ignore.label			"تجاهل">
 
-<!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
-<!ENTITY zotero.recognizePDF.cancel.label "Cancel">
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
-<!ENTITY zotero.recognizePDF.itemName.label "Item Name">
-<!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
+<!ENTITY zotero.recognizePDF.recognizing.label			"جاري استرجاع البيانات الوصفية...">
+<!ENTITY zotero.recognizePDF.cancel.label					"إلغاء">
+<!ENTITY zotero.recognizePDF.pdfName.label				"اسم ملف PDF">
+<!ENTITY zotero.recognizePDF.itemName.label				"اسم العنصر">
+<!ENTITY zotero.recognizePDF.captcha.label				"اكتب النص التالي لمواصلة استرجاع البيانات الوصفية.">
 
-<!ENTITY zotero.rtfScan.title "RTF Scan">
-<!ENTITY zotero.rtfScan.cancel.label "Cancel">
-<!ENTITY zotero.rtfScan.citation.label "Citation">
-<!ENTITY zotero.rtfScan.itemName.label "Item Name">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
-<!ENTITY zotero.rtfScan.introPage.label "Introduction">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
-<!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
-<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
-<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
-<!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
-<!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
-<!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
-<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
-<!ENTITY zotero.rtfScan.inputFile.label "Input File">
-<!ENTITY zotero.rtfScan.outputFile.label "Output File">
+<!ENTITY zotero.rtfScan.title		                    "فحص ملف RTF">
+<!ENTITY zotero.rtfScan.cancel.label					"إلغاء">
+<!ENTITY zotero.rtfScan.citation.label					"الاستشهاد">
+<!ENTITY zotero.rtfScan.itemName.label					"اسم العنصر">
+<!ENTITY zotero.rtfScan.unmappedCitations.label				"استشهادات مرجعية غير مخططة">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label			"استشهادات مرجعية مبهمة">
+<!ENTITY zotero.rtfScan.mappedCitations.label				"استشهادات مرجعية مخططة">
+<!ENTITY zotero.rtfScan.introPage.label				"المقدمة">
+<!ENTITY zotero.rtfScan.introPage.description		"يمكن لزوتيرو القيام بالاستخلاص التلقائي للاستشهادات واعادة صياغتها وكذلك ادراج قائمة المراجع في ملفات RTF. خاصية فحص RTF تدعم حاليا الاستشهادات المختلفة بناء على الصياغات التالية:">
+<!ENTITY zotero.rtfScan.introPage.description2		"للبدء في العملية، قم بتحديد ملف مدخلات و ملف مخرجات RTF:">
+<!ENTITY zotero.rtfScan.scanPage.label				"جاري البحث عن الاستشهادات المرجعية">
+<!ENTITY zotero.rtfScan.scanPage.description		"يقوم زوتيرو بفحص المستند بحثا عن استشهادات مرجعية. برجاء الانتظار.">
+<!ENTITY zotero.rtfScan.citationsPage.label				"تأكد من صياغة استشهادات العناصر">
+<!ENTITY zotero.rtfScan.citationsPage.description		"الرجاء مراجعة قائمة الاستشهادات المرجعية المتعرف عليها ادناه لضمان أن زوتيرو قد اختار العناصر المطابقة بشكل صحيح. يجب ضبط أي استشهادات غير مخططة أو مبهمة قبل الانتقال الى الخطوة التالية.">
+<!ENTITY zotero.rtfScan.stylePage.label				"تنسيق المستند">
+<!ENTITY zotero.rtfScan.formatPage.label				"صياغة الاستشهادات">
+<!ENTITY zotero.rtfScan.formatPage.description		"يقوم زوتيرو بمعالجة وتنسيق ملف RTF لديك. يرجى الانتظار.">
+<!ENTITY zotero.rtfScan.completePage.label				"تمت عملية فحص ملف RTF">
+<!ENTITY zotero.rtfScan.completePage.description		"تم فحص ومعالجة المستند. برجاء التأكد من انه تم تنسيق الصياغات بشكل صحيح .">
+<!ENTITY zotero.rtfScan.inputFile.label			"ملف المدخلات ">
+<!ENTITY zotero.rtfScan.outputFile.label			"ملف المخرجات">
 
-<!ENTITY zotero.file.choose.label "Choose File...">
-<!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.file.choose.label			"اختر الملف...">
+<!ENTITY zotero.file.noneSelected.label			"لم يتم تحديد ملف">
+
+<!ENTITY zotero.downloadManager.label			"احفظ في زوتيرو">
