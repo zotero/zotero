@@ -1189,8 +1189,7 @@ var Zotero = new function(){
 	
 	
 	/*
-	 * Join the elements of an array into a string using the appropriate
-	 * locale direction
+	 * This function should be removed
 	 *
 	 * |separator| defaults to a space (not a comma like Array.join()) if
 	 *   not specified
@@ -1200,10 +1199,6 @@ var Zotero = new function(){
 	function localeJoin(arr, separator) {
 		if (typeof separator == 'undefined') {
 			separator = ' ';
-		}
-		if (this.dir == 'rtl') {
-			arr.reverse();
-			separator.split('').reverse().join('');
 		}
 		return arr.join(separator);
 	}
