@@ -446,7 +446,7 @@ Zotero.Tags = new function() {
 		tagColors = JSON.stringify(tagColors);
 		Zotero.Prefs.set('tagColors', tagColors);
 		
-		_reloadTagColors()
+		_reloadTagColors();
 		Zotero.Notifier.trigger('redraw', 'item', []);
 	}
 	
