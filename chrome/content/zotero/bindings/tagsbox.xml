@@ -32,6 +32,7 @@
 	<binding id="tags-box">
 		<implementation>
 			<field name="clickHandler"/>
+			<field name="_tagColors"/>
 			
 			<!-- Modes are predefined settings groups for particular tasks -->
 			<field name="_mode">"view"</field>
@@ -120,6 +121,7 @@
 							rows.removeChild(rows.firstChild);
 						
 						var tags = this.item.getTags();
+						this._tagColors = Zotero.Tags.getColors();
 						
 						if(tags)
 						{
@@ -253,6 +255,11 @@
 					else {
 						// Wrap to multiple lines
 						valueElement.appendChild(document.createTextNode(valueText));
+					}
+					
+					// Tag color
+					if (color = this._tagColors[valueText]) {
+						valueElement.setAttribute('style', 'color:' + this._tagColors[valueText]);
 					}
 					
 					return valueElement;

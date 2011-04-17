@@ -712,7 +712,25 @@
 					tagIDs = tagIDs.split('-');
 					var name = Zotero.Tags.getName(tagIDs[0]);
 					Zotero.Tags.setColor(name, color);
-					this.refresh();
+					
+					// Iterate through all windows, updating tag selector and tags box
+					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								.getService(Components.interfaces.nsIWindowMediator);
+					var enumerator = wm.getEnumerator("navigator:browser");
+					while (enumerator.hasMoreElements()) {
+						var win = enumerator.getNext();
+						if (!win.ZoteroPane) continue;
+						
+						var tagSelector = win.ZoteroPane.document.getElementById('zotero-tag-selector');
+						var itemPane = win.ZoteroPane.document.getElementById('zotero-view-item');
+						
+						tagSelector.refresh();
+						
+						if (itemPane.selectedPanel.firstChild.getAttribute('id') == 'zotero-editpane-tags') {
+							var tagsBox = win.ZoteroPane.document.getElementById('zotero-editpane-tags');
+							tagsBox.reload();
+						}
+					}
 				]]>
 				</body>
 			</method>
