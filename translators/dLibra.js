@@ -2,13 +2,13 @@
         "translatorID":"915e3ae2-afa9-4b1d-9780-28ed3defe0ab",
         "label":"dLibra",
         "creator":"Pawel Kolodziej <p.kolodziej@gmail.com>",
-        "target":"/.*dlibra\\/(doccontent|docmetadata|collectiondescription|results).*|.*/dlibra/?",
+        "target":"/.*dlibra\\/(doccontent|docmetadata|collectiondescription|results)|/dlibra/?",
         "minVersion":"1.0.0b3.r1",
         "maxVersion":"",
         "priority":100,
         "inRepository":"1",
         "translatorType":4,
-        "lastUpdated":"2010-10-29 21:01:35"
+        "lastUpdated":"2011-04-18 23:20:17"
 }
 /*
    dLibra Translator
