@@ -39,7 +39,7 @@ Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
                          getService(Components.interfaces.nsIXULAppInfo);
-if(appInfo.platformVersion[0] == 2) {
+if(appInfo.platformVersion[0] >= 2) {
 	Components.utils.import("resource://gre/modules/AddonManager.jsm");
 }
 
