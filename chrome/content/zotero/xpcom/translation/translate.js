@@ -991,8 +991,9 @@ Zotero.Translate.Web.prototype._getPotentialTranslators = function() {
 	var allTranslators = Zotero.Translators.getAllForType("web");
 	var potentialTranslators = [];
 	
+	Zotero.debug("Translate: Running regular expressions");
 	for(var i=0; i<allTranslators.length; i++) {
-		if(!allTranslators[i].webRegexp || allTranslators[i].webRegexp.test(this.location)) {
+		if(!allTranslators[i].webRegexp || (this.location.length < 8192 && allTranslators[i].webRegexp.test(this.location))) {
 			potentialTranslators.push(allTranslators[i]);
 		}
 	}
