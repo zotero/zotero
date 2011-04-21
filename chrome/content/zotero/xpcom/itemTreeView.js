@@ -2415,16 +2415,35 @@ Zotero.ItemTreeView.prototype.onDragExit = function (event) {
 ////////////////////////////////////////////////////////////////////////////////
 
 Zotero.ItemTreeView.prototype.isSeparator = function(row) 						{ return false; }
-Zotero.ItemTreeView.prototype.getRowProperties = function(row, prop) { }
+Zotero.ItemTreeView.prototype.getRowProperties = function(row, prop) {
+	if (!this.selection.isSelected(row)) {
+		return;
+	}
+	
+	var itemID = this._getItemAtRow(row).ref.id;
+	
+	// Set background color for selected items with colored tags
+	if (color = Zotero.Tags.getItemColor(itemID)) {
+		var aServ = Components.classes["@mozilla.org/atom-service;1"].
+			getService(Components.interfaces.nsIAtomService);
+		prop.AppendElement(aServ.getAtom("color" + color.substr(1)));
+	}
+}
 Zotero.ItemTreeView.prototype.getColumnProperties = function(col, prop) { }
 Zotero.ItemTreeView.prototype.getCellProperties = function(row, col, prop) {
 	var itemID = this._getItemAtRow(row).ref.id;
 	
 	// Set tag colors
-	if (color = Zotero.Tags.getItemColor(itemID)) {
-		var aServ = Components.classes["@mozilla.org/atom-service;1"].
-			getService(Components.interfaces.nsIAtomService);
-		prop.AppendElement(aServ.getAtom("color" + color.substr(1)));
+	//
+	// Don't set the text color if the row is selected, in which case the background
+	// color is set in getRowProperties() instead, unless the tree isn't focused,
+	// in which case it's not
+	if (!this.selection.isSelected(row) || !this._treebox.focused) {
+		if (color = Zotero.Tags.getItemColor(itemID)) {
+			var aServ = Components.classes["@mozilla.org/atom-service;1"].
+				getService(Components.interfaces.nsIAtomService);
+			prop.AppendElement(aServ.getAtom("color" + color.substr(1)));
+		}
 	}
 	
 	// Mark items not matching search as context rows, displayed in gray
