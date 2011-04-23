@@ -208,7 +208,7 @@ var Zotero = new function(){
 		this.isFx35 = appInfo.platformVersion.indexOf('1.9.1') === 0;
 		this.isFx31 = this.isFx35;
 		this.isFx36 = appInfo.platformVersion.indexOf('1.9.2') === 0;
-		this.isFx4 = appInfo.platformVersion[0] == 2;
+		this.isFx4 = appInfo.platformVersion[0] >= 2;
 		
 		this.isStandalone = appInfo.ID == ZOTERO_CONFIG['GUID'];
 		if(this.isStandalone) {
