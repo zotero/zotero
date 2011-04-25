@@ -9,7 +9,7 @@
 	"priority":100,
 	"configOptions":{"dataMode":"block"},
 	"inRepository":true,
-	"lastUpdated":"2011-03-10 10:15:00"
+	"lastUpdated":"2011-04-21 10:15:00"
 }
 
 function detectWeb(doc, url) {
@@ -261,6 +261,14 @@ function doWeb(doc, url) {
 		if (!uid) {
 			// Fall back on span 
 			uids = doc.evaluate('//span[@class="pmid"]', doc,
+					nsResolver, XPathResult.ANY_TYPE, null);
+			uid = uids.iterateNext();
+		}
+		if (!uid) {
+			// Fall back on <dl class="rprtid"> 
+			// See http://www.ncbi.nlm.nih.gov/pubmed?term=1173[page]+AND+1995[pdat]+AND+Morton[author]&cmd=detailssearch
+			// Discussed http://forums.zotero.org/discussion/17662
+			uids = doc.evaluate('//dl[@class="rprtid"]/dd[1]', doc,
 					nsResolver, XPathResult.ANY_TYPE, null);
 			uid = uids.iterateNext();
 		}
