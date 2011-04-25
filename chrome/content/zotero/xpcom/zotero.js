@@ -1713,6 +1713,17 @@ Zotero.Prefs = new function(){
 					Zotero.Sync.Runner.IdleListener.unregister();
 				}
 				break;
+			
+			case "search.quicksearch-mode":
+				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+							.getService(Components.interfaces.nsIWindowMediator);
+				var enumerator = wm.getEnumerator("navigator:browser");
+				while (enumerator.hasMoreElements()) {
+					var win = enumerator.getNext();
+					if (!win.ZoteroPane) continue;
+					win.ZoteroPane.updateQuickSearchBox();
+				}
+				break;
 		}
 	}
 }

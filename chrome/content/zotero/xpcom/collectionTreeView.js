@@ -1890,7 +1890,8 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 	s2.setScope(s, includeScopeChildren);
 	
 	if (this.searchText) {
-		s2.addCondition('quicksearch', 'contains', this.searchText);
+		var cond = 'quicksearch-' + Zotero.Prefs.get('search.quicksearch-mode');
+		s2.addCondition(cond, 'contains', this.searchText);
 	}
 	
 	if (this.tags){

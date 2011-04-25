@@ -419,6 +419,15 @@
 	width: 150px;
 }
 
+#zotero-tb-search-menu-button
+{
+	margin: -6px -2px -6px -16px;
+	padding: 6px 2px 6px 14px;
+	-moz-appearance: none;
+	min-width: 0;
+	cursor: default;
+}
+
 #zotero-view-tabbox, #zotero-item-pane-content > groupbox, #zotero-item-pane-content > groupbox > .groupbox-body
 {
 	margin: 0 !important;

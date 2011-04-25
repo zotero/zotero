@@ -119,6 +119,8 @@ var ZoteroPane = new function()
 		window.addEventListener("resize", this.updateToolbarPosition, false);
 		window.setTimeout(this.updateToolbarPosition, 0);
 		
+		this.updateQuickSearchBox();
+		
 		if (Zotero.isMac) {
 			//document.getElementById('zotero-tb-actions-zeroconf-update').setAttribute('hidden', false);
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'mac');
@@ -1694,7 +1696,7 @@ var ZoteroPane = new function()
 		var search = document.getElementById('zotero-tb-search');
 		if (search.value != '') {
 			search.value = '';
-			search.doCommand('cmd_zotero_search');
+			ZoteroPane_Local.search();
 		}
 	}
 	
@@ -3608,6 +3610,95 @@ var ZoteroPane = new function()
 			
 			computedStyle = window.getComputedStyle(pane, null);
 			toolbar.style.width = computedStyle.getPropertyValue("width");
+		}
+	}
+	
+	
+	this.updateQuickSearchBox = function () {
+		var mode = Zotero.Prefs.get("search.quicksearch-mode");
+		var prefix = 'zotero-tb-search-mode-';
+		var prefixLen = prefix.length;
+		
+		var modes = {
+			titlesAndCreators: {
+				label: "Titles & Creators"
+			},
+			
+			fields: {
+				label: "All Fields"
+			},
+			
+			everything: {
+				label: "Everything"
+			}
+		};
+		
+		if (!modes[mode]) {
+			mode = 'everything';
+		}
+		
+		var searchBox = document.getElementById('zotero-tb-search');
+		
+		var hbox = document.getAnonymousNodes(searchBox)[0];
+		var input = hbox.getElementsByAttribute('class', 'textbox-input')[0];
+		
+		// Already initialized, so just update selection
+		var button = hbox.getElementsByAttribute('id', 'zotero-tb-search-menu-button');
+		if (button.length) {
+			button = button[0];
+			var menupopup = button.firstChild;
+			for each(var menuitem in menupopup.childNodes) {
+				if (menuitem.id.substr(prefixLen) == mode) {
+					menuitem.setAttribute('checked', true);
+					if (Zotero.isFx36) {
+						searchBox.emptytext = modes[mode].label;
+					}
+					else {
+						searchBox.placeholder = modes[mode].label;
+					}
+					return;
+				}
+			}
+			return;
+		}
+		
+		// Otherwise, build menu
+		button = document.createElement('button');
+		button.id = 'zotero-tb-search-menu-button';
+		button.setAttribute('type', 'menu');
+		
+		var menupopup = document.createElement('menupopup');
+		
+		for (var i in modes) {
+			var menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('id', prefix + i);
+			menuitem.setAttribute('label', modes[i].label);
+			menuitem.setAttribute('name', 'searchMode');
+			menuitem.setAttribute('type', 'radio');
+			//menuitem.setAttribute("tooltiptext", "");
+			
+			menupopup.appendChild(menuitem);
+			
+			if (mode == i) {
+				menuitem.setAttribute('checked', true);
+				menupopup.selectedItem = menuitem;
+			}
+		}
+		
+		menupopup.setAttribute(
+			'oncommand',
+			'var mode = event.target.id.substr(22); '
+				+ 'Zotero.Prefs.set("search.quicksearch-mode", mode);'
+		);
+		
+		button.appendChild(menupopup);
+		hbox.insertBefore(button, input);
+		
+		if (Zotero.isFx36) {
+			searchBox.emptytext = modes[mode].label;
+		}
+		else {
+			searchBox.placeholder = modes[mode].label;
 		}
 	}
 }
