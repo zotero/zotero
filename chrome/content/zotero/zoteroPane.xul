@@ -46,7 +46,6 @@
 	<script src="locateMenu.js" type="application/javascript;version=1.7"/>
 	
 	<commandset id="mainCommandSet">
-		<command id="cmd_zotero_search" oncommand="ZoteroPane_Local.search();"/>
 		<command id="cmd_zotero_reportErrors" oncommand="ZoteroPane_Local.reportErrors();"/>
 	</commandset>
 	
@@ -145,10 +144,10 @@
 					<toolbarseparator/>
 					<toolbarbutton id="zotero-tb-advanced-search" class="zotero-tb-button" tooltiptext="&zotero.toolbar.advancedSearch;" oncommand="ZoteroPane_Local.openAdvancedSearchWindow()"/>
 					<spacer flex="1"/>
-					<textbox id="zotero-tb-search" type="search" timeout="250" command="cmd_zotero_search" dir="reverse"
-						onkeypress="ZoteroPane_Local.handleSearchKeypress(this, event)"
-						oninput="ZoteroPane_Local.handleSearchInput(this, event)">
-					</textbox>
+					<textbox id="zotero-tb-search" type="search" timeout="250" dir="reverse"
+							onkeypress="ZoteroPane_Local.handleSearchKeypress(this, event)"
+							oninput="ZoteroPane_Local.handleSearchInput(this, event)"
+							oncommand="ZoteroPane_Local.search()"/>
 				</hbox>
 				
 				<hbox id="zotero-item-toolbar" align="center" flex="1">

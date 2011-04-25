@@ -43,6 +43,10 @@
   padding: 5px 1px 5px 11px;
 }
 
+#zotero-tb-search-menu-button {
+	list-style-image: url("chrome://browser/skin/searchbar-dropmarker.png");
+}
+
 #zotero-tb-sync > .toolbarbutton-icon {
   -moz-padding-start: 8px;
   padding-top: 1px;

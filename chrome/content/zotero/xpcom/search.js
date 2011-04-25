@@ -398,24 +398,32 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 	}
 	
 	// Shortcut to add a condition on every table -- does not return an id
-	if (condition=='quicksearch'){
+	if (condition.match(/^quicksearch/)) {
 		var parts = Zotero.SearchConditions.parseSearchString(value);
 		
 		for each(var part in parts) {
 			this.addCondition('blockStart');
-			this.addCondition('field', operator, part.text, false);
-			this.addCondition('creator', operator, part.text, false);
-			this.addCondition('tag', operator, part.text, false);
-			this.addCondition('note', operator, part.text, false);
-			this.addCondition('annotation', operator, part.text, false);
-			
-			if (part.inQuotes) {
-				this.addCondition('fulltextContent', operator, part.text, false);
+			if (condition == 'quicksearch-titlesAndCreators') {
+				this.addCondition('title', operator, part.text, false);
 			}
 			else {
-				var splits = Zotero.Fulltext.semanticSplitter(part.text);
-				for each(var split in splits) {
-					this.addCondition('fulltextWord', operator, split, false);
+				this.addCondition('field', operator, part.text, false);
+			}
+			this.addCondition('creator', operator, part.text, false);
+			
+			if (condition == 'quicksearch-everything') {
+				this.addCondition('tag', operator, part.text, false);
+				this.addCondition('note', operator, part.text, false);
+				this.addCondition('annotation', operator, part.text, false);
+				
+				if (part.inQuotes) {
+					this.addCondition('fulltextContent', operator, part.text, false);
+				}
+				else {
+					var splits = Zotero.Fulltext.semanticSplitter(part.text);
+					for each(var split in splits) {
+						this.addCondition('fulltextWord', operator, split, false);
+					}
 				}
 			}
 			
@@ -1817,6 +1825,40 @@ Zotero.SearchConditions = new function(){
 				}
 			},
 			
+			{
+				name: 'quicksearch-titlesAndCreators',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				},
+				noLoad: true
+			},
+			
+			{
+				name: 'quicksearch-fields',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				},
+				noLoad: true
+			},
+			
+			{
+				name: 'quicksearch-everything',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				},
+				noLoad: true
+			},
+			
+			// Deprecated
 			{
 				name: 'quicksearch',
 				operators: {
