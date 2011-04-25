@@ -2,6 +2,11 @@
 	margin-left: 5px;
 }
 
+#zotero-tb-search-menu-button {
+	list-style-image: url(mainwindow-dropdown-arrow.png);
+	-moz-image-region: rect(0, 13px, 11px, 0);
+}
+
 #zotero-tb-sync-warning {
 	margin-right: 2px;
 }
