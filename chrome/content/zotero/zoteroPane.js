@@ -3634,7 +3634,7 @@ var ZoteroPane = new function()
 		};
 		
 		if (!modes[mode]) {
-			mode = 'everything';
+			mode = 'fields';
 		}
 		
 		var searchBox = document.getElementById('zotero-tb-search');
