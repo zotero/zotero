@@ -144,7 +144,7 @@
 					<toolbarseparator/>
 					<toolbarbutton id="zotero-tb-advanced-search" class="zotero-tb-button" tooltiptext="&zotero.toolbar.advancedSearch;" oncommand="ZoteroPane_Local.openAdvancedSearchWindow()"/>
 					<spacer flex="1"/>
-					<textbox id="zotero-tb-search" type="search" timeout="250" dir="reverse"
+					<textbox id="zotero-tb-search" type="search" timeout="250"
 							onkeypress="ZoteroPane_Local.handleSearchKeypress(this, event)"
 							oninput="ZoteroPane_Local.handleSearchInput(this, event)"
 							oncommand="ZoteroPane_Local.search()"/>

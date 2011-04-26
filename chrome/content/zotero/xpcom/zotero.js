@@ -1495,6 +1495,94 @@ var Zotero = new function(){
 	}
 	
 	
+	this.updateQuickSearchBox = function (document) {
+		var mode = Zotero.Prefs.get("search.quicksearch-mode");
+		var prefix = 'zotero-tb-search-mode-';
+		var prefixLen = prefix.length;
+		
+		var modes = {
+			titlesAndCreators: {
+				label: "Titles & Creators"
+			},
+			
+			fields: {
+				label: "All Fields"
+			},
+			
+			everything: {
+				label: "Everything"
+			}
+		};
+		
+		if (!modes[mode]) {
+			mode = 'fields';
+		}
+		
+		var searchBox = document.getElementById('zotero-tb-search')
+		var hbox = document.getAnonymousNodes(searchBox)[0];
+		var input = hbox.getElementsByAttribute('class', 'textbox-input')[0];
+		
+		// Already initialized, so just update selection
+		var button = hbox.getElementsByAttribute('id', 'zotero-tb-search-menu-button');
+		if (button.length) {
+			button = button[0];
+			var menupopup = button.firstChild;
+			for each(var menuitem in menupopup.childNodes) {
+				if (menuitem.id.substr(prefixLen) == mode) {
+					menuitem.setAttribute('checked', true);
+					if (Zotero.isFx36) {
+						searchBox.emptytext = modes[mode].label;
+					}
+					else {
+						searchBox.placeholder = modes[mode].label;
+					}
+					return;
+				}
+			}
+			return;
+		}
+		
+		// Otherwise, build menu
+		button = document.createElement('button');
+		button.id = 'zotero-tb-search-menu-button';
+		button.setAttribute('type', 'menu');
+		
+		var menupopup = document.createElement('menupopup');
+		
+		for (var i in modes) {
+			var menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('id', prefix + i);
+			menuitem.setAttribute('label', modes[i].label);
+			menuitem.setAttribute('name', 'searchMode');
+			menuitem.setAttribute('type', 'radio');
+			//menuitem.setAttribute("tooltiptext", "");
+			
+			menupopup.appendChild(menuitem);
+			
+			if (mode == i) {
+				menuitem.setAttribute('checked', true);
+				menupopup.selectedItem = menuitem;
+			}
+		}
+		
+		menupopup.setAttribute(
+			'oncommand',
+			'var mode = event.target.id.substr(22); '
+				+ 'Zotero.Prefs.set("search.quicksearch-mode", mode);'
+		);
+		
+		button.appendChild(menupopup);
+		hbox.insertBefore(button, input);
+		
+		if (Zotero.isFx36) {
+			searchBox.emptytext = modes[mode].label;
+		}
+		else {
+			searchBox.placeholder = modes[mode].label;
+		}
+	}
+	
+	
 	/*
 	 * Clear entries that no longer exist from various tables
 	 */
