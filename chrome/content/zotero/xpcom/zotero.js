@@ -1569,6 +1569,7 @@ var Zotero = new function(){
 			'oncommand',
 			'var mode = event.target.id.substr(22); '
 				+ 'Zotero.Prefs.set("search.quicksearch-mode", mode);'
+				+ 'if (document.getElementById("zotero-tb-search").value == "") { event.stopPropagation(); }'
 		);
 		
 		button.appendChild(menupopup);
@@ -1580,6 +1581,16 @@ var Zotero = new function(){
 		else {
 			searchBox.placeholder = modes[mode].label;
 		}
+		
+		// If Alt-Up/Down, show popup
+		searchBox.setAttribute(
+			'onkeypress',
+			searchBox.getAttribute('onkeypress') + "\n"
+			+ "if (event.altKey && (event.keyCode == event.DOM_VK_UP || event.keyCode == event.DOM_VK_DOWN)) {"
+				+ "document.getElementById('zotero-tb-search-menu-button').open = true;"
+				+ "event.stopPropagation();"
+			+ "}"
+		);
 	}
 	
 	
@@ -1809,7 +1820,7 @@ Zotero.Prefs = new function(){
 				while (enumerator.hasMoreElements()) {
 					var win = enumerator.getNext();
 					if (!win.ZoteroPane) continue;
-					win.ZoteroPane.updateQuickSearchBox();
+					Zotero.updateQuickSearchBox(win.ZoteroPane.document);
 				}
 				break;
 		}
