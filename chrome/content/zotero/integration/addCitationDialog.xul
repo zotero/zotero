@@ -27,6 +27,7 @@
 <?xml-stylesheet href="chrome://global/skin/dialog.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
@@ -55,8 +56,8 @@
 			<hbox flex="1">
 				<vbox align="stretch" flex="1">
 					<hbox align="center" pack="end">
-						<textbox id="zotero-tb-search" type="search" timeout="250" oncommand="onSearch()" dir="reverse" tabindex="1"
-								onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { if (this.value == '') { cancelDialog(); return false; } this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;"/>
+						<textbox id="zotero-tb-search" type="search" timeout="250" oncommand="onSearch()" tabindex="1"
+								onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { if (this.value == '') { cancelDialog(); return false; } this.value = ''; onSearch(); return false; } return true;"/>
 					</hbox>
 					<hbox flex="1" style="margin-top: 5px">
 						<tree id="zotero-collections-tree"
