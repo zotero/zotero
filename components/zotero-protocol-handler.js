@@ -470,9 +470,22 @@ function ChromeExtensionHandler() {
 						break;
 					
 					default:
+						var content = Zotero.Report.generateHTMLDetails(items, combineChildItems);
+						
+						// Serve invalid XML as text/html
+						//
+						// This is a temporary workaround until we figure out
+						// something better.
+						try {
+							var xml = new XML(content.replace(/^<\!DOCTYPE [^>]+>\n/, '').trim());
+							mimeType = 'application/xhtml+xml';
+						}
+						catch (e) {
+							Zotero.debug(e);
+							mimeType = 'text/html';
+						}
+						
 						format = 'html';
-						mimeType = 'application/xhtml+xml';
-						content = Zotero.Report.generateHTMLDetails(items, combineChildItems);
 				}
 			}
 			catch (e){
