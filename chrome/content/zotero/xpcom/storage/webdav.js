@@ -1356,7 +1356,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.purgeOrphanedStorageFiles = functio
 			
 			// Skip root URI
 			if (href == path
-					// Some Apache servers respond with an "/zotero" href
+					// Some Apache servers respond with a "/zotero" href
 					// even for a "/zotero/" request
 					|| (trailingSlash && href + '/' == path)
 					// Try URL-encoded as well, as above
