@@ -1354,6 +1354,16 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.purgeOrphanedStorageFiles = functio
 				href = href.path;
 			}
 			
+			// Skip root URI
+			if (href == path
+					// Some Apache servers respond with an "/zotero" href
+					// even for a "/zotero/" request
+					|| (trailingSlash && href + '/' == path)
+					// Try URL-encoded as well, as above
+					|| decodeURIComponent(href) == path) {
+				continue;
+			}
+			
 			if (href.indexOf(path) == -1
 					// Try URL-encoded as well, in case there's a '~' or similar
 					// character in the URL and the server (e.g., Sakai) is
@@ -1361,13 +1371,6 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.purgeOrphanedStorageFiles = functio
 					&& decodeURIComponent(href).indexOf(path) == -1) {
 				self.onError("DAV:href '" + href
 						+ "' does not begin with path '" + path + "' in " + funcName);
-			}
-			
-			// Skip root URI
-			if (href == path
-					// Try URL-encoded as well, as above
-					|| decodeURIComponent(href) == path) {
-				continue;
 			}
 			
 			var matches = href.match(/[^\/]+$/);
