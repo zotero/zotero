@@ -47,9 +47,10 @@ function detectWeb(doc, url) {
 			url.match("content/firstcite") 
 		) {
 			return "multiple";
-		} else if (url.match("content/(early/)?[0-9]+")) {
+		} else if (url.match("content/(early/)?[0-9]+") 
+				&& (url.indexOf("frame") === -1 || url.indexOf("frame=sidebar") !== -1)) {
 			return "journalArticle";
-		}
+		} 
 	}
 }
 
@@ -117,6 +118,9 @@ function doWeb(doc, url) {
 		newurl = newurls.shift();		
 		if (newurl.match("cgi/content")) {
 			pdfurl = newurl.replace(/cgi\/content\/abstract/, "content") + ".full.pdf";
+		// This is here to catch those pdf+html pages
+		} else if (newurl.match("\.full\.pdf")) {
+			pdfurl = newurl.slice(0, newurl.lastIndexOf(".full.pdf")) + ".full.pdf";
 		} else {
 			// This is not ideal...todo: brew a regex that grabs the correct URL
 			pdfurl = newurl.slice(0, newurl.lastIndexOf(".")) + ".full.pdf";
