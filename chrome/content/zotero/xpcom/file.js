@@ -365,7 +365,7 @@ Zotero.File = new function(){
 			var checkFileOther = "Check that the file is not currently "
 				+ "in use and that its permissions allow write access.";
 			var msg = str + " "
-					+ (!Zotero.isWin ? checkFileWindows : checkFileOther)
+					+ (Zotero.isWin ? checkFileWindows : checkFileOther)
 					+ "\n\n"
 					+ "Restarting your computer or disabling security "
 					+ "software may also help.";
