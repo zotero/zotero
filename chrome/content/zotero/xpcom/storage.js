@@ -786,6 +786,9 @@ Zotero.Sync.Storage = new function () {
 	
 	this.purgeDeletedStorageFiles = function (module, callback) {
 		var session = new Zotero.Sync.Storage.Session(module, { onError: _error });
+		if (!this.active) {
+			return;
+		}
 		if (!session.initFromPrefs()) {
 			return;
 		}
@@ -795,6 +798,9 @@ Zotero.Sync.Storage = new function () {
 	
 	this.purgeOrphanedStorageFiles = function (module, callback) {
 		var session = new Zotero.Sync.Storage.Session(module, { onError: _error });
+		if (!this.active) {
+			return;
+		}
 		if (!session.initFromPrefs()) {
 			return;
 		}
