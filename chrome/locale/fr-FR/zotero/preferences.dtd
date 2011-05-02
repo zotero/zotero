@@ -7,9 +7,9 @@
 <!ENTITY zotero.preferences.prefpane.general "Générales">
 
 <!ENTITY zotero.preferences.userInterface "Interface utilisateur">
-<!ENTITY zotero.preferences.showIn "Load Zotero in:">
-<!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
-<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
+<!ENTITY zotero.preferences.showIn "Ouvrir Zotero dans :">
+<!ENTITY zotero.preferences.showIn.browserPane "un panneau du navigateur">
+<!ENTITY zotero.preferences.showIn.separateTab "un onglet séparé">
 <!ENTITY zotero.preferences.statusBarIcon "Icône dans la barre d'état :">
 <!ENTITY zotero.preferences.statusBarIcon.none "Aucune">
 <!ENTITY zotero.preferences.fontSize "Taille des caractères :">
@@ -28,8 +28,8 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Faire une capture automatique de la page lors de la création d'éléments à partir de pages Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Joindre automatiquement les fichers PDF associés lors de l'enregistrement d'un élément">
 <!ENTITY zotero.preferences.automaticTags "Ajouter automatiquement aux éléments des marqueurs grâce aux mots-clés et aux sujets">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Supprimer automatiquement les éléments mis à la corbeille depuis plus de">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "jours">
 
 <!ENTITY zotero.preferences.groups "Groupes">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "En copiant des éléments entre des bibliothèques, inclure :">
@@ -99,16 +99,16 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Format de sortie">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Désactiver la copie rapide lorsqu'on fait glisser plus de">
 
-<!ENTITY zotero.preferences.prefpane.cite "Cite">
+<!ENTITY zotero.preferences.prefpane.cite "Citer">
 <!ENTITY zotero.preferences.cite.styles "Styles">
-<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
+<!ENTITY zotero.preferences.cite.wordProcessors "Traitements de texte">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Aucune extension pour traitement de texte n'est installée.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Obtenir des extensions pour traitement de texte…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
 
-<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Gestionnaire de styles">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Titre">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Mis à jour">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Obtenir des styles supplémentaires…">
 
@@ -134,8 +134,8 @@
 <!ENTITY zotero.preferences.proxies.desc_link "documentation concernant les serveurs mandataires">
 <!ENTITY zotero.preferences.proxies.desc_after_link "pour plus d'information.">
 <!ENTITY zotero.preferences.proxies.transparent "Retenir automatiquement les ressources atteintes par l'entremise d'un serveur mandataire">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Reconnaître automatiquement les ressources passant par un serveur mandataire">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Désactiver la redirection par un serveur mandataire lorsque mon nom de domaine contient ">
 <!ENTITY zotero.preferences.proxies.configured "Serveurs mandataires configurés">
 <!ENTITY zotero.preferences.proxies.hostname "Adresse Internet">
 <!ENTITY zotero.preferences.proxies.scheme "Schéma">
@@ -151,13 +151,13 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avancées">
 
-<!ENTITY zotero.preferences.prefpane.locate "Locate">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
+<!ENTITY zotero.preferences.prefpane.locate "Localiser">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Gestion des moteurs de recherche d'articles">
 <!ENTITY zotero.preferences.locate.description "Description">
-<!ENTITY zotero.preferences.locate.name "Name">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
-<!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
+<!ENTITY zotero.preferences.locate.name "Nom">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "Un moteur de recherche étend les capacités du menu Localiser du panneau d'information. En activant des moteurs de recherche dans la liste ci-dessous, ils seront ajoutés au menu déroulant et pourront être utilisés pour localiser des ressources de votre bibliothèque sur le Web.">
+<!ENTITY zotero.preferences.locate.addDescription "Pour ajouter un moteur de recherche absent de la liste, allez sur le moteur de recherche voulu dans votre navigateur et sélectionnez 'Ajoutez' dans la barre de recherche de Firefox. À la réouverture de ce panneau de préférences vous aurez une option pour activer le nouveau moteur de recherche.">
+<!ENTITY zotero.preferences.locate.restoreDefaults "Rétablir les moteurs par défaut">
 
 <!ENTITY zotero.preferences.charset "Codage de caractères">
 <!ENTITY zotero.preferences.charset.importCharset "Importer le codage de caractères">

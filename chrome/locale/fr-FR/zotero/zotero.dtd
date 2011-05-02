@@ -37,7 +37,7 @@
 <!ENTITY zotero.tabs.related.label "Connexe">
 <!ENTITY zotero.notes.separate "Éditer dans une nouvelle fenêtre">
 
-<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.collections.showUnfiledItems "Afficher les éléments sans collection">
 
 <!ENTITY zotero.items.itemType "Type de document">
 <!ENTITY zotero.items.type_column "Type">
@@ -89,7 +89,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Assistance et documentation">
 <!ENTITY zotero.toolbar.about.label "À propos de Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Recherche avancée">
-<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
+<!ENTITY zotero.toolbar.tab.tooltip "Basculer en mode onglet">
 <!ENTITY zotero.toolbar.openURL.label "Localiser">
 <!ENTITY zotero.toolbar.openURL.tooltip "Chercher dans votre bibliothèque locale">
 
