@@ -496,9 +496,43 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 	
 	if(madeChanges)
 	{
-		// If adding and this is the active window, select the item
-		if(action == 'add' && ids.length===1 && activeWindow)
-		{
+		var singleSelect = false;
+		// If adding a single top-level item and this is the active window, select it
+		if (action == 'add' && activeWindow) {
+			if (ids.length == 1) {
+				singleSelect = ids[0];
+			}
+			// If there's only one parent item in the set of added items,
+			// mark that for selection in the UI
+			//
+			// Only bother checking for single parent item if 1-5 total items,
+			// since a translator is unlikely to save more than 4 child items
+			else if (ids.length <= 5) {
+				var items = Zotero.Items.get(ids);
+				if (items) {
+					var found = false;
+					for each(var item in items) {
+						// Check for note and attachment type, since it's quicker
+						// than checking for parent item
+						if (item.itemTypeID == 1 || item.itemTypeID == 14) {
+							continue;
+						}
+						
+						// We already found a top-level item, so cancel the
+						// single selection
+						if (found) {
+							singleSelect = false;
+							break;
+						}
+						found = true;
+						singleSelect = item.id;
+					}
+				}
+			}
+		}
+		
+		
+		if (singleSelect) {
 			if (sort) {
 				this.sort(typeof sort == 'number' ? sort : false);
 			}
@@ -509,7 +543,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 			// Reset to Info tab
 			this._ownerDocument.getElementById('zotero-view-tabbox').selectedIndex = 0;
 			
-			this.selectItem(ids[0]);
+			this.selectItem(singleSelect);
 		}
 		// If single item is selected and was modified
 		else if (action == 'modify' && ids.length == 1 &&
