@@ -1515,6 +1515,7 @@ var Zotero = new function(){
 		};
 		
 		if (!modes[mode]) {
+			Zotero.Prefs.set("search.quicksearch-mode", "fields");
 			mode = 'fields';
 		}
 		
