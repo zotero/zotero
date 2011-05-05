@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-09 21:10:00"
+	"lastUpdated":"2011-05-05 21:10:00"
 }
 
 function detectWeb(doc, url) {
@@ -61,6 +61,10 @@ function doWeb(doc, url) {
 	
 	var datePath = '//div[@class="story"]/div[@class="byline"]/p[1]/br/following-sibling::text()';
 	var dateElement = doc.evaluate(datePath, doc, null,XPathResult.ANY_TYPE, null).iterateNext();
+	if (!dateElement) {
+			datePath = '//div[@class="story"]/div[@class="byline"]/span[@class="publishedDate"]';
+			dateElement = doc.evaluate(datePath, doc, null,XPathResult.ANY_TYPE, null).iterateNext();
+	}
 	if (dateElement) {
 		var dateRE = /\d\d?\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d\d\d\d/;
 		var date = dateElement.textContent.match(dateRE);
