@@ -1,14 +1,14 @@
 {
-	"translatorID":"40b9ca22-8df4-4f3b-9cb6-8f9b55486d30",
-	"translatorType":4,
-	"label":"Telegraph.co.uk",
-	"creator":"Reino Ruusu",
-	"target":"^http://www\\.telegraph\\.co\\.uk/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-05-05 21:10:00"
+        "translatorID": "40b9ca22-8df4-4f3b-9cb6-8f9b55486d30",
+        "label": "The Telegraph",
+        "creator": "Reino Ruusu",
+        "target": "^http://www\\.telegraph\\.co\\.uk/",
+        "minVersion": "1.0.0b4.r5",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "lastUpdated": "2011-05-05 19:58:29"
 }
 
 function detectWeb(doc, url) {
@@ -38,9 +38,8 @@ function doWeb(doc, url) {
 	Zotero.debug("doWeb URL= "+ url);
 	var newArticle = new Zotero.Item('newspaperArticle');
 	newArticle.url = url;
-	newArticle.publicationTitle = 'Telegraph.co.uk';
-	//newArticle.publisher = 'Telegraph Media Group Limited';
-	//Zotero.debug(doc.evaluate('//html/head/meta[@name="title"]/@content', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
+	newArticle.publicationTitle = 'The Telegraph';
+	newArticle.publisher = 'Telegraph Media Group Limited';
 	var metaElements = doc.evaluate('html/head/meta', doc, null, XPathResult.ANY_TYPE, null);
 	var tmp;	
 	while (tmp = metaElements.iterateNext()) {
@@ -48,7 +47,7 @@ function doWeb(doc, url) {
 		var content = tmp.getAttribute('content');
 		if (name == 'title')
 			newArticle.title = content;
-			else if (name == 'author') {
+			else if (name == 'author' || name == "DCSext.author") {
 				content = Zotero.Utilities.trim(content);
 				//Zotero.debug(content);
 				content = content.replace(/^By\s+/, "");
