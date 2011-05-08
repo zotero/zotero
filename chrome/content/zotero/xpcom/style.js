@@ -71,7 +71,19 @@ Zotero.Styles = new function() {
 			var file = contents.getNext().QueryInterface(Components.interfaces.nsIFile);
 			if(!file.leafName || file.leafName[0] == "." || file.isDirectory()) continue;
 			
-			var style = new Zotero.Style(file);
+			try {
+				var style = new Zotero.Style(file);
+			}
+			catch (e) {
+				Zotero.log(
+					"Error loading style '" + file.leafName + "': " + e.message,
+					"error",
+					file.path,
+					null,
+					e.lineNumber
+				);
+				continue;
+			}
 			if(style.styleID) {
 				if(_styles[style.styleID]) {
 					// same style is already cached
