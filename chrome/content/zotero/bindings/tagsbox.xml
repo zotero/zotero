@@ -187,7 +187,7 @@
 						if (this.editable) {
 							var remove = document.createElement("label");
 							remove.setAttribute('value','-');
-							remove.setAttribute('class','zotero-clicky');
+							remove.setAttribute('class','zotero-clicky zotero-clicky-minus');
 							if (tagID)
 							{
 								remove.setAttribute('ztabindex', -1);
