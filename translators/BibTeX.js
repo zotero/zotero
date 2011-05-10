@@ -10,7 +10,7 @@
 	"configOptions":{"dataMode":"block"},
 	"displayOptions":{"exportCharset":"UTF-8", "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2011-04-01 21:20:00"
+	"lastUpdated":"2011-05-10 21:20:00"
 }
 
 function detectImport() {
@@ -80,7 +80,8 @@ var inputFieldMap = {
 	booktitle :"publicationTitle",
 	school:"publisher",
 	institution:"publisher",
-	publisher:"publisher"
+	publisher:"publisher",
+	issue:"issue"
 };
 
 var zotero2bibtexTypeMap = {
@@ -165,11 +166,13 @@ var mappingTable = {
     "\u00C6":"{\\AE}", // LATIN CAPITAL LETTER AE
     "\u00D0":"{\\DH}", // LATIN CAPITAL LETTER ETH
     "\u00D7":"{\\texttimes}", // MULTIPLICATION SIGN
+    "\U00D8":"{\\O}", // LATIN CAPITAL LETTER O WITH STROKE
     "\u00DE":"{\\TH}", // LATIN CAPITAL LETTER THORN
     "\u00DF":"{\\ss}", // LATIN SMALL LETTER SHARP S
     "\u00E6":"{\\ae}", // LATIN SMALL LETTER AE
     "\u00F0":"{\\dh}", // LATIN SMALL LETTER ETH
     "\u00F7":"{\\textdiv}", // DIVISION SIGN
+    "\U00F8":"{\\o}", // LATIN SMALL LETTER O WITH STROKE
     "\u00FE":"{\\th}", // LATIN SMALL LETTER THORN
     "\u0131":"{\\i}", // LATIN SMALL LETTER DOTLESS I
     "\u0132":"IJ", // LATIN CAPITAL LIGATURE IJ
@@ -1089,11 +1092,13 @@ var reversemappingTable = {
     "{\\AE}"                          : "\u00C6", // LATIN CAPITAL LETTER AE
     "{\\DH}"                          : "\u00D0", // LATIN CAPITAL LETTER ETH
     "{\\texttimes}"                   : "\u00D7", // MULTIPLICATION SIGN
+    "{\\O}"                          : "\U00D8", // LATIN SMALL LETTER O WITH STROKE
     "{\\TH}"                          : "\u00DE", // LATIN CAPITAL LETTER THORN
     "{\\ss}"                          : "\u00DF", // LATIN SMALL LETTER SHARP S
     "{\\ae}"                          : "\u00E6", // LATIN SMALL LETTER AE
     "{\\dh}"                          : "\u00F0", // LATIN SMALL LETTER ETH
     "{\\textdiv}"                     : "\u00F7", // DIVISION SIGN
+    "{\\o}"                          : "\U00F8", // LATIN SMALL LETTER O WITH STROKE
     "{\\th}"                          : "\u00FE", // LATIN SMALL LETTER THORN
     "{\\i}"                           : "\u0131", // LATIN SMALL LETTER DOTLESS I
     "'n"                              : "\u0149", // LATIN SMALL LETTER N PRECEDED BY APOSTROPHE
