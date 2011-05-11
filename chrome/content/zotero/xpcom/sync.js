@@ -2033,7 +2033,7 @@ Zotero.Sync.Server = new function () {
 		if (!wait || isNaN(wait)) {
 			wait = 5000;
 		}
-		Zotero.debug(msg + " — waiting " + wait + "ms before next check");
+		Zotero.debug(msg + " -- waiting " + wait + "ms before next check");
 		_checkTimer = setTimeout(function () { callback(mode); }, wait);
 		return true;
 	}
