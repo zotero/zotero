@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2011-05-05 22:04:16"
+	"lastUpdated":"2011-05-12 22:04:16"
 }
 
 function detectWeb(doc, url) {
@@ -64,18 +64,21 @@ function doWeb(doc, url) {
 		for(var url in items) {
 			// Some pages don't show the metadata we need (http://forums.zotero.org/discussion/16283)
 			// No data: http://ieeexplore.ieee.org/search/srchabstract.jsp?tp=&arnumber=1397982
+			// No data: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1397982
 			// Data: http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1397982
 			var arnumber = url.match(/arnumber=(\d+)/)[1];
-			url = url.replace(/\/search\/.*$/, "/xpls/abs_all.jsp?arnumber="+arnumber);
+			url = url.replace(/\/(?:search|stamp)\/.*$/, "/xpls/abs_all.jsp?arnumber="+arnumber);
 			urls.push(url);
 		}
 		Zotero.Utilities.processDocuments(urls, scrape, function () { Zotero.done(); });
 		Zotero.wait();
 	} else {
-		if (url.indexOf("/search/") !== -1) {
+		if (url.indexOf("/search/") !== -1 || url.indexOf("/stamp/") !== -1 || url.indexOf("/ielx4/")) {
 			// Address the same missing metadata problem as above
+			// Also address issue of saving from PDF itself, I hope
+			// URL like http://ieeexplore.ieee.org/ielx4/78/2655/00080767.pdf?tp=&arnumber=80767&isnumber=2655
 			var arnumber = url.match(/arnumber=(\d+)/)[1];
-			url = url.replace(/\/search\/.*$/, "/xpls/abs_all.jsp?arnumber="+arnumber);
+			url = url.replace(/\/(?:search|stamp|ielx4)\/.*$/, "/xpls/abs_all.jsp?arnumber="+arnumber);
 			Zotero.Utilities.processDocuments([url], scrape, function () { Zotero.done(); });
 			Zotero.wait();
 		} else {
