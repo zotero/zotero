@@ -10,7 +10,7 @@
 	"configOptions":{"dataMode":"block"},
 	"displayOptions":{"exportCharset":"UTF-8", "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2011-05-10 21:20:00"
+	"lastUpdated":"2011-05-12 21:20:00"
 }
 
 function detectImport() {
@@ -1837,7 +1837,7 @@ function writeField(field, value, isMacro) {
 		// I hope these are all the escape characters!
 		value = value.replace(/[|\<\>\~\^\\]/g, mapEscape).replace(/([\#\$\%\&\_])/g, "\\$1");
 		// Case of words with uppercase characters in non-initial positions is preserved with braces.
-		if(!isMacro&&field != "pages") value = value.replace(/([^\s]+[A-Z][^\s]*)/g, "{$1}");
+		if(!isMacro&&field != "pages") value = value.replace(/([^\s]+[A-Z][^\s,]*)/g, "{$1}");
 	}
 	if (Zotero.getOption("exportCharset") != "UTF-8") {
 		value = value.replace(/[\u0080-\uFFFF]/g, mapAccent);
@@ -2016,7 +2016,7 @@ function doExport() {
 				var creatorString = creator.lastName;
 
 				if (creator.firstName) {
-					creatorString = creator.firstName + " " + creator.lastName;
+					creatorString = creator.lastName + ", " + creator.firstName;
 				}
 
 				if (creator.creatorType == "editor") {
