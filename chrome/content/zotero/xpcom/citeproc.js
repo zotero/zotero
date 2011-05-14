@@ -1840,7 +1840,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.163";
+	this.processor_version = "1.0.165";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3316,7 +3316,7 @@ CSL.getCitationCluster = function (inputList, citationID) {
 		CSL.Output.Queue.adjustPunctuation(this, this.output.queue, mystk);
 		composite = this.output.string(this, this.output.queue);
 		this.tmp.suppress_decorations = false;
-		if (item && item["author-only"]) {
+		if ("string" === typeof composite) {
 			this.tmp.suppress_decorations = false;
 			return composite;
 		}
@@ -6294,6 +6294,7 @@ CSL.Node.text = {
 							func = function (state, Item) {
 								var idx, value;
 								value = state.getVariable(Item, "page", form);
+								value = value.replace("\u2013", "-", "g");
 								if (value) {
 									idx = value.indexOf("-");
 									if (idx > -1) {
@@ -8419,6 +8420,7 @@ CSL.Util.PageRangeMangler.getFunction = function (state) {
 	};
 	listify = function (str) {
 		var m, lst, ret;
+		str = str.replace("\u2013", "-", "g");
 		m = str.match(/([a-zA-Z]*[0-9]+\s*-\s*[a-zA-Z]*[0-9]+)/g);
 		lst = str.split(/[a-zA-Z]*[0-9]+\s*-\s*[a-zA-Z]*[0-9]+/);
 		if (lst.length === 0) {
@@ -8504,7 +8506,7 @@ CSL.Util.PageRangeMangler.getFunction = function (state) {
 	};
 	if (!state.opt["page-range-format"]) {
 		ret_func = function (str) {
-			return str;
+			return str.replace("-", "\u2013", "g");
 		};
 	} else if (state.opt["page-range-format"] === "expanded") {
 		ret_func = function (str) {
@@ -9221,7 +9223,8 @@ CSL.Registry.prototype.init = function (myitems, uncited_flag) {
 CSL.Registry.prototype.dodeletes = function (myhash) {
 	var otheritems, key, ambig, pos, len, items, kkey, mypos, id;
 	if ("string" === typeof myhash) {
-		myhash = {myhash: true};
+		myhash = {};
+		myhash[myhash] = true;
 	}
 	for (key in this.registry) {
 		if (this.registry.hasOwnProperty(key) && !myhash[key]) {
@@ -9488,6 +9491,7 @@ CSL.Registry.NameReg = function (state) {
 		param = 2;
 		dagopt = state.opt["disambiguate-add-givenname"];
 		gdropt = state.opt["givenname-disambiguation-rule"];
+		var gdropt_orig = gdropt;
 		if (gdropt === "by-cite") {
 			gdropt = "all-names";
 		}
@@ -9499,7 +9503,7 @@ CSL.Registry.NameReg = function (state) {
 		if ("undefined" === typeof this.namereg[pkey] || "undefined" === typeof this.namereg[pkey].ikey[ikey]) {
 			return param;
 		}
-		if (param < request_base) {
+		if (gdropt_orig === "by-cite" && param < request_base) {
 			param = request_base;
 		}
 		if (!dagopt) {
@@ -9584,7 +9588,15 @@ CSL.Registry.NameReg = function (state) {
 				this.namereg[pkey].ikey[ikey].skey[skey].items.push("" + item_id);
 			}
 		}
-		return param;
+		if (!state.registry.registry[item_id]) {
+			if (form == "short") {
+				return 0;
+			} else if ("string" == typeof initials) {
+				return 1
+			}
+		} else {
+			return param;
+		}
 	};
 	delitems = function (ids) {
 		var i, item, pos, len, posA, posB, id, fullkey, llen, ppos, otherid;
@@ -9608,7 +9620,7 @@ CSL.Registry.NameReg = function (state) {
 						continue;
 					}
 					items = this.namereg[pkey].items;
-					if (skey) {
+					if (skey && this.namereg[pkey].ikey[ikey] && this.namereg[pkey].ikey[ikey].skey[skey]) {
 						myitems = this.namereg[pkey].ikey[ikey].skey[skey].items;
 						posB = myitems.indexOf("" + id);
 						if (posB > -1) {
@@ -9622,7 +9634,7 @@ CSL.Registry.NameReg = function (state) {
 							ret[this.namereg[pkey].ikey[ikey].items[ppos]] = true;
 						}
 					}
-					if (ikey) {
+					if (ikey && this.namereg[pkey].ikey[ikey]) {
 						posB = this.namereg[pkey].ikey[ikey].items.indexOf("" + id);
 						if (posB > -1) {
 							items = this.namereg[pkey].ikey[ikey].items.slice();
@@ -9774,7 +9786,7 @@ CSL.Disambiguation.prototype.disNames = function (ismax) {
 		mybase = CSL.cloneAmbigConfig(this.base);
 		mybase.year_suffix = false;
 		this.state.registry.registerAmbigToken(this.akey, "" + this.partners[0].id, mybase);
-		this.lists[this.listpos] = [this.base, this.nonpartners];
+		this.lists[this.listpos] = [this.base, []];
 	} else if (this.nonpartners.length === 1) {
 		mybase = CSL.cloneAmbigConfig(this.base);
 		mybase.year_suffix = false;
@@ -9808,7 +9820,7 @@ CSL.Disambiguation.prototype.disGivens = function (ismax) {
 		}
 		mybase = CSL.cloneAmbigConfig(this.base);
 		mybase.year_suffix = false;
-		this.state.registry.registerAmbigToken(this.akey, "" + this.partners[0].id, mybase);
+		this.state.registry.registerAmbigToken(this.akey, "" + this.partners[0].id, this.base);
 		this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, mybase);
 		this.lists[this.listpos] = [this.base, []];
 	} else if (this.clashes[1] === 0) {
@@ -9973,6 +9985,7 @@ CSL.Disambiguation.prototype.initVars = function (akey) {
 	this.lists = [];
 	this.base = false;
 	this.akey = akey;
+	this.advance_mode = false;
 	myItemBundles = [];
 	myIds = this.ambigcites[akey];
 	if (myIds && myIds.length > 1) {
