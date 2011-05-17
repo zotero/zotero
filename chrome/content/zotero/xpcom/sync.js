@@ -1333,6 +1333,16 @@ Zotero.Sync.Server = new function () {
 		if (!lastsync) {
 			lastsync = 1;
 		}
+		
+		// If no local timestamp is stored, don't use remote time
+		//
+		// This used to be possible when remote time was saved whether or not
+		// the subsequent upload went through
+		var lastLocalSyncTime = Zotero.Sync.Server.lastLocalSyncTime;
+		if (!lastLocalSyncTime) {
+			lastsync = 1;
+		}
+		
 		var body = _apiVersionComponent
 					+ '&' + Zotero.Sync.Server.sessionIDComponent
 					+ '&lastsync=' + lastsync;
@@ -1407,7 +1417,6 @@ Zotero.Sync.Server = new function () {
 				
 				Zotero.UnresponsiveScriptIndicator.disable();
 				
-				var lastLocalSyncTime = Zotero.Sync.Server.lastLocalSyncTime;
 				var lastLocalSyncDate = lastLocalSyncTime ?
 					new Date(lastLocalSyncTime * 1000) : false;
 				
@@ -1465,10 +1474,9 @@ Zotero.Sync.Server = new function () {
 					Zotero.debug(xmlstr);
 				}
 				
-				Zotero.Sync.Server.lastRemoteSyncTime = response.getAttribute('timestamp');
-				
 				if (!xmlstr) {
 					Zotero.debug("Nothing to upload to server");
+					Zotero.Sync.Server.lastRemoteSyncTime = response.getAttribute('timestamp');
 					Zotero.Sync.Server.lastLocalSyncTime = nextLocalSyncTime;
 					Zotero.Sync.Server.nextLocalSyncDate = false;
 					Zotero.DB.commitTransaction();
