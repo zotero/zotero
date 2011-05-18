@@ -82,17 +82,22 @@
 						"Goofy"
 					],
 					
+					"fa": [
+						"CRCIS"
+					],
+					
 					"fi-FI": [
 						"hirvela"
 					],
 					
 					"fr-FR": [
-						"Marie Léger-St-Jean",
-						"locale_locker",
 						"fiuzzy",
-						"Pascal Pichon",
+						"Grégoire Colly",
 						"Jojaba",
-						"La Luciole"
+						"La Luciole",
+						"locale_locker",
+						"Marie Léger-St-Jean",
+						"Pascal Pichon"
 					],
 					
 					"gl-ES": [
