@@ -1,7 +1,7 @@
 <!ENTITY zotero.preferences.title "Préférences de Zotero">
 
 <!ENTITY zotero.preferences.default "Par défaut :">
-<!ENTITY zotero.preferences.items "éléments">
+<!ENTITY zotero.preferences.items "documents">
 <!ENTITY zotero.preferences.period ".">
 
 <!ENTITY zotero.preferences.prefpane.general "Générales">
@@ -25,14 +25,14 @@
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Autoriser zotero.org à personnaliser le contenu en se basant sur la version actuelle de Zotero">
 <!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Si activé, le numéro de version de Zotero sera ajouté aux requêtes HTTP vers zotero.org.">
 <!ENTITY zotero.preferences.parseRISRefer "Utiliser Zotero pour les fichiers RIS/Refer téléchargés">
-<!ENTITY zotero.preferences.automaticSnapshots "Faire une capture automatique de la page lors de la création d'éléments à partir de pages Web">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Joindre automatiquement les fichers PDF associés lors de l'enregistrement d'un élément">
-<!ENTITY zotero.preferences.automaticTags "Ajouter automatiquement aux éléments des marqueurs grâce aux mots-clés et aux sujets">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Supprimer automatiquement les éléments mis à la corbeille depuis plus de">
+<!ENTITY zotero.preferences.automaticSnapshots "Faire une capture automatique de la page lors de la création de documents à partir de pages Web">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Joindre automatiquement les fichers PDF associés lors de l'enregistrement d'un document">
+<!ENTITY zotero.preferences.automaticTags "Ajouter automatiquement aux documents des marqueurs grâce aux mots-clés et aux sujets">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Supprimer automatiquement les documents mis à la corbeille depuis plus de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "jours">
 
 <!ENTITY zotero.preferences.groups "Groupes">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "En copiant des éléments entre des bibliothèques, inclure :">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "En copiant des documents entre des bibliothèques, inclure :">
 <!ENTITY zotero.preferences.groups.childNotes "les notes enfants">
 <!ENTITY zotero.preferences.groups.childFiles "les captures d'écran et fichiers importés enfants">
 <!ENTITY zotero.preferences.groups.childLinks "les liens enfants">
@@ -118,11 +118,11 @@
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Bascule du mode plein écran">
 <!ENTITY zotero.preferences.keys.library "Bibliothèque">
 <!ENTITY zotero.preferences.keys.quicksearch "Recherche rapide">
-<!ENTITY zotero.preferences.keys.newItem "Créer un nouvel élément">
+<!ENTITY zotero.preferences.keys.newItem "Créer un nouveau document">
 <!ENTITY zotero.preferences.keys.newNote "Créer une nouvelle note">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Bascule du sélecteur de marqueurs">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copier les citations de l'élément sélectionné dans le presse-papiers">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copier les éléments sélectionnés dans le presse-papiers">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copier les citations du document sélectionné dans le presse-papiers">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copier les documents sélectionnés dans le presse-papiers">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importer du presse-papiers">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Essayer de gérer les conflits de raccourcis">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Les modifications ne prennent effet que dans les nouvelles fenêtres.">

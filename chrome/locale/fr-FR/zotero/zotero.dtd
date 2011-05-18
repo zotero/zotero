@@ -37,7 +37,7 @@
 <!ENTITY zotero.tabs.related.label "Connexe">
 <!ENTITY zotero.notes.separate "Éditer dans une nouvelle fenêtre">
 
-<!ENTITY zotero.collections.showUnfiledItems "Afficher les éléments sans collection">
+<!ENTITY zotero.collections.showUnfiledItems "Afficher les documents sans collection">
 
 <!ENTITY zotero.items.itemType "Type de document">
 <!ENTITY zotero.items.type_column "Type">
@@ -47,10 +47,10 @@
 <!ENTITY zotero.items.year_column "Année">
 <!ENTITY zotero.items.publisher_column "Éditeur">
 <!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Abrév. de journal">
+<!ENTITY zotero.items.journalAbbr_column "Abrév. de revue">
 <!ENTITY zotero.items.language_column "Langue">
-<!ENTITY zotero.items.accessDate_column "Accédé">
-<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.accessDate_column "Date de consultation">
+<!ENTITY zotero.items.libraryCatalog_column "Catalogue de bibliothèque">
 <!ENTITY zotero.items.callNumber_column "Cote">
 <!ENTITY zotero.items.rights_column "Autorisations">
 <!ENTITY zotero.items.dateAdded_column "Date d'ajout">
@@ -65,13 +65,13 @@
 <!ENTITY zotero.items.menu.attach.file "Joindre une copie enregistrée du fichier…">
 <!ENTITY zotero.items.menu.attach.fileLink "Joindre un lien vers le fichier…">
 
-<!ENTITY zotero.items.menu.duplicateItem "Dupliquer l'élément sélectionné">
+<!ENTITY zotero.items.menu.duplicateItem "Dupliquer le document sélectionné">
 
-<!ENTITY zotero.toolbar.newItem.label "Nouvel élément">
+<!ENTITY zotero.toolbar.newItem.label "Nouveau document">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Plus">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Créer un nouvel élément à partir de la page courante">
-<!ENTITY zotero.toolbar.lookup.label "Ajouter un élément par son identifiant">
-<!ENTITY zotero.toolbar.removeItem.label "Supprimer l'élément…">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Créer un nouveau document à partir de la page courante">
+<!ENTITY zotero.toolbar.lookup.label "Ajouter un document par son identifiant">
+<!ENTITY zotero.toolbar.removeItem.label "Supprimer le document…">
 <!ENTITY zotero.toolbar.newCollection.label "Nouvelle collection…">
 <!ENTITY zotero.toolbar.newGroup "Nouveau groupe…">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nouvelle sous-collection…">
@@ -89,7 +89,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Assistance et documentation">
 <!ENTITY zotero.toolbar.about.label "À propos de Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Recherche avancée">
-<!ENTITY zotero.toolbar.tab.tooltip "Basculer en mode onglet">
+<!ENTITY zotero.toolbar.tab.tooltip "Bascule du mode onglet">
 <!ENTITY zotero.toolbar.openURL.label "Localiser">
 <!ENTITY zotero.toolbar.openURL.tooltip "Chercher dans votre bibliothèque locale">
 
@@ -118,8 +118,8 @@
 
 <!ENTITY zotero.lookup.description "Saisir l'ISBN, le DOI ou le PMID à chercher dans la boîte ci-dessous.">
 
-<!ENTITY zotero.selectitems.title "Sélectionner des éléments">
-<!ENTITY zotero.selectitems.intro.label "Veuillez sélectionner les éléments à ajouter à votre bibliothèque">
+<!ENTITY zotero.selectitems.title "Sélectionner des documents">
+<!ENTITY zotero.selectitems.intro.label "Veuillez sélectionner les documents à ajouter à votre bibliothèque">
 <!ENTITY zotero.selectitems.cancel.label "Annuler">
 <!ENTITY zotero.selectitems.select.label "OK">
 
@@ -200,13 +200,13 @@
 <!ENTITY zotero.recognizePDF.recognizing.label "Récupération des métadonnées…">
 <!ENTITY zotero.recognizePDF.cancel.label "Annuler">
 <!ENTITY zotero.recognizePDF.pdfName.label "Nom du PDF">
-<!ENTITY zotero.recognizePDF.itemName.label "Nom de l'élément">
+<!ENTITY zotero.recognizePDF.itemName.label "Nom du document">
 <!ENTITY zotero.recognizePDF.captcha.label "Entrez le texte ci-dessous pour poursuivre la récupération des métadonnées.">
 
 <!ENTITY zotero.rtfScan.title "Balayage d'un fichier RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Annuler">
 <!ENTITY zotero.rtfScan.citation.label "Citation">
-<!ENTITY zotero.rtfScan.itemName.label "Nom de l'élément">
+<!ENTITY zotero.rtfScan.itemName.label "Nom du document">
 <!ENTITY zotero.rtfScan.unmappedCitations.label "Citations non transcrites">
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Citations ambiguës">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Citations transcrites">
@@ -215,8 +215,8 @@
 <!ENTITY zotero.rtfScan.introPage.description2 "Pour démarrer, sélectionnez un fichier RTF en lecture et un fichier de sortie ci-dessous :">
 <!ENTITY zotero.rtfScan.scanPage.label "Recherche de citations">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero balaie votre document à la recherche de citations. Veuillez patienter.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Vérification des éléments cités">
-<!ENTITY zotero.rtfScan.citationsPage.description "Veuillez vérifier la liste des citations reconnues ci-dessous pour vous assurer que Zotero a sélectionné correctement les éléments correspondants. Toute citation non transcrite ou ambiguë doit être résolue avant de passer à l'étape suivante.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Vérification des documents cités">
+<!ENTITY zotero.rtfScan.citationsPage.description "Veuillez vérifier la liste des citations reconnues ci-dessous pour vous assurer que Zotero a sélectionné correctement les documents correspondants. Toute citation non transcrite ou ambiguë doit être résolue avant de passer à l'étape suivante.">
 <!ENTITY zotero.rtfScan.stylePage.label "Mise en forme du document">
 <!ENTITY zotero.rtfScan.formatPage.label "Mise en forme des citations">
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero traite et met en forme votre fichier RTF. Veuillez patienter.">
