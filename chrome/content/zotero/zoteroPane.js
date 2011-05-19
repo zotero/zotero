@@ -84,6 +84,8 @@ var ZoteroPane = new function()
 	this.reportErrors = reportErrors;
 	this.displayErrorMessage = displayErrorMessage;
 	
+	this.document = document;
+	
 	const COLLECTIONS_HEIGHT = 32; // minimum height of the collections pane and toolbar
 	
 	var self = this;
@@ -98,7 +100,6 @@ var ZoteroPane = new function()
 	 */
 	function init()
 	{	
-		this.document = document;
 		if(!Zotero || !Zotero.initialized) return;
 		
 		// Set "Report Errors..." label via property rather than DTD entity,
