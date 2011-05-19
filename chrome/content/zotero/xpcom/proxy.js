@@ -398,16 +398,9 @@ Zotero.Proxies = new function() {
 	  * @return	{Array} Array containing a browser object and a DOM window object
 	  */
 	 function _getBrowserAndWindow(notificationCallbacks) {
-		try {
-			var pageDOMDocument = notificationCallbacks.getInterface(Components.interfaces.nsIDOMWindow).top.document;
-			if(!pageDOMDocument) return false;
-			var enumerator = windowMediator.getZOrderDOMWindowEnumerator("navigator:browser", true);
-			while(enumerator.hasMoreElements()) {
-				var window = enumerator.getNext();
-				browser = window.gBrowser.getBrowserForDocument(pageDOMDocument);
-				if(browser) break;
-			}
-		} catch(e) {}
+		var browser = notificationCallbacks.getInterface(Ci.nsIWebNavigation)
+			.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
+		var window = browser.ownerDocument.defaultView;
 		return [browser, window];
 	 }
 	 
