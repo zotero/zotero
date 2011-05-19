@@ -306,8 +306,10 @@ var ZoteroOverlay = new function()
 		window.zoteroSavedCollectionSelection = ZoteroPane.collectionsView.saveSelection();
 		if(tab) {		// Zotero is running in a tab
 			if(setMode) return;
-			// don't do anything if Zotero tab is the only tab
-			if(tab && (gBrowser.tabs ? gBrowser.tabs : gBrowser.mTabs).length === 1) return;
+			// if Zotero tab is the only tab, open the home page in a new tab
+			if((gBrowser.tabs ? gBrowser.tabs : gBrowser.mTabs).length === 1) {
+				gBrowser.addTab(gBrowser.homePage);
+			}
 			
 			// swap ZoteroPane object
 			ZoteroPane = ZoteroPane_Overlay;
