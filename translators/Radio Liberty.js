@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2011-04-01 00:45:00"
+	"lastUpdated":"2011-05-24 00:45:00"
 }
 
 /*
@@ -74,7 +74,7 @@
 */
 
 function detectWeb(doc, url){
-	if (url.match(/\/content\//)) {
+	if (url.match(/\/content\/|\/archive\/news/)) {
 		// The translator uses this type because RFE/RL generally has a place of publication
 		// and a Section; both are specific to newspaperArticle.
 		return "newspaperArticle";
@@ -137,7 +137,7 @@ function doWeb(doc, url){
 			item.creators.push(cleaned);
 		}
 		// The section should _always_ be present
-		item.section = doc.evaluate('//div[@id="article"]/h2/a[@class="h3link"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.section = doc.evaluate('//div[@id="article" or @class="middle_content"]/h2', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent.trim();
 
 		// This exposes a limitation of Zotero's date handling; the Afghan services
 		// use the Hijri calendar, and mixed sorting looks funny-- I'd like to be able
@@ -154,16 +154,19 @@ function doWeb(doc, url){
 		// 	characters that may occur in city names.
 		//	This all-caps class is borrowed from utilities.js and augmented by
 		//	the basic Cyrillic capital letters.
-		var text = doc.evaluate('//div[@id="article"]/div[@class="zoomMe"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		hits = text.match(/([A-ZА-Я \u0400-\u042f]+) \((.*)\) --/);
-		if (!hits) {
-			hits = text.match(/([A-ZА-Я \u0400-\u042f]+) --/);
-		}
-		if (hits) {
-			var place = Zotero.Utilities.capitalizeTitle(hits[1], true);
-			item.place = place;
-			// We add the wire service as an author; it would be nice to have a field for it
-			item.creators.push({lastName : hits[2], creatorType:"author", fieldMode:true});
+		var textnode = doc.evaluate('//div[@id="article"]/div[@class="zoomMe"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
+		if (textnode) {
+			var text = textnode.textContent;
+			hits = text.match(/([A-ZА-Я \u0400-\u042f]+) \((.*)\) --/);
+			if (!hits) {
+				hits = text.match(/([A-ZА-Я \u0400-\u042f]+) --/);
+			}
+			if (hits) {
+				var place = Zotero.Utilities.capitalizeTitle(hits[1], true);
+				item.place = place;
+				// We add the wire service as an author; it would be nice to have a field for it
+				item.creators.push({lastName : hits[2], creatorType:"author", fieldMode:true});
+			}
 		}
 
 		item.url = url;
