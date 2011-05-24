@@ -9,7 +9,7 @@
 	"priority":100,
 	"configOptions":{"dataMode":"block"},
 	"inRepository":true,
-	"lastUpdated":"2011-04-21 10:15:00"
+	"lastUpdated":"2011-04-25 18:05:00"
 }
 
 function detectWeb(doc, url) {

@@ -8,7 +8,7 @@
 	"priority":100,
 	"inRepository":true,
 	"translatorType":4,
-	"lastUpdated":"2011-04-04 06:45:00"
+	"lastUpdated":"2011-05-23 06:45:00"
 }
 
 /* Test URLs
@@ -22,7 +22,11 @@ Journal issue ToC:
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf("quicksearch") != -1) {
+	if (url.indexOf("quicksearch") !== -1 || url.indexOf("title~db") !== -1) {
+		return "multiple";
+	} else if (url.indexOf("content=g") != -1 || 
+			doc.evaluate('//div[@id="browse"]//tbody/tr/td[2]/a[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ||
+			doc.evaluate('//div[@id="title"]//td[2]/div/strong/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	} else if (doc.evaluate('//a[substring(text(), 2, 8) = "Download"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		if (doc.evaluate('//img[substring(@title, 1, 17) = "Publication type:"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -36,10 +40,6 @@ function detectWeb(doc, url) {
 			// Default to journal article
 			return "journalArticle";
 		}
-	} else if (url.indexOf("content=g") != -1 || 
-			doc.evaluate('//div[@id="browse"]//tbody/tr/td[2]/a[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ||
-			doc.evaluate('//div[@id="title"]//td[2]/div/strong/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		return "multiple";
 	} else {
 		return true;
 	}
