@@ -9,6 +9,7 @@
 	title="Search"
 	orient="vertical"
 	buttons="accept,cancel"
+	onload="window.sizeToContent();"
 	ondialogaccept="return Zotero_Lookup.accept();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
