@@ -49,10 +49,14 @@ var bookSectionFieldMap = {
 	M3:"DOI"
 };
 
+// Accounting for input fields that we don't export the same way;
+// mainly for common abuses of the spec
 var inputFieldMap = {
 	TI:"title",
 	CT:"title",
-	CY:"place"
+	CY:"place",
+	ST:"shortTitle",
+	DO:"DOI"
 };
 
 // TODO: figure out if these are the best types for letter, interview, webpage
@@ -127,7 +131,7 @@ function processTag(item, tag, value) {
 		
 		// first check typeMap
 		for(var i in typeMap) {
-			if(value == typeMap[i]) {
+			if(value.toUpperCase() == typeMap[i]) {
 				item.itemType = i;
 			}
 		}
@@ -246,7 +250,7 @@ function processTag(item, tag, value) {
 			}
 		} 
 		// ToDo: Handle correctly formatted Y2 fields (secondary date)
-	} else if(tag == "N1" || tag == "AB") {
+	} else if(tag == "N1") {
 		// notes
 		if(value != item.title) {       // why does EndNote do this!?
 			var clean = Zotero.Utilities.cleanTags(value);
@@ -262,7 +266,7 @@ function processTag(item, tag, value) {
 				item.notes.push({note:value});
 			} else item.notes.push({note:value});
 		}
-	} else if(tag == "N2") {
+	} else if(tag == "N2" || tag == "AB") {
 		// abstract
 		item.abstractNote = value;
 	} else if(tag == "KW") {
@@ -368,6 +372,10 @@ function completeItem(item) {
 	if(item.journalAbbreviation && !item.publicationTitle){
 		item.publicationTitle = item.journalAbbreviation;
 	}
+	// Hack for Endnote exports missing full title
+	if(item.shortTitle && !item.title){
+		item.title = item.shortTitle;
+	}
 	item.complete();
 }
 
@@ -399,7 +407,9 @@ function doImport(attachments) {
 	while((rawLine = Zotero.read()) !== false) {    // until EOF
 		// trim leading space if this line is not part of a note
 		line = rawLine.replace(/^\s+/, "");
-		if(line.substr(2, 4) == "  - " || line == "ER  -" || line.substr(0, 5) == "TY - ") {
+		// Handle out-of-spec old EndNote exports with one space
+		var split = line.match(/^([A-Z0-9]{2}) {1,2}-(?: ([^\n]*))?/);
+		if(split) {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
 			if(tag) {
@@ -408,21 +418,16 @@ function doImport(attachments) {
 			}
 
 			// then fetch the tag and data from this line
-			tag = line.substr(0,2);
-			
-			// Handle out-of-spec old EndNote exports
-			if (line.substr(0, 5) == "TY - ") {
-				data = line.substr(5);
-			}
-			else {
-				data = line.substr(6);
-			}
+			tag = split[1];
+			data = split[2];
 
 			if(tag == "ER") {	       // ER signals end of reference
 				// unset info
 				tag = data = false;
-				// new item
 				completeItem(item);
+			}
+			if(tag == "TY") {
+				// new item
 				item = new Zotero.Item();
 				i++;
 				if(attachments && attachments[i]) {
