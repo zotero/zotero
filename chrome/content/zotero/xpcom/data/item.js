@@ -1448,6 +1448,7 @@ Zotero.Item.prototype.save = function() {
 				Zotero.DB.query(sql, bindParams);
 			}
 			
+			Zotero.Notifier.trigger('add', 'item', itemID);
 			
 			// Parent item
 			if (this._sourceItem) {
@@ -1831,6 +1832,7 @@ Zotero.Item.prototype.save = function() {
 				Zotero.DB.query(sql, bindParams);
 			}
 			
+			Zotero.Notifier.trigger('modify', 'item', this.id, { old: this._previousData });
 			
 			// Parent
 			if (this._changedSource) {
@@ -2047,13 +2049,6 @@ Zotero.Item.prototype.save = function() {
 	}
 	
 	Zotero.Items.reload(this.id);
-	
-	if (isNew) {
-		Zotero.Notifier.trigger('add', 'item', this.id);
-	}
-	else {
-		Zotero.Notifier.trigger('modify', 'item', this.id, { old: this._previousData });
-	}
 	
 	this._previousData = null;
 	
