@@ -8,7 +8,7 @@
         "priority": 100,
         "inRepository": true,
         "translatorType": 4,
-        "lastUpdated": "2011-05-27 16:18:35"
+        "lastUpdated": "2011-05-27 20:13:50"
 }
 
 function detectWeb(doc, url) {
@@ -19,7 +19,7 @@ function detectWeb(doc, url) {
 	} else if (entry) {
 		return "blogPost";
 	} else {
-		return "false";
+		return false;
 	}
 }
 
