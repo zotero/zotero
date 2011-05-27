@@ -1,28 +1,26 @@
 {
-	"translatorID":"6f9aa90d-6631-4459-81ef-a0758d2e3921",
-	"translatorType":4,
-	"label":"Blogger",
-	"creator":"Adam Crymble",
-	"target":"blogspot.com",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2008-07-24 05:15:00"
+        "translatorID": "6f9aa90d-6631-4459-81ef-a0758d2e3921",
+        "label": "Blogger",
+        "creator": "Adam Crymble",
+        "target": "blogspot\\.com",
+        "minVersion": "1.0.0b4.r5",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "lastUpdated": "2011-05-27 16:18:35"
 }
 
 function detectWeb(doc, url) {
-	
-	if (doc.evaluate('//h3[@class="post-title entry-title"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		var entryCount = doc.evaluate('count (//h3[@class="post-title entry-title"]/a)', doc, null, XPathResult.ANY_TYPE, null);
-	}
-	
-	if (entryCount.numberValue == 1) {
-		return "blogPost";
-	} else if (entryCount.numberValue > 1) {
+	var result = doc.evaluate('//h3[contains(@class,"post-title") and contains(@class,"entry-title")]', doc, null, XPathResult.ANY_TYPE, null);
+	var entry = result.iterateNext();
+	if (entry && result.iterateNext()) {
 		return "multiple";
+	} else if (entry) {
+		return "blogPost";
+	} else {
+		return "false";
 	}
-	
 }
 
 //Blogger translator. Code by Adam Crymble
