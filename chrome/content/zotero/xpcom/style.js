@@ -398,7 +398,7 @@ Zotero.Style = function(arg) {
 		
 		this.source = null;
 		for each(var link in xml.info.link) {
-			if(link.@rel == "source") {
+			if(link.@rel == "source" || link.@rel == "independent-parent") {
 				this.source = link.@href.toString();
 				if(this.source == this.styleID) {
 					throw "Style with ID "+this.styleID+" references itself as source";
