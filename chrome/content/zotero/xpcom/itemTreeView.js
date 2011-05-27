@@ -386,6 +386,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		else if (!quicksearch || quicksearch.value == '')
 		{
 			var items = Zotero.Items.get(ids);
+			
 			for each(var item in items) {
 				var id = item.id;
 				
@@ -401,9 +402,11 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 					{
 						this.toggleOpenState(row);
 						this.toggleOpenState(row);
+						sort = id;
 					}
 					// If item moved from top-level to under another item,
-					// remove the old row
+					// remove the old row -- the container refresh above
+					// takes care of adding the new row
 					else if (!this.isContainer(row) && parentIndex == -1
 						&& sourceItemID)
 					{
@@ -418,7 +421,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 						this._treebox.rowCountChanged(this.rowCount-1, 1);
 						sort = id;
 					}
-					// If not moved from under one item to another
+					// If not moved from under one item to another, resort the row
 					else if (!(sourceItemID && parentIndex != -1 && this._itemRowMap[sourceItemID] != parentIndex)) {
 						sort = id;
 					}
