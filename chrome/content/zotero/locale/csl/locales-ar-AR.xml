@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<locale xmlns="http://purl.org/net/xbiblio/csl" version="1.0" xml:lang="ar">
+<locale xmlns="http://purl.org/net/xbiblio/csl" version="1.0" xml:lang="ar-AR">
   <style-options punctuation-in-quote="false"/>
   <date form="text">
     <date-part name="day" suffix=" "/>
@@ -49,21 +49,25 @@
       <multiple>مراجع</multiple>
     </term>
     <term name="retrieved">استرجع</term>
+
     <!-- ANNO DOMINI; BEFORE CHRIST -->
     <term name="ad">بعد الميلاد</term>
     <term name="bc">قبل الميلاد</term>
+
     <!-- QUOTES -->
-	<!-- Source: http://www.w3.org/International/tutorials/bidi-xhtml/ -->
+    <!-- Source: http://www.w3.org/International/tutorials/bidi-xhtml/ -->
     <!-- Use of single straight quote for inner is a guess -->
     <term name="open-quote">"</term>
     <term name="close-quote">"</term>
     <term name="open-inner-quote">'</term>
     <term name="close-inner-quote">'</term>
+
     <!-- ORDINALS st., nd., rd.-->
     <term name="ordinal-01"/>
     <term name="ordinal-02"/>
     <term name="ordinal-03"/>
     <term name="ordinal-04"/>
+
     <!-- LONG ORDINALS -->
     <term name="long-ordinal-01">الاول</term>
     <term name="long-ordinal-02">الثاني</term>
@@ -75,6 +79,7 @@
     <term name="long-ordinal-08">الثامن</term>
     <term name="long-ordinal-09">التاسع</term>
     <term name="long-ordinal-10">العاشر</term>
+
     <!-- CATEGORIES -->
     <term name="anthropology">علم الأعراق البشرية</term>
     <term name="astronomy">الفلك</term>
@@ -100,6 +105,7 @@
     <term name="social_science">العلوم الإجتماعية</term>
     <term name="theology">الإلهيات</term>
     <term name="zoology">علم الحيوان</term>
+
     <!-- LONG LOCATOR FORMS -->
     <term name="book">
       <single>كتاب</single>
@@ -165,6 +171,7 @@
       <single>مجلد</single>
       <multiple>مجلدات</multiple>
     </term>
+
     <!-- SHORT LOCATOR FORMS -->
     <term name="book" form="short">كتاب</term>
     <term name="chapter" form="short">فصل</term>
@@ -192,6 +199,7 @@
       <single>مج.</single>
       <multiple>مج.</multiple>
     </term>
+
     <!-- SYMBOL LOCATOR FORMS -->
     <term name="paragraph" form="symbol">
       <single>¶</single>
@@ -201,6 +209,7 @@
       <single>§</single>
       <multiple>§§</multiple>
     </term>
+
     <!-- LONG ROLE FORMS -->
     <term name="author">
       <single>مؤلف</single>
@@ -222,6 +231,7 @@
       <single>مترجم ومحرر</single>
       <multiple>مترجمين ومحررين</multiple>
     </term>
+
     <!-- SHORT ROLE FORMS -->
     <term name="author" form="short">
       <single>مؤلف</single>
@@ -243,6 +253,7 @@
       <single>مترجم ومشرف على الطباعه</single>
       <multiple>مترجمين ومشرفين على الطباعه</multiple>
     </term>
+
     <!-- VERB ROLE FORMS -->
     <term name="editor" form="verb">تحرير</term>
     <term name="editorial-director" form="verb">اعداد</term>
@@ -250,12 +261,14 @@
     <term name="editortranslator" form="verb">اعداد وترجمة</term>
     <term name="recipient" form="verb">إلى</term>
     <term name="interviewer" form="verb">مقابلة بواسطة</term>
+
     <!-- SHORT VERB ROLE FORMS -->
     <term name="container-author" form="verb-short">by</term>
     <term name="editor" form="verb-short">تحرير</term>
     <term name="editorial-director" form="verb-short">اشرف على الطبعة</term>
     <term name="translator" form="verb-short">ترجمة</term>
     <term name="editortranslator" form="verb-short">ترجمه واشرف على الطباعه</term>
+
     <!-- LONG MONTH FORMS -->
     <term name="month-01">يناير</term>
     <term name="month-02">فبراير</term>
@@ -269,6 +282,7 @@
     <term name="month-10">اكتوبر</term>
     <term name="month-11">نوفمبر</term>
     <term name="month-12">ديسمبر</term>
+
     <!-- SHORT MONTH FORMS -->
     <term name="month-01" form="short">يناير</term>
     <term name="month-02" form="short">فبراير</term>
@@ -282,6 +296,7 @@
     <term name="month-10" form="short">اكتوبر</term>
     <term name="month-11" form="short">نوفمبر</term>
     <term name="month-12" form="short">ديسمبر</term>
+
     <!-- SEASONS -->
     <term name="season-01">الربيع</term>
     <term name="season-02">الصيف</term>
