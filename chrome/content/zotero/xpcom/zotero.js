@@ -466,7 +466,11 @@ var Zotero = new function(){
 		
 		// Add notifier queue callbacks to the DB layer
 		Zotero.DB.addCallback('begin', Zotero.Notifier.begin);
-		Zotero.DB.addCallback('commit', Zotero.Notifier.commit);
+		Zotero.DB.addCallback('commit', function () {
+			setTimeout(function () {
+				Zotero.Notifier.commit();
+			}, 1)
+		});
 		Zotero.DB.addCallback('rollback', Zotero.Notifier.reset);
 		
 		Zotero.Fulltext.init();
