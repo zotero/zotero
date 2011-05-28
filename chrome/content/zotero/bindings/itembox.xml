@@ -642,7 +642,7 @@
 					// Minus (-) button
 					var removeButton = document.createElement('label');
 					removeButton.setAttribute("value","-");
-					removeButton.setAttribute("class","zotero-clicky");
+					removeButton.setAttribute("class","zotero-clicky zotero-clicky-minus");
 					// If default first row, don't let user remove it
 					if (defaultRow) {
 						this.disableButton(removeButton);
@@ -658,7 +658,7 @@
 					// Plus (+) button
 					var addButton = document.createElement('label');
 					addButton.setAttribute("value","+");
-					addButton.setAttribute("class", "zotero-clicky");
+					addButton.setAttribute("class", "zotero-clicky zotero-clicky-plus");
 					// If row isn't saved, don't let user add more
 					if (unsaved) {
 						this.disableButton(addButton);

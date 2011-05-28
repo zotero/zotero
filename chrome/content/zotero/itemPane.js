@@ -117,7 +117,7 @@ var ZoteroItemPane = new function() {
 					if (editable) {
 						var removeButton = document.createElement('label');
 						removeButton.setAttribute("value","-");
-						removeButton.setAttribute("class","zotero-clicky");
+						removeButton.setAttribute("class","zotero-clicky zotero-clicky-minus");
 						removeButton.setAttribute("onclick","ZoteroItemPane.removeNote(" + notes[i].id + ")");
 					}
 					

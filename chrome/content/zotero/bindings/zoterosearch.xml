@@ -698,8 +698,8 @@
 				</xul:menulist>
 				<xul:zoterosearchagefield id="value-date-age" hidden="true" flex="1"/>
 				<!-- Adding elements below will break disable/enableRemoveButton() -->
-				<xul:toolbarbutton id="remove" class="zotero-clicky" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked(event); event.stopPropagation()"/>
-				<xul:toolbarbutton id="add" class="zotero-clicky" label="+" oncommand="this.parentNode.parentNode.onAddClicked(event); event.stopPropagation()"/>
+				<xul:toolbarbutton id="remove" class="zotero-clicky zotero-clicky-minus" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked(event); event.stopPropagation()"/>
+				<xul:toolbarbutton id="add" class="zotero-clicky zotero-clicky-plus" label="+" oncommand="this.parentNode.parentNode.onAddClicked(event); event.stopPropagation()"/>
 			</xul:hbox>
 		</content>
 	</binding>
