@@ -1,6 +1,6 @@
 {
         "translatorID": "a30274ac-d3d1-4977-80f4-5320613226ec",
-        "label": "IMDB",
+        "label": "IMDb",
         "creator": "Avram Lyon",
         "target": "^https?://www\\.imdb\\.com/",
         "minVersion": "2.1",
@@ -8,7 +8,7 @@
         "priority": 100,
         "inRepository": true,
         "translatorType": 4,
-        "lastUpdated": "2011-05-28 14:17:44"
+        "lastUpdated": "2011-05-29 09:44:03"
 }
 
 /*
@@ -55,17 +55,22 @@ function doWeb(doc, url){
 			var url = link.href.match(/\/title\/(tt\d+)/)[1];
 			items[url] = title;
 		}
-		items = Zotero.selectItems(items);
-		if(!items) return true;
-		for (var i in items) {
-			ids.push(i);
-		}
+		
+		Zotero.selectItems(items, function(items) {
+			if(!items) {
+				Zotero.done();
+				return true;
+			}
+			for (var i in items) {
+				ids.push(i);
+			}
+			apiFetch(ids);
+		});
 	} else {
 		var id = url.match(/\/title\/(tt\d+)/)[1];
-		ids = [id];
+		apiFetch([id]);
 	}
-	
-	apiFetch(ids);	
+	Zotero.wait();
 }
 
 // Takes IMDB IDs and makes items
@@ -73,7 +78,6 @@ function apiFetch(ids) {
 	var apiRoot = "http://imdbapi.com/?tomatoes=true&i=";
 	for (i in ids) ids[i] = apiRoot + ids[i];
 	Zotero.Utilities.doGet(ids, parseIMDBapi, function() {Zotero.done()});
-	Zotero.wait();
 }
 
 // parse result from imdbapi.com
@@ -107,6 +111,10 @@ function parseIMDBapi(text, response, url) {
 }
 
 function addCreator (item, creator, type) {
+	if (creator == "N/A") {
+		Zotero.debug("Discarding "+type+"="+creator);
+		return item;
+	}
 	var broken = creator.split(",");
 	for (i in broken) {
 		item.creators.push(Zotero.Utilities.cleanAuthor(broken[i], type));
