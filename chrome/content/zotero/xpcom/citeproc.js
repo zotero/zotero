@@ -296,6 +296,113 @@ var CSL = {
 		vi: "vi_VN",
 		zh: "zh_CN"
 	},
+	SUPERSCRIPTS: {
+		"\u00AA": "\u0061",
+		"\u00B2": "\u0032",
+		"\u00B3": "\u0033",
+		"\u00B9": "\u0031",
+		"\u00BA": "\u006F",
+		"\u02B0": "\u0068",
+		"\u02B1": "\u0266",
+		"\u02B2": "\u006A",
+		"\u02B3": "\u0072",
+		"\u02B4": "\u0279",
+		"\u02B5": "\u027B",
+		"\u02B6": "\u0281",
+		"\u02B7": "\u0077",
+		"\u02B8": "\u0079",
+		"\u02E0": "\u0263",
+		"\u02E1": "\u006C",
+		"\u02E2": "\u0073",
+		"\u02E3": "\u0078",
+		"\u02E4": "\u0295",
+		"\u1D2C": "\u0041",
+		"\u1D2D": "\u00C6",
+		"\u1D2E": "\u0042",
+		"\u1D30": "\u0044",
+		"\u1D31": "\u0045",
+		"\u1D32": "\u018E",
+		"\u1D33": "\u0047",
+		"\u1D34": "\u0048",
+		"\u1D35": "\u0049",
+		"\u1D36": "\u004A",
+		"\u1D37": "\u004B",
+		"\u1D38": "\u004C",
+		"\u1D39": "\u004D",
+		"\u1D3A": "\u004E",
+		"\u1D3C": "\u004F",
+		"\u1D3D": "\u0222",
+		"\u1D3E": "\u0050",
+		"\u1D3F": "\u0052",
+		"\u1D40": "\u0054",
+		"\u1D41": "\u0055",
+		"\u1D42": "\u0057",
+		"\u1D43": "\u0061",
+		"\u1D44": "\u0250",
+		"\u1D45": "\u0251",
+		"\u1D46": "\u1D02",
+		"\u1D47": "\u0062",
+		"\u1D48": "\u0064",
+		"\u1D49": "\u0065",
+		"\u1D4A": "\u0259",
+		"\u1D4B": "\u025B",
+		"\u1D4C": "\u025C",
+		"\u1D4D": "\u0067",
+		"\u1D4F": "\u006B",
+		"\u1D50": "\u006D",
+		"\u1D51": "\u014B",
+		"\u1D52": "\u006F",
+		"\u1D53": "\u0254",
+		"\u1D54": "\u1D16",
+		"\u1D55": "\u1D17",
+		"\u1D56": "\u0070",
+		"\u1D57": "\u0074",
+		"\u1D58": "\u0075",
+		"\u1D59": "\u1D1D",
+		"\u1D5A": "\u026F",
+		"\u1D5B": "\u0076",
+		"\u1D5C": "\u1D25",
+		"\u1D5D": "\u03B2",
+		"\u1D5E": "\u03B3",
+		"\u1D5F": "\u03B4",
+		"\u1D60": "\u03C6",
+		"\u1D61": "\u03C7",
+		"\u2070": "\u0030",
+		"\u2071": "\u0069",
+		"\u2074": "\u0034",
+		"\u2075": "\u0035",
+		"\u2076": "\u0036",
+		"\u2077": "\u0037",
+		"\u2078": "\u0038",
+		"\u2079": "\u0039",
+		"\u207A": "\u002B",
+		"\u207B": "\u2212",
+		"\u207C": "\u003D",
+		"\u207D": "\u0028",
+		"\u207E": "\u0029",
+		"\u207F": "\u006E",
+		"\u2120": "\u0053\u004D",
+		"\u2122": "\u0054\u004D",
+		"\u3192": "\u4E00",
+		"\u3193": "\u4E8C",
+		"\u3194": "\u4E09",
+		"\u3195": "\u56DB",
+		"\u3196": "\u4E0A",
+		"\u3197": "\u4E2D",
+		"\u3198": "\u4E0B",
+		"\u3199": "\u7532",
+		"\u319A": "\u4E59",
+		"\u319B": "\u4E19",
+		"\u319C": "\u4E01",
+		"\u319D": "\u5929",
+		"\u319E": "\u5730",
+		"\u319F": "\u4EBA",
+		"\u02C0": "\u0294",
+		"\u02C1": "\u0295",
+		"\u06E5": "\u0648",
+		"\u06E6": "\u064A"
+	},
+	SUPERSCRIPTS_REGEXP: new RegExp("[\u00AA\u00B2\u00B3\u00B9\u00BA\u02B0\u02B1\u02B2\u02B3\u02B4\u02B5\u02B6\u02B7\u02B8\u02E0\u02E1\u02E2\u02E3\u02E4\u1D2C\u1D2D\u1D2E\u1D30\u1D31\u1D32\u1D33\u1D34\u1D35\u1D36\u1D37\u1D38\u1D39\u1D3A\u1D3C\u1D3D\u1D3E\u1D3F\u1D40\u1D41\u1D42\u1D43\u1D44\u1D45\u1D46\u1D47\u1D48\u1D49\u1D4A\u1D4B\u1D4C\u1D4D\u1D4F\u1D50\u1D51\u1D52\u1D53\u1D54\u1D55\u1D56\u1D57\u1D58\u1D59\u1D5A\u1D5B\u1D5C\u1D5D\u1D5E\u1D5F\u1D60\u1D61\u2070\u2071\u2074\u2075\u2076\u2077\u2078\u2079\u207A\u207B\u207C\u207D\u207E\u207F\u2120\u2122\u3192\u3193\u3194\u3195\u3196\u3197\u3198\u3199\u319A\u319B\u319C\u319D\u319E\u319F\u02C0\u02C1\u06E5\u06E6]", "g"),
 	locale: {},
 	locale_opts: {},
 	locale_dates: {}
@@ -1763,7 +1870,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.174";
+	this.processor_version = "1.0.175";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -9091,7 +9198,14 @@ CSL.Output.Formatters.serializeItemAsRdfA = function (Item) {
 CSL.Output.Formats = function () {};
 CSL.Output.Formats.prototype.html = {
 	"text_escape": function (text) {
-		return text.replace(/&/g, "&#38;").replace(/</g, "&#60;").replace(/>/g, "&#62;").replace("  ", "&#160; ", "g");
+		return text.replace(/&/g, "&#38;")
+		.replace(/</g, "&#60;")
+		.replace(/>/g, "&#62;")
+		.replace("  ", "&#160; ", "g")
+		.replace(CSL.SUPERSCRIPTS_REGEXP,
+				 function(aChar) {
+					 return "&#60;sup&#62;" + CSL.SUPERSCRIPTS[aChar] + "&#60;/sup&#62;";
+				 });
 	},
 	"bibstart": "<div class=\"csl-bib-body\">\n",
 	"bibend": "</div>",
@@ -9201,9 +9315,15 @@ CSL.Output.Formats.prototype.text = {
 };
 CSL.Output.Formats.prototype.rtf = {
 	"text_escape": function (text) {
-		return text.replace(/([\\{}])/g, "\\$1", "g").replace(/[\x7F-\uFFFF]/g,
-			function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+"{}" })
-			.replace("\t", "\\tab{}", "g");
+		return text
+		.replace(/([\\{}])/g, "\\$1", "g")
+		.replace(CSL.SUPERSCRIPTS_REGEXP,
+				 function(aChar) {
+					 return "\\super " + CSL.SUPERSCRIPTS[aChar] + "\\nosupersub{}";
+				 })
+		.replace(/[\x7F-\uFFFF]/g,
+				 function(aChar) { return "\\uc0\\u"+aChar.charCodeAt(0).toString()+"{}" })
+		.replace("\t", "\\tab{}", "g");
 	},
 	"@passthrough/true": CSL.Output.Formatters.passthrough,
 	"@font-style/italic":"\\i %%STRING%%\\i0{}",
