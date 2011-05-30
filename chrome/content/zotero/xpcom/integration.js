@@ -665,7 +665,6 @@ Zotero.Integration.Document = function(app, doc) {
 Zotero.Integration.Document.prototype._createNewSession = function(data) {
 	data.sessionID = Zotero.randomString();
 	var session = Zotero.Integration.sessions[data.sessionID] = new Zotero.Integration.Session();
-	session.setData(data);
 	return session;
 }
 
@@ -684,7 +683,9 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			throw new Zotero.Integration.DisplayException("mustInsertCitation");
 		} else {
 			// Set doc prefs if no data string yet
-			this._session = this._createNewSession(new Zotero.Integration.DocumentData());
+			var data = new Zotero.Integration.DocumentData();
+			this._session = this._createNewSession(data);
+			this._session.setData(data);
 			if(dontRunSetDocPrefs) return false;
 			
 			Zotero.Integration.activate();
@@ -715,14 +716,19 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			this._session = Zotero.Integration.sessions[data.sessionID];
 		} else {
 			this._session = this._createNewSession(data);
-			
-			// make sure style is defined
-			if(!this._session.style) {
-				Zotero.Integration.activate();
-				try {
-					this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
-				} finally {
-					this._doc.activate();
+			try {
+				this._session.setData(data);
+			} catch(e) {
+				// make sure style is defined
+				if(e instanceof Zotero.Integration.DisplayException && e.name === "invalidStyle") {
+					Zotero.Integration.activate();
+					try {
+						this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
+					} finally {
+						this._doc.activate();
+					}
+				} else {
+					throw e;
 				}
 			}
 			this._doc.setDocumentData(this._session.data.serializeXML());
@@ -1278,9 +1284,9 @@ Zotero.Integration.Session.prototype.setData = function(data) {
 			this.styleClass = getStyle.class;
 			this.dateModified = new Object();
 		} catch(e) {
-			Zotero.debug(e)
+			Zotero.logError(e);
 			data.style.styleID = undefined;
-			return false;
+			throw new Zotero.Integration.DisplayException("invalidStyle");
 		}
 		
 		return true;
