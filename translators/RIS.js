@@ -266,6 +266,8 @@ function processTag(item, tag, value) {
 				item.notes.push({note:value});
 			} else item.notes.push({note:value});
 		}
+	// The RIS spec insanely claims that AB == N1, but other software seems
+	// to overlook or ignore this, so we will too on import
 	} else if(tag == "N2" || tag == "AB") {
 		// abstract
 		item.abstractNote = value;
