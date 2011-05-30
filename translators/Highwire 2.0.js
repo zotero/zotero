@@ -1,14 +1,14 @@
 {
-	"translatorID":"8c1f42d5-02fa-437b-b2b2-73afc768eb07",
-	"label":"Highwire 2.0",
-	"creator":"Matt Burton",
-	"target":"(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":"1",
-	"translatorType":4,
-	"lastUpdated":"2011-01-05 17:05:00"
+        "translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
+        "label": "Highwire 2.0",
+        "creator": "Matt Burton",
+        "target": "(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
+        "minVersion": "1.0.0b4.r5",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "lastUpdated": "2011-05-23 21:37:09"
 }
 
 /*
@@ -32,8 +32,14 @@ function detectWeb(doc, url) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
 	
-	// lets hope this installations don't tweak this...
-	var highwiretest = doc.evaluate("//link[@href = '/shared/css/hw-global.css']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var highwiretest = false;
+	
+	highwiretest = url.match(/\.pdf+html\?frame=header/);
+	
+	if (!highwiretest) {
+		// lets hope this installations don't tweak this...
+		highwiretest = doc.evaluate("//link[@href = '/shared/css/hw-global.css']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	}
 	
 	if(highwiretest) {
 		
@@ -47,8 +53,7 @@ function detectWeb(doc, url) {
 			url.match("content/firstcite") 
 		) {
 			return "multiple";
-		} else if (url.match("content/(early/)?[0-9]+") 
-				&& (url.indexOf("frame") === -1 || url.indexOf("frame=sidebar") !== -1)) {
+		} else if (url.match("content/(early/)?[0-9]+")) {
 			return "journalArticle";
 		} 
 	}
@@ -59,7 +64,19 @@ function doWeb(doc, url) {
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
-		
+	
+	if (!url) url = doc.documentElement.location;
+	else if (url.match(/\?frame=header/)) {
+		// recall all this using new url
+		url = url.replace(/\?.*/,"?frame=sidebar");
+		Zotero.Utilities.processDocuments(url,
+				function(newdoc) {
+					doWeb(newdoc, url);
+				}, function() {Zotero.done()});
+		Zotero.wait();
+		return true;
+	}
+	
 	var host = 'http://' + doc.location.host + "/";
 	
 	var arts = new Array();
