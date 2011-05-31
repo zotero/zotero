@@ -3602,13 +3602,16 @@ var ZoteroPane = new function()
 	 * Moves around the toolbar when the user moves around the pane
 	 */
 	this.updateToolbarPosition = function() {
-	const PANES = ["collections", "items"];
+		const PANES = ["collections", "items"];
 		for each(var paneName in PANES) {
 			var pane = document.getElementById("zotero-"+paneName+"-pane");
 			var toolbar = document.getElementById("zotero-"+paneName+"-toolbar");
 			
-			computedStyle = window.getComputedStyle(pane, null);
-			toolbar.style.width = computedStyle.getPropertyValue("width");
+			var paneComputedStyle = window.getComputedStyle(pane, null);
+			var splitterComputedStyle = window.getComputedStyle(splitter, null);
+			
+			toolbar.style.width = paneComputedStyle.getPropertyValue("width");
+			toolbar.style.marginRight = splitterComputedStyle.getPropertyValue("width");
 		}
 	}
 }

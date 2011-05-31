@@ -112,7 +112,7 @@
 					</toolbarbutton>
 				</hbox>
 				
-				<hbox id="zotero-items-toolbar" align="center">
+				<hbox id="zotero-items-toolbar">
 					<toolbarbutton id="zotero-tb-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItem.label;" type="menu">
 						<!-- New Item drop-down built in overlay.js::onLoad() -->
 						<menupopup>
@@ -151,7 +151,7 @@
 					</textbox>
 				</hbox>
 				
-				<hbox id="zotero-item-toolbar" align="center" flex="1">
+				<hbox id="zotero-item-toolbar" flex="1">
 					<hbox align="center" pack="start" flex="1">
 						<toolbarbutton id="zotero-tb-locate" class="zotero-tb-button" tooltiptext="&zotero.toolbar.openURL.label;" type="menu">
 							<menupopup id="zotero-tb-locate-menu" onpopupshowing="Zotero_LocateMenu.buildLocateMenu()"/>
@@ -287,10 +287,10 @@
 						oncommand="ZoteroPane_Local.updateTagFilter()"/>
 				</vbox>
 				
-				<splitter id="zotero-tree-splitter" resizebefore="closest" resizeafter="closest" collapse="before"
+				<splitter id="zotero-collections-splitter" resizebefore="closest" resizeafter="closest" collapse="before"
 					onmousemove="document.getElementById('zotero-items-toolbar').setAttribute('state', this.getAttribute('state'));ZoteroPane_Local.updateToolbarPosition();"
 					oncommand="ZoteroPane_Local.updateToolbarPosition()">
-					<grippy/>
+					<grippy id="zotero-collections-grippy"/>
 				</splitter>
 				
 				<vbox id="zotero-items-pane" zotero-persist="width" flex="1">
@@ -397,7 +397,7 @@
 					</deck>
 				</vbox>
 				
-				<splitter id="zotero-view-splitter" resizebefore="closest" resizeafter="closest"
+				<splitter id="zotero-items-splitter" resizebefore="closest" resizeafter="closest"
 					onmousemove="ZoteroPane_Local.updateToolbarPosition()"
 					oncommand="ZoteroPane_Local.updateToolbarPosition()"/>
 				

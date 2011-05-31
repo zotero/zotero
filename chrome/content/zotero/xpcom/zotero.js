@@ -176,6 +176,11 @@ var Zotero = new function(){
 	var _progressMeters;
 	var _lastPercentage;
 	
+	/**
+	 * A set of nsITimerCallbacks to be executed when Zotero.wait() completes
+	 */
+	var _waitTimerCallbacks = [];
+	
 	/*
 	 * Initialize the extension
 	 */
@@ -1365,10 +1370,40 @@ var Zotero = new function(){
 		
 		_waiting = false;
 		
+		// requeue nsITimerCallbacks that came up during Zotero.wait() but couldn't execute
+		for each(var timerCallback in _waitTimerCallbacks) {
+			var timer = Components.classes["@mozilla.org/timer;1"].
+				createInstance(Components.interfaces.nsITimer);
+			timer.initWithCallback(timerCallback, 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+		}
+		_waitTimerCallbacks = [];
+		
 		//Zotero.debug("Waited " + cycles + " cycles");
 		return;
 	};
 	
+	/**
+	 * Emulates the behavior of window.setTimeout, but ensures that timeouts do not get called
+	 * during Zotero.wait()
+	 *
+	 * @param {Function} func The function to be called
+	 * @param {Integer} ms The number of milliseconds to wait before calling func
+	 */
+	this.setTimeout = function(func, ms) {
+		var timer = Components.classes["@mozilla.org/timer;1"].
+			createInstance(Components.interfaces.nsITimer);
+		var timerCallback = {"notify":function() {
+			if(_waiting) {
+				// if our callback gets called during Zotero.wait(), queue it to be set again
+				// when Zotero.wait() completes
+				_waitTimerCallbacks.push(timerCallback);
+			} else {
+				// otherwise, execute callback function
+				func();
+			}
+		}}
+		timer.initWithCallback(timerCallback, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+	}
 	
 	/**
 	 * Show Zotero pane overlay and progress bar in all windows
