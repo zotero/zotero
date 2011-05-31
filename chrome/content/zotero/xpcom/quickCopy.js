@@ -199,7 +199,12 @@ Zotero.QuickCopy = new function() {
 				for (var i=0; i<notes.length; i++) {
 					var noteContent = notes[i].getNote();
 					try {
-						var noteDiv = new XML('<div class="zotero-note">' + noteContent + '</div>');
+						var noteDiv = new XML('<div class="zotero-note">'
+							+ noteContent
+								// &nbsp; is the only HTML entity we allow in
+								// notes, and it's not valid XML
+								.replace('&nbsp;', '&#160;')
+							+ '</div>');
 					}
 					catch (e) {
 						Zotero.debug(e);
