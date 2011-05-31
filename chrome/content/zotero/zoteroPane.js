@@ -3607,10 +3607,14 @@ var ZoteroPane = new function()
 		const PANES = ["collections", "items"];
 		for each(var paneName in PANES) {
 			var pane = document.getElementById("zotero-"+paneName+"-pane");
+			var splitter = document.getElementById("zotero-"+paneName+"-splitter");
 			var toolbar = document.getElementById("zotero-"+paneName+"-toolbar");
 			
-			computedStyle = window.getComputedStyle(pane, null);
-			toolbar.style.width = computedStyle.getPropertyValue("width");
+			var paneComputedStyle = window.getComputedStyle(pane, null);
+			var splitterComputedStyle = window.getComputedStyle(splitter, null);
+			
+			toolbar.style.width = parseInt(paneComputedStyle.getPropertyValue("width"))
+				+parseInt(splitterComputedStyle.getPropertyValue("width"))+"px";
 		}
 	}
 	
