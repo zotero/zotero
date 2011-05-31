@@ -1996,6 +1996,8 @@ Zotero.Integration.Session.prototype.editCitation = function(index, noteIndex, c
 	// determine whether citation is sortable in current style
 	io.sortable = this.style.opt.sort_citations;
 	
+	// citeproc-js style object for use of third-party extension
+	io.style = this.style;
 	
 	this._displayDialog('chrome://zotero/content/integration/addCitationDialog.xul', 'resizable', io);
 	
