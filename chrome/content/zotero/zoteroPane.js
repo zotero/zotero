@@ -1663,7 +1663,7 @@ var ZoteroPane = new function()
 			}
 		}
 		if (!canCopy) {
-			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 									.getService(Components.interfaces.nsIPromptService);
 			ps.alert(null, "", Zotero.getString("fileInterface.noReferencesError"));
 			return;
@@ -3204,7 +3204,7 @@ var ZoteroPane = new function()
 				catch (e) {
 					Zotero.debug("launch() not supported -- passing file to loadURI()");
 					var fileURL = attachment.getLocalFileURL();
-					window.loadURI(fileURL);
+					this.loadURI(fileURL);
 				}
 			}
 		}
