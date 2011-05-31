@@ -61,10 +61,10 @@
     <term name="close-inner-quote">”</term>
 
     <!-- ORDINALS -->
-    <term name="ordinal-01">&lt;sup&gt;er&lt;/sup&gt;</term>
-    <term name="ordinal-02">&lt;sup&gt;e&lt;/sup&gt;</term>
-    <term name="ordinal-03">&lt;sup&gt;e&lt;/sup&gt;</term>
-    <term name="ordinal-04">&lt;sup&gt;e&lt;/sup&gt;</term>
+    <term name="ordinal-01">ᵉʳ</term>
+    <term name="ordinal-02">ᵉ</term>
+    <term name="ordinal-03">ᵉ</term>
+    <term name="ordinal-04">ᵉ</term>
 
     <!-- LONG ORDINALS -->
     <term name="long-ordinal-01">premier</term>
@@ -175,8 +175,8 @@
     <term name="chapter" form="short">chap.</term>
     <term name="column" form="short">col.</term>
     <term name="figure" form="short">fig.</term>
-    <term name="folio" form="short">f&lt;sup&gt;o&lt;/sup&gt;</term>
-    <term name="issue" form="short">n&lt;sup&gt;o&lt;/sup&gt;</term>
+    <term name="folio" form="short">fᵒ</term>
+    <term name="issue" form="short">nᵒ</term>
     <term name="line" form="short">l.</term>
     <term name="note" form="short">n.</term>
     <term name="opus" form="short">op.</term>
