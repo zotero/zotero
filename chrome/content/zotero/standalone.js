@@ -36,6 +36,19 @@ var ZoteroStandalone = new function()
 		}
 		ZoteroPane.init();
 		ZoteroPane.makeVisible();
+		
+		// Run check for corrupt installation, where the wrong Gecko runtime is being used
+		if(Zotero.isMac) {
+			 var greDir = Components.classes["@mozilla.org/file/directory_service;1"]
+				.getService(Components.interfaces.nsIProperties)
+				.get("GreD", Components.interfaces.nsIFile);
+			if(greDir.isSymlink() || greDir.leafName !== "Current") {
+				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+										.getService(Components.interfaces.nsIPromptService);
+				ps.alert(null, "", Zotero.getString('standalone.corruptInstallation'));
+			}
+		}
+		
 	}
 	
 	this.onUnload = function() {
