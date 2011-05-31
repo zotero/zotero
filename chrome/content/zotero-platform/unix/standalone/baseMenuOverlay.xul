@@ -42,38 +42,34 @@
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-    <!--<menu id="helpMenu"
+    <menu id="helpMenu"
           label="&helpMenu.label;"
           accesskey="&helpMenu.accesskey;">
       <menupopup id="menu_HelpPopup" onpopupshowing="buildHelpMenu();">
         <menuitem id="menu_openHelp"
-                  oncommand="openHelpLink('firefox-help')"
-                  onclick="checkForMiddleClick(this, event);"
+                  oncommand="ZoteroStandalone.openHelp();"
                   label="&productHelp.label;"
-                  accesskey="&productHelp.accesskey;"
-                  />
+                  accesskey="&productHelp.accesskey;"/>
         <menuitem id="troubleShooting"
                   accesskey="&helpTroubleshootingInfo.accesskey;"
                   label="&helpTroubleshootingInfo.label;"
-                  oncommand="openTroubleshootingPage()"
-                  onclick="checkForMiddleClick(this, event);"/>
+                  oncommand="ZoteroStandalone.openHelp("troubleshooting")"/>
         <menuitem id="feedbackPage"
                   accesskey="&helpFeedbackPage.accesskey;"
                   label="&helpFeedbackPage.label;"
-                  oncommand="openFeedbackPage()"
-                  onclick="checkForMiddleClick(this, event);"/>
-        <menuitem id="helpSafeMode"
-                  accesskey="&helpSafeMode.accesskey;"
-                  label="&helpSafeMode.label;"
-                  oncommand="safeModeRestart();"/>
+                  oncommand="ZoteroStandalone.openHelp("feedback")"/>
         <menuseparator/>
+        <menuitem id="reportErrors"
+                  accesskey="&helpReportErrors.accesskey;"
+                  label="&helpReportErrors.label;"
+                  command="cmd_zotero_reportErrors"/>
         <menuseparator id="aboutSeparator"/>
         <menuitem id="aboutName"
                   accesskey="&aboutProduct.accesskey;"
                   label="&aboutProduct.label;"
                   oncommand="openAboutDialog();"/>
       </menupopup>
-    </menu>-->
+    </menu>
 
     <keyset id="baseMenuKeyset">
     </keyset>

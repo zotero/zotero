@@ -12,7 +12,7 @@
 <!ENTITY helpMenuWin.accesskey    "H">
 <!ENTITY aboutProduct.label       "About &brandShortName;">
 <!ENTITY aboutProduct.accesskey   "A">
-<!ENTITY productHelp.label        "&brandShortName; Help">
+<!ENTITY productHelp.label        "Support and Documentation">
 <!ENTITY productHelp.accesskey    "H">
 <!ENTITY helpMac.commandkey       "?">
 <!ENTITY helpSafeMode.label       "Restart with Add-ons Disabled…">
@@ -23,6 +23,9 @@
 
 <!ENTITY helpFeedbackPage.label      "Submit Feedback…">
 <!ENTITY helpFeedbackPage.accesskey  "S">
+
+<!ENTITY helpReportErrors.label      "Report Errors…">
+<!ENTITY helpReportErrors.accesskey  "R">
 
 <!ENTITY preferencesCmdMac.label        "Preferences…">
 <!ENTITY preferencesCmdMac.commandkey   ",">

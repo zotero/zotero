@@ -204,7 +204,7 @@ var ZoteroPane = new function()
 		// -- this way the page won't be displayed when they sync their DB to
 		// another profile or if the DB is initialized erroneously (e.g. while
 		// switching data directory locations)
-		else if (Zotero.Prefs.get('firstRun2')) {
+		else if (Zotero.Prefs.get('firstRun2') && !Zotero.isStandalone) {
 			if (Zotero.Schema.dbInitialized || !Zotero.Sync.Server.enabled) {
 				setTimeout(function () {
 					var url = "http://zotero.org/start";
@@ -3604,7 +3604,7 @@ var ZoteroPane = new function()
 	 * Moves around the toolbar when the user moves around the pane
 	 */
 	this.updateToolbarPosition = function() {
-	const PANES = ["collections", "items"];
+		const PANES = ["collections", "items"];
 		for each(var paneName in PANES) {
 			var pane = document.getElementById("zotero-"+paneName+"-pane");
 			var toolbar = document.getElementById("zotero-"+paneName+"-toolbar");
@@ -3612,6 +3612,13 @@ var ZoteroPane = new function()
 			computedStyle = window.getComputedStyle(pane, null);
 			toolbar.style.width = computedStyle.getPropertyValue("width");
 		}
+	}
+	
+	/**
+	 * Opens the about dialog
+	 */
+	this.openAboutDialog = function() {
+		window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome');
 	}
 }
 

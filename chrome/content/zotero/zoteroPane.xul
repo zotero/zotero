@@ -106,7 +106,7 @@
 								oncommand="ZoteroPane_Local.openPreferences()"/>
 							<menuitem id="zotero-tb-actions-reportErrors" command="cmd_zotero_reportErrors" disabled="true"/>
 							<menuitem id="zotero-tb-actions-support" label="&zotero.toolbar.supportAndDocumentation;" oncommand="gBrowser.selectedTab = gBrowser.addTab('http://www.zotero.org/support/')"/>
-							<menuitem id="zotero-tb-actions-about" label="&zotero.toolbar.about.label;" oncommand="window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome')"/>
+							<menuitem id="zotero-tb-actions-about" label="&zotero.toolbar.about.label;" oncommand="ZoteroPane_Local.openAboutDialog()"/>
 						</menupopup>
 					</toolbarbutton>
 				</hbox>
