@@ -3613,8 +3613,8 @@ var ZoteroPane = new function()
 			var paneComputedStyle = window.getComputedStyle(pane, null);
 			var splitterComputedStyle = window.getComputedStyle(splitter, null);
 			
-			toolbar.style.width = parseInt(paneComputedStyle.getPropertyValue("width"))
-				+parseInt(splitterComputedStyle.getPropertyValue("width"))+"px";
+			toolbar.style.width = paneComputedStyle.getPropertyValue("width");
+			toolbar.style.marginRight = splitterComputedStyle.getPropertyValue("width");
 		}
 	}
 	
