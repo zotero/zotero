@@ -1,0 +1,149 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2009 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+	The Original Code is Mozilla.org Code.
+ 
+	The Initial Developer of the Original Code is Netscape
+	Communications Corporation. Portions created by Netscape are
+	Copyright (C) 1998-2000 Netscape Communications Corporation. All
+	Rights Reserved.
+	
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+
+<!DOCTYPE overlay [
+<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd">
+%brandDTD;
+<!ENTITY % baseMenuOverlayDTD SYSTEM "chrome://zotero/locale/standalone/baseMenuOverlay.dtd">
+%baseMenuOverlayDTD;
+]>
+<overlay id="baseMenuOverlay"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<!-- nsMenuBarX hides these and uses them to build the Application menu.
+     When using Carbon widgets for Mac OS X widgets, some of these are not
+     used as they only apply to Cocoa widget builds. All version of Firefox
+     through Firefox 2 will use Carbon widgets. -->
+    <menupopup id="menu_FilePopup">
+        <menuitem id="menu_preferences" label="&preferencesCmdMac.label;" key="key_preferencesCmdMac" oncommand="ZoteroPane.openPreferences();"/>
+        <menuitem id="menu_mac_services" label="&servicesMenuMac.label;"/>
+        <menuitem id="menu_mac_hide_app" label="&hideThisAppCmdMac.label;" key="key_hideThisAppCmdMac"/>
+        <menuitem id="menu_mac_hide_others" label="&hideOtherAppsCmdMac.label;" key="key_hideOtherAppsCmdMac"/>
+        <menuitem id="menu_mac_show_all" label="&showAllAppsCmdMac.label;"/>
+    </menupopup>
+    <script type="application/javascript" src="chrome://global/content/macWindowMenu.js"/>
+    <commandset id="baseMenuCommandSet">
+        <command id="minimizeWindow"
+                 label="&minimizeWindow.label;"
+                 oncommand="Zotero.debug('minimizing window'); window.minimize();" />
+        <command id="zoomWindow"
+                 label="&zoomWindow.label;"
+                 oncommand="zoomWindow();" />
+    </commandset>
+    <menu id="windowMenu"
+          label="&windowMenu.label;"
+          datasources="rdf:window-mediator" ref="NC:WindowMediatorRoot"
+          onpopupshowing="macWindowMenuDidShow();"
+          hidden="false">
+        <template>
+        <rule>
+            <menupopup>
+                <menuitem uri="rdf:*"
+                          label="rdf:http://home.netscape.com/NC-rdf#Name"
+                          type="radio"
+                          name="windowList"
+                          oncommand="ShowWindowFromResource(event.target)"/>
+            </menupopup>
+        </rule>
+        </template>
+        <menupopup id="windowPopup">
+            <menuitem command="minimizeWindow" label="&minimizeWindow.label;" key="key_minimizeWindow"/>
+            <menuitem command="zoomWindow" label="&zoomWindow.label;"/>
+            <!-- decomment when "BringAllToFront" is implemented
+                <menuseparator/>
+                <menuitem label="&bringAllToFront.label;" disabled="true"/> -->
+            <menuseparator id="sep-window-list"/>
+        </menupopup>
+    </menu>
+
+    <!--<menu id="helpMenu"
+          label="&helpMenu.label;"
+          accesskey="&helpMenu.accesskey;">
+      <menupopup id="menu_HelpPopup" onpopupshowing="buildHelpMenu();">
+        <menuitem id="menu_openHelp"
+                  oncommand="openHelpLink('firefox-help')"
+                  onclick="checkForMiddleClick(this, event);"
+                  label="&productHelp.label;"
+                  accesskey="&productHelp.accesskey;"
+                  key="key_openHelpMac"/>
+        <menuitem id="troubleShooting"
+                  accesskey="&helpTroubleshootingInfo.accesskey;"
+                  label="&helpTroubleshootingInfo.label;"
+                  oncommand="openTroubleshootingPage()"
+                  onclick="checkForMiddleClick(this, event);"/>
+        <menuitem id="feedbackPage"
+                  accesskey="&helpFeedbackPage.accesskey;"
+                  label="&helpFeedbackPage.label;"
+                  oncommand="openFeedbackPage()"
+                  onclick="checkForMiddleClick(this, event);"/>
+        <menuitem id="helpSafeMode"
+                  accesskey="&helpSafeMode.accesskey;"
+                  label="&helpSafeMode.label;"
+                  oncommand="safeModeRestart();"/>
+        <menuseparator/>
+        <menuseparator id="aboutSeparator"/>
+        <menuitem id="aboutName"
+                  accesskey="&aboutProduct.accesskey;"
+                  label="&aboutProduct.label;"
+                  oncommand="openAboutDialog();"/>
+      </menupopup>
+    </menu>-->
+
+    <keyset id="baseMenuKeyset">
+        <key id="key_minimizeWindow"
+             command="minimizeWindow"
+             key="&minimizeWindow.key;"
+             modifiers="accel"/>
+        <key id="key_openHelpMac"
+             oncommand="openHelpLink('firefox-osxkey');"
+             key="&helpMac.commandkey;"
+             modifiers="accel"/>
+<!-- These are used to build the Application menu under Cocoa widgets -->
+        <key id="key_preferencesCmdMac"
+             key="&preferencesCmdMac.commandkey;"
+             modifiers="accel"/>
+        <key id="key_hideThisAppCmdMac"
+             key="&hideThisAppCmdMac.commandkey;"
+             modifiers="accel"/>
+        <key id="key_hideOtherAppsCmdMac"
+             key="&hideOtherAppsCmdMac.commandkey;"
+             modifiers="accel,alt"/>
+    </keyset>
+
+    <stringbundleset id="stringbundleset">
+        <stringbundle id="bundle_browser" src="chrome://browser/locale/browser.properties"/>
+        <stringbundle id="bundle_browser_region" src="chrome://browser-region/locale/region.properties"/>
+    </stringbundleset>
+</overlay>

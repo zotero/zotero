@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2009 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+	The Original Code is Mozilla.org Code.
+ 
+	The Initial Developer of the Original Code is Netscape
+	Communications Corporation. Portions created by Netscape are
+	Copyright (C) 1998-2000 Netscape Communications Corporation. All
+	Rights Reserved.
+	
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+
+<!DOCTYPE overlay [
+<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd">
+%brandDTD;
+<!ENTITY % baseMenuOverlayDTD SYSTEM "chrome://zotero/locale/standalone/baseMenuOverlay.dtd">
+%baseMenuOverlayDTD;
+]>
+<overlay id="baseMenuOverlay"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <!--<menu id="helpMenu"
+          label="&helpMenuWin.label;"
+          accesskey="&helpMenuWin.accesskey;">
+      <menupopup id="menu_HelpPopup" onpopupshowing="buildHelpMenu();">
+        <menuitem id="menu_openHelp"
+                  oncommand="openHelpLink('firefox-help')"
+                  onclick="checkForMiddleClick(this, event);"
+                  label="&productHelp.label;"
+                  accesskey="&productHelp.accesskey;"
+                  />
+        <menuitem id="troubleShooting"
+                  accesskey="&helpTroubleshootingInfo.accesskey;"
+                  label="&helpTroubleshootingInfo.label;"
+                  oncommand="openTroubleshootingPage()"
+                  onclick="checkForMiddleClick(this, event);"/>
+        <menuitem id="feedbackPage"
+                  accesskey="&helpFeedbackPage.accesskey;"
+                  label="&helpFeedbackPage.label;"
+                  oncommand="openFeedbackPage()"
+                  onclick="checkForMiddleClick(this, event);"/>
+        <menuitem id="helpSafeMode"
+                  accesskey="&helpSafeMode.accesskey;"
+                  label="&helpSafeMode.label;"
+                  oncommand="safeModeRestart();"/>
+        <menuseparator/>
+        <menuseparator id="aboutSeparator"/>
+        <menuitem id="aboutName"
+                  accesskey="&aboutProduct.accesskey;"
+                  label="&aboutProduct.label;"
+                  oncommand="openAboutDialog();"/>
+      </menupopup>
+    </menu>-->
+
+    <keyset id="baseMenuKeyset">
+    </keyset>
+
+    <stringbundleset id="stringbundleset">
+        <stringbundle id="bundle_browser" src="chrome://browser/locale/browser.properties"/>
+        <stringbundle id="bundle_browser_region" src="chrome://browser-region/locale/region.properties"/>
+    </stringbundleset>
+</overlay>

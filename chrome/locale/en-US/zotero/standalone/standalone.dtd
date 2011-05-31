@@ -78,3 +78,10 @@ you can use these alternative items. Otherwise, their values should be empty.  -
 <!ENTITY fullZoomToggleCmd.accesskey    "T">
 <!ENTITY fullZoom.label                 "Zoom">
 <!ENTITY fullZoom.accesskey             "Z">
+
+<!ENTITY toolsMenu.label              "Tools">
+<!ENTITY toolsMenu.accesskey          "T"> 
+
+<!ENTITY errorConsoleCmd.label        "Error Console">
+<!ENTITY errorConsoleCmd.accesskey    "C">
+<!ENTITY errorConsoleCmd.commandkey   "j">
