@@ -23,7 +23,9 @@
     ***** END LICENSE BLOCK *****
 */
 
-/*
+Components.utils.import("resource://gre/modules/Services.jsm");
+
+/**
  * This object contains the various functions for the interface
  */
 var ZoteroStandalone = new function()
@@ -53,6 +55,24 @@ var ZoteroStandalone = new function()
 	
 	this.onUnload = function() {
 		ZoteroPane.destroy();
+	}
+}
+
+/** Taken from browser.js **/
+function toJavaScriptConsole() {
+	toOpenWindowByType("global:console", "chrome://global/content/console.xul");
+}
+
+function toOpenWindowByType(inType, uri, features)
+{
+	var topWindow = Services.wm.getMostRecentWindow(inType);
+	
+	if (topWindow) {
+		topWindow.focus();
+	} else if(features) {
+		window.open(uri, "_blank", features);
+	} else {
+		window.open(uri, "_blank", "chrome,extrachrome,menubar,resizable,scrollbars,status,toolbar");
 	}
 }
 

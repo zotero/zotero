@@ -1,0 +1,38 @@
+<!ENTITY minimizeWindow.key       "m">
+<!ENTITY minimizeWindow.label     "Minimize">
+<!ENTITY bringAllToFront.label    "Bring All to Front">
+<!ENTITY zoomWindow.label         "Zoom">
+<!ENTITY windowMenu.label         "Window">
+
+<!ENTITY helpMenu.label           "Help"> 
+<!ENTITY helpMenu.accesskey       "H"> 
+<!-- LOCALIZATION NOTE some localizations of Windows (ex:french, german) use "?"
+                       for the help button in the menubar but Gnome does not.   -->
+<!ENTITY helpMenuWin.label        "Help"> 
+<!ENTITY helpMenuWin.accesskey    "H">
+<!ENTITY aboutProduct.label       "About &brandShortName;">
+<!ENTITY aboutProduct.accesskey   "A">
+<!ENTITY productHelp.label        "&brandShortName; Help">
+<!ENTITY productHelp.accesskey    "H">
+<!ENTITY helpMac.commandkey       "?">
+<!ENTITY helpSafeMode.label       "Restart with Add-ons Disabled…">
+<!ENTITY helpSafeMode.accesskey   "R">
+
+<!ENTITY helpTroubleshootingInfo.label      "Troubleshooting Information">
+<!ENTITY helpTroubleshootingInfo.accesskey  "T">
+
+<!ENTITY helpFeedbackPage.label      "Submit Feedback…">
+<!ENTITY helpFeedbackPage.accesskey  "S">
+
+<!ENTITY preferencesCmdMac.label        "Preferences…">
+<!ENTITY preferencesCmdMac.commandkey   ",">
+
+<!ENTITY servicesMenuMac.label          "Services">
+
+<!ENTITY hideThisAppCmdMac.label        "Hide &brandShortName;">
+<!ENTITY hideThisAppCmdMac.commandkey   "H">
+
+<!ENTITY hideOtherAppsCmdMac.label      "Hide Others">
+<!ENTITY hideOtherAppsCmdMac.commandkey "H">
+
+<!ENTITY showAllAppsCmdMac.label        "Show All">
