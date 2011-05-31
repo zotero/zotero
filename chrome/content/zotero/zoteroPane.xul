@@ -111,7 +111,7 @@
 					</toolbarbutton>
 				</hbox>
 				
-				<hbox id="zotero-items-toolbar" align="center">
+				<hbox id="zotero-items-toolbar">
 					<toolbarbutton id="zotero-tb-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItem.label;" type="menu">
 						<!-- New Item drop-down built in overlay.js::onLoad() -->
 						<menupopup>
@@ -150,7 +150,7 @@
 							oncommand="ZoteroPane_Local.search()"/>
 				</hbox>
 				
-				<hbox id="zotero-item-toolbar" align="center" flex="1">
+				<hbox id="zotero-item-toolbar" flex="1">
 					<hbox align="center" pack="start" flex="1">
 						<toolbarbutton id="zotero-tb-locate" class="zotero-tb-button" tooltiptext="&zotero.toolbar.openURL.label;" type="menu">
 							<menupopup id="zotero-tb-locate-menu" onpopupshowing="Zotero_LocateMenu.buildLocateMenu()"/>
