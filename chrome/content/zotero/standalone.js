@@ -53,6 +53,16 @@ var ZoteroStandalone = new function()
 		
 	}
 	
+	this.openHelp = function(type) {
+		if(type === "troubleshooting") {
+			ZoteroPane.loadURI("http://www.zotero.org/support/getting_help");
+		} else if(type === "feedback") {
+			ZoteroPane.loadURI("http://forums.zotero.org/categories/");
+		} else {
+			ZoteroPane.loadURI("http://www.zotero.org/support/");
+		}
+	}
+	
 	this.onUnload = function() {
 		ZoteroPane.destroy();
 	}

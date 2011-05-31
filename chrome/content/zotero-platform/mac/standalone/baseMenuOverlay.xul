@@ -88,38 +88,34 @@
         </menupopup>
     </menu>
 
-    <!--<menu id="helpMenu"
+    <menu id="helpMenu"
           label="&helpMenu.label;"
           accesskey="&helpMenu.accesskey;">
-      <menupopup id="menu_HelpPopup" onpopupshowing="buildHelpMenu();">
+      <menupopup id="menu_HelpPopup">
         <menuitem id="menu_openHelp"
-                  oncommand="openHelpLink('firefox-help')"
-                  onclick="checkForMiddleClick(this, event);"
+                  oncommand="ZoteroStandalone.openHelp();"
                   label="&productHelp.label;"
                   accesskey="&productHelp.accesskey;"
                   key="key_openHelpMac"/>
         <menuitem id="troubleShooting"
                   accesskey="&helpTroubleshootingInfo.accesskey;"
                   label="&helpTroubleshootingInfo.label;"
-                  oncommand="openTroubleshootingPage()"
-                  onclick="checkForMiddleClick(this, event);"/>
+                  oncommand="ZoteroStandalone.openHelp('troubleshooting');"/>
         <menuitem id="feedbackPage"
                   accesskey="&helpFeedbackPage.accesskey;"
                   label="&helpFeedbackPage.label;"
-                  oncommand="openFeedbackPage()"
-                  onclick="checkForMiddleClick(this, event);"/>
-        <menuitem id="helpSafeMode"
-                  accesskey="&helpSafeMode.accesskey;"
-                  label="&helpSafeMode.label;"
-                  oncommand="safeModeRestart();"/>
+                  oncommand="ZoteroStandalone.openHelp('feedback');"/>
         <menuseparator/>
-        <menuseparator id="aboutSeparator"/>
+        <menuitem id="reportErrors"
+                  accesskey="&helpReportErrors.accesskey;"
+                  label="&helpReportErrors.label;"
+                  command="cmd_zotero_reportErrors"/>
         <menuitem id="aboutName"
                   accesskey="&aboutProduct.accesskey;"
                   label="&aboutProduct.label;"
-                  oncommand="openAboutDialog();"/>
+                  oncommand="ZoteroPane.openAboutDialog();"/>
       </menupopup>
-    </menu>-->
+    </menu>
 
     <keyset id="baseMenuKeyset">
         <key id="key_minimizeWindow"
@@ -127,7 +123,7 @@
              key="&minimizeWindow.key;"
              modifiers="accel"/>
         <key id="key_openHelpMac"
-             oncommand="openHelpLink('firefox-osxkey');"
+             oncommand="ZoteroStandalone.openHelp();"
              key="&helpMac.commandkey;"
              modifiers="accel"/>
 <!-- These are used to build the Application menu under Cocoa widgets -->
