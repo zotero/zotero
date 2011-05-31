@@ -286,10 +286,10 @@
 						oncommand="ZoteroPane_Local.updateTagFilter()"/>
 				</vbox>
 				
-				<splitter id="zotero-tree-splitter" resizebefore="closest" resizeafter="closest" collapse="before"
+				<splitter id="zotero-collections-splitter" resizebefore="closest" resizeafter="closest" collapse="before"
 					onmousemove="document.getElementById('zotero-items-toolbar').setAttribute('state', this.getAttribute('state'));ZoteroPane_Local.updateToolbarPosition();"
 					oncommand="ZoteroPane_Local.updateToolbarPosition()">
-					<grippy/>
+					<grippy id="zotero-collections-grippy"/>
 				</splitter>
 				
 				<vbox id="zotero-items-pane" zotero-persist="width" flex="1">
@@ -396,7 +396,7 @@
 					</deck>
 				</vbox>
 				
-				<splitter id="zotero-view-splitter" resizebefore="closest" resizeafter="closest"
+				<splitter id="zotero-items-splitter" resizebefore="closest" resizeafter="closest"
 					onmousemove="ZoteroPane_Local.updateToolbarPosition()"
 					oncommand="ZoteroPane_Local.updateToolbarPosition()"/>
 				
