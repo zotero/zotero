@@ -24,7 +24,7 @@
 <!ENTITY helpFeedbackPage.label      "Submit Feedback…">
 <!ENTITY helpFeedbackPage.accesskey  "S">
 
-<!ENTITY helpReportErrors.label      "Report Errors…">
+<!ENTITY helpReportErrors.label      "Report Errors to Zotero…">
 <!ENTITY helpReportErrors.accesskey  "R">
 
 <!ENTITY preferencesCmdMac.label        "Preferences…">
