@@ -310,7 +310,7 @@ var Zotero_File_Interface = new function() {
 				null, null, {}
 			);
 			if (index == 1) {
-				window.loadURI("http://zotero.org/support/kb/importing");
+				ZoteroPane_Local.loadURI("http://zotero.org/support/kb/importing");
 			}
 		}
 	}
