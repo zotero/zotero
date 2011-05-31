@@ -214,14 +214,8 @@ function confirm(msg){
 /**
 * Convenience method to replicate window.setTimeout()
 **/
-// TODO: is this still used? if so, move to zotero.js
-function setTimeout(func, ms){
-	var timer = Components.classes["@mozilla.org/timer;1"].
-		createInstance(Components.interfaces.nsITimer);
-	// {} implements nsITimerCallback
-	timer.initWithCallback({notify:func}, ms,
-		Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-	return timer;
+function setTimeout(func, ms) {
+	Zotero.setTimeout(func, ms);
 }
 
 
