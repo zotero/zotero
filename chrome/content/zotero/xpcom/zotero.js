@@ -1376,6 +1376,7 @@ var Zotero = new function(){
 				createInstance(Components.interfaces.nsITimer);
 			timer.initWithCallback(timerCallback, 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 		}
+		_waitTimerCallbacks = [];
 		
 		//Zotero.debug("Waited " + cycles + " cycles");
 		return;
@@ -1394,7 +1395,7 @@ var Zotero = new function(){
 		var timerCallback = {"notify":function() {
 			if(_waiting) {
 				// if our callback gets called during Zotero.wait(), queue it to be set again
-				// when Zotero.wait() complets
+				// when Zotero.wait() completes
 				_waitTimerCallbacks.push(timerCallback);
 			} else {
 				// otherwise, execute callback function
