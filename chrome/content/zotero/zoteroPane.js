@@ -349,6 +349,7 @@ var ZoteroPane = new function()
 		}
 		
 		this.unserializePersist();
+		this.updateToolbarPosition();
 		this.updateTagSelectorSize();
 		
 		// restore saved row selection (for tab switching)
@@ -3606,6 +3607,7 @@ var ZoteroPane = new function()
 	 * Moves around the toolbar when the user moves around the pane
 	 */
 	this.updateToolbarPosition = function() {
+		if(document.getElementById("zotero-pane-stack").hidden) return;
 		const PANES = ["collections", "items"];
 		for each(var paneName in PANES) {
 			var pane = document.getElementById("zotero-"+paneName+"-pane");
