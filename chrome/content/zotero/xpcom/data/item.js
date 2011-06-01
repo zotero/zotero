@@ -2000,6 +2000,45 @@ Zotero.Item.prototype.save = function() {
 			}
 		}
 		
+		if (!this.id) {
+			this._id = itemID;
+		}
+		
+		if (!this.key) {
+			this._key = key;
+		}
+		
+		if (this._changedDeleted) {
+			// Update child item counts on parent
+			var sourceItemID = this.getSource();
+			if (sourceItemID) {
+				var sourceItem = Zotero.Items.get(sourceItemID);
+				if (this._deleted) {
+					if (this.isAttachment()) {
+						sourceItem.decrementAttachmentCount();
+					}
+					else {
+						sourceItem.decrementNoteCount();
+					}
+				}
+				else {
+					if (this.isAttachment()) {
+						sourceItem.incrementAttachmentCount();
+					}
+					else {
+						sourceItem.incrementNoteCount();
+					}
+				}
+			}
+			// Refresh trash
+			Zotero.Notifier.trigger('refresh', 'collection', 0);
+			if (this._deleted) {
+				Zotero.Notifier.trigger('trash', 'item', this.id);
+			}
+		}
+		
+		Zotero.Items.reload(this.id);
+		
 		//Zotero.History.commit();
 		Zotero.DB.commitTransaction();
 	}
@@ -2011,47 +2050,8 @@ Zotero.Item.prototype.save = function() {
 		throw(e);
 	}
 	
-	if (!this.id) {
-		this._id = itemID;
-	}
-	
-	if (!this.key) {
-		this._key = key;
-	}
-	
-	if (this._changedDeleted) {
-		// Update child item counts on parent
-		var sourceItemID = this.getSource();
-		if (sourceItemID) {
-			var sourceItem = Zotero.Items.get(sourceItemID);
-			if (this._deleted) {
-				if (this.isAttachment()) {
-					sourceItem.decrementAttachmentCount();
-				}
-				else {
-					sourceItem.decrementNoteCount();
-				}
-			}
-			else {
-				if (this.isAttachment()) {
-					sourceItem.incrementAttachmentCount();
-				}
-				else {
-					sourceItem.incrementNoteCount();
-				}
-			}
-		}
-		// Refresh trash
-		Zotero.Notifier.trigger('refresh', 'collection', 0);
-		if (this._deleted) {
-			Zotero.Notifier.trigger('trash', 'item', this.id);
-		}
-	}
-	
-	Zotero.Items.reload(this.id);
-	
-	this._previousData = null;
-	
+	// New items have to be reloaded via Zotero.Items.get(),
+	// so mark them as disabled
 	if (isNew) {
 		var id = this.id;
 		this._disabled = true;
