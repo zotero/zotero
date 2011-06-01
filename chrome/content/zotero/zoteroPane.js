@@ -661,6 +661,8 @@ var ZoteroPane = new function()
 			var itemGroup = null;
 		}
 		
+		Zotero.DB.beginTransaction();
+		
 		var item = new Zotero.Item(typeID);
 		item.libraryID = libraryID;
 		for (var i in data) {
@@ -671,6 +673,8 @@ var ZoteroPane = new function()
 		if (itemGroup && itemGroup.isCollection()) {
 			itemGroup.ref.addItem(itemID);
 		}
+		
+		Zotero.DB.commitTransaction();
 		
 		//set to Info tab
 		document.getElementById('zotero-view-item').selectedIndex = 0;
