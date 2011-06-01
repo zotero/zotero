@@ -97,12 +97,15 @@ Zotero.CachedTypes = function() {
 	}
 	
 	
-	function getTypes(where) {
-		return Zotero.DB.query('SELECT ' + this._idCol + ' AS id, '
-			+ this._nameCol + ' AS name'
-			+ (this._hasCustom ? ', custom' : '')
-			+ ' FROM ' + this._table
-			+ (where ? ' ' + where : ''));
+	function getTypes(where, params) {
+		return Zotero.DB.query(
+			'SELECT ' + this._idCol + ' AS id, '
+				+ this._nameCol + ' AS name'
+				+ (this._hasCustom ? ', custom' : '')
+				+ ' FROM ' + this._table
+				+ (where ? ' ' + where : ''),
+			params ? params : false
+		);
 	}
 	
 	
@@ -231,11 +234,43 @@ Zotero.ItemTypes = new function() {
 	var _customLabels = {};
 	
 	function getPrimaryTypes() {
-		return this.getTypes('WHERE display=2');
+		var limit = 5;
+		
+		// TODO: get rid of ' AND itemTypeID!=5' and just remove display=2
+		// from magazineArticle in system.sql
+		var sql = 'WHERE (display=2 AND itemTypeID!=5) ';
+		
+		var mru = Zotero.Prefs.get('newItemTypeMRU');
+		if (mru) {
+			var params = [];
+			mru = mru.split(',').slice(0, limit);
+			for (var i=0, len=mru.length; i<len; i++) {
+				var id = parseInt(mru[i]);
+				if (!isNaN(id)) {
+					params.push(id);
+				}
+			}
+			if (params.length) {
+				sql += 'OR id IN '
+						+ '(' + params.map(function () '?').join() + ') '
+						+ 'ORDER BY id NOT IN '
+						+ '(' + params.map(function () '?').join() + ') ';
+				params = params.concat(params);
+			}
+			else {
+				params = false;
+			}
+		}
+		else {
+			params = false;
+		}
+		sql += 'LIMIT ' + limit;
+		
+		return this.getTypes(sql, params);
 	}
 
 	function getSecondaryTypes() {
-		return this.getTypes('WHERE display=1');
+		return this.getTypes('WHERE display IN (1,2)');
 	}
 	
 	function getHiddenTypes() {
