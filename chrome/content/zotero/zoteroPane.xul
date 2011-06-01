@@ -114,13 +114,13 @@
 				<hbox id="zotero-items-toolbar">
 					<toolbarbutton id="zotero-tb-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItem.label;" type="menu">
 						<!-- New Item drop-down built in overlay.js::onLoad() -->
-						<menupopup>
+						<menupopup onpopupshowing="ZoteroPane_Local.updateNewItemTypes()">
 							<menuseparator/>
 							<menuitem label="&zotero.toolbar.attachment.linked;" oncommand="ZoteroPane_Local.addAttachmentFromDialog(true);" tooltiptext=""/>
 							<menuitem label="&zotero.toolbar.attachment.add;" oncommand="ZoteroPane_Local.addAttachmentFromDialog();"  tooltiptext=""/>
 							<menuseparator/>
 							<menu label="&zotero.toolbar.moreItemTypes.label;" tooltiptext="">
-								<menupopup id="zotero-tb-add-more"/>
+								<menupopup id="zotero-tb-add-more" onpopupshowing="event.stopPropagation()"/>
 							</menu>
 						</menupopup>
 					</toolbarbutton>

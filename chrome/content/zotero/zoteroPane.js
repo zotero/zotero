@@ -147,7 +147,7 @@ var ZoteroPane = new function()
 		itemsTree.controllers.appendController(new Zotero.ItemTreeCommandController(itemsTree));
 		itemsTree.addEventListener("click", ZoteroPane_Local.onTreeClick, true);
 		
-		this.buildItemTypeMenus();
+		this.buildItemTypeSubMenu();
 		
 		var menu = document.getElementById("contentAreaContextMenu");
 		menu.addEventListener("popupshowing", ZoteroPane_Local.contextPopupShowing, false);
@@ -233,14 +233,41 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.buildItemTypeMenus = function () {
-		//
-		// Create the New Item (+) menu with each item type
-		//
-		var addMenu = document.getElementById('zotero-tb-add').firstChild;
+	/*
+	 * Create the New Item (+) submenu with each item type
+	 */
+	this.buildItemTypeSubMenu = function () {
 		var moreMenu = document.getElementById('zotero-tb-add-more');
 		
-		// Remove all nodes, in case we're reloading
+		// Sort by localized name
+		var t = Zotero.ItemTypes.getSecondaryTypes();
+		var itemTypes = [];
+		for (var i=0; i<t.length; i++) {
+			itemTypes.push({
+				id: t[i].id,
+				name: t[i].name,
+				localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
+			});
+		}
+		var collation = Zotero.getLocaleCollation();
+		itemTypes.sort(function(a, b) {
+			return collation.compareString(1, a.localized, b.localized);
+		});
+		
+		for (var i = 0; i<itemTypes.length; i++) {
+			var menuitem = document.createElement("menuitem");
+			menuitem.setAttribute("label", itemTypes[i].localized);
+			menuitem.setAttribute("oncommand","ZoteroPane_Local.newItem("+itemTypes[i]['id']+")");
+			menuitem.setAttribute("tooltiptext", "");
+			moreMenu.appendChild(menuitem);
+		}
+	}
+	
+	
+	this.updateNewItemTypes = function () {
+		var addMenu = document.getElementById('zotero-tb-add').firstChild;
+		
+		// Remove all nodes so we can regenerate
 		var options = addMenu.getElementsByAttribute("class", "zotero-tb-add");
 		while (options.length) {
 			var p = options[0].parentNode;
@@ -272,36 +299,8 @@ var ZoteroPane = new function()
 			menuitem.className = "zotero-tb-add";
 			addMenu.insertBefore(menuitem, separator);
 		}
-		
-		
-		//
-		// Create submenu for secondary item types
-		//
-		
-		// Sort by localized name
-		var t = Zotero.ItemTypes.getSecondaryTypes();
-		var itemTypes = [];
-		for (var i=0; i<t.length; i++) {
-			itemTypes.push({
-				id: t[i].id,
-				name: t[i].name,
-				localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
-			});
-		}
-		var collation = Zotero.getLocaleCollation();
-		itemTypes.sort(function(a, b) {
-			return collation.compareString(1, a.localized, b.localized);
-		});
-		
-		for (var i = 0; i<itemTypes.length; i++) {
-			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("label", itemTypes[i].localized);
-			menuitem.setAttribute("oncommand","ZoteroPane_Local.newItem("+itemTypes[i]['id']+")");
-			menuitem.setAttribute("tooltiptext", "");
-			menuitem.className = "zotero-tb-add";
-			moreMenu.appendChild(menuitem);
-		}
 	}
+	
 	
 	
 	/*
@@ -676,6 +675,21 @@ var ZoteroPane = new function()
 		document.getElementById('zotero-view-item').selectedIndex = 0;
 		
 		this.selectItem(itemID);
+		
+		// Update most-recently-used list for New Item menu
+		var mru = Zotero.Prefs.get('newItemTypeMRU');
+		if (mru) {
+			var mru = mru.split(',');
+			var pos = mru.indexOf(typeID + '');
+			if (pos != -1) {
+				mru.splice(pos, 1);
+			}
+			mru.unshift(typeID);
+		}
+		else {
+			var mru = [typeID + ''];
+		}
+		Zotero.Prefs.set('newItemTypeMRU', mru.slice(0, 5).join(','));
 		
 		return Zotero.Items.get(itemID);
 	}
