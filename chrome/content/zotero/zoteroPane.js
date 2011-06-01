@@ -3609,6 +3609,7 @@ var ZoteroPane = new function()
 		const PANES = ["collections", "items"];
 		for each(var paneName in PANES) {
 			var pane = document.getElementById("zotero-"+paneName+"-pane");
+			var splitter = document.getElementById("zotero-"+paneName+"-splitter");
 			var toolbar = document.getElementById("zotero-"+paneName+"-toolbar");
 			
 			var paneComputedStyle = window.getComputedStyle(pane, null);
