@@ -423,6 +423,15 @@ CSL_E4X.prototype.clean = function (xml) {
 	xml = xml.replace(/\s+$/g, "");
 	return xml;
 };
+CSL_E4X.prototype.getStyleId = function (myxml) {
+	var text = "";
+	default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
+	var node = myxml..id;
+	if (node && node.length()) {
+		text = node[0].toString();
+	}
+	return text;
+};
 CSL_E4X.prototype.children = function (myxml) {
 	return myxml.children();
 };
@@ -1870,7 +1879,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.175";
+	this.processor_version = "1.0.176";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -1906,6 +1915,7 @@ CSL.Engine = function (sys, style, lang, forceLang) {
 	this.opt["initialize-with-hyphen"] = true;
 	this.setStyleAttributes();
 	this.opt.xclass = sys.xml.getAttributeValue(this.cslXml, "class");
+	this.opt.styleID = this.sys.xml.getStyleId(this.cslXml);
 	if (lang) {
 		lang = lang.replace("_", "-");
 	}
