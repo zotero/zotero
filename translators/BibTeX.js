@@ -8,9 +8,9 @@
 	"maxVersion":"",
 	"priority":200,
 	"configOptions":{"dataMode":"block"},
-	"displayOptions":{"exportCharset":"UTF-8", "exportFileData":false},
+	"displayOptions":{"exportCharset":"UTF-8", "exportNotes":true, "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2011-05-12 21:20:00"
+	"lastUpdated":"2011-05-27 19:42:10"
 }
 
 function detectImport() {
@@ -1632,7 +1632,7 @@ function processField(item, field, value) {
 			item.tags = value.split(/, ?/g);
 		}
 	} else if (field == "comment" || field == "annote" || field == "review") {
-		item.notes.push({note:value});
+		item.notes.push({note:Zotero.Utilities.text2html(value)});
 	} else if (field == "pdf") {
 		if (/:\/\//.test(value)) { // a full uri is given
 			item.attachments = [{url:value, mimeType:"application/pdf", downloadable:true}];
@@ -2074,9 +2074,9 @@ function doExport() {
 		if(item.itemType == "webpage") {
 			writeField("howpublished", item.url);
 		}
-		if (item.notes) {
+		if (item.notes && Zotero.getOption("exportNotes")) {
 			for each (var note in item.notes) {
-				writeField("annote", note["note"]);
+				writeField("annote", Zotero.Utilities.unescapeHTML(note["note"]));
 			}
 		}		
 		
