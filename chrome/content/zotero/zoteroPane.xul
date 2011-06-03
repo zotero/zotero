@@ -47,6 +47,10 @@
 	
 	<commandset id="mainCommandSet">
 		<command id="cmd_zotero_reportErrors" oncommand="ZoteroPane_Local.reportErrors();"/>
+		<command id="cmd_zotero_import" oncommand="Zotero_File_Interface.importFile();"/>
+		<command id="cmd_zotero_importFromClipboard" oncommand="Zotero_File_Interface.importFromClipboard();"/>
+		<command id="cmd_zotero_exportLibrary" oncommand="Zotero_File_Interface.exportFile();"/>
+		<command id="cmd_zotero_advancedSearch" oncommand="ZoteroPane_Local.openAdvancedSearchWindow();"/>
 	</commandset>
 	
 	<popup id="contentAreaContextMenu">
@@ -87,9 +91,9 @@
 					<spacer flex="1"/>
 					<toolbarbutton id="zotero-tb-actions-menu" class="zotero-tb-button" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
 						<menupopup id="zotero-tb-actions-popup" onpopupshowing="document.getElementById('cmd_zotero_reportErrors').setAttribute('disabled', Zotero.getErrors().length == 0)">
-							<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" oncommand="Zotero_File_Interface.importFile();"/>
-							<menuitem id="zotero-tb-actions-import-clipboard" label="&zotero.toolbar.importFromClipboard;" oncommand="Zotero_File_Interface.importFromClipboard();" />
-							<menuitem id="zotero-tb-actions-export" label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile();"/>
+							<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" command="cmd_zotero_import"/>
+							<menuitem id="zotero-tb-actions-import-clipboard" label="&zotero.toolbar.importFromClipboard;" command="cmd_zotero_importFromClipboard"/>
+							<menuitem id="zotero-tb-actions-export" label="&zotero.toolbar.export.label;" command="cmd_zotero_exportLibrary"/>
 							<menuitem id="zotero-tb-actions-rtfScan" label="&zotero.toolbar.rtfScan.label;" oncommand="window.openDialog('chrome://zotero/content/rtfScan.xul', 'rtfScan', 'chrome,centerscreen')"/>
 							<menuitem hidden="true" id="zotero-tb-actions-zeroconf-update"
 								label="Search for Shared Libraries" oncommand="Zotero.Zeroconf.findInstances()"/>
@@ -142,7 +146,7 @@
 						</menupopup>
 					</toolbarbutton>
 					<toolbarseparator/>
-					<toolbarbutton id="zotero-tb-advanced-search" class="zotero-tb-button" tooltiptext="&zotero.toolbar.advancedSearch;" oncommand="ZoteroPane_Local.openAdvancedSearchWindow()"/>
+					<toolbarbutton id="zotero-tb-advanced-search" class="zotero-tb-button" tooltiptext="&zotero.toolbar.advancedSearch;" command="cmd_zotero_advancedSearch"/>
 					<spacer flex="1"/>
 					<textbox id="zotero-tb-search" type="search" timeout="250"
 							onkeypress="ZoteroPane_Local.handleSearchKeypress(this, event)"
