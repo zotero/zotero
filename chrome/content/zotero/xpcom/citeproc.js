@@ -9214,7 +9214,7 @@ CSL.Output.Formats.prototype.html = {
 		.replace("  ", "&#160; ", "g")
 		.replace(CSL.SUPERSCRIPTS_REGEXP,
 				 function(aChar) {
-					 return "&#60;sup&#62;" + CSL.SUPERSCRIPTS[aChar] + "&#60;/sup&#62;";
+					 return "<sup>" + CSL.SUPERSCRIPTS[aChar] + "</sup>";
 				 });
 	},
 	"bibstart": "<div class=\"csl-bib-body\">\n",
