@@ -1295,9 +1295,13 @@ Zotero_Preferences.Debug_Output = {
 	
 	
 	toggleStore: function () {
-		var storing = Zotero.Debug.storing;
-		Zotero.Debug.setStore(!storing);
-		if (!storing) {
+		this.setStore(!Zotero.Debug.storing);
+	},
+	
+	
+	setStore: function (set) {
+		Zotero.Debug.setStore(set);
+		if (set) {
 			this._initTimer();
 		}
 		else {
@@ -1336,6 +1340,7 @@ Zotero_Preferences.Debug_Output = {
 		
 		var url = "http://www.zotero.org/repo/report?debug=1";
 		var output = Zotero.Debug.get();
+		Zotero_Preferences.Debug_Output.setStore(false);
 		
 		var uploadCallback = function (xmlhttp) {
 			document.getElementById('debug-output-submit').disabled = false;
@@ -1367,7 +1372,7 @@ Zotero_Preferences.Debug_Output = {
 			var reportID = reported[0].getAttribute('reportID');
 			ps.alert(
 				null,
-				"Submitted",
+				"Debug Output Submitted",
 				"Debug output has been sent to the Zotero server.\n\n"
 					+ "The Debug ID is D" + reportID + "."
 			);
