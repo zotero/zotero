@@ -31,19 +31,15 @@
 <?xul-overlay href="chrome://global/content/editMenuOverlay.xul"?>
 <?xul-overlay href="chrome://zotero/content/zoteroPane.xul"?>
 <?xul-overlay href="chrome://zotero/content/itemPane.xul"?>
-<?xul-overlay href="chrome://zotero-platform/content/standalone/baseMenuOverlay.xul"?>
+<?xul-overlay href="chrome://zotero-platform/content/standalone/menuOverlay.xul"?>
 
 <!DOCTYPE window [
-<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd">
-%globalDTD;
-<!ENTITY % charsetDTD SYSTEM "chrome://global/locale/charsetOverlay.dtd" >
-%charsetDTD;
-<!ENTITY % textcontextDTD SYSTEM "chrome://global/locale/textcontext.dtd" >
-%textcontextDTD;
-<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone/standalone.dtd" >
-%standaloneDTD;
-<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd" >
-%brandDTD;
+	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
+	<!ENTITY % charsetDTD SYSTEM "chrome://global/locale/charsetOverlay.dtd" > %charsetDTD;
+	<!ENTITY % textcontextDTD SYSTEM "chrome://global/locale/textcontext.dtd" > %textcontextDTD;
+	<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone/standalone.dtd" > %standaloneDTD;
+	<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd" > %brandDTD;
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
 ]>
 
 <window id="main-window"
@@ -55,30 +51,25 @@
 				persist="screenX screenY width height sizemode"> 
 	<script type="application/javascript" src="standalone.js"/>
 	<script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
-	<script type="application/javascript" src="chrome://global/content/viewZoomOverlay.js"/>
 	<script type="application/javascript" src="chrome://global/content/contentAreaUtils.js"/>
 	<script type="application/javascript" src="chrome://global/content/inlineSpellCheckUI.js"/>
+	
 	<commandset id="mainCommandSet">
-		<command id="cmd_toggleTaskbar" oncommand="goToggleToolbar('status-bar','toggle_taskbar');"/>
-		<command id="cmd_quitApplication" oncommand="goQuitApplication()"/>
+		<!--FILE-->
+		<command id="cmd_quitApplication" oncommand="goQuitApplication();"/>
+		<command id="cmd_close" oncommand="window.close();"/>
 		
+		<!--EDIT-->
 		<commandset id="editMenuCommands"/>
-		
 		<command id="cmd_find"
-				 oncommand="gFindBar.onFindCommand();"
-				 observes="isImage"/>
-		<command id="cmd_findAgain"
-				 oncommand="gFindBar.onFindAgainCommand(false);"
-				 observes="isImage"/>
-		<command id="cmd_findPrevious"
-				 oncommand="gFindBar.onFindAgainCommand(true);"
-				 observes="isImage"/>
-		
-		<command id="cmd_fullZoomReduce"  oncommand="FullZoom.reduce()"/>
-		<command id="cmd_fullZoomEnlarge" oncommand="FullZoom.enlarge()"/>
-		<command id="cmd_fullZoomReset"   oncommand="FullZoom.reset()"/>
-		<command id="cmd_fullZoomToggle"  oncommand="ZoomManager.toggleZoom();"/>
+			oncommand="document.getElementById('zotero-tb-search').focus();"/>
 	</commandset>
+	
+	<keyset id="mainKeyset">
+		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
+	</keyset>
+	<keyset id="editMenuKeys"/>
+	
 	<popup id="contentAreaContextMenu">
 		<menuitem id="context-undo"
 				label="&undoCmd.label;"
@@ -116,60 +107,42 @@
 			<toolbaritem id="menubar-items" align="center">
 				<menubar id="main-menubar"
 				style="border:0px;padding:0px;margin:0px;-moz-appearance:none">
-					<menu id="file-menu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
+					<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
 						<menupopup id="menu_FilePopup">
 							<menuitem id="menu_close" label="&closeCmd.label;" key="key_close"
 									accesskey="&closeCmd.accesskey;" command="cmd_close"/>
-							<menuitem id="menu_FileQuitItem" 
-									label="&quitApplicationCmdMac.label;"
-									key="key_quitApplication"
-									command="cmd_quitApplication"/>
+							<menuseparator/>
+							<menuitem id="menu_import" label="&zotero.toolbar.import.label;"
+									command="cmd_zotero_import"/>
+							<menuitem id="menu_importFromClipboard" label="&zotero.toolbar.importFromClipboard;"
+									command="cmd_zotero_importFromClipboard"/>
+							<menuitem id="menu_exportLibrary" label="&zotero.toolbar.export.label;"
+									command="cmd_zotero_exportLibrary"/>
 						</menupopup>
 					</menu>
 					
-					<menu id="edit-menu" label="&editMenu.label;" accesskey="&editMenu.accesskey;">
+					<menu id="editMenu" label="&editMenu.label;" accesskey="&editMenu.accesskey;">
 						<menupopup id="menu_EditPopup">
-							<menuitem label="&undoCmd.label;"
-									id="menu_undo"
-									key="key_undo"
-									accesskey="&undoCmd.accesskey;"
-									command="cmd_undo"/>
-							<menuitem label="&redoCmd.label;"
-									id="menu_redo"
-									key="key_redo"
-									accesskey="&redoCmd.accesskey;"
-									command="cmd_redo"/>
+							<menuitem id="menu_undo"/>
+							<menuitem id="menu_redo"/>
 							<menuseparator/>
-							<menuitem label="&cutCmd.label;"
-									id="menu_cut"
-									key="key_cut"
-									accesskey="&cutCmd.accesskey;"
-									command="cmd_cut"/>
-							<menuitem label="&copyCmd.label;"
-									id="menu_copy"
-									key="key_copy"
-									accesskey="&copyCmd.accesskey;"
+							<menuitem id="menu_cut"/>
+							<menuitem id="menu_copy" label="&copyCmd.label;"
+									key="key_copy" accesskey="&copyCmd.accesskey;"
 									command="cmd_copy"/>
-							<menuitem label="&pasteCmd.label;"
-									id="menu_paste"
-									key="key_paste"
-									accesskey="&pasteCmd.accesskey;"
-									command="cmd_paste"/>
-							<menuitem label="&deleteCmd.label;"
-									id="menu_delete"
-									key="key_delete"
-									accesskey="&deleteCmd.accesskey;"
-									command="cmd_delete"/>
+							<menuitem id="menu_copyCitation" label="&copyCitationCmd.label;"
+									oncommand="ZoteroPane_Local.copySelectedItemsToClipboard(true);"/>
+							<menuitem id="menu_copyBibliography" label="&copyBibliographyCmd.label;"
+									oncommand="ZoteroPane_Local.copySelectedItemsToClipboard();"/>
+							<menuitem id="menu_paste"/>
+							<menuitem id="menu_delete"/>
 							<menuseparator/>
-							<menuitem id="menu_selectAll"
-									label="&selectAllCmd.label;"
-									key="key_selectAll"
-									accesskey="&selectAllCmd.accesskey;"
-									command="cmd_selectAll"/>
+							<menuitem id="menu_selectAll"/>
 							<menuseparator/>
-							<menuitem id="menu_find" label="&findOnCmd.label;" accesskey="&findOnCmd.accesskey;" key="key_find" command="cmd_find"/>
-							<menuitem label="&findAgainCmd.label;" accesskey="&findAgainCmd.accesskey;" key="key_findAgain" command="cmd_findAgain"
-									id="menu_findAgain" />
+							<menuitem id="menu_find"/>
+							<menuitem id="menu_advancedSearch"
+									label="&zotero.toolbar.advancedSearch;"
+									command="cmd_zotero_advancedSearch"/>
 							<menuseparator hidden="true" id="textfieldDirection-separator"/>
 							<menuitem id="textfieldDirection-swap"
 									command="cmd_switchTextDirection"
@@ -181,47 +154,39 @@
 					</menu>
 					
 					<menu id="windowMenu" />
-					<menu id="helpMenu" />
+					
+					<menu id="helpMenu"
+							label="&helpMenu.label;"
+							accesskey="&helpMenu.accesskey;">
+						<menupopup id="menu_HelpPopup">
+							<menuitem id="menu_openHelp"
+									  oncommand="ZoteroStandalone.openHelp();"
+									  label="&productHelp.label;"
+									  accesskey="&productHelp.accesskey;"
+									  key="key_openHelpMac"/>
+							<menuitem id="troubleShooting"
+									  accesskey="&helpTroubleshootingInfo.accesskey;"
+									  label="&helpTroubleshootingInfo.label;"
+									  oncommand="ZoteroStandalone.openHelp('troubleshooting');"/>
+							<menuitem id="feedbackPage"
+									  accesskey="&helpFeedbackPage.accesskey;"
+									  label="&helpFeedbackPage.label;"
+									  oncommand="ZoteroStandalone.openHelp('feedback');"/>
+							<menuseparator/>
+							<menuitem id="reportErrors"
+									  accesskey="&helpReportErrors.accesskey;"
+									  label="&helpReportErrors.label;"
+									  command="cmd_zotero_reportErrors"/>
+							<menuitem id="aboutName"
+									  accesskey="&aboutProduct.accesskey;"
+									  label="&aboutProduct.label;"
+									  oncommand="ZoteroPane.openAboutDialog();"/>
+						</menupopup>
+					</menu>
 				</menubar>
 			</toolbaritem>
 		</toolbar>
 	</toolbox>
-	<keyset id="mainKeyset">
-		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
-		<key id="key_undo"
-			 key="&undoCmd.key;"
-			 modifiers="accel"/>
-		<key id="key_redo" key="&undoCmd.key;" modifiers="accel,shift"/>
-		<key id="key_cut"
-			 key="&cutCmd.key;"
-			 modifiers="accel"/>
-		<key id="key_copy"
-			 key="&copyCmd.key;"
-			 modifiers="accel"/>
-		<key id="key_paste"
-			 key="&pasteCmd.key;"
-			 modifiers="accel"/>
-		<key id="key_delete" keycode="VK_DELETE" command="cmd_delete"/>
-		<key id="key_selectAll" key="&selectAllCmd.key;" modifiers="accel"/>
-		
-		<key id="key_find" key="&findOnCmd.commandkey;" command="cmd_find" modifiers="accel"/>
-		<key id="key_findAgain" key="&findAgainCmd.commandkey;" command="cmd_findAgain" modifiers="accel"/>
-		<key id="key_findPrevious" key="&findAgainCmd.commandkey;" command="cmd_findPrevious" modifiers="accel,shift"/>
-		<key keycode="&findAgainCmd.commandkey2;" command="cmd_findAgain"/>
-		<key keycode="&findAgainCmd.commandkey2;"  command="cmd_findPrevious" modifiers="shift"/>
-		
-		<key id="key_fullZoomReduce"  key="&fullZoomReduceCmd.commandkey;"   command="cmd_fullZoomReduce"  modifiers="accel"/>
-		<key                          key="&fullZoomReduceCmd.commandkey2;"  command="cmd_fullZoomReduce"  modifiers="accel"/>
-		<key id="key_fullZoomEnlarge" key="&fullZoomEnlargeCmd.commandkey;"  command="cmd_fullZoomEnlarge" modifiers="accel"/>
-		<key                          key="&fullZoomEnlargeCmd.commandkey2;" command="cmd_fullZoomEnlarge" modifiers="accel"/>
-		<key                          key="&fullZoomEnlargeCmd.commandkey3;" command="cmd_fullZoomEnlarge" modifiers="accel"/>
-		<key id="key_fullZoomReset"   key="&fullZoomResetCmd.commandkey;"    command="cmd_fullZoomReset"   modifiers="accel"/>
-		<key                          key="&fullZoomResetCmd.commandkey2;"   command="cmd_fullZoomReset"   modifiers="accel"/>
-		
-		<key id="key_switchTextDirection" key="&bidiSwitchTextDirectionItem.commandkey;" command="cmd_switchTextDirection" modifiers="accel,shift" />
-		<key id="key_quitApplication" key="&quitApplicationCmdMac.key;" command="cmd_quitApplication" modifiers="accel"/>
-		<key id="key_errorConsole" key="&errorConsoleCmd.commandkey;" oncommand="toJavaScriptConsole();" modifiers="accel,shift" disabled="true"/>
-	</keyset>
 	<!--<toolbarpalette/>
 
 	<toolbar id="nav-bar" class="toolbar-primary chromeclass-toolbar"
@@ -243,7 +208,4 @@
 			<stack id="zotero-pane-stack" fullscreenmode="true" flex="1"/>
 		</vbox>
 	</hbox>
-	<keyset id="mainKeyset"/>
-	<keyset id="baseMenuKeyset"/>
-	<commandset id="baseMenuCommandSet"/>
 </window>
