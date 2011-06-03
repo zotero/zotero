@@ -39,6 +39,9 @@ Zotero.Debug = new function () {
 	this.init = function () {
 		_console = Zotero.Prefs.get('debug.log');
 		_store = Zotero.Prefs.get('debug.store');
+		if (_store) {
+			Zotero.Prefs.set('debug.store', false);
+		}
 		_level = Zotero.Prefs.get('debug.level');
 		_time = Zotero.Prefs.get('debug.time');
 	}
