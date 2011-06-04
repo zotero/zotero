@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-07-21 19:20:00"
+	"lastUpdated":"2011-06-04 19:20:00"
 }
 
 function detectWeb(doc, url) {
@@ -39,7 +39,7 @@ function doWeb(doc, url){
 		var doi;
 		var title;
 		var availableItems = new Array();
-		var xpath = '//div[@class="articleBox"]';
+		var xpath = '//div[@class="articleBox" or @class="articleBox "]';
 		if (doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 			elmts = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 			var elmt = elmts.iterateNext();
