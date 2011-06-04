@@ -2,16 +2,14 @@
 	"translatorID":"774d7dc2-3474-2684-392c-f787789ec63d",
 	"translatorType":4,
 	"label":"Library Catalog (Dynix)",
-	"creator":"Simon Kornblith, updated by Sylvain Machefert",
-	"target":"ipac\\.jsp\\?.*(?:uri=(?:link|full)=[0-9]|menu=search)",
+	"creator":"Simon Kornblith and Sylvain Machefert",
+	"target":"ipac\\.jsp\\?.*(?:uri=(?:link|full)=[0-9]|menu=search|term=)",
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2011-04-04 07:10:00"
+	"lastUpdated":"2011-06-04 22:44:38"
 }
-
-
 
 function detectWeb(doc, url) {
   var namespace = doc.documentElement.namespaceURI;
