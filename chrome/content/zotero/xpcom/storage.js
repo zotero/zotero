@@ -553,14 +553,7 @@ Zotero.Sync.Storage = new function () {
 		}
 		
 		for (var itemID in updatedStates) {
-			var sql = "UPDATE itemAttachments SET syncState=? WHERE itemID=?";
-			Zotero.DB.query(
-				sql,
-				[
-					updatedStates[itemID],
-					itemID
-				]
-			);
+			Zotero.Sync.Storage.setSyncState(itemID, updatedStates[itemID]);
 			changed = true;
 		}
 		
