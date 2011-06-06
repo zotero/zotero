@@ -42,7 +42,7 @@ var Zotero_LocateMenu = new function() {
 			locateMenu.removeChild(locateMenu.firstChild);
 		}
 		
-		var selectedItems = [item for each(item in ZoteroPane_Local.getSelectedItems()) if(!item.isNote())];
+		var selectedItems = _getSelectedItems();
 		
 		if(selectedItems.length) {
 			_addViewOptions(locateMenu, selectedItems, true, true);
@@ -96,7 +96,7 @@ var Zotero_LocateMenu = new function() {
 	 */
 	this.buildContextMenu = function(menu) {
 		// get selected items
-		var selectedItems = [item for each(item in ZoteroPane_Local.getSelectedItems()) if(!item.isNote())];
+		var selectedItems = _getSelectedItems();
 		
 		// if no items selected, stop now
 		if(!selectedItems.length) return;
@@ -271,7 +271,7 @@ var Zotero_LocateMenu = new function() {
 	 * Locate selected items
 	 */
 	function _locateItem(event) {
-		var selectedItems = ZoteroPane_Local.getSelectedItems();
+		var selectedItems = _getSelectedItems();
 		
 		// find selected engine
 		var selectedEngine = Zotero.LocateManager.getEngineByName(event.target.label);
@@ -309,6 +309,19 @@ var Zotero_LocateMenu = new function() {
 			'Zotero Locate Engine Manager',
 			'chrome,centerscreen'
 		);
+	}
+	
+	/**
+	 * Get the first 50 selected items
+	 */
+	function _getSelectedItems() {
+		var allSelectedItems = ZoteroPane_Local.getSelectedItems();
+		var selectedItems = [];
+		while(selectedItems.length < 50 && allSelectedItems.length) {
+			var item = allSelectedItems.shift();
+			if(!item.isNote()) selectedItems.push(item);
+		}
+		return selectedItems;
 	}
 	
 	var ViewOptions = {};
