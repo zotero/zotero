@@ -109,7 +109,7 @@
 							<menuitem id="zotero-tb-actions-prefs" label="&zotero.toolbar.preferences.label;"
 								oncommand="ZoteroPane_Local.openPreferences()"/>
 							<menuitem id="zotero-tb-actions-reportErrors" command="cmd_zotero_reportErrors" disabled="true"/>
-							<menuitem id="zotero-tb-actions-support" label="&zotero.toolbar.supportAndDocumentation;" oncommand="gBrowser.selectedTab = gBrowser.addTab('http://www.zotero.org/support/')"/>
+							<menuitem id="zotero-tb-actions-support" label="&zotero.toolbar.supportAndDocumentation;" oncommand="ZoteroPane.loadURI('http://www.zotero.org/support/', {'metaKey':true, 'shiftKey':true})"/>
 							<menuitem id="zotero-tb-actions-about" label="&zotero.toolbar.about.label;" oncommand="ZoteroPane_Local.openAboutDialog()"/>
 						</menupopup>
 					</toolbarbutton>
