@@ -2,9 +2,26 @@
 	margin-left: 5px;
 }
 
+#zotero-tb-search .textbox-search-icon {
+	visibility: hidden;
+}
+
 #zotero-tb-search-menu-button {
-	list-style-image: url(mainwindow-dropdown-arrow.png);
+	margin: 0 -1px 0 -4px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	list-style-image: url("chrome://browser/skin/mainwindow-dropdown-arrow.png");
 	-moz-image-region: rect(0, 13px, 11px, 0);
+}
+
+#zotero-tb-search-menu-button .button-menu-dropmarker {
+	display: none;
+}
+
+#zotero-tb-search-menu-button:hover:active,
+#zotero-tb-search-menu-button[open="true"] {
+	-moz-image-region: rect(0, 26px, 11px, 13px);
 }
 
 #zotero-tb-sync-warning {
