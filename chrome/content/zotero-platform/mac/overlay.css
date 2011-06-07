@@ -318,27 +318,43 @@
 }
 
 #zotero-collections-tree treechildren::-moz-tree-row {
-  background-color: transparent;
-  border-color: transparent;
+	background-color: transparent;
+	border-color: transparent;
 }
 
-#zotero-collections-tree treechildren::-moz-tree-cell(selected) {  
-  background-color: #6f81a9;
-  background-image: url("chrome://zotero/skin/mac/selected-gradient.png");
-  background-repeat: repeat-x;
-  background-position: bottom left;
-  border-top: 1px solid #979797;
+#zotero-collections-tree treechildren::-moz-tree-cell(selected) {
+	background: -moz-linear-gradient(top, #A0B0CF, #7386AB) repeat-x;
+	border-top: 1px solid #94A1C0;
 }
 
-#zotero-collections-tree treechildren::-moz-tree-cell(selected,focus) {  
-  background-image: url("chrome://zotero/skin/mac/selected-focused-gradient.png");
-  background-color: #8a8a8a !important;
-  border-top: 1px solid #91a0c0;
+#zotero-collections-tree:-moz-window-inactive treechildren::-moz-tree-cell(selected) {  
+	background: -moz-linear-gradient(top, #B4B4B4, #8A8A8A) repeat-x;
+	border-top: 1px solid #979797;
+}
+
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) treechildren::-moz-tree-cell(selected) {   
+	background: -moz-linear-gradient(top, #B4B4B4, #8A8A8A) repeat-x;
+	border-top: 1px solid #979797;
+}
+
+#zotero-collections-tree treechildren::-moz-tree-cell(selected, focus) {  
+  background: -moz-linear-gradient(top, #6494D4, #2559AC) repeat-x;
+  border-top: 1px solid #5382C5;
 }
 
 #zotero-collections-tree treechildren::-moz-tree-cell-text(selected) {  
   font-weight: bold !important;
   color: #ffffff !important;
+}
+
+#zotero-collections-tree treechildren::-moz-tree-twisty(selected) {
+	-moz-appearance: none;
+	list-style-image: url("chrome://zotero/skin/mac/twisty-selected.png");
+}
+
+#zotero-collections-tree treechildren::-moz-tree-twisty(selected, open) {
+	-moz-appearance: none;
+	list-style-image: url("chrome://zotero/skin/mac/twisty-selected-open.png");
 }
 
 #zotero-collections-splitter, #zotero-items-splitter
