@@ -11,7 +11,9 @@
 	padding: 0;
 	border: 0;
 	background: transparent;
-	list-style-image: url("chrome://browser/skin/mainwindow-dropdown-arrow.png");
+	/* Mozilla file copied from chrome://browser/skin/mainwindow-dropdown-arrow.png
+	   for availability in Standalone */
+	list-style-image: url("chrome://zotero/skin/win/mainwindow-dropdown-arrow.png");
 	-moz-image-region: rect(0, 13px, 11px, 0);
 }
 
