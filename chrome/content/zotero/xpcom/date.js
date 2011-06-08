@@ -256,6 +256,9 @@ Zotero.Date = new function(){
 				date.year = m[2];
 				date.month = m[4];
 				date.day = m[6];
+			} else if(m[2] && !m[4] && m[6]) {
+				date.month = m[2];
+				date.year = m[6];
 			} else {
 				// local style date (middle or little endian)
 				date.year = m[6];
