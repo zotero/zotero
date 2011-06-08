@@ -1,14 +1,14 @@
 {
-	"translatorID":"92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
-	"translatorType":4,
-	"label":"IEEE Xplore",
-	"creator":"Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target":"^https?://[^/]*ieeexplore\\.ieee\\.org[^/]*/(?:[^\\?]+\\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp))",
-	"minVersion":"2.1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-05-12 22:04:16"
+        "translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
+        "label": "IEEE Xplore",
+        "creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
+        "target": "^https?://[^/]*ieeexplore\\.ieee\\.org[^/]*/(?:[^\\?]+\\?(?:|.*&)arnumber=[0-9]+|search/(?:searchresult.jsp|selected.jsp))",
+        "minVersion": "2.1",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "lastUpdated": "2011-06-04 12:17:06"
 }
 
 function detectWeb(doc, url) {
@@ -44,8 +44,12 @@ function doWeb(doc, url) {
 		var tableRows = doc.evaluate(xPathRows, doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var tableRow;
 		while(tableRow = tableRows.iterateNext()) {
-			var link = doc.evaluate('.//div[@class="detail"]/h3/a', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;			
-			
+			var linknode = doc.evaluate('.//div[@class="detail"]/h3/a', tableRow, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();			
+			if(!linknode) {
+				// There are things like tables of contents that don't have item pages, so we'll just skip them
+				continue;
+			}
+			var link = linknode.href;
 			var title = "";
 			var strongs = tableRow.getElementsByTagName("h3");
 			for each(var strong in strongs) {
@@ -165,6 +169,7 @@ function scrape(doc,url) {
 			// Google.
 			case "citation_journal_title": if (!newItem.publicationTitle) newItem.publicationTitle = value; break;
 			case "citation_authors":
+			case "citation_author":
 				// I'm a little concerned we'll see multiple copies of the author names...
 				for each(var author in value.split(';'))
 					newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author", true));
@@ -183,6 +188,10 @@ function scrape(doc,url) {
 			case "citation_language": if ((!newItem.language || newItem.language.length < 4)
 								&& value != "null" && value != "") newItem.language = value; break;
 			case "citation_doi": if (!newItem.DOI) newItem.DOI = value; break;
+			case "citation_conference":
+						 newItem.itemType = "conferencePaper";
+						 newItem.conferenceName = value;
+						 break;
 			case "citation_abstract": newItem.abstractNote = value; break;
 			case "citation_abstract_html_url": newItem.attachments.push({url:value, title:"IEEE Xplore Abstract Record", snapshot:false}); break;
 			case "citation_pdf_url": if(!pdf) pdf = value; break;
@@ -213,11 +222,26 @@ function scrape(doc,url) {
 	if (pages[0] && pages[1]) newItem.pages = pages.join('-')
 	else newItem.pages = pages[0] ? pages[1] : (pages[1] ? pages[1] : "");
 
+	// Re-assign fields if the type changed
+	if (newItem.itemType == "conferencePaper") {
+		newItem.proceedingsTitle = newItem.publicationTitle = newItem.conferenceName;
+	}
+
 	// Abstracts don't seem to come with
 	if (!newItem.abstractNote) {
 		var abstractNode = doc.evaluate('//a[@name="Abstract"]/following-sibling::p[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 		if (abstractNode) newItem.abstractNote = Zotero.Utilities.trimInternal(abstractNode.textContent);
 	}
+	
+	var res;
+	// Rearrange titles, per http://forums.zotero.org/discussion/8056
+	// If something has a comma or a period, and the text after comma ends with
+	//"of", "IEEE", or the like, then we switch the parts. Prefer periods.
+	if (res = (newItem.publicationTitle.indexOf(".") !== -1) ?
+				 newItem.publicationTitle.trim().match(/^(.*)\.(.*(?:of|on|IEE|IEEE|IET|IRE))$/) :
+				 newItem.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/))
+		newItem.publicationTitle = res[2]+" "+res[1];
+	newItem.proceedingsTitle = newItem.conferenceName = newItem.publicationTitle;
 	
 	if (pdf) {
 		Zotero.Utilities.processDocuments([pdf], function (doc, url) {
