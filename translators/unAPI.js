@@ -9,7 +9,7 @@
 	"priority":200,
 	"inRepository":true,
 	"detectXPath":"//link[@rel='unapi-server']",
-	"lastUpdated":"2011-04-19 19:40:07"
+	"lastUpdated":"2011-06-09 01:57:14"
 }
 
 var RECOGNIZABLE_FORMATS = ["rdf_zotero", "rdf_bibliontology", "mods", "marc", "unimarc", "ris",
@@ -152,7 +152,12 @@ UnAPIID.prototype = {
 					// run callback on item array
 					callback(me.items);
 				});
-				translator.translate();
+				try {
+					translator.translate();
+				} catch(e) {
+					Zotero.debug("unAPI: Could not parse "+me.format.name+" metadata for ID "+me.id+": "+e);
+					callback(me.items);
+				}
 			});
 		});
 	},
@@ -177,7 +182,7 @@ UnAPIID.prototype = {
 			} else {
 				// if no supported default format, try format for this item
 				Zotero.Utilities.HTTP.doGet(unAPIResolver+"?id="+me.id, function(text) {
-					me.format = UnAPIFormat(text);
+					me.format = new UnAPIFormat(text);
 					callback(!!me.format.isSupported);
 				});
 			}
