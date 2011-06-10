@@ -424,7 +424,19 @@ function() {
 		}
 	}
 	
-	if(this._version == "0.8") {
+	// determine version of parent style
+	if(this.source) {
+		var parentStyle = Zotero.Styles.get(this.source);
+		if(!parentStyle) {
+			throw(new Error('Style references '+this.source+', but this style is not installed',
+				Zotero.Styles.ios.newFileURI(this.file).spec, null));
+		}
+		var version = parentStyle._version;
+	} else {
+		var version = this._version;
+	}
+	
+	if(version === "0.8") {
 		// get XSLT processor from updateCSL.xsl file
 		if(!Zotero.Styles.xsltProcessor) {
 			let protHandler = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
