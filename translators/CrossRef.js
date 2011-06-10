@@ -4,12 +4,14 @@
 	"label":"CrossRef",
 	"creator":"Simon Kornblith",
 	"target":"^https?://partneraccess\\.oclc\\.org/",
-	"minVersion":"1.0.0b3.r1",
+	"minVersion":"2.1",
 	"maxVersion":"",
 	"priority":90,
 	"inRepository":true,
-	"lastUpdated":"2011-04-13 17:19:11"
+	"lastUpdated":"2011-06-10 17:19:11"
 }
+
+/* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
 
 function detectSearch(item) {
 	if(item.itemType == "journalArticle") {
@@ -59,8 +61,7 @@ function processCrossRef(xmlOutput) {
 		var itemXML = xml.doi_record.crossref.journal;
 		var refXML = itemXML.journal_article;
 		var metadataXML = itemXML.journal_metadata;
-		
-		item.ISSN = itemXML.journal_metadata.issn[0].toString();
+	
 		item.publicationTitle = itemXML.journal_metadata.full_title.toString();
 		if (itemXML.journal_metadata.abbrev_title.length()) {
 			item.journalAbbreviation = itemXML.journal_metadata.abbrev_title[0].toString();
