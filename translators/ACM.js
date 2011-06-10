@@ -1,14 +1,14 @@
 {
-	"translatorID":"f3f092bf-ae09-4be6-8855-a22ddd817925",
-	"label":"ACM Digital Library",
-	"creator":"Simon Kornblith, Michael Berkowitz and John McCaffery",
-	"target":"^https?://[^/]*portal\\.acm\\.org[^/]*/(?:results\\.cfm|citation\\.cfm)",
-	"minVersion":"1.0",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":"1",
-	"translatorType":4,
-	"lastUpdated":"2011-03-24 23:30:00"
+        "translatorID": "f3f092bf-ae09-4be6-8855-a22ddd817925",
+        "label": "ACM Digital Library",
+        "creator": "Simon Kornblith, Michael Berkowitz and John McCaffery",
+        "target": "^https?://[^/]*portal\\.acm\\.org[^/]*/(?:results\\.cfm|citation\\.cfm)",
+        "minVersion": "1.0",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "lastUpdated": "2011-06-10 01:14:01"
 }
 
 /**
@@ -146,6 +146,8 @@ function scrape(doc) {
 	var abs = scrapeAbstract(doc);
 	// Type not used, since it was less reliable than BibTeX
 	var type = getArticleType(doc, url, nsResolver);
+	// Manual journal not used. Some pieces are multiply published, see http://portal.acm.org/citation.cfm?id=52400.52432&coll=DL&dl=GUIDECFID=16073284&CFTOKEN=77905982
+	// and also http://forums.zotero.org/discussion/17532/
 	var journal = getText("//meta[@name='citation_journal_title']/@content",doc, nsResolver);	
 	//Get the bibtex reference for this document as a string
 	var bibtex = scrapeBibtex(url, nsResolver);
@@ -166,15 +168,17 @@ function scrape(doc) {
 		// There were issues with grabbing type from the page;
 		// see http://forums.zotero.org/discussion/17246/
 		//newItem.itemType= type;
-		if (journal && journal != newItem.publicationTitle) {
+		/*if (journal && journal != newItem.publicationTitle) {
 			newItem.journalAbbreviation = newItem.publicationTitle;
 			newItem.publicationTitle = journal;
-		}
+		}*/
 		// If the URL is just a DOI, clear it.
-		if (newItem.url.match(/^http:\/\/doi\.acm\.org\//)) newItem.url = "";
+		if (newItem.url && newItem.url.match(/^http:\/\/doi\.acm\.org\//)) newItem.url = "";
 		if (newItem.DOI) newItem.DOI = newItem.DOI.replace(/^http:\/\/doi\.acm\.org\//, '');
 		var acmid = bibtex.match(/acmid = {(\d+)}/);
 		if(acmid) newItem.extra = "ACM ID: "+ acmid[1];
+		newItem.place = newItem.archiveLocation;
+		newItem.archiveLocation = null;
 		//Complete the parsing of the page
 		newItem.complete();
 	});
