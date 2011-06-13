@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"CiteULike",
 	"creator":"Sean Takats",
-	"target":"https?://(?:www\\.)?citeulike.org(?:.*/tag/[^/]*$|/search/|/journal/|/group/[0-9]+/library$|/\\?page=[0-9]+$|/.*article/[0-9]+$|/$)",
+	"target":"https?://(?:www\\.)?citeulike.org(?:.*/tag/[^/]*$|/search/|/journal/|/user/|/group/[0-9]+/library$|/\\?page=[0-9]+$|/.*article/[0-9]+$|/$)",
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-02-01 19:30:00"
+	"lastUpdated":"2011-06-13 19:30:00"
 }
 
 function detectWeb(doc, url){
