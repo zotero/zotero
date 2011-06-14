@@ -196,9 +196,20 @@ if(appInfo.platformVersion[0] >= 2) {
 	var _broadcastInitComplete = false;
 	
 	/**
-	 * A set of nsITimerCallbacks to be executed when Zotero.wait() completes
+	 * Maintains nsITimers to be used when Zotero.wait() completes (to reduce performance penalty
+	 * of initializing new objects)
+	 */
+	var _waitTimers = [];
+	
+	/**
+	 * Maintains nsITimerCallbacks to be used when Zotero.wait() completes
 	 */
 	var _waitTimerCallbacks = [];
+	
+	/**
+	 * Maintains running nsITimers in global scope, so that they don't disappear randomly
+	 */
+	var _runningTimers = [];
 	
 	/**
 	 * Initialize the extension
@@ -1501,11 +1512,10 @@ if(appInfo.platformVersion[0] >= 2) {
 		_waiting = false;
 		
 		// requeue nsITimerCallbacks that came up during Zotero.wait() but couldn't execute
-		for each(var timerCallback in _waitTimerCallbacks) {
-			var timer = Components.classes["@mozilla.org/timer;1"].
-				createInstance(Components.interfaces.nsITimer);
-			timer.initWithCallback(timerCallback, 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+		for(var i in _waitTimers) {
+			_waitTimers[i].initWithCallback(_waitTimerCallbacks[i], 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 		}
+		_waitTimers = [];
 		_waitTimerCallbacks = [];
 		
 		//Zotero.debug("Waited " + cycles + " cycles");
@@ -1523,19 +1533,21 @@ if(appInfo.platformVersion[0] >= 2) {
 		var timer = Components.classes["@mozilla.org/timer;1"].
 			createInstance(Components.interfaces.nsITimer);
 		var timerCallback = {"notify":function() {
-			//
-			// DEBUG: This can result in the callback not being triggered in Fx4+
-			//
-			//if(_waiting) {
+			if(_waiting) {
 				// if our callback gets called during Zotero.wait(), queue it to be set again
 				// when Zotero.wait() completes
-				//_waitTimerCallbacks.push(timerCallback);
-			//} else {
-				// otherwise, execute callback function
+				_waitTimers.push(timer);
+				_waitTimerCallbacks.push(timerCallback);
+			} else {
+				// execute callback function
 				func();
-			//}
+				// remove timer from global scope, so it can be garbage collected
+				_runningTimers.splice(_runningTimers.indexOf(timer), 1);
+			}
 		}}
 		timer.initWithCallback(timerCallback, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+		// add timer to global scope so that it doesn't get garbage collected before it completes
+		_runningTimers.push(timer);
 	}
 	
 	/**
