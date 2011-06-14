@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-06-14 04:31:00"
 }
 
 /* Provides support for databases of Cambridge Scientific Abstracts
@@ -120,7 +120,8 @@ function scrape(doc) {
 					newItem.publisher = m[2];
 				}
 			} else if(itemType == "bookSection") {
-				if((content.length > newItem.publicationTitle.length
+                var untitled = !newItem.publicationTitle;
+				if(untitled || (content.length > newItem.publicationTitle.length
 				   && content.substr(0, newItem.publicationTitle.length) == newItem.publicationTitle)
 				   || content.indexOf(newItem.publicationTitle)) {
 					if (content.indexOf(newItem.publicationTitle) > 4) {
@@ -131,10 +132,14 @@ function scrape(doc) {
 					}
 					var m = content.match(/\)\. ([^:()]+): ([^,0-9]+)/);
 					if(m) {
+                        if (untitled) {
+                            var n = content.match(/\([0-9]{4}\)([^(]*)/);
+                            if (n) newItem.publicationTitle = n[1];
+                        }
 						newItem.place = m[1];
 						newItem.publisher = m[2];
 					}
-					var m = content.match(/\(pp. ([\-0-9]+)\)/);
+					m = content.match(/\(pp. ([\-0-9]+)\)/);
 					if(m) newItem.pages = m[1];
 				}
 			}
