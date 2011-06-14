@@ -320,6 +320,7 @@ Zotero.IPC.Pipe = new function() {
 	 * deletes it
 	 */
 	this.writeShutdownMessage = function(file) {
+		Zotero.debug("IPC: Closing pipe "+file.path);
 		var oStream = Components.classes["@mozilla.org/network/file-output-stream;1"].
 			getService(Components.interfaces.nsIFileOutputStream);
 		oStream.init(file, 0x02 | 0x10, 0, 0);
@@ -327,7 +328,6 @@ Zotero.IPC.Pipe = new function() {
 		oStream.write(cmd, cmd.length);
 		oStream.close();
 		file.remove(false);
-		Zotero.debug("IPC: Closing pipe "+file.path);
 	}
 }
 
@@ -405,7 +405,14 @@ Zotero.IPC.Pipe.WorkerThread = function(file, callback) {
 	worker.postMessage({"path":file.path, "libc":Zotero.IPC.getLibcPath()});
 	
 	// add shutdown listener
-	Zotero.addShutdownListener(Zotero.IPC.Pipe.writeShutdownMessage.bind(null, file));
+	Zotero.addShutdownListener(function() {
+		// wait for pending events to complete (so that we don't try to close the pipe before it 
+		// finishes opening)
+		while(Zotero.mainThread.processNextEvent(false)) {};
+		
+		// close pipe
+		Zotero.IPC.Pipe.writeShutdownMessage(file)
+	});
 }
 
 Zotero.IPC.Pipe.WorkerThread.prototype = {
