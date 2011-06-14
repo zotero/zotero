@@ -36,6 +36,8 @@ const ZOTERO_CONFIG = {
 	PREF_BRANCH: 'extensions.zotero.'
 };
 
+const ZOTERO_METAREGEXP = /[-[\]{}()*+?.\\^$|,#\s]/g;
+
 // Fx4.0b8+ use implicit SJOWs and get rid of explicit XPCSafeJSObjectWrapper constructor
 // Ugly hack to get around this until we can just kill the XPCSafeJSObjectWrapper calls (when we
 // drop Fx3.6 support)
@@ -45,10 +47,17 @@ try {
 	eval("var XPCSafeJSObjectWrapper = function(arg) { return arg }");
 }
 
+// Load AddonManager for Firefox 4
+var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
+                         getService(Components.interfaces.nsIXULAppInfo);
+if(appInfo.platformVersion[0] >= 2) {
+	Components.utils.import("resource://gre/modules/AddonManager.jsm");
+}
+
 /*
  * Core functions
  */
-var Zotero = new function(){
+ (function(){
 	// Privileged (public) methods
 	this.init = init;
 	this.stateCheck = stateCheck;
@@ -173,34 +182,39 @@ var Zotero = new function(){
 	
 	var _locked;
 	var _unlockCallbacks = [];
+	var _shutdownListeners = [];
 	var _progressMeters;
 	var _lastPercentage;
+	
+	// whether we are waiting for another Zotero process to release its DB lock
+	var _waitingForDBLock = false;
+	// whether we are waiting for another Zotero process to initialize so we can use connector
+	var _waitingForInitComplete = false;
+	
+	// whether we should broadcast an initComplete message when initialization finishes (we should
+	// do this if we forced another Zotero process to release its lock)
+	var _broadcastInitComplete = false;
 	
 	/**
 	 * A set of nsITimerCallbacks to be executed when Zotero.wait() completes
 	 */
 	var _waitTimerCallbacks = [];
 	
-	/*
+	/**
 	 * Initialize the extension
 	 */
-	function init(){
+	function init() {
 		if (this.initialized || this.skipLoading) {
 			return false;
 		}
 		
-		var start = (new Date()).getTime()
+		var start = (new Date()).getTime();
 		
-		// Register shutdown handler to call Zotero.shutdown()
 		var observerService = Components.classes["@mozilla.org/observer-service;1"]
 			.getService(Components.interfaces.nsIObserverService);
-		observerService.addObserver({
-			observe: Zotero.shutdown
-		}, "quit-application", false);
 		
 		// Load in the preferences branch for the extension
 		Zotero.Prefs.init();
-		
 		Zotero.Debug.init();
 		
 		this.mainThread = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
@@ -214,6 +228,7 @@ var Zotero = new function(){
 		this.isFx31 = this.isFx35;
 		this.isFx36 = appInfo.platformVersion.indexOf('1.9.2') === 0;
 		this.isFx4 = appInfo.platformVersion[0] >= 2;
+		this.isFx5 = appInfo.platformVersion[0] >= 5;
 		
 		this.isStandalone = appInfo.ID == ZOTERO_CONFIG['GUID'];
 		if(this.isStandalone) {
@@ -241,6 +256,9 @@ var Zotero = new function(){
 		this.isWin = (this.platform.substr(0, 3) == "Win");
 		this.isLinux = (this.platform.substr(0, 5) == "Linux");
 		this.oscpu = win.navigator.oscpu;
+		
+		// Browser
+		Zotero.browser = "g";
 		
 		// Locale
 		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
@@ -275,19 +293,19 @@ var Zotero = new function(){
 		xmlhttp.send(null);
 		var matches = xmlhttp.responseText.match(/(ltr|rtl)/);
 		if (matches && matches[0] == 'rtl') {
-			this.dir = 'rtl';
+			Zotero.dir = 'rtl';
 		}
 		else {
-			this.dir = 'ltr';
+			Zotero.dir = 'ltr';
 		}
 		
 		try {
-			var dataDir = this.getZoteroDirectory();
+			var dataDir = Zotero.getZoteroDirectory();
 		}
 		catch (e) {
 			// Zotero dir not found
 			if (e.name == 'NS_ERROR_FILE_NOT_FOUND') {
-				this.startupError = Zotero.getString('dataDir.notFound');
+				Zotero.startupError = Zotero.getString('dataDir.notFound');
 				_startupErrorHandler = function() {
 					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 						.getService(Components.interfaces.nsIWindowMediator);
@@ -300,7 +318,7 @@ var Zotero = new function(){
 						+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING);
 					var index = ps.confirmEx(win,
 						Zotero.getString('general.error'),
-						this.startupError + '\n\n' +
+						Zotero.startupError + '\n\n' +
 						Zotero.getString('dataDir.previousDir') + ' '
 							+ Zotero.Prefs.get('lastDataDir'),
 						buttonFlags, null,
@@ -382,7 +400,6 @@ var Zotero = new function(){
 				else if (index == 2) {
 					Zotero.chooseZoteroDirectory(true);
 				}
-				var dataDir = this.getZoteroDirectory();
 			}
 			// DEBUG: handle more startup errors
 			else {
@@ -391,6 +408,54 @@ var Zotero = new function(){
 			}
 		}
 		
+		Zotero.IPC.init();
+		
+		// Load additional info for connector or not
+		if(Zotero.isConnector) {
+			Zotero.debug("Loading in connector mode");
+			Zotero.Connector.init();
+		} else {
+			Zotero.debug("Loading in full mode");
+			_initFull();
+		}
+		
+		this.initialized = true;
+		
+		// Register shutdown handler to call Zotero.shutdown()
+		var _shutdownObserver = {observe:Zotero.shutdown};
+		observerService.addObserver(_shutdownObserver, "quit-application", false);
+		
+		// Add shutdown listerner to remove observer
+		this.addShutdownListener(function() {
+			observerService.removeObserver(_shutdownObserver, "quit-application", false);
+		});
+		
+		Zotero.debug("Initialized in "+((new Date()).getTime() - start)+" ms");
+		
+		if(!Zotero.isFirstLoadThisSession) {
+			if(Zotero.isConnector) {
+				// wait for initComplete message if we switched to connector because standalone was
+				// started
+				_waitingForInitComplete = true;
+				while(_waitingForInitComplete) Zotero.mainThread.processNextEvent(true);
+			}
+			
+			// trigger zotero-reloaded event
+			Zotero.debug('Triggering "zotero-reloaded" event');
+			observerService.notifyObservers(Zotero, "zotero-reloaded", null);
+		}
+		
+		// Broadcast initComplete message if desired
+		if(_broadcastInitComplete) Zotero.IPC.broadcast("initComplete");
+		
+		return true;
+	}
+	
+	/**
+	 * Initialization function to be called only if Zotero is in full mode
+	 */
+	function _initFull() {
+		var dataDir = Zotero.getZoteroDirectory();
 		Zotero.VersionHeader.init();
 		
 		// Check for DB restore
@@ -412,7 +477,7 @@ var Zotero = new function(){
 				Zotero.Schema.skipDefaultData = true;
 				Zotero.Schema.updateSchema();
 				
-				this.restoreFromServer = true;
+				Zotero.restoreFromServer = true;
 			}
 			catch (e) {
 				// Restore from backup?
@@ -420,54 +485,7 @@ var Zotero = new function(){
 			}
 		}
 		
-		try {
-			// Test read access
-			Zotero.DB.test();
-			
-			var dbfile = Zotero.getZoteroDatabase();
-			
-			// Test write access on Zotero data directory
-			if (!dbfile.parent.isWritable()) {
-				var msg = 'Cannot write to ' + dbfile.parent.path + '/';
-			}
-			// Test write access on Zotero database
-			else if (!dbfile.isWritable()) {
-				var msg = 'Cannot write to ' + dbfile.path;
-			}
-			else {
-				var msg = false;
-			}
-			
-			if (msg) {
-				var e = {
-					name: 'NS_ERROR_FILE_ACCESS_DENIED',
-					message: msg,
-					toString: function () {
-						return this.name + ': ' + this.message; 
-					}
-				};
-				throw (e);
-			}
-		}
-		catch (e) {
-			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
-				var msg = Zotero.localeJoin([
-					Zotero.getString('startupError.databaseCannotBeOpened'),
-					Zotero.getString('startupError.checkPermissions')
-				]);
-				this.startupError = msg;
-			} else if(e.name == "NS_ERROR_STORAGE_BUSY" || e.result == 2153971713) {
-				var msg = Zotero.localeJoin([
-					Zotero.getString('startupError.databaseInUse'),
-					Zotero.getString(Zotero.isStandalone ? 'startupError.closeFirefox' : 'startupError.closeStandalone')
-				]);
-				this.startupError = msg;
-			}
-			
-			Components.utils.reportError(e);
-			this.skipLoading = true;
-			return;
-		}
+		if(!_initDB()) return;
 		
 		// Add notifier queue callbacks to the DB layer
 		Zotero.DB.addCallback('begin', Zotero.Notifier.begin);
@@ -477,7 +495,7 @@ var Zotero = new function(){
 		Zotero.Fulltext.init();
 		
 		// Require >=2.1b3 database to ensure proper locking
-		if (this.isStandalone && Zotero.Schema.getDBVersion('system') > 0 && Zotero.Schema.getDBVersion('system') < 31) {
+		if (Zotero.isStandalone && Zotero.Schema.getDBVersion('system') > 0 && Zotero.Schema.getDBVersion('system') < 31) {
 			var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
 					.getService(Components.interfaces.nsIAppStartup);
 			
@@ -541,7 +559,7 @@ var Zotero = new function(){
 				appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
 			}
 			
-			this.skipLoading = true;
+			Zotero.skipLoading = true;
 			return false;
 		}
 		
@@ -549,7 +567,7 @@ var Zotero = new function(){
 		if (Zotero.Schema.userDataUpgradeRequired()) {
 			var upgraded = Zotero.Schema.showUpgradeWizard();
 			if (!upgraded) {
-				this.skipLoading = true;
+				Zotero.skipLoading = true;
 				return false;
 			}
 		}
@@ -567,12 +585,12 @@ var Zotero = new function(){
 						]) + "\n\n"
 						+ Zotero.getString('startupError.zoteroVersionIsOlder.current', Zotero.version) + "\n\n"
 						+ Zotero.getString('general.seeForMoreInformation', kbURL);
-					this.startupError = msg;
+					Zotero.startupError = msg;
 				}
 				else {
-					this.startupError = Zotero.getString('startupError.databaseUpgradeError');
+					Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError');
 				}
-				this.skipLoading = true;
+				Zotero.skipLoading = true;
 				Components.utils.reportError(e);
 				return false;
 			}
@@ -589,8 +607,8 @@ var Zotero = new function(){
 		// Initialize various services
 		Zotero.Integration.init();
 		
-		if(Zotero.Prefs.get("connector.enabled")) {
-			Zotero.Connector.init();
+		if(Zotero.Prefs.get("httpServer.enabled")) {
+			Zotero.Server.init();
 		}
 		
 		Zotero.Zeroconf.init();
@@ -607,18 +625,108 @@ var Zotero = new function(){
 		// Initialize Locate Manager
 		Zotero.LocateManager.init();
 		
-		this.initialized = true;
-		Zotero.debug("Initialized in "+((new Date()).getTime() - start)+" ms");
+		return true;
+	}
+	
+	/**
+	 * Initializes the DB connection
+	 */
+	function _initDB() {
+		try {
+			// Test read access
+			Zotero.DB.test();
+			
+			var dbfile = Zotero.getZoteroDatabase();
+			
+			// Test write access on Zotero data directory
+			if (!dbfile.parent.isWritable()) {
+				var msg = 'Cannot write to ' + dbfile.parent.path + '/';
+			}
+			// Test write access on Zotero database
+			else if (!dbfile.isWritable()) {
+				var msg = 'Cannot write to ' + dbfile.path;
+			}
+			else {
+				var msg = false;
+			}
+			
+			if (msg) {
+				var e = {
+					name: 'NS_ERROR_FILE_ACCESS_DENIED',
+					message: msg,
+					toString: function () {
+						return Zotero.name + ': ' + Zotero.message; 
+					}
+				};
+				throw (e);
+			}
+		}
+		catch (e) {
+			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+				var msg = Zotero.localeJoin([
+					Zotero.getString('startupError.databaseCannotBeOpened'),
+					Zotero.getString('startupError.checkPermissions')
+				]);
+				Zotero.startupError = msg;
+			} else if(e.name == "NS_ERROR_STORAGE_BUSY" || e.result == 2153971713) {
+				if(Zotero.isStandalone) {
+					// Standalone should force Fx to release lock 
+					if(Zotero.IPC.broadcast("releaseLock")) {
+						_waitingForDBLock = true;
+						while(_waitingForDBLock) Zotero.mainThread.processNextEvent(true);
+						// we will want to broadcast when initialization completes
+						_broadcastInitComplete = true;
+						return _initDB();
+					}
+				} else {
+					// Fx should start as connector if Standalone is running
+					var haveStandalone = Zotero.IPC.broadcast("test");
+					if(haveStandalone) {
+						throw "ZOTERO_SHOULD_START_AS_CONNECTOR";
+					}
+				}
+				
+				var msg = Zotero.localeJoin([
+					Zotero.getString('startupError.databaseInUse'),
+					Zotero.getString(Zotero.isStandalone ? 'startupError.closeFirefox' : 'startupError.closeStandalone')
+				]);
+				Zotero.startupError = msg;
+			}
+			
+			Components.utils.reportError(e);
+			Zotero.skipLoading = true;
+			return false;
+		}
 		
 		return true;
 	}
 	
+	/**
+	 * Called when the DB has been released by another Zotero process to perform necessary 
+	 * initialization steps
+	 */
+	this.onDBLockReleased = function() {
+		if(Zotero.isConnector) {
+			// if DB lock is released, switch out of connector mode
+			switchConnectorMode(false);
+		} else if(_waitingForDBLock) {
+			// if waiting for DB lock and we get it, continue init
+			_waitingForDBLock = false;
+		}
+	}
+	
+	/**
+	 * Called when an accessory process has been initialized to let use get data
+	 */
+	this.onInitComplete = function() {
+		_waitingForInitComplete = false;
+	}
 	
 	/*
 	 * Check if a DB transaction is open and, if so, disable Zotero
 	 */
 	function stateCheck() {
-		if (Zotero.DB.transactionInProgress()) {
+		if(!Zotero.isConnector && Zotero.DB.transactionInProgress()) {
 			this.initialized = false;
 			this.skipLoading = true;
 			return false;
@@ -630,7 +738,33 @@ var Zotero = new function(){
 	
 	this.shutdown = function (subject, topic, data) {
 		Zotero.debug("Shutting down Zotero");
-		Zotero.removeTempDirectory();
+		
+		try {
+			// run shutdown listener
+			for each(var listener in _shutdownListeners) listener();
+			
+			// remove temp directory
+			Zotero.removeTempDirectory();
+			
+			if(Zotero.initialized && Zotero.DB) {
+				Zotero.debug("Closing database");
+				
+				// run GC to finalize open statements
+				// TODO remove this and finalize statements created with
+				// Zotero.DBConnection.getStatement() explicitly
+				Components.utils.forceGC();
+				
+				// unlock DB
+				Zotero.DB.closeDatabase();
+				
+				// broadcast that DB lock has been released
+				Zotero.IPC.broadcast("lockReleased");
+			}
+		} catch(e) {
+			Zotero.debug(e);
+			throw e;
+		}
+		
 		return true;
 	}
 	
@@ -1511,6 +1645,12 @@ var Zotero = new function(){
 		return true;
 	}
 	
+	/**
+	 * Adds a listener to be called when Zotero shuts down (even if Firefox is not shut down)
+	 */
+	this.addShutdownListener = function(listener) {
+		_shutdownListeners.push(listener);
+	}
 	
 	function _showWindowZoteroPaneOverlay(doc) {
 		doc.getElementById('zotero-collections-tree').disabled = true;
@@ -1658,9 +1798,21 @@ var Zotero = new function(){
 		Zotero.Creators.reloadAll();
 		Zotero.Items.reloadAll();
 	}
-};
-
-
+	
+	/**
+	 * Brings Zotero Standalone to the foreground
+	 */
+	this.activateStandalone = function() {
+		var io = Components.classes['@mozilla.org/network/io-service;1']
+					.getService(Components.interfaces.nsIIOService);
+		var uri = io.newURI('zotero://select', null, null);
+		var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
+					.getService(Components.interfaces.nsIExternalProtocolService)
+					.getProtocolHandlerInfo('zotero');
+		handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
+		handler.launchWithURI(uri, null);
+	}
+}).call(Zotero);
 
 Zotero.Prefs = new function(){
 	// Privileged methods

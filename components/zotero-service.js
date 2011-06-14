@@ -35,30 +35,31 @@ const ZOTERO_IID = Components.interfaces.chnmIZoteroService; //unused
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-
-var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
-                         getService(Components.interfaces.nsIXULAppInfo);
-if(appInfo.platformVersion[0] >= 2) {
-	Components.utils.import("resource://gre/modules/AddonManager.jsm");
-}
-
-// Assign the global scope to a variable to passed via wrappedJSObject
-var ZoteroWrapped = this;
-
-/********************************************************************
-* Include the core objects to be stored within XPCOM
-*********************************************************************/
-
-var xpcomFiles = [
+/** XPCOM files to be loaded for all modes **/
+const xpcomFilesAll = [
 	'zotero',
+	'date',
+	'debug',
+	'error',
+	'file',
+	'http',
+	'mimeTypeHandler',
+	'openurl',
+	'ipc',
+	'progressWindow',
+	'translation/translate',
+	'translation/translate_firefox',
+	'translation/tlds',
+	'utilities'
+];
+
+/** XPCOM files to be loaded only for local translation and DB access **/
+const xpcomFilesLocal = [
+	'collectionTreeView',
 	'annotate',
 	'attachments',
 	'cite',
-	'collectionTreeView',
 	'commons',
-	'connector',
-	'dataServer',
 	'data_access',
 	'data/dataObjects',
 	'data/cachedTypes',
@@ -79,28 +80,21 @@ var xpcomFiles = [
 	'data/tags',
 	'date',
 	'db',
-	'debug',
 	'duplicate',
 	'enstyle',
-	'error',
-	'file',
 	'fulltext',
-	'http',
 	'id',
 	'integration',
-	'integration_compat',
 	'itemTreeView',
 	'locateManager',
 	'mime',
-	'mimeTypeHandler',
 	'notifier',
-	'openurl',
-	'progressWindow',
 	'proxy',
 	'quickCopy',
 	'report',
 	'schema',
 	'search',
+	'server',
 	'style',
 	'sync',
 	'storage',
@@ -108,116 +102,196 @@ var xpcomFiles = [
 	'storage/zfs',
 	'storage/webdav',
 	'timeline',
-	'translation/translator',
-	'translation/translate',
-	'translation/browser_firefox',
-	'translation/item_local',
 	'uri',
-	'utilities',
-	'zeroconf'
+	'zeroconf',
+	'translation/translate_item',
+	'translation/translator',
+	'server_connector'
 ];
 
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFiles[0] + ".js");
-
-// Load CiteProc into Zotero.CiteProc namespace
-Zotero.CiteProc = {"Zotero":Zotero};
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://zotero/content/xpcom/citeproc.js", Zotero.CiteProc);
-
-for (var i=1; i<xpcomFiles.length; i++) {
-	try {
-		Cc["@mozilla.org/moz/jssubscript-loader;1"]
-			.getService(Ci.mozIJSSubScriptLoader)
-			.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFiles[i] + ".js");
-	}
-	catch (e) {
-		Components.utils.reportError("Error loading " + xpcomFiles[i] + ".js");
-		throw (e);
-	}
-}
-
-
-// Load RDF files into Zotero.RDF.AJAW namespace (easier than modifying all of the references)
-var rdfXpcomFiles = [
-	'rdf/uri',
-	'rdf/term',
-	'rdf/identity',
-	'rdf/match',
-	'rdf/n3parser',
-	'rdf/rdfparser',
-	'rdf/serialize',
-	'rdf'
+/** XPCOM files to be loaded only for connector translation and DB access **/
+const xpcomFilesConnector = [
+	'connector/translate_item',
+	'connector/translator',
+	'connector/connector',
+	'connector/cachedTypes'
 ];
 
-Zotero.RDF = {AJAW:{}};
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
-for (var i=0; i<rdfXpcomFiles.length; i++) {
+var instanceID = (new Date()).getTime();
+var isFirstLoadThisSession = true;
+var zContext = null;
+
+ZoteroContext = function() {}
+ZoteroContext.prototype = {
+	/**
+	 * Convenience method to replicate window.alert()
+	 **/
+	// TODO: is this still used? if so, move to zotero.js
+	"alert":function alert(msg){
+		this.Zotero.debug("alert() is deprecated from Zotero XPCOM");
+		Cc["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Ci.nsIPromptService)
+			.alert(null, "", msg);
+	},
+	
+	/**
+	 * Convenience method to replicate window.confirm()
+	 **/
+	// TODO: is this still used? if so, move to zotero.js
+	"confirm":function confirm(msg){
+		this.Zotero.debug("confirm() is deprecated from Zotero XPCOM");
+		return Cc["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Ci.nsIPromptService)
+			.confirm(null, "", msg);
+	},
+	
+	"Cc":Cc,
+	"Ci":Ci,
+	
+	/**
+	 * Convenience method to replicate window.setTimeout()
+	 **/
+	"setTimeout":function setTimeout(func, ms){
+		this.Zotero.setTimeout(func, ms);
+	},
+	
+	/**
+	 * Switches in or out of connector mode
+	 */
+	"switchConnectorMode":function(isConnector) {
+		if(isConnector !== this.isConnector) {
+			zContext.Zotero.shutdown();
+			
+			// create a new zContext
+			makeZoteroContext(isConnector);
+			zContext.Zotero.init();
+		}
+		
+		return zContext;
+	}
+};
+
+/**
+ * The class from which the Zotero global XPCOM context is constructed
+ *
+ * @constructor
+ * This runs when ZoteroService is first requested to load all applicable scripts and initialize
+ * Zotero. Calls to other XPCOM components must be in here rather than in top-level code, as other
+ * components may not have yet been initialized.
+ */
+function makeZoteroContext(isConnector) {
+	if(zContext) {
+		// Swap out old zContext
+		var oldzContext = zContext;
+		// Create new zContext
+		zContext = new ZoteroContext();
+		// Swap in old Zotero object, so that references don't break, but empty it
+		zContext.Zotero = oldzContext.Zotero;
+		for(var key in zContext.Zotero) delete zContext.Zotero[key];
+	} else {
+		zContext = new ZoteroContext();
+		zContext.Zotero = function() {};
+	}
+	
+	// Load zotero.js first
 	Cc["@mozilla.org/moz/jssubscript-loader;1"]
 		.getService(Ci.mozIJSSubScriptLoader)
-		.loadSubScript("chrome://zotero/content/xpcom/" + rdfXpcomFiles[i] + ".js", Zotero.RDF.AJAW);
-}
-
-Cc["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Ci.mozIJSSubScriptLoader)
-	.loadSubScript("chrome://global/content/nsTransferable.js");
-
-/********************************************************************/
-
-
-// Initialize the Zotero service
-//
-// This runs when ZoteroService is first requested.
-// Calls to other XPCOM components must be in here rather than in top-level
-// code, as other components may not have yet been initialized.
-function setupService(){
-	try {
-		Zotero.init();
+		.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFilesAll[0] + ".js", zContext);
+	
+	// Load CiteProc into Zotero.CiteProc namespace
+	zContext.Zotero.CiteProc = {"Zotero":zContext.Zotero};
+	Cc["@mozilla.org/moz/jssubscript-loader;1"]
+		.getService(Ci.mozIJSSubScriptLoader)
+		.loadSubScript("chrome://zotero/content/xpcom/citeproc.js", zContext.Zotero.CiteProc);
+	
+	// Load remaining xpcomFiles
+	for (var i=1; i<xpcomFilesAll.length; i++) {
+		try {
+			Cc["@mozilla.org/moz/jssubscript-loader;1"]
+				.getService(Ci.mozIJSSubScriptLoader)
+				.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFilesAll[i] + ".js", zContext);
+		}
+		catch (e) {
+			Components.utils.reportError("Error loading " + xpcomFilesAll[i] + ".js", zContext);
+			throw (e);
+		}
 	}
-	catch (e) {
+	
+	// Load xpcomFiles for specific mode
+	for each(var xpcomFile in (isConnector ? xpcomFilesConnector : xpcomFilesLocal)) {
+		try {
+			Cc["@mozilla.org/moz/jssubscript-loader;1"]
+				.getService(Ci.mozIJSSubScriptLoader)
+				.loadSubScript("chrome://zotero/content/xpcom/" + xpcomFile + ".js", zContext);
+		}
+		catch (e) {
+			Components.utils.reportError("Error loading " + xpcomFile + ".js", zContext);
+			throw (e);
+		}
+	}
+	
+	// Load RDF files into Zotero.RDF.AJAW namespace (easier than modifying all of the references)
+	const rdfXpcomFiles = [
+		'rdf/uri',
+		'rdf/term',
+		'rdf/identity',
+		'rdf/match',
+		'rdf/n3parser',
+		'rdf/rdfparser',
+		'rdf/serialize',
+		'rdf'
+	];
+	zContext.Zotero.RDF = {AJAW:{Zotero:zContext.Zotero}};
+	for (var i=0; i<rdfXpcomFiles.length; i++) {
+		Cc["@mozilla.org/moz/jssubscript-loader;1"]
+			.getService(Ci.mozIJSSubScriptLoader)
+			.loadSubScript("chrome://zotero/content/xpcom/" + rdfXpcomFiles[i] + ".js", zContext.Zotero.RDF.AJAW);
+	}
+	
+	// load nsTransferable (query: do we still use this?)
+	Cc["@mozilla.org/moz/jssubscript-loader;1"]
+		.getService(Ci.mozIJSSubScriptLoader)
+		.loadSubScript("chrome://global/content/nsTransferable.js", zContext);
+	
+	// add connector-related properties
+	zContext.Zotero.isConnector = isConnector;
+	zContext.Zotero.instanceID = instanceID;
+	zContext.Zotero.__defineGetter__("isFirstLoadThisSession", function() isFirstLoadThisSession);
+};
+
+/**
+ * The class representing the Zotero service, and affiliated XPCOM goop
+ */
+function ZoteroService(){
+	try {
+		if(isFirstLoadThisSession) {
+			makeZoteroContext(false);
+			try {
+				zContext.Zotero.init();
+			} catch(e) {
+				if(e === "ZOTERO_SHOULD_START_AS_CONNECTOR") {
+					// if Zotero should start as a connector, reload it
+					zContext.Zotero.shutdown();
+					makeZoteroContext(true);
+					zContext.Zotero.init();
+				} else {
+					dump(e.toSource());
+					Components.utils.reportError(e);
+					throw e;
+				}
+			}
+		}
+		isFirstLoadThisSession = false;	// no longer first load
+		this.wrappedJSObject = zContext.Zotero;
+	} catch(e) {
 		var msg = typeof e == 'string' ? e : e.name;
 		dump(e + "\n\n");
 		Components.utils.reportError(e);
-		throw (e);
+		throw e;
 	}
 }
-
-function ZoteroService(){
-	this.wrappedJSObject = ZoteroWrapped.Zotero;
-	setupService();
-}
-
-
-/**
-* Convenience method to replicate window.alert()
-**/
-// TODO: is this still used? if so, move to zotero.js
-function alert(msg){
-	Cc["@mozilla.org/embedcomp/prompt-service;1"]
-		.getService(Ci.nsIPromptService)
-		.alert(null, "", msg);
-}
-
-/**
-* Convenience method to replicate window.confirm()
-**/
-// TODO: is this still used? if so, move to zotero.js
-function confirm(msg){
-	return Cc["@mozilla.org/embedcomp/prompt-service;1"]
-		.getService(Ci.nsIPromptService)
-		.confirm(null, "", msg);
-}
-
-
-/**
-* Convenience method to replicate window.setTimeout()
-**/
-function setTimeout(func, ms) {
-	Zotero.setTimeout(func, ms);
-}
-
 
 //
 // XPCOM goop
@@ -227,8 +301,8 @@ ZoteroService.prototype = {
 	contractID: ZOTERO_CONTRACTID,
 	classDescription: ZOTERO_CLASSNAME,
 	classID: ZOTERO_CID,
-	service: true,
-	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsISupports, ZOTERO_IID])
+	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsISupports,
+			Components.interfaces.nsIProtocolHandler])
 }
 
 /**

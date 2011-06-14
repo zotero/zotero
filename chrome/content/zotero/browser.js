@@ -112,6 +112,17 @@ var Zotero_Browser = new function() {
 			function(e) { Zotero_Browser.chromeLoad(e) }, false);
 		window.addEventListener("unload",
 			function(e) { Zotero_Browser.chromeUnload(e) }, false);
+		
+		ZoteroPane_Local.addReloadListener(reload);
+		reload();
+	}
+	
+	/**
+	 * Called when Zotero is reloaded
+	 */
+	function reload() {
+		// Handles the display of a div showing progress in scraping
+		Zotero_Browser.progress = new Zotero.ProgressWindow();
 	}
 	
 	/**
@@ -144,7 +155,7 @@ var Zotero_Browser = new function() {
 		
 		// get libraryID and collectionID
 		var libraryID, collectionID;
-		if(ZoteroPane) {
+		if(ZoteroPane && !Zotero.isConnector) {
 			libraryID = ZoteroPane.getSelectedLibraryID();
 			collectionID = ZoteroPane.getSelectedCollection(true);
 		} else {
@@ -374,7 +385,7 @@ var Zotero_Browser = new function() {
 		// get data object
 		var tab = _getTabObject(browser);
 		
-		if(isHTML) {
+		if(isHTML && !Zotero.isConnector) {
 			var annotationID = Zotero.Annotate.getAnnotationIDFromURL(browser.currentURI.spec);
 			if(annotationID) {
 				if(Zotero.Annotate.isAnnotated(annotationID)) {
@@ -509,8 +520,8 @@ var Zotero_Browser = new function() {
 	 * Callback to be executed when an item has been finished
 	 */
 	function itemDone(obj, item, collection) {
-		var title = item.getField("title", false, true);
-		var icon = item.getImageSrc();
+		var title = item.title;
+		var icon = Zotero.ItemTypes.getImageSrc(item.itemType);
 		Zotero_Browser.progress.show();
 		Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scraping"));
 		Zotero_Browser.progress.addLines([title], [icon]);
@@ -742,7 +753,7 @@ Zotero_Browser.Tab.prototype.translate = function(libraryID, collectionID) {
 			this.page.hasBeenTranslated = true;
 		}
 		this.page.translate.clearHandlers("itemDone");
-		this.page.translate.setHandler("itemDone", function(obj, item) { Zotero_Browser.itemDone(obj, item, collection) });
+		this.page.translate.setHandler("itemDone", function(obj, dbItem, item) { Zotero_Browser.itemDone(obj, item, collection) });
 		
 		this.page.translate.translate(libraryID);
 	}
@@ -755,12 +766,10 @@ Zotero_Browser.Tab.prototype.translate = function(libraryID, collectionID) {
 Zotero_Browser.Tab.prototype.getCaptureIcon = function() {
 	if(this.page.translators && this.page.translators.length) {
 		var itemType = this.page.translators[0].itemType;
-		if(itemType == "multiple") {
-			// Use folder icon for multiple types, for now
-			return "chrome://zotero/skin/treesource-collection.png";
-		} else {
-			return Zotero.ItemTypes.getImageSrc(itemType);
-		}
+		Zotero.debug("want capture icon for "+itemType);
+		return (itemType === "multiple"
+				? "chrome://zotero/skin/treesource-collection.png"
+				: Zotero.ItemTypes.getImageSrc(itemType));
 	}
 	
 	return false;
@@ -784,7 +793,7 @@ Zotero_Browser.Tab.prototype.getCaptureTooltip = function() {
 /*
  * called when a user is supposed to select items
  */
-Zotero_Browser.Tab.prototype._selectItems = function(obj, itemList) {
+Zotero_Browser.Tab.prototype._selectItems = function(obj, itemList, callback) {
 	// this is kinda ugly, mozillazine made me do it! honest!
 	var io = { dataIn:itemList, dataOut:null }
 	var newDialog = window.openDialog("chrome://zotero/content/ingester/selectitems.xul",
@@ -794,7 +803,7 @@ Zotero_Browser.Tab.prototype._selectItems = function(obj, itemList) {
 		Zotero_Browser.progress.close();
 	}
 	
-	return io.dataOut;
+	callback(io.dataOut);
 }
 
 /*
@@ -811,8 +820,5 @@ Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, transla
 	}
 	Zotero_Browser.updateStatus();
 }
-
-// Handles the display of a div showing progress in scraping
-Zotero_Browser.progress = new Zotero.ProgressWindow();
 
 Zotero_Browser.init();

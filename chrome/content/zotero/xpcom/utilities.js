@@ -595,6 +595,17 @@ Zotero.Utilities = {
 		} catch(e) {
 			return false;
 		}
+	},
+	
+	/**
+	 * Escapes metacharacters in a literal so that it may be used in a regular expression
+	 */
+	"quotemeta":function(literal) {
+		if(typeof literal !== "string") {
+			throw "Argument "+literal+" must be a string in Zotero.Utilities.quotemeta()";
+		}
+		const metaRegexp = /[-[\]{}()*+?.\\^$|,#\s]/g;
+		return literal.replace(metaRegexp, "\\$&");
 	}
 }
 
@@ -746,13 +757,11 @@ Zotero.Utilities.Translate.prototype.loadDocument = function(url, succeeded, fai
  * @ignore
  */
 Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor, done, exception) {
-	if(this._translate.locationIsProxied) {
-		if(typeof(urls) == "string") {
-			urls = [this._convertURL(urls)];
-		} else {
-			for(var i in urls) {
-				urls[i] = this._convertURL(urls[i]);
-			}
+	if(typeof(urls) == "string") {
+		urls = [this._convertURL(urls)];
+	} else {
+		for(var i in urls) {
+			urls[i] = this._convertURL(urls[i]);
 		}
 	}
 	
@@ -776,7 +785,7 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
  * @return {Document} 			DOM document object
  */
 Zotero.Utilities.Translate.prototype.retrieveDocument = function(url) {
-	if(this._translate.locationIsProxied) url = this._convertURL(url);
+	url = this._convertURL(url);
 	
 	var mainThread = Zotero.mainThread;
 	var loaded = false;
@@ -822,7 +831,7 @@ Zotero.Utilities.Translate.prototype.retrieveSource = function(url, body, header
 	/* Apparently, a synchronous XMLHttpRequest would have the behavior of this routine in FF3, but
 	 * in FF3.5, synchronous XHR blocks all JavaScript on the thread. See 
 	 * http://hacks.mozilla.org/2009/07/synchronous-xhr/. */
-	if(this._translate.locationIsProxied) url = this._convertURL(url);
+	url = this._convertURL(url);
 	if(!headers) headers = null;
 	if(!responseCharset) responseCharset = null;
 	
@@ -911,15 +920,25 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
  */
 Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 	const protocolRe = /^(?:(?:http|https|ftp):)/i;
-	const fileRe = /^[^:]*/;
 	
-	if(this._translate.locationIsProxied) {
-		url = Zotero.Proxies.properToProxy(url);
+	// convert proxy to proper if applicable
+	if(this._translate.translator && this._translate.translator[0]
+			&& this._translate.translator[0].properToProxy) {
+		url = this._translate.translator[0].properToProxy(url);
 	}
-	if(protocolRe.test(url)) return url;
-	if(!fileRe.test(url)) {
-		throw "Invalid URL supplied for HTTP request";
+	
+	if(Zotero.isChrome || Zotero.isSafari) {
+		// this code is sandboxed, so we don't worry
+		return url;
 	} else {
+		if(protocolRe.test(url)) return url;
+		
+		if(uri.indexOf(":") !== -1) {
+			// don't allow protocol switches
+			throw "Invalid URL supplied for HTTP request";
+		}
+		
+		// resolve relative URIs
 		return Components.classes["@mozilla.org/network/io-service;1"].
 			getService(Components.interfaces.nsIIOService).
 			newURI(this._translate.location, "", null).resolve(url);

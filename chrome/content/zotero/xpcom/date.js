@@ -61,7 +61,7 @@ Zotero.Date = new function(){
 			.getService(Components.interfaces.nsIStringBundleService).createBundle(src, appLocale);
 		
 		_months = {"short":[], "long":[]};
-		for(let i=1; i<=12; i++) {
+		for(var i=1; i<=12; i++) {
 			_months.short.push(bundle.GetStringFromName("month."+i+".Mmm"));
 			_months.long.push(bundle.GetStringFromName("month."+i+".name"));
 		}

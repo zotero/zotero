@@ -852,12 +852,20 @@ function ChromeExtensionHandler() {
 				var [path, queryString] = uri.path.substr(1).split('?');
 				var [type, id] = path.split('/');
 				
-				//currently only able to select one item
+				// currently only able to select one item
 				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator);
-				var win = wm.getMostRecentWindow(null);
+				var win = wm.getMostRecentWindow("navigator:browser");
 				
+				// restore window if it's in the dock
+				if(win.windowState == Components.interfaces.nsIDOMChromeWindow.STATE_MINIMIZED) {
+					win.restore();
+				}
+				
+				// open Zotero pane
 				win.ZoteroPane.show();
+				
+				if(!id) return;
 				
 				var lkh = Zotero.Items.parseLibraryKeyHash(id);
 				if (lkh) {
@@ -1026,10 +1034,10 @@ function ChromeExtensionHandler() {
 			try {
 				var originalURI = uri.path;
 				originalURI = decodeURIComponent(originalURI.substr(originalURI.indexOf("/")+1));
-				if(!Zotero.Connector.Data[originalURI]) {
+				if(!Zotero.Server.Connector.Data[originalURI]) {
 					return null;
 				} else {
-					return new ConnectorChannel(originalURI, Zotero.Connector.Data[originalURI]);
+					return new ConnectorChannel(originalURI, Zotero.Server.Connector.Data[originalURI]);
 				}
 			} catch(e) {
 				Zotero.debug(e);

@@ -149,18 +149,153 @@ Zotero.Translators = new function() {
 	
 	/**
 	 * Gets the translator that corresponds to a given ID
+	 * @param {String} id The ID of the translator
+	 * @param {Function} [callback] An optional callback to be executed when translators have been
+	 *                              retrieved. If no callback is specified, translators are
+	 *                              returned.
 	 */
-	this.get = function(id) {
+	this.get = function(id, callback) {
 		if(!_initialized) this.init();
-		return _translators[id] ? _translators[id] : false;
+		var translator = _translators[id] ? _translators[id] : false;
+		
+		if(callback) {
+			callback(translator);
+			return true;
+		}
+		return translator;
+	}
+	
+	/**
+	 * Gets all translators for a specific type of translation
+	 * @param {String} type The type of translators to get (import, export, web, or search)
+	 * @param {Function} [callback] An optional callback to be executed when translators have been
+	 *                              retrieved. If no callback is specified, translators are
+	 *                              returned.
+	 */
+	this.getAllForType = function(type, callback) {
+		if(!_initialized) this.init()
+		
+		var translators = _cache[type].slice(0);
+		if(callback) {
+			callback(translators);
+			return true;
+		}
+		return translators;
 	}
 	
 	/**
 	 * Gets all translators for a specific type of translation
 	 */
-	this.getAllForType = function(type) {
+	this.getAll = function() {
 		if(!_initialized) this.init();
-		return _cache[type].slice(0);
+		return [translator for each(translator in _translators)];
+	}
+	
+	/**
+	 * Gets web translators for a specific location
+	 * @param {String} uri The URI for which to look for translators
+	 * @param {Function} [callback] An optional callback to be executed when translators have been
+	 *                              retrieved. If no callback is specified, translators are
+	 *                              returned. The callback is passed a set of functions for
+	 *                              converting URLs from proper to proxied forms as the second
+	 *                              argument.
+	 */
+	this.getWebTranslatorsForLocation = function(uri, callback) {
+		var allTranslators = this.getAllForType("web");
+		var potentialTranslators = [];
+		
+		var properHosts = [];
+		var proxyHosts = [];
+		
+		var properURI = Zotero.Proxies.proxyToProper(uri);
+		var knownProxy = properURI !== uri;
+		if(knownProxy) {
+			// if we know this proxy, just use the proper URI for detection
+			var searchURIs = [properURI];
+		} else {
+			var searchURIs = [uri];
+			
+			// if there is a subdomain that is also a TLD, also test against URI with the domain
+			// dropped after the TLD
+			// (i.e., www.nature.com.mutex.gmu.edu => www.nature.com)
+			var m = /^(https?:\/\/)([^\/]+)/i.exec(uri);
+			if(m) {
+				var hostnames = m[2].split(".");
+				for(var i=1; i<hostnames.length-2; i++) {
+					if(TLDS[hostnames[i].toLowerCase()]) {
+						var properHost = hostnames.slice(0, i+1).join(".");
+						searchURIs.push(m[1]+properHost+uri.substr(m[0].length));
+						properHosts.push(properHost);
+						proxyHosts.push(hostnames.slice(i+1).join("."));
+					}
+				}
+			}
+		}
+		
+		Zotero.debug("Translators: Looking for translators for "+searchURIs.join(", "));
+		
+		var converterFunctions = [];
+		for(var i=0; i<allTranslators.length; i++) {
+			for(var j=0; j<searchURIs.length; j++) {
+				if((!allTranslators[i].webRegexp
+						&& allTranslators[i].runMode === Zotero.Translator.RUN_MODE_IN_BROWSER)
+						|| (uri.length < 8192 && allTranslators[i].webRegexp.test(searchURIs[j]))) {
+					// add translator to list
+					potentialTranslators.push(allTranslators[i]);
+					
+					if(j === 0) {
+						if(knownProxy) {
+							converterFunctions.push(Zotero.Proxies.properToProxy);
+						} else {
+							converterFunctions.push(null);
+						}
+					} else {
+						converterFunctions.push(new function() {
+							var re = new RegExp('^https?://(?:[^/]\\.)?'+Zotero.Utilities.quotemeta(properHosts[j-1]), "gi");
+							var proxyHost = proxyHosts[j-1].replace(/\$/g, "$$$$");
+							return function(uri) { return uri.replace(re, "$&."+proxyHost) };
+						});
+					}
+					
+					// don't add translator more than once
+					break;
+				}
+			}
+		}
+		
+		if(callback) {
+			callback([potentialTranslators, converterFunctions]);
+			return true;
+		}
+		return potentialTranslators;
+	}
+	
+	/**
+	 * Gets import translators for a specific location
+	 * @param {String} location The location for which to look for translators
+	 * @param {Function} [callback] An optional callback to be executed when translators have been
+	 *                              retrieved. If no callback is specified, translators are
+	 *                              returned.
+	 */
+	this.getImportTranslatorsForLocation = function(location, callback) {	
+		var allTranslators = Zotero.Translators.getAllForType("import");
+		var tier1Translators = [];
+		var tier2Translators = [];
+		
+		for(var i=0; i<allTranslators.length; i++) {
+			if(allTranslators[i].importRegexp.test(location)) {
+				tier1Translators.push(allTranslators[i]);
+			} else {
+				tier2Translators.push(allTranslators[i]);
+			}
+		}
+		
+		var translators = tier1Translators.concat(tier2Translators);
+		if(callback) {
+			callback(translators);
+			return true;
+		}
+		return translators;
 	}
 	
 	/**
@@ -170,7 +305,6 @@ Zotero.Translators = new function() {
 	this.getFileNameFromLabel = function(label) {
 		return Zotero.File.getValidFileName(label) + ".js";
 	}
-	
 	
 	/**
 	 * @param	{String}		metadata
@@ -262,29 +396,6 @@ Zotero.Translators = new function() {
 	}
 }
 
-/**
- * @class Represents an individual translator
- * @constructor
- * @param {nsIFile} file File from which to generate a translator object
- * @property {String} translatorID Unique GUID of the translator
- * @property {Integer} translatorType Type of the translator (use bitwise & with TRANSLATOR_TYPES to read)
- * @property {String} label Human-readable name of the translator
- * @property {String} creator Author(s) of the translator
- * @property {String} target Location that the translator processes
- * @property {String} minVersion Minimum Zotero version
- * @property {String} maxVersion Minimum Zotero version
- * @property {Integer} priority Lower-priority translators will be selected first
- * @property {String} browserSupport String indicating browser supported by the translator
- *     g = Gecko (Firefox)
- *     c = Google Chrome (WebKit & V8)
- *     s = Safari (WebKit & Nitro/Squirrelfish Extreme)
- *     i = Internet Explorer
- * @property {Object} configOptions Configuration options for import/export
- * @property {Object} displayOptions Display options for export
- * @property {Boolean} inRepository Whether the translator may be found in the repository
- * @property {String} lastUpdated SQL-style date and time of translator's last update
- * @property {String} code The executable JavaScript for the translator
- */
 Zotero.Translator = function(file, json, code) {
 	const codeGetterFunction = function() { return Zotero.File.getContents(this.file); }
 	// Maximum length for the info JSON in a translator
@@ -355,6 +466,7 @@ Zotero.Translator = function(file, json, code) {
 	this._configOptions = info["configOptions"] ? info["configOptions"] : {};
 	this._displayOptions = info["displayOptions"] ? info["displayOptions"] : {};
 	this.browserSupport = info["browserSupport"] ? info["browserSupport"] : "g";
+	this.runMode = Zotero.Translator.RUN_MODE_IN_BROWSER;
 	
 	if(this.translatorType & TRANSLATOR_TYPES["import"]) {
 		// compile import regexp to match only file extension
@@ -374,7 +486,6 @@ Zotero.Translator = function(file, json, code) {
 		try {
 			this.webRegexp = this.target ? new RegExp(this.target, "i") : null;
 		} catch(e) {
-			if(fStream) fStream.close();
 			this.logError("Invalid target in " + file.leafName);
 			this.webRegexp = null;
 			if(fStream) fStream.close();
@@ -421,3 +532,7 @@ Zotero.Translator.prototype.logError = function(message, type, line, lineNumber,
 		getService(Components.interfaces.nsIIOService);
 	Zotero.log(message, type ? type : "error", ios.newFileURI(this.file).spec);
 }
+
+Zotero.Translator.RUN_MODE_IN_BROWSER = 1;
+Zotero.Translator.RUN_MODE_ZOTERO_STANDALONE = 2;
+Zotero.Translator.RUN_MODE_ZOTERO_SERVER = 4;

@@ -402,7 +402,7 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 			Zotero.Browser.deleteHiddenBrowser(me._hiddenBrowser);
 			me._callback(item);
 		});
-		translate.setHandler("select", function(translate, items) { return me._selectItems(translate, items) });
+		translate.setHandler("select", function(translate, items) { me._selectItems(translate, items, callback) });
 		translate.setHandler("done", function(translate, success) { if(!success) me._queryGoogle(); });
 		
 		this._hiddenBrowser.addEventListener("pageshow", function() { me._scrape(translate) }, true);
@@ -449,10 +449,12 @@ Zotero_RecognizePDF.Recognizer.prototype._scrape = function(/**Zotero.Translate*
  * @private
  * @type Object
  */
-Zotero_RecognizePDF.Recognizer.prototype._selectItems = function(/**Zotero.Translate*/ translate, /**Object*/ items) {
+Zotero_RecognizePDF.Recognizer.prototype._selectItems = function(/**Zotero.Translate*/ translate,
+		/**Object*/ items, /**Function**/ callback) {
 	for(var i in items) {
 		var obj = {};
 		obj[i] = items;
-		return obj;
+		callback(obj);
+		return;
 	}
 }
