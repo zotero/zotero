@@ -30,6 +30,7 @@
 /**
  * @namespace
  */
+if(!Zotero.Connector) Zotero.Connector = {};
 Zotero.Connector.Types = new function() {
 	/**
 	 * Initializes types
@@ -77,8 +78,10 @@ Zotero.ItemTypes = new function() {
 		
 		if(Zotero.isFx) {
 			return "chrome://zotero/skin/"+Zotero.Connector.Types["itemTypes"][idOrName].icon;
-		} else {
-			return "images/"+Zotero.Connector.Types["itemTypes"][idOrName].icon;
+		} else if(Zotero.isChrome) {
+			return chrome.extension.getURL("images/"+Zotero.Connector.Types["itemTypes"][idOrName].icon);
+		} else if(Zotero.isSafari) {
+			return safari.extension.baseURI+"images/itemTypes/"+Zotero.Connector.Types["itemTypes"][idOrName].icon;
 		}
 	}
 }
