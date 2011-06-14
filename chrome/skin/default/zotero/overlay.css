@@ -416,14 +416,14 @@
 
 #zotero-tb-search
 {
-	font-size: 11px !important; /* Keep font size in Linux within reason */
+	font-size: 11px !important;
 	width: 150px;
 }
 
 #zotero-tb-search-menu-button
 {
-	margin: -6px -2px -6px -16px;
-	padding: 6px 2px 6px 14px;
+	margin: 0;
+	padding: 0;
 	-moz-appearance: none;
 	min-width: 0;
 	cursor: default;

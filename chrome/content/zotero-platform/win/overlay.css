@@ -2,13 +2,12 @@
 	margin-left: 5px;
 }
 
-#zotero-tb-search .textbox-search-icon {
-	visibility: hidden;
+.zotero-tb-button:not([type=menu]) {
+	margin-right: 4px;
 }
 
 #zotero-tb-search-menu-button {
 	margin: 0 -1px 0 -4px;
-	padding: 0;
 	border: 0;
 	background: transparent;
 	/* Mozilla file copied from chrome://browser/skin/mainwindow-dropdown-arrow.png
@@ -26,13 +25,17 @@
 	-moz-image-region: rect(0, 26px, 11px, 13px);
 }
 
+#zotero-tb-search .textbox-search-icon {
+	visibility: hidden;
+}
+
 #zotero-tb-sync-warning {
 	margin-right: 2px;
 }
 
-
 #zotero-tb-sync {
 	margin-right: 1px;
+	padding-top: 4px;
 }
 
 #zotero-tb-fullscreen {
