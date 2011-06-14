@@ -29,11 +29,16 @@
 var ZoteroOverlay = new function()
 {
 	const DEFAULT_ZPANE_HEIGHT = 300;
-	var toolbarCollapseState, isFx36, showInPref;
+	var toolbarCollapseState, isFx36, showInPref;	
+	var zoteroPane, zoteroSplitter;
+	var _stateBeforeReload = false;
 	
 	this.isTab = false;
 	
 	this.onLoad = function() {
+		zoteroPane = document.getElementById('zotero-pane-stack');
+		zoteroSplitter = document.getElementById('zotero-splitter');
+		
 		ZoteroPane_Overlay = ZoteroPane;
 		ZoteroPane.init();
 		
@@ -141,6 +146,19 @@ var ZoteroOverlay = new function()
 		if(Zotero.isFx4) {
 			XULBrowserWindow.inContentWhitelist.push("chrome://zotero/content/tab.xul");
 		}
+		
+		// Close pane if connector is enabled
+		ZoteroPane_Local.addReloadListener(function() {
+			if(Zotero.isConnector) {
+				// save current state
+				_stateBeforeReload = !zoteroPane.hidden && !zoteroPane.collapsed;
+				// ensure pane is closed
+				if(!zoteroPane.collapsed) ZoteroOverlay.toggleDisplay(false);
+			} else {
+				// reopen pane if it was open before
+				ZoteroOverlay.toggleDisplay(_stateBeforeReload);
+			}
+		});
 	}
 	
 	this.onUnload = function() {
@@ -158,10 +176,16 @@ var ZoteroOverlay = new function()
 	 */
 	this.toggleDisplay = function(makeVisible)
 	{
-		if(this.isTab && (makeVisible || makeVisible === undefined)) {
-			// If in separate tab mode, just open the tab
-			this.loadZoteroTab();
-			return;
+		if(makeVisible || makeVisible === undefined) {
+			if(Zotero.isConnector) {
+				// If in connector mode, bring Zotero Standalone to foreground
+				Zotero.activateStandalone();
+				return;
+			} else if(this.isTab) {
+				// If in separate tab mode, just open the tab
+				this.loadZoteroTab();
+				return;
+			}
 		}
 		
 		if(!Zotero || !Zotero.initialized) {
@@ -169,12 +193,7 @@ var ZoteroOverlay = new function()
 			return;
 		}
 		
-		var zoteroPane = document.getElementById('zotero-pane-stack');
-		var zoteroSplitter = document.getElementById('zotero-splitter');
-		var isHidden = zoteroPane.getAttribute('hidden') == 'true';
-		var isCollapsed = zoteroPane.getAttribute('collapsed') == 'true';
-		
-		if(makeVisible === undefined) makeVisible = isHidden || isCollapsed;
+		if(makeVisible === undefined) makeVisible = zoteroPane.hidden || zoteroPane.collapsed;
 		
 		zoteroSplitter.setAttribute('hidden', !makeVisible);
 		zoteroPane.setAttribute('hidden', false);

@@ -129,7 +129,7 @@ Zotero.DBConnection.prototype.query = function (sql,params) {
 				}
 				dataset.push(row);
 			}
-			statement.reset();
+			statement.finalize();
 			
 			return dataset.length ? dataset : false;
 		}
@@ -170,12 +170,12 @@ Zotero.DBConnection.prototype.valueQuery = function (sql,params) {
 	
 	// No rows
 	if (!statement.executeStep()) {
-		statement.reset();
+		statement.finalize();
 		return false;
 	}
 	
 	var value = this._getTypedValue(statement, 0);
-	statement.reset();
+	statement.finalize();
 	return value;
 }
 
@@ -202,7 +202,7 @@ Zotero.DBConnection.prototype.columnQuery = function (sql,params) {
 		while (statement.executeStep()) {
 			column.push(this._getTypedValue(statement, 0));
 		}
-		statement.reset();
+		statement.finalize();
 		return column.length ? column : false;
 	}
 	return false;
@@ -630,7 +630,7 @@ Zotero.DBConnection.prototype.getColumns = function (table) {
 		for (var i=0,len=statement.columnCount; i<len; i++) {
 			cols.push(statement.getColumnName(i));
 		}
-		statement.reset();
+		statement.finalize();
 		return cols;
 	}
 	catch (e) {
@@ -771,8 +771,11 @@ Zotero.DBConnection.prototype.checkException = function (e) {
 
 
 Zotero.DBConnection.prototype.closeDatabase = function () {
-	var db = this._getDBConnection();
-	db.close();
+	if(this._connection) {
+		this.stopDummyStatement();
+		this._connection.close();
+		return true;
+	}
 }
 
 
@@ -855,10 +858,10 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 	var hadDummyStatement = !!this._dummyStatement;
 	try {
 		if (dbLockExclusive) {
-			Zotero.DB.query("PRAGMA locking_mode=NORMAL");
+			this.query("PRAGMA locking_mode=NORMAL");
 		}
 		if (hadDummyStatement) {
-			Zotero.DB.stopDummyStatement();
+			this.stopDummyStatement();
 		}
 		
 		var store = Components.classes["@mozilla.org/storage/service;1"].
@@ -872,10 +875,10 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 	}
 	finally {
 		if (dbLockExclusive) {
-			Zotero.DB.query("PRAGMA locking_mode=EXCLUSIVE");
+			this.query("PRAGMA locking_mode=EXCLUSIVE");
 		}
 		if (hadDummyStatement) {
-			Zotero.DB.startDummyStatement();
+			this.startDummyStatement();
 		}
 	}
 	
@@ -1003,8 +1006,10 @@ Zotero.DBConnection.prototype.stopDummyStatement = function () {
 	}
 	
 	Zotero.debug("Stopping dummy statement for '" + this._dbName + "'");
-	this._dummyStatement.reset();
-	this._dummyStatement = null;
+	this._dummyStatement.finalize();
+	this._dummyConnection.close();
+	delete this._dummyConnection;
+	delete this._dummyStatement;
 }
 
 

@@ -54,19 +54,12 @@ onmessage = function(event) {
 		
 		// extract message
 		var string = buf.readString();
-		var parts = string.match(/^([^ \n]*) ([^ \n]*)(?: ([^\n]*))?\n?$/);
-		if(!parts) {
-			postMessage(["Exception", "Integration Worker: Invalid input received: "+string]);
-			continue;
-		}
-		var agent = parts[1].toString();
-		var cmd = parts[2].toString();
-		var document = parts[3] ? parts[3] : null;
-		if(agent == "Zotero" && cmd == "shutdown") {
-			postMessage(["Debug", "Integration Worker: Shutting down"]);
+		if(string === "Zotero shutdown\n") {
+			postMessage(["Debug", "IPC: Worker closing "+event.data.path]);
 			lib.close();
 			return;
 		}
-		postMessage([agent, cmd, document]);
+		
+		postMessage(["Read", string]);
 	}
 };

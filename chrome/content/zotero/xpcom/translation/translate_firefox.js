@@ -38,10 +38,9 @@ Components.utils.import("resource://gre/modules/NetUtil.jsm");
  * @param {Zotero.Translate} translate
  * @param {String|window} sandboxLocation
  */
-Zotero.Translate.SandboxManager = function(translate, sandboxLocation) {
+Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	this.sandbox = new Components.utils.Sandbox(sandboxLocation);
 	this.sandbox.Zotero = {};
-	this._translate = translate;
 	
 	// import functions missing from global scope into Fx sandbox
 	this.sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
@@ -111,6 +110,7 @@ Zotero.Translate.SandboxManager.prototype = {
 					
 					return object[localKey].apply(object, args);
 				};
+				attachTo[localKey].name = localKey;
 				
 				// attach members
 				if(!(object instanceof Components.interfaces.nsISupports)) {

@@ -180,6 +180,8 @@ Zotero.MIMETypeHandler = new function () {
 	 */
 	var _Observer = new function() {
 		this.observe = function(channel) {
+			if(Zotero.isConnector) return;
+			
 			channel.QueryInterface(Components.interfaces.nsIRequest);
 			if(channel.loadFlags & Components.interfaces.nsIHttpChannel.LOAD_DOCUMENT_URI) {
 				channel.QueryInterface(Components.interfaces.nsIHttpChannel);
@@ -222,6 +224,7 @@ Zotero.MIMETypeHandler = new function () {
 		 * Called to see if we can handle a content type
 		 */
 		this.canHandleContent = this.isPreferred = function(contentType, isContentPreferred, desiredContentType) {
+			if(Zotero.isConnector) return false;
 			return !!_typeHandlers[contentType.toLowerCase()];
 		}
 		

@@ -107,8 +107,8 @@ pref("extensions.zotero.integration.port", 50001);
 pref("extensions.zotero.integration.autoRegenerate", -1);	// -1 = ask; 0 = no; 1 = yes
 
 // Connector settings
-pref("extensions.zotero.connector.enabled", false);
-pref("extensions.zotero.connector.port", 23119);	// ascii "ZO"
+pref("extensions.zotero.httpServer.enabled", false);	// TODO enabled for testing only
+pref("extensions.zotero.httpServer.port", 23119);	// ascii "ZO"
 
 // Zeroconf
 pref("extensions.zotero.zeroconf.server.enabled", false);

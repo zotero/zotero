@@ -23,8 +23,18 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Translate.Item = {
-	"saveItem":function (translate, item) {
-		
-	}
+Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType) {
+	this.newItems = [];
 }
+
+Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE = 0;
+Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD = 1;
+Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE = 2;
+
+Zotero.Translate.ItemSaver.prototype = {
+	"saveItem":function(item) {
+		this.newItems.push(item);
+		Zotero.debug("Saving item");
+		Zotero.Connector.callMethod("saveItems", {"items":[item]});
+	}
+};

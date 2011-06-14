@@ -25,8 +25,8 @@
 
 
 Zotero.Debug = new function () {
-	this.__defineGetter__('storing', function () _store);
-	this.__defineGetter__('enabled', function () _console || _store);
+	this.__defineGetter__('storing', function () { return _store; });
+	this.__defineGetter__('enabled', function () { return _console || _store; });
 	
 	var _console;
 	var _store;
@@ -81,7 +81,12 @@ Zotero.Debug = new function () {
 		}
 		
 		if (_console) {
-			dump('zotero(' + level + ')' + (_time ? deltaStr : '') + ': ' + message + "\n\n");
+			var output = 'zotero(' + level + ')' + (_time ? deltaStr : '') + ': ' + message;
+			if(Zotero.isFx) {
+				dump(output+"\n\n");
+			} else {
+				console.log(output);
+			}
 		}
 		if (_store) {
 			if (Math.random() < 1/1000) {

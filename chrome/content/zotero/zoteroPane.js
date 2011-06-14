@@ -90,18 +90,16 @@ var ZoteroPane = new function()
 	
 	var self = this;
 	var _loaded = false;
-	var titlebarcolorState, titleState;
+	var titlebarcolorState, titleState, observerService;
+	var _reloadFunctions = [];
 	
 	// Also needs to be changed in collectionTreeView.js
 	var _lastViewedFolderRE = /^(?:(C|S|G)([0-9]+)|L)$/;
 	
-	/*
+	/**
 	 * Called when the window containing Zotero pane is open
 	 */
-	function init()
-	{	
-		if(!Zotero || !Zotero.initialized) return;
-		
+	function init() {
 		// Set "Report Errors..." label via property rather than DTD entity,
 		// since we need to reference it in script elsewhere
 		document.getElementById('zotero-tb-actions-reportErrors').setAttribute('label',
@@ -116,9 +114,9 @@ var ZoteroPane = new function()
 		
 		var zp = document.getElementById('zotero-pane');
 		Zotero.setFontSize(zp);
-		this.updateToolbarPosition();
-		window.addEventListener("resize", this.updateToolbarPosition, false);
-		window.setTimeout(this.updateToolbarPosition, 0);
+		ZoteroPane_Local.updateToolbarPosition();
+		window.addEventListener("resize", ZoteroPane_Local.updateToolbarPosition, false);
+		window.setTimeout(ZoteroPane_Local.updateToolbarPosition, 0);
 		
 		Zotero.updateQuickSearchBox(document);
 		
@@ -136,18 +134,40 @@ var ZoteroPane = new function()
 			zp.setAttribute("ignoreActiveAttribute", "true");
 		}
 		
+		// register an observer for Zotero reload
+		observerService = Components.classes["@mozilla.org/observer-service;1"]
+					  .getService(Components.interfaces.nsIObserverService);
+		observerService.addObserver(_reload, "zotero-reloaded", false);
+		this.addReloadListener(_loadPane);
+		
+		// continue loading pane
+		_loadPane();
+	}
+	
+	/**
+	 * Called on window load or when has been reloaded after switching into or out of connector
+	 * mode
+	 */
+	function _loadPane() {
+		if(!Zotero || !Zotero.initialized) return;
+		
+		if(Zotero.isConnector) {
+			ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('connector.standaloneOpen'));
+			return;
+		} else {
+			ZoteroPane_Local.clearItemsPaneMessage();
+		}
+		
 		//Initialize collections view
-		this.collectionsView = new Zotero.CollectionTreeView();
+		ZoteroPane_Local.collectionsView = new Zotero.CollectionTreeView();
 		var collectionsTree = document.getElementById('zotero-collections-tree');
-		collectionsTree.view = this.collectionsView;
+		collectionsTree.view = ZoteroPane_Local.collectionsView;
 		collectionsTree.controllers.appendController(new Zotero.CollectionTreeCommandController(collectionsTree));
 		collectionsTree.addEventListener("click", ZoteroPane_Local.onTreeClick, true);
 		
 		var itemsTree = document.getElementById('zotero-items-tree');
 		itemsTree.controllers.appendController(new Zotero.ItemTreeCommandController(itemsTree));
 		itemsTree.addEventListener("click", ZoteroPane_Local.onTreeClick, true);
-		
-		this.buildItemTypeSubMenu();
 		
 		var menu = document.getElementById("contentAreaContextMenu");
 		menu.addEventListener("popupshowing", ZoteroPane_Local.contextPopupShowing, false);
@@ -322,6 +342,8 @@ var ZoteroPane = new function()
 		this.collectionsView.unregister();
 		if (this.itemsView)
 			this.itemsView.unregister();
+		
+		observerService.removeObserver(_reload, "zotero-reloaded", false);
 	}
 	
 	/**
@@ -349,6 +371,7 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
+		this.buildItemTypeSubMenu();
 		this.unserializePersist();
 		this.updateToolbarPosition();
 		this.updateTagSelectorSize();
@@ -3643,6 +3666,22 @@ var ZoteroPane = new function()
 	 */
 	this.openAboutDialog = function() {
 		window.openDialog('chrome://zotero/content/about.xul', 'about', 'chrome');
+	}
+	
+	/**
+	 * Adds or removes a function to be called when Zotero is reloaded by switching into or out of
+	 * the connector
+	 */
+	this.addReloadListener = function(/** @param {Function} **/func) {
+		if(_reloadFunctions.indexOf(func) === -1) _reloadFunctions.push(func);
+	}
+	
+	/**
+	 * Called when Zotero is reloaded (i.e., if it is switched into or out of connector mode)
+	 */
+	function _reload() {
+		Zotero.debug("Reloading Zotero pane");
+		for each(var func in _reloadFunctions) func();
 	}
 }
 

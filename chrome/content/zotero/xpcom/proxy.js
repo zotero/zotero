@@ -480,8 +480,6 @@ const Zotero_Proxy_schemeParameterRegexps = {
 	"%a":/([^%])%a/
 };
 
-const Zotero_Proxy_metaRegexp = /[-[\]{}()*+?.\\^$|,#\s]/g;
-
 /**
  * Compiles the regular expression against which we match URLs to determine if this proxy is in use
  * and saves it in this.regexp
@@ -514,7 +512,7 @@ Zotero.Proxy.prototype.compileRegexp = function() {
 	})
 	
 	// now replace with regexp fragment in reverse order
-	var re = "^"+this.scheme.replace(Zotero_Proxy_metaRegexp, "\\$&")+"$";
+	var re = "^"+Zotero.Utilities.quotemeta(this.scheme)+"$";
 	for(var i=this.parameters.length-1; i>=0; i--) {
 		var param = this.parameters[i];
 		re = re.replace(Zotero_Proxy_schemeParameterRegexps[param], "$1"+parametersToCheck[param]);
@@ -571,7 +569,7 @@ Zotero.Proxy.prototype.save = function(transparent) {
 	if(hasErrors) throw "Zotero.Proxy: could not be saved because it is invalid: error "+hasErrors[0];
 	
 	// we never save any changes to non-persisting proxies, so this works
-	var newProxy = !!this.proxyID;
+	var newProxy = !this.proxyID;
 	
 	this.autoAssociate = this.multiHost && this.autoAssociate;
 	this.compileRegexp();
