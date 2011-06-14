@@ -1523,14 +1523,17 @@ if(appInfo.platformVersion[0] >= 2) {
 		var timer = Components.classes["@mozilla.org/timer;1"].
 			createInstance(Components.interfaces.nsITimer);
 		var timerCallback = {"notify":function() {
-			if(_waiting) {
+			//
+			// DEBUG: This can result in the callback not being triggered in Fx4+
+			//
+			//if(_waiting) {
 				// if our callback gets called during Zotero.wait(), queue it to be set again
 				// when Zotero.wait() completes
-				_waitTimerCallbacks.push(timerCallback);
-			} else {
+				//_waitTimerCallbacks.push(timerCallback);
+			//} else {
 				// otherwise, execute callback function
 				func();
-			}
+			//}
 		}}
 		timer.initWithCallback(timerCallback, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 	}
