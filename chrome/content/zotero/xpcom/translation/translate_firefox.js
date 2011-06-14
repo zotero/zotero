@@ -110,7 +110,6 @@ Zotero.Translate.SandboxManager.prototype = {
 					
 					return object[localKey].apply(object, args);
 				};
-				attachTo[localKey].name = localKey;
 				
 				// attach members
 				if(!(object instanceof Components.interfaces.nsISupports)) {
