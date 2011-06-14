@@ -142,6 +142,26 @@ Zotero.Connector = new function() {
 	}
 	
 	/**
+	 * Gives callback an object containing schema and preferences from Zotero.Connector.data
+	 */
+	this.getSchemaAndPreferences = function(callback) {
+		if(Zotero.Connector.data) {
+			callback({"schema":Zotero.Connector.data["schema"],
+					"preferences":Zotero.Connector.data["preferences"]});
+			return;
+		}
+		
+		this.getData(function(success) {
+			if(success) {
+				callback({"schema":Zotero.Connector.data["schema"],
+						"preferences":Zotero.Connector.data["preferences"]});
+				return;
+			}
+			callback(false);
+		});
+	}
+	
+	/**
 	 * Sends the XHR to execute an RPC call.
 	 *
 	 * @param	{String}		method			RPC method. See documentation above.
