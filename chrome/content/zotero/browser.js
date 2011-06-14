@@ -766,7 +766,6 @@ Zotero_Browser.Tab.prototype.translate = function(libraryID, collectionID) {
 Zotero_Browser.Tab.prototype.getCaptureIcon = function() {
 	if(this.page.translators && this.page.translators.length) {
 		var itemType = this.page.translators[0].itemType;
-		Zotero.debug("want capture icon for "+itemType);
 		return (itemType === "multiple"
 				? "chrome://zotero/skin/treesource-collection.png"
 				: Zotero.ItemTypes.getImageSrc(itemType));
