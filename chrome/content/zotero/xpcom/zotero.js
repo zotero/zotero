@@ -1523,17 +1523,19 @@ if(appInfo.platformVersion[0] >= 2) {
 	};
 	
 	/**
-	 * Emulates the behavior of window.setTimeout, but ensures that timeouts do not get called
+	 * Emulates the behavior of window.setTimeout, but ensures that callbacks do not get called
 	 * during Zotero.wait()
 	 *
-	 * @param {Function} func The function to be called
-	 * @param {Integer} ms The number of milliseconds to wait before calling func
+	 * @param {Function} func			The function to be called
+	 * @param {Integer} ms				The number of milliseconds to wait before calling func
+	 * @param {Boolean} runWhenWaiting	True if the callback should be run even if Zotero.wait()
+	 *                                  is executing
 	 */
-	this.setTimeout = function(func, ms) {
+	this.setTimeout = function(func, ms, runWhenWaiting) {
 		var timer = Components.classes["@mozilla.org/timer;1"].
 			createInstance(Components.interfaces.nsITimer);
 		var timerCallback = {"notify":function() {
-			if(_waiting) {
+			if(_waiting && !runWhenWaiting) {
 				// if our callback gets called during Zotero.wait(), queue it to be set again
 				// when Zotero.wait() completes
 				_waitTimers.push(timer);

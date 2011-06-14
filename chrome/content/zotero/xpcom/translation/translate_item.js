@@ -78,10 +78,8 @@ Zotero.Translate.ItemSaver.prototype = {
 			Zotero.debug("Translate: Beginning transaction");
 			Zotero.DB.beginTransaction();
 			
-			this._timer = Components.classes["@mozilla.org/timer;1"].
-				createInstance(Components.interfaces.nsITimer);
-			this._timer.initWithCallback(this, 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-			
+			var me = this;
+			Zotero.setTimeout(function() { me._closeTransaction() }, 0);
 			Zotero.showZoteroPaneProgressMeter(Zotero.getString("ingester.scraping"), false);
 		}
 		
@@ -514,15 +512,9 @@ Zotero.Translate.ItemSaver.prototype = {
 	},
 	
 	/**
-	 * Implements nsITimer.notify, closing the transaction when the current code block finishes
-	 * executing.
+	 * Closes the transaction when the current code block finishes executing.
 	 */
-	"notify":function() {
-		if(Zotero.waiting) {
-			this._timer.initWithCallback(this, 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-			return;
-		}
-		
+	"_closeTransaction":function() {
 		Zotero.debug("Translate: Closing transaction");
 		Zotero.hideZoteroPaneOverlay();
 		Zotero.DB.commitTransaction();
