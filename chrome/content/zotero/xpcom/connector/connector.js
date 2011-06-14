@@ -173,22 +173,20 @@ Zotero.Connector = new function() {
 		Zotero.HTTP.doPost(CONNECTOR_URI+"connector/"+method, JSON.stringify(data),
 			function(req) {
 				_checkState(req.status != 0, function() {
-						if(!callback) callback(false);
+						if(!callback) return;
 						
 						if(Zotero.Connector.EXCEPTION_CODES.indexOf(req.status) !== -1) {
-							if(callback) callback(false, req.status);
+							callback(false, req.status);
 						} else {
-							if(callback) {
-								var val = undefined;
-								if(req.responseText) {
-									if(req.getResponseHeader("Content-Type") === "application/json") {
-										val = JSON.parse(req.responseText);
-									} else {
-										val = req.responseText;
-									}
+							var val = null;
+							if(req.responseText) {
+								if(req.getResponseHeader("Content-Type") === "application/json") {
+									val = JSON.parse(req.responseText);
+								} else {
+									val = req.responseText;
 								}
-								callback(val, req.status);
 							}
+							callback(val, req.status);
 						}
 					});
 			}, {"Content-Type":"application/json"});
