@@ -1,5 +1,17 @@
+.zotero-tb-button:not([type=menu]) {
+	margin-right: 4px;
+}
+
 #zotero-tb-search-menu-button {
 	-moz-appearance: toolbarbutton-dropdown !important;
 	width: 12px;
 	height: 12px;
+}
+
+#zotero-tb-search-menu-button .button-menu-dropmarker {
+	display: none;
+}
+
+#zotero-tb-search .textbox-search-icon {
+	visibility: hidden;
 }
