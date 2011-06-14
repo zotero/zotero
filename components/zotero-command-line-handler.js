@@ -62,9 +62,7 @@ ZoteroCommandLineHandler.prototype = {
 			
 			// Not quite sure why this is necessary to get the appropriate scoping
 			var Zotero = this.Zotero;
-			var timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
-			timer.initWithCallback({notify:function() { Zotero.Integration.execCommand(agent, command, docId) }}, 0,
-				Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+			Zotero.setTimeout(function() { Zotero.Integration.execCommand(agent, command, docId) }, 0);
 		}
 		
 		// handler for Windows IPC commands
