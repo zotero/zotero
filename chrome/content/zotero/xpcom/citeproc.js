@@ -1877,7 +1877,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.177";
+	this.processor_version = "1.0.179";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -4539,9 +4539,6 @@ CSL.Node.label = {
 				this.strings.form = "long";
 			}
 			var func = function (state, Item, item) {
-				if (item && item.label === "sub verbo") {
-					item.label = "sub-verbo";
-				}
 				var termtxt = CSL.evaluateLabel(this, state, Item, item);
 				state.output.append(termtxt, this);
 			};
@@ -5281,10 +5278,7 @@ CSL.NameOutput.prototype._runDisambigNames = function (lst, pos) {
 		myform = this.name.strings.form;
 		myinitials = this.name.strings["initialize-with"];
 		paramx = this.state.registry.namereg.evalname("" + this.Item.id, lst[i], i, 0, myform, myinitials);
-		if (this.state.tmp.sort_key_flag) {
-			this.state.tmp.disambig_settings.givens[pos][i] = 2;
-			param = 2;
-		} else if (this.state.tmp.disambig_request) {
+		if (this.state.tmp.disambig_request) {
 			var val = this.state.tmp.disambig_settings.givens[pos][i];
 			if (val === 1 && 
 				this.state.opt["givenname-disambiguation-rule"] === "by-cite" && 
@@ -5569,6 +5563,9 @@ CSL.NameOutput.prototype._renderOnePersonalName = function (value, pos, i) {
 		suffix = false;
 	}
 	var sort_sep = this.name.strings["sort-separator"];
+	if (!sort_sep) {
+		sort_sep = "";
+	}
 	var suffix_sep;
 	if (name["comma-suffix"]) {
 		suffix_sep = ", ";
@@ -5829,7 +5826,11 @@ CSL.evaluateLabel = function (node, state, Item, item) {
 	var myterm;
 	if ("locator" === node.strings.term) {
 		if (item && item.label) {
-			myterm = item.label;
+			if (item.label === "sub verbo") {
+				myterm = "sub-verbo";
+			} else {
+				myterm = item.label;
+			}
 		}
 		if (!myterm) {
 			myterm = "page";
