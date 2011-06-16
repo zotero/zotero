@@ -1189,6 +1189,9 @@ function runIntegrityCheck() {
 		.getService(Components.interfaces.nsIPromptService);
 	
 	var ok = Zotero.DB.integrityCheck();
+	if (ok) {
+		ok = Zotero.Schema.integrityCheck();
+	}
 	var str = ok ? 'passed' : 'failed';
 	
 	ps.alert(window,
