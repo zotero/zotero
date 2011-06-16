@@ -2853,6 +2853,27 @@ var ZoteroPane = new function()
 	}
 	
 	
+	this.addAttachmentFromURI = function (link, itemID) {
+		if (!this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+					.getService(Components.interfaces.nsIPromptService);
+		
+		var input = {};
+		var check = {value : false};
+		
+		// TODO: Localize
+		// TODO: Allow title to be specified?
+		var result = ps.prompt(null, "Attach Link to URI", "Enter a URI:", input, "", {});
+		if (!result || !input.value) return false;
+		
+		// Create a new attachment
+		Zotero.Attachments.linkFromURL(input.value, itemID);
+	}
+	
+	
 	function addAttachmentFromDialog(link, id)
 	{
 		if (!this.canEdit()) {

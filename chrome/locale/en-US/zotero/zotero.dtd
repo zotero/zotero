@@ -62,6 +62,7 @@
 <!ENTITY zotero.items.menu.attach						"Add Attachment">
 <!ENTITY zotero.items.menu.attach.snapshot				"Attach Snapshot of Current Page">
 <!ENTITY zotero.items.menu.attach.link					"Attach Link to Current Page">
+<!ENTITY zotero.items.menu.attach.link.uri				"Attach Link to URI...">
 <!ENTITY zotero.items.menu.attach.file					"Attach Stored Copy of File...">
 <!ENTITY zotero.items.menu.attach.fileLink				"Attach Link to File...">
 
