@@ -295,10 +295,13 @@ Zotero.Translator = function(info) {
 	}
 	
 	if(info.code) {
-		this.code = info.code;
+		this.code = preprocessCode(info.code);
 	}
 }
 
+/**
+ * Retrieves code for this translator
+ */
 Zotero.Translator.prototype.getCode = function(callback) {
 	if(this.code) {
 		callback(true);
@@ -309,12 +312,26 @@ Zotero.Translator.prototype.getCode = function(callback) {
 				if(!code) {
 					callback(false);
 				} else {
-					me.code = code;
+					me.code = me.preprocessCode(code);
 					callback(true);
 				}
 			}
 		);
 	}
+}
+
+/**
+ * Preprocesses code for this translator
+ */
+Zotero.Translator.prototype.preprocessCode = function(code) {
+	if(!Zotero.isFx) {
+		const foreach = /^(\s*)for each\s*\((var )?([^ ]+) in (.*?)\)(\s*){/m;
+		code = code.replace(foreach, "$1var $3_zForEachSubject = $4; "+
+			"for(var $3_zForEachIndex in $4_zForEachSubject)$5{ "+
+			"$2$3 = $3_zForEachSubject[$3_zForEachIndex];", code);
+		Zotero.debug(code);
+	}
+	return code;
 }
 
 Zotero.Translator.prototype.__defineGetter__("displayOptions", function() {
