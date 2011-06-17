@@ -785,6 +785,9 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
  * @return {Document} 			DOM document object
  */
 Zotero.Utilities.Translate.prototype.retrieveDocument = function(url) {
+	if(!Zotero.isFx) throw "Zotero.Utilities.retrieveDocument() is unsupported outside of Firefox";
+	this._translate._debug("WARNING: Zotero.Utilities.retrieveDocument() is unsupported outside of Firefox", 1);
+	
 	url = this._convertURL(url);
 	
 	var mainThread = Zotero.mainThread;
@@ -828,25 +831,37 @@ Zotero.Utilities.Translate.prototype.retrieveDocument = function(url) {
  * @return {String} 						Request body
  */
 Zotero.Utilities.Translate.prototype.retrieveSource = function(url, body, headers, responseCharset) {
-	/* Apparently, a synchronous XMLHttpRequest would have the behavior of this routine in FF3, but
-	 * in FF3.5, synchronous XHR blocks all JavaScript on the thread. See 
-	 * http://hacks.mozilla.org/2009/07/synchronous-xhr/. */
-	url = this._convertURL(url);
-	if(!headers) headers = null;
-	if(!responseCharset) responseCharset = null;
+	this._translate._debug("WARNING: Use of Zotero.Utilities.retrieveSource() is deprecated. "+
+		"The main thread will be frozen when Zotero.Utilities.retrieveSource() is called outside "+
+		"of Firefox, and cross-domain requests will not work.", 1);
 	
-	var mainThread = Zotero.mainThread;
-	var xmlhttp = false;
-	var listener = function(aXmlhttp) { xmlhttp = aXmlhttp };
-	
-	if(body) {
-		Zotero.HTTP.doPost(url, body, listener, headers, responseCharset);
+	if(Zotero.isFx) {
+		/* Apparently, a synchronous XMLHttpRequest would have the behavior of this routine in FF3, but
+		 * in FF3.5, synchronous XHR blocks all JavaScript on the thread. See 
+		 * http://hacks.mozilla.org/2009/07/synchronous-xhr/. */
+		url = this._convertURL(url);
+		if(!headers) headers = null;
+		if(!responseCharset) responseCharset = null;
+		
+		var mainThread = Zotero.mainThread;
+		var xmlhttp = false;
+		var listener = function(aXmlhttp) { xmlhttp = aXmlhttp };
+		
+		if(body) {
+			Zotero.HTTP.doPost(url, body, listener, headers, responseCharset);
+		} else {
+			Zotero.HTTP.doGet(url, listener, responseCharset);
+		}
+		
+		while(!xmlhttp) mainThread.processNextEvent(true);
 	} else {
-		Zotero.HTTP.doGet(url, listener, responseCharset);
+		// Use a synchronous XMLHttpRequest, even though this is inadvisable
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.open((body ? "POST" : "GET"), url, false);
+		xmlhttp.send(body ? body : null);
 	}
 	
-	while(!xmlhttp) mainThread.processNextEvent(true);
-	if(xmlhttp.status >= 400) throw "retrieveSource failed: "+xmlhttp.status+" "+xmlhttp.statusText;
+	if(xmlhttp.status >= 400) throw "Zotero.Utilities.retrieveSource() failed: "+xmlhttp.status+" "+xmlhttp.statusText;
 	
 	return xmlhttp.responseText;
 }
