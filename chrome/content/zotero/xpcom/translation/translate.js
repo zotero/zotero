@@ -181,11 +181,15 @@ Zotero.Translate.Sandbox = {
 				translation.setHandler(arg1, 
 					function(obj, item) {
 						try {
-							// necessary to get around object wrappers
-							if(Zotero.isFx && arg1 == "itemDone"
-							   && (translate instanceof Zotero.Translate.Web
-							   || translate instanceof Zotero.Translate.Search)) {
-								item = translate._sandboxManager.sandbox.Zotero._transferItem(JSON.stringify(item));
+							if(arg1 == "itemDone") {
+								if(Zotero.isFx && (translate instanceof Zotero.Translate.Web
+										|| translate instanceof Zotero.Translate.Search)) {
+									// necessary to get around object wrappers in Firefox
+									item = translate._sandboxManager.sandbox.Zotero._transferItem(JSON.stringify(item));
+								} else {
+									// otherwise, just use parent translator's complete function
+									item.complete = translate._sandboxManager.sandbox.Zotero.Item.prototype.complete;
+								}
 							}
 							arg2(obj, item);
 						} catch(e) {
@@ -665,7 +669,7 @@ Zotero.Translate.Base.prototype = {
 			}
 			
 			for(var i in this._handlers[type]) {
-				Zotero.debug("Translate: running handler "+i+" for "+type, 5);
+				Zotero.debug("Translate: Running handler "+i+" for "+type, 5);
 				try {
 					returnValue = this._handlers[type][i].apply(null, args);
 				} catch(e) {
