@@ -744,8 +744,7 @@ Zotero.Translate.Base.prototype = {
 			}
 		}
 		
-		// TODO maybe this should only be in the web translator
-		if(this._waitingForRPC) {
+		if(this._waitingForRPC && this instanceof Zotero.Translate.Web) {
 			var me = this;
 			Zotero.Connector.callMethod("detect", {"uri":this.location.toString(),
 				"cookie":this.document.cookie,
@@ -956,7 +955,8 @@ Zotero.Translate.Base.prototype = {
 		Zotero.debug("Translate: Parsing code for "+translator.label, 4);
 		
 		try {
-			this._sandboxManager.eval("var translatorInfo = "+translator.code, this._sandbox);
+			this._sandboxManager.eval("var translatorInfo = "+translator.code,
+				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix]);
 		} catch(e) {
 			if(translator.logError) {
 				translator.logError(e.toString());
@@ -1030,7 +1030,10 @@ Zotero.Translate.Base.prototype = {
 	 * @param {Integer} level Log level (1-5, higher numbers are higher priority)
 	 */
 	"_debug":function(string, level) {
-		if(typeof string === "object") string = new XPCSafeJSObjectWrapper(string);
+		if(typeof string === "object" && Zotero.isFx36) {
+			string = new XPCSafeJSObjectWrapper(string);
+		}
+		
 		if(level !== undefined && typeof level !== "number") {
 			Zotero.debug("debug: level must be an integer");
 			return;
