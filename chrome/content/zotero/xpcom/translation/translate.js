@@ -353,11 +353,9 @@ Zotero.Translate.Sandbox = {
 					}
 				}
 			} else {	// no handler defined; assume they want all of them
-				return options;
+				if(callback) callback(items);
+				return items;
 			}
-			
-			if(callback) callback(options);
-			return options;
 		},
 		
 		/**
