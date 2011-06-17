@@ -296,14 +296,12 @@ var wpdDOMSaver = {
       aNode.StopPlay();                   
       dump ("ready! \n");
     } catch (e) {}     */
-	if(!Zotero.isFx4) {
-		try {  
-			var container = aNode.QueryInterface(Components.interfaces.nsIImageLoadingContent)
-					  .getRequest(Components.interfaces.nsIImageLoadingContent.CURRENT_REQUEST)
-					  .image;
-			container.animationMode = Components.interfaces.imgIContainer.kDontAnimMode;
-		} catch(e) {}
-	}
+	try {  
+		var container = aNode.QueryInterface(Components.interfaces.nsIImageLoadingContent)
+				  .getRequest(Components.interfaces.nsIImageLoadingContent.CURRENT_REQUEST)
+				  .image;
+		container.animationMode = Components.interfaces.imgIContainer.kDontAnimMode;
+	} catch(e) {}
   },            
 
   // get the node value of aNode directly from the actual DOM tree (WPD_CLONENODEBUG)
@@ -654,7 +652,7 @@ var wpdDOMSaver = {
 		catch (e) {
 			var msg = "Unable to access cssRules property of " + aCSS.href
 				+ " in wpdDOMSaver.processCSSRecursively()";
-			Zotero.debug(msg, 2);
+			dump("WebPageDump: "+msg+"\n\n", 2);
 			Components.utils.reportError(msg);
 			return "";
 		}
