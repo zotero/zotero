@@ -51,19 +51,28 @@ Zotero.Date = new function(){
 	 * Load dateFormat bundle into _dateFormatsBundle
 	 */
 	function _loadDateFormatsBundle() {
-		var src = 'chrome://global/locale/dateFormat.properties';
-		var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
-							getService(Components.interfaces.nsILocaleService);
-		var appLocale = localeService.getApplicationLocale();
-		
-		var bundle =
-			Components.classes["@mozilla.org/intl/stringbundle;1"]
-			.getService(Components.interfaces.nsIStringBundleService).createBundle(src, appLocale);
-		
-		_months = {"short":[], "long":[]};
-		for(var i=1; i<=12; i++) {
-			_months.short.push(bundle.GetStringFromName("month."+i+".Mmm"));
-			_months.long.push(bundle.GetStringFromName("month."+i+".name"));
+		if(Zotero.isFx) {
+			var src = 'chrome://global/locale/dateFormat.properties';
+			var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
+								getService(Components.interfaces.nsILocaleService);
+			var appLocale = localeService.getApplicationLocale();
+			
+			var bundle =
+				Components.classes["@mozilla.org/intl/stringbundle;1"]
+				.getService(Components.interfaces.nsIStringBundleService).createBundle(src, appLocale);
+			
+			_months = {"short":[], "long":[]};
+			for(var i=1; i<=12; i++) {
+				_months.short.push(bundle.GetStringFromName("month."+i+".Mmm"));
+				_months.long.push(bundle.GetStringFromName("month."+i+".name"));
+			}
+		} else {
+			// TODO localize for Chrome/Safari
+			_months = {
+				"short":["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
+					"Oct", "Nov", "Dec"],
+				"long":["January", "February", "March", "April", "May", "June", "July",
+					"Auguest", "September", "October", "November", "December"]};
 		}
 	}
 	
