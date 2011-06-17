@@ -34,7 +34,6 @@ Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE = 2;
 Zotero.Translate.ItemSaver.prototype = {
 	"saveItem":function(item) {
 		this.newItems.push(item);
-		Zotero.debug("Saving item");
-		Zotero.Connector.callMethod("saveItems", {"items":[item]});
+		Zotero.Connector.callMethod("saveItems", {"items":[item]}, function(success) {});
 	}
 };
