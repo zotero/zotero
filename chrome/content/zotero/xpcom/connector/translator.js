@@ -325,7 +325,7 @@ Zotero.Translator.prototype.getCode = function(callback) {
  */
 Zotero.Translator.prototype.preprocessCode = function(code) {
 	if(!Zotero.isFx) {
-		const foreach = /^(\s*)for each\s*\((var )?([^ ]+) in (.*?)\)(\s*){/m;
+		const foreach = /^(\s*)for each\s*\((var )?([^ ]+) in (.*?)\)(\s*){/gm;
 		code = code.replace(foreach, "$1var $3_zForEachSubject = $4; "+
 			"for(var $3_zForEachIndex in $3_zForEachSubject)$5{ "+
 			"$2$3 = $3_zForEachSubject[$3_zForEachIndex];", code);
