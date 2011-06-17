@@ -334,12 +334,9 @@ Zotero.Translate.Sandbox = {
 				translate._runHandler("select", items, callback);
 				
 				if(!haveAsyncCallback) {
-					if(translate.translator[0].browserSupport !== "g") {
-						Zotero.debug("Translate: WARNING: This translator is configured for "+
-							"non-Firefox browser support, but no callback was provided for "+
-							"selectItems(). When executed outside of Firefox, a selectItems() call "+
-							"will require that this translator to be called multiple times.", 3);
-					}
+					translate._debug("WARNING: No callback was provided for "+
+						"Zotero.selectItems(). When executed outside of Firefox, a selectItems() call "+
+						"will require that this translator to be called multiple times.", 1);
 					
 					if(returnedItems === null) {
 						// The select handler is asynchronous, but this translator doesn't support
