@@ -120,7 +120,7 @@ Zotero.Connector = new function() {
 	 */
 	this.getData = function(callback) {
 		Zotero.HTTP.doPost(CONNECTOR_URI+"connector/getData",
-			JSON.stringify({"browser":Zotero.Connector_Browser}),
+			JSON.stringify({"browser":Zotero.browser}),
 			function(req) {
 				var isOnline = req.status !== 0;
 				

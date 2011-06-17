@@ -396,6 +396,29 @@ Zotero.Translators = new function() {
 	}
 }
 
+/**
+ * @class Represents an individual translator
+ * @constructor
+ * @param {nsIFile} file File from which to generate a translator object
+ * @property {String} translatorID Unique GUID of the translator
+ * @property {Integer} translatorType Type of the translator (use bitwise & with TRANSLATOR_TYPES to read)
+ * @property {String} label Human-readable name of the translator
+ * @property {String} creator Author(s) of the translator
+ * @property {String} target Location that the translator processes
+ * @property {String} minVersion Minimum Zotero version
+ * @property {String} maxVersion Minimum Zotero version
+ * @property {Integer} priority Lower-priority translators will be selected first
+ * @property {String} browserSupport String indicating browser supported by the translator
+ *     g = Gecko (Firefox)
+ *     c = Google Chrome (WebKit & V8)
+ *     s = Safari (WebKit & Nitro/Squirrelfish Extreme)
+ *     i = Internet Explorer
+ * @property {Object} configOptions Configuration options for import/export
+ * @property {Object} displayOptions Display options for export
+ * @property {Boolean} inRepository Whether the translator may be found in the repository
+ * @property {String} lastUpdated SQL-style date and time of translator's last update
+ * @property {String} code The executable JavaScript for the translator
+ */
 Zotero.Translator = function(file, json, code) {
 	const codeGetterFunction = function() { return Zotero.File.getContents(this.file); }
 	// Maximum length for the info JSON in a translator
