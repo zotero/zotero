@@ -218,9 +218,15 @@ Zotero.Utilities = {
 	 * @type String
 	 */
 	"unescapeHTML":function(/**String*/ str) {
-		var nsISUHTML = Components.classes["@mozilla.org/feed-unescapehtml;1"]
-			.getService(Components.interfaces.nsIScriptableUnescapeHTML);
-		return nsISUHTML.unescape(str);
+		if(Zotero.isFx) {
+			var nsISUHTML = Components.classes["@mozilla.org/feed-unescapehtml;1"]
+				.getService(Components.interfaces.nsIScriptableUnescapeHTML);
+			return nsISUHTML.unescape(str);
+		} else {
+			var node = document.createElement("div");
+			node.innerHTML = str;
+			return node.textContent;
+		}
 	},
 	
 	/**
