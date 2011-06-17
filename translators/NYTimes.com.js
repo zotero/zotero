@@ -3,32 +3,34 @@
 	"translatorType":4,
 	"label":"NYTimes.com",
 	"creator":"Simon Kornblith",
-	"target":"^https?://(?:query\\.nytimes\\.com/search/(?:alternate/)?query|(?:select\\.|www\\.)?nytimes\\.com/.)",
+	"target":"^https?://(?:query\\.nytimes\\.com/search/(?:alternate/)?|(?:select\\.|www\\.)?nytimes\\.com/.)",
 	"minVersion":"1.0.0b3.r1",
+	"browserSupport":"gcs",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2011-03-21 20:48:32"
+	"lastUpdated":"2011-06-17 18:21:52"
 }
 
 function detectWeb(doc, url) {
-	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == 'x') return namespace; else return null;
-		} : null;
-		
-		var result = doc.evaluate('//div[@id="srchContent"]', doc, nsResolver,
-		             XPathResult.ANY_TYPE, null).iterateNext();
-		if(result) {
-			return "multiple";
+	// Check for search results
+	var searchResults = doc.evaluate('//div[@id="search_results"]', doc, null,
+				 XPathResult.ANY_TYPE, null).iterateNext();
+	if(searchResults) return "multiple";
+	
+	// Check for article meta tags
+	var metaTags = doc.getElementsByTagName("meta");
+	var haveHdl = false;
+	var haveByl = false;
+	for(var i in metaTags) {
+		if(metaTags[i].name === "hdl") {
+			haveHdl = true;
+		} else if(metaTags[i].name == "byl") {
+			haveByl = true;
 		}
-	} else {
-		var metaTags = doc.getElementsByTagName("meta");
-		if(metaTags.namedItem("hdl") && metaTags.namedItem("byl")) {
-			return "newspaperArticle";
-		}
+		if(haveHdl && haveByl) return "newspaperArticle";
 	}
+	return false;
 }
 
 function associateMeta(newItem, metaTags, field, zoteroField) {
@@ -142,28 +144,18 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == 'x') return namespace; else return null;
-		} : null;
+	var searchResults = doc.evaluate('//div[@id="search_results"]', doc, null,
+				 XPathResult.ANY_TYPE, null).iterateNext();
+	if(searchResults) {
+		var items = Zotero.Utilities.getItemArray(doc, searchResults, '^http://(?:select\.|www\.)nytimes.com/.*\.html(\\?|$)');
 		
-		var result = doc.evaluate('//div[@id="srchContent"]', doc, nsResolver,
-		             XPathResult.ANY_TYPE, null).iterateNext();
-		var items = Zotero.Utilities.getItemArray(doc, result, '^http://(?:select\.|www\.)nytimes.com/.*\.html(\\?|$)');
 		items = Zotero.selectItems(items);
-			
-		if(!items) {
-			return true;
-		}
+		if(!items) return true;
 		
-		var urls = new Array();
-		for(var i in items) {
-			urls.push(i);
-		}
+		var urls = [];
+		for(var i in items) urls.push(i);
 		
 		Zotero.Utilities.HTTP.doGet(urls, function(text, response, url) { scrape(text, url) }, function() { Zotero.done(); }, null);
-		
 		Zotero.wait();
 	} else {
 		scrape(doc);
