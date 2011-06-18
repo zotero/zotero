@@ -51,7 +51,8 @@ Zotero.Cite.System._zoteroFieldMap = {
 	"number":["number"],
 	"references":["history"],
 	"shortTitle":["shortTitle"],
-	"journalAbbreviation":["journalAbbreviation"]
+	"journalAbbreviation":["journalAbbreviation"],
+	"language":["language"]
 }
 
 Zotero.Cite.System._zoteroDateMap = {
