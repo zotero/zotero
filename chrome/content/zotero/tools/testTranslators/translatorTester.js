@@ -164,6 +164,14 @@ Zotero_TranslatorTester.prototype._checkResult = function(test, translate, retur
 		var testItem = test.items[i];
 		var translatedItem = translate.newItems[i];
 		
+		// Clear attachment document objects
+		if (translatedItem && translatedItem.attachments && translatedItem.attachments.length) {
+			for (var i=0; i<translatedItem.attachments.length; i++) {
+				if (translatedItem.attachments[i].document)
+					translatedItem.attachments[i].document = "[object]";
+			}
+		}
+		
 		for(var j in Zotero_TranslatorTester_IGNORE_FIELDS) {
 			delete testItem[Zotero_TranslatorTester_IGNORE_FIELDS[j]];
 			delete translatedItem[Zotero_TranslatorTester_IGNORE_FIELDS[j]];
