@@ -127,7 +127,6 @@ Zotero.TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
  * @param {Function} testDoneCallback A callback to be executed when test is complete
  */
 Zotero.TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback) {
-	this._debug(test);
 	var me = this;
 	var translate = Zotero.Translate.newInstance(this._type);
 	translate.setDocument(doc);
