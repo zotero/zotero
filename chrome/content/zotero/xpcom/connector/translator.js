@@ -99,10 +99,10 @@ Zotero.Translators = new function() {
 	 *                              retrieved. If no callback is specified, translators are
 	 *                              returned.
 	 */
-	this.getAllForType = function(type, callback) {
+	this.getAllForType = function(type, callback, includeUnsupported) {
 		if(!_initialized) Zotero.Translators.init()
 		var translators = _cache[type].slice(0);
-		new Zotero.Translators.CodeGetter(translators, callback, translators);
+		new Zotero.Translators.CodeGetter(translators, callback, translators, includeUnsupported);
 		return true;
 	}
 	
@@ -207,11 +207,17 @@ Zotero.Translators = new function() {
 
 /**
  * A class to get the code for a set of translators at once
+ *
+ * @param {Zotero.Translator[]} translators Translators for which to retrieve code
+ * @param {Function} callback Callback to call once code has been retrieved
+ * @param {Function} callbackArgs All arguments to be passed to callback (including translators)
+ * @param {Boolean} [includeUnsupported] If true, include code for unsupported translators
  */
-Zotero.Translators.CodeGetter = function(translators, callback, callbackArgs) {
+Zotero.Translators.CodeGetter = function(translators, callback, callbackArgs, includeUnsupported) {
 	this._translators = translators;
 	this._callbackArgs = callbackArgs;
 	this._callback = callback;
+	this._includeUnsupported = includeUnsupported;
 	this.getCodeFor(0);
 }
 
@@ -224,7 +230,7 @@ Zotero.Translators.CodeGetter.prototype.getCodeFor = function(i) {
 			return;
 		}
 		
-		if(this._translators[i].runMode === Zotero.Translator.RUN_MODE_IN_BROWSER) {
+		if(this._translators[i].runMode === Zotero.Translator.RUN_MODE_IN_BROWSER || this._includeUnsupported) {
 			// get next translator
 			this._translators[i].getCode(function() { me.getCodeFor(i+1) });
 			return;

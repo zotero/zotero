@@ -23,24 +23,10 @@
     ***** END LICENSE BLOCK *****
 */
 
-const CHROME_SAFARI_SCRIPTS = [
-	"zotero.js",
-	"zotero/date.js",
-	"zotero/debug.js",
-	"zotero/inject/translator.js",
-	"zotero/openurl.js",
-	"zotero/translate.js",
-	"zotero/utilities.js",
-	"zotero/messages.js",
-	"messaging_inject.js",
-	"translatorTests.js"
-];
-
 const TRANSLATOR_TYPES = ["Web", "Import", "Export", "Search"];
 const TABLE_COLUMNS = ["Translator", "Supported", "Status", "Pending", "Succeeded", "Failed", "Unknown"];
 var translatorTables = {};
 var translatorTestViewsToRun = {};
-var Zotero;
 
 /**
  * Encapsulates a set of tests for a specific translator and type
@@ -48,6 +34,7 @@ var Zotero;
  */
 var TranslatorTestView = function(translator, type) {
 	this._translator = translator;
+	this._type = type;
 	
 	var row = document.createElement("tr");
 	
@@ -87,23 +74,23 @@ var TranslatorTestView = function(translator, type) {
 	translatorTables[type].appendChild(row);
 	
 	// create translator tester and update status based on what it knows
-	this._translatorTester = new Zotero_TranslatorTester(translator, type);
-	this.updateStatus();
+	this._translatorTester = new Zotero.TranslatorTester(translator, type);
+	this.updateStatus(this._translatorTester);
 	this.hasTests = !!this._translatorTester.tests.length;
 }
 
 /**
  * Changes the displayed status of a translator
  */
-TranslatorTestView.prototype.updateStatus = function() {
-	if(this._translatorTester.tests.length) {
-		if(this._translatorTester.pending.length) {
+TranslatorTestView.prototype.updateStatus = function(obj) {
+	if(obj.tests.length) {
+		if(obj.pending.length) {
 			this._status.className = "status-pending";
 			this._status.textContent = "Pending";
-		} else if(this._translatorTester.failed.length) {
+		} else if(obj.failed.length) {
 			this._status.className = "status-failed";
 			this._status.textContent = "Failed";
-		} else if(this._translatorTester.unknown.length) {
+		} else if(obj.unknown.length) {
 			this._status.className = "status-unknown";
 			this._status.textContent = "Unknown";
 		} else {
@@ -115,10 +102,10 @@ TranslatorTestView.prototype.updateStatus = function() {
 		this._status.textContent = "Untested";
 	}
 	
-	this._pending.textContent = this._translatorTester.pending.length;
-	this._succeeded.textContent = this._translatorTester.succeeded.length;
-	this._failed.textContent = this._translatorTester.failed.length;
-	this._unknown.textContent = this._translatorTester.unknown.length;
+	this._pending.textContent = obj.pending.length;
+	this._succeeded.textContent = obj.succeeded.length;
+	this._failed.textContent = obj.failed.length;
+	this._unknown.textContent = obj.unknown.length;
 }
 
 /**
@@ -126,15 +113,17 @@ TranslatorTestView.prototype.updateStatus = function() {
  */
 TranslatorTestView.prototype.runTests = function(doneCallback) {
 	var me = this;
+	var newCallback = function(obj, status, message) {
+		me.updateStatus(obj);
+		if(obj.pending.length === 0) {
+			doneCallback();
+		}
+	};
+	
 	if(Zotero.isFx) {
-		// yay, no message passing
-		var i = 1;
-		this._translatorTester.runTests(function(status, message) {
-			me.updateStatus();
-			if(me._translatorTester.pending.length === 0) {
-				doneCallback();
-			}
-		});
+		this._translatorTester.runTests(newCallback);
+	} else {
+		Zotero.TranslatorTester.runTests(this._translator, this._type, newCallback);
 	}
 }
 
@@ -143,24 +132,8 @@ TranslatorTestView.prototype.runTests = function(doneCallback) {
  */
 function load(event) {	
 	if(window.chrome || window.safari) {
-		// load scripts
-		for(var i in CHROME_SAFARI_SCRIPTS) {
-			var script = document.createElement("script");
-			script.setAttribute("type", "text/javascript");
-			script.setAttribute("src", CHROME_SAFARI_SCRIPTS[i]);
-			document.head.appendChild(script);
-		}
-		
 		// initialize
 		Zotero.initInject();
-	} else {
-		// load scripts
-		Zotero = Components.classes["@zotero.org/Zotero;1"]
-				.getService(Components.interfaces.nsISupports)
-				.wrappedJSObject;
-		Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-			.getService(Components.interfaces.mozIJSSubScriptLoader)
-			.loadSubScript("chrome://zotero/content/tools/testTranslators/translatorTester.js");
 	}
 
 	for(var i in TRANSLATOR_TYPES) {
