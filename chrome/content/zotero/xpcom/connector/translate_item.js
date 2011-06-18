@@ -33,6 +33,15 @@ Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE = 2;
 
 Zotero.Translate.ItemSaver.prototype = {
 	"saveItem":function(item) {
+		// don't save documents as documents, since we can't pass them around
+		for(var i in item.attachments) {
+			if(item.attachments[i].document) {
+				item.attachments[i].url = item.attachments[i].document.location.href;
+				delete item.attachments[i].document;
+			}
+		}
+		
+		// save items
 		this.newItems.push(item);
 		Zotero.Connector.callMethod("saveItems", {"items":[item]}, function(success) {});
 	}
