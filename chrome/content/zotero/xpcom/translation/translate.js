@@ -1176,7 +1176,7 @@ Zotero.Translate.Web.prototype._prepareTranslation = function() {
  */
 Zotero.Translate.Web.prototype.translate = function(libraryID, saveAttachments, selectedItems) {
 	this._selectedItems = selectedItems;
-	Zotero.Translate.Base.prototype.translate.apply(this, libraryID, saveAttachments);
+	Zotero.Translate.Base.prototype.translate.apply(this, [libraryID, saveAttachments]);
 }
 
 /**
