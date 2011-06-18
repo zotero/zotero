@@ -23,6 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
+const NUM_CONCURRENT_TESTS = 6;
 const TRANSLATOR_TYPES = ["Web", "Import", "Export", "Search"];
 const TABLE_COLUMNS = ["Translator", "Supported", "Status", "Pending", "Succeeded", "Failed", "Unknown"];
 var translatorTables = {};
@@ -74,7 +75,7 @@ var TranslatorTestView = function(translator, type) {
 	translatorTables[type].appendChild(row);
 	
 	// create translator tester and update status based on what it knows
-	this._translatorTester = new Zotero.TranslatorTester(translator, type);
+	this._translatorTester = new Zotero_TranslatorTester(translator, type);
 	this.updateStatus(this._translatorTester);
 	this.hasTests = !!this._translatorTester.tests.length;
 }
@@ -185,7 +186,9 @@ function haveTranslators(translators, type) {
 		}
 	}
 	
-	runTranslatorTests(type);
+	for(var i=0; i<NUM_CONCURRENT_TESTS; i++) {
+		runTranslatorTests(type);
+	}
 }
 
 /**
