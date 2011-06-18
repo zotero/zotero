@@ -1,0 +1,51 @@
+body {
+	font-family: Helvetica, sans;
+	font-size: 12px;
+}
+
+table {
+	border-color: black;
+	border-width: 0 0 1px 1px;
+	border-style: solid;
+	border-collapse: collapse;
+}
+
+td, th {
+	border-color: black;
+	border-width: 1px 1px 0 0;
+	border-style: solid;
+	padding: 2px;
+}
+
+.th-translator {
+	width: 500px;
+	max-width: 500px;
+}
+
+.th-status {
+	width: 100px;
+}
+
+.th-pending, .th-supported, .th-succeeded, .th-failed, .th-unknown {
+	width: 75px;
+}
+
+.status-succeeded, .supported-yes {
+	background-color: #90ff90;
+}
+
+.status-failed, .supported-no {
+	background-color: #ff9090;
+}
+
+.status-unknown {
+	background-color: #FFB;
+}
+
+.status-untested {
+	background-color: #ececec;
+}
+
+.status-pending {
+	background-color: #9FF;
+}
