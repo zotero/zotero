@@ -36,8 +36,10 @@ const Zotero_TranslatorTester_IGNORE_FIELDS = ["complete", "accessDate", "checkF
  * @constructor
  * @param {Zotero.Translator[]} translator The translator for which to run tests
  * @param {String} type The type of tests to run (web, import, export, or search)
+ * @param {Function} [debug] A function to call to write debug output. If not present, Zotero.debug
+ *                           will be used.
  */
-Zotero.TranslatorTester = function(translator, type, debug) {
+Zotero_TranslatorTester = function(translator, type, debug) {
 	this._type = type;
 	this._translator = translator;
 	this._debug = (debug ? debug : function(a, b) { Zotero.debug(a, b) });
@@ -77,7 +79,7 @@ Zotero.TranslatorTester = function(translator, type, debug) {
  * Executes tests for this translator
  * @param {Function} testDoneCallback A callback to be executed each time a test is complete
  */
-Zotero.TranslatorTester.prototype.runTests = function(testDoneCallback, recursiveRun) {
+Zotero_TranslatorTester.prototype.runTests = function(testDoneCallback, recursiveRun) {
 	if(!recursiveRun) {
 		this._debug("TranslatorTester: Running "+this.pending.length+" tests for "+this._translator.label);
 	}
@@ -107,7 +109,7 @@ Zotero.TranslatorTester.prototype.runTests = function(testDoneCallback, recursiv
  * @param {Document} doc DOM document to test against
  * @param {Function} testDoneCallback A callback to be executed when test is complete
  */
-Zotero.TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneCallback) {
+Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneCallback) {
 	var me = this;
 	Zotero.HTTP.processDocuments(test.url,
 		function(doc) {
@@ -126,7 +128,7 @@ Zotero.TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
  * @param {Document} doc DOM document to test against
  * @param {Function} testDoneCallback A callback to be executed when test is complete
  */
-Zotero.TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback) {
+Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback) {
 	var me = this;
 	var translate = Zotero.Translate.newInstance(this._type);
 	translate.setDocument(doc);
@@ -142,7 +144,7 @@ Zotero.TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
  * @param {Boolean} returnValue Whether translation completed successfully
  * @param {Function} testDoneCallback A callback to be executed when test is complete
  */
-Zotero.TranslatorTester.prototype._checkResult = function(test, translate, returnValue, testDoneCallback) {
+Zotero_TranslatorTester.prototype._checkResult = function(test, translate, returnValue, testDoneCallback) {
 	if(!returnValue) {
 		testDoneCallback(this, "failed", "Translation failed; examine debug output for errors");
 		return;
