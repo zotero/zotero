@@ -782,7 +782,12 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 		}
 	}
 	
-	Zotero.HTTP.processDocuments(urls, processor, done, exception);
+	var translate = this._translate;
+	translate.incrementAsyncProcesses();
+	Zotero.HTTP.processDocuments(urls, processor, function() {
+		done();
+		translate.decrementAsyncProcesses();
+	}, exception);
 }
 
 /**
@@ -897,6 +902,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 	
 	var me = this;
 	
+	this._translate.incrementAsyncProcesses();
 	Zotero.HTTP.doGet(url, function(xmlhttp) {
 		try {
 			if(processor) {
@@ -910,6 +916,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 					done();
 				}
 			}
+			me._translate.decrementAsyncProcesses();
 		} catch(e) {
 			me._translate.complete(false, e);
 		}
@@ -924,9 +931,11 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
 	url = this._convertURL(url);
 	
 	var translate = this._translate;
+	this._translate.incrementAsyncProcesses();
 	Zotero.HTTP.doPost(url, body, function(xmlhttp) {
 		try {
 			onDone(xmlhttp.responseText, xmlhttp);
+			translate.decrementAsyncProcesses();
 		} catch(e) {
 			translate.complete(false, e);
 		}
