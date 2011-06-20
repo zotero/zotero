@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-const NUM_CONCURRENT_TESTS = 1;
+const NUM_CONCURRENT_TESTS = 6;
 const TRANSLATOR_TYPES = ["Web", "Import", "Export", "Search"];
 const TABLE_COLUMNS = ["Translator", "Supported", "Status", "Pending", "Succeeded", "Failed", "Unknown"];
 var translatorTables = {};
