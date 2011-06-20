@@ -114,7 +114,7 @@ TranslatorTestView.prototype.updateStatus = function(obj) {
  */
 TranslatorTestView.prototype.runTests = function(doneCallback) {
 	var me = this;
-	var newCallback = function(obj, status, message) {
+	var newCallback = function(obj, test, status, message) {
 		me.updateStatus(obj);
 		if(obj.pending.length === 0) {
 			doneCallback();
