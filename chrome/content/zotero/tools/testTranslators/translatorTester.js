@@ -329,7 +329,7 @@ Zotero_TranslatorTester.prototype._objectCompare = function(x, y) {
 	for(p in y) { if (y[p]) {
 		switch(typeof(y[p])) {
 			case 'object':
-				if (!_objectCompare(y[p],x[p])) { 
+				if (!this._objectCompare(y[p],x[p])) { 
 					return returner(p);
 				};
 				break;
