@@ -121,11 +121,7 @@ TranslatorTestView.prototype.runTests = function(doneCallback) {
 		}
 	};
 	
-	if(Zotero.isFx) {
-		this._translatorTester.runTests(newCallback);
-	} else {
-		Zotero.TranslatorTester.runTests(this._translator, this._type, newCallback);
-	}
+	this._translatorTester.runTests(newCallback);
 }
 
 /**
