@@ -84,7 +84,8 @@ Zotero_TranslatorTester._sanitizeItem = function(item) {
 	if(item.attachments && item.attachments.length) {
 		for (var i=0; i<item.attachments.length; i++) {
 			if(item.attachments[i].document) {
-				item.attachments[i].document = {};
+				item.attachments[i].url = item.attachments[i].document.location.href;
+				delete item.attachments[i].document;
 			}
 		}
 	}
