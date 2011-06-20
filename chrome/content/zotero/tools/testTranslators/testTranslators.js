@@ -23,11 +23,43 @@
     ***** END LICENSE BLOCK *****
 */
 
-const NUM_CONCURRENT_TESTS = 6;
+const NUM_CONCURRENT_TESTS = 1;
 const TRANSLATOR_TYPES = ["Web", "Import", "Export", "Search"];
 const TABLE_COLUMNS = ["Translator", "Supported", "Status", "Pending", "Succeeded", "Failed", "Unknown"];
 var translatorTables = {};
 var translatorTestViewsToRun = {};
+var translatorBox;
+var outputBox;
+var allOutputView;
+var currentOutputView;
+
+/**
+ * Handles adding debug output to the output box
+ * @param {HTMLElement} el An element to add class="selected" to when this outputView is displayed
+ */
+var OutputView = function(el) {
+	this._output = [];
+	this._el = el;
+}
+
+/**
+ * Sets whether this output is currently displayed in the output box
+ * @param {Boolean} isDisplayed
+ */
+OutputView.prototype.setDisplayed = function(isDisplayed) {
+	this.isDisplayed = isDisplayed;
+	if(this.isDisplayed) outputBox.textContent = this._output.join("\n\n");
+	if(this._el) this._el.className = (isDisplayed ? "output-displayed" : "output-hidden");
+	currentOutputView = this;
+}
+
+/**
+ * Adds output to the output view
+ */
+OutputView.prototype.addOutput = function(msg, level) {
+	this._output.push(msg);
+	if(this.isDisplayed) outputBox.textContent = this._output.join("\n\n");
+}
 
 /**
  * Encapsulates a set of tests for a specific translator and type
@@ -74,20 +106,57 @@ var TranslatorTestView = function(translator, type) {
 	// append to table
 	translatorTables[type].appendChild(row);
 	
+	// create output view and debug function
+	var outputView = new OutputView(row);
+	var debug = function(obj, msg, level) {
+		outputView.addOutput(msg, level);
+		allOutputView.addOutput(msg, level);
+	}
+	
+	// put click handler on row to allow display of debug output
+	row.addEventListener("click", function(e) {
+		// don't run deselect click event handler
+		e.stopPropagation();
+		
+		currentOutputView.setDisplayed(false);
+		outputView.setDisplayed(true);
+	}, false);
+	
 	// create translator tester and update status based on what it knows
-	this._translatorTester = new Zotero_TranslatorTester(translator, type);
+	this._translatorTester = new Zotero_TranslatorTester(translator, type, debug);
 	this.updateStatus(this._translatorTester);
 	this.hasTests = !!this._translatorTester.tests.length;
+	this.isRunning = false;
 }
 
 /**
  * Changes the displayed status of a translator
  */
-TranslatorTestView.prototype.updateStatus = function(obj) {
+TranslatorTestView.prototype.updateStatus = function(obj, status) {
+	while(this._status.hasChildNodes()) {
+		this._status.removeChild(this._status.firstChild);
+	}
+	
 	if(obj.tests.length) {
 		if(obj.pending.length) {
-			this._status.className = "status-pending";
-			this._status.textContent = "Pending";
+			if(this.isRunning) {
+				this._status.className = "status-running";
+				this._status.textContent = "Running";
+			} else if(status && status === "pending") {
+				this._status.className = "status-pending";
+				this._status.textContent = "Pending";
+			} else {
+				// show link to start
+				var me = this;
+				var a = document.createElement("a");
+				a.href = "#";
+				a.addEventListener("click", function(e) {
+					e.preventDefault();
+					me.runTests();
+				}, false);
+				a.textContent = "Run";
+				this._status.appendChild(a);
+			}
 		} else if(obj.failed.length) {
 			this._status.className = "status-failed";
 			this._status.textContent = "Failed";
@@ -113,10 +182,17 @@ TranslatorTestView.prototype.updateStatus = function(obj) {
  * Runs test for this translator
  */
 TranslatorTestView.prototype.runTests = function(doneCallback) {
+	if(this.isRunning) return;
+	this.isRunning = true;
+	
+	// show as running
+	this.updateStatus(this._translatorTester);
+	
+	// set up callback
 	var me = this;
 	var newCallback = function(obj, test, status, message) {
 		me.updateStatus(obj);
-		if(obj.pending.length === 0) {
+		if(obj.pending.length === 0 && doneCallback) {
 			doneCallback();
 		}
 	};
@@ -132,6 +208,27 @@ function load(event) {
 		// initialize
 		Zotero.initInject();
 	}
+	
+	// create translator box
+	translatorBox = document.createElement("div");
+	translatorBox.id = "translator-box";
+	document.body.appendChild(translatorBox);
+	
+	// create output box
+	outputBox = document.createElement("div");
+	outputBox.id = "output-box";
+	document.body.appendChild(outputBox);
+	
+	// set click handler for translator box to display all output, so that when the user clicks
+	// outside of a translator, it will revert to this state
+	translatorBox.addEventListener("click", function(e) {
+		currentOutputView.setDisplayed(false);
+		allOutputView.setDisplayed(true);
+	}, false);
+	
+	// create output view for all output and display
+	allOutputView = new OutputView();
+	allOutputView.setDisplayed(true);
 
 	for(var i in TRANSLATOR_TYPES) {
 		var displayType = TRANSLATOR_TYPES[i];
@@ -139,8 +236,26 @@ function load(event) {
 		
 		// create header
 		var h1 = document.createElement("h1");
-		h1.appendChild(document.createTextNode(displayType+" Translators"));
-		document.body.appendChild(h1);
+		h1.appendChild(document.createTextNode(displayType+" Translators "));
+		
+		// create "run all"
+		var runAll = document.createElement("a");
+		runAll.href = "#";
+		runAll.appendChild(document.createTextNode("(Run)"));
+		runAll.addEventListener("click", new function() {
+			var type = translatorType;
+			return function(e) {
+				e.preventDefault();
+				for(var i in translatorTestViewsToRun[type]) {
+					var testView = translatorTestViewsToRun[type][i];
+					testView.updateStatus(testView._translatorTester, "pending");
+				}
+				runTranslatorTests(type);
+			}
+		}, false);
+		h1.appendChild(runAll);
+		
+		translatorBox.appendChild(h1);
 		
 		// create table
 		var translatorTable = document.createElement("table");
@@ -157,7 +272,7 @@ function load(event) {
 		
 		// append to document
 		translatorTable.appendChild(headings);
-		document.body.appendChild(translatorTable);
+		translatorBox.appendChild(translatorTable);
 		
 		// get translators, with code for unsupported translators
 		Zotero.Translators.getAllForType(translatorType, new function() {
@@ -180,10 +295,6 @@ function haveTranslators(translators, type) {
 		if(translatorTestView.hasTests) {
 			translatorTestViewsToRun[type].push(translatorTestView);
 		}
-	}
-	
-	for(var i=0; i<NUM_CONCURRENT_TESTS; i++) {
-		runTranslatorTests(type);
 	}
 }
 

@@ -119,7 +119,7 @@ Zotero_TranslatorTester.prototype.runTests = function(testDoneCallback, recursiv
 	}
 	if(!this.pending.length) {
 		// always call testDoneCallback once if there are no tests
-		if(!recursiveRun) testDoneCallback(this, null, "unknown", "No tests present");
+		if(!recursiveRun && testDoneCallback) testDoneCallback(this, null, "unknown", "No tests present");
 		return;
 	}
 	
