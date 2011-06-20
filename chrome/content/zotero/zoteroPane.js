@@ -396,7 +396,10 @@ var ZoteroPane = new function()
 		}
 		
 		// Focus the quicksearch on pane open
-		setTimeout("document.getElementById('zotero-tb-search').inputField.select();", 1);
+		var searchBar = document.getElementById('zotero-tb-search');
+		setTimeout(function () {
+			searchBar.inputField.select();
+		}, 1);
 		
 		// Auto-empty trashed items older than a certain number of days
 		var days = Zotero.Prefs.get('trashAutoEmptyDays');
@@ -1749,11 +1752,17 @@ var ZoteroPane = new function()
 		if (event.keyCode == event.DOM_VK_ESCAPE) {
 			textbox.value = '';
 			ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('searchInProgress'));
-			setTimeout("ZoteroPane_Local.search(); ZoteroPane_Local.clearItemsPaneMessage();", 1);
+			setTimeout(function () {
+				ZoteroPane_Local.search();
+				ZoteroPane_Local.clearItemsPaneMessage();
+			}, 1);
 		}
 		else if (event.keyCode == event.DOM_VK_RETURN || event.keyCode == event.DOM_VK_ENTER) {
 			ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('searchInProgress'));
-			setTimeout("ZoteroPane_Local.search(true); ZoteroPane_Local.clearItemsPaneMessage();", 1);
+			setTimeout(function () {
+				ZoteroPane_Local.search(true);
+				ZoteroPane_Local.clearItemsPaneMessage();
+			}, 1);
 		}
 	}
 	
@@ -1763,7 +1772,10 @@ var ZoteroPane = new function()
 		// result of Undo or Redo
 		if (!textbox.value.length) {
 			ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('searchInProgress'));
-			setTimeout("ZoteroPane_Local.search(); ZoteroPane_Local.clearItemsPaneMessage();", 1);
+			setTimeout(function () {
+				ZoteroPane_Local.search();
+				ZoteroPane_Local.clearItemsPaneMessage();
+			}, 1);
 		}
 		else if (textbox.value.indexOf('"') != -1) {
 			ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('advancedSearchMode'));

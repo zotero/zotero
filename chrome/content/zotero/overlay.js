@@ -139,7 +139,10 @@ var ZoteroOverlay = new function()
 		
 		// Used for loading pages from upgrade wizard
 		if (Zotero && Zotero.initialURL) {
-			setTimeout("gBrowser.selectedTab = gBrowser.addTab(Zotero.initialURL); Zotero.initialURL = null;", 1);
+			setTimeout(function () {
+				gBrowser.selectedTab = gBrowser.addTab(Zotero.initialURL);
+				Zotero.initialURL = null;
+			}, 1);
 		}
 		
 		// Hide browser chrome on Zotero tab
