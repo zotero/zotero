@@ -42,7 +42,7 @@ const Zotero_TranslatorTester_IGNORE_FIELDS = ["complete", "accessDate", "checkF
 Zotero_TranslatorTester = function(translator, type, debug) {
 	this._type = type;
 	this._translator = translator;
-	this._debug = (debug ? debug : function(a, b) { Zotero.debug(a, b) });
+	this._debug = debug ? debug : function(obj, a, b) { Zotero.debug(a, b) };
 	
 	this.tests = [];
 	this.pending = [];
@@ -73,7 +73,40 @@ Zotero_TranslatorTester = function(translator, type, debug) {
 			}
 		}
 	}
-}
+};
+
+/**
+ * Removes document objects, which contain cyclic references, and other fields to be ignored from items
+ * @param {Object} Item, in the format returned by Zotero.Item.serialize()
+ */
+Zotero_TranslatorTester._sanitizeItem = function(item) {
+	// remove cyclic references
+	if(item.attachments && item.attachments.length) {
+		for (var i=0; i<item.attachments.length; i++) {
+			if(item.attachments[i].document) {
+				item.attachments[i].document = {};
+			}
+		}
+	}
+	
+	// remove fields to be ignored
+	for(var j in Zotero_TranslatorTester_IGNORE_FIELDS) {
+		delete item[Zotero_TranslatorTester_IGNORE_FIELDS[j]];
+	}
+	
+	return item;
+};
+
+/**
+ * Sets tests for this translatorTester
+ */
+Zotero_TranslatorTester.prototype.setTests = function(tests) {
+	this.tests = tests.slice(0);
+	this.pending = tests.slice(0);
+	this.succeeded = [];
+	this.failed = [];
+	this.unknown = [];
+};
 
 /**
  * Executes tests for this translator
@@ -81,11 +114,11 @@ Zotero_TranslatorTester = function(translator, type, debug) {
  */
 Zotero_TranslatorTester.prototype.runTests = function(testDoneCallback, recursiveRun) {
 	if(!recursiveRun) {
-		this._debug("TranslatorTester: Running "+this.pending.length+" tests for "+this._translator.label);
+		this._debug(this, "TranslatorTester: Running "+this.pending.length+" tests for "+this._translator.label);
 	}
 	if(!this.pending.length) {
 		// always call testDoneCallback once if there are no tests
-		if(!recursiveRun) testDoneCallback(this, "unknown", "No tests present");
+		if(!recursiveRun) testDoneCallback(this, null, "unknown", "No tests present");
 		return;
 	}
 	
@@ -93,15 +126,15 @@ Zotero_TranslatorTester.prototype.runTests = function(testDoneCallback, recursiv
 	var testNumber = this.tests.length-this.pending.length;
 	var me = this;
 	
-	var callback = function(obj, status, message) {
-		me._debug("TranslatorTester: "+me._translator.label+" Test "+testNumber+": "+status+" ("+message+")");
+	var callback = function(obj, test, status, message) {
+		me._debug(this, "TranslatorTester: "+me._translator.label+" Test "+testNumber+": "+status+" ("+message+")");
 		me[status].push(test);
-		if(testDoneCallback) testDoneCallback(me, status, message);
+		if(testDoneCallback) testDoneCallback(me, test, status, message);
 		me.runTests(testDoneCallback, true);
 	};
 	
 	this.fetchPageAndRunTest(test, callback);
-}
+};
 
 /**
  * Fetches the page for a given test and runs it
@@ -117,10 +150,10 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 		},
 		null,
 		function(e) {
-			testDoneCallback(this, "failed", "Translation failed to initialize: "+e);
+			testDoneCallback(this, test, "failed", "Translation failed to initialize: "+e);
 		}
 	);
-}
+};
 
 /**
  * Executes a test for a translator, given the document to test upon
@@ -132,10 +165,38 @@ Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
 	var me = this;
 	var translate = Zotero.Translate.newInstance(this._type);
 	translate.setDocument(doc);
-	translate.setTranslator(this._translator);
-	translate.setHandler("done", function(obj, returnValue) { me._checkResult(test, obj, returnValue, testDoneCallback) });
-	translate.translate(false);
+	
+	translate.setHandler("translators", function(obj, translators) {
+		me._runTestTranslate(translate, translators, test, testDoneCallback);
+	});
+	translate.setHandler("debug", this._debug);
+	translate.setHandler("done", function(obj, returnValue) {
+		me._checkResult(test, obj, returnValue, testDoneCallback);
+	});
+	
+	// internal hack to call detect on this translator
+	translate._potentialTranslators = [this._translator];
+	translate._foundTranslators = [];
+	translate._currentState = "detect";
+	translate._detect();
 }
+
+/**
+ * Runs translation for a translator, given a document to test against
+ */
+Zotero_TranslatorTester.prototype._runTestTranslate = function(translate, translators, test, testDoneCallback) {
+	if(!translators.length) {
+		testDoneCallback(this, test, "failed", "Detection failed");
+		return;
+	} else if(translators[0].itemType !== "multiple" && test.items.length > 1 ||
+			test.items.length === 1 && translators[0].itemType !== test.items[0].itemType) {
+		testDoneCallback(this, test, "failed", "Detection returned wrong item type");
+		return;
+	}
+	
+	translate.setTranslator(this._translator);
+	translate.translate(false);
+};
 
 /**
  * Checks whether the results of translation match what is expected by the test
@@ -146,45 +207,64 @@ Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
  */
 Zotero_TranslatorTester.prototype._checkResult = function(test, translate, returnValue, testDoneCallback) {
 	if(!returnValue) {
-		testDoneCallback(this, "failed", "Translation failed; examine debug output for errors");
+		testDoneCallback(this, test, "failed", "Translation failed; examine debug output for errors");
 		return;
 	}
 	
 	if(!translate.newItems.length) {
-		testDoneCallback(this, "failed", "Translation failed; no items returned");
+		testDoneCallback(this, test, "failed", "Translation failed: no items returned");
 		return;
 	}
 	
 	if(translate.newItems.length !== test.items.length) {
-		testDoneCallback(this, "unknown", "Expected "+test.items.length+" items; got "+translate.newItems.length);
+		testDoneCallback(this, test, "unknown", "Expected "+test.items.length+" items; got "+translate.newItems.length);
 		return;
 	}
 	
 	for(var i in test.items) {
-		var testItem = test.items[i];
-		var translatedItem = translate.newItems[i];
-		
-		// Clear attachment document objects
-		if (translatedItem && translatedItem.attachments && translatedItem.attachments.length) {
-			for (var i=0; i<translatedItem.attachments.length; i++) {
-				if (translatedItem.attachments[i].document)
-					translatedItem.attachments[i].document = "[object]";
-			}
-		}
-		
-		for(var j in Zotero_TranslatorTester_IGNORE_FIELDS) {
-			delete testItem[Zotero_TranslatorTester_IGNORE_FIELDS[j]];
-			delete translatedItem[Zotero_TranslatorTester_IGNORE_FIELDS[j]];
-		}
+		var testItem = Zotero_TranslatorTester._sanitizeItem(test.items[i]);
+		var translatedItem = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
 		
 		var testItemJSON = JSON.stringify(testItem);
 		var translatedItemJSON = JSON.stringify(translatedItem);
 		if(testItemJSON != translatedItemJSON) {
-			testDoneCallback(this, "unknown", "Item "+i+" does not match");
-			this._debug("TranslatorTester: Mismatch between "+testItemJSON+" and "+translatedItemJSON);
+			testDoneCallback(this, test, "unknown", "Item "+i+" does not match");
+			this._debug(this, "TranslatorTester: Mismatch between "+testItemJSON+" and "+translatedItemJSON);
 			return;
 		}
 	}
 	
-	testDoneCallback(this, "succeeded", "Test succeeded");
-}
+	testDoneCallback(this, test, "succeeded", "Test succeeded");
+};
+
+/**
+ * Creates a new test for a document
+ * @param {Document} doc DOM document to test against
+ * @param {Function} testReadyCallback A callback to be passed test (as object) when complete
+ */
+Zotero_TranslatorTester.prototype.newTest = function(doc, testReadyCallback) {
+	var me = this;
+	var translate = Zotero.Translate.newInstance(this._type);
+	translate.setDocument(doc);
+	translate.setTranslator(this._translator);
+	translate.setHandler("debug", this._debug);
+	translate.setHandler("done", function(obj, returnValue) { me._createTest(obj, returnValue, testReadyCallback) });
+	translate.translate(false);
+};
+
+/**
+ * Creates a new test for a document
+ * @param {Zotero.Translate} translate The Zotero.Translate instance
+ * @param {Function} testDoneCallback A callback to be passed test (as object) when complete
+ */
+Zotero_TranslatorTester.prototype._createTest = function(translate, returnValue, testReadyCallback) {
+	if(!returnValue) {
+		testReadyCallback(returnValue);
+		return;
+	}
+	
+	for(var i in translate.newItems) Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
+	testReadyCallback(this, {"type":this._type,
+		"url":translate.document.location.href,
+		"items":translate.newItems});
+};
