@@ -206,12 +206,19 @@ Zotero.Translate.Sandbox = {
 				}
 			};
 			safeTranslator.getTranslators = function() { return translation.getTranslators() };
+			var doneHandlerSet = false;
 			safeTranslator.translate = function() {
+				translate.incrementAsyncProcesses();
 				setDefaultHandlers(translate, translation);
+				if(!doneHandlerSet) {
+					doneHandlerSet = true;
+					translation.setHandler("done", function() { translate.decrementAsyncProcesses() });
+				}
 				return translation.translate(false);
 			};
 			// TODO
 			safeTranslator.getTranslatorObject = function(callback) {
+				if(callback) translate.incrementAsyncProcesses();
 				var haveTranslatorFunction = function(translator) {
 					translation.translator[0] = translator;
 					if(!Zotero._loadTranslator(translator)) throw "Translator could not be loaded";
@@ -239,7 +246,10 @@ Zotero.Translate.Sandbox = {
 					translation._prepareTranslation();
 					setDefaultHandlers(translate, translation);
 					
-					if(callback) callback(translation._sandboxManager.sandbox);
+					if(callback) {
+						callback(translation._sandboxManager.sandbox);
+						translate.decrementAsyncProcesses();
+					}
 				};
 				
 				if(typeof translation.translator[0] === "object") {
@@ -265,26 +275,18 @@ Zotero.Translate.Sandbox = {
 		/**
 		 * Enables asynchronous detection or translation
 		 * @param {Zotero.Translate} translate
+		 * @deprecated
 		 */
-		"wait":function(translate) {
-			if(translate._currentState == "translate") {
-				translate._waitForCompletion = true;
-			} else {
-				throw "Translate: cannot call Zotero.wait() in detectCode of non-web translators";
-			}
-		},
+		"wait":function(translate) {},
 		
 		/**
 		 * Completes asynchronous detection or translation
 		 *
 		 * @param {Zotero.Translate} translate
-		 * @param {Boolean|String} [val] Whether detection or translation completed successfully.
-		 *     For detection, this should be a string or false. For translation, this should be
-		 *     boolean.
-		 * @param {String} [error] The error string, if an error occurred.
+		 * @deprecated
 		 */
-		"done":function(translate, val, error) {
-			translate.complete(typeof val === "undefined" ? true : val, (error ? error : "No error message specified"));
+		"done":function(translate, returnValue) {
+			this._returnValue = returnValue;
 		},
 		
 		/**
@@ -318,42 +320,61 @@ Zotero.Translate.Sandbox = {
 				// if we have a set of selected items for this translation, use them
 				return translate._selectedItems;
 			} else if(translate._handlers.select) {
-				var haveAsyncCallback = !!callback;
-				var haveAsyncHandler = false;
-				var returnedItems = null;
-				
-				// if this translator doesn't provide an async callback for selectItems, set things
-				// up so that we can wait to see if the select handler returns synchronously. If it
-				// doesn't, we will need to restart translation.
-				if(!haveAsyncCallback) {
-					callback = function(selectedItems) {
-						if(haveAsyncHandler) {						
-							translate.translate(this._libraryID, this._saveAttachments, selectedItems);
-						} else {
-							returnedItems = selectedItems;
-						}
-					};
-				}
-				
-				translate._runHandler("select", items, callback);
-				
-				if(!haveAsyncCallback) {
-					translate._debug("WARNING: No callback was provided for "+
-						"Zotero.selectItems(). When executed outside of Firefox, a selectItems() call "+
-						"will require that this translator to be called multiple times.", 1);
+					// whether the translator supports asynchronous selectItems
+					var haveAsyncCallback = !!callback;
+					// whether the handler operates asynchronously
+					var haveAsyncHandler = false;
+					var returnedItems = null;
 					
-					if(returnedItems === null) {
-						// The select handler is asynchronous, but this translator doesn't support
-						// asynchronous select. We return false to abort translation in this
-						// instance, and we will restart it later when the selectItems call is
-						// complete.
-						haveAsyncHandler = true;
+					var callbackExecuted = false;
+					if(haveAsyncCallback) {
+						// if this translator provides an async callback for selectItems, rig things
+						// up to pop off the async process
+						var newCallback = function(selectedItems) {
+							callbackExecuted = true;
+							callback(selectedItems);
+							if(haveAsyncHandler) translate.decrementAsyncProcesses();
+						};
+					} else {
+						// if this translator doesn't provide an async callback for selectItems, set things
+						// up so that we can wait to see if the select handler returns synchronously. If it
+						// doesn't, we will need to restart translation.
+						var newCallback = function(selectedItems) {
+							callbackExecuted = true;
+							if(haveAsyncHandler) {
+								translate.translate(this._libraryID, this._saveAttachments, selectedItems);
+							} else {
+								returnedItems = selectedItems;
+							}
+						};
+					}
+					
+					translate._runHandler("select", items, newCallback);
+					
+					// if we don't have returnedItems set already, the handler is asynchronous
+					haveAsyncHandler = !callbackExecuted;
+					
+					if(haveAsyncCallback) {
+						// we are running asynchronously, so increment async processes
+						if(haveAsyncHandler) translate.incrementAsyncProcesses();
 						return false;
 					} else {
-						return returnedItems;
+						translate._debug("WARNING: No callback was provided for "+
+							"Zotero.selectItems(). When executed outside of Firefox, a selectItems() call "+
+							"will require that this translator to be called multiple times.", 1);
+						
+						if(haveAsyncHandler) {
+							// The select handler is asynchronous, but this translator doesn't support
+							// asynchronous select. We return false to abort translation in this
+							// instance, and we will restart it later when the selectItems call is
+							// complete.
+							translate._aborted = true;
+							return false;
+						} else {
+							return returnedItems;
+						}
 					}
-				}
-			} else {	// no handler defined; assume they want all of them
+			} else { // no handler defined; assume they want all of them
 				if(callback) callback(items);
 				return items;
 			}
@@ -395,6 +416,10 @@ Zotero.Translate.Sandbox = {
 				item.accessDate = "CURRENT_TIMESTAMP";
 			}
 			
+			if(!item.title) {
+				throw "No title specified for item";
+			}
+			
 			// create short title
 			if(item.shortTitle === undefined && Zotero.Utilities.fieldIsValidForType("shortTitle", item.itemType)) {		
 				// only set if changes have been made
@@ -422,14 +447,6 @@ Zotero.Translate.Sandbox = {
 			
 			// call super
 			Zotero.Translate.Sandbox.Base._itemDone(translate, item);
-		},
-		
-		/**
-		 * Overloads {@link Zotero.Sandbox.Base.wait} to allow asynchronous detect
-		 * @param {Zotero.Translate} translate
-		 */
-		"wait":function(translate) {
-			translate._waitForCompletion = true;
 		}
 	},
 
@@ -535,6 +552,8 @@ Zotero.Translate.Sandbox = {
  * @property {String} path The path or URI string of the target
  * @property {String} newItems Items created when translate() was called
  * @property {String} newCollections Collections created when translate() was called
+ * @property {Number} runningAsyncProcesses The number of async processes that are running. These
+ *                                          need to terminate before Zotero.done() is called.
  */
 Zotero.Translate.Base = function() {}
 Zotero.Translate.Base.prototype = {
@@ -640,12 +659,33 @@ Zotero.Translate.Base.prototype = {
 		this._handlers[type].push(handler);
 	},
 
-	/*
+	/**
 	 * Clears all handlers for a given function
 	 * @param {String} type See {@link Zotero.Translate.Base#setHandler} for valid values
 	 */
 	"clearHandlers":function(type) {
 		this._handlers[type] = new Array();
+	},
+	
+	/**
+	 * Indicates that a new async process is running
+	 */
+	"incrementAsyncProcesses":function() {
+		this._runningAsyncProcesses++;
+		Zotero.debug("Translate: Incremented asynchronous processes to "+this._runningAsyncProcesses, 4);
+		if(this._parentTranslator) this._parentTranslator.incrementAsyncProcesses();
+	},
+	
+	/**
+	 * Indicates that a new async process is finished
+	 */
+	"decrementAsyncProcesses":function() {
+		this._runningAsyncProcesses--;
+		Zotero.debug("Translate: Decremented asynchronous processes to "+this._runningAsyncProcesses, 4);
+		if(this._runningAsyncProcesses === 0) {
+			this.complete();
+		}
+		if(this._parentTranslator) this._parentTranslator.decrementAsyncProcesses();
 	},
 
 	/**
@@ -821,6 +861,8 @@ Zotero.Translate.Base.prototype = {
 		
 		Zotero.debug("Translate: Beginning translation with "+this.translator[0].label);
 		
+		this.incrementAsyncProcesses();
+		
 		// translate
 		try {
 			this._sandboxManager.sandbox["do"+this._entryFunctionSuffix].apply(null, this._getParameters());
@@ -833,7 +875,7 @@ Zotero.Translate.Base.prototype = {
 			}
 		}
 		
-		if(!this._waitForCompletion) this.complete(true);
+		this.decrementAsyncProcesses();
 	},
 	
 	/**
@@ -845,16 +887,25 @@ Zotero.Translate.Base.prototype = {
 	 *     completed successfully.
 	 */
 	"complete":function(returnValue, error) {
+		// allow translation to be aborted for re-running after selecting items
+		if(this._aborted) return;
+		
 		// Make sure this isn't called twice
 		if(this._currentState === null) {
-			Zotero.debug("Translate: WARNING: Zotero.done() called after translation completion; please fix your code");
+			Zotero.debug("Translate: WARNING: Zotero.done() called after translation completion; this should never happen");
+			try {
+				a
+			} catch(e) {
+				Zotero.debug(e);
+			}
 			return;
 		}
 		var oldState = this._currentState;
-		this._waitForCompletion = false;
+		this._runningAsyncProcesses = 0;
+		if(!returnValue && this._returnValue) returnValue = this._returnValue;
 		
 		var errorString = null;
-		if(!returnValue) errorString = this._generateErrorString(error);
+		if(!returnValue && error) errorString = this._generateErrorString(error);
 		
 		if(oldState === "detect") {
 			if(this._potentialTranslators.length) {
@@ -879,6 +930,9 @@ Zotero.Translate.Base.prototype = {
 			}
 		} else {
 			this._currentState = null;
+			
+			// unset return value is equivalent to true
+			if(returnValue === undefined) returnValue = true;
 			
 			if(returnValue) {
 				this._debug("Translation successful");
@@ -919,6 +973,8 @@ Zotero.Translate.Base.prototype = {
 		}
 		this._prepareDetection();
 		
+		this.incrementAsyncProcesses();
+		
 		try {
 			var returnValue = this._sandboxManager.sandbox["detect"+this._entryFunctionSuffix].apply(null, this._getParameters());
 		} catch(e) {
@@ -926,7 +982,8 @@ Zotero.Translate.Base.prototype = {
 			return;
 		}
 		
-		if(!this._waitForCompletion) this.complete(returnValue);
+		if(returnValue !== undefined) this._returnValue = returnValue;
+		this.decrementAsyncProcesses();
 	},
 	
 	/**
@@ -949,7 +1006,10 @@ Zotero.Translate.Base.prototype = {
 			this._sandboxLocation = sandboxLocation;
 			this._generateSandbox();
 		}
-		this._waitForCompletion = false;
+		
+		this._runningAsyncProcesses = 0;
+		this._returnValue = undefined;
+		this._aborted = false;
 		
 		Zotero.debug("Translate: Parsing code for "+translator.label, 4);
 		
@@ -1317,7 +1377,6 @@ Zotero.Translate.Import.prototype._loadTranslator = function(translator) {
 	var returnVal = Zotero.Translate.Base.prototype._loadTranslator.call(this, translator);
 	if(!returnVal) return returnVal;
 	
-	this._waitForCompletion = false;
 	var dataMode = (translator ? translator : this._potentialTranslators[0]).configOptions["dataMode"];
 	
 	var err = false;
