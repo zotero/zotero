@@ -318,6 +318,7 @@ Zotero.Translators = new function() {
 	 * @param	{String|undefined}	metadata.configOptions
 	 * @param	{String|undefined}	metadata.displayOptions
 	 * @param	{Integer}		metadata.priority
+	 * @param	{String}		metadata.browserSupport
 	 * @param	{Boolean}		metadata.inRepository
 	 * @param	{String}		metadata.lastUpdated		SQL date
 	 * @param	{String}		code
@@ -351,6 +352,10 @@ Zotero.Translators = new function() {
 		
 		if (!metadata.lastUpdated) {
 			throw ("metadata.lastUpdated not provided in Zotero.Translators.save()");
+		}
+		
+		if (!metadata.browserSupport) {
+			metadata.browserSupport = "g";
 		}
 		
 		if (!code) {
