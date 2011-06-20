@@ -46,6 +46,33 @@ td, th {
 	background-color: #ececec;
 }
 
-.status-pending {
+.status-pending, .status-running {
 	background-color: #9FF;
+}
+
+tr.output-displayed > td {
+	background-color: #b4d5ff !important;
+}
+
+#translator-box {
+	position: absolute;
+	top: 0;
+	bottom: 25%;
+	left: 0;
+	right: 0;
+	padding: 5px;
+	overflow: scroll;
+}
+
+#output-box {
+	position: absolute;
+	top: 75%;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 5px;
+	white-space: pre;
+	overflow: scroll;
+	font-family: Monaco, Courier, monospace;
+	font-size: 10px;
 }
