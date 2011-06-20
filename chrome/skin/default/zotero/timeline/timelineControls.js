@@ -87,7 +87,9 @@ function doKeyPress(e)
 		checkDate(lastJumpToYearValue);
 	}
 	else {
-		jumpToYearTimer = setTimeout('wasChanged(document.getElementById("jumpYear").value);', 1000)
+		jumpToYearTimer = setTimeout(function () {
+			wasChanged(document.getElementById("jumpYear").value);
+		}, 1000)
 	}
 }
 
