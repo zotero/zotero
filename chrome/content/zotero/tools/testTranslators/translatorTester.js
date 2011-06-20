@@ -83,7 +83,7 @@ Zotero_TranslatorTester._sanitizeItem = function(item) {
 	// remove cyclic references
 	if(item.attachments && item.attachments.length) {
 		for (var i=0; i<item.attachments.length; i++) {
-			if(item.attachments[i].document) {
+			if(item.attachments[i].document && item.attachments[i].document.location) {
 				item.attachments[i].url = item.attachments[i].document.location.href;
 				delete item.attachments[i].document;
 			}
@@ -226,11 +226,8 @@ Zotero_TranslatorTester.prototype._checkResult = function(test, translate, retur
 		var testItem = Zotero_TranslatorTester._sanitizeItem(test.items[i]);
 		var translatedItem = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
 		
-		var testItemJSON = JSON.stringify(testItem);
-		var translatedItemJSON = JSON.stringify(translatedItem);
-		if(testItemJSON != translatedItemJSON) {
+		if(!this._compare(testItem, translatedItem)) {
 			testDoneCallback(this, test, "unknown", "Item "+i+" does not match");
-			this._debug(this, "TranslatorTester: Mismatch between "+testItemJSON+" and "+translatedItemJSON);
 			return;
 		}
 	}
@@ -268,4 +265,98 @@ Zotero_TranslatorTester.prototype._createTest = function(translate, returnValue,
 	testReadyCallback(this, {"type":this._type,
 		"url":translate.document.location.href,
 		"items":translate.newItems});
+};
+
+
+/**
+ * Compare items or sets thereof
+ */
+Zotero_TranslatorTester.prototype._compare = function(i, j) {
+	var match = false;
+	if (Object.prototype.toString.apply(i) === '[object Array]') {
+		if (Object.prototype.toString.apply(j) === '[object Array]') {
+			do {
+				match = this._compare(i.pop(), j.pop());
+			} while (match && i.length && j.length);
+			if (match)
+				return true;
+			else
+				return false;
+		} else {
+			this._debug(this, "i is array, j is not");
+			return false;
+		}
+	} else if (Object.prototype.toString.apply(j) === '[object Array]') {
+		this._debug(this, "j is array, i is not");
+		return false;
+	}
+
+	// Neither is an array
+	if(this._objectCompare(i, j)) {
+		return true;
+	} else {
+		this._debug(this, JSON.stringify({i:i, j:j}));
+		this._debug(this, "Items don't match");
+		return false;
+	}
+};
+
+Zotero_TranslatorTester.prototype._objectCompare = function(x, y) {
+	// Special handlers
+	var _debug = this._debug;
+	var special = { 
+		"complete" : function(a,b) { _debug(this, "Ignoring non-matching parameter 'complete'"); return true },
+		"accessDate" : function(a,b) { _debug(this, "Ignoring non-matching parameter 'accessDate'"); return true },
+		"checkFields" : function(a,b) { _debug(this, "Ignoring non-matching parameter 'checkFields'"); return true }
+	};
+
+	var returner = function(param) {
+			if (special[param]) return special[param](x[param], y[param]);
+			else return false;
+	}
+
+	if ((y === undefined && x !== undefined)
+		|| (x === undefined && y !== undefined)) {
+		return false;
+	}
+
+	for(p in y) { if(typeof(x[p])=='undefined') {
+			this._debug(this, "Param "+p+" in y not defined in x");
+			return returner(p);
+		}
+	}
+
+	for(p in y) { if (y[p]) {
+		switch(typeof(y[p])) {
+			case 'object':
+				if (!_objectCompare(y[p],x[p])) { 
+					return returner(p);
+				};
+				break;
+			case 'function':
+				if (typeof(x[p])=='undefined' 
+					|| (y[p].toString() != x[p].toString())) {
+					this._debug(this, "Function "+p+" defined in y, not in x, or definitions differ");
+					return returner(p) };
+				break;
+			default:
+				if (y[p] != x[p]) {
+					this._debug(this, "Param "+p+" differs: " + JSON.stringify({x:x[p], y:y[p]}));
+					return returner(p);
+				}
+		}
+	} else {
+		if (x[p]) { 
+			this._debug(this, "Param "+p+" true in x, not in y");
+			return returner(p);
+		}
+	} }
+
+	for(p in x) {
+		if(typeof(y[p])=='undefined') {
+			this._debug(this, "Param "+p+" in x not defined in y");
+			return returner(p);
+		}
+	}
+	return true;
 };
