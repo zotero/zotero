@@ -519,7 +519,7 @@ var Zotero_Browser = new function() {
 	/*
 	 * Callback to be executed when an item has been finished
 	 */
-	function itemDone(obj, item, collection) {
+	function itemDone(obj, dbItem, item, collection) {
 		var title = item.title;
 		var icon = Zotero.ItemTypes.getImageSrc(item.itemType);
 		Zotero_Browser.progress.show();
@@ -528,7 +528,7 @@ var Zotero_Browser = new function() {
 		
 		// add item to collection, if one was specified
 		if(collection) {
-			collection.addItem(item.getID());
+			collection.addItem(dbItem.id);
 		}
 		
 		if(Zotero_Browser.isScraping) {
@@ -753,7 +753,7 @@ Zotero_Browser.Tab.prototype.translate = function(libraryID, collectionID) {
 			this.page.hasBeenTranslated = true;
 		}
 		this.page.translate.clearHandlers("itemDone");
-		this.page.translate.setHandler("itemDone", function(obj, dbItem, item) { Zotero_Browser.itemDone(obj, item, collection) });
+		this.page.translate.setHandler("itemDone", function(obj, dbItem, item) { Zotero_Browser.itemDone(obj, dbItem, item, collection) });
 		
 		this.page.translate.translate(libraryID);
 	}
