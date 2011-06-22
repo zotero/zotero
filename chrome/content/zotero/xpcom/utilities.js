@@ -636,6 +636,7 @@ Zotero.Utilities = {
 		var results = [];
 		for(var i in elements) {
 			var element = elements[i];
+			// Firefox 5 hack
 			if(element.__wrappedDOMObject) element = element.__wrappedDOMObject;
 			
 			if(element.ownerDocument) {
@@ -659,6 +660,7 @@ Zotero.Utilities = {
 			
 			var newEl;
 			while(newEl = xpathObject.iterateNext()) {
+				// Firefox 5 hack
 				results.push(Zotero.isFx5 && !_dontWrap ? Zotero.Translate.SandboxManager.Fx5DOMWrapper(newEl) : newEl);
 			}
 		}
