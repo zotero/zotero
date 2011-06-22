@@ -4,7 +4,7 @@
 	"label":"CrossRef",
 	"creator":"Simon Kornblith",
 	"target":"^https?://partneraccess\\.oclc\\.org/",
-	"minVersion":"2.1",
+	"minVersion":"3.0",
 	"maxVersion":"",
 	"priority":90,
 	"inRepository":true,
