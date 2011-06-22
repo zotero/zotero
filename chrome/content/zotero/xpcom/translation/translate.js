@@ -280,13 +280,14 @@ Zotero.Translate.Sandbox = {
 		"wait":function(translate) {},
 		
 		/**
-		 * Completes asynchronous detection or translation
+		 * Sets the return value for detection
 		 *
 		 * @param {Zotero.Translate} translate
-		 * @deprecated
 		 */
 		"done":function(translate, returnValue) {
-			this._returnValue = returnValue;
+			if(translate._currentState === "detect") {
+				translate._returnValue = returnValue;
+			}
 		},
 		
 		/**
@@ -588,7 +589,7 @@ Zotero.Translate.Base.prototype = {
 	 */
 	"setTranslator":function(translator) {
 		if(!translator) {
-			throw("cannot set translator: invalid value");
+			throw new Error("Zotero.Translate: no translator specified");
 		}
 		
 		this.translator = null;
@@ -892,12 +893,9 @@ Zotero.Translate.Base.prototype = {
 		
 		// Make sure this isn't called twice
 		if(this._currentState === null) {
-			Zotero.debug("Translate: WARNING: Zotero.done() called after translation completion; this should never happen");
-			try {
-				a
-			} catch(e) {
-				Zotero.debug(e);
-			}
+			var e = new Error();
+			Zotero.debug("Translate: WARNING: Zotero.done() called after translation completion. This should never happen. Please examine the stack below.");
+			Zotero.debug(e.stack);
 			return;
 		}
 		var oldState = this._currentState;
@@ -937,15 +935,17 @@ Zotero.Translate.Base.prototype = {
 			if(returnValue) {
 				this._debug("Translation successful");
 			} else {
-				// report error to console
-				if(this.translator[0] && this.translator[0].logError) {
-					this.translator[0].logError(error.toString(), "exception");
-				} else {
-					Zotero.logError(error);
+				if(error) {
+					// report error to console
+					if(this.translator[0] && this.translator[0].logError) {
+						this.translator[0].logError(error.toString(), "exception");
+					} else {
+						Zotero.logError(error);
+					}
+					
+					// report error to debug log
+					this._debug("Translation using "+(this.translator && this.translator[0] && this.translator[0].label ? this.translator[0].label : "no translator")+" failed: \n"+errorString, 2);
 				}
-				
-				// report error to debug log
-				this._debug("Translation using "+(this.translator && this.translator[0] && this.translator[0].label ? this.translator[0].label : "no translator")+" failed: \n"+errorString, 2);
 				
 				this._runHandler("error", error);
 			}
@@ -967,10 +967,7 @@ Zotero.Translate.Base.prototype = {
 			return;
 		}
 		
-		if(!this._loadTranslator(this._potentialTranslators[0])) {
-			this.complete(false, "Error loading translator into sandbox");
-			return;
-		}
+		if(!this._loadTranslator(this._potentialTranslators[0])) return;
 		this._prepareDetection();
 		
 		this.incrementAsyncProcesses();
@@ -1044,36 +1041,44 @@ Zotero.Translate.Base.prototype = {
 				"for(var i in createArrays) {"+
 					"this[createArrays[i]] = [];"+
 				"}"+
-		"};"+
-		"Zotero.Collection = function () {};"+
-		"Zotero.Collection.prototype.complete = function() { Zotero._collectionDone(this); };"+
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=609143 - can't pass E4X to sandbox in Fx4
-		"Zotero.getXML = function() {"+
-			"var xml = Zotero._getXML();"+
-			"if(typeof xml == 'string') return new XML(xml);"+
-		"};"+
-		"Zotero._transferItem = function(itemString) {"+
-			"var item = JSON.parse(itemString);"+
-			"item.complete = Zotero.Item.prototype.complete;"+
-			"return item;"+
-		"};"+
-		"Zotero.Item.prototype.complete = function() { ";
+		"};";
+		
+		if(this instanceof Zotero.Translate.Export) {
+			src += "Zotero.Collection = function () {};"+
+			"Zotero.Collection.prototype.complete = function() { Zotero._collectionDone(this); };";
+		} else if (this instanceof Zotero.Translate.Import) {
+			// https://bugzilla.mozilla.org/show_bug.cgi?id=609143 - can't pass E4X to sandbox in Fx4
+			src += "Zotero.getXML = function() {"+
+				"var xml = Zotero._getXML();"+
+				"if(typeof xml == 'string') return new XML(xml);"+
+			"};";
+		}
+		
 		if(Zotero.isFx) {
 			// workaround for inadvertant attempts to pass E4X back from sandbox
-			src += "for(var key in this) {"+
-				"if("+createArrays+".indexOf(key) !== -1) {"+
-					"for each(var item in this[key]) {"+
-						"for(var key2 in item[key2]) {"+
-							"if(typeof item[key2] === 'xml') {"+
-								"item[key2] = item[key2].toString();"+
+			src += "Zotero._transferItem = function(itemString) {"+
+					"var item = JSON.parse(itemString);"+
+					"item.complete = Zotero.Item.prototype.complete;"+
+					"return item;"+
+				"};"+
+				"Zotero.Item.prototype.complete = function() { "+
+					"for(var key in this) {"+
+					"if("+createArrays+".indexOf(key) !== -1) {"+
+						"for each(var item in this[key]) {"+
+							"for(var key2 in item[key2]) {"+
+								"if(typeof item[key2] === 'xml') {"+
+									"item[key2] = item[key2].toString();"+
+								"}"+
 							"}"+
 						"}"+
+					"} else if(typeof this[key] === 'xml') {"+
+						"this[key] = this[key].toString();"+
 					"}"+
-				"} else if(typeof this[key] === 'xml') {"+
-					"this[key] = this[key].toString();"+
-				"}"+
-			"}";
+				"}";
+		} else {
+			src += "Zotero.Item.prototype.complete = function() { ";
 		}
+		
 		src += "Zotero._itemDone(this);"+
 		"}";
 		
@@ -1081,6 +1086,10 @@ Zotero.Translate.Base.prototype = {
 		this._sandboxManager.importObject(this.Sandbox, this);
 		this._sandboxManager.importObject({"Utilities":new Zotero.Utilities.Translate(this)});
 		this._sandboxManager.sandbox.Zotero.Utilities.HTTP = this._sandboxManager.sandbox.Zotero.Utilities;
+		
+		// create shortcuts
+		this._sandboxManager.sandbox.Z = this._sandboxManager.sandbox.Zotero;
+		this._sandboxManager.sandbox.ZU = this._sandboxManager.sandbox.Zotero.Utilities;
 	},
 	
 	/**
@@ -1612,16 +1621,16 @@ Zotero.Translate.Search.prototype.setTranslator = function(translator) {
  * translation fails
  */
 Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
-	if(this._currentState == "translate") {
-		if(!this.newItems.length) returnValue = false;
-		if(!returnValue) {
-			Zotero.debug("Translate: Could not find a result using "+this.translator[0].label+": \n"
-						  +this._generateErrorString(error), 3);
-			if(this.translator.length > 1) {
-				this.translator.shift();
-				this.translate(this._libraryID, this._saveAttachments);
-				return;
-			}
+	if(this._currentState == "translate" && !this.newItems.length) {
+		Zotero.debug("Translate: Could not find a result using "+this.translator[0].label+": \n"
+					  +this._generateErrorString(error), 3);
+		if(this.translator.length > 1) {
+			this.translator.shift();
+			this.translate(this._libraryID, this._saveAttachments);
+			return;
+		} else {
+			error = "No items returned from any translator";
+			returnValue = false;
 		}
 	}
 	

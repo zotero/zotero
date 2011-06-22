@@ -68,10 +68,60 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 		
 		// expose parseFromString
 		this.__exposedProps__ = {"parseFromString":"r"};
-		this.parseFromString = function(str, contentType) _DOMParser.parseFromString(str, contentType);
+		if(Zotero.isFx5) {
+			this.parseFromString = function(str, contentType) {
+				return Zotero.Translate.SandboxManager.Fx5DOMWrapper(_DOMParser.parseFromString(str, contentType));
+			}
+		} else {
+			this.parseFromString = function(str, contentType) _DOMParser.parseFromString(str, contentType);
+		}
 	}
 	this.sandbox.DOMParser.__exposedProps__ = {"prototype":"r"};
 	this.sandbox.DOMParser.prototype = {};
+}
+
+/**
+ * A really ugly way of making a DOM object not look like a DOM object, so we can pass it to the
+ * sandbox under Firefox 5
+ */
+Zotero.Translate.SandboxManager.Fx5DOMWrapper = function(obj, parent) {
+	if(obj === null) {
+		return null;
+	}
+	
+	var type = typeof obj;
+	if(type === "function") {
+		var me = this;
+		var val = function() {
+			var nArgs = arguments.length;
+			var args = new Array(nArgs);
+			for(var i=0; i<nArgs; i++) {
+				args[i] = (arguments[i] instanceof Object && arguments[i].__wrappedDOMObject
+						? arguments[i].__wrappedDOMObject : arguments[i]);
+			}
+			return Zotero.Translate.SandboxManager.Fx5DOMWrapper(obj.apply(parent ? parent : null, args));
+		}
+	} else if(type === "object") {
+		if(val instanceof Array) {
+			var val = [];
+		} else {
+			var val = {};
+		}
+	} else {
+		return obj;
+	}
+	
+	val.__wrappedDOMObject = obj;
+	val.__exposedProps__ = {};
+	for(var prop in obj) {
+		let localProp = prop;
+		val.__exposedProps__[localProp] = "r";
+		val.__defineGetter__(localProp, function() {
+			return Zotero.Translate.SandboxManager.Fx5DOMWrapper(obj[localProp], obj);
+		});
+	}
+	
+	return val;
 }
 
 Zotero.Translate.SandboxManager.prototype = {
