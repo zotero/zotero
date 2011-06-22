@@ -612,6 +612,80 @@ Zotero.Utilities = {
 		}
 		const metaRegexp = /[-[\]{}()*+?.\\^$|,#\s]/g;
 		return literal.replace(metaRegexp, "\\$&");
+	},
+	
+	/**
+	 * Evaluate an XPath
+	 *
+	 * @param {element|element[]} elements The element(s) to use as the context for the XPath
+	 * @param {String} xpath The XPath expression
+	 * @param {Object} [namespaces] An object whose keys represent namespace prefixes, and whose
+	 *                              values represent their URIs
+	 * @return {element[]} DOM elements matching XPath
+	 */
+	"xpath":function(elements, xpath, namespaces, _dontWrap) {
+		var nsResolver = null;
+		if(namespaces) {
+			nsResolver = function(prefix) {
+				return namespaces[prefix] || null;
+			};
+		}
+		
+		if(!(elements instanceof Array)) elements = [elements];
+		
+		var results = [];
+		for(var i in elements) {
+			var element = elements[i];
+			if(element.__wrappedDOMObject) element = element.__wrappedDOMObject;
+			
+			if(element.ownerDocument) {
+				var rootDoc = element.ownerDocument;
+			} else if(element.documentElement) {
+				var rootDoc = element;
+			} else {
+				throw new Error("First argument must be either element(s) or document(s) in Zotero.Utilities.xpath()");
+			}
+			
+			try {
+				var xpathObject = rootDoc.evaluate(xpath, element, nsResolver, 
+					(Zotero.isFx
+						? Components.interfaces.nsIDOMXPathResult.ORDERED_NODE_ITERATOR_TYPE
+						: XPathResult.ORDERED_NODE_ITERATOR_TYPE),
+					null);
+			} catch(e) {
+				// rethrow so that we get a stack
+				throw new Error(e.name+": "+e.message);
+			}
+			
+			var newEl;
+			while(newEl = xpathObject.iterateNext()) {
+				results.push(Zotero.isFx5 && !_dontWrap ? Zotero.Translate.SandboxManager.Fx5DOMWrapper(newEl) : newEl);
+			}
+		}
+		
+		return results;
+	},
+	
+	/**
+	 * Generates a string from the content of nodes matching a given XPath
+	 *
+	 * @param {element} node The node representing the document and context
+	 * @param {String} xpath The XPath expression
+	 * @param {Object} [namespaces] An object whose keys represent namespace prefixes, and whose
+	 *                              values represent their URIs
+	 * @param {String} [delimiter] The string with which to join multiple matching nodes
+	 * @return {String|null} DOM elements matching XPath, or null if no elements exist
+	 */
+	"xpathText":function(node, xpath, namespaces, delimiter) {
+		var elements = Zotero.Utilities.xpath(node, xpath, namespaces);
+		if(!elements.length) return null;
+		
+		var strings = new Array(elements.length);
+		for(var i in elements) {
+			strings[i] = elements[i].textContent;
+		}
+		
+		return strings.join(delimiter ? delimiter : ", ");
 	}
 }
 
@@ -655,7 +729,7 @@ Zotero.Utilities.Translate.prototype.getVersion = function() {
 /**
  * Takes an XPath query and returns the results
  *
- * @deprecated Use doc.evaluate() directly instead
+ * @deprecated Use {@link Zotero.Utilities.xpath} or doc.evaluate() directly
  * @type Node[]
  */
 Zotero.Utilities.Translate.prototype.gatherElementsOnXPath = function(doc, parentNode, xpath, nsResolver) {
