@@ -125,6 +125,60 @@ Zotero.Translate.SandboxManager.Fx5DOMWrapper = function(obj, parent) {
 	return val;
 }
 
+Zotero.Translate.SandboxManager.prototype = {
+	/**
+	 * Evaluates code in the sandbox
+	 */
+	"eval":function(code) {
+		Components.utils.evalInSandbox(code, this.sandbox);
+	},
+	
+	/**
+	 * Imports an object into the sandbox
+	 *
+	 * @param {Object} object Object to be imported (under Zotero)
+	 * @param {Boolean} passTranslateAsFirstArgument Whether the translate instance should be passed
+	 *     as the first argument to the function.
+	 */
+	"importObject":function(object, passAsFirstArgument, attachTo) {
+		if(!attachTo) attachTo = this.sandbox.Zotero;
+		var newExposedProps = false;
+		if(!object.__exposedProps__) newExposedProps = {};
+		for(var key in (newExposedProps ? object : object.__exposedProps__)) {
+			let localKey = key;
+			if(newExposedProps) newExposedProps[localKey] = "r";
+			
+			// magical XPCSafeJSObjectWrappers for sandbox
+			if(typeof object[localKey] === "function" || typeof object[localKey] === "object") {
+				if(attachTo == this.sandbox) Zotero.debug(localKey);
+				attachTo[localKey] = function() {
+					var args = (passAsFirstArgument ? [passAsFirstArgument] : []);
+					for(var i=0; i<arguments.length; i++) {
+						args.push((typeof arguments[i] === "object" && arguments[i] !== null)
+							|| typeof arguments[i] === "function"
+							? new XPCSafeJSObjectWrapper(arguments[i]) : arguments[i]);
+					}
+					
+					return object[localKey].apply(object, args);
+				};
+				
+				// attach members
+				if(!(object instanceof Components.interfaces.nsISupports)) {
+					this.importObject(object[localKey], passAsFirstArgument ? passAsFirstArgument : null, attachTo[localKey]);
+				}
+			} else {
+				attachTo[localKey] = object[localKey];
+			}
+		}
+		
+		if(newExposedProps) {
+			attachTo.__exposedProps__ = newExposedProps;
+		} else {
+			attachTo.__exposedProps__ = object.__exposedProps__;
+		}
+	}
+}
+
 /**
  * This variable holds a reference to all open nsIInputStreams and nsIOutputStreams in the global  
  * scope at all times. Otherwise, our streams might get garbage collected when we allow other code
