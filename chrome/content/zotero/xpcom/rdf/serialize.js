@@ -470,9 +470,9 @@ function backslashUify(str) {
     for (var i=0; i<str.length; i++) {
         k = str.charCodeAt(i);
         if (k>65535)
-            res += '\U' + ('00000000'+n.toString(16)).slice(-8); // convert to upper?
+            res += '\\U' + ('00000000'+n.toString(16)).slice(-8); // convert to upper?
         else if (k>126) 
-            res += '\u' + ('0000'+n.toString(16)).slice(-4);
+            res += '\\u' + ('0000'+n.toString(16)).slice(-4);
         else
             res += str[i];
     }
