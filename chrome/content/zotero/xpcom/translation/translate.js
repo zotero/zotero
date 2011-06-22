@@ -860,6 +860,10 @@ Zotero.Translate.Base.prototype = {
 		this._sandboxManager.importObject(this.Sandbox, this);
 		this._sandboxManager.importObject({"Utilities":new Zotero.Utilities.Translate(this)});
 		this._sandboxManager.sandbox.Zotero.Utilities.HTTP = this._sandboxManager.sandbox.Zotero.Utilities;
+		
+		// create shortcuts
+		this._sandboxManager.sandbox.Z = this._sandboxManager.sandbox.Zotero;
+		this._sandboxManager.sandbox.ZU = this._sandboxManager.sandbox.Zotero.Utilities;
 	},
 	
 	/**

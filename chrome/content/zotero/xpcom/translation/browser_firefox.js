@@ -69,64 +69,60 @@ Zotero.Translate.SandboxManager = function(translate, sandboxLocation) {
 		
 		// expose parseFromString
 		this.__exposedProps__ = {"parseFromString":"r"};
-		this.parseFromString = function(str, contentType) _DOMParser.parseFromString(str, contentType);
+		if(Zotero.isFx5) {
+			this.parseFromString = function(str, contentType) {
+				return Zotero.Translate.SandboxManager.Fx5DOMWrapper(_DOMParser.parseFromString(str, contentType));
+			}
+		} else {
+			this.parseFromString = function(str, contentType) _DOMParser.parseFromString(str, contentType);
+		}
 	}
 	this.sandbox.DOMParser.__exposedProps__ = {"prototype":"r"};
 	this.sandbox.DOMParser.prototype = {};
 }
 
-Zotero.Translate.SandboxManager.prototype = {
-	/**
-	 * Evaluates code in the sandbox
-	 */
-	"eval":function(code) {
-		Components.utils.evalInSandbox(code, this.sandbox);
-	},
-	
-	/**
-	 * Imports an object into the sandbox
-	 *
-	 * @param {Object} object Object to be imported (under Zotero)
-	 * @param {Boolean} passTranslateAsFirstArgument Whether the translate instance should be passed
-	 *     as the first argument to the function.
-	 */
-	"importObject":function(object, passAsFirstArgument, attachTo) {
-		if(!attachTo) attachTo = this.sandbox.Zotero;
-		var newExposedProps = false;
-		if(!object.__exposedProps__) newExposedProps = {};
-		for(var key in (newExposedProps ? object : object.__exposedProps__)) {
-			let localKey = key;
-			if(newExposedProps) newExposedProps[localKey] = "r";
-			
-			// magical XPCSafeJSObjectWrappers for sandbox
-			if(typeof object[localKey] === "function" || typeof object[localKey] === "object") {
-				if(attachTo == this.sandbox) Zotero.debug(localKey);
-				attachTo[localKey] = function() {
-					var args = (passAsFirstArgument ? [passAsFirstArgument] : []);
-					for(var i=0; i<arguments.length; i++) {
-						args.push((typeof arguments[i] === "object" && arguments[i] !== null)
-							|| typeof arguments[i] === "function"
-							? new XPCSafeJSObjectWrapper(arguments[i]) : arguments[i]);
-					}
-					
-					return object[localKey].apply(object, args);
-				};
-				
-				// attach members
-				if(!(object instanceof Components.interfaces.nsISupports)) {
-					this.importObject(object[localKey], passAsFirstArgument ? passAsFirstArgument : null, attachTo[localKey]);
-				}
-			} else {
-				attachTo[localKey] = object[localKey];
-			}
-		}
-		
-		if(newExposedProps) {
-			attachTo.__exposedProps__ = newExposedProps;
-		} else {
-			attachTo.__exposedProps__ = object.__exposedProps__;
-		}
+/**
+ * A really ugly way of making a DOM object not look like a DOM object, so we can pass it to the
+ * sandbox under Firefox 5
+ */
+Zotero.Translate.SandboxManager.Fx5DOMWrapper = function(obj, parent) {
+	if(obj === null) {
+		return null;
 	}
+	
+	var type = typeof obj;
+	if(type === "function") {
+		var me = this;
+		var val = function() {
+			var nArgs = arguments.length;
+			var args = new Array(nArgs);
+			for(var i=0; i<nArgs; i++) {
+				args[i] = (arguments[i] instanceof Object && arguments[i].__wrappedDOMObject
+						? arguments[i].__wrappedDOMObject : arguments[i]);
+			}
+			return Zotero.Translate.SandboxManager.Fx5DOMWrapper(obj.apply(parent ? parent : null, args));
+		}
+	} else if(type === "object") {
+		if(val instanceof Array) {
+			var val = [];
+		} else {
+			var val = {};
+		}
+	} else {
+		return obj;
+	}
+	
+	val.__wrappedDOMObject = obj;
+	val.__exposedProps__ = {};
+	for(var prop in obj) {
+		let localProp = prop;
+		val.__exposedProps__[localProp] = "r";
+		val.__defineGetter__(localProp, function() {
+			return Zotero.Translate.SandboxManager.Fx5DOMWrapper(obj[localProp], obj);
+		});
+	}
+	
+	return val;
 }
 
 /**
