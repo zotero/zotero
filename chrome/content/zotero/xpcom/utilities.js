@@ -606,7 +606,7 @@ Zotero.Utilities = {
 	 *                              values represent their URIs
 	 * @return {element[]} DOM elements matching XPath
 	 */
-	"xpath":function(elements, xpath, namespaces, _dontWrap) {
+	"xpath":function(elements, xpath, namespaces) {
 		var nsResolver = null;
 		if(namespaces) {
 			nsResolver = function(prefix) {
@@ -644,7 +644,7 @@ Zotero.Utilities = {
 			var newEl;
 			while(newEl = xpathObject.iterateNext()) {
 				// Firefox 5 hack
-				results.push(Zotero.isFx5 && !_dontWrap ? Zotero.Translate.SandboxManager.Fx5DOMWrapper(newEl) : newEl);
+				results.push(Zotero.isFx5 ? Zotero.Translate.SandboxManager.Fx5DOMWrapper(newEl) : newEl);
 			}
 		}
 		
