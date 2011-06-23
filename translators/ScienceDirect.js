@@ -1,15 +1,15 @@
 {
-	"translatorID":"b6d0a7a-d076-48ae-b2f0-b6de28b194e",
-	"label":"ScienceDirect",
-	"creator":"Michael Berkowitz",
-	"target":"https?://[^/]*science-?direct\\.com[^/]*/science(\\/article)?(\\?(?:.+\\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"browserSupport":"gcs",
-	"inRepository":true,
-	"translatorType":4,
-	"lastUpdated":"2011-06-17 20:07:40"
+        "translatorID": "b6d0a7a-d076-48ae-b2f0-b6de28b194e",
+        "label": "ScienceDirect",
+        "creator": "Michael Berkowitz",
+        "target": "https?://[^/]*science-?direct\\.com[^/]*/science(\\/article)?(\\?(?:.+\\&|)ob=(?:ArticleURL|ArticleListURL|PublicationURL))?",
+        "minVersion": "1.0.0b3.r1",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "browserSupport": "gcs",
+        "lastUpdated": "2011-06-20 02:05:48"
 }
 
 function detectWeb(doc, url) {
@@ -326,3 +326,58 @@ function doWeb(doc, url) {
 	}
 	Zotero.wait();
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+    {
+        "type": "web",
+        "url": "http://www.sciencedirect.com/science/article/pii/S0896627311004430#bib5",
+        "items": [
+            {
+                "itemType": "journalArticle",
+                "creators": [
+                    {
+                        "lastName": "Schaaf",
+                        "firstName": "Christian P.",
+                        "creatorType": "author"
+                    },
+                    {
+                        "lastName": "Zoghbi",
+                        "firstName": "Huda Y.",
+                        "creatorType": "author"
+                    }
+                ],
+                "notes": [],
+                "tags": [],
+                "seeAlso": [],
+                "attachments": [
+                    {
+                        "url": false,
+                        "title": "ScienceDirect Snapshot",
+                        "mimeType": "text/html"
+                    },
+                    {
+                        "url": false,
+                        "title": "ScienceDirect Full Text PDF",
+                        "mimeType": "application/pdf"
+                    }
+                ],
+                "title": "Solving the Autism Puzzle a Few Pieces at a Time",
+                "publicationTitle": "Neuron",
+                "volume": "70",
+                "issue": "5",
+                "pages": "806-808",
+                "date": "June 9, 2011",
+                "backupPublicationTitle": "",
+                "ISBN": "0896-6273",
+                "ISSN": "0896-6273",
+                "DOI": "16/j.neuron.2011.05.025",
+                "url": "http://www.sciencedirect.com/science/article/pii/S0896627311004430",
+                "abstractNote": "\u000aIn this issue, a pair of studies (Levy et al. and Sanders et al.) identify several de novo copy-number variants that together account for 5%-8% of cases of simplex autism spectrum disorders. These studies suggest that several hundreds of loci are likely to contribute to the complex genetic heterogeneity of this group of disorders. An accompanying study in this issue (Gilman et al.), presents network analysis implicating these CNVs in neural processes related to synapse development, axon targeting, and neuron motility.",
+                "libraryCatalog": "ScienceDirect"
+            }
+        ]
+    }
+]
+/** END TEST CASES **/
