@@ -685,8 +685,8 @@ Zotero.Translate.Base.prototype = {
 	/**
 	 * Indicates that a new async process is finished
 	 */
-	"decrementAsyncProcesses":function() {
-		this._runningAsyncProcesses--;
+	"decrementAsyncProcesses":function(by) {
+		this._runningAsyncProcesses -= (by ? by : 1);
 		Zotero.debug("Translate: Decremented asynchronous processes to "+this._runningAsyncProcesses, 4);
 		if(this._runningAsyncProcesses === 0) {
 			this.complete();
@@ -906,9 +906,8 @@ Zotero.Translate.Base.prototype = {
 		var oldState = this._currentState;
 		
 		// reset async processes and propagate them to parent
-		if(this._parentTranslator) {
-			this._parentTranslator._runningAsyncProcesses -= this._runningAsyncProcesses;
-			if(this._parentTranslator._runningAsyncProcesses === 0) this._parentTranslator.complete();
+		if(this._parentTranslator && this._runningAsyncProcesses) {
+			this._parentTranslator.decrementAsyncProcesses(this._runningAsyncProcesses);
 		}
 		this._runningAsyncProcesses = 0;
 		
