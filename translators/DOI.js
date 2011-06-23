@@ -1,3 +1,17 @@
+{
+	"translatorID":"c159dcfe-8a53-4301-a499-30f6549c340d",
+	"translatorType":4,
+	"label":"DOI",
+	"creator":"Simon Kornblith",
+	"target":null,
+	"minVersion":"1.0.10",
+	"maxVersion":"",
+	"priority":300,
+	"browserSupport":"gcs",
+	"inRepository":true,
+	"lastUpdated":"2011-06-23 08:58:22"
+}
+
 var items = {};
 var selectArray = {};
 
