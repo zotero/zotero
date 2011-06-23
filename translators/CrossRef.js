@@ -4,18 +4,20 @@
 	"label":"CrossRef",
 	"creator":"Simon Kornblith",
 	"target":"^https?://partneraccess\\.oclc\\.org/",
-	"minVersion":"3.0",
+	"minVersion":"2.1.9",
 	"maxVersion":"",
 	"priority":90,
+	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2011-06-21 02:10:40"
+	"lastUpdated":"2011-06-23 08:05:22"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
 var ns;
 
 function detectSearch(item) {
-	if(item.itemType == "journalArticle") {
+	// query: should we make this more forgiving?
+	if(item.itemType === "journalArticle" || item.DOI) {
 		return true;
 	}
 	return false;
@@ -213,7 +215,7 @@ function processCrossRef(xmlOutput) {
 	item.url = ZU.xpathText(refXML, 'c:doi_data/c:resource', ns);
 	item.title = ZU.xpathText(refXML, 'c:titles[1]/c:title[1]', ns);
 	
-	Zotero.debug(item);
+	//Zotero.debug(JSON.stringify(item, null, 4));
 	
 	item.complete();
 	return true;
@@ -225,6 +227,8 @@ function doSearch(item) {
 		if(co.indexOf("url_ver=") == -1) {
 			co = "url_ver=Z39.88-2004&"+co;
 		}
+	} else if(item.DOI) {
+		var co = "url_ver=Z39.88-2004&&rft_id=info:doi/"+ZU.cleanDOI(item.DOI.toString());
 	} else {
 		var co = Zotero.Utilities.createContextObject(item);
 	}
@@ -236,3 +240,43 @@ function doSearch(item) {
 	
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "search",
+		"input": {
+			"DOI":"10.1017/CCOL0521858429.016"
+		},
+		"items": [
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"creatorType": "editor",
+						"firstName": "John",
+						"lastName": "Rodden"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Christopher",
+						"lastName": "Hitchens"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"bookTitle": "The Cambridge Companion to George Orwell",
+				"place": "Cambridge",
+				"ISBN": "0521858429, 9780521858427, 0521675073, 9780521675079",
+				"publisher": "Cambridge University Press",
+				"pages": "201-207",
+				"DOI": "10.1017/CCOL0521858429.016",
+				"url": "http://cco.cambridge.org/extract?id=ccol0521858429_CCOL0521858429A016",
+				"title": "Why Orwell still matters",
+				"libraryCatalog": "CrossRef"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
