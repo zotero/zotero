@@ -7,8 +7,9 @@
 	"minVersion":"1.0.10",
 	"maxVersion":"",
 	"priority":300,
+	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2010-01-05 09:05:00"
+	"lastUpdated":"2011-06-23 08:58:22"
 }
 
 var items = {};
