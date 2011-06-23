@@ -159,20 +159,26 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
 
 /**
  * Fetches the page for a given test and runs it
+ * This function is only applicable in Firefox; it is overridden in translator_global.js in Chrome
+ * and Safari
  * @param {Object} test Test to execute
  * @param {Document} doc DOM document to test against
  * @param {Function} testDoneCallback A callback to be executed when test is complete
  */
 Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneCallback) {
 	var me = this;
-	Zotero.HTTP.processDocuments(test.url,
+	var hiddenBrowser = Zotero.HTTP.processDocuments(test.url,
 		function(doc) {
-			me.runTest(test, doc, testDoneCallback);
+			me.runTest(test, doc, function(obj, test, status, message) {
+				Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+				testDoneCallback(obj, test, status, message);
+			});
 		},
 		null,
 		function(e) {
 			testDoneCallback(this, test, "failed", "Translation failed to initialize: "+e);
-		}
+		},
+		true
 	);
 };
 
