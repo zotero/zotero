@@ -91,6 +91,11 @@ Zotero.Translate.Sandbox = {
 			// if we're not supposed to save the item or we're in a child translator,
 			// just return the item array
 			if(translate._libraryID === false || translate._parentTranslator) {
+				// remove null, undefined, and false properties
+				for(var i in item) {
+					if(!item[i] && item[i] !== 0) delete item[i];
+				}
+				
 				translate.newItems.push(item);
 				translate._runHandler("itemDone", item, item);
 				return;
@@ -899,7 +904,14 @@ Zotero.Translate.Base.prototype = {
 			return;
 		}
 		var oldState = this._currentState;
+		
+		// reset async processes and propagate them to parent
+		if(this._parentTranslator) {
+			this._parentTranslator._runningAsyncProcesses -= this._runningAsyncProcesses;
+			if(this._parentTranslator._runningAsyncProcesses === 0) this._parentTranslator.complete();
+		}
 		this._runningAsyncProcesses = 0;
+		
 		if(!returnValue && this._returnValue) returnValue = this._returnValue;
 		
 		var errorString = null;
