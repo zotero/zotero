@@ -504,14 +504,17 @@ Zotero.HTTP = new function() {
 	 * @param {Function} processor Callback to be executed for each document loaded
 	 * @param {Function} done Callback to be executed after all documents have been loaded
 	 * @param {Function} exception Callback to be executed if an exception occurs
+	 * @param {Boolean} dontDelete Don't delete the hidden browser upon completion; calling function
+	 *                             must call deleteHiddenBrowser itself.
+	 * @return {browser} Hidden browser used for loading
 	 */
-	this.processDocuments = function(urls, processor, done, exception) {
+	this.processDocuments = function(urls, processor, done, exception, dontDelete) {
 		/**
 		 * Removes event listener for the load event and deletes the hidden browser
 		 */
 		var removeListeners = function() {
 			hiddenBrowser.removeEventListener(loadEvent, onLoad, true);
-			Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+			if(!dontDelete) Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
 		}
 		
 		/**
@@ -572,6 +575,8 @@ Zotero.HTTP = new function() {
 		hiddenBrowser.addEventListener(loadEvent, onLoad, true);
 		
 		doLoad();
+		
+		return hiddenBrowser;
 	}
 	
 	/**
