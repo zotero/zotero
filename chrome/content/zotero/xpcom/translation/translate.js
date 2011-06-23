@@ -691,7 +691,7 @@ Zotero.Translate.Base.prototype = {
 		if(this._runningAsyncProcesses === 0) {
 			this.complete();
 		}
-		if(this._parentTranslator) this._parentTranslator.decrementAsyncProcesses();
+		if(this._parentTranslator) this._parentTranslator.decrementAsyncProcesses(by);
 	},
 
 	/**
