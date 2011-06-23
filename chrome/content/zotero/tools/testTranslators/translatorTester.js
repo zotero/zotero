@@ -79,20 +79,26 @@ Zotero_TranslatorTester = function(translator, type, debug) {
  * Removes document objects, which contain cyclic references, and other fields to be ignored from items
  * @param {Object} Item, in the format returned by Zotero.Item.serialize()
  */
-Zotero_TranslatorTester._sanitizeItem = function(item) {
-	// remove cyclic references
+Zotero_TranslatorTester._sanitizeItem = function(item, forSave) {
+	// remove cyclic references 
 	if(item.attachments && item.attachments.length) {
+		// don't actually test URI equality
 		for (var i=0; i<item.attachments.length; i++) {
-			if(item.attachments[i].document && item.attachments[i].document.location) {
-				item.attachments[i].url = item.attachments[i].document.location.href;
-				delete item.attachments[i].document;
+			if(item.attachments[i].document) {
+				item.attachments[i].document = false;
+			} else if(item.attachments[i].url) {
+				item.attachments[i].url = false;
 			}
 		}
 	}
 	
 	// remove fields to be ignored
 	for(var j in Zotero_TranslatorTester_IGNORE_FIELDS) {
-		delete item[Zotero_TranslatorTester_IGNORE_FIELDS[j]];
+		if(forSave) {
+			delete item[Zotero_TranslatorTester_IGNORE_FIELDS[j]]
+		} else {
+			item[Zotero_TranslatorTester_IGNORE_FIELDS[j]] = false;
+		}
 	}
 	
 	return item;
@@ -115,14 +121,24 @@ Zotero_TranslatorTester.prototype.setTests = function(tests) {
  */
 Zotero_TranslatorTester.prototype.runTests = function(testDoneCallback, recursiveRun) {
 	if(!recursiveRun) {
-		this._debug(this, "TranslatorTester: Running "+this.pending.length+" tests for "+this._translator.label);
+		var w = (this.pending.length === 1) ? " test" : " tests"; 
+		this._debug(this, "TranslatorTester: Running "+this.pending.length+" "+w+" for "+this._translator.label);
 	}
+	
 	if(!this.pending.length) {
 		// always call testDoneCallback once if there are no tests
 		if(!recursiveRun && testDoneCallback) testDoneCallback(this, null, "unknown", "No tests present");
 		return;
 	}
 	
+	this._runTestsRecursively(testDoneCallback);
+};
+
+/**
+ * Executes tests for this translator, without checks or a debug message
+ * @param {Function} testDoneCallback A callback to be executed each time a test is complete
+ */
+Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallback) {
 	var test = this.pending.shift();
 	var testNumber = this.tests.length-this.pending.length;
 	var me = this;
@@ -134,7 +150,11 @@ Zotero_TranslatorTester.prototype.runTests = function(testDoneCallback, recursiv
 		me.runTests(testDoneCallback, true);
 	};
 	
-	this.fetchPageAndRunTest(test, callback);
+	if(this._type === "web") {
+		this.fetchPageAndRunTest(test, callback);
+	} else {
+		this.runTest(test, null, callback);
+	}
 };
 
 /**
@@ -159,13 +179,20 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 /**
  * Executes a test for a translator, given the document to test upon
  * @param {Object} test Test to execute
- * @param {Document} doc DOM document to test against
+ * @param {Document} data DOM document to test against
  * @param {Function} testDoneCallback A callback to be executed when test is complete
  */
 Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback) {
 	var me = this;
 	var translate = Zotero.Translate.newInstance(this._type);
-	translate.setDocument(doc);
+	
+	if(this._type === "web") {
+		translate.setDocument(doc);
+	} else if(this._type === "import") {
+		translate.setString(test.input);
+	} else if(this._type === "search") {
+		translate.setSearch(test.input);
+	}
 	
 	translate.setHandler("translators", function(obj, translators) {
 		me._runTestTranslate(translate, translators, test, testDoneCallback);
@@ -173,6 +200,29 @@ Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
 	translate.setHandler("debug", this._debug);
 	translate.setHandler("done", function(obj, returnValue) {
 		me._checkResult(test, obj, returnValue, testDoneCallback);
+	});
+	translate.setHandler("select", function(obj, items, callback) {
+		if(test.items !== "multiple" && test.items.length <= 1) {
+			testDoneCallback(me, test, "failed", "Zotero.selectItems() called, but only one item defined in test");
+			callback({});
+		}
+		
+		var newItems = {};
+		var haveItems = false;
+		for(var i in items) {
+			newItems[i] = items[i];
+			haveItems = true;
+			
+			// only save one item if "items":"multiple" (as opposed to an array of items)
+			if(test.items === "multiple") break;
+		}
+		
+		if(!haveItems) {
+			testDoneCallback(me, test, "failed", "No items defined");
+			callback({});
+		}
+		
+		callback(newItems);
 	});
 	
 	// internal hack to call detect on this translator
@@ -189,8 +239,9 @@ Zotero_TranslatorTester.prototype._runTestTranslate = function(translate, transl
 	if(!translators.length) {
 		testDoneCallback(this, test, "failed", "Detection failed");
 		return;
-	} else if(translators[0].itemType !== "multiple" && test.items.length > 1 ||
-			test.items.length === 1 && translators[0].itemType !== test.items[0].itemType) {
+	} else if(this._type === "web" && (translators[0].itemType !== "multiple" && test.items.length > 1 ||
+			test.items.length === 1 && translators[0].itemType !== test.items[0].itemType)) {
+				// this handles "items":"multiple" too, since the string has length 8
 		testDoneCallback(this, test, "failed", "Detection returned wrong item type");
 		return;
 	}
@@ -217,18 +268,20 @@ Zotero_TranslatorTester.prototype._checkResult = function(test, translate, retur
 		return;
 	}
 	
-	if(translate.newItems.length !== test.items.length) {
-		testDoneCallback(this, test, "unknown", "Expected "+test.items.length+" items; got "+translate.newItems.length);
-		return;
-	}
-	
-	for(var i in test.items) {
-		var testItem = Zotero_TranslatorTester._sanitizeItem(test.items[i]);
-		var translatedItem = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
-		
-		if(!this._compare(testItem, translatedItem)) {
-			testDoneCallback(this, test, "unknown", "Item "+i+" does not match");
+	if(test.items !== "multiple") {
+		if(translate.newItems.length !== test.items.length) {
+			testDoneCallback(this, test, "unknown", "Expected "+test.items.length+" items; got "+translate.newItems.length);
 			return;
+		}
+		
+		for(var i in test.items) {
+			var testItem = Zotero_TranslatorTester._sanitizeItem(test.items[i]);
+			var translatedItem = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
+			
+			if(!this._compare(testItem, translatedItem)) {
+				testDoneCallback(this, test, "unknown", "Item "+i+" does not match");
+				return;
+			}
 		}
 	}
 	
@@ -241,12 +294,26 @@ Zotero_TranslatorTester.prototype._checkResult = function(test, translate, retur
  * @param {Function} testReadyCallback A callback to be passed test (as object) when complete
  */
 Zotero_TranslatorTester.prototype.newTest = function(doc, testReadyCallback) {
+	// keeps track of whether select was called
+	var multipleMode = false;
+	
 	var me = this;
 	var translate = Zotero.Translate.newInstance(this._type);
 	translate.setDocument(doc);
 	translate.setTranslator(this._translator);
 	translate.setHandler("debug", this._debug);
-	translate.setHandler("done", function(obj, returnValue) { me._createTest(obj, returnValue, testReadyCallback) });
+	translate.setHandler("select", function(obj, items, callback) {
+		multipleMode = true;
+		
+		var newItems = {};
+		for(var i in items) {
+			newItems[i] = items[i];
+			break;
+		}
+		
+		callback(newItems);
+	});
+	translate.setHandler("done", function(obj, returnValue) { me._createTest(obj, multipleMode, returnValue, testReadyCallback) });
 	translate.translate(false);
 };
 
@@ -255,16 +322,26 @@ Zotero_TranslatorTester.prototype.newTest = function(doc, testReadyCallback) {
  * @param {Zotero.Translate} translate The Zotero.Translate instance
  * @param {Function} testDoneCallback A callback to be passed test (as object) when complete
  */
-Zotero_TranslatorTester.prototype._createTest = function(translate, returnValue, testReadyCallback) {
+Zotero_TranslatorTester.prototype._createTest = function(translate, multipleMode, returnValue, testReadyCallback) {
 	if(!returnValue) {
 		testReadyCallback(returnValue);
 		return;
 	}
 	
-	for(var i in translate.newItems) Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
-	testReadyCallback(this, {"type":this._type,
-		"url":translate.document.location.href,
-		"items":translate.newItems});
+	if(!translate.newItems.length) {
+		testReadyCallback(false);
+		return;
+	}
+	
+	if(multipleMode) {
+		var items = "multiple";
+	} else {
+		for(var i in translate.newItems) Zotero_TranslatorTester._sanitizeItem(translate.newItems[i], true);
+		var items = translate.newItems;
+	}
+	
+	testReadyCallback(this, {"type":this._type, "url":translate.document.location.href,
+		"items":items});
 };
 
 
@@ -304,12 +381,7 @@ Zotero_TranslatorTester.prototype._compare = function(i, j) {
 Zotero_TranslatorTester.prototype._objectCompare = function(x, y) {
 	// Special handlers
 	var _debug = this._debug;
-	var special = { 
-		"complete" : function(a,b) { _debug(this, "Ignoring non-matching parameter 'complete'"); return true },
-		"accessDate" : function(a,b) { _debug(this, "Ignoring non-matching parameter 'accessDate'"); return true },
-		"checkFields" : function(a,b) { _debug(this, "Ignoring non-matching parameter 'checkFields'"); return true }
-	};
-
+	
 	var returner = function(param) {
 			if (special[param]) return special[param](x[param], y[param]);
 			else return false;
@@ -320,42 +392,39 @@ Zotero_TranslatorTester.prototype._objectCompare = function(x, y) {
 		return false;
 	}
 
-	for(p in y) { if(typeof(x[p])=='undefined') {
-			this._debug(this, "Param "+p+" in y not defined in x");
-			return returner(p);
+	for(p in y) {
+		if(y[p] || y[p] === 0) {
+			switch(typeof(y[p])) {
+				case 'object':
+					if (!this._objectCompare(y[p],x[p])) { 
+						return false;
+					};
+					break;
+				case 'function':
+					if (typeof(x[p])=='undefined' 
+						|| (y[p].toString() != x[p].toString())) {
+						this._debug(this, "Function "+p+" defined in y, not in x, or definitions differ");
+						return false;
+					}
+					break;
+				default:
+					if (y[p] != x[p] && x[p] !== false) {	// special exemption: x (test item)
+															// can have a property set to false
+															// and we will ignore it here
+						this._debug(this, "Param "+p+" differs: " + JSON.stringify({x:x[p], y:y[p]}));
+						return false;
+					}
+			}
+		} else if(x[p] || x[p] === 0) { 
+			this._debug(this, "Param "+p+" true in x, not in y");
+			return false;
 		}
 	}
 
-	for(p in y) { if (y[p]) {
-		switch(typeof(y[p])) {
-			case 'object':
-				if (!this._objectCompare(y[p],x[p])) { 
-					return returner(p);
-				};
-				break;
-			case 'function':
-				if (typeof(x[p])=='undefined' 
-					|| (y[p].toString() != x[p].toString())) {
-					this._debug(this, "Function "+p+" defined in y, not in x, or definitions differ");
-					return returner(p) };
-				break;
-			default:
-				if (y[p] != x[p]) {
-					this._debug(this, "Param "+p+" differs: " + JSON.stringify({x:x[p], y:y[p]}));
-					return returner(p);
-				}
-		}
-	} else {
-		if (x[p]) { 
-			this._debug(this, "Param "+p+" true in x, not in y");
-			return returner(p);
-		}
-	} }
-
 	for(p in x) {
-		if(typeof(y[p])=='undefined') {
+		if((x[p] || x[p] === 0) && typeof(y[p])=='undefined') {
 			this._debug(this, "Param "+p+" in x not defined in y");
-			return returner(p);
+			return false;
 		}
 	}
 	return true;
