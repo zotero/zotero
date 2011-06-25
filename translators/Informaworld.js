@@ -1,14 +1,14 @@
 {
-	"translatorID":"1885b93c-cf37-4b25-aef5-283f42eada9d",
-	"label":"Informaworld",
-	"creator":"Michael Berkowitz",
-	"target":"^http://www\\.informaworld\\.com",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"translatorType":4,
-	"lastUpdated":"2011-05-23 06:45:00"
+        "translatorID": "1885b93c-cf37-4b25-aef5-283f42eada9d",
+        "label": "Informaworld",
+        "creator": "Michael Berkowitz",
+        "target": "^http://www\\.informaworld\\.com",
+        "minVersion": "1.0.0b4.r5",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "lastUpdated": "2011-06-22 23:21:54"
 }
 
 /* Test URLs
@@ -22,26 +22,32 @@ Journal issue ToC:
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf("quicksearch") !== -1 || url.indexOf("title~db") !== -1) {
+	if (url.indexOf("quicksearch") !== -1 ||
+            (url.indexOf("title~db") !== -1
+                && !doc.evaluate('//div[@id="breadcrumb"]/a[text() = "Books"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext())) {
 		return "multiple";
 	} else if (url.indexOf("content=g") != -1 || 
 			doc.evaluate('//div[@id="browse"]//tbody/tr/td[2]/a[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ||
 			doc.evaluate('//div[@id="title"]//td[2]/div/strong/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
-	} else if (doc.evaluate('//a[substring(text(), 2, 8) = "Download"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (doc.evaluate('//a[substring(text(), 2, 8) = "Download"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ||
+            doc.evaluate('//div[@id="breadcrumb"]/a[text() = "Journals" or text() = "Books"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext() ) {
 		if (doc.evaluate('//img[substring(@title, 1, 17) = "Publication type:"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var pubtype = doc.evaluate('//img[substring(@title, 1, 17) = "Publication type:"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().title;
+			var pubtype = doc.evaluate('//div[@id="breadcrumb"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext().title;
 			if (pubtype.match("journal")) {
 				return "journalArticle";
 			} else if (pubtype.match("book")) {
 				return "bookSection";
 			}
 		} else {
+            if (doc.evaluate('//div[@id="breadcrumb"]/a[text() = "Books"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+                return "book";
+            }
 			// Default to journal article
 			return "journalArticle";
 		}
 	} else {
-		return true;
+		return false;
 	}
 }
 
@@ -69,8 +75,9 @@ function doWeb(doc, url) {
 		var id = newDoc.location.href.match(/content=([\w\d]+)/);
 		// If URL has DOI rather than id, use navbar link to get id
 		if (id[1] == 10) {
-			id = newDoc.evaluate('//div[@id="contenttabs"]//a[@title = "Article"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().href;
-			id = id.match(/content=([\w\d]+)/);
+			id = newDoc.evaluate('//div[@id="contenttabs"]//a[@title = "Article"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext();
+			if (!id) id = newDoc.evaluate('//a[img[@class="downloadicon" and @title = "Download PDF"]]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext();
+            id = id.href.match(/content=([\w\d]+)/);
 		}
 		var post = 'tab=citation&selecteditems=' + id[1].substr(1) + '&content=' + id[1] + '&citstyle=refworks&showabs=false&format=file';
 		data.postdata = post;
@@ -182,3 +189,89 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processAsync(sets, callbacks, function () { Zotero.done(); });
 	Zotero.wait();
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+    {
+        "type": "web",
+        "url": "http://www.informaworld.com/smpp/content~db=all?content=10.1080/00221687509499713",
+        "items": [
+            {
+                "itemType": "journalArticle",
+                "creators": [
+                    {
+                        "lastName": "Savage",
+                        "firstName": "S. B.",
+                        "creatorType": "author"
+                    },
+                    {
+                        "lastName": "Brimberg",
+                        "firstName": "J.",
+                        "creatorType": "author"
+                    }
+                ],
+                "notes": [],
+                "tags": [],
+                "seeAlso": [],
+                "attachments": [
+                    {
+                        "url": "http://www.informaworld.com/smpp/ftinterface~content=a918972008~fulltext=713240930~frm=content",
+                        "title": "Analysis Of Plunging Phenomena In Water Reservoirs",
+                        "mimeType": "application/pdf"
+                    }
+                ],
+                "publicationTitle": "Journal of Hydraulic Research",
+                "title": "Analysis Of Plunging Phenomena In Water Reservoirs",
+                "publisher": "Taylor & Francis",
+                "ISBN": "0022-1686",
+                "ISSN": "0022-1686",
+                "date": "1975",
+                "volume": "13",
+                "issue": "2",
+                "pages": "187",
+                "url": "",
+                "DOI": "10.1080/00221687509499713",
+                "libraryCatalog": "Informaworld"
+            }
+        ]
+    },
+    {
+        "type": "web",
+        "url": "http://www.informaworld.com/smpp/title~db=all~content=t777453493",
+        "items": [
+            {
+                "itemType": "book",
+                "creators": [
+                    {
+                        "lastName": "Wisnicki",
+                        "firstName": "Adrian",
+                        "creatorType": "author"
+                    }
+                ],
+                "notes": [],
+                "tags": [],
+                "seeAlso": [],
+                "attachments": [
+                    {
+                        "url": "http://www.informaworld.com/978-0-415-95560-7",
+                        "title": "Informaworld Link",
+                        "snapshot": false
+                    },
+                    {
+                        "url": null,
+                        "title": "Conspiracy, Revolution, and Terrorism from Victorian Fiction to the Modern Novel",
+                        "mimeType": "application/pdf"
+                    }
+                ],
+                "title": "Conspiracy, Revolution, and Terrorism from Victorian Fiction to the Modern Novel",
+                "publisher": "Routledge",
+                "ISBN": "978-0-415-95560-7",
+                "ISSN": "978-0-415-95560-7",
+                "url": "",
+                "libraryCatalog": "Informaworld"
+            }
+        ]
+    }
+]
+/** END TEST CASES **/
