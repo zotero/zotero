@@ -122,7 +122,7 @@ Zotero.Translate.Sandbox = {
 		 */
 		"getOption":function(translate, option) {
 			if(typeof option !== "string") {
-				throw("Translate: getOption: option must be a string");
+				throw(new Error("getOption: option must be a string"));
 				return;
 			}
 			
@@ -149,7 +149,7 @@ Zotero.Translate.Sandbox = {
 			}
 			
 			if(typeof type !== "string") {
-				throw("Translate: loadTranslator: type must be a string");
+				throw(new Error("loadTranslator: type must be a string"));
 				return;
 			}
 			
@@ -158,7 +158,7 @@ Zotero.Translate.Sandbox = {
 			translation._parentTranslator = translate;
 			
 			if(translation instanceof Zotero.Translate.Export && !(translation instanceof Zotero.Translate.Export)) {
-				throw("Translate: only export translators may call other export translators");
+				throw(new Error("Only export translators may call other export translators"));
 			}
 			
 			/**
@@ -207,7 +207,7 @@ Zotero.Translate.Sandbox = {
 			safeTranslator.setTranslator = function(arg) {
 				var success = translation.setTranslator(arg);
 				if(!success) {
-					throw "Translator "+translate.translator[0].translatorID+" attempted to call invalid translatorID "+arg;
+					throw new Error("Translator "+translate.translator[0].translatorID+" attempted to call invalid translatorID "+arg);
 				}
 			};
 			safeTranslator.getTranslators = function() { return translation.getTranslators() };
@@ -226,7 +226,7 @@ Zotero.Translate.Sandbox = {
 				if(callback) translate.incrementAsyncProcesses();
 				var haveTranslatorFunction = function(translator) {
 					translation.translator[0] = translator;
-					if(!Zotero._loadTranslator(translator)) throw "Translator could not be loaded";
+					if(!Zotero._loadTranslator(translator)) throw new Error("Translator could not be loaded");
 					
 					if(Zotero.isFx) {
 						// do same origin check
@@ -243,8 +243,8 @@ Zotero.Translate.Sandbox = {
 						try {
 							secMan.checkSameOriginURI(outerSandboxURI, innerSandboxURI, false);
 						} catch(e) {
-							throw "Translate: getTranslatorObject() may not be called from web or search "+
-								"translators to web or search translators from different origins.";
+							throw new Error("getTranslatorObject() may not be called from web or search "+
+								"translators to web or search translators from different origins.");
 						}
 					}
 					
@@ -262,8 +262,8 @@ Zotero.Translate.Sandbox = {
 					return translation._sandboxManager.sandbox;
 				} else {
 					if(Zotero.isConnector && !callback) {
-						throw "Translate: Translator must accept a callback to getTranslatorObject() to "+
-							"operate in this translation environment.";
+						throw new Error("Translator must accept a callback to getTranslatorObject() to "+
+							"operate in this translation environment.");
 					}
 					
 					Zotero.Translators.get(translation.translator[0], haveTranslatorFunction);
@@ -319,7 +319,7 @@ Zotero.Translate.Sandbox = {
 		 */
 		"selectItems":function(translate, items, callback) {
 			if(Zotero.Utilities.isEmpty(items)) {
-				throw "Translate: translator called select items with no items";
+				throw new Error("Translator called select items with no items");
 			}
 			
 			if(translate._selectedItems) {
@@ -423,7 +423,7 @@ Zotero.Translate.Sandbox = {
 			}
 			
 			if(!item.title) {
-				throw "No title specified for item";
+				throw new Error("No title specified for item");
 			}
 			
 			// create short title
@@ -520,7 +520,7 @@ Zotero.Translate.Sandbox = {
 		 */
 		"nextCollection":function(translate) {
 			if(!translate.translator[0].configOptions.getCollections) {
-				throw("Translate: getCollections configure option not set; cannot retrieve collection");
+				throw(new Error("getCollections configure option not set; cannot retrieve collection"));
 			}
 			
 			return translate._itemGetter.nextCollection();
@@ -594,7 +594,7 @@ Zotero.Translate.Base.prototype = {
 	 */
 	"setTranslator":function(translator) {
 		if(!translator) {
-			throw new Error("Zotero.Translate: no translator specified");
+			throw new Error("No translator specified");
 		}
 		
 		this.translator = null;
@@ -604,7 +604,7 @@ Zotero.Translate.Base.prototype = {
 			if(translator.translatorID) {
 				this.translator = [translator];
 			} else {
-				throw("No translatorID specified");
+				throw(new Error("No translatorID specified"));
 			}
 		} else {
 			this.translator = [translator];
@@ -748,7 +748,7 @@ Zotero.Translate.Base.prototype = {
 	 */
 	"getTranslators":function(getAllTranslators) {
 		// do not allow simultaneous instances of getTranslators
-		if(this._currentState == "detect") throw "Translate: getTranslators: detection is already running";
+		if(this._currentState == "detect") throw new Error("getTranslators: detection is already running");
 		this._currentState = "detect";
 		this._getAllTranslators = getAllTranslators;
 		this._getTranslatorsGetPotentialTranslators();
@@ -832,7 +832,7 @@ Zotero.Translate.Base.prototype = {
 		this._currentState = "translate";
 		
 		if(!this.translator || !this.translator.length) {
-			throw("Translate: Failed: no translator specified");
+			throw new Error("Failed: no translator specified");
 		}
 		
 		this._libraryID = libraryID;
@@ -1300,6 +1300,7 @@ Zotero.Translate.Web.prototype._translateRPCComplete = function(obj, failureCode
 		for(var i in obj.items) {
 			this._runHandler("itemDone", null, obj.items[i]);
 		}
+		this.newItems = obj.items;
 		this.complete(true);
 	}
 }
@@ -1551,7 +1552,7 @@ Zotero.Translate.Export.prototype._prepareTranslation = function() {
 		var io = this._io = new Zotero.Translate.IO.String(null, this.path ? this.path : "", this.translator[0].configOptions["dataMode"]);
 		this.__defineGetter__("string", function() { return io.string; });
 	} else if(!Zotero.Translate.IO.Write) {
-		throw "Translate: Writing to files is not supported in this build of Zotero.";
+		throw new Error("Writing to files is not supported in this build of Zotero.");
 	} else {
 		this._io = new Zotero.Translate.IO.Write(this.location,
 			this.translator[0].configOptions["dataMode"],
@@ -1687,7 +1688,7 @@ Zotero.Translate.IO = {
 				var dp = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 				   .createInstance(Components.interfaces.nsIDOMParser);
 			} catch(e) {
-				throw "DOMParser not supported";
+				throw new Error("DOMParser not supported");
 			}
 		}
 		
@@ -1698,7 +1699,7 @@ Zotero.Translate.IO = {
 		}
 		
 		if(nodes.getElementsByTagName("parsererror").length) {
-			throw("DOMParser error: loading data into data store failed");
+			throw new Error("DOMParser error: loading data into data store failed");
 		}
 		
 		return nodes;
@@ -1945,7 +1946,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		
 		type = type.toLowerCase();
 		if(!containerTypes[type]) {
-			throw "Invalid container type in Zotero.RDF.newContainer";
+			throw new Error("Invalid container type in Zotero.RDF.newContainer");
 		}
 		
 		var about = this._getResource(about);
@@ -2016,7 +2017,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	"getResourceURI":function(resource) {
 		if(typeof(resource) == "string") return resource;
 		if(resource.uri) return resource.uri;
-		if(resource.toNT == undefined) throw "Zotero.RDF: getResourceURI called on invalid resource";
+		if(resource.toNT == undefined) throw new Error("Zotero.RDF: getResourceURI called on invalid resource");
 		return resource.toNT();
 	},
 	

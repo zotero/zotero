@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+const CONNECTOR_SERVER_API_VERSION = 1;
+
 Zotero.Server.Connector = function() {};
 Zotero.Server.Connector._waitingForSelection = {};
 Zotero.Server.Connector.Data = {};
@@ -227,6 +229,10 @@ Zotero.Server.Connector.GetData.prototype = {
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
 	"init":function(data, sendResponseCallback) {
+		if(data.apiVersion !== CONNECTOR_SERVER_API_VERSION) {
+			sendResponseCallback(412);
+		}
+		
 		// Translator data
 		var responseData = {"preferences":{}, "translators":[]};
 		
