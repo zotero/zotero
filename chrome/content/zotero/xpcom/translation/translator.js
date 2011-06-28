@@ -367,7 +367,7 @@ Zotero.Translators = new function() {
 		destFile.append(fileName);
 		
 		// JSON.stringify (FF 3.5.4 and up) has the benefit of indenting JSON
-		var metadataJSON = JSON.stringify(metadata,null,8);
+		var metadataJSON = JSON.stringify(metadata, null, "\t");
 		
 		var str = metadataJSON + "\n\n" + code;
 		
