@@ -67,7 +67,7 @@ Zotero.Connector_Debug = new function() {
 			callback(true, reportID);
 		}
 		
-		Zotero.HTTP.doPost("http://www.zotero.org/repo/report?debug=1", output,
+		Zotero.HTTP.doPost("http://www.zotero.org/repo/report?debug=1", Zotero.Debug.get(),
 			function(xmlhttp) {
 				if (!xmlhttp.responseXML) {
 					callback(false, 'Invalid response from server');
