@@ -22,8 +22,10 @@
     
     ***** END LICENSE BLOCK *****
 */
+
 Zotero.Connector = new function() {
 	const CONNECTOR_URI = "http://127.0.0.1:23119/";
+	const CONNECTOR_SERVER_API_VERSION = 1;
 	
 	this.isOnline = true;
 	this.haveRefreshedData = false;
@@ -34,6 +36,18 @@ Zotero.Connector = new function() {
 	 */
 	this.init = function() {
 		Zotero.Connector.getData();
+	}
+	
+	/**
+	 * Checks if Zotero is online and passes current status to callback
+	 * @param {Function} callback
+	 */
+	this.checkIsOnline = function(callback) {
+		if(Zotero.Connector.isOnline) {
+			callback(true);
+		} else {
+			Zotero.Connector.getData(callback);
+		}
 	}
 	
 	function _getDataFile() {
@@ -76,9 +90,10 @@ Zotero.Connector = new function() {
 	this.EXCEPTION_NOT_AVAILABLE = 0;
 	this.EXCEPTION_BAD_REQUEST = 400;
 	this.EXCEPTION_NO_ENDPOINT = 404;
+	this.EXCEPTION_INCOMPATIBLE_VERSION = 412;
 	this.EXCEPTION_CONNECTOR_INTERNAL = 500;
 	this.EXCEPTION_METHOD_NOT_IMPLEMENTED = 501;
-	this.EXCEPTION_CODES = [0, 400, 404, 500, 501];
+	this.EXCEPTION_CODES = [0, 400, 404, 412, 500, 501];
 	
 	/**
 	 * Updates Zotero's status depending on the success or failure of a request
@@ -120,9 +135,9 @@ Zotero.Connector = new function() {
 	 */
 	this.getData = function(callback) {
 		Zotero.HTTP.doPost(CONNECTOR_URI+"connector/getData",
-			JSON.stringify({"browser":Zotero.browser}),
+			JSON.stringify({"browser":Zotero.browser, "apiVersion":CONNECTOR_SERVER_API_VERSION}),
 			function(req) {
-				var isOnline = req.status !== 0;
+				var isOnline = req.status !== 0 && req.status !== 412;
 				
 				if(isOnline) {
 					// if request succeded, update data
@@ -172,7 +187,8 @@ Zotero.Connector = new function() {
 	this.callMethod = function(method, data, callback) {
 		Zotero.HTTP.doPost(CONNECTOR_URI+"connector/"+method, JSON.stringify(data),
 			function(req) {
-				_checkState(req.status != 0, function() {
+				_checkState(req.status !== this.EXCEPTION_NOT_AVAILABLE
+					&& req.status !== this.EXCEPTION_INCOMPATIBLE_VERSION, function() {
 						if(!callback) return;
 						
 						if(Zotero.Connector.EXCEPTION_CODES.indexOf(req.status) !== -1) {
