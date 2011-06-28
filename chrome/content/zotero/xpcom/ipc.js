@@ -24,7 +24,7 @@
 */
 
 Zotero.IPC = new function() {
-	var _libc, _libcPath, _instancePipe, _user32;
+	var _libc, _libcPath, _instancePipe, _user32, open, write, close, instancePipeOpen;
 	
 	/**
 	 * Initialize pipe for communication with connector
@@ -44,19 +44,58 @@ Zotero.IPC = new function() {
 	/**
 	 * Parses input received via instance pipe
 	 */
-	this.parsePipeInput = function(msg) {
-		// remove a newline if there is one
-		if(msg[msg.length-1] === "\n") msg = msg.substr(0, msg.length-1);
-		
-		Zotero.debug('IPC: Received "'+msg+'"');
-		
-		if(msg === "releaseLock" && !Zotero.isConnector) {
-			switchConnectorMode(true);
-		} else if(msg === "lockReleased") {
-			Zotero.onDBLockReleased();
-		} else if(msg === "initComplete") {
-			Zotero.onInitComplete();
+	this.parsePipeInput = function(msgs) {
+		for each(var msg in msgs.split("\n")) {
+			if(!msg) continue;
+			Zotero.debug('IPC: Received "'+msg+'"');
+			
+			if(msg === "releaseLock" && !Zotero.isConnector) {
+				switchConnectorMode(true);
+			} else if(msg === "lockReleased") {
+				Zotero.onDBLockReleased();
+			} else if(msg === "initComplete") {
+				Zotero.onInitComplete();
+			}
 		}
+	}
+	
+	/**
+	 * Writes safely to a file, avoiding blocking
+	 * @param {String} path The path of the file
+	 * @param {String} string The string to write to the file
+	 * @return {Boolean} True if write succeeded; false otherwise
+	 */
+	this.safePipeWrite = function(path, string) {
+		if(!open) {
+			// safely write to instance pipes
+			var lib = Zotero.IPC.getLibc();
+			if(!lib) return false;
+			
+			// int open(const char *path, int oflag);
+			if(Zotero.isFx36) {
+				open = lib.declare("open", ctypes.default_abi, ctypes.int32_t, ctypes.string, ctypes.int32_t);
+			} else {
+				open = lib.declare("open", ctypes.default_abi, ctypes.int, ctypes.char.ptr, ctypes.int);
+			}
+			// ssize_t write(int fildes, const void *buf, size_t nbyte);
+			if(Zotero.isFx36) {
+				write = lib.declare("write", ctypes.default_abi, ctypes.int32_t, ctypes.int32_t, ctypes.string, ctypes.uint32_t);
+			} else {
+				write = lib.declare("write", ctypes.default_abi, ctypes.ssize_t, ctypes.int, ctypes.char.ptr, ctypes.size_t);
+			}
+			// int close(int filedes);
+			if(Zotero.isFx36) {
+				close = lib.declare("close", ctypes.default_abi, ctypes.int32_t, ctypes.int32_t);
+			} else {
+				close = lib.declare("close", ctypes.default_abi, ctypes.int, ctypes.int);
+			}
+		}
+		
+		var fd = open(path, 0x0004 | 0x0001);	// O_NONBLOCK | O_WRONLY
+		if(fd === -1) return false;			
+		write(fd, string, string.length);
+		close(fd);
+		return true;
 	}
 	
 	/**
@@ -145,6 +184,13 @@ Zotero.IPC = new function() {
 			user32.close();
 			return false;
 		} else {			// communicate via pipes
+			// make sure instance pipe is open and accepting input, or ignore if it has been deleted
+			if(!instancePipeOpen && _instancePipe.exists()) {
+				while(!Zotero.IPC.safePipeWrite(_instancePipe.path, "test\n")) {
+					Zotero.wait();
+				}
+				instancePipeOpen = true;
+			}
 			
 			// look for other Zotero instances
 			var pipes = [];
@@ -160,37 +206,13 @@ Zotero.IPC = new function() {
 			}
 			
 			if(!pipes.length) return false;
-			
-			// safely write to instance pipes
-			var lib = this.getLibc();
-			if(!lib) return false;
-			
-			// int open(const char *path, int oflag);
-			if(Zotero.isFx36) {
-				var open = lib.declare("open", ctypes.default_abi, ctypes.int32_t, ctypes.string, ctypes.int32_t);
-			} else {
-				var open = lib.declare("open", ctypes.default_abi, ctypes.int, ctypes.char.ptr, ctypes.int);
-			}
-			// ssize_t write(int fildes, const void *buf, size_t nbyte);
-			if(Zotero.isFx36) {
-			} else {
-				var write = lib.declare("write", ctypes.default_abi, ctypes.ssize_t, ctypes.int, ctypes.char.ptr, ctypes.size_t);
-			}
-			// int close(int filedes);
-			if(Zotero.isFx36) {
-			} else {
-				var close = lib.declare("close", ctypes.default_abi, ctypes.int, ctypes.int);
-			}
-			
 			var success = false;
 			for each(var pipe in pipes) {
-				var fd = open(pipe.path, 0x0004 | 0x0001);	// O_NONBLOCK | O_WRONLY
-				if(fd !== -1) {
-					Zotero.debug('IPC: Broadcasting "'+msg+'" to instance '+pipe.leafName);
+				Zotero.debug('IPC: Trying to broadcast "'+msg+'" to instance '+pipe.leafName);
+				if(Zotero.IPC.safePipeWrite(pipe.path, msg+"\n")) {
 					success = true;
-					write(fd, msg+"\n", msg.length);
-					close(fd);
 				} else {
+					Zotero.debug('IPC: Removing defunct pipe '+pipe.leafName);
 					try {
 						pipe.remove(true);
 					} catch(e) {};
@@ -320,13 +342,19 @@ Zotero.IPC.Pipe = new function() {
 	 * deletes it
 	 */
 	this.writeShutdownMessage = function(file) {
+		// Make sure pipe actually exists
+		if(!file.exists()) {
+			Zotero.debug("IPC: Not closing pipe "+file.path+": already deleted");
+			return;
+		}
+		
+		// Keep trying to write to pipe until we succeed, in case pipe is not yet open
 		Zotero.debug("IPC: Closing pipe "+file.path);
-		var oStream = Components.classes["@mozilla.org/network/file-output-stream;1"].
-			getService(Components.interfaces.nsIFileOutputStream);
-		oStream.init(file, 0x02 | 0x10, 0, 0);
-		const cmd = "Zotero shutdown\n";
-		oStream.write(cmd, cmd.length);
-		oStream.close();
+		while(!Zotero.IPC.safePipeWrite(file.path, "Zotero shutdown\n")) {
+			Zotero.wait();
+		}
+		
+		// Delete pipe
 		file.remove(false);
 	}
 }
@@ -405,14 +433,7 @@ Zotero.IPC.Pipe.WorkerThread = function(file, callback) {
 	worker.postMessage({"path":file.path, "libc":Zotero.IPC.getLibcPath()});
 	
 	// add shutdown listener
-	Zotero.addShutdownListener(function() {
-		// wait for pending events to complete (so that we don't try to close the pipe before it 
-		// finishes opening)
-		while(Zotero.mainThread.processNextEvent(false)) {};
-		
-		// close pipe
-		Zotero.IPC.Pipe.writeShutdownMessage(file)
-	});
+	Zotero.addShutdownListener(Zotero.IPC.Pipe.writeShutdownMessage.bind(null, file));
 }
 
 Zotero.IPC.Pipe.WorkerThread.prototype = {
