@@ -33,7 +33,7 @@ function doWeb(doc, url){
 	if(detectWeb(doc, url) == "multiple") {  //search
 		var title;
 		var availableItems = new Array();
-		var articles = doc.evaluate('//li//div[@class="citation article"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var articles = doc.evaluate('//li//div[@class="citation article" or @class="citation tocArticle"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var article = false;
 		while (article = articles.iterateNext()) {
 			availableItems[article.href] = article.textContent;
