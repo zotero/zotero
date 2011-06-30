@@ -63,12 +63,20 @@ Zotero.Translate.ItemSaver.prototype = {
 		// clear timeout, since saving has begin
 		this._timeoutID = null;
 		
-		var newItems = new Array(this._itemsToSaveToServer.length);
+		var newItems = [];
 		for(var i in this._itemsToSaveToServer) {
 			var item = this._itemsToSaveToServer[i];
-			var newItem = newItems[i] = {};
+			
+			var newItem = {};
+			newItems.push(newItem);
 			
 			var typeID = Zotero.ItemTypes.getID(item.itemType);
+			if(!typeID) {
+				Zotero.debug("Translate: Invalid itemType "+item.itemType+"; saving as webpage");
+				item.itemType = "webpage";
+				typeID = Zotero.ItemTypes.getID(item.itemType);
+			}
+			
 			var fieldID;
 			for(var field in item) {
 				if(IGNORE_FIELDS.indexOf(field) !== -1) continue;
@@ -78,10 +86,41 @@ Zotero.Translate.ItemSaver.prototype = {
 				if(field === "itemType") {
 					newItem[field] = val;
 				} else if(field === "creators") {
-					// TODO normalize
-					newItem[field] = val;
+					// normalize creators
+					var newCreators = newItem.creators = [];
+					for(var j in val) {
+						var creator = val[j];
+						
+						// Single-field mode
+						if (creator.fieldMode && creator.fieldMode == 1) {
+							var newCreator = {
+								lastName: creator.lastName,
+								fieldMode: 1
+							};
+						}
+						// Two-field mode
+						else {
+							var newCreator = {
+								firstName: creator.firstName,
+								lastName: creator.lastName
+							};
+						}
+						
+						// ensure creatorType is present and valid
+						newCreator.creatorType = "author";
+						if(creator.creatorType) {
+							if(Zotero.CreatorTypes.getID(creator.creatorType)) {
+								newCreator.creatorType = creator.creatorType;
+							} else {
+								Zotero.debug("Translate: Invalid creator type "+creator.creatorType+"; falling back to author");
+							}
+						}
+						
+						newCreators.push(newCreator);
+					}
 				} else if(field === "tags") {
-					var newTags = [];
+					// normalize tags
+					var newTags = newItem.tags = [];
 					for(var j in val) {
 						var tag = val[j];
 						if(typeof tag === "object") {
@@ -90,15 +129,26 @@ Zotero.Translate.ItemSaver.prototype = {
 							} else if(tag.name) {
 								tag = tag.name;
 							} else {
+								Zotero.debug("Translate: Discarded invalid tag");
 								continue;
 							}
 						}
-						newTags.push({tag:tag.toString(), type:1})
+						newTags.push({"tag":tag.toString(), "type":1})
 					}
-					newItem.tags = newTags;
 				} else if(field === "notes") {
-					// TODO normalize
-					newItem[field] = val;
+					// normalize notes
+					var newNotes = newItem.notes = [];
+					for(var j in val) {
+						var note = val[j];
+						if(typeof note === "object") {
+							if(!note.note) {
+								Zotero.debug("Translate: Discarded invalid note");
+								continue;
+							}
+							note = note.note;
+						}
+						newNotes.push({"itemType":"note", "note":note.toString()});
+					}
 				} else if(fieldID = Zotero.ItemFields.getID(field)) {
 					// if content is not a string, either stringify it or delete it
 					if(typeof val !== "string") {
@@ -136,7 +186,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			if(!status) {
 				Zotero.Messaging.sendMessage("saveDialog_error", status);
 				Zotero.debug("Translate: Save to server payload:\n\n"+payload);
-				throw new Error("Translate: Save to server failed: "+message);
+				Zotero.logError(new Error("Translate: Save to server failed: "+message));
 			} else {
 				Zotero.debug("Translate: Save to server complete");
 			}
