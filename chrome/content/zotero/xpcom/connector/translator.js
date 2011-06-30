@@ -110,7 +110,8 @@ Zotero.Translators = new function() {
 		}
 		
 		// only need to get code if it is of some use
-		if(translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER) {
+		if(translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER
+				&& !translator.hasOwnProperty("code")) {
 			translator.getCode(function() { callback(translator) });
 		} else {
 			callback(translator);
@@ -120,14 +121,16 @@ Zotero.Translators = new function() {
 	/**
 	 * Gets all translators for a specific type of translation
 	 * @param {String} type The type of translators to get (import, export, web, or search)
-	 * @param {Function} [callback] An optional callback to be executed when translators have been
-	 *                              retrieved. If no callback is specified, translators are
-	 *                              returned.
+	 * @param {Function} callback A required callback to be executed when translators have been
+	 *                            retrieved.
+	 * @param {Boolean} [debugMode] Whether to assume debugging mode. If true, code is included for 
+	 *                              unsupported translators, and code originally retrieved from the
+	 *                              repo is re-retrieved from Zotero Standalone.
 	 */
-	this.getAllForType = function(type, callback, includeUnsupported) {
+	this.getAllForType = function(type, callback, debugMode) {
 		if(!_initialized) Zotero.Translators.init()
 		var translators = _cache[type].slice(0);
-		new Zotero.Translators.CodeGetter(translators, callback, translators, includeUnsupported);
+		new Zotero.Translators.CodeGetter(translators, callback, translators, debugMode);
 		return true;
 	}
 	
@@ -325,13 +328,13 @@ Zotero.Translators = new function() {
  * @param {Zotero.Translator[]} translators Translators for which to retrieve code
  * @param {Function} callback Callback to call once code has been retrieved
  * @param {Function} callbackArgs All arguments to be passed to callback (including translators)
- * @param {Boolean} [includeUnsupported] If true, include code for unsupported translators
+ * @param {Boolean} [debugMode] If true, include code for unsupported translators
  */
-Zotero.Translators.CodeGetter = function(translators, callback, callbackArgs, includeUnsupported) {
+Zotero.Translators.CodeGetter = function(translators, callback, callbackArgs, debugMode) {
 	this._translators = translators;
 	this._callbackArgs = callbackArgs;
 	this._callback = callback;
-	this._includeUnsupported = includeUnsupported;
+	this._debugMode = debugMode;
 	this.getCodeFor(0);
 }
 
@@ -344,9 +347,17 @@ Zotero.Translators.CodeGetter.prototype.getCodeFor = function(i) {
 			return;
 		}
 		
-		if(this._translators[i].runMode === Zotero.Translator.RUN_MODE_IN_BROWSER || this._includeUnsupported) {
-			// get next translator
-			this._translators[i].getCode(function() { me.getCodeFor(i+1) });
+		var translator = this._translators[i];
+		
+		// retrieve code if no code and translator is supported locally
+		if((translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER && !translator.hasOwnProperty("code"))
+				// or if debug mode is enabled (even if unsupported locally)
+				|| (this._debugMode && (!translator.hasOwnProperty("code")
+				// or if in debug mode and the code we have came from the repo (which doesn't
+				// include test cases)
+				|| translator.codeSource === Zotero.Repo.SOURCE_REPO))) {
+				// get next translator
+			translator.getCode(function() { me.getCodeFor(i+1) });
 			return;
 		}
 		
@@ -439,22 +450,19 @@ Zotero.Translator.prototype.init = function(info) {
  * Retrieves code for this translator
  */
 Zotero.Translator.prototype.getCode = function(callback) {
-	if(this.code) {
-		callback(true);
-	} else {
-		var me = this;
-		Zotero.Repo.getTranslatorCode(this.translatorID,
-			function(code) {
-				if(!code) {
-					callback(false);
-				} else {
-					// cache code for session only (we have standalone anyway)
-					me.code = code;
-					callback(true);
-				}
+	var me = this;
+	Zotero.Repo.getTranslatorCode(this.translatorID,
+		function(code, source) {
+			if(!code) {
+				callback(false);
+			} else {
+				// cache code for session only (we have standalone anyway)
+				me.code = code;
+				me.codeSource = source;
+				callback(true);
 			}
-		);
-	}
+		}
+	);
 }
 
 Zotero.Translator.prototype.__defineGetter__("displayOptions", function() {
