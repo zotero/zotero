@@ -83,6 +83,18 @@ Zotero.Translators = new function() {
 	}
 	
 	/**
+	 * Gets the translator that corresponds to a given ID, without attempting to retrieve code
+	 * @param {String} id The ID of the translator
+	 * @param {Function} [callback] An optional callback to be executed when translators have been
+	 *                              retrieved. If no callback is specified, translators are
+	 *                              returned.
+	 */
+	this.getWithoutCode = function(id) {
+		if(!_initialized) Zotero.Translators.init();
+		return _translators[id] ? _translators[id] : false;
+	}
+	
+	/**
 	 * Gets the translator that corresponds to a given ID
 	 * @param {String} id The ID of the translator
 	 * @param {Function} [callback] An optional callback to be executed when translators have been
@@ -219,6 +231,9 @@ Zotero.Translators = new function() {
 	
 	/**
 	 * Saves all translator data to localStorage
+	 * @param {Object[]} newMetadata Metadata for new translators
+	 * @param {Boolean} reset Whether to clear all existing translators and overwrite them with
+	 *                        the specified translators.
 	 */
 	this.update = function(newMetadata, reset) {
 		if(!_initialized) Zotero.Translators.init();
@@ -241,17 +256,17 @@ Zotero.Translators = new function() {
 			
 			// Update translators with new metadata
 			for(var i in newMetadata) {
-				var newTranslator = new Zotero.Translator(newMetadata[i]);
+				var newTranslator = newMetadata[i];
 				
 				if(_translators.hasOwnProperty(newTranslator.translatorID)) {
-					var oldLastUpdated = _translators[newTranslator.translatorID].lastUpdated;
+					var oldTranslator = _translators[newTranslator.translatorID];
 					
 					// check whether translator has changed
-					if(oldLastUpdated !== newTranslator.lastUpdated) {
+					if(oldTranslator.lastUpdated !== newTranslator.lastUpdated) {
 						// check whether newTranslator is actually newer than the existing
 						// translator, and if not, don't update
-						if(Zotero.Date.sqlToDate(newTranslator.lastUpdated) < Zotero.Date.sqlToDate(oldLastUpdated)) {
-							Zotero.debug("Translators: Received older version of "+newTranslator.label+" from repo ("+newTranslator.lastUpdated+" vs. "+oldLastUpdated+")");
+						if(Zotero.Date.sqlToDate(newTranslator.lastUpdated) < Zotero.Date.sqlToDate(oldTranslator.lastUpdated)) {
+							Zotero.debug("Translators: Received older version of "+newTranslator.label+" from repo ("+newTranslator.lastUpdated+" vs. "+oldTranslator.lastUpdated+")");
 							continue;
 						}
 						
@@ -262,14 +277,14 @@ Zotero.Translators = new function() {
 						}
 						
 						Zotero.debug("Translators: Updating "+newTranslator.label);
+						oldTranslator.init(newTranslator);
 						hasChanged = true;
 					}
 				} else {
 					Zotero.debug("Translators: Adding "+newTranslator.label);
+					_translators[newTranslator.translatorID] = new Zotero.Translator(newTranslator);
 					hasChanged = true;
 				}
-				
-				_translators[newTranslator.translatorID] = newTranslator;
 			}
 			
 			if(!hasChanged) return;
@@ -373,6 +388,13 @@ var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browser
  * @property {String} code The executable JavaScript for the translator
  */
 Zotero.Translator = function(info) {
+	this.init(info);
+}
+
+/**
+ * Initializes a translator from a set of info, clearing code if it is set
+ */
+Zotero.Translator.prototype.init = function(info) {
 	// make sure we have all the properties
 	for(var i in TRANSLATOR_REQUIRED_PROPERTIES) {
 		var property = TRANSLATOR_REQUIRED_PROPERTIES[i];
@@ -399,15 +421,21 @@ Zotero.Translator = function(info) {
 	if(this.translatorType & TRANSLATOR_TYPES["import"]) {
 		// compile import regexp to match only file extension
 		this.importRegexp = this.target ? new RegExp("\\."+this.target+"$", "i") : null;
+	} else if(this.hasOwnProperty("importRegexp")) {
+		delete this.importRegexp;
 	}
 	 
 	if(this.translatorType & TRANSLATOR_TYPES["web"]) {
 		// compile web regexp
 		this.webRegexp = this.target ? new RegExp(this.target, "i") : null;
+	} else if(this.hasOwnProperty("webRegexp")) {
+		delete this.webRegexp;
 	}
 	
 	if(info.code) {
 		this.code = preprocessCode(info.code);
+	} else if(this.hasOwnProperty("code")) {
+		delete this.code;
 	}
 }
 
