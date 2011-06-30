@@ -205,10 +205,25 @@ TranslatorTestView.prototype.runTests = function(doneCallback) {
  */
 function load(event) {	
 	if(window.chrome || window.safari) {
-		// initialize
+		// initialize injection
 		Zotero.initInject();
+		// make sure that connector is online
+		Zotero.Connector.checkIsOnline(function(status) {
+			if(status) {
+				init();
+			} else {
+				document.body.textContent = "To avoid excessive repo requests, the translator tester may only be used when Zotero Standalone is running.";
+			}
+		});
+	} else {
+		init();
 	}
-	
+}
+
+/**
+ * Builds translator display and retrieves translators
+ */
+function init() {
 	// create translator box
 	translatorBox = document.createElement("div");
 	translatorBox.id = "translator-box";
