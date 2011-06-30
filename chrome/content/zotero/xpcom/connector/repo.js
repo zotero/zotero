@@ -29,6 +29,9 @@ Zotero.Repo = new function() {
 	var _timeoutID;
 	const infoRe = /^\s*{[\S\s]*?}\s*?[\r\n]/;
 	
+	this.SOURCE_ZOTERO_STANDALONE = 1;
+	this.SOURCE_REPO = 2;
+	
 	/**
 	 * Try to retrieve translator metadata from Zotero Standalone and initialize repository check
 	 * timer
@@ -58,13 +61,14 @@ Zotero.Repo = new function() {
 		// try standalone
 		Zotero.Connector.callMethod("getTranslatorCode", {"translatorID":translatorID}, function(result) {
 			if(result) {
-				_haveCode(result, translatorID, callback);
+				_haveCode(result, translatorID, Zotero.Repo.SOURCE_ZOTERO_STANDALONE, callback);
 				return;
 			}
 			
 			// then try repo
-			Zotero.HTTP.doGet(ZOTERO_CONFIG.REPOSITORY_URL+"/code/"+translatorID, function(xmlhttp) {
-				_haveCode(xmlhttp.status === 200 ? xmlhttp.responseText : false, translatorID, callback);
+			Zotero.HTTP.doGet(ZOTERO_CONFIG.REPOSITORY_URL+"/code/"+ZOTERO_CONFIG.REPOSITORY_CHANNEL+"/"+translatorID, function(xmlhttp) {
+				_haveCode(xmlhttp.status === 200 ? xmlhttp.responseText : false, translatorID,
+					Zotero.Repo.SOURCE_REPO, callback);
 			});
 		});
 	};
@@ -72,7 +76,7 @@ Zotero.Repo = new function() {
 	/**
 	 * Called when code has been retrieved from standalone or repo
 	 */
-	function _haveCode(code, translatorID, callback) {
+	function _haveCode(code, translatorID, source, callback) {
 		if(!code) {
 			Zotero.logError(new Error("Code could not be retrieved for " + translatorID));
 			callback(false);
@@ -112,7 +116,7 @@ Zotero.Repo = new function() {
 				}
 			}
 		}
-		callback(code);
+		callback(code, source);
 	}
 	
 	/**
