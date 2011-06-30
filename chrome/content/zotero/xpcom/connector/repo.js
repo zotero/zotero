@@ -42,17 +42,9 @@ Zotero.Repo = new function() {
 	};
 	
 	/**
-	 * Reset all translators and code
-	 */
-	this.reset = function(callback) {
-		Zotero.Prefs.set("connector.repo.lastCheck.repoTime", 0);
-		this.update(true);
-	};
-	
-	/**
 	 * Force updating translators
 	 */
-	var update = this.update = function(reset, callback) {
+	var update = this.update = function(reset) {
 		_updateFromStandalone(true, reset);
 	};
 	
@@ -121,7 +113,7 @@ Zotero.Repo = new function() {
 	 */
 	function _updateFromRepo(reset, callback) {
 		var url = ZOTERO_CONFIG.REPOSITORY_URL+"/metadata?last="+
-				Zotero.Prefs.get("connector.repo.lastCheck.repoTime");
+				(reset ? "0" : Zotero.Prefs.get("connector.repo.lastCheck.repoTime"));
 		
 		Zotero.HTTP.doGet(url, function(xmlhttp) {
 			var success = xmlhttp.status === 200;

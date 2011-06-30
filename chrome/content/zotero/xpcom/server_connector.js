@@ -215,17 +215,14 @@ Zotero.Server.Connector.GetTranslators.prototype = {
 		// Translator data
 		var responseData = [];
 		
-		// TODO only send necessary translators
 		var translators = Zotero.Translators.getAll();
 		for each(var translator in translators) {
 			let serializableTranslator = {};
 			for each(var key in ["translatorID", "translatorType", "label", "creator", "target",
-								 "priority", "browserSupport"]) {
+					"minVersion", "maxVersion", "configOptions", "displayOptions", "priority", 
+					"browserSupport", "inRepository", "lastUpdated"]) {
 				serializableTranslator[key] = translator[key];
 			}
-			
-			// Do not pass targetless translators that do not support this browser (since that
-			// would mean passing each page back to Zotero)
 			responseData.push(serializableTranslator);
 		}
 		

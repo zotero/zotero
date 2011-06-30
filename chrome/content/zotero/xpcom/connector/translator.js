@@ -244,9 +244,19 @@ Zotero.Translators = new function() {
 				var newTranslator = new Zotero.Translator(newMetadata[i]);
 				
 				if(_translators.hasOwnProperty(newTranslator.translatorID)) {
-					if(_translators[newTranslator.translatorID].lastUpdated !== newTranslator.lastUpdated) {
+					var oldLastUpdated = _translators[newTranslator.translatorID].lastUpdated;
+					
+					// check whether translator has changed
+					if(oldLastUpdated !== newTranslator.lastUpdated) {
+						// check whether newTranslator is actually newer than the existing
+						// translator, and if not, don't update
+						if(Zotero.Date.sqlToDate(newTranslator.lastUpdated) < Zotero.Date.sqlToDate(oldLastUpdated)) {
+							Zotero.debug("Translators: Received older version of "+newTranslator.label+" from repo ("+newTranslator.lastUpdated+" vs. "+oldLastUpdated+")");
+							continue;
+						}
+						
 						if(!Zotero.isFx) {
-							// if lastUpdated does not match between old and new translator
+							// if lastUpdated does not match between old and new translator,
 							// invalidate translator code cache
 							delete localStorage["translatorCode-"+newTranslator.translatorID];
 						}
@@ -336,7 +346,7 @@ Zotero.Translators.CodeGetter.prototype.getCodeFor = function(i) {
 }
 
 const TRANSLATOR_REQUIRED_PROPERTIES = ["translatorID", "translatorType", "label", "creator", "target",
-		"priority"];
+		"priority", "lastUpdated"];
 var TRANSLATOR_PASSING_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["displayOptions", "configOptions",
 		"browserSupport", "code", "runMode"]);
 var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browserSupport"]);
