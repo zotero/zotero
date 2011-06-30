@@ -36,15 +36,28 @@ Zotero.Translators = new function() {
 	
 	/**
 	 * Initializes translator cache, loading all relevant translators into memory
+	 * @param {Zotero.Translate[]} [translators] List of translators. If not specified, it will be
+	 *                                           retrieved from storage.
 	 */
-	this.init = function() {
+	this.init = function(translators) {
+		if(!translators) {
+			translators = [];
+			if(!Zotero.isFx && localStorage["translatorMetadata"]) {
+				try {
+					translators = JSON.parse(localStorage["translatorMetadata"]);
+					if(typeof translators !== "object") {
+						translators = [];
+					}
+				} catch(e) {}
+			}
+		}
+		
 		_cache = {"import":[], "export":[], "web":[], "search":[]};
 		_translators = {};
 		_initialized = true;
 		
 		// Build caches
-		var translators = Zotero.Connector.data.translators;
-		for(var i=0; i<translators.length; i++) {
+		for(var i in translators) {
 			var translator = new Zotero.Translator(translators[i]);
 			_translators[translator.translatorID] = translator;
 			
@@ -185,23 +198,103 @@ Zotero.Translators = new function() {
 	/**
 	 * Converts translators to JSON-serializable objects
 	 */
-	this.serialize = function(translator) {
+	this.serialize = function(translator, properties) {
 		// handle translator arrays
 		if(translator.length !== undefined) {
 			var newTranslators = new Array(translator.length);
 			for(var i in translator) {
-				newTranslators[i] = Zotero.Translators.serialize(translator[i]);
+				newTranslators[i] = Zotero.Translators.serialize(translator[i], properties);
 			}
 			return newTranslators;
 		}
 		
 		// handle individual translator
 		var newTranslator = {};
-		for(var i in PRESERVE_PROPERTIES) {
-			var property = PRESERVE_PROPERTIES[i];
+		for(var i in properties) {
+			var property = properties[i];
 			newTranslator[property] = translator[property];
 		}
 		return newTranslator;
+	}
+	
+	/**
+	 * Saves all translator data to localStorage
+	 */
+	this.update = function(newMetadata, reset) {
+		if(!_initialized) Zotero.Translators.init();
+		if(!newMetadata.length) return;
+		
+		if(reset) {
+			var serializedTranslators = newMetadata;
+			if(!Zotero.isFx) {
+				// clear cached translatorCode
+				Zotero.debug("Translators: Resetting translators");
+				for(var i in localStorage) {
+					if(i.substr(0, TRANSLATOR_CODE_PREFIX.length) === TRANSLATOR_CODE_PREFIX) {
+						delete localStorage[i];
+					}
+				}
+			}
+		} else {
+			var serializedTranslators = [];
+			var hasChanged = false;
+			
+			// Update translators with new metadata
+			for(var i in newMetadata) {
+				var newTranslator = new Zotero.Translator(newMetadata[i]);
+				
+				if(_translators.hasOwnProperty(newTranslator.translatorID)) {
+					if(_translators[newTranslator.translatorID].lastUpdated !== newTranslator.lastUpdated) {
+						if(!Zotero.isFx) {
+							// if lastUpdated does not match between old and new translator
+							// invalidate translator code cache
+							delete localStorage["translatorCode-"+newTranslator.translatorID];
+						}
+						
+						Zotero.debug("Translators: Updating "+newTranslator.label);
+						hasChanged = true;
+					}
+				} else {
+					Zotero.debug("Translators: Adding "+newTranslator.label);
+					hasChanged = true;
+				}
+				
+				_translators[newTranslator.translatorID] = newTranslator;
+			}
+			
+			if(!hasChanged) return;
+			
+			// Serialize translators
+			for(var i in _translators) {
+				var serializedTranslator = this.serialize(_translators[i], TRANSLATOR_SAVE_PROPERTIES);
+				
+				// don't save run mode
+				delete serializedTranslator.runMode;
+				
+				serializedTranslators.push(serializedTranslator);
+			}
+		}
+		
+		// Store
+		if(!Zotero.isFx) {
+			localStorage["translatorMetadata"] = JSON.stringify(serializedTranslators);
+		}
+		
+		// Reinitialize
+		Zotero.Translators.init(serializedTranslators);
+	}
+	
+	/**
+	 * Preprocesses code for a translator
+	 */
+	this.preprocessCode = function(code) {
+		if(!Zotero.isFx) {
+			const foreach = /^(\s*)for each\s*\((var )?([^ ]+) in (.*?)\)(\s*){/gm;
+			code = code.replace(foreach, "$1var $3_zForEachSubject = $4; "+
+				"for(var $3_zForEachIndex in $3_zForEachSubject)$5{ "+
+				"$2$3 = $3_zForEachSubject[$3_zForEachIndex];", code);
+		}
+		return code;
 	}
 }
 
@@ -242,10 +335,11 @@ Zotero.Translators.CodeGetter.prototype.getCodeFor = function(i) {
 	}
 }
 
-const TRANSLATOR_PROPERTIES = ["translatorID", "translatorType", "label", "creator", "target",
-		"priority", "browserSupport"];
-var PRESERVE_PROPERTIES = TRANSLATOR_PROPERTIES.concat(["displayOptions", "configOptions",
-		"code", "runMode"]);
+const TRANSLATOR_REQUIRED_PROPERTIES = ["translatorID", "translatorType", "label", "creator", "target",
+		"priority"];
+var TRANSLATOR_PASSING_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["displayOptions", "configOptions",
+		"browserSupport", "code", "runMode"]);
+var TRANSLATOR_SAVE_PROPERTIES = TRANSLATOR_REQUIRED_PROPERTIES.concat(["browserSupport"]);
 /**
  * @class Represents an individual translator
  * @constructor
@@ -270,8 +364,8 @@ var PRESERVE_PROPERTIES = TRANSLATOR_PROPERTIES.concat(["displayOptions", "confi
  */
 Zotero.Translator = function(info) {
 	// make sure we have all the properties
-	for(var i in TRANSLATOR_PROPERTIES) {
-		var property = TRANSLATOR_PROPERTIES[i];
+	for(var i in TRANSLATOR_REQUIRED_PROPERTIES) {
+		var property = TRANSLATOR_REQUIRED_PROPERTIES[i];
 		if(info[property] === undefined) {
 			this.logError('Missing property "'+property+'" in translator metadata JSON object in ' + info.label);
 			haveMetadata = false;
@@ -281,7 +375,9 @@ Zotero.Translator = function(info) {
 		}
 	}
 	
-	if(info["browserSupport"].indexOf(Zotero.browser) !== -1) {
+	this.browserSupport = info["browserSupport"] ? info["browserSupport"] : "g";
+	
+	if(this.browserSupport.indexOf(Zotero.browser) !== -1) {
 		this.runMode = Zotero.Translator.RUN_MODE_IN_BROWSER;
 	} else {
 		this.runMode = Zotero.Translator.RUN_MODE_ZOTERO_STANDALONE;
@@ -313,31 +409,18 @@ Zotero.Translator.prototype.getCode = function(callback) {
 		callback(true);
 	} else {
 		var me = this;
-		Zotero.Connector.callMethod("getTranslatorCode", {"translatorID":this.translatorID},
+		Zotero.Repo.getTranslatorCode(this.translatorID,
 			function(code) {
 				if(!code) {
 					callback(false);
 				} else {
-					me.code = me.preprocessCode(code);
+					// cache code for session only (we have standalone anyway)
+					me.code = code;
 					callback(true);
 				}
 			}
 		);
 	}
-}
-
-/**
- * Preprocesses code for this translator
- */
-Zotero.Translator.prototype.preprocessCode = function(code) {
-	if(!Zotero.isFx) {
-		const foreach = /^(\s*)for each\s*\((var )?([^ ]+) in (.*?)\)(\s*){/gm;
-		code = code.replace(foreach, "$1var $3_zForEachSubject = $4; "+
-			"for(var $3_zForEachIndex in $3_zForEachSubject)$5{ "+
-			"$2$3 = $3_zForEachSubject[$3_zForEachIndex];", code);
-		Zotero.debug(code);
-	}
-	return code;
 }
 
 Zotero.Translator.prototype.__defineGetter__("displayOptions", function() {
@@ -356,7 +439,7 @@ Zotero.Translator.prototype.__defineGetter__("configOptions", function() {
  * @param {Integer} colNumber
  */
 Zotero.Translator.prototype.logError = function(message, type, line, lineNumber, colNumber) {
-	Zotero.log(message, type ? type : "error", this.label);
+	Zotero.logError(message);
 }
 
 Zotero.Translator.RUN_MODE_IN_BROWSER = 1;

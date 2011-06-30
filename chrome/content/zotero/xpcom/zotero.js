@@ -424,7 +424,16 @@ if(appInfo.platformVersion[0] >= 2) {
 		// Load additional info for connector or not
 		if(Zotero.isConnector) {
 			Zotero.debug("Loading in connector mode");
-			Zotero.Connector.init();
+			Zotero.Connector_Types.init();
+			
+			if(!Zotero.isFirstLoadThisSession) {
+				// wait for initComplete message if we switched to connector because standalone was
+				// started
+				_waitingForInitComplete = true;
+				while(_waitingForInitComplete) Zotero.mainThread.processNextEvent(true);
+			}
+			
+			Zotero.Repo.init();
 		} else {
 			Zotero.debug("Loading in full mode");
 			_initFull();
@@ -444,13 +453,6 @@ if(appInfo.platformVersion[0] >= 2) {
 		Zotero.debug("Initialized in "+((new Date()).getTime() - start)+" ms");
 		
 		if(!Zotero.isFirstLoadThisSession) {
-			if(Zotero.isConnector) {
-				// wait for initComplete message if we switched to connector because standalone was
-				// started
-				_waitingForInitComplete = true;
-				while(_waitingForInitComplete) Zotero.mainThread.processNextEvent(true);
-			}
-			
 			// trigger zotero-reloaded event
 			Zotero.debug('Triggering "zotero-reloaded" event');
 			observerService.notifyObservers(Zotero, "zotero-reloaded", null);

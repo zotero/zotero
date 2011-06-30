@@ -27,63 +27,16 @@ Zotero.Connector = new function() {
 	const CONNECTOR_URI = "http://127.0.0.1:23119/";
 	const CONNECTOR_SERVER_API_VERSION = 1;
 	
-	this.isOnline = true;
-	this.haveRefreshedData = false;
-	this.data = null;
-	
-	/**
-	 * Called to initialize Zotero
-	 */
-	this.init = function() {
-		Zotero.Connector.getData();
-	}
+	this.isOnline = null;
 	
 	/**
 	 * Checks if Zotero is online and passes current status to callback
 	 * @param {Function} callback
 	 */
 	this.checkIsOnline = function(callback) {
-		if(Zotero.Connector.isOnline) {
-			callback(true);
-		} else {
-			Zotero.Connector.getData(callback);
-		}
-	}
-	
-	function _getDataFile() {
-		var dataFile = Zotero.getZoteroDirectory();
-		dataFile.append("connector.json");
-		return dataFile;
-	}
-	
-	/**
-	 * Serializes the Zotero.Connector.data object to localStorage/preferences
-	 * @param {String} [json] The 
-	 */
-	this.serializeData = function(json) {
-		if(!json) json = JSON.stringify(Zotero.Connector.data);
-		
-		if(Zotero.isFx) {
-			Zotero.File.putContents(_getDataFile(), json);
-		} else {
-			localStorage.data = json;
-		}
-	}
-	
-	/**
-	 * Unserializes the Zotero.Connector.data object from localStorage/preferences
-	 */
-	this.unserializeData = function() {
-		var data = null;
-		
-		if(Zotero.isFx) {
-			var dataFile = _getDataFile();
-			if(dataFile.exists()) data = Zotero.File.getContents(dataFile);
-		} else {
-			if(localStorage.data) data = localStorage.data;
-		}
-		
-		if(data) Zotero.Connector.data = JSON.parse(data);
+		Zotero.Connector.callMethod("ping", {}, function(status) {
+			callback(status !== false);
+		});
 	}
 
 	// saner descriptions of some HTTP error codes
@@ -96,115 +49,48 @@ Zotero.Connector = new function() {
 	this.EXCEPTION_CODES = [0, 400, 404, 412, 500, 501];
 	
 	/**
-	 * Updates Zotero's status depending on the success or failure of a request
-	 *
-	 * @param	{Boolean}		isOnline		Whether or not Zotero was online
-	 * @param	{Function}		successCallback	Function to be called after loading new data if
-	 *		Zotero is online
-	 * @param	{Function}		failureCallback	Function to be called if Zotero is offline
-	 *
-	 * Calls Zotero.Connector.Browser.onStateChange(isOnline, method, context) if status has changed
-	 */
-	 function _checkState(isOnline, callback) {
-		if(isOnline) {
-			if(Zotero.Connector.haveRefreshedData) {
-				if(callback) callback(true);
-			} else {
-				Zotero.Connector.getData(callback);
-			}
-		} else {
-			if(callback) callback(false, this.EXCEPTION_NOT_AVAILABLE);
-		}
-		
-		if(Zotero.Connector.isOnline !== isOnline) {
-			Zotero.Connector.isOnline = isOnline;
-			if(Zotero.Connector_Browser && Zotero.Connector_Browser.onStateChange) {
-				Zotero.Connector_Browser.onStateChange(isOnline);
-			}
-		}
-		
-		return isOnline;
-	}
-	
-	/**
-	 * Loads list of translators and other relevant data from local Zotero instance
-	 *
-	 * @param	{Function}		successCallback	Function to be called after loading new data if
-	 *		Zotero is online
-	 * @param	{Function}		failureCallback	Function to be called if Zotero is offline
-	 */
-	this.getData = function(callback) {
-		Zotero.HTTP.doPost(CONNECTOR_URI+"connector/getData",
-			JSON.stringify({"browser":Zotero.browser, "apiVersion":CONNECTOR_SERVER_API_VERSION}),
-			function(req) {
-				var isOnline = req.status !== 0 && req.status !== 412;
-				
-				if(isOnline) {
-					// if request succeded, update data
-					Zotero.Connector.haveRefreshedData = true;
-					Zotero.Connector.serializeData(req.responseText);
-					Zotero.Connector.data = JSON.parse(req.responseText);
-				} else {
-					// if request failed, unserialize saved data
-					Zotero.Connector.unserializeData();
-				}
-				Zotero.Connector.Types.init(Zotero.Connector.data.schema);
-				
-				// update online state. this shouldn't loop, since haveRefreshedData should
-				// be true if isOnline is true.
-				_checkState(isOnline, callback);
-			}, {"Content-Type":"application/json"});
-	}
-	
-	/**
-	 * Gives callback an object containing schema and preferences from Zotero.Connector.data
-	 */
-	this.getSchemaAndPreferences = function(callback) {
-		if(Zotero.Connector.data) {
-			callback({"schema":Zotero.Connector.data["schema"],
-					"preferences":Zotero.Connector.data["preferences"]});
-			return;
-		}
-		
-		this.getData(function(success) {
-			if(success) {
-				callback({"schema":Zotero.Connector.data["schema"],
-						"preferences":Zotero.Connector.data["preferences"]});
-				return;
-			}
-			callback(false);
-		});
-	}
-	
-	/**
 	 * Sends the XHR to execute an RPC call.
 	 *
 	 * @param	{String}		method			RPC method. See documentation above.
 	 * @param	{Object}		data			RPC data. See documentation above.
-	 * @param	{Function}		successCallback	Function to be called if request succeeded.
-	 * @param	{Function}		failureCallback	Function to be called if request failed.
+	 * @param	{Function}		callback		Function to be called when requests complete.
 	 */
 	this.callMethod = function(method, data, callback) {
-		Zotero.HTTP.doPost(CONNECTOR_URI+"connector/"+method, JSON.stringify(data),
-			function(req) {
-				_checkState(req.status !== this.EXCEPTION_NOT_AVAILABLE
-					&& req.status !== this.EXCEPTION_INCOMPATIBLE_VERSION, function() {
-						if(!callback) return;
-						
-						if(Zotero.Connector.EXCEPTION_CODES.indexOf(req.status) !== -1) {
-							callback(false, req.status);
+		var newCallback = function(req) {
+			try {
+				var isOnline = req.status !== Zotero.Connector.EXCEPTION_NOT_AVAILABLE
+					&& req.status !== Zotero.Connector.EXCEPTION_INCOMPATIBLE_VERSION;
+				
+				if(Zotero.Connector.isOnline !== isOnline) {
+					Zotero.Connector.isOnline = isOnline;
+					if(Zotero.Connector_Browser && Zotero.Connector_Browser.onStateChange) {
+						Zotero.Connector_Browser.onStateChange(isOnline);
+					}
+				}
+				
+				if(Zotero.Connector.EXCEPTION_CODES.indexOf(req.status) !== -1) {
+					Zotero.debug("Connector: Method "+method+" failed");
+					if(callback) callback(false, req.status);
+				} else {
+					Zotero.debug("Connector: Method "+method+" succeeded");
+					var val = null;
+					if(req.responseText) {
+						if(req.getResponseHeader("Content-Type") === "application/json") {
+							val = JSON.parse(req.responseText);
 						} else {
-							var val = null;
-							if(req.responseText) {
-								if(req.getResponseHeader("Content-Type") === "application/json") {
-									val = JSON.parse(req.responseText);
-								} else {
-									val = req.responseText;
-								}
-							}
-							callback(val, req.status);
+							val = req.responseText;
 						}
-					});
-			}, {"Content-Type":"application/json"});
+					}
+					if(callback) callback(val, req.status);
+				}
+			} catch(e) {
+				Zotero.logError(e);
+				return;
+			}
+		};
+		var uri = CONNECTOR_URI+"connector/"+method;
+		
+		Zotero.HTTP.doPost(uri, JSON.stringify(data),
+			newCallback, {"Content-Type":"application/json"});
 	}
 }

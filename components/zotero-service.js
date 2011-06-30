@@ -114,7 +114,9 @@ const xpcomFilesConnector = [
 	'connector/translate_item',
 	'connector/translator',
 	'connector/connector',
-	'connector/cachedTypes'
+	'connector/cachedTypes',
+	'connector/repo',
+	'connector/typeSchemaData'
 ];
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");

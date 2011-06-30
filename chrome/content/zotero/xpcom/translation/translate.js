@@ -1633,7 +1633,7 @@ Zotero.Translate.Search.prototype.setTranslator = function(translator) {
  * translation fails
  */
 Zotero.Translate.Search.prototype.complete = function(returnValue, error) {
-	if(this._currentState == "translate" && !this.newItems.length) {
+	if(this._currentState == "translate" && (!this.newItems || !this.newItems.length)) {
 		Zotero.debug("Translate: Could not find a result using "+this.translator[0].label+": \n"
 					  +this._generateErrorString(error), 3);
 		if(this.translator.length > 1) {

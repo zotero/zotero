@@ -538,7 +538,7 @@ Zotero.Utilities = {
 	 * @return {Object}
 	 */
 	"deepCopy":function(obj) {
-		var obj2 = {};
+		var obj2 = (obj instanceof Array ? [] : {});
 		for(var i in obj) {
 			if(typeof obj[i] === "object") {
 				obj2[i] = Zotero.Utilities.deepCopy(obj[i]);
