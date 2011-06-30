@@ -81,8 +81,21 @@ Zotero.Translate.ItemSaver.prototype = {
 					// TODO normalize
 					newItem[field] = val;
 				} else if(field === "tags") {
-					// TODO normalize
-					newItem[field] = val;
+					var newTags = [];
+					for(var j in val) {
+						var tag = val[j];
+						if(typeof tag === "object") {
+							if(tag.tag) {
+								tag = tag.tag;
+							} else if(tag.name) {
+								tag = tag.name;
+							} else {
+								continue;
+							}
+						}
+						newTags.push({tag:tag.toString(), type:1})
+					}
+					newItem.tags = newTags;
 				} else if(field === "notes") {
 					// TODO normalize
 					newItem[field] = val;
@@ -116,12 +129,13 @@ Zotero.Translate.ItemSaver.prototype = {
 		}
 		
 		var url = 'users/%%USERID%%/items?key=%%APIKEY%%';
-		var payload = JSON.stringify({"items":newItems});
+		var payload = JSON.stringify({"items":newItems}, null, "\t")
 		this._itemsToSaveToServer = [];
 		
 		Zotero.OAuth.doAuthenticatedPost(url, payload, function(status, message) {
 			if(!status) {
 				Zotero.Messaging.sendMessage("saveDialog_error", status);
+				Zotero.debug("Translate: Save to server payload:\n\n"+payload);
 				throw new Error("Translate: Save to server failed: "+message);
 			} else {
 				Zotero.debug("Translate: Save to server complete");
