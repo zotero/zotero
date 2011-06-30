@@ -27,6 +27,7 @@ const TRANSLATOR_CODE_PREFIX = "translatorCode-";
 Zotero.Repo = new function() {
 	var _nextCheck;
 	var _timeoutID;
+	const infoRe = /^\s*{[\S\s]*?}\s*?[\r\n]/;
 	
 	/**
 	 * Try to retrieve translator metadata from Zotero Standalone and initialize repository check
@@ -82,12 +83,43 @@ Zotero.Repo = new function() {
 	 */
 	function _haveCode(code, translatorID, callback) {
 		if(!code) {
+			Zotero.logError(new Error("Code could not be retrieved for " + translatorID));
 			callback(false);
 			return;
 		}
 		
 		if(!Zotero.isFx) {
-			localStorage["translatorCode-"+translatorID] = Zotero.Translators.preprocessCode(code);
+			code = Zotero.Translators.preprocessCode(code);
+			
+			// make sure the version of the translator we retrieved actually matches what's in the
+			// repo. if not (because it's from a different source), we won't save it.
+			var lastUpdatedIndex = code.indexOf('"lastUpdated"');
+			if (lastUpdatedIndex == -1) {
+				callback(false);
+				Zotero.logError(new Error("Invalid or missing translator metadata JSON object for " + translatorID));
+				return;
+			}
+			
+			// Add 50 characters to clear lastUpdated timestamp and final "}"
+			var header = code.substr(0, lastUpdatedIndex + 50);
+			var m = infoRe.exec(header);
+			if (!m) {
+				Zotero.logError(new Error("Invalid or missing translator metadata JSON object for " + translatorID));
+				return;
+			}
+			
+			var metadata = JSON.parse(m[0]);
+			var translator = Zotero.Translators.getWithoutCode(translatorID);
+			
+			if(metadata.lastUpdated === translator.lastUpdated) {
+				localStorage["translatorCode-"+translatorID] = code;
+			} else if(Zotero.Date.sqlToDate(metadata.lastUpdated) > Zotero.Date.sqlToDate(translator.lastUpdated)) {
+				Zotero.debug("Repo: Retrieved code for "+metadata.label+" newer than stored metadata; updating");
+				Zotero.Translators.update([metadata]);
+				localStorage["translatorCode-"+translatorID] = code;
+			} else {
+				Zotero.debug("Repo: Retrieved code for "+metadata.label+" older than stored metadata; not caching");
+			}
 		}
 		callback(code);
 	}
