@@ -153,3 +153,7 @@ pref("extensions.zotero.pane.persist", '');
 
 // Domains allowed to import, separated by a semicolon
 pref("extensions.zotero.ingester.allowedSites", "");
+
+// Connector
+pref("extensions.zotero.connector.repo.lastCheck.localTime", 0);
+pref("extensions.zotero.connector.repo.lastCheck.repoTime", 0);

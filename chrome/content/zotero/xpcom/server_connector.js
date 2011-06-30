@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-const CONNECTOR_SERVER_API_VERSION = 1;
+const CONNECTOR_SERVER_API_VERSION = 2;
 
 Zotero.Server.Connector = function() {};
 Zotero.Server.Connector._waitingForSelection = {};
@@ -196,30 +196,13 @@ Zotero.Server.Connector.CookieManager.prototype = {
  * Lists all available translators, including code for translators that should be run on every page
  *
  * Accepts:
- *		browser - one-letter code of the current browser
- *			g = Gecko (Firefox)
- *			c = Google Chrome (WebKit & V8)
- *			s = Safari (WebKit & Nitro/Squirrelfish Extreme)
- *			i = Internet Explorer
+ *		Nothing
  * Returns:
- *		translators - Zotero.Translator objects
- *		schema		- Some information about the database. Currently includes:
- *			itemTypes
- *				name
- *				localizedString
- *				creatorTypes
- *				fields
- *				baseFields
- *			creatorTypes
- *				name
- *				localizedString
- *			fields
- *				name
- *				localizedString
+ *		Array of Zotero.Translator objects
  */
-Zotero.Server.Connector.GetData = function() {};
-Zotero.Server.Endpoints["/connector/getData"] = Zotero.Server.Connector.GetData;
-Zotero.Server.Connector.GetData.prototype = {
+Zotero.Server.Connector.GetTranslators = function() {};
+Zotero.Server.Endpoints["/connector/getTranslators"] = Zotero.Server.Connector.GetTranslators;
+Zotero.Server.Connector.GetTranslators.prototype = {
 	"supportedMethods":["POST"],
 	"supportedDataTypes":["application/json"],
 	
@@ -229,12 +212,8 @@ Zotero.Server.Connector.GetData.prototype = {
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
 	"init":function(data, sendResponseCallback) {
-		if(data.apiVersion !== CONNECTOR_SERVER_API_VERSION) {
-			sendResponseCallback(412);
-		}
-		
 		// Translator data
-		var responseData = {"preferences":{}, "translators":[]};
+		var responseData = [];
 		
 		// TODO only send necessary translators
 		var translators = Zotero.Translators.getAll();
@@ -247,68 +226,10 @@ Zotero.Server.Connector.GetData.prototype = {
 			
 			// Do not pass targetless translators that do not support this browser (since that
 			// would mean passing each page back to Zotero)
-			responseData.translators.push(serializableTranslator);
-		}
-		
-		// Various DB data (only sending what is required at the moment)
-		var systemVersion = Zotero.Schema.getDBVersion("system");
-		if(systemVersion != data.systemVersion) {
-			responseData.schema = this._generateTypeSchema();
-		}
-		
-		// Preferences
-		var prefs = Zotero.Prefs.prefBranch.getChildList("", {}, {});
-		for each(var pref in prefs) {
-			responseData.preferences[pref] = Zotero.Prefs.get(pref);
+			responseData.push(serializableTranslator);
 		}
 		
 		sendResponseCallback(200, "application/json", JSON.stringify(responseData));
-	},
-	
-	/**
-	 * Generates a type schema. This is used by connector/type.js to handle types without DB access.
-	 */
-	"_generateTypeSchema":function() {
-		var schema = {"itemTypes":{}, "creatorTypes":{}, "fields":{}};
-		var types = Zotero.ItemTypes.getTypes();
-		
-		var fieldIDs = Zotero.DB.columnQuery("SELECT fieldID FROM fieldsCombined");
-		var baseMappedFields = Zotero.ItemFields.getBaseMappedFields();
-		for each(var fieldID in fieldIDs) {
-			var fieldObj = {"name":Zotero.ItemFields.getName(fieldID)};
-			try {
-				fieldObj.localizedString = Zotero.getString("itemFields." + fieldObj.name)
-			} catch(e) {}
-			schema.fields[fieldID] = fieldObj;
-		}
-		
-		// names, localizedStrings, creatorTypes, and fields for each item type
-		for each(var type in types) {
-			var fieldIDs = Zotero.ItemFields.getItemTypeFields(type.id);
-			var baseFields = {};
-			for each(var fieldID in fieldIDs) {
-				if(baseMappedFields.indexOf(fieldID) !== -1) {
-					baseFields[fieldID] = Zotero.ItemFields.getFieldIDFromTypeAndBase(type.id, fieldID);
-				}
-			}
-			
-			var icon = Zotero.ItemTypes.getImageSrc(type.name);
-			icon = icon.substr(icon.lastIndexOf("/")+1);
-			
-			schema.itemTypes[type.id] = {"name":type.name,
-				"localizedString":Zotero.ItemTypes.getLocalizedString(type.name),
-				"creatorTypes":[creatorType.id for each(creatorType in Zotero.CreatorTypes.getTypesForItemType(type.id))],
-				"fields":fieldIDs, "baseFields":baseFields, "icon":icon};
-				
-		}
-		
-		var types = Zotero.CreatorTypes.getTypes();
-		for each(var type in types) {
-			schema.creatorTypes[type.id] = {"name":type.name,
-				"localizedString":Zotero.CreatorTypes.getLocalizedString(type.name)};
-		}
-		
-		return schema;
 	}
 }
 
@@ -609,5 +530,30 @@ Zotero.Server.Connector.GetTranslatorCode.prototype = {
 	"init":function(postData, sendResponseCallback) {
 		var translator = Zotero.Translators.get(postData.translatorID);
 		sendResponseCallback(200, "application/javascript", translator.code);
+	}
+}
+
+
+/**
+ * Test connection
+ *
+ * Accepts:
+ *		Nothing
+ * Returns:
+ *		Nothing (200 OK response)
+ */
+Zotero.Server.Connector.Ping = function() {};
+Zotero.Server.Endpoints["/connector/ping"] = Zotero.Server.Connector.Ping;
+Zotero.Server.Connector.Ping.prototype = {
+	"supportedMethods":["POST"],
+	"supportedDataTypes":["application/json"],
+	
+	/**
+	 * Finishes up translation when item selection is complete
+	 * @param {String} data POST data or GET query string
+	 * @param {Function} sendResponseCallback function to send HTTP response
+	 */
+	"init":function(postData, sendResponseCallback) {
+		sendResponseCallback(200);
 	}
 }

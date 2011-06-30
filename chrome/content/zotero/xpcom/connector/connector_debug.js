@@ -81,6 +81,6 @@ Zotero.Connector_Debug = new function() {
 				
 				var reportID = reported[0].getAttribute('reportID');
 				callback(true, reportID);
-			}, {"Content-Type":"application/octet-stream"});
+			}, {"Content-Type":"text/plain"});
 	}
 }
