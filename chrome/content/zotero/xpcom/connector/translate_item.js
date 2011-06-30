@@ -52,7 +52,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				// attempt to save to server on a timer
 				if(me._timeoutID) clearTimeout(me._timeoutID);
 				me._itemsToSaveToServer.push(item);
-				setTimeout(function() { me._saveToServer() }, 2000);
+				me._timeoutID = setTimeout(function() { me._saveToServer() }, 2000);
 			}
 		});
 	},
@@ -123,6 +123,8 @@ Zotero.Translate.ItemSaver.prototype = {
 			if(!status) {
 				Zotero.Messaging.sendMessage("saveDialog_error", status);
 				throw new Error("Translate: Save to server failed: "+message);
+			} else {
+				Zotero.debug("Translate: Save to server complete");
 			}
 		}, true);
 	}
