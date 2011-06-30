@@ -230,7 +230,7 @@ Zotero.Translators = new function() {
 	}
 	
 	/**
-	 * Saves all translator data to localStorage
+	 * Saves all translator metadata to localStorage
 	 * @param {Object[]} newMetadata Metadata for new translators
 	 * @param {Boolean} reset Whether to clear all existing translators and overwrite them with
 	 *                        the specified translators.
@@ -244,6 +244,8 @@ Zotero.Translators = new function() {
 			if(!Zotero.isFx) {
 				// clear cached translatorCode
 				Zotero.debug("Translators: Resetting translators");
+				// XXX this is only to clear localStorage for people who installed yesterday and
+				// should disappear soon
 				for(var i in localStorage) {
 					if(i.substr(0, TRANSLATOR_CODE_PREFIX.length) === TRANSLATOR_CODE_PREFIX) {
 						delete localStorage[i];
@@ -268,12 +270,6 @@ Zotero.Translators = new function() {
 						if(Zotero.Date.sqlToDate(newTranslator.lastUpdated) < Zotero.Date.sqlToDate(oldTranslator.lastUpdated)) {
 							Zotero.debug("Translators: Received older version of "+newTranslator.label+" from repo ("+newTranslator.lastUpdated+" vs. "+oldTranslator.lastUpdated+")");
 							continue;
-						}
-						
-						if(!Zotero.isFx) {
-							// if lastUpdated does not match between old and new translator,
-							// invalidate translator code cache
-							delete localStorage["translatorCode-"+newTranslator.translatorID];
 						}
 						
 						Zotero.debug("Translators: Updating "+newTranslator.label);

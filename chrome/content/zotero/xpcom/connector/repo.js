@@ -55,16 +55,7 @@ Zotero.Repo = new function() {
 	 * @param {Function} callback Callback to pass code when retreived
 	 */
 	this.getTranslatorCode = function(translatorID, callback) {
-		// we might have code in localstorage
-		if(!Zotero.isFx) {
-			var localCode = localStorage[TRANSLATOR_CODE_PREFIX+translatorID];
-			if(localCode) {
-				callback(localCode);
-				return;
-			}
-		}
-		
-		// otherwise, try standalone
+		// try standalone
 		Zotero.Connector.callMethod("getTranslatorCode", {"translatorID":translatorID}, function(result) {
 			if(result) {
 				_haveCode(result, translatorID, callback);
@@ -95,8 +86,8 @@ Zotero.Repo = new function() {
 			// repo. if not (because it's from a different source), we won't save it.
 			var lastUpdatedIndex = code.indexOf('"lastUpdated"');
 			if (lastUpdatedIndex == -1) {
-				callback(false);
 				Zotero.logError(new Error("Invalid or missing translator metadata JSON object for " + translatorID));
+				callback(false);
 				return;
 			}
 			
@@ -105,20 +96,20 @@ Zotero.Repo = new function() {
 			var m = infoRe.exec(header);
 			if (!m) {
 				Zotero.logError(new Error("Invalid or missing translator metadata JSON object for " + translatorID));
+				callback(false);
 				return;
 			}
 			
 			var metadata = JSON.parse(m[0]);
 			var translator = Zotero.Translators.getWithoutCode(translatorID);
 			
-			if(metadata.lastUpdated === translator.lastUpdated) {
-				localStorage["translatorCode-"+translatorID] = code;
-			} else if(Zotero.Date.sqlToDate(metadata.lastUpdated) > Zotero.Date.sqlToDate(translator.lastUpdated)) {
-				Zotero.debug("Repo: Retrieved code for "+metadata.label+" newer than stored metadata; updating");
-				Zotero.Translators.update([metadata]);
-				localStorage["translatorCode-"+translatorID] = code;
-			} else {
-				Zotero.debug("Repo: Retrieved code for "+metadata.label+" older than stored metadata; not caching");
+			if(metadata.lastUpdated !== translator.lastUpdated) {
+				if(Zotero.Date.sqlToDate(metadata.lastUpdated) > Zotero.Date.sqlToDate(translator.lastUpdated)) {
+					Zotero.debug("Repo: Retrieved code for "+metadata.label+" newer than stored metadata; updating");
+					Zotero.Translators.update([metadata]);
+				} else {
+					Zotero.debug("Repo: Retrieved code for "+metadata.label+" older than stored metadata; not caching");
+				}
 			}
 		}
 		callback(code);
