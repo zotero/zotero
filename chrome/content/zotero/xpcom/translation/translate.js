@@ -210,7 +210,25 @@ Zotero.Translate.Sandbox = {
 					throw new Error("Translator "+translate.translator[0].translatorID+" attempted to call invalid translatorID "+arg);
 				}
 			};
-			safeTranslator.getTranslators = function() { return translation.getTranslators() };
+			
+			safeTranslator.getTranslators = function(callback) {
+				if(callback) {
+					translate.incrementAsyncProcesses();
+					translation.clearHandlers("translators");
+					translation.setHandler("translators", function(obj, translators) {
+						translate.decrementAsyncProcesses();
+						callback(translators);
+					});
+					translation.getTranslators();
+				} else if(Zotero.isConnector) {
+					throw new Error("Translator must pass a callback to getTranslatorObject() to "+
+						"operate in this translation environment.");
+				} else {
+					Zotero.debug("Translate: COMPAT WARNING: Translator must pass a callback to getTranslators() to operate in connector");
+					return translation.getTranslators();
+				}
+			};
+			
 			var doneHandlerSet = false;
 			safeTranslator.translate = function() {
 				translate.incrementAsyncProcesses();
@@ -221,9 +239,14 @@ Zotero.Translate.Sandbox = {
 				}
 				return translation.translate(false);
 			};
-			// TODO
+			
 			safeTranslator.getTranslatorObject = function(callback) {
-				if(callback) translate.incrementAsyncProcesses();
+				if(callback) {
+					translate.incrementAsyncProcesses();
+				} else {
+					Zotero.debug("Translate: COMPAT WARNING: Translator must pass a callback to getTranslatorObject() to operate in connector");
+				}
+				
 				var haveTranslatorFunction = function(translator) {
 					translation.translator[0] = translator;
 					if(!Zotero._loadTranslator(translator)) throw new Error("Translator could not be loaded");
@@ -262,7 +285,7 @@ Zotero.Translate.Sandbox = {
 					return translation._sandboxManager.sandbox;
 				} else {
 					if(Zotero.isConnector && !callback) {
-						throw new Error("Translator must accept a callback to getTranslatorObject() to "+
+						throw new Error("Translator must pass a callback to getTranslatorObject() to "+
 							"operate in this translation environment.");
 					}
 					
@@ -365,7 +388,7 @@ Zotero.Translate.Sandbox = {
 						if(haveAsyncHandler) translate.incrementAsyncProcesses();
 						return false;
 					} else {
-						translate._debug("WARNING: No callback was provided for "+
+						translate._debug("Translate: COMPAT WARNING: No callback was provided for "+
 							"Zotero.selectItems(). When executed outside of Firefox, a selectItems() call "+
 							"will require that this translator to be called multiple times.", 1);
 						
@@ -678,8 +701,12 @@ Zotero.Translate.Base.prototype = {
 	 */
 	"incrementAsyncProcesses":function() {
 		this._runningAsyncProcesses++;
-		Zotero.debug("Translate: Incremented asynchronous processes to "+this._runningAsyncProcesses, 4);
-		if(this._parentTranslator) this._parentTranslator.incrementAsyncProcesses();
+		if(this._parentTranslator) {
+			this._parentTranslator.incrementAsyncProcesses();
+		} else {
+			Zotero.debug("Translate: Incremented asynchronous processes to "+this._runningAsyncProcesses, 4);
+			//Zotero.debug((new Error()).stack);
+		}
 	},
 	
 	/**
@@ -687,7 +714,10 @@ Zotero.Translate.Base.prototype = {
 	 */
 	"decrementAsyncProcesses":function(by) {
 		this._runningAsyncProcesses -= (by ? by : 1);
-		Zotero.debug("Translate: Decremented asynchronous processes to "+this._runningAsyncProcesses, 4);
+		if(!this._parentTranslator) {
+			Zotero.debug("Translate: Decremented asynchronous processes to "+this._runningAsyncProcesses, 4);
+			//Zotero.debug((new Error()).stack);
+		}
 		if(this._runningAsyncProcesses === 0) {
 			this.complete();
 		}
@@ -784,12 +814,12 @@ Zotero.Translate.Base.prototype = {
 			var translator = allPotentialTranslators[i];
 			if(translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER) {
 				this._potentialTranslators.push(translator);
-			} else {
+			} else if(this instanceof Zotero.Translate.Web) {
 				this._waitingForRPC = true;
 			}
 		}
 		
-		if(this._waitingForRPC && this instanceof Zotero.Translate.Web) {
+		if(this._waitingForRPC) {
 			var me = this;
 			Zotero.Connector.callMethod("detect", {"uri":this.location.toString(),
 				"cookie":this.document.cookie,
