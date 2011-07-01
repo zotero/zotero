@@ -378,10 +378,15 @@ Zotero.Translate.Sandbox = {
 						};
 					}
 					
-					translate._runHandler("select", items, newCallback);
-					
-					// if we don't have returnedItems set already, the handler is asynchronous
-					haveAsyncHandler = !callbackExecuted;
+					var returnValue = translate._runHandler("select", items, newCallback);
+					if(returnValue !== undefined) {
+						// handler may have returned a value, which makes callback unnecessary
+						returnedItems = returnValue;
+						haveAsyncHandler = false;
+					} else {
+						// if we don't have returnedItems set already, the handler is asynchronous
+						haveAsyncHandler = !callbackExecuted;
+					}
 					
 					if(haveAsyncCallback) {
 						// we are running asynchronously, so increment async processes
