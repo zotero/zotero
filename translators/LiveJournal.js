@@ -19,7 +19,6 @@
 
 
 
-
 /**
     Copyright (c) 2011, Avram Lyon
 
@@ -38,7 +37,7 @@
     <http://www.gnu.org/licenses/>.
 */
 
-/* There are at least three major page structures on LJ, represented
+/* There are at least 4 major page structures on LJ, represented
    by the scrapers and tests specified below. Additional structures
    may need additional logic. */
 
@@ -82,6 +81,21 @@ attachments      : [{ url: FW.Url(),
 creators         : FW.Xpath('//dd[@class="profile-username item"]/span[@class="ljuser ljuser-name_"]/a/b').text().cleanAuthor("author"),
 blogTitle         : FW.Xpath('//div[@id="header-name"]/a').text()
 });
+
+// http://shlyahtich.livejournal.com/ (Lanzelot design)
+FW.Scraper({
+itemType         : "blogPost",
+detect           : FW.Xpath('//table[@class="lanzelot-content"]'),
+title            : FW.Xpath('//div[@id="content-wrapper"]/div/font/i').text(),
+date            : FW.Xpath('//div[@id="content-wrapper"]/table//td[last()]')
+                    .text().trimInternal().remove(/^.*@/),
+attachments      : [{ url: FW.Url(),
+  title:  "LiveJournal Snapshot",
+  type: "text/html" }],
+creators         : FW.Xpath('//div[@id="content-wrapper"]/table//span[@class="ljuser ljuser-name_"]/preceding-sibling::text()').text().remove(/\(\s*$/).cleanAuthor("author"),
+blogTitle         : FW.Xpath('/html/head/title').text().remove(/:.*$/)
+});
+
 
 // http://irek-murtazin.livejournal.com
 FW.Scraper({
@@ -262,6 +276,7 @@ var testCases = [
                 "title": "Рейтинг-механизм в en.wikipedia",
                 "libraryCatalog": "LiveJournal"
             },
+
             {
                 "itemType": "blogPost",
                 "creators": [
@@ -488,6 +503,40 @@ var testCases = [
                 "date": "2011-05-10",
                 "title": "HDR на коленке",
                 "libraryCatalog": "LiveJournal"
+            }
+        ]
+    },
+    {
+        "type": "web",
+        "url": "http://shlyahtich.livejournal.com/625326.html",
+        "items": [
+            {
+                "itemType": "blogPost",
+                "creators": [
+                    {
+                        "firstName": "Sergey",
+                        "lastName": "Kalenik",
+                        "creatorType": "author"
+                    }
+                ],
+                "notes": [],
+                "tags": [],
+                "seeAlso": [],
+                "attachments": [
+                    {
+                        "url": "http://shlyahtich.livejournal.com/625326.html",
+                        "title": "LiveJournal Snapshot",
+                        "type": "text/html",
+                        "document": "[object]"
+                    }
+                ],
+                "url": "http://shlyahtich.livejournal.com/625326.html",
+                "blogTitle": "shlyahtich",
+                "date": " 2011-06-14 16:34:00",
+                "title": "Новая Утиная Правда о Буданове",
+                "libraryCatalog": "LiveJournal",
+                "accessDate": "CURRENT_TIMESTAMP",
+                "checkFields": "title"
             }
         ]
     }

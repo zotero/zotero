@@ -172,7 +172,11 @@ function doWeb(doc, url) {
 		if (xml.GetRecord.record.header.identifier.length()) {
 			articleID = xml.GetRecord.record.header.identifier.text().toString();
 			articleID = articleID.substr(14);
-			newItem.publicationTitle = articleID;
+			var idPrefixRegex = /^arXiv:/i;
+                        if (idPrefixRegex.test (articleID))
+                                newItem.publicationTitle = articleID;
+                        else
+                                newItem.publicationTitle = "arXiv:" + articleID;
 		}
 //		TODO add "arXiv.org" to bib data?
 		newItem.attachments.push({url:newItem.url, title:"arXiv.org Snapshot", mimeType:"text/html"});
