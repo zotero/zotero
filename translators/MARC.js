@@ -7,8 +7,9 @@
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
+	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2010-02-04 02:00:00"
+	"lastUpdated":"2011-07-01 06:23:45"
 }
 
 function detectImport() {
