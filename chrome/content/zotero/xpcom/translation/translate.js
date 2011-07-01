@@ -388,9 +388,17 @@ Zotero.Translate.Sandbox = {
 						haveAsyncHandler = !callbackExecuted;
 					}
 					
+					Zotero.debug("Translate: "+(haveAsyncHandler ? "" : "don't")+" have async handler");
+					Zotero.debug("Translate: "+(haveAsyncHandler ? "" : "don't")+" have async callback");
+					
 					if(haveAsyncCallback) {
-						// we are running asynchronously, so increment async processes
-						if(haveAsyncHandler) translate.incrementAsyncProcesses();
+						if(haveAsyncHandler) {
+							// we are running asynchronously, so increment async processes
+							translate.incrementAsyncProcesses();
+						} else if(!callbackExecuted) {
+							// callback didn't get called from handler, so call it here
+							callback(returnedItems);
+						}
 						return false;
 					} else {
 						translate._debug("Translate: COMPAT WARNING: No callback was provided for "+
