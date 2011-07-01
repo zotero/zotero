@@ -1,15 +1,15 @@
 {
-	"translatorID":"05d07af9-105a-4572-99f6-a8e231c0daef",
-	"translatorType":4,
-	"label":"COinS",
-	"creator":"Simon Kornblith",
-	"target":null,
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":300,
-	"inRepository":true,
-	"detectXPath":"//span[contains(@class, ' Z3988') or contains(@class, 'Z3988 ') or @class='Z3988'][@title]",
-	"lastUpdated":"2010-09-23 04:19:20"
+	"translatorID": "05d07af9-105a-4572-99f6-a8e231c0daef",
+	"label": "COinS",
+	"creator": "Simon Kornblith",
+	"target": "",
+	"minVersion": "2.2",
+	"maxVersion": "",
+	"priority": 300,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-07-01 05:16:13"
 }
 
 function detectWeb(doc, url) {
@@ -61,13 +61,14 @@ function retrieveNextCOinS(needFullItems, newItems, couldUseFullItems, doc) {
 		search.setSearch(item);
 		
 		// look for translators
-		var translators = search.getTranslators();
-		if(translators.length) {
-			search.setTranslator(translators);
-			search.translate();
-		} else {
-			retrieveNextCOinS(needFullItems, newItems, couldUseFullItems, doc);
-		}
+		search.getTranslators(function(translators) {
+			if(translators.length) {
+				search.setTranslator(translators);
+				search.translate();
+			} else {
+				retrieveNextCOinS(needFullItems, newItems, couldUseFullItems, doc);
+			}
+		});
 	} else {
 		completeCOinS(newItems, couldUseFullItems, doc);
 		Zotero.done();
@@ -77,18 +78,18 @@ function retrieveNextCOinS(needFullItems, newItems, couldUseFullItems, doc) {
 // saves all COinS objects
 function completeCOinS(newItems, couldUseFullItems, doc) {
 	if(newItems.length > 1) {
-		var selectArray = new Array();
-		
+		var selectArray = new Array(newItems.length);
 		for(var i in newItems) {
 			selectArray[i] = newItems[i].title;
 		}
-		selectArray = Zotero.selectItems(selectArray);
-		
-		var useIndices = new Array();
-		for(var i in selectArray) {
-			useIndices.push(i);
-		}
-		completeItems(newItems, useIndices, couldUseFullItems);
+        
+		Zotero.selectItems(selectArray, function (selectArray) {
+    		var useIndices = new Array();
+    		for(var i in selectArray) {
+    			useIndices.push(i);
+    		}
+    		completeItems(newItems, useIndices, couldUseFullItems);
+		});
 	} else if(newItems.length) {
 		completeItems(newItems, [0], couldUseFullItems);
 	}
@@ -125,17 +126,18 @@ function completeItems(newItems, useIndices, couldUseFullItems, doc) {
 		});
 		
 		search.setSearch(newItems[i]);			
-		var translators = search.getTranslators();
-		if(translators.length) {
-			search.setTranslator(translators);
-			search.translate();
-		} else {
-			// add doc as attachment
-			newItems[i].attachments.push({document:doc});
-			newItems[i].complete();
-			// call next
-			completeItems(newItems, useIndices, couldUseFullItems);
-		}
+		var translators = search.getTranslators(function(translators) {
+			if(translators.length) {
+				search.setTranslator(translators);
+				search.translate();
+			} else {
+				// add doc as attachment
+				newItems[i].attachments.push({document:doc});
+				newItems[i].complete();
+				// call next
+				completeItems(newItems, useIndices, couldUseFullItems);
+			}
+		});
 	} else {
 		// add doc as attachment
 		newItems[i].attachments.push({document:doc});
@@ -190,3 +192,79 @@ function doWeb(doc, url) {
 		completeCOinS(newItems, couldUseFullItems, doc);
 	}
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.husdal.com/2011/06/19/disruptions-in-supply-networks/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Phil",
+						"lastName": "Greening",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christine",
+						"lastName": "Rutherford",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{}
+				],
+				"publicationTitle": "International Journal of Logistics Management",
+				"title": "Disruptions and supply networks: a multi-level, multi-theoretical relational perspective",
+				"date": "2011",
+				"volume": "22",
+				"issue": "1",
+				"pages": "104-126",
+				"libraryCatalog": false,
+				"shortTitle": "Disruptions and supply networks"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://gamblershouse.wordpress.com/2011/06/19/the-view-from-dolores/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.hubmed.org/display.cgi?uids=21665052",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Hui-Wen Vivian",
+						"lastName": "Tang"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{}
+				],
+				"publicationTitle": "Evaluation and Program Planning",
+				"volume": "34",
+				"ISSN": "01497189",
+				"date": "11/2011",
+				"pages": "343-352",
+				"DOI": "10.1016/j.evalprogplan.2011.04.002",
+				"url": "http://linkinghub.elsevier.com/retrieve/pii/S0149718911000449",
+				"title": "Optimizing an immersion ESL curriculum using analytic hierarchy process",
+				"libraryCatalog": "CrossRef"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
