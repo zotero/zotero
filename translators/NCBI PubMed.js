@@ -4,12 +4,13 @@
 	"label":"NCBI PubMed",
 	"creator":"Simon Kornblith, Michael Berkowitz, Avram Lyon, and Rintze Zelle",
 	"target":"https?://[^/]*(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed)",
-	"minVersion":"2.1b1",
+	"minVersion":"2.1.9",
 	"maxVersion":"",
 	"priority":100,
+	"browserSupport":"gcs",
 	"configOptions":{"dataMode":"block"},
 	"inRepository":true,
-	"lastUpdated":"2011-04-25 18:05:00"
+	"lastUpdated":"2011-07-01 04:22:03"
 }
 
 function detectWeb(doc, url) {
@@ -91,9 +92,6 @@ function detectImport() {
 }
 
 function doImportFromText(text) {
-	// Remove xml parse instruction and doctype
-	text = text.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
-
 	if (!text.substr(0,1000).match(/<PubmedArticleSet>/)) {
 		// Pubmed data in the wild, perhaps copied from the web site's search results,
 		// can be missing the <PubmedArticleSet> root tag. Let's add a pair!
@@ -101,28 +99,30 @@ function doImportFromText(text) {
 		text = "<PubmedArticleSet>" + text + "</PubmedArticleSet>";
 	}
 
-	var xml = new XML(text);
+	// parse XML with DOMParser
+	var parser = new DOMParser();
+	var doc = parser.parseFromString(text, "text/xml");
 	
-	for(var i=0; i<xml.PubmedArticle.length(); i++) {
+	var articles = ZU.xpath(doc, '/PubmedArticleSet/PubmedArticle');
+	for(var i in articles) {
 		var newItem = new Zotero.Item("journalArticle");
 
-		var citation = xml.PubmedArticle[i].MedlineCitation;
-
-		var PMID = citation.PMID.text().toString();
+		var citation = ZU.xpath(articles[i], 'MedlineCitation');
+		var PMID = ZU.xpathText(citation, 'PMID');
 		newItem.url = "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID;
 		newItem.extra = "PMID: "+PMID;
 
-		var article = citation.Article;
-		if(article.ArticleTitle.length()) {
-			var title = article.ArticleTitle.text().toString();
+		var article = ZU.xpath(citation, 'Article');
+		var title = ZU.xpathText(article, 'ArticleTitle');
+		if(title) {
 			if(title.substr(-1) == ".") {
 				title = title.substring(0, title.length-1);
 			}
 			newItem.title = title;
 		}
-
-		if (article.Pagination.MedlinePgn.length()){
-			var fullPageRange = article.Pagination.MedlinePgn.text().toString();
+		
+		var fullPageRange = ZU.xpathText(article, 'Pagination/MedlinePgn');
+		if(fullPageRange) {
 			var pageRange = fullPageRange.match(/\d+-\d+/g);
 			for (var j in pageRange) {
 				var pageRangeStart = pageRange[j].match(/^\d+/)[0];
@@ -134,76 +134,88 @@ function doImportFromText(text) {
 			}
 			newItem.pages = fullPageRange;
 		}
-
-		if(article.Journal.length()) {
-			var issn = article.Journal.ISSN.text().toString();
-			if(issn) {
-				newItem.ISSN = issn;
+		
+		var journal = ZU.xpath(article, 'Journal');
+		if(journal.length) {
+			newItem.ISSN = ZU.xpathText(journal, 'ISSN');
+			
+			var abbreviation;
+			if((abbreviation = ZU.xpathText(journal, 'ISOAbbreviation'))) {
+				newItem.journalAbbreviation = abbreviation;	
+			} else if((abbreviation = ZU.xpathText(journal, 'MedlineTA'))) {
+				newItem.journalAbbreviation = abbreviation;
 			}
-
-			if(citation.Article.Journal.ISOAbbreviation.length()) {
-				newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.Article.Journal.ISOAbbreviation.text().toString());				
-			} else if(citation.MedlineJournalInfo.MedlineTA.length()) {
-				newItem.journalAbbreviation = Zotero.Utilities.superCleanString(citation.MedlineJournalInfo.MedlineTA.text().toString());
-			}
-
-			if(article.Journal.Title.length()) {
-				newItem.publicationTitle = Zotero.Utilities.superCleanString(article.Journal.Title.text().toString());
-			} else if(newItem.journalAbbreviation.length()) {
+			
+			var title = ZU.xpathText(journal, 'Title');
+			if(title) {
+				newItem.publicationTitle = title;
+			} else if(newItem.journalAbbreviation) {
 				newItem.publicationTitle = newItem.journalAbbreviation;
 			}
-
-			if(article.Journal.JournalIssue.length()) {
-				newItem.volume = article.Journal.JournalIssue.Volume.text().toString();
-				newItem.issue = article.Journal.JournalIssue.Issue.text().toString();
-				if(article.Journal.JournalIssue.PubDate.length()) {	// try to get the date
-					if(article.Journal.JournalIssue.PubDate.Day.text().toString() != "") {
-						newItem.date = article.Journal.JournalIssue.PubDate.Month.text().toString()+" "+article.Journal.JournalIssue.PubDate.Day.text().toString()+", "+article.Journal.JournalIssue.PubDate.Year.text().toString();
-					} else if(article.Journal.JournalIssue.PubDate.Month.text().toString() != "") {
-						newItem.date = article.Journal.JournalIssue.PubDate.Month.text().toString()+" "+article.Journal.JournalIssue.PubDate.Year.text().toString();
-					} else if(article.Journal.JournalIssue.PubDate.Year.text().toString() != "") {
-						newItem.date = article.Journal.JournalIssue.PubDate.Year.text().toString();
-					} else if(article.Journal.JournalIssue.PubDate.MedlineDate.text().toString() != "") {
-						newItem.date = article.Journal.JournalIssue.PubDate.MedlineDate.text().toString();
+			
+			var journalIssue = ZU.xpath(journal, 'JournalIssue');
+			if(journalIssue.length) {
+				newItem.volume = ZU.xpathText(journalIssue, 'Volume');
+				newItem.issue = ZU.xpathText(journalIssue, 'Issue');
+				var pubDate = ZU.xpath(journalIssue, 'PubDate');
+				if(pubDate.length) {	// try to get the date
+					var day = ZU.xpathText(pubDate, 'Day');
+					var month = ZU.xpathText(pubDate, 'Month');
+					var year = ZU.xpathText(pubDate, 'Year');
+					
+					if(day) {
+						newItem.date = month+" "+day+", "+year;
+					} else if(month) {
+						newItem.date = month+" "+year;
+					} else if(year) {
+						newItem.date = year;
+					} else {
+						newItem.date = ZU.xpathText(pubDate, 'MedlineDate');
 					}
 				}
 			}
 		}
 
-		if(article.AuthorList.length() && article.AuthorList.Author.length()) {
-			var authors = article.AuthorList.Author;
-			for(var j=0; j<authors.length(); j++) {
-				var lastName = authors[j].LastName.text().toString();
-				var firstName = authors[j].FirstName.text().toString();
-				if(firstName == "") {
-					firstName = authors[j].ForeName.text().toString();
-				}
-				var suffix = authors[j].Suffix.text().toString();
-				if(suffix && firstName != "") {
-					firstName += ", " + authors[j].Suffix.text().toString();
-				}
-				if(firstName || lastName) {
-					newItem.creators.push({lastName:lastName, firstName:firstName});
-				}
+		var authors = ZU.xpath(article, 'AuthorList/Author');
+		for(var j in authors) {
+			var author = authors[j];
+			
+			var lastName = ZU.xpathText(author, 'LastName');
+			var firstName = ZU.xpathText(author, 'FirstName');
+			if(!firstName) {
+				firstName = ZU.xpathText(author, 'ForeName');
+			}
+			var suffix = ZU.xpathText(author, 'Suffix');
+			if(suffix && firstName) {
+				firstName += ", " + suffix
+			}
+			if(firstName || lastName) {
+				newItem.creators.push({lastName:lastName, firstName:firstName});
 			}
 		}
-
-
-		if (citation.MeshHeadingList && citation.MeshHeadingList.MeshHeading) {
-			var keywords = citation.MeshHeadingList.MeshHeading;
-			for (var k = 0 ; k < keywords.length() ; k++) {
-				newItem.tags.push(keywords[k].DescriptorName.text().toString());
-			}
+		
+		
+		var keywords = ZU.xpath(citation, 'MeshHeadingList/MeshHeading');
+		for(var k in keywords) {
+			newItem.tags.push(ZU.xpathText(keywords[k], 'DescriptorName'));
 		}
-		// We use a regex to remove the section labels
-		// also, we have entities to clear up
-		newItem.abstractNote = Zotero.Utilities.unescapeHTML(
-						article.Abstract.AbstractText.toString()
-							.replace(/<\/?AbstractText\s*(?:Label=")?([^">]+)?[^>]*>/g, "$1\n")
-						);
-
-			newItem.DOI = xml.PubmedArticle[i].PubmedData.ArticleIdList.ArticleId.(@IdType == "doi" ).text().toString();
-		newItem.publicationTitle = Zotero.Utilities.capitalizeTitle(newItem.publicationTitle);
+		
+		var abstractSections = ZU.xpath(article, 'Abstract/AbstractText');
+		var abstractNote = [];
+		for(var j in abstractSections) {
+			var abstractSection = abstractSections[j];
+			if(abstractSection.hasAttribute("Label")) {
+				abstractNote.push(abstractSection.getAttribute("Label"));
+			}
+			abstractNote.push(abstractSection.textContent+"\n");
+		}
+		
+		newItem.abstractNote = abstractNote.join("\n\n");
+		newItem.DOI = ZU.xpathText(articles[i], 'PubmedData/ArticleIdList/ArticleId[@IdType="doi"]');
+		// (do we want this?)
+		if(newItem.publicationTitle) {
+			newItem.publicationTitle = Zotero.Utilities.capitalizeTitle(newItem.publicationTitle);
+		}
 		newItem.complete();
 	}
 }
@@ -238,17 +250,17 @@ function doWeb(doc, url) {
 				items[uid.value] = article.textContent;
 			}
 
-			items = Zotero.selectItems(items);
-
-			if(!items) {
-				return true;
-			}
-
-			for(var i in items) {
-				ids.push(i);
-			}
-
-			lookupPMIDs(ids);
+			Zotero.selectItems(items, function(items) {
+				if(!items) {
+					return true;
+				}
+	
+				for(var i in items) {
+					ids.push(i);
+				}
+	
+				lookupPMIDs(ids);
+			});
 		} else {
 			ids.push(uid.value);
 			lookupPMIDs(ids, doc);
@@ -293,3 +305,55 @@ function doSearch(item) {
 	// pmid was defined earlier in detectSearch
 	lookupPMIDs([getPMID(item.contextObject)]);
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.ncbi.nlm.nih.gov/pubmed/20729678",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Coar",
+						"firstName": "Jaekea T"
+					},
+					{
+						"lastName": "Sewell",
+						"firstName": "Jeanne P"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Bibliography as Topic",
+					"Database Management Systems",
+					"Humans"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"url": "http://www.ncbi.nlm.nih.gov/pubmed/20729678",
+				"extra": "PMID: 20729678",
+				"title": "Zotero: harnessing the power of a personal bibliographic manager",
+				"pages": "205-207",
+				"ISSN": "1538-9855",
+				"journalAbbreviation": "Nurse Educ",
+				"publicationTitle": "Nurse Educator",
+				"volume": "35",
+				"issue": "5",
+				"date": "2010 Sep-Oct",
+				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.\u000a",
+				"DOI": "10.1097/NNE.0b013e3181ed81e4",
+				"libraryCatalog": "NCBI PubMed",
+				"shortTitle": "Zotero"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ncbi.nlm.nih.gov/pubmed?term=zotero",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
