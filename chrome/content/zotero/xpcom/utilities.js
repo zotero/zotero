@@ -497,7 +497,7 @@ Zotero.Utilities = {
 		const delimiterRegexp = /([ \/\-–—])/;
 		
 		string = this.trimInternal(string);
-		string = string.replace(" : ", ": ", "g");
+		string = string.replace(/ : /g, ": ");
 		if(!Zotero.Prefs.get('capitalizeTitles') && !force) return string;
 		if(!string) return "";
 		
