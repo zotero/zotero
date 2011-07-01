@@ -3,13 +3,13 @@
 	"label": "COinS",
 	"creator": "Simon Kornblith",
 	"target": "",
-	"minVersion": "2.2",
+	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 300,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-01 05:16:13"
+	"lastUpdated": "2011-07-01 19:16:28"
 }
 
 function detectWeb(doc, url) {
@@ -58,10 +58,8 @@ function retrieveNextCOinS(needFullItems, newItems, couldUseFullItems, doc) {
 		search.setHandler("done", function() {
 			retrieveNextCOinS(needFullItems, newItems, couldUseFullItems, doc);
 		});
-		search.setSearch(item);
-		
 		// look for translators
-		search.getTranslators(function(translators) {
+		search.setHandler("translators", function(obj, translators) {
 			if(translators.length) {
 				search.setTranslator(translators);
 				search.translate();
@@ -69,6 +67,9 @@ function retrieveNextCOinS(needFullItems, newItems, couldUseFullItems, doc) {
 				retrieveNextCOinS(needFullItems, newItems, couldUseFullItems, doc);
 			}
 		});
+		
+		search.setSearch(item);
+		search.getTranslators();
 	} else {
 		completeCOinS(newItems, couldUseFullItems, doc);
 		Zotero.done();
@@ -124,9 +125,7 @@ function completeItems(newItems, useIndices, couldUseFullItems, doc) {
 			// call next
 			completeItems(newItems, useIndices, couldUseFullItems);
 		});
-		
-		search.setSearch(newItems[i]);			
-		var translators = search.getTranslators(function(translators) {
+		search.setHandler("translators", function(obj, translators) {
 			if(translators.length) {
 				search.setTranslator(translators);
 				search.translate();
@@ -138,6 +137,9 @@ function completeItems(newItems, useIndices, couldUseFullItems, doc) {
 				completeItems(newItems, useIndices, couldUseFullItems);
 			}
 		});
+		
+		search.setSearch(newItems[i]);
+		search.getTranslators();
 	} else {
 		// add doc as attachment
 		newItems[i].attachments.push({document:doc});
