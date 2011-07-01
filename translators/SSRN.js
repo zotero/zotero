@@ -8,7 +8,7 @@
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2009-01-28 18:10:00"
+	"lastUpdated":"2011-07-01 18:10:00"
 }
 
 function detectWeb(doc, url)	{
@@ -83,7 +83,7 @@ function doWeb(doc, url) {
 				var aut = Zotero.Utilities.capitalizeTitle(Zotero.Utilities.trimInternal(author.textContent));
 				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 			}
-			item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="innerWhite"]/font[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).substr(10);
+			item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="innerWhite"]/font[1]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent).replace(/^abstract/i,'');
 			var tags = doc.evaluate('//font[contains(./b/text(), "Key")]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			if (tags) {
 				item.tags = Zotero.Utilities.trimInternal(tags.textContent).substr(10).split(/,\s+/);

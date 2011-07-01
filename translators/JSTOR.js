@@ -124,7 +124,7 @@ function doWeb(doc, url) {
 				if(item.notes && item.notes[0]) {
 					// For some reason JSTOR exports abstract with 'AB' tag istead of 'N1'
 					item.abstractNote = item.notes[0].note;
-					item.abstractNote = item.abstractNote.replace(/^<p>ABSTRACT /,'').replace(/<\/p>$/,'');
+					item.abstractNote = item.abstractNote.replace(/^<p>(ABSTRACT )?/,'').replace(/<\/p>$/,'');
 					delete item.notes;
 					item.notes = undefined;
 				}
