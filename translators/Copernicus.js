@@ -1,77 +1,60 @@
 {
-	"translatorID":"a8df3cb0-f76c-4e2c-a11e-5fa283f8010c",
-	"translatorType":4,
-	"label":"Copernicus",
-	"creator":"Michael Berkowitz",
-	"target":"http://www.(adv-geosci|adv-radio-sci|ann-geophys).net/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+        "translatorID": "8082115d-5bc6-4517-a4e8-abed1b2a784a",
+        "label": "Copernicus",
+        "creator": "Michael Berkowitz",
+        "target": "http://www.(adv-sci-res|adv-geosci|adv-radio-sci|ann-geophys|astrophys-space-sci-trans|atmos-chem-phys|biogeosciences(-discuss)?|clim-past|electronic-earth|hydrol-earth-syst-sci|nat-hazards-earth-syst-sci|nonlin-processes-geophys|ocean-sci|soc-geogr|surv-perspect-integr-environ-soc|the-cryosphere).net/",
+        "minVersion": "2.1",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "lastUpdated": "2011-07-01 10:38:24"
 }
 
 function detectWeb(doc, url) {
-	if (doc.evaluate('//iframe', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate('//li[a[contains(text(), "Abstract")]]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	if (doc.evaluate('//div[@id="publisher"]/iframe', doc, null, XPathResult.ANY_TYPE, null).iterateNext() || doc.evaluate('//td[*[a[contains(text(), "Abstract")]]]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		return "multiple";
 	} else if (doc.title.match(/Abstract/)) {
 		return "journalArticle";
 	}
 }
 
-function scrape(doc) {
-	var item = new Zotero.Item("journalArticle");
-	item.url = doc.location.href;
-	item.title = doc.evaluate('//span[@class="inhaltueber_16f"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	item.publicationTitle = doc.evaluate('//span[@class="ueberschrift"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/\n/)[0];	
-	item.repository = item.publicationTitle;
-	var authors = doc.evaluate('//td/span[3]/b', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	authors = authors.replace(/\d/g, "").replace(/,,/, ",").split(/(,|and)/);
-	for each (var aut in authors) {
-		if (!(aut == "and") && (aut.match(/\w/))) {
-			aut = Zotero.Utilities.trimInternal(aut);
-			names = aut.match(/(.*)\s([^\s]+)/);
-			item.creators.push({firstName:names[1], lastName:names[2], creatorType:"author"});
-		}
-	}
-	var voliss = doc.evaluate('//tr[3]/td/span[@class="lib_small"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	voliss = voliss.match(/^([^,]+),([^,]+),([^,]+),([^w]+)/);
-	item.journalAbbreviation = voliss[1];
-	item.volume = Zotero.Utilities.trimInternal(voliss[2]);
-	item.pages = Zotero.Utilities.trimInternal(voliss[3]);
-	item.year = Zotero.Utilities.trimInternal(voliss[4]);
-	item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//tr[3]/td/span[4]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.substr(10));
-	item.attachments = [
-		{url:item.url, title:item.publicationTitle + " Snapshot", mimeType:"text/html"},
-		{url:item.url.replace(".html", ".pdf"), title:item.publicationTitle + " PDF", mimeType:"application/pdf"}
-	];
-	item.complete();
+function getRIS(link) {
+	Zotero.Utilities.HTTP.doGet(link, function(text) {
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+			item.repository = "Copernicus Online Journals";
+			item.attachments[0].title = item.publicationTitle + " Snapshot";
+			item.attachments[0].mimeType = "text/html";
+			item.attachments[1].title = item.publicationTitle + " PDF";
+			item.complete();
+		});
+		translator.translate();
+	});
 }
 
 function doWeb(doc, url) {
 	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
-		if (doc.evaluate('//iframe', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var link = doc.evaluate('//iframe', doc, null, XPathResult.ANY_TYPE, null).iterateNext().src;
+		if (doc.evaluate('//div[@id="publisher"]/iframe', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+			var link = doc.evaluate('//div[@id="publisher"]/iframe', doc, null, XPathResult.ANY_TYPE, null).iterateNext().src;
 			Zotero.Utilities.HTTP.doGet(link, function(text) {
 				var links = text.match(/<a\s+target=\"_top\"\s+href=\"[^"]+\">[^<]+/g);
 				for each (var link in links) {
 					link = link.match(/href=\"([^"]+)\">(.*)/);
-					items[link[1].replace(/\.[^\.]+$/, ".html")] = Zotero.Utilities.trimInternal(link[2]) + "...";
+					items[link[1].replace(/\.[^\.]+$/, ".ris")] = Zotero.Utilities.trimInternal(link[2]) + "...";
 				}
 				items = Zotero.selectItems(items);
 				for (var i in items) {
-					arts.push(i);
+					getRIS(i);
 				}
-				
-				Zotero.Utilities.processDocuments(arts, function(doc) {
-					scrape(doc);
-				}, function() {Zotero.done();});				
 			});
 		} else {
-			var titles = doc.evaluate('//li[a[contains(text(), "Abstract")]]/span[@class="articletitle"]', doc, null, XPathResult.ANY_TYPE, null);
-			var links = doc.evaluate('//li[a[contains(text(), "Abstract")]]/a[1]', doc, null, XPathResult.ANY_TYPE, null);
+			var titles = doc.evaluate('//td[*[a[contains(text(), "Abstract")]]]/span[@class="pb_toc_article_title"]', doc, null, XPathResult.ANY_TYPE, null);
+			var links = doc.evaluate('//td[*[a[contains(text(), "Abstract")]]]//a[1]', doc, null, XPathResult.ANY_TYPE, null);
 			var title;
 			var link;
 			while ((title = titles.iterateNext()) && (link = links.iterateNext())) {
@@ -79,14 +62,125 @@ function doWeb(doc, url) {
 			}
 			items = Zotero.selectItems(items);
 			for (var i in items) {
-				arts.push(i);
+				getRIS(i.replace(".html", ".ris"));
 			}
-			Zotero.Utilities.processDocuments(arts, function(doc) { scrape(doc);}, function() {Zotero.done();});
 		}
 	} else {
-		Zotero.Utilities.processDocuments([url], function(doc) {
-			scrape(doc);
-		}, function() {Zotero.done();});
+		getRIS(url.replace('.html', '.ris'));
 	}
 	Zotero.wait();
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+    {
+        "type": "web",
+        "url": "http://www.adv-geosci.net/30/1/2011/adgeo-30-1-2011.html",
+        "items": [
+            {
+                "itemType": "journalArticle",
+                "creators": [
+                    {
+                        "lastName": "Michaelides",
+                        "firstName": "S.",
+                        "creatorType": "author"
+                    },
+                    {
+                        "lastName": "Athanasatos",
+                        "firstName": "S.",
+                        "creatorType": "author"
+                    }
+                ],
+                "notes": [],
+                "tags": [],
+                "seeAlso": [],
+                "attachments": [
+                    {
+                        "url": "http://www.adv-geosci.net/30/1/2011/",
+                        "title": "Adv. Geosci. Snapshot",
+                        "mimeType": "text/html"
+                    },
+                    {
+                        "url": "http://www.adv-geosci.net/30/1/2011/adgeo-30-1-2011.pdf",
+                        "mimeType": "application/pdf",
+                        "title": "Adv. Geosci. PDF",
+                        "downloadable": true
+                    }
+                ],
+                "title": "Preface ''Precipitation: Measurement, Climatology, Remote Sensing, and Modeling (EGU 2010)''",
+                "publicationTitle": "Adv. Geosci.",
+                "volume": "30",
+                "pages": "1-2",
+                "date": "May 09, 2011",
+                "publisher": "Copernicus Publications",
+                "ISBN": "1680-7359",
+                "ISSN": "1680-7359",
+                "url": "http://www.adv-geosci.net/30/1/2011/",
+                "DOI": "10.5194/adgeo-30-1-2011",
+                "libraryCatalog": "Copernicus Online Journals",
+                "accessDate": "CURRENT_TIMESTAMP",
+                "shortTitle": "Preface ''Precipitation"
+            }
+        ]
+    },
+    {
+        "type": "web",
+        "url": "http://www.adv-radio-sci.net/6/1/2008/ars-6-1-2008.html",
+        "items": [
+            {
+                "itemType": "journalArticle",
+                "creators": [
+                    {
+                        "lastName": "Will",
+                        "firstName": "B.",
+                        "creatorType": "author"
+                    },
+                    {
+                        "lastName": "Gerding",
+                        "firstName": "M.",
+                        "creatorType": "author"
+                    },
+                    {
+                        "lastName": "Schultz",
+                        "firstName": "S.",
+                        "creatorType": "author"
+                    },
+                    {
+                        "lastName": "Schiek",
+                        "firstName": "B.",
+                        "creatorType": "author"
+                    }
+                ],
+                "notes": [],
+                "tags": [],
+                "seeAlso": [],
+                "attachments": [
+                    {
+                        "url": "http://www.adv-radio-sci.net/6/1/2008/",
+                        "title": "Adv. Radio Sci. Snapshot",
+                        "mimeType": "text/html"
+                    },
+                    {
+                        "url": "http://www.adv-radio-sci.net/6/1/2008/ars-6-1-2008.pdf",
+                        "mimeType": "application/pdf",
+                        "title": "Adv. Radio Sci. PDF",
+                        "downloadable": true
+                    }
+                ],
+                "title": "Time domain reflectrometry measurements using a movable obstacle for the determination of dielectric profiles",
+                "publicationTitle": "Adv. Radio Sci.",
+                "volume": "6",
+                "pages": "1-4",
+                "date": "May 26, 2008",
+                "publisher": "Copernicus Publications",
+                "ISBN": "1684-9965",
+                "ISSN": "1684-9965",
+                "url": "http://www.adv-radio-sci.net/6/1/2008/",
+                "DOI": "10.5194/ars-6-1-2008",
+                "libraryCatalog": "Copernicus Online Journals",
+                "accessDate": "CURRENT_TIMESTAMP"
+            }
+        ]
+    }
+]
+/** END TEST CASES **/
