@@ -211,22 +211,24 @@ Zotero.Translate.Sandbox = {
 				}
 			};
 			
+			var translatorsHandlerSet = false;
 			safeTranslator.getTranslators = function(callback) {
-				if(callback) {
-					translate.incrementAsyncProcesses();
-					translation.clearHandlers("translators");
-					translation.setHandler("translators", function(obj, translators) {
-						translate.decrementAsyncProcesses();
-						callback(translators);
-					});
-					translation.getTranslators();
-				} else if(Zotero.isConnector) {
-					throw new Error("Translator must pass a callback to getTranslatorObject() to "+
-						"operate in this translation environment.");
-				} else {
-					Zotero.debug("Translate: COMPAT WARNING: Translator must pass a callback to getTranslators() to operate in connector");
-					return translation.getTranslators();
+				if(!translation._handlers["translators"] || !translation._handlers["translators"].length) {
+					if(Zotero.isConnector) {
+						throw new Error('Translator must register a "translators" handler to '+
+							'call getTranslators() in this translation environment.');
+					} else {
+						translate._debug('COMPAT WARNING: Translator must register a "translators" handler to '+
+							'call getTranslators() in connector');
+					}
 				}
+				if(!translatorsHandlerSet) {
+					translation.setHandler("translators", function() {
+						translate.decrementAsyncProcesses();
+					});
+				}
+				translate.incrementAsyncProcesses();
+				return translation.getTranslators();
 			};
 			
 			var doneHandlerSet = false;
@@ -244,7 +246,7 @@ Zotero.Translate.Sandbox = {
 				if(callback) {
 					translate.incrementAsyncProcesses();
 				} else {
-					Zotero.debug("Translate: COMPAT WARNING: Translator must pass a callback to getTranslatorObject() to operate in connector");
+					translate._debug("COMPAT WARNING: Translator must pass a callback to getTranslatorObject() to operate in connector");
 				}
 				
 				var haveTranslatorFunction = function(translator) {
@@ -401,7 +403,7 @@ Zotero.Translate.Sandbox = {
 						}
 						return false;
 					} else {
-						translate._debug("Translate: COMPAT WARNING: No callback was provided for "+
+						translate._debug("COMPAT WARNING: No callback was provided for "+
 							"Zotero.selectItems(). When executed outside of Firefox, a selectItems() call "+
 							"will require that this translator to be called multiple times.", 1);
 						
@@ -432,7 +434,7 @@ Zotero.Translate.Sandbox = {
 		 "_itemDone":function(translate, item) {
 			if(!item.itemType) {
 				item.itemType = "webpage";
-				Zotero.debug("Translate: WARNING: No item type specified");
+				translate._debug("WARNING: No item type specified");
 			}
 			
 			if(item.type == "attachment" || item.type == "note") {
