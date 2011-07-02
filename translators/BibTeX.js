@@ -7,10 +7,11 @@
 	"minVersion":"2.1.3",
 	"maxVersion":"",
 	"priority":200,
+	"browserSupport":"gcs",
 	"configOptions":{"dataMode":"block"},
 	"displayOptions":{"exportCharset":"UTF-8", "exportNotes":true, "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2011-05-27 19:42:10"
+	"lastUpdated":"2011-07-02 00:39:53"
 }
 
 function detectImport() {
@@ -1561,7 +1562,8 @@ function processField(item, field, value) {
 	} else if(field == "author" || field == "editor" || field == "translator") {
 		// parse authors/editors/translators
 		var names = value.split(/ and /i); // now case insensitive
-		for each(var name in names) {
+		for(var i in names) {
+			var name = names[i];
 			// skip empty names
 			if (Zotero.Utilities.trim(name) == '') {
 				continue;
@@ -1642,8 +1644,13 @@ function processField(item, field, value) {
 	} else if (field == "sentelink") { // the reference manager 'Sente' has a unique file scheme in exported BibTeX
 			item.attachments = [{url:value.split(",")[0], mimeType:"application/pdf", downloadable:true}];
 	} else if (field == "file") {
-		for each(var attachment in value.split(";")){
-			var [filetitle, filepath, filetype] = attachment.split(":");
+		var attachments = value.split(";");
+		for(var i in attachments){
+			var attachment = attachments[i];
+			var parts = attachment.split(":");
+			var filetitle = parts[0];
+			var filepath = parts[1];
+			var filetype = parts[2];
 			if (filetitle.length == 0) {
 				filetitle = "Attachment";
 			}
@@ -2012,7 +2019,8 @@ function doExport() {
 			var author = "";
 			var editor = "";
 			var translator = "";
-			for each(var creator in item.creators) {
+			for(var i in item.creators) {
+				var creator = item.creators[i];
 				var creatorString = creator.lastName;
 
 				if (creator.firstName) {
@@ -2056,7 +2064,8 @@ function doExport() {
 		
 		if(item.tags && item.tags.length) {
 			var tagString = "";
-			for each(var tag in item.tags) {
+			for(var i in item.tags) {
+				var tag = item.tags[i];
 				tagString += ", "+tag.tag;
 			}
 			writeField("keywords", tagString.substr(2));
@@ -2075,7 +2084,8 @@ function doExport() {
 			writeField("howpublished", item.url);
 		}
 		if (item.notes && Zotero.getOption("exportNotes")) {
-			for each (var note in item.notes) {
+			for(var i in item.notes) {
+				var note = item.notes[i];
 				writeField("annote", Zotero.Utilities.unescapeHTML(note["note"]));
 			}
 		}		
@@ -2083,7 +2093,8 @@ function doExport() {
 		if(Zotero.getOption("exportFileData")) {
 			if(item.attachments) {
 				var attachmentString = "";
-				for each(var attachment in item.attachments) {
+				for(var i in item.attachments) {
+					var attachment = item.attachments[i];
 					attachmentString += ";" + attachment.title + ":" + attachment.path + ":" + attachment.mimeType;
 				}
 				writeField("file", attachmentString.substr(1));
