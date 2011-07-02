@@ -80,11 +80,16 @@ ZoteroCommandLineHandler.prototype = {
 			if(param) {
 				var uri = cmdLine.resolveURI(param);
 				if(uri.schemeIs("zotero")) {
-					// Don't open a new window
-					cmdLine.preventDefault = true;
-					
-					Components.classes["@mozilla.org/network/protocol;1?name=zotero"]
+					// Check for existing window and focus it
+					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						.getService(Components.interfaces.nsIWindowMediator);
+					var win = wm.getMostRecentWindow("navigator:browser");
+					if(win) {
+						cmdLine.preventDefault = true;
+						win.focus();
+						Components.classes["@mozilla.org/network/protocol;1?name=zotero"]
 							.createInstance(Components.interfaces.nsIProtocolHandler).newChannel(uri);
+					}
 				}
 			}
 		}
