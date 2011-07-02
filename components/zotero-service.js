@@ -27,11 +27,6 @@
     ***** END LICENSE BLOCK *****
 */
 
-const ZOTERO_CONTRACTID = '@zotero.org/Zotero;1';
-const ZOTERO_CLASSNAME = 'Zotero';
-const ZOTERO_CID = Components.ID('{e4c61080-ec2d-11da-8ad9-0800200c9a66}');
-const ZOTERO_IID = Components.interfaces.chnmIZoteroService; //unused
-
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
@@ -266,7 +261,7 @@ function makeZoteroContext(isConnector) {
 /**
  * The class representing the Zotero service, and affiliated XPCOM goop
  */
-function ZoteroService(){
+function ZoteroService() {
 	try {
 		if(isFirstLoadThisSession) {
 			makeZoteroContext(false);
@@ -295,24 +290,90 @@ function ZoteroService(){
 	}
 }
 
-//
-// XPCOM goop
-//
-
 ZoteroService.prototype = {
-	contractID: ZOTERO_CONTRACTID,
-	classDescription: ZOTERO_CLASSNAME,
-	classID: ZOTERO_CID,
+	contractID: '@zotero.org/Zotero;1',
+	classDescription: 'Zotero',
+	classID: Components.ID('{e4c61080-ec2d-11da-8ad9-0800200c9a66}'),
 	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsISupports,
 			Components.interfaces.nsIProtocolHandler])
 }
+
+/**
+ * The class representing the Zotero command line handler
+ */
+function ZoteroCommandLineHandler() {}
+ZoteroCommandLineHandler.prototype = {
+	/* nsISupports */
+	QueryInterface : XPCOMUtils.generateQI([Components.interfaces.nsICommandLineHandler,
+			Components.interfaces.nsIFactory, Components.interfaces.nsISupports]),
+	
+	/* nsICommandLineHandler */
+	handle : function(cmdLine) {
+		// handler for Zotero integration commands
+		// this is typically used on Windows only, via WM_COPYDATA rather than the command line
+		var agent = cmdLine.handleFlagWithParam("ZoteroIntegrationAgent", false);
+		if(agent) {
+			// Don't open a new window
+			cmdLine.preventDefault = true;
+			
+			var command = cmdLine.handleFlagWithParam("ZoteroIntegrationCommand", false);
+			var docId = cmdLine.handleFlagWithParam("ZoteroIntegrationDocument", false);
+			
+			// Not quite sure why this is necessary to get the appropriate scoping
+			var Zotero = this.Zotero;
+			Zotero.setTimeout(function() { Zotero.Integration.execCommand(agent, command, docId) }, 0);
+		}
+		
+		// handler for Windows IPC commands
+		var param = cmdLine.handleFlagWithParam("ZoteroIPC", false);
+		if(param) {
+			// Don't open a new window
+			cmdLine.preventDefault = true;
+			this.Zotero.IPC.parsePipeInput(param);
+		}
+		
+		// special handler for "zotero" URIs at the command line to prevent them from opening a new
+		// window
+		if(this.Zotero.isStandalone) {
+			var param = cmdLine.handleFlagWithParam("url", false);
+			if(param) {
+				var uri = cmdLine.resolveURI(param);
+				if(uri.schemeIs("zotero")) {
+					// Check for existing window and focus it
+					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						.getService(Components.interfaces.nsIWindowMediator);
+					var win = wm.getMostRecentWindow("navigator:browser");
+					if(win) {
+						cmdLine.preventDefault = true;
+						win.focus();
+						Components.classes["@mozilla.org/network/protocol;1?name=zotero"]
+							.createInstance(Components.interfaces.nsIProtocolHandler).newChannel(uri);
+					}
+				}
+			}
+		}
+	},
+	
+	contractID: "@mozilla.org/commandlinehandler/general-startup;1?type=zotero",
+	classDescription: "Zotero Command Line Handler",
+	classID: Components.ID("{531828f8-a16c-46be-b9aa-14845c3b010f}"),
+	service: true,
+	_xpcom_categories: [{category:"command-line-handler", entry:"m-zotero"}],
+	QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsICommandLineHandler,
+	                                       Components.interfaces.nsISupports])
+};
+
+ZoteroCommandLineHandler.prototype.__defineGetter__("Zotero", function() {
+	if(!zContext) new ZoteroService();
+	return zContext.Zotero;
+});
 
 /**
 * XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
 * XPCOMUtils.generateNSGetModule is for Mozilla 1.9.2 (Firefox 3.6).
 */
 if (XPCOMUtils.generateNSGetFactory) {
-	var NSGetFactory = XPCOMUtils.generateNSGetFactory([ZoteroService]);
+	var NSGetFactory = XPCOMUtils.generateNSGetFactory([ZoteroService, ZoteroCommandLineHandler]);
 } else {
-	var NSGetModule = XPCOMUtils.generateNSGetModule([ZoteroService]);
+	var NSGetModule = XPCOMUtils.generateNSGetModule([ZoteroService, ZoteroCommandLineHandler]);
 }
