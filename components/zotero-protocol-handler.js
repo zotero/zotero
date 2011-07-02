@@ -906,7 +906,7 @@ function ChromeExtensionHandler() {
 			generateContent: try {
 				var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 					.getService(Components.interfaces.nsIWindowWatcher)
-					.openWindow(null, 'chrome://zotero/content/standalone.xul', '',
+					.openWindow(null, 'chrome://zotero/content/standalone/standalone.xul', '',
 						'chrome,centerscreen,resizable', null);
 			}
 			catch (e) {
