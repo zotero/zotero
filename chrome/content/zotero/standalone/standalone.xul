@@ -168,6 +168,9 @@
 									command="cmd_zotero_createTimeline"/>
 							<menuitem id="menu_rtfScan" label="&zotero.toolbar.rtfScan.label;"
 									command="cmd_zotero_rtfScan"/>
+							<menuseparator/>
+							<menuitem id="menu_addons" label="&addons.label;"
+									oncommand="ZoteroStandalone.openInViewer('about:addons')"/>
 						</menupopup>
 					</menu>
 					

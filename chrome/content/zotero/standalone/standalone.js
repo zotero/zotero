@@ -100,6 +100,21 @@ var ZoteroStandalone = new function()
 	}
 	
 	/**
+	 * Opens a URL in the basic viewer
+	 */
+	this.openInViewer = function(uri) {
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+			.getService(Components.interfaces.nsIWindowMediator);
+		var win = wm.getMostRecentWindow("zotero:basicViewer");
+		if(win) {
+			win.loadURI(uri);
+		} else {
+			window.openDialog("chrome://zotero/content/standalone/basicViewer.xul",
+				"basicViewer", "chrome,resizable,centerscreen", uri);
+		}
+	}
+	
+	/**
 	 * Handles help menu requests
 	 */
 	this.openHelp = function(type) {
