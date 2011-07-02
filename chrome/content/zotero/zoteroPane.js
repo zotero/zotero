@@ -227,9 +227,9 @@ var ZoteroPane = new function()
 		else if (Zotero.Prefs.get('firstRun2')) {
 			if (Zotero.Schema.dbInitialized || !Zotero.Sync.Server.enabled) {
 				setTimeout(function () {
-					var url = "http://zotero.org/start";
+					const url = "https://www.zotero.org/start";
 					if(Zotero.isStandalone) {
-						ZoteroStandalone.openInViewer("http://zotero.org/start");
+						ZoteroStandalone.openInViewer(url);
 					} else {
 						gBrowser.selectedTab = gBrowser.addTab(url);
 					}
