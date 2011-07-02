@@ -44,6 +44,8 @@
  * ###############################
  */
 
+var bogusItemID = 1;
+
 var detectWeb = function (doc, url) {
 	// Icon shows only for search results and law cases
 	if (url.match(/scholar_case/)) {
@@ -432,6 +434,7 @@ ItemFactory.prototype.saveItem = function () {
 	if (this.v.title) {
 		this.repairTitle();
 		if (this.vv.volRepPag.length) {
+			var completed_items = [];
 			for (i = 0, ilen = this.vv.volRepPag.length; i < ilen; i += 1) {
 				this.item = new Zotero.Item("case");
 				for (key in this.vv.volRepPag[i]) {
@@ -443,8 +446,19 @@ ItemFactory.prototype.saveItem = function () {
 				if (i === (this.vv.volRepPag.length - 1)) {
 					this.pushAttachments("Judgement");
 				}
-				this.item.complete();
-			};
+				this.item.itemID = "" + bogusID;
+				bogusID += 1;
+				completed_items.push(this.item);
+			}
+			for (i = 0, ilen = completed_items.length; i < ilen; i += 1) {
+				for (j = 0, jlen = completed_items.length; j < jlen; j += 1) {
+					if (i === j) {
+						continue;
+					}
+					completed_items[i].seeAlso.push(completed_items[j].itemID);
+				}
+				completed_items[i].complete();
+			}
 		} else {
 			this.item = new Zotero.Item("case");
 			this.saveItemCommonVars();
