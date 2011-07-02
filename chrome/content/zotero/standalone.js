@@ -30,6 +30,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
  */
 var ZoteroStandalone = new function()
 {
+	/**
+	 * Run when standalone window first opens
+	 */
 	this.onLoad = function() {
 		if(!Zotero || !Zotero.initialized) {
 			ZoteroPane.displayStartupError();
@@ -53,6 +56,52 @@ var ZoteroStandalone = new function()
 		
 	}
 	
+	/**
+	 * Builds new item menu
+	 */
+	this.buildNewItemMenu = function() {
+		var addMenu = document.getElementById('menu_NewItemPopup');
+		
+		// Remove all nodes so we can regenerate
+		while(addMenu.hasChildNodes()) addMenu.removeChild(addMenu.firstChild);
+		
+		var typeSets = [Zotero.ItemTypes.getPrimaryTypes(), Zotero.ItemTypes.getSecondaryTypes()];
+		for(var i in typeSets) {
+			var t = typeSets[i];
+			
+			// Sort by localized name
+			var itemTypes = [];
+			for (var i=0; i<t.length; i++) {
+				itemTypes.push({
+					id: t[i].id,
+					name: t[i].name,
+					localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
+				});
+			}
+			var collation = Zotero.getLocaleCollation();
+			itemTypes.sort(function(a, b) {
+				return collation.compareString(1, a.localized, b.localized);
+			});
+			
+			for (var i = 0; i<itemTypes.length; i++) {
+				var menuitem = document.createElement("menuitem");
+				menuitem.setAttribute("label", itemTypes[i].localized);
+				menuitem.setAttribute("oncommand","ZoteroPane_Local.newItem("+itemTypes[i]['id']+")");
+				menuitem.setAttribute("tooltiptext", "");
+				menuitem.className = "zotero-tb-add";
+				addMenu.appendChild(menuitem);
+			}
+			
+			// add separator between sets
+			if(i !== typeSets.length-1) {
+				addMenu.appendChild(document.createElement("menuseparator"));
+			}
+		}
+	}
+	
+	/**
+	 * Handles help menu requests
+	 */
 	this.openHelp = function(type) {
 		if(type === "troubleshooting") {
 			ZoteroPane.loadURI("http://www.zotero.org/support/getting_help");
@@ -63,6 +112,9 @@ var ZoteroStandalone = new function()
 		}
 	}
 	
+	/**
+	 * Called before standalone window is closed
+	 */
 	this.onUnload = function() {
 		ZoteroPane.destroy();
 	}

@@ -60,6 +60,10 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
+<!--TOOLS MENU-->
+<!ENTITY toolsMenu.label           "Tools"> 
+<!ENTITY toolsMenu.accesskey           "T"> 
+
 <!--WINDOW MENU-->
 <!ENTITY minimizeWindow.key       "m">
 <!ENTITY minimizeWindow.label     "Minimize">

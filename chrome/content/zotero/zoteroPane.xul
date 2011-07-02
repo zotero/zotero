@@ -51,6 +51,13 @@
 		<command id="cmd_zotero_importFromClipboard" oncommand="Zotero_File_Interface.importFromClipboard();"/>
 		<command id="cmd_zotero_exportLibrary" oncommand="Zotero_File_Interface.exportFile();"/>
 		<command id="cmd_zotero_advancedSearch" oncommand="ZoteroPane_Local.openAdvancedSearchWindow();"/>
+		<command id="cmd_zotero_copyCitation" oncommand="ZoteroPane_Local.copySelectedItemsToClipboard(true);"/>
+		<command id="cmd_zotero_copyBibliography" oncommand="ZoteroPane_Local.copySelectedItemsToClipboard();"/>
+		<command id="cmd_zotero_createTimeline" oncommand="Zotero_Timeline_Interface.loadTimeline();"/>
+		<command id="cmd_zotero_rtfScan" oncommand="window.openDialog('chrome://zotero/content/rtfScan.xul', 'rtfScan', 'chrome,centerscreen')"/>
+		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane_Local.newCollection()"/>
+		<command id="cmd_zotero_newSavedSearch" oncommand="ZoteroPane_Local.newSearch()"/>
+		<command id="cmd_zotero_newStandaloneNote" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
 	</commandset>
 	
 	<popup id="contentAreaContextMenu">
@@ -86,7 +93,7 @@
 			
 			<hbox id="zotero-toolbar" class="toolbar">
 				<hbox id="zotero-collections-toolbar">
-					<toolbarbutton id="zotero-tb-collection-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.newCollection()"/>
+					<toolbarbutton id="zotero-tb-collection-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
 					<toolbarbutton id="zotero-tb-group-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
 					<spacer flex="1"/>
 					<toolbarbutton id="zotero-tb-actions-menu" class="zotero-tb-button" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
@@ -94,11 +101,11 @@
 							<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" command="cmd_zotero_import"/>
 							<menuitem id="zotero-tb-actions-import-clipboard" label="&zotero.toolbar.importFromClipboard;" command="cmd_zotero_importFromClipboard"/>
 							<menuitem id="zotero-tb-actions-export" label="&zotero.toolbar.export.label;" command="cmd_zotero_exportLibrary"/>
-							<menuitem id="zotero-tb-actions-rtfScan" label="&zotero.toolbar.rtfScan.label;" oncommand="window.openDialog('chrome://zotero/content/rtfScan.xul', 'rtfScan', 'chrome,centerscreen')"/>
+							<menuitem id="zotero-tb-actions-rtfScan" label="&zotero.toolbar.rtfScan.label;" command="cmd_zotero_rtfScan"/>
 							<menuitem hidden="true" id="zotero-tb-actions-zeroconf-update"
 								label="Search for Shared Libraries" oncommand="Zotero.Zeroconf.findInstances()"/>
 							<menuseparator id="zotero-tb-actions-plugins-separator"/>
-							<menuitem id="zotero-tb-actions-timeline" label="&zotero.toolbar.timeline.label;" oncommand="Zotero_Timeline_Interface.loadTimeline()"/>
+							<menuitem id="zotero-tb-actions-timeline" label="&zotero.toolbar.timeline.label;" command="cmd_zotero_createTimeline"/>
 							<!-- TODO: localize <menuitem id="zotero-tb-actions-duplicate" label="&zotero.toolbar.duplicate.label;" oncommand="ZoteroPane_Local.showDuplicates()"/>-->
 							<menuitem id="zotero-tb-actions-showDuplicates" label="Show Duplicates" oncommand="ZoteroPane_Local.showDuplicates()" hidden="true"/>
 							<menuseparator hidden="true" id="zotero-tb-actions-sync-separator"/>
@@ -131,10 +138,10 @@
 					<toolbarbutton id="zotero-tb-item-from-page" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItemFromPage.label;" oncommand="ZoteroPane_Local.addItemFromPage('temporaryPDFHack', event.shiftKey ? !Zotero.Prefs.get('automaticSnapshots') : null)"/>
 					<toolbarbutton id="zotero-tb-lookup" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" oncommand="ZoteroPane_Local.openLookupWindow()"/>
 					<!--<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>-->
-					<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="New Note" type="menu">
+					<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;" type="menu">
 						<menupopup onpopupshowing="ZoteroPane_Local.updateNoteButtonMenu()">
-							<menuitem label="Add Standalone Note" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
-							<menuitem id="zotero-tb-add-child-note" label="Add Child Note" oncommand="var selected = ZoteroPane_Local.getSelectedItems()[0]; var parent = selected.getSource(); parent = parent ? parent : selected.id; ZoteroPane_Local.newNote(event.shiftKey, parent);"/>
+							<menuitem label="&zotero.toolbar.note.standalone;" command="cmd_zotero_newStandaloneNote"/>
+							<menuitem id="zotero-tb-add-child-note" label="&zotero.toolbar.note.child;" oncommand="var selected = ZoteroPane_Local.getSelectedItems()[0]; var parent = selected.getSource(); parent = parent ? parent : selected.id; ZoteroPane_Local.newNote(event.shiftKey, parent);"/>
 						</menupopup>
 					</toolbarbutton>
 					<toolbarbutton id="zotero-tb-attachment-add" class="zotero-tb-button" tooltiptext="New Child Attachment" type="menu">
@@ -216,8 +223,8 @@
 			
 			<popupset>
 				<menupopup id="zotero-collectionmenu" onpopupshowing="ZoteroPane_Local.buildCollectionContextMenu();">
-					<menuitem label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.newCollection()"/>
-					<menuitem label="&zotero.toolbar.newSavedSearch.label;" oncommand="ZoteroPane_Local.newSearch()"/>
+					<menuitem label="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
+					<menuitem label="&zotero.toolbar.newSavedSearch.label;" command="cmd_zotero_newSavedSearch"/>
 					<menuitem label="&zotero.toolbar.newSubcollection.label;" oncommand="ZoteroPane_Local.newCollection(ZoteroPane_Local.getSelectedCollection().id)"/>
 					<menuseparator/>
 					<menuitem label="&zotero.collections.showUnfiledItems;" oncommand="ZoteroPane_Local.setUnfiled(ZoteroPane_Local.getSelectedLibraryID(), true)"/>

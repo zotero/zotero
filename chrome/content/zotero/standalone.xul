@@ -109,6 +109,15 @@
 				style="border:0px;padding:0px;margin:0px;-moz-appearance:none">
 					<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
 						<menupopup id="menu_FilePopup">
+							<menu id="menu_newItem" label="&zotero.toolbar.newItem.label;">
+								<menupopup id="menu_NewItemPopup"
+										onpopupshowing="ZoteroStandalone.buildNewItemMenu()"/>
+							</menu>
+							<menuitem id="menu_newNote" label="&zotero.toolbar.newNote;"
+									command="cmd_zotero_newStandaloneNote"/>
+							<menuitem id="menu_newCollection" label="&zotero.toolbar.newCollection.label;"
+									command="cmd_zotero_newCollection"/>
+							<menuseparator/>
 							<menuitem id="menu_close" label="&closeCmd.label;" key="key_close"
 									accesskey="&closeCmd.accesskey;" command="cmd_close"/>
 							<menuseparator/>
@@ -131,9 +140,9 @@
 									key="key_copy" accesskey="&copyCmd.accesskey;"
 									command="cmd_copy"/>
 							<menuitem id="menu_copyCitation" label="&copyCitationCmd.label;"
-									oncommand="ZoteroPane_Local.copySelectedItemsToClipboard(true);"/>
+									command="cmd_zotero_copyCitation"/>
 							<menuitem id="menu_copyBibliography" label="&copyBibliographyCmd.label;"
-									oncommand="ZoteroPane_Local.copySelectedItemsToClipboard();"/>
+									command="cmd_zotero_copyBibliography"/>
 							<menuitem id="menu_paste"/>
 							<menuitem id="menu_delete"/>
 							<menuseparator/>
@@ -150,6 +159,15 @@
 									label="&bidiSwitchTextDirectionItem.label;"
 									accesskey="&bidiSwitchTextDirectionItem.accesskey;"
 									hidden="true"/>
+						</menupopup>
+					</menu>
+					
+					<menu id="toolsMenu" label="&toolsMenu.label;" accesskey="&toolsMenu.accesskey;">
+						<menupopup id="menu_ToolsPopup">
+							<menuitem id="menu_createTimeline" label="&zotero.toolbar.timeline.label;"
+									command="cmd_zotero_createTimeline"/>
+							<menuitem id="menu_rtfScan" label="&zotero.toolbar.rtfScan.label;"
+									command="cmd_zotero_rtfScan"/>
 						</menupopup>
 					</menu>
 					
