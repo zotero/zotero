@@ -224,11 +224,15 @@ var ZoteroPane = new function()
 		// -- this way the page won't be displayed when they sync their DB to
 		// another profile or if the DB is initialized erroneously (e.g. while
 		// switching data directory locations)
-		else if (Zotero.Prefs.get('firstRun2') && !Zotero.isStandalone) {
+		else if (Zotero.Prefs.get('firstRun2')) {
 			if (Zotero.Schema.dbInitialized || !Zotero.Sync.Server.enabled) {
 				setTimeout(function () {
 					var url = "http://zotero.org/start";
-					gBrowser.selectedTab = gBrowser.addTab(url);
+					if(Zotero.isStandalone) {
+						ZoteroStandalone.openInViewer("http://zotero.org/start");
+					} else {
+						gBrowser.selectedTab = gBrowser.addTab(url);
+					}
 				}, 400);
 			}
 			Zotero.Prefs.set('firstRun2', false);
