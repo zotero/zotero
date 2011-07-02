@@ -1,15 +1,15 @@
 {
-	"translatorID": "57a00950-f0d1-4b41-b6ba-44ff0fc30289",
-	"label": "Google Scholar",
-	"creator": "Simon Kornblith, Frank Bennett",
-	"target": "http://scholar\\.google\\.(?:com|com?\\.[a-z]{2}|[a-z]{2}|co\\.[a-z]{2})/scholar(?:_case)*",
-	"minVersion": "1.0.0b3.r1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-01 20:21:22"
+        "translatorID": "57a00950-f0d1-4b41-b6ba-44ff0fc30289",
+        "label": "Google Scholar",
+        "creator": "Simon Kornblith, Frank Bennett",
+        "target": "^https?://scholar\\.google\\.(?:com|com?\\.[a-z]{2}|[a-z]{2}|co\\.[a-z]{2})/scholar(?:_case)*",
+        "minVersion": "2.1.9",
+        "maxVersion": "",
+        "priority": 100,
+        "inRepository": true,
+        "translatorType": 4,
+        "browserSupport": "gcs",
+        "lastUpdated": "2011-07-02 13:33:19"
 }
 
 /*
@@ -446,8 +446,8 @@ ItemFactory.prototype.saveItem = function () {
 				if (i === (this.vv.volRepPag.length - 1)) {
 					this.pushAttachments("Judgement");
 				}
-				this.item.itemID = "" + bogusID;
-				bogusID += 1;
+				this.item.itemID = "" + bogusItemID;
+				bogusItemID += 1;
 				completed_items.push(this.item);
 			}
 			for (i = 0, ilen = completed_items.length; i < ilen; i += 1) {
@@ -480,57 +480,58 @@ ItemFactory.prototype.saveItemCommonVars = function () {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://scholar.google.com/scholar?q=marbury&hl=en&btnG=Search&as_sdt=1%2C22&as_sdtp=on",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://scholar.google.com/scholar?hl=en&q=kelo&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://scholar.google.com/scholar?hl=en&q=smith&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://scholar.google.com/scholar?hl=en&q=view+of+the+cathedral&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://scholar.google.com/scholar?hl=en&q=clifford&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://scholar.google.com/scholar_case?case=9834052745083343188&q=marbury+v+madison&hl=en&as_sdt=2,5",
-		"items": [
-			{
-				"itemType": "case",
-				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Google Scholar Linked Judgement",
-						"type": "text/html",
-						"url": false
-					}
-				],
-				"volume": "5",
-				"reporter": "US",
-				"pages": "137",
-				"title": "Marbury v. Madison",
-				"court": "Supreme Court",
-				"date": "1803",
-				"libraryCatalog": "Google Scholar"
-			}
-		]
-	}
+    {
+        "type": "web",
+        "url": "http://scholar.google.com/scholar?q=marbury&hl=en&btnG=Search&as_sdt=1%2C22&as_sdtp=on",
+        "items": "multiple"
+    },
+    {
+        "type": "web",
+        "url": "http://scholar.google.com/scholar?hl=en&q=kelo&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
+        "items": "multiple"
+    },
+    {
+        "type": "web",
+        "url": "http://scholar.google.com/scholar?hl=en&q=smith&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
+        "items": "multiple"
+    },
+    {
+        "type": "web",
+        "url": "http://scholar.google.com/scholar?hl=en&q=view+of+the+cathedral&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
+        "items": "multiple"
+    },
+    {
+        "type": "web",
+        "url": "http://scholar.google.com/scholar?hl=en&q=clifford&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
+        "items": "multiple"
+    },
+    {
+        "type": "web",
+        "url": "http://scholar.google.com/scholar_case?case=9834052745083343188&q=marbury+v+madison&hl=en&as_sdt=2,5",
+        "items": [
+            {
+                "itemType": "case",
+                "creators": [],
+                "notes": [],
+                "tags": [],
+                "seeAlso": [],
+                "attachments": [
+                    {
+                        "title": "Google Scholar Linked Judgement",
+                        "type": "text/html",
+                        "url": false
+                    }
+                ],
+                "volume": "5",
+                "reporter": "US",
+                "pages": "137",
+                "title": "Marbury v. Madison",
+                "court": "Supreme Court",
+                "date": "1803",
+                "itemID": "1",
+                "libraryCatalog": "Google Scholar"
+            }
+        ]
+    }
 ]
 /** END TEST CASES **/
