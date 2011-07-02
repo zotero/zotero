@@ -1319,19 +1319,30 @@ Zotero_Preferences.Debug_Output = {
 	
 	
 	view: function () {
-		var uri = "zotero://debug/";
-		var features = "menubar=yes,toolbar=no,location=no,scrollbars,centerscreen,resizable";
+		const uri = "zotero://debug/";
+		const features = "menubar=yes,toolbar=no,location=no,scrollbars,centerscreen,resizable";
 		
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-		.getService(Components.interfaces.nsIWindowMediator);
-		var win = wm.getMostRecentWindow("navigator:browser");
-		if (win) {
-			win.open(uri, null, features);
-		}
-		else {
-			var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-						.getService(Components.interfaces.nsIWindowWatcher);
-			var win = ww.openWindow(null, uri, null, features + ",width=775,height=575", null);
+			.getService(Components.interfaces.nsIWindowMediator);
+		
+		if(Zotero.isStandalone) {
+			var win = wm.getMostRecentWindow("zotero:basicViewer");
+			if(win) {
+				win.loadURI(uri);
+			} else {
+				window.openDialog("chrome://zotero/content/standalone/basicViewer.xul",
+					"basicViewer", "chrome,resizable,centerscreen", uri);
+			}
+		} else {
+			var win = wm.getMostRecentWindow("navigator:browser");
+			if(win) {
+				win.open(uri, null, features);
+			}
+			else {
+				var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+							.getService(Components.interfaces.nsIWindowWatcher);
+				var win = ww.openWindow(null, uri, null, features + ",width=775,height=575", null);
+			}
 		}
 	},
 	
