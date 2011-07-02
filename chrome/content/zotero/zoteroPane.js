@@ -1714,7 +1714,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		var url = window.content.location.href;
+		var url = (window.content && window.content.location ? window.content.location.href : null);
 		var [mode, format] = Zotero.QuickCopy.getFormatFromURL(url).split('=');
 		var [mode, contentType] = mode.split('/');
 		
