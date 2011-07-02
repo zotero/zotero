@@ -63,6 +63,7 @@
 <!--TOOLS MENU-->
 <!ENTITY toolsMenu.label           "Tools"> 
 <!ENTITY toolsMenu.accesskey           "T"> 
+<!ENTITY addons.label				"Add-ons">
 
 <!--WINDOW MENU-->
 <!ENTITY minimizeWindow.key       "m">
