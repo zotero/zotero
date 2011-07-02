@@ -905,7 +905,7 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	var translate = this._translate;
 	translate.incrementAsyncProcesses();
 	Zotero.HTTP.processDocuments(urls, processor, function() {
-		done();
+		if(done) done();
 		translate.decrementAsyncProcesses();
 	}, exception);
 }
