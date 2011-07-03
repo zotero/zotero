@@ -465,6 +465,7 @@ Zotero.Translate.Sandbox = {
 			}
 			
 			// create short title
+			Zotero.debug("item type is "+item.itemType);
 			if(item.shortTitle === undefined && Zotero.Utilities.fieldIsValidForType("shortTitle", item.itemType)) {		
 				// only set if changes have been made
 				var setShortTitle = false;
@@ -793,7 +794,7 @@ Zotero.Translate.Base.prototype = {
 	 */
 	"getTranslators":function(getAllTranslators) {
 		// do not allow simultaneous instances of getTranslators
-		if(this._currentState == "detect") throw new Error("getTranslators: detection is already running");
+		if(this._currentState === "detect") throw new Error("getTranslators: detection is already running");
 		this._currentState = "detect";
 		this._getAllTranslators = getAllTranslators;
 		this._getTranslatorsGetPotentialTranslators();
@@ -1426,6 +1427,8 @@ Zotero.Translate.Import.prototype._getTranslatorsGetPotentialTranslators = funct
  */
 Zotero.Translate.Import.prototype.getTranslators = function() {
 	if(!this._string && !this.location) {
+		if(this._currentState === "detect") throw new Error("getTranslators: detection is already running");
+		this._currentState = "detect";
 		this._foundTranslators = Zotero.Translators.getAllForType(this.type);
 		this._potentialTranslators = [];
 		this.complete(true);
@@ -1562,6 +1565,8 @@ Zotero.Translate.Export.prototype.complete = Zotero.Translate.Import.prototype.c
  * Overload {@link Zotero.Translate.Base#getTranslators} to return all translators immediately
  */
 Zotero.Translate.Export.prototype.getTranslators = function() {
+	if(this._currentState === "detect") throw new Error("getTranslators: detection is already running");
+	this._currentState = "detect";
 	this._foundTranslators = Zotero.Translators.getAllForType(this.type);
 	this._potentialTranslators = [];
 	this.complete(true);

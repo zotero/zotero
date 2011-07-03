@@ -115,7 +115,7 @@ Zotero.ItemFields = new function() {
 	this.isValidForType = function(fieldIdOrName, typeIdOrName) {
 		// mimics itemFields.js
 		if(!Zotero.Connector_Types["fields"][fieldIdOrName]
-		   || !Zotero.Connector_Types["itemTypes"][typeIdOrName]) throw "Invalid field or type ID";
+		   || !Zotero.Connector_Types["itemTypes"][typeIdOrName]) return false;
 		
 		return Zotero.Connector_Types["itemTypes"][typeIdOrName].fields.indexOf(
 			Zotero.Connector_Types["fields"][fieldIdOrName].id) !== -1;
@@ -123,7 +123,7 @@ Zotero.ItemFields = new function() {
 	
 	this.getFieldIDFromTypeAndBase = function(itemType, baseField) {
 		if(!Zotero.Connector_Types["fields"][baseField]
-		   || !Zotero.Connector_Types["itemTypes"][itemType]) throw "Invalid field or type ID";
+		   || !Zotero.Connector_Types["itemTypes"][itemType]) throw new Error("Invalid field or type ID");
 		
 		// get as ID
 		baseField = Zotero.Connector_Types["fields"][baseField].id;
