@@ -255,7 +255,7 @@ Zotero.Translate.Sandbox = {
 				
 				var haveTranslatorFunction = function(translator) {
 					translation.translator[0] = translator;
-					if(!Zotero._loadTranslator(translator)) throw new Error("Translator could not be loaded");
+					if(!translation._loadTranslator(translator)) throw new Error("Translator could not be loaded");
 					
 					if(Zotero.isFx) {
 						// do same origin check
