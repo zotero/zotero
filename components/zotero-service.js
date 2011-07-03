@@ -338,11 +338,12 @@ ZoteroCommandLineHandler.prototype = {
 		}
 		
 		// handler for Windows IPC commands
-		var param = cmdLine.handleFlagWithParam("ZoteroIPC", false);
-		if(param) {
+		var ipcParam = cmdLine.handleFlagWithParam("ZoteroIPC", false);
+		if(ipcParam) {
 			// Don't open a new window
 			cmdLine.preventDefault = true;
-			this.Zotero.IPC.parsePipeInput(param);
+			var Zotero = this.Zotero;
+			Zotero.setTimeout(function() { Zotero.IPC.parsePipeInput(ipcParam) }, 0);
 		}
 		
 		// special handler for "zotero" URIs at the command line to prevent them from opening a new
