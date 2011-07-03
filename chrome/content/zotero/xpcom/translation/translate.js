@@ -94,6 +94,7 @@ Zotero.Translate.Sandbox = {
 				// remove null, undefined, and false properties
 				for(var i in item) {
 					if(!item[i] && item[i] !== 0) delete item[i];
+					if(typeof item[i] === "string") item[i] = item[i].trim();
 				}
 				
 				translate.newItems.push(item);
