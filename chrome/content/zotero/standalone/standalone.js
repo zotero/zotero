@@ -54,6 +54,17 @@ var ZoteroStandalone = new function()
 			}
 		}
 		
+		// Don't ask before handing http and https URIs
+		var eps = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
+				.getService(Components.interfaces.nsIExternalProtocolService);
+		var hs = Components.classes["@mozilla.org/uriloader/handler-service;1"]
+				.getService(Components.interfaces.nsIHandlerService);
+		for each(var scheme in ["http", "https"]) {
+			var handlerInfo = eps.getProtocolHandlerInfo(scheme);
+			handlerInfo.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
+			handlerInfo.alwaysAskBeforeHandling = false;
+			hs.store(handlerInfo);
+		}
 	}
 	
 	/**
