@@ -1085,7 +1085,7 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 	} else {
 		if(protocolRe.test(url)) return url;
 		
-		if(uri.indexOf(":") !== -1) {
+		if(url.indexOf(":") !== -1) {
 			// don't allow protocol switches
 			throw "Invalid URL supplied for HTTP request";
 		}
