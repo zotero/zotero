@@ -175,6 +175,11 @@ if(appInfo.platformVersion[0] >= 2) {
 	 */
 	this.suppressUIUpdates = false;
 	
+	/**
+	 * @property	{Boolean}	closing		True if the application is closing.
+	 */
+	this.closing = false;
+	
 	var _startupErrorHandler;
 	var _zoteroDirectory = false;
 	var _localizedStringBundle;
@@ -420,6 +425,15 @@ if(appInfo.platformVersion[0] >= 2) {
 			}
 		}
 		
+		// Register shutdown handler to call Zotero.shutdown()
+		var _shutdownObserver = {observe:Zotero.shutdown};
+		observerService.addObserver(_shutdownObserver, "quit-application", false);
+		
+		// Add shutdown listerner to remove observer
+		this.addShutdownListener(function() {
+			observerService.removeObserver(_shutdownObserver, "quit-application", false);
+		});
+		
 		Zotero.IPC.init();
 		
 		// Load additional info for connector or not
@@ -428,10 +442,14 @@ if(appInfo.platformVersion[0] >= 2) {
 			Zotero.Connector_Types.init();
 			
 			if(!Zotero.isFirstLoadThisSession) {
-				// wait for initComplete message if we switched to connector because standalone was
-				// started
+				// Wait for initComplete message if we switched to connector because standalone was
+				// started. This shouldn't loop indefinitely, but even if it does, it won't hang
+				// anything (since it will stop looping on shutdown).
 				_waitingForInitComplete = true;
-				while(_waitingForInitComplete) Zotero.mainThread.processNextEvent(true);
+				while(_waitingForInitComplete && !Zotero.closing) {
+					Zotero.mainThread.processNextEvent(true);
+				}
+				if(Zotero.closing) return;
 			}
 			
 			Zotero.Repo.init();
@@ -441,15 +459,6 @@ if(appInfo.platformVersion[0] >= 2) {
 		}
 		
 		this.initialized = true;
-		
-		// Register shutdown handler to call Zotero.shutdown()
-		var _shutdownObserver = {observe:Zotero.shutdown};
-		observerService.addObserver(_shutdownObserver, "quit-application", false);
-		
-		// Add shutdown listerner to remove observer
-		this.addShutdownListener(function() {
-			observerService.removeObserver(_shutdownObserver, "quit-application", false);
-		});
 		
 		Zotero.debug("Initialized in "+((new Date()).getTime() - start)+" ms");
 		
@@ -645,7 +654,7 @@ if(appInfo.platformVersion[0] >= 2) {
 	/**
 	 * Initializes the DB connection
 	 */
-	function _initDB() {
+	function _initDB(haveReleasedLock) {
 		try {
 			// Test read access
 			Zotero.DB.test();
@@ -685,12 +694,21 @@ if(appInfo.platformVersion[0] >= 2) {
 			} else if(e.name == "NS_ERROR_STORAGE_BUSY" || e.result == 2153971713) {
 				if(Zotero.isStandalone) {
 					// Standalone should force Fx to release lock 
-					if(Zotero.IPC.broadcast("releaseLock")) {
+					if(!haveReleasedLock && Zotero.IPC.broadcast("releaseLock")) {
 						_waitingForDBLock = true;
-						while(_waitingForDBLock) Zotero.mainThread.processNextEvent(true);
-						// we will want to broadcast when initialization completes
+						
+						var timeout = Date.now() + 5000; // 5 second timeout
+						while(_waitingForDBLock && !Zotero.closing && Date.now() < timeout) {
+							Zotero.mainThread.processNextEvent(true);
+						}
+						if(Zotero.closing) return;
+						
+						// We will want to broadcast when initialization completes
 						_broadcastInitComplete = true;
-						return _initDB();
+						
+						// Run a second init with haveReleasedLock = true, so that
+						// if we still can't acquire a DB lock, we will give up
+						return _initDB(true);
 					}
 				} else {
 					// Fx should start as connector if Standalone is running
@@ -754,6 +772,9 @@ if(appInfo.platformVersion[0] >= 2) {
 		Zotero.debug("Shutting down Zotero");
 		
 		try {
+			// set closing to true
+			Zotero.closing = true;
+			
 			// run shutdown listener
 			for each(var listener in _shutdownListeners) listener();
 			
