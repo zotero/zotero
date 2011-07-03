@@ -298,6 +298,19 @@ ZoteroService.prototype = {
 			Components.interfaces.nsIProtocolHandler])
 }
 
+var _isStandalone = null;
+/**
+ * Determine whether Zotero Standalone is running
+ */
+function isStandalone() {
+	if(_isStandalone === null) {
+		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
+			getService(Components.interfaces.nsIXULAppInfo);
+		_isStandalone = appInfo.ID === 'zotero@chnm.gmu.edu';
+	}
+	return _isStandalone;
+}
+
 /**
  * The class representing the Zotero command line handler
  */
@@ -334,7 +347,7 @@ ZoteroCommandLineHandler.prototype = {
 		
 		// special handler for "zotero" URIs at the command line to prevent them from opening a new
 		// window
-		if(this.Zotero.isStandalone) {
+		if(isStandalone()) {
 			var param = cmdLine.handleFlagWithParam("url", false);
 			if(param) {
 				var uri = cmdLine.resolveURI(param);
