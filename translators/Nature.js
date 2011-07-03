@@ -3,13 +3,13 @@
 	"label": "Nature",
 	"creator": "Simon Kornblith",
 	"target": "https?://www\\.nature\\.com[^/]*/(?:[^/]+/journal/v[^/]+/n[^/]+/(?:(?:full|abs)/.+\\.html|index.html)|search/executeSearch)",
-	"minVersion": "1.0.0b3.r1",
+	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-03 04:19:18"
+	"lastUpdated": "2011-07-03 04:20:14"
 }
 
 var articleRe = /(https?:\/\/[^\/]+\/[^\/]+\/journal\/v[^\/]+\/n[^\/]+\/)(full|abs)(\/.+)\.html/;
