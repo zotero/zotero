@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-03 03:57:15"
+	"lastUpdated": "2011-07-03 03:58:51"
 }
 
 function detectWeb(doc, url) {
@@ -178,6 +178,7 @@ function doWeb(doc, url) {
     			thisRequest.pdfs.push(pdfs[gca]);
     			thisRequest.args += "&gca="+gca;
     		}
+            handleRequests(requests);
 		});
 	} else {
 		var baseURL = doc.evaluate('//a[substring(@href, 1, 16) = "/cgi/citmgr?gca="]', doc, null,
