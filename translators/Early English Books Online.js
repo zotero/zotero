@@ -3,12 +3,12 @@
 	"translatorType":4,
 	"label":"Early English Books Online",
 	"creator":"Michael Berkowitz",
-	"target":"http://[^/]*eebo.chadwyck.com[^/]*/search",
-	"minVersion":"1.0.0b4.r5",
+	"target":"^http://[^/]*eebo.chadwyck.com[^/]*/search",
+	"minVersion":"2.1",
 	"maxVersion":"",
 	"priority":100,
 	"inRepository":true,
-	"lastUpdated":"2008-02-11 19:30:00"
+	"lastUpdated":"2011-06-14 19:30:00"
 }
 
 function detectWeb(doc, url) {
@@ -25,28 +25,26 @@ function doWeb(doc, url) {
 	var hostRegexp = new RegExp("^(https?://[^/]+)/");
 	var hMatch = hostRegexp.exec(url);
 	var host = hMatch[1];
+    var IDRegex = /&ID=([^&]+)/
 
 	if (doc.title == "Search Results - EEBO") {
 		var items = new Object();
-		Zotero.debug("search page");
-		var IDxpath = '//td[3]/script';
-		var Titlexpath = '//td[3]/i';
+		var IDxpath = '//td/input[@name="EeboId"]/@value';
+    	var Titlexpath = '//table[tbody/tr/td/input[@name="EeboId"]]/following-sibling::table[1]//i[1]';
 		var new_ids = doc.evaluate(IDxpath, doc, null, XPathResult.ANY_TYPE, null);
-		var new_titles = doc.evaluate(Titlexpath, doc, null, XPathResult.ANY_TYPE, null);
+        var new_titles = doc.evaluate(Titlexpath, doc, null, XPathResult.ANY_TYPE, null);
 		var next_id = new_ids.iterateNext();
-		var next_title = new_titles.iterateNext();
-		var IDRegex = /'(\d+)'/;
+    	var next_title = new_titles.iterateNext();
 		while (next_id) {
-			items[next_id.textContent.match(IDRegex)[1]] = next_title.textContent;
+			items[next_id.textContent.trim()] = next_title.textContent.trim();
 			next_id = new_ids.iterateNext();
 			next_title = new_titles.iterateNext();
-		}
+        }
 		items = Zotero.selectItems(items);
 		for (var i in items) {
 			eeboIDs.push(i);
 		}
 	} else {
-		var IDRegex = /&ID=(\w+)&/
 		var eeboid = url.match(IDRegex)[1];
 		if (eeboid[0] == "D") {
 			eeboid = eeboid.slice(7, 14);
@@ -63,11 +61,15 @@ function doWeb(doc, url) {
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text.substring(17));
 			translator.setHandler("itemDone", function(obj, item) {
-				item.url = host+'/search/full_rec?SOURCE=pgimages.cfg&ACTION=ByID&ID=' + new_eeboid + '&FILE=../session/1190302085_15129&SEARCHSCREEN=CITATIONS&SEARCHCONFIG=config.cfg&DISPLAY=ALPHA';
+				item.attachments.push(
+                        {url : host+'/search/full_rec?SOURCE=pgimages.cfg&ACTION=ByID&ID=' + new_eeboid + '&FILE=../session/1190302085_15129&SEARCHSCREEN=CITATIONS&SEARCHCONFIG=config.cfg&DISPLAY=ALPHA',
+                         title : "EEBO Record",
+                         snapshot : false });
 				item.complete();
 			});
 			translator.translate();
 			Zotero.done();
 		});
 	}
+    Zotero.wait();
 }
