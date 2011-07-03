@@ -395,7 +395,8 @@ if(appInfo.platformVersion[0] >= 2) {
 						Components.utils.evalInSandbox(prefsJs, sandbox);
 						var prefs = new XPCSafeJSObjectWrapper(sandbox.prefs);
 						for(var key in prefs) {
-							if(key.substr(0, ZOTERO_CONFIG.PREF_BRANCH.length) == ZOTERO_CONFIG.PREF_BRANCH) {
+							if(key.substr(0, ZOTERO_CONFIG.PREF_BRANCH.length) === ZOTERO_CONFIG.PREF_BRANCH
+									&& key !== "extensions.zotero.firstRun2") {
 								Zotero.Prefs.set(key.substr(ZOTERO_CONFIG.PREF_BRANCH.length), prefs[key]);
 							}
 						}

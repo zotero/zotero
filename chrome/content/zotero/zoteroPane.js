@@ -137,7 +137,7 @@ var ZoteroPane = new function()
 		// register an observer for Zotero reload
 		observerService = Components.classes["@mozilla.org/observer-service;1"]
 					  .getService(Components.interfaces.nsIObserverService);
-		observerService.addObserver(_reload, "zotero-reloaded", false);
+		observerService.addObserver(_reloadObserver, "zotero-reloaded", false);
 		this.addReloadListener(_loadPane);
 		
 		// continue loading pane
@@ -227,11 +227,10 @@ var ZoteroPane = new function()
 		else if (Zotero.Prefs.get('firstRun2')) {
 			if (Zotero.Schema.dbInitialized || !Zotero.Sync.Server.enabled) {
 				setTimeout(function () {
-					const url = "https://www.zotero.org/start";
 					if(Zotero.isStandalone) {
-						ZoteroStandalone.openInViewer(url);
+						ZoteroPane_Local.loadURI("https://www.zotero.org/start_standalone");
 					} else {
-						gBrowser.selectedTab = gBrowser.addTab(url);
+						gBrowser.selectedTab = gBrowser.addTab("https://www.zotero.org/start");
 					}
 				}, 400);
 			}
@@ -347,7 +346,7 @@ var ZoteroPane = new function()
 		if (this.itemsView)
 			this.itemsView.unregister();
 		
-		observerService.removeObserver(_reload, "zotero-reloaded", false);
+		observerService.removeObserver(_reloadObserver, "zotero-reloaded", false);
 	}
 	
 	/**
@@ -3714,12 +3713,17 @@ var ZoteroPane = new function()
 	}
 	
 	/**
-	 * Called when Zotero is reloaded (i.e., if it is switched into or out of connector mode)
+	 * Implements nsIObserver for Zotero reload
 	 */
-	function _reload() {
-		Zotero.debug("Reloading Zotero pane");
-		for each(var func in _reloadFunctions) func();
-	}
+	var _reloadObserver = {	
+		/**
+		 * Called when Zotero is reloaded (i.e., if it is switched into or out of connector mode)
+		 */
+		"observe":function() {
+			Zotero.debug("Reloading Zotero pane");
+			for each(var func in _reloadFunctions) func();
+		}
+	};
 }
 
 /**
