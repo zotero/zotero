@@ -72,73 +72,79 @@ Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD = 1;
 Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE = 2;
 
 Zotero.Translate.ItemSaver.prototype = {
-	"saveItem":function(item) {
+	"saveItems":function(items, callback) {
 		// if no open transaction, open a transaction and add a timer call to close it
+		var openedTransaction = false;
 		if(!Zotero.DB.transactionInProgress()) {
-			Zotero.debug("Translate: Beginning transaction");
 			Zotero.DB.beginTransaction();
-			
-			var me = this;
-			Zotero.setTimeout(function() { me._closeTransaction() }, 0);
-			Zotero.showZoteroPaneProgressMeter(Zotero.getString("ingester.scraping"), false);
+			openedTransaction = true;
 		}
 		
-		// Get typeID, defaulting to "webpage"
-		var newItem;
-		var type = (item.itemType ? item.itemType : "webpage");
-		
-		if(type == "note") {			// handle notes differently
-			newItem = new Zotero.Item('note');
-			newItem.libraryID = this._libraryID;
-			newItem.setNote(item.note);
-			var myID = newItem.save();
-			newItem = Zotero.Items.get(myID);
-		} else {
-			if(type == "attachment") {	// handle attachments differently
-				newItem = this._saveAttachment(item);
-				if(!newItem) return;
-				var myID = newItem.id;
-			} else {
-				var typeID = Zotero.ItemTypes.getID(type);
-				newItem = new Zotero.Item(typeID);
-				newItem._libraryID = this._libraryID;
-			
-				this._saveFields(item, newItem);
+		try {
+			var newItems = [];
+			for each(var item in items) {
+				// Get typeID, defaulting to "webpage"
+				var newItem;
+				var type = (item.itemType ? item.itemType : "webpage");
 				
-				// handle creators
-				if(item.creators) {
-					this._saveCreators(item, newItem);
-				}
-				
-				// save item
-				var myID = newItem.save();
-				newItem = Zotero.Items.get(myID);
-				
-				// handle notes
-				if(item.notes) {
-					this._saveNotes(item, myID);
-				}
-			
-				// handle attachments
-				if(item.attachments) {
-					for(var i=0; i<item.attachments.length; i++) {
-						var newAttachment = this._saveAttachment(item.attachments[i], myID);
-						if(newAttachment) this._saveTags(item.attachments[i], newAttachment);
+				if(type == "note") {			// handle notes differently
+					newItem = new Zotero.Item('note');
+					newItem.libraryID = this._libraryID;
+					newItem.setNote(item.note);
+					var myID = newItem.save();
+					newItem = Zotero.Items.get(myID);
+				} else {
+					if(type == "attachment") {	// handle attachments differently
+						newItem = this._saveAttachment(item);
+						if(!newItem) return;
+						var myID = newItem.id;
+					} else {
+						var typeID = Zotero.ItemTypes.getID(type);
+						newItem = new Zotero.Item(typeID);
+						newItem._libraryID = this._libraryID;
+					
+						this._saveFields(item, newItem);
+						
+						// handle creators
+						if(item.creators) {
+							this._saveCreators(item, newItem);
+						}
+						
+						// save item
+						var myID = newItem.save();
+						newItem = Zotero.Items.get(myID);
+						
+						// handle notes
+						if(item.notes) {
+							this._saveNotes(item, myID);
+						}
+					
+						// handle attachments
+						if(item.attachments) {
+							for(var i=0; i<item.attachments.length; i++) {
+								var newAttachment = this._saveAttachment(item.attachments[i], myID);
+								if(newAttachment) this._saveTags(item.attachments[i], newAttachment);
+							}
+						}
 					}
 				}
+				
+				if(item.itemID) this._IDMap[item.itemID] = myID;
+				
+				// handle see also
+				this._saveTags(item, newItem);
+				
+				// add to new item list
+				newItem = Zotero.Items.get(myID);
+				newItems.push(newItem);
 			}
+			
+			if(openedTransaction) Zotero.DB.commitTransaction();
+			callback(true, newItems);
+		} catch(e) {
+			if(openedTransaction) Zotero.DB.rollbackTransaction();
+			callback(false, e);
 		}
-		
-		if(item.itemID) this._IDMap[item.itemID] = myID;
-		
-		// handle see also
-		this._saveTags(item, newItem);
-		
-		// add to new item list
-		this.newItems.push(myID);
-		
-		newItem = Zotero.Items.get(myID);
-		return newItem;
 	},
 	
 	"saveCollection":function(collection) {
@@ -509,15 +515,6 @@ Zotero.Translate.ItemSaver.prototype = {
 				}
 			}
 		}
-	},
-	
-	/**
-	 * Closes the transaction when the current code block finishes executing.
-	 */
-	"_closeTransaction":function() {
-		Zotero.debug("Translate: Closing transaction");
-		Zotero.hideZoteroPaneOverlay();
-		Zotero.DB.commitTransaction();
 	}
 }
 

@@ -465,11 +465,21 @@ Zotero.Server.Connector.SaveItem.prototype = {
 		// save items
 		var itemSaver = new Zotero.Translate.ItemSaver(libraryID,
 			Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD, 1);
-		for each(var item in data.items) {
-			var savedItem = itemSaver.saveItem(item);
-			if(collection) collection.addItem(savedItem.id);
-		}
-		sendResponseCallback(201);
+		itemSaver.saveItems(data.items, function(returnValue, data) {
+			if(returnValue) {
+				try {
+					for each(var item in data) {
+						if(collection) collection.addItem(savedItem.id);
+					}
+					sendResponseCallback(201);
+				} catch(e) {
+					sendResponseCallback(500);
+				}
+			} else {
+				sendResponseCallback(500);
+				throw data;
+			}
+		});
 	}
 }
 

@@ -26,7 +26,6 @@
 Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType) {
 	this.newItems = [];
 	
-	this._itemsToSaveToServer = [];
 	this._timeoutID = null;
 }
 
@@ -35,37 +34,46 @@ Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD = 1;
 Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE = 2;
 
 Zotero.Translate.ItemSaver.prototype = {
-	"saveItem":function(item) {
+	/**
+	 * Saves items to Standalone or the server
+	 */
+	"saveItems":function(items, callback) {
 		// don't save documents as documents, since we can't pass them around
-		for(var i in item.attachments) {
-			if(item.attachments[i].document) {
-				item.attachments[i].url = item.attachments[i].document.location.href;
-				delete item.attachments[i].document;
+		var nItems = items.length;
+		for(var i=0; i<nItems.length; i++) {
+			var attachments = item[i].attachments;
+			var nAttachments = attachments.length;
+			for(var j=0; j<nAttachments.length; j++) {
+				if(attachments[j].document) {
+					attachments[j].url = attachments[j].document.location.href;
+					delete attachments[j].document;
+				}
 			}
 		}
 		
-		// save items
-		this.newItems.push(item);
 		var me = this;
-		Zotero.Connector.callMethod("saveItems", {"items":[item]}, function(success) {
-			if(success === false && !Zotero.isFx) {
-				// attempt to save to server on a timer
-				if(me._timeoutID) clearTimeout(me._timeoutID);
-				me._itemsToSaveToServer.push(item);
-				me._timeoutID = setTimeout(function() { me._saveToServer() }, 2000);
+		// first try to save items via connector
+		Zotero.Connector.callMethod("saveItems", {"items":items}, function(success, status) {
+			if(success !== false) {
+				Zotero.debug("Translate: Save via Standalone succeeded");
+				callback(true, items);
+			} else if(Zotero.isFx) {
+				callback(false, new Error("Save via Standalone failed with "+status));
+			} else {
+				me._saveToServer(items, callback);
 			}
 		});
 	},
 	
-	"_saveToServer":function() {
+	/**
+	 * Saves items to server
+	 */
+	"_saveToServer":function(items, callback) {
 		const IGNORE_FIELDS = ["seeAlso", "attachments", "complete"];
 		
-		// clear timeout, since saving has begin
-		this._timeoutID = null;
-		
 		var newItems = [];
-		for(var i in this._itemsToSaveToServer) {
-			var item = this._itemsToSaveToServer[i];
+		for(var i in items) {
+			var item = items[i];
 			
 			var newItem = {};
 			newItems.push(newItem);
@@ -180,15 +188,14 @@ Zotero.Translate.ItemSaver.prototype = {
 		
 		var url = 'users/%%USERID%%/items?key=%%APIKEY%%';
 		var payload = JSON.stringify({"items":newItems}, null, "\t")
-		this._itemsToSaveToServer = [];
 		
 		Zotero.OAuth.doAuthenticatedPost(url, payload, function(status, message) {
 			if(!status) {
-				Zotero.Messaging.sendMessage("saveDialog_error", status);
-				Zotero.debug("Translate: Save to server payload:\n\n"+payload);
-				Zotero.logError(new Error("Translate: Save to server failed: "+message));
+				Zotero.debug("Translate: Save to server failed with message "+message+"; payload:\n\n"+payload);
+				callback(false, new Error("Save to server failed with "+message));
 			} else {
 				Zotero.debug("Translate: Save to server complete");
+				callback(true, newItems);
 			}
 		}, true);
 	}
