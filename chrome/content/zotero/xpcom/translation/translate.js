@@ -105,17 +105,32 @@ Zotero.Translate.Sandbox = {
 				return;
 			}
 			
-			var newItem = translate._itemSaver.saveItem(item);
+			// We use this within the connector to keep track of items as they are saved
+			if(!item.id) item.id = Zotero.Utilities.randomString();
 			
-			// Allow progress meter to update
-			//
-			// This can probably be re-enabled for web translators once badly asynced ones are fixed
-			if(!translate.noWait && translate instanceof Zotero.Translate.Import) {
-				Zotero.wait();
+			if(translate instanceof Zotero.Translate.Web) {
+				// For web translators, we queue saves
+				translate.saveQueue.push(item);
+				translate._runHandler("itemSaving", item);
+			} else {
+				var newItem;
+				translate._itemSaver.saveItems([item], function(returnValue, data) {
+					if(returnValue) {
+						newItem = data[0];
+						translate.newItems.push(newItem);
+					} else {
+						translate.complete(false, data);
+						throw data;
+					}
+				});
+			
+				// Allow progress meter to update
+				if(!translate.noWait) Zotero.wait();
+				
+				translate._runHandler("itemSaving", item);
+				// pass both the saved item and the original JS array item
+				translate._runHandler("itemDone", newItem, item);
 			}
-			
-			// pass both the saved item and the original JS array item
-			translate._runHandler("itemDone", newItem, item);
 		},
 		
 		/**
@@ -949,6 +964,30 @@ Zotero.Translate.Base.prototype = {
 	},
 	
 	/**
+	 * Executed when items have been saved (which may happen asynchronously, if in connector)
+	 *
+	 * @param {Boolean} returnValue Whether saving was successful
+	 * @param {Zotero.Item[]|Error} data If returnValue is true, this will be an array of
+	 *                                    Zotero.Item objects. If returnValue is false, this will
+	 *                                    be a string error message.
+	 */
+	"itemsSaved":function(returnValue, data) {
+		if(returnValue) {
+			// trigger deferred itemDone events
+			var nItems = data.length;
+			for(var i=0; i<nItems; i++) {
+				this._runHandler("itemDone", data[i], this.saveQueue[i]);
+			}
+			
+			this.saveQueue = [];
+		} else {
+			Zotero.logError(data);
+		}
+		
+		this._runHandler("done", returnValue);
+	},
+	
+	/**
 	 * Executed on translator completion, either automatically from a synchronous scraper or as
 	 * done() from an asynchronous scraper. Finishes things up and calls callback function(s).
 	 * @param {Boolean|String} returnValue An item type or a boolean true or false
@@ -1008,7 +1047,14 @@ Zotero.Translate.Base.prototype = {
 			if(returnValue === undefined) returnValue = true;
 			
 			if(returnValue) {
-				this._debug("Translation successful");
+				if(this.saveQueue.length) {
+					var me = this;
+					this._itemSaver.saveItems(this.saveQueue.slice(),
+						function(returnValue, data) { me.itemsSaved(returnValue, data) });
+					return;
+				} else {
+					this._debug("Translation successful");
+				}
 			} else {
 				if(error) {
 					// report error to console
@@ -1082,6 +1128,7 @@ Zotero.Translate.Base.prototype = {
 		this._runningAsyncProcesses = 0;
 		this._returnValue = undefined;
 		this._aborted = false;
+		this.saveQueue = [];
 		
 		Zotero.debug("Translate: Parsing code for "+translator.label, 4);
 		
@@ -1118,7 +1165,7 @@ Zotero.Translate.Base.prototype = {
 				"}"+
 		"};";
 		
-		if(this instanceof Zotero.Translate.Export) {
+		if(this instanceof Zotero.Translate.Export || this instanceof Zotero.Translate.Import) {
 			src += "Zotero.Collection = function () {};"+
 			"Zotero.Collection.prototype.complete = function() { Zotero._collectionDone(this); };";
 		} else if (this instanceof Zotero.Translate.Import) {
@@ -1312,7 +1359,7 @@ Zotero.Translate.Web.prototype._getParameters = function() { return [this.docume
 Zotero.Translate.Web.prototype._prepareTranslation = function() {
 	this._itemSaver = new Zotero.Translate.ItemSaver(this._libraryID,
 		Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_DOWNLOAD" : "ATTACHMENT_MODE_IGNORE")], 1);
-	this.newItems = this._itemSaver.newItems;
+	this.newItems = [];
 }
 
 /**
@@ -1507,7 +1554,7 @@ Zotero.Translate.Import.prototype._prepareTranslation = function() {
 	this._progress = undefined;
 	this._itemSaver = new Zotero.Translate.ItemSaver(this._libraryID,
 		Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_FILE" : "ATTACHMENT_MODE_IGNORE")]);
-	this.newItems = this._itemSaver.newItems;
+	this.newItems = [];
 	this.newCollections = this._itemSaver.newCollections;
 }
 

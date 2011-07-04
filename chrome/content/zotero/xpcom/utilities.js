@@ -732,6 +732,24 @@ Zotero.Utilities = {
 		}
 		
 		return strings.join(delimiter ? delimiter : ", ");
+	},
+	
+	/**
+	* Generate a random string of length 'len' (defaults to 8)
+	**/
+	"randomString":function(len, chars) {
+		if (!chars) {
+			chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+		}
+		if (!len) {
+			len = 8;
+		}
+		var randomstring = '';
+		for (var i=0; i<len; i++) {
+			var rnum = Math.floor(Math.random() * chars.length);
+			randomstring += chars.substring(rnum,rnum+1);
+		}
+		return randomstring;
 	}
 }
 
