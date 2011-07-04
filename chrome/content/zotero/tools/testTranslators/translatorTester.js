@@ -321,6 +321,7 @@ Zotero_TranslatorTester.prototype.newTest = function(doc, testReadyCallback) {
 		callback(newItems);
 	});
 	translate.setHandler("done", function(obj, returnValue) { me._createTest(obj, multipleMode, returnValue, testReadyCallback) });
+	translate.capitalizeTitles = false;
 	translate.translate(false);
 };
 
