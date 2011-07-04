@@ -219,9 +219,13 @@ Zotero.Translate.Sandbox = {
 				translation._prepareTranslation();
 				setDefaultHandlers(translate, translation);
 				
+				var sandbox = translation._sandboxManager.sandbox.Export
+					? translation._sandboxManager.sandbox.Export
+					: translation._sandboxManager.sandbox;
+				
 				// return sandbox
-				if(callback) callback(translation._sandboxManager.sandbox);
-				return translation._sandboxManager.sandbox;
+				if(callback) callback(sandbox);
+				return sandbox;
 			};
 			
 			// TODO security is not super-tight here, as someone could pass something into arg
