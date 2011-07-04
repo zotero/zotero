@@ -100,10 +100,9 @@ Zotero.Translate.ItemSaver.prototype = {
 						var creator = val[j];
 						
 						// Single-field mode
-						if (creator.fieldMode && creator.fieldMode == 1) {
+						if (!creator.firstName || (creator.fieldMode && creator.fieldMode == 1)) {
 							var newCreator = {
-								lastName: creator.lastName,
-								fieldMode: 1
+								name: creator.lastName
 							};
 						}
 						// Two-field mode
