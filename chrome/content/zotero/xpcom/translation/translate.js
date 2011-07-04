@@ -936,7 +936,10 @@ Zotero.Translate.Base.prototype = {
 	 */
 	"_translateHaveTranslator":function() {
 		// load translators
-		if(!this._loadTranslator(this.translator[0])) return;
+		if(!this._loadTranslator(this.translator[0])) {
+			this.complete(false, new Error("Translator could not be loaded"));
+			return;
+		}
 		
 		// set display options to default if they don't exist
 		if(!this._displayOptions) this._displayOptions = this.translator[0].displayOptions;
