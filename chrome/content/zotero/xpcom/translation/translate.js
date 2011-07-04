@@ -253,6 +253,7 @@ Zotero.Translate.Sandbox = {
 					translate._debug("COMPAT WARNING: Translator must pass a callback to getTranslatorObject() to operate in connector");
 				}
 				
+				var sandbox;
 				var haveTranslatorFunction = function(translator) {
 					translation.translator[0] = translator;
 					if(!translation._loadTranslator(translator)) throw new Error("Translator could not be loaded");
@@ -269,6 +270,9 @@ Zotero.Translate.Sandbox = {
 						var innerSandboxURI = ioService.newURI(typeof translation._sandboxLocation === "object" ?
 							translation._sandboxLocation.location : translation._sandboxLocation, null, null);
 						
+						Zotero.debug(outerSandboxURI.spec);
+						Zotero.debug(innerSandboxURI.spec);
+						
 						try {
 							secMan.checkSameOriginURI(outerSandboxURI, innerSandboxURI, false);
 						} catch(e) {
@@ -279,9 +283,19 @@ Zotero.Translate.Sandbox = {
 					
 					translation._prepareTranslation();
 					setDefaultHandlers(translate, translation);
+					sandbox = translation._sandboxManager.sandbox;
+					if(sandbox.Export) {
+						sandbox.Export.Zotero = sandbox.Zotero;
+						sandbox = sandbox.Export;
+					} else {
+						translate._debug("COMPAT WARNING: "+translate.translator[0].label+" does "+
+							"not export any properties. Only detect"+translate._entryFunctionSuffix+
+							" and do"+translate._entryFunctionSuffix+" will be available in "+
+							"connectors.");
+					}
 					
 					if(callback) {
-						callback(translation._sandboxManager.sandbox);
+						callback(sandbox);
 						translate.decrementAsyncProcesses();
 					}
 				};
@@ -296,7 +310,7 @@ Zotero.Translate.Sandbox = {
 					}
 					
 					Zotero.Translators.get(translation.translator[0], haveTranslatorFunction);
-					if(!Zotero.isConnector) return translation._sandboxManager.sandbox;
+					if(!Zotero.isConnector) return sandbox;
 				}
 			};
 			
@@ -1073,7 +1087,7 @@ Zotero.Translate.Base.prototype = {
 		
 		try {
 			this._sandboxManager.eval("var translatorInfo = "+translator.code,
-				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix]);
+				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix, "Export"]);
 		} catch(e) {
 			if(translator.logError) {
 				translator.logError(e.toString());

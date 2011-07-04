@@ -40,8 +40,6 @@ var n = {
 
 var callNumberTypes = [n.dcterms+"LCC", n.dcterms+"DDC", n.dcterms+"UDC"];
 
-var defaultUnknownType = "book";
-
 // gets the first result set for a property that can be encoded in multiple
 // ontologies
 function getFirstResults(node, properties, onlyOneString) {
@@ -301,7 +299,7 @@ function importItem(newItem, node, type) {
 	}
 	
 	if(!newItem.itemType) {
-		newItem.itemType = defaultUnknownType;
+		newItem.itemType = Export.defaultUnknownType;
 	}
 	
 	// regular author-type creators
@@ -634,3 +632,11 @@ function doImport() {
 		}
 	}
 }
+
+/*
+ * Export doImport and defaultUnknownType to other translators
+ */
+var Export = {
+	"doImport":doImport,
+	"defaultUnknownType":"book"
+};
