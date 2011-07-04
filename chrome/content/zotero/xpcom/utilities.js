@@ -498,7 +498,7 @@ Zotero.Utilities = {
 		
 		string = this.trimInternal(string);
 		string = string.replace(/ : /g, ": ");
-		if(!Zotero.Prefs.get('capitalizeTitles') && !force) return string;
+		if(force === false || (!Zotero.Prefs.get('capitalizeTitles') && !force)) return string;
 		if(!string) return "";
 		
 		// split words
@@ -782,6 +782,24 @@ Zotero.Utilities.Translate.prototype.strToDate = Zotero.Date.strToDate;
 Zotero.Utilities.Translate.prototype.strToISO = Zotero.Date.strToISO;
 Zotero.Utilities.Translate.prototype.createContextObject = Zotero.OpenURL.createContextObject;
 Zotero.Utilities.Translate.prototype.parseContextObject = Zotero.OpenURL.parseContextObject;
+
+/**
+ * Hack to overloads {@link Zotero.Utilities.capitalizeTitle} to allow overriding capitalizeTitles 
+ * pref on a per-translate instance basis (for translator testing only)
+ */
+Zotero.Utilities.Translate.prototype.capitalizeTitle = function(string, force) {
+	if(force === undefined) {
+		var translate = this._translate;
+		do {
+			if(translate.capitalizeTitles !== undefined) {
+				force = translate.capitalizeTitles;
+				break;
+			}
+		} while(translate = translate._parentTranslator);
+	}
+	
+	return Zotero.Utilities.capitalizeTitle(string, force);
+}
 
 /**
  * Gets the current Zotero version
