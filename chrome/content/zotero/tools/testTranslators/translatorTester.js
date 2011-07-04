@@ -230,6 +230,7 @@ Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
 		
 		callback(newItems);
 	});
+	translate.capitalizeTitles = false;
 	
 	// internal hack to call detect on this translator
 	translate._potentialTranslators = [this._translator];
