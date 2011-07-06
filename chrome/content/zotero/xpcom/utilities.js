@@ -737,8 +737,8 @@ Zotero.Utilities = {
 	},
 	
 	/**
-	* Generate a random string of length 'len' (defaults to 8)
-	**/
+	 * Generate a random string of length 'len' (defaults to 8)
+	 **/
 	"randomString":function(len, chars) {
 		if (!chars) {
 			chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
@@ -752,6 +752,50 @@ Zotero.Utilities = {
 			randomstring += chars.substring(rnum,rnum+1);
 		}
 		return randomstring;
+	},
+	
+	/**
+	 * PHP var_dump equivalent for JS
+	 *
+	 * Adapted from http://binnyva.blogspot.com/2005/10/dump-function-javascript-equivalent-of.html
+	 */
+	"varDump":function(arr,level) {
+		var dumped_text = "";
+		if (!level){
+			level = 0;
+		}
+		
+		// The padding given at the beginning of the line.
+		var level_padding = "";
+		for (var j=0;j<level+1;j++){
+			level_padding += "    ";
+		}
+		
+		if (typeof(arr) == 'object') { // Array/Hashes/Objects
+			for (var item in arr) {
+				var value = arr[item];
+				
+				if (typeof(value) == 'object') { // If it is an array,
+					dumped_text += level_padding + "'" + item + "' ...\n";
+					dumped_text += arguments.callee(value,level+1);
+				}
+				else {
+					if (typeof value == 'function'){
+						dumped_text += level_padding + "'" + item + "' => function(...){...} \n";
+					}
+					else if (typeof value == 'number') {
+						dumped_text += level_padding + "'" + item + "' => " + value + "\n";
+					}
+					else {
+						dumped_text += level_padding + "'" + item + "' => \"" + value + "\"\n";
+					}
+				}
+			}
+		}
+		else { // Stings/Chars/Numbers etc.
+			dumped_text = "===>"+arr+"<===("+typeof(arr)+")";
+		}
+		return dumped_text;
 	}
 }
 

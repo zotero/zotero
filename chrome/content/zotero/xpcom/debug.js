@@ -52,7 +52,7 @@ Zotero.Debug = new function () {
 		}
 		
 		if (typeof message != 'string') {
-			message = Zotero.varDump(message);
+			message = Zotero.Utilities.varDump(message);
 		}
 		
 		if (!level) {

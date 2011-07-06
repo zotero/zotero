@@ -345,7 +345,7 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 						}
 						else {
 							var msg = 'Invalid bound parameter ' + params[i]
-								+ ' in ' + Zotero.varDump(params)
+								+ ' in ' + Zotero.Utilities.varDump(params)
 								+ ' [QUERY: ' + sql + ']';
 							Zotero.debug(msg);
 							throw(msg);
