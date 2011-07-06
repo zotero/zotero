@@ -38,19 +38,6 @@ Zotero.Translate.ItemSaver.prototype = {
 	 * Saves items to Standalone or the server
 	 */
 	"saveItems":function(items, callback) {
-		// don't save documents as documents, since we can't pass them around
-		var nItems = items.length;
-		for(var i=0; i<nItems.length; i++) {
-			var attachments = item[i].attachments;
-			var nAttachments = attachments.length;
-			for(var j=0; j<nAttachments.length; j++) {
-				if(attachments[j].document) {
-					attachments[j].url = attachments[j].document.location.href;
-					delete attachments[j].document;
-				}
-			}
-		}
-		
 		var me = this;
 		// first try to save items via connector
 		Zotero.Connector.callMethod("saveItems", {"items":items}, function(success, status) {

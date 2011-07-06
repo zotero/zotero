@@ -108,6 +108,18 @@ Zotero.Translate.Sandbox = {
 			// We use this within the connector to keep track of items as they are saved
 			if(!item.id) item.id = Zotero.Utilities.randomString();
 			
+			// don't save documents as documents in connector, since we can't pass them around
+			if(Zotero.isConnector) {
+				var attachments = item.attachments;
+				var nAttachments = attachments.length;
+				for(var j=0; j<nAttachments; j++) {
+					if(attachments[j].document) {
+						attachments[j].url = attachments[j].document.location.href;
+						delete attachments[j].document;
+					}
+				}
+			}
+			
 			if(translate instanceof Zotero.Translate.Web) {
 				// For web translators, we queue saves
 				translate.saveQueue.push(item);
