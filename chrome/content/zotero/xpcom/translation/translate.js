@@ -1091,7 +1091,9 @@ Zotero.Translate.Base.prototype = {
 			return;
 		}
 		
-		if(!this._loadTranslator(this._potentialTranslators[0])) return;
+		if(!this._loadTranslator(this._potentialTranslators[0])) {
+			this.complete(false);
+		}
 		this._prepareDetection();
 		
 		this.incrementAsyncProcesses();
@@ -1171,12 +1173,13 @@ Zotero.Translate.Base.prototype = {
 		if(this instanceof Zotero.Translate.Export || this instanceof Zotero.Translate.Import) {
 			src += "Zotero.Collection = function () {};"+
 			"Zotero.Collection.prototype.complete = function() { Zotero._collectionDone(this); };";
-		} else if (this instanceof Zotero.Translate.Import) {
-			// https://bugzilla.mozilla.org/show_bug.cgi?id=609143 - can't pass E4X to sandbox in Fx4
-			src += "Zotero.getXML = function() {"+
-				"var xml = Zotero._getXML();"+
-				"if(typeof xml == 'string') return new XML(xml);"+
-			"};";
+			if (this instanceof Zotero.Translate.Import) {
+				// https://bugzilla.mozilla.org/show_bug.cgi?id=609143 - can't pass E4X to sandbox in Fx4
+				src += "Zotero.getXML = function() {"+
+					"var xml = Zotero._getXML();"+
+					"if(typeof xml == 'string') return new XML(xml);"+
+				"};";
+			}
 		}
 		
 		if(Zotero.isFx) {
