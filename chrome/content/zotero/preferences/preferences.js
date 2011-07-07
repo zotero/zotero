@@ -1418,7 +1418,7 @@ Zotero_Preferences.Debug_Output = {
 				Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
 					createInstance();
 			req.open('POST', url, true);
-			req.setRequestHeader('Content-Type', "application/octet-stream");
+			req.setRequestHeader('Content-Type', "text/plain");
 			req.setRequestHeader('Content-Encoding', 'gzip');
 			
 			req.channel.notificationCallbacks = {
