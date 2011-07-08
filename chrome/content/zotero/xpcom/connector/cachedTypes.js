@@ -140,7 +140,17 @@ Zotero.ItemFields = new function() {
 		return false;
 	};
 	
-	this.getItemTypeFields = function(idOrName) {
+	this.getBaseIDFromTypeAndField = function(itemType, fieldIdOrName) {
+		if(!Zotero.Connector_Types["fields"][fieldIdOrName]
+		   || !Zotero.Connector_Types["itemTypes"][itemType]) throw new Error("Invalid field or type ID");
+		
+		fieldIdOrName = Zotero.Connector_Types["fields"][fieldIdOrName].id;
+		
+		var baseField = Zotero.Connector_Types["itemTypes"][itemType]["baseFields"][fieldIdOrName];
+		return baseField ? baseField : false;
+	};
+	
+	this.getItemTypeFields = function(typeIdOrName) {
 		return Zotero.Connector_Types["itemTypes"][typeIdOrName].fields.slice();
 	};
 }
