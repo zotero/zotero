@@ -664,33 +664,7 @@ Zotero.Translate.ItemGetter.prototype = {
 			returnItemArray.date = Zotero.Date.multipartToStr(returnItemArray.date);
 		}
 		
-		returnItemArray.uniqueFields = {};
-		
-		// get base fields, not just the type-specific ones
-		var itemTypeID = returnItem.itemTypeID;
-		var allFields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
-		for each(var field in allFields) {
-			var fieldName = Zotero.ItemFields.getName(field);
-			
-			if(returnItemArray[fieldName] !== undefined) {
-				var baseField = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, field);
-				
-				var baseName = null;
-				if(baseField && baseField != field) {
-					baseName = Zotero.ItemFields.getName(baseField);
-				}
-				
-				if(baseName) {
-					returnItemArray[baseName] = returnItemArray[fieldName];
-					returnItemArray.uniqueFields[baseName] = returnItemArray[fieldName];
-				} else {
-					returnItemArray.uniqueFields[fieldName] = returnItemArray[fieldName];
-				}
-			}
-		}
-		
-		// preserve notes
-		if(returnItemArray.note) returnItemArray.uniqueFields.note = returnItemArray.note;
+		var returnItemArray = Zotero.Utilities.itemToExportFormat(returnItemArray);
 		
 		// TODO: Change tag.tag references in translators to tag.name
 		// once translators are 1.5-only

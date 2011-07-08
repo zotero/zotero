@@ -222,6 +222,17 @@ Zotero.Utilities = {
 			var nsISUHTML = Components.classes["@mozilla.org/feed-unescapehtml;1"]
 				.getService(Components.interfaces.nsIScriptableUnescapeHTML);
 			return nsISUHTML.unescape(str);
+		} else if(Zotero.isNode) {
+			var doc = require('jsdom').jsdom(str, null, {
+				"features":{
+					"FetchExternalResources":false,
+					"ProcessExternalResources":false,
+					"MutationEvents":false,
+					"QuerySelector":false
+				}
+			});
+			if(!doc.documentElement) return str;
+			return doc.documentElement.textContent;
 		} else {
 			var node = document.createElement("div");
 			node.innerHTML = str;
@@ -796,6 +807,159 @@ Zotero.Utilities = {
 			dumped_text = "===>"+arr+"<===("+typeof(arr)+")";
 		}
 		return dumped_text;
+	},
+	
+	/**
+	 * Adds all fields to an item in toArray() format and adds a unique (base) fields to 
+	 * uniqueFields array
+	 */
+	"itemToExportFormat":function(item) {
+		item.uniqueFields = {};
+		
+		// get base fields, not just the type-specific ones
+		var itemTypeID = (item.itemTypeID ? item.itemTypeID : Zotero.ItemTypes.getID(item.itemType));
+		var allFields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
+		for(var i in allFields) {
+			var field = allFields[i];
+			var fieldName = Zotero.ItemFields.getName(field);
+			
+			if(item[fieldName] !== undefined) {
+				var baseField = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, field);
+				
+				var baseName = null;
+				if(baseField && baseField != field) {
+					baseName = Zotero.ItemFields.getName(baseField);
+				}
+				
+				if(baseName) {
+					item[baseName] = item[fieldName];
+					item.uniqueFields[baseName] = item[fieldName];
+				} else {
+					item.uniqueFields[fieldName] = item[fieldName];
+				}
+			}
+		}
+		
+		// preserve notes
+		if(item.note) item.uniqueFields.note = item.note;
+		
+		return item;
+	},
+	
+	/**
+	 * Converts an item from toArray() format to content=json format used by the server
+	 */
+	"itemToServerJSON":function(item) {
+		const IGNORE_FIELDS = ["seeAlso", "attachments", "complete"];
+		var newItem = {};
+		
+		var typeID = Zotero.ItemTypes.getID(item.itemType);
+		if(!typeID) {
+			Zotero.debug("Translate: Invalid itemType "+item.itemType+"; saving as webpage");
+			item.itemType = "webpage";
+			typeID = Zotero.ItemTypes.getID(item.itemType);
+		}
+		
+		var fieldID;
+		for(var field in item) {
+			if(IGNORE_FIELDS.indexOf(field) !== -1) continue;
+			
+			var val = item[field];
+			
+			if(field === "itemType") {
+				newItem[field] = val;
+			} else if(field === "creators") {
+				// normalize creators
+				var newCreators = newItem.creators = [];
+				for(var j in val) {
+					var creator = val[j];
+					
+					// Single-field mode
+					if (!creator.firstName || (creator.fieldMode && creator.fieldMode == 1)) {
+						var newCreator = {
+							name: creator.lastName
+						};
+					}
+					// Two-field mode
+					else {
+						var newCreator = {
+							firstName: creator.firstName,
+							lastName: creator.lastName
+						};
+					}
+					
+					// ensure creatorType is present and valid
+					newCreator.creatorType = "author";
+					if(creator.creatorType) {
+						if(Zotero.CreatorTypes.getID(creator.creatorType)) {
+							newCreator.creatorType = creator.creatorType;
+						} else {
+							Zotero.debug("Translate: Invalid creator type "+creator.creatorType+"; falling back to author");
+						}
+					}
+					
+					newCreators.push(newCreator);
+				}
+			} else if(field === "tags") {
+				// normalize tags
+				var newTags = newItem.tags = [];
+				for(var j in val) {
+					var tag = val[j];
+					if(typeof tag === "object") {
+						if(tag.tag) {
+							tag = tag.tag;
+						} else if(tag.name) {
+							tag = tag.name;
+						} else {
+							Zotero.debug("Translate: Discarded invalid tag");
+							continue;
+						}
+					}
+					newTags.push({"tag":tag.toString(), "type":1})
+				}
+			} else if(field === "notes") {
+				// normalize notes
+				var newNotes = newItem.notes = [];
+				for(var j in val) {
+					var note = val[j];
+					if(typeof note === "object") {
+						if(!note.note) {
+							Zotero.debug("Translate: Discarded invalid note");
+							continue;
+						}
+						note = note.note;
+					}
+					newNotes.push({"itemType":"note", "note":note.toString()});
+				}
+			} else if(fieldID = Zotero.ItemFields.getID(field)) {
+				// if content is not a string, either stringify it or delete it
+				if(typeof val !== "string") {
+					if(val || val === 0) {
+						val = val.toString();
+					} else {
+						continue;
+					}
+				}
+				
+				// map from base field if possible
+				var itemFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, fieldID);
+				if(itemFieldID) {
+					newItem[Zotero.ItemFields.getName(itemFieldID)] = val;
+					continue;	// already know this is valid
+				}
+				
+				// if field is valid for this type, set field
+				if(Zotero.ItemFields.isValidForType(fieldID, typeID)) {
+					newItem[field] = val;
+				} else {
+					Zotero.debug("Translate: Discarded field "+field+": field not valid for type "+item.itemType, 3);
+				}
+			} else if(field !== "complete") {
+				Zotero.debug("Translate: Discarded unknown field "+field, 3);
+			}
+		}
+		
+		return newItem;
 	}
 }
 
