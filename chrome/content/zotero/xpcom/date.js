@@ -234,13 +234,13 @@ Zotero.Date = new function(){
 	function strToDate(string) {
 		// Parse 'yesterday'/'today'/'tomorrow'
 		var lc = (string + '').toLowerCase();
-		if (lc == 'yesterday' || lc == Zotero.getString('date.yesterday')) {
+		if (lc == 'yesterday' || (Zotero.getString && lc === Zotero.getString('date.yesterday'))) {
 			string = Zotero.Date.dateToSQL(new Date(new Date().getTime() - 86400000)).substr(0, 10);
 		}
-		else if (lc == 'today' || lc == Zotero.getString('date.today')) {
+		else if (lc == 'today' || (Zotero.getString && lc == Zotero.getString('date.today'))) {
 			string = Zotero.Date.dateToSQL(new Date()).substr(0, 10);
 		}
-		else if (lc == 'tomorrow' || lc == Zotero.getString('date.tomorrow')) {
+		else if (lc == 'tomorrow' || (Zotero.getString && lc == Zotero.getString('date.tomorrow'))) {
 			string = Zotero.Date.dateToSQL(new Date(new Date().getTime() + 86400000)).substr(0, 10);
 		}
 		
@@ -367,7 +367,7 @@ Zotero.Date = new function(){
 		if(!date.day) {
 			// compile day regular expression
 			if(!_dayRe) {
-				var daySuffixes = Zotero.getString("date.daySuffixes").replace(/, ?/g, "|");
+				var daySuffixes = Zotero.getString ? Zotero.getString("date.daySuffixes").replace(/, ?/g, "|") : "";
 				_dayRe = new RegExp("\\b([0-9]{1,2})(?:"+daySuffixes+")?\\b(.*)", "i");
 			}
 			
