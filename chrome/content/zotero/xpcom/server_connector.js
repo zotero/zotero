@@ -473,6 +473,7 @@ Zotero.Server.Connector.SaveItem.prototype = {
 					}
 					sendResponseCallback(201);
 				} catch(e) {
+					Zotero.logError(e);
 					sendResponseCallback(500);
 				}
 			} else {
