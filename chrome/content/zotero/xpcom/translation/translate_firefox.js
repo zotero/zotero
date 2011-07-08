@@ -465,13 +465,12 @@ function() {
 
 /******* Write support *******/
 
-Zotero.Translate.IO.Write = function(file, mode, charset) {
+Zotero.Translate.IO.Write = function(file) {
 	Zotero.Translate.IO.maintainedInstances.push(this);
 	this._rawStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
 		.createInstance(Components.interfaces.nsIFileOutputStream);
 	this._rawStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0); // write, create, truncate
 	this._writtenToStream = false;
-	if(mode || charset) this.reset(mode, charset);
 }
 
 Zotero.Translate.IO.Write.prototype = {
@@ -528,7 +527,7 @@ Zotero.Translate.IO.Write.prototype = {
 		this._writtenToStream = true;
 	},
 	
-	"reset":function(newMode, charset) {
+	"init":function(newMode, charset, callback) {
 		this._mode = newMode;
 		if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1) {
 			this._initRDF();
