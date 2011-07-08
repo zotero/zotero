@@ -1151,13 +1151,7 @@ Zotero.Translate.Base.prototype = {
 			this._sandboxManager.eval("var translatorInfo = "+translator.code,
 				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix, "Export"]);
 		} catch(e) {
-			if(translator.logError) {
-				translator.logError(e.toString());
-			} else {
-				Zotero.logError(e);
-			}
-			
-			this.complete(false, "parse error");
+			this.complete(false, e);
 		}
 		
 		if(callback) callback();
@@ -1701,15 +1695,19 @@ Zotero.Translate.Export.prototype._prepareTranslation = function() {
 	}
 	
 	// initialize IO
+	// this is currently hackish since we pass null callbacks to the init function (they have
+	// callbacks to be consistent with import, but they are synchronous, so we ignore them)
 	if(!this.location) {
-		var io = this._io = new Zotero.Translate.IO.String(null, this.path ? this.path : "", this.translator[0].configOptions["dataMode"]);
+		var io = this._io = new Zotero.Translate.IO.String(null, this.path ? this.path : "");
+		io.init(this.translator[0].configOptions["dataMode"], function() {});
 		this.__defineGetter__("string", function() { return io.string; });
 	} else if(!Zotero.Translate.IO.Write) {
 		throw new Error("Writing to files is not supported in this build of Zotero.");
 	} else {
-		this._io = new Zotero.Translate.IO.Write(this.location,
-			this.translator[0].configOptions["dataMode"],
-			this._displayOptions["exportCharset"] ? this._displayOptions["exportCharset"] : null);
+		this._io = new Zotero.Translate.IO.Write(this.location);
+		this._io.init(this.translator[0].configOptions["dataMode"],
+			this._displayOptions["exportCharset"] ? this._displayOptions["exportCharset"] : null,
+			function() {});
 	}
 	
 	this._sandboxManager.importObject(this._io);

@@ -315,7 +315,7 @@ Zotero.Date = new function(){
 				}
 				
 				if(date.month) date.month--;		// subtract one for JS style
-				Zotero.debug("DATE: retrieved with algorithms: "+date.toSource());
+				Zotero.debug("DATE: retrieved with algorithms: "+JSON.stringify(date));
 				
 				date.part = m[1]+m[7];
 			} else {
