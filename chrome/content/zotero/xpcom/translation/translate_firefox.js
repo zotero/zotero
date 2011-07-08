@@ -325,9 +325,6 @@ Zotero.Translate.IO.Read = function(file, mode) {
 	}
 	
 	Zotero.debug("Translate: Detected file charset as "+this._charset);
-		
-	// We know the charset now. Open a converter stream.
-	if(mode) this.reset(mode);
 }
 
 Zotero.Translate.IO.Read.prototype = {
@@ -437,7 +434,7 @@ Zotero.Translate.IO.Read.prototype = {
 		}
 	},
 	
-	"reset":function(newMode) {
+	"init":function(newMode, callback) {
 		if(Zotero.Translate.IO.maintainedInstances.indexOf(this) === -1) {
 			Zotero.Translate.IO.maintainedInstances.push(this);
 		}
@@ -447,6 +444,8 @@ Zotero.Translate.IO.Read.prototype = {
 		if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1 && !this.RDF) {
 			this._initRDF();
 		}
+		
+		callback(true);
 	},
 	
 	"close":function() {

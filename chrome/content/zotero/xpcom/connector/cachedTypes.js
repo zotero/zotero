@@ -48,7 +48,7 @@ Zotero.Connector_Types = new function() {
 				this[schemaType][entry.name] = entry;
 			}
 		}
-	}
+	};
 	
 	/**
 	 * Passes schema to a callback
@@ -56,24 +56,24 @@ Zotero.Connector_Types = new function() {
 	 */
 	this.getSchema = function(callback) {
 		callback(Zotero.Connector_Types.schema);
-	}
+	};
 }
 
 Zotero.CachedTypes = function() {
 	this.getID = function(idOrName) {
 		if(!Zotero.Connector_Types[this.schemaType][idOrName]) return false;
 		return Zotero.Connector_Types[this.schemaType][idOrName].id;
-	}
+	};
 	
 	this.getName = function(idOrName) {
 		if(!Zotero.Connector_Types[this.schemaType][idOrName]) return false;
 		return Zotero.Connector_Types[this.schemaType][idOrName].name;
-	}
+	};
 	
 	this.getLocalizedString = function(idOrName) {
 		if(!Zotero.Connector_Types[this.schemaType][idOrName]) return false;
 		return Zotero.Connector_Types[this.schemaType][idOrName].localizedString;
-	}
+	};
 }
 
 Zotero.ItemTypes = new function() {
@@ -90,7 +90,7 @@ Zotero.ItemTypes = new function() {
 		} else if(Zotero.isSafari) {
 			return safari.extension.baseURI+"images/itemTypes/"+Zotero.Connector_Types["itemTypes"][idOrName].icon;
 		}
-	}
+	};
 }
 
 Zotero.CreatorTypes = new function() {
@@ -105,7 +105,7 @@ Zotero.CreatorTypes = new function() {
 			creatorTypes.push(Zotero.Connector_Types["creatorTypes"][itemType.creatorTypes[i]]);
 		}
 		return creatorTypes;
-	}
+	};
 }
 
 Zotero.ItemFields = new function() {
@@ -119,7 +119,7 @@ Zotero.ItemFields = new function() {
 		
 		return Zotero.Connector_Types["itemTypes"][typeIdOrName].fields.indexOf(
 			Zotero.Connector_Types["fields"][fieldIdOrName].id) !== -1;
-	}
+	};
 	
 	this.getFieldIDFromTypeAndBase = function(itemType, baseField) {
 		if(!Zotero.Connector_Types["fields"][baseField]
@@ -138,5 +138,9 @@ Zotero.ItemFields = new function() {
 		}
 		
 		return false;
-	}
+	};
+	
+	this.getItemTypeFields = function(idOrName) {
+		return Zotero.Connector_Types["itemTypes"][typeIdOrName].fields.slice();
+	};
 }

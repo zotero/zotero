@@ -42,7 +42,7 @@ Zotero.Translators = new function() {
 	this.init = function(translators) {
 		if(!translators) {
 			translators = [];
-			if(!Zotero.isFx && localStorage["translatorMetadata"]) {
+			if((Zotero.isChrome || Zotero.isSafari) && localStorage["translatorMetadata"]) {
 				try {
 					translators = JSON.parse(localStorage["translatorMetadata"]);
 					if(typeof translators !== "object") {
@@ -186,17 +186,17 @@ Zotero.Translators = new function() {
 					
 					if(j === 0) {
 						converterFunctions.push(null);
-					} else if(Zotero.isFx) {
+					} else if(Zotero.isChrome || Zotero.isSafari) {
+						// in Chrome/Safari, the converterFunction needs to be passed as JSON, so
+						// just push an array with the proper and proxyHosts
+						converterFunctions.push([properHosts[j-1], proxyHosts[j-1]]);
+					} else {
 						// in Firefox, push the converterFunction
 						converterFunctions.push(new function() {
 							var re = new RegExp('^https?://(?:[^/]\\.)?'+Zotero.Utilities.quotemeta(properHosts[j-1]), "gi");
 							var proxyHost = proxyHosts[j-1].replace(/\$/g, "$$$$");
 							return function(uri) { return uri.replace(re, "$&."+proxyHost) };
 						});
-					} else {
-						// in Chrome/Safari, the converterFunction needs to be passed as JSON, so
-						// just push an array with the proper and proxyHosts
-						converterFunctions.push([properHosts[j-1], proxyHosts[j-1]]);
 					}
 					
 					// don't add translator more than once
@@ -244,17 +244,6 @@ Zotero.Translators = new function() {
 		
 		if(reset) {
 			var serializedTranslators = newMetadata;
-			if(!Zotero.isFx) {
-				// clear cached translatorCode
-				Zotero.debug("Translators: Resetting translators");
-				// XXX this is only to clear localStorage for people who installed yesterday and
-				// should disappear soon
-				for(var i in localStorage) {
-					if(i.substr(0, TRANSLATOR_CODE_PREFIX.length) === TRANSLATOR_CODE_PREFIX) {
-						delete localStorage[i];
-					}
-				}
-			}
 		} else {
 			var serializedTranslators = [];
 			var hasChanged = false;
@@ -300,7 +289,7 @@ Zotero.Translators = new function() {
 		}
 		
 		// Store
-		if(!Zotero.isFx) {
+		if(Zotero.isChrome || Zotero.isSafari) {
 			localStorage["translatorMetadata"] = JSON.stringify(serializedTranslators);
 		}
 		
@@ -440,7 +429,7 @@ Zotero.Translator.prototype.init = function(info) {
 	}
 	
 	if(info.code) {
-		this.code = preprocessCode(info.code);
+		this.code = Zotero.Translators.preprocessCode(info.code);
 	} else if(this.hasOwnProperty("code")) {
 		delete this.code;
 	}
