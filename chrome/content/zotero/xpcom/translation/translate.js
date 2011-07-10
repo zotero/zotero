@@ -944,6 +944,12 @@ Zotero.Translate.Base.prototype = {
 	 * Called when translator has been retrieved and loaded
 	 */
 	"_translateTranslatorLoaded":function() {
+		if(!this.translator[0].code) {
+			this.complete(false,
+				new Error("Translator "+this.translator[0].label+" is unsupported within this environment"));
+			return;
+		}
+		
 		// set display options to default if they don't exist
 		if(!this._displayOptions) this._displayOptions = this.translator[0].displayOptions;
 		
