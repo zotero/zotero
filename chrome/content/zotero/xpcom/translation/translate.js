@@ -552,8 +552,14 @@ Zotero.Translate.Sandbox = {
 		 * @param {SandboxCollection} collection
 		 */
 		"_collectionDone":function(translate, collection) {
-			var newCollection = translate._itemSaver.saveCollection(collection);
-			translate._runHandler("collectionDone", newCollection);
+			if(this._libraryID == false) {
+				this.newCollections.push(collection);
+				translate._runHandler("collectionDone", collection);
+			} else {
+				var newCollection = translate._itemSaver.saveCollection(collection);
+				this.newCollections.push(newCollection);
+				translate._runHandler("collectionDone", newCollection);
+			}
 		},
 		
 		/**
@@ -1587,7 +1593,7 @@ Zotero.Translate.Import.prototype._prepareTranslation = function() {
 	this._itemSaver = new Zotero.Translate.ItemSaver(this._libraryID,
 		Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_FILE" : "ATTACHMENT_MODE_IGNORE")]);
 	this.newItems = [];
-	this.newCollections = this._itemSaver.newCollections;
+	this.newCollections = [];
 }
 
 Zotero.Translate.Import.prototype.__defineGetter__("progress",
