@@ -1331,15 +1331,16 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 	} else {
 		if(protocolRe.test(url)) return url;
 		
-		if(url.indexOf(":") !== -1) {
-			// don't allow protocol switches
-			throw "Invalid URL supplied for HTTP request";
-		}
-		
-		// resolve relative URIs
-		return Components.classes["@mozilla.org/network/io-service;1"].
+		// resolve local URL
+		var resolved = Components.classes["@mozilla.org/network/io-service;1"].
 			getService(Components.interfaces.nsIIOService).
 			newURI(this._translate.location, "", null).resolve(url);
+		
+		if(!protocolRe.test(resolved)) {
+			throw new Error("Invalid URL supplied for HTTP request: "+url);
+		}
+		
+		return resolved;
 	}
 }
 
