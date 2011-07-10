@@ -1325,23 +1325,27 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 		url = this._translate.translator[0].properToProxy(url);
 	}
 	
-	if(Zotero.isChrome || Zotero.isSafari) {
-		// this code is sandboxed, so we don't worry
-		return url;
-	} else {
-		if(protocolRe.test(url)) return url;
-		
-		// resolve local URL
-		var resolved = Components.classes["@mozilla.org/network/io-service;1"].
+	if(protocolRe.test(url)) return url;
+	
+	// resolve local URL
+	var resolved = "";
+	if(Zotero.isFx) {
+		resolved = Components.classes["@mozilla.org/network/io-service;1"].
 			getService(Components.interfaces.nsIIOService).
 			newURI(this._translate.location, "", null).resolve(url);
-		
-		if(!protocolRe.test(resolved)) {
-			throw new Error("Invalid URL supplied for HTTP request: "+url);
-		}
-		
-		return resolved;
+	} else if(Zotero.isChrome || Zotero.isSafari) {
+		var a = document.createElement('a');
+        a.href = url;
+        resolved = a.href;
+	} else if(Zotero.isNode) {
+		resolved = require('url').resolve(this._translate.location, url);
 	}
+	
+	if(!protocolRe.test(resolved)) {
+		throw new Error("Invalid URL supplied for HTTP request: "+url);
+	}
+	
+	return resolved;
 }
 
 Zotero.Utilities.Translate.prototype.__exposedProps__ = {"HTTP":"r"};
