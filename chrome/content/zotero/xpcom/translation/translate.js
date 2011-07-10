@@ -296,9 +296,6 @@ Zotero.Translate.Sandbox = {
 							var innerSandboxURI = ioService.newURI(typeof translation._sandboxLocation === "object" ?
 								translation._sandboxLocation.location : translation._sandboxLocation, null, null);
 							
-							Zotero.debug(outerSandboxURI.spec);
-							Zotero.debug(innerSandboxURI.spec);
-							
 							try {
 								secMan.checkSameOriginURI(outerSandboxURI, innerSandboxURI, false);
 							} catch(e) {
@@ -435,9 +432,6 @@ Zotero.Translate.Sandbox = {
 						haveAsyncHandler = !callbackExecuted;
 					}
 					
-					Zotero.debug("Translate: "+(haveAsyncHandler ? "" : "don't")+" have async handler");
-					Zotero.debug("Translate: "+(haveAsyncHandler ? "" : "don't")+" have async callback");
-					
 					if(haveAsyncCallback) {
 						if(haveAsyncHandler) {
 							// we are running asynchronously, so increment async processes
@@ -510,7 +504,6 @@ Zotero.Translate.Sandbox = {
 			}
 			
 			// create short title
-			Zotero.debug("item type is "+item.itemType);
 			if(item.shortTitle === undefined && Zotero.Utilities.fieldIsValidForType("shortTitle", item.itemType)) {		
 				// only set if changes have been made
 				var setShortTitle = false;
@@ -879,7 +872,7 @@ Zotero.Translate.Base.prototype = {
 			var translator = allPotentialTranslators[i];
 			if(translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER) {
 				this._potentialTranslators.push(translator);
-			} else if(this instanceof Zotero.Translate.Web) {
+			} else if(this instanceof Zotero.Translate.Web && Zotero.Connector) {
 				this._waitingForRPC = true;
 			}
 		}
