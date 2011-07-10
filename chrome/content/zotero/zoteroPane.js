@@ -1538,7 +1538,7 @@ var ZoteroPane = new function()
 				}
 				
 				var newTitle = {};
-				var result = prompt.prompt(
+				var result = ps.prompt(
 					null,
 					"",
 					// TODO: localize
