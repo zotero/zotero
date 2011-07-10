@@ -288,11 +288,7 @@ var Zotero_Browser = new function() {
 				Zotero_Browser.updateStatus();
 			}, false);
 		// this is for pageshow, for updating the status of the book icon
-		this.appcontent.addEventListener("pageshow",
-			function(e) {
-				//Zotero.debug("pageshow");
-				Zotero_Browser.contentLoad(e);
-			}, true);
+		this.appcontent.addEventListener("pageshow", contentLoad, true);
 		// this is for turning off the book icon when a user navigates away from a page
 		this.appcontent.addEventListener("pagehide",
 			function(e) {
@@ -374,9 +370,11 @@ var Zotero_Browser = new function() {
 		
 		// Figure out what browser this contentDocument is associated with
 		var browser;
-		for(var i=0; i<this.tabbrowser.browsers.length; i++) {
-			if(rootDoc == this.tabbrowser.browsers[i].contentDocument) {
-				browser = this.tabbrowser.browsers[i];
+		var browsers = Zotero_Browser.tabbrowser.browsers;
+		var nBrowsers = Zotero_Browser.tabbrowser.browsers.length;
+		for(var i=0; i<nBrowsers; i++) {
+			if(rootDoc == browsers[i].contentDocument) {
+				browser = browsers[i]
 				break;
 			}
 		}
@@ -392,7 +390,7 @@ var Zotero_Browser = new function() {
 					window.alert(Zotero.getString("annotations.oneWindowWarning"));
 				} else if(!tab.page.annotations) {
 					// enable annotation
-					tab.page.annotations = new Zotero.Annotations(this, browser, annotationID);
+					tab.page.annotations = new Zotero.Annotations(Zotero_Browser, browser, annotationID);
 					var saveAnnotations = function() {
 						tab.page.annotations.save();
 						tab.page.annotations = undefined;
@@ -406,6 +404,9 @@ var Zotero_Browser = new function() {
 		
 		// detect translators
 		tab.detectTranslators(rootDoc, doc);
+		
+		// register metadata updated event
+		doc.addEventListener("ZoteroItemUpdated", contentLoad, false);
 	}
 
 	/*
