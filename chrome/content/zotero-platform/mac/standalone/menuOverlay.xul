@@ -81,10 +81,6 @@
 
 	<!-- nsMenuBarX hides these and uses them to build the Application menu. -->
     <menupopup id="menu_FilePopup">
-		<menuitem id="aboutName"
-				accesskey="&aboutProduct.accesskey;"
-				label="&aboutProduct.label;"
-				oncommand="ZoteroPane.openAboutDialog();"/>
         <menuitem id="menu_preferences"
 				label="&preferencesCmdMac.label;"
 				key="key_preferencesCmdMac"
