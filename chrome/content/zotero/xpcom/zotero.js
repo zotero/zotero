@@ -398,7 +398,7 @@ var Zotero = new function(){
 			// DEBUG: handle more startup errors
 			else {
 				throw (e);
-				return;
+				return false;
 			}
 		}
 		
@@ -2201,13 +2201,13 @@ Zotero.WebProgressFinishListener = function(onFinish) {
  * Saves or loads JSON objects.
  */
 Zotero.JSON = new function() {
-	var nativeJSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON);
-	
 	this.serialize = function(arg) {
-		return nativeJSON.encode(arg);
+		Zotero.debug("WARNING: Zotero.JSON.serialize() is deprecated; use JSON.stringify()");
+		return JSON.stringify(arg);
 	}
 	
 	this.unserialize = function(arg) {
-		return nativeJSON.decode(arg);
+		Zotero.debug("WARNING: Zotero.JSON.unserialize() is deprecated; use JSON.parse()");
+		return JSON.parse(arg);
 	}
 }

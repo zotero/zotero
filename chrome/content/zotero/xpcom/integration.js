@@ -1524,15 +1524,15 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) 
 		
 		// get JSON
 		try {
-			var citation = Zotero.JSON.unserialize(arg);
+			var citation = JSON.parse(arg);
 		} catch(e) {
 			// fix for corrupted fields (corrupted by Word, somehow)
 			try {
-				var citation = Zotero.JSON.unserialize(arg.substr(0, arg.length-1));
+				var citation = JSON.parse(arg.substr(0, arg.length-1));
 			} catch(e) {
 				// another fix for corrupted fields (corrupted by 2.1b1)
 				try {
-					var citation = Zotero.JSON.unserialize(arg.replace(/{{((?:\s*,?"unsorted":(?:true|false)|\s*,?"custom":"(?:(?:\\")?[^"]*\s*)*")*)}}/, "{$1}"));
+					var citation = JSON.parse(arg.replace(/{{((?:\s*,?"unsorted":(?:true|false)|\s*,?"custom":"(?:(?:\\")?[^"]*\s*)*")*)}}/, "{$1}"));
 				} catch(e) {
 					throw new Zotero.Integration.CorruptFieldException(arg);
 				}
@@ -1825,10 +1825,10 @@ Zotero.Integration.Session.prototype.restoreProcessorState = function() {
  */
 Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 	try {
-		var documentData = Zotero.JSON.unserialize(json);
+		var documentData = JSON.parse(json);
 	} catch(e) {
 		try {
-			var documentData = Zotero.JSON.unserialize(json.substr(0, json.length-1));
+			var documentData = JSON.parse(json.substr(0, json.length-1));
 		} catch(e) {
 			throw new Zotero.Integration.CorruptFieldException(json);
 		}
@@ -1934,7 +1934,7 @@ Zotero.Integration.Session.prototype.getBibliographyData = function() {
 		for(id in this.customBibliographyText)];
 	
 	if(bibliographyData.uncited || bibliographyData.custom) {
-		return Zotero.JSON.serialize(bibliographyData);
+		return JSON.stringify(bibliographyData);
 	} else {
 		return ""; 	// nothing
 	}
@@ -1980,7 +1980,7 @@ Zotero.Integration.Session.prototype.editCitation = function(index, noteIndex, c
 	}
 	
 	// create object to hold citation
-	io.citation = (citation ? Zotero.JSON.unserialize(Zotero.JSON.serialize(citation)) : {"citationItems":{}, "properties":{}});
+	io.citation = (citation ? JSON.parse(JSON.stringify(citation)) : {"citationItems":{}, "properties":{}});
 	io.citation.properties.zoteroIndex = parseInt(index, 10);
 	io.citation.properties.noteIndex = parseInt(noteIndex, 10);
 	// assign preview function
