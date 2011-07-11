@@ -91,7 +91,10 @@ Zotero.IPC = new function() {
 			}
 		}
 		
-		var fd = open(path, 0x0004 | 0x0001);	// O_NONBLOCK | O_WRONLY
+		// On OS X, O_NONBLOCK = 0x0004
+		// On Linux, O_NONBLOCK = 04000
+		// On both, O_WRONLY = 0x0001
+		var fd = open(path, 04000 | 0x0004 | 0x0001);
 		if(fd === -1) return false;			
 		write(fd, string, string.length);
 		close(fd);
@@ -341,7 +344,7 @@ Zotero.IPC.Pipe = new function() {
 	 * Adds a shutdown listener for a pipe that writes "Zotero shutdown\n" to the pipe and then
 	 * deletes it
 	 */
-	this.writeShutdownMessage = function(file) {
+	this.writeShutdownMessage = function(pipe, file) {
 		// Make sure pipe actually exists
 		if(!file.exists()) {
 			Zotero.debug("IPC: Not closing pipe "+file.path+": already deleted");
@@ -350,7 +353,7 @@ Zotero.IPC.Pipe = new function() {
 		
 		// Keep trying to write to pipe until we succeed, in case pipe is not yet open
 		Zotero.debug("IPC: Closing pipe "+file.path);
-		while(!Zotero.IPC.safePipeWrite(file.path, "Zotero shutdown\n")) {
+		while(!Zotero.IPC.safePipeWrite(file.path, "Zotero shutdown\n") && !pipe.open) {
 			Zotero.wait();
 		}
 		
@@ -373,7 +376,7 @@ Zotero.IPC.Pipe.DeferredOpen = function(file, callback) {
 	this._initPump();
 	
 	// add shutdown listener
-	Zotero.addShutdownListener(Zotero.IPC.Pipe.writeShutdownMessage.bind(null, file));
+	Zotero.addShutdownListener(Zotero.IPC.Pipe.writeShutdownMessage.bind(null, this, file));
 }
 
 Zotero.IPC.Pipe.DeferredOpen.prototype = {
@@ -411,8 +414,17 @@ Zotero.IPC.Pipe.DeferredOpen.prototype = {
 			createInstance(Components.interfaces.nsIInputStreamPump);
 		pump.init(fifoStream, -1, -1, 4096, 1, true);
 		pump.asyncRead(this, null);
+		
+		this._openTime = Date.now();
 	}
 };
+
+/**
+ * Deferred open pipe is open if there are no pending events or it was opened > 1 second ago
+ */
+Zotero.IPC.Pipe.DeferredOpen.prototype.__defineGetter__("open", function() {
+	return Date.now() > this._openTime+1000 || !Zotero.mainThread.hasPendingEvents();
+});
 
 /**
  * Listens synchronously for data on the integration pipe on a separate JS thread and reads it
@@ -433,7 +445,7 @@ Zotero.IPC.Pipe.WorkerThread = function(file, callback) {
 	worker.postMessage({"path":file.path, "libc":Zotero.IPC.getLibcPath()});
 	
 	// add shutdown listener
-	Zotero.addShutdownListener(Zotero.IPC.Pipe.writeShutdownMessage.bind(null, file));
+	Zotero.addShutdownListener(Zotero.IPC.Pipe.writeShutdownMessage.bind(null, this, file));
 }
 
 Zotero.IPC.Pipe.WorkerThread.prototype = {
@@ -447,9 +459,19 @@ Zotero.IPC.Pipe.WorkerThread.prototype = {
 			Zotero.debug(event.data[1]);
 		} else if(event.data[0] === "Read") {
 			this._callback(event.data[1]);
+		} else if(event.data[0] === "Open") {
+			this._openTime = Date.now();
 		}
 	}
 }
+
+/**
+ * Worker thread gets a message once the pipe is about to open; we add 500 ms to make sure it
+ * actually is
+ */
+Zotero.IPC.Pipe.DeferredOpen.prototype.__defineGetter__("open", function() {
+	return Date.now() > this._openTime+500;
+});
 
 /**
  * Polling mechanism for file
