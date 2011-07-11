@@ -98,8 +98,8 @@ var Zotero_LocateMenu = new function() {
 		// get selected items
 		var selectedItems = _getSelectedItems();
 		
-		// if no items selected, stop now
-		if(!selectedItems.length) return;
+		// if no items selected or >20 items selected, stop now
+		if(!selectedItems.length || selectedItems.length > 20) return;
 		
 		// add view options
 		_addViewOptions(menu, selectedItems);
@@ -338,13 +338,13 @@ var Zotero_LocateMenu = new function() {
 		this.canHandleItem = function(item) !!_getFirstAttachmentWithMIMEType(item, this._mimeTypes);
 		
 		this.handleItems = function(items, event) {
+			var attachments = [];
 			for each(var item in items) {
 				var attachment = _getFirstAttachmentWithMIMEType(item, this._mimeTypes);
-				if(attachment) {
-					ZoteroPane_Local.viewAttachment(attachment.id, event);
-					return;
-				}
+				if(attachment) attachments.push(attachment.id);
 			}
+			
+			ZoteroPane_Local.viewAttachment(attachments, event);
 		}
 		
 		function _getFirstAttachmentWithMIMEType(item, mimeTypes) {
@@ -431,13 +431,13 @@ var Zotero_LocateMenu = new function() {
 		this.canHandleItem = function(item) !!_getFile(item);
 		
 		this.handleItems = function(items, event) {
+			var attachments = [];
 			for each(var item in items) {
 				var attachment = _getFile(item);
-				if(attachment) {
-					ZoteroPane_Local.viewAttachment(attachment.id, event);
-					return;
-				}
+				if(attachment) attachments.push(attachment.id);
 			}
+			
+			ZoteroPane_Local.viewAttachment(attachments, event);
 		}
 		
 		function _getFile(item) {
@@ -469,13 +469,13 @@ var Zotero_LocateMenu = new function() {
 		}
 		
 		this.handleItems = function(items, event) {
+			var attachments = [];
 			for each(var item in items) {
 				var attachment = _getBestNonNativeAttachment(item);
-				if(attachment) {
-					ZoteroPane_Local.viewAttachment(attachment.id, event, false, this.useExternalViewer);
-					return;
-				}
+				if(attachment) attachments.push(attachment.id);
 			}
+			
+			ZoteroPane_Local.viewAttachment(attachments, event, false, this.useExternalViewer);
 		}
 		
 		function _getBestNonNativeAttachment(item) {
@@ -530,7 +530,6 @@ var Zotero_LocateMenu = new function() {
 				var attachment = _getBestFile(item);
 				if(attachment) {
 					ZoteroPane_Local.showAttachmentInFilesystem(attachment.id);
-					return;
 				}
 			}
 		}
