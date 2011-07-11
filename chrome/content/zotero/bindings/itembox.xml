@@ -1819,9 +1819,6 @@
 				<![CDATA[
 					var val = this._getFieldValue(label);
 					switch (mode) {
-						case 'lower':
-							var newVal = val.toLowerCase();
-							break;
 						case 'title':
 							var newVal = Zotero.Utilities.capitalizeTitle(val.toLowerCase(), true);
 							break;
@@ -2271,8 +2268,6 @@
 									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'title')"/>
 								<menuitem label="&zotero.item.textTransform.sentencecase;" class="menuitem-non-iconic"
 									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'sentence')"/>
-								<menuitem label="&zotero.item.textTransform.lowercase;" class="menuitem-non-iconic"
-									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'lower')"/>
 							</menupopup>
 						</menu>
 					</menupopup>
