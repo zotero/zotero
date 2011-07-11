@@ -62,9 +62,9 @@
 <!ENTITY zotero.items.menu.attach						"Add Attachment">
 <!ENTITY zotero.items.menu.attach.snapshot				"Attach Snapshot of Current Page">
 <!ENTITY zotero.items.menu.attach.link					"Attach Link to Current Page">
-<!ENTITY zotero.items.menu.attach.link.uri				"Attach Link to URI...">
-<!ENTITY zotero.items.menu.attach.file					"Attach Stored Copy of File...">
-<!ENTITY zotero.items.menu.attach.fileLink				"Attach Link to File...">
+<!ENTITY zotero.items.menu.attach.link.uri				"Attach Link to URI…">
+<!ENTITY zotero.items.menu.attach.file					"Attach Stored Copy of File…">
+<!ENTITY zotero.items.menu.attach.fileLink				"Attach Link to File…">
 
 <!ENTITY zotero.items.menu.duplicateItem					"Duplicate Selected Item">
 
@@ -72,21 +72,21 @@
 <!ENTITY zotero.toolbar.moreItemTypes.label			"More">
 <!ENTITY zotero.toolbar.newItemFromPage.label			"Create New Item from Current Page">
 <!ENTITY zotero.toolbar.lookup.label				"Add Item by Identifier">
-<!ENTITY zotero.toolbar.removeItem.label				"Remove Item...">
-<!ENTITY zotero.toolbar.newCollection.label			"New Collection...">
-<!ENTITY zotero.toolbar.newGroup						"New Group...">
-<!ENTITY zotero.toolbar.newSubcollection.label			"New Subcollection...">
-<!ENTITY zotero.toolbar.newSavedSearch.label			"New Saved Search...">
+<!ENTITY zotero.toolbar.removeItem.label				"Remove Item…">
+<!ENTITY zotero.toolbar.newCollection.label			"New Collection…">
+<!ENTITY zotero.toolbar.newGroup						"New Group…">
+<!ENTITY zotero.toolbar.newSubcollection.label			"New Subcollection…">
+<!ENTITY zotero.toolbar.newSavedSearch.label			"New Saved Search…">
 <!ENTITY zotero.toolbar.emptyTrash.label				"Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label			"Show/Hide Tag Selector">
 <!ENTITY zotero.toolbar.actions.label					"Actions">
-<!ENTITY zotero.toolbar.import.label					"Import...">
+<!ENTITY zotero.toolbar.import.label					"Import…">
 <!ENTITY zotero.toolbar.importFromClipboard			"Import from Clipboard">
-<!ENTITY zotero.toolbar.export.label					"Export Library...">
-<!ENTITY zotero.toolbar.rtfScan.label					"RTF Scan...">
+<!ENTITY zotero.toolbar.export.label					"Export Library…">
+<!ENTITY zotero.toolbar.rtfScan.label					"RTF Scan…">
 <!ENTITY zotero.toolbar.timeline.label				"Create Timeline">
 <!ENTITY zotero.toolbar.duplicate.label				"Show Duplicates">
-<!ENTITY zotero.toolbar.preferences.label				"Preferences...">
+<!ENTITY zotero.toolbar.preferences.label				"Preferences…">
 <!ENTITY zotero.toolbar.supportAndDocumentation		"Support and Documentation">
 <!ENTITY zotero.toolbar.about.label					"About Zotero">
 <!ENTITY zotero.toolbar.advancedSearch				"Advanced Search">
@@ -103,9 +103,9 @@
 <!ENTITY zotero.toolbar.newNote				"New Note">
 <!ENTITY zotero.toolbar.note.standalone				"New Standalone Note">
 <!ENTITY zotero.toolbar.note.child					"Add Child Note">
-<!ENTITY zotero.toolbar.lookup						"Lookup by Identifier...">
-<!ENTITY zotero.toolbar.attachment.linked				"Link to File...">
-<!ENTITY zotero.toolbar.attachment.add					"Store Copy of File...">
+<!ENTITY zotero.toolbar.lookup						"Lookup by Identifier…">
+<!ENTITY zotero.toolbar.attachment.linked				"Link to File…">
+<!ENTITY zotero.toolbar.attachment.add					"Store Copy of File…">
 <!ENTITY zotero.toolbar.attachment.weblink				"Save Link to Current Page">
 <!ENTITY zotero.toolbar.attachment.snapshot			"Take Snapshot of Current Page">
 
@@ -116,8 +116,8 @@
 <!ENTITY zotero.tagSelector.selectVisible			"Select Visible">
 <!ENTITY zotero.tagSelector.clearVisible				"Deselect Visible">
 <!ENTITY zotero.tagSelector.clearAll					"Deselect All">
-<!ENTITY zotero.tagSelector.renameTag				"Rename Tag...">
-<!ENTITY zotero.tagSelector.deleteTag				"Delete Tag...">
+<!ENTITY zotero.tagSelector.renameTag				"Rename Tag…">
+<!ENTITY zotero.tagSelector.deleteTag				"Delete Tag…">
 
 <!ENTITY zotero.lookup.description				"Enter the ISBN, DOI, or PMID to look up in the box below.">
 
@@ -140,7 +140,7 @@
 
 <!ENTITY zotero.progress.title							"Progress">
 
-<!ENTITY zotero.exportOptions.title						"Export...">
+<!ENTITY zotero.exportOptions.title						"Export…">
 <!ENTITY zotero.exportOptions.format.label				"Format:">
 <!ENTITY zotero.exportOptions.translatorOptions.label	"Translator Options">
 
@@ -200,7 +200,7 @@
 <!ENTITY zotero.proxy.recognized.disable.label			"Do not automatically redirect requests through previously recognized proxies">
 <!ENTITY zotero.proxy.recognized.ignore.label			"Ignore">
 
-<!ENTITY zotero.recognizePDF.recognizing.label			"Retrieving Metadata...">
+<!ENTITY zotero.recognizePDF.recognizing.label			"Retrieving Metadata…">
 <!ENTITY zotero.recognizePDF.cancel.label					"Cancel">
 <!ENTITY zotero.recognizePDF.pdfName.label				"PDF Name">
 <!ENTITY zotero.recognizePDF.itemName.label				"Item Name">
@@ -228,7 +228,7 @@
 <!ENTITY zotero.rtfScan.inputFile.label			"Input File">
 <!ENTITY zotero.rtfScan.outputFile.label			"Output File">
 
-<!ENTITY zotero.file.choose.label			"Choose File...">
+<!ENTITY zotero.file.choose.label			"Choose File…">
 <!ENTITY zotero.file.noneSelected.label			"No file selected">
 
 <!ENTITY zotero.downloadManager.label			"Save to Zotero">
