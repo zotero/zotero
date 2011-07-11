@@ -358,14 +358,14 @@ Zotero.OpenURL = new function() {
 				if(complexAu.length && !lastCreator.lastName && !lastCreator.institutional) {
 					lastCreator.lastName = value;
 				} else {
-					complexAu.push({lastName:value, creatorType:(key == "rft.aulast" ? "author" : "inventor")});
+					complexAu.push({lastName:value, creatorType:(key == "rft.aulast" ? "author" : "inventor"), offset:item.creators.length});
 				}
 			} else if(key == "rft.aufirst" || key == "rft.invfirst") {
 				var lastCreator = complexAu[complexAu.length-1];
 				if(complexAu.length && !lastCreator.firstName && !lastCreator.institutional) {
 					lastCreator.firstName = value;
 				} else {
-					complexAu.push({firstName:value, creatorType:(key == "rft.aufirst" ? "author" : "inventor")});
+					complexAu.push({firstName:value, creatorType:(key == "rft.aufirst" ? "author" : "inventor"), offset:item.creators.length});
 				}
 			} else if(key == "rft.au" || key == "rft.creator" || key == "rft.contributor" || key == "rft.inventor") {
 				if(key == "rft.contributor") {
@@ -439,10 +439,16 @@ Zotero.OpenURL = new function() {
 				}
 			}
 		}
+
+		// To maintain author ordering when complex and simple authors are combined,
+		// we remember where they were and the correct offsets
+		var inserted = 0;
 		
 		// combine two lists of authors, eliminating duplicates
 		for(var i=0; i<complexAu.length; i++) {
 			var pushMe = true;
+			var offset = complexAu[i].offset;
+			delete complexAu[i].offset;
 			for(var j=0; j<item.creators.length; j++) {
 				// if there's a plain author that is close to this author (the
 				// same last name, and the same first name up to a point), keep
@@ -455,7 +461,12 @@ Zotero.OpenURL = new function() {
 					break;
 				}
 			}
-			if(pushMe) item.creators.push(complexAu[i]);
+			// Splice in the complex creator at the correct location,
+			// accounting for previous insertions
+			if(pushMe) {
+				item.creators = item.creators.splice(offset + inserted, 0, complexAu[i]);
+				inserted++;
+			}
 		}
 		
 		return item;
