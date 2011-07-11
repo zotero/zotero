@@ -130,7 +130,7 @@ var CSL = {
 		"delimiter"
 	],
 	PARALLEL_MATCH_VARS: ["container-title"],
-	PARALLEL_TYPES: ["legal_case",  "legislation"],
+	PARALLEL_TYPES: ["legal_case",  "legislation", "bill"],
 	PARALLEL_COLLAPSING_MID_VARSET: ["volume", "container-title", "section"],
 	LOOSE: 0,
 	STRICT: 1,
@@ -1886,7 +1886,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.185";
+	this.processor_version = "1.0.189";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2193,6 +2193,10 @@ CSL.Engine.prototype.retrieveItems = function (ids) {
 CSL.Engine.prototype.retrieveItem = function (id) {
 	var Item, m, pos, len, mm;
 	Item = this.sys.retrieveItem("" + id);
+	if (Item.type === "bill" && Item.number && !Item.volume && Item.page) {
+		Item.volume = Item.number;
+		Item.number = undefined;
+	}
 	if (this.opt.development_extensions && Item.note) {
 		m = CSL.NOTE_FIELDS_REGEXP.exec(Item.note);
 		if (m) {
@@ -3086,7 +3090,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 					thisauthor = sortedItems[i][1].sortkeys[0];
 					thiskey =  sortedItems[i][1].sortkeys[1];
 				}
-				sortedItems[i][1].sortkeys[0] = thiskey;
+				sortedItems[i][1].sortkeys[0] = "" + thiskey + i;
 				lastauthor = thisauthor;
 			}
 		}
@@ -3488,7 +3492,6 @@ CSL.getCitationCluster = function (inputList, citationID) {
 		for (ppos = 0; ppos < llen; ppos += 1) {
 			obj = composite[ppos];
 			if ("string" === typeof obj) {
-				print("delim2=" + this.tmp.splice_delimiter)
 				objects.push(txt_esc(this.tmp.splice_delimiter) + obj);
 				continue;
 			}
@@ -3503,7 +3506,8 @@ CSL.getCitationCluster = function (inputList, citationID) {
 	}
 	result += this.output.renderBlobs(objects);
 	if (result) {
-		if (this.tmp.last_chr === use_layout_suffix.slice(0, 1)) {
+		if (CSL.TERMINAL_PUNCTUATION.indexOf(this.tmp.last_chr) > -1 
+			&& this.tmp.last_chr === use_layout_suffix.slice(0, 1)) {
 			use_layout_suffix = use_layout_suffix.slice(1);
 		}
 		result = txt_esc(this.citation.opt.layout_prefix) + result + txt_esc(use_layout_suffix);
@@ -3902,7 +3906,6 @@ CSL.Node.date = {
 			tok.dateparts = state.build.date_parts.slice();
 			tok.variables = state.build.date_variables;
 			CSL.Node.key.build.call(tok, state, target);
-			state.build.sort_flag = false;
 		}
 		if (!state.build.sort_flag && (this.tokentype === CSL.END || this.tokentype === CSL.SINGLETON)) {
 			func = function (state, Item) {
@@ -6490,8 +6493,12 @@ CSL.Node.text = {
 				    state.build.plural = false;
 				} else if (this.variables_real.length) {
 					func = function (state, Item) {
-						state.parallel.StartVariable(this.variables[0]);
-						state.parallel.AppendToVariable(Item[this.variables[0]]);
+						var parallel_variable = this.variables[0];
+						if (parallel_variable === "title" && form === "short") {
+							parallel_variable = "shortTitle";
+						}
+						state.parallel.StartVariable(parallel_variable);
+						state.parallel.AppendToVariable(Item[parallel_variable]);
 					};
 					this.execs.push(func);
 					if (CSL.MULTI_FIELDS.indexOf(this.variables_real[0]) > -1) {
@@ -7690,7 +7697,7 @@ CSL.Parallel = function (state) {
 	this.use_parallels = true;
 };
 CSL.Parallel.prototype.isMid = function (variable) {
-	return ["names", "section", "volume", "container-title", "issue", "page", "locator"].indexOf(variable) > -1;
+	return ["section", "volume", "container-title", "issue", "page", "page-first", "locator"].indexOf(variable) > -1;
 };
 CSL.Parallel.prototype.StartCitation = function (sortedItems, out) {
 	if (this.use_parallels) {
@@ -7777,7 +7784,7 @@ CSL.Parallel.prototype.StartVariable = function (variable) {
 		this.data.value = "";
 		this.data.blobs = [];
 		var is_mid = this.isMid(variable);
-		if (this.target === "front" && is_mid && this.cite.front.length && (this.cite.front.length > 1 || this.cite.front.indexOf("names") === -1)) {
+		if (this.target === "front" && is_mid) {
 			this.target = "mid";
 		} else if (this.target === "mid" && !is_mid && this.cite.Item.title) {
 			this.target = "back";
