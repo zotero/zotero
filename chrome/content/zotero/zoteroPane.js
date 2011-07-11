@@ -3240,54 +3240,66 @@ var ZoteroPane = new function()
 	}
 	
 	
-	function viewAttachment(itemID, event, noLocateOnMissing, forceExternalViewer) {
-		var attachment = Zotero.Items.get(itemID);
-		if (!attachment.isAttachment()) {
-			throw ("Item " + itemID + " is not an attachment in ZoteroPane_Local.viewAttachment()");
+	function viewAttachment(itemIDs, event, noLocateOnMissing, forceExternalViewer) {
+		if(typeof itemIDs != "object") itemIDs = [itemIDs];
+		
+		// If multiple items, set up event so we open in new tab
+		if(itemIDs.length > 1) {
+			if(!event || (!event.metaKey && !event.shiftKey)) {
+				event = {"metaKey":true, "shiftKey":true};
+			}
 		}
 		
-		if (attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-			this.loadURI(attachment.getField('url'), event);
-			return;
-		}
-		
-		var file = attachment.getFile();
-		if (file) {
-			if(forceExternalViewer !== undefined) {
-				var externalViewer = forceExternalViewer;
-			} else {
-				var mimeType = attachment.attachmentMIMEType;
-				// If no MIME type specified, try to detect again (I guess in case
-				// we've gotten smarter since the file was imported?)
-				if (!mimeType) {
-					mimeType = Zotero.MIME.getMIMETypeFromFile(file);
+		for each(var itemID in itemIDs) {
+			var attachment = Zotero.Items.get(itemID);
+			if (!attachment.isAttachment()) {
+				throw ("Item " + itemID + " is not an attachment in ZoteroPane_Local.viewAttachment()");
+			}
+			
+			if (attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+				this.loadURI(attachment.getField('url'), event);
+				continue;
+			}
+			
+			var file = attachment.getFile();
+			if (file) {
+				if(forceExternalViewer !== undefined) {
+					var externalViewer = forceExternalViewer;
+				} else {
+					var mimeType = attachment.attachmentMIMEType;
+					// If no MIME type specified, try to detect again (I guess in case
+					// we've gotten smarter since the file was imported?)
+					if (!mimeType) {
+						mimeType = Zotero.MIME.getMIMETypeFromFile(file);
+						
+						// TODO: update DB with new info
+					}
 					
-					// TODO: update DB with new info
+					var ext = Zotero.File.getExtension(file);
+					var externalViewer = Zotero.isStandalone || (!Zotero.MIME.hasNativeHandler(mimeType, ext) &&
+						(!Zotero.MIME.hasInternalHandler(mimeType, ext) || Zotero.Prefs.get('launchNonNativeFiles')));
 				}
 				
-				var ext = Zotero.File.getExtension(file);
-				var externalViewer = Zotero.isStandalone || (!Zotero.MIME.hasNativeHandler(mimeType, ext) &&
-					(!Zotero.MIME.hasInternalHandler(mimeType, ext) || Zotero.Prefs.get('launchNonNativeFiles')));
-			}
-			if (!externalViewer) {
-				var url = 'zotero://attachment/' + itemID + '/';
-				this.loadURI(url, event, { attachmentID: itemID});
+				if (!externalViewer) {
+					var url = 'zotero://attachment/' + itemID + '/';
+					this.loadURI(url, event, { attachmentID: itemID});
+				}
+				else {
+					// Some platforms don't have nsILocalFile.launch, so we just load it and
+					// let the Firefox external helper app window handle it
+					try {
+						file.launch();
+					}
+					catch (e) {
+						Zotero.debug("launch() not supported -- passing file to loadURI()");
+						var fileURL = attachment.getLocalFileURL();
+						this.loadURI(fileURL);
+					}
+				}
 			}
 			else {
-				// Some platforms don't have nsILocalFile.launch, so we just load it and
-				// let the Firefox external helper app window handle it
-				try {
-					file.launch();
-				}
-				catch (e) {
-					Zotero.debug("launch() not supported -- passing file to loadURI()");
-					var fileURL = attachment.getLocalFileURL();
-					this.loadURI(fileURL);
-				}
+				this.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
 			}
-		}
-		else {
-			this.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
 		}
 	}
 	
