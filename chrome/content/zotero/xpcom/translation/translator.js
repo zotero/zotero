@@ -434,7 +434,7 @@ Zotero.Translator = function(file, json, code) {
 	
 	var fStream, cStream;
 	if(json) {
-		var info = Zotero.JSON.unserialize(json);
+		var info = JSON.parse(json);
 	} else {
 		fStream = Components.classes["@mozilla.org/network/file-input-stream;1"].
 			createInstance(Components.interfaces.nsIFileInputStream);
@@ -467,7 +467,7 @@ Zotero.Translator = function(file, json, code) {
 		this.metadataString = m[0];
 		
 		try {
-			var info = Zotero.JSON.unserialize(this.metadataString);
+			var info = JSON.parse(this.metadataString);
 		} catch(e) {
 			this.logError("Invalid or missing translator metadata JSON object in " + file.leafName);
 			fStream.close();
