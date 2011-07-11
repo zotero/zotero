@@ -809,6 +809,9 @@ CSL.Output.Queue.prototype.append = function (str, tokname, notSerious) {
 	blob = new CSL.Blob(token, str);
 	curr = this.current.value();
 	if ("string" === typeof blob.blobs) {
+		if (this.state.tmp.strip_periods) {
+			blob.blobs = blob.blobs.replace(/\./g, "");
+		}
 		this.state.tmp.term_predecessor = true;
 	}
 	if (!notSerious) {
@@ -1886,7 +1889,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.189";
+	this.processor_version = "1.0.190";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2485,6 +2488,7 @@ CSL.Engine.Tmp = function () {
 	this.delimiter = new CSL.Stack("", CSL.LITERAL);
 	this.cite_locales = [];
 	this.cite_affixes = false;
+	this.strip_periods = 0;
 };
 CSL.Engine.Fun = function () {
 	this.match = new  CSL.Util.Match();
@@ -5701,13 +5705,31 @@ CSL.NameOutput.prototype._normalizeNameInput = function (value) {
 	this._parseName(name);
 	return name;
 };
+CSL.NameOutput.prototype._stripPeriods = function (tokname, str) {
+	var decor_tok = this[tokname + "_decor"];
+	if (str) {
+		if (this.state.tmp.strip_periods) {
+			str = str.replace(/\./g, "");
+		} else  if (decor_tok) {
+			for (var i = 0, ilen = decor_tok.decorations.length; i < ilen; i += 1) {
+				if ("@strip-periods" === decor_tok.decorations[i][0] && "true" === decor_tok.decorations[i][1]) {
+					str = str.replace(/\./g, "");
+					break
+				}
+			}
+		}
+	}
+	return str;
+}
 CSL.NameOutput.prototype._nonDroppingParticle = function (name) {
-	if (this.state.output.append(name["non-dropping-particle"], this.family_decor, true)) {
+	var str = this._stripPeriods("family", name["non-dropping-particle"]);
+	if (this.state.output.append(str, this.family_decor, true)) {
 		return this.state.output.pop();
 	}
 	return false;
 };
 CSL.NameOutput.prototype._droppingParticle = function (name, pos) {
+	var str = this._stripPeriods("given", name["dropping-particle"]);
 	if (name["dropping-particle"] && name["dropping-particle"].match(/^et.?al[^a-z]$/)) {
 		if (this.name.strings["et-al-use-last"]) {
 			this.etal_spec[pos] = 2;
@@ -5715,13 +5737,14 @@ CSL.NameOutput.prototype._droppingParticle = function (name, pos) {
 			this.etal_spec[pos] = 1;
 		}
 		name["comma-dropping-particle"] = "";
-	} else if (this.state.output.append(name["dropping-particle"], this.given_decor, true)) {
+	} else if (this.state.output.append(str, this.given_decor, true)) {
 		return this.state.output.pop();
 	}
 	return false;
 };
 CSL.NameOutput.prototype._familyName = function (name) {
-	if (this.state.output.append(name.family, this.family_decor, true)) {
+	var str = this._stripPeriods("family", name.family);
+	if (this.state.output.append(str, this.family_decor, true)) {
 		return this.state.output.pop();
 	}
 	return false;
@@ -5733,13 +5756,15 @@ CSL.NameOutput.prototype._givenName = function (name, pos, i) {
 	} else {
 		name.given = CSL.Util.Names.unInitialize(this.state, name.given);
 	}
-	if (this.state.output.append(name.given, this.given_decor, true)) {
+	var str = this._stripPeriods("given", name.given);
+	if (this.state.output.append(str, this.given_decor, true)) {
 		return this.state.output.pop();
 	}
 	return false;
 };
 CSL.NameOutput.prototype._nameSuffix = function (name) {
-	if (this.state.output.append(name.suffix, "empty", true)) {
+	var str = this._stripPeriods("family", name.suffix);
+	if (this.state.output.append(str, "empty", true)) {
 		return this.state.output.pop();
 	}
 	return false;
@@ -5899,8 +5924,15 @@ CSL.evaluateStringPluralism = function (str) {
 };
 CSL.castLabel = function (state, node, term, plural, mode) {
 	var ret = state.getTerm(term, node.strings.form, plural, false, mode);
-	if (node.strings["strip-periods"]) {
+	if (state.tmp.strip_periods) {
 		ret = ret.replace(/\./g, "");
+	} else {
+		for (var i = 0, ilen = node.decorations.length; i < ilen; i += 1) {
+			if ("@strip-periods" === node.decorations[i][0] && "true" === node.decorations[i][1]) {
+				ret = ret.replace(/\./g, "");
+				break
+			}
+		}
 	}
 	return ret;
 };
@@ -6470,9 +6502,6 @@ CSL.Node.text = {
 				if (this.strings.term) {
 				    term = this.strings.term;
 				    term = state.getTerm(term, form, plural);
-				    if (this.strings["strip-periods"]) {
-					term = term.replace(/\./g, "");
-				    }
 				    func = function (state, Item) {
 					var myterm;
 					if (term !== "") {
@@ -6484,6 +6513,16 @@ CSL.Node.text = {
 					    myterm = CSL.Output.Formatters["capitalize-first"](state, term);
 					} else {
 					    myterm = term;
+					}
+					if (state.tmp.strip_periods) {
+						myterm = myterm.replace(/\./g, "");
+					} else {
+						for (var i = 0, ilen = this.decorations.length; i < ilen; i += 1) {
+							if ("@strip-periods" === this.decorations[i][0] && "true" === this.decorations[i][1]) {
+								myterm = myterm.replace(/\./g, "");
+								break
+							}
+						}
 					}
 					state.output.append(myterm, this);
 				    };
@@ -8444,6 +8483,15 @@ CSL.Util.Sort.strip_prepositions = function (str) {
 };
 CSL.Util.substituteStart = function (state, target) {
 	var element_trace, display, bib_first, func, choose_start, if_start, nodetypes;
+	var func = function (state, Item) {
+		for (var i = 0, ilen = this.decorations.length; i < ilen; i += 1) {
+			if ("@strip-periods" === this.decorations[i][0] && "true" === this.decorations[i][1]) {
+				state.tmp.strip_periods += 1;
+				break;
+			}
+		}
+	}
+	this.execs.push(func);
 	nodetypes = ["number", "date", "names"];
 	if (("text" === this.name && !this.postponed_macro) || nodetypes.indexOf(this.name) > -1) {
 		element_trace = function (state, Item, item) {
@@ -8506,6 +8554,15 @@ CSL.Util.substituteStart = function (state, target) {
 };
 CSL.Util.substituteEnd = function (state, target) {
 	var func, bib_first_end, bib_other, if_end, choose_end, toplevel, hasval, author_substitute, str;
+	var func = function (state, Item) {
+		for (var i = 0, ilen = this.decorations.length; i < ilen; i += 1) {
+			if ("@strip-periods" === this.decorations[i][0] && "true" === this.decorations[i][1]) {
+				state.tmp.strip_periods += -1;
+				break;
+			}
+		}
+	}
+	this.execs.push(func);
 	state.build.render_nesting_level += -1;
 	if (state.build.render_nesting_level === 0) {
 		if (state.build.cls) {
@@ -9126,9 +9183,6 @@ CSL.getSafeEscape = function(outputModeOpt, outputArea) {
 		return function (txt) { return txt; };
 	}
 };
-CSL.Output.Formatters.strip_periods = function (state, string) {
-    return string.replace(/\./g, "");
-};
 CSL.Output.Formatters.passthrough = function (state, string) {
 	return string;
 };
@@ -9291,10 +9345,8 @@ CSL.Output.Formats.prototype.html = {
 	"@vertical-align/sup": "<sup>%%STRING%%</sup>",
 	"@vertical-align/sub": "<sub>%%STRING%%</sub>",
 	"@vertical-align/baseline": "<span style=\"baseline\">%%STRING%%</span>",
-	"@strip-periods/true": CSL.Output.Formatters.strip_periods,
-	"@strip-periods/false": function (state, string) {
-		return string;
-	},
+	"@strip-periods/true": CSL.Output.Formatters.passthrough,
+	"@strip-periods/false": CSL.Output.Formatters.passthrough,
 	"@quotes/true": function (state, str) {
 		if ("undefined" === typeof str) {
 			return state.getTerm("open-quote");
@@ -9348,10 +9400,8 @@ CSL.Output.Formats.prototype.text = {
 	"@vertical-align/baseline": false,
 	"@vertical-align/sup": false,
 	"@vertical-align/sub": false,
-	"@strip-periods/true": CSL.Output.Formatters.strip_periods,
-	"@strip-periods/false": function (state, string) {
-		return string;
-	},
+	"@strip-periods/true": CSL.Output.Formatters.passthrough,
+	"@strip-periods/false": CSL.Output.Formatters.passthrough,
 	"@quotes/true": function (state, str) {
 		if ("undefined" === typeof str) {
 			return state.getTerm("open-quote");
@@ -9407,10 +9457,8 @@ CSL.Output.Formats.prototype.rtf = {
 	"@vertical-align/baseline":false,
 	"@vertical-align/sup":"\\super %%STRING%%\\nosupersub{}",
 	"@vertical-align/sub":"\\sub %%STRING%%\\nosupersub{}",
-	"@strip-periods/true": CSL.Output.Formatters.strip_periods,
-	"@strip-periods/false": function (state, string) {
-		return string;
-	},
+	"@strip-periods/true": CSL.Output.Formatters.passthrough,
+	"@strip-periods/false": CSL.Output.Formatters.passthrough,
 	"@quotes/true": function (state, str) {
 		if ("undefined" === typeof str) {
 			return CSL.Output.Formats.rtf.text_escape(state.getTerm("open-quote"));
