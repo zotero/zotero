@@ -70,9 +70,15 @@ var Zotero_DownloadOverlay = new function() {
 		// set up callback
 		var callback = function(item) {
 			if(!win) return;
-			
-			if(item) win.Zotero_Browser.itemDone(null, item);
-			win.Zotero_Browser.finishScraping(null, !!item);
+						
+			if(item) {
+				progressWin.addLines([item.getDisplayTitle()], [item.getImageSrc()]);
+				progressWin.startCloseTimer();
+				if(collection) collection.addItem(item.id);
+			} else {
+				progressWin.addDescription(Zotero.getString("save.link.error"));
+				progressWin.startCloseTimer(8000);
+			}
 			
 			if(recognizePDF) {
 				var timer = Components.classes["@mozilla.org/timer;1"]
@@ -90,7 +96,9 @@ var Zotero_DownloadOverlay = new function() {
 		};
 		
 		// show progress dialog
-		win.Zotero_Browser.progress.show();
+		var progressWin = new Zotero.ProgressWindow();
+		progressWin.changeHeadline(Zotero.getString("save.link"));
+		progressWin.show();
 		
 		// perform import
 		Zotero.Attachments.importFromURL(url, false, false, false,
