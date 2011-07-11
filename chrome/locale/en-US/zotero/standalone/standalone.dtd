@@ -90,3 +90,5 @@
 <!ENTITY helpFeedbackPage.accesskey  "S">
 <!ENTITY helpReportErrors.label      "Report Errors to Zotero…">
 <!ENTITY helpReportErrors.accesskey  "R">
+<!ENTITY helpCheckForUpdates.label      "Check for Updates…">
+<!ENTITY helpCheckForUpdates.accesskey  "U">
