@@ -1825,6 +1825,9 @@
 						case 'title':
 							var newVal = Zotero.Utilities.capitalizeTitle(val.toLowerCase(), true);
 							break;
+						case 'sentence':
+							var newVal = val.length ? val[0].toUpperCase()+val.substr(1).toLowerCase() : val;
+							break;
 						default:
 							throw ("Invalid transform mode '" + mode + "' in zoteroitembox.textTransform()");
 					}
@@ -2264,10 +2267,12 @@
 					<menupopup id="field-menu">
 						<menu label="&zotero.item.textTransform;">
 							<menupopup>
-								<menuitem label="&zotero.item.textTransform.lowercase;" class="menuitem-non-iconic"
-									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'lower')"/>
 								<menuitem label="&zotero.item.textTransform.titlecase;" class="menuitem-non-iconic"
 									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'title')"/>
+								<menuitem label="&zotero.item.textTransform.sentencecase;" class="menuitem-non-iconic"
+									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'sentence')"/>
+								<menuitem label="&zotero.item.textTransform.lowercase;" class="menuitem-non-iconic"
+									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'lower')"/>
 							</menupopup>
 						</menu>
 					</menupopup>
