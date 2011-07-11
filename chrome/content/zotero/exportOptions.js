@@ -121,7 +121,7 @@ var Zotero_File_Interface_Export = new function() {
 		
 		if(optionString) {
 			try {
-				var options = Zotero.JSON.unserialize(optionString);
+				var options = JSON.parse(optionString);
 			} catch(e) {}
 		}
 		
@@ -211,7 +211,7 @@ var Zotero_File_Interface_Export = new function() {
 		}
 		
 		// save options
-		var optionString = Zotero.JSON.serialize(displayOptions);
+		var optionString = JSON.stringify(displayOptions);
 		Zotero.Prefs.set("export.translatorSettings", optionString);
 	}
 	
