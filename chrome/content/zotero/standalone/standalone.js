@@ -139,6 +139,13 @@ var ZoteroStandalone = new function()
 	}
 	
 	/**
+	 * Checks for updates
+	 */
+	this.checkForUpdates = function() {
+		window.open('chrome://mozapps/content/update/updates.xul', 'updateChecker', 'chrome,centerscreen');
+	}
+	
+	/**
 	 * Called before standalone window is closed
 	 */
 	this.onUnload = function() {

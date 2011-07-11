@@ -198,6 +198,10 @@
 									  accesskey="&helpReportErrors.accesskey;"
 									  label="&helpReportErrors.label;"
 									  command="cmd_zotero_reportErrors"/>
+							<menuitem id="checkForUpdates"
+									  accesskey="&helpCheckForUpdates.accesskey;"
+									  label="&helpCheckForUpdates.label;"
+									  oncommand="ZoteroStandalone.checkForUpdates();"/>
 							<menuitem id="aboutName"
 									  accesskey="&aboutProduct.accesskey;"
 									  label="&aboutProduct.label;"
