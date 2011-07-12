@@ -2677,7 +2677,6 @@ var ZoteroPane = new function()
 		}
 		
 		var menuitem = document.getElementById("zotero-context-add-to-current-note");
-		var showing = false;
 		if (menuitem){
 			var items = ZoteroPane_Local.getSelectedItems();
 			if (ZoteroPane_Local.itemsView.selection && ZoteroPane_Local.itemsView.selection.count==1
@@ -2685,7 +2684,6 @@ var ZoteroPane = new function()
 				&& window.gContextMenu.isTextSelected)
 			{
 				menuitem.hidden = false;
-				showing = true;
 			}
 			else
 			{
@@ -2698,7 +2696,6 @@ var ZoteroPane = new function()
 			if (window.gContextMenu.isTextSelected)
 			{
 				menuitem.hidden = false;
-				showing = true;
 			}
 			else
 			{
@@ -2710,7 +2707,6 @@ var ZoteroPane = new function()
 		if (menuitem) {
 			if (window.gContextMenu.onLink) {
 				menuitem.hidden = false;
-				showing = true;
 			}
 			else {
 				menuitem.hidden = true;
@@ -2723,7 +2719,6 @@ var ZoteroPane = new function()
 			// they can use the Firefox option to view and then import from there
 			if (window.gContextMenu.onImage) {
 				menuitem.hidden = false;
-				showing = true;
 			}
 			else {
 				menuitem.hidden = true;
@@ -2732,7 +2727,6 @@ var ZoteroPane = new function()
 		
 		// If Zotero is locked or library is read-only, disable menu items
 		var menu = document.getElementById('zotero-content-area-context-menu');
-		menu.hidden = !showing;
 		var disabled = Zotero.locked;
 		if (!disabled && self.collectionsView.selection && self.collectionsView.selection.count) {
 			var itemGroup = self.collectionsView._getItemAtRow(self.collectionsView.selection.currentIndex);
