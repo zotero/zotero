@@ -58,11 +58,15 @@
 		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane_Local.newCollection()"/>
 		<command id="cmd_zotero_newSavedSearch" oncommand="ZoteroPane_Local.newSearch()"/>
 		<command id="cmd_zotero_newStandaloneNote" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
+		<command id="cmd_zotero_newItemFromCurrentPage" oncommand="ZoteroPane_Local.addItemFromPage('temporaryPDFHack', event.shiftKey ? !Zotero.Prefs.get('automaticSnapshots') : null)"/>
 	</commandset>
 	
 	<popup id="contentAreaContextMenu">
 		<menu id="zotero-content-area-context-menu" label="Zotero">
 			<menupopup>
+				<menuitem id="zotero-context-item-from-page" class="menu-iconic"
+					label="&zotero.toolbar.newItemFromPage.label;"
+					command="cmd_zotero_newItemFromCurrentPage"/>
 				<menuitem id="zotero-context-add-to-current-note" class="menu-iconic"
 					label="&zotero.contextMenu.addTextToCurrentNote;" hidden="true"
 					oncommand="var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString(); var uri = event.currentTarget.ownerDocument.popupNode.ownerDocument.location.href; ZoteroPane_Local.addTextToNote(str, uri)"/>
@@ -135,7 +139,7 @@
 							</menu>
 						</menupopup>
 					</toolbarbutton>
-					<toolbarbutton id="zotero-tb-item-from-page" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItemFromPage.label;" oncommand="ZoteroPane_Local.addItemFromPage('temporaryPDFHack', event.shiftKey ? !Zotero.Prefs.get('automaticSnapshots') : null)"/>
+					<toolbarbutton id="zotero-tb-item-from-page" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItemFromPage.label;" command="cmd_zotero_newItemFromCurrentPage"/>
 					<toolbarbutton id="zotero-tb-lookup" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" oncommand="ZoteroPane_Local.openLookupWindow()"/>
 					<!--<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>-->
 					<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;" type="menu">
