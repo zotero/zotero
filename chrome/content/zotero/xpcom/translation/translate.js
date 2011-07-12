@@ -425,6 +425,10 @@ Zotero.Translate.Sandbox = {
 					var returnValue = translate._runHandler("select", items, newCallback);
 					if(returnValue !== undefined) {
 						// handler may have returned a value, which makes callback unnecessary
+						Zotero.debug("WARNING: Returning items from a select handler is deprecated. "+
+							"Please pass items as to the callback provided as the third argument to "+
+							"the handler.");
+						
 						returnedItems = returnValue;
 						haveAsyncHandler = false;
 					} else {
@@ -1520,7 +1524,7 @@ Zotero.Translate.Import.prototype.getTranslators = function() {
 		});
 		if(this._currentState === null) return this._foundTranslators;
 	} else {
-		Zotero.Translate.Base.prototype.getTranslators.call(this);
+		return Zotero.Translate.Base.prototype.getTranslators.call(this);
 	}
 }
 	
