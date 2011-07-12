@@ -462,7 +462,7 @@ Zotero.Utilities = {
 			throw ("Length not specified in Zotero.Utilities.ellipsize()");
 		}
 		if (str.length > len) {
-			return str.substr(0, len) + '...' + (countChars ? ' (' + str.length + ' chars)' : '');
+			return str.substr(0, len) + '…' + (countChars ? ' (' + str.length + ' chars)' : '');
 		}
 		return str;
 	},
