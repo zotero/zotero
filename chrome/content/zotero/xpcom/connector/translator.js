@@ -344,7 +344,7 @@ Zotero.Translators.CodeGetter.prototype.getCodeFor = function(i) {
 				|| (this._debugMode && (!translator.hasOwnProperty("code")
 				// or if in debug mode and the code we have came from the repo (which doesn't
 				// include test cases)
-				|| translator.codeSource === Zotero.Repo.SOURCE_REPO))) {
+				|| (Zotero.Repo && translator.codeSource === Zotero.Repo.SOURCE_REPO)))) {
 				// get next translator
 			translator.getCode(function() { me.getCodeFor(i+1) });
 			return;

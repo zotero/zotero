@@ -705,10 +705,7 @@ Zotero.Utilities = {
 			}
 			
 			try {
-				var xpathObject = rootDoc.evaluate(xpath, element, nsResolver, 
-					(Zotero.isFx
-						? Components.interfaces.nsIDOMXPathResult.ORDERED_NODE_ITERATOR_TYPE
-						: XPathResult.ORDERED_NODE_ITERATOR_TYPE),
+				var xpathObject = rootDoc.evaluate(xpath, element, nsResolver, 5, // 5 = ORDERED_NODE_ITERATOR_TYPE
 					null);
 			} catch(e) {
 				// rethrow so that we get a stack
