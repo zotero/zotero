@@ -170,7 +170,7 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 	var hiddenBrowser = Zotero.HTTP.processDocuments(test.url,
 		function(doc) {
 			me.runTest(test, doc, function(obj, test, status, message) {
-				Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+				if(hiddenBrowser) Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
 				testDoneCallback(obj, test, status, message);
 			});
 		},

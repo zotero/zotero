@@ -316,10 +316,12 @@ function haveTranslators(translators, type) {
 /**
  * Runs translator tests recursively, after translatorTestViews has been populated
  */
-function runTranslatorTests(type) {
+function runTranslatorTests(type, callback) {
 	if(translatorTestViewsToRun[type].length) {
 		var translatorTestView = translatorTestViewsToRun[type].shift();
-		translatorTestView.runTests(function() { runTranslatorTests(type) });
+		translatorTestView.runTests(function() { runTranslatorTests(type, callback) });
+	} else if(callback) {
+		callback();
 	}
 }
 
