@@ -45,7 +45,6 @@ var Zotero_Browser = new function() {
 	this.toggleMode = toggleMode;
 	this.toggleCollapsed = toggleCollapsed;
 	this.chromeLoad = chromeLoad;
-	this.chromeUnload = chromeUnload;
 	this.contentLoad = contentLoad;
 	this.contentHide = contentHide;
 	this.tabClose = tabClose;
@@ -110,8 +109,6 @@ var Zotero_Browser = new function() {
 		
 		window.addEventListener("load",
 			function(e) { Zotero_Browser.chromeLoad(e) }, false);
-		window.addEventListener("unload",
-			function(e) { Zotero_Browser.chromeUnload(e) }, false);
 		
 		ZoteroPane_Local.addReloadListener(reload);
 		reload();
@@ -322,26 +319,17 @@ var Zotero_Browser = new function() {
 	}
 	
 	/*
-	 * Called when chrome is unloaded
-	 */
-	function chromeUnload() {
-	}
-	
-	/*
 	 * An event handler called when a new document is loaded. Creates a new document
 	 * object, and updates the status of the capture icon
 	 */
 	function contentLoad(event) {
-		var isHTML = event.originalTarget instanceof HTMLDocument;
 		var doc = event.originalTarget;
-		var rootDoc = doc;
+		var isHTML = doc instanceof HTMLDocument;
+		var rootDoc = (doc instanceof HTMLDocument ? doc.defaultView.top.document : doc);
+		var browser = Zotero_Browser.tabbrowser.getBrowserForDocument(rootDoc);
+		if(!browser) return;
 		
 		if(isHTML) {
-			// get the appropriate root document to check which browser we're on
-			while(rootDoc.defaultView.frameElement) {
-				rootDoc = rootDoc.defaultView.frameElement.ownerDocument;
-			}
-			
 			// ignore blacklisted domains
 			try {
 				if(doc.domain) {
@@ -367,18 +355,6 @@ var Zotero_Browser = new function() {
 			}
 		}
 		catch (e) {}
-		
-		// Figure out what browser this contentDocument is associated with
-		var browser;
-		var browsers = Zotero_Browser.tabbrowser.browsers;
-		var nBrowsers = Zotero_Browser.tabbrowser.browsers.length;
-		for(var i=0; i<nBrowsers; i++) {
-			if(rootDoc == browsers[i].contentDocument) {
-				browser = browsers[i]
-				break;
-			}
-		}
-		if(!browser) return;
 		
 		// get data object
 		var tab = _getTabObject(browser);
@@ -406,43 +382,56 @@ var Zotero_Browser = new function() {
 		tab.detectTranslators(rootDoc, doc);
 		
 		// register metadata updated event
-		doc.addEventListener("ZoteroItemUpdated", contentLoad, false);
+		if(isHTML) {
+			var contentWin = doc.defaultView;
+			if(!contentWin.haveZoteroEventListener) {
+				contentWin.addEventListener("ZoteroItemUpdated", itemUpdated, false);
+				contentWin.haveZoteroEventListener = true;
+				Zotero.debug("event listener registered");
+			}
+		}
 	}
 
 	/*
 	 * called to unregister Zotero icon, etc.
 	 */
 	function contentHide(event) {
-		if(event.originalTarget instanceof HTMLDocument) {
-			// Get root document if this is a frameset
-			var doc = event.originalTarget;
-			var rootDoc = doc;
-			while(rootDoc.defaultView.frameElement) {
-				rootDoc = rootDoc.defaultView.frameElement.ownerDocument;
-			}
-			
-			// Figure out what browser this contentDocument is associated with
-			var browser;
-			for(var i=0; i<this.tabbrowser.browsers.length; i++) {
-				if(rootDoc == this.tabbrowser.browsers[i].contentDocument) {
-					browser = this.tabbrowser.browsers[i];
-					break;
-				}
-			}
-			
-			var tab = _getTabObject(browser);
-			if(!tab) return;
-			if(doc == tab.page.document || doc == rootDoc) {
-				// clear translator only if the page on which the pagehide event was called is
-				// either the page to which the translator corresponded, or the root document
-				// (the second check is probably paranoid, but won't hurt)
-				tab.clear();
-			}
-			
-			// update status
-			if(this.tabbrowser.selectedBrowser == browser) {
-				updateStatus();
-			}
+		var doc = event.originalTarget;
+		if(!(doc instanceof HTMLDocument)) return;
+	
+		var rootDoc = (doc instanceof HTMLDocument ? doc.defaultView.top.document : doc);
+		var browser = Zotero_Browser.tabbrowser.getBrowserForDocument(rootDoc);
+		if(!browser) return;
+		
+		var tab = _getTabObject(browser);
+		if(!tab) return;
+		
+		if(doc == tab.page.document || doc == rootDoc) {
+			// clear translator only if the page on which the pagehide event was called is
+			// either the page to which the translator corresponded, or the root document
+			// (the second check is probably paranoid, but won't hurt)
+			tab.clear();
+		}
+		
+		// update status
+		if(Zotero_Browser.tabbrowser.selectedBrowser == browser) {
+			updateStatus();
+		}
+	}
+	
+	/**
+	 * Called when item should be updated due to a DOM event
+	 */
+	function itemUpdated(event) {
+		try {
+		var doc = event.originalTarget;
+		var rootDoc = (doc instanceof HTMLDocument ? doc.defaultView.top.document : doc);
+		var browser = Zotero_Browser.tabbrowser.getBrowserForDocument(rootDoc);
+		var tab = _getTabObject(browser);
+		if(doc == tab.page.document || doc == rootDoc) tab.clear();
+		tab.detectTranslators(rootDoc, doc);
+		} catch(e) {
+			Zotero.debug(e);
 		}
 	}
 	
@@ -457,7 +446,6 @@ var Zotero_Browser = new function() {
 		tab.clear();
 		
 		// To execute if document object does not exist
-		_deleteTabObject(event.target.linkedBrowser);
 		toggleMode();
 	}
 	
@@ -562,19 +550,10 @@ var Zotero_Browser = new function() {
 	 */
 	function _getTabObject(browser) {
 		if(!browser) return false;
-		try {
-			var key = browser.getAttribute("zotero-key");
-			if(_browserData[key]) {
-				return _browserData[key];
-			}
-		} finally {
-			if(!key) {
-				var key = (new Date()).getTime();
-				browser.setAttribute("zotero-key", key);
-				return (_browserData[key] = new Zotero_Browser.Tab(browser));
-			}
+		if(!browser.zoteroBrowserData) {
+			browser.zoteroBrowserData = new Zotero_Browser.Tab(browser);
 		}
-		return false;
+		return browser.zoteroBrowserData;
 	}
 	
 	/*
