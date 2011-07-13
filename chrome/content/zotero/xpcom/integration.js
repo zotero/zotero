@@ -89,11 +89,7 @@ Zotero.Integration = new function() {
 		// destroy old pipe, if one exists
 		try {
 			if(_fifoFile.exists()) {
-				if(_fifoFile.isSpecial() && Zotero.IPC.safePipeWrite(_fifoFile.path, "Zotero test\n")) {
-					Zotero.debug("Integration pipe already open by another instance; not initializing integration pipe");
-					return;
-				}
-				
+				Zotero.IPC.safePipeWrite(_fifoFile.path, "Zotero shutdown\n");
 				_fifoFile.remove(false);
 			}
 		} catch (e) {
@@ -201,8 +197,6 @@ Zotero.Integration = new function() {
 	 */
 	function _parseIntegrationPipeCommand(string) {
 		if(string != "") {
-			if(string === "Zotero test\n") return;
-			
 			// exec command if possible
 			var parts = string.match(/^([^ \n]*) ([^ \n]*)(?: ([^\n]*))?\n?$/);
 			if(parts) {
