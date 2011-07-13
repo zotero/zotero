@@ -1391,7 +1391,7 @@ Zotero.Translate.Web.prototype.translate = function(libraryID, saveAttachments, 
 /**
  * Overload _translateHaveTranslator to send an RPC call if necessary
  */
-Zotero.Translate.Web.prototype._translateHaveTranslator = function() {
+Zotero.Translate.Web.prototype._translateTranslatorLoaded = function() {
 	if(this.translator[0].runMode === Zotero.Translator.RUN_MODE_IN_BROWSER) {
 		// begin process to run translator in browser
 		Zotero.Translate.Base.prototype._translateHaveTranslator.apply(this);
