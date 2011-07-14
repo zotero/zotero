@@ -302,11 +302,11 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 	if (params) {
 		if (checkParams) {
 			if (numParams == 0) {
-				throw ("Parameters provided for query without placeholders");
+				throw ("Parameters provided for query without placeholders [QUERY: " + sql + "]");
 			}
 			else if (numParams != params.length) {
 				throw ("Incorrect number of parameters provided for query "
-					+ "(" + params.length + ", expecting " + numParams + ")");
+					+ "(" + params.length + ", expecting " + numParams + ") [QUERY: " + sql + "]");
 			}
 		}
 		
