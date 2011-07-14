@@ -766,7 +766,7 @@ Zotero.Translate.Base.prototype = {
 		if(this._parentTranslator) {
 			this._parentTranslator.incrementAsyncProcesses();
 		} else {
-			Zotero.debug("Translate: Incremented asynchronous processes to "+this._runningAsyncProcesses, 4);
+			//Zotero.debug("Translate: Incremented asynchronous processes to "+this._runningAsyncProcesses, 4);
 			//Zotero.debug((new Error()).stack);
 		}
 	},
@@ -777,7 +777,7 @@ Zotero.Translate.Base.prototype = {
 	"decrementAsyncProcesses":function(by) {
 		this._runningAsyncProcesses -= (by ? by : 1);
 		if(!this._parentTranslator) {
-			Zotero.debug("Translate: Decremented asynchronous processes to "+this._runningAsyncProcesses, 4);
+			//Zotero.debug("Translate: Decremented asynchronous processes to "+this._runningAsyncProcesses, 4);
 			//Zotero.debug((new Error()).stack);
 		}
 		if(this._runningAsyncProcesses === 0) {
