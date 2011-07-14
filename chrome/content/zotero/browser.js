@@ -58,7 +58,6 @@ var Zotero_Browser = new function() {
 	this.statusImage = null;
 	this.isScraping = false;
 	
-	var _scrapePopupShowing = false;
 	var _browserData = new Object();
 	
 	var _blacklist = [
@@ -215,54 +214,6 @@ var Zotero_Browser = new function() {
 	function toggleCollapsed() {
 		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
 		tab.page.annotations.toggleCollapsed();
-	}
-	
-	/*
-	 * called to hide the collection selection popup
-	 */
-	function hidePopup(collectionID) {
-		_scrapePopupShowing = false;
-	}
-
-	/*
-	 * called to show the collection selection popup
-	 *
-	 * not currently used
-	 */
-	function showPopup(collectionID, parentElement) {
-		if(_scrapePopupShowing && parentElement.hasChildNodes()) {
-			return false;	// Don't dynamically reload popups that are already showing
-		}
-		_scrapePopupShowing = true;
-		parentElement.removeAllItems();
-		
-		if(collectionID == null) {	// show library
-			var newItem = document.createElement("menuitem");
-			newItem.setAttribute("label", Zotero.getString("pane.collections.library"));
-			newItem.setAttribute("class", "menuitem-iconic zotero-scrape-popup-library");
-			newItem.setAttribute("oncommand", 'Zotero_Browser.scrapeThisPage()');
-			parentElement.appendChild(newItem);
-		}
-		
-		var childrenList = Zotero.getCollections(collectionID);
-		for(var i = 0; i < childrenList.length; i++) {
-			if(childrenList[i].hasChildCollections()) {
-				var newItem = document.createElement("menu");
-				var subMenu = document.createElement("menupopup");
-				subMenu.setAttribute("onpopupshowing", 'Zotero_Browser.showPopup("'+childrenList[i].getID()+'", this)');
-				newItem.setAttribute("class", "menu-iconic zotero-scrape-popup-collection");
-				newItem.appendChild(subMenu);
-			} else {
-				var newItem = document.createElement("menuitem");
-				newItem.setAttribute("class", "menuitem-iconic zotero-scrape-popup-collection");
-			}
-			newItem.setAttribute("label", childrenList[i].getName());
-			newItem.setAttribute("oncommand", 'Zotero_Browser.scrapeThisPage("'+childrenList[i].getID()+'")');
-			
-			parentElement.appendChild(newItem);
-		}
-		
-		return true;
 	}
 	
 	/*
@@ -553,21 +504,6 @@ var Zotero_Browser = new function() {
 			browser.zoteroBrowserData = new Zotero_Browser.Tab(browser);
 		}
 		return browser.zoteroBrowserData;
-	}
-	
-	/*
-	 * Deletes the document object associated with a given browser window object
-	 */
-	function _deleteTabObject(browser) {
-		if(!browser) return false;
-		try {
-			var key = browser.getAttribute("zotero-key");
-			if(_browserData[key]) {
-				delete _browserData[key];
-				return true;
-			}
-		} finally {}
-		return false;
 	}
 	
 	/*
