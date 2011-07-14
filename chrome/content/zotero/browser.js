@@ -387,7 +387,6 @@ var Zotero_Browser = new function() {
 			if(!contentWin.haveZoteroEventListener) {
 				contentWin.addEventListener("ZoteroItemUpdated", itemUpdated, false);
 				contentWin.haveZoteroEventListener = true;
-				Zotero.debug("event listener registered");
 			}
 		}
 	}
