@@ -148,22 +148,44 @@ Zotero.Translate.SandboxManager.prototype = {
 			if(newExposedProps) newExposedProps[localKey] = "r";
 			
 			// magical XPCSafeJSObjectWrappers for sandbox
-			if(typeof object[localKey] === "function" || typeof object[localKey] === "object") {
-				if(attachTo == this.sandbox) Zotero.debug(localKey);
-				attachTo[localKey] = function() {
-					var args = (passAsFirstArgument ? [passAsFirstArgument] : []);
-					for(var i=0; i<arguments.length; i++) {
-						args.push((typeof arguments[i] === "object" && arguments[i] !== null)
-							|| typeof arguments[i] === "function"
-							? new XPCSafeJSObjectWrapper(arguments[i]) : arguments[i]);
+			var type = typeof object[localKey];
+			var isFunction = type === "function";
+			var isObject = typeof object[localKey] === "object";
+			if(isFunction || isObject) {
+				if(isFunction) {
+					if(Zotero.isFx4) {
+						if(passAsFirstArgument) {
+							attachTo[localKey] = object[localKey].bind(object, passAsFirstArgument);
+						} else {
+							attachTo[localKey] = object[localKey].bind(object);
+						}
+					} else {
+						attachTo[localKey] = function() {
+							if(passAsFirstArgument) {
+								var args = new Array(arguments.length+1);
+								args[0] = passAsFirstArgument;
+								var offset = 1;
+							} else {
+								var args = new Array(arguments.length);
+								var offset = 0;
+							}
+							
+							for(var i=0, nArgs=arguments.length; i<nArgs; i++) {
+								args[i+offset] = (((typeof arguments[i] === "object" && arguments[i] !== null)
+									|| typeof arguments[i] === "function") 
+									? new XPCSafeJSObjectWrapper(arguments[i]) : arguments[i]);
+							}
+							
+							return object[localKey].apply(object, args);
+						};
 					}
-					
-					return object[localKey].apply(object, args);
-				};
+				} else {
+					attachTo[localKey] = {};
+				}
 				
 				// attach members
 				if(!(object instanceof Components.interfaces.nsISupports)) {
-					this.importObject(object[localKey], passAsFirstArgument ? passAsFirstArgument : null, attachTo[localKey]);
+					this.importObject(object[localKey], passAsFirstArgument, attachTo[localKey]);
 				}
 			} else {
 				attachTo[localKey] = object[localKey];

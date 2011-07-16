@@ -39,7 +39,7 @@ Zotero.Server = new function() {
 	/**
 	 * initializes a very rudimentary web server
 	 */
-	this.init = function() {
+	this.init = function(port, bindAllAddr, maxConcurrentConnections) {
 		if (Zotero.HTTP.browserIsOffline()) {
 			Zotero.debug('Browser is offline -- not initializing HTTP server');
 			_registerOnlineObserver();
@@ -51,10 +51,10 @@ Zotero.Server = new function() {
 					.createInstance(Components.interfaces.nsIServerSocket);
 		try {
 			// bind to a random port on loopback only
-			serv.init(Zotero.Prefs.get('httpServer.port'), true, -1);
+			serv.init(port ? port : Zotero.Prefs.get('httpServer.port'), !bindAllAddr, -1);
 			serv.asyncListen(Zotero.Server.SocketListener);
 			
-			Zotero.debug("HTTP server listening on 127.0.0.1:"+serv.port);
+			Zotero.debug("HTTP server listening on "+(bindAllAddr ? "*": " 127.0.0.1")+":"+serv.port);
 		} catch(e) {
 			Zotero.debug("Not initializing HTTP server");
 		}
@@ -80,6 +80,20 @@ Zotero.Server = new function() {
 		}
 		
 		return response;
+	}
+	
+	/**
+	 * Parses a query string into a key => value object
+	 * @param {String} queryString Query string
+	 */
+	this.decodeQueryString = function(queryString) {
+		var splitData = queryString.split("&");
+		var decodedData = {};
+		for each(var variable in splitData) {
+			var splitIndex = variable.indexOf("=");
+			decodedData[decodeURIComponent(variable.substr(0, splitIndex))] = decodeURIComponent(variable.substr(splitIndex+1));
+		}
+		return decodedData;
 	}
 	
 	function _registerOnlineObserver() {
@@ -218,7 +232,7 @@ Zotero.Server.DataListener.prototype.onDataAvailable = function(request, context
 Zotero.Server.DataListener.prototype._headerFinished = function() {
 	this.headerFinished = true;
 	
-	Zotero.debug(this.header);
+	Zotero.debug(this.header, 5);
 	
 	const methodRe = /^([A-Z]+) ([^ \r\n?]+)(\?[^ \r\n]+)?/;
 	const contentTypeRe = /[\r\n]Content-Type: +([^ \r\n]+)/i;
@@ -233,33 +247,35 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 	}
 	
 	if(!method) {
-		this._requestFinished(Zotero.Server.generateResponse(400));
+		this._requestFinished(Zotero.Server.generateResponse(400, "text/plain", "Invalid method specified\n"));
 		return;
 	}
 	if(!Zotero.Server.Endpoints[method[2]]) {
-		this._requestFinished(Zotero.Server.generateResponse(404));
+		this._requestFinished(Zotero.Server.generateResponse(404, "text/plain", "No endpoint found\n"));
 		return;
 	}
+	this.pathname = method[2];
 	this.endpoint = Zotero.Server.Endpoints[method[2]];
+	this.query = method[3];
 	
 	if(method[1] == "HEAD" || method[1] == "OPTIONS") {
 		this._requestFinished(Zotero.Server.generateResponse(200));
 	} else if(method[1] == "GET") {
-		this._requestFinished(this._processEndpoint("GET", method[3]));
+		this._processEndpoint("GET", null);
 	} else if(method[1] == "POST") {
 		const contentLengthRe = /[\r\n]Content-Length: +([0-9]+)/i;
 		
 		// parse content length
 		var m = contentLengthRe.exec(this.header);
 		if(!m) {
-			this._requestFinished(Zotero.Server.generateResponse(400));
+			this._requestFinished(Zotero.Server.generateResponse(400, "text/plain", "Content-length not provided\n"));
 			return;
 		}
 		
 		this.bodyLength = parseInt(m[1]);
 		this._bodyData();
 	} else {
-		this._requestFinished(Zotero.Server.generateResponse(501));
+		this._requestFinished(Zotero.Server.generateResponse(501, "text/plain", "Method not implemented\n"));
 		return;
 	}
 }
@@ -297,29 +313,30 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 		var endpoint = new this.endpoint;
 		
 		// check that endpoint supports method
-		if(endpoint.supportedMethods.indexOf(method) === -1) {
-			this._requestFinished(Zotero.Server.generateResponse(400));
+		if(endpoint.supportedMethods && endpoint.supportedMethods.indexOf(method) === -1) {
+			this._requestFinished(Zotero.Server.generateResponse(400, "text/plain", "Endpoint does not support method\n"));
 			return;
 		}
 		
 		var decodedData = null;
 		if(postData && this.contentType) {
 			// check that endpoint supports contentType
-			if(endpoint.supportedDataTypes.indexOf(this.contentType) === -1) {
-				this._requestFinished(Zotero.Server.generateResponse(400));
+			var supportedDataTypes = endpoint.supportedDataTypes;
+			if(supportedDataTypes && supportedDataTypes.indexOf(this.contentType) === -1) {
+				this._requestFinished(Zotero.Server.generateResponse(400, "text/plain", "Endpoint does not support content-type\n"));
 				return;
 			}
 			
 			// decode JSON or urlencoded post data, and pass through anything else
-			if(this.contentType === "application/json") {
-				decodedData = JSON.parse(postData);
-			} else if(this.contentType === "application/x-www-urlencoded") {				
-				var splitData = postData.split("&");
-				decodedData = {};
-				for each(var variable in splitData) {
-					var splitIndex = variable.indexOf("=");
-					data[decodeURIComponent(variable.substr(0, splitIndex))] = decodeURIComponent(variable.substr(splitIndex+1));
+			if(supportedDataTypes && this.contentType === "application/json") {
+				try {
+					decodedData = JSON.parse(postData);
+				} catch(e) {
+					this._requestFinished(Zotero.Server.generateResponse(400, "text/plain", "Invalid JSON provided\n"));
+					return;
 				}
+			} else if(supportedDataTypes && this.contentType === "application/x-www-urlencoded") {				
+				decodedData = Zotero.Server.decodeQueryString(postData);
 			} else {
 				decodedData = postData;
 			}
@@ -332,10 +349,19 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 		}
 		
 		// pass to endpoint
-		endpoint.init(decodedData, sendResponseCallback);
+		if((endpoint.init.length ? endpoint.init.length : endpoint.init.arity) === 3) {
+			var url = {
+				"pathname":this.pathname,
+				"query":this.query ? Zotero.Server.decodeQueryString(this.query.substr(1)) : {}
+			};
+			
+			endpoint.init(url, decodedData, sendResponseCallback);
+		} else {
+			endpoint.init(decodedData, sendResponseCallback);
+		}
 	} catch(e) {
 		Zotero.debug(e);
-		this._requestFinished(Zotero.Server.generateResponse(500));
+		this._requestFinished(Zotero.Server.generateResponse(500), "text/plain", "An error occurred\n");
 		throw e;
 	}
 }
@@ -356,7 +382,7 @@ Zotero.Server.DataListener.prototype._requestFinished = function(response) {
 		intlStream.init(this.oStream, "UTF-8", 1024, "?".charCodeAt(0));
 		
 		// write response
-		Zotero.debug(response);
+		Zotero.debug(response, 5);
 		intlStream.writeString(response);
 	} finally {	
 		intlStream.close();
