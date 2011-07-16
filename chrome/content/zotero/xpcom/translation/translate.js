@@ -81,7 +81,7 @@ Zotero.Translate.Sandbox = {
 		 * @param {SandboxItem} An item created using the Zotero.Item class from the sandbox
 		 */
 		"_itemDone":function(translate, item) {
-			Zotero.debug("Translate: Saving item");
+			//Zotero.debug("Translate: Saving item");
 			
 			// warn if itemDone called after translation completed
 			if(translate._complete) {
@@ -1859,7 +1859,7 @@ Zotero.Translate.IO = {
 		}
 		
 		if(nodes.getElementsByTagName("parsererror").length) {
-			throw new Error("DOMParser error: loading data into data store failed");
+			throw "DOMParser error: loading data into data store failed";
 		}
 		
 		return nodes;
@@ -1901,8 +1901,14 @@ Zotero.Translate.IO.String.prototype = {
 		this.RDF = new Zotero.Translate.IO._RDFSandbox(this._dataStore);
 		
 		if(this._string.length) {
+			try {
+				var xml = Zotero.Translate.IO.parseDOMXML(this._string);
+			} catch(e) {
+				this._xmlInvalid = true;
+				throw e;
+			}
 			var parser = new Zotero.RDF.AJAW.RDFParser(this._dataStore);
-			parser.parse(Zotero.Translate.IO.parseDOMXML(this._string), this._uri);
+			parser.parse(xml, this._uri);
 			callback(true);
 		}
 	},
@@ -1931,19 +1937,23 @@ Zotero.Translate.IO.String.prototype = {
 			var oldPointer = this._stringPointer;
 			var lfIndex = this._string.indexOf("\n", this._stringPointer);
 			
-			if(lfIndex != -1) {
+			if(lfIndex !== -1) {
 				// in case we have a CRLF
 				this._stringPointer = lfIndex+1;
-				if(this._string.length > lfIndex && this._string[lfIndex-1] == "\r") {
+				if(this._string.length > lfIndex && this._string[lfIndex-1] === "\r") {
 					lfIndex--;
 				}
 				return this._string.substr(oldPointer, lfIndex-oldPointer);					
 			}
 			
-			var crIndex = this._string.indexOf("\r", this._stringPointer);
-			if(crIndex != -1) {
-				this._stringPointer = crIndex+1;
-				return this._string.substr(oldPointer, crIndex-oldPointer-1);
+			if(!this._noCR) {
+				var crIndex = this._string.indexOf("\r", this._stringPointer);
+				if(crIndex === -1) {
+					this._noCR = true;
+				} else {
+					this._stringPointer = crIndex+1;
+					return this._string.substr(oldPointer, crIndex-oldPointer-1);
+				}
 			}
 			
 			this._stringPointer = this._string.length;
@@ -1957,7 +1967,12 @@ Zotero.Translate.IO.String.prototype = {
 	
 	"_getXML":function() {
 		if(this._mode == "xml/dom") {
-			return Zotero.Translate.IO.parseDOMXML(this._string);
+			try {
+				return Zotero.Translate.IO.parseDOMXML(this._string);
+			} catch(e) {
+				this._xmlInvalid = true;
+				throw e;
+			}
 		} else {
 			return this._string.replace(/<\?xml[^>]+\?>/, "");
 		}
@@ -1965,9 +1980,13 @@ Zotero.Translate.IO.String.prototype = {
 	
 	"init":function(newMode, callback) {
 		this._stringPointer = 0;
+		this._noCR = undefined;
 		
 		this._mode = newMode;
-		if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1) {
+		if(newMode && (Zotero.Translate.IO.rdfDataModes.indexOf(newMode) !== -1
+				|| newMode.substr(0, 3) === "xml") && this._xmlInvalid) {
+			throw "XML known invalid";
+		} else if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1) {
 			this._initRDF(callback);
 		} else {
 			callback(true);

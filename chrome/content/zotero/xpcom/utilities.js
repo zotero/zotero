@@ -218,12 +218,17 @@ Zotero.Utilities = {
 	 * @type String
 	 */
 	"unescapeHTML":function(/**String*/ str) {
+		// If no tags, no need to unescape
+		if(str.indexOf("<") === -1 && str.indexOf("&") === -1) return str;
+		
 		if(Zotero.isFx) {
-			var nsISUHTML = Components.classes["@mozilla.org/feed-unescapehtml;1"]
-				.getService(Components.interfaces.nsIScriptableUnescapeHTML);
-			return nsISUHTML.unescape(str);
+			if(!Zotero.Utilities._nsISUHTML) {
+				Zotero.Utilities._nsISUHTML = Components.classes["@mozilla.org/feed-unescapehtml;1"]
+					.getService(Components.interfaces.nsIScriptableUnescapeHTML);
+			}
+			return Zotero.Utilities._nsISUHTML.unescape(str);
 		} else if(Zotero.isNode) {
-			var doc = require('jsdom').jsdom(str, null, {
+			/*var doc = require('jsdom').jsdom(str, null, {
 				"features":{
 					"FetchExternalResources":false,
 					"ProcessExternalResources":false,
@@ -232,7 +237,8 @@ Zotero.Utilities = {
 				}
 			});
 			if(!doc.documentElement) return str;
-			return doc.documentElement.textContent;
+			return doc.documentElement.textContent;*/
+			return Zotero.Utilities.cleanTags(str);
 		} else {
 			var node = document.createElement("div");
 			node.innerHTML = str;
@@ -847,7 +853,6 @@ Zotero.Utilities = {
 	 * Converts an item from toArray() format to content=json format used by the server
 	 */
 	"itemToServerJSON":function(item) {
-		const IGNORE_FIELDS = ["seeAlso", "attachments", "complete"];
 		var newItem = {};
 		
 		var typeID = Zotero.ItemTypes.getID(item.itemType);
@@ -857,9 +862,10 @@ Zotero.Utilities = {
 			typeID = Zotero.ItemTypes.getID(item.itemType);
 		}
 		
-		var fieldID;
+		var fieldID, itemFieldID;
 		for(var field in item) {
-			if(IGNORE_FIELDS.indexOf(field) !== -1) continue;
+			if(field === "complete" || field === "itemID" || field === "attachments"
+					|| field === "seeAlso") continue;
 			
 			var val = item[field];
 			
@@ -867,8 +873,9 @@ Zotero.Utilities = {
 				newItem[field] = val;
 			} else if(field === "creators") {
 				// normalize creators
-				var newCreators = newItem.creators = [];
-				for(var j in val) {
+				var n = val.length;
+				var newCreators = newItem.creators = new Array(n);
+				for(var j=0; j<n; j++) {
 					var creator = val[j];
 					
 					// Single-field mode
@@ -886,7 +893,6 @@ Zotero.Utilities = {
 					}
 					
 					// ensure creatorType is present and valid
-					newCreator.creatorType = "author";
 					if(creator.creatorType) {
 						if(Zotero.CreatorTypes.getID(creator.creatorType)) {
 							newCreator.creatorType = creator.creatorType;
@@ -894,13 +900,15 @@ Zotero.Utilities = {
 							Zotero.debug("Translate: Invalid creator type "+creator.creatorType+"; falling back to author");
 						}
 					}
+					if(!newCreator.creatorType) newCreator.creatorType = "author";
 					
-					newCreators.push(newCreator);
+					newCreators[j] = newCreator;
 				}
 			} else if(field === "tags") {
 				// normalize tags
-				var newTags = newItem.tags = [];
-				for(var j in val) {
+				var n = val.length;
+				var newTags = newItem.tags = new Array(n);
+				for(var j=0; j<n; j++) {
 					var tag = val[j];
 					if(typeof tag === "object") {
 						if(tag.tag) {
@@ -912,12 +920,13 @@ Zotero.Utilities = {
 							continue;
 						}
 					}
-					newTags.push({"tag":tag.toString(), "type":1})
+					newTags[j] = {"tag":tag.toString(), "type":1};
 				}
 			} else if(field === "notes") {
 				// normalize notes
-				var newNotes = newItem.notes = [];
-				for(var j in val) {
+				var n = val.length;
+				var newNotes = newItem.notes = new Array(n);
+				for(var j=0; j<n; j++) {
 					var note = val[j];
 					if(typeof note === "object") {
 						if(!note.note) {
@@ -926,9 +935,9 @@ Zotero.Utilities = {
 						}
 						note = note.note;
 					}
-					newNotes.push({"itemType":"note", "note":note.toString()});
+					newNotes[j] = {"itemType":"note", "note":note.toString()};
 				}
-			} else if(fieldID = Zotero.ItemFields.getID(field)) {
+			} else if((fieldID = Zotero.ItemFields.getID(field))) {
 				// if content is not a string, either stringify it or delete it
 				if(typeof val !== "string") {
 					if(val || val === 0) {
@@ -939,8 +948,7 @@ Zotero.Utilities = {
 				}
 				
 				// map from base field if possible
-				var itemFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, fieldID);
-				if(itemFieldID) {
+				if((itemFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, fieldID))) {
 					newItem[Zotero.ItemFields.getName(itemFieldID)] = val;
 					continue;	// already know this is valid
 				}
@@ -951,7 +959,7 @@ Zotero.Utilities = {
 				} else {
 					Zotero.debug("Translate: Discarded field "+field+": field not valid for type "+item.itemType, 3);
 				}
-			} else if(field !== "complete") {
+			} else {
 				Zotero.debug("Translate: Discarded unknown field "+field, 3);
 			}
 		}
