@@ -154,9 +154,8 @@ TranslatorTestView.prototype.unserialize = function(serializedData) {
 	this._supported.appendChild(document.createTextNode(this.isSupported ? "Yes" : "No"));
 	this._supported.className = this.isSupported ? "supported-yes" : "supported-no";
 	
-	this._translatorTester = serializedData;
 	this.canRun = false;
-	this.updateStatus(this._translatorTester);
+	this.updateStatus(serializedData);
 	
 	this._type = serializedData.type;
 	translatorTables[this._type].appendChild(this._row);
@@ -171,10 +170,10 @@ TranslatorTestView.prototype.serialize = function(serializedData) {
 		"output":this._outputView.getOutput(),
 		"label":this._label.textContent,
 		"isSupported":this.isSupported,
-		"pending":this._translatorTester.pending,
-		"failed":this._translatorTester.failed,
-		"succeeded":this._translatorTester.succeeded,
-		"unknown":this._translatorTester.unknown
+		"pending":parseInt(this._pending.textContent),
+		"failed":parseInt(this._failed.textContent),
+		"succeeded":parseInt(this._succeeded.textContent),
+		"unknown":parseInt(this._unknown.textContent)
 	};
 }
 
@@ -186,8 +185,13 @@ TranslatorTestView.prototype.updateStatus = function(obj, status) {
 		this._status.removeChild(this._status.firstChild);
 	}
 	
-	if(obj.pending.length || obj.succeeded.length || obj.failed.length || obj.unknown.length) {
-		if(obj.pending.length) {
+	var pending = typeof obj.pending === "object" ? obj.pending.length : obj.pending;
+	var succeeded = typeof obj.succeeded === "object" ? obj.succeeded.length : obj.succeeded;
+	var failed = typeof obj.failed === "object" ? obj.failed.length : obj.failed;
+	var unknown = typeof obj.unknown === "object" ? obj.unknown.length : obj.unknown;
+	
+	if(pending || succeeded || failed || unknown) {
+		if(pending) {
 			if(this.isRunning) {
 				this._status.className = "status-running";
 				this._status.textContent = "Running";
@@ -208,10 +212,10 @@ TranslatorTestView.prototype.updateStatus = function(obj, status) {
 			} else {
 				this._status.textContent = "Not Run";
 			}
-		} else if(obj.failed.length) {
+		} else if(failed) {
 			this._status.className = "status-failed";
 			this._status.textContent = "Failed";
-		} else if(obj.unknown.length) {
+		} else if(unknown) {
 			this._status.className = "status-unknown";
 			this._status.textContent = "Unknown";
 		} else {
@@ -223,10 +227,10 @@ TranslatorTestView.prototype.updateStatus = function(obj, status) {
 		this._status.textContent = "Untested";
 	}
 	
-	this._pending.textContent = obj.pending.length;
-	this._succeeded.textContent = obj.succeeded.length;
-	this._failed.textContent = obj.failed.length;
-	this._unknown.textContent = obj.unknown.length;
+	this._pending.textContent = pending;
+	this._succeeded.textContent = succeeded;
+	this._failed.textContent = failed;
+	this._unknown.textContent = unknown;
 }
 
 /**
