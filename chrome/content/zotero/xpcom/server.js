@@ -67,8 +67,6 @@ Zotero.Server = new function() {
 	 */
 	this.generateResponse = function (status, contentType, body) {
 		var response = "HTTP/1.0 "+status+" "+responseCodes[status]+"\r\n";
-		response += "Access-Control-Allow-Origin: org.zotero.zoteroconnectorforsafari-69x6c999f9\r\n";
-		response += "Access-Control-Allow-Methods: POST, GET, OPTIONS, HEAD\r\n";
 		
 		if(body) {
 			if(contentType) {
