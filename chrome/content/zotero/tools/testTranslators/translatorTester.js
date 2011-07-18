@@ -40,8 +40,8 @@ const Zotero_TranslatorTester_IGNORE_FIELDS = ["complete", "accessDate", "checkF
  *                           will be used.
  */
 Zotero_TranslatorTester = function(translator, type, debug) {
-	this._type = type;
-	this._translator = translator;
+	this.type = type;
+	this.translator = translator;
 	this._debug = debug ? debug : function(obj, a, b) { Zotero.debug(a, b) };
 	
 	this.tests = [];
@@ -122,7 +122,7 @@ Zotero_TranslatorTester.prototype.setTests = function(tests) {
 Zotero_TranslatorTester.prototype.runTests = function(testDoneCallback, recursiveRun) {
 	if(!recursiveRun) {
 		var w = (this.pending.length === 1) ? " test" : " tests"; 
-		this._debug(this, "TranslatorTester: Running "+this.pending.length+" "+w+" for "+this._translator.label);
+		this._debug(this, "TranslatorTester: Running "+this.pending.length+" "+w+" for "+this.translator.label);
 	}
 	
 	if(!this.pending.length) {
@@ -144,13 +144,13 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
 	var me = this;
 	
 	var callback = function(obj, test, status, message) {
-		me._debug(this, "TranslatorTester: "+me._translator.label+" Test "+testNumber+": "+status+" ("+message+")");
+		me._debug(this, "TranslatorTester: "+me.translator.label+" Test "+testNumber+": "+status+" ("+message+")");
 		me[status].push(test);
 		if(testDoneCallback) testDoneCallback(me, test, status, message);
 		me.runTests(testDoneCallback, true);
 	};
 	
-	if(this._type === "web") {
+	if(this.type === "web") {
 		this.fetchPageAndRunTest(test, callback);
 	} else {
 		this.runTest(test, null, callback);
@@ -190,13 +190,13 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
  */
 Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback) {
 	var me = this;
-	var translate = Zotero.Translate.newInstance(this._type);
+	var translate = Zotero.Translate.newInstance(this.type);
 	
-	if(this._type === "web") {
+	if(this.type === "web") {
 		translate.setDocument(doc);
-	} else if(this._type === "import") {
+	} else if(this.type === "import") {
 		translate.setString(test.input);
-	} else if(this._type === "search") {
+	} else if(this.type === "search") {
 		translate.setSearch(test.input);
 	}
 	
@@ -233,7 +233,7 @@ Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
 	translate.capitalizeTitles = false;
 	
 	// internal hack to call detect on this translator
-	translate._potentialTranslators = [this._translator];
+	translate._potentialTranslators = [this.translator];
 	translate._foundTranslators = [];
 	translate._currentState = "detect";
 	translate._detect();
@@ -246,14 +246,14 @@ Zotero_TranslatorTester.prototype._runTestTranslate = function(translate, transl
 	if(!translators.length) {
 		testDoneCallback(this, test, "failed", "Detection failed");
 		return;
-	} else if(this._type === "web" && (translators[0].itemType !== "multiple" && test.items.length > 1 ||
+	} else if(this.type === "web" && (translators[0].itemType !== "multiple" && test.items.length > 1 ||
 			test.items.length === 1 && translators[0].itemType !== test.items[0].itemType)) {
 				// this handles "items":"multiple" too, since the string has length 8
 		testDoneCallback(this, test, "failed", "Detection returned wrong item type");
 		return;
 	}
 	
-	translate.setTranslator(this._translator);
+	translate.setTranslator(this.translator);
 	translate.translate(false);
 };
 
@@ -305,9 +305,9 @@ Zotero_TranslatorTester.prototype.newTest = function(doc, testReadyCallback) {
 	var multipleMode = false;
 	
 	var me = this;
-	var translate = Zotero.Translate.newInstance(this._type);
+	var translate = Zotero.Translate.newInstance(this.type);
 	translate.setDocument(doc);
-	translate.setTranslator(this._translator);
+	translate.setTranslator(this.translator);
 	translate.setHandler("debug", this._debug);
 	translate.setHandler("select", function(obj, items, callback) {
 		multipleMode = true;
@@ -348,7 +348,7 @@ Zotero_TranslatorTester.prototype._createTest = function(translate, multipleMode
 		var items = translate.newItems;
 	}
 	
-	testReadyCallback(this, {"type":this._type, "url":translate.document.location.href,
+	testReadyCallback(this, {"type":this.type, "url":translate.document.location.href,
 		"items":items});
 };
 
