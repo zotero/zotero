@@ -121,13 +121,13 @@ Zotero_TranslatorTester.prototype.setTests = function(tests) {
  */
 Zotero_TranslatorTester.prototype.runTests = function(testDoneCallback, recursiveRun) {
 	if(!recursiveRun) {
-		var w = (this.pending.length === 1) ? " test" : " tests"; 
+		var w = (this.pending.length === 1) ? "test" : "tests"; 
 		this._debug(this, "TranslatorTester: Running "+this.pending.length+" "+w+" for "+this.translator.label);
 	}
 	
 	if(!this.pending.length) {
 		// always call testDoneCallback once if there are no tests
-		if(!recursiveRun && testDoneCallback) testDoneCallback(this, null, "unknown", "No tests present");
+		if(!recursiveRun && testDoneCallback) testDoneCallback(this, null, "unknown", "No tests present\n");
 		return;
 	}
 	
@@ -139,9 +139,12 @@ Zotero_TranslatorTester.prototype.runTests = function(testDoneCallback, recursiv
  * @param {Function} testDoneCallback A callback to be executed each time a test is complete
  */
 Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallback) {
+	
 	var test = this.pending.shift();
 	var testNumber = this.tests.length-this.pending.length;
 	var me = this;
+	
+	this._debug(this, "\nTranslatorTester: Running "+this.translator.label+" Test "+testNumber);
 	
 	var callback = function(obj, test, status, message) {
 		me._debug(this, "TranslatorTester: "+me.translator.label+" Test "+testNumber+": "+status+" ("+message+")");
@@ -151,6 +154,7 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
 	};
 	
 	if(this.type === "web") {
+		this._debug(this, "TranslatorTester: Translating "+test.url);
 		this.fetchPageAndRunTest(test, callback);
 	} else {
 		this.runTest(test, null, callback);
@@ -368,11 +372,11 @@ Zotero_TranslatorTester.prototype._compare = function(i, j) {
 			else
 				return false;
 		} else {
-			this._debug(this, "i is array, j is not");
+			this._debug(this, "TranslatorTester: i is array, j is not");
 			return false;
 		}
 	} else if (Object.prototype.toString.apply(j) === '[object Array]') {
-		this._debug(this, "j is array, i is not");
+		this._debug(this, "TranslatorTester: j is array, i is not");
 		return false;
 	}
 
@@ -381,7 +385,7 @@ Zotero_TranslatorTester.prototype._compare = function(i, j) {
 		return true;
 	} else {
 		this._debug(this, JSON.stringify({i:i, j:j}));
-		this._debug(this, "Items don't match");
+		this._debug(this, "TranslatorTester: Items don't match");
 		return false;
 	}
 };
@@ -411,7 +415,7 @@ Zotero_TranslatorTester.prototype._objectCompare = function(x, y) {
 				case 'function':
 					if (typeof(x[p])=='undefined' 
 						|| (y[p].toString() != x[p].toString())) {
-						this._debug(this, "Function "+p+" defined in y, not in x, or definitions differ");
+						this._debug(this, "TranslatorTester: Function "+p+" defined in y, not in x, or definitions differ");
 						return false;
 					}
 					break;
@@ -419,19 +423,19 @@ Zotero_TranslatorTester.prototype._objectCompare = function(x, y) {
 					if (y[p] != x[p] && x[p] !== false) {	// special exemption: x (test item)
 															// can have a property set to false
 															// and we will ignore it here
-						this._debug(this, "Param "+p+" differs: " + JSON.stringify({x:x[p], y:y[p]}));
+						this._debug(this, "TranslatorTester: Param "+p+" differs: " + JSON.stringify({x:x[p], y:y[p]}));
 						return false;
 					}
 			}
 		} else if(x[p] || x[p] === 0) { 
-			this._debug(this, "Param "+p+" true in x, not in y");
+			this._debug(this, "TranslatorTester: Param "+p+" true in x, not in y");
 			return false;
 		}
 	}
 
 	for(p in x) {
 		if((x[p] || x[p] === 0) && typeof(y[p])=='undefined') {
-			this._debug(this, "Param "+p+" in x not defined in y");
+			this._debug(this, "TranslatorTester: Param "+p+" in x not defined in y");
 			return false;
 		}
 	}
