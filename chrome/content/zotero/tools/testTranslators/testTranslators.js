@@ -321,7 +321,9 @@ function init() {
 						var testView = translatorTestViewsToRun[type][i];
 						testView.updateStatus(testView._translatorTester, "pending");
 					}
-					runTranslatorTests(type);
+					for(var i=0; i<NUM_CONCURRENT_TESTS; i++) {
+						runTranslatorTests(type);
+					}
 				}
 			}, false);
 			h1.appendChild(runAll);
