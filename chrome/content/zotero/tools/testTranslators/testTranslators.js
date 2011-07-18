@@ -26,12 +26,14 @@
 const NUM_CONCURRENT_TESTS = 6;
 const TRANSLATOR_TYPES = ["Web", "Import", "Export", "Search"];
 const TABLE_COLUMNS = ["Translator", "Supported", "Status", "Pending", "Succeeded", "Failed", "Unknown"];
-var translatorTables = {};
-var translatorTestViewsToRun = {};
-var translatorBox;
-var outputBox;
-var allOutputView;
-var currentOutputView;
+var translatorTables = {},
+	translatorTestViews = {},
+	translatorTestViewsToRun = {},
+	translatorBox,
+	outputBox,
+	allOutputView,
+	currentOutputView,
+	viewerMode = true;
 
 /**
  * Handles adding debug output to the output box
@@ -48,7 +50,7 @@ var OutputView = function(el) {
  */
 OutputView.prototype.setDisplayed = function(isDisplayed) {
 	this.isDisplayed = isDisplayed;
-	if(this.isDisplayed) outputBox.textContent = this._output.join("\n\n");
+	if(this.isDisplayed) outputBox.textContent = this._output.join("\n");
 	if(this._el) this._el.className = (isDisplayed ? "output-displayed" : "output-hidden");
 	currentOutputView = this;
 }
@@ -58,7 +60,14 @@ OutputView.prototype.setDisplayed = function(isDisplayed) {
  */
 OutputView.prototype.addOutput = function(msg, level) {
 	this._output.push(msg);
-	if(this.isDisplayed) outputBox.textContent = this._output.join("\n\n");
+	if(this.isDisplayed) outputBox.textContent = this._output.join("\n");
+}
+
+/**
+ * Gets output to the output view
+ */
+OutputView.prototype.getOutput = function() {
+	return this._output.join("\n");
 }
 
 /**
@@ -66,21 +75,14 @@ OutputView.prototype.addOutput = function(msg, level) {
  * @constructor
  */
 var TranslatorTestView = function(translator, type) {
-	this._translator = translator;
-	this._type = type;
-	
-	var row = document.createElement("tr");
+	var row = this._row = document.createElement("tr");
 	
 	// Translator
 	this._label = document.createElement("td");
-	this._label.appendChild(document.createTextNode(translator.label));
 	row.appendChild(this._label);
 	
 	// Supported
 	this._supported = document.createElement("td");
-	var isSupported = translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER;
-	this._supported.appendChild(document.createTextNode(isSupported ? "Yes" : "No"));
-	this._supported.className = isSupported ? "supported-yes" : "supported-no";
 	row.appendChild(this._supported);
 	
 	// Status
@@ -103,12 +105,9 @@ var TranslatorTestView = function(translator, type) {
 	this._unknown = document.createElement("td");
 	row.appendChild(this._unknown);
 	
-	// append to table
-	translatorTables[type].appendChild(row);
-	
 	// create output view and debug function
-	var outputView = new OutputView(row);
-	var debug = function(obj, msg, level) {
+	var outputView = this._outputView = new OutputView(row);
+	this._debug = function(obj, msg, level) {
 		outputView.addOutput(msg, level);
 		allOutputView.addOutput(msg, level);
 	}
@@ -123,10 +122,60 @@ var TranslatorTestView = function(translator, type) {
 	}, false);
 	
 	// create translator tester and update status based on what it knows
-	this._translatorTester = new Zotero_TranslatorTester(translator, type, debug);
-	this.updateStatus(this._translatorTester);
-	this.hasTests = !!this._translatorTester.tests.length;
 	this.isRunning = false;
+}
+
+/**
+ * Initializes TranslatorTestView given a translator and its type
+ */
+TranslatorTestView.prototype.initWithTranslatorAndType = function(translator, type) {
+	this._label.appendChild(document.createTextNode(translator.label));
+	
+	this.isSupported = translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER;
+	this._supported.appendChild(document.createTextNode(this.isSupported ? "Yes" : "No"));
+	this._supported.className = this.isSupported ? "supported-yes" : "supported-no";
+	
+	this._translatorTester = new Zotero_TranslatorTester(translator, type, this._debug);
+	this.canRun = !!this._translatorTester.tests.length;
+	this.updateStatus(this._translatorTester);
+	
+	this._type = type;
+	translatorTables[this._type].appendChild(this._row);
+}
+
+/**
+ * Initializes TranslatorTestView given a JSON-ified translatorTester
+ */
+TranslatorTestView.prototype.unserialize = function(serializedData) {
+	this._outputView.addOutput(serializedData.output);
+	this._label.appendChild(document.createTextNode(serializedData.label));
+	
+	this.isSupported = serializedData.isSupported;
+	this._supported.appendChild(document.createTextNode(this.isSupported ? "Yes" : "No"));
+	this._supported.className = this.isSupported ? "supported-yes" : "supported-no";
+	
+	this._translatorTester = serializedData;
+	this.canRun = false;
+	this.updateStatus(this._translatorTester);
+	
+	this._type = serializedData.type;
+	translatorTables[this._type].appendChild(this._row);
+}
+
+/**
+ * Initializes TranslatorTestView given a JSON-ified translatorTester
+ */
+TranslatorTestView.prototype.serialize = function(serializedData) {
+	return {
+		"type":this._type,
+		"output":this._outputView.getOutput(),
+		"label":this._label.textContent,
+		"isSupported":this.isSupported,
+		"pending":this._translatorTester.pending,
+		"failed":this._translatorTester.failed,
+		"succeeded":this._translatorTester.succeeded,
+		"unknown":this._translatorTester.unknown
+	};
 }
 
 /**
@@ -137,7 +186,7 @@ TranslatorTestView.prototype.updateStatus = function(obj, status) {
 		this._status.removeChild(this._status.firstChild);
 	}
 	
-	if(obj.tests.length) {
+	if(obj.pending.length || obj.succeeded.length || obj.failed.length || obj.unknown.length) {
 		if(obj.pending.length) {
 			if(this.isRunning) {
 				this._status.className = "status-running";
@@ -145,7 +194,7 @@ TranslatorTestView.prototype.updateStatus = function(obj, status) {
 			} else if(status && status === "pending") {
 				this._status.className = "status-pending";
 				this._status.textContent = "Pending";
-			} else {
+			} else if(this.canRun) {
 				// show link to start
 				var me = this;
 				var a = document.createElement("a");
@@ -156,6 +205,8 @@ TranslatorTestView.prototype.updateStatus = function(obj, status) {
 				}, false);
 				a.textContent = "Run";
 				this._status.appendChild(a);
+			} else {
+				this._status.textContent = "Not Run";
 			}
 		} else if(obj.failed.length) {
 			this._status.className = "status-failed";
@@ -203,7 +254,11 @@ TranslatorTestView.prototype.runTests = function(doneCallback) {
 /**
  * Called when loaded
  */
-function load(event) {	
+function load(event) {
+	try {
+		viewerMode = !Zotero;
+	} catch(e) {};
+	
 	if(window.chrome || window.safari) {
 		// initialize injection
 		Zotero.initInject();
@@ -253,22 +308,24 @@ function init() {
 		var h1 = document.createElement("h1");
 		h1.appendChild(document.createTextNode(displayType+" Translators "));
 		
-		// create "run all"
-		var runAll = document.createElement("a");
-		runAll.href = "#";
-		runAll.appendChild(document.createTextNode("(Run)"));
-		runAll.addEventListener("click", new function() {
-			var type = translatorType;
-			return function(e) {
-				e.preventDefault();
-				for(var i in translatorTestViewsToRun[type]) {
-					var testView = translatorTestViewsToRun[type][i];
-					testView.updateStatus(testView._translatorTester, "pending");
+		if(!viewerMode) {
+			// create "run all"
+			var runAll = document.createElement("a");
+			runAll.href = "#";
+			runAll.appendChild(document.createTextNode("(Run)"));
+			runAll.addEventListener("click", new function() {
+				var type = translatorType;
+				return function(e) {
+					e.preventDefault();
+					for(var i in translatorTestViewsToRun[type]) {
+						var testView = translatorTestViewsToRun[type][i];
+						testView.updateStatus(testView._translatorTester, "pending");
+					}
+					runTranslatorTests(type);
 				}
-				runTranslatorTests(type);
-			}
-		}, false);
-		h1.appendChild(runAll);
+			}, false);
+			h1.appendChild(runAll);
+		}
 		
 		translatorBox.appendChild(h1);
 		
@@ -290,24 +347,74 @@ function init() {
 		translatorBox.appendChild(translatorTable);
 		
 		// get translators, with code for unsupported translators
-		Zotero.Translators.getAllForType(translatorType, new function() {
-			var type = translatorType;
-			return function(translators) {
-				haveTranslators(translators, type);
-			}
-		}, true);
+		if(!viewerMode) {
+			Zotero.Translators.getAllForType(translatorType, new function() {
+				var type = translatorType;
+				return function(translators) {
+					haveTranslators(translators, type);
+				}
+			}, true);
+		}
 	}
+	
+	if(viewerMode) {
+		// if no Zotero object, try to unserialize data
+		var req = new XMLHttpRequest();
+		req.open("GET", "testResults.json", true);
+		req.overrideMimeType("text/plain");
+		req.onreadystatechange = function(e) {
+			if(req.readyState != 4) return;
+
+			if(req.responseText) {	// success; unserialize
+				var data = JSON.parse(req.responseText);
+				for(var i=0, n=data.length; i<n; i++) {
+					var translatorTestView = new TranslatorTestView();
+					translatorTestView.unserialize(data[i]);
+				}
+			} else {
+				jsonNotFound("XMLHttpRequest returned "+req.status);
+			}
+		};
+		
+		try {
+			req.send();
+		} catch(e) {
+			jsonNotFound(e.toString());
+		}
+	} else {
+		// create "serialize" link at bottom
+		var lastP = document.createElement("p");
+		var serialize = document.createElement("a");
+		serialize.href = "#";
+		serialize.appendChild(document.createTextNode("Serialize Results"));
+		serialize.addEventListener("click", serializeAll, false);
+		lastP.appendChild(serialize);
+		translatorBox.appendChild(lastP);
+	}
+}
+
+
+/**
+ * Indicates no JSON file could be found.
+ */
+function jsonNotFound(str) {
+	var body = document.body;
+	while(body.hasChildNodes()) body.removeChild(body.firstChild);
+	body.textContent = "testResults.json could not be loaded ("+str+").";
 }
 
 /**
  * Called after translators are returned from main script
  */
 function haveTranslators(translators, type) {
+	translatorTestViews[type] = [];
 	translatorTestViewsToRun[type] = [];
 	
 	for(var i in translators) {
-		var translatorTestView = new TranslatorTestView(translators[i], type);
-		if(translatorTestView.hasTests) {
+		var translatorTestView = new TranslatorTestView();
+		translatorTestView.initWithTranslatorAndType(translators[i], type);
+		translatorTestViews[type].push(translatorTestView);
+		if(translatorTestView.canRun) {
 			translatorTestViewsToRun[type].push(translatorTestView);
 		}
 	}
@@ -323,6 +430,22 @@ function runTranslatorTests(type, callback) {
 	} else if(callback) {
 		callback();
 	}
+}
+
+/**
+ * Serializes all run translator tests
+ */
+function serializeAll(e) {
+	var serializedData = [];
+	for(var i in translatorTestViews) {
+		var n = translatorTestViews[i].length;
+		for(var j=0; j<n; j++) {
+			serializedData.push(translatorTestViews[i][j].serialize());
+		}
+	}
+	
+	document.location.href = "data:application/octet-stream,"+encodeURIComponent(JSON.stringify(serializedData, null, "\t"));
+	e.preventDefault();
 }
 
 window.addEventListener("load", load, false);
