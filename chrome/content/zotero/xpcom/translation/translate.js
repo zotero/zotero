@@ -87,19 +87,28 @@ Zotero.Translate.Sandbox = {
 			if(translate._complete) {
 				Zotero.debug("Translate: WARNING: Zotero.Item#complete() called after Zotero.done(); please fix your code", 2);
 			}
+				
+			const allowedObjects = ["complete", "attachments", "seeAlso", "creators", "tags", "notes"];
+			
+			for(var i in item) {
+				var val = item[i];
+				var type = typeof val;
+				if(!val && val !== 0) {
+					// remove null, undefined, and false properties, and convert objects to strings
+					delete item[i];
+				} else if(type === "string") {
+					// trim strings
+					item[i] = val.trim();
+				} else if((type === "object" || type === "xml") && allowedObjects.indexOf(i) === -1) {
+					// convert things that shouldn't be objecst to objects
+					translate._debug("Translate: WARNING: typeof "+i+" is "+type+"; converting to string");
+					item[i] = val.toString();
+				}
+			}
 			
 			// if we're not supposed to save the item or we're in a child translator,
 			// just return the item array
 			if(translate._libraryID === false || translate._parentTranslator) {
-				// remove null, undefined, and false properties
-				for(var i in item) {
-					if(!item[i] && item[i] !== 0) {
-						delete item[i];
-					} else if(typeof item[i] === "string") {
-						item[i] = item[i].trim();
-					}
-				}
-				
 				translate.newItems.push(item);
 				translate._runHandler("itemDone", item, item);
 				return;
