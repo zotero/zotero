@@ -1,7 +1,7 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2009 Center for History and New Media
+    Copyright © 2011 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
     
@@ -22,8 +22,7 @@
     
     ***** END LICENSE BLOCK *****
 */
-
-const CONNECTOR_SERVER_API_VERSION = 2;
+const CONNECTOR_API_VERSION = 2;
 
 Zotero.Server.Connector = function() {};
 Zotero.Server.Connector._waitingForSelection = {};
@@ -407,3 +406,8 @@ Zotero.Server.Connector.Ping.prototype = {
 		sendResponseCallback(200);
 	}
 }
+
+
+// XXX For compatibility with older connectors; to be removed
+Zotero.Server.Endpoints["/translate/list"] = Zotero.Server.Connector.GetTranslators;
+Zotero.Server.Endpoints["/translate/save"] = Zotero.Server.Connector.SavePage;

@@ -67,6 +67,10 @@ Zotero.Server = new function() {
 	 */
 	this.generateResponse = function (status, contentType, body) {
 		var response = "HTTP/1.0 "+status+" "+responseCodes[status]+"\r\n";
+		if(!Zotero.isServer) {
+			response += "X-Zotero-Version: "+Zotero.version+"\r\n";
+			response += "X-Zotero-Connector-API-Version: "+CONNECTOR_API_VERSION+"\r\n";
+		}
 		
 		if(body) {
 			if(contentType) {

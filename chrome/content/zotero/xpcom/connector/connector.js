@@ -25,7 +25,7 @@
 
 Zotero.Connector = new function() {
 	const CONNECTOR_URI = "http://127.0.0.1:23119/";
-	const CONNECTOR_SERVER_API_VERSION = 1;
+	const CONNECTOR_API_VERSION = 2;
 	
 	this.isOnline = null;
 	
@@ -69,8 +69,18 @@ Zotero.Connector = new function() {
 				}
 				
 				if(Zotero.Connector.EXCEPTION_CODES.indexOf(req.status) !== -1) {
-					Zotero.debug("Connector: Method "+method+" failed");
+					Zotero.debug("Connector: Method "+method+" failed with status "+req.status);
 					if(callback) callback(false, req.status);
+					
+					// Check for incompatible version
+					if(req.status === 404 || req.status === 412) {
+						if(Zotero.Connector_Browser && Zotero.Connector_Browser.onIncompatibleStandaloneVersion) {
+							var standaloneVersion = req.getResponseHeader("X-Zotero-Version");
+							Zotero.Connector_Browser.onIncompatibleStandaloneVersion(Zotero.version, standaloneVersion);
+							throw "Connector: Version mismatch: Connector version "+Zotero.version
+								+", Standalone version "+(standaloneVersion ? standaloneVersion : "<unknown>");
+						}
+					}
 				} else {
 					Zotero.debug("Connector: Method "+method+" succeeded");
 					var val = null;
@@ -91,6 +101,10 @@ Zotero.Connector = new function() {
 		var uri = CONNECTOR_URI+"connector/"+method;
 		
 		Zotero.HTTP.doPost(uri, JSON.stringify(data),
-			newCallback, {"Content-Type":"application/json"});
+			newCallback, {
+				"Content-Type":"application/json",
+				"X-Zotero-Version":Zotero.version,
+				"X-Zotero-Connector-API-Version":CONNECTOR_API_VERSION
+		});
 	}
 }
