@@ -1,0 +1,285 @@
+/*
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2011 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+*/
+
+/**
+ * Manage cookies in a sandboxed fashion
+ *
+ * @constructor
+ * @param {browser} browser Hidden browser object
+ * @param {String|nsIURI} uri URI of page to manage cookies for (cookies for domains that are not 
+ *                     subdomains of this URI are ignored)
+ * @param {String} cookieData Cookies with which to initiate the sandbox
+ */
+Zotero.CookieSandbox = function(browser, uri, cookieData) {
+	this._webNav = browser.webNavigation;
+	this._browser = browser;
+	this._watchedBrowsers = [browser];
+	this._watchedXHRs = [];
+	this._observerService = Components.classes["@mozilla.org/observer-service;1"].
+		getService(Components.interfaces.nsIObserverService);
+	
+	if(uri instanceof Components.interfaces.nsIURI) {
+		this.URI = uri;
+	} else {
+		this.URI = Components.classes["@mozilla.org/network/io-service;1"]
+			.getService(Components.interfaces.nsIIOService)
+			.newURI(uri, null, null);
+	}
+	
+	this._cookies = {};
+	if(cookieData) {
+		var splitCookies = cookieData.split(/; ?/);
+		for each(var cookie in splitCookies) {
+			var key = cookie.substr(0, cookie.indexOf("="));
+			var value = cookie.substr(cookie.indexOf("=")+1);
+			this._cookies[key] = value;
+		}
+	}
+	
+	// register with observer
+	Zotero.CookieSandbox.Observer.register(this);
+}
+
+Zotero.CookieSandbox.prototype = {
+	/**
+	 * Check whether we track a browser for this document
+	 */
+	"isDocumentTracked":function(doc) {	
+		var i = this._watchedBrowsers.length;
+		while(i--) {
+			var browser = this._watchedBrowsers[i];
+			if(doc == browser.contentDocument) return true;
+		}
+		return false;
+	},
+	
+	/**
+	 * Check whether we track an XHR for this document
+	 */
+	"isXHRTracked":function(xhr) {
+		return this._watchedXHRs.indexOf(xhr) !== -1;
+	},
+	
+	/**
+	 * Adds cookies to this CookieSandbox based on a cookie header
+	 * @param {String} cookieString;
+	 */
+	"addCookiesFromHeader":function(cookieString) {
+		var cookies = cookieString.split("\n");
+		for(var i=0, n=cookies.length; i<n; i++) {
+			var cookieInfo = cookies[i].split(/; ?/);
+			var secure = false;
+			
+			for(var j=1, m=cookieInfo.length; j<m; j++) {
+				if(cookieInfo[j].substr(0, cookieInfo[j].indexOf("=")).toLowerCase() === "secure") {
+					secure = true;
+					break;
+				}
+			}
+			
+			if(!secure) {
+				var key = cookieInfo[0].substr(0, cookieInfo[0].indexOf("="));
+				var value = cookieInfo[0].substr(cookieInfo[0].indexOf("=")+1);
+				this._cookies[key] = value;
+			}
+		}
+	},
+	
+	/**
+	 * Attach CookieSandbox to a specific XMLHttpRequest
+	 * @param {XMLHttpRequest} xhr
+	 */
+	"attachToBrowser":function(browser) {
+		this._watchedBrowsers.push(browser);
+	},
+	
+	/**
+	 * Attach CookieSandbox to a specific XMLHttpRequest
+	 * @param {XMLHttpRequest} xhr
+	 */
+	"attachToXHR": function(xhr) {
+		this._watchedXHRs.push(xhr);
+	},
+	
+	/**
+	 * Destroys this CookieSandbox (intended to be executed when the browser is destroyed)
+	 */
+	"destroy": function() {
+		// unregister with observer
+		Zotero.CookieSandbox.Observer.unregister(this);
+	}
+}
+
+Zotero.CookieSandbox.prototype.__defineGetter__("cookieString", function() {
+	return [key+"="+this._cookies[key] for(key in this._cookies)].join("; ");
+});
+
+/**
+ * nsIObserver implementation for adding, clearing, and slurping cookies
+ */
+Zotero.CookieSandbox.Observer = new function() {
+	const observeredTopics = ["http-on-examine-response", "http-on-modify-request", "quit-application"];
+	
+	var observerService = Components.classes["@mozilla.org/observer-service;1"].
+			getService(Components.interfaces.nsIObserverService),
+		observing = false,
+		cookieSandboxes = [];
+	
+	/**
+	 * Registers cookie manager and observer, if necessary
+	 */
+	this.register = function(CookieSandbox) {
+		cookieSandboxes.push(CookieSandbox);
+		
+		if(!observing) {
+			Zotero.debug("CookieSandbox: Registering observers");
+			for each(var topic in observeredTopics) observerService.addObserver(this, topic, false);
+			observing = true;
+		}
+	}
+	
+	/**
+	 * Unregisters cookie manager and observer
+	 */
+	this.unregister = function(CookieSandbox) {
+		// remove cookie manager from list
+		cookieSandboxes.splice(cookieSandboxes.indexOf(CookieSandbox), 1);
+		
+		// remove observer if this is the last and this is not translation-server
+		if(cookieSandboxes.length === 0 && !Zotero.isServer) {
+			Zotero.debug("CookieSandbox: Unregistering observers");
+			for each(var topic in observeredTopics) observerService.removeObserver(this, topic);
+			observing = false;
+		}
+	}
+	
+	/**
+	 * Implements nsIObserver to watch for new cookies and to add sandboxed cookies
+	 */
+	this.observe = function(channel, topic) {
+		if(topic == "quit-application" && cookieSandboxes.length) {
+			Zotero.debug("WARNING: A CookieSandbox for "+cookieSandboxes[0].URI.spec+" was still open on shutdown");
+			return;
+		}
+		
+		channel.QueryInterface(Components.interfaces.nsIHttpChannel);
+		var trackedBy, tested, doc, xhr,
+			channelURI = channel.URI.spec,
+			notificationCallbacks = channel.notificationCallbacks;
+		
+		// try the document
+		try {
+			doc = notificationCallbacks.getInterface(Components.interfaces.nsIDOMWindow).top.document;
+		} catch(e) {}
+		if(doc) {
+			tested = true;
+			for(var i=0, n=cookieSandboxes.length; i<n; i++) {
+				if(cookieSandboxes[i].isDocumentTracked(doc)) {
+					trackedBy = cookieSandboxes[i];
+				}
+			}
+		} else {
+			// try the document for the load group
+			try {
+				doc = channel.loadGroup.notificationCallbacks.getInterface(Components.interfaces.nsIDOMWindow).top.document;
+			} catch(e) {}
+			if(doc) {
+				tested = true;
+				for(var i=0, n=cookieSandboxes.length; i<n; i++) {
+					if(cookieSandboxes[i].isDocumentTracked(doc)) {
+						trackedBy = cookieSandboxes[i];
+					}
+				}
+			} else {
+				// try getting as an XHR
+				try {
+					xhr = notificationCallbacks.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
+				} catch(e) {}
+				if(xhr) {
+					tested = true;
+					for(var i=0, n=cookieSandboxes.length; i<n; i++) {
+						if(cookieSandboxes[i].isXHRTracked(xhr)) {
+							trackedBy = cookieSandboxes[i];
+						}
+					}
+				}
+			}
+		}
+		
+		// isTracked is now either true, false, or null
+		// trackedBy => we should manage cookies for this request
+		// tested && !trackedBy => we should not manage cookies for this request
+		// !tested && !trackedBy => this request is of a type we couldn't match to this request.
+		//         one such type is a link prefetch (nsPrefetchNode) but there might be others as
+		//         well. for now, we are paranoid and reject these.
+		
+		if(tested) {
+			if(trackedBy) {
+				Zotero.debug("CookieSandbox: Managing cookies for "+channelURI, 5);
+			} else {
+				Zotero.debug("CookieSandbox: Not touching channel for "+channelURI, 5);
+				return;
+			}
+		} else {
+			Zotero.debug("CookieSandbox: Being paranoid about channel for "+channelURI, 5);
+		}
+		
+		if(topic == "http-on-modify-request") {
+			// clear cookies to be sent to other domains
+			if(!trackedBy || channel.URI.host != trackedBy.URI.host) {
+				channel.setRequestHeader("Cookie", "", false);
+				channel.setRequestHeader("Cookie2", "", false);
+				Zotero.debug("CookieSandbox: Cleared cookies to be sent to "+channelURI, 5);
+				return;
+			}
+			
+			// add cookies to be sent to this domain
+			Zotero.debug(trackedBy.cookieString);
+			channel.setRequestHeader("Cookie", trackedBy.cookieString, false);
+			Zotero.debug("CookieSandbox: Added cookies for request to "+channelURI, 5);
+		} else if(topic == "http-on-examine-response") {
+			// clear cookies being received
+			try {
+				var cookieHeader = channel.getResponseHeader("Set-Cookie");
+			} catch(e) {
+				return;
+			}
+			channel.setResponseHeader("Set-Cookie", "", false);
+			channel.setResponseHeader("Set-Cookie2", "", false);
+			
+			// don't process further if these cookies are for another set of domains
+			if(!trackedBy || channel.URI.host != trackedBy.URI.host) {
+				Zotero.debug("CookieSandbox: Rejected cookies from "+channelURI, 5);
+				return;
+			}
+			
+			// put new cookies into our sandbox
+			Zotero.debug(cookieHeader);
+			if(cookieHeader) trackedBy.addCookiesFromHeader(cookieHeader);
+			
+			Zotero.debug("CookieSandbox: Slurped cookies from "+channelURI, 5);
+		}
+	}
+}

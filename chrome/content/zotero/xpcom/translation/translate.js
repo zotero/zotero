@@ -1315,7 +1315,7 @@ Zotero.Translate.Base.prototype = {
  * @class Web translation
  *
  * @property {Document} document The document object to be used for web scraping (set with setDocument)
- * @property {Zotero.Connector.CookieManager} cookieManager A CookieManager to manage cookies for
+ * @property {Zotero.CookieSandbox} cookieSandbox A CookieSandbox to manage cookies for
  *     this Translate instance.
  */
 Zotero.Translate.Web = function() {
@@ -1336,13 +1336,13 @@ Zotero.Translate.Web.prototype.setDocument = function(doc) {
 }
 
 /**
- * Sets a Zotero.Connector.CookieManager to handle cookie management for XHRs initiated from this
+ * Sets a Zotero.CookieSandbox to handle cookie management for XHRs initiated from this
  * translate instance
  *
- * @param {Zotero.Connector.CookieManager} cookieManager
+ * @param {Zotero.CookieSandbox} cookieSandbox
  */
-Zotero.Translate.Web.prototype.setCookieManager = function(cookieManager) {
-	this.cookieManager = cookieManager;
+Zotero.Translate.Web.prototype.setCookieSandbox = function(cookieSandbox) {
+	this.cookieSandbox = cookieSandbox;
 }
 
 /**
@@ -1757,9 +1757,9 @@ Zotero.Translate.Search.prototype._entryFunctionSuffix = "Search";
 Zotero.Translate.Search.prototype.Sandbox = Zotero.Translate.Sandbox._inheritFromBase(Zotero.Translate.Sandbox.Search);
 
 /**
- * @borrows Zotero.Translate.Web#setCookieManager
+ * @borrows Zotero.Translate.Web#setCookieSandbox
  */
-Zotero.Translate.Search.prototype.setCookieManager = Zotero.Translate.Web.prototype.setCookieManager;
+Zotero.Translate.Search.prototype.setCookieSandbox = Zotero.Translate.Web.prototype.setCookieSandbox;
 
 /**
  * Sets the item to be used for searching

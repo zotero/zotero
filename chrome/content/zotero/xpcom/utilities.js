@@ -1155,10 +1155,10 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	
 	var translate = this._translate;
 	translate.incrementAsyncProcesses();
-	Zotero.HTTP.processDocuments(urls, processor, function() {
+	var hiddenBrowser = Zotero.HTTP.processDocuments(urls, processor, function() {
 		if(done) done();
 		translate.decrementAsyncProcesses();
-	}, exception);
+	}, exception, false, translate.cookieSandbox);
 }
 
 /**
@@ -1181,6 +1181,8 @@ Zotero.Utilities.Translate.prototype.retrieveDocument = function(url) {
 	}
 	
 	var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
+	if(translate.cookieSandbox) translate.cookieSandbox.attachToBrowser(hiddenBrowser);
+	
 	hiddenBrowser.addEventListener("pageshow", listener, true);
 	hiddenBrowser.loadURI(url);
 	
@@ -1228,16 +1230,16 @@ Zotero.Utilities.Translate.prototype.retrieveSource = function(url, body, header
 		if(!responseCharset) responseCharset = null;
 		
 		var mainThread = Zotero.mainThread;
-		var xmlhttp = false;
-		var listener = function(aXmlhttp) { xmlhttp = aXmlhttp };
+		var finished = false;
+		var listener = function() { finished = true };
 		
 		if(body) {
-			Zotero.HTTP.doPost(url, body, listener, headers, responseCharset);
+			var xmlhttp = Zotero.HTTP.doPost(url, body, listener, headers, responseCharset, translate.cookieSandbox);
 		} else {
-			Zotero.HTTP.doGet(url, listener, responseCharset);
+			var xmlhttp = Zotero.HTTP.doGet(url, listener, responseCharset, translate.cookieSandbox);
 		}
 		
-		while(!xmlhttp) mainThread.processNextEvent(true);
+		while(!finished) mainThread.processNextEvent(true);
 	} else {
 		// Use a synchronous XMLHttpRequest, even though this is inadvisable
 		var xmlhttp = new XMLHttpRequest();
@@ -1274,7 +1276,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 	var me = this;
 	
 	this._translate.incrementAsyncProcesses();
-	Zotero.HTTP.doGet(url, function(xmlhttp) {
+	var xmlhttp = Zotero.HTTP.doGet(url, function(xmlhttp) {
 		try {
 			if(processor) {
 				processor(xmlhttp.responseText, xmlhttp, url);
@@ -1291,7 +1293,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 		} catch(e) {
 			me._translate.complete(false, e);
 		}
-	}, responseCharset);
+	}, responseCharset, this._translate.cookieSandbox);
 }
 
 /**
@@ -1303,14 +1305,14 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
 	
 	var translate = this._translate;
 	this._translate.incrementAsyncProcesses();
-	Zotero.HTTP.doPost(url, body, function(xmlhttp) {
+	var xmlhttp = Zotero.HTTP.doPost(url, body, function(xmlhttp) {
 		try {
 			onDone(xmlhttp.responseText, xmlhttp);
 			translate.decrementAsyncProcesses();
 		} catch(e) {
 			translate.complete(false, e);
 		}
-	}, headers, responseCharset);
+	}, headers, responseCharset, translate.cookieSandbox ? translate.cookieSandbox : undefined);
 }
 
 /**
