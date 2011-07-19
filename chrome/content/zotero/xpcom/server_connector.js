@@ -409,5 +409,26 @@ Zotero.Server.Connector.Ping.prototype = {
 
 
 // XXX For compatibility with older connectors; to be removed
-Zotero.Server.Endpoints["/translate/list"] = Zotero.Server.Connector.GetTranslators;
-Zotero.Server.Endpoints["/translate/save"] = Zotero.Server.Connector.SavePage;
+Zotero.Server.Connector.IncompatibleVersion = function() {};
+Zotero.Server.Connector.IncompatibleVersion._errorShown = false
+Zotero.Server.Endpoints["/translate/list"] = Zotero.Server.Connector.IncompatibleVersion;
+Zotero.Server.Endpoints["/translate/detect"] = Zotero.Server.Connector.IncompatibleVersion;
+Zotero.Server.Endpoints["/translate/save"] = Zotero.Server.Connector.IncompatibleVersion;
+Zotero.Server.Endpoints["/translate/select"] = Zotero.Server.Connector.IncompatibleVersion;
+Zotero.Server.Connector.IncompatibleVersion.prototype = {
+	"supportedMethods":["POST"],
+	"supportedDataTypes":["application/json"],
+	
+	"init":function(postData, sendResponseCallback) {
+		sendResponseCallback(404);
+		if(Zotero.Server.Connector.IncompatibleVersion._errorShown) return;
+		
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
+				createInstance(Components.interfaces.nsIPromptService);
+		ps.confirm(null,
+			Zotero.getString("connector.error.title"),
+			Zotero.getString("integration.error.incompatibleVersion2",
+				["Standalone "+Zotero.version, "Connector", "2.1.999"]));
+		Zotero.Server.Connector.IncompatibleVersion._errorShown = true;
+	}
+};
