@@ -30,169 +30,6 @@ Zotero.Server.Connector._waitingForSelection = {};
 Zotero.Server.Connector.Data = {};
 
 /**
- * Manage cookies in a sandboxed fashion
- *
- * @param {browser} browser Hidden browser object
- * @param {String} uri URI of page to manage cookies for (cookies for domains that are not 
- *                     subdomains of this URI are ignored)
- * @param {String} cookieData Cookies with which to initiate the sandbox
- */
-Zotero.Server.Connector.CookieManager = function(browser, uri, cookieData) {
-	this._webNav = browser.webNavigation;
-	this._browser = browser;
-	this._watchedBrowsers = [browser];
-	this._observerService = Components.classes["@mozilla.org/observer-service;1"].
-		getService(Components.interfaces.nsIObserverService);
-	
-	this._uri = Components.classes["@mozilla.org/network/io-service;1"]
-		.getService(Components.interfaces.nsIIOService)
-		.newURI(uri, null, null);
-	
-	var splitCookies = cookieData.split(/; ?/);
-	this._cookies = {};
-	for each(var cookie in splitCookies) {
-		var key = cookie.substr(0, cookie.indexOf("="));
-		var value = cookie.substr(cookie.indexOf("=")+1);
-		this._cookies[key] = value;
-	}
-	
-	[this._observerService.addObserver(this, topic, false) for each(topic in this._observerTopics)];
-}
-
-Zotero.Server.Connector.CookieManager.prototype = {
-	"_observerTopics":["http-on-examine-response", "http-on-modify-request", "quit-application"],
-	"_watchedXHRs":[],
-	
-	/**
-	 * nsIObserver implementation for adding, clearing, and slurping cookies
-	 */
-	"observe": function(channel, topic) {
-		if(topic == "quit-application") {
-			Zotero.debug("WARNING: A Zotero.Server.CookieManager for "+this._uri.spec+" was still open on shutdown");
-		} else {
-			channel.QueryInterface(Components.interfaces.nsIHttpChannel);
-			var isTracked = null;
-			try {
-				var topDoc = channel.notificationCallbacks.getInterface(Components.interfaces.nsIDOMWindow).top.document;
-				for each(var browser in this._watchedBrowsers) {
-					isTracked = topDoc == browser.contentDocument;
-					if(isTracked) break;
-				}
-			} catch(e) {}
-			if(isTracked === null) {
-				try {
-					isTracked = channel.loadGroup.notificationCallbacks.getInterface(Components.interfaces.nsIDOMWindow).top.document == this._browser.contentDocument;
-				} catch(e) {}
-			}
-			if(isTracked === null) {
-				try {
-					isTracked = this._watchedXHRs.indexOf(channel.notificationCallbacks.QueryInterface(Components.interfaces.nsIXMLHttpRequest)) !== -1;
-				} catch(e) {}
-			}
-			
-			// isTracked is now either true, false, or null
-			// true => we should manage cookies for this request
-			// false => we should not manage cookies for this request
-			// null => this request is of a type we couldn't match to this request. one such type
-			//         is a link prefetch (nsPrefetchNode) but there might be others as well. for
-			//         now, we are paranoid and reject these.
-			
-			if(isTracked === false) {
-				Zotero.debug("Zotero.Server.CookieManager: not touching channel for "+channel.URI.spec);
-				return;
-			} else if(isTracked) {
-				Zotero.debug("Zotero.Server.CookieManager: managing cookies for "+channel.URI.spec);
-			} else {
-				Zotero.debug("Zotero.Server.CookieManager: being paranoid about channel for "+channel.URI.spec);
-			}
-			
-			if(topic == "http-on-modify-request") {
-				// clear cookies to be sent to other domains
-				if(isTracked === null || channel.URI.host != this._uri.host) {
-					channel.setRequestHeader("Cookie", "", false);
-					channel.setRequestHeader("Cookie2", "", false);
-					Zotero.debug("Zotero.Server.CookieManager: cleared cookies to be sent to "+channel.URI.spec);
-					return;
-				}
-				
-				// add cookies to be sent to this domain
-				var cookies = [key+"="+this._cookies[key]
-						for(key in this._cookies)].join("; ");
-				channel.setRequestHeader("Cookie", cookies, false);
-				Zotero.debug("Zotero.Server.CookieManager: added cookies for request to "+channel.URI.spec);
-			} else if(topic == "http-on-examine-response") {
-				// clear cookies being received
-				try {
-					var cookieHeader = channel.getResponseHeader("Set-Cookie");
-				} catch(e) {
-					return;
-				}
-				channel.setResponseHeader("Set-Cookie", "", false);
-				channel.setResponseHeader("Set-Cookie2", "", false);
-				
-				// don't process further if these cookies are for another set of domains
-				if(isTracked === null || channel.URI.host != this._uri.host) {
-					Zotero.debug("Zotero.Server.CookieManager: rejected cookies from "+channel.URI.spec);
-					return;
-				}
-				
-				// put new cookies into our sandbox
-				if(cookieHeader) {
-					var cookies = cookieHeader.split(/; ?/);
-					var newCookies = {};
-					for each(var cookie in cookies) {
-						var key = cookie.substr(0, cookie.indexOf("="));
-						var value = cookie.substr(cookie.indexOf("=")+1);
-						var lcCookie = key.toLowerCase();
-						
-						if(["comment", "domain", "max-age", "path", "version", "expires"].indexOf(lcCookie) != -1) {
-							// ignore cookie parameters; we are only holding cookies for a few minutes
-							// with a single domain, and the path attribute doesn't allow any additional
-							// security.
-							// DEBUG: does ignoring the path attribute break any sites?
-							continue;
-						} else if(lcCookie == "secure") {
-							// don't accept secure cookies
-							newCookies = {};
-							break;
-						} else {
-							newCookies[key] = value;
-						}
-					}
-					[this._cookies[key] = newCookies[key] for(key in newCookies)];
-				}
-				
-				Zotero.debug("Zotero.Server.CookieManager: slurped cookies from "+channel.URI.spec);
-			}
-		}
-	},
-	
-	/**
-	 * Attach CookieManager to a specific XMLHttpRequest
-	 * @param {XMLHttpRequest} xhr
-	 */
-	"attachToBrowser": function(browser) {
-		this._watchedBrowsers.push(browser);
-	},
-	
-	/**
-	 * Attach CookieManager to a specific XMLHttpRequest
-	 * @param {XMLHttpRequest} xhr
-	 */
-	"attachToXHR": function(xhr) {
-		this._watchedXHRs.push(xhr);
-	},
-	
-	/**
-	 * Destroys this CookieManager (intended to be executed when the browser is destroyed)
-	 */
-	"destroy": function() {
-		[this._observerService.removeObserver(this, topic) for each(topic in this._observerTopics)];
-	}
-}
-
-
-/**
  * Lists all available translators, including code for translators that should be run on every page
  *
  * Accepts:
@@ -268,7 +105,7 @@ Zotero.Server.Connector.Detect.prototype = {
 		
 		var pageShowCalled = false;
 		var me = this;
-		this._translate.setCookieManager(new Zotero.Server.Connector.CookieManager(this._browser,
+		this._translate.setCookieSandbox(new Zotero.CookieSandbox(this._browser,
 			this._parsedPostData["uri"], this._parsedPostData["cookie"]));
 		this._browser.addEventListener("DOMContentLoaded", function() {
 			try {
@@ -310,7 +147,7 @@ Zotero.Server.Connector.Detect.prototype = {
 		}
 		this._sendResponse(200, "application/json", JSON.stringify(jsons));
 		
-		this._translate.cookieManager.destroy();
+		this._translate.cookieSandbox.destroy();
 		Zotero.Browser.deleteHiddenBrowser(this._browser);
 	}
 }
@@ -396,6 +233,7 @@ Zotero.Server.Connector.SavePage.prototype = {
 	"_translatorsAvailable":function(translate, translators) {
 		// make sure translatorsAvailable succeded
 		if(!translators.length) {
+			me._translate.cookieSandbox.destroy();
 			Zotero.Browser.deleteHiddenBrowser(this._browser);
 			this._sendResponse(500);
 			return;
@@ -420,10 +258,14 @@ Zotero.Server.Connector.SavePage.prototype = {
 			}
 			jsonItems.push(jsonItem);
 		});
-		translate.setHandler("done", function(obj, item) {	
-			me._translate.cookieManager.destroy();
+		translate.setHandler("done", function(obj, item) {
+			me._translate.cookieSandbox.destroy();
 			Zotero.Browser.deleteHiddenBrowser(me._browser);
-			me._sendResponse(201, "application/json", JSON.stringify({"items":jsonItems}));
+			if(jsonItems.length) {
+				me._sendResponse(201, "application/json", JSON.stringify({"items":jsonItems}));
+			} else {
+				me._sendResponse(500);
+			}
 		});
 		
 		// set translator and translate

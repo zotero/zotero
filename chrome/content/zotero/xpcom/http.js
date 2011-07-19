@@ -12,9 +12,10 @@ Zotero.HTTP = new function() {
 	* @param {nsIURI|String}	url				URL to request
 	* @param {Function} 		onDone			Callback to be executed upon request completion
 	* @param {String} 		responseCharset	Character set to force on the response
+	* @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
 	* @return {Boolean} True if the request was sent, or false if the browser is offline
 	*/
-	this.doGet = function(url, onDone, responseCharset) {
+	this.doGet = function(url, onDone, responseCharset, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
 			var disp = url.clone();
@@ -69,6 +70,7 @@ Zotero.HTTP = new function() {
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
+		if(cookieSandbox) cookieSandbox.attachToXHR(xmlhttp);
 		xmlhttp.send(null);
 		
 		return xmlhttp;
@@ -82,9 +84,10 @@ Zotero.HTTP = new function() {
 	* @param {Function} onDone Callback to be executed upon request completion
 	* @param {String} headers Request HTTP headers
 	* @param {String} responseCharset Character set to force on the response
+	* @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
 	* @return {Boolean} True if the request was sent, or false if the browser is offline
 	*/
-	this.doPost = function(url, body, onDone, headers, responseCharset) {
+	this.doPost = function(url, body, onDone, headers, responseCharset, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
 			var disp = url.clone();
@@ -166,6 +169,7 @@ Zotero.HTTP = new function() {
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
+		if(cookieSandbox) cookieSandbox.attachToXHR(xmlhttp);
 		xmlhttp.send(body);
 		
 		return xmlhttp;
@@ -506,9 +510,10 @@ Zotero.HTTP = new function() {
 	 * @param {Function} exception Callback to be executed if an exception occurs
 	 * @param {Boolean} dontDelete Don't delete the hidden browser upon completion; calling function
 	 *                             must call deleteHiddenBrowser itself.
+	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
 	 * @return {browser} Hidden browser used for loading
 	 */
-	this.processDocuments = function(urls, processor, done, exception, dontDelete) {
+	this.processDocuments = function(urls, processor, done, exception, dontDelete, cookieSandbox) {
 		/**
 		 * Removes event listener for the load event and deletes the hidden browser
 		 */
@@ -573,6 +578,7 @@ Zotero.HTTP = new function() {
 		
 		var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
 		hiddenBrowser.addEventListener(loadEvent, onLoad, true);
+		if(cookieSandbox) cookieSandbox.attachToBrowser(hiddenBrowser);
 		
 		doLoad();
 		
