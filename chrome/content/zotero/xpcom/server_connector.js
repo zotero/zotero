@@ -423,6 +423,7 @@ Zotero.Server.Connector.IncompatibleVersion.prototype = {
 		sendResponseCallback(404);
 		if(Zotero.Server.Connector.IncompatibleVersion._errorShown) return;
 		
+		Zotero.Integration.activate();
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
 		ps.confirm(null,
