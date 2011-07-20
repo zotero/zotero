@@ -701,7 +701,7 @@ if(appInfo.platformVersion[0] >= 2) {
 						while(_waitingForDBLock && !Zotero.closing && Date.now() < timeout) {
 							Zotero.mainThread.processNextEvent(true);
 						}
-						if(Zotero.closing) return;
+						if(Zotero.closing) return false;
 						
 						// We will want to broadcast when initialization completes
 						_broadcastInitComplete = true;
