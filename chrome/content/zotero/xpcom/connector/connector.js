@@ -108,3 +108,65 @@ Zotero.Connector = new function() {
 		});
 	}
 }
+
+Zotero.Connector_Debug = new function() {
+	/**
+	 * Call a callback depending upon whether debug output is being stored
+	 */
+	this.storing = function(callback) {
+		callback(Zotero.Debug.storing);
+	}
+	
+	/**
+	 * Call a callback with the lines themselves
+	 */
+	this.get = function(callback) {
+		callback(Zotero.Debug.get());
+	}
+		
+	/**
+	 * Call a callback with the number of lines of output
+	 */
+	this.count = function(callback) {
+		callback(Zotero.Debug.count());
+	}
+	
+	/**
+	 * Submit data to the sserver
+	 */
+	this.submitReport = function(callback) {
+		var uploadCallback = function (xmlhttp) {
+			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+									.getService(Components.interfaces.nsIPromptService);
+			
+			if (!xmlhttp.responseXML) {
+				callback(false, 'Invalid response from server');
+				return;
+			}
+			var reported = xmlhttp.responseXML.getElementsByTagName('reported');
+			if (reported.length != 1) {
+				callback(false, 'The server returned an error. Please try again.');
+				return;
+			}
+			
+			var reportID = reported[0].getAttribute('reportID');
+			callback(true, reportID);
+		}
+		
+		Zotero.HTTP.doPost("http://www.zotero.org/repo/report?debug=1", Zotero.Debug.get(),
+			function(xmlhttp) {
+				if (!xmlhttp.responseXML) {
+					callback(false, 'Invalid response from server');
+					return;
+				}
+				var reported = xmlhttp.responseXML.getElementsByTagName('reported');
+				if (reported.length != 1) {
+					callback(false, 'The server returned an error. Please try again.');
+					return;
+				}
+				
+				var reportID = reported[0].getAttribute('reportID');
+				callback(true, reportID);
+			}, {"Content-Type":"text/plain"});
+	}
+}
