@@ -109,6 +109,7 @@ Zotero.MIME = new function(){
 		// Enforce some extensions
 		switch (mimeType) {
 			case 'text/html':
+			case 'application/xhtml+xml':
 				return 'html';
 			
 			case 'application/pdf':
