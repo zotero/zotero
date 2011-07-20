@@ -110,6 +110,7 @@ const xpcomFilesConnector = [
 	'connector/translate_item',
 	'connector/translator',
 	'connector/connector',
+	'connector/connector_firefox',
 	'connector/cachedTypes',
 	'connector/repo',
 	'connector/typeSchemaData'
