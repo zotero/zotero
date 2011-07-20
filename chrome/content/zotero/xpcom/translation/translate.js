@@ -219,9 +219,11 @@ Zotero.Translate.Sandbox = {
 				translation._prepareTranslation();
 				setDefaultHandlers(translate, translation);
 				
-				var sandbox = translation._sandboxManager.sandbox.Export
-					? translation._sandboxManager.sandbox.Export
-					: translation._sandboxManager.sandbox;
+				var sandbox = translation._sandboxManager.sandbox;
+				if(!Zotero.Utilities.isEmpty(sandbox.exports)) {
+					sandbox.exports.Zotero = sandbox.Zotero;
+					sandbox = sandbox.exports;
+				}
 				
 				// return sandbox
 				if(callback) callback(sandbox);
@@ -821,7 +823,7 @@ Zotero.Translate.Base.prototype = {
 		Zotero.debug("Translate: Binding sandbox to "+(typeof this._sandboxLocation == "object" ? this._sandboxLocation.document.location : this._sandboxLocation), 4);
 		this._sandboxManager = new Zotero.Translate.SandboxManager(this, this._sandboxLocation);
 		const createArrays = "['creators', 'notes', 'tags', 'seeAlso', 'attachments']";
-		var src = "var Zotero = {};"+
+		var src = "var Zotero = {}, exports = {};"+
 		"Zotero.Item = function (itemType) {"+
 				"this.itemType = itemType;"+
 				"for each(var array in "+createArrays+") {"+
