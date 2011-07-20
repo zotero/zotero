@@ -128,8 +128,8 @@ Zotero.Translate.SandboxManager.prototype = {
 	/**
 	 * Evaluates code in the sandbox
 	 */
-	"eval":function(code) {
-		Components.utils.evalInSandbox(code, this.sandbox);
+	"eval":function(code, exported, path) {
+		Components.utils.evalInSandbox(code, this.sandbox, "1.8", path, 1);
 	},
 	
 	/**
