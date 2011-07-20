@@ -89,7 +89,7 @@ Zotero.Integration = new function() {
 		// destroy old pipe, if one exists
 		try {
 			if(_fifoFile.exists()) {
-				Zotero.IPC.safePipeWrite(_fifoFile.path, "Zotero shutdown\n");
+				Zotero.IPC.safePipeWrite(_fifoFile, "Zotero shutdown\n");
 				_fifoFile.remove(false);
 			}
 		} catch (e) {
