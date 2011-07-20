@@ -30,7 +30,7 @@ Zotero.IPC = new function() {
 	 * Initialize pipe for communication with connector
 	 */
 	this.init = function() {
-		if(!Zotero.isWin && (Zotero.isFx4 || Zotero.isMac)) {	// no pipe support on Fx 3.6
+		if(!Zotero.isWin) {	// no pipe support on Fx 3.6
 			_instancePipe = _getPipeDirectory();
 			if(!_instancePipe.exists()) {
 				_instancePipe.create(Ci.nsIFile.DIRECTORY_TYPE, 0700);
@@ -61,11 +61,11 @@ Zotero.IPC = new function() {
 	
 	/**
 	 * Writes safely to a file, avoiding blocking
-	 * @param {String} path The path of the file
+	 * @param {nsIFile} pipe The pipe as an nsIFile
 	 * @param {String} string The string to write to the file
 	 * @return {Boolean} True if write succeeded; false otherwise
 	 */
-	this.safePipeWrite = function(path, string) {
+	this.safePipeWrite = function(pipe, string) {
 		if(!open) {
 			// safely write to instance pipes
 			var lib = Zotero.IPC.getLibc();
@@ -92,9 +92,16 @@ Zotero.IPC = new function() {
 		}
 		
 		// On OS X, O_NONBLOCK = 0x0004
-		// On Linux, O_NONBLOCK = 04000
+		// On Linux, O_NONBLOCK = 00004000
 		// On both, O_WRONLY = 0x0001
-		var fd = open(path, 04000 | 0x0004 | 0x0001);
+		var mode = (Zotero.isMac ? 0x0004 : 00004000) | 0x0001;
+		
+		// Also append to plain files to get things working with Fx 3.6 polling
+		// On OS X, O_APPEND = 0x0008
+		// On Linux, O_APPEND = 00002000
+		if(!pipe.isSpecial()) mode = mode | (Zotero.isMac ? 0x0008 : 00002000);
+		
+		var fd = open(pipe.path, mode);
 		if(fd === -1) return false;			
 		write(fd, string, string.length);
 		close(fd);
@@ -189,7 +196,7 @@ Zotero.IPC = new function() {
 		} else {			// communicate via pipes
 			// make sure instance pipe is open and accepting input, or ignore if it has been deleted
 			if(!instancePipeOpen && _instancePipe.exists()) {
-				while(!Zotero.IPC.safePipeWrite(_instancePipe.path, "test\n")) {
+				while(!Zotero.IPC.safePipeWrite(_instancePipe, "test\n")) {
 					Zotero.wait();
 				}
 				instancePipeOpen = true;
@@ -212,9 +219,30 @@ Zotero.IPC = new function() {
 			var success = false;
 			for each(var pipe in pipes) {
 				Zotero.debug('IPC: Trying to broadcast "'+msg+'" to instance '+pipe.leafName);
-				if(Zotero.IPC.safePipeWrite(pipe.path, msg+"\n")) {
-					success = true;
-				} else {
+				
+				var defunct = false;
+				
+				if(!pipe.isSpecial()) {
+					// not actually a pipe
+					if(!pipe.isFile()) {
+						// not a file, so definitely defunct
+						defunct = true;
+					} else {
+						// check to see whether the size exceeds a certain threshold that we find
+						// reasonable for the queue, and if not, delete the pipe, because it's 
+						// probably just a file that wasn't deleted on shutdown and is now
+						// accumulating vast amounts of data
+						defunct = pipe.fileSize > 1024;
+					}
+				}
+				
+				if(!defunct) {
+					var wroteToPipe = Zotero.IPC.safePipeWrite(pipe, msg+"\n");
+					success = success || wroteToPipe;
+					defunct = !wroteToPipe
+				}
+				
+				if(defunct) {
 					Zotero.debug('IPC: Removing defunct pipe '+pipe.leafName);
 					try {
 						pipe.remove(true);
@@ -353,7 +381,7 @@ Zotero.IPC.Pipe = new function() {
 		
 		// Keep trying to write to pipe until we succeed, in case pipe is not yet open
 		Zotero.debug("IPC: Closing pipe "+file.path);
-		while(!Zotero.IPC.safePipeWrite(file.path, "Zotero shutdown\n") && !pipe.open) {
+		while(!Zotero.IPC.safePipeWrite(file, "Zotero shutdown\n") && !pipe.open) {
 			Zotero.wait();
 		}
 		
