@@ -24,23 +24,29 @@
 */
 
 Zotero.Connector_Browser = new function() {
-	var _incompatibleVersionMessageShown;
-	
 	/**
 	 * Called if Zotero version is determined to be incompatible with Standalone
 	 */
 	this.onIncompatibleStandaloneVersion = function(zoteroVersion, standaloneVersion) {
-		if(_incompatibleVersionMessageShown) return;
-		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
-				createInstance(Components.interfaces.nsIPromptService);
-		ps.alert(null,
-			Zotero.getString("connector.error.title"),
-			'Zotero '+zoteroVersion+' is incompatible with the running '+
+		Zotero.startupError = 'Zotero for Firefox '+Zotero.version+' is incompatible with the running '+
 			'version of Zotero Standalone'+(standaloneVersion ? " ("+standaloneVersion+")" : "")+
-			'. Zotero Connector will continue to operate, but functionality that relies upon '+
-			'Zotero Standalone may be unavaliable.\n\n'+
-			'Please ensure that you have installed the latest version of these components. See '+
-			'http://www.zotero.org/support/standalone for more details.');
-		_incompatibleVersionMessageShown = true;
+			'.\n\nPlease ensure that you have installed the latest version of these components. See '+
+			'http://www.zotero.org/support/standalone for more details.';
+		Zotero.initialized = false;
+	}
+	
+	/**
+	 * Called if connector is offline. This should only happen if Zotero is getting a DB busy 
+	 * message and no connector is open, so use the DB busy error message here.
+	 */
+	this.onStateChange = function(isOnline) {
+		if(isOnline) return;
+		
+		var msg = Zotero.localeJoin([
+			Zotero.getString('startupError.databaseInUse'),
+			Zotero.getString(Zotero.isStandalone ? 'startupError.closeFirefox' : 'startupError.closeStandalone')
+		]);
+		Zotero.startupError = msg;
+		Zotero.initialized = false;
 	}
 }
