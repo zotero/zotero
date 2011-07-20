@@ -1169,7 +1169,7 @@ Zotero.Translate.Base.prototype = {
 			this._sandboxManager.eval("var translatorInfo = "+translator.code,
 				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix, "exports"]);
 		} catch(e) {
-			this.complete(false, "Parse error");
+			this.complete(false, "Parse error: "+e.toString());
 			return;
 		}
 		
