@@ -426,7 +426,7 @@ Zotero.Server.Connector.IncompatibleVersion.prototype = {
 		Zotero.Integration.activate();
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
 				createInstance(Components.interfaces.nsIPromptService);
-		ps.confirm(null,
+		ps.alert(null,
 			Zotero.getString("connector.error.title"),
 			Zotero.getString("integration.error.incompatibleVersion2",
 				["Standalone "+Zotero.version, "Connector", "2.1.999"]));
