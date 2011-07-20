@@ -1083,11 +1083,7 @@ Zotero.Translate.Base.prototype = {
 			} else {
 				if(error) {
 					// report error to console
-					if(this.translator[0] && this.translator[0].logError) {
-						this.translator[0].logError(error.toString(), "exception");
-					} else {
-						Zotero.logError(error);
-					}
+					Zotero.logError(error);
 					
 					// report error to debug log
 					this._debug("Translation using "+(this.translator && this.translator[0] && this.translator[0].label ? this.translator[0].label : "no translator")+" failed: \n"+errorString, 2);
@@ -1167,7 +1163,8 @@ Zotero.Translate.Base.prototype = {
 		
 		try {
 			this._sandboxManager.eval("var translatorInfo = "+translator.code,
-				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix, "exports"]);
+				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix, "exports"],
+				(translator.file ? translator.file.path : translator.label));
 		} catch(e) {
 			this.complete(false, "Parse error: "+e.toString());
 			return;
@@ -1279,6 +1276,7 @@ Zotero.Translate.Base.prototype = {
 					errorString += "\n"+i+' => '+error[i];
 				}
 			}
+			errorString += "\nstring => "+error.toString();
 		}
 		
 		errorString += "\nurl => "+this.path
