@@ -42,24 +42,19 @@ var Zotero_Charset_Menu = new function() {
 		var charsetSeparator = document.createElement("menuseparator");
 		charsetPopup.appendChild(charsetSeparator);
 		
-		var rdfService = Components.classes["@mozilla.org/rdf/rdf-service;1"].
-			getService(Components.interfaces.nsIRDFService);
-		var RDFCU = Components.classes["@mozilla.org/rdf/container-utils;1"].
-			getService(Components.interfaces.nsIRDFContainerUtils);
-		var rdfDataSource = rdfService.GetDataSource("rdf:charset-menu");
-		var rdfName = rdfService.GetResource("http://home.netscape.com/NC-rdf#Name");
-		var rdfContainer = Components.classes["@mozilla.org/rdf/container;1"].
-			createInstance(Components.interfaces.nsIRDFContainer);
-		rdfContainer.Init(rdfDataSource, rdfService.GetResource("NC:EncodersRoot"));
-		var charsets = rdfContainer.GetElements();
+		var charsetConverter = Components.classes["@mozilla.org/charset-converter-manager;1"].
+			getService(Components.interfaces.nsICharsetConverterManager);
+		var charsets = charsetConverter.getEncoderList();
 		
 		// add charsets to popup in order
-		while(charsets.hasMoreElements()) {
-			var charset = charsets.getNext().QueryInterface(Components.interfaces.nsIRDFResource);
-			var label = rdfDataSource.GetTarget(charset, rdfName, true).
-				QueryInterface(Components.interfaces.nsIRDFLiteral);
-			charset = charset.Value;
-			label = label.Value;
+		while(charsets.hasMore()) {
+			var charset = charsets.getNext();
+			Zotero.debug(charset);
+			try {
+				var label = charsetConverter.getCharsetTitle(charset);
+			} catch(e) {
+				continue;
+			}
 			
 			var isUTF16 = charset.length >= 6 && charset.substr(0, 6) == "UTF-16";
 			
