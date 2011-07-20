@@ -178,7 +178,12 @@ var ZoteroOverlay = new function()
 	 * Hides/displays the Zotero interface
 	 */
 	this.toggleDisplay = function(makeVisible)
-	{
+	{	
+		if(!Zotero || !Zotero.initialized) {
+			ZoteroPane.displayStartupError();
+			return;
+		}
+		
 		if(makeVisible || makeVisible === undefined) {
 			if(Zotero.isConnector) {
 				// If in connector mode, bring Zotero Standalone to foreground
@@ -189,11 +194,6 @@ var ZoteroOverlay = new function()
 				this.loadZoteroTab();
 				return;
 			}
-		}
-		
-		if(!Zotero || !Zotero.initialized) {
-			ZoteroPane.displayStartupError();
-			return;
 		}
 		
 		if(makeVisible === undefined) makeVisible = zoteroPane.hidden || zoteroPane.collapsed;
