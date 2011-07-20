@@ -1166,7 +1166,7 @@ Zotero.Translate.Base.prototype = {
 				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix, "exports"],
 				(translator.file ? translator.file.path : translator.label));
 		} catch(e) {
-			this.complete(false, "Parse error: "+e.toString());
+			this.complete(false, e);
 			return;
 		}
 		
