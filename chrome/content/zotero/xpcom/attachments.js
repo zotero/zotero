@@ -566,7 +566,7 @@ Zotero.Attachments = new function(){
 				};
 			}
 			
-			if (mimeType == 'text/html') {
+			if (mimeType === 'text/html' || mimeType === 'application/xhtml+xml') {
 				var sync = true;
 				
 				// Load WebPageDump code
