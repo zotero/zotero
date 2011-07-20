@@ -316,9 +316,9 @@ Zotero.Translate.Sandbox = {
 						translation._prepareTranslation();
 						setDefaultHandlers(translate, translation);
 						sandbox = translation._sandboxManager.sandbox;
-						if(sandbox.Export) {
-							sandbox.Export.Zotero = sandbox.Zotero;
-							sandbox = sandbox.Export;
+						if(!Zotero.Utilities.isEmpty(sandbox.exports)) {
+							sandbox.exports.Zotero = sandbox.Zotero;
+							sandbox = sandbox.exports;
 						} else {
 							translate._debug("COMPAT WARNING: "+translate.translator[0].label+" does "+
 								"not export any properties. Only detect"+translate._entryFunctionSuffix+
@@ -1167,7 +1167,7 @@ Zotero.Translate.Base.prototype = {
 		
 		try {
 			this._sandboxManager.eval("var translatorInfo = "+translator.code,
-				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix, "Export"]);
+				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix, "exports"]);
 		} catch(e) {
 			this.complete(false, e);
 		}
@@ -1182,7 +1182,7 @@ Zotero.Translate.Base.prototype = {
 		Zotero.debug("Translate: Binding sandbox to "+(typeof this._sandboxLocation == "object" ? this._sandboxLocation.document.location : this._sandboxLocation), 4);
 		this._sandboxManager = new Zotero.Translate.SandboxManager(this._sandboxLocation);
 		const createArrays = "['creators', 'notes', 'tags', 'seeAlso', 'attachments']";
-		var src = "var Zotero = {};"+
+		var src = "var Zotero = {}, exports = {};"+
 		"Zotero.Item = function (itemType) {"+
 				"const createArrays = "+createArrays+";"+
 				"this.itemType = itemType;"+
@@ -1918,8 +1918,8 @@ Zotero.Translate.IO.String.prototype = {
 			}
 			var parser = new Zotero.RDF.AJAW.RDFParser(this._dataStore);
 			parser.parse(xml, this._uri);
-			callback(true);
 		}
+		callback(true);
 	},
 	
 	"setCharacterSet":function(charset) {},
