@@ -455,7 +455,7 @@ if(appInfo.platformVersion[0] >= 2) {
 			Zotero.Repo.init();
 		} else {
 			Zotero.debug("Loading in full mode");
-			_initFull();
+			if(!_initFull()) return false;
 		}
 		
 		this.initialized = true;
