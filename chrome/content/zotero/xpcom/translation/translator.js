@@ -354,10 +354,6 @@ Zotero.Translators = new function() {
 			throw ("metadata.lastUpdated not provided in Zotero.Translators.save()");
 		}
 		
-		if (!metadata.browserSupport) {
-			metadata.browserSupport = "g";
-		}
-		
 		if (!code) {
 			throw ("code not provided in Zotero.Translators.save()");
 		}
