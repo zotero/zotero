@@ -95,6 +95,7 @@ Zotero.Integration = new function() {
 		} catch (e) {
 			// if pipe can't be deleted, log an error
 			Zotero.debug("Error removing old integration pipe", 1);
+			Zotero.logError(e);
 			Components.utils.reportError(
 				"Zotero word processor integration initialization failed. "
 					+ "See http://forums.zotero.org/discussion/12054/#Item_10 "
