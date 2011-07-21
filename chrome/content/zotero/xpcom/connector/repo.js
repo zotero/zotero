@@ -86,25 +86,21 @@ Zotero.Repo = new function() {
 		if(!Zotero.isFx) {
 			code = Zotero.Translators.preprocessCode(code);
 			
-			// make sure the version of the translator we retrieved actually matches what's in the
-			// repo. if not (because it's from a different source), we won't save it.
-			var lastUpdatedIndex = code.indexOf('"lastUpdated"');
-			if (lastUpdatedIndex == -1) {
-				Zotero.logError(new Error("Invalid or missing translator metadata JSON object for " + translatorID));
-				callback(false);
-				return;
-			}
-			
-			// Add 50 characters to clear lastUpdated timestamp and final "}"
-			var header = code.substr(0, lastUpdatedIndex + 50);
-			var m = infoRe.exec(header);
+			var m = infoRe.exec(code);
 			if (!m) {
 				Zotero.logError(new Error("Invalid or missing translator metadata JSON object for " + translatorID));
 				callback(false);
 				return;
 			}
 			
-			var metadata = JSON.parse(m[0]);
+			try {
+				var metadata = JSON.parse(m[0]);
+			} catch(e) {
+				Zotero.logError(new Error("Invalid or missing translator metadata JSON object for " + translatorID));
+				callback(false);
+				return;
+			}
+			
 			var translator = Zotero.Translators.getWithoutCode(translatorID);
 			
 			if(metadata.lastUpdated !== translator.lastUpdated) {
