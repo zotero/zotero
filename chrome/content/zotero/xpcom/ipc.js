@@ -99,7 +99,7 @@ Zotero.IPC = new function() {
 		// Also append to plain files to get things working with Fx 3.6 polling
 		// On OS X, O_APPEND = 0x0008
 		// On Linux, O_APPEND = 00002000
-		if(!pipe.isSpecial()) mode = mode | (Zotero.isMac ? 0x0008 : 00002000);
+		if(pipe.isFile()) mode = mode | (Zotero.isMac ? 0x0008 : 00002000);
 		
 		var fd = open(pipe.path, mode);
 		if(fd === -1) return false;			
@@ -222,9 +222,9 @@ Zotero.IPC = new function() {
 				
 				var defunct = false;
 				
-				if(!pipe.isSpecial()) {
+				if(pipe.isFile()) {
 					// not actually a pipe
-					if(!pipe.isFile()) {
+					if(pipe.isDirectory()) {
 						// not a file, so definitely defunct
 						defunct = true;
 					} else {
@@ -523,7 +523,8 @@ Zotero.IPC.Pipe.Poll = function(file, callback) {
 	Zotero.IPC.Pipe.Poll._activePipes.push(this);
 	
 	// add shutdown listener
-	Zotero.addShutdownListener(this);
+	var me = this;
+	Zotero.addShutdownListener(function() { me._clearFile() });
 }
 Zotero.IPC.Pipe.Poll._activePipes = [];
 
