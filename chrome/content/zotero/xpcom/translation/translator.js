@@ -443,17 +443,7 @@ Zotero.Translator = function(file, json, code) {
 		var str = {};
 		cStream.readString(MAX_INFO_LENGTH, str);
 		
-		// We assume lastUpdated is at the end to avoid running the regexp on more than necessary
-		var lastUpdatedIndex = str.value.indexOf('"lastUpdated"');
-		if (lastUpdatedIndex == -1) {
-			this.logError("Invalid or missing translator metadata JSON object in " + file.leafName);
-			fStream.close();
-			return;
-		}
-		
-		// Add 50 characters to clear lastUpdated timestamp and final "}"
-		var header = str.value.substr(0, lastUpdatedIndex + 50);
-		var m = infoRe.exec(header);
+		var m = infoRe.exec(str.value);
 		if (!m) {
 			this.logError("Invalid or missing translator metadata JSON object in " + file.leafName);
 			fStream.close();
