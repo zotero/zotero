@@ -910,6 +910,9 @@ Zotero.Translate.Base.prototype = {
 		
 		// if there are translators, add them to the list of found translators
 		if(rpcTranslators) {
+			for(var i=0, n=rpcTranslators.length; i<n; i++) {
+				rpcTranslators[i].runMode = Zotero.Translator.RUN_MODE_ZOTERO_STANDALONE;
+			}
 			this._foundTranslators = this._foundTranslators.concat(rpcTranslators);
 		}
 		

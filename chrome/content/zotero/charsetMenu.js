@@ -49,7 +49,6 @@ var Zotero_Charset_Menu = new function() {
 		// add charsets to popup in order
 		while(charsets.hasMore()) {
 			var charset = charsets.getNext();
-			Zotero.debug(charset);
 			try {
 				var label = charsetConverter.getCharsetTitle(charset);
 			} catch(e) {
