@@ -180,8 +180,24 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 		return a == b ? 1 : -1;
 	});
 	
+	// Match books by ISBN
+	var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
+				+ "JOIN itemDataValues USING (valueID) "
+				+ "WHERE libraryID=? AND itemTypeID=? AND fieldID=? "
+				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
+				+ "ORDER BY value";
+	var rows = Zotero.DB.query(
+		sql,
+		[
+			this._libraryID,
+			Zotero.ItemTypes.getID('book'),
+			Zotero.ItemFields.getID('ISBN')
+		]
+	);
+	processRows();
+	
 	// Match on exact fields
-	var fields = ['DOI', 'ISBN'];
+	var fields = ['DOI'];
 	for each(var field in fields) {
 		var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 					+ "JOIN itemDataValues USING (valueID) "
