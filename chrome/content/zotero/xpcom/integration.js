@@ -41,7 +41,6 @@ Zotero.Integration = new function() {
 	var INTEGRATION_MIN_VERSIONS;
 	
 	// these need to be global because of GC
-	var _timer;
 	var _updateTimer;
 	
 	this.sessions = {};
@@ -310,7 +309,7 @@ Zotero.Integration = new function() {
 	/**
 	 * Activates Firefox
 	 */
-	this.activate = function() {
+	this.activate = function(win) {
 		if(Zotero.isMac) {
 			const BUNDLE_IDS = {
 				"Zotero":"org.zotero.zotero",
@@ -318,12 +317,44 @@ Zotero.Integration = new function() {
 				"Minefield":"org.mozilla.minefield"
 			};
 			
-			if(Zotero.oscpu == "PPC Mac OS X 10.4" || Zotero.oscpu == "Intel Mac OS X 10.4"
-			   || !BUNDLE_IDS[Zotero.appName]) {
-				// 10.4 doesn't support "tell application id"
-				_executeAppleScript('tell application "'+Zotero.appName+'" to activate');
+			if(Zotero.isFx4 && win) {
+				const carbon = ctypes.open("/System/Library/Frameworks/Carbon.framework/Carbon");
+				/*
+				 * struct ProcessSerialNumber {
+				 *    unsigned long highLongOfPSN;
+				 *    unsigned long lowLongOfPSN;
+				 * };
+				 */
+				const ProcessSerialNumber = new ctypes.StructType("ProcessSerialNumber", 
+					[{"highLongOfPSN":ctypes.uint32_t}, {"lowLongOfPSN":ctypes.uint32_t}]);
+					
+				/*
+				 * OSStatus SetFrontProcessWithOptions (
+				 *    const ProcessSerialNumber *inProcess,
+				 *    OptionBits inOptions
+				 * );
+				 */
+				const SetFrontProcessWithOptions = carbon.declare("SetFrontProcessWithOptions",
+					ctypes.default_abi, ctypes.int32_t, ProcessSerialNumber.ptr, ctypes.uint32_t);
+				
+				var psn = new ProcessSerialNumber();
+				psn.highLongOfPSN = 0;
+				psn.lowLongOfPSN = 2 // kCurrentProcess
+				
+				win.addEventListener("load", function() {
+					var res = SetFrontProcessWithOptions(
+						psn.address(),
+						1 // kSetFrontProcessFrontWindowOnly = (1 << 0)
+					);
+				}, false);
 			} else {
-				_executeAppleScript('tell application id "'+BUNDLE_IDS[Zotero.appName]+'" to activate');
+				if(Zotero.oscpu == "PPC Mac OS X 10.4" || Zotero.oscpu == "Intel Mac OS X 10.4"
+				   || !BUNDLE_IDS[Zotero.appName]) {
+					// 10.4 doesn't support "tell application id"
+					_executeAppleScript('tell application "'+Zotero.appName+'" to activate');
+				} else {
+					_executeAppleScript('tell application id "'+BUNDLE_IDS[Zotero.appName]+'" to activate');
+				}
 			}
 		}
 	}
@@ -433,7 +464,6 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			this._session.setData(data);
 			if(dontRunSetDocPrefs) return false;
 			
-			Zotero.Integration.activate();
 			try {
 				var ret = this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
 			} finally {
@@ -466,7 +496,6 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			} catch(e) {
 				// make sure style is defined
 				if(e instanceof Zotero.Integration.DisplayException && e.name === "invalidStyle") {
-					Zotero.Integration.activate();
 					try {
 						this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
 					} finally {
@@ -630,7 +659,6 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 								this._removeCodeFields.push(i);
 							} else {					// Yes
 								// Display reselect item dialog
-								Zotero.Integration.activate();
 								this._session.reselectItem(e);
 								// Now try again
 								this._session.addCitation(i, field.getNoteIndex(), fieldCode.substr(ITEM_CODE.length+1));
@@ -705,7 +733,6 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 		var editFieldCode = editField.getCode().substr(ITEM_CODE.length+1);
 		var editCitation = editFieldCode ? this._session.unserializeCitation(editFieldCode, editFieldIndex) : null;
 		
-		Zotero.Integration.activate();
 		var editNoteIndex = editField.getNoteIndex();
 		var added = this._session.editCitation(editFieldIndex, editNoteIndex, editCitation);
 		this._doc.activate();
@@ -877,7 +904,6 @@ Zotero.Integration.Document.prototype.editBibliography = function() {
 	}
 	
 	this._updateSession();
-	Zotero.Integration.activate();
 	this._session.editBibliography();
 	this._doc.activate();
 	this._updateDocument(false, true);
@@ -917,7 +943,6 @@ Zotero.Integration.Document.prototype.removeCodes = function() {
 Zotero.Integration.Document.prototype.setDocPrefs = function() {
 	this._getFields();
 	
-	Zotero.Integration.activate();
 	try {
 		var oldData = this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
 	} finally {
@@ -1047,6 +1072,7 @@ Zotero.Integration.Session.prototype._displayDialog = function(url, options, io)
 	var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 		.getService(Components.interfaces.nsIWindowWatcher)
 		.openWindow(null, url, '', 'chrome,centerscreen'+(options ? ','+options : ""), (io ? io : null));
+	Zotero.Integration.activate(window);
 	while(!window.closed) Zotero.mainThread.processNextEvent(true);
 }
 
