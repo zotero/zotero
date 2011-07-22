@@ -176,10 +176,50 @@ Zotero.Relation.prototype.save = function () {
 }
 
 
+Zotero.Relation.prototype.erase = function () {
+	if (!this.id) {
+		throw ("ID not set in Zotero.Relation.erase()");
+	}
+	
+	Zotero.DB.beginTransaction();
+	
+	var deleteData = {};
+	deleteData[this.id] = {
+		old: this.serialize()
+	}
+	
+	var sql = "DELETE FROM relations WHERE ROWID=?";
+	Zotero.DB.query(sql, [this.id]);
+	
+	Zotero.DB.commitTransaction();
+	
+	Zotero.Notifier.trigger('delete', 'relation', [this.id], deleteData);
+}
+
+
 Zotero.Relation.prototype.toXML = function () {
 	var xml = <relation/>;
 	xml.subject = this.subject;
 	xml.predicate = this.predicate;
 	xml.object = this.object;
 	return xml;
+}
+
+
+Zotero.Relation.prototype.serialize = function () {
+	// Use a hash of the parts as the object key
+	var key = Zotero.Utilities.Internal.md5(this.subject + "_" + this.predicate + "_" + this.object);
+	
+	var obj = {
+		primary: {
+			libraryID: this.libraryID,
+			key: key,
+		},
+		fields: {
+			subject: this.subject,
+			predicate: this.predicate,
+			object: this.object
+		}
+	};
+	return obj;
 }

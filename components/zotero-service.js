@@ -76,7 +76,7 @@ const xpcomFilesLocal = [
 	'data/tags',
 	'date',
 	'db',
-	'duplicate',
+	'duplicates',
 	'enstyle',
 	'fulltext',
 	'id',

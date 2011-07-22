@@ -984,7 +984,7 @@ Zotero.Search.prototype._buildQuery = function(){
 		var data = Zotero.SearchConditions.get(this._conditions[i]['condition']);
 		
 		// Has a table (or 'savedSearch', which doesn't have a table but isn't special)
-		if (data.table || data.name == 'savedSearch') {
+		if (data.table || data.name == 'savedSearch' || data.name == 'tempTable') {
 			conditions.push({
 				name: data['name'],
 				alias: data['name']!=this._conditions[i]['condition']
@@ -1283,6 +1283,14 @@ Zotero.Search.prototype._buildQuery = function(){
 						openParens++;
 						break;
 					
+					case 'tempTable':
+						if (!condition.value.match(/^[a-zA-Z0-9]+$/)) {
+							throw ("Invalid temp table '" + condition.value + "'");
+						}
+						condSQL += "itemID IN (SELECT id FROM " + condition.value + ")";
+						skipOperators = true;
+						break;
+						
 					// For quicksearch blocks
 					case 'blockStart':
 					case 'blockEnd':
@@ -2142,6 +2150,13 @@ Zotero.SearchConditions = new function(){
 					doesNotContain: true
 				},
 				special: false
+			},
+			
+			{
+				name: 'tempTable',
+				operators: {
+					is: true
+				}
 			}
 		];
 		

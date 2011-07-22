@@ -223,6 +223,10 @@ Zotero.Sync = new function() {
 	
 	
 	function _loadObjectTypes() {
+		// TEMP: Take this out once system.sql > 31
+		var sql = "UPDATE syncObjectTypes SET name='relation' WHERE syncObjectTypeID=6 AND name='relations'";
+		Zotero.DB.query(sql);
+		
 		var sql = "SELECT * FROM syncObjectTypes";
 		var types = Zotero.DB.query(sql);
 		for each(var type in types) {

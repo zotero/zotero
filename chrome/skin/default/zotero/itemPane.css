@@ -1,4 +1,54 @@
+#zotero-item-pane-message {
+	padding: 0 2em;
+}
+
+#zotero-view-tabbox, #zotero-item-pane-content > groupbox, #zotero-item-pane-content > groupbox > .groupbox-body
+{
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+#zotero-view-tabbox tabs tab
+{
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+}
+
+#zotero-view-tabbox tabs tab .tab-text
+{
+	margin-top: .2em !important;
+	margin-bottom: .25em !important;
+}
+
+#zotero-view-item
+{
+	padding: 1.5em .25em .25em;
+}
+
 #zotero-view-item > tabpanel > *
 {
 	overflow: auto;
+}
+
+#zotero-view-item > vbox
+{
+	overflow: auto;
+	margin-left: 5px;
+}
+
+
+/* Merge pane in duplicates view */
+#zotero-duplicates-merge-button
+{
+	font-size: 13px;
+}
+
+#zotero-duplicates-merge-pane > groupbox
+{
+	margin: 0;
+}
+
+#zotero-duplicates-merge-item-box row
+{
+	min-height: 20px;
 }

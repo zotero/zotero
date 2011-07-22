@@ -149,3 +149,9 @@ hbox.zotero-date-field-status > label
 	border-width: 0 !important;
 	-moz-border-radius: 4px !important;
 }
+
+/* Merge pane in duplicates view */
+.zotero-field-version-button {
+	margin: 0;
+	padding: 0;
+}

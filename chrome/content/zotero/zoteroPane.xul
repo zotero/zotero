@@ -110,8 +110,6 @@
 								label="Search for Shared Libraries" oncommand="Zotero.Zeroconf.findInstances()"/>
 							<menuseparator id="zotero-tb-actions-plugins-separator"/>
 							<menuitem id="zotero-tb-actions-timeline" label="&zotero.toolbar.timeline.label;" command="cmd_zotero_createTimeline"/>
-							<!-- TODO: localize <menuitem id="zotero-tb-actions-duplicate" label="&zotero.toolbar.duplicate.label;" oncommand="ZoteroPane_Local.showDuplicates()"/>-->
-							<menuitem id="zotero-tb-actions-showDuplicates" label="Show Duplicates" oncommand="ZoteroPane_Local.showDuplicates()" hidden="true"/>
 							<menuseparator hidden="true" id="zotero-tb-actions-sync-separator"/>
 							<menuitem hidden="true" label="WebDAV Sync Debugging" disabled="true"/>
 							<menuitem hidden="true" label="  Purge Deleted Storage Files" oncommand="Zotero.Sync.Storage.purgeDeletedStorageFiles('webdav', function(results) { Zotero.debug(results); })"/>
@@ -153,8 +151,9 @@
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-snapshot" label="&zotero.items.menu.attach.snapshot;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(false, itemID)"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(true, itemID)"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
-							<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="Attach Stored Copy of File..." oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
-							<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="Attach Link to File..." oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(true, itemID);"/>
+							<!-- TODO: localize -->
+							<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="Attach Stored Copy of File…" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
+							<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="Attach Link to File…" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(true, itemID);"/>
 						</menupopup>
 					</toolbarbutton>
 					<toolbarseparator/>
@@ -231,7 +230,8 @@
 					<menuitem label="&zotero.toolbar.newSavedSearch.label;" command="cmd_zotero_newSavedSearch"/>
 					<menuitem label="&zotero.toolbar.newSubcollection.label;" oncommand="ZoteroPane_Local.newCollection(ZoteroPane_Local.getSelectedCollection().id)"/>
 					<menuseparator/>
-					<menuitem label="&zotero.collections.showUnfiledItems;" oncommand="ZoteroPane_Local.setUnfiled(ZoteroPane_Local.getSelectedLibraryID(), true)"/>
+					<menuitem label="&zotero.toolbar.duplicate.label;" oncommand="ZoteroPane_Local.setVirtual(ZoteroPane_Local.getSelectedLibraryID(), 'duplicates', true)"/>
+					<menuitem label="&zotero.collections.showUnfiledItems;" oncommand="ZoteroPane_Local.setVirtual(ZoteroPane_Local.getSelectedLibraryID(), 'unfiled', true)"/>
 					<menuitem oncommand="ZoteroPane_Local.editSelectedCollection();"/>
 					<menuitem oncommand="ZoteroPane_Local.deleteSelectedCollection();"/>
 					<menuseparator/>
@@ -261,6 +261,8 @@
 					<menuitem label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane_Local.duplicateSelectedItem();"/>
 					<menuitem oncommand="ZoteroPane_Local.deleteSelectedItems();"/>
 					<menuitem oncommand="ZoteroPane_Local.deleteSelectedItems(true);"/>
+					<!-- TODO: localize -->
+					<menuitem oncommand="ZoteroPane_Local.mergeSelectedItems();" label="Merge Items…"/>
 					<menuseparator/>
 					<menuitem oncommand="Zotero_File_Interface.exportItems();"/>
 					<menuitem oncommand="Zotero_File_Interface.bibliographyFromItems();"/>
@@ -316,7 +318,7 @@
 							enableColumnDrag="true"
 							onfocus="if (ZoteroPane_Local.itemsView.rowCount &amp;&amp; !ZoteroPane_Local.itemsView.selection.count) { ZoteroPane_Local.itemsView.selection.select(0); }"
 							onkeypress="ZoteroPane_Local.handleKeyPress(event, this.id)"
-							onselect="ZoteroPane_Local.itemSelected();"
+							onselect="ZoteroPane_Local.itemSelected(event)"
 							ondragstart="if (event.target.localName == 'treechildren') { ZoteroPane_Local.itemsView.onDragStart(event); }"
 							ondragenter="return ZoteroPane_Local.itemsView.onDragEnter(event)"
 							ondragover="return ZoteroPane_Local.itemsView.onDragOver(event)"
@@ -417,37 +419,8 @@
 					onmousemove="ZoteroPane_Local.updateToolbarPosition()"
 					oncommand="ZoteroPane_Local.updateToolbarPosition()"/>
 				
-				<vbox id="zotero-item-pane" zotero-persist="width">
-					<!-- TODO: localize -->
-					<button id="zotero-item-restore-button" label="Restore to Library"
-						oncommand="ZoteroPane_Local.restoreSelectedItems()" hidden="true"/>
-					<!-- TODO: localize -->
-					<button id="zotero-item-show-original" label="Show Original"
-						oncommand="ZoteroPane_Local.showOriginalItem()" hidden="true"/>
-					<deck id="zotero-item-pane-content" selectedIndex="0" flex="1">
-						<groupbox pack="center" align="center">
-							<label id="zotero-view-selected-label"/>
-						</groupbox>
-						<tabbox id="zotero-view-tabbox" flex="1" onselect="if (!ZoteroPane_Local.collectionsView.selection || event.originalTarget.localName != 'tabpanels') { return; }; ZoteroItemPane.viewItem(ZoteroPane_Local.getSelectedItems()[0], ZoteroPane_Local.collectionsView.editable ? 'edit' : 'view', this.selectedIndex)">
-							<tabs>
-								<tab label="&zotero.tabs.info.label;"/>
-								<tab label="&zotero.tabs.notes.label;"/>
-								<tab label="&zotero.tabs.tags.label;"/>
-								<tab label="&zotero.tabs.related.label;"/>
-							</tabs>
-							<tabpanels id="zotero-view-item" flex="1"/>
-						</tabbox>
-						<!-- Note info pane -->
-						<groupbox id="zotero-view-note" flex="1">
-							<zoteronoteeditor id="zotero-note-editor" flex="1" notitle="1"/>
-							<button id="zotero-view-note-button" label="&zotero.notes.separate;" oncommand="ZoteroPane_Local.openNoteWindow(this.getAttribute('noteID')); if(this.hasAttribute('sourceID')) ZoteroPane_Local.selectItem(this.getAttribute('sourceID'));"/>
-						</groupbox>
-						<!-- Attachment info pane -->
-						<groupbox flex="1">
-							<zoteroattachmentbox id="zotero-attachment-box" flex="1"/>
-						</groupbox>
-					</deck>
-				</vbox>
+				<!-- itemPane.xul -->
+				<vbox id="zotero-item-pane"/>
 			</hbox>
 		</vbox>
 		
