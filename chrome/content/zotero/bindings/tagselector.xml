@@ -467,6 +467,20 @@
 				<parameter name="ids"/>
 				<body>
 				<![CDATA[
+					var itemGroup = ZoteroPane_Local.getItemGroup();
+					
+					// Ignore anything other than deletes in duplicates view
+					if (itemGroup.isDuplicates()) {
+						switch (event) {
+							case 'delete':
+							case 'trash':
+								break;
+							
+							default:
+								return;
+						}
+					}
+					
 					// If a selected tag no longer exists, deselect it
 					if (event == 'delete') {
 						this._tags = Zotero.Tags.getAll(this._types, this.libraryID);

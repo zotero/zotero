@@ -1359,4 +1359,4 @@ INSERT INTO "syncObjectTypes" VALUES(2, 'creator');
 INSERT INTO "syncObjectTypes" VALUES(3, 'item');
 INSERT INTO "syncObjectTypes" VALUES(4, 'search');
 INSERT INTO "syncObjectTypes" VALUES(5, 'tag');
-INSERT INTO "syncObjectTypes" VALUES(6, 'relations');
+INSERT INTO "syncObjectTypes" VALUES(6, 'relation');

@@ -79,7 +79,6 @@
 							break;
 						
 						case 'merge':
-							//this.hideEmptyFields = true;
 							this.clickByItem = true;
 							break;
 						
@@ -90,6 +89,11 @@
 							this.showTypeMenu = true;
 							this.clickHandler = this.showEditor;
 							this.blurHandler = this.hideEditor;
+							break;
+						
+						case 'fieldmerge':
+							this.hideEmptyFields = true;
+							this._fieldAlternatives = {};
 							break;
 						
 						default:
@@ -103,15 +107,22 @@
 			</property>
 			
 			<field name="_item"/>
-			<property name="item"
-				onget="return this._item;"
-				onset="this._item = val; this.refresh();">
+			<property name="item" onget="return this._item;">
+				<setter>
+				<![CDATA[
+					if (!(val instanceof Zotero.Item)) {
+						throw ("<zoteroitembox>.item must be a Zotero.Item");
+					}
+					this._item = val;
+					this.refresh();
+				]]>
+				</setter>
 			</property>
 			
 			<!-- .ref is an alias for .item -->
 			<property name="ref"
 				onget="return this._item;"
-				onset="this._item = val; this.refresh();">
+				onset="this.item = val; this.refresh();">
 			</property>
 			
 			
@@ -128,6 +139,22 @@
 					}
 					
 					this._visibleFields = val;
+				]]>
+				</setter>
+			</property>
+			
+			<!--
+				 An array of field names that should be hidden
+			-->
+			<field name="_hiddenFields">[]</field>
+			<property name="hiddenFields">
+				<setter>
+				<![CDATA[
+					if (val.constructor.name != 'Array') {
+						throw ('hiddenFields must be an array in <itembox>.visibleFields');
+					}
+					
+					this._hiddenFields = val;
 				]]>
 				</setter>
 			</property>
@@ -166,6 +193,26 @@
 				</setter>
 			</property>
 			
+			<!--
+				 An object of alternative values for keyed fields
+				 
+			-->
+			<field name="_fieldAlternatives">{}</field>
+			<property name="fieldAlternatives">
+				<setter>
+				<![CDATA[
+					if (val.constructor.name != 'Object') {
+						throw ('fieldAlternatives must be an Object in <itembox>.fieldAlternatives');
+					}
+					
+					if (this.mode != 'fieldmerge') {
+						throw ('fieldAlternatives is valid only in fieldmerge mode in <itembox>.fieldAlternatives');
+					}
+					
+					this._fieldAlternatives = val;
+				]]>
+				</setter>
+			</property>
 			
 			<!--
 				 An array of field names in the order they should appear
@@ -209,7 +256,6 @@
 				onget="return '(' + Zotero.getString('pane.item.defaultLastName') + ')'"/>
 			<property name="_defaultFullName"
 				onget="return '(' + Zotero.getString('pane.item.defaultFullName') + ')'"/>
-			
 			<method name="refresh">
 				<body>
 				<![CDATA[
@@ -285,6 +331,10 @@
 						}
 						
 						if (fieldName) {
+							if (this._hiddenFields.indexOf(fieldName) != -1) {
+								continue;
+							}
+							
 							// createValueElement() adds the itemTypeID as an attribute
 							// and converts it to a localized string for display
 							if (fieldName == 'itemType') {
@@ -294,12 +344,13 @@
 								val = this.item.getField(fieldName);
 							}
 							
-							var fieldIsClickable = this._fieldIsClickable(fieldName);
-							
 							if (!val && this.hideEmptyFields
-									&& this._visibleFields.indexOf(fieldName) == -1) {
+									&& this._visibleFields.indexOf(fieldName) == -1
+									&& (this.mode != 'fieldmerge' || typeof this._fieldAlternatives[fieldName] == 'undefined')) {
 								continue;
 							}
+							
+							var fieldIsClickable = this._fieldIsClickable(fieldName);
 							
 							// Start tabindex at 1001 after creators
 							var tabindex = fieldIsClickable
@@ -365,10 +416,38 @@
 								"if (this.nextSibling.inputField) { this.nextSibling.inputField.blur(); }");
 						}
 						
-						this.addDynamicRow(label, valueElement);
+						var row = this.addDynamicRow(label, valueElement);
 						
 						if (fieldName && this._selectField == fieldName) {
 							this.showEditor(valueElement);
+						}
+						
+						// In field merge mode, add a button to switch field versions
+						else if (this.mode == 'fieldmerge' && typeof this._fieldAlternatives[fieldName] != 'undefined') {
+							var button = document.createElement("toolbarbutton");
+							button.className = 'zotero-field-version-button';
+							button.setAttribute('image', 'chrome://zotero/skin/treesource-duplicates.png');
+							button.setAttribute('type', 'menu');
+							
+							var popup = button.appendChild(document.createElement("menupopup"));
+							
+							for each(var v in this._fieldAlternatives[fieldName]) {
+								var menuitem = document.createElement("menuitem");
+								menuitem.setAttribute('label', Zotero.Utilities.ellipsize(v, 40));
+								menuitem.setAttribute('fieldName', fieldName);
+								menuitem.setAttribute('originalValue', v);
+								menuitem.setAttribute(
+									'oncommand',
+									"var binding = document.getBindingParent(this); "
+									+ "var item = binding.item; "
+									+ "item.setField(this.getAttribute('fieldName'), this.getAttribute('originalValue')); "
+									+ "var row = Zotero.getAncestorByTagName(this, 'row'); "
+									+ "binding.refresh();"
+								);
+								popup.appendChild(menuitem);
+							}
+							
+							row.appendChild(button);
 						}
 					}
 					this._selectField = false;
@@ -446,13 +525,11 @@
 						this.addCreatorRow(false, false, true, true);
 					}
 					
-					
 					// Move to next or previous field if (shift-)tab was pressed
 					if (this._lastTabIndex && this._tabDirection)
 					{
 						this._focusNextField('info', this._dynamicFields, this._lastTabIndex, this._tabDirection == -1);
 					}
-
 				]]>
 				</body>
 			</method>
@@ -534,6 +611,8 @@
 					else {
 						this._dynamicFields.appendChild(row);
 					}
+					
+					return row;
 				]]>
 				</body>
 			</method>
@@ -1140,10 +1219,10 @@
 						}
 						
 						// Display a context menu for certain fields
-						if (fieldName == 'seriesTitle' || fieldName == 'shortTitle' ||
+						if (this.editable && (fieldName == 'seriesTitle' || fieldName == 'shortTitle' ||
 								Zotero.ItemFields.isFieldOfBase(fieldID, 'title') ||
-								Zotero.ItemFields.isFieldOfBase(fieldID, 'publicationTitle')) {
-							valueElement.setAttribute('contextmenu', 'field-menu');
+								Zotero.ItemFields.isFieldOfBase(fieldID, 'publicationTitle'))) {
+							valueElement.setAttribute('contextmenu', 'zotero-field-transform-menu');
 						}
 					}
 					
@@ -2261,7 +2340,7 @@
 							);
 							typeBox.setAttribute('typeid', typeID);
 							document.getBindingParent(this).modifyCreator(index, fields);"/>
-					<menupopup id="field-menu">
+					<menupopup id="zotero-field-transform-menu">
 						<menu label="&zotero.item.textTransform;">
 							<menupopup>
 								<menuitem label="&zotero.item.textTransform.titlecase;" class="menuitem-non-iconic"

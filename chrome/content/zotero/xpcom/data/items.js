@@ -374,6 +374,68 @@ Zotero.Items = new function() {
 	}
 	
 	
+	this.merge = function (item, otherItems) {
+		Zotero.DB.beginTransaction();
+		
+		var otherItemIDs = [];  
+		var itemURI = Zotero.URI.getItemURI(item);
+		
+		for each(var otherItem in otherItems) {
+			// Move child items to master
+			var ids = otherItem.getAttachments(true).concat(otherItem.getNotes(true));
+			for each(var id in ids) {
+				var attachment = Zotero.Items.get(id);
+				
+				// TODO: Skip identical children?
+				
+				attachment.setSource(item.id);
+				attachment.save();
+			}
+			
+			// All other operations are additive only and do not affect the,
+			// old item, which will be put in the trash
+			
+			// Add collections to master
+			var collectionIDs = otherItem.getCollections();
+			for each(var collectionID in collectionIDs) {
+				var collection = Zotero.Collections.get(collectionID);
+				collection.addItem(item.id);
+			}
+			
+			// Add tags to master
+			var tags = otherItem.getTags();
+			for each(var tag in tags) {
+				item.addTagByID(tag.id);
+			}
+			
+			// Related items
+			var relatedItems = otherItem.relatedItemsBidirectional;
+			Zotero.debug(item._getRelatedItems(true));
+			for each(var relatedItemID in relatedItems) {
+				item.addRelatedItem(relatedItemID);
+			}
+			item.save();
+			
+			// Relations
+			Zotero.Relations.copyURIs(
+				item.libraryID,
+				Zotero.URI.getItemURI(item),
+				Zotero.URI.getItemURI(otherItem)
+			);
+			
+			// Add relation to track merge
+			var otherItemURI = Zotero.URI.getItemURI(otherItem);
+			Zotero.Relations.add(item.libraryID, otherItemURI, Zotero.Relations.deletedItemPredicate, itemURI);
+			
+			// Trash other item
+			otherItem.deleted = true;
+			otherItem.save();
+		}
+		
+		Zotero.DB.commitTransaction();
+	}
+	
+	
 	this.trash = function (ids) {
 		ids = Zotero.flattenArguments(ids);
 		

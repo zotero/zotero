@@ -28,7 +28,7 @@ Zotero.Notifier = new function(){
 	var _disabled = false;
 	var _types = [
 		'collection', 'creator', 'search', 'share', 'share-items', 'item',
-		'collection-item', 'item-tag', 'tag', 'group', 'bucket'
+		'collection-item', 'item-tag', 'tag', 'group', 'bucket', 'relation'
 	];
 	var _inTransaction;
 	var _locked = false;
@@ -90,7 +90,7 @@ Zotero.Notifier = new function(){
 	*
 	* 	event: 'add', 'modify', 'delete', 'move' ('c', for changing parent),
 	*		'remove' (ci, it), 'refresh', 'redraw', 'trash'
-	* 	type - 'collection', 'search', 'item', 'collection-item', 'item-tag', 'tag', 'group'
+	* 	type - 'collection', 'search', 'item', 'collection-item', 'item-tag', 'tag', 'group', 'relation'
 	* 	ids - single id or array of ids
 	*
 	* Notes:
@@ -152,7 +152,7 @@ Zotero.Notifier = new function(){
 		}
 		
 		for (var i in _observers.items){
-			Zotero.debug("Calling notify() on observer with hash '" + i + "'", 4);
+			Zotero.debug("Calling notify('" + event + "') on observer with hash '" + i + "'", 4);
 			// Find observers that handle notifications for this type (or all types)
 			if (!_observers.get(i).types || _observers.get(i).types.indexOf(type)!=-1){
 				// Catch exceptions so all observers get notified even if

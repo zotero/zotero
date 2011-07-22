@@ -106,10 +106,10 @@ Zotero.Item.prototype.__defineGetter__('dateAdded', function () { return this.ge
 Zotero.Item.prototype.__defineGetter__('dateModified', function () { return this.getField('dateModified'); });
 Zotero.Item.prototype.__defineGetter__('firstCreator', function () { return this.getField('firstCreator'); });
 
-Zotero.Item.prototype.__defineGetter__('relatedItems', function () { var ids = this._getRelatedItems(true); return ids ? ids : []; });
+Zotero.Item.prototype.__defineGetter__('relatedItems', function () { var ids = this._getRelatedItems(true); return ids; });
 Zotero.Item.prototype.__defineSetter__('relatedItems', function (arr) { this._setRelatedItems(arr); });
-Zotero.Item.prototype.__defineGetter__('relatedItemsReverse', function () { var ids = this._getRelatedItemsReverse(); return ids ? ids : []; });
-Zotero.Item.prototype.__defineGetter__('relatedItemsBidirectional', function () { var ids = this._getRelatedItemsBidirectional(); return ids ? ids : []; });
+Zotero.Item.prototype.__defineGetter__('relatedItemsReverse', function () { var ids = this._getRelatedItemsReverse(); return ids; });
+Zotero.Item.prototype.__defineGetter__('relatedItemsBidirectional', function () { var ids = this._getRelatedItemsBidirectional(); return ids; });
 
 
 Zotero.Item.prototype.getID = function() {
@@ -608,8 +608,10 @@ Zotero.Item.prototype.getFieldsNotInType = function (itemTypeID, allowBaseConver
 * Return an array of collectionIDs for all collections the item belongs to
 **/
 Zotero.Item.prototype.getCollections = function() {
-	return Zotero.DB.columnQuery("SELECT collectionID FROM collectionItems "
-		+ "WHERE itemID=" + this.id);
+	var ids = Zotero.DB.columnQuery(
+		"SELECT collectionID FROM collectionItems WHERE itemID=?", this.id
+	);
+	return ids ? ids : [];
 }
 
 
@@ -1105,7 +1107,7 @@ Zotero.Item.prototype.addRelatedItem = function (itemID) {
 	}
 	
 	var current = this._getRelatedItems(true);
-	if (current && current.indexOf(itemID) != -1) {
+	if (current.indexOf(itemID) != -1) {
 		Zotero.debug("Item " + this.id + " already related to item "
 			+ itemID + " in Zotero.Item.addItem()");
 		return false;
@@ -1139,11 +1141,9 @@ Zotero.Item.prototype.removeRelatedItem = function (itemID) {
 	itemID = parsedInt;
 	
 	var current = this._getRelatedItems(true);
-	if (current) {
-		var index = current.indexOf(itemID);
-	}
+	var index = current.indexOf(itemID);
 	
-	if (!current || index == -1) {
+	if (index == -1) {
 		Zotero.debug("Item " + this.id + " isn't related to item "
 			+ itemID + " in Zotero.Item.removeRelatedItem()");
 		return false;
@@ -1487,9 +1487,6 @@ Zotero.Item.prototype.save = function() {
 				var removed = [];
 				var newids = [];
 				var currentIDs = this._getRelatedItems(true);
-				if (!currentIDs) {
-					currentIDs = [];
-				}
 				
 				if (this._previousData && this._previousData.related) {
 					for each(var id in this._previousData.related) {
@@ -1763,6 +1760,16 @@ Zotero.Item.prototype.save = function() {
 					sql = "REPLACE INTO deletedItems (itemID) VALUES (?)";
 				}
 				else {
+					// If undeleting, remove any merge-tracking relations
+					var relations = Zotero.Relations.getByURIs(
+						Zotero.URI.getItemURI(this),
+						Zotero.Relations.deletedItemPredicate,
+						false
+					);
+					for each(var relation in relations) {
+						relation.erase();
+					}
+					
 					sql = "DELETE FROM deletedItems WHERE itemID=?";
 				}
 				Zotero.DB.query(sql, this.id);
@@ -1952,9 +1959,6 @@ Zotero.Item.prototype.save = function() {
 				var removed = [];
 				var newids = [];
 				var currentIDs = this._getRelatedItems(true);
-				if (!currentIDs) {
-					currentIDs = [];
-				}
 				
 				if (this._previousData && this._previousData.related) {
 					for each(var id in this._previousData.related) {
@@ -2418,7 +2422,7 @@ Zotero.Item.prototype.setNote = function(text) {
  * Returns child notes of this item
  *
  * @param	{Boolean}	includeTrashed		Include trashed child items
- * @return	{Integer[]}						Array of itemIDs, or FALSE if none
+ * @return	{Integer[]}						Array of itemIDs
  */
 Zotero.Item.prototype.getNotes = function(includeTrashed) {
 	if (this.isNote()) {
@@ -2442,7 +2446,7 @@ Zotero.Item.prototype.getNotes = function(includeTrashed) {
 	
 	var notes = Zotero.DB.query(sql, this.id);
 	if (!notes) {
-		return false;
+		return [];
 	}
 	
 	// Sort by title
@@ -3204,7 +3208,7 @@ Zotero.Item.prototype.__defineGetter__('attachmentText', function () {
  * Returns child attachments of this item
  *
  * @param	{Boolean}	includeTrashed		Include trashed child items
- * @return	{Integer[]}						Array of itemIDs, or FALSE if none
+ * @return	{Integer[]}						Array of itemIDs
  */
 Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 	if (this.isAttachment()) {
@@ -3232,7 +3236,7 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 	
 	var attachments = Zotero.DB.query(sql, this.id);
 	if (!attachments) {
-		return false;
+		return [];
 	}
 	
 	// Sort by title
@@ -3322,7 +3326,7 @@ Zotero.Item.prototype.addTag = function(name, type) {
 	
 	var matchingTags = Zotero.Tags.getIDs(name, this.libraryID);
 	var itemTags = this.getTags();
-	if (matchingTags && itemTags) {
+	if (matchingTags && itemTags.length) {
 		for each(var id in matchingTags) {
 			if (itemTags.indexOf(id) != -1) {
 				var tag = Zotero.Tags.get(id);
@@ -3422,17 +3426,17 @@ Zotero.Item.prototype.hasTags = function(tagIDs) {
 /**
  * Returns all tags assigned to an item
  *
- * @return	array			Array of Zotero.Tag objects
+ * @return	Array			Array of Zotero.Tag objects
  */
 Zotero.Item.prototype.getTags = function() {
 	if (!this.id) {
-		return false;
+		return [];
 	}
 	var sql = "SELECT tagID, name FROM tags WHERE tagID IN "
 		+ "(SELECT tagID FROM itemTags WHERE itemID=?)";
 	var tags = Zotero.DB.query(sql, this.id);
 	if (!tags) {
-		return false;
+		return [];
 	}
 	
 	var collation = Zotero.getLocaleCollation();
@@ -3756,6 +3760,50 @@ Zotero.Item.prototype.diff = function (item, includeMatches, ignoreFields) {
 
 
 /**
+ * Compare multiple items against this item and return fields that differ
+ *
+ * Currently compares only item data, not primary fields
+ */
+Zotero.Item.prototype.multiDiff = function (otherItems, ignoreFields) {
+	var thisData = this.serialize();
+	
+	var alternatives = {};
+	var hasDiffs = false;
+	
+	for each(var otherItem in otherItems) {
+		var diff = [];
+		var otherData = otherItem.serialize();
+		var numDiffs = Zotero.Items.diff(thisData, otherData, diff);
+		
+		if (numDiffs) {
+			for (var field in diff[1].fields) {
+				if (ignoreFields && ignoreFields.indexOf(field) != -1) {
+					continue;
+				}
+				
+				var value = diff[1].fields[field];
+				
+				if (!alternatives[field]) {
+					hasDiffs = true;
+					alternatives[field] = [value];
+				}
+				else if (alternatives[field].indexOf(value) == -1) {
+					hasDiffs = true;
+					alternatives[field].push(value);
+				}
+			}
+		}
+	}
+	
+	if (!hasDiffs) {
+		return false;
+	}
+	
+	return alternatives;
+}
+
+
+/**
  * Returns an unsaved copy of the item
  *
  * @param	{Boolean}		[includePrimary=false]
@@ -3781,13 +3829,14 @@ Zotero.Item.prototype.clone = function(includePrimary, newItem, unsaved) {
 		var sameLibrary = newItem.libraryID == this.libraryID;
 	}
 	else {
-		var newItem = new Zotero.Item(itemTypeID);
+		var newItem = new Zotero.Item;
 		var sameLibrary = true;
 		
 		if (includePrimary) {
 			newItem.id = this.id;
 			newItem.libraryID = this.libraryID;
 			newItem.key = this.key;
+			newItem.itemTypeID = itemTypeID;
 			for (var field in obj.primary) {
 				switch (field) {
 					case 'itemID':
@@ -3798,6 +3847,9 @@ Zotero.Item.prototype.clone = function(includePrimary, newItem, unsaved) {
 				}
 				newItem.setField(field, obj.primary[field]);
 			}
+		}
+		else {
+			newItem.setType(itemTypeID);
 		}
 	}
 	
@@ -4026,13 +4078,11 @@ Zotero.Item.prototype.erase = function() {
 	
 	// Flag related items for notification
 	var relateds = this._getRelatedItemsBidirectional();
-	if (relateds) {
-		for each(var id in relateds) {
-			var relatedItem = Zotero.Items.get(id);
-			if (changedItems.indexOf(id) != -1) {
-				changedItemsNotifierData[id] = { old: relatedItem.serialize() };
-				changedItems.push(id);
-			}
+	for each(var id in relateds) {
+		var relatedItem = Zotero.Items.get(id);
+		if (changedItems.indexOf(id) != -1) {
+			changedItemsNotifierData[id] = { old: relatedItem.serialize() };
+			changedItems.push(id);
 		}
 	}
 	
@@ -4042,9 +4092,9 @@ Zotero.Item.prototype.erase = function() {
 		//Zotero.Fulltext.clearItemContent(this.id);
 	}
 	
-	// Remove relations
-	var relation = Zotero.URI.getItemURI(this);
-	Zotero.Relations.eraseByURIPrefix(relation);
+	// Remove relations (except for merge tracker)
+	var uri = Zotero.URI.getItemURI(this);
+	Zotero.Relations.eraseByURIPrefix(uri, [Zotero.Relations.deletedItemPredicate]);
 	
 	Zotero.DB.query('DELETE FROM annotations WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM highlights WHERE itemID=?', this.id);
@@ -4061,7 +4111,7 @@ Zotero.Item.prototype.erase = function() {
 	Zotero.DB.query('DELETE FROM itemSeeAlso WHERE linkedItemID=?', this.id);
 	
 	var tags = this.getTags();
-	if (tags) {
+	if (tags.length) {
 		var hasTags = true;
 		Zotero.DB.query('DELETE FROM itemTags WHERE itemID=?', this.id);
 		// DEBUG: Hack to reload linked items -- replace with something better
@@ -4236,19 +4286,14 @@ Zotero.Item.prototype.toArray = function (mode) {
 	
 	arr.tags = [];
 	var tags = this.getTags();
-	if (tags) {
-		for (var i=0; i<tags.length; i++) {
-			var tag = tags[i].serialize();
-			tag.tag = tag.fields.name;
-			tag.type = tag.fields.type;
-			arr.tags.push(tag);
-		}
+	for (var i=0, len=tags.length; i<len; i++) {
+		var tag = tags[i].serialize();
+		tag.tag = tag.fields.name;
+		tag.type = tag.fields.type;
+		arr.tags.push(tag);
 	}
 	
 	arr.related = this._getRelatedItemsBidirectional();
-	if (!arr.related) {
-		arr.related = [];
-	}
 	
 	return arr;
 }
@@ -4376,16 +4421,12 @@ Zotero.Item.prototype.serialize = function(mode) {
 	
 	arr.tags = [];
 	var tags = this.getTags();
-	if (tags) {
-		for (var i=0; i<tags.length; i++) {
-			arr.tags.push(tags[i].serialize());
-		}
+	for (var i=0, len=tags.length; i<len; i++) {
+		arr.tags.push(tags[i].serialize());
 	}
 	
-	var related = this._getRelatedItems(true);
-	var reverse = this._getRelatedItemsReverse();
-	arr.related = related ? related : [];
-	arr.relatedReverse = reverse ? reverse : [];
+	arr.related = this._getRelatedItems(true);
+	arr.relatedReverse = this._getRelatedItemsReverse();
 	
 	return arr;
 }
@@ -4502,7 +4543,7 @@ Zotero.Item.prototype._loadRelatedItems = function() {
  * Returns related items this item point to
  *
  * @param	bool		asIDs		Return as itemIDs
- * @return	array					Array of itemIDs, or FALSE if none
+ * @return	array					Array of itemIDs
  */
 Zotero.Item.prototype._getRelatedItems = function (asIDs) {
 	if (!this._relatedItemsLoaded) {
@@ -4510,7 +4551,7 @@ Zotero.Item.prototype._getRelatedItems = function (asIDs) {
 	}
 	
 	if (this._relatedItems.length == 0) {
-		return false;
+		return [];
 	}
 	
 	// Return itemIDs
@@ -4534,28 +4575,33 @@ Zotero.Item.prototype._getRelatedItems = function (asIDs) {
 /**
  * Returns related items that point to this item
  *
- * @return	array						Array of itemIDs, or FALSE if none
+ * @return	array						Array of itemIDs
  */
 Zotero.Item.prototype._getRelatedItemsReverse = function () {
 	if (!this.id) {
-		return false;
+		return [];
 	}
 	
 	var sql = "SELECT itemID FROM itemSeeAlso WHERE linkedItemID=?";
-	return Zotero.DB.columnQuery(sql, this.id);
+	var ids = Zotero.DB.columnQuery(sql, this.id);
+	if (!ids) {
+		return [];
+	}
+	return ids;
 }
 
 
 /**
  * Returns related items this item points to and that point to this item
  *
- * @return array|bool		Array of itemIDs, or false if none
+ * @return array		Array of itemIDs
  */
 Zotero.Item.prototype._getRelatedItemsBidirectional = function () {
 	var related = this._getRelatedItems(true);
 	var reverse = this._getRelatedItemsReverse();
-	if (reverse) {
-		if (!related) {
+	
+	if (reverse.length) {
+		if (!related.length) {
 			return reverse;
 		}
 		
@@ -4566,7 +4612,7 @@ Zotero.Item.prototype._getRelatedItemsBidirectional = function () {
 		}
 	}
 	else if (!related) {
-		return false;
+		return [];
 	}
 	return related;
 }
@@ -4582,9 +4628,6 @@ Zotero.Item.prototype._setRelatedItems = function (itemIDs) {
 	}
 	
 	var currentIDs = this._getRelatedItems(true);
-	if (!currentIDs) {
-		currentIDs = [];
-	}
 	var oldIDs = []; // children being kept
 	var newIDs = []; // new children
 	
