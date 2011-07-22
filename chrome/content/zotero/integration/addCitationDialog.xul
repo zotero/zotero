@@ -38,14 +38,12 @@
 	width="600" height="450"
 	onload="Zotero_Citation_Dialog.load();"
 	onunload="doUnload();"
-	xmlns:html="http://www.w3.org/1999/xhtml"
-	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	persist="screenX screenY width height"
-	style="background: transparent; -moz-appearance:none; padding: 0"
-	chromemargin="0, 0, 0, 0"
-	buttons="extra1,extra2,accept,cancel"
 	ondialogaccept="return Zotero_Citation_Dialog.accept();"
 	ondialogcancel="Zotero_Citation_Dialog.cancel();"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	persist="screenX screenY width height"
+	resizable="true"
+	buttons="extra1,extra2,accept,cancel"
 	ondialogextra2="Zotero_Citation_Dialog.toggleEditor()"
 	ondialogextra1="Zotero_Citation_Dialog.toggleMultipleSources()">
 	
@@ -53,7 +51,7 @@
 	<script src="../selectItemsDialog.js"/>
 	<script src="addCitationDialog.js"/>
 	
-	<vbox id="zotero-select-items-container" style="background: rgba(239,239,239,0.9); border-radius:15px; padding: 5px;" flex="1">
+	<vbox id="zotero-select-items-container" flex="1">
 		<vbox flex="1">
 			<hbox flex="1">
 				<vbox align="stretch" flex="1">
@@ -203,15 +201,5 @@
 		<textbox id="editor" type="styled" mode="integration" hidden="true" flex="1"/>
 		<!-- TODO: localize -->
 		<description id="zotero-editor-warning" style="margin: 9px 1px 0" hidden="true">Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.</description>
-		<hbox>
-			<hbox flex="1">
-				<button dlgtype="extra1"/>
-				<button dlgtype="extra2"/>
-			</hbox>
-			<hbox>
-				<button dlgtype="cancel"/>
-				<button dlgtype="accept"/>
-			</hbox>
-		</hbox>
 	</vbox>
 </dialog>
