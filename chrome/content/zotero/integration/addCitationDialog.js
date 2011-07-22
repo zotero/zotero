@@ -70,6 +70,7 @@ var Zotero_Citation_Dialog = new function () {
 	 * initialize add citation dialog
 	 */
 	function load() {
+		document.documentElement.setAttribute("drawintitlebar", "true");
 		document.documentElement.getButton("extra1").label = Zotero.getString("citation.multipleSources");
 		document.documentElement.getButton("extra2").label = Zotero.getString("citation.showEditor");
 		
