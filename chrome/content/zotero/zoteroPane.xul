@@ -31,6 +31,7 @@
 <!DOCTYPE overlay [
 	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
 	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+	<!ENTITY % dialogOverlayDTD SYSTEM "chrome://global/locale/dialogOverlay.dtd"> %dialogOverlayDTD;
 ]>
 
 <overlay id="zotero"
@@ -43,7 +44,8 @@
 	<script src="timelineInterface.js"/>
 	<script src="recognizePDF.js"/>
 	<script src="browser.js"/>
-	<script src="locateMenu.js" type="application/javascript;version=1.7"/>
+	<script src="lookup.js"/>
+	<script src="locateMenu.js" type="application/javascript;version=1.8"/>
 	
 	<commandset id="mainCommandSet">
 		<command id="cmd_zotero_reportErrors" oncommand="ZoteroPane_Local.reportErrors();"/>
@@ -138,7 +140,25 @@
 						</menupopup>
 					</toolbarbutton>
 					<toolbarbutton id="zotero-tb-item-from-page" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItemFromPage.label;" command="cmd_zotero_newItemFromCurrentPage"/>
-					<toolbarbutton id="zotero-tb-lookup" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" oncommand="ZoteroPane_Local.openLookupWindow()"/>
+					<toolbarbutton id="zotero-tb-lookup" class="zotero-tb-button" tooltiptext="&zotero.toolbar.lookup.label;" type="panel">
+						<panel id="zotero-lookup-panel" type="arrow" onpopupshown="Zotero_Lookup.onShowing()"
+								onpopuphidden="Zotero_Lookup.onHidden()" noautohide="true">
+							<vbox>
+								<description>&zotero.lookup.description;</description>
+								<textbox id="zotero-lookup-textbox" style="margin: 2px 0 2px 0" onkeypress="if([13, 14].indexOf(event.keyCode) !== -1) { Zotero_Lookup.accept(); } return true;" flex="1"/>
+								<hbox>
+									<toolbarbutton class="zotero-small-progress-indicator" id="zotero-lookup-progress"/>
+									<spacer flex="1"/>
+									<button id="zotero-lookup-cancel-button" style="list-style-image: none"
+										class="editBookmarkPanelBottomButton" label="&cancelButton.label;"
+										oncommand="document.getElementById('zotero-lookup-panel').hidePopup()"/>
+									<button id="zotero-lookup-accept-button" style="list-style-image: none; margin-right: 0"
+										class="editBookmarkPanelBottomButton" label="&okButton.label;"
+										oncommand="Zotero_Lookup.accept()"/>
+								</hbox>
+							</vbox>
+						</panel>
+					</toolbarbutton>
 					<!--<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>-->
 					<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;" type="menu">
 						<menupopup onpopupshowing="ZoteroPane_Local.updateNoteButtonMenu()">

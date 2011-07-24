@@ -253,6 +253,10 @@
 	height:24px;
 }
 
+.zotero-tb-button[type="panel"] > dropmarker {
+  display: none;
+}
+
 #zotero-tb-collection-add
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-collection-add.png');
