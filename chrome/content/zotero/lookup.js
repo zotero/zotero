@@ -32,12 +32,6 @@ const Zotero_Lookup = new function () {
 	 * Performs a lookup by DOI, PMID, or ISBN
 	 */
 	this.accept = function() {
-		var progressElement = document.getElementById("zotero-lookup-progress");
-		progressElement.setAttribute("status", "animate");
-		
-		var acceptElement = document.getElementById("zotero-lookup-accept-button");
-		acceptElement.disabled = true;
-		
 		var identifierElement = document.getElementById("zotero-lookup-textbox");
 		var identifier = identifierElement.value;
 		
@@ -67,9 +61,6 @@ const Zotero_Lookup = new function () {
 			if(success) {
 				document.getElementById("zotero-lookup-panel").hidePopup();
 			} else {
-				acceptElement.disabled = undefined;
-				progressElement.removeAttribute("status");
-				
 				var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 				                        .getService(Components.interfaces.nsIPromptService);
 				prompts.alert(window, Zotero.getString("lookup.failure.title"),
@@ -118,9 +109,6 @@ const Zotero_Lookup = new function () {
 	 * Cancels the popup and resets fields
 	 */
 	this.onHidden = function() {
-		var progressElement = document.getElementById("zotero-lookup-progress");
-		if(progressElement.hasAttribute("status")) progressElement.removeAttribute("status");
-		document.getElementById("zotero-lookup-accept-button").disabled = undefined;
 		document.getElementById("zotero-lookup-textbox").value = "";
 	}
 }
