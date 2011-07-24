@@ -129,7 +129,11 @@ Zotero.Translate.SandboxManager.prototype = {
 	 * Evaluates code in the sandbox
 	 */
 	"eval":function(code, exported, path) {
-		Components.utils.evalInSandbox(code, this.sandbox, "1.8", path, 1);
+		if(Zotero.isFx4) {
+			Components.utils.evalInSandbox(code, this.sandbox, "1.8", path, 1);
+		} else {
+			Components.utils.evalInSandbox(code, this.sandbox);
+		}
 	},
 	
 	/**
@@ -147,7 +151,6 @@ Zotero.Translate.SandboxManager.prototype = {
 			let localKey = key;
 			if(newExposedProps) newExposedProps[localKey] = "r";
 			
-			// magical XPCSafeJSObjectWrappers for sandbox
 			var type = typeof object[localKey];
 			var isFunction = type === "function";
 			var isObject = typeof object[localKey] === "object";
@@ -171,9 +174,7 @@ Zotero.Translate.SandboxManager.prototype = {
 							}
 							
 							for(var i=0, nArgs=arguments.length; i<nArgs; i++) {
-								args[i+offset] = (((typeof arguments[i] === "object" && arguments[i] !== null)
-									|| typeof arguments[i] === "function") 
-									? new XPCSafeJSObjectWrapper(arguments[i]) : arguments[i]);
+								args[i+offset] = arguments[i];
 							}
 							
 							return object[localKey].apply(object, args);

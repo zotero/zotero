@@ -1157,7 +1157,7 @@ Zotero.Translate.Base.prototype = {
 	 */
 	"_loadTranslator":function(translator, callback) {
 		var sandboxLocation = this._getSandboxLocation();
-		if(!this._sandboxLocation || sandboxLocation != this._sandboxLocation) {
+		if(!this._sandboxLocation || sandboxLocation !== this._sandboxLocation) {
 			this._sandboxLocation = sandboxLocation;
 			this._generateSandbox();
 		}
