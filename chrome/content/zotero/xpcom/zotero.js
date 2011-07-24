@@ -37,17 +37,6 @@ const ZOTERO_CONFIG = {
 	PREF_BRANCH: 'extensions.zotero.'
 };
 
-const ZOTERO_METAREGEXP = /[-[\]{}()*+?.\\^$|,#\s]/g;
-
-// Fx4.0b8+ use implicit SJOWs and get rid of explicit XPCSafeJSObjectWrapper constructor
-// Ugly hack to get around this until we can just kill the XPCSafeJSObjectWrapper calls (when we
-// drop Fx3.6 support)
-try {
-	XPCSafeJSObjectWrapper;
-} catch(e) {
-	eval("var XPCSafeJSObjectWrapper = function(arg) { return arg }");
-}
-
 // Load AddonManager for Firefox 4
 var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
                          getService(Components.interfaces.nsIXULAppInfo);
@@ -392,7 +381,11 @@ if(appInfo.platformVersion[0] >= 2) {
 						
 						// evaluate
 						Components.utils.evalInSandbox(prefsJs, sandbox);
-						var prefs = new XPCSafeJSObjectWrapper(sandbox.prefs);
+						if(Zotero.isFx4) {
+							var prefs = sandbox.prefs;
+						} else {
+							var prefs = new XPCSafeJSObjectWrapper(sandbox.prefs);
+						}
 						for(var key in prefs) {
 							if(key.substr(0, ZOTERO_CONFIG.PREF_BRANCH.length) === ZOTERO_CONFIG.PREF_BRANCH
 									&& key !== "extensions.zotero.firstRun2") {
