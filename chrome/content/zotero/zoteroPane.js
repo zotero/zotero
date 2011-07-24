@@ -2170,7 +2170,7 @@ var ZoteroPane = new function()
 		
 		var itemGroup = this.getItemGroup();
 		
-		show.push(m.deleteItem, m.deleteFromLibrary, m.sep3, m.exportItems, m.createBib, m.loadReport);
+		show.push(m.deleteFromLibrary, m.sep3, m.exportItems, m.createBib, m.loadReport);
 		
 		if (this.itemsView.selection.count > 0) {
 			// Multiple items selected
