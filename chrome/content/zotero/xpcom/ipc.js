@@ -524,7 +524,7 @@ Zotero.IPC.Pipe.Poll = function(file, callback) {
 	
 	// add shutdown listener
 	var me = this;
-	Zotero.addShutdownListener(function() { me._clearFile() });
+	Zotero.addShutdownListener(function() { file.remove(false) });
 }
 Zotero.IPC.Pipe.Poll._activePipes = [];
 
@@ -541,13 +541,6 @@ Zotero.IPC.Pipe.Poll.prototype = {
 		
 		// run command
 		this._callback(string);
-	},
-	
-	/**
-	 * Called on quit to remove the file
-	 */
-	"observe":function() {
-		this._file.remove();
 	},
 	
 	/**
