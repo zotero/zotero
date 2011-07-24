@@ -69,24 +69,6 @@
   display:  none;
 }
 
-.zotero-tb-button[type="menu"] > .toolbarbutton-icon {
-  -moz-padding-end: 4px;
-}
-
-.zotero-tb-button[type="menu"] > .toolbarbutton-menu-dropmarker {
-  list-style-image: url("chrome://zotero/skin/mac/folderDropArrow.png");
-  padding: 0;
-}
-
-/* This property controls the strength of the SVG outer glow mask on the toolbar buttons */
-.zotero-tb-button > .toolbarbutton-icon > stack > .zotero-tb-glow {
-	opacity: .7;
-}
-
-#zotero-tb-attachment-add > .toolbarbutton-icon > stack > .zotero-tb-glow {
-	display: none;
-}
-
 #zotero-tb-sync > .toolbarbutton-icon {
 	-moz-binding: none !important;
 	padding: 2px 0px 2px 8px !important;

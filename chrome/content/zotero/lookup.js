@@ -1,9 +1,9 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2009 Center for History and New Media
-                     George Mason University, Fairfax, Virginia, USA
-                     http://zotero.org
+    Copyright © 2009-2011 Center for History and New Media
+                          George Mason University, Fairfax, Virginia, USA
+                          http://zotero.org
     
     This file is part of Zotero.
     
@@ -23,12 +23,23 @@
     ***** END LICENSE BLOCK *****
 */
 
-
+/**
+ * Handles UI for lookup panel
+ * @namespace
+ */
 const Zotero_Lookup = new function () {
+	/**
+	 * Performs a lookup by DOI, PMID, or ISBN
+	 */
 	this.accept = function() {
-		document.getElementById("progress").setAttribute("status", "animate");
-		document.getElementById("accept-button").disabled = true;
-		var identifier = document.getElementById("lookup-textbox").value;
+		var progressElement = document.getElementById("zotero-lookup-progress");
+		progressElement.setAttribute("status", "animate");
+		
+		var acceptElement = document.getElementById("zotero-lookup-accept-button");
+		acceptElement.disabled = true;
+		
+		var identifierElement = document.getElementById("zotero-lookup-textbox");
+		var identifier = identifierElement.value;
 		
 		var doi = Zotero.Utilities.cleanDOI(identifier);
 		if(doi) {
@@ -54,10 +65,11 @@ const Zotero_Lookup = new function () {
 		
 		translate.setHandler("done", function(translate, success) {
 			if(success) {
-				window.close();
+				document.getElementById("zotero-lookup-panel").hidePopup();
 			} else {
-				document.getElementById("accept-button").disabled = undefined;
-				document.getElementById("progress").setAttribute("status", "error");
+				acceptElement.disabled = undefined;
+				progressElement.removeAttribute("status");
+				
 				var prompts = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 				                        .getService(Components.interfaces.nsIPromptService);
 				prompts.alert(window, Zotero.getString("lookup.failure.title"),
@@ -77,5 +89,25 @@ const Zotero_Lookup = new function () {
 		
 		translate.translate(libraryID);
 		return false;
+	}
+	
+	/**
+	 * Focuses the field
+	 */
+	this.onShowing = function() {
+		if(!Zotero.isFx4) {
+			document.getElementById("zotero-lookup-panel").style.padding = "10px";
+		}
+		document.getElementById("zotero-lookup-textbox").focus();
+	}
+	
+	/**
+	 * Cancels the popup and resets fields
+	 */
+	this.onHidden = function() {
+		var progressElement = document.getElementById("zotero-lookup-progress");
+		if(progressElement.hasAttribute("status")) progressElement.removeAttribute("status");
+		document.getElementById("zotero-lookup-accept-button").disabled = undefined;
+		document.getElementById("zotero-lookup-textbox").value = "";
 	}
 }
