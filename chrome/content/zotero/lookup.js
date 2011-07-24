@@ -92,6 +92,19 @@ const Zotero_Lookup = new function () {
 	}
 	
 	/**
+	 * Handles a key press
+	 */
+	this.onKeyPress = function(event) {
+		var keyCode = event.keyCode;
+		if(keyCode === 13 || keyCode === 14) {
+			Zotero_Lookup.accept();
+		} else if(keyCode == event.DOM_VK_ESCAPE) {
+			document.getElementById("zotero-lookup-panel").hidePopup();
+		}
+		return true;
+	}
+	
+	/**
 	 * Focuses the field
 	 */
 	this.onShowing = function() {
