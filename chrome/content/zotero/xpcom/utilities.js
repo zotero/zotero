@@ -619,8 +619,10 @@ Zotero.Utilities = {
 		var results = [];
 		for(var i in elements) {
 			var element = elements[i];
-			// Firefox 5 hack
-			if(element.__wrappedDOMObject) element = element.__wrappedDOMObject;
+			
+			// Firefox 5 hack, so we will preserve Fx5DOMWrappers
+			var useFx5DOMWrapper = !!element.__wrappedDOMObject;
+			if(useFx5DOMWrapper) element = element.__wrappedDOMObject;
 			
 			if(element.ownerDocument) {
 				var rootDoc = element.ownerDocument;
@@ -644,7 +646,7 @@ Zotero.Utilities = {
 			var newEl;
 			while(newEl = xpathObject.iterateNext()) {
 				// Firefox 5 hack
-				results.push(Zotero.isFx5 ? Zotero.Translate.SandboxManager.Fx5DOMWrapper(newEl) : newEl);
+				results.push(useFx5DOMWrapper ? Zotero.Translate.SandboxManager.Fx5DOMWrapper(newEl) : newEl);
 			}
 		}
 		
