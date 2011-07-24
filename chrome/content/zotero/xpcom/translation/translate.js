@@ -327,7 +327,12 @@ Zotero.Translate.Sandbox = {
 						}
 						
 						if(callback) {
-							callback(sandbox);
+							try {
+								callback(sandbox);
+							} catch(e) {
+								translate.complete(false, e);
+								return;
+							}
 							translate.decrementAsyncProcesses();
 						}
 					});
@@ -1279,7 +1284,9 @@ Zotero.Translate.Base.prototype = {
 					errorString += "\n"+i+' => '+error[i];
 				}
 			}
-			errorString += "\nstring => "+error.toString();
+			if(error) {
+				errorString += "\nstring => "+error.toString();
+			}
 		}
 		
 		errorString += "\nurl => "+this.path
