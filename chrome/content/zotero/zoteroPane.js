@@ -840,15 +840,21 @@ var ZoteroPane = new function()
 		
 		Zotero.Prefs.set(prefKey, newids.join());
 		
-		if (show) {
-			Zotero.Prefs.set('lastViewedFolder', lastViewedFolderID);
-		}
-		
 		this.collectionsView.refresh();
 		
+		// If group is closed, open it
+		this.collectionsView.selectLibrary(libraryID);
+		row = this.collectionsView.selection.currentIndex;
+		if (!this.collectionsView.isContainerOpen(row)) {
+			this.collectionsView.toggleOpenState(row);
+		}
+		
 		// Select new row
-		var row = this.collectionsView.getLastViewedRow();
-		this.collectionsView.selection.select(row);
+		if (show) {
+			Zotero.Prefs.set('lastViewedFolder', lastViewedFolderID);
+			var row = this.collectionsView.getLastViewedRow();
+			this.collectionsView.selection.select(row);
+		}
 	}
 	
 	
@@ -2100,7 +2106,7 @@ var ZoteroPane = new function()
 		// Library
 		else
 		{
-			show = [m.newCollection, m.newSavedSearch, m.showDuplicates, m.showUnfiled, m.sep2, m.exportFile];
+			show = [m.newCollection, m.newSavedSearch, m.sep1, m.showDuplicates, m.showUnfiled, m.sep2, m.exportFile];
 		}
 		
 		// Disable some actions if user doesn't have write access

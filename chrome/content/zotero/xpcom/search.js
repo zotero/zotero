@@ -343,6 +343,13 @@ Zotero.Search.prototype.save = function(fixGaps) {
 			Zotero.DB.query(sql, sqlParams);
 		}
 		
+		
+		if (isNew && this.libraryID) {
+			var groupID = Zotero.Libraries.getGroupIDFromLibraryID(this.libraryID);
+			var group = Zotero.Groups.get(groupID);
+			group.clearSearchCache();
+		}
+		
 		Zotero.DB.commitTransaction();
 	}
 	catch (e) {
