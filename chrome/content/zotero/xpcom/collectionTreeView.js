@@ -36,11 +36,15 @@
  */
 Zotero.CollectionTreeView = function()
 {
-	this._treebox = null;
 	this.itemToSelect = null;
+	this.hideSources = [];
+	
+	this._treebox = null;
 	this._highlightedRows = {};
 	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search', 'share', 'group', 'bucket']);
-	this.hideSources = [];
+	this._containerState = {};
+	this._duplicatesLibraries = [];
+	this._unfiledLibraries = [];
 }
 
 /*
@@ -71,7 +75,15 @@ Zotero.CollectionTreeView.prototype.setTree = function(treebox)
 		}
 	}, false);
 	
-	this.refresh();
+	try {
+		this.refresh();
+	}
+	// Tree errors don't get caught by default
+	catch (e) {
+		Zotero.debug(e);
+		Components.utils.reportError(e);
+		throw (e);
+	}
 	
 	this.selection.currentColumn = this._treebox.columns.getFirstColumn();
 	
@@ -107,86 +119,46 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 	this._dataItems = [];
 	this.rowCount = 0;
 	
+	try {
+		this._containerState = JSON.parse(Zotero.Prefs.get("sourceList.persist"));
+	}
+	catch (e) {
+		this._containerState = {};
+	}
+	
 	if (this.hideSources.indexOf('duplicates') == -1) {
 		try {
-			var duplicateLibraries = Zotero.Prefs.get('duplicateLibraries').split(',');
+			this._duplicateLibraries = Zotero.Prefs.get('duplicateLibraries').split(',');
 		}
 		catch (e) {
 			// Add to personal library by default
 			Zotero.Prefs.set('duplicateLibraries', '0');
-			duplicateLibraries = ['0'];
+			this._duplicateLibraries = ['0'];
 		}
 	}
 	
 	try {
-		var unfiledLibraries = Zotero.Prefs.get('unfiledLibraries').split(',');
+		this._unfiledLibraries = Zotero.Prefs.get('unfiledLibraries').split(',');
 	}
 	catch (e) {
 		// Add to personal library by default
 		Zotero.Prefs.set('unfiledLibraries', '0');
-		unfiledLibraries = ['0'];
+		this._unfiledLibraries = ['0'];
 	}
 	
 	var self = this;
 	var library = {
 		id: null,
-		libraryID: null,
-		expand: function () {
-			var newRows = 0;
-			
-			var collections = Zotero.getCollections();
-			for (var i=0; i<collections.length; i++) {
-				// Skip group collections
-				if (collections[i].libraryID) {
-					continue;
-				}
-				self._showItem(new Zotero.ItemGroup('collection', collections[i]), 1, newRows+1);
-				newRows++;
-			}
-			
-			var savedSearches = Zotero.Searches.getAll();
-			if (savedSearches) {
-				for (var i=0; i<savedSearches.length; i++) {
-					self._showItem(new Zotero.ItemGroup('search', savedSearches[i]), 1, newRows+1);
-					newRows++;
-				}
-			}
-			
-			// Duplicate items
-			if (self.hideSources.indexOf('duplicates') == -1 && duplicateLibraries.indexOf('0') != -1) {
-				var d = new Zotero.Duplicates(0);
-				self._showItem(new Zotero.ItemGroup('duplicates', d), 1, newRows+1);
-				newRows++;
-			}
-			
-			// Unfiled items
-			if (unfiledLibraries.indexOf('0') != -1) {
-				var s = new Zotero.Search;
-				s.name = Zotero.getString('pane.collections.unfiled');
-				s.addCondition('libraryID', 'is', null);
-				s.addCondition('unfiled', 'true');
-				self._showItem(new Zotero.ItemGroup('unfiled', s), 1, newRows+1);
-				newRows++;
-			}
-			
-			if (self.hideSources.indexOf('trash') == -1) {
-				var deletedItems = Zotero.Items.getDeleted();
-				if (deletedItems || Zotero.Prefs.get("showTrashWhenEmpty")) {
-					self._showItem(new Zotero.ItemGroup('trash', false), 1, newRows+1);
-					newRows++;
-				}
-				self.trashNotEmpty = !!deletedItems;
-			}
-			
-			return newRows;
-		}
+		libraryID: null
 	};
-	this._showItem(new Zotero.ItemGroup('library', library), 0, 1, 1); // itemgroup ref, level, beforeRow, startOpen
-	library.expand();
+	
+	 // itemgroup, level, beforeRow, startOpen
+	this._showRow(new Zotero.ItemGroup('library', library), 0, 1);
+	this._expandRow(0);
 	
 	var groups = Zotero.Groups.getAll();
 	if (groups.length) {
-		this._showItem(new Zotero.ItemGroup('separator', false));
+		this._showRow(new Zotero.ItemGroup('separator', false));
 		var header = {
 			id: "group-libraries-header",
 			label: "Group Libraries", // TODO: localize
@@ -195,71 +167,36 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 					var groups = Zotero.Groups.getAll();
 				}
 				
-				for (var i=0; i<groups.length; i++) {
-					var startOpen = groups[i].hasCollections();
-					
-					self._showItem(new Zotero.ItemGroup('group', groups[i]), 1, null, startOpen);
-					
-					var newRows = 0;
-					
-					// Add group collections
-					var collections = groups[i].getCollections();
-					for (var j=0; j<collections.length; j++) {
-						self._showItem(new Zotero.ItemGroup('collection', collections[j]), 2);
-						newRows++;
-					}
-					
-					// Add group searches
-					var savedSearches = Zotero.Searches.getAll(groups[i].libraryID);
-					if (savedSearches) {
-						for (var j=0; j<savedSearches.length; j++) {
-							self._showItem(new Zotero.ItemGroup('search', savedSearches[j]), 2);
-							newRows++;
-						}
-					}
-					
-					// Duplicate items
-					if (self.hideSources.indexOf('duplicates') == -1
-							&& duplicateLibraries.indexOf(groups[i].libraryID + '') != -1) {
-						var d = new Zotero.Duplicates(groups[i].libraryID);
-						self._showItem(new Zotero.ItemGroup('duplicates', d), 2);
-						newRows++;
-					}
-					
-					// Unfiled items
-					if (unfiledLibraries.indexOf(groups[i].libraryID + '') != -1) {
-						var s = new Zotero.Search;
-						s.libraryID = groups[i].libraryID;
-						s.name = Zotero.getString('pane.collections.unfiled');
-						s.addCondition('libraryID', 'is', groups[i].libraryID);
-						s.addCondition('unfiled', 'true');
-						self._showItem(new Zotero.ItemGroup('unfiled', s), 2);
-						newRows++;
-					}
+				for (var i = 0, len = groups.length; i < len; i++) {
+					var row = self._showRow(new Zotero.ItemGroup('group', groups[i]), 1);
+					self._expandRow(row);
 				}
 			}
-		};
-		this._showItem(new Zotero.ItemGroup('header', header), null, null, true);
-		header.expand(groups);
+		}
+		var row = this._showRow(new Zotero.ItemGroup('header', header));
+		if (this._containerState.HG) {
+			this._dataItems[row][1] = true;
+			header.expand(groups);
+		}
 	}
 	
 	var shares = Zotero.Zeroconf.instances;
 	if (shares.length) {
-		this._showItem(new Zotero.ItemGroup('separator', false));
+		this._showRow(new Zotero.ItemGroup('separator', false));
 		for each(var share in shares) {
-			this._showItem(new Zotero.ItemGroup('share', share));
+			this._showRow(new Zotero.ItemGroup('share', share));
 		}
 	}
 	
 	if (this.hideSources.indexOf('commons') == -1 && Zotero.Commons.enabled) {
-		this._showItem(new Zotero.ItemGroup('separator', false));
+		this._showRow(new Zotero.ItemGroup('separator', false));
 		var header = {
 			id: "commons-header",
 			label: "Commons", // TODO: localize
 			expand: function (buckets) {
 				var show = function (buckets) {
 					for each(var bucket in buckets) {
-						self._showItem(new Zotero.ItemGroup('bucket', bucket), 1);
+						self._showRow(new Zotero.ItemGroup('bucket', bucket), 1);
 					}
 				}
 				if (buckets) {
@@ -270,7 +207,7 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 				}
 			}
 		};
-		this._showItem(new Zotero.ItemGroup('header', header), null, null, commonsExpand);
+		this._showRow(new Zotero.ItemGroup('header', header), null, null, commonsExpand);
 		if (commonsExpand) {
 			header.expand();
 		}
@@ -291,6 +228,7 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 		this._treebox.rowCountChanged(0, diff);
 	}
 }
+
 
 /*
  *  Redisplay everything
@@ -566,7 +504,12 @@ Zotero.CollectionTreeView.prototype.isContainerEmpty = function(row)
 		return true;
 	}
 	if (itemGroup.isGroup()) {
-		return !itemGroup.ref.hasCollections();
+		var libraryID = itemGroup.ref.libraryID;
+		
+		return !itemGroup.ref.hasCollections()
+				&& !itemGroup.ref.hasSearches()
+				&& this._duplicateLibraries.indexOf(libraryID + '') == -1
+				&& this._unfiledLibraries.indexOf(libraryID + '') == -1;
 	}
 	if (itemGroup.isCollection()) {
 		return !itemGroup.ref.hasChildCollections();
@@ -622,36 +565,8 @@ Zotero.CollectionTreeView.prototype.toggleOpenState = function(row)
 		if (itemGroup.type == 'header') {
 			itemGroup.ref.expand();
 		}
-		else if(itemGroup.type == 'bucket') {
-		}
-		else {
-			if (itemGroup.isLibrary()) {
-				count = itemGroup.ref.expand();
-			}
-			else {
-				if (itemGroup.isGroup()) {
-					var collections = itemGroup.ref.getCollections();
-				}
-				else {
-					var collections = Zotero.getCollections(itemGroup.ref.id);
-				}
-				// Add child collections
-				for (var i=0; i<collections.length; i++) {
-					this._showItem(new Zotero.ItemGroup('collection', collections[i]), thisLevel + 1, row + count + 1);
-					count++;
-				}
-				
-				// Add group searches
-				if (itemGroup.isGroup()) {
-					var savedSearches = Zotero.Searches.getAll(itemGroup.ref.libraryID);
-					if (savedSearches) {
-						for (var i=0; i<savedSearches.length; i++) {
-							this._showItem(new Zotero.ItemGroup('search', savedSearches[i]), thisLevel + 1, row + count + 1);
-							count;
-						}
-					}
-				}
-			}
+		else if (itemGroup.isLibrary(true) || itemGroup.isCollection()) {
+			this._expandRow(row, true);
 		}
 	}
 	this._dataItems[row][1] = !this._dataItems[row][1];  //toggle container open value
@@ -660,6 +575,7 @@ Zotero.CollectionTreeView.prototype.toggleOpenState = function(row)
 	this._treebox.invalidateRow(row);
 	this._treebox.endUpdateBatch();	
 	this._refreshHashMap();
+	this._rememberOpenStates();
 }
 
 
@@ -755,8 +671,16 @@ Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
 	}
 	
 	// Find library
-	for (var i=0, rows=this.rowCount; i<rows; i++) {
+	for (var i = 0; i < this.rowCount; i++) {
 		var itemGroup = this._getItemAtRow(i);
+		
+		// If group header is closed, open it
+		if (itemGroup.isHeader() && itemGroup.ref.id == 'group-libraries-header'
+				&& !this.isContainerOpen(i)) {
+			this.toggleOpenState(i);
+			continue;
+		}
+		
 		if (itemGroup.ref && itemGroup.ref.libraryID == libraryID) {
 			this.selection.select(i);
 			return true;
@@ -772,7 +696,7 @@ Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
  */
 Zotero.CollectionTreeView.prototype.getLastViewedRow = function () {
 	var lastViewedFolder = Zotero.Prefs.get('lastViewedFolder');
-	var matches = lastViewedFolder.match(/^([A-Z])([0-9]+)?$/);
+	var matches = lastViewedFolder.match(/^([A-Z])([G0-9]+)?$/);
 	var select = 0;
 	if (matches) {
 		if (matches[1] == 'C') {
@@ -895,14 +819,118 @@ Zotero.CollectionTreeView.prototype.deleteSelection = function()
 	}
 }
 
+
+/**
+ * Expand row based on last state, or manually from toggleOpenState()
+ */
+Zotero.CollectionTreeView.prototype._expandRow = function (row, forceOpen) {
+	var itemGroup = this._getItemAtRow(row);
+	var isGroup = itemGroup.isGroup();
+	var isCollection = itemGroup.isCollection();
+	var level = this.getLevel(row) + 1;
+	var libraryID = itemGroup.ref.libraryID;
+	var intLibraryID = libraryID ? libraryID : 0;
+	
+	if (isGroup) {
+		var group = Zotero.Groups.getByLibraryID(libraryID);
+		var collections = group.getCollections();
+		var showTrash = false;
+	}
+	else {
+		var collections = Zotero.getCollections(itemGroup.ref.id);
+		var showTrash = this.hideSources.indexOf('trash') == -1;
+	}
+	
+	var savedSearches = Zotero.Searches.getAll(libraryID);
+	var showDuplicates = this.hideSources.indexOf('duplicates') == -1
+							&& this._duplicateLibraries.indexOf(intLibraryID + '') != -1;
+	var showUnfiled = this._unfiledLibraries.indexOf(intLibraryID + '') != -1;
+	
+	// If not a manual open and either the library is set to be hidden
+	// or this is a collection that isn't explicitly opened,
+	// set the initial state to closed
+	if (!forceOpen &&
+			(this._containerState[itemGroup.id] === false
+				|| (isCollection && !this._containerState[itemGroup.id]))) {
+		this._dataItems[row][1] = false;
+		return 0;
+	}
+	
+	var startOpen = !!(collections.length || savedSearches.length || showDuplicates || showUnfiled);
+	
+	// If this isn't a manual open, set the initial state depending on whether
+	// there are child nodes
+	if (!forceOpen) {
+		this._dataItems[row][1] = startOpen;
+	}
+	
+	if (!startOpen) {
+		return 0;
+	}
+	
+	var newRows = 0;
+	
+	// Add collections
+	for (var i = 0, len = collections.length; i < len; i++) {
+		// In personal library root, skip group collections
+		if (!isGroup && !isCollection && collections[i].libraryID) {
+			continue;
+		}
+		var newRow = this._showRow(new Zotero.ItemGroup('collection', collections[i]), level, row + 1 + newRows);
+		
+		// Recursively expand child collections that should be open
+		newRows += this._expandRow(newRow);
+		
+		newRows++;
+	}
+	
+	if (isCollection) {
+		return newRows;
+	}
+	
+	// Add searches
+	for (var i = 0, len = savedSearches.length; i < len; i++) {
+		this._showRow(new Zotero.ItemGroup('search', savedSearches[i]), level, row + 1 + newRows);
+		newRows++;
+	}
+	
+	// Duplicate items
+	if (showDuplicates) {
+		var d = new Zotero.Duplicates(isGroup ? group.libraryID : 0);
+		this._showRow(new Zotero.ItemGroup('duplicates', d), level, row + 1 + newRows);
+		newRows++;
+	}
+	
+	// Unfiled items
+	if (showUnfiled) {
+		var s = new Zotero.Search;
+		if (isGroup) {
+			s.libraryID = group.libraryID;
+		}
+		s.name = Zotero.getString('pane.collections.unfiled');
+		s.addCondition('libraryID', 'is', isGroup ? group.libraryID : null);
+		s.addCondition('unfiled', 'true');
+		this._showRow(new Zotero.ItemGroup('unfiled', s), level, row + 1 + newRows);
+		newRows++;
+	}
+	
+	if (showTrash) {
+		var deletedItems = Zotero.Items.getDeleted();
+		if (deletedItems || Zotero.Prefs.get("showTrashWhenEmpty")) {
+			this._showRow(new Zotero.ItemGroup('trash', false), level, row + 1 + newRows);
+			newRows++;
+		}
+		this.trashNotEmpty = !!deletedItems;
+	}
+	
+	return newRows;
+}
+
+
 /*
  *  Called by various view functions to show a row
- * 
- *  	itemGroup:	reference to the ItemGroup
- *  	level:	the indent level of the row
- *      beforeRow:	row index to insert new row before
  */
-Zotero.CollectionTreeView.prototype._showItem = function(itemGroup, level, beforeRow, startOpen)
+Zotero.CollectionTreeView.prototype._showRow = function(itemGroup, level, beforeRow)
 {
 	if (!level) {
 		level = 0;
@@ -912,13 +940,12 @@ Zotero.CollectionTreeView.prototype._showItem = function(itemGroup, level, befor
 		beforeRow = this._dataItems.length;
 	}
 	
-	if (!startOpen) {
-		startOpen = false;
-	}
-	
-	this._dataItems.splice(beforeRow, 0, [itemGroup, startOpen, level]);
+	this._dataItems.splice(beforeRow, 0, [itemGroup, false, level]);
 	this.rowCount++;
+	
+	return beforeRow;
 }
+
 
 /*
  *  Called by view to hide specified row
@@ -928,6 +955,7 @@ Zotero.CollectionTreeView.prototype._hideItem = function(row)
 	this._dataItems.splice(row,1); this.rowCount--;
 }
 
+
 /*
  * Returns Zotero.ItemGroup at row
  */
@@ -935,6 +963,7 @@ Zotero.CollectionTreeView.prototype._getItemAtRow = function(row)
 {
 	return this._dataItems[row][0];
 }
+
 
 /*
  *  Saves the ids of the currently selected item for later
@@ -965,8 +994,8 @@ Zotero.CollectionTreeView.prototype.rememberSelection = function(selection)
 		this.selection.select(this._rowMap[selection]);
 	}
 }
-	
-	
+
+
 Zotero.CollectionTreeView.prototype.getSelectedCollection = function(asID) {
 	if (this.selection
 			&& this.selection.count > 0
@@ -978,7 +1007,6 @@ Zotero.CollectionTreeView.prototype.getSelectedCollection = function(asID) {
 	}
 	return false;
 }
-
 
 
 /**
@@ -999,6 +1027,58 @@ Zotero.CollectionTreeView.prototype._refreshHashMap = function()
 		this._rowMap[itemGroup.id] = i;
 	}
 }
+
+
+Zotero.CollectionTreeView.prototype._rememberOpenStates = function () {
+	var state = this._containerState;
+	
+	// Every so often, remove obsolete rows
+	if (Math.random() < 1/20) {
+		Zotero.debug("Purging sourceList.persist");
+		for (var id in state) {
+			var m = id.match(/^C([0-9]+)$/);
+			if (m) {
+				if (!Zotero.Collections.get(m[1])) {
+					delete state[id];
+				}
+				continue;
+			}
+			
+			var m = id.match(/^G([0-9]+)$/);
+			if (m) {
+				if (!Zotero.Groups.get(m[1])) {
+					delete state[id];
+				}
+				continue;
+			}
+		}
+	}
+	
+	for (var i = 0, len = this.rowCount; i < len; i++) {
+		if (!this.isContainer(i)) {
+			continue;
+		}
+		
+		var itemGroup = this._getItemAtRow(i);
+		if (!itemGroup.id) {
+			continue;
+		}
+		
+		var open = this.isContainerOpen(i);
+		
+		// Collections default to closed
+		if (!open && itemGroup.isCollection()) {
+			delete state[itemGroup.id];
+			continue;
+		}
+		
+		state[itemGroup.id] = open;
+	}
+	
+	this._containerState = state;
+	Zotero.Prefs.set("sourceList.persist", JSON.stringify(state));
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -1646,12 +1726,17 @@ Zotero.ItemGroup.prototype.__defineGetter__('id', function () {
 		case 'trash':
 			return 'T';
 		
+		case 'header':
+			if (this.ref.id == 'group-libraries-header') {
+				return 'HG';
+			}
+			break;
+		
 		case 'group':
 			return 'G' + this.ref.id;
-		
-		default:
-			return '';
 	}
+	
+	return '';
 });
 
 Zotero.ItemGroup.prototype.isLibrary = function (includeGlobal)

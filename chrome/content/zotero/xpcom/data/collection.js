@@ -587,11 +587,12 @@ Zotero.Collection.prototype.save = function () {
 			//Zotero.Notifier.trigger('add', 'collection-item', this.id + '-' + itemID);
 		}
 		
-		if (this._changed.libraryID) {
+		if (isNew && this.libraryID) {
 			var groupID = Zotero.Libraries.getGroupIDFromLibraryID(this.libraryID);
 			var group = Zotero.Groups.get(groupID);
-			group.clearCollectionsCache();
+			group.clearCollectionCache();
 		}
+		
 		Zotero.DB.commitTransaction();
 	}
 	catch (e) {

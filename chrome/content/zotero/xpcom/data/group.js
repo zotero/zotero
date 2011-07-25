@@ -44,6 +44,7 @@ Zotero.Group.prototype._init = function () {
 	this._loaded = false;
 	this._changed = false;
 	this._hasCollections = null;
+	this._hasSearches = null;
 }
 
 
@@ -139,6 +140,7 @@ Zotero.Group.prototype.loadFromRow = function(row) {
 	this._loaded = true;
 	this._changed = false;
 	this._hasCollections = null;
+	this._hasSearches = null;
 	
 	this._id = row.groupID;
 	this._libraryID = row.libraryID;
@@ -174,10 +176,23 @@ Zotero.Group.prototype.hasCollections = function () {
 }
 
 
-Zotero.Group.prototype.clearCollectionsCache = function () {
+Zotero.Group.prototype.hasSearches = function () {
+	if (this._hasSearches !== null) {
+		return this._hasSearches;
+	}
+	
+	this._hasSearches = !!Zotero.Searches.getAll(this.id).length;
+	return this._hasSearches;
+}
+
+
+Zotero.Group.prototype.clearCollectionCache = function () {
 	this._hasCollections = null;
 }
 
+Zotero.Group.prototype.clearSearchCache = function () {
+	this._hasSearches = null;
+}
 
 /**
  * Returns collections of this group
