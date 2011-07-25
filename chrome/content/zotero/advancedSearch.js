@@ -54,7 +54,7 @@ var ZoteroAdvancedSearch = new function() {
 		// A minimal implementation of Zotero.CollectionTreeView
 		var itemGroup = {
 			isSearchMode: function() { return true; },
-			getChildItems: function () {
+			getItems: function () {
 				//var search = _searchBox.search.clone();
 				
 				var s2 = new Zotero.Search();
