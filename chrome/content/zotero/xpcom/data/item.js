@@ -770,8 +770,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		}
 		
 		// If existing value, make sure it's actually changing
-		if ((!this._itemData[fieldID] && !value) ||
-				(this._itemData[fieldID] && this._itemData[fieldID]==value)) {
+		if (this._itemData[fieldID] === value) {
 			return false;
 		}
 		
