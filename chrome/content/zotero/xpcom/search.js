@@ -345,7 +345,7 @@ Zotero.Search.prototype.save = function(fixGaps) {
 		
 		
 		if (isNew && this.libraryID) {
-			var groupID = Zotero.Libraries.getGroupIDFromLibraryID(this.libraryID);
+			var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
 			var group = Zotero.Groups.get(groupID);
 			group.clearSearchCache();
 		}
