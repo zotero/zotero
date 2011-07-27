@@ -588,7 +588,7 @@ Zotero.Collection.prototype.save = function () {
 		}
 		
 		if (isNew && this.libraryID) {
-			var groupID = Zotero.Libraries.getGroupIDFromLibraryID(this.libraryID);
+			var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
 			var group = Zotero.Groups.get(groupID);
 			group.clearCollectionCache();
 		}
