@@ -117,7 +117,7 @@ Zotero.Server.Connector.Detect.prototype = {
 				me._translate.setDocument(me._browser.contentDocument);
 				me._translate.getTranslators();
 			} catch(e) {
-				Zotero.debug(e);
+				sendResponseCallback(500);
 				throw e;
 			}
 		}, false);
@@ -274,7 +274,7 @@ Zotero.Server.Connector.SavePage.prototype = {
 }
 
 /**
- * Performs translation of a given page, or, alternatively, saves items directly
+ * Saves items to DB
  *
  * Accepts:
  *		items - an array of JSON format items
@@ -326,6 +326,90 @@ Zotero.Server.Connector.SaveItem.prototype = {
 }
 
 /**
+ * Saves a snapshot to the DB
+ *
+ * Accepts:
+ *		uri - The URI of the page to be saved
+ *		html - document.innerHTML or equivalent
+ *		cookie - document.cookie or equivalent
+ * Returns:
+ *		Nothing (200 OK response)
+ */
+Zotero.Server.Connector.SaveSnapshot = function() {};
+Zotero.Server.Endpoints["/connector/saveSnapshot"] = Zotero.Server.Connector.SaveSnapshot;
+Zotero.Server.Connector.SaveSnapshot.prototype = {
+	"supportedMethods":["POST"],
+	"supportedDataTypes":["application/json"],
+	
+	/**
+	 * Save snapshot
+	 * @param {String} data POST data or GET query string
+	 * @param {Function} sendResponseCallback function to send HTTP response
+	 */
+	"init":function(data, sendResponseCallback) {
+		Zotero.Server.Connector.Data[data["url"]] = "<html>"+data["html"]+"</html>";
+		var browser = Zotero.Browser.createHiddenBrowser();
+		
+		var pageShowCalled = false;
+		var cookieSandbox = new Zotero.CookieSandbox(browser, data["url"], data["cookie"]);
+		browser.addEventListener("DOMContentLoaded", function() {
+			if(browser.contentDocument.location.href == "about:blank") return;
+			if(pageShowCalled) return;
+			pageShowCalled = true;
+			delete Zotero.Server.Connector.Data[data["url"]];
+			
+			// figure out where to save
+			var libraryID = null;
+			var collectionID = null;
+			var zp = Zotero.getActiveZoteroPane();
+			try {
+				var libraryID = zp.getSelectedLibraryID();
+				var collection = zp.getSelectedCollection();
+			} catch(e) {}
+			
+			try {
+				var doc = browser.contentDocument;
+				
+				// create new webpage item
+				var item = new Zotero.Item("webpage");
+				item.libraryID = libraryID;
+				item.setField("title", doc.title);
+				item.setField("url", data.url);
+				item.setField("accessDate", "CURRENT_TIMESTAMP");
+				var itemID = item.save();
+				if(collection) collection.addItem(itemID);
+				
+				// determine whether snapshot can be saved
+				var filesEditable;
+				if (libraryID) {
+					var group = Zotero.Groups.getByLibraryID(libraryID);
+					filesEditable = group.filesEditable;
+				} else {
+					filesEditable = true;
+				}
+				
+				// save snapshot
+				if(filesEditable) {
+					Zotero.Attachments.importFromDocument(doc, itemID);
+				}
+				
+				// remove browser
+				Zotero.Browser.deleteHiddenBrowser(browser);
+				
+				// destroy cookieSandbox
+				cookieSandbox.destroy();
+				sendResponseCallback(201);
+			} catch(e) {
+				sendResponseCallback(500);
+				throw e;
+			}
+		}, false);
+		
+		browser.loadURI("zotero://connector/"+encodeURIComponent(data["url"]));
+	}
+}
+
+/**
  * Handle item selection
  *
  * Accepts:
@@ -372,7 +456,7 @@ Zotero.Server.Connector.GetTranslatorCode.prototype = {
 	"supportedDataTypes":["application/json"],
 	
 	/**
-	 * Finishes up translation when item selection is complete
+	 * Returns a 200 response to say the server is alive
 	 * @param {String} data POST data or GET query string
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
@@ -381,7 +465,6 @@ Zotero.Server.Connector.GetTranslatorCode.prototype = {
 		sendResponseCallback(200, "application/javascript", translator.code);
 	}
 }
-
 
 /**
  * Test connection
