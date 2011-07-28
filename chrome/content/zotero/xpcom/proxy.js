@@ -954,7 +954,7 @@ Zotero.Proxies.DNS = new function() {
 			domain.pop();
 		}
 		
-		domain = domain.join(".");
+		domain = domain.join(".").toLowerCase();
 		Zotero.debug("Proxies: "+ip+" PTR "+domain);
 		
 		inStream.close();
