@@ -1,7 +1,7 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2009 Center for History and New Media
+    Copyright © 2011 Center for History and New Media
 				     George Mason University, Fairfax, Virginia, USA
 				     http://zotero.org
     
@@ -432,7 +432,7 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Accepts current selection and adds citation
 	 */
-	_accept = function() {
+	function _accept() {
 		var nodes = qfe.childNodes;
 		io.citation.citationItems = [];
 		for(var i=0, n=nodes.length; i<n; i++) {
@@ -548,6 +548,7 @@ var Zotero_QuickFormat = new function () {
 		target.setAttribute("selected", "true");
 		panel.openPopup(target, "after_start",
 			target.clientWidth/2, 0, false, false, event);
+		locator.focus();
 		
 		var closeListener = function(event) {
 			panel.removeEventListener("popuphidden", closeListener, false);
@@ -603,8 +604,9 @@ var Zotero_QuickFormat = new function () {
 	 * Makes "Enter" work in the panel
 	 */
 	this.onPanelKeyPress = function(event) {
+		var keyCode = event.keyCode;
 		if(keyCode === event.DOM_VK_RETURN || keyCode === event.DOM_VK_ENTER) {
-			event.target.hidePopup();
+			document.getElementById("citation-properties").hidePopup();
 		}
 	};
 	
