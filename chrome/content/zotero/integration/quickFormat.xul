@@ -53,7 +53,7 @@
 		</hbox>
 		<richlistbox id="quick-format-reference-list" hidden="true" flex="1"/>
 	</vbox>
-	<panel id="citation-properties" type="arrow" orient="vertical" onkeypress="Zotero_QuickStart.onPanelKeyPress(event)">
+	<panel id="citation-properties" type="arrow" orient="vertical" onkeypress="Zotero_QuickFormat.onPanelKeyPress(event)">
 		<grid flex="1">
 			<columns>
 				<column/>
@@ -61,18 +61,18 @@
 			</columns>
 			<rows>
 				<row align="center">
+					<menulist id="locator-label" sizetopopup="none">
+						<menupopup id="locator-label-popup"/>
+					</menulist>
+					<textbox id="locator" flex="1"/>
+				</row>
+				<row align="center">
 					<label value="&zotero.citation.prefix.label;"/>
 					<textbox class="citation-textbox" id="prefix" flex="1"/>
 				</row>
 				<row align="center">
 					<label value="&zotero.citation.suffix.label;"/>
 					<textbox class="citation-textbox" id="suffix" flex="1"/>
-				</row>
-				<row align="center">
-					<menulist id="locator-label" sizetopopup="none">
-						<menupopup id="locator-label-popup"/>
-					</menulist>
-					<textbox id="locator" flex="1"/>
 				</row>
 				<checkbox id="suppress-author" label="&zotero.citation.suppressAuthor.label;"/>
 			</rows>
