@@ -143,10 +143,14 @@
 }
 
 #quick-format-search[multiline="true"] {
-	padding: 1px 2px 0 18px;
+	padding: 2px 2px 0 18px;
 	border: 1px solid rgba(0, 0, 0, 0.5);
-	border-radius: 8px;
+	border-radius: 10px;
 	-moz-appearance: none;
+}
+
+#quick-format-search[multiline="true"] > #quick-format-iframe {
+	margin: -1px 0 0 0;
 }
 
 body {
@@ -226,5 +230,13 @@ richlistitem[selected="true"] {
 }
 
 #citation-properties menulist > .menulist-dropmarker > .dropmarker-icon {
-  list-style-image: url("chrome://browser/skin/hud-style-dropmarker-double-arrows.png");
+	list-style-image: url("chrome://browser/skin/hud-style-dropmarker-double-arrows.png");
+}
+
+#zotero-icon {
+	list-style-image: url("chrome://zotero/skin/zotero-new-z-16px.png");
+	width: 16px;
+	height: 16px;
+	background-color: #fff;
+	margin-left: -13px;
 }
