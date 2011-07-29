@@ -24,7 +24,7 @@
 */
 
 var Zotero_QuickFormat = new function () {
-	var io, qft, qftWindow, qftDocument, qfe,
+	var io, qfs, qfi, qfiWindow, qfiDocument, qfe,
 		qfb, qfbHeight,
 		referenceBox, referenceHeight,
 		dragX, dragY, curLocator, curLocatorLabel,
@@ -35,14 +35,15 @@ var Zotero_QuickFormat = new function () {
 	 * Initialize add citation dialog
 	 */
 	this.onLoad = function() {
-		qft = document.getElementById("quick-format-search");
+		qfs = document.getElementById("quick-format-search");
+		qfi = document.getElementById("quick-format-iframe");
 		qfb = document.getElementById("quick-format-entry");
 		qfbHeight = qfb.scrollHeight;
 		referenceBox = document.getElementById("quick-format-reference-list");
-		qftWindow = qft.contentWindow;
-		qftDocument = qft.contentDocument;
+		qfiWindow = qfi.contentWindow;
+		qfiDocument = qfi.contentDocument;
 		qfb.addEventListener("keypress", _onQuickSearchKeyPress, false);
-		qfe = qftDocument.getElementById("quick-format-editor");
+		qfe = qfiDocument.getElementById("quick-format-editor");
 		qfe.focus();
 		
 		// Add labels to popup
@@ -65,8 +66,8 @@ var Zotero_QuickFormat = new function () {
 		io = window.arguments[0].wrappedJSObject;
 		if(io.citation.citationItems.length) {
 			// hack to get spacing right
-			var evt = qftDocument.createEvent("KeyboardEvent");
-			evt.initKeyEvent("keypress", true, true, qftWindow,
+			var evt = qfiDocument.createEvent("KeyboardEvent");
+			evt.initKeyEvent("keypress", true, true, qfiWindow,
 				0, 0, 0, 0,
 				0, " ".charCodeAt(0))
 			qfe.dispatchEvent(evt);
@@ -85,7 +86,7 @@ var Zotero_QuickFormat = new function () {
 	 * Gets the content of the text node that the cursor is currently within
 	 */
 	function _getCurrentEditorTextNode() {
-		var selection = qftWindow.getSelection();
+		var selection = qfiWindow.getSelection();
 		var range = selection.getRangeAt(0);
 		
 		var node = range.startContainer;
@@ -171,6 +172,7 @@ var Zotero_QuickFormat = new function () {
 		}
 		
 		var s = new Zotero.Search();
+		var haveConditions = false;
 		
 		if(charRe.test(str)) {
 			Zotero.debug("QuickFormat: QuickSearch: "+str);
@@ -348,7 +350,7 @@ var Zotero_QuickFormat = new function () {
 		// It's entirely unintuitive why, but after trying a bunch of things, it looks like using
 		// a XUL label for these things works best. A regular span causes issues with moving the
 		// cursor.
-		var bubble = qftDocument.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "label");
+		var bubble = qfiDocument.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "label");
 		bubble.setAttribute("class", "quick-format-bubble");
 		bubble.setAttribute("value", str);
 		bubble.addEventListener("click", _onBubbleClick, false);
@@ -415,14 +417,15 @@ var Zotero_QuickFormat = new function () {
 		}
 		
 		if(height === window.innerHeight) return;
+		Zotero.debug(qfeHeight);
 		if(qfeHeight > 20) {
-			qft.style.height = (22-16+qfeHeight+(qft.style.height == "22px" ? 2 : -2))+"px";
+			qfs.style.height = (22-16+qfeHeight+(qfi.style.height == "22px" ? 2 : -2))+"px";
 			qfe.style.lineHeight = "18px";
-			qft.setAttribute("multiline", true);
+			qfs.setAttribute("multiline", true);
 		} else {
-			qft.style.height = "22px";
+			qfs.style.height = "22px";
 			qfe.style.lineHeight = "16px";
-			qft.removeAttribute("multiline");
+			qfs.removeAttribute("multiline");
 		}
 		if(curResizer) curResizer.stop();
 		curResizer = new Resizer(window, null, height, 10, 100);
@@ -495,7 +498,7 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _onBubbleDrag(event) {
 		// just in case
-		var el = qftDocument.getElementById("zotero-drag");
+		var el = qfiDocument.getElementById("zotero-drag");
 		if(el) el.parentNode.removeChild(el);
 		
 		var dt = event.dataTransfer;
@@ -509,7 +512,7 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _onBubbleDrop(event) {
 		window.setTimeout(function() {
-			var el = qftDocument.getElementById("zotero-drag");
+			var el = qfiDocument.getElementById("zotero-drag");
 			if(el) {
 				_insertBubble(dragging, el);
 				Zotero.debug(dragging);

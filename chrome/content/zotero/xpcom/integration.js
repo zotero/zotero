@@ -1804,7 +1804,7 @@ Zotero.Integration.Session.prototype.editCitation = function(index, noteIndex, c
 	io.style = this.style;
 	
 	if(Zotero.Prefs.get("integration.quickFormat")) {
-		this._displayDialog('chrome://zotero/content/integration/quickFormat.xul', io);
+		this._displayDialog('chrome://zotero/content/integration/quickFormat.xul', '', io);
 	} else {
 		this._displayDialog('chrome://zotero/content/integration/addCitationDialog.xul', 'resizable', io);
 	}
