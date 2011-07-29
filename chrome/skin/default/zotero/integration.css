@@ -235,8 +235,16 @@ richlistitem[selected="true"] {
 
 #zotero-icon {
 	list-style-image: url("chrome://zotero/skin/zotero-new-z-16px.png");
+	background-color: #fff;
+	margin: 0 0 0 -13px;
+	padding: 0;
+}
+
+#zotero-icon .toolbarbutton-text {
+	display: none;
+}
+
+#zotero-icon .toolbarbutton-icon {
 	width: 16px;
 	height: 16px;
-	background-color: #fff;
-	margin-left: -13px;
 }

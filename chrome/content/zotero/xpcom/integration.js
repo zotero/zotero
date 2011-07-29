@@ -1073,7 +1073,10 @@ Zotero.Integration.Session.prototype._displayDialog = function(url, options, io)
 		.getService(Components.interfaces.nsIWindowWatcher)
 		.openWindow(null, url, '', 'chrome,centerscreen'+(options ? ','+options : ""), (io ? io : null));
 	Zotero.Integration.activate(window);
-	while(!window.closed) Zotero.mainThread.processNextEvent(true);
+	while(!window.closed) {
+		Zotero.mainThread.processNextEvent(true);
+		if(window.newWindow) window = window.newWindow;
+	}
 }
 
 /**
