@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2011 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://global/skin/browser.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<window
+	id="zotero-quick-format-dialog"
+	orient="vertical"
+	title="Quick Format Citation"
+	width="500" height="44"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	persist="screenX screenY"
+	style="background: transparent; -moz-appearance:none; padding: 0"
+	hidechrome="true" onkeypress="Zotero_QuickFormat.onKeyPress(event)">
+	
+	<script src="../include.js"/>
+	<script src="quickFormat.js"/>
+	
+	<vbox id="zotero-select-items-container" flex="1">
+		<hbox id="quick-format-entry" ondragstart="Zotero_QuickFormat.onDragStart(this, event)"> 
+			<!-- javascript:encodeURIComponent('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="chrome://zotero/skin/integration.css"/></head><body id="quick-format-editor"/></html>') -->
+			<iframe id="quick-format-search" ondragstart="event.stopPropagation()" src="data:application/xhtml+xml,%3C!DOCTYPE%20html%20PUBLIC%20%22-%2F%2FW3C%2F%2FDTD%20XHTML%201.0%20Strict%2F%2FEN%22%20%22http%3A%2F%2Fwww.w3.org%2FTR%2Fxhtml1%2FDTD%2Fxhtml1-strict.dtd%22%3E%3Chtml%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%3E%3Chead%3E%3Clink%20rel%3D%22stylesheet%22%20type%3D%22text%2Fcss%22%20href%3D%22chrome%3A%2F%2Fzotero%2Fskin%2Fintegration.css%22%2F%3E%3C%2Fhead%3E%3Cbody%20contenteditable%3D%22true%22%20id%3D%22quick-format-editor%22%2F%3E%3C%2Fhtml%3E"
+				tabindex="1" flex="1"/>
+		</hbox>
+		<richlistbox id="quick-format-reference-list" hidden="true" flex="1"/>
+	</vbox>
+	<panel id="citation-properties" type="arrow" orient="vertical" onkeypress="Zotero_QuickStart.onPanelKeyPress(event)">
+		<grid flex="1">
+			<columns>
+				<column/>
+				<column flex="1"/>
+			</columns>
+			<rows>
+				<row align="center">
+					<label value="&zotero.citation.prefix.label;"/>
+					<textbox class="citation-textbox" id="prefix" flex="1"/>
+				</row>
+				<row align="center">
+					<label value="&zotero.citation.suffix.label;"/>
+					<textbox class="citation-textbox" id="suffix" flex="1"/>
+				</row>
+				<row align="center">
+					<menulist id="locator-label" sizetopopup="none">
+						<menupopup id="locator-label-popup"/>
+					</menulist>
+					<textbox id="locator" flex="1"/>
+				</row>
+				<checkbox id="suppress-author" label="&zotero.citation.suppressAuthor.label;"/>
+			</rows>
+		</grid>
+	</panel>
+</window>

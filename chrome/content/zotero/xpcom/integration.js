@@ -1803,7 +1803,11 @@ Zotero.Integration.Session.prototype.editCitation = function(index, noteIndex, c
 	// citeproc-js style object for use of third-party extension
 	io.style = this.style;
 	
-	this._displayDialog('chrome://zotero/content/integration/addCitationDialog.xul', 'resizable', io);
+	if(Zotero.Prefs.get("integration.quickFormat")) {
+		this._displayDialog('chrome://zotero/content/integration/quickFormat.xul', io);
+	} else {
+		this._displayDialog('chrome://zotero/content/integration/addCitationDialog.xul', 'resizable', io);
+	}
 	
 	if(io.citation.citationItems.length) {		// we have an item
 		this.addCitation(index, noteIndex, io.citation);
