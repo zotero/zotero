@@ -45,9 +45,9 @@
 		
 		<deck id="zotero-item-pane-content" selectedIndex="0" flex="1">
 			<!-- Center label (for zero or multiple item selection) -->
-			<vbox pack="center" align="center">
+			<groupbox pack="center" align="center">
 				<label id="zotero-item-pane-message"/>
-			</vbox>
+			</groupbox>
 			
 			<!-- Regular item -->
 			<tabbox id="zotero-view-tabbox" flex="1" onselect="if (!ZoteroPane_Local.collectionsView.selection || event.originalTarget.localName != 'tabpanels') { return; }; ZoteroItemPane.viewItem(ZoteroPane_Local.getSelectedItems()[0], ZoteroPane_Local.collectionsView.editable ? 'edit' : 'view', this.selectedIndex)">
@@ -95,7 +95,9 @@
 			</groupbox>
 			
 			<!-- Attachment item -->
-			<zoteroattachmentbox id="zotero-attachment-box" flex="1"/>
+			<groupbox>
+				<zoteroattachmentbox id="zotero-attachment-box" flex="1"/>
+			</groupbox>
 			
 			<!-- Duplicate merging -->
 			<!-- TODO: localize -->
