@@ -1,3 +1,34 @@
+/*
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2011 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    Parts of this code are derived from mozilla.org code.
+    
+    The Initial Developer of this Original Code is Netscape Communications Corporation.
+    Portions created by the Initial Developer are Copyright (C) 1998-1999
+    the Initial Developer. All Rights Reserved.
+    
+    ***** END LICENSE BLOCK *****
+*/
+
 #up {
 	list-style-image: url('chrome://zotero/skin/citation-up.png');
 }
@@ -58,4 +89,142 @@
 #editor {
 	margin-top: 10px;
 	max-height: 100px;
+}
+
+.quick-format-title {
+	margin: 0;
+	font-weight: bold;
+	overflow: hidden;
+}
+
+.quick-format-info {
+	margin: 0;
+	overflow: hidden;
+}
+.quick-format-info > label {
+	margin: 0;
+	padding: 0;
+}
+
+.quick-format-bubble {
+	-moz-border-radius: 8px;
+	background-color: #dee7f8;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #a8c0ec;
+	padding: 0 6px 0 6px;
+	margin: -1px 2px 0 2px;
+	-moz-user-select: all;
+}
+
+.quick-format-bubble:hover {
+	background-color: #bbcef1;
+	border-color: #6d95e0;
+}
+
+.quick-format-bubble:hover {
+	background-color: #bbcef1;
+}
+
+.quick-format-bubble[selected="true"] {
+	-moz-border-radius: 8px !important;
+	background-color: #598bec;
+	color: #fff;
+}
+
+#quick-format-search {
+	margin: 0;
+	padding: 0;
+	background: white;
+	height: 22px;
+	padding-top: 0;
+	padding-bottom: 0;
+	-moz-appearance: searchfield;
+}
+
+#quick-format-search[multiline="true"] {
+	padding: 1px 2px 0 18px;
+	border: 1px solid rgba(0, 0, 0, 0.5);
+	border-radius: 8px;
+	-moz-appearance: none;
+}
+
+body {
+	margin: 0 2px 0 2px;
+	padding: 0;
+	font: -moz-field;
+	font-size: 11px;
+	line-height: 18px;
+	overflow: hidden;
+}
+
+.quick-format-item {
+	font-size: 12px;
+	font: -moz-field;
+	-moz-user-focus: normal;
+	padding: 5px;
+	max-height: 39px;
+}
+
+.quick-format-item:not(:last-child) {
+	border-style: solid;
+	border-width: 0 0 1px 0;
+	border-color: #BBB;
+}
+
+richlistitem[selected="true"] {
+	background: Highlight;
+	color: HighlightText;
+}
+
+#quick-format-entry {
+	background: -moz-linear-gradient(-90deg, rgb(243,123,119) 0, rgb(180,47,38) 50%, rgb(156,36,27) 50%);
+	-moz-border-radius:15px;
+	padding: 10px;
+}
+
+#quick-format-reference-list {
+	margin: 0 15px 0 15px;
+	background: white;
+	opacity: 0.9;
+	-moz-user-focus: ignore;
+}
+
+#citation-properties menulist {
+	-moz-appearance: none; color: #fff;
+	text-shadow: 0 -1px 0 rgba(0,0,0,.5);
+	border-radius: 12px;
+	border: 1px solid rgba(0,0,0,.65);
+	background: -moz-linear-gradient(rgba(110,110,110,.9), rgba(70,70,70,.9) 49%, rgba(50,50,50,.9) 51%, rgba(40,40,40,.9));
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.2), inset 0 0 1px rgba(255,255,255,.1), 0 1px 0 rgba(255,255,255,.1);
+	background-clip: padding-box;
+	background-origin: padding-box;
+	padding: 2px 9px;
+	border-radius: 3px;
+	min-height: 22px;
+	-moz-padding-start: 4px;
+	-moz-padding-end: 0;
+}
+
+#citation-properties menulist:-moz-focusring {
+	box-shadow: 0 0 1px -moz-mac-focusring inset, 0 0 4px 1px -moz-mac-focusring, 0 0 2px 1px -moz-mac-focusring;
+}
+
+#citation-properties menulist[open="true"],
+#citation-properties menulist:hover:active {
+	background: -moz-linear-gradient(rgba(40,40,40,.9), rgba(70,70,70,.9));
+	box-shadow: inset 0 0 3px rgba(0,0,0,.2), inset 0 1px 7px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.1);
+}
+
+#citation-properties menulist > .menulist-dropmarker {
+	-moz-appearance: none;
+	display: -moz-box;
+	background-color: transparent;
+	border: 0;
+	margin: 0;
+	padding: 0;
+}
+
+#citation-properties menulist > .menulist-dropmarker > .dropmarker-icon {
+  list-style-image: url("chrome://browser/skin/hud-style-dropmarker-double-arrows.png");
 }
