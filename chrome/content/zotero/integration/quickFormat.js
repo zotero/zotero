@@ -25,8 +25,8 @@
 
 var Zotero_QuickFormat = new function () {
 	var io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, keepSorted, showEditor,
-		referenceBox, referenceHeight, dragX, dragY, curLocator, curLocatorLabel, curIDs = [],
-		curResizer, dragging;
+		referencePanel, referenceBox, referenceHeight, dragX, dragY, curLocator, curLocatorLabel,
+		curIDs = [], curResizer, dragging;
 	const SHOWN_REFERENCES = 7;
 	
 	/**
@@ -39,6 +39,11 @@ var Zotero_QuickFormat = new function () {
 		qfi = document.getElementById("quick-format-iframe");
 		qfb = document.getElementById("quick-format-entry");
 		qfbHeight = qfb.scrollHeight;
+		referencePanel = document.getElementById("quick-format-reference-panel");
+		referencePanel.addEventListener("popuphidden", function() {
+			window.focus();
+			qfe.focus();
+		}, false);
 		referenceBox = document.getElementById("quick-format-reference-list");
 		qfiWindow = qfi.contentWindow;
 		qfiDocument = qfi.contentDocument;
@@ -123,80 +128,76 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _quickFormat() {
 		var str = _getEditorContent();
-		if(!str || str.length === 1) {
-			// if only one char or no string, remove references and break
-			while(referenceBox.hasChildNodes()) referenceBox.removeChild(referenceBox.firstChild);
-			_resize();
-			return;
-		}
-		
-		const specifiedLocatorRe = /,? *(pp|p)(?:\. *| +)([0-9\-]+) *$/;
-		const yearPageLocatorRe = /,? *([0-9]+) *((B[. ]*C[. ]*|B[. ]*)|[AC][. ]*|A[. ]*D[. ]*|C[. ]*E[. ]*)?,? *(?:([0-9\-]+))?$/i;
-		const creatorSplitRe = /(?:,| *(?:and|\&)) +/;
-		const charRe = /[\w\u007F-\uFFFF]/;
-		const etAl = " et al.";
-		
-		var m,
-			year = false,
-			isBC = false,
-			dateID = false;
-		
-		curLocator = false;
-		curLocatorLabel = false;
-		
-		// check for specified locator
-		m = specifiedLocatorRe.exec(str);
-		if(m) {
-			if(m.index === 0) {
-				// add to previous cite
-				var node = _getCurrentEditorTextNode();
-				var prevNode = node.previousSibling;
-				if(prevNode && prevNode.citationItem) {
-					prevNode.citationItem.locator = m[2];
-					prevNode.value = _buildBubbleString(prevNode.citationItem);
-					node.nodeValue = "";
-					_clearEntryList();
-					return;
-				}
-			}
-			
-			// TODO support types other than page
-			curLocator = m[2];
-			str = str.substring(0, m.index);
-		}
-		
-		// check for year and pages
-		m = yearPageLocatorRe.exec(str);
-		if(m) {
-			if(m[1].length === 4 || m[2] || m[4]) {
-				year = parseInt(m[1]);
-				if(m[3]) {
-					isBC = true;
-				}
-				if(!curLocator && m[4]) {
-					curLocator = m[4];
-				}
-			} else {
-				curLocator = m[1];
-			}
-			
-			str = str.substr(0, m.index)+str.substring(m.index+m[0].length);
-		}
-		
-		var s = new Zotero.Search();
 		var haveConditions = false;
 		
-		if(charRe.test(str)) {
-			Zotero.debug("QuickFormat: QuickSearch: "+str);
-			s.addCondition("quicksearch-titlesAndCreators", "contains", str);
-			haveConditions = true;
-		}
-		
-		if(year) {
-			Zotero.debug("QuickFormat: Year: "+year);
-			s.addCondition("date", "isAfter", (year)+"-01-01 00:00:00");
-			s.addCondition("date", "isBefore", (year)+"-12-31 23:59:59");
-			haveConditions = true;
+		if(str && str.length > 1) {
+			const specifiedLocatorRe = /,? *(pp|p)(?:\. *| +)([0-9\-]+) *$/;
+			const yearPageLocatorRe = /,? *([0-9]+) *((B[. ]*C[. ]*|B[. ]*)|[AC][. ]*|A[. ]*D[. ]*|C[. ]*E[. ]*)?,? *(?:([0-9\-]+))?$/i;
+			const creatorSplitRe = /(?:,| *(?:and|\&)) +/;
+			const charRe = /[\w\u007F-\uFFFF]/;
+			const etAl = " et al.";
+			
+			var m,
+				year = false,
+				isBC = false,
+				dateID = false;
+			
+			curLocator = false;
+			curLocatorLabel = false;
+			
+			// check for specified locator
+			m = specifiedLocatorRe.exec(str);
+			if(m) {
+				if(m.index === 0) {
+					// add to previous cite
+					var node = _getCurrentEditorTextNode();
+					var prevNode = node.previousSibling;
+					if(prevNode && prevNode.citationItem) {
+						prevNode.citationItem.locator = m[2];
+						prevNode.value = _buildBubbleString(prevNode.citationItem);
+						node.nodeValue = "";
+						_clearEntryList();
+						return;
+					}
+				}
+				
+				// TODO support types other than page
+				curLocator = m[2];
+				str = str.substring(0, m.index);
+			}
+			
+			// check for year and pages
+			m = yearPageLocatorRe.exec(str);
+			if(m) {
+				if(m[1].length === 4 || m[2] || m[4]) {
+					year = parseInt(m[1]);
+					if(m[3]) {
+						isBC = true;
+					}
+					if(!curLocator && m[4]) {
+						curLocator = m[4];
+					}
+				} else {
+					curLocator = m[1];
+				}
+				
+				str = str.substr(0, m.index)+str.substring(m.index+m[0].length);
+			}
+			
+			var s = new Zotero.Search();
+			
+			if(charRe.test(str)) {
+				Zotero.debug("QuickFormat: QuickSearch: "+str);
+				s.addCondition("quicksearch-titlesAndCreators", "contains", str);
+				haveConditions = true;
+			}
+			
+			if(year) {
+				Zotero.debug("QuickFormat: Year: "+year);
+				s.addCondition("date", "isAfter", (year)+"-01-01 00:00:00");
+				s.addCondition("date", "isBefore", (year)+"-12-31 23:59:59");
+				haveConditions = true;
+			}
 		}
 		
 		var ids = (haveConditions ? s.search() : []);
@@ -413,31 +414,43 @@ var Zotero_QuickFormat = new function () {
 	function _resize() {
 		var numReferences = referenceBox.childNodes.length, height;
 		var qfeHeight = qfe.scrollHeight;
-		if(numReferences) {
-			referenceBox.hidden = false;
-			if(!referenceHeight) {
-				referenceHeight = referenceBox.firstChild.scrollHeight;
-			}		
-			height = qfbHeight+qfeHeight-14+
-				+(numReferences < SHOWN_REFERENCES ? numReferences : SHOWN_REFERENCES)*referenceHeight;
-		} else {
-			referenceBox.hidden = true;
-			height = qfbHeight+qfeHeight-14;
-		}
 		
-		if(height === window.innerHeight) return;
 		if(qfeHeight > 20) {
-			qfs.style.height = (22-16+qfeHeight+(qfs.style.height == "22px" ? 2 : -2))+"px";
+			var height = (22-16+qfeHeight+(qfs.style.height == "22px" ? 2 : -2));
+			window.resizeTo(window.innerWidth, height+20);
+			qfs.style.height = height+"px";
 			qfe.style.lineHeight = "18px";
 			qfs.setAttribute("multiline", true);
 		} else {
-			qfs.style.height = "22px";
+			var height = 22;
+			window.resizeTo(window.innerWidth, height+20);
+			qfs.style.height = height+"px";
 			qfe.style.lineHeight = "16px";
 			qfs.removeAttribute("multiline");
 		}
-		if(curResizer) curResizer.stop();
-		curResizer = new Resizer(window, null, height, 10, 100);
-		curResizer.animate();
+		
+		var panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
+		
+		if(numReferences) {
+			const referenceHeight = 39;
+			var height = (numReferences < SHOWN_REFERENCES ? numReferences : SHOWN_REFERENCES)*referenceHeight+2;
+			
+			if(panelShowing && height !== referencePanel.clientHeight) {
+				referencePanel.sizeTo((window.innerWidth-30), height);
+				/*if(curResizer) curResizer.stop();
+				curResizer = new Resizer(referencePanel, null, height, 30, 1000);
+				curResizer.animate();*/
+			} else {
+				referencePanel.sizeTo((window.innerWidth-30), height);
+				referencePanel.openPopup(document.documentElement, "after_start", 15, null,
+					false, false, null);
+			}
+		} else {
+			if(panelShowing) {
+				referencePanel.hidePopup();
+				referencePanel.sizeTo(referencePanel.clientWidth, 0);
+			}
+		}
 	}
 	
 	/**
@@ -728,14 +741,15 @@ var Zotero_QuickFormat = new function () {
 	 * Resizes windows
 	 * @constructor
 	 */
-	var Resizer = function(window, targetWidth, targetHeight, steps, time) {
-		this.curWidth = window.innerWidth;
-		this.curHeight = window.innerHeight;
+	var Resizer = function(panel, targetWidth, targetHeight, pixelsPerStep, stepsPerSecond) {
+		this.panel = panel;
+		this.curWidth = panel.clientWidth;
+		this.curHeight = panel.clientHeight;
 		this.difX = (targetWidth ? targetWidth - this.curWidth : 0);
 		this.difY = (targetHeight ? targetHeight - this.curHeight : 0);
 		this.step = 0;
-		this.steps = steps;
-		this.timeout = time/steps;
+		this.steps = Math.ceil(Math.max(Math.abs(this.difX), Math.abs(this.difY))/pixelsPerStep);
+		this.timeout = (1000/stepsPerSecond);
 		
 		var me = this;
 		this._animateCallback = function() { me.animate() };
@@ -747,7 +761,7 @@ var Zotero_QuickFormat = new function () {
 	Resizer.prototype.animate = function() {
 		if(this.stopped) return;
 		this.step++;
-		window.resizeTo(this.curWidth+Math.round(this.step*this.difX/this.steps),
+		this.panel.sizeTo(this.curWidth+Math.round(this.step*this.difX/this.steps),
 			this.curHeight+Math.round(this.step*this.difY/this.steps));
 		if(this.step !== this.steps) {
 			window.setTimeout(this._animateCallback, this.timeout);
