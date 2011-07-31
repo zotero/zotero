@@ -88,7 +88,10 @@
 					<label value="&zotero.citation.suffix.label;"/>
 					<textbox class="citation-textbox" id="suffix" flex="1"/>
 				</row>
-				<checkbox id="suppress-author" label="&zotero.citation.suppressAuthor.label;"/>
+				<hbox pack="left">
+					<html:input type="checkbox" id="suppress-author"/>
+					<html:label for="suppress-author">&zotero.citation.suppressAuthor.label;</html:label>
+				</hbox>
 			</rows>
 		</grid>
 	</panel>

@@ -29,6 +29,9 @@ var Zotero_QuickFormat = new function () {
 		curResizer, dragging;
 	const SHOWN_REFERENCES = 7;
 	
+	/**
+	 * Pre-initialization, when the dialog has loaded but has not yet appeared
+	 */
 	this.onDOMContentLoaded = function() {
 		io = window.arguments[0].wrappedJSObject;
 		
@@ -484,6 +487,19 @@ var Zotero_QuickFormat = new function () {
 	}
 	
 	/**
+	 * Move cursor to end of the textbox
+	 */
+	function _moveCursorToEnd() {
+		var nodeRange = qfiDocument.createRange();
+		nodeRange.selectNode(qfe.lastChild);
+		nodeRange.collapse(false);
+		
+		var selection = qfiWindow.getSelection();
+		selection.removeAllRanges();
+		selection.addRange(nodeRange);
+	}
+	
+	/**
 	 * Generates the preview and sorts citations
 	 */
 	function _previewAndSort() {
@@ -502,13 +518,7 @@ var Zotero_QuickFormat = new function () {
 			var lastBubble = qfe.getElementsByClassName("quick-format-bubble");
 			lastBubble = lastBubble[lastBubble.length-1];
 			
-			var nodeRange = qfiDocument.createRange();
-			nodeRange.selectNode(lastBubble);
-			nodeRange.collapse(false);
-			
-			var selection = qfiWindow.getSelection();
-			selection.removeAllRanges();
-			selection.addRange(nodeRange);
+			_moveCursorToEnd();
 		}
 	}
 	
@@ -657,6 +667,7 @@ var Zotero_QuickFormat = new function () {
 				delete target.citationItem["suppress-author"];
 			}
 			target.value = _buildBubbleString(target.citationItem);
+			_moveCursorToEnd();
 		}
 		panel.addEventListener("popuphidden", closeListener, false);
 	}
