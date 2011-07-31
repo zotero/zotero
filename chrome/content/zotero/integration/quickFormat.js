@@ -536,6 +536,71 @@ var Zotero_QuickFormat = new function () {
 	}
 	
 	/**
+	 * Shows the citation properties panel for a given bubble
+	 */
+	function _showCitationProperties(target) {
+		var panel = document.getElementById("citation-properties");
+		var prefix = document.getElementById("prefix");
+		var suffix = document.getElementById("suffix");
+		var suppressAuthor = document.getElementById("suppress-author");
+		var locatorLabel = document.getElementById("locator-label");
+		var locator = document.getElementById("locator");
+		
+		prefix.value = target.citationItem["prefix"] ? target.citationItem["prefix"] : "";
+		suffix.value = target.citationItem["suffix"] ? target.citationItem["suffix"] : "";
+		if(target.citationItem["label"]) {
+			var option = locatorLabel.getElementsByAttribute("value", target.citationItem["label"]);
+			if(option.length) {
+				locatorLabel.selectedItem = option[0];
+			} else {
+				locatorLabel.selectedIndex = 0;
+			}
+		} else {
+			locatorLabel.selectedIndex = 0;
+		}
+		locator.value = target.citationItem["locator"] ? target.citationItem["locator"] : "";
+		suppressAuthor.checked = !!target.citationItem["suppress-author"];
+		
+		target.setAttribute("selected", "true");
+		panel.openPopup(target, "after_start",
+			target.clientWidth/2, 0, false, false, null);
+		locator.focus();
+		
+		var closeListener = function(event) {
+			panel.removeEventListener("popuphidden", closeListener, false);
+			target.removeAttribute("selected");
+			if(prefix.value) {
+				target.citationItem["prefix"] = prefix.value;
+			} else {
+				delete target.citationItem["prefix"];
+			}
+			if(suffix.value) {
+				target.citationItem["suffix"] = suffix.value;
+			} else {
+				delete target.citationItem["suffix"];
+			}
+			if(locatorLabel.selectedIndex !== 0) {
+				target.citationItem["label"] = locatorLabel.selectedItem.value;
+			} else {
+				delete target.citationItem["label"];
+			}
+			if(locator.value) {
+				target.citationItem["locator"] = locator.value;
+			} else {
+				delete target.citationItem["locator"];
+			}
+			if(suppressAuthor.checked) {
+				target.citationItem["suppress-author"] = true;
+			} else {
+				delete target.citationItem["suppress-author"];
+			}
+			target.value = _buildBubbleString(target.citationItem);
+			_moveCursorToEnd();
+		}
+		panel.addEventListener("popuphidden", closeListener, false);
+	}
+	
+	/**
 	 * Accepts current selection and adds citation
 	 */
 	function _accept() {
@@ -576,13 +641,54 @@ var Zotero_QuickFormat = new function () {
 					event.preventDefault();
 				};
 			} else if(keyCode === event.DOM_VK_DOWN) {
-				var selectedItem = referenceBox.selectedItem;
-				var nextSibling;
-				if((nextSibling = selectedItem.nextSibling)) {
-					referenceBox.selectedItem = nextSibling;
-					referenceBox.ensureElementIsVisible(nextSibling);
+				if((Zotero.isMac ? event.metaKey : event.ctrlKey)) {
+					// If meta key is held down, show the citation properties panel
+					var selection = qfiWindow.getSelection();
+					var range = selection.getRangeAt(0);
+					
+					// Check whether the bubble is selected
+					var endContainer = range.endContainer;
+					if(endContainer !== qfe) {
+						if(range.endContainer.citationItem) {
+							_showCitationProperties(range.endContainer);
+						} else if(endContainer.nodeType === Node.TEXT_NODE) {
+							if(endContainer.parentNode === qfe) {
+								var node = endContainer;
+								while((node = endContainer.previousSibling)) {
+									if(node.citationItem) {
+										_showCitationProperties(node);
+										event.preventDefault();
+										return;
+									}
+								}
+							}
+						}
+						event.preventDefault();
+						return;
+					}
+					
+					// Check whether there is a bubble in the range
+					var endOffset = range.endOffset;
+					var childNodes = qfe.childNodes;
+					for(var i=Math.min(endOffset, childNodes.length-1); i>=0; i--) {
+						var node = childNodes[i];
+						if(node.citationItem) {
+							_showCitationProperties(node);
+							event.preventDefault();
+							return;
+						}
+					}
+					
 					event.preventDefault();
-				};
+				} else {
+					var selectedItem = referenceBox.selectedItem;
+					var nextSibling;
+					if((nextSibling = selectedItem.nextSibling)) {
+						referenceBox.selectedItem = nextSibling;
+						referenceBox.ensureElementIsVisible(nextSibling);
+						event.preventDefault();
+					};
+				}
 			} else {
 				// Use a timeout so that _quickFormat gets called after update
 				window.setTimeout(_quickFormat, 0);
@@ -623,66 +729,7 @@ var Zotero_QuickFormat = new function () {
 	 * Handle a click on a bubble
 	 */
 	function _onBubbleClick(event) {
-		var target = event.target;
-		var panel = document.getElementById("citation-properties");
-		var prefix = document.getElementById("prefix");
-		var suffix = document.getElementById("suffix");
-		var suppressAuthor = document.getElementById("suppress-author");
-		var locatorLabel = document.getElementById("locator-label");
-		var locator = document.getElementById("locator");
-		
-		prefix.value = target.citationItem["prefix"] ? target.citationItem["prefix"] : "";
-		suffix.value = target.citationItem["suffix"] ? target.citationItem["suffix"] : "";
-		if(target.citationItem["label"]) {
-			var option = locatorLabel.getElementsByAttribute("value", target.citationItem["label"]);
-			if(option.length) {
-				locatorLabel.selectedItem = option[0];
-			} else {
-				locatorLabel.selectedIndex = 0;
-			}
-		} else {
-			locatorLabel.selectedIndex = 0;
-		}
-		locator.value = target.citationItem["locator"] ? target.citationItem["locator"] : "";
-		suppressAuthor.checked = !!target.citationItem["suppress-author"];
-		
-		target.setAttribute("selected", "true");
-		panel.openPopup(target, "after_start",
-			target.clientWidth/2, 0, false, false, event);
-		locator.focus();
-		
-		var closeListener = function(event) {
-			panel.removeEventListener("popuphidden", closeListener, false);
-			target.removeAttribute("selected");
-			if(prefix.value) {
-				target.citationItem["prefix"] = prefix.value;
-			} else {
-				delete target.citationItem["prefix"];
-			}
-			if(suffix.value) {
-				target.citationItem["suffix"] = suffix.value;
-			} else {
-				delete target.citationItem["suffix"];
-			}
-			if(locatorLabel.selectedIndex !== 0) {
-				target.citationItem["label"] = locatorLabel.selectedItem.value;
-			} else {
-				delete target.citationItem["label"];
-			}
-			if(locator.value) {
-				target.citationItem["locator"] = locator.value;
-			} else {
-				delete target.citationItem["locator"];
-			}
-			if(suppressAuthor.checked) {
-				target.citationItem["suppress-author"] = true;
-			} else {
-				delete target.citationItem["suppress-author"];
-			}
-			target.value = _buildBubbleString(target.citationItem);
-			_moveCursorToEnd();
-		}
-		panel.addEventListener("popuphidden", closeListener, false);
+		_showCitationProperties(event.target);
 	}
 	
 	/**
