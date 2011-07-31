@@ -65,8 +65,10 @@
 					tabindex="1" flex="1"/>
 			</hbox>
 		</hbox>
-		<richlistbox id="quick-format-reference-list" hidden="true" flex="1"/>
 	</vbox>
+	<panel id="quick-format-reference-panel" noautofocus="true" noautohide="true" norestorefocus="true" onfocus="window.focus()" onpopupshowing="window.focus()">
+		<richlistbox id="quick-format-reference-list" flex="1"/>
+	</panel>
 	<panel id="citation-properties" type="arrow" orient="vertical" onkeypress="Zotero_QuickFormat.onPanelKeyPress(event)">
 		<grid flex="1">
 			<columns>

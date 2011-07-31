@@ -187,11 +187,18 @@ richlistitem[selected="true"] {
 	padding: 10px;
 }
 
-#quick-format-reference-list {
-	margin: 0 15px 0 15px;
+#quick-format-reference-panel {
+	margin: 0;
+	padding: 0;
 	background: white;
 	opacity: 0.9;
 	-moz-user-focus: ignore;
+	height: 37px;
+}
+
+#quick-format-reference-list {
+	margin: 0;
+	padding: 0;
 }
 
 #citation-properties menulist {
