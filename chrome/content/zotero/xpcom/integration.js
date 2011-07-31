@@ -346,6 +346,7 @@ Zotero.Integration = new function() {
 						psn.address(),
 						1 // kSetFrontProcessFrontWindowOnly = (1 << 0)
 					);
+					carbon.close();
 				}, false);
 			} else {
 				if(Zotero.oscpu == "PPC Mac OS X 10.4" || Zotero.oscpu == "Intel Mac OS X 10.4"

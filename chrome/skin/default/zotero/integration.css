@@ -248,3 +248,7 @@ richlistitem[selected="true"] {
 	width: 16px;
 	height: 16px;
 }
+
+#citation-properties #suppress-author {
+	-moz-user-focus: normal;
+}
