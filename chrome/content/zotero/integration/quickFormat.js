@@ -35,16 +35,16 @@ var Zotero_QuickFormat = new function () {
 	this.onDOMContentLoaded = function() {
 		io = window.arguments[0].wrappedJSObject;
 		
+		// Only hide chrome on Windows or Mac
+		if(Zotero.isMac || Zotero.isWin) {
+			document.documentElement.setAttribute("hidechrome", true);
+		}
+		
 		qfs = document.getElementById("quick-format-search");
 		qfi = document.getElementById("quick-format-iframe");
 		qfb = document.getElementById("quick-format-entry");
 		qfbHeight = qfb.scrollHeight;
 		referencePanel = document.getElementById("quick-format-reference-panel");
-		referencePanel.addEventListener("popuphidden", _refocusQfe, false);
-		referencePanel.addEventListener("popupshown", _refocusQfe, false);
-		referencePanel.addEventListener("focus", _refocusQfe, false);
-		referencePanel.addEventListener("activate", _refocusQfe, false);
-		referencePanel.addEventListener("keypress", _onReferencePanelKeypress, false);
 		referenceBox = document.getElementById("quick-format-reference-list");
 		qfiWindow = qfi.contentWindow;
 		qfiDocument = qfi.contentDocument;
@@ -103,6 +103,7 @@ var Zotero_QuickFormat = new function () {
 	function _refocusQfe() {
 		window.focus();
 		qfe.focus();
+		referencePanel.blur();
 	}
 	
 	/**
@@ -421,18 +422,19 @@ var Zotero_QuickFormat = new function () {
 		var numReferences = referenceBox.childNodes.length, height;
 		var qfeHeight = qfe.scrollHeight;
 		
-		if(qfeHeight > 20) {
-			var height = (22-16+qfeHeight+(qfs.style.height == "22px" ? 2 : -2));
-			window.resizeTo(window.innerWidth, height+20);
-			qfs.style.height = height+"px";
-			qfe.style.lineHeight = "18px";
+		if(qfeHeight > 30) {
+			qfe.setAttribute("multiline", true);
 			qfs.setAttribute("multiline", true);
-		} else {
-			var height = 22;
-			window.resizeTo(window.innerWidth, height+20);
+			qfeHeight = qfe.scrollHeight;
+			var height = 4+qfeHeight;
+			
 			qfs.style.height = height+"px";
-			qfe.style.lineHeight = "16px";
+			window.sizeToContent();
+		} else {
+			delete qfs.style.height;
+			qfe.removeAttribute("multiline");
 			qfs.removeAttribute("multiline");
+			window.sizeToContent();
 		}
 		
 		var panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
@@ -441,12 +443,12 @@ var Zotero_QuickFormat = new function () {
 			var height = referenceHeight ? Math.min(numReferences, SHOWN_REFERENCES)*referenceHeight+2 : 39;
 			
 			if(panelShowing && height !== referencePanel.clientHeight) {
-				referencePanel.sizeTo((window.innerWidth-30), height);
+				referencePanel.sizeTo((window.outerWidth-30), height);
 				/*if(curResizer) curResizer.stop();
 				curResizer = new Resizer(referencePanel, null, height, 30, 1000);
 				curResizer.animate();*/
 			} else {
-				referencePanel.sizeTo((window.innerWidth-30), height);
+				referencePanel.sizeTo((window.outerWidth-30), height);
 				referencePanel.openPopup(document.documentElement, "after_start", 15, null,
 					false, false, null);
 				
@@ -454,7 +456,6 @@ var Zotero_QuickFormat = new function () {
 					referenceHeight = referenceBox.firstChild.scrollHeight;
 					height = Math.min(numReferences, SHOWN_REFERENCES)*referenceHeight+2;
 					referencePanel.sizeTo((window.innerWidth-30), height);
-					window.setTimeout(_refocusQfe, 100);
 				}
 			}
 		} else {
@@ -634,79 +635,77 @@ var Zotero_QuickFormat = new function () {
 	 * Handle return or escape
 	 */
 	function _onQuickSearchKeyPress(event) {
-		try {
-			var keyCode = event.keyCode;
-			if(keyCode === event.DOM_VK_RETURN || keyCode === event.DOM_VK_ENTER) {
+		var keyCode = event.keyCode;
+		if(keyCode === event.DOM_VK_RETURN || keyCode === event.DOM_VK_ENTER) {
+			event.preventDefault();
+			if(!_bubbleizeSelected()) {
+				_accept();
+			}
+		} else if(keyCode === event.DOM_VK_TAB || event.charCode === 59 /* ; */) {
+			event.preventDefault();
+			_bubbleizeSelected();
+		} else if(keyCode === event.DOM_VK_BACK_SPACE) {
+			_resize();
+		} else if(keyCode === event.DOM_VK_UP) {
+			var selectedItem = referenceBox.selectedItem;
+			var previousSibling;
+			if((previousSibling = selectedItem.previousSibling)) {
+				referenceBox.selectedItem = previousSibling;
+				referenceBox.ensureElementIsVisible(previousSibling);
 				event.preventDefault();
-				if(!_bubbleizeSelected()) {
-					_accept();
-				}
-			} else if(keyCode === event.DOM_VK_TAB || event.charCode === 59 /* ; */) {
-				event.preventDefault();
-				_bubbleizeSelected();
-			} else if(keyCode === event.DOM_VK_UP) {
-				var selectedItem = referenceBox.selectedItem;
-				var previousSibling;
-				if((previousSibling = selectedItem.previousSibling)) {
-					referenceBox.selectedItem = previousSibling;
-					referenceBox.ensureElementIsVisible(previousSibling);
-					event.preventDefault();
-				};
-			} else if(keyCode === event.DOM_VK_DOWN) {
-				if((Zotero.isMac ? event.metaKey : event.ctrlKey)) {
-					// If meta key is held down, show the citation properties panel
-					var selection = qfiWindow.getSelection();
-					var range = selection.getRangeAt(0);
-					
-					// Check whether the bubble is selected
-					var endContainer = range.endContainer;
-					if(endContainer !== qfe) {
-						if(range.endContainer.citationItem) {
-							_showCitationProperties(range.endContainer);
-						} else if(endContainer.nodeType === Node.TEXT_NODE) {
-							if(endContainer.parentNode === qfe) {
-								var node = endContainer;
-								while((node = endContainer.previousSibling)) {
-									if(node.citationItem) {
-										_showCitationProperties(node);
-										event.preventDefault();
-										return;
-									}
+			};
+		} else if(keyCode === event.DOM_VK_DOWN) {
+			if((Zotero.isMac ? event.metaKey : event.ctrlKey)) {
+				// If meta key is held down, show the citation properties panel
+				var selection = qfiWindow.getSelection();
+				var range = selection.getRangeAt(0);
+				
+				// Check whether the bubble is selected
+				var endContainer = range.endContainer;
+				if(endContainer !== qfe) {
+					if(range.endContainer.citationItem) {
+						_showCitationProperties(range.endContainer);
+					} else if(endContainer.nodeType === Node.TEXT_NODE) {
+						if(endContainer.parentNode === qfe) {
+							var node = endContainer;
+							while((node = endContainer.previousSibling)) {
+								if(node.citationItem) {
+									_showCitationProperties(node);
+									event.preventDefault();
+									return;
 								}
 							}
 						}
+					}
+					event.preventDefault();
+					return;
+				}
+				
+				// Check whether there is a bubble in the range
+				var endOffset = range.endOffset;
+				var childNodes = qfe.childNodes;
+				for(var i=Math.min(endOffset, childNodes.length-1); i>=0; i--) {
+					var node = childNodes[i];
+					if(node.citationItem) {
+						_showCitationProperties(node);
 						event.preventDefault();
 						return;
 					}
-					
-					// Check whether there is a bubble in the range
-					var endOffset = range.endOffset;
-					var childNodes = qfe.childNodes;
-					for(var i=Math.min(endOffset, childNodes.length-1); i>=0; i--) {
-						var node = childNodes[i];
-						if(node.citationItem) {
-							_showCitationProperties(node);
-							event.preventDefault();
-							return;
-						}
-					}
-					
-					event.preventDefault();
-				} else {
-					var selectedItem = referenceBox.selectedItem;
-					var nextSibling;
-					if((nextSibling = selectedItem.nextSibling)) {
-						referenceBox.selectedItem = nextSibling;
-						referenceBox.ensureElementIsVisible(nextSibling);
-						event.preventDefault();
-					};
 				}
+				
+				event.preventDefault();
 			} else {
-				// Use a timeout so that _quickFormat gets called after update
-				window.setTimeout(_quickFormat, 0);
+				var selectedItem = referenceBox.selectedItem;
+				var nextSibling;
+				if((nextSibling = selectedItem.nextSibling)) {
+					referenceBox.selectedItem = nextSibling;
+					referenceBox.ensureElementIsVisible(nextSibling);
+					event.preventDefault();
+				};
 			}
-		} catch(e) {
-			Zotero.logError(e);
+		} else {
+			// Use a timeout so that _quickFormat gets called after update
+			window.setTimeout(_quickFormat, 0);
 		}
 	}
 	

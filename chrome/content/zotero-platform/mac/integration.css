@@ -1,0 +1,83 @@
+body {
+	line-height: 1.45em;
+}
+
+body[multiline="true"] {
+	line-height: 1.63em;
+}
+
+#quick-format-dialog {
+	background: transparent;
+	-moz-appearance: none;
+	padding: 0;
+}
+
+#quick-format-search {
+	height: 22px;
+	background: white;
+	-moz-appearance: searchfield;
+}
+
+#quick-format-search[multiline="true"] {
+	padding: 2px 2px 0 18px;
+	border: 1px solid rgba(0, 0, 0, 0.5);
+	border-radius: 10px;
+	-moz-appearance: none;
+}
+
+#quick-format-search:not([multiline="true"]) {
+	height: 22px !important;
+}
+
+#quick-format-search[multiline="true"] > #quick-format-iframe {
+	margin: -1px 0 0 0;
+}
+
+#quick-format-entry {
+	background: -moz-linear-gradient(-90deg, rgb(243,123,119) 0, rgb(180,47,38) 50%, rgb(156,36,27) 50%);
+	-moz-border-radius:15px;
+	padding: 10px;
+}
+
+#zotero-icon {
+	margin: 0 0 0 -13px;
+}
+
+#citation-properties menulist {
+	-moz-appearance: none; color: #fff;
+	text-shadow: 0 -1px 0 rgba(0,0,0,.5);
+	border-radius: 12px;
+	border: 1px solid rgba(0,0,0,.65);
+	background: -moz-linear-gradient(rgba(110,110,110,.9), rgba(70,70,70,.9) 49%, rgba(50,50,50,.9) 51%, rgba(40,40,40,.9));
+	box-shadow: inset 0 1px 0 rgba(255,255,255,.2), inset 0 0 1px rgba(255,255,255,.1), 0 1px 0 rgba(255,255,255,.1);
+	background-clip: padding-box;
+	background-origin: padding-box;
+	padding: 2px 9px;
+	border-radius: 3px;
+	min-height: 22px;
+	-moz-padding-start: 4px;
+	-moz-padding-end: 0;
+}
+
+#citation-properties menulist:-moz-focusring {
+	box-shadow: 0 0 1px -moz-mac-focusring inset, 0 0 4px 1px -moz-mac-focusring, 0 0 2px 1px -moz-mac-focusring;
+}
+
+#citation-properties menulist[open="true"],
+#citation-properties menulist:hover:active {
+	background: -moz-linear-gradient(rgba(40,40,40,.9), rgba(70,70,70,.9));
+	box-shadow: inset 0 0 3px rgba(0,0,0,.2), inset 0 1px 7px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.1);
+}
+
+#citation-properties menulist > .menulist-dropmarker {
+	-moz-appearance: none;
+	display: -moz-box;
+	background-color: transparent;
+	border: 0;
+	margin: 0;
+	padding: 0;
+}
+
+#citation-properties menulist > .menulist-dropmarker > .dropmarker-icon {
+	list-style-image: url("chrome://browser/skin/hud-style-dropmarker-double-arrows.png");
+}
