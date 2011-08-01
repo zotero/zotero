@@ -193,12 +193,12 @@ richlistitem[selected="true"] {
 	background: white;
 	opacity: 0.9;
 	-moz-user-focus: ignore;
-	height: 37px;
 }
 
 #quick-format-reference-list {
 	margin: 0;
 	padding: 0;
+	-moz-user-focus: ignore;
 }
 
 #citation-properties menulist {
