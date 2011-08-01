@@ -40,10 +40,11 @@ var Zotero_QuickFormat = new function () {
 		qfb = document.getElementById("quick-format-entry");
 		qfbHeight = qfb.scrollHeight;
 		referencePanel = document.getElementById("quick-format-reference-panel");
-		referencePanel.addEventListener("popuphidden", function() {
-			window.focus();
-			qfe.focus();
-		}, false);
+		referencePanel.addEventListener("popuphidden", _refocusQfe, false);
+		referencePanel.addEventListener("popupshown", _refocusQfe, false);
+		referencePanel.addEventListener("focus", _refocusQfe, false);
+		referencePanel.addEventListener("activate", _refocusQfe, false);
+		referencePanel.addEventListener("keypress", _onReferencePanelKeypress, false);
 		referenceBox = document.getElementById("quick-format-reference-list");
 		qfiWindow = qfi.contentWindow;
 		qfiDocument = qfi.contentDocument;
@@ -98,6 +99,11 @@ var Zotero_QuickFormat = new function () {
 			}, 1);
 		}
 	};
+	
+	function _refocusQfe() {
+		window.focus();
+		qfe.focus();
+	}
 	
 	/**
 	 * Gets the content of the text node that the cursor is currently within
@@ -223,12 +229,12 @@ var Zotero_QuickFormat = new function () {
 			for(var i=0, n=items.length; i<n; i++) {
 				referenceBox.appendChild(_buildListItem(items[i]));
 			}
-			referenceBox.ensureIndexIsVisible(0);
 		}
 		
 		_resize();
 		
 		referenceBox.selectedIndex = 0;
+		referenceBox.ensureIndexIsVisible(0);
 	}
 	
 	/**
@@ -432,8 +438,7 @@ var Zotero_QuickFormat = new function () {
 		var panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
 		
 		if(numReferences) {
-			const referenceHeight = 39;
-			var height = (numReferences < SHOWN_REFERENCES ? numReferences : SHOWN_REFERENCES)*referenceHeight+2;
+			var height = referenceHeight ? Math.min(numReferences, SHOWN_REFERENCES)*referenceHeight+2 : 39;
 			
 			if(panelShowing && height !== referencePanel.clientHeight) {
 				referencePanel.sizeTo((window.innerWidth-30), height);
@@ -444,6 +449,13 @@ var Zotero_QuickFormat = new function () {
 				referencePanel.sizeTo((window.innerWidth-30), height);
 				referencePanel.openPopup(document.documentElement, "after_start", 15, null,
 					false, false, null);
+				
+				if(!referenceHeight) {
+					referenceHeight = referenceBox.firstChild.scrollHeight;
+					height = Math.min(numReferences, SHOWN_REFERENCES)*referenceHeight+2;
+					referencePanel.sizeTo((window.innerWidth-30), height);
+					window.setTimeout(_refocusQfe, 100);
+				}
 			}
 		} else {
 			if(panelShowing) {
