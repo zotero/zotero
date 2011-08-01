@@ -1,0 +1,42 @@
+#quick-format-dialog {
+	background: transparent;
+	-moz-appearance: -moz-win-borderless-glass;
+	padding: 0;
+}
+
+#quick-format-search {
+	background: white;
+	padding: 2px 2px 2px 0;
+	border: 1px solid rgba(0, 0, 0, 0.5);
+	border-radius: 10px;
+	-moz-appearance: none;
+}
+
+#quick-format-dialog {
+	background: transparent;
+	-moz-appearance: none;
+	padding: 0;
+}
+
+#quick-format-search:not([multiline="true"]) {
+	height: 28px !important;
+}
+
+#quick-format-entry {
+	background: -moz-linear-gradient(-90deg, rgb(243,123,119) 0, rgb(180,47,38) 50%, rgb(156,36,27) 50%);
+	-moz-border-radius:15px;
+	padding: 10px;
+}
+
+#zotero-icon {
+	margin: 2px 0 0 2px;
+	-moz-appearance: none;
+}
+
+body {
+	line-height: 1.65em;
+}
+
+body[multiline="true"] {
+	padding-bottom: 2px;
+}

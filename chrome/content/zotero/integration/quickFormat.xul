@@ -25,22 +25,19 @@
 -->
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://global/skin/browser.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/integration.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window
-	id="zotero-quick-format-dialog"
+	id="quick-format-dialog"
 	orient="vertical"
 	title="Quick Format Citation"
-	width="500" height="44"
+	width="600" height="42"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY"
-	style="background: transparent; -moz-appearance:none; padding: 0"
-	hidechrome="true" onkeypress="Zotero_QuickFormat.onKeyPress(event)">
+	onkeypress="Zotero_QuickFormat.onKeyPress(event)">
 	
 	<script src="../include.js"/>
 	<script src="quickFormat.js"/>
@@ -60,13 +57,12 @@
 							oncommand="Zotero_QuickFormat.onClassicViewCommand()"/>
 					</menupopup>
 				</toolbarbutton>
-				<!-- javascript:encodeURIComponent('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="chrome://zotero/skin/integration.css"/></head><body id="quick-format-editor"/></html>') -->
-				<iframe id="quick-format-iframe" ondragstart="event.stopPropagation()" src="data:application/xhtml+xml,%3C!DOCTYPE%20html%20PUBLIC%20%22-%2F%2FW3C%2F%2FDTD%20XHTML%201.0%20Strict%2F%2FEN%22%20%22http%3A%2F%2Fwww.w3.org%2FTR%2Fxhtml1%2FDTD%2Fxhtml1-strict.dtd%22%3E%3Chtml%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%3E%3Chead%3E%3Clink%20rel%3D%22stylesheet%22%20type%3D%22text%2Fcss%22%20href%3D%22chrome%3A%2F%2Fzotero%2Fskin%2Fintegration.css%22%2F%3E%3C%2Fhead%3E%3Cbody%20contenteditable%3D%22true%22%20id%3D%22quick-format-editor%22%2F%3E%3C%2Fhtml%3E"
+				<iframe id="quick-format-iframe" ondragstart="event.stopPropagation()" src="data:application/xhtml+xml,%3C!DOCTYPE%20html%20PUBLIC%20%22-//W3C//DTD%20XHTML%201.0%20Strict//EN%22%20%22http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd%22%3E%3Chtml%20xmlns=%22http://www.w3.org/1999/xhtml%22%3E%3Chead%3E%3Clink%20rel=%22stylesheet%22%20type=%22text/css%22%20href=%22chrome://zotero/skin/integration.css%22/%3E%3Clink%20rel=%22stylesheet%22%20type=%22text/css%22%20href=%22chrome://zotero-platform/content/integration.css%22/%3E%3C/head%3E%3Cbody%20contenteditable=%22true%22%20id=%22quick-format-editor%22/%3E%3C/html%3E"
 					tabindex="1" flex="1"/>
 			</hbox>
 		</hbox>
 	</vbox>
-	<panel id="quick-format-reference-panel" noautofocus="true" noautohide="true" norestorefocus="true" onfocus="window.focus()" onpopupshowing="window.focus()">
+	<panel id="quick-format-reference-panel" noautofocus="true" norestorefocus="true">
 		<richlistbox id="quick-format-reference-list" flex="1"/>
 	</panel>
 	<panel id="citation-properties" type="arrow" orient="vertical" onkeypress="Zotero_QuickFormat.onPanelKeyPress(event)">
