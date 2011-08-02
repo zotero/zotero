@@ -1,0 +1,25 @@
+body {
+	line-height: 1.5em;
+}
+
+#quick-format-search:not([multiline="true"]) {
+	height: 27px !important;
+}
+
+#quick-format-search {
+	background: white;
+	padding: 1px 2px 1px 0;
+	border: 1px solid rgba(0, 0, 0, 0.5);
+	-moz-appearance: none;
+}
+
+#quick-format-dialog {
+	background: transparent;
+	-moz-appearance: none;
+	padding: 0;
+}
+
+#zotero-icon {
+	margin: 3px 0 0 2px;
+	-moz-appearance: none;
+}
