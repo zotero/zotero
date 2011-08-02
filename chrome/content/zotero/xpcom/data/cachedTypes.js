@@ -193,7 +193,7 @@ Zotero.CreatorTypes = new function() {
 		}
 		
 		var valid = false;
-		var types = this.getTypesForItemType(creatorTypeID, itemTypeID);
+		var types = this.getTypesForItemType(itemTypeID);
 		for each(var type in types) {
 			if (type.id == creatorTypeID) {
 				valid = true;
