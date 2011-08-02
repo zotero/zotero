@@ -1168,7 +1168,7 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 			for each(var item in items) {
 				// Can only drag top-level items
 				if (!item.isTopLevelItem()) {
-					return false
+					return false;
 				}
 				
 				if (itemGroup.isWithinGroup() && item.isAttachment()) {
@@ -1833,7 +1833,7 @@ Zotero.ItemGroup.prototype.__defineGetter__('filesEditable', function () {
 	if (this.isGroup()) {
 		return this.ref.filesEditable;
 	}
-	if (this.isCollection()) {
+	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled()) {
 		var type = Zotero.Libraries.getType(libraryID);
 		if (type == 'group') {
 			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
