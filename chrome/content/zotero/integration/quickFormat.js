@@ -629,6 +629,7 @@ var Zotero_QuickFormat = new function () {
 	this.onKeyPress = function(event) {
 		var keyCode = event.keyCode;
 		if(keyCode === event.DOM_VK_ESCAPE) {
+			io.citation.citationItems = [];
 			window.close();
 		}
 	}
