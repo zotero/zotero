@@ -88,6 +88,7 @@
 
 #editor {
 	margin-top: 10px;
+	max-height: 100px;
 }
 
 .quick-format-title {
@@ -132,6 +133,10 @@
 	padding: 0;
 	padding-top: 0;
 	padding-bottom: 0;
+}
+
+#quick-format-iframe {
+	height: 9999px;
 }
 
 body {
