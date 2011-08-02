@@ -1070,9 +1070,15 @@ Zotero.Integration.Session.prototype.setData = function(data) {
  */
 Zotero.Integration.Session.prototype._displayDialog = function(url, options, io) {
 	if(this.doc) this.doc.cleanup();
+	
+	var allOptions = 'chrome,centerscreen';
+	// without this, Firefox gets raised with our windows under Compiz
+	if(Zotero.isLinux) allOptions += ',dialog=no';
+	if(options) allOptions += ','+options;
+	
 	var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 		.getService(Components.interfaces.nsIWindowWatcher)
-		.openWindow(null, url, '', 'chrome,centerscreen'+(options ? ','+options : ""), (io ? io : null));
+		.openWindow(null, url, '', allOptions, (io ? io : null));
 	Zotero.Integration.activate(window);
 	while(!window.closed) {
 		Zotero.mainThread.processNextEvent(true);
