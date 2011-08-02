@@ -922,12 +922,15 @@ Zotero.Sync.Storage = new function () {
 			else if (e.name == "NS_ERROR_FAILURE" && destFile.leafName.length >= 244) {
 				nameLength = true;
 			}
-			// ecrypt (on Ubuntu, at least) can result in a lower limit —
-			// not much we can do about this, but throw a specific error
+			// Filesystem encryption (or, more specifically, filename encryption)
+			// can result in a lower limit -- not much we can do about this,
+			// but log a warning and skip the file
 			else if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
-				var e = "Error creating file '" + destFile.leafName + "'\n\n"
-					+ "Check whether you are using a filesystem encryption such as eCryptfs "
-					+ "that results in a filename length limit below 255 bytes.";
+				Zotero.debug(e);
+				var msg = "Error creating file '" + destFile.leafName + "'\n\n"
+					+ "See http://www.zotero.org/support/kb/encrypted_filenames for more information.";
+				Components.utils.reportError(msg);
+				return;
 			}
 			
 			if (windowsLength || nameLength) {
@@ -1120,13 +1123,16 @@ Zotero.Sync.Storage = new function () {
 				else if (e.name == "NS_ERROR_FAILURE" && destFile.leafName.length >= 244) {
 					nameLength = true;
 				}
-				// ecrypt (on Ubuntu, at least) can result in a lower limit --
-				// not much we can do about this, but log a warning
+				// Filesystem encryption (or, more specifically, filename encryption)
+				// can result in a lower limit -- not much we can do about this,
+				// but log a warning and skip the file
 				else if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
-					var msg = "Error creating file '" + destFile.leafName + "' "
-						+ "(Are you using filesystem encryption such as ecrypt "
-						+ "that results in a filename length limit below 255 bytes?)";
+					Zotero.debug(e);
+					// TODO: localize
+					var msg = "Error creating file '" + destFile.leafName + "'. "
+						+ "See http://www.zotero.org/support/kb/encrypted_filenames for more information.";
 					Components.utils.reportError(msg);
+					continue;
 				}
 				
 				if (windowsLength || nameLength) {
@@ -1175,7 +1181,26 @@ Zotero.Sync.Storage = new function () {
 					Zotero.debug(msg, 2);
 					Components.utils.reportError(msg);
 					
-					destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+					try {
+						destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+					}
+					catch (e) {
+						// See above
+						if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
+							Zotero.debug(e);
+							// TODO: localize
+							var msg = "Error creating file '" + destFile.leafName + "'. "
+								+ "See http://www.zotero.org/support/kb/encrypted_filenames for more information.";
+							Components.utils.reportError(msg);
+							continue;
+						}
+						
+						zipReader.close();
+						
+						Components.utils.reportError(e);
+						var msg = Zotero.getString('sync.storage.error.fileNotCreated', parentDir.leafName + '/' + fileName);
+						throw(msg);
+					}
 					
 					if (primaryFile) {
 						renamed = true;
