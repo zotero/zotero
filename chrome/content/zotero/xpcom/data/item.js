@@ -1002,6 +1002,15 @@ Zotero.Item.prototype.setCreator = function(orderIndex, creator, creatorTypeIDOr
 		creatorTypeID = 1;
 	}
 	
+	// If creatorTypeID isn't valid for this type, use the primary type
+	if (!Zotero.CreatorTypes.isValidForItemType(creatorTypeID, this.itemTypeID)) {
+		var msg = "Invalid creator type " + creatorTypeID + " for item type " + this.itemTypeID
+				+ " -- changing to primary creator";
+		Zotero.debug(msg);
+		Components.utils.reportError(msg)
+		creatorTypeID = Zotero.CreatorTypes.getPrimaryIDForType(this.itemTypeID);
+	}
+	
 	// If creator at this position hasn't changed, cancel
 	if (this._creators[orderIndex] &&
 			this._creators[orderIndex].ref.id == creator.id &&
@@ -1009,11 +1018,6 @@ Zotero.Item.prototype.setCreator = function(orderIndex, creator, creatorTypeIDOr
 			!creator.hasChanged()) {
 		Zotero.debug("Creator in position " + orderIndex + " hasn't changed", 4);
 		return false;
-	}
-	
-	if (!Zotero.CreatorTypes.isValidForItemType(creatorTypeID, this.itemTypeID)) {
-		throw ("Invalid creator type for item type in Zotero.Item.setCreator() "
-			+ "(" + creatorTypeID + ", " + this.itemTypeID + ")");
 	}
 	
 	this._creators[orderIndex] = {
@@ -3840,7 +3844,7 @@ Zotero.Item.prototype.clone = function(includePrimary, newItem, unsaved) {
 			newItem.id = this.id;
 			newItem.libraryID = this.libraryID;
 			newItem.key = this.key;
-			newItem.itemTypeID = itemTypeID;
+			newItem.setType(itemTypeID);
 			for (var field in obj.primary) {
 				switch (field) {
 					case 'itemID':
