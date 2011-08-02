@@ -164,21 +164,48 @@ Zotero.CreatorTypes = new function() {
 	
 	var _primaryIDCache = {};
 	var _hasCreatorTypeCache = {};
+	var _creatorTypesByItemType = {};
+	var _isValidForItemType = {};
 	
 	function getTypesForItemType(itemTypeID) {
+		if (_creatorTypesByItemType[itemTypeID]) {
+			return _creatorTypesByItemType[itemTypeID];
+		}
+		
 		var sql = "SELECT creatorTypeID AS id, creatorType AS name "
 			+ "FROM itemTypeCreatorTypes NATURAL JOIN creatorTypes "
 			// DEBUG: sort needs to be on localized strings in itemPane.js
 			// (though still put primary field at top)
 			+ "WHERE itemTypeID=? ORDER BY primaryField=1 DESC, name";
-		return Zotero.DB.query(sql, itemTypeID);
+		var types = Zotero.DB.query(sql, itemTypeID);
+		if (!types) {
+			types = [];
+		}
+		
+		_creatorTypesByItemType[itemTypeID] = types;
+		return _creatorTypesByItemType[itemTypeID];
 	}
 	
 	
 	function isValidForItemType(creatorTypeID, itemTypeID) {
-		var sql = "SELECT COUNT(*) FROM itemTypeCreatorTypes "
-			+ "WHERE itemTypeID=? AND creatorTypeID=?";
-		return !!Zotero.DB.valueQuery(sql, [itemTypeID, creatorTypeID]);
+		if (_isValidForItemType[itemTypeID] && typeof _isValidForItemType[itemTypeID][creatorTypeID] != 'undefined') {
+			return _isValidForItemType[itemTypeID][creatorTypeID];
+		}
+		
+		var valid = false;
+		var types = this.getTypesForItemType(creatorTypeID, itemTypeID);
+		for each(var type in types) {
+			if (type.id == creatorTypeID) {
+				valid = true;
+				break;
+			}
+		}
+		
+		if (!_isValidForItemType[itemTypeID]) {
+			_isValidForItemType[itemTypeID] = {};
+		}
+		_isValidForItemType[itemTypeID][creatorTypeID] = valid;
+		return valid;
 	}
 	
 	

@@ -1011,6 +1011,11 @@ Zotero.Item.prototype.setCreator = function(orderIndex, creator, creatorTypeIDOr
 		return false;
 	}
 	
+	if (!Zotero.CreatorTypes.isValidForItemType(creatorTypeID, this.itemTypeID)) {
+		throw ("Invalid creator type for item type in Zotero.Item.setCreator() "
+			+ "(" + creatorTypeID + ", " + this.itemTypeID + ")");
+	}
+	
 	this._creators[orderIndex] = {
 		ref: creator,
 		creatorTypeID: creatorTypeID
