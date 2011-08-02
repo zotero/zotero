@@ -75,6 +75,8 @@ var Zotero_QuickFormat = new function () {
 				keepSorted.setAttribute("checked", "true");
 			}
 		}
+		
+		window.sizeToContent();
 	}
 	
 	/**
