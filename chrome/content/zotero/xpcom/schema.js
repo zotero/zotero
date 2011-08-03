@@ -1486,6 +1486,7 @@ Zotero.Schema = new function(){
 			priority: parseInt(
 				xmlnode.getElementsByTagName('priority')[0].firstChild.nodeValue
 			),
+			browserSupport: xmlnode.getAttribute('browserSupport'),
 			inRepository: true,
 		};
 		
