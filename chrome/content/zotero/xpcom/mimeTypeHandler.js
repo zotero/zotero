@@ -52,6 +52,8 @@ Zotero.MIMETypeHandler = new function () {
 		if(Zotero.Prefs.get("parseEndNoteMIMETypes")) {
 			this.addHandler("application/x-endnote-refer", _importHandler, true);
 			this.addHandler("application/x-research-info-systems", _importHandler, true);
+			// Add ISI
+			this.addHandler("application/x-inst-for-Scientific-info", _importHandler, true);
 			//
 			// And some non-standard ones
 			//
@@ -90,9 +92,9 @@ Zotero.MIMETypeHandler = new function () {
 	
 	
 	/**
-	 * Handles Refer/RIS MIME types
-	 * @param {String} string The Refer/RIS formatted records
-	 * @param {String} uri The URI from which the Refer/RIS formatted records were downloaded
+	 * Handles Refer/RIS/ISI MIME types
+	 * @param {String} string The Refer/RIS/ISI formatted records
+	 * @param {String} uri The URI from which the Refer/RIS/ISI formatted records were downloaded
 	 */
 	function _importHandler(string, uri, contentType, channel) {
 		var win = channel.notificationCallbacks.getInterface(Components.interfaces.nsIDOMWindow).top;
@@ -167,7 +169,7 @@ Zotero.MIMETypeHandler = new function () {
 		if(!translators.length) {
 			// we lied. we can't really translate this file.
 			frontWindow.Zotero_Browser.progress.close();
-			throw "No translator found for handled RIS or Refer file"
+			throw "No translator found for handled RIS, Refer or ISI file"
 		}
 		
 		// translate using first available
