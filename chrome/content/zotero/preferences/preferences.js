@@ -73,6 +73,11 @@ function init()
 	} else if(document.location.hash == "#cite") {
 		document.getElementById('zotero-prefs').showPane(document.getElementById("zotero-prefpane-cite"));
 	}
+	
+	var showInAppTab;
+	if(!Zotero.isFx4 && (showInAppTab = document.getElementById("zotero-prefpane-general-showIn-appTab"))) {
+		showInAppTab.setAttribute("hidden", "true");
+	}
 }
 
 
@@ -1791,6 +1796,7 @@ function updateProxyPrefs() {
 		document.getElementById('zotero-proxies-autoRecognize').disabled = 
 		document.getElementById('zotero-proxies-disableByDomain-checkbox').disabled = 
 		document.getElementById('zotero-proxies-disableByDomain-textbox').disabled = !transparent;
+
 }
 
 /**
@@ -1810,8 +1816,9 @@ function updateWordProcessorInstructions() {
  */
 function handleShowInPreferenceChange() {
 	var showInSeparateTab = document.getElementById("zotero-prefpane-general-showIn-separateTab");
+	var showInAppTab = document.getElementById("zotero-prefpane-general-showIn-appTab");
 	if(Zotero.isFx4) {
-		if(showInSeparateTab.selected) {
+		if(showInAppTab.selected) {
 			document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-none');
 			Zotero.Prefs.set("statusBarIcon", 0);
 		} else if(Zotero.isFx4) {

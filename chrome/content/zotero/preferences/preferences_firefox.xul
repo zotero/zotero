@@ -59,6 +59,7 @@ To add a new preference:
 							<radiogroup id="showIn" orient="horizontal" preference="pref-showIn" oncommand="handleShowInPreferenceChange()">
 								<radio id="zotero-prefpane-general-showIn-browserPane" label="&zotero.preferences.showIn.browserPane;" value="1"/>
 								<radio id="zotero-prefpane-general-showIn-separateTab" label="&zotero.preferences.showIn.separateTab;" value="2"/>
+								<radio id="zotero-prefpane-general-showIn-appTab" label="&zotero.preferences.showIn.appTab;" value="3"/>
 							</radiogroup>
 						</row>
 						<row position="2" id="zotero-prefpane-general-statusBarIcon-row">

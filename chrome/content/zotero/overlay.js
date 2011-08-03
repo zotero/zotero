@@ -50,14 +50,14 @@ var ZoteroOverlay = new function()
 		showInPref = Components.classes["@mozilla.org/preferences-service;1"]
 							.getService(Components.interfaces.nsIPrefService)
 							.getBranch('extensions.zotero.').getIntPref('showIn');
-		this.isTab = showInPref === 2;
+		this.isTab = showInPref !== 1;
 		if(!isFx36) {
 			var observerService = Components.classes["@mozilla.org/observer-service;1"]
 				.getService(Components.interfaces.nsIObserverService);
 			var zoteroObserver = function(subject, topic, data) {
 				if(subject != window) return;
 				observerService.removeObserver(this, "browser-delayed-startup-finished");
-				if(showInPref === 2) {
+				if(showInPref === 3) {
 					var tabbar = document.getElementById("TabsToolbar");
 					if(tabbar && window.getComputedStyle(tabbar).display !== "none") {
 						// load Zotero as a tab, if it isn't loading by default
@@ -314,7 +314,7 @@ var ZoteroOverlay = new function()
 		// If no existing tab, add a new tab
 		if(!tab) tab = gBrowser.addTab(ZOTERO_TAB_URL);
 		// Pin tab
-		if(!isFx36) gBrowser.pinTab(tab);
+		if(!isFx36 && showInPref == 3) gBrowser.pinTab(tab);
 		// If requested, activate tab
 		if(!background) gBrowser.selectedTab = tab;
 	}
