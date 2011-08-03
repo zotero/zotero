@@ -104,7 +104,7 @@ var ZoteroTab = new function()
 			if(tabs.length > 1) {
 				window.close();
 			} else {
-				if(Zotero.isFx4) this.containerWindow.gBrowser.unpinTab(tabs[0]);
+				if(Zotero.isFx4 && tabs[0].pinned) this.containerWindow.gBrowser.unpinTab(tabs[0]);
 				document.location.replace(this.containerWindow.gHomeButton.getHomePage());
 			}
 			return;

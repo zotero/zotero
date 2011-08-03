@@ -10,6 +10,7 @@
 <!ENTITY zotero.preferences.showIn						"Load Zotero in:">
 <!ENTITY zotero.preferences.showIn.browserPane					"Browser pane">
 <!ENTITY zotero.preferences.showIn.separateTab					"Separate tab">
+<!ENTITY zotero.preferences.showIn.appTab					"App tab">
 <!ENTITY zotero.preferences.statusBarIcon				"Status bar icon:">
 <!ENTITY zotero.preferences.statusBarIcon.none			"None">
 <!ENTITY zotero.preferences.fontSize						"Font size:">
