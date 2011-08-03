@@ -41,8 +41,7 @@ To add a new preference:
 
 -->
 <prefwindow id="zotero-prefs" title="&zotero.preferences.title;" onload="init()" onunload="Zotero_Preferences.onUnload()"
-		windowtype="zotero:pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-		style="min-height: 600px">
+		windowtype="zotero:pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<prefpane id="zotero-prefpane-general"
 						label="&zotero.preferences.prefpane.general;"
