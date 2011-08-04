@@ -1324,31 +1324,7 @@ Zotero_Preferences.Debug_Output = {
 	
 	
 	view: function () {
-		const uri = "zotero://debug/";
-		const features = "menubar=yes,toolbar=no,location=no,scrollbars,centerscreen,resizable";
-		
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			.getService(Components.interfaces.nsIWindowMediator);
-		
-		if(Zotero.isStandalone) {
-			var win = wm.getMostRecentWindow("zotero:basicViewer");
-			if(win) {
-				win.loadURI(uri);
-			} else {
-				window.openDialog("chrome://zotero/content/standalone/basicViewer.xul",
-					"basicViewer", "chrome,resizable,centerscreen", uri);
-			}
-		} else {
-			var win = wm.getMostRecentWindow("navigator:browser");
-			if(win) {
-				win.open(uri, null, features);
-			}
-			else {
-				var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-							.getService(Components.interfaces.nsIWindowWatcher);
-				var win = ww.openWindow(null, uri, null, features + ",width=775,height=575", null);
-			}
-		}
+		openInViewer("zotero://debug/");
 	},
 	
 	
@@ -1824,6 +1800,35 @@ function handleShowInPreferenceChange() {
 		} else if(Zotero.isFx4) {
 			document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-full');
 			Zotero.Prefs.set("statusBarIcon", 2);
+		}
+	}
+}
+
+/**
+ * Opens a URI in the basic viewer in Standalone, or a new window in Firefox
+ */
+function openInViewer(uri) {
+	var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+		.getService(Components.interfaces.nsIWindowMediator);
+	const features = "menubar=yes,toolbar=no,location=no,scrollbars,centerscreen,resizable";
+	
+	if(Zotero.isStandalone) {
+		var win = wm.getMostRecentWindow("zotero:basicViewer");
+		if(win) {
+			win.loadURI(uri);
+		} else {
+			window.openDialog("chrome://zotero/content/standalone/basicViewer.xul",
+				"basicViewer", "chrome,resizable,centerscreen", uri);
+		}
+	} else {
+		var win = wm.getMostRecentWindow("navigator:browser");
+		if(win) {
+			win.open(uri, null, features);
+		}
+		else {
+			var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+						.getService(Components.interfaces.nsIWindowWatcher);
+			var win = ww.openWindow(null, uri, null, features + ",width=775,height=575", null);
 		}
 	}
 }
