@@ -2149,8 +2149,8 @@ var ZoteroPane = new function()
 			'createBib',
 			'loadReport',
 			'sep4',
-			'createParent',
 			'recognizePDF',
+			'createParent',
 			'renameAttachments',
 			'reindexItem'
 		];
@@ -2290,12 +2290,11 @@ var ZoteroPane = new function()
 						show.push(m.recognizePDF);
 						showSep4 = true;
 					}
-					else {
-						// If not a PDF, allow parent item creation
-						if (item.isTopLevelItem()) {
-							show.push(m.createParent);
-							showSep4 = true;
-						}
+					
+					// Allow parent item creation for standalone attachments
+					if (item.isTopLevelItem()) {
+						show.push(m.createParent);
+						showSep4 = true;
 					}
 					
 					// Attachment rename option
