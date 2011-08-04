@@ -203,7 +203,7 @@ Zotero.QuickCopy = new function() {
 							+ noteContent
 								// &nbsp; is the only HTML entity we allow in
 								// notes, and it's not valid XML
-								.replace('&nbsp;', '&#160;')
+								.replace(/&nbsp;/g, '&#160;')
 							+ '</div>');
 					}
 					catch (e) {
