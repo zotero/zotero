@@ -2220,17 +2220,16 @@ var ZoteroPane = new function()
 				if (canRecognize) {
 					show.push(m.recognizePDF);
 				}
-				else {
-					var canCreateParent = true;
-					for each(var item in items) {
-						if (!item.isTopLevelItem() || !item.isAttachment() || Zotero_RecognizePDF.canRecognize(item)) {
-							canCreateParent = false;
-							break;
-						}
+				
+				var canCreateParent = true;
+				for each(var item in items) {
+					if (!item.isTopLevelItem() || !item.isAttachment()) {
+						canCreateParent = false;
+						break;
 					}
-					if (canCreateParent) {
-						show.push(m.createParent);
-					}
+				}
+				if (canCreateParent) {
+					show.push(m.createParent);
 				}
 				
 				if (canRename) {
