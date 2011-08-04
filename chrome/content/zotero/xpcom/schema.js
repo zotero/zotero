@@ -1488,6 +1488,11 @@ Zotero.Schema = new function(){
 			inRepository: true,
 		};
 		
+		var browserSupport = xmlnode.getAttribute('browserSupport');
+		if (browserSupport) {
+			metadata.browserSupport = browserSupport;
+		}
+		
 		for each(var attr in ["configOptions", "displayOptions"]) {
 			try {
 				metadata[attr] = JSON.parse(xmlnode.getAttribute(attr));
