@@ -1486,9 +1486,13 @@ Zotero.Schema = new function(){
 			priority: parseInt(
 				xmlnode.getElementsByTagName('priority')[0].firstChild.nodeValue
 			),
-			browserSupport: xmlnode.getAttribute('browserSupport'),
 			inRepository: true,
 		};
+		
+		var browserSupport = xmlnode.getAttribute('browserSupport');
+		if (browserSupport) {
+			metadata.browserSupport = browserSupport;
+		}
 		
 		for each(var attr in ["configOptions", "displayOptions"]) {
 			try {
