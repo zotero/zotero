@@ -2045,8 +2045,8 @@ var ZoteroPane = new function()
 			createBib: 10,
 			loadReport: 11,
 			sep4: 12,
-			createParent: 13,
-			recognizePDF: 14,
+			recognizePDF: 13,
+			createParent: 14,
 			renameAttachments: 15,
 			reindexItem: 16
 		};
@@ -2103,24 +2103,23 @@ var ZoteroPane = new function()
 				}
 				if (canRecognize) {
 					show.push(m.recognizePDF);
-					hide.push(m.createParent);
 				}
 				else {
 					hide.push(m.recognizePDF);
-					
-					var canCreateParent = true;
-					for (var i=0; i<items.length; i++) {
-						if (!items[i].isTopLevelItem() || items[i].isRegularItem() || Zotero_RecognizePDF.canRecognize(items[i])) {
-							canCreateParent = false;
-							break;
-						}
+				}
+				
+				var canCreateParent = true;
+				for (var i=0; i<items.length; i++) {
+					if (!items[i].isTopLevelItem() || items[i].isRegularItem()) {
+						canCreateParent = false;
+						break;
 					}
-					if (canCreateParent) {
-						show.push(m.createParent);
-					}
-					else {
-						hide.push(m.createParent);
-					}
+				}
+				if (canCreateParent) {
+					show.push(m.createParent);
+				}
+				else {
+					hide.push(m.createParent);
 				}
 				
 				// If all items are child attachments, show rename option
@@ -2202,20 +2201,19 @@ var ZoteroPane = new function()
 					
 					if (Zotero_RecognizePDF.canRecognize(item)) {
 						show.push(m.recognizePDF);
-						hide.push(m.createParent);
 						showSep4 = true;
 					}
 					else {
 						hide.push(m.recognizePDF);
+					}
 						
-						// If not a PDF, allow parent item creation
-						if (item.isTopLevelItem()) {
-							show.push(m.createParent);
-							showSep4 = true;
-						}
-						else {
-							hide.push(m.createParent);
-						}
+					// Allow parent item creation for standalone attachments
+					if (item.isTopLevelItem()) {
+						show.push(m.createParent);
+						showSep4 = true;
+					}
+					else {
+						hide.push(m.createParent);
 					}
 					
 					// Attachment rename option
