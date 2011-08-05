@@ -498,6 +498,7 @@ var Zotero_QuickFormat = new function () {
 	function _showCitation(insertBefore) {
 		if(!io.citation.properties.unsorted
 				&& keepSorted.hasAttribute("checked")
+				&& io.citation.sortedItems
 				&& io.citation.sortedItems.length) {
 			for(var i=0, n=io.citation.sortedItems.length; i<n; i++) {
 				_insertBubble(io.citation.sortedItems[i][1], insertBefore);
