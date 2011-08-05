@@ -535,7 +535,6 @@
 			</method>
 			
 			
-			<!-- Not currently used -->
 			<method name="clearVisible">
 				<body>
 					<![CDATA[
