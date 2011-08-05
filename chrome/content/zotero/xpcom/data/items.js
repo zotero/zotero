@@ -52,7 +52,6 @@ Zotero.Items = new function() {
 		return _primaryFields;
 	});
 	
-	this.__defineGetter__('linkedItemPredicate', function () "owl:sameAs");
 	
 	// Private members
 	var _cachedFields = [];

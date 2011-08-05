@@ -897,6 +897,40 @@ Zotero.Collection.prototype.diff = function (collection, includeMatches, ignoreO
 
 
 /**
+ * Returns an unsaved copy of the collection
+ *
+ * Does not copy parent collection or child items
+ *
+ * @param	{Boolean}		[includePrimary=false]
+ * @param	{Zotero.Collection} [newCollection=null]
+ */
+Zotero.Collection.prototype.clone = function (includePrimary, newCollection) {
+	Zotero.debug('Cloning collection ' + this.id);
+	
+	if (newCollection) {
+		var sameLibrary = newCollection.libraryID == this.libraryID;
+	}
+	else {
+		var newCollection = new Zotero.Collection;
+		var sameLibrary = true;
+		
+		if (includePrimary) {
+			newCollection.id = this.id;
+			newCollection.libraryID = this.libraryID;
+			newCollection.key = this.key;
+			
+			// TODO: This isn't used, but if it were, it should probably include
+			// parent collection and child items
+		}
+	}
+	
+	newCollection.name = this.name;
+	
+	return newCollection;
+}
+
+
+/**
 * Deletes collection and all descendent collections (and optionally items)
 **/
 Zotero.Collection.prototype.erase = function(deleteItems) {
@@ -929,6 +963,10 @@ Zotero.Collection.prototype.erase = function(deleteItems) {
 	if (del.length) {
 		Zotero.Items.erase(del);
 	}
+	
+	// Remove relations
+	var uri = Zotero.URI.getCollectionURI(this);
+	Zotero.Relations.eraseByURIPrefix(uri);
 	
 	var placeholders = collections.map(function () '?').join();
 	
@@ -1094,6 +1132,60 @@ Zotero.Collection.prototype.getDescendents = function(nested, type, includeDelet
 	return this.getChildren(true, nested, type, includeDeletedItems);
 }
 
+
+/**
+ * Return a collection in the specified library equivalent to this collection
+ */
+Zotero.Collection.prototype.getLinkedCollection = function (libraryID) {
+	if (libraryID == this.libraryID) {
+		throw ("Collection is already in library " + libraryID + " in Zotero.Collection.getLinkedCollection()");
+	}
+	
+	var predicate = Zotero.Relations.linkedObjectPredicate;
+	var collectionURI = Zotero.URI.getCollectionURI(this);
+	var links = Zotero.Relations.getObject(collectionURI, predicate, false).concat(
+		Zotero.Relations.getSubject(false, predicate, collectionURI)
+	);
+	
+	if (!links.length) {
+		return false;
+	}
+	
+	if (libraryID) {
+		var libraryCollectionPrefix = Zotero.URI.getLibraryURI(libraryID) + "/collections/";
+	}
+	else {
+		var libraryCollectionPrefix = Zotero.URI.getCurrentUserURI() + "/collections/";
+	}
+	for each(var link in links) {
+		if (link.indexOf(libraryCollectionPrefix) == 0) {
+			var collection = Zotero.URI.getURICollection(link);
+			if (!collection) {
+				Zotero.debug("Referenced linked collection '" + link + "' not found in Zotero.Collection.getLinkedCollection()", 2);
+				continue;
+			}
+			return collection;
+		}
+	}
+	return false;
+}
+
+
+Zotero.Collection.prototype.addLinkedCollection = function (collection) {
+	var url1 = Zotero.URI.getCollectionURI(this);
+	var url2 = Zotero.URI.getCollectionURI(collection);
+	var predicate = Zotero.Relations.linkedObjectPredicate;
+	if (Zotero.Relations.getByURIs(url1, predicate, url2).length
+			|| Zotero.Relations.getByURIs(url2, predicate, url1).length) {
+		Zotero.debug("Collections " + this.key + " and " + collection.key + " are already linked");
+		return false;
+	}
+	Zotero.Relations.add(null, url1, predicate, url2);
+}
+
+//
+// Private methods
+//
 
 Zotero.Collection.prototype._prepFieldChange = function (field) {
 	if (!this._changed) {
