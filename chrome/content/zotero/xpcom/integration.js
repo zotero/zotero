@@ -476,7 +476,9 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 	} else {
 		var data = new Zotero.Integration.DocumentData(dataString);
 		if(data.dataVersion < DATA_VERSION) {
-			if(data.dataVersion == 1 && data.prefs.fieldType == "Field" && this._app.primaryFieldType == "ReferenceMark") {
+			if(data.dataVersion == 1
+					&& data.prefs.fieldType == "Field"
+					&& this._app.primaryFieldType == "ReferenceMark") {
 				// Converted OOo docs use ReferenceMarks, not fields
 				data.prefs.fieldType = "ReferenceMark";
 			}
@@ -488,6 +490,12 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 		} else if(data.dataVersion > DATA_VERSION) {
 			throw new Zotero.Integration.DisplayException("newerDocumentVersion", [data.zoteroVersion, Zotero.version]);
 		}
+		
+		if(data.prefs.fieldType !== this._app.primaryFieldType
+				&& data.prefs.fieldType !== this._app.secondaryFieldType) {
+			throw new Zotero.Integration.DisplayException("fieldTypeMismatch");
+		}
+		
 		if(Zotero.Integration.sessions[data.sessionID]) {
 			this._session = Zotero.Integration.sessions[data.sessionID];
 		} else {
@@ -1213,40 +1221,7 @@ Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, ar
 		var zoteroItem = false;
 		if(citationItem.uri) {
 			[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(citationItem.uri);
-			if(zoteroItem) {
-				if(needUpdate) this.updateIndices[index] = true;
-			} else {
-				// Try merged item mappings
-				for each(var uri in citationItem.uri) {
-					var seen = [];
-					
-					// Follow merged item relations until we find an item
-					// or hit a dead end
-					while (!zoteroItem) {
-						var relations = Zotero.Relations.getByURIs(uri, Zotero.Relations.deletedItemPredicate);
-						// No merged items found
-						if(!relations.length) {
-							break;
-						}
-						
-						uri = relations[0].object;
-						
-						// Keep track of mapped URIs in case there's a circular relation
-						if(seen.indexOf(uri) != -1) {
-							var msg = "Circular relation for '" + uri + "' in merged item mapping resolution";
-							Zotero.debug(msg, 2);
-							Components.utils.reportError(msg);
-							break;
-						}
-						seen.push(uri);
-						
-						[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs([uri]);
-					}
-				}
-				
-				if(zoteroItem && needUpdate) this.updateIndices[index] = true;
-			}
-			
+			if(needUpdate) this.updateIndices[index] = true;
 		} else {
 			if(citationItem.key) {
 				zoteroItem = Zotero.Items.getByKey(citationItem.key);
@@ -1662,7 +1637,7 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 			// new style array of arrays with URIs
 			let zoteroItem, needUpdate;
 			for each(var uris in documentData.uncited) {
-				[zoteroItem, update] = this.uriMap.getZoteroItemForURIs(uris);
+				[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(uris);
 				if(zoteroItem && !this.citationsByItemID[zoteroItem.id]) {
 					this.uncitedItems[zoteroItem.id] = true;
 				} else {
@@ -2089,16 +2064,56 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
 	var zoteroItem = false;
 	var needUpdate = false;
 	
-	for(var i in uris) {
+	for(var i=0, n=uris.length; i<n; i++) {
+		// Try getting URI directly
+		var uri = uris[i];
 		try {
-			zoteroItem = Zotero.URI.getURIItem(uris[i]);
+			zoteroItem = Zotero.URI.getURIItem(uri);
 			if(zoteroItem) {
 				// Ignore items in the trash
 				if(zoteroItem.deleted) {
 					zoteroItem = false;
+				} else {
+					break;
 				}
 			}
 		} catch(e) {}
+		
+		// Try merged item mappings
+		var seen = [];
+		
+		// Follow merged item relations until we find an item or hit a dead end
+		while (!zoteroItem) {
+			var relations = Zotero.Relations.getByURIs(uri, Zotero.Relations.deletedItemPredicate);
+			// No merged items found
+			if(!relations.length) {
+				break;
+			}
+			
+			uri = relations[0].object;
+			
+			// Keep track of mapped URIs in case there's a circular relation
+			if(seen.indexOf(uri) != -1) {
+				var msg = "Circular relation for '" + uri + "' in merged item mapping resolution";
+				Zotero.debug(msg, 2);
+				Components.utils.reportError(msg);
+				break;
+			}
+			seen.push(uri);
+			
+			try {
+				zoteroItem = Zotero.URI.getURIItem(uri);
+				if(zoteroItem) {
+					// Ignore items in the trash
+					if(zoteroItem.deleted) {
+						zoteroItem = false;
+					} else {
+						break;
+					}
+				}
+			} catch(e) {}
+		}
+		if(zoteroItem) break;
 	}
 	
 	if(zoteroItem) {
