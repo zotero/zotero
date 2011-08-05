@@ -110,6 +110,11 @@ var Zotero_File_Interface_Bibliography = new function() {
 			document.getElementById("fields-file-format-notice").textContent = Zotero.getString("integration."+formatOption+".fileFormatNotice");
 			document.getElementById("bookmarks-file-format-notice").textContent = Zotero.getString("integration.fields.fileFormatNotice");
 		}
+		if(document.getElementById("storeReferences")) {
+			if(_io.storeReferences || _io.storeReferences === undefined) {
+				document.getElementById("storeReferences").checked = true;
+			}
+		}
 		
 		// set style to false, in case this is cancelled
 		_io.style = false;
@@ -157,6 +162,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		if(document.getElementById("displayAs")) {
 			_io.useEndnotes = document.getElementById("displayAs").selectedIndex;
 			_io.fieldType = (document.getElementById("formatUsing").selectedIndex == 0 ? _io.primaryFieldType : _io.secondaryFieldType);
+			_io.storeReferences = document.getElementById("storeReferences").checked;
 		}
 		
 		// save style (this happens only for "Export Bibliography," or Word
