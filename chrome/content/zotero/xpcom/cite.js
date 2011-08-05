@@ -102,13 +102,28 @@ Zotero.Cite.System._quotedRegexp = /^".+"$/;
 Zotero.Cite.System._cache = new Object();
 
 Zotero.Cite.System.retrieveItem = function(item){
+	var zoteroItem, slashIndex;
 	if(item instanceof Zotero.Item) {
 		//if(this._cache[item.id]) return this._cache[item.id];
-		var zoteroItem = item;
+		zoteroItem = item;
 	} else {
-		// is an item ID
-		//if(this._cache[item]) return this._cache[item];
-		var zoteroItem = Zotero.Items.get(item);
+		var type = typeof item;
+		if(type === "string" && (slashIndex = item.indexOf("/")) !== -1) {
+			// is an embedded item
+			var sessionID = item.substr(0, slashIndex);
+			var session = Zotero.Integration.sessions[sessionID]
+			if(session) {
+				var embeddedCitation = session.embeddedItems[item.substr(slashIndex+1)];
+				if(embeddedCitation) {
+					embeddedCitation.id = item;
+					return embeddedCitation;
+				}
+			}
+		} else {
+			// is an item ID
+			//if(this._cache[item]) return this._cache[item];
+			zoteroItem = Zotero.Items.get(item);
+		}
 	}
 
 	if(!zoteroItem) {
