@@ -1581,6 +1581,11 @@ Zotero.Integration.Session.prototype.unserializeCitation = function(arg, index) 
 					"volume", "verse"];
 				citationItem.label = locatorTypeTerms[parseInt(citationItem.label)];
 			}
+		
+			// For forward compatibility with Zotero >2.1
+			if(citationItem.uris && !citationItem.uri) {
+				citationItem.uri = citationItem.uris;
+			}
 		}
 		if(citation.sort) {
 			citation.properties.unsorted = !citation.sort;
