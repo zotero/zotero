@@ -3548,12 +3548,12 @@ Zotero.Item.prototype.getLinkedItem = function (libraryID) {
 		throw ("Item is already in library " + libraryID + " in Zotero.Item.getLinkedItem()");
 	}
 	
-	var predicate = Zotero.Items.linkedItemPredicate;
+	var predicate = Zotero.Relations.linkedObjectPredicate;
 	var itemURI = Zotero.URI.getItemURI(this);
 	var links = Zotero.Relations.getObject(itemURI, predicate, false).concat(
 		Zotero.Relations.getSubject(false, predicate, itemURI)
 	);
-	Zotero.debug(links);
+	
 	if (!links.length) {
 		return false;
 	}
@@ -3581,7 +3581,7 @@ Zotero.Item.prototype.getLinkedItem = function (libraryID) {
 Zotero.Item.prototype.addLinkedItem = function (item) {
 	var url1 = Zotero.URI.getItemURI(this);
 	var url2 = Zotero.URI.getItemURI(item);
-	var predicate = Zotero.Items.linkedItemPredicate;
+	var predicate = Zotero.Relations.linkedObjectPredicate;
 	if (Zotero.Relations.getByURIs(url1, predicate, url2).length
 			|| Zotero.Relations.getByURIs(url2, predicate, url1).length) {
 		Zotero.debug("Items " + this.key + " and " + item.key + " are already linked");

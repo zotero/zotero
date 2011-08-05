@@ -27,6 +27,7 @@ Zotero.Relations = new function () {
 	Zotero.DataObjects.apply(this, ['relation']);
 	this.constructor.prototype = new Zotero.DataObjects();
 	
+	this.__defineGetter__('linkedObjectPredicate', function () "owl:sameAs");
 	this.__defineGetter__('deletedItemPredicate', function () 'dc:isReplacedBy');
 	
 	var _namespaces = {
@@ -226,7 +227,10 @@ Zotero.Relations = new function () {
 				if (uri.indexOf(prefix) == -1) {
 					continue;
 				}
-				if (!Zotero.URI.getURIItem(uri)) {
+				if (uri.indexOf(/\/items\//) != -1 && !Zotero.URI.getURIItem(uri)) {
+					this.eraseByURI(uri);
+				}
+				if (uri.indexOf(/\/collections\//) != -1 && !Zotero.URI.getURICollection(uri)) {
 					this.eraseByURI(uri);
 				}
 			}

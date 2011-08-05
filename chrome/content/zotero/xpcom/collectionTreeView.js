@@ -235,24 +235,8 @@ Zotero.CollectionTreeView.prototype.refresh = function()
  */
 Zotero.CollectionTreeView.prototype.reload = function()
 {
-	var openCollections = [];
-	
-	for (var i=0; i<this.rowCount; i++) {
-		if (this.isContainer(i) && this.isContainerOpen(i)) {
-			openCollections.push(this._getItemAtRow(i).ref.id);
-		}
-	}
-	
 	this._treebox.beginUpdateBatch();
 	this.refresh();
-	
-	for(var i = 0; i < openCollections.length; i++)
-	{
-		var row = this._collectionRowMap[openCollections[i]];
-		if (typeof row != 'undefined') {
-			this.toggleOpenState(row);
-		}
-	}
 	this._treebox.invalidate();
 	this._treebox.endUpdateBatch();
 }
@@ -360,9 +344,9 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 		{
 			case 'collection':
 				var collection = Zotero.Collections.get(ids);
-				var collectionID = collection.id;
+				
 				// Open container if creating subcollection
-				var parentID = collection.getParent();
+				var parentID = collection.parent;
 				if (parentID) {
 					if (!this.isContainerOpen(this._collectionRowMap[parentID])){
 						this.toggleOpenState(this._collectionRowMap[parentID]);
@@ -374,7 +358,7 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 					this.rememberSelection(savedSelection);
 					break;
 				}
-				this.selection.select(this._collectionRowMap[collectionID]);
+				this.selection.select(this._collectionRowMap[collection.id]);
 				break;
 				
 			case 'search':
@@ -1259,27 +1243,42 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 			return true;
 		}
 		else if (dataType == 'zotero/collection') {
-			// Collections cannot be dropped on themselves
-			if (data[0] == itemGroup.ref.id) {
-				return false;
-			}
-			
-			// Nor in their children
-			if (Zotero.Collections.get(data[0]).hasDescendent('collection', itemGroup.ref.id)) {
-				return false;
-			}
-			
 			var col = Zotero.Collections.get(data[0]);
 			
-			// Nor, at least for now, on another group
-			if (itemGroup.isWithinGroup()) {
-				if (itemGroup.ref.libraryID != col.libraryID) {
+			if (itemGroup.ref.libraryID == col.libraryID) {
+				// Collections cannot be dropped on themselves
+				if (data[0] == itemGroup.ref.id) {
+					return false;
+				}
+				
+				// Nor in their children
+				if (Zotero.Collections.get(data[0]).hasDescendent('collection', itemGroup.ref.id)) {
 					return false;
 				}
 			}
-			// Nor from a group library to the local library
-			else if (col.libraryID) {
-				return false;
+			// Dragging a collection to a different library
+			else {
+				// Allow cross-library drag only to root library and collections
+				if (!itemGroup.isLibrary(true) && !itemGroup.isCollection()) {
+					return false;
+				}
+				
+				// Disallow if linked collection already exists
+				if (col.getLinkedCollection(itemGroup.ref.libraryID)) {
+					return false;
+				}
+				
+				var descendents = col.getDescendents(false, 'collection');
+				for each(var descendent in descendents) {
+					descendent = Zotero.Collections.get(descendent.id);
+					// Disallow if linked collection already exists for any subcollections
+					//
+					// If this is allowed in the future for the root collection,
+					// need to allow drag only to root
+					if (descendent.getLinkedCollection(itemGroup.ref.libraryID)) {
+						return false;
+					}
+				}
 			}
 			
 			return true;
@@ -1303,27 +1302,207 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 	var data = dragData.data;
 	var itemGroup = this._getItemAtRow(row);
 	
-	if(dataType == 'zotero/collection')
-	{
-		var targetCollectionID;
-		if (itemGroup.isCollection()) {
-			targetCollectionID = itemGroup.ref.id;
+	function copyItem (item, targetLibraryID) {
+		// Check if there's already a copy of this item in the library
+		var linkedItem = item.getLinkedItem(targetLibraryID);
+		if (linkedItem) {
+			return linkedItem.id;
+			
+			/*
+			// TODO: support tags, related, attachments, etc.
+			
+			// Overlay source item fields on unsaved clone of linked item
+			var newItem = item.clone(false, linkedItem.clone(true));
+			newItem.setField('dateAdded', item.dateAdded);
+			newItem.setField('dateModified', item.dateModified);
+			
+			var diff = newItem.diff(linkedItem, false, ["dateAdded", "dateModified"]);
+			if (!diff) {
+				// Check if creators changed
+				var creatorsChanged = false;
+				
+				var creators = item.getCreators();
+				var linkedCreators = linkedItem.getCreators();
+				if (creators.length != linkedCreators.length) {
+					Zotero.debug('Creators have changed');
+					creatorsChanged = true;
+				}
+				else {
+					for (var i=0; i<creators.length; i++) {
+						if (!creators[i].ref.equals(linkedCreators[i].ref)) {
+							Zotero.debug('changed');
+							creatorsChanged = true;
+							break;
+						}
+					}
+				}
+				if (!creatorsChanged) {
+					Zotero.debug("Linked item hasn't changed -- skipping conflict resolution");
+					continue;
+				}
+			}
+			toReconcile.push([newItem, linkedItem]);
+			continue;
+			*/
 		}
+		
+		// Standalone attachment
+		if (item.isAttachment()) {
+			return Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
+		}
+		
+		// Create new unsaved clone item in target library
+		var newItem = new Zotero.Item(item.itemTypeID);
+		newItem.libraryID = targetLibraryID;
+		// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
+		var id = newItem.save();
+		newItem = Zotero.Items.get(id);
+		item.clone(false, newItem);
+		newItem.save();
+		//var id = newItem.save();
+		//var newItem = Zotero.Items.get(id);
+		
+		// Record link
+		item.addLinkedItem(newItem);
+		var newID = id;
+		
+		if (item.isNote()) {
+			return newID;
+		}
+		
+		// For regular items, add child items if prefs and permissions allow
+		
+		// Child notes
+		if (Zotero.Prefs.get('groups.copyChildNotes')) {
+			var noteIDs = item.getNotes();
+			var notes = Zotero.Items.get(noteIDs);
+			for each(var note in notes) {
+				var newNote = new Zotero.Item('note');
+				newNote.libraryID = targetLibraryID;
+				// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
+				var id = newNote.save();
+				newNote = Zotero.Items.get(id);
+				note.clone(false, newNote);
+				newNote.setSource(newItem.id);
+				newNote.save();
+				
+				note.addLinkedItem(newNote);
+			}
+		}
+		
+		// Child attachments
+		var copyChildLinks = Zotero.Prefs.get('groups.copyChildLinks');
+		var copyChildFileAttachments = Zotero.Prefs.get('groups.copyChildFileAttachments');
+		if (copyChildLinks || copyChildFileAttachments) {
+			var attachmentIDs = item.getAttachments();
+			var attachments = Zotero.Items.get(attachmentIDs);
+			for each(var attachment in attachments) {
+				var linkMode = attachment.attachmentLinkMode;
+				
+				// Skip linked files
+				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+					continue;
+				}
+				
+				// Skip imported files if we don't have pref and permissions
+				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+					if (!copyChildLinks) {
+						Zotero.debug("Skipping child link attachment on drag");
+						continue;
+					}
+				}
+				else {
+					if (!copyChildFileAttachments || !itemGroup.filesEditable) {
+						Zotero.debug("Skipping child file attachment on drag");
+						continue;
+					}
+				}
+				
+				Zotero.Attachments.copyAttachmentToLibrary(attachment, targetLibraryID, newItem.id);
+			}
+		}
+		
+		return newID;
+	}
+	
+	
+	var targetLibraryID = itemGroup.isWithinGroup() ? itemGroup.ref.libraryID : null;
+	var targetCollectionID = itemGroup.isCollection() ? itemGroup.ref.id : false;
+	
+	if (dataType == 'zotero/collection') {
 		var droppedCollection = Zotero.Collections.get(data[0]);
-		droppedCollection.parent = targetCollectionID;
-		droppedCollection.save();
+		
+		// Collection drag between libraries
+		if (targetLibraryID != droppedCollection.libraryID) {
+			Zotero.DB.beginTransaction();
+			
+			function copyCollections(descendents, parent, addItems) {
+				for each(var desc in descendents) {
+					// Collections
+					if (desc.type == 'collection') {
+						var c = Zotero.Collections.get(desc.id);
+						
+						var newCollection = new Zotero.Collection;
+						newCollection.libraryID = targetLibraryID;
+						c.clone(false, newCollection);
+						if (parent) {
+							newCollection.parent = parent;
+						}
+						var collectionID = newCollection.save();
+						
+						// Record link
+						c.addLinkedCollection(newCollection);
+						
+						// Recursively copy subcollections
+						if (desc.children.length) {
+							copyCollections(desc.children, collectionID, addItems);
+						}
+					}
+					// Items
+					else {
+						var item = Zotero.Items.get(desc.id);
+						var id = copyItem(item, targetLibraryID);
+						// Mark copied item for adding to collection
+						if (parent) {
+							if (!addItems[parent]) {
+								addItems[parent] = [];
+							}
+							addItems[parent].push(id);
+						}
+					}
+				}
+				
+				return collectionID;
+			}
+			
+			var collections = [{
+				id: droppedCollection.id,
+				children: droppedCollection.getDescendents(true),
+				type: 'collection'
+			}];
+			
+			var addItems = {};
+			copyCollections(collections, targetCollectionID, addItems);
+			for (var collectionID in addItems) {
+				var collection = Zotero.Collections.get(collectionID);
+				collection.addItems(addItems[collectionID]);
+			}
+			
+			// TODO: add subcollections and subitems, if they don't already exist,
+			// and display a warning if any of the subcollections already exist
+			
+			Zotero.DB.commitTransaction();
+		}
+		// Collection drag within a library
+		else {
+			droppedCollection.parent = targetCollectionID;
+			droppedCollection.save();
+		}
 	}
 	else if (dataType == 'zotero/item') {
 		var ids = data;
 		if (ids.length < 1) {
 			return;
-		}
-		
-		if (itemGroup.isWithinGroup()) {
-			var targetLibraryID = itemGroup.ref.libraryID;
-		}
-		else {
-			var targetLibraryID = null;
 		}
 		
 		if(itemGroup.isBucket()) {
@@ -1335,6 +1514,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		
 		var items = Zotero.Items.get(ids);
 		if (!items) {
+			Zotero.DB.commitTransaction();
 			return;
 		}
 		
@@ -1364,131 +1544,9 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		if (!sameLibrary) {
 			var toReconcile = [];
 			
+			var newIDs = [];
 			for each(var item in newItems) {
-				// Check if there's already a copy of this item in the library
-				var linkedItem = item.getLinkedItem(targetLibraryID);
-				if (linkedItem) {
-					// Add linked item to target collection rather than copying
-					if (itemGroup.isCollection()) {
-						itemGroup.ref.addItem(linkedItem.id);
-						continue;
-					}
-					
-					/*
-					// TODO: support tags, related, attachments, etc.
-					
-					// Overlay source item fields on unsaved clone of linked item
-					var newItem = item.clone(false, linkedItem.clone(true));
-					newItem.setField('dateAdded', item.dateAdded);
-					newItem.setField('dateModified', item.dateModified);
-					
-					var diff = newItem.diff(linkedItem, false, ["dateAdded", "dateModified"]);
-					if (!diff) {
-						// Check if creators changed
-						var creatorsChanged = false;
-						
-						var creators = item.getCreators();
-						var linkedCreators = linkedItem.getCreators();
-						if (creators.length != linkedCreators.length) {
-							Zotero.debug('Creators have changed');
-							creatorsChanged = true;
-						}
-						else {
-							for (var i=0; i<creators.length; i++) {
-								if (!creators[i].ref.equals(linkedCreators[i].ref)) {
-									Zotero.debug('changed');
-									creatorsChanged = true;
-									break;
-								}
-							}
-						}
-						if (!creatorsChanged) {
-							Zotero.debug("Linked item hasn't changed -- skipping conflict resolution");
-							continue;
-						}
-					}
-					toReconcile.push([newItem, linkedItem]);
-					continue;
-					*/
-				}
-				
-				// Standalone attachment
-				if (item.isAttachment()) {
-					var id = Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
-					newIDs.push(id);
-					continue;
-				}
-				
-				// Create new unsaved clone item in target library
-				var newItem = new Zotero.Item(item.itemTypeID);
-				newItem.libraryID = targetLibraryID;
-				// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
-				var id = newItem.save();
-				newItem = Zotero.Items.get(id);
-				item.clone(false, newItem);
-				newItem.save();
-				//var id = newItem.save();
-				//var newItem = Zotero.Items.get(id);
-				
-				// Record link
-				item.addLinkedItem(newItem);
-				newIDs.push(id);
-				
-				if (item.isNote()) {
-					continue;
-				}
-				
-				// For regular items, add child items if prefs and permissions allow
-				
-				// Child notes
-				if (Zotero.Prefs.get('groups.copyChildNotes')) {
-					var noteIDs = item.getNotes();
-					var notes = Zotero.Items.get(noteIDs);
-					for each(var note in notes) {
-						var newNote = new Zotero.Item('note');
-						newNote.libraryID = targetLibraryID;
-						// DEBUG: save here because clone() doesn't currently work on unsaved tagged items
-						var id = newNote.save();
-						newNote = Zotero.Items.get(id);
-						note.clone(false, newNote);
-						newNote.setSource(newItem.id);
-						newNote.save();
-						
-						note.addLinkedItem(newNote);
-					}
-				}
-				
-				// Child attachments
-				var copyChildLinks = Zotero.Prefs.get('groups.copyChildLinks');
-				var copyChildFileAttachments = Zotero.Prefs.get('groups.copyChildFileAttachments');
-				if (copyChildLinks || copyChildFileAttachments) {
-					var attachmentIDs = item.getAttachments();
-					var attachments = Zotero.Items.get(attachmentIDs);
-					for each(var attachment in attachments) {
-						var linkMode = attachment.attachmentLinkMode;
-						
-						// Skip linked files
-						if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-							continue;
-						}
-						
-						// Skip imported files if we don't have pref and permissions
-						if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-							if (!copyChildLinks) {
-								Zotero.debug("Skipping child link attachment on drag");
-								continue;
-							}
-						}
-						else {
-							if (!copyChildFileAttachments || !itemGroup.filesEditable) {
-								Zotero.debug("Skipping child file attachment on drag");
-								continue;
-							}
-						}
-						
-						var id = Zotero.Attachments.copyAttachmentToLibrary(attachment, targetLibraryID, newItem.id);
-					}
-				}
+				newIDs.push(copyItem(item, libraryID));
 			}
 			
 			if (toReconcile.length) {
@@ -1529,8 +1587,10 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 			}
 		}
 		
-		if (newIDs.length && itemGroup.isCollection()) {
-			itemGroup.ref.addItems(newIDs);
+		// Add items to target collection
+		if (targetCollectionID) {
+			var collection = Zotero.Collections.get(targetCollectionID);
+			collection.addItems(newIDs);
 		}
 		
 		Zotero.DB.commitTransaction();

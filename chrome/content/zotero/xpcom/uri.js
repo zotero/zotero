@@ -131,6 +131,28 @@ Zotero.URI = new function () {
 	}
 	
 	
+	/**
+	 * Return URI of collection, which might be a local URI if user hasn't synced
+	 */
+	this.getCollectionURI = function (collection) {
+		if (collection.libraryID) {
+			var baseURI = this.getLibraryURI(collection.libraryID);
+		}
+		else {
+			var baseURI =  this.getCurrentUserURI();
+		}
+		return baseURI + "/collections/" + collection.key;
+	}
+	
+	
+	/**
+	 * Get path portion of collection URI (e.g., users/6/collections/ABCD1234 or groups/1/collections/ABCD1234)
+	 */
+	this.getCollectionPath = function (collection) {
+		return this.getLibraryPath(collection.libraryID) + "/collections/" + collection.key;
+	}
+	
+	
 	this.getGroupsURL = function () {
 		return ZOTERO_CONFIG.WWW_BASE_URL + "groups";
 	}
@@ -156,17 +178,42 @@ Zotero.URI = new function () {
 	 * @param	{Zotero.Item|FALSE}
 	 */
 	this.getURIItem = function (itemURI) {
+		return this._getURIObject(itemURI, 'item');
+	}
+	
+	
+	/**
+	 * Convert a collection URI into a collection
+	 *
+	 * @param	{String}				collectionURI
+	 * @param	{Zotero.Collection|FALSE}
+	 */
+	this.getURICollection = function (collectionURI) {
+		return this._getURIObject(collectionURI, 'collection');
+	}
+	
+	
+	/**
+	 * Convert an object URI into an object (item, collection, etc.)
+	 *
+	 * @param	{String}				objectURI
+	 * @param	{Zotero.Item|Zotero.Collection|FALSE}
+	 */
+	this._getURIObject = function (objectURI, type) {
+		var Types = type[0].toUpperCase() + type.substr(1) + 's';
+		var types = Types.toLowerCase();
+		
 		var libraryType = null;
 		
 		// If this is a local URI, compare to the local user key
-		if (itemURI.match(/\/users\/local\//)) {
+		if (objectURI.match(/\/users\/local\//)) {
 			// For now, at least, don't check local id
 			/*
 			var localUserURI = this.getLocalUserURI();
 			if (localUserURI) {
 				localUserURI += "/";
-				if (itemURI.indexOf(localUserURI) == 0) {
-					itemURI = itemURI.substr(localUserURI.length);
+				if (objectURI.indexOf(localUserURI) == 0) {
+					objectURI = objectURI.substr(localUserURI.length);
 					var libraryType = 'user';
 					var id = null;
 				}
@@ -178,29 +225,30 @@ Zotero.URI = new function () {
 		
 		// If not found, try global URI
 		if (!libraryType) {
-			if (itemURI.indexOf(_baseURI) != 0) {
-				throw ("Invalid base URI '" + itemURI + "' in Zotero.URI.getURIItem()");
+			if (objectURI.indexOf(_baseURI) != 0) {
+				throw ("Invalid base URI '" + objectURI + "' in Zotero.URI._getURIObject()");
 			}
-			itemURI = itemURI.substr(_baseURI.length);
+			objectURI = objectURI.substr(_baseURI.length);
 			var typeRE = /^(users|groups)\/([0-9]+)\//;
-			var matches = itemURI.match(typeRE);
+			var matches = objectURI.match(typeRE);
 			if (!matches) {
-				throw ("Invalid library URI '" + itemURI + "' in Zotero.URI.getURIItem()");
+				throw ("Invalid library URI '" + objectURI + "' in Zotero.URI._getURIObject()");
 			}
 			var libraryType = matches[1].substr(0, matches[1].length-1);
 			var id = matches[2];
-			itemURI = itemURI.replace(typeRE, '');
+			objectURI = objectURI.replace(typeRE, '');
 		}
 		
-		// TODO: itemID-based URI?
-		var matches = itemURI.match(/items\/([A-Z0-9]{8})/);
+		// TODO: objectID-based URI?
+		var re = new RegExp(types + "\/([A-Z0-9]{8})");
+		var matches = objectURI.match(re);
 		if (!matches) {
-			throw ("Invalid item URI '" + itemURI + "' in Zotero.URI.getURIItem()");
+			throw ("Invalid object URI '" + objectURI + "' in Zotero.URI._getURIObject()");
 		}
-		var itemKey = matches[1];
+		var objectKey = matches[1];
 		
 		if (libraryType == 'user') {
-			return Zotero.Items.getByLibraryAndKey(null, itemKey);
+			return Zotero[Types].getByLibraryAndKey(null, objectKey);
 		}
 		
 		if (libraryType == 'group') {
@@ -208,7 +256,7 @@ Zotero.URI = new function () {
 				return false;
 			}
 			var libraryID = Zotero.Groups.getLibraryIDFromGroupID(id);
-			return Zotero.Items.getByLibraryAndKey(libraryID, itemKey);
+			return Zotero[Types].getByLibraryAndKey(libraryID, objectKey);
 		}
 	}
 }
