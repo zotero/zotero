@@ -993,7 +993,9 @@ var ZoteroPane = new function()
 	 * Sets the tag filter on the items view
 	 */
 	function updateTagFilter(){
-		this.itemsView.setFilter('tags', getTagSelection());
+		if (this.itemsView) {
+			this.itemsView.setFilter('tags', getTagSelection());
+		}
 	}
 	
 	
@@ -1034,7 +1036,9 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-items-tree').view = this.itemsView = null;
 		}
 		
-		document.getElementById('zotero-tb-search').value = ""; 
+		// Clear quick search and tag selector when switching views
+		document.getElementById('zotero-tb-search').value = "";
+		document.getElementById('zotero-tag-selector').clearAll();
 		
 		if (this.collectionsView.selection.count != 1) {
 			document.getElementById('zotero-items-tree').view = this.itemsView = null;
