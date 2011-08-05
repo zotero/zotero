@@ -183,3 +183,5 @@
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput				"View Output">
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput				"Clear Output">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer			"Submit to Zotero Server">
+
+<!ENTITY zotero.preferences.openAboutConfig				"Open about:config">
