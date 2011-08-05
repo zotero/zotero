@@ -397,6 +397,12 @@ Zotero.Tag.prototype.save = function (full) {
 				var done = 0;
 				var maxItems = 998; // stay below compiled limit
 				var numItems = removed.length;
+				
+				var pairs = [];
+				for each(var itemID in removed) {
+					pairs.push(itemID + "-" + tagID);
+				}
+				
 				var tempRemoved = removed;
 				
 				do {
@@ -409,12 +415,15 @@ Zotero.Tag.prototype.save = function (full) {
 					done += chunk.length;
 				}
 				while (done < numItems);
+				
+				Zotero.Notifier.trigger('remove', 'item-tag', pairs);
 			}
 			
 			if (newids.length) {
 				var sql = "INSERT INTO itemTags (itemID, tagID) VALUES (?,?)";
 				var insertStatement = Zotero.DB.getStatement(sql);
 				
+				var pairs = [];
 				for each(var itemID in newids) {
 					insertStatement.bindInt32Parameter(0, itemID);
 					insertStatement.bindInt32Parameter(1, tagID);
@@ -427,10 +436,12 @@ Zotero.Tag.prototype.save = function (full) {
 						Zotero.debug("tagID: " + tagID);
 						throw (e + ' [ERROR: ' + Zotero.DB.getLastErrorString() + ']');
 					}
+					
+					pairs.push(itemID + "-" + tagID);
 				}
+				
+				Zotero.Notifier.trigger('add', 'item-tag', pairs);
 			}
-			
-			//Zotero.Notifier.trigger('add', 'tag-item', this.id + '-' + itemID);
 			
 			// TODO: notify linked items of name changes?
 			Zotero.Notifier.trigger('modify', 'item', removed.concat(newids));
