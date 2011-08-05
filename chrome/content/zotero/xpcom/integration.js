@@ -2054,6 +2054,17 @@ Zotero.Integration.URIMap.prototype.getURIsForItemID = function(id) {
 	if(!this.itemIDURIs[id]) {
 		this.itemIDURIs[id] = [Zotero.URI.getItemURI(Zotero.Items.get(id))];
 	}
+	
+	// Make sure that group relations are included
+	var uris = this.itemIDURIs[id];
+	for(var i=0; i<uris.length; i++) {
+		var relations = Zotero.Relations.getByURIs(uris[i], Zotero.Item.linkedItemPredicate);
+		for(var j=0, n=relations.length; j<n; j++) {
+			var newUri = relations[j].object;
+			if(uris.indexOf(newUri) === -1) uris.push(newUri);
+		}
+	}
+	
 	return this.itemIDURIs[id];
 }
 
