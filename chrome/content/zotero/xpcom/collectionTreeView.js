@@ -162,21 +162,22 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 		var header = {
 			id: "group-libraries-header",
 			label: "Group Libraries", // TODO: localize
-			expand: function (groups) {
+			expand: function (beforeRow, groups) {
 				if (!groups) {
 					var groups = Zotero.Groups.getAll();
 				}
 				
+				var newRows = 0;
 				for (var i = 0, len = groups.length; i < len; i++) {
-					var row = self._showRow(new Zotero.ItemGroup('group', groups[i]), 1);
-					self._expandRow(row);
+					var row = self._showRow(new Zotero.ItemGroup('group', groups[i]), 1, beforeRow ? beforeRow + i + newRows : null);
+					newRows += self._expandRow(row);
 				}
 			}
 		}
 		var row = this._showRow(new Zotero.ItemGroup('header', header));
 		if (this._containerState.HG) {
 			this._dataItems[row][1] = true;
-			header.expand(groups);
+			header.expand(null, groups);
 		}
 	}
 	
@@ -547,7 +548,7 @@ Zotero.CollectionTreeView.prototype.toggleOpenState = function(row)
 		var itemGroup = this._getItemAtRow(row);
 		
 		if (itemGroup.type == 'header') {
-			itemGroup.ref.expand();
+			itemGroup.ref.expand(row + 1);
 		}
 		else if (itemGroup.isLibrary(true) || itemGroup.isCollection()) {
 			this._expandRow(row, true);
