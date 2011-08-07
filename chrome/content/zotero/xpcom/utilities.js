@@ -999,9 +999,16 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 	}
 	
 	// resolve local URL
+	var location;
+	if(this._translate.document && this._translate.document.location) {
+		location = this._translate.document.location.href;
+	} else {
+		location = this._translate.location;
+	}
+	
 	var resolved = Components.classes["@mozilla.org/network/io-service;1"].
 		getService(Components.interfaces.nsIIOService).
-		newURI(this._translate.location, "", null).resolve(url);
+		newURI(location, "", null).resolve(url);
 	
 	if(!protocolRe.test(resolved)) {
 		throw new Error("Invalid URL supplied for HTTP request: "+url);
