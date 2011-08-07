@@ -49,16 +49,38 @@ Zotero.IPC = new function() {
 			if(!msg) continue;
 			Zotero.debug('IPC: Received "'+msg+'"');
 			
+			/*
+			 * The below messages coordinate switching Zotero for Firefox from extension mode to
+			 * connector mode without restarting after Zotero Standalone has been launched. The
+			 * dance typically proceeds as follows:
+			 *
+			 * 1. SA sends a releaseLock message to Z4Fx that tells it to release its lock.
+			 * 2. Z4Fx releases its lock and sends a lockReleased message to SA.
+			 * 3. Z4Fx restarts in connector mode. Once it's ready for an IPC command, it sends
+			 *    a checkInitComplete message to SA.
+			 * 4. Once SA finishes initializing, or immediately after a checkInitComplete message
+			 *    has been received if it is already initialized, SA sends an initComplete message 
+			 *    to Z4Fx.
+			 */
 			if(msg === "releaseLock" && !Zotero.isConnector) {
+				// Standalone sends this to the Firefox extension to tell the Firefox extension to
+				// release its lock on the Zotero database
 				switchConnectorMode(true);
 			} else if(msg === "lockReleased") {
+				// The Firefox extension sends this to Standalone to let Standalone know that it has
+				// released its lock
 				Zotero.onDBLockReleased();
 			} else if(msg === "checkInitComplete") {
+				// The Firefox extension sends this to Standalone to tell Standalone to send an
+				// initComplete message when it is fully initialized
 				while(!Zotero.initialized) {
 					Zotero.mainThread.processNextEvent(true)
 				}
 				Zotero.IPC.broadcast("initComplete");
 			} else if(msg === "initComplete") {
+				// Standalone sends this to the Firefox extension to let the Firefox extension
+				// know that Standalone has fully initialized and it should pull the list of
+				// translators
 				Zotero.onInitComplete();
 			}
 		}

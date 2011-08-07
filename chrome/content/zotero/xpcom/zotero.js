@@ -185,10 +185,6 @@ if(appInfo.platformVersion[0] >= 2) {
 	// whether we are waiting for another Zotero process to initialize so we can use connector
 	var _waitingForInitComplete = false;
 	
-	// whether we should broadcast an initComplete message when initialization finishes (we should
-	// do this if we forced another Zotero process to release its lock)
-	var _broadcastInitComplete = false;
-	
 	/**
 	 * Maintains nsITimers to be used when Zotero.wait() completes (to reduce performance penalty
 	 * of initializing new objects)
