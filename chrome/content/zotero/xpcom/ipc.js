@@ -53,6 +53,11 @@ Zotero.IPC = new function() {
 				switchConnectorMode(true);
 			} else if(msg === "lockReleased") {
 				Zotero.onDBLockReleased();
+			} else if(msg === "checkInitComplete") {
+				while(!Zotero.initialized) {
+					Zotero.mainThread.processNextEvent(true)
+				}
+				Zotero.IPC.broadcast("initComplete");
 			} else if(msg === "initComplete") {
 				Zotero.onInitComplete();
 			}
