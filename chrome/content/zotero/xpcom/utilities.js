@@ -989,19 +989,25 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
  */
 Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 	const protocolRe = /^(?:(?:http|https|ftp):)/i;
-	const fileRe = /^[^:]*/;
 	
-	if(this._translate.locationIsProxied) {
-		url = Zotero.Proxies.properToProxy(url);
+	// convert proxy to proper if applicable
+	if(protocolRe.test(url)) {
+		if(this._translate.locationIsProxied) {
+			url = Zotero.Proxies.properToProxy(url);
+		}
+		return url;
 	}
-	if(protocolRe.test(url)) return url;
-	if(!fileRe.test(url)) {
-		throw "Invalid URL supplied for HTTP request";
-	} else {
-		return Components.classes["@mozilla.org/network/io-service;1"].
-			getService(Components.interfaces.nsIIOService).
-			newURI(this._translate.location, "", null).resolve(url);
+	
+	// resolve local URL
+	var resolved = Components.classes["@mozilla.org/network/io-service;1"].
+		getService(Components.interfaces.nsIIOService).
+		newURI(this._translate.location, "", null).resolve(url);
+	
+	if(!protocolRe.test(resolved)) {
+		throw new Error("Invalid URL supplied for HTTP request: "+url);
 	}
+	
+	return resolved;
 }
 
 Zotero.Utilities.Translate.prototype.__exposedProps__ = {"HTTP":"r"};
