@@ -1445,12 +1445,13 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 	const protocolRe = /^(?:(?:http|https|ftp):)/i;
 	
 	// convert proxy to proper if applicable
-	if(this._translate.translator && this._translate.translator[0]
-			&& this._translate.translator[0].properToProxy) {
-		url = this._translate.translator[0].properToProxy(url);
+	if(protocolRe.test(url)) {
+		if(this._translate.translator && this._translate.translator[0]
+				&& this._translate.translator[0].properToProxy) {
+			url = this._translate.translator[0].properToProxy(url);
+		}
+		return url;
 	}
-	
-	if(protocolRe.test(url)) return url;
 	
 	// resolve local URL
 	var resolved = "";
