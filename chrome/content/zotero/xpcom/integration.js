@@ -1756,8 +1756,11 @@ Zotero.Integration.Session.prototype.restoreProcessorState = function() {
  * Loads document data from a JSON object
  */
 Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
+	var openBraceIndex = json.indexOf("{");
+	if(openBraceIndex == -1) return;
+	
 	try {
-		var documentData = JSON.parse(json.substring(json.indexOf("{"), json.lastIndexOf("}")+1));
+		var documentData = JSON.parse(json.substring(openBraceIndex, json.lastIndexOf("}")+1));
 	} catch(e) {
 		try {
 			var documentData = JSON.parse(json.substr(0, json.length-1));
