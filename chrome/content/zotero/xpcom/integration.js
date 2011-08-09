@@ -33,12 +33,13 @@ const INTEGRATION_PLUGINS = ["zoteroMacWordIntegration@zotero.org",
 	"zoteroOpenOfficeIntegration@zotero.org", "zoteroWinWordIntegration@zotero.org"];
 
 Zotero.Integration = new function() {
+	const INTEGRATION_MIN_VERSIONS = ["3.1.6.SVN", "3.5b1.SVN", "3.1.2.SVN"];
+	
 	var _fifoFile = null;
 	var _tmpFile = null;
 	var _osascriptFile;
 	var _inProgress = false;
 	var _integrationVersionsOK = null;
-	var INTEGRATION_MIN_VERSIONS;
 	
 	// these need to be global because of GC
 	var _updateTimer;
@@ -49,12 +50,6 @@ Zotero.Integration = new function() {
 	 * Initializes the pipe used for integration on non-Windows platforms.
 	 */
 	this.init = function() {
-		if(Zotero.isMac || Zotero.isWin) {	// on Mac or Windows, we don't have pipe issues
-			INTEGRATION_MIN_VERSIONS = ["3.1.2", "3.1b1", "3.1b1"];
-		} else {							// on *NIX, there's no point in supporting 3.1b1
-			INTEGRATION_MIN_VERSIONS = ["3.1.2", "3.5a1", "3.1b1"];
-		}
-		
 		// We only use an integration pipe on OS X.
 		// On Linux, we use the alternative communication method in the OOo plug-in
 		// On Windows, we use a command line handler for integration. See
@@ -813,27 +808,53 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 	this._deleteFields = this._deleteFields.concat([i for(i in deleteCitations)]);
 	for(var i in this._session.updateIndices) {
 		var citation = this._session.citationsByIndex[i];
+		var field = this._fields[i];
+		
+		// If there is no citation, we're deleting it, or we shouldn't update it, ignore it
 		if(!citation || deleteCitations[i]) continue;
+		
+		if(!citation.properties.dontUpdate) {
+			var isRich = false;
+			var formattedCitation = citation.properties.custom
+				? citation.properties.custom : this._session.citationText[i];
+			
+			if(formattedCitation.indexOf("\\") !== -1) {
+				// need to set text as RTF
+				formattedCitation = "{\\rtf "+formattedCitation+"}"
+				isRich = true;
+			}
+			
+			if(forceCitations || citation.properties.formattedCitation !== formattedCitation) {
+				// Check if citation has been manually modified
+				if(citation.properties.plainCitation) {
+					var plainCitation = field.getText();
+					if(plainCitation !== citation.properties.plainCitation) {
+						// Citation manually modified; ask user if they want to save changes
+						field.select();
+						var result = this._doc.displayAlert(
+							Zotero.getString("integration.citationChanged")+"\n\n"+Zotero.getString("integration.citationChanged.description"), 
+							Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
+							Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_YES_NO);
+						if(result) {
+							citation.properties.dontUpdate = true;
+						}
+					}
+				}
+				
+				if(!citation.properties.dontUpdate) {
+					field.setText(formattedCitation, isRich);
+					
+					citation.properties.formattedCitation = formattedCitation;
+					citation.properties.plainCitation = field.getText();
+				}
+			}
+		}
 		
 		var fieldCode = this._session.getCitationField(citation);
 		if(fieldCode != citation.properties.field) {
-			this._fields[i].setCode(
+			field.setCode(
 				(this._session.data.prefs.storeReferences ? "ITEM CSL_CITATION" : "ITEM")
 				+" "+fieldCode);
-		}
-		
-		if(citation.properties.custom) {
-			var citationText = citation.properties.custom;
-		} else {
-			var citationText = this._session.citationText[i];
-		}
-		
-		if(citationText.indexOf("\\") !== -1) {
-			// need to set text as RTF
-			this._fields[i].setText("{\\rtf "+citationText+"}", true);
-		} else {
-			// set text as plain
-			this._fields[i].setText(citationText, false);
 		}
 	}
 	
@@ -1223,7 +1244,7 @@ Zotero.Integration.Session.prototype.reselectItem = function(exception) {
  * Generates a field from a citation object
  */
 Zotero.Integration.Session.prototype.getCitationField = function(citation) {
-	const saveProperties = ["custom", "unsorted"];
+	const saveProperties = ["custom", "unsorted", "formattedCitation", "plainCitation", "dontUpdate"];
 	const saveCitationItemKeys = ["locator", "label", "suppress-author", "author-only", "prefix",
 		"suffix"];
 	var addSchema = false;
@@ -1916,6 +1937,11 @@ Zotero.Integration.Session.prototype.editCitation = function(index, noteIndex, c
 	
 	// create object to hold citation
 	io.citation = (citation ? JSON.parse(JSON.stringify(citation)) : {"citationItems":{}, "properties":{}});
+	
+	delete io.citation.properties["formattedCitation"];
+	delete io.citation.properties["plainCitation"];
+	delete io.citation.properties["dontUpdate"];
+	
 	io.citation.properties.zoteroIndex = parseInt(index, 10);
 	io.citation.properties.noteIndex = parseInt(noteIndex, 10);
 	// assign preview function
