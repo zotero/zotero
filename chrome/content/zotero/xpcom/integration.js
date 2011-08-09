@@ -800,8 +800,13 @@ Zotero.Integration.Document.prototype._updateSession = function(newField, editFi
 
 /**
  * Updates bibliographies and fields within a document
+ * @param {Boolean} forceCitations Whether to regenerate all citations
+ * @param {Boolean} forceBibliography Whether to regenerate all bibliography entries
+ * @param {Boolean} [ignoreCitationChanges] Whether to ignore changes to citations that have been 
+ *	modified since they were created, instead of showing a warning
  */
-Zotero.Integration.Document.prototype._updateDocument = function(forceCitations, forceBibliography) {
+Zotero.Integration.Document.prototype._updateDocument = function(forceCitations, forceBibliography,
+		ignoreCitationChanges) {
 	// update citations
 	this._session.updateUpdateIndices(forceCitations);
 	var deleteCitations = this._session.updateCitations();
@@ -826,7 +831,7 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 			
 			if(forceCitations || citation.properties.formattedCitation !== formattedCitation) {
 				// Check if citation has been manually modified
-				if(citation.properties.plainCitation) {
+				if(!ignoreCitationChanges && citation.properties.plainCitation) {
 					var plainCitation = field.getText();
 					if(plainCitation !== citation.properties.plainCitation) {
 						// Citation manually modified; ask user if they want to save changes
@@ -1044,8 +1049,11 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 				var [type, content] = this._getCodeTypeAndContent(fieldCode);
 				
 				if(convertItems && type === INTEGRATION_TYPE_ITEM) {
-					fieldsToConvert.push(field);
-					fieldNoteTypes.push(this._session.data.prefs.noteType);
+					var citation = this._session.unserializeCitation(fieldCode);
+					if(!citation.properties.dontUpdate) {
+						fieldsToConvert.push(field);
+						fieldNoteTypes.push(this._session.data.prefs.noteType);
+					}
 				} else if(convertBibliographies && type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
 					fieldsToConvert.push(field);
 					fieldNoteTypes.push(0);
@@ -1062,7 +1070,9 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 			}
 			
 			// refresh contents
-			this.refresh();
+			this._getFields(true);
+			this._updateSession();
+			this._updateDocument(true, true, true);
 		}
 	}
 }
