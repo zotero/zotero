@@ -558,7 +558,8 @@ To add a new preference:
 						image="chrome://zotero/skin/prefs-styles.png">
 		
 		<preferences id="zotero-preferences-cite">
-			<preference id="pref-styles-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
+			<preference id="pref-cite-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
+			<preference id="pref-cite-useClassicAddCitationDialog" name="extensions.zotero.integration.useClassicAddCitationDialog" type="bool"/>
 		</preferences>
 		
 		<tabbox>
@@ -571,6 +572,7 @@ To add a new preference:
 					<label id="wordProcessors-noWordProcessorPluginsInstalled" width="45em" hidden="true">
 							&zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled;
 					</label>
+					<checkbox label="&zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog;" preference="pref-cite-useClassicAddCitationDialog"/>
 					<label id="wordProcessors-getWordProcessorPlugins" class="text-link" href="&zotero.preferences.cite.wordProcessors.getPlugins.url;" value="&zotero.preferences.cite.wordProcessors.getPlugins;"/>
 				</tabpanel>
 				<tabpanel orient="vertical" id="styles">
@@ -598,7 +600,7 @@ To add a new preference:
 					<groupbox>
 						<caption label="&zotero.preferences.citationOptions.caption;"/>
 						
-						<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="pref-styles-citePaperJournalArticleURL"/>
+						<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="pref-cite-citePaperJournalArticleURL"/>
 						<!-- This doesn't wrap without an explicit width, for some reason -->
 						<label id="export-citePaperJournalArticleURL" width="45em">
 							&zotero.preferences.export.citePaperJournalArticleURL.description;

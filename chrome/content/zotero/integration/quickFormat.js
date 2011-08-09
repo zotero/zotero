@@ -217,7 +217,7 @@ var Zotero_QuickFormat = new function () {
 			
 			if(year) {
 				Zotero.debug("QuickFormat: Year: "+year);
-				s.addCondition("date", "isAfter", (year)+"-01-01 00:00:00");
+				s.addCondition("date", "isAfter", (year-1)+"-12-31 23:59:59");
 				s.addCondition("date", "isBefore", (year)+"-12-31 23:59:59");
 				haveConditions = true;
 			}
