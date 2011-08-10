@@ -1183,7 +1183,8 @@ if(appInfo.platformVersion[0] >= 2) {
 				'LibX:',
 				'function skype_',
 				'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
-				'CVE-2009-3555'
+				'CVE-2009-3555',
+				'OpenGL LayerManager'
 			];
 			
 			for (var i=0; i<blacklist.length; i++) {
