@@ -3086,7 +3086,7 @@ Zotero.Schema = new function(){
 				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 										.getService(Components.interfaces.nsIPromptService);
 				var title = Zotero.getString('upgrade.failed.title');
-				ps.alert(null, title, Zotero.getString('upgrade.couldNotMigrate') + "\n\n" + Zotero.getString('upgrade.couldNotMigrate.restart'));
+				ps.alert(null, title, Zotero.getString('upgrade.couldNotMigrate', Zotero.appName) + "\n\n" + Zotero.getString('upgrade.couldNotMigrate.restart'));
 			}
 			
 			throw(e);

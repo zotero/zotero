@@ -142,7 +142,7 @@ var Zotero_Browser = new function() {
 		if (!Zotero.stateCheck()) {
 			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
 			var desc = Zotero.getString("ingester.scrapeErrorDescription.previousError")
-				+ ' ' + Zotero.getString("general.restartFirefoxAndTryAgain");
+				+ ' ' + Zotero.getString("general.restartFirefoxAndTryAgain", Zotero.appName);
 			Zotero_Browser.progress.addDescription(desc);
 			Zotero_Browser.progress.show();
 			Zotero_Browser.progress.startCloseTimer(8000);
