@@ -37,6 +37,7 @@
 <!ENTITY zotero.tabs.related.label "관련 페이지">
 <!ENTITY zotero.notes.separate "분리 창으로 편집">
 
+<!ENTITY zotero.toolbar.duplicate.label "중복 보기">
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
 
 <!ENTITY zotero.items.itemType "Item Type">
@@ -62,6 +63,7 @@
 <!ENTITY zotero.items.menu.attach "첨부 추가">
 <!ENTITY zotero.items.menu.attach.snapshot "현재 페이지의 스냅샷 첨부">
 <!ENTITY zotero.items.menu.attach.link "현재 페이지로 링크 첨부">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
 <!ENTITY zotero.items.menu.attach.fileLink "파일에 링크 첨부...">
 
@@ -84,7 +86,6 @@
 <!ENTITY zotero.toolbar.export.label "라이브러리 내보내기...">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
 <!ENTITY zotero.toolbar.timeline.label "연표 생성">
-<!ENTITY zotero.toolbar.duplicate.label "중복 보기">
 <!ENTITY zotero.toolbar.preferences.label "환경설정...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "지원 및 문서">
 <!ENTITY zotero.toolbar.about.label "Zotero 정보">
@@ -96,10 +97,12 @@
 <!ENTITY zotero.item.add "추가">
 <!ENTITY zotero.item.attachment.file.show "파일 표시">
 <!ENTITY zotero.item.textTransform "글자 변형">
-<!ENTITY zotero.item.textTransform.lowercase "소문자">
 <!ENTITY zotero.item.textTransform.titlecase "제목">
+<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 
+<!ENTITY zotero.toolbar.newNote "New Note">
 <!ENTITY zotero.toolbar.note.standalone "새로운 독립 노트">
+<!ENTITY zotero.toolbar.note.child "Add Child Note">
 <!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
 <!ENTITY zotero.toolbar.attachment.linked "파일로 연결...">
 <!ENTITY zotero.toolbar.attachment.add "파일의 사본을 보존...">
@@ -173,6 +176,12 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "북마크">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "책갈피는 Microsoft Word와 OpenOffice에서 알수 있도록 보존되지만, 우연히 변경될지도 모릅니다.">
 
+<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+
+<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.integration.classicView.label "Classic View">
+
 <!ENTITY zotero.integration.references.label "저서 목록 내 참조">
 
 <!ENTITY zotero.sync.button "Zotero 서버와 동기화">
@@ -227,3 +236,5 @@
 
 <!ENTITY zotero.file.choose.label "파일 선택...">
 <!ENTITY zotero.file.noneSelected.label "선택된 파일 없음">
+
+<!ENTITY zotero.downloadManager.label "Save to Zotero">

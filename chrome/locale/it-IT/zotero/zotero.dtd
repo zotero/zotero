@@ -37,6 +37,7 @@
 <!ENTITY zotero.tabs.related.label "Collegamenti">
 <!ENTITY zotero.notes.separate "Modifica in una nuova finestra">
 
+<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
 
 <!ENTITY zotero.items.itemType "Item Type">
@@ -62,6 +63,7 @@
 <!ENTITY zotero.items.menu.attach "Add Attachment">
 <!ENTITY zotero.items.menu.attach.snapshot "Allega istantanea della pagina attuale">
 <!ENTITY zotero.items.menu.attach.link "Allega collegamento alla pagina attuale">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
 <!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
 
@@ -84,7 +86,6 @@
 <!ENTITY zotero.toolbar.export.label "Esporta libreria...">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
 <!ENTITY zotero.toolbar.timeline.label "Crea indicatore cronologico">
-<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "Impostazioni...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "Informazioni su Zotero...">
@@ -96,10 +97,12 @@
 <!ENTITY zotero.item.add "Aggiungi">
 <!ENTITY zotero.item.attachment.file.show "Visualizza file">
 <!ENTITY zotero.item.textTransform "Modifica testo">
-<!ENTITY zotero.item.textTransform.lowercase "Minuscolo">
 <!ENTITY zotero.item.textTransform.titlecase "Maiuscolo">
+<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 
+<!ENTITY zotero.toolbar.newNote "New Note">
 <!ENTITY zotero.toolbar.note.standalone "Nuova nota">
+<!ENTITY zotero.toolbar.note.child "Add Child Note">
 <!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
 <!ENTITY zotero.toolbar.attachment.linked "Collegamento al file...">
 <!ENTITY zotero.toolbar.attachment.add "Archivia copia del file...">
@@ -173,6 +176,12 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Segnalibri">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "I segnalibri vengono solitamente mantenuti passando da Microsoft Word a OpenOffice, ma potrebbero subire modifiche non previste.">
 
+<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+
+<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.integration.classicView.label "Classic View">
+
 <!ENTITY zotero.integration.references.label "Citazioni bibliografiche">
 
 <!ENTITY zotero.sync.button "Sync with Zotero Server">
@@ -227,3 +236,5 @@
 
 <!ENTITY zotero.file.choose.label "Choose File...">
 <!ENTITY zotero.file.noneSelected.label "No file selected">
+
+<!ENTITY zotero.downloadManager.label "Save to Zotero">

@@ -37,6 +37,7 @@
 <!ENTITY zotero.tabs.related.label "Близки">
 <!ENTITY zotero.notes.separate "Редактира в отделен прозорец">
 
+<!ENTITY zotero.toolbar.duplicate.label "Показва дупликатите">
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
 
 <!ENTITY zotero.items.itemType "Вид запис">
@@ -62,6 +63,7 @@
 <!ENTITY zotero.items.menu.attach "Добавя приложение">
 <!ENTITY zotero.items.menu.attach.snapshot "Прилага снимка на настоящата страница">
 <!ENTITY zotero.items.menu.attach.link "Прилага връзка към настоящата страница">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.file "Прилага съхранено копие на файл...">
 <!ENTITY zotero.items.menu.attach.fileLink "Прилага връзка към файл">
 
@@ -84,7 +86,6 @@
 <!ENTITY zotero.toolbar.export.label "Износ на библиотека...">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF преглед...">
 <!ENTITY zotero.toolbar.timeline.label "Създава хронология">
-<!ENTITY zotero.toolbar.duplicate.label "Показва дупликатите">
 <!ENTITY zotero.toolbar.preferences.label "Настройки...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Подръжка и документация">
 <!ENTITY zotero.toolbar.about.label "За Зотеро">
@@ -96,10 +97,12 @@
 <!ENTITY zotero.item.add "Добавя">
 <!ENTITY zotero.item.attachment.file.show "Показва Файл">
 <!ENTITY zotero.item.textTransform "Преобразува текст">
-<!ENTITY zotero.item.textTransform.lowercase "Малки букви">
 <!ENTITY zotero.item.textTransform.titlecase "Заглавни букви">
+<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 
+<!ENTITY zotero.toolbar.newNote "New Note">
 <!ENTITY zotero.toolbar.note.standalone "Нова самостоятелна бележка">
+<!ENTITY zotero.toolbar.note.child "Add Child Note">
 <!ENTITY zotero.toolbar.lookup "Търси чрез идентификатор...">
 <!ENTITY zotero.toolbar.attachment.linked "Връзка към файл">
 <!ENTITY zotero.toolbar.attachment.add "Запазва копие от файл">
@@ -173,6 +176,12 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Отметки">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Отметките се запазват при прехвърляне между Microsoft Word и OpenOffice, но могат да бъдат променени по грешка.">
 
+<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+
+<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.integration.classicView.label "Classic View">
+
 <!ENTITY zotero.integration.references.label "Препратки в библиографията">
 
 <!ENTITY zotero.sync.button "Синхронизира със сървъра на Зотеро">
@@ -227,3 +236,5 @@
 
 <!ENTITY zotero.file.choose.label "Избира файл...">
 <!ENTITY zotero.file.noneSelected.label "Няма избран файл">
+
+<!ENTITY zotero.downloadManager.label "Save to Zotero">

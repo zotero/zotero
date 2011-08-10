@@ -10,6 +10,7 @@
 <!ENTITY zotero.preferences.showIn "Load Zotero in:">
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
 <!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
+<!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.statusBarIcon "상태 막대 아이콘:">
 <!ENTITY zotero.preferences.statusBarIcon.none "없음">
 <!ENTITY zotero.preferences.fontSize "글꼴 크기:">
@@ -105,6 +106,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
@@ -182,3 +184,5 @@
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "출력 보기">
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "출력 지우기">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Zotero 서버에 제출">
+
+<!ENTITY zotero.preferences.openAboutConfig "Open about:config">

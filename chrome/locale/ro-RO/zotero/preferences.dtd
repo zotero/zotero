@@ -10,6 +10,7 @@
 <!ENTITY zotero.preferences.showIn "Încarcă Zotero în:">
 <!ENTITY zotero.preferences.showIn.browserPane "Panou browser">
 <!ENTITY zotero.preferences.showIn.separateTab "Filă separată">
+<!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.statusBarIcon "Imaginea din bara de stare:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Niciuna">
 <!ENTITY zotero.preferences.fontSize "Mărime caractere:">
@@ -105,6 +106,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Niciu plug-in pentru procesorul de text nu este instalat în acest moment.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Obține plug-in-urile pentru procesorul de text...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Manager de stiluri">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titlu">
@@ -182,3 +184,5 @@
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Vizualizare ieșire">
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Ștergere ieșire">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Trimitere către serverul Zotero">
+
+<!ENTITY zotero.preferences.openAboutConfig "Open about:config">

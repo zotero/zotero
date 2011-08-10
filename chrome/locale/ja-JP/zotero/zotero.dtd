@@ -37,6 +37,7 @@
 <!ENTITY zotero.tabs.related.label "関連">
 <!ENTITY zotero.notes.separate "別画面で編集する">
 
+<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
 
 <!ENTITY zotero.items.itemType "Item Type">
@@ -62,6 +63,7 @@
 <!ENTITY zotero.items.menu.attach "ファイルを添付する">
 <!ENTITY zotero.items.menu.attach.snapshot "現ページのスナップショットを添付">
 <!ENTITY zotero.items.menu.attach.link "現ページへのリンクを添付">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.file "ファイルの保存されたコピーを添付する">
 <!ENTITY zotero.items.menu.attach.fileLink "リンクをファイルに添付する">
 
@@ -84,7 +86,6 @@
 <!ENTITY zotero.toolbar.export.label "ライブラリーをエクスポート">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
 <!ENTITY zotero.toolbar.timeline.label "タイムラインを作成">
-<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "設定">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "Zoteroについて">
@@ -96,10 +97,12 @@
 <!ENTITY zotero.item.add "追加">
 <!ENTITY zotero.item.attachment.file.show "ファイルを表示">
 <!ENTITY zotero.item.textTransform "テキストの大文字・小文字を指定する">
-<!ENTITY zotero.item.textTransform.lowercase "小文字">
 <!ENTITY zotero.item.textTransform.titlecase "大文字">
+<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 
+<!ENTITY zotero.toolbar.newNote "New Note">
 <!ENTITY zotero.toolbar.note.standalone "新規メモを作成">
+<!ENTITY zotero.toolbar.note.child "Add Child Note">
 <!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
 <!ENTITY zotero.toolbar.attachment.linked "ファイルへのリンク">
 <!ENTITY zotero.toolbar.attachment.add "ファイルのコピー">
@@ -173,6 +176,12 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "ブックマーク">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "ブックマークはMicrosoft Word、OpenOffice双方で保存されますが、偶然に変更されてしまう場合があります。">
 
+<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+
+<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.integration.classicView.label "Classic View">
+
 <!ENTITY zotero.integration.references.label "参照文献リストの中の参照文献">
 
 <!ENTITY zotero.sync.button "Sync with Zotero Server">
@@ -227,3 +236,5 @@
 
 <!ENTITY zotero.file.choose.label "Choose File...">
 <!ENTITY zotero.file.noneSelected.label "No file selected">
+
+<!ENTITY zotero.downloadManager.label "Save to Zotero">

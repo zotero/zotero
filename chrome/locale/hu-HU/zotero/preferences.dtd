@@ -10,6 +10,7 @@
 <!ENTITY zotero.preferences.showIn "Load Zotero in:">
 <!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
 <!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
+<!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.statusBarIcon "Ikon az állapotsorban:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Egyik sem">
 <!ENTITY zotero.preferences.fontSize "Betűméret">
@@ -105,6 +106,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
@@ -182,3 +184,5 @@
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Kimenet megtekintése">
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Output törlése">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Elküldés a Zotero szervernek">
+
+<!ENTITY zotero.preferences.openAboutConfig "Open about:config">

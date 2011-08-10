@@ -37,6 +37,7 @@
 <!ENTITY zotero.tabs.related.label "Related">
 <!ENTITY zotero.notes.separate "Edit in a separate window">
 
+<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
 
 <!ENTITY zotero.items.itemType "Item Type">
@@ -62,6 +63,7 @@
 <!ENTITY zotero.items.menu.attach "Add Attachment">
 <!ENTITY zotero.items.menu.attach.snapshot "Attach Snapshot of Current Page">
 <!ENTITY zotero.items.menu.attach.link "Attach Link to Current Page">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
 <!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
 
@@ -84,7 +86,6 @@
 <!ENTITY zotero.toolbar.export.label "Export Library...">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
 <!ENTITY zotero.toolbar.timeline.label "Create Timeline">
-<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
 <!ENTITY zotero.toolbar.preferences.label "...העדפות">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
 <!ENTITY zotero.toolbar.about.label "About Zotero">
@@ -96,10 +97,12 @@
 <!ENTITY zotero.item.add "הוספה">
 <!ENTITY zotero.item.attachment.file.show "Show File">
 <!ENTITY zotero.item.textTransform "Transform Text">
-<!ENTITY zotero.item.textTransform.lowercase "lower case">
 <!ENTITY zotero.item.textTransform.titlecase "Title Case">
+<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 
+<!ENTITY zotero.toolbar.newNote "New Note">
 <!ENTITY zotero.toolbar.note.standalone "New Standalone Note">
+<!ENTITY zotero.toolbar.note.child "Add Child Note">
 <!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
 <!ENTITY zotero.toolbar.attachment.linked "קישור לקובץ...">
 <!ENTITY zotero.toolbar.attachment.add "Store Copy of File...">
@@ -173,6 +176,12 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified.">
 
+<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+
+<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.integration.classicView.label "Classic View">
+
 <!ENTITY zotero.integration.references.label "References in Bibliography">
 
 <!ENTITY zotero.sync.button "Sync with Zotero Server">
@@ -227,3 +236,5 @@
 
 <!ENTITY zotero.file.choose.label "Choose File...">
 <!ENTITY zotero.file.noneSelected.label "No file selected">
+
+<!ENTITY zotero.downloadManager.label "Save to Zotero">
