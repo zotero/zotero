@@ -224,6 +224,7 @@
 							tagsToggleBox.removeChild(tagsToggleBox.firstChild);
 						}
 						
+						var me = this;
 						var i=0;
 						for (var tagID in this._tags) {
 							// If the last tag was the same, add this tagID and tagType to it
@@ -236,8 +237,8 @@
 								continue;
 							}
 							
-							var label = document.createElement('label');
-							label.setAttribute('onclick', "document.getBindingParent(this).handleTagClick(event, this)");
+							let label = document.createElement('label');
+							label.addEventListener('click', function(event) { me.handleTagClick(event, label) }, false);
 							label.className = 'zotero-clicky';
 							
 							
@@ -455,7 +456,8 @@
 							var mod = 'plural';
 					}
 					
-					this.id('num-selected').value = Zotero.getString('pane.tagSelector.numSelected.' + mod, [count]);
+					this.id('num-selected').label = Zotero.getString('pane.tagSelector.numSelected.' + mod, [count]);
+					this.id('deselect-all').disabled = count == 0;
 				]]>
 				</body>
 			</method>
@@ -868,23 +870,6 @@
 				
 				<xul:vbox id="tag-controls">
 					<xul:hbox>
-						<xul:hbox pack="start">
-							<xul:checkbox id="display-all-tags" label="&zotero.tagSelector.displayAllInLibrary;"
-								oncommand="var ts = document.getBindingParent(this); ts.filterToScope = !this.checked; event.stopPropagation();">
-							</xul:checkbox>
-						</xul:hbox>
-						
-						<!--
-						<xul:hbox>
-							<xul:radiogroup orient="horizontal">
-								<xul:radio label="any"/>
-								<xul:radio label="all"/>
-							</xul:radiogroup>
-						</xul:hbox>
-						-->
-					</xul:hbox>
-						
-					<xul:hbox>
 						<!-- TODO: &zotero.tagSelector.filter; is now unused -->
 						<xul:textbox id="tags-search" flex="1" type="search" timeout="250" dir="reverse"
 							oncommand="document.getBindingParent(this).handleKeyPress(); event.stopPropagation()"
@@ -892,28 +877,16 @@
 						<xul:toolbarbutton id="view-settings-menu" tooltiptext="&zotero.toolbar.actions.label;"
 								image="chrome://zotero/skin/tag-selector-menu.png" type="menu">
 							<xul:menupopup id="view-settings-popup">
+								<xul:menuitem id="num-selected" disabled="true"/>
+								<xul:menuitem id="deselect-all" label="&zotero.tagSelector.clearAll;"
+									oncommand="document.getBindingParent(this).clearAll(); event.stopPropagation();"/>
+								<xul:menuseparator/>
 								<xul:menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" autocheck="true" type="checkbox"
 									oncommand="var ts = document.getBindingParent(this); ts._dirty = true; ts.setAttribute('showAutomatic', this.getAttribute('checked') == 'true')"/>
+								<xul:menuitem id="display-all-tags" label="&zotero.tagSelector.displayAllInLibrary;" autocheck="true" type="checkbox"
+									oncommand="document.getBindingParent(this).filterToScope = !(this.getAttribute('checked') == 'true'); event.stopPropagation();"/>
 							</xul:menupopup>
 						</xul:toolbarbutton>
-					</xul:hbox>
-					
-					<xul:hbox align="center">
-						<xul:hbox pack="center">
-							<xul:label id="num-selected"/>
-						</xul:hbox>
-						
-						<!--
-						Disabled (at least) until there's an ANY search mode
-						<xul:toolbarbutton label="&zotero.tagSelector.selectVisible;"
-							oncommand="document.getBindingParent(this).selectVisible()"/>
-						<xul:button label="&zotero.tagSelector.clearVisible;"
-							oncommand="document.getBindingParent(this).clearVisible()"/> -->
-						<xul:toolbarseparator/>
-						<xul:hbox pack="center">
-							<xul:button label="&zotero.tagSelector.clearAll;"
-								oncommand="document.getBindingParent(this).clearAll(); event.stopPropagation();"/>
-						</xul:hbox>
 					</xul:hbox>
 				</xul:vbox>
 			</xul:groupbox>
