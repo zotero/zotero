@@ -10,6 +10,7 @@
 <!ENTITY zotero.preferences.showIn "Laadida Zotero:">
 <!ENTITY zotero.preferences.showIn.browserPane "Brauseri paanil">
 <!ENTITY zotero.preferences.showIn.separateTab "Eraldi">
+<!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.statusBarIcon "Staatusriba ikoon:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Puudub">
 <!ENTITY zotero.preferences.fontSize "Fondi suurus:">
@@ -105,6 +106,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Ühtegi tekstiredaktori lisa ei ole paigaldatud.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Lisade hankimine...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stiilide haldamine">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Pealkiri">
@@ -182,3 +184,5 @@
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Logi vaatamine">
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Logi tühjendamine">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Saata Zotero serverisse">
+
+<!ENTITY zotero.preferences.openAboutConfig "Open about:config">

@@ -37,6 +37,7 @@
 <!ENTITY zotero.tabs.related.label "Související">
 <!ENTITY zotero.notes.separate "Upravit v samostatném okně">
 
+<!ENTITY zotero.toolbar.duplicate.label "Ukázat duplikáty">
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
 
 <!ENTITY zotero.items.itemType "Typ položky">
@@ -62,6 +63,7 @@
 <!ENTITY zotero.items.menu.attach "Přidat přílohu">
 <!ENTITY zotero.items.menu.attach.snapshot "Připojit snímek současné stránky">
 <!ENTITY zotero.items.menu.attach.link "Připojit odkaz na současnou stránku">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.file "Přiložit uloženou kopii souboru...">
 <!ENTITY zotero.items.menu.attach.fileLink "Přiložit odkaz na soubor...">
 
@@ -84,7 +86,6 @@
 <!ENTITY zotero.toolbar.export.label "Exportovat knihovnu...">
 <!ENTITY zotero.toolbar.rtfScan.label "Skenovat RTF...">
 <!ENTITY zotero.toolbar.timeline.label "Vytvořit časovou přímku">
-<!ENTITY zotero.toolbar.duplicate.label "Ukázat duplikáty">
 <!ENTITY zotero.toolbar.preferences.label "Nastavení...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Podpora a dokumentace">
 <!ENTITY zotero.toolbar.about.label "O Zoteru">
@@ -96,10 +97,12 @@
 <!ENTITY zotero.item.add "Přidat">
 <!ENTITY zotero.item.attachment.file.show "Ukázat soubor">
 <!ENTITY zotero.item.textTransform "Převést text">
-<!ENTITY zotero.item.textTransform.lowercase "malá písmena">
 <!ENTITY zotero.item.textTransform.titlecase "Velká Písmena">
+<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 
+<!ENTITY zotero.toolbar.newNote "New Note">
 <!ENTITY zotero.toolbar.note.standalone "Nová samostatná poznámka">
+<!ENTITY zotero.toolbar.note.child "Add Child Note">
 <!ENTITY zotero.toolbar.lookup "Vyhledat s pomocí identifikátoru...">
 <!ENTITY zotero.toolbar.attachment.linked "Odkaz na soubor...">
 <!ENTITY zotero.toolbar.attachment.add "Uložit kopii souboru...">
@@ -173,6 +176,12 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Záložky">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Záložky jsou zachovány u Microsoft Word i OpenOffice, ale mohou být náhodně modifikovány. Kvůli kompatibilitě nemohou být citace vkládány do poznámek pod čarou nebo koncových poznámek, pokud je tato možnost zvolena.">
 
+<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+
+<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.integration.classicView.label "Classic View">
+
 <!ENTITY zotero.integration.references.label "Reference v bibliografii">
 
 <!ENTITY zotero.sync.button "Synchronizovat se Zotero Serverem">
@@ -227,3 +236,5 @@
 
 <!ENTITY zotero.file.choose.label "Vybrat soubor...">
 <!ENTITY zotero.file.noneSelected.label "Nebyl vybrán žádný soubor">
+
+<!ENTITY zotero.downloadManager.label "Save to Zotero">

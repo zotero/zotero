@@ -10,6 +10,7 @@
 <!ENTITY zotero.preferences.showIn "Ładuj Zotero w:">
 <!ENTITY zotero.preferences.showIn.browserPane "Panelu przeglądarki">
 <!ENTITY zotero.preferences.showIn.separateTab "Oddzielnej zakładce">
+<!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.statusBarIcon "Ikona paska stanu:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Brak">
 <!ENTITY zotero.preferences.fontSize "Wielkość czcionki:">
@@ -105,6 +106,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Brak aktualnie zainstalowanych wtyczek procesorów tekstu.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Pobierz wtyczki procesorów tekstu...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Zarządzanie stylami">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Nazwa">
@@ -182,3 +184,5 @@
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Pokaż wyjście">
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Wyczyść wyjście">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Wyślij na serwer Zotero">
+
+<!ENTITY zotero.preferences.openAboutConfig "Open about:config">

@@ -37,6 +37,7 @@
 <!ENTITY zotero.tabs.related.label "相關的">
 <!ENTITY zotero.notes.separate "分出一個獨立視窗來編輯">
 
+<!ENTITY zotero.toolbar.duplicate.label "顯示重復的">
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
 
 <!ENTITY zotero.items.itemType "項目類型">
@@ -62,6 +63,7 @@
 <!ENTITY zotero.items.menu.attach "新增附加檔案">
 <!ENTITY zotero.items.menu.attach.snapshot "附上目前網頁的快照">
 <!ENTITY zotero.items.menu.attach.link "附上目前網頁的鏈結">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.file "附加已儲存的檔案拷貝……">
 <!ENTITY zotero.items.menu.attach.fileLink "附加鏈結到檔案……">
 
@@ -84,7 +86,6 @@
 <!ENTITY zotero.toolbar.export.label "匯出圖書館…">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF 掃描…">
 <!ENTITY zotero.toolbar.timeline.label "建立時序列表">
-<!ENTITY zotero.toolbar.duplicate.label "顯示重復的">
 <!ENTITY zotero.toolbar.preferences.label "偏好設定…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "支援及說明文件">
 <!ENTITY zotero.toolbar.about.label "關於 Zotero…">
@@ -96,10 +97,12 @@
 <!ENTITY zotero.item.add "加入">
 <!ENTITY zotero.item.attachment.file.show "顯示檔案">
 <!ENTITY zotero.item.textTransform "轉換文字">
-<!ENTITY zotero.item.textTransform.lowercase "小寫">
 <!ENTITY zotero.item.textTransform.titlecase "標題大小寫">
+<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 
+<!ENTITY zotero.toolbar.newNote "New Note">
 <!ENTITY zotero.toolbar.note.standalone "新增獨立筆記">
+<!ENTITY zotero.toolbar.note.child "Add Child Note">
 <!ENTITY zotero.toolbar.lookup "以標識符查找…">
 <!ENTITY zotero.toolbar.attachment.linked "檔案鏈結…">
 <!ENTITY zotero.toolbar.attachment.add "儲存檔案副本…">
@@ -173,6 +176,12 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "書籤">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified. For &#xA;compatibility reasons, citations cannot be inserted into footnotes or endnotes when this option is selected.">
 
+<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+
+<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.integration.classicView.label "Classic View">
+
 <!ENTITY zotero.integration.references.label "參考書目中的參考文獻">
 
 <!ENTITY zotero.sync.button "與 Zotero 伺服器同步">
@@ -227,3 +236,5 @@
 
 <!ENTITY zotero.file.choose.label "選擇檔案…">
 <!ENTITY zotero.file.noneSelected.label "未選取檔案">
+
+<!ENTITY zotero.downloadManager.label "Save to Zotero">

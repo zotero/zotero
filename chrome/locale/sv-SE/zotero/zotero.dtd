@@ -37,6 +37,7 @@
 <!ENTITY zotero.tabs.related.label "Liknande källor">
 <!ENTITY zotero.notes.separate "Redigera i ett separat fönster">
 
+<!ENTITY zotero.toolbar.duplicate.label "Visa dubletter">
 <!ENTITY zotero.collections.showUnfiledItems "Visa oregistererade källor">
 
 <!ENTITY zotero.items.itemType "Källtyp">
@@ -62,6 +63,7 @@
 <!ENTITY zotero.items.menu.attach "Lägg till bilaga">
 <!ENTITY zotero.items.menu.attach.snapshot "Bifoga sparad kopia av aktuell sida">
 <!ENTITY zotero.items.menu.attach.link "Bifoga länk till aktuell sida">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.file "Bifoga sparad kopia av filen...">
 <!ENTITY zotero.items.menu.attach.fileLink "Bifoga länk till fil...">
 
@@ -84,7 +86,6 @@
 <!ENTITY zotero.toolbar.export.label "Exportera bibliotek...">
 <!ENTITY zotero.toolbar.rtfScan.label "Läs in RTF...">
 <!ENTITY zotero.toolbar.timeline.label "Skapa tidslinje">
-<!ENTITY zotero.toolbar.duplicate.label "Visa dubletter">
 <!ENTITY zotero.toolbar.preferences.label "Inställningar...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Hjälp och dokumentation">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
@@ -96,10 +97,12 @@
 <!ENTITY zotero.item.add "Lägg till">
 <!ENTITY zotero.item.attachment.file.show "Visa fil">
 <!ENTITY zotero.item.textTransform "Omvandla text">
-<!ENTITY zotero.item.textTransform.lowercase "gemener">
 <!ENTITY zotero.item.textTransform.titlecase "engelsk titelskrivning">
+<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 
+<!ENTITY zotero.toolbar.newNote "New Note">
 <!ENTITY zotero.toolbar.note.standalone "Ny fristående anteckning">
+<!ENTITY zotero.toolbar.note.child "Add Child Note">
 <!ENTITY zotero.toolbar.lookup "Sök med registreringsnummer...">
 <!ENTITY zotero.toolbar.attachment.linked "Länk till fil...">
 <!ENTITY zotero.toolbar.attachment.add "Lagra kopia av fil...">
@@ -173,6 +176,12 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Bokmärken">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Bokmärken sparas i Microsoft Word och OpenOffice, men kan ändras av misstag.">
 
+<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+
+<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.integration.classicView.label "Classic View">
+
 <!ENTITY zotero.integration.references.label "Innehåll i källförteckningen">
 
 <!ENTITY zotero.sync.button "Synkronisera med Zoteros server">
@@ -227,3 +236,5 @@
 
 <!ENTITY zotero.file.choose.label "Välj fil...">
 <!ENTITY zotero.file.noneSelected.label "Ingen fil vald">
+
+<!ENTITY zotero.downloadManager.label "Save to Zotero">

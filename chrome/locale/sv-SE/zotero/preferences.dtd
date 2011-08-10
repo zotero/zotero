@@ -10,6 +10,7 @@
 <!ENTITY zotero.preferences.showIn "Ladda Zotero i:">
 <!ENTITY zotero.preferences.showIn.browserPane "Webbläsarfönstret">
 <!ENTITY zotero.preferences.showIn.separateTab "Separat tab">
+<!ENTITY zotero.preferences.showIn.appTab "App tab">
 <!ENTITY zotero.preferences.statusBarIcon "Ikon i statusfält:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Ingen ikon">
 <!ENTITY zotero.preferences.fontSize "Teckenstorlek:">
@@ -105,6 +106,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Inget insticksprogram för ordbehandlare är installerat.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Hämtar insticksprogram för ordbehandlare...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/sv/word_processor_plugin_installation">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stilhanterare">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
@@ -182,3 +184,5 @@
 <!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Visa internt tillstånd">
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Radera info om internt tillstånd">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Skicka till Zotero Server">
+
+<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
