@@ -3619,7 +3619,7 @@ var ZoteroPane = new function()
 		if (popup) {
 			var pw = new Zotero.ProgressWindow();
 			pw.changeHeadline(Zotero.getString('general.errorHasOccurred'));
-			var msg = Zotero.getString('general.restartFirefox') + ' '
+			var msg = Zotero.getString('general.restartFirefox', Zotero.appName) + ' '
 				+ reportInstructions;
 			pw.addDescription(msg);
 			pw.show();
@@ -3628,7 +3628,7 @@ var ZoteroPane = new function()
 		// Display as items pane message
 		else {
 			var msg = Zotero.getString('general.errorHasOccurred') + ' '
-				+ Zotero.getString('general.restartFirefox') + '\n\n'
+				+ Zotero.getString('general.restartFirefox', Zotero.appName) + '\n\n'
 				+ reportInstructions;
 			self.setItemsPaneMessage(msg, true);
 		}

@@ -1131,8 +1131,8 @@ Zotero.Sync.Server = new function () {
 		}
 		catch (e) {
 			Zotero.debug(e);
-			var msg = Zotero.getString('sync.error.loginManagerCorrupted1') + "\n\n"
-						+ Zotero.getString('sync.error.loginManagerCorrupted2');
+			var msg = Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"
+						+ Zotero.getString('sync.error.loginManagerCorrupted2', Zotero.appName);
 			alert(msg);
 			return '';
 		}
@@ -1321,7 +1321,7 @@ Zotero.Sync.Server = new function () {
 			if (_syncInProgress) {
 				var msg = Zotero.localeJoin([
 					Zotero.getString('sync.error.syncInProgress'),
-					Zotero.getString('sync.error.syncInProgress.wait')
+					Zotero.getString('sync.error.syncInProgress.wait', Zotero.appName)
 				]);
 				var e = new Zotero.Error(msg, 0, { dialogButtonText: null, frontWindowOnly: true });
 				_error(e);

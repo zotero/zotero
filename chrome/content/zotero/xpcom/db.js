@@ -750,7 +750,7 @@ Zotero.DBConnection.prototype.checkException = function (e) {
 		
 		var index = ps.confirmEx(null,
 			Zotero.getString('general.error'),
-			Zotero.getString('db.dbCorrupted', this._dbName) + '\n\n' + Zotero.getString('db.dbCorrupted.restart'),
+			Zotero.getString('db.dbCorrupted', this._dbName) + '\n\n' + Zotero.getString('db.dbCorrupted.restart', Zotero.appName),
 			buttonFlags,
 			Zotero.getString('general.restartNow'),
 			Zotero.getString('general.restartLater'),
