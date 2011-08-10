@@ -35,7 +35,7 @@
 <!DOCTYPE overlay [
 <!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd">
 %brandDTD;
-<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone/standalone.dtd" >
+<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" >
 %standaloneDTD;
 ]>
 <overlay id="menuOverlay"
