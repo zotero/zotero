@@ -196,8 +196,17 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	);
 	processRows();
 	
+	// DOI
+	var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
+				+ "JOIN itemDataValues USING (valueID) "
+				+ "WHERE libraryID=? AND fieldID=? AND REGEXP('^10\.', value) "
+				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
+				+ "ORDER BY value";
+	var rows = Zotero.DB.query(sql, [this._libraryID, Zotero.ItemFields.getID('DOI')]);
+	processRows();
+	
 	// Match on exact fields
-	var fields = ['DOI'];
+	/*var fields = [''];
 	for each(var field in fields) {
 		var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 					+ "JOIN itemDataValues USING (valueID) "
@@ -206,7 +215,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 					+ "ORDER BY value";
 		var rows = Zotero.DB.query(sql, [this._libraryID, Zotero.ItemFields.getID(field)]);
 		processRows();
-	}
+	}*/
 }
 
 
