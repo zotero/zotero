@@ -1,4 +1,4 @@
-5  # Increment number when modifying file
+6  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -19,3 +19,4 @@ bc39e05b-141a-4322-85f0-a5b86edf896b  # Hindawi
 e78d20f7-488-4023-831-dfe39679f3f     # ACM (replaced by newer version)
 3f44a651-8b6b-4591-8ca4-4bfb943a13f4  # Edutopia (replaced with nothing)
 636c8ea6-2af7-4488-8ccd-ea280e4a7a98  # Sage Journals Online (replaced by Highwire 2.0)
+a8df3cb0-f76c-4e2c-a11e-5fa283f8010c  # Copernicus (replaced by newer version)
