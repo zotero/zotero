@@ -512,7 +512,7 @@ Zotero.Server.Connector.IncompatibleVersion.prototype = {
 		ps.alert(null,
 			Zotero.getString("connector.error.title"),
 			Zotero.getString("integration.error.incompatibleVersion2",
-				["Standalone "+Zotero.version, "Connector", "2.1.999"]));
+				["Standalone "+Zotero.version, "Connector", "2.999.1"]));
 		Zotero.Server.Connector.IncompatibleVersion._errorShown = true;
 	}
 };
