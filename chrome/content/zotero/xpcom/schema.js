@@ -89,7 +89,7 @@ Zotero.Schema = new function(){
 		
 		if (obj.data.e) {
 			if (obj.data.e.name && obj.data.e.name == "NS_ERROR_FAILURE" && obj.data.e.message.match(/nsIFile\.moveTo/)) {
-				Components.utils.reportError(obj.data.e);
+				Zotero.logError(obj.data.e);
 				return false;
 			}
 			
@@ -212,7 +212,7 @@ Zotero.Schema = new function(){
 			}
 			catch (e) {
 				Zotero.debug(e);
-				Components.utils.reportError(e);
+				Zotero.logError(e);
 			}
 			
 			if (up2 || up3 || up4) {
@@ -1276,7 +1276,7 @@ Zotero.Schema = new function(){
 		}
 		catch(e){
 			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
+			Zotero.logError(e);
 			Zotero.DB.rollbackTransaction();
 			alert('Error initializing Zotero database');
 			throw(e);
@@ -1287,7 +1287,7 @@ Zotero.Schema = new function(){
 		}
 		catch (e) {
 			Zotero.debug(e);
-			Components.utils.reportError(e);
+			Zotero.logError(e);
 			alert('Error updating Zotero translators and styles');
 		}
 	}
