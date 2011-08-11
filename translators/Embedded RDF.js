@@ -1,15 +1,15 @@
 {
-	"translatorID":"951c027d-74ac-47d4-a107-9c3069ab7b48",
-	"translatorType":4,
-	"label":"Embedded RDF",
-	"creator":"Simon Kornblith",
-	"target":null,
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":400,
-	"inRepository":true,
-	"detectXPath":"//meta[substring(@name, 1, 3)='dc.'] | //link[substring(@rel, 1, 7)='schema.']",
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "951c027d-74ac-47d4-a107-9c3069ab7b48",
+	"label": "Embedded RDF",
+	"creator": "Simon Kornblith",
+	"target": "",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 400,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-07-04 00:32:05"
 }
 
 var _prefix;
@@ -69,28 +69,66 @@ function doWeb(doc, url) {
 		newItem.repository = false;
 		newItem.complete();
 	});
-	var rdf = translator.getTranslatorObject();
 	
-	var metaTags = doc.getElementsByTagName("meta");
-	var foundTitle = false;		// We can use the page title if necessary
-	for(var i=0; i<metaTags.length; i++) {
-		var tag = metaTags[i].getAttribute("name");
-		var value = metaTags[i].getAttribute("content");
-		if(tag && value && tag.substr(0, prefix.length).toLowerCase() == prefix) {
-			if(tag == "dc.title") {
-				foundTitle = true;
+	translator.getTranslatorObject(function(rdf) {
+		var metaTags = doc.getElementsByTagName("meta");
+		var foundTitle = false;		// We can use the page title if necessary
+		for(var i=0; i<metaTags.length; i++) {
+			var tag = metaTags[i].getAttribute("name");
+			var value = metaTags[i].getAttribute("content");
+			if(tag && value && tag.substr(0, prefix.length).toLowerCase() == prefix) {
+				if(tag == "dc.title") {
+					foundTitle = true;
+				}
+				rdf.Zotero.RDF.addStatement(url, _dc + tag.substr(3).toLowerCase(), value, true);
+			} else if(tag && value && (tag == "author" || tag == "author-personal")) {
+				rdf.Zotero.RDF.addStatement(url, _dc + "creator", value, true);
+			} else if(tag && value && tag == "author-corporate") {
+				rdf.Zotero.RDF.addStatement(url, _dc + "creator", value, true);
 			}
-			rdf.Zotero.RDF.addStatement(url, _dc + tag.substr(3).toLowerCase(), value, true);
-		} else if(tag && value && (tag == "author" || tag == "author-personal")) {
-			rdf.Zotero.RDF.addStatement(url, _dc + "creator", value, true);
-		} else if(tag && value && tag == "author-corporate") {
-			rdf.Zotero.RDF.addStatement(url, _dc + "creator", value, true);
 		}
-	}
-	
-	if (!foundTitle) {
-		rdf.Zotero.RDF.addStatement(url, _dc + "title", doc.title, true);
-	}
-	rdf.defaultUnknownType = "webpage";
-	rdf.doImport();
+		
+		if (!foundTitle) {
+			rdf.Zotero.RDF.addStatement(url, _dc + "title", doc.title, true);
+		}
+		rdf.defaultUnknownType = "webpage";
+		rdf.doImport();
+	});
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://dublincore.org/documents/usageguide/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"creators": [
+					{
+						"lastName": "Diane Hillmann",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"document": false
+					}
+				],
+				"itemID": "http://dublincore.org/documents/usageguide/",
+				"title": "Using Dublin Core",
+				"publisher": "Dublin Core Metadata Initiative",
+				"institution": "Dublin Core Metadata Initiative",
+				"company": "Dublin Core Metadata Initiative",
+				"label": "Dublin Core Metadata Initiative",
+				"distributor": "Dublin Core Metadata Initiative",
+				"extra": "This document is intended as an entry point for users of Dublin Core. For non-specialists, it will assist them in creating simple descriptive records for information resources (for example, electronic documents). Specialists may find the document a useful point of reference to the documentation of Dublin Core, as it changes and grows.",
+				"url": "http://dublincore.org/documents/usageguide/"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

@@ -8,8 +8,9 @@
 	"maxVersion":"",
 	"priority":100,
 	"displayOptions":{"exportCharset":"UTF-8"},
+	"browserSupport":"gcsn",
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-07-08 04:51:41"
 }
 
 var fieldMap = {

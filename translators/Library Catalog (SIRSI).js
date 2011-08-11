@@ -1,14 +1,14 @@
 {
-	"translatorID":"add7c71c-21f3-ee14-d188-caf9da12728b",
-	"translatorType":4,
-	"label":"Library Catalog (SIRSI)",
-	"creator":"Sean Takats & Hicham El Kasmi(Dutch Language fields)",
-	"target":"/uhtbin/cgisirsi",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "add7c71c-21f3-ee14-d188-caf9da12728b",
+	"label": "Library Catalog (SIRSI)",
+	"creator": "Sean Takats,  Hicham El Kasmi",
+	"target": "/uhtbin/(?:cgisirsi|quick_keyword)",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"lastUpdated": "2011-07-25 13:01:08"
 }
 
 function detectWeb(doc, url) {
@@ -29,7 +29,7 @@ function detectWeb(doc, url) {
 		return "book";
 	}
 	var elmts = doc.evaluate('/html/body/form//text()', doc, nsResolver,
-	                         XPathResult.ANY_TYPE, null);
+					 XPathResult.ANY_TYPE, null);
 	while(elmt = elmts.iterateNext()) {
 		if(Zotero.Utilities.superCleanString(elmt.nodeValue) == "Viewing record") {
 			Zotero.debug("SIRSI detectWeb: Viewing record");
@@ -47,7 +47,6 @@ function detectWeb(doc, url) {
 		Zotero.debug("SIRSI detectWeb: hitlist");
 		return "multiple";
 	}
-	//	var xpath = '//input[@type="checkbox"]' 	
 }
 
 function scrape(doc) {
@@ -102,9 +101,9 @@ function scrape(doc) {
 					var pubParts = value.split(" : ");
 					newItem.place = pubParts[0];
 					if (pubParts[1].match(/\d+/)) {
-					    newItem.date = pubParts[1].match(/\d+/)[0];
-					    newItem.publisher = pubParts[1].match(/(.*),/)[1];
-				    }
+						newItem.date = pubParts[1].match(/\d+/)[0];
+						newItem.publisher = pubParts[1].match(/(.*),/)[1];
+					}
 				} else if(field == "personal author" || field == "autor personal" || field == "auteur") {
 					if(authors.indexOf(value) == -1) {
 						value = value.replace(/(\(|\)|\d+|\-)/g, "");
@@ -166,10 +165,18 @@ function scrape(doc) {
 	if(newItem.extra) {
 		newItem.extra = newItem.extra.substr(0, newItem.extra.length-1);
 	}
-	
+
 	var callNumber = doc.evaluate('//tr/td[1][@class="holdingslist"]/text()', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(callNumber && callNumber.nodeValue) {
-		newItem.callNumber = callNumber.nodeValue;
+		newItem.callNumber = callNumber.nodeValue.trim();
+	}
+	
+	// UVA has the call number separately, in the next field
+	// http://virgo.lib.virginia.edu
+	callNumber = doc.evaluate('//tr/td[2][@class="holdingslist"]/text()', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	// The regex here is looking for something like an LOC call number
+	if(callNumber && callNumber.nodeValue.trim().match(/^[A-Z]{1,2}[0-9]+/)) {
+		newItem.callNumber += " " + callNumber.nodeValue.trim();
 	}
 	
 	var domain = doc.location.href.match(/https?:\/\/([^/]+)/);
@@ -201,7 +208,7 @@ function doWeb(doc, url){
 		sirsiNew = false;
 	} else {
 	var elmts = doc.evaluate('/html/body/form//text()', doc, nsResolver,
-	                         XPathResult.ANY_TYPE, null);
+							 XPathResult.ANY_TYPE, null);
 		while(elmt = elmts.iterateNext()) {
 			if(Zotero.Utilities.superCleanString(elmt.nodeValue) == "Viewing record") {
 				Zotero.debug("SIRSI doWeb: Viewing record");

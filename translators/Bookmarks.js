@@ -1,14 +1,15 @@
 {
-	"translatorID":"4e7119e0-02be-4848-86ef-79a64185aad8",
-	"translatorType":3,
-	"label":"Bookmarks",
-	"creator":"Avram Lyon",
-	"target":"html",
-	"minVersion":"2.1b6",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-03-16 23:24:54"
+	"translatorID": "4e7119e0-02be-4848-86ef-79a64185aad8",
+	"label": "Bookmarks",
+	"creator": "Avram Lyon",
+	"target": "html",
+	"minVersion": "2.1b6",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 3,
+	"browserSupport": "gscn",
+	"lastUpdated": "2011-07-09 18:52:34"
 }
 
 /*
@@ -72,33 +73,70 @@ function doImport() {
 	var hits;
 	var item = false;
 	var itemIncomplete = false;
+	var collection = false;
 	var re = /([A-Za-z_]+)="([^"]+)"/g; 
 	while((line = Zotero.read()) !== false) {
-		if (line.indexOf("<DT>") !== -1) {
+		if (line.indexOf("<DT>") !== -1 && line.indexOf("<A") !== -1) {
 			if (itemIncomplete) item.complete();
 			itemIncomplete = true;
+			//Zotero.debug(line);
 			item = new Zotero.Item("webpage");
+			if (collection) collection.children.push(item);
 			item.title = line.match(/>([^<]*)<\/A>/)[1];
-			Zotero.debug(item.title);
+			//Zotero.debug(item.title);
 			while(hits = re.exec(line)) {
-				if (!hits) { Zotero.debug("RE no match in "+line);
+				if (!hits) {
+					Zotero.debug("RE no match in "+line);
+					continue;
 				}
 				switch (hits[1]) {
-					case "HREF": item.url = hits[2]; break;
+					case "HREF":	item.url = hits[2]; 
+									break;
 					case "TAGS": item.tags = hits[2].split(','); break;
+					case "ICON": break;
+					case "ICON_URI": break;
+					case "ADD_DATE":
+							item.accessDate = convertDate(hits[2]);
+							break;
 					default: item.extra = item.extra ? 	item.extra + "; "+ [hits[1], hits[2]].join("=") :
 										[hits[1], hits[2]].join("=");
 				}
 			}
+			if (item.url.match(/^place:/)) {
+				item = false;
+				itemIncomplete = false;
+			}
+		} else if (line.indexOf("<DT>") !== -1 && line.indexOf("<H3") !== -1) {
+			if (collection) {
+				collection.complete();
+			}
+			collection = new Zotero.Collection();
+			collection.name = Zotero.Utilities.unescapeHTML(line.match(/<H3[^>]*>([^<]*)<\/H3>/i)[1]);
+			Zotero.debug("Starting collection: "+ collection.name);
+			collection.type = "collection";
+			collection.children = new Array();
 		} else if (line.substr(0,4) == "<DD>") {
 			if (itemIncomplete) item.abstractNote = item.abstractNote ? item.abstractNote + " " + line.substr(4) : line.substr(4);
 			else Zotero.debug("Discarding description line without item: " + line);
 		} else {
-			Zotero.debug("Discarding line: " + line);
+			//Zotero.debug("Discarding line: " + line);
 		}
 	}
 	if (item && itemIncomplete) item.complete();
+	if (collection) collection.complete();
 }
+
+function convertDate(timestamp){
+	var d = new Date(timestamp*1000);
+ 	function pad(n){return n<10 ? '0'+n : n};
+ 	return d.getUTCFullYear()+'-'
+      + pad(d.getUTCMonth()+1)+'-'
+      + pad(d.getUTCDate())+' '
+      + pad(d.getUTCHours())+':'
+      + pad(d.getUTCMinutes())+':'
+      + pad(d.getUTCSeconds())+' UTC';
+ }
+
 
 
 function doExport() {
@@ -124,3 +162,8 @@ function doExport() {
 	}
 	Zotero.write(footer);
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = []
+/** END TEST CASES **/

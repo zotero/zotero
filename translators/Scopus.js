@@ -1,20 +1,38 @@
 {
-	"translatorID":"a14ac3eb-64a0-4179-970c-92ecc2fec992",
-	"translatorType":4,
-	"label":"Scopus",
-	"creator":"Michael Berkowitz and Rintze Zelle",
-	"target":"http://[^/]*www.scopus.com[^/]*",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-06-04 00:00:00"
+	"translatorID": "a14ac3eb-64a0-4179-970c-92ecc2fec992",
+	"label": "Scopus",
+	"creator": "Michael Berkowitz, Rintze Zelle and Avram Lyon",
+	"target": "^http://www\\.scopus\\.com[^/]*",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"lastUpdated": "2011-07-27 14:06:10"
 }
 
+/*
+   Scopus Translator
+   Copyright (C) 2008-2011 Center for History and New Media
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 function detectWeb(doc, url) {
-	if (url.indexOf("/results/") != -1) {
+	if (url.indexOf("/results/") !== -1) {
 		return "multiple";
-	} else if (url.indexOf("/record/") != -1) {
+	} else if (url.indexOf("/record/") !== -1) {
 		return "journalArticle";
 	}
 }
@@ -24,7 +42,7 @@ function getEID(url) {
 }
 
 function returnURL(eid) {
-	return 'http://www.scopus.com/scopus/citation/output.url?origin=recordpage&eid=' + eid + '&src=s&view=CiteAbsKeywsRefs';
+	return 'http://www.scopus.com/citation/output.url?origin=recordpage&eid=' + eid + '&src=s&view=FullDocument&outputType=export';
 }
 
 function doWeb(doc, url) {
@@ -36,24 +54,35 @@ function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
 		items = new Object();
-		var boxes = doc.evaluate('//table/tbody/tr[@class]/td[@class="fldtextPad"][1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var boxes = doc.evaluate('//div[@id="resultsBody"]/table/tbody/tr[@class and (not(@id) or not(contains(@id,"previewabstractrow")))]/td[@class="fldtextPad"][1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var box;
 		while (box = boxes.iterateNext()) {
-			var title = Zotero.Utilities.trimInternal(doc.evaluate('.//span[@class="txtBoldOnly"]', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent);
-			var link = doc.evaluate('.//a[@class="outwardLink"]', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href;
-			items[link] = title;
+			var link = doc.evaluate('.//a', box, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+			items[link.href] = Zotero.Utilities.trimInternal(link.textContent);
 		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(returnURL(getEID(i)));
-		}
+		Zotero.selectItems(items, function (items) {
+			for (var i in items) {
+				articles.push(returnURL(getEID(i)));
+			}
+			scrape(articles);
+		});
 	} else {
 		articles = [returnURL(getEID(url))];
+		scrape(articles);
 	}
-	Zotero.Utilities.processDocuments(articles, function(newDoc) {
-		var eid = getEID(newDoc.location.href);
-		var stateKey = newDoc.evaluate('//input[@name="stateKey"]', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().value;
-		var get = 'http://www.scopus.com/scopus/citation/export.url';
+	Zotero.wait();
+}
+
+function scrape(articles) {
+	var article = articles.shift();
+	Zotero.Utilities.doGet(article, function(text, obj) {
+		var stateKey = text.match(/<input[^>]*name="stateKey"[^>]*>/);
+		if (!stateKey) Zotero.debug("No stateKey");
+		else stateKey = stateKey[0].match(/value="([^"]*)"/)[1];
+		var eid = text.match(/<input[^>]*name="eid"[^>]*>/);
+		if (!eid) Zotero.debug("No eid");
+		else eid = eid[0].match(/value="([^"]*)"/)[1];
+		var get = 'http://www.scopus.com/citation/export.url';
 		var post = 'origin=recordpage&sid=&src=s&stateKey=' + stateKey + '&eid=' + eid + '&sort=&exportFormat=RIS&view=CiteAbsKeyws&selectedCitationInformationItemsAll=on';
 		var rislink = get + "?" + post;	
 		Zotero.Utilities.HTTP.doGet(rislink, function(text) {
@@ -62,14 +91,17 @@ function doWeb(doc, url) {
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
-				if (item.notes[0]['note']) {
-					item.abstractNote = item.notes[0]['note'];
-					item.notes = new Array();
-					item.complete();
+				for (i in item.notes) {
+					if (item.notes[i]['note'].match(/Export Date:|Source:/))
+						delete item.notes[i];
 				}
+				delete item.url;
+				item.complete();
 			});
 			translator.translate();
+		}, function() { 
+			if (articles.length > 0) scrape(articles);
+			else Zotero.done();
 		});
-	}, function() {Zotero.done();});
-	Zotero.wait();
+	});
 }

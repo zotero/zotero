@@ -7,7 +7,7 @@
 	"minVersion":"2.0",
 	"maxVersion":"",
 	"priority":100,
-	"configOptions":{"getCollections":"true", "dataMode":"line"},
+	"configOptions":{"dataMode":"line"},
 	"inRepository":false,
 	"lastUpdated":"2011-01-11 04:31:00"
 }

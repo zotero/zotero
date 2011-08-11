@@ -1,14 +1,14 @@
 {
-	"translatorID":"774d7dc2-3474-2684-392c-f787789ec63d",
-	"translatorType":4,
-	"label":"Library Catalog (Dynix)",
-	"creator":"Simon Kornblith and Sylvain Machefert",
-	"target":"ipac\\.jsp\\?.*(?:uri=(?:link|full)=[0-9]|menu=search|term=)",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-06-04 22:44:38"
+	"translatorID": "774d7dc2-3474-2684-392c-f787789ec63d",
+	"label": "Library Catalog (Dynix)",
+	"creator": "Simon Kornblith and Sylvain Machefert",
+	"target": "ipac\\.jsp\\?.*(?:uri=(?:link|full)=[0-9]|menu=search|term=)",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"lastUpdated": "2011-07-24 19:43:47"
 }
 
 function detectWeb(doc, url) {
@@ -40,7 +40,10 @@ function doWeb(doc, url) {
 	
 	var uris = new Array();
 	if(detectWeb(doc,uri) == "book") {
-		uris.push(uri+'&fullmarc=true');
+		if (uri.indexOf("#") !== -1)
+			uris.push(uri.replace(/#/,'&fullmarc=true#'));
+		else
+			uris.push(uri+'&fullmarc=true');
 	} else {
 		var items = Zotero.Utilities.getItemArray(doc, doc, "ipac\.jsp\?.*uri=(?:full|link)=[0-9]|^javascript:buildNewList\\('.*uri%3Dfull%3D[0-9]", "Show details");
 		items = Zotero.selectItems(items);
@@ -64,9 +67,15 @@ function doWeb(doc, url) {
 	
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-	var marc = translator.getTranslatorObject();
-	
-	Zotero.Utilities.processDocuments(uris, function(newDoc) {
+	translator.getTranslatorObject(function (marc) {
+		Zotero.Utilities.processDocuments(uris, function (newDoc) {
+			scrape(newDoc, marc);
+			}, function() { Zotero.done() }, null);
+	});
+	Zotero.wait();
+}   
+
+function scrape(newDoc, marc) {
 		var uri = newDoc.location.href;
 		
 		var namespace = newDoc.documentElement.namespaceURI;
@@ -127,7 +136,7 @@ function doWeb(doc, url) {
 		var newItem = new Zotero.Item();
 		record.translate(newItem);
 		
-		var domain = url.match(/https?:\/\/([^/]+)/);
+		var domain = uri.match(/https?:\/\/([^/]+)/);
 		newItem.repository = domain[1]+" Library Catalog";
 
 		// 20091210 : We try to get a permalink on the record
@@ -150,7 +159,79 @@ function doWeb(doc, url) {
 		}
 
 		newItem.complete();
-	}, function() { Zotero.done() }, null);
-	
-	Zotero.wait();
-}   
+	}
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://siris-libraries.si.edu/ipac20/ipac.jsp?&profile=all&source=~!silibraries&uri=full=3100001~!820431~!0#focus",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Pennsylvania Academy of the Fine Arts",
+						"fieldMode": true
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Eakins",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Susan Macdowell",
+						"lastName": "Eakins",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Benjamin",
+						"lastName": "Eakins",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Charles",
+						"lastName": "Bregler",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Kathleen A",
+						"lastName": "Foster",
+						"creatorType": "contributor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Eakins, Thomas",
+					"Eakins, Susan Macdowell",
+					"Eakins, Benjamin",
+					"Bregler, Charles",
+					"Bregler, Charles",
+					"Library",
+					"McDowell family",
+					"Manuscripts",
+					"Private collections",
+					"Pennsylvania Philadelphia"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "Original record",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"ISBN": "0812282248",
+				"title": "Charles Bregler's Thomas Eakins collection",
+				"place": "Philadelphia, PA",
+				"publisher": "University of Pennsylvania Press",
+				"date": "1989",
+				"numPages": "37",
+				"callNumber": "mfc 000652",
+				"libraryCatalog": "siris-libraries.si.edu Library Catalog"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

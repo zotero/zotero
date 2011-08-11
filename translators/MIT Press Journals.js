@@ -1,14 +1,15 @@
 {
-	"translatorID":"2e43f4a9-d2e2-4112-a6ef-b3528b39b4d2",
-	"translatorType":4,
-	"label":"MIT Press Journals",
-	"creator":"Michael Berkowitz",
-	"target":"http://www.mitpressjournals.org/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "2e43f4a9-d2e2-4112-a6ef-b3528b39b4d2",
+	"label": "MIT Press Journals",
+	"creator": "Michael Berkowitz",
+	"target": "http://www.mitpressjournals.org/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2011-07-13 12:10:55"
 }
 
 function detectWeb(doc, url) {
@@ -67,3 +68,56 @@ function doWeb(doc, url) {
 	}, function() {Zotero.done();});
 	Zotero.wait();
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.mitpressjournals.org/toc/afar/43/4",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.mitpressjournals.org/doi/abs/10.1162/afar.2010.43.4.60",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Verswijver",
+						"firstName": "Gustaaf",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "African Arts Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"url": false,
+						"title": "African Arts Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Removable Hair Caps of Karamoja (Uganda)",
+				"date": "2011/07/13 2010",
+				"DOI": "i: 10.1162/afar.2010.43.4.60</p>",
+				"publicationTitle": "African Arts",
+				"pages": "60-71",
+				"volume": "43",
+				"issue": "4",
+				"publisher": "MIT Press",
+				"ISBN": "0001-9933",
+				"ISSN": "0001-9933",
+				"url": "http://dx.doi.org/10.1162/afar.2010.43.4.60",
+				"libraryCatalog": "MIT Press Journals"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
