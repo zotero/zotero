@@ -47,3 +47,61 @@
 	padding-left: .7em;
 	padding-right: .7em;
 }
+
+#zotero-pane {
+	padding: 0;
+}
+
+#zotero-toolbar {
+	-moz-appearance: none !important;
+	background-image: -moz-linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+	background-color: rgb(207, 219, 236) !important;
+	border-width: 0 0 1px 0;
+	border-style: solid;
+	border-color: #818790;
+	padding-left: 2px;
+}
+
+#zotero-collections-tree, #zotero-items-tree, #zotero-view-item {
+	-moz-appearance: none;
+	border-style: solid;
+	border-color: #818790;
+	margin: 0;
+	padding: 0;
+	-moz-border-top-colors: none;
+	-moz-border-bottom-colors: none;
+	-moz-border-right-colors: none;
+	-moz-border-left-colors: none;
+}
+
+#zotero-collections-tree {
+	border-width: 0 1px 1px 0;
+}
+
+#zotero-items-tree {
+	border-width: 0 1px;
+}
+
+#zotero-view-item {
+	padding: 0 !important;
+	-moz-appearance: none;
+	background-color: white;
+	border-width: 1px 0 0  1px;
+}
+
+#zotero-view-tabbox > tabs {
+	margin-top: -1px;
+}
+
+#zotero-editpane-item-box > scrollbox, #zotero-view-item > tabpanel > vbox, 
+#zotero-editpane-tags > scrollbox, #zotero-editpane-related {
+	padding-top: 5px;
+}
+
+#zotero-editpane-tags > scrollbox {
+	padding-left: 5px;
+}
+
+#zotero-view-item > tabpanel > vbox {
+	padding-left: 5px;
+}
