@@ -506,8 +506,14 @@ Zotero.Schema = new function(){
 		var lastVersion = Zotero.DB.valueQuery(sql);
 		
 		var deleted = extDir.clone();
-		deleted.append('translators');
 		deleted.append('deleted.txt');
+		// In SVN builds, deleted.txt is in the translators directory
+		if (!deleted.exists()) {
+			deleted = extDir.clone();
+			deleted.append('translators');
+			deleted.append('deleted.txt');
+		}
+		
 		deleted = Zotero.File.getContents(deleted);
 		deleted = deleted.match(/^([^\s]+)/gm);
 		var version = deleted.shift();
