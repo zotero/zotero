@@ -1,15 +1,15 @@
 {
-        "translatorID": "57a00950-f0d1-4b41-b6ba-44ff0fc30289",
-        "label": "Google Scholar",
-        "creator": "Simon Kornblith, Frank Bennett",
-        "target": "^https?://scholar\\.google\\.(?:com|com?\\.[a-z]{2}|[a-z]{2}|co\\.[a-z]{2})/scholar(?:_case)*",
-        "minVersion": "2.1.9",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": true,
-        "translatorType": 4,
-        "browserSupport": "gcs",
-        "lastUpdated": "2011-07-02 13:33:19"
+	"translatorID": "57a00950-f0d1-4b41-b6ba-44ff0fc30289",
+	"label": "Google Scholar",
+	"creator": "Simon Kornblith, Frank Bennett",
+	"target": "^https?://scholar\\.google\\.(?:com|com?\\.[a-z]{2}|[a-z]{2}|co\\.[a-z]{2})/scholar(?:_case)*",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-07-04 13:18:22"
 }
 
 /*
@@ -181,6 +181,9 @@ function processFactories(factories) {
 				// Has BibTeX data with title, pass it through to the BibTeX translator
 				attachments = factory.getAttachments("Page");
 				bibtexTranslator.setString(res);
+				bibtexTranslator.setHandler("done", function() {
+					processFactories(factories);
+				});
 				bibtexTranslator.translate();
 			} else {
 				// If BibTeX is empty, this is some kind of case, if anything.

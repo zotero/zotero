@@ -19,7 +19,7 @@ function doWeb(doc, url) { return FW.doWeb(doc, url); }
 FW.Scraper({
   itemType         : 'document',
   detect           : "always",
-  title            : FW.Xpath('//table[@class="cable"]/tbody/tr[2]/td/a').text().prepend("Wikileaks Cable "),
+  title		   : FW.Xpath('//div[@class="pane big"]/h3').text().remove(/^Viewing cable /).prepend("Wikileaks Cable ")
     attachments      : [{
     url: FW.Url(),
     title:  "Wikileaks cable snapshot",

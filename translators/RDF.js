@@ -4,12 +4,13 @@
 	"label":"RDF",
 	"creator":"Simon Kornblith",
 	"target":"rdf",
-	"minVersion":"2.1b2",
+	"minVersion":"2.1.9",
 	"maxVersion":"",
 	"priority":100,
+	"browserSupport":"gcsn",
 	"configOptions":{"dataMode":"rdf/xml"},
 	"inRepository":true,
-	"lastUpdated":"2011-02-03 07:00:12"
+	"lastUpdated":"2011-07-08 04:51:41"
 }
 
 function detectImport() {
@@ -299,7 +300,7 @@ function importItem(newItem, node, type) {
 	}
 	
 	if(!newItem.itemType) {
-		newItem.itemType = Export.defaultUnknownType;
+		newItem.itemType = exports.defaultUnknownType;
 	}
 	
 	// regular author-type creators
@@ -633,10 +634,8 @@ function doImport() {
 	}
 }
 
-/*
+/**
  * Export doImport and defaultUnknownType to other translators
  */
-var Export = {
-	"doImport":doImport,
-	"defaultUnknownType":"book"
-};
+exports.doImport = doImport;
+exports.defaultUnknownType = "book";

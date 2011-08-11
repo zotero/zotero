@@ -1,15 +1,15 @@
 {
-        "translatorID": "ce7a3727-d184-407f-ac12-52837f3361ff",
-        "label": "NYTimes.com",
-        "creator": "Simon Kornblith",
-        "target": "^https?://(?:query\\.nytimes\\.com/search/(?:alternate/)?|(?:select\\.|www\\.)?nytimes\\.com/.)",
-        "minVersion": "1.0.0b3.r1",
-        "maxVersion": "",
-        "priority": 100,
-        "browserSupport":"gcs",
-        "inRepository": true,
-        "translatorType": 4,
-        "lastUpdated": "2011-06-19 21:21:19"
+	"translatorID": "ce7a3727-d184-407f-ac12-52837f3361ff",
+	"label": "NYTimes.com",
+	"creator": "Simon Kornblith",
+	"target": "^https?://(?:query\\.nytimes\\.com/search/(?:alternate/)?|(?:select\\.|www\\.)?nytimes\\.com/.)",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-07-04 01:09:00"
 }
 
 function detectWeb(doc, url) {
@@ -74,7 +74,7 @@ function scrape(doc, url) {
 		}
 		// We want to get everything on one page
 		newItem.attachments.push({url:url.replace(/\.html\??([^/]*)(pagewanted=[^&]*)?([^/]*)$/,".html?pagewanted=all&$1$2"), title:"New York Times Snapshot",
-	 	                          mimeType:"text/html"});
+	 							  mimeType:"text/html"});
 	} else {
 		newItem.url = doc.location.href;
 		var metaTagHTML = doc.getElementsByTagName("meta");
@@ -89,9 +89,9 @@ function scrape(doc, url) {
 		var singlePage = false;
 		if (!newItem.url.match(/\?pagewanted=all/)
 				&& (singlePage = doc.evaluate('//ul[@id="toolsList"]/li[@class="singlePage"]/a', doc, nsResolver,
-		             XPathResult.ANY_TYPE, null).iterateNext())) {
+					 XPathResult.ANY_TYPE, null).iterateNext())) {
 			newItem.attachments.push({url:singlePage.href, title:"New York Times Snapshot",
-	 		                          mimeType:"text/html"});
+	 								  mimeType:"text/html"});
 		} else {
 			newItem.attachments.push({document:doc, title:"New York Times Snapshot"});
 		}
@@ -149,14 +149,15 @@ function doWeb(doc, url) {
 	if(searchResults) {
 		var items = Zotero.Utilities.getItemArray(doc, searchResults, '^http://(?:select\.|www\.)nytimes.com/.*\.html(\\?|$)');
 		
-		items = Zotero.selectItems(items);
-		if(!items) return true;
+		Zotero.selectItems(items, function (items) {
+			if(!items) return true;
 		
-		var urls = [];
-		for(var i in items) urls.push(i);
+			var urls = [];
+			for(var i in items) urls.push(i);
 		
-		Zotero.Utilities.HTTP.doGet(urls, function(text, response, url) { scrape(text, url) }, function() { Zotero.done(); }, null);
-		Zotero.wait();
+			Zotero.Utilities.HTTP.doGet(urls, function(text, response, url) { scrape(text, url) }, function() { Zotero.done(); }, null);
+			Zotero.wait();
+		});
 	} else {
 		scrape(doc);
 	}
@@ -164,323 +165,50 @@ function doWeb(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-    {
-        "type": "web",
-        "url": "https://www.nytimes.com/2010/08/21/education/21harvard.html?scp=1&sq=marc%20hauser&st=cse&gwh=4B8CBC2383B24F22FED81E754DFA960B",
-        "items": [
-            {
-                "itemType": "newspaperArticle",
-                "creators": [
-                    {
-                        "firstName": "Nicholas",
-                        "lastName": "Wade",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [
-                    "Science and Technology",
-                    "Research",
-                    "Ethics",
-                    "Hauser, Marc D",
-                    "Harvard University"
-                ],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "document": "[object]",
-                        "title": "New York Times Snapshot"
-                    }
-                ],
-                "publicationTitle": "The New York Times",
-                "ISSN": "0362-4331",
-                "url": "https://www.nytimes.com/2010/08/21/education/21harvard.html?scp=1&sq=marc%20hauser&st=cse&gwh=4B8CBC2383B24F22FED81E754DFA960B",
-                "date": "2010-08-20",
-                "title": "Harvard Finds Marc Hauser Guilty of Scientific Misconduct",
-                "section": "Education",
-                "accessionNumber": "1248068890906",
-                "libraryCatalog": "NYTimes.com",
-                "accessDate": "CURRENT_TIMESTAMP"
-            }
-        ]
-    },
-    {
-        "type": "web",
-        "url": "http://query.nytimes.com/search/query?frow=0&n=10&srcht=a&query=marc+hauser&srchst=nyt&submit.x=18&submit.y=12&hdlquery=&bylquery=&daterange=period&mon1=01&day1=01&year1=2010&mon2=01&day2=18&year2=2011",
-        "items": [
-            {
-                "itemType": "newspaperArticle",
-                "creators": [
-                    {
-                        "firstName": "Nicholas",
-                        "lastName": "Wade",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [
-                    "Science and Technology",
-                    "Research",
-                    "Ethics",
-                    "Hauser, Marc D",
-                    "Harvard University"
-                ],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "url": "http://www.nytimes.com/2010/08/21/education/21harvard.html?pagewanted=all&scp=1&sq=marc+hauser&st=nyt",
-                        "title": "New York Times Snapshot",
-                        "mimeType": "text/html"
-                    }
-                ],
-                "publicationTitle": "The New York Times",
-                "ISSN": "0362-4331",
-                "url": "http://www.nytimes.com/2010/08/21/education/21harvard.html?scp=1&sq=marc+hauser&st=nyt",
-                "date": "2010-08-20",
-                "title": "Harvard Finds Marc Hauser Guilty of Scientific Misconduct",
-                "section": "Education",
-                "accessionNumber": "1248068890906",
-                "libraryCatalog": "NYTimes.com"
-            },
-            {
-                "itemType": "newspaperArticle",
-                "creators": [
-                    {
-                        "firstName": "Nicholas",
-                        "lastName": "Wade",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [
-                    "Laboratories and Scientific Equipment",
-                    "Research",
-                    "Ethics",
-                    "Hauser, Marc D",
-                    "Harvard University"
-                ],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "url": "http://www.nytimes.com/2010/08/14/education/14harvard.html?pagewanted=all&scp=3&sq=marc+hauser&st=nyt",
-                        "title": "New York Times Snapshot",
-                        "mimeType": "text/html"
-                    }
-                ],
-                "publicationTitle": "The New York Times",
-                "ISSN": "0362-4331",
-                "url": "http://www.nytimes.com/2010/08/14/education/14harvard.html?scp=3&sq=marc+hauser&st=nyt",
-                "date": "2010-08-13",
-                "title": "In Inquiry at Marc Hauser’s Harvard Lab, a Raid and Then a 3-Year Wait",
-                "section": "Education",
-                "accessionNumber": "1247468623821",
-                "libraryCatalog": "NYTimes.com"
-            },
-            {
-                "itemType": "newspaperArticle",
-                "creators": [
-                    {
-                        "firstName": "Nicholas",
-                        "lastName": "Wade",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [
-                    "Hauser, Marc D",
-                    "Harvard University",
-                    "Office of Research Integrity"
-                ],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "url": "http://www.nytimes.com/2010/08/13/education/13harvard.html?pagewanted=all&scp=4&sq=marc+hauser&st=nyt",
-                        "title": "New York Times Snapshot",
-                        "mimeType": "text/html"
-                    }
-                ],
-                "publicationTitle": "The New York Times",
-                "ISSN": "0362-4331",
-                "url": "http://www.nytimes.com/2010/08/13/education/13harvard.html?scp=4&sq=marc+hauser&st=nyt",
-                "date": "2010-08-12",
-                "title": "Inquiry on Harvard Lab Threatens Ripple Effect",
-                "section": "Education",
-                "accessionNumber": "1247468617115",
-                "libraryCatalog": "NYTimes.com"
-            },
-            {
-                "itemType": "newspaperArticle",
-                "creators": [
-                    {
-                        "firstName": "Nicholas",
-                        "lastName": "Wade",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [
-                    "Monkeys and Apes",
-                    "Science and Technology",
-                    "Ethics",
-                    "Hauser, Marc D",
-                    "University of Virginia"
-                ],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "url": "http://www.nytimes.com/2010/08/28/science/28harvard.html?pagewanted=all&scp=5&sq=marc+hauser&st=nyt",
-                        "title": "New York Times Snapshot",
-                        "mimeType": "text/html"
-                    }
-                ],
-                "publicationTitle": "The New York Times",
-                "ISSN": "0362-4331",
-                "url": "http://www.nytimes.com/2010/08/28/science/28harvard.html?scp=5&sq=marc+hauser&st=nyt",
-                "date": "2010-08-27",
-                "title": "Marc Hauser May Have Fabricated Data at Harvard Lab",
-                "section": "Science",
-                "accessionNumber": "1248068931442",
-                "libraryCatalog": "NYTimes.com"
-            },
-            {
-                "itemType": "newspaperArticle",
-                "creators": [
-                    {
-                        "firstName": "Nicholas",
-                        "lastName": "Wade",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [
-                    "Psychology and Psychologists",
-                    "Monkeys and Apes",
-                    "Science and Technology",
-                    "Hauser, Marc D",
-                    "Harvard University"
-                ],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "url": "http://www.nytimes.com/2010/10/26/science/26hauser.html?pagewanted=all&scp=7&sq=marc+hauser&st=nyt",
-                        "title": "New York Times Snapshot",
-                        "mimeType": "text/html"
-                    }
-                ],
-                "publicationTitle": "The New York Times",
-                "ISSN": "0362-4331",
-                "url": "http://www.nytimes.com/2010/10/26/science/26hauser.html?scp=7&sq=marc+hauser&st=nyt",
-                "date": "2010-10-25",
-                "title": "Harvard Case Against Marc Hauser Is Hard to Define",
-                "section": "Science",
-                "accessionNumber": "1248069238889",
-                "libraryCatalog": "NYTimes.com"
-            },
-            {
-                "itemType": "newspaperArticle",
-                "creators": [
-                    {
-                        "firstName": "Nicholas",
-                        "lastName": "Wade",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [
-                    "Research",
-                    "Colleges and Universities",
-                    "Ethics",
-                    "Hauser, Marc",
-                    "Harvard University"
-                ],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "url": "http://www.nytimes.com/2010/08/12/education/12harvard.html?pagewanted=all&scp=8&sq=marc+hauser&st=nyt",
-                        "title": "New York Times Snapshot",
-                        "mimeType": "text/html"
-                    }
-                ],
-                "publicationTitle": "The New York Times",
-                "ISSN": "0362-4331",
-                "url": "http://www.nytimes.com/2010/08/12/education/12harvard.html?scp=8&sq=marc+hauser&st=nyt",
-                "date": "2010-08-11",
-                "title": "Marc Hauser, Harvard Academic, Faces Inquiry",
-                "section": "Education",
-                "accessionNumber": "1247468609178",
-                "libraryCatalog": "NYTimes.com"
-            },
-            {
-                "itemType": "newspaperArticle",
-                "creators": [
-                    {
-                        "firstName": "David",
-                        "lastName": "Brooks",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [
-                    "Ethics",
-                    "Bloom, Paul",
-                    "Haidt, Jonathan",
-                    "Phelps, Elizabeth",
-                    "Greene, Joshua",
-                    "Edge Foundation"
-                ],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "url": "http://www.nytimes.com/2010/07/23/opinion/23brooks.html?pagewanted=all&scp=9&sq=marc+hauser&st=nyt",
-                        "title": "New York Times Snapshot",
-                        "mimeType": "text/html"
-                    }
-                ],
-                "publicationTitle": "The New York Times",
-                "ISSN": "0362-4331",
-                "url": "http://www.nytimes.com/2010/07/23/opinion/23brooks.html?scp=9&sq=marc+hauser&st=nyt",
-                "date": "2010-07-22",
-                "title": "The Moral Naturalists",
-                "section": "Opinion",
-                "accessionNumber": "1247468494988",
-                "libraryCatalog": "NYTimes.com"
-            },
-            {
-                "itemType": "newspaperArticle",
-                "creators": [
-                    {
-                        "firstName": "Claudia",
-                        "lastName": "Dreifus",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [
-                    "Dolphins and Porpoises",
-                    "Brain",
-                    "Psychology and Psychologists",
-                    "Whales and Whaling",
-                    "Science and Technology",
-                    "Reiss, Diana"
-                ],
-                "seeAlso": [],
-                "attachments": [
-                    {
-                        "url": "http://www.nytimes.com/2010/09/21/science/21conversation.html?pagewanted=all&scp=10&sq=marc+hauser&st=nyt",
-                        "title": "New York Times Snapshot",
-                        "mimeType": "text/html"
-                    }
-                ],
-                "publicationTitle": "The New York Times",
-                "ISSN": "0362-4331",
-                "url": "http://www.nytimes.com/2010/09/21/science/21conversation.html?scp=10&sq=marc+hauser&st=nyt",
-                "date": "2010-09-20",
-                "title": "Studying the Big-Brained Dolphin",
-                "section": "Science",
-                "accessionNumber": "1248069061708",
-                "libraryCatalog": "NYTimes.com"
-            }
-        ]
-    }
+	{
+		"type": "web",
+		"url": "https://www.nytimes.com/2010/08/21/education/21harvard.html?scp=1&sq=marc%20hauser&st=cse&gwh=4B8CBC2383B24F22FED81E754DFA960B",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Nicholas",
+						"lastName": "Wade",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Science and Technology",
+					"Research",
+					"Ethics",
+					"Hauser, Marc D",
+					"Harvard University"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"document": "[object]",
+						"title": "New York Times Snapshot"
+					}
+				],
+				"publicationTitle": "The New York Times",
+				"ISSN": "0362-4331",
+				"url": "https://www.nytimes.com/2010/08/21/education/21harvard.html?scp=1&sq=marc%20hauser&st=cse&gwh=4B8CBC2383B24F22FED81E754DFA960B",
+				"date": "2010-08-20",
+				"title": "Harvard Finds Marc Hauser Guilty of Scientific Misconduct",
+				"section": "Education",
+				"accessionNumber": "1248068890906",
+				"libraryCatalog": "NYTimes.com",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://query.nytimes.com/search/query?frow=0&n=10&srcht=a&query=marc+hauser&srchst=nyt&submit.x=18&submit.y=12&hdlquery=&bylquery=&daterange=period&mon1=01&day1=01&year1=2010&mon2=01&day2=18&year2=2011",
+		"items": "multiple"
+	}
 ]
 /** END TEST CASES **/

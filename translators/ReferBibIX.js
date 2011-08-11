@@ -7,10 +7,11 @@
 	"minVersion":"1.0.0b4.r5",
 	"maxVersion":"",
 	"priority":100,
+	"browserSupport":"gcsn",
 	"configOptions":{"dataMode":"line"},
 	"displayOptions":{"exportCharset":"UTF-8"},
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-07-08 04:51:41"
 }
 
 function detectImport() {

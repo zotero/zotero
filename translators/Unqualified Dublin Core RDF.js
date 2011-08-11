@@ -7,9 +7,10 @@
 	"minVersion":"1.0.0b3.r1",
 	"maxVersion":"",
 	"priority":100,
+	"browserSupport":"gcsn",
 	"configOptions":{"dataMode":"rdf/xml"},
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-07-08 04:51:41"
 }
 
 function doExport() {

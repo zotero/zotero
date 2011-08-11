@@ -1,14 +1,14 @@
 {
-	"translatorID":"d71e9b6d-2baa-44ed-acb4-13fe2fe592c0",
-	"translatorType":4,
-	"label":"Google Patents",
-	"creator":"Adam Crymble",
-	"target":"http://www\\.google.*/patents",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-07-09 07:46:31"
+	"translatorID": "d71e9b6d-2baa-44ed-acb4-13fe2fe592c0",
+	"label": "Google Patents",
+	"creator": "Adam Crymble",
+	"target": "^http://www\\.google.*/patents",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"lastUpdated": "2011-07-16 14:00:40"
 }
 
 function detectWeb(doc, url) {
@@ -22,7 +22,6 @@ function detectWeb(doc, url) {
 	} else if(doc.location.href.match(/[?&]id=/)) {
 		return "patent";
 	}
-	
 }
 
 //Google Patents Translator. Code by Adam Crymble
@@ -69,8 +68,8 @@ function scrape(doc, url) {
 	*/
 	//associate headings with contents.
 	
-	//extra field\
-	//newItem.extra = '';
+	//extra field
+	newItem.extra = '';
 
 	for (fieldTitle in dataTags) {
 		Zotero.debug(fieldTitle);
@@ -96,28 +95,27 @@ function scrape(doc, url) {
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(dataTags["Inventor"], "inventor"));
 		}
 		
-		if (fieldTitle == "U.S. Classification"  ) {
-			newItem.extra += "U.S. Classification: " + dataTags["U.S. Classification"]+"\n";
+		if (fieldTitle == "Current U.S. Classification"  ) {
+			newItem.extra += "U.S. Classification: " + dataTags["Current U.S. Classification"]+"\n";
 		} else if (fieldTitle == "International Classification" ) {
 			newItem.extra += "International Classification: " + dataTags["International Classification"]+"\n";
-		} else if (fieldTitle == "Filing date" ) {
-			newItem.extra += "Filing Date: " + dataTags["Filing date"]+"\n";
 		}	else if (fieldTitle == "Publication number" ) {
 			newItem.extra += "Publication number: " +dataTags["Publication number"]+"\n";
 		}
 	}
 
- 
-
 	associateData (newItem, dataTags, "Patent number", "patentNumber");
 	associateData (newItem, dataTags, "Issue date", "date");
+	associateData (newItem, dataTags, "Filing date", "filingDate");
 	associateData (newItem, dataTags, "Assignees", "assignee");
 	associateData (newItem, dataTags, "Assignee", "assignee");
 	associateData (newItem, dataTags, "Abstract", "abstractNote");
 	associateData (newItem, dataTags, "Application number", "applicationNumber");
 	
-	newItem.title = doc.evaluate('//h1[@class="title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	newItem.url = doc.location.href;
+	var pdf = doc.evaluate('//div[@class="g-button-basic"]/span/span/a[contains(@href,"/download/)]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if (pdf) newItem.attachments.push({url:pdf.href, title:"Google Patents PDF", mimeType:"application/pdf"});
+	newItem.title = doc.evaluate('//h1[@class="gb-volume-title"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	newItem.url = doc.location.href.replace(/(^[^\?]*\?id=[a-zA-Z0-9]+).*/,"$1");
 
 	newItem.complete();
 }
@@ -125,17 +123,55 @@ function scrape(doc, url) {
 function doWeb(doc, url) {
 	var host = 'http://' + doc.location.host + "/";
 	
-	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = Zotero.Utilities.getItemArray(doc, doc, /\/patents\/about\?id=/);
-		items = Zotero.selectItems(items);
-		if(!items) return true;
-		for (var i in items) {
-			articles.push(i);
-		}	
+		var items = Zotero.Utilities.getItemArray(doc, doc, /\/patents(?:\/about)?\?id=/);
+		Zotero.selectItems(items, function (items) {
+			var articles = new Array();
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
+			Zotero.wait();
+		});			
 	} else {
-		articles.push(url);
+		scrape(doc);
 	}
-	Zotero.wait();
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.google.com/patents/about?id=j5NSAAAAEBAJ",
+		"items": [
+			{
+				"itemType": "patent",
+				"creators": [
+					{
+						"firstName": "T.",
+						"lastName": "SHOOK",
+						"creatorType": "inventor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"extra": "U.S. Classification: 215/273",
+				"patentNumber": "1065211",
+				"date": "Jun 17, 1913",
+				"filingDate": "Aug 3, 1912",
+				"title": "BOTTLE-STOPPER",
+				"url": "http://www.google.com/patents/about?id=j5NSAAAAEBAJ",
+				"libraryCatalog": "Google Patents"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.google.com/search?tbm=pts&tbo=1&hl=en&q=book&btnG=Search+Patents",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

@@ -1,14 +1,14 @@
 {
-	"translatorID":"4fd6b89b-2316-2dc4-fd87-61a97dd941e8",
-	"label":"Library Catalog (InnoPAC)",
-	"creator":"Simon Kornblith and Michael Berkowitz",
-	"target":"(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+(~S[0-9])?|/search/q\\?)",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":200,
-	"inRepository":true,
-	"translatorType":4,
-	"lastUpdated":"2010-09-28 06:55:00"
+	"translatorID": "4fd6b89b-2316-2dc4-fd87-61a97dd941e8",
+	"label": "Library Catalog (InnoPAC)",
+	"creator": "Simon Kornblith and Michael Berkowitz",
+	"target": "(search~|\\/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=b[0-9]+(~S[0-9])?|/search/q\\?)",
+	"minVersion": "1.0.0b3.r1",
+	"maxVersion": "",
+	"priority": 200,
+	"inRepository": true,
+	"translatorType": 4,
+	"lastUpdated": "2011-07-22 17:52:39"
 }
 
 function detectWeb(doc, url) {
@@ -56,7 +56,7 @@ function detectWeb(doc, url) {
 		}
 	}
 	// Next, look for the MARC button	
-	xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
+	xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]] | //a[span/img[@src="/screens/marc_display.gif" or @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
 	elmt = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if(elmt) {
 		return "book";
@@ -172,8 +172,8 @@ function doWeb(doc, url) {
 		if (m) {
 			newUri = uri.replace(/frameset/, "marc");
 		} else {
-			var xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
-			newUri = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.replace(/frameset/, "marc");;
+			var xpath = '//a[img[@src="/screens/marc_display.gif" or @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]] | //a[span/img[@src="/screens/marc_display.gif" or @src="/screens/ico_marc.gif" or @src="/screens/marcdisp.gif" or starts-with(@alt, "MARC ") or @src="/screens/regdisp.gif" or @alt="REGULAR RECORD DISPLAY"]]';
+			newUri = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().href.replace(/frameset/, "marc");
 		}
 		pageByPage(marc, [newUri]);
 	} else {	// Search results page
@@ -186,7 +186,7 @@ function doWeb(doc, url) {
 		var firstURL = false;
 		
 		var tableRows = doc.evaluate('//table[@class="browseScreen"]//tr[@class="browseEntry" or @class="briefCitRow" or td/input[@type="checkbox"] or td[contains(@class,"briefCitRow")]]',
-		                             doc, nsResolver, XPathResult.ANY_TYPE, null);
+									 doc, nsResolver, XPathResult.ANY_TYPE, null);
 		// Go through table rows
 		var i = 0;
 		while(tableRow = tableRows.iterateNext()) {
@@ -228,3 +228,50 @@ function doWeb(doc, url) {
 
 	Zotero.wait();
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://books.luther.edu/record=b2115431~S9",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "G. W",
+						"lastName": "Kimura",
+						"creatorType": "contributor"
+					},
+					{
+						"lastName": "ebrary, Inc",
+						"fieldMode": true
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Alaska",
+					"History",
+					"Alaska",
+					"Anniversaries, etc",
+					"Alaska",
+					"Social conditions",
+					"Alaska",
+					"Economic conditions",
+					"Electronic books"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Alaska at 50 the past, present, and next fifty years of statehood",
+				"place": "Fairbanks",
+				"publisher": "University of Alaska Press",
+				"date": "2009",
+				"numPages": "285",
+				"callNumber": "F904 .A477 2009eb",
+				"libraryCatalog": "books.luther.edu Library Catalog"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

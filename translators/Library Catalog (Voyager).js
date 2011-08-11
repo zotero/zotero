@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-01 02:14:28"
+	"lastUpdated": "2011-07-04 13:09:56"
 }
 
 function detectWeb(doc, url) {
@@ -184,78 +184,77 @@ function doWeb(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-    {
-        "type": "web",
-        "url": "http://catalog.loc.gov/cgi-bin/Pwebrecon.cgi?DB=local&Search_Arg=zotero&Search_Code=GKEY^*&CNT=100&hist=1&type=quick",
-        "items": [
-            {
-                "itemType": "book",
-                "creators": [
-                    {
-                        "firstName": "Jason",
-                        "lastName": "Puckett",
-                        "creatorType": "author"
-                    }
-                ],
-                "notes": [],
-                "tags": [
-                    "Zotero",
-                    "Bibliographical citations",
-                    "Computer programs",
-                    "Citation of electronic information resources",
-                    "Computer programs"
-                ],
-                "seeAlso": [],
-                "attachments": [],
-                "ISBN": "9780838985892",
-                "title": "Zotero: A Guide for Librarians, Researchers, and Educators",
-                "place": "Chicago",
-                "publisher": "Association of College and Research Libraries",
-                "date": "2011",
-                "callNumber": "PN171.F56 P83 2011",
-                "libraryCatalog": "Library of Congress Catalog",
-                "shortTitle": "Zotero"
-            },
-            {
-                "itemType": "book",
-                "creators": [
-                    {
-                        "lastName": "IAMSLIC Conference",
-                        "fieldMode": true
-                    },
-                    {
-                        "firstName": "Dorothy",
-                        "lastName": "Barr",
-                        "creatorType": "contributor"
-                    },
-                    {
-                        "lastName": "International Association of Aquatic and Marine Science Libraries and Information Centers",
-                        "fieldMode": true
-                    }
-                ],
-                "notes": [],
-                "tags": [
-                    "Marine science libraries",
-                    "Marine sciences",
-                    "Information services",
-                    "Aquatic science libraries",
-                    "Aquatic sciences",
-                    "Information services",
-                    "Fishery libraries",
-                    "Fisheries",
-                    "Information services"
-                ],
-                "seeAlso": [],
-                "attachments": [],
-                "title": "Netting Knowledge: Two Hemispheres/One World: Proceedings of the 36th IAMSLIC Annual Conference",
-                "place": "Fort Pierce, Fla",
-                "publisher": "IAMSLIC",
-                "date": "2011",
-                "callNumber": "Z675.M35 I2 2010",
-                "libraryCatalog": "Library of Congress Catalog",
-                "shortTitle": "Netting Knowledge"
-            }
-        ]
-    }
+	{
+		"type": "web",
+		"url": "http://catalog.loc.gov/cgi-bin/Pwebrecon.cgi?DB=local&Search_Arg=zotero&Search_Code=GKEY^*&CNT=100&hist=1&type=quick",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://i-share.carli.illinois.edu/nby/cgi-bin/Pwebrecon.cgi?DB=local&v1=1&BBRecID=790862",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Francisco",
+						"lastName": "Xarque",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Masseta, Simon",
+					"Cuellar y Mosquera, Gabriel de",
+					"Missions",
+					"Paraguay"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Insignes missioneros de la Compañia de Jesus en la prouincia del Paraguay: estado presente de sus missiones en Tucuman, Paraguay, y Rio de la Plata, que comprehende su distrito",
+				"place": "En Pamplona",
+				"publisher": "Por Juan Micòn, Impressor",
+				"date": "1687",
+				"numPages": "24",
+				"callNumber": "F2681 .X3",
+				"libraryCatalog": "i-share.carli.illinois.edu Library Catalog",
+				"shortTitle": "Insignes missioneros de la Compañia de Jesus en la prouincia del Paraguay"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://catalog.loc.gov/cgi-bin/Pwebrecon.cgi?v1=1&ti=1,1&Search%5FArg=zotero&Search%5FCode=GKEY%5E%2A&CNT=100&type=quick&PID=UiW_ZKCUShsRhZ5pIpsx_-5hND3W&SEQ=20110704130645&SID=1",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Jason",
+						"lastName": "Puckett",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Zotero",
+					"Bibliographical citations",
+					"Computer programs",
+					"Citation of electronic information resources",
+					"Computer programs"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "9780838985892",
+				"title": "Zotero: a guide for librarians, researchers, and educators",
+				"place": "Chicago",
+				"publisher": "Association of College and Research Libraries",
+				"date": "2011",
+				"callNumber": "PN171.F56 P83 2011",
+				"libraryCatalog": "Library of Congress Catalog",
+				"shortTitle": "Zotero"
+			}
+		]
+	}
 ]
 /** END TEST CASES **/
