@@ -1145,7 +1145,7 @@ if(appInfo.platformVersion[0] >= 2) {
 	 */
 	function logError(err) {
 		log(err.message ? err.message : err.toString(), "error",
-			err.fileName ? err.fileName : null, null,
+			err.fileName ? err.fileName : (err.filename ? err.filename : null), null,
 			err.lineNumber ? err.lineNumber : null, null);
 	}
 	
