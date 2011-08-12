@@ -352,7 +352,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 		
 		var pageShowCalled = false;
 		var cookieSandbox = new Zotero.CookieSandbox(browser, data["url"], data["cookie"]);
-		browser.addEventListener("DOMContentLoaded", function() {
+		browser.addEventListener("pageshow", function() {
 			if(browser.contentDocument.location.href == "about:blank") return;
 			if(pageShowCalled) return;
 			pageShowCalled = true;
