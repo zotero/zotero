@@ -967,7 +967,7 @@ function ChromeExtensionHandler() {
 	
 	ConnectorChannel.prototype.contentCharset = "UTF-8";
 	ConnectorChannel.prototype.contentType = "text/html";
-	ConnectorChannel.prototype.notificationCallbacks = {};
+	ConnectorChannel.prototype.notificationCallbacks = null;
 	ConnectorChannel.prototype.securityInfo = null;
 	ConnectorChannel.prototype.status = 0;
 	ConnectorChannel.prototype.loadGroup = null;
@@ -978,10 +978,12 @@ function ChromeExtensionHandler() {
 	ConnectorChannel.prototype.__defineSetter__("originalURI", function() { });
 	
 	ConnectorChannel.prototype.asyncOpen = function(streamListener, context) {
+		if(this.loadGroup) this.loadGroup.addRequest(this, null);
 		streamListener.onStartRequest(this, context);
 		streamListener.onDataAvailable(this, context, this._stream, 0, this.contentLength);
 		streamListener.onStopRequest(this, context, this.status);
 		this._isPending = false;
+		if(this.loadGroup) this.loadGroup.removeRequest(this, null, 0);
 	}
 	
 	ConnectorChannel.prototype.isPending = function() {
@@ -994,13 +996,9 @@ function ChromeExtensionHandler() {
 		if(this._stream) this._stream.close();
 	}
 	
-	ConnectorChannel.prototype.suspend = function(status) {
-		this.status = status;
-	}
+	ConnectorChannel.prototype.suspend = function() {}
 	
-	ConnectorChannel.prototype.resume = function(status) {
-		this.status = status;
-	}
+	ConnectorChannel.prototype.resume = function() {}
 	
 	ConnectorChannel.prototype.open = function() {
 		return this._stream;
