@@ -66,10 +66,12 @@ Zotero.Repo = new function() {
 			}
 			
 			// then try repo
-			Zotero.HTTP.doGet(ZOTERO_CONFIG.REPOSITORY_URL+"/code/"+ZOTERO_CONFIG.REPOSITORY_CHANNEL+"/"+translatorID, function(xmlhttp) {
-				_haveCode(xmlhttp.status === 200 ? xmlhttp.responseText : false, translatorID,
-					Zotero.Repo.SOURCE_REPO, callback);
-			});
+			Zotero.HTTP.doGet(ZOTERO_CONFIG.REPOSITORY_URL+"/code/"+translatorID+"?version="+Zotero.version,
+				function(xmlhttp) {
+					_haveCode(xmlhttp.status === 200 ? xmlhttp.responseText : false, translatorID,
+						Zotero.Repo.SOURCE_REPO, callback);
+				}
+			);
 		});
 	};
 	
@@ -135,7 +137,7 @@ Zotero.Repo = new function() {
 	 * Retrieve metadata from repository
 	 */
 	function _updateFromRepo(reset, callback) {
-		var url = ZOTERO_CONFIG.REPOSITORY_URL+"/metadata?last="+
+		var url = ZOTERO_CONFIG.REPOSITORY_URL+"/metadata?version="+Zotero.version+"&last="+
 				(reset ? "0" : Zotero.Prefs.get("connector.repo.lastCheck.repoTime"));
 		
 		Zotero.HTTP.doGet(url, function(xmlhttp) {

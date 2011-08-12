@@ -243,7 +243,9 @@ Zotero.Translators = new function() {
 		if(!newMetadata.length) return;
 		
 		if(reset) {
-			var serializedTranslators = newMetadata;
+			var serializedTranslators = newMetadata.filter(function(translator) {
+				return !translator.deleted;
+			});
 		} else {
 			var serializedTranslators = [];
 			var hasChanged = false;
@@ -252,7 +254,10 @@ Zotero.Translators = new function() {
 			for(var i in newMetadata) {
 				var newTranslator = newMetadata[i];
 				
-				if(_translators.hasOwnProperty(newTranslator.translatorID)) {
+				if(newTranslator.deleted) {
+					// handle translator deletions
+					delete _translators[newTranslator.translatorID];
+				} else if(_translators.hasOwnProperty(newTranslator.translatorID)) {
 					var oldTranslator = _translators[newTranslator.translatorID];
 					
 					// check whether translator has changed
@@ -395,7 +400,7 @@ Zotero.Translator.prototype.init = function(info) {
 	for(var i in TRANSLATOR_REQUIRED_PROPERTIES) {
 		var property = TRANSLATOR_REQUIRED_PROPERTIES[i];
 		if(info[property] === undefined) {
-			this.logError('Missing property "'+property+'" in translator metadata JSON object in ' + info.label);
+			Zotero.logError(new Error('Missing property "'+property+'" in translator metadata JSON object in ' + info.label));
 			haveMetadata = false;
 			break;
 		} else {
