@@ -29,7 +29,6 @@ const ZOTERO_CONFIG = {
 	REPOSITORY_URL: 'https://repo.zotero.org/repo',
 	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
 	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
-	REPOSITORY_CHANNEL: 'trunk',
 	BASE_URI: 'http://zotero.org/',
 	WWW_BASE_URL: 'http://www.zotero.org/',
 	SYNC_URL: 'https://sync.zotero.org/',
@@ -2275,10 +2274,13 @@ Zotero.Browser = new function() {
 		hiddenBrowser.setAttribute('disablehistory', 'true');
 		win.document.documentElement.appendChild(hiddenBrowser);
 		// Disable some features
+		hiddenBrowser.docShell.allowAuth = false;
+		hiddenBrowser.docShell.allowDNSPrefetch = false;
 		hiddenBrowser.docShell.allowImages = false;
 		hiddenBrowser.docShell.allowJavascript = false;
 		hiddenBrowser.docShell.allowMetaRedirects = false;
 		hiddenBrowser.docShell.allowPlugins = false;
+		hiddenBrowser.docShell.canExecuteScripts = false;
 		Zotero.debug("created hidden browser ("
 			+ (win.document.getElementsByTagName('browser').length - 1) + ")");
 		return hiddenBrowser;
