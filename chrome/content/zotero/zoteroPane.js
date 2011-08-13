@@ -2993,7 +2993,18 @@ var ZoteroPane = new function()
 	
 	
 	this.addItemFromPage = function (itemType, saveSnapshot, row) {
-		if (!this.canEdit(row)) {
+		if(Zotero.isConnector) {
+			// In connector, save page via Zotero Standalone
+			var doc = window.content.document;
+			Zotero.Connector.callMethod("saveSnapshot", {"url":doc.location.toString(),
+					"cookie":doc.cookie, "html":doc.documentElement.innerHTML},
+			function(returnValue, status) {
+				_showPageSaveStatus(doc.title);
+			});
+			return;
+		}
+		
+		if ((row || (this.collectionsView && this.collectionsView.selection)) && !this.canEdit(row)) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -3001,6 +3012,17 @@ var ZoteroPane = new function()
 		return this.addItemFromDocument(window.content.document, itemType, saveSnapshot, row);
 	}
 	
+	/**
+	 * Shows progress dialog for a webpage/snapshot save request
+	 */
+	function _showPageSaveStatus(title) {
+		var progressWin = new Zotero.ProgressWindow();
+		progressWin.changeHeadline(Zotero.getString('ingester.scraping'));
+		var icon = 'chrome://zotero/skin/treeitem-webpage.png';
+		progressWin.addLines(title, icon)
+		progressWin.show();
+		progressWin.startCloseTimer();
+	}
 	
 	/**
 	 * @param	{Document}			doc
@@ -3009,12 +3031,7 @@ var ZoteroPane = new function()
 	 *														regardless of automaticSnapshots pref
 	 */
 	this.addItemFromDocument = function (doc, itemType, saveSnapshot, row) {
-		var progressWin = new Zotero.ProgressWindow();
-		progressWin.changeHeadline(Zotero.getString('ingester.scraping'));
-		var icon = 'chrome://zotero/skin/treeitem-webpage.png';
-		progressWin.addLines(doc.title, icon)
-		progressWin.show();
-		progressWin.startCloseTimer();
+		_showPageSaveStatus(doc.title);
 		
 		// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
 		saveSnapshot = saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'));
@@ -3051,11 +3068,11 @@ var ZoteroPane = new function()
 				}
 				
 				// Currently selected row
-				if (row === undefined) {
+				if (row === undefined && this.collectionsView && this.collectionsView.selection) {
 					row = this.collectionsView.selection.currentIndex;
 				}
 				
-				if (!this.canEdit(row)) {
+				if (row && !this.canEdit(row)) {
 					this.displayCannotEditLibraryMessage();
 					return;
 				}
