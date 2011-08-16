@@ -310,7 +310,7 @@ Zotero.Server.Connector.SaveItem.prototype = {
 			if(returnValue) {
 				try {
 					for each(var item in data) {
-						if(collection) collection.addItem(savedItem.id);
+						if(collection) collection.addItem(item.id);
 					}
 					sendResponseCallback(201);
 				} catch(e) {
