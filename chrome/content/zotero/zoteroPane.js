@@ -2637,15 +2637,19 @@ var ZoteroPane = new function()
 				return;
 			}
 			
-			if (Zotero.isStandalone && uri.match(/^https?/)) {
-				var io = Components.classes['@mozilla.org/network/io-service;1']
-							.getService(Components.interfaces.nsIIOService);
-				var uri = io.newURI(uri, null, null);
-				var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
-							.getService(Components.interfaces.nsIExternalProtocolService)
-							.getProtocolHandlerInfo('http');
-				handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
-				handler.launchWithURI(uri, null);
+			if (Zotero.isStandalone) {
+				if(uri.match(/^https?/)) {
+					var io = Components.classes['@mozilla.org/network/io-service;1']
+								.getService(Components.interfaces.nsIIOService);
+					var uri = io.newURI(uri, null, null);
+					var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
+								.getService(Components.interfaces.nsIExternalProtocolService)
+								.getProtocolHandlerInfo('http');
+					handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
+					handler.launchWithURI(uri, null);
+				} else {
+					ZoteroStandalone.openInViewer(uri);
+				}
 				return;
 			}
 			
