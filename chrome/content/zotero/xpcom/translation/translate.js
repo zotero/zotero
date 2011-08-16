@@ -349,7 +349,7 @@ Zotero.Translate.Sandbox = {
 					
 					Zotero.Translators.get(translation.translator[0], haveTranslatorFunction);
 					if(Zotero.isConnector && Zotero.isFx && !callback) {
-						while(!sandbox) {
+						while(!sandbox && translate._currentState) {
 							Zotero.mainThread.processNextEvent(true);
 						}
 					}
