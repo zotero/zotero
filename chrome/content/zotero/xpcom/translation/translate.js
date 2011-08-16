@@ -563,12 +563,12 @@ Zotero.Translate.Sandbox = {
 		 * @param {SandboxCollection} collection
 		 */
 		"_collectionDone":function(translate, collection) {
-			if(this._libraryID == false) {
-				this.newCollections.push(collection);
+			if(translate._libraryID == false) {
+				translate.newCollections.push(collection);
 				translate._runHandler("collectionDone", collection);
 			} else {
 				var newCollection = translate._itemSaver.saveCollection(collection);
-				this.newCollections.push(newCollection);
+				translate.newCollections.push(newCollection);
 				translate._runHandler("collectionDone", newCollection);
 			}
 		},
