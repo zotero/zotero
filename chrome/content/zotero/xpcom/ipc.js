@@ -73,10 +73,17 @@ Zotero.IPC = new function() {
 			} else if(msg === "checkInitComplete") {
 				// The Firefox extension sends this to Standalone to tell Standalone to send an
 				// initComplete message when it is fully initialized
-				while(!Zotero.initialized) {
-					Zotero.mainThread.processNextEvent(true)
+				if(Zotero.initialized) {
+					Zotero.IPC.broadcast("initComplete");
+				} else {
+					var observerService = Components.classes["@mozilla.org/observer-service;1"]
+						.getService(Components.interfaces.nsIObserverService);
+					var _loadObserver = function() {
+						Zotero.IPC.broadcast("initComplete");
+						observerService.removeObserver(_loadObserver, "zotero-loaded");
+					};
+					observerService.addObserver(_loadObserver, "zotero-loaded", false);
 				}
-				Zotero.IPC.broadcast("initComplete");
 			} else if(msg === "initComplete") {
 				// Standalone sends this to the Firefox extension to let the Firefox extension
 				// know that Standalone has fully initialized and it should pull the list of

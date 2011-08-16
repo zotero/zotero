@@ -459,6 +459,9 @@ if(appInfo.platformVersion[0] >= 2) {
 			observerService.notifyObservers(Zotero, "zotero-reloaded", null);
 		}
 		
+		Zotero.debug('Triggering "zotero-loaded" event');
+		observerService.notifyObservers(Zotero, "zotero-loaded", null);
+		
 		return true;
 	}
 	
