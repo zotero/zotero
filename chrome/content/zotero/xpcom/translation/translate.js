@@ -342,13 +342,18 @@ Zotero.Translate.Sandbox = {
 					haveTranslatorFunction(translation.translator[0]);
 					return translation._sandboxManager.sandbox;
 				} else {
-					if(Zotero.isConnector && !callback) {
+					if(Zotero.isConnector && !Zotero.isFx && !callback) {
 						throw new Error("Translator must pass a callback to getTranslatorObject() to "+
 							"operate in this translation environment.");
 					}
 					
 					Zotero.Translators.get(translation.translator[0], haveTranslatorFunction);
-					if(!Zotero.isConnector) return sandbox;
+					if(Zotero.isConnector && Zotero.isFx && !callback) {
+						while(!sandbox) {
+							Zotero.mainThread.processNextEvent(true);
+						}
+					}
+					if(sandbox) return sandbox;
 				}
 			};
 			
