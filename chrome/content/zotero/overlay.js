@@ -63,7 +63,7 @@ var ZoteroOverlay = new function()
 						// load Zotero as a tab, if it isn't loading by default
 						ZoteroOverlay.loadZoteroTab(true);
 					}
-				} else {
+				} else if(showInPref === 1) {
 					// close Zotero as a tab, in case it was pinned
 					var zoteroTab = ZoteroOverlay.findZoteroTab();
 					if(zoteroTab) gBrowser.removeTab(zoteroTab);
