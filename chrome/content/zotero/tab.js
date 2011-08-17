@@ -83,7 +83,7 @@ var ZoteroTab = new function()
 			this.containerWindow.gBrowser.tabContainer.addEventListener("TabSelect", listener, false);
 		}
 		
-		if(Zotero && Zotero.isFx4) {
+		if(Zotero && Zotero.isFx4 && Zotero.Prefs.get("showIn") == 3) {
 			// on Fx 4, add an event listener so the pinned tab isn't restored on close
 			var pinnedTabCloser = function() {
 				try {
