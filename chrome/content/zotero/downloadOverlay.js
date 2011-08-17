@@ -130,6 +130,8 @@ var Zotero_DownloadOverlay = new function() {
 	 * Called when the save dialog is opened
 	 */
 	this.init = function() {
+		if(Zotero.isConnector) return;
+		
 		// Disable for filetypes people probably don't want to save
 		var show = false;
 		var mimeType = dialog.mLauncher.MIMEInfo.MIMEType.toLowerCase();
@@ -137,10 +139,12 @@ var Zotero_DownloadOverlay = new function() {
 			if(typeof elem === "string") {
 				if(elem === mimeType) {
 					document.getElementById('zotero-container').hidden = false;
+					document.getElementById('zotero-radio').disabled = false;
 					break;
 				}
 			} else if(elem.test(mimeType)) {
 				document.getElementById('zotero-container').hidden = false;
+				document.getElementById('zotero-radio').disabled = false;
 				break;
 			}
 		}
