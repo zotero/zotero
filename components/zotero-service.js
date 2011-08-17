@@ -353,9 +353,6 @@ ZoteroCommandLineHandler.prototype = {
 		if(isStandalone()) {
 			var param = cmdLine.handleFlagWithParam("url", false);
 			if(param) {
-				// don't open a new window
-				cmdLine.preventDefault = true;
-				
 				var uri = cmdLine.resolveURI(param);
 				if(uri.schemeIs("zotero")) {
 					// Check for existing window and focus it
@@ -374,9 +371,6 @@ ZoteroCommandLineHandler.prototype = {
 			
 			var param = cmdLine.handleFlagWithParam("file", false);
 			if(param) {
-				// don't open a new window
-				cmdLine.preventDefault = true;
-				
 				var file = Components.classes["@mozilla.org/file/local;1"].
 					createInstance(Components.interfaces.nsILocalFile);
 				file.initWithPath(param);
