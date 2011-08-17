@@ -192,30 +192,36 @@ var Zotero_File_Interface = new function() {
 		}
 	}
 	
-	/*
+	/**
 	 * Creates Zotero.Translate instance and shows file picker for file import
 	 */
-	function importFile() {
+	function importFile(file) {
 		var translation = new Zotero.Translate.Import();
-		var translators = translation.getTranslators();
-		
-		const nsIFilePicker = Components.interfaces.nsIFilePicker;
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-				.createInstance(nsIFilePicker);
-		fp.init(window, Zotero.getString("fileInterface.import"), nsIFilePicker.modeOpen);
-		
-		fp.appendFilters(nsIFilePicker.filterAll);
-		for(var i in translators) {
-			fp.appendFilter(translators[i].label, "*."+translators[i].target);
+		if(!file) {
+			var translators = translation.getTranslators();
+			
+			const nsIFilePicker = Components.interfaces.nsIFilePicker;
+			var fp = Components.classes["@mozilla.org/filepicker;1"]
+					.createInstance(nsIFilePicker);
+			fp.init(window, Zotero.getString("fileInterface.import"), nsIFilePicker.modeOpen);
+			
+			fp.appendFilters(nsIFilePicker.filterAll);
+			for(var i in translators) {
+				fp.appendFilter(translators[i].label, "*."+translators[i].target);
+			}
+			
+			var rv = fp.show();
+			if (rv !== nsIFilePicker.returnOK && rv !== nsIFilePicker.returnReplace) {
+				return false;
+			}
+			
+			file = fp.file;
 		}
 		
-		var rv = fp.show();
-		if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
-			translation.setLocation(fp.file);
-			// get translators again, bc now we can check against the file
-			translation.setHandler("translators", function(obj, item) { _importTranslatorsAvailable(obj, item) });
-			translators = translation.getTranslators();
-		}
+		translation.setLocation(file);
+		// get translators again, bc now we can check against the file
+		translation.setHandler("translators", function(obj, item) { _importTranslatorsAvailable(obj, item) });
+		translators = translation.getTranslators();
 	}
 	
 	
