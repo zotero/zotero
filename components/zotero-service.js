@@ -353,6 +353,9 @@ ZoteroCommandLineHandler.prototype = {
 		if(isStandalone()) {
 			var param = cmdLine.handleFlagWithParam("url", false);
 			if(param) {
+				// don't open a new window
+				cmdLine.preventDefault = true;
+				
 				var uri = cmdLine.resolveURI(param);
 				if(uri.schemeIs("zotero")) {
 					// Check for existing window and focus it
@@ -360,11 +363,34 @@ ZoteroCommandLineHandler.prototype = {
 						.getService(Components.interfaces.nsIWindowMediator);
 					var win = wm.getMostRecentWindow("navigator:browser");
 					if(win) {
-						cmdLine.preventDefault = true;
 						win.focus();
 						Components.classes["@mozilla.org/network/protocol;1?name=zotero"]
 							.createInstance(Components.interfaces.nsIProtocolHandler).newChannel(uri);
 					}
+				} else {
+					Zotero.debug("Not handling URL: "+uri.spec);
+				}
+			}
+			
+			var param = cmdLine.handleFlagWithParam("file", false);
+			if(param) {
+				// don't open a new window
+				cmdLine.preventDefault = true;
+				
+				var file = Components.classes["@mozilla.org/file/local;1"].
+					createInstance(Components.interfaces.nsILocalFile);
+				file.initWithPath(param);
+				
+				if(file.leafName.substr(-4).toLowerCase() === ".csl"
+						|| file.leafName.substr(-8).toLowerCase() === ".csl.txt") {
+					// Install CSL file
+					this.Zotero.Styles.install(file);
+				} else {
+					// Show file import dialog
+					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+									   .getService(Components.interfaces.nsIWindowMediator);
+					var browserWindow = wm.getMostRecentWindow("navigator:browser");
+					browserWindow.Zotero_File_Interface.importFile(file);
 				}
 			}
 		}
