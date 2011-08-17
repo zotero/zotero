@@ -90,7 +90,7 @@
 }
 
 #zotero-view-tabbox > tabs {
-	margin-top: -1px;
+	margin-top: 2px;
 }
 
 #zotero-editpane-item-box > scrollbox, #zotero-view-item > tabpanel > vbox, 
