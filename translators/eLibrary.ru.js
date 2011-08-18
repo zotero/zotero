@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-08-02 22:31:22"
+	"lastUpdated": "2011-08-03 10:41:53"
 }
 
 /*
@@ -32,7 +32,7 @@
 function detectWeb(doc, url){
 	if (url.match(/\/item.asp/)) {
 		return "journalArticle";
-	} else if (url.match(/\/(query_results|contents|org_items)\.asp/)){
+	} else if (url.match(/\/(query_results|contents|org_items|itembox_items)\.asp/)){
 		return "multiple";
 	}
 }
