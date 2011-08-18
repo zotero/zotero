@@ -380,11 +380,17 @@ ZoteroCommandLineHandler.prototype = {
 					// Install CSL file
 					this.Zotero.Styles.install(file);
 				} else {
-					// Show file import dialog
-					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-									   .getService(Components.interfaces.nsIWindowMediator);
-					var browserWindow = wm.getMostRecentWindow("navigator:browser");
-					browserWindow.Zotero_File_Interface.importFile(file);
+					// Ask before importing
+					if(Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+							.getService(Components.interfaces.nsIPromptService)
+							.confirm(null, this.Zotero.getString('ingester.importFile.title'),
+							this.Zotero.getString('ingester.importFile.text', [file.leafName]))) {
+						// Perform file import in front window
+						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+										   .getService(Components.interfaces.nsIWindowMediator);
+						var browserWindow = wm.getMostRecentWindow("navigator:browser");
+						browserWindow.Zotero_File_Interface.importFile(file);
+					}
 				}
 			}
 		}
