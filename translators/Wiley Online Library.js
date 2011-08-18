@@ -8,7 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-07-20 17:14:04"
+	"browserSupport": "g",
+	"lastUpdated": "2011-08-18 01:25:48"
 }
 
 function detectWeb(doc, url){
@@ -51,7 +52,13 @@ function doWeb(doc, url){
 		}
 		Zotero.Utilities.processDocuments(urls, scrape, function () { Zotero.done(); });
 	} else { //single article
-		scrape(doc, url);
+		if (url.indexOf("/pdf/") != -1) {
+			url = url.replace(/\/pdf\/.+$/,'/abstract');
+			Z.debug("Redirecting to abstract page: "+url);
+			Zotero.Utilities.processDocuments([ url ], scrape, function () { Zotero.done(); });
+		} else {
+			scrape(doc, url);
+		}
 	}
 	
 	Zotero.wait();
@@ -421,6 +428,74 @@ var testCases = [
 				"language": "en",
 				"date": "2008/09/01",
 				"pages": "186-206",
+				"libraryCatalog": "Wiley Online Library"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://onlinelibrary.wiley.com/doi/10.1002/14651858.CD007019.pub2/pdf/standard",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Michelle",
+						"lastName": "Butler",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rita",
+						"lastName": "Collins",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jonathan",
+						"lastName": "Drennan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Phil",
+						"lastName": "Halligan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dónal P",
+						"lastName": "O'Mathúna",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Timothy J",
+						"lastName": "Schultz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ann",
+						"lastName": "Sheridan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Eileen",
+						"lastName": "Vilis",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "Wiley Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"url": "http://onlinelibrary.wiley.com/doi/10.1002/14651858.CD007019.pub2/abstract",
+				"DOI": "10.1002/14651858.CD007019.pub2",
+				"publisher": "John Wiley & Sons, Ltd",
+				"ISSN": "1465-1858",
+				"title": "Hospital nurse staffing models and patient and staff‐related outcomes",
+				"language": "en",
 				"libraryCatalog": "Wiley Online Library"
 			}
 		]

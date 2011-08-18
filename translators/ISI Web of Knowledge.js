@@ -2,7 +2,7 @@
 	"translatorID": "594ebe3c-90a0-4830-83bc-9502825a6810",
 	"label": "ISI Web of Knowledge",
 	"creator": "Michael Berkowitz, Avram Lyon",
-	"target": "(WOS_GeneralSearch|product=WOS|product=CABI)",
+	"target": "^https?://[^/]*webofknowledge\\.com/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
@@ -12,9 +12,9 @@
 }
 
 function detectWeb(doc, url) {
-	if ((doc.title.indexOf("Web of Science Results") != -1) | (doc.title.indexOf("CABI Results") != -1)) {
+	if (url.indexOf("full_record.do") !== -1) {
 		return "multiple";
-	} else if (url.indexOf("full_record.do") != -1) {
+	} else if ((doc.title.indexOf(" Results") !== -1)) {
 		return "journalArticle";
 	}
 }
@@ -55,13 +55,24 @@ function fetchIds(ids, url) {
 	var product = url.match("product=([^\&]+)\&")[1];
 	Zotero.Utilities.processDocuments(ids, function (newDoc) {
 		var url = newDoc.location.href;
-		var sid = newDoc.evaluate('//input[@name="selectedIds"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
-		var nid = newDoc.evaluate('//input[@name="SID"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
-		var post2 = 'product='+product+'&product_sid=' + nid + '&plugin=&product_st_thomas=http://esti.isiknowledge.com:8360/esti/xrpc&export_ref.x=0&export_ref.y=0';
-		var post = 'action=go&mode=quickOutput&product='+product+'&SID=' + nid + '&format=ref&fields=BibAbs&mark_id='+product+'&count_new_items_marked=0&selectedIds=' + sid + '&qo_fields=bib&endnote.x=95&endnote.y=12&save_options=default';
-		Zotero.Utilities.doPost('http://apps.isiknowledge.com/OutboundService.do', post, function (text, obj) {
-			Zotero.Utilities.doPost('http://pcs.isiknowledge.com/uml/uml_view.cgi', post2, function (text, obj) {
-				//Zotero.debug(text);
+		var names = ["recordID", "colName", "SID", "selectedIds", "sortBy", "qid", "product" ];
+		var values = {};
+		var n;
+		for each (n in names) {
+			values[n] = newDoc.evaluate('//input[@name="'+n+'"]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
+		}
+		var post2 = 'locale=en_US&fileOpt=fieldtagged'+
+					'&colName=' + values.colName + '&action=saveDataToRef'+
+					'&qid='+values.qid+'&sortBy='+values.sortBy.replace(/;/g,"%3;")+
+					'&SID='+values.SID+'&product='+values.product+'&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&numRecords=1&locale=en_US';
+		var post = 'action=go&viewType=fullRecord&product='+values.product
+				+'&mark_id='+values.product+'&colName=' + values.colName
+				+'&recordID='+values.recordID.replace(/;/g,"%3;")
+				+'&sortBy='+values.sortBy.replace(/;/g,"%3;")+'&mode=outputService'
+				+'&qid='+values.qid+'&SID='+values.SID+
+				+'&format=saveToRef&filters=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&selectedIds=3&mark_to=&mark_from=&count_new_items_marked=0&value%28record_select_type%29=selrecords&marked_list_candidates=3&LinksAreAllowedRightClick=CitedRefList.do&LinksAreAllowedRightClick=CitingArticles.do&LinksAreAllowedRightClick=OneClickSearch.do&LinksAreAllowedRightClick=full_record.do&fields_selection=FUNDING+SUBJECT_CATEGORY+JCR_CATEGORY+LANG+IDS+PAGEC+SABBR+CITREFC+ISSN+PUBINFO+KEYWORDS+CITTIMES+ADDRS+CONFERENCE_SPONSORS+DOCTYPE+ABSTRACT+CONFERENCE_INFO+SOURCE+TITLE+AUTHORS++&save_options=fieldtagged';
+		Zotero.Utilities.doPost('http://apps.webofknowledge.com/OutboundService.do',post, function (text, obj) {
+			Zotero.Utilities.doPost('http://ets.webofknowledge.com/ETS/saveDataToRef.do',post2, function (text, obj) {
 				importer.setString(text);
 				importer.setHandler("itemDone", function (obj, item) {
 					item.attachments = [{url: url, type: "text/html", title: "ISI Web of Knowledge Record"}];
@@ -87,8 +98,8 @@ function detectImport() {
 					return false;
 				}
 			}
+				}
 		}
-	}
 }
 
 function processTag(item, field, content) {
@@ -140,8 +151,8 @@ function processTag(item, field, content) {
 		}
 		var year = item.date.match(/\d{4}/);
 		// If we have a double year, eliminate one
-		if (year && item.date.replace(year,"").indexOf(year) !== -1)
-			item.date = item.date.replace(year,"");
+		if (year && item.date.replace(year[0],"").indexOf(year[0]) !== -1)
+			item.date = item.date.replace(year[0],"");
 	} else if (field == "VL") {
 		item.volume = content;
 	} else if (field == "IS") {

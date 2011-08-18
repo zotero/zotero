@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-08-02 02:41:31"
+	"lastUpdated": "2011-08-03 11:08:32"
 }
 
 /*
@@ -102,8 +102,8 @@ function scrape (doc) {
 	var record_rows = doc.evaluate('//div[@class="display_record_indexing_row"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	var abstract_link = doc.evaluate('//a[@class="formats_base_sprite format_abstract"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if (!record_rows && abstract_link) {
-			Zotero.Utilities.processDocuments(abstract_link.href, scrape, function() {Zotero.done();});
-			return true;
+		Zotero.Utilities.processDocuments(abstract_link.href, scrape, function() {Zotero.done();});
+		return true;
 	}
 	var url = doc.location.href;
 	
@@ -191,11 +191,15 @@ function scrape (doc) {
 			case "Copyright":
 					item.rights = value; break;
 			case "Database":
+					value = value.replace(/^\d\s+databasesView list\s+Hide list/,'');
+					value = value.replace(/(ProQuest.*)(ProQuest.*)/,'$1; $2');
 					item.libraryCatalog = value; break;
 			case "Document URL":
-					item.attachments.push({url:value.replace(/\?accountid=[0-9]+$/,''),
+					item.attachments.push({url:value.replace(/\?accountid=[0-9]+$/,'')+"/abstract",
 								title: "ProQuest Record",
 								mimeType: "text/html"}); break;
+			case "ProQuest Document ID":
+					item.callNumber = value; break;
 			case "Language of Publication":
 					item.language = value; break;
 			case "Section":
@@ -337,6 +341,7 @@ var testCases = [
 				"publisher": "Menno Simons College",
 				"ISSN": "00084697",
 				"language": "English",
+				"callNumber": "213445241",
 				"rights": "Copyright Peace Research May 1995",
 				"proceedingsTitle": "Peace Research",
 				"libraryCatalog": "ProQuest",
