@@ -213,7 +213,7 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 		return '';
 	}
 	
-	if (this.id && this._itemData[fieldID] === null && !this._itemDataLoaded) {
+	if (!this._itemDataLoaded && this.id && this._itemData[fieldID] === null) {
 		this._loadItemData();
 	}
 	
@@ -424,7 +424,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 			throw ('Cannot change type in loadIn mode in Zotero.Item.setType()');
 		}
 		
-		if (this.id && !this._itemDataLoaded) {
+		if (!this._itemDataLoaded && this.id) {
 			this._loadItemData();
 		}
 		
@@ -924,7 +924,7 @@ Zotero.Item.prototype.getDisplayTitle = function (includeAuthorAndDate) {
  * Returns the number of creators for this item
  */
 Zotero.Item.prototype.numCreators = function() {
-	if (this.id && !this._creatorsLoaded) {
+	if (!this._creatorsLoaded && this.id) {
 		this._loadCreators();
 	}
 	return this._creators.length;
@@ -932,7 +932,7 @@ Zotero.Item.prototype.numCreators = function() {
 
 
 Zotero.Item.prototype.hasCreatorAt = function(pos) {
-	if (this.id && !this._creatorsLoaded) {
+	if (!this._creatorsLoaded && this.id) {
 		this._loadCreators();
 	}
 	
@@ -946,7 +946,7 @@ Zotero.Item.prototype.hasCreatorAt = function(pos) {
  * Note: Creator data array is returned by reference
  */
 Zotero.Item.prototype.getCreator = function(pos) {
-	if (this.id && !this._creatorsLoaded) {
+	if (!this._creatorsLoaded && this.id) {
 		this._loadCreators();
 	}
 	
@@ -958,7 +958,7 @@ Zotero.Item.prototype.getCreator = function(pos) {
  * Return the position of the given creator, or FALSE if not found
  */
 Zotero.Item.prototype.getCreatorPosition = function(creatorID) {
-	if (this.id && !this._creatorsLoaded) {
+	if (!this._creatorsLoaded && this.id) {
 		this._loadCreators();
 	}
 	
@@ -978,7 +978,7 @@ Zotero.Item.prototype.getCreatorPosition = function(creatorID) {
  * Note: Creator data array is returned by reference
  */
 Zotero.Item.prototype.getCreators = function() {
-	if (this.id && !this._creatorsLoaded) {
+	if (!this._creatorsLoaded && this.id) {
 		this._loadCreators();
 	}
 	
@@ -1047,7 +1047,7 @@ Zotero.Item.prototype.setCreator = function(orderIndex, creator, creatorTypeIDOr
  * Remove a creator and shift others down
  */
 Zotero.Item.prototype.removeCreator = function(orderIndex) {
-	if (this.id && !this._creatorsLoaded) {
+	if (!this._creatorsLoaded && this.id) {
 		this._loadCreators();
 	}
 	
