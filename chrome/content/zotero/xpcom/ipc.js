@@ -208,7 +208,7 @@ Zotero.IPC = new function() {
 					Zotero.debug('IPC: Broadcasting "'+msg+'" to window "'+appName+'MessageWindow"');
 					
 					// allocate message
-					var data = ctypes.char.array()('firefox.exe -ZoteroIPC "'+msg.replace('"', '""', "g")+'"\x00C:\\');
+					var data = ctypes.char.array()('firefox.exe -silent -ZoteroIPC "'+msg.replace('"', '""', "g")+'"\x00C:\\');
 					var dataSize = data.length*data.constructor.size;
 					
 					// create new COPYDATASTRUCT
