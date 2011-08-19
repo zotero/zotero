@@ -91,7 +91,12 @@ Zotero.Item.prototype._init = function () {
 
 
 Zotero.Item.prototype.__defineGetter__('objectType', function () { return 'item'; });
-Zotero.Item.prototype.__defineGetter__('id', function () { return this.getField('id'); });
+Zotero.Item.prototype.__defineGetter__('id', function () {
+	if(!this._id && this._key && !this._primaryDataLoaded) {
+		this.loadPrimaryData(true);
+	}
+	return this._id;
+});
 Zotero.Item.prototype.__defineGetter__('itemID', function () {
 	Zotero.debug("Item.itemID is deprecated -- use Item.id");
 	return this.id;
