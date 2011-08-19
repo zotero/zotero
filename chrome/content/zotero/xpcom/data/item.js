@@ -106,7 +106,12 @@ Zotero.Item.prototype.__defineGetter__('libraryID', function () { return this.ge
 Zotero.Item.prototype.__defineSetter__('libraryID', function (val) { this.setField('libraryID', val); });
 Zotero.Item.prototype.__defineGetter__('key', function () { return this.getField('key'); });
 Zotero.Item.prototype.__defineSetter__('key', function (val) { this.setField('key', val) });
-Zotero.Item.prototype.__defineGetter__('itemTypeID', function () { return this.getField('itemTypeID'); });
+Zotero.Item.prototype.__defineGetter__('itemTypeID', function () {
+	if(!this._itemTypeID && (this._id || this._key) && !this._primaryDataLoaded) {
+		this.loadPrimaryData(true);
+	}
+	return this._itemTypeID;
+});
 Zotero.Item.prototype.__defineGetter__('dateAdded', function () { return this.getField('dateAdded'); });
 Zotero.Item.prototype.__defineGetter__('dateModified', function () { return this.getField('dateModified'); });
 Zotero.Item.prototype.__defineGetter__('firstCreator', function () { return this.getField('firstCreator'); });
