@@ -10,7 +10,7 @@
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2011-07-08 04:51:41"
+	"lastUpdated":"2011-08-16 15:07:21"
 }
 
 var item;
@@ -323,7 +323,10 @@ function generateItem(item, zoteroType, resource) {
 	}
 	
 	// relative file path for attachment items
-	if(item.path) {
+	if(item.defaultPath) {	// For Zotero 3.0
+		item.saveFile(item.defaultPath, true);
+		Zotero.RDF.addStatement(resource, rdf+"resource", item.defaultPath, false);
+	} else if(item.path) {	// For Zotero 2.1
 		Zotero.RDF.addStatement(resource, rdf+"resource", item.path, false);
 	}
     
