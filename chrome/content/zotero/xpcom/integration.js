@@ -1262,6 +1262,7 @@ Zotero.Integration.Session.prototype.reselectItem = function(exception) {
  * Generates a field from a citation object
  */
 Zotero.Integration.Session.prototype.getCitationField = function(citation) {
+	Zotero.debug(citation);
 	const saveProperties = ["custom", "unsorted", "formattedCitation", "plainCitation", "dontUpdate"];
 	const saveCitationItemKeys = ["locator", "label", "suppress-author", "author-only", "prefix",
 		"suffix"];
@@ -1310,7 +1311,7 @@ Zotero.Integration.Session.prototype.getCitationField = function(citation) {
 		
 		// copy saveCitationItemKeys
 		for(var i=0, n=saveCitationItemKeys.length; i<n; i++) {
-			if((value = serializeCitationItem[(key = saveCitationItemKeys[i])])) {
+			if((value = citationItem[(key = saveCitationItemKeys[i])])) {
 				serializeCitationItem[key] = value;
 			}
 		}
