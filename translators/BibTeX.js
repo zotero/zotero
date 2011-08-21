@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2011-07-29 03:35:07"
+	"lastUpdated": "2011-08-16 15:07:38"
 }
 
 function detectImport() {
@@ -2109,11 +2109,20 @@ function doExport() {
 		if(Zotero.getOption("exportFileData")) {
 			if(item.attachments) {
 				var attachmentString = "";
+				
 				for(var i in item.attachments) {
 					var attachment = item.attachments[i];
-					attachmentString += ";" + attachment.title + ":" + attachment.path + ":" + attachment.mimeType;
+					if(attachment.defaultPath) {	// For Zotero 3.0
+						attachment.saveFile(attachment.defaultPath, true);
+						attachmentString += ";" + attachment.title + ":" + attachment.defaultPath + ":" + attachment.mimeType;
+					} else if(attachment.path) {	// For Zotero 2.1
+						attachmentString += ";" + attachment.title + ":" + attachment.path + ":" + attachment.mimeType;
+					}
 				}
-				writeField("file", attachmentString.substr(1));
+				
+				if(attachmentString) {
+					writeField("file", attachmentString.substr(1));
+				}
 			}
 		}
 		
