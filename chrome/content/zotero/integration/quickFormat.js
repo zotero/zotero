@@ -153,21 +153,36 @@ var Zotero_QuickFormat = new function () {
 		var str = _getEditorContent();
 		var haveConditions = false;
 		
+		const specifiedLocatorRe = /,? *(pp|p)(?:\. *| +)([0-9\-]+) *$/;
+		const yearPageLocatorRe = /,? *([0-9]+) *((B[. ]*C[. ]*|B[. ]*)|[AC][. ]*|A[. ]*D[. ]*|C[. ]*E[. ]*)?,? *(?:([0-9\-]+))?$/i;
+		const creatorSplitRe = /(?:,| *(?:and|\&)) +/;
+		const charRe = /[\w\u007F-\uFFFF]/;
+		const numRe = /^[0-9\-]+$/;
+		const etAl = " et al.";
+		
+		var m,
+			year = false,
+			isBC = false,
+			dateID = false;
+		
+		curLocator = false;
+		curLocatorLabel = false;
+		
+		// check for adding a number onto a previous page number
+		if(numRe.test(str)) {
+			// add to previous cite
+			var node = _getCurrentEditorTextNode();
+			var prevNode = node.previousSibling;
+			if(prevNode && prevNode.citationItem && prevNode.citationItem.locator) {
+				prevNode.citationItem.locator += str;
+				prevNode.value = _buildBubbleString(prevNode.citationItem);
+				node.nodeValue = "";
+				_clearEntryList();
+				return;
+			}
+		}
+		
 		if(str && str.length > 1) {
-			const specifiedLocatorRe = /,? *(pp|p)(?:\. *| +)([0-9\-]+) *$/;
-			const yearPageLocatorRe = /,? *([0-9]+) *((B[. ]*C[. ]*|B[. ]*)|[AC][. ]*|A[. ]*D[. ]*|C[. ]*E[. ]*)?,? *(?:([0-9\-]+))?$/i;
-			const creatorSplitRe = /(?:,| *(?:and|\&)) +/;
-			const charRe = /[\w\u007F-\uFFFF]/;
-			const etAl = " et al.";
-			
-			var m,
-				year = false,
-				isBC = false,
-				dateID = false;
-			
-			curLocator = false;
-			curLocatorLabel = false;
-			
 			// check for specified locator
 			m = specifiedLocatorRe.exec(str);
 			if(m) {
