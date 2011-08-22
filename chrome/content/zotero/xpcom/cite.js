@@ -37,7 +37,7 @@ Zotero.Cite.System._zoteroFieldMap = {
 	"version":["version"],
 	"section":["section"],
 	"genre":["type", "artworkSize"], /* artworkSize should move to SQL mapping tables, or added as a CSL variable */
-	"medium":["medium"],
+	"medium":["medium", "system"],
 	"archive":["archive"],
 	"archive_location":["archiveLocation"],
 	"event":["meetingName", "conferenceName"], /* these should be mapped to the same base field in SQL mapping tables */
