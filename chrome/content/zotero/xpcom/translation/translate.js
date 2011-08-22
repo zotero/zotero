@@ -320,9 +320,9 @@ Zotero.Translate.Sandbox = {
 							sandbox.exports.Zotero = sandbox.Zotero;
 							sandbox = sandbox.exports;
 						} else {
-							translate._debug("COMPAT WARNING: "+translate.translator[0].label+" does "+
-								"not export any properties. Only detect"+translate._entryFunctionSuffix+
-								" and do"+translate._entryFunctionSuffix+" will be available in "+
+							translate._debug("COMPAT WARNING: "+translation.translator[0].label+" does "+
+								"not export any properties. Only detect"+translation._entryFunctionSuffix+
+								" and do"+translation._entryFunctionSuffix+" will be available in "+
 								"connectors.");
 						}
 						
