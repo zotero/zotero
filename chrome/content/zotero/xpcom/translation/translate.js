@@ -1175,7 +1175,7 @@ Zotero.Translate.Base.prototype = {
 		Zotero.debug("Translate: Parsing code for "+translator.label, 4);
 		
 		try {
-			this._sandboxManager.eval("var translatorInfo = "+translator.code,
+			this._sandboxManager.eval("var exports = {}, translatorInfo = "+translator.code,
 				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix, "exports"],
 				(translator.file ? translator.file.path : translator.label));
 		} catch(e) {
@@ -1193,7 +1193,7 @@ Zotero.Translate.Base.prototype = {
 		Zotero.debug("Translate: Binding sandbox to "+(typeof this._sandboxLocation == "object" ? this._sandboxLocation.document.location : this._sandboxLocation), 4);
 		this._sandboxManager = new Zotero.Translate.SandboxManager(this._sandboxLocation);
 		const createArrays = "['creators', 'notes', 'tags', 'seeAlso', 'attachments']";
-		var src = "var Zotero = {}, exports = {};"+
+		var src = "var Zotero = {};"+
 		"Zotero.Item = function (itemType) {"+
 				"const createArrays = "+createArrays+";"+
 				"this.itemType = itemType;"+
