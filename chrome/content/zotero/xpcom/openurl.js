@@ -464,7 +464,7 @@ Zotero.OpenURL = new function() {
 			// Splice in the complex creator at the correct location,
 			// accounting for previous insertions
 			if(pushMe) {
-				item.creators = item.creators.splice(offset + inserted, 0, complexAu[i]);
+				item.creators.splice(offset + inserted, 0, complexAu[i]);
 				inserted++;
 			}
 		}
