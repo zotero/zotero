@@ -47,7 +47,7 @@
 {
 	margin: -6px -2px -6px -16px;
 	padding: 6px 2px 6px 14px;
-	list-style-image: url("chrome://browser/skin/searchbar-dropmarker.png");
+	list-style-image: url("chrome://zotero/skin/mac/searchbar-dropmarker.png");
 }
 
 #zotero-tb-sync > .toolbarbutton-icon {
