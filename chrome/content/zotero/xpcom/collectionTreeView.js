@@ -1547,7 +1547,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 			
 			var newIDs = [];
 			for each(var item in newItems) {
-				newIDs.push(copyItem(item, libraryID));
+				newIDs.push(copyItem(item, targetLibraryID));
 			}
 			
 			if (toReconcile.length) {
