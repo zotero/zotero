@@ -227,6 +227,7 @@ var Zotero_QuickFormat = new function () {
 			if(charRe.test(str)) {
 				Zotero.debug("QuickFormat: QuickSearch: "+str);
 				s.addCondition("quicksearch-titlesAndCreators", "contains", str);
+				s.addCondition("itemType", "isNot", "attachment");
 				haveConditions = true;
 			}
 			
