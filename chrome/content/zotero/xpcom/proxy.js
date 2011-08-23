@@ -94,8 +94,12 @@ Zotero.Proxies = new function() {
 		if(m) {
 			var host = m[proxy.parameters.indexOf("%h")+1];
 			// add this host if we know a proxy
-			if(proxy.autoAssociate && !Zotero.Proxies.hosts[host] && proxy.hosts.indexOf(host) == -1 && !_isBlacklisted(host)) {
-				// if no saved host and host is not blacklisted, auto associate
+			if(proxy.autoAssociate							// if autoAssociate is on
+				&& channel.responseStatus < 400				// and query was successful
+				&& !Zotero.Proxies.hosts[host]				// and host is not saved
+				&& proxy.hosts.indexOf(host) === -1
+				&& !_isBlacklisted(host)					// and host is not blacklisted
+			) {	
 				proxy.hosts.push(host);
 				proxy.save(true);
 				
