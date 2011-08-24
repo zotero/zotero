@@ -265,6 +265,8 @@ function makeZoteroContext(isConnector) {
  */
 function ZoteroService() {
 	try {
+		var start = Date.now();
+		
 		if(isFirstLoadThisSession) {
 			makeZoteroContext(false);
 			try {
@@ -284,6 +286,8 @@ function ZoteroService() {
 		}
 		isFirstLoadThisSession = false;	// no longer first load
 		this.wrappedJSObject = zContext.Zotero;
+		
+		zContext.Zotero.debug("Initialized in "+(Date.now() - start)+" ms");
 	} catch(e) {
 		var msg = typeof e == 'string' ? e : e.name;
 		dump(e + "\n\n");
