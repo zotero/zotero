@@ -37,13 +37,6 @@
 	<script>
 	<![CDATA[
 		var Zotero_CSL_Editor = new function() {
-			var mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-				.getInterface(Components.interfaces.nsIWebNavigation)
-				.QueryInterface(Components.interfaces.nsIDocShellTreeItem)
-				.rootTreeItem
-				.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-				.getInterface(Components.interfaces.nsIDOMWindow);
-			
 			this.init = init;
 			this.handleKeyPress = handleKeyPress;
 			this.loadCSL = loadCSL;
@@ -103,7 +96,7 @@
 				var editor = document.getElementById('zotero-csl-editor')
 				var iframe = document.getElementById('zotero-csl-preview-box');
 				
-				var items = mainWindow.ZoteroPane.getSelectedItems();
+				var items = Zotero.getActiveZoteroPane().getSelectedItems();
 				if (items.length == 0) {
 					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No references selected in Zotero.</p></body></html>';
 					return;
