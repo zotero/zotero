@@ -3791,9 +3791,10 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		// Creators
+		var defaultLibraryID = Zotero.libraryID;
 		for (var index in item.creators) {
 			var newCreator = <creator/>;
-			var libraryID = item.creators[index].libraryID ? item.creators[index].libraryID : Zotero.libraryID;
+			var libraryID = item.creators[index].libraryID ? item.creators[index].libraryID : defaultLibraryID;
 			var key = item.creators[index].key;
 			if (!key) {
 				Zotero.debug('==========');
@@ -3818,7 +3819,7 @@ Zotero.Sync.Server.Data = new function() {
 				newCreator.creator = creatorXML;
 			}
 			
-			xml.creator += newCreator;
+			xml.appendChild(newCreator);
 		}
 		
 		// Related items
