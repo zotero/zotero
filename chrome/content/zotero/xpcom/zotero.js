@@ -852,8 +852,8 @@ if(appInfo.platformVersion[0] >= 2) {
 		
 		
 		if(defaultSection.IsRelative) {
-			var defaultProfile = prefDir.clone();
-			[defaultProfile.append(dir) for each(dir in defaultSection.Path.split("/"))];
+			var defaultProfile = prefDir.clone().QueryInterface(Components.interfaces.nsILocalFile);
+			defaultProfile.appendRelativePath(defaultSection.Path);
 		} else {
 			var defaultProfile = Components.classes["@mozilla.org/file/local;1"]
 				.createInstance(Components.interfaces.nsILocalFile);
@@ -924,7 +924,15 @@ if(appInfo.platformVersion[0] >= 2) {
 				Zotero.debug("Looking for existing profile in "+prefDir.path);
 				
 				// get default profile
-				var defProfile = getDefaultProfile(prefDir);
+				var defProfile;
+				try {
+					defProfile = getDefaultProfile(prefDir);
+				} catch(e) {
+					Zotero.debug("An error occurred locating the Firefox profile; not "+
+						"attempting to migrate from Zotero for Firefox");
+					Zotero.logError(e);
+				}
+				
 				if(defProfile) {
 					// get Zotero directory
 					var zoteroDir = defProfile[0].clone();
