@@ -335,11 +335,10 @@ var ZoteroPane = new function()
 		var tagSelector = document.getElementById('zotero-tag-selector');
 		tagSelector.unregister();
 		
-		this.collectionsView.unregister();
-		if (this.itemsView)
-			this.itemsView.unregister();
+		if(this.collectionsView) this.collectionsView.unregister();
+		if(this.itemsView) this.itemsView.unregister();
 		
-		observerService.removeObserver(_reloadObserver, "zotero-reloaded", false);
+		observerService.removeObserver(_reloadObserver, "zotero-reloaded");
 	}
 	
 	/**
