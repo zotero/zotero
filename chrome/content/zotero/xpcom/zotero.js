@@ -763,7 +763,9 @@ if(appInfo.platformVersion[0] >= 2) {
 			for each(var listener in _shutdownListeners) {
 				try {
 					listener();
-				} catch(e) {}
+				} catch(e) {
+					Zotero.logError(e);
+				}
 			}
 			
 			// remove temp directory
