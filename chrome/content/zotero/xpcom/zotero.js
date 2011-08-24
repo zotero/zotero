@@ -847,7 +847,7 @@ if(appInfo.platformVersion[0] >= 2) {
 		if(!defaultSection || !defaultSection.Path) return false;
 		
 		
-		if(defaultSection.IsRelative) {
+		if(defaultSection.IsRelative === "1") {
 			var defaultProfile = prefDir.clone().QueryInterface(Components.interfaces.nsILocalFile);
 			try {
 				for each(var dir in defaultSection.Path.split("/")) defaultProfile.append(dir);
