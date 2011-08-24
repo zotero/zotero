@@ -40,13 +40,6 @@
 		default xml namespace = "http://purl.org/net/xbiblio/csl";
 
 		var Zotero_CSL_Preview = new function() {
-			var mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-				.getInterface(Components.interfaces.nsIWebNavigation)
-				.QueryInterface(Components.interfaces.nsIDocShellTreeItem)
-				.rootTreeItem
-				.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-				.getInterface(Components.interfaces.nsIDOMWindow);
-			
 			this.init = init;
 			this.refresh = refresh;
 			this.generateBibliography = generateBibliography;
@@ -56,7 +49,7 @@
 			}
 			function refresh() {
 				var iframe = document.getElementById('zotero-csl-preview-box');
-				var items = mainWindow.ZoteroPane.getSelectedItems();
+				var items = Zotero.getActiveZoteroPane().getSelectedItems();
 				if (items.length == 0) {
 					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No references selected in Zotero.</p></body></html>';
 					return;
@@ -65,7 +58,7 @@
 				// XXX needs its own string really!
 				progressWin.changeHeadline(Zotero.getString("pane.items.menu.createBib.multiple"));
 				var icon = 'chrome://zotero/skin/treeitem-attachment-file.png';
-				progressWin.addLines(window.content.document.title, icon)
+				progressWin.addLines(document.title, icon)
 				progressWin.show();
 				progressWin.startCloseTimer();
 				var f = function() {
@@ -94,7 +87,7 @@
 			function generateBibliography(style) {
 				var iframe = document.getElementById('zotero-csl-preview-box');
 				
-				var items = mainWindow.ZoteroPane.getSelectedItems();
+				var items = Zotero.getActiveZoteroPane().getSelectedItems();
 				if (items.length == 0) {
 					iframe.contentDocument.documentElement.innerHTML = '<html><head><title></title></head><body><p style="color: red">No references selected in Zotero.</p></body></html>';
 					return '';
