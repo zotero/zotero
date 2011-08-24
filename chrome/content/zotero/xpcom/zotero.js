@@ -208,8 +208,6 @@ if(appInfo.platformVersion[0] >= 2) {
 			return false;
 		}
 		
-		var start = (new Date()).getTime();
-		
 		var observerService = Components.classes["@mozilla.org/observer-service;1"]
 			.getService(Components.interfaces.nsIObserverService);
 		
@@ -450,8 +448,6 @@ if(appInfo.platformVersion[0] >= 2) {
 		}
 		
 		this.initialized = true;
-		
-		Zotero.debug("Initialized in "+((new Date()).getTime() - start)+" ms");
 		
 		if(!Zotero.isFirstLoadThisSession) {
 			// trigger zotero-reloaded event
