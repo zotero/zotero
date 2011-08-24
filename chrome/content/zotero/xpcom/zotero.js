@@ -760,7 +760,11 @@ if(appInfo.platformVersion[0] >= 2) {
 			Zotero.closing = true;
 			
 			// run shutdown listener
-			for each(var listener in _shutdownListeners) listener();
+			for each(var listener in _shutdownListeners) {
+				try {
+					listener();
+				} catch(e) {}
+			}
 			
 			// remove temp directory
 			Zotero.removeTempDirectory();
