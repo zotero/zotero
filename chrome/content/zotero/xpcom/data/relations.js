@@ -27,6 +27,8 @@ Zotero.Relations = new function () {
 	Zotero.DataObjects.apply(this, ['relation']);
 	this.constructor.prototype = new Zotero.DataObjects();
 	
+	this.__defineGetter__('deletedItemPredicate', function () 'dc:isReplacedBy');
+	
 	var _namespaces = {
 		owl: 'http://www.w3.org/2002/07/owl#'
 	};
@@ -177,8 +179,9 @@ Zotero.Relations = new function () {
 	
 	
 	this.purge = function () {
-		var sql = "SELECT subject FROM relations UNION SELECT object FROM relations";
-		var uris = Zotero.DB.columnQuery(sql);
+		var sql = "SELECT subject FROM relations WHERE predicate != ? "
+				+ "UNION SELECT object FROM relations WHERE predicate != ?";
+		var uris = Zotero.DB.columnQuery(sql, [this.deletedItemPredicate, this.deletedItemPredicate]);
 		if (uris) {
 			var prefix = Zotero.URI.defaultPrefix;
 			Zotero.DB.beginTransaction();
@@ -188,7 +191,7 @@ Zotero.Relations = new function () {
 				if (uri.indexOf(prefix) == -1) {
 					continue;
 				}
-				if (!Zotero.URI.getURIItem(uri)) {
+				if (uri.indexOf(/\/items\//) != -1 && !Zotero.URI.getURIItem(uri)) {
 					this.eraseByURI(uri);
 				}
 			}
