@@ -853,7 +853,12 @@ if(appInfo.platformVersion[0] >= 2) {
 		
 		if(defaultSection.IsRelative) {
 			var defaultProfile = prefDir.clone().QueryInterface(Components.interfaces.nsILocalFile);
-			for each(var dir in defaultSection.Path.split("/")) defaultProfile.append(dir);
+			try {
+				for each(var dir in defaultSection.Path.split("/")) defaultProfile.append(dir);
+			} catch(e) {
+				Zotero.logError("Could not find profile at "+defaultSection.Path);
+				throw e;
+			}
 		} else {
 			var defaultProfile = Components.classes["@mozilla.org/file/local;1"]
 				.createInstance(Components.interfaces.nsILocalFile);
