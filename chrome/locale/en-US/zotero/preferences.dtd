@@ -186,3 +186,4 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer			"Submit to Zotero Server">
 
 <!ENTITY zotero.preferences.openAboutConfig				"Open about:config">
+<!ENTITY zotero.preferences.openCSLEdit					"Open csledit.xul">
