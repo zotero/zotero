@@ -87,10 +87,10 @@ var ZoteroPane = new function()
 	
 	const COLLECTIONS_HEIGHT = 32; // minimum height of the collections pane and toolbar
 	
-	var self = this;
-	var _loaded = false;
-	var titlebarcolorState, titleState, observerService;
-	var _reloadFunctions = [];
+	var self = this,
+		_loaded = false, _madeVisible = false,
+		titlebarcolorState, titleState, observerService,
+		_reloadFunctions = [];
 	
 	/**
 	 * Called when the window containing Zotero pane is open
@@ -366,7 +366,11 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		this.buildItemTypeSubMenu();
+		if(!_madeVisible) {
+			this.buildItemTypeSubMenu();
+		}
+		_madeVisible = true;
+		
 		this.unserializePersist();
 		this.updateToolbarPosition();
 		this.updateTagSelectorSize();
