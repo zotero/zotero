@@ -1264,9 +1264,23 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	
 	// Unless the translator has proposed some way to handle an error, handle it
 	// by throwing a "scraping error" message
-	if(!exception) {
-		var translate = this._translate;
-		var exception = function(e) {
+	var translate = this._translate;
+	if(exception) {
+		var myException = function(e) {
+			try {
+				exception(e);
+			} catch(e) {
+				try {
+					Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+				} catch(e) {}
+				translate.complete(false, e);
+			}
+		}
+	} else {
+		var myException = function(e) {
+			try {
+				Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+			} catch(e) {}
 			translate.complete(false, e);
 		}
 	}
@@ -1276,7 +1290,12 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	var hiddenBrowser = Zotero.HTTP.processDocuments(urls, processor, function() {
 		if(done) done();
 		translate.decrementAsyncProcesses();
-	}, exception, false, translate.cookieSandbox);
+		translate.setHandler("done", function() {
+			try {
+				Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+			} catch(e) {}
+		});
+	}, myException, true, translate.cookieSandbox);
 }
 
 /**
