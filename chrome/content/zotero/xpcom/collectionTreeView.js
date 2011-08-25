@@ -43,7 +43,7 @@ Zotero.CollectionTreeView = function()
 	this._highlightedRows = {};
 	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search', 'share', 'group', 'bucket']);
 	this._containerState = {};
-	this._duplicatesLibraries = [];
+	this._duplicateLibraries = [];
 	this._unfiledLibraries = [];
 }
 
