@@ -82,8 +82,8 @@ const ZoteroStandalone = new function() {
 		while(addMenu.hasChildNodes()) addMenu.removeChild(addMenu.firstChild);
 		
 		var typeSets = [Zotero.ItemTypes.getPrimaryTypes(), Zotero.ItemTypes.getSecondaryTypes()];
-		for(var i in typeSets) {
-			var t = typeSets[i];
+		for(var j=0; j<typeSets.length; j++) {
+			var t = typeSets[j];
 			
 			// Sort by localized name
 			var itemTypes = [];
@@ -109,7 +109,7 @@ const ZoteroStandalone = new function() {
 			}
 			
 			// add separator between sets
-			if(i !== typeSets.length-1) {
+			if(j !== typeSets.length-1) {
 				addMenu.appendChild(document.createElement("menuseparator"));
 			}
 		}
