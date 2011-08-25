@@ -220,12 +220,12 @@ Zotero.DBConnection.prototype.columnQuery = function (sql,params) {
  *		[1,"hello",3] or [{'int':2},{'string':'foobar'}]
  */
 Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams) {
-	// TODO: limit to Zotero.DB, not all Zotero.DBConnections?
-	if (Zotero.waiting) {
-		throw ("Cannot access database layer during active Zotero.wait()");
-	}
-	
 	var db = this._getDBConnection();
+	
+	// TODO: limit to Zotero.DB, not all Zotero.DBConnections?
+	if (db.transactionInProgress && Zotero.waiting) {
+		throw ("Cannot access database layer during active Zotero.wait() if a transaction is open");
+	}
 	
 	// First, determine the type of query using first word
 	var matches = sql.match(/^[^\s\(]*/);
@@ -422,16 +422,16 @@ Zotero.DBConnection.prototype.getLastErrorString = function () {
 
 
 Zotero.DBConnection.prototype.beginTransaction = function () {
-	// TODO: limit to Zotero.DB, not all Zotero.DBConnections?
-	if (Zotero.waiting) {
-		var msg = "Cannot access database layer during active Zotero.wait()";
-		Zotero.debug(msg, 2);
-		throw (msg);
-	}
-	
 	var db = this._getDBConnection();
 	
 	if (db.transactionInProgress) {
+		// TODO: limit to Zotero.DB, not all Zotero.DBConnections?
+		if (Zotero.waiting) {
+			var msg = "Cannot access database layer during active Zotero.wait() if a transaction is in progress";
+			Zotero.debug(msg, 2);
+			throw (msg);
+		}
+		
 		this._transactionNestingLevel++;
 		this._debug('Transaction in progress -- increasing level to '
 			+ this._transactionNestingLevel, 5);
