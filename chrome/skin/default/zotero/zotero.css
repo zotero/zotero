@@ -143,6 +143,15 @@ dialog[resizable="true"]
 	-moz-binding: url('chrome://zotero/content/bindings/resizabledialog.xml#resizabledialog');
 }
 
+label.zotero-text-link {
+	-moz-binding: url('chrome://zotero/content/bindings/text-link.xml#text-link');
+	-moz-user-focus: normal;
+	color: -moz-nativehyperlinktext;
+	text-decoration: underline;
+	border: 1px solid transparent;
+	cursor: pointer;
+}
+
 .zotero-clicky
 {	
 	-moz-border-radius: 6px;

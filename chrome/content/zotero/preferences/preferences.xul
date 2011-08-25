@@ -28,6 +28,7 @@
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/preferences.css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css"?>
 
 <!--
 
@@ -210,9 +211,9 @@ To add a new preference:
 							<hbox style="width:2em"/>
 							
 							<vbox>
-								<label class="text-link" value="&zotero.preferences.sync.createAccount;" href="http://zotero.org/user/register"/>
+								<label class="zotero-text-link" value="&zotero.preferences.sync.createAccount;" href="http://zotero.org/user/register"/>
 								<separator class="thin"/>
-								<label class="text-link" value="&zotero.preferences.sync.lostPassword;" href="http://zotero.org/user/lostpassword"/>
+								<label class="zotero-text-link" value="&zotero.preferences.sync.lostPassword;" href="http://zotero.org/user/lostpassword"/>
 							</vbox>
 						</hbox>
 						
@@ -222,7 +223,7 @@ To add a new preference:
 							<checkbox label="&zotero.preferences.sync.syncAutomatically;" preference="pref-sync-autosync"/>
 						</hbox>
 						
-						<label class="text-link" style="margin-top:.7em; margin-left: 0" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
+						<label class="zotero-text-link" style="margin-top:.7em; margin-left: 0" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
 					</groupbox>
 					
 					
@@ -314,10 +315,10 @@ To add a new preference:
 						<separator class="thin"/>
 						
 						<vbox>
-							<label class="text-link" style="margin-top:.3em; margin-left: 0" value="&zotero.preferences.sync.fileSyncing.about;" href="http://zotero.org/support/file_sync"/>
+							<label class="zotero-text-link" style="margin-top:.3em; margin-left: 0" value="&zotero.preferences.sync.fileSyncing.about;" href="http://zotero.org/support/file_sync"/>
 							<hbox id="storage-terms" style="margin-top: .4em" align="center">
 								<label>&zotero.preferences.sync.fileSyncing.tos1;</label>
-								<label class="text-link" href="http://www.digitalscholar.org/z_terms" value="&zotero.preferences.sync.fileSyncing.tos2;"/>
+								<label class="zotero-text-link" href="http://www.digitalscholar.org/z_terms" value="&zotero.preferences.sync.fileSyncing.tos2;"/>
 								<label>&zotero.preferences.period;</label>
 							</hbox>
 						</vbox>
@@ -329,7 +330,7 @@ To add a new preference:
 					<!-- This doesn't wrap without an explicit width, for some reason -->
 					<description width="45em">The following operations are for use only in rare, specific situations and should not be used for general troubleshooting.
 					In many cases, resetting will cause additional problems.
-					See <label style="margin-left: 0; margin-right: 0" class="text-link" href="http://zotero.org/support/kb/sync_reset_options">Sync Reset Options</label> for more information.</description>
+					See <label style="margin-left: 0; margin-right: 0" class="zotero-text-link" href="http://zotero.org/support/kb/sync_reset_options">Sync Reset Options</label> for more information.</description>
 					
 					<radiogroup id="zotero-reset-sync-group" oncommand="handleSyncResetSelect(this)">
 						<groupbox>
@@ -573,7 +574,7 @@ To add a new preference:
 							&zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled;
 					</label>
 					<checkbox label="&zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog;" preference="pref-cite-useClassicAddCitationDialog"/>
-					<label id="wordProcessors-getWordProcessorPlugins" class="text-link" href="&zotero.preferences.cite.wordProcessors.getPlugins.url;" value="&zotero.preferences.cite.wordProcessors.getPlugins;"/>
+					<label id="wordProcessors-getWordProcessorPlugins" class="zotero-text-link" href="&zotero.preferences.cite.wordProcessors.getPlugins.url;" value="&zotero.preferences.cite.wordProcessors.getPlugins;"/>
 				</tabpanel>
 				<tabpanel orient="vertical" id="styles">
 					<groupbox flex="1">
@@ -591,7 +592,7 @@ To add a new preference:
 						</tree>
 						<separator class="thin"/>
 						<hbox align="center" flex="1" height="40">
-							<label class="text-link" href="http://www.zotero.org/styles/" value="&zotero.preferences.export.getAdditionalStyles;" flex="1"/>
+							<label class="zotero-text-link" href="http://www.zotero.org/styles/" value="&zotero.preferences.export.getAdditionalStyles;" flex="1"/>
 							<button disabled="true" id="styleManager-delete" label="-" onclick="deleteStyle()"/>
 							<button label="+" onclick="addStyle()"/>
 						</hbox>
