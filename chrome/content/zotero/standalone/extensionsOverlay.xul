@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<overlay id="zotero-addons"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<page id="addons-page">
+		<script type="application/javascript" src="chrome://zotero/content/standalone/extensionsOverlay.js"/>
+	</page>
+</overlay>

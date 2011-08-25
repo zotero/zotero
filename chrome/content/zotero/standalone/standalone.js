@@ -28,8 +28,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 /**
  * This object contains the various functions for the interface
  */
-var ZoteroStandalone = new function()
-{
+const ZoteroStandalone = new function() {
 	/**
 	 * Run when standalone window first opens
 	 */
@@ -65,6 +64,12 @@ var ZoteroStandalone = new function()
 			handlerInfo.alwaysAskBeforeHandling = false;
 			hs.store(handlerInfo);
 		}
+		
+		// Add add-on listeners (not yet hooked up)Services.obs.addObserver(gXPInstallObserver, "addon-install-disabled", false);
+		Services.obs.addObserver(gXPInstallObserver, "addon-install-started", false);
+		Services.obs.addObserver(gXPInstallObserver, "addon-install-blocked", false);
+		Services.obs.addObserver(gXPInstallObserver, "addon-install-failed", false);
+		Services.obs.addObserver(gXPInstallObserver, "addon-install-complete", false);
 	}
 	
 	/**
@@ -170,6 +175,25 @@ function toOpenWindowByType(inType, uri, features)
 		window.open(uri, "_blank", "chrome,extrachrome,menubar,resizable,scrollbars,status,toolbar");
 	}
 }
+
+const gXPInstallObserver = {
+	observe: function (aSubject, aTopic, aData) {
+		var installInfo = aSubject.QueryInterface(Components.interfaces.amIWebInstallInfo);
+		var win = installInfo.originatingWindow;
+		switch (aTopic) {
+			case "addon-install-disabled":
+			case "addon-install-blocked":
+			case "addon-install-failed":
+				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+					.getService(Components.interfaces.nsIPromptService);
+				promptService.alert(win, Zotero.getString("standalone.addonInstallationFailed.title"),
+					Zotero.getString("standalone.addonInstallationFailed.body", installInfo.installs[0].name));
+				break;
+			/*case "addon-install-started":
+			case "addon-install-complete":*/
+		}
+	}
+};
 
 window.addEventListener("load", function(e) { ZoteroStandalone.onLoad(e); }, false);
 window.addEventListener("unload", function(e) { ZoteroStandalone.onUnload(e); }, false);
