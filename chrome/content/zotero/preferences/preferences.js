@@ -821,7 +821,7 @@ function updatePDFToolsStatus() {
 			else if (part.type == 'link') {
 				var elem = document.createElement('label');
 				elem.setAttribute('value', part.text);
-				elem.setAttribute('class', 'text-link');
+				elem.setAttribute('class', 'zotero-text-link');
 				for (var key in part.attributes) {
 					elem.setAttribute(key, part.attributes[key]);
 					
@@ -851,7 +851,7 @@ function updatePDFToolsStatus() {
 			else if (part.type == 'link') {
 				var elem = document.createElement('label');
 				elem.setAttribute('value', part.text);
-				elem.setAttribute('class', 'text-link');
+				elem.setAttribute('class', 'zotero-text-link');
 				for (var key in part.attributes) {
 					elem.setAttribute(key, part.attributes[key]);
 					

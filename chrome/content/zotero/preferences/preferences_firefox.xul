@@ -81,7 +81,7 @@ To add a new preference:
 							image="chrome://zotero/skin/prefs-proxies.png" position="6">
 			<description width="45em" style="font-size: 12px">
 				&zotero.preferences.proxies.desc_before_link;
-				<label class="text-link" href="http://www.zotero.org/support/proxies"
+				<label class="zotero-text-link" href="http://www.zotero.org/support/proxies"
 					value="&zotero.preferences.proxies.desc_link;"/>
 				&zotero.preferences.proxies.desc_after_link;
 			</description>

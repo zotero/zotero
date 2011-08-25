@@ -201,7 +201,7 @@
 								 urlField.onclick = function (event) {
 									ZoteroPane_Local.loadURI(this.value, event)
 								};
-								urlField.className = 'text-link';
+								urlField.className = 'zotero-text-link';
 							}
 							else {
 								urlField.className = '';

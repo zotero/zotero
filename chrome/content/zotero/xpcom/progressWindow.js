@@ -220,7 +220,7 @@ Zotero.ProgressWindow = function(_window){
 				else if (part.type == 'link') {
 					var elem = _progressWindow.document.createElement('label');
 					elem.setAttribute('value', part.text);
-					elem.setAttribute('class', 'text-link');
+					elem.setAttribute('class', 'zotero-text-link');
 					for (var i in part.attributes) {
 						elem.setAttribute(i, part.attributes[i]);
 					}
