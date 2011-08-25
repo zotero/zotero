@@ -42,7 +42,7 @@ Zotero.Groups = new function () {
 	
 	this.getAll = function () {
 		var groups = [];
-		var sql = "SELECT groupID FROM groups";
+		var sql = "SELECT groupID FROM groups ORDER BY name COLLATE locale";
 		var groupIDs = Zotero.DB.columnQuery(sql);
 		if (!groupIDs) {
 			return groups;
