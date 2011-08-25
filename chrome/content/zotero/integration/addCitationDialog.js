@@ -565,6 +565,7 @@ var Zotero_Citation_Dialog = new function () {
 		if(_previewShown) {
 			document.documentElement.getButton("extra2").label = Zotero.getString("citation.hideEditor");		
 			if(text) {
+				_originalHTML = io.previewFunction();
 				editor.value = text;
 			} else {
 				_updatePreview();
@@ -623,7 +624,16 @@ var Zotero_Citation_Dialog = new function () {
 			
 			editor.readonly = !io.citation.citationItems.length;
 			editor.value = (io.citation.citationItems.length ? io.previewFunction() : "");
-			_originalHTML = editor.value;
+			
+			if(editor.initialized) {
+				_originalHTML = editor.value;
+			} else {
+				var eventListener = function() {
+					_originalHTML = editor.value;
+					editor.removeEventListener("tinymceInitialized", eventListener, false);
+				};
+				editor.addEventListener("tinymceInitialized", eventListener, false);
+			}
 		}
 	}
 	

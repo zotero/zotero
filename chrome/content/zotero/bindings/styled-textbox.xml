@@ -169,6 +169,13 @@
 			</property>
 			
 			<!-- Sets or returns formatting (currently, HTML or Integration) of rich text box -->
+			<property name="initialized">
+				<getter><![CDATA[
+					return !!this._editor;
+				]]></getter>
+			</property>	
+			
+			<!-- Sets or returns formatting (currently, HTML or Integration) of rich text box -->
 			<property name="format">
 				<getter><![CDATA[
 					return this._format;
@@ -421,6 +428,11 @@
 								style.innerHTML = css;
 								head.appendChild(style);
 							}
+							
+							// Dispatch a tinymceInitialized event
+							var ev = document.createEvent('HTMLEvents');
+							ev.initEvent('tinymceInitialized', true, true);
+							self.dispatchEvent(ev);
 						};
 						onInitFunction.__exposedProps__ = {"apply":"r"};
 						editor.onInit.add(onInitFunction);
