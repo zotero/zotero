@@ -71,7 +71,43 @@ gDiscoverView.onLocationChange = function(aWebProgress, aRequest, aLocation) {
 	// Canceling the request will send an error to onStateChange which will show
 	// the error page
 	aRequest.cancel(Components.results.NS_BINDING_ABORTED);*/
-}
+};
+
+gDiscoverView.onStateChange = function(aWebProgress, aRequest, aStateFlags, aStatus) {
+	// Only care about the network events
+	if (!(aStateFlags & (Ci.nsIWebProgressListener.STATE_IS_NETWORK)))
+		return;
+
+	// If this is the start of network activity then show the loading page
+	if (aStateFlags & (Ci.nsIWebProgressListener.STATE_START))
+		this.node.selectedPanel = this._loading;
+
+	// Ignore anything except stop events
+	if (!(aStateFlags & (Ci.nsIWebProgressListener.STATE_STOP)))
+		return;
+
+	// Consider the successful load of about:blank as still loading
+	if (aRequest instanceof Ci.nsIChannel && aRequest.URI.spec == "about:blank")
+		return;
+
+	// If there was an error loading the page or the new hostname is not the
+	// same as the default hostname or the default scheme is secure and the new
+	// scheme is insecure then show the error page
+	if (aRequest && aRequest instanceof Ci.nsIHttpChannel && !aRequest.requestSucceeded) {
+		this.showError();
+	} else {
+		// Got a successful load, make sure the browser is visible
+		this.node.selectedPanel = this._browser;
+		gViewController.updateCommands();
+	}
+
+	var listeners = this._loadListeners;
+	this._loadListeners = [];
+
+	listeners.forEach(function(aListener) {
+		aListener();
+	});
+};
 
 // Don't care about http/https
 gDiscoverView.onSecurityChange = function() {};
