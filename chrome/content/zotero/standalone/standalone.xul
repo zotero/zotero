@@ -44,7 +44,6 @@
 
 <window id="main-window"
 				xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-				onload="window.sizeToContent()"
 				windowtype="navigator:browser" 
 				title="&brandShortName;"
 				width="900" height="500"

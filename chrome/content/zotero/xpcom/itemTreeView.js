@@ -124,18 +124,19 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 		
 		// Add a keypress listener for expand/collapse
 		var tree = this._treebox.treeBody.parentNode;
+		var me = this;
 		var listener = function(event) {
 			// Handle arrow keys specially on multiple selection, since
 			// otherwise the tree just applies it to the last-selected row
 			if (event.keyCode == 39 || event.keyCode == 37) {
-				if (this._treebox.view.selection.count > 1) {
+				if (me._treebox.view.selection.count > 1) {
 					switch (event.keyCode) {
 						case 39:
-							this.expandSelectedRows();
+							me.expandSelectedRows();
 							break;
 							
 						case 37:
-							this.collapseSelectedRows();
+							me.collapseSelectedRows();
 							break;
 					}
 					
@@ -147,12 +148,12 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 			
 			var key = String.fromCharCode(event.which);
 			if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
-				this.expandAllRows();
+				me.expandAllRows();
 				event.preventDefault();
 				return;
 			}
 			else if (key == '-' && !(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey)) {
-				this.collapseAllRows();
+				me.collapseAllRows();
 				event.preventDefault();
 				return;
 			}
