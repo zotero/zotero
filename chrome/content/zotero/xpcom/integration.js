@@ -865,8 +865,7 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 					&& !citation.properties.dontUpdate) {
 				// For ReferenceMarks with formatting, we need to set the text again, because
 				// setting the field code removes formatting from the mark. I don't like this.
-				field.setText(citation.properties.custom ? citation.properties.custom 
-					: citation.properties.formattedCitation, isRich);
+				field.setText(formattedCitation, isRich);
 			}
 		}
 	}
