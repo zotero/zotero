@@ -583,6 +583,7 @@ var Zotero_Citation_Dialog = new function () {
 		_getCitation();
 		Zotero.debug("got citation");
 		var isCustom = _previewShown && io.citation.citationItems.length	// if a citation is selected
+				&& _originalHTML
 				&& document.getElementById('editor').value != _originalHTML	// and citation has been edited
 		
 		if(isCustom) {	
