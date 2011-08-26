@@ -111,7 +111,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 		str = str + "";
 		
 		str = Zotero.Utilities.removeDiacritics(str)
-			.replace(/[^!-~]/g, ' ') // Convert punctuation to spaces
+			.replace(/[!-/:-@[-`{-~]/g, ' ') // Convert (ASCII) punctuation to spaces
 			.replace(/ +/, ' ') // Normalize spaces
 			.toLowerCase();
 		
@@ -173,6 +173,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	processRows(function (a, b) {
 		a = normalizeString(a.value);
 		b = normalizeString(b.value);
+		
 		// If we stripped one of the strings completely, we can't compare them
 		if (a.length == 0 || b.length == 0) {
 			return -1;
