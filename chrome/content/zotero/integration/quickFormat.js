@@ -680,6 +680,7 @@ var Zotero_QuickFormat = new function () {
 			_bubbleizeSelected();
 		} else if(keyCode === event.DOM_VK_BACK_SPACE) {
 			_resize();
+			window.setTimeout(_quickFormat, 0);
 		} else if(keyCode === event.DOM_VK_UP) {
 			var selectedItem = referenceBox.selectedItem;
 			var previousSibling;
