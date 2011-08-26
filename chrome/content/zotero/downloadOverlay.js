@@ -70,7 +70,8 @@ var Zotero_DownloadOverlay = new function() {
 		} catch(e) {};
 		
 		var recognizePDF = document.getElementById('zotero-recognizePDF').checked
-				&& !document.getElementById('zotero-recognizePDF').hidden;
+				&& !document.getElementById('zotero-recognizePDF').hidden
+				&& !document.getElementById('zotero-recognizePDF').disabled;
 		
 		// set up callback
 		var callback = function(item) {
@@ -193,6 +194,9 @@ var Zotero_DownloadOverlay = new function() {
 			recognizePDF.label = Zotero.getString("pane.items.menu.recognizePDF");
 			recognizePDF.hidden = false;
 			recognizePDF.disabled = true;
+			if(!Zotero.Fulltext.pdfConverterIsRegistered()) {
+				recognizePDF.checked = false;
+			}
 		}
 	};
 }
