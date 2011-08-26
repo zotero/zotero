@@ -61,8 +61,13 @@ var Zotero_DownloadOverlay = new function() {
 		var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 						.getService(Components.interfaces.nsIWindowMediator)
 						.getMostRecentWindow("navigator:browser");
-		var libraryID = (win ? win.ZoteroPane.getSelectedLibraryID() : false);
-		var collection = (win ? win.ZoteroPane.getSelectedCollection() : false);
+		var libraryID, collection;
+		try {
+			if(win.ZoteroPane.getItemGroup().filesEditable) {
+				libraryID = win.ZoteroPane.getSelectedLibraryID();
+				collection = win.ZoteroPane.getSelectedCollection();
+			}
+		} catch(e) {};
 		
 		var recognizePDF = document.getElementById('zotero-recognizePDF').checked
 				&& !document.getElementById('zotero-recognizePDF').hidden;
@@ -123,8 +128,31 @@ var Zotero_DownloadOverlay = new function() {
 		document.getElementById('rememberChoice').disabled = zoteroSelected;
 		
 		// disable recognizePDF checkbox as necessary
-		document.getElementById('zotero-recognizePDF').disabled = !zoteroSelected;
+		if(!Zotero.Fulltext.pdfConverterIsRegistered()) {
+			document.getElementById('zotero-noPDFTools-description').hidden = !zoteroSelected;
+			document.getElementById('zotero-recognizePDF').disabled = true;
+			window.sizeToContent();
+		} else {
+			document.getElementById('zotero-recognizePDF').disabled = !zoteroSelected;
+		}
+		
+		Zotero_DownloadOverlay.updateLibraryNote();
 	};
+	
+	/**
+	 * Determines whether the note stating that the item will be saved to "My Library" is shown
+	 */
+	this.updateLibraryNote = function() {
+		var zoteroSelected = document.getElementById('zotero-radio').selected;
+		var zp = Zotero.getActiveZoteroPane(), canSave = true;
+		try {
+			canSave = zp.getItemGroup().filesEditable;
+		} catch(e) {
+			Zotero.logError(e);
+		};
+		document.getElementById('zotero-saveToLibrary-description').hidden = !zoteroSelected || canSave;
+		window.sizeToContent();
+	}
 	
 	/**
 	 * Called when the save dialog is opened
@@ -170,3 +198,4 @@ var Zotero_DownloadOverlay = new function() {
 }
 
 window.addEventListener("load", Zotero_DownloadOverlay.init, false);
+window.addEventListener("activate", Zotero_DownloadOverlay.updateLibraryNote, false);
