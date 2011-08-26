@@ -41,7 +41,9 @@
 		<vbox insertbefore="save" id="zotero-container" flex="1" hidden="true">
 			<radio id="zotero-radio" label="&zotero.downloadManager.label;" disabled="true"/>
 			<vbox style="margin-left: 10px">
+				<description id="zotero-saveToLibrary-description" style="font: -moz-info" hidden="true">&zotero.downloadManager.saveToLibrary.description;</description>
 				<checkbox id="zotero-recognizePDF" hidden="true" persist="checked" disabled="true"/>
+				<description style="margin-left: 20px; font: -moz-info" id="zotero-noPDFTools-description" hidden="true">&zotero.downloadManager.noPDFTools.description;</description>
 			</vbox>
 		</vbox>
 	</radiogroup>
