@@ -186,3 +186,5 @@
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Zum Zotero-Server übertragen">
 
 <!ENTITY zotero.preferences.openAboutConfig "Open about:config">
+<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
