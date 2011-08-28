@@ -60,7 +60,7 @@
 		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane_Local.newCollection()"/>
 		<command id="cmd_zotero_newSavedSearch" oncommand="ZoteroPane_Local.newSearch()"/>
 		<command id="cmd_zotero_newStandaloneNote" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
-		<command id="cmd_zotero_newItemFromCurrentPage" oncommand="ZoteroPane_Local.addItemFromPage('temporaryPDFHack', event.shiftKey ? !Zotero.Prefs.get('automaticSnapshots') : null)"/>
+		<command id="cmd_zotero_newItemFromCurrentPage" oncommand="ZoteroPane.addItemFromPage('temporaryPDFHack', event.shiftKey ? !Zotero.Prefs.get('automaticSnapshots') : null)"/>
 	</commandset>
 	
 	<popup id="contentAreaContextMenu">
@@ -71,16 +71,16 @@
 					command="cmd_zotero_newItemFromCurrentPage"/>
 				<menuitem id="zotero-context-add-to-current-note" class="menu-iconic"
 					label="&zotero.contextMenu.addTextToCurrentNote;" hidden="true"
-					oncommand="var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString(); var uri = event.currentTarget.ownerDocument.popupNode.ownerDocument.location.href; ZoteroPane_Local.addTextToNote(str, uri)"/>
+					oncommand="var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString(); var uri = event.currentTarget.ownerDocument.popupNode.ownerDocument.location.href; ZoteroPane.addTextToNote(str, uri)"/>
 				<menuitem id="zotero-context-add-to-new-note" class="menu-iconic"
 					label="&zotero.contextMenu.addTextToNewNote;" hidden="true"
-					oncommand="var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString(); var uri = event.currentTarget.ownerDocument.popupNode.ownerDocument.location.href; var itemID = ZoteroPane_Local.addItemFromPage(); ZoteroPane_Local.newNote(false, itemID, str, uri)"/>
+					oncommand="var str = event.currentTarget.ownerDocument.popupNode.ownerDocument.defaultView.getSelection().toString(); var uri = event.currentTarget.ownerDocument.popupNode.ownerDocument.location.href; var itemID = ZoteroPane.addItemFromPage(); ZoteroPane.newNote(false, itemID, str, uri)"/>
 				<menuitem id="zotero-context-save-link-as-item" class="menu-iconic"
 					label="&zotero.contextMenu.saveLinkAsItem;" hidden="true"
-					oncommand="ZoteroPane_Local.addItemFromURL(window.gContextMenu.linkURL, 'temporaryPDFHack')"/>
+					oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.linkURL, 'temporaryPDFHack')"/>
 				<menuitem id="zotero-context-save-image-as-item" class="menu-iconic"
 					label="&zotero.contextMenu.saveImageAsItem;" hidden="true"
-					oncommand="ZoteroPane_Local.addItemFromURL(window.gContextMenu.onImage ? (window.gContextMenu.mediaURL ? window.gContextMenu.mediaURL : window.gContextMenu.imageURL) : window.gContextMenu.bgImageURL, 'artwork')"/>
+					oncommand="ZoteroPane.addItemFromURL(window.gContextMenu.onImage ? (window.gContextMenu.mediaURL ? window.gContextMenu.mediaURL : window.gContextMenu.imageURL) : window.gContextMenu.bgImageURL, 'artwork')"/>
 			</menupopup>
 		</menu>
 	</popup>
