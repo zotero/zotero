@@ -870,7 +870,11 @@ Zotero.Proxies.DNS = new function() {
 		var dns = Components.classes["@mozilla.org/network/dns-service;1"]
 		                    .getService(Components.interfaces.nsIDNSService);
 		myHostName = dns.myHostName;
-		var record = dns.resolve(myHostName, null);
+		try {
+			var record = dns.resolve(myHostName, null);
+		} catch(e) {
+			return [];
+		}
 		
 		// get IPs
 		var ips = [];
