@@ -69,7 +69,12 @@
 	
 	<!-- Scrape Code -->
 	<hbox id="urlbar-icons">
-		<image src="chrome://zotero/skin/treeitem-book.png" id="zotero-status-image" onclick="Zotero_Browser.scrapeThisPage()" position="1" hidden="true"/>
+		<popupset>
+			<menupopup id="zotero-status-image-context" onpopupshowing="Zotero_Browser.onStatusPopupShowing(event)"/>
+		</popupset>
+		<image src="chrome://zotero/skin/treeitem-book.png" id="zotero-status-image"
+			onclick="if(event.button === 0) Zotero_Browser.scrapeThisPage()" context="zotero-status-image-context"
+			position="1" hidden="true"/>
 	</hbox>
 		
 	<menupopup id="menu_ToolsPopup">

@@ -50,7 +50,7 @@ var Zotero_LocateMenu = new function() {
 			var availableEngines = _getAvailableLocateEngines(selectedItems);
 			// add engines that are available for selected items
 			if(availableEngines.length) {
-				_addLocateEngines(locateMenu, availableEngines, true);
+				Zotero_LocateMenu.addLocateEngines(locateMenu, availableEngines, null, true);
 			}
 		} else {
 			// add "no items selected"
@@ -207,16 +207,21 @@ var Zotero_LocateMenu = new function() {
 	/**
 	 * Add locate engine options to a menu
 	 * @param {menupopup} menu The menu to add menu items to
-	 * @param {Zotero.LocateManater.LocateEngine[]} engines The list of engines to add to the menu
+	 * @param {Zotero.LocateManager.LocateEngine[]} engines The list of engines to add to the menu
+	 * @param {Function|null} items Function to call to locate items
 	 * @param {Boolean} showIcons Whether menu items should have associated icons
 	 */
-	function _addLocateEngines(menu, engines, showIcons) {
+	this.addLocateEngines = function(menu, engines, locateFn, showIcons) {
+		if(!locateFn) {
+			locateFn = this.locateItem;
+		}
+		
 		for each(var engine in engines) {
 			var menuitem = _createMenuItem(engine.name, null, engine.description);
 			menuitem.setAttribute("class", "menuitem-iconic");
 			menuitem.setAttribute("image", engine.icon);
 			menu.appendChild(menuitem);
-			menuitem.addEventListener("command", _locateItem, false);
+			menuitem.addEventListener("command", locateFn, false);
 		}
 	}
 	
@@ -270,8 +275,10 @@ var Zotero_LocateMenu = new function() {
 	/**
 	 * Locate selected items
 	 */
-	function _locateItem(event) {
-		var selectedItems = _getSelectedItems();
+	this.locateItem = function(event, selectedItems) {
+		if(!selectedItems) {
+			selectedItems = _getSelectedItems();
+		}
 		
 		// find selected engine
 		var selectedEngine = Zotero.LocateManager.getEngineByName(event.target.label);
