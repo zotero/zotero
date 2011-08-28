@@ -269,7 +269,7 @@ Zotero.LocateManager = new function() {
 			var ns = engine._urlNamespaces[nsPrefix];
 			if(!ns) return false;
 		} else {
-			if(param === "searchTerms") return [item.getField("title")];
+			if(param === "searchTerms") return [item.title];
 			return false;
 		}
 		
@@ -277,7 +277,7 @@ Zotero.LocateManager = new function() {
 			// take a normal "title," even though we don't use it, because it is valid (but not
 			// preferred) OpenURL
 			if(param === "title") {
-				var title = item.getField("title");
+				var title = item.title;
 				return (title ? [encodeURIComponent(title)] : false);
 			}
 			
@@ -298,7 +298,7 @@ Zotero.LocateManager = new function() {
 			} else if(param === "year") {
 				return (itemOpenURL["rft.date"] ? [itemOpenURL["rft.date"][0].substr(0, 4)] : false);
 			} else {
-				var result = item.getField(param);
+				var result = item[param];
 				return (result ? [encodeURIComponent(result)] : false);
 			}
 		} else {
@@ -411,6 +411,10 @@ Zotero.LocateManager = new function() {
 		"getItemSubmission":function(item, responseType) {
 			if(responseType && responseType !== "text/html") {
 				throw "LocateManager supports only responseType text/html";
+			}
+		
+			if(item.toArray) {
+				item = item.toArray();
 			}
 			
 			var itemAsOpenURL = Zotero.OpenURL.createContextObject(item, "1.0", true);
