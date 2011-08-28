@@ -667,14 +667,14 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		// Currently selected row
-		if (row === undefined) {
+		// Make sure currently selected view is editable
+		if (row === undefined && this.collectionsView.selection) {
 			row = this.collectionsView.selection.currentIndex;
-		}
-		
-		if (!this.canEdit(row)) {
-			this.displayCannotEditLibraryMessage();
-			return;
+			
+			if (!this.canEdit(row)) {
+				this.displayCannotEditLibraryMessage();
+				return;
+			}
 		}
 		
 		if (row !== undefined) {
@@ -703,8 +703,6 @@ var ZoteroPane = new function()
 		
 		//set to Info tab
 		document.getElementById('zotero-view-item').selectedIndex = 0;
-		
-		this.selectItem(itemID);
 		
 		// Update most-recently-used list for New Item menu
 		var mru = Zotero.Prefs.get('newItemTypeMRU');
