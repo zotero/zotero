@@ -1017,13 +1017,13 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	
 	var includeTrashed = this._itemGroup.isTrash();
 	
-	var i = 0, me = this;
+	var rowsSorted = 0, me = this;
 	function rowSort(a, b) {
-		if(i === 1000) {
+		if(rowsSorted === 1000) {
 			me.showLoadingMessageIfNecessary();
-			i = 0;
+			rowsSorted = 0;
 		}
-		i++;
+		rowsSorted++;
 		
 		var cmp, fieldA, fieldB;
 		
@@ -1306,7 +1306,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	if (itemID) {
 		var row = this._itemRowMap[itemID];
 		for (var i=0, len=this._dataItems.length; i<len; i++) {
-			if (i == row) {
+			if (i === row) {
 				continue;
 			}
 			
