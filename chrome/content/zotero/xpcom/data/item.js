@@ -2151,7 +2151,7 @@ Zotero.Item.prototype.getSource = function() {
 	var sql = "SELECT sourceItemID FROM item" + Type + "s WHERE itemID=?";
 	var sourceItemID = Zotero.DB.valueQuery(sql, this.id);
 	if (!sourceItemID) {
-		sourceItemID = null;
+		sourceItemID = false;
 	}
 	this._sourceItem = sourceItemID;
 	return sourceItemID;
