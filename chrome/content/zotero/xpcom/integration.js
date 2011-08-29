@@ -35,7 +35,6 @@ const INTEGRATION_PLUGINS = ["zoteroMacWordIntegration@zotero.org",
 Zotero.Integration = new function() {
 	const INTEGRATION_MIN_VERSIONS = ["3.1.6.SVN", "3.5b1.SVN", "3.1.2.SVN"];
 	
-	var _fifoFile = null;
 	var _tmpFile = null;
 	var _osascriptFile;
 	var _inProgress = false;
@@ -59,36 +58,64 @@ Zotero.Integration = new function() {
 		// Determine where to put the pipe
 		// on OS X, first try /Users/Shared for those who can't put pipes in their home
 		// directories
-		_fifoFile = Components.classes["@mozilla.org/file/local;1"].
+		var pipe = null;
+		var sharedDir = Components.classes["@mozilla.org/file/local;1"].
 			createInstance(Components.interfaces.nsILocalFile);
-		_fifoFile.initWithPath("/Users/Shared");
+		sharedDir.initWithPath("/Users/Shared");
 		
-		if(_fifoFile.exists() && _fifoFile.isDirectory() && _fifoFile.isWritable()) {
+		if(sharedDir.exists() && sharedDir.isDirectory()) {
 			var logname = Components.classes["@mozilla.org/process/environment;1"].
 				getService(Components.interfaces.nsIEnvironment).
 				get("LOGNAME");
-			_fifoFile.append(".zoteroIntegrationPipe_"+logname);
-		} else {
-			_fifoFile = null;
+			var sharedPipe = sharedDir.clone();
+			sharedPipe.append(".zoteroIntegrationPipe_"+logname);
+			
+			if(sharedPipe.exists()) {
+				if(_deletePipe(sharedPipe) && sharedDir.isWritable()) {
+					pipe = sharedPipe;
+				}
+			} else if(sharedDir.isWritable()) {
+				pipe = sharedPipe;
+			}
 		}
 		
-		if(!_fifoFile) {
+		if(!pipe) {
 			// on other platforms, or as a fallback, use home directory
-			_fifoFile = Components.classes["@mozilla.org/file/directory_service;1"].
+			pipe = Components.classes["@mozilla.org/file/directory_service;1"].
 				getService(Components.interfaces.nsIProperties).
 				get("Home", Components.interfaces.nsIFile);
-			_fifoFile.append(".zoteroIntegrationPipe");
+			pipe.append(".zoteroIntegrationPipe");
+		
+			// destroy old pipe, if one exists
+			if(!_deletePipe(pipe)) return;
 		}
 		
-		// destroy old pipe, if one exists
+		// try to initialize pipe
 		try {
-			if(_fifoFile.exists()) {
-				Zotero.IPC.safePipeWrite(_fifoFile, "Zotero shutdown\n");
-				_fifoFile.remove(false);
+			Zotero.IPC.Pipe.initPipeListener(pipe, _parseIntegrationPipeCommand);
+		} catch(e) {
+			Zotero.logError(e);
+		}
+		
+		_updateTimer = Components.classes["@mozilla.org/timer;1"].
+			createInstance(Components.interfaces.nsITimer);
+		_updateTimer.initWithCallback({"notify":_checkPluginVersions}, 1000,
+			Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+	}
+	
+	/**
+	 * Deletes a defunct pipe on OS X
+	 */
+	function _deletePipe(pipe) {
+		try {
+			if(pipe.exists()) {
+				Zotero.IPC.safePipeWrite(pipe, "Zotero shutdown\n");
+				pipe.remove(false);
 			}
+			return true;
 		} catch (e) {
 			// if pipe can't be deleted, log an error
-			Zotero.debug("Error removing old integration pipe", 1);
+			Zotero.debug("Error removing old integration pipe "+pipe.path, 1);
 			Zotero.logError(e);
 			Components.utils.reportError(
 				"Zotero word processor integration initialization failed. "
@@ -101,27 +128,15 @@ Zotero.Integration = new function() {
 				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 					.getService(Components.interfaces.nsIPromptService);
 				var deletePipe = promptService.confirm(null, Zotero.getString("integration.error.title"), Zotero.getString("integration.error.deletePipe"));
-				if(!deletePipe) return;
-				let escapedFifoFile = _fifoFile.path.replace("'", "'\\''");
+				if(!deletePipe) return false;
+				let escapedFifoFile = pipe.path.replace("'", "'\\''");
 				_executeAppleScript("do shell script \"rmdir '"+escapedFifoFile+"'; rm -f '"+escapedFifoFile+"'\" with administrator privileges", true);
-				if(_fifoFile.exists()) return;
+				if(pipe.exists()) return false;
 			} catch(e) {
 				Zotero.logError(e);
-				return;
+				return false;
 			}
 		}
-		
-		// try to initialize pipe
-		try {
-			Zotero.IPC.Pipe.initPipeListener(_fifoFile, _parseIntegrationPipeCommand);
-		} catch(e) {
-			Zotero.logError(e);
-		}
-		
-		_updateTimer = Components.classes["@mozilla.org/timer;1"].
-			createInstance(Components.interfaces.nsITimer);
-		_updateTimer.initWithCallback({"notify":_checkPluginVersions}, 1000,
-			Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 	}
 	
 	function _checkPluginVersions() {
