@@ -1,14 +1,15 @@
 {
-	"translatorID":"b1c90b99-2e1a-4374-a03b-92e45f1afc55",
-	"translatorType":4,
-	"label":"Radio Free Europe / Radio Liberty",
-	"creator":"Avram Lyon",
-	"target":"^http://www\\.rferl\\.org/|^http://www\\.azatliq\\.org/|^http://www\\.azattyq\\.org/|^http://rus\\.azattyq\\.org/|^http://da\\.azadiradio\\.org/|^http://pa\\.azadiradio\\.org/|^http://www\\.azattyk\\.org/|^http://www\\.ozodi\\.org/|^http://www\\.ozodlik\\.org/|^http://www\\.evropaelire\\.org/|^http://www\\.slobodnaevropa\\.org/|^http://www\\.makdenes\\.org/|^http://www\\.iraqhurr\\.org/|^http://www\\.radiofarda\\.com/|^http://www\\.azatutyun\\.am/|^http://www\\.azadliq\\.org/|^http://www\\.svaboda\\.org/|^http://www\\.tavisupleba\\.org/|^http://www\\.azathabar\\.com/|^http://www\\.svobodanews\\.ru/|^http://www\\.europalibera\\.org/|^http://www\\.radiosvoboda\\.org/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-05-24 00:45:00"
+	"translatorID": "b1c90b99-2e1a-4374-a03b-92e45f1afc55",
+	"label": "Radio Free Europe / Radio Liberty",
+	"creator": "Avram Lyon",
+	"target": "^http://www\\.rferl\\.org/|^http://www\\.azatliq\\.org/|^http://www\\.azattyq\\.org/|^http://rus\\.azattyq\\.org/|^http://da\\.azadiradio\\.org/|^http://pa\\.azadiradio\\.org/|^http://www\\.azattyk\\.org/|^http://www\\.ozodi\\.org/|^http://www\\.ozodlik\\.org/|^http://www\\.evropaelire\\.org/|^http://www\\.slobodnaevropa\\.org/|^http://www\\.makdenes\\.org/|^http://www\\.iraqhurr\\.org/|^http://www\\.radiofarda\\.com/|^http://www\\.azatutyun\\.am/|^http://www\\.azadliq\\.org/|^http://www\\.svaboda\\.org/|^http://www\\.tavisupleba\\.org/|^http://www\\.azathabar\\.com/|^http://www\\.svobodanews\\.ru/|^http://www\\.europalibera\\.org/|^http://www\\.radiosvoboda\\.org/",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-08-18 15:31:42"
 }
 
 /*
@@ -119,9 +120,9 @@ function doWeb(doc, url){
 		if ((author = author.iterateNext()) !== null) {
 			author = author.textContent;
 			// Sometimes we have "By Author"
-                	if(author.substr(0, 3).toLowerCase() == "by ") {
-                        	author = author.substr(3);
-                	}
+			if(author.substr(0, 3).toLowerCase() == "by ") {
+				author = author.substr(3);
+			}
 			var cleaned = Zotero.Utilities.cleanAuthor(author, "author");
 			// If we have only one name, set the author to one-name mode
 			if (cleaned.firstName == "") {
@@ -222,3 +223,46 @@ function addAudio(text) {
 	if (audio) item.attachments.push({url:audio[0], mimeType:"application/octet-stream", title:"RFE/RL Audio"})
 	item.complete();
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.azatliq.org/content/article/24281041.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Гүзәл",
+						"lastName": "Мәхмүтова",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": " Азатлык Радиосы  Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"url": false,
+						"mimeType": "application/octet-stream",
+						"title": "RFE/RL Audio"
+					}
+				],
+				"title": "Татар яшьләре татарлыкны сакларга тырыша",
+				"section": "татарстан",
+				"date": "29.07.2011",
+				"url": "http://www.azatliq.org/content/article/24281041.html",
+				"publicationTitle": "Азатлык Радиосы",
+				"language": "Tatar/Bashkir",
+				"libraryCatalog": "Radio Free Europe / Radio Liberty"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
