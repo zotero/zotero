@@ -28,13 +28,7 @@ Zotero.Debug = new function () {
 	this.__defineGetter__('storing', function () { return _store; });
 	this.__defineGetter__('enabled', function () { return _console || _store; });
 	
-	var _console;
-	var _store;
-	var _level;
-	var _time;
-	var _lastTime;
-	var _output = [];
-	
+	var _console, _stackTrace, _store, _level, _time, _lastTime, _output = [];
 	
 	this.init = function () {
 		_console = Zotero.Prefs.get('debug.log');
@@ -44,6 +38,7 @@ Zotero.Debug = new function () {
 		}
 		_level = Zotero.Prefs.get('debug.level');
 		_time = Zotero.Prefs.get('debug.time');
+		_stackTrace = Zotero.Prefs.get('debug.stackTrace');
 	}
 	
 	this.log = function (message, level) {
@@ -78,6 +73,17 @@ Zotero.Debug = new function () {
 			}
 			
 			deltaStr = '(+' + delta + ')';
+		}
+		
+		if (_stackTrace) {
+			var stack = (new Error()).stack;
+			var nl1Index = stack.indexOf("\n")
+			var nl2Index = stack.indexOf("\n", nl1Index+1);
+			var line2 = stack.substring(nl1Index+2, nl2Index-1);
+			var debugLine = line2.substr(line2.indexOf("@"));
+			
+			stack = stack.substring(nl2Index, stack.length-1);
+			message += "\n"+debugLine+stack;
 		}
 		
 		if (_console) {

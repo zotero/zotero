@@ -11,6 +11,7 @@ pref("extensions.zotero.dataDir", '');
 pref("extensions.zotero.lastDataDir", '');
 pref("extensions.zotero.dbLockExclusive", true);
 pref("extensions.zotero.debug.log",false);
+pref("extensions.zotero.debug.stackTrace", false);
 pref("extensions.zotero.debug.store",false);
 pref("extensions.zotero.debug.store.limit",750000);
 pref("extensions.zotero.debug.level",5);
