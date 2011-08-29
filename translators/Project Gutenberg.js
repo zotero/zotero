@@ -7,8 +7,9 @@
 	"minVersion":"2.1",
 	"maxVersion":"",
 	"priority":100,
+	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2011-04-11 00:15:00"
+	"lastUpdated":"2011-08-22 22:31:32"
 }
 
 function detectWeb(doc, url) {

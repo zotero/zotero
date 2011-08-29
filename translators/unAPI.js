@@ -1,15 +1,15 @@
 {
-	"translatorID":"e7e01cac-1e37-4da6-b078-a0e8343b0e98",
-	"translatorType":4,
-	"label":"unAPI",
-	"creator":"Simon Kornblith",
-	"target":null,
-	"minVersion":"2.1",
-	"maxVersion":"",
-	"priority":200,
-	"inRepository":true,
-	"detectXPath":"//link[@rel='unapi-server']",
-	"lastUpdated":"2011-06-09 01:57:14"
+	"translatorID": "e7e01cac-1e37-4da6-b078-a0e8343b0e98",
+	"label": "unAPI",
+	"creator": "Simon Kornblith",
+	"target": "",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 200,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-08-26 18:39:33"
 }
 
 var RECOGNIZABLE_FORMATS = ["rdf_zotero", "rdf_bibliontology", "mods", "marc", "unimarc", "ris",
@@ -168,13 +168,13 @@ UnAPIID.prototype = {
 	 */
 	"isSupported":function(callback) {
 		if(this.hasOwnProperty("format")) {
-			callback(me.format.isSupported);
+			callback(this.format.isSupported);
 			return;
 		}
 		
 		var me = this;
 		
-		getDefaultFormat(function() {
+		getDefaultFormat(function(defaultFormat) {
 			// first try default format, since this won't require >1 HTTP request
 			if(defaultFormat.isSupported) {
 				me.format = defaultFormat;
@@ -260,7 +260,11 @@ function determineDetectItemType(ids, supportedId) {
 			determineDetectItemType(ids, (isSupported ? id : supportedId));
 		} else {
 			// If all IDs have been handled, get foundItemType for only supported ID
-			supportedId.getItemType(Zotero.done);
+			if(isSupported) {
+				id.getItemType(Zotero.done);
+			} else {
+				Zotero.done(false);
+			}
 		}
 	});
 }
@@ -337,3 +341,53 @@ function doWeb(doc, url) {
 		return;
 	});
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://search8.library.utoronto.ca/UTL/index?N=0&Ntk=Anywhere&Ntt=nimni+challenge+of+post-zionism&Ntx=mode%2Bmatchallpartial&Nu=p_work_normalized&Np=1&formName=search_form_simple",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"lastName": "Nimni",
+						"firstName": "Ephraim.",
+						"creatorType": "contributor"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Post-Zionism.",
+					"Zionism -- Philosophy.",
+					"National characteristics, Israeli.",
+					"Israel -- Politics and government."
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false
+					}
+				],
+				"itemID": "4908720  (UTL catalogue ckey)",
+				"title": "The challenge of Post-Zionism : alternatives to Israeli fundamentalist politics",
+				"date": "2003",
+				"publisher": "Zed Books",
+				"place": "New York",
+				"ISBN": "185649893X",
+				"ISSN": "185649893X",
+				"url": "http://www.loc.gov/catdir/description/hol032/2002190908.html",
+				"libraryCatalog": "search8.library.utoronto.ca",
+				"shortTitle": "The challenge of Post-Zionism"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://search8.library.utoronto.ca/UTL/index?N=0&Ntk=Anywhere&Ntt=adam+smith&Ntx=mode%2Bmatchallpartial&Nu=p_work_normalized&Np=1&formName=search_form_simple",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
