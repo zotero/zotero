@@ -147,10 +147,6 @@ var Zotero_Duplicates_Pane = new function () {
 	
 	this.merge = function () {
 		var itembox = document.getElementById('zotero-duplicates-merge-item-box');
-		// Work around item.clone() weirdness -- the cloned item can't safely be
-		// used after it's saved, because it's not the version in memory and
-		// doesn't get reloaded properly in item.save()
-		var item = Zotero.Items.get(itembox.item.id);
-		Zotero.Items.merge(item, _otherItems);
+		Zotero.Items.merge(itembox.item, _otherItems);
 	}
 }

@@ -413,13 +413,12 @@ Zotero.Items = new function() {
 			for each(var relatedItemID in relatedItems) {
 				item.addRelatedItem(relatedItemID);
 			}
-			item.save();
 			
 			// Relations
 			Zotero.Relations.copyURIs(
 				item.libraryID,
-				Zotero.URI.getItemURI(item),
-				Zotero.URI.getItemURI(otherItem)
+				Zotero.URI.getItemURI(otherItem),
+				Zotero.URI.getItemURI(item)
 			);
 			
 			// Add relation to track merge
@@ -430,6 +429,8 @@ Zotero.Items = new function() {
 			otherItem.deleted = true;
 			otherItem.save();
 		}
+		
+		item.save();
 		
 		Zotero.DB.commitTransaction();
 	}
