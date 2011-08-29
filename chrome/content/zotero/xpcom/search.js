@@ -436,6 +436,11 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 			
 			this.addCondition('blockEnd');
 		}
+		
+		if (condition == 'quicksearch-titlesAndCreators') {
+			this.addCondition('noChildren', 'true');
+		}
+		
 		return false;
 	}
 	// Shortcut to add a collection
