@@ -9,7 +9,7 @@
 	"priority":90,
 	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2011-06-23 08:05:22"
+	"lastUpdated":"2011-07-29 18:13:47"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -24,7 +24,7 @@ function detectSearch(item) {
 }
 
 function fixAuthorCapitalization(string) {
-	if(string.toUpperCase() == string) {
+	if(typeof string === "string" && string.toUpperCase() === string) {
 		string = string.toLowerCase().replace(/\b[a-z]/g, function(m) { return m[0].toUpperCase() });
 	}
 	return string;

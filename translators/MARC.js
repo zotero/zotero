@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsn",
-	"lastUpdated": "2011-07-21 17:16:37"
+	"lastUpdated": "2011-08-22 23:29:49"
 }
 
 function detectImport() {
@@ -563,10 +563,12 @@ function doImport() {
 	}
 }
 
-exports.record = record;
-exports.fieldTerminator = fieldTerminator;
-exports.recordTerminator = recordTerminator;
-exports.subfieldDelimiter = subfieldDelimiter;
+var exports = {
+	"record":record,
+	"fieldTerminator":fieldTerminator,
+	"recordTerminator":recordTerminator,
+	"subfieldDelimiter":subfieldDelimiter
+};
 
 /** BEGIN TEST CASES **/
 var testCases = [

@@ -10,12 +10,11 @@
 	"browserSupport":"gcsn",
 	"configOptions":{"dataMode":"rdf/xml"},
 	"inRepository":true,
-	"lastUpdated":"2011-07-08 04:51:41"
+	"lastUpdated":"2011-08-22 23:56:28"
 }
 
 function detectImport() {
-	// unfortunately, Mozilla will let you create a data source from any type
-	// of XML, so we need to make sure there are actually nodes
+	// Make sure there are actually nodes
 	
 	var nodes = Zotero.RDF.getAllResources();
 	if(nodes) {
@@ -637,5 +636,7 @@ function doImport() {
 /**
  * Export doImport and defaultUnknownType to other translators
  */
-exports.doImport = doImport;
-exports.defaultUnknownType = "book";
+var exports = {
+	"doImport":doImport,
+	"defaultUnknownType":"book"
+};
