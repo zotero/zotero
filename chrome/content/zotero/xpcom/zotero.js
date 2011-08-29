@@ -33,7 +33,8 @@ const ZOTERO_CONFIG = {
 	WWW_BASE_URL: 'http://www.zotero.org/',
 	SYNC_URL: 'https://sync.zotero.org/',
 	API_URL: 'https://api.zotero.org/',
-	PREF_BRANCH: 'extensions.zotero.'
+	PREF_BRANCH: 'extensions.zotero.',
+	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/'
 };
 
 // Load AddonManager for Firefox 4
@@ -1476,6 +1477,7 @@ if(appInfo.platformVersion[0] >= 2) {
 		
 		_waiting = true;
 		
+		Zotero.debug("Waiting", 5);
 		do {
 			more = mainThread.processNextEvent(false);
 			//cycles++;
