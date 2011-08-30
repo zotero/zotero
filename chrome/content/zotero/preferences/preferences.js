@@ -1337,8 +1337,11 @@ Zotero_Preferences.Debug_Output = {
 		document.getElementById('debug-output-submit').disabled = true;
 		document.getElementById('debug-output-submit-progress').hidden = false;
 		
-		var url = "http://www.zotero.org/repo/report?debug=1";
-		var output = Zotero.Debug.get();
+		var url = "https://repo.zotero.org/repo/report?debug=1";
+		var output = Zotero.Debug.get(
+			Zotero.Prefs.get('debug.store.submitLimit'),
+			Zotero.Prefs.get('debug.store.submitLineLength')
+		);
 		
 		var uploadCallback = function (xmlhttp) {
 			document.getElementById('debug-output-submit').disabled = false;
