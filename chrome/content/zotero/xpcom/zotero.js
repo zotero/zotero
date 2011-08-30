@@ -172,7 +172,7 @@ if(appInfo.platformVersion[0] >= 2) {
 	var _zoteroDirectory = false;
 	var _localizedStringBundle;
 	var _localUserKey;
-	var _waiting;
+	var _waiting = 0;
 	
 	var _locked;
 	var _unlockCallbacks = [];
@@ -1475,15 +1475,15 @@ if(appInfo.platformVersion[0] >= 2) {
 		var more;
 		//var cycles = 0;
 		
-		_waiting = true;
+		_waiting++;
 		
-		Zotero.debug("Waiting", 5);
+		Zotero.debug("Spinning event loop ("+_waiting+")", 5);
 		do {
 			more = mainThread.processNextEvent(false);
 			//cycles++;
 		} while (more && Date.now() < endTime);
 		
-		_waiting = false;
+		_waiting--;
 		
 		// requeue nsITimerCallbacks that came up during Zotero.wait() but couldn't execute
 		for(var i in _waitTimers) {
