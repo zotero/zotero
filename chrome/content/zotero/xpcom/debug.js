@@ -106,8 +106,25 @@ Zotero.Debug = new function () {
 		}
 	}
 	
-	this.get = function () {
-		return _output.join('\n\n');
+	
+	this.get = function (limit, maxLength) {
+		var output = _output;
+		var total = output.length;
+		
+		if (limit && limit < total) {
+			output = output.slice(limit * -1);
+		}
+		
+		if (maxLength) {
+			for (var i=0, len=output.length; i<len; i++) {
+				var origLength = output[i].length;
+				if (origLength > maxLength) {
+					output[i] = Zotero.Utilities.ellipsize(output[i], maxLength, true);
+				}
+			}
+		}
+		
+		return output.join('\n\n');
 	}
 	
 	
