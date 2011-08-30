@@ -49,9 +49,20 @@ Zotero.Server.Connector.GetTranslators.prototype = {
 	 */
 	"init":function(data, sendResponseCallback) {
 		// Translator data
+		if(data.url) {
+			var me = this;
+			Zotero.Translators.getWebTranslatorsForLocation(data.url, function(data) {				
+				sendResponseCallback(200, "application/json",
+						JSON.stringify(me._serializeTranslators(data[0])));
+			});
+		} else {
+			var responseData = this._serializeTranslators(Zotero.Translators.getAll());
+			sendResponseCallback(200, "application/json", JSON.stringify(responseData));
+		}
+	},
+	
+	"_serializeTranslators":function(translators) {
 		var responseData = [];
-		
-		var translators = Zotero.Translators.getAll();
 		for each(var translator in translators) {
 			let serializableTranslator = {};
 			for each(var key in ["translatorID", "translatorType", "label", "creator", "target",
@@ -61,8 +72,7 @@ Zotero.Server.Connector.GetTranslators.prototype = {
 			}
 			responseData.push(serializableTranslator);
 		}
-		
-		sendResponseCallback(200, "application/json", JSON.stringify(responseData));
+		return responseData;
 	}
 }
 
@@ -260,7 +270,7 @@ Zotero.Server.Connector.SavePage.prototype = {
 		translate.setHandler("done", function(obj, item) {
 			me._translate.cookieSandbox.destroy();
 			Zotero.Browser.deleteHiddenBrowser(me._browser);
-			if(jsonItems.length) {
+			if(jsonItems.length || me.selectedItems === false) {
 				me._sendResponse(201, "application/json", JSON.stringify({"items":jsonItems}));
 			} else {
 				me._sendResponse(500);

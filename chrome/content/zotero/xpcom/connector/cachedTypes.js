@@ -83,7 +83,9 @@ Zotero.ItemTypes = new function() {
 	this.getImageSrc = function(idOrName) {
 		if(!Zotero.Connector_Types["itemTypes"][idOrName]) return false;
 		
-		if(Zotero.isFx) {
+		if(Zotero.isBookmarklet) {
+			return ZOTERO_CONFIG.BOOKMARKLET_URL+"icons/"+Zotero.Connector_Types["itemTypes"][idOrName].icon;
+		} else if(Zotero.isFx) {
 			return "chrome://zotero/skin/"+Zotero.Connector_Types["itemTypes"][idOrName].icon;
 		} else if(Zotero.isChrome) {
 			return chrome.extension.getURL("images/"+Zotero.Connector_Types["itemTypes"][idOrName].icon);
