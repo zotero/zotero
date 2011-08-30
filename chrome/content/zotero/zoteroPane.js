@@ -404,7 +404,8 @@ var ZoteroPane = new function()
 		var days = Zotero.Prefs.get('trashAutoEmptyDays');
 		if (days) {
 			var d = new Date();
-			var deleted = Zotero.Items.emptyTrash(days);
+			// TODO: empty group trashes if permissions
+			var deleted = Zotero.Items.emptyTrash(null, days);
 			var d2 = new Date();
 			Zotero.debug("Emptied old items from trash in " + (d2 - d) + " ms");
 		}
@@ -1430,13 +1431,13 @@ var ZoteroPane = new function()
 			)
 		};
 		
-		if (itemGroup.isLibrary()) {
+		if (itemGroup.isLibrary(true)) {
 			// In library, don't prompt if meta key was pressed
 			var prompt = force ? false : toTrash;
 		}
 		else if (itemGroup.isCollection()) {
 			// In collection, only prompt if trashing
-			var prompt = force ? (itemGroup.isWithinGroup() ? toDelete : toTrash) : false;
+			var prompt = force ? toTrash : false;
 		}
 		else if (itemGroup.isSearch() || itemGroup.isUnfiled() || itemGroup.isDuplicates()) {
 			if (!force) {
@@ -1456,10 +1457,6 @@ var ZoteroPane = new function()
 					}
 				}
 			}
-			var prompt = toDelete;
-		}
-		// This should be changed if/when groups get trash
-		else if (itemGroup.isGroup()) {
 			var prompt = toDelete;
 		}
 		else if (itemGroup.isBucket()) {
@@ -1570,6 +1567,8 @@ var ZoteroPane = new function()
 	
 	
 	this.emptyTrash = function () {
+		var libraryID = this.getSelectedLibraryID();
+		
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
 		
@@ -1580,7 +1579,7 @@ var ZoteroPane = new function()
 				+ Zotero.getString('general.actionCannotBeUndone')
 		);
 		if (result) {
-			Zotero.Items.emptyTrash();
+			Zotero.Items.emptyTrash(libraryID);
 			Zotero.purgeDataObjects(true);
 		}
 	}
@@ -1909,15 +1908,17 @@ var ZoteroPane = new function()
 	
 	
 	this.getSelectedLibraryID = function () {
-		var group = this.getSelectedGroup();
-		if (group) {
-			return group.libraryID;
+		var itemGroup = this.getItemGroup();
+		var groupID = this.getSelectedGroup(true);
+		if (groupID) {
+			return groupID;
 		}
-		var collection = this.getSelectedCollection();
-		if (collection) {
-			return collection.libraryID;
+		else if (itemGroup.isWithinGroup()) {
+			return itemGroup.ref.libraryID;
 		}
-		return null;
+		else {
+			return null;
+		}
 	}
 	
 	
@@ -1960,7 +1961,8 @@ var ZoteroPane = new function()
 		if (this.collectionsView.selection
 				&& this.collectionsView.selection.count > 0
 				&& this.collectionsView.selection.currentIndex != -1) {
-			var itemGroup = this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
+		
+			var itemGroup = this.getItemGroup();
 			if (itemGroup && itemGroup.isGroup()) {
 				return asID ? itemGroup.ref.id : itemGroup.ref;
 			}

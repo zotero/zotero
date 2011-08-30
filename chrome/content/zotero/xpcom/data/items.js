@@ -125,16 +125,34 @@ Zotero.Items = new function() {
 	/**
 	 * Return items marked as deleted
 	 *
-	 * @param	{Boolean}	asIDs			Return itemIDs instead of
+	 * @param {Number|NULL}  libraryID
+	 * @param {Boolean}  asIDs			Return itemIDs instead of
 	 *											Zotero.Item objects
-	 * @return	{Zotero.Item[]|Integer[]}
+	 * @return {Zotero.Item[]|Integer[]}
 	 */
-	this.getDeleted = function (asIDs, days) {
-		var sql = "SELECT itemID FROM deletedItems";
-		if (days) {
-			sql += " WHERE dateDeleted<=DATE('NOW', '-" + parseInt(days) + " DAYS')";
+	this.getDeleted = function (libraryID, asIDs, days) {
+		// Throw warning for pre-3.0b3 arguments
+		if (typeof libraryID == 'boolean') {
+			throw new Error("libraryID must be a number or null");
 		}
-		var ids = Zotero.DB.columnQuery(sql);
+		
+		var sql = "SELECT itemID FROM items JOIN deletedItems USING (itemID) "
+				+ "WHERE libraryID"  + (libraryID ? "=?" : " IS NULL");
+		
+		if (days) {
+			sql += " AND dateDeleted<=DATE('NOW', '-" + parseInt(days) + " DAYS')";
+		}
+		
+		if (libraryID) {
+			var ids = Zotero.DB.columnQuery(sql, [libraryID]);
+		}
+		else {
+			var ids = Zotero.DB.columnQuery(sql);
+		}
+		
+		if (!ids) {
+			return [];
+		}
 		if (asIDs) {
 			return ids;
 		}
@@ -467,15 +485,15 @@ Zotero.Items = new function() {
 	/**
 	 * @param	{Integer}	days	Only delete items deleted more than this many days ago
 	 */
-	this.emptyTrash = function (days) {
+	this.emptyTrash = function (libraryID, days) {
 		Zotero.DB.beginTransaction();
-		var deletedIDs = this.getDeleted(true, days);
-		if (deletedIDs) {
+		var deletedIDs = this.getDeleted(libraryID, true, days);
+		if (deletedIDs.length) {
 			this.erase(deletedIDs);
-			Zotero.Notifier.trigger('refresh', 'collection', 0);
+			Zotero.Notifier.trigger('refresh', 'collection', libraryID ? libraryID : 0);
 		}
 		Zotero.DB.commitTransaction();
-		return deletedIDs ? deletedIDs.length : 0;
+		return deletedIDs.length;
 	}
 	
 	

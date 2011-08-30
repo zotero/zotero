@@ -1383,7 +1383,7 @@ if(appInfo.platformVersion[0] >= 2) {
 		
 		var returns = [];
 		for (var i=0; i<args.length; i++){
-			if (!args[i]) {
+			if (!args[i] && args[i] !== 0) {
 				continue;
 			}
 			if (args[i].constructor.name == 'Array') {

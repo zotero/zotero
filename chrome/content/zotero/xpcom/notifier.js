@@ -28,7 +28,7 @@ Zotero.Notifier = new function(){
 	var _disabled = false;
 	var _types = [
 		'collection', 'creator', 'search', 'share', 'share-items', 'item',
-		'collection-item', 'item-tag', 'tag', 'group', 'bucket', 'relation'
+		'collection-item', 'item-tag', 'tag', 'group', 'trash', 'bucket', 'relation'
 	];
 	var _inTransaction;
 	var _locked = false;
@@ -277,7 +277,7 @@ Zotero.Notifier = new function(){
 					}
 				}
 				
-				if (runQueue[type][event].ids.length) {
+				if (runQueue[type][event].ids.length || event == 'refresh') {
 					totals += ' [' + event + '-' + type + ': ' + runQueue[type][event].ids.length + ']';
 				}
 			}
@@ -290,7 +290,7 @@ Zotero.Notifier = new function(){
 			
 			for (var type in runQueue) {
 				for (var event in runQueue[type]) {
-					if (runQueue[type][event].ids.length) {
+					if (runQueue[type][event].ids.length || event == 'refresh') {
 						trigger(event, type, runQueue[type][event].ids,
 							runQueue[type][event].data, true);
 					}

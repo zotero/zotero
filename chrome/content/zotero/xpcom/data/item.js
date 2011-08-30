@@ -2053,7 +2053,7 @@ Zotero.Item.prototype.save = function() {
 				}
 			}
 			// Refresh trash
-			Zotero.Notifier.trigger('refresh', 'collection', 0);
+			Zotero.Notifier.trigger('refresh', 'trash', this.libraryID ? this.libraryID : 0);
 			if (this._deleted) {
 				Zotero.Notifier.trigger('trash', 'item', this.id);
 			}

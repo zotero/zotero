@@ -41,10 +41,11 @@ Zotero.CollectionTreeView = function()
 	
 	this._treebox = null;
 	this._highlightedRows = {};
-	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search', 'share', 'group', 'bucket']);
+	this._unregisterID = Zotero.Notifier.registerObserver(this, ['collection', 'search', 'share', 'group', 'trash', 'bucket']);
 	this._containerState = {};
 	this._duplicateLibraries = [];
 	this._unfiledLibraries = [];
+	this._trashNotEmpty = {};
 }
 
 /*
@@ -148,7 +149,6 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 	
 	var self = this;
 	var library = {
-		id: null,
 		libraryID: null
 	};
 	
@@ -256,10 +256,13 @@ Zotero.CollectionTreeView.prototype.notify = function(action, type, ids)
 		return;
 	}
 	
+	if (action == 'refresh' && type == 'trash') {
+		this._trashNotEmpty[ids[0]] = !!Zotero.Items.getDeleted(ids[0]).length;
+		return;
+	}
+	
 	this.selection.selectEventsSuppressed = true;
 	var savedSelection = this.saveSelection();
-	
-	var madeChanges = false;
 	
 	if (action == 'delete') {
 		var selectedIndex = this.selection.count ? this.selection.selectedIndex : 0;
@@ -432,20 +435,20 @@ Zotero.CollectionTreeView.prototype.getCellText = function(row, column)
 
 Zotero.CollectionTreeView.prototype.getImageSrc = function(row, col)
 {
-	var source = this._getItemAtRow(row);
-	var collectionType = source.type;
+	var itemGroup = this._getItemAtRow(row);
+	var collectionType = itemGroup.type;
 	switch (collectionType) {
 		case 'trash':
-			if (this.trashNotEmpty) {
+			if (this._trashNotEmpty[itemGroup.ref.libraryID ? itemGroup.ref.libraryID : 0]) {
 				collectionType += '-full';
 			}
 			break;
 		
 		case 'header':
-			if (source.ref.id == 'group-libraries-header') {
+			if (itemGroup.ref.id == 'group-libraries-header') {
 				collectionType = 'groups';
 			}
-			else if (source.ref.id == 'commons-header') {
+			else if (itemGroup.ref.id == 'commons-header') {
 				collectionType = 'commons';
 			}
 			break;
@@ -490,11 +493,13 @@ Zotero.CollectionTreeView.prototype.isContainerEmpty = function(row)
 	}
 	if (itemGroup.isGroup()) {
 		var libraryID = itemGroup.ref.libraryID;
+		libraryID = (libraryID ? libraryID : 0) + '';
 		
 		return !itemGroup.ref.hasCollections()
 				&& !itemGroup.ref.hasSearches()
-				&& this._duplicateLibraries.indexOf(libraryID + '') == -1
-				&& this._unfiledLibraries.indexOf(libraryID + '') == -1;
+				&& this._duplicateLibraries.indexOf(libraryID) == -1
+				&& this._unfiledLibraries.indexOf(libraryID) == -1
+				&& this.hideSources.indexOf('trash') != -1;
 	}
 	if (itemGroup.isCollection()) {
 		return !itemGroup.ref.hasChildCollections();
@@ -819,17 +824,16 @@ Zotero.CollectionTreeView.prototype._expandRow = function (row, forceOpen) {
 	if (isGroup) {
 		var group = Zotero.Groups.getByLibraryID(libraryID);
 		var collections = group.getCollections();
-		var showTrash = false;
 	}
 	else {
 		var collections = Zotero.getCollections(itemGroup.ref.id);
-		var showTrash = this.hideSources.indexOf('trash') == -1;
 	}
 	
 	var savedSearches = Zotero.Searches.getAll(libraryID);
 	var showDuplicates = this.hideSources.indexOf('duplicates') == -1
 							&& this._duplicateLibraries.indexOf(intLibraryID + '') != -1;
 	var showUnfiled = this._unfiledLibraries.indexOf(intLibraryID + '') != -1;
+	var showTrash = this.hideSources.indexOf('trash') == -1;
 	
 	// If not a manual open and either the library is set to be hidden
 	// or this is a collection that isn't explicitly opened,
@@ -841,7 +845,7 @@ Zotero.CollectionTreeView.prototype._expandRow = function (row, forceOpen) {
 		return 0;
 	}
 	
-	var startOpen = !!(collections.length || savedSearches.length || showDuplicates || showUnfiled);
+	var startOpen = !!(collections.length || savedSearches.length || showDuplicates || showUnfiled || showTrash);
 	
 	// If this isn't a manual open, set the initial state depending on whether
 	// there are child nodes
@@ -881,7 +885,7 @@ Zotero.CollectionTreeView.prototype._expandRow = function (row, forceOpen) {
 	
 	// Duplicate items
 	if (showDuplicates) {
-		var d = new Zotero.Duplicates(isGroup ? group.libraryID : 0);
+		var d = new Zotero.Duplicates(intLibraryID);
 		this._showRow(new Zotero.ItemGroup('duplicates', d), level, row + 1 + newRows);
 		newRows++;
 	}
@@ -890,22 +894,25 @@ Zotero.CollectionTreeView.prototype._expandRow = function (row, forceOpen) {
 	if (showUnfiled) {
 		var s = new Zotero.Search;
 		if (isGroup) {
-			s.libraryID = group.libraryID;
+			s.libraryID = libraryID;
 		}
 		s.name = Zotero.getString('pane.collections.unfiled');
-		s.addCondition('libraryID', 'is', isGroup ? group.libraryID : null);
+		s.addCondition('libraryID', 'is', libraryID);
 		s.addCondition('unfiled', 'true');
 		this._showRow(new Zotero.ItemGroup('unfiled', s), level, row + 1 + newRows);
 		newRows++;
 	}
 	
 	if (showTrash) {
-		var deletedItems = Zotero.Items.getDeleted();
-		if (deletedItems || Zotero.Prefs.get("showTrashWhenEmpty")) {
-			this._showRow(new Zotero.ItemGroup('trash', false), level, row + 1 + newRows);
+		var deletedItems = Zotero.Items.getDeleted(libraryID);
+		if (deletedItems.length || Zotero.Prefs.get("showTrashWhenEmpty")) {
+			var ref = {
+				libraryID: libraryID
+			};
+			this._showRow(new Zotero.ItemGroup('trash', ref), level, row + 1 + newRows);
 			newRows++;
 		}
-		this.trashNotEmpty = !!deletedItems;
+		this._trashNotEmpty[intLibraryID] = !!deletedItems.length;
 	}
 	
 	return newRows;
@@ -1785,7 +1792,7 @@ Zotero.ItemGroup.prototype.__defineGetter__('id', function () {
 			return 'U' + (this.ref.libraryID ? this.ref.libraryID : 0);
 		
 		case 'trash':
-			return 'T';
+			return 'T' + (this.ref.libraryID ? this.ref.libraryID : 0);
 		
 		case 'header':
 			if (this.ref.id == 'group-libraries-header') {
@@ -2005,6 +2012,7 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 			includeScopeChildren = true;
 		}
 		else if (this.isTrash()) {
+			s.addCondition('libraryID', 'is', this.ref.libraryID);
 			s.addCondition('deleted', 'true');
 		}
 		else {
