@@ -65,6 +65,7 @@ Zotero.DBConnection = function(dbName) {
 	this._lastTransactionDate = null;
 	this._transactionRollback = null;
 	this._transactionNestingLevel = 0;
+	this._transactionWaitLevel = 0;
 	this._callbacks = { begin: [], commit: [], rollback: [] };
 	this._dbIsCorrupt = null
 	this._self = this;
@@ -223,8 +224,8 @@ Zotero.DBConnection.prototype.getStatement = function (sql, params, checkParams)
 	var db = this._getDBConnection();
 	
 	// TODO: limit to Zotero.DB, not all Zotero.DBConnections?
-	if (db.transactionInProgress && Zotero.waiting) {
-		throw ("Cannot access database layer during active Zotero.wait() if a transaction is open");
+	if (db.transactionInProgress && Zotero.waiting > this._transactionWaitLevel) {
+		throw ("Cannot access database layer from a higher wait level if a transaction is open");
 	}
 	
 	// First, determine the type of query using first word
@@ -426,8 +427,8 @@ Zotero.DBConnection.prototype.beginTransaction = function () {
 	
 	if (db.transactionInProgress) {
 		// TODO: limit to Zotero.DB, not all Zotero.DBConnections?
-		if (Zotero.waiting) {
-			var msg = "Cannot access database layer during active Zotero.wait() if a transaction is in progress";
+		if (Zotero.waiting != this._transactionWaitLevel) {
+			var msg = "Cannot start a DB transaction from a different wait level";
 			Zotero.debug(msg, 2);
 			throw (msg);
 		}
@@ -437,6 +438,8 @@ Zotero.DBConnection.prototype.beginTransaction = function () {
 			+ this._transactionNestingLevel, 5);
 	}
 	else {
+		this._transactionWaitLevel = Zotero.waiting;
+		
 		this._debug('Beginning DB transaction', 5);
 		db.beginTransaction();
 		
