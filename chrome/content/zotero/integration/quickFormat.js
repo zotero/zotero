@@ -224,7 +224,7 @@ var Zotero_QuickFormat = new function () {
 			}
 			
 			var s = new Zotero.Search();
-			
+			str = str.replace(" & ", " ", "g").replace(" and ", " ", "g");
 			if(charRe.test(str)) {
 				Zotero.debug("QuickFormat: QuickSearch: "+str);
 				s.addCondition("quicksearch-titlesAndCreators", "contains", str);
