@@ -154,7 +154,7 @@ var Zotero_QuickFormat = new function () {
 		var str = _getEditorContent();
 		var haveConditions = false;
 		
-		const specifiedLocatorRe = /,? *(pp|p)(?:\. *| +)([0-9\-]+) *$/;
+		const specifiedLocatorRe = /(?:,? *(pp|p)(?:\. *| +)|:)([0-9\-]+) *$/;
 		const yearPageLocatorRe = /,? *([0-9]+) *((B[. ]*C[. ]*|B[. ]*)|[AC][. ]*|A[. ]*D[. ]*|C[. ]*E[. ]*)?,? *(?:([0-9\-]+))?$/i;
 		const creatorSplitRe = /(?:,| *(?:and|\&)) +/;
 		const charRe = /[\w\u007F-\uFFFF]/;
@@ -674,7 +674,7 @@ var Zotero_QuickFormat = new function () {
 		var keyCode = event.keyCode;
 		if(keyCode === event.DOM_VK_RETURN || keyCode === event.DOM_VK_ENTER) {
 			event.preventDefault();
-			if(!_bubbleizeSelected()) {
+			if(!_bubbleizeSelected() && !_getEditorContent()) {
 				_accept();
 			}
 		} else if(keyCode === event.DOM_VK_TAB || event.charCode === 59 /* ; */) {
