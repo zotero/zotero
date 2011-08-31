@@ -112,6 +112,7 @@ var Zotero_QuickFormat = new function () {
 				var node = qfe.firstChild;
 				node.nodeValue = "";
 				_showCitation(node);
+				_resize();
 			}, 1);
 		}
 	};
