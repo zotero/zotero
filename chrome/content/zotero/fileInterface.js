@@ -615,7 +615,7 @@ var Zotero_File_Interface = new function() {
 	 * Updates progress indicators based on current progress of translation
 	 */
 	this.updateProgress = function(translate) {
-		Zotero.updateZoteroPaneProgressMeter(translate.progress);
+		Zotero.updateZoteroPaneProgressMeter(translate.getProgress());
 	}
 }
 

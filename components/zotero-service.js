@@ -45,7 +45,9 @@ const xpcomFilesAll = [
 	'translation/translate',
 	'translation/translate_firefox',
 	'translation/tlds',
-	'utilities'
+	'utilities',
+	'utilities_internal',
+	'utilities_translate'
 ];
 
 /** XPCOM files to be loaded only for local translation and DB access **/

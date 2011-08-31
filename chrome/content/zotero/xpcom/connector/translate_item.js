@@ -64,10 +64,9 @@ Zotero.Translate.ItemSaver.prototype = {
 		var url = 'users/%%USERID%%/items?key=%%APIKEY%%';
 		var payload = JSON.stringify({"items":newItems}, null, "\t")
 		
-		Zotero.OAuth.doAuthenticatedPost(url, payload, function(status, message) {
+		Zotero.OAuth.doAuthenticatedPost(url, payload, function(status) {
 			if(!status) {
-				Zotero.debug("Translate: Save to server failed with message "+message+"; payload:\n\n"+payload);
-				callback(false, new Error("Save to server failed with "+message));
+				callback(false, new Error("Save to server failed"));
 			} else {
 				Zotero.debug("Translate: Save to server complete");
 				callback(true, newItems);

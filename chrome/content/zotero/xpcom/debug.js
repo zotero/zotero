@@ -25,12 +25,12 @@
 
 
 Zotero.Debug = new function () {
-	this.__defineGetter__('storing', function () { return _store; });
-	this.__defineGetter__('enabled', function () { return _console || _store; });
-	
 	var _console, _stackTrace, _store, _level, _time, _lastTime, _output = [];
 	
 	this.init = function () {
+		this.storing = _store;
+		this.enabled = _console || _store;
+		
 		_console = Zotero.Prefs.get('debug.log');
 		_store = Zotero.Prefs.get('debug.store');
 		if (_store) {
@@ -133,6 +133,9 @@ Zotero.Debug = new function () {
 			this.clear();
 		}
 		_store = enable;
+		
+		this.storing = _store;
+		this.enabled = _console || _store;
 	}
 	
 	

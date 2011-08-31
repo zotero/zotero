@@ -233,7 +233,7 @@ Timeline.GregorianDateLabeller=function(locale,timeZone){this._locale=locale;thi
 	Modified by Ben for Zotero
 */
 
-Timeline.GregorianDateLabeller.monthNames = Zotero.Date.months.short;
+Timeline.GregorianDateLabeller.monthNames = Zotero.Date.getMonths().short;
 Timeline.GregorianDateLabeller.getMonthName=function(month,locale) {
 	return Timeline.GregorianDateLabeller.monthNames[month];
 };

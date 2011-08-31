@@ -50,7 +50,9 @@ Zotero.Date = new function(){
 	/**
 	 * Load dateFormat bundle into _dateFormatsBundle
 	 */
-	function _loadDateFormatsBundle() {
+	this.getMonths = function() {
+		if(_months) return _months;
+		
 		if(Zotero.isFx) {
 			var src = 'chrome://global/locale/dateFormat.properties';
 			var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
@@ -74,15 +76,9 @@ Zotero.Date = new function(){
 				"long":["January", "February", "March", "April", "May", "June", "July",
 					"Auguest", "September", "October", "November", "December"]};
 		}
-	}
-	
-	/**
-	 * Lazy getter for reading month strings from dateFormat.properties
-	 */
-	this.__defineGetter__("months", function() {
-		if(!_months) _loadDateFormatsBundle();
+		
 		return _months;
-	});
+	}
 	
 	/**
 	* Convert an SQL date in the form '2006-06-13 11:03:05' into a JS Date object
@@ -346,7 +342,8 @@ Zotero.Date = new function(){
 				'aug', 'sep', 'oct', 'nov', 'dec'];
 			// If using a non-English bibliography locale, try those too
 			if (Zotero.locale != 'en-US') {
-				months = months.concat(Zotero.Date.months.short).concat(Zotero.Date.months.long);
+				Zotero.Date.getMonths();
+				months = months.concat(_months['short']).concat(_months['long']);
 				for(var i in months) months[i] = months[i].toLowerCase();
 			}
 			
@@ -425,7 +422,7 @@ Zotero.Date = new function(){
 				string += date.part+" ";
 			}
 			
-			var months = Zotero.Date.months.long;
+			var months = Zotero.Date.getMonths().long;
 			if(date.month != undefined && months[date.month]) {
 				// get short month strings from CSL interpreter
 				string += months[date.month];

@@ -1026,6 +1026,11 @@ Zotero.Translate.Base.prototype = {
 	},
 	
 	/**
+	 * Return the progress of the import operation, or null if progress cannot be determined
+	 */
+	"getProgress":function() { return null },
+	
+	/**
 	 * Executed on translator completion, either automatically from a synchronous scraper or as
 	 * done() from an asynchronous scraper. Finishes things up and calls callback function(s).
 	 * @param {Boolean|String} returnValue An item type or a boolean true or false
@@ -1322,7 +1327,7 @@ Zotero.Translate.Base.prototype = {
 	/**
 	 * No-op for preparing translation
 	 */
-	"_prepareTranslation":function() {},
+	"_prepareTranslation":function() {}
 }
 
 /**
@@ -1622,17 +1627,16 @@ Zotero.Translate.Import.prototype._prepareTranslation = function() {
 	this.newCollections = [];
 }
 
-Zotero.Translate.Import.prototype.__defineGetter__("progress",
 /**
  * Return the progress of the import operation, or null if progress cannot be determined
  */
-function() {
+Zotero.Translate.Import.prototype.getProgress = function() {
 	if(this._progress !== undefined) return this._progress;
 	if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1 || this._mode === "xml/e4x" || this._mode == "xml/dom" || !this._io) {
 		return null;
 	}
 	return this._io.bytesRead/this._io.contentLength*100;
-});
+};
 	
 
 /**
@@ -1686,9 +1690,20 @@ Zotero.Translate.Export.prototype.setDisplayOptions = function(displayOptions) {
 }
 
 /**
- * @borrows Zotero.Translate.Import#complete
+ * Overload {@link Zotero.Translate.Base#complete} to close file and set complete
  */
-Zotero.Translate.Export.prototype.complete = Zotero.Translate.Import.prototype.complete;
+Zotero.Translate.Export.prototype.complete = function(returnValue, error) {
+	if(this._io) {
+		this._progress = null;
+		this._io.close();
+		if(this._io instanceof Zotero.Translate.IO.String) {
+			this.string = this._io.string;
+		}
+	}
+	
+	// call super
+	Zotero.Translate.Base.prototype.complete.apply(this, [returnValue, error]);
+}
 
 /**
  * Overload {@link Zotero.Translate.Base#getTranslators} to return all translators immediately
@@ -1730,9 +1745,8 @@ Zotero.Translate.Export.prototype._prepareTranslation = function() {
 	// this is currently hackish since we pass null callbacks to the init function (they have
 	// callbacks to be consistent with import, but they are synchronous, so we ignore them)
 	if(!this.location) {
-		var io = this._io = new Zotero.Translate.IO.String(null, this.path ? this.path : "");
-		io.init(this.translator[0].configOptions["dataMode"], function() {});
-		this.__defineGetter__("string", function() { return io.string; });
+		this._io = new Zotero.Translate.IO.String(null, this.path ? this.path : "");
+		this._io.init(this.translator[0].configOptions["dataMode"], function() {});
 	} else if(!Zotero.Translate.IO.Write) {
 		throw new Error("Writing to files is not supported in this build of Zotero.");
 	} else {
@@ -1745,17 +1759,16 @@ Zotero.Translate.Export.prototype._prepareTranslation = function() {
 	this._sandboxManager.importObject(this._io);
 }
 
-Zotero.Translate.Export.prototype.__defineGetter__("progress",
 /**
  * Return the progress of the import operation, or null if progress cannot be determined
  */
-function() {
+Zotero.Translate.Export.prototype.getProgress = function() {
 	if(this._progress !== undefined) return this._progress;
 	if(!this._itemGetter) {
 		return null;
 	}
 	return (1-this._itemGetter.numItemsRemaining/this._itemGetter.numItems)*100;
-});
+};
 
 /**
  * @class Search translation
@@ -1901,11 +1914,12 @@ Zotero.Translate.IO = {
  */
 Zotero.Translate.IO.String = function(string, uri, mode) {
 	if(string && typeof string === "string") {
-		this._string = string;
+		this.string = string;
 	} else {
-		this._string = "";
+		this.string = "";
 	}
-	this._stringPointer = 0;
+	this.contentLength = this.string.length;
+	this.bytesRead = 0;
 	this._uri = uri;
 }
 
@@ -1923,9 +1937,9 @@ Zotero.Translate.IO.String.prototype = {
 		this._dataStore = new Zotero.RDF.AJAW.RDFIndexedFormula();
 		this.RDF = new Zotero.Translate.IO._RDFSandbox(this._dataStore);
 		
-		if(this._string.length) {
+		if(this.contentLength) {
 			try {
-				var xml = Zotero.Translate.IO.parseDOMXML(this._string);
+				var xml = Zotero.Translate.IO.parseDOMXML(this.string);
 			} catch(e) {
 				this._xmlInvalid = true;
 				throw e;
@@ -1941,68 +1955,69 @@ Zotero.Translate.IO.String.prototype = {
 	"read":function(bytes) {
 		// if we are reading in RDF data mode and no string is set, serialize current RDF to the
 		// string
-		if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1 && this._string === "") {
-			this._string = this.RDF.serialize();
+		if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1 && this.string === "") {
+			this.string = this.RDF.serialize();
 		}
 		
 		// return false if string has been read
-		if(this._stringPointer >= this._string.length) {
+		if(this.bytesRead >= this.contentLength) {
 			return false;
 		}
 		
 		if(bytes !== undefined) {
-			if(this._stringPointer >= this._string.length) return false;
-			var oldPointer = this._stringPointer;
-			this._stringPointer += bytes;
-			return this._string.substr(oldPointer, bytes);
+			if(this.bytesRead >= this.contentLength) return false;
+			var oldPointer = this.bytesRead;
+			this.bytesRead += bytes;
+			return this.string.substr(oldPointer, bytes);
 		} else {
 			// bytes not specified; read a line
-			var oldPointer = this._stringPointer;
-			var lfIndex = this._string.indexOf("\n", this._stringPointer);
+			var oldPointer = this.bytesRead;
+			var lfIndex = this.string.indexOf("\n", this.bytesRead);
 			
 			if(lfIndex !== -1) {
 				// in case we have a CRLF
-				this._stringPointer = lfIndex+1;
-				if(this._string.length > lfIndex && this._string[lfIndex-1] === "\r") {
+				this.bytesRead = lfIndex+1;
+				if(this.contentLength > lfIndex && this.string[lfIndex-1] === "\r") {
 					lfIndex--;
 				}
-				return this._string.substr(oldPointer, lfIndex-oldPointer);					
+				return this.string.substr(oldPointer, lfIndex-oldPointer);					
 			}
 			
 			if(!this._noCR) {
-				var crIndex = this._string.indexOf("\r", this._stringPointer);
+				var crIndex = this.string.indexOf("\r", this.bytesRead);
 				if(crIndex === -1) {
 					this._noCR = true;
 				} else {
-					this._stringPointer = crIndex+1;
-					return this._string.substr(oldPointer, crIndex-oldPointer-1);
+					this.bytesRead = crIndex+1;
+					return this.string.substr(oldPointer, crIndex-oldPointer-1);
 				}
 			}
 			
-			this._stringPointer = this._string.length;
-			return this._string.substr(oldPointer);
+			this.bytesRead = this.contentLength;
+			return this.string.substr(oldPointer);
 		}
 	},
 	
 	"write":function(data) {
-		this._string += data;
+		this.string += data;
+		this.contentLength = this.string.length;
 	},
 	
 	"_getXML":function() {
 		if(this._mode == "xml/dom") {
 			try {
-				return Zotero.Translate.IO.parseDOMXML(this._string);
+				return Zotero.Translate.IO.parseDOMXML(this.string);
 			} catch(e) {
 				this._xmlInvalid = true;
 				throw e;
 			}
 		} else {
-			return this._string.replace(/<\?xml[^>]+\?>/, "");
+			return this.string.replace(/<\?xml[^>]+\?>/, "");
 		}
 	},
 	
 	"init":function(newMode, callback) {
-		this._stringPointer = 0;
+		this.bytesRead = 0;
 		this._noCR = undefined;
 		
 		this._mode = newMode;
@@ -2018,26 +2033,6 @@ Zotero.Translate.IO.String.prototype = {
 	
 	"close":function() {}
 }
-Zotero.Translate.IO.String.prototype.__defineGetter__("string",
-function() {
-	if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1) {
-		return this.RDF.serialize();
-	} else {
-		return this._string;
-	}
-});
-Zotero.Translate.IO.String.prototype.__defineSetter__("string",
-function(string) {
-	this._string = string;
-});
-Zotero.Translate.IO.String.prototype.__defineGetter__("bytesRead",
-function() {
-	return this._stringPointer;
-});
-Zotero.Translate.IO.String.prototype.__defineGetter__("contentLength",
-function() {
-	return this._string.length;
-});
 
 /****** RDF DATA MODE ******/
 
