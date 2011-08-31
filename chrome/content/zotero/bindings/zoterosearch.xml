@@ -660,14 +660,18 @@
 			<method name="disableRemoveButton">
 				<body>
 					<![CDATA[
-						document.getAnonymousNodes(this)[0].lastChild.previousSibling.disabled = true;
+						var button = this.id("remove");
+						button.setAttribute('disabled', true);
+						button.removeAttribute('onclick');
 					]]>
 				</body>
 			</method>
 			<method name="enableRemoveButton">
 				<body>
 					<![CDATA[
-						document.getAnonymousNodes(this)[0].lastChild.previousSibling.disabled = false;
+						var button = this.id("remove");
+						button.setAttribute('disabled', false);
+						button.setAttribute('onclick', "document.getBindingParent(this).onRemoveClicked(event)");
 					]]>
 				</body>
 			</method>
@@ -686,10 +690,10 @@
 			<xul:hbox id="search-condition" xbl:inherits="flex">
 				<xul:popupset id="condition-tooltips"/>
 				
-				<xul:menulist id="conditionsmenu" oncommand="this.parentNode.parentNode.onConditionSelected(); event.stopPropagation()">
+				<xul:menulist id="conditionsmenu" oncommand="document.getBindingParent(this).onConditionSelected(); event.stopPropagation()">
 					<xul:menupopup/>
 				</xul:menulist>
-				<xul:menulist id="operatorsmenu" oncommand="this.parentNode.parentNode.onOperatorSelected(); event.stopPropagation()">
+				<xul:menulist id="operatorsmenu" oncommand="document.getBindingParent(this).onOperatorSelected(); event.stopPropagation()">
 					<xul:menupopup/>
 				</xul:menulist>
 				<xul:zoterosearchtextbox id="valuefield" flex="1"/>
@@ -697,9 +701,8 @@
 					<xul:menupopup/>
 				</xul:menulist>
 				<xul:zoterosearchagefield id="value-date-age" hidden="true" flex="1"/>
-				<!-- Adding elements below will break disable/enableRemoveButton() -->
-				<xul:toolbarbutton id="remove" class="zotero-clicky zotero-clicky-minus" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked(event); event.stopPropagation()"/>
-				<xul:toolbarbutton id="add" class="zotero-clicky zotero-clicky-plus" label="+" oncommand="this.parentNode.parentNode.onAddClicked(event); event.stopPropagation()"/>
+				<xul:label id="remove" class="zotero-clicky zotero-clicky-minus" value="-" onclick="document.getBindingParent(this).onRemoveClicked(event)"/>
+				<xul:label id="add" class="zotero-clicky zotero-clicky-plus" value="+" onclick="document.getBindingParent(this).onAddClicked(event)"/>
 			</xul:hbox>
 		</content>
 	</binding>
