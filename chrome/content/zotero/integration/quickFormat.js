@@ -443,6 +443,7 @@ var Zotero_QuickFormat = new function () {
 		var bubble = _insertBubble(citationItem, node);
 		_clearEntryList();
 		_previewAndSort();
+		_refocusQfe();
 		
 		return true;
 	}
