@@ -311,7 +311,6 @@ Zotero.Server.DataListener.prototype._generateResponse = function(status, conten
 	} else {
 		response += "Content-Length: 0\r\n\r\n";
 	}
-	Zotero.debug(response);
 	
 	return response;
 }

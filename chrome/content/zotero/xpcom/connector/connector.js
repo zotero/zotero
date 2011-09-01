@@ -40,23 +40,41 @@ Zotero.Connector = new function() {
 		if(Zotero.isBookmarklet && this.isOnline !== null) callback(this.isOnline);
 		
 		if(Zotero.isIE) {
-			var listener = function(event) {
-				if(event.origin === "http://www.zotero.org" && event.data === "ZOTERO_IE_STANDALONE_LOADED false") {
-					callback(false);
-				} else if(event.origin === "http://127.0.0.1:23119" && event.data === "ZOTERO_IE_STANDALONE_LOADED true") {
-					_ieStandaloneIframeTarget = event.source;
-					callback(true);
-				} else {
-					return;
-				}
-				window.removeEventListener("message", listener, false);
-			};
-			window.addEventListener("message", listener, false);
-			
+			if(window.location.protocol !== "http:") {
+				this.isOnline = false;
+				callback(false);
+				return;
+			}
+		
 			Zotero.debug("Connector: Trying IE hack");
-			var s = document.createElement("iframe");
-			s.src = "http://www.zotero.org/bookmarklet/ie_hack.html";
-			(document.body ? document.body : document.documentElement).appendChild(s);
+			try {
+				var xdr = new XDomainRequest();
+				xdr.open("POST", "http://127.0.0.1:23119/connector/ping", true);
+				xdr.onerror = xdr.ontimeout = function() {
+					this.isOnline = false;
+					callback(false);
+				};
+				xdr.onload = function() {
+					var listener = function(event) {
+						if(event.origin === "http://127.0.0.1:23119" && event.data === "ZOTERO_IE_STANDALONE_LOADED true") {
+							this.isOnline = true;
+							window.removeEventListener("message", listener, false);
+							_ieStandaloneIframeTarget = iframe.contentWindow;
+							callback(true);
+						}
+					};
+					window.addEventListener("message", listener, false);
+					
+					var iframe = document.createElement("iframe");
+					iframe.src = "http://127.0.0.1:23119/connector/ieHack";
+					document.documentElement.appendChild(iframe);
+				};
+				xdr.send("");
+			} catch(e) {
+				Zotero.logError(e);
+				this.isOnline = false;
+				callback(false);
+			}
 		} else {
 			Zotero.Connector.callMethod("ping", {}, function(status) {
 				callback(status !== false);
@@ -129,7 +147,7 @@ Zotero.Connector = new function() {
 		
 		var uri = CONNECTOR_URI+"connector/"+method;
 		if(Zotero.isIE) {	// IE requires XDR for CORS
-			if(_ieStandaloneIframeTarget) {
+			if(_ieStandaloneIframeTarget !== undefined) {
 				var requestID = Zotero.Utilities.randomString();
 				
 				var listener = function(event) {
@@ -142,15 +160,15 @@ Zotero.Connector = new function() {
 						var xhrSurrogate = {
 							"status":data[1][1],
 							"responseText":data[1][2],
-							"getResponseHeader":function(x) { return data[1][3][x] }
+							"getResponseHeader":function(x) { return data[1][3][x.toLowerCase()] }
 						};
 						newCallback(xhrSurrogate);
 					}
 				};
 				
 				window.addEventListener("message", listener, false);
-				_ieStandaloneIframeTarget.postMessage(IE_HACK_MSG+" "+JSON.stringify(["connectorRequest",
-					[requestID, method, JSON.stringify(data)]]));
+				_ieStandaloneIframeTarget.postMessage(IE_HACK_MSG+JSON.stringify(["connectorRequest",
+					[requestID, method, JSON.stringify(data)]]), "http://127.0.0.1:23119/connector/ieHack");
 			} else {
 				Zotero.debug("Connector: No iframe target; not sending to Standalone");
 				callback(false, 0);
