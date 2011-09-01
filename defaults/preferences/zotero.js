@@ -109,6 +109,7 @@ pref("extensions.zotero.export.quickCopy.compatibility.word", false);
 pref("extensions.zotero.integration.port", 50001);
 pref("extensions.zotero.integration.autoRegenerate", -1);	// -1 = ask; 0 = no; 1 = yes
 pref("extensions.zotero.integration.useClassicAddCitationDialog", false);
+pref("extensions.zotero.integration.keepAddCitationDialogRaised", false);
 
 // Connector settings
 pref("extensions.zotero.httpServer.enabled", false);	// TODO enabled for testing only
