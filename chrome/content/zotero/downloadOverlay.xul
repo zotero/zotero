@@ -38,7 +38,7 @@
 	<script type="application/x-javascript" src="include.js"/>
 	<script type="application/x-javascript" src="downloadOverlay.js"/>
 	<radiogroup id="mode">
-		<vbox insertbefore="save" id="zotero-container" flex="1" hidden="true">
+		<vbox id="zotero-container" flex="1" hidden="true">
 			<radio id="zotero-radio" label="&zotero.downloadManager.label;" disabled="true"/>
 			<vbox style="margin-left: 15px">
 				<description id="zotero-saveToLibrary-description" style="font: small-caption; font-weight: normal" hidden="true">&zotero.downloadManager.saveToLibrary.description;</description>
