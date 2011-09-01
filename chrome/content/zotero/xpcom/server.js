@@ -25,7 +25,7 @@
 
 Zotero.Server = new function() {
 	var _onlineObserverRegistered;
-	var responseCodes = {
+	this.responseCodes = {
 		200:"OK",
 		201:"Created",
 		300:"Multiple Choices",
@@ -60,29 +60,6 @@ Zotero.Server = new function() {
 		}
 		
 		_registerOnlineObserver()
-	}
-	
-	/**
-	 * generates the response to an HTTP request
-	 */
-	this.generateResponse = function (status, contentType, body, headers) {
-		var response = "HTTP/1.0 "+status+" "+responseCodes[status]+"\r\n";
-		if(!Zotero.isServer) {
-			response += "X-Zotero-Version: "+Zotero.version+"\r\n";
-			response += "X-Zotero-Connector-API-Version: "+CONNECTOR_API_VERSION+"\r\n";
-			if(headers) response += headers;
-		}
-		
-		if(body) {
-			if(contentType) {
-				response += "Content-Type: "+contentType+"\r\n";
-			}
-			response += "\r\n"+body;
-		} else {
-			response += "Content-Length: 0\r\n\r\n";
-		}
-		
-		return response;
 	}
 	
 	/**
@@ -250,11 +227,11 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 	}
 	
 	if(!method) {
-		this._requestFinished(Zotero.Server.generateResponse(400, "text/plain", "Invalid method specified\n"));
+		this._requestFinished(this._generateResponse(400, "text/plain", "Invalid method specified\n"));
 		return;
 	}
 	if(!Zotero.Server.Endpoints[method[2]]) {
-		this._requestFinished(Zotero.Server.generateResponse(404, "text/plain", "No endpoint found\n"));
+		this._requestFinished(this._generateResponse(404, "text/plain", "No endpoint found\n"));
 		return;
 	}
 	this.pathname = method[2];
@@ -262,7 +239,7 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 	this.query = method[3];
 	
 	if(method[1] == "HEAD" || method[1] == "OPTIONS") {
-		this._requestFinished(Zotero.Server.generateResponse(200));
+		this._requestFinished(this._generateResponse(200));
 	} else if(method[1] == "GET") {
 		this._processEndpoint("GET", null);
 	} else if(method[1] == "POST") {
@@ -271,14 +248,14 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 		// parse content length
 		var m = contentLengthRe.exec(this.header);
 		if(!m) {
-			this._requestFinished(Zotero.Server.generateResponse(400, "text/plain", "Content-length not provided\n"));
+			this._requestFinished(this._generateResponse(400, "text/plain", "Content-length not provided\n"));
 			return;
 		}
 		
 		this.bodyLength = parseInt(m[1]);
 		this._bodyData();
 	} else {
-		this._requestFinished(Zotero.Server.generateResponse(501, "text/plain", "Method not implemented\n"));
+		this._requestFinished(this._generateResponse(501, "text/plain", "Method not implemented\n"));
 		return;
 	}
 }
@@ -307,26 +284,49 @@ Zotero.Server.DataListener.prototype._bodyData = function() {
 		this._processEndpoint("POST", this.body);
 	}
 }
-
+	
 /**
- * Generates a response based on calling the function associated with the endpoint
+ * Generates the response to an HTTP request
  */
-Zotero.Server.DataListener.prototype._processEndpoint = function(method, postData) {
-	try {
-		var headers = "";
+Zotero.Server.DataListener.prototype._generateResponse = function(status, contentType, body) {
+	var response = "HTTP/1.0 "+status+" "+Zotero.Server.responseCodes[status]+"\r\n";
+	if(!Zotero.isServer) {
+		response += "X-Zotero-Version: "+Zotero.version+"\r\n";
+		response += "X-Zotero-Connector-API-Version: "+CONNECTOR_API_VERSION+"\r\n";
+		
 		const originRe = /[\r\n]Origin: +([^ \r\n]+)/i;
+		Zotero.debug(this.header);
 		var m = originRe.exec(this.header);
 		if(m && (m[1] === "https://www.zotero.org" || m[1] === "http://www.zotero.org")) {
 			headers += "Access-Control-Allow-Origin: "+m[1]+"\r\n";
 			headers += "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n";
 			headers += "Access-Control-Allow-Headers: Content-Type,X-Zotero-Connector-API-Version,X-Zotero-Version\r\n";
 		}
-		
+	}
+	
+	if(body) {
+		if(contentType) {
+			response += "Content-Type: "+contentType+"\r\n";
+		}
+		response += "\r\n"+body;
+	} else {
+		response += "Content-Length: 0\r\n\r\n";
+	}
+	Zotero.debug(response);
+	
+	return response;
+}
+
+/**
+ * Generates a response based on calling the function associated with the endpoint
+ */
+Zotero.Server.DataListener.prototype._processEndpoint = function(method, postData) {
+	try {
 		var endpoint = new this.endpoint;
 		
 		// check that endpoint supports method
 		if(endpoint.supportedMethods && endpoint.supportedMethods.indexOf(method) === -1) {
-			this._requestFinished(Zotero.Server.generateResponse(400, "text/plain", "Endpoint does not support method\n", headers));
+			this._requestFinished(this._generateResponse(400, "text/plain", "Endpoint does not support method\n"));
 			return;
 		}
 		
@@ -335,7 +335,7 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 			// check that endpoint supports contentType
 			var supportedDataTypes = endpoint.supportedDataTypes;
 			if(supportedDataTypes && supportedDataTypes.indexOf(this.contentType) === -1) {
-				this._requestFinished(Zotero.Server.generateResponse(400, "text/plain", "Endpoint does not support content-type\n", headers));
+				this._requestFinished(this._generateResponse(400, "text/plain", "Endpoint does not support content-type\n"));
 				return;
 			}
 			
@@ -344,7 +344,7 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 				try {
 					decodedData = JSON.parse(postData);
 				} catch(e) {
-					this._requestFinished(Zotero.Server.generateResponse(400, "text/plain", "Invalid JSON provided\n", headers));
+					this._requestFinished(this._generateResponse(400, "text/plain", "Invalid JSON provided\n"));
 					return;
 				}
 			} else if(supportedDataTypes && this.contentType === "application/x-www-urlencoded") {				
@@ -357,7 +357,7 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 		// set up response callback
 		var me = this;
 		var sendResponseCallback = function(code, contentType, arg) {
-			me._requestFinished(Zotero.Server.generateResponse(code, contentType, arg, headers));
+			me._requestFinished(me._generateResponse(code, contentType, arg));
 		}
 		
 		// pass to endpoint
@@ -373,7 +373,7 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 		}
 	} catch(e) {
 		Zotero.debug(e);
-		this._requestFinished(Zotero.Server.generateResponse(500), "text/plain", "An error occurred\n", headers);
+		this._requestFinished(this._generateResponse(500), "text/plain", "An error occurred\n");
 		throw e;
 	}
 }
