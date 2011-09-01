@@ -1,6 +1,5 @@
 #quick-format-dialog {
 	background: transparent;
-	-moz-appearance: -moz-win-borderless-glass;
 	padding: 0;
 }
 
@@ -24,8 +23,11 @@
 
 #quick-format-entry {
 	background: -moz-linear-gradient(-90deg, rgb(243,123,119) 0, rgb(180,47,38) 50%, rgb(156,36,27) 50%);
-	-moz-border-radius:15px;
 	padding: 10px;
+}
+
+#quick-format-entry:not([square="true"]) {
+	-moz-border-radius: 15px;
 }
 
 #zotero-icon {

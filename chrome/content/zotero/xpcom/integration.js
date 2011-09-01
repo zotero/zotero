@@ -1986,10 +1986,13 @@ Zotero.Integration.Session.prototype.editCitation = function(index, noteIndex, c
 	// citeproc-js style object for use of third-party extension
 	io.style = this.style;
 	
+	
 	if(Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
-		this._displayDialog('chrome://zotero/content/integration/addCitationDialog.xul', 'resizable', io);
+		this._displayDialog('chrome://zotero/content/integration/addCitationDialog.xul', 'alwaysRaised,resizable', io);
 	} else {
-		this._displayDialog('chrome://zotero/content/integration/quickFormat.xul', '', io);
+		var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
+			? 'popup' : 'alwaysRaised')
+		this._displayDialog('chrome://zotero/content/integration/quickFormat.xul', mode, io);
 	}
 	
 	if(io.citation.citationItems.length) {		// we have an item

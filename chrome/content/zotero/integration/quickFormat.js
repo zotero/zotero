@@ -51,6 +51,10 @@ var Zotero_QuickFormat = new function () {
 		qfb.addEventListener("keypress", _onQuickSearchKeyPress, false);
 		qfe = qfiDocument.getElementById("quick-format-editor");
 		
+		if(Zotero.isWin && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')) {
+			qfb.setAttribute("square", "true");
+		}
+		
 		// add labels to popup
 		var locators = Zotero.Cite.labels;
 		var menu = document.getElementById("locator-label");
