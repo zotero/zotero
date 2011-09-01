@@ -502,16 +502,16 @@ Zotero.Server.Connector.Ping.prototype = {
 }
 
 /**
- * Test connection
+ * IE messaging hack
  *
  * Accepts:
  *		Nothing
  * Returns:
- *		Nothing (200 OK response)
+ *		Static Response
  */
-Zotero.Server.Connector.Ping = function() {};
-Zotero.Server.Endpoints["/connector/ieHack"] = Zotero.Server.Connector.Ping;
-Zotero.Server.Connector.Ping.prototype = {
+Zotero.Server.Connector.IEHack = function() {};
+Zotero.Server.Endpoints["/connector/ieHack"] = Zotero.Server.Connector.IEHack;
+Zotero.Server.Connector.IEHack.prototype = {
 	"supportedMethods":["POST"],
 	"supportedDataTypes":["application/json"],
 	
