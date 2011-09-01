@@ -295,12 +295,11 @@ Zotero.Server.DataListener.prototype._generateResponse = function(status, conten
 		response += "X-Zotero-Connector-API-Version: "+CONNECTOR_API_VERSION+"\r\n";
 		
 		const originRe = /[\r\n]Origin: +([^ \r\n]+)/i;
-		Zotero.debug(this.header);
 		var m = originRe.exec(this.header);
 		if(m && (m[1] === "https://www.zotero.org" || m[1] === "http://www.zotero.org")) {
-			headers += "Access-Control-Allow-Origin: "+m[1]+"\r\n";
-			headers += "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n";
-			headers += "Access-Control-Allow-Headers: Content-Type,X-Zotero-Connector-API-Version,X-Zotero-Version\r\n";
+			response += "Access-Control-Allow-Origin: "+m[1]+"\r\n";
+			response += "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n";
+			response += "Access-Control-Allow-Headers: Content-Type,X-Zotero-Connector-API-Version,X-Zotero-Version\r\n";
 		}
 	}
 	
