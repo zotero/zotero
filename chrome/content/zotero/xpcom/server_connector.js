@@ -512,8 +512,7 @@ Zotero.Server.Connector.Ping.prototype = {
 Zotero.Server.Connector.IEHack = function() {};
 Zotero.Server.Endpoints["/connector/ieHack"] = Zotero.Server.Connector.IEHack;
 Zotero.Server.Connector.IEHack.prototype = {
-	"supportedMethods":["POST"],
-	"supportedDataTypes":["application/json"],
+	"supportedMethods":["GET"],
 	
 	/**
 	 * Finishes up translation when item selection is complete
