@@ -45,7 +45,7 @@ Zotero.Translate = function(type) {
  * Create a new translator by a string type
  */
 Zotero.Translate.newInstance = function(type) {
-	return new Zotero.Translate[type[0].toUpperCase()+type.substr(1).toLowerCase()];
+	return new Zotero.Translate[type.substr(0, 1).toUpperCase()+type.substr(1).toLowerCase()];
 }
 
 /**
@@ -193,7 +193,7 @@ Zotero.Translate.Sandbox = {
 				return;
 			}
 			
-			Zotero.debug("Translate: creating translate instance of type "+type+" in sandbox");
+			Zotero.debug("Translate: Creating translate instance of type "+type+" in sandbox");
 			var translation = Zotero.Translate.newInstance(type);
 			translation._parentTranslator = translate;
 			
@@ -1391,7 +1391,7 @@ Zotero.Translate.Web.prototype._getTranslatorsGetPotentialTranslators = function
  * Bind sandbox to document being translated
  */
 Zotero.Translate.Web.prototype._getSandboxLocation = function() {
-	return this.document.defaultView;
+	return ("defaultView" in this.document ? this.document.defaultView : this.document.location.toString());
 }
 
 /**

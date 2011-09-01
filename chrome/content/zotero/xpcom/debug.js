@@ -90,8 +90,8 @@ Zotero.Debug = new function () {
 			var output = 'zotero(' + level + ')' + (_time ? deltaStr : '') + ': ' + message;
 			if(Zotero.isFx) {
 				dump(output+"\n\n");
-			} else {
-				console.log(output);
+			} else if(window.console) {
+				window.console.log(output);
 			}
 		}
 		if (_store) {
