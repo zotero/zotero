@@ -489,7 +489,7 @@ Zotero.Server.Connector.Ping = function() {};
 Zotero.Server.Endpoints["/connector/ping"] = Zotero.Server.Connector.Ping;
 Zotero.Server.Connector.Ping.prototype = {
 	"supportedMethods":["POST"],
-	"supportedDataTypes":["application/json"],
+	"supportedDataTypes":["application/json", "text/plain"],
 	
 	/**
 	 * Finishes up translation when item selection is complete
@@ -501,6 +501,33 @@ Zotero.Server.Connector.Ping.prototype = {
 	}
 }
 
+/**
+ * Test connection
+ *
+ * Accepts:
+ *		Nothing
+ * Returns:
+ *		Nothing (200 OK response)
+ */
+Zotero.Server.Connector.Ping = function() {};
+Zotero.Server.Endpoints["/connector/ieHack"] = Zotero.Server.Connector.Ping;
+Zotero.Server.Connector.Ping.prototype = {
+	"supportedMethods":["POST"],
+	"supportedDataTypes":["application/json"],
+	
+	/**
+	 * Finishes up translation when item selection is complete
+	 * @param {String} data POST data or GET query string
+	 * @param {Function} sendResponseCallback function to send HTTP response
+	 */
+	"init":function(postData, sendResponseCallback) {
+		sendResponseCallback(200, "text/html",
+			'<!DOCTYPE html><html><head>'+
+			'<script src="https://www.zotero.org/bookmarklet/ie_compat.js"></script>'+
+			'<script src="https://www.zotero.org/bookmarklet/ie_hack.js"></script>'+
+			'</head><body></body></html>');
+	}
+}
 
 // XXX For compatibility with older connectors; to be removed
 Zotero.Server.Connector.IncompatibleVersion = function() {};
