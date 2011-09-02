@@ -182,7 +182,6 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 		
 		delete this._waitAfter;
 		Zotero.debug("Set tree in "+(Date.now()-start)+" ms");
-		Zotero.wait();
 	} catch(e) {
 		Zotero.logError(e);
 	}
