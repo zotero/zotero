@@ -14,7 +14,7 @@ pref("extensions.zotero.debug.log",false);
 pref("extensions.zotero.debug.stackTrace", false);
 pref("extensions.zotero.debug.store",false);
 pref("extensions.zotero.debug.store.limit",500000);
-pref("extensions.zotero.debug.store.submitLimit",100000);
+pref("extensions.zotero.debug.store.submitSize",1000000);
 pref("extensions.zotero.debug.store.submitLineLength",10000);
 pref("extensions.zotero.debug.level",5);
 pref("extensions.zotero.debug.time", false);
