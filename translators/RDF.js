@@ -4,17 +4,17 @@
 	"label":"RDF",
 	"creator":"Simon Kornblith",
 	"target":"rdf",
-	"minVersion":"2.1b2",
+	"minVersion":"2.1.9",
 	"maxVersion":"",
 	"priority":100,
+	"browserSupport":"gcsn",
 	"configOptions":{"dataMode":"rdf/xml"},
 	"inRepository":true,
-	"lastUpdated":"2011-02-03 07:00:12"
+	"lastUpdated":"2011-08-22 23:56:28"
 }
 
 function detectImport() {
-	// unfortunately, Mozilla will let you create a data source from any type
-	// of XML, so we need to make sure there are actually nodes
+	// Make sure there are actually nodes
 	
 	var nodes = Zotero.RDF.getAllResources();
 	if(nodes) {
@@ -39,8 +39,6 @@ var n = {
 };
 
 var callNumberTypes = [n.dcterms+"LCC", n.dcterms+"DDC", n.dcterms+"UDC"];
-
-var defaultUnknownType = "book";
 
 // gets the first result set for a property that can be encoded in multiple
 // ontologies
@@ -301,7 +299,7 @@ function importItem(newItem, node, type) {
 	}
 	
 	if(!newItem.itemType) {
-		newItem.itemType = defaultUnknownType;
+		newItem.itemType = exports.defaultUnknownType;
 	}
 	
 	// regular author-type creators
@@ -634,3 +632,11 @@ function doImport() {
 		}
 	}
 }
+
+/**
+ * Export doImport and defaultUnknownType to other translators
+ */
+var exports = {
+	"doImport":doImport,
+	"defaultUnknownType":"book"
+};

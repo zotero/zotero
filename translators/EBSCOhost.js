@@ -1,119 +1,65 @@
 {
 	"translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
 	"label": "EBSCOhost",
-	"creator": "Simon Kornblith and Michael Berkowitz",
+	"creator": "Simon Kornblith, Michael Berkowitz, Josh Geller",
 	"target": "^https?://[^/]+/(?:eds|bsi|ehost)/(?:results|detail|folder)",
-	"minVersion": "1.0.0b3.r1",
+	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": "1",
+	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2011-03-24 23:30:00"
+	"lastUpdated": "2011-08-07 11:11:54"
 }
 
 function detectWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
+		if (prefix == 'x') { return namespace; } else { return null; }
 	} : null;
-		// The Scientific American Archive breaks this translator, disabling 
-		try {
-			var databases = doc.evaluate("//span[@class = 'selected-databases']", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			if(databases.indexOf("Scientific American Archive Online") != -1) {
-				return false;
-			}
-		} catch(e) {
-		}
-	
 	
 	// See if this is a search results or folder results page
-	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver,
-	                                XPathResult.ANY_TYPE, null).iterateNext();         
+	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();         
 	if(searchResult) {
 		return "multiple";
 	}
-/*
-	var xpath = '//div[@class="citation-wrapping-div"]/dl[@class="citation-fields"]/dt[starts-with(text(), "Persistent link to this record")'
-		+' or starts-with(text(), "Vínculo persistente a este informe")'
-		+' or starts-with(text(), "Lien permanent à cette donnée")'
-		+' or starts-with(text(), "Permanenter Link zu diesem Datensatz")'
-		+' or starts-with(text(), "Link permanente al record")'
-		+' or starts-with(text(), "Link permanente para este registro")'
-		+' or starts-with(text(), "本記錄固定連結")'
-		+' or starts-with(text(), "此记录的永久链接")'
-		+' or starts-with(text(), "このレコードへのパーシスタント リンク")'
-		+' or starts-with(text(), "레코드 링크 URL")'
-		+' or starts-with(text(), "Постоянная ссылка на эту запись")'
-		+' or starts-with(text(), "Bu kayda sürekli bağlantı")'
-		+' or starts-with(text(), "Μόνιμος σύνδεσμος σε αυτό το αρχείο")]';
-*/
-	var xpath = '//input[@id="ctl00_ctl00_Column2_Column2_topDeliveryControl_deliveryButtonControl_lnkExport"]';
+
+	var xpath = '//a[@class="permalink-link"]';
 	var persistentLink = doc.evaluate(xpath, doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if(persistentLink) {
 		return "journalArticle";
 	}
 }
 
-var customViewStateMatch = /<input type="hidden" name="__CUSTOMVIEWSTATE" id="__CUSTOMVIEWSTATE" value="([^"]+)" \/>/
-var host;
-
-function fullEscape(text) {
-	return escape(text).replace(/\//g, "%2F").replace(/\+/g, "%2B");
-}
-
-function generateDeliverString(nsResolver, doc){	
-	var hiddenInputs = doc.evaluate('//input[@type="hidden" and not(contains(@name, "folderHas")) and not(@name ="ajax")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var hiddenInput;
-	var deliverString ="";
-	while(hiddenInput = hiddenInputs.iterateNext()) {
-		if (hiddenInput.name !== "__EVENTTARGET" && hiddenInput.name !== "") {
-			deliverString = deliverString+hiddenInput.name.replace(/\$/g, "%24")+"="+encodeURIComponent(hiddenInput.value) + "&";
-		}
-	}
-	var otherHiddenInputs = doc.evaluate('//input[@type="hidden" and contains(@name, "folderHas")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	while(hiddenInput = otherHiddenInputs.iterateNext()) {
-		deliverString = deliverString+hiddenInput.name.replace(/\$/g, "%24")+"="+escape(hiddenInput.value).replace(/\//g, "%2F").replace(/%20/g, "+") + "&";
-	}
-	
-	deliverString = "__EVENTTARGET=ctl00%24ctl00%24Column2%24Column2%24topDeliveryControl%24deliveryButtonControl%24lnkExport&" + deliverString;
-	
-	return deliverString;
-}
-
-
 /*
  * given the text of the delivery page, downloads an item
  */
-function downloadFunction(text) {
-	var postMatch = false;
-	var form = text.match(/<form[^>]*(?:id|name)="aspnetForm"[^>]*/);
-	if (form) postMatch = form[0].match(/action="([^"]+)"/);
-	else postMatch = customViewStateMatch.exec(text);
- 	if (!postMatch) {
-	 	Zotero.debug("Failed to find download URI in delivery page.");
-	 	return false;
- 	}
-	var deliveryURL = postMatch[1].replace(/&amp;/g,"&");
- 	var viewstateMatch = customViewStateMatch.exec(text);
- 	var downloadString = "__EVENTTARGET=&__EVENTARGUMENT=&__CUSTOMVIEWSTATE="+fullEscape(viewstateMatch[1])+"&__VIEWSTATE=&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24btnSubmit=Save&ctl00%24ctl00%24MainContentArea%24MainContentArea%24ctl00%24BibFormat=1&ajax=enabled";
+function downloadFunction(text, url) {
+		var an = url.match(/_(\d+)_AN/);
+		var pdf = false;
+		var risDate = false;
+		var queryString = {};
+		url.replace(
+			new RegExp("([^?=&]+)(=([^&]*))?", "g"),
+				function($0, $1, $2, $3) { queryString[$1] = $3; }
+		);
+		pdf = "/ehost/pdfviewer/pdfviewer?sid="+queryString["sid"]+"&vid="+queryString["vid"];
 
-	
-	Zotero.Utilities.HTTP.doPost(host+"/ehost/"+deliveryURL,
-								 downloadString, function(text) {	// get marked records as RIS
-		Zotero.debug(text);
-		// load translator for RIS
-		if (text.match(/^AB\s\s\-/m)) text = text.replace(/^AB\s\s\-/m, "N2  -");
-		if (!text.match(/^TY\s\s-/m)) text = text+"\nTY  - JOUR\n"; 
+		if (text.match(/^Y1\s+-(.*)$/m)) {
+			risDate = text.match(/^Y1\s+-(.*)$/m);
+		}
+
+		if (!text.match(/^TY\s\s-/m)) { text = text+"\nTY  - JOUR\n"; }
 		// load translator for RIS
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
+		Zotero.debug(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			if (text.match(/^L3\s+-\s*(.*)/m)) {
 				item.DOI = text.match(/^L3\s+\-\s*(.*)/m)[1];
 			}
 			if (text.match(/^M3\s+-\s*(.*)/m)) {
-				if (item.DOI == text.match(/^M3\s+\-\s*(.*)/m)[1]) item.DOI = "";
+				if (item.DOI == text.match(/^M3\s+\-\s*(.*)/m)[1]) { item.DOI = ""; }
 			}
 			if (text.match(/^DO\s+-\s*(.*)/m)) {
 				item.DOI = text.match(/^DO\s+-\s*(.*)/m)[1];
@@ -121,68 +67,221 @@ function downloadFunction(text) {
 			if (text.match(/^T1\s+-/m)) {
 				item.title = text.match(/^T1\s+-\s*(.*)/m)[1];
 			}
-			//item.itemType = "journalArticle";
-			item.url = false;
-			// RIS translator tries to download the link in "UR" this leads to unhappyness
-			item.attachments = [];
-			item.complete();
+		
+			// Get the accession number from URL or elsewhere	
+			if (an) {
+				an = an[1];
+				item.callNumber = an;
+			} else {
+				an = item.url.match(/AN=([0-9]+)/);
+				if (an) an = an[1];
+			}
 
+			if (risDate) {
+				var year = risDate[1].match(/\d{4}/);
+				var extra = risDate[1].match(/\/([^\/]+)$/);
+				// If we have a double year in risDate, use last section
+				if (year && extra && extra[1].indexOf(year[0]) !== -1) {
+					item.date = extra[1];
+				}
+			}		
+	
+			// RIS translator tries to download the link in "UR"
+			item.attachments = [];
+			
+			// But keep the stable link as a link attachment
+			if(item.url) {
+				// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
+				item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1");
+				item.attachments.push({url: item.url+"&scope=cite",
+							title: "EBSCO Record",
+							mimeType: "text/html",
+							snapshot: false});
+				item.url = "";
+			}
+			// A lot of extra info is jammed into notes by the RIS translator
+			item.notes = [];
+			// Since order of requests might matter, let's grab the stable link, then the PDF
+			Zotero.Utilities.doGet(item.url, function (doc) { Zotero.Utilities.doGet(pdf, function (text) {
+				var realpdf = text.match(/<embed id="pdfEmbed"[^>]*>/);
+				if(realpdf) {
+					realpdf = text.match(/<embed[^>]*src="([^"]+)"/);
+					if (realpdf) {
+						realpdf = realpdf[1].replace(/&amp;/g, "&").replace(/K=\d+/,"K="+an);
+						Zotero.debug("PDF for "+item.title+": "+realpdf);
+						item.attachments.push({url:realpdf,
+								title: "EBSCO Full Text",
+								mimeType:"application/pdf"});
+					}
+				}
+			}, function () { item.complete(); }); }, function () { return true; });
 		});
 		translator.translate();
-		
-		Zotero.done();
-	});
 }
+
+var host;
 
 function doWeb(doc, url) {
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
+		if (prefix == 'x') { return namespace; } else { return null; }
 	} : null;
 
 	var hostRe = new RegExp("^(https?://[^/]+)/");
 	var hostMatch = hostRe.exec(url);
 	host = hostMatch[1];
-	                                
-	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver,
-	                                XPathResult.ANY_TYPE, null).iterateNext();                              
+									
+	var searchResult = doc.evaluate('//ul[@class="result-list" or @class="folder-list"]/li/div[@class="result-list-record" or @class="folder-item"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();                              
 
 	if(searchResult) {
+		/* Get title links and text */
 		var titlex = '//a[@class = "title-link color-p4"]';
 		var titles = doc.evaluate(titlex, doc, nsResolver, XPathResult.ANY_TYPE, null);
-		var items = new Object();
-		var title;
+		
+		/* Get folder data for AN, DB, and tag */
+		var folderx = '//span[@class = "item add-to-folder"]/input/@value';
+		var folderData = doc.evaluate(folderx, doc, nsResolver, XPathResult.ANY_TYPE, null);
+		
+		var items = {};
+		var folderInfos = {};
+		var title, folderInfo;
+		
+		/* load up urls, title text and records keys (DB, AN, tag) */
 		while (title = titles.iterateNext()) {
 			items[title.href] = title.textContent;
+			
+			folderInfo = folderData.iterateNext();
+			folderInfos[title.href] = folderInfo.textContent;
 		}
 		
-		var items = Zotero.selectItems(items);
-		if(!items) {
-			return true;
-		}
+		Zotero.selectItems(items, function (items) {
+				if(!items) {
+					return true;
+				}
 
-		var uris = new Array();
-		for(var i in items) {
-			uris.push(i);
-		}
-		
-		Zotero.Utilities.processDocuments(uris, function(newDoc){
-			var postURL = newDoc.evaluate('//form[@id="aspnetForm"]/@action', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			postURL = host+"/ehost/"+postURL.nodeValue;
-			var deliverString = generateDeliverString(nsResolver, newDoc);
-			Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
+				/* Get each citation page and pass in record key (db, tag, an) since data does not exist in an easily digestable way on this page */
+				var urls = [];
+				var infos = [];
+				var i;
+				for(i in items) {
+					urls.push(i);
+					infos.push(folderInfos[i]);
+				}
+
+				var run = function(urls, infos) {
+					var url, info;
+					if (urls.length == 0 || infos.length == 0) {
+						Zotero.done();
+						return true;
+					}
+					url = urls.shift();
+					info = infos.shift();
+					Zotero.Utilities.processDocuments(url, 
+						function (newDoc) { doDelivery(doc, nsResolver, info, function () { run(urls, infos) }); },
+						function () { return true; });
+				};
+
+				run(urls, infos);
+
+				Zotero.wait();
 		});
 	} else {
-		//This is a hack, generateDeliveryString is acting up for single pages, but it works on the plink url
-		// The URL-encoding can cause issues too-- we decode it
-		var link = [decodeURI(doc.evaluate("//input[@id ='pLink']/@value", doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().nodeValue)];
-		Zotero.Utilities.processDocuments(link, function(newDoc){			
-			var postURL = newDoc.evaluate('//form[@id="aspnetForm"]/@action', newDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			postURL = host+"/ehost/"+postURL.nodeValue;
-			var deliverString = generateDeliverString(nsResolver, newDoc);
-			Zotero.Utilities.HTTP.doPost(postURL, deliverString, downloadFunction);
-		});
-
+		/* Individual record. Record key exists in attribute for add to folder link in DOM */
+		doDelivery(doc, nsResolver, null, function () { Zotero.done(); return true; });
+		Zotero.wait();
 	}
-	Zotero.wait();
 }
+function doDelivery(doc, nsResolver, folderData, onDone) {
+	if(folderData === null)	{
+		/* Get the db, AN, and tag from ep.clientData instead */
+		var script;
+		var scripts = doc.evaluate('//script[@type="text/javascript"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		while (script = scripts.iterateNext().textContent) {
+			var clientData = script.match(/var ep\s*=\s*({[^;]*});/);
+			if (clientData) break;
+		}
+		if (!clientData) {return false;}
+			/* We now have the script containing ep.clientData */
+
+		/* The JSON is technically invalid, since it doesn't quote the
+		   attribute names-- we pull out the valid bit inside it. */
+		var clientData = script.match(/var ep\s*=\s*({[^;]*});/);
+		if (!clientData) { return false; }
+		clientData = clientData[1].match(/"currentRecord"\s*:\s*({[^}]*})/);
+		/* If this starts throwing exceptions, we should probably start try-elsing it */
+		folderData = JSON.parse(clientData[1]);
+	} else {
+		/* Ditto for this. */
+		// The attributes are a little different
+		folderData = JSON.parse(folderData);
+		folderData.Db = folderData.db;
+		folderData.Term = folderData.uiTerm;
+		folderData.Tag = folderData.uiTag;
+	}
+	
+	var postURL = doc.evaluate('//form[@id="aspnetForm"]/@action', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+
+	var queryString = {};
+	postURL.replace(
+		new RegExp("([^?=&]+)(=([^&]*))?", "g"),
+			function($0, $1, $2, $3) { queryString[$1] = $3; }
+	);
+	
+	/* ExportFormat = 1 for RIS file */
+	postURL = host+"/ehost/delivery/ExportPanelSave/"+folderData.Db+"_"+folderData.Term+"_"+folderData.Tag+"?sid="+queryString["sid"]+"&vid="+queryString["vid"]+"&bdata="+queryString["bdata"]+"&theExportFormat=1";
+	Zotero.Utilities.HTTP.doGet(postURL, function (text) { downloadFunction(text, postURL); }, onDone);
+}
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://search.ebscohost.com/login.aspx?direct=true&db=a9h&AN=4370815&lang=cs&site=ehost-live",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Warren",
+						"firstName": "Karen J.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"RECONCILIATION",
+					"WAR -- Moral & ethical aspects",
+					"SOCIAL sciences -- Philosophy",
+					"STERBA, James",
+					"JUSTICE for Here & Now (Book)"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "EBSCO Record",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"url": false,
+						"title": "EBSCO Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Peacemaking and Philosophy: A Critique of Justice for Hero and Now.",
+				"publicationTitle": "Journal of Social Philosophy",
+				"date": "Winter 1999",
+				"volume": "30",
+				"issue": "3",
+				"pages": "411-423",
+				"publisher": "Wiley-Blackwell",
+				"ISBN": "00472786",
+				"ISSN": "00472786",
+				"abstractNote": "This article presents a critical analysis of James Sterba's book, Justice for Here and Now.  In the book, Sterba undertakes two distinct but interconnected objects--one primarily methodological and the other primarily ethical. The methodological project is to establish the necessity and desirability of adopting a peacemaking model of doing philosophy, that is, one that is committed to fair-mindedness, openness and self-criticalness in seeking to determine which philosophical views are most justified. Sterba contrasts the peacemaking model with a war-making model of doing philosophy. The ethical project involves establishing two related claims: rationality is required for morality, and it is possible and desirable to reconcile the practical perspectives of alternative positions on justice; welfare liberalism, libertarianism, socialism, feminism, multiculturalism, anthropocentric and nonanthropocentric environmental ethics, and pacifism and just war theory. There is an important and intimate connection between the methodological and ethical projects. In fact, at various places throughout the book Sterba suggests that the relationship is one of logical entailment: not only does appeal to a peacemaking model of doing philosophy establish the two main claims of the ethical project; by showing the rational grounds for reconciling alternative philosophical positions on justice, one establishes that a peacemaking model of philosophy ought to be adopted.",
+				"libraryCatalog": "EBSCOhost",
+				"shortTitle": "Peacemaking and Philosophy"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

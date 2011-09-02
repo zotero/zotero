@@ -10,9 +10,10 @@
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"lastUpdated":"2011-08-16 15:07:21"
 }
 
+var item;
 var rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
 var n = {
@@ -79,15 +80,21 @@ function generateCollection(collection) {
  */
 function getDisplayTitle(item) {
 	if(!item.title && (item.itemType == "interview" || item.itemType == "letter")) {
-		var participants = [creator for each(creator in item.creators)
+		var participants = []
+		for each(var creator in item.creators) {
 			if (item.itemType == "letter" && creator.creatorType == "recipient" ||
-			   item.itemType == "interview" && creator.creatorType == "interviewer")];
+					item.itemType == "interview" && creator.creatorType == "interviewer") {
+			   participants.push(creator);
+			}
+		}
 		
 		var displayTitle = "["+(item.itemType == "letter" ? "Letter" : "Interview");
 		if(participants.length) {
 			//var names = [creator.firstName ? creator.firstName+" "+creator.lastName : creator.lastName
-			var names = [creator.lastName
-				for each(creator in participants)];
+			var names = [];
+			for each(var creator in participants) {
+				names.push(creator.lastName);
+			}
 			
 			displayTitle += (item.itemType == "letter" ? " to " : " of ")+names[0];
 			
@@ -316,7 +323,10 @@ function generateItem(item, zoteroType, resource) {
 	}
 	
 	// relative file path for attachment items
-	if(item.path) {
+	if(item.defaultPath) {	// For Zotero 3.0
+		item.saveFile(item.defaultPath, true);
+		Zotero.RDF.addStatement(resource, rdf+"resource", item.defaultPath, false);
+	} else if(item.path) {	// For Zotero 2.1
 		Zotero.RDF.addStatement(resource, rdf+"resource", item.path, false);
 	}
     

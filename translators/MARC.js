@@ -1,14 +1,15 @@
 {
-	"translatorID":"a6ee60df-1ddc-4aae-bb25-45e0537be973",
-	"translatorType":1,
-	"label":"MARC",
-	"creator":"Simon Kornblith, updated for unimarc by Sylvain Machefert",
-	"target":"marc",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2010-02-04 02:00:00"
+	"translatorID": "a6ee60df-1ddc-4aae-bb25-45e0537be973",
+	"label": "MARC",
+	"creator": "Simon Kornblith, Sylvain Machefert",
+	"target": "marc",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 1,
+	"browserSupport": "gcsn",
+	"lastUpdated": "2011-08-22 23:29:49"
 }
 
 function detectImport() {
@@ -170,8 +171,8 @@ record.prototype.getField = function(field) {
 		
 		// add to array, replacing null characters
 		fields.push([this.content.substr(location[0], this.indicatorLength),
-		             this.content.substr(location[0]+this.indicatorLength,
-		               location[1]-this.indicatorLength-1).replace(/\x00/g, "")]);
+			this.content.substr(location[0]+this.indicatorLength,
+			location[1]-this.indicatorLength-1).replace(/\x00/g, "")]);
 	}
 	
 	return fields;
@@ -194,6 +195,10 @@ record.prototype.getFieldSubfields = function(tag) { // returns a two-dimensiona
 					var subfieldIndex = subfields[j].substr(0, this.subfieldCodeLength-1);
 					if(!returnFields[i][subfieldIndex]) {
 						returnFields[i][subfieldIndex] = subfields[j].substr(this.subfieldCodeLength-1);
+					} else {
+						// Duplicate subfield
+						Zotero.debug("Duplicate subfield '"+tag+" "+subfieldIndex+"="+subfields[j]);
+						returnFields[i][subfieldIndex] = returnFields[i][subfieldIndex] + " " + subfields[j].substr(this.subfieldCodeLength-1);
 					}
 				}
 			}
@@ -237,6 +242,24 @@ record.prototype._associateDBField = function(item, fieldNo, part, fieldName, ex
 			}
 		}
 	}
+}
+
+// add field to DB as note
+record.prototype._associateNotes = function(item, fieldNo, part) {
+	var field = this.getFieldSubfields(fieldNo);
+	var texts = [];	
+
+	for(var i in field) {
+		for(var j=0; j<part.length; j++) {
+			var myPart = part[j];
+			if(field[i][myPart]) {
+				texts.push(clean(field[i][myPart]));
+			}
+		}
+	}
+	var text = texts.join(' ');
+	if (text.trim() != "")
+		item.notes.push({note: text});
 }
 
 // add field to DB as tags
@@ -334,8 +357,8 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "330", "a", "abstractNote");
 		
 		// Extract tags
-		// TODO : Ajouter les autres champs en 6xx avec les autorit�s construites. 
-		// n�cessite de reconstruire les autorit�s
+		// TODO : Ajouter les autres champs en 6xx avec les autorités construites. 
+		// nécessite de reconstruire les autorités
 		this._associateTags(item, "610", "a");
 		
 		// Extract scale (for maps)
@@ -426,6 +449,17 @@ record.prototype.translate = function(item) {
 		this._associateTags(item, "658", "ab");
 		// hierarchical geographic place name
 		this._associateTags(item, "662", "abcdfgh");
+
+		// Extract note fields
+		// http://www.loc.gov/marc/bibliographic/bd5xx.html
+		// general note
+		this._associateNotes(item, "500", "a");
+		// formatted contents (table of contents)
+		this._associateNotes(item, "505", "art");
+		// summary
+		this._associateNotes(item, "520", "ab");
+		// biographical or historical data
+		this._associateNotes(item, "545", "ab");
 		
 		// Extract title
 		this._associateDBField(item, "245", "ab", "title");
@@ -445,9 +479,12 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "260", "c", "date", pullNumber);
 		// Extract pages
 		this._associateDBField(item, "300", "a", "numPages", pullNumber);
-		// Extract series
+		// Extract series and series number
+		// The current preference is 490
+		this._associateDBField(item, "490", "a", "series");
+		this._associateDBField(item, "490", "v", "seriesNumber");
+		// 440 was made obsolete as of 2008; see http://www.loc.gov/marc/bibliographic/bd4xx.html
 		this._associateDBField(item, "440", "a", "series");
-		// Extract series number
 		this._associateDBField(item, "440", "v", "seriesNumber");
 		// Extract call number
 		this._associateDBField(item, "084", "ab", "callNumber");
@@ -458,6 +495,7 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "050", "ab", "callNumber");
 		this._associateDBField(item, "090", "a", "callNumber");
 		this._associateDBField(item, "099", "a", "callNumber");
+		this._associateDBField(item, "852", "khim", "callNumber");
 		
 		//German
 		if (!item.place) this._associateDBField(item, "410", "a", "place");
@@ -524,3 +562,50 @@ function doImport() {
 		}
 	}
 }
+
+var exports = {
+	"record":record,
+	"fieldTerminator":fieldTerminator,
+	"recordTerminator":recordTerminator,
+	"subfieldDelimiter":subfieldDelimiter
+};
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "import",
+		"input": "01841cam a2200385Ma 45\u00020001000700000005001700007008004100024010001700065035002300082035001800105040003000123043001200153050001500165049001500180100003900195245028100234260005900515300006100574500019500635500014500830510003000975510002701005510004501032500002601077610004401103600004001147600004801187650004501235610004501280852005801325946003101383910001001414994001201424947001901436\u001e790862\u001e20080120004008.0\u001e880726s1687    sp bf         000 0cspa d\u001e  \u001fa   03021876 \u001e  \u001fa(OCoLC)ocm29051663\u001e  \u001fa(NBYdb)790862\u001e  \u001faMNU\u001fcMNU\u001fdOCL\u001fdDIBAM\u001fdIBV\u001e  \u001fas-py---\u001e0 \u001faF2681\u001fb.X3\u001e  \u001faIBVA\u001flbklr\u001e1 \u001faXarque, Francisco,\u001fdca. 1609-1691.\u001e10\u001faInsignes missioneros de la Compañia de Jesus en la prouincia del Paraguay :\u001fbestado presente de sus missiones en Tucuman, Paraguay, y Rio de la Plata, que comprehende su distrito /\u001fcpor el doct. d. Francisco Xarque, dean de la Catredral [sic] de Santa Maria de Albarrazin ...\u001e  \u001faEn Pamplona :\u001fbPor Juan Micòn, Impressor,\u001fcaño 1687.\u001e  \u001fa[24], 432 p., [1] folded leaf of plates :\u001fbmap ;\u001fc22 cm.\u001e  \u001faBrunet and Graesse both mention a map of Paraguay; this copy has a map of Chile with title: Tabula geocraphica [sic] regni Chile / studio et labore P. Procuratoris Chilensis Societatis Jesu.\u001e  \u001faIn 3 books; the first two are biographies of Jesuits, Simon Mazeta and Francisco Diaz Taño, the 3rd deals with Jesuit missions in Paraguay.\u001e4 \u001faNUC pre-1956,\u001fcNX0000604.\u001e4 \u001faSabin,\u001fc105716 (v.29).\u001e4 \u001faPalau y Dulcet (2nd ed.),\u001fc123233 (v.7).\u001e  \u001faHead and tail pieces.\u001e20\u001faJesuits\u001fzParaguay\u001fvEarly works to 1800.\u001e10\u001faMasseta, Simon,\u001fdca. 1582-ca. 1656.\u001e10\u001faCuellar y Mosquera, Gabriel de,\u001fd1593-1677.\u001e 0\u001faMissions\u001fzParaguay\u001fvEarly works to 1800.\u001e20\u001faJesuits\u001fvBiography\u001fvEarly works to 1800.\u001e8 \u001fbvau,ayer\u001fkVAULT\u001fhAyer\u001fi1343\u001fi.J515\u001fiP211\u001fiX2\u001fi1687\u001ft1\u001e  \u001faOCLC RECON PROJECT\u001farc3758\u001e  \u001fa35535\u001e  \u001fa02\u001fbIBV\u001e  \u001faMARS\u001fa20071227\u001e\u001d",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Francisco",
+						"lastName": "Xarque",
+						"creatorType": "author"
+					}
+				],
+				"notes": [
+					{
+						"note": "Brunet and Graesse both mention a map of Paraguay; this copy has a map of Chile with title: Tabula geocraphica [sic] regni Chile / studio et labore P. Procuratoris Chilensis Societatis Jesu In 3 books; the first two are biographies of Jesuits, Simon Mazeta and Francisco Diaz Taño, the 3rd deals with Jesuit missions in Paraguay Head and tail pieces"
+					}
+				],
+				"tags": [
+					"Masseta, Simon",
+					"Cuellar y Mosquera, Gabriel de",
+					"Missions",
+					"Paraguay"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Insignes missioneros de la Compañia de Jesus en la prouincia del Paraguay: estado presente de sus missiones en Tucuman, Paraguay, y Rio de la Plata, que comprehende su distrito",
+				"place": "En Pamplona",
+				"publisher": "Por Juan Micòn, Impressor",
+				"date": "1687",
+				"numPages": "24",
+				"callNumber": "VAULT Ayer 1343 .J515 P211 X2 1687"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

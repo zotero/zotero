@@ -7,9 +7,10 @@
 	"minVersion":"2.1.3",
 	"maxVersion":"",
 	"priority":100,
+	"browserSupport":"gcsn",
 	"inRepository":true,
 	"displayOptions":{"exportCharset":"UTF-8", "exportNotes":true},
-	"lastUpdated":"2011-04-01 20:50:00"
+	"lastUpdated":"2011-07-08 04:51:41"
 }
 
 function detectImport() {
@@ -118,7 +119,7 @@ function processTag(item, tag, value) {
 	if (tag != "N1" && tag != "AB" && Zotero.Utilities.unescapeHTML) {
 		value = Zotero.Utilities.unescapeHTML(value);
 	}
-    
+	
 	if(fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
 	} else if(inputFieldMap[tag]) {
@@ -270,7 +271,8 @@ function processTag(item, tag, value) {
 	// to overlook or ignore this, so we will too on import
 	} else if(tag == "N2" || tag == "AB") {
 		// abstract
-		item.abstractNote = value;
+		if (item.abstractNote) item.abstractNote += "\n" + value;
+		else item.abstractNote = value;
 	} else if(tag == "KW") {
 		// keywords/tags
 		
@@ -415,7 +417,7 @@ function doImport(attachments) {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
 			if(tag) {
-				Zotero.debug("tag: '"+tag+"'; data: '"+data+"'");
+				//Zotero.debug("tag: '"+tag+"'; data: '"+data+"'");
 				processTag(item, tag, data);
 			}
 
@@ -454,7 +456,7 @@ function doImport(attachments) {
 	}
 
 	if(tag && tag != "ER") {	// save any unprocessed tags
-		Zotero.debug(tag);
+		//Zotero.debug(tag);
 		processTag(item, tag, data);
 		completeItem(item);
 	}

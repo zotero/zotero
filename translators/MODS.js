@@ -1,16 +1,21 @@
 {
-	"translatorID":"0e2235e7-babf-413c-9acf-f27cce5f059c",
-	"translatorType":3,
-	"label":"MODS",
-	"creator":"Simon Kornblith",
-	"target":"xml",
-	"minVersion":"2.1b3",
-	"maxVersion":"",
-	"priority":50,
-	"configOptions":{"dataMode":"xml/e4x"},
-	"displayOptions":{"exportNotes":true},
-	"inRepository":true,
-	"lastUpdated":"2011-04-04 16:00:00"
+	"translatorID": "0e2235e7-babf-413c-9acf-f27cce5f059c",
+	"label": "MODS",
+	"creator": "Simon Kornblith and Richard Karnesky",
+	"target": "xml",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 50,
+	"configOptions": {
+		"dataMode": "xml/e4x"
+	},
+	"displayOptions": {
+		"exportNotes": true
+	},
+	"inRepository": true,
+	"translatorType": 3,
+	"browserSupport": "g",
+	"lastUpdated": "2011-07-18 13:49:58"
 }
 
 function detectImport() {
@@ -39,8 +44,14 @@ function doExport() {
 		if(item.title) {
 			mods.titleInfo.title = item.title;
 		}
+		if(item.shortTitle) {
+			mods.titleInfo += <titleInfo type="abbreviated"><title>{item.shortTitle}</title></titleInfo>;
+		}
 		
 		// XML tag typeOfResource/genre; object field type
+		// 
+		// The exact marcGenre of a book section can, perhaps, be debated;
+		// But it should have 'book' as the host's genre.
 		var modsType, marcGenre;
 		if(item.itemType == "book" || item.itemType == "bookSection") {
 			modsType = "text";
@@ -84,8 +95,7 @@ function doExport() {
 		// XML tag genre; object field thesisType, type
 		if(item.thesisType) {
 			mods.genre += <genre>{item.thesisType}</genre>;
-		}
-		if(item.type) {
+		} else if(item.type) {
 			mods.genre += <genre>{item.type}</genre>;
 		}
 		
@@ -96,22 +106,41 @@ function doExport() {
 				roleTerm = "aut";
 			} else if(item.creators[j].creatorType == "editor") {
 				roleTerm = "edt";
+			} else if(item.creators[j].creatorType == "translator") {
+				roleTerm = "trl";
 			} else {
 				roleTerm = "ctb";
 			}
 			
 			// FIXME - currently all names are personal
-			if(item.creators[j].fieldMode == 1) {
-				mods.name += <name type="personal">
-					<namePart>{item.creators[j].lastName}</namePart>
-					<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
-					</name>;
-			} else {
-				mods.name += <name type="personal">
-					<namePart type="family">{item.creators[j].lastName}</namePart>
-					<namePart type="given">{item.creators[j].firstName}</namePart>
-					<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
-					</name>;
+			if(item.creators[j].creatorType != "seriesEditor") {
+				if(isPartialItem && item.creators[j].creatorType == "editor"){
+					if(item.creators[j].fieldMode == 1) {
+						mods.relatedItem.name += <name type="personal">
+							<namePart>{item.creators[j].lastName}</namePart>
+							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+							</name>;
+					} else {
+						mods.relatedItem.name += <name type="personal">
+							<namePart type="family">{item.creators[j].lastName}</namePart>
+							<namePart type="given">{item.creators[j].firstName}</namePart>
+							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+							</name>;
+					}
+				} else {
+					if(item.creators[j].fieldMode == 1) {
+						mods.name += <name type="personal">
+							<namePart>{item.creators[j].lastName}</namePart>
+							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+							</name>;
+					} else {
+						mods.name += <name type="personal">
+							<namePart type="family">{item.creators[j].lastName}</namePart>
+							<namePart type="given">{item.creators[j].firstName}</namePart>
+							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+							</name>;
+					}
+				}
 			}
 		}
 		
@@ -141,29 +170,17 @@ function doExport() {
 		
 		// XML tag detail; object field volume
 		if(item.volume) {
-			if(parseInt(item.volume) == item.volume) {
-				part += <detail type="volume"><number>{item.volume}</number></detail>;
-			} else {
-				part += <detail type="volume"><text>{item.volume}</text></detail>;
-			}
+			part += <detail type="volume"><number>{item.volume}</number></detail>;
 		}
 		
 		// XML tag detail; object field number
 		if(item.issue) {
-			if(parseInt(item.issue) == item.issue) {
-				part += <detail type="issue"><number>{item.issue}</number></detail>;
-			} else {
-				part += <detail type="issue"><text>{item.issue}</text></detail>;
-			}
+			part += <detail type="issue"><number>{item.issue}</number></detail>;
 		}
 		
 		// XML tag detail; object field section
 		if(item.section) {
-			if(parseInt(item.section) == item.section) {
-				part += <detail type="section"><number>{item.section}</number></detail>;
-			} else {
-				part += <detail type="section"><text>{item.section}</text></detail>;
-			}
+			part += <detail type="section"><number>{item.section}</number></detail>;
 		}
 		
 		// XML tag detail; object field pages
@@ -209,15 +226,51 @@ function doExport() {
 			var tag = <{dateType}>{item.date}</{dateType}>;
 			originInfo += tag;
 		}
-		if(item.accessDate) {
-			originInfo += <dateCaptured>{item.accessDate}</dateCaptured>;
-		}
+
+		if(item.numPages) {
+			mods.physicalDescription = <physicalDescription><extent unit="pages"><total>{item.numPages}</total></extent></physicalDescription>;
+ 		}
+
 		if(originInfo.length() != 1) {
 			if(isPartialItem) {
 				// For a journal article, bookSection, etc., this goes under the host
 				mods.relatedItem.originInfo += <originInfo>{originInfo}</originInfo>;
 			} else {
 				mods.originInfo += <originInfo>{originInfo}</originInfo>;
+			}
+		}
+
+		// eXist Solutions points out that most types are more often
+		// monographic than not & will use this internally.
+		// Perhaps comment this out in the main distribution, though.
+		mods.originInfo.issuance = "monographic";
+
+		if(isPartialItem) {
+			// eXist Solutions points out that these types are more often
+			// continuing than not & will use this internally.
+			// Perhaps comment this out in the main distribution, though.
+			if(item.itemType == "journalArticle" || item.itemType == "magazineArticle" || item.itemType == "newspaperArticle") {
+				mods.relatedItem.originInfo.issuance = "continuing";
+				if(item.itemType == "journalArticle" || item.itemType == "magazineArticle") {
+					mods.relatedItem.genre += <genre authority="marcgt">periodical</genre>;
+				} else if (item.itemType == "newspaperArticle") {
+					mods.relatedItem.genre += <genre authority="marcgt">newspaper</genre>;
+				}
+			}
+			else if (item.itemType == "bookSection" || item.itemType == "conferencePaper" || item.itemType == "encyclopediaArticle") {
+				mods.relatedItem.originInfo.issuance = "monographic";
+				if (item.itemType == "bookSection") {
+					mods.relatedItem.genre += <genre authority="marcgt">book</genre>;
+				} else if (item.itemType == "conferencePaper") {
+					mods.relatedItem.genre += <genre authority="marcgt">conference publication</genre>;
+					if (item.conferenceName) {
+						mods.relatedItem.name += <name type="conference">
+							<namePart>{item.conferenceName}</namePart>
+							</name>;
+					}
+				} else if (item.itemType == "encyclopediaArticle") {
+					mods.relatedItem.genre += <genre authority="marcgt">encyclopedia</genre>;
+				}
 			}
 		}
 		
@@ -246,15 +299,19 @@ function doExport() {
 		if(item.callNumber) {
 			mods.classification = item.callNumber;
 		}
+
+		// XML tag location.url; object field archiveLocation
+		if(item.url) {
+			mods.location.url += item.url;
+			if(item.accessDate) {
+				mods.location.url.@dateLastAccessed = item.accessDate;
+			}
+		}
+
 		
 		// XML tag location.physicalLocation; object field archiveLocation
 		if(item.archiveLocation) {
-			mods.location.physicalLocation = item.archiveLocation;
-		}
-		
-		// XML tag location.url; object field archiveLocation
-		if(item.url) {
-			mods.location.url = item.url;
+			mods.location += <location><physicalLocation>{item.archiveLocation}</physicalLocation></location>;
 		}
 		
 		// XML tag title.titleInfo; object field journalAbbreviation
@@ -286,18 +343,34 @@ function doExport() {
 		for(var j in item.tags) {
 			mods.subject += <subject><topic>{item.tags[j].tag}</topic></subject>;
 		}
+
+		/** LANGUAGE **/
+
+		if(item.language) {
+			mods.language.languageTerm = <languageTerm type="text">{item.language}</languageTerm>;
+		}
+
+		/** EXTRA->NOTE **/
+		if(item.extra) {
+			mods.note += <note>{item.extra}</note>;
+		}
 		
 		
 		// XML tag relatedItem.titleInfo; object field series
 		if(item.seriesTitle || item.series || item.seriesNumber || item.seriesText) {
 			var series = <relatedItem type="series"/>;
+
+			// eXist Solutions points out that these types are more often
+			// continuing than not & will use this internally.
+			// Perhaps comment this out in the main distribution, though.
+			series.originInfo.issuance = "continuing";
 			
 			if(item.series) {
 				series.titleInfo.title = item.series;
 			}
 			
 			if(item.seriesTitle) {
-				series.titleInfo.partTitle = item.seriesTitle;
+				series.titleInfo.title += <title>{item.seriesTitle}</title>;
 			}
 			
 			if(item.seriesText) {
@@ -305,16 +378,36 @@ function doExport() {
 			}
 			
 			if(item.seriesNumber) {
-				series.titleInfo.partNumber = item.seriesNumber;
+				series.part.detail = <detail type="volume"><number>{item.seriesNumber}</number></detail>;
+			}
+
+			// handle series editors
+			for(var j in item.creators) {
+				var roleTerm = "";
+				if(item.creators[j].creatorType == "seriesEditor") {
+					roleTerm = "pbd";
+					if(item.creators[j].fieldMode == 1) {
+						series.name += <name type="personal">
+							<namePart>{item.creators[j].lastName}</namePart>
+							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+							</name>;
+					} else {
+						series.name += <name type="personal">
+							<namePart type="family">{item.creators[j].lastName}</namePart>
+							<namePart type="given">{item.creators[j].firstName}</namePart>
+							<role><roleTerm type="code" authority="marcrelator">{roleTerm}</roleTerm></role>
+							</name>;
+					}
+				}
 			}
 			
 			// TODO: make this work in import
-			/*if(item.itemType == "bookSection") {
-				// For a book section, series info must go inside host tag
+			//
+			if(isPartialItem) {
 				mods.relatedItem.relatedItem = series;
-			} else {*/
+			} else {
 				mods.relatedItem += series;
-			//}
+			}
 		}
 		
 		modsCollection.mods += mods;
@@ -742,9 +835,24 @@ function doImport() {
 		// Language
 		// create an array of languages
 		var languages = new Array();
-		// E4X filter might need to be updated to include languageTerms that are @type="code" only
-		for each(var language in mods.m::language.m::languageTerm.(@type == "text")) { 
-			languages.push(language.text().toString());
+		for each(var language in mods.m::language) {
+			var code = false;
+			for each(var term in language.m::languageTerm) {
+				if (term.@type == "text") {
+					languages.push(term.text().toString());
+					code = false;
+					break;
+				// code authorities should be used, not ignored
+				// but we ignore them for now
+				} else if (term.@type == "code" || term.@authority) {
+					code = term.text().toString();
+				}
+			}
+			// If we have a code or text content of the node
+			// (prefer the former), then we add that
+			if (code || (code = language.text().toString())) {
+				languages.push(code);
+			}
 		}
 		// join the list separated by semicolons & add it to zotero item
 		newItem.language = languages.join('; ');
@@ -753,3 +861,135 @@ function doImport() {
 		newItem.complete();
 	}
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\u000a<modsCollection xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.loc.gov/mods/v3\" xsi:schemaLocation=\"http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd\">\u000a<mods version=\"3.3\">\u000a     <titleInfo>\u000a \u0009 \u0009<title>FranUlmer.com -- Home Page</title>\u000a \u0009</titleInfo>\u000a \u0009<titleInfo type=\"alternative\"><title>Fran Ulmer, Democratic candidate for Governor, Alaska, 2002</title>\u000a \u0009</titleInfo>\u000a \u0009<name type=\"personal\">\u000a \u0009 \u0009<namePart>Ulmer, Fran</namePart>\u000a \u0009</name>\u000a \u0009<genre>Web site</genre>\u000a \u0009<originInfo>\u000a \u0009 \u0009<dateCaptured point=\"start\" encoding=\"iso8601\">20020702 </dateCaptured>\u000a \u0009 \u0009<dateCaptured point=\"end\" encoding=\"iso8601\"> 20021203</dateCaptured>\u000a \u0009</originInfo>\u000a \u0009<language>\u000a \u0009 \u0009<languageTerm authority=\"iso639-2b\">eng</languageTerm>\u000a \u0009</language>\u000a \u0009<physicalDescription>\u000a \u0009 \u0009<internetMediaType>text/html</internetMediaType>\u000a \u0009 \u0009<internetMediaType>image/jpg</internetMediaType>\u000a \u0009</physicalDescription>\u000a \u0009<abstract>Web site promoting the candidacy of Fran Ulmer, Democratic candidate for Governor, Alaska, 2002. Includes candidate biography, issue position statements, campaign contact information, privacy policy and campaign news press releases. Site features enable visitors to sign up for campaign email list, volunteer, make campaign contributions and follow links to other internet locations. </abstract>\u000a \u0009<subject>\u000a \u0009 \u0009<topic>Elections</topic>\u000a \u0009 \u0009<geographic>Alaska</geographic>\u000a \u0009</subject>\u000a \u0009<subject>\u000a \u0009 \u0009<topic>Governors</topic>\u000a \u0009 \u0009<geographic>Alaska</geographic>\u000a \u0009 \u0009<topic>Election</topic>\u000a \u0009</subject>\u000a \u0009<subject>\u000a \u0009 \u0009<topic>Democratic Party (AK)</topic>\u000a \u0009</subject>\u000a \u0009<relatedItem type=\"host\">\u000a \u0009 \u0009<titleInfo>\u000a \u0009 \u0009 \u0009<title>Election 2002 Web Archive</title>\u000a \u0009 \u0009</titleInfo>\u000a \u0009 \u0009<location>\u000a \u0009 \u0009 \u0009<url>http://www.loc.gov/minerva/collect/elec2002/</url>\u000a \u0009 \u0009</location>\u000a \u0009</relatedItem>\u000a \u0009<location>\u000a \u0009 \u0009<url displayLabel=\"Active site (if available)\">http://www.franulmer.com/</url>\u000a \u0009</location>\u000a \u0009<location>\u000a \u0009 \u0009<url displayLabel=\"Archived site\">http://wayback-cgi1.alexa.com/e2002/*/http://www.franulmer.com/</url>\u000a \u0009</location>\u000a</mods>\u000a</modsCollection>",
+		"items": [
+			{
+				"itemType": "document",
+				"creators": [
+					{
+						"firstName": "Fran",
+						"lastName": "Ulmer",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Elections",
+					"Governors",
+					"Election",
+					"Democratic Party (AK)"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "FranUlmer.com -- Home Page",
+				"publicationTitle": "Election 2002 Web Archive",
+				"url": "http://wayback-cgi1.alexa.com/e2002/*/http://www.franulmer.com/",
+				"abstractNote": "Web site promoting the candidacy of Fran Ulmer, Democratic candidate for Governor, Alaska, 2002. Includes candidate biography, issue position statements, campaign contact information, privacy policy and campaign news press releases. Site features enable visitors to sign up for campaign email list, volunteer, make campaign contributions and follow links to other internet locations.",
+				"language": "eng"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\u000a<modsCollection xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.loc.gov/mods/v3\" xsi:schemaLocation=\"http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd\">\u000a<mods version=\"3.3\">\u000a     <titleInfo>\u000a \u0009 \u0009<title>At Gettysburg, or, What a Girl Saw and Heard of the Battle: A True Narrative</title>\u000a \u0009</titleInfo>\u000a \u0009<name type=\"personal\">\u000a \u0009 \u0009<namePart>Alleman, Tillie Pierce [1848-1914]</namePart>\u000a \u0009 \u0009<role>\u000a \u0009 \u0009 \u0009<roleTerm type=\"code\" authority=\"marcrelator\">aut</roleTerm>\u000a \u0009 \u0009 \u0009<roleTerm type=\"text\" authority=\"marcrelator\">Author</roleTerm>\u000a \u0009 \u0009</role>\u000a \u0009</name>\u000a \u0009<typeOfResource>text</typeOfResource>\u000a \u0009<originInfo>\u000a \u0009 \u0009<place>\u000a \u0009 \u0009 \u0009<placeTerm type=\"text\">New York</placeTerm>\u000a \u0009 \u0009</place>\u000a \u0009 \u0009<publisher>W. Lake Borland</publisher>\u000a \u0009 \u0009<dateIssued keyDate=\"yes\" encoding=\"w3cdtf\">1889</dateIssued>\u000a \u0009</originInfo>\u000a \u0009<language>\u000a \u0009 \u0009<languageTerm authority=\"iso639-2b\">eng</languageTerm>\u000a \u0009 \u0009<languageTerm type=\"text\">English</languageTerm>\u000a \u0009</language>\u000a \u0009<physicalDescription>\u000a \u0009 \u0009<internetMediaType>text/html</internetMediaType>\u000a \u0009 \u0009<digitalOrigin>reformatted digital</digitalOrigin>\u000a \u0009</physicalDescription>\u000a \u0009<subject authority=\"lcsh\">\u000a \u0009 \u0009<topic >Gettysburg, Battle of, Gettysburg, Pa., 1863</topic>\u000a \u0009</subject>\u000a \u0009<subject authority=\"lcsh\">\u000a \u0009 \u0009<topic>Gettysburg (Pa.) -- History -- Civil War, 1861-1865</topic>\u000a \u0009</subject>\u000a \u0009<subject authority=\"lcsh\">\u000a \u0009 \u0009<topic>United States -- History -- Civil War, 1861-1865 -- Campaigns</topic>\u000a \u0009</subject>\u000a \u0009<classification authority=\"lcc\">E475.53 .A42</classification>\u000a \u0009<relatedItem type=\"host\">\u000a \u0009 \u0009<titleInfo type=\"uniform\" authority=\"dlfaqcoll\">\u000a \u0009 \u0009 \u0009<title>A Celebration of Women Writers: Americana</title>\u000a \u0009 \u0009</titleInfo>\u000a \u0009</relatedItem>\u000a \u0009<location>\u000a \u0009 \u0009<url usage=\"primary display\" access=\"object in context\"> http://digital.library.upenn.edu/women/alleman/gettysburg/gettysburg.html\u000a</url>\u000a \u0009</location>\u000a \u0009<accessCondition> Personal, noncommercial use of this item is permitted in the United States of America. Please see http://digital.library.upenn.edu/women/ for other rights and restrictions that may apply to this resource.\u000a</accessCondition>\u000a<recordInfo>\u000a \u0009<recordSource>University of Pennsylvania Digital Library</recordSource>\u000a \u0009<recordOrigin> MODS auto-converted from a simple Online Books Page metadata record. For details, see http://onlinebooks.library.upenn.edu/mods.html </recordOrigin>\u000a \u0009<languageOfCataloging>\u000a \u0009 \u0009<languageTerm type=\"code\" authority=\"iso639-2b\">eng</languageTerm>\u000a \u0009</languageOfCataloging>\u000a</recordInfo>\u000a</mods>\u000a</modsCollection>",
+		"items": [
+			{
+				"itemType": "document",
+				"creators": [
+					{
+						"firstName": "Tillie Pierce [1848-1914",
+						"lastName": "Alleman",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Gettysburg, Battle of, Gettysburg, Pa., 1863",
+					"Gettysburg (Pa.) -- History -- Civil War, 1861-1865",
+					"United States -- History -- Civil War, 1861-1865 -- Campaigns"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "At Gettysburg, or, What a Girl Saw and Heard of the Battle: A True Narrative",
+				"rights": "Personal, noncommercial use of this item is permitted in the United States of America. Please see http://digital.library.upenn.edu/women/ for other rights and restrictions that may apply to this resource.",
+				"publicationTitle": "A Celebration of Women Writers: Americana",
+				"callNumber": "E475.53 .A42",
+				"url": "http://digital.library.upenn.edu/women/alleman/gettysburg/gettysburg.html",
+				"language": "English"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\u000a<modsCollection xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.loc.gov/mods/v3\" xsi:schemaLocation=\"http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd\">\u000a<mods version=\"3.3\">\u000a     <titleInfo>\u000a \u0009 \u0009<title>Telescope Peak from Zabriskie Point</title>\u000a \u0009</titleInfo>\u000a \u0009<titleInfo type=\"alternative\" >\u000a \u0009 \u0009<title>Telescope PK from Zabriskie Pt.</title>\u000a \u0009</titleInfo>\u000a \u0009<name type=\"personal\">\u000a \u0009 \u0009<namePart type=\"family\">Cushman</namePart>\u000a \u0009 \u0009<namePart type=\"given\">Charles Weever</namePart>\u000a \u0009 \u0009<namePart type=\"date\">1896-1972</namePart>\u000a \u0009 \u0009<role>\u000a \u0009 \u0009 \u0009<roleTerm type=\"code\" authority=\"marcrelator\">pht</roleTerm>\u000a \u0009 \u0009 \u0009<roleTerm type=\"text\" authority=\"marcrelator\">Photographer</roleTerm>\u000a \u0009 \u0009</role>\u000a \u0009</name>\u000a \u0009<typeOfResource>still image</typeOfResource>\u000a \u0009<genre authority=\"gmgpc\">Landscape photographs</genre>\u000a \u0009<originInfo>\u000a \u0009 \u0009<dateCreated encoding=\"w3cdtf\" keyDate=\"yes\">1955-03-22</dateCreated>\u000a \u0009 \u0009<copyrightDate encoding=\"w3cdtf\">2003</copyrightDate>\u000a \u0009</originInfo>\u000a \u0009<physicalDescription>\u000a \u0009 \u0009<internetMediaType>image/jpeg</internetMediaType>\u000a \u0009 \u0009<digitalOrigin>reformatted digital</digitalOrigin>\u000a \u0009 \u0009<note> Original 35mm slide was digitized in 2003 as a TIFF image. Display versions in JPEG format in three sizes are available.</note>\u000a \u0009 \u0009<note>100 f 6.3 tl</note>\u000a \u0009</physicalDescription>\u000a \u0009<subject authority=\"lctgm\">\u000a \u0009 \u0009<topic>Mountains</topic>\u000a \u0009</subject>\u000a \u0009<subject authority=\"lctgm\">\u000a \u0009 \u0009<topic>Snow</topic>\u000a \u0009</subject>\u000a \u0009<subject>\u000a \u0009 \u0009<topic>Telescope Peak (Inyo County, Calif.)</topic>\u000a \u0009</subject>\u000a \u0009<subject>\u000a \u0009 \u0009<topic>Zabriskie Point (Calif.)</topic>\u000a \u0009</subject>\u000a \u0009<subject>\u000a \u0009 \u0009<hierarchicalGeographic>\u000a \u0009 \u0009 \u0009<country>United States</country>\u000a \u0009 \u0009 \u0009<state>California</state>\u000a \u0009 \u0009 \u0009<county>Inyo</county>\u000a \u0009 \u0009</hierarchicalGeographic>\u000a \u0009</subject>\u000a \u0009<relatedItem type=\"original\">\u000a \u0009 \u0009<originInfo>\u000a \u0009 \u0009 \u0009<dateCreated encoding=\"w3cdtf\" keyDate=\"yes\">1955-03-22</dateCreated>\u000a \u0009 \u0009</originInfo>\u000a \u0009 \u0009<physicalDescription>\u000a \u0009 \u0009 \u0009<form authority=\"gmd\">graphic</form>\u000a \u0009 \u0009 \u0009<extent>1 slide : col. ; 35mm</extent>\u000a \u0009 \u0009 \u0009<note>Original 35mm slide was digitized in 2003 as a TIFF image. Display versions in JPEG format in three sizes are available.</note>\u000a \u0009 \u0009</physicalDescription>\u000a \u0009 \u0009<location>\u000a \u0009 \u0009 \u0009<physicalLocation displayLabel=\"Original slide\"> Indiana University, Bloomington. University Archives P07803 </physicalLocation>\u000a \u0009 \u0009</location>\u000a \u0009</relatedItem>\u000a \u0009<relatedItem type=\"host\">\u000a \u0009 \u0009<titleInfo type=\"uniform\" authority=\"dlfaqcoll\">\u000a \u0009 \u0009 \u0009<title> Indiana University Digital Library Program: Charles W. Cushman Photograph Collection</title>\u000a \u0009 \u0009</titleInfo>\u000a \u0009</relatedItem>\u000a \u0009<identifier displayLabel=\"Cushman number\" type=\"local\">955.11</identifier>\u000a \u0009<identifier displayLabel=\"IU Archives number\" type=\"local\">P07803</identifier>\u000a \u0009<location>\u000a \u0009 \u0009<url>http://purl.dlib.indiana.edu/iudl/archives/cushman/P07803</url>\u000a \u0009 \u0009<url access=\"preview\">http://quod.lib.umich.edu/m/mods/thumbs/Indiana/oai.dlib.indiana.edu/ archives/cushman/oai_3Aoai.dlib.indiana.edu_3Aarchives_5Ccushman_5CP07803.png</url>\u000a \u0009</location>\u000a \u0009<accessCondition> Copyright and reproduction rights for all Charles W. Cushman photographs are held by Indiana University and administered by the University Archives, Indiana University, Bloomington, IN 47405</accessCondition>\u000a \u0009<recordInfo>\u000a \u0009<recordContentSource>Indiana University Digital Library Program</recordContentSource>\u000a \u0009<recordCreationDate encoding=\"w3cdtf\">2004-09-09</recordCreationDate>\u000a \u0009<recordIdentifier>archives/cushman/P07803</recordIdentifier>\u000a \u0009</recordInfo>\u000a</mods>\u000a\u000a</modsCollection>",
+		"items": [
+			{
+				"itemType": "artwork",
+				"creators": [
+					{
+						"firstName": "Charles Weever",
+						"lastName": "Cushman",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Mountains",
+					"Snow",
+					"Telescope Peak (Inyo County, Calif.)",
+					"Zabriskie Point (Calif.)"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Telescope Peak from Zabriskie Point",
+				"source": "Indiana University Digital Library Program",
+				"accessionNumber": "archives/cushman/P07803",
+				"rights": "Copyright and reproduction rights for all Charles W. Cushman photographs are held by Indiana University and administered by the University Archives, Indiana University, Bloomington, IN 47405",
+				"publicationTitle": "Indiana University Digital Library Program: Charles W. Cushman Photograph Collection",
+				"url": "http://quod.lib.umich.edu/m/mods/thumbs/Indiana/oai.dlib.indiana.edu/ archives/cushman/oai_3Aoai.dlib.indiana.edu_3Aarchives_5Ccushman_5CP07803.png"
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<modsCollection xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.loc.gov/mods/v3\" xsi:schemaLocation=\"http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd\">\u000a<mods version=\"3.3\">\u000a     <titleInfo>\u000a \u0009 \u0009<title>Hiring and recruitment practices in academic libraries</title>\u000a \u0009</titleInfo>\u000a \u0009<name type=\"personal\">\u000a \u0009 \u0009<namePart>Raschke, Gregory K.</namePart>\u000a \u0009 \u0009<displayForm>Gregory K. Raschke</displayForm>\u000a \u0009</name>\u000a \u0009<typeOfResource>text</typeOfResource>\u000a \u0009<genre>journal article</genre>\u000a \u0009<originInfo>\u000a \u0009 \u0009<place>\u000a \u0009 \u0009 \u0009<text>Baltimore, Md.</text>\u000a \u0009 \u0009</place>\u000a \u0009 \u0009<publisher>Johns Hopkins University Press</publisher>\u000a \u0009 \u0009<dateIssued>2003</dateIssued>\u000a \u0009 \u0009<issuance>monographic</issuance>\u000a \u0009</originInfo>\u000a \u0009<language authority=\"iso639-2b\">eng</language>\u000a \u0009<physicalDescription>\u000a \u0009 \u0009<form authority=\"marcform\">print</form>\u000a \u0009 \u0009<extent>15 p.</extent>\u000a \u0009</physicalDescription>\u000a \u0009<abstract>\u000aAcademic libraries need to change their recruiting and hiring procedures to stay competitive in today's changing marketplace. By taking too long to find and to hire talented professionals in a tight labor market, academic libraries are losing out on top candidates and limiting their ability to become innovative and dynamic organizations. Traditional, deliberate, and risk-averse hiring models lead to positions remaining open for long periods, opportunities lost as top prospects find other positions, and a reduction in the overall talent level of the organization. To be more competitive and effective in their recruitment and hiring processes, academic libraries must foster manageable internal solutions, look to other professions for effective hiring techniques and models, and employ innovative concepts from modern personnel management literature. </abstract>\u000a \u0009<subject>\u000a \u0009 \u0009<topic>College librarians</topic>\u000a \u0009 \u0009<topic>Recruiting</topic>\u000a \u0009 \u0009<geographic>United States</geographic>\u000a \u0009</subject>\u000a \u0009<subject>\u000a \u0009 \u0009<topic>College librarians</topic>\u000a \u0009 \u0009<topic>Selection and appointment</topic>\u000a \u0009 \u0009<geographic>United States</geographic>\u000a \u0009</subject>\u000a \u0009<relatedItem type=\"host\">\u000a \u0009 \u0009<titleInfo>\u000a \u0009 \u0009 \u0009<title>portal: libraries and the academy</title>\u000a \u0009 \u0009</titleInfo>\u000a \u0009 \u0009<part>\u000a \u0009 \u0009 \u0009<detail type=\"volume\">\u000a \u0009 \u0009 \u0009 \u0009<number>3</number>\u000a \u0009 \u0009 \u0009 \u0009<caption>vol.</caption>\u000a \u0009 \u0009 \u0009</detail>\u000a \u0009 \u0009 \u0009<detail type=\"number\">\u000a \u0009 \u0009 \u0009 \u0009<number>1</number>\u000a \u0009 \u0009 \u0009 \u0009<caption>no.</caption>\u000a \u0009 \u0009 \u0009</detail>\u000a \u0009 \u0009 \u0009<extent unit=\"page\">\u000a \u0009 \u0009 \u0009 \u0009<start>53</start>\u000a \u0009 \u0009 \u0009 \u0009<end>57</end>\u000a \u0009 \u0009 \u0009</extent>\u000a \u0009 \u0009 \u0009<date>Jan. 2003</date>\u000a \u0009 \u0009</part>\u000a \u0009 \u0009<identifier type=\"issn\">1531-2542</identifier>\u000a \u0009</relatedItem>\u000a</mods>\u000a\u000a</modsCollection>",
+		"items": [
+			{
+				"itemType": "document",
+				"creators": [
+					{
+						"firstName": "Gregory K",
+						"lastName": "Raschke",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"notes": [],
+				"tags": [
+					"College librarians",
+					"Recruiting",
+					"College librarians",
+					"Selection and appointment"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Hiring and recruitment practices in academic libraries",
+				"publicationTitle": "portal: libraries and the academy",
+				"ISSN": "1531-2542",
+				"volume": "3",
+				"pages": "53-57",
+				"abstractNote": "Academic libraries need to change their recruiting and hiring procedures to stay competitive in today's changing marketplace. By taking too long to find and to hire talented professionals in a tight labor market, academic libraries are losing out on top candidates and limiting their ability to become innovative and dynamic organizations. Traditional, deliberate, and risk-averse hiring models lead to positions remaining open for long periods, opportunities lost as top prospects find other positions, and a reduction in the overall talent level of the organization. To be more competitive and effective in their recruitment and hiring processes, academic libraries must foster manageable internal solutions, look to other professions for effective hiring techniques and models, and employ innovative concepts from modern personnel management literature.",
+				"language": "eng"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

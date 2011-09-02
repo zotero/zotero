@@ -275,6 +275,9 @@ function scrapeAttachments(doc, url) {
 			Zotero.debug("Text Page: " + textURL);					
 			attachments.push({title:"ACM Full Text HTML", mimeType:"text/html", url:textURL});
 		}
+
+		// Break at a reasonable limit
+		if (attachments.length > 20) return attachments;
 	}
 		
 	return attachments;

@@ -1,19 +1,20 @@
 {
-	"translatorID":"4f0d0c90-5da0-11df-a08a-0800200c9a66",
-	"translatorType":4,
-	"label":"FAZ.NET",
-	"creator":"ibex",
-	"target":"^http://((www\\.)?faz\\.net/.)",
-	"minVersion":"2.0",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":false,
-	"lastUpdated":"2010-09-08 12:00:00"
+        "translatorID": "4f0d0c90-5da0-11df-a08a-0800200c9a66",
+        "label": "FAZ.NET",
+        "creator": "ibex",
+        "target": "^http://((www\\.)?faz\\.net/.)",
+        "minVersion": "2.1",
+        "maxVersion": "",
+        "priority": 100,
+        "browserSupport": "gcs",
+        "inRepository": true,
+        "translatorType": 4,
+        "lastUpdated": "2011-07-01 07:38:34"
 }
 
 /*
 	FAZ Translator - Parses FAZ articles and creates Zotero-based metadata.
-	Copyright (C) 2010 ibex
+	Copyright (C) 2010-2011 ibex
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -27,6 +28,12 @@
 
 	You should have received a copy of the GNU General Public License
 	along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/*
+Test with the following URLs:
+http://www.faz.net/artikel/C30783/wissenschaftsphilosophie-krumme-wege-der-vernunft-30436005.html
+http://www.faz.net/f30/common/Suchergebnis.aspx?term=philosophie&x=0&y=0&allchk=1
 */
 
 /* Get the first xpath element from doc, if not found return null. */
@@ -54,8 +61,12 @@ function doWeb(doc, url) {
 	//Zotero.debug("ibex doWeb URL = "+ url);
 	var urls = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = Zotero.Utilities.getItemArray(doc, doc.getElementById("MainColumn").getElementsByTagName("h1"), '/s/.+\\.html');
+		var items = Zotero.Utilities.getItemArray(doc,
+                doc.getElementById("MainColumn")
+                .getElementsByTagName("h1"),
+                '/artikel/.+\\.html');
 		if (!items || countObjectProperties(items) == 0) {
+            Zotero.debug("no items");
 			return true;
 		}
 		items = Zotero.selectItems(items);
@@ -74,11 +85,12 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc) {
-	//Zotero.debug("ibex scrape URL = "+ doc.location.href);
 	var newArticle = new Zotero.Item('newspaperArticle');
 	newArticle.url = doc.location.href;
 	newArticle.title = Zotero.Utilities.trimInternal(getXPath('//div[@class = "Article"]/h1', doc).textContent);
-	newArticle.date = Zotero.Utilities.trimInternal(getXPath('//div[@class = "Article"]/span[@class = "Italic"][1]', doc).textContent);
+	var date = getXPath('//div[@class = "Article"]//span[@id = "dateline"][1]', doc).textContent;
+	newArticle.date = Zotero.Utilities.trimInternal(date.replace(/ .*$/, ""));
+
 
 	var subtitle = getXPath('//div[@class = "Article"]/h2', doc);
 	if (subtitle != null) {
@@ -131,3 +143,54 @@ function countObjectProperties(obj) {
 	}
 	return size;
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+    {
+        "type": "web",
+        "url": "http://www.faz.net/artikel/C30783/wissenschaftsphilosophie-krumme-wege-der-vernunft-30436005.html",
+        "items": [
+            {
+                "itemType": "newspaperArticle",
+                "creators": [
+                    {
+                        "firstName": "Fynn Ole",
+                        "lastName": "Engler",
+                        "creatorType": "author"
+                    },
+                    {
+                        "firstName": "Jürgen",
+                        "lastName": "Renn",
+                        "creatorType": "author"
+                    }
+                ],
+                "notes": [],
+                "tags": [],
+                "seeAlso": [],
+                "attachments": [
+                    {
+                        "title": "FAZ.NET Article Snapshot",
+                        "mimeType": "text/html",
+                        "url": false,
+                        "snapshot": true
+                    }
+                ],
+                "url": "http://www.faz.net/artikel/C30783/wissenschaftsphilosophie-krumme-wege-der-vernunft-30436005.html",
+                "title": "Wissenschaftsphilosophie: Krumme Wege der Vernunft",
+                "date": "2011-06-13",
+                "shortTitle": "Krumme Wege der Vernunft",
+                "abstractNote": "Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
+                "publicationTitle": "FAZ.NET",
+                "extra": "Fynn Ole Engler ist Mitherausgeber der als Langzeitvorhaben der Akademie der Wissenschaften in Hamburg erscheinenden Moritz-Schlick-Gesamtausgabe. Jürgen Renn ist Direktor am Max-Planck-Institut für Wissenschaftsgeschichte in Berlin. Text: F.A.S. Bildmaterial: Foto ETH Zürich, ÖNB Bildarchiv Austria",
+                "libraryCatalog": "FAZ.NET"
+            }
+        ]
+    },
+    {
+        "type": "web",
+        "url": "http://www.faz.net/f30/common/Suchergebnis.aspx?term=philosophie&x=0&y=0&allchk=1",
+        "items": "multiple"
+    }
+]
+/** END TEST CASES **/

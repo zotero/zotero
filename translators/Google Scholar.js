@@ -1,14 +1,15 @@
 {
-        "translatorID":"57a00950-f0d1-4b41-b6ba-44ff0fc30289",
-        "label":"Google Scholar",
-        "creator":"Simon Kornblith, Frank Bennett",
-        "target":"http://scholar\\.google\\.(?:com|com?\\.[a-z]{2}|[a-z]{2}|co\\.[a-z]{2})/scholar(?:_case)*",
-        "minVersion":"1.0.0b3.r1",
-        "maxVersion":"",
-        "priority":100,
-        "inRepository":"1",
-        "translatorType":4,
-        "lastUpdated":"2010-11-18 06:10:00"
+	"translatorID": "57a00950-f0d1-4b41-b6ba-44ff0fc30289",
+	"label": "Google Scholar",
+	"creator": "Simon Kornblith, Frank Bennett",
+	"target": "^https?://scholar\\.google\\.(?:com|com?\\.[a-z]{2}|[a-z]{2}|co\\.[a-z]{2})/scholar(?:_case)*",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-07-04 13:18:22"
 }
 
 /*
@@ -43,6 +44,8 @@
  * ###############################
  */
 
+var bogusItemID = 1;
+
 var detectWeb = function (doc, url) {
 	// Icon shows only for search results and law cases
 	if (url.match(/scholar_case/)) {
@@ -59,7 +62,7 @@ var detectWeb = function (doc, url) {
 function doWeb(doc, url) {
 	var haveBibTexLinks, nsResolver;
 	// Invoke the case or the listing scraper, as appropriate.
-    // In a listings page, this forces use of bibtex data and English page version
+	// In a listings page, this forces use of bibtex data and English page version
 	nsResolver = doc.createNSResolver(doc.documentElement);
 	if (url.match(/scholar_case/)) {
 		scrapeCase(doc, url);
@@ -69,15 +72,18 @@ function doWeb(doc, url) {
 		if(!haveBibTexLinks) {
 			url = url.replace (/hl\=[^&]*&?/, "");
 			url = url.replace("scholar?", "scholar_setprefs?hl=en&scis=yes&scisf=4&submit=Save+Preferences&");
-			var scisigDoc = Zotero.Utilities.retrieveDocument(url);
-			var scisig = scisigDoc.evaluate('//input[@name="scisig"]',
-				scisigDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			url = url + "&scisig="+scisig.value;
-			doc = Zotero.Utilities.retrieveDocument(url);
-			haveBibTexLinks = true;
-			Zotero.debug(url);
+			Zotero.Utilities.processDocuments(url, function(scisigDoc) {
+				var scisig = scisigDoc.evaluate('//input[@name="scisig"]',
+					scisigDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				url = url + "&scisig="+scisig.value;
+				Zotero.Utilities.processDocuments(url, function(doc) {
+					scrapeListing(doc);
+				}, function() {});
+			}, function() {});
+		} else {
+			scrapeListing(doc);
 		}
-		scrapeListing(doc);
+		Zotero.wait();
 	}
 }
 
@@ -131,48 +137,71 @@ var scrapeListing = function (doc) {
 		factories.push(factory);
 	}
 
-	var items = Zotero.selectItems(labels);
-
-	if(!items) {
-		return false;
-	}
-
-	// The only supplementary translator we use is BibTeX
-	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-	translator.setHandler("itemDone", function(obj, item) {
-		item.attachments = attachments;
-		item.complete();
+	Zotero.selectItems(labels, function(items) {
+		if(!items) {
+			return false;
+		}
+		
+		var newFactories = [];
+		for(var i in items) {
+			newFactories.push(factories[i]);
+		}
+		
+		processFactories(newFactories);
 	});
+	return true;
+};
 
-	for(var i in items) {
-		var factory = factories[i];
-		factory.getCourt();
-		factory.getVolRepPag();
-		if (factory.hasReporter()) {
-			// If we win here, we get by without fetching the BibTeX object at all.
-			factory.saveItem();
-		} else {
-			var res = factory.getBibtexData();
+function processFactories(factories) {
+	if(!factories.length) {
+		Zotero.done();
+		return;
+	}
+	
+	var factory = factories.shift();
+	factory.getCourt();
+	factory.getVolRepPag();
+	if (factory.hasReporter()) {
+		// If we win here, we get by without fetching the BibTeX object at all.
+		factory.saveItem();
+		processFactories(factories);
+	} else {
+		var attachments;
+		
+		// The only supplementary translator we use is BibTeX
+		var bibtexTranslator = Zotero.loadTranslator("import");
+		bibtexTranslator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+		bibtexTranslator.setHandler("itemDone", function(obj, item) {
+			item.attachments = attachments;
+			item.complete();
+		});
+		
+		factory.getBibtexData(function(res) {
 			if (res) {
 				// Has BibTeX data with title, pass it through to the BibTeX translator
-				var attachments = factory.getAttachments("Page");
-				translator.setString(res);
-				translator.translate();
+				attachments = factory.getAttachments("Page");
+				bibtexTranslator.setString(res);
+				bibtexTranslator.setHandler("done", function() {
+					processFactories(factories);
+				});
+				bibtexTranslator.translate();
 			} else {
 				// If BibTeX is empty, this is some kind of case, if anything.
 				// Metadata from the citelet, supplemented by the target
 				// document for the docket number, if possible.
 				if (!factory.hasReporter()) {
-					factory.getDocketNumber();
+					factory.getDocketNumber(null, function() {
+						factory.saveItem();
+						processFactories(factories);
+					});
+				} else {
+					factory.saveItem();
+					processFactories(factories);
 				}
-				factory.saveItem();
 			}
-		}
+		});
 	}
-	return true;
-};
-
+}
 
 var scrapeCase = function (doc, url) {
 	// Citelet is identified by
@@ -348,11 +377,15 @@ ItemFactory.prototype.getTitle = function () {
 };
 
 
-ItemFactory.prototype.getDocketNumber = function (doc) {
+ItemFactory.prototype.getDocketNumber = function (doc, callback) {
 	if (!doc) {
 		// Needs doc fetch and xpath
-		doc = Zotero.Utilities.retrieveDocument(this.attachmentLinks[0]);
+		var me = this;
+		Zotero.Utilities.processDocuments(this.attachmentLinks[0],
+			function(doc) { me.getDocumentNumber(doc, callback) }, function() {});
+		return;
 	}
+	
 	var nsResolver = doc.createNSResolver(doc.documentElement);
 	if (doc) {
 		var docNumFrag = doc.evaluate('//center[preceding-sibling::center//h3[@id="gsl_case_name"]]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
@@ -360,6 +393,8 @@ ItemFactory.prototype.getDocketNumber = function (doc) {
 			this.v.docketNumber = docNumFrag.textContent.replace(/^\s*[Nn][Oo](?:.|\s+)\s*/, "").replace(/\.\s*$/, "");
 		}
 	}
+	
+	if(callback) callback();
 };
 
 
@@ -368,7 +403,7 @@ ItemFactory.prototype.getAttachments = function (doctype) {
 	attachments = [];
 	for (i = 0, ilen = this.attachmentLinks.length; i < ilen; i += 1) {
 		attachments.push({title:"Google Scholar Linked " + doctype, type:"text/html",
-			                  url:this.attachmentLinks[i]});
+							  url:this.attachmentLinks[i]});
 	}
 	return attachments;
 };
@@ -379,18 +414,21 @@ ItemFactory.prototype.pushAttachments = function (doctype) {
 };
 
 
-ItemFactory.prototype.getBibtexData = function () {
+ItemFactory.prototype.getBibtexData = function (callback) {
 	if (!this.bibtexData) {
 		if (this.bibtexData !== false) {
-			var bibtexData = Zotero.Utilities.retrieveSource(this.bibtexLink);
-			if (!bibtexData.match(/title={{}}/)) {
-				this.bibtexData = bibtexData;
-			} else {
-				this.bibtexData = false;
-			}
+			Zotero.Utilities.doGet(this.bibtexLink, function(bibtexData) {
+				if (!bibtexData.match(/title={{}}/)) {
+					this.bibtexData = bibtexData;
+				} else {
+					this.bibtexData = false;
+				}
+				callback(this.bibtexData);
+			});
+			return;
 		}
 	}
-	return this.bibtexData;
+	callback(this.bibtexData);
 };
 
 
@@ -399,6 +437,7 @@ ItemFactory.prototype.saveItem = function () {
 	if (this.v.title) {
 		this.repairTitle();
 		if (this.vv.volRepPag.length) {
+			var completed_items = [];
 			for (i = 0, ilen = this.vv.volRepPag.length; i < ilen; i += 1) {
 				this.item = new Zotero.Item("case");
 				for (key in this.vv.volRepPag[i]) {
@@ -410,8 +449,19 @@ ItemFactory.prototype.saveItem = function () {
 				if (i === (this.vv.volRepPag.length - 1)) {
 					this.pushAttachments("Judgement");
 				}
-				this.item.complete();
-			};
+				this.item.itemID = "" + bogusItemID;
+				bogusItemID += 1;
+				completed_items.push(this.item);
+			}
+			for (i = 0, ilen = completed_items.length; i < ilen; i += 1) {
+				for (j = 0, jlen = completed_items.length; j < jlen; j += 1) {
+					if (i === j) {
+						continue;
+					}
+					completed_items[i].seeAlso.push(completed_items[j].itemID);
+				}
+				completed_items[i].complete();
+			}
 		} else {
 			this.item = new Zotero.Item("case");
 			this.saveItemCommonVars();
@@ -429,3 +479,62 @@ ItemFactory.prototype.saveItemCommonVars = function () {
 		}
 	}
 };
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+    {
+        "type": "web",
+        "url": "http://scholar.google.com/scholar?q=marbury&hl=en&btnG=Search&as_sdt=1%2C22&as_sdtp=on",
+        "items": "multiple"
+    },
+    {
+        "type": "web",
+        "url": "http://scholar.google.com/scholar?hl=en&q=kelo&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
+        "items": "multiple"
+    },
+    {
+        "type": "web",
+        "url": "http://scholar.google.com/scholar?hl=en&q=smith&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
+        "items": "multiple"
+    },
+    {
+        "type": "web",
+        "url": "http://scholar.google.com/scholar?hl=en&q=view+of+the+cathedral&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
+        "items": "multiple"
+    },
+    {
+        "type": "web",
+        "url": "http://scholar.google.com/scholar?hl=en&q=clifford&btnG=Search&as_sdt=0%2C22&as_ylo=&as_vis=0",
+        "items": "multiple"
+    },
+    {
+        "type": "web",
+        "url": "http://scholar.google.com/scholar_case?case=9834052745083343188&q=marbury+v+madison&hl=en&as_sdt=2,5",
+        "items": [
+            {
+                "itemType": "case",
+                "creators": [],
+                "notes": [],
+                "tags": [],
+                "seeAlso": [],
+                "attachments": [
+                    {
+                        "title": "Google Scholar Linked Judgement",
+                        "type": "text/html",
+                        "url": false
+                    }
+                ],
+                "volume": "5",
+                "reporter": "US",
+                "pages": "137",
+                "title": "Marbury v. Madison",
+                "court": "Supreme Court",
+                "date": "1803",
+                "itemID": "1",
+                "libraryCatalog": "Google Scholar"
+            }
+        ]
+    }
+]
+/** END TEST CASES **/

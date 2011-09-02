@@ -1,18 +1,22 @@
 {
-	"translatorID":"88915634-1af6-c134-0171-56fd198235ed",
-	"translatorType":4,
-	"label":"Library Catalog (Voyager)",
-	"creator":"Simon Kornblith",
-	"target":"Pwebrecon\\.cgi",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "88915634-1af6-c134-0171-56fd198235ed",
+	"label": "Library Catalog (Voyager)",
+	"creator": "Simon Kornblith",
+	"target": "Pwebrecon\\.cgi",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-07-04 13:09:56"
 }
 
 function detectWeb(doc, url) {
-	var export_options = doc.forms.namedItem('frm').elements.namedItem('RD').options;
+	var export_options = ZU.xpath(doc, '//form[@name="frm"]//*[@name="RD"]');
+	if(!export_options.length) return false;
+	export_options = export_options[0];
+	
 	for(var i in export_options) {
 		if(export_options[i].text == 'Latin1 MARC'
 		|| export_options[i].text == 'Raw MARC'
@@ -27,7 +31,7 @@ function detectWeb(doc, url) {
 		|| export_options[i].text == 'MARC communication format'
 		|| export_options[i].text == 'MARC Record') {
 			// We have an exportable single record
-			if(doc.forms.namedItem('frm').elements.namedItem('RC')) {
+			if(ZU.xpath(doc, '//form[@name="frm"]//*[@name="RC"]').length) {
 				return "multiple";
 			} else {
 				return "book";
@@ -38,11 +42,11 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var postString = '';
-	var form = doc.forms.namedItem('frm');
+	var form = ZU.xpath(doc, '//form[@name="frm"]')[0];
 	var newUri = form.action;
 	var multiple = false;
 	
-	if(doc.forms.namedItem('frm').elements.namedItem('RC')) {
+	if(ZU.xpath(form, '//*[@name="RC"]').length) {
 		multiple = true;
 		
 		var availableItems = new Object();	// Technically, associative arrays are objects
@@ -114,7 +118,7 @@ function doWeb(doc, url) {
 		}
 	}
 	
-	var export_options = form.elements.namedItem('RD').options;
+	var export_options = ZU.xpath(form, '//select[@name="RD"]/option');
 	for(var i=0; i<export_options.length; i++) {
 		if(export_options[i].text == 'Raw MARC'
 		|| export_options[i].text == 'MARC 8'
@@ -177,3 +181,80 @@ function doWeb(doc, url) {
 	}, null, responseCharset);
 	Zotero.wait();
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://catalog.loc.gov/cgi-bin/Pwebrecon.cgi?DB=local&Search_Arg=zotero&Search_Code=GKEY^*&CNT=100&hist=1&type=quick",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://i-share.carli.illinois.edu/nby/cgi-bin/Pwebrecon.cgi?DB=local&v1=1&BBRecID=790862",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Francisco",
+						"lastName": "Xarque",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Masseta, Simon",
+					"Cuellar y Mosquera, Gabriel de",
+					"Missions",
+					"Paraguay"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Insignes missioneros de la Compañia de Jesus en la prouincia del Paraguay: estado presente de sus missiones en Tucuman, Paraguay, y Rio de la Plata, que comprehende su distrito",
+				"place": "En Pamplona",
+				"publisher": "Por Juan Micòn, Impressor",
+				"date": "1687",
+				"numPages": "24",
+				"callNumber": "F2681 .X3",
+				"libraryCatalog": "i-share.carli.illinois.edu Library Catalog",
+				"shortTitle": "Insignes missioneros de la Compañia de Jesus en la prouincia del Paraguay"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://catalog.loc.gov/cgi-bin/Pwebrecon.cgi?v1=1&ti=1,1&Search%5FArg=zotero&Search%5FCode=GKEY%5E%2A&CNT=100&type=quick&PID=UiW_ZKCUShsRhZ5pIpsx_-5hND3W&SEQ=20110704130645&SID=1",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Jason",
+						"lastName": "Puckett",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Zotero",
+					"Bibliographical citations",
+					"Computer programs",
+					"Citation of electronic information resources",
+					"Computer programs"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "9780838985892",
+				"title": "Zotero: a guide for librarians, researchers, and educators",
+				"place": "Chicago",
+				"publisher": "Association of College and Research Libraries",
+				"date": "2011",
+				"callNumber": "PN171.F56 P83 2011",
+				"libraryCatalog": "Library of Congress Catalog",
+				"shortTitle": "Zotero"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

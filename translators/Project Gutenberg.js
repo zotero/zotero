@@ -7,8 +7,9 @@
 	"minVersion":"2.1",
 	"maxVersion":"",
 	"priority":100,
+	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2011-04-11 00:15:00"
+	"lastUpdated":"2011-08-22 22:31:32"
 }
 
 function detectWeb(doc, url) {
@@ -49,7 +50,7 @@ function scrape(doc, url) {
 	while (i = headings.iterateNext()) {
 		fieldTitle = i.textContent;
 		dataTags[fieldTitle] = Zotero.Utilities.cleanTags(content.iterateNext().textContent.replace(/^\s*|\s*$/g, ''));
-		Zotero.debug(i.textContent);
+		//Zotero.debug(i.textContent);
 		if (fieldTitle == "Creator") {
 			creatorType.push("author");
 			creatorField.push("Creator");
@@ -78,14 +79,14 @@ function scrape(doc, url) {
 			creatorType.push("contributor");
 			creatorField.push("Contributor");
 			creatorContent.push(dataTags[fieldTitle]);
-		}
-		if (fieldTitle == "Imprint") {
+		} else if (fieldTitle == "Imprint") {
 			var place = dataTags["Imprint"].split(":");
 			newItem.place = place[0];
-			Zotero.debug(place);
-		}
-		 if (fieldTitle == "Subject") {
-			newItem.tags[i] = dataTags["Subject"];
+			//Zotero.debug(place);
+		} else if (fieldTitle == "Subject") {
+			newItem.tags.push(dataTags["Subject"]);
+		} else {
+			//Zotero.debug("Have: " + fieldTitle + "=>" + dataTags[fieldTitle]);
 		}
 	}
 
@@ -114,7 +115,7 @@ function scrape(doc, url) {
 		newItem.extra = "LoC Class " + dataTags["LoCClass"];
 	}
 
-	associateData (newItem, dataTags, "Title", "title");	
+	associateData (newItem, dataTags, "Title", "title");
 	associateData (newItem, dataTags, "Language", "language");
 	associateData (newItem, dataTags, "CopyrightStatus", "rights");
 	
@@ -155,3 +156,39 @@ function doWeb(doc, url) {
 		scrape(doc, url);
 	}
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.gutenberg.org/ebooks/20321",
+		"items": [
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Bartolomé de las",
+						"lastName": "Casas",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Indians, Treatment of -- Latin America",
+					"Spain -- Colonies -- America"
+				],
+				"seeAlso": [],
+				"attachments": [],
+				"date": "Release Date Jan 9, 2007",
+				"extra": "LoC Class F1401: Latin America local history: General",
+				"title": "A Brief Account of the Destruction of the Indies\u000aOr, a faithful NARRATIVE OF THE Horrid and Unexampled Massacres, Butcheries, and all manner of Cruelties, that Hell and Malice could invent, committed by the Popish Spanish Party on the inhabitants of West-India, TOGETHER With the Devastations of several Kingdoms in America by Fire and Sword, for the space of Forty and Two Years, from the time of its first Discovery by them.",
+				"language": "English",
+				"rights": "Public domain in the USA.",
+				"url": "http://www.gutenberg.org/ebooks/20321",
+				"libraryCatalog": "Project Gutenberg"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

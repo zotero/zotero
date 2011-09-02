@@ -1,14 +1,15 @@
 {
-        "translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
-        "label": "ProQuest 2",
-        "creator": "Avram Lyon",
-        "target": "^https?://search\\.proquest\\.com[^/]*(/pqrl|/pqdt)?/(docview|publication|publicationissue|results)",
-        "minVersion": "2.0",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": true,
-        "translatorType": 4,
-        "lastUpdated": "2011-05-24 11:36:36"
+	"translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
+	"label": "ProQuest",
+	"creator": "Avram Lyon",
+	"target": "^https?://search\\.proquest\\.com[^/]*(/pqrl|/pqdt|/hnp[a-z]*)?/(docview|publication|publicationissue|results)",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 100,
+	"browserSupport": "gcs",
+	"inRepository": true,
+	"translatorType": 4,
+	"lastUpdated": "2011-08-22 22:32:08"
 }
 
 /*
@@ -38,9 +39,24 @@ function detectWeb(doc, url) {
 	
 	var record_rows = doc.evaluate('//div[@class="display_record_indexing_row"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if (record_rows.iterateNext()) {
-		return "journalArticle";	
+		type = doc.evaluate('//div[@class="display_record_indexing_fieldname" and contains(text(),"Document Type")]/following-sibling::div[@class="display_record_indexing_data"]',
+							doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if (type) {
+			type = type.textContent.trim();
+			type = mapToZotero(type);
+			if (type) return type;
+		}
+		// Fall back on journalArticle-- even if we couldn't guess the type
+		return "journalArticle";
 	}
-	var resultitem = doc.evaluate('//li[@class="resultItem"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	
+	if (url.indexOf("/results/") === -1) {
+		var abstract_link = doc.evaluate('//a[@class="formats_base_sprite format_abstract"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		if (abstract_link.iterateNext()) {
+			return "journalArticle";	
+		}
+	}
+	var resultitem = doc.evaluate('//li[@class="resultItem" or contains(@class, "resultItem ")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 	if (resultitem.iterateNext()) {
 		return "multiple";
 	}
@@ -58,7 +74,7 @@ function doWeb(doc, url) {
 		scrape(doc,url);
 	} else if (detected) {
 		var articles = new Array();
-		var results = doc.evaluate('//li[@class="resultItem"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
+		var results = doc.evaluate('//li[@class="resultItem" or contains(@class, "resultItem ")]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 		var items = new Array();
 		var result;
 		while(result = results.iterateNext()) {
@@ -67,22 +83,30 @@ function doWeb(doc, url) {
 			var url = link.href;
 			items[url] = title;
 		}
-		items = Zotero.selectItems(items);
-		if(!items) return true;
-		for (var i in items) {
-			articles.push(i);
-		}
-		Zotero.Utilities.processDocuments(articles, scrape, function () {Zotero.done();});
+		Zotero.selectItems(items, function (items) {
+			if(!items) return true;
+			for (var i in items) {
+				articles.push(i);
+			}
+			Zotero.Utilities.processDocuments(articles, scrape, function () {Zotero.done();});
+		});
 		Zotero.wait();
 	}
 }
 
 function scrape (doc) {
-	var url = doc.location.href;
 	var namespace = doc.documentElement.namespaceURI;
 	var nsResolver = namespace ? function(prefix) {
 		if (prefix == 'x') return namespace; else return null;
 	} : null;
+	
+	var record_rows = doc.evaluate('//div[@class="display_record_indexing_row"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var abstract_link = doc.evaluate('//a[@class="formats_base_sprite format_abstract"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if (!record_rows && abstract_link) {
+		Zotero.Utilities.processDocuments(abstract_link.href, scrape, function() {Zotero.done();});
+		return true;
+	}
+	var url = doc.location.href;
 	
 	// ProQuest provides us with two different data sources; we can pull the RIS
 	// (which is nicely embedded in each page!), or we can scrape the Display Record section
@@ -96,7 +120,9 @@ function scrape (doc) {
 	item.thesisType = [];
 	var account_id;
 	while (record_row = record_rows.iterateNext()) {
-		var field = doc.evaluate('./div[@class="display_record_indexing_fieldname"]', record_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.trim();
+		var field = doc.evaluate('./div[@class="display_record_indexing_fieldname"]', record_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()
+		if (!field) continue;
+		field = field.textContent.trim();
 		var value = doc.evaluate('./div[@class="display_record_indexing_data"]', record_row, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.trim();
 		// Separate values in a single field are generally wrapped in <a> nodes; pull a list of them
 		var valueAResult = doc.evaluate('./div[@class="display_record_indexing_data"]/a', record_row, nsResolver, XPathResult.ANY_TYPE, null);
@@ -166,7 +192,15 @@ function scrape (doc) {
 			case "Copyright":
 					item.rights = value; break;
 			case "Database":
+					value = value.replace(/^\d\s+databasesView list\s+Hide list/,'');
+					value = value.replace(/(ProQuest.*)(ProQuest.*)/,'$1; $2');
 					item.libraryCatalog = value; break;
+			case "Document URL":
+					item.attachments.push({url:value.replace(/\?accountid=[0-9]+$/,'')+"/abstract",
+								title: "ProQuest Record",
+								mimeType: "text/html"}); break;
+			case "ProQuest Document ID":
+					item.callNumber = value; break;
 			case "Language of Publication":
 					item.language = value; break;
 			case "Section":
@@ -179,37 +213,13 @@ function scrape (doc) {
 		}
 	}
 	
-	var abs = doc.evaluate('//div[@id="abstract_field"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	var abs = doc.evaluate('//div[@id="abstract_field" or @id="abstractSummary"]/p', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	if (abs) {
 		item.abstractNote = abs.textContent
-					.replace(/^.*\[\s*Show all\s*\]/,"")
-					.replace(/\[\s*Show less\s*\]/,"")
+					.replace(/\[\s*[Ss]how all\s*\].*/,"")
+					.replace(/\[\s*[Ss]how less\s*\].*/,"")
 					.replace(/\[\s*PUBLICATION ABSTRACT\s*\]/,"")
 					.trim();
-	}
-	
-	
-	// Ok, now we'll pull the RIS and run it through the translator. And merge with the temporary item.
-	// RIS LOGIC GOES HERE
-	
-	// Sometimes the PDF is right on this page
-	var realLink = doc.evaluate('//div[@id="pdffailure"]/div[@class="body"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if (realLink) {
-		item.attachments.push({url:realLink.href, title:"ProQuest PDF", mimeType:"application/pdf"});
-	} else {
-		// The PDF link requires two requests-- we fetch the PDF full text page
-		var pdf = doc.evaluate('//a[@class="formats_base_sprite format_pdf"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		if (pdf) {
-			var pdfDoc = Zotero.Utilities.retrieveDocument(pdf.href);
-			// This page gives a beautiful link directly to the PDF, right in the HTML
-			realLink = pdfDoc.evaluate('//div[@id="pdffailure"]/div[@class="body"]/a', pdfDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-			if (realLink) {
-				item.attachments.push({url:realLink.href, title:"ProQuest PDF", mimeType:"application/pdf"});
-			}
-		} else {
-				// If no PDF, we'll save at least something. This might be fulltext, but we're not sure.
-				item.attachments.push({url:url, title:"ProQuest HTML", mimeType:"text/html"});
-		}
 	}
 	
 	item.place = item.place.join(', ');
@@ -217,8 +227,49 @@ function scrape (doc) {
 	
 	item.proceedingsTitle = item.publicationTitle;
 	
+	// On historical newspapers, we see:
+	// Rights: Copyright New York Times Company Dec 1, 1852
+	// Date: 1852
+	// We can improve on this, so we do.
+	var fullerDate = item.rights.match(/([A-Z][a-z]{2} \d{1,2}, \d{4}$)/);
+	if (!item.date || 
+		(item.date.match(/^\d{4}$/) && fullerDate)) {
+		item.date = fullerDate[1];
+	}
+	
+	if (!item.itemType && item.libraryCatalog && item.libraryCatalog.match(/Historical Newspapers/))
+		item.itemType = "newspaperArticle";
+	
 	if(!item.itemType) item.itemType="journalArticle";
-	item.complete();
+	
+	// Ok, now we'll pull the RIS and run it through the translator. And merge with the temporary item.
+	// RIS LOGIC GOES HERE
+	
+	// Sometimes the PDF is right on this page
+	var realLink = doc.evaluate('//div[@id="pdffailure"]/div[@class="body"]/a', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+	if (realLink) {
+		item.attachments.push({url:realLink.href,
+								title:"ProQuest PDF",
+								mimeType:"application/pdf"});
+		item.complete();
+	} else {
+		// The PDF link requires two requests-- we fetch the PDF full text page
+		var pdf = doc.evaluate('//a[@class="formats_base_sprite format_pdf"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+		if (pdf) {
+			Zotero.Utilities.processDocuments(pdf.href, function(pdfDoc){
+				// This page gives a beautiful link directly to the PDF, right in the HTML
+				realLink = pdfDoc.evaluate('//div[@id="pdffailure"]/div[@class="body"]/a', pdfDoc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
+				if (realLink) {
+					item.attachments.push({url:realLink.href,
+											title:"ProQuest PDF",
+											mimeType:"application/pdf"});
+				}
+				item.complete();
+			}, function () {});
+		} else {
+			item.complete();
+		}
+	}
 }
 
 // This map is not complete. See debug output to catch unassigned types
@@ -228,6 +279,7 @@ function mapToZotero (type) {
 	"Book Review-Mixed" : false, // FIX AS NECESSARY
 	"Reports" : "report",
 	"REPORT" : "report",
+	"Historical Newspapers" : "newspaperArticle",
 	"Newspapers" : "newspaperArticle",
 	//"News" : "newspaperArticle",	// Otherwise Foreign Policy is treated as a newspaper http://search.proquest.com/docview/840433348
 	"Magazines" : "magazineArticle",
@@ -241,3 +293,62 @@ function mapToZotero (type) {
 	Zotero.debug("No mapping for type: "+type);
 	return false;
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://search.proquest.com/docview/213445241",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "Gerald F",
+						"lastName": "Powers",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Drew",
+						"lastName": "Christiansen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert T",
+						"lastName": "Hennemeyer",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Peace",
+					"Book reviews"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "ProQuest Record",
+						"mimeType": "text/html"
+					}
+				],
+				"place": "Winnipeg",
+				"title": "Peacemaking: moral & policy challenges for a new world // Review",
+				"publicationTitle": "Peace Research",
+				"volume": "27",
+				"issue": "2",
+				"pages": "90-100",
+				"numPages": "0",
+				"date": "May 1995",
+				"publisher": "Menno Simons College",
+				"ISSN": "00084697",
+				"language": "English",
+				"callNumber": "213445241",
+				"rights": "Copyright Peace Research May 1995",
+				"proceedingsTitle": "Peace Research",
+				"libraryCatalog": "ProQuest",
+				"shortTitle": "Peacemaking"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

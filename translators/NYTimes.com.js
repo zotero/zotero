@@ -1,34 +1,36 @@
 {
-	"translatorID":"ce7a3727-d184-407f-ac12-52837f3361ff",
-	"translatorType":4,
-	"label":"NYTimes.com",
-	"creator":"Simon Kornblith",
-	"target":"^https?://(?:query\\.nytimes\\.com/search/(?:alternate/)?query|(?:select\\.|www\\.)?nytimes\\.com/.)",
-	"minVersion":"1.0.0b3.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-03-21 20:48:32"
+	"translatorID": "ce7a3727-d184-407f-ac12-52837f3361ff",
+	"label": "NYTimes.com",
+	"creator": "Simon Kornblith",
+	"target": "^https?://(?:query\\.nytimes\\.com/search/(?:alternate/)?|(?:select\\.|www\\.)?nytimes\\.com/.)",
+	"minVersion": "2.1.9",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2011-07-04 01:09:00"
 }
 
 function detectWeb(doc, url) {
-	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == 'x') return namespace; else return null;
-		} : null;
-		
-		var result = doc.evaluate('//div[@id="srchContent"]', doc, nsResolver,
-		             XPathResult.ANY_TYPE, null).iterateNext();
-		if(result) {
-			return "multiple";
+	// Check for search results
+	var searchResults = doc.evaluate('//div[@id="search_results"] | //div[@id="srchContent"]', doc, null,
+				 XPathResult.ANY_TYPE, null).iterateNext();
+	if(searchResults) return "multiple";
+	
+	// Check for article meta tags
+	var metaTags = doc.getElementsByTagName("meta");
+	var haveHdl = false;
+	var haveByl = false;
+	for(var i in metaTags) {
+		if(metaTags[i].name === "hdl") {
+			haveHdl = true;
+		} else if(metaTags[i].name == "byl") {
+			haveByl = true;
 		}
-	} else {
-		var metaTags = doc.getElementsByTagName("meta");
-		if(metaTags.namedItem("hdl") && metaTags.namedItem("byl")) {
-			return "newspaperArticle";
-		}
+		if(haveHdl && haveByl) return "newspaperArticle";
 	}
+	return false;
 }
 
 function associateMeta(newItem, metaTags, field, zoteroField) {
@@ -72,7 +74,7 @@ function scrape(doc, url) {
 		}
 		// We want to get everything on one page
 		newItem.attachments.push({url:url.replace(/\.html\??([^/]*)(pagewanted=[^&]*)?([^/]*)$/,".html?pagewanted=all&$1$2"), title:"New York Times Snapshot",
-	 	                          mimeType:"text/html"});
+	 							  mimeType:"text/html"});
 	} else {
 		newItem.url = doc.location.href;
 		var metaTagHTML = doc.getElementsByTagName("meta");
@@ -87,9 +89,9 @@ function scrape(doc, url) {
 		var singlePage = false;
 		if (!newItem.url.match(/\?pagewanted=all/)
 				&& (singlePage = doc.evaluate('//ul[@id="toolsList"]/li[@class="singlePage"]/a', doc, nsResolver,
-		             XPathResult.ANY_TYPE, null).iterateNext())) {
+					 XPathResult.ANY_TYPE, null).iterateNext())) {
 			newItem.attachments.push({url:singlePage.href, title:"New York Times Snapshot",
-	 		                          mimeType:"text/html"});
+	 								  mimeType:"text/html"});
 		} else {
 			newItem.attachments.push({document:doc, title:"New York Times Snapshot"});
 		}
@@ -142,30 +144,71 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	if(doc.title.substr(0, 30) == "The New York Times: Search for") {
-		var namespace = doc.documentElement.namespaceURI;
-		var nsResolver = namespace ? function(prefix) {
-			if (prefix == 'x') return namespace; else return null;
-		} : null;
+	var searchResults = doc.evaluate('//div[@id="search_results"] | //div[@id="srchContent"]', doc, null,
+				 XPathResult.ANY_TYPE, null).iterateNext();
+	if(searchResults) {
+		var items = Zotero.Utilities.getItemArray(doc, searchResults, '^http://(?:select\.|www\.)nytimes.com/.*\.html(\\?|$)');
 		
-		var result = doc.evaluate('//div[@id="srchContent"]', doc, nsResolver,
-		             XPathResult.ANY_TYPE, null).iterateNext();
-		var items = Zotero.Utilities.getItemArray(doc, result, '^http://(?:select\.|www\.)nytimes.com/.*\.html(\\?|$)');
-		items = Zotero.selectItems(items);
-			
-		if(!items) {
-			return true;
-		}
+		Zotero.selectItems(items, function (items) {
+			if(!items) return true;
 		
-		var urls = new Array();
-		for(var i in items) {
-			urls.push(i);
-		}
+			var urls = [];
+			for(var i in items) urls.push(i);
 		
-		Zotero.Utilities.HTTP.doGet(urls, function(text, response, url) { scrape(text, url) }, function() { Zotero.done(); }, null);
-		
-		Zotero.wait();
+			Zotero.Utilities.HTTP.doGet(urls, function(text, response, url) { scrape(text, url) }, function() { Zotero.done(); }, null);
+			Zotero.wait();
+		});
 	} else {
 		scrape(doc);
 	}
 }
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.nytimes.com/2010/08/21/education/21harvard.html?scp=1&sq=marc%20hauser&st=cse&gwh=4B8CBC2383B24F22FED81E754DFA960B",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"creators": [
+					{
+						"firstName": "Nicholas",
+						"lastName": "Wade",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [
+					"Science and Technology",
+					"Research",
+					"Ethics",
+					"Hauser, Marc D",
+					"Harvard University"
+				],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"document": "[object]",
+						"title": "New York Times Snapshot"
+					}
+				],
+				"publicationTitle": "The New York Times",
+				"ISSN": "0362-4331",
+				"url": "https://www.nytimes.com/2010/08/21/education/21harvard.html?scp=1&sq=marc%20hauser&st=cse&gwh=4B8CBC2383B24F22FED81E754DFA960B",
+				"date": "2010-08-20",
+				"title": "Harvard Finds Marc Hauser Guilty of Scientific Misconduct",
+				"section": "Education",
+				"accessionNumber": "1248068890906",
+				"libraryCatalog": "NYTimes.com",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://query.nytimes.com/search/query?frow=0&n=10&srcht=a&query=marc+hauser&srchst=nyt&submit.x=18&submit.y=12&hdlquery=&bylquery=&daterange=period&mon1=01&day1=01&year1=2010&mon2=01&day2=18&year2=2011",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/

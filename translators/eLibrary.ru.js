@@ -1,14 +1,15 @@
 {
-        "translatorID": "587709d3-80c5-467d-9fc8-ed41c31e20cf",
-        "label": "eLibrary.ru",
-        "creator": "Avram Lyon",
-        "target": "^http://elibrary\\.ru/",
-        "minVersion": "1.0.0b4.r5",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": "1",
-        "translatorType": 4,
-        "lastUpdated": "2011-03-12 22:55:32"
+	"translatorID": "587709d3-80c5-467d-9fc8-ed41c31e20cf",
+	"label": "eLibrary.ru",
+	"creator": "Avram Lyon",
+	"target": "^http://elibrary\\.ru/",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 100,
+	"browserSupport": "gcs",
+	"inRepository": true,
+	"translatorType": 4,
+	"lastUpdated": "2011-08-22 22:43:15"
 }
 
 /*
@@ -32,7 +33,7 @@
 function detectWeb(doc, url){
 	if (url.match(/\/item.asp/)) {
 		return "journalArticle";
-	} else if (url.match(/\/query_results\.asp/) || url.match(/\/contents\.asp/)){
+	} else if (url.match(/\/(query_results|contents|org_items|itembox_items)\.asp/)){
 		return "multiple";
 	}
 }
@@ -68,17 +69,17 @@ function doWeb(doc, url){
 }
 
 function scrape (doc) {
-	    var n = doc.documentElement.namespaceURI;
-    var ns = n ? function(prefix) {
-        if (prefix == 'x') return n; else return null;
-    } : null;
+	var n = doc.documentElement.namespaceURI;
+	var ns = n ? function(prefix) {
+		if (prefix == 'x') return n; else return null;
+	} : null;
 		var datablock = doc.evaluate('//td[@align="right" and @width="100%" and @valign="top"]', doc, ns, XPathResult.ANY_TYPE, null).iterateNext();
 		
 		var tableLabels = doc.evaluate('./table/tbody/tr[1]/td[@bgcolor="#dddddd"][1]|./table//table[1]//tr[1]/td[@bgcolor="#dddddd"][1]', datablock, ns, XPathResult.ANY_TYPE, null);
 
 		var titleBlock, authorBlock, publicationBlock, metaBlock, codeBlock, keywordBlock,  abstractBlock, referenceBlock;
 		var t = 0,  label;	// Table number and label
-		while ((label =  tableLabels.iterateNext()) !== null) {
+		while ((label = tableLabels.iterateNext()) !== null) {
 			t++;
 			label = label.textContent;
 
@@ -194,17 +195,17 @@ function scrape (doc) {
 		switch (item.itemType) {
 			case "обзорная статья": // Would be "review article"
 			case "научная статья":
-			        item.itemType = "journalArticle";
-			        break;
+				item.itemType = "journalArticle";
+				break;
 			case "учебное пособие":
 			case "монография":
-			        item.itemType = "book";
-			        break;
+				item.itemType = "book";
+				break;
 			case "публикация в сборнике трудов конференции":
-			        item.itemType = "conferencePaper";
-			        break;
+				item.itemType = "conferencePaper";
+				break;
 			default:
-		                Zotero.debug("Unknown type: "+item.itemType+". Using 'journalArticle'");
+				Zotero.debug("Unknown type: "+item.itemType+". Using 'journalArticle'");
 				item.itemType = "journalArticle";
 				break;
 		}
@@ -275,4 +276,42 @@ function mapper (from, to, block, doc) {
 			Zotero.debug("Unmapped field: "+name.textContent.trim());
 	}
 	return [key, value.textContent.trim()];
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://elibrary.ru/org_items.asp?orgsid=3326",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://elibrary.ru/item.asp?id=9541154",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"firstName": "М.В",
+						"lastName": "Свет",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "Иноязычные заимствования в художественной прозе на иврите в XX в",
+				"publicationTitle": "Вестник Московского университета. Серия 13: Востоковедение",
+				"publisher": "Издательство Московского государственного университета",
+				"date": "2007",
+				"ISSN": "0320-8095",
+				"extra": "Цитируемость в РИНЦ: 0",
+				"issue": "1",
+				"pages": "40-58",
+				"language": "русский",
+				"libraryCatalog": "eLibrary.ru"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

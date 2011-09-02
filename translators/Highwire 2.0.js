@@ -1,14 +1,15 @@
 {
-        "translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
-        "label": "Highwire 2.0",
-        "creator": "Matt Burton",
-        "target": "(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
-        "minVersion": "1.0.0b4.r5",
-        "maxVersion": "",
-        "priority": 100,
-        "inRepository": true,
-        "translatorType": 4,
-        "lastUpdated": "2011-05-23 21:37:09"
+	"translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
+	"label": "Highwire 2.0",
+	"creator": "Matt Burton",
+	"target": "(content/([0-9]+/[0-9]+|current|firstcite|early)|search\\?submit=|search\\?fulltext=|cgi/collection/.+)",
+	"minVersion": "2.1",
+	"maxVersion": "",
+	"priority": 100,
+	"browserSupport": "gcs",
+	"inRepository": true,
+	"translatorType": 4,
+	"lastUpdated": "2011-08-22 22:43:24"
 }
 
 /*
@@ -23,7 +24,7 @@
 4. M L Giger et al., “Pulmonary nodules: computer-aided detection in digital chest images.,” Radiographics 10, no. 1 (January 1990): 41-51.
 	http://radiographics.rsna.org/content/10/1/41.abstract
 5. Mitch Leslie, "CLIP catches enzymes in the act," The Journal of Cell Biology 191, no. 1 (October 4, 2010): 2.
-       http://jcb.rupress.org/content/191/1/2.2.short
+	   http://jcb.rupress.org/content/191/1/2.2.short
 */
 
 function detectWeb(doc, url) {
@@ -122,14 +123,14 @@ function doWeb(doc, url) {
 		var id, match, newurl, pdfurl, get;
 		/* Here, we have to use three phrasings because they all occur, depending on
 		   the journal.
-                TODO We should rewrite this to not use regex! */
+				TODO We should rewrite this to not use regex! */
 		match = text.match(/=([^=]+)\">\s*Download (C|c)itation/);
 		if (!match || match.length < 1) {
 			match = text.match(/=([^=]+)\">\s*Download to citation manager/);
 			if (!match || match.length < 1) {
 				// Journal of Cell Biology
-          			match = text.match(/=([^=]+)\">\s*Add to Citation Manager/);
-        		}
+		  			match = text.match(/=([^=]+)\">\s*Add to Citation Manager/);
+				}
 		}
 		id = match[1];
 		newurl = newurls.shift();		
@@ -165,3 +166,144 @@ function doWeb(doc, url) {
 	});
 	Zotero.wait();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://rer.sagepub.com/content/52/2/201.abstract",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Hofstein",
+						"firstName": "Avi",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Lunetta",
+						"firstName": "Vincent N.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"url": false,
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "The Role of the Laboratory in Science Teaching: Neglected Aspects of Research",
+				"date": "Summer 1982",
+				"publicationTitle": "Review of Educational Research",
+				"pages": "201 -217",
+				"volume": "52",
+				"issue": "2",
+				"url": "http://rer.sagepub.com/content/52/2/201.abstract",
+				"abstractNote": "The laboratory has been given a central and distinctive role in science education, and science educators have suggested that there are rich benefits in learning from using laboratory activities. At this time, however, some educators have begun to question seriously the effectiveness and the role of laboratory work, and the case for laboratory teaching is not as self-evident as it once seemed. This paper provides perspectives on these issues through a review of the history, goals, and research findings regarding the laboratory as a medium of instruction in introductory science teaching. The analysis of research culminates with suggestions for researchers who are working to clarify the role of the laboratory in science education.",
+				"DOI": "10.3102/00346543052002201",
+				"libraryCatalog": "Highwire 2.0",
+				"shortTitle": "The Role of the Laboratory in Science Teaching"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://sag.sagepub.com/content/early/2010/04/23/1046878110366277.abstract",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Owens",
+						"firstName": "Trevor",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"url": false,
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "Modding the History of Science: Values at Play in Modder Discussions of Sid Meier’s CIVILIZATION",
+				"date": "May 27 , 2010",
+				"publicationTitle": "Simulation & Gaming",
+				"url": "http://sag.sagepub.com/content/early/2010/04/23/1046878110366277.abstract",
+				"abstractNote": "Sid Meier’s CIVILIZATION has been promoted as an educational tool, used as a platform for building educational simulations, and maligned as promoting Eurocentrism, bioimperialism, and racial superiority. This article explores the complex issues involved in interpreting a game through analysis of the ways modders (gamers who modify the game) have approached the history of science, technology, and knowledge embodied in the game. Through text analysis of modder discussion, this article explores the assumed values and tone of the community’s discourse. The study offers initial findings that CIVILIZATION modders value a variety of positive discursive practices for developing historical models. Community members value a form of historical authenticity, they prize subtlety and nuance in models for science in the game, and they communicate through civil consensus building. Game theorists, players, and scholars, as well as those interested in modeling the history, sociology, and philosophy of science, will be interested to see the ways in which CIVILIZATION III cultivates an audience of modders who spend their time reimagining how science and technology could work in the game.",
+				"DOI": "10.1177/1046878110366277",
+				"libraryCatalog": "Highwire 2.0",
+				"shortTitle": "Modding the History of Science"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://scx.sagepub.com/content/30/2/277.abstract",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"lastName": "Mulder",
+						"firstName": "Henk A. J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Longnecker",
+						"firstName": "Nancy",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Davis",
+						"firstName": "Lloyd S.",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"url": false,
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"url": false,
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"title": "The State of Science Communication Programs at Universities Around the World",
+				"date": "December 01 , 2008",
+				"publicationTitle": "Science Communication",
+				"pages": "277 -287",
+				"volume": "30",
+				"issue": "2",
+				"url": "http://scx.sagepub.com/content/30/2/277.abstract",
+				"abstractNote": "Building on discussions at two workshops held at the recent 10th International Conference on the Public Communication of Science and Technology during June 2008 in Malmö, Sweden, this article proposes specific steps toward achieving a common understanding of the essential elements for academic programs in science communication. About 40 academics, science communication professionals, and students from at least 16 countries participated in this process.",
+				"DOI": "10.1177/1075547008324878",
+				"libraryCatalog": "Highwire 2.0"
+			}
+		]
+	}
+]
+/** END TEST CASES **/

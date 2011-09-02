@@ -7,8 +7,9 @@
 	"minVersion":"1.0.10",
 	"maxVersion":"",
 	"priority":300,
+	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2010-01-05 09:05:00"
+	"lastUpdated":"2011-06-23 08:58:22"
 }
 
 var items = {};
@@ -108,3 +109,47 @@ function doWeb(doc, url) {
 	Zotero.wait();
 	retrieveNextDOI(DOIs, doc);
 }
+
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.crossref.org/help/Content/01_About_DOIs/What_is_a_DOI.htm",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "J",
+						"lastName": "Mou"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"document": false
+					}
+				],
+				"publicationTitle": "Journal of Molecular Biology",
+				"volume": "248",
+				"ISSN": "00222836",
+				"date": "1995-5-5",
+				"pages": "507-512",
+				"DOI": "10.1006/jmbi.1995.0238",
+				"url": "http://www.crossref.org/help/Content/01_About_DOIs/What_is_a_DOI.htm",
+				"title": "Atomic Force Microscopy of Cholera Toxin B-oligomers Bound to Bilayers of Biologically Relevant Lipids",
+				"libraryCatalog": "CrossRef"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://blog.apastyle.org/apastyle/digital-object-identifier-doi/",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
