@@ -906,6 +906,7 @@ Zotero.Translate.Base.prototype = {
 					errorString += "\n"+i+' => '+error[i];
 				}
 			}
+			errorString += '\nstring => '+error;
 		}
 		
 		errorString += "\nurl => "+this.path

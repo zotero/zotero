@@ -219,12 +219,15 @@ var Zotero = new function(){
 		var appInfo =
 			Components.classes["@mozilla.org/xre/app-info;1"].
 				getService(Components.interfaces.nsIXULAppInfo);
+		var versionComparator = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
+			.getService(Components.interfaces.nsIVersionComparator);
 		this.isFx = true;
 		this.isFx3 = appInfo.platformVersion.indexOf('1.9') === 0;
 		this.isFx35 = appInfo.platformVersion.indexOf('1.9.1') === 0;
 		this.isFx31 = this.isFx35;
 		this.isFx36 = appInfo.platformVersion.indexOf('1.9.2') === 0;
-		this.isFx4 = appInfo.platformVersion[0] >= 2;
+		this.isFx4 = versionComparator.compare(appInfo.platformVersion[0], "2.0a1") >= 0;
+		this.isFx5 = versionComparator.compare(appInfo.platformVersion[0], "5.0a1") >= 0;
 		
 		this.isStandalone = appInfo.ID == ZOTERO_CONFIG['GUID'];
 		if(this.isStandalone) {

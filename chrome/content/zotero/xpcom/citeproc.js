@@ -270,6 +270,7 @@ var CSL = {
 		en: "en_US",
 		es: "es_ES",
 		et: "et_EE",
+		fa: "fa_FA",
 		fr: "fr_FR",
 		he: "he_IL",
 		hu: "hu_HU",
@@ -1479,15 +1480,18 @@ CSL.tokenExec = function (token, Item, item) {
 	return next;
 };
 CSL.expandMacro = function (macro_key_token) {
-	var mkey, start_token, key, end_token, navi, macroxml, newoutput, mergeoutput, end_of_macro, func;
+	var mkey, start_token, key, end_token, navi, macro_nodes, newoutput, mergeoutput, end_of_macro, func;
 	mkey = macro_key_token.postponed_macro;
 	if (this.build.macro_stack.indexOf(mkey) > -1) {
 		throw "CSL processor error: call to macro \"" + mkey + "\" would cause an infinite loop";
 	} else {
 		this.build.macro_stack.push(mkey);
 	}
-	macroxml = this.sys.xml.getNodesByName(this.cslXml, 'macro', mkey);
-	var hasDate = this.sys.xml.getAttributeValue(macroxml, "macro-has-date");
+	var hasDate = false;
+	var macro_nodes = this.sys.xml.getNodesByName(this.cslXml, 'macro', mkey);
+	if (macro_nodes.length) {
+		hasDate = this.sys.xml.getAttributeValue(macro_nodes[0], "macro-has-date");
+	}
 	if (hasDate) {
 		func = function (state, Item) {
 			if (state.tmp.area.slice(-5) === "_sort") {
@@ -1498,19 +1502,21 @@ CSL.expandMacro = function (macro_key_token) {
 	}
 	macro_key_token.tokentype = CSL.START;
 	CSL.Node.group.build.call(macro_key_token, this, this[this.build.area].tokens, true);
-	if (!this.sys.xml.getNodeValue(macroxml)) {
+	if (!this.sys.xml.getNodeValue(macro_nodes)) {
 		throw "CSL style error: undefined macro \"" + mkey + "\"";
 	}
-	navi = new this.getNavi(this, macroxml);
+	navi = new this.getNavi(this, macro_nodes);
 	CSL.buildStyle.call(this, navi);
 	end_of_macro = new CSL.Token("group", CSL.END);
+	if (hasDate) {
+		func = function (state, Item) {
+			if (state.tmp.area.slice(-5) === "_sort") {
+				state.tmp["doing-macro-with-date"] = false;
+			}
+		};
+		end_of_macro.execs.push(func);
+	}
 	CSL.Node.group.build.call(end_of_macro, this, this[this.build.area].tokens, true);
-	func = function (state, Item) {
-		if (state.tmp.area.slice(-5) === "_sort") {
-			state.tmp["doing-macro-with-date"] = false;
-		}
-	};
-	this[this.build.area].tokens[this[this.build.area].tokens.length - 1].execs.push(func);
 	this.build.macro_stack.pop();
 };
 CSL.XmlToToken = function (state, tokentype) {
@@ -1924,7 +1930,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
 	var attrs, langspec, localexml, locale;
-	this.processor_version = "1.0.202";
+	this.processor_version = "1.0.206";
 	this.csl_version = "1.0";
 	this.sys = sys;
 	this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3198,14 +3204,33 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
 						} else {
 							suprame = true;
 						}
-						var prev_locator, curr_locator;
+						var prev, prev_locator, prev_label, curr_locator, curr_label;
 						if (ibidme) {
 							if (k > 0) {
-								prev_locator = onecitation.sortedItems[(k - 1)][1].locator;
+								prev = onecitation.sortedItems[(k - 1)][1];
 							} else {
-								prev_locator = citations[(j - 1)].sortedItems[0][1].locator;
+								prev = citations[(j - 1)].sortedItems[0][1];
 							}
-							curr_locator = item[1].locator;
+							if (prev.locator) {
+								if (prev.label) {
+									prev_label = prev.label;
+								} else {
+									prev_label = "";
+								}
+								prev_locator = "" + prev.locator + prev_label;
+							} else {
+								prev_locator = prev.locator;
+							}
+							if (item[1].locator) {
+								if (item[1].label) {
+									curr_label = item[1].label;
+								} else {
+									curr_label = "";
+								}
+								curr_locator = "" + item[1].locator + curr_label;
+							} else {
+								curr_locator = item[1].locator;
+							}
 						}
 						if (ibidme && prev_locator && !curr_locator) {
 							ibidme = false;
@@ -5082,6 +5107,21 @@ CSL.NameOutput.prototype.divideAndTransliterateNames = function () {
 		}
 		this._getFreeters(v, values);
 		this._getPersonsAndInstitutions(v, values);
+		if (this.name.strings["suppress-min"] === 0) {
+			this.freeters[v] = [];
+			for (var j = 0, jlen = this.persons[v].length; j < jlen; j += 1) {
+				this.persons[v][j] = [];
+			}
+		} else if (this.institution.strings["suppress-min"] === 0) {
+			this.institutions[v] = [];
+			this.freeters[v] = this.freeters[v].concat(this.persons[v]);
+			for (var j = 0, jlen = this.persons[v].length; j < jlen; j += 1) {
+				for (var k = 0, klen = this.persons[v][j].length; k < klen; k += 1) {
+					this.freeters[v].push(this.persons[v][j][k])
+				}
+			}
+			this.persons[v] = [];
+		}
 	}
 };
 CSL.NameOutput.prototype._normalizeVariableValue = function (Item, variable) {
