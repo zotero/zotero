@@ -1339,7 +1339,7 @@ Zotero_Preferences.Debug_Output = {
 		
 		var url = "https://repo.zotero.org/repo/report?debug=1";
 		var output = Zotero.Debug.get(
-			Zotero.Prefs.get('debug.store.submitLimit'),
+			Zotero.Prefs.get('debug.store.submitSize'),
 			Zotero.Prefs.get('debug.store.submitLineLength')
 		);
 		

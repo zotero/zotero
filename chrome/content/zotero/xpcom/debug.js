@@ -93,24 +93,36 @@ Zotero.Debug = new function () {
 	}
 	
 	
-	this.get = function (limit, maxLength) {
+	this.get = function (maxChars, maxLineLength) {
 		var output = _output;
 		var total = output.length;
 		
-		if (limit && limit < total) {
-			output = output.slice(limit * -1);
+		if (total == 0) {
+			return "";
 		}
 		
-		if (maxLength) {
+		if (maxLineLength) {
 			for (var i=0, len=output.length; i<len; i++) {
-				var origLength = output[i].length;
-				if (origLength > maxLength) {
-					output[i] = Zotero.Utilities.ellipsize(output[i], maxLength, true);
+				if (output[i].length > maxLineLength) {
+					output[i] = Zotero.Utilities.ellipsize(output[i], maxLineLength, true);
 				}
 			}
 		}
 		
-		return output.join('\n\n');
+		output = output.join('\n\n');
+		
+		if (maxChars) {
+			output = output.substr(maxChars * -1);
+			// Cut at two newlines
+			for (var i=1, len=output.length; i<len; i++) {
+				if (output[i] == '\n' && output[i-1] == '\n') {
+					output = output.substr(i + 1);
+					break;
+				}
+			}
+		}
+		
+		return output;
 	}
 	
 	
