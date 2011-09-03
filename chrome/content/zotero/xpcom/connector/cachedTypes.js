@@ -42,7 +42,7 @@ Zotero.Connector_Types = new function() {
 		for(var i=0; i<schemaTypes.length; i++) {
 			var schemaType = schemaTypes[i];
 			this[schemaType] = Zotero.Utilities.deepCopy(Zotero.Connector_Types.schema[schemaType]);
-			for(var id in this[schemaType]) {
+			for(var id in Zotero.Connector_Types.schema[schemaType]) {
 				var entry = this[schemaType][id];
 				entry.id = parseInt(id);
 				this[schemaType][entry.name] = entry;
