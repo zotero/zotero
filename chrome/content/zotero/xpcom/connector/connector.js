@@ -49,6 +49,7 @@ Zotero.Connector = new function() {
 			Zotero.debug("Connector: Looking for Zotero Standalone");
 			try {
 				var xdr = new XDomainRequest();
+				xdr.timeout = 700;
 				xdr.open("POST", "http://127.0.0.1:23119/connector/ping", true);
 				xdr.onerror = xdr.ontimeout = function() {
 					Zotero.debug("Connector: Zotero Standalone is not online or cannot be contacted");
@@ -137,7 +138,7 @@ Zotero.Connector = new function() {
 					if(callback) callback(false, req.status);
 					
 					// Check for incompatible version
-					if(req.status === 404 || req.status === 412) {
+					if(req.status === 412) {
 						if(Zotero.Connector_Browser && Zotero.Connector_Browser.onIncompatibleStandaloneVersion) {
 							var standaloneVersion = req.getResponseHeader("X-Zotero-Version");
 							Zotero.Connector_Browser.onIncompatibleStandaloneVersion(Zotero.version, standaloneVersion);
