@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-const Zotero_TranslatorTester_IGNORE_FIELDS = ["complete", "accessDate", "checkFields"];
+var Zotero_TranslatorTester_IGNORE_FIELDS = ["complete", "accessDate", "checkFields"];
 
 /**
  * A tool to run unit tests for a given translator
@@ -66,7 +66,7 @@ Zotero_TranslatorTester = function(translator, type, debug) {
 			Zotero.logError(e);
 		}
 		
-		for(var i in testObject) {
+		for(var i=0, n=testObject.length; i<n; i++) {
 			if(testObject[i].type === type) {
 				this.tests.push(testObject[i]);
 				this.pending.push(testObject[i]);
@@ -93,7 +93,7 @@ Zotero_TranslatorTester._sanitizeItem = function(item, forSave) {
 	}
 	
 	// remove fields to be ignored
-	for(var j in Zotero_TranslatorTester_IGNORE_FIELDS) {
+	for(var j=0, n=Zotero_TranslatorTester_IGNORE_FIELDS.length; j<n; j++) {
 		if(forSave) {
 			delete item[Zotero_TranslatorTester_IGNORE_FIELDS[j]]
 		} else {
@@ -285,7 +285,7 @@ Zotero_TranslatorTester.prototype._checkResult = function(test, translate, retur
 			return;
 		}
 		
-		for(var i in test.items) {
+		for(var i=0, n=test.items.length; i<n; i++) {
 			var testItem = Zotero_TranslatorTester._sanitizeItem(test.items[i]);
 			var translatedItem = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
 			
@@ -348,7 +348,9 @@ Zotero_TranslatorTester.prototype._createTest = function(translate, multipleMode
 	if(multipleMode) {
 		var items = "multiple";
 	} else {
-		for(var i in translate.newItems) Zotero_TranslatorTester._sanitizeItem(translate.newItems[i], true);
+		for(var i=0, n=translate.newItems; i<n; i++) {
+			Zotero_TranslatorTester._sanitizeItem(translate.newItems[i], true);
+		}
 		var items = translate.newItems;
 	}
 	
