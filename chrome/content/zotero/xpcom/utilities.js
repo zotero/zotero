@@ -719,6 +719,8 @@ Zotero.Utilities = {
 	"deepCopy":function(obj) {
 		var obj2 = (obj instanceof Array ? [] : {});
 		for(var i in obj) {
+			if(!obj.hasOwnProperty(i)) continue;
+			
 			if(typeof obj[i] === "object") {
 				obj2[i] = Zotero.Utilities.deepCopy(obj[i]);
 			} else {
@@ -813,7 +815,7 @@ Zotero.Utilities = {
 		if(!(elements instanceof Array)) elements = [elements];
 		
 		var results = [];
-		for(var i in elements) {
+		for(var i=0, n=elements.length; i<n; i++) {
 			var element = elements[i];
 			
 			// Firefox 5 hack, so we will preserve Fx5DOMWrappers
@@ -861,7 +863,7 @@ Zotero.Utilities = {
 		if(!elements.length) return null;
 		
 		var strings = new Array(elements.length);
-		for(var i in elements) {
+		for(var i=0, n=elements.length; i<n; i++) {
 			strings[i] = elements[i].textContent;
 		}
 		

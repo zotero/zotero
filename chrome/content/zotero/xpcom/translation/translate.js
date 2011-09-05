@@ -825,7 +825,7 @@ Zotero.Translate.Base.prototype = {
 				args.push(arguments[i]);
 			}
 			
-			for(var i in this._handlers[type]) {
+			for(var i=0, n=this._handlers[type].length; i<n; i++) {
 				Zotero.debug("Translate: Running handler "+i+" for "+type, 5);
 				try {
 					returnValue = this._handlers[type][i].apply(null, args);
@@ -891,7 +891,7 @@ Zotero.Translate.Base.prototype = {
 		this._properToProxyFunctions = properToProxyFunctions ? properToProxyFunctions : null;
 		this._waitingForRPC = false;
 		
-		for(var i in allPotentialTranslators) {
+		for(var i=0, n=allPotentialTranslators.length; i<n; i++) {
 			var translator = allPotentialTranslators[i];
 			if(translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER) {
 				this._potentialTranslators.push(translator);
@@ -1202,7 +1202,7 @@ Zotero.Translate.Base.prototype = {
 		"Zotero.Item = function (itemType) {"+
 				"const createArrays = "+createArrays+";"+
 				"this.itemType = itemType;"+
-				"for(var i in createArrays) {"+
+				"for(var i=0, n=createArrays.length; i<n; i++) {"+
 					"this[createArrays[i]] = [];"+
 				"}"+
 		"};";
@@ -1454,7 +1454,7 @@ Zotero.Translate.Web.prototype._translateRPCComplete = function(obj, failureCode
 		);
 	} else {
 		// if we don't have to select items, continue
-		for(var i in obj.items) {
+		for(var i=0, n=obj.items.length; i<n; i++) {
 			this._runHandler("itemDone", null, obj.items[i]);
 		}
 		this.newItems = obj.items;
@@ -1815,7 +1815,7 @@ Zotero.Translate.Search.prototype.setTranslator = function(translator) {
 		
 		// accept a list of objects
 		this.translator = [];
-		for(var i in translator) {
+		for(var i=0, n=translator.length; i<n; i++) {
 			this.translator.push(translator[i]);
 		}
 		return true;

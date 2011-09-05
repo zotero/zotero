@@ -57,7 +57,7 @@ Zotero.Translate.ItemSaver.prototype = {
 	 */
 	"_saveToServer":function(items, callback) {
 		var newItems = [];
-		for(var i in items) {
+		for(var i=0, n=items.length; i<n; i++) {
 			newItems.push(Zotero.Utilities.itemToServerJSON(items[i]));
 		}
 		

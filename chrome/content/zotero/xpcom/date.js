@@ -344,7 +344,7 @@ Zotero.Date = new function(){
 			if (Zotero.locale != 'en-US') {
 				Zotero.Date.getMonths();
 				months = months.concat(_months['short']).concat(_months['long']);
-				for(var i in months) months[i] = months[i].toLowerCase();
+				for(var i=0, n=months.length; i<n; i++) months[i] = months[i].toLowerCase();
 			}
 			
 			if(!_monthRe) {
