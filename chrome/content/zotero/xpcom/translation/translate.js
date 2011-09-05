@@ -265,27 +265,27 @@ Zotero.Translate.Sandbox = {
 				}
 				if(!translatorsHandlerSet) {
 					translation.setHandler("translators", function() {
-						translate.decrementAsyncProcesses();
+						translate.decrementAsyncProcesses("safeTranslator#getTranslators()");
 					});
 				}
-				translate.incrementAsyncProcesses();
+				translate.incrementAsyncProcesses("safeTranslator#getTranslators()");
 				return translation.getTranslators();
 			};
 			
 			var doneHandlerSet = false;
 			safeTranslator.translate = function() {
-				translate.incrementAsyncProcesses();
+				translate.incrementAsyncProcesses("safeTranslator#translate()");
 				setDefaultHandlers(translate, translation);
 				if(!doneHandlerSet) {
 					doneHandlerSet = true;
-					translation.setHandler("done", function() { translate.decrementAsyncProcesses() });
+					translation.setHandler("done", function() { translate.decrementAsyncProcesses("safeTranslator#translate()") });
 				}
 				return translation.translate(false);
 			};
 			
 			safeTranslator.getTranslatorObject = function(callback) {
 				if(callback) {
-					translate.incrementAsyncProcesses();
+					translate.incrementAsyncProcesses("safeTranslator#getTranslatorObject()");
 				} else {
 					translate._debug("COMPAT WARNING: Translator must pass a callback to getTranslatorObject() to operate in connector");
 				}
@@ -334,7 +334,7 @@ Zotero.Translate.Sandbox = {
 								translate.complete(false, e);
 								return;
 							}
-							translate.decrementAsyncProcesses();
+							translate.decrementAsyncProcesses("safeTranslator#getTranslatorObject()");
 						}
 					});
 				};
@@ -426,7 +426,7 @@ Zotero.Translate.Sandbox = {
 						var newCallback = function(selectedItems) {
 							callbackExecuted = true;
 							callback(selectedItems);
-							if(haveAsyncHandler) translate.decrementAsyncProcesses();
+							if(haveAsyncHandler) translate.decrementAsyncProcesses("Zotero.selectItems()");
 						};
 					} else {
 						// if this translator doesn't provide an async callback for selectItems, set things
@@ -459,7 +459,7 @@ Zotero.Translate.Sandbox = {
 					if(haveAsyncCallback) {
 						if(haveAsyncHandler) {
 							// we are running asynchronously, so increment async processes
-							translate.incrementAsyncProcesses();
+							translate.incrementAsyncProcesses("Zotero.selectItems()");
 						} else if(!callbackExecuted) {
 							// callback didn't get called from handler, so call it here
 							callback(returnedItems);
@@ -781,12 +781,12 @@ Zotero.Translate.Base.prototype = {
 	/**
 	 * Indicates that a new async process is running
 	 */
-	"incrementAsyncProcesses":function() {
+	"incrementAsyncProcesses":function(f) {
 		this._runningAsyncProcesses++;
 		if(this._parentTranslator) {
-			this._parentTranslator.incrementAsyncProcesses();
+			this._parentTranslator.incrementAsyncProcesses(f+" from child translator");
 		} else {
-			//Zotero.debug("Translate: Incremented asynchronous processes to "+this._runningAsyncProcesses, 4);
+			//Zotero.debug("Translate: Incremented asynchronous processes to "+this._runningAsyncProcesses+" for "+f, 4);
 			//Zotero.debug((new Error()).stack);
 		}
 	},
@@ -794,16 +794,16 @@ Zotero.Translate.Base.prototype = {
 	/**
 	 * Indicates that a new async process is finished
 	 */
-	"decrementAsyncProcesses":function(by) {
+	"decrementAsyncProcesses":function(f, by) {
 		this._runningAsyncProcesses -= (by ? by : 1);
 		if(!this._parentTranslator) {
-			//Zotero.debug("Translate: Decremented asynchronous processes to "+this._runningAsyncProcesses, 4);
+			//Zotero.debug("Translate: Decremented asynchronous processes to "+this._runningAsyncProcesses+" for "+f, 4);
 			//Zotero.debug((new Error()).stack);
 		}
 		if(this._runningAsyncProcesses === 0) {
 			this.complete();
 		}
-		if(this._parentTranslator) this._parentTranslator.decrementAsyncProcesses(by);
+		if(this._parentTranslator) this._parentTranslator.decrementAsyncProcesses(f+" from child translator", by);
 	},
 
 	/**
@@ -985,7 +985,7 @@ Zotero.Translate.Base.prototype = {
 		
 		Zotero.debug("Translate: Beginning translation with "+this.translator[0].label);
 		
-		this.incrementAsyncProcesses();
+		this.incrementAsyncProcesses("Zotero.Translate#translate()");
 		
 		// translate
 		try {
@@ -999,7 +999,7 @@ Zotero.Translate.Base.prototype = {
 			}
 		}
 		
-		this.decrementAsyncProcesses();
+		this.decrementAsyncProcesses("Zotero.Translate#translate()");
 	},
 	
 	/**
@@ -1054,7 +1054,7 @@ Zotero.Translate.Base.prototype = {
 		
 		// reset async processes and propagate them to parent
 		if(this._parentTranslator && this._runningAsyncProcesses) {
-			this._parentTranslator.decrementAsyncProcesses(this._runningAsyncProcesses);
+			this._parentTranslator.decrementAsyncProcesses("Zotero.Translate#complete", this._runningAsyncProcesses);
 		}
 		this._runningAsyncProcesses = 0;
 		
@@ -1139,7 +1139,7 @@ Zotero.Translate.Base.prototype = {
 	"_detectTranslatorLoaded":function() {
 		this._prepareDetection();
 		
-		this.incrementAsyncProcesses();
+		this.incrementAsyncProcesses("Zotero.Translate#getTranslators");
 		
 		try {
 			var returnValue = this._sandboxManager.sandbox["detect"+this._entryFunctionSuffix].apply(null, this._getParameters());
@@ -1149,7 +1149,7 @@ Zotero.Translate.Base.prototype = {
 		}
 		
 		if(returnValue !== undefined) this._returnValue = returnValue;
-		this.decrementAsyncProcesses();
+		this.decrementAsyncProcesses("Zotero.Translate#getTranslators");
 	},
 	
 	/**

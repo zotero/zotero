@@ -227,15 +227,15 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	}
 	
 	var translate = this._translate;
-	translate.incrementAsyncProcesses();
+	translate.incrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
 	var hiddenBrowser = Zotero.HTTP.processDocuments(urls, processor, function() {
 		if(done) done();
-		translate.decrementAsyncProcesses();
 		translate.setHandler("done", function() {
 			try {
 				Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
 			} catch(e) {}
 		});
+		translate.decrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
 	}, myException, true, translate.cookieSandbox);
 }
 
@@ -353,7 +353,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 	
 	var me = this;
 	
-	this._translate.incrementAsyncProcesses();
+	this._translate.incrementAsyncProcesses("Zotero.Utilities.Translate#doGet");
 	var xmlhttp = Zotero.HTTP.doGet(url, function(xmlhttp) {
 		try {
 			if(processor) {
@@ -367,7 +367,7 @@ Zotero.Utilities.Translate.prototype.doGet = function(urls, processor, done, res
 					done();
 				}
 			}
-			me._translate.decrementAsyncProcesses();
+			me._translate.decrementAsyncProcesses("Zotero.Utilities.Translate#doGet");
 		} catch(e) {
 			me._translate.complete(false, e);
 		}
@@ -382,11 +382,11 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
 	url = this._convertURL(url);
 	
 	var translate = this._translate;
-	this._translate.incrementAsyncProcesses();
+	this._translate.incrementAsyncProcesses("Zotero.Utilities.Translate#doPost");
 	var xmlhttp = Zotero.HTTP.doPost(url, body, function(xmlhttp) {
 		try {
 			onDone(xmlhttp.responseText, xmlhttp);
-			translate.decrementAsyncProcesses();
+			translate.decrementAsyncProcesses("Zotero.Utilities.Translate#doPost");
 		} catch(e) {
 			translate.complete(false, e);
 		}
