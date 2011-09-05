@@ -47,16 +47,23 @@ Zotero.Connector = new function() {
 			}
 		
 			Zotero.debug("Connector: Looking for Zotero Standalone");
+			var me = this;
+			var fail = function() {
+				if(me.isOnline !== null) return;
+				Zotero.debug("Connector: Zotero Standalone is not online or cannot be contacted");
+				me.isOnline = false;
+				callback(false);
+			};
+			
+			window.setTimeout(fail, 1000);
 			try {
 				var xdr = new XDomainRequest();
 				xdr.timeout = 700;
 				xdr.open("POST", "http://127.0.0.1:23119/connector/ping", true);
-				xdr.onerror = xdr.ontimeout = function() {
-					Zotero.debug("Connector: Zotero Standalone is not online or cannot be contacted");
-					this.isOnline = false;
-					callback(false);
-				};
+				xdr.onerror = xdr.ontimeout = fail
 				xdr.onload = function() {
+					if(me.isOnline !== null) return;
+					me.isOnline = true;
 					Zotero.debug("Connector: Standalone found; trying IE hack");
 					
 					_ieConnectorCallbacks = [];
@@ -64,7 +71,6 @@ Zotero.Connector = new function() {
 						if(event.origin !== "http://127.0.0.1:23119") return;
 						
 						Zotero.debug("Connector: Standalone loaded");
-						this.isOnline = true;
 						_ieStandaloneIframeTarget = iframe.contentWindow;
 						callback(true);
 					});
@@ -86,10 +92,8 @@ Zotero.Connector = new function() {
 				};
 				xdr.send("");
 			} catch(e) {
-				Zotero.debug("Connector: Zotero Standalone is not online or cannot be contacted");
 				Zotero.logError(e);
-				this.isOnline = false;
-				callback(false);
+				fail();
 			}
 		} else {
 			Zotero.Connector.callMethod("ping", {}, function(status) {
