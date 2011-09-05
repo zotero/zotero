@@ -150,12 +150,12 @@ var Zotero_Browser = new function() {
 		}
 		
 		// get libraryID and collectionID
-		var libraryID, collectionID;
+		var libraryID = null, collectionID = null;
 		if(ZoteroPane && !Zotero.isConnector) {
-			libraryID = ZoteroPane.getSelectedLibraryID();
-			collectionID = ZoteroPane.getSelectedCollection(true);
-		} else {
-			libraryID = collectionID = null;
+			try {
+				libraryID = ZoteroPane.getSelectedLibraryID();
+				collectionID = ZoteroPane.getSelectedCollection(true);
+			} catch(e) {}
 		}
 		
 		// translate into specified library and collection
