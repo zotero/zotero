@@ -218,7 +218,7 @@ Zotero.Translate.Sandbox = {
 				"getTranslatorObject":"r"
 			};
 			safeTranslator.setSearch = function(arg) {
-				if(Zotero.isFx4) arg = JSON.parse(JSON.stringify(arg));
+				if(Zotero.isFx4 && !Zotero.isBookmarklet) arg = JSON.parse(JSON.stringify(arg));
 				return translation.setSearch(arg);
 			};
 			safeTranslator.setDocument = function(arg) { return translation.setDocument(arg) };
@@ -227,7 +227,8 @@ Zotero.Translate.Sandbox = {
 					function(obj, item) {
 						try {
 							if(arg1 == "itemDone") {
-								if(Zotero.isFx && (translate instanceof Zotero.Translate.Web
+								if(Zotero.isFx && !Zotero.isBookmarklet
+										&& (translate instanceof Zotero.Translate.Web
 										|| translate instanceof Zotero.Translate.Search)) {
 									// necessary to get around object wrappers in Firefox
 									item = translate._sandboxManager.sandbox.Zotero._transferItem(JSON.stringify(item));
@@ -293,7 +294,7 @@ Zotero.Translate.Sandbox = {
 				var haveTranslatorFunction = function(translator) {
 					translation.translator[0] = translator;
 					translation._loadTranslator(translator, function() {
-						if(Zotero.isFx) {
+						if(Zotero.isFx && !Zotero.isBookmarklet) {
 							// do same origin check
 							var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
 								.getService(Components.interfaces.nsIScriptSecurityManager);
@@ -342,7 +343,7 @@ Zotero.Translate.Sandbox = {
 					haveTranslatorFunction(translation.translator[0]);
 					return translation._sandboxManager.sandbox;
 				} else {
-					if(Zotero.isConnector && !Zotero.isFx && !callback) {
+					if(Zotero.isConnector && (!Zotero.isFx || Zotero.isBookmarklet) && !callback) {
 						throw new Error("Translator must pass a callback to getTranslatorObject() to "+
 							"operate in this translation environment.");
 					}
@@ -1219,7 +1220,7 @@ Zotero.Translate.Base.prototype = {
 			}
 		}
 		
-		if(Zotero.isFx) {
+		if(Zotero.isFx && !Zotero.isBookmarklet) {
 			// workaround for inadvertant attempts to pass E4X back from sandbox
 			src += "Zotero._transferItem = function(itemString) {"+
 					"var item = JSON.parse(itemString);"+
@@ -1263,7 +1264,7 @@ Zotero.Translate.Base.prototype = {
 	 * @param {Integer} level Log level (1-5, higher numbers are higher priority)
 	 */
 	"_debug":function(string, level) {
-		if(typeof string === "object" && Zotero.isFx36) {
+		if(typeof string === "object" && Zotero.isFx36 && !Zotero.isBookmarklet) {
 			string = new XPCSafeJSObjectWrapper(string);
 		}
 		
@@ -1473,7 +1474,7 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 	// Report translation failure if we failed
 	if(oldState == "translate" && errorString && this.translator[0].inRepository && Zotero.Prefs.get("reportTranslationFailure")) {
 		// Don't report failure if in private browsing mode
-		if(Zotero.isFx && !Zotero.isStandalone) {
+		if(Zotero.isFx && !Zotero.isBookmarklet && !Zotero.isStandalone) {
 			var pbs = Components.classes["@mozilla.org/privatebrowsing;1"]
 						.getService(Components.interfaces.nsIPrivateBrowsingService);
 			if (pbs.privateBrowsingEnabled) {

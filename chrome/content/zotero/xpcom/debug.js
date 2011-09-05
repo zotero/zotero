@@ -88,7 +88,7 @@ Zotero.Debug = new function () {
 		
 		if (_console) {
 			var output = 'zotero(' + level + ')' + (_time ? deltaStr : '') + ': ' + message;
-			if(Zotero.isFx) {
+			if(Zotero.isFx && !Zotero.isBookmarklet) {
 				dump(output+"\n\n");
 			} else if(window.console) {
 				window.console.log(output);

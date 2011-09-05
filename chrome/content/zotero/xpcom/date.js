@@ -53,7 +53,7 @@ Zotero.Date = new function(){
 	this.getMonths = function() {
 		if(_months) return _months;
 		
-		if(Zotero.isFx) {
+		if(Zotero.isFx && !Zotero.isBookmarklet) {
 			var src = 'chrome://global/locale/dateFormat.properties';
 			var localeService = Components.classes['@mozilla.org/intl/nslocaleservice;1'].
 								getService(Components.interfaces.nsILocaleService);

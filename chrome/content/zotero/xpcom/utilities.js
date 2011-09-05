@@ -221,7 +221,7 @@ Zotero.Utilities = {
 		// If no tags, no need to unescape
 		if(str.indexOf("<") === -1 && str.indexOf("&") === -1) return str;
 		
-		if(Zotero.isFx) {
+		if(Zotero.isFx && !Zotero.isBookmarklet) {
 			if(!Zotero.Utilities._nsISUHTML) {
 				Zotero.Utilities._nsISUHTML = Components.classes["@mozilla.org/feed-unescapehtml;1"]
 					.getService(Components.interfaces.nsIScriptableUnescapeHTML);

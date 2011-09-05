@@ -263,7 +263,7 @@ function load(event) {
 		viewerMode = !Zotero;
 	} catch(e) {};
 	
-	if(window.chrome || window.safari) {
+	if(!viewerMode && (window.chrome || window.safari)) {
 		// initialize injection
 		Zotero.initInject();
 		// make sure that connector is online
