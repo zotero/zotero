@@ -199,23 +199,25 @@ Zotero.Tags = new function() {
 	 *
 	 * _types_ is an optional array of tag types to fetch
 	 */
-	function getAllWithinSearch(search, types) {
+	function getAllWithinSearch(search, types, tmpTable) {
 		// Save search results to temporary table
-		try {
-			var tmpTable = search.search(true);
-		}
-		catch (e) {
-			if (typeof e == 'string'
-					&& e.match(/Saved search [0-9]+ does not exist/)) {
-				Zotero.DB.rollbackTransaction();
-				Zotero.debug(e, 2);
+		if(!tmpTable) {
+			try {
+				var tmpTable = search.search(true);
 			}
-			else {
-				throw (e);
+			catch (e) {
+				if (typeof e == 'string'
+						&& e.match(/Saved search [0-9]+ does not exist/)) {
+					Zotero.DB.rollbackTransaction();
+					Zotero.debug(e, 2);
+				}
+				else {
+					throw (e);
+				}
 			}
-		}
-		if (!tmpTable) {
-			return {};
+			if (!tmpTable) {
+				return {};
+			}
 		}
 		
 		var sql = "SELECT DISTINCT tagID, name, type FROM itemTags "
@@ -226,7 +228,9 @@ Zotero.Tags = new function() {
 		}
 		var tags = Zotero.DB.query(sql);
 		
-		Zotero.DB.query("DROP TABLE " + tmpTable);
+		if(!tmpTable) {
+			Zotero.DB.query("DROP TABLE " + tmpTable);
+		}
 		
 		if (!tags) {
 			return {};

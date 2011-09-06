@@ -651,7 +651,7 @@ Zotero.Search.prototype.search = function(asTempTable){
 				return false;
 			}
 			
-			var tmpTable = this._idsToTempTable(ids);
+			var tmpTable = Zotero.Search.idsToTempTable(ids);
 		}
 		// Otherwise, just copy to temp table directly
 		else {
@@ -720,7 +720,7 @@ Zotero.Search.prototype.search = function(asTempTable){
 				if (joinMode == 'any') {
 					if (!tmpTable) {
 						Zotero.DB.beginTransaction();
-						var tmpTable = this._idsToTempTable(ids);
+						var tmpTable = Zotero.Search.idsToTempTable(ids);
 					}
 					
 					var sql = "SELECT itemID FROM items WHERE "
@@ -839,7 +839,7 @@ Zotero.Search.prototype.search = function(asTempTable){
 	if (this.hasPostSearchFilter() &&
 			(includeParentsAndChildren || includeParents || includeChildren)) {
 		Zotero.DB.beginTransaction();
-		var tmpTable = this._idsToTempTable(ids);
+		var tmpTable = Zotero.Search.idsToTempTable(ids);
 		
 		if (includeParentsAndChildren || includeParents) {
 			//Zotero.debug("Adding parent items to result set");
@@ -890,7 +890,8 @@ Zotero.Search.prototype.search = function(asTempTable){
 	}
 	
 	if (asTempTable) {
-		return this._idsToTempTable(ids);
+		var table = Zotero.Search.idsToTempTable(ids);
+		return table;
 	}
 	
 	return ids;
@@ -951,7 +952,7 @@ Zotero.Search.prototype._prepFieldChange = function (field) {
 /*
  * Batch insert
  */
-Zotero.Search.prototype._idsToTempTable = function (ids) {
+Zotero.Search.idsToTempTable = function (ids) {
 	var tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
 	
 	Zotero.DB.beginTransaction();

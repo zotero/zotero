@@ -1767,6 +1767,23 @@ Zotero.CollectionTreeView.prototype.cycleHeader = function(column)					{ }
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
+Zotero.ItemGroupCache = {
+	"lastItemGroup":null,
+	"lastTempTable":null,
+	"lastSearch":null,
+	"lastResults":null,
+	
+	"clear":function() {
+		this.lastItemGroup = null;
+		this.lastSearch = null;
+		this.lastTempTable = null;
+		if(this.lastTempTable) {
+			Zotero.DB.query("DROP TABLE "+this.lastTempTable);
+		}
+		this.lastResults = null;
+	}
+};
+
 Zotero.ItemGroup = function(type, ref)
 {
 	this.type = type;
@@ -1947,24 +1964,8 @@ Zotero.ItemGroup.prototype.getItems = function()
 			return [];
 	}
 	
-	var s = this.getSearchObject();
-	
-	// FIXME: Hack to exclude group libraries for now
-	if (this.isSearch()) {
-		var currentLibraryID = this.ref.libraryID;
-		if (currentLibraryID) {
-			s.addCondition('libraryID', 'is', currentLibraryID);
-		}
-		else {
-			var groups = Zotero.Groups.getAll();
-			for each(var group in groups) {
-				s.addCondition('libraryID', 'isNot', group.libraryID);
-			}
-		}
-	}
-	
 	try {
-		var ids = s.search();
+		var ids = this.getSearchResults();
 	}
 	catch (e) {
 		Zotero.DB.rollbackAllTransactions();
@@ -1975,6 +1976,40 @@ Zotero.ItemGroup.prototype.getItems = function()
 	return Zotero.Items.get(ids);
 }
 
+Zotero.ItemGroup.prototype.getSearchResults = function(asTempTable) {
+	if(Zotero.ItemGroupCache.lastItemGroup !== this) {
+		Zotero.ItemGroupCache.clear();
+	}
+	
+	if(!Zotero.ItemGroupCache.lastResults) {
+		var s = this.getSearchObject();
+	
+		// FIXME: Hack to exclude group libraries for now
+		if (this.isSearch()) {
+			var currentLibraryID = this.ref.libraryID;
+			if (currentLibraryID) {
+				s.addCondition('libraryID', 'is', currentLibraryID);
+			}
+			else {
+				var groups = Zotero.Groups.getAll();
+				for each(var group in groups) {
+					s.addCondition('libraryID', 'isNot', group.libraryID);
+				}
+			}
+		}
+		
+		Zotero.ItemGroupCache.lastResults = s.search();
+		Zotero.ItemGroupCache.lastItemGroup = this;
+	}
+	
+	if(asTempTable) {
+		if(!Zotero.ItemGroupCache.lastTempTable) {
+			Zotero.ItemGroupCache.lastTempTable = Zotero.Search.idsToTempTable(Zotero.ItemGroupCache.lastResults);
+		}
+		return Zotero.ItemGroupCache.lastTempTable;
+	}
+	return Zotero.ItemGroupCache.lastResults;
+}
 
 /*
  * Returns the search object for the currently display
@@ -1982,6 +2017,14 @@ Zotero.ItemGroup.prototype.getItems = function()
  * This accounts for the collection, saved search, quicksearch, tags, etc.
  */
 Zotero.ItemGroup.prototype.getSearchObject = function() {
+	if(Zotero.ItemGroupCache.lastItemGroup !== this) {
+		Zotero.ItemGroupCache.clear();
+	}
+	
+	if(Zotero.ItemGroupCache.lastSearch) {
+		return Zotero.ItemGroupCache.lastSearch;
+	}	
+	
 	var includeScopeChildren = false;
 	
 	// Create/load the inner search
@@ -2040,6 +2083,8 @@ Zotero.ItemGroup.prototype.getSearchObject = function() {
 		}
 	}
 	
+	Zotero.ItemGroupCache.lastItemGroup = this;
+	Zotero.ItemGroupCache.lastSearch = s2;
 	return s2;
 }
 
@@ -2060,18 +2105,22 @@ Zotero.ItemGroup.prototype.getChildTags = function() {
 			return false;
 	}
 	
-	var s = this.getSearchObject();
-	return Zotero.Tags.getAllWithinSearch(s);
+	return Zotero.Tags.getAllWithinSearch(this.getSearchObject(),
+		undefined, this.getSearchResults(true));
 }
 
 
 Zotero.ItemGroup.prototype.setSearch = function(searchText)
 {
+	if(searchText !== this.searchText) {
+		Zotero.ItemGroupCache.clear();
+	}
 	this.searchText = searchText;
 }
 
 Zotero.ItemGroup.prototype.setTags = function(tags)
 {
+	Zotero.ItemGroupCache.clear();
 	this.tags = tags;
 }
 

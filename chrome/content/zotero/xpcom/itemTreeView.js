@@ -63,6 +63,7 @@ Zotero.ItemTreeView.prototype.addCallback = function(callback) {
 
 Zotero.ItemTreeView.prototype._runCallbacks = function() {
 	for each(var cb in this._callbacks) {
+		this.showLoadingMessageIfNecessary();
 		cb();
 	}
 }
