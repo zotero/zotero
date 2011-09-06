@@ -3,7 +3,7 @@ scrollbox
 	padding-top: 3px;
 }
 
-row > label:first-child, .creator-type-label
+row > label:first-child, .creator-type-label, #more-creators-label
 {
 	color: #7f7f7f;
 }

@@ -52,6 +52,9 @@
 			<field name="clickHandler"/>
 			<field name="blurHandler"/>
 			
+			<field name="_initialVisibleCreators">10</field>
+			<field name="_displayAllCreators"/>
+			
 			<!-- Modes are predefined settings groups for particular tasks -->
 			<field name="_mode">"view"</field>
 			<property name="mode" onget="return this._mode;">
@@ -113,6 +116,12 @@
 					if (!(val instanceof Zotero.Item)) {
 						throw ("<zoteroitembox>.item must be a Zotero.Item");
 					}
+					
+					// When changing items, reset truncation of creator list
+					if (!this._item || val.id != this._item.id) {
+						this._displayAllCreators = false;
+					}
+					
 					this._item = val;
 					this.refresh();
 				]]>
@@ -509,20 +518,46 @@
 					}
 					
 					this._creatorCount = 0;
-					if (this.item.numCreators() > 0) {
-						for (var i = 0, len=this.item.numCreators(); i<len; i++) {
+					var num = this.item.numCreators();
+					if (num > 0) {
+						var max = Math.min(num, this._initialVisibleCreators);
+						// If fewer than five more, just display
+						if (num < max + 5 || this._displayAllCreators) {
+							max = num;
+						}
+						for (var i = 0; i < max; i++) {
 							this.addCreatorRow(this.item.getCreator(i).ref,
 								this.item.getCreator(i).creatorTypeID);
+							
+							if (i == max - 2) {
+								this.disableCreatorAddButtons();
+							}
 						}
 						
-						if (this._addCreatorRow) {
-							this.addCreatorRow(false, false, true);
-							this._addCreatorRow = false;
+						// Additional creators not displayed
+						if (num > max) {
+							this.addMoreCreatorsRow(num - max);
+							
+							this.disableCreatorAddButtons();
+						}
+						else {
+							// If we didn't start with creators truncated,
+							// don't truncate for as long as we're viewing
+							// this item, so that added creators aren't
+							// immediately hidden
+							this._displayAllCreators = true;
+							
+							if (this._addCreatorRow) {
+								this.addCreatorRow(false, false, true);
+								this._addCreatorRow = false;
+								this.disableCreatorAddButtons();
+							}
 						}
 					}
 					else if (this.editable && Zotero.CreatorTypes.itemTypeHasCreators(this.item.itemTypeID)) {
 						// Add default row
 						this.addCreatorRow(false, false, true, true);
+						this.disableCreatorAddButtons();
 					}
 					
 					// Move to next or previous field if (shift-)tab was pressed
@@ -634,12 +669,6 @@
 							lastName: '',
 							fieldMode: Zotero.Prefs.get('lastCreatorFieldMode')
 						};
-					}
-					
-					// Disable the "+" button on previous rows
-					var elems = this._dynamicFields.getElementsByAttribute('value', '+');
-					if (elems.length) {
-						this.disableButton(elems[elems.length-1]);
 					}
 					
 					if (creator.fieldMode == 1) {
@@ -773,6 +802,27 @@
 				</body>
 			</method>
 			
+			
+			<method name="addMoreCreatorsRow">
+				<parameter name="num"/>
+				<body>
+				<![CDATA[
+					var box = document.createElement('box');
+					
+					var label = document.createElement('label');
+					label.id = 'more-creators-label';
+					// TODO: localize
+					label.setAttribute('value', num + " more…");
+					label.setAttribute('onclick',
+						"var binding = document.getBindingParent(this); "
+						+ "binding._displayAllCreators = true; "
+						+ "binding.refresh()"
+					);
+					
+					this.addDynamicRow(box, label, true);
+				]]>
+				</body>
+			</method>
 			
 			<method name="addDateRow">
 				<parameter name="field"/>
@@ -1117,18 +1167,31 @@
 				<![CDATA[
 					button.setAttribute('disabled', false);
 					button.setAttribute("onclick",
-						"document.getBindingParent(this).disableButton(this); "
+						"var parent = document.getBindingParent(this); "
+						+ "parent.disableButton(this); "
 						+ "var creator = new Zotero.Creator; "
 						+ "creator.fieldMode = " + (fieldMode ? fieldMode : 0) + "; "
-						+ "document.getBindingParent(this).addCreatorRow(creator, "
-						+ (creatorTypeID ? creatorTypeID : 'false') + ", true);");
+						+ "parent.addCreatorRow("
+							+ "creator, "
+							+ (creatorTypeID ? creatorTypeID : 'false') + ", true"
+						+ ");"
+					);
 				]]>
 				</body>
 			</method>
 			
 			
-			
-			
+			<method name="disableCreatorAddButtons">
+				<body>
+				<![CDATA[
+					// Disable the "+" button on all creator rows
+					var elems = this._dynamicFields.getElementsByAttribute('value', '+');
+					for (var i = 0, len = elems.length; i < len; i++) {
+						this.disableButton(elems[i]);
+					}
+				]]>
+				</body>
+			</method>
 			
 			
 			<method name="createValueElement">

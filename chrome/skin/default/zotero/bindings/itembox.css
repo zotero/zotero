@@ -30,6 +30,11 @@ row > label:first-child, .creator-type-label
 	margin-right: 0 !important;
 }
 
+#more-creators-label
+{
+	font-weight: bold;
+}
+
 row > label
 {
 	border: 1px solid transparent;
