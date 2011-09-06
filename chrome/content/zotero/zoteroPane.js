@@ -29,6 +29,7 @@ const ZOTERO_TAB_URL = "chrome://zotero/content/tab.xul";
  */
 var ZoteroPane = new function()
 {
+	var _unserialized = false;
 	this.collectionsView = false;
 	this.itemsView = false;
 	this.__defineGetter__('loaded', function () _loaded);
@@ -3726,6 +3727,7 @@ var ZoteroPane = new function()
 	 * Unserializes zotero-persist elements from preferences
 	 */
 	this.unserializePersist = function() {
+		_unserialized = true;
 		var serializedValues = Zotero.Prefs.get("pane.persist");
 		if(!serializedValues) return;
 		serializedValues = JSON.parse(serializedValues);
@@ -3750,6 +3752,7 @@ var ZoteroPane = new function()
 	 * Serializes zotero-persist elements to preferences
 	 */
 	this.serializePersist = function() {
+		if(!_unserialized) return;
 		var serializedValues = {};
 		for each(var el in document.getElementsByAttribute("zotero-persist", "*")) {
 			if(!el.getAttribute) continue;
