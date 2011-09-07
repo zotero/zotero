@@ -44,9 +44,127 @@ Zotero.Connector_Types = new function() {
 			this[schemaType] = Zotero.Utilities.deepCopy(Zotero.Connector_Types.schema[schemaType]);
 			for(var id in Zotero.Connector_Types.schema[schemaType]) {
 				var entry = this[schemaType][id];
-				entry.id = parseInt(id);
-				this[schemaType][entry.name] = entry;
+				entry.unshift(parseInt(id, 10));
+				this[schemaType][entry[1]/* name */] = entry;
 			}
+		}
+			
+		var itemTypes = Zotero.Connector_Types["itemTypes"];
+		var creatorTypes = Zotero.Connector_Types["creatorTypes"];
+		var fields = Zotero.Connector_Types["fields"];
+
+		Zotero.CachedTypes = function() {
+			var thisType = Zotero.Connector_Types[this.schemaType];
+			
+			this.getID = function(idOrName) {
+				var type = thisType[idOrName];
+				return (type ? type[0]/* id */ : false);
+			};
+			
+			this.getName = function(idOrName) {
+				var type = thisType[idOrName];
+				return (type ? type[1]/* name */ : false);
+			};
+			
+			this.getLocalizedString = function(idOrName) {
+				var type = thisType[idOrName];
+				return (type ? type[2]/* localizedString */ : false);
+			};
+		}
+		
+		Zotero.ItemTypes = new function() {
+			this.schemaType = "itemTypes";
+			Zotero.CachedTypes.call(this);
+			
+			this.getImageSrc = function(idOrName) {
+				var itemType = Zotero.Connector_Types["itemTypes"][idOrName];
+				if(!itemType) return false;
+				var icon = itemType[6]/* icon */;
+				
+				if(Zotero.isBookmarklet) {
+					return ZOTERO_CONFIG.BOOKMARKLET_URL+"icons/"+icon;
+				} else if(Zotero.isFx) {
+					return "chrome://zotero/skin/"+icon;
+				} else if(Zotero.isChrome) {
+					return chrome.extension.getURL("images/"+icon);
+				} else if(Zotero.isSafari) {
+					return safari.extension.baseURI+"images/itemTypes/"+icon;
+				}
+			};
+		}
+		
+		Zotero.CreatorTypes = new function() {
+			this.schemaType = "creatorTypes";
+			Zotero.CachedTypes.call(this);
+			
+			this.getTypesForItemType = function(idOrName) {
+				var itemType = itemTypes[idOrName];
+				if(!itemType) return false;
+				
+				var itemCreatorTypes = itemType[3]/* creatorTypes */,
+					n = itemCreatorTypes.length,
+					outputTypes = new Array(n);
+				
+				for(var i=0; i<n; i++) {
+					var creatorType = creatorTypes[itemCreatorTypes[i]];
+					outputTypes.push({"id":creatorType[0]/* id */,
+						"name":creatorType[1]/* name */});
+				}
+				return outputTypes;
+			};
+			
+			this.getPrimaryIDForType = function(idOrName) {
+				var itemType = itemTypes[idOrName];
+				if(!itemType) return false;
+				return itemTypes[3]/* creatorTypes */[0];
+			};
+		}
+		
+		Zotero.ItemFields = new function() {
+			this.schemaType = "fields";
+			Zotero.CachedTypes.call(this);
+			
+			this.isValidForType = function(fieldIdOrName, typeIdOrName) {
+				var field = fields[fieldIdOrName], itemType = itemTypes[typeIdOrName];
+				
+				// mimics itemFields.js
+				if(!field || !itemType) return false;
+				
+				return itemType[4]/* fields */.indexOf(field[0]/* id */) !== -1;
+			};
+			
+			this.getFieldIDFromTypeAndBase = function(typeIdOrName, fieldIdOrName) {
+				var baseField = fields[fieldIdOrName], itemType = itemTypes[typeIdOrName];
+				
+				if(!baseField || !itemType) return false;
+				
+				// get as ID
+				baseField = baseField[0]/* id */;
+				
+				// loop through base fields for item type
+				var baseFields = itemType[5];
+				for(var i=0, n=baseFields.length; i<n; i++) {
+					if(baseFields[i] === baseField) {
+						return i;
+					}
+				}
+				
+				return false;
+			};
+			
+			this.getBaseIDFromTypeAndField = function(itemType, fieldIdOrName) {
+				var field = fields[fieldIdOrName], itemType = itemTypes[typeIdOrName];
+				if(!field || !itemType) {
+					throw new Error("Invalid field or type ID");
+				}
+				
+				var baseField = itemType[5]/* baseFields */[field[0]/* id */];
+				return baseField ? baseField : false;
+			};
+			
+			this.getItemTypeFields = function(typeIdOrName) {
+				return itemTypes[typeIdOrName][4]/* fields */.slice();
+			};
 		}
 	};
 	
@@ -56,103 +174,5 @@ Zotero.Connector_Types = new function() {
 	 */
 	this.getSchema = function(callback) {
 		callback(Zotero.Connector_Types.schema);
-	};
-}
-
-Zotero.CachedTypes = function() {
-	this.getID = function(idOrName) {
-		if(!Zotero.Connector_Types[this.schemaType][idOrName]) return false;
-		return Zotero.Connector_Types[this.schemaType][idOrName].id;
-	};
-	
-	this.getName = function(idOrName) {
-		if(!Zotero.Connector_Types[this.schemaType][idOrName]) return false;
-		return Zotero.Connector_Types[this.schemaType][idOrName].name;
-	};
-	
-	this.getLocalizedString = function(idOrName) {
-		if(!Zotero.Connector_Types[this.schemaType][idOrName]) return false;
-		return Zotero.Connector_Types[this.schemaType][idOrName].localizedString;
-	};
-}
-
-Zotero.ItemTypes = new function() {
-	this.schemaType = "itemTypes";
-	Zotero.CachedTypes.call(this);
-	
-	this.getImageSrc = function(idOrName) {
-		if(!Zotero.Connector_Types["itemTypes"][idOrName]) return false;
-		
-		if(Zotero.isBookmarklet) {
-			return ZOTERO_CONFIG.BOOKMARKLET_URL+"icons/"+Zotero.Connector_Types["itemTypes"][idOrName].icon;
-		} else if(Zotero.isFx) {
-			return "chrome://zotero/skin/"+Zotero.Connector_Types["itemTypes"][idOrName].icon;
-		} else if(Zotero.isChrome) {
-			return chrome.extension.getURL("images/"+Zotero.Connector_Types["itemTypes"][idOrName].icon);
-		} else if(Zotero.isSafari) {
-			return safari.extension.baseURI+"images/itemTypes/"+Zotero.Connector_Types["itemTypes"][idOrName].icon;
-		}
-	};
-}
-
-Zotero.CreatorTypes = new function() {
-	this.schemaType = "creatorTypes";
-	Zotero.CachedTypes.call(this);
-	
-	this.getTypesForItemType = function(idOrName) {
-		if(!Zotero.Connector_Types["itemTypes"][idOrName]) return false;
-		var itemType = Zotero.Connector_Types["itemTypes"][idOrName];
-		var creatorTypes = [];
-		for(var i=0; i<itemType.creatorTypes.length; i++) {
-			creatorTypes.push(Zotero.Connector_Types["creatorTypes"][itemType.creatorTypes[i]]);
-		}
-		return creatorTypes;
-	};
-}
-
-Zotero.ItemFields = new function() {
-	this.schemaType = "fields";
-	Zotero.CachedTypes.call(this);
-	
-	this.isValidForType = function(fieldIdOrName, typeIdOrName) {
-		// mimics itemFields.js
-		if(!Zotero.Connector_Types["fields"][fieldIdOrName]
-		   || !Zotero.Connector_Types["itemTypes"][typeIdOrName]) return false;
-		
-		return Zotero.Connector_Types["itemTypes"][typeIdOrName].fields.indexOf(
-			Zotero.Connector_Types["fields"][fieldIdOrName].id) !== -1;
-	};
-	
-	this.getFieldIDFromTypeAndBase = function(itemType, baseField) {
-		if(!Zotero.Connector_Types["fields"][baseField]
-		   || !Zotero.Connector_Types["itemTypes"][itemType]) throw new Error("Invalid field or type ID");
-		
-		// get as ID
-		baseField = Zotero.Connector_Types["fields"][baseField].id;
-		
-		
-		// loop through base fields for item type
-		var baseFields = Zotero.Connector_Types["itemTypes"][itemType]["baseFields"];
-		for(var i in baseFields) {
-			if(baseFields[i] === baseField) {
-				return i;
-			}
-		}
-		
-		return false;
-	};
-	
-	this.getBaseIDFromTypeAndField = function(itemType, fieldIdOrName) {
-		if(!Zotero.Connector_Types["fields"][fieldIdOrName]
-		   || !Zotero.Connector_Types["itemTypes"][itemType]) throw new Error("Invalid field or type ID");
-		
-		fieldIdOrName = Zotero.Connector_Types["fields"][fieldIdOrName].id;
-		
-		var baseField = Zotero.Connector_Types["itemTypes"][itemType]["baseFields"][fieldIdOrName];
-		return baseField ? baseField : false;
-	};
-	
-	this.getItemTypeFields = function(typeIdOrName) {
-		return Zotero.Connector_Types["itemTypes"][typeIdOrName].fields.slice();
 	};
 }
