@@ -230,11 +230,13 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	translate.incrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
 	var hiddenBrowser = Zotero.HTTP.processDocuments(urls, processor, function() {
 		if(done) done();
-		translate.setHandler("done", function() {
+		var handler = function() {
 			try {
 				Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+				translate.removeHandler("done", handler);
 			} catch(e) {}
-		});
+		};
+		translate.setHandler("done", handler);
 		translate.decrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
 	}, myException, true, translate.cookieSandbox);
 }

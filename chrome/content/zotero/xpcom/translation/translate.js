@@ -777,6 +777,16 @@ Zotero.Translate.Base.prototype = {
 	"clearHandlers":function(type) {
 		this._handlers[type] = new Array();
 	},
+
+	/**
+	 * Clears a single handler for a given function
+	 * @param {String} type See {@link Zotero.Translate.Base#setHandler} for valid values
+	 * @param {Function} handler Callback function to remove
+	 */
+	"removeHandler":function(type, handler) {
+		var handlerIndex = this._handlers[type].indexOf(handler);
+		if(handlerIndex !== -1) this._handlers[type].splice(handlerIndex, 1);
+	},
 	
 	/**
 	 * Indicates that a new async process is running
