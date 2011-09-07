@@ -785,23 +785,6 @@ var Zotero_QuickFormat = new function () {
 	}
 	
 	/**
-	 * Called when the user begins to drag the window
-	 */
-	this.onDragStart = function(el, event) {
-		dragX = event.clientX;
-		dragY = event.clientY;
-		window.addEventListener("mousemove", _onDrag, false);
-		window.addEventListener("mouseup", function() { window.removeEventListener("mousemove", _onDrag, false) }, false);
-	}
-	
-	/**
-	 * Called during the window drag
-	 */
-	function _onDrag(event) {
-		window.moveTo(event.screenX-dragX, event.screenY-dragY);
-	}
-	
-	/**
 	 * Makes "Enter" work in the panel
 	 */
 	this.onPanelKeyPress = function(event) {
