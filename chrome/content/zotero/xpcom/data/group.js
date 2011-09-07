@@ -359,6 +359,10 @@ Zotero.Group.prototype.erase = function() {
 	sql = "DELETE FROM groups WHERE groupID=?";
 	ids = Zotero.DB.query(sql, this.id)
 	
+	// Delete library
+	sql = "DELETE FROM libraries WHERE groupID=?";
+	ids = Zotero.DB.query(sql, this.id)
+	
 	Zotero.purgeDataObjects();
 	
 	var notifierData = {};
