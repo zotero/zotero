@@ -1084,7 +1084,12 @@ Zotero.Schema = new function(){
 			"SELECT COUNT(*) FROM tags NATURAL JOIN itemTags JOIN items USING (itemID) WHERE IFNULL(tags.libraryID, 0)!=IFNULL(items.libraryID,0)",
 			
 			"SELECT COUNT(*) FROM itemTags WHERE tagID IS NULL",
-			"SELECT COUNT(*) FROM itemAttachments WHERE charsetID='NULL'"
+			"SELECT COUNT(*) FROM itemAttachments WHERE charsetID='NULL'",
+			
+			// TODO: check 'libraries', not 'groups', but first add a
+			// migration step to delete 'libraries' rows not in 'groups'
+			//"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM libraries)"
+			"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM groups)"
 		];
 		
 		for each(var sql in queries) {
