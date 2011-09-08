@@ -844,7 +844,7 @@ Zotero.Integration.Document.prototype._updateDocument = function(forceCitations,
 				isRich = true;
 			}
 			
-			if(forceCitations || citation.properties.formattedCitation !== formattedCitation) {
+			if(citation.properties.formattedCitation !== formattedCitation) {
 				// Check if citation has been manually modified
 				if(!ignoreCitationChanges && citation.properties.plainCitation) {
 					var plainCitation = field.getText();
