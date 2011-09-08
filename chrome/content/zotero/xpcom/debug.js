@@ -28,9 +28,6 @@ Zotero.Debug = new function () {
 	var _console, _stackTrace, _store, _level, _time, _lastTime, _output = [];
 	
 	this.init = function () {
-		this.storing = _store;
-		this.enabled = _console || _store;
-		
 		_console = Zotero.Prefs.get('debug.log');
 		_store = Zotero.Prefs.get('debug.store');
 		if (_store) {
@@ -39,6 +36,9 @@ Zotero.Debug = new function () {
 		_level = Zotero.Prefs.get('debug.level');
 		_time = Zotero.Prefs.get('debug.time');
 		_stackTrace = Zotero.Prefs.get('debug.stackTrace');
+		
+		this.storing = _store;
+		this.enabled = _console || _store;
 	}
 	
 	this.log = function (message, level) {
