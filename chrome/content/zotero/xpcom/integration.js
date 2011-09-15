@@ -1266,12 +1266,33 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 		citation = io.citation = {"citationItems":{}, "properties":{}};
 	}
 	
+	var sessionUpdated = false;
+	var previewing = false;
+	
 	// assign preview function
-	io.previewFunction = function() {
-		throw "Not yet implemented";
-		citation.properties.zoteroIndex = parseInt(index, 10);
-		citation.properties.noteIndex = parseInt(noteIndex, 10);
-		return me._session.previewCitation(io.citation);
+	io.preview = function() {
+		if(previewing) return;
+		previewing = true;
+		
+		var returnVal;
+		me.get(function() {
+			if(!sessionUpdated) {
+				me.updateSession();
+				sessionUpdated = true;
+			}
+			
+			// fieldIndex will already be set by the time we get here
+			citation.properties.zoteroIndex = fieldIndex;
+			citation.properties.noteIndex = field.getNoteIndex();
+			returnVal = me._session.previewCitation(citation);
+		});
+		
+		// wait until we get the preview
+		while(returnVal === undefined) Zotero.mainThread.processNextEvent(true);
+		
+		// return the preview
+		return returnVal;
+		previewing = false;
 	}
 	// assign sort function
 	io.sort = function() {
@@ -1284,7 +1305,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 		if(io.citation.citationItems.length) {
 			// Citation added
 			me.get(function() {
-				me.updateSession();
+				if(!sessionUpdated) me.updateSession();
 				if(fieldIndex !== undefined) {
 					session.addCitation(fieldIndex, field.getNoteIndex(), io.citation);
 				}
@@ -1305,7 +1326,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 	// citeproc-js style object for use of third-party extension
 	io.style = session.style;
 	
-	// Find this citation
+	// Start finding this citation this citation
 	var fieldIndex;
 	this.get(function(fields) {
 		for(var i=0, n=fields.length; i<n; i++) {

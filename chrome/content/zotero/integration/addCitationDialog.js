@@ -565,7 +565,7 @@ var Zotero_Citation_Dialog = new function () {
 		if(_previewShown) {
 			document.documentElement.getButton("extra2").label = Zotero.getString("citation.hideEditor");		
 			if(text) {
-				_originalHTML = io.previewFunction();
+				_originalHTML = io.preview();
 				editor.value = text;
 			} else {
 				_updatePreview();
@@ -599,6 +599,7 @@ var Zotero_Citation_Dialog = new function () {
 			io.citation.properties.custom = citation;
 		}
 		
+		io.accept();
 		return true;
 	}
 	
@@ -607,6 +608,7 @@ var Zotero_Citation_Dialog = new function () {
 	 */
 	function cancel() {
 		io.citation.citationItems = new Array();
+		io.accept();
 	}
 	
 	/*
@@ -618,7 +620,7 @@ var Zotero_Citation_Dialog = new function () {
 			_getCitation();
 			
 			editor.readonly = !io.citation.citationItems.length;
-			editor.value = (io.citation.citationItems.length ? io.previewFunction() : "");
+			editor.value = (io.citation.citationItems.length ? io.preview() : "");
 			
 			if(editor.initialized) {
 				_originalHTML = editor.value;
