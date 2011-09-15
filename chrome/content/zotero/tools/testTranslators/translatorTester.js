@@ -154,7 +154,6 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
 	};
 	
 	if(this.type === "web") {
-		this._debug(this, "TranslatorTester: Translating "+test.url);
 		this.fetchPageAndRunTest(test, callback);
 	} else {
 		this.runTest(test, null, callback);
@@ -193,6 +192,8 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
  * @param {Function} testDoneCallback A callback to be executed when test is complete
  */
 Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback) {
+	this._debug(this, "TranslatorTester: Translating "+test.url);
+	
 	var me = this;
 	var translate = Zotero.Translate.newInstance(this.type);
 	
