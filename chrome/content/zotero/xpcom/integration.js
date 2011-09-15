@@ -35,7 +35,7 @@ const INTEGRATION_PLUGINS = ["zoteroMacWordIntegration@zotero.org",
 	"zoteroOpenOfficeIntegration@zotero.org", "zoteroWinWordIntegration@zotero.org"];
 
 Zotero.Integration = new function() {
-	const INTEGRATION_MIN_VERSIONS = ["3.1.6.SVN", "3.5b1.SVN", "3.1.2.SVN"];
+	const INTEGRATION_MIN_VERSIONS = ["3.1.7.SVN", "3.5b2.SVN", "3.1.3.SVN"];
 	
 	var _tmpFile = null;
 	var _osascriptFile;
