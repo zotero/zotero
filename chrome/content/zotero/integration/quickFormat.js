@@ -573,7 +573,7 @@ var Zotero_QuickFormat = new function () {
 		if(!shouldKeepSorted && !editorShowing) return;
 		
 		_updateCitationObject();
-		io.previewFunction();
+		io.sort();
 		if(shouldKeepSorted) {
 			// means we need to resort citations
 			_clearCitation();
@@ -653,11 +653,25 @@ var Zotero_QuickFormat = new function () {
 	}
 	
 	/**
+	 * Called when progress changes
+	 */
+	function _onProgress(percent) {
+		var meter = document.getElementById("quick-format-progress-meter");
+		if(percent === null) {
+			meter.mode = "undetermined";
+		} else {
+			meter.mode = "determined";
+			meter.value = Math.round(percent);
+		}
+	}
+	
+	/**
 	 * Accepts current selection and adds citation
 	 */
 	function _accept() {
 		_updateCitationObject();
-		window.close();
+		document.getElementById("quick-format-deck").selectedIndex = 1;
+		io.accept(_onProgress);
 	}
 	
 	/**
@@ -667,7 +681,7 @@ var Zotero_QuickFormat = new function () {
 		var keyCode = event.keyCode;
 		if(keyCode === event.DOM_VK_ESCAPE) {
 			io.citation.citationItems = [];
-			window.close();
+			io.accept();
 		}
 	}
 	
