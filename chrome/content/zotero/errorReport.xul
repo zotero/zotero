@@ -41,20 +41,22 @@
 				var wizard = document.getElementById('zotero-error-report');
 				var continueButtonName = wizard.getButton('next').disabled = true;
 				
-				var parts = {
-					error: "true",
-					errorData: Zotero.getErrors(true).join('\n'),
-					extraData: extraData,
-					diagnostic: Zotero.getSystemInfo()
-				};
-				
-				var body = '';
-				for (var key in parts) {
-					body += key + '=' + encodeURIComponent(parts[key]) + '&';
-				}
-				body = body.substr(0, body.length - 1);
-				Zotero.HTTP.doPost("https://repo.zotero.org/repo/report", body,
-					_sendErrorReportCallback);
+				Zotero.getSystemInfo(function(info) {
+					var parts = {
+						error: "true",
+						errorData: Zotero.getErrors(true).join('\n'),
+						extraData: extraData,
+						diagnostic: info
+					};
+					
+					var body = '';
+					for (var key in parts) {
+						body += key + '=' + encodeURIComponent(parts[key]) + '&';
+					}
+					body = body.substr(0, body.length - 1);
+					Zotero.HTTP.doPost("https://repo.zotero.org/repo/report", body,
+						_sendErrorReportCallback);
+				});
 			}
 			
 			

@@ -1486,11 +1486,13 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 			}
 		}
 		
-		var postBody = "id=" + encodeURIComponent(this.translator[0].translatorID) +
-					   "&lastUpdated=" + encodeURIComponent(this.translator[0].lastUpdated) +
-					   "&diagnostic=" + encodeURIComponent(Zotero.getSystemInfo()) +
-					   "&errorData=" + encodeURIComponent(errorString);
-		Zotero.HTTP.doPost("http://www.zotero.org/repo/report", postBody);
+		Zotero.getSystemInfo(function(info) {
+			var postBody = "id=" + encodeURIComponent(this.translator[0].translatorID) +
+						   "&lastUpdated=" + encodeURIComponent(this.translator[0].lastUpdated) +
+						   "&diagnostic=" + encodeURIComponent(info) +
+						   "&errorData=" + encodeURIComponent(errorString);
+			Zotero.HTTP.doPost("http://www.zotero.org/repo/report", postBody);
+		});
 	}
 }
 

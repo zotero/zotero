@@ -34,7 +34,8 @@ const ZOTERO_CONFIG = {
 	SYNC_URL: 'https://sync.zotero.org/',
 	API_URL: 'https://api.zotero.org/',
 	PREF_BRANCH: 'extensions.zotero.',
-	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/'
+	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
+	VERSION: "3.0b3.SVN"
 };
 
 // Load AddonManager for Firefox 4
@@ -235,17 +236,7 @@ if(appInfo.platformVersion[0] >= 2) {
 		if(this.isStandalone) {
 			this.version = appInfo.version;
 		} else {
-			// Load in the extension version from the extension manager
-			if(this.isFx4) {
-				AddonManager.getAddonByID(ZOTERO_CONFIG['GUID'],
-					function(addon) { Zotero.version = addon.version; Zotero.addon = addon; });
-			} else {
-				var gExtensionManager =
-					Components.classes["@mozilla.org/extensions/manager;1"]
-						.getService(Components.interfaces.nsIExtensionManager);
-				this.version
-					= gExtensionManager.getItemForID(ZOTERO_CONFIG['GUID']).version;
-			}
+			this.version = ZOTERO_CONFIG['VERSION'];
 		}
 		
 		// OS platform
@@ -804,24 +795,14 @@ if(appInfo.platformVersion[0] >= 2) {
 	}
 	
 	
-	function getInstallDirectory() {
-		if(this.isStandalone) {
-			var dir = Components.classes["@mozilla.org/file/directory_service;1"]
-				.getService(Components.interfaces.nsIProperties)
-				.get("CurProcD", Components.interfaces.nsILocalFile);
-			return dir;
-		} else {
-			if(this.isFx4) {
-				while(Zotero.addon === undefined) Zotero.mainThread.processNextEvent(true);
-				var resourceURI = Zotero.addon.getResourceURI();
-				return resourceURI.QueryInterface(Components.interfaces.nsIFileURL).file;
-			} else {
-				var id = ZOTERO_CONFIG.GUID;
-				var em = Components.classes["@mozilla.org/extensions/manager;1"].
-							getService(Components.interfaces.nsIExtensionManager);
-				return em.getInstallLocation(id).getItemLocation(id);
-			}
-		}
+	function getInstallDirectory() {		
+		var cr = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
+			.getService(Components.interfaces.nsIChromeRegistry);
+		var ioService = Components.classes["@mozilla.org/network/io-service;1"]  
+			.getService(Components.interfaces.nsIIOService);  
+		var zoteroURI = ioService.newURI("chrome://zotero/content/", "UTF-8", null);
+		zoteroURI = cr.convertChromeURL(zoteroURI).QueryInterface(Components.interfaces.nsIFileURL);
+		return zoteroURI.file.parent.parent.parent.parent;
 	}
 	
 	function getDefaultProfile(prefDir) {
@@ -1234,59 +1215,60 @@ if(appInfo.platformVersion[0] >= 2) {
 	}
 	
 	
-	function getSystemInfo() {
+	function getSystemInfo(callback) {
 		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
 			getService(Components.interfaces.nsIXULAppInfo);
 		
-		var info = {
-			version: Zotero.version,
-			platform: Zotero.platform,
-			oscpu: Zotero.oscpu,
-			locale: Zotero.locale,
-			appName: appInfo.name,
-			appVersion: appInfo.version,
-			extensions: this.getInstalledExtensions().join(', ')
-		};
-		
-		var str = '';
-		for (var key in info) {
-			str += key + ' => ' + info[key] + ', ';
-		}
-		str = str.substr(0, str.length - 2);
-		return str;
+		Zotero.getInstalledExtensions(function(extensions) {
+			var info = {
+				version: Zotero.version,
+				platform: Zotero.platform,
+				oscpu: Zotero.oscpu,
+				locale: Zotero.locale,
+				appName: appInfo.name,
+				appVersion: appInfo.version,
+				extensions: extensions.join(', ')
+			};
+			
+			var str = '';
+			for (var key in info) {
+				str += key + ' => ' + info[key] + ', ';
+			}
+			str = str.substr(0, str.length - 2);
+			callback(str);
+		});
 	}
 	
 	
 	/**
 	 * @return	{String[]}		Array of extension names and versions
 	 */
-	this.getInstalledExtensions = function () {
-		if(this.isFx4) {
-			if(!Zotero.addons) {
-				AddonManager.getAllAddons(function(addonList) { Zotero.addons = addonList; });
-				while(Zotero.addons === undefined) Zotero.mainThread.processNextEvent(true);
+	this.getInstalledExtensions = function(callback) {
+		function onHaveInstalledAddons(installed) {
+			var addons = [];
+			for each(var addon in installed) {
+				switch (addon.id) {
+					case "zotero@chnm.gmu.edu":
+					case "{972ce4c6-7e08-4474-a285-3208198ce6fd}": // Default theme
+						continue;
+				}
+				
+				addons.push(addon.name + " (" + addon.version
+					+ (addon.type != 2 ? ", " + addon.type : "") + ")");
 			}
-			var installed = Zotero.addons;
+			callback(addons);
+		}
+		
+		if(this.isFx4) {
+			AddonManager.getAllAddons(onHaveInstalledAddons);
 		} else {
 			var em = Components.classes["@mozilla.org/extensions/manager;1"].
 						getService(Components.interfaces.nsIExtensionManager);
 			var installed = em.getItemList(
 				Components.interfaces.nsIUpdateItem.TYPE_ANY, {}
 			);
+			onHaveInstalledAddons(installed);
 		}
-		
-		var addons = [];
-		for each(var addon in installed) {
-			switch (addon.id) {
-				case "zotero@chnm.gmu.edu":
-				case "{972ce4c6-7e08-4474-a285-3208198ce6fd}": // Default theme
-					continue;
-			}
-			
-			addons.push(addon.name + " (" + addon.version
-				+ (addon.type != 2 ? ", " + addon.type : "") + ")");
-		}
-		return addons;
 	}
 	
 	

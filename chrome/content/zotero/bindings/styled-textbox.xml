@@ -361,18 +361,19 @@
 							&& (!SJOW._zoteroMatchTo || SJOW._zoteroMatchTo !== matchTo)) return;
 						
 						if (!SJOW.tinyMCE) {
-							var exts = Zotero.getInstalledExtensions();
-							for each(var ext in exts) {
-								if (ext.indexOf('NoScript') != -1) {
-									var warning = win.document.getElementById('noScriptWarning');
-									var str = "The NoScript extension is preventing Zotero "
-										+ "from displaying notes. To use NoScript and Zotero together, "
-										+ "whitelist the 'file:' scheme in the NoScript preferences "
-										+ "and restart Firefox.";
-									warning.appendChild(document.createTextNode(str));
-									break;
+							var exts = Zotero.getInstalledExtensions(function(exts) {
+								for each(var ext in exts) {
+									if (ext.indexOf('NoScript') != -1) {
+										var warning = win.document.getElementById('noScriptWarning');
+										var str = "The NoScript extension is preventing Zotero "
+											+ "from displaying notes. To use NoScript and Zotero together, "
+											+ "whitelist the 'file:' scheme in the NoScript preferences "
+											+ "and restart Firefox.";
+										warning.appendChild(document.createTextNode(str));
+										break;
+									}
 								}
-							}
+							});
 							return;
 						}
 						
