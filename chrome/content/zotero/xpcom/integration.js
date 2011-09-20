@@ -1275,9 +1275,10 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 	var previewing = false;
 	
 	// assign preview function
-	io.preview = function() {
-		if(previewing) return;
-		previewing = true;
+	var previewCallbackQueue;
+	io.preview = function(callback) {
+		if(!previewCallbackQueue) previewCallbackQueue = [];
+		previewCallbackQueue.push(callback);
 		
 		var returnVal;
 		me.get(function() {
@@ -1290,14 +1291,10 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 			citation.properties.zoteroIndex = fieldIndex;
 			citation.properties.noteIndex = field.getNoteIndex();
 			returnVal = me._session.previewCitation(citation);
+			
+			for(var i=0, n=previewCallbackQueue.length; i<n; i++) previewCallbackQueue[i](returnVal);
+			previewCallbackQueue = undefined;
 		});
-		
-		// wait until we get the preview
-		while(returnVal === undefined) Zotero.mainThread.processNextEvent(true);
-		
-		// return the preview
-		return returnVal;
-		previewing = false;
 	}
 	// assign sort function
 	io.sort = function() {
