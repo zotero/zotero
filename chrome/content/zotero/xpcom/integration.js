@@ -102,7 +102,7 @@ Zotero.Integration = new function() {
 		
 		_updateTimer = Components.classes["@mozilla.org/timer;1"].
 			createInstance(Components.interfaces.nsITimer);
-		_updateTimer.initWithCallback({"notify":_checkPluginVersions}, 1000,
+		_updateTimer.initWithCallback({"notify":function() { _checkPluginVersions() }}, 1000,
 			Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 	}
 	
@@ -142,8 +142,13 @@ Zotero.Integration = new function() {
 		}
 	}
 	
-	function _checkPluginVersions() {
+	function _checkPluginVersions(callback) {
 		if(_updateTimer) _updateTimer = undefined;
+		
+		if(_integrationVersionsOK !== null) {
+			if(callback) callback(_integrationVersionsOK);
+			return;
+		}
 		
 		var verComp = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
 			.getService(Components.interfaces.nsIVersionComparator);
@@ -166,24 +171,22 @@ Zotero.Integration = new function() {
 					Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 						.getService(Components.interfaces.nsIPromptService)
 						.alert(null, Zotero.getString("integration.error.title"), msg);
-					success = false;
 					throw msg;
 				}
 			}
 			_integrationVersionsOK = true;
+			
+			if(callback) callback(_integrationVersionsOK);
 		}
 	
 		if(Zotero.isFx4) {
 			Components.utils.import("resource://gre/modules/AddonManager.jsm");
 			AddonManager.getAddonsByIDs(INTEGRATION_PLUGINS, _checkAddons);
-			while(!addonsChecked) Zotero.mainThread.processNextEvent(true);
 		} else {
 			var extMan = Components.classes['@mozilla.org/extensions/manager;1'].
 				getService(Components.interfaces.nsIExtensionManager);
 			_checkAddons([extMan.getItemForID(id) for each(id in INTEGRATION_PLUGINS)]);
 		}
-		
-		return success;
 	}
 	
 	/**
@@ -201,11 +204,13 @@ Zotero.Integration = new function() {
 		_inProgress = true;
 		
 		// Check integration component versions
-		if(_checkPluginVersions()) {
-			_callIntegration(agent, command, docId);
-		} else {
-			_inProgress = false;
-		}
+		_checkPluginVersions(function(success) {
+			if(success) {
+				_callIntegration(agent, command, docId);
+			} else {
+				_inProgress = false;
+			}
+		});
 	}
 	
 	/**
