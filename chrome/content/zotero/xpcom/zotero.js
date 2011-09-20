@@ -183,8 +183,6 @@ if(appInfo.platformVersion[0] >= 2) {
 	
 	// whether we are waiting for another Zotero process to release its DB lock
 	var _waitingForDBLock = false;
-	// whether we are waiting for another Zotero process to initialize so we can use connector
-	var _waitingForInitComplete = false;
 	
 	/**
 	 * Maintains nsITimers to be used when Zotero.wait() completes (to reduce performance penalty
@@ -422,26 +420,34 @@ if(appInfo.platformVersion[0] >= 2) {
 			Zotero.Connector_Types.init();
 			
 			if(!Zotero.isFirstLoadThisSession) {
-				// Wait for initComplete message if we switched to connector because standalone was
-				// started. This shouldn't loop indefinitely, but even if it does, it won't hang
-				// anything (since it will stop looping on shutdown).
+				// We want to get a checkInitComplete message before initializing if we switched to
+				// connector mode because Standalone was launched
 				Zotero.IPC.broadcast("checkInitComplete");
-				Zotero.debug("Waiting for initComplete message");
-				_waitingForInitComplete = true;
-				while(_waitingForInitComplete && !Zotero.closing) {
-					Zotero.mainThread.processNextEvent(true);
-				}
-				Zotero.debug("initComplete message received");
-				if(Zotero.closing) return false;
+			} else {
+				Zotero.initComplete();
 			}
-			
-			Zotero.Repo.init();
 		} else {
 			Zotero.debug("Loading in full mode");
 			if(!_initFull()) return false;
+			Zotero.initComplete();
 		}
 		
+		return true;
+	}
+	
+	/**
+	 * Triggers events when initialization finishes
+	 */
+	this.initComplete = function() {
+		if(Zotero.initialized) return;
 		this.initialized = true;
+		
+		if(Zotero.isConnector) {
+			Zotero.Repo.init();
+		}
+		
+		var observerService = Components.classes["@mozilla.org/observer-service;1"]
+			.getService(Components.interfaces.nsIObserverService);
 		
 		if(!Zotero.isFirstLoadThisSession) {
 			// trigger zotero-reloaded event
@@ -451,8 +457,6 @@ if(appInfo.platformVersion[0] >= 2) {
 		
 		Zotero.debug('Triggering "zotero-loaded" event');
 		observerService.notifyObservers(Zotero, "zotero-loaded", null);
-		
-		return true;
 	}
 	
 	/**
@@ -723,13 +727,6 @@ if(appInfo.platformVersion[0] >= 2) {
 			// if waiting for DB lock and we get it, continue init
 			_waitingForDBLock = false;
 		}
-	}
-	
-	/**
-	 * Called when an accessory process has been initialized to let use get data
-	 */
-	this.onInitComplete = function() {
-		_waitingForInitComplete = false;
 	}
 	
 	/*

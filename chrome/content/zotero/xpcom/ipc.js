@@ -88,7 +88,7 @@ Zotero.IPC = new function() {
 				// Standalone sends this to the Firefox extension to let the Firefox extension
 				// know that Standalone has fully initialized and it should pull the list of
 				// translators
-				Zotero.onInitComplete();
+				Zotero.initComplete();
 			}
 		}
 	}
