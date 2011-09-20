@@ -920,7 +920,7 @@ Zotero.Sync.Runner = new function () {
 						);
 						
 						if (index == 1) {
-							setTimeout(buttonCallback, 1);
+							setTimeout(function () { buttonCallback }, 1);
 						}
 					}
 				}

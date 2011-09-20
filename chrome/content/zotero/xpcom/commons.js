@@ -346,19 +346,6 @@ Zotero.Commons = new function() {
 	}
 	
 	
-	this.createUnauthenticatedRequest = function (method, resource, headers) {
-		var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-			.createInstance(Components.interfaces.nsIXMLHttpRequest);
-		req.open(method, Zotero.Commons.apiUrl + resource, false);
-		
-		for(var header in headers) {
-			req.setRequestHeader(header, headers[header]);
-		}
-		
-		return req;
-	}
-	
-	
 	// Recursively add files and directories to zipWriter
 	this.zipDirectory = function (rootDir, dir, zipWriter) {
 		dir = dir.directoryEntries;
