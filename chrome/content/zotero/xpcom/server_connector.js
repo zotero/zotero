@@ -99,7 +99,7 @@ Zotero.Server.Connector.Detect.prototype = {
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
 	"init":function(data, sendResponseCallback) {
-		this._sendResponse = sendResponseCallback;
+		this.sendResponse = sendResponseCallback;
 		this._parsedPostData = data;
 		
 		this._translate = new Zotero.Translate("web");
@@ -154,7 +154,7 @@ Zotero.Server.Connector.Detect.prototype = {
 				"label":translator.label, "priority":translator.priority}
 			jsons.push(json);
 		}
-		this._sendResponse(200, "application/json", JSON.stringify(jsons));
+		this.sendResponse(200, "application/json", JSON.stringify(jsons));
 		
 		this._translate.cookieSandbox.destroy();
 		Zotero.Browser.deleteHiddenBrowser(this._browser);
@@ -189,7 +189,7 @@ Zotero.Server.Connector.SavePage.prototype = {
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
 	"init":function(data, sendResponseCallback) {
-		this._sendResponse = sendResponseCallback;
+		this.sendResponse = sendResponseCallback;
 		Zotero.Server.Connector.Detect.prototype.init.apply(this, [data, sendResponseCallback])
 	},
 
@@ -212,25 +212,8 @@ Zotero.Server.Connector.SavePage.prototype = {
 		}
 		
 		// Send "Multiple Choices" HTTP response
-		this._sendResponse(300, "application/json", JSON.stringify({"selectItems":itemList, "instanceID":instanceID, "uri":this._parsedPostData.uri}));
-		
-		// We need this to make sure that we won't stop Firefox from quitting, even if the user
-		// didn't close the selectItems window
-		var observerService = Components.classes["@mozilla.org/observer-service;1"]
-			.getService(Components.interfaces.nsIObserverService);
-		var me = this;
-		var quitObserver = {observe:function() { me.selectedItems = false; }};
-		observerService.addObserver(quitObserver, "quit-application", false);
-		
-		this.selectedItems = null;
-		var endTime = Date.now() + 60*60*1000;	// after an hour, timeout, so that we don't
-												// permanently slow Firefox with this loop
-		while(this.selectedItems === null && Date.now() < endTime) {
-			Zotero.mainThread.processNextEvent(true);
-		}
-		
-		observerService.removeObserver(quitObserver, "quit-application");
-		callback(this.selectedItems);
+		this.sendResponse(300, "application/json", JSON.stringify({"selectItems":itemList, "instanceID":instanceID, "uri":this._parsedPostData.uri}));
+		this.selectedItemsCallback = callback;
 	},
 
 	/**
@@ -244,7 +227,7 @@ Zotero.Server.Connector.SavePage.prototype = {
 		if(!translators.length) {
 			me._translate.cookieSandbox.destroy();
 			Zotero.Browser.deleteHiddenBrowser(this._browser);
-			this._sendResponse(500);
+			this.sendResponse(500);
 			return;
 		}
 		
@@ -271,9 +254,9 @@ Zotero.Server.Connector.SavePage.prototype = {
 			me._translate.cookieSandbox.destroy();
 			Zotero.Browser.deleteHiddenBrowser(me._browser);
 			if(jsonItems.length || me.selectedItems === false) {
-				me._sendResponse(201, "application/json", JSON.stringify({"items":jsonItems}));
+				me.sendResponse(201, "application/json", JSON.stringify({"items":jsonItems}));
 			} else {
-				me._sendResponse(500);
+				me.sendResponse(500);
 			}
 		});
 		
@@ -442,13 +425,14 @@ Zotero.Server.Connector.SelectItems.prototype = {
 	 */
 	"init":function(data, sendResponseCallback) {
 		var saveInstance = Zotero.Server.Connector._waitingForSelection[data.instanceID];
-		saveInstance._sendResponse = sendResponseCallback;
+		saveInstance.sendResponse = sendResponseCallback;
 		
-		saveInstance.selectedItems = false;
+		var selectedItems = false;
 		for(var i in data.selectedItems) {
-			saveInstance.selectedItems = data.selectedItems;
+			selectedItems = data.selectedItems;
 			break;
 		}
+		saveInstance.selectedItemsCallback(selectedItems);
 	}
 }
 
