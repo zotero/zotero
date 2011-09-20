@@ -295,6 +295,7 @@ var Zotero_File_Interface = new function() {
 			Zotero_File_Interface.Progress.show(
 				Zotero.getString("fileInterface.itemsImported")
 			);
+			Zotero.repaint(window);
 			Zotero.DB.beginTransaction();
 			translation.translate();
 		} else {
@@ -616,6 +617,7 @@ var Zotero_File_Interface = new function() {
 	 */
 	this.updateProgress = function(translate) {
 		Zotero.updateZoteroPaneProgressMeter(translate.getProgress());
+		Zotero.repaint(window);
 	}
 }
 

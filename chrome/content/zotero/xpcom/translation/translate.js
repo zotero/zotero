@@ -144,9 +144,6 @@ Zotero.Translate.Sandbox = {
 						throw data;
 					}
 				});
-			
-				// Allow progress meter to update
-				if(!translate.noWait && Zotero.wait) Zotero.wait();
 				
 				translate._runHandler("itemSaving", item);
 				// pass both the saved item and the original JS array item
@@ -611,9 +608,6 @@ Zotero.Translate.Sandbox = {
 			}
 			
 			translate._runHandler("itemDone", item);
-			
-			// Update progress bar
-			if(!translate.noWait && Zotero.wait) Zotero.wait();
 			
 			return item;
 		},
