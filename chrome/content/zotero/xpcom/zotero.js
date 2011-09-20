@@ -211,6 +211,8 @@ if(appInfo.platformVersion[0] >= 2) {
 		
 		var observerService = Components.classes["@mozilla.org/observer-service;1"]
 			.getService(Components.interfaces.nsIObserverService);
+		var versionComparator = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
+			.getService(Components.interfaces.nsIVersionComparator);
 		
 		// Load in the preferences branch for the extension
 		Zotero.Prefs.init();
@@ -226,8 +228,8 @@ if(appInfo.platformVersion[0] >= 2) {
 		this.isFx35 = appInfo.platformVersion.indexOf('1.9.1') === 0;
 		this.isFx31 = this.isFx35;
 		this.isFx36 = appInfo.platformVersion.indexOf('1.9.2') === 0;
-		this.isFx4 = appInfo.platformVersion[0] >= 2;
-		this.isFx5 = appInfo.platformVersion[0] >= 5;
+		this.isFx4 = versionComparator.compare(appInfo.platformVersion[0], "2.0a1") >= 0;
+		this.isFx5 = versionComparator.compare(appInfo.platformVersion[0], "5.0a1") >= 0;
 		
 		this.isStandalone = appInfo.ID == ZOTERO_CONFIG['GUID'];
 		if(this.isStandalone) {
@@ -1494,6 +1496,38 @@ if(appInfo.platformVersion[0] >= 2) {
 		
 		//Zotero.debug("Waited " + cycles + " cycles");
 		return;
+	};
+	
+	
+	/**
+	 * Repaint UI on given window, without executing any events.
+	 *
+	 * @param {window} window Window to repaint
+	 * @param {Boolean} [force=false] Whether to force a repaint. If false, a repaint only takes
+	 * place if the last repaint was more than 100 ms ago.
+	 */
+	this.repaint = function(window, force) {
+		var now = Date.now();
+		
+		// Don't repaint more than 10 times per second unless forced.
+		if(!force && window.zoteroLastRepaint && (now - window.zoteroLastRepaint) < 100) return
+		
+		// Start a nested event queue
+		Zotero.mainThread.pushEventQueue(null);
+		try {
+			// Add the redraw event onto event queue
+			window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+				.getInterface(Components.interfaces.nsIDOMWindowUtils)
+				.redraw();
+			
+			// Process redraw event
+			Zotero.mainThread.processNextEvent(false);
+		} finally {
+			// Close nested event queue
+			Zotero.mainThread.popEventQueue();
+		}
+		
+		window.zoteroLastRepaint = now;
 	};
 	
 	/**
