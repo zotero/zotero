@@ -630,8 +630,9 @@ Zotero.Integration.Document.prototype.addBibliography = function() {
 			field = fieldGetter.addField();
 		field.setCode("BIBL");
 		fieldGetter.updateSession(function() {
-			fieldGetter.updateDocument(false, true);
-			Zotero.Integration.complete(me._doc);
+			fieldGetter.updateDocument(false, true, false, function() {
+				Zotero.Integration.complete(me._doc);
+			});
 		});
 	});
 }
@@ -662,9 +663,9 @@ Zotero.Integration.Document.prototype.editBibliography = function(callback) {
 			fieldGetter.updateSession(function() {
 				me._session.editBibliography(function() {
 					me._doc.activate();
-					fieldGetter.updateDocument(false, true);
-					
-					Zotero.Integration.complete(me._doc);
+					fieldGetter.updateDocument(false, true, false, function() {
+						Zotero.Integration.complete(me._doc);
+					});
 				});
 			});
 		});
@@ -680,8 +681,9 @@ Zotero.Integration.Document.prototype.refresh = function() {
 		// Send request, forcing update of citations and bibliography
 		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
 		fieldGetter.updateSession(function() {
-			fieldGetter.updateDocument(true, true);
-			Zotero.Integration.complete(me._doc);
+			fieldGetter.updateDocument(true, true, false, function() {
+				Zotero.Integration.complete(me._doc);
+			});
 		});
 	});
 }
@@ -757,8 +759,9 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 						// refresh contents
 						fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
 						fieldGetter.updateSession(function() {
-							fieldGetter.updateDocument(true, true, true);
-							Zotero.Integration.complete(me._doc);
+							fieldGetter.updateDocument(true, true, true, function() {
+								Zotero.Integration.complete(me._doc);
+							});
 						});
 					}
 				});
@@ -1076,7 +1079,6 @@ Zotero.Integration.Fields.prototype._processFields = function(fields, callback, 
 	
 	callback();
 }
-
 /**
  * Updates bibliographies and fields within a document
  * @param {Boolean} forceCitations Whether to regenerate all citations
@@ -1085,7 +1087,19 @@ Zotero.Integration.Fields.prototype._processFields = function(fields, callback, 
  *	modified since they were created, instead of showing a warning
  */
 Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, forceBibliography,
-		ignoreCitationChanges) {
+		ignoreCitationChanges, callback) {
+	Zotero.pumpGenerator(this._updateDocument(forceCitations, forceBibliography, ignoreCitationChanges, callback));
+}
+
+/**
+ * Helper function to update bibliographys and fields within a document
+ * @param {Boolean} forceCitations Whether to regenerate all citations
+ * @param {Boolean} forceBibliography Whether to regenerate all bibliography entries
+ * @param {Boolean} [ignoreCitationChanges] Whether to ignore changes to citations that have been 
+ *	modified since they were created, instead of showing a warning
+ */
+Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, forceBibliography,
+		ignoreCitationChanges, callback) {
 	// update citations
 	this._session.updateUpdateIndices(forceCitations);
 	var deleteCitations = this._session.updateCitations();
@@ -1102,7 +1116,7 @@ Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, fo
 	for(var i in this._session.updateIndices) {
 		if(this._progressCallback && nUpdated % 10 == 0) {
 			this._progressCallback(75+(nUpdated/nFieldUpdates)*25);
-			Zotero.wait();
+			yield true;
 		}
 		
 		var citation = this._session.citationsByIndex[i];
@@ -1204,7 +1218,7 @@ Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, fo
 		for each(var field in bibliographyFields) {
 			if(this._progressCallback) {
 				this._progressCallback(75+(nUpdated/nFieldUpdates)*25);
-				Zotero.wait();
+				yield true;
 			}
 			
 			if(bibliographyText) {
@@ -1225,6 +1239,8 @@ Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, fo
 	for(var i=(this._removeCodeFields.length-1); i>=0; i--) {
 		this._fields[this._removeCodeFields[i]].removeCode();
 	}
+	
+	callback();
 }
 
 /**
@@ -1321,9 +1337,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 		Zotero.debug("fieldIndex is "+fieldIndex);
 		session.addCitation(fieldIndex, field.getNoteIndex(), io.citation);
 		session.updateIndices[fieldIndex] = true;
-		me.updateDocument();
-			
-		callback();
+		me.updateDocument(callback);
 	}
 	io.accept = function(progressCallback) {
 		me._progressCallback = progressCallback;
