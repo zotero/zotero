@@ -172,31 +172,38 @@ Zotero.ProgressWindow = function(_window){
 		}
 	}
 	
-	function addLines(label, icon) {
+	function addLines(labels, icons) {
 		if(_windowLoaded) {
-			for (var i in label) {
-				var newLabel = _progressWindow.document.createElement("label");
-				newLabel.setAttribute("class", "zotero-progress-item-label");
-				newLabel.setAttribute("crop", "end");
-				newLabel.setAttribute("value", label[i]);
+			for (var i in labels) {
+				var newText = _progressWindow.document.createElement("description");
+				newText.appendChild(
+					_progressWindow.document.createTextNode(labels[i])
+				);
+				newText.setAttribute("class", "zotero-progress-item-label");
+				newText.setAttribute("crop", "end");
 				
+				var newImageHolder = _progressWindow.document.createElement("vbox");
 				var newImage = _progressWindow.document.createElement("image");
 				newImage.setAttribute("class", "zotero-progress-item-icon");
-				newImage.setAttribute("src", icon[i]);
+				newImage.setAttribute("src", icons[i]);
+				newImage.setAttribute("flex", 0);
+				newImage.setAttribute("orient", "horizontal");
+				newImage.setAttribute("pack", "start");
+				newImageHolder.appendChild(newImage);
 				
 				var newHB = _progressWindow.document.createElement("hbox");
 				newHB.setAttribute("class", "zotero-progress-item-hbox");
-				newHB.setAttribute("valign", "center");
-				newHB.appendChild(newImage);
-				newHB.appendChild(newLabel);
+				
+				newHB.appendChild(newImageHolder);
+				newHB.appendChild(newText);
 				
 				_progressWindow.document.getElementById("zotero-progress-text-box").appendChild(newHB);
 			}
 			
 			_move();
 		} else {
-			_loadLines = _loadLines.concat(label);
-			_loadIcons = _loadIcons.concat(icon);
+			_loadLines = _loadLines.concat(labels);
+			_loadIcons = _loadIcons.concat(icons);
 		}
 	}
 	

@@ -179,6 +179,7 @@ if(appInfo.platformVersion[0] >= 2) {
 	var _unlockCallbacks = [];
 	var _shutdownListeners = [];
 	var _progressMeters;
+	var _progressPopup;
 	var _lastPercentage;
 	
 	// whether we are waiting for another Zotero process to release its DB lock
@@ -1472,6 +1473,12 @@ if(appInfo.platformVersion[0] >= 2) {
 	this.repaint = function(window, force) {
 		var now = Date.now();
 		
+		if (!window) {
+			window = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+							.getService(Components.interfaces.nsIWindowMediator)
+							.getMostRecentWindow("navigator:browser");
+		}
+		
 		// Don't repaint more than 10 times per second unless forced.
 		if(!force && window.zoteroLastRepaint && (now - window.zoteroLastRepaint) < 100) return
 		
@@ -1503,8 +1510,12 @@ if(appInfo.platformVersion[0] >= 2) {
 			createInstance(Components.interfaces.nsITimer);
 		var timerCallback = {"notify":function() {
 			var err = false;
+			_waiting--;
 			try {
-				if(generator.next()) return;
+				if(generator.next()) {
+					_waiting++;
+					return;
+				}
 			} catch(e if e.toString() === "[object StopIteration]") {
 				// There must be a better way to perform this check
 			} catch(e) {
@@ -1513,7 +1524,6 @@ if(appInfo.platformVersion[0] >= 2) {
 			
 			timer.cancel();
 			_runningTimers.splice(_runningTimers.indexOf(timer), 1);
-			_waiting--;
 			
 			if(err) throw err;
 		}}
@@ -1559,17 +1569,32 @@ if(appInfo.platformVersion[0] >= 2) {
 	 * @param	{Boolean}		[determinate=false]
 	 * @return	void
 	 */
-	this.showZoteroPaneProgressMeter = function (msg, determinate) {
-		Zotero.debug("showing progress meter");
+	this.showZoteroPaneProgressMeter = function (msg, determinate, icon) {
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator);
+		var currentWindow = wm.getMostRecentWindow("navigator:browser");
 		var enumerator = wm.getEnumerator("navigator:browser");
 		var progressMeters = [];
 		while (enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
-			Zotero.debug("win found");
 			if(!win.ZoteroPane) continue;
-			Zotero.debug("win has pane");
+			if(!win.ZoteroPane.isShowing()) {
+				if (win != currentWindow) {
+					continue;
+				}
+				
+				// If Zotero is closed in the top-most window, show a popup instead
+				_progressPopup = new Zotero.ProgressWindow();
+				_progressPopup.changeHeadline("Zotero");
+				if (icon) {
+					_progressPopup.addLines([msg], [icon]);
+				}
+				else {
+					_progressPopup.addDescription(msg);
+				}
+				_progressPopup.show();
+				continue;
+			}
 			
 			win.ZoteroPane.document.getElementById('zotero-pane-progress-label').value = msg;
 			var progressMeter = win.ZoteroPane.document.getElementById('zotero-pane-progressmeter')
@@ -1586,7 +1611,6 @@ if(appInfo.platformVersion[0] >= 2) {
 			win.ZoteroPane.document.getElementById('zotero-pane-overlay-deck').selectedIndex = 0;
 			
 			progressMeters.push(progressMeter);
-			Zotero.debug("added meter for win");
 		}
 		_locked = true;
 		_progressMeters = progressMeters;
@@ -1643,8 +1667,14 @@ if(appInfo.platformVersion[0] >= 2) {
 				_hideWindowZoteroPaneOverlay(win.ZoteroPane.document);
 			}
 		}
+		
+		if (_progressPopup) {
+			_progressPopup.close();
+		}
+		
 		_locked = false;
 		_progressMeters = [];
+		_progressPopup = null;
 		_lastPercentage = null;
 	}
 	

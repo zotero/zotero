@@ -136,7 +136,6 @@ var Zotero_Browser = new function() {
 			Zotero_Browser.progress.show();
 			Zotero_Browser.progress.startCloseTimer(8000);
 			return;
-			return;
 		}
 		
 		if (!Zotero.stateCheck()) {

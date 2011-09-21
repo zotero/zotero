@@ -198,10 +198,6 @@ var ZoteroOverlay = new function()
 		
 		if(makeVisible === undefined) makeVisible = zoteroPane.hidden || zoteroPane.collapsed;
 		
-		zoteroSplitter.setAttribute('hidden', !makeVisible);
-		zoteroPane.setAttribute('hidden', false);
-		zoteroPane.setAttribute('collapsed', false);
-		
 		/*
 		Zotero.debug("zoteroPane.boxObject.height: " + zoteroPane.boxObject.height);
 		Zotero.debug("zoteroPane.getAttribute('height'): " + zoteroPane.getAttribute('height'));
@@ -210,6 +206,18 @@ var ZoteroOverlay = new function()
 		*/
 		
 		if(makeVisible) {
+			if (Zotero.locked) {
+				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+										.getService(Components.interfaces.nsIPromptService);
+				var msg = Zotero.getString('general.operationInProgress') + '\n\n' + Zotero.getString('general.operationInProgress.waitUntilFinished');
+				ps.alert(null, "", msg);
+				return false;
+			}
+			
+			zoteroSplitter.setAttribute('hidden', false);
+			zoteroPane.setAttribute('hidden', false);
+			zoteroPane.setAttribute('collapsed', false);
+			
 			// Get saved height (makeVisible() may change it)
 			if (zoteroPane.hasAttribute('savedHeight')) {
 				var savedHeight = zoteroPane.getAttribute('savedHeight');
@@ -232,6 +240,7 @@ var ZoteroOverlay = new function()
 			ZoteroPane.makeHidden();
 			
 			// Collapse pane
+			zoteroSplitter.setAttribute('hidden', true);
 			zoteroPane.setAttribute('collapsed', true);
 			zoteroPane.height = 0;
 			

@@ -484,6 +484,10 @@ Zotero.DBConnection.prototype.commitTransaction = function () {
 		}
 		
 		try {
+			if (!db.transactionInProgress) {
+				throw new Error("No transaction in progress");
+			}
+			
 			db.commitTransaction();
 			
 			if (this.transactionVacuum) {

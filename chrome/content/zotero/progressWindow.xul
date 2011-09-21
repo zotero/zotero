@@ -9,7 +9,7 @@
 		
 	<hbox id="zotero-progress-box">
 		<vbox id="zotero-progress-text-box">
-			<label id="zotero-progress-text-headline" style="font-weight: bold;" />
+			<label id="zotero-progress-text-headline"/>
 		</vbox>
 	</hbox>
 </window>

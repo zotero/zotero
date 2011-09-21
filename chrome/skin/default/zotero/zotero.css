@@ -208,7 +208,7 @@ label.zotero-text-link {
 }
 
 
-#zotero-progress-box, #zotero-progress-box
+#zotero-progress-box
 {
 	border: 2px solid #7a0000;
 	margin: 0;
@@ -217,13 +217,18 @@ label.zotero-text-link {
 	padding-bottom: 3px;
 }
 
-.zotero-progress-item-icon, .zotero-progress-item-icon
+#zotero-progress-text-headline
+{
+	font-weight: bold;
+}
+
+.zotero-progress-item-icon
 {
 	width: 16px;
 	height: 16px;
 }
 
-.zotero-progress-item-hbox, .zotero-progress-item-hbox
+.zotero-progress-item-hbox
 {
 	padding-left: 5px;
 	margin-top: 3px;
@@ -233,6 +238,7 @@ label.zotero-text-link {
 .zotero-progress-item-label
 {
 	width: 210px;
+	margin-left: 5px;
 }
 
 #zotero-progress-box description
