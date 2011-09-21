@@ -1512,7 +1512,7 @@ if(appInfo.platformVersion[0] >= 2) {
 	/**
 	 * Pumps a generator until it yields false. See schema.js for an example.
 	 */
-	this.pumpGenerator = function(generator) {
+	this.pumpGenerator = function(generator, ms) {
 		_waiting++;
 		
 		var timer = Components.classes["@mozilla.org/timer;1"].
@@ -1524,7 +1524,7 @@ if(appInfo.platformVersion[0] >= 2) {
 				_waiting--;
 			}
 		}}
-		timer.initWithCallback(timerCallback, ms, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
+		timer.initWithCallback(timerCallback, ms ? ms : 0, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
 		// add timer to global scope so that it doesn't get garbage collected before it completes
 		_runningTimers.push(timer);
 	}
