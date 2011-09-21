@@ -1427,22 +1427,6 @@ if(appInfo.platformVersion[0] >= 2) {
 	
 	
 	/**
-	 * Sleep for a given amount of time, allowing other events on main thread to be processed
-	 *
-	 * @param	{Integer}	ms			Milliseconds to wait
-	 */
-	this.sleep = function (ms) {
-		var mainThread = Zotero.mainThread;
-		var endTime = Date.now() + ms;
-		do {
-			mainThread.processNextEvent(false);
-		} while (Date.now() < endTime);
-		
-		return;
-	};
-	
-	
-	/**
 	 * Allow other events (e.g., UI updates) on main thread to be processed if necessary
 	 *
 	 * @param	{Integer}	[timeout=50]		Maximum number of milliseconds to wait
