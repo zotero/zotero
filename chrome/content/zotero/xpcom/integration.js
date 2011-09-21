@@ -480,7 +480,7 @@ Zotero.Integration.Document = function(app, doc) {
  */
 Zotero.Integration.Document.prototype._createNewSession = function(data) {
 	data.sessionID = Zotero.randomString();
-	var session = Zotero.Integration.sessions[data.sessionID] = new Zotero.Integration.Session();
+	var session = Zotero.Integration.sessions[data.sessionID] = new Zotero.Integration.Session(this._doc);
 	return session;
 }
 
@@ -491,8 +491,9 @@ Zotero.Integration.Document.prototype._createNewSession = function(data) {
  * @param dontRunSetDocPrefs {Boolean} Whether to show the Set Document Preferences window if no
  *                                     preferences exist
  */
-Zotero.Integration.Document.prototype._getSession = function(require, dontRunSetDocPrefs) {
-	var dataString = this._doc.getDocumentData();
+Zotero.Integration.Document.prototype._getSession = function(require, dontRunSetDocPrefs, callback) {
+	var dataString = this._doc.getDocumentData(),
+		me = this;
 	if(!dataString) {
 		var haveFields = false;
 		var data = new Zotero.Integration.DocumentData();
@@ -519,20 +520,20 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 		// Set doc prefs if no data string yet
 		this._session = this._createNewSession(data);
 		this._session.setData(data);
-		if(dontRunSetDocPrefs) return false;
-		
-		try {
-			var ret = this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
-		} finally {
-			this._doc.activate();
+		if(dontRunSetDocPrefs) {
+			callback();
+			return;
 		}
 		
-		// save doc prefs in doc
-		this._doc.setDocumentData(this._session.data.serializeXML());
-		
-		if(haveFields) {
-			this._session.reload = true;
-		}
+		this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType, function() {
+			// save doc prefs in doc
+			me._doc.setDocumentData(me._session.data.serializeXML());
+			
+			if(haveFields) {
+				me._session.reload = true;
+			}
+			callback();
+		});
 	} else {
 		var data = new Zotero.Integration.DocumentData(dataString);
 		if(data.dataVersion < DATA_VERSION) {
@@ -565,34 +566,34 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			} catch(e) {
 				// make sure style is defined
 				if(e instanceof Zotero.Integration.DisplayException && e.name === "invalidStyle") {
-					try {
-						this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
-					} finally {
-						this._doc.activate();
-					}
+					this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType, function() {
+						me._doc.setDocumentData(me._session.data.serializeXML());
+						me._session.reload = true;
+						callback(true);
+					});
+					return;
 				} else {
 					throw e;
 				}
 			}
-			this._doc.setDocumentData(this._session.data.serializeXML());
 			
+			this._doc.setDocumentData(this._session.data.serializeXML());
 			this._session.reload = true;
 		}
+		callback();
 	}
-	
-	return !!dataString;
 }
 
 /**
  * Adds a citation to the current document.
  */
 Zotero.Integration.Document.prototype.addCitation = function() {
-	this._getSession();
-	
-	var fieldGetter = new Zotero.Integration.Fields(this._session, this._doc),
-		me = this;
-	fieldGetter.addEditCitation(null, function() {
-		Zotero.Integration.complete(me._doc);
+	var me = this;
+	this._getSession(false, false, function() {
+		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		fieldGetter.addEditCitation(null, function() {
+			Zotero.Integration.complete(me._doc);
+		});
 	});
 }
 	
@@ -600,17 +601,17 @@ Zotero.Integration.Document.prototype.addCitation = function() {
  * Edits the citation at the cursor position.
  */
 Zotero.Integration.Document.prototype.editCitation = function() {
-	this._getSession(true);
-	
-	var field = this._doc.cursorInField(this._session.data.prefs['fieldType'])
-	if(!field) {
-		throw new Zotero.Integration.DisplayException("notInCitation");
-	}
-	
-	var fieldGetter = new Zotero.Integration.Fields(this._session, this._doc),
-		me = this;
-	fieldGetter.addEditCitation(field, function() {
-		Zotero.Integration.complete(me._doc);
+	var me = this;
+	this._getSession(true, false, function() {
+		var field = me._doc.cursorInField(me._session.data.prefs['fieldType'])
+		if(!field) {
+			throw new Zotero.Integration.DisplayException("notInCitation");
+		}
+		
+		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		fieldGetter.addEditCitation(field, function() {
+			Zotero.Integration.complete(me._doc);
+		});
 	});
 }
 
@@ -618,53 +619,55 @@ Zotero.Integration.Document.prototype.editCitation = function() {
  * Adds a bibliography to the current document.
  */
 Zotero.Integration.Document.prototype.addBibliography = function() {
-	this._getSession(true);
-
-	// Make sure we can have a bibliography
-	if(!this._session.data.style.hasBibliography) {
-		throw new Zotero.Integration.DisplayException("noBibliography");
-	}
-	
-	var fieldGetter = new Zotero.Integration.Fields(this._session, this._doc),
-		field = fieldGetter.addField(),
-		me = this;		
-	field.setCode("BIBL");
-	fieldGetter.updateSession(function() {
-		fieldGetter.updateDocument(false, true);
-		Zotero.Integration.complete(me._doc);
+	var me = this;
+	this._getSession(true, false, function() {
+		// Make sure we can have a bibliography
+		if(!me._session.data.style.hasBibliography) {
+			throw new Zotero.Integration.DisplayException("noBibliography");
+		}
+		
+		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc),
+			field = fieldGetter.addField();
+		field.setCode("BIBL");
+		fieldGetter.updateSession(function() {
+			fieldGetter.updateDocument(false, true);
+			Zotero.Integration.complete(me._doc);
+		});
 	});
 }
 
 /**
  * Edits bibliography metadata.
  */
-Zotero.Integration.Document.prototype.editBibliography = function() {
+Zotero.Integration.Document.prototype.editBibliography = function(callback) {
 	// Make sure we have a bibliography
-	this._getSession(true);
-	
-	var fieldGetter = new Zotero.Integration.Fields(this._session, this._doc),
-		me = this;
-	fieldGetter.get(function(fields) {
-		var haveBibliography = false;
-		for(var i=fields.length-1; i>=0; i--) {
-			var code = fields[i].getCode();
-			var [type, content] = fieldGetter.getCodeTypeAndContent(code);
-			if(type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
-				haveBibliography = true;
-				break;
+	var me = this;
+	this._getSession(true, false, function() {
+		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		fieldGetter.get(function(fields) {
+			var haveBibliography = false;
+			for(var i=fields.length-1; i>=0; i--) {
+				var code = fields[i].getCode();
+				var [type, content] = fieldGetter.getCodeTypeAndContent(code);
+				if(type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
+					haveBibliography = true;
+					break;
+				}
 			}
-		}
-		
-		if(!haveBibliography) {
-			throw new Zotero.Integration.DisplayException("mustInsertBibliography");
-		}
-		
-		fieldGetter.updateSession();
-		me._session.editBibliography();
-		me._doc.activate();
-		fieldGetter.updateDocument(false, true);
-		
-		Zotero.Integration.complete(me._doc);
+			
+			if(!haveBibliography) {
+				throw new Zotero.Integration.DisplayException("mustInsertBibliography");
+			}
+			
+			fieldGetter.updateSession(function() {
+				me._session.editBibliography(function() {
+					me._doc.activate();
+					fieldGetter.updateDocument(false, true);
+					
+					Zotero.Integration.complete(me._doc);
+				});
+			});
+		});
 	});
 }
 
@@ -672,14 +675,14 @@ Zotero.Integration.Document.prototype.editBibliography = function() {
  * Updates the citation data for all citations and bibliography entries.
  */
 Zotero.Integration.Document.prototype.refresh = function() {
-	this._getSession(true);
-	
-	// Send request, forcing update of citations and bibliography
-	var fieldGetter = new Zotero.Integration.Fields(this._session, this._doc),
-		me = this;
-	fieldGetter.updateSession(function() {
-		fieldGetter.updateDocument(true, true);
-		Zotero.Integration.complete(me._doc);
+	var me = this;
+	this._getSession(true, false, function() {
+		// Send request, forcing update of citations and bibliography
+		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		fieldGetter.updateSession(function() {
+			fieldGetter.updateDocument(true, true);
+			Zotero.Integration.complete(me._doc);
+		});
 	});
 }
 
@@ -687,21 +690,21 @@ Zotero.Integration.Document.prototype.refresh = function() {
  * Deletes field codes.
  */
 Zotero.Integration.Document.prototype.removeCodes = function() {
-	this._getSession(true);
-	
-	var fieldGetter = new Zotero.Integration.Fields(this._session, this._doc),
-		me = this;
-	fieldGetter.get(function(fields) {
-		var result = me._doc.displayAlert(Zotero.getString("integration.removeCodesWarning"),
-					Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
-					Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
-		if(result) {
-			for(var i=fields.length-1; i>=0; i--) {
-				fields[i].removeCode();
+	var me = this;
+	this._getSession(true, false, function() {
+		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		fieldGetter.get(function(fields) {
+			var result = me._doc.displayAlert(Zotero.getString("integration.removeCodesWarning"),
+						Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
+						Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
+			if(result) {
+				for(var i=fields.length-1; i>=0; i--) {
+					fields[i].removeCode();
+				}
 			}
-		}
-		
-		Zotero.Integration.complete(me._doc);
+			
+			Zotero.Integration.complete(me._doc);
+		});
 	});
 }
 
@@ -709,65 +712,61 @@ Zotero.Integration.Document.prototype.removeCodes = function() {
  * Displays a dialog to set document preferences (style, footnotes/endnotes, etc.)
  */
 Zotero.Integration.Document.prototype.setDocPrefs = function() {
-	this._getSession(false, true);
-	
-	var fieldGetter = new Zotero.Integration.Fields(this._session, this._doc);
-	fieldGetter.get();
-	
-	try {
-		var oldData = this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType);
-	} finally {
-		this._doc.activate();
-	}
-	
-	if(oldData) {
-		this._doc.setDocumentData(this._session.data.serializeXML());
+	var me = this;
+	this._getSession(false, true, function() {
+		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		fieldGetter.get();
 		
-		var me = this;
-		fieldGetter.get(function(fields) {
-			if(fields && fields.length) {
-				// if there are fields, we will have to convert some things; get a list of what we need to deal with
-				var convertBibliographies = oldData === true || oldData.prefs.fieldType != me._session.data.prefs.fieldType;
-				var convertItems = convertBibliographies || oldData.prefs.noteType != me._session.data.prefs.noteType;
-				var fieldsToConvert = new Array();
-				var fieldNoteTypes = new Array();
-				for(var i=0, n=fields.length; i<n; i++) {
-					var field = fields[i],
-						fieldCode = field.getCode(),
-						[type, content] = fieldGetter.getCodeTypeAndContent(fieldCode);
-					
-					if(convertItems && type === INTEGRATION_TYPE_ITEM) {
-						var citation = me._session.unserializeCitation(fieldCode);
-						if(!citation.properties.dontUpdate) {
-							fieldsToConvert.push(field);
-							fieldNoteTypes.push(me._session.data.prefs.noteType);
+		me._session.setDocPrefs(me._app.primaryFieldType, me._app.secondaryFieldType, function(oldData) {
+			if(oldData) {
+				me._doc.setDocumentData(me._session.data.serializeXML());
+				
+				fieldGetter.get(function(fields) {
+					if(fields && fields.length) {
+						// if there are fields, we will have to convert some things; get a list of what we need to deal with
+						var convertBibliographies = oldData === true || oldData.prefs.fieldType != me._session.data.prefs.fieldType;
+						var convertItems = convertBibliographies || oldData.prefs.noteType != me._session.data.prefs.noteType;
+						var fieldsToConvert = new Array();
+						var fieldNoteTypes = new Array();
+						for(var i=0, n=fields.length; i<n; i++) {
+							var field = fields[i],
+								fieldCode = field.getCode(),
+								[type, content] = fieldGetter.getCodeTypeAndContent(fieldCode);
+							
+							if(convertItems && type === INTEGRATION_TYPE_ITEM) {
+								var citation = me._session.unserializeCitation(fieldCode);
+								if(!citation.properties.dontUpdate) {
+									fieldsToConvert.push(field);
+									fieldNoteTypes.push(me._session.data.prefs.noteType);
+								}
+							} else if(convertBibliographies && type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
+								fieldsToConvert.push(field);
+								fieldNoteTypes.push(0);
+							}
 						}
-					} else if(convertBibliographies && type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
-						fieldsToConvert.push(field);
-						fieldNoteTypes.push(0);
+						
+						if(fieldsToConvert.length) {
+							// pass to conversion function
+							me._doc.convert(new Zotero.Integration.Document.JSEnumerator(fieldsToConvert),
+								me._session.data.prefs.fieldType, fieldNoteTypes, fieldNoteTypes.length);
+							
+							// clear fields so that they will get collected again before refresh
+							me._fields = undefined;
+						}
+						
+						// refresh contents
+						fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+						fieldGetter.updateSession(function() {
+							fieldGetter.updateDocument(true, true, true);
+							Zotero.Integration.complete(me._doc);
+						});
 					}
-				}
-				
-				if(fieldsToConvert.length) {
-					// pass to conversion function
-					me._doc.convert(new Zotero.Integration.Document.JSEnumerator(fieldsToConvert),
-						me._session.data.prefs.fieldType, fieldNoteTypes, fieldNoteTypes.length);
-					
-					// clear fields so that they will get collected again before refresh
-					me._fields = undefined;
-				}
-				
-				// refresh contents
-				fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
-				fieldGetter.updateSession(function() {
-					fieldGetter.updateDocument(true, true, true);
-					Zotero.Integration.complete(me._doc);
 				});
+			} else {
+				Zotero.Integration.complete(me._doc);
 			}
 		});
-	} else {
-		Zotero.Integration.complete(this._doc);
-	}
+	});
 }
 
 /**
@@ -850,8 +849,8 @@ Zotero.Integration.Fields.prototype.get = function(callback) {
 				callback(this._fields);
 			}
 		} catch(e) {
+			Zotero.logError(e);
 			Zotero.Integration.handleError(e, this._doc);
-			throw e;
 		}
 		return;
 	}
@@ -942,25 +941,72 @@ Zotero.Integration.Fields.prototype._showCorruptFieldError = function(e, field, 
 Zotero.Integration.Fields.prototype.updateSession = function(callback) {
 	var me = this;
 	this.get(function(fields) {
-		me._updateSession(fields);
-		if(callback) callback(this._session);
+		me._session.resetRequest(me._doc);
+		
+		me._deleteKeys = {};
+		me._deleteFields = [];
+		me._removeCodeFields = [];
+		me._bibliographyFields = [];
+		me._bibliographyData = "";
+		
+		var collectFieldsTime = (new Date()).getTime();
+		me._processFields(fields, function() {
+			var endTime = (new Date()).getTime();
+			if(Zotero.Debug.enabled) {
+				Zotero.debug("Integration: Updated session data for "+fields.length+" fields in "+
+					(endTime-collectFieldsTime)/1000+"; "+
+					1000/((endTime-collectFieldsTime)/fields.length)+" fields/second");
+			}
+			
+			// load uncited items from bibliography
+			if(me._bibliographyData && !me._session.bibliographyData) {
+				try {
+					me._session.loadBibliographyData(me._bibliographyData);
+				} catch(e) {
+					if(e instanceof Zotero.Integration.CorruptFieldException) {
+						var msg = Zotero.getString("integration.corruptBibliography")+'\n\n'+
+								  Zotero.getString('integration.corruptBibliography.description');
+						var result = me._doc.displayAlert(msg, 
+									Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
+									Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
+						if(result == 0) {
+							throw e;
+						} else {
+							me._bibliographyData = "";
+							me._session.bibliographyHasChanged = true;
+							me._session.bibliographyDataHasChanged = true;
+						}
+					} else {
+						throw e;
+					}
+				}
+			}
+			
+			// if we are reloading this session, assume no item IDs to be updated except for edited items
+			if(me._session.reload) {
+				//this._session.restoreProcessorState(); TODO doesn't appear to be working properly
+				me._session.updateUpdateIndices();
+				var deleteCitations = me._session.updateCitations();
+				me._deleteFields = me._deleteFields.concat([i for(i in deleteCitations)]);
+				me._session.updateIndices = {};
+				me._session.updateItemIDs = {};
+				me._session.citationText = {};
+				me._session.bibliographyHasChanged = false;
+				delete me._session.reload;
+			}
+			
+			if(callback) callback(this._session);
+		});		
 	});
 }
 
 /**
- * Callback for Zotero.Integration.Fields.get()
+ * Keep processing fields until all have been processed
  */
-Zotero.Integration.Fields.prototype._updateSession = function(fields) {
-	this._session.resetRequest(this._doc);
+Zotero.Integration.Fields.prototype._processFields = function(fields, callback, i) {
+	if(!i) i = 0;
 	
-	var deleteKeys = {};
-	this._deleteFields = [];
-	this._removeCodeFields = [];
-	this._bibliographyFields = [];
-	var bibliographyData = "";
-	
-	var collectFieldsTime = (new Date()).getTime();
-	for(var i=0, n=fields.length; i<n; i++) {
+	for(var n = fields.length; i<n; i++) {
 		var field = fields[i];
 		
 		try {
@@ -979,7 +1025,7 @@ Zotero.Integration.Fields.prototype._updateSession = function(fields) {
 					// First, check if we've already decided to remove field codes from these
 					var reselect = true;
 					for each(var reselectKey in e.reselectKeys) {
-						if(deleteKeys[reselectKey]) {
+						if(this._deleteKeys[reselectKey]) {
 							this._removeCodeFields.push(i);
 							reselect = false;
 							break;
@@ -1000,15 +1046,18 @@ Zotero.Integration.Fields.prototype._updateSession = function(fields) {
 							throw new Zotero.Integration.UserCancelledException();
 						} else if(result == 1) {	// No
 							for each(var reselectKey in e.reselectKeys) {
-								deleteKeys[reselectKey] = true;
+								this._deleteKeys[reselectKey] = true;
 							}
 							this._removeCodeFields.push(i);
 						} else {					// Yes
 							// Display reselect item dialog
-							this._session.reselectItem(e);
-							// Now try again
-							this._session.addCitation(i, field.getNoteIndex(), content);
-							this._doc.activate();
+							var me = this;
+							this._session.reselectItem(e, function() {
+								// Now try again
+								me._doc.activate();
+								me._processFields(fields, callback, i);
+							});
+							return;
 						}
 					}
 				} else if(e instanceof Zotero.Integration.CorruptFieldException) {
@@ -1019,53 +1068,13 @@ Zotero.Integration.Fields.prototype._updateSession = function(fields) {
 			}
 		} else if(type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
 			this._bibliographyFields.push(field);
-			if(!this._session.bibliographyData && !bibliographyData) {
-				bibliographyData = content;
-			}
-		}
-	}
-	var endTime = (new Date()).getTime();
-	if(Zotero.Debug.enabled) {
-		Zotero.debug("Integration: Updated session data for "+fields.length+" fields in "+
-			(endTime-collectFieldsTime)/1000+"; "+
-			1000/((endTime-collectFieldsTime)/fields.length)+" fields/second");
-	}
-	
-	// load uncited items from bibliography
-	if(bibliographyData && !this._session.bibliographyData) {
-		try {
-			this._session.loadBibliographyData(bibliographyData);
-		} catch(e) {
-			if(e instanceof Zotero.Integration.CorruptFieldException) {
-				var msg = Zotero.getString("integration.corruptBibliography")+'\n\n'+
-						  Zotero.getString('integration.corruptBibliography.description');
-				var result = this._doc.displayAlert(msg, 
-							Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
-							Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
-				if(result == 0) {
-					throw e;
-				} else {
-					bibliographyData = "";
-					this._session.bibliographyHasChanged = true;
-					this._session.bibliographyDataHasChanged = true;
-				}
-			} else {
-				throw e;
+			if(!this._session.bibliographyData && !this._bibliographyData) {
+				this._bibliographyData = content;
 			}
 		}
 	}
 	
-	// if we are reloading this session, assume no item IDs to be updated except for edited items
-	if(this._session.reload) {
-		//this._session.restoreProcessorState(); TODO doesn't appear to be working properly
-		this._session.updateUpdateIndices();
-		var deleteCitations = this._session.updateCitations();
-		this._deleteFields = this._deleteFields.concat([i for(i in deleteCitations)]);
-		this._session.updateIndices = {};
-		this._session.updateItemIDs = {};
-		this._session.bibliographyHasChanged = false;
-		delete this._session.reload;
-	}
+	callback();
 }
 
 /**
@@ -1222,7 +1231,7 @@ Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, fo
  * Brings up the addCitationDialog, prepopulated if a citation is provided
  */
 Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) {
-	var newField, citation,
+	var newField, citation, fieldIndex
 		session = this._session,
 		me = this,
 		io = new function() { this.wrappedJSObject = this; }
@@ -1276,52 +1285,65 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 	
 	// assign preview function
 	var previewCallbackQueue;
+	function doPreview() {
+		// fieldIndex will already be set by the time we get here
+		citation.properties.zoteroIndex = fieldIndex;
+		citation.properties.noteIndex = field.getNoteIndex();
+		returnVal = me._session.previewCitation(citation);
+		
+		for(var i=0, n=previewCallbackQueue.length; i<n; i++) previewCallbackQueue[i](returnVal);
+		previewCallbackQueue = undefined;
+	}
 	io.preview = function(callback) {
 		if(!previewCallbackQueue) previewCallbackQueue = [];
 		previewCallbackQueue.push(callback);
 		
 		var returnVal;
 		me.get(function() {
-			if(!sessionUpdated) {
-				me.updateSession();
-				sessionUpdated = true;
+			if(sessionUpdated) {
+				doPreview();
+			} else {
+				me.updateSession(function() {
+					sessionUpdated = true;
+					doPreview();
+				});
 			}
-			
-			// fieldIndex will already be set by the time we get here
-			citation.properties.zoteroIndex = fieldIndex;
-			citation.properties.noteIndex = field.getNoteIndex();
-			returnVal = me._session.previewCitation(citation);
-			
-			for(var i=0, n=previewCallbackQueue.length; i<n; i++) previewCallbackQueue[i](returnVal);
-			previewCallbackQueue = undefined;
 		});
 	}
+	
 	// assign sort function
 	io.sort = function() {
 		me._session.previewCitation(io.citation);
 	}
+	
 	// assign accept function
+	function doAccept() {
+		Zotero.debug("fieldIndex is "+fieldIndex);
+		session.addCitation(fieldIndex, field.getNoteIndex(), io.citation);
+		session.updateIndices[fieldIndex] = true;
+		me.updateDocument();
+			
+		callback();
+	}
 	io.accept = function(progressCallback) {
 		me._progressCallback = progressCallback;
 		
 		if(io.citation.citationItems.length) {
 			// Citation added
 			me.get(function() {
-				if(!sessionUpdated) me.updateSession();
-				if(fieldIndex !== undefined) {
-					session.addCitation(fieldIndex, field.getNoteIndex(), io.citation);
+				if(sessionUpdated) {
+					doAccept();
+				} else {
+					me.updateSession(doAccept);
 				}
-				session.updateIndices[fieldIndex] = true;
-				me.updateDocument();
-					
-				callback();
 			});
 		} else if(newField) {
 			// New citation was cancelled
-			field.delete();		
+			field.delete();
 			callback();
 		}
 	}
+	
 	// determine whether citation is sortable in current style
 	io.sortable = session.style.opt.sort_citations;
 	
@@ -1329,11 +1351,11 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 	io.style = session.style;
 	
 	// Start finding this citation this citation
-	var fieldIndex;
 	this.get(function(fields) {
 		for(var i=0, n=fields.length; i<n; i++) {
 			if(fields[i].equals(field)) {
 				fieldIndex = i;
+				return;
 			}
 		}
 	});
@@ -1350,13 +1372,13 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 /**
  * Keeps track of all session-specific variables
  */
-Zotero.Integration.Session = function() {
+Zotero.Integration.Session = function(doc) {
 	// holds items not in document that should be in bibliography
 	this.uncitedItems = {};
 	this.omittedItems = {};
 	this.customBibliographyText = {};
 	this.reselectedItems = {};
-	this.resetRequest();
+	this.resetRequest(doc);
 }
 
 /**
@@ -1427,6 +1449,7 @@ Zotero.Integration.Session.prototype.displayDialog = function(url, options, io, 
 	// without this, Firefox gets raised with our windows under Compiz
 	if(Zotero.isLinux) allOptions += ',dialog=no';
 	if(options) allOptions += ','+options;
+	if(!async) allOptions += ',modal=yes';
 	
 	var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 		.getService(Components.interfaces.nsIWindowWatcher)
@@ -1434,37 +1457,32 @@ Zotero.Integration.Session.prototype.displayDialog = function(url, options, io, 
 	Zotero.Integration.currentWindow = window;
 	Zotero.Integration.activate(window);
 	
-	if(async) {
-		var listener = function() {
-			if(window.location.toString() === "about:blank") return;
-			
-			if(window.newWindow) {
-				window = window.newWindow;
-				Zotero.Integration.currentWindow = window;
-				window.addEventListener("unload", listener, false);
-				return;
-			}
-			
-			Zotero.Integration.currentWindow = false;
-			if(async instanceof Function) async();
+	var listener = function() {
+		if(window.location.toString() === "about:blank") return;
+		
+		if(window.newWindow) {
+			window = window.newWindow;
+			Zotero.Integration.currentWindow = window;
+			window.addEventListener("unload", listener, false);
+			return;
 		}
-		window.addEventListener("unload", listener, false);
-	} else {
-		while(!window.closed) {
-			Zotero.mainThread.processNextEvent(true);
-			if(window.newWindow) {
-				window = window.newWindow;
-				Zotero.Integration.currentWindow = window;
-			}
-		}
+		
 		Zotero.Integration.currentWindow = false;
+		if(async instanceof Function) {
+			try {
+				async();
+			} catch(e) {
+				Zotero.Integration.handleError(e, this.doc);
+			}
+		}
 	}
+	window.addEventListener("unload", listener, false);
 }
 
 /**
  * Displays a dialog to set document preferences
  */
-Zotero.Integration.Session.prototype.setDocPrefs = function(primaryFieldType, secondaryFieldType) {
+Zotero.Integration.Session.prototype.setDocPrefs = function(primaryFieldType, secondaryFieldType, callback) {
 	var io = new function() {
 		this.wrappedJSObject = this;
 	};
@@ -1478,56 +1496,64 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(primaryFieldType, se
 		io.storeReferences = this.data.prefs.storeReferences;
 	}
 	
-	this.displayDialog('chrome://zotero/content/integration/integrationDocPrefs.xul', '', io);
-	if(!io.style) throw new Zotero.Integration.UserCancelledException();
-	
-	// set data
-	var oldData = this.data;
-	var data = new Zotero.Integration.DocumentData();
-	data.sessionID = oldData.sessionID;
-	data.style.styleID = io.style;
-	data.prefs.fieldType = io.fieldType;
-	data.prefs.storeReferences = io.storeReferences;
-	this.setData(data);
-	// need to do this after setting the data so that we know if it's a note style
-	this.data.prefs.noteType = this.style && this.styleClass == "note" ? io.useEndnotes+1 : 0;
-	
-	if(!oldData || oldData.style.styleID != data.style.styleID
-			|| oldData.prefs.noteType != data.prefs.noteType
-			|| oldData.prefs.fieldType != data.prefs.fieldType) {
-		this.oldCitationIDs = {};
-	}
-	
-	return oldData ? oldData : true;
+	var me = this;
+	this.displayDialog('chrome://zotero/content/integration/integrationDocPrefs.xul', '', io, function() {
+		if(!io.style) {
+			Zotero.Integration.activate();
+			return;
+		}
+		
+		// set data
+		var oldData = me.data;
+		var data = new Zotero.Integration.DocumentData();
+		data.sessionID = oldData.sessionID;
+		data.style.styleID = io.style;
+		data.prefs.fieldType = io.fieldType;
+		data.prefs.storeReferences = io.storeReferences;
+		me.setData(data);
+		// need to do this after setting the data so that we know if it's a note style
+		me.data.prefs.noteType = me.style && me.styleClass == "note" ? io.useEndnotes+1 : 0;
+		
+		if(!oldData || oldData.style.styleID != data.style.styleID
+				|| oldData.prefs.noteType != data.prefs.noteType
+				|| oldData.prefs.fieldType != data.prefs.fieldType) {
+			me.oldCitationIDs = {};
+		}
+		
+		callback(oldData ? oldData : true);
+	});
 }
 
 /**
  * Reselects an item to replace a deleted item
  * @param exception {Zotero.Integration.MissingItemException}
  */
-Zotero.Integration.Session.prototype.reselectItem = function(exception) {
+Zotero.Integration.Session.prototype.reselectItem = function(exception, callback) {
 	var io = new function() {
 		this.wrappedJSObject = this;
-	};
+	},
+		me = this;
 	io.addBorder = Zotero.isWin;
 	io.singleSelection = true;
 	
-	this.displayDialog('chrome://zotero/content/selectItemsDialog.xul', 'resizable', io);
-	
-	if(io.dataOut && io.dataOut.length) {
-		var itemID = io.dataOut[0];
+	this.displayDialog('chrome://zotero/content/selectItemsDialog.xul', 'resizable', io, function() {
+		if(io.dataOut && io.dataOut.length) {
+			var itemID = io.dataOut[0];
+			
+			// add reselected item IDs to hash, so they can be used
+			for each(var reselectKey in exception.reselectKeys) {
+				me.reselectedItems[reselectKey] = itemID;
+			}
+			// add old URIs to map, so that they will be included
+			if(exception.reselectKeyType == RESELECT_KEY_URI) {
+				me.uriMap.add(itemID, exception.reselectKeys.concat(me.uriMap.getURIsForItemID(itemID)));
+			}
+			// flag for update
+			me.updateItemIDs[itemID] = true;
+		}
 		
-		// add reselected item IDs to hash, so they can be used
-		for each(var reselectKey in exception.reselectKeys) {
-			this.reselectedItems[reselectKey] = itemID;
-		}
-		// add old URIs to map, so that they will be included
-		if(exception.reselectKeyType == RESELECT_KEY_URI) {
-			this.uriMap.add(itemID, exception.reselectKeys.concat(this.uriMap.getURIsForItemID(itemID)));
-		}
-		// flag for update
-		this.updateItemIDs[itemID] = true;
-	}
+		callback();
+	});
 }
 
 /**
@@ -2197,7 +2223,6 @@ Zotero.Integration.Session.prototype.previewCitation = function(citation) {
 	try {
 		return this.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
 	} catch(e) {
-		Zotero.debug(e);
 		throw e;
 	}
 }
@@ -2205,13 +2230,13 @@ Zotero.Integration.Session.prototype.previewCitation = function(citation) {
 /**
  * Edits integration bibliography
  */
-Zotero.Integration.Session.prototype.editBibliography = function() {
+Zotero.Integration.Session.prototype.editBibliography = function(callback) {
 	var bibliographyEditor = new Zotero.Integration.Session.BibliographyEditInterface(this);
 	var io = new function() { this.wrappedJSObject = bibliographyEditor; }
 	
 	this.bibliographyDataHasChanged = this.bibliographyHasChanged = true;
 	
-	this.displayDialog('chrome://zotero/content/integration/editBibliographyDialog.xul', 'resizable', io);
+	this.displayDialog('chrome://zotero/content/integration/editBibliographyDialog.xul', 'resizable', io, callback);
 }
 
 /**
