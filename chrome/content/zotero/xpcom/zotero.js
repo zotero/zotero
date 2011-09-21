@@ -797,9 +797,9 @@ if(appInfo.platformVersion[0] >= 2) {
 			.getService(Components.interfaces.nsIChromeRegistry);
 		var ioService = Components.classes["@mozilla.org/network/io-service;1"]  
 			.getService(Components.interfaces.nsIIOService);  
-		var zoteroURI = ioService.newURI("chrome://zotero/content/", "UTF-8", null);
+		var zoteroURI = ioService.newURI("chrome://zotero-resource/content/", "UTF-8", null);
 		zoteroURI = cr.convertChromeURL(zoteroURI).QueryInterface(Components.interfaces.nsIFileURL);
-		return zoteroURI.file.parent.parent.parent.parent;
+		return zoteroURI.file.parent.parent;
 	}
 	
 	function getDefaultProfile(prefDir) {
