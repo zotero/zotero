@@ -1502,11 +1502,20 @@ if(appInfo.platformVersion[0] >= 2) {
 		var timer = Components.classes["@mozilla.org/timer;1"].
 			createInstance(Components.interfaces.nsITimer);
 		var timerCallback = {"notify":function() {
-			if(!generator.next()) {
-				timer.cancel();
-				_runningTimers.splice(_runningTimers.indexOf(timer), 1);
-				_waiting--;
+			var err = false;
+			try {
+				if(generator.next()) return;
+			} catch(e if e.toString() === "[object StopIteration]") {
+				// There must be a better way to perform this check
+			} catch(e) {
+				err = e;
 			}
+			
+			timer.cancel();
+			_runningTimers.splice(_runningTimers.indexOf(timer), 1);
+			_waiting--;
+			
+			if(err) throw err;
 		}}
 		timer.initWithCallback(timerCallback, ms ? ms : 0, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
 		// add timer to global scope so that it doesn't get garbage collected before it completes
