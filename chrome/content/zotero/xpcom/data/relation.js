@@ -158,13 +158,7 @@ Zotero.Relation.prototype.save = function () {
 		throw ("Missing object in Zotero.Relation.save()");
 	}
 	
-	// Hack to deal with duplicate relations inserted in the wrong order in 3.0b1
-	//
-	// This could possibly be addressed by a database upgrade step that deleted
-	// any deletedItemPredicate relations _from_ existing non-trashed items
-	var ignore = this.predicate == Zotero.Relations.deletedItemPredicate ? "OR IGNORE " : "";
-	
-	var sql = "INSERT " + ignore + "INTO relations "
+	var sql = "INSERT OR IGNORE INTO relations "
 				+ "(libraryID, subject, predicate, object, clientDateModified) "
 				+ "VALUES (?, ?, ?, ?, ?)";
 	var insertID = Zotero.DB.query(
