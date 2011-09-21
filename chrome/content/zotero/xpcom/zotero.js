@@ -1510,6 +1510,26 @@ if(appInfo.platformVersion[0] >= 2) {
 	};
 	
 	/**
+	 * Pumps a generator until it yields false. See schema.js for an example.
+	 */
+	this.pumpGenerator = function(generator) {
+		_waiting++;
+		
+		var timer = Components.classes["@mozilla.org/timer;1"].
+			createInstance(Components.interfaces.nsITimer);
+		var timerCallback = {"notify":function() {
+			if(!generator.next()) {
+				timer.cancel();
+				_runningTimers.splice(_runningTimers.indexOf(timer), 1);
+				_waiting--;
+			}
+		}}
+		timer.initWithCallback(timerCallback, ms, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
+		// add timer to global scope so that it doesn't get garbage collected before it completes
+		_runningTimers.push(timer);
+	}
+	
+	/**
 	 * Emulates the behavior of window.setTimeout, but ensures that callbacks do not get called
 	 * during Zotero.wait()
 	 *
