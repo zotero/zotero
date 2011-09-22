@@ -94,12 +94,13 @@ Zotero.IPC = new function() {
 	}
 	
 	/**
-	 * Writes safely to a file, avoiding blocking
-	 * @param {nsIFile} pipe The pipe as an nsIFile
-	 * @param {String} string The string to write to the file
+	 * Writes safely to a file, avoiding blocking.
+	 * @param {nsIFile} pipe The pipe as an nsIFile.
+	 * @param {String} string The string to write to the file.
+	 * @param {Boolean} [block] Whether we should block. Usually, we don't want this.
 	 * @return {Boolean} True if write succeeded; false otherwise
 	 */
-	this.safePipeWrite = function(pipe, string) {
+	this.safePipeWrite = function(pipe, string, block) {
 		if(!open) {
 			// safely write to instance pipes
 			var lib = Zotero.IPC.getLibc();
@@ -128,7 +129,8 @@ Zotero.IPC = new function() {
 		// On OS X, O_NONBLOCK = 0x0004
 		// On Linux, O_NONBLOCK = 00004000
 		// On both, O_WRONLY = 0x0001
-		var mode = (Zotero.isMac ? 0x0004 : 00004000) | 0x0001;
+		var mode = 0x0001;
+		if(!block) mode = mode | (Zotero.isMac ? 0x0004 : 00004000);
 		
 		// Also append to plain files to get things working with Fx 3.6 polling
 		// On OS X, O_APPEND = 0x0008
@@ -228,14 +230,6 @@ Zotero.IPC = new function() {
 			user32.close();
 			return false;
 		} else {			// communicate via pipes
-			// make sure instance pipe is open and accepting input, or ignore if it has been deleted
-			if(!instancePipeOpen && _instancePipe.exists()) {
-				while(!Zotero.IPC.safePipeWrite(_instancePipe, "test\n")) {
-					Zotero.wait();
-				}
-				instancePipeOpen = true;
-			}
-			
 			// look for other Zotero instances
 			var pipes = [];
 			var pipeDir = _getPipeDirectory();
@@ -271,6 +265,13 @@ Zotero.IPC = new function() {
 				}
 				
 				if(!defunct) {
+					// make sure instance pipe is open and accepting input, so that we can receive
+					// a response to whatever we're sending
+					if(!instancePipeOpen && _instancePipe.exists()) {
+						Zotero.IPC.safePipeWrite(_instancePipe, "test\n", true);
+						instancePipeOpen = true;
+					}
+					
 					var wroteToPipe = Zotero.IPC.safePipeWrite(pipe, msg+"\n");
 					success = success || wroteToPipe;
 					defunct = !wroteToPipe
@@ -415,9 +416,7 @@ Zotero.IPC.Pipe = new function() {
 		
 		// Keep trying to write to pipe until we succeed, in case pipe is not yet open
 		Zotero.debug("IPC: Closing pipe "+file.path);
-		while(!Zotero.IPC.safePipeWrite(file, "Zotero shutdown\n") && !pipe.open) {
-			Zotero.wait();
-		}
+		Zotero.IPC.safePipeWrite(file, "Zotero shutdown\n", true);
 		
 		// Delete pipe
 		file.remove(false);
@@ -482,13 +481,6 @@ Zotero.IPC.Pipe.DeferredOpen.prototype = {
 };
 
 /**
- * Deferred open pipe is open if there are no pending events or it was opened > 1 second ago
- */
-Zotero.IPC.Pipe.DeferredOpen.prototype.__defineGetter__("open", function() {
-	return Date.now() > this._openTime+1000 || !Zotero.mainThread.hasPendingEvents();
-});
-
-/**
  * Listens synchronously for data on the integration pipe on a separate JS thread and reads it
  * when available
  *
@@ -526,14 +518,6 @@ Zotero.IPC.Pipe.WorkerThread.prototype = {
 		}
 	}
 }
-
-/**
- * Worker thread gets a message once the pipe is about to open; we add 500 ms to make sure it
- * actually is
- */
-Zotero.IPC.Pipe.DeferredOpen.prototype.__defineGetter__("open", function() {
-	return Date.now() > this._openTime+500;
-});
 
 /**
  * Polling mechanism for file
