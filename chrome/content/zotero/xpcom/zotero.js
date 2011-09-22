@@ -686,10 +686,8 @@ if(appInfo.platformVersion[0] >= 2) {
 						var timeout = Date.now() + 5000; // 5 second timeout
 						while(_waitingForDBLock && !Zotero.closing && Date.now() < timeout) {
 							// Dear friendly AMO reviewer:
-							// 
 							// The following processNextEvent() call is only used within Zotero
-							// Standalone. It is never used when Zotero is running as a Firefox 
-							// extension.
+							// Standalone. It is never used when Zotero is running in Firefox. 
 							Zotero.mainThread.processNextEvent(true);
 						}
 						if(Zotero.closing) return false;
