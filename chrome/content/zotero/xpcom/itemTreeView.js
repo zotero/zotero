@@ -74,7 +74,9 @@ Zotero.ItemTreeView.prototype._runCallbacks = function() {
 Zotero.ItemTreeView.prototype.setTree = function(treebox)
 {
 	var generator = this._setTreeGenerator(treebox);
-	Zotero.pumpGenerator(generator);
+	if(generator.next()) {
+		Zotero.pumpGenerator(generator);
+	}
 }
 
 /**
@@ -199,6 +201,7 @@ Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 	} catch(e) {
 		Zotero.logError(e);
 	}
+	yield false;
 }
 
 /**
@@ -254,8 +257,6 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	Zotero.Items.cacheFields(cacheFields);
 	Zotero.ItemTreeView._haveCachedFields = true;
 	
-	if(this._waitAfter && Date.now() > this._waitAfter) yield true;
-	
 	var newRows = this._itemGroup.getItems();
 	
 	var added = 0;
@@ -278,8 +279,6 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 			added++;
 		}
 		this._searchItemIDs[newRows[i].id] = true;
-		
-		if(i % 100 === 0 && this._waitAfter && Date.now() > this._waitAfter) yield true;
 	}
 	
 	// Add parents of matches if not matches themselves
@@ -292,6 +291,8 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	}
 	
 	Zotero.DB.commitTransaction();
+		
+	if(this._waitAfter && Date.now() > this._waitAfter) yield true;
 	
 	this._refreshHashMap();
 	
