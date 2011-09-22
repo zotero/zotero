@@ -63,16 +63,24 @@ Zotero.ItemTreeView.prototype.addCallback = function(callback) {
 
 Zotero.ItemTreeView.prototype._runCallbacks = function() {
 	for each(var cb in this._callbacks) {
-		this.showLoadingMessageIfNecessary();
 		cb();
 	}
 }
 
 
-/*
- *  Called by the tree itself
+/**
+ * Called by the tree itself
  */
 Zotero.ItemTreeView.prototype.setTree = function(treebox)
+{
+	var generator = this._setTreeGenerator(treebox);
+	Zotero.pumpGenerator(generator);
+}
+
+/**
+ * Generator used internally for setting the tree
+ */
+Zotero.ItemTreeView.prototype._setTreeGenerator = function(treebox)
 {
 	try {
 		//Zotero.debug("Calling setTree()");
@@ -89,7 +97,7 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 			if (this._needsSort) {
 				this.sort();
 			}
-			return;
+			yield false;
 		}
 		
 		if (!treebox) {
@@ -110,7 +118,7 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 			if (this._ownerDocument.defaultView.ZoteroPane_Local) {
 				this._ownerDocument.defaultView.ZoteroPane_Local.clearItemsPaneMessage();
 			}
-			return;
+			yield false;
 		}
 		
 		// If a DB transaction is open, display error message and bail
@@ -118,10 +126,11 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 			if (this._ownerDocument.defaultView.ZoteroPane_Local) {
 				this._ownerDocument.defaultView.ZoteroPane_Local.displayErrorMessage();
 			}
-			return;
+			yield false;
 		}
 		
-		this.refresh();
+		var generator = this._refreshGenerator();
+		while(generator.next()) yield true;
 		
 		// Add a keypress listener for expand/collapse
 		var tree = this._treebox.treeBody.parentNode;
@@ -165,6 +174,10 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 		tree.addEventListener('keypress', listener, false);
 		
 		this.sort();
+		
+		// Only yield if there are callbacks; otherwise, we're almost done
+		if(this._callbacks.length && this._waitAfter && Date.now() > this._waitAfter) yield true;
+		
 		this.expandMatchParents();
 		
 		//Zotero.debug('Running callbacks in itemTreeView.setTree()', 4);
@@ -189,25 +202,23 @@ Zotero.ItemTreeView.prototype.setTree = function(treebox)
 }
 
 /**
- * Checks whether it's taken long enough to load the item pane that we should show a "loading"
- * message. This should be called at semi-regular intervals throughout functions that consume a lot
- * of time.
- */
-Zotero.ItemTreeView.prototype.showLoadingMessageIfNecessary = function() {
-	if(this._waitAfter && Date.now() > this._waitAfter) {
-		Zotero.wait();
-		delete this._waitAfter;
-	}
-}
-
-
-/*
  *  Reload the rows from the data access methods
  *  (doesn't call the tree.invalidate methods, etc.)
  */
 Zotero.ItemTreeView.prototype.refresh = function()
 {
+	var generator = this._refreshGenerator();
+	while(generator.next()) {};
+}
+
+/**
+ * Generator used internally for refresh
+ */
+Zotero.ItemTreeView._haveCachedFields = false;
+Zotero.ItemTreeView.prototype._refreshGenerator = function()
+{
 	Zotero.debug('Refreshing items list');
+	if(!Zotero.ItemTreeView._haveCachedFields) yield true;
 	
 	var usiDisabled = Zotero.UnresponsiveScriptIndicator.disable();
 	
@@ -226,7 +237,7 @@ Zotero.ItemTreeView.prototype.refresh = function()
 	}
 	// If treebox isn't ready, skip refresh
 	catch (e) {
-		return;
+		yield false;
 	}
 	
 	for (var i=0; i<visibleFields.length; i++) {
@@ -241,6 +252,9 @@ Zotero.ItemTreeView.prototype.refresh = function()
 	
 	Zotero.DB.beginTransaction();
 	Zotero.Items.cacheFields(cacheFields);
+	Zotero.ItemTreeView._haveCachedFields = true;
+	
+	if(this._waitAfter && Date.now() > this._waitAfter) yield true;
 	
 	var newRows = this._itemGroup.getItems();
 	
@@ -265,9 +279,7 @@ Zotero.ItemTreeView.prototype.refresh = function()
 		}
 		this._searchItemIDs[newRows[i].id] = true;
 		
-		if(i % 100 === 0) {
-			this.showLoadingMessageIfNecessary();
-		}
+		if(i % 100 === 0 && this._waitAfter && Date.now() > this._waitAfter) yield true;
 	}
 	
 	// Add parents of matches if not matches themselves
@@ -293,6 +305,8 @@ Zotero.ItemTreeView.prototype.refresh = function()
 	if (usiDisabled) {
 		Zotero.UnresponsiveScriptIndicator.enable();
 	}
+	
+	yield false;
 }
 
 
@@ -1017,14 +1031,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	
 	var includeTrashed = this._itemGroup.isTrash();
 	
-	var rowsSorted = 0, me = this;
+	var me = this;
 	function rowSort(a, b) {
-		if(rowsSorted === 1000) {
-			me.showLoadingMessageIfNecessary();
-			rowsSorted = 0;
-		}
-		rowsSorted++;
-		
 		var cmp, fieldA, fieldB;
 		
 		var aItemID = a.id;
