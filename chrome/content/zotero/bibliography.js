@@ -113,6 +113,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		if(document.getElementById("storeReferences")) {
 			if(_io.storeReferences || _io.storeReferences === undefined) {
 				document.getElementById("storeReferences").checked = true;
+				if(_io.requireStoreReferences) document.getElementById("storeReferences").disabled = true;
 			}
 		}
 		

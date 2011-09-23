@@ -522,18 +522,22 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 		this._session = this._createNewSession(data);
 		this._session.setData(data);
 		if(dontRunSetDocPrefs) {
-			callback();
+			callback(false);
 			return;
 		}
 		
-		this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType, function() {
+		this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType, function(status) {
+			if(status === false) {
+				throw new Zotero.Integration.UserCancelledException();
+			}
+			
 			// save doc prefs in doc
 			me._doc.setDocumentData(me._session.data.serializeXML());
 			
 			if(haveFields) {
 				me._session.reload = true;
 			}
-			callback();
+			callback(true);
 		});
 	} else {
 		var data = new Zotero.Integration.DocumentData(dataString);
@@ -581,7 +585,7 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			this._doc.setDocumentData(this._session.data.serializeXML());
 			this._session.reload = true;
 		}
-		callback();
+		callback(true);
 	}
 }
 
@@ -716,60 +720,75 @@ Zotero.Integration.Document.prototype.removeCodes = function() {
  */
 Zotero.Integration.Document.prototype.setDocPrefs = function() {
 	var me = this;
-	this._getSession(false, true, function() {
-		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
-		fieldGetter.get();
-		
-		me._session.setDocPrefs(me._app.primaryFieldType, me._app.secondaryFieldType, function(oldData) {
-			if(oldData) {
-				me._doc.setDocumentData(me._session.data.serializeXML());
-				
-				fieldGetter.get(function(fields) {
-					if(fields && fields.length) {
-						// if there are fields, we will have to convert some things; get a list of what we need to deal with
-						var convertBibliographies = oldData === true || oldData.prefs.fieldType != me._session.data.prefs.fieldType;
-						var convertItems = convertBibliographies || oldData.prefs.noteType != me._session.data.prefs.noteType;
-						var fieldsToConvert = new Array();
-						var fieldNoteTypes = new Array();
-						for(var i=0, n=fields.length; i<n; i++) {
-							var field = fields[i],
-								fieldCode = field.getCode(),
-								[type, content] = fieldGetter.getCodeTypeAndContent(fieldCode);
-							
-							if(convertItems && type === INTEGRATION_TYPE_ITEM) {
-								var citation = me._session.unserializeCitation(fieldCode);
-								if(!citation.properties.dontUpdate) {
+	this._getSession(false, true, function(haveSession) {
+		var setDocPrefs = function() {
+			me._session.setDocPrefs(me._app.primaryFieldType, me._app.secondaryFieldType, function(oldData) {
+				if(oldData || oldData === null) {
+					me._doc.setDocumentData(me._session.data.serializeXML());
+					if(oldData === null) return;
+					
+					fieldGetter.get(function(fields) {
+						if(fields && fields.length) {
+							// if there are fields, we will have to convert some things; get a list of what we need to deal with
+							var convertBibliographies = oldData === true || oldData.prefs.fieldType != me._session.data.prefs.fieldType;
+							var convertItems = convertBibliographies || oldData.prefs.noteType != me._session.data.prefs.noteType;
+							var fieldsToConvert = new Array();
+							var fieldNoteTypes = new Array();
+							for(var i=0, n=fields.length; i<n; i++) {
+								var field = fields[i],
+									fieldCode = field.getCode(),
+									[type, content] = fieldGetter.getCodeTypeAndContent(fieldCode);
+								
+								if(convertItems && type === INTEGRATION_TYPE_ITEM) {
+									var citation = me._session.unserializeCitation(fieldCode);
+									if(!citation.properties.dontUpdate) {
+										fieldsToConvert.push(field);
+										fieldNoteTypes.push(me._session.data.prefs.noteType);
+									}
+								} else if(convertBibliographies && type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
 									fieldsToConvert.push(field);
-									fieldNoteTypes.push(me._session.data.prefs.noteType);
+									fieldNoteTypes.push(0);
 								}
-							} else if(convertBibliographies && type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
-								fieldsToConvert.push(field);
-								fieldNoteTypes.push(0);
 							}
-						}
-						
-						if(fieldsToConvert.length) {
-							// pass to conversion function
-							me._doc.convert(new Zotero.Integration.Document.JSEnumerator(fieldsToConvert),
-								me._session.data.prefs.fieldType, fieldNoteTypes, fieldNoteTypes.length);
 							
-							// clear fields so that they will get collected again before refresh
-							me._fields = undefined;
-						}
-						
-						// refresh contents
-						fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
-						fieldGetter.updateSession(function() {
-							fieldGetter.updateDocument(true, true, true, function() {
-								Zotero.Integration.complete(me._doc);
+							if(fieldsToConvert.length) {
+								// pass to conversion function
+								me._doc.convert(new Zotero.Integration.Document.JSEnumerator(fieldsToConvert),
+									me._session.data.prefs.fieldType, fieldNoteTypes, fieldNoteTypes.length);
+								
+								// clear fields so that they will get collected again before refresh
+								me._fields = undefined;
+							}
+							
+							// refresh contents
+							fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+							fieldGetter.updateSession(function() {
+								fieldGetter.updateDocument(true, true, true, function() {
+									Zotero.Integration.complete(me._doc);
+								});
 							});
-						});
-					}
-				});
-			} else {
-				Zotero.Integration.complete(me._doc);
-			}
-		});
+						}
+					});
+				} else {
+					Zotero.Integration.complete(me._doc);
+				}
+			});
+		};
+		
+		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		
+		if(!haveSession) {
+			// This is a brand new document; don't try to get fields
+			setDocPrefs();
+		} else if(me._session.reload) {
+			// Always reload before setDocPrefs so we can permit/deny unchecking storeReferences as
+			// appropriate
+			fieldGetter.updateSession(setDocPrefs);
+		} else {
+			// Can get fields while dialog is open
+			fieldGetter.get();
+			setDocPrefs();
+		}
 	});
 }
 
@@ -1512,6 +1531,7 @@ Zotero.Integration.Session.prototype.displayDialog = function(url, options, io, 
 
 /**
  * Displays a dialog to set document preferences
+ * @return {oldData|null|false} Old document data, if there was any; null, if there wasn't; false if cancelled
  */
 Zotero.Integration.Session.prototype.setDocPrefs = function(primaryFieldType, secondaryFieldType, callback) {
 	var io = new function() {
@@ -1525,12 +1545,13 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(primaryFieldType, se
 		io.primaryFieldType = primaryFieldType;
 		io.secondaryFieldType = secondaryFieldType;
 		io.storeReferences = this.data.prefs.storeReferences;
+		io.requireStoreReferences = !Zotero.Utilities.isEmpty(this.embeddedItems);
 	}
 	
 	var me = this;
 	this.displayDialog('chrome://zotero/content/integration/integrationDocPrefs.xul', '', io, function() {
 		if(!io.style) {
-			Zotero.Integration.activate();
+			callback(false);
 			return;
 		}
 		
@@ -1551,7 +1572,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(primaryFieldType, se
 			me.oldCitationIDs = {};
 		}
 		
-		callback(oldData ? oldData : true);
+		callback(oldData ? oldData : null);
 	});
 }
 
