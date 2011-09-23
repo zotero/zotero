@@ -322,6 +322,8 @@ Zotero.Integration = new function() {
 	 * Show appropriate dialogs for an integration error
 	 */
 	this.handleError = function(e, document) {
+		this.complete(document);
+		
 		if(!(e instanceof Zotero.Integration.UserCancelledException)) {
 			try {
 				var displayError = null;
@@ -361,6 +363,7 @@ Zotero.Integration = new function() {
 				
 				if(displayError) {
 					if(document) {
+						document.activate();
 						document.displayAlert(displayError,
 								Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
 								Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
@@ -375,8 +378,6 @@ Zotero.Integration = new function() {
 				Zotero.logError(e);
 			}
 		}
-		
-		this.complete(document);
 	}
 	
 	/**
@@ -897,7 +898,6 @@ Zotero.Integration.Fields.prototype._retrieveFields = function() {
 					me._callbacks[i](fields);
 				}
 			} catch(e) {
-				Zotero.logError(e);
 				Zotero.Integration.handleError(e, me._doc);
 			}
 		} else if(topic === "fields-progress" && me._progressCallback) {
@@ -1077,7 +1077,7 @@ Zotero.Integration.Fields.prototype._processFields = function(fields, callback, 
 		}
 	}
 	
-	callback();
+	if(callback) callback();
 }
 /**
  * Updates bibliographies and fields within a document
@@ -1100,147 +1100,155 @@ Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, fo
  */
 Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, forceBibliography,
 		ignoreCitationChanges, callback) {
-	// update citations
-	this._session.updateUpdateIndices(forceCitations);
-	var deleteCitations = this._session.updateCitations();
-	this._deleteFields = this._deleteFields.concat([i for(i in deleteCitations)]);
-	
-	if(this._progressCallback) {
-		var nFieldUpdates = [i for(i in this._session.updateIndices)].length;
-		if(this._session.bibliographyHasChanged || forceBibliography) {
-			nFieldUpdates += this._bibliographyFields.length*5;
-		}
-	}
-	
-	var nUpdated=0;
-	for(var i in this._session.updateIndices) {
-		if(this._progressCallback && nUpdated % 10 == 0) {
-			this._progressCallback(75+(nUpdated/nFieldUpdates)*25);
-			yield true;
-		}
+	try {
+		// update citations
+		this._session.updateUpdateIndices(forceCitations);
+		var deleteCitations = this._session.updateCitations();
+		this._deleteFields = this._deleteFields.concat([i for(i in deleteCitations)]);
 		
-		var citation = this._session.citationsByIndex[i];
-		var field = this._fields[i];
-		
-		// If there is no citation, we're deleting it, or we shouldn't update it, ignore it
-		if(!citation || deleteCitations[i]) continue;
-		
-		if(!citation.properties.dontUpdate) {
-			var isRich = false;
-			var formattedCitation = citation.properties.custom
-				? citation.properties.custom : this._session.citationText[i];
-			
-			if(formattedCitation.indexOf("\\") !== -1) {
-				// need to set text as RTF
-				formattedCitation = "{\\rtf "+formattedCitation+"}"
-				isRich = true;
-			}
-			
-			if(citation.properties.formattedCitation !== formattedCitation) {
-				// Check if citation has been manually modified
-				if(!ignoreCitationChanges && citation.properties.plainCitation) {
-					var plainCitation = field.getText();
-					if(plainCitation !== citation.properties.plainCitation) {
-						// Citation manually modified; ask user if they want to save changes
-						field.select();
-						var result = this._doc.displayAlert(
-							Zotero.getString("integration.citationChanged")+"\n\n"+Zotero.getString("integration.citationChanged.description"), 
-							Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
-							Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_YES_NO);
-						if(result) {
-							citation.properties.dontUpdate = true;
-						}
-					}
-				}
-				
-				if(!citation.properties.dontUpdate) {
-					field.setText(formattedCitation, isRich);
-					
-					citation.properties.formattedCitation = formattedCitation;
-					citation.properties.plainCitation = field.getText();
-				}
+		if(this._progressCallback) {
+			var nFieldUpdates = [i for(i in this._session.updateIndices)].length;
+			if(this._session.bibliographyHasChanged || forceBibliography) {
+				nFieldUpdates += this._bibliographyFields.length*5;
 			}
 		}
 		
-		var fieldCode = this._session.getCitationField(citation);
-		if(fieldCode != citation.properties.field) {
-			field.setCode(
-				(this._session.data.prefs.storeReferences ? "ITEM CSL_CITATION" : "ITEM")
-				+" "+fieldCode);
-			
-			if(this._session.data.prefs.fieldType === "ReferenceMark" && isRich
-					&& !citation.properties.dontUpdate) {
-				// For ReferenceMarks with formatting, we need to set the text again, because
-				// setting the field code removes formatting from the mark. I don't like this.
-				field.setText(formattedCitation, isRich);
-			}
-		}
-		nUpdated++;
-	}
-	
-	// update bibliographies
-	if(this._bibliographyFields.length	 				// if bibliography exists
-			&& (this._session.bibliographyHasChanged	// and bibliography changed
-			|| forceBibliography)) {					// or if we should generate regardless of
-														// changes
-		var bibliographyFields = this._bibliographyFields;
-		
-		if(forceBibliography || this._session.bibliographyDataHasChanged) {
-			var bibliographyData = this._session.getBibliographyData();
-			for each(var field in bibliographyFields) {
-				field.setCode("BIBL "+bibliographyData
-					+(this._session.data.prefs.storeReferences ? " CSL_BIBLIOGRAPHY" : ""));
-			}
-		}
-		
-		// get bibliography and format as RTF
-		var bib = this._session.getBibliography();
-		
-		var bibliographyText = "";
-		if(bib) {
-			bibliographyText = bib[0].bibstart+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
-			
-			// if bibliography style not set, set it
-			if(!this._session.data.style.bibliographyStyleHasBeenSet) {
-				var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
-				
-				// set bibliography style
-				this._doc.setBibliographyStyle(bibStyle.firstLineIndent, bibStyle.indent,
-					bibStyle.lineSpacing, bibStyle.entrySpacing, bibStyle.tabStops, bibStyle.tabStops.length);
-				
-				// set bibliographyStyleHasBeenSet parameter to prevent further changes	
-				this._session.data.style.bibliographyStyleHasBeenSet = true;
-				this._doc.setDocumentData(this._session.data.serializeXML());
-			}
-		}
-		
-		// set bibliography text
-		for each(var field in bibliographyFields) {
-			if(this._progressCallback) {
+		var nUpdated=0;
+		for(var i in this._session.updateIndices) {
+			if(this._progressCallback && nUpdated % 10 == 0) {
 				this._progressCallback(75+(nUpdated/nFieldUpdates)*25);
 				yield true;
 			}
 			
-			if(bibliographyText) {
-				field.setText(bibliographyText, true);
-			} else {
-				field.setText("{Bibliography}", false);
+			var citation = this._session.citationsByIndex[i];
+			var field = this._fields[i];
+			
+			// If there is no citation, we're deleting it, or we shouldn't update it, ignore it
+			if(!citation || deleteCitations[i]) continue;
+			
+			if(!citation.properties.dontUpdate) {
+				var isRich = false;
+				var formattedCitation = citation.properties.custom
+					? citation.properties.custom : this._session.citationText[i];
+				
+				if(formattedCitation.indexOf("\\") !== -1) {
+					// need to set text as RTF
+					formattedCitation = "{\\rtf "+formattedCitation+"}"
+					isRich = true;
+				}
+				
+				if(citation.properties.formattedCitation !== formattedCitation) {
+					// Check if citation has been manually modified
+					if(!ignoreCitationChanges && citation.properties.plainCitation) {
+						var plainCitation = field.getText();
+						if(plainCitation !== citation.properties.plainCitation) {
+							// Citation manually modified; ask user if they want to save changes
+							field.select();
+							var result = this._doc.displayAlert(
+								Zotero.getString("integration.citationChanged")+"\n\n"+Zotero.getString("integration.citationChanged.description"), 
+								Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
+								Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_YES_NO);
+							if(result) {
+								citation.properties.dontUpdate = true;
+							}
+						}
+					}
+					
+					if(!citation.properties.dontUpdate) {
+						field.setText(formattedCitation, isRich);
+						
+						citation.properties.formattedCitation = formattedCitation;
+						citation.properties.plainCitation = field.getText();
+					}
+				}
 			}
-			nUpdated += 5;
+			
+			var fieldCode = this._session.getCitationField(citation);
+			if(fieldCode != citation.properties.field) {
+				field.setCode(
+					(this._session.data.prefs.storeReferences ? "ITEM CSL_CITATION" : "ITEM")
+					+" "+fieldCode);
+				
+				if(this._session.data.prefs.fieldType === "ReferenceMark" && isRich
+						&& !citation.properties.dontUpdate) {
+					// For ReferenceMarks with formatting, we need to set the text again, because
+					// setting the field code removes formatting from the mark. I don't like this.
+					field.setText(formattedCitation, isRich);
+				}
+			}
+			nUpdated++;
 		}
+		
+		Zotero.debug("Updating bib");
+		
+		// update bibliographies
+		if(this._bibliographyFields.length	 				// if bibliography exists
+				&& (this._session.bibliographyHasChanged	// and bibliography changed
+				|| forceBibliography)) {					// or if we should generate regardless of
+															// changes
+			var bibliographyFields = this._bibliographyFields;
+			
+			if(forceBibliography || this._session.bibliographyDataHasChanged) {
+				var bibliographyData = this._session.getBibliographyData();
+				for each(var field in bibliographyFields) {
+					field.setCode("BIBL "+bibliographyData
+						+(this._session.data.prefs.storeReferences ? " CSL_BIBLIOGRAPHY" : ""));
+				}
+			}
+			
+			// get bibliography and format as RTF
+			var bib = this._session.getBibliography();
+			
+			var bibliographyText = "";
+			if(bib) {
+				bibliographyText = bib[0].bibstart+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
+				
+				// if bibliography style not set, set it
+				if(!this._session.data.style.bibliographyStyleHasBeenSet) {
+					var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
+					
+					// set bibliography style
+					this._doc.setBibliographyStyle(bibStyle.firstLineIndent, bibStyle.indent,
+						bibStyle.lineSpacing, bibStyle.entrySpacing, bibStyle.tabStops, bibStyle.tabStops.length);
+					
+					// set bibliographyStyleHasBeenSet parameter to prevent further changes	
+					this._session.data.style.bibliographyStyleHasBeenSet = true;
+					this._doc.setDocumentData(this._session.data.serializeXML());
+				}
+			}
+			
+			// set bibliography text
+			for each(var field in bibliographyFields) {
+				if(this._progressCallback) {
+					this._progressCallback(75+(nUpdated/nFieldUpdates)*25);
+					yield true;
+				}
+				
+				if(bibliographyText) {
+					field.setText(bibliographyText, true);
+				} else {
+					field.setText("{Bibliography}", false);
+				}
+				nUpdated += 5;
+			}
+		}
+		
+		// do this operations in reverse in case plug-ins care about order
+		this._deleteFields.sort();
+		for(var i=(this._deleteFields.length-1); i>=0; i--) {
+			this._fields[this._deleteFields[i]].delete();
+		}
+		this._removeCodeFields.sort();
+		for(var i=(this._removeCodeFields.length-1); i>=0; i--) {
+			this._fields[this._removeCodeFields[i]].removeCode();
+		}
+		
+		if(callback) {
+			callback();
+		}
+	} catch(e) {
+		Zotero.Integration.handleError(e, this._doc);
 	}
-	
-	// do this operations in reverse in case plug-ins care about order
-	this._deleteFields.sort();
-	for(var i=(this._deleteFields.length-1); i>=0; i--) {
-		this._fields[this._deleteFields[i]].delete();
-	}
-	this._removeCodeFields.sort();
-	for(var i=(this._removeCodeFields.length-1); i>=0; i--) {
-		this._fields[this._removeCodeFields[i]].removeCode();
-	}
-	
-	callback();
 }
 
 /**
@@ -1334,10 +1342,19 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 	
 	// assign accept function
 	function doAccept() {
-		Zotero.debug("fieldIndex is "+fieldIndex);
 		session.addCitation(fieldIndex, field.getNoteIndex(), io.citation);
 		session.updateIndices[fieldIndex] = true;
-		me.updateDocument(callback);
+		
+		if(!session.bibliographyHasChanged) {
+			for(var i=0, n=citation.citationItems.length; i<n; i++) {
+				if(session.citationsByItemID[citation.citationItems[i].itemID].length == 1) {
+					session.bibliographyHasChanged = true;
+					break;
+				}
+			}
+		}
+		
+		me.updateDocument(false, false, false, callback);
 	}
 	io.accept = function(progressCallback) {
 		me._progressCallback = progressCallback;
@@ -1390,6 +1407,8 @@ Zotero.Integration.Session = function(doc) {
 	// holds items not in document that should be in bibliography
 	this.uncitedItems = {};
 	this.omittedItems = {};
+	this.embeddedItems = {};
+	this.embeddedItemsByURI = {};
 	this.customBibliographyText = {};
 	this.reselectedItems = {};
 	this.resetRequest(doc);
@@ -1399,8 +1418,6 @@ Zotero.Integration.Session = function(doc) {
  * Resets per-request variables in the CitationSet
  */
 Zotero.Integration.Session.prototype.resetRequest = function(doc) {
-	this.embeddedItems = {};
-	this.embeddedItemsByURI = {};
 	this.uriMap = new Zotero.Integration.URIMap(this);
 	
 	this.regenerateAll = false;
