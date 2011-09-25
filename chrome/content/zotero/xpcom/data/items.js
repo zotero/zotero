@@ -49,6 +49,11 @@ Zotero.Items = new function() {
 				['firstCreator', 'numNotes', 'numAttachments']
 			);
 		}
+		
+		// Once primary fields have been cached, get rid of getter for speed purposes
+		delete this.primaryFields;
+		this.primaryFields = _primaryFields;
+		
 		return _primaryFields;
 	});
 	
@@ -685,28 +690,29 @@ Zotero.Items = new function() {
 		if (arguments[0]) {
 			sql += ' AND I.itemID IN (' + Zotero.join(arguments[0], ',') + ')';
 		}
-		var itemsRows = Zotero.DB.query(sql);
-		var itemIDs = [];
-		for each(var row in itemsRows) {
-			var itemID = row.itemID;
-			itemIDs.push(itemID);
+		var itemsRows = Zotero.DB.query(sql),
+			itemIDs = {};
+		for(var i=0, n=itemsRows.length; i<n; i++) {
+			var row = itemsRows[i],
+				itemID = row.itemID;
+			itemIDs[itemID] = true;
 			
 			// Item doesn't exist -- create new object and stuff in array
-			if (!this._objectCache[row.itemID]) {
+			if (!this._objectCache[itemID]) {
 				var item = new Zotero.Item();
 				item.loadFromRow(row, true);
-				this._objectCache[row.itemID] = item;
+				this._objectCache[itemID] = item;
 			}
 			// Existing item -- reload in place
 			else {
-				this._objectCache[row.itemID].loadFromRow(row, true);
+				this._objectCache[itemID].loadFromRow(row, true);
 			}
 		}
 		
 		// If loading all items, remove old items that no longer exist
 		if (!arguments[0]) {
 			for each(var c in this._objectCache) {
-				if (itemIDs.indexOf(c.id) == -1) {
+				if (!itemIDs[c.id]) {
 					this.unload(c.id);
 				}
 			}
