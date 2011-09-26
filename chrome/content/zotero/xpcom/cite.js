@@ -1,107 +1,12 @@
 Zotero.Cite = function(){}
 Zotero.Cite.System = function(){};
 
-/**
- * Mappings for names
- * Note that this is the reverse of the text variable map, since all mappings should be one to one
- * and it makes the code cleaner
- */
-Zotero.Cite.System._zoteroNameMap = {
-	"author":"author",
-	"bookAuthor":"container-author",
-	"composer":"composer",
-	"editor":"editor",
-	"interviewer":"interviewer",
-	"recipient":"recipient",
-	"seriesEditor":"collection-editor",
-	"translator":"translator"
-}
-
-/**
- * Mappings for text variables
- */
-Zotero.Cite.System._zoteroFieldMap = {
-	"title":["title"],
-	"container-title":["publicationTitle",  "reporter", "code"], /* reporter and code should move to SQL mapping tables */
-	"collection-title":["seriesTitle", "series"],
-	"collection-number":["seriesNumber"],
-	"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
-	"publisher-place":["place"],
-	"authority":["court"],
-	"page":["pages"],
-	"volume":["volume"],
-	"issue":["issue"],
-	"number-of-volumes":["numberOfVolumes"],
-	"number-of-pages":["numPages"],
-	"edition":["edition"],
-	"version":["version"],
-	"section":["section"],
-	"genre":["type", "artworkSize"], /* artworkSize should move to SQL mapping tables, or added as a CSL variable */
-	"medium":["medium", "system"],
-	"archive":["archive"],
-	"archive_location":["archiveLocation"],
-	"event":["meetingName", "conferenceName"], /* these should be mapped to the same base field in SQL mapping tables */
-	"event-place":["place"],
-	"abstract":["abstractNote"],
-	"URL":["url"],
-	"DOI":["DOI"],
-	"ISBN":["ISBN"],
-	"call-number":["callNumber"],
-	"note":["extra"],
-	"number":["number"],
-	"references":["history"],
-	"shortTitle":["shortTitle"],
-	"journalAbbreviation":["journalAbbreviation"],
-	"language":["language"]
-}
-
-Zotero.Cite.System._zoteroDateMap = {
-	"issued":"date",
-	"accessed":"accessDate"
-}
-
-Zotero.Cite.System._zoteroTypeMap = {
-	'book':"book",
-	'bookSection':'chapter',
-	'journalArticle':"article-journal",
-	'magazineArticle':"article-magazine",
-	'newspaperArticle':"article-newspaper",
-	'thesis':"thesis",
-	'encyclopediaArticle':"entry-encyclopedia",
-	'dictionaryEntry':"entry-dictionary",
-	'conferencePaper':"paper-conference",
-	'letter':"personal_communication",
-	'manuscript':"manuscript",
-	'interview':"interview",
-	'film':"motion_picture",
-	'artwork':"graphic",
-	'webpage':"webpage",
-	'report':"report",
-	'bill':"bill",
-	'case':"legal_case",
-	'hearing':"bill",				// ??
-	'patent':"patent",
-	'statute':"bill",				// ??
-	'email':"personal_communication",
-	'map':"map",
-	'blogPost':"webpage",
-	'instantMessage':"personal_communication",
-	'forumPost':"webpage",
-	'audioRecording':"song",		// ??
-	'presentation':"speech",
-	'videoRecording':"motion_picture",
-	'tvBroadcast':"broadcast",
-	'radioBroadcast':"broadcast",
-	'podcast':"song",			// ??
-	'computerProgram':"book"		// ??
-};
-
 Zotero.Cite.System._quotedRegexp = /^".+"$/;
 
 // TODO: Clear this cache from time to time
 Zotero.Cite.System._cache = new Object();
 
-Zotero.Cite.System.retrieveItem = function(item){
+Zotero.Cite.System.retrieveItem = function(item) {
 	var zoteroItem, slashIndex;
 	if(item instanceof Zotero.Item) {
 		//if(this._cache[item.id]) return this._cache[item.id];
@@ -127,13 +32,13 @@ Zotero.Cite.System.retrieveItem = function(item){
 	}
 
 	if(!zoteroItem) {
-		throw "Zotero.Cite.getCSLItem called to wrap a non-item";
+		throw "Zotero.Cite.getCSLItem called to wrap a non-item "+item;
 	}
 	
 	// don't return URL or accessed information for journal articles if a
 	// pages field exists
 	var itemType = Zotero.ItemTypes.getName(zoteroItem.itemTypeID);
-	var cslType = Zotero.Cite.System._zoteroTypeMap[itemType];
+	var cslType = CSL_TYPE_MAPPINGS[itemType];
 	if(!cslType) cslType = "article";
 	var ignoreURL = ((zoteroItem.getField("accessDate", true, true) || zoteroItem.getField("url", true, true)) &&
 			["journalArticle", "newspaperArticle", "magazineArticle"].indexOf(itemType) !== -1
@@ -147,8 +52,8 @@ Zotero.Cite.System.retrieveItem = function(item){
 	
 	// get all text variables (there must be a better way)
 	// TODO: does citeproc-js permit short forms?
-	for(var variable in Zotero.Cite.System._zoteroFieldMap) {
-		var fields = Zotero.Cite.System._zoteroFieldMap[variable];
+	for(var variable in CSL_TEXT_MAPPINGS) {
+		var fields = CSL_TEXT_MAPPINGS[variable];
 		if(variable == "URL" && ignoreURL) continue;
 		for each(var field in fields) {
 			var value = zoteroItem.getField(field, false, true).toString();
@@ -173,7 +78,7 @@ Zotero.Cite.System.retrieveItem = function(item){
 			var creatorType = Zotero.CreatorTypes.getName(creator.creatorTypeID);
 		}
 		
-		var creatorType = Zotero.Cite.System._zoteroNameMap[creatorType];
+		var creatorType = CSL_NAMES_MAPPINGS[creatorType];
 		if(!creatorType) continue;
 		
 		var nameObj = {'family':creator.ref.lastName, 'given':creator.ref.firstName};
@@ -186,8 +91,8 @@ Zotero.Cite.System.retrieveItem = function(item){
 	}
 	
 	// get date variables
-	for(var variable in Zotero.Cite.System._zoteroDateMap) {
-		var date = zoteroItem.getField(Zotero.Cite.System._zoteroDateMap[variable], false, true);
+	for(var variable in CSL_DATE_MAPPINGS) {
+		var date = zoteroItem.getField(CSL_DATE_MAPPINGS[variable], false, true);
 		if(date) {
 			var dateObj = Zotero.Date.strToDate(date);
 			// otherwise, use date-parts

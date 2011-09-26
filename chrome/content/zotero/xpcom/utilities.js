@@ -26,6 +26,107 @@
     ***** END LICENSE BLOCK *****
 */
 
+/*
+ * Mappings for names
+ * Note that this is the reverse of the text variable map, since all mappings should be one to one
+ * and it makes the code cleaner
+ */
+const CSL_NAMES_MAPPINGS = {
+	"author":"author",
+	"bookAuthor":"container-author",
+	"composer":"composer",
+	"editor":"editor",
+	"interviewer":"interviewer",
+	"recipient":"recipient",
+	"seriesEditor":"collection-editor",
+	"translator":"translator"
+}
+
+/*
+ * Mappings for text variables
+ */
+const CSL_TEXT_MAPPINGS = {
+	"title":["title"],
+	"container-title":["publicationTitle",  "reporter", "code"], /* reporter and code should move to SQL mapping tables */
+	"collection-title":["seriesTitle", "series"],
+	"collection-number":["seriesNumber"],
+	"publisher":["publisher", "distributor"], /* distributor should move to SQL mapping tables */
+	"publisher-place":["place"],
+	"authority":["court"],
+	"page":["pages"],
+	"volume":["volume"],
+	"issue":["issue"],
+	"number-of-volumes":["numberOfVolumes"],
+	"number-of-pages":["numPages"],
+	"edition":["edition"],
+	"version":["version"],
+	"section":["section"],
+	"genre":["type", "artworkSize"], /* artworkSize should move to SQL mapping tables, or added as a CSL variable */
+	"medium":["medium", "system"],
+	"archive":["archive"],
+	"archive_location":["archiveLocation"],
+	"event":["meetingName", "conferenceName"], /* these should be mapped to the same base field in SQL mapping tables */
+	"event-place":["place"],
+	"abstract":["abstractNote"],
+	"URL":["url"],
+	"DOI":["DOI"],
+	"ISBN":["ISBN"],
+	"call-number":["callNumber"],
+	"note":["extra"],
+	"number":["number"],
+	"references":["history"],
+	"shortTitle":["shortTitle"],
+	"journalAbbreviation":["journalAbbreviation"],
+	"language":["language"]
+}
+
+/*
+ * Mappings for dates
+ */
+const CSL_DATE_MAPPINGS = {
+	"issued":"date",
+	"accessed":"accessDate"
+}
+
+/*
+ * Mappings for types
+ */
+const CSL_TYPE_MAPPINGS = {
+	'book':"book",
+	'bookSection':'chapter',
+	'journalArticle':"article-journal",
+	'magazineArticle':"article-magazine",
+	'newspaperArticle':"article-newspaper",
+	'thesis':"thesis",
+	'encyclopediaArticle':"entry-encyclopedia",
+	'dictionaryEntry':"entry-dictionary",
+	'conferencePaper':"paper-conference",
+	'letter':"personal_communication",
+	'manuscript':"manuscript",
+	'interview':"interview",
+	'film':"motion_picture",
+	'artwork':"graphic",
+	'webpage':"webpage",
+	'report':"report",
+	'bill':"bill",
+	'case':"legal_case",
+	'hearing':"bill",				// ??
+	'patent':"patent",
+	'statute':"bill",				// ??
+	'email':"personal_communication",
+	'map':"map",
+	'blogPost':"webpage",
+	'instantMessage':"personal_communication",
+	'forumPost':"webpage",
+	'audioRecording':"song",		// ??
+	'presentation':"speech",
+	'videoRecording':"motion_picture",
+	'tvBroadcast':"broadcast",
+	'radioBroadcast':"broadcast",
+	'podcast':"song",			// ??
+	'computerProgram':"book"		// ??
+};
+
 /**
  * @class Functions for text manipulation and other miscellaneous purposes
  */
@@ -1085,5 +1186,113 @@ Zotero.Utilities = {
 		}
 		
 		return newItem;
+	},
+	
+	/**
+	 * Converts an item from toArray() format to citeproc-js JSON
+	 */
+	"itemToCSLJSON":function(item) {
+		if(item instanceof Zotero.Item) {
+			item = item.toArray();
+		}
+		
+		var itemType = item.itemType;
+		var cslType = CSL_TYPE_MAPPINGS[itemType];
+		if(!cslType) cslType = "article";
+		
+		var cslItem = {
+			'id':item.itemID,
+			'type':cslType
+		};
+		
+		// Map text fields
+		var itemTypeID = Zotero.ItemTypes.getID(itemType);
+		for(var variable in CSL_TEXT_MAPPINGS) {
+			var fields = CSL_TEXT_MAPPINGS[variable];
+			for(var i=0, n=fields.length; i<n; i++) {
+				var field = fields[i], value = undefined;
+				
+				if(field in item) {
+					value = item[field];
+				} else {
+					var fieldID = Zotero.ItemFields.getID(field),
+						baseMapping
+					if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)
+							&& (baseMapping = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, fieldID))) {
+						value = item[Zotero.ItemTypes.getName(baseMapping)];
+					}
+				}
+				
+				if(!value) continue;
+				
+				var valueLength = value.length;
+				if(valueLength) {
+					// Strip enclosing quotes
+					if(value[0] === '"' && value[valueLength-1] === '"') {
+						value = value.substr(1, valueLength-2);
+					}
+				}
+				
+				cslItem[variable] = value;
+				break;
+			}
+		}
+		
+		// separate name variables
+		var authorID = Zotero.CreatorTypes.getPrimaryIDForType(item.itemType);
+		var creators = item.creators;
+		if(creators) {
+			for(var i=0, n=creators.length; i<n; i++) {
+				var creator = creators[i];
+				
+				if(creator.creatorTypeID == authorID) {
+					var creatorType = "author";
+				} else {
+					var creatorType = CSL_NAMES_MAPPINGS[creator.creatorType]
+				}
+				
+				if(!creatorType) continue;
+				
+				var nameObj = {'family':creator.lastName, 'given':creator.firstName};
+				
+				if(cslItem[creatorType]) {
+					cslItem[creatorType].push(nameObj);
+				} else {
+					cslItem[creatorType] = [nameObj];
+				}
+			}
+		}
+		
+		// get date variables
+		for(var variable in CSL_DATE_MAPPINGS) {
+			var date = item[CSL_DATE_MAPPINGS[variable]];
+			if(date) {
+				var dateObj = Zotero.Date.strToDate(date);
+				// otherwise, use date-parts
+				var dateParts = [];
+				if(dateObj.year) {
+					// add year, month, and day, if they exist
+					dateParts.push(dateObj.year);
+					if(dateObj.month !== undefined) {
+						dateParts.push(dateObj.month+1);
+						if(dateObj.day) {
+							dateParts.push(dateObj.day);
+						}
+					}
+					cslItem[variable] = {"date-parts":[dateParts]};
+					
+					// if no month, use season as month
+					if(dateObj.part && !dateObj.month) {
+						cslItem[variable].season = dateObj.part;
+					}
+				} else {
+					// if no year, pass date literally
+					cslItem[variable] = {"literal":date};
+				}
+			}
+		}
+		
+		//this._cache[item.id] = cslItem;
+		return cslItem;
 	}
 }
