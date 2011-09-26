@@ -861,10 +861,11 @@ Zotero.Utilities = {
 	},
 	
 	/**
-	 * Find valid creator types for a given item type
+	 * Determine whether a given field is valid for a given item type
 	 *
+	 * @param {String} field Field name
 	 * @param {String} type Item type
-	 * @return {String[]} Creator types
+	 * @type Boolean
 	 */
 	"fieldIsValidForType":function(field, type) {
 		return Zotero.ItemFields.isValidForType(field, Zotero.ItemTypes.getID(type));
