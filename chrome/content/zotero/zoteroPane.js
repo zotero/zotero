@@ -3159,7 +3159,7 @@ var ZoteroPane = new function()
 	
 	
 	this.addItemFromURL = function (url, itemType, saveSnapshot, row) {
-		if (url == window.content.document.location.href) {
+		if (window.content && url == window.content.document.location.href) {
 			return this.addItemFromPage(itemType, saveSnapshot, row);
 		}
 		
