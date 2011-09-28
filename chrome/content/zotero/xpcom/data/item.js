@@ -418,12 +418,18 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		return true;
 	}
 	
-	// If there's an existing type
-	if (this._itemTypeID) {
+	var oldItemTypeID = this._itemTypeID;
+	
+	if (oldItemTypeID) {
 		if (loadIn) {
 			throw ('Cannot change type in loadIn mode in Zotero.Item.setType()');
 		}
-		
+	}
+	
+	this._itemTypeID = itemTypeID;
+	
+	// If there's an existing type
+	if (oldItemTypeID) {
 		if (!this._itemDataLoaded && this.id) {
 			this._loadItemData();
 		}
@@ -438,7 +444,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		if (obsoleteFields) {
 			// Move bookTitle to title and clear short title when going from
 			// bookSection to book if there's not also a title
-			if (this._itemTypeID == bookSectionTypeID && itemTypeID == bookTypeID) {
+			if (oldItemTypeID == bookSectionTypeID && itemTypeID == bookTypeID) {
 				var titleFieldID = Zotero.ItemFields.getID('title');
 				var bookTitleFieldID = Zotero.ItemFields.getID('bookTitle');
 				var shortTitleFieldID = Zotero.ItemFields.getID('shortTitle');
@@ -478,7 +484,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		}
 		
 		// Move title to bookTitle and clear shortTitle when going from book to bookSection
-		if (this._itemTypeID == bookTypeID && itemTypeID == bookSectionTypeID) {
+		if (oldItemTypeID == bookTypeID && itemTypeID == bookSectionTypeID) {
 			var titleFieldID = Zotero.ItemFields.getID('title');
 			var bookTitleFieldID = Zotero.ItemFields.getID('bookTitle');
 			var shortTitleFieldID = Zotero.ItemFields.getID('shortTitle');
@@ -498,12 +504,13 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 			}
 		}
 		
-		// And reset custom creator types to the default
+		// Reset custom creator types to the default
 		var creators = this.getCreators();
 		if (creators) {
+			var removeAll = !Zotero.CreatorTypes.itemTypeHasCreators(itemTypeID);
 			for (var i in creators) {
 				// Remove all creators if new item type doesn't have any
-				if (!Zotero.CreatorTypes.itemTypeHasCreators(itemTypeID)) {
+				if (removeAll) {
 					this.removeCreator(i);
 					continue;
 				}
@@ -512,7 +519,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 					// Convert existing primary creator type to new item type's
 					// primary creator type, or contributor (creatorTypeID 2)
 					// if none or not currently primary
-					var oldPrimary = Zotero.CreatorTypes.getPrimaryIDForType(this.getType());
+					var oldPrimary = Zotero.CreatorTypes.getPrimaryIDForType(oldItemTypeID);
 					if (oldPrimary == creators[i].creatorTypeID) {
 						var newPrimary = Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID);
 					}
@@ -523,8 +530,6 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 			}
 		}
 	}
-	
-	this._itemTypeID = itemTypeID;
 	
 	// Initialize this._itemData with type-specific fields
 	this._itemData = {};
