@@ -1910,16 +1910,7 @@ var ZoteroPane = new function()
 	
 	this.getSelectedLibraryID = function () {
 		var itemGroup = this.getItemGroup();
-		var groupID = this.getSelectedGroup(true);
-		if (groupID) {
-			return groupID;
-		}
-		else if (itemGroup.isWithinGroup()) {
-			return itemGroup.ref.libraryID;
-		}
-		else {
-			return null;
-		}
+		return itemGroup && itemGroup.ref && itemGroup.ref.libraryID ? itemGroup.ref.libraryID : null;
 	}
 	
 	
