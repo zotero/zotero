@@ -664,7 +664,7 @@ Zotero.Search.prototype.search = function(asTempTable){
 		}
 		
 		// Search ids in temp table
-		var sql = "SELECT itemID FROM items WHERE itemID IN (" + this._sql + ") "
+		var sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE itemID IN (" + this._sql + ") "
 			+ "AND ("
 			+ "itemID IN (SELECT itemID FROM " + tmpTable + ")";
 		
@@ -676,7 +676,8 @@ Zotero.Search.prototype.search = function(asTempTable){
 		}
 		sql += ")";
 		
-		var ids = Zotero.DB.columnQuery(sql, this._sqlParams);
+		var res = Zotero.DB.valueQuery(sql, this._sqlParams),
+			ids = res ? res.split(",") : [];
 		/*
 		// DEBUG: Should this be here?
 		//
@@ -723,9 +724,10 @@ Zotero.Search.prototype.search = function(asTempTable){
 						var tmpTable = Zotero.Search.idsToTempTable(ids);
 					}
 					
-					var sql = "SELECT itemID FROM items WHERE "
+					var sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE "
 						+ "itemID NOT IN (SELECT itemID FROM " + tmpTable + ")";
-					var scopeIDs = Zotero.DB.columnQuery(sql);
+					var res = Zotero.DB.valueQuery(sql).split(",");
+					var scopeIDs = res ? res.split(",") : [];
 				}
 				// If an ALL search, scan only items from the main search
 				else {
@@ -866,8 +868,9 @@ Zotero.Search.prototype.search = function(asTempTable){
 			}
 		}
 		
-		sql = "SELECT itemID FROM items WHERE itemID IN (" + sql + ")";
-		var parentChildIDs = Zotero.DB.columnQuery(sql);
+		sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE itemID IN (" + sql + ")";
+		var res = Zotero.DB.valueQuery(sql);
+		var parentChildIDs = res ? res.split(",") : [];
 		Zotero.DB.query("DROP TABLE " + tmpTable);
 		Zotero.DB.commitTransaction();
 		
@@ -953,16 +956,26 @@ Zotero.Search.prototype._prepFieldChange = function (field) {
  * Batch insert
  */
 Zotero.Search.idsToTempTable = function (ids) {
+	const N_COMBINED_INSERTS = 128;
+	
 	var tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
 	
 	Zotero.DB.beginTransaction();
 	
 	var sql = "CREATE TEMPORARY TABLE " + tmpTable + " (itemID INT)";
 	Zotero.DB.query(sql);
-	var sql = "INSERT INTO " + tmpTable + " VALUES (?)";
-	var insertStatement = Zotero.DB.getStatement(sql);
-	for (var i=0; i<ids.length; i++) {
-		insertStatement.bindInt32Parameter(0, ids[i]);
+	
+	var sql = "INSERT INTO " + tmpTable + " SELECT ? ";
+	for (var i=0; i<(N_COMBINED_INSERTS-1); i++) {
+		sql += "UNION SELECT ? ";
+	}
+	
+	var insertStatement = Zotero.DB.getStatement(sql),
+		n = ids.length;
+	for (var i=0; i<n; i+=N_COMBINED_INSERTS) {
+		for (var j=0; j<N_COMBINED_INSERTS; j++) {
+			insertStatement.bindInt32Parameter(j, ids[i+j]);
+		}
 		try {
 			insertStatement.execute();
 		}
@@ -970,7 +983,19 @@ Zotero.Search.idsToTempTable = function (ids) {
 			throw (Zotero.DB.getLastErrorString());
 		}
 	}
-	insertStatement.reset();
+	insertStatement.finalize();
+	
+	var nRemainingInserts = (n % N_COMBINED_INSERTS);
+	var remainingInsertStart = n-nRemainingInserts-1;
+	var sql = "INSERT INTO " + tmpTable + " SELECT ? ";
+	for (var i=remainingInsertStart; i<n; i++) {
+		sql += "UNION SELECT ? ";
+	}
+	
+	var insertStatement = Zotero.DB.getStatement(sql);
+	for (var j=remainingInsertStart; j<n; j++) {
+		insertStatement.bindInt32Parameter(j-remainingInsertStart, ids[remainingInsertStart]);
+	}
 	
 	var sql = "CREATE INDEX " + tmpTable + "_itemID ON " + tmpTable + "(itemID)";
 	Zotero.DB.query(sql);
