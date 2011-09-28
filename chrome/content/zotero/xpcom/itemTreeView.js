@@ -1809,6 +1809,7 @@ Zotero.ItemTreeView.prototype.rememberFirstRow = function(firstRow) {
 
 
 Zotero.ItemTreeView.prototype.expandAllRows = function() {
+	this.selection.selectEventsSuppressed = true;
 	this._treebox.beginUpdateBatch();
 	for (var i=0; i<this.rowCount; i++) {
 		if (this.isContainer(i) && !this.isContainerOpen(i)) {
@@ -1817,6 +1818,7 @@ Zotero.ItemTreeView.prototype.expandAllRows = function() {
 	}
 	this._refreshHashMap();
 	this._treebox.endUpdateBatch();
+	this.selection.selectEventsSuppressed = false;
 }
 
 
