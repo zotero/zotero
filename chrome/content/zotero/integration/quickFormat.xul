@@ -69,6 +69,10 @@
 		<richlistbox id="quick-format-reference-list" flex="1"/>
 	</panel>
 	<panel id="citation-properties" type="arrow" orient="vertical" onkeypress="Zotero_QuickFormat.onPanelKeyPress(event)">
+		<vbox flex="1">
+			<description id="citation-properties-title"/>
+			<hbox id="citation-properties-info"/>
+		</vbox>
 		<grid flex="1">
 			<columns>
 				<column/>

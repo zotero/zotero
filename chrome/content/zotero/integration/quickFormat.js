@@ -276,21 +276,11 @@ var Zotero_QuickFormat = new function () {
 	}
 	
 	/**
-	 * Creates an item to be added to the item list
+	 * Builds a string describing an item. We avoid CSL here for speed.
 	 */
-	function _buildListItem(item) {
-		var titleNode = document.createElement("label");
-		titleNode.setAttribute("class", "quick-format-title");
-		titleNode.setAttribute("flex", "1");
-		titleNode.setAttribute("crop", "end");
-		titleNode.setAttribute("value", item.getDisplayTitle());
-		
-		var infoNode = document.createElement("hbox");
-		infoNode.setAttribute("class", "quick-format-info");
-		
+	function _buildItemDescription(item, infoHbox) {
 		var nodes = [];
 		
-		// do some basic bibliography formatting; not using CSL here for speed
 		var author, authorDate = "";
 		if(item.firstCreator) author = authorDate = item.firstCreator;
 		var date = item.getField("date", true);
@@ -338,23 +328,35 @@ var Zotero_QuickFormat = new function () {
 				var label = document.createElement("label");
 				label.setAttribute("value", str);
 				label.setAttribute("crop", "end");
-				infoNode.appendChild(label);
-				infoNode.appendChild(node);
+				infoHbox.appendChild(label);
+				infoHbox.appendChild(node);
 				str = "";
 			} else {
 				str += node;
 			}
 		}
 		
-		if(nodes.length && (!str.length || str[str.length-1] !== ".")) str += "."
+		if(nodes.length && (!str.length || str[str.length-1] !== ".")) str += ".";
+		var label = document.createElement("label");
+		label.setAttribute("value", str);
+		label.setAttribute("crop", "end");
+		label.setAttribute("flex", "1");
+		infoHbox.appendChild(label);
+	}
+	
+	/**
+	 * Creates an item to be added to the item list
+	 */
+	function _buildListItem(item) {
+		var titleNode = document.createElement("label");
+		titleNode.setAttribute("class", "quick-format-title");
+		titleNode.setAttribute("flex", "1");
+		titleNode.setAttribute("crop", "end");
+		titleNode.setAttribute("value", item.getDisplayTitle());
 		
-		if(str) {
-			var label = document.createElement("label");
-			label.setAttribute("value", str);
-			label.setAttribute("crop", "end");
-			label.setAttribute("flex", "1");
-			infoNode.appendChild(label);
-		}
+		var infoNode = document.createElement("hbox");
+		infoNode.setAttribute("class", "quick-format-info");
+		_buildItemDescription(item, infoNode);
 		
 		// add to rich list item
 		var rll = document.createElement("richlistitem");
@@ -597,6 +599,7 @@ var Zotero_QuickFormat = new function () {
 		var suppressAuthor = document.getElementById("suppress-author");
 		var locatorLabel = document.getElementById("locator-label");
 		var locator = document.getElementById("locator");
+		var info = document.getElementById("citation-properties-info");
 		
 		prefix.value = target.citationItem["prefix"] ? target.citationItem["prefix"] : "";
 		suffix.value = target.citationItem["suffix"] ? target.citationItem["suffix"] : "";
@@ -612,6 +615,11 @@ var Zotero_QuickFormat = new function () {
 		}
 		locator.value = target.citationItem["locator"] ? target.citationItem["locator"] : "";
 		suppressAuthor.checked = !!target.citationItem["suppress-author"];
+		
+		var item = Zotero.Items.get(target.citationItem.id);
+		document.getElementById("citation-properties-title").textContent = item.getDisplayTitle();
+		while(info.hasChildNodes()) info.removeChild(info.firstChild);
+		_buildItemDescription(item, info);
 		
 		target.setAttribute("selected", "true");
 		panel.openPopup(target, "after_start",

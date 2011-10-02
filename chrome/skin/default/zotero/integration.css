@@ -205,3 +205,23 @@ richlistitem[selected="true"] {
 #citation-properties #suppress-author {
 	-moz-user-focus: normal;
 }
+
+#citation-properties-title {
+	padding-left: 0;
+	padding-right: 0;
+	margin-left: 0;
+	margin-right: 0;
+	max-width: 300px;
+	font-weight: bold;
+}
+
+#citation-properties-info > label {
+	padding-left: 0;
+	padding-right: 0;
+	margin-left: 0;
+	margin-right: 0;
+}
+
+#citation-properties-info {
+	margin-bottom: 3px;
+}
