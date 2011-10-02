@@ -2142,6 +2142,7 @@ var ZoteroPane = new function()
 			'duplicateItem',
 			'deleteItem',
 			'deleteFromLibrary',
+			'restoreToLibrary',
 			'mergeItems',
 			'sep3',
 			'exportItems',
@@ -2175,7 +2176,13 @@ var ZoteroPane = new function()
 		
 		var itemGroup = this.getItemGroup();
 		
-		show.push(m.deleteFromLibrary, m.sep3, m.exportItems, m.createBib, m.loadReport);
+		if(itemGroup.isTrash()) {
+			show.push(m.restoreToLibrary);
+		} else {
+			show.push(m.deleteFromLibrary);
+		}
+		
+		show.push(m.sep3, m.exportItems, m.createBib, m.loadReport);
 		
 		if (this.itemsView.selection.count > 0) {
 			// Multiple items selected
@@ -2252,10 +2259,7 @@ var ZoteroPane = new function()
 						}
 					}
 					if (hasImportedAttachment) {
-						var d = [m.deleteFromLibrary, m.createParent, m.renameAttachments];
-						for each(var val in d) {
-							disable.push(val);
-						}
+						disable.push(m.deleteFromLibrary, m.createParent, m.renameAttachments);
 					}
 				}
 			}
@@ -2274,7 +2278,7 @@ var ZoteroPane = new function()
 				
 				// Disable actions in the trash
 				if (itemGroup.isTrash()) {
-					disable.push(m.deleteItem, m.deleteFromLibrary);
+					disable.push(m.deleteItem);
 				}
 				
 				if (item.isRegularItem()) {
@@ -2351,6 +2355,7 @@ var ZoteroPane = new function()
 						case 'exportItems':
 						case 'createBib':
 						case 'loadReport':
+						case 'restoreToLibrary':
 							continue;
 					}
 				}
