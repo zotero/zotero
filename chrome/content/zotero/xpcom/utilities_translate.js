@@ -417,17 +417,19 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
  * @private
  */
 Zotero.Utilities.Translate.prototype._convertURL = function(url) {
-	const hostPortRe = /^(?:(?:http|https|ftp):)\/\/([^\/]+)/i;
+	const hostPortRe = /^((?:http|https|ftp):)\/\/([^\/]+)/i;
 	// resolve local URL
 	var resolved = "";
 	
 	// convert proxy to proper if applicable
-	if(hostPortRe.test(url) && this._translate.translator && this._translate.translator[0]
-			&& this._translate.translator[0].properToProxy) {
-		resolved = this._translate.translator[0].properToProxy(url);
-	}
-	
-	if(Zotero.isFx) {
+	if(hostPortRe.test(url)) {
+		if(this._translate.translator && this._translate.translator[0]
+				&& this._translate.translator[0].properToProxy) {
+			resolved = this._translate.translator[0].properToProxy(url);
+		} else {
+			resolved = url;
+		}
+	} else if(Zotero.isFx) {
 		resolved = Components.classes["@mozilla.org/network/io-service;1"].
 			getService(Components.interfaces.nsIIOService).
 			newURI(this._translate.location, "", null).resolve(url);
@@ -439,18 +441,18 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
         resolved = a.href;
 	}
 	
-	var m = hostPortRe.exec(resolved);
+	/*var m = hostPortRe.exec(resolved);
 	if(!m) {
 		throw new Error("Invalid URL supplied for HTTP request: "+url);
 	} else if(this._translate.document && this._translate.document.location) {
 		var loc = this._translate.document.location;
-		if(this._translate._currentState !== "translate" && doc
-				&& (m[0].toLowerCase() !== loc.protocol.toLowerCase()
-				|| m[1].toLowerCase() !== loc.host.toLowerCase())) {
-			throw new Error("Attempt to access "+m[0]+"//"+m[1]+" from "+loc.protocol+"//"+loc.host
+		if(this._translate._currentState !== "translate" && loc
+				&& (m[1].toLowerCase() !== loc.protocol.toLowerCase()
+				|| m[2].toLowerCase() !== loc.host.toLowerCase())) {
+			throw new Error("Attempt to access "+m[1]+"//"+m[2]+" from "+loc.protocol+"//"+loc.host
 				+" blocked: Cross-site requests are only allowed during translation");
 		}
-	}
+	}*/
 	
 	return resolved;
 }
