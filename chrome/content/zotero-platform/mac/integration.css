@@ -13,13 +13,12 @@ body[multiline="true"] {
 }
 
 #quick-format-search {
-	height: 22px;
 	background: white;
 	-moz-appearance: searchfield;
 }
 
 #quick-format-search[multiline="true"] {
-	padding: 2px 2px 0 18px;
+	padding: 1px 2px 0 18px;
 	border: 1px solid rgba(0, 0, 0, 0.5);
 	border-radius: 10px;
 	-moz-appearance: none;
@@ -29,10 +28,6 @@ body[multiline="true"] {
 	height: 22px !important;
 }
 
-#quick-format-search[multiline="true"] > #quick-format-iframe {
-	margin: -1px 0 0 0;
-}
-
 #quick-format-entry {
 	background: -moz-linear-gradient(-90deg, rgb(243,123,119) 0, rgb(180,47,38) 50%, rgb(156,36,27) 50%);
 	-moz-border-radius:15px;
@@ -40,7 +35,11 @@ body[multiline="true"] {
 }
 
 #zotero-icon {
-	margin: 0 0 0 -13px;
+	margin: -1px 0 0 -13px;
+}
+
+#quick-format-search[multiline="true"] #zotero-icon {
+	margin: 0 0 1px -13px;
 }
 
 #citation-properties menulist {
