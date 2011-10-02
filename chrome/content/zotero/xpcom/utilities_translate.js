@@ -227,8 +227,20 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	}
 	
 	var translate = this._translate;
+	var loc = translate.document.location;
 	translate.incrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
-	var hiddenBrowser = Zotero.HTTP.processDocuments(urls, processor, function() {
+	var hiddenBrowser = Zotero.HTTP.processDocuments(urls, function(doc) {
+		if(!processor) return;
+		
+		if(Zotero.isFx && (loc.protocol !== doc.protocol || loc.host !== doc.host)) {
+			// Cross-site; need to serialize and unserialize
+			processor(Zotero.Translate.SandboxManager.Fx5DOMWrapper(doc));
+		} else {
+			// Not cross-site; no need to wrap
+			processor(doc);
+		}
+	},
+	function() {
 		if(done) done();
 		var handler = function() {
 			try {
@@ -404,19 +416,16 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
  * @private
  */
 Zotero.Utilities.Translate.prototype._convertURL = function(url) {
-	const protocolRe = /^(?:(?:http|https|ftp):)/i;
-	
-	// convert proxy to proper if applicable
-	if(protocolRe.test(url)) {
-		if(this._translate.translator && this._translate.translator[0]
-				&& this._translate.translator[0].properToProxy) {
-			url = this._translate.translator[0].properToProxy(url);
-		}
-		return url;
-	}
-	
+	const hostPortRe = /^(?:(?:http|https|ftp):)\/\/([^\/]+)/i;
 	// resolve local URL
 	var resolved = "";
+	
+	// convert proxy to proper if applicable
+	if(hostPortRe.test(url) && this._translate.translator && this._translate.translator[0]
+			&& this._translate.translator[0].properToProxy) {
+		resolved = this._translate.translator[0].properToProxy(url);
+	}
+	
 	if(Zotero.isFx) {
 		resolved = Components.classes["@mozilla.org/network/io-service;1"].
 			getService(Components.interfaces.nsIIOService).
@@ -429,8 +438,17 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
         resolved = a.href;
 	}
 	
-	if(!protocolRe.test(resolved)) {
+	var m = hostPortRe.exec(resolved);
+	if(!m) {
 		throw new Error("Invalid URL supplied for HTTP request: "+url);
+	} else {
+		var loc = this._translate.document.location;
+		if(this._translate._currentState !== "translate" && doc
+				&& (m[0].toLowerCase() !== loc.protocol.toLowerCase()
+				|| m[1].toLowerCase() !== loc.host.toLowerCase())) {
+			throw new Error("Attempt to access "+m[0]+"//"+m[1]+" from "+loc.protocol+"//"+loc.host
+				+" blocked: Cross-site requests are only allowed during translation");
+		}
 	}
 	
 	return resolved;
