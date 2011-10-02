@@ -1062,6 +1062,19 @@ var ZoteroPane = new function()
 		itemgroup.setSearch('');
 		itemgroup.setTags(getTagSelection());
 		
+		// Enable or disable toolbar icons as necessary
+		const disableIfNoEdit = ["cmd_zotero_newCollection", "zotero-tb-add",
+			"cmd_zotero_newItemFromCurrentPage", "zotero-tb-lookup", "cmd_zotero_newStandaloneNote",
+			"zotero-tb-note-add", "zotero-tb-attachment-add"];
+		for(var i=0; i<disableIfNoEdit.length; i++) {
+			var el = document.getElementById(disableIfNoEdit[i]);
+			if(itemgroup.editable) {
+				if(el.hasAttribute("disabled")) el.removeAttribute("disabled");
+			} else {
+				el.setAttribute("disabled", "true");
+			}
+		}
+		
 		try {
 			Zotero.UnresponsiveScriptIndicator.disable();
 			this.itemsView = new Zotero.ItemTreeView(itemgroup);

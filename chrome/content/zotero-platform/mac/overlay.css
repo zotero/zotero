@@ -36,7 +36,7 @@
 }
 
 .zotero-tb-button[open="true"],
-.zotero-tb-button:hover:active {
+.zotero-tb-button:not([disabled="true"]):hover:active {
   background: url("chrome://zotero/skin/mac/menubutton-end-pressed.png") right center no-repeat;
 }
 
@@ -69,7 +69,7 @@
 }
 
 .zotero-tb-button[open="true"] > .toolbarbutton-icon,
-.zotero-tb-button:hover:active > .toolbarbutton-icon {
+.zotero-tb-button:not([disabled="true"]):hover:active > .toolbarbutton-icon {
   background: url("chrome://zotero/skin/mac/menubutton-start-pressed.png") left center no-repeat;
 }
 
