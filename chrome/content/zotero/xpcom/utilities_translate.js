@@ -442,7 +442,7 @@ Zotero.Utilities.Translate.prototype._convertURL = function(url) {
 	var m = hostPortRe.exec(resolved);
 	if(!m) {
 		throw new Error("Invalid URL supplied for HTTP request: "+url);
-	} else {
+	} else if(this._translate.document && this._translate.document.location) {
 		var loc = this._translate.document.location;
 		if(this._translate._currentState !== "translate" && doc
 				&& (m[0].toLowerCase() !== loc.protocol.toLowerCase()
