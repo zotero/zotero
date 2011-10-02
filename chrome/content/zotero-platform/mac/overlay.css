@@ -27,6 +27,14 @@
   background: url("chrome://zotero/skin/mac/menubutton-end.png") right center no-repeat;
 }
 
+:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) .zotero-tb-button, .zotero-tb-button[disabled="true"]{
+	opacity: 0.7;
+}
+
+.zotero-tb-button:-moz-window-inactive {
+	opacity: 0.7;
+}
+
 .zotero-tb-button[open="true"],
 .zotero-tb-button:hover:active {
   background: url("chrome://zotero/skin/mac/menubutton-end-pressed.png") right center no-repeat;
