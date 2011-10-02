@@ -445,6 +445,7 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		// If trash or saved search, just re-run search
 		if (itemGroup.isTrash() || itemGroup.isSearch())
 		{
+			Zotero.ItemGroupCache.clear();
 			this.refresh();
 			madeChanges = true;
 			sort = true;
