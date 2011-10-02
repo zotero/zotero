@@ -476,7 +476,7 @@ Zotero.Server.Connector.Ping.prototype = {
 	"supportedDataTypes":["application/json", "text/plain"],
 	
 	/**
-	 * Finishes up translation when item selection is complete
+	 * Sends nothing
 	 * @param {String} data POST data or GET query string
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
@@ -499,7 +499,7 @@ Zotero.Server.Connector.IEHack.prototype = {
 	"supportedMethods":["GET"],
 	
 	/**
-	 * Finishes up translation when item selection is complete
+	 * Sends a fixed webpage
 	 * @param {String} data POST data or GET query string
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
