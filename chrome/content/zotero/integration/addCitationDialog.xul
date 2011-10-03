@@ -33,6 +33,7 @@
 
 <dialog
 	id="zotero-add-citation-dialog"
+	windowtype="zotero:item-selector"
 	orient="vertical"
 	title="&zotero.integration.addEditCitation.title;"
 	width="600" height="450"

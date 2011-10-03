@@ -1714,6 +1714,9 @@ const ZOTERO_CONFIG = {
 	
 	
 	this.updateQuickSearchBox = function (document) {
+		var searchBox = document.getElementById('zotero-tb-search');
+		if(!searchBox) return;
+		
 		var mode = Zotero.Prefs.get("search.quicksearch-mode");
 		var prefix = 'zotero-tb-search-mode-';
 		var prefixLen = prefix.length;
@@ -1737,13 +1740,13 @@ const ZOTERO_CONFIG = {
 			mode = 'fields';
 		}
 		
-		var searchBox = document.getElementById('zotero-tb-search')
 		var hbox = document.getAnonymousNodes(searchBox)[0];
 		var input = hbox.getElementsByAttribute('class', 'textbox-input')[0];
 		
 		// Already initialized, so just update selection
 		var button = hbox.getElementsByAttribute('id', 'zotero-tb-search-menu-button');
 		if (button.length) {
+			Zotero.debug("already initialized search menu");
 			button = button[0];
 			var menupopup = button.firstChild;
 			for each(var menuitem in menupopup.childNodes) {
@@ -1784,12 +1787,13 @@ const ZOTERO_CONFIG = {
 			}
 		}
 		
-		menupopup.setAttribute(
-			'oncommand',
-			'var mode = event.target.id.substr(22); '
-				+ 'Zotero.Prefs.set("search.quicksearch-mode", mode);'
-				+ 'if (document.getElementById("zotero-tb-search").value == "") { event.stopPropagation(); }'
-		);
+		menupopup.addEventListener("command", function(event) {
+			var mode = event.target.id.substr(22);
+			Zotero.Prefs.set("search.quicksearch-mode", mode);
+			if (document.getElementById("zotero-tb-search").value == "") {
+				event.stopPropagation();
+			}
+		}, false);
 		
 		button.appendChild(menupopup);
 		hbox.insertBefore(button, input);
@@ -1802,14 +1806,12 @@ const ZOTERO_CONFIG = {
 		}
 		
 		// If Alt-Up/Down, show popup
-		searchBox.setAttribute(
-			'onkeypress',
-			searchBox.getAttribute('onkeypress') + "\n"
-			+ "if (event.altKey && (event.keyCode == event.DOM_VK_UP || event.keyCode == event.DOM_VK_DOWN)) {"
-				+ "document.getElementById('zotero-tb-search-menu-button').open = true;"
-				+ "event.stopPropagation();"
-			+ "}"
-		);
+		searchBox.addEventListener("keypress", function(event) {
+			if (event.altKey && (event.keyCode == event.DOM_VK_UP || event.keyCode == event.DOM_VK_DOWN)) {
+				document.getElementById('zotero-tb-search-menu-button').open = true;
+				event.stopPropagation();
+			}
+		}, false);
 	}
 	
 	
@@ -2052,6 +2054,13 @@ Zotero.Prefs = new function(){
 					var win = enumerator.getNext();
 					if (!win.ZoteroPane) continue;
 					Zotero.updateQuickSearchBox(win.ZoteroPane.document);
+				}
+				
+				var enumerator = wm.getEnumerator("zotero:item-selector");
+				while (enumerator.hasMoreElements()) {
+					var win = enumerator.getNext();
+					if (!win.Zotero) continue;
+					Zotero.updateQuickSearchBox(win.document);
 				}
 				break;
 		}
