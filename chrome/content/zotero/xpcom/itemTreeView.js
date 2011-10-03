@@ -1548,6 +1548,7 @@ Zotero.ItemTreeView.prototype.deleteSelection = function (force)
 			ids.push(this._getItemAtRow(j).id);
 	}
 	
+	Zotero.ItemGroupCache.clear();
 	var itemGroup = this._itemGroup;
 	
 	if (itemGroup.isBucket()) {
