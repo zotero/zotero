@@ -416,7 +416,7 @@ Zotero.IPC.Pipe = new function() {
 		
 		// Keep trying to write to pipe until we succeed, in case pipe is not yet open
 		Zotero.debug("IPC: Closing pipe "+file.path);
-		Zotero.IPC.safePipeWrite(file, "Zotero shutdown\n", true);
+		Zotero.IPC.safePipeWrite(file, "Zotero shutdown\n");
 		
 		// Delete pipe
 		file.remove(false);
