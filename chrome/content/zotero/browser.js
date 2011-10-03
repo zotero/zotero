@@ -421,6 +421,10 @@ var Zotero_Browser = new function() {
 			Zotero_Browser.statusImage.src = captureIcon;
 			Zotero_Browser.statusImage.tooltipText = tab.getCaptureTooltip();
 			Zotero_Browser.statusImage.hidden = false;
+			
+			Zotero_Browser.statusImage.addEventListener("load", function() {
+				document.getElementById("zotero-status-image-guidance").show();
+			}, false);
 		} else {
 			Zotero_Browser.statusImage.hidden = true;
 		}

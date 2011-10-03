@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2011 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+		  xmlns:xbl="http://www.mozilla.org/xbl"
+		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<binding id="guidancepanel">
+		<implementation>
+			<method name="show">
+				<body>
+				<![CDATA[
+					var about = this.getAttribute("about");
+					var pref = "firstRunGuidanceShown."+about;
+					
+					var shown = false;
+					try {
+						shown = Zotero.Prefs.get(pref);
+					} catch(e) {};
+					if(shown) return;
+					
+					var panel = document.getAnonymousNodes(this)[0],
+						forEl = this.getAttribute("for");
+					panel.lastChild.textContent = Zotero.getString("firstRunGuidance."+about);
+					panel.openPopup(document.getElementById(forEl),
+						"after_start", 0, 0, false, true, null);
+					
+					Zotero.Prefs.set(pref, true);
+				]]>
+				</body>
+			</method>
+		</implementation>
+		
+		<content>
+			<xul:panel orient="horizontal" style="max-width: 400px" type="arrow" align="top">
+				<xul:image src="chrome://zotero/skin/zotero-new-z-48px.png" style="margin-right: 10px; width: 48px; height: 48px;"/>
+				<xul:description flex="1"></xul:description>
+			</xul:panel>
+		</content>
+	</binding>
+</bindings>
