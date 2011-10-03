@@ -2112,9 +2112,7 @@ Zotero.ItemGroup.prototype.getChildTags = function() {
 
 Zotero.ItemGroup.prototype.setSearch = function(searchText)
 {
-	if(searchText !== this.searchText) {
-		Zotero.ItemGroupCache.clear();
-	}
+	Zotero.ItemGroupCache.clear();
 	this.searchText = searchText;
 }
 
