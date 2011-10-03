@@ -1867,6 +1867,11 @@
 					if(field === 'creator') {
 						// Reset creator mode settings here so that flex attribute gets reset
 						this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
+						
+						if(Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
+							var creatorTypeLabels = document.getAnonymousNodes(this)[0].getElementsByClassName("creator-type-label");
+							document.getElementById("zotero-author-guidance").show(creatorTypeLabels[creatorTypeLabels.length-1]);
+						}
 					}
 					
 					if (this._tabDirection) {
@@ -2412,7 +2417,8 @@
 									oncommand="document.getBindingParent(this).textTransform(document.popupNode, 'sentence')"/>
 							</menupopup>
 						</menu>
-					</menupopup>
+					</menupopup>					
+					<zoteroguidancepanel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
 				</popupset>
 				<grid flex="1">
 					<columns>

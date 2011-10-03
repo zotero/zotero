@@ -31,22 +31,26 @@
 	<binding id="guidancepanel">
 		<implementation>
 			<method name="show">
+				<parameter name="forEl"/>
 				<body>
 				<![CDATA[
-					var about = this.getAttribute("about");
-					var pref = "firstRunGuidanceShown."+about;
-					
-					var shown = false;
+					var about = this.getAttribute("about"),
+						pref = "firstRunGuidanceShown."+about,
+						shown = false;
 					try {
 						shown = Zotero.Prefs.get(pref);
 					} catch(e) {};
 					if(shown) return;
 					
-					var panel = document.getAnonymousNodes(this)[0],
-						forEl = this.getAttribute("for");
+					var x = this.getAttribute("x"),
+						y = this.getAttribute("y"),
+						position = this.getAttribute("position"),
+						panel = document.getAnonymousNodes(this)[0];
+					
+					if(!forEl) forEl = document.getElementById(this.getAttribute("for"));
 					panel.lastChild.textContent = Zotero.getString("firstRunGuidance."+about);
-					panel.openPopup(document.getElementById(forEl),
-						"after_start", 0, 0, false, true, null);
+					panel.openPopup(forEl, position ? position : "after_start",
+						x ? parseInt(x, 10) : 0, y ? parseInt(y, 10) : 0, false, false, null);
 					
 					Zotero.Prefs.set(pref, true);
 				]]>
