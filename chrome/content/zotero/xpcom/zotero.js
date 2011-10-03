@@ -38,13 +38,6 @@ const ZOTERO_CONFIG = {
 	VERSION: "3.0b3.SVN"
 };
 
-// Load AddonManager for Firefox 4
-var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
-                         getService(Components.interfaces.nsIXULAppInfo);
-if(appInfo.platformVersion[0] >= 2) {
-	Components.utils.import("resource://gre/modules/AddonManager.jsm");
-}
-
 /*
  * Core functions
  */
@@ -1260,6 +1253,7 @@ if(appInfo.platformVersion[0] >= 2) {
 		}
 		
 		if(this.isFx4) {
+			Components.utils.import("resource://gre/modules/AddonManager.jsm");
 			AddonManager.getAllAddons(onHaveInstalledAddons);
 		} else {
 			var em = Components.classes["@mozilla.org/extensions/manager;1"].
