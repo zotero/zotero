@@ -628,10 +628,8 @@ Zotero.Schema = new function(){
 				var dbCache = Zotero.DB.columnQuery(sql);
 				// If there's anything in the cache, see what we actually need to extract
 				if (dbCache) {
-					var nsIJSON = Components.classes["@mozilla.org/dom/json;1"]
-						.createInstance(Components.interfaces.nsIJSON);
 					for each(var json in dbCache) {
-						var metadata = nsIJSON.decode(json);
+						var metadata = JSON.parse(json);
 						var id = metadata.translatorID;
 						if (index[id] && index[id].lastUpdated == metadata.lastUpdated) {
 							index[id].extract = false;
@@ -2546,8 +2544,7 @@ Zotero.Schema = new function(){
 							var fileName = Zotero.Translators.getFileNameFromLabel(row.label);
 							file.append(fileName);
 							var metadata = { translatorID: row.translatorID, translatorType: parseInt(row.translatorType), label: row.label, creator: row.creator, target: row.target ? row.target : null, minVersion: row.minVersion, maxVersion: row.maxVersion, priority: parseInt(row.priority), inRepository: row.inRepository == 1 ? true : false, lastUpdated: row.lastUpdated };
-							var nsIJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
-							var metadataJSON = nsIJSON.encode(metadata);
+							var metadataJSON = JSON.stringify(metadata, null, "\t");
 							var str = metadataJSON + "\n\n" + (row.detectCode ? row.detectCode + "\n\n" : "") + row.code;
 							Zotero.debug("Extracting translator '" + row.label + "' from database");
 							Zotero.File.putContents(file, str);
