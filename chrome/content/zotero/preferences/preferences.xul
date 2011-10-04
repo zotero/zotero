@@ -807,8 +807,8 @@ To add a new preference:
 			<caption label="&zotero.preferences.miscellaneous;"/>
 			<hbox align="center">
 				<button id="openAboutConfig" label="&zotero.preferences.openAboutConfig;" oncommand="openInViewer('about:config', '')"/>
-				<button id="openCSLEdit" label="&zotero.preferences.openCSLEdit;" oncommand="openInViewer('chrome://zotero/content/tools/cslEdit.xul', '')"/>
-				<button id="openCSLPreview" label="&zotero.preferences.openCSLPreview;" oncommand="openInViewer('chrome://zotero/content/tools/cslPreview.xul', '')"/>
+				<button id="openCSLEdit" label="&zotero.preferences.openCSLEdit;" oncommand="openInViewer('chrome://zotero/content/tools/csledit.xul', '')"/>
+				<button id="openCSLPreview" label="&zotero.preferences.openCSLPreview;" oncommand="openInViewer('chrome://zotero/content/tools/cslpreview.xul', '')"/>
 			</hbox>
 		</groupbox>
 		
