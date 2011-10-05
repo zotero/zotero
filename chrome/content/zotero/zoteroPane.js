@@ -1922,16 +1922,12 @@ var ZoteroPane = new function()
 	
 	
 	this.getSelectedLibraryID = function () {
-		var itemGroup = this.getItemGroup();
-		return itemGroup && itemGroup.ref && itemGroup.ref.libraryID ? itemGroup.ref.libraryID : null;
+		return this.collectionsView.getSelectedLibraryID();
 	}
 	
 	
 	function getSelectedCollection(asID) {
-		if (this.collectionsView) {
-			return this.collectionsView.getSelectedCollection(asID);
-		}
-		return false;
+		return this.collectionsView ? this.collectionsView.getSelectedCollection(asID) : false;
 	}
 	
 	
