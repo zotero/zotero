@@ -213,16 +213,16 @@ const ZOTERO_CONFIG = {
 		
 		this.mainThread = Components.classes["@mozilla.org/thread-manager;1"].getService().mainThread;
 		
-		var appInfo =
-			Components.classes["@mozilla.org/xre/app-info;1"].
-				getService(Components.interfaces.nsIXULAppInfo);
+		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
+				getService(Components.interfaces.nsIXULAppInfo),
+			platformVersion = appInfo.platformVersion;
 		this.isFx = true;
-		this.isFx3 = appInfo.platformVersion.indexOf('1.9') === 0;
-		this.isFx35 = appInfo.platformVersion.indexOf('1.9.1') === 0;
+		this.isFx3 = platformVersion.indexOf('1.9') === 0;
+		this.isFx35 = platformVersion.indexOf('1.9.1') === 0;
 		this.isFx31 = this.isFx35;
-		this.isFx36 = appInfo.platformVersion.indexOf('1.9.2') === 0;
-		this.isFx4 = versionComparator.compare(appInfo.platformVersion[0], "2.0a1") >= 0;
-		this.isFx5 = versionComparator.compare(appInfo.platformVersion[0], "5.0a1") >= 0;
+		this.isFx36 = platformVersion.indexOf('1.9.2') === 0;
+		this.isFx4 = versionComparator.compare(platformVersion, "2.0a1") >= 0;
+		this.isFx5 = versionComparator.compare(platformVersion, "5.0a1") >= 0;
 		
 		this.isStandalone = appInfo.ID == ZOTERO_CONFIG['GUID'];
 		if(this.isStandalone) {
