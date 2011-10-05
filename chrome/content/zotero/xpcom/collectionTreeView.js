@@ -692,6 +692,7 @@ Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
 	
 	// Select local library
 	if (!libraryID) {
+		this._treebox.ensureRowIsVisible(0);
 		this.selection.select(0);
 		return true;
 	}
@@ -700,6 +701,7 @@ Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
 	if (this.selection.currentIndex != -1) {
 		var itemGroup = this._getItemAtRow(this.selection.currentIndex);
 		if (itemGroup.isLibrary(true) && itemGroup.ref.libraryID == libraryID) {
+			this._treebox.ensureRowIsVisible(this.selection.currentIndex);
 			return true;
 		}
 	}
@@ -716,6 +718,7 @@ Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
 		}
 		
 		if (itemGroup.ref && itemGroup.ref.libraryID == libraryID) {
+			this._treebox.ensureRowIsVisible(i);
 			this.selection.select(i);
 			return true;
 		}
