@@ -59,19 +59,19 @@ Zotero.CollectionTreeView.prototype.setTree = function(treebox)
 	this._treebox = treebox;
 	
 	// Add a keypress listener for expand/collapse
-	var expandAllRows = this.expandAllRows;
-	var collapseAllRows = this.collapseAllRows;
 	var tree = this._treebox.treeBody.parentNode;
+	var self = this;
+	
 	tree.addEventListener('keypress', function(event) {
 		var key = String.fromCharCode(event.which);
 		
 		if (key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
-			expandAllRows(treebox);
+			self.expandLibrary(self);
 			return;
 		}
 		else if (key == '-' && !(event.shiftKey || event.ctrlKey ||
 				event.altKey || event.metaKey)) {
-			collapseAllRows(treebox);
+			self.collapseLibrary(self);
 			return;
 		}
 	}, false);
@@ -584,15 +584,68 @@ Zotero.CollectionTreeView.prototype.__defineGetter__('editable', function () {
 });
 
 
-Zotero.CollectionTreeView.prototype.expandAllRows = function(treebox) {
-	var view = treebox.view;
-	treebox.beginUpdateBatch();
-	for (var i=0; i<view.rowCount; i++) {
-		if (view.isContainer(i) && !view.isContainerOpen(i)) {
-			view.toggleOpenState(i);
+Zotero.CollectionTreeView.prototype.expandLibrary = function(self) {
+	var selectedLibraryID = self.getSelectedLibraryID();
+	if (selectedLibraryID === false) {
+		return;
+	}
+	
+	self._treebox.beginUpdateBatch();
+	
+	var selection = self.saveSelection();
+	
+	var found = false;
+	for (var i=0; i<self.rowCount; i++) {
+		if (self._getItemAtRow(i).ref.libraryID != selectedLibraryID) {
+			// Once we've moved beyond the original library, stop looking
+			if (found) {
+				break;
+			}
+			continue;
+		}
+		
+		found = true;
+		
+		if (self.isContainer(i) && !self.isContainerOpen(i)) {
+			self.toggleOpenState(i);
 		}
 	}
-	treebox.endUpdateBatch();
+	
+	self._treebox.endUpdateBatch();
+	
+	self.rememberSelection(selection);
+}
+
+
+Zotero.CollectionTreeView.prototype.collapseLibrary = function(self) {
+	var selectedLibraryID = self.getSelectedLibraryID();
+	if (selectedLibraryID === false) {
+		return;
+	}
+	
+	self._treebox.beginUpdateBatch();
+	
+	var found = false;
+	for (var i=self.rowCount-1; i>=0; i--) {
+		if (self._getItemAtRow(i).ref.libraryID !== selectedLibraryID) {
+			// Once we've moved beyond the original library, stop looking
+			if (found) {
+				break;
+			}
+			continue;
+		}
+		
+		found = true;
+		
+		if (self.isContainer(i) && self.isContainerOpen(i)) {
+			self.toggleOpenState(i);
+		}
+	}
+	
+	self._treebox.endUpdateBatch();
+	
+	// Select the collapsed library
+	self.selectLibrary(selectedLibraryID);
 }
 
 
@@ -622,17 +675,6 @@ Zotero.CollectionTreeView.prototype.expandToCollection = function(collectionID) 
 }
 
 
-Zotero.CollectionTreeView.prototype.collapseAllRows = function(treebox) {
-	var view = treebox.view;
-	treebox.beginUpdateBatch();
-	for (var i=0; i<view.rowCount; i++) {
-		if (view.isContainer(i) && view.isContainerOpen(i)) {
-			view.toggleOpenState(i);
-		}
-	}
-	treebox.endUpdateBatch();
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -654,10 +696,12 @@ Zotero.CollectionTreeView.prototype.selectLibrary = function (libraryID) {
 		return true;
 	}
 	
-	// Already selected
-	var itemGroup = this._getItemAtRow(this.selection.currentIndex);
-	if (itemGroup.isLibrary(true) && itemGroup.ref.libraryID == libraryID) {
-		return true;
+	// Check if library is already selected
+	if (this.selection.currentIndex != -1) {
+		var itemGroup = this._getItemAtRow(this.selection.currentIndex);
+		if (itemGroup.isLibrary(true) && itemGroup.ref.libraryID == libraryID) {
+			return true;
+		}
 	}
 	
 	// Find library
@@ -985,6 +1029,16 @@ Zotero.CollectionTreeView.prototype.rememberSelection = function(selection)
 	if (selection && this._rowMap[selection] != 'undefined') {
 		this.selection.select(this._rowMap[selection]);
 	}
+}
+
+
+/**
+ * Returns libraryID, null for personal library, or false if not a library
+ */
+Zotero.CollectionTreeView.prototype.getSelectedLibraryID = function() {
+	var itemGroup = this._getItemAtRow(this.selection.currentIndex);
+	return itemGroup && itemGroup.ref && itemGroup.ref.libraryID !== undefined
+			&& (itemGroup.ref.libraryID ? itemGroup.ref.libraryID : null);
 }
 
 
