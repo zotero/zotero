@@ -1521,6 +1521,13 @@ const ZOTERO_CONFIG = {
 			timer.cancel();
 			_runningTimers.splice(_runningTimers.indexOf(timer), 1);
 			
+			// requeue nsITimerCallbacks that came up during generator pumping but couldn't execute
+			for(var i in _waitTimers) {
+				_waitTimers[i].initWithCallback(_waitTimerCallbacks[i], 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+			}
+			_waitTimers = [];
+			_waitTimerCallbacks = [];
+			
 			if(err) throw err;
 		}}
 		timer.initWithCallback(timerCallback, ms ? ms : 0, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
