@@ -110,7 +110,7 @@ Zotero.Notifier = new function(){
 			throw ('Invalid type ' + type + ' in Notifier.trigger()');
 		}
 		
-		switch (type) {
+		switch (event) {
 			case 'modify':
 			case 'delete':
 				if (!extraData) {
