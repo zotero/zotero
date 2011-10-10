@@ -110,14 +110,6 @@ Zotero.Notifier = new function(){
 			throw ('Invalid type ' + type + ' in Notifier.trigger()');
 		}
 		
-		switch (event) {
-			case 'modify':
-			case 'delete':
-				if (!extraData) {
-					throw ("Extra data must be supplied with Notifier type '" + type + "'");
-				}
-		}
-		
 		ids = Zotero.flattenArguments(ids);
 		
 		var queue = _inTransaction && !force;
