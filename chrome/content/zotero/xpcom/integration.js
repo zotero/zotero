@@ -1200,8 +1200,6 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 			nUpdated++;
 		}
 		
-		Zotero.debug("Updating bib");
-		
 		// update bibliographies
 		if(this._bibliographyFields.length	 				// if bibliography exists
 				&& (this._session.bibliographyHasChanged	// and bibliography changed
