@@ -131,7 +131,7 @@ var CSL = {
     ],
     PARALLEL_MATCH_VARS: ["container-title"],
     PARALLEL_TYPES: ["legal_case",  "legislation", "bill"],
-    PARALLEL_COLLAPSING_MID_VARSET: ["volume", "container-title", "section"],
+    PARALLEL_COLLAPSING_MID_VARSET: ["volume", "issue", "container-title", "section", "collection-number"],
     LOOSE: 0,
     STRICT: 1,
     TOLERANT: 2,
@@ -582,7 +582,7 @@ CSL_E4X.prototype.addInstitutionNodes = function(myxml) {
     default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
     for each (node in myxml..names) {
         if ("xml" == typeof node && node.elements("name").length() > 0) {
-            if (!node.institution.toXMLString()) {
+            if (node.institution.length() === 0) {
                 institution_long = <institution
                     institution-parts="long"
                     substitute-use-first="1"
@@ -590,7 +590,7 @@ CSL_E4X.prototype.addInstitutionNodes = function(myxml) {
                 institution_part = <institution-part name="long"/>;
                 node.name += institution_long;
                 node.institution.@delimiter = node.name.@delimiter.toString();
-                if (node.name.@and.toXMLString()) {
+                if (node.name.@and.toString()) {
                     node.institution.@and = "text";
                 }
                 node.institution[0].appendChild(institution_part);
@@ -1922,7 +1922,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.223";
+    this.processor_version = "1.0.226";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2223,8 +2223,10 @@ CSL.Engine.prototype.retrieveItems = function (ids) {
     }
     return ret;
 };
+CSL.ITERATION = 0;
 CSL.Engine.prototype.retrieveItem = function (id) {
     var Item, m, pos, len, mm;
+    CSL.ITERATION += 1;
     if (this.registry.generate.genIDs["" + id]) {
         Item = this.registry.generate.items["" + id];
     } else {
@@ -2235,11 +2237,11 @@ CSL.Engine.prototype.retrieveItem = function (id) {
         Item.number = undefined;
     }
     if (this.opt.development_extensions.field_hack && Item.note) {
-        m = CSL.NOTE_FIELDS_REGEXP.exec(Item.note);
+        m = Item.note.match(CSL.NOTE_FIELDS_REGEXP);
         if (m) {
             for (pos = 0, len = m.length; pos < len; pos += 1) {
-                mm = CSL.NOTE_FIELD_REGEXP.exec(m[pos]);
-                if (!Item[mm[1]]) {
+                mm = m[pos].match(CSL.NOTE_FIELD_REGEXP);
+                if (!Item[mm[1]] || true) {
                     if (CSL.DATE_VARIABLES.indexOf(mm[1]) > -1) {
                         Item[mm[1]] = {raw:mm[2]};
                     } else {
@@ -2272,14 +2274,14 @@ CSL.Engine.prototype.setOpt = function (token, name, value) {
     }
 };
 CSL.Engine.prototype.fixOpt = function (token, name, localname) {
-    if ("citation" === token.name || "bibliography" === token.name) {
+    if (["citation", "bibliography", "citation_sort", "bibliography_sort"].indexOf(token.name) > -1) {
         if (! this[token.name].opt[name] && "undefined" !== typeof this.opt[name]) {
             this[token.name].opt[name] = this.opt[name];
         }
     }
     if ("name" === token.name || "names" === token.name) {
-        if ("undefined" === typeof token.strings[localname] && "undefined" !== typeof this[this.build.area].opt[name]) {
-            token.strings[localname] = this[this.build.area].opt[name];
+        if ("undefined" === typeof token.strings[localname] && "undefined" !== typeof this[this.tmp.area].opt[name]) {
+            token.strings[localname] = this[this.tmp.area].opt[name];
         }
     }
 };
@@ -2437,6 +2439,11 @@ CSL.Engine.prototype.setAutoVietnameseNamesOption = function (arg) {
         this.opt["auto-vietnamese-names"] = false;
     }
 };
+CSL.Engine.prototype.setAbbreviations = function (arg) {
+	if (this.sys.setAbbreviations) {
+		this.sys.setAbbreviations(arg);
+	}
+}
 CSL.Engine.Opt = function () {
     this.has_disambiguate = false;
     this.mode = "html";
@@ -3431,7 +3438,7 @@ CSL.getAmbiguousCite = function (Item, disambig) {
 CSL.getSpliceDelimiter = function (last_collapsed, pos) {
     if (last_collapsed && ! this.tmp.have_collapsed && "string" === typeof this.citation.opt["after-collapse-delimiter"]) {
         this.tmp.splice_delimiter = this.citation.opt["after-collapse-delimiter"];
-    } else if (this.tmp.have_collapsed && this.opt.xclass === "in-text") {
+    } else if (this.tmp.have_collapsed && this.opt.xclass === "in-text" && this.opt.update_mode !== CSL.NUMERIC) {
         this.tmp.splice_delimiter = ", ";
     } else if (this.tmp.cite_locales[pos - 1]) {
         var alt_affixes = this.tmp.cite_affixes[this.tmp.cite_locales[pos - 1]];
@@ -5200,55 +5207,66 @@ CSL.NameOutput.prototype._truncateNameList = function (container, variable, inde
     }
     return lst;
 };
-CSL.NameOutput.prototype._splitInstitution = function (value, v, i) {
+CSL.NameOutput.prototype._splitInstitution = function (value, v, i, force_test) {
     var ret = {};
-    var splitInstitution = value.literal.replace(/\s*\|\s*/, "|", "g");
-    if (this.institution.strings.form === "short") {
-        this.state.transform.loadAbbreviation("institution", splitInstitution);
-        if (this.state.transform.abbrevs.institution[splitInstitution]) {
-            splitInstitution = this.state.transform.abbrevs.institution[splitInstitution];
+    var splitInstitution = value.literal.replace(/\s*\|\s*/g, "|");
+    splitInstitution = splitInstitution.split("|");
+    if (this.institution.strings.form === "short" && !force_test) {
+        for (var j = splitInstitution.length; j > 1; j += -1) {
+            var str = splitInstitution.slice(0, j).join("|");
+            this.state.transform.loadAbbreviation("institution", str);
+            if (this.state.transform.abbrevs.institution[str]) {
+                str = this.state.transform.abbrevs.institution[str];
+                splitInstitution = [str].concat(splitInstitution.slice(j));
+            }
         }
     }
-    splitInstitution = splitInstitution.split(/\s*\|\s*/);
     splitInstitution.reverse();
-    ret["long"] = this._trimInstitution(splitInstitution, v, i);
-    var str = value.literal;
-    if (str) {
-        if (str.slice(0,1) === '"' && str.slice(-1) === '"') {
-            str = str.slice(1,-1);
-        }
-        ret["short"] = this._trimInstitution(splitInstitution, v, i);
+    ret["long"] = this._trimInstitution(splitInstitution, v, i, force_test);
+    if (splitInstitution.length) {
+        ret["short"] = ret["long"].slice();
     } else {
         ret["short"] = false;
     }
     return ret;
 };
-CSL.NameOutput.prototype._trimInstitution = function (subunits, v, i) {
+CSL.NameOutput.prototype._trimInstitution = function (subunits, v, i, force_test) {
     var s;
     var use_first = this.institution.strings["use-first"];
+    if (force_test) {
+        use_first = 1;
+    }
     if (!use_first) {
         if (this.persons[v][i].length === 0) {
             use_first = this.institution.strings["substitute-use-first"];
+        }
+        if (!use_first) {
+            use_first = 0;
+        }
+    }
+    var append_last = this.institution.strings["use-last"];
+    if (!append_last) {
+        if (!use_first) {
+            append_last = subunits.length;
+        } else {
+            append_last = 0;
         }
     }
     if (use_first > subunits.length - 1) {
         use_first = subunits.length - 1;
     }
-    var append_last = this.institution.strings["use-last"];
-    if (!append_last) {
+    if (force_test) {
         append_last = 0;
     }
-    if ("number" === typeof use_first || append_last) {
-        s = subunits.slice();
-        subunits = subunits.slice(0, use_first);
-        s = s.slice(use_first);
+    s = subunits.slice();
+    subunits = subunits.slice(0, use_first);
+    s = s.slice(use_first);
+    if (append_last) {
+        if (append_last > s.length) {
+            append_last = s.length;
+        }
         if (append_last) {
-            if (append_last > s.length) {
-                append_last = s.length;
-            }
-            if (append_last) {
-                subunits = subunits.concat(s.slice((s.length - append_last)));
-            }
+            subunits = subunits.concat(s.slice((s.length - append_last)));
         }
     }
     return subunits;
@@ -5741,7 +5759,18 @@ CSL.NameOutput.prototype.renderInstitutionNames = function () {
 CSL.NameOutput.prototype._renderOneInstitutionPart = function (blobs, style) {
     for (var i = 0, ilen = blobs.length; i < ilen; i += 1) {
         if (blobs[i]) {
-            this.state.output.append(blobs[i], style, true);
+            var str = blobs[i];
+            if (this.state.tmp.strip_periods) {
+                str = str.replace(/\./g, "");
+            } else {
+                for (var j = 0, jlen = style.decorations.length; j < jlen; j += 1) {
+                    if ("@strip-periods" === style.decorations[j][0] && "true" === style.decorations[j][1]) {
+                        str = str.replace(/\./g, "");
+                        break;
+                    }
+                }
+            }
+            this.state.output.append(str, style, true);
             blobs[i] = this.state.output.pop();
         }
     }
@@ -5864,6 +5893,7 @@ CSL.NameOutput.prototype._normalizeNameInput = function (value) {
     var name = {
         literal:value.literal,
         family:value.family,
+        isInstitution:value.isInstitution,
         given:value.given,
         suffix:value.suffix,
         "comma-suffix":value["comma-suffix"],
@@ -6908,6 +6938,24 @@ CSL.Node.text = {
     }
 };
 CSL.Attributes = {};
+CSL.Attributes["@institution-use-first"] = function (state, arg) {
+    var func = function (state, Item) {
+        var result = false;
+        var nameset = Item[arg];
+        if (nameset && nameset.length) {
+            var name = nameset[0];
+            name = state.nameOutput._normalizeNameInput(name);
+            if (name.literal) {
+                name = state.nameOutput._splitInstitution(name, false, false, true);
+                if (name["long"].length) {
+                    result = true;
+                }
+            }
+        }
+		return result;
+    };
+    this.tests.push(func);
+}
 CSL.Attributes["@context"] = function (state, arg) {
     var func = function (state, Item) {
 		var area = state.tmp.area.slice(0, arg.length);
@@ -8078,6 +8126,7 @@ CSL.Parallel = function (state) {
     this.sets = new CSL.Stack([]);
     this.try_cite = true;
     this.use_parallels = true;
+    this.midVars = ["section", "volume", "container-title", "collection-number", "issue", "page", "page-first", "locator"];
 };
 CSL.Parallel.prototype.isMid = function (variable) {
     return (this.midVars.indexOf(variable) > -1);
@@ -8091,7 +8140,6 @@ CSL.Parallel.prototype.StartCitation = function (sortedItems, out) {
         this.in_series = true;
         this.delim_counter = 0;
         this.delim_pointers = [];
-        this.midVars = ["section", "volume", "container-title", "issue", "page", "page-first", "locator"];
         if (out) {
             this.out = out;
         } else {
@@ -8111,15 +8159,17 @@ CSL.Parallel.prototype.StartCite = function (Item, item, prevItemID) {
             position = item.position;
         }
         this.try_cite = true;
-        len = CSL.PARALLEL_MATCH_VARS.length;
-        for (pos = 0; pos < len; pos += 1) {
-            x = CSL.PARALLEL_MATCH_VARS[pos];
-            if (!Item[x] || CSL.PARALLEL_TYPES.indexOf(Item.type) === -1) {
-                this.try_cite = true;
-                if (this.in_series) {
-                    this.in_series = false;
-                }
+        var has_required_var = false;
+        for (var i = 0, ilen = CSL.PARALLEL_MATCH_VARS.length; i < ilen; i += 1) {
+            if (Item[CSL.PARALLEL_MATCH_VARS[i]]) {
+                has_required_var = true;
                 break;
+            }
+        }
+        if (!has_required_var || CSL.PARALLEL_TYPES.indexOf(Item.type) === -1) {
+            this.try_cite = true;
+            if (this.in_series) {
+                this.in_series = false;
             }
         }
         this.cite = {};
@@ -8220,13 +8270,15 @@ CSL.Parallel.prototype.CloseVariable = function (hello) {
         if (this.sets.value().length > 0) {
             var prev = this.sets.value()[(this.sets.value().length - 1)];
             if (this.target === "front" && this.variable === "issued") {
-                if (this.data.value && this.data.value.match(/^::[[0-9]{4}$/)) {
+                if (this.data.value && this.master_was_neutral_cite) {
                     this.target = "mid";
                 }
             }
             if (this.target === "front") {
-                if (!(!prev[this.variable] && !this.data.value) && (!prev[this.variable] || this.data.value !== prev[this.variable].value)) {
-                    this.in_series = false;
+                if ((prev[this.variable] || this.data.value) && (!prev[this.variable] || this.data.value !== prev[this.variable].value)) {
+                    if ("issued" !== this.variable) {
+                        this.in_series = false;
+                    }
                 }
             } else if (this.target === "mid") {
                 if (CSL.PARALLEL_COLLAPSING_MID_VARSET.indexOf(this.variable) > -1) {
@@ -8261,6 +8313,9 @@ CSL.Parallel.prototype.CloseCite = function () {
         if (this.cite.front_collapse.volume === false) {
             use_journal_info = true;
         }
+        if (this.cite.front_collapse["collection-number"] === false) {
+            use_journal_info = true;
+        }
         if (this.cite.front_collapse.section === false) {
             use_journal_info = true;
         }
@@ -8278,6 +8333,10 @@ CSL.Parallel.prototype.CloseCite = function () {
             if (container_title_pos > -1) {
                 this.cite.front = this.cite.front.slice(0,container_title_pos).concat(this.cite.front.slice(container_title_pos + 1));
             }
+            collection_number_pos = this.cite.front.indexOf("collection-number");
+            if (collection_number_pos > -1) {
+                this.cite.front = this.cite.front.slice(0,collection_number_pos).concat(this.cite.front.slice(collection_number_pos + 1));
+            }
         }
         if (!this.in_series && !this.force_collapse) {
             this.ComposeSet(true);
@@ -8294,18 +8353,19 @@ CSL.Parallel.prototype.CloseCite = function () {
             if (!has_issued) {
                 this.cite.back_forceme.push("issued");
             }
-            if (this.master_was_neutral_cite) {
-                this.cite.back_forceme.push("names:mid");
-            }
         } else {
             var idx = this.cite.front.indexOf("issued");
             if (idx === -1 || this.master_was_neutral_cite) {
                 this.cite.back_forceme = this.sets.value().slice(-1)[0].back_forceme;
             }
-            if (idx !== -1) {
-                if (this.cite.issued.value.match(/^::[0-9]{4}$/)) {
+            if (idx > -1) {
+                var prev = this.sets.value()[this.sets.value().length - 1];
+                if (!prev.issued) {
                     this.cite.front = this.cite.front.slice(0, idx).concat(this.cite.front.slice(idx + 1));
                 }
+            }
+            if (this.master_was_neutral_cite && this.cite.mid.indexOf("names:mid") > -1) {
+                this.cite.front.push("names:mid");
             }
         }
         this.sets.value().push(this.cite);
@@ -9398,7 +9458,8 @@ CSL.Util.PageRangeMangler.getFunction = function (state) {
         return stringify(lst);
     };
     var sniff = function (str, func, minchars, isyear) {
-        var ret = str;
+        var ret;
+		str = "" + str;
         var lst;
 		if (!str.match(/[^\-\u20130-9 ,&]/)) {
 			lst = expand(str, "-");
@@ -10134,6 +10195,14 @@ CSL.Registry = function (state) {
 CSL.Registry.prototype.init = function (myitems, uncited_flag) {
     var i, ilen;
     this.oldseq = {};
+	var tmphash = {};
+	for (i = myitems.length - 1; i > -1; i += -1) {
+		if (tmphash[myitems[i]]) {
+			myitems = myitems.slice(0, i).concat(myitems.slice(i + 1));
+		} else {
+			tmphash[myitems[i]] = true;
+		}
+	}
     if (uncited_flag && this.mylist && this.mylist.length) {
         this.uncited = myitems;
         for (i = 0, ilen = myitems.length; i < ilen; i += 1) {
