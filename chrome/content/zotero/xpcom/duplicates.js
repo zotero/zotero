@@ -101,6 +101,8 @@ Zotero.Duplicates.prototype._getObjectFromID = function (id) {
 
 
 Zotero.Duplicates.prototype._findDuplicates = function () {
+	var start = Date.now();
+	
 	var self = this;
 	
 	this._sets = new Zotero.DisjointSetForest;
@@ -109,6 +111,10 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	function normalizeString(str) {
 		// Make sure we have a string and not an integer
 		str = str + "";
+		
+		if (str === "") {
+			return "";
+		}
 		
 		str = Zotero.Utilities.removeDiacritics(str)
 			.replace(/[!-/:-@[-`{-~]/g, ' ') // Convert (ASCII) punctuation to spaces
@@ -120,14 +126,23 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	
 	/**
 	 * @param {Function} compareRows  Comparison function, if not exact match
+	 * @param {Boolean} reprocessMatches  Compare every row against every other,
+	 *                                    without skipping ahead to the last match.
+	 *                                    This is necessary for multi-dimensional
+	 *                                    matches such as title + at least one creator.
+	 *                                    Without it, only one set of matches would be
+	 *                                    found per matching title, since items with
+	 *                                    different creators wouldn't match the first
+	 *                                    set and the next start row would be a
+	 *                                    different title.
 	 */
-	function processRows(compareRows) {
+	function processRows(compareRows, reprocessMatches) {
 		if (!rows) {
 			return;
 		}
 		
 		for (var i = 0, len = rows.length; i < len; i++) {
-			var j = i + 1, lastMatch = false, added = false;
+			var j = i + 1, lastMatch = false;
 			while (j < len) {
 				if (compareRows) {
 					var match = compareRows(rows[i], rows[j]);
@@ -143,7 +158,7 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 				}
 				// If no comparison function, check for exact match
 				else {
-					if (rows[i].value != rows[j].value) {
+					if (rows[i].value !== rows[j].value) {
 						break;
 					}
 				}
@@ -156,30 +171,11 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 				lastMatch = j;
 				j++;
 			}
-			if (lastMatch) {
+			if (!reprocessMatches && lastMatch) {
 				i = lastMatch;
 			}
 		}
 	}
-	
-	// Match on normalized title
-	var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
-				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND fieldID BETWEEN 110 AND 113 "
-				+ "AND itemTypeID NOT IN (1, 14) "
-				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
-				+ "ORDER BY value COLLATE locale";
-	var rows = Zotero.DB.query(sql, [this._libraryID]);
-	processRows(function (a, b) {
-		a = normalizeString(a.value);
-		b = normalizeString(b.value);
-		
-		// If we stripped one of the strings completely, we can't compare them
-		if (a.length == 0 || b.length == 0) {
-			return -1;
-		}
-		return a == b ? 1 : -1;
-	});
 	
 	// Match books by ISBN
 	var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
@@ -206,6 +202,81 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	var rows = Zotero.DB.query(sql, [this._libraryID, Zotero.ItemFields.getID('DOI')]);
 	processRows();
 	
+	var creatorRowsCache = {};
+	
+	// Match on normalized title
+	var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
+				+ "JOIN itemDataValues USING (valueID) "
+				+ "WHERE libraryID=? AND fieldID BETWEEN 110 AND 113 "
+				+ "AND itemTypeID NOT IN (1, 14) "
+				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
+				+ "ORDER BY value COLLATE locale";
+	var rows = Zotero.DB.query(sql, [this._libraryID]);
+	processRows(function (a, b) {
+		var aTitle = normalizeString(a.value);
+		var bTitle = normalizeString(b.value);
+		
+		// If we stripped one of the strings completely, we can't compare them
+		if (aTitle.length == 0 || bTitle.length == 0) {
+			return -1;
+		}
+		
+		if (aTitle !== bTitle) {
+			return -1;
+		}
+		
+		// Check for at least one match on last name + first initial of first name
+		if (creatorRowsCache[a.itemID] != undefined) {
+			aCreatorRows = creatorRowsCache[a.itemID];
+		}
+		else {
+			var sql = "SELECT lastName, firstName, fieldMode FROM itemCreators "
+						+ "JOIN creators USING (creatorID) "
+						+ "JOIN creatorData USING (creatorDataID) "
+						+ "WHERE itemID=? ORDER BY orderIndex LIMIT 10";
+			var aCreatorRows = Zotero.DB.query(sql, a.itemID);
+			creatorRowsCache[a.itemID] = aCreatorRows;
+		}
+		
+		// Check for at least one match on last name + first initial of first name
+		if (creatorRowsCache[b.itemID] != undefined) {
+			bCreatorRows = creatorRowsCache[b.itemID];
+		}
+		else {
+			var sql = "SELECT lastName, firstName, fieldMode FROM itemCreators "
+						+ "JOIN creators USING (creatorID) "
+						+ "JOIN creatorData USING (creatorDataID) "
+						+ "WHERE itemID=? ORDER BY orderIndex LIMIT 10";
+			var bCreatorRows = Zotero.DB.query(sql, b.itemID);
+			creatorRowsCache[b.itemID] = bCreatorRows;
+		}
+		
+		// Match if no creators
+		if (!aCreatorRows && !bCreatorRows.length) {
+			return 1;
+		}
+		
+		if (!aCreatorRows || !bCreatorRows) {
+			return 0;
+		}
+		
+		for each(var aCreatorRow in aCreatorRows) {
+			var aLastName = normalizeString(aCreatorRow.lastName);
+			var aFirstInitial = aCreatorRow.fieldMode == 0 ? normalizeString(aCreatorRow.firstName.substr(1)) : false;
+			
+			for each(var bCreatorRow in bCreatorRows) {
+				var bLastName = normalizeString(bCreatorRow.lastName);
+				var bFirstInitial = bCreatorRow.fieldMode == 0 ? normalizeString(bCreatorRow.firstName.substr(1)) : false;
+				
+				if (aLastName === bLastName && aFirstInitial === bFirstInitial) {
+					return 1;
+				}
+			}
+		}
+		
+		return 0;
+	}, true);
+	
 	// Match on exact fields
 	/*var fields = [''];
 	for each(var field in fields) {
@@ -217,6 +288,8 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 		var rows = Zotero.DB.query(sql, [this._libraryID, Zotero.ItemFields.getID(field)]);
 		processRows();
 	}*/
+	
+	Zotero.debug("Found duplicates in " + (Date.now() - start) + " ms");
 }
 
 
