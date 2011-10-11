@@ -1498,8 +1498,11 @@ const ZOTERO_CONFIG = {
 	
 	/**
 	 * Pumps a generator until it yields false. See itemTreeView.js for an example.
+	 *
+	 * If errorHandler is specified, exceptions in the generator will be caught
+	 * and passed to the callback
 	 */
-	this.pumpGenerator = function(generator, ms) {
+	this.pumpGenerator = function(generator, ms, errorHandler) {
 		_waiting++;
 		
 		var timer = Components.classes["@mozilla.org/timer;1"].
@@ -1528,7 +1531,13 @@ const ZOTERO_CONFIG = {
 			_waitTimers = [];
 			_waitTimerCallbacks = [];
 			
-			if(err) throw err;
+			if(err) {
+				if(errorHandler) {
+					errorHandler(err);
+				} else {
+					throw err;
+				}
+			}
 		}}
 		timer.initWithCallback(timerCallback, ms ? ms : 0, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
 		// add timer to global scope so that it doesn't get garbage collected before it completes
