@@ -442,7 +442,11 @@
 							
 							for each(var v in this._fieldAlternatives[fieldName]) {
 								var menuitem = document.createElement("menuitem");
-								menuitem.setAttribute('label', Zotero.Utilities.ellipsize(v, 40));
+								var sv = Zotero.Utilities.ellipsize(v, 60);
+								menuitem.setAttribute('label', sv);
+								if (v != sv) {
+									menuitem.setAttribute('tooltiptext', v);
+								}
 								menuitem.setAttribute('fieldName', fieldName);
 								menuitem.setAttribute('originalValue', v);
 								menuitem.setAttribute(
@@ -520,6 +524,7 @@
 					this._creatorCount = 0;
 					var num = this.item.numCreators();
 					if (num > 0) {
+						// Limit number of creators display
 						var max = Math.min(num, this._initialVisibleCreators);
 						// If fewer than five more, just display
 						if (num < max + 5 || this._displayAllCreators) {
@@ -529,6 +534,7 @@
 							this.addCreatorRow(this.item.getCreator(i).ref,
 								this.item.getCreator(i).creatorTypeID);
 							
+							// Display "+" button on all but last row
 							if (i == max - 2) {
 								this.disableCreatorAddButtons();
 							}
