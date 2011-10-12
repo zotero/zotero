@@ -501,6 +501,7 @@ var ZoteroPane = new function()
 					notify: ZoteroPane_Local.setHighlightedRowsCallback
 				}, 225, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 			}
+			// Unhighlight on key up
 			else if ((Zotero.isWin && event.ctrlKey) ||
 					(!Zotero.isWin && event.altKey)) {
 				if (this.highlightTimer) {
@@ -2411,11 +2412,14 @@ var ZoteroPane = new function()
 	
 	
 	this.onTreeMouseDown = function (event) {
+		var t = event.originalTarget;
+		var tree = t.parentNode;
+		
 		var itemGroup = ZoteroPane_Local.getItemGroup();
 		
 		// Automatically select all equivalent items when clicking on an item
 		// in duplicates view
-		if (itemGroup.isDuplicates()) {
+		if (itemGroup.isDuplicates() && tree.id == 'zotero-items-tree') {
 			// Trigger only on primary-button single clicks with modifiers
 			// (so that items can still be selected and deselected manually)
 			if (!event || event.detail != 1 || event.button != 0 || event.metaKey || event.shiftKey) {
@@ -2433,7 +2437,7 @@ var ZoteroPane = new function()
 			var row = {}, col = {}, obj = {};
 			tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
 			
-			// obj.value == 'cell'/'text'/'image'
+			// obj.value == 'cell'/'text'/'image'/'twisty'
 			if (!obj.value) {
 				return;
 			}
@@ -2458,6 +2462,8 @@ var ZoteroPane = new function()
 			return;
 		}
 		
+		var tree = t.parentNode;
+		
 		// We care only about primary-button double and triple clicks
 		if (!event || (event.detail != 2 && event.detail != 3) || event.button != 0) {
 			// The Mozilla tree binding fires select() in mousedown(),
@@ -2466,11 +2472,18 @@ var ZoteroPane = new function()
 			// selected during mousedown()), it fires select() again.
 			// We prevent that here.
 			var itemGroup = ZoteroPane_Local.getItemGroup();
-			
-			if (itemGroup.isDuplicates()) {
+			if (itemGroup.isDuplicates() && tree.id == 'zotero-items-tree') {
 				if (event.metaKey || event.shiftKey) {
 					return;
 				}
+				
+				// Allow twisty click to work in duplicates mode
+				var row = {}, col = {}, obj = {};
+				tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
+				if (obj.value == 'twisty') {
+					return;
+				}
+				
 				event.stopPropagation();
 				event.preventDefault();
 			}
@@ -2480,14 +2493,15 @@ var ZoteroPane = new function()
 		
 		var itemGroup = ZoteroPane_Local.getItemGroup();
 		
-		// Ignore all double-clicks in duplicates view
+		// Ignore double-clicks in duplicates view on everything except attachments
 		if (itemGroup.isDuplicates()) {
-			event.stopPropagation();
-			event.preventDefault();
-			return;
+			var items = ZoteroPane_Local.getSelectedItems();
+			if (items.length != 1 || !items[0].isAttachment()) {
+				event.stopPropagation();
+				event.preventDefault();
+				return;
+			}
 		}
-		
-		var tree = t.parentNode;
 		
 		var row = {}, col = {}, obj = {};
 		tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);

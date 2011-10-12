@@ -172,6 +172,7 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 					var row = self._showRow(new Zotero.ItemGroup('group', groups[i]), 1, beforeRow ? beforeRow + i + newRows : null);
 					newRows += self._expandRow(row);
 				}
+				return newRows;
 			}
 		}
 		var row = this._showRow(new Zotero.ItemGroup('header', header));
@@ -540,7 +541,7 @@ Zotero.CollectionTreeView.prototype.toggleOpenState = function(row)
 {
 	var count = 0;		//used to tell the tree how many rows were added/removed
 	var thisLevel = this.getLevel(row);
-
+	
 	this._treebox.beginUpdateBatch();
 	if (this.isContainerOpen(row)) {
 		while((row + 1 < this._dataItems.length) && (this.getLevel(row + 1) > thisLevel))
@@ -551,16 +552,15 @@ Zotero.CollectionTreeView.prototype.toggleOpenState = function(row)
 	}
 	else {
 		var itemGroup = this._getItemAtRow(row);
-		
 		if (itemGroup.type == 'header') {
-			itemGroup.ref.expand(row + 1);
+			count = itemGroup.ref.expand(row + 1);
 		}
 		else if (itemGroup.isLibrary(true) || itemGroup.isCollection()) {
-			this._expandRow(row, true);
+			count = this._expandRow(row, true);
 		}
 	}
 	this._dataItems[row][1] = !this._dataItems[row][1];  //toggle container open value
-
+	
 	this._treebox.rowCountChanged(row+1, count); //tell treebox to repaint these
 	this._treebox.invalidateRow(row);
 	this._treebox.endUpdateBatch();	
@@ -912,6 +912,7 @@ Zotero.CollectionTreeView.prototype._expandRow = function (row, forceOpen) {
 		if (!isGroup && !isCollection && collections[i].libraryID) {
 			continue;
 		}
+		
 		var newRow = this._showRow(new Zotero.ItemGroup('collection', collections[i]), level, row + 1 + newRows);
 		
 		// Recursively expand child collections that should be open
