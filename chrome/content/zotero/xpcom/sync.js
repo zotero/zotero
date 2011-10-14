@@ -1489,9 +1489,6 @@ Zotero.Sync.Server = new function () {
 							Zotero.suppressUIUpdates = false;
 							_updatesInProgress = false;
 							
-							//Zotero.debug(xmlstr);
-							//throw('break');
-							
 							if (xmlstr === false) {
 								Zotero.debug("Sync cancelled");
 								Zotero.DB.rollbackTransaction();
@@ -1504,6 +1501,11 @@ Zotero.Sync.Server = new function () {
 							
 							if (xmlstr) {
 								Zotero.debug(xmlstr);
+							}
+							
+							if (Zotero.Prefs.get('sync.debugBreak')) {
+								Zotero.debug('===============');
+								throw ("break");
 							}
 							
 							if (!xmlstr) {
@@ -3273,15 +3275,7 @@ Zotero.Sync.Server.Data = new function() {
 		
 		if (_timeToYield()) yield true;
 		
-		var xmlstr = Zotero.Sync.Server.Data.buildUploadXML(syncSession);
-		
-		if (Zotero.Prefs.get('sync.debugBreak')) {
-			Zotero.debug(xmlstr);
-			callback(false);
-			return;
-		}
-		
-		callback(xmlstr);
+		callback(Zotero.Sync.Server.Data.buildUploadXML(syncSession));
 	}
 	
 	
@@ -3795,7 +3789,7 @@ Zotero.Sync.Server.Data = new function() {
 			}
 			var newField = <field>{_xmlize(item.fields[field])}</field>;
 			newField.@name = field;
-			xml.field += newField;
+			xml.appendChild(newField);
 		}
 		
 		// Deleted item flag
@@ -3812,7 +3806,7 @@ Zotero.Sync.Server.Data = new function() {
 		// Note
 		if (item.primary.itemType == 'note') {
 			var note = <note>{_xmlize(item.note)}</note>;
-			xml.note += note;
+			xml.appendChild(note);
 		}
 		
 		// Attachment
@@ -3837,7 +3831,7 @@ Zotero.Sync.Server.Data = new function() {
 
 				}
 				path = <path>{path}</path>;
-				xml.path += path;
+				xml.appendChild(path);
 				
 				// Include storage sync time and hash for imported files
 				if (item.attachment.linkMode != Zotero.Attachments.LINK_MODE_LINKED_FILE) {
@@ -3855,7 +3849,7 @@ Zotero.Sync.Server.Data = new function() {
 			
 			if (item.note) {
 				var note = <note>{_xmlize(item.note)}</note>;
-				xml.note += note;
+				xml.appendChild(note);
 			}
 		}
 		
@@ -4316,7 +4310,7 @@ Zotero.Sync.Server.Data = new function() {
 				if (condition.required) {
 					conditionXML.@required = 1;
 				}
-				xml.condition += conditionXML;
+				xml.appendChild(conditionXML);
 			}
 		}
 		
