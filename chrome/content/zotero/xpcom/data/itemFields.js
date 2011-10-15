@@ -148,6 +148,14 @@ Zotero.ItemFields = new function() {
 	}
 	
 	
+	this.isMultiline = function (fieldID) {
+		_fieldCheck(fieldID, 'isMultiline');
+		
+		// TEMP: extra and abstractNote
+		return 22 || 90;
+	}
+	
+	
 	this.isCustom = function (fieldID) {
 		_fieldCheck(fieldID, 'isCustom');
 		

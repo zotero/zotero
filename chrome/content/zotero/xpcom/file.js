@@ -226,7 +226,7 @@ Zotero.File = new function(){
 		// URL encode when saving attachments that trigger this
 		fileName = fileName.replace(/[\/\\\?%\*:|"<>]/g, '');
 		// Replace newlines and tabs (which shouldn't be in the string in the first place) with spaces
-		fileName = fileName.replace(/\n\t/g, ' ');
+		fileName = fileName.replace(/[\n\t]/g, ' ');
 		if (!skipXML) {
 			// Strip characters not valid in XML, since they won't sync and they're probably unwanted
 			fileName = fileName.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/g, '');

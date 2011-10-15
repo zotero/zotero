@@ -3336,6 +3336,12 @@ var ZoteroPane = new function()
 	
 	
 	function viewAttachment(itemIDs, event, noLocateOnMissing, forceExternalViewer) {
+		// If view isn't editable, don't show Locate button, since the updated
+		// path couldn't be sent back up
+		if (!this.itemsView.editable) {
+			noLocateOnMissing = true;
+		}
+		
 		if(typeof itemIDs != "object") itemIDs = [itemIDs];
 		
 		// If multiple items, set up event so we open in new tab

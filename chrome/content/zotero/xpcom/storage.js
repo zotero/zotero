@@ -653,16 +653,29 @@ Zotero.Sync.Storage = new function () {
 			var newFile = _processDownload(item);
 		}
 		
-		// If |updated| is a file, it was renamed, so set item filename to that
+		// If |newFile| is set, the file was renamed, so set item filename to that
 		// and mark for updated
 		var file = item.getFile();
 		if (newFile && file.leafName != newFile.leafName) {
 			_updatesInProgress = true;
-			item.relinkAttachmentFile(newFile);
-			_updatesInProgress = false;
+			
+			// If library isn't editable but filename was changed, update
+			// database without updating the item's mod time, which would result
+			// in a library access error
+			if (!Zotero.Items.editCheck(item)) {
+				Zotero.debug("File renamed without library access -- updating itemAttachments path", 3);
+				item.relinkAttachmentFile(newFile, true);
+				var useCurrentModTime = false;
+			}
+			else {
+				item.relinkAttachmentFile(newFile);
+				
+				// TODO: use an integer counter instead of mod time for change detection
+				var useCurrentModTime = true;
+			}
+			
 			file = item.getFile();
-			// TODO: use an integer counter instead of mod time for change detection
-			var useCurrentModTime = true;
+			_updatesInProgress = false;
 		}
 		else {
 			var useCurrentModTime = false;

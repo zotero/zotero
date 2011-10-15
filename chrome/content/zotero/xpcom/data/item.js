@@ -73,6 +73,7 @@ Zotero.Item.prototype._init = function () {
 	this._changedSource = false;
 	this._changedAttachmentData = false;
 	
+	this._skipModTimeUpdate = false;
 	this._previousData = null;
 	
 	this._deleted = null;
@@ -647,7 +648,7 @@ Zotero.Item.prototype.inCollection = function(collectionID) {
  */
 Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	if (typeof value == 'string') {
-		value = Zotero.Utilities.trim(value);
+		value = value.trim();
 	}
 	
 	this._disabledCheck();
@@ -766,6 +767,11 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		else {
 			throw (msg);
 		}
+	}
+	
+	// If not a multiline field, strip newlines
+	if (typeof value == 'string' && !Zotero.ItemFields.isMultiline(fieldID)) {
+		value = value.replace(/[\r\n]+/g, " ");;
 	}
 	
 	if (!loadIn) {
@@ -1586,7 +1592,8 @@ Zotero.Item.prototype.save = function() {
 					sql += field + '=?, ';
 					sqlValues.push(this.getField(field));
 				}
-				else if (field == 'dateModified' || field == 'clientDateModified') {
+				else if ((field == 'dateModified' || field == 'clientDateModified')
+							&& !this._skipModTimeUpdate) {
 					sql += field + '=?, ';
 					sqlValues.push(Zotero.DB.transactionDateTime);
 				}
@@ -1595,7 +1602,9 @@ Zotero.Item.prototype.save = function() {
 			sql = sql.substr(0, sql.length-2) + " WHERE itemID=?";
 			sqlValues.push({ int: this.id });
 			
-			Zotero.DB.query(sql, sqlValues);
+			if (sqlValues.length > 1) {
+				Zotero.DB.query(sql, sqlValues);
+			}
 			
 			
 			//
@@ -2755,7 +2764,14 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 }
 
 
-Zotero.Item.prototype.relinkAttachmentFile = function(file) {
+/**
+ * @param {Boolean} [skipItemUpdate] Don't update attachment item mod time,
+ *                                   so that item doesn't sync. Used when a file
+ *                                   needs to be renamed to be accessible but the
+ *                                   user doesn't have access to modify the
+ *                                   attachment metadata
+ */
+Zotero.Item.prototype.relinkAttachmentFile = function(file, skipItemUpdate) {
 	var linkMode = this.attachmentLinkMode;
 	if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 		throw('Cannot relink linked URL in Zotero.Items.relinkAttachmentFile()');
@@ -2774,6 +2790,10 @@ Zotero.Item.prototype.relinkAttachmentFile = function(file) {
 	
 	var path = Zotero.Attachments.getPath(file, linkMode);
 	this.attachmentPath = path;
+	
+	if (skipItemUpdate) {
+		this._skipModTimeUpdate = true;
+	}
 	this.save();
 	
 	return false;
