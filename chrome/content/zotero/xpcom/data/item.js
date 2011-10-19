@@ -425,12 +425,6 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		if (loadIn) {
 			throw ('Cannot change type in loadIn mode in Zotero.Item.setType()');
 		}
-	}
-	
-	this._itemTypeID = itemTypeID;
-	
-	// If there's an existing type
-	if (oldItemTypeID) {
 		if (!this._itemDataLoaded && this.id) {
 			this._loadItemData();
 		}
@@ -460,7 +454,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 			for each(var oldFieldID in obsoleteFields) {
 				// Try to get a base type for this field
 				var baseFieldID =
-					Zotero.ItemFields.getBaseIDFromTypeAndField(this.itemTypeID, oldFieldID);
+					Zotero.ItemFields.getBaseIDFromTypeAndField(oldItemTypeID, oldFieldID);
 				
 				if (baseFieldID) {
 					var newFieldID =
@@ -504,7 +498,12 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 				copiedFields.push([fieldID, this.getField(fieldID)]);
 			}
 		}
-		
+	}
+	
+	this._itemTypeID = itemTypeID;
+	
+	// If there's an existing type
+	if (oldItemTypeID) {
 		// Reset custom creator types to the default
 		var creators = this.getCreators();
 		if (creators) {
@@ -765,7 +764,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 			return false;
 		}
 		else {
-			throw (msg);
+			throw new Error(msg);
 		}
 	}
 	
