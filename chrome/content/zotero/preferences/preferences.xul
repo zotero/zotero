@@ -189,7 +189,7 @@ To add a new preference:
 									<row>
 										<label value="&zotero.preferences.sync.username;"/>
 										<textbox preference="pref-sync-username"
-											onchange="Zotero.Prefs.set('sync.server.username', this.value); var pass = document.getElementById('sync-password'); if (pass.value) { Zotero.Sync.Server.password = pass.value; }"/>
+											onchange="this.value = this.value.trim(); Zotero.Prefs.set('sync.server.username', this.value); var pass = document.getElementById('sync-password'); if (pass.value) { Zotero.Sync.Server.password = pass.value; }"/>
 									</row>
 									<row>
 										<label value="&zotero.preferences.sync.password;"/>
