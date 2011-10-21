@@ -3286,11 +3286,13 @@ Zotero.Sync.Server.Data = new function() {
 		//Zotero.debug(syncSession);
 		var keys = syncSession.uploadKeys;
 		
-		var xml = <data/>
+		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser);
+		var doc = parser.parseFromString("<data/>", "text/xml");
+		var docElem = doc.documentElement;
 		
 		// Add API version attribute
-		xml.@version = Zotero.Sync.Server.apiVersion;
-		
+		docElem.setAttribute('version', Zotero.Sync.Server.apiVersion);
 		
 		// Updates
 		for each(var syncObject in Zotero.Sync.syncObjects) {
@@ -3298,16 +3300,16 @@ Zotero.Sync.Server.Data = new function() {
 			var Types = syncObject.plural; // 'Items'
 			var type = Type.toLowerCase(); // 'item'
 			var types = Types.toLowerCase(); // 'items'
+			var xmlObjectsNode = false;
 			
 			Zotero.debug("Processing locally changed " + types);
 			
-			var elementCreated = false;
 			var libraryID, key;
 			for (var libraryID in keys.updated[types]) {
 				for (var key in keys.updated[types][libraryID]) {
-					if (!elementCreated) {
-						xml[types] = new XML("<" + types + "/>");
-						elementCreated = true;
+					// Insert the <[types]> node
+					if (!xmlObjectsNode) {
+						xmlObjectsNode = docElem.appendChild(doc.createElement(types));
 					}
 					
 					var l = parseInt(libraryID);
@@ -3322,23 +3324,30 @@ Zotero.Sync.Server.Data = new function() {
 						});
 						continue;
 					}
+					
 					if (type == 'item') {
 						// itemToXML needs the sync session
-						xml.items.appendChild(this.itemToXML(obj, syncSession));
+						var str = this.itemToXML(obj, syncSession).toXMLString();
 					}
 					else {
-						xml[types].appendChild(this[type + 'ToXML'](obj));
+						var str = this[type + 'ToXML'](obj).toXMLString();
 					}
+					
+					xmlObjectsNode.appendChild(doc.createRange().createContextualFragment(str));
 				}
 			}
 		}
 		
 		// Deletions
+		var xmlDeletedNode = doc.createElement('deleted');
+		var inserted = false;
+		
 		for each(var syncObject in Zotero.Sync.syncObjects) {
 			var Type = syncObject.singular; // 'Item'
 			var Types = syncObject.plural; // 'Items'
 			var type = Type.toLowerCase(); // 'item'
 			var types = Types.toLowerCase(); // 'items'
+			var xmlDeletedObjectsNode = false;
 			
 			Zotero.debug('Processing locally deleted ' + types);
 			
@@ -3346,19 +3355,30 @@ Zotero.Sync.Server.Data = new function() {
 			var libraryID, key;
 			for (var libraryID in keys.deleted[types]) {
 				for (var key in keys.deleted[types][libraryID]) {
-					if (!elementCreated) {
-						xml.deleted[types] = new XML("<" + types + "/>");
-						elementCreated = true;
+					// Insert the <deleted> node
+					if (!inserted) {
+						docElem.appendChild(xmlDeletedNode);
+						inserted = true;
 					}
-					var deletexml = new XML('<' + type + '/>');
-					deletexml.@libraryID = parseInt(libraryID) ? parseInt(libraryID) : Zotero.libraryID;
-					deletexml.@key = key;
-					xml.deleted[types].appendChild(deletexml);
+					// Insert the <deleted><[types]></deleted> node
+					if (!xmlDeletedObjectsNode) {
+						xmlDeletedObjectsNode = xmlDeletedNode.appendChild(doc.createElement(types));
+					}
+					
+					var n = doc.createElement(type);
+					n.setAttribute('libraryID', parseInt(libraryID) ? parseInt(libraryID) : Zotero.libraryID);
+					n.setAttribute('key', key);
+					xmlDeletedObjectsNode.appendChild(n);
 				}
 			}
 		}
 		
-		var xmlstr = xml.toXMLString();
+		
+		var s = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
+					.createInstance(Components.interfaces.nsIDOMSerializer);
+		var xmlstr = s.serializeToString(doc);
+		
+		// No updated data
 		if (xmlstr.match('<data version="[0-9]+"/>')) {
 			return '';
 		}
