@@ -27,6 +27,10 @@ var Zotero_QuickFormat = new function () {
 	var io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, keepSorted, showEditor,
 		referencePanel, referenceBox, referenceHeight, dragX, dragY, curLocator, curLocatorLabel,
 		curIDs = [], curResizer, dragging;
+	
+	// A variable that contains the timeout object for the latest onKeyPress event
+	var eventTimeout = null;
+	
 	const SHOWN_REFERENCES = 7;
 	
 	/**
@@ -697,6 +701,7 @@ var Zotero_QuickFormat = new function () {
 	 * Handle return or escape
 	 */
 	function _onQuickSearchKeyPress(event) {
+		
 		var keyCode = event.keyCode;
 		if(keyCode === event.DOM_VK_RETURN || keyCode === event.DOM_VK_ENTER) {
 			event.preventDefault();
@@ -708,7 +713,10 @@ var Zotero_QuickFormat = new function () {
 			_bubbleizeSelected();
 		} else if(keyCode === event.DOM_VK_BACK_SPACE) {
 			_resize();
-			window.setTimeout(_quickFormat, 0);
+			
+			if(Zotero_QuickFormat.eventTimeout) clearTimeout(Zotero_QuickFormat.eventTimeout);
+			Zotero_QuickFormat.eventTimeout = setTimeout(_quickFormat, 250);
+			
 		} else if(keyCode === event.DOM_VK_UP) {
 			var selectedItem = referenceBox.selectedItem;
 			var previousSibling;
@@ -768,7 +776,8 @@ var Zotero_QuickFormat = new function () {
 			}
 		} else {
 			// Use a timeout so that _quickFormat gets called after update
-			window.setTimeout(_quickFormat, 0);
+			if(Zotero_QuickFormat.eventTimeout) clearTimeout(Zotero_QuickFormat.eventTimeout);
+			Zotero_QuickFormat.eventTimeout = setTimeout(_quickFormat, 250);
 		}
 	}
 	
