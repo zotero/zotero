@@ -434,7 +434,7 @@ Zotero.Schema = new function(){
 	
 	/**
 	 * Update styles and translators in data directory with versions from
-	 * ZIP file (XPI) or directory (SVN) in extension directory
+	 * ZIP file (XPI) or directory (source) in extension directory
 	 *
 	 * @param	{String}	[mode]					'translators' or 'styles'
 	 * @param	{Boolean}	[skipDeleteUpdated]		Skip updating of the file deleting version --
@@ -507,7 +507,7 @@ Zotero.Schema = new function(){
 		
 		var deleted = extDir.clone();
 		deleted.append('deleted.txt');
-		// In SVN builds, deleted.txt is in the translators directory
+		// In source builds, deleted.txt is in the translators directory
 		if (!deleted.exists()) {
 			deleted = extDir.clone();
 			deleted.append('translators');
@@ -730,7 +730,7 @@ Zotero.Schema = new function(){
 			
 			zipReader.close();
 		}
-		// SVN installation
+		// Source installation
 		else {
 			var sourceDir = extDir.clone();
 			sourceDir.append(modes);
@@ -746,7 +746,7 @@ Zotero.Schema = new function(){
 			while (entries.hasMoreElements()) {
 				var file = entries.getNext();
 				file.QueryInterface(Components.interfaces.nsIFile);
-				// File might not exist in an SVN build with style symlinks
+				// File might not exist in an source build with style symlinks
 				if (!file.exists()
 						|| !file.leafName.match(fileNameRE)
 						|| file.isDirectory()) {
@@ -759,7 +759,7 @@ Zotero.Schema = new function(){
 				}
 			}
 			
-			// Don't attempt installation for SVN build with missing styles
+			// Don't attempt installation for source build with missing styles
 			if (!sourceFilesExist) {
 				Zotero.debug("No source " + mode + " files exist -- skipping update");
 				return false;
