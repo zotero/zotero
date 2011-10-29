@@ -1189,6 +1189,7 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 	if (!dragData || !dragData.data) {
 		var dragData = Zotero.DragDrop.getDragData(this);
 	}
+	
 	if (!dragData) {
 		return false;
 	}
@@ -1770,6 +1771,10 @@ Zotero.CollectionTreeView.prototype.onDragEnter = function (event) {
  * Called by HTML 5 Drag and Drop when dragging over the tree
  */
 Zotero.CollectionTreeView.prototype.onDragOver = function (event, dropdata, session) {
+	// Show copy symbol when dragging an item over a collection
+	if (event.dataTransfer.getData("zotero/item")) {
+		event.dataTransfer.dropEffect = "copy";
+	}
 	return false;
 }
 
