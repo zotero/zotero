@@ -4,17 +4,17 @@ content zotero-resource		resource/
 
 locale	zotero	en-US		chrome/locale/en-US/zotero/
 locale	zotero	af-ZA		chrome/locale/af-ZA/zotero/
-locale	zotero	ar			chrome/locale/ar/zotero/
+locale	zotero	ar		chrome/locale/ar/zotero/
 locale	zotero	bg-BG		chrome/locale/bg-BG/zotero/
 locale	zotero	ca-AD		chrome/locale/ca-AD/zotero/
 locale	zotero	cs-CZ		chrome/locale/cs-CZ/zotero/
 locale	zotero	da-DK		chrome/locale/da-DK/zotero/
-locale	zotero	de			chrome/locale/de-DE/zotero/
+locale	zotero	de		chrome/locale/de/zotero/
 locale	zotero	el-GR		chrome/locale/el-GR/zotero/
 locale	zotero	es-ES		chrome/locale/es-ES/zotero/
 locale	zotero	et-EE		chrome/locale/et-EE/zotero/
 locale	zotero	eu-ES		chrome/locale/eu-ES/zotero/
-locale	zotero	fa			chrome/locale/fa/zotero/
+locale	zotero	fa		chrome/locale/fa/zotero/
 locale	zotero	fi-FI		chrome/locale/fi-FI/zotero/
 locale	zotero	fr-FR		chrome/locale/fr-FR/zotero/
 locale	zotero	gl-ES		chrome/locale/gl-ES/zotero/
