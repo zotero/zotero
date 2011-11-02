@@ -229,10 +229,9 @@ Zotero.Translate.Sandbox = {
 										|| translate instanceof Zotero.Translate.Search)) {
 									// Necessary to get around object wrappers in Firefox
 									var attachments = item.attachments;
-									delete item.attachments;
 									
-									item = translate._sandboxManager.sandbox.Zotero._transferItem(JSON.stringify(item));
 									item.attachments = [];
+									item = translate._sandboxManager.sandbox.Zotero._transferItem(JSON.stringify(item));
 									
 									// Manually copy attachments in case there are documents, which
 									// can't be serialized and don't need to be
