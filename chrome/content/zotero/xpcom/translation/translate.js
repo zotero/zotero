@@ -227,8 +227,28 @@ Zotero.Translate.Sandbox = {
 								if(Zotero.isFx && !Zotero.isBookmarklet
 										&& (translate instanceof Zotero.Translate.Web
 										|| translate instanceof Zotero.Translate.Search)) {
-									// necessary to get around object wrappers in Firefox
+									// Necessary to get around object wrappers in Firefox
+									var attachments = item.attachments;
+									delete item.attachments;
+									
 									item = translate._sandboxManager.sandbox.Zotero._transferItem(JSON.stringify(item));
+									item.attachments = [];
+									
+									// Manually copy attachments in case there are documents, which
+									// can't be serialized and don't need to be
+									if(attachments) {
+										for(var i=0; i<attachments.length; i++) {
+											var attachment = attachments[i];
+											var doc = (attachments.document ? attachments.document : undefined);
+											delete attachments.document;
+											
+											attachment = translate._sandboxManager.sandbox.Zotero._transferItem(JSON.stringify(item));
+											
+											if(doc) attachment.document = doc;
+											
+											item.attachments.push(attachment);
+										}
+									}
 								} else {
 									// otherwise, just use parent translator's complete function
 									item.complete = translate._sandboxManager.sandbox.Zotero.Item.prototype.complete;
