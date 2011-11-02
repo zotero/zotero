@@ -136,7 +136,10 @@ Zotero.Debug = new function () {
 			}
 		}
 		
-		return output;
+		return Zotero.getErrors(true).join('\n\n') +
+				"\n\n" + Zotero.getSystemInfo() + "\n\n" +
+				"=========================================================\n\n" +
+				output;
 	}
 	
 	

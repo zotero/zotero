@@ -1208,28 +1208,44 @@ const ZOTERO_CONFIG = {
 	}
 	
 	
+	/**
+	 * Get versions, platform, etc.
+	 *
+	 * Can be used synchronously or asynchronously; info on other add-ons
+	 * is available only in async mode
+	 */
 	function getSystemInfo(callback) {
 		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
 			getService(Components.interfaces.nsIXULAppInfo);
 		
-		Zotero.getInstalledExtensions(function(extensions) {
-			var info = {
-				version: Zotero.version,
-				platform: Zotero.platform,
-				oscpu: Zotero.oscpu,
-				locale: Zotero.locale,
-				appName: appInfo.name,
-				appVersion: appInfo.version,
-				extensions: extensions.join(', ')
-			};
-			
-			var str = '';
-			for (var key in info) {
-				str += key + ' => ' + info[key] + ', ';
-			}
-			str = str.substr(0, str.length - 2);
-			callback(str);
-		});
+		var info = {
+			version: Zotero.version,
+			platform: Zotero.platform,
+			oscpu: Zotero.oscpu,
+			locale: Zotero.locale,
+			appName: appInfo.name,
+			appVersion: appInfo.version
+		};
+		
+		if (callback) {
+			Zotero.getInstalledExtensions(function(extensions) {
+				info.extensions = extensions.join(', ');
+					
+				var str = '';
+				for (var key in info) {
+					str += key + ' => ' + info[key] + ', ';
+				}
+				str = str.substr(0, str.length - 2);
+				callback(str);
+			});
+		}
+		
+		var str = '';
+		for (var key in info) {
+			str += key + ' => ' + info[key] + ', ';
+		}
+		str = str.substr(0, str.length - 2);
+		return str;
 	}
 	
 	
