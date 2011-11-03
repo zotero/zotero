@@ -671,6 +671,9 @@ Zotero.Utilities = {
 	 * From http://lehelk.com/2011/05/06/script-to-remove-diacritics/
 	 */
 	"removeDiacritics": function (str, lowercaseOnly) {
+		// Short-circuit on the most basic input
+		if (/^[a-zA-Z0-9_-]*$/.test(str)) return str;
+
 		var map = this._diacriticsRemovalMap.lowercase;
 		for (var i=0, len=map.length; i<len; i++) {
 			str = str.replace(map[i].letters, map[i].base);
