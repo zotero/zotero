@@ -1266,6 +1266,15 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			aPos++;
 			var aFound = false;
 			while (aPos < aNumCreators) {
+				// Don't die if there's no creator at an index
+				if (!aCreators[aPos]) {
+					Components.utils.reportError(
+						"Creator is missing at position " + aPos
+						+ " for item " + a.ref.libraryID + "/" + a.ref.key
+					);
+					return -1;
+				}
+				
 				if (aCreators[aPos].creatorTypeID == aFirstCreatorTypeID) {
 					aFound = true;
 					break;
@@ -1276,6 +1285,15 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			bPos++;
 			var bFound = false;
 			while (bPos < bNumCreators) {
+				// Don't die if there's no creator at an index
+				if (!bCreators[bPos]) {
+					Components.utils.reportError(
+						"Creator is missing at position " + bPos
+						+ " for item " + b.ref.libraryID + "/" + b.ref.key
+					);
+					return -1;
+				}
+				
 				if (bCreators[bPos].creatorTypeID == bFirstCreatorTypeID) {
 					bFound = true;
 					break;
