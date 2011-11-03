@@ -4,3 +4,6 @@
 [submodule "chrome/content/zotero/locale/csl"]
 	path = chrome/content/zotero/locale/csl
 	url = git://github.com/citation-style-language/locales.git
+[submodule "styles"]
+	path = styles
+	url = git://github.com/zotero/bundled-styles.git
