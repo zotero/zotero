@@ -783,7 +783,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.setLastSyncTime = function (callbac
 		
 		var self = this;
 		
-		Zotero.HTTP.WebDAV.doPut(successFileURI, " ", function (req) {
+		Zotero.HTTP.WebDAV.doPut(successFileURI, "1", function (req) {
 			Zotero.debug(req.responseText);
 			Zotero.debug(req.status);
 			
@@ -918,7 +918,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServer = function (callback) {
 					// Test if Zotero directory is writable
 					var testFileURI = uri.clone();
 					testFileURI.spec += "zotero-test-file";
-					Zotero.HTTP.WebDAV.doPut(testFileURI, " ", function (req) {
+					Zotero.HTTP.WebDAV.doPut(testFileURI, "1", function (req) {
 						Zotero.debug(req.responseText);
 						Zotero.debug(req.status);
 						
