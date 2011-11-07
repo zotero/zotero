@@ -293,6 +293,7 @@
 					t.setAttribute('fieldname', fieldName);
 					t.setAttribute('ztabindex', tabindex);
 					t.setAttribute('flex', '1');
+                    t.setAttribute('newlines','pasteintact');
 					
 					// Add auto-complete
 					t.setAttribute('type', 'autocomplete');
