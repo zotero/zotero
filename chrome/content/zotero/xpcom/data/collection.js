@@ -1180,7 +1180,12 @@ Zotero.Collection.prototype.addLinkedCollection = function (collection) {
 		Zotero.debug("Collections " + this.key + " and " + collection.key + " are already linked");
 		return false;
 	}
-	Zotero.Relations.add(null, url1, predicate, url2);
+	
+	// If both group libraries, store relation with source group.
+	// Otherwise, store with personal library.
+	var libraryID = (this.libraryID && item.libraryID) ? this.libraryID : null;
+	
+	Zotero.Relations.add(libraryID, url1, predicate, url2);
 }
 
 //

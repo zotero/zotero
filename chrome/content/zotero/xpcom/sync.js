@@ -1209,7 +1209,7 @@ Zotero.Sync.Server = new function () {
 	this.manualSyncRequired = false;
 	this.upgradeRequired = false;
 	this.nextLocalSyncDate = false;
-	this.apiVersion = 8;
+	this.apiVersion = 9;
 	
 	default xml namespace = '';
 	
@@ -2203,7 +2203,8 @@ Zotero.Sync.Server = new function () {
 			Zotero.userID = userID;
 			Zotero.libraryID = libraryID;
 			
-			// Update userID in relations
+			// Update libraryID in relations, which we store for the local
+			// for some reason. All other objects use null for the local library.
 			if (lastUserID && lastLibraryID) {
 				Zotero.Relations.updateUser(lastUserID, lastLibraryID, userID, libraryID);
 				

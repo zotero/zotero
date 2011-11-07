@@ -158,20 +158,46 @@ Zotero.Relation.prototype.save = function () {
 		throw ("Missing object in Zotero.Relation.save()");
 	}
 	
-	var sql = "INSERT OR IGNORE INTO relations "
+	var sql = "INSERT INTO relations "
 				+ "(libraryID, subject, predicate, object, clientDateModified) "
 				+ "VALUES (?, ?, ?, ?, ?)";
-	var insertID = Zotero.DB.query(
-		sql,
-		[
-			this.libraryID,
-			this.subject,
-			this.predicate,
-			this.object,
-			Zotero.DB.transactionDateTime
-		]
-	);
-	
+	try {
+		var insertID = Zotero.DB.query(
+			sql,
+			[
+				this.libraryID,
+				this.subject,
+				this.predicate,
+				this.object,
+				Zotero.DB.transactionDateTime
+			]
+		);
+	}
+	catch (e) {
+		// If above failed, try deleting existing row, in case libraryID has changed
+		Zotero.DB.beginTransaction();
+		
+		var sql2 = "SELECT COUNT(*) FROM relations WHERE subject=? AND predicate=? AND object=?";
+		if (Zotero.DB.valueQuery(sql2, [this.subject, this.predicate, this.object])) {
+			// Delete
+			sql2 = "DELETE FROM relations WHERE subject=? AND predicate=? AND object=?";
+			Zotero.DB.query(sql2, [this.subject, this.predicate, this.object]);
+			
+			// Insert with original query
+			var insertID = Zotero.DB.query(
+				sql,
+				[
+					this.libraryID,
+					this.subject,
+					this.predicate,
+					this.object,
+					Zotero.DB.transactionDateTime
+				]
+			);
+		}
+		
+		Zotero.DB.commitTransaction();
+	}
 	return insertID;
 }
 
@@ -199,6 +225,7 @@ Zotero.Relation.prototype.erase = function () {
 
 Zotero.Relation.prototype.toXML = function () {
 	var xml = <relation/>;
+	xml.@libraryID = this.libraryID;
 	xml.subject = this.subject;
 	xml.predicate = this.predicate;
 	xml.object = this.object;
