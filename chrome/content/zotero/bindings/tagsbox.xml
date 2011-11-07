@@ -294,27 +294,11 @@
 					t.setAttribute('ztabindex', tabindex);
 					t.setAttribute('flex', '1');
 					
-					t.setAttribute('newlines','pasteintact');
-					
 					// Add auto-complete
 					t.setAttribute('type', 'autocomplete');
 					t.setAttribute('autocompletesearch', 'zotero');
 					var suffix = itemID ? itemID : '';
 					t.setAttribute('autocompletesearchparam', fieldName + '/' + suffix);
-					
-					/*
-					var output = '';
-					var counter = 0;
-					for (property in t) {
-					  output += property + ': ' + t[property]+'; ';
-					  counter += 1;
-					  if (counter > 5) {
-					  	alert(output);
-					  	output = '';
-					  	counter = 0;
-					  }
-					}
-					*/
 					
 					var box = elem.parentNode;
 					box.replaceChild(t, elem);

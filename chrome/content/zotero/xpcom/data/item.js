@@ -73,6 +73,7 @@ Zotero.Item.prototype._init = function () {
 	this._changedSource = false;
 	this._changedAttachmentData = false;
 	
+	this._skipModTimeUpdate = false;
 	this._previousData = null;
 	
 	this._deleted = null;
@@ -418,12 +419,12 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		return true;
 	}
 	
-	// If there's an existing type
-	if (this._itemTypeID) {
+	var oldItemTypeID = this._itemTypeID;
+	
+	if (oldItemTypeID) {
 		if (loadIn) {
 			throw ('Cannot change type in loadIn mode in Zotero.Item.setType()');
 		}
-		
 		if (!this._itemDataLoaded && this.id) {
 			this._loadItemData();
 		}
@@ -438,7 +439,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		if (obsoleteFields) {
 			// Move bookTitle to title and clear short title when going from
 			// bookSection to book if there's not also a title
-			if (this._itemTypeID == bookSectionTypeID && itemTypeID == bookTypeID) {
+			if (oldItemTypeID == bookSectionTypeID && itemTypeID == bookTypeID) {
 				var titleFieldID = Zotero.ItemFields.getID('title');
 				var bookTitleFieldID = Zotero.ItemFields.getID('bookTitle');
 				var shortTitleFieldID = Zotero.ItemFields.getID('shortTitle');
@@ -453,7 +454,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 			for each(var oldFieldID in obsoleteFields) {
 				// Try to get a base type for this field
 				var baseFieldID =
-					Zotero.ItemFields.getBaseIDFromTypeAndField(this.itemTypeID, oldFieldID);
+					Zotero.ItemFields.getBaseIDFromTypeAndField(oldItemTypeID, oldFieldID);
 				
 				if (baseFieldID) {
 					var newFieldID =
@@ -478,7 +479,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 		}
 		
 		// Move title to bookTitle and clear shortTitle when going from book to bookSection
-		if (this._itemTypeID == bookTypeID && itemTypeID == bookSectionTypeID) {
+		if (oldItemTypeID == bookTypeID && itemTypeID == bookSectionTypeID) {
 			var titleFieldID = Zotero.ItemFields.getID('title');
 			var bookTitleFieldID = Zotero.ItemFields.getID('bookTitle');
 			var shortTitleFieldID = Zotero.ItemFields.getID('shortTitle');
@@ -497,13 +498,19 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 				copiedFields.push([fieldID, this.getField(fieldID)]);
 			}
 		}
-		
-		// And reset custom creator types to the default
+	}
+	
+	this._itemTypeID = itemTypeID;
+	
+	// If there's an existing type
+	if (oldItemTypeID) {
+		// Reset custom creator types to the default
 		var creators = this.getCreators();
 		if (creators) {
+			var removeAll = !Zotero.CreatorTypes.itemTypeHasCreators(itemTypeID);
 			for (var i in creators) {
 				// Remove all creators if new item type doesn't have any
-				if (!Zotero.CreatorTypes.itemTypeHasCreators(itemTypeID)) {
+				if (removeAll) {
 					this.removeCreator(i);
 					continue;
 				}
@@ -512,7 +519,7 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 					// Convert existing primary creator type to new item type's
 					// primary creator type, or contributor (creatorTypeID 2)
 					// if none or not currently primary
-					var oldPrimary = Zotero.CreatorTypes.getPrimaryIDForType(this.getType());
+					var oldPrimary = Zotero.CreatorTypes.getPrimaryIDForType(oldItemTypeID);
 					if (oldPrimary == creators[i].creatorTypeID) {
 						var newPrimary = Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID);
 					}
@@ -523,8 +530,6 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 			}
 		}
 	}
-	
-	this._itemTypeID = itemTypeID;
 	
 	// Initialize this._itemData with type-specific fields
 	this._itemData = {};
@@ -642,7 +647,7 @@ Zotero.Item.prototype.inCollection = function(collectionID) {
  */
 Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	if (typeof value == 'string') {
-		value = Zotero.Utilities.trim(value);
+		value = value.trim();
 	}
 	
 	this._disabledCheck();
@@ -759,8 +764,13 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 			return false;
 		}
 		else {
-			throw (msg);
+			throw new Error(msg);
 		}
+	}
+	
+	// If not a multiline field, strip newlines
+	if (typeof value == 'string' && !Zotero.ItemFields.isMultiline(fieldID)) {
+		value = value.replace(/[\r\n]+/g, " ");;
 	}
 	
 	if (!loadIn) {
@@ -1581,7 +1591,8 @@ Zotero.Item.prototype.save = function() {
 					sql += field + '=?, ';
 					sqlValues.push(this.getField(field));
 				}
-				else if (field == 'dateModified' || field == 'clientDateModified') {
+				else if ((field == 'dateModified' || field == 'clientDateModified')
+							&& !this._skipModTimeUpdate) {
 					sql += field + '=?, ';
 					sqlValues.push(Zotero.DB.transactionDateTime);
 				}
@@ -1590,7 +1601,9 @@ Zotero.Item.prototype.save = function() {
 			sql = sql.substr(0, sql.length-2) + " WHERE itemID=?";
 			sqlValues.push({ int: this.id });
 			
-			Zotero.DB.query(sql, sqlValues);
+			if (sqlValues.length > 1) {
+				Zotero.DB.query(sql, sqlValues);
+			}
 			
 			
 			//
@@ -2053,7 +2066,7 @@ Zotero.Item.prototype.save = function() {
 				}
 			}
 			// Refresh trash
-			Zotero.Notifier.trigger('refresh', 'collection', 0);
+			Zotero.Notifier.trigger('refresh', 'trash', this.libraryID ? this.libraryID : 0);
 			if (this._deleted) {
 				Zotero.Notifier.trigger('trash', 'item', this.id);
 			}
@@ -2750,7 +2763,14 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 }
 
 
-Zotero.Item.prototype.relinkAttachmentFile = function(file) {
+/**
+ * @param {Boolean} [skipItemUpdate] Don't update attachment item mod time,
+ *                                   so that item doesn't sync. Used when a file
+ *                                   needs to be renamed to be accessible but the
+ *                                   user doesn't have access to modify the
+ *                                   attachment metadata
+ */
+Zotero.Item.prototype.relinkAttachmentFile = function(file, skipItemUpdate) {
 	var linkMode = this.attachmentLinkMode;
 	if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 		throw('Cannot relink linked URL in Zotero.Items.relinkAttachmentFile()');
@@ -2769,6 +2789,10 @@ Zotero.Item.prototype.relinkAttachmentFile = function(file) {
 	
 	var path = Zotero.Attachments.getPath(file, linkMode);
 	this.attachmentPath = path;
+	
+	if (skipItemUpdate) {
+		this._skipModTimeUpdate = true;
+	}
 	this.save();
 	
 	return false;
@@ -3327,17 +3351,6 @@ Zotero.Item.prototype.addTag = function(name, type) {
 	if (!this.id) {
 		throw ('Cannot add tag to unsaved item in Item.addTag()');
 	}
-    
-    //Check for newlines or carriage returns used as delimiters
-    //in a series of tags added at once.  Add each tag
-    //separately.
-    if (name.search('\r') > -1 || name.search('\n') > -1) {
-        name = name.replace('\r\n','\n');
-        name = name.replace('\r','\n');
-        var nameArray = name.split('\n');
-        this.addTags(nameArray,type);
-        return false;
-    }
 	
 	name = Zotero.Utilities.trim(name);
 	
@@ -3608,7 +3621,12 @@ Zotero.Item.prototype.addLinkedItem = function (item) {
 		Zotero.debug("Items " + this.key + " and " + item.key + " are already linked");
 		return false;
 	}
-	Zotero.Relations.add(null, url1, predicate, url2);
+	
+	// If both group libraries, store relation with source group.
+	// Otherwise, store with personal library.
+	var libraryID = (this.libraryID && item.libraryID) ? this.libraryID : null;
+	
+	Zotero.Relations.add(libraryID, url1, predicate, url2);
 }
 
 
