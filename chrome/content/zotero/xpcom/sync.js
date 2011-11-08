@@ -1849,7 +1849,7 @@ Zotero.Sync.Server = new function () {
 		
 		if (firstChild.localName == 'error') {
 			// Don't automatically retry 400 errors
-			if (xmlhttp.status >= 400 && xmlhttp.status < 500) {
+			if (xmlhttp.status >= 400 && xmlhttp.status < 500 && !_invalidSession(xmlhttp)) {
 				Zotero.debug("Server returned " + xmlhttp.status + " -- manual sync required", 2);
 				Zotero.Sync.Server.manualSyncRequired = true;
 			}
