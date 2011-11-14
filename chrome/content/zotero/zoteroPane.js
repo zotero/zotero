@@ -2590,14 +2590,8 @@ var ZoteroPane = new function()
 								createInstance(Components.interfaces.nsIURI);
 						var snapID = item.getBestAttachment();
 						if (snapID) {
-							spec = Zotero.Items.get(snapID).getLocalFileURL();
-							if (spec) {
-								uri.spec = spec;
-								if (uri.scheme && uri.scheme == 'file') {
-									ZoteroPane_Local.viewAttachment(snapID, event);
-									return;
-								}
-							}
+							ZoteroPane_Local.viewAttachment(snapID, event);
+							return;
 						}
 						
 						var uri = item.getField('url');
@@ -3352,22 +3346,22 @@ var ZoteroPane = new function()
 		}
 		
 		for each(var itemID in itemIDs) {
-			var attachment = Zotero.Items.get(itemID);
-			if (!attachment.isAttachment()) {
+			var item = Zotero.Items.get(itemID);
+			if (!item.isAttachment()) {
 				throw ("Item " + itemID + " is not an attachment in ZoteroPane_Local.viewAttachment()");
 			}
 			
-			if (attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-				this.loadURI(attachment.getField('url'), event);
+			if (item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+				this.loadURI(item.getField('url'), event);
 				continue;
 			}
 			
-			var file = attachment.getFile();
+			var file = item.getFile();
 			if (file) {
 				if(forceExternalViewer !== undefined) {
 					var externalViewer = forceExternalViewer;
 				} else {
-					var mimeType = attachment.attachmentMIMEType;
+					var mimeType = item.attachmentMIMEType;
 					// If no MIME type specified, try to detect again (I guess in case
 					// we've gotten smarter since the file was imported?)
 					if (!mimeType) {
@@ -3393,12 +3387,43 @@ var ZoteroPane = new function()
 					}
 					catch (e) {
 						Zotero.debug("launch() not supported -- passing file to loadURI()");
-						var fileURL = attachment.getLocalFileURL();
+						var fileURL = item.getLocalFileURL();
 						this.loadURI(fileURL);
 					}
 				}
 			}
 			else {
+				if (item.isImportedAttachment() && Zotero.Sync.Storage.downloadAsNeeded(item.libraryID)) {
+					let downloadedItem = item;
+					var started = Zotero.Sync.Storage.downloadFile(item, {
+						onStart: function (request) {
+							if (!(request instanceof Zotero.Sync.Storage.Request)) {
+								throw new Error("Invalid request object");
+							}
+						},
+						
+						onProgress: function (progress, progressMax) {
+							
+						},
+						
+						onStop: function () {
+							if (!downloadedItem.getFile()) {
+								ZoteroPane_Local.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
+								return;
+							}
+							
+							// check if unchanged?
+							// maybe not necessary, since we'll get an error if there's an error
+							
+							ZoteroPane_Local.viewAttachment(downloadedItem.id, event, false, forceExternalViewer);
+						},
+					});
+					
+					if (started) {
+						continue;
+					}
+				}
+				
 				this.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
 			}
 		}

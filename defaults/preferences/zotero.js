@@ -140,6 +140,8 @@ pref("extensions.zotero.sync.storage.maxDownloads", 4);
 pref("extensions.zotero.sync.storage.maxUploads", 4);
 pref("extensions.zotero.sync.storage.deleteDelayDays", 30);
 pref("extensions.zotero.sync.storage.groups.enabled", true);
+pref("extensions.zotero.sync.storage.downloadMode.personal", "on-demand");
+pref("extensions.zotero.sync.storage.downloadMode.groups", "on-demand");
 
 // Proxy
 pref("extensions.zotero.proxies.autoRecognize", true);

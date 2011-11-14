@@ -1859,12 +1859,12 @@ const ZOTERO_CONFIG = {
 		Zotero.Relations.purge();
 		
 		if (!skipStoragePurge && Math.random() < 1/10) {
-			Zotero.Sync.Storage.purgeDeletedStorageFiles('zfs');
-			Zotero.Sync.Storage.purgeDeletedStorageFiles('webdav');
+			Zotero.Sync.Storage.purgeDeletedStorageFiles('ZFS');
+			Zotero.Sync.Storage.purgeDeletedStorageFiles('WebDAV');
 		}
 		
 		if (!skipStoragePurge) {
-			Zotero.Sync.Storage.purgeOrphanedStorageFiles('webdav');
+			Zotero.Sync.Storage.purgeOrphanedStorageFiles('WebDAV');
 		}
 	}
 	
@@ -1911,6 +1911,32 @@ Zotero.Prefs = new function(){
 		
 		// Register observer to handle pref changes
 		this.register();
+		
+		// Process pref version updates
+		var fromVersion = this.get('prefVersion');
+		if (!fromVersion) {
+			fromVersion = 0;
+		}
+		var toVersion = 1;
+		if (fromVersion < toVersion) {
+			for (var i = fromVersion + 1; i <= toVersion; i++) {
+				switch (i) {
+					case 1:
+						// If a sync username is entered and ZFS is enabled, turn
+						// on-demand downloading off to maintain current behavior
+						if (this.get('sync.server.username')) {
+							if (this.get('sync.storage.enabled')
+									&& this.get('sync.storage.protocol') == 'zotero') {
+								this.set('sync.storage.downloadMode.personal', 'on-sync');
+							}
+							if (this.get('sync.storage.groups.enabled')) {
+								this.set('sync.storage.downloadMode.groups', 'on-sync');
+							}
+						}
+				}
+			}
+			this.set('prefVersion', toVersion);
+		}
 	}
 	
 	

@@ -3,6 +3,7 @@
 <!ENTITY zotero.preferences.default					"Default:">
 <!ENTITY zotero.preferences.items						 "items">
 <!ENTITY zotero.preferences.period						 ".">
+<!ENTITY zotero.preferences.settings					"Settings">
 
 <!ENTITY zotero.preferences.prefpane.general				"General">
 
@@ -58,7 +59,9 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url					"URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary				"Sync attachment files in My Library using">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups				"Sync attachment files in group libraries using Zotero storage">
-<!ENTITY zotero.preferences.sync.fileSyncing.about					"About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.download				"Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime	"at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand		"as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1					"By using Zotero storage, you agree to become bound by its">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2					"terms and conditions">
 <!ENTITY zotero.preferences.sync.reset.fullSync					"Full Sync with Zotero Server">
@@ -69,6 +72,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc		"Erase all server data and overwrite with local Zotero data.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory		"Reset File Sync History">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc	"Force checking of the storage server for all local attachment files.">
+<!ENTITY zotero.preferences.sync.reset								"Reset">
 <!ENTITY zotero.preferences.sync.reset.button						"Reset...">
 
 

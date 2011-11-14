@@ -28,6 +28,9 @@ Zotero.Notes = new function() {
 	this.noteToTitle = noteToTitle;
 	
 	this.__defineGetter__("MAX_TITLE_LENGTH", function() { return 80; });
+	this.__defineGetter__("defaultNote", function () '<div class="zotero-note znv1"></div>');
+	this.__defineGetter__("notePrefix", function () '<div class="zotero-note znv1">');
+	this.__defineGetter__("noteSuffix", function () '</div>');
 	
 	/**
 	* Return first line (or first MAX_LENGTH characters) of note content

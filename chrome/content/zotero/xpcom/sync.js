@@ -425,7 +425,7 @@ Zotero.Sync.EventListener = new function () {
 			var sql = "REPLACE INTO syncDeleteLog VALUES (?, ?, ?, ?)";
 			var syncStatement = Zotero.DB.getStatement(sql);
 			
-			if (isItem && Zotero.Sync.Storage.isActive('webdav')) {
+			if (isItem && Zotero.Sync.Storage.isActive('WebDAV')) {
 				var storageEnabled = true;
 				var sql = "INSERT INTO storageDeleteLog VALUES (?, ?, ?)";
 				var storageStatement = Zotero.DB.getStatement(sql);
@@ -562,74 +562,59 @@ Zotero.Sync.Runner = new function () {
 			
 			Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.syncingFiles'));
 			
-			Zotero.Sync.Storage.sync(
-				'webdav',
-				
-				{
-					// WebDAV success
+			var zfsSync = function (skipSyncNeeded) {
+				Zotero.Sync.Storage.sync('ZFS', {
+					// ZFS success
 					onSuccess: function () {
-						syncNeeded = true;
-						
-						Zotero.Sync.Storage.sync(
-							'zfs',
-							
-							{
-								// ZFS success
-								onSuccess: function () {
-									Zotero.Sync.Server.sync(finalCallbacks);
-								},
-								
-								// ZFS skip
-								onSkip: function () {
-									if (syncNeeded) {
-										Zotero.Sync.Server.sync(finalCallbacks);
-									}
-								},
-								
-								// ZFS cancel
-								onStop: Zotero.Sync.Runner.stop,
-								
-								// ZFS failure
-								onError: Zotero.Sync.Runner.error,
-								
-								onWarning: Zotero.Sync.Runner.warning
-							}
-						)
+						setTimeout(function () {
+							Zotero.Sync.Server.sync(finalCallbacks);
+						}, 0);
 					},
 					
-					// WebDAV skip
+					// ZFS skip
 					onSkip: function () {
-						Zotero.Sync.Storage.sync(
-							'zfs',
-							
-							{
-								// ZFS success
-								onSuccess: function () {
-									Zotero.Sync.Server.sync(finalCallbacks);
-								},
-								
-								// ZFS skip
-								onSkip: Zotero.Sync.Runner.stop,
-								
-								// ZFS cancel
-								onStop: Zotero.Sync.Runner.stop,
-								
-								// ZFS failure
-								onError: Zotero.Sync.Runner.error,
-								
-								onWarning: Zotero.Sync.Runner.warning
+						setTimeout(function () {
+							if (skipSyncNeeded) {
+								Zotero.Sync.Server.sync(finalCallbacks);
 							}
-						)
+							else {
+								Zotero.Sync.Runner.stop();
+							}
+						}, 0);
 					},
 					
-					// WebDAV cancel
-					onStop: Zotero.Sync.Runner.stop,
+					// ZFS cancel
+					onStop: function () {
+						setTimeout(function () {
+							Zotero.Sync.Runner.stop();
+						}, 0);
+					},
 					
-					// WebDAV failure
-					onError: Zotero.Sync.Runner.error
-				}
-			)
-		}
+					// ZFS failure
+					onError: Zotero.Sync.Runner.error,
+					
+					onWarning: Zotero.Sync.Runner.warning
+				})
+			};
+			
+			Zotero.Sync.Storage.sync('WebDAV', {
+				// WebDAV success
+				onSuccess: function () {
+					zfsSync(true);
+				},
+				
+				// WebDAV skip
+				onSkip: function () {
+					zfsSync();
+				},
+				
+				// WebDAV cancel
+				onStop: Zotero.Sync.Runner.stop,
+				
+				// WebDAV failure
+				onError: Zotero.Sync.Runner.error
+			});
+		};
 		
 		Zotero.Sync.Server.sync({
 			// Sync 1 success

@@ -225,6 +225,7 @@ Zotero.Schema = new function(){
 		finally {
 			Zotero.UnresponsiveScriptIndicator.enable();
 		}
+		
 		return up1 || up2 || up3 || up4;
 	}
 	

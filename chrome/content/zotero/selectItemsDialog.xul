@@ -147,9 +147,18 @@
 					flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 				<splitter class="tree-splitter"/>
 				<treecol
-					id="zotero-items-column-numChildren"
-					label="&zotero.items.numChildren_column;"
-					persist="width ordinal hidden sortActive sortDirection"/>
+					id="zotero-items-column-hasAttachment"
+					class="treecol-image"
+					label="&zotero.tabs.attachments.label;"
+					src="chrome://zotero/skin/attach-small.png"
+					zotero-persist="width ordinal hidden sortActive sortDirection"/>
+				<splitter class="tree-splitter"/>
+				<treecol
+					id="zotero-items-column-hasNote"
+					class="treecol-image"
+					label="&zotero.tabs.notes.label;"
+					src="chrome://zotero/skin/treeitem-note-small.png"
+					zotero-persist="width ordinal hidden sortActive sortDirection"/>
 			</treecols>				
 			<treechildren/>
 		</tree>

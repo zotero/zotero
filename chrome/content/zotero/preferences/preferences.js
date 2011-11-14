@@ -198,6 +198,7 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 		protocol = oldProtocol;
 	}
 	
+	var storageSettings = document.getElementById('storage-settings');
 	var protocolMenu = document.getElementById('storage-protocol');
 	var settings = document.getElementById('storage-webdav-settings');
 	var sep = document.getElementById('storage-separator');
@@ -211,7 +212,12 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 		sep.hidden = true;
 	}
 	
-	protocolMenu.disabled = !enabled;
+	var menulists = storageSettings.getElementsByTagName('menulist');
+	for each(var menulist in menulists) {
+		if (menulist.className == 'storage-personal') {
+			menulist.disabled = !enabled;
+		}
+	}
 	
 	if (!skipWarnings) {
 		// WARN if going between
@@ -270,6 +276,21 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 }
 
 
+function updateStorageSettingsGroups(enabled) {
+	var storageSettings = document.getElementById('storage-settings');
+	var menulists = storageSettings.getElementsByTagName('menulist');
+	for each(var menulist in menulists) {
+		if (menulist.className == 'storage-groups') {
+			menulist.disabled = !enabled;
+		}
+	}
+	
+	setTimeout(function () {
+		updateStorageTerms();
+	}, 1)
+}
+
+
 function updateStorageTerms() {
 	var terms = document.getElementById('storage-terms');
 	
@@ -297,7 +318,11 @@ function verifyStorageServer() {
 	var usernameField = document.getElementById("storage-username");
 	var passwordField = document.getElementById("storage-password");
 	
-	var callback = function (uri, status, error) {
+	verifyButton.hidden = true;
+	abortButton.hidden = false;
+	progressMeter.hidden = false;
+	
+	var requestHolder = Zotero.Sync.Storage.checkServer('webdav', function (uri, status, callback) {
 		verifyButton.hidden = false;
 		abortButton.hidden = true;
 		progressMeter.hidden = true;
@@ -322,13 +347,9 @@ function verifyStorageServer() {
 				break;
 		}
 		
-		Zotero.Sync.Storage.checkServerCallback(uri, status, window, false, error);
-	}
+		callback(uri, status, window);
+	});
 	
-	verifyButton.hidden = true;
-	abortButton.hidden = false;
-	progressMeter.hidden = false;
-	var requestHolder = Zotero.Sync.Storage.checkServer('webdav', callback);
 	abortButton.onclick = function () {
 		if (requestHolder.request) {
 			requestHolder.request.onreadystatechange = undefined;

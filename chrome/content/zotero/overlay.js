@@ -178,7 +178,7 @@ var ZoteroOverlay = new function()
 	 * Hides/displays the Zotero interface
 	 */
 	this.toggleDisplay = function(makeVisible)
-	{	
+	{
 		if(!Zotero || !Zotero.initialized) {
 			ZoteroPane.displayStartupError();
 			return;

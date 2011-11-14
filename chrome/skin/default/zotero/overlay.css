@@ -66,6 +66,11 @@
 	background-image: none;
 }
 
+#zotero-items-column-hasAttachment, #zotero-items-column-hasNote
+{
+	min-width: 21px;
+}
+
 #zotero-items-tree treechildren::-moz-tree-image
 {
 	margin-right: 5px;

@@ -165,13 +165,15 @@ To add a new preference:
 			<preference id="pref-storage-scheme" name="extensions.zotero.sync.storage.scheme" type="string"/>
 			<preference id="pref-storage-url" name="extensions.zotero.sync.storage.url" type="string" instantApply="true"/>
 			<preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string" instantApply="true"/>
+			<preference id="pref-storage-downloadMode-personal" name="extensions.zotero.sync.storage.downloadMode.personal" type="string"/>
+			<preference id="pref-storage-downloadMode-groups" name="extensions.zotero.sync.storage.downloadMode.groups" type="string"/>
 			<preference id="pref-group-storage-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
 		</preferences>
 		
 		<tabbox>
 			<tabs>
-				<tab label="Settings"/>
-				<tab label="Reset"/>
+				<tab label="&zotero.preferences.settings;"/>
+				<tab label="&zotero.preferences.sync.reset;"/>
 			</tabs>
 			
 			<tabpanels>
@@ -197,6 +199,10 @@ To add a new preference:
 										<textbox id="sync-password" type="password"
 											onchange="Zotero.Sync.Server.password = this.value"/>
 									</row>
+									<row>
+										<box/>
+										<checkbox label="&zotero.preferences.sync.syncAutomatically;" preference="pref-sync-autosync"/>
+									</row>
 									<!--
 									<row>
 										<box/>
@@ -212,29 +218,23 @@ To add a new preference:
 							<hbox style="width:2em"/>
 							
 							<vbox>
+								<label class="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
+								<separator class="thin"/>
 								<label class="zotero-text-link" value="&zotero.preferences.sync.createAccount;" href="http://zotero.org/user/register"/>
 								<separator class="thin"/>
 								<label class="zotero-text-link" value="&zotero.preferences.sync.lostPassword;" href="http://zotero.org/user/lostpassword"/>
 							</vbox>
 						</hbox>
-						
-						<separator class="thin"/>
-						
-						<hbox>
-							<checkbox label="&zotero.preferences.sync.syncAutomatically;" preference="pref-sync-autosync"/>
-						</hbox>
-						
-						<label class="zotero-text-link" style="margin-top:.7em; margin-left: 0" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
 					</groupbox>
 					
 					
-					<groupbox>
+					<groupbox id="storage-settings">
 						<caption label="&zotero.preferences.sync.fileSyncing;"/>
 						
 						<!-- My Library -->
-						<hbox style="margin: 0">
+						<hbox>
 							<checkbox label="&zotero.preferences.sync.fileSyncing.myLibrary;" preference="pref-storage-enabled" oncommand="updateStorageSettings(this.checked, null)"/>
-							<menulist id="storage-protocol" style="margin-left: .5em" preference="pref-storage-protocol" oncommand="updateStorageSettings(null, this.value)">
+							<menulist id="storage-protocol" class="storage-personal" style="margin-left: .5em" preference="pref-storage-protocol" oncommand="updateStorageSettings(null, this.value)">
 								<menupopup>
 									<menuitem label="Zotero" value="zotero"/>
 									<menuitem label="WebDAV" value="webdav"/>
@@ -307,16 +307,35 @@ To add a new preference:
 						
 						</stack>
 						
+						<hbox class="storage-settings-download-options" align="center">
+							<label value="&zotero.preferences.sync.fileSyncing.download;"/>
+							<menulist class="storage-personal" preference="pref-storage-downloadMode-personal" style="margin-left: 0">
+								<menupopup>
+									<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
+									<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
+								</menupopup>
+							</menulist>
+						</hbox>
+						
 						<separator id="storage-separator" class="thin"/>
 						
 						<!-- Group Libraries -->
 						<checkbox label="&zotero.preferences.sync.fileSyncing.groups;"
-								preference="pref-group-storage-enabled" oncommand="setTimeout(function () { updateStorageTerms(); }, 1)"/>
+								preference="pref-group-storage-enabled" oncommand="updateStorageSettingsGroups(this.checked)"/>
+						
+						<hbox class="storage-settings-download-options" align="center">
+							<label value="&zotero.preferences.sync.fileSyncing.download;"/>
+							<menulist class="storage-groups" preference="pref-storage-downloadMode-groups" style="margin-left: 0">
+								<menupopup>
+									<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
+									<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
+								</menupopup>
+							</menulist>
+						</hbox>
 						
 						<separator class="thin"/>
 						
 						<vbox>
-							<label class="zotero-text-link" style="margin-top:.3em; margin-left: 0" value="&zotero.preferences.sync.fileSyncing.about;" href="http://zotero.org/support/file_sync"/>
 							<hbox id="storage-terms" style="margin-top: .4em" align="center">
 								<label>&zotero.preferences.sync.fileSyncing.tos1;</label>
 								<label class="zotero-text-link" href="http://www.digitalscholar.org/z_terms" value="&zotero.preferences.sync.fileSyncing.tos2;"/>
