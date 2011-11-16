@@ -165,6 +165,12 @@ To add a new preference:
 			<preference id="pref-storage-url" name="extensions.zotero.sync.storage.url" type="string" instantApply="true"/>
 			<preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string" instantApply="true"/>
 			<preference id="pref-group-storage-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
+
+			<preference id="pref-sync-location-sync" name="extensions.zotero.sync.location.sync" type="string" instantApply="true"/>
+			<preference id="pref-sync-location-api" name="extensions.zotero.api.location" type="string" instantApply="true"/>
+
+			<preference id="pref-sync-location" name="extensions.zotero.sync.location" type="string" instantApply="true"/>
+
 		</preferences>
 		
 		<tabbox>
@@ -177,6 +183,15 @@ To add a new preference:
 				<tabpanel orient="vertical">
 					<groupbox>
 						<caption label="&zotero.preferences.sync.syncServer;"/>
+							<hbox style="margin: 0" align="center">
+								<label value="Store sync information in"/>
+								<menulist id="sync-location" style="margin-left: .5em" preference="pref-sync-location">
+									<menupopup>
+										<menuitem label="Zotero" value="zotero_sync"/>
+										<menuitem label="My Sync server" value="server_sync"/>
+									</menupopup>
+								</menulist>
+							</hbox>
 						
 						<hbox>
 							<grid>
@@ -186,6 +201,14 @@ To add a new preference:
 								</columns>
 								
 								<rows>
+									<row>
+										<label value="Sync URL" />
+										<textbox preference="pref-sync-location-sync"/>
+									</row>
+									<row>
+										<label value="API URL" />
+										<textbox preference="pref-sync-location-api"/>
+									</row>
 									<row>
 										<label value="&zotero.preferences.sync.username;"/>
 										<textbox preference="pref-sync-username"
