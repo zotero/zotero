@@ -1216,7 +1216,16 @@ Zotero.Sync.Server = new function () {
 	var _loginManagerHost = 'chrome://zotero';
 	var _loginManagerURL = 'Zotero Sync Server';
 	
-	var _serverURL = ZOTERO_CONFIG.SYNC_URL;
+
+	var prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                    .getService(Components.interfaces.nsIPrefBranch);
+
+	var prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                    .getService(Components.interfaces.nsIPrefService);
+
+	prefs = prefs.getBranch("extensions.zotero.");
+	var _serverURL = prefs.getCharPref("sync.location.sync");
+
 	
 	var _apiVersionComponent = "version=" + this.apiVersion;
 	var _cachedCredentials = {};
