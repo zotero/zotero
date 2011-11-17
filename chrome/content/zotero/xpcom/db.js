@@ -699,26 +699,34 @@ Zotero.DBConnection.prototype.getNextID = function (table, column) {
 **/
 Zotero.DBConnection.prototype.getNextName = function (table, field, name)
 {
-	var sql = "SELECT " + field + " FROM " + table + " WHERE " + field
-		+ " LIKE ? ORDER BY " + field + " COLLATE NOCASE";
-	var untitleds = this.columnQuery(sql, name + '%');
-	
-	if (!untitleds || untitleds[0]!=name) {
+	var sql = "SELECT TRIM(SUBSTR(" + field + ", " + (name.length + 1) + ")) "
+				+ "FROM " + table + " "
+				+ "WHERE " + field + " REGEXP '^" + name + "( [0-9]+)?$' "
+				+ "ORDER BY " + field;
+	var suffixes = this.columnQuery(sql);
+	// If none found or first one has a suffix, use default name
+	if (!suffixes || suffixes[0]) {
 		return name;
 	}
 	
+	suffixes.sort(function (a, b) {
+		return parseInt(a) - parseInt(b);
+	});
+	
+	Zotero.debug(suffixes);
+	
 	var i = 1;
+	while (suffixes[i] === "") {
+		i++;
+	}
 	var num = 2;
-	while (untitleds[i] && untitleds[i]==(name + ' ' + num)) {
-		while (untitleds[i+1] && untitleds[i]==untitleds[i+1]) {
-			this._debug('Next ' + i + ' is ' + untitleds[i]);
+	while (suffixes[i] == num) {
+		while (suffixes[i+1] && suffixes[i] == suffixes[i+1]) {
 			i++;
 		}
-		
 		i++;
 		num++;
 	}
-	
 	return name + ' ' + num;
 }
 
