@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "権利">
 <!ENTITY zotero.items.dateAdded_column "作成日時">
 <!ENTITY zotero.items.dateModified_column "更新日時">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "ライブラリーで表示">
 <!ENTITY zotero.items.menu.attach.note "メモを追加">

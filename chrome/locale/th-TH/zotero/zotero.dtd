@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Rights">
 <!ENTITY zotero.items.dateAdded_column "วันที่เพิ่ม">
 <!ENTITY zotero.items.dateModified_column "วันที่แก้ไข">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "แสดงในไลบรารี่">
 <!ENTITY zotero.items.menu.attach.note "Add Note">

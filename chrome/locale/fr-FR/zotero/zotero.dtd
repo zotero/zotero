@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Autorisations">
 <!ENTITY zotero.items.dateAdded_column "Date d'ajout">
 <!ENTITY zotero.items.dateModified_column "Date de modification">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Afficher dans la bibliothèque">
 <!ENTITY zotero.items.menu.attach.note "Ajouter une note">

@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Telif">
 <!ENTITY zotero.items.dateAdded_column "Eklendiği Tarih">
 <!ENTITY zotero.items.dateModified_column "Değiştirildiği Tarih">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Kitaplıkta Göster">
 <!ENTITY zotero.items.menu.attach.note "Not Ekle">

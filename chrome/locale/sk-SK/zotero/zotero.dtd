@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Práva">
 <!ENTITY zotero.items.dateAdded_column "Pridané dňa">
 <!ENTITY zotero.items.dateModified_column "Upravené dňa">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Zobraziť v knižnici">
 <!ENTITY zotero.items.menu.attach.note "Pridať poznámku">

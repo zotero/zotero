@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Права">
 <!ENTITY zotero.items.dateAdded_column "Датум додавања">
 <!ENTITY zotero.items.dateModified_column "Датум промене">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Прикажи у библиотеци">
 <!ENTITY zotero.items.menu.attach.note "Додај белешку">

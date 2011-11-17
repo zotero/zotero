@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Rettigheter">
 <!ENTITY zotero.items.dateAdded_column "Lagt til">
 <!ENTITY zotero.items.dateModified_column "Sist endret">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Vis i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Legg til notat">

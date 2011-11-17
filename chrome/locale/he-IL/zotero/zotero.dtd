@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "זכויות">
 <!ENTITY zotero.items.dateAdded_column "תאריך הוספה">
 <!ENTITY zotero.items.dateModified_column "תאריך שינוי">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "הצג בספרייה">
 <!ENTITY zotero.items.menu.attach.note "Add Note">

@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "权限">
 <!ENTITY zotero.items.dateAdded_column "添加时间">
 <!ENTITY zotero.items.dateModified_column "修改时间">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "在书库中显示">
 <!ENTITY zotero.items.menu.attach.note "添加便笺">

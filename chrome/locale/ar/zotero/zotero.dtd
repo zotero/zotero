@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "الملكية الفكرية">
 <!ENTITY zotero.items.dateAdded_column "تاريخ الإضافة">
 <!ENTITY zotero.items.dateModified_column "تاريخ التعديل">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "عرض في المكتبة">
 <!ENTITY zotero.items.menu.attach.note "اضافة ملاحظة">

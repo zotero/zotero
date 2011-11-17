@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Rights">
 <!ENTITY zotero.items.dateAdded_column "Date Added">
 <!ENTITY zotero.items.dateModified_column "Date Modified">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Show in Library">
 <!ENTITY zotero.items.menu.attach.note "Тэмдэглэл нэмэх">

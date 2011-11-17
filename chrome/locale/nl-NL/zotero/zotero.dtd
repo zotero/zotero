@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Rechten">
 <!ENTITY zotero.items.dateAdded_column "Datum toegevoegd">
 <!ENTITY zotero.items.dateModified_column "Datum bewerkt">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "In bibliotheek tonen">
 <!ENTITY zotero.items.menu.attach.note "Aantekening toevoegen">

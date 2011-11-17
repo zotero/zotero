@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Pravice">
 <!ENTITY zotero.items.dateAdded_column "Dodano dne">
 <!ENTITY zotero.items.dateModified_column "Datum spremembe">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Pokaži v knjižnici">
 <!ENTITY zotero.items.menu.attach.note "Dodaj opombo">

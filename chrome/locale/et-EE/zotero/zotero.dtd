@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Õigused">
 <!ENTITY zotero.items.dateAdded_column "Lisamise kuupäev">
 <!ENTITY zotero.items.dateModified_column "Muutmise kuupäev">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Näidata raamatukogus">
 <!ENTITY zotero.items.menu.attach.note "Märkuse lisamine">

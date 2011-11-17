@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Quyền hạn">
 <!ENTITY zotero.items.dateAdded_column "Ngày tạo lập">
 <!ENTITY zotero.items.dateModified_column "Ngày thay đổi">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Hiển thị trong Thư viện">
 <!ENTITY zotero.items.menu.attach.note "Tạo một Ghi chép">
