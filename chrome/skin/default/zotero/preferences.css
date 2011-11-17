@@ -50,24 +50,31 @@ grid row hbox:first-child
 
 #fontSize2
 {
-	font-size: 1.25em;
+	font-size: 1.15em;
 }
 
 #fontSize3
 {
+	font-size: 1.3em;
+}
+
+#fontSize4
+{
 	font-size: 1.5em;
 }
 
-#fontSize radio, #statusBarIcon radio
+
+#showIn radio, #statusBarIcon radio
 {
-	width: 90px;
-}
-#showIn radio
-{
-	width: 135px;
+	width: 120px;
 }
 
-#fontSize radio .radio-icon, #statusBarIcon radio .radio-icon
+#fontSize radio
+{
+	margin-right: 20px;
+}
+
+#statusBarIcon radio .radio-icon
 {
 	margin-left: 6px;
 }

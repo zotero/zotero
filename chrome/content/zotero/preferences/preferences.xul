@@ -78,10 +78,11 @@ To add a new preference:
 						<hbox align="center">
 							<label value="&zotero.preferences.fontSize;" control="fontSize"/>
 						</hbox>
-						<radiogroup id="fontSize" orient="horizontal" preference="pref-fontSize">
+						<radiogroup id="fontSize" orient="horizontal" align="center" preference="pref-fontSize">
 							<radio id="fontSize1" label="&zotero.preferences.fontSize.small;" value="1.0"/>
-							<radio id="fontSize2" label="&zotero.preferences.fontSize.medium;" value="1.25"/>
-							<radio id="fontSize3" label="&zotero.preferences.fontSize.large;" value="1.5"/>
+							<radio id="fontSize2" label="&zotero.preferences.fontSize.medium;" value="1.15"/>
+							<radio id="fontSize3" label="&zotero.preferences.fontSize.large;" value="1.3"/>
+							<radio id="fontSize4" label="&zotero.preferences.fontSize.xlarge;" value="1.5"/>
 						</radiogroup>
 					</row>
 					
