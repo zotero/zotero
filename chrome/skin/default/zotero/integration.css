@@ -150,13 +150,20 @@ body {
 	font-size: 12px;
 	font: -moz-field;
 	-moz-user-focus: normal;
-	padding: 5px;
+	padding: 3px 5px 3px 10px;
 }
 
-.quick-format-item:not(:last-child) {
+.quick-format-item:not(:last-child), .quick-format-separator:not(:last-child) {
 	border-style: solid;
 	border-width: 0 0 1px 0;
 	border-color: #BBB;
+}
+
+.quick-format-separator {
+	font-size: 12px;
+	font: -moz-field;
+	-moz-user-focus: ignore;
+	color: gray;
 }
 
 richlistitem[selected="true"] {

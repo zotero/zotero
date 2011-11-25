@@ -25,8 +25,8 @@
 
 var Zotero_QuickFormat = new function () {
 	var io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, keepSorted, showEditor,
-		referencePanel, referenceBox, referenceHeight, dragX, dragY, curLocator, curLocatorLabel,
-		curIDs = [], curResizer, dragging;
+		referencePanel, referenceBox, referenceHeight, separatorHeight, dragX, dragY, curLocator,
+		curLocatorLabel, curIDs = [], curResizer, dragging;
 	
 	// A variable that contains the timeout object for the latest onKeyPress event
 	var eventTimeout = null;
@@ -279,14 +279,17 @@ var Zotero_QuickFormat = new function () {
 			var previousLibrary = -1;
 			
 			for(var i=0, n=items.length; i<n; i++) {
-				if(previousLibrary!=items[i].libraryID){
-					//TODO: Make localized labels and resolve the library name based on library ID
-					referenceBox.appendChild(_buildListSeparator("Items from "+items[i].libraryID));
+				var item = items[i], libraryID = item.libraryID;
+				
+				if(previousLibrary != libraryID) {
+					var libraryName = libraryID ? Zotero.Libraries.getName(libraryID)
+						: Zotero.getString('pane.collections.library');
+					referenceBox.appendChild(_buildListSeparator(libraryName));
 				}
 
-				referenceBox.appendChild(_buildListItem(items[i]),false);
+				referenceBox.appendChild(_buildListItem(item),false);
 				
-				previousLibrary=items[i].libraryID
+				previousLibrary = libraryID;
 
 			}
 		}
@@ -396,8 +399,7 @@ var Zotero_QuickFormat = new function () {
 
 	function _buildListSeparator(labelText) {
 		var titleNode = document.createElement("label");
-		//TODO: CSS style needed for this class
-		titleNode.setAttribute("class", "quick-format-separator");
+		titleNode.setAttribute("class", "quick-format-separator-title");
 		titleNode.setAttribute("flex", "1");
 		titleNode.setAttribute("crop", "end");
 		titleNode.setAttribute("value", labelText);
@@ -409,6 +411,8 @@ var Zotero_QuickFormat = new function () {
 		rll.setAttribute("disabled", true);
 		rll.setAttribute("class", "quick-format-separator");
 		rll.appendChild(titleNode);
+		rll.addEventListener("mousedown", _ignoreClick, true);
+		rll.addEventListener("click", _ignoreClick, true);
 		
 		return rll;
 	}
@@ -498,10 +502,29 @@ var Zotero_QuickFormat = new function () {
 	}
 	
 	/**
+	 * Ignores clicks (for use on separators in the rich list box)
+	 */
+	function _ignoreClick(e) {
+		e.stopPropagation();
+		e.preventDefault();
+	}
+	
+	/**
 	 * Resizes window to fit content
 	 */
 	function _resize() {
-		var numReferences = referenceBox.childNodes.length, height;
+		var childNodes = referenceBox.childNodes,
+			numReferences = 0,
+			numSeparators = 0,
+			height;
+		for(var i=0, n=childNodes.length; i<n; i++) {
+			if(childNodes[i].className === "quick-format-item") {
+				numReferences++;
+			} else if(childNodes[i].className === "quick-format-separator") {
+				numSeparators++;
+			}
+		}
+		
 		var qfeHeight = qfe.scrollHeight;
 		
 		if(qfeHeight > 30) {
@@ -522,7 +545,9 @@ var Zotero_QuickFormat = new function () {
 		var panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
 		
 		if(numReferences) {
-			var height = referenceHeight ? Math.min(numReferences, SHOWN_REFERENCES)*referenceHeight+2 : 39;
+			var height = referenceHeight ? 
+				Math.min(numReferences*referenceHeight+1+numSeparators*separatorHeight, 
+					SHOWN_REFERENCES*referenceHeight+1+separatorHeight) : 39;
 			
 			if(panelShowing && height !== referencePanel.clientHeight) {
 				referencePanel.sizeTo((window.outerWidth-30), height);
@@ -535,9 +560,11 @@ var Zotero_QuickFormat = new function () {
 					false, false, null);
 				
 				if(!referenceHeight) {
-					referenceHeight = referenceBox.firstChild.scrollHeight;
-					height = Math.min(numReferences, SHOWN_REFERENCES)*referenceHeight+2;
-					referencePanel.sizeTo((window.innerWidth-30), height);
+					separatorHeight = referenceBox.firstChild.scrollHeight;
+					referenceHeight = referenceBox.childNodes[1].scrollHeight;
+					height = Math.min(numReferences*referenceHeight+1+numSeparators*separatorHeight, 
+						SHOWN_REFERENCES*referenceHeight+1+separatorHeight);
+					referencePanel.sizeTo((window.outerWidth-30), height);
 				}
 			}
 		} else {
@@ -739,7 +766,6 @@ var Zotero_QuickFormat = new function () {
 	 * Handle return or escape
 	 */
 	function _onQuickSearchKeyPress(event) {
-		
 		var keyCode = event.keyCode;
 		if(keyCode === event.DOM_VK_RETURN || keyCode === event.DOM_VK_ENTER) {
 			event.preventDefault();
