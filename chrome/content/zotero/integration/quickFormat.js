@@ -265,19 +265,38 @@ var Zotero_QuickFormat = new function () {
 		
 		while(referenceBox.hasChildNodes()) referenceBox.removeChild(referenceBox.firstChild);
 		
+		var firstSelectableIndex = 0;
+
 		if(ids.length) {
 			if(ids.length > 50) ids = ids.slice(0, 50);
 			var items = Zotero.Items.get(ids);
+			
+			firstSelectableIndex = 1;
+			
+			//TODO: sort the currently used items in before any other items
+			items.sort(function(a, b) {return a.libraryID > b.libraryID}) 
+			
+			var previousLibrary = -1;
+			
 			for(var i=0, n=items.length; i<n; i++) {
-				referenceBox.appendChild(_buildListItem(items[i]));
+				if(previousLibrary!=items[i].libraryID){
+					//TODO: Make localized labels and resolve the library name based on library ID
+					referenceBox.appendChild(_buildListSeparator("Items from "+items[i].libraryID));
+				}
+
+				referenceBox.appendChild(_buildListItem(items[i]),false);
+				
+				previousLibrary=items[i].libraryID
+
 			}
 		}
 		
 		_resize();
 		
-		referenceBox.selectedIndex = 0;
-		referenceBox.ensureIndexIsVisible(0);
+		referenceBox.selectedIndex = firstSelectableIndex;
+		referenceBox.ensureIndexIsVisible(firstSelectableIndex);
 	}
+
 	
 	/**
 	 * Builds a string describing an item. We avoid CSL here for speed.
@@ -371,6 +390,25 @@ var Zotero_QuickFormat = new function () {
 		rll.appendChild(titleNode);
 		rll.appendChild(infoNode);
 		rll.addEventListener("click", _bubbleizeSelected, false);
+		
+		return rll;
+	}
+
+	function _buildListSeparator(labelText) {
+		var titleNode = document.createElement("label");
+		//TODO: CSS style needed for this class
+		titleNode.setAttribute("class", "quick-format-separator");
+		titleNode.setAttribute("flex", "1");
+		titleNode.setAttribute("crop", "end");
+		titleNode.setAttribute("value", labelText);
+		
+		// add to rich list item
+		var rll = document.createElement("richlistitem");
+		rll.setAttribute("orient", "vertical");
+		rll.setAttribute("flex", "1");
+		rll.setAttribute("disabled", true);
+		rll.setAttribute("class", "quick-format-separator");
+		rll.appendChild(titleNode);
 		
 		return rll;
 	}
@@ -719,10 +757,24 @@ var Zotero_QuickFormat = new function () {
 			
 		} else if(keyCode === event.DOM_VK_UP) {
 			var selectedItem = referenceBox.selectedItem;
+
 			var previousSibling;
-			if((previousSibling = selectedItem.previousSibling)) {
+			
+			//Seek the closet previous sibling that is not disabled
+			while((previousSibling = selectedItem.previousSibling) && previousSibling.getAttribute("disabled")){
+				selectedItem = previousSibling;
+			}
+			//If found, change to that
+			if(previousSibling) {
 				referenceBox.selectedItem = previousSibling;
-				referenceBox.ensureElementIsVisible(previousSibling);
+				
+				//If there are separators before this item, ensure that they are visible
+				var visibleItem = previousSibling;
+
+				while(visibleItem.previousSibling && visibleItem.previousSibling.getAttribute("disabled")){
+					visibleItem = visibleItem.previousSibling;
+				}
+				referenceBox.ensureElementIsVisible(visibleItem);
 				event.preventDefault();
 			};
 		} else if(keyCode === event.DOM_VK_DOWN) {
@@ -768,7 +820,15 @@ var Zotero_QuickFormat = new function () {
 			} else {
 				var selectedItem = referenceBox.selectedItem;
 				var nextSibling;
-				if((nextSibling = selectedItem.nextSibling)) {
+				
+				//Seek the closet next sibling that is not disabled
+				while((nextSibling = selectedItem.nextSibling) && nextSibling.getAttribute("disabled")){
+					selectedItem = nextSibling;
+				}
+				
+				//If found, change to that
+
+				if(nextSibling){
 					referenceBox.selectedItem = nextSibling;
 					referenceBox.ensureElementIsVisible(nextSibling);
 					event.preventDefault();
