@@ -1754,12 +1754,12 @@ const ZOTERO_CONFIG = {
 		var prefixLen = prefix.length;
 		
 		var modes = {
-			titlesAndCreators: {
-				label: "Titles & Creators"
+			titleCreatorYear: {
+				label: "Title, Creator, Year"
 			},
 			
 			fields: {
-				label: "All Fields"
+				label: "All Fields & Tags"
 			},
 			
 			everything: {
@@ -1770,6 +1770,11 @@ const ZOTERO_CONFIG = {
 		if (!modes[mode]) {
 			Zotero.Prefs.set("search.quicksearch-mode", "fields");
 			mode = 'fields';
+		}
+		// TEMP -- pre-3.0b3
+		else if (modes[mode] == 'titlesAndCreators') {
+			Zotero.Prefs.set("search.quicksearch-mode", "titleCreatorYear");
+			mode = 'titleCreatorYear'
 		}
 		
 		var hbox = document.getAnonymousNodes(searchBox)[0];

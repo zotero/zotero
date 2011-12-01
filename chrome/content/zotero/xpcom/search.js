@@ -410,8 +410,9 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 		
 		for each(var part in parts) {
 			this.addCondition('blockStart');
-			if (condition == 'quicksearch-titlesAndCreators') {
+			if (condition == 'quicksearch-titleCreatorYear') {
 				this.addCondition('title', operator, part.text, false);
+				this.addCondition('year', operator, part.text, false);
 			}
 			else {
 				this.addCondition('field', operator, part.text, false);
@@ -437,7 +438,7 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 			this.addCondition('blockEnd');
 		}
 		
-		if (condition == 'quicksearch-titlesAndCreators') {
+		if (condition == 'quicksearch-titleCreatorYear') {
 			this.addCondition('noChildren', 'true');
 		}
 		
@@ -1189,6 +1190,15 @@ Zotero.Search.prototype._buildQuery = function(){
 						openParens++;
 						break;
 					
+					case 'year':
+						condSQL += 'fieldID IN (?) AND ';
+						condSQLParams.push(Zotero.ItemFields.getID('date'));
+						condSQL += "valueID IN (SELECT valueID FROM "
+							+ "itemDataValues WHERE ";
+						
+						openParens++;
+						break;
+					
 					case 'collection':
 						var col;
 						if (condition.value) {
@@ -1872,7 +1882,7 @@ Zotero.SearchConditions = new function(){
 			},
 			
 			{
-				name: 'quicksearch-titlesAndCreators',
+				name: 'quicksearch-titleCreatorYear',
 				operators: {
 					is: true,
 					isNot: true,
@@ -2127,6 +2137,19 @@ Zotero.SearchConditions = new function(){
 				field: 'value',
 				aliases: ['accessDate', 'date', 'dateDue', 'accepted'], // TEMP - NSF
 				template: true // mark for special handling
+			},
+			
+			{
+				name: 'year',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'itemData',
+				field: 'STRFTIME("%Y", SUBSTR(value, 1, 10))',
+				special: true
 			},
 			
 			{
