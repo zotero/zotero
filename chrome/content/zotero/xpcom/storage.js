@@ -141,9 +141,8 @@ Zotero.Sync.Storage = new function () {
 			return;
 		}
 		
-		if ((!module.includeUserFiles || !Zotero.Sync.Storage.downloadOnSync())
-				&& (!module.includeGroupFiles || !Zotero.Sync.Storage.downloadOnSync('groups'))) {
-			Zotero.debug("No libraries are enabled for on-sync downloading");
+		if (!module.includeUserFiles && !module.includeGroupFiles) {
+			Zotero.debug("No libraries are enabled for " + module.name + " syncing");
 			Zotero.Sync.Storage.EventManager.skip();
 			return;
 		}
@@ -969,10 +968,15 @@ Zotero.Sync.Storage = new function () {
 			_syncInProgress = true;
 		}
 		
-		var downloadFileIDs = _getFilesToDownload(
-			module.includeUserFiles && Zotero.Sync.Storage.downloadOnSync(),
-			module.includeGroupFiles && Zotero.Sync.Storage.downloadOnSync('groups')
-		);
+		var includeUserFiles = module.includeUserFiles && Zotero.Sync.Storage.downloadOnSync();
+		var includeGroupFiles = module.includeGroupFiles && Zotero.Sync.Storage.downloadOnSync('groups');
+		
+		if (!includeUserFiles && !includeGroupFiles) {
+			Zotero.debug("No libraries are enabled for on-sync downloading");
+			return false;
+		}
+		
+		var downloadFileIDs = _getFilesToDownload(includeUserFiles, includeGroupFiles);
 		if (!downloadFileIDs) {
 			Zotero.debug("No files to download");
 			return false;
