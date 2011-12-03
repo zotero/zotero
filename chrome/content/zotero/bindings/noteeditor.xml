@@ -497,7 +497,7 @@
 			</method>
 		</implementation>
 		<content>
-			<xul:vbox id="note-editor" xbl:inherits="flex">
+			<xul:vbox xbl:inherits="flex">
 				<xul:grid>
 					<xul:columns>
 						<xul:column/>

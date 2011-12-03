@@ -297,7 +297,7 @@
 					}
 					
 					// Note editor
-					var noteEditor = this._id('note-editor');
+					var noteEditor = this._id('attachment-note-editor');
 					if (this.displayNote) {
 						if (this.displayNoteIfEmpty || this.item.getNote() != '') {
 							Zotero.debug("setting links on top");
@@ -542,7 +542,7 @@
 					</rows>
 				</grid>
 				
-				<zoteronoteeditor id="note-editor" notitle="1" flex="1"/>
+				<zoteronoteeditor id="attachment-note-editor" notitle="1" flex="1"/>
 				
 				<button id="select-button" hidden="true"/>
 			</vbox>

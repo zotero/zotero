@@ -103,6 +103,7 @@
 
 				this._constructed = true;
 				
+				// Don't load if a value hasn't yet been set
 				if (this._loadOnConstruct) {
 					this._load();
 				}
