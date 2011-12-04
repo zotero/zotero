@@ -216,9 +216,13 @@
 			<method name="save">
 				<body>
 					<![CDATA[
-						var noteField = this._id('noteField');
+						if (this._mode == 'view') {
+							Zotero.debug("Not saving read-only note");
+							return;
+						}
 						
 						// Update note
+						var noteField = this._id('noteField');
 						if (this.item) {
 							// If note is reselected automatically after save
 							// from external note window, don't overwrite content
@@ -493,7 +497,7 @@
 			</method>
 		</implementation>
 		<content>
-			<xul:vbox id="note-editor" xbl:inherits="flex">
+			<xul:vbox xbl:inherits="flex">
 				<xul:grid>
 					<xul:columns>
 						<xul:column/>

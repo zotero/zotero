@@ -262,7 +262,7 @@ Zotero.Annotate = new function() {
 	function _seen(node,array) {
 		var seen = false;
 		for (n in array) {
-			if (node.isSameNode(array[n])) {
+			if (node === array[n]) {
 				var seen = true;
 			}
 		}
@@ -389,7 +389,7 @@ Zotero.Annotate.Path.prototype.fromNode = function(node, offset) {
 	}
 	if(!node) throw "Annotate: Path() resolved text offset inappropriately";
 	
-	while(node && !node.isSameNode(this._document)) {
+	while(node && !node === this._document) {
 		var number = 1;
 		var sibling = node.previousSibling;
 		while(sibling) {
@@ -1378,7 +1378,7 @@ Zotero.Highlight.prototype.unhighlight = function(container, offset, path, mode)
 		if(!span) continue;
 		var parentNode = span.parentNode;
 		
-		if(mode != 0 && span.isSameNode(container.parentNode) && offset != 0) {
+		if(mode != 0 && span === container.parentNode && offset != 0) {
 			if(mode == 1) {
 				// split text node
 				var textNode = container.splitText(offset);
@@ -1387,7 +1387,7 @@ Zotero.Highlight.prototype.unhighlight = function(container, offset, path, mode)
 				// loop through, removing nodes
 				var node = span.firstChild;
 				
-				while(span.firstChild && !span.firstChild.isSameNode(textNode)) {
+				while(span.firstChild && !span.firstChild === textNode) {
 					parentNode.insertBefore(span.removeChild(span.firstChild), span);
 				}
 			} else if(mode == 2) {
@@ -1435,25 +1435,25 @@ Zotero.Highlight.prototype._highlight = function() {
 	
 	var ancestor = this.range.commonAncestorContainer;
 	
-	var onlyOneNode = startNode.isSameNode(endNode);
+	var onlyOneNode = startNode === endNode;
 	
-	if(!onlyOneNode && !startNode.isSameNode(ancestor) && !endNode.isSameNode(ancestor)) {
+	if(!onlyOneNode && !startNode === ancestor && !endNode === ancestor) {
 		// highlight nodes after start node in the DOM hierarchy not at ancestor level
-		while(startNode.parentNode && !startNode.parentNode.isSameNode(ancestor)) {
+		while(startNode.parentNode && !startNode.parentNode === ancestor) {
 			if(startNode.nextSibling) {
 				this._highlightSpaceBetween(startNode.nextSibling, startNode.parentNode.lastChild);
 			}
 			startNode = startNode.parentNode
 		}
 		// highlight nodes after end node in the DOM hierarchy not at ancestor level
-		while(endNode.parentNode && !endNode.parentNode.isSameNode(ancestor)) {
+		while(endNode.parentNode && !endNode.parentNode === ancestor) {
 			if(endNode.previousSibling) {
 				this._highlightSpaceBetween(endNode.parentNode.firstChild, endNode.previousSibling);
 			}
 			endNode = endNode.parentNode
 		}
 		// highlight nodes between start node and end node at ancestor level
-		if(!startNode.isSameNode(endNode.previousSibling)) {
+		if(!startNode === endNode.previousSibling) {
 			this._highlightSpaceBetween(startNode.nextSibling, endNode.previousSibling);
 		}
 	}
@@ -1531,10 +1531,10 @@ Zotero.Highlight.prototype._highlightTextNode = function(textNode) {
 			// look for span in this.spans and delete it if it's there
 			var span = previousSiblingHighlighted ? previousSibling : nextSibling;
 			for(var i=0; i<this.spans.length; i++) {
-				if(parent.isSameNode(this.spans[i])) {
+				if(parent === this.spans[i]) {
 					this.spans.splice(i, 1);
 					i--;
-				} else if(span.isSameNode(this.spans[i])) {
+				} else if(span === this.spans[i]) {
 					saveSpan = false;
 				}
 			}
@@ -1546,14 +1546,14 @@ Zotero.Highlight.prototype._highlightTextNode = function(textNode) {
 		
 		var span = previousSibling;
 		for(var i=0; i<this.spans.length; i++) {
-			if(span.isSameNode(this.spans[i])) saveSpan = false;
+			if(span === this.spans[i]) saveSpan = false;
 		}
 	} else if(nextSiblingHighlighted) {
 		nextSibling.insertBefore(parent.removeChild(textNode), nextSibling.firstChild);
 		
 		var span = nextSibling;
 		for(var i=0; i<this.spans.length; i++) {
-			if(span.isSameNode(this.spans[i])) saveSpan = false;
+			if(span === this.spans[i]) saveSpan = false;
 		}
 	} else {
 		var previousSibling = textNode.previousSibling;
@@ -1607,7 +1607,7 @@ Zotero.Highlight.prototype._highlightSpaceBetween = function(start, end) {
 		}
 		
 		// do this in the middle, after we're finished with node but before we add any spans
-		if(node.isSameNode(end)) {
+		if(node === end) {
 			node = false;
 		} else {
 			node = node.nextSibling;

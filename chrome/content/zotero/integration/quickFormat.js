@@ -162,7 +162,7 @@ var Zotero_QuickFormat = new function () {
 		var str = _getEditorContent();
 		var haveConditions = false;
 		
-		const specifiedLocatorRe = /(?:,? *(pp|p)(?:\. *| +)|:)([0-9\-]+) *$/;
+		const specifiedLocatorRe = /^(?:,? *(pp|p)(?:\. *| +)|:)([0-9\-]+) *$/;
 		const yearPageLocatorRe = /,? *([0-9]+) *((B[. ]*C[. ]*|B[. ]*)|[AC][. ]*|A[. ]*D[. ]*|C[. ]*E[. ]*)?,? *(?:([0-9\-]+))?$/i;
 		const creatorSplitRe = /(?:,| *(?:and|\&)) +/;
 		const charRe = /[\w\u007F-\uFFFF]/;
@@ -230,20 +230,14 @@ var Zotero_QuickFormat = new function () {
 				
 				str = str.substr(0, m.index)+str.substring(m.index+m[0].length);
 			}
+			if(year) str += " "+year;
 			
 			var s = new Zotero.Search();
 			str = str.replace(" & ", " ", "g").replace(" and ", " ", "g");
 			if(charRe.test(str)) {
 				Zotero.debug("QuickFormat: QuickSearch: "+str);
-				s.addCondition("quicksearch-titlesAndCreators", "contains", str);
+				s.addCondition("quicksearch-titleCreatorYear", "contains", str);
 				s.addCondition("itemType", "isNot", "attachment");
-				haveConditions = true;
-			}
-			
-			if(year) {
-				Zotero.debug("QuickFormat: Year: "+year);
-				s.addCondition("date", "isAfter", (year-1)+"-12-31 23:59:59");
-				s.addCondition("date", "isBefore", (year)+"-12-31 23:59:59");
 				haveConditions = true;
 			}
 		}
