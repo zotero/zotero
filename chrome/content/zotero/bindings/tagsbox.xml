@@ -293,6 +293,7 @@
 					t.setAttribute('fieldname', fieldName);
 					t.setAttribute('ztabindex', tabindex);
 					t.setAttribute('flex', '1');
+                    t.setAttribute('newlines','pasteintact');
 					
 					// Add auto-complete
 					t.setAttribute('type', 'autocomplete');
@@ -481,8 +482,19 @@
 					var focusMode = 'tags';
 					var focusBox = tagsbox;
 					
+					//Move at least one field even if no entry was added because of
+					//the way bookkeeping is done above
+					var fieldsToMove = 1;
+					//Check if id is an array and, if so, how many new entries
+					//were added at once
+					if (Object.prototype.toString.call(id) === '[object Array]') {
+						fieldsToMove = id.length;
+					}
+					
 					if (this._tabDirection) {
-						this._focusNextField(focusBox, this._lastTabIndex, this._tabDirection == -1);
+						for (var i = 0; i < fieldsToMove; i++) {
+							this._focusNextField(focusBox, this._lastTabIndex, this._tabDirection == -1);
+						}
 					}
 				]]>
 				</body>

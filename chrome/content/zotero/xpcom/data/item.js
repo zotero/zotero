@@ -1593,7 +1593,7 @@ Zotero.Item.prototype.save = function() {
 				'libraryID',
 				'key'
 			];
-			for each(field in updateFields) {
+			for each(var field in updateFields) {
 				if (this._changedPrimaryData && this._changedPrimaryData[field]) {
 					sql += field + '=?, ';
 					sqlValues.push(this.getField(field));
@@ -3478,6 +3478,16 @@ Zotero.Item.prototype.addTag = function(name, type) {
 	if (!this.id) {
 		throw ('Cannot add tag to unsaved item in Item.addTag()');
 	}
+    
+    //Check for newlines or carriage returns used as delimiters
+    //in a series of tags added at once.  Add each tag
+    //separately.
+    if (name.search('\r') > -1 || name.search('\n') > -1) {
+        name = name.replace('\r\n','\n');
+        name = name.replace('\r','\n');
+        var nameArray = name.split('\n');
+        return this.addTags(nameArray,type);
+    }
 	
 	name = Zotero.Utilities.trim(name);
 	
@@ -3541,10 +3551,21 @@ Zotero.Item.prototype.addTag = function(name, type) {
 Zotero.Item.prototype.addTags = function (tags, type) {
 	Zotero.DB.beginTransaction();
 	try {
-		for each(var tag in tags) {
-			this.addTag(tag, type);
+		var tagIDarray = [];
+		var counter = 0;
+		var tempID = false;
+		for (var i = 0; i < tags.length; i++) {
+			tempID = this.addTag(tags[i], type);
+			if (tempID) {
+				tagIDarray[counter] = tempID;
+				counter++;
+			}
 		}
+		
+		tagIDarray = (tagIDarray.length>0) ? tagIDarray : false;
+		
 		Zotero.DB.commitTransaction();
+		return tagIDarray;
 	}
 	catch (e) {
 		Zotero.DB.rollbackTransaction();
