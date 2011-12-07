@@ -1366,7 +1366,8 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 		
 		if(!session.bibliographyHasChanged) {
 			for(var i=0, n=citation.citationItems.length; i<n; i++) {
-				if(session.citationsByItemID[citation.citationItems[i].itemID].length == 1) {
+				if(session.citationsByItemID[citation.citationItems[i].itemID] &&
+						session.citationsByItemID[citation.citationItems[i].itemID].length == 1) {
 					session.bibliographyHasChanged = true;
 					break;
 				}
