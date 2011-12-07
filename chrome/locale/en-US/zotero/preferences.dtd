@@ -159,7 +159,7 @@
 <!ENTITY zotero.preferences.locate.description				"Description">
 <!ENTITY zotero.preferences.locate.name						"Name">
 <!ENTITY zotero.preferences.locate.locateEnginedescription	"A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
-<!ENTITY zotero.preferences.locate.addDescription			"To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select "Add" from Zotero's Locate menu.">
+<!ENTITY zotero.preferences.locate.addDescription			"To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select &#34;Add&#34; from Zotero's Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults			"Restore Defaults">
 
 <!ENTITY zotero.preferences.charset							"Character Encoding">
