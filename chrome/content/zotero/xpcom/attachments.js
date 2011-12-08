@@ -328,11 +328,9 @@ Zotero.Attachments = new function(){
 						// if it fails
 						//
 						// TODO: index later
-						var timer = Components.classes["@mozilla.org/timer;1"].
-							createInstance(Components.interfaces.nsITimer);
-						timer.initWithCallback({notify: function() {
+						setTimeout(function() {
 							Zotero.Fulltext.indexItems([itemID]);
-						}}, 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+						}, 1000);
 					}
 					catch (e) {
 						// Clean up
