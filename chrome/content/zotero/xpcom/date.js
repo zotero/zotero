@@ -342,7 +342,7 @@ Zotero.Date = new function(){
 				'aug', 'sep', 'oct', 'nov', 'dec'];
 			// If using a non-English bibliography locale, try those too
 			if (Zotero.locale != 'en-US') {
-				Zotero.Date.getMonths();
+				_months = Zotero.Date.getMonths();
 				months = months.concat(_months['short']).concat(_months['long']);
 				for(var i=0, n=months.length; i<n; i++) months[i] = months[i].toLowerCase();
 			}
