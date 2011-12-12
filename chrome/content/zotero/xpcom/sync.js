@@ -3343,6 +3343,8 @@ Zotero.Sync.Server.Data = new function() {
 		var xmlDeletedNode = doc.createElement('deleted');
 		var inserted = false;
 		
+		var defaultLibraryID = Zotero.libraryID;
+		
 		for each(var syncObject in Zotero.Sync.syncObjects) {
 			var Type = syncObject.singular; // 'Item'
 			var Types = syncObject.plural; // 'Items'
@@ -3367,7 +3369,7 @@ Zotero.Sync.Server.Data = new function() {
 					}
 					
 					var n = doc.createElement(type);
-					n.setAttribute('libraryID', parseInt(libraryID) ? parseInt(libraryID) : Zotero.libraryID);
+					n.setAttribute('libraryID', parseInt(libraryID) ? parseInt(libraryID) : defaultLibraryID);
 					n.setAttribute('key', key);
 					xmlDeletedObjectsNode.appendChild(n);
 				}
