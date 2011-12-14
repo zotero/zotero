@@ -254,9 +254,8 @@
 					<label value="George Mason University"/>
 					<label value="Fairfax, VA, USA"/>
 				</vbox>
-				<label class="subhead" value="&zotero.directors;"/>
+				<label class="subhead" value="&zotero.director;"/>
 				<vbox class="subcontent">
-					<label value="Dan Cohen"/>
 					<label value="Sean Takats"/>
 				</vbox>
 				<label class="subhead" value="&zotero.developers;"/>
@@ -264,16 +263,12 @@
 					<label value="Dan Stillman"/>
 					<label value="Simon Kornblith"/>
 					<label value="Faolan Cheslack-Postava"/>
-					<label value="Fred Gibbs"/>
-				</vbox>
-				<label class="subhead" value="Community Support:"/><!-- TODO: localize -->
-				<vbox class="subcontent">
-					<label value="Debbie Maron"/>
 				</vbox>
 				<label class="subhead" value="&zotero.about.localizations;"/>
 				<vbox class="subcontent">
 					<vbox id="zotero-translators-list"/>
 				</vbox>
+				<label class="text-link" href="http://www.zotero.org/support/credits_and_acknowledgments" value="&zotero.moreCreditsAndAcknowledgements;"/>
 			</vbox>
 			<vbox id="column2">
 				<label class="subhead" value="Citation &amp; Bibliography Processing"/>
@@ -291,10 +286,6 @@
 					<label class="text-link" href="http://tinymce.moxiecode.com/" value="TinyMCE (rich-text editing)"/>
 					<label class="text-link" href="http://www.dbai.tuwien.ac.at/user/pollak/webpagedump/" value="WebPageDump (snapshot code)"/>
 					<label class="text-link" href="http://www.foolabs.com/xpdf/" value="Xpdf (pdftotext)"/>
-				</vbox>
-				<label class="subhead" value="&zotero.executiveProducer;"/>
-				<vbox class="subcontent">
-					<label value="Roy Rosenzweig"/>
 				</vbox>
 				<label class="subhead" value="&zotero.thanks;"/>
 				<vbox class="subcontent">
