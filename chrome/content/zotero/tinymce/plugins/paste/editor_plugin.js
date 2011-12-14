@@ -522,6 +522,14 @@
 		_postProcess : function(pl, o) {
 			var t = this, ed = t.editor, dom = ed.dom, styleProps;
 
+			/* Save local images */
+			each(dom.select('img', o.node), function (img) {
+				if (a.alt && a.alt.indexOf('zotero://') === 0) {
+					a.setAttribute('href', a.alt);
+					a.setAttribute('mce_href', a.alt);
+				}
+			});
+
 			if (o.wordContent) {
 				// Remove named anchors or TOC links
 				each(dom.select('a', o.node), function(a) {
