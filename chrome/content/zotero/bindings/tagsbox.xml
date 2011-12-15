@@ -430,8 +430,10 @@
 					// Tag id encoded as 'tag-1234'
 					var id = row.getAttribute('id').split('-')[1];
 					
+					var newlinePresent = (value.search('\r') > -1 || value.search('\n') > -1);
+					
 					if (saveChanges) {
-						if (id) {
+						if (id && newlinePresent != true) {
 							if (value) {
 								// If trying to replace with another existing tag
 								// (which causes a delete of the row),
@@ -453,7 +455,18 @@
 						}
 						// New tag
 						else {
-							var id = tagsbox.add(value);
+							//Check for newlines or carriage returns used as delimiters
+							//in a series of tags added at once.  Add each tag
+							//separately.
+							if (newlinePresent) {
+								value = value.replace('\r\n','\n');
+								value = value.replace('\r','\n');
+								var nameArray = value.split('\n');
+								id = this.item.addTags(nameArray);
+							}
+							else {
+								id = tagsbox.add(value);
+							}
 							if (!id) {
 								this._lastTabIndex--;
 							}

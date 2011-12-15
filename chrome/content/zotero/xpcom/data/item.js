@@ -3478,16 +3478,6 @@ Zotero.Item.prototype.addTag = function(name, type) {
 	if (!this.id) {
 		throw ('Cannot add tag to unsaved item in Item.addTag()');
 	}
-    
-    //Check for newlines or carriage returns used as delimiters
-    //in a series of tags added at once.  Add each tag
-    //separately.
-    if (name.search('\r') > -1 || name.search('\n') > -1) {
-        name = name.replace('\r\n','\n');
-        name = name.replace('\r','\n');
-        var nameArray = name.split('\n');
-        return this.addTags(nameArray,type);
-    }
 	
 	name = Zotero.Utilities.trim(name);
 	
