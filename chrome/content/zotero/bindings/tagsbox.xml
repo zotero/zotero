@@ -467,7 +467,7 @@
 							else {
 								id = tagsbox.add(value);
 							}
-							if (!id) {
+							if (!id && (this._tabDirection==1)) {
 								this._lastTabIndex--;
 							}
 						}
