@@ -1095,11 +1095,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.checkServerCallback = function (uri
 	
 	// If there's an error, just display that
 	if (e) {
-		promptService.alert(
-			window,
-			Zotero.getString('general.error'),
-			e.toString()
-		);
+		Zotero.Utilities.Internal.errorPrompt(Zotero.getString('general.error'), e);
 		return false;
 	}
 	
@@ -1645,9 +1641,11 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._checkResponse = function (req, obj
 	if (!channel instanceof Ci.nsIChannel) {
 		obj.onError('No HTTPS channel available');
 	}
+	
 	var secInfo = channel.securityInfo;
 	if (secInfo instanceof Ci.nsITransportSecurityInfo) {
 		secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
+		
 		if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_INSECURE) == Ci.nsIWebProgressListener.STATE_IS_INSECURE) {
 			var host = 'host';
 			try {
@@ -1657,20 +1655,40 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._checkResponse = function (req, obj
 				Zotero.debug(e);
 			}
 			
-			var msg = Zotero.localeJoin([
-				Zotero.getString('sync.storage.error.webdav.sslCertificateError', host),
-				Zotero.getString('sync.storage.error.webdav.loadURLForMoreInfo')
-			]);
+			var msg = Zotero.getString('sync.storage.error.webdav.sslCertificateError', host)
+				+ " " + Zotero.getString('sync.storage.error.webdav.loadURLForMoreInfo');
+			var e = new Zotero.Error(
+				msg,
+				0,
+				{
+					dialogText: msg,
+					dialogButtonText: Zotero.getString('sync.storage.error.webdav.loadURL'),
+					dialogButtonCallback: function () {
+						var zp = Zotero.getActiveZoteroPane();
+						zp.loadURI(channel.URI.spec, { shiftKey: true });
+					}
+				}
+			);
 			
-			obj.onError(msg);
+			obj.onError(e);
 			return;
 		}
 		else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN) == Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
-			var msg = Zotero.localeJoin([
-				Zotero.getString('sync.storage.error.webdav.sslConnectionError', host),
-				Zotero.getString('sync.storage.error.webdav.loadURLForMoreInfo')
-			]);
-			obj.onError(msg);
+			var msg = Zotero.getString('sync.storage.error.webdav.sslConnectionError', host) +
+						Zotero.getString('sync.storage.error.webdav.loadURLForMoreInfo');
+			var e = new Zotero.Error(
+				msg,
+				0,
+				{
+					dialogText: msg,
+					dialogButtonText: Zotero.getString('sync.storage.error.webdav.loadURL'),
+					dialogButtonCallback: function () {
+						var zp = Zotero.getActiveZoteroPane();
+						zp.loadURI(channel.URI.spec, { shiftKey: true });
+					}
+				}
+			);
+			obj.onError(e);
 			return;
 		}
 	}

@@ -102,6 +102,62 @@ Zotero.Utilities.Internal = {
 			ascii.push(String.fromCharCode(tens + (tens > 9 ? 87 : 48)) + String.fromCharCode(ones + (ones > 9 ? 87 : 48)));
 		}
 		return ascii.join('');
+	},
+	
+	
+	/**
+	 * Display a prompt from an error with custom buttons and a callback
+	 */
+	"errorPrompt":function(title, e) {
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+					.getService(Components.interfaces.nsIPromptService);
+		var message, buttonText, buttonCallback;
+		
+		if (e.data) {
+			if (e.data.dialogText) {
+				message = e.data.dialogText;
+			}
+			if (typeof e.data.dialogButtonText != 'undefined') {
+				buttonText = e.data.dialogButtonText;
+				buttonCallback = e.data.dialogButtonCallback;
+			}
+		}
+		if (!message) {
+			if (e.message) {
+				message = e.message;
+			}
+			else {
+				message = e;
+			}
+		}
+		
+		if (typeof buttonText == 'undefined') {
+			buttonText = Zotero.getString('errorReport.reportError');
+			buttonCallback = function () {
+				win.ZoteroPane.reportErrors();
+			}
+		}
+		// If secondary button is explicitly null, just use an alert
+		else if (buttonText === null) {
+			ps.alert(null, title, message);
+			return;
+		}
+		
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
+							+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+		var index = ps.confirmEx(
+			null,
+			title,
+			message,
+			buttonFlags,
+			"",
+			buttonText,
+			"", null, {}
+		);
+		
+		if (index == 1) {
+			setTimeout(function () { buttonCallback(); }, 1);
+		}
 	}
 }
 
