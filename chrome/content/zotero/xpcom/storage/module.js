@@ -163,7 +163,7 @@ Zotero.Sync.Storage.Module.prototype.checkServer = function (callback) {
 
 Zotero.Sync.Storage.Module.prototype.checkServerCallback = function (uri, status, window, skipSuccessMessage) {
 	try {
-		return this._module.checkServerCallback(uri, status, authRequired, window, skipSuccessMessage);
+		return this._module.checkServerCallback(uri, status, window, skipSuccessMessage);
 	}
 	catch (e) {
 		Zotero.Sync.Storage.EventManager.error(e);

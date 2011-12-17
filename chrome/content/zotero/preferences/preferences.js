@@ -322,7 +322,7 @@ function verifyStorageServer() {
 	abortButton.hidden = false;
 	progressMeter.hidden = false;
 	
-	var requestHolder = Zotero.Sync.Storage.checkServer('webdav', function (uri, status, callback) {
+	var requestHolder = Zotero.Sync.Storage.checkServer('WebDAV', function (uri, status, callback) {
 		verifyButton.hidden = false;
 		abortButton.hidden = true;
 		progressMeter.hidden = true;

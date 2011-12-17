@@ -826,12 +826,17 @@ Zotero.Sync.Storage = new function () {
 			onSuccess: function () {},
 			onError: function (e) {
 				Zotero.debug(e, 1);
-				callback(null, null, e);
-				throw (e);
+				callback(null, null, function () {
+					// If there's an error, just display that
+					Zotero.Utilities.Internal.errorPrompt(Zotero.getString('general.error'), e);
+				});
+				return true;
 			}
-		});
+		}, false, "checkServer");
 		return module.checkServer(function (uri, status) {
-			callback(uri, status, module.checkServerCallback);
+			callback(uri, status, function () {
+				module.checkServerCallback(uri, status);
+			});
 		});
 	}
 	
@@ -845,7 +850,7 @@ Zotero.Sync.Storage = new function () {
 			onError: function (e) {
 				error(e);
 			}
-		});
+		}, false, "purgeDeletedStorageFiles");
 		module.purgeDeletedStorageFiles(callback);
 	}
 	
@@ -859,7 +864,7 @@ Zotero.Sync.Storage = new function () {
 			onError: function (e) {
 				error(e);
 			}
-		});
+		}, false, "purgeOrphanedStorageFiles");
 		module.purgeOrphanedStorageFiles(callback);
 	}
 	
