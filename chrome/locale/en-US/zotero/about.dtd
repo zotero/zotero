@@ -1,5 +1,6 @@
 <!ENTITY zotero.version		"version">
 <!ENTITY zotero.createdby		"Created By:">
+<!ENTITY zotero.director		"Director:">
 <!ENTITY zotero.directors		"Directors:">
 <!ENTITY zotero.developers		"Developers:">
 <!ENTITY zotero.alumni			"Alumni:">
@@ -8,3 +9,4 @@
 <!ENTITY zotero.executiveProducer		"Executive Producer:">
 <!ENTITY zotero.thanks			"Special Thanks:">
 <!ENTITY zotero.about.close	"Close">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">

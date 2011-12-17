@@ -615,15 +615,37 @@ Zotero.Sync.Storage.Module.WebDAV = (function () {
 				
 				var msg = Zotero.getString('sync.storage.error.webdav.sslCertificateError', host)
 					+ " " + Zotero.getString('sync.storage.error.webdav.loadURLForMoreInfo');
+				var e = new Zotero.Error(
+					msg,
+					0,
+					{
+						dialogText: msg,
+						dialogButtonText: Zotero.getString('sync.storage.error.webdav.loadURL'),
+						dialogButtonCallback: function () {
+							var zp = Zotero.getActiveZoteroPane();
+							zp.loadURI(channel.URI.spec, { shiftKey: true });
+						}
+					}
+				);
 				
-				Zotero.Sync.Storage.EventManager.error(msg);
+				Zotero.Sync.Storage.EventManager.error(e);
 			}
 			else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN) == Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
-				var msg = Zotero.localeJoin([
-					Zotero.getString('sync.storage.error.webdav.sslConnectionError', host),
-					Zotero.getString('sync.storage.error.webdav.loadURLForMoreInfo')
-				]);
-				Zotero.Sync.Storage.EventManager.error(msg);
+				var msg = Zotero.getString('sync.storage.error.webdav.sslConnectionError', host) +
+							Zotero.getString('sync.storage.error.webdav.loadURLForMoreInfo');
+				var e = new Zotero.Error(
+					msg,
+					0,
+					{
+						dialogText: msg,
+						dialogButtonText: Zotero.getString('sync.storage.error.webdav.loadURL'),
+						dialogButtonCallback: function () {
+							var zp = Zotero.getActiveZoteroPane();
+							zp.loadURI(channel.URI.spec, { shiftKey: true });
+						}
+					}
+				);
+				Zotero.Sync.Storage.EventManager.error(e);
 			}
 		}
 	}

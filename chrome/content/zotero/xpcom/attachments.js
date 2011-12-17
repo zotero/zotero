@@ -328,11 +328,9 @@ Zotero.Attachments = new function(){
 						// if it fails
 						//
 						// TODO: index later
-						var timer = Components.classes["@mozilla.org/timer;1"].
-							createInstance(Components.interfaces.nsITimer);
-						timer.initWithCallback({notify: function() {
+						setTimeout(function() {
 							Zotero.Fulltext.indexItems([itemID]);
-						}}, 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+						}, 1000);
 					}
 					catch (e) {
 						// Clean up
@@ -612,10 +610,9 @@ Zotero.Attachments = new function(){
 						// we'll index it later if it fails
 						//
 						// TODO: index later
-						var timer = Components.classes["@mozilla.org/timer;1"].
-							createInstance(Components.interfaces.nsITimer);
-						timer.initWithCallback({notify: f}, 1000,
-							Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+						setTimeout(function () {
+							f();
+						}, 1000);
 					}
 					catch (e) {
 						// Clean up
@@ -652,10 +649,9 @@ Zotero.Attachments = new function(){
 				Zotero.Notifier.trigger('add', 'item', itemID);
 				
 				// Wait a second before indexing (see note above)
-				var timer = Components.classes["@mozilla.org/timer;1"].
-					createInstance(Components.interfaces.nsITimer);
-				timer.initWithCallback({notify: f}, 1000,
-					Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+				setTimeout(function () {
+					f();
+				}, 1000);
 			}
 			
 			// Caution: Take care using this itemID. The notifier may not yet have been called,

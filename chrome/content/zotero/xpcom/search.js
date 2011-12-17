@@ -2148,7 +2148,7 @@ Zotero.SearchConditions = new function(){
 					doesNotContain: true
 				},
 				table: 'itemData',
-				field: 'STRFTIME("%Y", SUBSTR(value, 1, 10))',
+				field: 'SUBSTR(value, 1, 4)',
 				special: true
 			},
 			

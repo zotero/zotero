@@ -2643,7 +2643,7 @@ var ZoteroPane = new function()
 	 *  (e.g. meta-click == new background tab, meta-shift-click == new front tab,
 	 *  shift-click == new window, no modifier == frontmost tab
 	 */
-	function loadURI(uris, event, data) {
+	function loadURI(uris, event) {
 		if(typeof uris === "string") {
 			uris = [uris];
 		}
@@ -3377,18 +3377,24 @@ var ZoteroPane = new function()
 				
 				if (!externalViewer) {
 					var url = 'zotero://attachment/' + itemID + '/';
-					this.loadURI(url, event, { attachmentID: itemID});
+					this.loadURI(url, event);
 				}
 				else {
-					// Some platforms don't have nsILocalFile.launch, so we just load it and
+					// Some platforms don't have nsILocalFile.launch, so we just
 					// let the Firefox external helper app window handle it
 					try {
 						file.launch();
 					}
 					catch (e) {
-						Zotero.debug("launch() not supported -- passing file to loadURI()");
-						var fileURL = item.getLocalFileURL();
-						this.loadURI(fileURL);
+						Zotero.debug("launch() not supported -- passing file to loadUrl()");
+						
+						var uri = Components.classes["@mozilla.org/network/standard-url;1"].
+									createInstance(Components.interfaces.nsIURI);
+						uri.spec = attachment.getLocalFileURL();
+						
+						var nsIEPS = Components.classes["@mozilla.org/uriloader/external-protocol-service;1"].
+										getService(Components.interfaces.nsIExternalProtocolService);
+						nsIEPS.loadUrl(uri);
 					}
 				}
 			}
