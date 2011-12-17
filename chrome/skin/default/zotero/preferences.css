@@ -22,7 +22,7 @@ radio[pane]
 }
 
 /* Links within messages */
-description label[class=text-link], label label[class=text-link]
+description label[class=zotero-text-link], label[class=zotero-text-link]
 {
 	margin: 0;
 }
