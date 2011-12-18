@@ -1388,9 +1388,11 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 					me.updateSession(doAccept);
 				}
 			});
-		} else if(newField) {
-			// New citation was cancelled
-			field.delete();
+		} else {
+			if(newField) {
+				// New citation was cancelled
+				field.delete();
+			}
 			callback();
 		}
 	}
