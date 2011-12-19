@@ -1399,8 +1399,6 @@ Zotero.Utilities = {
 						if(cslDate.season) date = cslDate.season+date;
 					}
 					
-					Zotero.debug(date);
-					
 					if(isZoteroItem) {
 						item.setField(fieldID, date);
 					} else {
