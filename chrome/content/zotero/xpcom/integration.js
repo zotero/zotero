@@ -897,7 +897,7 @@ Zotero.Integration.Fields.prototype._retrieveFields = function() {
 	var me = this;
 	this._doc.getFieldsAsync(this._session.data.prefs['fieldType'], {"observe":function(subject, topic, data) {
 		if(topic === "fields-available") {
-			if(me._progressCallback) me._progressCallback(75);
+			if(me.progressCallback) me.progressCallback(75);
 			
 			// Add fields to fields array
 			var fieldsEnumerator = subject.QueryInterface(Components.interfaces.nsISimpleEnumerator);
@@ -921,8 +921,8 @@ Zotero.Integration.Fields.prototype._retrieveFields = function() {
 			} catch(e) {
 				Zotero.Integration.handleError(e, me._doc);
 			}
-		} else if(topic === "fields-progress" && me._progressCallback) {
-			me._progressCallback((data ? parseInt(data, 10)*(3/4) : null));
+		} else if(topic === "fields-progress" && me.progressCallback) {
+			me.progressCallback((data ? parseInt(data, 10)*(3/4) : null));
 		} else if(topic === "fields-error") {
 			Zotero.logError(data);
 			Zotero.Integration.handleError(data, me._doc);
@@ -1127,7 +1127,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 		var deleteCitations = this._session.updateCitations();
 		this._deleteFields = this._deleteFields.concat([i for(i in deleteCitations)]);
 		
-		if(this._progressCallback) {
+		if(this.progressCallback) {
 			var nFieldUpdates = [i for(i in this._session.updateIndices)].length;
 			if(this._session.bibliographyHasChanged || forceBibliography) {
 				nFieldUpdates += this._bibliographyFields.length*5;
@@ -1136,8 +1136,8 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 		
 		var nUpdated=0;
 		for(var i in this._session.updateIndices) {
-			if(this._progressCallback && nUpdated % 10 == 0) {
-				this._progressCallback(75+(nUpdated/nFieldUpdates)*25);
+			if(this.progressCallback && nUpdated % 10 == 0) {
+				this.progressCallback(75+(nUpdated/nFieldUpdates)*25);
 				yield true;
 			}
 			
@@ -1238,8 +1238,8 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 			
 			// set bibliography text
 			for each(var field in bibliographyFields) {
-				if(this._progressCallback) {
-					this._progressCallback(75+(nUpdated/nFieldUpdates)*25);
+				if(this.progressCallback) {
+					this.progressCallback(75+(nUpdated/nFieldUpdates)*25);
 					yield true;
 				}
 				
@@ -1274,10 +1274,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
  * Brings up the addCitationDialog, prepopulated if a citation is provided
  */
 Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) {
-	var newField, citation, fieldIndex
-		session = this._session,
-		me = this,
-		io = new function() { this.wrappedJSObject = this; }
+	var newField, citation, fieldIndex, session = this._session, me = this;
 	
 	// if there's already a citation, make sure we have item IDs in addition to keys
 	if(field) {
@@ -1287,7 +1284,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 			throw new Zotero.Integration.DisplayException("notInCitation");
 		}
 		
-		citation = io.citation = session.unserializeCitation(content);
+		citation = session.unserializeCitation(content);
 		
 		var zoteroItem;
 		for each(var citationItem in citation.citationItems) {
@@ -1320,98 +1317,10 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 		var field = this.addField(true);
 		field.setCode("TEMP");
 		
-		citation = io.citation = {"citationItems":{}, "properties":{}};
+		citation = {"citationItems":{}, "properties":{}};
 	}
 	
-	var sessionUpdated = false;
-	var previewing = false;
-	
-	// assign preview function
-	var previewCallbackQueue;
-	function doPreview() {
-		// fieldIndex will already be set by the time we get here
-		citation.properties.zoteroIndex = fieldIndex;
-		citation.properties.noteIndex = field.getNoteIndex();
-		returnVal = me._session.previewCitation(citation);
-		
-		for(var i=0, n=previewCallbackQueue.length; i<n; i++) previewCallbackQueue[i](returnVal);
-		previewCallbackQueue = undefined;
-	}
-	io.preview = function(callback) {
-		if(!previewCallbackQueue) previewCallbackQueue = [];
-		previewCallbackQueue.push(callback);
-		
-		var returnVal;
-		me.get(function() {
-			if(sessionUpdated) {
-				doPreview();
-			} else {
-				me.updateSession(function() {
-					sessionUpdated = true;
-					doPreview();
-				});
-			}
-		});
-	}
-	
-	// assign sort function
-	io.sort = function() {
-		me._session.previewCitation(io.citation);
-	}
-	
-	// assign accept function
-	function doAccept() {
-		session.addCitation(fieldIndex, field.getNoteIndex(), io.citation);
-		session.updateIndices[fieldIndex] = true;
-		
-		if(!session.bibliographyHasChanged) {
-			for(var i=0, n=citation.citationItems.length; i<n; i++) {
-				if(session.citationsByItemID[citation.citationItems[i].itemID] &&
-						session.citationsByItemID[citation.citationItems[i].itemID].length == 1) {
-					session.bibliographyHasChanged = true;
-					break;
-				}
-			}
-		}
-		
-		me.updateDocument(false, false, false, callback);
-	}
-	io.accept = function(progressCallback) {
-		me._progressCallback = progressCallback;
-		
-		if(io.citation.citationItems.length) {
-			// Citation added
-			me.get(function() {
-				if(sessionUpdated) {
-					doAccept();
-				} else {
-					me.updateSession(doAccept);
-				}
-			});
-		} else {
-			if(newField) {
-				// New citation was cancelled
-				field.delete();
-			}
-			callback();
-		}
-	}
-	
-	// determine whether citation is sortable in current style
-	io.sortable = session.style.opt.sort_citations;
-	
-	// citeproc-js style object for use of third-party extension
-	io.style = session.style;
-	
-	// Start finding this citation this citation
-	this.get(function(fields) {
-		for(var i=0, n=fields.length; i<n; i++) {
-			if(fields[i].equals(field)) {
-				fieldIndex = i;
-				return;
-			}
-		}
-	});
+	var io = new Zotero.Integration.CitationEditInterface(citation, field, this, session, newField, callback);
 	
 	if(Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
 		session.displayDialog('chrome://zotero/content/integration/addCitationDialog.xul', 'alwaysRaised,resizable', io, true);
@@ -1419,6 +1328,173 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 		var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
 			? 'popup' : 'alwaysRaised')
 		session.displayDialog('chrome://zotero/content/integration/quickFormat.xul', mode, io, true);
+	}
+}
+
+/**
+ * Citation editing functions and propertiesaccessible to quickFormat.js and addCitationDialog.js
+ */
+Zotero.Integration.CitationEditInterface = function(citation, field, fields, session, deleteOnCancel, doneCallback) {
+	this.citation = citation;
+	this._field = field;
+	this._fields = fields;
+	this._session = session;
+	this._deleteOnCancel = deleteOnCancel;
+	this._doneCallback = doneCallback;
+	
+	this._sessionUpdated = false;
+	this._sessionCallbackQueue = false;
+	
+	// Needed to make this work across boundaries
+	this.wrappedJSObject = this;
+	
+	// Determine whether citation is sortable in current style
+	this.sortable = session.style.opt.sort_citations;
+	
+	// Citeproc-js style object for use of third-party extension
+	this.style = session.style;
+	
+	// Start getting citation data
+	var me = this;
+	fields.get(function(fields) {
+		for(var i=0, n=fields.length; i<n; i++) {
+			if(fields[i].equals(field)) {
+				me._fieldIndex = i;
+				return;
+			}
+		}
+	});
+}
+
+Zotero.Integration.CitationEditInterface.prototype = {
+	/**
+	 * Run a function when the session information has been updated
+	 * @param {Function} sessionUpdatedCallback
+	 */
+	"_runWhenSessionUpdated":function runWhenSessionUpdated(sessionUpdatedCallback) {
+		if(this._sessionUpdated) {
+			// session has been updated; run callback
+			sessionUpdatedCallback();
+		} else if(this._sessionCallbackQueue) {
+			// session is being updated; add to queue
+			this._sessionCallbackQueue.push(sessionUpdatedCallback);
+		} else {
+			// session is not yet updated; start update
+			this._sessionCallbackQueue = [sessionUpdatedCallback];
+			var me = this;
+			me._fields.updateSession(function() {
+				for(var i=0, n=me._sessionCallbackQueue.length; i<n; i++) {
+					me._sessionCallbackQueue[i]();
+				}
+				me._sessionUpdated = true;
+				delete me._sessionCallbackQueue;
+			});
+		}
+	},
+	
+	/**
+	 * Execute a callback with a preview of the given citation
+	 * @param {Function} previewCallback
+	 */
+	"preview":function preview(previewCallback) {
+		var me = this;
+		this._runWhenSessionUpdated(function() {
+			me.citation.properties.zoteroIndex = me._fieldIndex;
+			me.citation.properties.noteIndex = me._field.getNoteIndex();
+			previewCallback(me._session.previewCitation(me.citation));
+		});
+	},
+	
+	/**
+	 * Sort the citation
+	 */
+	"sort":function() {
+		// Unlike above, we can do the previewing here without waiting for all the fields to load,
+		// since they won't change the sorting (I don't think)
+		this._session.previewCitation(this.citation);
+	},
+	
+	/**
+	 * Accept changes to the citation
+	 * @param {Function} [progressCallback] A callback to be run when progress has changed.
+	 *     Receives a number from 0 to 100 indicating current status.
+	 */
+	"accept":function(progressCallback) {
+		this._fields.progressCallback = progressCallback;
+		
+		if(this.citation.citationItems.length) {
+			// Citation added
+			var me = this;
+			this._runWhenSessionUpdated(function() {
+				me._session.addCitation(me._fieldIndex, me._field.getNoteIndex(), me.citation);
+				me._session.updateIndices[me._fieldIndex] = true;
+				
+				if(!me._session.bibliographyHasChanged) {
+					var citationItems = me.citation.citationItems;
+					for(var i=0, n=citationItems.length; i<n; i++) {
+						if(me._session.citationsByItemID[citationItems[i].itemID] &&
+								me._session.citationsByItemID[citationItems[i].itemID].length == 1) {
+							me._session.bibliographyHasChanged = true;
+							break;
+						}
+					}
+				}
+				
+				me._fields.updateDocument(false, false, false, me._doneCallback);
+			});
+		} else {
+			if(this._deleteOnCancel) this._field.delete();
+			if(this._doneCallback) this._doneCallback();
+		}
+	},
+	
+	/**
+	 * Get a list of items used in the current document
+	 * @param {Function} [itemsCallback] A callback to be run with item objects when items have been
+	 *      retrieved.
+	 */
+	"getItems":function(itemsCallback) {
+		if(this._fieldIndex || Zotero.Utilities.isEmpty(this._session.citationsByItemID)) {
+			// Either we already have field data for this run or we have no item data at all.
+			// Update session before continuing.
+			var me = this;
+			this._runWhenSessionUpdated(function() { me._getItems(itemsCallback); });
+		} else {
+			// We have item data left over from a previous run with this document, so we don't need
+			// to wait.
+			this._getItems(itemsCallback);
+		}
+	},
+	
+	/**
+	 * Helper function for getItems. Does the same thing, but this can assume that the session data
+	 * has already been updated if it should be.
+	 */
+	"_getItems":function(itemsCallback) {
+		// TODO handle items not in library
+		var citationsByItemID = this._session.citationsByItemID;
+		var items = [itemID for(itemID in citationsByItemID)
+			if(citationsByItemID[itemID] && citationsByItemID[itemID].length
+				// Exclude this item
+				&& (citationsByItemID[itemID].length > 1
+					|| citationsByItemID[itemID][0].properties.zoteroIndex !== this._fieldIndex))];
+		
+		// Sort all previously cited items at top, and all items cited later at bottom
+		var fieldIndex = this._fieldIndex;
+		items.sort(function(a, b) {
+			var indexA = citationsByItemID[a][0].properties.zoteroIndex,
+				indexB = citationsByItemID[b][0].properties.zoteroIndex;
+			
+			if(indexA >= fieldIndex){
+				if(indexB < fieldIndex) return 1;
+				return indexA - indexB;
+			}
+			
+			if(indexB > fieldIndex) return -1;
+			return indexB - indexA;
+		});
+		
+		itemsCallback(Zotero.Items.get(items));
 	}
 }
 
