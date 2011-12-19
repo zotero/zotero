@@ -1274,7 +1274,7 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
  * Brings up the addCitationDialog, prepopulated if a citation is provided
  */
 Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) {
-	var newField, citation, fieldIndex, session = this._session, me = this;
+	var newField, citation, fieldIndex, session = this._session, me = this, loadFirst;
 	
 	// if there's already a citation, make sure we have item IDs in addition to keys
 	if(field) {
@@ -1285,18 +1285,13 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 		}
 		
 		citation = session.unserializeCitation(content);
-		
-		var zoteroItem;
-		for each(var citationItem in citation.citationItems) {
-			var item = false;
-			if(!citationItem.id) {
-				zoteroItem = false;
-				if(citationItem.uris) {
-					[zoteroItem, ] = session.uriMap.getZoteroItemForURIs(citationItem.uris);
-				} else if(citationItem.key) {
-					zoteroItem = Zotero.Items.getByKey(citationItem.key);
-				}
-				if(zoteroItem) citationItem.id = zoteroItem.id;
+		try {
+			session.lookupItems(citation);
+		} catch(e) {
+			if(e instanceof MissingItemException) {
+				citation.citationItems = [];
+			} else {
+				throw e;
 			}
 		}
 		
@@ -1471,9 +1466,8 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	 * has already been updated if it should be.
 	 */
 	"_getItems":function(itemsCallback) {
-		// TODO handle items not in library
 		var citationsByItemID = this._session.citationsByItemID;
-		var items = [itemID for(itemID in citationsByItemID)
+		var ids = [itemID for(itemID in citationsByItemID)
 			if(citationsByItemID[itemID] && citationsByItemID[itemID].length
 				// Exclude this item
 				&& (citationsByItemID[itemID].length > 1
@@ -1481,7 +1475,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 		
 		// Sort all previously cited items at top, and all items cited later at bottom
 		var fieldIndex = this._fieldIndex;
-		items.sort(function(a, b) {
+		ids.sort(function(a, b) {
 			var indexA = citationsByItemID[a][0].properties.zoteroIndex,
 				indexB = citationsByItemID[b][0].properties.zoteroIndex;
 			
@@ -1494,7 +1488,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 			return indexB - indexA;
 		});
 		
-		itemsCallback(Zotero.Items.get(items));
+		itemsCallback(Zotero.Cite.getItem(ids));
 	}
 }
 
@@ -1506,6 +1500,7 @@ Zotero.Integration.Session = function(doc) {
 	this.uncitedItems = {};
 	this.omittedItems = {};
 	this.embeddedItems = {};
+	this.embeddedZoteroItems = {};
 	this.embeddedItemsByURI = {};
 	this.customBibliographyText = {};
 	this.reselectedItems = {};
@@ -1779,89 +1774,7 @@ Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, ar
 	}
 	
 	// get items
-	for(var i=0, n=citation.citationItems.length; i<n; i++) {
-		var citationItem = citation.citationItems[i];
-		
-		// get Zotero item
-		var zoteroItem = false;
-		if(citationItem.uris) {
-			[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(citationItem.uris);
-			if(needUpdate) this.updateIndices[index] = true;
-		} else {
-			if(citationItem.key) {
-				zoteroItem = Zotero.Items.getByKey(citationItem.key);
-			} else if(citationItem.itemID) {
-				zoteroItem = Zotero.Items.get(citationItem.itemID);
-			} else if(citationItem.id) {
-				zoteroItem = Zotero.Items.get(citationItem.id);
-			}
-			if(zoteroItem) this.updateIndices[index] = true;
-		}
-		
-		// if no item, check if it was already reselected and otherwise handle as a missing item
-		if(!zoteroItem) {	
-			if(citationItem.uris) {
-				var reselectKeys = citationItem.uris;
-				var reselectKeyType = RESELECT_KEY_URI;
-			} else if(citationItem.key) {
-				var reselectKeys = [citationItem.key];
-				var reselectKeyType = RESELECT_KEY_ITEM_KEY;
-			} else if(citationItem.id) {
-				var reselectKeys = [citationItem.id];
-				var reselectKeyType = RESELECT_KEY_ITEM_ID;
-			} else {
-				var reselectKeys = [citationItem.itemID];
-				var reselectKeyType = RESELECT_KEY_ITEM_ID;
-			}
-			
-			// look to see if item has already been reselected
-			for each(var reselectKey in reselectKeys) {
-				if(this.reselectedItems[reselectKey]) {
-					zoteroItem = Zotero.Items.get(this.reselectedItems[reselectKey]);
-					citationItem.id = zoteroItem.id;
-					this.updateIndices[index] = true;
-					break;
-				}
-			}
-			
-			if(!zoteroItem) {
-				// check embedded items
-				if(citationItem.uris) {
-					var success = false;
-					for(var j=0, m=citationItem.uris.length; j<m; j++) {
-						var embeddedItem = this.embeddedItemsByURI[citationItem.uris[j]];
-						if(embeddedItem) {
-							citationItem.id = this.data.sessionID+"/"+embeddedItem.id;
-							success = true;
-							break;
-						}
-					}
-					if(success) continue;
-				}
-				
-				if(citationItem.itemData) {
-					// add new embedded item
-					var itemData = Zotero.Utilities.deepCopy(citationItem.itemData);
-					for(var j=0, m=citationItem.uris.length; j<m; j++) {
-						this.embeddedItemsByURI[citationItem.uris[j]] = itemData;
-					}
-					
-					// assign a random string as an item ID
-					var anonymousID = itemData.id = Zotero.randomString();
-					this.embeddedItems[anonymousID] = itemData;
-					citationItem.id = this.data.sessionID+"/"+anonymousID;
-				} else {
-					// if not already reselected, throw a MissingItemException
-					throw(new Zotero.Integration.MissingItemException(
-						reselectKeys, reselectKeyType, i, citation.citationItems.length));
-				}
-			}
-		}
-		
-		if(zoteroItem) {
-			citationItem.id = zoteroItem.id;
-		}
-	}
+	this.lookupItems(citation, index);
 	
 	citation.properties.added = true;
 	citation.properties.zoteroIndex = index;
@@ -1898,6 +1811,104 @@ Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, ar
 	}
 	Zotero.debug("Integration: Adding citationID "+citation.citationID);
 	this.citationIDs[citation.citationID] = true;
+}
+
+/**
+ * Looks up item IDs to correspond with keys or generates embedded items for given citation object.
+ * Throws a MissingItemException if item was not found.
+ */
+Zotero.Integration.Session.prototype.lookupItems = function(citation, index) {
+	for(var i=0, n=citation.citationItems.length; i<n; i++) {
+		var citationItem = citation.citationItems[i];
+		
+		// get Zotero item
+		var zoteroItem = false;
+		if(citationItem.cslItemID) {
+			
+		} else if(citationItem.uris) {
+			[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(citationItem.uris);
+			if(needUpdate && index) this.updateIndices[index] = true;
+		} else {
+			if(citationItem.key) {
+				zoteroItem = Zotero.Items.getByKey(citationItem.key);
+			} else if(citationItem.itemID) {
+				zoteroItem = Zotero.Items.get(citationItem.itemID);
+			} else if(citationItem.id) {
+				zoteroItem = Zotero.Items.get(citationItem.id);
+			}
+			if(zoteroItem && index) this.updateIndices[index] = true;
+		}
+		
+		// if no item, check if it was already reselected and otherwise handle as a missing item
+		if(!zoteroItem) {	
+			if(citationItem.uris) {
+				var reselectKeys = citationItem.uris;
+				var reselectKeyType = RESELECT_KEY_URI;
+			} else if(citationItem.key) {
+				var reselectKeys = [citationItem.key];
+				var reselectKeyType = RESELECT_KEY_ITEM_KEY;
+			} else if(citationItem.id) {
+				var reselectKeys = [citationItem.id];
+				var reselectKeyType = RESELECT_KEY_ITEM_ID;
+			} else {
+				var reselectKeys = [citationItem.itemID];
+				var reselectKeyType = RESELECT_KEY_ITEM_ID;
+			}
+			
+			// look to see if item has already been reselected
+			for each(var reselectKey in reselectKeys) {
+				if(this.reselectedItems[reselectKey]) {
+					zoteroItem = Zotero.Items.get(this.reselectedItems[reselectKey]);
+					citationItem.id = zoteroItem.id;
+					if(index) this.updateIndices[index] = true;
+					break;
+				}
+			}
+			
+			if(!zoteroItem) {
+				// check embedded items
+				if(citationItem.uris) {
+					var success = false;
+					for(var j=0, m=citationItem.uris.length; j<m; j++) {
+						var embeddedItem = this.embeddedItemsByURI[citationItem.uris[j]];
+						if(embeddedItem) {
+							citationItem.id = embeddedItem.id;
+							success = true;
+							break;
+						}
+					}
+					if(success) continue;
+				}
+				
+				if(citationItem.itemData) {
+					// add new embedded item
+					var itemData = Zotero.Utilities.deepCopy(citationItem.itemData);
+					for(var j=0, m=citationItem.uris.length; j<m; j++) {
+						this.embeddedItemsByURI[citationItem.uris[j]] = itemData;
+					}
+					
+					// assign a random string as an item ID
+					var anonymousID = Zotero.randomString();
+					var globalID = itemData.id = citationItem.id = this.data.sessionID+"/"+anonymousID;
+					this.embeddedItems[anonymousID] = itemData;
+					
+					var surrogateItem = this.embeddedZoteroItems[anonymousID] = new Zotero.Item();
+					Zotero.Utilities.itemFromCSLJSON(surrogateItem, itemData);
+					surrogateItem.cslItemID = globalID;
+					surrogateItem.cslURIs = citationItem.uris;
+					surrogateItem.cslItemData = itemData;
+				} else {
+					// if not already reselected, throw a MissingItemException
+					throw(new Zotero.Integration.MissingItemException(
+						reselectKeys, reselectKeyType, i, citation.citationItems.length));
+				}
+			}
+		}
+		
+		if(zoteroItem) {
+			citationItem.id = zoteroItem.id;
+		}
+	}
 }
 
 /**
@@ -2706,3 +2717,7 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
 	
 	return [zoteroItem, needUpdate];
 }
+
+/**
+ * 
+ */

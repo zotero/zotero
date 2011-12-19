@@ -183,7 +183,19 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 		this.loadPrimaryData(true);
 	}
 	
-	if (field == 'id' || Zotero.Items.isPrimaryField(field)) {
+	if (field === 'firstCreator' && !this.id) {
+		// Hack to get a firstCreator for an unsaved item
+		var creators = this.getCreators();
+		if(creators.length === 0) {
+			return "";
+		} else if(creators.length === 1) {
+			return creators[0].ref.lastName;
+		} else if(creators.length === 2) {
+			return creators[0].ref.lastName+" "+Zotero.getString('general.and')+" "+creators[1].ref.lastName;
+		} else if(creators.length > 3) {
+			return creators[0].ref.lastName+" et al."
+		}
+	} else if (field === 'id' || Zotero.Items.isPrimaryField(field)) {
 		var privField = '_' + field;
 		//Zotero.debug('Returning ' + (this[privField] ? this[privField] : '') + ' (typeof ' + typeof this[privField] + ')');
 		return this[privField];
