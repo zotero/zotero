@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Přiložit uloženou kopii souboru...">
 <!ENTITY zotero.items.menu.attach.fileLink "Přiložit odkaz na soubor...">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Duplikovat vybranou položku">
 
 <!ENTITY zotero.toolbar.newItem.label "Nová položka">

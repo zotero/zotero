@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Gordetako dokumentu baten kopia erantsi">
 <!ENTITY zotero.items.menu.attach.fileLink "Fitxategi baten helbidea erantsi">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Hautatutako itema bikoiztu">
 
 <!ENTITY zotero.toolbar.newItem.label "Item berria">

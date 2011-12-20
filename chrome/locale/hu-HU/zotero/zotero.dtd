@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Helyben tárolt példány csatolása">
 <!ENTITY zotero.items.menu.attach.fileLink "Fájlra mutató hivatkozás csatolása">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Kiválasztott elem duplikálása">
 
 <!ENTITY zotero.toolbar.newItem.label "Új elem">

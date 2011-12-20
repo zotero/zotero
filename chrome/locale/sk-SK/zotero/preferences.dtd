@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "malé">
 <!ENTITY zotero.preferences.fontSize.medium "stredné">
 <!ENTITY zotero.preferences.fontSize.large "veľké">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Veľkosť písma v poznámkach">
 
 <!ENTITY zotero.preferences.miscellaneous "Rôzne">

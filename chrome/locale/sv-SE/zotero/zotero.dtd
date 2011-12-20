@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Bifoga sparad kopia av filen...">
 <!ENTITY zotero.items.menu.attach.fileLink "Bifoga länk till fil...">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicera vald post">
 
 <!ENTITY zotero.toolbar.newItem.label "Ny post">

@@ -1,5 +1,6 @@
 <!ENTITY zotero.version "útgáfa">
 <!ENTITY zotero.createdby "Höfundar:">
+<!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Stjórnendur">
 <!ENTITY zotero.developers "Þróunaraðilar">
 <!ENTITY zotero.alumni "Alumni:">
@@ -8,3 +9,4 @@
 <!ENTITY zotero.executiveProducer "Framkvæmdastjóri:">
 <!ENTITY zotero.thanks "Sérstakar þakkir:">
 <!ENTITY zotero.about.close "Loka">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">

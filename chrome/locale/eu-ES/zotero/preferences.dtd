@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "txikia">
 <!ENTITY zotero.preferences.fontSize.medium "erdia">
 <!ENTITY zotero.preferences.fontSize.large "handia">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "font neurria oharretan:">
 
 <!ENTITY zotero.preferences.miscellaneous "Bestelakoak">

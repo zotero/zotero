@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Dołącz zachowaną kopię pliku...">
 <!ENTITY zotero.items.menu.attach.fileLink "Dołącz odsyłacz do pliku...">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Duplikuj zaznaczony element">
 
 <!ENTITY zotero.toolbar.newItem.label "Nowy element">

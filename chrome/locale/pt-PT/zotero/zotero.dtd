@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Anexar Cópia Armazenada de Arquivo...">
 <!ENTITY zotero.items.menu.attach.fileLink "Anexar Ligação a Arquivo...">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicar o Item Seleccionado">
 
 <!ENTITY zotero.toolbar.newItem.label "Novo Item">

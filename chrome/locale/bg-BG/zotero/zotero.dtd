@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Прилага съхранено копие на файл...">
 <!ENTITY zotero.items.menu.attach.fileLink "Прилага връзка към файл">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Дуплицира избраните записи">
 
 <!ENTITY zotero.toolbar.newItem.label "Нов запис">

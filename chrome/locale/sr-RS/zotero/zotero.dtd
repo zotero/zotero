@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Додај сачувану копију датотеке...">
 <!ENTITY zotero.items.menu.attach.fileLink "Приложи везу датотеци...">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Умножи изабрану ставку">
 
 <!ENTITY zotero.toolbar.newItem.label "Нова ставка">

@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "附加已儲存的檔案拷貝……">
 <!ENTITY zotero.items.menu.attach.fileLink "附加鏈結到檔案……">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "為選取的項目建立副本">
 
 <!ENTITY zotero.toolbar.newItem.label "新增項目">

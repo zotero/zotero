@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
 <!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
 
 <!ENTITY zotero.toolbar.newItem.label "ไอเทมใหม่">

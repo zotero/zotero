@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Anexează copia salvată a fișierului...">
 <!ENTITY zotero.items.menu.attach.fileLink "Anexează o legătură la fișier...">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Fă un duplicat înregistrării selectate">
 
 <!ENTITY zotero.toolbar.newItem.label "Înregistrare nouă">

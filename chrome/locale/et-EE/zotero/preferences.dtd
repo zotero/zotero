@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "Väike">
 <!ENTITY zotero.preferences.fontSize.medium "Keskmine">
 <!ENTITY zotero.preferences.fontSize.large "Suur">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Märkuse fondisuurus">
 
 <!ENTITY zotero.preferences.miscellaneous "Mitmesugust">

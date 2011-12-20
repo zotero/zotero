@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
 <!ENTITY zotero.items.menu.attach.fileLink "파일에 링크 첨부...">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "선택된 항목 복제">
 
 <!ENTITY zotero.toolbar.newItem.label "새 항목">

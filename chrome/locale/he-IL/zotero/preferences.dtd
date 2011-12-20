@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "קטן">
 <!ENTITY zotero.preferences.fontSize.medium "בינוני">
 <!ENTITY zotero.preferences.fontSize.large "גדול">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Note font size:">
 
 <!ENTITY zotero.preferences.miscellaneous "שונות">

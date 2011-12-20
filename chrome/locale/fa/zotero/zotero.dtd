@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "پیوست کردن رونوشت پرونده...">
 <!ENTITY zotero.items.menu.attach.fileLink "پیوست کردن پیوند به پرونده...">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "ساخت رونوشت از این آیتم">
 
 <!ENTITY zotero.toolbar.newItem.label "آیتم‌ جدید">

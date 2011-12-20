@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "Мали">
 <!ENTITY zotero.preferences.fontSize.medium "Средњи">
 <!ENTITY zotero.preferences.fontSize.large "Велики">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Величина фонта:">
 
 <!ENTITY zotero.preferences.miscellaneous "Разне поставке">

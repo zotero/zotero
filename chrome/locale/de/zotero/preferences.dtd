@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "Klein">
 <!ENTITY zotero.preferences.fontSize.medium "Mittel">
 <!ENTITY zotero.preferences.fontSize.large "Groß">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Schriftgröße Notizen:">
 
 <!ENTITY zotero.preferences.miscellaneous "Verschiedenes">

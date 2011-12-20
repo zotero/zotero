@@ -1,5 +1,6 @@
 <!ENTITY zotero.version "versioon">
 <!ENTITY zotero.createdby "Loodud:">
+<!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Juhatajad:">
 <!ENTITY zotero.developers "Arendajad:">
 <!ENTITY zotero.alumni "Kaastöötajad:">
@@ -8,3 +9,4 @@
 <!ENTITY zotero.executiveProducer "Vastutav produtsent:">
 <!ENTITY zotero.thanks "Tänud:">
 <!ENTITY zotero.about.close "Sulge">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">

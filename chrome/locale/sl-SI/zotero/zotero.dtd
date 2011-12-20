@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Pripni shranjeno kopijo datoteke ...">
 <!ENTITY zotero.items.menu.attach.fileLink "Pripni povezavo do datoteke ...">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Podvoji izbrani vnos">
 
 <!ENTITY zotero.toolbar.newItem.label "Nov vnos">

@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "إرفاق نسخة من ملف مخزن...">
 <!ENTITY zotero.items.menu.attach.fileLink "إرفاق ارتباط لملف...">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "تكرار العنصر المحدد">
 
 <!ENTITY zotero.toolbar.newItem.label "عنصر جديد">

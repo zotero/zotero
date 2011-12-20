@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "เล็ก">
 <!ENTITY zotero.preferences.fontSize.medium "กลาง">
 <!ENTITY zotero.preferences.fontSize.large "ใหญ่">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Note font size:">
 
 <!ENTITY zotero.preferences.miscellaneous "อื่น ๆ">

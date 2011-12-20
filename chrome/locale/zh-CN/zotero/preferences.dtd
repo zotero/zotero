@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "小">
 <!ENTITY zotero.preferences.fontSize.medium "中">
 <!ENTITY zotero.preferences.fontSize.large "大">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Note font size:">
 
 <!ENTITY zotero.preferences.miscellaneous "杂项">

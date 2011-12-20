@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Kopie van bestand toevoegen...">
 <!ENTITY zotero.items.menu.attach.fileLink "Koppeling naar bestand toevoegen...">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Kopie maken van geselecteerd object">
 
 <!ENTITY zotero.toolbar.newItem.label "Nieuw object">

@@ -1,5 +1,6 @@
 <!ENTITY zotero.version "نگارش">
 <!ENTITY zotero.createdby "محصولی از:">
+<!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "مدیران:">
 <!ENTITY zotero.developers "توسعه‌دهندگان:">
 <!ENTITY zotero.alumni "فارغ‌التحصیلان:">
@@ -8,3 +9,4 @@
 <!ENTITY zotero.executiveProducer "مدیر اجرایی:">
 <!ENTITY zotero.thanks "تشکر ویژه از:">
 <!ENTITY zotero.about.close "بستن">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">

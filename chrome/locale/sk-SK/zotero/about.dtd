@@ -1,5 +1,6 @@
 <!ENTITY zotero.version "verzia">
 <!ENTITY zotero.createdby "Vytvorili:">
+<!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Pod vedením:">
 <!ENTITY zotero.developers "Vývojári:">
 <!ENTITY zotero.alumni "Alumni:">
@@ -8,3 +9,4 @@
 <!ENTITY zotero.executiveProducer "Výkonný producent:">
 <!ENTITY zotero.thanks "Špeciálne poďakovanie:">
 <!ENTITY zotero.about.close "Zatvoriť">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">

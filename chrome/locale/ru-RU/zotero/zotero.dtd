@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Прикрепить копию файла…">
 <!ENTITY zotero.items.menu.attach.fileLink "Прикрепить ссылку на файл…">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Сделать дубликат выбранного документа">
 
 <!ENTITY zotero.toolbar.newItem.label "Новый документ">

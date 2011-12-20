@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Lisada fail kirje manusena">
 <!ENTITY zotero.items.menu.attach.fileLink "Lisada link failile">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Valitud kirje duplitseerimine">
 
 <!ENTITY zotero.toolbar.newItem.label "Uus kirje">

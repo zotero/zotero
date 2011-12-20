@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "Mici">
 <!ENTITY zotero.preferences.fontSize.medium "Medii">
 <!ENTITY zotero.preferences.fontSize.large "Mari">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Mărimea fontului pentru notă:">
 
 <!ENTITY zotero.preferences.miscellaneous "Diverse">

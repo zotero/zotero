@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "Dosyanın Kaydedilen Kopyasını  Ekle">
 <!ENTITY zotero.items.menu.attach.fileLink "Dosyaya Bağlantı Ekle...">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "Seçili Eseri Çoğalt">
 
 <!ENTITY zotero.toolbar.newItem.label "Yeni Eser">

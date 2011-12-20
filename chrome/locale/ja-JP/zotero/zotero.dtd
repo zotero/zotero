@@ -67,6 +67,7 @@
 <!ENTITY zotero.items.menu.attach.file "ファイルの保存されたコピーを添付する">
 <!ENTITY zotero.items.menu.attach.fileLink "リンクをファイルに添付する">
 
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem "選択されたアイテムを複製">
 
 <!ENTITY zotero.toolbar.newItem.label "新規アイテム">
