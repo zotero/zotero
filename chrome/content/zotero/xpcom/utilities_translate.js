@@ -340,9 +340,9 @@ Zotero.Utilities.Translate.prototype.retrieveSource = function(url, body, header
 		var listener = function() { finished = true };
 		
 		if(body) {
-			var xmlhttp = Zotero.HTTP.doPost(url, body, listener, headers, responseCharset, translate.cookieSandbox);
+			var xmlhttp = Zotero.HTTP.doPost(url, body, listener, headers, responseCharset, this._translate.cookieSandbox);
 		} else {
-			var xmlhttp = Zotero.HTTP.doGet(url, listener, responseCharset, translate.cookieSandbox);
+			var xmlhttp = Zotero.HTTP.doGet(url, listener, responseCharset, this._translate.cookieSandbox);
 		}
 		
 		while(!finished) mainThread.processNextEvent(true);
