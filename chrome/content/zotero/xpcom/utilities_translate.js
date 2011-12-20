@@ -287,7 +287,7 @@ Zotero.Utilities.Translate.prototype.retrieveDocument = function(url) {
 	}
 	
 	var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
-	if(translate.cookieSandbox) translate.cookieSandbox.attachToBrowser(hiddenBrowser);
+	if(this._translate.cookieSandbox) this._translate.cookieSandbox.attachToBrowser(hiddenBrowser);
 	
 	hiddenBrowser.addEventListener("pageshow", listener, true);
 	hiddenBrowser.loadURI(url);
