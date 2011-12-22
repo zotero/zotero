@@ -1,5 +1,6 @@
 <!ENTITY zotero.version "versiune">
 <!ENTITY zotero.createdby "Creat de:">
+<!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Directori:">
 <!ENTITY zotero.developers "Dezvoltatori:">
 <!ENTITY zotero.alumni "Alumni:">
@@ -8,3 +9,4 @@
 <!ENTITY zotero.executiveProducer "Producător executiv:">
 <!ENTITY zotero.thanks "Mulțumiri speciale:">
 <!ENTITY zotero.about.close "Închide">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">

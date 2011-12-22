@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "Nhỏ">
 <!ENTITY zotero.preferences.fontSize.medium "Trung bình">
 <!ENTITY zotero.preferences.fontSize.large "Lớn">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Note font size:">
 
 <!ENTITY zotero.preferences.miscellaneous "Các tùy chọn khác">

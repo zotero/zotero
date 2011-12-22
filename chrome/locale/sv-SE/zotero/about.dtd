@@ -1,5 +1,6 @@
 <!ENTITY zotero.version "Version">
 <!ENTITY zotero.createdby "Skapad av:">
+<!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Ledare:">
 <!ENTITY zotero.developers "Utvecklare:">
 <!ENTITY zotero.alumni "Alumni:">
@@ -8,3 +9,4 @@
 <!ENTITY zotero.executiveProducer "Produktionsledare:">
 <!ENTITY zotero.thanks "Särskilt tack:">
 <!ENTITY zotero.about.close "Stäng">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">

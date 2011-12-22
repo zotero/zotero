@@ -242,36 +242,136 @@ var Zotero_QuickFormat = new function () {
 			}
 		}
 		
-		var ids = (haveConditions ? s.search() : []);
-		
-		// no need to refresh anything if box hasnt changed
-		if(ids.length === curIDs.length) {
-			var mismatch = false;
-			for(var i=0; i<ids.length; i++) {
-				if(curIDs[i] !== ids[i]) {
-					mismatch = true;
-					break;
+		if(haveConditions) {		
+			var searchResultIDs = (haveConditions ? s.search() : []);
+			
+			// No need to refresh anything if box hasn't changed
+			if(searchResultIDs.length === curIDs.length) {
+				var mismatch = false;
+				for(var i=0; i<searchResultIDs.length; i++) {
+					if(curIDs[i] !== searchResultIDs[i]) {
+						mismatch = true;
+						break;
+					}
+				}
+				if(!mismatch) {
+					_resize();
+					return;
 				}
 			}
-			if(!mismatch) return;
+			curIDs = searchResultIDs;
+			
+			// Check to see which search results match items already in the document
+			var citedItems, completed = false, isAsync = false;
+			io.getItems(function(citedItems) {
+				// Don't do anything if panel is already closed
+				if(isAsync && referencePanel.state !== "open" && referencePanel.state !== "showing") return;
+				
+				completed = true;
+				
+				if(str.toLowerCase() === Zotero.getString("integration.ibid").toLowerCase()) {
+					// If "ibid" is entered, show all cited items
+					citedItemsMatchingSearch = citedItems;
+				} else {
+					Zotero.debug("Searching cited items");
+					// Search against items. We do this here because it's possible that some of these
+					// items are only in the doc, and not in the DB.
+					var splits = Zotero.Fulltext.semanticSplitter(str),
+						citedItemsMatchingSearch = [];
+					for(var i=0, iCount=citedItems.length; i<iCount; i++) {
+						// Generate a string to search for each item
+						var item = citedItems[i],
+							itemStr = [creator.ref.firstName+" "+creator.ref.lastName for each(creator in item.getCreators())];
+						itemStr = itemStr.concat([item.getField("title"), item.getField("date", true, true).substr(0, 4)]).join(" ");
+						
+						// See if words match
+						for(var j=0, jCount=splits.length; j<jCount; j++) {
+							var split = splits[j];
+							if(itemStr.toLowerCase().indexOf(split) === -1) break;
+						}
+						
+						// If matched, add to citedItemsMatchingSearch
+						if(j === jCount) citedItemsMatchingSearch.push(item);
+					}
+					Zotero.debug("Searched cited items");
+				}
+				
+				_updateItemList(citedItemsMatchingSearch, searchResultIDs, isAsync);
+			});
+			
+			if(!completed) {
+				// We are going to have to wait until items have been retrieved from the document.
+				// Until then, show item list without cited items.
+				_updateItemList(false, searchResultIDs);
+				isAsync = true;
+			}
+		} else {
+			// No search conditions, so just clear the box
+			_updateItemList([], []);
 		}
-		curIDs = ids;
+	}
+	
+	/**
+	 * Sorts items
+	 */
+	function _itemSort(a, b) {
+		// Sort by library ID
+		var libA = a.libraryID, libB = b.libraryID;
+		if(libA !== libB) {
+			return libA - libB;
+		}
+	
+		// Sort by last name of first author
+		var creatorsA = a.getCreators(), creatorsB = b.getCreators(),
+			caExists = creatorsA.length ? 1 : 0, cbExists = creatorsB.length ? 1 : 0;
+		if(caExists !== cbExists) {
+			return cbExists-caExists;
+		} else if(caExists) {
+			return creatorsA[0].ref.lastName.localeCompare(creatorsB[0].ref.lastName);
+		}
+		
+		// Sort by date
+		var yearA = a.getField("date", true, true).substr(0, 4),
+			yearB = b.getField("date", true, true).substr(0, 4);
+		return yearA - yearB;
+	}
+	
+	/**
+	 * Updates the item list
+	 */
+	function _updateItemList(citedItems, searchResultIDs, preserveSelection) {
+		var selectedIndex = 1, previousItemID;
+		
+		// Do this so we can preserve the selected item after cited items have been loaded
+		if(preserveSelection && referenceBox.selectedIndex !== 2) {
+			previousItemID = parseInt(referenceBox.selectedItem.getAttribute("zotero-item"), 10);
+		}
 		
 		while(referenceBox.hasChildNodes()) referenceBox.removeChild(referenceBox.firstChild);
 		
-		var firstSelectableIndex = 0;
+		if(!citedItems) {
+			// We don't know whether or not we have cited items, because we are waiting for document
+			// data
+			referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.cited.loading")));
+			selectedIndex = 2;
+		} else if(citedItems.length) {
+			// We have cited items
+			referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.cited")));
+			for(var i=0, n=citedItems.length; i<n; i++) {
+				referenceBox.appendChild(_buildListItem(citedItems[i]));
+			}
+		}
 
-		if(ids.length) {
-			if(ids.length > 50) ids = ids.slice(0, 50);
-			var items = Zotero.Items.get(ids);
+		if(searchResultIDs.length && (!citedItems || citedItems.length < 50)) {
+			// Don't handle more than 50 results
+			if(searchResultIDs.length > 50-citedItems.length) {
+				searchResultIDs = searchResultIDs.slice(0, 50-citedItems.length);
+			}
 			
-			firstSelectableIndex = 1;
-			
-			//TODO: sort the currently used items in before any other items
-			items.sort(function(a, b) {return a.libraryID > b.libraryID}) 
+			var items = Zotero.Items.get(searchResultIDs);
+			items.sort(_itemSort);
 			
 			var previousLibrary = -1;
-			
 			for(var i=0, n=items.length; i<n; i++) {
 				var item = items[i], libraryID = item.libraryID;
 				
@@ -281,19 +381,21 @@ var Zotero_QuickFormat = new function () {
 					referenceBox.appendChild(_buildListSeparator(libraryName));
 				}
 
-				referenceBox.appendChild(_buildListItem(item),false);
-				
+				referenceBox.appendChild(_buildListItem(item));
 				previousLibrary = libraryID;
-
+				
+				if(preserveSelection && (item.cslItemID ? item.cslItemID : item.id) === previousItemID) {
+					selectedIndex = referenceBox.childNodes.length-1;
+				}
 			}
 		}
 		
 		_resize();
-		
-		referenceBox.selectedIndex = firstSelectableIndex;
-		referenceBox.ensureIndexIsVisible(firstSelectableIndex);
+		if((citedItems && citedItems.length) || searchResultIDs.length) {
+			referenceBox.selectedIndex = selectedIndex;
+			referenceBox.ensureIndexIsVisible(selectedIndex);
+		}
 	}
-
 	
 	/**
 	 * Builds a string describing an item. We avoid CSL here for speed.
@@ -383,7 +485,7 @@ var Zotero_QuickFormat = new function () {
 		rll.setAttribute("orient", "vertical");
 		rll.setAttribute("flex", "1");
 		rll.setAttribute("class", "quick-format-item");
-		rll.setAttribute("zotero-item", item.id);
+		rll.setAttribute("zotero-item", item.cslItemID ? item.cslItemID : item.id);
 		rll.appendChild(titleNode);
 		rll.appendChild(infoNode);
 		rll.addEventListener("click", _bubbleizeSelected, false);
@@ -391,7 +493,10 @@ var Zotero_QuickFormat = new function () {
 		return rll;
 	}
 
-	function _buildListSeparator(labelText) {
+	/**
+	 * Creates a list separator to be added to the item list
+	 */
+	function _buildListSeparator(labelText, loading) {
 		var titleNode = document.createElement("label");
 		titleNode.setAttribute("class", "quick-format-separator-title");
 		titleNode.setAttribute("flex", "1");
@@ -403,7 +508,7 @@ var Zotero_QuickFormat = new function () {
 		rll.setAttribute("orient", "vertical");
 		rll.setAttribute("flex", "1");
 		rll.setAttribute("disabled", true);
-		rll.setAttribute("class", "quick-format-separator");
+		rll.setAttribute("class", loading ? "quick-format-loading" : "quick-format-separator");
 		rll.appendChild(titleNode);
 		rll.addEventListener("mousedown", _ignoreClick, true);
 		rll.addEventListener("click", _ignoreClick, true);
@@ -415,7 +520,7 @@ var Zotero_QuickFormat = new function () {
 	 * Builds the string to go inside a bubble
 	 */
 	function _buildBubbleString(citationItem) {
-		var item = Zotero.Items.get(citationItem.id);
+		var item = Zotero.Cite.getItem(citationItem.id);
 		// create text for bubble
 		var title, delimiter;
 		var str = item.getField("firstCreator");
@@ -477,6 +582,11 @@ var Zotero_QuickFormat = new function () {
 		if(!referenceBox.hasChildNodes() || !referenceBox.selectedItem) return false;
 		
 		var citationItem = {"id":referenceBox.selectedItem.getAttribute("zotero-item")};
+		if(typeof citationItem.id === "string" && citationItem.id.indexOf("/") !== -1) {
+			var item = Zotero.Cite.getItem(citationItem.id);
+			citationItem.uris = item.cslURIs;
+			citationItem.itemData = item.cslItemData;
+		}
 		if(curLocator) {
 			 citationItem["locator"] = curLocator;
 			if(curLocatorLabel) {
@@ -510,12 +620,16 @@ var Zotero_QuickFormat = new function () {
 		var childNodes = referenceBox.childNodes,
 			numReferences = 0,
 			numSeparators = 0,
+			firstReference,
+			firstSeparator,
 			height;
-		for(var i=0, n=childNodes.length; i<n; i++) {
+		for(var i=0, n=childNodes.length; i<n && numReferences < SHOWN_REFERENCES; i++) {
 			if(childNodes[i].className === "quick-format-item") {
 				numReferences++;
+				firstReference = childNodes[i];
 			} else if(childNodes[i].className === "quick-format-separator") {
 				numSeparators++;
+				firstSeparator = childNodes[i];
 			}
 		}
 		
@@ -540,8 +654,7 @@ var Zotero_QuickFormat = new function () {
 		
 		if(numReferences) {
 			var height = referenceHeight ? 
-				Math.min(numReferences*referenceHeight+1+numSeparators*separatorHeight, 
-					SHOWN_REFERENCES*referenceHeight+1+separatorHeight) : 39;
+				Math.min(numReferences*referenceHeight+1+numSeparators*separatorHeight) : 39;
 			
 			if(panelShowing && height !== referencePanel.clientHeight) {
 				referencePanel.sizeTo((window.outerWidth-30), height);
@@ -554,10 +667,9 @@ var Zotero_QuickFormat = new function () {
 					false, false, null);
 				
 				if(!referenceHeight) {
-					separatorHeight = referenceBox.firstChild.scrollHeight;
-					referenceHeight = referenceBox.childNodes[1].scrollHeight;
-					height = Math.min(numReferences*referenceHeight+1+numSeparators*separatorHeight, 
-						SHOWN_REFERENCES*referenceHeight+1+separatorHeight);
+					separatorHeight = firstSeparator.scrollHeight;
+					referenceHeight = firstReference.scrollHeight;
+					height = Math.min(numReferences*referenceHeight+1+numSeparators*separatorHeight);
 					referencePanel.sizeTo((window.outerWidth-30), height);
 				}
 			}
@@ -679,7 +791,7 @@ var Zotero_QuickFormat = new function () {
 		locator.value = target.citationItem["locator"] ? target.citationItem["locator"] : "";
 		suppressAuthor.checked = !!target.citationItem["suppress-author"];
 		
-		var item = Zotero.Items.get(target.citationItem.id);
+		var item = Zotero.Cite.getItem(target.citationItem.id);
 		document.getElementById("citation-properties-title").textContent = item.getDisplayTitle();
 		while(info.hasChildNodes()) info.removeChild(info.firstChild);
 		_buildItemDescription(item, info);

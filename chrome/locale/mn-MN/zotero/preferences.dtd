@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "Бага">
 <!ENTITY zotero.preferences.fontSize.medium "Дунд">
 <!ENTITY zotero.preferences.fontSize.large "Том">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Note font size:">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">

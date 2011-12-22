@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "Liten">
 <!ENTITY zotero.preferences.fontSize.medium "Mellan">
 <!ENTITY zotero.preferences.fontSize.large "Stor">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Storlek på anteckningar">
 
 <!ENTITY zotero.preferences.miscellaneous "Blandat">

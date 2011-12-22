@@ -1,5 +1,6 @@
 <!ENTITY zotero.version "phiên bản">
 <!ENTITY zotero.createdby "Một sản phẩm của:">
+<!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Giám đốc điều hành:">
 <!ENTITY zotero.developers "Phát triển phần mềm:">
 <!ENTITY zotero.alumni "Cựu thành viên:">
@@ -8,3 +9,4 @@
 <!ENTITY zotero.executiveProducer "Chủ nhiệm:">
 <!ENTITY zotero.thanks "Xin gửi lời cảm ơn đặc biệt tới:">
 <!ENTITY zotero.about.close "Đóng">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">

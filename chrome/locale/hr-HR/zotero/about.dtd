@@ -1,5 +1,6 @@
 <!ENTITY zotero.version "inačica">
 <!ENTITY zotero.createdby "Izradili:">
+<!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Ravnatelji:">
 <!ENTITY zotero.developers "Razvojni tim:">
 <!ENTITY zotero.alumni "Alumni:">
@@ -8,3 +9,4 @@
 <!ENTITY zotero.executiveProducer "Izvršni producent:">
 <!ENTITY zotero.thanks "Posebna zahvala:">
 <!ENTITY zotero.about.close "Zatvori">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">

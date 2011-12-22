@@ -390,6 +390,35 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 	}
 }
 
+/**
+ * Get an item by ID, either by retrieving it from the library or looking for the document it
+ * belongs to.
+ * @param {String|Number|Array} id
+ */
+Zotero.Cite.getItem = function(id) {
+	var slashIndex;
+	
+	if(id instanceof Array) {
+		return [Zotero.Cite.getItem(anId) for each(anId in id)];
+	} else if(typeof id === "string" && (slashIndex = id.indexOf("/")) !== -1) {		
+		var sessionID = id.substr(0, slashIndex),
+			session = Zotero.Integration.sessions[sessionID],
+			item;
+		if(session) {
+			item = session.embeddedZoteroItems[id.substr(slashIndex+1)];
+		}
+		
+		if(!item) {
+			item = new Zotero.Item("document");
+			item.setField("title", "Missing Item");
+			Zotero.log("CSL item "+id+" not found");
+		}
+		return item;
+	} else {
+		return Zotero.Items.get(id);
+	}
+}
+
 Zotero.Cite.labels = ["page", "book", "chapter", "column", "figure", "folio",
 		"issue", "line", "note", "opus", "paragraph", "part", "section", "sub verbo",
 		"volume", "verse"];

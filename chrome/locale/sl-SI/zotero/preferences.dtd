@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "majhna">
 <!ENTITY zotero.preferences.fontSize.medium "srednja">
 <!ENTITY zotero.preferences.fontSize.large "velika">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Velikost pisave opomb:">
 
 <!ENTITY zotero.preferences.miscellaneous "Razno">

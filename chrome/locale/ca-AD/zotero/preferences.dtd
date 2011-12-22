@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "Petita">
 <!ENTITY zotero.preferences.fontSize.medium "Mitjana">
 <!ENTITY zotero.preferences.fontSize.large "Gran">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Note font size:">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscel·lania">

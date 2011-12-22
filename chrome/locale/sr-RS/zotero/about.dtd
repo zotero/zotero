@@ -1,5 +1,6 @@
 <!ENTITY zotero.version "верзија">
 <!ENTITY zotero.createdby "Направљена од стране:">
+<!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Директори:">
 <!ENTITY zotero.developers "Програмери:">
 <!ENTITY zotero.alumni "Предходни:">
@@ -8,3 +9,4 @@
 <!ENTITY zotero.executiveProducer "Извршни продуцент:">
 <!ENTITY zotero.thanks "Посебне захвалнице:">
 <!ENTITY zotero.about.close "Затвори">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">

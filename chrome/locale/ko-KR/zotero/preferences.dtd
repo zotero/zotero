@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "작게">
 <!ENTITY zotero.preferences.fontSize.medium "중간">
 <!ENTITY zotero.preferences.fontSize.large "크게">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "노트 글꼴 크기:">
 
 <!ENTITY zotero.preferences.miscellaneous "기타">

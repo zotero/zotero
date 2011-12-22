@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "صغير">
 <!ENTITY zotero.preferences.fontSize.medium "متوسط">
 <!ENTITY zotero.preferences.fontSize.large "كبير">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "حجم خط الملاحظات:">
 
 <!ENTITY zotero.preferences.miscellaneous "أخرى">

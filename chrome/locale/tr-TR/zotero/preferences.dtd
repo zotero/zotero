@@ -17,6 +17,7 @@
 <!ENTITY zotero.preferences.fontSize.small "Küçük">
 <!ENTITY zotero.preferences.fontSize.medium "Orta">
 <!ENTITY zotero.preferences.fontSize.large "Büyük">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
 <!ENTITY zotero.preferences.fontSize.notes "Not yazıtipi boyutu:">
 
 <!ENTITY zotero.preferences.miscellaneous "Çeşitli">

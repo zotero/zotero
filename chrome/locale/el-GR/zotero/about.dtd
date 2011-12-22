@@ -1,5 +1,6 @@
 <!ENTITY zotero.version "έκδοση">
 <!ENTITY zotero.createdby "Δημιουργήθηκε Από:">
+<!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Διευθυντές:">
 <!ENTITY zotero.developers "Προγραμματιστές:">
 <!ENTITY zotero.alumni "Απόφοιτοι:">
@@ -8,3 +9,4 @@
 <!ENTITY zotero.executiveProducer "Εκτελεστικός Παραγωγός:">
 <!ENTITY zotero.thanks "Ειδικές Ευχαριστίες:">
 <!ENTITY zotero.about.close "Κλείσιμο">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">

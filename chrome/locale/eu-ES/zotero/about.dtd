@@ -1,5 +1,6 @@
 <!ENTITY zotero.version "bertsioa">
 <!ENTITY zotero.createdby "Egileak:">
+<!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Zuzendariak:">
 <!ENTITY zotero.developers "Garatzaileak:">
 <!ENTITY zotero.alumni "Ikasleak:">
@@ -8,3 +9,4 @@
 <!ENTITY zotero.executiveProducer "Executive Producer:">
 <!ENTITY zotero.thanks "Mila esker:">
 <!ENTITY zotero.about.close "Gora askatasuna">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">

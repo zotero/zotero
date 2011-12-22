@@ -226,14 +226,27 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 		}
 	}
 	
-	var translate = this._translate;
-	var loc = translate.document.location;
+	if(Zotero.isFx) {
+		var translate = this._translate;
+		if(translate.document) {
+			var protocol = translate.document.location.protocol,
+				host = translate.document.location.host;
+		} else {
+			var url = Components.classes["@mozilla.org/network/io-service;1"] 
+					.getService(Components.interfaces.nsIIOService)
+					.newURI(typeof translate._sandboxLocation === "object" ?
+						translate._sandboxLocation.location : translate._sandboxLocation, null, null),
+				protocol = url.scheme+":",
+				host = url.host;
+		}
+	}
+	
 	translate.incrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
 	var hiddenBrowser = Zotero.HTTP.processDocuments(urls, function(doc) {
 		if(!processor) return;
 		
 		var newLoc = doc.location;
-		if(Zotero.isFx && (loc.protocol !== newLoc.protocol || loc.host !== newLoc.host)) {
+		if(Zotero.isFx && (protocol != newLoc.protocol || host != newLoc.host)) {
 			// Cross-site; need to wrap
 			processor(Zotero.Translate.SandboxManager.Fx5DOMWrapper(doc), newLoc.toString());
 		} else {
@@ -274,7 +287,7 @@ Zotero.Utilities.Translate.prototype.retrieveDocument = function(url) {
 	}
 	
 	var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
-	if(translate.cookieSandbox) translate.cookieSandbox.attachToBrowser(hiddenBrowser);
+	if(this._translate.cookieSandbox) this._translate.cookieSandbox.attachToBrowser(hiddenBrowser);
 	
 	hiddenBrowser.addEventListener("pageshow", listener, true);
 	hiddenBrowser.loadURI(url);
@@ -327,9 +340,9 @@ Zotero.Utilities.Translate.prototype.retrieveSource = function(url, body, header
 		var listener = function() { finished = true };
 		
 		if(body) {
-			var xmlhttp = Zotero.HTTP.doPost(url, body, listener, headers, responseCharset, translate.cookieSandbox);
+			var xmlhttp = Zotero.HTTP.doPost(url, body, listener, headers, responseCharset, this._translate.cookieSandbox);
 		} else {
-			var xmlhttp = Zotero.HTTP.doGet(url, listener, responseCharset, translate.cookieSandbox);
+			var xmlhttp = Zotero.HTTP.doGet(url, listener, responseCharset, this._translate.cookieSandbox);
 		}
 		
 		while(!finished) mainThread.processNextEvent(true);
