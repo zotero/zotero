@@ -247,6 +247,7 @@ var Zotero_QuickFormat = new function () {
 			
 			// No need to refresh anything if box hasn't changed
 			if(searchResultIDs.length === curIDs.length) {
+				Zotero.debug("unchanged");
 				var mismatch = false;
 				for(var i=0; i<searchResultIDs.length; i++) {
 					if(curIDs[i] !== searchResultIDs[i]) {
@@ -312,31 +313,6 @@ var Zotero_QuickFormat = new function () {
 	}
 	
 	/**
-	 * Sorts items
-	 */
-	function _itemSort(a, b) {
-		// Sort by library ID
-		var libA = a.libraryID, libB = b.libraryID;
-		if(libA !== libB) {
-			return libA - libB;
-		}
-	
-		// Sort by last name of first author
-		var creatorsA = a.getCreators(), creatorsB = b.getCreators(),
-			caExists = creatorsA.length ? 1 : 0, cbExists = creatorsB.length ? 1 : 0;
-		if(caExists !== cbExists) {
-			return cbExists-caExists;
-		} else if(caExists) {
-			return creatorsA[0].ref.lastName.localeCompare(creatorsB[0].ref.lastName);
-		}
-		
-		// Sort by date
-		var yearA = a.getField("date", true, true).substr(0, 4),
-			yearB = b.getField("date", true, true).substr(0, 4);
-		return yearA - yearB;
-	}
-	
-	/**
 	 * Updates the item list
 	 */
 	function _updateItemList(citedItems, searchResultIDs, preserveSelection) {
@@ -349,6 +325,7 @@ var Zotero_QuickFormat = new function () {
 		
 		while(referenceBox.hasChildNodes()) referenceBox.removeChild(referenceBox.firstChild);
 		
+		var nCitedItemsFromLibrary = {};
 		if(!citedItems) {
 			// We don't know whether or not we have cited items, because we are waiting for document
 			// data
@@ -358,21 +335,78 @@ var Zotero_QuickFormat = new function () {
 			// We have cited items
 			referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.cited")));
 			for(var i=0, n=citedItems.length; i<n; i++) {
-				referenceBox.appendChild(_buildListItem(citedItems[i]));
+				var citedItem = citedItems[i];
+				if(i < 50) {
+					referenceBox.appendChild(_buildListItem(citedItem));
+				}
+				
+				// Tabulate number of items in document for each library
+				if(!citedItem.cslItemID) {
+					var libraryID = citedItem.libraryID ? citedItem.libraryID : 0;
+					if(libraryID in nCitedItemsFromLibrary) {
+						nCitedItemsFromLibrary[libraryID]++;
+					} else {
+						nCitedItemsFromLibrary[libraryID] = 1;
+					}
+				}
+			}
+		}
+		
+		// Also take into account items cited in this citation. This means that the sorting isn't
+		// exactly by # of items cited from each library, but maybe it's better this way.
+		_updateCitationObject();
+		for each(var citationItem in io.citation.citationItems) {
+			var citedItem = Zotero.Cite.getItem(citationItem.id);
+			if(!citedItem.cslItemID) {
+				var libraryID = citedItem.libraryID ? citedItem.libraryID : 0;
+				if(libraryID in nCitedItemsFromLibrary) {
+					nCitedItemsFromLibrary[libraryID]++;
+				} else {
+					nCitedItemsFromLibrary[libraryID] = 1;
+				}
 			}
 		}
 
 		if(searchResultIDs.length && (!citedItems || citedItems.length < 50)) {
-			// Don't handle more than 50 results
-			if(searchResultIDs.length > 50-citedItems.length) {
-				searchResultIDs = searchResultIDs.slice(0, 50-citedItems.length);
-			}
-			
 			var items = Zotero.Items.get(searchResultIDs);
-			items.sort(_itemSort);
+			
+			items.sort(function _itemSort(a, b) {
+				var libA = a.libraryID ? a.libraryID : 0, libB = b.libraryID ? b.libraryID : 0;
+				if(libA !== libB) {
+					Zotero.debug(libA);
+					Zotero.debug(libB);
+					// Sort by number of cites for library
+					if(nCitedItemsFromLibrary[libA] && !nCitedItemsFromLibrary[libB]) {
+						return -1;
+					}
+					if(!nCitedItemsFromLibrary[libA] && nCitedItemsFromLibrary[libB]) {
+						return 1;
+					}
+					if(nCitedItemsFromLibrary[libA] !== nCitedItemsFromLibrary[libB]) {
+						return nCitedItemsFromLibrary[libB] - nCitedItemsFromLibrary[libA];
+					}
+					
+					// Sort by ID even if number of cites is equal
+					return libA - libB;
+				}
+			
+				// Sort by last name of first author
+				var creatorsA = a.getCreators(), creatorsB = b.getCreators(),
+					caExists = creatorsA.length ? 1 : 0, cbExists = creatorsB.length ? 1 : 0;
+				if(caExists !== cbExists) {
+					return cbExists-caExists;
+				} else if(caExists) {
+					return creatorsA[0].ref.lastName.localeCompare(creatorsB[0].ref.lastName);
+				}
+				
+				// Sort by date
+				var yearA = a.getField("date", true, true).substr(0, 4),
+					yearB = b.getField("date", true, true).substr(0, 4);
+				return yearA - yearB;
+			});
 			
 			var previousLibrary = -1;
-			for(var i=0, n=items.length; i<n; i++) {
+			for(var i=0, n=Math.min(items.length, 50-citedItems.length); i<n; i++) {
 				var item = items[i], libraryID = item.libraryID;
 				
 				if(previousLibrary != libraryID) {
@@ -571,6 +605,7 @@ var Zotero_QuickFormat = new function () {
 	 * Clear list of bubbles
 	 */
 	function _clearEntryList() {
+		curIDs = [];
 		while(referenceBox.hasChildNodes()) referenceBox.removeChild(referenceBox.firstChild);
 		_resize();
 	}
