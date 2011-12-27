@@ -1329,8 +1329,10 @@ Zotero.Utilities = {
 		// map text fields
 		for(var variable in CSL_TEXT_MAPPINGS) {
 			if(variable in cslItem) {
-				for each(var field in CSL_TEXT_MAPPINGS[variable]) {
-					var fieldID = Zotero.ItemFields.getID(field);
+				var textMappings = CSL_TEXT_MAPPINGS[variable];
+				for(var i in textMappings) {
+					var field = textMappings[i],
+						fieldID = Zotero.ItemFields.getID(field);
 					if(Zotero.ItemFields.isBaseField(fieldID)) {
 						var newFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID);
 						if(newFieldID) fieldID = newFieldID;
@@ -1355,8 +1357,10 @@ Zotero.Utilities = {
 					creatorTypeID = Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID);
 				}
 				
-				for each(var cslAuthor in cslItem[CSL_NAMES_MAPPINGS[field]]) {
-					var creator = isZoteroItem ? new Zotero.Creator() : {};
+				var nameMappings = cslItem[CSL_NAMES_MAPPINGS[field]];
+				for(var i in nameMappings) {
+					var cslAuthor = nameMappings[i],
+						creator = isZoteroItem ? new Zotero.Creator() : {};
 					if(cslAuthor.family || cslAuthor.given) {
 						if(cslAuthor.family) creator.lastName = cslAuthor.family;
 						if(cslAuthor.given) creator.firstName = cslAuthor.given;
