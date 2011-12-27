@@ -438,18 +438,29 @@
 								// when the notifier kicks in
 								var existing = Zotero.Tags.getID(value, 0);
 								if (existing && id != existing) {
-									this._tabDirection = false;
+								//	this._tabDirection = false;
 								}
+								var origTagIndex = this.item.getTagIndex(id);
 								var changed = tagsbox.replace(id, value);
 								if (changed) {
-									return;
+									var newTagIndex = this.item.getTagIndex(changed);
+									if (newTagIndex>origTagIndex) {
+										if (this._tabDirection == 1) {
+											this._lastTabIndex--;
+										}
+									}
+									else if (newTagIndex<origTagIndex) {
+										if (this._tabDirection == -1) {
+											this._lastTabIndex++;
+										}
+									}
+								} 
+								else if (value != Zotero.Tags.getName(id)) {
+									if (this._tabDirection == 1) {
+										this._lastTabIndex -= 1;
+									}
 								}
 							}
-							else {
-								tagsbox.remove(id);
-								return;
-							}
-						}
 						// New tag
 						else {
 							//Check for newlines or carriage returns used as delimiters
