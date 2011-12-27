@@ -1,7 +1,7 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2009 Center for History and New Media
+    Copyright ¬© 2009 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
     
@@ -2703,7 +2703,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			// Strip "storage:"
 			var path = row.path.substr(8);
 			// setRelativeDescriptor() silently uses the parent directory on Windows
-			// if the filename contains certain characters, so strip them —
+			// if the filename contains certain characters, so strip them ‚Äî
 			// but don't skip characters outside of XML range, since they may be
 			// correct in the opaque relative descriptor string
 			//
@@ -3635,6 +3635,22 @@ Zotero.Item.prototype.getTags = function() {
 Zotero.Item.prototype.getTagIDs = function() {
 	var sql = "SELECT tagID FROM itemTags WHERE itemID=?";
 	return Zotero.DB.columnQuery(sql, this.id);
+}
+
+//Return the index of tagID in the list of the item's tags
+//sorted in alphabetical order.
+Zotero.Item.prototype.getTagIndex = function(tagID) {
+	var tags = this.getTags();
+	
+	var tagIndex=-1;
+	for (var i=0;i<tags.length;i++) {
+		if (tagID == tags[i].id) {
+			tagIndex=i;
+			break;
+		}
+	}
+	
+	return tagIndex;
 }
 
 Zotero.Item.prototype.replaceTag = function(oldTagID, newTag) {

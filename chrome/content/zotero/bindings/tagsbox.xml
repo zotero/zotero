@@ -411,11 +411,8 @@
 					
 					var fieldName = 'tag';
 					var tabindex = textbox.getAttribute('ztabindex');
-					
-					//var value = t.value;
+
 					var value = textbox.value;
-					
-					var elem;
 					
 					var tagsbox = Zotero.getAncestorByTagName(textbox, 'tagsbox');
 					if (!tagsbox)
@@ -462,7 +459,34 @@
 								value = value.replace('\r\n','\n');
 								value = value.replace('\r','\n');
 								var nameArray = value.split('\n');
+								
+								var extremeTag = false;
+								var nextTag = false;
+								if (this._tabDirection == -1) {
+									if (this._lastTabIndex == 1) {
+										extremeTag = true;
+									} else {
+										nextTag = row.previousSibling.getAttribute('id').split('-')[1];
+									}
+								} else if (this._tabDirection == 1) {
+									if (this._lastTabIndex >= this.item.getTags().length) {
+										extremeTag = true;
+									} else {
+										nextTag = row.nextSibling.getAttribute('id').split('-')[1];
+									}
+								}
+								
 								id = this.item.addTags(nameArray);
+								
+								if (extremeTag) {
+									if (this._tabDirection == 1) {
+										this._lastTabIndex = this.item.getTags().length;
+									} else if (this._tabDirection == -1) {
+										this._lastTabIndex = 2;
+									}
+								} else {
+									this._lastTabIndex = this.item.getTagIndex(nextTag)+1-this._tabDirection;
+								}
 							}
 							else {
 								id = tagsbox.add(value);
@@ -474,7 +498,7 @@
 					}
 					
 					if (id) {
-						elem = this.createValueElement(
+						var elem = this.createValueElement(
 							value,
 							tabindex
 						);
@@ -492,22 +516,10 @@
 						catch (e) {}
 					}
 					
-					var focusMode = 'tags';
 					var focusBox = tagsbox;
 					
-					//Move at least one field even if no entry was added because of
-					//the way bookkeeping is done above
-					var fieldsToMove = 1;
-					//Check if id is an array and, if so, how many new entries
-					//were added at once
-					if (Object.prototype.toString.call(id) === '[object Array]') {
-						fieldsToMove = id.length;
-					}
-					
 					if (this._tabDirection) {
-						for (var i = 0; i < fieldsToMove; i++) {
-							this._focusNextField(focusBox, this._lastTabIndex, this._tabDirection == -1);
-						}
+						this._focusNextField(focusBox, this._lastTabIndex, this._tabDirection == -1);
 					}
 				]]>
 				</body>
