@@ -427,10 +427,10 @@
 					// Tag id encoded as 'tag-1234'
 					var id = row.getAttribute('id').split('-')[1];
 					
-					var newlinePresent = (value.search('\r') > -1 || value.search('\n') > -1);
+					var tagArray = value.split(/\r\n?|\n/);
 					
 					if (saveChanges) {
-						if (id && newlinePresent != true) {
+						if (id && (tagArray.length < 2)) {
 							if (value) {
 								var origTagIndex = this.item.getTagIndex(id);
 								var changed = tagsbox.replace(id, value);
@@ -453,16 +453,13 @@
 									}
 								}
 							}
+						}
 						// New tag
 						else {
 							//Check for newlines or carriage returns used as delimiters
 							//in a series of tags added at once.  Add each tag
 							//separately.
-							if (newlinePresent) {
-								value = value.replace('\r\n','\n');
-								value = value.replace('\r','\n');
-								var nameArray = value.split('\n');
-								
+							if (tagArray.length > 1) {
 								var extremeTag = false;
 								var nextTag = false;
 								if (this._tabDirection == -1) {
@@ -479,7 +476,7 @@
 									}
 								}
 								
-								id = this.item.addTags(nameArray);
+								id = this.item.addTags(tagArray);
 								
 								if (extremeTag) {
 									if (this._tabDirection == 1) {

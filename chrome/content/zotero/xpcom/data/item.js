@@ -1,7 +1,7 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright ¬© 2009 Center for History and New Media
+    Copyright © 2009 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
     
@@ -2703,7 +2703,7 @@ Zotero.Item.prototype.getFile = function(row, skipExistsCheck) {
 			// Strip "storage:"
 			var path = row.path.substr(8);
 			// setRelativeDescriptor() silently uses the parent directory on Windows
-			// if the filename contains certain characters, so strip them ‚Äî
+			// if the filename contains certain characters, so strip them —
 			// but don't skip characters outside of XML range, since they may be
 			// correct in the opaque relative descriptor string
 			//
@@ -3541,21 +3541,19 @@ Zotero.Item.prototype.addTag = function(name, type) {
 Zotero.Item.prototype.addTags = function (tags, type) {
 	Zotero.DB.beginTransaction();
 	try {
-		var tagIDarray = [];
-		var counter = 0;
+		var tagIDArray = [];
 		var tempID = false;
 		for (var i = 0; i < tags.length; i++) {
 			tempID = this.addTag(tags[i], type);
 			if (tempID) {
-				tagIDarray[counter] = tempID;
-				counter++;
+				tagIDArray.push(tempID);
 			}
 		}
 		
-		tagIDarray = (tagIDarray.length>0) ? tagIDarray : false;
+		tagIDArray = (tagIDArray.length>0) ? tagIDArray : false;
 		
 		Zotero.DB.commitTransaction();
-		return tagIDarray;
+		return tagIDArray;
 	}
 	catch (e) {
 		Zotero.DB.rollbackTransaction();
@@ -3637,20 +3635,19 @@ Zotero.Item.prototype.getTagIDs = function() {
 	return Zotero.DB.columnQuery(sql, this.id);
 }
 
-//Return the index of tagID in the list of the item's tags
-//sorted in alphabetical order.
+/**
+* Return the index of tagID in the list of the item's tags sorted in alphabetical order.
+*/
 Zotero.Item.prototype.getTagIndex = function(tagID) {
 	var tags = this.getTags();
 	
-	var tagIndex=-1;
 	for (var i=0;i<tags.length;i++) {
 		if (tagID == tags[i].id) {
-			tagIndex=i;
-			break;
+			return i;
 		}
 	}
 	
-	return tagIndex;
+	return false;
 }
 
 Zotero.Item.prototype.replaceTag = function(oldTagID, newTag) {

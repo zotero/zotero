@@ -1698,12 +1698,9 @@
 						otherFields[creatorField] = value;
 						var lastName = otherFields.lastName;
 						
-						//Handle \n\r delimited entries
-						if (lastName.search('\r') > -1 || lastName.search('\n') > -1) {
-							lastName = lastName.replace('\r\n','\n');
-							lastName = lastName.replace('\r','\n');
-							var rawNameArray = lastName.split('\n');
-							
+						//Handle \n\r and \n delimited entries
+						var rawNameArray = lastName.split(/\r\n?|\n/);
+						if (rawNameArray.length > 1) {
 							//Save tab direction and add creator flags since they are reset in the 
 							//process of adding multiple authors
 							var tabDirectionBuffer = this._tabDirection;
@@ -1713,16 +1710,7 @@
 							this._addCreatorRow = false;
 							
 							//Filter out bad names
-							var nameArray = new Array();
-							var counter = 0;
-							var tempName = '';
-							for each(tempName in rawNameArray) {
-								if (tempName.length > 0) {
-									//Put further error checking of tempName here
-									nameArray[counter] = tempName;
-									counter++;
-								}
-							}
+							var nameArray = [tempName for each(tempName in rawNameArray) if(tempName)];
 							
 							//If not adding names at the end of the creator list, make new creator 
 							//entries and then shift down existing creators.
@@ -1742,25 +1730,25 @@
 							}
 							
 							//Add the creators in lastNameArray one at a time
-							var tempFields=otherFields;
 							for each(tempName in nameArray) {
-								// Check for comma to determine creator name format
-								tempFields.fieldMode = (tempName.indexOf('\t') == -1) ? 1 : 0;
-								if (tempFields.fieldMode == 0) {
-									tempFields.lastName=tempName.split('\t')[0];
-									tempFields.firstName=tempName.split('\t')[1];
+								// Check for tab to determine creator name format
+								otherFields.fieldMode = (tempName.indexOf('\t') == -1) ? 1 : 0;
+								if (otherFields.fieldMode == 0) {
+									otherFields.lastName=tempName.split('\t')[0];
+									otherFields.firstName=tempName.split('\t')[1];
 								} 
 								else {
-									tempFields.lastName=tempName;
+									otherFields.lastName=tempName;
+									otherFields.firstName='';
 								}
-								this.modifyCreator(creatorIndex,tempFields);
+								this.modifyCreator(creatorIndex,otherFields);
 								creatorIndex++;
 							}
 							this._tabDirection = tabDirectionBuffer;
 							this._addCreatorRow = (creatorsToShift==0) ? addCreatorRowBuffer : false;
 							if (this._tabDirection == 1) {
 								this._lastTabIndex = parseInt(tabIndexBuffer,10) + 2*(nameArray.length-1);
-								if (tempFields.fieldMode == 0) {
+								if (otherFields.fieldMode == 0) {
 									this._lastTabIndex++;
 								}
 							}
