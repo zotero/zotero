@@ -1963,7 +1963,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.251";
+    this.processor_version = "1.0.252";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3831,8 +3831,8 @@ CSL.localeResolve = function (langstr) {
     langlst = langstr.split(/[\-_]/);
     ret.base = CSL.LANG_BASES[langlst[0]];
     if ("undefined" === typeof ret.base) {
-        CSL.debug("Warning: unknown locale "+langstr+", setting to en-US");
-        return {base:"en-US", best:"en-US", bare:"en"};
+        CSL.debug("Warning: unknown locale "+langstr+", setting fallback to en-US");
+        return {base:"en-US", best:langstr, bare:"en"};
     }
     if (langlst.length === 1 || langlst[1] === "x") {
         ret.best = ret.base.replace("_", "-");
@@ -4793,16 +4793,18 @@ CSL.Node.layout = {
                     var sp;
                     if (item && item.prefix) {
                         sp = "";
-                        if (item.prefix.match(CSL.ENDSWITH_ROMANESQUE_REGEXP)) {
+                        var prefix = item.prefix.replace(/<[^>]+>/g, "").replace(/\s+$/, "").replace(/^\s+/, "");
+                        if (prefix.match(CSL.ENDSWITH_ROMANESQUE_REGEXP)) {
                             sp = " ";
                         }
-                        var prefix = item.prefix.replace(/\s+$/, "");
                         var ignorePredecessor = false;
-                        if (CSL.TERMINAL_PUNCTUATION.slice(0,-1).indexOf(prefix.slice(-1)) > -1) {
+                        if (CSL.TERMINAL_PUNCTUATION.slice(0,-1).indexOf(prefix.slice(-1)) > -1
+                            && prefix[0] != prefix[0].toLowerCase()) {
                             state.tmp.term_predecessor = false;
                             ignorePredecessor = true;
                         }
-                        state.output.append((item.prefix + sp), this, false, ignorePredecessor);
+                        prefix = (item.prefix + sp).replace(/\s+/g, " ")
+                        state.output.append(prefix, this, false, ignorePredecessor);
                     }
                 };
                 prefix_token.execs.push(func);
