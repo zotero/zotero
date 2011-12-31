@@ -1075,7 +1075,6 @@ var Zotero_QuickFormat = new function () {
 		} else {
 			delete panelRefersToBubble.citationItem["suppress-author"];
 		}
-		Zotero.debug(panelRefersToBubble.citationItem);
 		panelRefersToBubble.value = _buildBubbleString(panelRefersToBubble.citationItem);
 	};
 	
