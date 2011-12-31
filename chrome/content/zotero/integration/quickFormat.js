@@ -717,14 +717,14 @@ var Zotero_QuickFormat = new function () {
 				if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
 					null, false, false, null);
 				panelShowing = true;
-				referenceHeight = firstReference.scrollHeight+1;
+				referenceHeight = firstReference.scrollHeight;
 			}
 			
 			if(!separatorHeight && firstSeparator) {
 				if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
 					null, false, false, null);
 				panelShowing = true;
-				separatorHeight = firstSeparator.scrollHeight+1;
+				separatorHeight = firstSeparator.scrollHeight;
 			}
 			
 			referencePanel.sizeTo(window.outerWidth-30,
