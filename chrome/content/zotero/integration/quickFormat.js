@@ -25,8 +25,8 @@
 
 var Zotero_QuickFormat = new function () {
 	var initialized, io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, keepSorted, 
-		showEditor, referencePanel, referenceBox, referenceHeight, separatorHeight, 
-		currentLocator, currentLocatorLabel, currentIDs = [], currentSearchTime, dragging, panel, 
+		showEditor, referencePanel, referenceBox, referenceHeight = 0, separatorHeight = 0, 
+		currentLocator, currentLocatorLabel, currentSearchTime, dragging, panel, 
 		panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator, panelInfo,
 		panelRefersToBubble;
 	
@@ -261,22 +261,6 @@ var Zotero_QuickFormat = new function () {
 		if(haveConditions) {		
 			var searchResultIDs = (haveConditions ? s.search() : []);
 			
-			// No need to refresh anything if box hasn't changed
-			if(searchResultIDs.length === currentIDs.length) {
-				var mismatch = false;
-				for(var i=0; i<searchResultIDs.length; i++) {
-					if(currentIDs[i] !== searchResultIDs[i]) {
-						mismatch = true;
-						break;
-					}
-				}
-				if(!mismatch) {
-					_resize();
-					return;
-				}
-			}
-			currentIDs = searchResultIDs;
-			
 			// Check to see which search results match items already in the document
 			var citedItems, completed = false, isAsync = false;
 			// Save current search so that when we get items, we know whether it's too late to
@@ -342,7 +326,7 @@ var Zotero_QuickFormat = new function () {
 		var selectedIndex = 1, previousItemID;
 		
 		// Do this so we can preserve the selected item after cited items have been loaded
-		if(preserveSelection && referenceBox.selectedIndex !== 2) {
+		if(preserveSelection && referenceBox.selectedIndex !== -1 && referenceBox.selectedIndex !== 2) {
 			previousItemID = parseInt(referenceBox.selectedItem.getAttribute("zotero-item"), 10);
 		}
 		
@@ -654,7 +638,6 @@ var Zotero_QuickFormat = new function () {
 	 * Clear list of bubbles
 	 */
 	function _clearEntryList() {
-		currentIDs = [];
 		while(referenceBox.hasChildNodes()) referenceBox.removeChild(referenceBox.firstChild);
 		_resize();
 	}
@@ -701,12 +684,8 @@ var Zotero_QuickFormat = new function () {
 	 * Resizes window to fit content
 	 */
 	function _resize() {
-		var childNodes = referenceBox.childNodes,
-			numReferences = 0,
-			numSeparators = 0,
-			firstReference,
-			firstSeparator,
-			height;
+		var childNodes = referenceBox.childNodes, numReferences = 0, numSeparators = 0,
+			firstReference, firstSeparator, height;
 		for(var i=0, n=childNodes.length; i<n && numReferences < SHOWN_REFERENCES; i++) {
 			if(childNodes[i].className === "quick-format-item") {
 				numReferences++;
@@ -722,10 +701,7 @@ var Zotero_QuickFormat = new function () {
 		if(qfeHeight > 30) {
 			qfe.setAttribute("multiline", true);
 			qfs.setAttribute("multiline", true);
-			qfeHeight = qfe.scrollHeight;
-			var height = 4+qfeHeight;
-			
-			qfs.style.height = height+"px";
+			qfs.style.height = (4+qfeHeight)+"px";
 			window.sizeToContent();
 		} else {
 			delete qfs.style.height;
@@ -737,31 +713,27 @@ var Zotero_QuickFormat = new function () {
 		var panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
 		
 		if(numReferences || numSeparators) {
-			var height = referenceHeight ? 
-				Math.min(numReferences*referenceHeight+1+numSeparators*separatorHeight) : 39;
+			if(!referenceHeight && firstReference) {
+				if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
+					null, false, false, null);
+				panelShowing = true;
+				referenceHeight = firstReference.scrollHeight+1;
+			}
 			
-			if(panelShowing && height !== referencePanel.clientHeight) {
-				referencePanel.sizeTo((window.outerWidth-30), height);
-				/*if(curResizer) curResizer.stop();
-				curResizer = new Resizer(referencePanel, null, height, 30, 1000);
-				curResizer.animate();*/
-			} else {
-				referencePanel.sizeTo((window.outerWidth-30), height);
-				referencePanel.openPopup(document.documentElement, "after_start", 15, null,
-					false, false, null);
-				
-				if(!referenceHeight) {
-					separatorHeight = firstSeparator.scrollHeight;
-					referenceHeight = firstReference.scrollHeight;
-					height = Math.min(numReferences*referenceHeight+1+numSeparators*separatorHeight);
-					referencePanel.sizeTo((window.outerWidth-30), height);
-				}
+			if(!separatorHeight && firstSeparator) {
+				if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
+					null, false, false, null);
+				panelShowing = true;
+				separatorHeight = firstSeparator.scrollHeight+1;
 			}
-		} else {
-			if(panelShowing) {
-				referencePanel.hidePopup();
-				referencePanel.sizeTo(referencePanel.clientWidth, 0);
-			}
+			
+			referencePanel.sizeTo(window.outerWidth-30,
+				numReferences*referenceHeight+1+numSeparators*separatorHeight);
+			if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
+				null, false, false, null);
+		} else if(panelShowing) {
+			referencePanel.hidePopup();
+			referencePanel.sizeTo(window.outerWidth-30, 0);
 		}
 	}
 	
