@@ -310,7 +310,8 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 	
 	// get (not quite) median length
 	var lineLengthsLength = lineLengths.length;
-	if(lineLengthsLength < 20) {
+	if(lineLengthsLength < 20
+			|| lines[0] === "This is a digital copy of a book that was preserved for generations on library shelves before it was carefully scanned by Google as part of a project") {
 		this._callback(false, "recognizePDF.noOCR");
 	} else {		
 		var sortedLengths = lineLengths.sort();
@@ -329,9 +330,6 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 		}
 		
 		this._startLine = this._iteration = 0;
-	}
-	
-	if(lineLengthsLength >= 20) {
 		this._queryGoogle();
 	}
 }
