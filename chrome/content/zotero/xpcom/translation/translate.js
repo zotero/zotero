@@ -849,7 +849,7 @@ Zotero.Translate.Base.prototype = {
 				args.push(arguments[i]);
 			}
 			
-			for(var i=0, n=this._handlers[type].length; i<n; i++) {
+			for(var i=0; i<this._handlers[type].length; i++) {
 				Zotero.debug("Translate: Running handler "+i+" for "+type, 5);
 				try {
 					returnValue = this._handlers[type][i].apply(null, args);
