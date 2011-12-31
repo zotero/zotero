@@ -522,7 +522,6 @@ var Zotero_QuickFormat = new function () {
 		// add to rich list item
 		var rll = document.createElement("richlistitem");
 		rll.setAttribute("orient", "vertical");
-		rll.setAttribute("flex", "1");
 		rll.setAttribute("class", "quick-format-item");
 		rll.setAttribute("zotero-item", item.cslItemID ? item.cslItemID : item.id);
 		rll.appendChild(titleNode);
@@ -545,7 +544,6 @@ var Zotero_QuickFormat = new function () {
 		// add to rich list item
 		var rll = document.createElement("richlistitem");
 		rll.setAttribute("orient", "vertical");
-		rll.setAttribute("flex", "1");
 		rll.setAttribute("disabled", true);
 		rll.setAttribute("class", loading ? "quick-format-loading" : "quick-format-separator");
 		rll.appendChild(titleNode);
@@ -718,6 +716,7 @@ var Zotero_QuickFormat = new function () {
 					null, false, false, null);
 				panelShowing = true;
 				referenceHeight = firstReference.scrollHeight;
+				if(firstReference === referenceBox.lastChild) referenceHeight += 1;
 			}
 			
 			if(!separatorHeight && firstSeparator) {
@@ -725,10 +724,11 @@ var Zotero_QuickFormat = new function () {
 					null, false, false, null);
 				panelShowing = true;
 				separatorHeight = firstSeparator.scrollHeight;
+				if(firstSeparator === referenceBox.lastChild) separatorHeight += 1;
 			}
 			
 			referencePanel.sizeTo(window.outerWidth-30,
-				numReferences*referenceHeight+1+numSeparators*separatorHeight);
+				numReferences*referenceHeight+1+numSeparators*separatorHeight-1);
 			if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
 				null, false, false, null);
 		} else if(panelShowing) {
