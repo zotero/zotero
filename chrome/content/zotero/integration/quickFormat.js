@@ -26,8 +26,8 @@
 var Zotero_QuickFormat = new function () {
 	var initialized, io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, keepSorted, 
 		showEditor, referencePanel, referenceBox, referenceHeight, separatorHeight, 
-		curLocator, curLocatorLabel, curIDs = [], curResizer, dragging, panel, panelPrefix,
-		panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator, panelInfo,
+		currentLocator, currentLocatorLabel, currentIDs = [], currentSearchTime, dragging, panel, 
+		panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator, panelInfo,
 		panelRefersToBubble;
 	
 	// A variable that contains the timeout object for the latest onKeyPress event
@@ -190,8 +190,8 @@ var Zotero_QuickFormat = new function () {
 			isBC = false,
 			dateID = false;
 		
-		curLocator = false;
-		curLocatorLabel = false;
+		currentLocator = false;
+		currentLocatorLabel = false;
 		
 		// check for adding a number onto a previous page number
 		if(numRe.test(str)) {
@@ -225,7 +225,7 @@ var Zotero_QuickFormat = new function () {
 				}
 				
 				// TODO support types other than page
-				curLocator = m[2];
+				currentLocator = m[2];
 				str = str.substring(0, m.index);
 			}
 			
@@ -237,11 +237,11 @@ var Zotero_QuickFormat = new function () {
 					if(m[3]) {
 						isBC = true;
 					}
-					if(!curLocator && m[4]) {
-						curLocator = m[4];
+					if(!currentLocator && m[4]) {
+						currentLocator = m[4];
 					}
 				} else {
-					curLocator = m[1];
+					currentLocator = m[1];
 				}
 				
 				str = str.substr(0, m.index)+str.substring(m.index+m[0].length);
@@ -262,11 +262,10 @@ var Zotero_QuickFormat = new function () {
 			var searchResultIDs = (haveConditions ? s.search() : []);
 			
 			// No need to refresh anything if box hasn't changed
-			if(searchResultIDs.length === curIDs.length) {
-				Zotero.debug("unchanged");
+			if(searchResultIDs.length === currentIDs.length) {
 				var mismatch = false;
 				for(var i=0; i<searchResultIDs.length; i++) {
-					if(curIDs[i] !== searchResultIDs[i]) {
+					if(currentIDs[i] !== searchResultIDs[i]) {
 						mismatch = true;
 						break;
 					}
@@ -276,13 +275,18 @@ var Zotero_QuickFormat = new function () {
 					return;
 				}
 			}
-			curIDs = searchResultIDs;
+			currentIDs = searchResultIDs;
 			
 			// Check to see which search results match items already in the document
 			var citedItems, completed = false, isAsync = false;
+			// Save current search so that when we get items, we know whether it's too late to
+			// process them or not
+			var lastSearchTime = currentSearchTime = Date.now();
 			io.getItems(function(citedItems) {
 				// Don't do anything if panel is already closed
-				if(isAsync && referencePanel.state !== "open" && referencePanel.state !== "showing") return;
+				if(isAsync &&
+						((referencePanel.state !== "open" && referencePanel.state !== "showing")
+						|| lastSearchTime !== currentSearchTime)) return;
 				
 				completed = true;
 				
@@ -319,8 +323,11 @@ var Zotero_QuickFormat = new function () {
 			if(!completed) {
 				// We are going to have to wait until items have been retrieved from the document.
 				// Until then, show item list without cited items.
+				Zotero.debug("Getting cited items asynchronously");
 				_updateItemList(false, searchResultIDs);
 				isAsync = true;
+			} else {
+				Zotero.debug("Got cited items synchronously");
 			}
 		} else {
 			// No search conditions, so just clear the box
@@ -389,8 +396,6 @@ var Zotero_QuickFormat = new function () {
 			items.sort(function _itemSort(a, b) {
 				var libA = a.libraryID ? a.libraryID : 0, libB = b.libraryID ? b.libraryID : 0;
 				if(libA !== libB) {
-					Zotero.debug(libA);
-					Zotero.debug(libB);
 					// Sort by number of cites for library
 					if(nCitedItemsFromLibrary[libA] && !nCitedItemsFromLibrary[libB]) {
 						return -1;
@@ -422,7 +427,7 @@ var Zotero_QuickFormat = new function () {
 			});
 			
 			var previousLibrary = -1;
-			for(var i=0, n=Math.min(items.length, 50-citedItems.length); i<n; i++) {
+			for(var i=0, n=Math.min(items.length, citedItems ? 50-citedItems.length : 50); i<n; i++) {
 				var item = items[i], libraryID = item.libraryID;
 				
 				if(previousLibrary != libraryID) {
@@ -649,7 +654,7 @@ var Zotero_QuickFormat = new function () {
 	 * Clear list of bubbles
 	 */
 	function _clearEntryList() {
-		curIDs = [];
+		currentIDs = [];
 		while(referenceBox.hasChildNodes()) referenceBox.removeChild(referenceBox.firstChild);
 		_resize();
 	}
@@ -666,10 +671,10 @@ var Zotero_QuickFormat = new function () {
 			citationItem.uris = item.cslURIs;
 			citationItem.itemData = item.cslItemData;
 		}
-		if(curLocator) {
-			 citationItem["locator"] = curLocator;
-			if(curLocatorLabel) {
-				citationItem["label"] = curLocatorLabel;
+		if(currentLocator) {
+			 citationItem["locator"] = currentLocator;
+			if(currentLocatorLabel) {
+				citationItem["label"] = currentLocatorLabel;
 			}
 		}
 		
@@ -731,7 +736,7 @@ var Zotero_QuickFormat = new function () {
 		
 		var panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
 		
-		if(numReferences) {
+		if(numReferences || numSeparators) {
 			var height = referenceHeight ? 
 				Math.min(numReferences*referenceHeight+1+numSeparators*separatorHeight) : 39;
 			
