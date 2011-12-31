@@ -403,16 +403,18 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 		}
 		
 		var translate = new Zotero.Translate("web");
+		var savedItem = false;
 		translate.setTranslator("57a00950-f0d1-4b41-b6ba-44ff0fc30289");
 		translate.setHandler("itemDone", function(translate, item) {
 			Zotero.Browser.deleteHiddenBrowser(me._hiddenBrowser);
+			savedItem = true;
 			me._callback(item);
 		});
 		translate.setHandler("select", function(translate, items, callback) {
 			me._selectItems(translate, items, callback);
 		});
 		translate.setHandler("done", function(translate, success) {
-			if(!success) me._queryGoogle();
+			if(!success || !savedItem) me._queryGoogle();
 		});
 		
 		this._hiddenBrowser.addEventListener("pageshow", function() { me._scrape(translate) }, true);
