@@ -24,9 +24,9 @@
 */
 
 var Zotero_QuickFormat = new function () {
-	var io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, keepSorted, showEditor,
-		referencePanel, referenceBox, referenceHeight, separatorHeight, dragX, dragY, curLocator,
-		curLocatorLabel, curIDs = [], curResizer, dragging;
+	var initialized, io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, keepSorted, 
+		showEditor, referencePanel, referenceBox, referenceHeight, separatorHeight, 
+		curLocator, curLocatorLabel, curIDs = [], curResizer, dragging;
 	
 	// A variable that contains the timeout object for the latest onKeyPress event
 	var eventTimeout = null;
@@ -36,61 +36,66 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Pre-initialization, when the dialog has loaded but has not yet appeared
 	 */
-	this.onDOMContentLoaded = function() {
-		io = window.arguments[0].wrappedJSObject;
-		
-		// Only hide chrome on Windows or Mac
-		if(Zotero.isMac || Zotero.isWin) {
-			document.documentElement.setAttribute("hidechrome", true);
-		}
-		
-		qfs = document.getElementById("quick-format-search");
-		qfi = document.getElementById("quick-format-iframe");
-		qfb = document.getElementById("quick-format-entry");
-		qfbHeight = qfb.scrollHeight;
-		referencePanel = document.getElementById("quick-format-reference-panel");
-		referenceBox = document.getElementById("quick-format-reference-list");
-		qfiWindow = qfi.contentWindow;
-		qfiDocument = qfi.contentDocument;
-		qfb.addEventListener("keypress", _onQuickSearchKeyPress, false);
-		qfe = qfiDocument.getElementById("quick-format-editor");
-		
-		if(Zotero.isWin && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')) {
-			qfb.setAttribute("square", "true");
-		}
-		
-		// add labels to popup
-		var locators = Zotero.Cite.labels;
-		var menu = document.getElementById("locator-label");
-		var labelList = document.getElementById("locator-label-popup");
-		for each(var locator in locators) {
-			// TODO localize
-			var locatorLabel = locator[0].toUpperCase()+locator.substr(1);
+	this.onDOMContentLoaded = function(event) {
+		if(event.target === document) {
+			initialized = true;
+			io = window.arguments[0].wrappedJSObject;
 			
-			// add to list of labels
-			var child = document.createElement("menuitem");
-			child.setAttribute("value", locator);
-			child.setAttribute("label", locatorLabel);
-			labelList.appendChild(child);
-		}
-		menu.selectedIndex = 0;
-		
-		keepSorted = document.getElementById("keep-sorted");
-		showEditor = document.getElementById("show-editor");
-		if(io.sortable) {
-			keepSorted.hidden = false;
-			if(!io.citation.properties.unsorted) {
-				keepSorted.setAttribute("checked", "true");
+			// Only hide chrome on Windows or Mac
+			if(Zotero.isMac || Zotero.isWin) {
+				document.documentElement.setAttribute("hidechrome", true);
 			}
+			
+			qfs = document.getElementById("quick-format-search");
+			qfi = document.getElementById("quick-format-iframe");
+			qfb = document.getElementById("quick-format-entry");
+			qfbHeight = qfb.scrollHeight;
+			referencePanel = document.getElementById("quick-format-reference-panel");
+			referenceBox = document.getElementById("quick-format-reference-list");
+			
+			if(Zotero.isWin && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')) {
+				qfb.setAttribute("square", "true");
+			}
+			
+			// add labels to popup
+			var locators = Zotero.Cite.labels;
+			var menu = document.getElementById("locator-label");
+			var labelList = document.getElementById("locator-label-popup");
+			for each(var locator in locators) {
+				// TODO localize
+				var locatorLabel = locator[0].toUpperCase()+locator.substr(1);
+				
+				// add to list of labels
+				var child = document.createElement("menuitem");
+				child.setAttribute("value", locator);
+				child.setAttribute("label", locatorLabel);
+				labelList.appendChild(child);
+			}
+			menu.selectedIndex = 0;
+			
+			keepSorted = document.getElementById("keep-sorted");
+			showEditor = document.getElementById("show-editor");
+			if(io.sortable) {
+				keepSorted.hidden = false;
+				if(!io.citation.properties.unsorted) {
+					keepSorted.setAttribute("checked", "true");
+				}
+			}
+			
+			window.sizeToContent();
+		} else if(event.target === qfi.contentDocument) {			
+			qfiWindow = qfi.contentWindow;
+			qfiDocument = qfi.contentDocument;
+			qfb.addEventListener("keypress", _onQuickSearchKeyPress, false);
+			qfe = qfiDocument.getElementById("quick-format-editor");
 		}
-		
-		window.sizeToContent();
 	}
 	
 	/**
 	 * Initialize add citation dialog
 	 */
-	this.onLoad = function() {
+	this.onLoad = function(event) {
+		if(event.target !== document) return;
 		// make sure we are visible
 		window.setTimeout(function() {
 			var screenX = window.screenX;
