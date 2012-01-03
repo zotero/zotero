@@ -1730,7 +1730,7 @@
 							}
 							
 							//Add the creators in lastNameArray one at a time
-							for each(tempName in nameArray) {
+							for each(var tempName in nameArray) {
 								// Check for tab to determine creator name format
 								otherFields.fieldMode = (tempName.indexOf('\t') == -1) ? 1 : 0;
 								if (otherFields.fieldMode == 0) {
