@@ -1092,6 +1092,9 @@ var ZoteroPane = new function()
 	
 	
 	this.getItemGroup = function () {
+		if (!this.collectionsView.selection) {
+			return false;
+		}
 		return this.collectionsView._getItemAtRow(this.collectionsView.selection.currentIndex);
 	}
 	

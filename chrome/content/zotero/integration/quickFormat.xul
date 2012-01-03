@@ -65,10 +65,12 @@
 			<progressmeter id="quick-format-progress-meter" mode="undetermined" value="0" flex="1"/>
 		</deck>
 	</windowdragbox>
-	<panel id="quick-format-reference-panel" noautofocus="true" norestorefocus="true" noautohide="true">
+	<panel id="quick-format-reference-panel" noautofocus="true" norestorefocus="true" noautohide="true" height="0">
 		<richlistbox id="quick-format-reference-list" flex="1"/>
 	</panel>
-	<panel id="citation-properties" type="arrow" orient="vertical" onkeypress="Zotero_QuickFormat.onPanelKeyPress(event)">
+	<panel id="citation-properties" type="arrow" orient="vertical"
+			onkeypress="Zotero_QuickFormat.onPanelKeyPress(event)"
+			onpopuphidden="Zotero_QuickFormat.onCitationPropertiesClosed(event)">
 		<vbox flex="1">
 			<description id="citation-properties-title"/>
 			<hbox id="citation-properties-info"/>
@@ -80,22 +82,29 @@
 			</columns>
 			<rows>
 				<row align="center">
-					<menulist id="locator-label" sizetopopup="none">
+					<menulist id="locator-label" sizetopopup="none"
+							oncommand="Zotero_QuickFormat.onCitationPropertiesChanged(event)">
 						<menupopup id="locator-label-popup"/>
 					</menulist>
-					<textbox id="locator" flex="1"/>
+					<textbox id="locator" flex="1"
+							oninput="window.setTimeout(Zotero_QuickFormat.onCitationPropertiesChanged, 0)"/>
 				</row>
 				<row align="center">
 					<label value="&zotero.citation.prefix.label;"/>
-					<textbox class="citation-textbox" id="prefix" flex="1"/>
+					<textbox class="citation-textbox" id="prefix" flex="1"
+							oninput="window.setTimeout(Zotero_QuickFormat.onCitationPropertiesChanged, 0)"/>
 				</row>
 				<row align="center">
 					<label value="&zotero.citation.suffix.label;"/>
-					<textbox class="citation-textbox" id="suffix" flex="1"/>
+					<textbox class="citation-textbox" id="suffix" flex="1"
+							oninput="window.setTimeout(Zotero_QuickFormat.onCitationPropertiesChanged, 0)"/>
 				</row>
 				<html:div>
-					<html:input type="checkbox" id="suppress-author"/>
-					<html:label for="suppress-author">&zotero.citation.suppressAuthor.label;</html:label>
+					<html:input type="checkbox" id="suppress-author"
+							onchange="Zotero_QuickFormat.onCitationPropertiesChanged(event)"/>
+					<html:label for="suppress-author">
+						&zotero.citation.suppressAuthor.label;
+					</html:label>
 				</html:div>
 			</rows>
 		</grid>

@@ -1010,16 +1010,18 @@ Zotero.Integration.Fields.prototype.updateSession = function(callback) {
 			if(me._session.reload) {
 				//this._session.restoreProcessorState(); TODO doesn't appear to be working properly
 				me._session.updateUpdateIndices();
-				var deleteCitations = me._session.updateCitations();
-				me._deleteFields = me._deleteFields.concat([i for(i in deleteCitations)]);
-				me._session.updateIndices = {};
-				me._session.updateItemIDs = {};
-				me._session.citationText = {};
-				me._session.bibliographyHasChanged = false;
-				delete me._session.reload;
+				Zotero.pumpGenerator(me._session.updateCitations(function(deleteCitations) {
+						me._deleteFields = me._deleteFields.concat([i for(i in deleteCitations)]);
+						me._session.updateIndices = {};
+						me._session.updateItemIDs = {};
+						me._session.citationText = {};
+						me._session.bibliographyHasChanged = false;
+						delete me._session.reload;
+						if(callback) callback(me._session);
+					}));
+			} else {
+				if(callback) callback(this._session);
 			}
-			
-			if(callback) callback(this._session);
 		});		
 	});
 }
@@ -1109,7 +1111,13 @@ Zotero.Integration.Fields.prototype._processFields = function(fields, callback, 
  */
 Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, forceBibliography,
 		ignoreCitationChanges, callback) {
-	Zotero.pumpGenerator(this._updateDocument(forceCitations, forceBibliography, ignoreCitationChanges, callback));
+	// update citations
+	this._session.updateUpdateIndices(forceCitations);
+	var me = this;
+	var deleteCitations = Zotero.pumpGenerator(this._session.updateCitations(function(deleteCitations) {
+		Zotero.pumpGenerator(me._updateDocument(forceCitations, forceBibliography,
+			ignoreCitationChanges, deleteCitations, callback));
+	}));
 }
 
 /**
@@ -1120,11 +1128,9 @@ Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, fo
  *	modified since they were created, instead of showing a warning
  */
 Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, forceBibliography,
-		ignoreCitationChanges, callback) {
+		ignoreCitationChanges, deleteCitations, callback) {
 	try {
 		// update citations
-		this._session.updateUpdateIndices(forceCitations);
-		var deleteCitations = this._session.updateCitations();
 		this._deleteFields = this._deleteFields.concat([i for(i in deleteCitations)]);
 		
 		if(this.progressCallback) {
@@ -2159,64 +2165,69 @@ Zotero.Integration.Session.prototype.formatCitation = function(index, citation) 
 /**
  * Updates the list of citations to be serialized to the document
  */
-Zotero.Integration.Session.prototype.updateCitations = function() {
-	/*var allUpdatesForced = false;
-	var forcedUpdates = {};
-	if(force) {
-		allUpdatesForced = true;
-		// make sure at least one citation gets updated
-		updateLoop: for each(var indexList in [this.newIndices, this.updateIndices]) {
-			for(var i in indexList) {
-				if(!this.citationsByIndex[i].properties.delete) {
-					allUpdatesForced = false;
-					break updateLoop;
+Zotero.Integration.Session.prototype.updateCitations = function(callback) {
+	try {
+		/*var allUpdatesForced = false;
+		var forcedUpdates = {};
+		if(force) {
+			allUpdatesForced = true;
+			// make sure at least one citation gets updated
+			updateLoop: for each(var indexList in [this.newIndices, this.updateIndices]) {
+				for(var i in indexList) {
+					if(!this.citationsByIndex[i].properties.delete) {
+						allUpdatesForced = false;
+						break updateLoop;
+					}
 				}
+			}
+			
+			if(allUpdatesForced) {
+				for(i in this.citationsByIndex) {
+					if(this.citationsByIndex[i] && !this.citationsByIndex[i].properties.delete) {
+						forcedUpdates[i] = true;
+						break;
+					}
+				}
+			}
+		}*/
+		
+		if(Zotero.Debug.enabled) {
+			Zotero.debug("Integration: Indices of new citations");
+			Zotero.debug([key for(key in this.newIndices)]);
+			Zotero.debug("Integration: Indices of updated citations");
+			Zotero.debug([key for(key in this.updateIndices)]);
+		}
+		
+		var deleteCitations = {};
+		for each(var indexList in [this.newIndices, this.updateIndices]) {
+			for(var index in indexList) {
+				index = parseInt(index);
+				
+				var citation = this.citationsByIndex[index];
+				if(citation.properties.delete) {
+					deleteCitations[index] = true;
+					continue;
+				}
+				if(this.formatCitation(index, citation)) {
+					this.bibliographyHasChanged = true;
+				}
+				if(!this.citationIDs[citation.citationID]) {
+					this.citationIDs[citation.citationID] = citation;
+				}
+				delete this.newIndices[index];
+				yield true;
 			}
 		}
 		
-		if(allUpdatesForced) {
-			for(i in this.citationsByIndex) {
-				if(this.citationsByIndex[i] && !this.citationsByIndex[i].properties.delete) {
-					forcedUpdates[i] = true;
-					break;
-				}
-			}
-		}
-	}*/
-	
-	if(Zotero.Debug.enabled) {
-		Zotero.debug("Integration: Indices of new citations");
-		Zotero.debug([key for(key in this.newIndices)]);
-		Zotero.debug("Integration: Indices of updated citations");
-		Zotero.debug([key for(key in this.updateIndices)]);
+		/*if(allUpdatesForced) {
+			this.newIndices = {};
+			this.updateIndices = {};
+		}*/
+		
+		callback(deleteCitations);
+	} catch(e) {
+		Zotero.Integration.handleError(e, this._doc);
 	}
-	
-	var deleteCitations = {};
-	for each(var indexList in [this.newIndices, this.updateIndices]) {
-		for(var index in indexList) {
-			index = parseInt(index);
-			
-			var citation = this.citationsByIndex[index];
-			if(citation.properties.delete) {
-				deleteCitations[index] = true;
-				continue;
-			}
-			if(this.formatCitation(index, citation)) {
-				this.bibliographyHasChanged = true;
-			}
-			if(!this.citationIDs[citation.citationID]) {
-				this.citationIDs[citation.citationID] = citation;
-			}
-			delete this.newIndices[index];
-		}
-	}
-	
-	/*if(allUpdatesForced) {
-		this.newIndices = {};
-		this.updateIndices = {};
-	}*/
-	
-	return deleteCitations;
 }
 
 /**

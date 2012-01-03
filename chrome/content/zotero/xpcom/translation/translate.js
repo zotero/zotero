@@ -849,10 +849,11 @@ Zotero.Translate.Base.prototype = {
 				args.push(arguments[i]);
 			}
 			
-			for(var i=0, n=this._handlers[type].length; i<n; i++) {
+			var handlers = this._handlers[type].slice();
+			for(var i=0, n=handlers.length; i<n; i++) {
 				Zotero.debug("Translate: Running handler "+i+" for "+type, 5);
 				try {
-					returnValue = this._handlers[type][i].apply(null, args);
+					returnValue = handlers[i].apply(null, args);
 				} catch(e) {
 					if(this._parentTranslator) {
 						// throw handler errors if they occur when a translator is

@@ -24,9 +24,11 @@
 */
 
 var Zotero_QuickFormat = new function () {
-	var io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, keepSorted, showEditor,
-		referencePanel, referenceBox, referenceHeight, separatorHeight, dragX, dragY, curLocator,
-		curLocatorLabel, curIDs = [], curResizer, dragging;
+	var initialized, io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, keepSorted, 
+		showEditor, referencePanel, referenceBox, referenceHeight = 0, separatorHeight = 0, 
+		currentLocator, currentLocatorLabel, currentSearchTime, dragging, panel, 
+		panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator, panelInfo,
+		panelRefersToBubble;
 	
 	// A variable that contains the timeout object for the latest onKeyPress event
 	var eventTimeout = null;
@@ -36,61 +38,75 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Pre-initialization, when the dialog has loaded but has not yet appeared
 	 */
-	this.onDOMContentLoaded = function() {
-		io = window.arguments[0].wrappedJSObject;
-		
-		// Only hide chrome on Windows or Mac
-		if(Zotero.isMac || Zotero.isWin) {
-			document.documentElement.setAttribute("hidechrome", true);
-		}
-		
-		qfs = document.getElementById("quick-format-search");
-		qfi = document.getElementById("quick-format-iframe");
-		qfb = document.getElementById("quick-format-entry");
-		qfbHeight = qfb.scrollHeight;
-		referencePanel = document.getElementById("quick-format-reference-panel");
-		referenceBox = document.getElementById("quick-format-reference-list");
-		qfiWindow = qfi.contentWindow;
-		qfiDocument = qfi.contentDocument;
-		qfb.addEventListener("keypress", _onQuickSearchKeyPress, false);
-		qfe = qfiDocument.getElementById("quick-format-editor");
-		
-		if(Zotero.isWin && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')) {
-			qfb.setAttribute("square", "true");
-		}
-		
-		// add labels to popup
-		var locators = Zotero.Cite.labels;
-		var menu = document.getElementById("locator-label");
-		var labelList = document.getElementById("locator-label-popup");
-		for each(var locator in locators) {
-			// TODO localize
-			var locatorLabel = locator[0].toUpperCase()+locator.substr(1);
+	this.onDOMContentLoaded = function(event) {
+		if(event.target === document) {
+			initialized = true;
+			io = window.arguments[0].wrappedJSObject;
 			
-			// add to list of labels
-			var child = document.createElement("menuitem");
-			child.setAttribute("value", locator);
-			child.setAttribute("label", locatorLabel);
-			labelList.appendChild(child);
-		}
-		menu.selectedIndex = 0;
-		
-		keepSorted = document.getElementById("keep-sorted");
-		showEditor = document.getElementById("show-editor");
-		if(io.sortable) {
-			keepSorted.hidden = false;
-			if(!io.citation.properties.unsorted) {
-				keepSorted.setAttribute("checked", "true");
+			// Only hide chrome on Windows or Mac
+			if(Zotero.isMac || Zotero.isWin) {
+				document.documentElement.setAttribute("hidechrome", true);
 			}
+			
+			qfs = document.getElementById("quick-format-search");
+			qfi = document.getElementById("quick-format-iframe");
+			qfb = document.getElementById("quick-format-entry");
+			qfbHeight = qfb.scrollHeight;
+			referencePanel = document.getElementById("quick-format-reference-panel");
+			referenceBox = document.getElementById("quick-format-reference-list");
+			
+			if(Zotero.isWin && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')) {
+				qfb.setAttribute("square", "true");
+			}
+			
+			// add labels to popup
+			var locators = Zotero.Cite.labels;
+			var menu = document.getElementById("locator-label");
+			var labelList = document.getElementById("locator-label-popup");
+			for each(var locator in locators) {
+				// TODO localize
+				var locatorLabel = locator[0].toUpperCase()+locator.substr(1);
+				
+				// add to list of labels
+				var child = document.createElement("menuitem");
+				child.setAttribute("value", locator);
+				child.setAttribute("label", locatorLabel);
+				labelList.appendChild(child);
+			}
+			menu.selectedIndex = 0;
+			
+			keepSorted = document.getElementById("keep-sorted");
+			showEditor = document.getElementById("show-editor");
+			if(io.sortable) {
+				keepSorted.hidden = false;
+				if(!io.citation.properties.unsorted) {
+					keepSorted.setAttribute("checked", "true");
+				}
+			}
+			
+			window.sizeToContent();
+			
+			// Nodes for citation properties panel
+			panel = document.getElementById("citation-properties");
+			panelPrefix = document.getElementById("prefix");
+			panelSuffix = document.getElementById("suffix");
+			panelSuppressAuthor = document.getElementById("suppress-author");
+			panelLocatorLabel = document.getElementById("locator-label");
+			panelLocator = document.getElementById("locator");
+			panelInfo = document.getElementById("citation-properties-info");
+		} else if(event.target === qfi.contentDocument) {			
+			qfiWindow = qfi.contentWindow;
+			qfiDocument = qfi.contentDocument;
+			qfb.addEventListener("keypress", _onQuickSearchKeyPress, false);
+			qfe = qfiDocument.getElementById("quick-format-editor");
 		}
-		
-		window.sizeToContent();
 	}
 	
 	/**
 	 * Initialize add citation dialog
 	 */
-	this.onLoad = function() {
+	this.onLoad = function(event) {
+		if(event.target !== document) return;
 		// make sure we are visible
 		window.setTimeout(function() {
 			var screenX = window.screenX;
@@ -174,8 +190,8 @@ var Zotero_QuickFormat = new function () {
 			isBC = false,
 			dateID = false;
 		
-		curLocator = false;
-		curLocatorLabel = false;
+		currentLocator = false;
+		currentLocatorLabel = false;
 		
 		// check for adding a number onto a previous page number
 		if(numRe.test(str)) {
@@ -209,7 +225,7 @@ var Zotero_QuickFormat = new function () {
 				}
 				
 				// TODO support types other than page
-				curLocator = m[2];
+				currentLocator = m[2];
 				str = str.substring(0, m.index);
 			}
 			
@@ -221,11 +237,11 @@ var Zotero_QuickFormat = new function () {
 					if(m[3]) {
 						isBC = true;
 					}
-					if(!curLocator && m[4]) {
-						curLocator = m[4];
+					if(!currentLocator && m[4]) {
+						currentLocator = m[4];
 					}
 				} else {
-					curLocator = m[1];
+					currentLocator = m[1];
 				}
 				
 				str = str.substr(0, m.index)+str.substring(m.index+m[0].length);
@@ -245,27 +261,16 @@ var Zotero_QuickFormat = new function () {
 		if(haveConditions) {		
 			var searchResultIDs = (haveConditions ? s.search() : []);
 			
-			// No need to refresh anything if box hasn't changed
-			if(searchResultIDs.length === curIDs.length) {
-				var mismatch = false;
-				for(var i=0; i<searchResultIDs.length; i++) {
-					if(curIDs[i] !== searchResultIDs[i]) {
-						mismatch = true;
-						break;
-					}
-				}
-				if(!mismatch) {
-					_resize();
-					return;
-				}
-			}
-			curIDs = searchResultIDs;
-			
 			// Check to see which search results match items already in the document
 			var citedItems, completed = false, isAsync = false;
+			// Save current search so that when we get items, we know whether it's too late to
+			// process them or not
+			var lastSearchTime = currentSearchTime = Date.now();
 			io.getItems(function(citedItems) {
 				// Don't do anything if panel is already closed
-				if(isAsync && referencePanel.state !== "open" && referencePanel.state !== "showing") return;
+				if(isAsync &&
+						((referencePanel.state !== "open" && referencePanel.state !== "showing")
+						|| lastSearchTime !== currentSearchTime)) return;
 				
 				completed = true;
 				
@@ -302,38 +307,16 @@ var Zotero_QuickFormat = new function () {
 			if(!completed) {
 				// We are going to have to wait until items have been retrieved from the document.
 				// Until then, show item list without cited items.
+				Zotero.debug("Getting cited items asynchronously");
 				_updateItemList(false, searchResultIDs);
 				isAsync = true;
+			} else {
+				Zotero.debug("Got cited items synchronously");
 			}
 		} else {
 			// No search conditions, so just clear the box
 			_updateItemList([], []);
 		}
-	}
-	
-	/**
-	 * Sorts items
-	 */
-	function _itemSort(a, b) {
-		// Sort by library ID
-		var libA = a.libraryID, libB = b.libraryID;
-		if(libA !== libB) {
-			return libA - libB;
-		}
-	
-		// Sort by last name of first author
-		var creatorsA = a.getCreators(), creatorsB = b.getCreators(),
-			caExists = creatorsA.length ? 1 : 0, cbExists = creatorsB.length ? 1 : 0;
-		if(caExists !== cbExists) {
-			return cbExists-caExists;
-		} else if(caExists) {
-			return creatorsA[0].ref.lastName.localeCompare(creatorsB[0].ref.lastName);
-		}
-		
-		// Sort by date
-		var yearA = a.getField("date", true, true).substr(0, 4),
-			yearB = b.getField("date", true, true).substr(0, 4);
-		return yearA - yearB;
 	}
 	
 	/**
@@ -343,12 +326,13 @@ var Zotero_QuickFormat = new function () {
 		var selectedIndex = 1, previousItemID;
 		
 		// Do this so we can preserve the selected item after cited items have been loaded
-		if(preserveSelection && referenceBox.selectedIndex !== 2) {
+		if(preserveSelection && referenceBox.selectedIndex !== -1 && referenceBox.selectedIndex !== 2) {
 			previousItemID = parseInt(referenceBox.selectedItem.getAttribute("zotero-item"), 10);
 		}
 		
 		while(referenceBox.hasChildNodes()) referenceBox.removeChild(referenceBox.firstChild);
 		
+		var nCitedItemsFromLibrary = {};
 		if(!citedItems) {
 			// We don't know whether or not we have cited items, because we are waiting for document
 			// data
@@ -358,21 +342,76 @@ var Zotero_QuickFormat = new function () {
 			// We have cited items
 			referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.cited")));
 			for(var i=0, n=citedItems.length; i<n; i++) {
-				referenceBox.appendChild(_buildListItem(citedItems[i]));
+				var citedItem = citedItems[i];
+				if(i < 50) {
+					referenceBox.appendChild(_buildListItem(citedItem));
+				}
+				
+				// Tabulate number of items in document for each library
+				if(!citedItem.cslItemID) {
+					var libraryID = citedItem.libraryID ? citedItem.libraryID : 0;
+					if(libraryID in nCitedItemsFromLibrary) {
+						nCitedItemsFromLibrary[libraryID]++;
+					} else {
+						nCitedItemsFromLibrary[libraryID] = 1;
+					}
+				}
+			}
+		}
+		
+		// Also take into account items cited in this citation. This means that the sorting isn't
+		// exactly by # of items cited from each library, but maybe it's better this way.
+		_updateCitationObject();
+		for each(var citationItem in io.citation.citationItems) {
+			var citedItem = Zotero.Cite.getItem(citationItem.id);
+			if(!citedItem.cslItemID) {
+				var libraryID = citedItem.libraryID ? citedItem.libraryID : 0;
+				if(libraryID in nCitedItemsFromLibrary) {
+					nCitedItemsFromLibrary[libraryID]++;
+				} else {
+					nCitedItemsFromLibrary[libraryID] = 1;
+				}
 			}
 		}
 
 		if(searchResultIDs.length && (!citedItems || citedItems.length < 50)) {
-			// Don't handle more than 50 results
-			if(searchResultIDs.length > 50-citedItems.length) {
-				searchResultIDs = searchResultIDs.slice(0, 50-citedItems.length);
-			}
-			
 			var items = Zotero.Items.get(searchResultIDs);
-			items.sort(_itemSort);
+			
+			items.sort(function _itemSort(a, b) {
+				var libA = a.libraryID ? a.libraryID : 0, libB = b.libraryID ? b.libraryID : 0;
+				if(libA !== libB) {
+					// Sort by number of cites for library
+					if(nCitedItemsFromLibrary[libA] && !nCitedItemsFromLibrary[libB]) {
+						return -1;
+					}
+					if(!nCitedItemsFromLibrary[libA] && nCitedItemsFromLibrary[libB]) {
+						return 1;
+					}
+					if(nCitedItemsFromLibrary[libA] !== nCitedItemsFromLibrary[libB]) {
+						return nCitedItemsFromLibrary[libB] - nCitedItemsFromLibrary[libA];
+					}
+					
+					// Sort by ID even if number of cites is equal
+					return libA - libB;
+				}
+			
+				// Sort by last name of first author
+				var creatorsA = a.getCreators(), creatorsB = b.getCreators(),
+					caExists = creatorsA.length ? 1 : 0, cbExists = creatorsB.length ? 1 : 0;
+				if(caExists !== cbExists) {
+					return cbExists-caExists;
+				} else if(caExists) {
+					return creatorsA[0].ref.lastName.localeCompare(creatorsB[0].ref.lastName);
+				}
+				
+				// Sort by date
+				var yearA = a.getField("date", true, true).substr(0, 4),
+					yearB = b.getField("date", true, true).substr(0, 4);
+				return yearA - yearB;
+			});
 			
 			var previousLibrary = -1;
-			for(var i=0, n=items.length; i<n; i++) {
+			for(var i=0, n=Math.min(items.length, citedItems ? 50-citedItems.length : 50); i<n; i++) {
 				var item = items[i], libraryID = item.libraryID;
 				
 				if(previousLibrary != libraryID) {
@@ -483,7 +522,6 @@ var Zotero_QuickFormat = new function () {
 		// add to rich list item
 		var rll = document.createElement("richlistitem");
 		rll.setAttribute("orient", "vertical");
-		rll.setAttribute("flex", "1");
 		rll.setAttribute("class", "quick-format-item");
 		rll.setAttribute("zotero-item", item.cslItemID ? item.cslItemID : item.id);
 		rll.appendChild(titleNode);
@@ -506,7 +544,6 @@ var Zotero_QuickFormat = new function () {
 		// add to rich list item
 		var rll = document.createElement("richlistitem");
 		rll.setAttribute("orient", "vertical");
-		rll.setAttribute("flex", "1");
 		rll.setAttribute("disabled", true);
 		rll.setAttribute("class", loading ? "quick-format-loading" : "quick-format-separator");
 		rll.appendChild(titleNode);
@@ -522,20 +559,48 @@ var Zotero_QuickFormat = new function () {
 	function _buildBubbleString(citationItem) {
 		var item = Zotero.Cite.getItem(citationItem.id);
 		// create text for bubble
+		
+		// Creator
 		var title, delimiter;
 		var str = item.getField("firstCreator");
+		
+		// Title, if no creator
 		if(!str) {
 			// TODO localize quotes
 			str = '"'+item.getField("title")+'"';
 		}
 		
+		// Date
 		var date = item.getField("date", true);
 		if(date && (date = date.substr(0, 4)) !== "0000") {
 			str += ", "+date;
 		}
 		
+		// Locator
 		if(citationItem.locator) {
-			str += ", "+(citationItem.locator.indexOf("-") !== -1 || citationItem.locator.indexOf("–") !== -1 ? "pp" : "p")+". "+citationItem.locator;
+			if(citationItem.label) {
+				// TODO localize and use short forms
+				var label = citationItem.label;
+			} else if(/[\-–,]/.test(citationItem.locator)) {
+				var label = "pp.";
+			} else {
+				var label = "p."
+			}
+			
+			str += ", "+label+" "+citationItem.locator;
+		}
+		
+		// Prefix
+		if(citationItem.prefix && Zotero.CiteProc.CSL.ENDSWITH_ROMANESQUE_REGEXP) {
+			str = citationItem.prefix
+				+(Zotero.CiteProc.CSL.ENDSWITH_ROMANESQUE_REGEXP.test(citationItem.prefix) ? " " : "")
+				+str;
+		}
+		
+		// Suffix
+		if(citationItem.suffix && Zotero.CiteProc.CSL.STARTSWITH_ROMANESQUE_REGEXP) {
+			str += (Zotero.CiteProc.CSL.STARTSWITH_ROMANESQUE_REGEXP.test(citationItem.suffix) ? " " : "")
+				+citationItem.suffix;
 		}
 		
 		return str;
@@ -587,10 +652,10 @@ var Zotero_QuickFormat = new function () {
 			citationItem.uris = item.cslURIs;
 			citationItem.itemData = item.cslItemData;
 		}
-		if(curLocator) {
-			 citationItem["locator"] = curLocator;
-			if(curLocatorLabel) {
-				citationItem["label"] = curLocatorLabel;
+		if(currentLocator) {
+			 citationItem["locator"] = currentLocator;
+			if(currentLocatorLabel) {
+				citationItem["label"] = currentLocatorLabel;
 			}
 		}
 		
@@ -617,12 +682,8 @@ var Zotero_QuickFormat = new function () {
 	 * Resizes window to fit content
 	 */
 	function _resize() {
-		var childNodes = referenceBox.childNodes,
-			numReferences = 0,
-			numSeparators = 0,
-			firstReference,
-			firstSeparator,
-			height;
+		var childNodes = referenceBox.childNodes, numReferences = 0, numSeparators = 0,
+			firstReference, firstSeparator, height;
 		for(var i=0, n=childNodes.length; i<n && numReferences < SHOWN_REFERENCES; i++) {
 			if(childNodes[i].className === "quick-format-item") {
 				numReferences++;
@@ -638,10 +699,7 @@ var Zotero_QuickFormat = new function () {
 		if(qfeHeight > 30) {
 			qfe.setAttribute("multiline", true);
 			qfs.setAttribute("multiline", true);
-			qfeHeight = qfe.scrollHeight;
-			var height = 4+qfeHeight;
-			
-			qfs.style.height = height+"px";
+			qfs.style.height = (4+qfeHeight)+"px";
 			window.sizeToContent();
 		} else {
 			delete qfs.style.height;
@@ -652,32 +710,30 @@ var Zotero_QuickFormat = new function () {
 		
 		var panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
 		
-		if(numReferences) {
-			var height = referenceHeight ? 
-				Math.min(numReferences*referenceHeight+1+numSeparators*separatorHeight) : 39;
+		if(numReferences || numSeparators) {
+			if(!referenceHeight && firstReference) {
+				if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
+					null, false, false, null);
+				panelShowing = true;
+				referenceHeight = firstReference.scrollHeight;
+				if(firstReference === referenceBox.lastChild) referenceHeight += 1;
+			}
 			
-			if(panelShowing && height !== referencePanel.clientHeight) {
-				referencePanel.sizeTo((window.outerWidth-30), height);
-				/*if(curResizer) curResizer.stop();
-				curResizer = new Resizer(referencePanel, null, height, 30, 1000);
-				curResizer.animate();*/
-			} else {
-				referencePanel.sizeTo((window.outerWidth-30), height);
-				referencePanel.openPopup(document.documentElement, "after_start", 15, null,
-					false, false, null);
-				
-				if(!referenceHeight) {
-					separatorHeight = firstSeparator.scrollHeight;
-					referenceHeight = firstReference.scrollHeight;
-					height = Math.min(numReferences*referenceHeight+1+numSeparators*separatorHeight);
-					referencePanel.sizeTo((window.outerWidth-30), height);
-				}
+			if(!separatorHeight && firstSeparator) {
+				if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
+					null, false, false, null);
+				panelShowing = true;
+				separatorHeight = firstSeparator.scrollHeight;
+				if(firstSeparator === referenceBox.lastChild) separatorHeight += 1;
 			}
-		} else {
-			if(panelShowing) {
-				referencePanel.hidePopup();
-				referencePanel.sizeTo(referencePanel.clientWidth, 0);
-			}
+			
+			referencePanel.sizeTo(window.outerWidth-30,
+				numReferences*referenceHeight+1+numSeparators*separatorHeight-1);
+			if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
+				null, false, false, null);
+		} else if(panelShowing) {
+			referencePanel.hidePopup();
+			referencePanel.sizeTo(window.outerWidth-30, 0);
 		}
 	}
 	
@@ -768,71 +824,31 @@ var Zotero_QuickFormat = new function () {
 	 * Shows the citation properties panel for a given bubble
 	 */
 	function _showCitationProperties(target) {
-		var panel = document.getElementById("citation-properties");
-		var prefix = document.getElementById("prefix");
-		var suffix = document.getElementById("suffix");
-		var suppressAuthor = document.getElementById("suppress-author");
-		var locatorLabel = document.getElementById("locator-label");
-		var locator = document.getElementById("locator");
-		var info = document.getElementById("citation-properties-info");
-		
-		prefix.value = target.citationItem["prefix"] ? target.citationItem["prefix"] : "";
-		suffix.value = target.citationItem["suffix"] ? target.citationItem["suffix"] : "";
+		panelRefersToBubble = target;
+		panelPrefix.value = target.citationItem["prefix"] ? target.citationItem["prefix"] : "";
+		panelSuffix.value = target.citationItem["suffix"] ? target.citationItem["suffix"] : "";
 		if(target.citationItem["label"]) {
-			var option = locatorLabel.getElementsByAttribute("value", target.citationItem["label"]);
+			var option = panelLocatorLabel.getElementsByAttribute("value", target.citationItem["label"]);
 			if(option.length) {
-				locatorLabel.selectedItem = option[0];
+				panelLocatorLabel.selectedItem = option[0];
 			} else {
-				locatorLabel.selectedIndex = 0;
+				panelLocatorLabel.selectedIndex = 0;
 			}
 		} else {
-			locatorLabel.selectedIndex = 0;
+			panelLocatorLabel.selectedIndex = 0;
 		}
-		locator.value = target.citationItem["locator"] ? target.citationItem["locator"] : "";
-		suppressAuthor.checked = !!target.citationItem["suppress-author"];
+		panelLocator.value = target.citationItem["locator"] ? target.citationItem["locator"] : "";
+		panelSuppressAuthor.checked = !!target.citationItem["suppress-author"];
 		
 		var item = Zotero.Cite.getItem(target.citationItem.id);
 		document.getElementById("citation-properties-title").textContent = item.getDisplayTitle();
-		while(info.hasChildNodes()) info.removeChild(info.firstChild);
-		_buildItemDescription(item, info);
+		while(panelInfo.hasChildNodes()) panelInfo.removeChild(panelInfo.firstChild);
+		_buildItemDescription(item, panelInfo);
 		
 		target.setAttribute("selected", "true");
 		panel.openPopup(target, "after_start",
 			target.clientWidth/2, 0, false, false, null);
-		locator.focus();
-		
-		var closeListener = function(event) {
-			panel.removeEventListener("popuphidden", closeListener, false);
-			target.removeAttribute("selected");
-			if(prefix.value) {
-				target.citationItem["prefix"] = prefix.value;
-			} else {
-				delete target.citationItem["prefix"];
-			}
-			if(suffix.value) {
-				target.citationItem["suffix"] = suffix.value;
-			} else {
-				delete target.citationItem["suffix"];
-			}
-			if(locatorLabel.selectedIndex !== 0) {
-				target.citationItem["label"] = locatorLabel.selectedItem.value;
-			} else {
-				delete target.citationItem["label"];
-			}
-			if(locator.value) {
-				target.citationItem["locator"] = locator.value;
-			} else {
-				delete target.citationItem["locator"];
-			}
-			if(suppressAuthor.checked) {
-				target.citationItem["suppress-author"] = true;
-			} else {
-				delete target.citationItem["suppress-author"];
-			}
-			target.value = _buildBubbleString(target.citationItem);
-			_moveCursorToEnd();
-		}
-		panel.addEventListener("popuphidden", closeListener, false);
+		panelLocator.focus();
 	}
 	
 	/**
@@ -1008,6 +1024,47 @@ var Zotero_QuickFormat = new function () {
 	}
 	
 	/**
+	 * Handle changes to citation properties
+	 */
+	this.onCitationPropertiesChanged = function(event) {
+		if(panelPrefix.value) {
+			panelRefersToBubble.citationItem["prefix"] = panelPrefix.value;
+		} else {
+			delete panelRefersToBubble.citationItem["prefix"];
+		}
+		if(panelSuffix.value) {
+			panelRefersToBubble.citationItem["suffix"] = panelSuffix.value;
+		} else {
+			delete panelRefersToBubble.citationItem["suffix"];
+		}
+		if(panelLocatorLabel.selectedIndex !== 0) {
+			panelRefersToBubble.citationItem["label"] = panelLocatorLabel.selectedItem.value;
+		} else {
+			delete panelRefersToBubble.citationItem["label"];
+		}
+		if(panelLocator.value) {
+			panelRefersToBubble.citationItem["locator"] = panelLocator.value;
+		} else {
+			delete panelRefersToBubble.citationItem["locator"];
+		}
+		if(panelSuppressAuthor.checked) {
+			panelRefersToBubble.citationItem["suppress-author"] = true;
+		} else {
+			delete panelRefersToBubble.citationItem["suppress-author"];
+		}
+		panelRefersToBubble.value = _buildBubbleString(panelRefersToBubble.citationItem);
+	};
+	
+	/**
+	 * Handle closing citation properties panel
+	 */
+	this.onCitationPropertiesClosed = function(event) {
+		panelRefersToBubble.removeAttribute("selected");
+		Zotero_QuickFormat.onCitationPropertiesChanged();
+		_moveCursorToEnd();
+	}
+	
+	/**
 	 * Makes "Enter" work in the panel
 	 */
 	this.onPanelKeyPress = function(event) {
@@ -1022,12 +1079,6 @@ var Zotero_QuickFormat = new function () {
 	 */
 	this.onKeepSortedCommand = function(event) {
 		_previewAndSort();
-	};
-	
-	/**
-	 * Handle checking/unchecking "Show Editor"
-	 */
-	this.onShowEditorCommand = function(event) {
 	};
 	
 	/**
