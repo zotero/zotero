@@ -3748,7 +3748,7 @@ Zotero.Item.prototype.diff = function (item, includeMatches, ignoreFields) {
 			var otherNote = otherData.note;
 			
 			// Stop non-Unix newlines from triggering erroneous conflicts
-			thisNote = thisNote.replace(/(\r\n?/g, "\n");
+			thisNote = thisNote.replace(/\r\n?/g, "\n");
 			otherNote = otherNote.replace(/\r\n?/g, "\n");
 			
 			// Normalize multiple spaces (due to differences TinyMCE, Z.U.text2html(),
