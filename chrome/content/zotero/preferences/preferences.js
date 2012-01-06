@@ -30,9 +30,45 @@ var _io = {};
 
 
 var Zotero_Preferences = {
-
 	onUnload: function () {
 		Zotero_Preferences.Debug_Output.onUnload();
+	},
+	
+	openHelpLink: function () {
+		var url = "http://www.zotero.org/support/preferences/";
+		var helpTopic = document.getElementsByTagName("prefwindow")[0].currentPane.helpTopic;
+		url += helpTopic;
+		
+		// Non-instantApply prefwindows are usually modal, so we can't open in the topmost window,
+		// since it's probably behind the window
+		var instantApply = Zotero.Prefs.get("browser.preferences.instantApply", true);
+		
+		if (instantApply) {
+			window.opener.ZoteroPane_Local.loadURI(url, { shiftKey: true, metaKey: true });
+		}
+		else {
+			if (Zotero.isStandalone) {
+				var io = Components.classes['@mozilla.org/network/io-service;1']
+							.getService(Components.interfaces.nsIIOService);
+				var uri = io.newURI(url, null, null);
+				var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
+							.getService(Components.interfaces.nsIExternalProtocolService)
+							.getProtocolHandlerInfo('http');
+				handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
+				handler.launchWithURI(uri, null);
+			}
+			else {
+				var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+							.getService(Components.interfaces.nsIWindowWatcher);
+				var win = ww.openWindow(
+					window,
+					url,
+					"helpWindow",
+					"chrome=no,menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes",
+					null
+				);
+			}
+		}
 	}
 }
 
