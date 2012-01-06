@@ -15,7 +15,7 @@ radio[pane]
 	-moz-box-pack: end;
 }
 
-description, #quickCopy-instructions, #export-citePaperJournalArticleURL
+#export-citePaperJournalArticleURL
 {
 	font-size: .85em;
 }
