@@ -1963,7 +1963,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.253";
+    this.processor_version = "1.0.254";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -6370,8 +6370,19 @@ CSL.NameOutput.prototype._splitInstitution = function (value, v, i) {
             var jurisdiction = this.state.transform.loadAbbreviation(jurisdiction, "institution-entire", str);
             if (this.state.transform.abbrevs[jurisdiction]["institution-entire"][str]) {
                 var splitLst = this.state.transform.abbrevs[jurisdiction]["institution-entire"][str];
-                var splitLst = splitLst.replace(/\s*\|\s*/g, "|");
-                var splitLst = splitLst.split("|");
+                var splitSplitLst = splitLst.split(/>>[0-9]{4}>>/);
+                var m = splitLst.match(/>>([0-9]{4})>>/);
+                splitLst = splitSplitLst.pop();
+                if (splitSplitLst.length > 0 && this.Item.issued && this.Item.issued.year) {
+                    for (var k=m.length - 1; k > 0; k += -1) {
+                        if (parseInt(this.Item.issued.year, 10) >= parseInt(m[k], 10)) {
+                            break;
+                        }
+                        splitLst = splitSplitLst.pop();
+                    }
+                }
+                splitLst = splitLst.replace(/\s*\|\s*/g, "|");
+                splitLst = splitLst.split("|");
                 splitInstitution = splitLst.concat(splitInstitution.slice(j));
             }
         }
