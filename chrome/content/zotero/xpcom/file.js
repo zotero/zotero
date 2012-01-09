@@ -351,7 +351,7 @@ Zotero.File = new function(){
 				var opWord = "updated";
 		}
 		
-		if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED'
+		if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED' || e.name == 'NS_ERROR_FILE_IS_LOCKED'
 				// Shows up on some Windows systems
 				|| e.name == 'NS_ERROR_FAILURE') {
 			Zotero.debug(e);

@@ -167,7 +167,6 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Afficher l'option de codage de caractères à l'exportation">
 
 <!ENTITY zotero.preferences.dataDir "Emplacement du répertoire contenant les données">
-<!ENTITY zotero.preferences.dataDir.useProfile "Utiliser le répertoire de profil de Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Personnalisé :">
 <!ENTITY zotero.preferences.dataDir.choose "Sélectionner…">
 <!ENTITY zotero.preferences.dataDir.reveal "Afficher le répertoire contenant les données">
