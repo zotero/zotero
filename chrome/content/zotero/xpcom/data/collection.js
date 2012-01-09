@@ -1183,7 +1183,7 @@ Zotero.Collection.prototype.addLinkedCollection = function (collection) {
 	
 	// If both group libraries, store relation with source group.
 	// Otherwise, store with personal library.
-	var libraryID = (this.libraryID && item.libraryID) ? this.libraryID : null;
+	var libraryID = (this.libraryID && collection.libraryID) ? this.libraryID : null;
 	
 	Zotero.Relations.add(libraryID, url1, predicate, url2);
 }
