@@ -322,8 +322,6 @@ Zotero.Integration = new function() {
 	 * Show appropriate dialogs for an integration error
 	 */
 	this.handleError = function(e, document) {
-		this.complete(document);
-		
 		if(!(e instanceof Zotero.Integration.UserCancelledException)) {
 			try {
 				var displayError = null;
@@ -378,6 +376,8 @@ Zotero.Integration = new function() {
 				Zotero.logError(e);
 			}
 		}
+		
+		this.complete(document);
 	}
 	
 	/**
