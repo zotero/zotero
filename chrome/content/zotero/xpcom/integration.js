@@ -432,6 +432,52 @@ Zotero.Integration = new function() {
 			} catch(e) {}
 		}
 	}
+	
+	/**
+	 * Displays a dialog in a modal-like fashion without hanging the thread 
+	 * @param {String} url The chrome:// URI of the window
+	 * @param {String} [options] Options to pass to the window
+	 * @param {String} [io] Data to pass to the window
+	 * @param {Function|Boolean} [async] Function to call when window is closed. If not specified,
+	 *     function waits to return until the window has been closed. If "true", the function returns
+	 *     immediately.
+	 */
+	this.displayDialog = function(doc, url, options, io, async) {
+		doc.cleanup();
+		
+		var allOptions = 'chrome,centerscreen';
+		// without this, Firefox gets raised with our windows under Compiz
+		if(Zotero.isLinux) allOptions += ',dialog=no';
+		if(options) allOptions += ','+options;
+		if(!async) allOptions += ',modal=yes';
+		
+		var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+			.getService(Components.interfaces.nsIWindowWatcher)
+			.openWindow(null, url, '', allOptions, (io ? io : null));
+		Zotero.Integration.currentWindow = window;
+		Zotero.Integration.activate(window);
+		
+		var listener = function() {
+			if(window.location.toString() === "about:blank") return;
+			
+			if(window.newWindow) {
+				window = window.newWindow;
+				Zotero.Integration.currentWindow = window;
+				window.addEventListener("unload", listener, false);
+				return;
+			}
+			
+			Zotero.Integration.currentWindow = false;
+			if(async instanceof Function) {
+				try {
+					async();
+				} catch(e) {
+					Zotero.Integration.handleError(e, doc);
+				}
+			}
+		}
+		window.addEventListener("unload", listener, false);
+	}
 }
 
 /**
@@ -1335,11 +1381,14 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 	var io = new Zotero.Integration.CitationEditInterface(citation, field, this, session, newField, callback);
 	
 	if(Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
-		session.displayDialog(this._doc, 'chrome://zotero/content/integration/addCitationDialog.xul', 'alwaysRaised,resizable', io, true);
+		Zotero.Integration.displayDialog(this._doc,
+			'chrome://zotero/content/integration/addCitationDialog.xul', 'alwaysRaised,resizable',
+			io, true);
 	} else {
 		var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
 			? 'popup' : 'alwaysRaised')
-		session.displayDialog(this._doc, 'chrome://zotero/content/integration/quickFormat.xul', mode, io, true);
+		Zotero.Integration.displayDialog(this._doc,
+			'chrome://zotero/content/integration/quickFormat.xul', mode, io, true);
 	}
 }
 
@@ -1575,52 +1624,6 @@ Zotero.Integration.Session.prototype.setData = function(data) {
 }
 
 /**
- * Displays a dialog in a modal-like fashion without hanging the thread 
- * @param {String} url The chrome:// URI of the window
- * @param {String} [options] Options to pass to the window
- * @param {String} [io] Data to pass to the window
- * @param {Function|Boolean} [async] Function to call when window is closed. If not specified,
- *     function waits to return until the window has been closed. If "true", the function returns
- *     immediately.
- */
-Zotero.Integration.Session.prototype.displayDialog = function(doc, url, options, io, async) {
-	doc.cleanup();
-	
-	var allOptions = 'chrome,centerscreen';
-	// without this, Firefox gets raised with our windows under Compiz
-	if(Zotero.isLinux) allOptions += ',dialog=no';
-	if(options) allOptions += ','+options;
-	if(!async) allOptions += ',modal=yes';
-	
-	var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-		.getService(Components.interfaces.nsIWindowWatcher)
-		.openWindow(null, url, '', allOptions, (io ? io : null));
-	Zotero.Integration.currentWindow = window;
-	Zotero.Integration.activate(window);
-	
-	var listener = function() {
-		if(window.location.toString() === "about:blank") return;
-		
-		if(window.newWindow) {
-			window = window.newWindow;
-			Zotero.Integration.currentWindow = window;
-			window.addEventListener("unload", listener, false);
-			return;
-		}
-		
-		Zotero.Integration.currentWindow = false;
-		if(async instanceof Function) {
-			try {
-				async();
-			} catch(e) {
-				Zotero.Integration.handleError(e, doc);
-			}
-		}
-	}
-	window.addEventListener("unload", listener, false);
-}
-
-/**
  * Displays a dialog to set document preferences
  * @return {oldData|null|false} Old document data, if there was any; null, if there wasn't; false if cancelled
  */
@@ -1640,7 +1643,8 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 	}
 	
 	var me = this;
-	this.displayDialog(doc, 'chrome://zotero/content/integration/integrationDocPrefs.xul', '', io, function() {
+	Zotero.Integration.displayDialog(doc,
+		'chrome://zotero/content/integration/integrationDocPrefs.xul', '', io, function() {
 		if(!io.style) {
 			callback(false);
 			return;
@@ -1679,7 +1683,8 @@ Zotero.Integration.Session.prototype.reselectItem = function(doc, exception, cal
 	io.addBorder = Zotero.isWin;
 	io.singleSelection = true;
 	
-	this.displayDialog(doc, 'chrome://zotero/content/selectItemsDialog.xul', 'resizable', io, function() {
+	Zotero.Integration.displayDialog(doc, 'chrome://zotero/content/selectItemsDialog.xul',
+		'resizable', io, function() {
 		if(io.dataOut && io.dataOut.length) {
 			var itemID = io.dataOut[0];
 			
@@ -2400,7 +2405,9 @@ Zotero.Integration.Session.prototype.editBibliography = function(doc, callback) 
 	
 	this.bibliographyDataHasChanged = this.bibliographyHasChanged = true;
 	
-	this.displayDialog(doc, 'chrome://zotero/content/integration/editBibliographyDialog.xul', 'resizable', io, callback);
+	Zotero.Integration.displayDialog(doc,
+		'chrome://zotero/content/integration/editBibliographyDialog.xul', 'resizable', io,
+		callback);
 }
 
 /**
