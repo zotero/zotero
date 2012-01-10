@@ -634,14 +634,7 @@ Zotero_Browser.Tab.prototype.clear = function() {
 /*
  * detects translators for this browser object
  */
-Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {
-	// if there's already a scrapable page in the browser window, and it's
-	// still there, ensure it is actually part of the page, then return
-	if(this.page.translators && this.page.translators.length && this.page.document.location) {
-		if(this._searchFrames(rootDoc, this.page.document)) return;
-		this.clear();
-	}
-	
+Zotero_Browser.Tab.prototype.detectTranslators = function(rootDoc, doc) {	
 	if(doc instanceof HTMLDocument && doc.documentURI.substr(0, 6) != "about:") {
 		// get translators
 		var me = this;
@@ -791,6 +784,17 @@ Zotero_Browser.Tab.prototype._selectItems = function(obj, itemList, callback) {
  */
 Zotero_Browser.Tab.prototype._translatorsAvailable = function(translate, translators) {
 	if(translators && translators.length) {
+		// if there's already a scrapable page in the browser window, and it's
+		// still there, ensure it is actually part of the page, then return
+		if(this.page.translators && this.page.translators.length && this.page.document.location) {
+			if(this.page.document.defaultView && !this.page.document.defaultView.closed) {
+				// if it is still there, switch translation to take place on 
+				if(!translators.length || this.page.translators[0].priority <= translators[0].priority) return;
+			} else {
+				this.clear();
+			}
+		}
+		
 		this.page.translate = translate;
 		this.page.translators = translators;
 		this.page.document = translate.document;
