@@ -43,6 +43,7 @@ Zotero.Integration = new function() {
 	
 	// these need to be global because of GC
 	var _updateTimer;
+	var _carbon, ProcessSerialNumber, SetFrontProcessWithOptions;
 	
 	var _inProgress = false;
 	this.currentWindow = false;
@@ -276,24 +277,27 @@ Zotero.Integration = new function() {
 			};
 			
 			if(Zotero.isFx4 && win) {
-				const carbon = ctypes.open("/System/Library/Frameworks/Carbon.framework/Carbon");
-				/*
-				 * struct ProcessSerialNumber {
-				 *    unsigned long highLongOfPSN;
-				 *    unsigned long lowLongOfPSN;
-				 * };
-				 */
-				const ProcessSerialNumber = new ctypes.StructType("ProcessSerialNumber", 
-					[{"highLongOfPSN":ctypes.uint32_t}, {"lowLongOfPSN":ctypes.uint32_t}]);
-					
-				/*
-				 * OSStatus SetFrontProcessWithOptions (
-				 *    const ProcessSerialNumber *inProcess,
-				 *    OptionBits inOptions
-				 * );
-				 */
-				const SetFrontProcessWithOptions = carbon.declare("SetFrontProcessWithOptions",
-					ctypes.default_abi, ctypes.int32_t, ProcessSerialNumber.ptr, ctypes.uint32_t);
+				if(!_carbon) {
+					_carbon = ctypes.open("/System/Library/Frameworks/Carbon.framework/Carbon");
+					/*
+					 * struct ProcessSerialNumber {
+					 *    unsigned long highLongOfPSN;
+					 *    unsigned long lowLongOfPSN;
+					 * };
+					 */
+					ProcessSerialNumber = new ctypes.StructType("ProcessSerialNumber", 
+						[{"highLongOfPSN":ctypes.uint32_t}, {"lowLongOfPSN":ctypes.uint32_t}]);
+						
+					/*
+					 * OSStatus SetFrontProcessWithOptions (
+					 *    const ProcessSerialNumber *inProcess,
+					 *    OptionBits inOptions
+					 * );
+					 */
+					SetFrontProcessWithOptions = _carbon.declare("SetFrontProcessWithOptions",
+						ctypes.default_abi, ctypes.int32_t, ProcessSerialNumber.ptr,
+						ctypes.uint32_t);
+				}
 				
 				var psn = new ProcessSerialNumber();
 				psn.highLongOfPSN = 0;
@@ -304,7 +308,6 @@ Zotero.Integration = new function() {
 						psn.address(),
 						1 // kSetFrontProcessFrontWindowOnly = (1 << 0)
 					);
-					carbon.close();
 				}, false);
 			} else {
 				if(Zotero.oscpu == "PPC Mac OS X 10.4" || Zotero.oscpu == "Intel Mac OS X 10.4"
