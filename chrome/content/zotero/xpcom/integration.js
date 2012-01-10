@@ -387,6 +387,12 @@ Zotero.Integration = new function() {
 		if(doc) {
 			try {
 				doc.cleanup();
+				
+				// Call complete function if one exists
+				if(doc.wrappedJSObject && doc.wrappedJSObject.complete) {
+					doc.wrapped.JSObject.complete();
+				}
+				
 				doc.activate();
 			} catch(e) {
 				Zotero.logError(e);
