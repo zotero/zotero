@@ -46,7 +46,23 @@ Zotero.Debug = new function () {
 			return;
 		}
 		
-		if (typeof message != 'string') {
+		// Properly display thrown Error objects
+		if (message && message.constructor) {
+			switch (message.constructor.name) {
+				case 'Error':
+				case 'EvalError':
+				case 'RangeError':
+				case 'ReferenceError':
+				case 'SyntaxError':
+				case 'TypeError':
+				case 'URIError':
+					message = "'message' => \"" + message.message + "\"\n"
+								+ Zotero.Utilities.varDump(message) + "\n"
+								+ message.stack;
+					break;
+			}
+		}
+		else if (typeof message != 'string') {
 			message = Zotero.Utilities.varDump(message);
 		}
 		
