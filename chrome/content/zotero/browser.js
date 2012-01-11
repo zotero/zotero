@@ -152,6 +152,15 @@ var Zotero_Browser = new function() {
 		var libraryID = null, collectionID = null;
 		if(ZoteroPane && !Zotero.isConnector) {
 			try {
+				if (!ZoteroPane.collectionsView.editable) {
+					Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+					var desc = Zotero.getString('save.error.cannotMakeChangesToLibrary');
+					Zotero_Browser.progress.addDescription(desc);
+					Zotero_Browser.progress.show();
+					Zotero_Browser.progress.startCloseTimer(8000);
+					return;
+				}
+				
 				libraryID = ZoteroPane.getSelectedLibraryID();
 				collectionID = ZoteroPane.getSelectedCollection(true);
 			} catch(e) {}

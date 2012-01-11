@@ -3498,14 +3498,14 @@ var ZoteroPane = new function()
 	this.displayCannotEditLibraryMessage = function () {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
-		ps.alert(null, "", "You cannot make changes to the currently selected library.");
+		ps.alert(null, "", Zotero.getString('save.error.cannotMakeChangesToLibrary'));
 	}
 	
 	
 	this.displayCannotEditLibraryFilesMessage = function () {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
-		ps.alert(null, "", "You cannot add files to the currently selected library.");
+		ps.alert(null, "", Zotero.getString('save.error.cannotAddFilesToLibrary'));
 	}
 	
 	
