@@ -1087,7 +1087,9 @@ Zotero.Schema = new function(){
 			// TODO: check 'libraries', not 'groups', but first add a
 			// migration step to delete 'libraries' rows not in 'groups'
 			//"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM libraries)"
-			"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM groups)"
+			"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM groups)",
+			
+			"SELECT COUNT(*) FROM creatorData WHERE firstName='' AND lastName=''"
 		];
 		
 		for each(var sql in queries) {
