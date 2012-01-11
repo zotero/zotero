@@ -1519,6 +1519,7 @@ var ZoteroPane = new function()
 		// Remove virtual duplicates collection
 		if (itemGroup.isDuplicates()) {
 			this.setVirtual(itemGroup.ref.libraryID, 'duplicates', false);
+			return;
 		}
 		// Remove virtual unfiled collection
 		else if (itemGroup.isUnfiled()) {
