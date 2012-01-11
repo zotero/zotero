@@ -2345,7 +2345,19 @@
 					}
 					
 					next[0].click();
-					this.ensureElementIsVisible(next[0]);
+					
+					// DEBUG: next[0] is always equal to the target element,
+					// but for some reason it's necessary to scroll to the next
+					// element when moving forward for the target element to
+					// be fully in view
+					if (!back && next[0].parentNode.nextSibling) {
+						var visElem = next[0].parentNode.nextSibling;
+					}
+					else {
+						var visElem = next[0];
+					}
+					this.ensureElementIsVisible(visElem);
+					
 					return true;
 				]]>
 				</body>
