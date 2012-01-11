@@ -236,6 +236,7 @@
 			
 			<popupset>
 				<menupopup id="zotero-collectionmenu" onpopupshowing="ZoteroPane_Local.buildCollectionContextMenu();">
+					<!-- Keep order in sync with buildCollectionContextMenu -->
 					<menuitem label="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
 					<menuitem label="&zotero.toolbar.newSavedSearch.label;" command="cmd_zotero_newSavedSearch"/>
 					<menuitem label="&zotero.toolbar.newSubcollection.label;" oncommand="ZoteroPane_Local.newCollection(ZoteroPane_Local.getSelectedCollection().id)"/>
@@ -254,6 +255,7 @@
 					<menuitem label="Refresh" oncommand="ZoteroPane_Local.refreshCommonsBucket();"/><!--TODO localize -->
 				</menupopup>
 				<menupopup id="zotero-itemmenu" onpopupshowing="ZoteroPane_Local.buildItemContextMenu();">
+					<!-- Keep order in sync with buildItemContextMenu -->
 					<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="ZoteroPane_Local.selectItem(this.parentNode.getAttribute('itemID'), true)"/>
 					<menuseparator/>
 					<!-- with icon: <menuitem class="menuitem-iconic" id="zotero-menuitem-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemID'))"/>-->

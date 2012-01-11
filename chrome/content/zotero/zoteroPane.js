@@ -1063,10 +1063,17 @@ var ZoteroPane = new function()
 		itemgroup.setSearch('');
 		itemgroup.setTags(getTagSelection());
 		
-		// Enable or disable toolbar icons as necessary
-		const disableIfNoEdit = ["cmd_zotero_newCollection", "zotero-tb-add",
-			"cmd_zotero_newItemFromCurrentPage", "zotero-tb-lookup", "cmd_zotero_newStandaloneNote",
-			"zotero-tb-note-add", "zotero-tb-attachment-add"];
+		// Enable or disable toolbar icons and menu options as necessary
+		const disableIfNoEdit = [
+			"cmd_zotero_newCollection",
+			"cmd_zotero_newSavedSearch",
+			"zotero-tb-add",
+			"cmd_zotero_newItemFromCurrentPage",
+			"zotero-tb-lookup",
+			"cmd_zotero_newStandaloneNote",
+			"zotero-tb-note-add",
+			"zotero-tb-attachment-add"
+		];
 		for(var i=0; i<disableIfNoEdit.length; i++) {
 			var el = document.getElementById(disableIfNoEdit[i]);
 			if(itemgroup.editable) {
@@ -2123,7 +2130,9 @@ var ZoteroPane = new function()
 		}
 		
 		// Disable some actions if user doesn't have write access
-		var s = [m.editSelectedCollection, m.removeCollection, m.newCollection, m.newSavedSearch, m.newSubcollection];
+		//
+		// Some actions are disabled via their commands in onCollectionSelected()
+		var s = [m.newSubcollection, m.editSelectedCollection, m.removeCollection, m.emptyTrash];
 		if (itemGroup.isWithinGroup() && !itemGroup.editable && !itemGroup.isDuplicates() && !itemGroup.isUnfiled()) {
 			disable = disable.concat(s);
 		}
