@@ -43,6 +43,7 @@ Zotero.Integration = new function() {
 	
 	// these need to be global because of GC
 	var _updateTimer;
+	var _carbon, ProcessSerialNumber, SetFrontProcessWithOptions;
 	
 	var _inProgress = false;
 	this.currentWindow = false;
@@ -276,24 +277,27 @@ Zotero.Integration = new function() {
 			};
 			
 			if(Zotero.isFx4 && win) {
-				const carbon = ctypes.open("/System/Library/Frameworks/Carbon.framework/Carbon");
-				/*
-				 * struct ProcessSerialNumber {
-				 *    unsigned long highLongOfPSN;
-				 *    unsigned long lowLongOfPSN;
-				 * };
-				 */
-				const ProcessSerialNumber = new ctypes.StructType("ProcessSerialNumber", 
-					[{"highLongOfPSN":ctypes.uint32_t}, {"lowLongOfPSN":ctypes.uint32_t}]);
-					
-				/*
-				 * OSStatus SetFrontProcessWithOptions (
-				 *    const ProcessSerialNumber *inProcess,
-				 *    OptionBits inOptions
-				 * );
-				 */
-				const SetFrontProcessWithOptions = carbon.declare("SetFrontProcessWithOptions",
-					ctypes.default_abi, ctypes.int32_t, ProcessSerialNumber.ptr, ctypes.uint32_t);
+				if(!_carbon) {
+					_carbon = ctypes.open("/System/Library/Frameworks/Carbon.framework/Carbon");
+					/*
+					 * struct ProcessSerialNumber {
+					 *    unsigned long highLongOfPSN;
+					 *    unsigned long lowLongOfPSN;
+					 * };
+					 */
+					ProcessSerialNumber = new ctypes.StructType("ProcessSerialNumber", 
+						[{"highLongOfPSN":ctypes.uint32_t}, {"lowLongOfPSN":ctypes.uint32_t}]);
+						
+					/*
+					 * OSStatus SetFrontProcessWithOptions (
+					 *    const ProcessSerialNumber *inProcess,
+					 *    OptionBits inOptions
+					 * );
+					 */
+					SetFrontProcessWithOptions = _carbon.declare("SetFrontProcessWithOptions",
+						ctypes.default_abi, ctypes.int32_t, ProcessSerialNumber.ptr,
+						ctypes.uint32_t);
+				}
 				
 				var psn = new ProcessSerialNumber();
 				psn.highLongOfPSN = 0;
@@ -304,7 +308,6 @@ Zotero.Integration = new function() {
 						psn.address(),
 						1 // kSetFrontProcessFrontWindowOnly = (1 << 0)
 					);
-					carbon.close();
 				}, false);
 			} else {
 				if(Zotero.oscpu == "PPC Mac OS X 10.4" || Zotero.oscpu == "Intel Mac OS X 10.4"
@@ -322,8 +325,6 @@ Zotero.Integration = new function() {
 	 * Show appropriate dialogs for an integration error
 	 */
 	this.handleError = function(e, document) {
-		this.complete(document);
-		
 		if(!(e instanceof Zotero.Integration.UserCancelledException)) {
 			try {
 				var displayError = null;
@@ -378,6 +379,8 @@ Zotero.Integration = new function() {
 				Zotero.logError(e);
 			}
 		}
+		
+		this.complete(document);
 	}
 	
 	/**
@@ -388,13 +391,21 @@ Zotero.Integration = new function() {
 			try {
 				doc.cleanup();
 				doc.activate();
+				
+				// Call complete function if one exists
+				if(doc.wrappedJSObject && doc.wrappedJSObject.complete) {
+					doc.wrappedJSObject.complete();
+				}
 			} catch(e) {
 				Zotero.logError(e);
 			}
 		}
 		
 		if(Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
-			Zotero.Integration.currentWindow.close();
+			var oldWindow = Zotero.Integration.currentWindow;
+			Zotero.setTimeout(function() {
+				oldWindow.close();
+			}, 100, true);
 		}
 		_inProgress = Zotero.Integration.currentWindow = false;
 	}
@@ -420,6 +431,52 @@ Zotero.Integration = new function() {
 				proc.run(!!block, ['-e', script], 2);
 			} catch(e) {}
 		}
+	}
+	
+	/**
+	 * Displays a dialog in a modal-like fashion without hanging the thread 
+	 * @param {String} url The chrome:// URI of the window
+	 * @param {String} [options] Options to pass to the window
+	 * @param {String} [io] Data to pass to the window
+	 * @param {Function|Boolean} [async] Function to call when window is closed. If not specified,
+	 *     function waits to return until the window has been closed. If "true", the function returns
+	 *     immediately.
+	 */
+	this.displayDialog = function(doc, url, options, io, async) {
+		doc.cleanup();
+		
+		var allOptions = 'chrome,centerscreen';
+		// without this, Firefox gets raised with our windows under Compiz
+		if(Zotero.isLinux) allOptions += ',dialog=no';
+		if(options) allOptions += ','+options;
+		if(!async) allOptions += ',modal=yes';
+		
+		var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+			.getService(Components.interfaces.nsIWindowWatcher)
+			.openWindow(null, url, '', allOptions, (io ? io : null));
+		Zotero.Integration.currentWindow = window;
+		Zotero.Integration.activate(window);
+		
+		var listener = function() {
+			if(window.location.toString() === "about:blank") return;
+			
+			if(window.newWindow) {
+				window = window.newWindow;
+				Zotero.Integration.currentWindow = window;
+				window.addEventListener("unload", listener, false);
+				return;
+			}
+			
+			Zotero.Integration.currentWindow = false;
+			if(async instanceof Function) {
+				try {
+					async();
+				} catch(e) {
+					Zotero.Integration.handleError(e, doc);
+				}
+			}
+		}
+		window.addEventListener("unload", listener, false);
 	}
 }
 
@@ -526,7 +583,7 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			return;
 		}
 		
-		this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType, function(status) {
+		this._session.setDocPrefs(this._doc, this._app.primaryFieldType, this._app.secondaryFieldType, function(status) {
 			if(status === false) {
 				throw new Zotero.Integration.UserCancelledException();
 			}
@@ -571,7 +628,7 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			} catch(e) {
 				// make sure style is defined
 				if(e instanceof Zotero.Integration.DisplayException && e.name === "invalidStyle") {
-					this._session.setDocPrefs(this._app.primaryFieldType, this._app.secondaryFieldType, function() {
+					this._session.setDocPrefs(this._doc, this._app.primaryFieldType, this._app.secondaryFieldType, function() {
 						me._doc.setDocumentData(me._session.data.serializeXML());
 						me._session.reload = true;
 						callback(true);
@@ -666,7 +723,7 @@ Zotero.Integration.Document.prototype.editBibliography = function(callback) {
 			}
 			
 			fieldGetter.updateSession(function() {
-				me._session.editBibliography(function() {
+				me._session.editBibliography(this._doc, function() {
 					me._doc.activate();
 					fieldGetter.updateDocument(false, true, false, function() {
 						Zotero.Integration.complete(me._doc);
@@ -1078,7 +1135,7 @@ Zotero.Integration.Fields.prototype._processFields = function(fields, callback, 
 						} else {					// Yes
 							// Display reselect item dialog
 							var me = this;
-							this._session.reselectItem(e, function() {
+							this._session.reselectItem(this._doc, e, function() {
 								// Now try again
 								me._doc.activate();
 								me._processFields(fields, callback, i);
@@ -1324,11 +1381,14 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 	var io = new Zotero.Integration.CitationEditInterface(citation, field, this, session, newField, callback);
 	
 	if(Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
-		session.displayDialog('chrome://zotero/content/integration/addCitationDialog.xul', 'alwaysRaised,resizable', io, true);
+		Zotero.Integration.displayDialog(this._doc,
+			'chrome://zotero/content/integration/addCitationDialog.xul', 'alwaysRaised,resizable',
+			io, true);
 	} else {
 		var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
 			? 'popup' : 'alwaysRaised')
-		session.displayDialog('chrome://zotero/content/integration/quickFormat.xul', mode, io, true);
+		Zotero.Integration.displayDialog(this._doc,
+			'chrome://zotero/content/integration/quickFormat.xul', mode, io, true);
 	}
 }
 
@@ -1564,56 +1624,10 @@ Zotero.Integration.Session.prototype.setData = function(data) {
 }
 
 /**
- * Displays a dialog in a modal-like fashion without hanging the thread 
- * @param {String} url The chrome:// URI of the window
- * @param {String} [options] Options to pass to the window
- * @param {String} [io] Data to pass to the window
- * @param {Function|Boolean} [async] Function to call when window is closed. If not specified,
- *     function waits to return until the window has been closed. If "true", the function returns
- *     immediately.
- */
-Zotero.Integration.Session.prototype.displayDialog = function(url, options, io, async) {
-	if(this.doc) this.doc.cleanup();
-	
-	var allOptions = 'chrome,centerscreen';
-	// without this, Firefox gets raised with our windows under Compiz
-	if(Zotero.isLinux) allOptions += ',dialog=no';
-	if(options) allOptions += ','+options;
-	if(!async) allOptions += ',modal=yes';
-	
-	var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-		.getService(Components.interfaces.nsIWindowWatcher)
-		.openWindow(null, url, '', allOptions, (io ? io : null));
-	Zotero.Integration.currentWindow = window;
-	Zotero.Integration.activate(window);
-	
-	var listener = function() {
-		if(window.location.toString() === "about:blank") return;
-		
-		if(window.newWindow) {
-			window = window.newWindow;
-			Zotero.Integration.currentWindow = window;
-			window.addEventListener("unload", listener, false);
-			return;
-		}
-		
-		Zotero.Integration.currentWindow = false;
-		if(async instanceof Function) {
-			try {
-				async();
-			} catch(e) {
-				Zotero.Integration.handleError(e, this.doc);
-			}
-		}
-	}
-	window.addEventListener("unload", listener, false);
-}
-
-/**
  * Displays a dialog to set document preferences
  * @return {oldData|null|false} Old document data, if there was any; null, if there wasn't; false if cancelled
  */
-Zotero.Integration.Session.prototype.setDocPrefs = function(primaryFieldType, secondaryFieldType, callback) {
+Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldType, secondaryFieldType, callback) {
 	var io = new function() {
 		this.wrappedJSObject = this;
 	};
@@ -1629,7 +1643,8 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(primaryFieldType, se
 	}
 	
 	var me = this;
-	this.displayDialog('chrome://zotero/content/integration/integrationDocPrefs.xul', '', io, function() {
+	Zotero.Integration.displayDialog(doc,
+		'chrome://zotero/content/integration/integrationDocPrefs.xul', '', io, function() {
 		if(!io.style) {
 			callback(false);
 			return;
@@ -1660,7 +1675,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(primaryFieldType, se
  * Reselects an item to replace a deleted item
  * @param exception {Zotero.Integration.MissingItemException}
  */
-Zotero.Integration.Session.prototype.reselectItem = function(exception, callback) {
+Zotero.Integration.Session.prototype.reselectItem = function(doc, exception, callback) {
 	var io = new function() {
 		this.wrappedJSObject = this;
 	},
@@ -1668,7 +1683,8 @@ Zotero.Integration.Session.prototype.reselectItem = function(exception, callback
 	io.addBorder = Zotero.isWin;
 	io.singleSelection = true;
 	
-	this.displayDialog('chrome://zotero/content/selectItemsDialog.xul', 'resizable', io, function() {
+	Zotero.Integration.displayDialog(doc, 'chrome://zotero/content/selectItemsDialog.xul',
+		'resizable', io, function() {
 		if(io.dataOut && io.dataOut.length) {
 			var itemID = io.dataOut[0];
 			
@@ -2383,13 +2399,15 @@ Zotero.Integration.Session.prototype.previewCitation = function(citation) {
 /**
  * Edits integration bibliography
  */
-Zotero.Integration.Session.prototype.editBibliography = function(callback) {
+Zotero.Integration.Session.prototype.editBibliography = function(doc, callback) {
 	var bibliographyEditor = new Zotero.Integration.Session.BibliographyEditInterface(this);
 	var io = new function() { this.wrappedJSObject = bibliographyEditor; }
 	
 	this.bibliographyDataHasChanged = this.bibliographyHasChanged = true;
 	
-	this.displayDialog('chrome://zotero/content/integration/editBibliographyDialog.xul', 'resizable', io, callback);
+	Zotero.Integration.displayDialog(doc,
+		'chrome://zotero/content/integration/editBibliographyDialog.xul', 'resizable', io,
+		callback);
 }
 
 /**
@@ -2717,7 +2735,3 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
 	
 	return [zoteroItem, needUpdate];
 }
-
-/**
- * 
- */

@@ -245,53 +245,6 @@ var ZoteroOverlay = new function()
 			zoteroPane.height = 0;
 			
 			document.getElementById('content').setAttribute('collapsed', false);
-			
-			// turn off full window mode, if it was on
-			_setFullWindowMode(false);
-			
-			// Return focus to the browser content pane
-			window.content.window.focus();
-		}
-	}
-	
-	/**
-	 * Hides or shows navigation toolbars
-	 * @param set {Boolean} Whether navigation toolbars should be hidden or shown
-	 */
-	function _setFullWindowMode(set) {
-		// hide or show navigation toolbars
-		if(!getNavToolbox) return;
-		var toolbox = getNavToolbox();
-		if(set) {
-			// the below would be a good thing to do if the whole title bar (and not just the center
-			// part) got updated when it happened...
-			/*if(Zotero.isMac) {
-				titlebarcolorState = document.documentElement.getAttribute("activetitlebarcolor");
-				document.documentElement.removeAttribute("activetitlebarcolor");
-			}*/
-			if(document.title != "Zotero") {
-				titleState = document.title;
-				document.title = "Zotero";
-			}
-			
-			if(!toolbarCollapseState) {
-				toolbarCollapseState = [node.collapsed for each (node in toolbox.childNodes)];
-				for(var i=0; i<toolbox.childNodes.length; i++) {
-					toolbox.childNodes[i].collapsed = true;
-				}
-			}
-		} else {
-			/*if(Zotero.isMac) {
-				document.documentElement.setAttribute("activetitlebarcolor", titlebarcolorState);
-			}*/
-			if(document.title == "Zotero") document.title = titleState;
-			
-			if(toolbarCollapseState) {
-				for(var i=0; i<toolbox.childNodes.length; i++) {
-					toolbox.childNodes[i].collapsed = toolbarCollapseState[i];
-				}
-				toolbarCollapseState = undefined;
-			}
 		}
 	}
 	

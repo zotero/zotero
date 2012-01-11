@@ -1082,7 +1082,7 @@ Zotero.Utilities = {
 		
 		var typeID = Zotero.ItemTypes.getID(item.itemType);
 		if(!typeID) {
-			Zotero.debug("Translate: Invalid itemType "+item.itemType+"; saving as webpage");
+			Zotero.debug("itemToServerJSON: Invalid itemType "+item.itemType+"; using webpage");
 			item.itemType = "webpage";
 			typeID = Zotero.ItemTypes.getID(item.itemType);
 		}
@@ -1103,6 +1103,11 @@ Zotero.Utilities = {
 				for(var j=0; j<n; j++) {
 					var creator = val[j];
 					
+					if(!creator.firstName && !creator.lastName) {
+						Zotero.debug("itemToServerJSON: Silently dropping empty creator");
+						continue;
+					}
+					
 					// Single-field mode
 					if (!creator.firstName || (creator.fieldMode && creator.fieldMode == 1)) {
 						var newCreator = {
@@ -1122,7 +1127,7 @@ Zotero.Utilities = {
 						if(Zotero.CreatorTypes.getID(creator.creatorType)) {
 							newCreator.creatorType = creator.creatorType;
 						} else {
-							Zotero.debug("Translate: Invalid creator type "+creator.creatorType+"; falling back to author");
+							Zotero.debug("itemToServerJSON: Invalid creator type "+creator.creatorType+"; falling back to author");
 						}
 					}
 					if(!newCreator.creatorType) newCreator.creatorType = "author";
@@ -1141,7 +1146,7 @@ Zotero.Utilities = {
 						} else if(tag.name) {
 							tag = tag.name;
 						} else {
-							Zotero.debug("Translate: Discarded invalid tag");
+							Zotero.debug("itemToServerJSON: Discarded invalid tag");
 							continue;
 						}
 					}
@@ -1155,7 +1160,7 @@ Zotero.Utilities = {
 					var note = val[j];
 					if(typeof note === "object") {
 						if(!note.note) {
-							Zotero.debug("Translate: Discarded invalid note");
+							Zotero.debug("itemToServerJSON: Discarded invalid note");
 							continue;
 						}
 						note = note.note;
@@ -1182,10 +1187,10 @@ Zotero.Utilities = {
 				if(Zotero.ItemFields.isValidForType(fieldID, typeID)) {
 					newItem[field] = val;
 				} else {
-					Zotero.debug("Translate: Discarded field "+field+": field not valid for type "+item.itemType, 3);
+					Zotero.debug("itemToServerJSON: Discarded field "+field+": field not valid for type "+item.itemType, 3);
 				}
 			} else {
-				Zotero.debug("Translate: Discarded unknown field "+field, 3);
+				Zotero.debug("itemToServerJSON: Discarded unknown field "+field, 3);
 			}
 		}
 		

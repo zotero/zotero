@@ -3065,6 +3065,10 @@ Zotero.Schema = new function(){
 				Zotero.wait();
 			}
 			
+			// TODO
+			//
+			// Replace customBaseFieldMappings to fix FK fields/customField -> customFields->customFieldID
+			
 			_updateDBVersion('userdata', toVersion);
 			
 			Zotero.DB.commitTransaction();

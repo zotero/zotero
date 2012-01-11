@@ -1963,7 +1963,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.252";
+    this.processor_version = "1.0.255";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3586,6 +3586,7 @@ CSL.getCitationCluster = function (inputList, citationID) {
         params.have_collapsed = this.tmp.have_collapsed;
         myparams.push(params);
     }
+    this.tmp.has_purged_parallel = false;
     this.parallel.PruneOutputQueue(this);
     empties = 0;
     myblobs = this.output.queue.slice();
@@ -3642,14 +3643,18 @@ CSL.getCitationCluster = function (inputList, citationID) {
             return composite;
         }
         if ("object" === typeof composite && composite.length === 0 && !item["suppress-author"]) {
-            composite.push("[CSL STYLE ERROR: reference with no printed form.]");
+            if (this.tmp.has_purged_parallel) {
+                composite.push("");
+            } else {
+                composite.push("[CSL STYLE ERROR: reference with no printed form.]");
+            }
         }
         if (objects.length && "string" === typeof composite[0]) {
             composite.reverse();
             var tmpstr = composite.pop();
             if (tmpstr && tmpstr.slice(0, 1) === ",") {
                 objects.push(tmpstr);
-            } else {
+            } else if (tmpstr) {
                 objects.push(txt_esc(this.tmp.splice_delimiter) + tmpstr);
             }
         } else {
@@ -6328,7 +6333,7 @@ CSL.NameOutput.prototype.fixupInstitution = function (name, varname, listpos) {
     if (this.state.sys.getAbbreviation) {
         var jurisdiction = this.Item.jurisdiction;
         for (var j = 0, jlen = long_form.length; j < jlen; j += 1) {
-            var jurisdiction = this.state.transform.loadAbbreviation(jurisdiction, "institution-part", long_form[j]);
+            jurisdiction = this.state.transform.loadAbbreviation(jurisdiction, "institution-part", long_form[j]);
             if (this.state.transform.abbrevs[jurisdiction]["institution-part"][long_form[j]]) {
                 short_form[j] = this.state.transform.abbrevs[jurisdiction]["institution-part"][long_form[j]];
             }
@@ -6362,11 +6367,22 @@ CSL.NameOutput.prototype._splitInstitution = function (value, v, i) {
         var jurisdiction = this.Item.jurisdiction;
         for (var j = splitInstitution.length; j > 0; j += -1) {
             var str = splitInstitution.slice(0, j).join("|");
-            var jurisdiction = this.state.transform.loadAbbreviation(jurisdiction, "institution-entire", str);
+            jurisdiction = this.state.transform.loadAbbreviation(jurisdiction, "institution-entire", str);
             if (this.state.transform.abbrevs[jurisdiction]["institution-entire"][str]) {
                 var splitLst = this.state.transform.abbrevs[jurisdiction]["institution-entire"][str];
-                var splitLst = splitLst.replace(/\s*\|\s*/g, "|");
-                var splitLst = splitLst.split("|");
+                var splitSplitLst = splitLst.split(/>>[0-9]{4}>>/);
+                var m = splitLst.match(/>>([0-9]{4})>>/);
+                splitLst = splitSplitLst.pop();
+                if (splitSplitLst.length > 0 && this.Item.issued && this.Item.issued.year) {
+                    for (var k=m.length - 1; k > 0; k += -1) {
+                        if (parseInt(this.Item.issued.year, 10) >= parseInt(m[k], 10)) {
+                            break;
+                        }
+                        splitLst = splitSplitLst.pop();
+                    }
+                }
+                splitLst = splitLst.replace(/\s*\|\s*/g, "|");
+                splitLst = splitLst.split("|");
                 splitInstitution = splitLst.concat(splitInstitution.slice(j));
             }
         }
@@ -8315,11 +8331,26 @@ CSL.Transform = function (state) {
             return jurisdiction;
         }
         if (state.sys.getAbbreviation) {
-            if (!this.abbrevs[jurisdiction]) {
-                this.abbrevs[jurisdiction] = new CSL.AbbreviationSegments();
+            var tryList = ['default'];
+            if (jurisdiction !== 'default') {
+                var workLst = jurisdiction.split(/\s*;\s*/);
+                for (var i=0, ilen=workLst.length; i < ilen; i += 1) {
+                    tryList.push(workLst.slice(0,i+1).join(';'));
+                }
             }
-            if (!this.abbrevs[jurisdiction][category][orig]) {
-                state.sys.getAbbreviation(state.opt.styleID, this.abbrevs, jurisdiction, category, orig);
+            for (var i=tryList.length - 1; i > -1; i += -1) {
+                if (!this.abbrevs[tryList[i]]) {
+                    this.abbrevs[tryList[i]] = new CSL.AbbreviationSegments();
+                }
+                if (!this.abbrevs[tryList[i]][category][orig]) {
+                    state.sys.getAbbreviation(state.opt.styleID, this.abbrevs, tryList[i], category, orig);
+                }
+                if (this.abbrevs[tryList[i]][category][orig]) {
+                    if (i < tryList.length) {
+                        this.abbrevs[jurisdiction][category][orig] = this.abbrevs[tryList[i]][category][orig];
+                    }
+                    break;
+                }
             }
         }
         return jurisdiction;
@@ -8828,6 +8859,7 @@ CSL.Parallel.prototype.purgeVariableBlobs = function (cite, varnames) {
                 for (ppos = llen; ppos > -1; ppos += -1) {
                     b = cite[varname].blobs[ppos];
                     b[0].blobs = b[0].blobs.slice(0, b[1]).concat(b[0].blobs.slice((b[1] + 1)));
+                    this.state.tmp.has_purged_parallel = true;
                     if (b[0] && b[0].strings && "string" == typeof b[0].strings.oops
                         && b[0].parent && b[0].parent) {
                         b[0].parent.parent.strings.delimiter = b[0].strings.oops;

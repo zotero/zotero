@@ -272,9 +272,13 @@ Zotero.IPC = new function() {
 						instancePipeOpen = true;
 					}
 					
-					var wroteToPipe = Zotero.IPC.safePipeWrite(pipe, msg+"\n");
+					// Try to write to the pipe once a ms for 100 ms
+					var timeout = Date.now()+100, wroteToPipe;
+					do {
+						wroteToPipe = Zotero.IPC.safePipeWrite(pipe, msg+"\n");
+					} while(Date.now() < timeout && !wroteToPipe);
 					success = success || wroteToPipe;
-					defunct = !wroteToPipe
+					defunct = !wroteToPipe;
 				}
 				
 				if(defunct) {

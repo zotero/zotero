@@ -1952,19 +1952,20 @@ Zotero.Prefs = new function(){
 		try {
 			if (global) {
 				var service = Components.classes["@mozilla.org/preferences-service;1"]
-					.getService(Components.interfaces.nsIPrefService);
+								.getService(Components.interfaces.nsIPrefService);
+				var branch = service.getBranch("");
 			}
 			else {
-				var service = this.prefBranch;
+				var branch = this.prefBranch;
 			}
 			
-			switch (this.prefBranch.getPrefType(pref)){
-				case this.prefBranch.PREF_BOOL:
-					return this.prefBranch.getBoolPref(pref);
-				case this.prefBranch.PREF_STRING:
-					return this.prefBranch.getCharPref(pref);
-				case this.prefBranch.PREF_INT:
-					return this.prefBranch.getIntPref(pref);
+			switch (branch.getPrefType(pref)){
+				case branch.PREF_BOOL:
+					return branch.getBoolPref(pref);
+				case branch.PREF_STRING:
+					return branch.getCharPref(pref);
+				case branch.PREF_INT:
+					return branch.getIntPref(pref);
 			}
 		}
 		catch (e){

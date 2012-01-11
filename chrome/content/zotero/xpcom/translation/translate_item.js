@@ -389,6 +389,11 @@ Zotero.Translate.ItemSaver.prototype = {
 		for(var i=0; i<item.creators.length; i++) {
 			var creator = item.creators[i];
 			
+			if(!creator.firstName && !creator.lastName) {
+				Zotero.debug("Translate: Silently dropping empty creator");
+				continue;
+			}
+			
 			// try to assign correct creator type
 			var creatorTypeID = 1;
 			if(creator.creatorType) {

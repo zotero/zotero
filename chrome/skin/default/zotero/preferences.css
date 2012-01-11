@@ -15,6 +15,11 @@ radio[pane]
 	-moz-box-pack: end;
 }
 
+#export-citePaperJournalArticleURL
+{
+	font-size: .85em;
+}
+
 .statusLine
 {
 	margin: .75em 0;
@@ -201,11 +206,6 @@ grid row hbox:first-child
 #zotero-prefpane-export separator:not(.thin)
 {
 	height: 1em;
-}
-
-#quickCopy-instructions, #quickCopy-macWarning, #export-citePaperJournalArticleURL
-{
-	font-size: .85em;
 }
 
 #quickCopy-siteSettings-rows::-moz-tree-cell(quickCopy-copyAsHTML) {

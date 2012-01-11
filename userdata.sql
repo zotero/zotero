@@ -378,7 +378,7 @@ CREATE TABLE customBaseFieldMappings (
     PRIMARY KEY (customItemTypeID, baseFieldID, customFieldID),
     FOREIGN KEY (customItemTypeID) REFERENCES customItemTypes(customItemTypeID),
     FOREIGN KEY (baseFieldID) REFERENCES fields(fieldID),
-    FOREIGN KEY (customFieldID) REFERENCES fields(customFieldID)
+    FOREIGN KEY (customFieldID) REFERENCES customFields(customFieldID)
 );
 CREATE INDEX customBaseFieldMappings_baseFieldID ON customBaseFieldMappings(baseFieldID);
 CREATE INDEX customBaseFieldMappings_customFieldID ON customBaseFieldMappings(customFieldID);

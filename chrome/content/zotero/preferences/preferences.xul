@@ -42,11 +42,13 @@ To add a new preference:
 
 -->
 <prefwindow id="zotero-prefs" title="&zotero.preferences.title;" onload="init()" onunload="Zotero_Preferences.onUnload()"
-		windowtype="zotero:pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+		windowtype="zotero:pref" ondialoghelp="Zotero_Preferences.openHelpLink()"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	
 	<prefpane id="zotero-prefpane-general"
 						label="&zotero.preferences.prefpane.general;"
-						image="chrome://zotero/skin/prefs-general.png">
+						image="chrome://zotero/skin/prefs-general.png"
+						helpTopic="general">
 		<preferences id="zotero-prefpane-general-preferences">
 			<preference id="pref-fontSize" name="extensions.zotero.fontSize" type="string"/>
 			<preference id="pref-noteFontSize" name="extensions.zotero.note.fontSize" type="string"/>
@@ -156,7 +158,8 @@ To add a new preference:
 	<prefpane id="zotero-prefpane-sync"
 						label="&zotero.preferences.prefpane.sync;"
 						onpaneload="document.getElementById('sync-password').value = Zotero.Sync.Server.password; document.getElementById('storage-password').value = Zotero.Sync.Storage.password;"
-						image="chrome://zotero/skin/prefs-sync.png">
+						image="chrome://zotero/skin/prefs-sync.png"
+						helpTopic="sync">
 		<preferences>
 			<preference id="pref-sync-autosync" name="extensions.zotero.sync.autoSync" type="bool"/>
 			<preference id="pref-sync-username" name="extensions.zotero.sync.server.username" type="string" instantApply="true"/>
@@ -422,7 +425,8 @@ To add a new preference:
 	<prefpane id="zotero-prefpane-search"
 						label="&zotero.preferences.prefpane.search;"
 						onpaneload="updateIndexStats()"
-						image="chrome://zotero/skin/prefs-search.png">
+						image="chrome://zotero/skin/prefs-search.png"
+						helpTopic="search">
 		<preferences>
 			<preference id="pref-fulltext-textMaxLength" name="extensions.zotero.fulltext.textMaxLength" type="int"/>
 			<preference id="pref-fulltext-pdfmaxpages" name="extensions.zotero.fulltext.pdfMaxPages" type="int"/>
@@ -511,7 +515,8 @@ To add a new preference:
 	
 	<prefpane id="zotero-prefpane-export"
 						label="&zotero.preferences.prefpane.export;"
-						image="chrome://zotero/skin/prefs-export.png">
+						image="chrome://zotero/skin/prefs-export.png"
+						helpTopic="export">
 		<preferences>
 			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
 			<preference id="pref-quickCopy-dragLimit" name="extensions.zotero.export.quickCopy.dragLimit" type="int"/>
@@ -576,7 +581,8 @@ To add a new preference:
 	
 	<prefpane id="zotero-prefpane-cite"
 						label="&zotero.preferences.prefpane.cite;"
-						image="chrome://zotero/skin/prefs-styles.png">
+						image="chrome://zotero/skin/prefs-styles.png"
+						helpTopic="cite">
 		
 		<preferences id="zotero-preferences-cite">
 			<preference id="pref-cite-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
@@ -635,7 +641,8 @@ To add a new preference:
 	
 	<prefpane id="zotero-prefpane-keys"
 						label="&zotero.preferences.prefpane.keys;"
-						image="chrome://zotero/skin/prefs-keys.png">
+						image="chrome://zotero/skin/prefs-keys.png"
+						helpTopic="shortcut_keys">
 		<preferences>
 			<preference id="pref-keys-openZotero" name="extensions.zotero.keys.openZotero" type="string"/>
 			<preference id="pref-keys-toggleFullscreen" name="extensions.zotero.keys.toggleFullscreen" type="string"/>
@@ -730,7 +737,8 @@ To add a new preference:
 	
 	<prefpane id="zotero-prefpane-advanced"
 						label="&zotero.preferences.prefpane.advanced;"
-						image="chrome://zotero/skin/prefs-advanced.png">
+						image="chrome://zotero/skin/prefs-advanced.png"
+						helpTopic="advanced">
 		<preferences>
 			<preference id="pref-useDataDir" name="extensions.zotero.useDataDir" type="bool"/>
 			<preference id="pref-dataDir" name="extensions.zotero.dataDir" type="string"/>
