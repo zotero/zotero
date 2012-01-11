@@ -3067,6 +3067,7 @@ Zotero.Schema = new function(){
 			// TODO
 			//
 			// Replace customBaseFieldMappings to fix FK fields/customField -> customFields->customFieldID
+			// If libraryID set, make sure no relations still use a local user key, and then remove on-error code in sync.js
 			
 			_updateDBVersion('userdata', toVersion);
 			
