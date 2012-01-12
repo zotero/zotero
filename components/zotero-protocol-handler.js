@@ -424,6 +424,15 @@ function ChromeExtensionHandler() {
 							valA = Zotero.Date.strToMultipart(a[sorts[index].field]);
 							valB = Zotero.Date.strToMultipart(b[sorts[index].field]);
 						}
+						// TEMP: This is an ugly hack to make creator sorting
+						// slightly less broken. To do this right, real creator
+						// sorting needs to be abstracted from itemTreeView.js.
+						else if (sorts[index].field == 'firstCreator') {
+							var itemA = Zotero.Items.getByLibraryAndKey(a.libraryID, a.key);
+							var itemB = Zotero.Items.getByLibraryAndKey(b.libraryID, b.key);
+							valA = itemA.getField('firstCreator');
+							valB = itemB.getField('firstCreator');
+						}
 						else {
 							valA = a[sorts[index].field];
 							valB = b[sorts[index].field];
