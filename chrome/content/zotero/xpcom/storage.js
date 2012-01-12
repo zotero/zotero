@@ -1707,7 +1707,7 @@ Zotero.Sync.Storage = new function () {
 		Zotero.Sync.Storage.EventManager.registerObserver({
 			onSuccess: function () finish(),
 			
-			onSkip: function () function () {
+			onSkip: function () {
 				_syncInProgress = false
 			},
 			
