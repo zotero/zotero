@@ -1643,7 +1643,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 	}
 	
 	var me = this;
-	Zotero.Integration.displayDialog(doc,
+	Zotero.Integration.displayDialog(this._doc,
 		'chrome://zotero/content/integration/integrationDocPrefs.xul', '', io, function() {
 		if(!io.style) {
 			callback(false);
