@@ -1242,7 +1242,7 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 					}
 					
 					var linkedItem = item.getLinkedItem(itemGroup.ref.libraryID);
-					if (linkedItem) {
+					if (linkedItem && !linkedItem.deleted) {
 						// For drag to root, skip if linked item exists
 						if (itemGroup.isLibrary(true)) {
 							continue;
@@ -1373,6 +1373,18 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		// Check if there's already a copy of this item in the library
 		var linkedItem = item.getLinkedItem(targetLibraryID);
 		if (linkedItem) {
+			// If linked item is in the trash, undelete it
+			if (linkedItem.deleted) {
+				// Remove from any existing collections, or else when it gets
+				// undeleted it would reappear in those collections
+				var collectionIDs = linkedItem.getCollections();
+				for each(var collectionID in collectionIDs) {
+					var col = Zotero.Collections.get(collectionID);
+					col.removeItem(linkedItem.id);
+				}
+				linkedItem.deleted = false;
+				linkedItem.save();
+			}
 			return linkedItem.id;
 			
 			/*
