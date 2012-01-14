@@ -628,7 +628,8 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			} catch(e) {
 				// make sure style is defined
 				if(e instanceof Zotero.Integration.DisplayException && e.name === "invalidStyle") {
-					this._session.setDocPrefs(this._doc, this._app.primaryFieldType, this._app.secondaryFieldType, function() {
+					this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
+							this._app.secondaryFieldType, function() {
 						me._doc.setDocumentData(me._session.data.serializeXML());
 						me._session.reload = true;
 						callback(true);
@@ -779,7 +780,8 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 	var me = this;
 	this._getSession(false, true, function(haveSession) {
 		var setDocPrefs = function() {
-			me._session.setDocPrefs(me._app.primaryFieldType, me._app.secondaryFieldType, function(oldData) {
+			me._session.setDocPrefs(me._doc, me._app.primaryFieldType, me._app.secondaryFieldType,
+			function(oldData) {
 				if(oldData || oldData === null) {
 					me._doc.setDocumentData(me._session.data.serializeXML());
 					if(oldData === null) return;
@@ -1643,7 +1645,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 	}
 	
 	var me = this;
-	Zotero.Integration.displayDialog(this._doc,
+	Zotero.Integration.displayDialog(doc,
 		'chrome://zotero/content/integration/integrationDocPrefs.xul', '', io, function() {
 		if(!io.style) {
 			callback(false);
