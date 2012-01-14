@@ -1980,7 +1980,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.258";
+    this.processor_version = "1.0.260";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3836,9 +3836,15 @@ CSL.citeStart = function (Item, item) {
         var openBrace = CSL.checkNestedBraceOpen.exec(item.prefix);
         var closeBrace = CSL.checkNestedBraceClose.exec(item.prefix);
         if (openBrace) {
-            if (!closeBrace || closeBrace[0].length < openBrace[0].length) {
+            if (!closeBrace) {
                 this.output.nestedBraces = CSL.NestedBraces;
+            } else if (closeBrace[0].length < openBrace[0].length) {
+                this.output.nestedBraces = CSL.NestedBraces;
+            } else {
+                this.output.nestedBraces = false;
             }
+        } else if (closeBrace) {
+            this.output.nestedBraces = false;
         }
     }
 };
@@ -3858,9 +3864,15 @@ CSL.citeEnd = function (Item, item) {
         var openBrace = CSL.checkNestedBraceOpen.exec(item.suffix);
         var closeBrace = CSL.checkNestedBraceClose.exec(item.suffix);
         if (closeBrace) {
-            if (!openBrace || openBrace[0].length < closeBrace[0].length) {
+            if (!openBrace) {
                 this.output.nestedBraces = false;
+            } else if (openBrace[0].length < closeBrace[0].length) {
+                this.output.nestedBraces = false;
+            } else {
+                this.output.nestedBraces = CSL.NestedBraces;
             }
+        } else if (openBrace) {
+            this.output.nestedBraces = CSL.NestedBraces;
         }
     }
 };
@@ -11290,7 +11302,7 @@ CSL.Disambiguation = function (state) {
     this.registry = state.registry.registry;
     this.ambigcites = state.registry.ambigcites;
     this.configModes();
-    this.clashes = [1, 0];
+    this.debug = false;
 };
 CSL.Disambiguation.prototype.run = function(akey) {
     if (!this.modes.length) {
@@ -11305,22 +11317,15 @@ CSL.Disambiguation.prototype.runDisambig = function () {
         this.nnameset = 0;
         this.gnameset = 0;
         this.gname = 0;
+        this.clashes = [1, 0];
         while(this.lists[pos][1].length) {
             this.listpos = pos;
             if (!this.base) {
                 this.base = this.lists[pos][0];
             }
-            if (this.rerun) {
-                this.rerun = false;
-            } else {
-                this.scanItems(this.lists[pos], 0);
-            }
             var names_used = [];
             ismax = this.incrementDisambig();
             this.scanItems(this.lists[pos], 1);
-            if (this.clashes[1] < this.clashes[0]) {
-                this.base.better = this.base.names.slice();
-            }
             this.evalScan(ismax);
         }
     }
@@ -11339,19 +11344,21 @@ CSL.Disambiguation.prototype.scanItems = function (list, phase) {
     this.minval = tempResult[2];
     ItemCite = tempResult[3];
     this.partners.push(Item);
-    this.clashes[phase] = 0;
     this.nonpartners = [];
+    var clashes = 0;
     for (pos = 1, len = list[1].length; pos < len; pos += 1) {
         otherItem = list[1][pos];
         var otherItemData = this.getItemDesc(otherItem);
         var otherItemCite = otherItemData[3];
         if (ItemCite === otherItemCite) {
-            this.clashes[phase] += 1;
+            clashes += 1;
             this.partners.push(otherItem);
         } else {
             this.nonpartners.push(otherItem);
         }
     }
+    this.clashes[0] = this.clashes[1];
+    this.clashes[1] = clashes;
 };
 CSL.Disambiguation.prototype.evalScan = function (ismax) {
     this[this.modes[this.modeindex]](ismax);
@@ -11365,92 +11372,27 @@ CSL.Disambiguation.prototype.disNames = function (ismax) {
         this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, mybase);
         this.lists[this.listpos] = [this.base, []];
     } else if (this.clashes[1] === 0) {
-        mybase = CSL.cloneAmbigConfig(this.base);
-        mybase.year_suffix = false;
-        this.state.registry.registerAmbigToken(this.akey, "" + this.partners[0].id, mybase);
+        this.betterbase = CSL.cloneAmbigConfig(this.base);
+        this.betterbase.year_suffix = false;
+        this.state.registry.registerAmbigToken(this.akey, "" + this.partners[0].id, this.betterbase);
         this.lists[this.listpos] = [this.base, []];
     } else if (this.nonpartners.length === 1) {
-        mybase = CSL.cloneAmbigConfig(this.base);
-        mybase.year_suffix = false;
-        this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, mybase);
+        this.betterbase = CSL.cloneAmbigConfig(this.base);
+        this.betterbase.year_suffix = false;
+        this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, this.betterbase);
         this.lists[this.listpos] = [this.base, this.partners];
     } else if (this.clashes[1] < this.clashes[0]) {
         this.lists[this.listpos] = [this.base, this.partners];
-        if (this.nonpartners.length === 1) {
-            this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, this.base);
-        } else {
-            this.lists.push([this.base, this.nonpartners]);
-        }
+        this.lists.push([this.base, this.nonpartners]);
     } else {
-        if (ismax || this.advance_mode) {
-            if (ismax) {
-                var better = this.lists[this.listpos][0].better;
-                if (better) {
-                    this.base.names = better.slice();
-                } else {
-                    this.base = new CSL.AmbigConfig();
-                }
-                this.lists[this.listpos] = [this.base, this.nonpartners];
+        if (ismax) {
+            if (this.betterbase) {
+                this.base = CSL.cloneAmbigConfig(this.betterbase);
             }
+            this.lists[this.listpos] = [this.base, this.nonpartners];
             for (pos = 0, len = this.partners.length; pos < len; pos += 1) {
                 this.state.registry.registerAmbigToken(this.akey, "" + this.partners[pos].id, this.base);
             }
-        } else {
-            this.rerun = true;
-        }
-    }
-};
-CSL.Disambiguation.prototype.disGivens = function (ismax) {
-    var pos, len, mybase;
-    if (this.clashes[1] === 0 && this.nonpartners.length === 1) {
-        if (this.clashes[0] === 1) {
-            this.base = this.decrementNames();
-        }
-        mybase = CSL.cloneAmbigConfig(this.base);
-        mybase.year_suffix = false;
-        this.state.registry.registerAmbigToken(this.akey, "" + this.partners[0].id, this.base);
-        this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, mybase);
-        this.lists[this.listpos] = [this.base, []];
-    } else if (this.clashes[1] === 0) {
-        if (this.clashes[0] === 1) {
-            this.base = this.decrementNames();
-        }
-        mybase = CSL.cloneAmbigConfig(this.base);
-        mybase.year_suffix = false;
-        this.state.registry.registerAmbigToken(this.akey, "" + this.partners[0].id, mybase);
-        this.lists[this.listpos] = [this.base, this.nonpartners];
-    } else if (this.nonpartners.length === 1) {
-        if (this.clashes[0] === 1) {
-            this.base = this.decrementNames();
-        }
-        mybase = CSL.cloneAmbigConfig(this.base);
-        mybase.year_suffix = false;
-        this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, mybase);
-        this.lists[this.listpos] = [this.base, this.partners];
-    } else if (this.clashes[1] < this.clashes[0]) {
-        this.lists[this.listpos] = [this.base, this.partners];
-        if (this.nonpartners.length === 1) {
-            this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, this.base);
-        } else {
-            this.lists.push([this.base, this.nonpartners]);
-        }
-    } else {
-        this.base = CSL.cloneAmbigConfig(this.oldbase);
-        if (ismax || this.advance_mode) {
-            if (ismax) {
-                var better = this.lists[this.listpos][0].better;
-                if (better) {
-                    this.base.names = better.slice();
-                } else {
-                    this.base = new CSL.AmbigConfig();
-                }
-                this.lists[this.listpos] = [this.base, this.nonpartners];
-            }
-            for (pos = 0, len = this.partners.length; pos < len; pos += 1) {
-                this.state.registry.registerAmbigToken(this.akey, "" + this.partners[pos].id, this.base);
-            }
-        } else {
-            this.rerun = true;
         }
     }
 };
@@ -11468,7 +11410,6 @@ CSL.Disambiguation.prototype.disExtraText = function () {
         }
     } else {
         this.base.disambiguate = false;
-        this.lists[this.listpos] = [this.base, this.lists[this.listpos][1].slice(1)];
     }
 };
 CSL.Disambiguation.prototype.disYears = function () {
@@ -11497,77 +11438,59 @@ CSL.Disambiguation.prototype.disYears = function () {
 CSL.Disambiguation.prototype.incrementDisambig = function () {
     var val, maxed;
     maxed = false;
-    this.oldbase = CSL.cloneAmbigConfig(this.base);
-    if (this.advance_mode) {
-        this.modeindex += 1;
-        this.advance_mode = false;
-    }
-    if (!maxed && "disNames" === this.modes[this.modeindex]) {
-        if (this.base.names[this.nnameset] < this.maxvals[this.nnameset]) {
-            this.base.names[this.nnameset] += 1;
-        } else {
-            if (this.nnameset < (this.base.names.length - 1)) {
-                this.nnameset += 1;
-            }
-            if (this.base.names[this.nnameset] < this.maxvals[this.nnameset]) {
-                this.base.names[this.nnameset] += 1;
-            }
-        }
-        if (this.nnameset === (this.base.names.length - 1) && this.base.names[this.nnameset] === this.maxvals[this.nnameset]) {
-            if (this.modeindex === (this.modes.length - 1)) {
-                return true;
+    if ("disNames" === this.modes[this.modeindex]) {
+        var increment_name = false;
+        var increment_nameset = false;
+        if (this.state.opt["disambiguate-add-givenname"] && this.state.opt["givenname-disambiguation-rule"] === "by-cite") {
+            if (this.base.givens[this.gnameset][this.gname] < 2) {
+                this.base.givens[this.gnameset][this.gname] += 1;
             } else {
-                maxed = false;
+                this.base.givens[this.gnameset][this.gname] = this.betterbase.givens[this.gnameset][this.gname];
+                if (this.gname < this.base.names[this.gnameset]) {
+                    this.gname += 1;
+                    this.base.names[this.gnameset] += 1;
+                    this.base.givens[this.gnameset][this.gname] += 1;
+                } else {
+                    increment_name = true;
+                }
             }
-        }
-    }
-    if (!maxed && "disGivens" === this.modes[this.modeindex]) {
-        if (this.gname < this.maxvals[this.gnameset]) {
-            if (this.base.givens[this.gnameset][this.gname] === this.minval) {
-                this.base.givens[this.gnameset][this.gname] += 1;
-            }
-            this.base.givens[this.gnameset][this.gname] += 1;
-            this.gname += 1;
         } else {
-            if (this.gnameset < (this.base.givens.length - 1)) {
-                this.gnameset += 1;
-                this.gname = 0;
+            increment_name = true;
+        }
+        if (this.state.opt["disambiguate-add-names"]) {
+            if (increment_name) {
+                if (this.base.names[this.gnameset] < this.maxvals[this.gnameset]) {
+                    this.gname += 1;
+                    this.base.names[this.gnameset] += 1;
+                } else {
+                    increment_nameset = true;
+                }
             }
-            if (this.gname < this.maxvals[this.gnameset]) {
-                this.base.givens[this.gnameset][this.gname] += 1;
-                this.gname += 1;
+            if (increment_nameset) {
+                if (this.gnameset < this.base.names.length - 1) {
+                    this.gnameset += 1;
+                    this.gname = 0;
+                    if (this.state.opt["disambiguate-add-givenname"] && this.state.opt["givenname-disambiguation-rule"] === "by-cite") {
+                        this.base.givens[this.gnameset][this.gname] += 1;
+                    } else if (this.base.names[this.gnameset] < this.maxvals[this.gnameset]) {
+                        this.gname += 1;
+                        this.base.names[this.gnameset] += 1;
+                    }
+                } else {
+                    maxed = true;
+                    if (this.modeindex < this.modes.length - 1) {
+                        this.modeindex += 1;
+                    }
+                }
             }
         }
     }
     if (!maxed && "disExtraText" === this.modes[this.modeindex]) {
-        maxed = false;
         this.base.disambiguate = true;
-        if (this.modeindex === (this.modes.length - 1)) {
-            return true;
-        } else {
-            maxed = false;
-        }
+        maxed = true;
     }
     if (!maxed && "disYears" === this.modes[this.modeindex]) {
-        maxed = false;
-    }
-    if (!maxed && this.modes[this.modeindex] === "disGivens") {
-        if ((this.gnameset >= (this.base.names.length - 1) && ("undefined" === typeof this.maxvals[this.gnameset] || this.gname === this.maxvals[this.gnameset])) || this.base.names.length === 0) {
-            if (this.modeindex === (this.modes.length - 1)) {
-                maxed = true;
-            } else {
-                this.advance_mode = true;
-            }
-        }
-    }
-    if (!maxed && this.modes[this.modeindex] === "disNames") {
-        if ((this.nnameset >= (this.base.names.length - 1) && ("undefined" === typeof this.maxvals[this.nnameset] ||this.base.names[this.nnameset] === this.maxvals[this.nnameset])) || this.base.names.length === 0) {
-            if (this.modeindex === (this.modes.length - 1)) {
-                maxed = true;
-            } else {
-                this.advance_mode = true;
-            }
-        }
+        maxed = true;
     }
     return maxed;
 };
@@ -11583,8 +11506,8 @@ CSL.Disambiguation.prototype.initVars = function (akey) {
     var i, ilen, myIds, myItemBundles, myItems;
     this.lists = [];
     this.base = false;
+    this.betterbase = false;
     this.akey = akey;
-    this.advance_mode = false;
     myItemBundles = [];
     this.old_desc = {};
     myIds = this.ambigcites[akey];
@@ -11592,6 +11515,12 @@ CSL.Disambiguation.prototype.initVars = function (akey) {
         for (i = 0, ilen = myIds.length; i < ilen; i += 1) {
             var myItem = this.state.retrieveItem("" + myIds[i]);
             var myDesc = this.getItemDesc(myItem);
+            if (!this.betterbase) {
+                this.betterbase = CSL.cloneAmbigConfig(myDesc[0]);
+                this.base = myDesc[0];
+                this.maxvals = myDesc[1];
+                this.minval = myDesc[2];
+            }
             myItemBundles.push([myDesc, myItem]);
             this.old_desc[myIds[i]] = [this.state.registry.registry[myIds[i]].disambig.year_suffix, this.state.registry.registry[myIds[i]].disambig.disambiguate];
         }
@@ -11623,13 +11552,10 @@ CSL.Disambiguation.prototype.initVars = function (akey) {
 CSL.Disambiguation.prototype.configModes = function () {
     var dagopt, gdropt;
     this.modes = [];
-    if (this.state.opt["disambiguate-add-names"]) {
-        this.modes.push("disNames");
-    }
     dagopt = this.state.opt["disambiguate-add-givenname"];
     gdropt = this.state.opt["givenname-disambiguation-rule"];
-    if (dagopt && gdropt === "by-cite") {
-        this.modes.push("disGivens");
+    if (this.state.opt['disambiguate-add-names'] || (dagopt && gdropt === "by-cite")) {
+        this.modes.push("disNames");
     }
     if (this.state.opt.has_disambiguate) {
         this.modes.push("disExtraText");
@@ -11637,35 +11563,6 @@ CSL.Disambiguation.prototype.configModes = function () {
     if (this.state.opt["disambiguate-add-year-suffix"]) {
         this.modes.push("disYears");
     }
-};
-CSL.Disambiguation.prototype.decrementNames = function () {
-    var base_return, do_me, i, j, pos, len, ppos, llen, ids;
-    base_return = CSL.cloneAmbigConfig(this.base);
-    do_me = false;
-    len = base_return.givens.length - 1;
-    for (pos = len; pos > -1; pos += -1) {
-        llen = base_return.givens[pos].length - 1;
-        for (ppos = llen; ppos > -1; ppos += -1) {
-            if (base_return.givens[pos][ppos] > this.oldbase.givens[pos][ppos]) {
-                do_me = true;
-            }
-        }
-    }
-    if (do_me) {
-        len = base_return.givens.length - 1;
-        for (pos = len; pos > -1; pos += -1) {
-            llen = base_return.givens[pos].length - 1;
-            for (ppos = llen; ppos > -1; ppos += -1) {
-                if (base_return.givens[pos][ppos] > this.oldbase.givens[pos][ppos]) {
-                    break;
-                }
-                if (ppos < base_return.names[pos]) {
-                    base_return.names[pos] += -1;
-                }
-            }
-        }
-    }
-    return base_return;
 };
 CSL.Registry.CitationReg = function (state) {
     this.citationById = {};
