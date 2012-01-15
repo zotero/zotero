@@ -366,16 +366,17 @@ Zotero.DataObjects = function (object, objectPlural, id, table) {
 	
 	this.editCheck = function (obj) {
 		if (!Zotero.Sync.Server.updatesInProgress && !Zotero.Sync.Storage.updatesInProgress && !this.isEditable(obj)) {
+			try {
+				asfasf();
+			}
+			catch (e) {
+				Zotero.debug(e);
+			}
 			if (Zotero.Sync.Storage.syncInProgress) {
-				try {
-					asfasf();
-				}
-				catch (e) {
-					Zotero.debug(e);
-				}
 				Components.utils.reportError("Storage sync in progress but updatesInProgress not set -- fix?");
 				return;
 			}
+			Components.utils.reportError("Cannot edit " + this._ZDO_object + " in read-only Zotero library");
 			throw ("Cannot edit " + this._ZDO_object + " in read-only Zotero library");
 		}
 	}
