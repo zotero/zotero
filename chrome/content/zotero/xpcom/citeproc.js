@@ -1980,7 +1980,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.260";
+    this.processor_version = "1.0.261";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -11398,19 +11398,22 @@ CSL.Disambiguation.prototype.disNames = function (ismax) {
 };
 CSL.Disambiguation.prototype.disExtraText = function () {
     var pos, len, mybase;
-    if (this.clashes[1] === 0) {
-        mybase = CSL.cloneAmbigConfig(this.base);
-        mybase.year_suffix = false;
+    mybase = CSL.cloneAmbigConfig(this.base);
+    mybase.year_suffix = false;
+    if (this.clashes[1] === 0 || this.clashes[1] < this.clashes[0]) {
         this.state.registry.registerAmbigToken(this.akey, "" + this.partners[0].id, mybase);
-        if (this.nonpartners.length === 1) {
-            this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, mybase);
-            this.lists[this.listpos] = [this.base,[]];
-        } else {
-            this.lists[this.listpos] = [this.base, this.nonpartners];
+        for (var i=0, ilen=this.partners.length; i < ilen; i += 1) {
+            this.state.registry.registerAmbigToken(this.akey, "" + this.partners[i].id, mybase);
+        }
+        for (var i=0, ilen=this.nonpartners.length; i < ilen; i += 1) {
+            this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[i].id, mybase);
         }
     } else {
-        this.base.disambiguate = false;
+        for (var i=0, ilen=this.partners.length; i < ilen; i += 1) {
+            this.state.registry.registerAmbigToken(this.akey, "" + this.partners[i].id, this.betterbase);
+        }
     }
+    this.lists[this.listpos] = [this.base, []];
 };
 CSL.Disambiguation.prototype.disYears = function () {
     var pos, len, tokens, token, item;
@@ -11483,14 +11486,17 @@ CSL.Disambiguation.prototype.incrementDisambig = function () {
                     }
                 }
             }
+        } else if (increment_name) {
+            maxed = true;
+            if (this.modeindex < this.modes.length - 1) {
+                this.modeindex += 1;
+            }
         }
     }
-    if (!maxed && "disExtraText" === this.modes[this.modeindex]) {
+    if ("disExtraText" === this.modes[this.modeindex]) {
         this.base.disambiguate = true;
-        maxed = true;
     }
-    if (!maxed && "disYears" === this.modes[this.modeindex]) {
-        maxed = true;
+    if ("disYears" === this.modes[this.modeindex]) {
     }
     return maxed;
 };
