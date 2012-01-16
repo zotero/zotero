@@ -2396,7 +2396,7 @@ Zotero.Browser = new function() {
 		hiddenBrowser.docShell.allowAuth = false;
 		hiddenBrowser.docShell.allowDNSPrefetch = false;
 		hiddenBrowser.docShell.allowImages = false;
-		hiddenBrowser.docShell.allowJavascript = false;
+		hiddenBrowser.docShell.allowJavascript = true;
 		hiddenBrowser.docShell.allowMetaRedirects = false;
 		hiddenBrowser.docShell.allowPlugins = false;
 		Zotero.debug("created hidden browser ("
