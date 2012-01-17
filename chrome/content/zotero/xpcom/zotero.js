@@ -35,7 +35,7 @@ const ZOTERO_CONFIG = {
 	API_URL: 'https://api.zotero.org/',
 	PREF_BRANCH: 'extensions.zotero.',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "3.0b3.SOURCE"
+	VERSION: "3.0rc1"
 };
 
 /*
@@ -227,8 +227,19 @@ const ZOTERO_CONFIG = {
 		this.isStandalone = appInfo.ID == ZOTERO_CONFIG['GUID'];
 		if(this.isStandalone) {
 			this.version = appInfo.version;
-		} else {
+		} else if(this.isFx4) {
+			// Use until we collect version from extension manager
 			this.version = ZOTERO_CONFIG['VERSION'];
+			
+			Components.utils.import("resource://gre/modules/AddonManager.jsm");
+			AddonManager.getAddonByID(ZOTERO_CONFIG['GUID'],
+				function(addon) { Zotero.version = addon.version; });
+		} else {
+			var gExtensionManager =
+				Components.classes["@mozilla.org/extensions/manager;1"]
+					.getService(Components.interfaces.nsIExtensionManager);
+			this.version
+				= gExtensionManager.getItemForID(ZOTERO_CONFIG['GUID']).version;
 		}
 		
 		// OS platform
