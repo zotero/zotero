@@ -42,10 +42,16 @@
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
     <menupopup id="menu_FilePopup">
-		<menuseparator/>		
+		<menuseparator/>
 		<menuitem id="menu_FileQuitItem" 
 				label="&quitApplicationCmdWin.label;"
 				key="key_quitApplication"
 				command="cmd_quitApplication"/>
+    </menupopup>
+    <menupopup id="menu_ToolsPopup">
+		<menuseparator/>
+        <menuitem id="menu_preferences"
+				label="&preferencesCmd.label;"
+				oncommand="ZoteroPane.openPreferences();"/>
     </menupopup>
 </overlay>
