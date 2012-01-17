@@ -106,9 +106,10 @@ var Zotero_QuickFormat = new function () {
 	 * Initialize add citation dialog
 	 */
 	this.onLoad = function(event) {
-		if(event.target !== document) return;
+		if(event.target !== document) return;		
 		// make sure we are visible
-		window.setTimeout(function() {
+		window.setTimeout(function() {	
+			if(!Zotero.isFx4) window.sizeToContent();
 			var screenX = window.screenX;
 			var screenY = window.screenY;
 			var xRange = [window.screen.availLeft, window.screen.width-window.outerWidth];
@@ -687,10 +688,13 @@ var Zotero_QuickFormat = new function () {
 		for(var i=0, n=childNodes.length; i<n && numReferences < SHOWN_REFERENCES; i++) {
 			if(childNodes[i].className === "quick-format-item") {
 				numReferences++;
-				firstReference = childNodes[i];
+				if(!firstReference) {
+					firstReference = childNodes[i];
+					if(referenceBox.selectedIndex === -1) referenceBox.selectedIndex = i;
+				}
 			} else if(childNodes[i].className === "quick-format-separator") {
 				numSeparators++;
-				firstSeparator = childNodes[i];
+				if(!firstSeparator) firstSeparator = childNodes[i];
 			}
 		}
 		
@@ -711,18 +715,27 @@ var Zotero_QuickFormat = new function () {
 		var panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
 		
 		if(numReferences || numSeparators) {
-			if(!referenceHeight && firstReference) {
-				if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
+			if(((!referenceHeight && firstReference) || (!separatorHeight && firstSeparator))
+					&& !panelShowing) {
+				referencePanel.openPopup(document.documentElement, "after_start", 15,
 					null, false, false, null);
-				panelShowing = true;
+				if(!Zotero.isFx4) {
+					window.setTimeout(function() { 
+						panelShowing = true;
+						_resize();
+					}, 0);
+					return;
+				} else {
+					panelShowing = true;
+				}
+			}
+		
+			if(!referenceHeight && firstReference) {
 				referenceHeight = firstReference.scrollHeight;
 				if(firstReference === referenceBox.lastChild) referenceHeight += 1;
 			}
 			
 			if(!separatorHeight && firstSeparator) {
-				if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
-					null, false, false, null);
-				panelShowing = true;
 				separatorHeight = firstSeparator.scrollHeight;
 				if(firstSeparator === referenceBox.lastChild) separatorHeight += 1;
 			}
