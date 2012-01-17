@@ -49,6 +49,8 @@ var Zotero_QuickFormat = new function () {
 				document.documentElement.setAttribute("hidechrome", true);
 			}
 			
+			new WindowDraggingElement(document.getElementById("quick-format-dialog"), window);
+			
 			qfs = document.getElementById("quick-format-search");
 			qfi = document.getElementById("quick-format-iframe");
 			qfb = document.getElementById("quick-format-entry");
