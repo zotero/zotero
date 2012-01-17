@@ -10,7 +10,7 @@ body {
 	background: white;
 	padding: 1px 2px 1px 0;
 	border: 1px solid rgba(0, 0, 0, 0.5);
-	-moz-appearance: textbox;
+	-moz-appearance: textfield;
 }
 
 #quick-format-dialog {
@@ -19,6 +19,6 @@ body {
 }
 
 #zotero-icon {
-	margin: 3px 0 0 2px;
+	margin: 0 0 0 2px;
 	-moz-appearance: none;
 }
