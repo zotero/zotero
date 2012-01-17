@@ -3947,7 +3947,8 @@ Zotero.Sync.Server.Data = new function() {
 		
 		// Item data
 		var fields = itemNode.getElementsByTagName('field');
-		for each(var field in fields) {
+		for (var i=0, len=fields.length; i<len; i++) {
+			var field = fields[i];
 			var fieldName = field.getAttribute('name');
 			item.setField(fieldName, field.textContent);
 			changedFields[fieldName] = true;
@@ -4080,26 +4081,18 @@ Zotero.Sync.Server.Data = new function() {
 		
 		var children = collection.getChildren();
 		if (children) {
-			//var collectionKeys = [];
 			var itemKeys = [];
 			
 			for each(var child in children) {
-				/*
-				if (child.type == 'collection') {
-					collectionKeys.push(child.key);
-				}
-				else */if (child.type == 'item') {
+				if (child.type == 'item') {
 					itemKeys.push(child.key);
 				}
 			}
 			
-			/*if (collectionKeys.length) {
-				var collectionsElem = doc.createElement('collections');
-				collectionsElem.appendChild(doc.createTextNode(collectionKeys.join(' ')));
-			}*/
 			if (itemKeys.length) {
 				var itemsElem = doc.createElement('items');
-				itemsElem.textContent(itemKeys.join(' '));
+				itemsElem.appendChild(doc.createTextNode(itemKeys.join(' ')));
+				colElem.appendChild(itemsElem);
 			}
 		}
 		
@@ -4358,7 +4351,8 @@ Zotero.Sync.Server.Data = new function() {
 		
 		// Search conditions
 		var conditions = searchNode.getElementsByTagName('condition');
-		for each(var condition in conditions) {
+		for (var i=0, len=conditions.length; i<len; i++) {
+			var condition = conditions[i];
 			conditionID = parseInt(condition.getAttribute('id'));
 			var name = condition.getAttribute('condition');
 			var mode = condition.getAttribute('mode');
