@@ -36,6 +36,11 @@
 	margin-left: 5px;
 }
 
+/* Restore button in trash view */
+#zotero-item-restore-button-holder
+{
+	-moz-appearance: toolbar;
+}
 
 /* Merge pane in duplicates view */
 #zotero-duplicates-merge-button

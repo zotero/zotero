@@ -124,15 +124,15 @@ Zotero.Relations = new function () {
 		Zotero.DB.beginTransaction();
 		
 		var sql = "UPDATE relations SET libraryID=? WHERE libraryID=?";
-		Zotero.DB.query(sql, [fromLibraryID, toLibraryID]);
+		Zotero.DB.query(sql, [toLibraryID, fromLibraryID]);
 		
 		sql = "UPDATE relations SET "
 				+ "subject=REPLACE(subject, 'zotero.org/users/" + fromUserID + "', "
 					+ "'zotero.org/users/" + toUserID + "'), "
 				+ "object=REPLACE(object, 'zotero.org/users/" + fromUserID + "', "
 					+ "'zotero.org/users/" + toUserID + "') "
-					+ "WHERE predicate='owl:sameAs'";
-		Zotero.DB.query(sql);
+					+ "WHERE predicate IN (?, ?)";
+		Zotero.DB.query(sql, [this.linkedObjectPredicate, this.deletedItemPredicate]);
 		
 		Zotero.DB.commitTransaction();
 	}

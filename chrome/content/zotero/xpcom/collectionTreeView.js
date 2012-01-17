@@ -1242,7 +1242,7 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 					}
 					
 					var linkedItem = item.getLinkedItem(itemGroup.ref.libraryID);
-					if (linkedItem) {
+					if (linkedItem && !linkedItem.deleted) {
 						// For drag to root, skip if linked item exists
 						if (itemGroup.isLibrary(true)) {
 							continue;
@@ -1373,6 +1373,18 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		// Check if there's already a copy of this item in the library
 		var linkedItem = item.getLinkedItem(targetLibraryID);
 		if (linkedItem) {
+			// If linked item is in the trash, undelete it
+			if (linkedItem.deleted) {
+				// Remove from any existing collections, or else when it gets
+				// undeleted it would reappear in those collections
+				var collectionIDs = linkedItem.getCollections();
+				for each(var collectionID in collectionIDs) {
+					var col = Zotero.Collections.get(collectionID);
+					col.removeItem(linkedItem.id);
+				}
+				linkedItem.deleted = false;
+				linkedItem.save();
+			}
 			return linkedItem.id;
 			
 			/*
@@ -1415,6 +1427,19 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		
 		// Standalone attachment
 		if (item.isAttachment()) {
+			var linkMode = item.attachmentLinkMode;
+			
+			// Skip linked files
+			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				Zotero.debug("Skipping standalone linked file attachment on drag");
+				return false;
+			}
+			
+			if (!itemGroup.filesEditable) {
+				Zotero.debug("Skipping standalone file attachment on drag");
+				return false;
+			}
+			
 			return Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
 		}
 		
@@ -1468,6 +1493,7 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 				
 				// Skip linked files
 				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+					Zotero.debug("Skipping child linked file attachment on drag");
 					continue;
 				}
 				
@@ -1529,6 +1555,10 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 					else {
 						var item = Zotero.Items.get(desc.id);
 						var id = copyItem(item, targetLibraryID);
+						// Standalone attachments might not get copied
+						if (!id) {
+							continue;
+						}
 						// Mark copied item for adding to collection
 						if (parent) {
 							if (!addItems[parent]) {
@@ -1538,8 +1568,6 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 						}
 					}
 				}
-				
-				return collectionID;
 			}
 			
 			var collections = [{
@@ -1613,7 +1641,12 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 			
 			var newIDs = [];
 			for each(var item in newItems) {
-				newIDs.push(copyItem(item, targetLibraryID));
+				var id = copyItem(item, targetLibraryID)
+				// Standalone attachments might not get copied
+				if (!id) {
+					continue;
+				}
+				newIDs.push(id);
 			}
 			
 			if (toReconcile.length) {

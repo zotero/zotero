@@ -169,7 +169,10 @@ Zotero.Styles = new function() {
 				var xml = enConverter.parse();
 			} else {
 				// CSL
-				var xml = new XML(this.cleanXML(style));
+				var xml = this.cleanXML(style);
+				if (!xml.name()) {
+					throw new Error("File is not XML");
+				}
 			}
 		} catch(e) {
 			error = e;

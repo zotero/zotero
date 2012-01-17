@@ -25,10 +25,10 @@
 
 var Zotero_QuickFormat = new function () {
 	var initialized, io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, keepSorted, 
-		showEditor, referencePanel, referenceBox, referenceHeight = 0, separatorHeight = 0, 
+		showEditor, referencePanel, referenceBox, referenceHeight = 0, separatorHeight = 0,
 		currentLocator, currentLocatorLabel, currentSearchTime, dragging, panel, 
 		panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator, panelInfo,
-		panelRefersToBubble;
+		panelRefersToBubble, panelFrameHeight = 0;
 	
 	// A variable that contains the timeout object for the latest onKeyPress event
 	var eventTimeout = null;
@@ -106,9 +106,10 @@ var Zotero_QuickFormat = new function () {
 	 * Initialize add citation dialog
 	 */
 	this.onLoad = function(event) {
-		if(event.target !== document) return;
+		if(event.target !== document) return;		
 		// make sure we are visible
-		window.setTimeout(function() {
+		window.setTimeout(function() {	
+			if(!Zotero.isFx4) window.sizeToContent();
 			var screenX = window.screenX;
 			var screenY = window.screenY;
 			var xRange = [window.screen.availLeft, window.screen.width-window.outerWidth];
@@ -142,9 +143,9 @@ var Zotero_QuickFormat = new function () {
 	};
 	
 	function _refocusQfe() {
+		referencePanel.blur();
 		window.focus();
 		qfe.focus();
-		referencePanel.blur();
 	}
 	
 	/**
@@ -687,10 +688,13 @@ var Zotero_QuickFormat = new function () {
 		for(var i=0, n=childNodes.length; i<n && numReferences < SHOWN_REFERENCES; i++) {
 			if(childNodes[i].className === "quick-format-item") {
 				numReferences++;
-				firstReference = childNodes[i];
+				if(!firstReference) {
+					firstReference = childNodes[i];
+					if(referenceBox.selectedIndex === -1) referenceBox.selectedIndex = i;
+				}
 			} else if(childNodes[i].className === "quick-format-separator") {
 				numSeparators++;
-				firstSeparator = childNodes[i];
+				if(!firstSeparator) firstSeparator = childNodes[i];
 			}
 		}
 		
@@ -711,29 +715,64 @@ var Zotero_QuickFormat = new function () {
 		var panelShowing = referencePanel.state === "open" || referencePanel.state === "showing";
 		
 		if(numReferences || numSeparators) {
+			if(((!referenceHeight && firstReference) || (!separatorHeight && firstSeparator)
+					|| !panelFrameHeight) && !panelShowing) {
+				_openReferencePanel();
+				if(!Zotero.isFx4) {
+					referencePanel.addEventListener("popupshown", function() {
+						referencePanel.removeEventListener("popupshown", arguments.callee, false); 
+						panelShowing = true;
+						_resize();
+					}, false);
+					return;
+				} else {
+					panelShowing = true;
+				}
+			}
+		
 			if(!referenceHeight && firstReference) {
-				if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
-					null, false, false, null);
-				panelShowing = true;
 				referenceHeight = firstReference.scrollHeight;
 				if(firstReference === referenceBox.lastChild) referenceHeight += 1;
 			}
 			
 			if(!separatorHeight && firstSeparator) {
-				if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
-					null, false, false, null);
-				panelShowing = true;
 				separatorHeight = firstSeparator.scrollHeight;
 				if(firstSeparator === referenceBox.lastChild) separatorHeight += 1;
 			}
 			
+			if(!panelFrameHeight) {
+				panelFrameHeight = referencePanel.boxObject.height - referencePanel.clientHeight;
+			}
+			
 			referencePanel.sizeTo(window.outerWidth-30,
-				numReferences*referenceHeight+1+numSeparators*separatorHeight-1);
-			if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
-				null, false, false, null);
+				numReferences*referenceHeight+numSeparators*separatorHeight+2*panelFrameHeight-1);
+			if(!panelShowing) _openReferencePanel();
 		} else if(panelShowing) {
 			referencePanel.hidePopup();
 			referencePanel.sizeTo(window.outerWidth-30, 0);
+			_refocusQfe();
+		}
+	}
+	
+	/**
+	 * Opens the reference panel and potentially refocuses the main text box
+	 */
+	function _openReferencePanel() {
+		referencePanel.openPopup(document.documentElement, "after_start", 15,
+			null, false, false, null);
+		if(!Zotero.isMac && !Zotero.isWin) {
+			// When it opens, we will lose focus
+			referencePanel.addEventListener("popupshown", function() {
+				referencePanel.removeEventListener("popupshown", arguments.callee, false);
+				_refocusQfe();
+				
+				// This is a nasty hack, but seems to be necessary to fix loss of focus on Linux
+				window.setTimeout(function() { _refocusQfe(); }, 25);
+				window.setTimeout(function() { _refocusQfe(); }, 50);
+				window.setTimeout(function() { _refocusQfe(); }, 100);
+				window.setTimeout(function() { _refocusQfe(); }, 175);
+				window.setTimeout(function() { _refocusQfe(); }, 250);
+			}, false);
 		}
 	}
 	

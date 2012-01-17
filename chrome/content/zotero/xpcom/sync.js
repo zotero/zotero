@@ -1867,6 +1867,21 @@ Zotero.Sync.Server = new function () {
 							}
 						}
 					}
+					
+					// Make sure this isn't due to relations using a local user key
+					//
+					// TEMP: This can be removed once a DB upgrade step is added
+					try {
+						var sql = "SELECT libraryID FROM relations WHERE libraryID LIKE 'local/%' LIMIT 1";
+						var repl = Zotero.DB.valueQuery(sql);
+						if (repl) {
+							Zotero.Relations.updateUser(repl, repl, Zotero.userID, Zotero.libraryID);
+						}
+					}
+					catch (e) {
+						Components.utils.reportError(e);
+						Zotero.debug(e);
+					}
 					break;
 				
 				case 'FULL_SYNC_REQUIRED':
@@ -2177,6 +2192,10 @@ Zotero.Sync.Server = new function () {
 		}
 		
 		if (lastUserID != userID || lastLibraryID != libraryID) {
+			if (!lastLibraryID) {
+				var repl = "local/" + Zotero.getLocalUserKey();
+			}
+			
 			Zotero.userID = userID;
 			Zotero.libraryID = libraryID;
 			
@@ -2187,6 +2206,11 @@ Zotero.Sync.Server = new function () {
 				
 				Zotero.Sync.Server.resetClient();
 				Zotero.Sync.Storage.resetAllSyncStates();
+			}
+			// Replace local user key with libraryID, in case duplicates were
+			// merged before the first sync
+			else if (!lastLibraryID) {
+				Zotero.Relations.updateUser(repl, repl, userID, libraryID);
 			}
 		}
 		

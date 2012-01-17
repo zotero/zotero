@@ -40,7 +40,7 @@ var Zotero_Report_Interface = new function() {
 		var sortColumn = ZoteroPane_Local.getSortField();
 		var sortDirection = ZoteroPane_Local.getSortDirection();
 		if (sortColumn != 'title' || sortDirection != 'ascending') {
-			queryString = '?sort=' + sortColumn + (sortDirection != 'ascending' ? '' : '/d');
+			queryString = '?sort=' + sortColumn + (sortDirection == 'ascending' ? '' : '/d');
 		}
 		
 		if (col) {

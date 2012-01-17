@@ -30,6 +30,14 @@ const RESELECT_KEY_ITEM_KEY = 2;
 const RESELECT_KEY_ITEM_ID = 3;
 const DATA_VERSION = 3;
 
+// Specifies that citations should only be updated if changed
+const FORCE_CITATIONS_FALSE = 0;
+// Specifies that citations should only be updated if formattedText has changed from what is encoded
+// in the field code
+const FORCE_CITATIONS_REGENERATE = 1;
+// Specifies that citations should be reset regardless of whether formattedText has changed
+const FORCE_CITATIONS_RESET_TEXT = 2;
+
 // this is used only for update checking
 const INTEGRATION_PLUGINS = ["zoteroMacWordIntegration@zotero.org",
 	"zoteroOpenOfficeIntegration@zotero.org", "zoteroWinWordIntegration@zotero.org"];
@@ -628,7 +636,8 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			} catch(e) {
 				// make sure style is defined
 				if(e instanceof Zotero.Integration.DisplayException && e.name === "invalidStyle") {
-					this._session.setDocPrefs(this._doc, this._app.primaryFieldType, this._app.secondaryFieldType, function() {
+					this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
+							this._app.secondaryFieldType, function() {
 						me._doc.setDocumentData(me._session.data.serializeXML());
 						me._session.reload = true;
 						callback(true);
@@ -692,7 +701,7 @@ Zotero.Integration.Document.prototype.addBibliography = function() {
 			field = fieldGetter.addField();
 		field.setCode("BIBL");
 		fieldGetter.updateSession(function() {
-			fieldGetter.updateDocument(false, true, false, function() {
+			fieldGetter.updateDocument(FORCE_CITATIONS_FALSE, true, false, function() {
 				Zotero.Integration.complete(me._doc);
 			});
 		});
@@ -725,7 +734,7 @@ Zotero.Integration.Document.prototype.editBibliography = function(callback) {
 			fieldGetter.updateSession(function() {
 				me._session.editBibliography(this._doc, function() {
 					me._doc.activate();
-					fieldGetter.updateDocument(false, true, false, function() {
+					fieldGetter.updateDocument(FORCE_CITATIONS_FALSE, true, false, function() {
 						Zotero.Integration.complete(me._doc);
 					});
 				});
@@ -743,7 +752,7 @@ Zotero.Integration.Document.prototype.refresh = function() {
 		// Send request, forcing update of citations and bibliography
 		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
 		fieldGetter.updateSession(function() {
-			fieldGetter.updateDocument(true, true, false, function() {
+			fieldGetter.updateDocument(FORCE_CITATIONS_REGENERATE, true, false, function() {
 				Zotero.Integration.complete(me._doc);
 			});
 		});
@@ -779,7 +788,8 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 	var me = this;
 	this._getSession(false, true, function(haveSession) {
 		var setDocPrefs = function() {
-			me._session.setDocPrefs(me._app.primaryFieldType, me._app.secondaryFieldType, function(oldData) {
+			me._session.setDocPrefs(me._doc, me._app.primaryFieldType, me._app.secondaryFieldType,
+			function(oldData) {
 				if(oldData || oldData === null) {
 					me._doc.setDocumentData(me._session.data.serializeXML());
 					if(oldData === null) return;
@@ -820,7 +830,8 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 							// refresh contents
 							fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
 							fieldGetter.updateSession(function() {
-								fieldGetter.updateDocument(true, true, true, function() {
+								fieldGetter.updateDocument(FORCE_CITATIONS_RESET_TEXT, true, true,
+								function() {
 									Zotero.Integration.complete(me._doc);
 								});
 							});
@@ -1221,7 +1232,8 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 					isRich = true;
 				}
 				
-				if(citation.properties.formattedCitation !== formattedCitation) {
+				if(forceCitations === FORCE_CITATIONS_RESET_TEXT
+						|| citation.properties.formattedCitation !== formattedCitation) {
 					// Check if citation has been manually modified
 					if(!ignoreCitationChanges && citation.properties.plainCitation) {
 						var plainCitation = field.getText();
@@ -1501,7 +1513,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 					}
 				}
 				
-				me._fields.updateDocument(false, false, false, me._doneCallback);
+				me._fields.updateDocument(FORCE_CITATIONS_FALSE, false, false, me._doneCallback);
 			});
 		} else {
 			if(this._deleteOnCancel) this._field.delete();

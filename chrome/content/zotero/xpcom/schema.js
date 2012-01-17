@@ -1088,7 +1088,9 @@ Zotero.Schema = new function(){
 			// TODO: check 'libraries', not 'groups', but first add a
 			// migration step to delete 'libraries' rows not in 'groups'
 			//"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM libraries)"
-			"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM groups)"
+			"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM groups)",
+			
+			"SELECT COUNT(*) FROM creatorData WHERE firstName='' AND lastName=''"
 		];
 		
 		for each(var sql in queries) {
@@ -3068,6 +3070,7 @@ Zotero.Schema = new function(){
 			// TODO
 			//
 			// Replace customBaseFieldMappings to fix FK fields/customField -> customFields->customFieldID
+			// If libraryID set, make sure no relations still use a local user key, and then remove on-error code in sync.js
 			
 			_updateDBVersion('userdata', toVersion);
 			

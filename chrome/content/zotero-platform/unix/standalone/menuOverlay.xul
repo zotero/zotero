@@ -48,4 +48,10 @@
 				key="key_quitApplication"
 				command="cmd_quitApplication"/>
     </menupopup>
+    <menupopup id="menu_EditPopup">
+		<menuseparator/>
+        <menuitem id="menu_preferences"
+				label="&preferencesCmd.label;"
+				oncommand="ZoteroPane.openPreferences();"/>
+    </menupopup>
 </overlay>

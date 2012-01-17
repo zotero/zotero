@@ -57,6 +57,12 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
+    NestedBraces: [
+        ["(", "["],
+        [")", "]"]
+    ],
+    checkNestedBraceOpen: new RegExp(".*\\("),
+    checkNestedBraceClose: new RegExp(".*\\)"),
     LangPrefsMap: {
         "title":"titles",
         "title-short":"titles",
@@ -105,9 +111,8 @@ var CSL = {
     FINISH: 1,
     POSITION_FIRST: 0,
     POSITION_SUBSEQUENT: 1,
-    POSITION_SUBSEQUENT_PARALLEL: 2,
-    POSITION_IBID: 3,
-    POSITION_IBID_WITH_LOCATOR: 4,
+    POSITION_IBID: 2,
+    POSITION_IBID_WITH_LOCATOR: 3,
     MARK_TRAILING_NAMES: true,
     POSITION_TEST_VARS: ["position", "first-reference-note-number", "near-note"],
     AREAS: ["citation", "citation_sort", "bibliography", "bibliography_sort"],
@@ -807,6 +812,12 @@ CSL.Output.Queue.prototype.openLevel = function (token, ephemeral) {
         }
         blob = new CSL.Blob(undefined, this.formats.value()[token], token);
     }
+    if (this.nestedBraces) {
+        blob.strings.prefix = blob.strings.prefix.replace(this.nestedBraces[0][0], this.nestedBraces[0][1]);
+        blob.strings.prefix = blob.strings.prefix.replace(this.nestedBraces[1][0], this.nestedBraces[1][1]);
+        blob.strings.suffix = blob.strings.suffix.replace(this.nestedBraces[0][0], this.nestedBraces[0][1]);
+        blob.strings.suffix = blob.strings.suffix.replace(this.nestedBraces[1][0], this.nestedBraces[1][1]);
+    }
     curr = this.current.value();
     curr.push(blob);
     this.current.push(blob);
@@ -865,6 +876,12 @@ CSL.Output.Queue.prototype.append = function (str, tokname, notSerious, ignorePr
         }
     }
     blob = new CSL.Blob(str, token);
+    if (this.nestedBraces) {
+        blob.strings.prefix = blob.strings.prefix.replace(this.nestedBraces[0][0], this.nestedBraces[0][1]);
+        blob.strings.prefix = blob.strings.prefix.replace(this.nestedBraces[1][0], this.nestedBraces[1][1]);
+        blob.strings.suffix = blob.strings.suffix.replace(this.nestedBraces[0][0], this.nestedBraces[0][1]);
+        blob.strings.suffix = blob.strings.suffix.replace(this.nestedBraces[1][0], this.nestedBraces[1][1]);
+    }
     curr = this.current.value();
     if ("undefined" === typeof curr && this.current.mystack.length === 0) {
         this.current.mystack.push([]);
@@ -897,7 +914,7 @@ CSL.Output.Queue.prototype.append = function (str, tokname, notSerious, ignorePr
 };
 CSL.Output.Queue.prototype.string = function (state, myblobs, blob) {
     var i, ilen, j, jlen, b;
-    var txt_esc = CSL.getSafeEscape(this.state.opt.mode, this.state.tmp.area);
+    var txt_esc = CSL.getSafeEscape(this.state);
     var blobs = myblobs.slice();
     var ret = [];
     if (blobs.length === 0) {
@@ -936,7 +953,7 @@ CSL.Output.Queue.prototype.string = function (state, myblobs, blob) {
                     }
                 }
                 if (b && b.length) {
-                    b = txt_esc(blobjr.strings.prefix) + b + txt_esc(blobjr.strings.suffix);
+                    b = txt_esc(blobjr.strings.prefix, state.tmp.nestedBraces) + b + txt_esc(blobjr.strings.suffix, state.tmp.nestedBraces);
                     ret.push(b);
                     if (state.tmp.count_offset_characters) {
                         state.tmp.offset_characters += (blen + blobjr.strings.suffix.length + blobjr.strings.prefix.length);
@@ -986,7 +1003,7 @@ CSL.Output.Queue.prototype.string = function (state, myblobs, blob) {
         use_suffix = blob.strings.suffix;
         if (b && b.length) {
             use_prefix = blob.strings.prefix;
-            b = txt_esc(use_prefix) + b + txt_esc(use_suffix);
+            b = txt_esc(use_prefix, state.tmp.nestedBraces) + b + txt_esc(use_suffix, state.tmp.nestedBraces);
             if (state.tmp.count_offset_characters) {
                 state.tmp.offset_characters += (use_prefix.length + use_suffix.length);
             }
@@ -1039,7 +1056,7 @@ CSL.Output.Queue.prototype.clearlevel = function () {
 };
 CSL.Output.Queue.prototype.renderBlobs = function (blobs, delim, has_more) {
     var state, ret, ret_last_char, use_delim, i, blob, pos, len, ppos, llen, pppos, lllen, res, str, params, txt_esc;
-    txt_esc = CSL.getSafeEscape(this.state.opt.mode, this.state.tmp.area);
+    txt_esc = CSL.getSafeEscape(this.state);
     if (!delim) {
         delim = "";
     }
@@ -1963,7 +1980,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.255";
+    this.processor_version = "1.0.260";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2519,6 +2536,7 @@ CSL.Engine.Opt = function () {
     this.development_extensions.locator_label_parse = true;
     this.development_extensions.raw_date_parsing = true;
     this.development_extensions.clean_up_csl_flaws = true;
+    this.development_extensions.flip_parentheses_to_braces = true;
     this.gender = {};
 	this['cite-lang-prefs'] = {
 		persons:['orig'],
@@ -3241,6 +3259,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
     }
     var citations;
     if (this.opt.update_mode === CSL.POSITION) {
+        var citationsInNote = {};
         for (i = 0; i < 2; i += 1) {
             citations = [textCitations, noteCitations][i];
             var first_ref = {};
@@ -3249,6 +3268,11 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                 var onecitation = citations[j];
                 if (!onecitation.properties.noteIndex) {
                     onecitation.properties.noteIndex = 0;
+                }
+                if (!citationsInNote[onecitation.properties.noteIndex]) {
+                    citationsInNote[onecitation.properties.noteIndex] = 1;
+                } else {
+                    citationsInNote[onecitation.properties.noteIndex] += 1;
                 }
                 for (k = 0, klen = citations[j].sortedItems.length; k < klen; k += 1) {
                     item = citations[j].sortedItems[k];
@@ -3280,7 +3304,9 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                             var items = citations[(j - 1)].sortedItems;
                             var useme = false;
                             if ((citations[(j - 1)].sortedItems[0][1].id  == item[1].id && citations[j - 1].properties.noteIndex >= (citations[j].properties.noteIndex - 1)) || citations[(j - 1)].sortedItems[0][1].id == this.registry.registry[item[1].id].parallel) {
-                                useme = true;
+                                if (citationsInNote[citations[j - 1].properties.noteIndex] === 1) {
+                                    useme = true;
+                                }
                             }
                             for (n = 0, nlen = items.slice(1).length; n < nlen; n += 1) {
                                 var itmp = items.slice(1)[n];
@@ -3345,11 +3371,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                             }
                         }
                         if (suprame) {
-                            if (this.registry.registry[item[1].id].parallel) {
-                                item[1].position = CSL.POSITION_SUBSEQUENT_PARALLEL;
-                            } else {
-                                item[1].position = CSL.POSITION_SUBSEQUENT;
-                            }
+                            item[1].position = CSL.POSITION_SUBSEQUENT;
                             if (first_ref[item[1].id] != onecitation.properties.noteIndex) {
                                 item[1]["first-reference-note-number"] = first_ref[item[1].id];
                             }
@@ -3527,7 +3549,8 @@ CSL.getSpliceDelimiter = function (last_collapsed, pos) {
 CSL.getCitationCluster = function (inputList, citationID) {
     var result, objects, myparams, len, pos, item, last_collapsed, params, empties, composite, compie, myblobs, Item, llen, ppos, obj, preceding_item, txt_esc, error_object;
     this.tmp.last_primary_names_string = false;
-    txt_esc = CSL.Output.Formats[this.opt.mode].text_escape;
+    this.tmp.nestedBraces = false;
+    txt_esc = CSL.getSafeEscape(this);
     this.tmp.area = "citation";
     result = "";
     objects = [];
@@ -3539,6 +3562,50 @@ CSL.getCitationCluster = function (inputList, citationID) {
     if (citationID) {
         this.registry.citationreg.citationById[citationID].properties.backref_index = false;
         this.registry.citationreg.citationById[citationID].properties.backref_citation = false;
+    }
+    if (this.opt.xclass === "note") {
+        var parasets = [];
+        var lastTitle = false;
+        var lastPosition = false;
+        var lastID = false;
+        for (var i=0, ilen = inputList.length; i < ilen; i += 1) {
+            var type = inputList[i][0].type;
+            var title = inputList[i][0].title;
+            var position = inputList[i][1].position;
+            var id = inputList[i][0].id;
+            if (title && type === "legal_case" && id !== lastID && position) {
+                if (title !== lastTitle || parasets.length === 0) {
+                    var lst = [];
+                    parasets.push(lst);
+                }
+                lst.push(inputList[i][1]);
+            }
+            lastTitle = title;
+            lastPosition = position;
+            lastID = id;
+        }
+        for (var i=0, ilen=parasets.length; i < ilen; i += 1) {
+            var lst = parasets[i];
+            if (lst.length < 2) {
+                continue;
+            }
+            var locatorInLastPosition = lst.slice(-1)[0].locator;
+            if (locatorInLastPosition) {
+                for (var j=0, jlen=lst.length - 1; j < jlen; j += 1) {
+                    if (lst[j].locator) {
+                        locatorInLastPosition = false;
+                    }
+                }
+            }
+            if (locatorInLastPosition) {
+                lst[0].locator = locatorInLastPosition;
+                delete lst.slice(-1)[0].locator;
+                lst[0].label = lst.slice(-1)[0].label;
+                if (lst.slice(-1)[0].label) {
+                    delete lst.slice(-1)[0].label;
+                }
+            }
+       }
     }
     myparams = [];
     len = inputList.length;
@@ -3689,6 +3756,7 @@ CSL.getCitationCluster = function (inputList, citationID) {
             && this.tmp.last_chr === use_layout_suffix.slice(0, 1)) {
             use_layout_suffix = use_layout_suffix.slice(1);
         }
+        this.output.nestedBraces = false;
         result = txt_esc(this.citation.opt.layout_prefix) + result + txt_esc(use_layout_suffix);
         if (!this.tmp.suppress_decorations) {
             len = this.citation.opt.layout_decorations.length;
@@ -3764,6 +3832,21 @@ CSL.citeStart = function (Item, item) {
     }
     this.tmp.shadow_numbers = {};
     this.tmp.first_name_string = false;
+    if (this.opt.development_extensions.flip_parentheses_to_braces && item && item.prefix) {
+        var openBrace = CSL.checkNestedBraceOpen.exec(item.prefix);
+        var closeBrace = CSL.checkNestedBraceClose.exec(item.prefix);
+        if (openBrace) {
+            if (!closeBrace) {
+                this.output.nestedBraces = CSL.NestedBraces;
+            } else if (closeBrace[0].length < openBrace[0].length) {
+                this.output.nestedBraces = CSL.NestedBraces;
+            } else {
+                this.output.nestedBraces = false;
+            }
+        } else if (closeBrace) {
+            this.output.nestedBraces = false;
+        }
+    }
 };
 CSL.citeEnd = function (Item, item) {
     if (this.tmp.disambig_restore) {
@@ -3777,6 +3860,21 @@ CSL.citeEnd = function (Item, item) {
     this.tmp.cut_var = false;
     this.tmp.disambig_request = false;
     this.tmp.cite_locales.push(this.tmp.last_cite_locale);
+    if (this.opt.development_extensions.flip_parentheses_to_braces && item && item.suffix) {
+        var openBrace = CSL.checkNestedBraceOpen.exec(item.suffix);
+        var closeBrace = CSL.checkNestedBraceClose.exec(item.suffix);
+        if (closeBrace) {
+            if (!openBrace) {
+                this.output.nestedBraces = false;
+            } else if (openBrace[0].length < closeBrace[0].length) {
+                this.output.nestedBraces = false;
+            } else {
+                this.output.nestedBraces = CSL.NestedBraces;
+            }
+        } else if (openBrace) {
+            this.output.nestedBraces = CSL.NestedBraces;
+        }
+    }
 };
 CSL.Node = {};
 CSL.Node.bibliography = {
@@ -7841,8 +7939,6 @@ CSL.Attributes["@position"] = function (state, arg) {
         for (var i = 0, ilen = lst.length; i < ilen; i += 1) {
             if (lst[i] === "first") {
                 tryposition = CSL.POSITION_FIRST;
-            } else if (lst[i] === "subsequent-parallel") {
-                tryposition = CSL.POSITION_SUBSEQUENT_PARALLEL;
             } else if (lst[i] === "subsequent") {
                 tryposition = CSL.POSITION_SUBSEQUENT;
             } else if (lst[i] === "ibid") {
@@ -8923,7 +9019,7 @@ CSL.Blob = function (str, token, levelname) {
     var len, pos, key;
     this.levelname = levelname;
     if (token) {
-        this.strings = {};
+        this.strings = {"prefix":"","suffix":""};
         for (key in token.strings) {
             if (token.strings.hasOwnProperty(key)) {
                 this.strings[key] = token.strings[key];
@@ -9509,7 +9605,7 @@ CSL.Util.substituteEnd = function (state, target) {
         author_substitute = new CSL.Token("text", CSL.SINGLETON);
         func = function (state, Item) {
             var i, ilen;
-            var text_esc = CSL.getSafeEscape(state.opt.mode, state.tmp.area);
+            var text_esc = CSL.getSafeEscape(state);
             var printing = !state.tmp.suppress_decorations;
             if (printing && state.tmp.area === "bibliography") {
                 if (!state.tmp.rendered_name) {
@@ -10003,7 +10099,7 @@ CSL.Util.FlipFlopper = function (state) {
     this.okReverseHash = hashes[4];
 };
 CSL.Util.FlipFlopper.prototype.init = function (str, blob) {
-    this.txt_esc = CSL.getSafeEscape(this.state.opt.mode, this.state.tmp.area);
+    this.txt_esc = CSL.getSafeEscape(this.state);
     str = this._normalizeString(str);
     if (!blob) {
         this.strs = this.getSplitStrings(str);
@@ -10230,9 +10326,9 @@ CSL.Util.FlipFlopper.prototype.addFlipFlop = function (blob, fun) {
     return newdecor;
 };
 CSL.Output.Formatters = {};
-CSL.getSafeEscape = function(outputModeOpt, outputArea) {
-    if (["bibliography", "citation"].indexOf(outputArea) > -1) {
-        return CSL.Output.Formats[outputModeOpt].text_escape;
+CSL.getSafeEscape = function(state) {
+    if (["bibliography", "citation"].indexOf(state.tmp.area) > -1) {
+        return CSL.Output.Formats[state.opt.mode].text_escape;
     } else {
         return function (txt) { return txt; };
     }
@@ -10304,7 +10400,7 @@ CSL.Output.Formatters.title = function (state, string) {
             lowerCaseVariant = words[pos].toLowerCase();
             var totallyskip = false;
             if (!isAllUpperCase || (words.length === 1 && words[pos].length < 4)) {
-                if (words[pos] === upperCaseVariant) {
+                if (words[pos] !== lowerCaseVariant) {
                     totallyskip = true;
                 }
             }
@@ -11206,7 +11302,7 @@ CSL.Disambiguation = function (state) {
     this.registry = state.registry.registry;
     this.ambigcites = state.registry.ambigcites;
     this.configModes();
-    this.clashes = [1, 0];
+    this.debug = false;
 };
 CSL.Disambiguation.prototype.run = function(akey) {
     if (!this.modes.length) {
@@ -11221,22 +11317,15 @@ CSL.Disambiguation.prototype.runDisambig = function () {
         this.nnameset = 0;
         this.gnameset = 0;
         this.gname = 0;
+        this.clashes = [1, 0];
         while(this.lists[pos][1].length) {
             this.listpos = pos;
             if (!this.base) {
                 this.base = this.lists[pos][0];
             }
-            if (this.rerun) {
-                this.rerun = false;
-            } else {
-                this.scanItems(this.lists[pos], 0);
-            }
             var names_used = [];
             ismax = this.incrementDisambig();
             this.scanItems(this.lists[pos], 1);
-            if (this.clashes[1] < this.clashes[0]) {
-                this.base.better = this.base.names.slice();
-            }
             this.evalScan(ismax);
         }
     }
@@ -11255,19 +11344,21 @@ CSL.Disambiguation.prototype.scanItems = function (list, phase) {
     this.minval = tempResult[2];
     ItemCite = tempResult[3];
     this.partners.push(Item);
-    this.clashes[phase] = 0;
     this.nonpartners = [];
+    var clashes = 0;
     for (pos = 1, len = list[1].length; pos < len; pos += 1) {
         otherItem = list[1][pos];
         var otherItemData = this.getItemDesc(otherItem);
         var otherItemCite = otherItemData[3];
         if (ItemCite === otherItemCite) {
-            this.clashes[phase] += 1;
+            clashes += 1;
             this.partners.push(otherItem);
         } else {
             this.nonpartners.push(otherItem);
         }
     }
+    this.clashes[0] = this.clashes[1];
+    this.clashes[1] = clashes;
 };
 CSL.Disambiguation.prototype.evalScan = function (ismax) {
     this[this.modes[this.modeindex]](ismax);
@@ -11281,92 +11372,27 @@ CSL.Disambiguation.prototype.disNames = function (ismax) {
         this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, mybase);
         this.lists[this.listpos] = [this.base, []];
     } else if (this.clashes[1] === 0) {
-        mybase = CSL.cloneAmbigConfig(this.base);
-        mybase.year_suffix = false;
-        this.state.registry.registerAmbigToken(this.akey, "" + this.partners[0].id, mybase);
+        this.betterbase = CSL.cloneAmbigConfig(this.base);
+        this.betterbase.year_suffix = false;
+        this.state.registry.registerAmbigToken(this.akey, "" + this.partners[0].id, this.betterbase);
         this.lists[this.listpos] = [this.base, []];
     } else if (this.nonpartners.length === 1) {
-        mybase = CSL.cloneAmbigConfig(this.base);
-        mybase.year_suffix = false;
-        this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, mybase);
+        this.betterbase = CSL.cloneAmbigConfig(this.base);
+        this.betterbase.year_suffix = false;
+        this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, this.betterbase);
         this.lists[this.listpos] = [this.base, this.partners];
     } else if (this.clashes[1] < this.clashes[0]) {
         this.lists[this.listpos] = [this.base, this.partners];
-        if (this.nonpartners.length === 1) {
-            this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, this.base);
-        } else {
-            this.lists.push([this.base, this.nonpartners]);
-        }
+        this.lists.push([this.base, this.nonpartners]);
     } else {
-        if (ismax || this.advance_mode) {
-            if (ismax) {
-                var better = this.lists[this.listpos][0].better;
-                if (better) {
-                    this.base.names = better.slice();
-                } else {
-                    this.base = new CSL.AmbigConfig();
-                }
-                this.lists[this.listpos] = [this.base, this.nonpartners];
+        if (ismax) {
+            if (this.betterbase) {
+                this.base = CSL.cloneAmbigConfig(this.betterbase);
             }
+            this.lists[this.listpos] = [this.base, this.nonpartners];
             for (pos = 0, len = this.partners.length; pos < len; pos += 1) {
                 this.state.registry.registerAmbigToken(this.akey, "" + this.partners[pos].id, this.base);
             }
-        } else {
-            this.rerun = true;
-        }
-    }
-};
-CSL.Disambiguation.prototype.disGivens = function (ismax) {
-    var pos, len, mybase;
-    if (this.clashes[1] === 0 && this.nonpartners.length === 1) {
-        if (this.clashes[0] === 1) {
-            this.base = this.decrementNames();
-        }
-        mybase = CSL.cloneAmbigConfig(this.base);
-        mybase.year_suffix = false;
-        this.state.registry.registerAmbigToken(this.akey, "" + this.partners[0].id, this.base);
-        this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, mybase);
-        this.lists[this.listpos] = [this.base, []];
-    } else if (this.clashes[1] === 0) {
-        if (this.clashes[0] === 1) {
-            this.base = this.decrementNames();
-        }
-        mybase = CSL.cloneAmbigConfig(this.base);
-        mybase.year_suffix = false;
-        this.state.registry.registerAmbigToken(this.akey, "" + this.partners[0].id, mybase);
-        this.lists[this.listpos] = [this.base, this.nonpartners];
-    } else if (this.nonpartners.length === 1) {
-        if (this.clashes[0] === 1) {
-            this.base = this.decrementNames();
-        }
-        mybase = CSL.cloneAmbigConfig(this.base);
-        mybase.year_suffix = false;
-        this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, mybase);
-        this.lists[this.listpos] = [this.base, this.partners];
-    } else if (this.clashes[1] < this.clashes[0]) {
-        this.lists[this.listpos] = [this.base, this.partners];
-        if (this.nonpartners.length === 1) {
-            this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, this.base);
-        } else {
-            this.lists.push([this.base, this.nonpartners]);
-        }
-    } else {
-        this.base = CSL.cloneAmbigConfig(this.oldbase);
-        if (ismax || this.advance_mode) {
-            if (ismax) {
-                var better = this.lists[this.listpos][0].better;
-                if (better) {
-                    this.base.names = better.slice();
-                } else {
-                    this.base = new CSL.AmbigConfig();
-                }
-                this.lists[this.listpos] = [this.base, this.nonpartners];
-            }
-            for (pos = 0, len = this.partners.length; pos < len; pos += 1) {
-                this.state.registry.registerAmbigToken(this.akey, "" + this.partners[pos].id, this.base);
-            }
-        } else {
-            this.rerun = true;
         }
     }
 };
@@ -11384,7 +11410,6 @@ CSL.Disambiguation.prototype.disExtraText = function () {
         }
     } else {
         this.base.disambiguate = false;
-        this.lists[this.listpos] = [this.base, this.lists[this.listpos][1].slice(1)];
     }
 };
 CSL.Disambiguation.prototype.disYears = function () {
@@ -11413,77 +11438,59 @@ CSL.Disambiguation.prototype.disYears = function () {
 CSL.Disambiguation.prototype.incrementDisambig = function () {
     var val, maxed;
     maxed = false;
-    this.oldbase = CSL.cloneAmbigConfig(this.base);
-    if (this.advance_mode) {
-        this.modeindex += 1;
-        this.advance_mode = false;
-    }
-    if (!maxed && "disNames" === this.modes[this.modeindex]) {
-        if (this.base.names[this.nnameset] < this.maxvals[this.nnameset]) {
-            this.base.names[this.nnameset] += 1;
-        } else {
-            if (this.nnameset < (this.base.names.length - 1)) {
-                this.nnameset += 1;
-            }
-            if (this.base.names[this.nnameset] < this.maxvals[this.nnameset]) {
-                this.base.names[this.nnameset] += 1;
-            }
-        }
-        if (this.nnameset === (this.base.names.length - 1) && this.base.names[this.nnameset] === this.maxvals[this.nnameset]) {
-            if (this.modeindex === (this.modes.length - 1)) {
-                return true;
+    if ("disNames" === this.modes[this.modeindex]) {
+        var increment_name = false;
+        var increment_nameset = false;
+        if (this.state.opt["disambiguate-add-givenname"] && this.state.opt["givenname-disambiguation-rule"] === "by-cite") {
+            if (this.base.givens[this.gnameset][this.gname] < 2) {
+                this.base.givens[this.gnameset][this.gname] += 1;
             } else {
-                maxed = false;
+                this.base.givens[this.gnameset][this.gname] = this.betterbase.givens[this.gnameset][this.gname];
+                if (this.gname < this.base.names[this.gnameset]) {
+                    this.gname += 1;
+                    this.base.names[this.gnameset] += 1;
+                    this.base.givens[this.gnameset][this.gname] += 1;
+                } else {
+                    increment_name = true;
+                }
             }
-        }
-    }
-    if (!maxed && "disGivens" === this.modes[this.modeindex]) {
-        if (this.gname < this.maxvals[this.gnameset]) {
-            if (this.base.givens[this.gnameset][this.gname] === this.minval) {
-                this.base.givens[this.gnameset][this.gname] += 1;
-            }
-            this.base.givens[this.gnameset][this.gname] += 1;
-            this.gname += 1;
         } else {
-            if (this.gnameset < (this.base.givens.length - 1)) {
-                this.gnameset += 1;
-                this.gname = 0;
+            increment_name = true;
+        }
+        if (this.state.opt["disambiguate-add-names"]) {
+            if (increment_name) {
+                if (this.base.names[this.gnameset] < this.maxvals[this.gnameset]) {
+                    this.gname += 1;
+                    this.base.names[this.gnameset] += 1;
+                } else {
+                    increment_nameset = true;
+                }
             }
-            if (this.gname < this.maxvals[this.gnameset]) {
-                this.base.givens[this.gnameset][this.gname] += 1;
-                this.gname += 1;
+            if (increment_nameset) {
+                if (this.gnameset < this.base.names.length - 1) {
+                    this.gnameset += 1;
+                    this.gname = 0;
+                    if (this.state.opt["disambiguate-add-givenname"] && this.state.opt["givenname-disambiguation-rule"] === "by-cite") {
+                        this.base.givens[this.gnameset][this.gname] += 1;
+                    } else if (this.base.names[this.gnameset] < this.maxvals[this.gnameset]) {
+                        this.gname += 1;
+                        this.base.names[this.gnameset] += 1;
+                    }
+                } else {
+                    maxed = true;
+                    if (this.modeindex < this.modes.length - 1) {
+                        this.modeindex += 1;
+                    }
+                }
             }
         }
     }
     if (!maxed && "disExtraText" === this.modes[this.modeindex]) {
-        maxed = false;
         this.base.disambiguate = true;
-        if (this.modeindex === (this.modes.length - 1)) {
-            return true;
-        } else {
-            maxed = false;
-        }
+        maxed = true;
     }
     if (!maxed && "disYears" === this.modes[this.modeindex]) {
-        maxed = false;
-    }
-    if (!maxed && this.modes[this.modeindex] === "disGivens") {
-        if ((this.gnameset >= (this.base.names.length - 1) && ("undefined" === typeof this.maxvals[this.gnameset] || this.gname === this.maxvals[this.gnameset])) || this.base.names.length === 0) {
-            if (this.modeindex === (this.modes.length - 1)) {
-                maxed = true;
-            } else {
-                this.advance_mode = true;
-            }
-        }
-    }
-    if (!maxed && this.modes[this.modeindex] === "disNames") {
-        if ((this.nnameset >= (this.base.names.length - 1) && ("undefined" === typeof this.maxvals[this.nnameset] ||this.base.names[this.nnameset] === this.maxvals[this.nnameset])) || this.base.names.length === 0) {
-            if (this.modeindex === (this.modes.length - 1)) {
-                maxed = true;
-            } else {
-                this.advance_mode = true;
-            }
-        }
+        maxed = true;
     }
     return maxed;
 };
@@ -11499,8 +11506,8 @@ CSL.Disambiguation.prototype.initVars = function (akey) {
     var i, ilen, myIds, myItemBundles, myItems;
     this.lists = [];
     this.base = false;
+    this.betterbase = false;
     this.akey = akey;
-    this.advance_mode = false;
     myItemBundles = [];
     this.old_desc = {};
     myIds = this.ambigcites[akey];
@@ -11508,6 +11515,12 @@ CSL.Disambiguation.prototype.initVars = function (akey) {
         for (i = 0, ilen = myIds.length; i < ilen; i += 1) {
             var myItem = this.state.retrieveItem("" + myIds[i]);
             var myDesc = this.getItemDesc(myItem);
+            if (!this.betterbase) {
+                this.betterbase = CSL.cloneAmbigConfig(myDesc[0]);
+                this.base = myDesc[0];
+                this.maxvals = myDesc[1];
+                this.minval = myDesc[2];
+            }
             myItemBundles.push([myDesc, myItem]);
             this.old_desc[myIds[i]] = [this.state.registry.registry[myIds[i]].disambig.year_suffix, this.state.registry.registry[myIds[i]].disambig.disambiguate];
         }
@@ -11539,13 +11552,10 @@ CSL.Disambiguation.prototype.initVars = function (akey) {
 CSL.Disambiguation.prototype.configModes = function () {
     var dagopt, gdropt;
     this.modes = [];
-    if (this.state.opt["disambiguate-add-names"]) {
-        this.modes.push("disNames");
-    }
     dagopt = this.state.opt["disambiguate-add-givenname"];
     gdropt = this.state.opt["givenname-disambiguation-rule"];
-    if (dagopt && gdropt === "by-cite") {
-        this.modes.push("disGivens");
+    if (this.state.opt['disambiguate-add-names'] || (dagopt && gdropt === "by-cite")) {
+        this.modes.push("disNames");
     }
     if (this.state.opt.has_disambiguate) {
         this.modes.push("disExtraText");
@@ -11553,35 +11563,6 @@ CSL.Disambiguation.prototype.configModes = function () {
     if (this.state.opt["disambiguate-add-year-suffix"]) {
         this.modes.push("disYears");
     }
-};
-CSL.Disambiguation.prototype.decrementNames = function () {
-    var base_return, do_me, i, j, pos, len, ppos, llen, ids;
-    base_return = CSL.cloneAmbigConfig(this.base);
-    do_me = false;
-    len = base_return.givens.length - 1;
-    for (pos = len; pos > -1; pos += -1) {
-        llen = base_return.givens[pos].length - 1;
-        for (ppos = llen; ppos > -1; ppos += -1) {
-            if (base_return.givens[pos][ppos] > this.oldbase.givens[pos][ppos]) {
-                do_me = true;
-            }
-        }
-    }
-    if (do_me) {
-        len = base_return.givens.length - 1;
-        for (pos = len; pos > -1; pos += -1) {
-            llen = base_return.givens[pos].length - 1;
-            for (ppos = llen; ppos > -1; ppos += -1) {
-                if (base_return.givens[pos][ppos] > this.oldbase.givens[pos][ppos]) {
-                    break;
-                }
-                if (ppos < base_return.names[pos]) {
-                    base_return.names[pos] += -1;
-                }
-            }
-        }
-    }
-    return base_return;
 };
 CSL.Registry.CitationReg = function (state) {
     this.citationById = {};
@@ -11596,4 +11577,3 @@ CSL.Node.generate = {
         }
     }
 };
-

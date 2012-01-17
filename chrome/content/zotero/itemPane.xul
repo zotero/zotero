@@ -34,9 +34,10 @@
 	
 	<vbox id="zotero-item-pane" zotero-persist="width">
 		<!-- Trash -->
-		<!-- TODO: Make look less awful -->
-		<button id="zotero-item-restore-button" label="&zotero.items.menu.restoreToLibrary;" 
-			oncommand="ZoteroPane_Local.restoreSelectedItems()" hidden="true"/>
+		<vbox id="zotero-item-restore-button-holder">
+			<button id="zotero-item-restore-button" label="&zotero.items.menu.restoreToLibrary;"
+				oncommand="ZoteroPane_Local.restoreSelectedItems()" hidden="true"/>
+		</vbox>
 		
 		<!-- Commons -->
 		<button id="zotero-item-show-original" label="Show Original"
