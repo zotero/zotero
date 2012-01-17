@@ -717,13 +717,13 @@ var Zotero_QuickFormat = new function () {
 		if(numReferences || numSeparators) {
 			if(((!referenceHeight && firstReference) || (!separatorHeight && firstSeparator))
 					&& !panelShowing) {
-				referencePanel.openPopup(document.documentElement, "after_start", 15,
-					null, false, false, null);
+				_openReferencePanel();
 				if(!Zotero.isFx4) {
-					window.setTimeout(function() { 
+					referencePanel.addEventListener("popupshown", function() {
+						referencePanel.removeEventListener("popupshown", arguments.callee, false); 
 						panelShowing = true;
 						_resize();
-					}, 0);
+					}, false);
 					return;
 				} else {
 					panelShowing = true;
@@ -741,12 +741,26 @@ var Zotero_QuickFormat = new function () {
 			}
 			
 			referencePanel.sizeTo(window.outerWidth-30,
-				numReferences*referenceHeight+1+numSeparators*separatorHeight-1);
-			if(!panelShowing) referencePanel.openPopup(document.documentElement, "after_start", 15,
-				null, false, false, null);
+				numReferences*referenceHeight+numSeparators*separatorHeight);
+			if(!panelShowing) _openReferencePanel();
 		} else if(panelShowing) {
 			referencePanel.hidePopup();
 			referencePanel.sizeTo(window.outerWidth-30, 0);
+		}
+	}
+	
+	/**
+	 * Opens the reference panel and potentially refocuses the main text box
+	 */
+	function _openReferencePanel() {
+		referencePanel.openPopup(document.documentElement, "after_start", 15,
+			null, false, false, null);
+		if(!Zotero.isMac && !Zotero.isWin) {
+			// When it opens, we will lose focus
+			referencePanel.addEventListener("popupshown", function() {
+				referencePanel.removeEventListener("popupshown", arguments.callee, false);
+				_refocusQfe();
+			}, false);
 		}
 	}
 	
