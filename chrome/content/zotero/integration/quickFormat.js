@@ -741,11 +741,15 @@ var Zotero_QuickFormat = new function () {
 			}
 			
 			if(!panelFrameHeight) {
-				panelFrameHeight = referencePanel.boxObject.height - referencePanel.clientHeight;
+				if(Zotero.isWin || Zotero.isMac) {
+					panelFrameHeight = 1;
+				} else {
+					panelFrameHeight = referencePanel.boxObject.height - referencePanel.clientHeight;
+				}
 			}
 			
 			referencePanel.sizeTo(window.outerWidth-30,
-				numReferences*referenceHeight+numSeparators*separatorHeight+2*panelFrameHeight-1);
+				numReferences*referenceHeight+numSeparators*separatorHeight+2*panelFrameHeight);
 			if(!panelShowing) _openReferencePanel();
 		} else if(panelShowing) {
 			referencePanel.hidePopup();
