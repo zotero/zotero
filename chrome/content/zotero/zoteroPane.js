@@ -3197,6 +3197,8 @@ var ZoteroPane = new function()
 		
 		var self = this;
 		
+		url = Zotero.Utilities.resolveIntermediateURL(url);
+		
 		Zotero.MIME.getMIMETypeFromURL(url, function (mimeType, hasNativeHandler) {
 			// If native type, save using a hidden browser
 			if (hasNativeHandler) {

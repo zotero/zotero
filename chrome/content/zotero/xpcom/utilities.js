@@ -1417,5 +1417,32 @@ Zotero.Utilities = {
 				}
 			}
 		}
+	},
+	
+	
+	/**
+	 * Get the real target URL from an intermediate URL
+	 */
+	"resolveIntermediateURL":function(url) {
+		var patterns = [
+			// Google search results
+			{
+				regexp: /^https?:\/\/(www.)?google\.(com|(com?\.)?[a-z]{2})\/url\?/,
+				variable: "url"
+			}
+		];
+		
+		for (var i=0, len=patterns.length; i<len; i++) {
+			if (!url.match(patterns[i].regexp)) {
+				continue;
+			}
+			var matches = url.match(new RegExp("&" + patterns[i].variable + "=(.+?)(&|$)"));
+			if (!matches) {
+				continue;
+			}
+			return decodeURIComponent(matches[1]);
+		}
+		
+		return url;
 	}
 }
