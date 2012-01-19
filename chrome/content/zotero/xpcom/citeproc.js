@@ -1979,7 +1979,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.263";
+    this.processor_version = "1.0.264";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2610,6 +2610,7 @@ CSL.Engine.Build = function () {
     this.root = "citation";
     this.extension = "";
     this.substitute_level = new CSL.Stack(0, CSL.LITERAL);
+    this.names_level = 0;
     this.render_nesting_level = 0;
     this.render_seen = false;
 };
@@ -6937,6 +6938,7 @@ CSL.Node.names = {
         }
         if (this.tokentype === CSL.START) {
             state.build.names_flag = true;
+            state.build.names_level += 1;
             func = function (state, Item, item) {
                 state.tmp.can_substitute.push(true);
                 state.parallel.StartVariable("names");
@@ -6948,8 +6950,11 @@ CSL.Node.names = {
             for (var i = 0, ilen = 3; i < ilen; i += 1) {
                 var key = ["family", "given", "et-al"][i];
                 this[key] = state.build[key];
-                state.build[key] = undefined;
+                if (state.build.names_level === 1) {
+                    state.build[key] = undefined;
+                }
             }
+            state.build.names_level += -1;
             this.label = state.build.name_label;
             state.build.name_label = undefined;
             var mywith = "with";
