@@ -2132,9 +2132,16 @@ var ZoteroPane = new function()
 		// Disable some actions if user doesn't have write access
 		//
 		// Some actions are disabled via their commands in onCollectionSelected()
-		var s = [m.newSubcollection, m.editSelectedCollection, m.removeCollection, m.emptyTrash];
+		var s = [m.newSubcollection, m.editSelectedCollection, m.removeCollection];
 		if (itemGroup.isWithinGroup() && !itemGroup.editable && !itemGroup.isDuplicates() && !itemGroup.isUnfiled()) {
 			disable = disable.concat(s);
+		}
+		
+		// If within non-editable group or trash it empty, disable Empty Trash
+		if (itemGroup.isTrash()) {
+			if ((itemGroup.isWithinGroup() && !itemGroup.isWithinEditableGroup()) || !this.itemsView.rowCount) {
+				disable.push(m.emptyTrash);
+			}
 		}
 		
 		// Hide and enable all actions by default (so if they're shown they're enabled)

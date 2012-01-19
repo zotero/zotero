@@ -1980,6 +1980,14 @@ Zotero.ItemGroup.prototype.isWithinGroup = function () {
 	return this.ref && !!this.ref.libraryID;
 }
 
+Zotero.ItemGroup.prototype.isWithinEditableGroup = function () {
+	if (!this.isWithinGroup()) {
+		return false;
+	}
+	var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.ref.libraryID);
+	return Zotero.Groups.get(groupID).editable;
+}
+
 Zotero.ItemGroup.prototype.__defineGetter__('editable', function () {
 	if (this.isTrash() || this.isShare() || this.isBucket()) {
 		return false;
