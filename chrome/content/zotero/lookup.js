@@ -58,6 +58,9 @@ const Zotero_Lookup = new function () {
 		translate.setTranslator(translators);
 		
 		translate.setHandler("done", function(translate, success) {
+			identifierElement.style.opacity = 1;
+			identifierElement.disabled = false;
+			document.getElementById("zotero-lookup-progress").hidden = true;
 			if(success) {
 				document.getElementById("zotero-lookup-panel").hidePopup();
 			} else {
@@ -77,6 +80,10 @@ const Zotero_Lookup = new function () {
 		translate.setHandler("itemDone", function(obj, item) {
 			if(collection) collection.addItem(item.id);
 		});
+		
+		identifierElement.style.opacity = 0.5;
+		identifierElement.disabled = true;
+		document.getElementById("zotero-lookup-progress").hidden = false;
 		
 		translate.translate(libraryID);
 		return false;
@@ -102,7 +109,12 @@ const Zotero_Lookup = new function () {
 		if(!Zotero.isFx4) {
 			document.getElementById("zotero-lookup-panel").style.padding = "10px";
 		}
-		document.getElementById("zotero-lookup-textbox").focus();
+		
+		document.getElementById("zotero-lookup-progress").hidden = false;
+		var identifierElement = document.getElementById("zotero-lookup-textbox");
+		identifierElement.style.opacity = 1;
+		identifierElement.disabled = false;
+		identifierElement.focus();
 	}
 	
 	/**
