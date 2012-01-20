@@ -154,7 +154,7 @@ var Zotero_Browser = new function() {
 			try {
 				if (!ZoteroPane.collectionsView.editable) {
 					Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-					var desc = Zotero.getString('save.error.cannotMakeChangesToLibrary');
+					var desc = Zotero.getString('save.error.cannotMakeChangesToCollection');
 					Zotero_Browser.progress.addDescription(desc);
 					Zotero_Browser.progress.show();
 					Zotero_Browser.progress.startCloseTimer(8000);
