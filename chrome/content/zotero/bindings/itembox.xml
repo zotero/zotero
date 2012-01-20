@@ -1802,21 +1802,31 @@
 						if (value != '') {
 							switch (fieldName) {
 								case 'accessDate':
+									Zotero.debug('==========');
+									Zotero.debug(value);
 									// If just date, don't convert to UTC
 									if (Zotero.Date.isSQLDate(value)) {
+										Zotero.debug('1');
 										var localDate = Zotero.Date.sqlToDate(value);
 										value = Zotero.Date.dateToSQL(localDate).replace(' 00:00:00', '');
 									}
 									else if (Zotero.Date.isSQLDateTime(value)) {
+										Zotero.debug('2');
 										var localDate = Zotero.Date.sqlToDate(value);
 										value = Zotero.Date.dateToSQL(localDate, true);
 									}
 									else {
+										Zotero.debug('3');
 										var d = Zotero.Date.strToDate(value);
+										Zotero.debug(d);
 										value = null;
 										if (d.year && d.month != undefined && d.day) {
 											d = new Date(d.year, d.month, d.day);
+											Zotero.debug('-');
+											Zotero.debug(d);
 											value = Zotero.Date.dateToSQL(d).replace(' 00:00:00', '');
+											Zotero.debug('=');
+											Zotero.debug(value);
 										}
 									}
 									break;
