@@ -177,6 +177,12 @@
 <!ENTITY zotero.preferences.dataDir.choose				"Choose...">
 <!ENTITY zotero.preferences.dataDir.reveal				"Show Data Directory">
 
+<!ENTITY zotero.preferences.attachments						"Attachments">
+<!ENTITY zotero.preferences.attachments.message				"Attached links to files below the base directory will be stored relative to the base directory.  This will allow links to remain functional on computers with different locations for the base directory.">
+<!ENTITY zotero.preferences.attachments.basePath			"Base directory:">
+<!ENTITY zotero.preferences.attachments.selectBasePath		"Choose...">
+<!ENTITY zotero.preferences.attachments.resetBasePath		"Revert to absolute paths">
+
 <!ENTITY zotero.preferences.dbMaintenance							"Database Maintenance">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck			"Check Database Integrity">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles	"Reset Translators and Styles...">

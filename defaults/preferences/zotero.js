@@ -6,6 +6,8 @@
 pref("extensions.zotero.firstRun2", true);
 pref("extensions.zotero@chnm.gmu.edu.description", "chrome://zotero/locale/zotero.properties");
 
+pref("extensions.zotero.saveRelativeAttachmentPath", false);
+pref("extensions.zotero.baseAttachmentPath", '');
 pref("extensions.zotero.useDataDir", false);
 pref("extensions.zotero.dataDir", '');
 pref("extensions.zotero.lastDataDir", '');
