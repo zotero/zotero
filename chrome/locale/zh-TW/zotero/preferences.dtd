@@ -167,6 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "匯出時顯示字元編碼的選項">
 
 <!ENTITY zotero.preferences.dataDir "儲存位置">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
 <!ENTITY zotero.preferences.dataDir.custom "自訂：">
 <!ENTITY zotero.preferences.dataDir.choose "選擇…">
 <!ENTITY zotero.preferences.dataDir.reveal "顯示資料目錄">

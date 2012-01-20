@@ -167,6 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Amosar opción de codificación de caracteres na exportación">
 
 <!ENTITY zotero.preferences.dataDir "Localización de almacenamento">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
 <!ENTITY zotero.preferences.dataDir.custom "Personalizado:">
 <!ENTITY zotero.preferences.dataDir.choose "Escoller...">
 <!ENTITY zotero.preferences.dataDir.reveal "Mostrar Directorio de Datos">
