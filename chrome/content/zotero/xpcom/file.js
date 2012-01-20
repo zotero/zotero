@@ -227,6 +227,10 @@ Zotero.File = new function(){
 		fileName = fileName.replace(/[\/\\\?%\*:|"<>]/g, '');
 		// Replace newlines and tabs (which shouldn't be in the string in the first place) with spaces
 		fileName = fileName.replace(/[\n\t]/g, ' ');
+		// Replace various thin spaces
+		fileName = fileName.replace(/[\u2000-\u200A]/g, ' ');
+		// Replace zero-width spaces
+		fileName = fileName.replace(/[\u200B-\u200E]/g, '');
 		if (!skipXML) {
 			// Strip characters not valid in XML, since they won't sync and they're probably unwanted
 			fileName = fileName.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/g, '');
