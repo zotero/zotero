@@ -530,8 +530,8 @@ Zotero.Schema = new function(){
 					continue;
 				}
 				
-				// Delete incorrectly named files saved via repo pre-1.5b3
 				switch (file.leafName) {
+					// Delete incorrectly named files saved via repo pre-1.5b3
 					case 'ama':
 					case 'apa':
 					case 'apsa':
@@ -548,7 +548,20 @@ Zotero.Schema = new function(){
 					case 'nature':
 					case 'nlm':
 					case 'vancouver':
+					
+					// Delete renamed/obsolete files
+					case 'chicago-note.csl':
+					case 'mhra_note_without_bibliography.csl':
 						toDelete.push(file);
+						continue;
+					
+					// Be a little more careful with this one, in case someone
+					// created a custom 'aaa' style
+					case 'aaa.csl':
+						var str = Zotero.File.getContents(file, false, 300);
+						if (str.indexOf("<title>American Anthropological Association</title>") != -1) {
+							toDelete.push(file);
+						}
 						continue;
 				}
 				
