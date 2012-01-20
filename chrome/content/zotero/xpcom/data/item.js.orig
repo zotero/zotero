@@ -3167,6 +3167,9 @@ Zotero.Item.prototype.__defineSetter__('attachmentPath', function (val) {
 		val = '';
 	}
 	
+<<<<<<< HEAD
+	if (val == this.attachmentPath) {
+=======
 	if ((Zotero.Prefs.get('useRelativeAttachmentPaths')) && (Zotero.Prefs.get('baseAttachmentPath') != '')) {
 		if (val.indexOf(Zotero.Prefs.get('baseAttachmentPath')) == 0) {
 			val = val.replace(Zotero.Prefs.get('baseAttachmentPath'),'<BASE_ATTACHMENT_PATH>');
@@ -3177,7 +3180,8 @@ Zotero.Item.prototype.__defineSetter__('attachmentPath', function (val) {
 		}
 	}
 	
-	if (val == this.attachmentPath) {
+	if (val == this._attachmentPath) {
+>>>>>>> Relative paths version 1
 		return;
 	}
 	

@@ -727,6 +727,8 @@ To add a new preference:
 						image="chrome://zotero/skin/prefs-advanced.png"
 						helpTopic="advanced">
 		<preferences>
+			<preference id="pref-useRelativeAttachmentPaths" name="extensions.zotero.useRelativeAttachmentPaths" type="bool"/>
+			<preference id="pref-baseAttachmentPath" name="extensions.zotero.baseAttachmentPath" type="string"/>
 			<preference id="pref-useDataDir" name="extensions.zotero.useDataDir" type="bool"/>
 			<preference id="pref-dataDir" name="extensions.zotero.dataDir" type="string"/>
 			<preference id="pref-export-displayCharsetOption" name="extensions.zotero.export.displayCharsetOption" type="bool"/>
@@ -735,6 +737,19 @@ To add a new preference:
 			<preference id="pref-openURL-resolver" name="extensions.zotero.openURL.resolver" type="string"/>
 			<preference id="pref-openURL-version" name="extensions.zotero.openURL.version" type="string"/>
 		</preferences>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.attachments;"/>
+			
+			<checkbox label="&zotero.preferences.attachments.useRelativePaths;" preference="pref-useRelativeAttachmentPaths"/>
+			
+			<hbox>
+				<label value="&zotero.preferences.attachments.basePath;"/>
+				<textbox id="baseAttachmentPath" preference="pref-baseAttachmentPath" flex="1"/>
+				<button label="Select base path" oncommand="var file = chooseBaseAttachmentPath(); if (!file) { event.stopPropagation(); }"/>
+			</hbox>
+			
+		</groupbox>
 		
 		<groupbox>
 			<caption label="&zotero.preferences.dataDir;"/>

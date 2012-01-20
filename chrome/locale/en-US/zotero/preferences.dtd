@@ -177,6 +177,10 @@
 <!ENTITY zotero.preferences.dataDir.choose				"Choose...">
 <!ENTITY zotero.preferences.dataDir.reveal				"Show Data Directory">
 
+<!ENTITY zotero.preferences.attachments						"Attachments">
+<!ENTITY zotero.preferences.attachments.useRelativePaths	"Save attachments on base path as relative paths">
+<!ENTITY zotero.preferences.attachments.basePath			"Base path:">
+
 <!ENTITY zotero.preferences.dbMaintenance							"Database Maintenance">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck			"Check Database Integrity">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles	"Reset Translators and Styles...">
