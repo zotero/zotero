@@ -3122,7 +3122,15 @@ Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
 	}
 	
 	if (this._attachmentPath !== null)  {
-		if ((this._pathIsRelative === null) || (this._pathIsRelative == false)) {
+		if (this._attachmentPath.indexOf('<BASE_ATTACHMENT_PATH>')==0) {
+			var path = this._attachmentPath;
+			if (Zotero.isWin) {
+				//Use windows directory delimiter
+				path = path.replace(/\//g,'\\');
+			}
+			return path.replace('<BASE_ATTACHMENT_PATH>',Zotero.Prefs.get('baseAttachmentPath'));
+		}
+		else {
 			return this._attachmentPath;
 		}
 	}
@@ -3137,19 +3145,16 @@ Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
 		path = '';
 	}
 	
+	this._attachmentPath = path;
+	
 	if (path.indexOf('<BASE_ATTACHMENT_PATH>')==0) {
 		if (Zotero.isWin) {
 			//Use windows directory delimiter
-			val = val.replace(/\//g,'\\');
+			path = path.replace(/\//g,'\\');
 		}
-		path = path.replace('<BASE_ATTACHMENT_PATH>',Zotero.Prefs.get('baseAttachmentPath'));
-		this._pathIsRelative = true;
-	}
-	else {
-		this._pathIsRelative = false;
+		return path.replace('<BASE_ATTACHMENT_PATH>',Zotero.Prefs.get('baseAttachmentPath'));
 	}
 	
-	this._attachmentPath = path;
 	return path;
 });
 

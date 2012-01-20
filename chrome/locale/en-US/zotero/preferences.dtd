@@ -178,7 +178,7 @@
 <!ENTITY zotero.preferences.dataDir.reveal				"Show Data Directory">
 
 <!ENTITY zotero.preferences.attachments						"Attachments">
-<!ENTITY zotero.preferences.attachments.useRelativePaths	"Save attachments on base path as relative paths">
+<!ENTITY zotero.preferences.attachments.message				"Attachments saved as links to files on the base path are saved as relative paths to the base path.">
 <!ENTITY zotero.preferences.attachments.basePath			"Base path:">
 
 <!ENTITY zotero.preferences.dbMaintenance							"Database Maintenance">
