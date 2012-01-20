@@ -288,13 +288,17 @@ Zotero.Translate.Sandbox = {
 				return translation.getTranslators();
 			};
 			
-			var doneHandlerSet = false;
+			var errorHandlerSet = false, doneHandlerSet = false;
 			safeTranslator.translate = function() {
 				translate.incrementAsyncProcesses("safeTranslator#translate()");
 				setDefaultHandlers(translate, translation);
 				if(!doneHandlerSet) {
 					doneHandlerSet = true;
 					translation.setHandler("done", function() { translate.decrementAsyncProcesses("safeTranslator#translate()") });
+				}
+				if(!errorHandlerSet) {
+					errorHandlerSet = true;
+					translation.setHandler("error", function(obj, error) { translate.complete(false, error) });
 				}
 				return translation.translate(false);
 			};
