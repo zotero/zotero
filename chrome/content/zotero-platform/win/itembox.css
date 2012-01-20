@@ -7,7 +7,7 @@ row > vbox
 	padding-bottom: 0 !important;
 }
 
-row vbox[fieldname],
+row vbox[fieldname]
 {
 	margin-left: 1px;
 }
