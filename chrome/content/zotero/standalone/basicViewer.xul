@@ -146,7 +146,7 @@
 	
 	<hbox flex="1" id="browser">
 		<vbox id="appcontent" flex="1">
-			<browser id="my-browser" type="content" flex="1"/>
+			<browser id="my-browser" type="content-primary" flex="1"/>
 		</vbox>
 	</hbox>
 </window>
