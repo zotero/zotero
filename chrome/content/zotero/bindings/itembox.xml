@@ -1860,6 +1860,12 @@
 						
 						this._modifyField(fieldName, value, this.saveOnEdit);
 						
+						if (fieldName == 'accessDate') {
+							Zotero.debug('========');
+							Zotero.debug(value);
+							Zotero.debug(this.item.getField(fieldName));
+						}
+						
 						elem = this.createValueElement(
 							this.item.getField(fieldName),
 							fieldName,
