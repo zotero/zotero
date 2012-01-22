@@ -1209,8 +1209,9 @@ Zotero.Translate.Base.prototype = {
 		Zotero.debug("Translate: Parsing code for "+translator.label, 4);
 		
 		try {
-			this._sandboxManager.eval("var exports = {}, translatorInfo = "+translator.code,
-				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix, "exports"],
+			this._sandboxManager.eval("var exports = {}, ZOTERO_TRANSLATOR_INFO = "+translator.code,
+				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix, "exports",
+					"ZOTERO_TRANSLATOR_INFO"],
 				(translator.file ? translator.file.path : translator.label));
 		} catch(e) {
 			this.complete(false, e);
@@ -1602,7 +1603,7 @@ Zotero.Translate.Import.prototype._loadTranslator = function(translator, callbac
  * Prepare translator IO
  */
 Zotero.Translate.Import.prototype._loadTranslatorPrepareIO = function(translator, callback) {
-	var dataMode = (translator ? translator : this._potentialTranslators[0]).configOptions["dataMode"];
+	var dataMode = this._sandboxManager.sandbox.ZOTERO_TRANSLATOR_INFO.configOptions["dataMode"];
 	
 	var me = this;
 	var initCallback = function(status, err) {
