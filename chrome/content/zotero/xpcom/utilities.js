@@ -37,7 +37,6 @@ const CSL_NAMES_MAPPINGS = {
 	"bookAuthor":"container-author",
 	"composer":"composer",
 	"interviewer":"interviewer",
-	"inventor":"author",
 	"recipient":"recipient",
 	"seriesEditor":"collection-editor",
 	"translator":"translator"
