@@ -124,7 +124,6 @@ Zotero.Cite.System.retrieveItem = function(item) {
 };
 
 Zotero.Cite.System.retrieveLocale = function(lang) {
-	Zotero.debug('=========' + lang);
 	var protHandler = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
 		.createInstance(Components.interfaces.nsIProtocolHandler);
 	var channel = protHandler.newChannel(protHandler.newURI("chrome://zotero/content/locale/csl/locales-"+lang+".xml", "UTF-8", null));
