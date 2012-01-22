@@ -1603,7 +1603,8 @@ Zotero.Translate.Import.prototype._loadTranslator = function(translator, callbac
  * Prepare translator IO
  */
 Zotero.Translate.Import.prototype._loadTranslatorPrepareIO = function(translator, callback) {
-	var dataMode = this._sandboxManager.sandbox.ZOTERO_TRANSLATOR_INFO.configOptions["dataMode"];
+	var configOptions = this._sandboxManager.sandbox.ZOTERO_TRANSLATOR_INFO.configOptions;
+	var dataMode = configOptions ? configOptions : {};
 	
 	var me = this;
 	var initCallback = function(status, err) {
