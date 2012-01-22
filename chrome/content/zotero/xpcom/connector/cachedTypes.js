@@ -107,8 +107,8 @@ Zotero.Connector_Types = new function() {
 				
 				for(var i=0; i<n; i++) {
 					var creatorType = creatorTypes[itemCreatorTypes[i]];
-					outputTypes.push({"id":creatorType[0]/* id */,
-						"name":creatorType[1]/* name */});
+					outputTypes[i] = {"id":creatorType[0]/* id */,
+						"name":creatorType[1]/* name */};
 				}
 				return outputTypes;
 			};
