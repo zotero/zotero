@@ -63,7 +63,8 @@ Zotero_TranslatorTester = function(translator, type, debug) {
 		try {
 			var testObject = JSON.parse(test);
 		} catch (e) {
-			Zotero.logError(e);
+			Zotero.logError(e+" parsing tests for "+translator.label);
+			return;
 		}
 		
 		for(var i=0, n=testObject.length; i<n; i++) {
