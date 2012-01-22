@@ -57,6 +57,16 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
+    STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:pt\.|ch\.|subch\.|sec\.|art\.|para\.))/g,
+    STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:pt\.|ch\.|subch\.|sec\.|art\.|para\.))/,
+    STATUTE_SUBDIV_STRINGS: {
+        "pt.": "part",
+        "ch.": "chapter",
+        "subch.": "subchapter",
+        "sec.": "section",
+        "art.": "article",
+        "para.": "paragraph"
+    },
     NestedBraces: [
         ["(", "["],
         [")", "]"]
@@ -116,7 +126,7 @@ var CSL = {
     MARK_TRAILING_NAMES: true,
     POSITION_TEST_VARS: ["position", "first-reference-note-number", "near-note"],
     AREAS: ["citation", "citation_sort", "bibliography", "bibliography_sort"],
-    MULTI_FIELDS: ["publisher", "publisher-place", "event-place", "title", "container-title", "collection-title", "authority","edition","genre","title-short"],
+    MULTI_FIELDS: ["event", "publisher", "publisher-place", "event-place", "title", "container-title", "collection-title", "authority","edition","genre","title-short"],
     CITE_FIELDS: ["first-reference-note-number", "locator", "locator-revision"],
     MINIMAL_NAME_FIELDS: ["literal", "family"],
     SWAPPING_PUNCTUATION: [".", "!", "?", ":",","],
@@ -1979,7 +1989,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.264";
+    this.processor_version = "1.0.266";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -7369,6 +7379,35 @@ CSL.Node.text = {
                                     state.output.append(value, this);
                                 }
                             };
+                        } else if (this.variables_real[0] === "section") {
+                            func = function (state, Item) {
+                                var value;
+                                value = state.getVariable(Item, this.variables[0], form);
+                                if (value) {
+                                    if (Item.type === "bill" || Item.type === "legislation") {
+                                        var m = value.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
+                                        if (m) {
+                                            var splt = value.split(CSL.STATUTE_SUBDIV_PLAIN_REGEX);
+                                            var lst = [];
+                                            if (!lst[0]) {
+                                                for (var i=1, ilen=splt.length; i < ilen; i += 1) {
+                                                    var subdiv = m[i - 1].replace(/^\s*/, "");
+                                                    subdiv = CSL.STATUTE_SUBDIV_STRINGS[subdiv];
+                                                    var plural = false;
+                                                    if (splt[i].match(/(?:&|, | and )/)) {
+                                                        plural = true;
+                                                    }
+                                                    subdiv = state.getTerm(subdiv, "symbol", plural);
+                                                    lst.push(subdiv);
+                                                    lst.push(splt[i].replace(/\s*,*\s*$/, "").replace(/^\s*,*\s*/, ""));
+                                                }
+                                                value = lst.join(" ");
+                                            }
+                                        }
+                                    }
+                                    state.output.append(value, this);
+                                }
+                            };
                         } else {
                             func = function (state, Item) {
                                 var value;
@@ -8352,7 +8391,7 @@ CSL.Transform = function (state) {
         if (["publisher", "authority"].indexOf(myabbrev_family) > -1) {
             myabbrev_family = "institution-part";
         }
-        if (["genre"].indexOf(myabbrev_family) > -1) {
+        if (["genre", "event"].indexOf(myabbrev_family) > -1) {
             myabbrev_family = "title";
         }
         if (["title-short"].indexOf(myabbrev_family) > -1) {
@@ -10106,7 +10145,6 @@ CSL.Util.FlipFlopper = function (state) {
 };
 CSL.Util.FlipFlopper.prototype.init = function (str, blob) {
     this.txt_esc = CSL.getSafeEscape(this.state);
-    str = this._normalizeString(str);
     if (!blob) {
         this.strs = this.getSplitStrings(str);
         this.blob = new CSL.Blob();
@@ -10118,14 +10156,25 @@ CSL.Util.FlipFlopper.prototype.init = function (str, blob) {
     this.blobstack = new CSL.Stack(this.blob);
 };
 CSL.Util.FlipFlopper.prototype._normalizeString = function (str) {
-    for (var i = 0, ilen = 2; i < ilen; i += 1) {
-        str = str.replace(this.quotechars[i + 2], this.quotechars[0]);
-        str = str.replace(this.quotechars[i + 4], this.quotechars[1]);
+    if (str.indexOf(this.quotechars[0]) > -1) {
+        for (var i = 0, ilen = 2; i < ilen; i += 1) {
+            if (this.quotechars[i + 2]) {
+                str = str.replace(this.quotechars[i + 2], this.quotechars[0]);
+            }
+        }
+    }
+    if (str.indexOf(this.quotechars[1]) > -1) {
+        for (var i = 0, ilen = 2; i < ilen; i += 1) {
+            if (this.quotechars[i + 4]) {
+                str = str.replace(this.quotechars[i + 4], this.quotechars[1]);
+            }
+        }
     }
     return str;
 };
 CSL.Util.FlipFlopper.prototype.getSplitStrings = function (str) {
     var strs, pos, len, newstr, head, tail, expected_closers, expected_openers, expected_flips, tagstack, badTagStack, posA, sameAsOpen, openRev, flipRev, tag, ibeenrunned, posB, wanted_closer, posC, sep, resplice, params, lenA, lenB, lenC, badTagPos, mx, myret;
+    str = this._normalizeString(str);
     mx = str.match(this.allTagsRexMatch);
     strs = str.split(this.allTagsRexSplit);
     myret = [strs[0]];
