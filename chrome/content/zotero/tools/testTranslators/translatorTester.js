@@ -55,7 +55,7 @@ Zotero_TranslatorTester = function(translator, type, debug) {
 	var testEnd   = code.indexOf("/** END TEST CASES **/"); 
 	if (testStart !== -1 && testEnd !== -1) {
 		var test = code.substring(testStart + 24, testEnd);
-		test = test.replace(/var testCases = /,'');
+		test = test.replace(/var testCases = /,'').trim();
 		// The JSON parser doesn't like final semicolons
 		if (test.lastIndexOf(';') == (test.length-1)) {
 			test = test.slice(0,-1);
