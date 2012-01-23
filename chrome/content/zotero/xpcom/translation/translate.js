@@ -1511,9 +1511,10 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 			}
 		}
 		
+		var translator = this.translator[0];
 		Zotero.getSystemInfo(function(info) {
-			var postBody = "id=" + encodeURIComponent(this.translator[0].translatorID) +
-						   "&lastUpdated=" + encodeURIComponent(this.translator[0].lastUpdated) +
+			var postBody = "id=" + encodeURIComponent(translator.translatorID) +
+						   "&lastUpdated=" + encodeURIComponent(translator.lastUpdated) +
 						   "&diagnostic=" + encodeURIComponent(info) +
 						   "&errorData=" + encodeURIComponent(errorString);
 			Zotero.HTTP.doPost("http://www.zotero.org/repo/report", postBody);
