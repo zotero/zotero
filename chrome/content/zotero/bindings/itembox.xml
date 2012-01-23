@@ -1260,21 +1260,30 @@
 						case 'dateSent':
 						case 'dateDue':
 						case 'accepted':
+							Zotero.debug('============');
+							Zotero.debug(fieldName);
+							Zotero.debug(valueText);
 							if (valueText) {
 								var date = Zotero.Date.sqlToDate(valueText, true);
+								Zotero.debug(date + '');
 								if (date) {
 									// If no time, interpret as local, not UTC
 									if (Zotero.Date.isSQLDate(valueText)) {
+										Zotero.debug('=');
 										date = Zotero.Date.sqlToDate(valueText);
+										Zotero.debug(date + '');
 										valueText = date.toLocaleDateString();
 									}
 									else {
+										Zotero.debug('-');
 										valueText = date.toLocaleString();
 									}
 								}
 								else {
 									valueText = '';
 								}
+								Zotero.debug('==');
+								Zotero.debug(valueText);
 							}
 							break;
 					}
@@ -1859,12 +1868,6 @@
 						}
 						
 						this._modifyField(fieldName, value, this.saveOnEdit);
-						
-						if (fieldName == 'accessDate') {
-							Zotero.debug('========');
-							Zotero.debug(value);
-							Zotero.debug(this.item.getField(fieldName));
-						}
 						
 						elem = this.createValueElement(
 							this.item.getField(fieldName),
