@@ -319,6 +319,9 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 				}
 			}
 			
+			var leftMarginDivs = xml..div.(@class == "csl-left-margin");
+			var clearEntries = leftMarginDivs.length() > 0;
+			
 			// csl-entry
 			var divs = xml..div.(@class == "csl-entry");
 			var num = divs.length();
@@ -326,6 +329,10 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 			for each(var div in divs) {
 				var first = i == 0;
 				var last = i == num - 1;
+				
+				if (clearEntries) {
+					div.@style += "clear: left; ";
+				}
 				
 				if(entrySpacing) {
 					if(!last) {
@@ -341,7 +348,7 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 			var rightPadding = .5;
 			
 			// div.csl-left-margin
-			for each(var div in xml..div.(@class == "csl-left-margin")) {
+			for each(var div in leftMarginDivs) {
 				div.@style = "float: left; padding-right: " + rightPadding + "em;";
 				
 				// Right-align the labels if aligning second line, since it looks
