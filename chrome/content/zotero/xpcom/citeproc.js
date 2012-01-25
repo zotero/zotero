@@ -1989,7 +1989,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.267";
+    this.processor_version = "1.0.268";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -11145,8 +11145,8 @@ CSL.Registry.NameReg = function (state) {
         if ("undefined" === typeof this.namereg[pkey] || "undefined" === typeof this.namereg[pkey].ikey[ikey]) {
             return param;
         }
-        if (gdropt_orig === "by-cite" && param < request_base) {
-            param = request_base;
+        if (gdropt_orig === "by-cite" && param <= request_base) {
+            return request_base;
         }
         if (!dagopt) {
             return param;
