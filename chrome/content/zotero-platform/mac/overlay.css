@@ -137,8 +137,13 @@
 
 #zotero-view-tabbox > tabs > tab > hbox .tab-text {
 	font: menu;
-	margin: 2px 6px 2px 7px !important;
+	margin: 2px 6px 2px 8px !important;
 	text-shadow: 0 1px rgba(255, 255, 255, .4);
+}
+
+/* This seems to be necessary to center the tabs. Not sure why. */
+#zotero-view-tabbox > tabs > tab:last-of-type > hbox .tab-text {
+	margin: 2px 8px 2px 8px !important;
 }
 
 #zotero-view-tabbox > tabs > tab[selected=true] > hbox .tab-text {
