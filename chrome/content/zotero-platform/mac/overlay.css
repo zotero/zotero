@@ -112,25 +112,52 @@
 }
 
 #zotero-view-tabbox > tabs {
-  -moz-appearance: -moz-mac-unified-toolbar; 
-  padding: 2px;
+	-moz-appearance: toolbar; 
+	padding: 4px 0 4px 0;
+}
+
+#zotero-view-tabbox > tabs > tab > hbox {
+	padding: 0;
 }
 
 #zotero-view-tabbox > tabs > tab > hbox > .tab-icon {
 	display: none;
 }
 
+#zotero-view-tabbox > tabs > tab {
+	-moz-box-orient: vertical;
+	-moz-box-align: center;
+	-moz-appearance: toolbarbutton;
+	-moz-user-focus: none;
+	text-align: center;
+	margin: 0;
+	padding: 0 1px;
+	height: 22px;
+}
+
 #zotero-view-tabbox > tabs > tab > hbox .tab-text {
+	font: menu;
+	margin: 2px 6px 2px 7px !important;
+	text-shadow: 0 1px rgba(255, 255, 255, .4);
+}
+
+#zotero-view-tabbox > tabs > tab[selected=true] > hbox .tab-text {
+	color: #FFF !important;
+	text-shadow: rgba(0, 0, 0, 0.4) 0 1px;
+}
+
+/** RULES FOR FX 3.6 **/
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab > hbox .tab-text {
   text-shadow: rgba(255, 255, 255, 0.4) 0 1px !important;
   font-size: 11px;
   font-weight: bold;
 }
-#zotero-view-tabbox > tabs > tab:active:hover > hbox > .tab-text,
-#zotero-view-tabbox > tabs > tab[selected=true] > hbox > .tab-text {
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab:active:hover > hbox > .tab-text,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab[selected=true] > hbox > .tab-text {
   text-shadow: none !important;
 }
 
-#zotero-view-tabbox > tabs > tab {
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab {
   -moz-box-orient: vertical;
   -moz-box-align: center;
   -moz-appearance: none;
@@ -142,32 +169,21 @@
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle.png") 0 4 0 5 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > tab:active:hover {
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab:active:hover {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-down.png") 0 4 0 5 repeat stretch;
   text-shadow: none !important;
 }
 
-#zotero-view-tabbox > tabs > tab[selected=true] {
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab[selected=true] {
   color: #FFF !important;
   text-shadow: rgba(0, 0, 0, 0.4) 0 1px;
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-selected.png") 0 4 0 5 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > tab[selected=true]:active:hover {
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab[selected=true]:active:hover {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-selected-down.png") 0 4 0 5 repeat stretch;
 }
 
-#zotero-view-tabbox:-moz-window-inactive > tabs > * {
-  color: #7C7C7C !important;
-  -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-inactive.png") 0 4 0 5 repeat stretch;
-}
-
-#zotero-view-tabbox:-moz-window-inactive > tabs > tab[selected=true] {
-  color: #FFF !important;
-  -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-selected-inactive.png") 0 4 0 5 repeat stretch;
-}
-
-/* Since Fx < 4 doesn't recognize the -moz-window-inactive pseudoclass as valid, these have to be separate (duplicate) rules to be parsed */
 :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > * {
   color: #7C7C7C !important;
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-inactive.png") 0 4 0 5 repeat stretch;
@@ -178,57 +194,41 @@
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-middle-selected-inactive.png") 0 4 0 5 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > :first-child,
-#zotero-view-tabbox > tabs > [first-visible],
-#zotero-view-tabbox > tabs[chromedir=rtl] > :last-child,
-#zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > :first-child,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > [first-visible],
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > :last-child,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
   border-width: 0 4px 0 6px;
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left.png") 0 4 0 6 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > :first-child:active:hover,
-#zotero-view-tabbox > tabs > [first-visible]:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > :last-child:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible]:active:hover {
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > :first-child:active:hover,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > [first-visible]:active:hover,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > :last-child:active:hover,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible]:active:hover {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-down.png") 0 4 0 6 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > tab:first-child[selected=true],
-#zotero-view-tabbox > tabs > tab[first-visible][selected=true],
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true],
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true] {
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab:first-child[selected=true],
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab[first-visible][selected=true],
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true],
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-selected.png") 0 4 0 6 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > tab:first-child[selected=true]:active:hover,
-#zotero-view-tabbox > tabs > tab[first-visible][selected=true]:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true]:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true]:active:hover {
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab:first-child[selected=true]:active:hover,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab[first-visible][selected=true]:active:hover,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:last-child[selected=true]:active:hover,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[last-visible][selected=true]:active:hover {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-selected-down.png") 0 4 0 6 repeat stretch;
 }
 
-#zotero-view-tabbox:-moz-window-inactive > tabs > :first-child,
-#zotero-view-tabbox:-moz-window-inactive > tabs > [first-visible],
-#zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > :last-child,
-#zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > [last-visible] {
-  -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-inactive.png") 0 4 0 6 repeat stretch;
-}
-
-/* Since Fx4 doesn't recognize the -moz-window-inactive pseudoclass as valid, these have to be separate (duplicate) rules to be parsed */
-
-:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > :first-child,
-:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > [first-visible],
-:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > :last-child,
-:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
+#zotero-pane:not([ignoreActiveAttribute]) :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > :first-child,
+#zotero-pane:not([ignoreActiveAttribute]) :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > [first-visible],
+#zotero-pane:not([ignoreActiveAttribute]) :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > :last-child,
+#zotero-pane:not([ignoreActiveAttribute]) :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > [last-visible] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-inactive.png") 0 4 0 6 repeat stretch;
 }  
-
-#zotero-view-tabbox:-moz-window-inactive > tabs > tab:first-child[selected=true],
-#zotero-view-tabbox:-moz-window-inactive > tabs > tab[first-visible][selected=true],
-#zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > tab:last-child[selected=true],
-#zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > tab[last-visible][selected=true] {
-  -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-selected-inactive.png") 0 4 0 6 repeat stretch;
-}
 
 :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab:first-child[selected=true],
 :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab[first-visible][selected=true],
@@ -237,46 +237,39 @@
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-left-selected-inactive.png") 0 4 0 6 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > :last-child,
-#zotero-view-tabbox > tabs > [last-visible],
-#zotero-view-tabbox > tabs[chromedir=rtl] > :first-child,
-#zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible] {
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > :last-child,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > [last-visible],
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > :first-child,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible] {
   border-width: 0 6px 0 5px;
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right.png") 0 6 0 5 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > :last-child:active:hover,
-#zotero-view-tabbox > tabs > [last-visible]:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > :first-child:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible]:active:hover {
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > :last-child:active:hover,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > [last-visible]:active:hover,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > :first-child:active:hover,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible]:active:hover {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-down.png") 0 6 0 5 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > tab:last-child[selected=true],
-#zotero-view-tabbox > tabs > tab[last-visible][selected=true],
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true],
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true] {
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab:last-child[selected=true],
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab[last-visible][selected=true],
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true],
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-selected.png") 0 6 0 5 repeat stretch;
 }
 
-#zotero-view-tabbox > tabs > tab:last-child[selected=true]:active:hover,
-#zotero-view-tabbox > tabs > tab[last-visible][selected=true]:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true]:active:hover,
-#zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true]:active:hover {
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab:last-child[selected=true]:active:hover,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab[last-visible][selected=true]:active:hover,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true]:active:hover,
+#zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true]:active:hover {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-selected-down.png") 0 6 0 5 repeat stretch;
 }
 
-#zotero-view-tabbox:-moz-window-inactive > tabs > :last-child,
-#zotero-view-tabbox:-moz-window-inactive > tabs > [last-visible],
-#zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > :first-child,
-#zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > [first-visible] {
-  -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-inactive.png") 0 6 0 5 repeat stretch;
-}
-
-:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > :last-child,
-:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > [last-visible],
-:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > :first-child,
-:root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible] {
+#zotero-pane:not([ignoreActiveAttribute]) :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > :last-child,
+#zotero-pane:not([ignoreActiveAttribute]) :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > [last-visible],
+#zotero-pane:not([ignoreActiveAttribute]) :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > :first-child,
+#zotero-pane:not([ignoreActiveAttribute]) :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > [first-visible] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-inactive.png") 0 6 0 5 repeat stretch;
 }
 
@@ -286,12 +279,14 @@
 #zotero-view-tabbox:-moz-window-inactive > tabs[chromedir=rtl] > tab[first-visible][selected=true] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-selected-inactive.png") 0 6 0 5 repeat stretch;
 }
+
 :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab:last-child[selected=true],
 :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs > tab[last-visible][selected=true],
 :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab:first-child[selected=true],
 :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) #zotero-view-tabbox > tabs[chromedir=rtl] > tab[first-visible][selected=true] {
   -moz-border-image: url("chrome://zotero/skin/mac/viewbutton-right-selected-inactive.png") 0 6 0 5 repeat stretch;
 }
+/** END RULES FOR FX 3.6 **/
 
 #zotero-collections-tree {
 	-moz-appearance: none;
