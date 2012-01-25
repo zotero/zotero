@@ -112,11 +112,11 @@
 }
 
 #zotero-view-tabbox > tabs {
-	background: -moz-linear-gradient(top, #f2f2f2, #cccccc);
+	background: -moz-linear-gradient(top, #ffffff, #e0e0e0);
 	border-style: solid;
 	border-width: 0 0 1px 0;
 	border-color: #5e5e5e;
-	padding: 2px 0 2px 0;
+	padding: 5px 0 4px 0;
 }
 
 #zotero-view-tabbox > tabs > tab > hbox {
@@ -134,7 +134,7 @@
 	-moz-user-focus: none;
 	text-align: center;
 	margin: 0;
-	padding: 1px 1px;
+	padding: 2px 1px;
 }
 
 #zotero-pane[ignoreActiveAttribute] #zotero-view-tabbox > tabs > tab > hbox .tab-text {
