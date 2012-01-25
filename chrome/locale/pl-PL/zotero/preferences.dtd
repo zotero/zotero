@@ -106,7 +106,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors "Procesory tekstu">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Brak aktualnie zainstalowanych wtyczek procesorów tekstu.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Pobierz wtyczki procesorów tekstu...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Zarządzanie stylami">

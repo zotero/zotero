@@ -106,7 +106,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors "Текстовые редакторы">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Плагины для текстовых редакторов не установлены.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Скачать плагины для текстовых редакторов…">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Диспетчер стилей">
