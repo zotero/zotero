@@ -115,9 +115,9 @@ const CSL_TYPE_MAPPINGS = {
 	'statute':"bill",				// ??
 	'email':"personal_communication",
 	'map':"map",
-	'blogPost':"webpage",
+	'blogPost':"post-weblog",
 	'instantMessage':"personal_communication",
-	'forumPost':"webpage",
+	'forumPost':"post",
 	'audioRecording':"song",		// ??
 	'presentation':"speech",
 	'videoRecording':"motion_picture",
