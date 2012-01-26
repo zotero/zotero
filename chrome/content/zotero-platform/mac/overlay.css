@@ -130,19 +130,19 @@
 	-moz-user-focus: none;
 	text-align: center;
 	margin: 0;
-	padding: 2px 1px;
+	padding: 3px 1px 3px 1px;
 }
 
 #zotero-pane[ignoreActiveAttribute] #zotero-view-tabbox > tabs > tab > hbox .tab-text {
 	font-size: 11px;
 	font-weight: bold;
-	margin: 2px 6px 2px 8px !important;
+	margin: 2px 7px 2px 9px !important;
 	text-shadow: 0 1px rgba(255, 255, 255, .4);
 }
 
 /* This seems to be necessary to center the tabs. Not sure why. */
 #zotero-pane[ignoreActiveAttribute] #zotero-view-tabbox > tabs > tab:last-of-type > hbox .tab-text {
-	margin: 2px 8px 2px 8px !important;
+	margin: 2px 9px 2px 9px !important;
 }
 
 #zotero-pane[ignoreActiveAttribute] #zotero-view-tabbox > tabs > tab[selected=true] > hbox .tab-text {
