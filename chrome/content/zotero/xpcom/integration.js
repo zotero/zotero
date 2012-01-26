@@ -732,7 +732,7 @@ Zotero.Integration.Document.prototype.editBibliography = function(callback) {
 			}
 			
 			fieldGetter.updateSession(function() {
-				me._session.editBibliography(this._doc, function() {
+				me._session.editBibliography(me._doc, function() {
 					me._doc.activate();
 					fieldGetter.updateDocument(FORCE_CITATIONS_FALSE, true, false, function() {
 						Zotero.Integration.complete(me._doc);
