@@ -48,10 +48,6 @@
 	padding-right: .7em;
 }
 
-#zotero-pane {
-	padding: 0;
-}
-
 #zotero-toolbar {
 	-moz-appearance: none !important;
 	background-image: -moz-linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));

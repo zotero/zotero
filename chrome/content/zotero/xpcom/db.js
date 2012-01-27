@@ -23,6 +23,11 @@
     ***** END LICENSE BLOCK *****
 */
 
+// Exclusive locking mode (default) prevents access to Zotero database while Firefox is open.
+// Normal mode is more convenient for development, but risks database corruption, particularly if
+// the same database is accessed simultaneously by multiple Zotero instances.
+const DB_LOCK_EXCLUSIVE = true;
+
 Zotero.DBConnection = function(dbName) {
 	if (!dbName) {
 		throw ('DB name not provided in Zotero.DBConnection()');
@@ -869,10 +874,9 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 	
 	// Turn off DB locking before backup and reenable after, since otherwise
 	// the lock is lost
-	var dbLockExclusive = Zotero.Prefs.get('dbLockExclusive');
 	var hadDummyStatement = !!this._dummyStatement;
 	try {
-		if (dbLockExclusive) {
+		if (DB_LOCK_EXCLUSIVE) {
 			this.query("PRAGMA locking_mode=NORMAL");
 		}
 		if (hadDummyStatement) {
@@ -889,7 +893,7 @@ Zotero.DBConnection.prototype.backupDatabase = function (suffix) {
 		return false;
 	}
 	finally {
-		if (dbLockExclusive) {
+		if (DB_LOCK_EXCLUSIVE) {
 			this.query("PRAGMA locking_mode=EXCLUSIVE");
 		}
 		if (hadDummyStatement) {
@@ -1183,9 +1187,7 @@ Zotero.DBConnection.prototype._getDBConnection = function () {
 		throw (e);
 	}
 	
-	// Exclusive locking mode (default) prevents access to Zotero database
-	// while Firefox is open -- normal mode is more convenient for development
-	if (Zotero.Prefs.get('dbLockExclusive')) {
+	if (DB_LOCK_EXCLUSIVE) {
 		Zotero.DB.query("PRAGMA locking_mode=EXCLUSIVE");
 	}
 	else {

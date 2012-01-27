@@ -40,9 +40,10 @@
 	onkeypress="Zotero_QuickFormat.onKeyPress(event)">
 	
 	<script src="../include.js"/>
-	<script src="quickFormat.js"/>
+	<script src="windowDraggingUtils.js" type="text/javascript;version=1.8"/>
+	<script src="quickFormat.js" type="text/javascript;version=1.8"/>
 	
-	<windowdragbox orient="horizontal" id="quick-format-entry"> 
+	<box orient="horizontal" id="quick-format-entry"> 
 		<deck id="quick-format-deck" selectedIndex="0" flex="1">
 			<hbox id="quick-format-search" flex="1" align="start">
 				<hbox flex="1">
@@ -64,7 +65,7 @@
 			</hbox>
 			<progressmeter id="quick-format-progress-meter" mode="undetermined" value="0" flex="1"/>
 		</deck>
-	</windowdragbox>
+	</box>
 	<panel id="quick-format-reference-panel" noautofocus="true" norestorefocus="true" noautohide="true" height="0">
 		<richlistbox id="quick-format-reference-list" flex="1"/>
 	</panel>

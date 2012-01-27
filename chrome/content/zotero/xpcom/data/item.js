@@ -2552,7 +2552,8 @@ Zotero.Item.prototype.getNotes = function(includeTrashed) {
 	
 	if (Zotero.Prefs.get('sortNotesChronologically')) {
 		sql += " ORDER BY dateAdded";
-		return Zotero.DB.columnQuery(sql, this.id);
+		var results = Zotero.DB.columnQuery(sql, this.id);
+		return results ? results : [];
 	}
 	
 	var notes = Zotero.DB.query(sql, this.id);
@@ -3391,7 +3392,8 @@ Zotero.Item.prototype.getAttachments = function(includeTrashed) {
 		
 	if (Zotero.Prefs.get('sortAttachmentsChronologically')) {
 		sql +=  " ORDER BY dateAdded";
-		return Zotero.DB.columnQuery(sql, this.id);
+		var results = Zotero.DB.columnQuery(sql, this.id);
+		return results ? results : [];
 	}
 	
 	var attachments = Zotero.DB.query(sql, this.id);

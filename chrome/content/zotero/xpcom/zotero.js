@@ -35,7 +35,7 @@ const ZOTERO_CONFIG = {
 	API_URL: 'https://api.zotero.org/',
 	PREF_BRANCH: 'extensions.zotero.',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "3.0rc1"
+	VERSION: "3.0rc1.SOURCE"
 };
 
 /*
@@ -257,8 +257,18 @@ const ZOTERO_CONFIG = {
 		
 		// Locale
 		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-						.getService(Components.interfaces.nsIPrefService);
-		this.locale = prefs.getBranch("general.useragent.").getCharPref("locale");
+						.getService(Components.interfaces.nsIPrefService),
+			uaPrefs = prefs.getBranch("general.useragent.");
+		try {
+			this.locale = uaPrefs.getComplexValue("locale", Components.interfaces.nsIPrefLocalizedString);
+		} catch (e) {}
+		
+		if(this.locale) {
+			this.locale = this.locale.toString();
+		} else {
+			this.locale = uaPrefs.getCharPref("locale");
+		}
+		
 		if (this.locale.length == 2) {
 			this.locale = this.locale + '-' + this.locale.toUpperCase();
 		}

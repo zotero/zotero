@@ -106,7 +106,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors "معالجات النصوص">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "الوظائف الاضافية لمعالجات النصوص غير مثبته حالياً">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "أحصل على الوظائف الاضافية لمعالجات النصوص...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "مدير الانماط">
@@ -167,6 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "اظهار خطائص ترميز الحروف عند التصدير">
 
 <!ENTITY zotero.preferences.dataDir "مكان تخزين البيانات">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
 <!ENTITY zotero.preferences.dataDir.custom "تخصيص:">
 <!ENTITY zotero.preferences.dataDir.choose "اختر...">
 <!ENTITY zotero.preferences.dataDir.reveal "عرض مجلد البيانات">

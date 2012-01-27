@@ -57,6 +57,16 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
+    STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:pt\.|ch\.|subch\.|sec\.|art\.|para\.))/g,
+    STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:pt\.|ch\.|subch\.|sec\.|art\.|para\.))/,
+    STATUTE_SUBDIV_STRINGS: {
+        "pt.": "part",
+        "ch.": "chapter",
+        "subch.": "subchapter",
+        "sec.": "section",
+        "art.": "article",
+        "para.": "paragraph"
+    },
     NestedBraces: [
         ["(", "["],
         [")", "]"]
@@ -116,12 +126,11 @@ var CSL = {
     MARK_TRAILING_NAMES: true,
     POSITION_TEST_VARS: ["position", "first-reference-note-number", "near-note"],
     AREAS: ["citation", "citation_sort", "bibliography", "bibliography_sort"],
-    MULTI_FIELDS: ["publisher", "publisher-place", "event-place", "title", "container-title", "collection-title", "authority","edition","genre","title-short"],
+    MULTI_FIELDS: ["event", "publisher", "publisher-place", "event-place", "title", "container-title", "collection-title", "authority","edition","genre","title-short"],
     CITE_FIELDS: ["first-reference-note-number", "locator", "locator-revision"],
     MINIMAL_NAME_FIELDS: ["literal", "family"],
     SWAPPING_PUNCTUATION: [".", "!", "?", ":",","],
     TERMINAL_PUNCTUATION: [":", ".", ";", "!", "?", " "],
-    SPLICE_PUNCTUATION: [".", "!", "?", ":", ";", ","],
     NONE: 0,
     NUMERIC: 1,
     POSITION: 2,
@@ -1980,7 +1989,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.260";
+    this.processor_version = "1.0.268";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2537,6 +2546,7 @@ CSL.Engine.Opt = function () {
     this.development_extensions.raw_date_parsing = true;
     this.development_extensions.clean_up_csl_flaws = true;
     this.development_extensions.flip_parentheses_to_braces = true;
+    this.development_extensions.parse_section_variable = true;
     this.gender = {};
 	this['cite-lang-prefs'] = {
 		persons:['orig'],
@@ -2611,6 +2621,7 @@ CSL.Engine.Build = function () {
     this.root = "citation";
     this.extension = "";
     this.substitute_level = new CSL.Stack(0, CSL.LITERAL);
+    this.names_level = 0;
     this.render_nesting_level = 0;
     this.render_seen = false;
 };
@@ -3721,6 +3732,8 @@ CSL.getCitationCluster = function (inputList, citationID) {
             var tmpstr = composite.pop();
             if (tmpstr && tmpstr.slice(0, 1) === ",") {
                 objects.push(tmpstr);
+            } else if ("string" == typeof objects.slice(-1)[0] && objects.slice(-1)[0].slice(-1) === ",") {
+                objects.push(" " + tmpstr)
             } else if (tmpstr) {
                 objects.push(txt_esc(this.tmp.splice_delimiter) + tmpstr);
             }
@@ -6936,6 +6949,7 @@ CSL.Node.names = {
         }
         if (this.tokentype === CSL.START) {
             state.build.names_flag = true;
+            state.build.names_level += 1;
             func = function (state, Item, item) {
                 state.tmp.can_substitute.push(true);
                 state.parallel.StartVariable("names");
@@ -6947,8 +6961,11 @@ CSL.Node.names = {
             for (var i = 0, ilen = 3; i < ilen; i += 1) {
                 var key = ["family", "given", "et-al"][i];
                 this[key] = state.build[key];
-                state.build[key] = undefined;
+                if (state.build.names_level === 1) {
+                    state.build[key] = undefined;
+                }
             }
+            state.build.names_level += -1;
             this.label = state.build.name_label;
             state.build.name_label = undefined;
             var mywith = "with";
@@ -7360,6 +7377,42 @@ CSL.Node.text = {
                                 var value = state.transform.abbrevs["default"].hereinafter[hereinafter_key];
                                 if (value) {
                                     state.tmp.group_context.value()[2] = true;
+                                    state.output.append(value, this);
+                                }
+                            };
+                        } else if (this.variables_real[0] === "section") {
+                            func = function (state, Item) {
+                                var value;
+                                value = state.getVariable(Item, this.variables[0], form);
+                                if (value) {
+                                    if ((Item.type === "bill" || Item.type === "legislation")
+                                       && state.opt.development_extensions.parse_section_variable) {
+                                        var m = value.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
+                                        if (m) {
+                                            var splt = value.split(CSL.STATUTE_SUBDIV_PLAIN_REGEX);
+                                            var lst = [];
+                                            if (!lst[0]) {
+                                                var parsed = false;
+                                                for (var i=1, ilen=splt.length; i < ilen; i += 1) {
+                                                    var subdiv = m[i - 1].replace(/^\s*/, "");
+                                                    subdiv = CSL.STATUTE_SUBDIV_STRINGS[subdiv];
+                                                    var plural = false;
+                                                    if (splt[i].match(/(?:&|, | and )/)) {
+                                                        plural = true;
+                                                    }
+                                                    subdiv = state.getTerm(subdiv, "symbol", plural);
+                                                    if (subdiv) {
+                                                        parsed = true;
+                                                    }
+                                                    lst.push(subdiv);
+                                                    lst.push(splt[i].replace(/\s*,*\s*$/, "").replace(/^\s*,*\s*/, ""));
+                                                }
+                                                if (parsed) {
+                                                    value = lst.join(" ");
+                                                }
+                                            }
+                                        }
+                                    }
                                     state.output.append(value, this);
                                 }
                             };
@@ -8346,7 +8399,7 @@ CSL.Transform = function (state) {
         if (["publisher", "authority"].indexOf(myabbrev_family) > -1) {
             myabbrev_family = "institution-part";
         }
-        if (["genre"].indexOf(myabbrev_family) > -1) {
+        if (["genre", "event"].indexOf(myabbrev_family) > -1) {
             myabbrev_family = "title";
         }
         if (["title-short"].indexOf(myabbrev_family) > -1) {
@@ -10100,7 +10153,6 @@ CSL.Util.FlipFlopper = function (state) {
 };
 CSL.Util.FlipFlopper.prototype.init = function (str, blob) {
     this.txt_esc = CSL.getSafeEscape(this.state);
-    str = this._normalizeString(str);
     if (!blob) {
         this.strs = this.getSplitStrings(str);
         this.blob = new CSL.Blob();
@@ -10112,14 +10164,25 @@ CSL.Util.FlipFlopper.prototype.init = function (str, blob) {
     this.blobstack = new CSL.Stack(this.blob);
 };
 CSL.Util.FlipFlopper.prototype._normalizeString = function (str) {
-    for (var i = 0, ilen = 2; i < ilen; i += 1) {
-        str = str.replace(this.quotechars[i + 2], this.quotechars[0]);
-        str = str.replace(this.quotechars[i + 4], this.quotechars[1]);
+    if (str.indexOf(this.quotechars[0]) > -1) {
+        for (var i = 0, ilen = 2; i < ilen; i += 1) {
+            if (this.quotechars[i + 2]) {
+                str = str.replace(this.quotechars[i + 2], this.quotechars[0]);
+            }
+        }
+    }
+    if (str.indexOf(this.quotechars[1]) > -1) {
+        for (var i = 0, ilen = 2; i < ilen; i += 1) {
+            if (this.quotechars[i + 4]) {
+                str = str.replace(this.quotechars[i + 4], this.quotechars[1]);
+            }
+        }
     }
     return str;
 };
 CSL.Util.FlipFlopper.prototype.getSplitStrings = function (str) {
     var strs, pos, len, newstr, head, tail, expected_closers, expected_openers, expected_flips, tagstack, badTagStack, posA, sameAsOpen, openRev, flipRev, tag, ibeenrunned, posB, wanted_closer, posC, sep, resplice, params, lenA, lenB, lenC, badTagPos, mx, myret;
+    str = this._normalizeString(str);
     mx = str.match(this.allTagsRexMatch);
     strs = str.split(this.allTagsRexSplit);
     myret = [strs[0]];
@@ -11082,8 +11145,8 @@ CSL.Registry.NameReg = function (state) {
         if ("undefined" === typeof this.namereg[pkey] || "undefined" === typeof this.namereg[pkey].ikey[ikey]) {
             return param;
         }
-        if (gdropt_orig === "by-cite" && param < request_base) {
-            param = request_base;
+        if (gdropt_orig === "by-cite" && param <= request_base) {
+            return request_base;
         }
         if (!dagopt) {
             return param;
@@ -11382,6 +11445,7 @@ CSL.Disambiguation.prototype.disNames = function (ismax) {
         this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, this.betterbase);
         this.lists[this.listpos] = [this.base, this.partners];
     } else if (this.clashes[1] < this.clashes[0]) {
+        this.betterbase = CSL.cloneAmbigConfig(this.base);
         this.lists[this.listpos] = [this.base, this.partners];
         this.lists.push([this.base, this.nonpartners]);
     } else {
@@ -11398,19 +11462,22 @@ CSL.Disambiguation.prototype.disNames = function (ismax) {
 };
 CSL.Disambiguation.prototype.disExtraText = function () {
     var pos, len, mybase;
-    if (this.clashes[1] === 0) {
-        mybase = CSL.cloneAmbigConfig(this.base);
-        mybase.year_suffix = false;
+    mybase = CSL.cloneAmbigConfig(this.base);
+    mybase.year_suffix = false;
+    if (this.clashes[1] === 0 || this.clashes[1] < this.clashes[0]) {
         this.state.registry.registerAmbigToken(this.akey, "" + this.partners[0].id, mybase);
-        if (this.nonpartners.length === 1) {
-            this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[0].id, mybase);
-            this.lists[this.listpos] = [this.base,[]];
-        } else {
-            this.lists[this.listpos] = [this.base, this.nonpartners];
+        for (var i=0, ilen=this.partners.length; i < ilen; i += 1) {
+            this.state.registry.registerAmbigToken(this.akey, "" + this.partners[i].id, mybase);
+        }
+        for (var i=0, ilen=this.nonpartners.length; i < ilen; i += 1) {
+            this.state.registry.registerAmbigToken(this.akey, "" + this.nonpartners[i].id, mybase);
         }
     } else {
-        this.base.disambiguate = false;
+        for (var i=0, ilen=this.partners.length; i < ilen; i += 1) {
+            this.state.registry.registerAmbigToken(this.akey, "" + this.partners[i].id, this.betterbase);
+        }
     }
+    this.lists[this.listpos] = [this.base, []];
 };
 CSL.Disambiguation.prototype.disYears = function () {
     var pos, len, tokens, token, item;
@@ -11437,7 +11504,7 @@ CSL.Disambiguation.prototype.disYears = function () {
 };
 CSL.Disambiguation.prototype.incrementDisambig = function () {
     var val, maxed;
-    maxed = false;
+    var maxed = false;
     if ("disNames" === this.modes[this.modeindex]) {
         var increment_name = false;
         var increment_nameset = false;
@@ -11478,19 +11545,23 @@ CSL.Disambiguation.prototype.incrementDisambig = function () {
                     }
                 } else {
                     maxed = true;
+                    this.base = CSL.cloneAmbigConfig(this.betterbase);
                     if (this.modeindex < this.modes.length - 1) {
                         this.modeindex += 1;
                     }
                 }
             }
+        } else if (increment_name) {
+            maxed = true;
+            if (this.modeindex < this.modes.length - 1) {
+                this.modeindex += 1;
+            }
         }
     }
-    if (!maxed && "disExtraText" === this.modes[this.modeindex]) {
+    if ("disExtraText" === this.modes[this.modeindex]) {
         this.base.disambiguate = true;
-        maxed = true;
     }
-    if (!maxed && "disYears" === this.modes[this.modeindex]) {
-        maxed = true;
+    if ("disYears" === this.modes[this.modeindex]) {
     }
     return maxed;
 };

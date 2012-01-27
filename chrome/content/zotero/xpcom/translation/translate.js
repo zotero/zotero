@@ -288,13 +288,17 @@ Zotero.Translate.Sandbox = {
 				return translation.getTranslators();
 			};
 			
-			var doneHandlerSet = false;
+			var errorHandlerSet = false, doneHandlerSet = false;
 			safeTranslator.translate = function() {
 				translate.incrementAsyncProcesses("safeTranslator#translate()");
 				setDefaultHandlers(translate, translation);
 				if(!doneHandlerSet) {
 					doneHandlerSet = true;
 					translation.setHandler("done", function() { translate.decrementAsyncProcesses("safeTranslator#translate()") });
+				}
+				if(!errorHandlerSet) {
+					errorHandlerSet = true;
+					translation.setHandler("error", function(obj, error) { translate.complete(false, error) });
 				}
 				return translation.translate(false);
 			};
@@ -1205,8 +1209,9 @@ Zotero.Translate.Base.prototype = {
 		Zotero.debug("Translate: Parsing code for "+translator.label, 4);
 		
 		try {
-			this._sandboxManager.eval("var exports = {}, translatorInfo = "+translator.code,
-				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix, "exports"],
+			this._sandboxManager.eval("var exports = {}, ZOTERO_TRANSLATOR_INFO = "+translator.code,
+				["detect"+this._entryFunctionSuffix, "do"+this._entryFunctionSuffix, "exports",
+					"ZOTERO_TRANSLATOR_INFO"],
 				(translator.file ? translator.file.path : translator.label));
 		} catch(e) {
 			this.complete(false, e);
@@ -1506,9 +1511,10 @@ Zotero.Translate.Web.prototype.complete = function(returnValue, error) {
 			}
 		}
 		
+		var translator = this.translator[0];
 		Zotero.getSystemInfo(function(info) {
-			var postBody = "id=" + encodeURIComponent(this.translator[0].translatorID) +
-						   "&lastUpdated=" + encodeURIComponent(this.translator[0].lastUpdated) +
+			var postBody = "id=" + encodeURIComponent(translator.translatorID) +
+						   "&lastUpdated=" + encodeURIComponent(translator.lastUpdated) +
 						   "&diagnostic=" + encodeURIComponent(info) +
 						   "&errorData=" + encodeURIComponent(errorString);
 			Zotero.HTTP.doPost("http://www.zotero.org/repo/report", postBody);
@@ -1598,7 +1604,8 @@ Zotero.Translate.Import.prototype._loadTranslator = function(translator, callbac
  * Prepare translator IO
  */
 Zotero.Translate.Import.prototype._loadTranslatorPrepareIO = function(translator, callback) {
-	var dataMode = (translator ? translator : this._potentialTranslators[0]).configOptions["dataMode"];
+	var configOptions = this._sandboxManager.sandbox.ZOTERO_TRANSLATOR_INFO.configOptions;
+	var dataMode = configOptions ? configOptions["dataMode"] : "";
 	
 	var me = this;
 	var initCallback = function(status, err) {

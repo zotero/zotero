@@ -24,6 +24,7 @@
 */
 
 var Zotero_QuickFormat = new function () {
+	const pixelRe = /^([0-9]+)px$/
 	var initialized, io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, keepSorted, 
 		showEditor, referencePanel, referenceBox, referenceHeight = 0, separatorHeight = 0,
 		currentLocator, currentLocatorLabel, currentSearchTime, dragging, panel, 
@@ -47,6 +48,8 @@ var Zotero_QuickFormat = new function () {
 			if(Zotero.isMac || Zotero.isWin) {
 				document.documentElement.setAttribute("hidechrome", true);
 			}
+			
+			new WindowDraggingElement(document.getElementById("quick-format-dialog"), window);
 			
 			qfs = document.getElementById("quick-format-search");
 			qfi = document.getElementById("quick-format-iframe");
@@ -742,10 +745,18 @@ var Zotero_QuickFormat = new function () {
 			
 			if(!panelFrameHeight) {
 				panelFrameHeight = referencePanel.boxObject.height - referencePanel.clientHeight;
+				var computedStyle = window.getComputedStyle(referenceBox, null);
+				for each(var attr in ["border-top-width", "border-bottom-width"]) {
+					var val = computedStyle.getPropertyValue(attr);
+					if(val) {
+						var m = pixelRe.exec(val);
+						if(m) panelFrameHeight += parseInt(m[1], 10);
+					}
+				}
 			}
 			
 			referencePanel.sizeTo(window.outerWidth-30,
-				numReferences*referenceHeight+numSeparators*separatorHeight+2*panelFrameHeight-1);
+				numReferences*referenceHeight+numSeparators*separatorHeight+panelFrameHeight);
 			if(!panelShowing) _openReferencePanel();
 		} else if(panelShowing) {
 			referencePanel.hidePopup();

@@ -613,14 +613,33 @@ Zotero.Sync.Storage.Module.WebDAV = (function () {
 					Zotero.debug(e);
 				}
 				
-				var msg = Zotero.getString('sync.storage.error.webdav.sslCertificateError', host)
-					+ " " + Zotero.getString('sync.storage.error.webdav.loadURLForMoreInfo');
+				var msg = Zotero.getString('sync.storage.error.webdav.sslCertificateError', host);
+				// In Standalone, provide cert_override.txt instructions and a
+				// button to open the Zotero profile directory
+				if (Zotero.isStandalone) {
+					msg += "\n\n" + Zotero.getString('sync.storage.error.webdav.seeCertOverrideDocumentation');
+					var buttonText = Zotero.getString('general.openDocumentation');
+					var func = function () {
+						var zp = Zotero.getActiveZoteroPane();
+						zp.loadURI("http://www.zotero.org/support/kb/cert_override", { shiftKey: true });
+					};
+				}
+				// In Firefox display a button to load the WebDAV URL
+				else {
+					msg += "\n\n" + Zotero.getString('sync.storage.error.webdav.loadURLForMoreInfo');
+					var buttonText = Zotero.getString('sync.storage.error.webdav.loadURL');
+					var func = function () {
+						var zp = Zotero.getActiveZoteroPane();
+						zp.loadURI(channel.URI.spec, { shiftKey: true });
+					};
+				}
+				
 				var e = new Zotero.Error(
 					msg,
 					0,
 					{
 						dialogText: msg,
-						dialogButtonText: Zotero.getString('sync.storage.error.webdav.loadURL'),
+						dialogButtonText: buttonText,
 						dialogButtonCallback: function () {
 							var zp = Zotero.getActiveZoteroPane();
 							zp.loadURI(channel.URI.spec, { shiftKey: true });

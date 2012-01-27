@@ -597,7 +597,8 @@ var wpdDOMSaver = {
 		if ( !aCSStext ) return "";                            
 		
 		// search for "url" entries inside the css
-		var re = new RegExp(/ url\(([^\'\)]+)\)/);
+		// Double-quotes in regexp added by Dan S. for Zotero
+		var re = new RegExp(/ url\("?([^'")]+)"?\)/);
 		var i = 0;
 		while ( aCSStext.match(re) ) {
 			if ( ++i > 20 ) break;  // safer (we try it maximal 20 times for one stylesheet element)

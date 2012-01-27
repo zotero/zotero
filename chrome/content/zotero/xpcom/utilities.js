@@ -37,7 +37,6 @@ const CSL_NAMES_MAPPINGS = {
 	"bookAuthor":"container-author",
 	"composer":"composer",
 	"interviewer":"interviewer",
-	"inventor":"author",
 	"recipient":"recipient",
 	"seriesEditor":"collection-editor",
 	"translator":"translator"
@@ -116,9 +115,9 @@ const CSL_TYPE_MAPPINGS = {
 	'statute':"bill",				// ??
 	'email':"personal_communication",
 	'map':"map",
-	'blogPost':"webpage",
+	'blogPost':"post-weblog",
 	'instantMessage':"personal_communication",
-	'forumPost':"webpage",
+	'forumPost':"post",
 	'audioRecording':"song",		// ??
 	'presentation':"speech",
 	'videoRecording':"motion_picture",
@@ -1417,5 +1416,32 @@ Zotero.Utilities = {
 				}
 			}
 		}
+	},
+	
+	
+	/**
+	 * Get the real target URL from an intermediate URL
+	 */
+	"resolveIntermediateURL":function(url) {
+		var patterns = [
+			// Google search results
+			{
+				regexp: /^https?:\/\/(www.)?google\.(com|(com?\.)?[a-z]{2})\/url\?/,
+				variable: "url"
+			}
+		];
+		
+		for (var i=0, len=patterns.length; i<len; i++) {
+			if (!url.match(patterns[i].regexp)) {
+				continue;
+			}
+			var matches = url.match(new RegExp("&" + patterns[i].variable + "=(.+?)(&|$)"));
+			if (!matches) {
+				continue;
+			}
+			return decodeURIComponent(matches[1]);
+		}
+		
+		return url;
 	}
 }

@@ -106,7 +106,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
@@ -167,6 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
 
 <!ENTITY zotero.preferences.dataDir "저장 위치">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
 <!ENTITY zotero.preferences.dataDir.custom "사용자 지정:">
 <!ENTITY zotero.preferences.dataDir.choose "선택...">
 <!ENTITY zotero.preferences.dataDir.reveal "자료 디렉토리 표시">

@@ -9,7 +9,6 @@ pref("extensions.zotero@chnm.gmu.edu.description", "chrome://zotero/locale/zoter
 pref("extensions.zotero.useDataDir", false);
 pref("extensions.zotero.dataDir", '');
 pref("extensions.zotero.lastDataDir", '');
-pref("extensions.zotero.dbLockExclusive", true);
 pref("extensions.zotero.debug.log",false);
 pref("extensions.zotero.debug.stackTrace", false);
 pref("extensions.zotero.debug.store",false);
@@ -164,3 +163,7 @@ pref("extensions.zotero.ingester.allowedSites", "");
 // Connector
 pref("extensions.zotero.connector.repo.lastCheck.localTime", 0);
 pref("extensions.zotero.connector.repo.lastCheck.repoTime", 0);
+
+// File/URL opening executable if launch() fails
+pref("extensions.zotero.fallbackLauncher.unix", "/usr/bin/xdg-open");
+pref("extensions.zotero.fallbackLauncher.windows", "");

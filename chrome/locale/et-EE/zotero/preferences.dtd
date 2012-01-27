@@ -106,7 +106,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors "Tekstiredaktorid">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Ühtegi tekstiredaktori lisa ei ole paigaldatud.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Lisade hankimine...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stiilide haldamine">
@@ -167,6 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Näidata ekspordi puhul tähtede kodeeringut">
 
 <!ENTITY zotero.preferences.dataDir "Lao asukoht">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
 <!ENTITY zotero.preferences.dataDir.custom "Oma valik:">
 <!ENTITY zotero.preferences.dataDir.choose "Valida...">
 <!ENTITY zotero.preferences.dataDir.reveal "Andmete kataloogi näitamine">

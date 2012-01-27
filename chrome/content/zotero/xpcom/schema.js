@@ -131,9 +131,8 @@ Zotero.Schema = new function(){
 			// If upgrading userdata, make backup of database first
 			if (dbVersion < schemaVersion){
 				Zotero.DB.backupDatabase(dbVersion);
-			}
-			
-			Zotero.wait(1000);
+				Zotero.wait(1000);
+			}			
 			
 			Zotero.DB.beginTransaction();
 			
@@ -159,14 +158,14 @@ Zotero.Schema = new function(){
 				if (Zotero.DB.tableExists('customItemTypes')) {
 					this.updateCustomTables(up2);
 				}
-				Zotero.wait();
+				if(up2) Zotero.wait();
 				var up1 = _migrateUserDataSchema(dbVersion);
 				var up3 = _updateSchema('triggers');
 				// Update custom tables again in case custom fields were changed during user data migration
 				if (up1) {
 					this.updateCustomTables();
 				}
-				Zotero.wait();
+				if(up1) Zotero.wait();
 				
 				Zotero.DB.commitTransaction();
 			}
@@ -531,8 +530,8 @@ Zotero.Schema = new function(){
 					continue;
 				}
 				
-				// Delete incorrectly named files saved via repo pre-1.5b3
 				switch (file.leafName) {
+					// Delete incorrectly named files saved via repo pre-1.5b3
 					case 'ama':
 					case 'apa':
 					case 'apsa':
@@ -549,7 +548,20 @@ Zotero.Schema = new function(){
 					case 'nature':
 					case 'nlm':
 					case 'vancouver':
+					
+					// Delete renamed/obsolete files
+					case 'chicago-note.csl':
+					case 'mhra_note_without_bibliography.csl':
 						toDelete.push(file);
+						continue;
+					
+					// Be a little more careful with this one, in case someone
+					// created a custom 'aaa' style
+					case 'aaa.csl':
+						var str = Zotero.File.getContents(file, false, 300);
+						if (str.indexOf("<title>American Anthropological Association</title>") != -1) {
+							toDelete.push(file);
+						}
 						continue;
 				}
 				
@@ -1090,7 +1102,9 @@ Zotero.Schema = new function(){
 			//"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM libraries)"
 			"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM groups)",
 			
-			"SELECT COUNT(*) FROM creatorData WHERE firstName='' AND lastName=''"
+			"SELECT COUNT(*) FROM creatorData WHERE firstName='' AND lastName=''",
+			
+			"SELECT COUNT(*) FROM itemAttachments JOIN items USING (itemID) WHERE itemTypeID != 14"
 		];
 		
 		for each(var sql in queries) {

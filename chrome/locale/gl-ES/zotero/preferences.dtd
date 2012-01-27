@@ -106,7 +106,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
@@ -167,6 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Amosar opción de codificación de caracteres na exportación">
 
 <!ENTITY zotero.preferences.dataDir "Localización de almacenamento">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
 <!ENTITY zotero.preferences.dataDir.custom "Personalizado:">
 <!ENTITY zotero.preferences.dataDir.choose "Escoller...">
 <!ENTITY zotero.preferences.dataDir.reveal "Mostrar Directorio de Datos">

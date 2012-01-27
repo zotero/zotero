@@ -2132,9 +2132,16 @@ var ZoteroPane = new function()
 		// Disable some actions if user doesn't have write access
 		//
 		// Some actions are disabled via their commands in onCollectionSelected()
-		var s = [m.newSubcollection, m.editSelectedCollection, m.removeCollection, m.emptyTrash];
+		var s = [m.newSubcollection, m.editSelectedCollection, m.removeCollection];
 		if (itemGroup.isWithinGroup() && !itemGroup.editable && !itemGroup.isDuplicates() && !itemGroup.isUnfiled()) {
 			disable = disable.concat(s);
+		}
+		
+		// If within non-editable group or trash it empty, disable Empty Trash
+		if (itemGroup.isTrash()) {
+			if ((itemGroup.isWithinGroup() && !itemGroup.isWithinEditableGroup()) || !this.itemsView.rowCount) {
+				disable.push(m.emptyTrash);
+			}
 		}
 		
 		// Hide and enable all actions by default (so if they're shown they're enabled)
@@ -2669,14 +2676,7 @@ var ZoteroPane = new function()
 			
 			if (Zotero.isStandalone) {
 				if(uri.match(/^https?/)) {
-					var io = Components.classes['@mozilla.org/network/io-service;1']
-								.getService(Components.interfaces.nsIIOService);
-					var uri = io.newURI(uri, null, null);
-					var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
-								.getService(Components.interfaces.nsIExternalProtocolService)
-								.getProtocolHandlerInfo('http');
-					handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
-					handler.launchWithURI(uri, null);
+					this.launchURL(uri);
 				} else {
 					ZoteroStandalone.openInViewer(uri);
 				}
@@ -3191,6 +3191,8 @@ var ZoteroPane = new function()
 		
 		var self = this;
 		
+		url = Zotero.Utilities.resolveIntermediateURL(url);
+		
 		Zotero.MIME.getMIMETypeFromURL(url, function (mimeType, hasNativeHandler) {
 			// If native type, save using a hidden browser
 			if (hasNativeHandler) {
@@ -3393,22 +3395,7 @@ var ZoteroPane = new function()
 					this.loadURI(url, event);
 				}
 				else {
-					// Some platforms don't have nsILocalFile.launch, so we just
-					// let the Firefox external helper app window handle it
-					try {
-						file.launch();
-					}
-					catch (e) {
-						Zotero.debug("launch() not supported -- passing file to loadUrl()");
-						
-						var uri = Components.classes["@mozilla.org/network/standard-url;1"].
-									createInstance(Components.interfaces.nsIURI);
-						uri.spec = attachment.getLocalFileURL();
-						
-						var nsIEPS = Components.classes["@mozilla.org/uriloader/external-protocol-service;1"].
-										getService(Components.interfaces.nsIExternalProtocolService);
-						nsIEPS.loadUrl(uri);
-					}
+					this.launchFile(file);
 				}
 			}
 			else {
@@ -3449,6 +3436,116 @@ var ZoteroPane = new function()
 	}
 	
 	
+	/**
+	 * Launch a file, the best way we can
+	 */
+	this.launchFile = function (file) {
+		try {
+			file.launch();
+		}
+		catch (e) {
+			Zotero.debug("launch() not supported -- trying fallback executable");
+			
+			try {
+				if (Zotero.isWin) {
+					var pref = "fallbackLauncher.windows";
+				}
+				else {
+					var pref = "fallbackLauncher.unix";
+				}
+				var path = Zotero.Prefs.get(pref);
+				
+				var exec = Components.classes["@mozilla.org/file/local;1"]
+							.createInstance(Components.interfaces.nsILocalFile);
+				exec.initWithPath(path);
+				if (!exec.exists()) {
+					throw (path + " does not exist");
+				}
+				
+				var proc = Components.classes["@mozilla.org/process/util;1"]
+								.createInstance(Components.interfaces.nsIProcess);
+				proc.init(exec);
+				
+				var args = [file.path];
+				if (!Zotero.isFx36) {
+					proc.runw(true, args, args.length);
+				}
+				else {
+					proc.run(true, args, args.length);
+				}
+			}
+			catch (e) {
+				Zotero.debug(e);
+				Zotero.debug("Launching via executable failed -- passing to loadUrl()");
+				
+				// If nsILocalFile.launch() isn't available and the fallback
+				// executable doesn't exist, we just let the Firefox external
+				// helper app window handle it
+				var nsIFPH = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+								.getService(Components.interfaces.nsIFileProtocolHandler);
+				var uri = nsIFPH.newFileURI(file);
+				
+				var nsIEPS = Components.classes["@mozilla.org/uriloader/external-protocol-service;1"].
+								getService(Components.interfaces.nsIExternalProtocolService);
+				nsIEPS.loadUrl(uri);
+			}
+		}
+	}
+	
+	
+	/**
+	 * Launch an HTTP URL externally, the best way we can
+	 *
+	 * Used only by Standalone
+	 */
+	this.launchURL = function (url) {
+		if (!url.match(/^https?/)) {
+			throw new Error("launchURL() requires an HTTP(S) URL");
+		}
+		
+		try {
+			var io = Components.classes['@mozilla.org/network/io-service;1']
+						.getService(Components.interfaces.nsIIOService);
+			var uri = io.newURI(url, null, null);
+			var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
+							.getService(Components.interfaces.nsIExternalProtocolService)
+							.getProtocolHandlerInfo('http');
+			handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
+			handler.launchWithURI(uri, null);
+		}
+		catch (e) {
+			Zotero.debug("launchWithURI() not supported -- trying fallback executable");
+			
+			if (Zotero.isWin) {
+				var pref = "fallbackLauncher.windows";
+			}
+			else {
+				var pref = "fallbackLauncher.unix";
+			}
+			var path = Zotero.Prefs.get(pref);
+			
+			var exec = Components.classes["@mozilla.org/file/local;1"]
+						.createInstance(Components.interfaces.nsILocalFile);
+			exec.initWithPath(path);
+			if (!exec.exists()) {
+				throw ("Fallback executable not found -- check extensions.zotero." + pref + " in about:config");
+			}
+			
+			var proc = Components.classes["@mozilla.org/process/util;1"]
+							.createInstance(Components.interfaces.nsIProcess);
+			proc.init(exec);
+			
+			var args = [url];
+			if (!Zotero.isFx36) {
+				proc.runw(true, args, args.length);
+			}
+			else {
+				proc.run(true, args, args.length);
+			}
+		}
+	}
+	
+	
 	function viewSelectedAttachment(event, noLocateOnMissing)
 	{
 		if (this.itemsView && this.itemsView.selection.count == 1) {
@@ -3461,27 +3558,15 @@ var ZoteroPane = new function()
 		var attachment = Zotero.Items.get(itemID)
 		if (attachment.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
 			var file = attachment.getFile();
-			if (file){
+			if (file) {
 				try {
 					file.reveal();
 				}
 				catch (e) {
 					// On platforms that don't support nsILocalFile.reveal() (e.g. Linux),
-					// "double-click" the parent directory
-					try {
-						var parent = file.parent.QueryInterface(Components.interfaces.nsILocalFile);
-						parent.launch();
-					}
-					// If launch also fails, try the OS handler
-					catch (e) {
-						var uri = Components.classes["@mozilla.org/network/io-service;1"].
-									getService(Components.interfaces.nsIIOService).
-									newFileURI(parent);
-						var protocolService =
-							Components.classes["@mozilla.org/uriloader/external-protocol-service;1"].
-								getService(Components.interfaces.nsIExternalProtocolService);
-						protocolService.loadUrl(uri);
-					}
+					// launch the parent directory
+					var parent = file.parent.QueryInterface(Components.interfaces.nsILocalFile);
+					this.launchFile(parent);
 				}
 			}
 			else {
@@ -3532,14 +3617,14 @@ var ZoteroPane = new function()
 	this.displayCannotEditLibraryMessage = function () {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
-		ps.alert(null, "", Zotero.getString('save.error.cannotMakeChangesToLibrary'));
+		ps.alert(null, "", Zotero.getString('save.error.cannotMakeChangesToCollection'));
 	}
 	
 	
 	this.displayCannotEditLibraryFilesMessage = function () {
 		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 								.getService(Components.interfaces.nsIPromptService);
-		ps.alert(null, "", Zotero.getString('save.error.cannotAddFilesToLibrary'));
+		ps.alert(null, "", Zotero.getString('save.error.cannotAddFilesToCollection'));
 	}
 	
 	
