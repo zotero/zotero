@@ -1101,7 +1101,9 @@ Zotero.Schema = new function(){
 			//"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM libraries)"
 			"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM groups)",
 			
-			"SELECT COUNT(*) FROM creatorData WHERE firstName='' AND lastName=''"
+			"SELECT COUNT(*) FROM creatorData WHERE firstName='' AND lastName=''",
+			
+			"SELECT COUNT(*) FROM itemAttachments JOIN items USING (itemID) WHERE itemTypeID != 14"
 		];
 		
 		for each(var sql in queries) {
