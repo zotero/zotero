@@ -1989,7 +1989,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.268";
+    this.processor_version = "1.0.269";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -6605,25 +6605,27 @@ CSL.evaluateLabel = function (node, state, Item, item) {
     } else {
         myterm = node.strings.term;
     }
-    var plural = 0;
-    if ("locator" === node.strings.term) {
-        if (item && item.locator) {
-            if (state.opt.development_extensions.locator_parsing_for_plurals) {
-                if (!state.tmp.shadow_numbers.locator) {
-                    state.processNumber(false, item, "locator");
+    var plural = node.strings.plural;
+    if ("number" !== typeof plural) {
+        if ("locator" === node.strings.term) {
+            if (item && item.locator) {
+                if (state.opt.development_extensions.locator_parsing_for_plurals) {
+                    if (!state.tmp.shadow_numbers.locator) {
+                        state.processNumber(false, item, "locator");
+                    }
+                    plural = state.tmp.shadow_numbers.locator.plural;
+                } else {
+                    plural = CSL.evaluateStringPluralism(item.locator);
                 }
-                plural = state.tmp.shadow_numbers.locator.plural;
-            } else {
-                plural = CSL.evaluateStringPluralism(item.locator);
             }
+        } else if (["page", "page-first"].indexOf(node.variables[0]) > -1) {
+            plural = CSL.evaluateStringPluralism(Item[myterm]);
+        } else {
+            if (!state.tmp.shadow_numbers[myterm]) {
+                state.processNumber(false, Item, myterm);
+            }
+            plural = state.tmp.shadow_numbers[myterm].plural;
         }
-    } else if (["page", "page-first"].indexOf(node.variables[0]) > -1) {
-        plural = CSL.evaluateStringPluralism(Item[myterm]);
-    } else {
-        if (!state.tmp.shadow_numbers[myterm]) {
-            state.processNumber(false, Item, myterm);
-        }
-        plural = state.tmp.shadow_numbers[myterm].plural;
     }
     return CSL.castLabel(state, node, myterm, plural);
 };
