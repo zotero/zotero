@@ -1613,9 +1613,9 @@ Zotero.Integration.Session.prototype.resetRequest = function(doc) {
  * @param data {Zotero.Integration.DocumentData}
  */
 Zotero.Integration.Session.prototype.setData = function(data) {
-	var oldStyleID = (this.data && this.data.style.styleID ? this.data.style.styleID : false);
+	var oldStyle = (this.data && this.data.style ? this.data.style : false);
 	this.data = data;
-	if(data.style.styleID && oldStyleID != data.style.styleID) {
+	if(!oldStyle || (data.style.styleID && oldStyle.styleID != data.style.styleID)) {
 		this.styleID = data.style.styleID;
 		try {
 			var getStyle = Zotero.Styles.get(data.style.styleID);
@@ -1631,6 +1631,8 @@ Zotero.Integration.Session.prototype.setData = function(data) {
 		}
 		
 		return true;
+	} else {
+		data.style = oldStyle;
 	}
 	return false;
 }
