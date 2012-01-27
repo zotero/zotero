@@ -1579,7 +1579,7 @@ Zotero.Integration.Session = function(doc) {
 	this.omittedItems = {};
 	this.embeddedItems = {};
 	this.embeddedZoteroItems = {};
-	this.embeddedItemsByURI = {};
+	this.embeddedZoteroItemsByURI = {};
 	this.customBibliographyText = {};
 	this.reselectedItems = {};
 	this.resetRequest(doc);
@@ -1900,37 +1900,25 @@ Zotero.Integration.Session.prototype.lookupItems = function(citation, index) {
 			}
 			
 			if(!zoteroItem) {
-				// check embedded items
-				if(citationItem.uris) {
-					var success = false;
-					for(var j=0, m=citationItem.uris.length; j<m; j++) {
-						var embeddedItem = this.embeddedItemsByURI[citationItem.uris[j]];
-						if(embeddedItem) {
-							citationItem.id = embeddedItem.id;
-							success = true;
-							break;
-						}
-					}
-					if(success) continue;
-				}
-				
 				if(citationItem.itemData) {
 					// add new embedded item
 					var itemData = Zotero.Utilities.deepCopy(citationItem.itemData);
-					for(var j=0, m=citationItem.uris.length; j<m; j++) {
-						this.embeddedItemsByURI[citationItem.uris[j]] = itemData;
-					}
 					
 					// assign a random string as an item ID
 					var anonymousID = Zotero.randomString();
 					var globalID = itemData.id = citationItem.id = this.data.sessionID+"/"+anonymousID;
 					this.embeddedItems[anonymousID] = itemData;
 					
+					// assign a Zotero item
 					var surrogateItem = this.embeddedZoteroItems[anonymousID] = new Zotero.Item();
 					Zotero.Utilities.itemFromCSLJSON(surrogateItem, itemData);
 					surrogateItem.cslItemID = globalID;
 					surrogateItem.cslURIs = citationItem.uris;
 					surrogateItem.cslItemData = itemData;
+					
+					for(var j=0, m=citationItem.uris.length; j<m; j++) {
+						this.embeddedZoteroItemsByURI[citationItem.uris[j]] = surrogateItem;
+					}
 				} else {
 					// if not already reselected, throw a MissingItemException
 					throw(new Zotero.Integration.MissingItemException(
@@ -1940,7 +1928,7 @@ Zotero.Integration.Session.prototype.lookupItems = function(citation, index) {
 		}
 		
 		if(zoteroItem) {
-			citationItem.id = zoteroItem.id;
+			citationItem.id = zoteroItem.cslItemID ? zoteroItem.cslItemID : zoteroItem.id;
 		}
 	}
 }
@@ -2297,8 +2285,9 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 			let zoteroItem, needUpdate;
 			for each(var uris in documentData.uncited) {
 				[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(uris);
-				if(zoteroItem && !this.citationsByItemID[zoteroItem.id]) {
-					this.uncitedItems[zoteroItem.id] = true;
+				var id = zoteroItem.cslItemID ? zoteroItem.cslItemID : zoteroItem.id;
+				if(zoteroItem && !this.citationsByItemID[id]) {
+					this.uncitedItems[id] = true;
 				} else {
 					needUpdate = true;
 				}
@@ -2327,8 +2316,9 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 				if(!zoteroItem) continue;
 				if(needUpdate) this.bibliographyDataHasChanged = true;
 				
-				if(this.citationsByItemID[zoteroItem.id] || this.uncitedItems[zoteroItem.id]) {
-					this.customBibliographyText[zoteroItem.id] = custom[1];
+				var id = zoteroItem.cslItemID ? zoteroItem.cslItemID : zoteroItem.id;
+				if(this.citationsByItemID[id] || this.uncitedItems[id]) {
+					this.customBibliographyText[id] = custom[1];
 				}
 			}
 		} else {
@@ -2351,8 +2341,9 @@ Zotero.Integration.Session.prototype.loadBibliographyData = function(json) {
 			let zoteroItem, needUpdate;
 			for each(var uris in documentData.omitted) {
 				[zoteroItem, update] = this.uriMap.getZoteroItemForURIs(uris);
-				if(zoteroItem && this.citationsByItemID[zoteroItem.id]) {
-					this.omittedItems[zoteroItem.id] = true;
+				var id = zoteroItem.cslItemID ? zoteroItem.cslItemID : zoteroItem.id;
+				if(zoteroItem && this.citationsByItemID[id]) {
+					this.omittedItems[id] = true;
 				} else {
 					needUpdate = true;
 				}
@@ -2669,9 +2660,14 @@ Zotero.Integration.URIMap.prototype.add = function(id, uris) {
  * Gets URIs for a given item ID, and adds to map
  */
 Zotero.Integration.URIMap.prototype.getURIsForItemID = function(id) {
+	if(typeof id === "string" && id.indexOf("/") !== -1) {
+		return Zotero.Cite.getItem(id).cslURIs;
+	}
+	
 	if(!this.itemIDURIs[id]) {
 		this.itemIDURIs[id] = [Zotero.URI.getItemURI(Zotero.Items.get(id))];
 	}
+	
 	return this.itemIDURIs[id];
 }
 
@@ -2681,10 +2677,17 @@ Zotero.Integration.URIMap.prototype.getURIsForItemID = function(id) {
 Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
 	var zoteroItem = false;
 	var needUpdate = false;
+	var embeddedItem = false;;
 	
 	for(var i=0, n=uris.length; i<n; i++) {
-		// Try getting URI directly
 		var uri = uris[i];
+		
+		// First try embedded URI
+		if(this.session.embeddedZoteroItemsByURI[uri]) {
+			embeddedItem = this.session.embeddedZoteroItemsByURI[uri];
+		}
+		
+		// Next try getting URI directly
 		try {
 			zoteroItem = Zotero.URI.getURIItem(uri);
 			if(zoteroItem) {
@@ -2743,6 +2746,8 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = function(uris) {
 		}
 		// cache uris
 		this.itemIDURIs[zoteroItem.id] = uris;
+	} else if(embeddedItem) {
+		return [embeddedItem, false];
 	}
 	
 	return [zoteroItem, needUpdate];
