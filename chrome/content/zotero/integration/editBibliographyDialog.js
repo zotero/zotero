@@ -302,7 +302,7 @@ var Zotero_Bibliography_Dialog = new function () {
 	 */
 	function _loadItems() {
 		var itemIDs = bibEditInterface.bibliography[0].entry_ids;
-		var items = Zotero.Items.get(itemIDs);
+		var items = [Zotero.Cite.getItem(itemID[0]) for each(itemID in itemIDs)];
 		
 		// delete all existing items from list
 		var itemList = document.getElementById("item-list");

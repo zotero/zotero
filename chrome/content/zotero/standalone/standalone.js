@@ -42,7 +42,7 @@ const ZoteroStandalone = new function() {
 		ZoteroPane.makeVisible();
 		
 		// Run check for corrupt installation, where the wrong Gecko runtime is being used
-		if(Zotero.isMac) {
+		if(Zotero.isMac && Zotero.isStandalone) {
 			 var greDir = Components.classes["@mozilla.org/file/directory_service;1"]
 				.getService(Components.interfaces.nsIProperties)
 				.get("GreD", Components.interfaces.nsIFile);
@@ -65,7 +65,8 @@ const ZoteroStandalone = new function() {
 			hs.store(handlerInfo);
 		}
 		
-		// Add add-on listeners (not yet hooked up)Services.obs.addObserver(gXPInstallObserver, "addon-install-disabled", false);
+		// Add add-on listeners (not yet hooked up)
+		Services.obs.addObserver(gXPInstallObserver, "addon-install-disabled", false);
 		Services.obs.addObserver(gXPInstallObserver, "addon-install-started", false);
 		Services.obs.addObserver(gXPInstallObserver, "addon-install-blocked", false);
 		Services.obs.addObserver(gXPInstallObserver, "addon-install-failed", false);

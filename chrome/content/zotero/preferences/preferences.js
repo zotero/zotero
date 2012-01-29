@@ -74,6 +74,16 @@ var Zotero_Preferences = {
 
 function init()
 {
+	if(Zotero.isConnector) {
+		Zotero.activateStandalone();
+		window.close();
+		return;
+	}
+	
+	observerService.addObserver(function() {
+		if(Zotero.isConnector) window.close();
+	}, "zotero-reloaded", false);
+	
 	// Display the appropriate modifier keys for the platform
 	var rows = document.getElementById('zotero-prefpane-keys').getElementsByTagName('row');
 	for (var i=0; i<rows.length; i++) {
