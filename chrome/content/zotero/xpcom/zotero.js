@@ -46,7 +46,6 @@ const ZOTERO_CONFIG = {
 	this.init = init;
 	this.stateCheck = stateCheck;
 	this.getProfileDirectory = getProfileDirectory;
-	this.getInstallDirectory = getInstallDirectory;
 	this.getZoteroDirectory = getZoteroDirectory;
 	this.getStorageDirectory = getStorageDirectory;
 	this.getZoteroDatabase = getZoteroDatabase;
@@ -806,17 +805,6 @@ const ZOTERO_CONFIG = {
 		return Components.classes["@mozilla.org/file/directory_service;1"]
 			 .getService(Components.interfaces.nsIProperties)
 			 .get("ProfD", Components.interfaces.nsIFile);
-	}
-	
-	
-	function getInstallDirectory() {		
-		var cr = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
-			.getService(Components.interfaces.nsIChromeRegistry);
-		var ioService = Components.classes["@mozilla.org/network/io-service;1"]  
-			.getService(Components.interfaces.nsIIOService);  
-		var zoteroURI = ioService.newURI("chrome://zotero-resource/content/", "UTF-8", null);
-		zoteroURI = cr.convertChromeURL(zoteroURI).QueryInterface(Components.interfaces.nsIFileURL);
-		return zoteroURI.file.parent.parent;
 	}
 	
 	function getDefaultProfile(prefDir) {

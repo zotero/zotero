@@ -85,9 +85,16 @@ Zotero.File = new function(){
 	
 	
 	function getContents(file, charset, maxLength){
-		var fis = Components.classes["@mozilla.org/network/file-input-stream;1"].
-			createInstance(Components.interfaces.nsIFileInputStream);
-		fis.init(file, 0x01, 0664, 0);
+		var fis;
+		if(file instanceof Components.interfaces.nsIInputStream) {
+			fis = file;
+		} else if(file instanceof Components.interfaces.nsIFile) {
+			fis = Components.classes["@mozilla.org/network/file-input-stream;1"].
+				createInstance(Components.interfaces.nsIFileInputStream);
+			fis.init(file, 0x01, 0664, 0);
+		} else {
+			throw new Error("File is not an nsIInputStream or nsIFile");
+		}
 		
 		if (charset){
 			charset = Zotero.CharacterSets.getName(charset);
@@ -150,6 +157,7 @@ Zotero.File = new function(){
 		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
 						.createInstance();
 		xmlhttp.open('GET', url, false);
+		xmlhttp.overrideMimeType("text/plain");
 		xmlhttp.send(null);
 		return xmlhttp.responseText;
 	}
