@@ -1387,7 +1387,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 		var field = this.addField(true);
 		field.setCode("TEMP");
 		
-		citation = {"citationItems":{}, "properties":{}};
+		citation = {"citationItems":[], "properties":{}};
 	}
 	
 	var io = new Zotero.Integration.CitationEditInterface(citation, field, this, session, newField, callback);

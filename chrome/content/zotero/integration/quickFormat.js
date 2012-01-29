@@ -29,7 +29,7 @@ var Zotero_QuickFormat = new function () {
 		showEditor, referencePanel, referenceBox, referenceHeight = 0, separatorHeight = 0,
 		currentLocator, currentLocatorLabel, currentSearchTime, dragging, panel, 
 		panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator, panelInfo,
-		panelRefersToBubble, panelFrameHeight = 0;
+		panelRefersToBubble, panelFrameHeight = 0, accepted = false;
 	
 	// A variable that contains the timeout object for the latest onKeyPress event
 	var eventTimeout = null;
@@ -918,9 +918,25 @@ var Zotero_QuickFormat = new function () {
 	 * Accepts current selection and adds citation
 	 */
 	function _accept() {
-		_updateCitationObject();
-		document.getElementById("quick-format-deck").selectedIndex = 1;
-		io.accept(_onProgress);
+		if(accepted) return;
+		accepted = true;
+		try {
+			_updateCitationObject();
+			document.getElementById("quick-format-deck").selectedIndex = 1;
+			io.accept(_onProgress);
+		} catch(e) {
+			Zotero.debug(e);
+		}
+	}
+	
+	/**
+	 * Handles windows closed with the close box
+	 */
+	this.onUnload = function() {
+		if(accepted) return;
+		accepted = true;
+		io.citation.citationItems = [];
+		io.accept();
 	}
 	
 	/**
@@ -928,7 +944,8 @@ var Zotero_QuickFormat = new function () {
 	 */
 	this.onKeyPress = function(event) {
 		var keyCode = event.keyCode;
-		if(keyCode === event.DOM_VK_ESCAPE) {
+		if(keyCode === event.DOM_VK_ESCAPE && !accepted) {
+			accepted = true;
 			io.citation.citationItems = [];
 			io.accept();
 		}

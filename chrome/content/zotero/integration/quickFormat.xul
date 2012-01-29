@@ -37,7 +37,8 @@
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY"
-	onkeypress="Zotero_QuickFormat.onKeyPress(event)">
+	onkeypress="Zotero_QuickFormat.onKeyPress(event)"
+	onunload="Zotero_QuickFormat.onUnload()">
 	
 	<script src="../include.js"/>
 	<script src="windowDraggingUtils.js" type="text/javascript;version=1.8"/>
