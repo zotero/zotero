@@ -51,7 +51,12 @@ Zotero.Integration = new function() {
 	
 	// these need to be global because of GC
 	var _updateTimer;
-	var _carbon, ProcessSerialNumber, SetFrontProcessWithOptions;
+	
+	// For Carbon and X11
+	var _carbon, ProcessSerialNumber, SetFrontProcessWithOptions,
+		_x11, _x11Display, XClientMessageEvent, XFetchName, XFree, XQueryTree, XOpenDisplay,
+		XCloseDisplay, XFlush, XDefaultRootWindow, XInternAtom, XSendEvent, XMapRaised,
+		XGetWindowProperty;
 	
 	var _inProgress = false;
 	this.currentWindow = false;
@@ -285,6 +290,8 @@ Zotero.Integration = new function() {
 			};
 			
 			if(Zotero.isFx4 && win) {
+				Components.utils.import("resource://gre/modules/ctypes.jsm");
+				
 				if(!_carbon) {
 					_carbon = ctypes.open("/System/Library/Frameworks/Carbon.framework/Carbon");
 					/*
@@ -326,7 +333,242 @@ Zotero.Integration = new function() {
 					_executeAppleScript('tell application id "'+BUNDLE_IDS[Zotero.appName]+'" to activate');
 				}
 			}
+		} else if(!Zotero.isWin && Zotero.isFx4 && win) {
+			Components.utils.import("resource://gre/modules/ctypes.jsm");
+			
+			if(_x11 === false) return;
+			if(!_x11) {
+				try {
+					var libName = ctypes.libraryName("X11");
+				} catch(e) {
+					_x11 = false;
+					Zotero.debug("Integration: Could not get libX11 name; not activating");
+					Zotero.logError(e);
+					return;
+				}
+				
+				try {
+					_x11 = ctypes.open(libName);
+				} catch(e) {
+					_x11 = false;
+					Zotero.debug("Integration: Could not open "+libName+"; not activating");
+					Zotero.logError(e);
+					return;
+				}
+				
+				const Status = ctypes.int,
+					Display = new ctypes.StructType("Display"),
+					Window = ctypes.unsigned_long,
+					Atom = ctypes.unsigned_long,
+					Bool = ctypes.int;
+					
+				/*
+				 * typedef struct {
+				 *     int type;
+				 *     unsigned long serial;	/ * # of last request processed by server * /
+				 *     Bool send_event;			/ * true if this came from a SendEvent request * /
+				 *     Display *display;		/ * Display the event was read from * /
+				 *     Window window;
+				 *     Atom message_type;
+				 *     int format;
+				 *     union {
+				 *         char b[20];
+				 *         short s[10];
+				 *         long l[5];
+				 *     } data;
+				 * } XClientMessageEvent;
+				 */
+				XClientMessageEvent = new ctypes.StructType("XClientMessageEvent",
+					[
+						{"type":ctypes.int},
+						{"serial":ctypes.unsigned_long},
+						{"send_event":Bool},
+						{"display":Display.ptr},
+						{"window":Window},
+						{"message_type":Atom},
+						{"format":ctypes.int},
+						{"l0":ctypes.long},
+						{"l1":ctypes.long},
+						{"l2":ctypes.long},
+						{"l3":ctypes.long},
+						{"l4":ctypes.long}
+					]
+				);
+				
+				/*
+				 * Status XFetchName(
+				 *    Display*		display,
+				 *    Window		w,
+				 *    char**		window_name_return
+				 * );
+				 */
+				XFetchName = _x11.declare("XFetchName", ctypes.default_abi, Status, Display.ptr,
+					Window, ctypes.char.ptr.ptr);
+					
+				/*
+				 * Status XQueryTree(
+				 *    Display*		display,
+				 *    Window		w,
+				 *    Window*		root_return,
+				 *    Window*		parent_return,
+				 *    Window**		children_return,
+				 *    unsigned int*	nchildren_return
+				 * );
+				 */
+				XQueryTree = _x11.declare("XQueryTree", ctypes.default_abi, Status, Display.ptr,
+					Window, Window.ptr, Window.ptr, Window.ptr.ptr, ctypes.unsigned_int.ptr);
+				
+				/*
+				 * int XFree(
+				 *    void*		data
+				 * );
+				 */
+				XFree = _x11.declare("XFree", ctypes.default_abi, ctypes.int, ctypes.voidptr_t);
+				
+				/*
+				 * Display *XOpenDisplay(
+				 *     _Xconst char*	display_name
+				 * );
+				 */
+				XOpenDisplay = _x11.declare("XOpenDisplay", ctypes.default_abi, Display.ptr,
+				 	ctypes.char.ptr);
+				 
+				/*
+				 * int XCloseDisplay(
+				 *     Display*		display
+				 * );
+				 */
+				XCloseDisplay = _x11.declare("XCloseDisplay", ctypes.default_abi, ctypes.int,
+					Display.ptr);
+				
+				/*
+				 * int XFlush(
+				 *     Display*		display
+				 * );
+				 */
+				XFlush = _x11.declare("XFlush", ctypes.default_abi, ctypes.int, Display.ptr);
+				
+				/*
+				 * Window XDefaultRootWindow(
+				 *     Display*		display
+				 * );
+				 */
+				XDefaultRootWindow = _x11.declare("XDefaultRootWindow", ctypes.default_abi,
+					Window, Display.ptr);
+					
+				/*
+				 * Atom XInternAtom(
+				 *     Display*			display,
+				 *     _Xconst char*	atom_name,
+				 *     Bool				only_if_exists
+				 * );
+				 */
+				XInternAtom = _x11.declare("XInternAtom", ctypes.default_abi, Atom, Display.ptr,
+				 	ctypes.char.ptr, Bool);
+				 
+				/*
+				 * Status XSendEvent(
+				 *     Display*		display,
+				 *     Window		w,
+				 *     Bool			propagate,
+				 *     long			event_mask,
+				 *     XEvent*		event_send
+				 * );
+				 */
+				XSendEvent = _x11.declare("XSendEvent", ctypes.default_abi, Status, Display.ptr,
+				 	Window, Bool, ctypes.long, XClientMessageEvent.ptr);
+				
+				/*
+				 * int XMapRaised(
+				 *     Display*		display,
+				 *     Window		w
+				 * );
+				 */
+				XMapRaised = _x11.declare("XMapRaised", ctypes.default_abi, ctypes.int, Display.ptr,
+				 	Window);
+				
+				 	
+				_x11Display = XOpenDisplay(null);
+				if(!_x11Display) {
+					Zotero.debug("Integration: Could not open display; not activating");
+					_x11 = false;
+				}
+				
+				Zotero.addShutdownListener(function() {
+					XCloseDisplay(_x11Display);
+				});
+			}
+	
+			var rootWindow = XDefaultRootWindow(_x11Display),
+				intervalID;
+			
+			function _X11BringToForeground() {
+				var windowTitle = win.QueryInterface(Ci.nsIInterfaceRequestor)
+					.getInterface(Ci.nsIWebNavigation).QueryInterface(Ci.nsIBaseWindow).title;
+				
+				var x11Window = _X11FindWindow(_x11Display, rootWindow, windowTitle);
+				if(!x11Window) return;
+				win.clearInterval(intervalID);
+					
+				var event = new XClientMessageEvent();
+				event.type = 33; /* ClientMessage*/
+				event.serial = 0;
+				event.send_event = 1;
+				event.message_type = XInternAtom(_x11Display, "_NET_ACTIVE_WINDOW", 0);
+				event.display = _x11Display;
+				event.window = x11Window;
+				event.format = 32;
+				event.l0 = 2;
+				var mask = 1<<20 /* SubstructureRedirectMask */ | 1<<19 /* SubstructureNotifyMask */;
+				Zotero.debug(event.toSource());
+				Zotero.debug([_x11Display, rootWindow, 0, mask, event.address()]);
+				
+				if(XSendEvent(_x11Display, rootWindow, 0, mask, event.address())) {
+					XMapRaised(_x11Display, x11Window);
+					XFlush(_x11Display);
+					Zotero.debug("Activated successfully");
+				} else {
+					Zotero.debug("Integration: An error occurred activating the window");
+				}
+			}
+			
+			win.addEventListener("load", function() {
+				intervalID = win.setInterval(_X11BringToForeground, 50);
+			}, false);
 		}
+	}
+	
+	function _X11FindWindow(display, w, searchName) {
+		Components.utils.import("resource://gre/modules/ctypes.jsm");
+		
+		var childrenPtr = new ctypes.unsigned_long.ptr(),
+			dummy = new ctypes.unsigned_long(),
+			foundName = new ctypes.char.ptr(),
+			nChildren = new ctypes.unsigned_int();
+		
+		if(XFetchName(display, w, foundName.address())) {
+			var foundNameString = foundName.readString();
+			XFree(foundName);
+			if(foundNameString === searchName) return w;
+		}
+		
+		var dummyPtr = dummy.address();
+		if(!XQueryTree(display, w, dummyPtr, dummyPtr, childrenPtr.address(),
+				nChildren.address()) || childrenPtr.isNull()) {
+			return false;
+		}
+		
+		var nChildrenJS = nChildren.value;
+		var children = ctypes.cast(childrenPtr, ctypes.uint32_t.array(nChildrenJS).ptr).contents;
+		var foundWindow = false;
+		for(var i=0; i<nChildrenJS; i++) {
+			foundWindow = _X11FindWindow(display, children.addressOfElement(i).contents,
+				searchName);
+			if(foundWindow) break;
+		}
+		
+		XFree(children);
+		return foundWindow;
 	}
 	
 	/**
