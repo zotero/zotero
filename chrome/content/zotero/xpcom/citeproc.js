@@ -837,7 +837,7 @@ CSL.Output.Queue.prototype.closeLevel = function (name) {
     }
     this.current.pop();
 };
-CSL.Output.Queue.prototype.append = function (str, tokname, notSerious, ignorePredecessor) {
+CSL.Output.Queue.prototype.append = function (str, tokname, notSerious, ignorePredecessor, noStripPeriods) {
     var token, blob, curr;
     var useblob = true;
     if (this.state.tmp["doing-macro-with-date"]) {
@@ -897,7 +897,7 @@ CSL.Output.Queue.prototype.append = function (str, tokname, notSerious, ignorePr
         curr = this.current.value();
     }
     if ("string" === typeof blob.blobs) {
-        if (this.state.tmp.strip_periods) {
+        if (this.state.tmp.strip_periods && !noStripPeriods) {
             blob.blobs = blob.blobs.replace(/\./g, "");
         }
         if (!ignorePredecessor) {
@@ -1989,7 +1989,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.269";
+    this.processor_version = "1.0.272";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -7093,7 +7093,7 @@ CSL.Node.number = {
                 }
                 newstr = state.fun.page_mangler(newstr);
             }
-            if (newstr && !newstr.match(/^[0-9]+$/)) {
+            if (newstr && !newstr.match(/^[-.\u20130-9]+$/)) {
                 state.output.append(newstr, this);
             } else {
                 state.output.openLevel("empty");
@@ -7105,7 +7105,7 @@ CSL.Node.number = {
                     if (i < values.length - 1) {
                         blob.strings.suffix = blob.strings.suffix.replace(/\s*$/, "");
                     }
-                    state.output.append(blob, "literal");
+                    state.output.append(blob, "literal", false, false, true);
                 }
                 state.output.closeLevel("empty");
             }
@@ -7339,7 +7339,7 @@ CSL.Node.text = {
                                 if (item && item[this.variables[0]]) {
                                     var locator = "" + item[this.variables[0]];
                                     locator = locator.replace(/--*/g,"\u2013");
-                                    state.output.append(locator, this);
+                                    state.output.append(locator, this, false, false, true);
                                 }
                             };
                         } else if (this.variables_real[0] === "page-first") {
@@ -7352,7 +7352,7 @@ CSL.Node.text = {
                                     if (idx > -1) {
                                         value = value.slice(0, idx);
                                     }
-                                    state.output.append(value, this);
+                                    state.output.append(value, this, false, false, true);
                                 }
                             };
                         } else  if (this.variables_real[0] === "page") {
@@ -7360,7 +7360,7 @@ CSL.Node.text = {
                                 var value = state.getVariable(Item, "page", form);
                                 if (value) {
                                     value = state.fun.page_mangler(value);
-                                    state.output.append(value, this);
+                                    state.output.append(value, this, false, false, true);
                                 }
                             };
                         } else if (this.variables_real[0] === "volume") {
@@ -7380,6 +7380,16 @@ CSL.Node.text = {
                                 if (value) {
                                     state.tmp.group_context.value()[2] = true;
                                     state.output.append(value, this);
+                                }
+                            };
+                        } else if (this.variables_real[0] === "URL") {
+                            func = function (state, Item) {
+                                var value;
+                                if (this.variables[0]) {
+                                    value = state.getVariable(Item, this.variables[0], form);
+                                    if (value) {
+                                        state.output.append(value, this, false, false, true);
+                                    }
                                 }
                             };
                         } else if (this.variables_real[0] === "section") {
@@ -8674,7 +8684,7 @@ CSL.Parallel = function (state) {
     this.sets = new CSL.Stack([]);
     this.try_cite = true;
     this.use_parallels = true;
-    this.midVars = ["section", "volume", "container-title", "collection-number", "issue", "page", "page-first", "locator"];
+    this.midVars = ["hereinafter", "section", "volume", "container-title", "collection-number", "issue", "page", "page-first", "locator"];
 };
 CSL.Parallel.prototype.isMid = function (variable) {
     return (this.midVars.indexOf(variable) > -1);
@@ -9280,6 +9290,7 @@ CSL.Util.Names.initializeWith = function (state, name, terminator, normalizeOnly
         namelist = namelist.replace(/\-/g, " ");
     }
     namelist = namelist.replace(/\s*\-\s*/g, "-").replace(/\s+/g, " ");
+    namelist = namelist.replace(/-([a-z])/g, "\u2013$1")
     mm = namelist.match(/[\-\s]+/g);
     lst = namelist.split(/[\-\s]+/);
     if (lst.length === 0) {
@@ -9311,6 +9322,7 @@ CSL.Util.Names.initializeWith = function (state, name, terminator, normalizeOnly
     } else {
         ret = CSL.Util.Names.doInitialize(state, lst, terminator);
     }
+    ret = ret.replace(/\u2013([a-z])/g, "-$1")
     return ret;
 };
 CSL.Util.Names.doNormalize = function (state, namelist, terminator, mode) {
