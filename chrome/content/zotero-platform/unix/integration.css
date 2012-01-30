@@ -3,12 +3,12 @@ body {
 }
 
 #quick-format-search:not([multiline="true"]) {
-	height: 27px !important;
+	height: 29px !important;
 }
 
 #quick-format-search {
 	background: white;
-	padding: 1px 2px 1px 0;
+	padding: 0 2px 0 0;
 	border: 1px solid rgba(0, 0, 0, 0.5);
 	-moz-appearance: textfield;
 }
