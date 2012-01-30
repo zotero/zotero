@@ -520,8 +520,6 @@ Zotero.Integration = new function() {
 				event.format = 32;
 				event.l0 = 2;
 				var mask = 1<<20 /* SubstructureRedirectMask */ | 1<<19 /* SubstructureNotifyMask */;
-				Zotero.debug(event.toSource());
-				Zotero.debug([_x11Display, rootWindow, 0, mask, event.address()]);
 				
 				if(XSendEvent(_x11Display, rootWindow, 0, mask, event.address())) {
 					XMapRaised(_x11Display, x11Window);
