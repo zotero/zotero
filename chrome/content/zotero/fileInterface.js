@@ -295,9 +295,11 @@ var Zotero_File_Interface = new function() {
 			Zotero_File_Interface.Progress.show(
 				Zotero.getString("fileInterface.itemsImported")
 			);
-			Zotero.repaint(window);
-			Zotero.DB.beginTransaction();
-			translation.translate();
+			
+			window.setTimeout(function() {
+				Zotero.DB.beginTransaction();
+				translation.translate();
+			}, 0);
 		} else {
 			// TODO: localize and remove fileInterface.fileFormatUnsupported string
 			var unsupportedFormat = "The selected file is not in a supported format.";
