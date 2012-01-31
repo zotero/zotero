@@ -371,6 +371,7 @@ Zotero.Translate.Sandbox = {
 					Zotero.Translators.get(translation.translator[0], haveTranslatorFunction);
 					if(Zotero.isConnector && Zotero.isFx && !callback) {
 						while(!sandbox && translate._currentState) {
+							// This processNextEvent call is used to handle a deprecated case
 							Zotero.mainThread.processNextEvent(true);
 						}
 					}

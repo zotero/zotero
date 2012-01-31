@@ -271,6 +271,7 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
  * Gets the DOM document object corresponding to the page located at URL, but avoids locking the
  * UI while the request is in process.
  *
+ * @deprecated
  * @param {String} 		url		URL to load
  * @return {Document} 			DOM document object
  */
@@ -297,6 +298,7 @@ Zotero.Utilities.Translate.prototype.retrieveDocument = function(url) {
 	// should ever take longer than 2 minutes. 
 	var endTime = Date.now() + 120000;
 	while(!loaded && Date.now() < endTime) {
+		// This processNextEvent call is used to handle a deprecated case
 		mainThread.processNextEvent(true);
 	}
 	
@@ -313,6 +315,7 @@ Zotero.Utilities.Translate.prototype.retrieveDocument = function(url) {
  * Gets the source of the page located at URL, but avoids locking the UI while the request is in
  * process.
  *
+ * @deprecated
  * @param {String} 		url					URL to load
  * @param {String}		[body=null]			Request body to POST to the URL; a GET request is
  *											executed if no body is present
@@ -345,6 +348,7 @@ Zotero.Utilities.Translate.prototype.retrieveSource = function(url, body, header
 			var xmlhttp = Zotero.HTTP.doGet(url, listener, responseCharset, this._translate.cookieSandbox);
 		}
 		
+		// This processNextEvent call is used to handle a deprecated case
 		while(!finished) mainThread.processNextEvent(true);
 	} else {
 		// Use a synchronous XMLHttpRequest, even though this is inadvisable
