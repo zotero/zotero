@@ -1495,44 +1495,6 @@ const ZOTERO_CONFIG = {
 		return;
 	};
 	
-	
-	/**
-	 * Repaint UI on given window, without executing any events.
-	 *
-	 * @param {window} window Window to repaint
-	 * @param {Boolean} [force=false] Whether to force a repaint. If false, a repaint only takes
-	 * place if the last repaint was more than 100 ms ago.
-	 */
-	this.repaint = function(window, force) {
-		var now = Date.now();
-		
-		if (!window) {
-			window = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-							.getService(Components.interfaces.nsIWindowMediator)
-							.getMostRecentWindow("navigator:browser");
-		}
-		
-		// Don't repaint more than 10 times per second unless forced.
-		if(!force && window.zoteroLastRepaint && (now - window.zoteroLastRepaint) < 100) return
-		
-		// Start a nested event queue
-		Zotero.mainThread.pushEventQueue(null);
-		try {
-			// Add the redraw event onto event queue
-			window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-				.getInterface(Components.interfaces.nsIDOMWindowUtils)
-				.redraw();
-			
-			// Process redraw event
-			Zotero.mainThread.processNextEvent(false);
-		} finally {
-			// Close nested event queue
-			Zotero.mainThread.popEventQueue();
-		}
-		
-		window.zoteroLastRepaint = now;
-	};
-	
 	/**
 	 * Pumps a generator until it yields false. See itemTreeView.js for an example.
 	 *

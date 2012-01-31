@@ -619,7 +619,28 @@ var Zotero_File_Interface = new function() {
 	 */
 	this.updateProgress = function(translate) {
 		Zotero.updateZoteroPaneProgressMeter(translate.getProgress());
-		Zotero.repaint(window);
+		
+		var now = Date.now();
+		
+		// Don't repaint more than 10 times per second unless forced.
+		if(!force && window.zoteroLastRepaint && (now - window.zoteroLastRepaint) < 100) return
+		
+		// Start a nested event queue
+		Zotero.mainThread.pushEventQueue(null);
+		try {
+			// Add the redraw event onto event queue
+			window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+				.getInterface(Components.interfaces.nsIDOMWindowUtils)
+				.redraw();
+			
+			// Process redraw event
+			Zotero.mainThread.processNextEvent(false);
+		} finally {
+			// Close nested event queue
+			Zotero.mainThread.popEventQueue();
+		}
+		
+		window.zoteroLastRepaint = now;
 	}
 }
 
