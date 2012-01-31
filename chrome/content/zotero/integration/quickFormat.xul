@@ -89,17 +89,17 @@
 						<menupopup id="locator-label-popup"/>
 					</menulist>
 					<textbox id="locator" flex="1"
-							oninput="window.setTimeout(Zotero_QuickFormat.onCitationPropertiesChanged, 0)"/>
+							oninput="window.setTimeout(function(event) { Zotero_QuickFormat.onCitationPropertiesChanged(event) }, 0)"/>
 				</row>
 				<row align="center">
 					<label value="&zotero.citation.prefix.label;"/>
 					<textbox class="citation-textbox" id="prefix" flex="1"
-							oninput="window.setTimeout(Zotero_QuickFormat.onCitationPropertiesChanged, 0)"/>
+							oninput="window.setTimeout(function(event) { Zotero_QuickFormat.onCitationPropertiesChanged(event) }, 0)"/>
 				</row>
 				<row align="center">
 					<label value="&zotero.citation.suffix.label;"/>
 					<textbox class="citation-textbox" id="suffix" flex="1"
-							oninput="window.setTimeout(Zotero_QuickFormat.onCitationPropertiesChanged, 0)"/>
+							oninput="window.setTimeout(function(event) { Zotero_QuickFormat.onCitationPropertiesChanged(event) }, 0)"/>
 				</row>
 				<html:div>
 					<html:input type="checkbox" id="suppress-author"
