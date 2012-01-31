@@ -1157,7 +1157,11 @@ var Zotero_QuickFormat = new function () {
 			.getService(Components.interfaces.nsIWindowWatcher)
 			.openWindow(null, 'chrome://zotero/content/integration/addCitationDialog.xul',
 			'', 'chrome,centerscreen,resizable', io);
-		newWindow.addEventListener("load", function() { window.close(); }, false);
+		newWindow.addEventListener("focus", function() {
+			newWindow.removeEventListener("focus", arguments.callee, true);
+			window.close();
+		}, true);
+		accepted = true;
 	}
 	
 	/**
