@@ -772,18 +772,18 @@ var Zotero_QuickFormat = new function () {
 		referencePanel.openPopup(document.documentElement, "after_start", 15,
 			null, false, false, null);
 		if(!Zotero.isMac && !Zotero.isWin) {
-			// When it opens, we will lose focus
-			referencePanel.addEventListener("popupshown", function() {
-				referencePanel.removeEventListener("popupshown", arguments.callee, false);
-				_refocusQfe();
-				
-				// This is a nasty hack, but seems to be necessary to fix loss of focus on Linux
-				window.setTimeout(function() { _refocusQfe(); }, 25);
-				window.setTimeout(function() { _refocusQfe(); }, 50);
-				window.setTimeout(function() { _refocusQfe(); }, 100);
-				window.setTimeout(function() { _refocusQfe(); }, 175);
-				window.setTimeout(function() { _refocusQfe(); }, 250);
-			}, false);
+			// When the reference panel opens, we may lose focus on Linux. We thus look for a 
+			// deactivate event within 1 second of the panel open request.
+			var eventHandler = function(e) {
+				if(e.target !== window) return;
+				window.removeEventListener("deactivate", eventHandler, false);
+				window.clearTimeout(timeoutID);
+				window.setTimeout(function() { _refocusQfe(); }, 0);
+			};
+			window.addEventListener("deactivate", eventHandler, false);
+			var timeoutID = window.setTimeout(function() {
+				window.removeEventListener("deactivate", eventHandler, false);
+			}, 1000);
 		}
 	}
 	
