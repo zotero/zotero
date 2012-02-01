@@ -25,11 +25,11 @@
 
 var Zotero_QuickFormat = new function () {
 	const pixelRe = /^([0-9]+)px$/
-	var initialized, io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, keepSorted, 
-		showEditor, referencePanel, referenceBox, referenceHeight = 0, separatorHeight = 0,
-		currentLocator, currentLocatorLabel, currentSearchTime, dragging, panel, 
-		panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator, panelInfo,
-		panelRefersToBubble, panelFrameHeight = 0, accepted = false;
+	var initialized, io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, qfGuidance,
+		keepSorted,  showEditor, referencePanel, referenceBox, referenceHeight = 0,
+		separatorHeight = 0, currentLocator, currentLocatorLabel, currentSearchTime, dragging,
+		panel, panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator,
+		panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false;
 	
 	// A variable that contains the timeout object for the latest onKeyPress event
 	var eventTimeout = null;
@@ -98,10 +98,9 @@ var Zotero_QuickFormat = new function () {
 			panelLocator = document.getElementById("locator");
 			panelInfo = document.getElementById("citation-properties-info");
 			
-			
 			// Don't need to set noautohide dynamically on these platforms, so do it now
 			if(Zotero.isMac || Zotero.isWin) {
-				tabPanel.setAttribute("noautohide", true);
+				referencePanel.setAttribute("noautohide", true);
 			}
 		} else if(event.target === qfi.contentDocument) {			
 			qfiWindow = qfi.contentWindow;
@@ -129,6 +128,9 @@ var Zotero_QuickFormat = new function () {
 				Zotero.debug("Moving window to "+targetX+", "+targetY);
 				window.moveTo(targetX, targetY);
 			}
+			qfGuidance = document.getElementById('quick-format-guidance');
+			qfGuidance.show();
+			_refocusQfe();
 		}, 0);
 		
 		window.focus();
@@ -961,6 +963,8 @@ var Zotero_QuickFormat = new function () {
 	 * Handle return or escape
 	 */
 	function _onQuickSearchKeyPress(event) {
+		qfGuidance.hide();
+		
 		var keyCode = event.keyCode;
 		if(keyCode === event.DOM_VK_RETURN || keyCode === event.DOM_VK_ENTER) {
 			event.preventDefault();
