@@ -389,7 +389,7 @@ Zotero.Annotate.Path.prototype.fromNode = function(node, offset) {
 	}
 	if(!node) throw "Annotate: Path() resolved text offset inappropriately";
 	
-	while(node && !node === this._document) {
+	while(node && node !== this._document) {
 		var number = 1;
 		var sibling = node.previousSibling;
 		while(sibling) {
@@ -731,10 +731,18 @@ Zotero.Annotations.prototype.save = function() {
 		
 		// save annotations
 		for each(var annotation in this.annotations) {
-			annotation.save();
+			// Don't drop all annotations if one is broken (due to ~3.0 glitch)
+			try {
+				annotation.save();
+			}
+			catch(e) {
+				Zotero.debug(e);
+				continue;
+			}
 		}
 		Zotero.DB.commitTransaction();
 	} catch(e) {
+		Zotero.debug(e);
 		Zotero.DB.rollbackTransaction();
 		throw(e);
 	}
@@ -1387,7 +1395,7 @@ Zotero.Highlight.prototype.unhighlight = function(container, offset, path, mode)
 				// loop through, removing nodes
 				var node = span.firstChild;
 				
-				while(span.firstChild && !span.firstChild === textNode) {
+				while(span.firstChild && span.firstChild !== textNode) {
 					parentNode.insertBefore(span.removeChild(span.firstChild), span);
 				}
 			} else if(mode == 2) {
@@ -1437,23 +1445,23 @@ Zotero.Highlight.prototype._highlight = function() {
 	
 	var onlyOneNode = startNode === endNode;
 	
-	if(!onlyOneNode && !startNode === ancestor && !endNode === ancestor) {
+	if(!onlyOneNode && startNode !== ancestor && endNode !== ancestor) {
 		// highlight nodes after start node in the DOM hierarchy not at ancestor level
-		while(startNode.parentNode && !startNode.parentNode === ancestor) {
+		while(startNode.parentNode && startNode.parentNode !== ancestor) {
 			if(startNode.nextSibling) {
 				this._highlightSpaceBetween(startNode.nextSibling, startNode.parentNode.lastChild);
 			}
 			startNode = startNode.parentNode
 		}
 		// highlight nodes after end node in the DOM hierarchy not at ancestor level
-		while(endNode.parentNode && !endNode.parentNode === ancestor) {
+		while(endNode.parentNode && endNode.parentNode !== ancestor) {
 			if(endNode.previousSibling) {
 				this._highlightSpaceBetween(endNode.parentNode.firstChild, endNode.previousSibling);
 			}
 			endNode = endNode.parentNode
 		}
 		// highlight nodes between start node and end node at ancestor level
-		if(!startNode === endNode.previousSibling) {
+		if(startNode !== endNode.previousSibling) {
 			this._highlightSpaceBetween(startNode.nextSibling, endNode.previousSibling);
 		}
 	}
