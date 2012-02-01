@@ -97,6 +97,12 @@ var Zotero_QuickFormat = new function () {
 			panelLocatorLabel = document.getElementById("locator-label");
 			panelLocator = document.getElementById("locator");
 			panelInfo = document.getElementById("citation-properties-info");
+			
+			
+			// Don't need to set noautohide dynamically on these platforms, so do it now
+			if(Zotero.isMac || Zotero.isWin) {
+				tabPanel.setAttribute("noautohide", true);
+			}
 		} else if(event.target === qfi.contentDocument) {			
 			qfiWindow = qfi.contentWindow;
 			qfiDocument = qfi.contentDocument;
@@ -769,21 +775,21 @@ var Zotero_QuickFormat = new function () {
 	 * Opens the reference panel and potentially refocuses the main text box
 	 */
 	function _openReferencePanel() {
+		if(!Zotero.isMac && !Zotero.isWin) {
+			// noautohide and noautofocus are incompatible on Linux
+			// https://bugzilla.mozilla.org/show_bug.cgi?id=545265
+			referencePanel.setAttribute("noautohide", "false");
+		}
+		
 		referencePanel.openPopup(document.documentElement, "after_start", 15,
 			null, false, false, null);
+		
 		if(!Zotero.isMac && !Zotero.isWin) {
-			// When the reference panel opens, we may lose focus on Linux. We thus look for a 
-			// deactivate event within 1 second of the panel open request.
-			var eventHandler = function(e) {
-				if(e.target !== window) return;
-				window.removeEventListener("deactivate", eventHandler, false);
-				window.clearTimeout(timeoutID);
-				window.setTimeout(function() { _refocusQfe(); }, 0);
-			};
-			window.addEventListener("deactivate", eventHandler, false);
-			var timeoutID = window.setTimeout(function() {
-				window.removeEventListener("deactivate", eventHandler, false);
-			}, 1000);
+			// reinstate noautohide after the window is shown
+			referencePanel.addEventListener("popupshowing", function() {
+				referencePanel.removeEventListener("popupshowing", arguments.callee, false);
+				referencePanel.setAttribute("noautohide", "true");
+			}, false);
 		}
 	}
 	

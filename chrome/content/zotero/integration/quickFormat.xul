@@ -67,7 +67,8 @@
 			<progressmeter id="quick-format-progress-meter" mode="undetermined" value="0" flex="1"/>
 		</deck>
 	</box>
-	<panel id="quick-format-reference-panel" noautofocus="true" norestorefocus="true" noautohide="true" height="0">
+	<panel id="quick-format-reference-panel" noautofocus="true" norestorefocus="true"
+			height="0" width="0">
 		<richlistbox id="quick-format-reference-list" flex="1"/>
 	</panel>
 	<panel id="citation-properties" type="arrow" orient="vertical"
