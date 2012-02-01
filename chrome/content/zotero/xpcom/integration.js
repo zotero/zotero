@@ -339,21 +339,25 @@ Zotero.Integration = new function() {
 			if(_x11 === false) return;
 			if(!_x11) {
 				try {
-					var libName = ctypes.libraryName("X11");
+					_x11 = ctypes.open("libX11.so.6");
 				} catch(e) {
-					_x11 = false;
-					Zotero.debug("Integration: Could not get libX11 name; not activating");
-					Zotero.logError(e);
-					return;
-				}
-				
-				try {
-					_x11 = ctypes.open(libName);
-				} catch(e) {
-					_x11 = false;
-					Zotero.debug("Integration: Could not open "+libName+"; not activating");
-					Zotero.logError(e);
-					return;
+					try {
+						var libName = ctypes.libraryName("X11");
+					} catch(e) {
+						_x11 = false;
+						Zotero.debug("Integration: Could not get libX11 name; not activating");
+						Zotero.logError(e);
+						return;
+					}
+					
+					try {
+						_x11 = ctypes.open(libName);
+					} catch(e) {
+						_x11 = false;
+						Zotero.debug("Integration: Could not open "+libName+"; not activating");
+						Zotero.logError(e);
+						return;
+					}
 				}
 				
 				const Status = ctypes.int,
