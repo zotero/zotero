@@ -25,6 +25,10 @@
 	-moz-image-region: rect(0, 26px, 11px, 13px);
 }
 
+#zotero-tb-search {
+	margin-right: -1px;
+}
+
 #zotero-tb-search .textbox-search-icon {
 	visibility: hidden;
 }
