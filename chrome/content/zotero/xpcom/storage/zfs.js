@@ -753,6 +753,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._onUploadComplete = function (httpRequ
 				+ " (" + Zotero.Items.getLibraryKeyHash(item) + ")";
 			Zotero.debug(msg, 1);
 			Components.utils.reportError(msg);
+			Components.utils.reportError(response);
 			this.onError();
 			return;
 	}
@@ -772,6 +773,7 @@ Zotero.Sync.Storage.Session.ZFS.prototype._onUploadComplete = function (httpRequ
 			Zotero.debug(req.responseText);
 			Zotero.debug(req.getAllResponseHeaders());
 			Components.utils.reportError(msg);
+			Components.utils.reportError(req.responseText);
 			self.onError();
 			return;
 		}
