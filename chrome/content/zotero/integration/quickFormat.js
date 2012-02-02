@@ -25,6 +25,13 @@
 
 var Zotero_QuickFormat = new function () {
 	const pixelRe = /^([0-9]+)px$/
+	const specifiedLocatorRe = /^(?:,? *(p{0,2})(?:\. *| +)|:)([0-9\-]+) *$/;
+	const yearRe = /,? *([0-9]+) *(B[. ]*C[. ]*(?:E[. ]*)?|A[. ]*D[. ]*|C[. ]*E[. ]*)?$/i;
+	const locatorRe = /(?:,? *(p{0,2})\.?|(\:)) *([0-9]+)$/i;
+	const creatorSplitRe = /(?:,| *(?:and|\&)) +/;
+	const charRe = /[\w\u007F-\uFFFF]/;
+	const numRe = /^[0-9\-]+$/;
+	
 	var initialized, io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, qfGuidance,
 		keepSorted,  showEditor, referencePanel, referenceBox, referenceHeight = 0,
 		separatorHeight = 0, currentLocator, currentLocatorLabel, currentSearchTime, dragging,
@@ -196,11 +203,6 @@ var Zotero_QuickFormat = new function () {
 		var str = _getEditorContent();
 		var haveConditions = false;
 		
-		const specifiedLocatorRe = /^(?:,? *(pp|p)(?:\. *| +)|:)([0-9\-]+) *$/;
-		const yearPageLocatorRe = /,? *([0-9]+) *((B[. ]*C[. ]*|B[. ]*)|[AC][. ]*|A[. ]*D[. ]*|C[. ]*E[. ]*)?,? *(?:([0-9\-]+))?$/i;
-		const creatorSplitRe = /(?:,| *(?:and|\&)) +/;
-		const charRe = /[\w\u007F-\uFFFF]/;
-		const numRe = /^[0-9\-]+$/;
 		const etAl = " et al.";
 		
 		var m,
@@ -248,20 +250,11 @@ var Zotero_QuickFormat = new function () {
 			}
 			
 			// check for year and pages
-			m = yearPageLocatorRe.exec(str);
+			str = _updateLocator(str);
+			m = yearRe.exec(str);
 			if(m) {
-				if(m[1].length === 4 || m[2] || m[4]) {
-					year = parseInt(m[1]);
-					if(m[3]) {
-						isBC = true;
-					}
-					if(!currentLocator && m[4]) {
-						currentLocator = m[4];
-					}
-				} else {
-					currentLocator = m[1];
-				}
-				
+				year = parseInt(m[1]);
+				isBC = m[2] && m[2][0] === "B";
 				str = str.substr(0, m.index)+str.substring(m.index+m[0].length);
 			}
 			if(year) str += " "+year;
@@ -335,6 +328,20 @@ var Zotero_QuickFormat = new function () {
 			// No search conditions, so just clear the box
 			_updateItemList([], []);
 		}
+	}
+	
+	/**
+	 * Updates currentLocator based on a string
+	 * @param {String} str String to search for locator
+	 * @return {String} str without locator
+	 */
+	function _updateLocator(str) {
+		m = locatorRe.exec(str);
+		if(m && (m[1] || m[2] || m[3].length !== 4)) {
+			currentLocator = m[3];
+			str = str.substr(0, m.index)+str.substring(m.index+m[0].length);
+		}
+		return str;
 	}
 	
 	/**
@@ -670,6 +677,8 @@ var Zotero_QuickFormat = new function () {
 			citationItem.uris = item.cslURIs;
 			citationItem.itemData = item.cslItemData;
 		}
+		
+		_updateLocator(_getEditorContent());
 		if(currentLocator) {
 			 citationItem["locator"] = currentLocator;
 			if(currentLocatorLabel) {
