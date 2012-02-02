@@ -49,6 +49,12 @@ var Zotero_QuickFormat = new function () {
 				document.documentElement.setAttribute("hidechrome", true);
 			}
 			
+			// Include a different key combo in message on Mac
+			if(Zotero.isMac) {
+				var qf = document.getElementById('quick-format-guidance');
+				qf.setAttribute('about', qf.getAttribute('about') + "Mac");
+			}
+			
 			new WindowDraggingElement(document.getElementById("quick-format-dialog"), window);
 			
 			qfs = document.getElementById("quick-format-search");
