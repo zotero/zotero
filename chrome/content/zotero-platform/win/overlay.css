@@ -49,13 +49,17 @@
 }
 
 #zotero-toolbar {
+	-moz-appearance: toolbox !important;
+	padding-left: 2px;
+}
+
+#zotero-toolbar:-moz-system-metric(windows-compositor) {
 	-moz-appearance: none !important;
 	background-image: -moz-linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
 	background-color: rgb(207, 219, 236) !important;
 	border-width: 0 0 1px 0;
 	border-style: solid;
 	border-color: #818790;
-	padding-left: 2px;
 }
 
 #zotero-collections-tree, #zotero-items-tree, #zotero-view-item {
@@ -85,7 +89,7 @@
 	border-width: 1px 0 0  1px;
 }
 
-#zotero-view-tabbox > tabs {
+#zotero-item-pane {
 	margin-top: 2px;
 }
 
