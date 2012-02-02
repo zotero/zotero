@@ -548,6 +548,9 @@ Zotero.Schema = new function(){
 					case 'nlm':
 					case 'vancouver':
 					
+					// Remove update script (included with 3.0 accidentally)
+					case 'update':
+					
 					// Delete renamed/obsolete files
 					case 'chicago-note.csl':
 					case 'mhra_note_without_bibliography.csl':
