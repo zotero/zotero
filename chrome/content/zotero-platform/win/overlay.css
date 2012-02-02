@@ -89,8 +89,16 @@
 	border-width: 1px 0 0  1px;
 }
 
-#zotero-item-pane {
+#zotero-view-tabbox > tabs {
 	margin-top: 2px;
+}
+
+#zotero-item-pane-groupbox {
+	-moz-appearance: none !important;
+	border-radius: 0;
+	border-width: 0 0 0 1px;
+	border-color: #818790;
+	border-style: solid;
 }
 
 #zotero-editpane-item-box > scrollbox, #zotero-view-item > tabpanel > vbox, 
