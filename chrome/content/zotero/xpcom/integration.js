@@ -564,8 +564,9 @@ Zotero.Integration = new function() {
 		var children = ctypes.cast(childrenPtr, ctypes.uint32_t.array(nChildrenJS).ptr).contents;
 		var foundWindow = false;
 		for(var i=0; i<nChildrenJS; i++) {
-			foundWindow = _X11FindWindow(display, children.addressOfElement(i).contents,
-				searchName);
+			var testWin = children.addressOfElement(i).contents;
+			if(testWin == 0) continue;
+			foundWindow = _X11FindWindow(display, testWin, searchName);
 			if(foundWindow) break;
 		}
 		
