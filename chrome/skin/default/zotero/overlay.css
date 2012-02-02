@@ -33,7 +33,7 @@
 #zotero-pane
 {
 	min-height: 32px; /* must match value in ZoteroPane.updateTagSelectorSize() */
-	overflow: hidden;tb-
+	overflow: hidden;
 }
 
 #zotero-collections-pane
