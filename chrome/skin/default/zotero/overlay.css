@@ -33,7 +33,7 @@
 #zotero-pane
 {
 	min-height: 32px; /* must match value in ZoteroPane.updateTagSelectorSize() */
-	overflow: hidden;
+	overflow: hidden;tb-
 }
 
 #zotero-collections-pane
@@ -257,6 +257,32 @@
 	height:24px;
 }
 
+#zotero-collections-toolbar {
+	padding-left: 2px;
+}
+
+.zotero-tb-button {
+	padding-left: 5px;
+	padding-right: 5px;
+	margin-right: 2px;
+	margin-left: 2px;
+}
+
+.zotero-tb-button:first-child {
+	margin-left: 0 !important;
+}
+
+.zotero-tb-button:last-child {
+	margin-right: 0 !important;
+}
+
+.zotero-tb-button[type="menu"] {
+	padding-left: 3px;
+	padding-right: 3px;
+	margin-left: 4px;
+	margin-right: 2px;
+}
+
 .zotero-tb-button[type="panel"] > dropmarker {
   display: none;
 }
@@ -399,8 +425,9 @@
 
 #zotero-tb-sync {
 	list-style-image: url(chrome://zotero/skin/arrow_rotate_static.png);
-	margin-left: -2px;
+	margin-left: -6px;
 	margin-right: -2px;
+	padding-right: 6px;
 }
 
 #zotero-tb-sync[status=animate] {

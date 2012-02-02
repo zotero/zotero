@@ -98,7 +98,7 @@
 			chromedir="&locale.dir;">
 			
 			<toolbar id="zotero-toolbar" class="toolbar">
-				<hbox id="zotero-collections-toolbar">
+				<hbox id="zotero-collections-toolbar" align="center">
 					<toolbarbutton id="zotero-tb-collection-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
 					<toolbarbutton id="zotero-tb-group-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
 					<spacer flex="1"/>
@@ -126,7 +126,7 @@
 					</toolbarbutton>
 				</hbox>
 				
-				<hbox id="zotero-items-toolbar">
+				<hbox id="zotero-items-toolbar" align="center">
 					<toolbarbutton id="zotero-tb-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItem.label;" type="menu">
 						<!-- New Item drop-down built in overlay.js::onLoad() -->
 						<menupopup onpopupshowing="ZoteroPane_Local.updateNewItemTypes()">
@@ -178,7 +178,7 @@
 							oncommand="ZoteroPane_Local.search()"/>
 				</hbox>
 				
-				<hbox id="zotero-item-toolbar" flex="1">
+				<hbox id="zotero-item-toolbar" flex="1" align="center">
 					<hbox align="center" pack="start" flex="1">
 						<toolbarbutton id="zotero-tb-locate" class="zotero-tb-button" tooltiptext="&zotero.toolbar.openURL.label;" type="menu">
 							<menupopup id="zotero-tb-locate-menu" onpopupshowing="Zotero_LocateMenu.buildLocateMenu()"/>
