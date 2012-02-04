@@ -3169,10 +3169,10 @@ var ZoteroPane = new function()
 		
 		if (item.libraryID) {
 			var group = Zotero.Groups.getByLibraryID(item.libraryID);
-			filesEditable = group.filesEditable;
+			var filesEditable = group.filesEditable;
 		}
 		else {
-			filesEditable = true;
+			var filesEditable = true;
 		}
 		
 		if (saveSnapshot) {
