@@ -44,36 +44,44 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	
 	// import functions missing from global scope into Fx sandbox
 	this.sandbox.XPathResult = Components.interfaces.nsIDOMXPathResult;
-	this.sandbox.DOMParser = function() {
-		// get URI
-		// DEBUG: In Fx 4 we can just use document.nodePrincipal, but in Fx 3.6 this doesn't work
-		if(typeof sandboxLocation === "string") {	// if sandbox specified by URI
-			var uri = sandboxLocation;
-		} else {									// if sandbox specified by DOM document
-			var uri = sandboxLocation.location.toString();
-		}
-		
-		// get principal from URI
-		var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
-				.getService(Components.interfaces.nsIScriptSecurityManager);
-		var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-			.getService(Components.interfaces.nsIIOService);
-		uri = ioService.newURI(uri, "UTF-8", null);
-		var principal = secMan.getCodebasePrincipal(uri);
-		
-		// initialize DOM parser
-		var _DOMParser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser);
-		_DOMParser.init(principal, uri, uri);
-		
-		// expose parseFromString
-		this.__exposedProps__ = {"parseFromString":"r"};
-		if(Zotero.isFx5) {
-			this.parseFromString = function(str, contentType) {
-				return Zotero.Translate.SandboxManager.Fx5DOMWrapper(_DOMParser.parseFromString(str, contentType));
+	if(typeof sandboxLocation === "object" &&
+			("wrappedJSObject" in sandboxLocation
+			? "DOMParser" in sandboxLocation.wrappedJSObject
+			: "DOMParser" in sandboxLocation)) {
+		this.sandbox.DOMParser = "wrappedJSObject" in sandboxLocation
+			? sandboxLocation.wrappedJSObject.DOMParser : sandboxLocation.DOMParser;
+	} else {
+		this.sandbox.DOMParser = function() {
+			// get URI
+			// DEBUG: In Fx 4 we can just use document.nodePrincipal, but in Fx 3.6 this doesn't work
+			if(typeof sandboxLocation === "string") {	// if sandbox specified by URI
+				var uri = sandboxLocation;
+			} else {									// if sandbox specified by DOM document
+				var uri = sandboxLocation.location.toString();
 			}
-		} else {
-			this.parseFromString = function(str, contentType) _DOMParser.parseFromString(str, contentType);
+			
+			// get principal from URI
+			var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
+					.getService(Components.interfaces.nsIScriptSecurityManager);
+			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
+				.getService(Components.interfaces.nsIIOService);
+			uri = ioService.newURI(uri, "UTF-8", null);
+			var principal = secMan.getCodebasePrincipal(uri);
+			
+			// initialize DOM parser
+			var _DOMParser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+				.createInstance(Components.interfaces.nsIDOMParser);
+			_DOMParser.init(principal, uri, uri);
+			
+			// expose parseFromString
+			this.__exposedProps__ = {"parseFromString":"r"};
+			if(Zotero.isFx5) {
+				this.parseFromString = function(str, contentType) {
+					return Zotero.Translate.SandboxManager.Fx5DOMWrapper(_DOMParser.parseFromString(str, contentType));
+				}
+			} else {
+				this.parseFromString = function(str, contentType) _DOMParser.parseFromString(str, contentType);
+			}
 		}
 	}
 	this.sandbox.DOMParser.__exposedProps__ = {"prototype":"r"};
