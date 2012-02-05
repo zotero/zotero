@@ -567,8 +567,17 @@ Zotero.Attachments = new function(){
 			if (mimeType === 'text/html' || mimeType === 'application/xhtml+xml') {
 				var sync = true;
 				
-				Zotero.WebPageDump.wpdDOMSaver.init(file.path, document);
-				Zotero.WebPageDump.wpdDOMSaver.saveHTMLDocument();
+				// Load WebPageDump code
+				var wpd = {"Zotero":Zotero};
+				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+					.getService(Components.interfaces.mozIJSSubScriptLoader)
+					.loadSubScript("chrome://zotero/content/webpagedump/common.js", wpd);
+				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+					.getService(Components.interfaces.mozIJSSubScriptLoader)
+					.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js", wpd);
+				
+				wpd.wpdDOMSaver.init(file.path, document);
+				wpd.wpdDOMSaver.saveHTMLDocument();
 				
 				attachmentItem.attachmentPath = this.getPath(
 					file, Zotero.Attachments.LINK_MODE_IMPORTED_URL

@@ -206,15 +206,6 @@ function makeZoteroContext(isConnector) {
 		.getService(Ci.mozIJSSubScriptLoader)
 		.loadSubScript("chrome://zotero/content/xpcom/citeproc.js", zContext.Zotero.CiteProc);
 	
-	// Load WPD into Zotero.WebPageDump namespace
-	zContext.Zotero.WebPageDump = {"Zotero":zContext.Zotero};
-	Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-		.getService(Components.interfaces.mozIJSSubScriptLoader)
-		.loadSubScript("chrome://zotero/content/webpagedump/common.js", zContext.Zotero.WebPageDump);
-	Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-		.getService(Components.interfaces.mozIJSSubScriptLoader)
-		.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js", zContext.Zotero.WebPageDump);
-	
 	// Load remaining xpcomFiles
 	for (var i=1; i<xpcomFilesAll.length; i++) {
 		try {
