@@ -95,11 +95,11 @@ function wpdWindowLoaded()
   try {                      
   	// this will be called multiple times if the page contains more than one document (frames, flash,...)
     //var browser=this.document.getElementById("content");
-   dump("[wpdWindowLoaded] ... \n");	 
+   Zotero.debug("[wpdWindowLoaded] ... ");	 
   	var browser = this.top.getBrowser();                   
   	// each time we have to check if the page is fully loaded...
   	if (!(browser.webProgress.isLoadingDocument || browser.contentDocument.location == gExceptLocation)) { 
-      dump("[wpdWindowLoaded] window finally loaded\n");	               
+      Zotero.debug("[wpdWindowLoaded] window finally loaded");	               
       gBrowserWindow.clearTimeout(gTimeOutID);      
       gBrowserWindow.removeEventListener("load",wpdWindowLoaded,true);    
       //dump("[wpdWindowLoaded] calling "+gCallback+"\n");      	
@@ -112,13 +112,13 @@ function wpdWindowLoaded()
       gBrowserWindow.setTimeout(gCallback, w);   
     }      
   } catch (ex)  {
-    dump("[wpdWindowLoaded] EXCEPTION: "+ex+"\n");
+    Zotero.debug("[wpdWindowLoaded] EXCEPTION: "+ex);
   }
 }           
 
 function wpdTimeOut()
 {                       
-  dump("[wpdTimeOut] timeout triggered!\n");	 
+  Zotero.debug("[wpdTimeOut] timeout triggered!");	 
   gTimedOut=true;
   gBrowserWindow.clearTimeout(gTimeOutID);      
   gBrowserWindow.removeEventListener("load",wpdWindowLoaded,true);    
@@ -134,7 +134,7 @@ function wpdLoadURL(aURI,aCallback)
 {               
   try {                                    
     gTimedOut=false;
-    dump("\n[wpdLoadURL] aURI: "+aURI+"\n");
+    Zotero.debug("[wpdLoadURL] aURI: "+aURI);
     if (aURI=="") return;        
     gBrowserWindow = wpdGetTopBrowserWindow();                      
     gBrowserWindow.loadURI(aURI);  
@@ -143,7 +143,7 @@ function wpdLoadURL(aURI,aCallback)
     gTimeOutID=gBrowserWindow.setTimeout(wpdTimeOut, 60000);      
     gBrowserWindow.addEventListener("load",wpdWindowLoaded, true);  
   } catch (ex) {   
-    dump("[wpdLoadURL] EXCEPTION: "+ex+"\n");
+    Zotero.debug("[wpdLoadURL] EXCEPTION: "+ex);
   }
 }        
 
@@ -262,7 +262,7 @@ var wpdCommon = {
   		  var gUnicodeConverter = Components.classes['@mozilla.org/intl/scriptableunicodeconverter'].getService(Components.interfaces.nsIScriptableUnicodeConverter);
   			gUnicodeConverter.charset = charset;       
   		} catch(ex) {                                                                                     
-  		  dump ("gUnicodeConverter EXCEPTION:"+ex+"\n");
+  		  Zotero.debug ("gUnicodeConverter EXCEPTION:"+ex);
   		}       
   	}
     
@@ -270,7 +270,7 @@ var wpdCommon = {
       try {
         var gEntityConverter = Components.classes["@mozilla.org/intl/entityconverter;1"].createInstance(Components.interfaces.nsIEntityConverter);
       } catch(e) { 
-        dump ("gEntityConverter EXCEPTION:"+ex+"\n");
+        Zotero.debug ("gEntityConverter EXCEPTION:"+ex);
       }
     }
 
@@ -326,7 +326,7 @@ var wpdCommon = {
 	// add a line to the error list (displays a maximum of 15 errors)                      
 	addError : function(aError)
 	{                             
-	  dump('ERROR: '+aError+"\n");  
+	  Zotero.debug('ERROR: '+aError);  
 		if (this.errCount<WPD_MAXUIERRORCOUNT) {  
 			if (this.errList.indexOf(aError)>-1) return;  // is the same 
 	    this.errList = this.errList+aError+"\n";	
@@ -337,7 +337,7 @@ var wpdCommon = {
 	},       
 	
 	saveWebPage : function(aDestFile) {
-	  dump("[saveWebPage] "+aDestFile+"\n"); 
+	  Zotero.debug("[saveWebPage] "+aDestFile); 
     var nsIWBP =	 Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"].createInstance(Components.interfaces.nsIWebBrowserPersist);
     var doc	= window.content.document;
     var file = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
