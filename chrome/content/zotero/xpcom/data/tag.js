@@ -353,7 +353,15 @@ Zotero.Tag.prototype.save = function (full) {
 			
 			var sql = "UPDATE tags SET " + columns.join("=?, ") + "=?"
 				+ " WHERE tagID=?";
-			Zotero.DB.query(sql, sqlValues);
+			try {
+				Zotero.DB.query(sql, sqlValues);
+			}
+			// TEMP
+			catch (e) {
+				var sql = "SELECT * FROM tags";
+				Zotero.debug(Zotero.DB.query(sql));
+				throw (e);
+			}
 		}
 		
 		
