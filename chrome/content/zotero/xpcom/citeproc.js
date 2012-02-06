@@ -126,7 +126,7 @@ var CSL = {
     MARK_TRAILING_NAMES: true,
     POSITION_TEST_VARS: ["position", "first-reference-note-number", "near-note"],
     AREAS: ["citation", "citation_sort", "bibliography", "bibliography_sort"],
-    MULTI_FIELDS: ["event", "publisher", "publisher-place", "event-place", "title", "container-title", "collection-title", "authority","edition","genre","title-short"],
+    MULTI_FIELDS: ["event", "publisher", "publisher-place", "event-place", "title", "container-title", "collection-title", "authority","edition","genre","title-short","subjurisdiction","medium"],
     CITE_FIELDS: ["first-reference-note-number", "locator", "locator-revision"],
     MINIMAL_NAME_FIELDS: ["literal", "family"],
     SWAPPING_PUNCTUATION: [".", "!", "?", ":",","],
@@ -463,217 +463,361 @@ CSL.debug = function (str) {
 CSL.error = function (str) {
     Zotero.debug("CSL error: " + str);
 };
-var CSL_E4X = function () {};
-CSL_E4X.prototype.clean = function (xml) {
+function DOMParser() {
+	return Components.classes["@mozilla.org/xmlextras/domparser;1"]
+		.createInstance(Components.interfaces.nsIDOMParser);
+};
+var CSL_IS_IE;
+var CSL_CHROME = function () {
+    if ("undefined" == typeof DOMParser || CSL_IS_IE) {
+        CSL_IS_IE = true;
+        DOMParser = function() {};
+        DOMParser.prototype.parseFromString = function(str, contentType) {
+            if ("undefined" != typeof ActiveXObject) {
+                var xmldata = new ActiveXObject('MSXML.DomDocument');
+                xmldata.async = false;
+                xmldata.loadXML(str);
+                return xmldata;
+            } else if ("undefined" != typeof XMLHttpRequest) {
+                var xmldata = new XMLHttpRequest;
+                if (!contentType) {
+                    contentType = 'text/xml';
+                }
+                xmldata.open('GET', 'data:' + contentType + ';charset=utf-8,' + encodeURIComponent(str), false);
+                if(xmldata.overrideMimeType) {
+                    xmldata.overrideMimeType(contentType);
+                }
+                xmldata.send(null);
+                return xmldata.responseXML;
+            }
+        };
+        this.hasAttributes = function (node) {
+            var ret;
+            if (node.attributes && node.attributes.length) {
+                ret = true;
+            } else {
+                ret = false;
+            }
+            return ret;
+        };
+    } else {
+        this.hasAttributes = function (node) {
+            var ret;
+            if (node.attributes && node.attributes.length) {
+                ret = true;
+            } else {
+                ret = false;
+            }
+            return ret;
+        };
+    }
+    this.importNode = function (doc, srcElement) {
+        if ("undefined" == typeof doc.importNode) {
+            var ret = this._importNode(doc, srcElement, true);
+        } else {
+            var ret = doc.importNode(srcElement, true);
+        }
+        return ret;
+    };
+    this._importNode = function(doc, node, allChildren) {
+        switch (node.nodeType) {
+            case 1:
+                var newNode = doc.createElement(node.nodeName);
+                if (node.attributes && node.attributes.length > 0)
+                    for (var i = 0, il = node.attributes.length; i < il;)
+                        newNode.setAttribute(node.attributes[i].nodeName, node.getAttribute(node.attributes[i++].nodeName));
+                    if (allChildren && node.childNodes && node.childNodes.length > 0)
+                        for (var i = 0, il = node.childNodes.length; i < il;)
+                            newNode.appendChild(this._importNode(doc, node.childNodes[i++], allChildren));
+                return newNode;
+                break;
+            case 3:
+            case 4:
+            case 8:
+        }
+    };
+    this.parser = new DOMParser();
+    var str = "<docco><institution institution-parts=\"long\" delimiter=\", \" substitute-use-first=\"1\" use-last=\"1\"><institution-part name=\"long\"/></institution></docco>";
+    var inst_doc = this.parser.parseFromString(str, "text/xml");
+    var inst_node = inst_doc.getElementsByTagName("institution");
+    this.institution = inst_node.item(0);
+    var inst_part_node = inst_doc.getElementsByTagName("institution-part");
+    this.institutionpart = inst_part_node.item(0);
+    this.ns = "http://purl.org/net/xbiblio/csl";
+};
+CSL_CHROME.prototype.clean = function (xml) {
     xml = xml.replace(/<\?[^?]+\?>/g, "");
     xml = xml.replace(/<![^>]+>/g, "");
-    xml = xml.replace(/^\s+/g, "");
-    xml = xml.replace(/\s+$/g, "");
+    xml = xml.replace(/^\s+/, "");
+    xml = xml.replace(/\s+$/, "");
+    xml = xml.replace(/^\n*/, "");
     return xml;
 };
-CSL_E4X.prototype.getStyleId = function (myxml) {
+CSL_CHROME.prototype.getStyleId = function (myxml) {
     var text = "";
-    default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-    var node = myxml..id;
-    if (node && node.length()) {
-        text = node[0].toString();
+    var node = myxml.getElementsByTagName("id");
+    if (node && node.length) {
+        node = node.item(0);
+    }
+    if (node) {
+        text = node.textContent;
+    }
+    if (!text) {
+        text = node.innerText;
+    }
+    if (!text) {
+        text = node.innerHTML;
     }
     return text;
 };
-CSL_E4X.prototype.children = function (myxml) {
-    return myxml.children();
+CSL_CHROME.prototype.children = function (myxml) {
+    var children, pos, len, ret;
+    if (myxml) {
+        ret = [];
+        children = myxml.childNodes;
+        for (pos = 0, len = children.length; pos < len; pos += 1) {
+            if (children[pos].nodeName != "#text") {
+                ret.push(children[pos]);
+            }
+        }
+        return ret;
+    } else {
+        return [];
+    }
 };
-CSL_E4X.prototype.nodename = function (myxml) {
-    var ret = myxml.localName();
+CSL_CHROME.prototype.nodename = function (myxml) {
+    var ret = myxml.nodeName;
     return ret;
 };
-CSL_E4X.prototype.attributes = function (myxml) {
-    var ret, attrs, attr, key, xml;
-    default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
+CSL_CHROME.prototype.attributes = function (myxml) {
+    var ret, attrs, attr, key, xml, pos, len;
     ret = new Object();
-    attrs = myxml.attributes();
-    for each (attr in attrs) {
-        key = "@" + attr.localName();
-        if (key.slice(0,5) == "@e4x_") {
-            continue;
+    if (myxml && this.hasAttributes(myxml)) {
+        attrs = myxml.attributes;
+        for (pos = 0, len=attrs.length; pos < len; pos += 1) {
+            attr = attrs[pos];
+            ret["@" + attr.name] = attr.value;
         }
-        ret[key] = attr.toString();
     }
     return ret;
 };
-CSL_E4X.prototype.content = function (myxml) {
-    return myxml.toString();
+CSL_CHROME.prototype.content = function (myxml) {
+    var ret;
+    if ("undefined" != typeof myxml.textContent) {
+        ret = myxml.textContent;
+    } else if ("undefined" != typeof myxml.innerText) {
+        ret = myxml.innerText;
+    } else {
+        ret = myxml.txt;
+    }
+    return ret;
 };
-CSL_E4X.prototype.namespace = {
+CSL_CHROME.prototype.namespace = {
     "xml":"http://www.w3.org/XML/1998/namespace"
 }
-CSL_E4X.prototype.numberofnodes = function (myxml) {
-    return myxml.length();
+CSL_CHROME.prototype.numberofnodes = function (myxml) {
+    if (myxml) {
+        return myxml.length;
+    } else {
+        return 0;
+    }
 };
-CSL_E4X.prototype.getAttributeName = function (attr) {
-    var ret = attr.localName();
+CSL_CHROME.prototype.getAttributeName = function (attr) {
+    var ret = attr.name;
     return ret;
 }
-CSL_E4X.prototype.getAttributeValue = function (myxml,name,namespace) {
-    var xml;
-    default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-    if (namespace) {
-        var ns = new Namespace(this.namespace[namespace]);
-        var ret = myxml.@ns::[name].toString();
+CSL_CHROME.prototype.getAttributeValue = function (myxml,name,namespace) {
+    var ret = "";
+    if (myxml && this.hasAttributes(myxml) && myxml.getAttribute(name)) {
+        ret = myxml.getAttribute(name);
+    }
+    return ret;
+}
+CSL_CHROME.prototype.getNodeValue = function (myxml,name) {
+    var ret = "";
+    if (name){
+        var vals = myxml.getElementsByTagName(name);
+        if (vals.length > 0) {
+            if ("undefined" != typeof vals[0].textContent) {
+                ret = vals[0].textContent;
+            } else if ("undefined" != typeof vals[0].innerText) {
+                ret = vals[0].innerText;
+            } else {
+                ret = vals[0].text;
+            }
+        }
     } else {
-        if (name) {
-            var ret = myxml.attribute(name).toString();
+        ret = myxml;
+    }
+    if (ret && ret.childNodes && (ret.childNodes.length == 0 || (ret.childNodes.length == 1 && ret.firstChild.nodeName == "#text"))) {
+        if ("undefined" != typeof ret.textContent) {
+            ret = ret.textContent;
+        } else if ("undefined" != typeof ret.innerText) {
+            ret = ret.innerText;
         } else {
-            var ret = myxml.toString();
+            ret = ret.text;
         }
     }
     return ret;
 }
-CSL_E4X.prototype.getNodeValue = function (myxml,name) {
-    var xml;
-    default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-    if (name){
-        return myxml[name].toString();
-    } else {
-        return myxml.toString();
+CSL_CHROME.prototype.setAttributeOnNodeIdentifiedByNameAttribute = function (myxml,nodename,partname,attrname,val) {
+    var pos, len, xml, nodes, node;
+    if (attrname.slice(0,1) === '@'){
+        attrname = attrname.slice(1);
+    }
+    nodes = myxml.getElementsByTagName(nodename);
+    for (pos = 0, len = nodes.length; pos < len; pos += 1) {
+        node = nodes[pos];
+        if (node.getAttribute("name") != partname) {
+            continue;
+        }
+        node.setAttribute(attrname, val);
     }
 }
-CSL_E4X.prototype.setAttributeOnNodeIdentifiedByNameAttribute = function (myxml,nodename,attrname,attr,val) {
-    var xml;
-    default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-    if (attr[0] != '@'){
-        attr = '@'+attr;
+CSL_CHROME.prototype.deleteNodeByNameAttribute = function (myxml,val) {
+    var pos, len, node, nodes;
+    nodes = myxml.childNodes;
+    for (pos = 0, len = nodes.length; pos < len; pos += 1) {
+        node = nodes[pos];
+        if (!node || node.nodeType == node.TEXT_NODE) {
+            continue;
+        }
+        if (this.hasAttributes(node) && node.getAttribute("name") == val) {
+            myxml.removeChild(nodes[pos]);
+        }
     }
-    myxml[nodename].(@name == attrname)[0][attr] = val;
 }
-CSL_E4X.prototype.deleteNodeByNameAttribute = function (myxml,val) {
-    delete myxml.*.(@name==val)[0];
+CSL_CHROME.prototype.deleteAttribute = function (myxml,attr) {
+    myxml.removeAttribute(attr);
 }
-CSL_E4X.prototype.deleteAttribute = function (myxml,attr) {
-    delete myxml["@"+attr];
+CSL_CHROME.prototype.setAttribute = function (myxml,attr,val) {
+    var attribute;
+    if (!myxml.ownerDocument) {
+        myxml = myxml.firstChild;
+    }
+    attribute = myxml.ownerDocument.createAttribute(attr);
+    myxml.setAttribute(attr, val);
+    return false;
 }
-CSL_E4X.prototype.setAttribute = function (myxml,attr,val) {
-    myxml['@'+attr] = val;
+CSL_CHROME.prototype.nodeCopy = function (myxml) {
+    var cloned_node = myxml.cloneNode(true);
+    return cloned_node;
 }
-CSL_E4X.prototype.nodeCopy = function (myxml) {
-    return myxml.copy();
-}
-CSL_E4X.prototype.getNodesByName = function (myxml,name,nameattrval) {
-    var xml, ret;
-    default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-    ret = myxml.descendants(name);
-    if (nameattrval){
-        ret = ret.(@name == nameattrval);
+CSL_CHROME.prototype.getNodesByName = function (myxml,name,nameattrval) {
+    var ret, nodes, node, pos, len;
+    ret = [];
+    nodes = myxml.getElementsByTagName(name);
+    for (pos = 0, len = nodes.length; pos < len; pos += 1) {
+        node = nodes.item(pos);
+        if (nameattrval && !(this.hasAttributes(node) && node.getAttribute("name") == nameattrval)) {
+            continue;
+        }
+        ret.push(node);
     }
     return ret;
 }
-CSL_E4X.prototype.nodeNameIs = function (myxml,name) {
-    var xml;
-    default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-    if (myxml.localName() && myxml.localName().toString() == name){
+CSL_CHROME.prototype.nodeNameIs = function (myxml,name) {
+    if (name == myxml.nodeName) {
         return true;
     }
     return false;
 }
-CSL_E4X.prototype.makeXml = function (myxml) {
-    var xml;
-    XML.ignoreComments = true;
-    XML.ignoreProcessingInstructions = true;
-     XML.ignoreWhitespace = true;
-    XML.prettyPrinting = true;
-    XML.prettyIndent = 2;
-    if ("xml" == typeof myxml){
-        myxml = myxml.toXMLString();
-    };
-    default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-    xml = new Namespace("http://www.w3.org/XML/1998/namespace");
-    if (myxml){
-        myxml = myxml.replace(/\s*<\?[^>]*\?>\s*\n*/g, "");
-        myxml = new XML(myxml);
-    } else {
-        myxml = new XML();
+CSL_CHROME.prototype.makeXml = function (myxml) {
+    var ret, topnode;
+    if (!myxml) {
+        myxml = "<docco><bogus/></docco>";
     }
-    return myxml;
+    myxml = myxml.replace(/\s*<\?[^>]*\?>\s*\n*/g, "");
+    var nodetree = this.parser.parseFromString(myxml, "application/xml");
+    return nodetree.firstChild;
 };
-CSL_E4X.prototype.insertChildNodeAfter = function (parent,node,pos,datexml) {
+CSL_CHROME.prototype.insertChildNodeAfter = function (parent,node,pos,datexml) {
     var myxml, xml;
-    default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-    myxml = XML(datexml.toXMLString());
-    parent.insertChildAfter(node,myxml);
-    delete parent.*[pos];
-    return parent;
-};
-CSL_E4X.prototype.insertPublisherAndPlace = function(myxml) {
-    default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-    for each (var node in myxml..group) {
-            if (node.children().length() === 2) {
-                var twovars = [];
-                for each (var child in node.children()) {
-                        if (child.children().length() === 0
-) {
-                            twovars.push(child.@variable.toString());
-                            if (child.@suffix.toString()
-                                || child.@prefix.toString()) {
-                                twovars = [];
-                                break;
-                            }
-                        }
+    myxml = this.importNode(node.ownerDocument, datexml);
+    parent.replaceChild(myxml, node);
+     return parent;
+ };
+CSL_CHROME.prototype.insertPublisherAndPlace = function(myxml) {
+    var group = myxml.getElementsByTagName("group");
+    for (var i = 0, ilen = group.length; i < ilen; i += 1) {
+        var node = group.item(i);
+        if (node.childNodes.length === 2) {
+            var twovars = [];
+            for (var j = 0, jlen = 2; j < jlen; j += 1) {
+                var child = node.childNodes.item(j);
+                if (child.childNodes.length === 0) {
+                    twovars.push(child.getAttribute('variable'));
+                    if (child.getAttribute('suffix')
+                        || child.getAttribute('prefix')) {
+                        twovars = [];
+                        break;
                     }
-                if (twovars.indexOf("publisher") > -1 && twovars.indexOf("publisher-place") > -1) {
-                    node["@has-publisher-and-publisher-place"] = "true";
                 }
             }
-        }
-};
-CSL_E4X.prototype.addMissingNameNodes = function(myxml) {
-    default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-    for each (node in myxml..names) {
-        if ("xml" == typeof node && node.parent().localName() !== "substitute" && node.elements("name").length() === 0) {
-            var name = <name/>;
-            node.appendChild(name);
-        }
-    }
-};
-CSL_E4X.prototype.addInstitutionNodes = function(myxml) {
-    var institution_long, institution_short, name_part, children, node, xml;
-    default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-    for each (node in myxml..names) {
-        if ("xml" == typeof node && node.elements("name").length() > 0) {
-            if (node.institution.length() === 0) {
-                institution_long = <institution
-                    institution-parts="long"
-                    substitute-use-first="1"
-                    use-last="1"/>
-                institution_part = <institution-part name="long"/>;
-                node.name += institution_long;
-                node.institution.@delimiter = node.name.@delimiter.toString();
-                if (node.name.@and.toString()) {
-                    node.institution.@and = "text";
-                }
-                node.institution[0].appendChild(institution_part);
-                for each (var attr in CSL.INSTITUTION_KEYS) {
-                    if (node.name.@[attr].toString()) {
-                        node.institution['institution-part'][0].@[attr] = node.name.@[attr].toString();
-                    }
-                }
-                for each (var namepartnode in node.name['name-part']) {
-                       if (namepartnode.@name.toString() === 'family') {
-                        for each (var attr in CSL.INSTITUTION_KEYS) {
-                            if (namepartnode.@[attr].toString()) {
-                                node.institution['institution-part'][0].@[attr] = namepartnode.@[attr].toString();
-                            }
-                        }
-                       }
-                }
+            if (twovars.indexOf("publisher") > -1 && twovars.indexOf("publisher-place") > -1) {
+                node.setAttribute('has-publisher-and-publisher-place', true);
             }
         }
     }
 };
-CSL_E4X.prototype.flagDateMacros = function(myxml) {
-    default xml namespace = "http://purl.org/net/xbiblio/csl"; with({});
-    for each (node in myxml..macro) {
-        if (node..date.length()) {
-            node.@['macro-has-date'] = 'true';
+CSL_CHROME.prototype.addMissingNameNodes = function(myxml) {
+    var nameslist = myxml.getElementsByTagName("names");
+    for (var i = 0, ilen = nameslist.length; i < ilen; i += 1) {
+        var names = nameslist.item(i);
+        var namelist = names.getElementsByTagName("name");
+        if ((!namelist || namelist.length === 0)
+            && names.parentNode.tagName.toLowerCase() !== "substitute") {
+            var doc = names.ownerDocument;
+            var name = doc.createElement("name");
+            names.appendChild(name);
+        }
+    }
+};
+CSL_CHROME.prototype.addInstitutionNodes = function(myxml) {
+    var names, thenames, institution, theinstitution, name, thename, xml, pos, len;
+    names = myxml.getElementsByTagName("names");
+    for (pos = 0, len = names.length; pos < len; pos += 1) {
+        thenames = names.item(pos);
+        name = thenames.getElementsByTagName("name");
+        if (name.length == 0) {
+            continue;
+        }
+        institution = thenames.getElementsByTagName("institution");
+        if (institution.length == 0) {
+            theinstitution = this.importNode(myxml.ownerDocument, this.institution);
+            theinstitutionpart = theinstitution.getElementsByTagName("institution-part").item(0);
+            thename = name.item(0);
+            thenames.insertBefore(theinstitution, thename.nextSibling);
+            for (var j = 0, jlen = CSL.INSTITUTION_KEYS.length; j < jlen; j += 1) {
+                var attrname = CSL.INSTITUTION_KEYS[j];
+                var attrval = thename.getAttribute(attrname);
+                if (attrval) {
+                    theinstitutionpart.setAttribute(attrname, attrval);
+                }
+            }
+            var nameparts = thename.getElementsByTagName("name-part");
+            for (var j = 0, jlen = nameparts.length; j < jlen; j += 1) {
+                if ('family' === nameparts[j].getAttribute('name')) {
+                    for (var k = 0, klen = CSL.INSTITUTION_KEYS.length; k < klen; k += 1) {
+                        var attrname = CSL.INSTITUTION_KEYS[k];
+                        var attrval = nameparts[j].getAttribute(attrname);
+                        if (attrval) {
+                            theinstitutionpart.setAttribute(attrname, attrval);
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+CSL_CHROME.prototype.flagDateMacros = function(myxml) {
+    var pos, len, thenode, thedate;
+    nodes = myxml.getElementsByTagName("macro");
+    for (pos = 0, len = nodes.length; pos < len; pos += 1) {
+        thenode = nodes.item(pos);
+        thedate = thenode.getElementsByTagName("date");
+        if (thedate.length) {
+            thenode.setAttribute('macro-has-date', 'true');
         }
     }
 };
@@ -1989,7 +2133,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.272";
+    this.processor_version = "1.0.277";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2309,16 +2453,32 @@ CSL.Engine.prototype.retrieveItem = function (id) {
     if (this.opt.development_extensions.field_hack && Item.note) {
         m = Item.note.match(CSL.NOTE_FIELDS_REGEXP);
         if (m) {
+            var names = {};
             for (pos = 0, len = m.length; pos < len; pos += 1) {
                 mm = m[pos].match(CSL.NOTE_FIELD_REGEXP);
-                if (!Item[mm[1]] || true) {
-                    if (CSL.DATE_VARIABLES.indexOf(mm[1]) > -1) {
-                        Item[mm[1]] = {raw:mm[2]};
-                    } else {
-                        Item[mm[1]] = mm[2].replace(/^\s+/, "").replace(/\s+$/, "");
+                if (!Item[mm[1]] && CSL.DATE_VARIABLES.indexOf(mm[1]) > -1) {
+                    Item[mm[1]] = {raw:mm[2]};
+                } else if (!Item[mm[1]] && CSL.NAME_VARIABLES.indexOf(mm[1]) > -1) {
+                    if (!Item[mm[1]]) {
+                        Item[mm[1]] = []
                     }
+                    var lst = mm[2].split(/\s*\|\|\s*/)
+                    if (lst.length === 1) {
+                        Item[mm[1]].push({family:lst[0],isInstitution:true});
+                    } else if (lst.length === 2) {
+                        Item[mm[1]].push({family:lst[0],given:lst[1]});
+                    }
+                } else if (!Item[mm[1]] || mm[1] === "type") {
+                    Item[mm[1]] = mm[2].replace(/^\s+/, "").replace(/\s+$/, "");
                 }
+                Item.note.replace(CSL.NOTE_FIELD_REGEXP, "")
             }
+        }
+    }
+    if (this.opt.development_extensions.jurisdiction_subfield && Item.jurisdiction) {
+        var subjurisdictions = Item.jurisdiction.split(";");
+        if (subjurisdictions.length > 1) {
+            Item.subjurisdiction = subjurisdictions.slice(0,2).join(";");
         }
     }
     for (var i = 1, ilen = CSL.DATE_VARIABLES.length; i < ilen; i += 1) {
@@ -2547,6 +2707,7 @@ CSL.Engine.Opt = function () {
     this.development_extensions.clean_up_csl_flaws = true;
     this.development_extensions.flip_parentheses_to_braces = true;
     this.development_extensions.parse_section_variable = true;
+    this.development_extensions.jurisdiction_subfield = true;
     this.gender = {};
 	this['cite-lang-prefs'] = {
 		persons:['orig'],
@@ -3315,7 +3476,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                             var items = citations[(j - 1)].sortedItems;
                             var useme = false;
                             if ((citations[(j - 1)].sortedItems[0][1].id  == item[1].id && citations[j - 1].properties.noteIndex >= (citations[j].properties.noteIndex - 1)) || citations[(j - 1)].sortedItems[0][1].id == this.registry.registry[item[1].id].parallel) {
-                                if (citationsInNote[citations[j - 1].properties.noteIndex] === 1) {
+                                if (citationsInNote[citations[j - 1].properties.noteIndex] === 1 || citations[j - 1].properties.noteIndex === 0) {
                                     useme = true;
                                 }
                             }
@@ -6630,11 +6791,13 @@ CSL.evaluateLabel = function (node, state, Item, item) {
     return CSL.castLabel(state, node, myterm, plural);
 };
 CSL.evaluateStringPluralism = function (str) {
-    if (str && str.match(/(?:[0-9],\s*[0-9]|\s+and\s+|&|[0-9]\s*[\-\u2013]\s*[0-9])/)) {
-        return 1;
-    } else {
-        return 0;
+    if (str) {
+        var m = str.match(/(?:[0-9],\s*[0-9]|\s+and\s+|&|([0-9]+)\s*[\-\u2013]\s*([0-9]+))/)
+        if (m && (!m[1] || parseInt(m[1]) < parseInt(m[2]))) {
+            return 1
+        }
     }
+    return 0;
 };
 CSL.castLabel = function (state, node, term, plural, mode) {
     var ret = state.getTerm(term, node.strings.form, plural, false, mode);
@@ -7091,7 +7254,6 @@ CSL.Node.number = {
                 for (var i = 0, ilen = values.length; i < ilen; i += 1) {
                     newstr += values[i][1];
                 }
-                newstr = state.fun.page_mangler(newstr);
             }
             if (newstr && !newstr.match(/^[-.\u20130-9]+$/)) {
                 state.output.append(newstr, this);
@@ -7339,6 +7501,12 @@ CSL.Node.text = {
                                 if (item && item[this.variables[0]]) {
                                     var locator = "" + item[this.variables[0]];
                                     locator = locator.replace(/--*/g,"\u2013");
+                                    var m = locator.match(/^([0-9]+)\s*\u2013\s*([0-9]+)$/)
+                                    if (m) {
+                                        if (parseInt(m[1]) >= parseInt(m[2])) {
+                                            locator = m[1] + "-" + m[2];
+                                        }
+                                    }
                                     state.output.append(locator, this, false, false, true);
                                 }
                             };
@@ -7375,8 +7543,8 @@ CSL.Node.text = {
                             };
                         } else if (this.variables_real[0] === "hereinafter") {
                             func = function (state, Item) {
-                                var hereinafter_key = state.transform.getHereinafter(Item);
-                                var value = state.transform.abbrevs["default"].hereinafter[hereinafter_key];
+                                var hereinafter_info = state.transform.getHereinafter(Item);
+                                var value = state.transform.abbrevs[hereinafter_info[0]].hereinafter[hereinafter_info[1]];
                                 if (value) {
                                     state.tmp.group_context.value()[2] = true;
                                     state.output.append(value, this);
@@ -7399,6 +7567,7 @@ CSL.Node.text = {
                                 if (value) {
                                     if ((Item.type === "bill" || Item.type === "legislation")
                                        && state.opt.development_extensions.parse_section_variable) {
+                                        value = "" + value;
                                         var m = value.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
                                         if (m) {
                                             var splt = value.split(CSL.STATUTE_SUBDIV_PLAIN_REGEX);
@@ -7605,8 +7774,8 @@ CSL.Attributes["@variable"] = function (state, arg) {
                     this.variables.push(variables[pos]);
                 }
                 if ("hereinafter" === variables[pos] && state.sys.getAbbreviation) {
-                    var hereinafter_key = state.transform.getHereinafter(Item);
-                    state.transform.loadAbbreviation("default", "hereinafter", hereinafter_key);
+                    var hereinafter_info = state.transform.getHereinafter(Item);
+                    state.transform.loadAbbreviation(hereinafter_info[0], "hereinafter", hereinafter_info[1]);
                 }
                 if (state.tmp.can_block_substitute) {
                     state.tmp.done_vars.push(variables[pos]);
@@ -7712,9 +7881,9 @@ CSL.Attributes["@variable"] = function (state, arg) {
                     myitem = item;
                 }
                 if (variable === "hereinafter" && state.sys.getAbbreviation) {
-                    var hereinafter_key = state.transform.getHereinafter(myitem);
-                    state.transform.loadAbbreviation("default", "hereinafter", hereinafter_key);
-                    if (state.transform.abbrevs["default"].hereinafter[hereinafter_key]) {
+                    var hereinafter_info = state.transform.getHereinafter(myitem);
+                    state.transform.loadAbbreviation(hereinafter_info[0], "hereinafter", hereinafter_info[1]);
+                    if (state.transform.abbrevs[hereinafter_info[0]].hereinafter[hereinafter_info[1]]) {
                         x = true
                     }
                 } else if (myitem[variable]) {
@@ -7887,7 +8056,10 @@ CSL.Attributes["@is-numeric"] = function (state, arg) {
                     state.processNumber(false, Item, variables[pos]);
                 }
             }
-            if (!state.tmp.shadow_numbers[variables[pos]].numeric) {
+            if (!state.tmp.shadow_numbers[variables[pos]].numeric
+                && !(variables[pos] === 'title'
+                     && Item[variables[pos]] 
+                     && Item[variables[pos]].slice(-1) === "" + parseInt(Item[variables[pos]].slice(-1)))) {
                 numeric = false;
                 break;
             }
@@ -8405,13 +8577,13 @@ CSL.Transform = function (state) {
         if (!myabbrev_family) {
             return basevalue;
         }
-        if (["publisher-place", "event-place"].indexOf(myabbrev_family) > -1) {
+        if (["publisher-place", "event-place", "subjurisdiction"].indexOf(myabbrev_family) > -1) {
             myabbrev_family = "place";
         }
         if (["publisher", "authority"].indexOf(myabbrev_family) > -1) {
             myabbrev_family = "institution-part";
         }
-        if (["genre", "event"].indexOf(myabbrev_family) > -1) {
+        if (["genre", "event", "medium"].indexOf(myabbrev_family) > -1) {
             myabbrev_family = "title";
         }
         if (["title-short"].indexOf(myabbrev_family) > -1) {
@@ -8667,15 +8839,16 @@ CSL.Transform = function (state) {
                 hereinafter_metadata.push("date:" + date);
             }
         }
+        var jurisdiction = "default";
         if (Item.jurisdiction) {
-            hereinafter_metadata.push("jurisdiction:" + Item.jurisdiction);
+            jurisdiction = Item.jurisdiction;
         }
         hereinafter_metadata = hereinafter_metadata.join(", ");
         if (hereinafter_metadata) {
             hereinafter_metadata = " [" + hereinafter_metadata + "]";
         }
         var hereinafter_key = hereinafter_author_title.join(", ") + hereinafter_metadata;
-        return hereinafter_key;
+        return [jurisdiction, hereinafter_key];
     }
     this.getHereinafter = getHereinafter;
 };
@@ -9787,11 +9960,11 @@ CSL.Util.Ordinalizer.prototype.format = function (num, gender) {
     str = num.toString();
     if ((num / 10) % 10 === 1 || (num > 10 && num < 20)) {
         str += this.suffixes[gender][3];
-    } else if (num % 10 === 1) {
+    } else if (num % 10 === 1 && num % 100 !== 11) {
         str += this.suffixes[gender][0];
-    } else if (num % 10 === 2) {
+    } else if (num % 10 === 2 && num % 100 !== 12) {
         str += this.suffixes[gender][1];
-    } else if (num % 10 === 3) {
+    } else if (num % 10 === 3 && num % 100 !== 13) {
         str += this.suffixes[gender][2];
     } else {
         str += this.suffixes[gender][3];
@@ -9847,7 +10020,9 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable) {
         if (num.slice(0, 1) === '"' && num.slice(-1) === '"') {
             num = num.slice(1, -1);
         }
-        num = num.replace(/\s*\-\s*/, "\u2013", "g");
+        if (num.indexOf("&") > -1 || num.indexOf("--") > -1) {
+            this.tmp.shadow_numbers[variable].plural = 1;
+        }
         if (this.variable === "page-first") {
             m = num.split(/\s*(?:&|,|-)\s*/);
             if (m) {
@@ -9857,8 +10032,8 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable) {
                 }
             }
         }
-        var lst = num.split(/(?:,\s+|\s*[\-\u2013]\s*|\s*&\s*)/);
-        var m = num.match(/(,\s+|\s*[\-\u2013]\s*|\s*&\s*)/g);
+        var lst = num.split(/(?:,\s+|\s*\\*[\-\u2013]+\s*|\s*&\s*)/);
+        var m = num.match(/(,\s+|\s*\\*[\-\u2013]+\s*|\s*&\s*)/g);
         var elements = [];
         for (var i = 0, ilen = lst.length - 1; i < ilen; i += 1) {
             elements.push(lst[i]);
@@ -9872,7 +10047,30 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable) {
             if (odd) {
                 if (elements[i]) {
                     if (elements[i].match(/[0-9]/)) {
-                        count = count + 1;
+                        if (elements[i - 1] && elements[i - 1].match(/^\s*\\*[\-\u2013]+\s*$/)) {
+                            var middle = this.tmp.shadow_numbers[variable].values.slice(-1);
+                            if (middle[0][1].indexOf("\\") == -1) {
+                                if (elements[i - 2] && ("" + elements[i - 2]).match(/[0-9]+$/)
+                                    && elements[i].match(/^[0-9]+/)
+                                    && parseInt(elements[i - 2]) < parseInt(elements[i].replace(/[^0-9].*/,""))) {
+                                    var start = this.tmp.shadow_numbers[variable].values.slice(-2);
+                                    middle[0][1] = "\u2013";
+                                    if (this.opt["page-range-format"] ) {
+                                        var newstr = this.fun.page_mangler(start[0][1] +"-"+elements[i]);
+                                        newstr = newstr.split(/\u2013/);
+                                        elements[i] = newstr[1];
+                                    }
+                                    count = count + 1;
+                                }
+                                if (middle[0][1].indexOf("--") > -1) {
+                                    middle[0][1] = middle[0][1].replace(/--*/, "\u2013");
+                                }
+                            } else {
+                                middle[0][1] = middle[0][1].replace(/\\/, "", "g");
+                            }
+                        } else {
+                            count = count + 1;
+                        }
                     }
                     var subelements = elements[i].split(/\s+/);
                     for (var j = 0, jlen = subelements.length; j < jlen; j += 1) {
@@ -9917,7 +10115,7 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable) {
             this.tmp.shadow_numbers[variable].numeric = true;
         } else {
              this.tmp.shadow_numbers[variable].numeric = numeric;
-       }
+        }
         if (count > 1) {
             this.tmp.shadow_numbers[variable].plural = 1;
         }
