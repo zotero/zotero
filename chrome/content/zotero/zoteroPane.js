@@ -274,8 +274,9 @@ var ZoteroPane = new function()
 		for (var i = 0; i<itemTypes.length; i++) {
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", itemTypes[i].localized);
-			menuitem.setAttribute("oncommand","ZoteroPane_Local.newItem("+itemTypes[i]['id']+")");
 			menuitem.setAttribute("tooltiptext", "");
+			let type = itemTypes[i].id;
+			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type); }, false);
 			moreMenu.appendChild(menuitem);
 		}
 	}
@@ -311,8 +312,9 @@ var ZoteroPane = new function()
 		for (var i = 0; i<itemTypes.length; i++) {
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", itemTypes[i].localized);
-			menuitem.setAttribute("oncommand","ZoteroPane_Local.newItem("+itemTypes[i]['id']+")");
 			menuitem.setAttribute("tooltiptext", "");
+			let type = itemTypes[i].id;
+			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type); }, false);
 			menuitem.className = "zotero-tb-add";
 			addMenu.insertBefore(menuitem, separator);
 		}
