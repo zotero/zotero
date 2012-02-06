@@ -623,7 +623,7 @@ var Zotero_File_Interface = new function() {
 		var now = Date.now();
 		
 		// Don't repaint more than 10 times per second unless forced.
-		if(!force && window.zoteroLastRepaint && (now - window.zoteroLastRepaint) < 100) return
+		if(window.zoteroLastRepaint && (now - window.zoteroLastRepaint) < 100) return
 		
 		// Start a nested event queue
 		Zotero.mainThread.pushEventQueue(null);
