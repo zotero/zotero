@@ -359,7 +359,17 @@ Zotero.Tag.prototype.save = function (full) {
 			// TEMP
 			catch (e) {
 				var sql = "SELECT * FROM tags";
-				Zotero.debug(Zotero.DB.query(sql));
+				var tags = Zotero.DB.query(sql);
+				for each(var tag in tags) {
+					Zotero.debug('------');
+					Zotero.debug(tag.tagID);
+					Zotero.debug(tag.libraryID);
+					Zotero.debug(tag.name);
+					Zotero.debug(tag.type);
+					Zotero.debug(tag.dateAdded);
+					Zotero.debug(tag.dateModified);
+					Zotero.debug(tag.clientDateModified);
+				}
 				throw (e);
 			}
 		}
