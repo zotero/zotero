@@ -1637,15 +1637,27 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 	
 	var io = new Zotero.Integration.CitationEditInterface(citation, field, this, session, newField, callback);
 	
-	if(Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
-		Zotero.Integration.displayDialog(this._doc,
-			'chrome://zotero/content/integration/addCitationDialog.xul', 'alwaysRaised,resizable',
-			io, true);
+	var doc = this._doc;
+	function openAddCitationDialog() {
+		if(Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
+			Zotero.Integration.displayDialog(doc,
+				'chrome://zotero/content/integration/addCitationDialog.xul', 'alwaysRaised,resizable',
+				io, true);
+		} else {
+			var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
+				? 'popup' : 'alwaysRaised')
+			Zotero.Integration.displayDialog(doc,
+				'chrome://zotero/content/integration/quickFormat.xul', mode, io, true);
+		}
+	}
+	
+	if(session.data.prefs.storeReferences) {
+		// If references are stored in document, don't delay opening dialog to see if there are
+		// missing references
+		openAddCitationDialog();
 	} else {
-		var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
-			? 'popup' : 'alwaysRaised')
-		Zotero.Integration.displayDialog(this._doc,
-			'chrome://zotero/content/integration/quickFormat.xul', mode, io, true);
+		// Otherwise, read items out of the document before doing anything
+		io._runWhenSessionUpdated(openAddCitationDialog);
 	}
 }
 
