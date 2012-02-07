@@ -1863,6 +1863,7 @@ Zotero.Integration.Session = function(doc) {
 	this.uncitedItems = {};
 	this.omittedItems = {};
 	this.embeddedItems = {};
+	this.newIndices = {};
 	this.embeddedZoteroItems = {};
 	this.embeddedZoteroItemsByURI = {};
 	this.customBibliographyText = {};
@@ -1881,7 +1882,6 @@ Zotero.Integration.Session.prototype.resetRequest = function(doc) {
 	this.bibliographyDataHasChanged = false;
 	this.updateItemIDs = {};
 	this.updateIndices = {};
-	this.newIndices = {};
 	
 	this.oldCitationIDs = this.citationIDs;
 	
