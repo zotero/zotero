@@ -337,39 +337,71 @@ Zotero.Tag.prototype.save = function (full) {
 			key
 		];
 		
-		if (isNew) {
-			var sql = "INSERT INTO tags (" + columns.join(', ') + ") VALUES ("
-				+ placeholders.join(', ') + ")";
-			var insertID = Zotero.DB.query(sql, sqlValues);
-			if (!tagID) {
-				tagID = insertID;
+		try {
+			if (isNew) {
+				var sql = "INSERT INTO tags (" + columns.join(', ') + ") VALUES ("
+					+ placeholders.join(', ') + ")";
+				var insertID = Zotero.DB.query(sql, sqlValues);
+				if (!tagID) {
+					tagID = insertID;
+				}
 			}
-		}
-		else {
-			// Remove tagID from beginning
-			columns.shift();
-			sqlValues.shift();
-			sqlValues.push(tagID);
-			
-			var sql = "UPDATE tags SET " + columns.join("=?, ") + "=?"
-				+ " WHERE tagID=?";
-			try {
+			else {
+				// Remove tagID from beginning
+				columns.shift();
+				sqlValues.shift();
+				sqlValues.push(tagID);
+				
+				var sql = "UPDATE tags SET " + columns.join("=?, ") + "=?"
+					+ " WHERE tagID=?";
 				Zotero.DB.query(sql, sqlValues);
 			}
-			// TEMP
-			catch (e) {
-				var sql = "SELECT * FROM tags";
-				var tags = Zotero.DB.query(sql);
-				for each(var tag in tags) {
-					Zotero.debug('------');
-					Zotero.debug(tag.tagID);
-					Zotero.debug(tag.libraryID);
-					Zotero.debug(tag.name);
-					Zotero.debug(tag.type);
-					Zotero.debug(tag.dateAdded);
-					Zotero.debug(tag.dateModified);
-					Zotero.debug(tag.clientDateModified);
+		}
+		catch (e) {
+			// If an incoming tag is the same as an existing tag, but with a different key,
+			// then delete the old tag and add its linked items to the new tag
+			if (typeof e == 'string' && e.indexOf('columns libraryID, name, type are not unique') != -1) {
+				Zotero.debug("Tag matches existing tag with different key -- delete old tag and merging items");
+				
+				// GET existing tag
+				var existing = Zotero.Tags.getIDs(this.name, this.libraryID);
+				if (!existing) {
+					throw new Error("Existing tag not found");
 				}
+				for each(var id in existing) {
+					var tag = Zotero.Tags.get(id, true);
+					if (tag.type == this.type) {
+						var linked = tag.getLinkedItems(true);
+						Zotero.Tags.erase(id);
+						Zotero.Tags.purge(id);
+						break;
+					}
+				}
+				
+				// Save again
+				if (isNew) {
+					var sql = "INSERT INTO tags (" + columns.join(', ') + ") VALUES ("
+						+ placeholders.join(', ') + ")";
+					var insertID = Zotero.DB.query(sql, sqlValues);
+					if (!tagID) {
+						tagID = insertID;
+					}
+				}
+				else {
+					var sql = "UPDATE tags SET " + columns.join("=?, ") + "=?"
+						+ " WHERE tagID=?";
+					Zotero.DB.query(sql, sqlValues);
+				}
+				
+				// TEMP: until getLinkedItems() returns only arrays
+				linked = linked ? linked : [];
+				var linked2 = this.getLinkedItems(true);
+				linked2 = linked2 ? linked2 : [];
+				linked = linked.concat(linked2);
+				
+				this.linkedItems = Zotero.Utilities.arrayUnique(linked);
+			}
+			else {
 				throw (e);
 			}
 		}
