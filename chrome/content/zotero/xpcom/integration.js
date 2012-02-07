@@ -1623,7 +1623,9 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 			
 			try {
 				citation = session.unserializeCitation(content);
-				
+			} catch(e) {}
+			
+			if(citation) {
 				try {
 					session.lookupItems(citation);
 				} catch(e) {
@@ -1634,7 +1636,10 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 					}
 				}
 				
-				if(citation.properties.dontUpdate) {
+				if(citation.properties.dontUpdate
+						|| (citation.properties.plainCitation
+							&& field.getText() !== citation.properties.plainCitation)) {
+					this._doc.activate();
 					if(!this._doc.displayAlert(Zotero.getString("integration.citationChanged.edit"),
 							Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
 							Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL)) {
@@ -1646,7 +1651,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 				delete citation.properties["formattedCitation"];
 				delete citation.properties["plainCitation"];
 				delete citation.properties["dontUpdate"];
-			} catch(e) {}
+			}
 		}
 	} else {
 		newField = true;
