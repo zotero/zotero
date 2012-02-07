@@ -1863,7 +1863,6 @@ Zotero.Integration.Session = function(doc) {
 	this.uncitedItems = {};
 	this.omittedItems = {};
 	this.embeddedItems = {};
-	this.newIndices = {};
 	this.embeddedZoteroItems = {};
 	this.embeddedZoteroItemsByURI = {};
 	this.customBibliographyText = {};
@@ -1882,6 +1881,7 @@ Zotero.Integration.Session.prototype.resetRequest = function(doc) {
 	this.bibliographyDataHasChanged = false;
 	this.updateItemIDs = {};
 	this.updateIndices = {};
+	this.newIndices = {};
 	
 	this.oldCitationIDs = this.citationIDs;
 	
@@ -2131,7 +2131,6 @@ Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, ar
 		this.updateIndices[index] = true;
 	}
 	Zotero.debug("Integration: Adding citationID "+citation.citationID);
-	this.citationIDs[citation.citationID] = true;
 }
 
 /**
@@ -2514,9 +2513,7 @@ Zotero.Integration.Session.prototype.updateCitations = function(callback) {
 				if(this.formatCitation(index, citation)) {
 					this.bibliographyHasChanged = true;
 				}
-				if(!this.citationIDs[citation.citationID]) {
-					this.citationIDs[citation.citationID] = citation;
-				}
+				this.citationIDs[citation.citationID] = true;
 				delete this.newIndices[index];
 				yield true;
 			}
