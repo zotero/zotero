@@ -1883,11 +1883,12 @@ Zotero.Integration.Session.prototype.resetRequest = function(doc) {
 	this.updateIndices = {};
 	this.newIndices = {};
 	
-	this.oldCitationIDs = this.citationIDs;
+	this.oldCitationIDs = this.citeprocCitationIDs;
 	
 	this.citationsByItemID = {};
 	this.citationsByIndex = [];
-	this.citationIDs = {};
+	this.documentCitationIDs = {};
+	this.citeprocCitationIDs = {};
 	this.citationText = {};
 	
 	this.doc = doc;
@@ -1963,6 +1964,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		if(!oldData || oldData.style.styleID != data.style.styleID
 				|| oldData.prefs.noteType != data.prefs.noteType
 				|| oldData.prefs.fieldType != data.prefs.fieldType) {
+			// This will cause us to regenerate all citations
 			me.oldCitationIDs = {};
 		}
 		
@@ -2121,7 +2123,8 @@ Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, ar
 		}
 	}
 	
-	var needNewID = !citation.citationID || this.citationIDs[citation.citationID];
+	// We need a new ID if there's another citation with the same citation ID in this document
+	var needNewID = !citation.citationID || this.documentCitationIDs[citation.citationID];
 	if(needNewID || !this.oldCitationIDs[citation.citationID]) {
 		if(needNewID) {
 			Zotero.debug("Integration: "+citation.citationID+" ("+index+") needs new citationID");
@@ -2131,6 +2134,7 @@ Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, ar
 		this.updateIndices[index] = true;
 	}
 	Zotero.debug("Integration: Adding citationID "+citation.citationID);
+	this.documentCitationIDs[citation.citationID] = citation.citationID;
 }
 
 /**
@@ -2362,7 +2366,7 @@ Zotero.Integration.Session.prototype.deleteCitation = function(index) {
 		}
 	}
 	Zotero.debug("Integration: Deleting old citationID "+oldCitation.citationID);
-	if(oldCitation.citationID) delete this.citationIDs[oldCitation.citationID];
+	if(oldCitation.citationID) delete this.citeprocCitationIDs[oldCitation.citationID];
 	
 	this.updateIndices[index] = true;
 }
@@ -2513,7 +2517,7 @@ Zotero.Integration.Session.prototype.updateCitations = function(callback) {
 				if(this.formatCitation(index, citation)) {
 					this.bibliographyHasChanged = true;
 				}
-				this.citationIDs[citation.citationID] = true;
+				this.citeprocCitationIDs[citation.citationID] = true;
 				delete this.newIndices[index];
 				yield true;
 			}
