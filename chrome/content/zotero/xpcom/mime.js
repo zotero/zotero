@@ -50,7 +50,6 @@ Zotero.MIME = new function(){
 		["\uFFFD\uFFFD\uFFFD\uFFFD", 'image/jpeg', 0],
 		["GIF8", 'image/gif', 0],
 		["\uFFFDPNG", 'image/png', 0],
-		["PK\x03\x04", "application/vnd.oasis.opendocument.text", 0],
 		["JFIF", 'image/jpeg'],
 		["FLV", "video/x-flv", 0]
 		
