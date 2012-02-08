@@ -1067,9 +1067,6 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 								// pass to conversion function
 								me._doc.convert(new Zotero.Integration.Document.JSEnumerator(fieldsToConvert),
 									me._session.data.prefs.fieldType, fieldNoteTypes, fieldNoteTypes.length);
-								
-								// clear fields so that they will get collected again before refresh
-								me._fields = undefined;
 							}
 							
 							// refresh contents
@@ -1656,6 +1653,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 	} else {
 		newField = true;
 		var field = this.addField(true);
+		if(!field) return;
 	}
 	
 	if(!citation) {
