@@ -255,6 +255,13 @@ function makeZoteroContext(isConnector) {
 			.loadSubScript("chrome://zotero/content/xpcom/" + rdfXpcomFiles[i] + ".js", zContext.Zotero.RDF.AJAW);
 	}
 	
+	if(isStandalone()) {
+		// If isStandalone, load standalone.js
+		Cc["@mozilla.org/moz/jssubscript-loader;1"]
+			.getService(Ci.mozIJSSubScriptLoader)
+			.loadSubScript("chrome://zotero/content/xpcom/standalone.js", zContext);
+	}
+	
 	// load nsTransferable (query: do we still use this?)
 	Cc["@mozilla.org/moz/jssubscript-loader;1"]
 		.getService(Ci.mozIJSSubScriptLoader)
