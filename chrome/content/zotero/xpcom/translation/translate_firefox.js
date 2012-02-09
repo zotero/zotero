@@ -318,7 +318,6 @@ Zotero.Translate.DOMWrapper = new function() {
 	 * @return {Object} An obj that is no longer Xrayed
 	 */
 	this.wrap = function(obj) {
-		Zotero.debug(obj.toString());
 		var newObj = wrapPrivileged(obj);
 		return newObj;
 	}
