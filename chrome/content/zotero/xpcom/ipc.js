@@ -132,11 +132,6 @@ Zotero.IPC = new function() {
 		var mode = 0x0001;
 		if(!block) mode = mode | (Zotero.isMac ? 0x0004 : 00004000);
 		
-		// Also append to plain files to get things working with Fx 3.6 polling
-		// On OS X, O_APPEND = 0x0008
-		// On Linux, O_APPEND = 00002000
-		if(pipe.isFile()) mode = mode | (Zotero.isMac ? 0x0008 : 00002000);
-		
 		var fd = open(pipe.path, mode);
 		if(fd === -1) return false;			
 		write(fd, string, string.length);
@@ -375,10 +370,6 @@ Zotero.IPC.Pipe = new function() {
 				getService(Components.interfaces.nsIXULAppInfo);
 			if(verComp.compare("2.2a1pre", appInfo.platformVersion) <= 0) {			// Gecko 5
 				_pipeClass = Zotero.IPC.Pipe.DeferredOpen;
-			} else if(verComp.compare("2.0b9pre", appInfo.platformVersion) <= 0) {	// Gecko 2.0b9+
-				_pipeClass = Zotero.IPC.Pipe.WorkerThread;
-			} else {																// Gecko 1.9.2
-				_pipeClass = Zotero.IPC.Pipe.Poll;
 			}
 		}
 		
@@ -481,98 +472,5 @@ Zotero.IPC.Pipe.DeferredOpen.prototype = {
 		pump.asyncRead(this, null);
 		
 		this._openTime = Date.now();
-	}
-};
-
-/**
- * Listens synchronously for data on the integration pipe on a separate JS thread and reads it
- * when available
- *
- * Used to read from pipe on Gecko 2
- */
-Zotero.IPC.Pipe.WorkerThread = function(file, callback) {
-	this._callback = callback;
-	
-	if(!Zotero.IPC.Pipe.mkfifo(file)) return;
-	
-	// set up worker
-	var worker = Components.classes["@mozilla.org/threads/workerfactory;1"]  
-		.createInstance(Components.interfaces.nsIWorkerFactory)
-		.newChromeWorker("chrome://zotero/content/xpcom/pipe_worker.js");
-	worker.onmessage = this.onmessage.bind(this);
-	worker.postMessage({"path":file.path, "libc":Zotero.IPC.getLibcPath()});
-	
-	// add shutdown listener
-	Zotero.addShutdownListener(Zotero.IPC.Pipe.writeShutdownMessage.bind(null, this, file));
-}
-
-Zotero.IPC.Pipe.WorkerThread.prototype = {
-	/**
-	 * onmessage call for worker thread, to get data from it
-	 */
-	"onmessage":function(event) {
-		if(event.data[0] === "Exception") {
-			throw event.data[1];
-		} else if(event.data[0] === "Debug") {
-			Zotero.debug(event.data[1]);
-		} else if(event.data[0] === "Read") {
-			this._callback(event.data[1]);
-		} else if(event.data[0] === "Open") {
-			this._openTime = Date.now();
-		}
-	}
-}
-
-/**
- * Polling mechanism for file
- *
- * Used to read from integration "pipe" on Gecko 1.9.2/Firefox 3.6
- */
-Zotero.IPC.Pipe.Poll = function(file, callback) {
-	this._file = file;
-	this._callback = callback;
-	
-	// create empty file
-	this._clearFile();
-	
-	// no deferred open capability, so we need to poll
-	this._timer = Components.classes["@mozilla.org/timer;1"].
-		createInstance(Components.interfaces.nsITimer);
-	this._timer.initWithCallback(this, 1000,
-		Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
-	
-	// this has to be in global scope so we don't get garbage collected
-	Zotero.IPC.Pipe.Poll._activePipes.push(this);
-	
-	// add shutdown listener
-	var me = this;
-	Zotero.addShutdownListener(function() { file.remove(false) });
-}
-Zotero.IPC.Pipe.Poll._activePipes = [];
-
-Zotero.IPC.Pipe.Poll.prototype = {
-	/**
-	 * Called every second to check if there is new data to be read
-	 */
-	"notify":function() {
-		if(this._file.fileSize === 0) return;
-		
-		// read from pipe (file, actually)
-		var string = Zotero.File.getContents(this._file);
-		this._clearFile();
-		
-		// run command
-		this._callback(string);
-	},
-	
-	/**
-	 * Clears the old contents of the fifo file
-	 */
-	"_clearFile":function() {
-		// clear file
-		var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"].
-			createInstance(Components.interfaces.nsIFileOutputStream);
-		foStream.init(this._file, 0x02 | 0x08 | 0x20, 0666, 0); 
-		foStream.close();
 	}
 };
