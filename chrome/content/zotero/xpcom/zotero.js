@@ -444,6 +444,7 @@ const ZOTERO_CONFIG = {
 		} else {
 			Zotero.debug("Loading in full mode");
 			if(!_initFull()) return false;
+			if(Zotero.isStandalone) Zotero.Standalone.init();
 			Zotero.initComplete();
 		}
 		
