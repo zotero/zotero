@@ -2133,7 +2133,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.277";
+    this.processor_version = "1.0.278";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -7792,6 +7792,11 @@ CSL.Attributes["@variable"] = function (state, arg) {
                 if (variable === "page-first") {
                     variable = "page";
                 }
+                if (variable === "authority"
+                    && "string" === typeof Item[variable]
+                    && "names" === this.name) {
+                    Item[variable] = [{family:Item[variable],isInstitution:true}]
+                }
                 if (this.strings.form === "short" && !Item[variable]) {
                     if (variable === "title") {
                         variable = "shortTitle";
@@ -11694,9 +11699,11 @@ CSL.Disambiguation.prototype.disExtraText = function () {
 CSL.Disambiguation.prototype.disYears = function () {
     var pos, len, tokens, token, item;
     tokens = [];
-    for (pos = 0, len = this.lists[this.listpos][1].length; pos < len; pos += 1) {
-        token = this.registry[this.lists[this.listpos][1][pos].id];
-        tokens.push(token);
+    if (this.clashes[1]) {
+        for (pos = 0, len = this.lists[this.listpos][1].length; pos < len; pos += 1) {
+            token = this.registry[this.lists[this.listpos][1][pos].id];
+            tokens.push(token);
+        }
     }
     tokens.sort(this.state.registry.sorter.compareKeys);
     for (pos = 0, len = tokens.length; pos < len; pos += 1) {
