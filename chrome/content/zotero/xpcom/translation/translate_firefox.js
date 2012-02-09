@@ -318,13 +318,9 @@ Zotero.Translate.DOMWrapper = new function() {
 	 * @return {Object} An obj that is no longer Xrayed
 	 */
 	this.wrap = function(obj) {
-		if(Zotero.isFx4) {
-			Zotero.debug(obj.toString());
-			var newObj = wrapPrivileged(obj);
-			return newObj;
-		} else {
-			return _wrapFx36(obj);
-		}
+		Zotero.debug(obj.toString());
+		var newObj = wrapPrivileged(obj);
+		return newObj;
 	}
 	
 	/**
@@ -347,53 +343,6 @@ Zotero.Translate.DOMWrapper = new function() {
 	 */
 	this.isWrapped = function(obj) {
 		return "__wrappedDOMObject" in obj || isWrapper(obj);
-	}
-
-	/**
-	 * A really ugly way of making a DOM object not look like a DOM object, so we can pass it to the
-	 * sandbox under Firefox 3.6
-	 * @param {XPCCrossOriginWrapper} obj
-	 * @param {Object} parent A parent to use as |this| when applying functions
-	 * @return {Object} An obj that is no longer Xrayed
-	 */
-	function _wrapFx36(obj, parent) {
-		if(obj === null) {
-			return null;
-		}
-		
-		var wrapFx36 = arguments.callee;
-		var type = typeof obj;
-		if(type === "function") {
-			var val = function() {
-				var nArgs = arguments.length;
-				var args = new Array(nArgs);
-				for(var i=0; i<nArgs; i++) {
-					args[i] = (arguments[i] instanceof Object && arguments[i].__wrappedDOMObject
-							? arguments[i].__wrappedDOMObject : arguments[i]);
-				}
-				return wrapFx36(obj.apply(parent ? parent : null, args));
-			}
-		} else if(type === "object") {
-			if(val instanceof Array) {
-				var val = [];
-			} else {
-				var val = {};
-			}
-		} else {
-			return obj;
-		}
-		
-		val.__wrappedDOMObject = obj;
-		val.__exposedProps__ = {};
-		for(var prop in obj) {
-			let localProp = prop;
-			val.__exposedProps__[localProp] = "r";
-			val.__defineGetter__(localProp, function() {
-				return wrapFx36(obj[localProp], obj);
-			});
-		}
-		
-		return val;
 	}
 }
 
@@ -429,7 +378,7 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 				.getService(Components.interfaces.nsIIOService);
 			uri = ioService.newURI(uri, "UTF-8", null);
 			
-			if(typeof sandboxLocation === "object" && sandboxLocation.nodePrincipal && Zotero.isFx4) {
+			if(typeof sandboxLocation === "object" && sandboxLocation.nodePrincipal) {
 				// if sandbox specified by DOM document, use nodePrincipal property
 				var principal = sandboxLocation.nodePrincipal;
 			} else {
@@ -464,11 +413,7 @@ Zotero.Translate.SandboxManager.prototype = {
 	 * Evaluates code in the sandbox
 	 */
 	"eval":function(code, exported, path) {
-		if(Zotero.isFx4) {
-			Components.utils.evalInSandbox(code, this.sandbox, "1.8", path, 1);
-		} else {
-			Components.utils.evalInSandbox(code, this.sandbox);
-		}
+		Components.utils.evalInSandbox(code, this.sandbox, "1.8", path, 1);
 	},
 	
 	/**
@@ -491,29 +436,10 @@ Zotero.Translate.SandboxManager.prototype = {
 			var isObject = typeof object[localKey] === "object";
 			if(isFunction || isObject) {
 				if(isFunction) {
-					if(Zotero.isFx4) {
-						if(passAsFirstArgument) {
-							attachTo[localKey] = object[localKey].bind(object, passAsFirstArgument);
-						} else {
-							attachTo[localKey] = object[localKey].bind(object);
-						}
+					if(passAsFirstArgument) {
+						attachTo[localKey] = object[localKey].bind(object, passAsFirstArgument);
 					} else {
-						attachTo[localKey] = function() {
-							if(passAsFirstArgument) {
-								var args = new Array(arguments.length+1);
-								args[0] = passAsFirstArgument;
-								var offset = 1;
-							} else {
-								var args = new Array(arguments.length);
-								var offset = 0;
-							}
-							
-							for(var i=0, nArgs=arguments.length; i<nArgs; i++) {
-								args[i+offset] = arguments[i];
-							}
-							
-							return object[localKey].apply(object, args);
-						};
+						attachTo[localKey] = object[localKey].bind(object);
 					}
 				} else {
 					attachTo[localKey] = {};

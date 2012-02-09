@@ -107,23 +107,11 @@ Zotero.IPC = new function() {
 			if(!lib) return false;
 			
 			// int open(const char *path, int oflag);
-			if(Zotero.isFx36) {
-				open = lib.declare("open", ctypes.default_abi, ctypes.int32_t, ctypes.string, ctypes.int32_t);
-			} else {
-				open = lib.declare("open", ctypes.default_abi, ctypes.int, ctypes.char.ptr, ctypes.int);
-			}
+			open = lib.declare("open", ctypes.default_abi, ctypes.int, ctypes.char.ptr, ctypes.int);
 			// ssize_t write(int fildes, const void *buf, size_t nbyte);
-			if(Zotero.isFx36) {
-				write = lib.declare("write", ctypes.default_abi, ctypes.int32_t, ctypes.int32_t, ctypes.string, ctypes.uint32_t);
-			} else {
-				write = lib.declare("write", ctypes.default_abi, ctypes.ssize_t, ctypes.int, ctypes.char.ptr, ctypes.size_t);
-			}
+			write = lib.declare("write", ctypes.default_abi, ctypes.ssize_t, ctypes.int, ctypes.char.ptr, ctypes.size_t);
 			// int close(int filedes);
-			if(Zotero.isFx36) {
-				close = lib.declare("close", ctypes.default_abi, ctypes.int32_t, ctypes.int32_t);
-			} else {
-				close = lib.declare("close", ctypes.default_abi, ctypes.int, ctypes.int);
-			}
+			close = lib.declare("close", ctypes.default_abi, ctypes.int, ctypes.int);
 		}
 		
 		// On OS X, O_NONBLOCK = 0x0004
@@ -144,11 +132,6 @@ Zotero.IPC = new function() {
 	 */
 	this.broadcast = function(msg) {
 		if(Zotero.isWin) {		// communicate via WM_COPYDATA method
-			// there is no ctypes struct support in Fx 3.6
-			// while we could mimic it, it's easier just to require users to upgrade if they
-			// want connector sharing
-			if(!Zotero.isFx4) return false;
-			
 			Components.utils.import("resource://gre/modules/ctypes.jsm");
 			
 			// communicate via message window
@@ -386,11 +369,7 @@ Zotero.IPC.Pipe = new function() {
 		if(!_mkfifo) {
 			var libc = Zotero.IPC.getLibc();
 			if(!libc) return false;
-			if(Zotero.isFx36) {
-				_mkfifo = libc.declare("mkfifo", ctypes.default_abi, ctypes.int32_t, ctypes.string, ctypes.uint32_t);
-			} else {
-				_mkfifo = libc.declare("mkfifo", ctypes.default_abi, ctypes.int, ctypes.char.ptr, ctypes.unsigned_int);
-			}
+			_mkfifo = libc.declare("mkfifo", ctypes.default_abi, ctypes.int, ctypes.char.ptr, ctypes.unsigned_int);
 		}
 		
 		// make pipe

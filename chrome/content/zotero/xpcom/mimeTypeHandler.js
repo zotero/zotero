@@ -112,22 +112,14 @@ Zotero.MIMETypeHandler = new function () {
 			var checkValue = {"value":false};
 			
 			// make tab-modal dialog (https://developer.mozilla.org/en/Using_tab-modal_prompts)
-			if(Zotero.isFx4) {
-				var prompt = Components.classes["@mozilla.org/prompter;1"]
-					 .getService(Components.interfaces.nsIPromptFactory)
-					 .getPrompt(win, Components.interfaces.nsIPrompt);
-				
-				var bag = prompt.QueryInterface(Components.interfaces.nsIWritablePropertyBag2);
-				bag.setPropertyAsBool("allowTabModal", true);
+			var prompt = Components.classes["@mozilla.org/prompter;1"]
+				 .getService(Components.interfaces.nsIPromptFactory)
+				 .getPrompt(win, Components.interfaces.nsIPrompt);
 			
-				var continueDownload = prompt.confirmCheck(title, text, checkMsg, checkValue);
-			} else {
-				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-						.getService(Components.interfaces.nsIPromptService);
-			
-				var continueDownload = ps.confirmCheck(win, title, text, checkMsg, checkValue);
-			}
-			
+			var bag = prompt.QueryInterface(Components.interfaces.nsIWritablePropertyBag2);
+			bag.setPropertyAsBool("allowTabModal", true);
+		
+			var continueDownload = prompt.confirmCheck(title, text, checkMsg, checkValue);
 			if(!continueDownload) return;
 			if(checkValue.value) {
 				// add to allowed sites if desired

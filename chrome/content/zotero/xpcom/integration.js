@@ -193,14 +193,9 @@ Zotero.Integration = new function() {
 			if(callback) callback(_integrationVersionsOK);
 		}
 	
-		if(Zotero.isFx4) {
-			Components.utils.import("resource://gre/modules/AddonManager.jsm");
-			AddonManager.getAddonsByIDs(INTEGRATION_PLUGINS, _checkAddons);
-		} else {
-			var extMan = Components.classes['@mozilla.org/extensions/manager;1'].
-				getService(Components.interfaces.nsIExtensionManager);
-			_checkAddons([extMan.getItemForID(id) for each(id in INTEGRATION_PLUGINS)]);
-		}
+		var extMan = Components.classes['@mozilla.org/extensions/manager;1'].
+			getService(Components.interfaces.nsIExtensionManager);
+		_checkAddons([extMan.getItemForID(id) for each(id in INTEGRATION_PLUGINS)]);
 	}
 	
 	/**
@@ -289,7 +284,7 @@ Zotero.Integration = new function() {
 				"Minefield":"org.mozilla.minefield"
 			};
 			
-			if(Zotero.isFx4 && win) {
+			if(win) {
 				Components.utils.import("resource://gre/modules/ctypes.jsm");
 				
 				if(!_carbon) {
@@ -333,7 +328,7 @@ Zotero.Integration = new function() {
 					_executeAppleScript('tell application id "'+BUNDLE_IDS[Zotero.appName]+'" to activate');
 				}
 			}
-		} else if(!Zotero.isWin && Zotero.isFx4 && win) {
+		} else if(!Zotero.isWin && win) {
 			Components.utils.import("resource://gre/modules/ctypes.jsm");
 			
 			if(_x11 === false) return;

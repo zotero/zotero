@@ -215,7 +215,7 @@ Zotero.Translate.Sandbox = {
 				"getTranslatorObject":"r"
 			};
 			safeTranslator.setSearch = function(arg) {
-				if(Zotero.isFx4 && !Zotero.isBookmarklet) arg = JSON.parse(JSON.stringify(arg));
+				if(!Zotero.isBookmarklet) arg = JSON.parse(JSON.stringify(arg));
 				return translation.setSearch(arg);
 			};
 			safeTranslator.setDocument = function(arg) { return translation.setDocument(arg) };

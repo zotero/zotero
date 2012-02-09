@@ -216,29 +216,23 @@ const ZOTERO_CONFIG = {
 				getService(Components.interfaces.nsIXULAppInfo),
 			platformVersion = appInfo.platformVersion;
 		this.isFx = true;
-		this.isFx3 = platformVersion.indexOf('1.9') === 0;
-		this.isFx35 = platformVersion.indexOf('1.9.1') === 0;
-		this.isFx31 = this.isFx35;
-		this.isFx36 = platformVersion.indexOf('1.9.2') === 0;
-		this.isFx4 = versionComparator.compare(platformVersion, "2.0a1") >= 0;
-		this.isFx5 = versionComparator.compare(platformVersion, "5.0a1") >= 0;
+		this.isFx3 = false;
+		this.isFx35 = false;
+		this.isFx31 = false;
+		this.isFx36 = false;
+		this.isFx4 = true;
+		this.isFx5 = true;
 		
 		this.isStandalone = appInfo.ID == ZOTERO_CONFIG['GUID'];
 		if(this.isStandalone) {
 			this.version = appInfo.version;
-		} else if(this.isFx4) {
+		} else {
 			// Use until we collect version from extension manager
 			this.version = ZOTERO_CONFIG['VERSION'];
 			
 			Components.utils.import("resource://gre/modules/AddonManager.jsm");
 			AddonManager.getAddonByID(ZOTERO_CONFIG['GUID'],
 				function(addon) { Zotero.version = addon.version; });
-		} else {
-			var gExtensionManager =
-				Components.classes["@mozilla.org/extensions/manager;1"]
-					.getService(Components.interfaces.nsIExtensionManager);
-			this.version
-				= gExtensionManager.getItemForID(ZOTERO_CONFIG['GUID']).version;
 		}
 		
 		// OS platform
@@ -380,11 +374,7 @@ const ZOTERO_CONFIG = {
 						
 						// evaluate
 						Components.utils.evalInSandbox(prefsJs, sandbox);
-						if(Zotero.isFx4) {
-							var prefs = sandbox.prefs;
-						} else {
-							var prefs = new XPCSafeJSObjectWrapper(sandbox.prefs);
-						}
+						var prefs = sandbox.prefs;
 						for(var key in prefs) {
 							if(key.substr(0, ZOTERO_CONFIG.PREF_BRANCH.length) === ZOTERO_CONFIG.PREF_BRANCH
 									&& key !== "extensions.zotero.firstRun2") {
@@ -1278,17 +1268,8 @@ const ZOTERO_CONFIG = {
 			callback(addons);
 		}
 		
-		if(this.isFx4) {
-			Components.utils.import("resource://gre/modules/AddonManager.jsm");
-			AddonManager.getAllAddons(onHaveInstalledAddons);
-		} else {
-			var em = Components.classes["@mozilla.org/extensions/manager;1"].
-						getService(Components.interfaces.nsIExtensionManager);
-			var installed = em.getItemList(
-				Components.interfaces.nsIUpdateItem.TYPE_ANY, {}
-			);
-			onHaveInstalledAddons(installed);
-		}
+		Components.utils.import("resource://gre/modules/AddonManager.jsm");
+		AddonManager.getAllAddons(onHaveInstalledAddons);
 	}
 	
 	

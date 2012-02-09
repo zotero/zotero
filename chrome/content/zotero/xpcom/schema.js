@@ -446,7 +446,7 @@ Zotero.Schema = new function(){
 				.get("AChrom", Components.interfaces.nsIFile);
 			_updateBundledFilesCallback(appChrome.parent, mode, skipDeleteUpdate,
 				runRemoteUpdateWhenComplete);
-		} else if(Zotero.isFx4) {
+		} else {
 			Components.utils.import("resource://gre/modules/AddonManager.jsm");
 			AddonManager.getAddonByID(ZOTERO_CONFIG['GUID'],
 				function(addon) {
@@ -454,13 +454,6 @@ Zotero.Schema = new function(){
 						addon.getResourceURI().QueryInterface(Components.interfaces.nsIFileURL).file,
 						mode, skipDeleteUpdate, runRemoteUpdateWhenComplete);
 				});
-		} else {
-			var gExtensionManager = Components.classes["@mozilla.org/extensions/manager;1"]
-				.getService(Components.interfaces.nsIExtensionManager);
-			var itemLocation = gExtensionManager.getInstallLocation(ZOTERO_CONFIG['GUID'])
-				.getItemLocation(ZOTERO_CONFIG['GUID']);
-			_updateBundledFilesCallback(itemLocation, mode, skipDeleteUpdate,
-				runRemoteUpdateWhenComplete);
 		}
 	}
 	

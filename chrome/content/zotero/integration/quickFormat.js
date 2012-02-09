@@ -130,7 +130,7 @@ var Zotero_QuickFormat = new function () {
 		if(event.target !== document) return;		
 		// make sure we are visible
 		window.setTimeout(function() {	
-			if(!Zotero.isFx4) window.sizeToContent();
+			window.sizeToContent();
 			var screenX = window.screenX;
 			var screenY = window.screenY;
 			var xRange = [window.screen.availLeft, window.screen.width-window.outerWidth];
@@ -744,16 +744,7 @@ var Zotero_QuickFormat = new function () {
 			if(((!referenceHeight && firstReference) || (!separatorHeight && firstSeparator)
 					|| !panelFrameHeight) && !panelShowing) {
 				_openReferencePanel();
-				if(!Zotero.isFx4) {
-					referencePanel.addEventListener("popupshown", function() {
-						referencePanel.removeEventListener("popupshown", arguments.callee, false); 
-						panelShowing = true;
-						_resize();
-					}, false);
-					return;
-				} else {
-					panelShowing = true;
-				}
+				panelShowing = true;
 			}
 		
 			if(!referenceHeight && firstReference) {

@@ -119,11 +119,6 @@ function init()
 	} else if(document.location.hash == "#cite") {
 		document.getElementById('zotero-prefs').showPane(document.getElementById("zotero-prefpane-cite"));
 	}
-	
-	var showInAppTab;
-	if(!Zotero.isFx4 && (showInAppTab = document.getElementById("zotero-prefpane-general-showIn-appTab"))) {
-		showInAppTab.setAttribute("hidden", "true");
-	}
 }
 
 

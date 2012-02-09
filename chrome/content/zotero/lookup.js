@@ -106,9 +106,7 @@ const Zotero_Lookup = new function () {
 	 * Focuses the field
 	 */
 	this.onShowing = function() {
-		if(!Zotero.isFx4) {
-			document.getElementById("zotero-lookup-panel").style.padding = "10px";
-		}
+		document.getElementById("zotero-lookup-panel").style.padding = "10px";
 		
 		document.getElementById("zotero-lookup-progress").hidden = false;
 		var identifierElement = document.getElementById("zotero-lookup-textbox");
