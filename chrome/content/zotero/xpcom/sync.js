@@ -524,7 +524,7 @@ Zotero.Sync.Runner = new function () {
 		
 		if (Zotero.HTTP.browserIsOffline()){
 			this.clearSyncTimeout(); // DEBUG: necessary?
-			var msg = "Zotero cannot sync while Firefox is in offline mode.";
+			var msg = "Zotero cannot sync while " + Zotero.appName + " is in offline mode.";
 			var e = new Zotero.Error(msg, 0, { dialogButtonText: null })
 			this.setSyncIcon('error', e);
 			return false;
@@ -533,7 +533,7 @@ Zotero.Sync.Runner = new function () {
 		if (_running) {
 			// TODO: show status in all windows
 			var msg = "A sync process is already running. To view progress, check "
-				+ "the window in which the sync began or restart Firefox.";
+				+ "the window in which the sync began or restart " + Zotero.appName + ".";
 			var e = new Zotero.Error(msg, 0, { dialogButtonText: null, frontWindowOnly: true })
 			this.setSyncIcon('error', e);
 			return false;

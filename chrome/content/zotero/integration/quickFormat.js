@@ -25,11 +25,18 @@
 
 var Zotero_QuickFormat = new function () {
 	const pixelRe = /^([0-9]+)px$/
-	var initialized, io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, keepSorted, 
-		showEditor, referencePanel, referenceBox, referenceHeight = 0, separatorHeight = 0,
-		currentLocator, currentLocatorLabel, currentSearchTime, dragging, panel, 
-		panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator, panelInfo,
-		panelRefersToBubble, panelFrameHeight = 0, accepted = false;
+	const specifiedLocatorRe = /^(?:,? *(p{0,2})(?:\. *| +)|:)([0-9\-]+) *$/;
+	const yearRe = /,? *([0-9]+) *(B[. ]*C[. ]*(?:E[. ]*)?|A[. ]*D[. ]*|C[. ]*E[. ]*)?$/i;
+	const locatorRe = /(?:,? *(p{0,2})\.?|(\:)) *([0-9]+)$/i;
+	const creatorSplitRe = /(?:,| *(?:and|\&)) +/;
+	const charRe = /[\w\u007F-\uFFFF]/;
+	const numRe = /^[0-9\-]+$/;
+	
+	var initialized, io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, qfGuidance,
+		keepSorted,  showEditor, referencePanel, referenceBox, referenceHeight = 0,
+		separatorHeight = 0, currentLocator, currentLocatorLabel, currentSearchTime, dragging,
+		panel, panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator,
+		panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false;
 	
 	// A variable that contains the timeout object for the latest onKeyPress event
 	var eventTimeout = null;
@@ -47,6 +54,12 @@ var Zotero_QuickFormat = new function () {
 			// Only hide chrome on Windows or Mac
 			if(Zotero.isMac || Zotero.isWin) {
 				document.documentElement.setAttribute("hidechrome", true);
+			}
+			
+			// Include a different key combo in message on Mac
+			if(Zotero.isMac) {
+				var qf = document.getElementById('quick-format-guidance');
+				qf.setAttribute('about', qf.getAttribute('about') + "Mac");
 			}
 			
 			new WindowDraggingElement(document.getElementById("quick-format-dialog"), window);
@@ -97,6 +110,11 @@ var Zotero_QuickFormat = new function () {
 			panelLocatorLabel = document.getElementById("locator-label");
 			panelLocator = document.getElementById("locator");
 			panelInfo = document.getElementById("citation-properties-info");
+			
+			// Don't need to set noautohide dynamically on these platforms, so do it now
+			if(Zotero.isMac || Zotero.isWin) {
+				referencePanel.setAttribute("noautohide", true);
+			}
 		} else if(event.target === qfi.contentDocument) {			
 			qfiWindow = qfi.contentWindow;
 			qfiDocument = qfi.contentDocument;
@@ -123,6 +141,9 @@ var Zotero_QuickFormat = new function () {
 				Zotero.debug("Moving window to "+targetX+", "+targetY);
 				window.moveTo(targetX, targetY);
 			}
+			qfGuidance = document.getElementById('quick-format-guidance');
+			qfGuidance.show();
+			_refocusQfe();
 		}, 0);
 		
 		window.focus();
@@ -182,11 +203,6 @@ var Zotero_QuickFormat = new function () {
 		var str = _getEditorContent();
 		var haveConditions = false;
 		
-		const specifiedLocatorRe = /^(?:,? *(pp|p)(?:\. *| +)|:)([0-9\-]+) *$/;
-		const yearPageLocatorRe = /,? *([0-9]+) *((B[. ]*C[. ]*|B[. ]*)|[AC][. ]*|A[. ]*D[. ]*|C[. ]*E[. ]*)?,? *(?:([0-9\-]+))?$/i;
-		const creatorSplitRe = /(?:,| *(?:and|\&)) +/;
-		const charRe = /[\w\u007F-\uFFFF]/;
-		const numRe = /^[0-9\-]+$/;
 		const etAl = " et al.";
 		
 		var m,
@@ -234,20 +250,11 @@ var Zotero_QuickFormat = new function () {
 			}
 			
 			// check for year and pages
-			m = yearPageLocatorRe.exec(str);
+			str = _updateLocator(str);
+			m = yearRe.exec(str);
 			if(m) {
-				if(m[1].length === 4 || m[2] || m[4]) {
-					year = parseInt(m[1]);
-					if(m[3]) {
-						isBC = true;
-					}
-					if(!currentLocator && m[4]) {
-						currentLocator = m[4];
-					}
-				} else {
-					currentLocator = m[1];
-				}
-				
+				year = parseInt(m[1]);
+				isBC = m[2] && m[2][0] === "B";
 				str = str.substr(0, m.index)+str.substring(m.index+m[0].length);
 			}
 			if(year) str += " "+year;
@@ -321,6 +328,20 @@ var Zotero_QuickFormat = new function () {
 			// No search conditions, so just clear the box
 			_updateItemList([], []);
 		}
+	}
+	
+	/**
+	 * Updates currentLocator based on a string
+	 * @param {String} str String to search for locator
+	 * @return {String} str without locator
+	 */
+	function _updateLocator(str) {
+		m = locatorRe.exec(str);
+		if(m && (m[1] || m[2] || m[3].length !== 4)) {
+			currentLocator = m[3];
+			str = str.substr(0, m.index)+str.substring(m.index+m[0].length);
+		}
+		return str;
 	}
 	
 	/**
@@ -656,6 +677,8 @@ var Zotero_QuickFormat = new function () {
 			citationItem.uris = item.cslURIs;
 			citationItem.itemData = item.cslItemData;
 		}
+		
+		_updateLocator(_getEditorContent());
 		if(currentLocator) {
 			 citationItem["locator"] = currentLocator;
 			if(currentLocatorLabel) {
@@ -769,20 +792,20 @@ var Zotero_QuickFormat = new function () {
 	 * Opens the reference panel and potentially refocuses the main text box
 	 */
 	function _openReferencePanel() {
+		if(!Zotero.isMac && !Zotero.isWin) {
+			// noautohide and noautofocus are incompatible on Linux
+			// https://bugzilla.mozilla.org/show_bug.cgi?id=545265
+			referencePanel.setAttribute("noautohide", "false");
+		}
+		
 		referencePanel.openPopup(document.documentElement, "after_start", 15,
 			null, false, false, null);
+		
 		if(!Zotero.isMac && !Zotero.isWin) {
-			// When it opens, we will lose focus
-			referencePanel.addEventListener("popupshown", function() {
-				referencePanel.removeEventListener("popupshown", arguments.callee, false);
-				_refocusQfe();
-				
-				// This is a nasty hack, but seems to be necessary to fix loss of focus on Linux
-				window.setTimeout(function() { _refocusQfe(); }, 25);
-				window.setTimeout(function() { _refocusQfe(); }, 50);
-				window.setTimeout(function() { _refocusQfe(); }, 100);
-				window.setTimeout(function() { _refocusQfe(); }, 175);
-				window.setTimeout(function() { _refocusQfe(); }, 250);
+			// reinstate noautohide after the window is shown
+			referencePanel.addEventListener("popupshowing", function() {
+				referencePanel.removeEventListener("popupshowing", arguments.callee, false);
+				referencePanel.setAttribute("noautohide", "true");
 			}, false);
 		}
 	}
@@ -955,6 +978,8 @@ var Zotero_QuickFormat = new function () {
 	 * Handle return or escape
 	 */
 	function _onQuickSearchKeyPress(event) {
+		qfGuidance.hide();
+		
 		var keyCode = event.keyCode;
 		if(keyCode === event.DOM_VK_RETURN || keyCode === event.DOM_VK_ENTER) {
 			event.preventDefault();
@@ -1157,7 +1182,11 @@ var Zotero_QuickFormat = new function () {
 			.getService(Components.interfaces.nsIWindowWatcher)
 			.openWindow(null, 'chrome://zotero/content/integration/addCitationDialog.xul',
 			'', 'chrome,centerscreen,resizable', io);
-		newWindow.addEventListener("load", function() { window.close(); }, false);
+		newWindow.addEventListener("focus", function() {
+			newWindow.removeEventListener("focus", arguments.callee, true);
+			window.close();
+		}, true);
+		accepted = true;
 	}
 	
 	/**

@@ -16,10 +16,15 @@
 	margin-left: 7px;
 }
 
-.zotero-tb-button {
-  -moz-margin-start: 5px;
-  -moz-padding-end: 10px;
+.zotero-tb-button, .zotero-tb-button:first-child, .zotero-tb-button:last-child {
+  -moz-margin-start: 0 !important;
+  -moz-margin-end: 3px !important;
+  -moz-padding-end: 10px !important;
   background: url("chrome://zotero/skin/mac/menubutton-end.png") right center no-repeat;
+}
+
+#zotero-collections-toolbar {
+	padding-left: 0;
 }
 
 :root:not([active]) #zotero-pane:not([ignoreActiveAttribute]) .zotero-tb-button, .zotero-tb-button[disabled="true"]{

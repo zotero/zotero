@@ -25,6 +25,7 @@
 -->
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://global/skin/browser.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/integration.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
@@ -67,7 +68,8 @@
 			<progressmeter id="quick-format-progress-meter" mode="undetermined" value="0" flex="1"/>
 		</deck>
 	</box>
-	<panel id="quick-format-reference-panel" noautofocus="true" norestorefocus="true" noautohide="true" height="0">
+	<panel id="quick-format-reference-panel" noautofocus="true" norestorefocus="true"
+			height="0" width="0">
 		<richlistbox id="quick-format-reference-list" flex="1"/>
 	</panel>
 	<panel id="citation-properties" type="arrow" orient="vertical"
@@ -89,17 +91,17 @@
 						<menupopup id="locator-label-popup"/>
 					</menulist>
 					<textbox id="locator" flex="1"
-							oninput="window.setTimeout(Zotero_QuickFormat.onCitationPropertiesChanged, 0)"/>
+							oninput="window.setTimeout(function(event) { Zotero_QuickFormat.onCitationPropertiesChanged(event) }, 0)"/>
 				</row>
 				<row align="center">
 					<label value="&zotero.citation.prefix.label;"/>
 					<textbox class="citation-textbox" id="prefix" flex="1"
-							oninput="window.setTimeout(Zotero_QuickFormat.onCitationPropertiesChanged, 0)"/>
+							oninput="window.setTimeout(function(event) { Zotero_QuickFormat.onCitationPropertiesChanged(event) }, 0)"/>
 				</row>
 				<row align="center">
 					<label value="&zotero.citation.suffix.label;"/>
 					<textbox class="citation-textbox" id="suffix" flex="1"
-							oninput="window.setTimeout(Zotero_QuickFormat.onCitationPropertiesChanged, 0)"/>
+							oninput="window.setTimeout(function(event) { Zotero_QuickFormat.onCitationPropertiesChanged(event) }, 0)"/>
 				</row>
 				<html:div>
 					<html:input type="checkbox" id="suppress-author"
@@ -111,4 +113,6 @@
 			</rows>
 		</grid>
 	</panel>
+	<zoteroguidancepanel id="quick-format-guidance" about="quickFormat"
+			for="zotero-icon" x="26"/>
 </window>

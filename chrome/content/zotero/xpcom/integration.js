@@ -339,21 +339,25 @@ Zotero.Integration = new function() {
 			if(_x11 === false) return;
 			if(!_x11) {
 				try {
-					var libName = ctypes.libraryName("X11");
+					_x11 = ctypes.open("libX11.so.6");
 				} catch(e) {
-					_x11 = false;
-					Zotero.debug("Integration: Could not get libX11 name; not activating");
-					Zotero.logError(e);
-					return;
-				}
-				
-				try {
-					_x11 = ctypes.open(libName);
-				} catch(e) {
-					_x11 = false;
-					Zotero.debug("Integration: Could not open "+libName+"; not activating");
-					Zotero.logError(e);
-					return;
+					try {
+						var libName = ctypes.libraryName("X11");
+					} catch(e) {
+						_x11 = false;
+						Zotero.debug("Integration: Could not get libX11 name; not activating");
+						Zotero.logError(e);
+						return;
+					}
+					
+					try {
+						_x11 = ctypes.open(libName);
+					} catch(e) {
+						_x11 = false;
+						Zotero.debug("Integration: Could not open "+libName+"; not activating");
+						Zotero.logError(e);
+						return;
+					}
 				}
 				
 				const Status = ctypes.int,
@@ -520,8 +524,6 @@ Zotero.Integration = new function() {
 				event.format = 32;
 				event.l0 = 2;
 				var mask = 1<<20 /* SubstructureRedirectMask */ | 1<<19 /* SubstructureNotifyMask */;
-				Zotero.debug(event.toSource());
-				Zotero.debug([_x11Display, rootWindow, 0, mask, event.address()]);
 				
 				if(XSendEvent(_x11Display, rootWindow, 0, mask, event.address())) {
 					XMapRaised(_x11Display, x11Window);
@@ -536,6 +538,24 @@ Zotero.Integration = new function() {
 				intervalID = win.setInterval(_X11BringToForeground, 50);
 			}, false);
 		}
+		
+		var dummyPtr = dummy.address();
+		if(!XQueryTree(display, w, dummyPtr, dummyPtr, childrenPtr.address(),
+				nChildren.address()) || childrenPtr.isNull()) {
+			return false;
+		}
+		
+		var nChildrenJS = nChildren.value;
+		var children = ctypes.cast(childrenPtr, ctypes.uint32_t.array(nChildrenJS).ptr).contents;
+		var foundWindow = false;
+		for(var i=0; i<nChildrenJS; i++) {
+			foundWindow = _X11FindWindow(display, children.addressOfElement(i).contents,
+				searchName);
+			if(foundWindow) break;
+		}
+		
+		XFree(children);
+		return foundWindow;
 	}
 	
 	function _X11FindWindow(display, w, searchName) {
@@ -562,8 +582,9 @@ Zotero.Integration = new function() {
 		var children = ctypes.cast(childrenPtr, ctypes.uint32_t.array(nChildrenJS).ptr).contents;
 		var foundWindow = false;
 		for(var i=0; i<nChildrenJS; i++) {
-			foundWindow = _X11FindWindow(display, children.addressOfElement(i).contents,
-				searchName);
+			var testWin = children.addressOfElement(i).contents;
+			if(testWin == 0) continue;
+			foundWindow = _X11FindWindow(display, testWin, searchName);
 			if(foundWindow) break;
 		}
 		
@@ -1064,9 +1085,6 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 								// pass to conversion function
 								me._doc.convert(new Zotero.Integration.Document.JSEnumerator(fieldsToConvert),
 									me._session.data.prefs.fieldType, fieldNoteTypes, fieldNoteTypes.length);
-								
-								// clear fields so that they will get collected again before refresh
-								me._fields = undefined;
 							}
 							
 							// refresh contents
@@ -1246,33 +1264,39 @@ Zotero.Integration.Fields.prototype._retrieveFields = function() {
  * @param {Field} field The Zotero field object
  * @param {Integer} i The field index
  */
-Zotero.Integration.Fields.prototype._showCorruptFieldError = function(e, field, i) {
+Zotero.Integration.Fields.prototype._showCorruptFieldError = function(e, field, callback, errorCallback, i) {
+	Zotero.logError(e);
+	
 	var msg = Zotero.getString("integration.corruptField")+'\n\n'+
 			  Zotero.getString('integration.corruptField.description');
 	field.select();
+	this._doc.activate();
 	var result = this._doc.displayAlert(msg,
 		Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
 		Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_YES_NO_CANCEL);
 	
 	if(result == 0) {
-		throw e;
+		throw new Zotero.Integration.UserCancelledException;
 	} else if(result == 1) {		// No
 		this._removeCodeFields.push(i);
+		return true;
 	} else {
 		// Display reselect edit citation dialog
-		var added = this.addEditCitation(field);
-		if(added) {
-			this._doc.activate();
-		} else {
-			throw new Zotero.Integration.UserCancelledException();
-		}
+		var me = this;
+		var oldWindow = Zotero.Integration.currentWindow;
+		this.addEditCitation(field, function() {
+			Zotero.Integration.currentWindow.close();
+			Zotero.Integration.currentWindow = oldWindow;
+			me.updateSession(callback, errorCallback);
+		});
+		return false;
 	}
 }
 
 /**
  * Updates Zotero.Integration.Session attached to Zotero.Integration.Fields in line with document
  */
-Zotero.Integration.Fields.prototype.updateSession = function(callback) {
+Zotero.Integration.Fields.prototype.updateSession = function(callback, errorCallback) {
 	var me = this;
 	this.get(function(fields) {
 		me._session.resetRequest(me._doc);
@@ -1297,7 +1321,9 @@ Zotero.Integration.Fields.prototype.updateSession = function(callback) {
 				try {
 					me._session.loadBibliographyData(me._bibliographyData);
 				} catch(e) {
-					if(e instanceof Zotero.Integration.CorruptFieldException) {
+					if(errorCallback) {
+						errorCallback(e);
+					} else if(e instanceof Zotero.Integration.CorruptFieldException) {
 						var msg = Zotero.getString("integration.corruptBibliography")+'\n\n'+
 								  Zotero.getString('integration.corruptBibliography.description');
 						var result = me._doc.displayAlert(msg, 
@@ -1330,16 +1356,16 @@ Zotero.Integration.Fields.prototype.updateSession = function(callback) {
 						if(callback) callback(me._session);
 					}));
 			} else {
-				if(callback) callback(this._session);
+				if(callback) callback(me._session);
 			}
-		});		
+		}, errorCallback);		
 	});
 }
 
 /**
  * Keep processing fields until all have been processed
  */
-Zotero.Integration.Fields.prototype._processFields = function(fields, callback, i) {
+Zotero.Integration.Fields.prototype._processFields = function(fields, callback, errorCallback, i) {
 	if(!i) i = 0;
 	
 	for(var n = fields.length; i<n; i++) {
@@ -1348,7 +1374,7 @@ Zotero.Integration.Fields.prototype._processFields = function(fields, callback, 
 		try {
 			var fieldCode = field.getCode();
 		} catch(e) {
-			this._showCorruptFieldError(e, field, i);
+			if(!this._showCorruptFieldError(e, field, callback, errorCallback, i)) return;
 		}
 		
 		var [type, content] = this.getCodeTypeAndContent(fieldCode);
@@ -1357,7 +1383,9 @@ Zotero.Integration.Fields.prototype._processFields = function(fields, callback, 
 			try {
 				this._session.addCitation(i, noteIndex, content);
 			} catch(e) {
-				if(e instanceof Zotero.Integration.MissingItemException) {
+				if(errorCallback) {
+					errorCallback(e);
+				} else if(e instanceof Zotero.Integration.MissingItemException) {
 					// First, check if we've already decided to remove field codes from these
 					var reselect = true;
 					for each(var reselectKey in e.reselectKeys) {
@@ -1377,6 +1405,7 @@ Zotero.Integration.Fields.prototype._processFields = function(fields, callback, 
 						}
 						msg += '\n\n'+Zotero.getString('integration.missingItem.description');
 						field.select();
+						this._doc.activate();
 						var result = this._doc.displayAlert(msg, 1, 3);
 						if(result == 0) {			// Cancel
 							throw new Zotero.Integration.UserCancelledException();
@@ -1388,16 +1417,18 @@ Zotero.Integration.Fields.prototype._processFields = function(fields, callback, 
 						} else {					// Yes
 							// Display reselect item dialog
 							var me = this;
+							var oldCurrentWindow = Zotero.Integration.currentWindow;
 							this._session.reselectItem(this._doc, e, function() {
 								// Now try again
+								Zotero.Integration.currentWindow = oldCurrentWindow;
 								me._doc.activate();
-								me._processFields(fields, callback, i);
+								me._processFields(fields, callback, errorCallback, i);
 							});
 							return;
 						}
 					}
 				} else if(e instanceof Zotero.Integration.CorruptFieldException) {
-					this._showCorruptFieldError(e, field, i);
+					if(!this._showCorruptFieldError(e, field, callback, errorCallback, i)) return;
 				} else {
 					throw e;
 				}
@@ -1595,40 +1626,56 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 	
 	// if there's already a citation, make sure we have item IDs in addition to keys
 	if(field) {
-		var code = field.getCode();
-		[type, content] = this.getCodeTypeAndContent(code);
-		if(type != INTEGRATION_TYPE_ITEM) {			
-			throw new Zotero.Integration.DisplayException("notInCitation");
-		}
-		
-		citation = session.unserializeCitation(content);
 		try {
-			session.lookupItems(citation);
-		} catch(e) {
-			if(e instanceof MissingItemException) {
-				citation.citationItems = [];
-			} else {
-				throw e;
+			var code = field.getCode();
+		} catch(e) {}
+		
+		if(code) {
+			[type, content] = this.getCodeTypeAndContent(code);
+			if(type != INTEGRATION_TYPE_ITEM) {			
+				throw new Zotero.Integration.DisplayException("notInCitation");
+			}
+			
+			try {
+				citation = session.unserializeCitation(content);
+			} catch(e) {}
+			
+			if(citation) {
+				try {
+					session.lookupItems(citation);
+				} catch(e) {
+					if(e instanceof MissingItemException) {
+						citation.citationItems = [];
+					} else {
+						throw e;
+					}
+				}
+				
+				if(citation.properties.dontUpdate
+						|| (citation.properties.plainCitation
+							&& field.getText() !== citation.properties.plainCitation)) {
+					this._doc.activate();
+					if(!this._doc.displayAlert(Zotero.getString("integration.citationChanged.edit"),
+							Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
+							Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL)) {
+						throw new Zotero.Integration.UserCancelledException;
+					}
+				}
+				
+				// make sure it's going to get updated
+				delete citation.properties["formattedCitation"];
+				delete citation.properties["plainCitation"];
+				delete citation.properties["dontUpdate"];
 			}
 		}
-		
-		if(citation.properties.dontUpdate) {
-			if(!this._doc.displayAlert(Zotero.getString("integration.citationChanged.edit"),
-					Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
-					Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL)) {
-				throw new Zotero.Integration.UserCancelledException;
-			}
-		}
-		
-		// make sure it's going to get updated
-		delete citation.properties["formattedCitation"];
-		delete citation.properties["plainCitation"];
-		delete citation.properties["dontUpdate"];
 	} else {
 		newField = true;
 		var field = this.addField(true);
+		if(!field) return;
+	}
+	
+	if(!citation) {
 		field.setCode("TEMP");
-		
 		citation = {"citationItems":[], "properties":{}};
 	}
 	
@@ -1703,6 +1750,11 @@ Zotero.Integration.CitationEditInterface.prototype = {
 				}
 				me._sessionUpdated = true;
 				delete me._sessionCallbackQueue;
+			}, function(e) {
+				if(e instanceof Zotero.Integration.MissingItemException
+						|| e instanceof Zotero.Integration.CorruptFieldException) {
+					me._errorOccurred = true;
+				}
 			});
 		}
 	},
@@ -1735,11 +1787,23 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	 *     Receives a number from 0 to 100 indicating current status.
 	 */
 	"accept":function(progressCallback) {
+		var me = this;
 		this._fields.progressCallback = progressCallback;
 		
+		if(this._errorOccurred) {
+			// If an error occurred updating the session, update it again, this time letting the
+			// error get displayed
+			Zotero.setTimeout(function() {
+				me._fields.updateSession(function() {
+					me._errorOccurred = false;
+					me.accept(progressCallback);
+				})
+			}, 0);
+			return;
+		}
+		
 		if(this.citation.citationItems.length) {
-			// Citation added
-			var me = this;
+			// Citation 
 			this._runWhenSessionUpdated(function() {
 				me._session.addCitation(me._fieldIndex, me._field.getNoteIndex(), me.citation);
 				me._session.updateIndices[me._fieldIndex] = true;
@@ -1840,11 +1904,12 @@ Zotero.Integration.Session.prototype.resetRequest = function(doc) {
 	this.updateIndices = {};
 	this.newIndices = {};
 	
-	this.oldCitationIDs = this.citationIDs;
+	this.oldCitationIDs = this.citeprocCitationIDs;
 	
 	this.citationsByItemID = {};
 	this.citationsByIndex = [];
-	this.citationIDs = {};
+	this.documentCitationIDs = {};
+	this.citeprocCitationIDs = {};
 	this.citationText = {};
 	
 	this.doc = doc;
@@ -1920,6 +1985,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		if(!oldData || oldData.style.styleID != data.style.styleID
 				|| oldData.prefs.noteType != data.prefs.noteType
 				|| oldData.prefs.fieldType != data.prefs.fieldType) {
+			// This will cause us to regenerate all citations
 			me.oldCitationIDs = {};
 		}
 		
@@ -2078,7 +2144,8 @@ Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, ar
 		}
 	}
 	
-	var needNewID = !citation.citationID || this.citationIDs[citation.citationID];
+	// We need a new ID if there's another citation with the same citation ID in this document
+	var needNewID = !citation.citationID || this.documentCitationIDs[citation.citationID];
 	if(needNewID || !this.oldCitationIDs[citation.citationID]) {
 		if(needNewID) {
 			Zotero.debug("Integration: "+citation.citationID+" ("+index+") needs new citationID");
@@ -2088,7 +2155,7 @@ Zotero.Integration.Session.prototype.addCitation = function(index, noteIndex, ar
 		this.updateIndices[index] = true;
 	}
 	Zotero.debug("Integration: Adding citationID "+citation.citationID);
-	this.citationIDs[citation.citationID] = true;
+	this.documentCitationIDs[citation.citationID] = citation.citationID;
 }
 
 /**
@@ -2320,7 +2387,7 @@ Zotero.Integration.Session.prototype.deleteCitation = function(index) {
 		}
 	}
 	Zotero.debug("Integration: Deleting old citationID "+oldCitation.citationID);
-	if(oldCitation.citationID) delete this.citationIDs[oldCitation.citationID];
+	if(oldCitation.citationID) delete this.citeprocCitationIDs[oldCitation.citationID];
 	
 	this.updateIndices[index] = true;
 }
@@ -2471,9 +2538,7 @@ Zotero.Integration.Session.prototype.updateCitations = function(callback) {
 				if(this.formatCitation(index, citation)) {
 					this.bibliographyHasChanged = true;
 				}
-				if(!this.citationIDs[citation.citationID]) {
-					this.citationIDs[citation.citationID] = citation;
-				}
+				this.citeprocCitationIDs[citation.citationID] = true;
 				delete this.newIndices[index];
 				yield true;
 			}

@@ -1,11 +1,3 @@
-.zotero-tb-button:not(:first-child) {
-	margin-left: 5px;
-}
-
-.zotero-tb-button:not([type=menu]) {
-	margin-right: 4px;
-}
-
 #zotero-tb-search-menu-button {
 	margin: 0 -1px 0 -4px;
 	border: 0;
@@ -49,13 +41,17 @@
 }
 
 #zotero-toolbar {
+	-moz-appearance: toolbox !important;
+	padding-left: 2px;
+}
+
+#zotero-toolbar:-moz-system-metric(windows-compositor) {
 	-moz-appearance: none !important;
 	background-image: -moz-linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
 	background-color: rgb(207, 219, 236) !important;
 	border-width: 0 0 1px 0;
 	border-style: solid;
 	border-color: #818790;
-	padding-left: 2px;
 }
 
 #zotero-collections-tree, #zotero-items-tree, #zotero-view-item {
@@ -87,6 +83,14 @@
 
 #zotero-view-tabbox > tabs {
 	margin-top: 2px;
+}
+
+#zotero-item-pane-groupbox {
+	-moz-appearance: none !important;
+	border-radius: 0;
+	border-width: 0 0 0 1px;
+	border-color: #818790;
+	border-style: solid;
 }
 
 #zotero-editpane-item-box > scrollbox, #zotero-view-item > tabpanel > vbox, 

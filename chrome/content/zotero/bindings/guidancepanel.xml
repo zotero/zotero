@@ -48,11 +48,25 @@
 						panel = document.getAnonymousNodes(this)[0];
 					
 					if(!forEl) forEl = document.getElementById(this.getAttribute("for"));
-					panel.lastChild.textContent = Zotero.getString("firstRunGuidance."+about);
+					var text = Zotero.getString("firstRunGuidance."+about).split("\n");
+					var descriptionNode = panel.lastChild;
+					while(text.length) {
+						var textLine = text.shift();
+						descriptionNode.appendChild(document.createTextNode(textLine));
+						if(text.length) descriptionNode.appendChild(document.createElementNS(
+							"http://www.w3.org/1999/xhtml", "br"));
+					}
 					panel.openPopup(forEl, position ? position : "after_start",
 						x ? parseInt(x, 10) : 0, y ? parseInt(y, 10) : 0, false, false, null);
 					
 					Zotero.Prefs.set(pref, true);
+				]]>
+				</body>
+			</method>
+			<method name="hide">
+				<body>
+				<![CDATA[
+					document.getAnonymousNodes(this)[0].hidePopup();
 				]]>
 				</body>
 			</method>

@@ -1,67 +1,4 @@
-/**
-*
-*  UTF-8 data encode / decode
-*  http://www.webtoolkit.info/
-*
-**/
-
-var Utf8 = {
-
-    // public method for url encoding
-    encode : function (string) {
-        string = string.replace(/\r\n/g,"\n");
-        var utftext = "";
-
-        for (var n = 0; n < string.length; n++) {
-
-            var c = string.charCodeAt(n);
-
-            if (c < 128) {
-                    utftext += String.fromCharCode(c);
-            }
-            else if((c > 127) && (c < 2048)) {
-                    utftext += String.fromCharCode((c >> 6) | 192);
-                    utftext += String.fromCharCode((c & 63) | 128);
-            }
-            else {
-                    utftext += String.fromCharCode((c >> 12) | 224);
-                    utftext += String.fromCharCode(((c >> 6) & 63) | 128);
-                    utftext += String.fromCharCode((c & 63) | 128);
-            }
-
-        }
-
-        return utftext;
-    },
-
-    // public method for url decoding
-    decode : function (utftext) {
-        var string = "";
-        var i = 0;
-
-        while ( i < utftext.length ) {
-
-                var c = utftext.charCodeAt(i);
-                if (c < 128) {
-                        string += String.fromCharCode(c);
-                        i++;
-                }
-                else if((c > 191) && (c < 224)) {
-                        string += String.fromCharCode(((c & 31) << 6)
-                            | (utftext.charCodeAt(i+1) & 63));
-                        i += 2;
-                }
-                else {
-                        string += String.fromCharCode(((c & 15) << 12)
-                            | ((utftext.charCodeAt(i+1) & 63) << 6)
-                            | (utftext.charCodeAt(i+2) & 63));
-                        i += 3;
-                }
-        }
-        return string;
-    }
-
-}// Things we need to define to make converted pythn code work in js
+// Things we need to define to make converted pythn code work in js
 // environment of tabulator
 
 var RDFSink_forSomeSym = "http://www.w3.org/2000/10/swap/log#forSome";
@@ -117,17 +54,6 @@ assertFudge = function(condition, desc) {
 
 stringFromCharCode = function(uesc) {
     return String.fromCharCode(uesc);
-}
-
-
-String.prototype.encode = function(encoding) {
-    if (encoding != 'utf-8') throw "UTF8_converter: can only do utf-8"
-    return Utf8.encode(this);
-}
-String.prototype.decode = function(encoding) {
-    if (encoding != 'utf-8') throw "UTF8_converter: can only do utf-8"
-    //return Utf8.decode(this);
-    return this;
 }
 
 
@@ -309,7 +235,7 @@ __SinkParser.prototype.feed = function(octets) {
     So if there is more data to feed to the
     parser, it should be straightforward to recover.*/
     
-    var str = octets.decode("utf-8");
+    var str = octets;
     var i = 0;
     while ((i >= 0)) {
         var j = this.skipSpace(str, i);
@@ -1461,36 +1387,7 @@ __SinkParser.prototype.UEscape = function(str, i, startline) {
     var uch = stringFromCharCode( (  ( "0x" + pyjslib_slice(value, 2, 10) )  - 0 ) );
     return new pyjslib_Tuple([j, uch]);
 };
-function OLD_BadSyntax(uri, lines, str, i, why) {
-    return new __OLD_BadSyntax(uri, lines, str, i, why);
-}
-function __OLD_BadSyntax(uri, lines, str, i, why) {
-    this._str = str.encode("utf-8");
-    this._str = str;
-    this._i = i;
-    this._why = why;
-    this.lines = lines;
-    this._uri = uri;
-}
-__OLD_BadSyntax.prototype.toString = function() {
-    var str = this._str;
-    var i = this._i;
-    var st = 0;
-    if ((i > 60)) {
-        var pre = "...";
-        var st =  ( i - 60 ) ;
-    }
-    else {
-        var pre = "";
-    }
-    if (( ( pyjslib_len(str) - i )  > 60)) {
-        var post = "...";
-    }
-    else {
-        var post = "";
-    }
-    return "Line %i of <%s>: Bad syntax (%s) at ^ in:\n\"%s%s^%s%s\"" % new pyjslib_Tuple([ ( this.lines + 1 ) , this._uri, this._why, pre, pyjslib_slice(str, st, i), pyjslib_slice(str, i,  ( i + 60 ) ), post]);
-};
+
 function BadSyntax(uri, lines, str, i, why) {
     return  (  (  (  (  (  (  (  ( "Line " +  ( lines + 1 )  )  + " of <" )  + uri )  + ">: Bad syntax: " )  + why )  + "\nat: \"" )  + pyjslib_slice(str, i,  ( i + 30 ) ) )  + "\"" ) ;
 }

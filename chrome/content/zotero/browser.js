@@ -482,8 +482,6 @@ var Zotero_Browser = new function() {
 			collection.addItem(dbItem.id);
 		}
 		
-		Zotero.repaint(window);
-		
 		if(Zotero_Browser.isScraping) {
 			// initialize close timer between item saves in case translator doesn't call done
 			Zotero_Browser.progress.startCloseTimer(10000);	// is this long enough?

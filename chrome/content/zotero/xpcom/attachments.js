@@ -568,16 +568,16 @@ Zotero.Attachments = new function(){
 				var sync = true;
 				
 				// Load WebPageDump code
+				var wpd = {"Zotero":Zotero};
 				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
 					.getService(Components.interfaces.mozIJSSubScriptLoader)
-					.loadSubScript("chrome://zotero/content/webpagedump/common.js");
-				
+					.loadSubScript("chrome://zotero/content/webpagedump/common.js", wpd);
 				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
 					.getService(Components.interfaces.mozIJSSubScriptLoader)
-					.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js");
+					.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js", wpd);
 				
-				wpdDOMSaver.init(file.path, document);
-				wpdDOMSaver.saveHTMLDocument();
+				wpd.wpdDOMSaver.init(file.path, document);
+				wpd.wpdDOMSaver.saveHTMLDocument();
 				
 				attachmentItem.attachmentPath = this.getPath(
 					file, Zotero.Attachments.LINK_MODE_IMPORTED_URL

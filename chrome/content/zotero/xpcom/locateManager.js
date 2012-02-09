@@ -201,7 +201,8 @@ Zotero.LocateManager = new function() {
 			"image/png":"png",
 			"image/jpeg":"jpg",
 			"image/gif":"gif",
-			"image/x-icon":"ico"
+			"image/x-icon":"ico",
+			"image/vnd.microsoft.icon":"ico"
 		};
 		
 		// ensure there is an icon
