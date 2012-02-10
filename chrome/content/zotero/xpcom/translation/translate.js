@@ -219,7 +219,9 @@ Zotero.Translate.Sandbox = {
 				return translation.setSearch(arg);
 			};
 			safeTranslator.setDocument = function(arg) { return translation.setDocument(arg) };
+			var errorHandlerSet = false;
 			safeTranslator.setHandler = function(arg1, arg2) {
+				if(arg1 === "error") errorHandlerSet = true;
 				translation.setHandler(arg1, 
 					function(obj, item) {
 						try {
@@ -288,7 +290,7 @@ Zotero.Translate.Sandbox = {
 				return translation.getTranslators();
 			};
 			
-			var errorHandlerSet = false, doneHandlerSet = false;
+			var doneHandlerSet = false;
 			safeTranslator.translate = function() {
 				translate.incrementAsyncProcesses("safeTranslator#translate()");
 				setDefaultHandlers(translate, translation);
