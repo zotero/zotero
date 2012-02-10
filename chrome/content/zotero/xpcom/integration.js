@@ -193,9 +193,8 @@ Zotero.Integration = new function() {
 			if(callback) callback(_integrationVersionsOK);
 		}
 	
-		var extMan = Components.classes['@mozilla.org/extensions/manager;1'].
-			getService(Components.interfaces.nsIExtensionManager);
-		_checkAddons([extMan.getItemForID(id) for each(id in INTEGRATION_PLUGINS)]);
+		Components.utils.import("resource://gre/modules/AddonManager.jsm");
+		AddonManager.getAddonsByIDs(INTEGRATION_PLUGINS, _checkAddons);
 	}
 	
 	/**
@@ -533,24 +532,6 @@ Zotero.Integration = new function() {
 				intervalID = win.setInterval(_X11BringToForeground, 50);
 			}, false);
 		}
-		
-		var dummyPtr = dummy.address();
-		if(!XQueryTree(display, w, dummyPtr, dummyPtr, childrenPtr.address(),
-				nChildren.address()) || childrenPtr.isNull()) {
-			return false;
-		}
-		
-		var nChildrenJS = nChildren.value;
-		var children = ctypes.cast(childrenPtr, ctypes.uint32_t.array(nChildrenJS).ptr).contents;
-		var foundWindow = false;
-		for(var i=0; i<nChildrenJS; i++) {
-			foundWindow = _X11FindWindow(display, children.addressOfElement(i).contents,
-				searchName);
-			if(foundWindow) break;
-		}
-		
-		XFree(children);
-		return foundWindow;
 	}
 	
 	function _X11FindWindow(display, w, searchName) {
