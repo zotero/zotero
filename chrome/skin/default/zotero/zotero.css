@@ -21,34 +21,36 @@
 	padding:0;
 }
 
-#zotero-toolbar-button
-{
-	list-style-image: url('chrome://zotero/skin/zotero-z-24px.png');
+/*
+  Add-on bar and toolbar icon
+*/
+#zotero-toolbar-button {
+	list-style-image: url(chrome://zotero/skin/zotero-z-24px.png);
 }
 
-#zotero-toolbar-button:hover
-{
-	list-style-image: url('chrome://zotero/skin/zotero-z-24px-hover.png');
+#zotero-toolbar-button:active {
+	list-style-image: url(chrome://zotero/skin/zotero-z-24px-active.png);
 }
 
-#zotero-toolbar-button:active
-{
-	list-style-image: url('chrome://zotero/skin/zotero-z-24px-active.png');
+toolbar[iconsize="small"] #zotero-toolbar-button {
+	list-style-image: url(chrome://zotero/skin/zotero-z-16px.png);
 }
 
-toolbar[iconsize="small"] #zotero-toolbar-button
-{
-	list-style-image: url('chrome://zotero/skin/zotero-z-16px.png');
+toolbar[iconsize="small"] #zotero-toolbar-button:active {
+	list-style-image: url(chrome://zotero/skin/zotero-z-16px-active.png);
 }
 
-toolbar[iconsize="small"] #zotero-toolbar-button:hover
-{
-	list-style-image: url('chrome://zotero/skin/zotero-z-16px-hover.png');
+#addon-bar #zotero-toolbar-button {
+	list-style-image: url(chrome://zotero/skin/zotero_status_bar.png);
 }
 
-toolbar[iconsize="small"] #zotero-toolbar-button:active
-{
-	list-style-image: url('chrome://zotero/skin/zotero-z-16px-active.png');
+#addon-bar #zotero-toolbar-button[compact="true"] {
+	width: 20px;
+	list-style-image: url(chrome://zotero/skin/zotero_status_bar_compact.png);
+}
+
+#addon-bar #zotero-toolbar-button[error="true"] {
+	list-style-image: url(chrome://zotero/skin/zotero_status_bar_error.png);
 }
 
 

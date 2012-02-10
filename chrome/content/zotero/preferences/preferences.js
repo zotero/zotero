@@ -1853,19 +1853,17 @@ function updateWordProcessorInstructions() {
 }
 
 /**
- * Sets "Status bar icon" to "None" if Zotero is set to load in separate tab on Fx 4
+ * Sets "Status bar icon" to "None" if Zotero is set to load in separate tab
  */
 function handleShowInPreferenceChange() {
 	var showInSeparateTab = document.getElementById("zotero-prefpane-general-showIn-separateTab");
 	var showInAppTab = document.getElementById("zotero-prefpane-general-showIn-appTab");
-	if(Zotero.isFx4) {
-		if(showInAppTab.selected) {
-			document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-none');
-			Zotero.Prefs.set("statusBarIcon", 0);
-		} else if(Zotero.isFx4) {
-			document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-full');
-			Zotero.Prefs.set("statusBarIcon", 2);
-		}
+	if(showInAppTab.selected) {
+		document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-none');
+		Zotero.Prefs.set("statusBarIcon", 0);
+	} else {
+		document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-full');
+		Zotero.Prefs.set("statusBarIcon", 2);
 	}
 }
 

@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<overlay id="zotero-status-bar"
-	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	
-	<statusbar id="status-bar">
-		<statusbarpanel id="zotero-status-bar-icon" hidden="true"
-			class="statusbarpanel-iconic" onclick="ZoteroOverlay.toggleDisplay();"/>
-	</statusbar>
-</overlay>

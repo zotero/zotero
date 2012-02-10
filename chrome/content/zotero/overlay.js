@@ -36,6 +36,8 @@ var ZoteroOverlay = new function()
 	this.isTab = false;
 	
 	this.onLoad = function() {
+		try {
+		
 		zoteroPane = document.getElementById('zotero-pane-stack');
 		zoteroSplitter = document.getElementById('zotero-splitter');
 		
@@ -74,43 +76,45 @@ var ZoteroOverlay = new function()
 		}
 		
 		// Make Zotero icon visible, if requested
-		var iconPref = Components.classes["@mozilla.org/preferences-service;1"]
+		var prefBranch = Components.classes["@mozilla.org/preferences-service;1"]
 							.getService(Components.interfaces.nsIPrefService)
-							.getBranch('extensions.zotero.').getIntPref('statusBarIcon');
+							.getBranch('extensions.zotero.');
 		
-		var fx36Icon = document.getElementById('zotero-status-bar-icon');
 		var addonBar = document.getElementById('addon-bar');
 		
-		// Status bar in Fx3.6
-		if (isFx36) {
-			var icon = fx36Icon;
+		var iconPref = prefBranch.getIntPref('statusBarIcon');
+		
+		// If this is the first run, add icon to add-on bar if not
+		// in the window already and not hidden by the Zotero prefs
+		if (!document.getElementById("zotero-toolbar-button") && iconPref != 0) {
+			addonBar.insertItem("zotero-toolbar-button");
+			addonBar.setAttribute("currentset", addonBar.currentSet);
+			document.persist(addonBar.id, "currentset");
+			addonBar.setAttribute("collapsed", false);
+			document.persist(addonBar.id, "collapsed");
 		}
-		// In >=Fx4, add to add-on bar
-		else {
-			// add Zotero icon
-			var icon = document.createElement('toolbarbutton');
-			icon.id = 'zotero-addon-bar-icon';
-			icon.setAttribute('oncommand', 'ZoteroOverlay.toggleDisplay()');
-			icon.setAttribute('hidden', true);
-			addonBar.appendChild(icon);
-			if (addonBar.collapsed) {
-				// If no Zotero or icon isn't set to hidden, show add-on bar
-				if (iconPref != 0) {
-					setToolbarVisibility(addonBar, true);
-				}
-			}
-		}
+		
+		var icon = document.getElementById('zotero-toolbar-button');
+		
+		// Add a listener for toolbar change events
+		window.addEventListener("customizationchange", onToolbarChange, false);
 		
 		if (Zotero && Zotero.initialized){
 			document.getElementById('appcontent').addEventListener('mousemove', Zotero.ProgressWindowSet.updateTimers, false);
-			switch (iconPref) {
-				case 2:
-					icon.setAttribute('hidden', false);
-					break;
-				case 1:
-					icon.setAttribute('hidden', false);
+			if (icon) {
+				if (iconPref == 1) {
 					icon.setAttribute('compact', true);
-					break;
+				}
+				// If hidden in prefs, remove from add-on bar
+				else if (iconPref == 0) {
+					var toolbar = icon.parentNode;
+					if (toolbar.id == 'addon-bar') {
+						var palette = doc.getElementById("navigator-toolbox").palette;
+						palette.appendChild(icon);
+						toolbar.setAttribute("currentset", toolbar.currentSet);
+						document.persist(toolbar.id, "currentset");
+					}
+				}
 			}
 		}
 		else {
@@ -134,7 +138,6 @@ var ZoteroOverlay = new function()
 			
 			icon.setAttribute('tooltiptext', errMsg);
 			icon.setAttribute('error', 'true');
-			icon.setAttribute('hidden', false);
 		}
 		
 		// Used for loading pages from upgrade wizard
@@ -162,9 +165,39 @@ var ZoteroOverlay = new function()
 				ZoteroOverlay.toggleDisplay(_stateBeforeReload);
 			}
 		});
+		
+		}
+		catch (e) {
+			Zotero.debug(e);
+		}
 	}
 	
+	
+    function onToolbarChange(e) {
+    	// e.target seems to be navigator-toolbox in all cases,
+    	// so check the addon-bar directly
+    	var addonBar = document.getElementById("addon-bar");
+    	var icon = document.getElementById("zotero-toolbar-button");
+    	if (icon) {
+    		// If dragged to add-on bar
+			if (addonBar.getElementsByAttribute("id", "zotero-toolbar-button").length) {
+				var statusBarPref = Zotero.Prefs.get("statusBarIcon");
+				// If pref set to hide, force to full
+				if (statusBarPref == 0) {
+					Zotero.Prefs.set("statusBarIcon", 2)
+				}
+				else if (statusBarPref == 1) {
+					icon.setAttribute("compact", true);
+				}
+				return;
+			}
+    	}
+    	Zotero.Prefs.set("statusBarIcon", 0);
+    }
+    
+    
 	this.onUnload = function() {
+		window.removeEventListener("customizationchange", onToolbarChange, false);
 		ZoteroPane.destroy();
 	}
 	
