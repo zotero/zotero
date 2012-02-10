@@ -416,7 +416,22 @@ const ZOTERO_CONFIG = {
 			observerService.removeObserver(_shutdownObserver, "quit-application", false);
 		});
 		
-		Zotero.IPC.init();
+		try {
+			Zotero.IPC.init();
+		}
+		catch (e) {
+			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
+				var msg = Zotero.localeJoin([
+					Zotero.getString('startupError.databaseCannotBeOpened'),
+					Zotero.getString('startupError.checkPermissions')
+				]);
+				Zotero.startupError = msg;
+				Zotero.debug(e);
+				Components.utils.reportError(e);
+				return false;
+			}
+			throw (e);
+		}
 		
 		// Load additional info for connector or not
 		if(Zotero.isConnector) {
