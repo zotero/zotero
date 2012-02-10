@@ -152,7 +152,7 @@ Zotero.Connector_Types = new function() {
 				return false;
 			};
 			
-			this.getBaseIDFromTypeAndField = function(itemType, fieldIdOrName) {
+			this.getBaseIDFromTypeAndField = function(typeIdOrName, fieldIdOrName) {
 				var field = fields[fieldIdOrName], itemType = itemTypes[typeIdOrName];
 				if(!field || !itemType) {
 					throw new Error("Invalid field or type ID");
