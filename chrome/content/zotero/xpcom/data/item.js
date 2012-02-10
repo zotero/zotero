@@ -3294,11 +3294,6 @@ Zotero.Item.prototype.__defineGetter__('attachmentText', function () {
 		if (cacheFile.exists()) {
 			var str = Zotero.File.getContents(cacheFile);
 			
-			// TODO: remove post-Fx3.0
-			if (!str.trim) {
-				return Zotero.Utilities.trim(str);
-			}
-			
 			return str.trim();
 		}
 		return '';
@@ -3353,11 +3348,6 @@ Zotero.Item.prototype.__defineGetter__('attachmentText', function () {
 	
 	else {
 		return '';
-	}
-	
-	// TODO: remove post-Fx3.0
-	if (!str.trim) {
-		return Zotero.Utilities.trim(str);
 	}
 	
 	return str.trim();
