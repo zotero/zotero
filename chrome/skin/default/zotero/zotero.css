@@ -42,6 +42,7 @@ toolbar[iconsize="small"] #zotero-toolbar-button:active {
 
 #addon-bar #zotero-toolbar-button {
 	list-style-image: url(chrome://zotero/skin/zotero_status_bar.png);
+	height: 18px;
 }
 
 #addon-bar #zotero-toolbar-button[compact="true"] {
