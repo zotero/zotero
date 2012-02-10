@@ -124,13 +124,6 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'win');
 		}
 		
-		if(Zotero.isFx4 || window.ZoteroTab) {
-			// hack, since Fx 4 no longer sets active, and the reverse in polarity of the preferred
-			// property makes things painful to handle otherwise
-			// DEBUG: remove this once we only support Fx 4
-			zp.setAttribute("ignoreActiveAttribute", "true");
-		}
-		
 		// register an observer for Zotero reload
 		observerService = Components.classes["@mozilla.org/observer-service;1"]
 					  .getService(Components.interfaces.nsIObserverService);
@@ -3469,12 +3462,7 @@ var ZoteroPane = new function()
 				proc.init(exec);
 				
 				var args = [file.path];
-				if (!Zotero.isFx36) {
-					proc.runw(true, args, args.length);
-				}
-				else {
-					proc.run(true, args, args.length);
-				}
+				proc.runw(true, args, args.length);
 			}
 			catch (e) {
 				Zotero.debug(e);
@@ -3538,12 +3526,7 @@ var ZoteroPane = new function()
 			proc.init(exec);
 			
 			var args = [url];
-			if (!Zotero.isFx36) {
-				proc.runw(true, args, args.length);
-			}
-			else {
-				proc.run(true, args, args.length);
-			}
+			proc.runw(true, args, args.length);
 		}
 	}
 	

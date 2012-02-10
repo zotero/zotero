@@ -29,7 +29,7 @@
 var ZoteroOverlay = new function()
 {
 	const DEFAULT_ZPANE_HEIGHT = 300;
-	var toolbarCollapseState, isFx36, showInPref;	
+	var toolbarCollapseState, showInPref;	
 	var zoteroPane, zoteroSplitter;
 	var _stateBeforeReload = false;
 	
@@ -44,36 +44,31 @@ var ZoteroOverlay = new function()
 		ZoteroPane_Overlay = ZoteroPane;
 		ZoteroPane.init();
 		
-		var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
-						.getService(Components.interfaces.nsIXULAppInfo);
-		isFx36 = appInfo.platformVersion.indexOf('1.9') === 0;
-		
 		// Open Zotero app tab, if in Fx 4 and requested by pref
 		showInPref = Components.classes["@mozilla.org/preferences-service;1"]
 							.getService(Components.interfaces.nsIPrefService)
 							.getBranch('extensions.zotero.').getIntPref('showIn');
 		this.isTab = showInPref !== 1;
-		if(!isFx36) {
-			var observerService = Components.classes["@mozilla.org/observer-service;1"]
-				.getService(Components.interfaces.nsIObserverService);
-			var zoteroObserver = function(subject, topic, data) {
-				if(subject != window) return;
-				observerService.removeObserver(this, "browser-delayed-startup-finished");
-				if(showInPref === 3) {
-					var tabbar = document.getElementById("TabsToolbar");
-					if(tabbar && window.getComputedStyle(tabbar).display !== "none") {
-						// load Zotero as a tab, if it isn't loading by default
-						ZoteroOverlay.loadZoteroTab(true);
-					}
-				} else if(showInPref === 1) {
-					// close Zotero as a tab, in case it was pinned
-					var zoteroTab = ZoteroOverlay.findZoteroTab();
-					if(zoteroTab) gBrowser.removeTab(zoteroTab);
+
+		var observerService = Components.classes["@mozilla.org/observer-service;1"]
+			.getService(Components.interfaces.nsIObserverService);
+		var zoteroObserver = function(subject, topic, data) {
+			if(subject != window) return;
+			observerService.removeObserver(this, "browser-delayed-startup-finished");
+			if(showInPref === 3) {
+				var tabbar = document.getElementById("TabsToolbar");
+				if(tabbar && window.getComputedStyle(tabbar).display !== "none") {
+					// load Zotero as a tab, if it isn't loading by default
+					ZoteroOverlay.loadZoteroTab(true);
 				}
-			};
-			
-			observerService.addObserver(zoteroObserver, "browser-delayed-startup-finished", false);
-		}
+			} else if(showInPref === 1) {
+				// close Zotero as a tab, in case it was pinned
+				var zoteroTab = ZoteroOverlay.findZoteroTab();
+				if(zoteroTab) gBrowser.removeTab(zoteroTab);
+			}
+		};
+		
+		observerService.addObserver(zoteroObserver, "browser-delayed-startup-finished", false);
 		
 		// Make Zotero icon visible, if requested
 		var prefBranch = Components.classes["@mozilla.org/preferences-service;1"]
@@ -149,9 +144,7 @@ var ZoteroOverlay = new function()
 		}
 		
 		// Hide browser chrome on Zotero tab
-		if(Zotero.isFx4) {
-			XULBrowserWindow.inContentWhitelist.push("chrome://zotero/content/tab.xul");
-		}
+		XULBrowserWindow.inContentWhitelist.push("chrome://zotero/content/tab.xul");
 		
 		// Close pane if connector is enabled
 		ZoteroPane_Local.addReloadListener(function() {
@@ -309,7 +302,7 @@ var ZoteroOverlay = new function()
 		// If no existing tab, add a new tab
 		if(!tab) tab = gBrowser.addTab(ZOTERO_TAB_URL);
 		// Pin tab
-		if(!isFx36 && showInPref == 3) gBrowser.pinTab(tab);
+		if(showInPref == 3) gBrowser.pinTab(tab);
 		// If requested, activate tab
 		if(!background) gBrowser.selectedTab = tab;
 	}

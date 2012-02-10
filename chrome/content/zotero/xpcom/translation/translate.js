@@ -1294,10 +1294,6 @@ Zotero.Translate.Base.prototype = {
 	 * @param {Integer} level Log level (1-5, higher numbers are higher priority)
 	 */
 	"_debug":function(string, level) {
-		if(typeof string === "object" && Zotero.isFx36 && !Zotero.isBookmarklet) {
-			string = new XPCSafeJSObjectWrapper(string);
-		}
-		
 		if(level !== undefined && typeof level !== "number") {
 			Zotero.debug("debug: level must be an integer");
 			return;

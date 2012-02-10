@@ -1757,12 +1757,7 @@ const ZOTERO_CONFIG = {
 			for each(var menuitem in menupopup.childNodes) {
 				if (menuitem.id.substr(prefixLen) == mode) {
 					menuitem.setAttribute('checked', true);
-					if (Zotero.isFx36) {
-						searchBox.emptytext = modes[mode].label;
-					}
-					else {
-						searchBox.placeholder = modes[mode].label;
-					}
+					searchBox.placeholder = modes[mode].label;
 					return;
 				}
 			}
@@ -1803,12 +1798,7 @@ const ZOTERO_CONFIG = {
 		button.appendChild(menupopup);
 		hbox.insertBefore(button, input);
 		
-		if (Zotero.isFx36) {
-			searchBox.emptytext = modes[mode].label;
-		}
-		else {
-			searchBox.placeholder = modes[mode].label;
-		}
+		searchBox.placeholder = modes[mode].label;
 		
 		// If Alt-Up/Down, show popup
 		searchBox.addEventListener("keypress", function(event) {
