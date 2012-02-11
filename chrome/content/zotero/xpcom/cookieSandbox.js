@@ -27,16 +27,12 @@
  * Manage cookies in a sandboxed fashion
  *
  * @constructor
- * @param {browser} browser Hidden browser object
+ * @param {browser} [browser] Hidden browser object
  * @param {String|nsIURI} uri URI of page to manage cookies for (cookies for domains that are not 
  *                     subdomains of this URI are ignored)
  * @param {String} cookieData Cookies with which to initiate the sandbox
  */
 Zotero.CookieSandbox = function(browser, uri, cookieData) {
-	this._webNav = browser.webNavigation;
-	this._browser = browser;
-	this._watchedBrowsers = [browser];
-	this._watchedXHRs = [];
 	this._observerService = Components.classes["@mozilla.org/observer-service;1"].
 		getService(Components.interfaces.nsIObserverService);
 	
@@ -58,30 +54,13 @@ Zotero.CookieSandbox = function(browser, uri, cookieData) {
 		}
 	}
 	
-	// register with observer
-	Zotero.CookieSandbox.Observer.register(this);
+	if(browser) {
+		this.attachToBrowser(browser);
+	}
+	Zotero.CookieSandbox.Observer.register();
 }
 
 Zotero.CookieSandbox.prototype = {
-	/**
-	 * Check whether we track a browser for this document
-	 */
-	"isDocumentTracked":function(doc) {	
-		var i = this._watchedBrowsers.length;
-		while(i--) {
-			var browser = this._watchedBrowsers[i];
-			if(doc == browser.contentDocument) return true;
-		}
-		return false;
-	},
-	
-	/**
-	 * Check whether we track an XHR for this document
-	 */
-	"isXHRTracked":function(xhr) {
-		return this._watchedXHRs.indexOf(xhr) !== -1;
-	},
-	
 	/**
 	 * Adds cookies to this CookieSandbox based on a cookie header
 	 * @param {String} cookieString;
@@ -108,27 +87,19 @@ Zotero.CookieSandbox.prototype = {
 	},
 	
 	/**
-	 * Attach CookieSandbox to a specific XMLHttpRequest
-	 * @param {XMLHttpRequest} xhr
+	 * Attach CookieSandbox to a specific browser
+	 * @param {Browser} browser
 	 */
 	"attachToBrowser":function(browser) {
-		this._watchedBrowsers.push(browser);
+		Zotero.CookieSandbox.Observer.trackedBrowsers.set(browser, this);
 	},
 	
 	/**
 	 * Attach CookieSandbox to a specific XMLHttpRequest
-	 * @param {XMLHttpRequest} xhr
+	 * @param {nsIInterfaceRequestor} ir
 	 */
-	"attachToXHR": function(xhr) {
-		this._watchedXHRs.push(xhr);
-	},
-	
-	/**
-	 * Destroys this CookieSandbox (intended to be executed when the browser is destroyed)
-	 */
-	"destroy": function() {
-		// unregister with observer
-		Zotero.CookieSandbox.Observer.unregister(this);
+	"attachToInterfaceRequestor": function(ir) {
+		Zotero.CookieSandbox.Observer.trackedInterfaceRequestors.set(ir.QueryInterface(Components.interfaces.nsIInterfaceRequestor), this);
 	}
 }
 
@@ -144,36 +115,21 @@ Zotero.CookieSandbox.Observer = new function() {
 	
 	var observerService = Components.classes["@mozilla.org/observer-service;1"].
 			getService(Components.interfaces.nsIObserverService),
-		observing = false,
-		cookieSandboxes = [];
+		observing = false;
+	
+	this.trackedBrowsers = new WeakMap();
+	this.trackedInterfaceRequestors = new WeakMap();
 	
 	/**
 	 * Registers cookie manager and observer, if necessary
 	 */
 	this.register = function(CookieSandbox) {
-		cookieSandboxes.push(CookieSandbox);
-		
 		if(!observing) {
 			Zotero.debug("CookieSandbox: Registering observers");
 			for each(var topic in observeredTopics) observerService.addObserver(this, topic, false);
 			observing = true;
 		}
-	}
-	
-	/**
-	 * Unregisters cookie manager and observer
-	 */
-	this.unregister = function(CookieSandbox) {
-		// remove cookie manager from list
-		cookieSandboxes.splice(cookieSandboxes.indexOf(CookieSandbox), 1);
-		
-		// remove observer if this is the last and this is not translation-server
-		if(cookieSandboxes.length === 0 && !Zotero.isServer) {
-			Zotero.debug("CookieSandbox: Unregistering observers");
-			for each(var topic in observeredTopics) observerService.removeObserver(this, topic);
-			observing = false;
-		}
-	}
+	};
 	
 	/**
 	 * Implements nsIObserver to watch for new cookies and to add sandboxed cookies
@@ -185,50 +141,48 @@ Zotero.CookieSandbox.Observer = new function() {
 		}
 		
 		channel.QueryInterface(Components.interfaces.nsIHttpChannel);
-		var trackedBy, tested, doc, xhr,
+		var trackedBy, tested, browser, callbacks,
 			channelURI = channel.URI.spec,
 			notificationCallbacks = channel.notificationCallbacks;
 		
-		// try the document
-		try {
-			doc = notificationCallbacks.getInterface(Components.interfaces.nsIDOMWindow).top.document;
-		} catch(e) {}
-		if(doc) {
+		// try the notification callbacks
+		trackedBy = this.trackedInterfaceRequestors.get(notificationCallbacks);
+		if(trackedBy) {
 			tested = true;
-			for(var i=0, n=cookieSandboxes.length; i<n; i++) {
-				if(cookieSandboxes[i].isDocumentTracked(doc)) {
-					trackedBy = cookieSandboxes[i];
-				}
-			}
 		} else {
-			// try the document for the load group
+			// try the browser
 			try {
-				doc = channel.loadGroup.notificationCallbacks.getInterface(Components.interfaces.nsIDOMWindow).top.document;
+				browser = notificationCallbacks.getInterface(Ci.nsIWebNavigation)
+					.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
 			} catch(e) {}
-			if(doc) {
+			if(browser) {
 				tested = true;
-				for(var i=0, n=cookieSandboxes.length; i<n; i++) {
-					if(cookieSandboxes[i].isDocumentTracked(doc)) {
-						trackedBy = cookieSandboxes[i];
-					}
-				}
+				trackedBy = this.trackedBrowsers.get(browser);
 			} else {
-				// try getting as an XHR
+				// try the document for the load group
 				try {
-					xhr = notificationCallbacks.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
+					browser = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsIWebNavigation)
+						.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
 				} catch(e) {}
-				if(xhr) {
+				if(browser) {
 					tested = true;
-					for(var i=0, n=cookieSandboxes.length; i<n; i++) {
-						if(cookieSandboxes[i].isXHRTracked(xhr)) {
-							trackedBy = cookieSandboxes[i];
-						}
+					trackedBy = this.trackedBrowsers.get(browser);
+				} else {
+					// try getting as an XHR or nsIWBP
+					try {
+						notificationCallbacks.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
+						tested = true;
+					} catch(e) {}
+					if(!tested) {
+						try {
+							notificationCallbacks.QueryInterface(Components.interfaces.nsIWebBrowserPersist);
+							tested = true;
+						} catch(e) {}
 					}
 				}
 			}
 		}
 		
-		// isTracked is now either true, false, or null
 		// trackedBy => we should manage cookies for this request
 		// tested && !trackedBy => we should not manage cookies for this request
 		// !tested && !trackedBy => this request is of a type we couldn't match to this request.
@@ -256,7 +210,6 @@ Zotero.CookieSandbox.Observer = new function() {
 			}
 			
 			// add cookies to be sent to this domain
-			Zotero.debug(trackedBy.cookieString);
 			channel.setRequestHeader("Cookie", trackedBy.cookieString, false);
 			Zotero.debug("CookieSandbox: Added cookies for request to "+channelURI, 5);
 		} else if(topic == "http-on-examine-response") {
@@ -276,7 +229,6 @@ Zotero.CookieSandbox.Observer = new function() {
 			}
 			
 			// put new cookies into our sandbox
-			Zotero.debug(cookieHeader);
 			if(cookieHeader) trackedBy.addCookiesFromHeader(cookieHeader);
 			
 			Zotero.debug("CookieSandbox: Slurped cookies from "+channelURI, 5);

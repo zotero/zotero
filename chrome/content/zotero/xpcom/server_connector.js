@@ -156,7 +156,6 @@ Zotero.Server.Connector.Detect.prototype = {
 		}
 		this.sendResponse(200, "application/json", JSON.stringify(jsons));
 		
-		this._translate.cookieSandbox.destroy();
 		Zotero.Browser.deleteHiddenBrowser(this._browser);
 	}
 }
@@ -225,7 +224,6 @@ Zotero.Server.Connector.SavePage.prototype = {
 	"_translatorsAvailable":function(translate, translators) {
 		// make sure translatorsAvailable succeded
 		if(!translators.length) {
-			me._translate.cookieSandbox.destroy();
 			Zotero.Browser.deleteHiddenBrowser(this._browser);
 			this.sendResponse(500);
 			return;
@@ -251,7 +249,6 @@ Zotero.Server.Connector.SavePage.prototype = {
 			jsonItems.push(jsonItem);
 		});
 		translate.setHandler("done", function(obj, item) {
-			me._translate.cookieSandbox.destroy();
 			Zotero.Browser.deleteHiddenBrowser(me._browser);
 			if(jsonItems.length || me.selectedItems === false) {
 				me.sendResponse(201, "application/json", JSON.stringify({"items":jsonItems}));
@@ -296,9 +293,12 @@ Zotero.Server.Connector.SaveItem.prototype = {
 			var collection = zp.getSelectedCollection();
 		} catch(e) {}
 		
+		var cookieSandbox = data["uri"] && data["cookie"] ? new Zotero.CookieSandbox(null, data["uri"],
+			data["cookie"]) : null;
+		
 		// save items
 		var itemSaver = new Zotero.Translate.ItemSaver(libraryID,
-			Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD, 1);
+			Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD, 1, undefined, cookieSandbox);
 		itemSaver.saveItems(data.items, function(returnValue, data) {
 			if(returnValue) {
 				try {
@@ -390,8 +390,6 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 				// remove browser
 				Zotero.Browser.deleteHiddenBrowser(browser);
 				
-				// destroy cookieSandbox
-				cookieSandbox.destroy();
 				sendResponseCallback(201);
 			} catch(e) {
 				sendResponseCallback(500);

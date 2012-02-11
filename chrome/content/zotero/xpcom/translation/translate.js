@@ -1433,7 +1433,8 @@ Zotero.Translate.Web.prototype._getParameters = function() { return [this.docume
  */
 Zotero.Translate.Web.prototype._prepareTranslation = function() {
 	this._itemSaver = new Zotero.Translate.ItemSaver(this._libraryID,
-		Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_DOWNLOAD" : "ATTACHMENT_MODE_IGNORE")], 1);
+		Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_DOWNLOAD" : "ATTACHMENT_MODE_IGNORE")], 1,
+		this.document, this._cookieSandbox);
 	this.newItems = [];
 }
 
@@ -1548,7 +1549,7 @@ Zotero.Translate.Import.prototype.setString = function(string) {
 Zotero.Translate.Import.prototype.complete = function(returnValue, error) {
 	if(this._io) {
 		this._progress = null;
-		this._io.close();
+		this._io.close(false);
 	}
 	
 	// call super
@@ -1728,7 +1729,7 @@ Zotero.Translate.Export.prototype.setDisplayOptions = function(displayOptions) {
 Zotero.Translate.Export.prototype.complete = function(returnValue, error) {
 	if(this._io) {
 		this._progress = null;
-		this._io.close();
+		this._io.close(true);
 		if(this._io instanceof Zotero.Translate.IO.String) {
 			this.string = this._io.string;
 		}
@@ -2064,7 +2065,13 @@ Zotero.Translate.IO.String.prototype = {
 		}
 	},
 	
-	"close":function() {}
+	"close":function(serialize) {
+		// if we are writing in RDF data mode and no string is set, serialize current RDF to the
+		// string
+		if(serialize && Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1 && this.string === "") {
+			this.string = this.RDF.serialize();
+		}
+	}
 }
 
 /****** RDF DATA MODE ******/

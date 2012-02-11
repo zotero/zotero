@@ -280,7 +280,7 @@ Zotero.MIME = new function(){
 	}
 	
 	
-	this.getMIMETypeFromURL = function (url, callback) {
+	this.getMIMETypeFromURL = function (url, callback, cookieSandbox) {
 		Zotero.HTTP.doHead(url, function(xmlhttp) {
 			if (xmlhttp.status != 200 && xmlhttp.status != 204) {
 				Zotero.debug("Attachment HEAD request returned with status code "
@@ -308,7 +308,7 @@ Zotero.MIME = new function(){
 			var hasNativeHandler = Zotero.MIME.hasNativeHandler(mimeType, ext)
 			
 			callback(mimeType, hasNativeHandler);
-		});
+		}, undefined, cookieSandbox);
 	}
 	
 	
