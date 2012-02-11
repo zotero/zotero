@@ -110,6 +110,7 @@ var Zotero_QuickFormat = new function () {
 			panelLocatorLabel = document.getElementById("locator-label");
 			panelLocator = document.getElementById("locator");
 			panelInfo = document.getElementById("citation-properties-info");
+			panelLibraryLink = document.getElementById("citation-properties-library-link");
 			
 			// Don't need to set noautohide dynamically on these platforms, so do it now
 			if(Zotero.isMac || Zotero.isWin) {
@@ -904,11 +905,21 @@ var Zotero_QuickFormat = new function () {
 		panelLocator.value = target.citationItem["locator"] ? target.citationItem["locator"] : "";
 		panelSuppressAuthor.checked = !!target.citationItem["suppress-author"];
 		
+		Zotero.Cite.getItem(panelRefersToBubble.citationItem.id).key;
+
 		var item = Zotero.Cite.getItem(target.citationItem.id);
 		document.getElementById("citation-properties-title").textContent = item.getDisplayTitle();
 		while(panelInfo.hasChildNodes()) panelInfo.removeChild(panelInfo.firstChild);
 		_buildItemDescription(item, panelInfo);
 		
+		var libraryName = item.libraryID ? Zotero.Libraries.getName(item.libraryID)
+						: Zotero.getString('pane.collections.library');
+		
+		var libraryLink = document.getElementById("citation-properties-library-link");
+		//TODO: Localize "Open in "
+		libraryLink.textContent ="Open in "+libraryName;
+		libraryLink.onclick=function() {window.open('zotero://select/'+item.key)};
+
 		target.setAttribute("selected", "true");
 		panel.openPopup(target, "after_start",
 			target.clientWidth/2, 0, false, false, null);
