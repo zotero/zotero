@@ -41,3 +41,10 @@ window.addEventListener("load", function() {
 	// show document
 	browser.loadURI.apply(browser, window.arguments);
 }, false);
+
+// XXX Why is this necessary to make the scroll bars appear?
+window.addEventListener("load", function() {
+	window.setTimeout(function() {
+		document.getElementById("my-browser").style.overflow = "auto";
+	}, 0);
+}, false);
