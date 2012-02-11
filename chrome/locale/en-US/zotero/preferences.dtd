@@ -180,6 +180,8 @@
 <!ENTITY zotero.preferences.attachments						"Attachments">
 <!ENTITY zotero.preferences.attachments.message				"Attachments saved as links to files on the base path are saved as relative paths to the base path.">
 <!ENTITY zotero.preferences.attachments.basePath			"Base path:">
+<!ENTITY zotero.preferences.attachments.selectBasePath		"Choose...">
+<!ENTITY zotero.preferences.attachments.resetBasePath		"Clear base path">
 
 <!ENTITY zotero.preferences.dbMaintenance							"Database Maintenance">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck			"Check Database Integrity">

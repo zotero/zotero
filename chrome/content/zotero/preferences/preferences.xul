@@ -747,8 +747,12 @@ To add a new preference:
 			
 			<hbox>
 				<label value="&zotero.preferences.attachments.basePath;"/>
-				<textbox id="baseAttachmentPath" preference="pref-baseAttachmentPath" flex="1"/>
-				<button label="Select base path" oncommand="var file = chooseBaseAttachmentPath(); if (!file) { event.stopPropagation(); }"/>
+				<textbox id="baseAttachmentPath" preference="pref-baseAttachmentPath" onsyncfrompreference="return getBaseAttachmentPath();" readonly="true" flex="1"/>
+				<button label="&zotero.preferences.attachments.selectBasePath;" oncommand="var file = chooseBaseAttachmentPath(); if (!file) { event.stopPropagation(); }"/>
+			</hbox>
+			
+			<hbox>
+				<button label="&zotero.preferences.attachments.resetBasePath;" oncommand="Zotero.Prefs.set('baseAttachmentPath', '');"/>
 			</hbox>
 			
 		</groupbox>

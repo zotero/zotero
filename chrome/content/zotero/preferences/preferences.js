@@ -152,6 +152,23 @@ function chooseBaseAttachmentPath() {
 	return file.path;
 }
 
+function getBaseAttachmentPath() {
+	var desc = Zotero.Prefs.get('baseAttachmentPath');
+	if (desc == '') {
+		return '';
+	}
+	
+	var file = Components.classes["@mozilla.org/file/local;1"].
+		createInstance(Components.interfaces.nsILocalFile);
+	try {
+		file.persistentDescriptor = desc;
+	}
+	catch (e) {
+		return '';
+	}
+	return file.path;
+}
+
 function onDataDirLoad() {
 	var path = document.getElementById('dataDirPath');
 	var useDataDir = Zotero.Prefs.get('useDataDir');
