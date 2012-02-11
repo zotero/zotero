@@ -100,7 +100,6 @@ const xpcomFilesLocal = [
 	'storage/webdav',
 	'timeline',
 	'uri',
-	'zeroconf',
 	'translation/translate_item',
 	'translation/translator',
 	'server_connector'
