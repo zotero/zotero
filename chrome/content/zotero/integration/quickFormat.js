@@ -914,11 +914,10 @@ var Zotero_QuickFormat = new function () {
 		
 		var libraryName = item.libraryID ? Zotero.Libraries.getName(item.libraryID)
 						: Zotero.getString('pane.collections.library');
-		
 		var libraryLink = document.getElementById("citation-properties-library-link");
 		//TODO: Localize "Open in "
 		libraryLink.textContent ="Open in "+libraryName;
-		libraryLink.onclick=function() {window.open('zotero://select/'+item.key)};
+		libraryLink.onclick=function() {window.open('zotero://select/item/'+(item.libraryID ? item.libraryID : 0)+'_'+item.key)};
 
 		target.setAttribute("selected", "true");
 		panel.openPopup(target, "after_start",
