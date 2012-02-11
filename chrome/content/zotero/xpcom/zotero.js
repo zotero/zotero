@@ -635,6 +635,8 @@ const ZOTERO_CONFIG = {
 			Zotero.Server.init();
 		}
 		
+		Zotero.Zeroconf.init();
+		
 		Zotero.Sync.init();
 		Zotero.Sync.Runner.init();
 		
