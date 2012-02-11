@@ -182,13 +182,13 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 		}
 	}
 	
-	var shares = Zotero.Zeroconf.instances;
+	/*var shares = Zotero.Zeroconf.instances;
 	if (shares.length) {
 		this._showRow(new Zotero.ItemGroup('separator', false));
 		for each(var share in shares) {
 			this._showRow(new Zotero.ItemGroup('share', share));
 		}
-	}
+	}*/
 	
 	if (this.hideSources.indexOf('commons') == -1 && Zotero.Commons.enabled) {
 		this._showRow(new Zotero.ItemGroup('separator', false));
