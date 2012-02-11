@@ -1,7 +1,7 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2009 Center for History and New Media
+    Copyright © 2012 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
     
@@ -23,7 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType) {
+Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType, document,
+		cookieSandbox) {
 	// initialize constants
 	this.newItems = [];
 	this.newCollections = [];
@@ -65,6 +66,7 @@ Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType) {
 	
 	// force tag types if requested
 	this._forceTagType = forceTagType;
+	this._cookieSandbox = cookieSandbox;
 };
 
 Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE = 0;
@@ -346,7 +348,9 @@ Zotero.Translate.ItemSaver.prototype = {
 
 					var fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentID);
 					try {
-						Zotero.Attachments.importFromURL(attachment.url, parentID, title, fileBaseName);
+						Zotero.debug('Importing attachment from URL');
+						Zotero.Attachments.importFromURL(attachment.url, parentID, title,
+							fileBaseName, null, mimeType, this._libraryID, null, this._cookieSandbox);
 					} catch(e) {
 						Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
 					}

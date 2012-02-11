@@ -52,7 +52,7 @@ Zotero.HTTP = new function() {
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
-		if(cookieSandbox) cookieSandbox.attachToXHR(xmlhttp);
+		if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(xmlhttp);
 		xmlhttp.send(null);
 		
 		return xmlhttp;
@@ -151,7 +151,7 @@ Zotero.HTTP = new function() {
 			_stateChange(xmlhttp, onDone, responseCharset);
 		};
 		
-		if(cookieSandbox) cookieSandbox.attachToXHR(xmlhttp);
+		if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(xmlhttp);
 		xmlhttp.send(body);
 		
 		return xmlhttp;
@@ -163,9 +163,10 @@ Zotero.HTTP = new function() {
 	* @param {String} url URL to request
 	* @param {Function} onDone Callback to be executed upon request completion
 	* @param {Object} requestHeaders HTTP headers to include with request
+	* @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
 	* @return {Boolean} True if the request was sent, or false if the browser is offline
 	*/
-	this.doHead = function(url, onDone, requestHeaders) {
+	this.doHead = function(url, onDone, requestHeaders, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
 			var disp = url.clone();
@@ -229,6 +230,7 @@ Zotero.HTTP = new function() {
 			_stateChange(xmlhttp, onDone);
 		};
 		
+		if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(xmlhttp);
 		xmlhttp.send(null);
 		
 		return xmlhttp;

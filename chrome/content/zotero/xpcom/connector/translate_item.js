@@ -1,7 +1,7 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2009 Center for History and New Media
+    Copyright © 2012 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
     
@@ -23,10 +23,15 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType) {
+Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType, document,
+		cookieSandbox) {
 	this.newItems = [];
-	
 	this._timeoutID = null;
+	
+	if(document) {
+		this._uri = document.location.toString();
+		this._cookie = document.cookie;
+	}
 }
 
 Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE = 0;
@@ -40,7 +45,13 @@ Zotero.Translate.ItemSaver.prototype = {
 	"saveItems":function(items, callback) {
 		var me = this;
 		// first try to save items via connector
-		Zotero.Connector.callMethod("saveItems", {"items":items}, function(success, status) {
+		var payload = {"items":items};
+		if(this._uri && this._cookie) {
+			payload.uri = this._uri;
+			payload.cookie = this._cookie;
+		}
+		
+		Zotero.Connector.callMethod("saveItems", payload, function(success, status) {
 			if(success !== false) {
 				Zotero.debug("Translate: Save via Standalone succeeded");
 				callback(true, items);

@@ -1437,7 +1437,8 @@ Zotero.Translate.Web.prototype._getParameters = function() { return [this.docume
  */
 Zotero.Translate.Web.prototype._prepareTranslation = function() {
 	this._itemSaver = new Zotero.Translate.ItemSaver(this._libraryID,
-		Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_DOWNLOAD" : "ATTACHMENT_MODE_IGNORE")], 1);
+		Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_DOWNLOAD" : "ATTACHMENT_MODE_IGNORE")], 1,
+		this.document, this._cookieSandbox);
 	this.newItems = [];
 }
 

@@ -200,7 +200,7 @@ Zotero.Attachments = new function(){
 	
 	
 	function importFromURL(url, sourceItemID, forceTitle, forceFileBaseName, parentCollectionIDs,
-			mimeType, libraryID, callback) {
+			mimeType, libraryID, callback, cookieSandbox) {
 		Zotero.debug('Importing attachment from URL');
 		
 		if (sourceItemID && parentCollectionIDs) {
@@ -222,6 +222,7 @@ Zotero.Attachments = new function(){
 		// Save using a hidden browser
 		var nativeHandlerImport = function () {
 			var browser = Zotero.Browser.createHiddenBrowser();
+			if(cookieSandbox) cookieSandbox.attachToBrowser(browser);
 			var imported = false;
 			var onpageshow = function() {
 				// ignore spurious about:blank loads
@@ -263,6 +264,7 @@ Zotero.Attachments = new function(){
 				.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
 				.createInstance(nsIWBP);
 			wbp.persistFlags = nsIWBP.PERSIST_FLAGS_AUTODETECT_APPLY_CONVERSION;
+			if(cookieSandbox) cookieSandbox.attachToInterfaceRequestor(wbp);
 			var encodingFlags = false;
 			
 			Zotero.DB.beginTransaction();
@@ -396,7 +398,7 @@ Zotero.Attachments = new function(){
 		else {
 			Zotero.MIME.getMIMETypeFromURL(url, function (mimeType, hasNativeHandler) {
 				process(mimeType, hasNativeHandler);
-			});
+			}, cookieSandbox);
 		}
 	}
 	
