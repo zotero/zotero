@@ -1620,7 +1620,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 				try {
 					session.lookupItems(citation);
 				} catch(e) {
-					if(e instanceof MissingItemException) {
+					if(e instanceof Zotero.Integration.MissingItemException) {
 						citation.citationItems = [];
 					} else {
 						throw e;
