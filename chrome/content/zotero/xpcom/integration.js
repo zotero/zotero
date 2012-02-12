@@ -1,3 +1,4 @@
+"use strict";
 /*
     ***** BEGIN LICENSE BLOCK *****
     
@@ -54,9 +55,9 @@ Zotero.Integration = new function() {
 	
 	// For Carbon and X11
 	var _carbon, ProcessSerialNumber, SetFrontProcessWithOptions,
-		_x11, _x11Display, XClientMessageEvent, XFetchName, XFree, XQueryTree, XOpenDisplay,
-		XCloseDisplay, XFlush, XDefaultRootWindow, XInternAtom, XSendEvent, XMapRaised,
-		XGetWindowProperty;
+		_x11, _x11Display, _x11RootWindow, XClientMessageEvent, XFetchName, XFree, XQueryTree,
+		XOpenDisplay, XCloseDisplay, XFlush, XDefaultRootWindow, XInternAtom, XSendEvent,
+		XMapRaised, XGetWindowProperty;
 	
 	var _inProgress = false;
 	this.currentWindow = false;
@@ -495,46 +496,57 @@ Zotero.Integration = new function() {
 				Zotero.addShutdownListener(function() {
 					XCloseDisplay(_x11Display);
 				});
-			}
-	
-			var rootWindow = XDefaultRootWindow(_x11Display),
-				intervalID;
-			
-			function _X11BringToForeground() {
-				var windowTitle = win.QueryInterface(Ci.nsIInterfaceRequestor)
-					.getInterface(Ci.nsIWebNavigation).QueryInterface(Ci.nsIBaseWindow).title;
 				
-				var x11Window = _X11FindWindow(_x11Display, rootWindow, windowTitle);
-				if(!x11Window) return;
-				win.clearInterval(intervalID);
-					
-				var event = new XClientMessageEvent();
-				event.type = 33; /* ClientMessage*/
-				event.serial = 0;
-				event.send_event = 1;
-				event.message_type = XInternAtom(_x11Display, "_NET_ACTIVE_WINDOW", 0);
-				event.display = _x11Display;
-				event.window = x11Window;
-				event.format = 32;
-				event.l0 = 2;
-				var mask = 1<<20 /* SubstructureRedirectMask */ | 1<<19 /* SubstructureNotifyMask */;
-				
-				if(XSendEvent(_x11Display, rootWindow, 0, mask, event.address())) {
-					XMapRaised(_x11Display, x11Window);
-					XFlush(_x11Display);
-					Zotero.debug("Activated successfully");
-				} else {
-					Zotero.debug("Integration: An error occurred activating the window");
+				_x11RootWindow = XDefaultRootWindow(_x11Display);
+				if(!_x11RootWindow) {
+					Zotero.debug("Integration: Could not get root window; not activating");
+					_x11 = false;
 				}
 			}
-			
+	
 			win.addEventListener("load", function() {
-				intervalID = win.setInterval(_X11BringToForeground, 50);
+				intervalID = win.setInterval(function() {
+					_X11BringToForeground(win, intervalID);
+				}, 50);
 			}, false);
 		}
 	}
 	
-	function _X11FindWindow(display, w, searchName) {
+	/** 
+	 * Bring a window to the foreground by interfacing directly with X11
+	 */
+	function _X11BringToForeground(win, intervalID) {
+		var windowTitle = win.QueryInterface(Ci.nsIInterfaceRequestor)
+			.getInterface(Ci.nsIWebNavigation).QueryInterface(Ci.nsIBaseWindow).title;
+		
+		var x11Window = _X11FindWindow(_x11RootWindow, windowTitle);
+		if(!x11Window) return;
+		win.clearInterval(intervalID);
+			
+		var event = new XClientMessageEvent();
+		event.type = 33; /* ClientMessage*/
+		event.serial = 0;
+		event.send_event = 1;
+		event.message_type = XInternAtom(_x11Display, "_NET_ACTIVE_WINDOW", 0);
+		event.display = _x11Display;
+		event.window = x11Window;
+		event.format = 32;
+		event.l0 = 2;
+		var mask = 1<<20 /* SubstructureRedirectMask */ | 1<<19 /* SubstructureNotifyMask */;
+		
+		if(XSendEvent(_x11Display, _x11RootWindow, 0, mask, event.address())) {
+			XMapRaised(_x11Display, x11Window);
+			XFlush(_x11Display);
+			Zotero.debug("Activated successfully");
+		} else {
+			Zotero.debug("Integration: An error occurred activating the window");
+		}
+	}
+	
+	/**
+	 * Find an X11 window given a name
+	 */
+	function _X11FindWindow(w, searchName) {
 		Components.utils.import("resource://gre/modules/ctypes.jsm");
 		
 		var childrenPtr = new ctypes.unsigned_long.ptr(),
@@ -542,14 +554,14 @@ Zotero.Integration = new function() {
 			foundName = new ctypes.char.ptr(),
 			nChildren = new ctypes.unsigned_int();
 		
-		if(XFetchName(display, w, foundName.address())) {
+		if(XFetchName(_x11Display, w, foundName.address())) {
 			var foundNameString = foundName.readString();
 			XFree(foundName);
 			if(foundNameString === searchName) return w;
 		}
 		
 		var dummyPtr = dummy.address();
-		if(!XQueryTree(display, w, dummyPtr, dummyPtr, childrenPtr.address(),
+		if(!XQueryTree(_x11Display, w, dummyPtr, dummyPtr, childrenPtr.address(),
 				nChildren.address()) || childrenPtr.isNull()) {
 			return false;
 		}
@@ -560,7 +572,7 @@ Zotero.Integration = new function() {
 		for(var i=0; i<nChildrenJS; i++) {
 			var testWin = children.addressOfElement(i).contents;
 			if(testWin == 0) continue;
-			foundWindow = _X11FindWindow(display, testWin, searchName);
+			foundWindow = _X11FindWindow(testWin, searchName);
 			if(foundWindow) break;
 		}
 		
@@ -2843,40 +2855,58 @@ Zotero.Integration.DocumentData = function(string) {
  * Serializes document-specific data as XML
  */
 Zotero.Integration.DocumentData.prototype.serializeXML = function() {
-	var xmlData = <data data-version={DATA_VERSION} zotero-version={Zotero.version}>
-			<session id={this.sessionID} />
-			<style id={this.style.styleID} hasBibliography={this.style.hasBibliography ? 1 : 0}
-				bibliographyStyleHasBeenSet={this.style.bibliographyStyleHasBeenSet ? 1 : 0}/>
-			<prefs/>
-		</data>;
+	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser);
+	var doc = parser.parseFromString("<data/>", "application/xml");
 	
+	var xmlData = doc.documentElement;
+	xmlData.setAttribute("data-version", DATA_VERSION);
+	xmlData.setAttribute("zotero-version", Zotero.version);
+	
+	var session = doc.createElement("session");
+	session.setAttribute("id", this.sessionID);
+	xmlData.appendChild(session);
+	
+	var style = doc.createElement("style");
+	style.setAttribute("id", this.style.styleID);
+	style.setAttribute("hasBibliography", this.style.hasBibliography ? 1 : 0);
+	style.setAttribute("bibliographyStyleHasBeenSet", this.style.bibliographyStyleHasBeenSet ? 1 : 0);
+	xmlData.appendChild(style);
+	
+	var prefs = doc.createElement("prefs");
 	for(var pref in this.prefs) {
-		xmlData.prefs.pref += <pref name={pref} value={this.prefs[pref]}/>
+		var prefXML = doc.createElement("pref");
+		prefXML.setAttribute("name", pref);
+		prefXML.setAttribute("value", this.prefs[pref]);
+		prefs.appendChild(prefXML);
 	}
+	xmlData.appendChild(prefs);
 	
-	XML.prettyPrinting = false;
-	var output = xmlData.toXMLString().replace("\n", "", "g");
-	XML.prettyPrinting = true;
-	return output;
-}
+	var domSerializer = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
+			.createInstance(Components.interfaces.nsIDOMSerializer);
+	return domSerializer.serializeToString(doc);
+};
 
 
 /**
  * Unserializes document-specific XML
  */
 Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
-	if(typeof xmlData == "string") {
-		var xmlData = new XML(xmlData);
-	}
+	Components.classes["@mozilla.org/xul/xul-document;1"].getService(Components.interfaces.nsIDOMDocument)  
+	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser);
+	xmlData = parser.parseFromString(xmlData, "application/xml").documentElement;
 	
-	this.sessionID = xmlData.session.@id.toString();
-	this.style = {"styleID":xmlData.style.@id.toString(),
-		"hasBibliography":(xmlData.style.@hasBibliography.toString() == 1),
-		"bibliographyStyleHasBeenSet":(xmlData.style.@bibliographyStyleHasBeenSet.toString() == 1)};
+	this.sessionID = Zotero.Utilities.xpathText(xmlData, "session/@id");
+	this.style = {
+		"styleID":Zotero.Utilities.xpathText(xmlData, "style/@id"),
+		"hasBibliography":(Zotero.Utilities.xpathText(xmlData, "style/@hasBibliography") == "1"),
+		"bibliographyStyleHasBeenSet":(Zotero.Utilities.xpathText(xmlData, "style/@bibliographyStyleHasBeenSet") == "1")
+	};
 	this.prefs = {};
-	for each(var pref in xmlData.prefs.children()) {
-		var name = pref.@name.toString();
-		var value = pref.@value.toString();
+	for each(var pref in Zotero.Utilities.xpath(xmlData, "prefs/pref")) {
+		var name = pref.getAttribute("name");
+		var value = pref.getAttribute("value");
 		if(value === "true") {
 			value = true;
 		} else if(value === "false") {
@@ -2886,9 +2916,11 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 		this.prefs[name] = value;
 	}
 	if(this.prefs["storeReferences"] === undefined) this.prefs["storeReferences"] = false;
-	this.zoteroVersion = xmlData["@zotero-version"].length() ? xmlData["@zotero-version"].toString() : "2.0";
-	this.dataVersion = xmlData["@data-version"].length() ? xmlData["@data-version"].toString() : 2;
-}
+	this.zoteroVersion = xmlData.getAttribute("zotero-version");
+	if(!this.zoteroVersion) this.zoteroVersion = "2.0";
+	this.dataVersion = xmlData.getAttribute("data-version");
+	if(!this.dataVersion) this.dataVersion = 2;
+};
 
 /**
  * Unserializes document-specific data, either as XML or as the string form used previously
