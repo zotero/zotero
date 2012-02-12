@@ -35,6 +35,7 @@
 	title="&zotero.integration.docPrefs.title;"
 	onload="Zotero_File_Interface_Bibliography.init();"
 	ondialogaccept="Zotero_File_Interface_Bibliography.acceptSelection();"
+	onclose="document.documentElement.cancelDialog(); event.preventDefault(); event.stopPropagation();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY"
 	style="width: 600px">
