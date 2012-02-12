@@ -109,7 +109,7 @@
 				<groupbox id="zotero-duplicates-merge-version-select">
 					<description>Choose the version of the item to use as the master item:</description>
 					<hbox>
-						<listbox id="zotero-duplicates-merge-original-date" onselect="Zotero_Duplicates_Pane.setMaster(this.selectedIndex)"/>
+						<listbox id="zotero-duplicates-merge-original-date" onselect="Zotero_Duplicates_Pane.setMaster(this.selectedIndex)" rows="0"/>
 					</hbox>
 				</groupbox>
 				
