@@ -1653,7 +1653,9 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 	} else {
 		newField = true;
 		var field = this.addField(true);
-		if(!field) return;
+		if(!field) {
+			throw new Zotero.Integration.UserCancelledException;
+		}
 	}
 	
 	if(!citation) {
