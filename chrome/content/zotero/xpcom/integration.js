@@ -491,6 +491,7 @@ Zotero.Integration = new function() {
 				if(!_x11Display) {
 					Zotero.debug("Integration: Could not open display; not activating");
 					_x11 = false;
+					return;
 				}
 				
 				Zotero.addShutdownListener(function() {
@@ -501,10 +502,12 @@ Zotero.Integration = new function() {
 				if(!_x11RootWindow) {
 					Zotero.debug("Integration: Could not get root window; not activating");
 					_x11 = false;
+					return;
 				}
 			}
 	
 			win.addEventListener("load", function() {
+				var intervalID;
 				intervalID = win.setInterval(function() {
 					_X11BringToForeground(win, intervalID);
 				}, 50);
