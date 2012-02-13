@@ -330,10 +330,6 @@ function isStandalone() {
  */
 function ZoteroCommandLineHandler() {}
 ZoteroCommandLineHandler.prototype = {
-	/* nsISupports */
-	QueryInterface : XPCOMUtils.generateQI([Components.interfaces.nsICommandLineHandler,
-			Components.interfaces.nsIFactory, Components.interfaces.nsISupports]),
-	
 	/* nsICommandLineHandler */
 	handle : function(cmdLine) {
 		// handler for Zotero integration commands
