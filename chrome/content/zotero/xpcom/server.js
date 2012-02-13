@@ -303,10 +303,11 @@ Zotero.Server.DataListener.prototype._generateResponse = function(status, conten
 		}
 	}
 	
+	if(contentType) {
+		response += "Content-Type: "+contentType+"\r\n";
+	}
+	
 	if(body) {
-		if(contentType) {
-			response += "Content-Type: "+contentType+"\r\n";
-		}
 		response += "\r\n"+body;
 	} else {
 		response += "Content-Length: 0\r\n\r\n";
