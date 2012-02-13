@@ -971,8 +971,12 @@ Zotero.Utilities = {
 		for(var i=0, n=elements.length; i<n; i++) {
 			strings[i] = elements[i].textContent;
 		}
-		
-		return strings.join(delimiter ? delimiter : ", ");
+
+		if( typeof(delimiter) == 'undefined' ) {
+			delimiter = ', ';
+		}
+
+		return strings.join(delimiter);
 	},
 	
 	/**
