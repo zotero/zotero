@@ -376,7 +376,14 @@ Zotero.Fulltext = new function(){
 		
 		// Record number of characters indexed
 		if (!isCacheFile) {
-			var totalChars = this.getTotalCharsFromFile(itemID);
+			try {
+				var totalChars = this.getTotalCharsFromFile(itemID);
+			}
+			catch (e) {
+				Zotero.debug(e);
+				Components.utils.reportError(e);
+				totalChars = 0;
+			}
 			if (maxLength) {
 				var charsIndexed = Math.min(maxLength, totalChars);
 			}
