@@ -1142,7 +1142,9 @@ Zotero.Integration.Fields.prototype.addField = function(note) {
 	if(field) {
 		if(!this._doc.displayAlert(Zotero.getString("integration.replace"),
 				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL)) return false;
+				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL)) {
+			throw new Zotero.Integration.UserCancelledException;
+		}
 	}
 	
 	if(!field) {
@@ -1653,9 +1655,6 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 	} else {
 		newField = true;
 		var field = this.addField(true);
-		if(!field) {
-			throw new Zotero.Integration.UserCancelledException;
-		}
 	}
 	
 	if(!citation) {
