@@ -3186,8 +3186,14 @@ Zotero.Item.prototype.__defineGetter__('attachmentPath', function () {
 	if (pathIsRelative) {
 		var baseDir = Components.classes["@mozilla.org/file/local;1"]
 			.createInstance(Components.interfaces.nsILocalFile);
-		baseDir.initWithPath(Zotero.Prefs.get('baseAttachmentPath'));
-		
+		var basePath = Zotero.Prefs.get('baseAttachmentPath');
+		if (basePath != '') {
+			baseDir.initWithPath(basePath);
+		} else {
+			//If the base path has been cleared, don't try to recreate the full attachment path
+			return '';
+		}
+	
 		var taggedRelativePath = this._attachmentPath;
         var relativePath = taggedRelativePath.replace(/^<BASE_ATTACHMENT_PATH>/,'');
 		var attachmentFile = Components.classes["@mozilla.org/file/local;1"]
