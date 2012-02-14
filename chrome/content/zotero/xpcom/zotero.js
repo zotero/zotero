@@ -429,11 +429,6 @@ const ZOTERO_CONFIG = {
 		var _shutdownObserver = {observe:Zotero.shutdown};
 		observerService.addObserver(_shutdownObserver, "quit-application", false);
 		
-		// Add shutdown listerner to remove observer
-		this.addShutdownListener(function() {
-			observerService.removeObserver(_shutdownObserver, "quit-application", false);
-		});
-		
 		Zotero.IPC.init();
 		
 		var cs = Components.classes["@mozilla.org/consoleservice;1"].
@@ -444,6 +439,12 @@ const ZOTERO_CONFIG = {
 		_startupErrors = [msg for each(msg in messages.value) if(_shouldKeepError(msg))];
 		// Register error observer
 		cs.registerListener(ConsoleListener);
+		
+		// Add shutdown listener to remove quit-application observer and console listener
+		this.addShutdownListener(function() {
+			observerService.removeObserver(_shutdownObserver, "quit-application", false);
+			cs.unregisterListener(ConsoleListener);
+		});
 		
 		// Load additional info for connector or not
 		if(Zotero.isConnector) {
