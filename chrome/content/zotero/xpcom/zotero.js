@@ -1884,7 +1884,8 @@ const ZOTERO_CONFIG = {
 			'function skype_',
 			'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
 			'CVE-2009-3555',
-			'OpenGL LayerManager'
+			'OpenGL LayerManager',
+			'trying to re-register CID'
 		];
 		
 		for (var i=0; i<blacklist.length; i++) {
