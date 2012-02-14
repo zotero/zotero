@@ -30,6 +30,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 // Class to provide options for bibliography
+// Used by rtfScan.xul, integrationDocPrefs.xul, and bibliography.xul
 
 var Zotero_File_Interface_Bibliography = new function() {
 	var _io, _saveStyle;
@@ -45,7 +46,10 @@ var Zotero_File_Interface_Bibliography = new function() {
 	function init() {
 		// Set font size from pref
 		// Affects bibliography.xul and integrationDocPrefs.xul
-		Zotero.setFontSize(document.getElementById("zotero-bibliography-container"));
+		var bibContainer = document.getElementById("zotero-bibliography-container");
+		if(bibContainer) {
+			Zotero.setFontSize(document.getElementById("zotero-bibliography-container"));
+		}
 		
 		if(window.arguments && window.arguments.length) {
 			_io = window.arguments[0];
