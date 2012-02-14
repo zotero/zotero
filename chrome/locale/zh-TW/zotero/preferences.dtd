@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "同步「我的圖書館」中的附加檔案時，採用">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "使用 Zotero storage 時，將圖書館中的附加檔案同步">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "關於檔案同步">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "使用 Zotero storage，您同意被它的">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "條款與條件 (terms and conditions) 所束縳">
 <!ENTITY zotero.preferences.sync.reset.fullSync "與 Zotero 伺服器完全同步">
@@ -167,7 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "匯出時顯示字元編碼的選項">
 
 <!ENTITY zotero.preferences.dataDir "儲存位置">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
+<!ENTITY zotero.preferences.dataDir.useProfile "使用 Firefox 個人設定檔目錄">
 <!ENTITY zotero.preferences.dataDir.custom "自訂：">
 <!ENTITY zotero.preferences.dataDir.choose "選擇…">
 <!ENTITY zotero.preferences.dataDir.reveal "顯示資料目錄">

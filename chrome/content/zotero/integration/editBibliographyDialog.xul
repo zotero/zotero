@@ -38,7 +38,7 @@
 	onload="Zotero_Bibliography_Dialog.load();"
 	ondialogaccept="Zotero_Bibliography_Dialog.accept();"
 	ondialogcancel="Zotero_Bibliography_Dialog.close();"
-	onclose="Zotero_Bibliography_Dialog.close();"
+	onclose="Zotero_Bibliography_Dialog.close(); event.preventDefault(); event.stopPropagation();"
 	onunload="doUnload();"
 	buttons="extra1,extra2,accept,cancel" buttonpack="end"
 	xmlns:html="http://www.w3.org/1999/xhtml"

@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Sync attachment files in group libraries using Zotero storage">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "О Зотеровом усклађивању">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "terms and conditions">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync with Zotero Server">
@@ -167,7 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
 
 <!ENTITY zotero.preferences.dataDir "Место за складиштење">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
+<!ENTITY zotero.preferences.dataDir.useProfile "Користи Firefox директоријум за профил">
 <!ENTITY zotero.preferences.dataDir.custom "Прилагођено:">
 <!ENTITY zotero.preferences.dataDir.choose "Изабери...">
 <!ENTITY zotero.preferences.dataDir.reveal "Прикажи директоријум података">

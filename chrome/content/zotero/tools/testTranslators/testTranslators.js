@@ -416,6 +416,10 @@ function haveTranslators(translators, type) {
 	translatorTestViews[type] = [];
 	translatorTestViewsToRun[type] = [];
 	
+	translators = translators.sort(function(a, b) {
+		return a.label.localeCompare(b.label);
+	});
+	
 	for(var i in translators) {
 		var translatorTestView = new TranslatorTestView();
 		translatorTestView.initWithTranslatorAndType(translators[i], type);

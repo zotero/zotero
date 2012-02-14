@@ -35,7 +35,7 @@ const ZOTERO_CONFIG = {
 	API_URL: 'https://api.zotero.org/',
 	PREF_BRANCH: 'extensions.zotero.',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "3.5a1.SOURCE"
+	VERSION: "3.0.2.SOURCE"
 };
 
 /*
@@ -46,6 +46,7 @@ const ZOTERO_CONFIG = {
 	this.init = init;
 	this.stateCheck = stateCheck;
 	this.getProfileDirectory = getProfileDirectory;
+	this.getInstallDirectory = getInstallDirectory;
 	this.getZoteroDirectory = getZoteroDirectory;
 	this.getStorageDirectory = getStorageDirectory;
 	this.getZoteroDatabase = getZoteroDatabase;
@@ -193,6 +194,13 @@ const ZOTERO_CONFIG = {
 	 */
 	var _runningTimers = [];
 	
+	// Errors that were in the console at startup
+	var _startupErrors = [];
+	// Number of errors to maintain in the recent errors buffer
+	const ERROR_BUFFER_SIZE = 25;
+	// A rolling buffer of the last ERROR_BUFFER_SIZE errors
+	var _recentErrors = [];
+	
 	/**
 	 * Initialize the extension
 	 */
@@ -216,23 +224,29 @@ const ZOTERO_CONFIG = {
 				getService(Components.interfaces.nsIXULAppInfo),
 			platformVersion = appInfo.platformVersion;
 		this.isFx = true;
-		this.isFx3 = false;
-		this.isFx35 = false;
-		this.isFx31 = false;
-		this.isFx36 = false;
-		this.isFx4 = true;
-		this.isFx5 = true;
+		this.isFx3 = platformVersion.indexOf('1.9') === 0;
+		this.isFx35 = platformVersion.indexOf('1.9.1') === 0;
+		this.isFx31 = this.isFx35;
+		this.isFx36 = platformVersion.indexOf('1.9.2') === 0;
+		this.isFx4 = versionComparator.compare(platformVersion, "2.0a1") >= 0;
+		this.isFx5 = versionComparator.compare(platformVersion, "5.0a1") >= 0;
 		
 		this.isStandalone = appInfo.ID == ZOTERO_CONFIG['GUID'];
 		if(this.isStandalone) {
 			this.version = appInfo.version;
-		} else {
+		} else if(this.isFx4) {
 			// Use until we collect version from extension manager
 			this.version = ZOTERO_CONFIG['VERSION'];
 			
 			Components.utils.import("resource://gre/modules/AddonManager.jsm");
 			AddonManager.getAddonByID(ZOTERO_CONFIG['GUID'],
 				function(addon) { Zotero.version = addon.version; });
+		} else {
+			var gExtensionManager =
+				Components.classes["@mozilla.org/extensions/manager;1"]
+					.getService(Components.interfaces.nsIExtensionManager);
+			this.version
+				= gExtensionManager.getItemForID(ZOTERO_CONFIG['GUID']).version;
 		}
 		
 		// OS platform
@@ -374,7 +388,11 @@ const ZOTERO_CONFIG = {
 						
 						// evaluate
 						Components.utils.evalInSandbox(prefsJs, sandbox);
-						var prefs = sandbox.prefs;
+						if(Zotero.isFx4) {
+							var prefs = sandbox.prefs;
+						} else {
+							var prefs = new XPCSafeJSObjectWrapper(sandbox.prefs);
+						}
 						for(var key in prefs) {
 							if(key.substr(0, ZOTERO_CONFIG.PREF_BRANCH.length) === ZOTERO_CONFIG.PREF_BRANCH
 									&& key !== "extensions.zotero.firstRun2") {
@@ -411,27 +429,22 @@ const ZOTERO_CONFIG = {
 		var _shutdownObserver = {observe:Zotero.shutdown};
 		observerService.addObserver(_shutdownObserver, "quit-application", false);
 		
-		// Add shutdown listerner to remove observer
+		Zotero.IPC.init();
+		
+		var cs = Components.classes["@mozilla.org/consoleservice;1"].
+			getService(Components.interfaces.nsIConsoleService);
+		// Get startup errors
+		var messages = {};
+		cs.getMessageArray(messages, {});
+		_startupErrors = [msg for each(msg in messages.value) if(_shouldKeepError(msg))];
+		// Register error observer
+		cs.registerListener(ConsoleListener);
+		
+		// Add shutdown listener to remove quit-application observer and console listener
 		this.addShutdownListener(function() {
 			observerService.removeObserver(_shutdownObserver, "quit-application", false);
+			cs.unregisterListener(ConsoleListener);
 		});
-		
-		try {
-			Zotero.IPC.init();
-		}
-		catch (e) {
-			if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED') {
-				var msg = Zotero.localeJoin([
-					Zotero.getString('startupError.databaseCannotBeOpened'),
-					Zotero.getString('startupError.checkPermissions')
-				]);
-				Zotero.startupError = msg;
-				Zotero.debug(e);
-				Components.utils.reportError(e);
-				return false;
-			}
-			throw (e);
-		}
 		
 		// Load additional info for connector or not
 		if(Zotero.isConnector) {
@@ -639,6 +652,8 @@ const ZOTERO_CONFIG = {
 			Zotero.Server.init();
 		}
 		
+		Zotero.Zeroconf.init();
+		
 		Zotero.Sync.init();
 		Zotero.Sync.Runner.init();
 		
@@ -809,6 +824,17 @@ const ZOTERO_CONFIG = {
 		return Components.classes["@mozilla.org/file/directory_service;1"]
 			 .getService(Components.interfaces.nsIProperties)
 			 .get("ProfD", Components.interfaces.nsIFile);
+	}
+	
+	
+	function getInstallDirectory() {		
+		var cr = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
+			.getService(Components.interfaces.nsIChromeRegistry);
+		var ioService = Components.classes["@mozilla.org/network/io-service;1"]  
+			.getService(Components.interfaces.nsIIOService);  
+		var zoteroURI = ioService.newURI("chrome://zotero-resource/content/", "UTF-8", null);
+		zoteroURI = cr.convertChromeURL(zoteroURI).QueryInterface(Components.interfaces.nsIFileURL);
+		return zoteroURI.file.parent.parent;
 	}
 	
 	function getDefaultProfile(prefDir) {
@@ -1158,49 +1184,8 @@ const ZOTERO_CONFIG = {
 	
 	function getErrors(asStrings) {
 		var errors = [];
-		var cs = Components.classes["@mozilla.org/consoleservice;1"].
-			getService(Components.interfaces.nsIConsoleService);
-		var messages = {};
-		cs.getMessageArray(messages, {})
 		
-		var skip = ['CSS Parser', 'content javascript'];
-		
-		msgblock:
-		for each(var msg in messages.value) {
-			//Zotero.debug(msg);
-			try {
-				msg.QueryInterface(Components.interfaces.nsIScriptError);
-				//Zotero.debug(msg);
-				if (skip.indexOf(msg.category) != -1 || msg.flags & msg.warningFlag) {
-					continue;
-				}
-			}
-			catch (e) { }
-			
-			var blacklist = [
-				"No chrome package registered for chrome://communicator",
-				'[JavaScript Error: "Components is not defined" {file: "chrome://nightly/content/talkback/talkback.js',
-				'[JavaScript Error: "document.getElementById("sanitizeItem")',
-				'No chrome package registered for chrome://piggy-bank',
-				'[JavaScript Error: "[Exception... "\'Component is not available\' when calling method: [nsIHandlerService::getTypeFromExtension',
-				'[JavaScript Error: "this._uiElement is null',
-				'Error: a._updateVisibleText is not a function',
-				'[JavaScript Error: "Warning: unrecognized command line flag ',
-				'[JavaScript Error: "Warning: unrecognized command line flag -foreground',
-				'LibX:',
-				'function skype_',
-				'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
-				'CVE-2009-3555',
-				'OpenGL LayerManager'
-			];
-			
-			for (var i=0; i<blacklist.length; i++) {
-				if (msg.message.indexOf(blacklist[i]) != -1) {
-					//Zotero.debug("Skipping blacklisted error: " + msg.message);
-					continue msgblock;
-				}
-			}
-			
+		for each(var msg in _startupErrors.concat(_recentErrors)) {
 			// Remove password in malformed XML messages
 			if (msg.category == 'malformed-xml') {
 				try {
@@ -1281,8 +1266,17 @@ const ZOTERO_CONFIG = {
 			callback(addons);
 		}
 		
-		Components.utils.import("resource://gre/modules/AddonManager.jsm");
-		AddonManager.getAllAddons(onHaveInstalledAddons);
+		if(this.isFx4) {
+			Components.utils.import("resource://gre/modules/AddonManager.jsm");
+			AddonManager.getAllAddons(onHaveInstalledAddons);
+		} else {
+			var em = Components.classes["@mozilla.org/extensions/manager;1"].
+						getService(Components.interfaces.nsIExtensionManager);
+			var installed = em.getItemList(
+				Components.interfaces.nsIUpdateItem.TYPE_ANY, {}
+			);
+			onHaveInstalledAddons(installed);
+		}
 	}
 	
 	
@@ -1755,7 +1749,12 @@ const ZOTERO_CONFIG = {
 			for each(var menuitem in menupopup.childNodes) {
 				if (menuitem.id.substr(prefixLen) == mode) {
 					menuitem.setAttribute('checked', true);
-					searchBox.placeholder = modes[mode].label;
+					if (Zotero.isFx36) {
+						searchBox.emptytext = modes[mode].label;
+					}
+					else {
+						searchBox.placeholder = modes[mode].label;
+					}
 					return;
 				}
 			}
@@ -1796,7 +1795,12 @@ const ZOTERO_CONFIG = {
 		button.appendChild(menupopup);
 		hbox.insertBefore(button, input);
 		
-		searchBox.placeholder = modes[mode].label;
+		if (Zotero.isFx36) {
+			searchBox.emptytext = modes[mode].label;
+		}
+		else {
+			searchBox.placeholder = modes[mode].label;
+		}
 		
 		// If Alt-Up/Down, show popup
 		searchBox.addEventListener("keypress", function(event) {
@@ -1820,12 +1824,12 @@ const ZOTERO_CONFIG = {
 		Zotero.Relations.purge();
 		
 		if (!skipStoragePurge && Math.random() < 1/10) {
-			Zotero.Sync.Storage.purgeDeletedStorageFiles('ZFS');
-			Zotero.Sync.Storage.purgeDeletedStorageFiles('WebDAV');
+			Zotero.Sync.Storage.purgeDeletedStorageFiles('zfs');
+			Zotero.Sync.Storage.purgeDeletedStorageFiles('webdav');
 		}
 		
 		if (!skipStoragePurge) {
-			Zotero.Sync.Storage.purgeOrphanedStorageFiles('WebDAV');
+			Zotero.Sync.Storage.purgeOrphanedStorageFiles('webdav');
 		}
 	}
 	
@@ -1850,6 +1854,64 @@ const ZOTERO_CONFIG = {
 		handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
 		handler.launchWithURI(uri, null);
 	}
+	
+	/**
+	 * Determines whether to keep an error message so that it can (potentially) be reported later
+	 */
+	function _shouldKeepError(msg) {
+		const skip = ['CSS Parser', 'content javascript'];
+		
+		//Zotero.debug(msg);
+		try {
+			msg.QueryInterface(Components.interfaces.nsIScriptError);
+			//Zotero.debug(msg);
+			if (skip.indexOf(msg.category) != -1 || msg.flags & msg.warningFlag) {
+				return false;
+			}
+		}
+		catch (e) { }
+		
+		const blacklist = [
+			"No chrome package registered for chrome://communicator",
+			'[JavaScript Error: "Components is not defined" {file: "chrome://nightly/content/talkback/talkback.js',
+			'[JavaScript Error: "document.getElementById("sanitizeItem")',
+			'No chrome package registered for chrome://piggy-bank',
+			'[JavaScript Error: "[Exception... "\'Component is not available\' when calling method: [nsIHandlerService::getTypeFromExtension',
+			'[JavaScript Error: "this._uiElement is null',
+			'Error: a._updateVisibleText is not a function',
+			'[JavaScript Error: "Warning: unrecognized command line flag ',
+			'[JavaScript Error: "Warning: unrecognized command line flag -foreground',
+			'LibX:',
+			'function skype_',
+			'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
+			'CVE-2009-3555',
+			'OpenGL LayerManager',
+			'trying to re-register CID'
+		];
+		
+		for (var i=0; i<blacklist.length; i++) {
+			if (msg.message.indexOf(blacklist[i]) != -1) {
+				//Zotero.debug("Skipping blacklisted error: " + msg.message);
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Observer for console messages
+	 * @namespace
+	 */
+	var ConsoleListener = {
+		"QueryInterface":XPCOMUtils.generateQI([Components.interfaces.nsIConsoleMessage,
+			Components.interfaces.nsISupports]),
+		"observe":function(msg) {
+			if(!_shouldKeepError(msg)) return;
+			if(_recentErrors.length === ERROR_BUFFER_SIZE) _recentErrors.shift();
+			_recentErrors.push(msg);
+		}
+	};
 }).call(Zotero);
 
 Zotero.Prefs = new function(){
@@ -1872,32 +1934,6 @@ Zotero.Prefs = new function(){
 		
 		// Register observer to handle pref changes
 		this.register();
-		
-		// Process pref version updates
-		var fromVersion = this.get('prefVersion');
-		if (!fromVersion) {
-			fromVersion = 0;
-		}
-		var toVersion = 1;
-		if (fromVersion < toVersion) {
-			for (var i = fromVersion + 1; i <= toVersion; i++) {
-				switch (i) {
-					case 1:
-						// If a sync username is entered and ZFS is enabled, turn
-						// on-demand downloading off to maintain current behavior
-						if (this.get('sync.server.username')) {
-							if (this.get('sync.storage.enabled')
-									&& this.get('sync.storage.protocol') == 'zotero') {
-								this.set('sync.storage.downloadMode.personal', 'on-sync');
-							}
-							if (this.get('sync.storage.groups.enabled')) {
-								this.set('sync.storage.downloadMode.groups', 'on-sync');
-							}
-						}
-				}
-			}
-			this.set('prefVersion', toVersion);
-		}
 	}
 	
 	
@@ -2036,74 +2072,9 @@ Zotero.Prefs = new function(){
 		if(topic!="nsPref:changed"){
 			return;
 		}
-		
-		try {
-		
 		// subject is the nsIPrefBranch we're observing (after appropriate QI)
 		// data is the name of the pref that's been changed (relative to subject)
-		switch (data) {
-			case "statusBarIcon":
-				var doc = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-							.getService(Components.interfaces.nsIWindowMediator)
-							.getMostRecentWindow("navigator:browser").document;
-				
-				var addonBar = doc.getElementById("addon-bar");
-				var icon = doc.getElementById("zotero-toolbar-button");
-				// When the customize window is open, toolbar buttons seem to
-				// become wrapped in toolbarpaletteitems, which we need to remove
-				// manually if we change the pref to hidden or else the customize
-				// window doesn't close.
-				var wrapper = doc.getElementById("wrapper-zotero-toolbar-button");
-				var palette = doc.getElementById("navigator-toolbox").palette;
-				var inAddonBar = false;
-				if (icon) {
-					// Because of the potential wrapper, don't just use .parentNode
-					var toolbar = Zotero.getAncestorByTagName(icon, "toolbar");
-					inAddonBar = toolbar == addonBar;
-				}
-				var val = this.get("statusBarIcon");
-				if (val == 0) {
-					// If showing in add-on bar, hide
-					if (!icon || !inAddonBar) {
-						return;
-					}
-					palette.appendChild(icon);
-					if (wrapper) {
-						addonBar.removeChild(wrapper);
-					}
-					addonBar.setAttribute("currentset", addonBar.currentSet);
-					doc.persist(addonBar.id, "currentset");
-				}
-				else {
-					// If showing somewhere else, remove it from there
-					if (icon && !inAddonBar) {
-						palette.appendChild(icon);
-						if (wrapper) {
-							toolbar.removeChild(wrapper);
-						}
-						toolbar.setAttribute("currentset", toolbar.currentSet);
-						doc.persist(toolbar.id, "currentset");
-					}
-					
-					// If not showing in add-on bar, add
-					if (!inAddonBar) {
-						var icon = addonBar.insertItem("zotero-toolbar-button");
-						addonBar.setAttribute("currentset", addonBar.currentSet);
-						doc.persist(addonBar.id, "currentset");
-						addonBar.setAttribute("collapsed", false);
-						doc.persist(addonBar.id, "collapsed");
-					}
-					// And make small
-					if (val == 1) {
-						icon.setAttribute("compact", true);
-					}
-					// Or large
-					else if (val == 2) {
-						icon.removeAttribute("compact");
-					}
-				}
-				break;
-			
+		switch (data){
 			case "automaticScraperUpdates":
 				if (this.get('automaticScraperUpdates')){
 					Zotero.Schema.updateFromRepository();
@@ -2148,12 +2119,6 @@ Zotero.Prefs = new function(){
 					Zotero.updateQuickSearchBox(win.document);
 				}
 				break;
-		}
-		
-		}
-		catch (e) {
-			Zotero.debug(e);
-			throw (e);
 		}
 	}
 }

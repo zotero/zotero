@@ -1151,7 +1151,9 @@ Zotero.Integration.Fields.prototype.addField = function(note) {
 	if(field) {
 		if(!this._doc.displayAlert(Zotero.getString("integration.replace"),
 				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL)) return false;
+				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL)) {
+			throw new Zotero.Integration.UserCancelledException;
+		}
 	}
 	
 	if(!field) {
@@ -1484,9 +1486,9 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 			
 			// If there is no citation, we're deleting it, or we shouldn't update it, ignore it
 			if(!citation || deleteCitations[i]) continue;
+			var isRich = false;
 			
 			if(!citation.properties.dontUpdate) {
-				var isRich = false;
 				var formattedCitation = citation.properties.custom
 					? citation.properties.custom : this._session.citationText[i];
 				
@@ -1662,7 +1664,6 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 	} else {
 		newField = true;
 		var field = this.addField(true);
-		if(!field) return;
 	}
 	
 	if(!citation) {

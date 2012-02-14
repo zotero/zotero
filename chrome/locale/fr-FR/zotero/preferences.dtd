@@ -10,14 +10,14 @@
 <!ENTITY zotero.preferences.showIn "Ouvrir Zotero dans :">
 <!ENTITY zotero.preferences.showIn.browserPane "un panneau du navigateur">
 <!ENTITY zotero.preferences.showIn.separateTab "un onglet séparé">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn.appTab "un onglet applicatif">
 <!ENTITY zotero.preferences.statusBarIcon "Icône dans la barre d'état :">
 <!ENTITY zotero.preferences.statusBarIcon.none "Aucune">
 <!ENTITY zotero.preferences.fontSize "Taille des caractères :">
 <!ENTITY zotero.preferences.fontSize.small "Petite">
 <!ENTITY zotero.preferences.fontSize.medium "Moyenne">
 <!ENTITY zotero.preferences.fontSize.large "Grande">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fontSize.xlarge "Très grande">
 <!ENTITY zotero.preferences.fontSize.notes "Taille des caractères des notes :">
 
 <!ENTITY zotero.preferences.miscellaneous "Divers">
@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Adresse :">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synchroniser les fichiers joints de Ma bibliothèque en utilisant">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Synchroniser les fichiers joints dans les bibliothèques de groupe en utilisant le stockage de Zotero">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "À propos de la synchronisation des fichiers">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "En utilisant le stockage de Zotero, vous acceptez d'être lié par ses">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "modalités et conditions">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Synchronisation complète avec le serveur Zotero">
@@ -106,8 +106,8 @@
 <!ENTITY zotero.preferences.cite.wordProcessors "Traitements de texte">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Aucune extension pour traitement de texte n'est installée.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Obtenir des extensions pour traitement de texte…">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/fr/word_processor_plugin_installation_for_zotero_2.1">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Utiliser la fenêtre classique d'ajout de citation">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Gestionnaire de styles">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titre">
@@ -167,7 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Afficher l'option de codage de caractères à l'exportation">
 
 <!ENTITY zotero.preferences.dataDir "Emplacement du répertoire contenant les données">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
+<!ENTITY zotero.preferences.dataDir.useProfile "Utiliser le répertoire de profil de Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Personnalisé :">
 <!ENTITY zotero.preferences.dataDir.choose "Sélectionner…">
 <!ENTITY zotero.preferences.dataDir.reveal "Afficher le répertoire contenant les données">
@@ -186,6 +186,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Effacer la sortie">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Transmettre au serveur de Zotero">
 
-<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
+<!ENTITY zotero.preferences.openAboutConfig "Ouvrir about:config">
+<!ENTITY zotero.preferences.openCSLEdit "Ouvrir CSL Editor (test des styles installés)">
+<!ENTITY zotero.preferences.openCSLPreview "Ouvrir CSL Preview (aperçu des styles installés)">

@@ -54,10 +54,10 @@ Zotero.CookieSandbox = function(browser, uri, cookieData) {
 		}
 	}
 	
+	Zotero.CookieSandbox.Observer.register();
 	if(browser) {
 		this.attachToBrowser(browser);
 	}
-	Zotero.CookieSandbox.Observer.register();
 }
 
 Zotero.CookieSandbox.prototype = {
@@ -117,13 +117,13 @@ Zotero.CookieSandbox.Observer = new function() {
 			getService(Components.interfaces.nsIObserverService),
 		observing = false;
 	
-	this.trackedBrowsers = new WeakMap();
-	this.trackedInterfaceRequestors = new WeakMap();
-	
 	/**
 	 * Registers cookie manager and observer, if necessary
 	 */
 	this.register = function(CookieSandbox) {
+		this.trackedBrowsers = new WeakMap();
+		this.trackedInterfaceRequestors = new WeakMap();
+		
 		if(!observing) {
 			Zotero.debug("CookieSandbox: Registering observers");
 			for each(var topic in observeredTopics) observerService.addObserver(this, topic, false);
@@ -135,11 +135,6 @@ Zotero.CookieSandbox.Observer = new function() {
 	 * Implements nsIObserver to watch for new cookies and to add sandboxed cookies
 	 */
 	this.observe = function(channel, topic) {
-		if(topic == "quit-application" && cookieSandboxes.length) {
-			Zotero.debug("WARNING: A CookieSandbox for "+cookieSandboxes[0].URI.spec+" was still open on shutdown");
-			return;
-		}
-		
 		channel.QueryInterface(Components.interfaces.nsIHttpChannel);
 		var trackedBy, tested, browser, callbacks,
 			channelURI = channel.URI.spec,

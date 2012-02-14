@@ -66,7 +66,7 @@
 <!ENTITY zotero.items.menu.attach.file "Прикрепить копию файла…">
 <!ENTITY zotero.items.menu.attach.fileLink "Прикрепить ссылку на файл…">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.restoreToLibrary "Восстановить в библиотеке">
 <!ENTITY zotero.items.menu.duplicateItem "Сделать дубликат выбранного документа">
 
 <!ENTITY zotero.toolbar.newItem.label "Новый документ">
@@ -176,7 +176,7 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Закладки">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Закладки сохраняются при переходе между Microsoft Word и OpenOffice, но могут быть случайно изменены. Из соображений совместимости, когда эта опция выбрана, цитаты не могут быть вставлены в (концевые) сноски.">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Сохранить ссылки в документе">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
 
 <!ENTITY zotero.integration.showEditor.label "Показать редактор">

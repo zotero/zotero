@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Zotero 저장소를 사용해 그룹 라이브러리내 첨부 파일을 동기화">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "파일 동기화란">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "이용 약관">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Zotero 서버와 전체 동기화">
@@ -167,7 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
 
 <!ENTITY zotero.preferences.dataDir "저장 위치">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
+<!ENTITY zotero.preferences.dataDir.useProfile "Firefox 프로필 디렉토리 이용">
 <!ENTITY zotero.preferences.dataDir.custom "사용자 지정:">
 <!ENTITY zotero.preferences.dataDir.choose "선택...">
 <!ENTITY zotero.preferences.dataDir.reveal "자료 디렉토리 표시">

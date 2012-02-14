@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sincronizar arquivos anexos da Minha Biblioteca usando">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Sincronizar arquivos anexos de bibliotecas de grupos usando a armazenagem Zotero">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "Acerca da Sincronização de Arquivos">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Ao usar a armazenagem Zotero concorda ter de se reger pelos seus">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "termos e condições">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Sincronização Completa com o Servidor Zotero">
@@ -167,7 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Mostrar opção de codificação de caracteres ao exportar">
 
 <!ENTITY zotero.preferences.dataDir "Local de Armazenamento">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
+<!ENTITY zotero.preferences.dataDir.useProfile "Usar pasta de perfil do Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Outra:">
 <!ENTITY zotero.preferences.dataDir.choose "Escolher...">
 <!ENTITY zotero.preferences.dataDir.reveal "Mostrar Pasta de Dados">

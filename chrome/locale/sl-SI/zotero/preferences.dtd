@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Uskladi datoteke priponk v Moji knjižnici s/z">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Uskladi datoteke priponk v skupinskih knjižnicah s shrambo Zotero">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "O usklajevanju datotek">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Če uporabljate shrambo Zotero, se strinjate z njenimi">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "pravili, omejitvami in pogoji">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Polna uskladitev s strežnikom Zotero">
@@ -167,7 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Pri izvozu ponudi možnost kodiranja znakov">
 
 <!ENTITY zotero.preferences.dataDir "Mesto shranjevanja">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
+<!ENTITY zotero.preferences.dataDir.useProfile "Uporabi mapo profila za Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Po meri:">
 <!ENTITY zotero.preferences.dataDir.choose "Izberi ...">
 <!ENTITY zotero.preferences.dataDir.reveal "Pokaži mapo s podatki">

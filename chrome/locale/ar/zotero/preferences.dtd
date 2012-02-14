@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "الرابط:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "قم بمزامنة الملفات المرفقة في مكتبتي باستخدام">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "قم بمزامنة الملفات المرفقة في مجموعة المكتبات باستخدام مساحة تخزين زوتيرو">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "نبذة عن تزامن الملفات">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "باستخدامك مساحة تخزين زوتيرو، فإنك توافق على الالتزام بكافة">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "الشروط والأحكام">
 <!ENTITY zotero.preferences.sync.reset.fullSync "التزامن الكامل مع خادم زوتيرو">
@@ -167,7 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "اظهار خطائص ترميز الحروف عند التصدير">
 
 <!ENTITY zotero.preferences.dataDir "مكان تخزين البيانات">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
+<!ENTITY zotero.preferences.dataDir.useProfile "استخدم مجلد الملف الشخصي لفايرفوكس">
 <!ENTITY zotero.preferences.dataDir.custom "تخصيص:">
 <!ENTITY zotero.preferences.dataDir.choose "اختر...">
 <!ENTITY zotero.preferences.dataDir.reveal "عرض مجلد البيانات">

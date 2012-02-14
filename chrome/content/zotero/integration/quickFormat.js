@@ -27,10 +27,10 @@ var Zotero_QuickFormat = new function () {
 	const pixelRe = /^([0-9]+)px$/
 	const specifiedLocatorRe = /^(?:,? *(p{0,2})(?:\. *| +)|:)([0-9\-]+) *$/;
 	const yearRe = /,? *([0-9]+) *(B[. ]*C[. ]*(?:E[. ]*)?|A[. ]*D[. ]*|C[. ]*E[. ]*)?$/i;
-	const locatorRe = /(?:,? *(p{0,2})\.?|(\:)) *([0-9]+)$/i;
+	const locatorRe = /(?:,? *(p{0,2})\.?|(\:)) *([0-9\-–]+)$/i;
 	const creatorSplitRe = /(?:,| *(?:and|\&)) +/;
 	const charRe = /[\w\u007F-\uFFFF]/;
-	const numRe = /^[0-9\-]+$/;
+	const numRe = /^[0-9\-–]+$/;
 	
 	var initialized, io, qfs, qfi, qfiWindow, qfiDocument, qfe, qfb, qfbHeight, qfGuidance,
 		keepSorted,  showEditor, referencePanel, referenceBox, referenceHeight = 0,

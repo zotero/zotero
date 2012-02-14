@@ -1,6 +1,6 @@
 <!ENTITY zotero.version "versie">
 <!ENTITY zotero.createdby "Gemaakt door:">
-<!ENTITY zotero.director "Director:">
+<!ENTITY zotero.director "Directeur:">
 <!ENTITY zotero.directors "Directeuren:">
 <!ENTITY zotero.developers "Ontwikkelaars:">
 <!ENTITY zotero.alumni "Alumni:">
@@ -9,4 +9,4 @@
 <!ENTITY zotero.executiveProducer "Uitvoerend producent:">
 <!ENTITY zotero.thanks "Met speciale dank aan:">
 <!ENTITY zotero.about.close "Sluiten">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Meer dankbetuigingen">
