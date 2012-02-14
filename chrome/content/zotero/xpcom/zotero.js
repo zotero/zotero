@@ -194,6 +194,13 @@ const ZOTERO_CONFIG = {
 	 */
 	var _runningTimers = [];
 	
+	// Errors that were in the console at startup
+	var _startupErrors = [];
+	// Number of errors to maintain in the recent errors buffer
+	const ERROR_BUFFER_SIZE = 25;
+	// A rolling buffer of the last ERROR_BUFFER_SIZE errors
+	var _recentErrors = [];
+	
 	/**
 	 * Initialize the extension
 	 */
@@ -428,6 +435,15 @@ const ZOTERO_CONFIG = {
 		});
 		
 		Zotero.IPC.init();
+		
+		var cs = Components.classes["@mozilla.org/consoleservice;1"].
+			getService(Components.interfaces.nsIConsoleService);
+		// Get startup errors
+		var messages = {};
+		cs.getMessageArray(messages, {});
+		_startupErrors = [msg for each(msg in messages.value) if(_shouldKeepError(msg))];
+		// Register error observer
+		cs.registerListener(ConsoleListener);
 		
 		// Load additional info for connector or not
 		if(Zotero.isConnector) {
@@ -1167,49 +1183,8 @@ const ZOTERO_CONFIG = {
 	
 	function getErrors(asStrings) {
 		var errors = [];
-		var cs = Components.classes["@mozilla.org/consoleservice;1"].
-			getService(Components.interfaces.nsIConsoleService);
-		var messages = {};
-		cs.getMessageArray(messages, {})
 		
-		var skip = ['CSS Parser', 'content javascript'];
-		
-		msgblock:
-		for each(var msg in messages.value) {
-			//Zotero.debug(msg);
-			try {
-				msg.QueryInterface(Components.interfaces.nsIScriptError);
-				//Zotero.debug(msg);
-				if (skip.indexOf(msg.category) != -1 || msg.flags & msg.warningFlag) {
-					continue;
-				}
-			}
-			catch (e) { }
-			
-			var blacklist = [
-				"No chrome package registered for chrome://communicator",
-				'[JavaScript Error: "Components is not defined" {file: "chrome://nightly/content/talkback/talkback.js',
-				'[JavaScript Error: "document.getElementById("sanitizeItem")',
-				'No chrome package registered for chrome://piggy-bank',
-				'[JavaScript Error: "[Exception... "\'Component is not available\' when calling method: [nsIHandlerService::getTypeFromExtension',
-				'[JavaScript Error: "this._uiElement is null',
-				'Error: a._updateVisibleText is not a function',
-				'[JavaScript Error: "Warning: unrecognized command line flag ',
-				'[JavaScript Error: "Warning: unrecognized command line flag -foreground',
-				'LibX:',
-				'function skype_',
-				'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
-				'CVE-2009-3555',
-				'OpenGL LayerManager'
-			];
-			
-			for (var i=0; i<blacklist.length; i++) {
-				if (msg.message.indexOf(blacklist[i]) != -1) {
-					//Zotero.debug("Skipping blacklisted error: " + msg.message);
-					continue msgblock;
-				}
-			}
-			
+		for each(var msg in _startupErrors.concat(_recentErrors)) {
 			// Remove password in malformed XML messages
 			if (msg.category == 'malformed-xml') {
 				try {
@@ -1878,6 +1853,63 @@ const ZOTERO_CONFIG = {
 		handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
 		handler.launchWithURI(uri, null);
 	}
+	
+	/**
+	 * Determines whether to keep an error message so that it can (potentially) be reported later
+	 */
+	function _shouldKeepError(msg) {
+		const skip = ['CSS Parser', 'content javascript'];
+		
+		//Zotero.debug(msg);
+		try {
+			msg.QueryInterface(Components.interfaces.nsIScriptError);
+			//Zotero.debug(msg);
+			if (skip.indexOf(msg.category) != -1 || msg.flags & msg.warningFlag) {
+				return false;
+			}
+		}
+		catch (e) { }
+		
+		const blacklist = [
+			"No chrome package registered for chrome://communicator",
+			'[JavaScript Error: "Components is not defined" {file: "chrome://nightly/content/talkback/talkback.js',
+			'[JavaScript Error: "document.getElementById("sanitizeItem")',
+			'No chrome package registered for chrome://piggy-bank',
+			'[JavaScript Error: "[Exception... "\'Component is not available\' when calling method: [nsIHandlerService::getTypeFromExtension',
+			'[JavaScript Error: "this._uiElement is null',
+			'Error: a._updateVisibleText is not a function',
+			'[JavaScript Error: "Warning: unrecognized command line flag ',
+			'[JavaScript Error: "Warning: unrecognized command line flag -foreground',
+			'LibX:',
+			'function skype_',
+			'[JavaScript Error: "uncaught exception: Permission denied to call method Location.toString"]',
+			'CVE-2009-3555',
+			'OpenGL LayerManager'
+		];
+		
+		for (var i=0; i<blacklist.length; i++) {
+			if (msg.message.indexOf(blacklist[i]) != -1) {
+				//Zotero.debug("Skipping blacklisted error: " + msg.message);
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Observer for console messages
+	 * @namespace
+	 */
+	var ConsoleListener = {
+		"QueryInterface":XPCOMUtils.generateQI([Components.interfaces.nsIConsoleMessage,
+			Components.interfaces.nsISupports]),
+		"observe":function(msg) {
+			if(!_shouldKeepError(msg)) return;
+			if(_recentErrors.length === ERROR_BUFFER_SIZE) _recentErrors.pop();
+			_recentErrors.push(msg);
+		}
+	};
 }).call(Zotero);
 
 Zotero.Prefs = new function(){
