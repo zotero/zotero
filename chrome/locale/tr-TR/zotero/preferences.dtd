@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Kütüphanemde kullanılan ekli dosyaları eşle">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Zotero deposunu kullanan kütüphane gruplarının ekli dosyalarını eşle">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "Dosya Eşleme Hakkında">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero depolamayı kullanarak sınırlamalarını kabul edersiniz">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "şartlar ve koşullar">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Zetoro Sunucu ile Tam Eşleme">
@@ -167,7 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Dışarı aktarırken karakter kodlama seçeneğini göster">
 
 <!ENTITY zotero.preferences.dataDir "Veri Dizini Konumu">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
+<!ENTITY zotero.preferences.dataDir.useProfile "Firefox profil dizinini kullan">
 <!ENTITY zotero.preferences.dataDir.custom "Özel:">
 <!ENTITY zotero.preferences.dataDir.choose "Seç...">
 <!ENTITY zotero.preferences.dataDir.reveal "Veri Dizinini Göster">

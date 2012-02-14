@@ -56,7 +56,7 @@
 <!ENTITY zotero.items.rights_column "Rättigheter">
 <!ENTITY zotero.items.dateAdded_column "Tillagt datum">
 <!ENTITY zotero.items.dateModified_column "Ändrat datum">
-<!ENTITY zotero.items.numChildren_column "Visa/dölj underordnade">
+<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Visa i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Lägg till anteckning">

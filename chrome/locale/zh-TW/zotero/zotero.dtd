@@ -56,7 +56,7 @@
 <!ENTITY zotero.items.rights_column "權利">
 <!ENTITY zotero.items.dateAdded_column "加入日期">
 <!ENTITY zotero.items.dateModified_column "修改日期">
-<!ENTITY zotero.items.numChildren_column "＋">
+<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "在圖書館中顯示">
 <!ENTITY zotero.items.menu.attach.note "加入筆記">

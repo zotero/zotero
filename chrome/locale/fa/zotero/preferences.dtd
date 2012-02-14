@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "آدرس:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "همزمان‌‌سازی پرونده‌های پیوست در کتابخانه با استفاده از ">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "همزمان‌‌سازی پرونده‌های پیوست در کتابخانه‌های گروهی با استفاده از سامانه ذخیره زوترو (Zotero storage)">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "درباره همزمان‌‌سازی پرونده‌ها">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "با استفاده از سامانه ذخیره زوترو (Zotero storage) می‌پذیرید که تابع">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "شرایط و قوانین آن باشید ">
 <!ENTITY zotero.preferences.sync.reset.fullSync "همزمان‌‌سازی کامل با کارگزار زوترو">
@@ -167,7 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "نمایش گزینه کدبندی نویسه‌ها در موقع صدور">
 
 <!ENTITY zotero.preferences.dataDir "محل ذخیره اطلاعات">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
+<!ENTITY zotero.preferences.dataDir.useProfile "استفاده از پوشه پروفایل فایرفاکس">
 <!ENTITY zotero.preferences.dataDir.custom "محل دلخواه:">
 <!ENTITY zotero.preferences.dataDir.choose "انتخاب...">
 <!ENTITY zotero.preferences.dataDir.reveal "نمایش محل ذخیره اطلاعات">

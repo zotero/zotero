@@ -1,9 +1,9 @@
 <!ENTITY zotero.general.optional "(Opciona1)">
 <!ENTITY zotero.general.note "Nota:">
-<!ENTITY zotero.general.selectAll "Select All">
-<!ENTITY zotero.general.deselectAll "Deselect All">
-<!ENTITY zotero.general.edit "Edit">
-<!ENTITY zotero.general.delete "Delete">
+<!ENTITY zotero.general.selectAll "Selecciona tot">
+<!ENTITY zotero.general.deselectAll "Desselecciona tot">
+<!ENTITY zotero.general.edit "Edita">
+<!ENTITY zotero.general.delete "Suprimeix">
 
 <!ENTITY zotero.errorReport.unrelatedMessages "El registre d&apos;error pot incloure missatges no relacionats amb Zotero.">
 <!ENTITY zotero.errorReport.submissionInProgress "Si-us-plau espera mentre s&apos;envia l&apos;informe d&apos;error.">
@@ -15,10 +15,10 @@
 <!ENTITY zotero.upgrade.newVersionInstalled "Has instal·lat una nova versió de Zotero.">
 <!ENTITY zotero.upgrade.upgradeRequired "La teva base de dades s&apos;ha d&apos;actualitzar per a funcionar amb la nova versió.">
 <!ENTITY zotero.upgrade.autoBackup "Es farà una còpia de seguertat de la base de dades existent abans de fer cap canvi">
-<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
-<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
+<!ENTITY zotero.upgrade.majorUpgrade "Aquesta és una actualització principal.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Assegureu-vos de revisar">
+<!ENTITY zotero.upgrade.majorUpgradeLink "instruccions d'actualització">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "abans de continuar.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Si-us-plau espera que s&apos;acabi el procés d&apos;actualització. Pot trigar uns minuts.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "La teva base de dades de Zotero s&apos;ha actualitzat correctament">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Si-us-plau mira">
@@ -27,20 +27,20 @@
 
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Afegeix la selecció a una nota de Zotero">
 <!ENTITY zotero.contextMenu.addTextToNewNote "Crea un element de Zotero i una nota amb la selecció">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Desa l'enllaç com un ítem de Zotero">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Desa l'imatge com un ítem de Zotero">
 
-<!ENTITY zotero.tabs.info.label "Info">
+<!ENTITY zotero.tabs.info.label "Informació">
 <!ENTITY zotero.tabs.notes.label "Notes">
 <!ENTITY zotero.tabs.attachments.label "Adjunts">
 <!ENTITY zotero.tabs.tags.label "Etiquetes">
 <!ENTITY zotero.tabs.related.label "Relacionats">
 <!ENTITY zotero.notes.separate "Edita en una finestra separada">
 
-<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
-<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.toolbar.duplicate.label "Mostra els duplicats">
+<!ENTITY zotero.collections.showUnfiledItems "Mostra els ítems no arxivats">
 
-<!ENTITY zotero.items.itemType "Item Type">
+<!ENTITY zotero.items.itemType "Tipus d'ítem">
 <!ENTITY zotero.items.type_column "Tipus">
 <!ENTITY zotero.items.title_column "Títol">
 <!ENTITY zotero.items.creator_column "Creador">
@@ -51,7 +51,7 @@
 <!ENTITY zotero.items.journalAbbr_column "Abreviatura de la revista">
 <!ENTITY zotero.items.language_column "Llengua">
 <!ENTITY zotero.items.accessDate_column "Accedit">
-<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.libraryCatalog_column "Catàleg de la biblioteca">
 <!ENTITY zotero.items.callNumber_column "Codi de Catàleg">
 <!ENTITY zotero.items.rights_column "Drets">
 <!ENTITY zotero.items.dateAdded_column "Data d&apos;incorporació">
@@ -60,38 +60,38 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Mostra a la Biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Afegeix nota">
-<!ENTITY zotero.items.menu.attach "Add Attachment">
+<!ENTITY zotero.items.menu.attach "Afegeix un adjunt">
 <!ENTITY zotero.items.menu.attach.snapshot "Adjunta captura de la pàgina actual">
 <!ENTITY zotero.items.menu.attach.link "Adjunta enllaç a la pàgina actual">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
+<!ENTITY zotero.items.menu.attach.link.uri "Adjunta un enllaç a l'identificador uniforme de recursos...">
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
 <!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.restoreToLibrary "Restaura a la Biblioteca">
 <!ENTITY zotero.items.menu.duplicateItem "Duplica l&apos;element seleccionat">
 
 <!ENTITY zotero.toolbar.newItem.label "Nou element">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Més">
 <!ENTITY zotero.toolbar.newItemFromPage.label "Crea un nou element a partir de la pàgina actual">
-<!ENTITY zotero.toolbar.lookup.label "Add Item by Identifier">
+<!ENTITY zotero.toolbar.lookup.label "Afegeix un ítem segons l'identificador">
 <!ENTITY zotero.toolbar.removeItem.label "Esborra element...">
 <!ENTITY zotero.toolbar.newCollection.label "Nova col·lecció...">
 <!ENTITY zotero.toolbar.newGroup "New Group...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nova subcol·lecció...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nova cerca desada...">
-<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
+<!ENTITY zotero.toolbar.emptyTrash.label "Buida la paperera">
 <!ENTITY zotero.toolbar.tagSelector.label "Mostra/Oculta el selector d&apos;etiquetes">
 <!ENTITY zotero.toolbar.actions.label "Accions">
 <!ENTITY zotero.toolbar.import.label "Importa...">
-<!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.toolbar.importFromClipboard "Importa del porta-retalls">
 <!ENTITY zotero.toolbar.export.label "Exporta Biblioteca...">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
 <!ENTITY zotero.toolbar.timeline.label "Crea línia del temps">
 <!ENTITY zotero.toolbar.preferences.label "Preferències...">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
+<!ENTITY zotero.toolbar.supportAndDocumentation "Assistència i documentació">
 <!ENTITY zotero.toolbar.about.label "Sobre Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Cerca avançada">
-<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
+<!ENTITY zotero.toolbar.tab.tooltip "Commuta el mode tabulació">
 <!ENTITY zotero.toolbar.openURL.label "Localitza">
 <!ENTITY zotero.toolbar.openURL.tooltip "Cerca&apos;l a la teva biblioteca local">
 
@@ -99,11 +99,11 @@
 <!ENTITY zotero.item.attachment.file.show "Mostra arxiu">
 <!ENTITY zotero.item.textTransform "Transforma el text">
 <!ENTITY zotero.item.textTransform.titlecase "Tipus Frase">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.sentencecase "Majúscules o minúscules">
 
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newNote "Nota nova">
 <!ENTITY zotero.toolbar.note.standalone "Nova nota independent">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
+<!ENTITY zotero.toolbar.note.child "Afegeix una nota descendent">
 <!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
 <!ENTITY zotero.toolbar.attachment.linked "Enllaç a l&apos;arxiu...">
 <!ENTITY zotero.toolbar.attachment.add "Emmagatzema copia de l&apos;arxiu...">
@@ -120,12 +120,12 @@
 <!ENTITY zotero.tagSelector.renameTag "Reanomena etiqueta...">
 <!ENTITY zotero.tagSelector.deleteTag "Esborra etiqueta...">
 
-<!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
+<!ENTITY zotero.lookup.description "Introduïu l'ISBN, DOI, o PMID per cercar en el quadre tot seguit.">
 
 <!ENTITY zotero.selectitems.title "Selecciona elements">
 <!ENTITY zotero.selectitems.intro.label "Selecciona els elements que vols afegir a la teva biblioteca">
 <!ENTITY zotero.selectitems.cancel.label "Cancela">
-<!ENTITY zotero.selectitems.select.label "OK">
+<!ENTITY zotero.selectitems.select.label "D'acord">
 
 <!ENTITY zotero.bibliography.title "Crea Bibliografia">
 <!ENTITY zotero.bibliography.style.label "Estil de cites:">
@@ -145,8 +145,8 @@
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Opcions del traductor">
 
-<!ENTITY zotero.charset.label "Character Encoding">
-<!ENTITY zotero.moreEncodings.label "More Encodings">
+<!ENTITY zotero.charset.label "Codificació del caràcters">
+<!ENTITY zotero.moreEncodings.label "Més codificacions">
 
 <!ENTITY zotero.citation.keepSorted.label "Mantingues les fonts ordenades">
 
@@ -177,67 +177,67 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Adreçes d&apos;interès">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Les adreces d&apos;interès es conserven entre Microsoft Word i OpenOffice però poden veure&apos;s accidentalment modificades.">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Emmagatzema les referències al document">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "L'emmagatzematge de les referències en el document augmenta lleugerament la mida del fitxer, però li permet compartir el seu document amb altres persones sense necessitat d'utilitzar un grup de Zotero. Per actualitzar els documents creats amb aquesta opció és necessari Zotero 3.0 o versions posteriors.">
 
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.showEditor.label "Mostra l'editor">
+<!ENTITY zotero.integration.classicView.label "Vista clàssica">
 
 <!ENTITY zotero.integration.references.label "Referències a la bibliografia">
 
-<!ENTITY zotero.sync.button "Sync with Zotero Server">
-<!ENTITY zotero.sync.error "Sync Error">
-<!ENTITY zotero.sync.storage.progress "Progress:">
-<!ENTITY zotero.sync.storage.downloads "Downloads:">
-<!ENTITY zotero.sync.storage.uploads "Uploads:">
+<!ENTITY zotero.sync.button "Sincronitza amb el Servidor de Zotero">
+<!ENTITY zotero.sync.error "Error de sincronització">
+<!ENTITY zotero.sync.storage.progress "Progrés:">
+<!ENTITY zotero.sync.storage.downloads "Descàrregues:">
+<!ENTITY zotero.sync.storage.uploads "Càrregues">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
-<!ENTITY zotero.sync.longTagFixer.split "Split">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
-<!ENTITY zotero.sync.longTagFixer.character "character">
-<!ENTITY zotero.sync.longTagFixer.characters "characters">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "La següent etiqueta de la seva biblioteca Zotero és massa llarga perquè es sincronitzi amb el servidor:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Les etiquetes sincronitzades ha d'ésser inferiors a 256 caràcters.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Pot dividir l'etiqueta en vàries etiquetes, editar-la manualment per reduir la seva longitud, o suprimir-la.">
+<!ENTITY zotero.sync.longTagFixer.split "Divideix">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Divideix en el">
+<!ENTITY zotero.sync.longTagFixer.character "caràcter">
+<!ENTITY zotero.sync.longTagFixer.characters "caràcters">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Les etiquetes desactivades no es desaran.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "L'etiqueta es suprimirà de tots els ítems.">
 
-<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
-<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
-<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
+<!ENTITY zotero.proxy.recognized.title "Servidor intermediari reconegut">
+<!ENTITY zotero.proxy.recognized.warning "Afegiu tan sols servidors intermediaris enllaçats des del lloc web de la vostra biblioteca, escola o corporació">
+<!ENTITY zotero.proxy.recognized.warning.secondary "L'addició d'altres servidors intermediaris permet als llocs maliciosos fer-se passar pels llocs de confiança.">
+<!ENTITY zotero.proxy.recognized.disable.label "No redirigeixis automàticament les peticions a través de servidors intermediaris prèviament reconeguts">
+<!ENTITY zotero.proxy.recognized.ignore.label "Ignora">
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
-<!ENTITY zotero.recognizePDF.cancel.label "Cancel">
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
-<!ENTITY zotero.recognizePDF.itemName.label "Item Name">
-<!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
+<!ENTITY zotero.recognizePDF.cancel.label "Cancel·la">
+<!ENTITY zotero.recognizePDF.pdfName.label "Nom PDF">
+<!ENTITY zotero.recognizePDF.itemName.label "Nom de l'ítem">
+<!ENTITY zotero.recognizePDF.captcha.label "Escriviu el text de sota per continuar la recuperació de les metadades.">
 
-<!ENTITY zotero.rtfScan.title "RTF Scan">
-<!ENTITY zotero.rtfScan.cancel.label "Cancel">
-<!ENTITY zotero.rtfScan.citation.label "Citation">
-<!ENTITY zotero.rtfScan.itemName.label "Item Name">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
-<!ENTITY zotero.rtfScan.introPage.label "Introduction">
+<!ENTITY zotero.rtfScan.title "Escaneig de RTF">
+<!ENTITY zotero.rtfScan.cancel.label "Cancel·la">
+<!ENTITY zotero.rtfScan.citation.label "Cita">
+<!ENTITY zotero.rtfScan.itemName.label "Nom de l'ítem">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Cites desassociades">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Cites  ambigües">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Cites sassociades">
+<!ENTITY zotero.rtfScan.introPage.label "Introducció">
 <!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
-<!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
-<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
-<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
-<!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
-<!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
-<!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
-<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
-<!ENTITY zotero.rtfScan.inputFile.label "Input File">
-<!ENTITY zotero.rtfScan.outputFile.label "Output File">
+<!ENTITY zotero.rtfScan.introPage.description2 "Per començar, seleccioneu un fitxer d'entrada RTF i un arxiu de sortida tot seguit:">
+<!ENTITY zotero.rtfScan.scanPage.label "Escanejant en cerca de cites">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero es troba escanejant el document cercant-hi cites. Si us plau, sigui pacient.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Verifica els ítems citats">
+<!ENTITY zotero.rtfScan.citationsPage.description "Reviseu la llista de cites reconegudes tot seguit per assegurar-se que Zotero ha seleccionat correctament els ítems corresponents. Totes les cites desassociades o ambigües han de ser resoltes abans de procedir al següent pas.">
+<!ENTITY zotero.rtfScan.stylePage.label "Formatació del document">
+<!ENTITY zotero.rtfScan.formatPage.label "Formatant les cites">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero es troba processant i formatant el seu fitxer RTF. Si us plau, sigui pacient.">
+<!ENTITY zotero.rtfScan.completePage.label "Escaneig RFT completat">
+<!ENTITY zotero.rtfScan.completePage.description "El document ja s'ha analitzat i processat. Si us plau, comproveu que és formatat correctament.">
+<!ENTITY zotero.rtfScan.inputFile.label "Fitxer d'entrada">
+<!ENTITY zotero.rtfScan.outputFile.label "Fitxer de sortida">
 
 <!ENTITY zotero.file.choose.label "Choose File...">
-<!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.file.noneSelected.label "No s'ha seleccionat cap fitxer">
 
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.label "Desa a Zotero">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Els adjunts no es poden desar a la biblioteca seleccionada. En comptes, aquest ítem es desarà a la seva biblioteca.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "Per utilitzar aquesta funció, primer cal instal·lar les eines de PDF en les preferències de Zotero.">

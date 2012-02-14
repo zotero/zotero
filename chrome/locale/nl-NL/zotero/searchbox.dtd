@@ -6,8 +6,8 @@
 <!ENTITY zotero.search.joinMode.suffix "volgende voorwaarden:">
 
 <!ENTITY zotero.search.recursive.label "Doorzoek onderliggende mappen">
-<!ENTITY zotero.search.noChildren "Laat alleen topniveau-objecten zien">
-<!ENTITY zotero.search.includeParentsAndChildren "Laat bij de zoekresultaten zowel het hoofdobject als de subobjecten zien">
+<!ENTITY zotero.search.noChildren "Toon alleen topniveau-objecten">
+<!ENTITY zotero.search.includeParentsAndChildren "Toon bijbehorende hoofd- en subobjecten">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (binaire bestanden inbegrepen)">

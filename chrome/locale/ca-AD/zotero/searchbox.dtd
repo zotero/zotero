@@ -6,13 +6,13 @@
 <!ENTITY zotero.search.joinMode.suffix "de les següents:">
 
 <!ENTITY zotero.search.recursive.label "Cerca dins les subcarpetes">
-<!ENTITY zotero.search.noChildren "Mostra només elements del nivell superior">
-<!ENTITY zotero.search.includeParentsAndChildren "Inclou pares i fills dels elements coincidents">
+<!ENTITY zotero.search.noChildren "Mostra només ítems de nivell superior">
+<!ENTITY zotero.search.includeParentsAndChildren "Inclou pares i descendents dels elements coincidents">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (també dins dels arxius binaris)">
 <!ENTITY zotero.search.textModes.regexp "Expressió regular">
-<!ENTITY zotero.search.textModes.regexpCS "Expressió regular (distingir entre majúscules i minúscules)">
+<!ENTITY zotero.search.textModes.regexpCS "Expressió regular (distingeix entre majúscules i minúscules)">
 
 <!ENTITY zotero.search.date.units.days "dies">
 <!ENTITY zotero.search.date.units.months "mesos">

@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Minu raamatukogus olevate lisade sünkroonimine kasutades">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Minu grupi raamatukogus olevate lisade sünkroonimine kasutades Zotero hoidlat">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "Failide sünkroonimise kohta">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Kasutades Zotero hoidlat, nõustute järgmiste">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "tingimuste ja piirangutega">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Zotero serveriga täissünkroonimine">
@@ -167,7 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Näidata ekspordi puhul tähtede kodeeringut">
 
 <!ENTITY zotero.preferences.dataDir "Lao asukoht">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
+<!ENTITY zotero.preferences.dataDir.useProfile "Kasutada Firefoxi profiili kataloogi">
 <!ENTITY zotero.preferences.dataDir.custom "Oma valik:">
 <!ENTITY zotero.preferences.dataDir.choose "Valida...">
 <!ENTITY zotero.preferences.dataDir.reveal "Andmete kataloogi näitamine">

@@ -58,7 +58,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Адрес:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Прекачените файлове в Моята Библиотека се синхронизират с">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Синхронизира прекачените файлове в груповите библиотеки с хранилището на Зотеро.">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "За синхронизирането на файлове">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Използвайки хранилището на Зотеро, Вие се съгласявате да бъдете обвързани с неговите">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "правила и условия">
 <!ENTITY zotero.preferences.sync.reset.fullSync "Пълно синхронизиране със сървъра на Зотеро">
@@ -167,7 +167,7 @@
 <!ENTITY zotero.preferences.charset.displayExportOption "Показва опция за символният код при експорт.">
 
 <!ENTITY zotero.preferences.dataDir "Място за съхранение">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
+<!ENTITY zotero.preferences.dataDir.useProfile "Използва папката с профила на Firefox">
 <!ENTITY zotero.preferences.dataDir.custom "Потребителски">
 <!ENTITY zotero.preferences.dataDir.choose "Избор...">
 <!ENTITY zotero.preferences.dataDir.reveal "Показва папката с дани">
