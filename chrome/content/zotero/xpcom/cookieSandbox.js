@@ -54,10 +54,10 @@ Zotero.CookieSandbox = function(browser, uri, cookieData) {
 		}
 	}
 	
+	Zotero.CookieSandbox.Observer.register();
 	if(browser) {
 		this.attachToBrowser(browser);
 	}
-	Zotero.CookieSandbox.Observer.register();
 }
 
 Zotero.CookieSandbox.prototype = {
