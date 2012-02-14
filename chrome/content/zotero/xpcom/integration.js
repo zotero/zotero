@@ -1477,9 +1477,9 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 			
 			// If there is no citation, we're deleting it, or we shouldn't update it, ignore it
 			if(!citation || deleteCitations[i]) continue;
-			var isRich = false;
 			
 			if(!citation.properties.dontUpdate) {
+				var isRich = false;
 				var formattedCitation = citation.properties.custom
 					? citation.properties.custom : this._session.citationText[i];
 				
