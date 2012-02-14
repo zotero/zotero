@@ -1908,7 +1908,7 @@ const ZOTERO_CONFIG = {
 			Components.interfaces.nsISupports]),
 		"observe":function(msg) {
 			if(!_shouldKeepError(msg)) return;
-			if(_recentErrors.length === ERROR_BUFFER_SIZE) _recentErrors.pop();
+			if(_recentErrors.length === ERROR_BUFFER_SIZE) _recentErrors.shift();
 			_recentErrors.push(msg);
 		}
 	};
