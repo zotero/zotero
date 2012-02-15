@@ -519,7 +519,7 @@ Zotero.LocateManager = new function() {
 				false)
 			  return this;
 			
-			throw Cr.NS_ERROR_NO_INTERFACE;
+			throw Components.results.NS_ERROR_NO_INTERFACE;
 		},
 		
 		// nsIRequestObserver
