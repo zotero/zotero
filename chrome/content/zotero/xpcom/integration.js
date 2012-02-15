@@ -2896,7 +2896,6 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
  * Unserializes document-specific XML
  */
 Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
-	Components.classes["@mozilla.org/xul/xul-document;1"].getService(Components.interfaces.nsIDOMDocument)  
 	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 			.createInstance(Components.interfaces.nsIDOMParser);
 	xmlData = parser.parseFromString(xmlData, "application/xml").documentElement;
