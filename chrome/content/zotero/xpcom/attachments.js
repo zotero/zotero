@@ -504,6 +504,10 @@ Zotero.Attachments = new function(){
 		var url = document.location.href;
 		var title = forceTitle ? forceTitle : document.title;
 		var mimeType = document.contentType;
+		if(Zotero.Attachments.isPDFJS(document)) {
+			mimeType = "application/pdf";
+		}
+		
 		var charsetID = Zotero.CharacterSets.getID(document.characterSet);
 		
 		if (!forceTitle) {
@@ -1357,5 +1361,23 @@ Zotero.Attachments = new function(){
 					.getService(Components.interfaces.nsIFileProtocolHandler)
 					.getURLSpecFromFile(file);
 		browser.loadURI(url);
+	}
+	
+	/**
+	 * Determines if a given document is an instance of PDFJS
+	 * @return {Boolean}
+	 */
+	this.isPDFJS = function(doc) {
+		// pdf.js HACK
+		if(doc.contentType === "text/html") {
+			var win = doc.defaultView;
+			if(win) {
+				win = win.wrappedJSObject;
+				if(win && "PDFJS" in win && win.PDFJS.isFirefoxExtension) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }
