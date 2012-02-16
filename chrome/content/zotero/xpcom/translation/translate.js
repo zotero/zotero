@@ -2155,6 +2155,16 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	 *     (false)
 	 */
 	"addStatement":function(about, relation, value, literal) {
+		if(about === null || about === undefined) {
+			throw new Error("about must be defined in Zotero.RDF.addStatement");
+		}
+		if(relation === null || relation === undefined) {
+			throw new Error("relation must be defined in Zotero.RDF.addStatement");
+		}
+		if(value === null || value === undefined) {
+			throw new Error("value must be defined in Zotero.RDF.addStatement");
+		}
+		
 		if(literal) {
 			// zap chars that Mozilla will mangle
 			value = value.toString().replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
