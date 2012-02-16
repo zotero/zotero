@@ -22,6 +22,7 @@
     
     ***** END LICENSE BLOCK *****
 */
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 Zotero.Standalone = new function() {
 	/**
@@ -70,6 +71,9 @@ Zotero.Standalone = new function() {
 	};
 	
 	this.init = function() {
+		// Set not offline
+		Services.io.offline = false;
+		
 		// Add an observer to handle AMO requests
 		Components.classes["@mozilla.org/observer-service;1"].
 			getService(Components.interfaces.nsIObserverService).
