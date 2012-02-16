@@ -736,16 +736,31 @@ CSL_CHROME.prototype.insertChildNodeAfter = function (parent,node,pos,datexml) {
     myxml = this.importNode(node.ownerDocument, datexml);
     parent.replaceChild(myxml, node);
      return parent;
- };
+};
 CSL_CHROME.prototype.insertPublisherAndPlace = function(myxml) {
     var group = myxml.getElementsByTagName("group");
     for (var i = 0, ilen = group.length; i < ilen; i += 1) {
         var node = group.item(i);
-        if (node.childNodes.length === 2) {
+        var skippers = [];
+        for (var j = 0, jlen = node.childNodes.length; j < jlen; j += 1) {
+            if (node.childNodes.item(j).nodeType !== 1) {
+                skippers.push(j);
+            }
+        }
+        if (node.childNodes.length - skippers.length === 2) {
             var twovars = [];
             for (var j = 0, jlen = 2; j < jlen; j += 1) {
-                var child = node.childNodes.item(j);
-                if (child.childNodes.length === 0) {
+                if (skippers.indexOf(j) > -1) {
+                    continue;
+                }
+                var child = node.childNodes.item(j);                    
+                var subskippers = [];
+                for (var k = 0, klen = child.childNodes.length; k < klen; k += 1) {
+                    if (child.childNodes.item(k).nodeType !== 1) {
+                        subskippers.push(k);
+                    }
+                }
+                if (child.childNodes.length - subskippers.length === 0) {
                     twovars.push(child.getAttribute('variable'));
                     if (child.getAttribute('suffix')
                         || child.getAttribute('prefix')) {
@@ -2133,7 +2148,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.280";
+    this.processor_version = "1.0.283";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -7500,15 +7515,8 @@ CSL.Node.text = {
                             func = function (state, Item, item) {
                                 if (item && item[this.variables[0]]) {
                                     var locator = "" + item[this.variables[0]];
-                                    locator = locator.replace(/--*/g,"\u2013");
-                                    var m = locator.match(/^([0-9]+)\s*\u2013\s*([0-9]+)$/)
-                                    if (m) {
-                                        if (parseInt(m[1]) >= parseInt(m[2])) {
-                                            locator = m[1] + "-" + m[2];
-                                        }
-                                    } else {
-                                        locator = locator.replace(/\u2013/g,"-");
-                                    }
+                                    locator = locator.replace(/([^\\])--*/g,"$1\u2013");
+                                    locator = locator.replace(/\\-/g,"-");
                                     state.output.append(locator, this, false, false, true);
                                 }
                             };
@@ -7529,15 +7537,8 @@ CSL.Node.text = {
                             func = function (state, Item) {
                                 var value = state.getVariable(Item, "page", form);
                                 if (value) {
-                                    value = value.replace(/--*/g,"\u2013");
-                                    var m = value.match(/^([0-9]+)\s*\u2013\s*([0-9]+)$/)
-                                    if (m) {
-                                        if (parseInt(m[1]) >= parseInt(m[2])) {
-                                            value = m[1] + "-" + m[2];
-                                        }
-                                    } else {
-                                        value = value.replace(/\u2013/g,"-");
-                                    }
+                                    value = value.replace(/([^\\])--*/g,"$1\u2013");
+                                    value = value.replace(/\\-/g,"-");
                                     value = state.fun.page_mangler(value);
                                     state.output.append(value, this, false, false, true);
                                 }
@@ -8839,11 +8840,15 @@ CSL.Transform = function (state) {
         if (Item.type) {
             hereinafter_metadata.push("type:" + Item.type);
         }
-        if (Item.issued) {
+        var date_segment = Item.issued
+        if (["legal_case", "bill", "legislation"].indexOf(Item.type) > -1) {
+            date_segment = Item["original-date"];
+        }
+        if (date_segment) {
             var date = [];
             for (var j = 0, jlen = CSL.DATE_PARTS.length; j < jlen; j += 1) {
-                if (Item.issued[CSL.DATE_PARTS[j]]) {
-                    var element =  Item.issued[CSL.DATE_PARTS[j]];
+                if (date_segment[CSL.DATE_PARTS[j]]) {
+                    var element =  date_segment[CSL.DATE_PARTS[j]];
                     while (element.length < 2) {
                         element = "0" + element;
                     }
@@ -9016,14 +9021,14 @@ CSL.Parallel.prototype.CloseVariable = function (hello) {
         this.cite[this.variable] = this.data;
         if (this.sets.value().length > 0) {
             var prev = this.sets.value()[(this.sets.value().length - 1)];
-            if (this.target === "front" && this.variable === "issued") {
+            if (this.target === "front" && this.variable === "original-date") {
                 if (this.data.value && this.master_was_neutral_cite) {
                     this.target = "mid";
                 }
             }
             if (this.target === "front") {
                 if ((prev[this.variable] || this.data.value) && (!prev[this.variable] || this.data.value !== prev[this.variable].value)) {
-                    if ("issued" !== this.variable) {
+                    if ("original-date" !== this.variable) {
                         this.in_series = false;
                     }
                 }
@@ -9089,25 +9094,25 @@ CSL.Parallel.prototype.CloseCite = function () {
             this.ComposeSet(true);
         }
         if (this.sets.value().length === 0) {
-            has_issued = false;
+            has_date = false;
             for (pos = 0, len = this.cite.back.length; pos < len; pos += 1) {
                 x = this.cite.back[pos];
-                if (x === "issued" && this.cite.issued && this.cite.issued.value) {
-                    has_issued = true;
+                if (x === "original-date" && this.cite["original-date"] && this.cite["original-date"].value) {
+                    has_date = true;
                     break;
                 }
             }
-            if (!has_issued) {
-                this.cite.back_forceme.push("issued");
+            if (!has_date) {
+                this.cite.back_forceme.push("original-date");
             }
         } else {
-            var idx = this.cite.front.indexOf("issued");
+            var idx = this.cite.front.indexOf("original-date");
             if (idx === -1 || this.master_was_neutral_cite) {
                 this.cite.back_forceme = this.sets.value().slice(-1)[0].back_forceme;
             }
             if (idx > -1) {
                 var prev = this.sets.value()[this.sets.value().length - 1];
-                if (!prev.issued) {
+                if (!prev["original-date"]) {
                     this.cite.front = this.cite.front.slice(0, idx).concat(this.cite.front.slice(idx + 1));
                 }
             }
@@ -10402,7 +10407,11 @@ CSL.Util.FlipFlopper.prototype._normalizeString = function (str) {
     if (str.indexOf(this.quotechars[1]) > -1) {
         for (var i = 0, ilen = 2; i < ilen; i += 1) {
             if (this.quotechars[i + 4]) {
-                str = str.replace(this.quotechars[i + 4], this.quotechars[1]);
+                if (i === 0) {
+                    str = str.replace(this.quotechars[i + 4], " " + this.quotechars[1]);
+                } else {
+                    str = str.replace(this.quotechars[i + 4], this.quotechars[1]);
+                }
             }
         }
     }
