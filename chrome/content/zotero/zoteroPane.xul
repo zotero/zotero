@@ -97,7 +97,7 @@
 			onkeyup="ZoteroPane_Local.handleKeyUp(event, this.id)"
 			chromedir="&locale.dir;">
 			
-			<toolbar id="zotero-toolbar" class="toolbar">
+			<toolbar id="zotero-toolbar" class="toolbar toolbar-primary">
 				<hbox id="zotero-collections-toolbar" align="center">
 					<toolbarbutton id="zotero-tb-collection-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
 					<toolbarbutton id="zotero-tb-group-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
