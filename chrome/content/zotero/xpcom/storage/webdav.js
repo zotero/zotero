@@ -49,7 +49,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.includeGroupItems = false;
 // TEMP
 // TODO: localize
 Zotero.Sync.Storage.Session.WebDAV.prototype.defaultError = "A WebDAV file sync error occurred. Please try syncing again.\n\nIf you receive this message repeatedly, check your WebDAV server settings in the Sync pane of the Zotero preferences.";
-Zotero.Sync.Storage.Session.WebDAV.prototype.defaultErrorRestart = "A WebDAV file sync error occurred. Please restart " + Zotero.appName + " and try syncing again.\n\nIf you receive this message repeatedly, check your WebDAV server settings in the Sync pane of the Zotero preferences.";
+Zotero.Sync.Storage.Session.WebDAV.prototype.__defineGetter__('defaultErrorRestart', function () "A WebDAV file sync error occurred. Please restart " + Zotero.appName + " and try syncing again.\n\nIf you receive this message repeatedly, check your WebDAV server settings in the Sync pane of the Zotero preferences.");
 
 
 Zotero.Sync.Storage.Session.WebDAV.prototype.__defineGetter__('enabled', function () {
@@ -703,10 +703,10 @@ Zotero.Sync.Storage.Session.WebDAV.prototype._onUploadCancel = function (httpReq
 
 
 Zotero.Sync.Storage.Session.WebDAV.prototype.getLastSyncTime = function (callback) {
+	var self = this;
+	
 	// Cache the credentials at the root URI
 	if (!this._cachedCredentials) {
-		var self = this;
-		
 		Zotero.HTTP.doOptions(this.rootURI, function (req) {
 			self._checkResponse(req, self);
 			
@@ -729,7 +729,6 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.getLastSyncTime = function (callbac
 		var successFileURI = uri.clone();
 		successFileURI.spec += "lastsync";
 		Zotero.HTTP.doGet(successFileURI, function (req) {
-			var ts = undefined;
 			try {
 				if (req.responseText) {
 					Zotero.debug(req.responseText);
@@ -744,10 +743,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.getLastSyncTime = function (callbac
 				if (req.status != 200 && req.status != 404) {
 					var msg = "Unexpected status code " + req.status + " for HEAD request "
 						+ "in Zotero.Sync.Storage.Session.WebDAV.getLastSyncTime()";
-					Zotero.debug(msg, 1);
-					Components.utils.reportError(msg);
-					self.onError();
-					return;
+					throw (msg);
 				}
 				
 				if (req.status == 200) {
@@ -759,9 +755,13 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.getLastSyncTime = function (callbac
 				else {
 					ts = null;
 				}
-			}
-			finally {
+				
 				callback(ts);
+			}
+			catch (e) {
+				Zotero.debug(e, 1);
+				Components.utils.reportError(e);
+				self.onError();
 			}
 		});
 		return;
@@ -769,7 +769,7 @@ Zotero.Sync.Storage.Session.WebDAV.prototype.getLastSyncTime = function (callbac
 	catch (e) {
 		Zotero.debug(e);
 		Components.utils.reportError(e);
-		callback();
+		self.onError();
 		return;
 	}
 }
