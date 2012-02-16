@@ -79,8 +79,12 @@ Zotero.Standalone = new function() {
 			getService(Components.interfaces.nsIObserverService).
 			addObserver({
 				"observe":function(ch) {
-					if(ch.QueryInterface(Components.interfaces.nsIRequest).URI.host
-						!== "versioncheck.addons.mozilla.org") return;
+					try {
+						if(ch.QueryInterface(Components.interfaces.nsIRequest).URI.host
+							!== "versioncheck.addons.mozilla.org") return;
+					} catch(e) {
+						return;
+					}
 					var newListener = new AMOStreamListener;
 					newListener.oldListener = ch.
 						QueryInterface(Components.interfaces.nsITraceableChannel).
