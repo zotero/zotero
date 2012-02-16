@@ -1115,11 +1115,14 @@ Zotero.Sync.Storage = new function () {
 				destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
 			}
 			catch (e) {
+				Zotero.debug(e, 1);
+				
 				var windowsLength = false;
 				var nameLength = false;
 				
 				// Windows API only allows paths of 260 characters
 				if (e.name == "NS_ERROR_FILE_NOT_FOUND" && destFile.path.length > 255) {
+					Zotero.debug("Path is " + destFile.path);
 					windowsLength = true;
 				}
 				// ext3/ext4/HFS+ have a filename length limit of ~254 bytes
@@ -1127,18 +1130,21 @@ Zotero.Sync.Storage = new function () {
 				// These filenames will almost always be ASCII ad files,
 				// but allow an extra 10 bytes anyway
 				else if (e.name == "NS_ERROR_FAILURE" && destFile.leafName.length >= 244) {
+					Zotero.debug("Filename is " + destFile.leafName);
 					nameLength = true;
 				}
 				// Filesystem encryption (or, more specifically, filename encryption)
 				// can result in a lower limit -- not much we can do about this,
 				// but log a warning and skip the file
 				else if (e.name == "NS_ERROR_FAILURE" && Zotero.isLinux && destFile.leafName.length > 130) {
-					Zotero.debug(e);
 					// TODO: localize
 					var msg = "Error creating file '" + destFile.leafName + "'. "
 						+ "See http://www.zotero.org/support/kb/encrypted_filenames for more information.";
 					Components.utils.reportError(msg);
 					continue;
+				}
+				else {
+					Zotero.debug("Path is " + destFile.path);
 				}
 				
 				if (windowsLength || nameLength) {
@@ -1148,7 +1154,7 @@ Zotero.Sync.Storage = new function () {
 					
 					if (windowsLength) {
 						var pathLength = destFile.path.length - destFile.leafName.length;
-						var newLength = 255 - pathLength;
+						var newLength = 254 - pathLength;
 						// Require 40 available characters in path -- this is arbitrary,
 						// but otherwise filenames are going to end up being cut off
 						if (newLength < 40) {
