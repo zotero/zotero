@@ -240,10 +240,10 @@ Zotero.Translate.Sandbox = {
 									if(attachments) {
 										for(var i=0; i<attachments.length; i++) {
 											var attachment = attachments[i];
-											var doc = (attachments.document ? attachments.document : undefined);
-											delete attachments.document;
+											var doc = (attachment.document ? attachment.document : undefined);
+											delete attachment.document;
 											
-											attachment = translate._sandboxManager.sandbox.Zotero._transferItem(JSON.stringify(item));
+											attachment = translate._sandboxManager.sandbox.Zotero._transferItem(JSON.stringify(attachment));
 											
 											if(doc) attachment.document = doc;
 											
