@@ -1,0 +1,93 @@
+<!ENTITY preferencesCmdMac.label "ជម្រើសអាទិភាព…">
+<!ENTITY preferencesCmdMac.commandkey ",">
+<!ENTITY servicesMenuMac.label "សេវាកម្ម">
+<!ENTITY hideThisAppCmdMac.label "លាក់​ និង ឈ្មោះម៉ាក;">
+<!ENTITY hideThisAppCmdMac.commandkey "H">
+<!ENTITY hideOtherAppsCmdMac.label "លាក់ផ្សេងៗ">
+<!ENTITY hideOtherAppsCmdMac.commandkey "H">
+<!ENTITY showAllAppsCmdMac.label "បង្ហាញទាំងអស់">
+<!ENTITY quitApplicationCmdMac.label "បិទហ្ស៊ូតេរ៉ូ">
+<!ENTITY quitApplicationCmdMac.key "Q">
+
+
+<!ENTITY fileMenu.label "តម្កល់ឯកសារ">
+<!ENTITY fileMenu.accesskey "F">
+<!ENTITY closeCmd.label "បិទ">
+<!ENTITY closeCmd.key "W">
+<!ENTITY closeCmd.accesskey "C">
+<!ENTITY quitApplicationCmdWin.label "ចាកចេញ">
+<!ENTITY quitApplicationCmdWin.accesskey "x">
+<!ENTITY quitApplicationCmd.label "បិទ">
+<!ENTITY quitApplicationCmd.accesskey "Q">
+
+
+<!ENTITY editMenu.label "កែតម្រូវ">
+<!ENTITY editMenu.accesskey "E">
+<!ENTITY undoCmd.label "បកមកក្រោយ">
+<!ENTITY undoCmd.key "Z">
+<!ENTITY undoCmd.accesskey "U">
+<!ENTITY redoCmd.label "បកទៅមុខ">
+<!ENTITY redoCmd.key "Y">
+<!ENTITY redoCmd.accesskey "R">
+<!ENTITY cutCmd.label "កាត់">
+<!ENTITY cutCmd.key "X">
+<!ENTITY cutCmd.accesskey "t">
+<!ENTITY copyCmd.label "ថតចម្លង">
+<!ENTITY copyCmd.key "C">
+<!ENTITY copyCmd.accesskey "C">
+<!ENTITY copyCitationCmd.label "ថតចម្លងអាគតដ្ឋាន">
+<!ENTITY copyBibliographyCmd.label "ថតចម្លងគន្ថនិទេ្ទស">
+<!ENTITY pasteCmd.label "បិទភ្ជាប់">
+<!ENTITY pasteCmd.key "V">
+<!ENTITY pasteCmd.accesskey "P">
+<!ENTITY deleteCmd.label "លុបចោល">
+<!ENTITY deleteCmd.key "D">
+<!ENTITY deleteCmd.accesskey "D">
+<!ENTITY selectAllCmd.label "ជ្រើសរើសទាំងអស់">
+<!ENTITY selectAllCmd.key "A">
+<!ENTITY selectAllCmd.accesskey "A">
+<!ENTITY preferencesCmd.label "ជម្រើស…">
+<!ENTITY preferencesCmd.accesskey "O">
+<!ENTITY preferencesCmdUnix.label "ជម្រើសអាទិភាព">
+<!ENTITY preferencesCmdUnix.accesskey "n">
+<!ENTITY findCmd.label "ស្វែងរក">
+<!ENTITY findCmd.accesskey "F">
+<!ENTITY findCmd.commandkey "f">
+<!ENTITY bidiSwitchPageDirectionItem.label "ប្តូរទិសទំព័រ">
+<!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
+<!ENTITY bidiSwitchTextDirectionItem.label "ប្តូរទិសអត្ថបទ">
+<!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
+<!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
+
+
+<!ENTITY toolsMenu.label "ឧបករណ៏">
+<!ENTITY toolsMenu.accesskey "T">
+<!ENTITY addons.label "កម្មវិធីកម្ជាប់បន្ថែម">
+
+
+<!ENTITY minimizeWindow.key "m">
+<!ENTITY minimizeWindow.label "អប្បបរមា">
+<!ENTITY bringAllToFront.label "នាំយកទាំងអស់មកខាងមុខ">
+<!ENTITY zoomWindow.label "ពង្រួម">
+<!ENTITY windowMenu.label "វីនដូយ៏">
+
+
+<!ENTITY helpMenu.label "ជំនួយ">
+<!ENTITY helpMenu.accesskey "H">
+
+
+<!ENTITY helpMenuWin.label "ជំនួយ">
+<!ENTITY helpMenuWin.accesskey "H">
+<!ENTITY helpMac.commandkey "?">
+<!ENTITY aboutProduct.label "អំពី​ និង ឈ្មោះម៉ាក;">
+<!ENTITY aboutProduct.accesskey "A">
+<!ENTITY productHelp.label "គាំទ្រ និង ឯកសារ">
+<!ENTITY productHelp.accesskey "H">
+<!ENTITY helpTroubleshootingInfo.label "ព័តិមានដំណោះស្រាយបញ្ហា">
+<!ENTITY helpTroubleshootingInfo.accesskey "T">
+<!ENTITY helpFeedbackPage.label "ដាក់ជូននូវការឆ្លើយតប…">
+<!ENTITY helpFeedbackPage.accesskey "S">
+<!ENTITY helpReportErrors.label "រាយការណ៏កំហុសទៅកាន់ហ្ស៊ូតេរ៉ូ…">
+<!ENTITY helpReportErrors.accesskey "R">
+<!ENTITY helpCheckForUpdates.label "ស្វែងរកទំនើបកម្ម…">
+<!ENTITY helpCheckForUpdates.accesskey "U">
