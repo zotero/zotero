@@ -43,6 +43,11 @@ Zotero.HTTP = new function() {
 		var channel = xmlhttp.channel;
 		channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
 		channel.forceAllowThirdPartyCookie = true;
+		
+		// Set charset
+		if (responseCharset) {
+			channel.contentCharset = responseCharset;
+		}
 	
 		// Don't cache GET requests
 		xmlhttp.channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
@@ -103,6 +108,11 @@ Zotero.HTTP = new function() {
 		var channel = xmlhttp.channel;
 		channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
 		channel.forceAllowThirdPartyCookie = true;
+		
+		// Set charset
+		if (responseCharset) {
+			channel.contentCharset = responseCharset;
+		}
 		
 		if (headers) {
 			if (typeof headers == 'string') {
