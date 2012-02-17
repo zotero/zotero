@@ -22,6 +22,7 @@
     
     ***** END LICENSE BLOCK *****
 */
+Components.utils.import("resource://gre/modules/Services.jsm");
 
 Zotero.Standalone = new function() {
 	/**
@@ -70,13 +71,20 @@ Zotero.Standalone = new function() {
 	};
 	
 	this.init = function() {
+		// Set not offline
+		Services.io.offline = false;
+		
 		// Add an observer to handle AMO requests
 		Components.classes["@mozilla.org/observer-service;1"].
 			getService(Components.interfaces.nsIObserverService).
 			addObserver({
 				"observe":function(ch) {
-					if(ch.QueryInterface(Components.interfaces.nsIRequest).URI.host
-						!== "versioncheck.addons.mozilla.org") return;
+					try {
+						if(ch.QueryInterface(Components.interfaces.nsIRequest).URI.host
+							!== "versioncheck.addons.mozilla.org") return;
+					} catch(e) {
+						return;
+					}
 					var newListener = new AMOStreamListener;
 					newListener.oldListener = ch.
 						QueryInterface(Components.interfaces.nsITraceableChannel).

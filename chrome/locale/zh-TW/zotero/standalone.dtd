@@ -1,93 +1,93 @@
-<!ENTITY preferencesCmdMac.label "Preferences…">
+<!ENTITY preferencesCmdMac.label "偏好設定...">
 <!ENTITY preferencesCmdMac.commandkey ",">
-<!ENTITY servicesMenuMac.label "Services">
-<!ENTITY hideThisAppCmdMac.label "Hide &brandShortName;">
+<!ENTITY servicesMenuMac.label "服務">
+<!ENTITY hideThisAppCmdMac.label "隱藏 &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Hide Others">
+<!ENTITY hideOtherAppsCmdMac.label "隱藏其他">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "Show All">
-<!ENTITY quitApplicationCmdMac.label "Quit Zotero">
+<!ENTITY showAllAppsCmdMac.label "顯示所有">
+<!ENTITY quitApplicationCmdMac.label "結束 Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 
-<!ENTITY fileMenu.label "File">
+<!ENTITY fileMenu.label "檔案">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY closeCmd.label "Close">
+<!ENTITY closeCmd.label "關閉">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY quitApplicationCmdWin.label "Exit">
+<!ENTITY quitApplicationCmdWin.label "退出">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
-<!ENTITY quitApplicationCmd.label "Quit">
+<!ENTITY quitApplicationCmd.label "結束">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Edit">
+<!ENTITY editMenu.label "編輯">
 <!ENTITY editMenu.accesskey "E">
-<!ENTITY undoCmd.label "Undo">
+<!ENTITY undoCmd.label "撤消">
 <!ENTITY undoCmd.key "Z">
 <!ENTITY undoCmd.accesskey "U">
-<!ENTITY redoCmd.label "Redo">
+<!ENTITY redoCmd.label "重做">
 <!ENTITY redoCmd.key "Y">
 <!ENTITY redoCmd.accesskey "R">
-<!ENTITY cutCmd.label "Cut">
+<!ENTITY cutCmd.label "剪下">
 <!ENTITY cutCmd.key "X">
 <!ENTITY cutCmd.accesskey "t">
-<!ENTITY copyCmd.label "Copy">
+<!ENTITY copyCmd.label "複製">
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.accesskey "C">
-<!ENTITY copyCitationCmd.label "Copy Citation">
-<!ENTITY copyBibliographyCmd.label "Copy Bibliography">
-<!ENTITY pasteCmd.label "Paste">
+<!ENTITY copyCitationCmd.label "複製引用文獻">
+<!ENTITY copyBibliographyCmd.label "複製參考書目">
+<!ENTITY pasteCmd.label "貼上">
 <!ENTITY pasteCmd.key "V">
 <!ENTITY pasteCmd.accesskey "P">
-<!ENTITY deleteCmd.label "Delete">
+<!ENTITY deleteCmd.label "刪除">
 <!ENTITY deleteCmd.key "D">
 <!ENTITY deleteCmd.accesskey "D">
-<!ENTITY selectAllCmd.label "Select All">
+<!ENTITY selectAllCmd.label "全選">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "A">
-<!ENTITY preferencesCmd.label "Options…">
+<!ENTITY preferencesCmd.label "選項…">
 <!ENTITY preferencesCmd.accesskey "O">
-<!ENTITY preferencesCmdUnix.label "Preferences">
+<!ENTITY preferencesCmdUnix.label "偏好設定">
 <!ENTITY preferencesCmdUnix.accesskey "n">
-<!ENTITY findCmd.label "Find">
+<!ENTITY findCmd.label "搜尋">
 <!ENTITY findCmd.accesskey "F">
 <!ENTITY findCmd.commandkey "f">
-<!ENTITY bidiSwitchPageDirectionItem.label "Switch Page Direction">
+<!ENTITY bidiSwitchPageDirectionItem.label "切換頁面方向">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
-<!ENTITY bidiSwitchTextDirectionItem.label "Switch Text Direction">
+<!ENTITY bidiSwitchTextDirectionItem.label "切換文字方向">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY toolsMenu.label "Tools">
+<!ENTITY toolsMenu.label "工具">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY addons.label "Add-ons">
+<!ENTITY addons.label "附加">
 
 
 <!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minimize">
-<!ENTITY bringAllToFront.label "Bring All to Front">
-<!ENTITY zoomWindow.label "Zoom">
-<!ENTITY windowMenu.label "Window">
+<!ENTITY minimizeWindow.label "最小化">
+<!ENTITY bringAllToFront.label "將所有帶到前面">
+<!ENTITY zoomWindow.label "縮放">
+<!ENTITY windowMenu.label "視窗">
 
 
-<!ENTITY helpMenu.label "Help">
+<!ENTITY helpMenu.label "說明">
 <!ENTITY helpMenu.accesskey "H">
 
 
-<!ENTITY helpMenuWin.label "Help">
+<!ENTITY helpMenuWin.label "說明">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "About &brandShortName;">
+<!ENTITY aboutProduct.label "關於 &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "Support and Documentation">
+<!ENTITY productHelp.label "支援及說明文件">
 <!ENTITY productHelp.accesskey "H">
-<!ENTITY helpTroubleshootingInfo.label "Troubleshooting Information">
+<!ENTITY helpTroubleshootingInfo.label "修理故障的資訊">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Submit Feedback…">
+<!ENTITY helpFeedbackPage.label "提交回應意見…">
 <!ENTITY helpFeedbackPage.accesskey "S">
-<!ENTITY helpReportErrors.label "Report Errors to Zotero…">
+<!ENTITY helpReportErrors.label "向 Zotero 回報錯誤…">
 <!ENTITY helpReportErrors.accesskey "R">
-<!ENTITY helpCheckForUpdates.label "Check for Updates…">
+<!ENTITY helpCheckForUpdates.label "檢查更新…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

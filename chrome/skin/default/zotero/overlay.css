@@ -497,3 +497,9 @@
 {
 	list-style-image: url('chrome://zotero/skin/annotate-unhighlight-selected.png');
 }
+
+#zotero-toolbar
+{
+	visibility: visible !important;
+	display: inherit !important;
+}

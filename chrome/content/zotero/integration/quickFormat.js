@@ -969,7 +969,7 @@ var Zotero_QuickFormat = new function () {
 	 * Handle return or escape
 	 */
 	function _onQuickSearchKeyPress(event) {
-		qfGuidance.hide();
+		if(qfGuidance) qfGuidance.hide();
 		
 		var keyCode = event.keyCode;
 		if(keyCode === event.DOM_VK_RETURN || keyCode === event.DOM_VK_ENTER) {

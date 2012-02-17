@@ -438,9 +438,13 @@ const ZOTERO_CONFIG = {
 		var cs = Components.classes["@mozilla.org/consoleservice;1"].
 			getService(Components.interfaces.nsIConsoleService);
 		// Get startup errors
-		var messages = {};
-		cs.getMessageArray(messages, {});
-		_startupErrors = [msg for each(msg in messages.value) if(_shouldKeepError(msg))];
+		try {
+			var messages = {};
+			cs.getMessageArray(messages, {});
+			_startupErrors = [msg for each(msg in messages.value) if(_shouldKeepError(msg))];
+		} catch(e) {
+			Zotero.logError(e);
+		}
 		// Register error observer
 		cs.registerListener(ConsoleListener);
 		

@@ -355,6 +355,12 @@ Zotero.MIME = new function(){
 			return isNative;
 		}
 		
+		if(mimeType === "application/pdf"
+				&& "@mozilla.org/streamconv;1?from=application/pdf&to=*/*" in Components.classes) {
+			// PDF can be handled internally if pdf.js is installed
+			return true;
+		}
+		
 		// Is there a better way to get to navigator?
 		var types = Components.classes["@mozilla.org/appshell/appShellService;1"]
 				.getService(Components.interfaces.nsIAppShellService)

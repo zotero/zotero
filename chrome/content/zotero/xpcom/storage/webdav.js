@@ -1004,9 +1004,13 @@ Zotero.Sync.Storage.Module.WebDAV = (function () {
 							else {
 								ts = null;
 							}
-						}
-						finally {
+							
 							callback(ts);
+						}
+						catch {
+							Zotero.debug(e, 1);
+							Components.utils.reportError(e);
+							Zotero.Sync.Storage.EventManager.error(_defaultError);
 						}
 					});
 					return;
@@ -1014,8 +1018,7 @@ Zotero.Sync.Storage.Module.WebDAV = (function () {
 				catch (e) {
 					Zotero.debug(e);
 					Components.utils.reportError(e);
-					callback();
-					return;
+					Zotero.Sync.Storage.EventManager.error(_defaultError);
 				}
 			});
 		},

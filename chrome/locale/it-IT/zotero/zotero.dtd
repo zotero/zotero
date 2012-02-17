@@ -98,7 +98,7 @@
 <!ENTITY zotero.item.attachment.file.show "Visualizza file">
 <!ENTITY zotero.item.textTransform "Modifica testo">
 <!ENTITY zotero.item.textTransform.titlecase "Maiuscolo">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.sentencecase "Maiuscole">
 
 <!ENTITY zotero.toolbar.newNote "Nuovo appunto">
 <!ENTITY zotero.toolbar.note.standalone "Nuova nota">
@@ -200,43 +200,43 @@
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "I tag non selezionati non saranno salvati">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Il tag sarà eliminato da tutti gli oggetti">
 
-<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
-<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
-<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
+<!ENTITY zotero.proxy.recognized.title "Proxy riconosciuto">
+<!ENTITY zotero.proxy.recognized.warning "Aggiungi solo proxy linkati dalla tua biblioteca, scuola o azienda.">
+<!ENTITY zotero.proxy.recognized.warning.secondary "Aggiungere altri proxy può permettere a siti maleintenzionati di camuffarsi da siti fidati.">
+<!ENTITY zotero.proxy.recognized.disable.label "Non reindirizzare automaticamente le richieste attraverso proxy riconosciuti in precedenza.">
+<!ENTITY zotero.proxy.recognized.ignore.label "Ignora">
 
 <!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
-<!ENTITY zotero.recognizePDF.cancel.label "Cancel">
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
-<!ENTITY zotero.recognizePDF.itemName.label "Item Name">
-<!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
+<!ENTITY zotero.recognizePDF.cancel.label "Annulla">
+<!ENTITY zotero.recognizePDF.pdfName.label "Nome PDF">
+<!ENTITY zotero.recognizePDF.itemName.label "Nome oggetto">
+<!ENTITY zotero.recognizePDF.captcha.label "Digita il testo qui sotto per continuare a recuperare i metadati">
 
-<!ENTITY zotero.rtfScan.title "RTF Scan">
-<!ENTITY zotero.rtfScan.cancel.label "Cancel">
-<!ENTITY zotero.rtfScan.citation.label "Citation">
-<!ENTITY zotero.rtfScan.itemName.label "Item Name">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
-<!ENTITY zotero.rtfScan.introPage.label "Introduction">
+<!ENTITY zotero.rtfScan.title "Scansione RTF">
+<!ENTITY zotero.rtfScan.cancel.label "Annulla">
+<!ENTITY zotero.rtfScan.citation.label "Citazione">
+<!ENTITY zotero.rtfScan.itemName.label "Nome oggetto">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Citazioni non corrispondenti">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Citazioni ambigue">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Citazioni corripondenti">
+<!ENTITY zotero.rtfScan.introPage.label "Introduzione">
 <!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
-<!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
-<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
-<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
-<!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
-<!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
-<!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
-<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
-<!ENTITY zotero.rtfScan.inputFile.label "Input File">
-<!ENTITY zotero.rtfScan.outputFile.label "Output File">
+<!ENTITY zotero.rtfScan.introPage.description2 "Per iniziare, seleziona un file RTF e un file di destinazione qui sotto:">
+<!ENTITY zotero.rtfScan.scanPage.label "Sto cercando citazioni">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero sta cercando citazioni nel tuo documento. Un attimo di pazienza, per favore.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Verifica gli oggetti citati.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Per favore controlla la lista delle citazioni riconosciute qui sotto e assicurati che Zotero abbia selezionato correttamente i relativi riferimenti. Le citazioni non corrispondenti o ambigue devono essere perfezionate prima di procedere al passaggio successivo.">
+<!ENTITY zotero.rtfScan.stylePage.label "Formattazione del documento">
+<!ENTITY zotero.rtfScan.formatPage.label "Formattazione delle citazioni">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero sta elaborando e formattando il tuo documento. Un attimo di pazienza, per favore.">
+<!ENTITY zotero.rtfScan.completePage.label "Elaborazione RTF completata.">
+<!ENTITY zotero.rtfScan.completePage.description "Il tuo documento è stato elaborato. Per favore assicurati che sia stato formattato correttamente.">
+<!ENTITY zotero.rtfScan.inputFile.label "File da elaborare">
+<!ENTITY zotero.rtfScan.outputFile.label "File di destinazione">
 
 <!ENTITY zotero.file.choose.label "Choose File...">
-<!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.file.noneSelected.label "Nessun file selezionato">
 
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.label "Salva in Zotero">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "La libreria selezionata non può essere usata per salvare allegati. Questo oggetto sarà salvato nella tua libreria.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "Per usare questa funzionalità, è necessario prima installare gli strumenti PDF tramite le impostazioni di Zotero.">

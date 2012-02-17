@@ -21,8 +21,8 @@
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY editMenu.label "Modifier">
-<!ENTITY editMenu.accesskey "e">
+<!ENTITY editMenu.label "Edit">
+<!ENTITY editMenu.accesskey "n">
 <!ENTITY undoCmd.label "Annuler">
 <!ENTITY undoCmd.key "Z">
 <!ENTITY undoCmd.accesskey "u">

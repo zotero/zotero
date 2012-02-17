@@ -38,7 +38,7 @@
 <!ENTITY zotero.notes.separate "分出一個獨立視窗來編輯">
 
 <!ENTITY zotero.toolbar.duplicate.label "顯示重復的">
-<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.collections.showUnfiledItems "顯示出未歸檔的項目">
 
 <!ENTITY zotero.items.itemType "項目類型">
 <!ENTITY zotero.items.type_column "類型">
@@ -51,7 +51,7 @@
 <!ENTITY zotero.items.journalAbbr_column "期刊簡寫">
 <!ENTITY zotero.items.language_column "語言">
 <!ENTITY zotero.items.accessDate_column "受使用的">
-<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.libraryCatalog_column "圖書館目錄">
 <!ENTITY zotero.items.callNumber_column "索書號">
 <!ENTITY zotero.items.rights_column "權利">
 <!ENTITY zotero.items.dateAdded_column "加入日期">
@@ -63,11 +63,11 @@
 <!ENTITY zotero.items.menu.attach "新增附加檔案">
 <!ENTITY zotero.items.menu.attach.snapshot "附上目前網頁的快照">
 <!ENTITY zotero.items.menu.attach.link "附上目前網頁的鏈結">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
-<!ENTITY zotero.items.menu.attach.file "附加已儲存的檔案拷貝……">
-<!ENTITY zotero.items.menu.attach.fileLink "附加鏈結到檔案……">
+<!ENTITY zotero.items.menu.attach.link.uri "附加到URI的鏈結…">
+<!ENTITY zotero.items.menu.attach.file "附加已儲存的檔案拷貝…">
+<!ENTITY zotero.items.menu.attach.fileLink "附加鏈結到檔案…">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.restoreToLibrary "還原到圖書館中">
 <!ENTITY zotero.items.menu.duplicateItem "為選取的項目建立副本">
 
 <!ENTITY zotero.toolbar.newItem.label "新增項目">
@@ -91,7 +91,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "支援及說明文件">
 <!ENTITY zotero.toolbar.about.label "關於 Zotero…">
 <!ENTITY zotero.toolbar.advancedSearch "進階搜尋">
-<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
+<!ENTITY zotero.toolbar.tab.tooltip "切換分頁模式">
 <!ENTITY zotero.toolbar.openURL.label "找出">
 <!ENTITY zotero.toolbar.openURL.tooltip "用你本地的圖書館來尋找">
 
@@ -99,11 +99,11 @@
 <!ENTITY zotero.item.attachment.file.show "顯示檔案">
 <!ENTITY zotero.item.textTransform "轉換文字">
 <!ENTITY zotero.item.textTransform.titlecase "標題大小寫">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.sentencecase "文句式大小寫">
 
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newNote "新的筆記">
 <!ENTITY zotero.toolbar.note.standalone "新增獨立筆記">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
+<!ENTITY zotero.toolbar.note.child "新增子筆記">
 <!ENTITY zotero.toolbar.lookup "以標識符查找…">
 <!ENTITY zotero.toolbar.attachment.linked "檔案鏈結…">
 <!ENTITY zotero.toolbar.attachment.add "儲存檔案副本…">
@@ -113,7 +113,7 @@
 <!ENTITY zotero.tagSelector.noTagsToDisplay "沒有標籤可顯示">
 <!ENTITY zotero.tagSelector.filter "篩選器：">
 <!ENTITY zotero.tagSelector.showAutomatic "顯示自動的">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "顯示在這圖書館中的所有標籤">
 <!ENTITY zotero.tagSelector.selectVisible "選取可見的">
 <!ENTITY zotero.tagSelector.clearVisible "取消可見的選取">
 <!ENTITY zotero.tagSelector.clearAll "取消全部的選取">
@@ -123,7 +123,7 @@
 <!ENTITY zotero.lookup.description "輸入 ISBN, DOI, 或 PMID 後在下面的方塊中尋找">
 
 <!ENTITY zotero.selectitems.title "選取項目">
-<!ENTITY zotero.selectitems.intro.label "選取要加到圖書館的項目">
+<!ENTITY zotero.selectitems.intro.label "選取要加到你的圖書館的項目">
 <!ENTITY zotero.selectitems.cancel.label "取消">
 <!ENTITY zotero.selectitems.select.label "確定">
 
@@ -175,13 +175,13 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "用以格式化：">
 <!ENTITY zotero.integration.prefs.bookmarks.label "書籤">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified. For &#xA;compatibility reasons, citations cannot be inserted into footnotes or endnotes when this option is selected.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "書簽在Microsoft Word及OpenOffice之間應會被保留，但也可能意外的受到改變。為了相容性，在選用這個選項時文獻引用不能被插入到腳注或尾注中。">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "將參考文獻存在文件中">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "將參考文獻存在文件中會讓檔案大一點，但可以讓你在不使用Zotero群組下和別人分享文件。更新用這個選項建立的文件需要Zotero 3.0以上的版本。">
 
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.showEditor.label "顯示編輯器">
+<!ENTITY zotero.integration.classicView.label "典型的外觀">
 
 <!ENTITY zotero.integration.references.label "參考書目中的參考文獻">
 
@@ -238,6 +238,6 @@
 <!ENTITY zotero.file.choose.label "選擇檔案…">
 <!ENTITY zotero.file.noneSelected.label "未選取檔案">
 
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.label "貯存到Zotero">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "附件不能被存到目前選定的圖書館。這個項目會被改存到你的圖書館。">
+<!ENTITY zotero.downloadManager.noPDFTools.description "要使用這個功能，你必須先在Zotero的偏好設定中安裝PDF工具。">

@@ -1777,9 +1777,15 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	 * Accept changes to the citation
 	 * @param {Function} [progressCallback] A callback to be run when progress has changed.
 	 *     Receives a number from 0 to 100 indicating current status.
+	 * @param {Boolean} [force] Whether to run accept even if it has been run previously.
 	 */
-	"accept":function(progressCallback) {
+	"accept":function(progressCallback, force) {
 		var me = this;
+		
+		// Don't allow accept to be called multiple times
+		if(!force && this._haveAccepted) return;
+		this._haveAccepted = true;
+		
 		this._fields.progressCallback = progressCallback;
 		
 		if(this._errorOccurred) {
@@ -1788,7 +1794,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 			Zotero.setTimeout(function() {
 				me._fields.updateSession(function() {
 					me._errorOccurred = false;
-					me.accept(progressCallback);
+					me.accept(progressCallback, true);
 				})
 			}, 0);
 			return;

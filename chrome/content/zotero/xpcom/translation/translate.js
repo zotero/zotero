@@ -240,10 +240,10 @@ Zotero.Translate.Sandbox = {
 									if(attachments) {
 										for(var i=0; i<attachments.length; i++) {
 											var attachment = attachments[i];
-											var doc = (attachments.document ? attachments.document : undefined);
-											delete attachments.document;
+											var doc = (attachment.document ? attachment.document : undefined);
+											delete attachment.document;
 											
-											attachment = translate._sandboxManager.sandbox.Zotero._transferItem(JSON.stringify(item));
+											attachment = translate._sandboxManager.sandbox.Zotero._transferItem(JSON.stringify(attachment));
 											
 											if(doc) attachment.document = doc;
 											
@@ -2151,6 +2151,16 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	 *     (false)
 	 */
 	"addStatement":function(about, relation, value, literal) {
+		if(about === null || about === undefined) {
+			throw new Error("about must be defined in Zotero.RDF.addStatement");
+		}
+		if(relation === null || relation === undefined) {
+			throw new Error("relation must be defined in Zotero.RDF.addStatement");
+		}
+		if(value === null || value === undefined) {
+			throw new Error("value must be defined in Zotero.RDF.addStatement");
+		}
+		
 		if(literal) {
 			// zap chars that Mozilla will mangle
 			value = value.toString().replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');

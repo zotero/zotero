@@ -1,0 +1,243 @@
+<!ENTITY zotero.general.optional "(ជម្រើស)">
+<!ENTITY zotero.general.note "កំណត់ចំណាំ:">
+<!ENTITY zotero.general.selectAll "ជ្រើសរើសទាំងអស់">
+<!ENTITY zotero.general.deselectAll "ដោះជម្រើស">
+<!ENTITY zotero.general.edit "កែតម្រូវ">
+<!ENTITY zotero.general.delete "លុបចោល">
+
+<!ENTITY zotero.errorReport.unrelatedMessages "កំណត់ហេតុកំហុសអាចបញ្ចូលសារដែលមិនពាក់ព័ន្ធទៅកាន់ហ្ស៊ូតេរ៉ូ។">
+<!ENTITY zotero.errorReport.submissionInProgress "សូមរង់ចាំ ខណៈពេលកំពុងធ្វើរបាយការណ៍អំពីកំហុស។">
+<!ENTITY zotero.errorReport.submitted "កំហុសបានធ្វើរបាយការណ៍រួចហើយ។">
+<!ENTITY zotero.errorReport.reportID "អត្តលេខរបាយការណ៍:">
+<!ENTITY zotero.errorReport.postToForums "សូមផ្ញើសារទៅកាន់វេទិកាហ្ស៊ូតេរ៉ូ (forums.zotero.org) ជាមួយនិងអត្តលេខរបាយការណ៍នេះ ការពណ៌នាបញ្ហា និង ជំហានចាំបាច់នានា ដើម្បីផលិតឡើងវិញ។">
+<!ENTITY zotero.errorReport.notReviewed "របាយការណ៍អំពីកំហុសមិនត្រូវបានពិនិត្យ លុះត្រាតែឆ្លងកាត់វេទិកានេះ។">
+
+<!ENTITY zotero.upgrade.newVersionInstalled "អ្នកបានដំឡើងហ្ស៊ូតេរ៉ូកំណែថ្មី។">
+<!ENTITY zotero.upgrade.upgradeRequired "អ្នកត្រូវធ្វើទំនើបកម្មទិន្នន័យហ្ស៊ូតេរ៉ូរបស់អ្នកដើម្បីដំណើរការជាមួយកំណែថ្មីនេះ។">
+<!ENTITY zotero.upgrade.autoBackup "ទិន្នន័យឯកសារដែលមានស្រាប់របស់អ្នកនឹងបានរក្សាបម្រុងទុកដោយស្វ័យប្រវត្តិមុនពេលផ្លាស់ប្តូរ។">
+<!ENTITY zotero.upgrade.majorUpgrade "នេះគឺជាការធ្វើទំនើបកម្មចម្បង។">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "ធ្វើឲប្រាកដថា អ្នកបានអាននូវ">
+<!ENTITY zotero.upgrade.majorUpgradeLink "ការណែនាំអំពីទំនើបកម្ម">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "មុនពេលបន្ត">
+<!ENTITY zotero.upgrade.upgradeInProgress "សូមរង់ចាំ ដើម្បីឲដំណើរការទំនើបកម្មបញ្ចប់។​ ដំណើរការនេះអាចចំណាយពេលមួយរយៈខ្លី។">
+<!ENTITY zotero.upgrade.upgradeSucceeded "ទិន្នន័យហ្ស៊ូតេរ៉ូរបស់អ្នកបានធ្វើទំនើបកម្មដោយជោគជ័យ។">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "សូមមើល">
+<!ENTITY zotero.upgrade.changeLogLink "កំណត់ហេតុផ្លាស់ប្តូរ">
+<!ENTITY zotero.upgrade.changeLogAfterLink "ដើម្បីរកមើលអ្វីដែលថ្មី។">
+
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "បន្ថែមជម្រើសទៅកាន់កំណត់ចំណាំហ្ស៊ូតេរ៉ូ">
+<!ENTITY zotero.contextMenu.addTextToNewNote "បង្កើតបញ្ជីឯកសារហ្ស៊ូតេរ៉ូ និង កំណត់ចំណាំចេញពីជម្រើស">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "ទាញរក្សាកម្ជាប់ទុកជាឯកសារហ្ស៊ូតេរ៉ូ">
+<!ENTITY zotero.contextMenu.saveImageAsItem "ទាញរក្សារូបភាពទុកជាឯកសារហ្ស៊ូតេរ៉ូ">
+
+<!ENTITY zotero.tabs.info.label "ទិន្នន័យ">
+<!ENTITY zotero.tabs.notes.label "កំណត់ត្រា">
+<!ENTITY zotero.tabs.attachments.label "ឯកសារកម្ជាប់">
+<!ENTITY zotero.tabs.tags.label "ស្លាក">
+<!ENTITY zotero.tabs.related.label "ពាក់ព័ន្ធ">
+<!ENTITY zotero.notes.separate "កែតម្រូវនៅក្នុងវីនដូយ៍ដោយឡែក">
+
+<!ENTITY zotero.toolbar.duplicate.label "បង្ហាញឯកសារត្រួត">
+<!ENTITY zotero.collections.showUnfiledItems "បង្ហាញឯកសារមិនទាន់បានតម្កល់ទុក">
+
+<!ENTITY zotero.items.itemType "ប្រភេទឯកសារ">
+<!ENTITY zotero.items.type_column "ប្រភេទ">
+<!ENTITY zotero.items.title_column "ចំណងជើង">
+<!ENTITY zotero.items.creator_column "អ្នកនិពន្ធ">
+<!ENTITY zotero.items.date_column "កាលបរិច្ឆេទ">
+<!ENTITY zotero.items.year_column "ឆ្នាំ">
+<!ENTITY zotero.items.publisher_column "អ្នកបោះពុម្ព">
+<!ENTITY zotero.items.publication_column "បោះពុម្ពផ្សាយ">
+<!ENTITY zotero.items.journalAbbr_column "អក្សរកាត់ទនានុប្បវត្តិ">
+<!ENTITY zotero.items.language_column "ភាសា">
+<!ENTITY zotero.items.accessDate_column "ចូលមើល">
+<!ENTITY zotero.items.libraryCatalog_column "កាតាឡុកបណ្ណាល័យ">
+<!ENTITY zotero.items.callNumber_column "លេខហៅ">
+<!ENTITY zotero.items.rights_column "សិទ្ធិ">
+<!ENTITY zotero.items.dateAdded_column "កាលបរិច្ឆេទបញ្ចូល">
+<!ENTITY zotero.items.dateModified_column "កាលបរិច្ឆេទកែតម្រូវ">
+<!ENTITY zotero.items.numChildren_column "+">
+
+<!ENTITY zotero.items.menu.showInLibrary "បង្ហាញនៅក្នុងបណ្ណាល័យ">
+<!ENTITY zotero.items.menu.attach.note "បន្ថែមកំណត់ចំណាំ">
+<!ENTITY zotero.items.menu.attach "បន្ថែមឯកសារកម្ជាប់">
+<!ENTITY zotero.items.menu.attach.snapshot "ភ្ជាប់រូបភាពអត្ថបទនៃគេហទំព័រនេះ">
+<!ENTITY zotero.items.menu.attach.link "ភ្ជាប់កម្ជាប់ទៅនឹងគេហទំព័រនេះ">
+<!ENTITY zotero.items.menu.attach.link.uri "ភ្ជាប់កម្ជាប់ទៅនឹងយូអ៊ែរអិល...">
+<!ENTITY zotero.items.menu.attach.file "ភ្ជាប់ឯកសារចម្លងចូលទុក...">
+<!ENTITY zotero.items.menu.attach.fileLink "ភ្ជាប់កម្ជាប់ទៅនឹងឯកសារ...">
+
+<!ENTITY zotero.items.menu.restoreToLibrary "ស្តារទៅកាន់បណ្ណាល័យវិញ">
+<!ENTITY zotero.items.menu.duplicateItem "ជ្រើសរើសឯកសារត្រួត">
+
+<!ENTITY zotero.toolbar.newItem.label "ឯកសារថ្មី">
+<!ENTITY zotero.toolbar.moreItemTypes.label "ជម្រើសប្រភេទឯកសារ">
+<!ENTITY zotero.toolbar.newItemFromPage.label "ថតយកអត្ថបទគេហទំព័រនេះ">
+<!ENTITY zotero.toolbar.lookup.label "បញ្ចូលឯកសារដោយដាក់អត្តសញ្ញាណកម្ម">
+<!ENTITY zotero.toolbar.removeItem.label "លុបឯកសារ...">
+<!ENTITY zotero.toolbar.newCollection.label "បង្កើតកម្រងឯកសារថ្មី...">
+<!ENTITY zotero.toolbar.newGroup "ក្រុមថ្មី...">
+<!ENTITY zotero.toolbar.newSubcollection.label "បង្កើតអនុកម្រងឯកសារថ្មី...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "ការស្រាវជ្រាវរក្សាទុកថ្មី...">
+<!ENTITY zotero.toolbar.emptyTrash.label "សម្អាតធុងសំរាម">
+<!ENTITY zotero.toolbar.tagSelector.label "បង្ហាញ/លាក់ជម្រើសស្លាក">
+<!ENTITY zotero.toolbar.actions.label "បញ្ជីសកម្មភាព">
+<!ENTITY zotero.toolbar.import.label "នាំចូល...">
+<!ENTITY zotero.toolbar.importFromClipboard "នាំចូលពីកន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
+<!ENTITY zotero.toolbar.export.label "នាំចេញពីបណ្ណាល័យ...">
+<!ENTITY zotero.toolbar.rtfScan.label "វិភាគអ៊ែរធីអែហ្វ...">
+<!ENTITY zotero.toolbar.timeline.label "បង្កើតលំដាប់ពេល">
+<!ENTITY zotero.toolbar.preferences.label "ជម្រើសអាទិភាពផ្សេងៗ...">
+<!ENTITY zotero.toolbar.supportAndDocumentation "គាំទ្រ និង ឯកសារ">
+<!ENTITY zotero.toolbar.about.label "អំពីហ្ស៊ូតេរ៉ូ">
+<!ENTITY zotero.toolbar.advancedSearch "ស្វែងរកលឿន">
+<!ENTITY zotero.toolbar.tab.tooltip "បើកពេញអេក្រង់">
+<!ENTITY zotero.toolbar.openURL.label "ទីតាំងឯកសារ">
+<!ENTITY zotero.toolbar.openURL.tooltip "រកនៅតាមបណ្ណាល័យរបស់អ្នក">
+
+<!ENTITY zotero.item.add "បន្ថែម">
+<!ENTITY zotero.item.attachment.file.show "បង្ហាញឯកសារ">
+<!ENTITY zotero.item.textTransform "បំលែងអត្ថបទ">
+<!ENTITY zotero.item.textTransform.titlecase "ចំណងជើងអក្សរធំ">
+<!ENTITY zotero.item.textTransform.sentencecase "ចំណងជើងអក្សរតូច">
+
+<!ENTITY zotero.toolbar.newNote "កំណត់ចំណាំថ្មី">
+<!ENTITY zotero.toolbar.note.standalone "កំណត់ត្រាទោលថ្មី">
+<!ENTITY zotero.toolbar.note.child "ភ្ជាប់កំណត់ត្រាចំណាំ">
+<!ENTITY zotero.toolbar.lookup "ស្វែងរកឯកសារតាមអត្តសញ្ញាណកម្ម...">
+<!ENTITY zotero.toolbar.attachment.linked "ភ្ជាប់ទៅកាន់ឯកសារ...">
+<!ENTITY zotero.toolbar.attachment.add "តម្កល់ឯកសារទុក...">
+<!ENTITY zotero.toolbar.attachment.weblink "ទាញរក្សាទុកកម្ជាប់គេហទំព័រនេះ">
+<!ENTITY zotero.toolbar.attachment.snapshot "ថតយកអត្ថបទគេហទំព័រនេះ">
+
+<!ENTITY zotero.tagSelector.noTagsToDisplay "គ្មានស្លាកត្រូវបង្ហាញ">
+<!ENTITY zotero.tagSelector.filter "តម្រង:">
+<!ENTITY zotero.tagSelector.showAutomatic "បង្ហាញដោយស្វ័យប្រវត្តិ">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "បង្ហាញគ្រប់ស្លាកនៅក្នុងបណ្ណាល័យនេះ">
+<!ENTITY zotero.tagSelector.selectVisible "ជម្រើសមើលឃើញ">
+<!ENTITY zotero.tagSelector.clearVisible "ដោះជម្រើសមើលឃើញ">
+<!ENTITY zotero.tagSelector.clearAll "ដោះជម្រើសទាំងអស់">
+<!ENTITY zotero.tagSelector.renameTag "ផ្លាស់ឈ្មោះស្លាក...">
+<!ENTITY zotero.tagSelector.deleteTag "លុបស្លាកចោល...">
+
+<!ENTITY zotero.lookup.description "សូមបញ្ចូលអាយអេសប៊ីអិន ឌីអូអាយ ឬ ភីអេមអាយឌី ដើម្បីរកមើលនៅក្នុងប្រអប់ខាងក្រោមៈ">
+
+<!ENTITY zotero.selectitems.title "ជ្រើសរើសឯកសារ">
+<!ENTITY zotero.selectitems.intro.label "ជ្រើសរើសឯកសារណាមួយដែលអ្នកចង់បញ្ចូលទៅក្នុងបណ្ណាល័យរបស់អ្នក">
+<!ENTITY zotero.selectitems.cancel.label "បដិសេធ">
+<!ENTITY zotero.selectitems.select.label "យល់ព្រម">
+
+<!ENTITY zotero.bibliography.title "បង្កើតគន្ថនិទេ្ទស">
+<!ENTITY zotero.bibliography.style.label "រចនាបថអាគតដ្ឋាន:">
+<!ENTITY zotero.bibliography.output.label "ទម្រង់ទិន្នផល">
+<!ENTITY zotero.bibliography.saveAsRTF.label "ទាញរក្សាទុកជាអ៊ែរធីអែហ្វ">
+<!ENTITY zotero.bibliography.saveAsHTML.label "ទាញរក្សាទុកជាអេចធីអេមអិល">
+<!ENTITY zotero.bibliography.copyToClipboard.label "ចម្លងទៅកាន់កន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
+<!ENTITY zotero.bibliography.print.label "បោះពុម្ពចេញ">
+
+<!ENTITY zotero.integration.docPrefs.title "ជម្រើសរចនាបថសម្រាប់យោងឯកសារ">
+<!ENTITY zotero.integration.addEditCitation.title "បន្ថែម ឬ កែតម្រូវអាគតដ្ឋាន">
+<!ENTITY zotero.integration.editBibliography.title "កែតម្រូវគន្ថនិទេ្ទស">
+
+<!ENTITY zotero.progress.title "កំពុងដំណើរ">
+
+<!ENTITY zotero.exportOptions.title "នាំចេញ...">
+<!ENTITY zotero.exportOptions.format.label "ទ្រង់ទ្រាយ:">
+<!ENTITY zotero.exportOptions.translatorOptions.label "ជម្រើសកូដចម្លង">
+
+<!ENTITY zotero.charset.label "បញ្ចូលកូដតួអក្សរ">
+<!ENTITY zotero.moreEncodings.label "បញ្ចូលកូដបន្ថែម">
+
+<!ENTITY zotero.citation.keepSorted.label "បែងចែកប្រភពតាមប្រភេទ">
+
+<!ENTITY zotero.citation.page "ទំព័រ">
+<!ENTITY zotero.citation.paragraph "កថាខណ្ឌ">
+<!ENTITY zotero.citation.line "បន្ទាត់">
+<!ENTITY zotero.citation.suppressAuthor.label "អ្នកនិពន្ធ">
+<!ENTITY zotero.citation.prefix.label "បុព្វបទ:">
+<!ENTITY zotero.citation.suffix.label "បច្ច័យ:">
+
+<!ENTITY zotero.richText.italic.label "អក្សរជ្រៀង">
+<!ENTITY zotero.richText.bold.label "អក្សរដិត">
+<!ENTITY zotero.richText.underline.label "គូសបន្ទាត់ពីក្រោម">
+<!ENTITY zotero.richText.superscript.label "អក្សរតូចលើ">
+<!ENTITY zotero.richText.subscript.label "អក្សរតូចក្រោម">
+
+<!ENTITY zotero.annotate.toolbar.add.label "បន្ថែមចំណារពន្យល់">
+<!ENTITY zotero.annotate.toolbar.collapse.label "វេញចំណារពន្យល់">
+<!ENTITY zotero.annotate.toolbar.expand.label "ពង្រីកចំណារពន្យល់">
+<!ENTITY zotero.annotate.toolbar.highlight.label "បន្លិចពណ៌អត្ថបទ">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "ដោះបន្លិចពណ៌អត្ថបទ">
+
+<!ENTITY zotero.integration.prefs.displayAs.label "បង្ហាញអាគតដ្ឋានក្នុងទម្រង់ជា:">
+<!ENTITY zotero.integration.prefs.footnotes.label "លេខយោងក្រោមអត្ថបទ">
+<!ENTITY zotero.integration.prefs.endnotes.label "លេខយោងចុងអត្ថបទ">
+
+<!ENTITY zotero.integration.prefs.formatUsing.label "ការប្រើទម្រង់:">
+<!ENTITY zotero.integration.prefs.bookmarks.label "កំណត់ចំណាំគេហទំព័រទុក">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "កំណត់ចំណាំគេហទំព័រអាចរក្សាទុកនៅក្នុងម៉ាយក្រូសូហ្វវើដ និង អូផិនអប់ហ្វីស ប៉ុន្តែអាចត្រូវបានកែប្រែដោយចៃដន្យ។ ដោយមូលហេតុសមិតភាព អាគតដ្ឋានមិនអាចដាក់ជាលេខយោងក្រោមអត្ថបទ​ ឬ លេខយោងចុងអត្ថបទនៅពេលត្រូវបានជ្រើសរើស។">
+
+<!ENTITY zotero.integration.prefs.storeReferences.label "ដាក់កំណត់យោងក្នុងឯកសារ">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "ការដាក់កំណត់យោងក្នុងឯកសាររបស់អ្នកនឹងបង្កើនទំហំឯកសារ ប៉ុន្តែវានឹងអនុញ្ញាតឲអ្នកអាចចែករំលែកឯកសារជាមួយអ្នកដទៃដោយមិនចាំបាច់ប្រើហ្ស៊ូតេរ៉ូជាក្រុម។​ ហ្ស៊ូតេរ៉ូកំណែថ្មីចាប់ពី ៣.០ ឡើងទៅ​ តម្រូវឲធ្វើទំនើបកម្មឯកសារដែលបានបង្កើតសម្រាប់ជម្រើសនេះ។">
+
+<!ENTITY zotero.integration.showEditor.label "បង្ហាញកំណែតម្រូវ">
+<!ENTITY zotero.integration.classicView.label "មើលតាមទម្រង់បុរាណ">
+
+<!ENTITY zotero.integration.references.label "កំណត់យោងក្នុងគន្ថនិទេ្ទស">
+
+<!ENTITY zotero.sync.button "សូមធ្វើសមកាលកម្មទៅកាន់ម៉ាស៊ីនបម្រើហ្ស៊ូតេរ៉ូ">
+<!ENTITY zotero.sync.error "សមកាលកម្មបានជួបនឹងកំហុសឆ្គង">
+<!ENTITY zotero.sync.storage.progress "កំពុងដំណើរការ:">
+<!ENTITY zotero.sync.storage.downloads "ទាញរក្សាទុក:">
+<!ENTITY zotero.sync.storage.uploads "ផ្ទុកឡើង:">
+
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "ស្លាកនៅក្នុងបណ្ណាល័យហ្ស៊ូតេរ៉ូរបស់អ្នកវែងពេកដែលពិបាកនឹងធ្វើសមកាលកម្មទៅនឹងម៉ាស៊ីនបម្រើ:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "ស្លាកដែលអាចធ្វើសមកាលកម្មបានត្រូវតែតិចជា២៥៦ តួអក្សរ។">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "អ្នកអាចបំបែកស្លាកឲទៅជាចំណែកតូចៗ ឬ កែតម្រូវឲខ្លី ឬ ក៏លុបចេញ។">
+<!ENTITY zotero.sync.longTagFixer.split "បំបែក">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "បំបែកនៅត្រង់">
+<!ENTITY zotero.sync.longTagFixer.character "តួអក្សរ">
+<!ENTITY zotero.sync.longTagFixer.characters "តួអក្សរ">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "ស្លាកដែលគ្មានការពិនិត្យនឹងមិនត្រូវបានទាញមករក្សាទុកទេ។">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "ស្លាកនឹងត្រូវលុបចេញពីគ្រប់ឯកសារទាំងអស់។">
+
+<!ENTITY zotero.proxy.recognized.title "សិទិ្ធប្រទានបានស្គាល់">
+<!ENTITY zotero.proxy.recognized.warning "គ្រាន់តែបន្ថែមសិទិ្ធប្រទានដែលបានភ្ជាប់ពីគេហទំព័រនៃបណ្ណាល័យ សាលារៀន ឬក៏សាជីវកម្មរបស់អ្នក">
+<!ENTITY zotero.proxy.recognized.warning.secondary "ការបន្ថែមសិទិ្ធប្រទានដទៃទៀតអាចធ្វើឲគេហទំព័រដែលមានវីរុសអាចបន្លំជាគេហទំព័រដែលអ្នកទុកចិត្តបាន។">
+<!ENTITY zotero.proxy.recognized.disable.label "កុំប្តូរទិសសំណើដោយស្វ័យប្រវត្តិតាមរយៈសិទិ្ធប្រទានដែលបានស្គាល់ពីមុន">
+<!ENTITY zotero.proxy.recognized.ignore.label "មិនអើពើ">
+
+<!ENTITY zotero.recognizePDF.recognizing.label "ស្តារទិន្នន័យមេតា...">
+<!ENTITY zotero.recognizePDF.cancel.label "បដិសេធ">
+<!ENTITY zotero.recognizePDF.pdfName.label "ឈ្មោះភីឌីអែហ្វ">
+<!ENTITY zotero.recognizePDF.itemName.label "ឈ្មោះឯកសារ">
+<!ENTITY zotero.recognizePDF.captcha.label "វាយអត្ថបទខាងក្រោម ដើម្បីបន្តស្តារទិន្នន័យមេតា">
+
+<!ENTITY zotero.rtfScan.title "វិភាគអ៊ែរធីអែហ្វ">
+<!ENTITY zotero.rtfScan.cancel.label "បដិសេធ">
+<!ENTITY zotero.rtfScan.citation.label "អាគតដ្ឋាន">
+<!ENTITY zotero.rtfScan.itemName.label "ឈ្មោះឯកសារ">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "អាគតដ្ឋានមិនបានផ្គូរផ្គង">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "អាគតដ្ឋានស្រពិចស្រពិល">
+<!ENTITY zotero.rtfScan.mappedCitations.label "អាគតដ្ឋានផ្គូរផ្គង">
+<!ENTITY zotero.rtfScan.introPage.label "សេចក្តីផ្តើម">
+<!ENTITY zotero.rtfScan.introPage.description "ហ្ស៊ូតេរ៉ូអាចដកស្រង់ និង​កំណត់ទ្រង់ទ្រាយអាគតដ្ឋានឡើងវិញដោយ​ស្វ័យប្រវត្តិ ហើយ ដាក់គន្ថនិទេ្ទសចូលទៅក្នុងឯកសារអ៊ែរធីអែហ្វ។ បច្ចុប្បន្ន លក្ខណៈពិសេសវិភាគអ៊ែរធីអែហ្វគាំទ្រអាគតដ្ឋាន​ទៅតាម​ទម្រង់ផ្សេងៗដូចខាងក្រោម:">
+<!ENTITY zotero.rtfScan.introPage.description2 "ដើម្បីចាប់ផ្តើម ត្រូវជ្រើសរើសឯកសារព័ត៌មានបញ្ចូលក្នុងអ៊ែរធីអែហ្វ និង ឯកសារទិន្នផលដូចខាងក្រោម:">
+<!ENTITY zotero.rtfScan.scanPage.label "កំពុងវិភាគរកអាគតដ្ឋាន">
+<!ENTITY zotero.rtfScan.scanPage.description "សូមរង់ចាំ ខណៈពេលហ្ស៊ូតេរ៉ូកំពុងវិភាគរកអាគតដ្ឋានក្នុងឯកសាររបស់​អ្នក។ ">
+<!ENTITY zotero.rtfScan.citationsPage.label "សូមបញ្ជាក់ឯកសារដែលត្រូវបានដាក់អាគតដ្ឋាន">
+<!ENTITY zotero.rtfScan.citationsPage.description "សូមធ្វើការពិនិត្យបញ្ជីអាគតដ្ឋានដែលបានទទួលស្គាល់ដូចខាងក្រោម ដើម្បីធ្វើឲប្រាកដថា ហ្ស៊ូតេរ៉ូបានជ្រើសរើសអាគតដ្ឋានត្រឹមត្រូវ។ អាគតដ្ឋានមិនបានផ្គូរផ្គង​ ឬ ស្រពិចស្រពិលត្រូវធ្វើការដោះស្រាយ​ជាមុន មុនពេលបន្តទៅជំហានបន្ទាប់។">
+<!ENTITY zotero.rtfScan.stylePage.label "ឯកសារកំពុងត្រូវបានធ្វើទ្រង់ទ្រាយ">
+<!ENTITY zotero.rtfScan.formatPage.label "កំពុងធ្វើទ្រង់ទ្រាយអាគតដ្ឋាន">
+<!ENTITY zotero.rtfScan.formatPage.description "សូមរង់ចាំ ខណៈពេលហ្ស៊ូតេរ៉ូកំពុងដំណើរការ និង ធ្វើទ្រង់ទ្រាយ​ឯកសារអ៊ែរធីអែហ្វរបស់អ្នក។">
+<!ENTITY zotero.rtfScan.completePage.label "វិភាគអ៊ែរធីអែហ្វបានបញ្ចប់">
+<!ENTITY zotero.rtfScan.completePage.description "ឥលូវឯកសាររបស់អ្នកត្រូវបានវិភាគ និង បញ្ចប់រួចហើយ។ សូមធ្វើឲប្រាកដ​ថា ឯកសាររបស់អ្នកត្រូវបានធ្វើទ្រង់ទ្រាយដោយត្រឹមត្រូវ។">
+<!ENTITY zotero.rtfScan.inputFile.label "ឯកសារព័ត៌មាន">
+<!ENTITY zotero.rtfScan.outputFile.label "ឯកសារទិន្នផល">
+
+<!ENTITY zotero.file.choose.label "ជម្រើសឯកសារ...">
+<!ENTITY zotero.file.noneSelected.label "សូមធ្វើការជ្រើសរើសឯកសារណាមួយដែលអ្នកចង់បាន">
+
+<!ENTITY zotero.downloadManager.label "ទាញរក្សាទុកក្នុងហ្ស៊ូតេរ៉ូ">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "កម្ជាប់មិនអាចទាញមករក្សាទុកនៅក្នុងបណ្ណល័យដែលកំពុងជ្រើសរើសនោះទេ។ ឯកសារនេះនឹងត្រូវទាញមករក្សាទុកនៅក្នុងបណ្ណល័យរបស់អ្នក។">
+<!ENTITY zotero.downloadManager.noPDFTools.description "ដើម្បីប្រើលក្ខណៈពិសេស​នេះ ដំបូងអ្នកត្រូវដំឡើងឧបករណ៏ភីឌីអែហ្វនៅ​ក្នុង​​ជម្រើសអាទិភាពហ្ស៊ូតេរ៉ូជាមុនសិន។">
