@@ -98,6 +98,8 @@ var ZoteroItemPane = new function() {
 			var notes = Zotero.Items.get(item.getNotes());
 			if (notes.length) {
 				for(var i = 0; i < notes.length; i++) {
+					let id = notes[i].id;
+					
 					var icon = document.createElement('image');
 					icon.setAttribute('src','chrome://zotero/skin/treeitem-note.png');
 					
@@ -109,8 +111,8 @@ var ZoteroItemPane = new function() {
 					label.setAttribute('crop','end');
 					
 					var box = document.createElement('box');
-					box.setAttribute('onclick',"ZoteroPane_Local.selectItem(" + notes[i].id + ");");
 					box.setAttribute('class','zotero-clicky');
+					box.addEventListener('click', function () { ZoteroPane_Local.selectItem(id); });
 					box.appendChild(icon);
 					box.appendChild(label);
 					
@@ -118,7 +120,7 @@ var ZoteroItemPane = new function() {
 						var removeButton = document.createElement('label');
 						removeButton.setAttribute("value","-");
 						removeButton.setAttribute("class","zotero-clicky zotero-clicky-minus");
-						removeButton.setAttribute("onclick","ZoteroItemPane.removeNote(" + notes[i].id + ")");
+						removeButton.addEventListener('click', function () { ZoteroItemPane.removeNote(id); });
 					}
 					
 					var row = document.createElement('row');
