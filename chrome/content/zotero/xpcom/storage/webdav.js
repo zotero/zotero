@@ -1007,7 +1007,7 @@ Zotero.Sync.Storage.Module.WebDAV = (function () {
 							
 							callback(ts);
 						}
-						catch {
+						catch(e) {
 							Zotero.debug(e, 1);
 							Components.utils.reportError(e);
 							Zotero.Sync.Storage.EventManager.error(_defaultError);
