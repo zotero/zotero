@@ -1305,8 +1305,7 @@ Zotero.Integration.Fields.prototype.updateSession = function(callback, errorCall
 				try {
 					me._session.loadBibliographyData(me._bibliographyData);
 				} catch(e) {
-					if(errorCallback) {
-						errorCallback(e);
+					if(errorCallback && !errorCallback(e)) {
 					} else if(e instanceof Zotero.Integration.CorruptFieldException) {
 						var msg = Zotero.getString("integration.corruptBibliography")+'\n\n'+
 								  Zotero.getString('integration.corruptBibliography.description');
@@ -1367,8 +1366,7 @@ Zotero.Integration.Fields.prototype._processFields = function(fields, callback, 
 			try {
 				this._session.addCitation(i, noteIndex, content);
 			} catch(e) {
-				if(errorCallback) {
-					errorCallback(e);
+				if(errorCallback && !errorCallback(e)) {
 				} else if(e instanceof Zotero.Integration.MissingItemException) {
 					// First, check if we've already decided to remove field codes from these
 					var reselect = true;
@@ -1741,7 +1739,18 @@ Zotero.Integration.CitationEditInterface.prototype = {
 			}, function(e) {
 				if(e instanceof Zotero.Integration.MissingItemException
 						|| e instanceof Zotero.Integration.CorruptFieldException) {
-					me._errorOccurred = true;
+					if(me._haveAccepted) {
+						// If accept button has been pressed, go ahead and show errors
+						return true;
+					} else {
+						// If not, suppress errors and we will show them later
+						me._errorOccurred = true;
+						return false;
+					}
+				} else {
+					// If not a MissingItemException or CorruptFieldException, go ahead and show
+					// the error now. This shouldn't happen!
+					return true;
 				}
 			});
 		}
