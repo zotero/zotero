@@ -78,6 +78,7 @@
 		<vbox flex="1">
 			<description id="citation-properties-title"/>
 			<hbox id="citation-properties-info"/>
+			<label id="citation-properties-library-link" onmouseover="event.target.style.cursor='pointer'" onmouseout="event.target.style.cursor='default'"/>
 		</vbox>
 		<grid flex="1">
 			<columns>
