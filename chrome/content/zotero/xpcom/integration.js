@@ -1437,12 +1437,17 @@ Zotero.Integration.Fields.prototype._processFields = function(fields, callback, 
 Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, forceBibliography,
 		ignoreCitationChanges, callback) {
 	// update citations
-	this._session.updateUpdateIndices(forceCitations);
-	var me = this;
-	var deleteCitations = Zotero.pumpGenerator(this._session.updateCitations(function(deleteCitations) {
-		Zotero.pumpGenerator(me._updateDocument(forceCitations, forceBibliography,
-			ignoreCitationChanges, deleteCitations, callback));
-	}));
+	try {
+		this._session.updateUpdateIndices(forceCitations);
+		var me = this;
+		var deleteCitations = Zotero.pumpGenerator(this._session.updateCitations(function(deleteCitations) {
+			Zotero.pumpGenerator(me._updateDocument(forceCitations, forceBibliography,
+				ignoreCitationChanges, deleteCitations, callback));
+		}));
+	} catch(e) {
+		Zotero.logError(e);
+		Zotero.Integration.handleError(e, this._doc);
+	}
 }
 
 /**
@@ -1786,7 +1791,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 				me._fields.updateSession(function() {
 					me._errorOccurred = false;
 					me.accept(progressCallback, true);
-				})
+				});
 			}, 0);
 			return;
 		}
