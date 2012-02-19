@@ -36,7 +36,7 @@ var Zotero_QuickFormat = new function () {
 		keepSorted,  showEditor, referencePanel, referenceBox, referenceHeight = 0,
 		separatorHeight = 0, currentLocator, currentLocatorLabel, currentSearchTime, dragging,
 		panel, panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator,
-		panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false;
+		panelLibraryLink, panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false;
 	
 	// A variable that contains the timeout object for the latest onKeyPress event
 	var eventTimeout = null;
@@ -912,12 +912,12 @@ var Zotero_QuickFormat = new function () {
 		while(panelInfo.hasChildNodes()) panelInfo.removeChild(panelInfo.firstChild);
 		_buildItemDescription(item, panelInfo);
 		
-		var libraryName = item.libraryID ? Zotero.Libraries.getName(item.libraryID)
-						: Zotero.getString('pane.collections.library');
-		var libraryLink = document.getElementById("citation-properties-library-link");
-		//TODO: Localize "Open in "
-		libraryLink.textContent ="Open in "+libraryName;
-		libraryLink.onclick=function() {window.open('zotero://select/item/'+(item.libraryID ? item.libraryID : 0)+'_'+item.key)};
+		panelLibraryLink.hidden = !item.id;
+		if(item.id) {
+			var libraryName = item.libraryID ? Zotero.Libraries.getName(item.libraryID)
+							: Zotero.getString('pane.collections.library');
+			panelLibraryLink.textContent = Zotero.getString("integration.openInLibrary", libraryName);
+		}
 
 		target.setAttribute("selected", "true");
 		panel.openPopup(target, "after_start",
@@ -1188,6 +1188,23 @@ var Zotero_QuickFormat = new function () {
 			window.close();
 		}, true);
 		accepted = true;
+	}
+	
+	/**
+	 * Show an item in the library it came from
+	 */
+	this.showInLibrary = function() {
+		var id = panelRefersToBubble.citationItem.id;
+		var pane = Zotero.getActiveZoteroPane();
+		if(pane) {
+			pane.show();
+			pane.selectItem(id);
+		} else {
+			var win = window.open('zotero://select/item/'+id);
+		}
+		
+		// Pull window to foreground
+		Zotero.Integration.activate(pane.document.defaultView);
 	}
 	
 	/**

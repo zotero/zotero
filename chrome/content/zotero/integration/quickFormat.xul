@@ -78,7 +78,6 @@
 		<vbox flex="1">
 			<description id="citation-properties-title"/>
 			<hbox id="citation-properties-info"/>
-			<label id="citation-properties-library-link" onmouseover="event.target.style.cursor='pointer'" onmouseout="event.target.style.cursor='default'"/>
 		</vbox>
 		<grid flex="1">
 			<columns>
@@ -113,6 +112,9 @@
 				</html:div>
 			</rows>
 		</grid>
+		<vbox flex="1" align="center">
+			<button id="citation-properties-library-link" onclick="Zotero_QuickFormat.showInLibrary()"/>
+		</vbox>
 	</panel>
 	<zoteroguidancepanel id="quick-format-guidance" about="quickFormat"
 			for="zotero-icon" x="26"/>

@@ -286,6 +286,7 @@ Zotero.Integration = new function() {
 			
 			if(win) {
 				Components.utils.import("resource://gre/modules/ctypes.jsm");
+				win.focus();
 				
 				if(!_carbon) {
 					_carbon = ctypes.open("/System/Library/Frameworks/Carbon.framework/Carbon");

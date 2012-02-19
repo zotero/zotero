@@ -232,3 +232,7 @@ richlistitem[selected="true"] {
 #citation-properties-info {
 	margin-bottom: 3px;
 }
+
+panel button .button-text {
+	margin: 0 !important;
+}
