@@ -318,7 +318,12 @@ Zotero_TranslatorTester.prototype._checkResult = function(test, translate, retur
 			var translatedItem = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
 			
 			if(!this._compare(testItem, translatedItem)) {
-				test.itemReturned = Zotero_TranslatorTester._sanitizeItem(test.items[i], true);
+				var m = translate.newItems.length;
+				test.itemsReturned = new Array(m);
+				for(var j=0; j<m; j++) {
+					test.itemsReturned[j] = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i], true);
+				}
+				
 				testDoneCallback(this, test, "unknown", "Item "+i+" does not match");
 				return;
 			}
