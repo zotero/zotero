@@ -324,13 +324,7 @@ function init() {
 				var type = translatorType;
 				return function(e) {
 					e.preventDefault();
-					for(var i in translatorTestViewsToRun[type]) {
-						var testView = translatorTestViewsToRun[type][i];
-						testView.updateStatus(testView._translatorTester, "pending");
-					}
-					for(var i=0; i<NUM_CONCURRENT_TESTS; i++) {
-						runTranslatorTests(type);
-					}
+					runTranslatorTests(type);
 				}
 			}, false);
 			h1.appendChild(runAll);
@@ -396,7 +390,7 @@ function init() {
 		var serialize = document.createElement("a");
 		serialize.href = "#";
 		serialize.appendChild(document.createTextNode("Serialize Results"));
-		serialize.addEventListener("click", serializeAll, false);
+		serialize.addEventListener("click", serializeToDownload, false);
 		lastP.appendChild(serialize);
 		translatorBox.appendChild(lastP);
 	}
@@ -434,22 +428,35 @@ function haveTranslators(translators, type) {
 }
 
 /**
- * Runs translator tests recursively, after translatorTestViews has been populated
+ * Begin running all translator tests of a given type
  */
-function runTranslatorTests(type, callback, runCallbackIfComplete) {
+function runTranslatorTests(type, callback) {
+	for(var i in translatorTestViewsToRun[type]) {
+		var testView = translatorTestViewsToRun[type][i];
+		testView.updateStatus(testView._translatorTester, "pending");
+	}
+	for(var i=0; i<NUM_CONCURRENT_TESTS; i++) {
+		initTests(type, callback);
+	}
+}
+
+/**
+ * Run translator tests recursively, after translatorTestViews has been populated
+ */
+function initTests(type, callback, runCallbackIfComplete) {
 	if(translatorTestViewsToRun[type].length) {
 		if(translatorTestViewsToRun[type].length === 1) runCallbackIfComplete = true;
 		var translatorTestView = translatorTestViewsToRun[type].shift();
-		translatorTestView.runTests(function() { runTranslatorTests(type, callback, runCallbackIfComplete) });
+		translatorTestView.runTests(function() { initTests(type, callback, runCallbackIfComplete) });
 	} else if(callback && runCallbackIfComplete) {
 		callback();
 	}
 }
 
 /**
- * Serializes all run translator tests
+ * Serializes translator tests to JSON
  */
-function serializeAll(e) {
+function serializeToJSON() {
 	var serializedData = {"browser":Zotero.browser, "results":[]};
 	for(var i in translatorTestViews) {
 		var n = translatorTestViews[i].length;
@@ -457,7 +464,14 @@ function serializeAll(e) {
 			serializedData.results.push(translatorTestViews[i][j].serialize());
 		}
 	}
-	
+	return serializedData;
+}
+
+/**
+ * Serializes all run translator tests
+ */
+function serializeToDownload(e) {
+	var serializedData = serializeToJSON();
 	document.location.href = "data:application/octet-stream,"+encodeURIComponent(JSON.stringify(serializedData, null, "\t"));
 	e.preventDefault();
 }
