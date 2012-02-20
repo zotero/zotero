@@ -153,6 +153,7 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
 		
 		me._debug(this, "TranslatorTester: "+me.translator.label+" Test "+testNumber+": "+status+" ("+message+")");
 		me[status].push(test);
+		test.message = message;
 		if(testDoneCallback) testDoneCallback(me, test, status, message);
 		me.runTests(testDoneCallback, true);
 	};
@@ -217,8 +218,12 @@ Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
 		me._runTestTranslate(translate, translators, test, testDoneCallback);
 	});
 	translate.setHandler("debug", this._debug);
+	var errorReturned;
+	translate.setHandler("error", function(obj, err) {
+		errorReturned = err;
+	});
 	translate.setHandler("done", function(obj, returnValue) {
-		me._checkResult(test, obj, returnValue, testDoneCallback);
+		me._checkResult(test, obj, returnValue, errorReturned, testDoneCallback);
 	});
 	translate.setHandler("select", function(obj, items, callback) {
 		if(test.items !== "multiple" && test.items.length <= 1) {
@@ -275,9 +280,23 @@ Zotero_TranslatorTester.prototype._runTestTranslate = function(translate, transl
  * @param {Object} test Test that was executed
  * @param {Zotero.Translate} translate The Zotero.Translate instance
  * @param {Boolean} returnValue Whether translation completed successfully
+ * @param {Error} error Error code, if one was specified
  * @param {Function} testDoneCallback A callback to be executed when test is complete
  */
-Zotero_TranslatorTester.prototype._checkResult = function(test, translate, returnValue, testDoneCallback) {
+Zotero_TranslatorTester.prototype._checkResult = function(test, translate, returnValue, error, testDoneCallback) {
+	if(error) {
+		var errorString = "Translation failed: "+error.toString();
+		if(typeof error === "object") {
+			for(var i in error) {
+				if(typeof(error[i]) != "object") {
+					errorString += "\n"+i+' => '+error[i];
+				}
+			}
+		}
+		testDoneCallback(this, test, "failed", errorString);
+		return;
+	}
+	
 	if(!returnValue) {
 		testDoneCallback(this, test, "failed", "Translation failed; examine debug output for errors");
 		return;
@@ -299,6 +318,7 @@ Zotero_TranslatorTester.prototype._checkResult = function(test, translate, retur
 			var translatedItem = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
 			
 			if(!this._compare(testItem, translatedItem)) {
+				test.translatedItem = testItem;
 				testDoneCallback(this, test, "unknown", "Item "+i+" does not match");
 				return;
 			}

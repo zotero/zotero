@@ -170,10 +170,10 @@ TranslatorTestView.prototype.serialize = function(serializedData) {
 		"output":this._outputView.getOutput(),
 		"label":this._label.textContent,
 		"isSupported":this.isSupported,
-		"pending":parseInt(this._pending.textContent),
-		"failed":parseInt(this._failed.textContent),
-		"succeeded":parseInt(this._succeeded.textContent),
-		"unknown":parseInt(this._unknown.textContent)
+		"pending":this._translatorTester.pending,
+		"failed":this._translatorTester.failed,
+		"succeeded":this._translatorTester.succeeded,
+		"unknown":this._translatorTester.unknown
 	};
 }
 
