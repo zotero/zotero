@@ -376,9 +376,9 @@ function init() {
 
 			if(req.responseText) {	// success; unserialize
 				var data = JSON.parse(req.responseText);
-				for(var i=0, n=data.length; i<n; i++) {
+				for(var i=0, n=data.results.length; i<n; i++) {
 					var translatorTestView = new TranslatorTestView();
-					translatorTestView.unserialize(data[i]);
+					translatorTestView.unserialize(data.results[i]);
 				}
 			} else {
 				jsonNotFound("XMLHttpRequest returned "+req.status);
@@ -450,11 +450,11 @@ function runTranslatorTests(type, callback, runCallbackIfComplete) {
  * Serializes all run translator tests
  */
 function serializeAll(e) {
-	var serializedData = [];
+	var serializedData = {"browser":Zotero.browser, "results":[]};
 	for(var i in translatorTestViews) {
 		var n = translatorTestViews[i].length;
 		for(var j=0; j<n; j++) {
-			serializedData.push(translatorTestViews[i][j].serialize());
+			serializedData.results.push(translatorTestViews[i][j].serialize());
 		}
 	}
 	
