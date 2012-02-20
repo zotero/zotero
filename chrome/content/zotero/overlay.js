@@ -156,10 +156,10 @@ var ZoteroOverlay = new function()
 				// save current state
 				_stateBeforeReload = !zoteroPane.hidden && !zoteroPane.collapsed;
 				// ensure pane is closed
-				if(!zoteroPane.collapsed) ZoteroOverlay.toggleDisplay(false);
+				if(!zoteroPane.collapsed) ZoteroOverlay.toggleDisplay(false, true);
 			} else {
 				// reopen pane if it was open before
-				ZoteroOverlay.toggleDisplay(_stateBeforeReload);
+				ZoteroOverlay.toggleDisplay(_stateBeforeReload, true);
 			}
 		});
 	}
@@ -176,8 +176,12 @@ var ZoteroOverlay = new function()
 	
 	/**
 	 * Hides/displays the Zotero interface
+	 * @param {Boolean} makeVisible Whether or not Zotero interface should be visible
+	 * @param {Boolean} dontRefocus If true, don't focus content when closing Zotero pane. Used
+	 *     when closing pane because Zotero Standalone is being opened, to avoid pulling Firefox to 
+	 *     the foreground.
 	 */
-	this.toggleDisplay = function(makeVisible)
+	this.toggleDisplay = function(makeVisible, dontRefocus)
 	{	
 		if(!Zotero || !Zotero.initialized) {
 			ZoteroPane.displayStartupError();
@@ -245,6 +249,11 @@ var ZoteroOverlay = new function()
 			zoteroPane.height = 0;
 			
 			document.getElementById('content').setAttribute('collapsed', false);
+			
+			if(!dontRefocus) {
+				// Return focus to the browser content pane
+				window.content.window.focus();
+			}
 		}
 	}
 	
