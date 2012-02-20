@@ -2234,6 +2234,7 @@ Zotero.VersionHeader = {
 		if (Zotero.Prefs.get("zoteroDotOrgVersionHeader")) {
 			this.register();
 		}
+		Zotero.addShutdownListener(this.unregister);
 	},
 	
 	// Called from this.init() and Zotero.Prefs.observe()
@@ -2258,7 +2259,7 @@ Zotero.VersionHeader = {
 	unregister: function () {
 		var observerService = Components.classes["@mozilla.org/observer-service;1"]
 								.getService(Components.interfaces.nsIObserverService);
-		observerService.removeObserver(this, "http-on-modify-request");
+		observerService.removeObserver(Zotero.VersionHeader, "http-on-modify-request");
 	}
 }
 

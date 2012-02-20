@@ -39,6 +39,11 @@ Zotero.MIMETypeHandler = new function () {
 			getService(Components.interfaces.nsIObserverService).
 			addObserver(_Observer, "http-on-examine-response", false);
 		this.initializeHandlers();
+		Zotero.addShutdownListener(function() {
+			Components.classes["@mozilla.org/observer-service;1"].
+				getService(Components.interfaces.nsIObserverService).
+				removeObserver(_Observer, "http-on-examine-response", false);
+		});
 	}
 	
 	/**
