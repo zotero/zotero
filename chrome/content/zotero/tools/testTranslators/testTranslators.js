@@ -425,6 +425,10 @@ function haveTranslators(translators, type) {
 			translatorTestViewsToRun[type].push(translatorTestView);
 		}
 	}
+	
+	var ev = document.createEvent('HTMLEvents');
+	ev.initEvent('ZoteroHaveTranslators-'+type, true, true);
+	document.dispatchEvent(ev);
 }
 
 /**
