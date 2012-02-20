@@ -23,6 +23,9 @@
     ***** END LICENSE BLOCK *****
 */
 
+// Timeout for test to complete
+const TEST_RUN_TIMEOUT = 600000;
+
 var Zotero_TranslatorTester_IGNORE_FIELDS = ["complete", "accessDate", "checkFields"];
 
 /**
@@ -137,14 +140,17 @@ Zotero_TranslatorTester.prototype.runTests = function(testDoneCallback, recursiv
  * @param {Function} testDoneCallback A callback to be executed each time a test is complete
  */
 Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallback) {
-	
 	var test = this.pending.shift();
 	var testNumber = this.tests.length-this.pending.length;
 	var me = this;
 	
 	this._debug(this, "\nTranslatorTester: Running "+this.translator.label+" Test "+testNumber);
 	
+	var executedCallback = false;
 	var callback = function(obj, test, status, message) {
+		if(executedCallback) return;
+		executedCallback = true;
+		
 		me._debug(this, "TranslatorTester: "+me.translator.label+" Test "+testNumber+": "+status+" ("+message+")");
 		me[status].push(test);
 		if(testDoneCallback) testDoneCallback(me, test, status, message);
@@ -156,6 +162,10 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
 	} else {
 		this.runTest(test, null, callback);
 	}
+	
+	window.setTimeout(function() {
+		callback(me, test, "failed", "Test timed out after "+TEST_RUN_TIMEOUT+" seconds");
+	}, TEST_RUN_TIMEOUT);
 };
 
 /**

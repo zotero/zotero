@@ -25,7 +25,7 @@
 
 const NUM_CONCURRENT_TESTS = 6;
 const TRANSLATOR_TYPES = ["Web", "Import", "Export", "Search"];
-const TABLE_COLUMNS = ["Translator", "Supported", "Status", "Pending", "Succeeded", "Failed", "Unknown"];
+const TABLE_COLUMNS = ["Translator", "Supported", "Status", "Pending", "Succeeded", "Failed", "Mismatch"];
 var translatorTables = {},
 	translatorTestViews = {},
 	translatorTestViewsToRun = {},
@@ -89,7 +89,7 @@ var TranslatorTestView = function(translator, type) {
 	this._status = document.createElement("td");
 	row.appendChild(this._status);
 	
-	// Unknown
+	// Pending
 	this._pending = document.createElement("td");
 	row.appendChild(this._pending);
 	
@@ -101,7 +101,7 @@ var TranslatorTestView = function(translator, type) {
 	this._failed = document.createElement("td");
 	row.appendChild(this._failed);
 	
-	// Unknown
+	// Mismatch
 	this._unknown = document.createElement("td");
 	row.appendChild(this._unknown);
 	
@@ -212,15 +212,18 @@ TranslatorTestView.prototype.updateStatus = function(obj, status) {
 			} else {
 				this._status.textContent = "Not Run";
 			}
+		} else if((succeeded || unknown) && failed) {
+			this._status.className = "status-partial-failure";
+			this._status.textContent = "Partial Failure";
 		} else if(failed) {
 			this._status.className = "status-failed";
-			this._status.textContent = "Failed";
+			this._status.textContent = "Failure";
 		} else if(unknown) {
-			this._status.className = "status-unknown";
-			this._status.textContent = "Unknown";
+			this._status.className = "status-mismatch";
+			this._status.textContent = "Data Mismatch";
 		} else {
 			this._status.className = "status-succeeded";
-			this._status.textContent = "Succeeded";
+			this._status.textContent = "Success";
 		}
 	} else {
 		this._status.className = "status-untested";
