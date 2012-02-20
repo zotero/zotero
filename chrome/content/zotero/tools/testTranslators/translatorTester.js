@@ -163,7 +163,7 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
 		this.runTest(test, null, callback);
 	}
 	
-	window.setTimeout(function() {
+	(Zotero.setTimeout ? Zotero : window).setTimeout(function() {
 		callback(me, test, "failed", "Test timed out after "+TEST_RUN_TIMEOUT+" seconds");
 	}, TEST_RUN_TIMEOUT);
 };
