@@ -363,7 +363,25 @@ function init() {
 	if(viewerMode) {
 		// if no Zotero object, try to unserialize data
 		var req = new XMLHttpRequest();
-		req.open("GET", "testResults.json", true);
+		var loc = "testResults.json";
+		if(window.location.hash) {
+			var hashVars = {};
+			var hashVarsSplit = window.location.hash.substr(1).split("&");
+			for(var i=0; i<hashVarsSplit.length; i++) {
+				var myVar = hashVarsSplit[i];
+				var index = myVar.indexOf("=");
+				hashVars[myVar.substr(0, index)] = myVar.substr(index+1);
+			}
+			
+			if(hashVars["browser"] && /^[a-z]$/.test(hashVars["browser"])
+					&& hashVars["version"] && /^[0-9a-zA-Z\-._]/.test(hashVars["version"])) {
+				loc = "testResults-"+hashVars["browser"]+"-"+hashVars["version"]+".json";
+			}
+			if(hashVars["date"] && /^[0-9\-]+$/.test(hashVars["date"])) {
+				loc = hashVars["date"]+"/"+loc;
+			}
+		}
+		req.open("GET", loc, true);
 		req.overrideMimeType("text/plain");
 		req.onreadystatechange = function(e) {
 			if(req.readyState != 4) return;
