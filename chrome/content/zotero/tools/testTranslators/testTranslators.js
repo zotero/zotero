@@ -386,7 +386,7 @@ function init() {
 		req.onreadystatechange = function(e) {
 			if(req.readyState != 4) return;
 
-			if(req.responseText) {	// success; unserialize
+			if(req.status === 200 && req.responseText) {	// success; unserialize
 				var data = JSON.parse(req.responseText);
 				for(var i=0, n=data.results.length; i<n; i++) {
 					var translatorTestView = new TranslatorTestView();
