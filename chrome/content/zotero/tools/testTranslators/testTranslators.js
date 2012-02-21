@@ -129,6 +129,7 @@ var TranslatorTestView = function(translator, type) {
  * Initializes TranslatorTestView given a translator and its type
  */
 TranslatorTestView.prototype.initWithTranslatorAndType = function(translator, type) {
+	this._translatorID = translator.translatorID;
 	this._label.appendChild(document.createTextNode(translator.label));
 	
 	this.isSupported = translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER;
@@ -166,6 +167,7 @@ TranslatorTestView.prototype.unserialize = function(serializedData) {
  */
 TranslatorTestView.prototype.serialize = function(serializedData) {
 	return {
+		"translatorID":this._translatorID,
 		"type":this._type,
 		"output":this._outputView.getOutput(),
 		"label":this._label.textContent,
