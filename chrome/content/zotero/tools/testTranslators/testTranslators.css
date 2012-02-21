@@ -18,8 +18,8 @@ td, th {
 }
 
 .th-translator {
-	width: 500px;
-	max-width: 500px;
+	width: 250px;
+	max-width: 250px;
 }
 
 .th-status {
@@ -28,6 +28,11 @@ td, th {
 
 .th-pending, .th-supported, .th-succeeded, .th-failed, .th-mismatch {
 	width: 75px;
+}
+
+.th-issues {
+	width: 250px;
+	max-width: 500px;
 }
 
 .status-succeeded, .supported-yes {
