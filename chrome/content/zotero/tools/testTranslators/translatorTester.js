@@ -85,21 +85,24 @@ Zotero_TranslatorTester._sanitizeItem = function(item, forSave) {
 	if(item.attachments && item.attachments.length) {
 		// don't actually test URI equality
 		for (var i=0; i<item.attachments.length; i++) {
-			if(item.attachments[i].document) {
-				item.attachments[i].document = false;
-			} else if(item.attachments[i].url) {
-				item.attachments[i].url = false;
+			var attachment = item.attachments[i];
+			if(attachment.document) {
+				delete attachment.document;
+			}
+			
+			if(attachment.url) {
+				delete attachment.url;
+			}
+			
+			if(attachment.complete) {
+				delete attachment.complete;
 			}
 		}
 	}
 	
 	// remove fields to be ignored
 	for(var j=0, n=Zotero_TranslatorTester_IGNORE_FIELDS.length; j<n; j++) {
-		if(forSave) {
-			delete item[Zotero_TranslatorTester_IGNORE_FIELDS[j]]
-		} else {
-			item[Zotero_TranslatorTester_IGNORE_FIELDS[j]] = false;
-		}
+		delete item[Zotero_TranslatorTester_IGNORE_FIELDS[j]];
 	}
 	
 	return item;
@@ -444,16 +447,9 @@ Zotero_TranslatorTester.prototype._objectCompare = function(x, y) {
 		if(y[p] || y[p] === 0) {
 			switch(typeof(y[p])) {
 				case 'object':
-					if (!this._objectCompare(y[p],x[p])) { 
+					if (!this._objectCompare(x[p],y[p])) { 
 						return false;
 					};
-					break;
-				case 'function':
-					if (typeof(x[p])=='undefined' 
-						|| (y[p].toString() != x[p].toString())) {
-						this._debug(this, "TranslatorTester: Function "+p+" defined in y, not in x, or definitions differ");
-						return false;
-					}
 					break;
 				default:
 					if (y[p] != x[p] && x[p] !== false) {	// special exemption: x (test item)
