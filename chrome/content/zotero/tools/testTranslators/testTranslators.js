@@ -25,7 +25,7 @@
 
 const NUM_CONCURRENT_TESTS = 6;
 const TRANSLATOR_TYPES = ["Web", "Import", "Export", "Search"];
-const TABLE_COLUMNS = ["Translator", "Supported", "Status", "Pending", "Succeeded", "Failed", "Mismatch"];
+const TABLE_COLUMNS = ["Translator", "Supported", "Status", "Pending", "Succeeded", "Failed", "Mismatch", "Issues"];
 var translatorTables = {},
 	translatorTestViews = {},
 	translatorTestViewsToRun = {},
@@ -34,6 +34,53 @@ var translatorTables = {},
 	allOutputView,
 	currentOutputView,
 	viewerMode = true;
+
+/**
+ * Fetches issue information from GitHub
+ */
+var Issues = new function() {
+	var _executeWhenRetrieved = [];
+	var githubInfo;
+	
+	/**
+	 * Gets issues for a specific translator
+	 * @param {String} translatorLabel Gets issues starting with translatorLabel
+	 * @param {Function} callback Function to call when issue information is available
+	 */
+	this.getFor = function(translatorLabel, callback) {
+		translatorLabel = translatorLabel.toLowerCase();
+		
+		var whenRetrieved = function() {
+			var issues = [];
+			for(var i=0; i<githubInfo.length; i++) {
+				var issue = githubInfo[i];
+				if(issue.title.substr(0, translatorLabel.length).toLowerCase() === translatorLabel) {
+					issues.push(issue);
+				}
+			}
+			callback(issues);
+		};
+		
+		if(githubInfo) {
+			whenRetrieved();
+		} else {
+			_executeWhenRetrieved.push(whenRetrieved);
+		}
+	};
+	
+	var req = new XMLHttpRequest();
+	req.open("GET", "https://api.github.com/repos/zotero/translators/issues", true);
+	req.onreadystatechange = function(e) {
+		if(req.readyState != 4) return;
+		
+		githubInfo = JSON.parse(req.responseText);
+		for(var i=0; i<_executeWhenRetrieved.length; i++) {
+			_executeWhenRetrieved[i]();
+		}
+		_executeWhenRetrieved = [];
+	};
+	req.send();
+}
 
 /**
  * Handles adding debug output to the output box
@@ -105,6 +152,10 @@ var TranslatorTestView = function(translator, type) {
 	this._unknown = document.createElement("td");
 	row.appendChild(this._unknown);
 	
+	// Issues
+	this._issues = document.createElement("td");
+	row.appendChild(this._issues);
+	
 	// create output view and debug function
 	var outputView = this._outputView = new OutputView(row);
 	this._debug = function(obj, msg, level) {
@@ -126,11 +177,31 @@ var TranslatorTestView = function(translator, type) {
 }
 
 /**
+ * Sets the label and retrieves corresponding GitHub issues
+ */
+TranslatorTestView.prototype.setLabel = function(label) {
+	this._label.appendChild(document.createTextNode(label));
+	var issuesNode = this._issues;
+	Issues.getFor(label, function(issues) {
+		for(var i=0; i<issues.length; i++) {
+			var issue = issues[i];
+			var div = document.createElement("div"),
+				a = document.createElement("a");
+			a.textContent = issue.title+" (#"+issue.number+")";
+			a.setAttribute("href", issue.html_url);
+			a.setAttribute("target", "_blank");
+			div.appendChild(a);
+			issuesNode.appendChild(div);
+		}
+	});
+}
+
+/**
  * Initializes TranslatorTestView given a translator and its type
  */
 TranslatorTestView.prototype.initWithTranslatorAndType = function(translator, type) {
 	this._translatorID = translator.translatorID;
-	this._label.appendChild(document.createTextNode(translator.label));
+	this.setLabel(translator.label);
 	
 	this.isSupported = translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER;
 	this._supported.appendChild(document.createTextNode(this.isSupported ? "Yes" : "No"));
@@ -149,7 +220,7 @@ TranslatorTestView.prototype.initWithTranslatorAndType = function(translator, ty
  */
 TranslatorTestView.prototype.unserialize = function(serializedData) {
 	this._outputView.addOutput(serializedData.output);
-	this._label.appendChild(document.createTextNode(serializedData.label));
+	this.setLabel(serializedData.label);
 	
 	this.isSupported = serializedData.isSupported;
 	this._supported.appendChild(document.createTextNode(this.isSupported ? "Yes" : "No"));
@@ -415,7 +486,6 @@ function init() {
 		translatorBox.appendChild(lastP);
 	}
 }
-
 
 /**
  * Indicates no JSON file could be found.
