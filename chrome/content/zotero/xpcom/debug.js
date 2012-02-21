@@ -62,7 +62,8 @@ Zotero.Debug = new function () {
 					break;
 			}
 		}
-		else if (typeof message != 'string') {
+		
+		if (typeof message != 'string') {
 			message = Zotero.Utilities.varDump(message);
 		}
 		
