@@ -588,7 +588,9 @@ function populateQuickCopyList() {
 	menulist.setAttribute('preference', "pref-quickCopy-setting");
 	updateQuickCopyHTMLCheckbox();
 	
-	refreshQuickCopySiteList();
+	if (!Zotero.isStandalone) {
+		refreshQuickCopySiteList();
+	}
 }
 
 

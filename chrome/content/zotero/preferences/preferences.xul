@@ -503,7 +503,7 @@ To add a new preference:
 			<preference id="pref-quickCopy-dragLimit" name="extensions.zotero.export.quickCopy.dragLimit" type="int"/>
 		</preferences>
 		
-		<groupbox>
+		<groupbox id="zotero-prefpane-export-groupbox">
 			<caption label="&zotero.preferences.quickCopy.caption;"/>
 			
 			<label id="quickCopy-instructions"/>
@@ -513,29 +513,12 @@ To add a new preference:
 			<label value="&zotero.preferences.quickCopy.defaultOutputFormat;" control="quickCopy-menu"/>
 			<menulist id="zotero-quickCopy-menu"/>
 			
-			<separator/>
+			<separator class="thin"/>
 			
 			<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
 				oncommand="buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : '');"/>
 			
-			<separator/>
-			
-			<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings"/>
-			<tree flex="1" id="quickCopy-siteSettings" hidecolumnpicker="true" rows="6" seltype="single"
-					ondblclick="showQuickCopySiteEditor(this.currentIndex)"
-					onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { deleteSelectedQuickCopySite(); }">
-				<treecols>
-					<treecol id="quickCopy-urlColumn" label="&zotero.preferences.quickCopy.siteEditor.domainPath;" flex="1"/>
-					<treecol id="quickCopy-formatColumn" label="&zotero.preferences.quickCopy.siteEditor.outputFormat;" flex="2"/>
-					<treecol id="quickCopy-copyAsHTML" label="HTML"/>
-				</treecols>
-				<treechildren id="quickCopy-siteSettings-rows"/>
-			</tree>
-			<separator class="thin"/>
-			<hbox pack="end">
-				<button label="-" onclick="deleteSelectedQuickCopySite()"/>
-				<button label="+" onclick="showQuickCopySiteEditor()"/>
-			</hbox>
+			<vbox id="zotero-prefpane-export-siteSettings"/>
 			
 			<hbox align="center">
 				<label value="&zotero.preferences.quickCopy.dragLimit;"/>
