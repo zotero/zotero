@@ -100,6 +100,11 @@ Zotero_TranslatorTester._sanitizeItem = function(item, forSave) {
 		}
 	}
 	
+	// try to convert to JSON and back to get rid of undesirable undeletable elements; this may fail
+	try {
+		item = JSON.parse(JSON.stringify(item));
+	} catch(e) {};
+	
 	// remove fields to be ignored
 	for(var j=0, n=Zotero_TranslatorTester_IGNORE_FIELDS.length; j<n; j++) {
 		delete item[Zotero_TranslatorTester_IGNORE_FIELDS[j]];
