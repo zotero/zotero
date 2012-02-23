@@ -390,7 +390,7 @@ Zotero_TranslatorTester.prototype._createTest = function(translate, multipleMode
 	if(multipleMode) {
 		var items = "multiple";
 	} else {
-		for(var i=0, n=translate.newItems; i<n; i++) {
+		for(var i=0, n=translate.newItems.length; i<n; i++) {
 			Zotero_TranslatorTester._sanitizeItem(translate.newItems[i], true);
 		}
 		var items = translate.newItems;
