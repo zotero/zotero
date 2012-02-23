@@ -187,12 +187,19 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
  */
 Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneCallback) {
 	var me = this;
+	var runTest = function(doc) {
+		me.runTest(test, doc, function(obj, test, status, message) {
+			if(hiddenBrowser) Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+			testDoneCallback(obj, test, status, message);
+		});
+	};
 	var hiddenBrowser = Zotero.HTTP.processDocuments(test.url,
 		function(doc) {
-			me.runTest(test, doc, function(obj, test, status, message) {
-				if(hiddenBrowser) Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-				testDoneCallback(obj, test, status, message);
-			});
+			if(test.defer) {
+				Zotero.setTimeout(function() { runTest(doc) }, 10000, true);
+			} else {
+				runTest(doc);
+			}
 		},
 		null,
 		function(e) {
