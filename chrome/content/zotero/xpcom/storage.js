@@ -1230,6 +1230,7 @@ Zotero.Sync.Storage = new function () {
 				zipReader.extract(entryName, destFile);
 			}
 			catch (e) {
+				Zotero.debug(destFile.path);
 				Zotero.File.checkFileAccessError(e, destFile, 'create');
 			}
 			
