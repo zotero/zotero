@@ -4192,7 +4192,7 @@ Zotero.Item.prototype.erase = function() {
 	catch (e) {
 		// If deletion fails, try to correct a few things that have come up before
 		Zotero.debug("Item deletion failed -- trying to fix", 2);
-		Zotero.DB.query('DELETE FROM fulltextItemWords WHERE itemID=?', this.id);
+		Zotero.Fulltext.clearItemWords(this.id);
 		Zotero.DB.query('DELETE FROM itemTags WHERE itemID=?', this.id);
 		
 		// And then try again
