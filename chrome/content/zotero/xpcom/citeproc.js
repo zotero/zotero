@@ -2149,7 +2149,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.288";
+    this.processor_version = "1.0.289";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -5838,6 +5838,9 @@ CSL.NameOutput.prototype.disambigNames = function () {
 CSL.NameOutput.prototype._runDisambigNames = function (lst, pos) {
     var chk, myform, myinitials, param, i, ilen, paramx;
     for (i = 0, ilen = lst.length; i < ilen; i += 1) {
+        if (!lst[i].given || !lst[i].family) {
+            continue;
+        }
         this.state.registry.namereg.addname("" + this.Item.id, lst[i], i);
         chk = this.state.tmp.disambig_settings.givens[pos];
         if ("undefined" === typeof chk) {
@@ -6648,6 +6651,12 @@ CSL.NameOutput.prototype.fixupInstitution = function (name, varname, listpos) {
             jurisdiction = this.state.transform.loadAbbreviation(jurisdiction, "institution-part", long_form[j]);
             if (this.state.transform.abbrevs[jurisdiction]["institution-part"][long_form[j]]) {
                 short_form[j] = this.state.transform.abbrevs[jurisdiction]["institution-part"][long_form[j]];
+                if (this.Item["container-title"]) {
+                    var suppressing_partner = this.state.transform.abbrevs[jurisdiction]["container-title"][this.Item["container-title"]];
+                    if (varname === "authority" && suppressing_partner && suppressing_partner === short_form[j]) {
+                        short_form[j] = false;
+                    }
+                }
             }
         }
     }
@@ -8841,7 +8850,7 @@ CSL.Transform = function (state) {
             if (myabbrev_family) {
                 primary = abbreviate(state, Item, alternative_varname, primary, myabbrev_family, true);
                 if (suppress_monitor && primary) {
-                    suppressing_partner = abbreviate(state, Item, false, Item["container-title"], "container-title", true);
+                    var suppressing_partner = abbreviate(state, Item, false, Item["container-title"], "container-title", true);
                     if (suppressing_partner && suppressing_partner.slice(0, primary.length) === primary) {
                         return null;
                     }
