@@ -1058,66 +1058,211 @@ Zotero.Schema = new function(){
 	}
 	
 	
-	this.integrityCheck = function () {
+	this.integrityCheck = function (fix) {
 		// There should be an equivalent SELECT COUNT(*) statement for every
 		// statement run by the DB Repair Tool
 		var queries = [
-			"SELECT COUNT(*) FROM annotations WHERE itemID NOT IN (SELECT itemID FROM items)",
-			"SELECT COUNT(*) FROM collectionItems WHERE itemID NOT IN (SELECT itemID FROM items)",
-			"SELECT COUNT(*) FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items)",
-			"SELECT COUNT(*) FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM items)",
-			"SELECT COUNT(*) FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM fulltextItems)",
-			"SELECT COUNT(*) FROM highlights WHERE itemID NOT IN (SELECT itemID FROM items)",
-			"SELECT COUNT(*) FROM itemAttachments WHERE itemID NOT IN (SELECT itemID FROM items)",
-			"SELECT COUNT(*) FROM itemCreators WHERE itemID NOT IN (SELECT itemID FROM items)",
-			"SELECT COUNT(*) FROM itemData WHERE itemID NOT IN (SELECT itemID FROM items)",
-			"SELECT COUNT(*) FROM itemNotes WHERE itemID NOT IN (SELECT itemID FROM items)",
-			"SELECT COUNT(*) FROM itemSeeAlso WHERE itemID NOT IN (SELECT itemID FROM items)",
-			"SELECT COUNT(*) FROM itemSeeAlso WHERE linkedItemID NOT IN (SELECT itemID FROM items)",
-			"SELECT COUNT(*) FROM itemTags WHERE itemID NOT IN (SELECT itemID FROM items)",
-			"SELECT COUNT(*) FROM itemTags WHERE tagID NOT IN (SELECT tagID FROM tags)",
-			"SELECT COUNT(*) FROM savedSearchConditions WHERE savedSearchID NOT IN (select savedSearchID FROM savedSearches)",
-			"SELECT COUNT(*) FROM items WHERE itemTypeID IS NULL",
+			[
+				"SELECT COUNT(*) FROM annotations WHERE itemID NOT IN (SELECT itemID FROM items)",
+				"DELETE FROM annotations WHERE itemID NOT IN (SELECT itemID FROM items)"
+			],
+			[
+				"SELECT COUNT(*) FROM collectionItems WHERE itemID NOT IN (SELECT itemID FROM items)",
+				"DELETE FROM collectionItems WHERE itemID NOT IN (SELECT itemID FROM items)"
+			],
+			[
+				"SELECT COUNT(*) FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items)",
+				"DELETE FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items)"
+			],
+			[
+				"SELECT COUNT(*) FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM items)",
+				"DELETE FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM items)",
+			],
+			[
+				"SELECT COUNT(*) FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM fulltextItems)",
+				"DELETE FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM fulltextItems)",
+			],
+			[
+				"SELECT COUNT(*) FROM highlights WHERE itemID NOT IN (SELECT itemID FROM items)",
+				"DELETE FROM highlights WHERE itemID NOT IN (SELECT itemID FROM items)",
+			],
+			[
+				"SELECT COUNT(*) FROM itemAttachments WHERE itemID NOT IN (SELECT itemID FROM items)",
+				"DELETE FROM itemAttachments WHERE itemID NOT IN (SELECT itemID FROM items)",
+			],
+			[
+				"SELECT COUNT(*) FROM itemCreators WHERE itemID NOT IN (SELECT itemID FROM items)",
+				"DELETE FROM itemCreators WHERE itemID NOT IN (SELECT itemID FROM items)",
+			],
+			[
+				"SELECT COUNT(*) FROM itemData WHERE itemID NOT IN (SELECT itemID FROM items)",
+				"DELETE FROM itemData WHERE itemID NOT IN (SELECT itemID FROM items)",
+			],
+			[
+				"SELECT COUNT(*) FROM itemNotes WHERE itemID NOT IN (SELECT itemID FROM items)",
+				"DELETE FROM itemNotes WHERE itemID NOT IN (SELECT itemID FROM items)",
+			],
+			[
+				"SELECT COUNT(*) FROM itemSeeAlso WHERE itemID NOT IN (SELECT itemID FROM items)",
+				"DELETE FROM itemSeeAlso WHERE itemID NOT IN (SELECT itemID FROM items)",
+			],
+			[
+				"SELECT COUNT(*) FROM itemSeeAlso WHERE linkedItemID NOT IN (SELECT itemID FROM items)",
+				"DELETE FROM itemSeeAlso WHERE linkedItemID NOT IN (SELECT itemID FROM items)",
+			],
+			[
+				"SELECT COUNT(*) FROM itemTags WHERE itemID NOT IN (SELECT itemID FROM items)",
+				"DELETE FROM itemTags WHERE itemID NOT IN (SELECT itemID FROM items)",
+			],
+			[
+				"SELECT COUNT(*) FROM itemTags WHERE tagID NOT IN (SELECT tagID FROM tags)",
+				"DELETE FROM itemTags WHERE tagID NOT IN (SELECT tagID FROM tags)",
+			],
+			[
+				"SELECT COUNT(*) FROM savedSearchConditions WHERE savedSearchID NOT IN (select savedSearchID FROM savedSearches)",
+				"DELETE FROM savedSearchConditions WHERE savedSearchID NOT IN (select savedSearchID FROM savedSearches)",
+			],
+			[
+				"SELECT COUNT(*) FROM items WHERE itemTypeID IS NULL",
+				"DELETE FROM items WHERE itemTypeID IS NULL",
+			],
 			
-			"SELECT COUNT(*) FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)",
-			"SELECT COUNT(*) FROM fulltextItemWords WHERE wordID NOT IN (SELECT wordID FROM fulltextWords)",
-			"SELECT COUNT(*) FROM collectionItems WHERE collectionID NOT IN (SELECT collectionID FROM collections)",
-			"SELECT COUNT(*) FROM itemCreators WHERE creatorID NOT IN (SELECT creatorID FROM creators)",
-			"SELECT COUNT(*) FROM itemTags WHERE tagID NOT IN (SELECT tagID FROM tags)",
-			"SELECT COUNT(*) FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM fields)",
-			"SELECT COUNT(*) FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)",
 			
-			"SELECT COUNT(*) FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM itemTypeFields WHERE itemTypeID=(SELECT itemTypeID FROM items WHERE itemID=itemData.itemID))",
+			[
+				"SELECT COUNT(*) FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)",
+				"DELETE FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)",
+			],
+			[
+				"SELECT COUNT(*) FROM fulltextItemWords WHERE wordID NOT IN (SELECT wordID FROM fulltextWords)",
+				"DELETE FROM fulltextItemWords WHERE wordID NOT IN (SELECT wordID FROM fulltextWords)",
+			],
+			[
+				"SELECT COUNT(*) FROM collectionItems WHERE collectionID NOT IN (SELECT collectionID FROM collections)",
+				"DELETE FROM collectionItems WHERE collectionID NOT IN (SELECT collectionID FROM collections)",
+			],
+			[
+				"SELECT COUNT(*) FROM itemCreators WHERE creatorID NOT IN (SELECT creatorID FROM creators)",
+				"DELETE FROM itemCreators WHERE creatorID NOT IN (SELECT creatorID FROM creators)",
+			],
+			[
+				"SELECT COUNT(*) FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM fields)",
+				"DELETE FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM fields)",
+			],
+			[
+				"SELECT COUNT(*) FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)",
+				"DELETE FROM itemData WHERE valueID NOT IN (SELECT valueID FROM itemDataValues)",
+			],
 			
-			"SELECT COUNT(*) FROM items WHERE itemTypeID=14 AND itemID NOT IN (SELECT itemID FROM itemAttachments)",
 			
-			"SELECT COUNT(*) FROM itemAttachments WHERE sourceItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (1,14))",
-			"SELECT COUNT(*) FROM itemNotes WHERE sourceItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (1,14))",
+			// Attachments row with itemTypeID != 14
+			[
+				"SELECT COUNT(*) FROM itemAttachments JOIN items USING (itemID) WHERE itemTypeID != 14",
+				"UPDATE items SET itemTypeID=14, clientDateModified=CURRENT_TIMESTAMP WHERE itemTypeID != 14 AND itemID IN (SELECT itemID FROM itemAttachments)",
+			],
+			// Fields not in type
+			[
+				"SELECT COUNT(*) FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM itemTypeFields WHERE itemTypeID=(SELECT itemTypeID FROM items WHERE itemID=itemData.itemID))",
+				"DELETE FROM itemData WHERE fieldID NOT IN (SELECT fieldID FROM itemTypeFields WHERE itemTypeID=(SELECT itemTypeID FROM items WHERE itemID=itemData.itemID))",
+			],
+			// Missing itemAttachments row
+			[
+				"SELECT COUNT(*) FROM items WHERE itemTypeID=14 AND itemID NOT IN (SELECT itemID FROM itemAttachments)",
+				"INSERT INTO itemAttachments (itemID, linkMode) SELECT itemID, 0 FROM items WHERE itemTypeID=14 AND itemID NOT IN (SELECT itemID FROM itemAttachments)",
+			],
+			// Note/child parents
+			[
+				"SELECT COUNT(*) FROM itemAttachments WHERE sourceItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (1,14))",
+				"UPDATE itemAttachments SET sourceItemID=NULL WHERE sourceItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (1,14))",
+			],
+			[
+				"SELECT COUNT(*) FROM itemNotes WHERE sourceItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (1,14))",
+				"UPDATE itemNotes SET sourceItemID=NULL WHERE sourceItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (1,14))",
+			],
 			
-			"SELECT COUNT(*) FROM tags NATURAL JOIN itemTags JOIN items USING (itemID) WHERE IFNULL(tags.libraryID, 0)!=IFNULL(items.libraryID,0)",
+			// Wrong library tags
+			[
+				"SELECT COUNT(*) FROM tags NATURAL JOIN itemTags JOIN items USING (itemID) WHERE IFNULL(tags.libraryID, 0)!=IFNULL(items.libraryID,0)",
+				[
+					"CREATE TEMPORARY TABLE tmpWrongLibraryTags AS SELECT itemTags.ROWID AS tagRowID, tagID, name, itemID, IFNULL(tags.libraryID,0) AS tagLibraryID, IFNULL(items.libraryID,0) AS itemLibraryID FROM tags NATURAL JOIN itemTags JOIN items USING (itemID) WHERE IFNULL(tags.libraryID, 0)!=IFNULL(items.libraryID,0)",
+					"DELETE FROM itemTags WHERE ROWID IN (SELECT tagRowID FROM tmpWrongLibraryTags)",
+					"DROP TABLE tmpWrongLibraryTags"
+				]
+			],
+			[
+				"SELECT COUNT(*) FROM itemTags WHERE tagID IS NULL",
+				"DELETE FROM itemTags WHERE tagID IS NULL",
+			],
+			[
+				"SELECT COUNT(*) FROM itemAttachments WHERE charsetID='NULL'",
+				"UPDATE itemAttachments SET charsetID=NULL WHERE charsetID='NULL'",
+			],
 			
-			"SELECT COUNT(*) FROM itemTags WHERE tagID IS NULL",
-			"SELECT COUNT(*) FROM itemAttachments WHERE charsetID='NULL'",
-			
+			// Reported by one user
+			// http://forums.zotero.org/discussion/19347/continual-synching-error-message/
 			// TODO: check 'libraries', not 'groups', but first add a
 			// migration step to delete 'libraries' rows not in 'groups'
 			//"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM libraries)"
-			"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM groups)",
+			[
+				"SELECT COUNT(*) FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM groups)",
+				"DELETE FROM syncDeleteLog WHERE libraryID != 0 AND libraryID NOT IN (SELECT libraryID FROM libraries)",
+			],
 			
-			"SELECT COUNT(*) FROM creatorData WHERE firstName='' AND lastName=''",
 			
-			"SELECT COUNT(*) FROM itemAttachments JOIN items USING (itemID) WHERE itemTypeID != 14"
+			// Delete empty creators
+			// This may cause itemCreator gaps, but that's better than empty creators
+			[
+				"SELECT COUNT(*) FROM creatorData WHERE firstName='' AND lastName=''",
+				[
+					"DELETE FROM itemCreators WHERE creatorID IN (SELECT creatorID FROM creators WHERE creatorDataID IN (SELECT creatorDataID FROM creatorData WHERE firstName='' AND lastName=''))",
+					"DELETE FROM creators WHERE creatorDataID IN (SELECT creatorDataID FROM creatorData WHERE firstName='' AND lastName='')",
+					"DELETE FROM creatorData WHERE firstName='' AND lastName=''"
+				],
+			],
+			
+			// Non-attachment items in the full-text index
+			[
+				"SELECT COUNT(*) FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=14)",
+				[
+					"DELETE FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=14)",
+					"SELECT 1"
+				]
+			],
+			[
+				"SELECT COUNT(*) FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=14)",
+				"DELETE FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=14)"
+			]
 		];
 		
 		for each(var sql in queries) {
-			if (Zotero.DB.valueQuery(sql)) {
+			if (Zotero.DB.valueQuery(sql[0])) {
+				Zotero.debug("Test failed!", 1);
+				
+				if (fix) {
+					try {
+						// Single query
+						if (typeof sql[1] == 'string') {
+							Zotero.DB.valueQuery(sql[1]);
+						}
+						// Multiple queries
+						else {
+							for each(var s in sql[1]) {
+								Zotero.DB.valueQuery(s);
+							}
+						}
+						continue;
+					}
+					catch (e) {
+						Zotero.debug(e);
+						Components.utils.reportError(e);
+					}
+				}
+				
 				return false;
 			}
 		}
 		
 		return true;
 	}
-	
 	
 	
 	/////////////////////////////////////////////////////////////////
