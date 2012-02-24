@@ -2149,7 +2149,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.289";
+    this.processor_version = "1.0.290";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -6651,12 +6651,6 @@ CSL.NameOutput.prototype.fixupInstitution = function (name, varname, listpos) {
             jurisdiction = this.state.transform.loadAbbreviation(jurisdiction, "institution-part", long_form[j]);
             if (this.state.transform.abbrevs[jurisdiction]["institution-part"][long_form[j]]) {
                 short_form[j] = this.state.transform.abbrevs[jurisdiction]["institution-part"][long_form[j]];
-                if (this.Item["container-title"]) {
-                    var suppressing_partner = this.state.transform.abbrevs[jurisdiction]["container-title"][this.Item["container-title"]];
-                    if (varname === "authority" && suppressing_partner && suppressing_partner === short_form[j]) {
-                        short_form[j] = false;
-                    }
-                }
             }
         }
     }
@@ -7537,9 +7531,6 @@ CSL.Node.text = {
                         } else {
                             state.transform.setTransformFallback(true);
                             state.transform.setAbbreviationFallback(true);
-                            if (this.variables_real[0] === "subjurisdiction") {
-                                state.transform.setSuppressMonitor("container-title");
-                            }
                             func = state.transform.getOutputFunction(this.variables);
 						}
                         if (this.variables_real[0] === "container-title") {
@@ -8631,8 +8622,7 @@ CSL.Transform = function (state) {
         opt = {
             abbreviation_fallback: false,
             alternative_varname: false,
-            transform_fallback: false,
-            suppress_monitor: false
+            transform_fallback: false
         };
     }
     this.init = init;
@@ -8708,10 +8698,6 @@ CSL.Transform = function (state) {
         opt.abbreviation_fallback = b;
     }
     this.setAbbreviationFallback = setAbbreviationFallback;
-    function setSuppressMonitor(b) {
-        opt.suppress_monitor = b;
-    }
-    this.setSuppressMonitor = setSuppressMonitor;
     function setAlternativeVariableName(s) {
         opt.alternative_varname = s;
     }
@@ -8785,7 +8771,6 @@ CSL.Transform = function (state) {
         var abbreviation_fallback = opt.abbreviation_fallback;
         var alternative_varname = opt.alternative_varname;
         var transform_fallback = opt.transform_fallback;
-        var suppress_monitor = opt.suppress_monitor;
 		var localesets;
         var langPrefs = CSL.LangPrefsMap[myfieldname];
         if (!langPrefs) {
@@ -8849,10 +8834,13 @@ CSL.Transform = function (state) {
 			}
             if (myabbrev_family) {
                 primary = abbreviate(state, Item, alternative_varname, primary, myabbrev_family, true);
-                if (suppress_monitor && primary) {
-                    var suppressing_partner = abbreviate(state, Item, false, Item["container-title"], "container-title", true);
-                    if (suppressing_partner && suppressing_partner.slice(0, primary.length) === primary) {
-                        return null;
+                if (primary) {
+                    var m = primary.match(/^!([-_a-z]+)<<</);
+                    if (m) {
+                        primary = primary.slice(m[0].length);
+                        if (state.tmp.done_vars.indexOf(m[1]) === -1) {
+                            state.tmp.done_vars.push(m[1]);
+                        }
                     }
                 }
                 secondary = abbreviate(state, Item, false, secondary, myabbrev_family, true);
