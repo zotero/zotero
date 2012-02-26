@@ -2149,7 +2149,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.291";
+    this.processor_version = "1.0.292";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -7304,18 +7304,20 @@ CSL.Node.number = {
             if (newstr && !newstr.match(/^[-.\u20130-9]+$/)) {
                 state.output.append(newstr, this);
             } else {
-                state.output.openLevel("empty");
-                for (var i = 0, ilen = values.length; i < ilen; i += 1) {
-                    var blob = new CSL[values[i][0]](values[i][1], values[i][2], Item.id);
-                    if (i > 0) {
-                        blob.strings.prefix = blob.strings.prefix.replace(/^\s*/, "");
+                if (values.length) {
+                    state.output.openLevel("empty");
+                    for (var i = 0, ilen = values.length; i < ilen; i += 1) {
+                        var blob = new CSL[values[i][0]](values[i][1], values[i][2], Item.id);
+                        if (i > 0) {
+                            blob.strings.prefix = blob.strings.prefix.replace(/^\s*/, "");
+                        }
+                        if (i < values.length - 1) {
+                            blob.strings.suffix = blob.strings.suffix.replace(/\s*$/, "");
+                        }
+                        state.output.append(blob, "literal", false, false, true);
                     }
-                    if (i < values.length - 1) {
-                        blob.strings.suffix = blob.strings.suffix.replace(/\s*$/, "");
-                    }
-                    state.output.append(blob, "literal", false, false, true);
+                    state.output.closeLevel("empty");
                 }
-                state.output.closeLevel("empty");
             }
             state.parallel.CloseVariable("number");
         };
