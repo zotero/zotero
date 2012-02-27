@@ -29,6 +29,7 @@ const TABLE_COLUMNS = ["Translator", "Supported", "Status", "Pending", "Succeede
 var translatorTables = {},
 	translatorTestViews = {},
 	translatorTestViewsToRun = {},
+	translatorTestStats = {},
 	translatorBox,
 	outputBox,
 	allOutputView,
@@ -187,7 +188,17 @@ TranslatorTestView.prototype.setLabel = function(label) {
 			var issue = issues[i];
 			var div = document.createElement("div"),
 				a = document.createElement("a");
-			a.textContent = issue.title+" (#"+issue.number+")";
+			
+			var date = issue.updated_at;
+			date = new Date(Date.UTC(date.substr(0, 4), date.substr(5, 2)-1, date.substr(8, 2),
+				date.substr(11, 2), date.substr(14, 2), date.substr(17, 2)));
+			if("toLocaleFormat" in date) {
+				date = date.toLocaleFormat("%x");
+			} else {
+				date = date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate();
+			}
+			
+			a.textContent = issue.title+" (#"+issue.number+"; "+date+")";
 			a.setAttribute("href", issue.html_url);
 			a.setAttribute("target", "_blank");
 			div.appendChild(a);
@@ -200,18 +211,14 @@ TranslatorTestView.prototype.setLabel = function(label) {
  * Initializes TranslatorTestView given a translator and its type
  */
 TranslatorTestView.prototype.initWithTranslatorAndType = function(translator, type) {
-	this._translatorID = translator.translatorID;
 	this.setLabel(translator.label);
-	
-	this.isSupported = translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER;
-	this._supported.appendChild(document.createTextNode(this.isSupported ? "Yes" : "No"));
-	this._supported.className = this.isSupported ? "supported-yes" : "supported-no";
 	
 	this._translatorTester = new Zotero_TranslatorTester(translator, type, this._debug);
 	this.canRun = !!this._translatorTester.tests.length;
 	this.updateStatus(this._translatorTester);
 	
 	this._type = type;
+	translatorTestViews[type].push(this);
 	translatorTables[this._type].appendChild(this._row);
 }
 
@@ -222,14 +229,11 @@ TranslatorTestView.prototype.unserialize = function(serializedData) {
 	this._outputView.addOutput(serializedData.output);
 	this.setLabel(serializedData.label);
 	
-	this.isSupported = serializedData.isSupported;
-	this._supported.appendChild(document.createTextNode(this.isSupported ? "Yes" : "No"));
-	this._supported.className = this.isSupported ? "supported-yes" : "supported-no";
+	this._type = serializedData.type;
+	translatorTestViews[serializedData.type].push(this);
 	
 	this.canRun = false;
 	this.updateStatus(serializedData);
-	
-	this._type = serializedData.type;
 	translatorTables[this._type].appendChild(this._row);
 }
 
@@ -237,17 +241,7 @@ TranslatorTestView.prototype.unserialize = function(serializedData) {
  * Initializes TranslatorTestView given a JSON-ified translatorTester
  */
 TranslatorTestView.prototype.serialize = function(serializedData) {
-	return {
-		"translatorID":this._translatorID,
-		"type":this._type,
-		"output":this._outputView.getOutput(),
-		"label":this._label.textContent,
-		"isSupported":this.isSupported,
-		"pending":this._translatorTester.pending,
-		"failed":this._translatorTester.failed,
-		"succeeded":this._translatorTester.succeeded,
-		"unknown":this._translatorTester.unknown
-	};
+	return this._translatorTester.serialize();
 }
 
 /**
@@ -257,6 +251,9 @@ TranslatorTestView.prototype.updateStatus = function(obj, status) {
 	while(this._status.hasChildNodes()) {
 		this._status.removeChild(this._status.firstChild);
 	}
+	
+	this._supported.textContent = obj.isSupported ? "Yes" : "No";
+	this._supported.className = obj.isSupported ? "supported-yes" : "supported-no";
 	
 	var pending = typeof obj.pending === "object" ? obj.pending.length : obj.pending;
 	var succeeded = typeof obj.succeeded === "object" ? obj.succeeded.length : obj.succeeded;
@@ -307,6 +304,8 @@ TranslatorTestView.prototype.updateStatus = function(obj, status) {
 	this._succeeded.textContent = succeeded;
 	this._failed.textContent = failed;
 	this._unknown.textContent = unknown;
+	
+	if(this._type) translatorTestStats[this._type].update();
 }
 
 /**
@@ -330,6 +329,44 @@ TranslatorTestView.prototype.runTests = function(doneCallback) {
 	
 	this._translatorTester.runTests(newCallback);
 }
+
+/**
+ * Gets overall stats for translators
+ */
+var TranslatorTestStats = function(translatorType) {
+	this.translatorType = translatorType
+	this.node = document.createElement("p");
+};
+
+TranslatorTestStats.prototype.update = function() {
+	var types = {
+		"Success":0,
+		"Data Mismatch":0,
+		"Partial Failure":0,
+		"Failure":0,
+		"Untested":0,
+		"Running":0,
+		"Pending":0,
+		"Not Run":0
+	};
+	
+	var testViews = translatorTestViews[this.translatorType];
+	for(var i in testViews) {
+		var status = testViews[i]._status ? testViews[i]._status.textContent : "Not Run";
+		if(status in types) {
+			types[status] += 1;
+		}
+	}
+	
+	var typeInfo = [];
+	for(var i in types) {
+		if(types[i]) {
+			typeInfo.push(i+": "+types[i]);
+		}
+	}
+	
+	this.node.textContent = typeInfo.join(" | ");
+};
 
 /**
  * Called when loaded
@@ -384,6 +421,8 @@ function init() {
 		var displayType = TRANSLATOR_TYPES[i];
 		var translatorType = displayType.toLowerCase();
 		
+		translatorTestViews[translatorType] = [];
+		
 		// create header
 		var h1 = document.createElement("h1");
 		h1.appendChild(document.createTextNode(displayType+" Translators "));
@@ -408,6 +447,9 @@ function init() {
 		// create table
 		var translatorTable = document.createElement("table");
 		translatorTables[translatorType] = translatorTable;
+		
+		translatorTestStats[translatorType] = new TranslatorTestStats(translatorType);
+		translatorBox.appendChild(translatorTestStats[translatorType].node);
 		
 		// add headings to table
 		var headings = document.createElement("tr");
@@ -500,7 +542,6 @@ function jsonNotFound(str) {
  * Called after translators are returned from main script
  */
 function haveTranslators(translators, type) {
-	translatorTestViews[type] = [];
 	translatorTestViewsToRun[type] = [];
 	
 	translators = translators.sort(function(a, b) {
@@ -510,12 +551,12 @@ function haveTranslators(translators, type) {
 	for(var i in translators) {
 		var translatorTestView = new TranslatorTestView();
 		translatorTestView.initWithTranslatorAndType(translators[i], type);
-		translatorTestViews[type].push(translatorTestView);
 		if(translatorTestView.canRun) {
 			translatorTestViewsToRun[type].push(translatorTestView);
 		}
 	}
 	
+	translatorTestStats[type].update();
 	var ev = document.createEvent('HTMLEvents');
 	ev.initEvent('ZoteroHaveTranslators-'+type, true, true);
 	document.dispatchEvent(ev);
@@ -551,7 +592,7 @@ function initTests(type, callback, runCallbackIfComplete) {
  * Serializes translator tests to JSON
  */
 function serializeToJSON() {
-	var serializedData = {"browser":Zotero.browser, "results":[]};
+	var serializedData = {"browser":Zotero.browser, "version":Zotero.version, "results":[]};
 	for(var i in translatorTestViews) {
 		var n = translatorTestViews[i].length;
 		for(var j=0; j<n; j++) {

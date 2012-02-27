@@ -8,6 +8,7 @@ table {
 	border-width: 0 0 1px 1px;
 	border-style: solid;
 	border-collapse: collapse;
+	width: 100%;
 }
 
 td, th {
@@ -18,21 +19,19 @@ td, th {
 }
 
 .th-translator {
-	width: 250px;
-	max-width: 250px;
 }
 
 .th-status {
 	width: 100px;
+	max-width: 100px;
 }
 
 .th-pending, .th-supported, .th-succeeded, .th-failed, .th-mismatch {
 	width: 75px;
+	max-width: 75px;
 }
 
 .th-issues {
-	width: 250px;
-	max-width: 500px;
 }
 
 .status-succeeded, .supported-yes {

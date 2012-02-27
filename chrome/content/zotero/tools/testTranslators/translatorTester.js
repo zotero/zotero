@@ -25,8 +25,110 @@
 
 // Timeout for test to complete
 const TEST_RUN_TIMEOUT = 600000;
+var EXPORTED_SYMBOLS = ["Zotero_TranslatorTesters"];
 
-var Zotero_TranslatorTester_IGNORE_FIELDS = ["complete", "accessDate", "checkFields"];
+try {
+	Zotero;
+} catch(e) {
+	var Zotero;
+}
+
+Zotero_TranslatorTesters = new function() {
+	const TEST_TYPES = ["web", "import", "export", "search"];
+	
+	/**
+	 * Runs all tests
+	 */
+	this.runAllTests = function(numConcurrentTests, skipTranslators, doneCallback) {
+		if(!Zotero) {
+			Zotero = Components.classes["@zotero.org/Zotero;1"]
+				.getService(Components.interfaces.nsISupports).wrappedJSObject;
+		}
+		
+		var testers = [];
+		var waitingForTranslators = TEST_TYPES.length;
+		for(var i=0; i<TEST_TYPES.length; i++) {
+			Zotero.Translators.getAllForType(TEST_TYPES[i], new function() {
+				var type = TEST_TYPES[i];
+				return function(translators) {
+					for(var i=0; i<translators.length; i++) {
+						if(skipTranslators && !skipTranslators[translators[i].translatorID]) {
+							testers.push(new Zotero_TranslatorTester(translators[i], type));
+						}
+					};
+					
+					if(!(--waitingForTranslators)) {
+						runTesters(testers, numConcurrentTests, doneCallback);
+					}
+				};
+			});
+		};
+	};
+	
+	/**
+	 * Runs a specific set of tests
+	 */
+	function runTesters(testers, numConcurrentTests, doneCallback) {
+		var testersRunning = 0;
+		var results = [];
+		
+		var strcmp;
+		try {
+			var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
+				.getService(Components.interfaces.nsILocaleService);
+			var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
+				.getService(Components.interfaces.nsICollationFactory);
+			var collation = collationFactory.CreateCollation(localeService.getApplicationLocale());
+			strcmp = function(a, b) {
+				return collation.compareString(1, a, b);
+			};
+		} catch (e) {
+			strcmp = function (a, b) {
+				return a.localeCompare(b);
+			};
+		}
+		
+		var testerDoneCallback = function(tester) {
+			if(tester.pending.length) return;
+			
+			Zotero.debug("Done testing "+tester.translator.label);
+			
+			// Done translating, so serialize test results
+			testersRunning--;
+			results.push(tester.serialize());
+			
+			if(testers.length) {
+				// Run next tester if one is available
+				runNextTester();
+			} else if(testersRunning === 0) {
+				// Testing is done, so sort results
+				results.sort(function(a, b) {
+					if(a.type !== b.type) {
+						return TEST_TYPES.indexOf(a.type) - TEST_TYPES.indexOf(b.type);
+					}
+					return strcmp(a.label, b.label);
+				});
+				
+				// Call done callback
+				doneCallback({
+					"browser":Zotero.browser,
+					"version":Zotero.version,
+					"results":results
+				});
+			}
+		};
+		
+		var runNextTester = function() {
+			testersRunning++;
+			Zotero.debug("Testing "+testers[0].translator.label);
+			testers.shift().runTests(testerDoneCallback);
+		};
+		
+		for(var i=0; i<numConcurrentTests; i++) {
+			runNextTester();
+		};
+	}
+}
 
 /**
  * A tool to run unit tests for a given translator
@@ -39,19 +141,30 @@ var Zotero_TranslatorTester_IGNORE_FIELDS = ["complete", "accessDate", "checkFie
  * @constructor
  * @param {Zotero.Translator[]} translator The translator for which to run tests
  * @param {String} type The type of tests to run (web, import, export, or search)
- * @param {Function} [debug] A function to call to write debug output. If not present, Zotero.debug
- *                           will be used.
+ * @param {Function} [debugCallback] A function to call to write debug output. If not present,
+ *     Zotero.debug will be used.
  */
-Zotero_TranslatorTester = function(translator, type, debug) {
+Zotero_TranslatorTester = function(translator, type, debugCallback) {
 	this.type = type;
 	this.translator = translator;
-	this._debug = debug ? debug : function(obj, a, b) { Zotero.debug(a, b) };
+	this.output = "";
+	this.isSupported = this.translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER;
 	
 	this.tests = [];
 	this.pending = [];
 	this.succeeded = [];
 	this.failed = [];
 	this.unknown = [];
+	
+	var me = this;
+	this._debug = function(obj, a, b) {
+		me.output += me.output ? "\n"+a : a;
+		if(debugCallback) {
+			debugCallback(me, a, b);
+		} else {
+			Zotero.debug(a, b);
+		}
+	};
 	
 	var code = translator.code;
 	var testStart = code.indexOf("/** BEGIN TEST CASES **/");
@@ -106,11 +219,28 @@ Zotero_TranslatorTester._sanitizeItem = function(item, forSave) {
 	} catch(e) {};
 	
 	// remove fields to be ignored
-	for(var j=0, n=Zotero_TranslatorTester_IGNORE_FIELDS.length; j<n; j++) {
-		delete item[Zotero_TranslatorTester_IGNORE_FIELDS[j]];
+	const IGNORE_FIELDS = ["complete", "accessDate", "checkFields"];
+	for(var j=0, n=IGNORE_FIELDS.length; j<n; j++) {
+		delete item[IGNORE_FIELDS[j]];
 	}
 	
 	return item;
+};
+/**
+ * Serializes translator tester results to JSON
+ */
+Zotero_TranslatorTester.prototype.serialize = function() {
+	return {
+		"translatorID":this.translator.translatorID,
+		"type":this.type,
+		"output":this.output,
+		"label":this.translator.label,
+		"isSupported":this.isSupported,
+		"pending":this.pending,
+		"failed":this.failed,
+		"succeeded":this.succeeded,
+		"unknown":this.unknown
+	};
 };
 
 /**
