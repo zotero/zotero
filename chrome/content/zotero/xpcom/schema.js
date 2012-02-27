@@ -205,26 +205,26 @@ Zotero.Schema = new function(){
 					Zotero.debug(e);
 				}
 			}
-			
-			try {
-				var up4 = this.updateBundledFiles();
-			}
-			catch (e) {
-				Zotero.debug(e);
-				Zotero.logError(e);
-			}
-			
-			if (up2 || up3 || up4) {
-				// Run a manual scraper update if upgraded and pref set
-				if (Zotero.Prefs.get('automaticScraperUpdates')){
-					this.updateFromRepository(2);
-				}
-			}
 		}
 		finally {
 			Zotero.UnresponsiveScriptIndicator.enable();
 		}
-		return up1 || up2 || up3 || up4;
+		
+		// After a delay, start update of bundled files and repo updates
+		setTimeout(function () {
+			var up = Zotero.Schema.updateBundledFiles();
+			if (up) {
+				// Run a manual scraper update if upgraded and pref set
+				if (Zotero.Prefs.get('automaticScraperUpdates')) {
+					Zotero.Schema.updateFromRepository(2);
+				}
+			}
+			else {
+				Zotero.Schema.updateFromRepository();
+			}
+		}, 5000);
+		
+		return up1 || up2 || up3;
 	}
 	
 	

@@ -642,7 +642,6 @@ const ZOTERO_CONFIG = {
 		}
 		
 		Zotero.DB.startDummyStatement();
-		Zotero.Schema.updateFromRepository();
 		
 		// Populate combined tables for custom types and fields -- this is likely temporary
 		if (!upgraded && !updated) {
