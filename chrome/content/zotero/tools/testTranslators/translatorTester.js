@@ -72,17 +72,12 @@ Zotero_TranslatorTesters = new function() {
 		var testersRunning = 0;
 		var results = [];
 		
-		var strcmp;
-		try {
-			var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
-				.getService(Components.interfaces.nsILocaleService);
-			var collationFactory = Components.classes["@mozilla.org/intl/collation-factory;1"]
-				.getService(Components.interfaces.nsICollationFactory);
+		if("getLocaleCollation" in Zotero) {
 			var collation = collationFactory.CreateCollation(localeService.getApplicationLocale());
 			strcmp = function(a, b) {
 				return collation.compareString(1, a, b);
 			};
-		} catch (e) {
+		} else {
 			strcmp = function (a, b) {
 				return a.localeCompare(b);
 			};
@@ -102,7 +97,7 @@ Zotero_TranslatorTesters = new function() {
 				runNextTester();
 			} else if(testersRunning === 0) {
 				// Testing is done, so sort results
-				results.sort(function(a, b) {
+				results = results.sort(function(a, b) {
 					if(a.type !== b.type) {
 						return TEST_TYPES.indexOf(a.type) - TEST_TYPES.indexOf(b.type);
 					}
