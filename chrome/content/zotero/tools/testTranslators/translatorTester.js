@@ -337,6 +337,9 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 		},
 		true
 	);
+	(Zotero.setTimeout ? Zotero : window).setTimeout(function() {
+		Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+	}, TEST_RUN_TIMEOUT);
 };
 
 /**
