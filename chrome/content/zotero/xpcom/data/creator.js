@@ -227,6 +227,9 @@ Zotero.Creator.prototype.save = function () {
 		
 		if (!creatorDataID) {
 			var creatorDataID = Zotero.Creators.getDataID(this, true);
+			if (creatorDataID != this.creatorDataID) {
+				this._creatorDataID = creatorDataID;
+			}
 		}
 		
 		var columns = [
