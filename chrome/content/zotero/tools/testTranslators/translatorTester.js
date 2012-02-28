@@ -73,7 +73,7 @@ Zotero_TranslatorTesters = new function() {
 		var results = [];
 		
 		if("getLocaleCollation" in Zotero) {
-			var collation = collationFactory.CreateCollation(localeService.getApplicationLocale());
+			var collation = Zotero.getLocaleCollation();
 			strcmp = function(a, b) {
 				return collation.compareString(1, a, b);
 			};
