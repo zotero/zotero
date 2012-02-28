@@ -316,9 +316,18 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
  * @param {Function} testDoneCallback A callback to be executed when test is complete
  */
 Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneCallback) {
+	var timer = Components.classes["@mozilla.org/timer;1"].
+		createInstance(Components.interfaces.nsITimer);
+	timer.initWithCallback({"notify":function() {
+		Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+	}}, TEST_RUN_TIMEOUT, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+	
 	var me = this;
 	var runTest = function(doc) {
 		me.runTest(test, doc, function(obj, test, status, message) {
+			try {
+				timer.cancel();
+			} catch(e) {};
 			if(hiddenBrowser) Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
 			testDoneCallback(obj, test, status, message);
 		});
@@ -337,9 +346,6 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 		},
 		true
 	);
-	(Zotero.setTimeout ? Zotero : window).setTimeout(function() {
-		Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-	}, TEST_RUN_TIMEOUT);
 };
 
 /**
