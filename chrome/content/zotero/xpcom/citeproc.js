@@ -456,6 +456,11 @@ var CSL = {
     locale_opts: {},
     locale_dates: {}
 };
+if (typeof require !== "undefined" && typeof module !== 'undefined' && "exports" in module) {
+    var CSL_IS_NODEJS = true;
+    var CSL_NODEJS = require("./csl_nodejs_jsdom").CSL_NODEJS_JSDOM;
+    exports.CSL = CSL;
+}
 CSL.TERMINAL_PUNCTUATION_REGEXP = new RegExp("^([" + CSL.TERMINAL_PUNCTUATION.slice(0, -1).join("") + "])(.*)");
 CSL.CLOSURES = new RegExp(".*[\\]\\)]");
 CSL.debug = function (str) {
@@ -850,7 +855,6 @@ CSL.getSortCompare = function () {
         };
         CSL.debug("Using collation sort");
     } catch (e) {
-        CSL.debug("NOT using collation sort because: "+e);
         strcmp = function (a, b) {
             return a.localeCompare(b);
         };
@@ -2149,7 +2153,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.293";
+    this.processor_version = "1.0.295";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2511,7 +2515,7 @@ CSL.Engine.prototype.retrieveItem = function (id) {
     return Item;
 };
 CSL.Engine.prototype.setOpt = function (token, name, value) {
-    if (token.name === "style") {
+    if (token.name === "style" || token.name === "cslstyle") {
         this.opt[name] = value;
     } else if (["citation", "bibliography"].indexOf(token.name) > -1) {
         this[token.name].opt[name] = value;
@@ -3256,6 +3260,7 @@ CSL.getBibliographyEntries = function (bibsection) {
             this.parallel.ComposeSet();
             this.parallel.PruneOutputQueue();
         } else if (!this.registry.registry[item.id].siblings) {
+            this.parallel.StartCitation(sortedItems);
             this.tmp.term_predecessor = false;
             entry_item_ids.push("" + CSL.getCite.call(this, item));
         }
@@ -7558,6 +7563,7 @@ CSL.Node.text = {
                                 var idx, value;
                                 value = state.getVariable(Item, "page", form);
                                 if (value) {
+                                    value = ""+value;
                                     value = value.replace("\u2013", "-", "g");
                                     idx = value.indexOf("-");
                                     if (idx > -1) {
@@ -7570,6 +7576,7 @@ CSL.Node.text = {
                             func = function (state, Item) {
                                 var value = state.getVariable(Item, "page", form);
                                 if (value) {
+                                    value = ""+value;
                                     value = value.replace(/([^\\])--*/g,"$1"+state.getTerm("page-range-delimiter"));
                                     value = value.replace(/\\-/g,"-");
                                     value = state.fun.page_mangler(value);
@@ -8482,10 +8489,9 @@ CSL.Attributes["@display"] = function (state, arg) {
     this.strings.cls = arg;
 };
 var XML_PARSING;
-var CSL_E4X;
-var CSL_CHROME;
-var DOMParser;
-if ("undefined" !== typeof CSL_E4X) {
+if ("undefined" !== typeof CSL_IS_NODEJS) {
+    XML_PARSING = CSL_NODEJS;
+} else if ("undefined" !== typeof CSL_E4X) {
     XML_PARSING = CSL_E4X;
 } else {
     XML_PARSING = CSL_CHROME;
