@@ -153,10 +153,14 @@ Zotero.Debug = new function () {
 			}
 		}
 		
-		return Zotero.getErrors(true).join('\n\n') +
-				"\n\n" + Zotero.getSystemInfo() + "\n\n" +
-				"=========================================================\n\n" +
-				output;
+		if(Zotero.getErrors) {
+			return Zotero.getErrors(true).join('\n\n') +
+					"\n\n" + Zotero.getSystemInfo() + "\n\n" +
+					"=========================================================\n\n" +
+					output;
+		} else {
+			return output;
+		}
 	}
 	
 	
