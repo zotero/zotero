@@ -319,7 +319,9 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 	var timer = Components.classes["@mozilla.org/timer;1"].
 		createInstance(Components.interfaces.nsITimer);
 	timer.initWithCallback({"notify":function() {
-		Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+		try {
+			Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+		} catch(e) {}
 	}}, TEST_RUN_TIMEOUT, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 	
 	var me = this;
