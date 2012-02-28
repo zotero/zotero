@@ -507,6 +507,8 @@ To add a new preference:
 			<caption label="&zotero.preferences.quickCopy.caption;"/>
 			
 			<label id="quickCopy-instructions"/>
+			<separator class="thin"/>
+			<label id="quickCopy-citationInstructions"/>
 			
 			<separator/>
 			

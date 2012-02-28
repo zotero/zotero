@@ -762,11 +762,18 @@ function deleteSelectedQuickCopySite() {
 
 function updateQuickCopyInstructions() {
 	var prefix = Zotero.isMac ? 'Cmd+Shift+' : 'Ctrl+Alt+';
+	
 	var key = Zotero.Prefs.get('keys.copySelectedItemsToClipboard');
-	
-	var instr = document.getElementById('quickCopy-instructions');
 	var str = Zotero.getString('zotero.preferences.export.quickCopy.instructions', prefix + key);
+	var instr = document.getElementById('quickCopy-instructions');
+	while (instr.hasChildNodes()) {
+		instr.removeChild(instr.firstChild);
+	}
+	instr.appendChild(document.createTextNode(str));
 	
+	var key = Zotero.Prefs.get('keys.copySelectedItemCitationsToClipboard');
+	var str = Zotero.getString('zotero.preferences.export.quickCopy.citationInstructions', prefix + key);
+	var instr = document.getElementById('quickCopy-citationInstructions');
 	while (instr.hasChildNodes()) {
 		instr.removeChild(instr.firstChild);
 	}
