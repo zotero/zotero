@@ -527,12 +527,13 @@ Zotero.HTTP = new function() {
 		 * @inner
 		 */
 		var onLoad = function() {
-			if(hiddenBrowser.contentDocument.location.href == "about:blank") return;
-			Zotero.debug(hiddenBrowser.contentDocument.location.href+" has been loaded");
-			if(hiddenBrowser.contentDocument.location.href != prevUrl) {	// Just in case it fires too many times
-				prevUrl = hiddenBrowser.contentDocument.location.href;
+			var doc = hiddenBrowser.contentDocument,
+				url = doc.location.href.toString();
+			if(url == "about:blank" || doc.readyState === "loading") return;
+			if(url !== prevUrl) {	// Just in case it fires too many times
+				prevUrl = url;
 				try {
-					processor(hiddenBrowser.contentDocument);
+					processor(doc);
 				} catch(e) {
 					removeListeners();
 					if(exception) {
