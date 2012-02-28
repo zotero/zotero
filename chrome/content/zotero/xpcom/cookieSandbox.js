@@ -141,38 +141,40 @@ Zotero.CookieSandbox.Observer = new function() {
 			notificationCallbacks = channel.notificationCallbacks;
 		
 		// try the notification callbacks
-		trackedBy = this.trackedInterfaceRequestors.get(notificationCallbacks);
-		if(trackedBy) {
-			tested = true;
-		} else {
-			// try the browser
-			try {
-				browser = notificationCallbacks.getInterface(Ci.nsIWebNavigation)
-					.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
-			} catch(e) {}
-			if(browser) {
+		if(notificationCallbacks) {
+			trackedBy = this.trackedInterfaceRequestors.get(notificationCallbacks);
+			if(trackedBy) {
 				tested = true;
-				trackedBy = this.trackedBrowsers.get(browser);
 			} else {
-				// try the document for the load group
+				// try the browser
 				try {
-					browser = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsIWebNavigation)
+					browser = notificationCallbacks.getInterface(Ci.nsIWebNavigation)
 						.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
 				} catch(e) {}
 				if(browser) {
 					tested = true;
 					trackedBy = this.trackedBrowsers.get(browser);
 				} else {
-					// try getting as an XHR or nsIWBP
+					// try the document for the load group
 					try {
-						notificationCallbacks.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
-						tested = true;
+						browser = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsIWebNavigation)
+							.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
 					} catch(e) {}
-					if(!tested) {
+					if(browser) {
+						tested = true;
+						trackedBy = this.trackedBrowsers.get(browser);
+					} else {
+						// try getting as an XHR or nsIWBP
 						try {
-							notificationCallbacks.QueryInterface(Components.interfaces.nsIWebBrowserPersist);
+							notificationCallbacks.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
 							tested = true;
 						} catch(e) {}
+						if(!tested) {
+							try {
+								notificationCallbacks.QueryInterface(Components.interfaces.nsIWebBrowserPersist);
+								tested = true;
+							} catch(e) {}
+						}
 					}
 				}
 			}
