@@ -23,7 +23,107 @@
     ***** END LICENSE BLOCK *****
 */
 
-var Zotero_TranslatorTester_IGNORE_FIELDS = ["complete", "accessDate", "checkFields"];
+// Timeout for test to complete
+const TEST_RUN_TIMEOUT = 600000;
+var EXPORTED_SYMBOLS = ["Zotero_TranslatorTesters"];
+
+try {
+	Zotero;
+} catch(e) {
+	var Zotero;
+}
+
+Zotero_TranslatorTesters = new function() {
+	const TEST_TYPES = ["web", "import", "export", "search"];
+	
+	/**
+	 * Runs all tests
+	 */
+	this.runAllTests = function(numConcurrentTests, skipTranslators, doneCallback) {
+		if(!Zotero) {
+			Zotero = Components.classes["@zotero.org/Zotero;1"]
+				.getService(Components.interfaces.nsISupports).wrappedJSObject;
+		}
+		
+		var testers = [];
+		var waitingForTranslators = TEST_TYPES.length;
+		for(var i=0; i<TEST_TYPES.length; i++) {
+			Zotero.Translators.getAllForType(TEST_TYPES[i], new function() {
+				var type = TEST_TYPES[i];
+				return function(translators) {
+					for(var i=0; i<translators.length; i++) {
+						if(skipTranslators && !skipTranslators[translators[i].translatorID]) {
+							testers.push(new Zotero_TranslatorTester(translators[i], type));
+						}
+					};
+					
+					if(!(--waitingForTranslators)) {
+						runTesters(testers, numConcurrentTests, doneCallback);
+					}
+				};
+			}, true);
+		};
+	};
+	
+	/**
+	 * Runs a specific set of tests
+	 */
+	function runTesters(testers, numConcurrentTests, doneCallback) {
+		var testersRunning = 0;
+		var results = [];
+		
+		if("getLocaleCollation" in Zotero) {
+			var collation = Zotero.getLocaleCollation();
+			strcmp = function(a, b) {
+				return collation.compareString(1, a, b);
+			};
+		} else {
+			strcmp = function (a, b) {
+				return a.localeCompare(b);
+			};
+		}
+		
+		var testerDoneCallback = function(tester) {
+			if(tester.pending.length) return;
+			
+			Zotero.debug("Done testing "+tester.translator.label);
+			
+			// Done translating, so serialize test results
+			testersRunning--;
+			results.push(tester.serialize());
+			
+			if(testers.length) {
+				// Run next tester if one is available
+				runNextTester();
+			} else if(testersRunning === 0) {
+				// Testing is done, so sort results
+				results = results.sort(function(a, b) {
+					if(a.type !== b.type) {
+						return TEST_TYPES.indexOf(a.type) - TEST_TYPES.indexOf(b.type);
+					}
+					return strcmp(a.label, b.label);
+				});
+				
+				// Call done callback
+				doneCallback({
+					"browser":Zotero.browser,
+					"version":Zotero.version,
+					"results":results
+				});
+			}
+		};
+		
+		var runNextTester = function() {
+			testersRunning++;
+			Zotero.debug("Testing "+testers[0].translator.label);
+			testers.shift().runTests(testerDoneCallback);
+		};
+		
+		for(var i=0; i<numConcurrentTests; i++) {
+			runNextTester();
+		};
+	}
+}
 
 /**
  * A tool to run unit tests for a given translator
@@ -36,19 +136,30 @@ var Zotero_TranslatorTester_IGNORE_FIELDS = ["complete", "accessDate", "checkFie
  * @constructor
  * @param {Zotero.Translator[]} translator The translator for which to run tests
  * @param {String} type The type of tests to run (web, import, export, or search)
- * @param {Function} [debug] A function to call to write debug output. If not present, Zotero.debug
- *                           will be used.
+ * @param {Function} [debugCallback] A function to call to write debug output. If not present,
+ *     Zotero.debug will be used.
  */
-Zotero_TranslatorTester = function(translator, type, debug) {
+Zotero_TranslatorTester = function(translator, type, debugCallback) {
 	this.type = type;
 	this.translator = translator;
-	this._debug = debug ? debug : function(obj, a, b) { Zotero.debug(a, b) };
+	this.output = "";
+	this.isSupported = this.translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER;
 	
 	this.tests = [];
 	this.pending = [];
 	this.succeeded = [];
 	this.failed = [];
 	this.unknown = [];
+	
+	var me = this;
+	this._debug = function(obj, a, b) {
+		me.output += me.output ? "\n"+a : a;
+		if(debugCallback) {
+			debugCallback(me, a, b);
+		} else {
+			Zotero.debug(a, b);
+		}
+	};
 	
 	var code = translator.code;
 	var testStart = code.indexOf("/** BEGIN TEST CASES **/");
@@ -82,24 +193,49 @@ Zotero_TranslatorTester._sanitizeItem = function(item, forSave) {
 	if(item.attachments && item.attachments.length) {
 		// don't actually test URI equality
 		for (var i=0; i<item.attachments.length; i++) {
-			if(item.attachments[i].document) {
-				item.attachments[i].document = false;
-			} else if(item.attachments[i].url) {
-				item.attachments[i].url = false;
+			var attachment = item.attachments[i];
+			if(attachment.document) {
+				delete attachment.document;
+			}
+			
+			if(attachment.url) {
+				delete attachment.url;
+			}
+			
+			if(attachment.complete) {
+				delete attachment.complete;
 			}
 		}
 	}
 	
+	// try to convert to JSON and back to get rid of undesirable undeletable elements; this may fail
+	try {
+		item = JSON.parse(JSON.stringify(item));
+	} catch(e) {};
+	
 	// remove fields to be ignored
-	for(var j=0, n=Zotero_TranslatorTester_IGNORE_FIELDS.length; j<n; j++) {
-		if(forSave) {
-			delete item[Zotero_TranslatorTester_IGNORE_FIELDS[j]]
-		} else {
-			item[Zotero_TranslatorTester_IGNORE_FIELDS[j]] = false;
-		}
+	const IGNORE_FIELDS = ["complete", "accessDate", "checkFields"];
+	for(var j=0, n=IGNORE_FIELDS.length; j<n; j++) {
+		delete item[IGNORE_FIELDS[j]];
 	}
 	
 	return item;
+};
+/**
+ * Serializes translator tester results to JSON
+ */
+Zotero_TranslatorTester.prototype.serialize = function() {
+	return {
+		"translatorID":this.translator.translatorID,
+		"type":this.type,
+		"output":this.output,
+		"label":this.translator.label,
+		"isSupported":this.isSupported,
+		"pending":this.pending,
+		"failed":this.failed,
+		"succeeded":this.succeeded,
+		"unknown":this.unknown
+	};
 };
 
 /**
@@ -137,16 +273,20 @@ Zotero_TranslatorTester.prototype.runTests = function(testDoneCallback, recursiv
  * @param {Function} testDoneCallback A callback to be executed each time a test is complete
  */
 Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallback) {
-	
 	var test = this.pending.shift();
 	var testNumber = this.tests.length-this.pending.length;
 	var me = this;
 	
 	this._debug(this, "\nTranslatorTester: Running "+this.translator.label+" Test "+testNumber);
 	
+	var executedCallback = false;
 	var callback = function(obj, test, status, message) {
+		if(executedCallback) return;
+		executedCallback = true;
+		
 		me._debug(this, "TranslatorTester: "+me.translator.label+" Test "+testNumber+": "+status+" ("+message+")");
 		me[status].push(test);
+		test.message = message;
 		if(testDoneCallback) testDoneCallback(me, test, status, message);
 		me.runTests(testDoneCallback, true);
 	};
@@ -156,6 +296,10 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
 	} else {
 		this.runTest(test, null, callback);
 	}
+	
+	(Zotero.setTimeout ? Zotero : window).setTimeout(function() {
+		callback(me, test, "failed", "Test timed out after "+TEST_RUN_TIMEOUT/1000+" seconds");
+	}, TEST_RUN_TIMEOUT);
 };
 
 /**
@@ -167,13 +311,31 @@ Zotero_TranslatorTester.prototype._runTestsRecursively = function(testDoneCallba
  * @param {Function} testDoneCallback A callback to be executed when test is complete
  */
 Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneCallback) {
+	var timer = Components.classes["@mozilla.org/timer;1"].
+		createInstance(Components.interfaces.nsITimer);
+	timer.initWithCallback({"notify":function() {
+		try {
+			Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+		} catch(e) {}
+	}}, TEST_RUN_TIMEOUT, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+	
 	var me = this;
+	var runTest = function(doc) {
+		me.runTest(test, doc, function(obj, test, status, message) {
+			try {
+				timer.cancel();
+			} catch(e) {};
+			if(hiddenBrowser) Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+			testDoneCallback(obj, test, status, message);
+		});
+	};
 	var hiddenBrowser = Zotero.HTTP.processDocuments(test.url,
 		function(doc) {
-			me.runTest(test, doc, function(obj, test, status, message) {
-				if(hiddenBrowser) Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-				testDoneCallback(obj, test, status, message);
-			});
+			if(test.defer) {
+				Zotero.setTimeout(function() { runTest(doc) }, 10000, true);
+			} else {
+				runTest(doc);
+			}
 		},
 		null,
 		function(e) {
@@ -190,7 +352,7 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
  * @param {Function} testDoneCallback A callback to be executed when test is complete
  */
 Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback) {
-	this._debug(this, "TranslatorTester: Translating "+test.url);
+	this._debug(this, "TranslatorTester: Translating"+(test.url ? " "+test.url : ""));
 	
 	var me = this;
 	var translate = Zotero.Translate.newInstance(this.type);
@@ -207,8 +369,12 @@ Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
 		me._runTestTranslate(translate, translators, test, testDoneCallback);
 	});
 	translate.setHandler("debug", this._debug);
+	var errorReturned;
+	translate.setHandler("error", function(obj, err) {
+		errorReturned = err;
+	});
 	translate.setHandler("done", function(obj, returnValue) {
-		me._checkResult(test, obj, returnValue, testDoneCallback);
+		me._checkResult(test, obj, returnValue, errorReturned, testDoneCallback);
 	});
 	translate.setHandler("select", function(obj, items, callback) {
 		if(test.items !== "multiple" && test.items.length <= 1) {
@@ -265,9 +431,23 @@ Zotero_TranslatorTester.prototype._runTestTranslate = function(translate, transl
  * @param {Object} test Test that was executed
  * @param {Zotero.Translate} translate The Zotero.Translate instance
  * @param {Boolean} returnValue Whether translation completed successfully
+ * @param {Error} error Error code, if one was specified
  * @param {Function} testDoneCallback A callback to be executed when test is complete
  */
-Zotero_TranslatorTester.prototype._checkResult = function(test, translate, returnValue, testDoneCallback) {
+Zotero_TranslatorTester.prototype._checkResult = function(test, translate, returnValue, error, testDoneCallback) {
+	if(error) {
+		var errorString = "Translation failed: "+error.toString();
+		if(typeof error === "object") {
+			for(var i in error) {
+				if(typeof(error[i]) != "object") {
+					errorString += "\n"+i+' => '+error[i];
+				}
+			}
+		}
+		testDoneCallback(this, test, "failed", errorString);
+		return;
+	}
+	
 	if(!returnValue) {
 		testDoneCallback(this, test, "failed", "Translation failed; examine debug output for errors");
 		return;
@@ -289,6 +469,12 @@ Zotero_TranslatorTester.prototype._checkResult = function(test, translate, retur
 			var translatedItem = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
 			
 			if(!this._compare(testItem, translatedItem)) {
+				var m = translate.newItems.length;
+				test.itemsReturned = new Array(m);
+				for(var j=0; j<m; j++) {
+					test.itemsReturned[j] = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i], true);
+				}
+				
 				testDoneCallback(this, test, "unknown", "Item "+i+" does not match");
 				return;
 			}
@@ -347,7 +533,7 @@ Zotero_TranslatorTester.prototype._createTest = function(translate, multipleMode
 	if(multipleMode) {
 		var items = "multiple";
 	} else {
-		for(var i=0, n=translate.newItems; i<n; i++) {
+		for(var i=0, n=translate.newItems.length; i<n; i++) {
 			Zotero_TranslatorTester._sanitizeItem(translate.newItems[i], true);
 		}
 		var items = translate.newItems;
@@ -409,16 +595,9 @@ Zotero_TranslatorTester.prototype._objectCompare = function(x, y) {
 		if(y[p] || y[p] === 0) {
 			switch(typeof(y[p])) {
 				case 'object':
-					if (!this._objectCompare(y[p],x[p])) { 
+					if (!this._objectCompare(x[p],y[p])) { 
 						return false;
 					};
-					break;
-				case 'function':
-					if (typeof(x[p])=='undefined' 
-						|| (y[p].toString() != x[p].toString())) {
-						this._debug(this, "TranslatorTester: Function "+p+" defined in y, not in x, or definitions differ");
-						return false;
-					}
 					break;
 				default:
 					if (y[p] != x[p] && x[p] !== false) {	// special exemption: x (test item)

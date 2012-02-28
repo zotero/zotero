@@ -2452,6 +2452,34 @@ Zotero.ItemTreeView.prototype.canDrop = function(row, orient, dragData)
 					return false;
 				}
 				
+				// Don't allow children to be dragged within their own parents
+				var parentItemID = item.getSource();
+				var parentIndex = this._itemRowMap[parentItemID];
+				if (this.getLevel(row) > 0) {
+					if (this._getItemAtRow(this.getParentIndex(row)).ref.id == parentItemID) {
+						return false;
+					}
+				}
+				// Including immediately after the parent
+				if (orient == 1) {
+					if (row == parentIndex) {
+						return false;
+					}
+				}
+				// And immediately before the next parent
+				if (orient == -1) {
+					var nextParentIndex = null;
+					for (var i = parentIndex + 1; i < this.rowCount; i++) {
+						if (this.getLevel(i) == 0) {
+							nextParentIndex = i;
+							break;
+						}
+					}
+					if (row === nextParentIndex) {
+						return false;
+					}
+				}
+				
 				// Disallow cross-library child drag
 				if (item.libraryID != itemGroup.ref.libraryID) {
 					return false;

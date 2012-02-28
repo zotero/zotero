@@ -25,15 +25,63 @@
 
 const NUM_CONCURRENT_TESTS = 6;
 const TRANSLATOR_TYPES = ["Web", "Import", "Export", "Search"];
-const TABLE_COLUMNS = ["Translator", "Supported", "Status", "Pending", "Succeeded", "Failed", "Unknown"];
+const TABLE_COLUMNS = ["Translator", "Supported", "Status", "Pending", "Succeeded", "Failed", "Mismatch", "Issues"];
 var translatorTables = {},
 	translatorTestViews = {},
 	translatorTestViewsToRun = {},
+	translatorTestStats = {},
 	translatorBox,
 	outputBox,
 	allOutputView,
 	currentOutputView,
 	viewerMode = true;
+
+/**
+ * Fetches issue information from GitHub
+ */
+var Issues = new function() {
+	var _executeWhenRetrieved = [];
+	var githubInfo;
+	
+	/**
+	 * Gets issues for a specific translator
+	 * @param {String} translatorLabel Gets issues starting with translatorLabel
+	 * @param {Function} callback Function to call when issue information is available
+	 */
+	this.getFor = function(translatorLabel, callback) {
+		translatorLabel = translatorLabel.toLowerCase();
+		
+		var whenRetrieved = function() {
+			var issues = [];
+			for(var i=0; i<githubInfo.length; i++) {
+				var issue = githubInfo[i];
+				if(issue.title.substr(0, translatorLabel.length).toLowerCase() === translatorLabel) {
+					issues.push(issue);
+				}
+			}
+			callback(issues);
+		};
+		
+		if(githubInfo) {
+			whenRetrieved();
+		} else {
+			_executeWhenRetrieved.push(whenRetrieved);
+		}
+	};
+	
+	var req = new XMLHttpRequest();
+	req.open("GET", "https://api.github.com/repos/zotero/translators/issues", true);
+	req.onreadystatechange = function(e) {
+		if(req.readyState != 4) return;
+		
+		githubInfo = JSON.parse(req.responseText);
+		for(var i=0; i<_executeWhenRetrieved.length; i++) {
+			_executeWhenRetrieved[i]();
+		}
+		_executeWhenRetrieved = [];
+	};
+	req.send();
+}
 
 /**
  * Handles adding debug output to the output box
@@ -89,7 +137,7 @@ var TranslatorTestView = function(translator, type) {
 	this._status = document.createElement("td");
 	row.appendChild(this._status);
 	
-	// Unknown
+	// Pending
 	this._pending = document.createElement("td");
 	row.appendChild(this._pending);
 	
@@ -101,9 +149,13 @@ var TranslatorTestView = function(translator, type) {
 	this._failed = document.createElement("td");
 	row.appendChild(this._failed);
 	
-	// Unknown
+	// Mismatch
 	this._unknown = document.createElement("td");
 	row.appendChild(this._unknown);
+	
+	// Issues
+	this._issues = document.createElement("td");
+	row.appendChild(this._issues);
 	
 	// create output view and debug function
 	var outputView = this._outputView = new OutputView(row);
@@ -126,20 +178,47 @@ var TranslatorTestView = function(translator, type) {
 }
 
 /**
+ * Sets the label and retrieves corresponding GitHub issues
+ */
+TranslatorTestView.prototype.setLabel = function(label) {
+	this._label.appendChild(document.createTextNode(label));
+	var issuesNode = this._issues;
+	Issues.getFor(label, function(issues) {
+		for(var i=0; i<issues.length; i++) {
+			var issue = issues[i];
+			var div = document.createElement("div"),
+				a = document.createElement("a");
+			
+			var date = issue.updated_at;
+			date = new Date(Date.UTC(date.substr(0, 4), date.substr(5, 2)-1, date.substr(8, 2),
+				date.substr(11, 2), date.substr(14, 2), date.substr(17, 2)));
+			if("toLocaleFormat" in date) {
+				date = date.toLocaleFormat("%x");
+			} else {
+				date = date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate();
+			}
+			
+			a.textContent = issue.title+" (#"+issue.number+"; "+date+")";
+			a.setAttribute("href", issue.html_url);
+			a.setAttribute("target", "_blank");
+			div.appendChild(a);
+			issuesNode.appendChild(div);
+		}
+	});
+}
+
+/**
  * Initializes TranslatorTestView given a translator and its type
  */
 TranslatorTestView.prototype.initWithTranslatorAndType = function(translator, type) {
-	this._label.appendChild(document.createTextNode(translator.label));
-	
-	this.isSupported = translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER;
-	this._supported.appendChild(document.createTextNode(this.isSupported ? "Yes" : "No"));
-	this._supported.className = this.isSupported ? "supported-yes" : "supported-no";
+	this.setLabel(translator.label);
 	
 	this._translatorTester = new Zotero_TranslatorTester(translator, type, this._debug);
 	this.canRun = !!this._translatorTester.tests.length;
 	this.updateStatus(this._translatorTester);
 	
 	this._type = type;
+	translatorTestViews[type].push(this);
 	translatorTables[this._type].appendChild(this._row);
 }
 
@@ -148,16 +227,13 @@ TranslatorTestView.prototype.initWithTranslatorAndType = function(translator, ty
  */
 TranslatorTestView.prototype.unserialize = function(serializedData) {
 	this._outputView.addOutput(serializedData.output);
-	this._label.appendChild(document.createTextNode(serializedData.label));
+	this.setLabel(serializedData.label);
 	
-	this.isSupported = serializedData.isSupported;
-	this._supported.appendChild(document.createTextNode(this.isSupported ? "Yes" : "No"));
-	this._supported.className = this.isSupported ? "supported-yes" : "supported-no";
+	this._type = serializedData.type;
+	translatorTestViews[serializedData.type].push(this);
 	
 	this.canRun = false;
 	this.updateStatus(serializedData);
-	
-	this._type = serializedData.type;
 	translatorTables[this._type].appendChild(this._row);
 }
 
@@ -165,16 +241,7 @@ TranslatorTestView.prototype.unserialize = function(serializedData) {
  * Initializes TranslatorTestView given a JSON-ified translatorTester
  */
 TranslatorTestView.prototype.serialize = function(serializedData) {
-	return {
-		"type":this._type,
-		"output":this._outputView.getOutput(),
-		"label":this._label.textContent,
-		"isSupported":this.isSupported,
-		"pending":parseInt(this._pending.textContent),
-		"failed":parseInt(this._failed.textContent),
-		"succeeded":parseInt(this._succeeded.textContent),
-		"unknown":parseInt(this._unknown.textContent)
-	};
+	return this._translatorTester.serialize();
 }
 
 /**
@@ -184,6 +251,9 @@ TranslatorTestView.prototype.updateStatus = function(obj, status) {
 	while(this._status.hasChildNodes()) {
 		this._status.removeChild(this._status.firstChild);
 	}
+	
+	this._supported.textContent = obj.isSupported ? "Yes" : "No";
+	this._supported.className = obj.isSupported ? "supported-yes" : "supported-no";
 	
 	var pending = typeof obj.pending === "object" ? obj.pending.length : obj.pending;
 	var succeeded = typeof obj.succeeded === "object" ? obj.succeeded.length : obj.succeeded;
@@ -212,15 +282,18 @@ TranslatorTestView.prototype.updateStatus = function(obj, status) {
 			} else {
 				this._status.textContent = "Not Run";
 			}
+		} else if((succeeded || unknown) && failed) {
+			this._status.className = "status-partial-failure";
+			this._status.textContent = "Partial Failure";
 		} else if(failed) {
 			this._status.className = "status-failed";
-			this._status.textContent = "Failed";
+			this._status.textContent = "Failure";
 		} else if(unknown) {
-			this._status.className = "status-unknown";
-			this._status.textContent = "Unknown";
+			this._status.className = "status-mismatch";
+			this._status.textContent = "Data Mismatch";
 		} else {
 			this._status.className = "status-succeeded";
-			this._status.textContent = "Succeeded";
+			this._status.textContent = "Success";
 		}
 	} else {
 		this._status.className = "status-untested";
@@ -231,6 +304,8 @@ TranslatorTestView.prototype.updateStatus = function(obj, status) {
 	this._succeeded.textContent = succeeded;
 	this._failed.textContent = failed;
 	this._unknown.textContent = unknown;
+	
+	if(this._type) translatorTestStats[this._type].update();
 }
 
 /**
@@ -254,6 +329,44 @@ TranslatorTestView.prototype.runTests = function(doneCallback) {
 	
 	this._translatorTester.runTests(newCallback);
 }
+
+/**
+ * Gets overall stats for translators
+ */
+var TranslatorTestStats = function(translatorType) {
+	this.translatorType = translatorType
+	this.node = document.createElement("p");
+};
+
+TranslatorTestStats.prototype.update = function() {
+	var types = {
+		"Success":0,
+		"Data Mismatch":0,
+		"Partial Failure":0,
+		"Failure":0,
+		"Untested":0,
+		"Running":0,
+		"Pending":0,
+		"Not Run":0
+	};
+	
+	var testViews = translatorTestViews[this.translatorType];
+	for(var i in testViews) {
+		var status = testViews[i]._status ? testViews[i]._status.textContent : "Not Run";
+		if(status in types) {
+			types[status] += 1;
+		}
+	}
+	
+	var typeInfo = [];
+	for(var i in types) {
+		if(types[i]) {
+			typeInfo.push(i+": "+types[i]);
+		}
+	}
+	
+	this.node.textContent = typeInfo.join(" | ");
+};
 
 /**
  * Called when loaded
@@ -308,6 +421,8 @@ function init() {
 		var displayType = TRANSLATOR_TYPES[i];
 		var translatorType = displayType.toLowerCase();
 		
+		translatorTestViews[translatorType] = [];
+		
 		// create header
 		var h1 = document.createElement("h1");
 		h1.appendChild(document.createTextNode(displayType+" Translators "));
@@ -321,13 +436,7 @@ function init() {
 				var type = translatorType;
 				return function(e) {
 					e.preventDefault();
-					for(var i in translatorTestViewsToRun[type]) {
-						var testView = translatorTestViewsToRun[type][i];
-						testView.updateStatus(testView._translatorTester, "pending");
-					}
-					for(var i=0; i<NUM_CONCURRENT_TESTS; i++) {
-						runTranslatorTests(type);
-					}
+					runTranslatorTests(type);
 				}
 			}, false);
 			h1.appendChild(runAll);
@@ -338,6 +447,9 @@ function init() {
 		// create table
 		var translatorTable = document.createElement("table");
 		translatorTables[translatorType] = translatorTable;
+		
+		translatorTestStats[translatorType] = new TranslatorTestStats(translatorType);
+		translatorBox.appendChild(translatorTestStats[translatorType].node);
 		
 		// add headings to table
 		var headings = document.createElement("tr");
@@ -366,16 +478,34 @@ function init() {
 	if(viewerMode) {
 		// if no Zotero object, try to unserialize data
 		var req = new XMLHttpRequest();
-		req.open("GET", "testResults.json", true);
+		var loc = "testResults.json";
+		if(window.location.hash) {
+			var hashVars = {};
+			var hashVarsSplit = window.location.hash.substr(1).split("&");
+			for(var i=0; i<hashVarsSplit.length; i++) {
+				var myVar = hashVarsSplit[i];
+				var index = myVar.indexOf("=");
+				hashVars[myVar.substr(0, index)] = myVar.substr(index+1);
+			}
+			
+			if(hashVars["browser"] && /^[a-z]$/.test(hashVars["browser"])
+					&& hashVars["version"] && /^[0-9a-zA-Z\-._]/.test(hashVars["version"])) {
+				loc = "testResults-"+hashVars["browser"]+"-"+hashVars["version"]+".json";
+			}
+			if(hashVars["date"] && /^[0-9\-]+$/.test(hashVars["date"])) {
+				loc = hashVars["date"]+"/"+loc;
+			}
+		}
+		req.open("GET", loc, true);
 		req.overrideMimeType("text/plain");
 		req.onreadystatechange = function(e) {
 			if(req.readyState != 4) return;
 
-			if(req.responseText) {	// success; unserialize
+			if(req.status === 200 && req.responseText) {	// success; unserialize
 				var data = JSON.parse(req.responseText);
-				for(var i=0, n=data.length; i<n; i++) {
+				for(var i=0, n=data.results.length; i<n; i++) {
 					var translatorTestView = new TranslatorTestView();
-					translatorTestView.unserialize(data[i]);
+					translatorTestView.unserialize(data.results[i]);
 				}
 			} else {
 				jsonNotFound("XMLHttpRequest returned "+req.status);
@@ -393,12 +523,11 @@ function init() {
 		var serialize = document.createElement("a");
 		serialize.href = "#";
 		serialize.appendChild(document.createTextNode("Serialize Results"));
-		serialize.addEventListener("click", serializeAll, false);
+		serialize.addEventListener("click", serializeToDownload, false);
 		lastP.appendChild(serialize);
 		translatorBox.appendChild(lastP);
 	}
 }
-
 
 /**
  * Indicates no JSON file could be found.
@@ -413,7 +542,6 @@ function jsonNotFound(str) {
  * Called after translators are returned from main script
  */
 function haveTranslators(translators, type) {
-	translatorTestViews[type] = [];
 	translatorTestViewsToRun[type] = [];
 	
 	translators = translators.sort(function(a, b) {
@@ -423,38 +551,62 @@ function haveTranslators(translators, type) {
 	for(var i in translators) {
 		var translatorTestView = new TranslatorTestView();
 		translatorTestView.initWithTranslatorAndType(translators[i], type);
-		translatorTestViews[type].push(translatorTestView);
 		if(translatorTestView.canRun) {
 			translatorTestViewsToRun[type].push(translatorTestView);
 		}
 	}
+	
+	translatorTestStats[type].update();
+	var ev = document.createEvent('HTMLEvents');
+	ev.initEvent('ZoteroHaveTranslators-'+type, true, true);
+	document.dispatchEvent(ev);
 }
 
 /**
- * Runs translator tests recursively, after translatorTestViews has been populated
+ * Begin running all translator tests of a given type
  */
-function runTranslatorTests(type, callback, runCallbackIfComplete) {
+function runTranslatorTests(type, callback) {
+	for(var i in translatorTestViewsToRun[type]) {
+		var testView = translatorTestViewsToRun[type][i];
+		testView.updateStatus(testView._translatorTester, "pending");
+	}
+	for(var i=0; i<NUM_CONCURRENT_TESTS; i++) {
+		initTests(type, callback);
+	}
+}
+
+/**
+ * Run translator tests recursively, after translatorTestViews has been populated
+ */
+function initTests(type, callback, runCallbackIfComplete) {
 	if(translatorTestViewsToRun[type].length) {
 		if(translatorTestViewsToRun[type].length === 1) runCallbackIfComplete = true;
 		var translatorTestView = translatorTestViewsToRun[type].shift();
-		translatorTestView.runTests(function() { runTranslatorTests(type, callback, runCallbackIfComplete) });
+		translatorTestView.runTests(function() { initTests(type, callback, runCallbackIfComplete) });
 	} else if(callback && runCallbackIfComplete) {
 		callback();
 	}
 }
 
 /**
- * Serializes all run translator tests
+ * Serializes translator tests to JSON
  */
-function serializeAll(e) {
-	var serializedData = [];
+function serializeToJSON() {
+	var serializedData = {"browser":Zotero.browser, "version":Zotero.version, "results":[]};
 	for(var i in translatorTestViews) {
 		var n = translatorTestViews[i].length;
 		for(var j=0; j<n; j++) {
-			serializedData.push(translatorTestViews[i][j].serialize());
+			serializedData.results.push(translatorTestViews[i][j].serialize());
 		}
 	}
-	
+	return serializedData;
+}
+
+/**
+ * Serializes all run translator tests
+ */
+function serializeToDownload(e) {
+	var serializedData = serializeToJSON();
 	document.location.href = "data:application/octet-stream,"+encodeURIComponent(JSON.stringify(serializedData, null, "\t"));
 	e.preventDefault();
 }

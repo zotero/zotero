@@ -8,6 +8,7 @@ table {
 	border-width: 0 0 1px 1px;
 	border-style: solid;
 	border-collapse: collapse;
+	width: 100%;
 }
 
 td, th {
@@ -18,16 +19,19 @@ td, th {
 }
 
 .th-translator {
-	width: 500px;
-	max-width: 500px;
 }
 
 .th-status {
 	width: 100px;
+	max-width: 100px;
 }
 
-.th-pending, .th-supported, .th-succeeded, .th-failed, .th-unknown {
+.th-pending, .th-supported, .th-succeeded, .th-failed, .th-mismatch {
 	width: 75px;
+	max-width: 75px;
+}
+
+.th-issues {
 }
 
 .status-succeeded, .supported-yes {
@@ -38,7 +42,7 @@ td, th {
 	background-color: #ff9090;
 }
 
-.status-unknown {
+.status-mismatch {
 	background-color: #FFB;
 }
 
@@ -48,6 +52,10 @@ td, th {
 
 .status-pending, .status-running {
 	background-color: #9FF;
+}
+
+.status-partial-failure {
+	background-color: rgb(249, 180, 98);
 }
 
 tr.output-displayed > td {

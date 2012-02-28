@@ -53,8 +53,8 @@ Zotero.Sync.Storage = new function () {
 	
 	// TEMP
 	// TODO: localize
-	this.defaultError = "A file sync error occurred. Please try syncing again.\n\nIf you receive this message repeatedly, restart " + Zotero.appName + " and/or your computer and try again. If you continue to receive the message, submit an error report and post the Report ID to a new thread in the Zotero Forums.";
-	this.defaultErrorRestart = "A file sync error occurred. Please restart " + Zotero.appName + " and/or your computer and try syncing again.\n\nIf you receive this message repeatedly, submit an error report and post the Report ID to a new thread in the Zotero Forums.";
+	this.__defineGetter__("defaultError", function () "A file sync error occurred. Please try syncing again.\n\nIf you receive this message repeatedly, restart " + Zotero.appName + " and/or your computer and try again. If you continue to receive the message, submit an error report and post the Report ID to a new thread in the Zotero Forums.");
+	this.__defineGetter__("defaultErrorRestart", function () "A file sync error occurred. Please restart " + Zotero.appName + " and/or your computer and try syncing again.\n\nIf you receive this message repeatedly, submit an error report and post the Report ID to a new thread in the Zotero Forums.");
 	
 	//
 	// Public properties
@@ -1339,7 +1339,10 @@ Zotero.Sync.Storage = new function () {
 					
 					if (windowsLength) {
 						var pathLength = destFile.path.length - destFile.leafName.length;
-						var newLength = 254 - pathLength;
+						// Limit should be 255, but a shorter limit seems to be
+						// enforced for nsIZipReader.extract() below on
+						// non-English systems
+						var newLength = 240 - pathLength;
 						// Require 40 available characters in path -- this is arbitrary,
 						// but otherwise filenames are going to end up being cut off
 						if (newLength < 40) {
@@ -1351,7 +1354,7 @@ Zotero.Sync.Storage = new function () {
 						}
 					}
 					else {
-						var newLength = 254;
+						var newLength = 240;
 					}
 					
 					// Shorten file if it's too long -- we don't relink it, but this should
@@ -1415,6 +1418,7 @@ Zotero.Sync.Storage = new function () {
 				zipReader.extract(entryName, destFile);
 			}
 			catch (e) {
+				Zotero.debug(destFile.path);
 				Zotero.File.checkFileAccessError(e, destFile, 'create');
 			}
 			

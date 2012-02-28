@@ -273,7 +273,7 @@ Zotero.ItemTypes = new function() {
 			mru = mru.split(',').slice(0, limit);
 			for (var i=0, len=mru.length; i<len; i++) {
 				var id = parseInt(mru[i]);
-				if (!isNaN(id)) {
+				if (!isNaN(id) && id != 13) { // ignore 'webpage' item type
 					params.push(id);
 				}
 			}

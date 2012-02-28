@@ -114,11 +114,11 @@ Zotero.IPC = new function() {
 			close = lib.declare("close", ctypes.default_abi, ctypes.int, ctypes.int);
 		}
 		
-		// On OS X, O_NONBLOCK = 0x0004
+		// On OS X and FreeBSD, O_NONBLOCK = 0x0004
 		// On Linux, O_NONBLOCK = 00004000
 		// On both, O_WRONLY = 0x0001
 		var mode = 0x0001;
-		if(!block) mode = mode | (Zotero.isMac ? 0x0004 : 00004000);
+		if(!block) mode = mode | (Zotero.isLinux ? 00004000 : 0x0004);
 		
 		var fd = open(pipe.path, mode);
 		if(fd === -1) return false;			

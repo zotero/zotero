@@ -604,7 +604,9 @@ function populateQuickCopyList() {
 	menulist.setAttribute('preference', "pref-quickCopy-setting");
 	updateQuickCopyHTMLCheckbox();
 	
-	refreshQuickCopySiteList();
+	if (!Zotero.isStandalone) {
+		refreshQuickCopySiteList();
+	}
 }
 
 
@@ -776,11 +778,18 @@ function deleteSelectedQuickCopySite() {
 
 function updateQuickCopyInstructions() {
 	var prefix = Zotero.isMac ? 'Cmd+Shift+' : 'Ctrl+Alt+';
+	
 	var key = Zotero.Prefs.get('keys.copySelectedItemsToClipboard');
-	
-	var instr = document.getElementById('quickCopy-instructions');
 	var str = Zotero.getString('zotero.preferences.export.quickCopy.instructions', prefix + key);
+	var instr = document.getElementById('quickCopy-instructions');
+	while (instr.hasChildNodes()) {
+		instr.removeChild(instr.firstChild);
+	}
+	instr.appendChild(document.createTextNode(str));
 	
+	var key = Zotero.Prefs.get('keys.copySelectedItemCitationsToClipboard');
+	var str = Zotero.getString('zotero.preferences.export.quickCopy.citationInstructions', prefix + key);
+	var instr = document.getElementById('quickCopy-citationInstructions');
 	while (instr.hasChildNodes()) {
 		instr.removeChild(instr.firstChild);
 	}
@@ -1258,6 +1267,55 @@ function runIntegrityCheck() {
 	var ok = Zotero.DB.integrityCheck();
 	if (ok) {
 		ok = Zotero.Schema.integrityCheck();
+		if (!ok) {
+			var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+			var index = ps.confirmEx(window,
+				Zotero.getString('general.failed'),
+				Zotero.getString('db.integrityCheck.failed') + "\n\n" +
+					Zotero.getString('db.integrityCheck.repairAttempt') + " " +
+					Zotero.getString('db.integrityCheck.appRestartNeeded', Zotero.appName),
+				buttonFlags,
+				Zotero.getString('db.integrityCheck.fixAndRestart', Zotero.appName),
+				null, null, null, {}
+			);
+			
+			if (index == 0) {
+				// Safety first
+				Zotero.DB.backupDatabase();
+				
+				// Fix the errors
+				Zotero.Schema.integrityCheck(true);
+				
+				// And run the check again
+				ok = Zotero.Schema.integrityCheck();
+				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING);
+				if (ok) {
+					var str = 'success';
+					var msg = Zotero.getString('db.integrityCheck.errorsFixed');
+				}
+				else {
+					var str = 'failed';
+					var msg = Zotero.getString('db.integrityCheck.errorsNotFixed')
+								+ "\n\n" + Zotero.getString('db.integrityCheck.reportInForums');
+				}
+				
+				ps.confirmEx(window,
+					Zotero.getString('general.' + str),
+					msg,
+					buttonFlags,
+					Zotero.getString('general.restartApp', Zotero.appName),
+					null, null, null, {}
+				);
+				
+				var appStartup = Components.classes["@mozilla.org/toolkit/app-startup;1"]
+						.getService(Components.interfaces.nsIAppStartup);
+				appStartup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit
+					| Components.interfaces.nsIAppStartup.eRestart);
+			}
+			
+			return;
+		}
 	}
 	var str = ok ? 'passed' : 'failed';
 	

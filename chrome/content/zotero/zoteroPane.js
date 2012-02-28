@@ -269,7 +269,7 @@ var ZoteroPane = new function()
 			menuitem.setAttribute("label", itemTypes[i].localized);
 			menuitem.setAttribute("tooltiptext", "");
 			let type = itemTypes[i].id;
-			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type); }, false);
+			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, {}, null, true); }, false);
 			moreMenu.appendChild(menuitem);
 		}
 	}
@@ -307,7 +307,7 @@ var ZoteroPane = new function()
 			menuitem.setAttribute("label", itemTypes[i].localized);
 			menuitem.setAttribute("tooltiptext", "");
 			let type = itemTypes[i].id;
-			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type); }, false);
+			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, {}, null, true); }, false);
 			menuitem.className = "zotero-tb-add";
 			addMenu.insertBefore(menuitem, separator);
 		}
@@ -658,7 +658,7 @@ var ZoteroPane = new function()
 	 *
 	 * _data_ is an optional object with field:value for itemData
 	 */
-	function newItem(typeID, data, row)
+	function newItem(typeID, data, row, manual)
 	{
 		if (!Zotero.stateCheck()) {
 			this.displayErrorMessage(true);
@@ -675,7 +675,7 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		if (row !== undefined) {
+		if (row !== undefined && row !== null) {
 			var itemGroup = this.collectionsView._getItemAtRow(row);
 			var libraryID = itemGroup.ref.libraryID;
 		}
@@ -703,19 +703,21 @@ var ZoteroPane = new function()
 		document.getElementById('zotero-view-item').selectedIndex = 0;
 		
 		// Update most-recently-used list for New Item menu
-		var mru = Zotero.Prefs.get('newItemTypeMRU');
-		if (mru) {
-			var mru = mru.split(',');
-			var pos = mru.indexOf(typeID + '');
-			if (pos != -1) {
-				mru.splice(pos, 1);
+		if (manual) {
+			var mru = Zotero.Prefs.get('newItemTypeMRU');
+			if (mru) {
+				var mru = mru.split(',');
+				var pos = mru.indexOf(typeID + '');
+				if (pos != -1) {
+					mru.splice(pos, 1);
+				}
+				mru.unshift(typeID);
 			}
-			mru.unshift(typeID);
+			else {
+				var mru = [typeID + ''];
+			}
+			Zotero.Prefs.set('newItemTypeMRU', mru.slice(0, 5).join(','));
 		}
-		else {
-			var mru = [typeID + ''];
-		}
-		Zotero.Prefs.set('newItemTypeMRU', mru.slice(0, 5).join(','));
 		
 		return Zotero.Items.get(itemID);
 	}

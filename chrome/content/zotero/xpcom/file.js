@@ -372,8 +372,9 @@ Zotero.File = new function(){
 			var checkFileWindows = "Check that the file is not currently "
 				+ "in use and that it is not marked as read-only. To check "
 				+ "all files in your Zotero data directory, right-click on "
-				+ "the 'zotero' directory, click Properties, and ensure that "
-				+ "the Read-Only checkbox is empty.";
+				+ "the 'zotero' directory, click Properties, clear "
+				+ "the Read-Only checkbox, and apply the change to all folders "
+				+ "and files in the directory.";
 			var checkFileOther = "Check that the file is not currently "
 				+ "in use and that its permissions allow write access.";
 			var msg = str + " "

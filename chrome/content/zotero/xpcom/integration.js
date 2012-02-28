@@ -1256,7 +1256,10 @@ Zotero.Integration.Fields.prototype._retrieveFields = function() {
  * Shows an error if a field code is corrupted
  * @param {Exception} e The exception thrown
  * @param {Field} field The Zotero field object
+ * @param {Function} callback The callback passed to updateSession
+ * @param {Function} errorCallback The error callback passed to updateSession
  * @param {Integer} i The field index
+ * @return {Boolean} Whether to continue updating the session
  */
 Zotero.Integration.Fields.prototype._showCorruptFieldError = function(e, field, callback, errorCallback, i) {
 	Zotero.logError(e);
@@ -1282,6 +1285,58 @@ Zotero.Integration.Fields.prototype._showCorruptFieldError = function(e, field, 
 			Zotero.Integration.currentWindow.close();
 			Zotero.Integration.currentWindow = oldWindow;
 			me.updateSession(callback, errorCallback);
+		});
+		return false;
+	}
+}
+
+/**
+ * Shows an error if a field code is missing
+ * @param {Exception} e The exception thrown
+ * @param {Exception} e The exception thrown
+ * @param {Field} field The Zotero field object
+ * @param {Function} callback The callback passed to updateSession
+ * @param {Function} errorCallback The error callback passed to updateSession
+ * @param {Integer} i The field index
+ * @return {Boolean} Whether to continue updating the session
+ */
+Zotero.Integration.Fields.prototype._showMissingItemError = function(e, field, callback, errorCallback, i) {
+	// First, check if we've already decided to remove field codes from these
+	var reselect = true;
+	for each(var reselectKey in e.reselectKeys) {
+		if(this._deleteKeys[reselectKey]) {
+			this._removeCodeFields.push(i);
+			return true;
+		}
+	}
+	
+	// Ask user what to do with this item
+	if(e.citationLength == 1) {
+		var msg = Zotero.getString("integration.missingItem.single");
+	} else {
+		var msg = Zotero.getString("integration.missingItem.multiple", (e.citationIndex+1).toString());
+	}
+	msg += '\n\n'+Zotero.getString('integration.missingItem.description');
+	field.select();
+	this._doc.activate();
+	var result = this._doc.displayAlert(msg, 1, 3);
+	if(result == 0) {			// Cancel
+		throw new Zotero.Integration.UserCancelledException();
+	} else if(result == 1) {	// No
+		for each(var reselectKey in e.reselectKeys) {
+			this._deleteKeys[reselectKey] = true;
+		}
+		this._removeCodeFields.push(i);
+		return true;
+	} else {					// Yes
+		// Display reselect item dialog
+		var me = this;
+		var oldCurrentWindow = Zotero.Integration.currentWindow;
+		this._session.reselectItem(this._doc, e, function() {
+			// Now try again
+			Zotero.Integration.currentWindow = oldCurrentWindow;
+			me._doc.activate();
+			me._processFields(me._fields, callback, errorCallback, i);
 		});
 		return false;
 	}
@@ -1315,23 +1370,28 @@ Zotero.Integration.Fields.prototype.updateSession = function(callback, errorCall
 				try {
 					me._session.loadBibliographyData(me._bibliographyData);
 				} catch(e) {
-					if(errorCallback) {
-						errorCallback(e);
-					} else if(e instanceof Zotero.Integration.CorruptFieldException) {
-						var msg = Zotero.getString("integration.corruptBibliography")+'\n\n'+
-								  Zotero.getString('integration.corruptBibliography.description');
-						var result = me._doc.displayAlert(msg, 
-									Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
-									Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
-						if(result == 0) {
-							throw e;
+					var defaultHandler = function() {
+						if(e instanceof Zotero.Integration.CorruptFieldException) {
+							var msg = Zotero.getString("integration.corruptBibliography")+'\n\n'+
+									  Zotero.getString('integration.corruptBibliography.description');
+							var result = me._doc.displayAlert(msg, 
+										Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_CAUTION, 
+										Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
+							if(result == 0) {
+								throw e;
+							} else {
+								me._bibliographyData = "";
+								me._session.bibliographyHasChanged = true;
+								me._session.bibliographyDataHasChanged = true;
+							}
 						} else {
-							me._bibliographyData = "";
-							me._session.bibliographyHasChanged = true;
-							me._session.bibliographyDataHasChanged = true;
+							throw e;
 						}
-					} else {
-						throw e;
+					};
+					if(errorCallback) {
+						if(!errorCallback(e, defaultHandler)) return;
+					} else if(!defaultHandler()) {
+						return;
 					}
 				}
 			}
@@ -1362,13 +1422,26 @@ Zotero.Integration.Fields.prototype.updateSession = function(callback, errorCall
 Zotero.Integration.Fields.prototype._processFields = function(fields, callback, errorCallback, i) {
 	if(!i) i = 0;
 	
+	var me = this;
 	for(var n = fields.length; i<n; i++) {
 		var field = fields[i];
 		
 		try {
 			var fieldCode = field.getCode();
 		} catch(e) {
-			if(!this._showCorruptFieldError(e, field, callback, errorCallback, i)) return;
+			var defaultHandler = function() {
+				return me._showCorruptFieldError(e, field, callback, errorCallback, i);
+			};
+			
+			if(errorCallback) {
+				if(errorCallback(e, defaultHandler)) {
+					continue;
+				} else {
+					return;
+				}
+			} else if(!defaultHandler()) {
+				return;
+			}
 		}
 		
 		var [type, content] = this.getCodeTypeAndContent(fieldCode);
@@ -1377,54 +1450,24 @@ Zotero.Integration.Fields.prototype._processFields = function(fields, callback, 
 			try {
 				this._session.addCitation(i, noteIndex, content);
 			} catch(e) {
+				var defaultHandler = function() {
+					if(e instanceof Zotero.Integration.MissingItemException) {
+						return me._showMissingItemError(e, field, callback, errorCallback, i);
+					} else if(e instanceof Zotero.Integration.CorruptFieldException) {
+						return me._showCorruptFieldError(e, field, callback, errorCallback, i);
+					} else {
+						throw e;
+					}
+				};
+				
 				if(errorCallback) {
-					errorCallback(e);
-				} else if(e instanceof Zotero.Integration.MissingItemException) {
-					// First, check if we've already decided to remove field codes from these
-					var reselect = true;
-					for each(var reselectKey in e.reselectKeys) {
-						if(this._deleteKeys[reselectKey]) {
-							this._removeCodeFields.push(i);
-							reselect = false;
-							break;
-						}
+					if(errorCallback(e, defaultHandler)) {
+						continue;
+					} else {
+						return;
 					}
-					
-					if(reselect) {
-						// Ask user what to do with this item
-						if(e.citationLength == 1) {
-							var msg = Zotero.getString("integration.missingItem.single");
-						} else {
-							var msg = Zotero.getString("integration.missingItem.multiple", (e.citationIndex+1).toString());
-						}
-						msg += '\n\n'+Zotero.getString('integration.missingItem.description');
-						field.select();
-						this._doc.activate();
-						var result = this._doc.displayAlert(msg, 1, 3);
-						if(result == 0) {			// Cancel
-							throw new Zotero.Integration.UserCancelledException();
-						} else if(result == 1) {	// No
-							for each(var reselectKey in e.reselectKeys) {
-								this._deleteKeys[reselectKey] = true;
-							}
-							this._removeCodeFields.push(i);
-						} else {					// Yes
-							// Display reselect item dialog
-							var me = this;
-							var oldCurrentWindow = Zotero.Integration.currentWindow;
-							this._session.reselectItem(this._doc, e, function() {
-								// Now try again
-								Zotero.Integration.currentWindow = oldCurrentWindow;
-								me._doc.activate();
-								me._processFields(fields, callback, errorCallback, i);
-							});
-							return;
-						}
-					}
-				} else if(e instanceof Zotero.Integration.CorruptFieldException) {
-					if(!this._showCorruptFieldError(e, field, callback, errorCallback, i)) return;
-				} else {
-					throw e;
+				} if(!defaultHandler()) {
+					return;
 				}
 			}
 		} else if(type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
@@ -1447,12 +1490,17 @@ Zotero.Integration.Fields.prototype._processFields = function(fields, callback, 
 Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, forceBibliography,
 		ignoreCitationChanges, callback) {
 	// update citations
-	this._session.updateUpdateIndices(forceCitations);
-	var me = this;
-	var deleteCitations = Zotero.pumpGenerator(this._session.updateCitations(function(deleteCitations) {
-		Zotero.pumpGenerator(me._updateDocument(forceCitations, forceBibliography,
-			ignoreCitationChanges, deleteCitations, callback));
-	}));
+	try {
+		this._session.updateUpdateIndices(forceCitations);
+		var me = this;
+		var deleteCitations = Zotero.pumpGenerator(this._session.updateCitations(function(deleteCitations) {
+			Zotero.pumpGenerator(me._updateDocument(forceCitations, forceBibliography,
+				ignoreCitationChanges, deleteCitations, callback));
+		}));
+	} catch(e) {
+		Zotero.logError(e);
+		Zotero.Integration.handleError(e, this._doc);
+	}
 }
 
 /**
@@ -1723,6 +1771,26 @@ Zotero.Integration.CitationEditInterface = function(citation, field, fields, ses
 
 Zotero.Integration.CitationEditInterface.prototype = {
 	/**
+	 * Handles an error in updateSession
+	 */
+	"_errorHandler":function(e, defaultHandler) {
+		Zotero.debug('Integration.CitationEditInterface: Error "'+e.toString()+'" caught by handler');
+		if(this._haveAccepted) {
+			try {
+				return defaultHandler();
+			} catch(e) {
+				if(e instanceof Zotero.Integration.UserCancelledException) {
+					this._field.delete();
+				}
+				throw e;
+			}
+		} else {
+			this._errorOccurred = true;
+			return true;
+		}
+	},
+	
+	/**
 	 * Run a function when the session information has been updated
 	 * @param {Function} sessionUpdatedCallback
 	 */
@@ -1743,12 +1811,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 				}
 				me._sessionUpdated = true;
 				delete me._sessionCallbackQueue;
-			}, function(e) {
-				if(e instanceof Zotero.Integration.MissingItemException
-						|| e instanceof Zotero.Integration.CorruptFieldException) {
-					me._errorOccurred = true;
-				}
-			});
+			}, function(e, defaultHandler) { return me._errorHandler(e, defaultHandler) });
 		}
 	},
 	
@@ -1795,8 +1858,9 @@ Zotero.Integration.CitationEditInterface.prototype = {
 			Zotero.setTimeout(function() {
 				me._fields.updateSession(function() {
 					me._errorOccurred = false;
+					me._sessionUpdated = true;
 					me.accept(progressCallback, true);
-				})
+				}, function(e, defaultHandler) { return me._errorHandler(e, defaultHandler) });
 			}, 0);
 			return;
 		}

@@ -102,6 +102,10 @@ Zotero.Attachments = new function(){
 			// hmph
 			Zotero.DB.rollbackTransaction();
 			
+			var msg = "Failed importing file " + file.path;
+			Components.utils.reportError(msg);
+			Zotero.debug(msg, 1);
+			
 			try {
 				// Clean up
 				if (itemID) {

@@ -62,7 +62,8 @@ Zotero.Debug = new function () {
 					break;
 			}
 		}
-		else if (typeof message != 'string') {
+		
+		if (typeof message != 'string') {
 			message = Zotero.Utilities.varDump(message);
 		}
 		
@@ -152,10 +153,14 @@ Zotero.Debug = new function () {
 			}
 		}
 		
-		return Zotero.getErrors(true).join('\n\n') +
-				"\n\n" + Zotero.getSystemInfo() + "\n\n" +
-				"=========================================================\n\n" +
-				output;
+		if(Zotero.getErrors) {
+			return Zotero.getErrors(true).join('\n\n') +
+					"\n\n" + Zotero.getSystemInfo() + "\n\n" +
+					"=========================================================\n\n" +
+					output;
+		} else {
+			return output;
+		}
 	}
 	
 	
