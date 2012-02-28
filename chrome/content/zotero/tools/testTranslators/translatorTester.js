@@ -61,7 +61,7 @@ Zotero_TranslatorTesters = new function() {
 						runTesters(testers, numConcurrentTests, doneCallback);
 					}
 				};
-			});
+			}, true);
 		};
 	};
 	
