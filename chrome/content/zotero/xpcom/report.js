@@ -28,12 +28,6 @@ Zotero.Report = new function() {
 	this.generateHTMLDetails = generateHTMLDetails;
 	this.generateHTMLList = generateHTMLList;
 	
-	// Sites that don't need the query string
-	// (full URL is kept for link but stripped for display)
-	var _noQueryStringSites = [
-		/^http:\/\/([^\.]*\.)?nytimes\.com/
-	];
-	
 	var escapeXML = function (str) {
 		str = str.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/g, '\u2B1A');
 		return Zotero.Utilities.htmlSpecialChars(str);
@@ -235,52 +229,8 @@ Zotero.Report = new function() {
 			var fieldText;
 			
 			if (i == 'url' && arr[i].match(/^https?:\/\//)) {
-				fieldText = arr[i];
-				
-				// Shorten long URLs manually until Firefox wraps at ?
-				// (like Safari) or supports the CSS3 word-wrap property
-				var firstSpace = fieldText.indexOf(' ');
-				if ((firstSpace == -1 && arr[i].length > 29) || firstSpace > 29) {
-					var stripped = false;
-					
-					// Strip query string for sites we know don't need it
-					for each(var re in _noQueryStringSites) {
-						if (re.test(arr[i])){
-							var pos = arr[i].indexOf('?');
-							if (pos != -1) {
-								fieldText = arr[i].substr(0, pos);
-								stripped = true;
-							}
-							break;
-						}
-					}
-					
-					if (!stripped) {
-						// Add a line-break after the ? of long URLs
-						fieldText = arr[i].replace('?', "?<ZOTEROBREAK/>");
-						
-						// Strip query string variables from the end while the
-						// query string is longer than the main part
-						var pos = fieldText.indexOf('?');
-						if (pos != -1) {
-							while (pos < (fieldText.length / 2)) {
-								var lastAmp = fieldText.lastIndexOf('&');
-								if (lastAmp == -1) {
-									break;
-								}
-								fieldText = fieldText.substr(0, lastAmp);
-								var shortened = true;
-							}
-							// Append '&...' to the end
-							if (shortened) {
-								fieldText += "&<ZOTEROHELLIP/>";
-							}
-						}
-					}
-				}
-				
 				fieldText = '<a href="' + escapeXML(arr[i]) + '">'
-					+ escapeXML(fieldText) + '</a>';
+					+ escapeXML(arr[i]) + '</a>';
 			}
 			// Remove SQL date from multipart dates
 			// (e.g. '2006-00-00 Summer 2006' becomes 'Summer 2006')
