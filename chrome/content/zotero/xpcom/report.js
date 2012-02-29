@@ -234,53 +234,53 @@ Zotero.Report = new function() {
 			table = true;
 			var fieldText;
 			
-			// Shorten long URLs manually until Firefox wraps at ?
-			// (like Safari) or supports the CSS3 word-wrap property
-			var firstSpace = arr[i].indexOf(' ');
-			if (arr[i].indexOf('http://') === 0 &&
-					((firstSpace == -1 && arr[i].length > 29) || firstSpace > 29)) {
+			if (i == 'url' && arr[i].match(/^https?:\/\//)) {
+				fieldText = arr[i];
 				
-				var stripped = false;
-				
-				// Strip query string for sites we know don't need it
-				for each(var re in _noQueryStringSites) {
-					if (re.test(arr[i])){
-						var pos = arr[i].indexOf('?');
-						if (pos != -1) {
-							fieldText = arr[i].substr(0, pos);
-							stripped = true;
-						}
-						break;
-					}
-				}
-				
-				if (!stripped) {
-					// Add a line-break after the ? of long URLs
-					fieldText = arr[i].replace('?', "?<ZOTEROBREAK/>");
+				// Shorten long URLs manually until Firefox wraps at ?
+				// (like Safari) or supports the CSS3 word-wrap property
+				var firstSpace = fieldText.indexOf(' ');
+				if ((firstSpace == -1 && arr[i].length > 29) || firstSpace > 29) {
+					var stripped = false;
 					
-					// Strip query string variables from the end while the
-					// query string is longer than the main part
-					var pos = fieldText.indexOf('?');
-					if (pos != -1) {
-						while (pos < (fieldText.length / 2)) {
-							var lastAmp = fieldText.lastIndexOf('&');
-							if (lastAmp == -1) {
-								break;
+					// Strip query string for sites we know don't need it
+					for each(var re in _noQueryStringSites) {
+						if (re.test(arr[i])){
+							var pos = arr[i].indexOf('?');
+							if (pos != -1) {
+								fieldText = arr[i].substr(0, pos);
+								stripped = true;
 							}
-							fieldText = fieldText.substr(0, lastAmp);
-							var shortened = true;
+							break;
 						}
-						// Append '&...' to the end
-						if (shortened) {
-							fieldText += "&<ZOTEROHELLIP/>";
+					}
+					
+					if (!stripped) {
+						// Add a line-break after the ? of long URLs
+						fieldText = arr[i].replace('?', "?<ZOTEROBREAK/>");
+						
+						// Strip query string variables from the end while the
+						// query string is longer than the main part
+						var pos = fieldText.indexOf('?');
+						if (pos != -1) {
+							while (pos < (fieldText.length / 2)) {
+								var lastAmp = fieldText.lastIndexOf('&');
+								if (lastAmp == -1) {
+									break;
+								}
+								fieldText = fieldText.substr(0, lastAmp);
+								var shortened = true;
+							}
+							// Append '&...' to the end
+							if (shortened) {
+								fieldText += "&<ZOTEROHELLIP/>";
+							}
 						}
 					}
 				}
 				
-				if (i == 'url') {
-					fieldText = '<a href="' + escapeXML(arr[i]) + '">'
-						+ escapeXML(fieldText) + '</a>';
-				}
+				fieldText = '<a href="' + escapeXML(arr[i]) + '">'
+					+ escapeXML(fieldText) + '</a>';
 			}
 			// Remove SQL date from multipart dates
 			// (e.g. '2006-00-00 Summer 2006' becomes 'Summer 2006')
