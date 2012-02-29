@@ -667,68 +667,19 @@ Zotero.Date = new function(){
 	 * Returns a string with y, m, and d (e.g. 'ymd', 'mdy')
 	 */
 	function getLocaleDateOrder(){
-		if (_localeDateOrder) {
-			return _localeDateOrder;
+		if (!_localeDateOrder) {
+			switch (Zotero.locale.substr(3)) {
+				case 'US': // The United States
+				case 'FM': // The Federated States of Micronesia
+				case 'PW':	// Palau
+				case 'PH':	// The Philippines
+					_localeDateOrder = 'mdy';
+					break;
+					
+				default:
+					_localeDateOrder = 'dmy';
+			}
 		}
-		
-		var date = new Date("October 5, 2006");
-		var parts = date.toLocaleDateString().match(/([0-9]+)[^0-9]+([0-9]+)[^0-9]+([0-9]+)/);
-		
-		// The above only works on OS X and Linux,
-		// where toLocaleDateString() produces "10/05/2006"
-		if (!parts) {
-				var country = Zotero.locale.substr(3);
-				switch (country) {
-					// I don't know where this country list came from, but these
-					// are little-endian in Zotero.strToDate()
-					case 'US': // The United States
-					case 'FM': // The Federated States of Micronesia
-					case 'PW':	// Palau
-					case 'PH':	// The Philippines
-						return 'mdy';
-						break;
-						
-					default:
-						return 'dmy';
-				}
-		}
-		
-		switch (parseInt(parts[1])){
-			case 2006:
-				var order = 'y';
-				break;
-			case 10:
-				var order = 'm';
-				break;
-			case 5:
-				var order = 'd';
-				break;
-		}
-		switch (parseInt(parts[2])){
-			case 2006:
-				order += 'y';
-				break;
-			case 10:
-				order += 'm';
-				break;
-			case 5:
-				order += 'd';
-				break;
-		}
-		switch (parseInt(parts[3])){
-			case 2006:
-				order += 'y';
-				break;
-			case 10:
-				order += 'm';
-				break;
-			case 5:
-				order += 'd';
-				break;
-		}
-		
-		_localeDateOrder = order;
-		
-		return order;
+		return _localeDateOrder;
 	}
 }
