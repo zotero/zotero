@@ -662,20 +662,43 @@ Zotero.Date = new function(){
 	}
 	
 	/**
-	 * Figure out the date order from the output of toLocaleDateString()
+	 * Get the order of the date components based on the current locale
 	 *
 	 * Returns a string with y, m, and d (e.g. 'ymd', 'mdy')
 	 */
 	function getLocaleDateOrder(){
 		if (!_localeDateOrder) {
-			switch (Zotero.locale.substr(3)) {
+			switch (Zotero.locale.substr(-2)) {
+				// middle-endian
 				case 'US': // The United States
+				case 'BZ': // Belize
 				case 'FM': // The Federated States of Micronesia
-				case 'PW':	// Palau
+				case 'PA': // Panama
 				case 'PH':	// The Philippines
+				case 'PW':	// Palau
+				case 'ZW': // Zimbabwe
 					_localeDateOrder = 'mdy';
 					break;
-					
+				
+				// big-endian
+				case 'fa': // Persian
+				case 'AL': // Albania
+				case 'CA': // Canada
+				case 'CN': // China
+				case 'HU': // Hungary
+				case 'JP': // Japan
+				case 'KE': // Kenya
+				case 'KR': // Korea
+				case 'LT': // Lithuania
+				case 'LV': // Latvia
+				case 'MN': // Mongolia
+				case 'SE': // Sweden
+				case 'TW': // Taiwan
+				case 'ZA': // South Africa
+					_localeDateOrder = 'ymd';
+					break;
+				
+				// little-endian
 				default:
 					_localeDateOrder = 'dmy';
 			}
