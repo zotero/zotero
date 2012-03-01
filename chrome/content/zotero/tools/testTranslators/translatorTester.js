@@ -79,7 +79,7 @@ Zotero_TranslatorTesters = new function() {
 			};
 		} else {
 			strcmp = function (a, b) {
-				return a.localeCompare(b);
+				return a.toLowerCase().localeCompare(b.toLowerCase());
 			};
 		}
 		
