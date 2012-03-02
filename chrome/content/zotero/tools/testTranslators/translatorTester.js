@@ -215,7 +215,7 @@ Zotero_TranslatorTester._sanitizeItem = function(item, forSave) {
 	
 	// remove fields that don't exist or aren't valid for this item type, and normalize base fields
 	// to fields specific to this item
-	var fieldID,
+	var fieldID, itemFieldID,
 		typeID = Zotero.ItemTypes.getID(item.itemType);
 	const skipFields = ["note", "notes", "itemID", "attachments", "tags", "seeAlso",
 						"itemType", "complete", "creators"];
@@ -227,14 +227,10 @@ Zotero_TranslatorTester._sanitizeItem = function(item, forSave) {
 			continue;
 		}
 		
-		if(Zotero.ItemFields.isBaseField(fieldID)) {
+		if(itemFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, fieldID)) {
 			var value = item[field];
-			delete item[field];
-			
-			var itemFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, fieldID);
-			if(itemFieldID) {
-				item[Zotero.ItemFields.getName(itemFieldID)] = value;
-			}
+			delete item[field];		
+			item[Zotero.ItemFields.getName(itemFieldID)] = value;
 			continue;
 		}
 		
