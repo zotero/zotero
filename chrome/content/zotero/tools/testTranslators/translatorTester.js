@@ -213,11 +213,38 @@ Zotero_TranslatorTester._sanitizeItem = function(item, forSave) {
 		item = JSON.parse(JSON.stringify(item));
 	} catch(e) {};
 	
-	// remove fields to be ignored
-	const IGNORE_FIELDS = ["complete", "accessDate", "checkFields"];
-	for(var j=0, n=IGNORE_FIELDS.length; j<n; j++) {
-		delete item[IGNORE_FIELDS[j]];
+	// remove fields that don't exist or aren't valid for this item type, and normalize base fields
+	// to fields specific to this item
+	var fieldID,
+		typeID = Zotero.ItemTypes.getID(item.itemType);
+	const skipFields = ["note", "notes", "itemID", "attachments", "tags", "seeAlso",
+						"itemType", "complete", "creators"];
+	for(var field in item) {
+		if(skipFields.indexOf(field) !== -1) continue;
+		
+		if(!item[field] || !(fieldID = Zotero.ItemFields.getID(field))) {
+			delete item[field];
+			continue;
+		}
+		
+		if(Zotero.ItemFields.isBaseField(fieldID)) {
+			var value = item[field];
+			delete item[field];
+			
+			var itemFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(typeID, fieldID);
+			if(itemFieldID) {
+				item[Zotero.ItemFields.getName(itemFieldID)] = value;
+			}
+			continue;
+		}
+		
+		if(!Zotero.ItemFields.isValidForType(fieldID, typeID)) {
+			delete item[field];
+		}
 	}
+	
+	// remove fields to be ignored
+	if("accessDate" in item) delete item.accessDate;
 	
 	return item;
 };
