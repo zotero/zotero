@@ -409,7 +409,7 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 		var s = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
 			.createInstance(Components.interfaces.nsIDOMSerializer);
 		this.serializeToString = function(doc) {
-			return s.serializeToString(Zotero.Translate.DOMWrapper.unwrapIfWrapped(doc));
+			return s.serializeToString(Zotero.Translate.DOMWrapper.unwrap(doc));
 		};
 	};
 }
