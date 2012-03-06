@@ -130,7 +130,8 @@ Zotero.Connector_Types = new function() {
 				// mimics itemFields.js
 				if(!field || !itemType) return false;
 				
-				return itemType[4]/* fields */.indexOf(field[0]/* id */) !== -1;
+				       /* fields */        /* id */
+				return itemType[4].indexOf(field[0]) !== -1;
 			};
 			
 			this.getFieldIDFromTypeAndBase = function(typeIdOrName, fieldIdOrName) {

@@ -310,6 +310,10 @@ Zotero.Translate.ItemSaver.prototype = {
 				|| downloadAssociatedFiles;
 			if(!shouldAttach) return;
 			
+			if(attachment.document && "__wrappedDOMObject" in attachment.document) {
+				attachment.document = attachment.document.__wrappedDOMObject;
+			}
+			
 			if(attachment.snapshot === false || !this._saveFiles) {
 				// if snapshot is explicitly set to false, attach as link
 				if(attachment.document) {

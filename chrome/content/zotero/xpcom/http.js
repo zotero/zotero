@@ -469,6 +469,11 @@ Zotero.HTTP = new function() {
 	 * @return {browser} Hidden browser used for loading
 	 */
 	this.processDocuments = function(urls, processor, done, exception, dontDelete, cookieSandbox) {
+		// (Approximately) how many seconds to wait if the document is left in the loading state and
+		// pageshow is called before we call pageshow with an incomplete document
+		const LOADING_STATE_TIMEOUT = 120;
+		
+		var firedLoadEvent;
 		/**
 		 * Removes event listener for the load event and deletes the hidden browser
 		 */
@@ -484,6 +489,7 @@ Zotero.HTTP = new function() {
 		var doLoad = function() {
 			if(urls.length) {
 				var url = urls.shift();
+				firedLoadEvent = 0;
 				try {
 					Zotero.debug("loading "+url);
 					hiddenBrowser.loadURI(url);
@@ -509,7 +515,13 @@ Zotero.HTTP = new function() {
 		var onLoad = function() {
 			var doc = hiddenBrowser.contentDocument,
 				url = doc.location.href.toString();
-			if(url == "about:blank" || doc.readyState === "loading") return;
+			if(url == "about:blank") return;
+			if(doc.readyState === "loading" && firedLoadEvent < 120) {
+				// Try again in a second	
+				firedLoadEvent++;
+				Zotero.setTimeout(onLoad, 1000);
+				return;
+			}
 			if(url !== prevUrl) {	// Just in case it fires too many times
 				prevUrl = url;
 				try {

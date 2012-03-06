@@ -1296,6 +1296,7 @@ Zotero.Sync.Storage = new function () {
 				Components.utils.reportError(msg + " in " + funcName);
 				continue;
 			}
+			
 			try {
 				destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
 			}
@@ -1419,6 +1420,20 @@ Zotero.Sync.Storage = new function () {
 			}
 			catch (e) {
 				Zotero.debug(destFile.path);
+				
+				// For advertising junk files, ignore a bug on Windows where
+				// destFile.create() works but zipReader.extract() doesn't
+				// when the path length is close to 255.
+				if (destFile.leafName.match(/[a-zA-Z0-9]{130,}/)) {
+					var msg = "Ignoring error extracting '" + destFile.path + "'";
+					Zotero.debug(msg, 2);
+					Zotero.debug(e, 2);
+					Components.utils.reportError(msg + " in " + funcName);
+					continue;
+				}
+				
+				zipReader.close();
+				
 				Zotero.File.checkFileAccessError(e, destFile, 'create');
 			}
 			
