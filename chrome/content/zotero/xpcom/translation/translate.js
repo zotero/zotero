@@ -1425,7 +1425,16 @@ Zotero.Translate.Web.prototype._getTranslatorsGetPotentialTranslators = function
  * Bind sandbox to document being translated
  */
 Zotero.Translate.Web.prototype._getSandboxLocation = function() {
-	return ("defaultView" in this.document ? this.document.defaultView : this.document.location.toString());
+	if("defaultView" in this.document) {
+		var defaultView = this.document.defaultView;
+		if("__wrappedDOMObject" in defaultView) {
+			return defaultView.__wrappedDOMObject;
+		} else {
+			return defaultView;
+		}
+	} else {
+		return this.document.location.toString();
+	}
 }
 
 /**
