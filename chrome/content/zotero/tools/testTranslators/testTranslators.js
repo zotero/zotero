@@ -488,7 +488,7 @@ function init() {
 				hashVars[myVar.substr(0, index)] = myVar.substr(index+1);
 			}
 			
-			if(hashVars["browser"] && /^[a-z]$/.test(hashVars["browser"])
+			if(hashVars["browser"] && /^[a-z]+$/.test(hashVars["browser"])
 					&& hashVars["version"] && /^[0-9a-zA-Z\-._]/.test(hashVars["version"])) {
 				loc = "testResults-"+hashVars["browser"]+"-"+hashVars["version"]+".json";
 			}
