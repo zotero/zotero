@@ -201,6 +201,6 @@
 		</vbox>
 		
 		<textbox id="editor" type="styled" mode="integration" hidden="true" flex="1"/>
-		<label id="zotero-editor-warning" style="margin: 9px 1px 0" hidden="true" value="&zotero.citation.editorWarning.label;"/>
+		<description id="zotero-editor-warning" style="margin: 9px 1px 0" hidden="true">&zotero.citation.editorWarning.label;</description>
 	</vbox>
 </dialog>
