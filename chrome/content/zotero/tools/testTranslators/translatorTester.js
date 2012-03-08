@@ -574,6 +574,8 @@ Zotero_TranslatorTester.prototype._compare = function(i, j) {
 	var match = false;
 	if (Object.prototype.toString.apply(i) === '[object Array]') {
 		if (Object.prototype.toString.apply(j) === '[object Array]') {
+			i.sort();
+			j.sort();
 			do {
 				match = this._compare(i.pop(), j.pop());
 			} while (match && i.length && j.length);
