@@ -459,7 +459,7 @@ Zotero.Translate.Sandbox = {
 						var newCallback = function(selectedItems) {
 							callbackExecuted = true;
 							if(haveAsyncHandler) {
-								translate.translate(this._libraryID, this._saveAttachments, selectedItems);
+								translate.translate(translate._libraryID, translate._saveAttachments, selectedItems);
 							} else {
 								returnedItems = selectedItems;
 							}
