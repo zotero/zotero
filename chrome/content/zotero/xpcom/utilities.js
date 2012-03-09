@@ -147,7 +147,7 @@ Zotero.Utilities = {
 		}
 		
 		author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
-		author = author.replace((useComma ? /[\s\,\/\[\]\:]+$/ : /[\s\,\/\[\]\:\.]+$/), '');
+		author = author.replace(/[\s\,\/\[\]\:\.]+$/, '');
 		author = author.replace(/  +/, ' ');
 		if(useComma) {
 			// Add spaces between periods
