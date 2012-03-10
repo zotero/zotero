@@ -28,6 +28,7 @@
 
 #quick-format-entry:not([square="true"]) {
 	-moz-border-radius: 15px;
+	border-radius: 15px;
 }
 
 #zotero-icon {

@@ -153,6 +153,7 @@ hbox.zotero-date-field-status > label
 	background-position: center !important;
 	border-width: 0 !important;
 	-moz-border-radius: 4px !important;
+	border-radius: 4px !important;
 }
 
 /* Merge pane in duplicates view */

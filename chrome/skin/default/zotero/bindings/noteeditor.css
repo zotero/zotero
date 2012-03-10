@@ -24,6 +24,7 @@ row > label, row > hbox
 	-moz-margin-end: 5px !important;
 	padding: 0 2px 0 2px !important;
 	-moz-border-radius: 6px;
+	border-radius: 6px;
 	border: 1px solid transparent;
 }
 
