@@ -185,7 +185,7 @@ Zotero.Utilities = {
 						.replace(/\s*([\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B])\s*/,'$1')
 						.split(/[\s\.]+/);
 			var newFirstName = '';
-			for(var i=0, n=names.length; i<n; n++) {
+			for(var i=0, n=names.length; i<n; i++) {
 				newFirstName += names[i];
 				if(names[i].length == 1) newFirstName += '.';
 				newFirstName += ' ';
