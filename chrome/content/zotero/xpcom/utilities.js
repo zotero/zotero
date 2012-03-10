@@ -147,7 +147,7 @@ Zotero.Utilities = {
 		}
 		
 		author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
-		author = author.replace((useComma ? /[\s\,\/\[\]\:]+$/ : /[\s\,\/\[\]\:\.]+$/), '');
+		author = author.replace(/[\s\,\/\[\]\:\.]+$/, '');
 		author = author.replace(/  +/, ' ');
 		if(useComma) {
 			// Add spaces between periods
@@ -176,7 +176,23 @@ Zotero.Utilities = {
 			}
 			firstName = newFirstName.substr(1);
 		}
-		
+
+		//add periods after all the initials
+		if(firstName) {
+			var names = firstName.replace(/^[\s\.]+/,'')
+						.replace(/[\s\,]+$/,'')
+						//remove spaces surronding any dashes
+						.replace(/\s*([\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B])\s*/,'$1')
+						.split(/[\s\.]+/);
+			var newFirstName = '';
+			for(var i=0, n=names.length; i<n; i++) {
+				newFirstName += names[i];
+				if(names[i].length == 1) newFirstName += '.';
+				newFirstName += ' ';
+			}
+			firstName = newFirstName.trim();
+		}
+
 		return {firstName:firstName, lastName:lastName, creatorType:type};
 	},
 	
