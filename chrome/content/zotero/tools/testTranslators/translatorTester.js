@@ -221,9 +221,6 @@ Zotero_TranslatorTester._sanitizeItem = function(item, forSave) {
 						"itemType", "complete", "creators"];
 	for(var field in item) {
 		if(skipFields.indexOf(field) !== -1) {
-			if(field == 'tags') {
-				item[field].sort();
-			}
 			continue;
 		}
 		
@@ -246,6 +243,9 @@ Zotero_TranslatorTester._sanitizeItem = function(item, forSave) {
 	
 	// remove fields to be ignored
 	if("accessDate" in item) delete item.accessDate;
+
+	//sort tags, if they're still there
+	if(item.tags) item.tags.sort();
 	
 	return item;
 };
