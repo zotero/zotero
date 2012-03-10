@@ -220,7 +220,12 @@ Zotero_TranslatorTester._sanitizeItem = function(item, forSave) {
 	const skipFields = ["note", "notes", "itemID", "attachments", "tags", "seeAlso",
 						"itemType", "complete", "creators"];
 	for(var field in item) {
-		if(skipFields.indexOf(field) !== -1) continue;
+		if(skipFields.indexOf(field) !== -1) {
+			if(field == 'tags') {
+				item[field].sort();
+			}
+			continue;
+		}
 		
 		if(!item[field] || !(fieldID = Zotero.ItemFields.getID(field))) {
 			delete item[field];
@@ -574,8 +579,6 @@ Zotero_TranslatorTester.prototype._compare = function(i, j) {
 	var match = false;
 	if (Object.prototype.toString.apply(i) === '[object Array]') {
 		if (Object.prototype.toString.apply(j) === '[object Array]') {
-			i.sort();
-			j.sort();
 			do {
 				match = this._compare(i.pop(), j.pop());
 			} while (match && i.length && j.length);
