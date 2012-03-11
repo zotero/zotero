@@ -70,7 +70,7 @@ var Issues = new function() {
 	};
 	
 	var req = new XMLHttpRequest();
-	req.open("GET", "https://api.github.com/repos/zotero/translators/issues", true);
+	req.open("GET", "https://api.github.com/repos/zotero/translators/issues?per_page=100", true);
 	req.onreadystatechange = function(e) {
 		if(req.readyState != 4) return;
 		
