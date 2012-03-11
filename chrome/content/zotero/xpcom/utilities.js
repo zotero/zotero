@@ -1115,7 +1115,7 @@ Zotero.Utilities = {
 			} else if(field === "creators") {
 				// normalize creators
 				var n = val.length;
-				var newCreators = newItem.creators = new Array(n);
+				var newCreators = newItem.creators = [];
 				for(var j=0; j<n; j++) {
 					var creator = val[j];
 					
@@ -1148,7 +1148,7 @@ Zotero.Utilities = {
 					}
 					if(!newCreator.creatorType) newCreator.creatorType = "author";
 					
-					newCreators[j] = newCreator;
+					newCreators.push(newCreator);
 				}
 			} else if(field === "tags") {
 				// normalize tags
