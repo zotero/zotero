@@ -3506,10 +3506,10 @@ var ZoteroPane = new function()
 			
 			var args = [url];
 			if (!Zotero.isFx36) {
-				proc.runw(true, args, args.length);
+				proc.runw(false, args, args.length);
 			}
 			else {
-				proc.run(true, args, args.length);
+				proc.run(false, args, args.length);
 			}
 		}
 	}
