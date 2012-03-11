@@ -62,6 +62,8 @@ Zotero.Items = new function() {
 	var _cachedFields = [];
 	var _firstCreatorSQL = '';
 	var _primaryFields = [];
+	var _emptyTrashIdleObserver = null;
+	var _emptyTrashTimer = null;
 	
 	
 	/*
@@ -490,15 +492,76 @@ Zotero.Items = new function() {
 	/**
 	 * @param	{Integer}	days	Only delete items deleted more than this many days ago
 	 */
-	this.emptyTrash = function (libraryID, days) {
+	this.emptyTrash = function (libraryID, days, limit) {
 		Zotero.DB.beginTransaction();
 		var deletedIDs = this.getDeleted(libraryID, true, days);
 		if (deletedIDs.length) {
+			if (limit) {
+				deletedIDs = deletedIDs.slice(0, limit - 1)
+			}
 			this.erase(deletedIDs);
-			Zotero.Notifier.trigger('refresh', 'collection', libraryID ? libraryID : 0);
+			Zotero.Notifier.trigger('refresh', 'trash', libraryID ? libraryID : 0);
 		}
 		Zotero.DB.commitTransaction();
 		return deletedIDs.length;
+	}
+	
+	
+	/**
+	 * Start idle observer to delete trashed items older than a certain number of days
+	 */
+	this.startEmptyTrashTimer = function () {
+		_emptyTrashIdleObserver = {
+			observe: function (subject, topic, data) {
+				if (topic == 'idle' || topic == 'timer-callback') {
+					var days = Zotero.Prefs.get('trashAutoEmptyDays');
+					if (!days) {
+						return;
+					}
+					
+					// TODO: empty group trashes if permissions
+					
+					var d = new Date();
+					
+					// Delete a few items a time
+					//
+					// TODO: increase number after dealing with slow
+					// tag.getLinkedItems() call during deletes
+					Zotero.debug("Auto-emptying items from trash");
+					var num = 10;
+					var deleted = Zotero.Items.emptyTrash(null, days, num);
+					
+					var d2 = new Date();
+					Zotero.debug("Emptied " + deleted + " old items from trash in " + (d2 - d) + " ms");
+					
+					if (!deleted) {
+						_emptyTrashTimer = null;
+						return;
+					}
+					
+					// Set a timer to do more every few seconds
+					if (!_emptyTrashTimer) {
+						_emptyTrashTimer = Components.classes["@mozilla.org/timer;1"].
+											createInstance(Components.interfaces.nsITimer);
+					}
+					_emptyTrashTimer.init(
+						_emptyTrashIdleObserver.observe,
+						5 * 1000,
+						Components.interfaces.nsITimer.TYPE_ONE_SHOT
+					);
+				}
+				// When no longer idle, cancel timer
+				else if (topic == 'back') {
+					if (_emptyTrashTimer) {
+						_emptyTrashTimer.cancel();
+					}
+				}
+			}
+		};
+		
+		var idleService = Components.classes["@mozilla.org/widget/idleservice;1"].
+							getService(Components.interfaces.nsIIdleService);
+		idleService.addIdleObserver(_emptyTrashIdleObserver, 305);
 	}
 	
 	
