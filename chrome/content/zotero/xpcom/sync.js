@@ -1057,7 +1057,19 @@ Zotero.Sync.Runner.IdleListener = {
 			return;
 		}
 		
+		// TODO: move to Runner.sync()?
+		if (Zotero.locked) {
+			Zotero.debug('Zotero is locked -- skipping idle sync', 4);
+			return;
+		}
+		
+		if (Zotero.Sync.Server.manualSyncRequired) {
+			Zotero.debug('Manual sync required -- skipping idle sync', 4);
+			return;
+		}
+		
 		Zotero.debug("Beginning idle sync");
+		
 		Zotero.Sync.Runner.sync(true);
 		Zotero.Sync.Runner.setSyncTimeout(this._idleTimeout, true);
 	},

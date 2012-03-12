@@ -411,9 +411,12 @@ var ZoteroPane = new function()
 		// Auto-sync on pane open
 		if (Zotero.Prefs.get('sync.autoSync')) {
 			setTimeout(function () {
-				if (!Zotero.Sync.Server.enabled
-						|| Zotero.Sync.Server.syncInProgress
-						|| Zotero.Sync.Storage.syncInProgress) {
+				if (!Zotero.Sync.Server.enabled) {
+					Zotero.debug('Sync not enabled -- skipping auto-sync', 4);
+					return;
+				}
+				
+				if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
 					Zotero.debug('Sync already running -- skipping auto-sync', 4);
 					return;
 				}
@@ -432,9 +435,6 @@ var ZoteroPane = new function()
 		// We don't bother setting an error state at open
 		if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
 			Zotero.Sync.Runner.setSyncIcon('animate');
-		}
-		else {
-			Zotero.Sync.Runner.setSyncIcon();
 		}
 		
 		return true;
