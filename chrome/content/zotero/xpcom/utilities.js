@@ -187,7 +187,7 @@ Zotero.Utilities = {
 			var newFirstName = '';
 			for(var i=0, n=names.length; i<n; i++) {
 				newFirstName += names[i];
-				if(names[i].length == 1) newFirstName += '.';
+				if(names[i].match(/^[A-Z]$/)) newFirstName += '.';
 				newFirstName += ' ';
 			}
 			firstName = newFirstName.trim();
