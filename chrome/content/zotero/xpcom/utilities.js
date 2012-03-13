@@ -1014,16 +1014,24 @@ Zotero.Utilities = {
 	 *
 	 * Adapted from http://binnyva.blogspot.com/2005/10/dump-function-javascript-equivalent-of.html
 	 */
-	"varDump":function(arr,level) {
+	"varDump":function(arr,level,maxLevel) {
 		var dumped_text = "";
 		if (!level){
 			level = 0;
+		}
+
+		if (!maxLevel) {
+			maxLevel = 4;
 		}
 		
 		// The padding given at the beginning of the line.
 		var level_padding = "";
 		for (var j=0;j<level+1;j++){
 			level_padding += "    ";
+		}
+
+		if (level > maxLevel){
+			return dumped_text + level_padding + "...\n";
 		}
 		
 		if (typeof(arr) == 'object') { // Array/Hashes/Objects
@@ -1032,7 +1040,7 @@ Zotero.Utilities = {
 				
 				if (typeof(value) == 'object') { // If it is an array,
 					dumped_text += level_padding + "'" + item + "' ...\n";
-					dumped_text += arguments.callee(value,level+1);
+					dumped_text += arguments.callee(value,level+1,maxLevel);
 				}
 				else {
 					if (typeof value == 'function'){
