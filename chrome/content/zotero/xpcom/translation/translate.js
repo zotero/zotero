@@ -548,7 +548,8 @@ Zotero.Translate.Sandbox = {
 			}
 			
 			if(!item.title) {
-				throw new Error("No title specified for item");
+				translate.complete(false, new Error("No title specified for item"));
+				return;
 			}
 			
 			// create short title
