@@ -283,7 +283,7 @@ Zotero.Translators = new function() {
 		var tier2Translators = [];
 		
 		for(var i=0; i<allTranslators.length; i++) {
-			if(allTranslators[i].importRegexp.test(location)) {
+			if(allTranslators[i].importRegexp && allTranslators[i].importRegexp.test(location)) {
 				tier1Translators.push(allTranslators[i]);
 			} else {
 				tier2Translators.push(allTranslators[i]);
