@@ -493,6 +493,8 @@ Zotero.Items = new function() {
 	 * @param	{Integer}	days	Only delete items deleted more than this many days ago
 	 */
 	this.emptyTrash = function (libraryID, days, limit) {
+		var t = new Date();
+		
 		Zotero.DB.beginTransaction();
 		var deletedIDs = this.getDeleted(libraryID, true, days);
 		if (deletedIDs.length) {
@@ -503,6 +505,11 @@ Zotero.Items = new function() {
 			Zotero.Notifier.trigger('refresh', 'trash', libraryID ? libraryID : 0);
 		}
 		Zotero.DB.commitTransaction();
+		
+		if (deletedIDs.length) {
+			Zotero.debug("Emptied " + deletedIDs.length + " item(s) from trash in " + (new Date() - t) + " ms");
+		}
+		
 		return deletedIDs.length;
 	}
 	
@@ -521,18 +528,12 @@ Zotero.Items = new function() {
 					
 					// TODO: empty group trashes if permissions
 					
-					var d = new Date();
-					
 					// Delete a few items a time
 					//
 					// TODO: increase number after dealing with slow
 					// tag.getLinkedItems() call during deletes
-					Zotero.debug("Auto-emptying items from trash");
 					var num = 10;
 					var deleted = Zotero.Items.emptyTrash(null, days, num);
-					
-					var d2 = new Date();
-					Zotero.debug("Emptied " + deleted + " old items from trash in " + (d2 - d) + " ms");
 					
 					if (!deleted) {
 						_emptyTrashTimer = null;
