@@ -1253,7 +1253,20 @@ var ZoteroPane = new function()
 					var msg = Zotero.getString('pane.item.selected.multiple', count);
 				}
 				else {
-					var msg = Zotero.getString('pane.item.selected.zero');
+					var rowCount = this.itemsView.rowCount;
+					var str = 'pane.item.unselected.';
+					switch (rowCount){
+						case 0:
+							str += 'zero';
+							break;
+						case 1:
+							str += 'singular';
+							break;
+						default:
+							str += 'plural';
+							break;
+					}
+					var msg = Zotero.getString(str, [rowCount]);
 				}
 				
 				this.setItemPaneMessage(msg);
