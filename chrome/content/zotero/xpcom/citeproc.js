@@ -2156,7 +2156,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.301";
+    this.processor_version = "1.0.302";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3518,10 +3518,10 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                     } else {
                         var ibidme = false;
                         var suprame = false;
-                        if (j > 0 && parseInt(k, 10) === 0) {
+                        if (j > 0 && parseInt(k, 10) === 0 && citations[j - 1].properties.noteIndex !== citations[j].properties.noteIndex) {
                             var items = citations[(j - 1)].sortedItems;
                             var useme = false;
-                            if ((citations[(j - 1)].sortedItems[0][1].id  == item[1].id && citations[j - 1].properties.noteIndex >= (citations[j].properties.noteIndex - 1)) || citations[(j - 1)].sortedItems[0][1].id == this.registry.registry[item[1].id].parallel) {
+                            if ((citations[j - 1].sortedItems[0][1].id  == item[1].id && citations[j - 1].properties.noteIndex >= (citations[j].properties.noteIndex - 1)) || citations[j - 1].sortedItems[0][1].id == this.registry.registry[item[1].id].parallel) {
                                 if (citationsInNote[citations[j - 1].properties.noteIndex] == 1 || citations[j - 1].properties.noteIndex == 0) {
                                     useme = true;
                                 }
@@ -3537,7 +3537,11 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                             } else {
                                 suprame = true;
                             }
-                        } else if (k > 0 && onecitation.sortedItems[(k - 1)][1].id == item[1].id) {
+                        } else if (k > 0 && onecitation.sortedItems[k - 1][1].id == item[1].id) {
+                            ibidme = true;
+                        } else if (k == 0 && citations[j - 1].properties.noteIndex == citations[j].properties.noteIndex
+                                   && citations[j - 1].sortedItems.length 
+                                   && citations[j - 1].sortedItems.slice(-1)[0][1].id == item[1].id) {
                             ibidme = true;
                         } else {
                             suprame = true;
