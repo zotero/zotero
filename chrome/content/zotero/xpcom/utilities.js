@@ -1039,7 +1039,7 @@ Zotero.Utilities = {
 			//initialise at first itteration
 			if(!parentObjects) {
 				parentObjects = [arr];
-				path = '__ROOT__';
+				path = ['ROOT'];
 			}
 
 			for (var item in arr) {
@@ -1049,7 +1049,7 @@ Zotero.Utilities = {
 					//check for recursion
 					var i = parentObjects.indexOf(value);
 					if(i != -1) {
-						var parentName = path.split('->').slice(0,i+1).join('->');
+						var parentName = path.slice(0,i+1).join('->');
 						dumped_text += level_padding + "'" + item + "' => <<Reference to parent object " + parentName + " >>\n";
 						continue;
 					}
@@ -1064,7 +1064,7 @@ Zotero.Utilities = {
 					dumped_text += level_padding + "'" + item + "' => " + openBrace;
 					//only recurse if there's anything in the object, purely cosmetical
 					for(var i in value) {
-						dumped_text += "\n" + arguments.callee(value,level+1,maxLevel,parentObjects.concat(value),path + '->' + item) + level_padding;
+						dumped_text += "\n" + arguments.callee(value,level+1,maxLevel,parentObjects.concat([value]),path.concat([item])) + level_padding;
 						break;
 					}
 					dumped_text += closeBrace + "\n";
