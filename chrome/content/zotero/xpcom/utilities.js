@@ -1014,7 +1014,7 @@ Zotero.Utilities = {
 	 *
 	 * Adapted from http://binnyva.blogspot.com/2005/10/dump-function-javascript-equivalent-of.html
 	 */
-	"varDump":function(arr,level,maxLevel) {
+	"varDump":function(arr,level,maxLevel,parentObjects,path) {
 		var dumped_text = "";
 		if (!level){
 			level = 0;
@@ -1023,7 +1023,7 @@ Zotero.Utilities = {
 		if (!maxLevel) {
 			maxLevel = 4;
 		}
-		
+
 		// The padding given at the beginning of the line.
 		var level_padding = "";
 		for (var j=0;j<level+1;j++){
@@ -1031,16 +1031,43 @@ Zotero.Utilities = {
 		}
 
 		if (level > maxLevel){
-			return dumped_text + level_padding + "...\n";
+			return dumped_text + level_padding + "<<Maximum depth reached>>...\n";
 		}
 		
 		if (typeof(arr) == 'object') { // Array/Hashes/Objects
+			//array for checking recursion
+			//initialise at first itteration
+			if(!parentObjects) {
+				parentObjects = [arr];
+				path = '__ROOT__';
+			}
+
 			for (var item in arr) {
 				var value = arr[item];
 				
-				if (typeof(value) == 'object') { // If it is an array,
-					dumped_text += level_padding + "'" + item + "' ...\n";
-					dumped_text += arguments.callee(value,level+1,maxLevel);
+				if (typeof(value) == 'object') { // If it is an array
+					//check for recursion
+					var i = parentObjects.indexOf(value);
+					if(i != -1) {
+						var parentName = path.split('->').slice(0,i+1).join('->');
+						dumped_text += level_padding + "'" + item + "' => <<Reference to parent object " + parentName + " >>\n";
+						continue;
+					}
+
+					var openBrace = '{', closeBrace = '}';
+					var type = Object.prototype.toString.call(value);
+					if(type == '[object Array]') {
+						openBrace = '[';
+						closeBrace = ']';
+					}
+
+					dumped_text += level_padding + "'" + item + "' => " + openBrace;
+					//only recurse if there's anything in the object, purely cosmetical
+					for(var i in value) {
+						dumped_text += "\n" + arguments.callee(value,level+1,maxLevel,parentObjects.concat(value),path + '->' + item) + level_padding;
+						break;
+					}
+					dumped_text += closeBrace + "\n";
 				}
 				else {
 					if (typeof value == 'function'){
