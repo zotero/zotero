@@ -662,10 +662,10 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		// Make sure currently selected view is editable
-		if (row === undefined && this.collectionsView.selection) {
+		if ((row === undefined || row === null) && this.collectionsView.selection) {
 			row = this.collectionsView.selection.currentIndex;
 			
+			// Make sure currently selected view is editable
 			if (!this.canEdit(row)) {
 				this.displayCannotEditLibraryMessage();
 				return;
