@@ -1064,7 +1064,7 @@ Zotero.Utilities = {
 					dumped_text += level_padding + "'" + item + "' => " + openBrace;
 					//only recurse if there's anything in the object, purely cosmetical
 					for(var i in value) {
-						dumped_text += "\n" + arguments.callee(value,level+1,maxLevel,parentObjects.concat([value]),path.concat([item])) + level_padding;
+						dumped_text += "\n" + varDump(value,level+1,maxLevel,parentObjects.concat([value]),path.concat([item])) + level_padding;
 						break;
 					}
 					dumped_text += closeBrace + "\n";
