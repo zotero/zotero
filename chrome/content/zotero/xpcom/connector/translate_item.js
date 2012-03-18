@@ -72,7 +72,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			newItems.push(Zotero.Utilities.itemToServerJSON(items[i]));
 		}
 		
-		var url = 'users/%%USERID%%/items';
+		var url = 'users/%%USERID%%/items?key=%%APIKEY%%';
 		var payload = JSON.stringify({"items":newItems}, null, "\t")
 		
 		Zotero.OAuth.doAuthenticatedPost(url, payload, function(status) {
