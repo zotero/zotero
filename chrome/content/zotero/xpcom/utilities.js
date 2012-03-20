@@ -176,7 +176,23 @@ Zotero.Utilities = {
 			}
 			firstName = newFirstName.substr(1);
 		}
-		
+
+		//add periods after all the initials
+		if(firstName) {
+			var names = firstName.replace(/^[\s\.]+/,'')
+						.replace(/[\s\,]+$/,'')
+						//remove spaces surronding any dashes
+						.replace(/\s*([\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B])\s*/,'$1')
+						.split(/[\s\.]+/);
+			var newFirstName = '';
+			for(var i=0, n=names.length; i<n; i++) {
+				newFirstName += names[i];
+				if(names[i].match(/^[A-Z]$/)) newFirstName += '.';
+				newFirstName += ' ';
+			}
+			firstName = newFirstName.trim();
+		}
+
 		return {firstName:firstName, lastName:lastName, creatorType:type};
 	},
 	
@@ -215,8 +231,8 @@ Zotero.Utilities = {
 			throw "superCleanString: argument must be a string";
 		}
 		
-		var x = x.replace(/^[\x00-\x27\x29-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]+/, "");
-		return x.replace(/[\x00-\x28\x2A-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]+$/, "");
+		var x = x.replace(/^[\x00-\x27\x29-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F\s]+/, "");
+		return x.replace(/[\x00-\x28\x2A-\x2F\x3A-\x40\x5B-\x60\x7B-\x7F\s]+$/, "");
 	},
 	
 	/**
@@ -998,16 +1014,24 @@ Zotero.Utilities = {
 	 *
 	 * Adapted from http://binnyva.blogspot.com/2005/10/dump-function-javascript-equivalent-of.html
 	 */
-	"varDump":function(arr,level) {
+	"varDump":function(arr,level,maxLevel) {
 		var dumped_text = "";
 		if (!level){
 			level = 0;
+		}
+
+		if (!maxLevel) {
+			maxLevel = 4;
 		}
 		
 		// The padding given at the beginning of the line.
 		var level_padding = "";
 		for (var j=0;j<level+1;j++){
 			level_padding += "    ";
+		}
+
+		if (level > maxLevel){
+			return dumped_text + level_padding + "...\n";
 		}
 		
 		if (typeof(arr) == 'object') { // Array/Hashes/Objects
@@ -1016,7 +1040,7 @@ Zotero.Utilities = {
 				
 				if (typeof(value) == 'object') { // If it is an array,
 					dumped_text += level_padding + "'" + item + "' ...\n";
-					dumped_text += arguments.callee(value,level+1);
+					dumped_text += arguments.callee(value,level+1,maxLevel);
 				}
 				else {
 					if (typeof value == 'function'){
@@ -1099,7 +1123,7 @@ Zotero.Utilities = {
 			} else if(field === "creators") {
 				// normalize creators
 				var n = val.length;
-				var newCreators = newItem.creators = new Array(n);
+				var newCreators = newItem.creators = [];
 				for(var j=0; j<n; j++) {
 					var creator = val[j];
 					
@@ -1132,7 +1156,7 @@ Zotero.Utilities = {
 					}
 					if(!newCreator.creatorType) newCreator.creatorType = "author";
 					
-					newCreators[j] = newCreator;
+					newCreators.push(newCreator);
 				}
 			} else if(field === "tags") {
 				// normalize tags

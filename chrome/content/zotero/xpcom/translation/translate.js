@@ -459,7 +459,7 @@ Zotero.Translate.Sandbox = {
 						var newCallback = function(selectedItems) {
 							callbackExecuted = true;
 							if(haveAsyncHandler) {
-								translate.translate(this._libraryID, this._saveAttachments, selectedItems);
+								translate.translate(translate._libraryID, translate._saveAttachments, selectedItems);
 							} else {
 								returnedItems = selectedItems;
 							}
@@ -548,7 +548,8 @@ Zotero.Translate.Sandbox = {
 			}
 			
 			if(!item.title) {
-				throw new Error("No title specified for item");
+				translate.complete(false, new Error("No title specified for item"));
+				return;
 			}
 			
 			// create short title
@@ -1457,7 +1458,8 @@ Zotero.Translate.Web.prototype.translate = function(libraryID, saveAttachments, 
  * Overload _translateTranslatorLoaded to send an RPC call if necessary
  */
 Zotero.Translate.Web.prototype._translateTranslatorLoaded = function() {
-	if(this.translator[0].runMode === Zotero.Translator.RUN_MODE_IN_BROWSER) {
+	if(this.translator[0].runMode === Zotero.Translator.RUN_MODE_IN_BROWSER
+			|| this._parentTranslator) {
 		// begin process to run translator in browser
 		Zotero.Translate.Base.prototype._translateTranslatorLoaded.apply(this);
 	} else {

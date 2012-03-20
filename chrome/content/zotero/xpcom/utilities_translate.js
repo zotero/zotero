@@ -241,6 +241,17 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 		}
 	}
 	
+	for(var i=0; i<urls.length; i++) {
+		if("document" in this._translate && "location" in this._translate.document
+				&& this._translate.document.location.toString() === urls[i]) {
+			// Document is attempting to reload itself
+			Zotero.debug("Translate: Attempted to load the current document using processDocuments; using loaded document instead");
+			processor(this._translate.document, urls[i]);
+			urls.splice(i, 1);
+			i--;
+		}
+	}
+	
 	translate.incrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
 	var hiddenBrowser = Zotero.HTTP.processDocuments(urls, function(doc) {
 		if(!processor) return;

@@ -1928,7 +1928,7 @@ function handleShowInPreferenceChange() {
 /**
  * Opens a URI in the basic viewer in Standalone, or a new window in Firefox
  */
-function openInViewer(uri) {
+function openInViewer(uri, newTab) {
 	var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 		.getService(Components.interfaces.nsIWindowMediator);
 	const features = "menubar=yes,toolbar=no,location=no,scrollbars,centerscreen,resizable";
@@ -1944,7 +1944,11 @@ function openInViewer(uri) {
 	} else {
 		var win = wm.getMostRecentWindow("navigator:browser");
 		if(win) {
-			win.open(uri, null, features);
+			if(newTab) {
+				win.gBrowser.selectedTab = win.gBrowser.addTab(uri);
+			} else {
+				win.open(uri, null, features);
+			}
 		}
 		else {
 			var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]

@@ -70,7 +70,7 @@ var Issues = new function() {
 	};
 	
 	var req = new XMLHttpRequest();
-	req.open("GET", "https://api.github.com/repos/zotero/translators/issues", true);
+	req.open("GET", "https://api.github.com/repos/zotero/translators/issues?per_page=100", true);
 	req.onreadystatechange = function(e) {
 		if(req.readyState != 4) return;
 		
@@ -488,7 +488,7 @@ function init() {
 				hashVars[myVar.substr(0, index)] = myVar.substr(index+1);
 			}
 			
-			if(hashVars["browser"] && /^[a-z]$/.test(hashVars["browser"])
+			if(hashVars["browser"] && /^[a-z]+$/.test(hashVars["browser"])
 					&& hashVars["version"] && /^[0-9a-zA-Z\-._]/.test(hashVars["version"])) {
 				loc = "testResults-"+hashVars["browser"]+"-"+hashVars["version"]+".json";
 			}

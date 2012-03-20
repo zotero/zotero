@@ -269,7 +269,18 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 	
 	var args = ['-enc', 'UTF-8', '-nopgbrk', '-layout', '-l', MAX_PAGES];
 	args.push(file.path, cacheFile.path);
-	proc.run(true, args, args.length);
+	try {
+		if (!Zotero.isFx36) {
+			proc.runw(true, args, args.length);
+		}
+		else {
+			proc.run(true, args, args.length);
+		}
+	}
+	catch (e) {
+		Zotero.debug("Error running pdfinfo", 1);
+		Zotero.debug(e, 1);
+	}
 	
 	if(!cacheFile.exists()) {
 		this._callback(false, "recognizePDF.couldNotRead");

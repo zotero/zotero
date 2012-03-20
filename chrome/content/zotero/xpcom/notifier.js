@@ -145,6 +145,12 @@ Zotero.Notifier = new function(){
 		
 		for (var i in _observers.items){
 			Zotero.debug("Calling notify('" + event + "') on observer with hash '" + i + "'", 4);
+			
+			if (!_observers.get(i)) {
+				Zotero.debug("Observer no longer exists");
+				continue;
+			}
+			
 			// Find observers that handle notifications for this type (or all types)
 			if (!_observers.get(i).types || _observers.get(i).types.indexOf(type)!=-1){
 				// Catch exceptions so all observers get notified even if

@@ -108,6 +108,7 @@
 
 .quick-format-bubble {
 	-moz-border-radius: 8px;
+	border-radius: 8px;
 	background-color: #dee7f8;
 	border-style: solid;
 	border-width: 1px;
@@ -124,6 +125,7 @@
 
 .quick-format-bubble[selected="true"] {
 	-moz-border-radius: 8px !important;
+	border-radius: 8px !important;
 	background-color: #598bec;
 	color: #fff;
 }

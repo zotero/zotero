@@ -671,6 +671,8 @@ const ZOTERO_CONFIG = {
 		// Initialize Locate Manager
 		Zotero.LocateManager.init();
 		
+		Zotero.Items.startEmptyTrashTimer();
+		
 		return true;
 	}
 	

@@ -396,16 +396,6 @@ var ZoteroPane = new function()
 			searchBar.inputField.select();
 		}, 1);
 		
-		// Auto-empty trashed items older than a certain number of days
-		var days = Zotero.Prefs.get('trashAutoEmptyDays');
-		if (days) {
-			var d = new Date();
-			// TODO: empty group trashes if permissions
-			var deleted = Zotero.Items.emptyTrash(null, days);
-			var d2 = new Date();
-			Zotero.debug("Emptied old items from trash in " + (d2 - d) + " ms");
-		}
-		
 		var d = new Date();
 		Zotero.purgeDataObjects();
 		var d2 = new Date();
@@ -414,9 +404,12 @@ var ZoteroPane = new function()
 		// Auto-sync on pane open
 		if (Zotero.Prefs.get('sync.autoSync')) {
 			setTimeout(function () {
-				if (!Zotero.Sync.Server.enabled
-						|| Zotero.Sync.Server.syncInProgress
-						|| Zotero.Sync.Storage.syncInProgress) {
+				if (!Zotero.Sync.Server.enabled) {
+					Zotero.debug('Sync not enabled -- skipping auto-sync', 4);
+					return;
+				}
+				
+				if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
 					Zotero.debug('Sync already running -- skipping auto-sync', 4);
 					return;
 				}
@@ -435,9 +428,6 @@ var ZoteroPane = new function()
 		// We don't bother setting an error state at open
 		if (Zotero.Sync.Server.syncInProgress || Zotero.Sync.Storage.syncInProgress) {
 			Zotero.Sync.Runner.setSyncIcon('animate');
-		}
-		else {
-			Zotero.Sync.Runner.setSyncIcon();
 		}
 		
 		return true;
@@ -665,10 +655,10 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		// Make sure currently selected view is editable
-		if (row === undefined && this.collectionsView.selection) {
+		if ((row === undefined || row === null) && this.collectionsView.selection) {
 			row = this.collectionsView.selection.currentIndex;
 			
+			// Make sure currently selected view is editable
 			if (!this.canEdit(row)) {
 				this.displayCannotEditLibraryMessage();
 				return;
@@ -3541,8 +3531,7 @@ var ZoteroPane = new function()
 			proc.init(exec);
 			
 			var args = [url];
-			proc.runw(true, args, args.length);
-		}
+			proc.runw(false, args, args.length);
 	}
 	
 	

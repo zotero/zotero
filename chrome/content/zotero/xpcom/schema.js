@@ -213,7 +213,22 @@ Zotero.Schema = new function(){
 		
 		// After a delay, start update of bundled files and repo updates
 		setTimeout(function () {
-			Zotero.Schema.updateBundledFiles(null, null, up2 || up3);
+			try {
+				Zotero.UnresponsiveScriptIndicator.disable();
+				var up = Zotero.Schema.updateBundledFiles();
+			}
+			finally {
+				Zotero.UnresponsiveScriptIndicator.enable();
+			}
+			if (up) {
+				// Run a manual scraper update if upgraded and pref set
+				if (Zotero.Prefs.get('automaticScraperUpdates')) {
+					Zotero.Schema.updateFromRepository(2);
+				}
+			}
+			else {
+				Zotero.Schema.updateFromRepository();
+			}
 		}, 5000);
 	}
 	
