@@ -1239,7 +1239,7 @@ Zotero.Sync.Storage = new function () {
 				// For advertising junk files, ignore a bug on Windows where
 				// destFile.create() works but zipReader.extract() doesn't
 				// when the path length is close to 255.
-				if (destFile.leafName.match(/[a-zA-Z0-9]{130,}/)) {
+				if (destFile.leafName.match(/[a-zA-Z0-9+=]{130,}/)) {
 					var msg = "Ignoring error extracting '" + destFile.path + "'";
 					Zotero.debug(msg, 2);
 					Zotero.debug(e, 2);
