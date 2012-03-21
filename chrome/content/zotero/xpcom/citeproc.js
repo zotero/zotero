@@ -2156,7 +2156,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.303";
+    this.processor_version = "1.0.304";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -7708,6 +7708,35 @@ CSL.Node.text = {
     }
 };
 CSL.Attributes = {};
+CSL.Attributes["@is-plural"] = function (state, arg) {
+    var func = function (state, Item, item) {
+        var nameList = Item[arg];
+        var ret = false;
+        if (nameList && nameList.length) {
+            var persons = 0;
+            var institutions = 0;
+            var last_is_person = false;
+            for (var i = 0, ilen = nameList.length; i < ilen; i += 1) {
+                if (nameList[i].isInstitution && (nameList[i].literal || (nameList[i].family && !nameList[i].given))) {
+                    institutions += 1;
+                    last_is_person = false;
+                } else {
+                    persons += 1;
+                    last_is_person = true;
+                }
+            }
+            if (persons > 1) {
+                ret = true;
+            } else if (institutions > 1) {
+                ret = true;
+            } else if (institutions && last_is_person) {
+                ret = true;
+            }
+        }
+        return ret;
+    }
+    this.tests.push(func);
+}
 CSL.Attributes["@subjurisdictions"] = function (state, arg) {
     var trysubjurisdictions = parseInt(arg, 10);
     var func = function (state, Item, item) {
