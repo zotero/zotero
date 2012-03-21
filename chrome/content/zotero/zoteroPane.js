@@ -3532,6 +3532,7 @@ var ZoteroPane = new function()
 			
 			var args = [url];
 			proc.runw(false, args, args.length);
+		}
 	}
 	
 	
