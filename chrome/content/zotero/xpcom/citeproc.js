@@ -2156,7 +2156,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.304";
+    this.processor_version = "1.0.305";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -7939,7 +7939,7 @@ CSL.Attributes["@variable"] = function (state, arg) {
                     }
                     if (Item[variable]) {
                         for (var key in Item[variable]) {
-                            if (this.dateparts.indexOf(key) === -1) {
+                            if (this.dateparts.indexOf(key) === -1 && "literal" !== key) {
                                 continue;
                             }
                             if (Item[variable][key]) {
