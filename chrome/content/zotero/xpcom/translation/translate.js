@@ -1287,6 +1287,10 @@ Zotero.Translate.Base.prototype = {
 		this._sandboxManager.importObject({"Utilities":new Zotero.Utilities.Translate(this)});
 		this._sandboxManager.sandbox.Zotero.Utilities.HTTP = this._sandboxManager.sandbox.Zotero.Utilities;
 		
+		this._sandboxManager.sandbox.Zotero.isBookmarklet = Zotero.isBookmarklet || false;
+		this._sandboxManager.sandbox.Zotero.isConnector = Zotero.isConnector || false;
+		this._sandboxManager.sandbox.Zotero.isServer = Zotero.isServer || false;
+		
 		// create shortcuts
 		this._sandboxManager.sandbox.Z = this._sandboxManager.sandbox.Zotero;
 		this._sandboxManager.sandbox.ZU = this._sandboxManager.sandbox.Zotero.Utilities;

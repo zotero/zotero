@@ -225,30 +225,14 @@ Zotero.Attachments = new function(){
 		
 		// Save using a hidden browser
 		var nativeHandlerImport = function () {
-			var browser = Zotero.Browser.createHiddenBrowser();
-			if(cookieSandbox) cookieSandbox.attachToBrowser(browser);
-			var imported = false;
-			var onpageshow = function() {
-				// ignore spurious about:blank loads
-				if(browser.contentDocument.location.href == "about:blank") return;
-				
-				// pageshow can be triggered multiple times on some pages,
-				// so make sure we only import once
-				// (https://www.zotero.org/trac/ticket/795)
-				if (imported) {
-					return;
-				}
+			var browser = Zotero.HTTP.processDocuments(url, function() {
 				var importCallback = function (item) {
-					browser.removeEventListener("pageshow", onpageshow, false);
 					Zotero.Browser.deleteHiddenBrowser(browser);
 					if(callback) callback(item);
 				};
 				Zotero.Attachments.importFromDocument(browser.contentDocument,
 					sourceItemID, forceTitle, parentCollectionIDs, importCallback, libraryID);
-				imported = true;
-			};
-			browser.addEventListener("pageshow", onpageshow, false);
-			browser.loadURI(url);
+			}, undefined, undefined, true);
 		};
 		
 		// Save using remote web browser persist
@@ -397,7 +381,7 @@ Zotero.Attachments = new function(){
 		}
 		
 		if (mimeType) {
-			return process(mimeType);
+			return process(mimeType, Zotero.MIME.hasNativeHandler(mimeType));
 		}
 		else {
 			Zotero.MIME.getMIMETypeFromURL(url, function (mimeType, hasNativeHandler) {
