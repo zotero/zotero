@@ -100,7 +100,7 @@ const xpcomFilesLocal = [
 	'storage/queueManager',
 	'storage/queue',
 	'storage/request',
-	'storage/module',
+	'storage/mode',
 	'storage/zfs',
 	'storage/webdav',
 	'timeline',

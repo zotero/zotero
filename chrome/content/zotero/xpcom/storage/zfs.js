@@ -24,7 +24,7 @@
 */
 
 
-Zotero.Sync.Storage.Module.ZFS = (function () {
+Zotero.Sync.Storage.ZFS = (function () {
 	var _rootURI;
 	var _userURI;
 	var _cachedCredentials = false;
@@ -40,7 +40,7 @@ Zotero.Sync.Storage.Module.ZFS = (function () {
 		var uri = getItemInfoURI(item);
 		
 		Zotero.HTTP.doGet(uri, function (req) {
-			var funcName = "Zotero.Sync.Storage.Module.ZFS.getStorageFileInfo()";
+			var funcName = "Zotero.Sync.Storage.ZFS.getStorageFileInfo()";
 			
 			if (req.status == 404) {
 				callback(item, false);
@@ -237,7 +237,7 @@ Zotero.Sync.Storage.Module.ZFS = (function () {
 		}
 		
 		Zotero.HTTP.doPost(uri, body, function (req) {
-			var funcName = "Zotero.Sync.Storage.Module.ZFS.getFileUploadParameters()";
+			var funcName = "Zotero.Sync.Storage.ZFS.getFileUploadParameters()";
 			
 			if (req.status == 413) {
 				var retry = req.getResponseHeader('Retry-After');
@@ -597,7 +597,7 @@ Zotero.Sync.Storage.Module.ZFS = (function () {
 	 * @return	{nsIURI}					URI of file on storage server
 	 */
 	function getItemURI(item) {
-		var uri = Zotero.Sync.Storage.Module.ZFS.rootURI;
+		var uri = Zotero.Sync.Storage.ZFS.rootURI;
 		// Be sure to mirror parameter changes to getItemInfoURI() below
 		uri.spec += Zotero.URI.getItemPath(item) + '/file?auth=1&iskey=1&version=1';
 		return uri;
@@ -612,7 +612,7 @@ Zotero.Sync.Storage.Module.ZFS = (function () {
 	 * @return	{nsIURI}					URI of file on storage server with info flag
 	 */
 	function getItemInfoURI(item) {
-		var uri = Zotero.Sync.Storage.Module.ZFS.rootURI;
+		var uri = Zotero.Sync.Storage.ZFS.rootURI;
 		uri.spec += Zotero.URI.getItemPath(item) + '/file?auth=1&iskey=1&version=1&info=1';
 		return uri;
 	}
@@ -631,435 +631,445 @@ Zotero.Sync.Storage.Module.ZFS = (function () {
 	}
 	
 	
-	return {
-		name: "ZFS",
-		
-		get includeUserFiles() {
+	//
+	// Public methods (called via Zotero.Sync.Storage.ZFS)
+	//
+	var obj = new Zotero.Sync.Storage.Mode;
+	obj.name = "ZFS";
+	
+	Object.defineProperty(obj, "includeUserFiles", {
+		get: function () {
 			return Zotero.Prefs.get("sync.storage.enabled") && Zotero.Prefs.get("sync.storage.protocol") == 'zotero';
-		},
-		
-		get includeGroupFiles() {
+		}
+	});
+	
+	Object.defineProperty(obj, "includeGroupFiles", {
+		get: function () {
 			return Zotero.Prefs.get("sync.storage.groups.enabled");
-		},
-		
-		get enabled() {
-			return this.includeUserFiles || this.includeGroupFiles;
-		},
-		
-		get verified() {
-			return true;
-		},
-		
-		get rootURI() {
+		}
+	});
+	
+	Object.defineProperty(obj, "_enabled", {
+		get: function () this.includeUserFiles || this.includeGroupFiles
+	});
+	
+	obj._verified = true;
+	
+	Object.defineProperty(obj, "rootURI", {
+		get: function () {
 			if (!_rootURI) {
 				throw ("Root URI not initialized in Zotero.Sync.Storage.ZFS.rootURI");
 			}
 			return _rootURI.clone();
-		},
-		
-		get userURI() {
+		}
+	});
+	
+	Object.defineProperty(obj, "userURI", {
+		get: function () {
 			if (!_userURI) {
 				throw ("User URI not initialized in Zotero.Sync.Storage.ZFS.userURI");
 			}
 			return _userURI.clone();
-		},
+		}
+	});
+	
+	
+	obj._init = function (url, username, password) {
+		var ios = Components.classes["@mozilla.org/network/io-service;1"].
+					getService(Components.interfaces.nsIIOService);
+		try {
+			var uri = ios.newURI(url, null, null);
+			if (username) {
+				uri.username = username;
+				uri.password = password;
+			}
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+			return false;
+		}
+		_rootURI = uri;
 		
+		uri = uri.clone();
+		uri.spec += 'users/' + Zotero.userID + '/';
+		_userURI = uri;
 		
-		init: function (url, username, password) {
-			var ios = Components.classes["@mozilla.org/network/io-service;1"].
-						getService(Components.interfaces.nsIIOService);
+		return true;
+	};
+	
+	
+	obj._initFromPrefs = function () {
+		var url = ZOTERO_CONFIG.API_URL;
+		var username = Zotero.Sync.Server.username;
+		var password = Zotero.Sync.Server.password;
+		return this._init(url, username, password);
+	};
+	
+	
+	/**
+	 * Begin download process for individual file
+	 *
+	 * @param	{Zotero.Sync.Storage.Request}	[request]
+	 */
+	obj._downloadFile = function (request) {
+		var item = Zotero.Sync.Storage.getItemFromRequestName(request.name);
+		if (!item) {
+			throw new Error("Item '" + request.name + "' not found");
+		}
+		
+		// Retrieve file info from server to store locally afterwards
+		getStorageFileInfo(item, function (item, info) {
+			if (!request.isRunning()) {
+				Zotero.debug("Download request '" + request.name
+					+ "' is no longer running after getting remote file info");
+				return;
+			}
+			
+			if (!info) {
+				Zotero.debug("Remote file not found for item " + item.libraryID + "/" + item.key);
+				request.finish();
+				return;
+			}
+			
 			try {
-				var uri = ios.newURI(url, null, null);
-				if (username) {
-					uri.username = username;
-					uri.password = password;
-				}
-			}
-			catch (e) {
-				Zotero.debug(e, 1);
-				Components.utils.reportError(e);
-				return false;
-			}
-			_rootURI = uri;
-			
-			uri = uri.clone();
-			uri.spec += 'users/' + Zotero.userID + '/';
-			_userURI = uri;
-			
-			return true;
-		},
-		
-		
-		initFromPrefs: function () {
-			var url = ZOTERO_CONFIG.API_URL;
-			var username = Zotero.Sync.Server.username;
-			var password = Zotero.Sync.Server.password;
-			return this.init(url, username, password);
-		},
-		
-		
-		/**
-		 * Begin download process for individual file
-		 *
-		 * @param	{Zotero.Sync.Storage.Request}	[request]
-		 */
-		downloadFile: function (request) {
-			var item = Zotero.Sync.Storage.getItemFromRequestName(request.name);
-			if (!item) {
-				throw new Error("Item '" + request.name + "' not found");
-			}
-			
-			// Retrieve file info from server to store locally afterwards
-			getStorageFileInfo(item, function (item, info) {
-				if (!request.isRunning()) {
-					Zotero.debug("Download request '" + request.name
-						+ "' is no longer running after getting remote file info");
-					return;
+				var syncModTime = info.mtime;
+				var syncHash = info.hash;
+				
+				var file = item.getFile();
+				// Skip download if local file exists and matches mod time
+				if (file && file.exists()) {
+					if (syncModTime == file.lastModifiedTime) {
+						Zotero.debug("File mod time matches remote file -- skipping download");
+						
+						Zotero.DB.beginTransaction();
+						var syncState = Zotero.Sync.Storage.getSyncState(item.id);
+						//var updateItem = syncState != 1;
+						var updateItem = false;
+						Zotero.Sync.Storage.setSyncedModificationTime(item.id, syncModTime, updateItem);
+						Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
+						Zotero.DB.commitTransaction();
+						Zotero.Sync.Storage.EventManager.changesMade();
+						request.finish();
+						return;
+					}
+					// If not compressed, check hash, in case only timestamp changed
+					else if (!info.compressed && item.attachmentHash == syncHash) {
+						Zotero.debug("File hash matches remote file -- skipping download");
+						
+						Zotero.DB.beginTransaction();
+						var syncState = Zotero.Sync.Storage.getSyncState(item.id);
+						//var updateItem = syncState != 1;
+						var updateItem = false;
+						if (!info.compressed) {
+							Zotero.Sync.Storage.setSyncedHash(item.id, syncHash, false);
+						}
+						Zotero.Sync.Storage.setSyncedModificationTime(item.id, syncModTime, updateItem);
+						Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
+						Zotero.DB.commitTransaction();
+						Zotero.Sync.Storage.EventManager.changesMade();
+						request.finish();
+						return;
+					}
 				}
 				
-				if (!info) {
-					Zotero.debug("Remote file not found for item " + item.libraryID + "/" + item.key);
-					request.finish();
-					return;
+				var destFile = Zotero.getTempDirectory();
+				if (info.compressed) {
+					destFile.append(item.key + '.zip.tmp');
+				}
+				else {
+					destFile.append(item.key + '.tmp');
 				}
 				
-				try {
-					var syncModTime = info.mtime;
-					var syncHash = info.hash;
-					
-					var file = item.getFile();
-					// Skip download if local file exists and matches mod time
-					if (file && file.exists()) {
-						if (syncModTime == file.lastModifiedTime) {
-							Zotero.debug("File mod time matches remote file -- skipping download");
-							
-							Zotero.DB.beginTransaction();
-							var syncState = Zotero.Sync.Storage.getSyncState(item.id);
-							//var updateItem = syncState != 1;
-							var updateItem = false;
-							Zotero.Sync.Storage.setSyncedModificationTime(item.id, syncModTime, updateItem);
-							Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
-							Zotero.DB.commitTransaction();
-							Zotero.Sync.Storage.EventManager.changesMade();
-							request.finish();
-							return;
-						}
-						// If not compressed, check hash, in case only timestamp changed
-						else if (!info.compressed && item.attachmentHash == syncHash) {
-							Zotero.debug("File hash matches remote file -- skipping download");
-							
-							Zotero.DB.beginTransaction();
-							var syncState = Zotero.Sync.Storage.getSyncState(item.id);
-							//var updateItem = syncState != 1;
-							var updateItem = false;
-							if (!info.compressed) {
-								Zotero.Sync.Storage.setSyncedHash(item.id, syncHash, false);
-							}
-							Zotero.Sync.Storage.setSyncedModificationTime(item.id, syncModTime, updateItem);
-							Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
-							Zotero.DB.commitTransaction();
-							Zotero.Sync.Storage.EventManager.changesMade();
-							request.finish();
-							return;
-						}
-					}
-					
-					var destFile = Zotero.getTempDirectory();
-					if (info.compressed) {
-						destFile.append(item.key + '.zip.tmp');
-					}
-					else {
-						destFile.append(item.key + '.tmp');
-					}
-					
-					if (destFile.exists()) {
-						try {
-							destFile.remove(false);
-						}
-						catch (e) {
-							Zotero.File.checkFileAccessError(e, destFile, 'delete');
-						}
-					}
-					
-					// saveURI() below appears not to create empty files for Content-Length: 0,
-					// so we create one here just in case
+				if (destFile.exists()) {
 					try {
-						destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
+						destFile.remove(false);
 					}
 					catch (e) {
-						Zotero.File.checkFileAccessError(e, destFile, 'create');
+						Zotero.File.checkFileAccessError(e, destFile, 'delete');
 					}
-					
-					var listener = new Zotero.Sync.Storage.StreamListener(
-						{
-							onStart: function (request, data) {
-								if (data.request.isFinished()) {
-									Zotero.debug("Download request " + data.request.name
-										+ " stopped before download started -- closing channel");
-									request.cancel(0x804b0002); // NS_BINDING_ABORTED
-									return;
-								}
-							},
-							onProgress: function (a, b, c) {
-								request.onProgress(a, b, c)
-							},
-							onStop: function (request, status, response, data) {
-								if (status != 200) {
-									var msg = "Unexpected status code " + status
-										+ " for request " + data.request.name
-										+ " in Zotero.Sync.Storage.Module.ZFS.downloadFile()";
-									Zotero.debug(msg, 1);
-									Components.utils.reportError(msg);
-									Zotero.Sync.Storage.EventManager.error(Zotero.Sync.Storage.defaultError);
-								}
-								
-								// Don't try to process if the request has been cancelled
-								if (data.request.isFinished()) {
-									Zotero.debug("Download request " + data.request.name
-										+ " is no longer running after file download", 2);
-									return;
-								}
-								
-								Zotero.debug("Finished download of " + destFile.path);
-								
-								try {
-									Zotero.Sync.Storage.processDownload(data);
-									data.request.finish();
-								}
-								catch (e) {
-									Zotero.Sync.Storage.EventManager.error(e);
-								}
-							},
-							request: request,
-							item: item,
-							compressed: info.compressed,
-							syncModTime: syncModTime,
-							syncHash: syncHash
-						}
-					);
-					
-					var uri = getItemURI(item);
-					
-					// Don't display password in console
-					var disp = uri.clone();
-					if (disp.password) {
-						disp.password = "********";
-					}
-					Zotero.debug('Saving ' + disp.spec + ' with saveURI()');
-					const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-					var wbp = Components
-						.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-						.createInstance(nsIWBP);
-					wbp.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
-					wbp.progressListener = listener;
-					wbp.saveURI(uri, null, null, null, null, destFile);
+				}
+				
+				// saveURI() below appears not to create empty files for Content-Length: 0,
+				// so we create one here just in case
+				try {
+					destFile.create(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
 				}
 				catch (e) {
-					Zotero.Sync.Storage.EventManager.error(e);
-				}
-			});
-		},
-		
-		
-		uploadFile: function (request) {
-			var item = Zotero.Sync.Storage.getItemFromRequestName(request.name);
-			if (Zotero.Attachments.getNumFiles(item) > 1) {
-				Zotero.Sync.Storage.createUploadFile(request, function (data) { processUploadFile(data); });
-			}
-			else {
-				processUploadFile({ request: request });
-			}
-		},
-		
-		
-		getLastSyncTime: function (callback) {
-			var uri = this.userURI;
-			var successFileURI = uri.clone();
-			successFileURI.spec += "laststoragesync?auth=1";
-			
-			// Cache the credentials at the root
-			var self = this;
-			this.cacheCredentials(function () {
-				Zotero.HTTP.doGet(successFileURI, function (req) {
-					if (req.responseText) {
-						Zotero.debug(req.responseText);
-					}
-					Zotero.debug(req.status);
-					
-					if (req.status == 401 || req.status == 403) {
-						Zotero.debug("Clearing ZFS authentication credentials", 2);
-						_cachedCredentials = false;
-					}
-					
-					if (req.status != 200 && req.status != 404) {
-						Zotero.Sync.Storage.EventManager.error(
-							"Unexpected status code " + req.status + " getting "
-								+ "last file sync time"
-						);
-					}
-					
-					if (req.status == 200) {
-						var ts = req.responseText;
-						var date = new Date(ts * 1000);
-						Zotero.debug("Last successful storage sync was " + date);
-						_lastSyncTime = ts;
-					}
-					else {
-						var ts = null;
-						_lastSyncTime = null;
-					}
-					callback(ts);
-				});
-			});
-		},
-		
-		
-		setLastSyncTime: function (callback, useLastSyncTime) {
-			if (useLastSyncTime) {
-				if (!_lastSyncTime) {
-					if (callback) {
-						callback();
-					}
-					return;
+					Zotero.File.checkFileAccessError(e, destFile, 'create');
 				}
 				
-				var sql = "REPLACE INTO version VALUES ('storage_zfs', ?)";
-				Zotero.DB.query(sql, { int: _lastSyncTime });
+				var listener = new Zotero.Sync.Storage.StreamListener(
+					{
+						onStart: function (request, data) {
+							if (data.request.isFinished()) {
+								Zotero.debug("Download request " + data.request.name
+									+ " stopped before download started -- closing channel");
+								request.cancel(0x804b0002); // NS_BINDING_ABORTED
+								return;
+							}
+						},
+						onProgress: function (a, b, c) {
+							request.onProgress(a, b, c)
+						},
+						onStop: function (request, status, response, data) {
+							if (status != 200) {
+								var msg = "Unexpected status code " + status
+									+ " for request " + data.request.name
+									+ " in Zotero.Sync.Storage.ZFS.downloadFile()";
+								Zotero.debug(msg, 1);
+								Components.utils.reportError(msg);
+								Zotero.Sync.Storage.EventManager.error(Zotero.Sync.Storage.defaultError);
+							}
+							
+							// Don't try to process if the request has been cancelled
+							if (data.request.isFinished()) {
+								Zotero.debug("Download request " + data.request.name
+									+ " is no longer running after file download", 2);
+								return;
+							}
+							
+							Zotero.debug("Finished download of " + destFile.path);
+							
+							try {
+								Zotero.Sync.Storage.processDownload(data);
+								data.request.finish();
+							}
+							catch (e) {
+								Zotero.Sync.Storage.EventManager.error(e);
+							}
+						},
+						request: request,
+						item: item,
+						compressed: info.compressed,
+						syncModTime: syncModTime,
+						syncHash: syncHash
+					}
+				);
 				
-				Zotero.debug("Clearing ZFS authentication credentials", 2);
-				_lastSyncTime = null;
-				_cachedCredentials = false;
+				var uri = getItemURI(item);
 				
-				if (callback) {
-					callback();
+				// Don't display password in console
+				var disp = uri.clone();
+				if (disp.password) {
+					disp.password = "********";
 				}
-				
-				return;
+				Zotero.debug('Saving ' + disp.spec + ' with saveURI()');
+				const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
+				var wbp = Components
+					.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+					.createInstance(nsIWBP);
+				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
+				wbp.progressListener = listener;
+				wbp.saveURI(uri, null, null, null, null, destFile);
 			}
-			_lastSyncTime = null;
-			
-			var uri = this.userURI;
-			var successFileURI = uri.clone();
-			successFileURI.spec += "laststoragesync?auth=1";
-			
-			Zotero.HTTP.doPost(successFileURI, "", function (req) {
-				Zotero.debug(req.responseText);
+			catch (e) {
+				Zotero.Sync.Storage.EventManager.error(e);
+			}
+		});
+	};
+	
+	
+	obj._uploadFile = function (request) {
+		var item = Zotero.Sync.Storage.getItemFromRequestName(request.name);
+		if (Zotero.Attachments.getNumFiles(item) > 1) {
+			Zotero.Sync.Storage.createUploadFile(request, function (data) { processUploadFile(data); });
+		}
+		else {
+			processUploadFile({ request: request });
+		}
+	};
+	
+	
+	obj._getLastSyncTime = function (callback) {
+		var uri = this.userURI;
+		var successFileURI = uri.clone();
+		successFileURI.spec += "laststoragesync?auth=1";
+		
+		// Cache the credentials at the root
+		var self = this;
+		this._cacheCredentials(function () {
+			Zotero.HTTP.doGet(successFileURI, function (req) {
+				if (req.responseText) {
+					Zotero.debug(req.responseText);
+				}
 				Zotero.debug(req.status);
 				
-				if (req.status != 200) {
-					var msg = "Unexpected status code " + req.status + " setting last file sync time";
-					Zotero.debug(msg, 1);
-					Components.utils.reportError(msg);
-					Zotero.Sync.Storage.EventManager.error(Zotero.Sync.Storage.defaultError);
+				if (req.status == 401 || req.status == 403) {
+					Zotero.debug("Clearing ZFS authentication credentials", 2);
+					_cachedCredentials = false;
 				}
 				
-				var ts = req.responseText;
-				
-				var sql = "REPLACE INTO version VALUES ('storage_zfs', ?)";
-				Zotero.DB.query(sql, { int: ts });
-				
-				Zotero.debug("Clearing ZFS authentication credentials", 2);
-				_cachedCredentials = false;
-				
-				if (callback) {
-					callback();
-				}
-			});
-		},
-		
-		
-		cacheCredentials: function (callback) {
-			if (_cachedCredentials) {
-				Zotero.debug("Credentials are already cached");
-				setTimeout(function () {
-					callback();
-				}, 0);
-				return false;
-			}
-			
-			var uri = this.rootURI;
-			// TODO: move to root uri
-			uri.spec += "?auth=1";
-			Zotero.HTTP.doGet(uri, function (req) {
-				if (req.status == 401) {
-					// TODO: localize
-					var msg = "File sync login failed\n\nCheck your username and password in the Sync pane of the Zotero preferences.";
-					Zotero.Sync.Storage.EventManager.error(msg);
-				}
-				else if (req.status != 200) {
-					var msg = "Unexpected status code " + req.status + " caching "
-						+ "authentication credentials in Zotero.Sync.Storage.Module.ZFS.cacheCredentials()";
-					Zotero.debug(msg, 1);
-					Components.utils.reportError(msg);
-					Zotero.Sync.Storage.EventManager.error(Zotero.Sync.Storage.defaultErrorRestart);
-				}
-				Zotero.debug("Credentials are cached");
-				_cachedCredentials = true;
-				callback();
-			});
-			return true;
-		},
-		
-		
-		/**
-		 * Remove all synced files from the server
-		 */
-		purgeDeletedStorageFiles: function (callback) {
-			// If we don't have a user id we've never synced and don't need to bother
-			if (!Zotero.userID) {
-				Zotero.Sync.Storage.EventManager.skip();
-				return;
-			}
-			
-			var sql = "SELECT value FROM settings WHERE setting=? AND key=?";
-			var values = Zotero.DB.columnQuery(sql, ['storage', 'zfsPurge']);
-			if (!values) {
-				Zotero.Sync.Storage.EventManager.skip();
-				return;
-			}
-			
-			Zotero.debug("Unlinking synced files on ZFS");
-			
-			var uri = this.userURI;
-			uri.spec += "removestoragefiles?";
-			// Unused
-			for each(var value in values) {
-				switch (value) {
-					case 'user':
-						uri.spec += "user=1&";
-						break;
-					
-					case 'group':
-						uri.spec += "group=1&";
-						break;
-					
-					default:
-						Zotero.Sync.Storage.EventManager.error(
-							"Invalid zfsPurge value '" + value + "' in ZFS purgeDeletedStorageFiles()"
-						);
-				}
-			}
-			uri.spec = uri.spec.substr(0, uri.spec.length - 1);
-			
-			Zotero.HTTP.doPost(uri, "", function (xmlhttp) {
-				if (xmlhttp.status != 204) {
-					if (callback) {
-						callback(false);
-					}
+				if (req.status != 200 && req.status != 404) {
 					Zotero.Sync.Storage.EventManager.error(
-						"Unexpected status code " + xmlhttp.status + " purging ZFS files"
+						"Unexpected status code " + req.status + " getting "
+							+ "last file sync time"
 					);
 				}
 				
-				var sql = "DELETE FROM settings WHERE setting=? AND key=?";
-				Zotero.DB.query(sql, ['storage', 'zfsPurge']);
-				
-				if (callback) {
-					callback(true);
+				if (req.status == 200) {
+					var ts = req.responseText;
+					var date = new Date(ts * 1000);
+					Zotero.debug("Last successful storage sync was " + date);
+					_lastSyncTime = ts;
 				}
-				
-				Zotero.Sync.Storage.EventManager.success();
+				else {
+					var ts = null;
+					_lastSyncTime = null;
+				}
+				callback(ts);
 			});
+		});
+	};
+	
+	
+	obj._setLastSyncTime = function (callback, useLastSyncTime) {
+		if (useLastSyncTime) {
+			if (!_lastSyncTime) {
+				if (callback) {
+					callback();
+				}
+				return;
+			}
+			
+			var sql = "REPLACE INTO version VALUES ('storage_zfs', ?)";
+			Zotero.DB.query(sql, { int: _lastSyncTime });
+			
+			Zotero.debug("Clearing ZFS authentication credentials", 2);
+			_lastSyncTime = null;
+			_cachedCredentials = false;
+			
+			if (callback) {
+				callback();
+			}
+			
+			return;
 		}
-	}
+		_lastSyncTime = null;
+		
+		var uri = this.userURI;
+		var successFileURI = uri.clone();
+		successFileURI.spec += "laststoragesync?auth=1";
+		
+		Zotero.HTTP.doPost(successFileURI, "", function (req) {
+			Zotero.debug(req.responseText);
+			Zotero.debug(req.status);
+			
+			if (req.status != 200) {
+				var msg = "Unexpected status code " + req.status + " setting last file sync time";
+				Zotero.debug(msg, 1);
+				Components.utils.reportError(msg);
+				Zotero.Sync.Storage.EventManager.error(Zotero.Sync.Storage.defaultError);
+			}
+			
+			var ts = req.responseText;
+			
+			var sql = "REPLACE INTO version VALUES ('storage_zfs', ?)";
+			Zotero.DB.query(sql, { int: ts });
+			
+			Zotero.debug("Clearing ZFS authentication credentials", 2);
+			_cachedCredentials = false;
+			
+			if (callback) {
+				callback();
+			}
+		});
+	};
+	
+	
+	obj._cacheCredentials = function (callback) {
+		if (_cachedCredentials) {
+			Zotero.debug("Credentials are already cached");
+			setTimeout(function () {
+				callback();
+			}, 0);
+			return false;
+		}
+		
+		var uri = this.rootURI;
+		// TODO: move to root uri
+		uri.spec += "?auth=1";
+		Zotero.HTTP.doGet(uri, function (req) {
+			if (req.status == 401) {
+				// TODO: localize
+				var msg = "File sync login failed\n\nCheck your username and password in the Sync pane of the Zotero preferences.";
+				Zotero.Sync.Storage.EventManager.error(msg);
+			}
+			else if (req.status != 200) {
+				var msg = "Unexpected status code " + req.status + " caching "
+					+ "authentication credentials in Zotero.Sync.Storage.ZFS.cacheCredentials()";
+				Zotero.debug(msg, 1);
+				Components.utils.reportError(msg);
+				Zotero.Sync.Storage.EventManager.error(Zotero.Sync.Storage.defaultErrorRestart);
+			}
+			Zotero.debug("Credentials are cached");
+			_cachedCredentials = true;
+			callback();
+		});
+		return true;
+	};
+	
+	
+	/**
+	 * Remove all synced files from the server
+	 */
+	obj._purgeDeletedStorageFiles = function (callback) {
+		// If we don't have a user id we've never synced and don't need to bother
+		if (!Zotero.userID) {
+			Zotero.Sync.Storage.EventManager.skip();
+			return;
+		}
+		
+		var sql = "SELECT value FROM settings WHERE setting=? AND key=?";
+		var values = Zotero.DB.columnQuery(sql, ['storage', 'zfsPurge']);
+		if (!values) {
+			Zotero.Sync.Storage.EventManager.skip();
+			return;
+		}
+		
+		Zotero.debug("Unlinking synced files on ZFS");
+		
+		var uri = this.userURI;
+		uri.spec += "removestoragefiles?";
+		// Unused
+		for each(var value in values) {
+			switch (value) {
+				case 'user':
+					uri.spec += "user=1&";
+					break;
+				
+				case 'group':
+					uri.spec += "group=1&";
+					break;
+				
+				default:
+					Zotero.Sync.Storage.EventManager.error(
+						"Invalid zfsPurge value '" + value + "' in ZFS purgeDeletedStorageFiles()"
+					);
+			}
+		}
+		uri.spec = uri.spec.substr(0, uri.spec.length - 1);
+		
+		Zotero.HTTP.doPost(uri, "", function (xmlhttp) {
+			if (xmlhttp.status != 204) {
+				if (callback) {
+					callback(false);
+				}
+				Zotero.Sync.Storage.EventManager.error(
+					"Unexpected status code " + xmlhttp.status + " purging ZFS files"
+				);
+			}
+			
+			var sql = "DELETE FROM settings WHERE setting=? AND key=?";
+			Zotero.DB.query(sql, ['storage', 'zfsPurge']);
+			
+			if (callback) {
+				callback(true);
+			}
+			
+			Zotero.Sync.Storage.EventManager.success();
+		});
+	};
+	
+	return obj;
 }());

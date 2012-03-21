@@ -1801,12 +1801,12 @@ const ZOTERO_CONFIG = {
 		Zotero.Relations.purge();
 		
 		if (!skipStoragePurge && Math.random() < 1/10) {
-			Zotero.Sync.Storage.purgeDeletedStorageFiles('ZFS');
-			Zotero.Sync.Storage.purgeDeletedStorageFiles('WebDAV');
+			Zotero.Sync.Storage.ZFS.purgeDeletedStorageFiles();
+			Zotero.Sync.Storage.WebDAV.purgeDeletedStorageFiles();
 		}
 		
 		if (!skipStoragePurge) {
-			Zotero.Sync.Storage.purgeOrphanedStorageFiles('WebDAV');
+			Zotero.Sync.Storage.WebDAV.purgeOrphanedStorageFiles();
 		}
 	}
 	

@@ -421,7 +421,7 @@ Zotero.Sync.EventListener = new function () {
 			var sql = "REPLACE INTO syncDeleteLog VALUES (?, ?, ?, ?)";
 			var syncStatement = Zotero.DB.getStatement(sql);
 			
-			if (isItem && Zotero.Sync.Storage.isActive('WebDAV')) {
+			if (isItem && Zotero.Sync.Storage.WebDAV.active) {
 				var storageEnabled = true;
 				var sql = "INSERT INTO storageDeleteLog VALUES (?, ?, ?)";
 				var storageStatement = Zotero.DB.getStatement(sql);
@@ -559,7 +559,7 @@ Zotero.Sync.Runner = new function () {
 			Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.syncingFiles'));
 			
 			var zfsSync = function (skipSyncNeeded) {
-				Zotero.Sync.Storage.sync('ZFS', {
+				Zotero.Sync.Storage.ZFS.sync({
 					// ZFS success
 					onSuccess: function () {
 						setTimeout(function () {
@@ -593,7 +593,7 @@ Zotero.Sync.Runner = new function () {
 				})
 			};
 			
-			Zotero.Sync.Storage.sync('WebDAV', {
+			Zotero.Sync.Storage.WebDAV.sync({
 				// WebDAV success
 				onSuccess: function () {
 					zfsSync(true);

@@ -291,7 +291,7 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 				var sql = "INSERT OR IGNORE INTO settings VALUES (?,?,?)";
 				Zotero.DB.query(sql, ['storage', 'zfsPurge', 'user']);
 				
-				Zotero.Sync.Storage.purgeDeletedStorageFiles('zfs', function (success) {
+				Zotero.Sync.Storage.ZFS.purgeDeletedStorageFiles(function (success) {
 					if (success) {
 						ps.alert(
 							null,
@@ -363,7 +363,7 @@ function verifyStorageServer() {
 	abortButton.hidden = false;
 	progressMeter.hidden = false;
 	
-	var requestHolder = Zotero.Sync.Storage.checkServer('WebDAV', function (uri, status, callback) {
+	var requestHolder = Zotero.Sync.Storage.WebDAV.checkServer(function (uri, status, callback) {
 		verifyButton.hidden = false;
 		abortButton.hidden = true;
 		progressMeter.hidden = true;
@@ -388,7 +388,7 @@ function verifyStorageServer() {
 				break;
 		}
 		
-		callback(uri, status, window);
+		Zotero.Sync.Storage.WebDAV.checkServerCallback(uri, status, window);
 	});
 	
 	abortButton.onclick = function () {

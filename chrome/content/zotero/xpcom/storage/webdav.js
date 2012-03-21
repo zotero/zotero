@@ -24,7 +24,7 @@
 */
 
 
-Zotero.Sync.Storage.Module.WebDAV = (function () {
+Zotero.Sync.Storage.WebDAV = (function () {
 	// TEMP
 	// TODO: localize
 	var _defaultError = "A WebDAV file sync error occurred. Please try syncing again.\n\nIf you receive this message repeatedly, check your WebDAV server settings in the Sync pane of the Zotero preferences.";
@@ -387,7 +387,7 @@ Zotero.Sync.Storage.Module.WebDAV = (function () {
 	 * Create a Zotero directory on the storage server
 	 */
 	function createServerDirectory(callback) {
-		var uri = Zotero.Sync.Storage.Module.WebDAV.rootURI;
+		var uri = Zotero.Sync.Storage.WebDAV.rootURI;
 		Zotero.HTTP.WebDAV.doMkCol(uri, function (req) {
 			Zotero.debug(req.responseText);
 			Zotero.debug(req.status);
@@ -429,7 +429,7 @@ Zotero.Sync.Storage.Module.WebDAV = (function () {
 	 * @return	{nsIURI}					URI of file on storage server
 	 */
 	function getItemURI(item) {
-		var uri = Zotero.Sync.Storage.Module.WebDAV.rootURI;
+		var uri = Zotero.Sync.Storage.WebDAV.rootURI;
 		uri.spec = uri.spec + item.key + '.zip';
 		return uri;
 	}
@@ -443,7 +443,7 @@ Zotero.Sync.Storage.Module.WebDAV = (function () {
 	 * @return	{nsIURI}					URI of property file on storage server
 	 */
 	function getItemPropertyURI(item) {
-		var uri = Zotero.Sync.Storage.Module.WebDAV.rootURI;
+		var uri = Zotero.Sync.Storage.WebDAV.rootURI;
 		uri.spec = uri.spec + item.key + '.prop';
 		return uri;
 	}
@@ -670,31 +670,37 @@ Zotero.Sync.Storage.Module.WebDAV = (function () {
 	}
 	
 	
-	return {
-		name: "WebDAV",
-		
-		get includeUserFiles() {
+	//
+	// Public methods (called via Zotero.Sync.Storage.WebDAV)
+	//
+	var obj = new Zotero.Sync.Storage.Mode;
+	obj.name = "WebDAV";
+	
+	Object.defineProperty(obj, "includeUserFiles", {
+		get: function () {
 			return Zotero.Prefs.get("sync.storage.enabled") && Zotero.Prefs.get("sync.storage.protocol") == 'webdav';
-		},
-		includeGroupItems: false,
+		}
+	});
+	obj.includeGroupItems = false;
 		
-		get enabled() {
-			return this.includeUserFiles;
-		},
-		
-		get verified() {
-			return Zotero.Prefs.get("sync.storage.verified");
-		},
-		
-		get username() {
-			return Zotero.Prefs.get('sync.storage.username');
-		},
-		
-		get password() {
-			var username = this.username;
+	Object.defineProperty(obj, "_enabled", {
+		get: function () this.includeUserFiles
+	});
+	
+	Object.defineProperty(obj, "_verified", {
+		get: function () Zotero.Prefs.get("sync.storage.verified")
+	});
+	
+	Object.defineProperty(obj, "_username", {
+		get: function () Zotero.Prefs.get('sync.storage.username')
+	});
+	
+	Object.defineProperty(obj, "_password", {
+		get: function () {
+			var username = this._username;
 			
 			if (!username) {
-				Zotero.debug('Username not set before getting Zotero.Sync.Storage.Module.WebDAV.password');
+				Zotero.debug('Username not set before getting Zotero.Sync.Storage.WebDAV.password');
 				return '';
 			}
 			
@@ -713,10 +719,10 @@ Zotero.Sync.Storage.Module.WebDAV = (function () {
 			return '';
 		},
 		
-		set password(password) {
-			var username = this.username;
+		set: function (password) {
+			var username = this._username;
 			if (!username) {
-				Zotero.debug('Username not set before setting Zotero.Sync.Server.Module.WebDAV.password');
+				Zotero.debug('Username not set before setting Zotero.Sync.Server.Mode.WebDAV.password');
 				return;
 			}
 			
@@ -740,419 +746,552 @@ Zotero.Sync.Storage.Module.WebDAV = (function () {
 					null, username, password, "", "");
 				loginManager.addLogin(loginInfo);
 			}
-		},
-		
-		get rootURI() {
+		}
+	});
+	
+	Object.defineProperty(obj, "rootURI", {
+		get: function () {
 			if (!_rootURI) {
 				throw new Error("Root URI not initialized");
 			}
 			return _rootURI.clone();
-		},
-		
-		get parentURI() {
+		}
+	});
+	
+	Object.defineProperty(obj, "parentURI", {
+		get: function () {
 			if (!_parentURI) {
 				throw new Error("Parent URI not initialized");
 			}
 			return _parentURI.clone();
-		},
+		}
+	});
+	
+	obj._init = function (url, dir, username, password) {
+		if (!url) {
+			var msg = "WebDAV URL not provided";
+			Zotero.debug(msg);
+			throw ({
+				message: msg,
+				name: "Z_ERROR_NO_URL",
+				filename: "webdav.js",
+				toString: function () { return this.message; }
+			});
+		}
 		
+		if (username && !password) {
+			var msg = "WebDAV password not provided";
+			Zotero.debug(msg);
+			throw ({
+				message: msg,
+				name: "Z_ERROR_NO_PASSWORD",
+				filename: "webdav.js",
+				toString: function () { return this.message; }
+			});
+		}
 		
-		init: function (url, dir, username, password) {
-			if (!url) {
-				var msg = "WebDAV URL not provided";
-				Zotero.debug(msg);
-				throw ({
-					message: msg,
-					name: "Z_ERROR_NO_URL",
-					filename: "webdav.js",
-					toString: function () { return this.message; }
-				});
+		var ios = Components.classes["@mozilla.org/network/io-service;1"].
+					getService(Components.interfaces.nsIIOService);
+		try {
+			var uri = ios.newURI(url, null, null);
+			if (username) {
+				uri.username = username;
+				uri.password = password;
+			}
+		}
+		catch (e) {
+			Zotero.debug(e);
+			Components.utils.reportError(e);
+			return false;
+		}
+		if (!uri.spec.match(/\/$/)) {
+			uri.spec += "/";
+		}
+		_parentURI = uri;
+		
+		var uri = uri.clone();
+		uri.spec += "zotero/";
+		_rootURI = uri;
+		return true;
+	};
+	
+	
+	obj._initFromPrefs = function () {
+		var scheme = Zotero.Prefs.get('sync.storage.scheme');
+		switch (scheme) {
+			case 'http':
+			case 'https':
+				break;
+			
+			default:
+				throw new Error("Invalid WebDAV scheme '" + scheme + "'");
+		}
+		
+		var url = Zotero.Prefs.get('sync.storage.url');
+		if (!url) {
+			return false;
+		}
+		
+		url = scheme + '://' + url;
+		var dir = "zotero";
+		var username = this._username;
+		var password = this._password;
+		
+		return this._init(url, dir, username, password);
+	};
+	
+	
+	/**
+	 * Begin download process for individual file
+	 *
+	 * @param	{Zotero.Sync.Storage.Request}	[request]
+	 */
+	obj._downloadFile = function (request) {
+		var item = Zotero.Sync.Storage.getItemFromRequestName(request.name);
+		if (!item) {
+			throw new Error("Item '" + request.name + "' not found");
+		}
+		
+		// Retrieve modification time from server to store locally afterwards 
+		getStorageModificationTime(item, function (item, mdate) {
+			if (!request.isRunning()) {
+				Zotero.debug("Download request '" + request.name
+					+ "' is no longer running after getting mod time");
+				return;
 			}
 			
-			if (username && !password) {
-				var msg = "WebDAV password not provided";
-				Zotero.debug(msg);
-				throw ({
-					message: msg,
-					name: "Z_ERROR_NO_PASSWORD",
-					filename: "webdav.js",
-					toString: function () { return this.message; }
-				});
+			if (!mdate) {
+				Zotero.debug("Remote file not found for item " + Zotero.Items.getLibraryKeyHash(item));
+				request.finish();
+				return;
 			}
 			
-			var ios = Components.classes["@mozilla.org/network/io-service;1"].
-						getService(Components.interfaces.nsIIOService);
 			try {
-				var uri = ios.newURI(url, null, null);
-				if (username) {
-					uri.username = username;
-					uri.password = password;
-				}
-			}
-			catch (e) {
-				Zotero.debug(e);
-				Components.utils.reportError(e);
-				return false;
-			}
-			if (!uri.spec.match(/\/$/)) {
-				uri.spec += "/";
-			}
-			_parentURI = uri;
-			
-			var uri = uri.clone();
-			uri.spec += "zotero/";
-			_rootURI = uri;
-			return true;
-		},
-		
-		
-		initFromPrefs: function () {
-			var scheme = Zotero.Prefs.get('sync.storage.scheme');
-			switch (scheme) {
-				case 'http':
-				case 'https':
-					break;
+				var syncModTime = mdate.getTime();
 				
-				default:
-					throw new Error("Invalid WebDAV scheme '" + scheme + "'");
-			}
-			
-			var url = Zotero.Prefs.get('sync.storage.url');
-			if (!url) {
-				return false;
-			}
-			
-			url = scheme + '://' + url;
-			var dir = "zotero";
-			var username = this.username;
-			var password = this.password;
-			
-			return this.init(url, dir, username, password);
-		},
-		
-		
-		/**
-		 * Begin download process for individual file
-		 *
-		 * @param	{Zotero.Sync.Storage.Request}	[request]
-		 */
-		downloadFile: function (request) {
-			var item = Zotero.Sync.Storage.getItemFromRequestName(request.name);
-			if (!item) {
-				throw new Error("Item '" + request.name + "' not found");
-			}
-			
-			// Retrieve modification time from server to store locally afterwards 
-			getStorageModificationTime(item, function (item, mdate) {
-				if (!request.isRunning()) {
-					Zotero.debug("Download request '" + request.name
-						+ "' is no longer running after getting mod time");
-					return;
-				}
-				
-				if (!mdate) {
-					Zotero.debug("Remote file not found for item " + Zotero.Items.getLibraryKeyHash(item));
+				// Skip download if local file exists and matches mod time
+				var file = item.getFile();
+				if (file && file.exists() && syncModTime == file.lastModifiedTime) {
+					Zotero.debug("File mod time matches remote file -- skipping download");
+					
+					Zotero.DB.beginTransaction();
+					var syncState = Zotero.Sync.Storage.getSyncState(item.id);
+					var updateItem = syncState != 1;
+					Zotero.Sync.Storage.setSyncedModificationTime(item.id, syncModTime, updateItem);
+					Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
+					Zotero.DB.commitTransaction();
+					onChangesMade();
 					request.finish();
 					return;
 				}
 				
-				try {
-					var syncModTime = mdate.getTime();
-					
-					// Skip download if local file exists and matches mod time
-					var file = item.getFile();
-					if (file && file.exists() && syncModTime == file.lastModifiedTime) {
-						Zotero.debug("File mod time matches remote file -- skipping download");
-						
-						Zotero.DB.beginTransaction();
-						var syncState = Zotero.Sync.Storage.getSyncState(item.id);
-						var updateItem = syncState != 1;
-						Zotero.Sync.Storage.setSyncedModificationTime(item.id, syncModTime, updateItem);
-						Zotero.Sync.Storage.setSyncState(item.id, Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
-						Zotero.DB.commitTransaction();
-						onChangesMade();
-						request.finish();
-						return;
-					}
-					
-					var uri = getItemURI(item);
-					var destFile = Zotero.getTempDirectory();
-					destFile.append(item.key + '.zip.tmp');
-					if (destFile.exists()) {
-						destFile.remove(false);
-					}
-					
-					var listener = new Zotero.Sync.Storage.StreamListener(
-						{
-							onStart: function (request, data) {
-								if (data.request.isFinished()) {
-									Zotero.debug("Download request " + data.request.name
-										+ " stopped before download started -- closing channel");
-									request.cancel(0x804b0002); // NS_BINDING_ABORTED
-									return;
-								}
-							},
-							onProgress: function (a, b, c) {
-								request.onProgress(a, b, c)
-							},
-							onStop: function (request, status, response, data) {
-								if (status == 404) {
-									var msg = "Remote ZIP file not found for item " + item.key;
-									Zotero.debug(msg, 2);
-									Components.utils.reportError(msg);
-									
-									// Delete the orphaned prop file
-									deleteStorageFiles([item.key + ".prop"]);
-									
-									data.request.finish();
-									return;
-								}
-								else if (status != 200) {
-									var msg = "Unexpected status code " + status
-										+ " for request " + data.request.name
-										+ " in Zotero.Sync.Storage.Module.WebDAV.downloadFile()";
-									Zotero.debug(msg, 1);
-									Components.utils.reportError(msg);
-									Zotero.Sync.Storage.EventManager.error(_defaultError);
-								}
-								
-								// Don't try to process if the request has been cancelled
-								if (data.request.isFinished()) {
-									Zotero.debug("Download request " + data.request.name
-										+ " is no longer running after file download");
-									return;
-								}
-								
-								Zotero.debug("Finished download of " + destFile.path);
-								
-								try {
-									Zotero.Sync.Storage.processDownload(data);
-									data.request.finish();
-								}
-								catch (e) {
-									Zotero.Sync.Storage.EventManager.error(e);
-								}
-							},
-							request: request,
-							item: item,
-							compressed: true,
-							syncModTime: syncModTime
-						}
-					);
-					
-					// Don't display password in console
-					var disp = uri.clone();
-					if (disp.password) {
-						disp.password = '********';
-					}
-					Zotero.debug('Saving ' + disp.spec + ' with saveURI()');
-					const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
-					var wbp = Components
-						.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
-						.createInstance(nsIWBP);
-					wbp.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
-					wbp.progressListener = listener;
-					wbp.saveURI(uri, null, null, null, null, destFile);
+				var uri = getItemURI(item);
+				var destFile = Zotero.getTempDirectory();
+				destFile.append(item.key + '.zip.tmp');
+				if (destFile.exists()) {
+					destFile.remove(false);
 				}
-				catch (e) {
-					request.error(e);
-				}
-			});
-		},
-		
-		
-		uploadFile: function (request) {
-			Zotero.Sync.Storage.createUploadFile(request, function (data) { processUploadFile(data); });
-		},
-		
-		
-		getLastSyncTime: function (callback) {
-			// Cache the credentials at the root URI
-			var self = this;
-			this.cacheCredentials(function () {
-				try {
-					var uri = this.rootURI;
-					var successFileURI = uri.clone();
-					successFileURI.spec += "lastsync";
-					Zotero.HTTP.doGet(successFileURI, function (req) {
-						var ts = undefined;
-						try {
-							if (req.responseText) {
-								Zotero.debug(req.responseText);
+				
+				var listener = new Zotero.Sync.Storage.StreamListener(
+					{
+						onStart: function (request, data) {
+							if (data.request.isFinished()) {
+								Zotero.debug("Download request " + data.request.name
+									+ " stopped before download started -- closing channel");
+								request.cancel(0x804b0002); // NS_BINDING_ABORTED
+								return;
 							}
-							Zotero.debug(req.status);
-							
-							if (req.status == 403) {
-								Zotero.debug("Clearing WebDAV authentication credentials", 2);
-								_cachedCredentials = false;
+						},
+						onProgress: function (a, b, c) {
+							request.onProgress(a, b, c)
+						},
+						onStop: function (request, status, response, data) {
+							if (status == 404) {
+								var msg = "Remote ZIP file not found for item " + item.key;
+								Zotero.debug(msg, 2);
+								Components.utils.reportError(msg);
+								
+								// Delete the orphaned prop file
+								deleteStorageFiles([item.key + ".prop"]);
+								
+								data.request.finish();
+								return;
 							}
-							
-							if (req.status != 200 && req.status != 404) {
-								var msg = "Unexpected status code " + req.status + " for HEAD request "
-									+ "in Zotero.Sync.Storage.Module.WebDAV.getLastSyncTime()";
+							else if (status != 200) {
+								var msg = "Unexpected status code " + status
+									+ " for request " + data.request.name
+									+ " in Zotero.Sync.Storage.WebDAV.downloadFile()";
 								Zotero.debug(msg, 1);
 								Components.utils.reportError(msg);
 								Zotero.Sync.Storage.EventManager.error(_defaultError);
 							}
 							
-							if (req.status == 200) {
-								var lastModified = req.getResponseHeader("Last-Modified");
-								var date = new Date(lastModified);
-								Zotero.debug("Last successful storage sync was " + date);
-								ts = Zotero.Date.toUnixTimestamp(date);
-							}
-							else {
-								ts = null;
+							// Don't try to process if the request has been cancelled
+							if (data.request.isFinished()) {
+								Zotero.debug("Download request " + data.request.name
+									+ " is no longer running after file download");
+								return;
 							}
 							
-							callback(ts);
-						}
-						catch(e) {
-							Zotero.debug(e, 1);
-							Components.utils.reportError(e);
-							Zotero.Sync.Storage.EventManager.error(_defaultError);
-						}
-					});
-					return;
+							Zotero.debug("Finished download of " + destFile.path);
+							
+							try {
+								Zotero.Sync.Storage.processDownload(data);
+								data.request.finish();
+							}
+							catch (e) {
+								Zotero.Sync.Storage.EventManager.error(e);
+							}
+						},
+						request: request,
+						item: item,
+						compressed: true,
+						syncModTime: syncModTime
+					}
+				);
+				
+				// Don't display password in console
+				var disp = uri.clone();
+				if (disp.password) {
+					disp.password = '********';
 				}
-				catch (e) {
-					Zotero.debug(e);
-					Components.utils.reportError(e);
-					Zotero.Sync.Storage.EventManager.error(_defaultError);
-				}
-			});
-		},
-		
-		
-		setLastSyncTime: function (callback) {
+				Zotero.debug('Saving ' + disp.spec + ' with saveURI()');
+				const nsIWBP = Components.interfaces.nsIWebBrowserPersist;
+				var wbp = Components
+					.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
+					.createInstance(nsIWBP);
+				wbp.persistFlags = nsIWBP.PERSIST_FLAGS_BYPASS_CACHE;
+				wbp.progressListener = listener;
+				wbp.saveURI(uri, null, null, null, null, destFile);
+			}
+			catch (e) {
+				request.error(e);
+			}
+		});
+	};
+	
+	
+	obj._uploadFile = function (request) {
+		Zotero.Sync.Storage.createUploadFile(request, function (data) { processUploadFile(data); });
+	};
+	
+	
+	obj._getLastSyncTime = function (callback) {
+		// Cache the credentials at the root URI
+		var self = this;
+		this._cacheCredentials(function () {
 			try {
 				var uri = this.rootURI;
 				var successFileURI = uri.clone();
 				successFileURI.spec += "lastsync";
-				
-				Zotero.HTTP.WebDAV.doPut(successFileURI, " ", function (req) {
-					Zotero.debug(req.responseText);
-					Zotero.debug(req.status);
-					
-					switch (req.status) {
-						case 200:
-						case 201:
-						case 204:
-							getLastSyncTime(function (ts) {
-								if (ts) {
-									var sql = "REPLACE INTO version VALUES ('storage_webdav', ?)";
-									Zotero.DB.query(sql, { int: ts });
-								}
-								if (callback) {
-									callback();
-								}
-							});
-							return;
+				Zotero.HTTP.doGet(successFileURI, function (req) {
+					var ts = undefined;
+					try {
+						if (req.responseText) {
+							Zotero.debug(req.responseText);
+						}
+						Zotero.debug(req.status);
+						
+						if (req.status == 403) {
+							Zotero.debug("Clearing WebDAV authentication credentials", 2);
+							_cachedCredentials = false;
+						}
+						
+						if (req.status != 200 && req.status != 404) {
+							var msg = "Unexpected status code " + req.status + " for HEAD request "
+								+ "in Zotero.Sync.Storage.WebDAV.getLastSyncTime()";
+							Zotero.debug(msg, 1);
+							Components.utils.reportError(msg);
+							Zotero.Sync.Storage.EventManager.error(_defaultError);
+						}
+						
+						if (req.status == 200) {
+							var lastModified = req.getResponseHeader("Last-Modified");
+							var date = new Date(lastModified);
+							Zotero.debug("Last successful storage sync was " + date);
+							ts = Zotero.Date.toUnixTimestamp(date);
+						}
+						else {
+							ts = null;
+						}
+						
+						callback(ts);
 					}
-					
-					var msg = "Unexpected error code " + req.status + " uploading storage success file";
-					Zotero.debug(msg, 2);
-					Components.utils.reportError(msg);
-					if (callback) {
-						callback();
+					catch(e) {
+						Zotero.debug(e, 1);
+						Components.utils.reportError(e);
+						Zotero.Sync.Storage.EventManager.error(_defaultError);
 					}
 				});
+				return;
 			}
 			catch (e) {
 				Zotero.debug(e);
 				Components.utils.reportError(e);
-				if (callback) {
-					callback();
-				}
-				return;
+				Zotero.Sync.Storage.EventManager.error(_defaultError);
 			}
-		},
-		
-		
-		cacheCredentials: function (callback) {
-			if (_cachedCredentials) {
-				Zotero.debug("Credentials are already cached");
-				setTimeout(function () {
-					callback();
-				}, 0);
-				return false;
-			}
+		});
+	};
+	
+	
+	obj._setLastSyncTime = function (callback) {
+		try {
+			var uri = this.rootURI;
+			var successFileURI = uri.clone();
+			successFileURI.spec += "lastsync";
 			
-			Zotero.HTTP.doOptions(this.rootURI, function (req) {
-				checkResponse(req);
-				
-				if (req.status != 200) {
-					var msg = "Unexpected status code " + req.status + " for OPTIONS request "
-						+ "in Zotero.Sync.Storage.Module.WebDAV.getLastSyncTime()";
-					Zotero.debug(msg, 1);
-					Components.utils.reportError(msg);
-					Zotero.Sync.Storage.EventManager.error(_defaultErrorRestart);
-				}
-				Zotero.debug("Credentials are cached");
-				_cachedCredentials = true;
-				callback();
-			});
-			return true;
-		},
-		
-		
-		/**
-		 * @param	{Function}	callback			Function to pass URI and result value to
-		 * @param	{Object}		errorCallbacks
-		 */
-		checkServer: function (callback) {
-			this.initFromPrefs();
-			
-			try {
-				var parentURI = this.parentURI;
-				var uri = this.rootURI;
-			}
-			catch (e) {
-				switch (e.name) {
-					case 'Z_ERROR_NO_URL':
-						callback(null, Zotero.Sync.Storage.ERROR_NO_URL);
-						return;
-					
-					case 'Z_ERROR_NO_PASSWORD':
-						callback(null, Zotero.Sync.Storage.ERROR_NO_PASSWORD);
-						return;
-						
-					default:
-						Zotero.debug(e);
-						Components.utils.reportError(e);
-						callback(null, Zotero.Sync.Storage.ERROR_UNKNOWN);
-						return;
-				}
-			}
-			
-			var requestHolder = { request: null };
-			
-			var prolog = '<?xml version="1.0" encoding="utf-8" ?>\n';
-			var D = new Namespace("D", "DAV:");
-			var nsDeclarations = 'xmlns:' + D.prefix + '=' + '"' + D.uri + '"';
-			
-			var requestXML = new XML('<D:propfind ' + nsDeclarations + '/>');
-			requestXML.D::prop = '';
-			// IIS 5.1 requires at least one property in PROPFIND
-			requestXML.D::prop.D::getcontentlength = '';
-			
-			var xmlstr = prolog + requestXML.toXMLString();
-			
-			// Test whether URL is WebDAV-enabled
-			var request = Zotero.HTTP.doOptions(uri, function (req) {
-				// Timeout
-				if (req.status == 0) {
-					checkResponse(req);
-					
-					callback(uri, Zotero.Sync.Storage.ERROR_UNREACHABLE);
-					return;
-				}
-				
-				Zotero.debug(req.getAllResponseHeaders());
+			Zotero.HTTP.WebDAV.doPut(successFileURI, " ", function (req) {
 				Zotero.debug(req.responseText);
 				Zotero.debug(req.status);
 				
 				switch (req.status) {
+					case 200:
+					case 201:
+					case 204:
+						getLastSyncTime(function (ts) {
+							if (ts) {
+								var sql = "REPLACE INTO version VALUES ('storage_webdav', ?)";
+								Zotero.DB.query(sql, { int: ts });
+							}
+							if (callback) {
+								callback();
+							}
+						});
+						return;
+				}
+				
+				var msg = "Unexpected error code " + req.status + " uploading storage success file";
+				Zotero.debug(msg, 2);
+				Components.utils.reportError(msg);
+				if (callback) {
+					callback();
+				}
+			});
+		}
+		catch (e) {
+			Zotero.debug(e);
+			Components.utils.reportError(e);
+			if (callback) {
+				callback();
+			}
+			return;
+		}
+	};
+	
+	
+	obj._cacheCredentials = function (callback) {
+		if (_cachedCredentials) {
+			Zotero.debug("Credentials are already cached");
+			setTimeout(function () {
+				callback();
+			}, 0);
+			return false;
+		}
+		
+		Zotero.HTTP.doOptions(this.rootURI, function (req) {
+			checkResponse(req);
+			
+			if (req.status != 200) {
+				var msg = "Unexpected status code " + req.status + " for OPTIONS request "
+					+ "in Zotero.Sync.Storage.WebDAV.getLastSyncTime()";
+				Zotero.debug(msg, 1);
+				Components.utils.reportError(msg);
+				Zotero.Sync.Storage.EventManager.error(_defaultErrorRestart);
+			}
+			Zotero.debug("Credentials are cached");
+			_cachedCredentials = true;
+			callback();
+		});
+		return true;
+	};
+	
+	
+	/**
+	 * @param	{Function}	callback			Function to pass URI and result value to
+	 * @param	{Object}		errorCallbacks
+	 */
+	obj._checkServer = function (callback) {
+		this._initFromPrefs();
+		
+		try {
+			var parentURI = this.parentURI;
+			var uri = this.rootURI;
+		}
+		catch (e) {
+			switch (e.name) {
+				case 'Z_ERROR_NO_URL':
+					callback(null, Zotero.Sync.Storage.ERROR_NO_URL);
+					return;
+				
+				case 'Z_ERROR_NO_PASSWORD':
+					callback(null, Zotero.Sync.Storage.ERROR_NO_PASSWORD);
+					return;
+					
+				default:
+					Zotero.debug(e);
+					Components.utils.reportError(e);
+					callback(null, Zotero.Sync.Storage.ERROR_UNKNOWN);
+					return;
+			}
+		}
+		
+		var requestHolder = { request: null };
+		
+		var prolog = '<?xml version="1.0" encoding="utf-8" ?>\n';
+		var D = new Namespace("D", "DAV:");
+		var nsDeclarations = 'xmlns:' + D.prefix + '=' + '"' + D.uri + '"';
+		
+		var requestXML = new XML('<D:propfind ' + nsDeclarations + '/>');
+		requestXML.D::prop = '';
+		// IIS 5.1 requires at least one property in PROPFIND
+		requestXML.D::prop.D::getcontentlength = '';
+		
+		var xmlstr = prolog + requestXML.toXMLString();
+		
+		// Test whether URL is WebDAV-enabled
+		var request = Zotero.HTTP.doOptions(uri, function (req) {
+			// Timeout
+			if (req.status == 0) {
+				checkResponse(req);
+				
+				callback(uri, Zotero.Sync.Storage.ERROR_UNREACHABLE);
+				return;
+			}
+			
+			Zotero.debug(req.getAllResponseHeaders());
+			Zotero.debug(req.responseText);
+			Zotero.debug(req.status);
+			
+			switch (req.status) {
+				case 400:
+					callback(uri, Zotero.Sync.Storage.ERROR_BAD_REQUEST);
+					return;
+				
+				case 401:
+					callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
+					return;
+				
+				case 403:
+					callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
+					return;
+				
+				case 500:
+					callback(uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR);
+					return;
+			}
+			
+			var dav = req.getResponseHeader("DAV");
+			if (dav == null) {
+				callback(uri, Zotero.Sync.Storage.ERROR_NOT_DAV);
+				return;
+			}
+			
+			// Get the Authorization header used in case we need to do a request
+			// on the parent below
+			var channelAuthorization = Zotero.HTTP.getChannelAuthorization(req.channel);
+			
+			var headers = { Depth: 0 };
+			
+			// Test whether Zotero directory exists
+			Zotero.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (req) {
+				Zotero.debug(req.responseText);
+				Zotero.debug(req.status);
+				
+				switch (req.status) {
+					case 207:
+						// Test if Zotero directory is writable
+						var testFileURI = uri.clone();
+						testFileURI.spec += "zotero-test-file";
+						Zotero.HTTP.WebDAV.doPut(testFileURI, " ", function (req) {
+							Zotero.debug(req.responseText);
+							Zotero.debug(req.status);
+							
+							switch (req.status) {
+								case 200:
+								case 201:
+								case 204:
+									Zotero.HTTP.doGet(
+										testFileURI,
+										function (req) {
+											Zotero.debug(req.responseText);
+											Zotero.debug(req.status);
+											
+											switch (req.status) {
+												case 200:
+													// Delete test file
+													Zotero.HTTP.WebDAV.doDelete(
+														testFileURI,
+														function (req) {
+															Zotero.debug(req.responseText);
+															Zotero.debug(req.status);
+															
+															switch (req.status) {
+																case 200: // IIS 5.1 and Sakai return 200
+																case 204:
+																	callback(uri, Zotero.Sync.Storage.SUCCESS);
+																	return;
+																
+																case 401:
+																	callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
+																	return;
+																
+																case 403:
+																	callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
+																	return;
+																
+																default:
+																	callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
+																	return;
+															}
+														}
+													);
+													return;
+												
+												case 401:
+													callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
+													return;
+												
+												case 403:
+													callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
+													return;
+												
+												// IIS 6+ configured not to serve extensionless files or .prop files
+												// http://support.microsoft.com/kb/326965
+												case 404:
+													callback(uri, Zotero.Sync.Storage.ERROR_FILE_MISSING_AFTER_UPLOAD);
+													return;
+												
+												case 500:
+													callback(uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR);
+													return;
+												
+												default:
+													callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
+													return;
+											}
+										}
+									);
+									return;
+								
+								case 401:
+									callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
+									return;
+								
+								case 403:
+									callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
+									return;
+								
+								case 500:
+									callback(uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR);
+									return;
+								
+								default:
+									callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
+									return;
+							}
+						});
+						return;
+					
 					case 400:
 						callback(uri, Zotero.Sync.Storage.ERROR_BAD_REQUEST);
 						return;
@@ -1165,530 +1304,399 @@ Zotero.Sync.Storage.Module.WebDAV = (function () {
 						callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
 						return;
 					
-					case 500:
-						callback(uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR);
-						return;
-				}
-				
-				var dav = req.getResponseHeader("DAV");
-				if (dav == null) {
-					callback(uri, Zotero.Sync.Storage.ERROR_NOT_DAV);
-					return;
-				}
-				
-				// Get the Authorization header used in case we need to do a request
-				// on the parent below
-				var channelAuthorization = Zotero.HTTP.getChannelAuthorization(req.channel);
-				
-				var headers = { Depth: 0 };
-				
-				// Test whether Zotero directory exists
-				Zotero.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (req) {
-					Zotero.debug(req.responseText);
-					Zotero.debug(req.status);
-					
-					switch (req.status) {
-						case 207:
-							// Test if Zotero directory is writable
-							var testFileURI = uri.clone();
-							testFileURI.spec += "zotero-test-file";
-							Zotero.HTTP.WebDAV.doPut(testFileURI, " ", function (req) {
+					case 404:
+						// Include Authorization header from /zotero request,
+						// since Firefox probably won't apply it to the parent request
+						var newHeaders = {};
+						for (var header in headers) {
+							newHeaders[header] = headers[header];
+						}
+						newHeaders["Authorization"] = channelAuthorization;
+						
+						// Zotero directory wasn't found, so see if at least
+						// the parent directory exists
+						Zotero.HTTP.WebDAV.doProp("PROPFIND", parentURI, xmlstr,
+							function (req) {
 								Zotero.debug(req.responseText);
 								Zotero.debug(req.status);
 								
 								switch (req.status) {
-									case 200:
-									case 201:
-									case 204:
-										Zotero.HTTP.doGet(
-											testFileURI,
-											function (req) {
-												Zotero.debug(req.responseText);
-												Zotero.debug(req.status);
-												
-												switch (req.status) {
-													case 200:
-														// Delete test file
-														Zotero.HTTP.WebDAV.doDelete(
-															testFileURI,
-															function (req) {
-																Zotero.debug(req.responseText);
-																Zotero.debug(req.status);
-																
-																switch (req.status) {
-																	case 200: // IIS 5.1 and Sakai return 200
-																	case 204:
-																		callback(
-																			uri,
-																			Zotero.Sync.Storage.SUCCESS
-																		);
-																		return;
-																	
-																	case 401:
-																		callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
-																		return;
-																	
-																	case 403:
-																		callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
-																		return;
-																	
-																	default:
-																		callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
-																		return;
-																}
-															}
-														);
-														return;
-													
-													case 401:
-														callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
-														return;
-													
-													case 403:
-														callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
-														return;
-													
-													// IIS 6+ configured not to serve extensionless files or .prop files
-													// http://support.microsoft.com/kb/326965
-													case 404:
-														callback(uri, Zotero.Sync.Storage.ERROR_FILE_MISSING_AFTER_UPLOAD);
-														return;
-													
-													case 500:
-														callback(uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR);
-														return;
-													
-													default:
-														callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
-														return;
-												}
-											}
-										);
+									// Parent directory existed
+									case 207:
+										callback(uri, Zotero.Sync.Storage.ERROR_ZOTERO_DIR_NOT_FOUND);
+										return;
+									
+									case 400:
+										callback(uri, Zotero.Sync.Storage.ERROR_BAD_REQUEST);
 										return;
 									
 									case 401:
 										callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
 										return;
 									
-									case 403:
-										callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
-										return;
-									
-									case 500:
-										callback(uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR);
+									// Parent directory wasn't found either
+									case 404:
+										callback(uri, Zotero.Sync.Storage.ERROR_PARENT_DIR_NOT_FOUND);
 										return;
 									
 									default:
 										callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
 										return;
 								}
-							});
-							return;
-						
-						case 400:
-							callback(uri, Zotero.Sync.Storage.ERROR_BAD_REQUEST);
-							return;
-						
-						case 401:
-							callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
-							return;
-						
-						case 403:
-							callback(uri, Zotero.Sync.Storage.ERROR_FORBIDDEN);
-							return;
-						
-						case 404:
-							// Include Authorization header from /zotero request,
-							// since Firefox probably won't apply it to the parent request
-							var newHeaders = {};
-							for (var header in headers) {
-								newHeaders[header] = headers[header];
-							}
-							newHeaders["Authorization"] = channelAuthorization;
-							
-							// Zotero directory wasn't found, so see if at least
-							// the parent directory exists
-							Zotero.HTTP.WebDAV.doProp("PROPFIND", this.parentURI, xmlstr,
-								function (req) {
-									Zotero.debug(req.responseText);
-									Zotero.debug(req.status);
-									
-									switch (req.status) {
-										// Parent directory existed
-										case 207:
-											callback(uri, Zotero.Sync.Storage.ERROR_ZOTERO_DIR_NOT_FOUND);
-											return;
-										
-										case 400:
-											callback(uri, Zotero.Sync.Storage.ERROR_BAD_REQUEST);
-											return;
-										
-										case 401:
-											callback(uri, Zotero.Sync.Storage.ERROR_AUTH_FAILED);
-											return;
-										
-										// Parent directory wasn't found either
-										case 404:
-											callback(uri, Zotero.Sync.Storage.ERROR_PARENT_DIR_NOT_FOUND);
-											return;
-										
-										default:
-											callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
-											return;
-									}
-								},  newHeaders);
-							return;
-						
-						case 500:
-							callback(uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR);
-							return;
-							
-						default:
-							callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
-							return;
-					}
-				}, headers);
-			});
-			
-			if (!request) {
-				callback(uri, Zotero.Sync.Storage.ERROR_OFFLINE);
-			}
-			
-			requestHolder.request = request;
-			return requestHolder;
-		},
-		
-		
-		checkServerCallback: function (uri, status, window, skipSuccessMessage) {
-			var promptService =
-				Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
-					createInstance(Components.interfaces.nsIPromptService);
-			if (uri) {
-				var spec = uri.scheme + '://' + uri.hostPort + uri.path;
-			}
-			
-			switch (status) {
-				case Zotero.Sync.Storage.SUCCESS:
-					if (!skipSuccessMessage) {
-						promptService.alert(
-							window,
-							Zotero.getString('sync.storage.serverConfigurationVerified'),
-							Zotero.getString('sync.storage.fileSyncSetUp')
-						);
-					}
-					Zotero.Prefs.set("sync.storage.verified", true);
-					return true;
-				
-				case Zotero.Sync.Storage.ERROR_NO_URL:
-					var errorMessage = Zotero.getString('sync.storage.error.webdav.enterURL');
-					break;
-				
-				case Zotero.Sync.Storage.ERROR_NO_PASSWORD:
-					var errorMessage = Zotero.getString('sync.error.enterPassword');
-					break;
-				
-				case Zotero.Sync.Storage.ERROR_UNREACHABLE:
-					var errorMessage = Zotero.getString('sync.storage.error.serverCouldNotBeReached', uri.host);
-					break;
-				
-				case Zotero.Sync.Storage.ERROR_NOT_DAV:
-					var errorMessage = Zotero.getString('sync.storage.error.webdav.invalidURL', spec);
-					break;
-				
-				case Zotero.Sync.Storage.ERROR_AUTH_FAILED:
-					var errorTitle = Zotero.getString('general.permissionDenied');
-					var errorMessage = Zotero.localeJoin([
-						Zotero.getString('sync.storage.error.webdav.invalidLogin'),
-						Zotero.getString('sync.storage.error.checkFileSyncSettings')
-					]);
-					break;
-				
-				case Zotero.Sync.Storage.ERROR_FORBIDDEN:
-					var errorTitle = Zotero.getString('general.permissionDenied');
-					var errorMessage = Zotero.localeJoin([
-						Zotero.getString('sync.storage.error.webdav.permissionDenied', uri.path),
-						Zotero.getString('sync.storage.error.checkFileSyncSettings')
-					]);
-					break;
-				
-				case Zotero.Sync.Storage.ERROR_PARENT_DIR_NOT_FOUND:
-					var errorTitle = Zotero.getString('sync.storage.error.directoryNotFound');
-					var parentSpec = spec.replace(/\/zotero\/$/, "");
-					var errorMessage = Zotero.getString('sync.storage.error.doesNotExist', parentSpec);
-					break;
-				
-				case Zotero.Sync.Storage.ERROR_ZOTERO_DIR_NOT_FOUND:
-					var create = promptService.confirmEx(
-						window,
-						Zotero.getString('sync.storage.error.directoryNotFound'),
-						Zotero.getString('sync.storage.error.doesNotExist', spec) + "\n\n"
-							+ Zotero.getString('sync.storage.error.createNow'),
-						promptService.BUTTON_POS_0
-							* promptService.BUTTON_TITLE_IS_STRING
-						+ promptService.BUTTON_POS_1
-							* promptService.BUTTON_TITLE_CANCEL,
-						Zotero.getString('general.create'),
-						null, null, null, {}
-					);
-					
-					if (create != 0) {
+							},  newHeaders);
 						return;
-					}
 					
-					createServerDirectory(function (uri, status) {
-						switch (status) {
-							case Zotero.Sync.Storage.SUCCESS:
-								if (!skipSuccessMessage) {
-									promptService.alert(
-										window,
-										Zotero.getString('sync.storage.serverConfigurationVerified'),
-										Zotero.getString('sync.storage.fileSyncSetUp')
-									);
-								}
-								Zotero.Prefs.set("sync.storage.verified", true);
-								return true;
-							
-							case Zotero.Sync.Storage.ERROR_FORBIDDEN:
-								var errorTitle = Zotero.getString('general.permissionDenied');
-								var errorMessage = Zotero.getString('sync.storage.error.permissionDeniedAtAddress') + "\n\n"
-									+ spec + "\n\n"
-									+ Zotero.getString('sync.storage.error.checkFileSyncSettings');
-								break;
-						}
+					case 500:
+						callback(uri, Zotero.Sync.Storage.ERROR_SERVER_ERROR);
+						return;
 						
-						// TEMP
-						if (!errorMessage) {
-							var errorMessage = status;
-						}
-						promptService.alert(window, errorTitle, errorMessage);
-					});
-					
-					return false;
-				
-				case Zotero.Sync.Storage.ERROR_FILE_MISSING_AFTER_UPLOAD:
-					// TODO: localize
-					var errorTitle = "WebDAV Server Configuration Error";
-					var errorMessage = "Your WebDAV server must be configured to serve files without extensions "
-						+ "and files with .prop extensions in order to work with Zotero.";
-					break;
-				
-				case Zotero.Sync.Storage.ERROR_SERVER_ERROR:
-					// TODO: localize
-					var errorTitle = "WebDAV Server Configuration Error";
-					var errorMessage = "Your WebDAV server returned an internal error."
-						+ "\n\n" + Zotero.getString('sync.storage.error.checkFileSyncSettings');
-					break;
-				
-				case Zotero.Sync.Storage.ERROR_UNKNOWN:
-					var errorMessage = Zotero.localeJoin([
-						Zotero.getString('general.unknownErrorOccurred'),
-						Zotero.getString('sync.storage.error.checkFileSyncSettings')
-					]);
-					break;
-			}
-			
-			if (!skipSuccessMessage) {
-				if (!errorTitle) {
-					var errorTitle = Zotero.getString("general.error");
+					default:
+						callback(uri, Zotero.Sync.Storage.ERROR_UNKNOWN);
+						return;
 				}
-				// TEMP
-				if (!errorMessage) {
-					var errorMessage = status;
-				}
-				promptService.alert(window, errorTitle, errorMessage);
-			}
-			return false;
-		},
+			}, headers);
+		});
 		
+		if (!request) {
+			callback(uri, Zotero.Sync.Storage.ERROR_OFFLINE);
+		}
 		
-		/**
-		 * Remove files on storage server that were deleted locally more than
-		 * sync.storage.deleteDelayDays days ago
-		 *
-		 * @param	{Function}	callback		Passed number of files deleted
-		 */
-		purgeDeletedStorageFiles: function (callback) {
-			if (!this.active) {
-				return;
-			}
-			
-			Zotero.debug("Purging deleted storage files");
-			var files = Zotero.Sync.Storage.getDeletedFiles();
-			if (!files) {
-				Zotero.debug("No files to delete remotely");
-				if (callback) {
-					callback();
+		requestHolder.request = request;
+		return requestHolder;
+	};
+	
+	
+	obj._checkServerCallback = function (uri, status, window, skipSuccessMessage) {
+		var promptService =
+			Components.classes["@mozilla.org/embedcomp/prompt-service;1"].
+				createInstance(Components.interfaces.nsIPromptService);
+		if (uri) {
+			var spec = uri.scheme + '://' + uri.hostPort + uri.path;
+		}
+		
+		switch (status) {
+			case Zotero.Sync.Storage.SUCCESS:
+				if (!skipSuccessMessage) {
+					promptService.alert(
+						window,
+						Zotero.getString('sync.storage.serverConfigurationVerified'),
+						Zotero.getString('sync.storage.fileSyncSetUp')
+					);
 				}
-				Zotero.Sync.Storage.EventManager.skip();
-				return;
-			}
+				Zotero.Prefs.set("sync.storage.verified", true);
+				return true;
 			
-			// Add .zip extension
-			var files = files.map(function (file) file + ".zip");
+			case Zotero.Sync.Storage.ERROR_NO_URL:
+				var errorMessage = Zotero.getString('sync.storage.error.webdav.enterURL');
+				break;
 			
-			deleteStorageFiles(files, function (results) {
-				// Remove deleted and nonexistent files from storage delete log
-				var toPurge = results.deleted.concat(results.missing);
-				if (toPurge.length > 0) {
-					var done = 0;
-					var maxFiles = 999;
-					var numFiles = toPurge.length;
-					
-					Zotero.DB.beginTransaction();
-					
-					do {
-						var chunk = toPurge.splice(0, maxFiles);
-						var sql = "DELETE FROM storageDeleteLog WHERE key IN ("
-							+ chunk.map(function () '?').join() + ")";
-						Zotero.DB.query(sql, chunk);
-						done += chunk.length;
+			case Zotero.Sync.Storage.ERROR_NO_PASSWORD:
+				var errorMessage = Zotero.getString('sync.error.enterPassword');
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_UNREACHABLE:
+				var errorMessage = Zotero.getString('sync.storage.error.serverCouldNotBeReached', uri.host);
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_NOT_DAV:
+				var errorMessage = Zotero.getString('sync.storage.error.webdav.invalidURL', spec);
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_AUTH_FAILED:
+				var errorTitle = Zotero.getString('general.permissionDenied');
+				var errorMessage = Zotero.localeJoin([
+					Zotero.getString('sync.storage.error.webdav.invalidLogin'),
+					Zotero.getString('sync.storage.error.checkFileSyncSettings')
+				]);
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_FORBIDDEN:
+				var errorTitle = Zotero.getString('general.permissionDenied');
+				var errorMessage = Zotero.localeJoin([
+					Zotero.getString('sync.storage.error.webdav.permissionDenied', uri.path),
+					Zotero.getString('sync.storage.error.checkFileSyncSettings')
+				]);
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_PARENT_DIR_NOT_FOUND:
+				var errorTitle = Zotero.getString('sync.storage.error.directoryNotFound');
+				var parentSpec = spec.replace(/\/zotero\/$/, "");
+				var errorMessage = Zotero.getString('sync.storage.error.doesNotExist', parentSpec);
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_ZOTERO_DIR_NOT_FOUND:
+				var create = promptService.confirmEx(
+					window,
+					Zotero.getString('sync.storage.error.directoryNotFound'),
+					Zotero.getString('sync.storage.error.doesNotExist', spec) + "\n\n"
+						+ Zotero.getString('sync.storage.error.createNow'),
+					promptService.BUTTON_POS_0
+						* promptService.BUTTON_TITLE_IS_STRING
+					+ promptService.BUTTON_POS_1
+						* promptService.BUTTON_TITLE_CANCEL,
+					Zotero.getString('general.create'),
+					null, null, null, {}
+				);
+				
+				if (create != 0) {
+					return;
+				}
+				
+				createServerDirectory(function (uri, status) {
+					switch (status) {
+						case Zotero.Sync.Storage.SUCCESS:
+							if (!skipSuccessMessage) {
+								promptService.alert(
+									window,
+									Zotero.getString('sync.storage.serverConfigurationVerified'),
+									Zotero.getString('sync.storage.fileSyncSetUp')
+								);
+							}
+							Zotero.Prefs.set("sync.storage.verified", true);
+							return true;
+						
+						case Zotero.Sync.Storage.ERROR_FORBIDDEN:
+							var errorTitle = Zotero.getString('general.permissionDenied');
+							var errorMessage = Zotero.getString('sync.storage.error.permissionDeniedAtAddress') + "\n\n"
+								+ spec + "\n\n"
+								+ Zotero.getString('sync.storage.error.checkFileSyncSettings');
+							break;
 					}
-					while (done < numFiles);
 					
-					Zotero.DB.commitTransaction();
+					// TEMP
+					if (!errorMessage) {
+						var errorMessage = status;
+					}
+					promptService.alert(window, errorTitle, errorMessage);
+				});
+				
+				return false;
+			
+			case Zotero.Sync.Storage.ERROR_FILE_MISSING_AFTER_UPLOAD:
+				// TODO: localize
+				var errorTitle = "WebDAV Server Configuration Error";
+				var errorMessage = "Your WebDAV server must be configured to serve files without extensions "
+					+ "and files with .prop extensions in order to work with Zotero.";
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_SERVER_ERROR:
+				// TODO: localize
+				var errorTitle = "WebDAV Server Configuration Error";
+				var errorMessage = "Your WebDAV server returned an internal error."
+					+ "\n\n" + Zotero.getString('sync.storage.error.checkFileSyncSettings');
+				break;
+			
+			case Zotero.Sync.Storage.ERROR_UNKNOWN:
+				var errorMessage = Zotero.localeJoin([
+					Zotero.getString('general.unknownErrorOccurred'),
+					Zotero.getString('sync.storage.error.checkFileSyncSettings')
+				]);
+				break;
+		}
+		
+		if (!skipSuccessMessage) {
+			if (!errorTitle) {
+				var errorTitle = Zotero.getString("general.error");
+			}
+			// TEMP
+			if (!errorMessage) {
+				var errorMessage = status;
+			}
+			promptService.alert(window, errorTitle, errorMessage);
+		}
+		return false;
+	};
+	
+	
+	/**
+	 * Remove files on storage server that were deleted locally more than
+	 * sync.storage.deleteDelayDays days ago
+	 *
+	 * @param	{Function}	callback		Passed number of files deleted
+	 */
+	obj._purgeDeletedStorageFiles = function (callback) {
+		if (!this._active) {
+			return;
+		}
+		
+		Zotero.debug("Purging deleted storage files");
+		var files = Zotero.Sync.Storage.getDeletedFiles();
+		if (!files) {
+			Zotero.debug("No files to delete remotely");
+			if (callback) {
+				callback();
+			}
+			Zotero.Sync.Storage.EventManager.skip();
+			return;
+		}
+		
+		// Add .zip extension
+		var files = files.map(function (file) file + ".zip");
+		
+		deleteStorageFiles(files, function (results) {
+			// Remove deleted and nonexistent files from storage delete log
+			var toPurge = results.deleted.concat(results.missing);
+			if (toPurge.length > 0) {
+				var done = 0;
+				var maxFiles = 999;
+				var numFiles = toPurge.length;
+				
+				Zotero.DB.beginTransaction();
+				
+				do {
+					var chunk = toPurge.splice(0, maxFiles);
+					var sql = "DELETE FROM storageDeleteLog WHERE key IN ("
+						+ chunk.map(function () '?').join() + ")";
+					Zotero.DB.query(sql, chunk);
+					done += chunk.length;
+				}
+				while (done < numFiles);
+				
+				Zotero.DB.commitTransaction();
+			}
+			
+			if (callback) {
+				callback(results.deleted.length);
+			}
+			
+			Zotero.Sync.Storage.EventManager.success();
+		});
+	};
+	
+	
+	/**
+	 * Delete orphaned storage files older than a day before last sync time
+	 *
+	 * @param	{Function}	callback
+	 */
+	obj._purgeOrphanedStorageFiles = function (callback) {
+		const daysBeforeSyncTime = 1;
+		
+		if (!this._active) {
+			Zotero.Sync.Storage.EventManager.skip();
+			return;
+		}
+		
+		// If recently purged, skip
+		var lastpurge = Zotero.Prefs.get('lastWebDAVOrphanPurge');
+		var days = 10;
+		if (lastpurge && new Date(lastpurge * 1000) > (new Date() - (1000 * 60 * 60 * 24 * days))) {
+			Zotero.Sync.Storage.EventManager.skip();
+			return;
+		}
+		
+		Zotero.debug("Purging orphaned storage files");
+		
+		var uri = this.rootURI;
+		var path = uri.path;
+		
+		var prolog = '<?xml version="1.0" encoding="utf-8" ?>\n';
+		var D = new Namespace("D", "DAV:");
+		var nsDeclarations = 'xmlns:' + D.prefix + '=' + '"' + D.uri + '"';
+		
+		var requestXML = new XML('<D:propfind ' + nsDeclarations + '/>');
+		requestXML.D::prop = '';
+		requestXML.D::prop.D::getlastmodified = '';
+		
+		var xmlstr = prolog + requestXML.toXMLString();
+		
+		var lastSyncDate = new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000);
+		
+		Zotero.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (req) {
+			Zotero.debug(req.responseText);
+				
+			var funcName = "Zotero.Sync.Storage.purgeOrphanedStorageFiles()";
+			
+			// Strip XML declaration and convert to E4X
+			var xml = new XML(req.responseText.replace(/<\?xml.*\?>/, ''));
+			
+			var deleteFiles = [];
+			var trailingSlash = !!path.match(/\/$/);
+			for each(var response in xml.D::response) {
+				var href = response.D::href.toString();
+				
+				// Strip trailing slash if there isn't one on the root path
+				if (!trailingSlash) {
+					href = href.replace(/\/$/, "")
 				}
 				
+				// Absolute
+				if (href.match(/^https?:\/\//)) {
+					var ios = Components.classes["@mozilla.org/network/io-service;1"].
+								getService(Components.interfaces.nsIIOService);
+					var href = ios.newURI(href, null, null);
+					href = href.path;
+				}
+				
+				// Skip root URI
+				if (href == path
+						// Some Apache servers respond with a "/zotero" href
+						// even for a "/zotero/" request
+						|| (trailingSlash && href + '/' == path)
+						// Try URL-encoded as well, as above
+						|| decodeURIComponent(href) == path) {
+					continue;
+				}
+				
+				if (href.indexOf(path) == -1
+						// Try URL-encoded as well, in case there's a '~' or similar
+						// character in the URL and the server (e.g., Sakai) is
+						// encoding the value
+						&& decodeURIComponent(href).indexOf(path) == -1) {
+					Zotero.Sync.Storage.EventManager.error(
+						"DAV:href '" + href + "' does not begin with path '"
+							+ path + "' in " + funcName
+					);
+				}
+				
+				var matches = href.match(/[^\/]+$/);
+				if (!matches) {
+					Zotero.Sync.Storage.EventManager.error(
+						"Unexpected href '" + href + "' in " + funcName
+					)
+				}
+				var file = matches[0];
+				
+				if (file.indexOf('.') == 0) {
+					Zotero.debug("Skipping hidden file " + file);
+					continue;
+				}
+				if (!file.match(/\.zip$/) && !file.match(/\.prop$/)) {
+					Zotero.debug("Skipping file " + file);
+					continue;
+				}
+				
+				var key = file.replace(/\.(zip|prop)$/, '');
+				var item = Zotero.Items.getByLibraryAndKey(null, key);
+				if (item) {
+					Zotero.debug("Skipping existing file " + file);
+					continue;
+				}
+				
+				Zotero.debug("Checking orphaned file " + file);
+				
+				// TODO: Parse HTTP date properly
+				var lastModified = response..*::getlastmodified.toString();
+				lastModified = Zotero.Date.strToISO(lastModified);
+				lastModified = Zotero.Date.sqlToDate(lastModified);
+				
+				// Delete files older than a day before last sync time
+				var days = (lastSyncDate - lastModified) / 1000 / 60 / 60 / 24;
+				
+				if (days > daysBeforeSyncTime) {
+					deleteFiles.push(file);
+				}
+			}
+			
+			deleteStorageFiles(deleteFiles, function (results) {
+				Zotero.Prefs.set("lastWebDAVOrphanPurge", Math.round(new Date().getTime() / 1000))
 				if (callback) {
-					callback(results.deleted.length);
+					callback(results);
 				}
-				
 				Zotero.Sync.Storage.EventManager.success();
 			});
-		},
-		
-		
-		/**
-		 * Delete orphaned storage files older than a day before last sync time
-		 *
-		 * @param	{Function}	callback
-		 */
-		purgeOrphanedStorageFiles: function (callback) {
-			const daysBeforeSyncTime = 1;
-			
-			if (!this.active) {
-				Zotero.Sync.Storage.EventManager.skip();
-				return;
-			}
-			
-			// If recently purged, skip
-			var lastpurge = Zotero.Prefs.get('lastWebDAVOrphanPurge');
-			var days = 10;
-			if (lastpurge && new Date(lastpurge * 1000) > (new Date() - (1000 * 60 * 60 * 24 * days))) {
-				Zotero.Sync.Storage.EventManager.skip();
-				return;
-			}
-			
-			Zotero.debug("Purging orphaned storage files");
-			
-			var uri = this.rootURI;
-			var path = uri.path;
-			
-			var prolog = '<?xml version="1.0" encoding="utf-8" ?>\n';
-			var D = new Namespace("D", "DAV:");
-			var nsDeclarations = 'xmlns:' + D.prefix + '=' + '"' + D.uri + '"';
-			
-			var requestXML = new XML('<D:propfind ' + nsDeclarations + '/>');
-			requestXML.D::prop = '';
-			requestXML.D::prop.D::getlastmodified = '';
-			
-			var xmlstr = prolog + requestXML.toXMLString();
-			
-			var lastSyncDate = new Date(Zotero.Sync.Server.lastLocalSyncTime * 1000);
-			
-			Zotero.HTTP.WebDAV.doProp("PROPFIND", uri, xmlstr, function (req) {
-				Zotero.debug(req.responseText);
-					
-				var funcName = "Zotero.Sync.Storage.purgeOrphanedStorageFiles()";
-				
-				// Strip XML declaration and convert to E4X
-				var xml = new XML(req.responseText.replace(/<\?xml.*\?>/, ''));
-				
-				var deleteFiles = [];
-				var trailingSlash = !!path.match(/\/$/);
-				for each(var response in xml.D::response) {
-					var href = response.D::href.toString();
-					
-					// Strip trailing slash if there isn't one on the root path
-					if (!trailingSlash) {
-						href = href.replace(/\/$/, "")
-					}
-					
-					// Absolute
-					if (href.match(/^https?:\/\//)) {
-						var ios = Components.classes["@mozilla.org/network/io-service;1"].
-									getService(Components.interfaces.nsIIOService);
-						var href = ios.newURI(href, null, null);
-						href = href.path;
-					}
-					
-					// Skip root URI
-					if (href == path
-							// Some Apache servers respond with a "/zotero" href
-							// even for a "/zotero/" request
-							|| (trailingSlash && href + '/' == path)
-							// Try URL-encoded as well, as above
-							|| decodeURIComponent(href) == path) {
-						continue;
-					}
-					
-					if (href.indexOf(path) == -1
-							// Try URL-encoded as well, in case there's a '~' or similar
-							// character in the URL and the server (e.g., Sakai) is
-							// encoding the value
-							&& decodeURIComponent(href).indexOf(path) == -1) {
-						Zotero.Sync.Storage.EventManager.error(
-							"DAV:href '" + href + "' does not begin with path '"
-								+ path + "' in " + funcName
-						);
-					}
-					
-					var matches = href.match(/[^\/]+$/);
-					if (!matches) {
-						Zotero.Sync.Storage.EventManager.error(
-							"Unexpected href '" + href + "' in " + funcName
-						)
-					}
-					var file = matches[0];
-					
-					if (file.indexOf('.') == 0) {
-						Zotero.debug("Skipping hidden file " + file);
-						continue;
-					}
-					if (!file.match(/\.zip$/) && !file.match(/\.prop$/)) {
-						Zotero.debug("Skipping file " + file);
-						continue;
-					}
-					
-					var key = file.replace(/\.(zip|prop)$/, '');
-					var item = Zotero.Items.getByLibraryAndKey(null, key);
-					if (item) {
-						Zotero.debug("Skipping existing file " + file);
-						continue;
-					}
-					
-					Zotero.debug("Checking orphaned file " + file);
-					
-					// TODO: Parse HTTP date properly
-					var lastModified = response..*::getlastmodified.toString();
-					lastModified = Zotero.Date.strToISO(lastModified);
-					lastModified = Zotero.Date.sqlToDate(lastModified);
-					
-					// Delete files older than a day before last sync time
-					var days = (lastSyncDate - lastModified) / 1000 / 60 / 60 / 24;
-					
-					if (days > daysBeforeSyncTime) {
-						deleteFiles.push(file);
-					}
-				}
-				
-				deleteStorageFiles(deleteFiles, function (results) {
-					Zotero.Prefs.set("lastWebDAVOrphanPurge", Math.round(new Date().getTime() / 1000))
-					if (callback) {
-						callback(results);
-					}
-					Zotero.Sync.Storage.EventManager.success();
-				});
-			}, { Depth: 1 });
-		}
+		}, { Depth: 1 });
 	};
+	
+	return obj;
 }());

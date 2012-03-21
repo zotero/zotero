@@ -130,7 +130,7 @@ Zotero.Sync.Storage.EventManager = (function () {
 			var queues = Zotero.Sync.Storage.QueueManager.getAll();
 			for each(var queue in queues) {
 				if (queue.isRunning()) {
-					Zotero.debug(queue[0].toUpperCase() + queue.substr(1)
+					Zotero.debug(queue.name[0].toUpperCase() + queue.name.substr(1)
 						+ " queue not empty -- not clearing storage sync event observers");
 					return;
 				}

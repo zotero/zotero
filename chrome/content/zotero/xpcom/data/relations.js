@@ -252,9 +252,13 @@ Zotero.Relations = new function () {
 			}
 			relation.libraryID = parseInt(libraryID);
 		}
-		relation.subject = _getFirstChildContent(relationNode, 'subject');
-		relation.predicate = _getFirstChildContent(relationNode, 'predicate');
-		relation.object = _getFirstChildContent(relationNode, 'object');
+		
+		var elems = Zotero.Utilities.xpath(relationNode, 'subject');
+		relation.subject = elems.length ? elems[0].textContent : "";
+		var elems = Zotero.Utilities.xpath(relationNode, 'predicate');
+		relation.predicate = elems.length ? elems[0].textContent : "";
+		var elems = Zotero.Utilities.xpath(relationNode, 'object');
+		relation.object = elems.length ? elems[0].textContent : "";
 		return relation;
 	}
 	
