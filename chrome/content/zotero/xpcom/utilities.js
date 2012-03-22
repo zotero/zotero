@@ -628,7 +628,7 @@ Zotero.Utilities = {
 			"down", "as"];
 		
 		// this may only match a single character
-		const delimiterRegexp = /([ \/\-–—])/;
+		const delimiterRegexp = /([ \/\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B])/;
 		
 		string = this.trimInternal(string);
 		string = string.replace(/ : /g, ": ");
