@@ -151,6 +151,11 @@ zoteroguidancepanel
 	-moz-binding: url('chrome://zotero/content/bindings/guidancepanel.xml#guidancepanel');
 }
 
+#zotero-items-columns-header  > treecolpicker
+ {
+	-moz-binding: url('chrome://zotero/content/bindings/columnpicker.xml#extended-columnpicker');
+}
+
 label.zotero-text-link {
 	-moz-binding: url('chrome://zotero/content/bindings/text-link.xml#text-link');
 	-moz-user-focus: normal;
