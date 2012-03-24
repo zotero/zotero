@@ -2158,7 +2158,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.307";
+    this.processor_version = "1.0.308";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -6727,6 +6727,7 @@ CSL.NameOutput.prototype.getStaticOrder = function (name, refresh) {
 }
 CSL.NameOutput.prototype._splitInstitution = function (value, v, i) {
     var ret = {};
+    value.literal = this.state.transform.quashCheck(value.literal);
     var splitInstitution = value.literal.replace(/\s*\|\s*/g, "|");
     splitInstitution = splitInstitution.split("|");
     if (this.institution.strings.form === "short" && this.state.sys.getAbbreviation) {
@@ -8921,16 +8922,7 @@ CSL.Transform = function (state) {
             if (myabbrev_family) {
                 primary = abbreviate(state, Item, alternative_varname, primary, myabbrev_family, true);
                 if (primary) {
-                    var m = primary.match(/^!([-,_a-z]+)<<</);
-                    if (m) {
-                        var fields = m[1].split(",");
-                        primary = primary.slice(m[0].length);
-                        for (var i = 0, ilen = fields.length; i < ilen; i += 1) {
-                            if (state.tmp.done_vars.indexOf(fields[i]) === -1) {
-                                state.tmp.done_vars.push(fields[i]);
-                            }
-                        }
-                    }
+                    primary = quashCheck(primary);
                 }
                 secondary = abbreviate(state, Item, false, secondary, myabbrev_family, true);
                 tertiary = abbreviate(state, Item, false, tertiary, myabbrev_family, true);
@@ -9007,6 +8999,20 @@ CSL.Transform = function (state) {
         return [jurisdiction, hereinafter_key];
     }
     this.getHereinafter = getHereinafter;
+    function quashCheck(value) {
+        var m = value.match(/^!([-,_a-z]+)<<</);
+        if (m) {
+            var fields = m[1].split(",");
+            value = value.slice(m[0].length);
+            for (var i = 0, ilen = fields.length; i < ilen; i += 1) {
+                if (state.tmp.done_vars.indexOf(fields[i]) === -1) {
+                    state.tmp.done_vars.push(fields[i]);
+                }
+            }
+        }
+        return value;
+    }
+    this.quashCheck = quashCheck;
 };
 CSL.Parallel = function (state) {
     this.state = state;
