@@ -1710,9 +1710,10 @@ CSL.expandMacro = function (macro_key_token) {
         this.build.macro_stack.push(mkey);
     }
     var hasDate = false;
+    var macroid = false;
     macro_nodes = this.sys.xml.getNodesByName(this.cslXml, 'macro', mkey);
-    var macroid = this.sys.xml.getAttributeValue(macro_nodes,'cslid');
     if (macro_nodes.length) {
+        macroid = this.sys.xml.getAttributeValue(macro_nodes[0],'cslid');
         hasDate = this.sys.xml.getAttributeValue(macro_nodes[0], "macro-has-date");
     }
     if (hasDate) {
@@ -2158,7 +2159,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.308";
+    this.processor_version = "1.0.309";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -6727,7 +6728,6 @@ CSL.NameOutput.prototype.getStaticOrder = function (name, refresh) {
 }
 CSL.NameOutput.prototype._splitInstitution = function (value, v, i) {
     var ret = {};
-    value.literal = this.state.transform.quashCheck(value.literal);
     var splitInstitution = value.literal.replace(/\s*\|\s*/g, "|");
     splitInstitution = splitInstitution.split("|");
     if (this.institution.strings.form === "short" && this.state.sys.getAbbreviation) {
@@ -6737,6 +6737,7 @@ CSL.NameOutput.prototype._splitInstitution = function (value, v, i) {
             jurisdiction = this.state.transform.loadAbbreviation(jurisdiction, "institution-entire", str);
             if (this.state.transform.abbrevs[jurisdiction]["institution-entire"][str]) {
                 var splitLst = this.state.transform.abbrevs[jurisdiction]["institution-entire"][str];
+                splitLst = this.state.transform.quashCheck(splitLst);
                 var splitSplitLst = splitLst.split(/>>[0-9]{4}>>/);
                 var m = splitLst.match(/>>([0-9]{4})>>/);
                 splitLst = splitSplitLst.pop();
