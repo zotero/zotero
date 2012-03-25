@@ -2159,7 +2159,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.309";
+    this.processor_version = "1.0.310";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -4414,7 +4414,7 @@ CSL.Node.date = {
                             }
                         }
                         dp = dpx.slice();
-                        if (!state.tmp.extension && ("" + Item.volume) === "" + state.tmp.date_object.year && this.dateparts.length === 1 && this.dateparts[0] === "year") {
+                        if (!state.tmp.extension && ("" + Item["collection-number"]) === "" + state.tmp.date_object.year && this.dateparts.length === 1 && this.dateparts[0] === "year") {
                             for (key in state.tmp.date_object) {
                                 if (state.tmp.date_object.hasOwnProperty(key)) {
                                     if (key.slice(0, 4) === "year" && state.tmp.citeblob.can_suppress_identical_year) {
@@ -7332,11 +7332,14 @@ CSL.Node.number = {
             varname = this.variables[0];
             state.parallel.StartVariable(this.variables[0]);
             state.parallel.AppendToVariable(Item[this.variables[0]]);
+            var value = Item[this.variables[0]];
+            if (value && this.variables[0] === "collection-number") {
+                state.tmp.citeblob.has_collection_number = true;
+            }
             if (this.text_case_normal) {
-                var value = Item[this.variables[0]];
                 if (value) {
                     value = value.replace("\\", "");
-                    state.output.append(value, this)
+                    state.output.append(value, this);
                 }
             } else {
                 var node = this;
@@ -7600,7 +7603,7 @@ CSL.Node.text = {
                         func = state.transform.getOutputFunction(this.variables, abbrevfam, abbrfall, altvar, transfall);
                         if (this.variables_real[0] === "container-title") {
                             var xfunc = function (state, Item, item) {
-                                if (Item['container-title'] && state.tmp.citeblob.has_volume) {
+                                if (Item['container-title'] && state.tmp.citeblob.has_collection_number) {
                                     state.tmp.citeblob.can_suppress_identical_year = true;
                                 }
                             };
@@ -7641,7 +7644,6 @@ CSL.Node.text = {
                                 if (this.variables[0]) {
                                     var value = state.getVariable(Item, this.variables[0], form);
                                     if (value) {
-                                        state.tmp.citeblob.has_volume = true;
                                         state.output.append(value, this);
                                     }
                                 }
