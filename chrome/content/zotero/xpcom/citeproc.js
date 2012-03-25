@@ -2159,7 +2159,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.310";
+    this.processor_version = "1.0.311";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -10188,14 +10188,14 @@ CSL.Util.Suffixator.prototype.format = function (N) {
 CSL.Engine.prototype.processNumber = function (node, ItemObject, variable) {
     var num, m, i, ilen, j, jlen;
     var debug = false;
-    if (!ItemObject) {
-        return;
-    }
     num = ItemObject[variable];
     this.tmp.shadow_numbers[variable] = {};
     this.tmp.shadow_numbers[variable].values = [];
     this.tmp.shadow_numbers[variable].plural = 0;
     this.tmp.shadow_numbers[variable].numeric = false;
+    if (!ItemObject) {
+        return;
+    }
     if ("undefined" !== typeof num) {
         if ("number" === typeof num) {
             num = "" + num;
