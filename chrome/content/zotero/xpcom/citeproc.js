@@ -2159,7 +2159,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.311";
+    this.processor_version = "1.0.312";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -4414,10 +4414,10 @@ CSL.Node.date = {
                             }
                         }
                         dp = dpx.slice();
-                        if (!state.tmp.extension && ("" + Item["collection-number"]) === "" + state.tmp.date_object.year && this.dateparts.length === 1 && this.dateparts[0] === "year") {
+                        if (!state.tmp.extension && ("" + Item["collection-number"]) === "" + state.tmp.date_object.year && this.dateparts.length === 1 && this.dateparts[0] === "year" && state.registry.registry[Item.id] && state.registry.registry[Item.id].renders_collection_number) {
                             for (key in state.tmp.date_object) {
                                 if (state.tmp.date_object.hasOwnProperty(key)) {
-                                    if (key.slice(0, 4) === "year" && state.tmp.citeblob.can_suppress_identical_year) {
+                                    if (key.slice(0, 4) === "year") {
                                         delete state.tmp.date_object[key];
                                     }
                                 }
@@ -5142,7 +5142,6 @@ CSL.Node.layout = {
             this.execs.push(func);
             func = function (state, Item) {
                 state.output.openLevel("empty");
-                state.tmp.citeblob = state.output.queue[state.output.queue.length - 1];
             };
             this.execs.push(func);
             target.push(this);
@@ -7332,10 +7331,10 @@ CSL.Node.number = {
             varname = this.variables[0];
             state.parallel.StartVariable(this.variables[0]);
             state.parallel.AppendToVariable(Item[this.variables[0]]);
-            var value = Item[this.variables[0]];
-            if (value && this.variables[0] === "collection-number") {
-                state.tmp.citeblob.has_collection_number = true;
+            if (varname === 'collection-number' && Item.type === 'legal_case') {
+                state.tmp.renders_collection_number = true;
             }
+            var value = Item[this.variables[0]];
             if (this.text_case_normal) {
                 if (value) {
                     value = value.replace("\\", "");
@@ -7601,14 +7600,6 @@ CSL.Node.text = {
                             abbrfall = true;
 						}
                         func = state.transform.getOutputFunction(this.variables, abbrevfam, abbrfall, altvar, transfall);
-                        if (this.variables_real[0] === "container-title") {
-                            var xfunc = function (state, Item, item) {
-                                if (Item['container-title'] && state.tmp.citeblob.has_collection_number) {
-                                    state.tmp.citeblob.can_suppress_identical_year = true;
-                                }
-                            };
-                            this.execs.push(xfunc);
-                        }
                     } else {
                         if (CSL.CITE_FIELDS.indexOf(this.variables_real[0]) > -1) {
                             func = function (state, Item, item) {
@@ -11267,6 +11258,10 @@ CSL.Registry.prototype.doinserts = function (mylist) {
                 "disambig": false,
                 "ref": Item
             };
+            if (this.state.tmp.renders_collection_number) {
+                newitem.renders_collection_number = true;
+                this.state.tmp.renders_collection_number = false;
+            }
             this.registry[item] = newitem;
             abase = CSL.getAmbigConfig.call(this.state);
             this.registerAmbigToken(akey, item, abase);
