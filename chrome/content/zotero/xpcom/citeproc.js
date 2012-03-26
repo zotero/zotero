@@ -697,12 +697,12 @@ CSL_CHROME.prototype.deleteAttribute = function (myxml,attr) {
     myxml.removeAttribute(attr);
 }
 CSL_CHROME.prototype.setAttribute = function (myxml,attr,val) {
-    var attribute;
     if (!myxml.ownerDocument) {
         myxml = myxml.firstChild;
     }
-    attribute = myxml.ownerDocument.createAttribute(attr);
-    myxml.setAttribute(attr, val);
+    if (myxml.setAttribute) {
+        myxml.setAttribute(attr, val);
+    }
     return false;
 }
 CSL_CHROME.prototype.nodeCopy = function (myxml) {
@@ -2159,7 +2159,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.312";
+    this.processor_version = "1.0.313";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -4105,6 +4105,19 @@ CSL.citeEnd = function (Item, item) {
     this.tmp.cut_var = false;
     this.tmp.disambig_request = false;
     this.tmp.cite_locales.push(this.tmp.last_cite_locale);
+    if (this.tmp.original_date && this.tmp.renders_collection_number) {
+        var buf = [];
+        for (var i = this.tmp.original_date.list.length - 1; i > this.tmp.original_date.pos; i += -1) {
+            buf.push(this.tmp.original_date.list.pop());
+        }
+        this.tmp.original_date.list.pop();
+        for (var i = buf.length - 1; i > -1; i += -1) {
+            this.tmp.original_date.list.push(buf.pop());
+        }
+        this.parallel.cite["original-date"] = false;
+    }
+    this.tmp.original_date = false;
+    this.tmp.renders_collection_number = false;
     if (this.opt.development_extensions.flip_parentheses_to_braces && item && item.suffix) {
         var openBrace = CSL.checkNestedBraceOpen.exec(item.suffix);
         var closeBrace = CSL.checkNestedBraceClose.exec(item.suffix);
@@ -4414,15 +4427,6 @@ CSL.Node.date = {
                             }
                         }
                         dp = dpx.slice();
-                        if (!state.tmp.extension && ("" + Item["collection-number"]) === "" + state.tmp.date_object.year && this.dateparts.length === 1 && this.dateparts[0] === "year" && state.registry.registry[Item.id] && state.registry.registry[Item.id].renders_collection_number) {
-                            for (key in state.tmp.date_object) {
-                                if (state.tmp.date_object.hasOwnProperty(key)) {
-                                    if (key.slice(0, 4) === "year") {
-                                        delete state.tmp.date_object[key];
-                                    }
-                                }
-                            }
-                        }
                         mypos = 2;
                         len = dp.length;
                         for (pos = 0; pos < len; pos += 1) {
@@ -4443,6 +4447,23 @@ CSL.Node.date = {
             this.execs.push(func);
             func = function (state, Item) {
                 state.output.startTag("date", this);
+                if (this.variables[0] === "original-date"
+                    && Item.type === "legal_case"
+                    && !state.tmp.extension
+                    && "" + Item["collection-number"] === "" + state.tmp.date_object.year
+                    && this.dateparts.length === 1
+                    && this.dateparts[0] === "year") {
+                    for (key in state.tmp.date_object) {
+                        if (state.tmp.date_object.hasOwnProperty(key)) {
+                            if (key.slice(0, 4) === "year") {
+                                state.tmp.original_date = {};
+                                var lst = state.output.current.mystack.slice(-2)[0].blobs;
+                                state.tmp.original_date.list = lst;
+                                state.tmp.original_date.pos = lst.length - 1;
+                            }
+                        }
+                    }
+                }
             };
             this.execs.push(func);
         }
@@ -6881,6 +6902,11 @@ CSL.evaluateLabel = function (node, state, Item, item) {
                 state.processNumber(false, Item, myterm);
             }
             plural = state.tmp.shadow_numbers[myterm].plural;
+        }
+        if (node.decorations && state.opt.development_extensions.csl_reverse_lookup_support) {
+            node.decorations.reverse();
+            node.decorations.push(["@showid","true", node.cslid]);
+            node.decorations.reverse();
         }
     }
     return CSL.castLabel(state, node, myterm, plural, CSL.TOLERANT);
@@ -11258,10 +11284,6 @@ CSL.Registry.prototype.doinserts = function (mylist) {
                 "disambig": false,
                 "ref": Item
             };
-            if (this.state.tmp.renders_collection_number) {
-                newitem.renders_collection_number = true;
-                this.state.tmp.renders_collection_number = false;
-            }
             this.registry[item] = newitem;
             abase = CSL.getAmbigConfig.call(this.state);
             this.registerAmbigToken(akey, item, abase);
