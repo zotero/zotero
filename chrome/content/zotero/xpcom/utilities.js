@@ -112,7 +112,7 @@ const CSL_TYPE_MAPPINGS = {
 	'case':"legal_case",
 	'hearing':"bill",				// ??
 	'patent':"patent",
-	'statute':"bill",				// ??
+	'statute':"legislation",		// ??
 	'email':"personal_communication",
 	'map':"map",
 	'blogPost':"post-weblog",
