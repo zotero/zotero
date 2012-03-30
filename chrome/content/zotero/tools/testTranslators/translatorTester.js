@@ -409,9 +409,11 @@ Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
 		if(test.items !== "multiple" && test.items.length <= 1) {
 			testDoneCallback(me, test, "failed", "Zotero.selectItems() called, but only one item defined in test");
 			callback({});
+			return;
 		} else if(selectCalled) {
 			testDoneCallback(me, test, "failed", "Zotero.selectItems() called multiple times");
 			callback({});
+			return;
 		}
 		
 		selectCalled = true;
