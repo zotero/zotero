@@ -252,6 +252,8 @@ Zotero.OpenURL = new function() {
 						item.itemType = "conferencePaper";
 					} else if(coParts.indexOf("rft.genre=report") !== -1) {
 						item.itemType = "report";
+					} else if(coParts.indexOf("rft.genre=document") !== -1) {
+						item.itemType = "document";
 					} else {
 						item.itemType = "book";
 					}
