@@ -304,14 +304,14 @@ Zotero.OpenURL = new function() {
 					item.publicationTitle = value;
 				}
 			} else if(key == "rft.atitle"
-					&& ["journalArticle", "bookSection", "conferencePaper"].indexOf(item.itemType)) {
+					&& ["journalArticle", "bookSection", "conferencePaper"].indexOf(item.itemType) !== -1) {
 				item.title = value;
 			} else if(key == "rft.jtitle" && item.itemType == "journalArticle") {
 				item.publicationTitle = value;
 			} else if(key == "rft.stitle" && item.itemType == "journalArticle") {
 				item.journalAbbreviation = value;
 			} else if(key == "rft.title") {
-				if(["journalArticle", "bookSection", "conferencePaper"].indexOf(item.itemType)) {
+				if(["journalArticle", "bookSection", "conferencePaper"].indexOf(item.itemType) !== -1) {
 					item.publicationTitle = value;
 				} else {
 					item.title = value;
