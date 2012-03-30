@@ -296,20 +296,20 @@ Zotero.OpenURL = new function() {
 					item.accessDate = "";
 				}
 			} else if(key == "rft.btitle") {
-				if(item.itemType == "book" || item.itemType == "conferencePaper" || item.itemType == "report") {
+				if(item.itemType == "book" || item.itemType == "report") {
 					item.title = value;
-				} else if(item.itemType == "bookSection") {
+				} else if(item.itemType == "bookSection" || item.itemType == "conferencePaper") {
 					item.publicationTitle = value;
 				}
-			} else if(key == "rft.atitle" && (item.itemType == "journalArticle" ||
-			                                  item.itemType == "bookSection")) {
+			} else if(key == "rft.atitle"
+					&& ["journalArticle", "bookSection", "conferencePaper"].indexOf(item.itemType)) {
 				item.title = value;
 			} else if(key == "rft.jtitle" && item.itemType == "journalArticle") {
 				item.publicationTitle = value;
 			} else if(key == "rft.stitle" && item.itemType == "journalArticle") {
 				item.journalAbbreviation = value;
 			} else if(key == "rft.title") {
-				if(item.itemType == "journalArticle" || item.itemType == "bookSection") {
+				if(["journalArticle", "bookSection", "conferencePaper"].indexOf(item.itemType)) {
 					item.publicationTitle = value;
 				} else {
 					item.title = value;
