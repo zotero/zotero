@@ -1200,6 +1200,8 @@ Zotero.Utilities = {
 							Zotero.debug("itemToServerJSON: Discarded invalid tag");
 							continue;
 						}
+					} else if(tag === "") {
+						continue;
 					}
 					newTags[j] = {"tag":tag.toString(), "type":1};
 				}
