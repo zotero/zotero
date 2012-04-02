@@ -24,7 +24,7 @@
 */
 
 Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType, document,
-		cookieSandbox) {
+		cookieSandbox, baseURI) {
 	// initialize constants
 	this.newItems = [];
 	this.newCollections = [];
@@ -66,7 +66,20 @@ Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType, d
 	
 	// force tag types if requested
 	this._forceTagType = forceTagType;
+	// to set cookies on downloaded files
 	this._cookieSandbox = cookieSandbox;
+	
+	// the URI to which other URIs are assumed to be relative
+	if(typeof baseURI === "object" && baseURI instanceof Components.interfaces.nsIURI) {
+		this._baseURI = baseURI;
+	} else {
+		// try to convert to a URI
+		this._baseURI = null;
+		try {
+			this._baseURI = Components.classes["@mozilla.org/network/io-service;1"].
+				getService(Components.interfaces.nsIIOService).newURI(baseURI, null, null);
+		} catch(e) {};
+	}
 };
 
 Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE = 0;
@@ -231,7 +244,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			var IOService = Components.classes["@mozilla.org/network/io-service;1"].
 							getService(Components.interfaces.nsIIOService);
 			try {
-				var uri = IOService.newURI(attachment.path, "", null);
+				var uri = IOService.newURI(attachment.path, "", this._baseURI);
 			}
 			catch (e) {
 				var msg = "Error parsing attachment path: " + attachment.path;

@@ -39,7 +39,7 @@ const Zotero_Lookup = new function () {
 		if(doi) {
 			var item = {itemType:"journalArticle", DOI:doi};
 		} else {
-			identifier = identifier.replace("-", "", "g");
+			identifier = identifier.trim().replace("-", "", "g");
 			if(identifier.length == 10 || identifier.length == 13) {
 				// ISBN
 				var item = {itemType:"book", ISBN:identifier};

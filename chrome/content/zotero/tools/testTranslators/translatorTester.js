@@ -404,12 +404,19 @@ Zotero_TranslatorTester.prototype.runTest = function(test, doc, testDoneCallback
 	translate.setHandler("done", function(obj, returnValue) {
 		me._checkResult(test, obj, returnValue, errorReturned, testDoneCallback);
 	});
+	var selectCalled = false;
 	translate.setHandler("select", function(obj, items, callback) {
 		if(test.items !== "multiple" && test.items.length <= 1) {
 			testDoneCallback(me, test, "failed", "Zotero.selectItems() called, but only one item defined in test");
 			callback({});
+			return;
+		} else if(selectCalled) {
+			testDoneCallback(me, test, "failed", "Zotero.selectItems() called multiple times");
+			callback({});
+			return;
 		}
 		
+		selectCalled = true;
 		var newItems = {};
 		var haveItems = false;
 		for(var i in items) {
