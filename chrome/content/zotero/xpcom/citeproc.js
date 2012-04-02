@@ -2153,7 +2153,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.315";
+    this.processor_version = "1.0.316";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2522,6 +2522,20 @@ CSL.Engine.prototype.retrieveItem = function (id) {
             }
         }
     }
+    if (this.opt.development_extensions.atomic_statutes) {
+        if (Item.type && ["legislation","bill"].indexOf(Item.type) > -1
+            && Item.title 
+            && Item.jurisdiction) {
+            var legislation_id = [];
+            for (var i = 0, ilen = 3; i < ilen; i += 1) {
+                var varname = ["type", "genre", "jurisdiction"][i];
+                if (Item[varname]) {
+                    legislation_id.push(Item[varname]);
+                }
+            }
+            Item.legislation_id = legislation_id.join("::");
+        }
+    }
     for (var i = 1, ilen = CSL.DATE_VARIABLES.length; i < ilen; i += 1) {
         var dateobj = Item[CSL.DATE_VARIABLES[i]];
         if (dateobj) {
@@ -2763,6 +2777,7 @@ CSL.Engine.Opt = function () {
     this.development_extensions.flip_parentheses_to_braces = true;
     this.development_extensions.parse_section_variable = true;
     this.development_extensions.jurisdiction_subfield = true;
+    this.development_extensions.atomic_statutes = false;
     this.development_extensions.csl_reverse_lookup_support = false;
     this.nodenames = [];
     this.gender = {};
@@ -3509,13 +3524,29 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                 }
                 for (k = 0, klen = citations[j].sortedItems.length; k < klen; k += 1) {
                     item = citations[j].sortedItems[k];
+                    var myid = item[0].id;
+                    var mylocator = item[1].locator;
+                    var mylabel = item[1].label;
+                    if (item[0].legislation_id) {
+                        myid = item[0].legislation_id;
+                        mylocator = item[0].section;
+                        mylabel = "";
+                    }
+                    var incitationid;
+                    if (k > 0) {
+                        if (onecitation.sortedItems[k - 1][0].legislation_id) {
+                            incitationid = onecitation.sortedItems[k - 1][0].legislation_id;
+                        } else {
+                            incitationid = onecitation.sortedItems[k - 1][1].id
+                        }
+                    }
                     if (flag === CSL.PREVIEW) {
                         if (onecitation.citationID != citation.citationID) {
                             if ("undefined" === typeof first_ref[item[1].id]) {
-                                first_ref[item[1].id] = onecitation.properties.noteIndex;
-                                last_ref[item[1].id] = onecitation.properties.noteIndex;
+                                first_ref[myid] = onecitation.properties.noteIndex;
+                                last_ref[myid] = onecitation.properties.noteIndex;
                             } else {
-                                last_ref[item[1].id] = onecitation.properties.noteIndex;
+                                last_ref[myid] = onecitation.properties.noteIndex;
                             }
                             continue;
                         }
@@ -3526,17 +3557,27 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                     oldvalue["near-note"] = item[1]["near-note"];
                     item[1]["first-reference-note-number"] = 0;
                     item[1]["near-note"] = false;
-                    if ("undefined" === typeof first_ref[item[1].id]) {
-                        first_ref[item[1].id] = onecitation.properties.noteIndex;
-                        last_ref[item[1].id] = onecitation.properties.noteIndex;
+                    if ("undefined" === typeof first_ref[myid]) {
+                        first_ref[myid] = onecitation.properties.noteIndex;
+                        last_ref[myid] = onecitation.properties.noteIndex;
                         item[1].position = CSL.POSITION_FIRST;
                     } else {
                         var ibidme = false;
                         var suprame = false;
+                        if (j > 0) {
+                            var oldlastid =  citations[j - 1].sortedItems.slice(-1)[0][1].id;
+                            if (citations[j - 1].sortedItems[0].slice(-1)[0].legislation_id) {
+                                oldlastid = citations[j - 1].sortedItems[0].slice(-1)[0].legislation_id;
+                            }
+                        }
                         if (j > 0 && parseInt(k, 10) === 0 && citations[j - 1].properties.noteIndex !== citations[j].properties.noteIndex) {
                             var items = citations[(j - 1)].sortedItems;
                             var useme = false;
-                            if ((citations[j - 1].sortedItems[0][1].id  == item[1].id && citations[j - 1].properties.noteIndex >= (citations[j].properties.noteIndex - 1)) || citations[j - 1].sortedItems[0][1].id == this.registry.registry[item[1].id].parallel) {
+                            var oldid = citations[j - 1].sortedItems[0][0].id;
+                            if (citations[j - 1].sortedItems[0][0].legislation_id) {
+                                oldid = citations[j - 1].sortedItems[0][0].legislation_id;
+                            }
+                            if ((oldid  == myid && citations[j - 1].properties.noteIndex >= (citations[j].properties.noteIndex - 1)) || citations[j - 1].sortedItems[0][1].id == this.registry.registry[item[1].id].parallel) {
                                 if (citationsInNote[citations[j - 1].properties.noteIndex] == 1 || citations[j - 1].properties.noteIndex == 0) {
                                     useme = true;
                                 }
@@ -3552,41 +3593,55 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                             } else {
                                 suprame = true;
                             }
-                        } else if (k > 0 && onecitation.sortedItems[k - 1][1].id == item[1].id) {
+                        } else if (k > 0 && incitationid == myid) {
                             ibidme = true;
                         } else if (k == 0 && citations[j - 1].properties.noteIndex == citations[j].properties.noteIndex
                                    && citations[j - 1].sortedItems.length 
-                                   && citations[j - 1].sortedItems.slice(-1)[0][1].id == item[1].id) {
+                                   && oldlastid == myid) {
                             ibidme = true;
                         } else {
                             suprame = true;
                         }
                         var prev, prev_locator, prev_label, curr_locator, curr_label;
                         if (ibidme) {
+                            var myprev_locator;
+                            var myprev_label;
                             if (k > 0) {
-                                prev = onecitation.sortedItems[(k - 1)][1];
+                                if (onecitation.sortedItems[(k - 1)][0].legislation_id) {
+                                    myprev_locator = onecitation.sortedItems[(k - 1)][0].section;
+                                    myprev_label = "";
+                                } else {
+                                    myprev_locator = onecitation.sortedItems[(k - 1)][1].locator;
+                                    myprev_label = onecitation.sortedItems[(k - 1)][1].label;
+                                }
                             } else {
-                                prev = citations[(j - 1)].sortedItems[0][1];
+                                if (citations[(j - 1)].sortedItems[0][0].legislation_id) {
+                                    myprev_locator = citations[(j - 1)].sortedItems[0][0].section;
+                                    myprev_label = "";
+                                } else {
+                                    myprev_locator = citations[(j - 1)].sortedItems[0][1].locator;
+                                    myprev_label = citations[(j - 1)].sortedItems[0][1].label;
+                                }
                             }
-                            if (prev.locator) {
-                                if (prev.label) {
-                                    prev_label = prev.label;
+                            if (myprev_locator) {
+                                if (myprev_label) {
+                                    prev_label = myprev_label;
                                 } else {
                                     prev_label = "";
                                 }
-                                prev_locator = "" + prev.locator + prev_label;
+                                prev_locator = "" + myprev_locator + prev_label;
                             } else {
-                                prev_locator = prev.locator;
+                                prev_locator = myprev_locator;
                             }
-                            if (item[1].locator) {
-                                if (item[1].label) {
-                                    curr_label = item[1].label;
+                            if (mylocator) {
+                                if (mylabel) {
+                                    curr_label = mylabel;
                                 } else {
                                     curr_label = "";
                                 }
-                                curr_locator = "" + item[1].locator + curr_label;
+                                curr_locator = "" + mylocator + curr_label;
                             } else {
-                                curr_locator = item[1].locator;
+                                curr_locator = mylocator;
                             }
                         }
                         if (ibidme && prev_locator && !curr_locator) {
@@ -3609,18 +3664,18 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                         }
                         if (suprame) {
                             item[1].position = CSL.POSITION_SUBSEQUENT;
-                            if (first_ref[item[1].id] != onecitation.properties.noteIndex) {
-                                item[1]["first-reference-note-number"] = first_ref[item[1].id];
+                            if (first_ref[myid] != onecitation.properties.noteIndex) {
+                                item[1]["first-reference-note-number"] = first_ref[myid];
                             }
                         }
                     }
                     if (onecitation.properties.noteIndex) {
-                        var note_distance = parseInt(onecitation.properties.noteIndex, 10) - parseInt(last_ref[item[1].id], 10);
+                        var note_distance = parseInt(onecitation.properties.noteIndex, 10) - parseInt(last_ref[myid], 10);
                         if (item[1].position !== CSL.POSITION_FIRST 
                             && note_distance <= this.citation.opt["near-note-distance"]) {
                             item[1]["near-note"] = true;
                         }
-                        last_ref[item[1].id] = onecitation.properties.noteIndex;
+                        last_ref[myid] = onecitation.properties.noteIndex;
                     }
                     if (onecitation.citationID != citation.citationID) {
                         for (n = 0, nlen = CSL.POSITION_TEST_VARS.length; n < nlen; n += 1) {
