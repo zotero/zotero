@@ -144,14 +144,15 @@ Zotero.Utilities = {
 									'\u0400-\u042f';		//cyrilic
 
 		var allCapsRe = new RegExp('^[' + allCaps + ']+$');
+		var initialRe = new RegExp('^-?[' + allCaps + ']$');
 
 		if(typeof(author) != "string") {
 			throw "cleanAuthor: author must be a string";
 		}
 
-		author = author.replace(/^[\s\00A0\.\,\/\[\]\:]+/, '')
-									  .replace(/[\s\00A0\.\,\/\[\]\:]+$/, '')
-									.replace(/[\s\00A0]+/, ' ');
+		author = author.replace(/^[\s\u00A0\.\,\/\[\]\:]+/, '')
+									  .replace(/[\s\u00A0\.\,\/\[\]\:]+$/, '')
+									.replace(/[\s\u00A0]+/, ' ');
 
 		if(useComma) {
 			// Add spaces between periods
@@ -187,14 +188,14 @@ Zotero.Utilities = {
 						.replace(/[\s\,]+$/,'')
 						//remove spaces surronding any dashes
 						.replace(/\s*([\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B])\s*/,'-')
-						.split(/[\s\.]+/);
+						.split(/(?:[\s\.]+|(?=-))/);
 			var newFirstName = '';
 			for(var i=0, n=names.length; i<n; i++) {
 				newFirstName += names[i];
-				if(names[i].match('^-?[' + allCaps + ']$')) newFirstName += '.';
+				if(initialRe.test(names[i])) newFirstName += '.';
 				newFirstName += ' ';
 			}
-			firstName = newFirstName.trim();
+			firstName = newFirstName.replace(/ -/g,'-').trim();
 		}
 
 		return {firstName:firstName, lastName:lastName, creatorType:type};
