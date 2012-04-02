@@ -1450,7 +1450,7 @@ Zotero.Translate.Web.prototype._getParameters = function() { return [this.docume
 Zotero.Translate.Web.prototype._prepareTranslation = function() {
 	this._itemSaver = new Zotero.Translate.ItemSaver(this._libraryID,
 		Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_DOWNLOAD" : "ATTACHMENT_MODE_IGNORE")], 1,
-		this.document, this._cookieSandbox);
+		this.document, this._cookieSandbox, this.location);
 	this.newItems = [];
 }
 
@@ -1672,8 +1672,18 @@ Zotero.Translate.Import.prototype._loadTranslatorPrepareIO = function(translator
  */
 Zotero.Translate.Import.prototype._prepareTranslation = function() {
 	this._progress = undefined;
+	
+	var baseURI = null;
+	if(this.location) {
+		try {
+			baseURI = Components.classes["@mozilla.org/network/io-service;1"].
+				getService(Components.interfaces.nsIIOService).newFileURI(this.location);
+		} catch(e) {}
+	}
+	
 	this._itemSaver = new Zotero.Translate.ItemSaver(this._libraryID,
-		Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_FILE" : "ATTACHMENT_MODE_IGNORE")]);
+		Zotero.Translate.ItemSaver[(this._saveAttachments ? "ATTACHMENT_MODE_FILE" : "ATTACHMENT_MODE_IGNORE")],
+		undefined, undefined, undefined, baseURI);
 	this.newItems = [];
 	this.newCollections = [];
 }
