@@ -626,7 +626,12 @@ var Zotero_File_Interface = new function() {
 		if(window.zoteroLastRepaint && (now - window.zoteroLastRepaint) < 100) return
 		
 		// Start a nested event queue
-		Zotero.mainThread.pushEventQueue(null);
+		// TODO Remove when Fx > 14
+		var eventQueuePushed = "pushEventQueue" in Zotero.mainThread;
+		if(eventQueuePushed) {
+			Zotero.mainThread.pushEventQueue(null);
+		}
+		
 		try {
 			// Add the redraw event onto event queue
 			window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
@@ -637,7 +642,7 @@ var Zotero_File_Interface = new function() {
 			Zotero.mainThread.processNextEvent(false);
 		} finally {
 			// Close nested event queue
-			Zotero.mainThread.popEventQueue();
+			if(eventQueuePushed) Zotero.mainThread.popEventQueue();
 		}
 		
 		window.zoteroLastRepaint = now;
