@@ -140,19 +140,23 @@ Zotero.Utilities = {
 	 * @return {Object} firstName, lastName, and creatorType
 	 */
 	"cleanAuthor":function(author, type, useComma) {
-		const allCapsRe = /^[A-Z\u0400-\u042f]+$/;
-		
+		var allCaps = 'A-Z' + 
+									'\u0400-\u042f';		//cyrilic
+
+		var allCapsRe = new RegExp('^[' + allCaps + ']+$');
+
 		if(typeof(author) != "string") {
 			throw "cleanAuthor: author must be a string";
 		}
-		
-		author = author.replace(/^[\s\.\,\/\[\]\:]+/, '');
-		author = author.replace(/[\s\,\/\[\]\:\.]+$/, '');
-		author = author.replace(/  +/, ' ');
+
+		author = author.replace(/^[\s\00A0\.\,\/\[\]\:]+/, '')
+									  .replace(/[\s\00A0\.\,\/\[\]\:]+$/, '')
+									.replace(/[\s\00A0]+/, ' ');
+
 		if(useComma) {
 			// Add spaces between periods
 			author = author.replace(/\.([^ ])/, ". $1");
-			
+
 			var splitNames = author.split(/, ?/);
 			if(splitNames.length > 1) {
 				var lastName = splitNames[0];
@@ -165,7 +169,7 @@ Zotero.Utilities = {
 			var lastName = author.substring(spaceIndex+1);
 			var firstName = author.substring(0, spaceIndex);
 		}
-		
+
 		if(firstName && allCapsRe.test(firstName) &&
 				firstName.length < 4 &&
 				(firstName.length == 1 || lastName.toUpperCase() != lastName)) {
@@ -182,12 +186,12 @@ Zotero.Utilities = {
 			var names = firstName.replace(/^[\s\.]+/,'')
 						.replace(/[\s\,]+$/,'')
 						//remove spaces surronding any dashes
-						.replace(/\s*([\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B])\s*/,'$1')
+						.replace(/\s*([\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B])\s*/,'-')
 						.split(/[\s\.]+/);
 			var newFirstName = '';
 			for(var i=0, n=names.length; i<n; i++) {
 				newFirstName += names[i];
-				if(names[i].match(/^[A-Z]$/)) newFirstName += '.';
+				if(names[i].match('^-?[' + allCaps + ']$')) newFirstName += '.';
 				newFirstName += ' ';
 			}
 			firstName = newFirstName.trim();
