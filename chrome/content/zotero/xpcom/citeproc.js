@@ -2161,7 +2161,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.317";
+    this.processor_version = "1.0.319";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2589,6 +2589,76 @@ CSL.Engine.prototype.fixOpt = function (token, name, localname) {
         }
     }
 };
+CSL.Engine.prototype.remapSectionVariable = function (inputList) {
+    for (var i = 0, ilen = inputList.length; i < ilen; i += 1) {
+        var Item = inputList[i][0];
+        var item = inputList[i][1];
+        if (Item.section
+            && item
+            && (Item.type === "bill" || Item.type === "legislation")
+            && this.opt.development_extensions.static_statute_locator) {
+            var value = "" + Item.section;
+            var locator = "";
+            var labelstr = "";
+            if (item.locator) {
+                locator = item.locator;
+                if (item.label && CSL.STATUTE_SUBDIV_STRINGS_REVERSE[item.label]) {
+                    labelstr = " " + CSL.STATUTE_SUBDIV_STRINGS_REVERSE[item.label] + " ";
+                }
+                locator = labelstr + locator;
+                if (locator.slice(0,1) === "&") {
+                    locator = " " + locator;
+                }
+                value = value + locator;
+            }
+            var m = value.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
+            if (m) {
+                var splt = value.split(CSL.STATUTE_SUBDIV_PLAIN_REGEX);
+                if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
+                    item.label = CSL.STATUTE_SUBDIV_STRINGS[slt[0]];
+                    splt.reverse();
+                    splt.pop();
+                    splt.reverse();
+                } else {
+                    item.label = "section";
+                }
+                if (splt.length > 1) {
+                    var lst = [];
+                    lst.push(splt[1].replace(/\s*$/, "").replace(/^\s*/, ""));
+                    var has_repeat_label = false;
+                    var has_sublabel = false;
+                    for (var j=2, jlen=splt.length; j < jlen; j += 1) {
+                        var subdiv = m[j - 1].replace(/^\s*/, "");
+                        subdiv = CSL.STATUTE_SUBDIV_STRINGS[subdiv];
+                        if (subdiv === item.label) {
+                            has_repeat_label = true;
+                        } else {
+                            has_sublabel = true;
+                        }
+                        var subplural = false;
+                        if (splt[j].match(/(?:&|, | and )/)) {
+                            subplural = true;
+                        }
+                        lst.push(this.getTerm(subdiv, "symbol", subplural));
+                        lst.push(splt[j].replace(/\s*$/, "").replace(/^\s*/, ""));
+                    }
+                    for (var j=lst.length - 2; j > 0; j += -2) {
+                        if (!has_sublabel) {
+                            lst = lst.slice(0,j).concat(lst.slice(j + 1));
+                        }
+                    }
+                    value = lst.join(" ");
+                    if (!has_sublabel && has_repeat_label) {
+                        item.force_pluralism = true;
+                    } else {
+                        item.force_pluralism = false;
+                    }
+                }
+            }
+            item.locator = value;
+        }
+    }
+}
 CSL.substituteOne = function (template) {
     return function (state, list) {
         if (!list) {
@@ -3416,69 +3486,7 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
     for (i = 0, ilen = citation.citationItems.length; i < ilen; i += 1) {
         item = citation.citationItems[i];
         Item = this.retrieveItem("" + item.id);
-        if (Item.section
-            && (Item.type === "bill" || Item.type === "legislation")
-            && this.opt.development_extensions.static_statute_locator) {
-            var value = "" + Item.section;
-            var locator = "";
-            var labelstr = "";
-            if (item.locator) {
-                locator = item.locator;
-                if (item.label && CSL.STATUTE_SUBDIV_STRINGS_REVERSE[item.label]) {
-                    labelstr = " " + CSL.STATUTE_SUBDIV_STRINGS_REVERSE[item.label] + " ";
-                }
-                locator = labelstr + locator;
-                if (locator.slice(0,1) === "&") {
-                    locator = " " + locator;
-                }
-                value = value + locator;
-            }
-            var m = value.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
-            if (m) {
-                var splt = value.split(CSL.STATUTE_SUBDIV_PLAIN_REGEX);
-                if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
-                    item.label = CSL.STATUTE_SUBDIV_STRINGS[slt[0]];
-                    splt.reverse();
-                    splt.pop();
-                    splt.reverse();
-                } else {
-                    item.label = "section";
-                }
-                if (splt.length > 1) {
-                    var lst = [];
-                    lst.push(splt[1].replace(/\s*$/, "").replace(/^\s*/, ""));
-                    var has_repeat_label = false;
-                    var has_sublabel = false;
-                    for (var j=2, jlen=splt.length; j < jlen; j += 1) {
-                        var subdiv = m[j - 1].replace(/^\s*/, "");
-                        subdiv = CSL.STATUTE_SUBDIV_STRINGS[subdiv];
-                        if (subdiv === item.label) {
-                            has_repeat_label = true;
-                        } else {
-                            has_sublabel = true;
-                        }
-                        var subplural = false;
-                        if (splt[j].match(/(?:&|, | and )/)) {
-                            subplural = true;
-                        }
-                        lst.push(this.getTerm(subdiv, "symbol", subplural));
-                        lst.push(splt[j].replace(/\s*$/, "").replace(/^\s*/, ""));
-                    }
-                    for (var j=lst.length - 2; j > 0; j += -2) {
-                        if (!has_sublabel) {
-                            lst = lst.slice(0,j).concat(lst.slice(j + 1));
-                        }
-                    }
-                    value = lst.join(" ");
-                    if (!has_sublabel && has_repeat_label) {
-                        item.force_pluralism = true;
-                    } else {
-                        item.force_pluralism = false;
-                    }
-                }
-            }
-            item.locator = value;
-        }
+        this.remapSectionVariable([[Item,item]]);
         if (this.opt.development_extensions.locator_date_and_revision) {
             if (item.locator) {
                 item.locator = "" + item.locator;
@@ -3850,6 +3858,7 @@ CSL.Engine.prototype.makeCitationCluster = function (rawList) {
         newitem = [Item, item];
         inputList.push(newitem);
     }
+    this.remapSectionVariable(inputList);
     if (inputList && inputList.length > 1 && this.citation_sort.tokens.length > 0) {
         len = inputList.length;
         for (pos = 0; pos < len; pos += 1) {
@@ -4339,6 +4348,13 @@ CSL.Engine.prototype.localeConfigure = function (langspec) {
         this.localeSet(this.cslXml, langspec.base, langspec.best);
     }
     this.localeSet(this.cslXml, langspec.best, langspec.best);
+    if ("undefined" === typeof this.locale[langspec.best].terms["page-range-delimiter"]) {
+        if (["fr", "pt"].indexOf(langspec.best.slice(0, 2).toLowerCase()) > -1) {
+            this.locale[langspec.best].terms["page-range-delimiter"] = "-";
+        } else {
+            this.locale[langspec.best].terms["page-range-delimiter"] = "\u2013";
+        }
+    }
 };
 CSL.Engine.prototype.localeSet = function (myxml, lang_in, lang_out) {
     var blob, locale, nodes, attributes, pos, ppos, term, form, termname, styleopts, attr, date, attrname, len, genderform, target, i, ilen;
@@ -4420,11 +4436,6 @@ CSL.Engine.prototype.localeSet = function (myxml, lang_in, lang_out) {
                 }
             }
         }
-    }
-    if (lang_out && ["fr", "pt"].indexOf(lang_out.slice(0, 2).toLowerCase()) > -1) {
-        this.locale[lang_out].terms["page-range-delimiter"] = "-";
-    } else {
-        this.locale[lang_out].terms["page-range-delimiter"] = "\u2013";
     }
     nodes = this.sys.xml.getNodesByName(locale, 'style-options');
     for (pos = 0, len = this.sys.xml.numberofnodes(nodes); pos < len; pos += 1) {
