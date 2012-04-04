@@ -3684,9 +3684,9 @@ var ZoteroPane = new function()
 			var parentItemID = item.getSource();
 			var newName = Zotero.Attachments.getFileBaseNameFromItem(parentItemID);
 			
-			var ext = file.leafName.match(/[^\.]+$/);
+			var ext = file.leafName.match(/\.[^\.]+$/);
 			if (ext) {
-				newName = newName + '.' + ext;
+				newName = newName + ext;
 			}
 			
 			var renamed = item.renameAttachmentFile(newName);

@@ -2742,15 +2742,21 @@ Zotero.Item.prototype.renameAttachmentFile = function(newName, overwrite) {
 		// Ignore if no change
 		//
 		// Note: Just comparing file.leafName to newName isn't reliable
-		if (file.leafName == dest.leafName) {
+		if (file.leafName === dest.leafName) {
 			return true;
 		}
 		
-		if (overwrite) {
-			dest.remove(false);
-		}
-		else if (dest.exists()) {
-			return -1;
+		// If old and new names differ only in case, let's bank on this
+		// just being a case change and not bother checking for existing
+		// files, since dest.exists() will just show true on a case-insensitive
+		// filesystem anyway.
+		if (file.leafName.toLowerCase() != dest.leafName.toLowerCase()) {
+			if (overwrite) {
+				dest.remove(false);
+			}
+			else if (dest.exists()) {
+				return -1;
+			}
 		}
 		
 		file.moveTo(null, newName);
