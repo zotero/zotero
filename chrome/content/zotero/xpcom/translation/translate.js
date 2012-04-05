@@ -779,7 +779,7 @@ Zotero.Translate.Base.prototype = {
 	 * translators
 	 *   valid: all
 	 *   called: when a translator search initiated with Zotero.Translate.getTranslators() is
-	 *           complete
+	 *           complete or when _detectWeb is called and completes.
 	 *   passed: an array of appropriate translators
 	 *   returns: N/A
 	 * @param {Function} handler Callback function. All handlers will be passed the current
@@ -1424,6 +1424,22 @@ Zotero.Translate.Web.prototype._getTranslatorsGetPotentialTranslators = function
 				// data[1] = list of functions to convert proper URIs to proxied URIs
 				me._getTranslatorsTranslatorsReceived(data[0], data[1]);
 			});
+}
+
+/**
+ * Run detectWeb on a loaded document using the set translator
+ */
+Zotero.Translate.Web.prototype._detectWeb = function() {
+	// Only one simultaneous instance allowed.
+	if(this._currentState === "detect") throw new Error("Translate: _detectWeb is already running");
+	this._currentState = "detect";
+	this._getAllTranslators = false;
+
+	var translators = new Array();
+	translators.push(Zotero.Translators.get(this.translator[0]));
+	if(!translators[0]) throw new Error('Translate: could not get translator ' + this.translator[0]);
+
+	this._getTranslatorsTranslatorsReceived(translators);
 }
 
 /**

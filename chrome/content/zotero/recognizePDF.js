@@ -463,42 +463,18 @@ Zotero_RecognizePDF.Recognizer.prototype._scrape = function(/**Zotero.Translate*
 	this._hiddenBrowser.removeEventListener("pageshow", this._scrape.caller, true);
 	translate.setDocument(this._hiddenBrowser.contentDocument);
 
-	//closure?
-	(function(me) {
-		me._detectWeb(translate, function(translate, itemType) {
-				if(itemType) {
-					translate.translate(me._libraryID, false);
-				} else {
-					me._queryGoogle();
-				}
-		});
-	})(this);
+	var me = this;
+
+	translate.setHandler("translators", function(translate, detected) { 
+			if(detected.length) {
+				translate.translate(me._libraryID, false);
+			} else {
+				me._queryGoogle();
+			}
+	});
+
+	translate._detectWeb();
 }
-
-/**
- * Performs detectWeb on a loaded page and calls callback
- *  with the itemType returned by the first matching translator or false
- * @private
- */
-Zotero_RecognizePDF.Recognizer.prototype._detectWeb = function(translate, callback) {
-	//do we need to use closure here for callback???
-	(function(callback) {
-		translate.setHandler("translators", function(translate, detected) {
-			callback(translate, (detected.length && detected[0].itemType) || false );
-		});
-	})(callback);
-
-	// Only one simultaneous instance allowed.
-	if(this._currentState === "detect") throw new Error("RecognizePDF: _scrape is already running");
-	translate._currentState = "detect";
-	translate._getAllTranslators = false;		//though this shouldn't matter, since we're only going to load one translator
-
-	var translators = new Array();
-	translators.push(Zotero.Translators.get(translate.translator[0]));
-	if(!translators[0]) throw new Error('RecognizePDF: could not get translator ' + translate.translator[0]);
-
-	translate._getTranslatorsTranslatorsReceived(translators);
-};
 
 /**
  * Callback to pick first item in the Google Scholar item list
