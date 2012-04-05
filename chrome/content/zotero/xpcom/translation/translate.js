@@ -272,7 +272,7 @@ Zotero.Translate.Sandbox = {
 			};
 			
 			var translatorsHandlerSet = false;
-			safeTranslator.getTranslators = function(callback) {
+			safeTranslator.getTranslators = function() {
 				if(!translation._handlers["translators"] || !translation._handlers["translators"].length) {
 					if(Zotero.isConnector) {
 						throw new Error('Translator must register a "translators" handler to '+
