@@ -363,7 +363,7 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 	var me = this;
 	if(this._DOI) {
 		// use CrossRef to look for DOI
-		var translate = new Zotero.Translate("search");
+		var translate = new Zotero.Translate.Search();
 		translate.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
 		var item = {"itemType":"journalArticle", "DOI":this._DOI};
 		translate.setSearch(item);
@@ -411,7 +411,7 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 			this._hiddenBrowser.docShell.allowImages = false;
 		}
 		
-		var translate = new Zotero.Translate("web");
+		var translate = new Zotero.Translate.Web();
 		var savedItem = false;
 		translate.setTranslator("57a00950-f0d1-4b41-b6ba-44ff0fc30289");
 		translate.setHandler("itemDone", function(translate, item) {
@@ -459,11 +459,46 @@ Zotero_RecognizePDF.Recognizer.prototype._scrape = function(/**Zotero.Translate*
 		this._callback(false, "recognizePDF.limit");
 		return;
 	}
-	
+
 	this._hiddenBrowser.removeEventListener("pageshow", this._scrape.caller, true);
 	translate.setDocument(this._hiddenBrowser.contentDocument);
-	translate.translate(this._libraryID, false);
+
+	//closure?
+	(function(me) {
+		me._detectWeb(translate, function(translate, itemType) {
+				if(itemType) {
+					translate.translate(me._libraryID, false);
+				} else {
+					me._queryGoogle();
+				}
+		});
+	})(this);
 }
+
+/**
+ * Performs detectWeb on a loaded page and calls callback
+ *  with the itemType returned by the first matching translator or false
+ * @private
+ */
+Zotero_RecognizePDF.Recognizer.prototype._detectWeb = function(translate, callback) {
+	//do we need to use closure here for callback???
+	(function(callback) {
+		translate.setHandler("translators", function(translate, detected) {
+			callback(translate, (detected.length && detected[0].itemType) || false );
+		});
+	})(callback);
+
+	// Only one simultaneous instance allowed.
+	if(this._currentState === "detect") throw new Error("RecognizePDF: _scrape is already running");
+	translate._currentState = "detect";
+	translate._getAllTranslators = false;		//though this shouldn't matter, since we're only going to load one translator
+
+	var translators = new Array();
+	translators.push(Zotero.Translators.get(translate.translator[0]));
+	if(!translators[0]) throw new Error('RecognizePDF: could not get translator ' + translate.translator[0]);
+
+	translate._getTranslatorsTranslatorsReceived(translators);
+};
 
 /**
  * Callback to pick first item in the Google Scholar item list
