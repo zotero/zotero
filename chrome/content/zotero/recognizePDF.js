@@ -473,7 +473,7 @@ Zotero_RecognizePDF.Recognizer.prototype._scrape = function(/**Zotero.Translate*
 			}
 	});
 
-	translate._detectWeb();
+	translate.getTranslators(false, true);
 }
 
 /**

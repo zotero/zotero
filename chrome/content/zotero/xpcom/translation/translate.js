@@ -779,7 +779,7 @@ Zotero.Translate.Base.prototype = {
 	 * translators
 	 *   valid: all
 	 *   called: when a translator search initiated with Zotero.Translate.getTranslators() is
-	 *           complete or when _detectWeb is called and completes.
+	 *           complete
 	 *   passed: an array of appropriate translators
 	 *   returns: N/A
 	 * @param {Function} handler Callback function. All handlers will be passed the current
@@ -889,15 +889,30 @@ Zotero.Translate.Base.prototype = {
 	 *
 	 * @param {Boolean} [getAllTranslators] Whether all applicable translators should be returned,
 	 *     rather than just the first available.
+	 * @param {Boolean} [checkSetTranslator] If true, the appropriate detect function is run on the
+	 *     set document/text/etc. using the translator set by setTranslator.
+	 *     getAllTranslators parameter is meaningless in this context.
 	 * @return {Zotero.Translator[]} An array of {@link Zotero.Translator} objects
 	 */
-	"getTranslators":function(getAllTranslators) {
+	"getTranslators":function(getAllTranslators, checkSetTranslator) {
 		// do not allow simultaneous instances of getTranslators
 		if(this._currentState === "detect") throw new Error("getTranslators: detection is already running");
 		this._currentState = "detect";
-		this._getAllTranslators = getAllTranslators;
-		this._getTranslatorsGetPotentialTranslators();
-		
+
+		if(checkSetTranslator) {
+			// setTranslator must be called beforehand if checkSetTranslator is set
+			if( !this.translator || !this.translator[0] ) {
+				throw new Error("getTranslators: translator must be set via setTranslator before calling" +
+													" getTranslators with the checkSetTranslator flag");
+			}
+			var translator = Zotero.Translators.get(this.translator[0]);
+			if(!translator) throw new Error("getTranslators: could not retrieve translator '" + this.translator[0] + "'");
+			this._getTranslatorsTranslatorsReceived([translator]);
+		} else {
+			this._getAllTranslators = getAllTranslators;
+			this._getTranslatorsGetPotentialTranslators();
+		}
+
 		// if detection returns immediately, return found translators
 		if(!this._currentState) return this._foundTranslators;
 	},
@@ -1424,22 +1439,6 @@ Zotero.Translate.Web.prototype._getTranslatorsGetPotentialTranslators = function
 				// data[1] = list of functions to convert proper URIs to proxied URIs
 				me._getTranslatorsTranslatorsReceived(data[0], data[1]);
 			});
-}
-
-/**
- * Run detectWeb on a loaded document using the set translator
- */
-Zotero.Translate.Web.prototype._detectWeb = function() {
-	// Only one simultaneous instance allowed.
-	if(this._currentState === "detect") throw new Error("Translate: _detectWeb is already running");
-	this._currentState = "detect";
-	this._getAllTranslators = false;
-
-	var translators = new Array();
-	translators.push(Zotero.Translators.get(this.translator[0]));
-	if(!translators[0]) throw new Error('Translate: could not get translator ' + this.translator[0]);
-
-	this._getTranslatorsTranslatorsReceived(translators);
 }
 
 /**
