@@ -2269,11 +2269,24 @@ Zotero.Integration.Session.prototype.lookupItems = function(citation, index) {
 		
 		// get Zotero item
 		var zoteroItem = false;
-		if(citationItem.cslItemID) {
-			
-		} else if(citationItem.uris) {
+		if(citationItem.uris) {
 			[zoteroItem, needUpdate] = this.uriMap.getZoteroItemForURIs(citationItem.uris);
 			if(needUpdate && index) this.updateIndices[index] = true;
+			
+			// Unfortunately, people do weird things with their documents. One weird thing people
+			// apparently like to do (http://forums.zotero.org/discussion/22262/) is to copy and
+			// paste citations from other documents created with earlier versions of Zotero into
+			// their documents and then not refresh the document. Usually, this isn't a problem. If
+			// document is edited by the same user, it will work without incident. If the first
+			// citation of a given item doesn't contain itemData, the user will get a
+			// MissingItemException. However, it may also happen that the first citation contains
+			// itemData, but later citations don't, because the user inserted the item properly and
+			// then copied and pasted the same citation from another document. We check for that
+			// possibility here.
+			if(zoteroItem.cslItemData && !citationItem.itemData) {
+				citationItem.itemData = zoteroItem.cslItemData;
+				this.updateIndices[index] = true;
+			}
 		} else {
 			if(citationItem.key) {
 				zoteroItem = Zotero.Items.getByKey(citationItem.key);
