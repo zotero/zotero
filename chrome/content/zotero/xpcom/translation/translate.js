@@ -898,6 +898,7 @@ Zotero.Translate.Base.prototype = {
 		// do not allow simultaneous instances of getTranslators
 		if(this._currentState === "detect") throw new Error("getTranslators: detection is already running");
 		this._currentState = "detect";
+		this._getAllTranslators = getAllTranslators;
 
 		if(checkSetTranslator) {
 			// setTranslator must be called beforehand if checkSetTranslator is set
@@ -905,11 +906,17 @@ Zotero.Translate.Base.prototype = {
 				throw new Error("getTranslators: translator must be set via setTranslator before calling" +
 													" getTranslators with the checkSetTranslator flag");
 			}
-			var translator = Zotero.Translators.get(this.translator[0]);
-			if(!translator) throw new Error("getTranslators: could not retrieve translator '" + this.translator[0] + "'");
-			this._getTranslatorsTranslatorsReceived([translator]);
+			var translators = new Array();
+			var t;
+			for(var i=0, n=this.translator.length; i<n; i++) {
+				t = Zotero.Translators.get(this.translator[i]);
+				if(!t) Zotero.debug("getTranslators: could not retrieve translator '" + this.translator[i] + "'");
+				/**TODO: check that the translator is of appropriate type*/
+				else translators.push(t);
+			}
+			if(!translators.length) throw new Error("getTranslators: no valid translators were set.");
+			this._getTranslatorsTranslatorsReceived(translators);
 		} else {
-			this._getAllTranslators = getAllTranslators;
 			this._getTranslatorsGetPotentialTranslators();
 		}
 
