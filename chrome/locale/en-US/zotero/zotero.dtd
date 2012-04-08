@@ -1,4 +1,4 @@
-<!ENTITY zotero.general.optional							"(Optional)">
+﻿<!ENTITY zotero.general.optional							"(Optional)">
 <!ENTITY zotero.general.note								"Note:">
 <!ENTITY zotero.general.selectAll							"Select All">
 <!ENTITY zotero.general.deselectAll						"Deselect All">
@@ -56,6 +56,22 @@
 <!ENTITY zotero.items.rights_column						"Rights">
 <!ENTITY zotero.items.dateAdded_column					"Date Added">
 <!ENTITY zotero.items.dateModified_column				"Date Modified">
+<!ENTITY zotero.items.extra_column						"Extra">
+<!ENTITY zotero.items.archive_column					"Archive">
+<!ENTITY zotero.items.archiveLocation_column			"Loc. in Archive">
+<!ENTITY zotero.items.place_column						"Place">
+<!ENTITY zotero.items.volume_column						"Volume">
+<!ENTITY zotero.items.edition_column					"Edition">
+<!ENTITY zotero.items.pages_column						"Pages">
+<!ENTITY zotero.items.issue_column						"Issue">
+<!ENTITY zotero.items.series_column						"Series">
+<!ENTITY zotero.items.seriesTitle_column				"Series Title">
+<!ENTITY zotero.items.court_column						"Court">
+<!ENTITY zotero.items.medium_column						"Medium/Format">
+<!ENTITY zotero.items.genre_column						"Genre">
+<!ENTITY zotero.items.system_column						"System">
+<!ENTITY zotero.items.moreColumns.label					"More Columns">
+<!ENTITY zotero.items.restoreColumnOrder.label			"Restore Column Order">
 
 <!ENTITY zotero.items.menu.showInLibrary					"Show in Library">
 <!ENTITY zotero.items.menu.attach.note					"Add Note">
