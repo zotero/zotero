@@ -67,6 +67,14 @@ var CSL = {
         "art.": "article",
         "para.": "paragraph"
     },
+    STATUTE_SUBDIV_STRINGS_REVERSE: {
+        "part": "pt.",
+        "chapter": "ch.",
+        "subchapter": "subch.",
+        "section": "sec.",
+        "article": "art.",
+        "paragraph": "para."
+    },
     NestedBraces: [
         ["(", "["],
         [")", "]"]
@@ -2153,7 +2161,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.316";
+    this.processor_version = "1.0.319";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2522,20 +2530,6 @@ CSL.Engine.prototype.retrieveItem = function (id) {
             }
         }
     }
-    if (this.opt.development_extensions.atomic_statutes) {
-        if (Item.type && ["legislation","bill"].indexOf(Item.type) > -1
-            && Item.title 
-            && Item.jurisdiction) {
-            var legislation_id = [];
-            for (var i = 0, ilen = 3; i < ilen; i += 1) {
-                var varname = ["type", "genre", "jurisdiction"][i];
-                if (Item[varname]) {
-                    legislation_id.push(Item[varname]);
-                }
-            }
-            Item.legislation_id = legislation_id.join("::");
-        }
-    }
     for (var i = 1, ilen = CSL.DATE_VARIABLES.length; i < ilen; i += 1) {
         var dateobj = Item[CSL.DATE_VARIABLES[i]];
         if (dateobj) {
@@ -2545,6 +2539,31 @@ CSL.Engine.prototype.retrieveItem = function (id) {
                 }
             }
             Item[CSL.DATE_VARIABLES[i]] = this.dateParseArray(dateobj);
+        }
+    }
+    if (this.opt.development_extensions.static_statute_locator) {
+        if (Item.type && ["legislation","bill"].indexOf(Item.type) > -1
+            && Item.title 
+            && Item.jurisdiction) {
+            var elements = ["type", "title", "jurisdiction", "genre", "volume", "container-title", "original-date", "issued"];
+            var legislation_id = [];
+            for (var i = 0, ilen = elements.length; i < ilen; i += 1) {
+                var varname = elements[i];
+                var value;
+                if (Item[varname]) {
+                    if (CSL.DATE_VARIABLES.indexOf(varname) > -1) {
+                        if (Item[varname].year) {
+                            value = Item[varname].year;
+                        } else {
+                            continue;
+                        }
+                    } else {
+                        value = Item[varname];
+                    }
+                    legislation_id.push(value);
+                }
+            }
+            Item.legislation_id = legislation_id.join("::");
         }
     }
     return Item;
@@ -2570,6 +2589,76 @@ CSL.Engine.prototype.fixOpt = function (token, name, localname) {
         }
     }
 };
+CSL.Engine.prototype.remapSectionVariable = function (inputList) {
+    for (var i = 0, ilen = inputList.length; i < ilen; i += 1) {
+        var Item = inputList[i][0];
+        var item = inputList[i][1];
+        if (Item.section
+            && item
+            && (Item.type === "bill" || Item.type === "legislation")
+            && this.opt.development_extensions.static_statute_locator) {
+            var value = "" + Item.section;
+            var locator = "";
+            var labelstr = "";
+            if (item.locator) {
+                locator = item.locator;
+                if (item.label && CSL.STATUTE_SUBDIV_STRINGS_REVERSE[item.label]) {
+                    labelstr = " " + CSL.STATUTE_SUBDIV_STRINGS_REVERSE[item.label] + " ";
+                }
+                locator = labelstr + locator;
+                if (locator.slice(0,1) === "&") {
+                    locator = " " + locator;
+                }
+                value = value + locator;
+            }
+            var m = value.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
+            if (m) {
+                var splt = value.split(CSL.STATUTE_SUBDIV_PLAIN_REGEX);
+                if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
+                    item.label = CSL.STATUTE_SUBDIV_STRINGS[slt[0]];
+                    splt.reverse();
+                    splt.pop();
+                    splt.reverse();
+                } else {
+                    item.label = "section";
+                }
+                if (splt.length > 1) {
+                    var lst = [];
+                    lst.push(splt[1].replace(/\s*$/, "").replace(/^\s*/, ""));
+                    var has_repeat_label = false;
+                    var has_sublabel = false;
+                    for (var j=2, jlen=splt.length; j < jlen; j += 1) {
+                        var subdiv = m[j - 1].replace(/^\s*/, "");
+                        subdiv = CSL.STATUTE_SUBDIV_STRINGS[subdiv];
+                        if (subdiv === item.label) {
+                            has_repeat_label = true;
+                        } else {
+                            has_sublabel = true;
+                        }
+                        var subplural = false;
+                        if (splt[j].match(/(?:&|, | and )/)) {
+                            subplural = true;
+                        }
+                        lst.push(this.getTerm(subdiv, "symbol", subplural));
+                        lst.push(splt[j].replace(/\s*$/, "").replace(/^\s*/, ""));
+                    }
+                    for (var j=lst.length - 2; j > 0; j += -2) {
+                        if (!has_sublabel) {
+                            lst = lst.slice(0,j).concat(lst.slice(j + 1));
+                        }
+                    }
+                    value = lst.join(" ");
+                    if (!has_sublabel && has_repeat_label) {
+                        item.force_pluralism = true;
+                    } else {
+                        item.force_pluralism = false;
+                    }
+                }
+            }
+            item.locator = value;
+        }
+    }
+}
 CSL.substituteOne = function (template) {
     return function (state, list) {
         if (!list) {
@@ -2775,9 +2864,8 @@ CSL.Engine.Opt = function () {
     this.development_extensions.raw_date_parsing = true;
     this.development_extensions.clean_up_csl_flaws = true;
     this.development_extensions.flip_parentheses_to_braces = true;
-    this.development_extensions.parse_section_variable = true;
     this.development_extensions.jurisdiction_subfield = true;
-    this.development_extensions.atomic_statutes = false;
+    this.development_extensions.static_statute_locator = false;
     this.development_extensions.csl_reverse_lookup_support = false;
     this.nodenames = [];
     this.gender = {};
@@ -3397,6 +3485,8 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
     var sortedItems = [];
     for (i = 0, ilen = citation.citationItems.length; i < ilen; i += 1) {
         item = citation.citationItems[i];
+        Item = this.retrieveItem("" + item.id);
+        this.remapSectionVariable([[Item,item]]);
         if (this.opt.development_extensions.locator_date_and_revision) {
             if (item.locator) {
                 item.locator = "" + item.locator;
@@ -3423,7 +3513,6 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                 }
             }
         }
-        Item = this.retrieveItem("" + item.id);
         var newitem = [Item, item];
         sortedItems.push(newitem);
         citation.citationItems[i].item = Item;
@@ -3529,8 +3618,6 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                     var mylabel = item[1].label;
                     if (item[0].legislation_id) {
                         myid = item[0].legislation_id;
-                        mylocator = item[0].section;
-                        mylabel = "";
                     }
                     var incitationid;
                     if (k > 0) {
@@ -3604,34 +3691,20 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                         }
                         var prev, prev_locator, prev_label, curr_locator, curr_label;
                         if (ibidme) {
-                            var myprev_locator;
-                            var myprev_label;
                             if (k > 0) {
-                                if (onecitation.sortedItems[(k - 1)][0].legislation_id) {
-                                    myprev_locator = onecitation.sortedItems[(k - 1)][0].section;
-                                    myprev_label = "";
-                                } else {
-                                    myprev_locator = onecitation.sortedItems[(k - 1)][1].locator;
-                                    myprev_label = onecitation.sortedItems[(k - 1)][1].label;
-                                }
+                                prev = onecitation.sortedItems[(k - 1)][1];
                             } else {
-                                if (citations[(j - 1)].sortedItems[0][0].legislation_id) {
-                                    myprev_locator = citations[(j - 1)].sortedItems[0][0].section;
-                                    myprev_label = "";
-                                } else {
-                                    myprev_locator = citations[(j - 1)].sortedItems[0][1].locator;
-                                    myprev_label = citations[(j - 1)].sortedItems[0][1].label;
-                                }
+                                prev = citations[(j - 1)].sortedItems[0][1];
                             }
-                            if (myprev_locator) {
-                                if (myprev_label) {
-                                    prev_label = myprev_label;
+                            if (prev.locator) {
+                                if (prev.label) {
+                                    prev_label = prev.label;
                                 } else {
                                     prev_label = "";
                                 }
-                                prev_locator = "" + myprev_locator + prev_label;
+                                prev_locator = "" + prev.locator + prev_label;
                             } else {
-                                prev_locator = myprev_locator;
+                                prev_locator = prev.locator;
                             }
                             if (mylocator) {
                                 if (mylabel) {
@@ -3785,6 +3858,7 @@ CSL.Engine.prototype.makeCitationCluster = function (rawList) {
         newitem = [Item, item];
         inputList.push(newitem);
     }
+    this.remapSectionVariable(inputList);
     if (inputList && inputList.length > 1 && this.citation_sort.tokens.length > 0) {
         len = inputList.length;
         for (pos = 0; pos < len; pos += 1) {
@@ -4274,6 +4348,13 @@ CSL.Engine.prototype.localeConfigure = function (langspec) {
         this.localeSet(this.cslXml, langspec.base, langspec.best);
     }
     this.localeSet(this.cslXml, langspec.best, langspec.best);
+    if ("undefined" === typeof this.locale[langspec.best].terms["page-range-delimiter"]) {
+        if (["fr", "pt"].indexOf(langspec.best.slice(0, 2).toLowerCase()) > -1) {
+            this.locale[langspec.best].terms["page-range-delimiter"] = "-";
+        } else {
+            this.locale[langspec.best].terms["page-range-delimiter"] = "\u2013";
+        }
+    }
 };
 CSL.Engine.prototype.localeSet = function (myxml, lang_in, lang_out) {
     var blob, locale, nodes, attributes, pos, ppos, term, form, termname, styleopts, attr, date, attrname, len, genderform, target, i, ilen;
@@ -4355,11 +4436,6 @@ CSL.Engine.prototype.localeSet = function (myxml, lang_in, lang_out) {
                 }
             }
         }
-    }
-    if (lang_out && ["fr", "pt"].indexOf(lang_out.slice(0, 2).toLowerCase()) > -1) {
-        this.locale[lang_out].terms["page-range-delimiter"] = "-";
-    } else {
-        this.locale[lang_out].terms["page-range-delimiter"] = "\u2013";
     }
     nodes = this.sys.xml.getNodesByName(locale, 'style-options');
     for (pos = 0, len = this.sys.xml.numberofnodes(nodes); pos < len; pos += 1) {
@@ -7743,35 +7819,6 @@ CSL.Node.text = {
                                 var value;
                                 value = state.getVariable(Item, this.variables[0], form);
                                 if (value) {
-                                    if ((Item.type === "bill" || Item.type === "legislation")
-                                       && state.opt.development_extensions.parse_section_variable) {
-                                        value = "" + value;
-                                        var m = value.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
-                                        if (m) {
-                                            var splt = value.split(CSL.STATUTE_SUBDIV_PLAIN_REGEX);
-                                            var lst = [];
-                                            if (!lst[0]) {
-                                                var parsed = false;
-                                                for (var i=1, ilen=splt.length; i < ilen; i += 1) {
-                                                    var subdiv = m[i - 1].replace(/^\s*/, "");
-                                                    subdiv = CSL.STATUTE_SUBDIV_STRINGS[subdiv];
-                                                    var plural = false;
-                                                    if (splt[i].match(/(?:&|, | and )/)) {
-                                                        plural = true;
-                                                    }
-                                                    subdiv = state.getTerm(subdiv, "symbol", plural);
-                                                    if (subdiv) {
-                                                        parsed = true;
-                                                    }
-                                                    lst.push(subdiv);
-                                                    lst.push(splt[i].replace(/\s*,*\s*$/, "").replace(/^\s*,*\s*/, ""));
-                                                }
-                                                if (parsed) {
-                                                    value = lst.join(" ");
-                                                }
-                                            }
-                                        }
-                                    }
                                     state.output.append(value, this);
                                 }
                             };
@@ -10353,7 +10400,7 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable) {
                     this.tmp.shadow_numbers[variable].values.push(["Blob", elements[i], undefined]);
                 }
             }
-        }
+                    };
         if (num.indexOf(" ") === -1 && num.match(/[0-9]/)) {
             this.tmp.shadow_numbers[variable].numeric = true;
         } else {
@@ -10361,6 +10408,11 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable) {
         }
         if (count > 1) {
             this.tmp.shadow_numbers[variable].plural = 1;
+        }
+        if (ItemObject.force_pluralism === true) {
+            this.tmp.shadow_numbers[variable].plural = 1;
+        } else if (ItemObject.force_pluralism) {
+            this.tmp.shadow_numbers[variable].plural = 0;
         }
     }
 };
