@@ -33,7 +33,8 @@ Zotero.Server = new function() {
 		404:"Not Found",
 		412:"Precondition Failed",
 		500:"Internal Server Error",
-		501:"Method Not Implemented"
+		501:"Method Not Implemented",
+		504:"Gateway Timeout"
 	};
 	
 	/**
@@ -381,6 +382,12 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
  * returns HTTP data from a request
  */
 Zotero.Server.DataListener.prototype._requestFinished = function(response) {
+	if(this._requestFinished) {
+		Zotero.debug("Request already finished; not sending another response");
+		return;
+	}
+	this._requestFinished = true;
+	
 	// close input stream
 	this.iStream.close();
 	

@@ -211,17 +211,21 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 			try {
 				exception(e);
 			} catch(e) {
-				try {
-					Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-				} catch(e) {}
+				if(hiddenBrowser) {
+					try {
+						Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+					} catch(e) {}
+				}
 				translate.complete(false, e);
 			}
 		}
 	} else {
 		var myException = function(e) {
-			try {
-				Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-			} catch(e) {}
+			if(hiddenBrowser) {
+				try {
+					Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+				} catch(e) {}
+			}
 			translate.complete(false, e);
 		}
 	}
@@ -268,10 +272,12 @@ Zotero.Utilities.Translate.prototype.processDocuments = function(urls, processor
 	function() {
 		if(done) done();
 		var handler = function() {
-			try {
-				Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-				translate.removeHandler("done", handler);
-			} catch(e) {}
+			if(hiddenBrowser) {
+				try {
+					Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+				} catch(e) {}
+			}
+			translate.removeHandler("done", handler);
 		};
 		translate.setHandler("done", handler);
 		translate.decrementAsyncProcesses("Zotero.Utilities.Translate#processDocuments");
