@@ -129,7 +129,6 @@ Zotero.Translate.ItemSaver.prototype = {
 				callback(false, new Error("Save to server failed"));
 			} else {
 				Zotero.debug("Translate: Save to server complete");
-				callback(true, items);
 				
 				if(typedArraysSupported) {
 					try {
@@ -147,6 +146,8 @@ Zotero.Translate.ItemSaver.prototype = {
 						}
 					}
 				}
+				
+				callback(true, items);
 			}
 		});
 	},
