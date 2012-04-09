@@ -909,10 +909,14 @@ Zotero.Translate.Base.prototype = {
 			var translators = new Array();
 			var t;
 			for(var i=0, n=this.translator.length; i<n; i++) {
-				t = Zotero.Translators.get(this.translator[i]);
-				if(!t) Zotero.debug("getTranslators: could not retrieve translator '" + this.translator[i] + "'");
-				/**TODO: check that the translator is of appropriate type*/
-				else translators.push(t);
+				if(typeof(this.translator[i]) == 'string') {
+					t = Zotero.Translators.get(this.translator[i]);
+					if(!t) Zotero.debug("getTranslators: could not retrieve translator '" + this.translator[i] + "'");
+				} else {
+					t = this.translator[i];
+				}
+				/**TODO: check that the translator is of appropriate type?*/
+				if(t) translators.push(t);
 			}
 			if(!translators.length) throw new Error("getTranslators: no valid translators were set.");
 			this._getTranslatorsTranslatorsReceived(translators);
