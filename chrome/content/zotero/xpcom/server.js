@@ -382,11 +382,11 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
  * returns HTTP data from a request
  */
 Zotero.Server.DataListener.prototype._requestFinished = function(response) {
-	if(this._requestFinished) {
+	if(this._responseSent) {
 		Zotero.debug("Request already finished; not sending another response");
 		return;
 	}
-	this._requestFinished = true;
+	this._responseSent = true;
 	
 	// close input stream
 	this.iStream.close();
