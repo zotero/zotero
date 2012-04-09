@@ -36,8 +36,7 @@ const BOMs = {
 
 Components.utils.import("resource://gre/modules/NetUtil.jsm");
 
-Zotero.Translate.DOMWrapper = new function() {
-	
+Zotero.Translate.DOMWrapper = new function() {	
 	/*
 	 * BEGIN SPECIAL POWERS WRAPPING CODE
 	 * https://mxr.mozilla.org/mozilla-central/source/testing/mochitest/tests/SimpleTest/specialpowersAPI.js?raw=1
@@ -66,7 +65,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		return Function.prototype.apply.call(fun, invocant, args);
 	}
 
-	function wrapPrivileged(obj) {
+	function wrapPrivileged(obj, overrides) {
 	
 		// Primitives pass straight through.
 		if (!isWrappable(obj))
@@ -77,7 +76,7 @@ Zotero.Translate.DOMWrapper = new function() {
 			throw "Trying to double-wrap object!";
 	
 		// Make our core wrapper object.
-		var handler = new SpecialPowersHandler(obj);
+		var handler = new SpecialPowersHandler(obj, overrides);
 	
 		// If the object is callable, make a function proxy.
 		if (typeof obj === "function") {
@@ -136,8 +135,9 @@ Zotero.Translate.DOMWrapper = new function() {
 	};
 	
 	
-	function SpecialPowersHandler(obj) {
+	function SpecialPowersHandler(obj, overrides) {
 		this.wrappedObject = obj;
+		this.overrides = overrides ? overrides : {};
 	};
 	
 	// Allow us to transitively maintain the membrane by wrapping descriptors
@@ -163,11 +163,14 @@ Zotero.Translate.DOMWrapper = new function() {
 		// Note that we have several cases here, each of which requires special handling.
 		//
 		var desc;
-	
+		
+		// Hack for overriding some properties
+		if (name in this.overrides)
+			return this.overrides[name];
 		// Case 1: Own Properties.
 		//
 		// This one is easy, thanks to Object.getOwnPropertyDescriptor().
-		if (own)
+		else if (own)
 			desc = Object.getOwnPropertyDescriptor(obj, name);
 	
 		// Case 2: Not own, not Xray-wrapped.
@@ -251,9 +254,11 @@ Zotero.Translate.DOMWrapper = new function() {
 		var specialAPI = 'SpecialPowers_wrappedObject';
 		if (props.indexOf(specialAPI) == -1)
 			props.push(specialAPI);
-	
+		
+		
 		// Do the normal thing.
 		var flt = function(a) { return props.indexOf(a) == -1; };
+		props = props.concat(Object.keys(this.overrides).filter(flt));
 		props = props.concat(Object.getOwnPropertyNames(obj).filter(flt));
 	
 		// If we've got an Xray wrapper, include the expandos as well.
@@ -317,10 +322,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	 * @param {XPCCrossOriginWrapper} obj
 	 * @return {Object} An obj that is no longer Xrayed
 	 */
-	this.wrap = function(obj) {
-		var newObj = wrapPrivileged(obj);
-		return newObj;
-	}
+	this.wrap = wrapPrivileged;
 	
 	/**
 	 * Unwraps an object
