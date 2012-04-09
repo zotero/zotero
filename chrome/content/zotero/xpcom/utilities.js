@@ -1476,7 +1476,6 @@ Zotero.Utilities = {
 		}
 	},
 	
-	
 	/**
 	 * Get the real target URL from an intermediate URL
 	 */
@@ -1501,5 +1500,55 @@ Zotero.Utilities = {
 		}
 		
 		return url;
+	},
+	
+	/**
+	 * Adds a string to a given array at a given offset, converted to UTF-8
+	 * @param {String} string The string to convert to UTF-8
+	 * @param {Array|Uint8Array} array The array to which to add the string
+	 * @param {Integer} [offset] Offset at which to add the string
+	 */
+	"stringToUTF8Array":function(string, array, offset) {
+		if(!offset) offset = 0;
+		var n = string.length;
+		for(var i=0; i<n; i++) {
+			var val = string.charCodeAt(i);
+			if(val >= 128) {
+				if(val >= 2048) {
+					array[offset] = ((val >>> 6) | 192);
+					array[offset+1] = (val & 63) | 128;
+					offset += 2;
+				} else {
+					array[offset] = (val >>> 12) | 224;
+					array[offset+1] = ((val >>> 6) & 63) | 128;
+					array[offset+2] = (val & 63) | 128;
+					offset += 3;
+				}
+			} else {
+				array[offset++] = val;
+			}
+		}
+	},
+	
+	/**
+	 * Gets the byte length of the UTF-8 representation of a given string
+	 * @param {String} string
+	 * @return {Integer}
+	 */
+	"getStringByteLength":function(string) {
+		var length = 0, n = string.length;
+		for(var i=0; i<n; i++) {
+			var val = string.charCodeAt(i);
+			if(val >= 128) {
+				if(val >= 2048) {
+					length += 3;
+				} else {
+					length += 2;
+				}
+			} else {
+				length += 1;
+			}
+		}
+		return length;
 	}
 }
