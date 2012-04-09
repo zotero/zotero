@@ -425,6 +425,13 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 		translate.setHandler("done", function(translate, success) {
 			if(!success || !savedItem) me._queryGoogle();
 		});
+		translate.setHandler("translators", function(translate, detected) { 
+				if(detected.length) {
+					translate.translate(me._libraryID, false);
+				} else {
+					me._queryGoogle();
+				}
+		});
 		
 		this._hiddenBrowser.addEventListener("pageshow", function() { me._scrape(translate) }, true);
 		
@@ -462,16 +469,6 @@ Zotero_RecognizePDF.Recognizer.prototype._scrape = function(/**Zotero.Translate*
 
 	this._hiddenBrowser.removeEventListener("pageshow", this._scrape.caller, true);
 	translate.setDocument(this._hiddenBrowser.contentDocument);
-
-	var me = this;
-
-	translate.setHandler("translators", function(translate, detected) { 
-			if(detected.length) {
-				translate.translate(me._libraryID, false);
-			} else {
-				me._queryGoogle();
-			}
-	});
 
 	translate.getTranslators(false, true);
 }
