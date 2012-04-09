@@ -892,15 +892,41 @@ Zotero.Translate.Base.prototype = {
 	 *
 	 * @param {Boolean} [getAllTranslators] Whether all applicable translators should be returned,
 	 *     rather than just the first available.
+	 * @param {Boolean} [checkSetTranslator] If true, the appropriate detect function is run on the
+	 *     set document/text/etc. using the translator set by setTranslator.
+	 *     getAllTranslators parameter is meaningless in this context.
 	 * @return {Zotero.Translator[]} An array of {@link Zotero.Translator} objects
 	 */
-	"getTranslators":function(getAllTranslators) {
+	"getTranslators":function(getAllTranslators, checkSetTranslator) {
 		// do not allow simultaneous instances of getTranslators
 		if(this._currentState === "detect") throw new Error("getTranslators: detection is already running");
 		this._currentState = "detect";
 		this._getAllTranslators = getAllTranslators;
-		this._getTranslatorsGetPotentialTranslators();
-		
+
+		if(checkSetTranslator) {
+			// setTranslator must be called beforehand if checkSetTranslator is set
+			if( !this.translator || !this.translator[0] ) {
+				throw new Error("getTranslators: translator must be set via setTranslator before calling" +
+													" getTranslators with the checkSetTranslator flag");
+			}
+			var translators = new Array();
+			var t;
+			for(var i=0, n=this.translator.length; i<n; i++) {
+				if(typeof(this.translator[i]) == 'string') {
+					t = Zotero.Translators.get(this.translator[i]);
+					if(!t) Zotero.debug("getTranslators: could not retrieve translator '" + this.translator[i] + "'");
+				} else {
+					t = this.translator[i];
+				}
+				/**TODO: check that the translator is of appropriate type?*/
+				if(t) translators.push(t);
+			}
+			if(!translators.length) throw new Error("getTranslators: no valid translators were set.");
+			this._getTranslatorsTranslatorsReceived(translators);
+		} else {
+			this._getTranslatorsGetPotentialTranslators();
+		}
+
 		// if detection returns immediately, return found translators
 		if(!this._currentState) return this._foundTranslators;
 	},

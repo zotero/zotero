@@ -363,7 +363,7 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 	var me = this;
 	if(this._DOI) {
 		// use CrossRef to look for DOI
-		var translate = new Zotero.Translate("search");
+		var translate = new Zotero.Translate.Search();
 		translate.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
 		var item = {"itemType":"journalArticle", "DOI":this._DOI};
 		translate.setSearch(item);
@@ -411,7 +411,7 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 			this._hiddenBrowser.docShell.allowImages = false;
 		}
 		
-		var translate = new Zotero.Translate("web");
+		var translate = new Zotero.Translate.Web();
 		var savedItem = false;
 		translate.setTranslator("57a00950-f0d1-4b41-b6ba-44ff0fc30289");
 		translate.setHandler("itemDone", function(translate, item) {
@@ -424,6 +424,13 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 		});
 		translate.setHandler("done", function(translate, success) {
 			if(!success || !savedItem) me._queryGoogle();
+		});
+		translate.setHandler("translators", function(translate, detected) { 
+				if(detected.length) {
+					translate.translate(me._libraryID, false);
+				} else {
+					me._queryGoogle();
+				}
 		});
 		
 		this._hiddenBrowser.addEventListener("pageshow", function() { me._scrape(translate) }, true);
@@ -459,10 +466,11 @@ Zotero_RecognizePDF.Recognizer.prototype._scrape = function(/**Zotero.Translate*
 		this._callback(false, "recognizePDF.limit");
 		return;
 	}
-	
+
 	this._hiddenBrowser.removeEventListener("pageshow", this._scrape.caller, true);
 	translate.setDocument(this._hiddenBrowser.contentDocument);
-	translate.translate(this._libraryID, false);
+
+	translate.getTranslators(false, true);
 }
 
 /**
