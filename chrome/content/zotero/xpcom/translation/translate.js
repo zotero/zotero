@@ -1428,7 +1428,7 @@ Zotero.Translate.Web.prototype._getTranslatorsGetPotentialTranslators = function
 Zotero.Translate.Web.prototype._getSandboxLocation = function() {
 	if(this._parentTranslator) {
 		return this._parentTranslator._sandboxLocation;
-	} else if("defaultView" in this.document) {
+	} else if(this.document.defaultView) {
 		return this.document.defaultView;
 	} else {
 		return this.document.location.toString();
