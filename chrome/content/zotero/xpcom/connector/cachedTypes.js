@@ -78,11 +78,10 @@ Zotero.Connector_Types = new function() {
 			
 			this.getImageSrc = function(idOrName) {
 				var itemType = Zotero.Connector_Types["itemTypes"][idOrName];
-				if(!itemType) return false;
-				var icon = itemType[6]/* icon */;
+				var icon = itemType ? itemType[6]/* icon */ : "treeitem-"+idOrName+".png";
 				
 				if(Zotero.isBookmarklet) {
-					return ZOTERO_CONFIG.BOOKMARKLET_URL+"icons/"+icon;
+					return ZOTERO_CONFIG.BOOKMARKLET_URL+"images/"+icon;
 				} else if(Zotero.isFx) {
 					return "chrome://zotero/skin/"+icon;
 				} else if(Zotero.isChrome) {
