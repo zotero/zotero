@@ -207,7 +207,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					} else {
 						attachment.key = newKeys[i];
 						
-						Zotero.debug("Finished creating item");
+						Zotero.debug("Finished creating items");
 						if(attachment.linkMode === "linked_url") {
 							attachmentCallback(attachment, 100);
 						} else if("data" in attachment) {
@@ -313,9 +313,9 @@ Zotero.Translate.ItemSaver.prototype = {
 				
 				var xhr = new XMLHttpRequest();
 				xhr.open("GET", attachment.url, true);
-				xhr.responseType = "arraybuffer"; 
-				xhr.onloadend = function() {
-					if(!checkHeaders()) return;
+				xhr.responseType = "arraybuffer";
+				xhr.onreadystatechange = function() {
+					if(xhr.readyState !== 4 || !checkHeaders()) return;
 				
 					attachmentCallback(attachment, 50);
 					attachment.data = xhr.response;
@@ -325,7 +325,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					}
 				};
 				xhr.onprogress = function(event) {
-					if(this.readyState < 2 || !checkHeaders()) return;
+					if(xhr.readyState < 2 || !checkHeaders()) return;
 					
 					if(event.total && attachmentCallback) {
 						attachmentCallback(attachment, event.loaded/event.total*50);
@@ -348,6 +348,7 @@ Zotero.Translate.ItemSaver.prototype = {
 	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
 	 */
 	"_uploadAttachmentToServer":function(attachment, attachmentCallback) {
+		Zotero.debug("Uploading attachment to server");
 		var binaryHash = this._md5(new Uint8Array(attachment.data), 0, attachment.data.byteLength),
 			hash = "";
 		for(var i=0; i<binaryHash.length; i++) {
