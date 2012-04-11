@@ -42,8 +42,9 @@ Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType, d
 			 if(callback) {
 				if(status === false || status === 100) {
 					delete Zotero.Translate.ItemSaver._attachmentCallbacks[id];
+				} else {
+					data[1] = 50+data[1]/2;
 				}
-				data[1] = 50+data[1]/2;
 				callback(data[1], data[2]);
 			 }
 		});
@@ -113,7 +114,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				// Get rid of attachments that we won't be able to save properly and add ids
 				for(var j=0; j<item.attachments.length; j++) {
 					if(!item.attachments[j].url || item.attachments[j].mimeType === "text/html") {
-						item.attachments.splice(j, 1);
+						item.attachments.splice(j--, 1);
 					} else {
 						item.attachments[j].id = Zotero.Utilities.randomString();
 					}
