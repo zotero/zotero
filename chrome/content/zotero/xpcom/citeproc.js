@@ -57,8 +57,8 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:p\.|pp\.|r\.|pt\.|ch\.|subch\.|sec\.|tit\.|art\.|para\.))/g,
-    STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:p\.|pp\.|r\.|pt\.|ch\.|subch\.|sec\.|tit\.|art\.|para\.))/,
+    STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:p\.|pp\.|r\.|pt\.|ch\.|subch\.|s\.|sec\.|tit\.|art\.|para\.))/g,
+    STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:p\.|pp\.|r\.|pt\.|ch\.|subch\.|s\.|sec\.|tit\.|art\.|para\.))/,
     STATUTE_SUBDIV_STRINGS: {
         "p.": "page",
         "pp.": "page",
@@ -66,17 +66,22 @@ var CSL = {
         "pt.": "part",
         "ch.": "chapter",
         "subch.": "subchapter",
-        "sec.": "section",
+        "s.": "section",
+        "sec.": "Section",
         "tit.": "title",
         "art.": "article",
         "para.": "paragraph"
     },
     STATUTE_SUBDIV_STRINGS_REVERSE: {
         "page": "p.",
+		"page": "pp.",
+		"rule": "r.",
         "part": "pt.",
         "chapter": "ch.",
         "subchapter": "subch.",
-        "section": "sec.",
+        "Section": "sec.",
+		"section": "s.",
+		"title": "tit.",
         "article": "art.",
         "paragraph": "para."
     },
@@ -447,7 +452,7 @@ var CSL = {
         "\u06E5": "\u0648",
         "\u06E6": "\u064A"
     },
-    LOCATOR_LABELS_REGEXP: new RegExp("^((ch|col|fig|no|l|n|op|p|pp|para|pt|r|tit|sec|sv|vrs|vol)\\.)\\s+(.*)"),
+    LOCATOR_LABELS_REGEXP: new RegExp("^((ch|col|fig|no|l|n|op|p|pp|para|pt|r|tit|s|sec|sv|vrs|vol)\\.)\\s+(.*)"),
     LOCATOR_LABELS_MAP: {
         "ch": "chapter",
         "col": "column",
@@ -461,7 +466,8 @@ var CSL = {
         "para": "paragraph",
         "pt": "part",
         "r": "rule",
-        "sec": "section",
+		"s": "section",
+        "sec": "Section",
         "tit": "title",
         "vrs": "verse",
         "vol": "volume"
@@ -2168,7 +2174,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.321";
+    this.processor_version = "1.0.322";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
