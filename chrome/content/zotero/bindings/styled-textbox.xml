@@ -319,6 +319,7 @@
 				<body>
 				<![CDATA[
 					if (this._editor) {
+						this._iframe.focus();
 						this._editor.focus();
 						this._focus = false;
 					}
@@ -403,6 +404,7 @@
 								self.value = self._value;
 							}
 							if (self._focus) {
+								self._iframe.focus();
 								self._editor.focus();
 								self._focus = false;
 							}
