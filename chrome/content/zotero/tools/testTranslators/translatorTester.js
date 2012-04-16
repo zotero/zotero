@@ -142,6 +142,7 @@ Zotero_TranslatorTesters = new function() {
 Zotero_TranslatorTester = function(translator, type, debugCallback) {
 	this.type = type;
 	this.translator = translator;
+	this.translator.runMode = Zotero.Translator.RUN_MODE_IN_BROWSER;
 	this.output = "";
 	this.isSupported = this.translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER;
 	
