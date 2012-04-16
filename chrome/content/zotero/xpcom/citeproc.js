@@ -57,14 +57,17 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:p\.|pt\.|ch\.|subch\.|sec\.|art\.|para\.))/g,
-    STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:p\.|pt\.|ch\.|subch\.|sec\.|art\.|para\.))/,
+    STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:p\.|pp\.|r\.|pt\.|ch\.|subch\.|sec\.|tit\.|art\.|para\.))/g,
+    STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:p\.|pp\.|r\.|pt\.|ch\.|subch\.|sec\.|tit\.|art\.|para\.))/,
     STATUTE_SUBDIV_STRINGS: {
         "p.": "page",
+        "pp.": "page",
+        "r.": "rule",
         "pt.": "part",
         "ch.": "chapter",
         "subch.": "subchapter",
         "sec.": "section",
+        "tit.": "title",
         "art.": "article",
         "para.": "paragraph"
     },
@@ -444,7 +447,7 @@ var CSL = {
         "\u06E5": "\u0648",
         "\u06E6": "\u064A"
     },
-    LOCATOR_LABELS_REGEXP: new RegExp("^((ch|col|fig|no|l|n|op|p|pp|para|pt|sec|sv|vrs|vol)\\.)\\s+(.*)"),
+    LOCATOR_LABELS_REGEXP: new RegExp("^((ch|col|fig|no|l|n|op|p|pp|para|pt|r|tit|sec|sv|vrs|vol)\\.)\\s+(.*)"),
     LOCATOR_LABELS_MAP: {
         "ch": "chapter",
         "col": "column",
@@ -457,8 +460,9 @@ var CSL = {
         "pp": "page",
         "para": "paragraph",
         "pt": "part",
+        "r": "rule",
         "sec": "section",
-        "sv": "sub-verbo",
+        "tit": "title",
         "vrs": "verse",
         "vol": "volume"
     },
@@ -2164,7 +2168,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.320";
+    this.processor_version = "1.0.321";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3752,6 +3756,8 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
                         }
                         if (suprame) {
                             item[1].position = CSL.POSITION_SUBSEQUENT;
+                        }
+                        if (suprame || ibidme) {
                             if (first_ref[myid] != onecitation.properties.noteIndex) {
                                 item[1]["first-reference-note-number"] = first_ref[myid];
                             }
@@ -5308,6 +5314,9 @@ CSL.Node.layout = {
         if (this.tokentype === CSL.START && !state.tmp.cite_affixes) {
             func = function (state, Item) {
                 state.tmp.done_vars = [];
+                if (!state.tmp.just_looking && state.registry.registry[Item.id].parallel) {
+                    state.tmp.done_vars.push("first-reference-note-number");
+                }
                 state.tmp.rendered_name = false;
                 state.tmp.name_node = {};
             };
@@ -7519,6 +7528,9 @@ CSL.Node.number = {
             this.splice_prefix = state[state.build.area].opt.layout_delimiter;
         }
         func = function (state, Item, item) {
+            if (this.variables.length === 0) {
+                return;
+            }
             var varname, num, number, m, j, jlen;
             varname = this.variables[0];
             state.parallel.StartVariable(this.variables[0]);
@@ -7843,10 +7855,7 @@ CSL.Node.text = {
                                     var value = "" + item[this.variables[0]];
                                     value = value.replace(/([^\\])--*/g,"$1"+state.getTerm("page-range-delimiter"));
                                     value = value.replace(/\\-/g,"-");
-                                    if (this.variables_real[0] !== "first-reference-note-number"
-                                       || !state.registry.registry[item.id].parallel) {
-                                        state.output.append(value, this, false, false, true);
-                                    }
+                                    state.output.append(value, this, false, false, true);
                                 }
                             };
                         } else if (this.variables_real[0] === "page-first") {
@@ -9279,7 +9288,8 @@ CSL.Parallel = function (state) {
     this.sets = new CSL.Stack([]);
     this.try_cite = true;
     this.use_parallels = true;
-    this.midVars = ["hereinafter", "section", "volume", "container-title", "collection-number", "issue", "page", "page-first", "locator", "number"];
+    this.midVars = ["section", "volume", "container-title", "collection-number", "issue", "page", "page-first", "number"];
+    this.ignoreVars = ["locator", "first-reference-note-number"];
 };
 CSL.Parallel.prototype.isMid = function (variable) {
     return (this.midVars.indexOf(variable) > -1);
@@ -9367,6 +9377,14 @@ CSL.Parallel.prototype.StartCite = function (Item, item, prevItemID) {
 };
 CSL.Parallel.prototype.StartVariable = function (variable) {
     if (this.use_parallels && (this.try_cite || this.force_collapse)) {
+        if (variable === "names") {
+            this.variable = variable + ":" + this.target;
+        } else {
+            this.variable = variable;
+        }
+        if (this.ignoreVars.indexOf(variable) > -1) {
+            return;
+        }
         if (variable === "container-title" && this.sets.value().length === 0) {
             this.master_was_neutral_cite = false;
         }
@@ -9382,11 +9400,6 @@ CSL.Parallel.prototype.StartVariable = function (variable) {
             this.try_cite = true;
             this.in_series = false;
         }
-        if (variable === "names") {
-            this.variable = variable + ":" + this.target;
-        } else {
-            this.variable = variable;
-        }
         if (variable === "number") {
             this.cite.front.push(this.variable);
         } else if (CSL.PARALLEL_COLLAPSING_MID_VARSET.indexOf(variable) > -1) {
@@ -9397,11 +9410,17 @@ CSL.Parallel.prototype.StartVariable = function (variable) {
     }
 };
 CSL.Parallel.prototype.AppendBlobPointer = function (blob) {
+    if (this.ignoreVars.indexOf(this.variable) > -1) {
+        return;
+    }
     if (this.use_parallels && this.variable && (this.try_cite || this.force_collapse) && blob && blob.blobs) {
         this.data.blobs.push([blob, blob.blobs.length]);
     }
 };
 CSL.Parallel.prototype.AppendToVariable = function (str, varname) {
+    if (this.ignoreVars.indexOf(this.variable) > -1) {
+        return;
+    }
     if (this.use_parallels && (this.try_cite || this.force_collapse)) {
         if (this.target !== "back" || true) {
             this.data.value += "::" + str;
@@ -9417,7 +9436,10 @@ CSL.Parallel.prototype.AppendToVariable = function (str, varname) {
         }
     }
 };
-CSL.Parallel.prototype.CloseVariable = function (hello) {
+CSL.Parallel.prototype.CloseVariable = function () {
+    if (this.ignoreVars.indexOf(this.variable) > -1) {
+        return;
+    }
     if (this.use_parallels && (this.try_cite || this.force_collapse)) {
         this.cite[this.variable] = this.data;
         if (this.sets.value().length > 0) {
