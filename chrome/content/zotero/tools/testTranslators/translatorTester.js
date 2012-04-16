@@ -24,7 +24,7 @@
 */
 
 // Timeout for test to complete
-const TEST_RUN_TIMEOUT = 600000;
+var TEST_RUN_TIMEOUT = 600000;
 var EXPORTED_SYMBOLS = ["Zotero_TranslatorTesters"];
 
 try {
