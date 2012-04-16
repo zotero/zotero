@@ -566,8 +566,23 @@ var ZoteroPane = new function()
 				document.getElementById('zotero-editpane-item-box').itemTypeMenu.menupopup.openPopup(menu, "before_start", 0, 0);
 				break;
 			case 'newNote':
+				// If a regular item is selected, use that as the parent.
+				// If a child item is selected, use its parent as the parent.
+				// Otherwise create a standalone note.
+				var parent = false;
+				var items = ZoteroPane_Local.getSelectedItems();
+				if (items.length == 1) {
+					if (items[0].isRegularItem()) {
+						parent = items[0].id;
+					}
+					else {
+						parent = items[0].getSource();
+					}
+				}
 				// Use key that's not the modifier as the popup toggle
-				ZoteroPane_Local.newNote(useShift ? event.altKey : event.shiftKey);
+				ZoteroPane_Local.newNote(
+					useShift ? event.altKey : event.shiftKey, parent
+				);
 				break;
 			case 'toggleTagSelector':
 				ZoteroPane_Local.toggleTagSelector();
