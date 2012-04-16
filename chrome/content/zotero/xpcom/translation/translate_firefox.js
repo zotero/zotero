@@ -258,7 +258,6 @@ Zotero.Translate.DOMWrapper = new function() {
 		
 		// Do the normal thing.
 		var flt = function(a) { return props.indexOf(a) == -1; };
-		props = props.concat(Object.keys(this.overrides).filter(flt));
 		props = props.concat(Object.getOwnPropertyNames(obj).filter(flt));
 	
 		// If we've got an Xray wrapper, include the expandos as well.
@@ -287,6 +286,7 @@ Zotero.Translate.DOMWrapper = new function() {
 		// the base object, and no Xray vision for the rest of the way up.
 		var obj = this.wrappedObject;
 		var props = [];
+		props = doGetOwnPropertyNames(this.overrides, props);
 		while (obj) {
 			props = doGetOwnPropertyNames(obj, props);
 			obj = Object.getPrototypeOf(XPCNativeWrapper.unwrap(obj));
