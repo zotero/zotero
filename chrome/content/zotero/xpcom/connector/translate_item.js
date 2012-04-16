@@ -105,7 +105,9 @@ Zotero.Translate.ItemSaver.prototype = {
 	"_saveToServer":function(items, callback, attachmentCallback) {
 		var newItems = [], typedArraysSupported = false;
 		try {
-			typedArraysSupported = new Uint8Array(1);
+			// Safari <5.2 supports typed arrays, but doesn't support sending them in
+			// an XHR
+			typedArraysSupported = new Uint8Array(1) && (!Zotero.isSafari || window.WebKitBlobBuilder);
 		} catch(e) {}
 		for(var i=0, n=items.length; i<n; i++) {
 			var item = items[i];

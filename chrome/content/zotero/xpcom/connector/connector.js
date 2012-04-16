@@ -68,7 +68,11 @@ Zotero.Connector = new function() {
 					_ieConnectorCallbacks = [];
 					var listener = function(event) {
 						if(event.origin !== "http://127.0.0.1:23119") return;
-						event.stopPropagation();
+						if(event.stopPropagation) {
+							event.stopPropagation();
+						} else {
+							event.cancelBubble = true;
+						}
 						
 						// If this is the first time the target was loaded, then this is a loaded
 						// event

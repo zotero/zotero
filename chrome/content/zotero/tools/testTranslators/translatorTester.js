@@ -24,7 +24,7 @@
 */
 
 // Timeout for test to complete
-const TEST_RUN_TIMEOUT = 600000;
+var TEST_RUN_TIMEOUT = 600000;
 var EXPORTED_SYMBOLS = ["Zotero_TranslatorTesters"];
 
 try {
@@ -142,6 +142,7 @@ Zotero_TranslatorTesters = new function() {
 Zotero_TranslatorTester = function(translator, type, debugCallback) {
 	this.type = type;
 	this.translator = translator;
+	this.translator.runMode = Zotero.Translator.RUN_MODE_IN_BROWSER;
 	this.output = "";
 	this.isSupported = this.translator.runMode === Zotero.Translator.RUN_MODE_IN_BROWSER;
 	
