@@ -47,6 +47,14 @@ var ZoteroItemPane = new function() {
 		_relatedBox = document.getElementById('zotero-editpane-related');
 	}
 	
+	function updateRelatedTab (relatedTab, count) {
+		var relatedLabel = relatedTab.getAttribute('label').replace(/(.*?)\s*\([0-9]\)$/,"$1");
+		if (count) {
+			relatedTab.setAttribute('label', relatedLabel + ' (' + count + ')');
+		} else {
+			relatedTab.setAttribute('label', relatedLabel + ' (0)');
+		}
+	}
 	
 	/*
 	 * Load an item
@@ -144,6 +152,15 @@ var ZoteroItemPane = new function() {
 			box.mode = 'edit';
 		}
 		box.item = item;
+		// Update the related items count on the tab when any panel is opened or modified.
+		var relatedTab = document.getElementById('zotero-tab-related');
+		var related = item.relatedItemsBidirectional ? item.relatedItemsBidirectional.length : 0;
+		updateRelatedTab(relatedTab, related);
+		if (box.getAttribute('id') == "zotero-editpane-related") {
+			// Attach the tab update function and the tab to the related box for its use
+			box.relatedTab = relatedTab;
+			box.updateRelatedTab = updateRelatedTab;
+		}
 	}
 	
 	
