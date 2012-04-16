@@ -322,7 +322,10 @@ Zotero.Translate.DOMWrapper = new function() {
 	 * @param {XPCCrossOriginWrapper} obj
 	 * @return {Object} An obj that is no longer Xrayed
 	 */
-	this.wrap = wrapPrivileged;
+	this.wrap = function(obj, overrides) {
+		if(isWrapper(obj)) return obj;
+		return wrapPrivileged(obj, overrides);
+	};
 	
 	/**
 	 * Unwraps an object
