@@ -1154,16 +1154,17 @@ var ZoteroPane = new function()
 				var noteEditor = document.getElementById('zotero-note-editor');
 				noteEditor.mode = this.collectionsView.editable ? 'edit' : 'view';
 				
-				// If loading new or different note, disable undo while we repopulate the text field
-				// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
-				// undo content from another note into the current one.
-				if (!noteEditor.item || noteEditor.item.id != item.id) {
-					noteEditor.disableUndo();
-				}
+				var clearUndo = noteEditor.item ? noteEditor.item.id != item.id : false;
+				
 				noteEditor.parent = null;
 				noteEditor.item = item;
 				
-				noteEditor.enableUndo();
+				// If loading new or different note, disable undo while we repopulate the text field
+				// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
+				// undo content from another note into the current one.
+				if (clearUndo) {
+					noteEditor.clearUndo();
+				}
 				
 				var viewButton = document.getElementById('zotero-view-note-button');
 				if (this.collectionsView.editable) {
