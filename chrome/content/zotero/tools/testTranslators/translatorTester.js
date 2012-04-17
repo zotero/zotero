@@ -189,7 +189,7 @@ Zotero_TranslatorTester = function(translator, type, debugCallback) {
  * Removes document objects, which contain cyclic references, and other fields to be ignored from items
  * @param {Object} Item, in the format returned by Zotero.Item.serialize()
  */
-Zotero_TranslatorTester._sanitizeItem = function(item, forSave) {
+Zotero_TranslatorTester._sanitizeItem = function(item, testItem) {
 	// remove cyclic references 
 	if(item.attachments && item.attachments.length) {
 		// don't actually test URI equality
@@ -225,7 +225,8 @@ Zotero_TranslatorTester._sanitizeItem = function(item, forSave) {
 			continue;
 		}
 		
-		if(!item[field] || !(fieldID = Zotero.ItemFields.getID(field))) {
+		if((!item[field] && (!testItem || item[field] !== false)
+				|| !(fieldID = Zotero.ItemFields.getID(field))) {
 			delete item[field];
 			continue;
 		}
@@ -501,14 +502,14 @@ Zotero_TranslatorTester.prototype._checkResult = function(test, translate, retur
 		}
 		
 		for(var i=0, n=test.items.length; i<n; i++) {
-			var testItem = Zotero_TranslatorTester._sanitizeItem(test.items[i]);
+			var testItem = Zotero_TranslatorTester._sanitizeItem(test.items[i], true);
 			var translatedItem = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
 			
 			if(!this._compare(testItem, translatedItem)) {
 				var m = translate.newItems.length;
 				test.itemsReturned = new Array(m);
 				for(var j=0; j<m; j++) {
-					test.itemsReturned[j] = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i], true);
+					test.itemsReturned[j] = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
 				}
 				
 				testDoneCallback(this, test, "unknown", "Item "+i+" does not match");
@@ -570,7 +571,7 @@ Zotero_TranslatorTester.prototype._createTest = function(translate, multipleMode
 		var items = "multiple";
 	} else {
 		for(var i=0, n=translate.newItems.length; i<n; i++) {
-			Zotero_TranslatorTester._sanitizeItem(translate.newItems[i], true);
+			Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
 		}
 		var items = translate.newItems;
 	}
