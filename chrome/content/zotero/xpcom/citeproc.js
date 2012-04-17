@@ -2174,7 +2174,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.322";
+    this.processor_version = "1.0.323";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2614,16 +2614,19 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
                    && ["bill","gazette","legislation"].indexOf(Item.type) > -1
                    && this.opt.development_extensions.static_statute_locator) {
             var value = "" + Item.section;
-            var old_label = item.label;
-            item.label = "section";
+            var later_label = item.label;
             if (value) {
                 var splt = value.split(/\s+/);
                 if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
                     item.label = CSL.STATUTE_SUBDIV_STRINGS[splt[0]];
                 } else {
-                    value = "sec. " + value;
+					item.label = "section";
+                    value = "s. " + value;
                 }
             }
+			if (!later_label) {
+				later_label = item.label;
+			}
             var m = value.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
             item.section_label_count = m.length;
             var locator = "";
@@ -2631,10 +2634,10 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
             if (item.locator) {
                 locator = item.locator;
                 var firstword = item.locator.split(/\s/)[0];
-                if (item.label === old_label && firstword && firstword.match(/^[0-9]/)) {
-                    labelstr = " " + CSL.STATUTE_SUBDIV_STRINGS_REVERSE[old_label];
-                } else if (item.label !== old_label && firstword && firstword.match(/^[0-9]/)) {
-                    labelstr = " " + CSL.STATUTE_SUBDIV_STRINGS_REVERSE[old_label] + " ";
+                if (item.label === later_label && firstword && firstword.match(/^[0-9]/)) {
+                    labelstr = " " + CSL.STATUTE_SUBDIV_STRINGS_REVERSE[later_label];
+                } else if (item.label !== later_label && firstword && firstword.match(/^[0-9]/)) {
+                    labelstr = " " + CSL.STATUTE_SUBDIV_STRINGS_REVERSE[later_label] + " ";
                 } else if (CSL.STATUTE_SUBDIV_STRINGS[firstword]) {
                     labelstr = " ";
                 }
