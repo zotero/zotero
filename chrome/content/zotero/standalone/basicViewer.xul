@@ -121,7 +121,7 @@
 									accesskey="&saveCmd.accesskey;" command="cmd_save"/>
 							<menuseparator/>
 							<menuitem id="menu_pageSetup" label="&pageSetupCmd.label;"
-									accesskey="&saveCmd.accesskey;" command="cmd_pageSetup"/>
+									accesskey="&pageSetupCmd.accesskey;" command="cmd_pageSetup"/>
 							<menuitem id="menu_print" label="&printCmd.label;" key="key_print"
 									accesskey="&printCmd.accesskey;" command="cmd_print"/>
 							
