@@ -225,7 +225,7 @@ Zotero_TranslatorTester._sanitizeItem = function(item, testItem) {
 			continue;
 		}
 		
-		if((!item[field] && (!testItem || item[field] !== false)
+		if((!item[field] && (!testItem || item[field] !== false))
 				|| !(fieldID = Zotero.ItemFields.getID(field))) {
 			delete item[field];
 			continue;
