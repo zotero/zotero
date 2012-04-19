@@ -136,7 +136,7 @@ pref("extensions.zotero.sync.storage.scheme", 'https');
 pref("extensions.zotero.sync.storage.url", '');
 pref("extensions.zotero.sync.storage.username", '');
 pref("extensions.zotero.sync.storage.maxDownloads", 4);
-pref("extensions.zotero.sync.storage.maxUploads", 4);
+pref("extensions.zotero.sync.storage.maxUploads", 2);
 pref("extensions.zotero.sync.storage.deleteDelayDays", 30);
 pref("extensions.zotero.sync.storage.groups.enabled", true);
 
