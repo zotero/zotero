@@ -1681,11 +1681,12 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 		}
 		
 		// do this operations in reverse in case plug-ins care about order
-		this._deleteFields.sort();
+		var sortClosure = function(a, b) { return a-b; };
+		this._deleteFields.sort(sortClosure);
 		for(var i=(this._deleteFields.length-1); i>=0; i--) {
 			this._fields[this._deleteFields[i]].delete();
 		}
-		this._removeCodeFields.sort();
+		this._removeCodeFields.sort(sortClosure);
 		for(var i=(this._removeCodeFields.length-1); i>=0; i--) {
 			this._fields[this._removeCodeFields[i]].removeCode();
 		}
