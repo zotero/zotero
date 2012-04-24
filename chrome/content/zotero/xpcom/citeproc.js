@@ -2189,7 +2189,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.324";
+    this.processor_version = "1.0.325";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -4998,7 +4998,7 @@ CSL.Node.group = {
                 if (!label_form && this.strings.label_form_override) {
                     label_form = this.strings.label_form_override;
                 }
-                state.tmp.group_context.push([false, false, false, false, state.output.current.value(), label_form], CSL.LITERAL);
+                state.tmp.group_context.push([false, false, false, false, state.output.current.value(), label_form, this.strings.set_parallel_condition], CSL.LITERAL);
                 if (this.strings.oops) {
                     state.tmp.group_context.value()[3] = this.strings.oops;
                 }
@@ -5045,6 +5045,16 @@ CSL.Node.group = {
                 }
                 if (flag[2] || (flag[0] && !flag[1])) {
                     state.tmp.group_context.value()[2] = true;
+                    var blobs = state.output.current.value().blobs;
+                    var pos = state.output.current.value().blobs.length - 1;
+                    if (!state.tmp.just_looking && "undefined" !== typeof flag[6]) {
+                        var parallel_condition_object = {
+                            blobs: blobs,
+                            pos: pos,
+                            condition: flag[6]
+                        }
+                        state.parallel.parallel_conditional_blobs_list.push(parallel_condition_object);
+                    }
                 } else {
                     if (state.output.current.value().blobs) {
                         state.output.current.value().blobs.pop();
@@ -5350,7 +5360,7 @@ CSL.Node.label = {
             }
             var func = function (state, Item, item) {
                 var termtxt = CSL.evaluateLabel(this, state, Item, item);
-                if (this.strings.term === "locator") {
+                if (item && this.strings.term === "locator") {
                     item.section_form_override = this.strings.form;
                 }
                 state.output.append(termtxt, this);
@@ -7663,7 +7673,9 @@ CSL.Node.number = {
                     && varname === "collection-number") {
                     rangeType = "year";
                 }
-                if (state.opt[rangeType + "-range-format"] 
+                if (((varname === "number" 
+                    && ["bill","gazette","legislation"].indexOf(Item.type) > -1)
+                     || state.opt[rangeType + "-range-format"]) 
                     && !this.strings.prefix && !this.strings.suffix
                     && !this.strings.form) {
                     for (var i = 0, ilen = values.length; i < ilen; i += 1) {
@@ -7671,29 +7683,26 @@ CSL.Node.number = {
                     }
                 }
                 if (newstr && !newstr.match(/^[-.\u20130-9]+$/)) {
+                    if (varname === "number" 
+                        && ["bill","gazette","legislation"].indexOf(Item.type) > -1) {
+                        var firstword = newstr.split(/\s/)[0];
+                        if (firstword) {
+                            var newlst = [];
+                            var m = newstr.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
+                            if (m) {
+                                var lst = newstr.split(CSL.STATUTE_SUBDIV_PLAIN_REGEX);
+                                for (var i = 1, ilen = lst.length; i < ilen; i += 1) {
+                                    newlst.push(state.getTerm(CSL.STATUTE_SUBDIV_STRINGS[m[i - 1].replace(/^\s+/, "")], this.strings.label_form_override));
+                                    newlst.push(lst[i].replace(/^\s+/, ""));
+                                }
+                                newstr = newlst.join(" ");
+                            }
+                        }
+                    }
                     state.output.append(newstr, this);
                 } else {
                     if (values.length) {
                         state.output.openLevel("empty");
-                        if (varname === "number" 
-                            && ["bill","gazette","legislation"].indexOf(Item.type) > -1) {
-                            values = values.slice();
-                            values[0] = values[0].slice();
-                            var firstword = values[0][1].split(/\s/)[0];
-                            if (firstword) {
-                                var newlst = [];
-                                var str = values[0][1];
-                                var m = str.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
-                                if (m) {
-                                    var lst = str.split(CSL.STATUTE_SUBDIV_PLAIN_REGEX);
-                                    for (var i = 1, ilen = lst.length; i < ilen; i += 1) {
-                                        newlst.push(state.getTerm(CSL.STATUTE_SUBDIV_STRINGS[m[i - 1].replace(/^\s+/, "")], this.strings.label_form_override));
-                                        newlst.push(lst[i].replace(/^\s+/, ""));
-                                    }
-                                    values[0][1] = newlst.join(" ");
-                                }
-                            }
-                        }
                         for (var i = 0, ilen = values.length; i < ilen; i += 1) {
                             var blob = new CSL[values[i][0]](values[i][1], values[i][2], Item.id);
                             if (i > 0) {
@@ -8034,6 +8043,13 @@ CSL.Node.text = {
 CSL.Attributes = {};
 CSL.Attributes["@cslid"] = function (state, arg) {
     this.cslid = parseInt(arg, 10);
+}
+CSL.Attributes["@is-parallel"] = function (state, arg) {
+    if ("true" === arg) {
+        this.strings.set_parallel_condition = true;
+    } else {
+        this.strings.set_parallel_condition = false;
+    }
 }
 CSL.Attributes["@is-plural"] = function (state, arg) {
     var func = function (state, Item, item) {
@@ -9377,6 +9393,7 @@ CSL.Parallel.prototype.isMid = function (variable) {
     return (this.midVars.indexOf(variable) > -1);
 };
 CSL.Parallel.prototype.StartCitation = function (sortedItems, out) {
+    this.parallel_conditional_blobs_list = [];
     if (this.use_parallels) {
         this.sortedItems = sortedItems;
         this.sortedItemsPos = -1;
@@ -9631,12 +9648,16 @@ CSL.Parallel.prototype.CloseCite = function () {
 CSL.Parallel.prototype.ComposeSet = function (next_output_in_progress) {
     var cite, pos, master, len;
     if (this.use_parallels) {
-        if (this.sets.value().length === 1) {
+        if (this.sets.value().length === 0) {
+            this.purgeGroupsIfParallel(false);
+        } else if (this.sets.value().length === 1) {
             if (!this.in_series) {
                 this.sets.value().pop();
                 this.delim_counter += 1;
             }
+            this.purgeGroupsIfParallel(false);
         } else {
+            this.purgeGroupsIfParallel(true);
             len = this.sets.value().length;
             for (pos = 0; pos < len; pos += 1) {
                 cite = this.sets.value()[pos];
@@ -9729,6 +9750,25 @@ CSL.Parallel.prototype.purgeVariableBlobs = function (cite, varnames) {
         }
     }
 };
+CSL.Parallel.prototype.purgeGroupsIfParallel = function (opposite_condition) {
+    var condition = !opposite_condition;
+    for (var i = this.parallel_conditional_blobs_list.length - 1; i > -1; i += -1) {
+        var obj = this.parallel_conditional_blobs_list[i];
+        if (obj.condition === condition) {
+            var buffer = [];
+            while (obj.blobs.length > obj.pos) {
+                buffer.push(obj.blobs.pop());
+            }
+            if (buffer.length) {
+                buffer.pop();
+            }
+            while (buffer.length) {
+                obj.blobs.push(buffer.pop());
+            }
+        }
+        this.parallel_conditional_blobs_list.pop();
+    }
+}
 CSL.Token = function (name, tokentype) {
     this.name = name;
     this.strings = {};
@@ -11647,7 +11687,9 @@ CSL.Registry.prototype.doinserts = function (mylist) {
                 }
             }
             akey = CSL.getAmbiguousCite.call(this.state, Item);
-            this.akeys[akey] = true;
+            if (!Item.legislation_id) {
+                this.akeys[akey] = true;
+            }
             newitem = {
                 "id": "" + item,
                 "seq": 0,
@@ -11713,7 +11755,9 @@ CSL.Registry.prototype.dorefreshes = function () {
             this.registry[key] = regtoken;
             abase = CSL.getAmbigConfig.call(this.state);
             this.registerAmbigToken(akey, key, abase);
-            this.akeys[akey] = true;
+            if (!Item.legislation_id) {
+                this.akeys[akey] = true;
+            }
             this.touched[key] = true;
         }
     }
@@ -11722,9 +11766,7 @@ CSL.Registry.prototype.setdisambigs = function () {
     var akey, leftovers, key, pos, len, id;
     this.leftovers = [];
     for (akey in this.akeys) {
-        if (this.akeys.hasOwnProperty(akey)) {
-            this.state.disambiguate.run(akey);
-        }
+        this.state.disambiguate.run(akey);
     }
     this.akeys = {};
 };
