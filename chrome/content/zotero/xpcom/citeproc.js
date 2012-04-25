@@ -2189,7 +2189,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.325";
+    this.processor_version = "1.0.326";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -3681,6 +3681,11 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
             var last_ref = {};
             for (j = 0, jlen = citations.length; j < jlen; j += 1) {
                 var onecitation = citations[j];
+                if (j > 0 && citations[j - 1].properties.noteIndex > citations[j].properties.noteIndex) {
+                    citationsInNote = {};
+                    first_ref = {};
+                    last_ref = {};
+                }
                 for (var k = 0, klen = onecitation.sortedItems.length; k < klen; k += 1) {
                     if (!this.registry.registry[onecitation.sortedItems[k][1].id].parallel) {
                         if (!citationsInNote[onecitation.properties.noteIndex]) {
