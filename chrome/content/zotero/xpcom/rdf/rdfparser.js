@@ -61,7 +61,9 @@
  * @constructor
  * @param {RDFStore} store An RDFStore object
  */
-function RDFParser(store) {
+$rdf.RDFParser = function (store) {
+    var RDFParser = {};
+
     /** Standard namespaces that we know how to handle @final
      *  @member RDFParser
      */
@@ -111,7 +113,7 @@ function RDFParser(store) {
 	
 	/** Add a symbol of a certain type to the this frame */
 		'addSymbol': function (type, uri) {
-		    uri = Util.uri.join(uri, this['base'])
+		    uri = $rdf.Util.uri.join(uri, this['base'])
 		    this['node'] = this['store']['sym'](uri)
 		    this['nodeType'] = type
 		},
@@ -129,7 +131,7 @@ function RDFParser(store) {
 		    }
 		    if (this['parent']['rdfid'] != null) { // reify
 			var triple = this['store']['sym'](
-			    Util.uri.join("#"+this['parent']['rdfid'],
+			    $rdf.Util.uri.join("#"+this['parent']['rdfid'],
 					  this['base']))
 			this['store']['add'](triple,
 					     this['store']['sym'](
@@ -236,6 +238,29 @@ function RDFParser(store) {
 	       }
     }
 
+    //from the OpenLayers source .. needed to get around IE problems.
+    this['getAttributeNodeNS'] = function(node, uri, name) {
+        var attributeNode = null;
+        if(node.getAttributeNodeNS) {
+            attributeNode = node.getAttributeNodeNS(uri, name);
+        } else {
+            var attributes = node.attributes;
+            var potentialNode, fullName;
+            for(var i=0; i<attributes.length; ++i) {
+                potentialNode = attributes[i];
+                if(potentialNode.namespaceURI == uri) {
+                    fullName = (potentialNode.prefix) ?
+                               (potentialNode.prefix + ":" + name) : name;
+                    if(fullName == potentialNode.nodeName) {
+                        attributeNode = potentialNode;
+                        break;
+                    }
+                }
+            }
+        }
+        return attributeNode;
+    }
+
     /** Our triple store reference @private */
     this['store'] = store
     /** Our identified blank nodes @private */
@@ -259,8 +284,7 @@ function RDFParser(store) {
 	this['cleanParser']()
 
 	// figure out the root element
-	var root = document.documentElement; //this is faster, I think, cross-browser issue? well, DOM 2
-	/*
+	//var root = document.documentElement; //this is faster, I think, cross-browser issue? well, DOM 2
 	if (document['nodeType'] == RDFParser['nodeType']['DOCUMENT']) {
 	    for (var c=0; c<children['length']; c++) {
 		if (children[c]['nodeType']
@@ -278,7 +302,6 @@ function RDFParser(store) {
 			    + ". Halting. ")
 	    return false
 	}
-	*/
 	
 	this['why'] = why
         
@@ -296,11 +319,23 @@ function RDFParser(store) {
     this['parseDOM'] = function (frame) {
 	// a DOM utility function used in parsing
 	var elementURI = function (el) {
+        var result = "";
             if (el['namespaceURI'] == null) {
                 throw new Error("RDF/XML syntax error: No namespace for "
                             +el['localName']+" in "+this.base)
             }
-	    return el['namespaceURI'] + el['localName']
+        if( el['namespaceURI'] ) {
+            result = result + el['namespaceURI'];
+        }
+        if( el['localName'] ) {
+            result = result + el['localName'];
+        } else if( el['nodeName'] ) {
+            if(el['nodeName'].indexOf(":")>=0)
+                result = result + el['nodeName'].split(":")[1];
+            else
+                result = result + el['nodeName'];
+        }
+	    return result;
 	}
 	var dig = true // if we'll dig down in the tree on the next iter
 
@@ -325,9 +360,9 @@ function RDFParser(store) {
                 if (!frame['parent'] || !frame['parent']['nodeType']
 		    || frame['parent']['nodeType'] == frame['ARC']) {
 		    // we need a node
-		    var about =dom['getAttributeNodeNS'](
+            var about =this['getAttributeNodeNS'](dom,
 			RDFParser['ns']['RDF'],"about")
-		    var rdfid =dom['getAttributeNodeNS'](
+		    var rdfid =this['getAttributeNodeNS'](dom,
 			RDFParser['ns']['RDF'],"ID")
 		    if (about && rdfid) {
 			throw new Error("RDFParser: " + dom['nodeName']
@@ -341,7 +376,7 @@ function RDFParser(store) {
 			dom['removeAttributeNode'](rdfid)
 		    }
 		    else if (about == null && rdfid == null) {
-			var bnid = dom['getAttributeNodeNS'](
+                var bnid = this['getAttributeNodeNS'](dom,
 			    RDFParser['ns']['RDF'],"nodeID")
 			if (bnid) {
 			    frame['addBNode'](bnid['nodeValue'])
@@ -354,7 +389,7 @@ function RDFParser(store) {
 		    }
 		
 		    // Typed nodes
-		    var rdftype = dom['getAttributeNodeNS'](
+		    var rdftype = this['getAttributeNodeNS'](dom,
 			RDFParser['ns']['RDF'],"type")
 		    if (RDFParser['ns']['RDF']+"Description"
 			!= elementURI(dom)) {
@@ -365,7 +400,7 @@ function RDFParser(store) {
 					     this['store']['sym'](
 						 RDFParser['ns']['RDF']+"type"),
 					     this['store']['sym'](
-						 Util.uri.join(
+						 $rdf.Util.uri.join(
 						     rdftype['nodeValue'],
 						     frame['base'])),
 					     this['why'])
@@ -390,7 +425,7 @@ function RDFParser(store) {
 
 		    // save the arc's rdf:ID if it has one
 		    if (this['reify']) {
-			var rdfid = dom['getAttributeNodeNS'](
+            var rdfid = this['getAttributeNodeNS'](dom,
 			    RDFParser['ns']['RDF'],"ID")
 			if (rdfid) {
 			    frame['rdfid'] = rdfid['nodeValue']
@@ -398,9 +433,9 @@ function RDFParser(store) {
 			}
 		    }
 
-		    var parsetype = dom['getAttributeNodeNS'](
+		    var parsetype = this['getAttributeNodeNS'](dom,
 			RDFParser['ns']['RDF'],"parseType")
-		    var datatype = dom['getAttributeNodeNS'](
+		    var datatype = this['getAttributeNodeNS'](dom,
 			RDFParser['ns']['RDF'],"datatype")
 		    if (datatype) {
 			frame['datatype'] = datatype['nodeValue']
@@ -432,9 +467,9 @@ function RDFParser(store) {
 		    }
 
 		    if (attrs['length'] != 0) {
-			var resource = dom['getAttributeNodeNS'](
+            var resource = this['getAttributeNodeNS'](dom,
 			    RDFParser['ns']['RDF'],"resource")
-			var bnid = dom['getAttributeNodeNS'](
+			var bnid = this['getAttributeNodeNS'](dom,
 			    RDFParser['ns']['RDF'],"nodeID")
 
 			frame = this['buildFrame'](frame)
@@ -549,7 +584,7 @@ function RDFParser(store) {
                 if (attrs[x].name.slice(0,6)=='xmlns:') {
                     var uri = attrs[x].nodeValue;
                     // alert('base for namespac attr:'+this.base);
-                    if (this.base) uri = Util.uri.join(uri, this.base);
+                    if (this.base) uri = $rdf.Util.uri.join(uri, this.base);
                     this.store.setPrefixForURI(attrs[x].name.slice(6),
                                                 uri);
                 }

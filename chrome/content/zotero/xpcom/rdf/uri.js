@@ -12,11 +12,10 @@
 //  See also http://www.w3.org/2000/10/swap/uripath.py
 //
 
-if (typeof Util == "undefined") { Util = {}}
-if (typeof Util.uri == "undefined") { Util.uri = {}}
+if (typeof $rdf.Util.uri == "undefined") { $rdf.Util.uri = {}; };
 
-Util.uri.join = function (given, base) {
-    // if (typeof tabulator.log.debug != 'undefined') tabulator.log.debug("   URI given="+given+" base="+base)
+$rdf.Util.uri.join = function (given, base) {
+    // if (typeof $rdf.log.debug != 'undefined') $rdf.log.debug("   URI given="+given+" base="+base)
     var baseHash = base.indexOf('#')
     if (baseHash > 0) base = base.slice(0, baseHash)
     if (given.length==0) return base // before chopping its filename off
@@ -69,30 +68,33 @@ Util.uri.join = function (given, base) {
     return base.slice(0, baseSingle) + path
 }
 
-var tIOService;
-if (typeof( isExtension ) != "undefined" && isExtension) {
-    tIOService = Components.classes['@mozilla.org/network/io-service;1']
+if (typeof tabulator != 'undefined' && tabulator.isExtension) {
+    $rdf.Util.uri.join2 = function (given, base){
+        var tIOService = Components.classes['@mozilla.org/network/io-service;1']
                         .getService(Components.interfaces.nsIIOService);
-    Util.uri.join2 = function (given, base){
-       var baseURI = tIOService.newURI(base, null, null);
-       return tIOService.newURI(baseURI.resolve(given), null, null).spec;
+
+        var baseURI = tIOService.newURI(base, null, null);
+        return tIOService.newURI(baseURI.resolve(given), null, null).spec;
     }
 } else
-    Util.uri.join2 = Util.uri.join;
+    $rdf.Util.uri.join2 = $rdf.Util.uri.join;
     
 //  refTo:    Make a URI relative to a given base
 //
 // based on code in http://www.w3.org/2000/10/swap/uripath.py
 //
-Util.uri.commonHost = new RegExp("^[-_a-zA-Z0-9.]+:(//[^/]*)?/[^/]*$");
-Util.uri.refTo = function(base, uri) {
+$rdf.Util.uri.commonHost = new RegExp("^[-_a-zA-Z0-9.]+:(//[^/]*)?/[^/]*$");
+
+$rdf.Util.uri.hostpart = function(u) { var m = /[^\/]*\/\/([^\/]*)\//.exec(u); return m? m[1]: '' };
+
+$rdf.Util.uri.refTo = function(base, uri) {
     if (!base) return uri;
     if (base == uri) return "";
     var i =0; // How much are they identical?
     while (i<uri.length && i < base.length)
         if (uri[i] == base[i]) i++;
         else break;
-    if (base.slice(0,i).match(Util.uri.commonHost)) {
+    if (base.slice(0,i).match($rdf.Util.uri.commonHost)) {
         var k = uri.indexOf('//');
         if (k<0) k=-2; // no host
         var l = uri.indexOf('/', k+2);   // First *single* slash
@@ -119,25 +121,25 @@ Util.uri.refTo = function(base, uri) {
 
 
 /** returns URI without the frag **/
-Util.uri.docpart = function (uri) {
+$rdf.Util.uri.docpart = function (uri) {
     var i = uri.indexOf("#")
     if (i < 0) return uri
     return uri.slice(0,i)
 } 
 
+/** The document in which something a thing defined  **/
+$rdf.Util.uri.document = function (x) {
+    return $rdf.sym($rdf.Util.uri.docpart(x.uri));
+} 
+
 /** return the protocol of a uri **/
 /** return null if there isn't one **/
-Util.uri.protocol = function (uri) {
+$rdf.Util.uri.protocol = function (uri) {
     var index = uri.indexOf(':');
     if (index >= 0)
         return uri.slice(0, index);
     else
         return null;
 } //protocol
-
-URIjoin = Util.uri.join
-uri_docpart = Util.uri.docpart
-uri_protocol = Util.uri.protocol
-
 
 //ends
