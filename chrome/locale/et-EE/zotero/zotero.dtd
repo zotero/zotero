@@ -63,11 +63,11 @@
 <!ENTITY zotero.items.menu.attach "Manuse lisamine">
 <!ENTITY zotero.items.menu.attach.snapshot "Lisada käesoleva lehekülje momentülesvõte">
 <!ENTITY zotero.items.menu.attach.link "Lisada link käesolevale leheküljele">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
+<!ENTITY zotero.items.menu.attach.link.uri "Seonda link URI-ga…">
 <!ENTITY zotero.items.menu.attach.file "Lisada fail kirje manusena">
 <!ENTITY zotero.items.menu.attach.fileLink "Lisada link failile">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.restoreToLibrary "Taasta raamatukokku">
 <!ENTITY zotero.items.menu.duplicateItem "Valitud kirje duplitseerimine">
 
 <!ENTITY zotero.toolbar.newItem.label "Uus kirje">
@@ -99,11 +99,11 @@
 <!ENTITY zotero.item.attachment.file.show "Faili näitamine">
 <!ENTITY zotero.item.textTransform "Teksti muutmine">
 <!ENTITY zotero.item.textTransform.titlecase "Suurteks Algustähtedeks">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.sentencecase "Lause tõst">
 
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newNote "Uus märkus">
 <!ENTITY zotero.toolbar.note.standalone "Uus sõltumatu märkus">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
+<!ENTITY zotero.toolbar.note.child "Lisada alammärkus">
 <!ENTITY zotero.toolbar.lookup "Identifitseerija abil otsida...">
 <!ENTITY zotero.toolbar.attachment.linked "Link failile...">
 <!ENTITY zotero.toolbar.attachment.add "Faili koopia salvestamine...">
@@ -146,7 +146,7 @@
 <!ENTITY zotero.exportOptions.translatorOptions.label "Tõlkija seaded">
 
 <!ENTITY zotero.charset.label "Märgikodeering">
-<!ENTITY zotero.moreEncodings.label "More Encodings">
+<!ENTITY zotero.moreEncodings.label "Rohkem kodeeringud">
 
 <!ENTITY zotero.citation.keepSorted.label "Hoida allikad sorteeritud">
 
@@ -177,11 +177,11 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Järjehoidjaid">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Järjehoidjad toimivad nii MS Wordi kui ka OpenOffice puhul, kuid võib juhtuda, et neid kogemata muudetakse. Ühilduvuse huvides ei ole võimalik lisada viiteid allmärkustele ja lõppmärkustele, kui see võimalus on aktiveeritud.">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Säilita viited dokumendiga koos">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Viidete salvestamine dokumendi sisse suurendab veidi failisuurust, kuid võimaldab teil seda dokumenti teiste Zotero kasutajatega jagada ilma Zotero gruppi kasutamata. Et sellist dokumenti redigeerida on vajalik Zotero 3.0 või hilisem verisoon.">
 
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.showEditor.label "Redaktori näitamine">
+<!ENTITY zotero.integration.classicView.label "Tavaline vaade">
 
 <!ENTITY zotero.integration.references.label "Referentsid bibliograafias">
 
@@ -238,6 +238,6 @@
 <!ENTITY zotero.file.choose.label "Faili valimine...">
 <!ENTITY zotero.file.noneSelected.label "Faili ei ole valitud">
 
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.label "Zoterosse salvestamine">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Valitud raamatukokku ei ole võimalik manuseid salvestada. See kirje salvestatakse teie isiklikku raamatukokku.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "Selle funktsiooni kasutamiseks on kõigepealt tarvis paigaldada PDF tööriistad Zotero seadetes.">

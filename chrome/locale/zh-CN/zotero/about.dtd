@@ -1,6 +1,6 @@
 <!ENTITY zotero.version "版本">
 <!ENTITY zotero.createdby "创建者:">
-<!ENTITY zotero.director "Director:">
+<!ENTITY zotero.director "主管">
 <!ENTITY zotero.directors "指导者:">
 <!ENTITY zotero.developers "开发者:">
 <!ENTITY zotero.alumni "校友:">
@@ -9,4 +9,4 @@
 <!ENTITY zotero.executiveProducer "执行制作人:">
 <!ENTITY zotero.thanks "特别感谢:">
 <!ENTITY zotero.about.close "关闭">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "其它人员和致谢">

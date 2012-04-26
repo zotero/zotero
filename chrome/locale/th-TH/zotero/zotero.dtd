@@ -1,243 +1,243 @@
-<!ENTITY zotero.general.optional "(Optional)">
-<!ENTITY zotero.general.note "โน๊ต:">
-<!ENTITY zotero.general.selectAll "Select All">
-<!ENTITY zotero.general.deselectAll "Deselect All">
-<!ENTITY zotero.general.edit "Edit">
-<!ENTITY zotero.general.delete "Delete">
+<!ENTITY zotero.general.optional "(ทางเลือก)">
+<!ENTITY zotero.general.note "หมายเหตุ:">
+<!ENTITY zotero.general.selectAll "เลือกทั้งหมด">
+<!ENTITY zotero.general.deselectAll "ไม่เลือกทั้งหมด">
+<!ENTITY zotero.general.edit "แก้ไข">
+<!ENTITY zotero.general.delete "ลบ">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
+<!ENTITY zotero.errorReport.unrelatedMessages "บันทึกความผิดพลาดอาจรวมข้อความที่ไม่เกี่ยวกับ Zotero ไว้ด้วย">
 <!ENTITY zotero.errorReport.submissionInProgress "โปรดรอในระหว่างที่รายงานข้อผิดพลาดกำลังส่งอยู่">
 <!ENTITY zotero.errorReport.submitted "รายงานข้อผิดพลาดได้รับการส่งเรียบร้อยแล้ว">
 <!ENTITY zotero.errorReport.reportID "รหัสรายงาน:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.postToForums "กรุณาลงประกาศข้อความในฟอรั่มของ Zotero (forums.zotero.org) โดยใช้รหัสรายงาน รายละเอียดของปัญหาและขั้นตอนที่ำทำให้เกิดปัญหานั้นอีก">
 <!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
-<!ENTITY zotero.upgrade.newVersionInstalled "ท่านได้ติดตั้งโซแทโรรุ่นใหม่แล้ว">
-<!ENTITY zotero.upgrade.upgradeRequired "ฐานข้อมูลโซแทโรของท่าน จำเป็นต้องอัพเกรดก่อนเพื่อให้ทำงานได้กับรุ่นใหม่">
+<!ENTITY zotero.upgrade.newVersionInstalled "ท่านได้ติดตั้ง Zotero รุ่นใหม่แล้ว">
+<!ENTITY zotero.upgrade.upgradeRequired "ฐานข้อมูล Zotero ของท่าน จำเป็นต้องปรับเป็นรุ่นปัจจุบันก่อนเพื่อให้ทำงานได้กับรุ่นใหม่">
 <!ENTITY zotero.upgrade.autoBackup "ฐานข้อมูลปัจจุบันของท่านจะได้รับการทำสำรองไว้โดยอัตโนมัติ ก่อนที่จะมีการเปลี่ยนแปลงใด ๆ เกิดขึ้น">
-<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
-<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
+<!ENTITY zotero.upgrade.majorUpgrade "นี่คือการปรับให้ทันสมัยครั้งสำคัญ">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "ต้องมั่นใจว่าคุณได้ทบทวน">
+<!ENTITY zotero.upgrade.majorUpgradeLink "คำแนะนำการปรับให้ทันสมัย">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "ก่อนที่จะทำต่อ">
 <!ENTITY zotero.upgrade.upgradeInProgress "โปรดรอจนกว่าจะบวนการอัพเกรดจะเสร็จสิ้น ซึ่งอาจใช้เวลาหลายนาที">
-<!ENTITY zotero.upgrade.upgradeSucceeded "ฐานข้อมูลโซแทโรของท่านได้รับการอัพเกรดแล้ว">
+<!ENTITY zotero.upgrade.upgradeSucceeded "ฐานข้อมูล Zotero ของท่านได้รับการปรับให้เป็นรุ่นปัจจุบันแล้ว">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "โปรดดู">
 <!ENTITY zotero.upgrade.changeLogLink "ข้อมูลการเปลี่ยนแปลง">
 <!ENTITY zotero.upgrade.changeLogAfterLink "ดูว่ามีอะไรใหม่">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Add Selection to Zotero Note">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Create Zotero Item and Note from Selection">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Save Link As Zotero Item">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Save Image As Zotero Item">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "เพิ่มสิ่งที่เลือกไว้เข้าในหมายเหตุของ Zotero">
+<!ENTITY zotero.contextMenu.addTextToNewNote "สร้างรายการและหมายเหตุใหม่จากสิ่งที่เลือก">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "บันทึกลิงค์เป็นรายการของ Zotero">
+<!ENTITY zotero.contextMenu.saveImageAsItem "บันทึกรูปภาพเป็นรายการของ Zotero">
 
-<!ENTITY zotero.tabs.info.label "ข้อมูล">
-<!ENTITY zotero.tabs.notes.label "โน้ต">
+<!ENTITY zotero.tabs.info.label "ข้อมูลข่าวสาร">
+<!ENTITY zotero.tabs.notes.label "หมายเหตุ">
 <!ENTITY zotero.tabs.attachments.label "ไฟล์แนบ">
 <!ENTITY zotero.tabs.tags.label "ป้าย">
-<!ENTITY zotero.tabs.related.label "Related">
-<!ENTITY zotero.notes.separate "Edit in a separate window">
+<!ENTITY zotero.tabs.related.label "เกี่ยวโยงกับ">
+<!ENTITY zotero.notes.separate "แก้ไขในหน้าต่างแยกต่างหาก">
 
-<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
-<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.toolbar.duplicate.label "แสดงรายการซ้ำ">
+<!ENTITY zotero.collections.showUnfiledItems "แสดงรายการที่ไม่ได้จัดกลุ่ม">
 
-<!ENTITY zotero.items.itemType "Item Type">
+<!ENTITY zotero.items.itemType "ประเภทรายการ">
 <!ENTITY zotero.items.type_column "รูปแบบ">
 <!ENTITY zotero.items.title_column "ชื่อเรื่อง">
 <!ENTITY zotero.items.creator_column "ผู้สร้าง">
 <!ENTITY zotero.items.date_column "วันที่">
 <!ENTITY zotero.items.year_column "ปี">
 <!ENTITY zotero.items.publisher_column "ผู้เผยแพร่">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Journal Abbr">
+<!ENTITY zotero.items.publication_column "ชื่อวารสาร">
+<!ENTITY zotero.items.journalAbbr_column "ชื่อวารสารแบบย่อ">
 <!ENTITY zotero.items.language_column "ภาษา">
-<!ENTITY zotero.items.accessDate_column "Accessed">
-<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.accessDate_column "เข้าถึงเมื่อ">
+<!ENTITY zotero.items.libraryCatalog_column "บัตรรายการ">
 <!ENTITY zotero.items.callNumber_column "เลขหมู่">
-<!ENTITY zotero.items.rights_column "Rights">
+<!ENTITY zotero.items.rights_column "ลิขสิทธิ์">
 <!ENTITY zotero.items.dateAdded_column "วันที่เพิ่ม">
 <!ENTITY zotero.items.dateModified_column "วันที่แก้ไข">
 <!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "แสดงในไลบรารี่">
-<!ENTITY zotero.items.menu.attach.note "Add Note">
-<!ENTITY zotero.items.menu.attach "Add Attachment">
-<!ENTITY zotero.items.menu.attach.snapshot "Attach Snapshot of Current Page">
-<!ENTITY zotero.items.menu.attach.link "Attach Link to Current Page">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
-<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
-<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+<!ENTITY zotero.items.menu.attach.note "เพิ่มหมายเหตุ">
+<!ENTITY zotero.items.menu.attach "เพิ่มแฟ้มแนบ">
+<!ENTITY zotero.items.menu.attach.snapshot "แนบภาพหน้าจอของหน้าเว็บปัจจุบัน">
+<!ENTITY zotero.items.menu.attach.link "แนบลิงค์ไปยังหน้าเว็บปัจจุบัน">
+<!ENTITY zotero.items.menu.attach.link.uri "แนบลิงค์ไปยัง URI…">
+<!ENTITY zotero.items.menu.attach.file "สำเนาแฟ้มข้อมูลที่จัดเก็บไว้...">
+<!ENTITY zotero.items.menu.attach.fileLink "แนบลิงค์ไปยังแฟ้มข้อมูล...">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
-<!ENTITY zotero.items.menu.duplicateItem "Duplicate Selected Item">
+<!ENTITY zotero.items.menu.restoreToLibrary "เรียกคืนกลับไลบรารี่">
+<!ENTITY zotero.items.menu.duplicateItem "ทำซ้ำรายการที่เลือก">
 
-<!ENTITY zotero.toolbar.newItem.label "ไอเทมใหม่">
-<!ENTITY zotero.toolbar.moreItemTypes.label "มากกว่านั้น">
-<!ENTITY zotero.toolbar.newItemFromPage.label "สร้างไอเทมใหม่จากหน้าปัจจุบัน">
-<!ENTITY zotero.toolbar.lookup.label "Add Item by Identifier">
-<!ENTITY zotero.toolbar.removeItem.label "ลบไอเทม...">
-<!ENTITY zotero.toolbar.newCollection.label "คอลเลคชันใหม่...">
-<!ENTITY zotero.toolbar.newGroup "New Group...">
-<!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
+<!ENTITY zotero.toolbar.newItem.label "รายการใหม่">
+<!ENTITY zotero.toolbar.moreItemTypes.label "มากกว่า">
+<!ENTITY zotero.toolbar.newItemFromPage.label "สร้างรายการใหม่จากหน้าปัจจุบัน">
+<!ENTITY zotero.toolbar.lookup.label "เพิ่มรายการโดยตัวระบุ">
+<!ENTITY zotero.toolbar.removeItem.label "ลบรายการ...">
+<!ENTITY zotero.toolbar.newCollection.label "คอลเล็กชั่นใหม่...">
+<!ENTITY zotero.toolbar.newGroup "กลุ่มใหม่...">
+<!ENTITY zotero.toolbar.newSubcollection.label "คอลเล็กชั่นย่อยใหม่...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "บันทึกผลการค้นหาใหม่...">
-<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
-<!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
-<!ENTITY zotero.toolbar.actions.label "Actions">
+<!ENTITY zotero.toolbar.emptyTrash.label "ล้างถังขยะ">
+<!ENTITY zotero.toolbar.tagSelector.label "แสดง/ซ่อนตัวเลือกแท็ก">
+<!ENTITY zotero.toolbar.actions.label "ปฏิบัติการ">
 <!ENTITY zotero.toolbar.import.label "นำเข้า...">
-<!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.toolbar.export.label "Export Library...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
-<!ENTITY zotero.toolbar.timeline.label "Create Timeline">
-<!ENTITY zotero.toolbar.preferences.label "Preferences...">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
-<!ENTITY zotero.toolbar.about.label "เกี่ยวกับโซแทโร">
-<!ENTITY zotero.toolbar.advancedSearch "Advanced Search">
-<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
-<!ENTITY zotero.toolbar.openURL.label "Locate">
-<!ENTITY zotero.toolbar.openURL.tooltip "Find through your local library">
+<!ENTITY zotero.toolbar.importFromClipboard "นำเข้าจากคลิปบอร์ด">
+<!ENTITY zotero.toolbar.export.label "ส่งออกไลบรารี่...">
+<!ENTITY zotero.toolbar.rtfScan.label "กราดตรวจ RTF...">
+<!ENTITY zotero.toolbar.timeline.label "สร้างไทม์ไลน์">
+<!ENTITY zotero.toolbar.preferences.label "ค่าตั้งพึงใจ...">
+<!ENTITY zotero.toolbar.supportAndDocumentation "การสนับสนุนและเอกสาร">
+<!ENTITY zotero.toolbar.about.label "เกี่ยวกับ Zotero">
+<!ENTITY zotero.toolbar.advancedSearch "ค้นหาแบบขั้นสูง">
+<!ENTITY zotero.toolbar.tab.tooltip "ปรับสู่แบบแท็บ">
+<!ENTITY zotero.toolbar.openURL.label "หาที่ตั้ง">
+<!ENTITY zotero.toolbar.openURL.tooltip "ค้นหาผ่านไลบรารี่ในเครื่องของคุณ">
 
 <!ENTITY zotero.item.add "เพิ่ม">
-<!ENTITY zotero.item.attachment.file.show "แสดงแฟ้ม">
-<!ENTITY zotero.item.textTransform "Transform Text">
-<!ENTITY zotero.item.textTransform.titlecase "Title Case">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.attachment.file.show "แสดงแฟ้มข้อมูล">
+<!ENTITY zotero.item.textTransform "แปลงแบบอักษร">
+<!ENTITY zotero.item.textTransform.titlecase "แบบชื่อเรื่อง">
+<!ENTITY zotero.item.textTransform.sentencecase "แบบประโยค">
 
-<!ENTITY zotero.toolbar.newNote "New Note">
-<!ENTITY zotero.toolbar.note.standalone "New Standalone Note">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
-<!ENTITY zotero.toolbar.attachment.linked "ลิ้งค์ไปยังแฟ้ม...">
-<!ENTITY zotero.toolbar.attachment.add "Store Copy of File...">
-<!ENTITY zotero.toolbar.attachment.weblink "Save Link to Current Page">
-<!ENTITY zotero.toolbar.attachment.snapshot "Take Snapshot of Current Page">
+<!ENTITY zotero.toolbar.newNote "หมายเหตุใหม่">
+<!ENTITY zotero.toolbar.note.standalone "หมายเหตุแบบสแตนด์อะโลนใหม่">
+<!ENTITY zotero.toolbar.note.child "เพิ่มหมายเหตุลูก">
+<!ENTITY zotero.toolbar.lookup "ค้นหาโดยตัวระบุ...">
+<!ENTITY zotero.toolbar.attachment.linked "ลิงค์ไปยังแฟ้มข้อมูล...">
+<!ENTITY zotero.toolbar.attachment.add "จัดเก็บสำเนาของแฟ้มข้อมูล...">
+<!ENTITY zotero.toolbar.attachment.weblink "บันทึกลิงค์ไปยังหน้าเว็บปัจจุบัน">
+<!ENTITY zotero.toolbar.attachment.snapshot "จับภาพหน้าเว็บปัจจุบัน">
 
-<!ENTITY zotero.tagSelector.noTagsToDisplay "No tags to display">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "ไม่มีแท็กให้แสดง">
 <!ENTITY zotero.tagSelector.filter "ตัวกรอง:">
-<!ENTITY zotero.tagSelector.showAutomatic "Show automatic">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
-<!ENTITY zotero.tagSelector.selectVisible "Select visible">
-<!ENTITY zotero.tagSelector.clearVisible "Deselect visible">
-<!ENTITY zotero.tagSelector.clearAll "Deselect all">
-<!ENTITY zotero.tagSelector.renameTag "Rename Tag...">
-<!ENTITY zotero.tagSelector.deleteTag "Delete Tag...">
+<!ENTITY zotero.tagSelector.showAutomatic "แสดงอัตโนมัติ">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "แสดงแท็กทั้งหมดในไลบรารี่นี้">
+<!ENTITY zotero.tagSelector.selectVisible "เลือกตามที่เห็น">
+<!ENTITY zotero.tagSelector.clearVisible "ไม่เลือกตามที่เห็น">
+<!ENTITY zotero.tagSelector.clearAll "ไม่เลือกทั้งหมด">
+<!ENTITY zotero.tagSelector.renameTag "เปลี่ยนชื่อแท็ก...">
+<!ENTITY zotero.tagSelector.deleteTag "ลบแท็ก...">
 
-<!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
+<!ENTITY zotero.lookup.description "ป้อน ISBN, DOI หรือ PMID ในกล่องด้านล่างนี้เพื่อค้นหา">
 
-<!ENTITY zotero.selectitems.title "Select Items">
-<!ENTITY zotero.selectitems.intro.label "Select which items you'd like to add to your library">
+<!ENTITY zotero.selectitems.title "เลือกรายการ">
+<!ENTITY zotero.selectitems.intro.label "เลือกรายการที่ต้องการเพิ่มเข้าไลบรารี่ของคุณ">
 <!ENTITY zotero.selectitems.cancel.label "ยกเลิก">
 <!ENTITY zotero.selectitems.select.label "ตกลง">
 
-<!ENTITY zotero.bibliography.title "Create Bibliography">
-<!ENTITY zotero.bibliography.style.label "Citation Style:">
-<!ENTITY zotero.bibliography.output.label "Output Format">
+<!ENTITY zotero.bibliography.title "สร้างบรรณานุกรม">
+<!ENTITY zotero.bibliography.style.label "รูปแบบการอ้างอิง:">
+<!ENTITY zotero.bibliography.output.label "รูปแบบการส่งออก">
 <!ENTITY zotero.bibliography.saveAsRTF.label "บันทึกเป็น RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "บันทึกเป็น HTML">
 <!ENTITY zotero.bibliography.copyToClipboard.label "ทำสำเนาไปคลิปบอร์ด">
 <!ENTITY zotero.bibliography.print.label "พิมพ์">
 
-<!ENTITY zotero.integration.docPrefs.title "Document Preferences">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "Edit Bibliography">
+<!ENTITY zotero.integration.docPrefs.title "ค่าตั้งพึงใจเกี่ยวกับแฟ้มเอกสาร">
+<!ENTITY zotero.integration.addEditCitation.title "เพิ่ม/แก้ไขการอ้างอิง">
+<!ENTITY zotero.integration.editBibliography.title "แก้ไขบรรณานุกรม">
 
 <!ENTITY zotero.progress.title "ความคืบหน้า">
 
-<!ENTITY zotero.exportOptions.title "Export...">
-<!ENTITY zotero.exportOptions.format.label "Format:">
-<!ENTITY zotero.exportOptions.translatorOptions.label "Translator Options">
+<!ENTITY zotero.exportOptions.title "ส่งออก...">
+<!ENTITY zotero.exportOptions.format.label "รูปแบบ:">
+<!ENTITY zotero.exportOptions.translatorOptions.label "ตัวเลือกของโปรแกรมแปลข้อมูลเมทา">
 
-<!ENTITY zotero.charset.label "Character Encoding">
-<!ENTITY zotero.moreEncodings.label "More Encodings">
+<!ENTITY zotero.charset.label "การเข้ารหัสอักษร">
+<!ENTITY zotero.moreEncodings.label "การเข้ารหัสอื่นๆ">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "คงการจัดเรียงแหล่งที่มา">
 
 <!ENTITY zotero.citation.page "หน้า">
 <!ENTITY zotero.citation.paragraph "ย่อหน้า">
 <!ENTITY zotero.citation.line "เส้น">
-<!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.suppressAuthor.label "ละผู้แต่ง">
+<!ENTITY zotero.citation.prefix.label "เติมหน้า:">
+<!ENTITY zotero.citation.suffix.label "เติมท้าย:">
 
 <!ENTITY zotero.richText.italic.label "ตัวเอียง">
-<!ENTITY zotero.richText.bold.label "ตัวหน้า">
+<!ENTITY zotero.richText.bold.label "ตัวหนา">
 <!ENTITY zotero.richText.underline.label "ขีดเส้นใต้">
 <!ENTITY zotero.richText.superscript.label "ตัวยก">
 <!ENTITY zotero.richText.subscript.label "ตัวห้อย">
 
-<!ENTITY zotero.annotate.toolbar.add.label "Add Annotation">
-<!ENTITY zotero.annotate.toolbar.collapse.label "Collapse All Annotations">
-<!ENTITY zotero.annotate.toolbar.expand.label "Expand All Annotations">
-<!ENTITY zotero.annotate.toolbar.highlight.label "Highlight Text">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "Unhighlight Text">
+<!ENTITY zotero.annotate.toolbar.add.label "เพิ่มความเห็นประกอบ">
+<!ENTITY zotero.annotate.toolbar.collapse.label "ยุบความเห็นประกอบทั้งหมด">
+<!ENTITY zotero.annotate.toolbar.expand.label "ขยายความเห็นประกอบทั้งหมด">
+<!ENTITY zotero.annotate.toolbar.highlight.label "เน้นข้อความให้เด่นชัด">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "เลิกเน้นข้อความให้เด่นชัด">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "Display Citations As:">
-<!ENTITY zotero.integration.prefs.footnotes.label "Footnotes">
-<!ENTITY zotero.integration.prefs.endnotes.label "Endnotes">
+<!ENTITY zotero.integration.prefs.displayAs.label "แสดงการอ้างอิงเป็น">
+<!ENTITY zotero.integration.prefs.footnotes.label "เชิงอรรถ">
+<!ENTITY zotero.integration.prefs.endnotes.label "อ้างอิงท้ายเรื่อง">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Format Using:">
-<!ENTITY zotero.integration.prefs.bookmarks.label "ที่คั่น">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified.">
+<!ENTITY zotero.integration.prefs.formatUsing.label "รูปแบบที่ใช้">
+<!ENTITY zotero.integration.prefs.bookmarks.label "คั่นหน้า">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "คั่นหน้าถูกคงไว้ผ่านไมโครซอฟท์เวิร์ดและโอเพ่นออฟฟิศ แต่อาจมีการเปลี่ยนแปลงได้โดยบังเอิญ สำหรับ &#xA;เหตุผลการเข้ากันได้ การอ้างอิงไม่สามารถแทรกในเชิงอรรถหรืออ้างอิงท้ายเรื่องเมื่อตัวเลือกนี้ถูกเลือก">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "จัดเก็บเอกสารอ้างอิงในแฟ้มเอกสาร">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "เก็บเอกสารอ้างอิงในแฟ้มเอกสารของคุณจะทำให้ขนาดแฟ้มใหญ่ขึ้นเล็กน้อย แต่ช่วยให้คุณใช้แฟ้มเอกสารของคุณร่วมกับผู้อื่นได้โดยไม่ต้องใช้กลุ่มของ Zotero ต้องใช้ Zotero รุ่น 3.0 ขึ้นไปเพื่อการปรับแฟ้มเอกสารที่สร้างด้วยตัวเลือกนี้">
 
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.showEditor.label "แสดงโปรแกรมจัดการข้อมูล">
+<!ENTITY zotero.integration.classicView.label "มุมมองแบบคลาสสิก">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "เอกสารอ้างอิงในบรรณานุกรม">
 
-<!ENTITY zotero.sync.button "Sync with Zotero Server">
-<!ENTITY zotero.sync.error "Sync Error">
-<!ENTITY zotero.sync.storage.progress "Progress:">
-<!ENTITY zotero.sync.storage.downloads "Downloads:">
-<!ENTITY zotero.sync.storage.uploads "Uploads:">
+<!ENTITY zotero.sync.button "ประสานกับเครื่องบริการ Zotero">
+<!ENTITY zotero.sync.error "การประสานมีความผิดพลาด">
+<!ENTITY zotero.sync.storage.progress "ความคืบหน้า">
+<!ENTITY zotero.sync.storage.downloads "ดาวน์โหลด">
+<!ENTITY zotero.sync.storage.uploads "อัพโหลด">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
-<!ENTITY zotero.sync.longTagFixer.split "Split">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
-<!ENTITY zotero.sync.longTagFixer.character "character">
-<!ENTITY zotero.sync.longTagFixer.characters "characters">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "แท็กต่อไปนี้ในไลบรารี่ของคุณยาวเกินไปที่จะประสานกับเครื่องบริการ Zotero">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "ประสานแท็กต้องมีความยาวน้อยกว่า 256 ตัวอักษร">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "คุณสามารถแยกแท็กไปยังหลายแท็ก แก้ไขแท็กให้สั้นด้วยตัวเองหรือลบแท็ก">
+<!ENTITY zotero.sync.longTagFixer.split "แยก">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "แยก ณ ">
+<!ENTITY zotero.sync.longTagFixer.character "ตัวอักษร">
+<!ENTITY zotero.sync.longTagFixer.characters "ตัวอักษร">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "แท็กที่ไม่ได้เลือกจะไม่ถูกบันทึก">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "แท็กจะถูกลบออกจากทุกรายการ">
 
-<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
-<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
-<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
+<!ENTITY zotero.proxy.recognized.title "จดจำพร็อกซี่">
+<!ENTITY zotero.proxy.recognized.warning "เพียงเพิ่มพร็อกซี่เชื่อมโยงจากเว็บไซต์ห้องสมุด โรงเรียนหรือองค์กรของคุณ">
+<!ENTITY zotero.proxy.recognized.warning.secondary "การเพิ่มพร็อกซี่อื่น ๆ อาจทำให้เว็บที่มุ่งร้ายสวมรอยเป็นเว็บที่เชื่อถือของคุณได้">
+<!ENTITY zotero.proxy.recognized.disable.label "ไม่เปลี่ยนทิศทางการร้องขอโดยอัตโนมัติผ่านพร็อกซี่ที่รู้จักก่อนหน้านี้">
+<!ENTITY zotero.proxy.recognized.ignore.label "ไม่สนใจ">
 
-<!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
-<!ENTITY zotero.recognizePDF.cancel.label "Cancel">
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
-<!ENTITY zotero.recognizePDF.itemName.label "Item Name">
-<!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
+<!ENTITY zotero.recognizePDF.recognizing.label "เรียกใช้ข้อมูลเมทา...">
+<!ENTITY zotero.recognizePDF.cancel.label "ยกเลิก">
+<!ENTITY zotero.recognizePDF.pdfName.label "ชื่อ PDF">
+<!ENTITY zotero.recognizePDF.itemName.label "ชื่อรายการ">
+<!ENTITY zotero.recognizePDF.captcha.label "พิมพ์ข้อความข้างล่างเพื่อเรียกข้อมูลเมทาต่อไป">
 
-<!ENTITY zotero.rtfScan.title "RTF Scan">
-<!ENTITY zotero.rtfScan.cancel.label "Cancel">
-<!ENTITY zotero.rtfScan.citation.label "Citation">
-<!ENTITY zotero.rtfScan.itemName.label "Item Name">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
-<!ENTITY zotero.rtfScan.introPage.label "Introduction">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
-<!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
-<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
-<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
-<!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
-<!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
-<!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
-<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
-<!ENTITY zotero.rtfScan.inputFile.label "Input File">
-<!ENTITY zotero.rtfScan.outputFile.label "Output File">
+<!ENTITY zotero.rtfScan.title "กราดตรวจ RTF">
+<!ENTITY zotero.rtfScan.cancel.label "ยกเลิก">
+<!ENTITY zotero.rtfScan.citation.label "การอ้างอิง">
+<!ENTITY zotero.rtfScan.itemName.label "ชื่อรายการ">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "ยกเลิกทำผังการอ้างอิง">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "การอ้างอิงที่คลุมเครือ">
+<!ENTITY zotero.rtfScan.mappedCitations.label "ทำผังการอ้างอิง">
+<!ENTITY zotero.rtfScan.introPage.label "คำแนะนำ">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero สามารถคัดลอกและปรับรูปแบบการอ้างอิง และแทรกบรรณานุกรมในแฟ้ม RTF ได้ คุณสมบัติกราดตรวจ RTF รองรับการอ้างอิงอย่างหลากหลายตามรูปแบบดังต่อไปนี้">
+<!ENTITY zotero.rtfScan.introPage.description2 "เริ่มโดยเลือกแฟ้มข้อมูล RTF เพื่อนำเข้าและแฟ้มข้อมูลสำหรับส่งออก:">
+<!ENTITY zotero.rtfScan.scanPage.label "กราดตรวจเพื่อการอ้างอิง">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero กำลังกราดตรวจแฟ้มเอกสารของคุณเพื่อการอ้างอิง กรุณารอสักครู่">
+<!ENTITY zotero.rtfScan.citationsPage.label "ตรวจสอบรายการที่อ้างถึง">
+<!ENTITY zotero.rtfScan.citationsPage.description "โปรดตรวจทานรายการการอ้างอิงข้างล่างนี้ เพื่อให้แน่ใจว่า Zotero เลือกรายการได้อย่างถูกต้อง การอ้างอิงที่ไม่ถูกต้องหรือคลุมเครือต้องแก้ไขก่อนที่จะดำเนินการขั้นต่อไป">
+<!ENTITY zotero.rtfScan.stylePage.label "จัดรูปแบบแฟ้มเอกสาร">
+<!ENTITY zotero.rtfScan.formatPage.label "จัดรูปแบบการอ้างอิง">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero กำลังดำเนินการและจัดรูปแบบแฟ้ม RTF ของคุณ กรุณารอสักครู่">
+<!ENTITY zotero.rtfScan.completePage.label "กราดตรวจ RTF เรียบร้อยแล้ว">
+<!ENTITY zotero.rtfScan.completePage.description "แฟ้มเอกสารของคุณได้กราดตรวจและดำเนินการแล้ว กรุณาตรวจสอบให้แน่ใจว่ารูปแบบที่ได้นั้นถูกต้อง">
+<!ENTITY zotero.rtfScan.inputFile.label "แฟ้มนำเข้า">
+<!ENTITY zotero.rtfScan.outputFile.label "แฟ้มส่งออก">
 
-<!ENTITY zotero.file.choose.label "Choose File...">
-<!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.file.choose.label "เลือกแฟ้ม...">
+<!ENTITY zotero.file.noneSelected.label "ไม่มีการเลือกแฟ้ม">
 
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.label "บันทึกไปยัง Zotero">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "ไม่สามารถบันทึกเอกสารแนบไปยังไลบรารี่ที่เลือกได้ รายการนี้จะถูกบันทึกไปยังไลบรารี่ของคุณแทน">
+<!ENTITY zotero.downloadManager.noPDFTools.description "การใช้คุณสมบัตินี้คุณต้องติดตั้งเครื่องมือ PDF ในการตั้งค่าพึงใจของ Zotero">

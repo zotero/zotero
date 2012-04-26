@@ -7,17 +7,17 @@
 <!ENTITY zotero.preferences.prefpane.general "Všeobecné">
 
 <!ENTITY zotero.preferences.userInterface "Používateľské rozhranie">
-<!ENTITY zotero.preferences.showIn "Load Zotero in:">
-<!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
-<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn "Nahrať Zotero do:">
+<!ENTITY zotero.preferences.showIn.browserPane "Panel prehliadača">
+<!ENTITY zotero.preferences.showIn.separateTab "Osobitná záložka">
+<!ENTITY zotero.preferences.showIn.appTab "Záložka aplikácií">
 <!ENTITY zotero.preferences.statusBarIcon "Ikonka v spodnej lište:">
 <!ENTITY zotero.preferences.statusBarIcon.none "žiadna">
 <!ENTITY zotero.preferences.fontSize "Veľkosť písma:">
 <!ENTITY zotero.preferences.fontSize.small "malé">
 <!ENTITY zotero.preferences.fontSize.medium "stredné">
 <!ENTITY zotero.preferences.fontSize.large "veľké">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fontSize.xlarge "Extra veľké">
 <!ENTITY zotero.preferences.fontSize.notes "Veľkosť písma v poznámkach">
 
 <!ENTITY zotero.preferences.miscellaneous "Rôzne">
@@ -30,8 +30,8 @@
 <!ENTITY zotero.preferences.automaticSnapshots "pri vytváraní položiek z webových stránok automaticky urobiť snímku danej stránky">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "pri ukladaní položiek automaticky priložiť prepojené PDF a ostatné súbory">
 <!ENTITY zotero.preferences.automaticTags "automaticky aplikovať kľúčové slová a predmetové heslá ako značky">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaticky odstrániť položky zmazané pred viac ako">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dňami">
 
 <!ENTITY zotero.preferences.groups "Skupiny">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Pri kopírovaní položiek medzi knižnicami, zahrnúť:">
@@ -46,14 +46,14 @@
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Verzia:">
 
-<!ENTITY zotero.preferences.prefpane.sync "Synch">
+<!ENTITY zotero.preferences.prefpane.sync "Synchronizácia">
 <!ENTITY zotero.preferences.sync.username "Meno používateľa:">
 <!ENTITY zotero.preferences.sync.password "Heslo:">
 <!ENTITY zotero.preferences.sync.syncServer "Synchronizačný server Zotero">
 <!ENTITY zotero.preferences.sync.createAccount "Vytvoriť nový účet">
 <!ENTITY zotero.preferences.sync.lostPassword "Stratené heslo?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchronizovať automaticky">
-<!ENTITY zotero.preferences.sync.about "About Syncing">
+<!ENTITY zotero.preferences.sync.about "O synchronizácii">
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronizácia súborov">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Na synchronizáciu príloh v Mojej knižnici použiť">
@@ -101,19 +101,19 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "výstupný formát">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Zakázať rýchle kopírovanie pri presúvaní viac než">
 
-<!ENTITY zotero.preferences.prefpane.cite "Cite">
-<!ENTITY zotero.preferences.cite.styles "Styles">
-<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
+<!ENTITY zotero.preferences.prefpane.cite "Citovanie">
+<!ENTITY zotero.preferences.cite.styles "Štýly">
+<!ENTITY zotero.preferences.cite.wordProcessors "Textové editory">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Momentálne nie sú nainštalované žiadne zásuvné moduly pre textové editory.">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Získať zásuvné moduly pre textové editory...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Použiť klasické okno pridávania citácií">
 
-<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Správca štýlov">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Názov">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Aktualizované">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Získať ďalšie štýly">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Získať ďalšie štýly...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Klávesové skratky">
 
@@ -137,8 +137,8 @@
 <!ENTITY zotero.preferences.proxies.desc_link "dokumentácii k proxy">
 <!ENTITY zotero.preferences.proxies.desc_after_link ".">
 <!ENTITY zotero.preferences.proxies.transparent "Transparentne presmerovať požiadavky cez v minulosti použité proxy">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Automaticky rozpoznať proxy zdroje ">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Vypnúť presmerovanie proxy, ak názov mojej domény obsahuje ">
 <!ENTITY zotero.preferences.proxies.configured "Nastavené proxy">
 <!ENTITY zotero.preferences.proxies.hostname "Názov sídla">
 <!ENTITY zotero.preferences.proxies.scheme "Schéma">
@@ -154,13 +154,13 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Pokročilé">
 
-<!ENTITY zotero.preferences.prefpane.locate "Locate">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
-<!ENTITY zotero.preferences.locate.description "Description">
-<!ENTITY zotero.preferences.locate.name "Name">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
+<!ENTITY zotero.preferences.prefpane.locate "Lokalizovať">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Správca motora vyhľadávania článkov">
+<!ENTITY zotero.preferences.locate.description "Popis">
+<!ENTITY zotero.preferences.locate.name "Meno">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "Vyhľadávací motor rozširuje schopnosť rozbaľovacej ponuky lokalizácie v paneli informácií. Aktivované vyhľadávacie motory v zozname dole sa pridajú do rozbaľovacej ponuky a použijú sa na lokalizáciu zdrojov z vašej knižnice na webe.">
 <!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
-<!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
+<!ENTITY zotero.preferences.locate.restoreDefaults "Obnoviť predvolené">
 
 <!ENTITY zotero.preferences.charset "Kódovanie znakov">
 <!ENTITY zotero.preferences.charset.importCharset "Kódovanie pri importovaní">
@@ -186,6 +186,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Vymazať protokol">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Odoslať na server Zotero">
 
-<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
+<!ENTITY zotero.preferences.openAboutConfig "Otvoriť about:config">
+<!ENTITY zotero.preferences.openCSLEdit "Otvoriť CSL Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Otvoriť ukážku CSL ">

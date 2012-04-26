@@ -1,12 +1,12 @@
-<!ENTITY zotero.version "version">
-<!ENTITY zotero.createdby "Created By:">
-<!ENTITY zotero.director "Director:">
-<!ENTITY zotero.directors "Directors:">
-<!ENTITY zotero.developers "Developers:">
-<!ENTITY zotero.alumni "Alumni:">
-<!ENTITY zotero.about.localizations "Localizations:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
-<!ENTITY zotero.executiveProducer "Executive Producer:">
-<!ENTITY zotero.thanks "Special Thanks:">
-<!ENTITY zotero.about.close "Close">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
+<!ENTITY zotero.version "versio">
+<!ENTITY zotero.createdby "Luonut:">
+<!ENTITY zotero.director "Johtaja:">
+<!ENTITY zotero.directors "Johtajat:">
+<!ENTITY zotero.developers "Kehittäjät:">
+<!ENTITY zotero.alumni "Alumnit:">
+<!ENTITY zotero.about.localizations "Lokalisaatiot:">
+<!ENTITY zotero.about.additionalSoftware "Ulkopuolisten kehittäjien ohjelmat ja standardit:">
+<!ENTITY zotero.executiveProducer "Projektipäällikkö:">
+<!ENTITY zotero.thanks "Erityiskiitokset:">
+<!ENTITY zotero.about.close "Sulje">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Lisää kiitoksia">

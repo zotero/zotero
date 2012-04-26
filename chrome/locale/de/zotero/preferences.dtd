@@ -136,9 +136,9 @@
 <!ENTITY zotero.preferences.proxies.desc_before_link "Zotero leitet Anfragen transparent durch gespeicherte Proxys um. Siehe die">
 <!ENTITY zotero.preferences.proxies.desc_link "Proxy-Dokumentation">
 <!ENTITY zotero.preferences.proxies.desc_after_link "für weitere Informationen">
-<!ENTITY zotero.preferences.proxies.transparent "Proxy Weiterleitung aktivieren">
+<!ENTITY zotero.preferences.proxies.transparent "Proxy-Weiterleitung aktivieren">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Proxy-Ressourcen automatisch erkennen">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Proxy Weiterleitung de-aktivieren bei diesen Domain Bestandteilen">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Proxy-Weiterleitung de-aktivieren bei diesen Domain-Bestandteilen:">
 <!ENTITY zotero.preferences.proxies.configured "Definierte Proxies">
 <!ENTITY zotero.preferences.proxies.hostname "Hostname">
 <!ENTITY zotero.preferences.proxies.scheme "Schema">
@@ -146,8 +146,8 @@
 <!ENTITY zotero.preferences.proxies.multiSite "Mehrere Seiten">
 <!ENTITY zotero.preferences.proxies.autoAssociate "Neue Hosts automatisch assoziieren">
 <!ENTITY zotero.preferences.proxies.variables "Sie können die folgenden Variablen in Ihrem Proxy-Schema verwenden:">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Hostname der Proxy-Site (z. B. www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Pfad der Proxy-Seite ohne den vorangestellten Slash (z. B. about/index.html)">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Hostname der Zieladresse (z. B. www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Pfad der Zieladresse ohne den Querstrich am Anfang (z. B. about/index.html)">
 <!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Verzeichnispfad (z. B. about/)">
 <!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Dateiname (z. B. index.html)">
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Beliebiger String">

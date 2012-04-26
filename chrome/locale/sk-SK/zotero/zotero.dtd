@@ -30,7 +30,7 @@
 <!ENTITY zotero.contextMenu.saveLinkAsItem "Uložiť odkaz ako novú položku">
 <!ENTITY zotero.contextMenu.saveImageAsItem "Uložiť obrázok ako novú položku">
 
-<!ENTITY zotero.tabs.info.label "Info">
+<!ENTITY zotero.tabs.info.label "Informácie">
 <!ENTITY zotero.tabs.notes.label "Poznámky">
 <!ENTITY zotero.tabs.attachments.label "Prílohy">
 <!ENTITY zotero.tabs.tags.label "Značky">
@@ -38,7 +38,7 @@
 <!ENTITY zotero.notes.separate "Upraviť v samostatnom okne">
 
 <!ENTITY zotero.toolbar.duplicate.label "Zobraziť duplicity">
-<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.collections.showUnfiledItems "Zobraziť nezaradené položky">
 
 <!ENTITY zotero.items.itemType "Typ položky">
 <!ENTITY zotero.items.type_column "Typ">
@@ -51,7 +51,7 @@
 <!ENTITY zotero.items.journalAbbr_column "Skratka periodika">
 <!ENTITY zotero.items.language_column "Jazyk">
 <!ENTITY zotero.items.accessDate_column "Citované">
-<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.libraryCatalog_column "Knižničný katalóg">
 <!ENTITY zotero.items.callNumber_column "Signatúra">
 <!ENTITY zotero.items.rights_column "Práva">
 <!ENTITY zotero.items.dateAdded_column "Pridané dňa">
@@ -63,11 +63,11 @@
 <!ENTITY zotero.items.menu.attach "Vložiť prílohu">
 <!ENTITY zotero.items.menu.attach.snapshot "Vložiť snímku aktuálnej stránky">
 <!ENTITY zotero.items.menu.attach.link "Vložiť odkaz na aktuálnu stránku">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
+<!ENTITY zotero.items.menu.attach.link.uri "Pripojiť odkaz na URI...">
 <!ENTITY zotero.items.menu.attach.file "Vložiť kópiu miestneho súboru">
 <!ENTITY zotero.items.menu.attach.fileLink "Vložiť odkaz na súbor">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.restoreToLibrary "Vrátiť do knižnice">
 <!ENTITY zotero.items.menu.duplicateItem "Duplikovať vybranú položku">
 
 <!ENTITY zotero.toolbar.newItem.label "Nová položka">
@@ -91,7 +91,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Podpora a dokumentácia">
 <!ENTITY zotero.toolbar.about.label "O Zotere">
 <!ENTITY zotero.toolbar.advancedSearch "Pokročilé vyhľadávanie">
-<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
+<!ENTITY zotero.toolbar.tab.tooltip "Režim prepínania záložiek">
 <!ENTITY zotero.toolbar.openURL.label "Nájsť">
 <!ENTITY zotero.toolbar.openURL.tooltip "Nájdi v miestnej knižnici">
 
@@ -99,11 +99,11 @@
 <!ENTITY zotero.item.attachment.file.show "Zobraziť súbor">
 <!ENTITY zotero.item.textTransform "Preveď text">
 <!ENTITY zotero.item.textTransform.titlecase "Prvé Veľké">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.sentencecase "Prvé veľké písmeno vo vete">
 
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newNote "Nová poznámka">
 <!ENTITY zotero.toolbar.note.standalone "Nová samostatná poznámka">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
+<!ENTITY zotero.toolbar.note.child "Pridať dcérsku poznámku">
 <!ENTITY zotero.toolbar.lookup "Nájsť podľa identifikátora...">
 <!ENTITY zotero.toolbar.attachment.linked "Odkaz na súbor...">
 <!ENTITY zotero.toolbar.attachment.add "Uložiť kópiu súboru...">
@@ -111,7 +111,7 @@
 <!ENTITY zotero.toolbar.attachment.snapshot "Urobiť snímku z aktuálnej stránky">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Žiadne značky na zobrazenie">
-<!ENTITY zotero.tagSelector.filter "Filter:">
+<!ENTITY zotero.tagSelector.filter "Filtrovať:">
 <!ENTITY zotero.tagSelector.showAutomatic "Zobrazovať automaticky">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
 <!ENTITY zotero.tagSelector.selectVisible "Označiť viditeľné">
@@ -153,7 +153,7 @@
 <!ENTITY zotero.citation.page "Strana">
 <!ENTITY zotero.citation.paragraph "Odstavec">
 <!ENTITY zotero.citation.line "Riadok">
-<!ENTITY zotero.citation.suppressAuthor.label "Potlač autora">
+<!ENTITY zotero.citation.suppressAuthor.label "Vynechaj autora">
 <!ENTITY zotero.citation.prefix.label "Predpona:">
 <!ENTITY zotero.citation.suffix.label "Prípona:">
 
@@ -175,13 +175,13 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Formátovať pomocou:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "záložiek">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks are preserved across Microsoft Word and OpenOffice, but may be accidentally modified. For &#xA;compatibility reasons, citations cannot be inserted into footnotes or endnotes when this option is selected.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Záložky sa môžu uchovať aj vo Worde a OpenOffice, ale môžu sa náhodne pozmeniť. Z dôvodu kompatibility sa citácie nemôžu vkladať do poznámok pod čiarou alebo do koncových poznámok pri výbere tejto možnosti.">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Ukladať odkazy do dokumentu">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Ukladanie odkazov do vášho dokumentu nepatrne zväčší veľkosť súboru, ale vám umožní zdieľať váš dokument s ostatnými bez použitia skupín Zotera. Pre aktualizáciu dokumentov vytvorených s touto možnosťou sa vyžaduje Zotero 3.0 alebo novšie. ">
 
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.showEditor.label "Zobraziť editor">
+<!ENTITY zotero.integration.classicView.label "Klasický náhľad">
 
 <!ENTITY zotero.integration.references.label "Referencie v bibliografii">
 
@@ -238,6 +238,6 @@
 <!ENTITY zotero.file.choose.label "Vybrať súbor">
 <!ENTITY zotero.file.noneSelected.label "Nie je označený žiaden súbor">
 
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.label "Uložiť do Zotera">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Prílohy nemožno uložiť do práve vybranej knižnice. Táto položka sa preto uloží do vašej knižnice.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "Pre použitie tejto funkcie musíte najprv nainštalovať nástroje PDF v predvoľbách Zotera.">

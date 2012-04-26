@@ -7,17 +7,17 @@
 <!ENTITY zotero.preferences.prefpane.general "一般">
 
 <!ENTITY zotero.preferences.userInterface "使用介面">
-<!ENTITY zotero.preferences.showIn "Load Zotero in:">
-<!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
-<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn "於...載入 Zotero：">
+<!ENTITY zotero.preferences.showIn.browserPane "瀏覽器窗格">
+<!ENTITY zotero.preferences.showIn.separateTab "不同的頁籤">
+<!ENTITY zotero.preferences.showIn.appTab "App 頁籤">
 <!ENTITY zotero.preferences.statusBarIcon "狀態列圖示：">
 <!ENTITY zotero.preferences.statusBarIcon.none "無">
 <!ENTITY zotero.preferences.fontSize "字型大小：">
 <!ENTITY zotero.preferences.fontSize.small "小">
 <!ENTITY zotero.preferences.fontSize.medium "中">
 <!ENTITY zotero.preferences.fontSize.large "大">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fontSize.xlarge "特大">
 <!ENTITY zotero.preferences.fontSize.notes "筆記字型大小：">
 
 <!ENTITY zotero.preferences.miscellaneous "雜項">
@@ -30,8 +30,8 @@
 <!ENTITY zotero.preferences.automaticSnapshots "從網頁建立項目時自動拍攝快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "儲存項目時自動附加相關的 PDF 檔與其他檔案">
 <!ENTITY zotero.preferences.automaticTags "自動以關鍵字與主標題作為項目的標籤">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "自動移除刪入垃圾桶中的項目，當超過">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "天">
 
 <!ENTITY zotero.preferences.groups "群組">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "在各圖書館之間複製項目時，包含：">
@@ -53,7 +53,7 @@
 <!ENTITY zotero.preferences.sync.createAccount "建立帳戶">
 <!ENTITY zotero.preferences.sync.lostPassword "遺失密碼？">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自動同步">
-<!ENTITY zotero.preferences.sync.about "About Syncing">
+<!ENTITY zotero.preferences.sync.about "關於同步">
 <!ENTITY zotero.preferences.sync.fileSyncing "檔案同步中">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "同步「我的圖書館」中的附加檔案時，採用">
@@ -101,18 +101,18 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "輸出格式">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "拖放超過多少個項目時，停用快速複製：">
 
-<!ENTITY zotero.preferences.prefpane.cite "Cite">
-<!ENTITY zotero.preferences.cite.styles "Styles">
-<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
+<!ENTITY zotero.preferences.prefpane.cite "引用">
+<!ENTITY zotero.preferences.cite.styles "樣式">
+<!ENTITY zotero.preferences.cite.wordProcessors "Word 處理器">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "目前沒安裝文書處理器外掛。">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "取得文書處理器外掛...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用傳統新增引用文獻條對話框">
 
-<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
-<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.styleManager "樣式管理器">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "標題">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "已更新">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "文獻樣式語言CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "獲取額外的樣式…">
 
 <!ENTITY zotero.preferences.prefpane.keys "快速鍵">
@@ -130,22 +130,22 @@
 <!ENTITY zotero.preferences.keys.overrideGlobal "嘗試蓋過相衝突的快速鍵">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "改變只會在新開的視窗中生效">
 
-<!ENTITY zotero.preferences.prefpane.proxies "Proxies">
+<!ENTITY zotero.preferences.prefpane.proxies "代理伺服器">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Proxy 選項">
 <!ENTITY zotero.preferences.proxies.desc_before_link "Zotero 會透明地透過已儲存的 proxies 重新導向發出的請求。請參見">
 <!ENTITY zotero.preferences.proxies.desc_link "proxy 文件">
 <!ENTITY zotero.preferences.proxies.desc_after_link "以得到更多資訊。">
 <!ENTITY zotero.preferences.proxies.transparent "自動記住透過代理伺服器的資源 (proxied resources)">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
+<!ENTITY zotero.preferences.proxies.autoRecognize "自動認出透過代理伺服器的資源">
+<!ENTITY zotero.preferences.proxies.disableByDomain "停用代理伺服器重導向，若我的網域名稱含 ">
 <!ENTITY zotero.preferences.proxies.configured "已設定的 Proxies">
 <!ENTITY zotero.preferences.proxies.hostname "主機名稱">
-<!ENTITY zotero.preferences.proxies.scheme "Scheme">
+<!ENTITY zotero.preferences.proxies.scheme "方案">
 
-<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
+<!ENTITY zotero.preferences.proxies.multiSite "多點式">
 <!ENTITY zotero.preferences.proxies.autoAssociate "自動與新的主機產生關聯">
-<!ENTITY zotero.preferences.proxies.variables "You may use the following variables in your proxy scheme:">
+<!ENTITY zotero.preferences.proxies.variables "你可以在你的代理器方案中使用以下的變數：">
 <!ENTITY zotero.preferences.proxies.h_variable "&#37;h - 透過 proxy 連接之網站 (proxied site) 的主機名稱 (例如：www.zotero.org)">
 <!ENTITY zotero.preferences.proxies.p_variable "&#37;p - 透過 proxy 連接之網頁 (proxied page) 的路徑名稱，需去除開頭的斜線 (例如：about/index.html)">
 <!ENTITY zotero.preferences.proxies.d_variable "&#37;d - 資料夾路徑 (例如：about/)">
@@ -154,13 +154,13 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "進階">
 
-<!ENTITY zotero.preferences.prefpane.locate "Locate">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
-<!ENTITY zotero.preferences.locate.description "Description">
-<!ENTITY zotero.preferences.locate.name "Name">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
+<!ENTITY zotero.preferences.prefpane.locate "查詢">
+<!ENTITY zotero.preferences.locate.locateEngineManager "論文查詢引擎管理器">
+<!ENTITY zotero.preferences.locate.description "描述">
+<!ENTITY zotero.preferences.locate.name "名稱">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "每一資訊窗格中的下拉選單中的查詢引擎擴充查詢能力。下面清單中的查詢引擎啟用後，會被加到下拉選單中，且能被用來查詢來自網站圖書館的資源。">
 <!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
-<!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
+<!ENTITY zotero.preferences.locate.restoreDefaults "恢復預設值">
 
 <!ENTITY zotero.preferences.charset "字元編碼">
 <!ENTITY zotero.preferences.charset.importCharset "匯入字元編碼">
@@ -186,6 +186,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "清除輸出">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "提交到 Zotero 伺服器">
 
-<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
+<!ENTITY zotero.preferences.openAboutConfig "開啟 about:config">
+<!ENTITY zotero.preferences.openCSLEdit "開啟 CSL 編輯器">
+<!ENTITY zotero.preferences.openCSLPreview "開啟 CSL 預覽">

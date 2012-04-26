@@ -1,49 +1,49 @@
-<!ENTITY zotero.general.optional "（オプショナル）">
-<!ENTITY zotero.general.note "メモ：">
+<!ENTITY zotero.general.optional "（任意）">
+<!ENTITY zotero.general.note "メモ:">
 <!ENTITY zotero.general.selectAll "すべて選択">
 <!ENTITY zotero.general.deselectAll "選択を解除">
 <!ENTITY zotero.general.edit "編集">
 <!ENTITY zotero.general.delete "削除">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "エラー･ログはZoteroとは関係していないメッセージを含んでいる可能性があります。">
+<!ENTITY zotero.errorReport.unrelatedMessages "エラー・ログは Zotero とは無関係のメッセージを含んでいる可能性があります。">
 <!ENTITY zotero.errorReport.submissionInProgress "エラーレポートが送信されるまでお待ちください。">
-<!ENTITY zotero.errorReport.submitted "エラーレポートは送信されました。">
+<!ENTITY zotero.errorReport.submitted "エラーレポートが送信されました。">
 <!ENTITY zotero.errorReport.reportID "レポートID:">
-<!ENTITY zotero.errorReport.postToForums "このレポートＩＤ、問題の説明及び問題を再現するために必要なステップについて、メッセージをZoteroフォーラム(forums.zotero.org)に掲示して下さい。">
-<!ENTITY zotero.errorReport.notReviewed "エラーレポートはフォーラムで言及されない限り、一般的にはレビューされることはありません。">
+<!ENTITY zotero.errorReport.postToForums "このレポート ID、問題の説明、および問題を再現するために必要な手順について、Zotero フォーラム(forums.zotero.org)に投稿して下さい。">
+<!ENTITY zotero.errorReport.notReviewed "エラーレポートはフォーラムで言及されない限り、調査されることはありません。">
 
-<!ENTITY zotero.upgrade.newVersionInstalled "Zoteroの新しいバージョンはインストールされました。">
-<!ENTITY zotero.upgrade.upgradeRequired "新しいバージョンを使用する前にZoteroのデータベースをアップグレードする必要があります。">
+<!ENTITY zotero.upgrade.newVersionInstalled "Zotero の新しいバージョンがインストールされました。">
+<!ENTITY zotero.upgrade.upgradeRequired "新しいバージョンを使用する前にあなたの Zotero のデータベースを更新する必要があります。">
 <!ENTITY zotero.upgrade.autoBackup "変更が行われる前にデータベースはすべて自動的にバックアップされます。">
-<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
-<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
-<!ENTITY zotero.upgrade.upgradeInProgress "このアップグレードが終了するまでお待ちください。数分間かかる場合もあります。">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Zoteroデータベースは問題なくアップグレードされました。">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "新機能と改良点に関しては">
+<!ENTITY zotero.upgrade.majorUpgrade "これは重要な更新です。">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "続ける前に">
+<!ENTITY zotero.upgrade.majorUpgradeLink "更新の手引き">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "をまずご確認ください。">
+<!ENTITY zotero.upgrade.upgradeInProgress "この更新が終了するまでお待ちください。数分間かかる場合もあります。">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Zotero データベースは問題なく更新されました。">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "新機能と改良点については">
 <!ENTITY zotero.upgrade.changeLogLink "変更履歴">
 <!ENTITY zotero.upgrade.changeLogAfterLink "をご覧ください。">
 
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "選択範囲をZoteroメモに追加">
-<!ENTITY zotero.contextMenu.addTextToNewNote "選択範囲からZoteroメモを作成">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "りんくをZoteroのアイテムとして保存">
-<!ENTITY zotero.contextMenu.saveImageAsItem "がぞうをZoteroのアイテムとして保存">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "選択範囲を Zotero メモに追加">
+<!ENTITY zotero.contextMenu.addTextToNewNote "選択範囲から Zotero アイテムとメモを作成">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "リンクを Zotero のアイテムとして保存">
+<!ENTITY zotero.contextMenu.saveImageAsItem "画像を Zotero のアイテムとして保存">
 
 <!ENTITY zotero.tabs.info.label "情報">
 <!ENTITY zotero.tabs.notes.label "メモ">
 <!ENTITY zotero.tabs.attachments.label "添付ファイル">
 <!ENTITY zotero.tabs.tags.label "タグ">
-<!ENTITY zotero.tabs.related.label "関連">
+<!ENTITY zotero.tabs.related.label "関連アイテム">
 <!ENTITY zotero.notes.separate "別画面で編集する">
 
-<!ENTITY zotero.toolbar.duplicate.label "Show Duplicates">
-<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.toolbar.duplicate.label "重複アイテムを表示">
+<!ENTITY zotero.collections.showUnfiledItems "未整理のアイテムを表示">
 
-<!ENTITY zotero.items.itemType "Item Type">
+<!ENTITY zotero.items.itemType "アイテムの種類">
 <!ENTITY zotero.items.type_column "種類">
-<!ENTITY zotero.items.title_column "タイトル">
-<!ENTITY zotero.items.creator_column "作成者">
+<!ENTITY zotero.items.title_column "題名">
+<!ENTITY zotero.items.creator_column "編著者等">
 <!ENTITY zotero.items.date_column "日時">
 <!ENTITY zotero.items.year_column "年">
 <!ENTITY zotero.items.publisher_column "出版社">
@@ -51,193 +51,193 @@
 <!ENTITY zotero.items.journalAbbr_column "雑誌略誌名">
 <!ENTITY zotero.items.language_column "言語">
 <!ENTITY zotero.items.accessDate_column "アクセス日時">
-<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.libraryCatalog_column "書誌情報">
 <!ENTITY zotero.items.callNumber_column "請求記号">
 <!ENTITY zotero.items.rights_column "権利">
-<!ENTITY zotero.items.dateAdded_column "作成日時">
+<!ENTITY zotero.items.dateAdded_column "追加日時">
 <!ENTITY zotero.items.dateModified_column "更新日時">
 <!ENTITY zotero.items.numChildren_column "+">
 
-<!ENTITY zotero.items.menu.showInLibrary "ライブラリーで表示">
+<!ENTITY zotero.items.menu.showInLibrary "ライブラリの中に表示">
 <!ENTITY zotero.items.menu.attach.note "メモを追加">
 <!ENTITY zotero.items.menu.attach "ファイルを添付する">
-<!ENTITY zotero.items.menu.attach.snapshot "現ページのスナップショットを添付">
-<!ENTITY zotero.items.menu.attach.link "現ページへのリンクを添付">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
-<!ENTITY zotero.items.menu.attach.file "ファイルの保存されたコピーを添付する">
+<!ENTITY zotero.items.menu.attach.snapshot "現在のページのスナップショットを添付">
+<!ENTITY zotero.items.menu.attach.link "現在のページへのリンクを添付">
+<!ENTITY zotero.items.menu.attach.link.uri "URIへのリンクを添付する...">
+<!ENTITY zotero.items.menu.attach.file "保存されたファイルのコピーを添付する...">
 <!ENTITY zotero.items.menu.attach.fileLink "リンクをファイルに添付する">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.restoreToLibrary "ライブラリへ復帰させる">
 <!ENTITY zotero.items.menu.duplicateItem "選択されたアイテムを複製">
 
 <!ENTITY zotero.toolbar.newItem.label "新規アイテム">
 <!ENTITY zotero.toolbar.moreItemTypes.label "その他">
-<!ENTITY zotero.toolbar.newItemFromPage.label "現ページから新規アイテムを作成">
-<!ENTITY zotero.toolbar.lookup.label "Add Item by Identifier">
-<!ENTITY zotero.toolbar.removeItem.label "アイテムを削除">
-<!ENTITY zotero.toolbar.newCollection.label "新規コレクション">
-<!ENTITY zotero.toolbar.newGroup "New Group...">
+<!ENTITY zotero.toolbar.newItemFromPage.label "現在のページから新規アイテムを作成">
+<!ENTITY zotero.toolbar.lookup.label "識別子によってアイテムを追加する">
+<!ENTITY zotero.toolbar.removeItem.label "アイテムを削除...">
+<!ENTITY zotero.toolbar.newCollection.label "新規コレクション...">
+<!ENTITY zotero.toolbar.newGroup "新規グループ...">
 <!ENTITY zotero.toolbar.newSubcollection.label "新規サブコレクション...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "新規検索式保存">
-<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
-<!ENTITY zotero.toolbar.tagSelector.label "タグ・セレクターを表示する／表示しない">
-<!ENTITY zotero.toolbar.actions.label "タスク">
-<!ENTITY zotero.toolbar.import.label "インポート">
-<!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.toolbar.export.label "ライブラリーをエクスポート">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "新規検索条件の保存...">
+<!ENTITY zotero.toolbar.emptyTrash.label "ゴミ箱を空にする">
+<!ENTITY zotero.toolbar.tagSelector.label "タグ選択ボックスを表示する／表示しない">
+<!ENTITY zotero.toolbar.actions.label "アクション">
+<!ENTITY zotero.toolbar.import.label "インポート...">
+<!ENTITY zotero.toolbar.importFromClipboard "クリップボードからインポートする">
+<!ENTITY zotero.toolbar.export.label "ライブラリをエクスポート...">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF スキャン...">
 <!ENTITY zotero.toolbar.timeline.label "タイムラインを作成">
-<!ENTITY zotero.toolbar.preferences.label "設定">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
-<!ENTITY zotero.toolbar.about.label "Zoteroについて">
+<!ENTITY zotero.toolbar.preferences.label "環境設定...">
+<!ENTITY zotero.toolbar.supportAndDocumentation "サポートとヘルプ">
+<!ENTITY zotero.toolbar.about.label "Zotero について">
 <!ENTITY zotero.toolbar.advancedSearch "詳細検索">
-<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
+<!ENTITY zotero.toolbar.tab.tooltip "タブのモード切り替え">
 <!ENTITY zotero.toolbar.openURL.label "所在確認">
-<!ENTITY zotero.toolbar.openURL.tooltip "あなたのローカル図書館を通して発見">
+<!ENTITY zotero.toolbar.openURL.tooltip "あなたの所属機関の図書館を通じて所在確認">
 
 <!ENTITY zotero.item.add "追加">
 <!ENTITY zotero.item.attachment.file.show "ファイルを表示">
 <!ENTITY zotero.item.textTransform "テキストの大文字・小文字を指定する">
-<!ENTITY zotero.item.textTransform.titlecase "大文字">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.titlecase "各単語の先頭を大文字">
+<!ENTITY zotero.item.textTransform.sentencecase "各文の先頭を大文字">
 
-<!ENTITY zotero.toolbar.newNote "New Note">
-<!ENTITY zotero.toolbar.note.standalone "新規メモを作成">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
-<!ENTITY zotero.toolbar.attachment.linked "ファイルへのリンク">
-<!ENTITY zotero.toolbar.attachment.add "ファイルのコピー">
-<!ENTITY zotero.toolbar.attachment.weblink "現ページへのリンク">
-<!ENTITY zotero.toolbar.attachment.snapshot "現ページのスナップショット">
+<!ENTITY zotero.toolbar.newNote "新しいメモ">
+<!ENTITY zotero.toolbar.note.standalone "新規メモを独立アイテムとして作成">
+<!ENTITY zotero.toolbar.note.child "子メモを追加する">
+<!ENTITY zotero.toolbar.lookup "識別子によって所在確認...">
+<!ENTITY zotero.toolbar.attachment.linked "ファイルへのリンク...">
+<!ENTITY zotero.toolbar.attachment.add "ファイルのコピーを保存...">
+<!ENTITY zotero.toolbar.attachment.weblink "現在のページへのリンクを保存">
+<!ENTITY zotero.toolbar.attachment.snapshot "現在のページのスナップショットを撮る">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "タグがありません">
 <!ENTITY zotero.tagSelector.filter "フィルター:">
-<!ENTITY zotero.tagSelector.showAutomatic "自動表示">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
+<!ENTITY zotero.tagSelector.showAutomatic "自動生成タグも表示">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "このライブラリの全タグを表示">
 <!ENTITY zotero.tagSelector.selectVisible "可視タグを選択">
 <!ENTITY zotero.tagSelector.clearVisible "可視タグの選択を解除">
-<!ENTITY zotero.tagSelector.clearAll "全選択の解除">
+<!ENTITY zotero.tagSelector.clearAll "選択の解除">
 <!ENTITY zotero.tagSelector.renameTag "タグ名の変更...">
 <!ENTITY zotero.tagSelector.deleteTag "タグを削除...">
 
-<!ENTITY zotero.lookup.description "Enter the ISBN, DOI, or PMID to look up in the box below.">
+<!ENTITY zotero.lookup.description "下のボックスから検索するため ISBN、DOI、または PMID を入力してください。">
 
 <!ENTITY zotero.selectitems.title "アイテムを選択">
-<!ENTITY zotero.selectitems.intro.label "ライブラリーに追加したいアイテムを選択してください">
+<!ENTITY zotero.selectitems.intro.label "ライブラリに追加したいアイテムを選択してください">
 <!ENTITY zotero.selectitems.cancel.label "キャンセル">
 <!ENTITY zotero.selectitems.select.label "OK">
 
-<!ENTITY zotero.bibliography.title "参照文献を作成">
-<!ENTITY zotero.bibliography.style.label "引用スタイル">
-<!ENTITY zotero.bibliography.output.label "アウトプット・フォーマット">
-<!ENTITY zotero.bibliography.saveAsRTF.label "RTFとして保存">
-<!ENTITY zotero.bibliography.saveAsHTML.label "HTMLとして保存">
+<!ENTITY zotero.bibliography.title "参考文献目録を作成">
+<!ENTITY zotero.bibliography.style.label "引用スタイル:">
+<!ENTITY zotero.bibliography.output.label "出力フォーマット">
+<!ENTITY zotero.bibliography.saveAsRTF.label "RTF として保存">
+<!ENTITY zotero.bibliography.saveAsHTML.label "HTML として保存">
 <!ENTITY zotero.bibliography.copyToClipboard.label "クリップボードにコピー">
 <!ENTITY zotero.bibliography.print.label "印刷">
 
 <!ENTITY zotero.integration.docPrefs.title "ドキュメントの設定">
-<!ENTITY zotero.integration.addEditCitation.title "引用を追加・編集">
-<!ENTITY zotero.integration.editBibliography.title "参照文献リストを編集">
+<!ENTITY zotero.integration.addEditCitation.title "出典表記を追加・編集">
+<!ENTITY zotero.integration.editBibliography.title "参考文献目録を編集">
 
 <!ENTITY zotero.progress.title "進行">
 
 <!ENTITY zotero.exportOptions.title "エクスポート...">
-<!ENTITY zotero.exportOptions.format.label "フォーマット：">
-<!ENTITY zotero.exportOptions.translatorOptions.label "トランスレーターのオプション">
+<!ENTITY zotero.exportOptions.format.label "フォーマット:">
+<!ENTITY zotero.exportOptions.translatorOptions.label "トランスレータのオプション">
 
-<!ENTITY zotero.charset.label "Character Encoding">
-<!ENTITY zotero.moreEncodings.label "More Encodings">
+<!ENTITY zotero.charset.label "文字コード">
+<!ENTITY zotero.moreEncodings.label "その他の文字コード">
 
-<!ENTITY zotero.citation.keepSorted.label "参照文献の配列をキープ">
+<!ENTITY zotero.citation.keepSorted.label "参考文献の順序を維持">
 
 <!ENTITY zotero.citation.page "ページ">
 <!ENTITY zotero.citation.paragraph "段落">
 <!ENTITY zotero.citation.line "行">
 <!ENTITY zotero.citation.suppressAuthor.label "著者名の非表示">
-<!ENTITY zotero.citation.prefix.label "接頭辞">
-<!ENTITY zotero.citation.suffix.label "接尾辞">
+<!ENTITY zotero.citation.prefix.label "接頭辞:">
+<!ENTITY zotero.citation.suffix.label "接尾辞:">
 
-<!ENTITY zotero.richText.italic.label "イタリック">
+<!ENTITY zotero.richText.italic.label "斜体">
 <!ENTITY zotero.richText.bold.label "太字">
 <!ENTITY zotero.richText.underline.label "下線">
 <!ENTITY zotero.richText.superscript.label "上付き文字">
 <!ENTITY zotero.richText.subscript.label "下付き文字">
 
-<!ENTITY zotero.annotate.toolbar.add.label "アノテーションを追加">
-<!ENTITY zotero.annotate.toolbar.collapse.label "すべてのアノテーションを折りたたみ表示">
-<!ENTITY zotero.annotate.toolbar.expand.label "すべてのアノテーションを展開表示">
-<!ENTITY zotero.annotate.toolbar.highlight.label "ハイライト表示">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "ハイライトを非表示">
+<!ENTITY zotero.annotate.toolbar.add.label "注釈を追加">
+<!ENTITY zotero.annotate.toolbar.collapse.label "すべての注釈を折りたたみ表示">
+<!ENTITY zotero.annotate.toolbar.expand.label "すべての注釈を展開表示">
+<!ENTITY zotero.annotate.toolbar.highlight.label "テキストを強調表示">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "テキストの強調表示を解除">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "引用の出力形式：">
+<!ENTITY zotero.integration.prefs.displayAs.label "出典表記の出力形式:">
 <!ENTITY zotero.integration.prefs.footnotes.label "脚注">
 <!ENTITY zotero.integration.prefs.endnotes.label "文末注">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "スタイル：">
+<!ENTITY zotero.integration.prefs.formatUsing.label "スタイル:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "ブックマーク">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "ブックマークはMicrosoft Word、OpenOffice双方で保存されますが、偶然に変更されてしまう場合があります。">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "ブックマークはMicrosoft Word、OpenOffice双方で保存されますが、誤って変更されてしまう場合があります。 &#xA; 互換性上の理由により、この機能を選んだ場合、出典表記を脚注や巻末注に挿入することができません。">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "文献情報を文書中に保存">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "文献情報をあなたの文書中に保存するとわずかにファイルサイズが大きくなりますが、あなたは Zotero グループを使わなくても他人とその文書を共有することが可能になります。このオプションで作成された文書を更新するには Zotero 3.0 以降が必要です。">
 
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.showEditor.label "エディタを表示">
+<!ENTITY zotero.integration.classicView.label "クラシック・ビュー">
 
-<!ENTITY zotero.integration.references.label "参照文献リストの中の参照文献">
+<!ENTITY zotero.integration.references.label "参考文献目録に含まれる文献">
 
-<!ENTITY zotero.sync.button "Sync with Zotero Server">
-<!ENTITY zotero.sync.error "Sync Error">
-<!ENTITY zotero.sync.storage.progress "Progress:">
-<!ENTITY zotero.sync.storage.downloads "Downloads:">
-<!ENTITY zotero.sync.storage.uploads "Uploads:">
+<!ENTITY zotero.sync.button "Zotero サーバと同期する">
+<!ENTITY zotero.sync.error "同期エラー">
+<!ENTITY zotero.sync.storage.progress "進捗:">
+<!ENTITY zotero.sync.storage.downloads "ダウンロード:">
+<!ENTITY zotero.sync.storage.uploads "アップロード:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
-<!ENTITY zotero.sync.longTagFixer.split "Split">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
-<!ENTITY zotero.sync.longTagFixer.character "character">
-<!ENTITY zotero.sync.longTagFixer.characters "characters">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "あなたの Zotero ライブラリにある以下のタグは、サーバと同期させるには長過ぎます。">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "タグを同期させるには256文字以下である必要があります。">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "問題のタグを複数のタグに分割するか、手動でタグを編集して短くするか、あるいは削除してください。">
+<!ENTITY zotero.sync.longTagFixer.split "分割する">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "次の場所で分割:">
+<!ENTITY zotero.sync.longTagFixer.character "文字目">
+<!ENTITY zotero.sync.longTagFixer.characters "文字目">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "チェックされていないタグは保存されません。">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "このタグは全てのアイテムから削除されます。">
 
-<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
-<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
-<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
+<!ENTITY zotero.proxy.recognized.title "プロキシが認識されました。">
+<!ENTITY zotero.proxy.recognized.warning "あなたの図書館、学校または企業のウェブサイトからリンクされたプロキシのみを追加するようにしてください。">
+<!ENTITY zotero.proxy.recognized.warning.secondary "その他のプロキシを追加すると、悪意あるサイトがあなたの信頼するサイトに成り済ます恐れがあります。">
+<!ENTITY zotero.proxy.recognized.disable.label "以前に認識されたプロキシを通じて、要求を自動転送しないでください。">
+<!ENTITY zotero.proxy.recognized.ignore.label "無視する">
 
-<!ENTITY zotero.recognizePDF.recognizing.label "Retrieving Metadata...">
-<!ENTITY zotero.recognizePDF.cancel.label "Cancel">
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF Name">
-<!ENTITY zotero.recognizePDF.itemName.label "Item Name">
+<!ENTITY zotero.recognizePDF.recognizing.label "メタデータの抽出中...">
+<!ENTITY zotero.recognizePDF.cancel.label "取り消し">
+<!ENTITY zotero.recognizePDF.pdfName.label "PDF 名">
+<!ENTITY zotero.recognizePDF.itemName.label "アイテム名">
 <!ENTITY zotero.recognizePDF.captcha.label "Type the text below to continue retrieving metadata.">
 
-<!ENTITY zotero.rtfScan.title "RTF Scan">
-<!ENTITY zotero.rtfScan.cancel.label "Cancel">
-<!ENTITY zotero.rtfScan.citation.label "Citation">
-<!ENTITY zotero.rtfScan.itemName.label "Item Name">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
+<!ENTITY zotero.rtfScan.title "RTF スキャン">
+<!ENTITY zotero.rtfScan.cancel.label "取り消す">
+<!ENTITY zotero.rtfScan.citation.label "出典表記">
+<!ENTITY zotero.rtfScan.itemName.label "アイテム名">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "文献不明の出典表記">
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
-<!ENTITY zotero.rtfScan.introPage.label "Introduction">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
-<!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
-<!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
-<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
-<!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
-<!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
-<!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
-<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
-<!ENTITY zotero.rtfScan.inputFile.label "Input File">
-<!ENTITY zotero.rtfScan.outputFile.label "Output File">
+<!ENTITY zotero.rtfScan.mappedCitations.label "文献同定済みの出典表記">
+<!ENTITY zotero.rtfScan.introPage.label "案内">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero は RTF ファイルから自動的に出典表記を抽出し、出典表記を再整形して、参考文献目録を挿入することができます。この RTF スキャン機能は現在、以下に挙げる形式の出典表記をサポートしています。">
+<!ENTITY zotero.rtfScan.introPage.description2 "まず、RTF 入力元ファイルと出力先ファイルを下記から選んでください。">
+<!ENTITY zotero.rtfScan.scanPage.label "出典表記をスキャンしています">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero はあなたの文書の引用をスキャンしています。しばらくお待ちください。">
+<!ENTITY zotero.rtfScan.citationsPage.label "引用されたアイテムを検証する">
+<!ENTITY zotero.rtfScan.citationsPage.description "以下に表示される、 Zotero が認識した出典表記の一覧をご覧頂き、対応する文献を正しく見つけたかどうかご確認ください。次の手順に進む前に、文献不明の出典表記やあいまいな出典表記はすべて解消される必要があります。">
+<!ENTITY zotero.rtfScan.stylePage.label "文書の書式設定">
+<!ENTITY zotero.rtfScan.formatPage.label "出典表記の書式設定">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero はあなたの RTF ファイルを処理中、整形中です。しばらくお待ちください。">
+<!ENTITY zotero.rtfScan.completePage.label "RTF スキャンが完了しました">
+<!ENTITY zotero.rtfScan.completePage.description "あなたの文書はスキャンされ処理が完了しました。正しく整形されていることを確認してください。">
+<!ENTITY zotero.rtfScan.inputFile.label "入力元ファイル">
+<!ENTITY zotero.rtfScan.outputFile.label "出力先ファイル">
 
-<!ENTITY zotero.file.choose.label "Choose File...">
-<!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.file.choose.label "ファイルを選択...">
+<!ENTITY zotero.file.noneSelected.label "ファイルが選択されていません">
 
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.label "Zotero に保存する">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "添付ファイルは現在選択中のライブラリに保存することができません。その代わり、このアイテムはあなたのライブラリに保存されます。">
+<!ENTITY zotero.downloadManager.noPDFTools.description "この機能を利用するには、まず Zotero 環境設定で PDF ツールをインストールする必要があります。">

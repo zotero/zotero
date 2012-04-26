@@ -1,19 +1,19 @@
-<!ENTITY zotero.general.optional "(Optional)">
+<!ENTITY zotero.general.optional "(Valgfrit)">
 <!ENTITY zotero.general.note "Note:">
-<!ENTITY zotero.general.selectAll "Select All">
-<!ENTITY zotero.general.deselectAll "Deselect All">
-<!ENTITY zotero.general.edit "Edit">
-<!ENTITY zotero.general.delete "Delete">
+<!ENTITY zotero.general.selectAll "Vælg alle">
+<!ENTITY zotero.general.deselectAll "Fravælg alle">
+<!ENTITY zotero.general.edit "Rediger">
+<!ENTITY zotero.general.delete "Slet">
 
-<!ENTITY zotero.errorReport.unrelatedMessages "The error log may include messages unrelated to Zotero.">
-<!ENTITY zotero.errorReport.submissionInProgress "Please wait while the error report is submitted.">
-<!ENTITY zotero.errorReport.submitted "Your error report has been submitted.">
-<!ENTITY zotero.errorReport.reportID "Report ID:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Logfilen for fejl kan indeholde meddelelser, der ikke har med Zotero at gøre.">
+<!ENTITY zotero.errorReport.submissionInProgress "Vent venligst, mens fejlrapporten registreres.">
+<!ENTITY zotero.errorReport.submitted "Din fejlrapport er registreret.">
+<!ENTITY zotero.errorReport.reportID "RapportID:">
+<!ENTITY zotero.errorReport.postToForums "Læg venligst en besked på Zoteros fora (forums.zotero.org) med dette RapportID, en beskrivelse af problemet og det, der får problemet til at opstå.">
 <!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
-<!ENTITY zotero.upgrade.newVersionInstalled "You have installed a new version of Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Your Zotero database must be upgraded to work with the new version.">
+<!ENTITY zotero.upgrade.newVersionInstalled "Du har installeret en ny version af Zotero.">
+<!ENTITY zotero.upgrade.upgradeRequired "Din Zoterodatabase skal opgraderes for at virke med den seneste version.">
 <!ENTITY zotero.upgrade.autoBackup "Your existing database will be backed up automatically before any changes are made.">
 <!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
