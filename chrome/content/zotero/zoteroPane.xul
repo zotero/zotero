@@ -252,7 +252,7 @@
 					<menuitem oncommand="Zotero_File_Interface.exportCollection();"/>
 					<menuitem oncommand="Zotero_File_Interface.bibliographyFromCollection();"/>
 					<menuitem label="&zotero.toolbar.export.label;" oncommand="Zotero_File_Interface.exportFile()"/>
-					<menuitem oncommand="Zotero_Report_Interface.loadCollectionReport()"/>
+					<menuitem oncommand="Zotero_Report_Interface.loadCollectionReport(event)"/>
 					<menuitem label="&zotero.toolbar.emptyTrash.label;" oncommand="ZoteroPane_Local.emptyTrash();"/>
 					<menuitem label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.createCommonsBucket();"/><!--TODO localize -->
 					<menuitem label="Refresh" oncommand="ZoteroPane_Local.refreshCommonsBucket();"/><!--TODO localize -->
@@ -282,7 +282,7 @@
 					<menuseparator/>
 					<menuitem oncommand="Zotero_File_Interface.exportItems();"/>
 					<menuitem oncommand="Zotero_File_Interface.bibliographyFromItems();"/>
-					<menuitem oncommand="Zotero_Report_Interface.loadItemReport()"/>
+					<menuitem oncommand="Zotero_Report_Interface.loadItemReport(event)"/>
 					<menuseparator/>
 					<menuitem oncommand="Zotero_RecognizePDF.recognizeSelected();"/>
 					<menuitem oncommand="ZoteroPane_Local.createParentItemsFromSelected();"/>
