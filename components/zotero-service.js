@@ -234,6 +234,7 @@ function makeZoteroContext(isConnector) {
 	
 	// Load RDF files into Zotero.RDF.AJAW namespace (easier than modifying all of the references)
 	const rdfXpcomFiles = [
+		'rdf/init',
 		'rdf/uri',
 		'rdf/term',
 		'rdf/identity',

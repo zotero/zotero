@@ -2311,7 +2311,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	 * Serializes the current RDF to a string
 	 */
 	"serialize":function(dataMode) {
-		var serializer = Serializer();
+		var serializer = Zotero.RDF.AJAW.Serializer(this._dataStore);
 		
 		for(var prefix in this._dataStore.namespaces) {
 			serializer.suggestPrefix(prefix, this._dataStore.namespaces[prefix]);
