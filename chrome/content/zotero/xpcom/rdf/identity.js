@@ -119,7 +119,7 @@ $rdf.IndexedFormula.prototype.newPropertyAction = function newPropertyAction(pre
     this.propertyActions[hash].push(action);
     // Now apply the function to to statements already in the store
     var toBeFixed = this.statementsMatching(undefined, pred, undefined);
-    done = false;
+    var done = false;
     for (var i=0; i<toBeFixed.length; i++) { // NOT optimized - sort toBeFixed etc
         done = done || action(this, toBeFixed[i].subject, pred, toBeFixed[i].object);
     }

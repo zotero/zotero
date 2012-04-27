@@ -271,7 +271,7 @@ __Serializer.prototype.statementsToN3 = function(sts) {
 
     var namespaceCounts = []; // which have been used
 
-    predMap = {
+    var predMap = {
         'http://www.w3.org/2002/07/owl#sameAs': '=',
         'http://www.w3.org/2000/10/swap/log#implies': '=>',
         'http://www.w3.org/1999/02/22-rdf-syntax-ns#type': 'a'
@@ -288,7 +288,7 @@ __Serializer.prototype.statementsToN3 = function(sts) {
         return s
     }
 
-    treeToLine = function(tree) {
+    var treeToLine = function(tree) {
         var str = '';
         for (var i=0; i<tree.length; i++) {
             var branch = tree[i];
@@ -300,7 +300,7 @@ __Serializer.prototype.statementsToN3 = function(sts) {
     }
     
     // Convert a nested tree of lists and strings to a string
-    treeToString = function(tree, level) {
+    var treeToString = function(tree, level) {
         var str = '';
         var lastLength = 100000;
         if (!level) level = 0;
@@ -484,7 +484,7 @@ __Serializer.prototype.statementsToN3 = function(sts) {
     }
     
     function prefixDirectives() {
-        str = '';
+        var str = '';
 	if (sz.defaultNamespace)
 	  str += '@prefix : <'+sz.defaultNamespace+'>.\n';
         for (var ns in namespaceCounts) {
@@ -563,7 +563,7 @@ function hexify(str) { // also used in parser
 
 
 function backslashUify(str) {
-    var res = '';
+    var res = '', k;
     for (var i=0; i<str.length; i++) {
         k = str.charCodeAt(i);
         if (k>65535)
@@ -599,7 +599,7 @@ __Serializer.prototype.statementsToXML = function(sts) {
         return s
     }
 
-    XMLtreeToLine = function(tree) {
+    var XMLtreeToLine = function(tree) {
         var str = '';
         for (var i=0; i<tree.length; i++) {
             var branch = tree[i];
@@ -610,7 +610,7 @@ __Serializer.prototype.statementsToXML = function(sts) {
     }
     
     // Convert a nested tree of lists and strings to a string
-    XMLtreeToString = function(tree, level) {
+    var XMLtreeToString = function(tree, level) {
         var str = '';
         var lastLength = 100000;
         if (!level) level = 0;
@@ -650,7 +650,7 @@ __Serializer.prototype.statementsToXML = function(sts) {
         sz.suggestPrefix('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
         var stats = sz.rootSubjects(statements);
         var roots = stats.roots;
-        results = []
+        var results = [], root;
         for (var i=0; i<roots.length; i++) {
             root = roots[i];
             results.push(subjectXMLTree(root, stats))
@@ -684,7 +684,7 @@ __Serializer.prototype.statementsToXML = function(sts) {
                 [propertyXMLTree(subject, stats)]).concat(["</rdf:Description>"]);
     }
     function collectionXMLTree(subject, stats) {
-        res = []
+        var res = []
         for (var i=0; i< subject.elements.length; i++) {
             res.push(subjectXMLTree(subject.elements[i], stats));
          }

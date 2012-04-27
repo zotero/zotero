@@ -1126,7 +1126,7 @@ __SinkParser.prototype.skipSpace = function(str, i) {
             }
         }
     }
-    val = (tmp.length - str.length) + j;
+    var val = (tmp.length - str.length) + j;
     if( val === tmp.length ) {
         return -1;
     }

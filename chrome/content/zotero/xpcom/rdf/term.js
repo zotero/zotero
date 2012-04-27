@@ -246,7 +246,7 @@ $rdf.Formula.prototype.collection = function () { // obsolete
 }
 
 $rdf.Formula.prototype.list = function (values) {
-    li = new $rdf.Collection();
+    var li = new $rdf.Collection();
     if (values) {
         for(var i = 0; i<values.length; i++) {
             li.append(values[i]);
