@@ -697,9 +697,14 @@ __Serializer.prototype.statementsToXML = function(sts) {
 						t = qname(st.predicate);
 						switch (st.object.termType) {
 							case 'bnode':
-								results = results.concat(['<'+ t +'>', 
-									subjectXMLTree(st.object, stats),
-									'</'+ t +'>']);
+								if(sz.incoming[st.object].length == 1) {
+									results = results.concat(['<'+ t +'>', 
+										subjectXMLTree(st.object, stats),
+										'</'+ t +'>']);
+								} else {
+									results = results.concat(['<'+ t +' rdf:nodeID="'
+										+st.object.toNT().slice(2)+'"/>']);
+								}
 							break;
 							case 'symbol':
 								results = results.concat(['<'+ t +' rdf:resource="'
@@ -728,7 +733,7 @@ __Serializer.prototype.statementsToXML = function(sts) {
         var attrs = '';
         if (subject.termType == 'bnode') {
             if(sz.incoming[subject].length != 1) { // not an anonymous bnode
-                attrs = ' rdf:ID="'+subject.toNT().slice(2)+'"';
+                attrs = ' rdf:nodeID="'+subject.toNT().slice(2)+'"';
             }
         } else {
             attrs = ' rdf:about="'+ relURI(subject)+'"';
