@@ -660,7 +660,7 @@ __Serializer.prototype.statementsToXML = function(sts) {
     
     function escapeForXML(str) {
         if (typeof str == 'undefined') return '@@@undefined@@@@';
-        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
     }
 
     function relURI(term) {
