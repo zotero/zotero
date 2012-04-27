@@ -706,9 +706,6 @@ __Serializer.prototype.statementsToXML = function(sts) {
 	        if(st.predicate.uri == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && !type && st.object.termType == "symbol") {
 	        	// look for a type
 	        	type = st.object;
-	        	sts.splice(i,1);
-	        	i--;
-	        	continue;
 	        } else {
 	          // see whether predicate can be replaced with "li"
 						if(st.predicate.uri.substr(0, liPrefix.length) == liPrefix) {
