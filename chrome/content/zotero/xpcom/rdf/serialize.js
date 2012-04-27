@@ -673,7 +673,34 @@ __Serializer.prototype.statementsToXML = function(sts) {
     		var results = [];
     		var type = null, t, st;
         var sts = stats.subjects[sz.toStr(subject)]; // relevant statements
-				sts.sort();
+
+				// Sort only on the predicate, leave the order at object
+				// level undisturbed.  This leaves multilingual content in
+				// the order of entry (for partner literals), which helps
+				// readability.
+				//
+				// For the predicate sort, we attempt to split the uri
+				// as a hint to the sequence, as sequenced items seems
+				// to be of the form http://example.com#_1, http://example.com#_2,
+				// et cetera.  Probably not the most optimal of fixes, but
+				// it does work.
+		    sts.sort(function(a,b) {
+					var aa = a.predicate.uri.split('#_');
+					var bb = a.predicate.uri.split('#_');
+					if (aa[0] > bb[0]) {
+						return 1;
+					} else if (aa[0] < bb[0]) {
+						return -1;
+					} else if ("undefined" !== typeof aa[1] && "undefined" !== typeof bb[1]) {
+						if (parseInt(aa[1], 10) > parseInt(bb[1], 10)) {
+							return 1;
+						} else if (parseInt(aa[1], 10) < parseInt(bb[1], 10)) {
+							return -1;
+						}
+					}
+					return 0;
+				});
+
         for (var i=0; i<sts.length; i++) {
 	        st = sts[i];
 	        if(st.predicate.uri == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && !type && st.object.termType == "symbol") {
