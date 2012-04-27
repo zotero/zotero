@@ -669,19 +669,72 @@ __Serializer.prototype.statementsToXML = function(sts) {
 
     // The tree for a subject
     function subjectXMLTree(subject, stats) {
-        var start
+    		const liPrefix = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#_';
+    		var results = [];
+    		var type = null, t, st;
+        var sts = stats.subjects[sz.toStr(subject)]; // relevant statements
+				sts.sort();
+        for (var i=0; i<sts.length; i++) {
+	        st = sts[i];
+	        if(st.predicate.uri == 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type' && !type && st.object.termType == "symbol") {
+	        	// look for a type
+	        	type = st.object;
+	        	sts.splice(i,1);
+	        	i--;
+	        	continue;
+	        } else {
+	          // see whether predicate can be replaced with "li"
+						if(st.predicate.uri.substr(0, liPrefix.length) == liPrefix) {
+							var number = st.predicate.uri.substr(liPrefix.length);
+							// make sure these are actually numeric list items
+							var intNumber = parseInt(number);
+							if(number == intNumber.toString()) {
+								// was numeric; don't need to worry about ordering since we've already
+								// sorted the statements
+								st.predicate = $rdf.Symbol('http://www.w3.org/1999/02/22-rdf-syntax-ns#li');
+							}
+						}
+						t = qname(st.predicate);
+						switch (st.object.termType) {
+							case 'bnode':
+								results = results.concat(['<'+ t +'>', 
+									subjectXMLTree(st.object, stats),
+									'</'+ t +'>']);
+							break;
+							case 'symbol':
+								results = results.concat(['<'+ t +' rdf:resource="'
+									+ relURI(st.object)+'"/>']); 
+							break;
+							case 'literal':
+								results = results.concat(['<'+ t
+									+ (st.object.dt ? ' rdf:datatype="'+escapeForXML(st.object.dt.uri)+'"' : '') 
+									+ (st.object.lang ? ' xml:lang="'+st.object.lang+'"' : '') 
+									+ '>' + escapeForXML(st.object.value)
+									+ '</'+ t +'>']);
+							break;
+							case 'collection':
+								results = results.concat(['<'+ t +' rdf:parseType="Collection">', 
+									collectionXMLTree(st.object, stats),
+									'</'+ t +'>']);
+							break;
+							default:
+								throw "Can't serialize object of type "+st.object.termType +" into XML";
+						} // switch
+					}
+		    }
+
+        var tag = type ? qname(type) : 'rdf:Description';
+
+        var attrs = '';
         if (subject.termType == 'bnode') {
-            if (!stats.incoming[subject]) { // anonymous bnode
-                var start = '<rdf:Description>';
-            } else {
-                var start = '<rdf:Description rdf:nodeID="'+subject.toNT().slice(2)+'">';
+            if(sz.incoming[subject].length != 1) { // not an anonymous bnode
+                attrs = ' rdf:ID="'+subject.toNT().slice(2)+'"';
             }
         } else {
-            var start = '<rdf:Description rdf:about="'+ relURI(subject)+'">';
+            attrs = ' rdf:about="'+ relURI(subject)+'"';
         }
 
-        return [ start ].concat(
-                [propertyXMLTree(subject, stats)]).concat(["</rdf:Description>"]);
+        return [ '<' + tag + attrs + '>' ].concat([results]).concat(["</"+ tag +">"]);
     }
     function collectionXMLTree(subject, stats) {
         var res = []
