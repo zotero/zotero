@@ -238,36 +238,8 @@ Zotero.Translate.ItemSaver.prototype = {
 			Zotero.debug("Translate: Created attachment; id is "+myID, 4);
 			var newItem = Zotero.Items.get(myID);
 		} else {
-			var uri, file;
-			
-			// generate nsIFile
-			var IOService = Components.classes["@mozilla.org/network/io-service;1"].
-							getService(Components.interfaces.nsIIOService);
-			try {
-				var uri = IOService.newURI(attachment.path, "", this._baseURI);
-			}
-			catch (e) {
-				var msg = "Error parsing attachment path: " + attachment.path;
-				Zotero.logError(msg);
-				Zotero.debug("Translate: " + msg, 2);
-				return;
-			}
-			
-			try {
-				var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
-				if (file.path == '/') {
-					var msg = "Error parsing attachment path: " + attachment.path;
-					Zotero.logError(msg);
-					Zotero.debug("Translate: " + msg, 2);
-					return;
-				}
-			}
-			catch (e) {
-				var msg = "Error getting file from attachment path: " + attachment.path;
-				Zotero.logError(msg);
-				Zotero.debug("Translate: " + msg, 2);
-				return;
-			}
+			var file = this._parsePath(attachment.path);
+			if(!file) return;
 			
 			if (!file.exists()) {
 				// use attachment title if possible, or else file leaf name
@@ -306,6 +278,45 @@ Zotero.Translate.ItemSaver.prototype = {
 		newItem.save();
 		
 		return newItem;
+	},
+	
+	"_parsePath":function(path) {
+		// generate nsIFile
+		var IOService = Components.classes["@mozilla.org/network/io-service;1"].
+						getService(Components.interfaces.nsIIOService);
+		try {
+			var uri = IOService.newURI(path, "", this._baseURI);
+		}
+		catch (e) {
+			var msg = "Error parsing attachment path: " + attachment.path;
+			Zotero.logError(msg);
+			Zotero.debug("Translate: " + msg, 2);
+			return false;
+		}
+		
+		try {
+			var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
+			if (file.path == '/') {
+				var msg = "Error parsing attachment path: " + attachment.path;
+				Zotero.logError(msg);
+				Zotero.debug("Translate: " + msg, 2);
+				return false;
+			}
+		}
+		catch (e) {
+			var msg = "Error getting file from attachment path: " + attachment.path;
+			Zotero.logError(msg);
+			Zotero.debug("Translate: " + msg, 2);
+			return false;
+		}
+		
+		if(!file.exists() && path[0] !== "/" && path.substr(0, 5).toLowerCase() !== "file:") {
+			// This looks like a relative path, but it might actually be an absolute path, because
+			// some people are not quite there.
+			var newFile = this._parsePath("/"+path);
+			if(newFile.exists()) return newFile;
+		}
+		return file;
 	},
 	
 	"_saveAttachmentDownload":function(attachment, parentID) {
