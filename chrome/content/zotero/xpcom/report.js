@@ -45,6 +45,9 @@ Zotero.Report = new function() {
 		content += '<link rel="stylesheet" type="text/css" media="print" href="zotero://report/detail_print.css"/>\n';
 		content += '</head>\n\n<body>\n';
 		
+		content += '<form class="noprint" name="breakForm">\n<input type="checkbox" name="checkbox" onClick="pageBreak()">Check this box if you want to print each item on a separate page.</form>\n';
+		content += '<script type="text/javascript">function pageBreak(){divs=document.getElementsByClassName("endItem");for(i=0;i<divs.length;i++){divs[i].style.pageBreakAfter=(document.forms.breakForm.checkbox.checked)?"always":""}}</script>\n';
+		
 		content += '<ul class="report' + (combineChildItems ? ' combineChildItems' : '') + '">\n';
 		for each(var arr in items) {
 			content += '\n<li id="i' + arr.itemID + '" class="item ' + arr.itemType + '">\n';
@@ -126,7 +129,7 @@ Zotero.Report = new function() {
 			}
 			
 			
-			content += '</li>\n\n';
+			content += '</li><div class="endItem"></div>\n\n';
 		}
 		content += '</ul>\n';
 		content += '</body>\n</html>';
@@ -302,4 +305,6 @@ Zotero.Report = new function() {
 		}
 		return content;
 	}
+	
+
 }
