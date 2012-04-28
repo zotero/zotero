@@ -45,6 +45,7 @@ Zotero.Report = new function() {
 		content += '<link rel="stylesheet" type="text/css" media="print" href="zotero://report/detail_print.css"/>\n';
 		content += '</head>\n\n<body>\n';
 		
+		// Add an option for page breaks between items in report
 		content += '<form class="noprint" name="breakForm">\n<input type="checkbox" name="checkbox" onClick="pageBreak()">Check this box if you want to print each item on a separate page.</form>\n';
 		content += '<script type="text/javascript">function pageBreak(){divs=document.getElementsByClassName("endItem");for(i=0;i<divs.length;i++){divs[i].style.pageBreakAfter=(document.forms.breakForm.checkbox.checked)?"always":""}}</script>\n';
 		
