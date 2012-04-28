@@ -2189,7 +2189,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.326";
+    this.processor_version = "1.0.327";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2567,28 +2567,25 @@ CSL.Engine.prototype.retrieveItem = function (id) {
         }
     }
     if (this.opt.development_extensions.static_statute_locator) {
-        if (Item.type && ["bill","gazette","legislation"].indexOf(Item.type) > -1
-            && Item.title 
-            && Item.jurisdiction) {
-            var elements = ["type", "title", "jurisdiction", "genre", "volume", "container-title", "original-date", "issued"];
+        if (Item.type && ["bill","gazette","legislation"].indexOf(Item.type) > -1) {
+            var elements = ["type", "title", "jurisdiction", "genre", "volume", "container-title"];
             var legislation_id = [];
             for (var i = 0, ilen = elements.length; i < ilen; i += 1) {
                 var varname = elements[i];
-                var value;
-                if (Item[varname]) {
-                    if (CSL.DATE_VARIABLES.indexOf(varname) > -1) {
-                        if (Item[varname].year) {
-                            value = Item[varname].year;
-                        } else {
-                            continue;
-                        }
-                    } else {
-                        value = Item[varname];
-                    }
-                    legislation_id.push(value);
-                }
-            }
-            Item.legislation_id = legislation_id.join("::");
+				if (Item[varname]) {
+					legislation_id.push(Item[varname]);
+				}
+			}
+			for (var i = 0, ilen = 2; i < ilen; i += 1) {
+				if (["original-date", "issued"].indexOf(varname) > -1) {
+					if (Item[varname] && Item[varname].year) {
+						value = Item[varname].year;
+						legislation_id.push(value);
+						break;
+					}
+				}
+			}
+			Item.legislation_id = legislation_id.join("::");
         }
     }
     return Item;
