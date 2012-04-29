@@ -46,12 +46,12 @@ Zotero.Report = new function() {
 		content += '</head>\n\n<body>\n';
 		
 		// Add an option for page breaks between items in report
-		content += '<form class="noprint" name="breakForm">\n<input type="checkbox" name="checkbox" onClick="pageBreak()">Check this box if you want to print each item on a separate page.</form>\n';
+		content += '<form class="noprint" name="breakForm">\n<input type="checkbox" name="checkbox" onClick="pageBreak()">' + Zotero.getString('report.option.pageBreak') + '</form>\n';
 		content += '<script type="text/javascript">function pageBreak(){divs=document.getElementsByClassName("endItem");for(i=0;i<divs.length;i++){divs[i].style.pageBreakAfter=(document.forms.breakForm.checkbox.checked)?"always":""}}</script>\n';
 		
 		content += '<ul class="report' + (combineChildItems ? ' combineChildItems' : '') + '">\n';
 		for each(var arr in items) {
-			content += '\n<li id="i' + arr.itemID + '" class="item ' + arr.itemType + '">\n';
+			content += '\n<li id="i' + arr.itemID + '" class="item ' + arr.itemType + ' endItem">\n';
 			
 			if (arr.title) {
 				// Top-level item matched search, so display title
@@ -130,7 +130,7 @@ Zotero.Report = new function() {
 			}
 			
 			
-			content += '</li><div class="endItem"></div>\n\n';
+			content += '</li>\n\n';
 		}
 		content += '</ul>\n';
 		content += '</body>\n</html>';
