@@ -241,8 +241,7 @@ function makeZoteroContext(isConnector) {
 		'rdf/match',
 		'rdf/n3parser',
 		'rdf/rdfparser',
-		'rdf/serialize',
-		'rdf'
+		'rdf/serialize'
 	];
 	zContext.Zotero.RDF = {AJAW:{Zotero:zContext.Zotero}};
 	for (var i=0; i<rdfXpcomFiles.length; i++) {

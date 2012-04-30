@@ -1,5 +1,5 @@
 /* Set up the environment before loading the rest of the files into Zotero */
-var $rdf = {
+Zotero.RDF.AJAW = {
   Util: {
     ArrayIndexOf: function (arr, item, i) {
       //supported in all browsers except IE<9
@@ -20,13 +20,13 @@ var $rdf = {
       throw "RDFArrayRemove: Array did not contain " + x;
     },
   },
+  tabulator: {
+  	log: {
+    	debug: Zotero.debug,
+    	warn: Zotero.debug
+  	}
+	},
+	alert: Zotero.debug
 };
 
-var tabulator = {
-  log: {
-    debug: Zotero.debug,
-    warn: Zotero.debug
-  }
-};
-
-var alert = tabulator.log.warn;
+Zotero.RDF.AJAW.$rdf = Zotero.RDF.AJAW;
