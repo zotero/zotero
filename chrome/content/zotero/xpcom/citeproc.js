@@ -2617,6 +2617,7 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
         var item = inputList[i][1];
         var section_label_count = 0;
         if (!Item.section
+            && !Item.page
             && ["bill","gazette","legislation"].indexOf(Item.type) > -1
             && this.opt.development_extensions.clobber_locator_if_no_statute_section) {
             item.locator = undefined;
