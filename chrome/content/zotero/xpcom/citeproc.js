@@ -2189,7 +2189,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.327";
+    this.processor_version = "1.0.328";
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -2616,83 +2616,100 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
         var Item = inputList[i][0];
         var item = inputList[i][1];
         var section_label_count = 0;
-        if (!Item.section
-            && !Item.page
-            && ["bill","gazette","legislation"].indexOf(Item.type) > -1
-            && this.opt.development_extensions.clobber_locator_if_no_statute_section) {
-            item.locator = undefined;
-            item.label = undefined;
-        } else if (Item.section
-                   && item
-                   && ["bill","gazette","legislation"].indexOf(Item.type) > -1
-                   && this.opt.development_extensions.static_statute_locator) {
-            var value = "" + Item.section;
-            var later_label = item.label;
-            if (value) {
+        var later_label = false;
+        var value = false;
+        if (["bill","gazette","legislation"].indexOf(Item.type) > -1) {
+            if (!Item.section
+                && !Item.page
+                && this.opt.development_extensions.clobber_locator_if_no_statute_section) {
+                item.locator = undefined;
+                item.label = undefined;
+            } else if (Item.section
+                       && item
+                       && this.opt.development_extensions.static_statute_locator) {
+                value = "" + Item.section;
+                later_label = item.label;
+                if (value) {
+                    var splt = value.split(/\s+/);
+                    if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
+                        item.label = CSL.STATUTE_SUBDIV_STRINGS[splt[0]];
+                    } else {
+					    item.label = "section";
+                        value = "sec. " + value;
+                    }
+                }
+            } else if (item
+                      && item.locator
+                      &&  this.opt.development_extensions.static_statute_locator) {
+                value = "" + item.locator;
                 var splt = value.split(/\s+/);
                 if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
                     item.label = CSL.STATUTE_SUBDIV_STRINGS[splt[0]];
+                } else if (item.label) {
+                    value = CSL.STATUTE_SUBDIV_STRINGS_REVERSE[item.label] + " " + value;
                 } else {
-					item.label = "section";
-                    value = "sec. " + value;
+					item.label = "page";
+                    value = "p. " + value;
                 }
             }
 			if (!later_label) {
 				later_label = item.label;
 			}
-            var m = value.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
-            item.section_label_count = m.length;
-            var locator = "";
-            var labelstr = "";
-            if (item.locator) {
-                locator = item.locator;
-                var firstword = item.locator.split(/\s/)[0];
-                if (item.label === later_label && firstword && firstword.match(/^[0-9]/)) {
-                    labelstr = ", " + CSL.STATUTE_SUBDIV_STRINGS_REVERSE[later_label];
-                } else if (item.label !== later_label && firstword && firstword.match(/^[0-9]/)) {
-                    labelstr = " " + CSL.STATUTE_SUBDIV_STRINGS_REVERSE[later_label] + " ";
-                } else if (CSL.STATUTE_SUBDIV_STRINGS[firstword]) {
-                    labelstr = " ";
+            if (value) {
+                var m = value.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
+                item.section_label_count = m.length;
+                var locator = "";
+                var labelstr = "";
+                if (item.locator) {
+                    locator = item.locator;
+                    var firstword = item.locator.split(/\s/)[0];
+                    if (item.label === later_label && firstword && firstword.match(/^[0-9]/)) {
+                        labelstr = ", " + CSL.STATUTE_SUBDIV_STRINGS_REVERSE[later_label];
+                    } else if (item.label !== later_label && firstword && firstword.match(/^[0-9]/)) {
+                        labelstr = " " + CSL.STATUTE_SUBDIV_STRINGS_REVERSE[later_label] + " ";
+                    } else if (CSL.STATUTE_SUBDIV_STRINGS[firstword]) {
+                        labelstr = " ";
+                    }
+                    locator = labelstr + locator;
+                    if (locator.slice(0,1) === "&") {
+                        locator = " " + locator;
+                    }
+                    value = value + locator;
                 }
-                locator = labelstr + locator;
-                if (locator.slice(0,1) === "&") {
-                    locator = " " + locator;
-                }
-                value = value + locator;
-            }
-            var m = value.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
-            if (m) {
-                var splt = value.split(CSL.STATUTE_SUBDIV_PLAIN_REGEX);
-                if (splt.length > 1) {
-                    var lst = [];
-                    lst.push(splt[1].replace(/\s*$/, "").replace(/^\s*/, ""));
-                    var has_repeat_label = false;
-                    var has_sublabel = false;
-                    for (var j=2, jlen=splt.length; j < jlen; j += 1) {
-                        var subdiv = m[j - 1].replace(/^\s*/, "");
-                        var fullsubdiv = CSL.STATUTE_SUBDIV_STRINGS[subdiv];
-                        if (fullsubdiv === item.label) {
-                            has_repeat_label = true;
+                var m = value.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
+                if (m) {
+                    var splt = value.split(CSL.STATUTE_SUBDIV_PLAIN_REGEX);
+                    if (splt.length > 1) {
+                        var lst = [];
+                        lst.push(splt[1].replace(/\s*$/, "").replace(/^\s*/, ""));
+                        var has_repeat_label = false;
+                        var has_sublabel = false;
+                        for (var j=2, jlen=splt.length; j < jlen; j += 1) {
+                            var subdiv = m[j - 1].replace(/^\s*/, "");
+                            var fullsubdiv = CSL.STATUTE_SUBDIV_STRINGS[subdiv];
+                            if (fullsubdiv === item.label) {
+                                has_repeat_label = true;
+                            } else {
+                                has_sublabel = true;
+                            }
+                            lst.push(subdiv);
+                            lst.push(splt[j].replace(/\s*$/, "").replace(/^\s*/, ""));
+                        }
+                        for (var j=lst.length - 2; j > 0; j += -2) {
+                            if (!has_sublabel) {
+                                lst = lst.slice(0,j).concat(lst.slice(j + 1));
+                            }
+                        }
+                        value = lst.join(" ");
+                        if (!has_sublabel && has_repeat_label) {
+                            item.force_pluralism = 1;
                         } else {
-                            has_sublabel = true;
+                            item.force_pluralism = 0;
                         }
-                        lst.push(subdiv);
-                        lst.push(splt[j].replace(/\s*$/, "").replace(/^\s*/, ""));
-                    }
-                    for (var j=lst.length - 2; j > 0; j += -2) {
-                        if (!has_sublabel) {
-                            lst = lst.slice(0,j).concat(lst.slice(j + 1));
-                        }
-                    }
-                    value = lst.join(" ");
-                    if (!has_sublabel && has_repeat_label) {
-                        item.force_pluralism = 1;
-                    } else {
-                        item.force_pluralism = 0;
                     }
                 }
+                item.locator = value;
             }
-            item.locator = value;
         }
     }
 }
