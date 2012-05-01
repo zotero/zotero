@@ -2646,6 +2646,9 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
                     item.label = CSL.STATUTE_SUBDIV_STRINGS[splt[0]];
                     item.locator = splt.slice(1).join(" ");
                 }
+                if ((!item.label || item.label === "page") && item.locator && item.locator.match(/^[0-9].*/)) {
+                    item.locator = ", " + item.locator;
+                }
             }
             if (value) {
 			    if (!later_label) {
