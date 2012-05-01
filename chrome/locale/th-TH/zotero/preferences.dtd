@@ -159,7 +159,7 @@
 <!ENTITY zotero.preferences.locate.description "รายละเอียด">
 <!ENTITY zotero.preferences.locate.name "ชื่อ">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "เครื่องมือค้นหาขยายความสามารถของดร็อปดาวน์ &quot;หาที่ตั้ง&quot; ในแผงข้อมูล หากเลือกใช้เครื่องมือค้นหาตามรายการข้างล่างมันจะถูกเพิ่มเข้าไปในดร็อปดาวน์และสามารถใช้กำหนดแหล่งข้อมูลจากไลบรารี่ของคุณบนเว็บ">
-<!ENTITY zotero.preferences.locate.addDescription "การเพิ่มเครื่องมือค้นหาซึ่งไม่มีอยู่ในรายการ ให้ไปที่เครื่องมือช่วยค้นหาในเบราว์เซอร์ของคุณและเลือก &#34;Add&#34 จากเมนู &quot;หาที่ตั้ง&quot; ของ Zotero">
+<!ENTITY zotero.preferences.locate.addDescription "การเพิ่มเครื่องมือค้นหาซึ่งไม่มีอยู่ในรายการ ให้ไปที่เครื่องมือช่วยค้นหาในเบราว์เซอร์ของคุณและเลือก &#34;Add&#34; จากเมนู &quot;หาที่ตั้ง&quot; ของ Zotero">
 <!ENTITY zotero.preferences.locate.restoreDefaults "ใช้ค่าโดยปริยาย">
 
 <!ENTITY zotero.preferences.charset "รหัสอักขระ">
