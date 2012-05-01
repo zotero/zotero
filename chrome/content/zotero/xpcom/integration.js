@@ -930,7 +930,11 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 				// make sure style is defined
 				if(e instanceof Zotero.Integration.DisplayException && e.name === "invalidStyle") {
 					this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
-							this._app.secondaryFieldType, function() {
+							this._app.secondaryFieldType, function(status) {							
+						if(status === false) {
+							throw new Zotero.Integration.UserCancelledException();
+						}
+						
 						me._doc.setDocumentData(me._session.data.serializeXML());
 						me._session.reload = true;
 						callback(true);
