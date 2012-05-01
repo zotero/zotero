@@ -2644,11 +2644,7 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
                 var splt = item.locator.split(/\s+/);
                 if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
                     item.label = CSL.STATUTE_SUBDIV_STRINGS[splt[0]];
-                } else if (item.label) {
-                    item.locator = CSL.STATUTE_SUBDIV_STRINGS_REVERSE[item.label] + " " + item.locator;
-                } else {
-					item.label = "page";
-                    item.locator = "p. " + item.locator;
+                    item.locator = splt.slice(1).join(" ");
                 }
             }
             if (value) {
