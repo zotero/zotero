@@ -164,9 +164,8 @@
 							<menuitem id="zotero-tb-snapshot-from-page" class="menuitem-iconic zotero-menuitem-attachments-snapshot" label="&zotero.items.menu.attach.snapshot;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(false, itemID)"/>
 							<menuitem id="zotero-tb-link-from-page" class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromPage(true, itemID)"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
-							<!-- TODO: localize -->
-							<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="Attach Stored Copy of File…" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
-							<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="Attach Link to File…" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(true, itemID);"/>
+							<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="&zotero.items.menu.attach.file;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
+							<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(true, itemID);"/>
 						</menupopup>
 					</toolbarbutton>
 					<toolbarseparator/>
@@ -277,8 +276,7 @@
 					<menuitem oncommand="ZoteroPane_Local.deleteSelectedItems();"/>
 					<menuitem oncommand="ZoteroPane_Local.deleteSelectedItems(true);"/>
 					<menuitem label="&zotero.items.menu.restoreToLibrary;" oncommand="ZoteroPane_Local.restoreSelectedItems();"/>
-					<!-- TODO: localize -->
-					<menuitem oncommand="ZoteroPane_Local.mergeSelectedItems();" label="Merge Items…"/>
+					<menuitem label="&zotero.items.menu.mergeItems;" oncommand="ZoteroPane_Local.mergeSelectedItems();"/>
 					<menuseparator/>
 					<menuitem oncommand="Zotero_File_Interface.exportItems();"/>
 					<menuitem oncommand="Zotero_File_Interface.bibliographyFromItems();"/>
