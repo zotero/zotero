@@ -926,7 +926,11 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 				// make sure style is defined
 				if(e instanceof Zotero.Integration.DisplayException && e.name === "invalidStyle") {
 					this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
-							this._app.secondaryFieldType, function() {
+							this._app.secondaryFieldType, function(status) {							
+						if(status === false) {
+							throw new Zotero.Integration.UserCancelledException();
+						}
+						
 						me._doc.setDocumentData(me._session.data.serializeXML());
 						me._session.reload = true;
 						callback(true);
@@ -1315,9 +1319,13 @@ Zotero.Integration.Fields.prototype._showCorruptFieldError = function(e, field, 
 		// Display reselect edit citation dialog
 		var me = this;
 		var oldWindow = Zotero.Integration.currentWindow;
+		var oldProgressCallback = me.progressCallback;
 		this.addEditCitation(field, function() {
-			Zotero.Integration.currentWindow.close();
+			if(Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
+				Zotero.Integration.currentWindow.close();
+			}
 			Zotero.Integration.currentWindow = oldWindow;
+			me.progressCallback = oldProgressCallback;
 			me.updateSession(callback, errorCallback);
 		});
 		return false;
@@ -1677,11 +1685,12 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 		}
 		
 		// do this operations in reverse in case plug-ins care about order
-		this._deleteFields.sort();
+		var sortClosure = function(a, b) { return a-b; };
+		this._deleteFields.sort(sortClosure);
 		for(var i=(this._deleteFields.length-1); i>=0; i--) {
 			this._fields[this._deleteFields[i]].delete();
 		}
-		this._removeCodeFields.sort();
+		this._removeCodeFields.sort(sortClosure);
 		for(var i=(this._removeCodeFields.length-1); i>=0; i--) {
 			this._fields[this._removeCodeFields[i]].removeCode();
 		}

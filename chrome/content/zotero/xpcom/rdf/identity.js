@@ -181,7 +181,7 @@ We replace the bigger with the smaller.
 
 */
 RDFIndexedFormula.prototype.equate = function(u1, u2) {
-    tabulator.log.info("Equating "+u1+" and "+u2)
+    tabulator.log.debug("Equating "+u1+" and "+u2)
     
     var d = u1.compareTerm(u2);
     if (!d) return true; // No information in {a = a}

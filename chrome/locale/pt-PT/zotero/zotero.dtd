@@ -38,7 +38,7 @@
 <!ENTITY zotero.notes.separate "Editar numa janela à parte">
 
 <!ENTITY zotero.toolbar.duplicate.label "Mostrar Duplicados">
-<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.collections.showUnfiledItems "Mostrar Itens por Arquivar">
 
 <!ENTITY zotero.items.itemType "Tipo de Item">
 <!ENTITY zotero.items.type_column "Tipo">
@@ -51,7 +51,7 @@
 <!ENTITY zotero.items.journalAbbr_column "Abreviatura de Revista Científica">
 <!ENTITY zotero.items.language_column "Língua">
 <!ENTITY zotero.items.accessDate_column "Acedido">
-<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.libraryCatalog_column "Catálogo da Biblioteca">
 <!ENTITY zotero.items.callNumber_column "Número da Chamada">
 <!ENTITY zotero.items.rights_column "Direitos">
 <!ENTITY zotero.items.dateAdded_column "Data de Adição">
@@ -62,11 +62,11 @@
 <!ENTITY zotero.items.menu.attach "Adicionar Anexo">
 <!ENTITY zotero.items.menu.attach.snapshot "Anexar Captura da Página Corrente">
 <!ENTITY zotero.items.menu.attach.link "Anexar Ligação à Página Corrente">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
+<!ENTITY zotero.items.menu.attach.link.uri "Atribuir Ligação a URI...">
 <!ENTITY zotero.items.menu.attach.file "Anexar Cópia Armazenada de Arquivo...">
 <!ENTITY zotero.items.menu.attach.fileLink "Anexar Ligação a Arquivo...">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.restoreToLibrary "Restaurar para a Biblioteca">
 <!ENTITY zotero.items.menu.duplicateItem "Duplicar o Item Seleccionado">
 
 <!ENTITY zotero.toolbar.newItem.label "Novo Item">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "Suporte e Documentação">
 <!ENTITY zotero.toolbar.about.label "Acerca do Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Procura Avançada">
-<!ENTITY zotero.toolbar.tab.tooltip "Toggle Tab Mode">
+<!ENTITY zotero.toolbar.tab.tooltip "Alternar Modo de Separadores">
 <!ENTITY zotero.toolbar.openURL.label "Localizar">
 <!ENTITY zotero.toolbar.openURL.tooltip "Encontrar através da sua biblioteca local">
 
@@ -98,11 +98,11 @@
 <!ENTITY zotero.item.attachment.file.show "Mostrar Arquivo">
 <!ENTITY zotero.item.textTransform "Transformar Texto">
 <!ENTITY zotero.item.textTransform.titlecase "Maiúsculas Iniciais de Título">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.sentencecase "Caixa da frase">
 
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newNote "Nova Nota">
 <!ENTITY zotero.toolbar.note.standalone "Nova Nota Isolada">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
+<!ENTITY zotero.toolbar.note.child "Adicionar Nota Filha">
 <!ENTITY zotero.toolbar.lookup "Procurar por Identificador...">
 <!ENTITY zotero.toolbar.attachment.linked "Ligação a Arquivo...">
 <!ENTITY zotero.toolbar.attachment.add "Guardar Cópia de Arquivo...">
@@ -176,11 +176,11 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Marcadores">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Os marcadores são preservados entre o Microsoft Word e o OpenOffice, mas podem ser acidentalmente modificados. Por razões de compatibilidade, as citações não podem ser inseridas em notas de pé-de-página ou em notas finais quando esta opção é escolhida.">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Armazenar referências no documento">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Armazenar referências no seu documento aumenta ligeiramente o tamanho do ficheiro, mas permitir-lhe-á partilhar o documento com outros sem usar um grupo Zotero. É necessário usar o Zotero 3.0 ou uma versão posterior para actualizar documentos criados com esta opção.">
 
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.showEditor.label "Mostrar Editor">
+<!ENTITY zotero.integration.classicView.label "Visualização Clássica">
 
 <!ENTITY zotero.integration.references.label "Referências na Bibliografia">
 
@@ -237,6 +237,6 @@
 <!ENTITY zotero.file.choose.label "Escolher Arquivo...">
 <!ENTITY zotero.file.noneSelected.label "Nenhum arquivo escolhido">
 
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.label "Guardar no Zotero">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Não é possível guardar anexos na biblioteca seleccionada neste momento. Este item será por isso guardado na sua biblioteca.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "Para usar esta funcionalidade tem de instalar primeiro as ferramentas PDF nas suas preferências do Zotero.">

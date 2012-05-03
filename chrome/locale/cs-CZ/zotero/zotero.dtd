@@ -30,7 +30,7 @@
 <!ENTITY zotero.contextMenu.saveLinkAsItem "Uložit odkaz jako položku Zotera">
 <!ENTITY zotero.contextMenu.saveImageAsItem "Uložit obrázek jako položku Zotera">
 
-<!ENTITY zotero.tabs.info.label "Info">
+<!ENTITY zotero.tabs.info.label "Informace">
 <!ENTITY zotero.tabs.notes.label "Poznámky">
 <!ENTITY zotero.tabs.attachments.label "Přílohy">
 <!ENTITY zotero.tabs.tags.label "Štítky">
@@ -38,7 +38,7 @@
 <!ENTITY zotero.notes.separate "Upravit v samostatném okně">
 
 <!ENTITY zotero.toolbar.duplicate.label "Ukázat duplikáty">
-<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
+<!ENTITY zotero.collections.showUnfiledItems "Zobrazit sjednocené položky">
 
 <!ENTITY zotero.items.itemType "Typ položky">
 <!ENTITY zotero.items.type_column "Typ">
@@ -51,7 +51,7 @@
 <!ENTITY zotero.items.journalAbbr_column "Zkratka časopisu">
 <!ENTITY zotero.items.language_column "Jazyk">
 <!ENTITY zotero.items.accessDate_column "Přistoupeno">
-<!ENTITY zotero.items.libraryCatalog_column "Library Catalog">
+<!ENTITY zotero.items.libraryCatalog_column "Katalog knihovny">
 <!ENTITY zotero.items.callNumber_column "Signatura">
 <!ENTITY zotero.items.rights_column "Práva">
 <!ENTITY zotero.items.dateAdded_column "Přidáno dne">

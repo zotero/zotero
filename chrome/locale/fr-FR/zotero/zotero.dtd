@@ -84,7 +84,7 @@
 <!ENTITY zotero.toolbar.import.label "Importer…">
 <!ENTITY zotero.toolbar.importFromClipboard "Importer depuis le presse-papiers">
 <!ENTITY zotero.toolbar.export.label "Exporter la bibliothèque…">
-<!ENTITY zotero.toolbar.rtfScan.label "Balayage d'un fichier RTF…">
+<!ENTITY zotero.toolbar.rtfScan.label "Analyse d'un fichier RTF…">
 <!ENTITY zotero.toolbar.timeline.label "Créer une chronologie">
 <!ENTITY zotero.toolbar.preferences.label "Préférences…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Assistance et documentation">
@@ -111,7 +111,7 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Aucun marqueur à afficher">
 <!ENTITY zotero.tagSelector.filter "Filtre :">
-<!ENTITY zotero.tagSelector.showAutomatic "Montrer automatiquement">
+<!ENTITY zotero.tagSelector.showAutomatic "Afficher les marqueurs ajoutés automatiquement">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Afficher tous les marqueurs de cette bibliothèque">
 <!ENTITY zotero.tagSelector.selectVisible "Sélectionner ce qui est visible">
 <!ENTITY zotero.tagSelector.clearVisible "Désélectionner ce qui est visible">
@@ -212,7 +212,7 @@
 <!ENTITY zotero.recognizePDF.itemName.label "Nom du document">
 <!ENTITY zotero.recognizePDF.captcha.label "Entrez le texte ci-dessous pour poursuivre la récupération des métadonnées.">
 
-<!ENTITY zotero.rtfScan.title "Balayage d'un fichier RTF">
+<!ENTITY zotero.rtfScan.title "Analyse d'un fichier RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Annuler">
 <!ENTITY zotero.rtfScan.citation.label "Citation">
 <!ENTITY zotero.rtfScan.itemName.label "Nom du document">
@@ -220,17 +220,17 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Citations ambiguës">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Citations transcrites">
 <!ENTITY zotero.rtfScan.introPage.label "Introduction">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero peut extraire et reformater automatiquement des citations et insérer une bibliographie dans des fichiers RTF. La fonctionnalité de balayage de RTF prend actuellement en charge des variations selon les formats suivants :">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero peut extraire et reformater automatiquement des citations et insérer une bibliographie dans des fichiers RTF. La fonctionnalité d'analyse de RTF prend actuellement en charge des variations selon les formats suivants :">
 <!ENTITY zotero.rtfScan.introPage.description2 "Pour démarrer, sélectionnez un fichier RTF en lecture et un fichier de sortie ci-dessous :">
 <!ENTITY zotero.rtfScan.scanPage.label "Recherche de citations">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero balaie votre document à la recherche de citations. Veuillez patienter.">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero analyse votre document à la recherche de citations. Veuillez patienter.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Vérification des documents cités">
 <!ENTITY zotero.rtfScan.citationsPage.description "Veuillez vérifier la liste des citations reconnues ci-dessous pour vous assurer que Zotero a sélectionné correctement les documents correspondants. Toute citation non transcrite ou ambiguë doit être résolue avant de passer à l'étape suivante.">
 <!ENTITY zotero.rtfScan.stylePage.label "Mise en forme du document">
 <!ENTITY zotero.rtfScan.formatPage.label "Mise en forme des citations">
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero traite et met en forme votre fichier RTF. Veuillez patienter.">
-<!ENTITY zotero.rtfScan.completePage.label "Balayage du RTF terminé">
-<!ENTITY zotero.rtfScan.completePage.description "Votre document a désormais été balayé et traité. Veuillez vous assurer qu'il a été mis en forme correctement.">
+<!ENTITY zotero.rtfScan.completePage.label "Analyse du RTF terminé">
+<!ENTITY zotero.rtfScan.completePage.description "Votre document a désormais été analysé et traité. Veuillez vous assurer qu'il a été mis en forme correctement.">
 <!ENTITY zotero.rtfScan.inputFile.label "Fichier en lecture">
 <!ENTITY zotero.rtfScan.outputFile.label "Fichier de sortie">
 

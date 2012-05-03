@@ -1440,21 +1440,12 @@ Zotero.Sync.Server = new function () {
 				Zotero.suppressUIUpdates = true;
 				_updatesInProgress = true;
 				
-				var progressMeter = true;
-				if (progressMeter) {
-					Zotero.showZoteroPaneProgressMeter(
-						Zotero.getString('sync.status.processingUpdatedData'),
-						false,
-						"chrome://zotero/skin/arrow_rotate_animated.png"
-					);
-				}
-				
 				var errorHandler = function (e) {
 					Zotero.DB.rollbackTransaction();
 					
 					Zotero.UnresponsiveScriptIndicator.enable();
 					
-					if (progressMeter) {
+					if (Zotero.locked) {
 						Zotero.hideZoteroPaneOverlay();
 					}
 					Zotero.suppressUIUpdates = false;
@@ -1472,7 +1463,7 @@ Zotero.Sync.Server = new function () {
 						function (xmlstr) {
 							Zotero.UnresponsiveScriptIndicator.enable();
 							
-							if (progressMeter) {
+							if (Zotero.locked) {
 								Zotero.hideZoteroPaneOverlay();
 							}
 							Zotero.suppressUIUpdates = false;
@@ -2522,15 +2513,26 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		function _timeToYield() {
-			if (progressMeter && Date.now() - lastRepaint > repaintTime) {
+			if (!progressMeter) {
+				if (Date.now() - start > progressMeterThreshold) {
+					Zotero.showZoteroPaneProgressMeter(
+						Zotero.getString('sync.status.processingUpdatedData'),
+						false,
+						"chrome://zotero/skin/arrow_rotate_animated.png"
+					);
+					progressMeter = true;
+				}
+			}
+			else if (Date.now() - lastRepaint > repaintTime) {
 				lastRepaint = Date.now();
 				return true;
 			}
-			
 			return false;
 		}
 		
-		var progressMeter = Zotero.locked;
+		var progressMeter = false;
+		var progressMeterThreshold = 100;
+		var start = Date.now();
 		var repaintTime = 100;
 		var lastRepaint = Date.now();
 		

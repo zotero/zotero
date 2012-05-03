@@ -1,7 +1,7 @@
 <!ENTITY zotero.preferences.title "Zotero - opcje">
 
 <!ENTITY zotero.preferences.default "Domyślna:">
-<!ENTITY zotero.preferences.items "items">
+<!ENTITY zotero.preferences.items "elementów">
 <!ENTITY zotero.preferences.period ".">
 
 <!ENTITY zotero.preferences.prefpane.general "Ogólne">
@@ -10,14 +10,14 @@
 <!ENTITY zotero.preferences.showIn "Ładuj Zotero w:">
 <!ENTITY zotero.preferences.showIn.browserPane "Panelu przeglądarki">
 <!ENTITY zotero.preferences.showIn.separateTab "Oddzielnej zakładce">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn.appTab "Zakładce aplikacji">
 <!ENTITY zotero.preferences.statusBarIcon "Ikona paska stanu:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Brak">
 <!ENTITY zotero.preferences.fontSize "Wielkość czcionki:">
 <!ENTITY zotero.preferences.fontSize.small "mała">
 <!ENTITY zotero.preferences.fontSize.medium "średnia">
 <!ENTITY zotero.preferences.fontSize.large "duża">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fontSize.xlarge "bardzo duża">
 <!ENTITY zotero.preferences.fontSize.notes "Wielkość czcionki notatek:">
 
 <!ENTITY zotero.preferences.miscellaneous "Różne">
@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Brak aktualnie zainstalowanych wtyczek procesorów tekstu.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Pobierz wtyczki procesorów tekstu...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Użyj klasycznego okna Dodaj cytowanie">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Zarządzanie stylami">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Nazwa">
@@ -146,11 +146,11 @@
 <!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
 <!ENTITY zotero.preferences.proxies.autoAssociate "Automatycznie przypisz nowe hosty">
 <!ENTITY zotero.preferences.proxies.variables "Możesz użyć następujących zmiennych w swoim schemacie proxy:">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - The hostname of the proxied site (e.g., www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - The path of the proxied page excluding the leading slash (e.g., about/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - The directory path (e.g., about/)">
-<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - The filename (e.g., index.html)">
-<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Nazwa hosta dla trasowanej witryny (np. www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Ścieżka do trasowanej strony bez pierwszego ukośnika (np. about/index.html)">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Ścieżka do katalogu (np. about/)">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Nazwa pliku (np. index.html)">
+<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Jakikolwiek tekst">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Zaawansowane">
 
@@ -186,6 +186,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Wyczyść wyjście">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Wyślij na serwer Zotero">
 
-<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
+<!ENTITY zotero.preferences.openAboutConfig "Otwórz about:config">
+<!ENTITY zotero.preferences.openCSLEdit "Otwórz edytor CSL">
+<!ENTITY zotero.preferences.openCSLPreview "Otwórz podgląd CSL">
