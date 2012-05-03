@@ -1323,9 +1323,13 @@ Zotero.Integration.Fields.prototype._showCorruptFieldError = function(e, field, 
 		// Display reselect edit citation dialog
 		var me = this;
 		var oldWindow = Zotero.Integration.currentWindow;
+		var oldProgressCallback = me.progressCallback;
 		this.addEditCitation(field, function() {
-			Zotero.Integration.currentWindow.close();
+			if(Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
+				Zotero.Integration.currentWindow.close();
+			}
 			Zotero.Integration.currentWindow = oldWindow;
+			me.progressCallback = oldProgressCallback;
 			me.updateSession(callback, errorCallback);
 		});
 		return false;
