@@ -497,9 +497,8 @@
 						moveDown.id = "zotero-creator-move-down";
 						moveUp.className = "zotero-creator-move";
 						moveDown.className = "zotero-creator-move";
-						// TODO: localize
-						moveUp.setAttribute("label", "Move Up");
-						moveDown.setAttribute("label", "Move Down");
+						moveUp.setAttribute("label", Zotero.getString('pane.item.creator.moveUp'));
+						moveDown.setAttribute("label", Zotero.getString('pane.item.creator.moveDown'));
 						this._creatorTypeMenu.appendChild(moveSep);
 						this._creatorTypeMenu.appendChild(moveUp);
 						this._creatorTypeMenu.appendChild(moveDown);
@@ -817,7 +816,6 @@
 					
 					var label = document.createElement('label');
 					label.id = 'more-creators-label';
-					// TODO: localize
 					label.setAttribute('value', num + " more…");
 					label.setAttribute('onclick',
 						"var binding = document.getBindingParent(this); "
