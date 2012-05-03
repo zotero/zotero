@@ -1232,8 +1232,7 @@ var ZoteroPane = new function()
 					Zotero_Duplicates_Pane.setItems(this.getSelectedItems(), displayNumItemsOnTypeError);
 				}
 				else {
-					// TODO: localize
-					var msg = "Select items to merge";
+					var msg = Zotero.getString('pane.item.selectToMerge');
 					this.setItemPaneMessage(msg);
 				}
 			}
