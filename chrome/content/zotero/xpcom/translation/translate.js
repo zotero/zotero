@@ -2151,7 +2151,7 @@ Zotero.Translate.IO.String.prototype = {
 	
 	"_initRDF":function(callback) {
 		Zotero.debug("Translate: Initializing RDF data store");
-		this._dataStore = new Zotero.RDF.IndexedFormula();
+		this._dataStore = new Zotero.RDF.AJAW.IndexedFormula();
 		this.RDF = new Zotero.Translate.IO._RDFSandbox(this._dataStore);
 		
 		if(this.contentLength) {
