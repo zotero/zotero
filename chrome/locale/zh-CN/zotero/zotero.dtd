@@ -69,6 +69,10 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "还原">
 <!ENTITY zotero.items.menu.duplicateItem "生成所选条目复件">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
 
 <!ENTITY zotero.toolbar.newItem.label "新建条目">
 <!ENTITY zotero.toolbar.moreItemTypes.label "更多">
