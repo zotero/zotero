@@ -29,8 +29,8 @@ var $rdf = {
 	alert: Zotero.debug
 };
 
-if(!Zotero.RDF) {	// For connector
+if(Zotero.RDF) {
+	Zotero.RDF.AJAW = $rdf;
+} else {
 	Zotero.RDF = {AJAW:$rdf};
-} else {			// For extension
-	Zotero.RDF.AJAW.$rdf = $rdf;
 }
