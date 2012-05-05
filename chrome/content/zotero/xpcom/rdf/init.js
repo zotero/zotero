@@ -1,5 +1,5 @@
 /* Set up the environment before loading the rest of the files into Zotero */
-Zotero.RDF.AJAW = {
+var $rdf = {
   Util: {
     ArrayIndexOf: function (arr, item, i) {
       //supported in all browsers except IE<9
@@ -29,4 +29,8 @@ Zotero.RDF.AJAW = {
 	alert: Zotero.debug
 };
 
-Zotero.RDF.AJAW.$rdf = Zotero.RDF.AJAW;
+if(!Zotero.RDF) {	// For connector
+	Zotero.RDF = {AJAW:$rdf};
+} else {			// For extension
+	Zotero.RDF.AJAW.$rdf = $rdf;
+}
