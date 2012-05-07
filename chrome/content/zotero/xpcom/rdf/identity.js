@@ -191,7 +191,7 @@ We replace the bigger with the smaller.
         }
       }
 
-      this.add(small, this.sym('http://www.w3.org/2007/ont/link#uri'), big.uri)
+      //this.add(small, this.sym('http://www.w3.org/2007/ont/link#uri'), big.uri)
 
       // If two things are equal, and one is requested, we should request the other.
       if(this.sf) {
@@ -202,7 +202,7 @@ We replace the bigger with the smaller.
     moveIndex(this.classActions);
     moveIndex(this.propertyActions);
 
-    //$rdf.log.debug("Equate done. "+big+" to be known as "+small)    
+    tabulator.log.debug("Equate done. "+big+" now links to "+small)    
     return true; // true means the statement does not need to be put in
   };
 
@@ -274,15 +274,11 @@ We replace the bigger with the smaller.
     obj = RDFMakeTerm(this, obj);
     why = RDFMakeTerm(this, why);
 
-    var hash = [this.canon(subj).hashString(), this.canon(pred).hashString(),
-                       this.canon(obj).hashString(), this.canon(why).hashString()];
-
-
     if(this.predicateCallback != undefined)
       this.predicateCallback(this, pred, why);
 
     // Action return true if the statement does not need to be added
-    var actions = this.propertyActions[hash[1]]; // Predicate hash
+    var actions = this.propertyActions[this.canon(pred).hashString()];
     var done = false;
     if(actions) {
       // alert('type: '+typeof actions +' @@ actions='+actions);
@@ -294,6 +290,8 @@ We replace the bigger with the smaller.
     //If we are tracking provenanance, every thing should be loaded into the store
     //if (done) return new Statement(subj, pred, obj, why); // Don't put it in the store
     // still return this statement for owl:sameAs input
+    var hash = [this.canon(subj).hashString(), this.canon(pred).hashString(),
+                   this.canon(obj).hashString(), this.canon(why).hashString()];
     var st = new $rdf.Statement(subj, pred, obj, why);
     for(var i = 0; i < 4; i++) {
       var ix = this.index[i];
@@ -302,7 +300,7 @@ We replace the bigger with the smaller.
       ix[h].push(st); // Set of things with this as subject, etc
     }
 
-    //$rdf.log.debug("ADDING    {"+subj+" "+pred+" "+obj+"} "+why);
+    //tabulator.log.debug("ADDING    {"+subj+" "+pred+" "+obj+"} "+why);
     this.statements.push(st);
     return st;
   }; //add
