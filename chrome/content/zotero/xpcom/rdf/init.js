@@ -19,14 +19,7 @@ var $rdf = {
       }
       throw "RDFArrayRemove: Array did not contain " + x;
     },
-  },
-  tabulator: {
-  	log: {
-    	debug: Zotero.debug,
-    	warn: Zotero.debug
-  	}
-	},
-	alert: Zotero.debug
+  }
 };
 
 if(Zotero.RDF) {
@@ -34,3 +27,12 @@ if(Zotero.RDF) {
 } else {
 	Zotero.RDF = {AJAW:$rdf};
 }
+
+var tabulator = {
+	log: {
+  	debug: Zotero.debug,
+  	warn: Zotero.debug
+	}
+};
+
+var alert = Zotero.debug;
