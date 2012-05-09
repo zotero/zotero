@@ -1723,8 +1723,8 @@ function addStyle() {
 			.createInstance(nsIFilePicker);
 	fp.init(window, Zotero.getString("zotero.preferences.styles.addStyle"), nsIFilePicker.modeOpen);
 	
-	fp.appendFilter("CSL Style", "*.csl");
-	fp.appendFilter("ENS Style", "*.ens");
+	fp.appendFilter("CSL Style (*.csl)", "*.csl");
+	fp.appendFilter("ENS Style (*.ens)", "*.ens");
 	
 	var rv = fp.show();
 	if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {

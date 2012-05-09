@@ -404,11 +404,14 @@ Zotero.Style = function(arg) {
 		this.styleID = xml.info.id.toString();
 		this.title = xml.info.title.toString();
 		this.updated = xml.info.updated.toString().replace(/(.+)T([^\+]+)\+?.*/, "$1 $2");
-		this.categories = [category.@term.toString() for each(category in xml.info) if(category.@term.length())];
 		this._class = xml.@class.toString();
 		this._hasBibliography = !!xml.bibliography.length();
 		this._version = xml.@version.toString();
-		if(this._version == "") this._version = "0.8";
+		if(this._version == "") {
+			this._version = "0.8";
+		} else {
+			this.categories = xml.info.category.attribute("citation-format").toString();
+		}
 		
 		this.source = null;
 		for each(var link in xml.info.link) {
