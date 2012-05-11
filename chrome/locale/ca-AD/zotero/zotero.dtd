@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Drets">
 <!ENTITY zotero.items.dateAdded_column "Data d&apos;incorporació">
 <!ENTITY zotero.items.dateModified_column "Data de modificació">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Mostra a la Biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Afegeix nota">

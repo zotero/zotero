@@ -100,23 +100,20 @@
 			</groupbox>
 			
 			<!-- Duplicate merging -->
-			<!-- TODO: localize -->
 			<vbox id="zotero-duplicates-merge-pane" flex="1">
 				<groupbox>
 					<button id="zotero-duplicates-merge-button" oncommand="Zotero_Duplicates_Pane.merge()"/>
 				</groupbox>
 				
 				<groupbox id="zotero-duplicates-merge-version-select">
-					<description>Choose the version of the item to use as the master item:</description>
+					<description>&zotero.duplicatesMerge.versionSelect;</description>
 					<hbox>
 						<listbox id="zotero-duplicates-merge-original-date" onselect="Zotero_Duplicates_Pane.setMaster(this.selectedIndex)" rows="0"/>
 					</hbox>
 				</groupbox>
 				
 				<groupbox flex="1">
-					<description id="zotero-duplicates-merge-field-select">
-						Select fields to keep from other versions of the item:
-					</description>
+					<description id="zotero-duplicates-merge-field-select">&zotero.duplicatesMerge.fieldSelect;</description>
 					<zoteroitembox id="zotero-duplicates-merge-item-box" flex="1"/>
 				</groupbox>
 			</vbox>

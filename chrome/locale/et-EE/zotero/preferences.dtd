@@ -10,14 +10,14 @@
 <!ENTITY zotero.preferences.showIn "Laadida Zotero:">
 <!ENTITY zotero.preferences.showIn.browserPane "Brauseri paanil">
 <!ENTITY zotero.preferences.showIn.separateTab "Eraldi">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn.appTab "Rakendus tab">
 <!ENTITY zotero.preferences.statusBarIcon "Staatusriba ikoon:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Puudub">
 <!ENTITY zotero.preferences.fontSize "Fondi suurus:">
 <!ENTITY zotero.preferences.fontSize.small "Väike">
 <!ENTITY zotero.preferences.fontSize.medium "Keskmine">
 <!ENTITY zotero.preferences.fontSize.large "Suur">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fontSize.xlarge "XL">
 <!ENTITY zotero.preferences.fontSize.notes "Märkuse fondisuurus">
 
 <!ENTITY zotero.preferences.miscellaneous "Mitmesugust">
@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Ühtegi tekstiredaktori lisa ei ole paigaldatud.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Lisade hankimine...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Tavaline tsitaadi lisamise vorm">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stiilide haldamine">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Pealkiri">
@@ -140,7 +140,7 @@
 <!ENTITY zotero.preferences.proxies.autoRecognize "Tuvastada prokside kaudu külastatavad lehed automaatselt">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Proksile ümbersuunamine peatada, kui domeeninimi sisaldab ">
 <!ENTITY zotero.preferences.proxies.configured "Konfigureeritud proksid">
-<!ENTITY zotero.preferences.proxies.hostname "Hostname">
+<!ENTITY zotero.preferences.proxies.hostname "Hostinimi">
 <!ENTITY zotero.preferences.proxies.scheme "Skeem">
 
 <!ENTITY zotero.preferences.proxies.multiSite "Mitme-lehekülje">
@@ -186,6 +186,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Logi tühjendamine">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Saata Zotero serverisse">
 
-<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
+<!ENTITY zotero.preferences.openAboutConfig "Avada about:config">
+<!ENTITY zotero.preferences.openCSLEdit "Avada CSL redaktor">
+<!ENTITY zotero.preferences.openCSLPreview "Avada CSL eelvaade">

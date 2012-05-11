@@ -106,6 +106,18 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
+	 * Unicode normalization
+	 */
+	"normalize":function(str) {
+		var normalizer = Components.classes["@mozilla.org/intl/unicodenormalizer;1"]
+							.getService(Components.interfaces.nsIUnicodeNormalizer);
+		var obj = {};
+		str = normalizer.NormalizeUnicodeNFC(str, obj);
+		return obj.value;
+	},
+	
+	
+	/**
 	 * Display a prompt from an error with custom buttons and a callback
 	 */
 	"errorPrompt":function(title, e) {

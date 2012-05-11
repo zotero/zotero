@@ -219,7 +219,7 @@ Zotero.Translate.Sandbox = {
 				"getTranslatorObject":"r"
 			};
 			safeTranslator.setSearch = function(arg) {
-				if(Zotero.isFx4 && !Zotero.isBookmarklet) arg = JSON.parse(JSON.stringify(arg));
+				if(!Zotero.isBookmarklet) arg = JSON.parse(JSON.stringify(arg));
 				return translation.setSearch(arg);
 			};
 			safeTranslator.setDocument = function(arg) { return translation.setDocument(arg) };
@@ -1378,6 +1378,9 @@ Zotero.Translate.Base.prototype = {
 		this._sandboxManager.sandbox.Zotero.isBookmarklet = Zotero.isBookmarklet || false;
 		this._sandboxManager.sandbox.Zotero.isConnector = Zotero.isConnector || false;
 		this._sandboxManager.sandbox.Zotero.isServer = Zotero.isServer || false;
+		this._sandboxManager.sandbox.Zotero.parentTranslator = this._parentTranslator
+			&& this._parentTranslator.translator && this._parentTranslator.translator[0] ? 
+			this._parentTranslator.translator[0].translatorID : null;
 		
 		// create shortcuts
 		this._sandboxManager.sandbox.Z = this._sandboxManager.sandbox.Zotero;
@@ -1390,10 +1393,6 @@ Zotero.Translate.Base.prototype = {
 	 * @param {Integer} level Log level (1-5, higher numbers are higher priority)
 	 */
 	"_debug":function(string, level) {
-		if(typeof string === "object" && Zotero.isFx36 && !Zotero.isBookmarklet) {
-			string = new XPCSafeJSObjectWrapper(string);
-		}
-		
 		if(level !== undefined && typeof level !== "number") {
 			Zotero.debug("debug: level must be an integer");
 			return;
@@ -1520,7 +1519,7 @@ Zotero.Translate.Web.prototype._getTranslatorsGetPotentialTranslators = function
 Zotero.Translate.Web.prototype._getSandboxLocation = function() {
 	if(this._parentTranslator) {
 		return this._parentTranslator._sandboxLocation;
-	} else if("defaultView" in this.document) {
+	} else if(this.document.defaultView) {
 		return this.document.defaultView;
 	} else {
 		return this.document.location.toString();

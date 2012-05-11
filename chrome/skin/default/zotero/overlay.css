@@ -3,32 +3,6 @@
 	width: 16px;
 	height: 16px;
 }
-#zotero-status-bar-icon, #zotero-addon-bar-icon
-{
-	width: 55px;
-	list-style-image: url(chrome://zotero/skin/zotero_status_bar.png);
-}
-#zotero-status-bar-icon
-{
-	margin: 0 0 -1px; /* For Fitts's law (on OS X, at least) */
-	padding: 0 0 1px;
-}
-#zotero-addon-bar-icon
-{
-	margin-left: 10px;
-	margin-right: 10px;
-	padding: 0 0 1px 0;
-	-moz-appearance: none;
-}
-#zotero-status-bar-icon[compact="true"], #zotero-addon-bar-icon[compact="true"]
-{
-	width: 20px;
-	list-style-image: url(chrome://zotero/skin/zotero_status_bar_compact.png);
-}
-#zotero-status-bar-icon[error="true"], #zotero-addon-bar-icon[error="true"]
-{
-	list-style-image: url(chrome://zotero/skin/zotero_status_bar_error.png);
-}
 
 #zotero-pane
 {
@@ -68,6 +42,11 @@
 	width: 10px;
 	background-color: transparent;
 	background-image: none;
+}
+
+#zotero-items-column-hasAttachment, #zotero-items-column-hasNote
+{
+	min-width: 21px;
 }
 
 #zotero-items-tree treechildren::-moz-tree-image

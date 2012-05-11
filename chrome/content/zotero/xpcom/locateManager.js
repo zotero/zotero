@@ -68,7 +68,7 @@ Zotero.LocateManager = new function() {
 	 * Gets all default search engines (not currently used)
 	 */
 	this.getDefaultEngines = function() [new LocateEngine(engine)
-				for each(engine in JSON.parse(Zotero.File.getContents(_getDefaultFile())))];
+				for each(engine in JSON.parse(Zotero.File.getContentsFromURL(_getDefaultFile())))];
 	
 	/**
 	 * Returns an array of all search engines
@@ -131,7 +131,8 @@ Zotero.LocateManager = new function() {
 		locateDir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
 		
 		// copy default file to new locate dir
-		_getDefaultFile().copyTo(locateDir, LOCATE_FILE_NAME);
+		Zotero.File.putContents(_jsonFile,
+			Zotero.File.getContentsFromURL(_getDefaultFile()));
 		
 		// reread locate engines
 		this.init();
@@ -170,9 +171,7 @@ Zotero.LocateManager = new function() {
 	 * Gets the JSON file containing the engine info for the default engines
 	 */
 	function _getDefaultFile() {
-		var defaultFile = Zotero.getInstallDirectory();
-		defaultFile.append(LOCATE_FILE_NAME);
-		return defaultFile;
+		return "resource://zotero/schema/"+LOCATE_FILE_NAME;
 	}
 	
 	

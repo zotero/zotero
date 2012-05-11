@@ -104,7 +104,6 @@ Zotero.HTTP = new function() {
 		// Prevent certificate/authentication dialogs from popping up
 		xmlhttp.mozBackgroundRequest = true;
 		xmlhttp.open('POST', url, true);
-	
 		// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
 		var channel = xmlhttp.channel;
 		channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
@@ -178,34 +177,15 @@ Zotero.HTTP = new function() {
 		
 		// Workaround for "Accept third-party cookies" being off in Firefox 3.0.1
 		// https://www.zotero.org/trac/ticket/1070
-		if (Zotero.isFx30) {
-			const Cc = Components.classes;
-			const Ci = Components.interfaces;
-			var ds = Cc["@mozilla.org/webshell;1"].
-						createInstance(Components.interfaces.nsIDocShellTreeItem).
-						QueryInterface(Ci.nsIInterfaceRequestor);
-			ds.itemType = Ci.nsIDocShellTreeItem.typeContent;
-			var xmlhttp = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
-							createInstance(Ci.nsIXMLHttpRequest);
-			// Prevent certificate/authentication dialogs from popping up
-			xmlhttp.mozBackgroundRequest = true;
-			xmlhttp.open("HEAD", url, true);
-			xmlhttp.channel.loadGroup = ds.getInterface(Ci.nsILoadGroup);
-			xmlhttp.channel.loadFlags |= Ci.nsIChannel.LOAD_DOCUMENT_URI;
-		}
-		else {
-			var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-							.createInstance();
-			// Prevent certificate/authentication dialogs from popping up
-			xmlhttp.mozBackgroundRequest = true;
-			xmlhttp.open('HEAD', url, true);
-			// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
-			if (!Zotero.isFx35) {
-				var channel = xmlhttp.channel;
-				channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
-				channel.forceAllowThirdPartyCookie = true;
-			}
-		}
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+						.createInstance();
+		// Prevent certificate/authentication dialogs from popping up
+		xmlhttp.mozBackgroundRequest = true;
+		xmlhttp.open('HEAD', url, true);
+		// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
+		var channel = xmlhttp.channel;
+		channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
+		channel.forceAllowThirdPartyCookie = true;
 		
 		if (requestHeaders) {
 			for (var header in requestHeaders) {
@@ -562,7 +542,7 @@ Zotero.HTTP = new function() {
 		if(typeof(urls) == "string") urls = [urls];
 		
 		var prevUrl;
-		var loadEvent = Zotero.isFx2 ? "load" : "pageshow";
+		var loadEvent = "pageshow";
 		
 		var hiddenBrowser = Zotero.Browser.createHiddenBrowser();
 		hiddenBrowser.addEventListener(loadEvent, onLoad, true);

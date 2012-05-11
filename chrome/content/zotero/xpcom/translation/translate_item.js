@@ -238,36 +238,8 @@ Zotero.Translate.ItemSaver.prototype = {
 			Zotero.debug("Translate: Created attachment; id is "+myID, 4);
 			var newItem = Zotero.Items.get(myID);
 		} else {
-			var uri, file;
-			
-			// generate nsIFile
-			var IOService = Components.classes["@mozilla.org/network/io-service;1"].
-							getService(Components.interfaces.nsIIOService);
-			try {
-				var uri = IOService.newURI(attachment.path, "", this._baseURI);
-			}
-			catch (e) {
-				var msg = "Error parsing attachment path: " + attachment.path;
-				Zotero.logError(msg);
-				Zotero.debug("Translate: " + msg, 2);
-				return;
-			}
-			
-			try {
-				var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
-				if (file.path == '/') {
-					var msg = "Error parsing attachment path: " + attachment.path;
-					Zotero.logError(msg);
-					Zotero.debug("Translate: " + msg, 2);
-					return;
-				}
-			}
-			catch (e) {
-				var msg = "Error getting file from attachment path: " + attachment.path;
-				Zotero.logError(msg);
-				Zotero.debug("Translate: " + msg, 2);
-				return;
-			}
+			var file = this._parsePath(attachment.path);
+			if(!file) return;
 			
 			if (!file.exists()) {
 				// use attachment title if possible, or else file leaf name
@@ -308,6 +280,45 @@ Zotero.Translate.ItemSaver.prototype = {
 		return newItem;
 	},
 	
+	"_parsePath":function(path) {
+		// generate nsIFile
+		var IOService = Components.classes["@mozilla.org/network/io-service;1"].
+						getService(Components.interfaces.nsIIOService);
+		try {
+			var uri = IOService.newURI(path, "", this._baseURI);
+		}
+		catch (e) {
+			var msg = "Error parsing attachment path: " + attachment.path;
+			Zotero.logError(msg);
+			Zotero.debug("Translate: " + msg, 2);
+			return false;
+		}
+		
+		try {
+			var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;
+			if (file.path == '/') {
+				var msg = "Error parsing attachment path: " + attachment.path;
+				Zotero.logError(msg);
+				Zotero.debug("Translate: " + msg, 2);
+				return false;
+			}
+		}
+		catch (e) {
+			var msg = "Error getting file from attachment path: " + attachment.path;
+			Zotero.logError(msg);
+			Zotero.debug("Translate: " + msg, 2);
+			return false;
+		}
+		
+		if(!file.exists() && path[0] !== "/" && path.substr(0, 5).toLowerCase() !== "file:") {
+			// This looks like a relative path, but it might actually be an absolute path, because
+			// some people are not quite there.
+			var newFile = this._parsePath("/"+path);
+			if(newFile.exists()) return newFile;
+		}
+		return file;
+	},
+	
 	"_saveAttachmentDownload":function(attachment, parentID) {
 		Zotero.debug("Translate: Adding attachment", 4);
 		
@@ -323,8 +334,8 @@ Zotero.Translate.ItemSaver.prototype = {
 				|| downloadAssociatedFiles;
 			if(!shouldAttach) return;
 			
-			if(attachment.document && "__wrappedDOMObject" in attachment.document) {
-				attachment.document = attachment.document.__wrappedDOMObject;
+			if(attachment.document) {
+				attachment.document = Zotero.Translate.DOMWrapper.unwrap(attachment.document);
 			}
 			
 			if(attachment.snapshot === false || !this._saveFiles) {
@@ -635,120 +646,126 @@ Zotero.Translate.ItemGetter.prototype = {
 		attachmentArray.mimeType = attachmentArray.uniqueFields.mimeType = attachment.attachmentMIMEType;
 		// Get charset
 		attachmentArray.charset = attachmentArray.uniqueFields.charset = attachment.attachmentCharset;
-		
-		if(linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL && this._exportFileDirectory) {
-			var exportDir = this._exportFileDirectory;
-			
-			// Add path and filename if not an internet link
+		if(linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
 			var attachFile = attachment.getFile();
-			if(attachFile) {
-				attachmentArray.defaultPath = "files/" + attachmentArray.itemID + "/" + attachFile.leafName;
-				attachmentArray.filename = attachFile.leafName;
+			attachmentArray.localPath = attachFile.path;
+			
+			if(this._exportFileDirectory) {
+				var exportDir = this._exportFileDirectory;
 				
-				/**
-				 * Copies the attachment file to the specified relative path from the
-				 * export directory.
-				 * @param {String} attachPath The path to which the file should be exported 
-				 *    including the filename. If supporting files are included, they will be
-				 *    copied as well without any renaming. 
-				 * @param {Boolean} overwriteExisting Optional - If this is set to false, the
-				 *    function will throw an error when exporting a file would require an existing
-				 *    file to be overwritten. If true, the file will be silently overwritten.
-				 *    defaults to false if not provided. 
-				 */
-				attachmentArray.saveFile = function(attachPath, overwriteExisting) {
-					// Ensure a valid path is specified
-					if(attachPath === undefined || attachPath == "") {
-						throw new Error("ERROR_EMPTY_PATH");
-					}
+				// Add path and filename if not an internet link
+				var attachFile = attachment.getFile();
+				if(attachFile) {
+					attachmentArray.defaultPath = "files/" + attachmentArray.itemID + "/" + attachFile.leafName;
+					attachmentArray.filename = attachFile.leafName;
 					
-					// Set the default value of overwriteExisting if it was not provided
-					if (overwriteExisting === undefined) {
-						overwriteExisting = false;
-					}
-					
-					// Separate the path into a list of subdirectories and the attachment filename,
-					// and initialize the required file objects
-					var targetFile = Components.classes["@mozilla.org/file/local;1"].
-							createInstance(Components.interfaces.nsILocalFile);
-					targetFile.initWithFile(exportDir);
-					for each(var dir in attachPath.split("/")) targetFile.append(dir);
-					
-					// First, check that we have not gone lower than exportDir in the hierarchy
-					var parent = targetFile, inExportFileDirectory;
-					while((parent = parent.parent)) {
-						if(exportDir.equals(parent)) {
-							inExportFileDirectory = true;
-							break;
-						}
-					}
-					
-					if(!inExportFileDirectory) {
-						throw new Error("Invalid path; attachment cannot be placed above export "+
-							"directory in the file hirarchy");
-					}
-					
-					// Create intermediate directories if they don't exist
-					parent = targetFile;
-					while((parent = parent.parent) && !parent.exists()) {
-						parent.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
-					}
-					
-					// Delete any existing file if overwriteExisting is set, or throw an exception
-					// if it is not
-					if(targetFile.exists()) {
-						if(overwriteExisting) {
-							targetFile.remove(false);
-						} else {
-							throw new Error("ERROR_FILE_EXISTS " + targetFile.leafName);
-						}
-					}
-					
-					var directory = targetFile.parent;
-					
-					// The only attachments that can have multiple supporting files are of mime type
-					// text/html (specified in Attachments.getNumFiles())
-					if(attachment.attachmentMIMEType == "text/html" 
-							&& Zotero.Attachments.getNumFiles(attachment) > 1) {
-						// Attachment is a snapshot with supporting files. Check if any of the
-						// supporting files would cause a name conflict, and build a list of transfers
-						// that should be performed
-						var copySrcs = [];
-						var files = attachment.getFile().parent.directoryEntries;
-						while (files.hasMoreElements()) {
-							file = files.getNext();
-							file.QueryInterface(Components.interfaces.nsIFile);
-							
-							// Ignore the main attachment file (has already been checked for name conflict)
-							if(attachFile.equals(file)) {
-								continue;
-							}
-							
-							// Remove any existing files in the target destination if overwriteExisting 
-							// is set, or throw an exception if it is not
-							var targetSupportFile = targetFile.parent.clone();
-							targetSupportFile.append(file.leafName);
-							if(targetSupportFile.exists()) {
-								if(overwriteExisting) {
-									targetSupportFile.remove(false);
-								} else {
-									throw new Error("ERROR_FILE_EXISTS " + targetSupportFile.leafName);
-								}
-							}
-							copySrcs.push(file.clone());
+					/**
+					 * Copies the attachment file to the specified relative path from the
+					 * export directory.
+					 * @param {String} attachPath The path to which the file should be exported 
+					 *    including the filename. If supporting files are included, they will be
+					 *    copied as well without any renaming. 
+					 * @param {Boolean} overwriteExisting Optional - If this is set to false, the
+					 *    function will throw an error when exporting a file would require an existing
+					 *    file to be overwritten. If true, the file will be silently overwritten.
+					 *    defaults to false if not provided. 
+					 */
+					attachmentArray.saveFile = function(attachPath, overwriteExisting) {
+						// Ensure a valid path is specified
+						if(attachPath === undefined || attachPath == "") {
+							throw new Error("ERROR_EMPTY_PATH");
 						}
 						
-						// No conflicts were detected or all conflicts were resolved, perform the copying
-						attachFile.copyTo(directory, targetFile.leafName);
-						for(var i = 0; i < copySrcs.length; i++) {
-							copySrcs[i].copyTo(directory, copySrcs[i].leafName);
+						// Set the default value of overwriteExisting if it was not provided
+						if (overwriteExisting === undefined) {
+							overwriteExisting = false;
 						}
-					} else {
-						// Attachment is a single file
-						// Copy the file to the specified location
-						attachFile.copyTo(directory, targetFile.leafName);
-					}
-				};
+						
+						// Separate the path into a list of subdirectories and the attachment filename,
+						// and initialize the required file objects
+						var targetFile = Components.classes["@mozilla.org/file/local;1"].
+								createInstance(Components.interfaces.nsILocalFile);
+						targetFile.initWithFile(exportDir);
+						for each(var dir in attachPath.split("/")) targetFile.append(dir);
+						
+						// First, check that we have not gone lower than exportDir in the hierarchy
+						var parent = targetFile, inExportFileDirectory;
+						while((parent = parent.parent)) {
+							if(exportDir.equals(parent)) {
+								inExportFileDirectory = true;
+								break;
+							}
+						}
+						
+						if(!inExportFileDirectory) {
+							throw new Error("Invalid path; attachment cannot be placed above export "+
+								"directory in the file hirarchy");
+						}
+						
+						// Create intermediate directories if they don't exist
+						parent = targetFile;
+						while((parent = parent.parent) && !parent.exists()) {
+							parent.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
+						}
+						
+						// Delete any existing file if overwriteExisting is set, or throw an exception
+						// if it is not
+						if(targetFile.exists()) {
+							if(overwriteExisting) {
+								targetFile.remove(false);
+							} else {
+								throw new Error("ERROR_FILE_EXISTS " + targetFile.leafName);
+							}
+						}
+						
+						var directory = targetFile.parent;
+						
+						// The only attachments that can have multiple supporting files are of mime type
+						// text/html (specified in Attachments.getNumFiles())
+						if(attachment.attachmentMIMEType == "text/html" 
+								&& Zotero.Attachments.getNumFiles(attachment) > 1) {
+							// Attachment is a snapshot with supporting files. Check if any of the
+							// supporting files would cause a name conflict, and build a list of transfers
+							// that should be performed
+							var copySrcs = [];
+							var files = attachment.getFile().parent.directoryEntries;
+							while (files.hasMoreElements()) {
+								file = files.getNext();
+								file.QueryInterface(Components.interfaces.nsIFile);
+								
+								// Ignore the main attachment file (has already been checked for name conflict)
+								if(attachFile.equals(file)) {
+									continue;
+								}
+								
+								// Remove any existing files in the target destination if overwriteExisting 
+								// is set, or throw an exception if it is not
+								var targetSupportFile = targetFile.parent.clone();
+								targetSupportFile.append(file.leafName);
+								if(targetSupportFile.exists()) {
+									if(overwriteExisting) {
+										targetSupportFile.remove(false);
+									} else {
+										throw new Error("ERROR_FILE_EXISTS " + targetSupportFile.leafName);
+									}
+								}
+								copySrcs.push(file.clone());
+							}
+							
+							// No conflicts were detected or all conflicts were resolved, perform the copying
+							attachFile.copyTo(directory, targetFile.leafName);
+							for(var i = 0; i < copySrcs.length; i++) {
+								copySrcs[i].copyTo(directory, copySrcs[i].leafName);
+							}
+						} else {
+							// Attachment is a single file
+							// Copy the file to the specified location
+							attachFile.copyTo(directory, targetFile.leafName);
+						}
+						
+						attachmentArray.path = targetFile.path;
+					};
+				}
 			}
 		}
 		

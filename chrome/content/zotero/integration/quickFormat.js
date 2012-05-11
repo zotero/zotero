@@ -36,7 +36,7 @@ var Zotero_QuickFormat = new function () {
 		keepSorted,  showEditor, referencePanel, referenceBox, referenceHeight = 0,
 		separatorHeight = 0, currentLocator, currentLocatorLabel, currentSearchTime, dragging,
 		panel, panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator,
-		panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false;
+		panelLibraryLink, panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false;
 	
 	// A variable that contains the timeout object for the latest onKeyPress event
 	var eventTimeout = null;
@@ -110,6 +110,7 @@ var Zotero_QuickFormat = new function () {
 			panelLocatorLabel = document.getElementById("locator-label");
 			panelLocator = document.getElementById("locator");
 			panelInfo = document.getElementById("citation-properties-info");
+			panelLibraryLink = document.getElementById("citation-properties-library-link");
 			
 			// Don't need to set noautohide dynamically on these platforms, so do it now
 			if(Zotero.isMac || Zotero.isWin) {
@@ -130,7 +131,7 @@ var Zotero_QuickFormat = new function () {
 		if(event.target !== document) return;		
 		// make sure we are visible
 		window.setTimeout(function() {	
-			if(!Zotero.isFx4) window.sizeToContent();
+			window.sizeToContent();
 			var screenX = window.screenX;
 			var screenY = window.screenY;
 			var xRange = [window.screen.availLeft, window.screen.width-window.outerWidth];
@@ -744,16 +745,7 @@ var Zotero_QuickFormat = new function () {
 			if(((!referenceHeight && firstReference) || (!separatorHeight && firstSeparator)
 					|| !panelFrameHeight) && !panelShowing) {
 				_openReferencePanel();
-				if(!Zotero.isFx4) {
-					referencePanel.addEventListener("popupshown", function() {
-						referencePanel.removeEventListener("popupshown", arguments.callee, false); 
-						panelShowing = true;
-						_resize();
-					}, false);
-					return;
-				} else {
-					panelShowing = true;
-				}
+				panelShowing = true;
 			}
 		
 			if(!referenceHeight && firstReference) {
@@ -913,11 +905,20 @@ var Zotero_QuickFormat = new function () {
 		panelLocator.value = target.citationItem["locator"] ? target.citationItem["locator"] : "";
 		panelSuppressAuthor.checked = !!target.citationItem["suppress-author"];
 		
+		Zotero.Cite.getItem(panelRefersToBubble.citationItem.id).key;
+
 		var item = Zotero.Cite.getItem(target.citationItem.id);
 		document.getElementById("citation-properties-title").textContent = item.getDisplayTitle();
 		while(panelInfo.hasChildNodes()) panelInfo.removeChild(panelInfo.firstChild);
 		_buildItemDescription(item, panelInfo);
 		
+		panelLibraryLink.hidden = !item.id;
+		if(item.id) {
+			var libraryName = item.libraryID ? Zotero.Libraries.getName(item.libraryID)
+							: Zotero.getString('pane.collections.library');
+			panelLibraryLink.textContent = Zotero.getString("integration.openInLibrary", libraryName);
+		}
+
 		target.setAttribute("selected", "true");
 		panel.openPopup(target, "after_start",
 			target.clientWidth/2, 0, false, false, null);
@@ -1187,6 +1188,23 @@ var Zotero_QuickFormat = new function () {
 			window.close();
 		}, true);
 		accepted = true;
+	}
+	
+	/**
+	 * Show an item in the library it came from
+	 */
+	this.showInLibrary = function() {
+		var id = panelRefersToBubble.citationItem.id;
+		var pane = Zotero.getActiveZoteroPane();
+		if(pane) {
+			pane.show();
+			pane.selectItem(id);
+		} else {
+			var win = window.open('zotero://select/item/'+id);
+		}
+		
+		// Pull window to foreground
+		Zotero.Integration.activate(pane.document.defaultView);
 	}
 	
 	/**

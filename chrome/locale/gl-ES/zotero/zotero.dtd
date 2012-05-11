@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Dereitos">
 <!ENTITY zotero.items.dateAdded_column "Data Alta">
 <!ENTITY zotero.items.dateModified_column "Data Modificación">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Amosar na Biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Engadir Nota">

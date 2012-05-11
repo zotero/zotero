@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Drepturi">
 <!ENTITY zotero.items.dateAdded_column "Data adăugării">
 <!ENTITY zotero.items.dateModified_column "Data modificării">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Afișează în bibliotecă">
 <!ENTITY zotero.items.menu.attach.note "Adaugă notă">

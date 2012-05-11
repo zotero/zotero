@@ -107,23 +107,11 @@ Zotero.IPC = new function() {
 			if(!lib) return false;
 			
 			// int open(const char *path, int oflag);
-			if(Zotero.isFx36) {
-				open = lib.declare("open", ctypes.default_abi, ctypes.int32_t, ctypes.string, ctypes.int32_t);
-			} else {
-				open = lib.declare("open", ctypes.default_abi, ctypes.int, ctypes.char.ptr, ctypes.int);
-			}
+			open = lib.declare("open", ctypes.default_abi, ctypes.int, ctypes.char.ptr, ctypes.int);
 			// ssize_t write(int fildes, const void *buf, size_t nbyte);
-			if(Zotero.isFx36) {
-				write = lib.declare("write", ctypes.default_abi, ctypes.int32_t, ctypes.int32_t, ctypes.string, ctypes.uint32_t);
-			} else {
-				write = lib.declare("write", ctypes.default_abi, ctypes.ssize_t, ctypes.int, ctypes.char.ptr, ctypes.size_t);
-			}
+			write = lib.declare("write", ctypes.default_abi, ctypes.ssize_t, ctypes.int, ctypes.char.ptr, ctypes.size_t);
 			// int close(int filedes);
-			if(Zotero.isFx36) {
-				close = lib.declare("close", ctypes.default_abi, ctypes.int32_t, ctypes.int32_t);
-			} else {
-				close = lib.declare("close", ctypes.default_abi, ctypes.int, ctypes.int);
-			}
+			close = lib.declare("close", ctypes.default_abi, ctypes.int, ctypes.int);
 		}
 		
 		// On OS X and FreeBSD, O_NONBLOCK = 0x0004
@@ -131,11 +119,6 @@ Zotero.IPC = new function() {
 		// On both, O_WRONLY = 0x0001
 		var mode = 0x0001;
 		if(!block) mode = mode | (Zotero.isLinux ? 00004000 : 0x0004);
-		
-		// Also append to plain files to get things working with Fx 3.6 polling
-		// On OS X, O_APPEND = 0x0008
-		// On Linux, O_APPEND = 00002000
-		if(pipe.isFile()) mode = mode | (Zotero.isMac ? 0x0008 : 00002000);
 		
 		var fd = open(pipe.path, mode);
 		if(fd === -1) return false;			
@@ -149,11 +132,6 @@ Zotero.IPC = new function() {
 	 */
 	this.broadcast = function(msg) {
 		if(Zotero.isWin) {		// communicate via WM_COPYDATA method
-			// there is no ctypes struct support in Fx 3.6
-			// while we could mimic it, it's easier just to require users to upgrade if they
-			// want connector sharing
-			if(!Zotero.isFx4) return false;
-			
 			Components.utils.import("resource://gre/modules/ctypes.jsm");
 			
 			// communicate via message window
@@ -375,10 +353,6 @@ Zotero.IPC.Pipe = new function() {
 				getService(Components.interfaces.nsIXULAppInfo);
 			if(verComp.compare("2.2a1pre", appInfo.platformVersion) <= 0) {			// Gecko 5
 				_pipeClass = Zotero.IPC.Pipe.DeferredOpen;
-			} else if(verComp.compare("2.0b9pre", appInfo.platformVersion) <= 0) {	// Gecko 2.0b9+
-				_pipeClass = Zotero.IPC.Pipe.WorkerThread;
-			} else {																// Gecko 1.9.2
-				_pipeClass = Zotero.IPC.Pipe.Poll;
 			}
 		}
 		
@@ -395,11 +369,7 @@ Zotero.IPC.Pipe = new function() {
 		if(!_mkfifo) {
 			var libc = Zotero.IPC.getLibc();
 			if(!libc) return false;
-			if(Zotero.isFx36) {
-				_mkfifo = libc.declare("mkfifo", ctypes.default_abi, ctypes.int32_t, ctypes.string, ctypes.uint32_t);
-			} else {
-				_mkfifo = libc.declare("mkfifo", ctypes.default_abi, ctypes.int, ctypes.char.ptr, ctypes.unsigned_int);
-			}
+			_mkfifo = libc.declare("mkfifo", ctypes.default_abi, ctypes.int, ctypes.char.ptr, ctypes.unsigned_int);
 		}
 		
 		// make pipe
@@ -481,98 +451,5 @@ Zotero.IPC.Pipe.DeferredOpen.prototype = {
 		pump.asyncRead(this, null);
 		
 		this._openTime = Date.now();
-	}
-};
-
-/**
- * Listens synchronously for data on the integration pipe on a separate JS thread and reads it
- * when available
- *
- * Used to read from pipe on Gecko 2
- */
-Zotero.IPC.Pipe.WorkerThread = function(file, callback) {
-	this._callback = callback;
-	
-	if(!Zotero.IPC.Pipe.mkfifo(file)) return;
-	
-	// set up worker
-	var worker = Components.classes["@mozilla.org/threads/workerfactory;1"]  
-		.createInstance(Components.interfaces.nsIWorkerFactory)
-		.newChromeWorker("chrome://zotero/content/xpcom/pipe_worker.js");
-	worker.onmessage = this.onmessage.bind(this);
-	worker.postMessage({"path":file.path, "libc":Zotero.IPC.getLibcPath()});
-	
-	// add shutdown listener
-	Zotero.addShutdownListener(Zotero.IPC.Pipe.writeShutdownMessage.bind(null, this, file));
-}
-
-Zotero.IPC.Pipe.WorkerThread.prototype = {
-	/**
-	 * onmessage call for worker thread, to get data from it
-	 */
-	"onmessage":function(event) {
-		if(event.data[0] === "Exception") {
-			throw event.data[1];
-		} else if(event.data[0] === "Debug") {
-			Zotero.debug(event.data[1]);
-		} else if(event.data[0] === "Read") {
-			this._callback(event.data[1]);
-		} else if(event.data[0] === "Open") {
-			this._openTime = Date.now();
-		}
-	}
-}
-
-/**
- * Polling mechanism for file
- *
- * Used to read from integration "pipe" on Gecko 1.9.2/Firefox 3.6
- */
-Zotero.IPC.Pipe.Poll = function(file, callback) {
-	this._file = file;
-	this._callback = callback;
-	
-	// create empty file
-	this._clearFile();
-	
-	// no deferred open capability, so we need to poll
-	this._timer = Components.classes["@mozilla.org/timer;1"].
-		createInstance(Components.interfaces.nsITimer);
-	this._timer.initWithCallback(this, 1000,
-		Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
-	
-	// this has to be in global scope so we don't get garbage collected
-	Zotero.IPC.Pipe.Poll._activePipes.push(this);
-	
-	// add shutdown listener
-	var me = this;
-	Zotero.addShutdownListener(function() { file.remove(false) });
-}
-Zotero.IPC.Pipe.Poll._activePipes = [];
-
-Zotero.IPC.Pipe.Poll.prototype = {
-	/**
-	 * Called every second to check if there is new data to be read
-	 */
-	"notify":function() {
-		if(this._file.fileSize === 0) return;
-		
-		// read from pipe (file, actually)
-		var string = Zotero.File.getContents(this._file);
-		this._clearFile();
-		
-		// run command
-		this._callback(string);
-	},
-	
-	/**
-	 * Clears the old contents of the fifo file
-	 */
-	"_clearFile":function() {
-		// clear file
-		var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"].
-			createInstance(Components.interfaces.nsIFileOutputStream);
-		foStream.init(this._file, 0x02 | 0x08 | 0x20, 0666, 0); 
-		foStream.close();
 	}
 };

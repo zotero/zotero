@@ -412,7 +412,7 @@ Zotero.Translator.prototype.init = function(info) {
 	
 	if(this.browserSupport.indexOf(Zotero.browser) !== -1) {
 		this.runMode = Zotero.Translator.RUN_MODE_IN_BROWSER;
-	} else {
+	} else if(!Zotero.isServer) {
 		this.runMode = Zotero.Translator.RUN_MODE_ZOTERO_STANDALONE;
 	}
 	

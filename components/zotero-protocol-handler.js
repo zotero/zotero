@@ -417,12 +417,11 @@ function ChromeExtensionHandler() {
 							valA = Zotero.Items.getSortTitle(valA);
 							valB = Zotero.Items.getSortTitle(valB);
 						}
-						// Use multipart date -- would be better just to get
-						// the unformatted date value directly, but toArray(),
-						// which we currently use above, doesn't do that
 						else if (sorts[index].field == 'date') {
-							valA = Zotero.Date.strToMultipart(a[sorts[index].field]);
-							valB = Zotero.Date.strToMultipart(b[sorts[index].field]);
+							var itemA = Zotero.Items.getByLibraryAndKey(a.libraryID, a.key);
+							var itemB = Zotero.Items.getByLibraryAndKey(b.libraryID, b.key);
+							valA = itemA.getField('date', true, true);
+							valB = itemB.getField('date', true, true);
 						}
 						// TEMP: This is an ugly hack to make creator sorting
 						// slightly less broken. To do this right, real creator

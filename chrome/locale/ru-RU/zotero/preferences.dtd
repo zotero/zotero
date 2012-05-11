@@ -10,14 +10,14 @@
 <!ENTITY zotero.preferences.showIn "Открывать Zotero в:">
 <!ENTITY zotero.preferences.showIn.browserPane "Текущей панеле">
 <!ENTITY zotero.preferences.showIn.separateTab "Отдельной вкладке">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn.appTab "Вкладка приложения">
 <!ENTITY zotero.preferences.statusBarIcon "Вид в строке состояния:">
 <!ENTITY zotero.preferences.statusBarIcon.none "Ничего">
 <!ENTITY zotero.preferences.fontSize "Размер шрифта:">
 <!ENTITY zotero.preferences.fontSize.small "Маленький">
 <!ENTITY zotero.preferences.fontSize.medium "Средний">
 <!ENTITY zotero.preferences.fontSize.large "Большой">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fontSize.xlarge "Огромный">
 <!ENTITY zotero.preferences.fontSize.notes "Размер шрифта заметок:">
 
 <!ENTITY zotero.preferences.miscellaneous "Разное">
@@ -107,7 +107,7 @@
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Плагины для текстовых редакторов не установлены.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Скачать плагины для текстовых редакторов…">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Использовать стандартный способ Добавления Цитаты">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Диспетчер стилей">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Название">
@@ -186,6 +186,6 @@
 <!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Очистить запись">
 <!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Отправить на сервер Zotero">
 
-<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
+<!ENTITY zotero.preferences.openAboutConfig "Открыть about:config">
+<!ENTITY zotero.preferences.openCSLEdit "Открыть редактор CSL">
+<!ENTITY zotero.preferences.openCSLPreview "Открыть предварительный просмотр CSL">

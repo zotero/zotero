@@ -239,9 +239,9 @@ Zotero.Relations = new function () {
 	}
 	
 	
-	this.xmlToRelation = function (xml) {
+	this.xmlToRelation = function (relationNode) {
 		var relation = new Zotero.Relation;
-		var libraryID = xml.@libraryID.toString();
+		var libraryID = relationNode.getAttribute('libraryID');
 		if (libraryID) {
 			relation.libraryID = parseInt(libraryID);
 		}
@@ -252,9 +252,13 @@ Zotero.Relations = new function () {
 			}
 			relation.libraryID = parseInt(libraryID);
 		}
-		relation.subject = xml.subject.toString();
-		relation.predicate = xml.predicate.toString();
-		relation.object = xml.object.toString();
+		
+		var elems = Zotero.Utilities.xpath(relationNode, 'subject');
+		relation.subject = elems.length ? elems[0].textContent : "";
+		var elems = Zotero.Utilities.xpath(relationNode, 'predicate');
+		relation.predicate = elems.length ? elems[0].textContent : "";
+		var elems = Zotero.Utilities.xpath(relationNode, 'object');
+		relation.object = elems.length ? elems[0].textContent : "";
 		return relation;
 	}
 	

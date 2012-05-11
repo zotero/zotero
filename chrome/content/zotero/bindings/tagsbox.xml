@@ -293,6 +293,7 @@
 					t.setAttribute('fieldname', fieldName);
 					t.setAttribute('ztabindex', tabindex);
 					t.setAttribute('flex', '1');
+                    t.setAttribute('newlines','pasteintact');
 					
 					// Add auto-complete
 					t.setAttribute('type', 'autocomplete');
@@ -410,11 +411,8 @@
 					
 					var fieldName = 'tag';
 					var tabindex = textbox.getAttribute('ztabindex');
-					
-					//var value = t.value;
+
 					var value = textbox.value;
-					
-					var elem;
 					
 					var tagsbox = Zotero.getAncestorByTagName(textbox, 'tagsbox');
 					if (!tagsbox)
@@ -429,38 +427,78 @@
 					// Tag id encoded as 'tag-1234'
 					var id = row.getAttribute('id').split('-')[1];
 					
+					var tagArray = value.split(/\r\n?|\n/);
+					
 					if (saveChanges) {
-						if (id) {
+						if (id && (tagArray.length < 2)) {
 							if (value) {
-								// If trying to replace with another existing tag
-								// (which causes a delete of the row),
-								// clear the tab direction so we don't advance
-								// when the notifier kicks in
-								var existing = Zotero.Tags.getID(value, 0);
-								if (existing && id != existing) {
-									this._tabDirection = false;
-								}
+								var origTagIndex = this.item.getTagIndex(id);
 								var changed = tagsbox.replace(id, value);
 								if (changed) {
-									return;
+									var newTagIndex = this.item.getTagIndex(changed);
+									if (newTagIndex>origTagIndex) {
+										if (this._tabDirection == 1) {
+											this._lastTabIndex--;
+										}
+									}
+									else if (newTagIndex<origTagIndex) {
+										if (this._tabDirection == -1) {
+											this._lastTabIndex++;
+										}
+									}
+								} 
+								else if (value != Zotero.Tags.getName(id)) {
+									if (this._tabDirection == 1) {
+										this._lastTabIndex -= 1;
+									}
 								}
-							}
-							else {
-								tagsbox.remove(id);
-								return;
 							}
 						}
 						// New tag
 						else {
-							var id = tagsbox.add(value);
-							if (!id) {
+							//Check for newlines or carriage returns used as delimiters
+							//in a series of tags added at once.  Add each tag
+							//separately.
+							if (tagArray.length > 1) {
+								var extremeTag = false;
+								var nextTag = false;
+								if (this._tabDirection == -1) {
+									if (this._lastTabIndex == 1) {
+										extremeTag = true;
+									} else {
+										nextTag = row.previousSibling.getAttribute('id').split('-')[1];
+									}
+								} else if (this._tabDirection == 1) {
+									if (this._lastTabIndex >= this.item.getTags().length) {
+										extremeTag = true;
+									} else {
+										nextTag = row.nextSibling.getAttribute('id').split('-')[1];
+									}
+								}
+								
+								id = this.item.addTags(tagArray);
+								
+								if (extremeTag) {
+									if (this._tabDirection == 1) {
+										this._lastTabIndex = this.item.getTags().length;
+									} else if (this._tabDirection == -1) {
+										this._lastTabIndex = 2;
+									}
+								} else {
+									this._lastTabIndex = this.item.getTagIndex(nextTag)+1-this._tabDirection;
+								}
+							}
+							else {
+								id = tagsbox.add(value);
+							}
+							if (!id && (this._tabDirection==1)) {
 								this._lastTabIndex--;
 							}
 						}
 					}
 					
 					if (id) {
-						elem = this.createValueElement(
+						var elem = this.createValueElement(
 							value,
 							tabindex
 						);
@@ -478,7 +516,6 @@
 						catch (e) {}
 					}
 					
-					var focusMode = 'tags';
 					var focusBox = tagsbox;
 					
 					if (this._tabDirection) {

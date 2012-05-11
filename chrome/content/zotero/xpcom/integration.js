@@ -1,3 +1,4 @@
+"use strict";
 /*
     ***** BEGIN LICENSE BLOCK *****
     
@@ -52,7 +53,7 @@ Zotero.Integration = new function() {
 	// these need to be global because of GC
 	var _updateTimer;
 	
-	// For Carbon
+	// For Carbon and X11
 	var _carbon, ProcessSerialNumber, SetFrontProcessWithOptions;
 	var _x11, _x11Display, _x11RootWindow, XClientMessageEvent, XFetchName, XFree, XQueryTree,
 		XOpenDisplay, XCloseDisplay, XFlush, XDefaultRootWindow, XInternAtom, XSendEvent,
@@ -193,14 +194,8 @@ Zotero.Integration = new function() {
 			if(callback) callback(_integrationVersionsOK);
 		}
 	
-		if(Zotero.isFx4) {
-			Components.utils.import("resource://gre/modules/AddonManager.jsm");
-			AddonManager.getAddonsByIDs(INTEGRATION_PLUGINS, _checkAddons);
-		} else {
-			var extMan = Components.classes['@mozilla.org/extensions/manager;1'].
-				getService(Components.interfaces.nsIExtensionManager);
-			_checkAddons([extMan.getItemForID(id) for each(id in INTEGRATION_PLUGINS)]);
-		}
+		Components.utils.import("resource://gre/modules/AddonManager.jsm");
+		AddonManager.getAddonsByIDs(INTEGRATION_PLUGINS, _checkAddons);
 	}
 	
 	/**
@@ -289,8 +284,9 @@ Zotero.Integration = new function() {
 				"Minefield":"org.mozilla.minefield"
 			};
 			
-			if(Zotero.isFx4 && win) {
+			if(win) {
 				Components.utils.import("resource://gre/modules/ctypes.jsm");
+				win.focus();
 				
 				if(!_carbon) {
 					_carbon = ctypes.open("/System/Library/Frameworks/Carbon.framework/Carbon");
@@ -333,7 +329,7 @@ Zotero.Integration = new function() {
 					_executeAppleScript('tell application id "'+BUNDLE_IDS[Zotero.appName]+'" to activate');
 				}
 			}
-		} else if(!Zotero.isWin && Zotero.isFx4 && win) {
+		} else if(!Zotero.isWin && win) {
 			Components.utils.import("resource://gre/modules/ctypes.jsm");
 			
 			if(_x11 === false) return;
@@ -930,7 +926,11 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 				// make sure style is defined
 				if(e instanceof Zotero.Integration.DisplayException && e.name === "invalidStyle") {
 					this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
-							this._app.secondaryFieldType, function() {
+							this._app.secondaryFieldType, function(status) {							
+						if(status === false) {
+							throw new Zotero.Integration.UserCancelledException();
+						}
+						
 						me._doc.setDocumentData(me._session.data.serializeXML());
 						me._session.reload = true;
 						callback(true);
@@ -1319,9 +1319,13 @@ Zotero.Integration.Fields.prototype._showCorruptFieldError = function(e, field, 
 		// Display reselect edit citation dialog
 		var me = this;
 		var oldWindow = Zotero.Integration.currentWindow;
+		var oldProgressCallback = me.progressCallback;
 		this.addEditCitation(field, function() {
-			Zotero.Integration.currentWindow.close();
+			if(Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
+				Zotero.Integration.currentWindow.close();
+			}
 			Zotero.Integration.currentWindow = oldWindow;
+			me.progressCallback = oldProgressCallback;
 			me.updateSession(callback, errorCallback);
 		});
 		return false;
@@ -1681,11 +1685,12 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 		}
 		
 		// do this operations in reverse in case plug-ins care about order
-		this._deleteFields.sort();
+		var sortClosure = function(a, b) { return a-b; };
+		this._deleteFields.sort(sortClosure);
 		for(var i=(this._deleteFields.length-1); i>=0; i--) {
 			this._fields[this._deleteFields[i]].delete();
 		}
-		this._removeCodeFields.sort();
+		this._removeCodeFields.sort(sortClosure);
 		for(var i=(this._removeCodeFields.length-1); i>=0; i--) {
 			this._fields[this._removeCodeFields[i]].removeCode();
 		}
@@ -2981,40 +2986,57 @@ Zotero.Integration.DocumentData = function(string) {
  * Serializes document-specific data as XML
  */
 Zotero.Integration.DocumentData.prototype.serializeXML = function() {
-	var xmlData = <data data-version={DATA_VERSION} zotero-version={Zotero.version}>
-			<session id={this.sessionID} />
-			<style id={this.style.styleID} hasBibliography={this.style.hasBibliography ? 1 : 0}
-				bibliographyStyleHasBeenSet={this.style.bibliographyStyleHasBeenSet ? 1 : 0}/>
-			<prefs/>
-		</data>;
+	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser);
+	var doc = parser.parseFromString("<data/>", "application/xml");
 	
+	var xmlData = doc.documentElement;
+	xmlData.setAttribute("data-version", DATA_VERSION);
+	xmlData.setAttribute("zotero-version", Zotero.version);
+	
+	var session = doc.createElement("session");
+	session.setAttribute("id", this.sessionID);
+	xmlData.appendChild(session);
+	
+	var style = doc.createElement("style");
+	style.setAttribute("id", this.style.styleID);
+	style.setAttribute("hasBibliography", this.style.hasBibliography ? 1 : 0);
+	style.setAttribute("bibliographyStyleHasBeenSet", this.style.bibliographyStyleHasBeenSet ? 1 : 0);
+	xmlData.appendChild(style);
+	
+	var prefs = doc.createElement("prefs");
 	for(var pref in this.prefs) {
-		xmlData.prefs.pref += <pref name={pref} value={this.prefs[pref]}/>
+		var prefXML = doc.createElement("pref");
+		prefXML.setAttribute("name", pref);
+		prefXML.setAttribute("value", this.prefs[pref]);
+		prefs.appendChild(prefXML);
 	}
+	xmlData.appendChild(prefs);
 	
-	XML.prettyPrinting = false;
-	var output = xmlData.toXMLString().replace("\n", "", "g");
-	XML.prettyPrinting = true;
-	return output;
-}
+	var domSerializer = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
+			.createInstance(Components.interfaces.nsIDOMSerializer);
+	return domSerializer.serializeToString(doc);
+};
 
 
 /**
  * Unserializes document-specific XML
  */
 Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
-	if(typeof xmlData == "string") {
-		var xmlData = new XML(xmlData);
-	}
+	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser);
+	xmlData = parser.parseFromString(xmlData, "application/xml").documentElement;
 	
-	this.sessionID = xmlData.session.@id.toString();
-	this.style = {"styleID":xmlData.style.@id.toString(),
-		"hasBibliography":(xmlData.style.@hasBibliography.toString() == 1),
-		"bibliographyStyleHasBeenSet":(xmlData.style.@bibliographyStyleHasBeenSet.toString() == 1)};
+	this.sessionID = Zotero.Utilities.xpathText(xmlData, "session/@id");
+	this.style = {
+		"styleID":Zotero.Utilities.xpathText(xmlData, "style/@id"),
+		"hasBibliography":(Zotero.Utilities.xpathText(xmlData, "style/@hasBibliography") == "1"),
+		"bibliographyStyleHasBeenSet":(Zotero.Utilities.xpathText(xmlData, "style/@bibliographyStyleHasBeenSet") == "1")
+	};
 	this.prefs = {};
-	for each(var pref in xmlData.prefs.children()) {
-		var name = pref.@name.toString();
-		var value = pref.@value.toString();
+	for each(var pref in Zotero.Utilities.xpath(xmlData, "prefs/pref")) {
+		var name = pref.getAttribute("name");
+		var value = pref.getAttribute("value");
 		if(value === "true") {
 			value = true;
 		} else if(value === "false") {
@@ -3024,9 +3046,11 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 		this.prefs[name] = value;
 	}
 	if(this.prefs["storeReferences"] === undefined) this.prefs["storeReferences"] = false;
-	this.zoteroVersion = xmlData["@zotero-version"].length() ? xmlData["@zotero-version"].toString() : "2.0";
-	this.dataVersion = xmlData["@data-version"].length() ? xmlData["@data-version"].toString() : 2;
-}
+	this.zoteroVersion = xmlData.getAttribute("zotero-version");
+	if(!this.zoteroVersion) this.zoteroVersion = "2.0";
+	this.dataVersion = xmlData.getAttribute("data-version");
+	if(!this.dataVersion) this.dataVersion = 2;
+};
 
 /**
  * Unserializes document-specific data, either as XML or as the string form used previously

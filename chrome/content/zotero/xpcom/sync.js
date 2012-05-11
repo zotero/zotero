@@ -55,8 +55,6 @@ Zotero.Sync = new function() {
 		};
 	});
 	
-	default xml namespace = '';
-	
 	var _typesLoaded = false;
 	var _objectTypeIDs = {};
 	var _objectTypeNames = {};
@@ -372,8 +370,6 @@ Zotero.Sync.ObjectKeySet.prototype.removeLibraryKeyPairs = function (type, keyPa
  * 		plus related methods
  */
 Zotero.Sync.EventListener = new function () {
-	default xml namespace = '';
-	
 	this.init = init;
 	this.ignoreDeletions = ignoreDeletions;
 	this.notify = notify;
@@ -425,7 +421,7 @@ Zotero.Sync.EventListener = new function () {
 			var sql = "REPLACE INTO syncDeleteLog VALUES (?, ?, ?, ?)";
 			var syncStatement = Zotero.DB.getStatement(sql);
 			
-			if (isItem && Zotero.Sync.Storage.isActive('webdav')) {
+			if (isItem && Zotero.Sync.Storage.WebDAV.active) {
 				var storageEnabled = true;
 				var sql = "INSERT INTO storageDeleteLog VALUES (?, ?, ?)";
 				var storageStatement = Zotero.DB.getStatement(sql);
@@ -562,74 +558,59 @@ Zotero.Sync.Runner = new function () {
 			
 			Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.syncingFiles'));
 			
-			Zotero.Sync.Storage.sync(
-				'webdav',
-				
-				{
-					// WebDAV success
+			var zfsSync = function (skipSyncNeeded) {
+				Zotero.Sync.Storage.ZFS.sync({
+					// ZFS success
 					onSuccess: function () {
-						syncNeeded = true;
-						
-						Zotero.Sync.Storage.sync(
-							'zfs',
-							
-							{
-								// ZFS success
-								onSuccess: function () {
-									Zotero.Sync.Server.sync(finalCallbacks);
-								},
-								
-								// ZFS skip
-								onSkip: function () {
-									if (syncNeeded) {
-										Zotero.Sync.Server.sync(finalCallbacks);
-									}
-								},
-								
-								// ZFS cancel
-								onStop: Zotero.Sync.Runner.stop,
-								
-								// ZFS failure
-								onError: Zotero.Sync.Runner.error,
-								
-								onWarning: Zotero.Sync.Runner.warning
-							}
-						)
+						setTimeout(function () {
+							Zotero.Sync.Server.sync(finalCallbacks);
+						}, 0);
 					},
 					
-					// WebDAV skip
+					// ZFS skip
 					onSkip: function () {
-						Zotero.Sync.Storage.sync(
-							'zfs',
-							
-							{
-								// ZFS success
-								onSuccess: function () {
-									Zotero.Sync.Server.sync(finalCallbacks);
-								},
-								
-								// ZFS skip
-								onSkip: Zotero.Sync.Runner.stop,
-								
-								// ZFS cancel
-								onStop: Zotero.Sync.Runner.stop,
-								
-								// ZFS failure
-								onError: Zotero.Sync.Runner.error,
-								
-								onWarning: Zotero.Sync.Runner.warning
+						setTimeout(function () {
+							if (skipSyncNeeded) {
+								Zotero.Sync.Server.sync(finalCallbacks);
 							}
-						)
+							else {
+								Zotero.Sync.Runner.stop();
+							}
+						}, 0);
 					},
 					
-					// WebDAV cancel
-					onStop: Zotero.Sync.Runner.stop,
+					// ZFS cancel
+					onStop: function () {
+						setTimeout(function () {
+							Zotero.Sync.Runner.stop();
+						}, 0);
+					},
 					
-					// WebDAV failure
-					onError: Zotero.Sync.Runner.error
-				}
-			)
-		}
+					// ZFS failure
+					onError: Zotero.Sync.Runner.error,
+					
+					onWarning: Zotero.Sync.Runner.warning
+				})
+			};
+			
+			Zotero.Sync.Storage.WebDAV.sync({
+				// WebDAV success
+				onSuccess: function () {
+					zfsSync(true);
+				},
+				
+				// WebDAV skip
+				onSkip: function () {
+					zfsSync();
+				},
+				
+				// WebDAV cancel
+				onStop: Zotero.Sync.Runner.stop,
+				
+				// WebDAV failure
+				onError: Zotero.Sync.Runner.error
+			});
+		};
 		
 		Zotero.Sync.Server.sync({
 			// Sync 1 success
@@ -1223,8 +1204,6 @@ Zotero.Sync.Server = new function () {
 	this.nextLocalSyncDate = false;
 	this.apiVersion = 9;
 	
-	default xml namespace = '';
-	
 	var _loginManagerHost = 'chrome://zotero';
 	var _loginManagerURL = 'Zotero Sync Server';
 	
@@ -1398,22 +1377,20 @@ Zotero.Sync.Server = new function () {
 			}
 			
 			try {
-				var xml = xmlhttp.responseText.replace(/^\s*<\?xml.*\?>\s*/, '').trim();
+				var responseNode = xmlhttp.responseXML.documentElement;
 				
-				// Strip XML declaration and convert to E4X
-				xml = new XML(xml);
-				
-				var updateKey = xml.@updateKey.toString();
+				var updateKey = responseNode.getAttribute('updateKey');
 				
 				// If no earliest date is provided by the server, the server
 				// account is empty
-				var earliestRemoteDate = parseInt(xml.@earliest) ?
-					new Date((xml.@earliest + 43200) * 1000) : false;
+				var earliestRemoteDate = responseNode.getAttribute('earliest');
+				earliestRemoteDate = parseInt(earliestRemoteDate) ?
+					new Date((earliestRemoteDate + 43200) * 1000) : false;
 				var noServerData = !!earliestRemoteDate;
 				
 				// Check to see if we're syncing with a different user
-				var userID = parseInt(xml.@userID);
-				var libraryID = parseInt(xml.@defaultLibraryID);
+				var userID = parseInt(responseNode.getAttribute('userID'));
+				var libraryID = parseInt(responseNode.getAttribute('defaultLibraryID'));
 				var c = _checkSyncUser(userID, libraryID, noServerData);
 				if (c == 0) {
 					// Groups were deleted, so restart sync
@@ -1463,21 +1440,12 @@ Zotero.Sync.Server = new function () {
 				Zotero.suppressUIUpdates = true;
 				_updatesInProgress = true;
 				
-				var progressMeter = true;
-				if (progressMeter) {
-					Zotero.showZoteroPaneProgressMeter(
-						Zotero.getString('sync.status.processingUpdatedData'),
-						false,
-						"chrome://zotero/skin/arrow_rotate_animated.png"
-					);
-				}
-				
 				var errorHandler = function (e) {
 					Zotero.DB.rollbackTransaction();
 					
 					Zotero.UnresponsiveScriptIndicator.enable();
 					
-					if (progressMeter) {
+					if (Zotero.locked) {
 						Zotero.hideZoteroPaneOverlay();
 					}
 					Zotero.suppressUIUpdates = false;
@@ -1488,14 +1456,14 @@ Zotero.Sync.Server = new function () {
 				
 				try {
 					var gen = Zotero.Sync.Server.Data.processUpdatedXML(
-						xml.updated,
+						responseNode.getElementsByTagName('updated')[0],
 						lastLocalSyncDate,
 						syncSession,
 						libraryID,
 						function (xmlstr) {
 							Zotero.UnresponsiveScriptIndicator.enable();
 							
-							if (progressMeter) {
+							if (Zotero.locked) {
 								Zotero.hideZoteroPaneOverlay();
 							}
 							Zotero.suppressUIUpdates = false;
@@ -2507,48 +2475,34 @@ Zotero.Sync.Server.Session.prototype._removeFromKeySet = function (keySet, objs)
 
 
 Zotero.Sync.Server.Data = new function() {
-	this.processUpdatedXML = processUpdatedXML;
-	this.itemToXML = itemToXML;
-	this.xmlToItem = xmlToItem;
-	this.removeMissingRelatedItems = removeMissingRelatedItems;
-	this.collectionToXML = collectionToXML;
-	this.xmlToCollection = xmlToCollection;
-	this.creatorToXML = creatorToXML;
-	this.xmlToCreator = xmlToCreator;
-	this.searchToXML = searchToXML;
-	this.xmlToSearch = xmlToSearch;
-	this.tagToXML = tagToXML;
-	this.xmlToTag = xmlToTag;
-	
 	var _noMergeTypes = ['search'];
-	
-	default xml namespace = '';
-	
 	
 	/**
 	 * Pull out collections from delete queue in XML
 	 *
-	 * @param	{XML}			xml
+	 * @param	{DOMNode}			xml
 	 * @return	{String[]}					Array of collection keys
 	 */
-	function _getDeletedCollectionKeys(xml) {
+	function _getDeletedCollectionKeys(updatedNode) {
 		var keys = [];
-		if (xml.deleted && xml.deleted.collections) {
-			for each(var xmlNode in xml.deleted.collections.collection) {
-				var libraryID = xmlNode.@libraryID.toString();
-				libraryID = libraryID ? parseInt(libraryID) : null;
-				keys.push({
-					libraryID: libraryID,
-					key: xmlNode.@key.toString()
-				});
-			}
+		for each(var c in updatedNode.xpath("deleted/collections/collection")) {
+			var libraryID = c.getAttribute('libraryID');
+			libraryID = libraryID ? parseInt(libraryID) : null;
+			keys.push({
+				libraryID: libraryID,
+				key: c.getAttribute('key')
+			});
 		}
 		return keys;
 	}
 	
 	
-	function processUpdatedXML(xml, lastLocalSyncDate, syncSession, defaultLibraryID, callback) {
-		if (xml.children().length() == 0) {
+	this.processUpdatedXML = function (updatedNode, lastLocalSyncDate, syncSession, defaultLibraryID, callback) {
+		updatedNode.xpath = function (path) {
+			return Zotero.Utilities.xpath(this, path);
+		};
+		
+		if (updatedNode.childNodes.length == 0) {
 			Zotero.debug('No changes received from server');
 			callback(Zotero.Sync.Server.Data.buildUploadXML(syncSession));
 			return;
@@ -2559,19 +2513,30 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		function _timeToYield() {
-			if (progressMeter && Date.now() - lastRepaint > repaintTime) {
+			if (!progressMeter) {
+				if (Date.now() - start > progressMeterThreshold) {
+					Zotero.showZoteroPaneProgressMeter(
+						Zotero.getString('sync.status.processingUpdatedData'),
+						false,
+						"chrome://zotero/skin/arrow_rotate_animated.png"
+					);
+					progressMeter = true;
+				}
+			}
+			else if (Date.now() - lastRepaint > repaintTime) {
 				lastRepaint = Date.now();
 				return true;
 			}
-			
 			return false;
 		}
 		
-		var progressMeter = Zotero.locked;
+		var progressMeter = false;
+		var progressMeterThreshold = 100;
+		var start = Date.now();
 		var repaintTime = 100;
 		var lastRepaint = Date.now();
 		
-		var deletedCollectionKeys = _getDeletedCollectionKeys(xml);
+		var deletedCollectionKeys = _getDeletedCollectionKeys(updatedNode);
 		
 		var remoteCreatorStore = {};
 		var relatedItemsStore = {};
@@ -2579,10 +2544,11 @@ Zotero.Sync.Server.Data = new function() {
 		var childItemStore = [];
 		
 		// Remotely changed groups
-		if (xml.groups.length()) {
+		var groupNodes = updatedNode.xpath("groups/group");
+		if (groupNodes.length) {
 			Zotero.debug("Processing remotely changed groups");
-			for each(var xmlNode in xml.groups.group) {
-				var group = Zotero.Sync.Server.Data.xmlToGroup(xmlNode);
+			for each(var groupNode in groupNodes) {
+				var group = Zotero.Sync.Server.Data.xmlToGroup(groupNode);
 				group.save();
 			}
 		}
@@ -2590,9 +2556,10 @@ Zotero.Sync.Server.Data = new function() {
 		if (_timeToYield()) yield true;
 		
 		// Remotely deleted groups
-		if (xml.deleted.groups.toString()) {
+		var deletedGroups = updatedNode.xpath("deleted/groups");
+		if (deletedGroups.length && deletedGroups.textContent) {
 			Zotero.debug("Processing remotely deleted groups");
-			var groupIDs = xml.deleted.groups.toString().split(' ');
+			var groupIDs = deletedGroups.textContent.split(' ');
 			Zotero.debug(groupIDs);
 			
 			for each(var groupID in groupIDs) {
@@ -2612,9 +2579,9 @@ Zotero.Sync.Server.Data = new function() {
 		// Get unmodified creators embedded within items -- this is necessary if, say,
 		// a creator was deleted locally and appears in a new/modified item remotely
 		var embeddedCreators = {};
-		for each(var creatorNode in xml.items.item.creator.creator) {
-			var libraryID = _libID(creatorNode.@libraryID.toString());
-			var key = creatorNode.@key.toString();
+		for each(var creatorNode in updatedNode.xpath("items/item/creator/creator")) {
+			var libraryID = _libID(creatorNode.getAttribute('libraryID'));
+			var key = creatorNode.getAttribute('key');
 			
 			var creatorObj = Zotero.Creators.getByLibraryAndKey(libraryID, key);
 			// If creator exists locally, we don't need it
@@ -2629,9 +2596,9 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		// Make sure embedded creators aren't already provided in the <creators> node
 		// This isn't necessary if the server data is correct
-		for each(var creatorNode in xml.creators.creator) {
-			var libraryID = _libID(creatorNode.@libraryID.toString());
-			var key = creatorNode.@key.toString();
+		for each(var creatorNode in updatedNode.xpath("creators/creator")) {
+			var libraryID = _libID(creatorNode.getAttribute('libraryID'));
+			var key = creatorNode.getAttribute('key');
 			var lkh = Zotero.Creators.makeLibraryKeyHash(libraryID, key);
 			if (embeddedCreators[lkh]) {
 				var msg = "Creator " + libraryID + "/" + key + " was unnecessarily embedded in server response "
@@ -2643,21 +2610,27 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		// For any embedded creators that don't exist locally and aren't already
 		// included in the <creators> node, copy the node into <creators> for saving
-		var elementCreated = !!xml.creators.length();
-		for each(var creatorNode in xml.items.item.creator.creator) {
-			var libraryID = _libID(creatorNode.@libraryID.toString());
-			var key = creatorNode.@key.toString();
+		var creatorsNode = false;
+		for each(var creatorNode in updatedNode.xpath("items/item/creator/creator")) {
+			var libraryID = _libID(creatorNode.getAttribute('libraryID'));
+			var key = creatorNode.getAttribute('key');
 			
 			var lkh = Zotero.Creators.makeLibraryKeyHash(libraryID, key);
 			if (embeddedCreators[lkh]) {
-				if (!elementCreated) {
-					xml.creators = new XML("<creators/>");
-					elementCreated = true;
+				if (!creatorsNode) {
+					creatorsNode = updatedNode.xpath("creators");
+					if (creatorsNode.length) {
+						creatorsNode = creatorsNode[0];
+					}
+					else {
+						creatorsNode = updatedNode.ownerDocument.createElement("creators");
+						updatedNode.appendChild(creatorsNode);
+					}
 				}
 				
 				Zotero.debug("Adding embedded creator " + libraryID + "/" + key + " to <creators>");
 				
-				xml.creators.appendChild(creatorNode);
+				creatorsNode.appendChild(creatorNode);
 				delete embeddedCreators[lkh];
 			}
 		}
@@ -2684,9 +2657,9 @@ Zotero.Sync.Server.Data = new function() {
 			Zotero.debug("Processing remotely changed " + types);
 			
 			typeloop:
-			for each(var xmlNode in xml[types][type]) {
-				var libraryID = _libID(xmlNode.@libraryID.toString());
-				var key = xmlNode.@key.toString();
+			for each(var objectNode in updatedNode.xpath(types + "/" + type)) {
+				var libraryID = _libID(objectNode.getAttribute('libraryID'));
+				var key = objectNode.getAttribute('key');
 				var objLibraryKeyHash = Zotero[Types].makeLibraryKeyHash(libraryID, key);
 				
 				Zotero.debug("Processing remote " + type + " " + libraryID + "/" + key, 4);
@@ -2719,7 +2692,7 @@ Zotero.Sync.Server.Data = new function() {
 						// affect related items
 						if (type == 'item') {
 							// Remote
-							var relKeys = xmlNode.related.toString();
+							var relKeys = _getFirstChildContent(objectNode, 'related');
 							relKeys = relKeys ? relKeys.split(' ') : [];
 							// Local
 							for each(var relID in obj.relatedItems) {
@@ -2731,10 +2704,10 @@ Zotero.Sync.Server.Data = new function() {
 							if (relKeys.length) {
 								relatedItemsStore[objLibraryKeyHash] = relKeys;
 							}
-							Zotero.Sync.Server.Data.removeMissingRelatedItems(xmlNode);
+							Zotero.Sync.Server.Data.removeMissingRelatedItems(objectNode);
 						}
 						
-						var remoteObj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode, null, null, defaultLibraryID);
+						var remoteObj = Zotero.Sync.Server.Data['xmlTo' + Type](objectNode, null, null, defaultLibraryID);
 
 						// Some types we don't bother to reconcile
 						if (_noMergeTypes.indexOf(type) != -1) {
@@ -2873,13 +2846,13 @@ Zotero.Sync.Server.Data = new function() {
 								syncSession.removeFromDeleted(fakeObj);
 								
 								var msg = _generateAutoChangeLogMessage(
-									type, null, xmlNode.@name.toString()
+									type, null, objectNode.getAttribute('name')
 								);
 								Zotero.log(msg, 'warning');
 								
 								if (!syncSession.suppressWarnings) {
 									var msg = _generateAutoChangeAlertMessage(
-										types, null, xmlNode.@name.toString()
+										types, null, objectNode.getAttribute('name')
 									);
 									alert(msg);
 									syncSession.suppressWarnings = true;
@@ -2899,7 +2872,7 @@ Zotero.Sync.Server.Data = new function() {
 				
 				// Temporarily remove and store related items that don't yet exist
 				if (type == 'item') {
-					var missing = Zotero.Sync.Server.Data.removeMissingRelatedItems(xmlNode);
+					var missing = Zotero.Sync.Server.Data.removeMissingRelatedItems(objectNode);
 					if (missing.length) {
 						relatedItemsStore[objLibraryKeyHash] = missing;
 					}
@@ -2909,7 +2882,7 @@ Zotero.Sync.Server.Data = new function() {
 				//
 				// If we skipped CR above, we already have an object to use
 				if (!skipCR) {
-					obj = Zotero.Sync.Server.Data['xmlTo' + Type](xmlNode, obj, false, defaultLibraryID, deletedItemKeys);
+					obj = Zotero.Sync.Server.Data['xmlTo' + Type](objectNode, obj, false, defaultLibraryID, deletedItemKeys);
 				}
 				
 				if (isNewObject && type == 'tag') {
@@ -2917,10 +2890,10 @@ Zotero.Sync.Server.Data = new function() {
 					// delete the local tag and add items linked to it to the
 					// matching remote tag
 					//
-					// DEBUG: why use xmlNode?
-					var tagName = xmlNode.@name.toString();
-					var tagType = xmlNode.@type.toString()
-									? parseInt(xmlNode.@type) : 0;
+					// DEBUG: why use objectNode?
+					var tagName = objectNode.getAttribute('name');
+					var tagType = objectNode.getAttribute('type');
+					tagType = tagType ? parseInt(tagType) : 0;
 					var linkedItems = _deleteConflictingTag(syncSession, tagName, tagType, obj.libraryID);
 					if (linkedItems) {
 						var mod = false;
@@ -2935,7 +2908,7 @@ Zotero.Sync.Server.Data = new function() {
 							syncSession.addToUpdated({
 								objectType: 'tag',
 								libraryID: obj.libraryID,
-								key: xmlNode.@key
+								key: objectNode.getAttribute('key')
 							});
 						}
 					}
@@ -2972,7 +2945,7 @@ Zotero.Sync.Server.Data = new function() {
 						}
 						// Set existing attachments mtime update check
 						else {
-							var mtime = xmlNode.@storageModTime.toString();
+							var mtime = objectNode.getAttribute('storageModTime');
 							if (mtime) {
 								var lk = Zotero.Items.getLibraryKeyHash(obj)
 								// Convert previously used Unix timestamps to ms-based timestamps
@@ -3047,14 +3020,15 @@ Zotero.Sync.Server.Data = new function() {
 			//
 			// Handle remotely deleted objects
 			//
-			if (xml.deleted.length() && xml.deleted[types].length()) {
+			var deletedObjectNodes = updatedNode.xpath("deleted/" + types + "/" + type);
+			if (deletedObjectNodes.length) {
 				Zotero.debug("Processing remotely deleted " + types);
 				
 				syncSession.suppressWarnings = false;
 				
-				for each(var xmlNode in xml.deleted[types][type]) {
-					var libraryID = _libID(xmlNode.@libraryID.toString());
-					var key = xmlNode.@key.toString();
+				for each(var delNode in deletedObjectNodes) {
+					var libraryID = _libID(delNode.getAttribute('libraryID'));
+					var key = delNode.getAttribute('key');
 					var obj = Zotero[Types].getByLibraryAndKey(libraryID, key);
 					// Object can't be found
 					if (!obj) {
@@ -3324,7 +3298,7 @@ Zotero.Sync.Server.Data = new function() {
 		var keys = syncSession.uploadKeys;
 		
 		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser);
+						.createInstance(Components.interfaces.nsIDOMParser);
 		var doc = parser.parseFromString("<data/>", "text/xml");
 		var docElem = doc.documentElement;
 		
@@ -3337,7 +3311,7 @@ Zotero.Sync.Server.Data = new function() {
 			var Types = syncObject.plural; // 'Items'
 			var type = Type.toLowerCase(); // 'item'
 			var types = Types.toLowerCase(); // 'items'
-			var xmlObjectsNode = false;
+			var objectsNode = false;
 			
 			Zotero.debug("Processing locally changed " + types);
 			
@@ -3345,8 +3319,8 @@ Zotero.Sync.Server.Data = new function() {
 			for (var libraryID in keys.updated[types]) {
 				for (var key in keys.updated[types][libraryID]) {
 					// Insert the <[types]> node
-					if (!xmlObjectsNode) {
-						xmlObjectsNode = docElem.appendChild(doc.createElement(types));
+					if (!objectsNode) {
+						objectsNode = docElem.appendChild(doc.createElement(types));
 					}
 					
 					var l = parseInt(libraryID);
@@ -3364,19 +3338,19 @@ Zotero.Sync.Server.Data = new function() {
 					
 					if (type == 'item') {
 						// itemToXML needs the sync session
-						var str = this.itemToXML(obj, syncSession).toXMLString();
+						var elem = this.itemToXML(obj, doc, syncSession);
 					}
 					else {
-						var str = this[type + 'ToXML'](obj).toXMLString();
+						var elem = this[type + 'ToXML'](obj, doc);
 					}
 					
-					xmlObjectsNode.appendChild(doc.createRange().createContextualFragment(str));
+					objectsNode.appendChild(elem);
 				}
 			}
 		}
 		
 		// Deletions
-		var xmlDeletedNode = doc.createElement('deleted');
+		var deletedNode = doc.createElement('deleted');
 		var inserted = false;
 		
 		var defaultLibraryID = Zotero.libraryID;
@@ -3386,7 +3360,7 @@ Zotero.Sync.Server.Data = new function() {
 			var Types = syncObject.plural; // 'Items'
 			var type = Type.toLowerCase(); // 'item'
 			var types = Types.toLowerCase(); // 'items'
-			var xmlDeletedObjectsNode = false;
+			var deletedObjectsNode = false;
 			
 			Zotero.debug('Processing locally deleted ' + types);
 			
@@ -3396,18 +3370,18 @@ Zotero.Sync.Server.Data = new function() {
 				for (var key in keys.deleted[types][libraryID]) {
 					// Insert the <deleted> node
 					if (!inserted) {
-						docElem.appendChild(xmlDeletedNode);
+						docElem.appendChild(deletedNode);
 						inserted = true;
 					}
 					// Insert the <deleted><[types]></deleted> node
-					if (!xmlDeletedObjectsNode) {
-						xmlDeletedObjectsNode = xmlDeletedNode.appendChild(doc.createElement(types));
+					if (!deletedObjectsNode) {
+						deletedObjectsNode = deletedNode.appendChild(doc.createElement(types));
 					}
 					
 					var n = doc.createElement(type);
 					n.setAttribute('libraryID', parseInt(libraryID) ? parseInt(libraryID) : defaultLibraryID);
 					n.setAttribute('key', key);
-					xmlDeletedObjectsNode.appendChild(n);
+					deletedObjectsNode.appendChild(n);
 				}
 			}
 		}
@@ -3418,7 +3392,7 @@ Zotero.Sync.Server.Data = new function() {
 		var xmlstr = s.serializeToString(doc);
 		
 		// No updated data
-		if (xmlstr.match('<data version="[0-9]+"/>')) {
+		if (docElem.childNodes.length == 0) {
 			return '';
 		}
 		
@@ -3815,17 +3789,18 @@ Zotero.Sync.Server.Data = new function() {
 	
 	
 	/**
-	 * Converts a Zotero.Item object to an E4X <item> object
+	 * Converts a Zotero.Item object to a DOM <item> node
 	 *
-	 * @param	{Zotero.Item}					item
-	 * @param	{Zotero.Sync.Server.Session}		[syncSession]
+	 * @param  {Zotero.Item}  item
+	 * @param  {DOMDocument}  doc
+	 * @param  {Zotero.Sync.Server.Session}  [syncSession]
 	 */
-	function itemToXML(item, syncSession) {
-		var xml = <item/>;
+	this.itemToXML = function (item, doc, syncSession) {
 		var item = item.serialize();
 		
-		xml.@libraryID = item.primary.libraryID ? item.primary.libraryID : Zotero.libraryID;
-		xml.@key = item.primary.key;
+		var itemNode = doc.createElement('item');
+		itemNode.setAttribute('libraryID', item.primary.libraryID ? item.primary.libraryID : Zotero.libraryID);
+		itemNode.setAttribute('key', item.primary.key);
 		
 		// Primary fields
 		for (var field in item.primary) {
@@ -3838,7 +3813,7 @@ Zotero.Sync.Server.Data = new function() {
 				default:
 					var attr = field;
 			}
-			xml['@' + attr] = item.primary[field];
+			itemNode.setAttribute(attr, item.primary[field]);
 		}
 		
 		// Item data
@@ -3846,35 +3821,37 @@ Zotero.Sync.Server.Data = new function() {
 			if (!item.fields[field]) {
 				continue;
 			}
-			var newField = <field>{_xmlize(item.fields[field])}</field>;
-			newField.@name = field;
-			xml.appendChild(newField);
+			var fieldElem = doc.createElement('field');
+			fieldElem.setAttribute('name', field);
+			fieldElem.appendChild(doc.createTextNode(_xmlize(item.fields[field])));
+			itemNode.appendChild(fieldElem);
 		}
 		
 		// Deleted item flag
 		if (item.deleted) {
-			xml.@deleted = '1';
+			itemNode.setAttribute('deleted', '1');
 		}
 		
 		if (item.primary.itemType == 'note' || item.primary.itemType == 'attachment') {
 			if (item.sourceItemKey) {
-				xml.@sourceItem = item.sourceItemKey;
+				itemNode.setAttribute('sourceItem', item.sourceItemKey);
 			}
 		}
 		
 		// Note
 		if (item.primary.itemType == 'note') {
-			var note = <note>{_xmlize(item.note)}</note>;
-			xml.appendChild(note);
+			var noteElem = doc.createElement('note');
+			noteElem.appendChild(doc.createTextNode(_xmlize(item.note)));
+			itemNode.appendChild(noteElem);
 		}
 		
 		// Attachment
 		if (item.primary.itemType == 'attachment') {
-			xml.@linkMode = item.attachment.linkMode;
-			xml.@mimeType = item.attachment.mimeType;
+			itemNode.setAttribute('linkMode', item.attachment.linkMode);
+			itemNode.setAttribute('mimeType', item.attachment.mimeType);
 			var charset = item.attachment.charset;
 			if (charset) {
-				xml.@charset = charset;
+				itemNode.setAttribute('charset', charset);
 			}
 			
 			if (item.attachment.linkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
@@ -3889,33 +3866,35 @@ Zotero.Sync.Server.Data = new function() {
 					throw (e);
 
 				}
-				path = <path>{path}</path>;
-				xml.appendChild(path);
+				var pathElem = doc.createElement('path');
+				pathElem.appendChild(doc.createTextNode(path));
+				itemNode.appendChild(pathElem);
 				
 				// Include storage sync time and hash for imported files
 				if (item.attachment.linkMode != Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 					var mtime = Zotero.Sync.Storage.getSyncedModificationTime(item.primary.itemID);
 					if (mtime) {
-						xml.@storageModTime = mtime;
+						itemNode.setAttribute('storageModTime', mtime);
 					}
 					
 					var hash = Zotero.Sync.Storage.getSyncedHash(item.primary.itemID);
 					if (hash) {
-						xml.@storageHash = hash;
+						itemNode.setAttribute('storageHash', hash);
 					}
 				}
 			}
 			
 			if (item.note) {
-				var note = <note>{_xmlize(item.note)}</note>;
-				xml.appendChild(note);
+				var noteElem = doc.createElement('note');
+				noteElem.appendChild(doc.createTextNode(_xmlize(item.note)));
+				itemNode.appendChild(noteElem);
 			}
 		}
 		
 		// Creators
 		var defaultLibraryID = Zotero.libraryID;
 		for (var index in item.creators) {
-			var newCreator = <creator/>;
+			var creatorElem = doc.createElement('creator');
 			var libraryID = item.creators[index].libraryID ? item.creators[index].libraryID : defaultLibraryID;
 			var key = item.creators[index].key;
 			if (!key) {
@@ -3924,10 +3903,10 @@ Zotero.Sync.Server.Data = new function() {
 				Zotero.debug(item);
 				throw ("Creator key not set for item in Zotero.Sync.Server.sync()");
 			}
-			newCreator.@libraryID = libraryID;
-			newCreator.@key = key;
-			newCreator.@creatorType = item.creators[index].creatorType;
-			newCreator.@index = index;
+			creatorElem.setAttribute('libraryID', libraryID);
+			creatorElem.setAttribute('key', key);
+			creatorElem.setAttribute('creatorType', item.creators[index].creatorType);
+			creatorElem.setAttribute('index', index);
 			
 			// Add creator XML as glue if not already included in sync session
 			var fakeObj = {
@@ -3937,11 +3916,11 @@ Zotero.Sync.Server.Data = new function() {
 			};
 			if (syncSession && syncSession.objectInUpdated(fakeObj)) {
 				var creator = Zotero.Creators.getByLibraryAndKey(libraryID, key);
-				var creatorXML = Zotero.Sync.Server.Data.creatorToXML(creator);
-				newCreator.creator = creatorXML;
+				var subCreatorElem = Zotero.Sync.Server.Data.creatorToXML(creator, doc);
+				creatorElem.appendChild(subCreatorElem);
 			}
 			
-			xml.appendChild(newCreator);
+			itemNode.appendChild(creatorElem);
 		}
 		
 		// Related items
@@ -3953,22 +3932,24 @@ Zotero.Sync.Server.Data = new function() {
 				keys.push(item.key);
 			}
 			if (keys.length) {
-				xml.related = keys.join(' ');
+				var relatedElem = doc.createElement('related');
+				relatedElem.appendChild(doc.createTextNode(keys.join(' ')));
+				itemNode.appendChild(relatedElem);
 			}
 		}
 		
-		return xml;
+		return itemNode;
 	}
 	
 	
 	/**
-	 * Convert E4X <item> object into an unsaved Zotero.Item
+	 * Convert DOM <item> node into an unsaved Zotero.Item
 	 *
-	 * @param	object	xmlItem		E4X XML node with item data
+	 * @param	object	itemNode		DOM XML node with item data
 	 * @param	object	item			(Optional) Existing Zotero.Item to update
 	 * @param	bool	skipPrimary		(Optional) Ignore passed primary fields (except itemTypeID)
 	 */
-	function xmlToItem(xmlItem, item, skipPrimary, defaultLibraryID) {
+	this.xmlToItem = function (itemNode, item, skipPrimary, defaultLibraryID) {
 		if (!item) {
 			item = new Zotero.Item;
 		}
@@ -3981,15 +3962,15 @@ Zotero.Sync.Server.Data = new function() {
 		
 		var data = {};
 		if (!skipPrimary) {
-			data.libraryID = _getLibraryID(xmlItem.@libraryID.toString(), defaultLibraryID);
-			data.key = xmlItem.@key.toString();
-			data.dateAdded = xmlItem.@dateAdded.toString();
-			data.dateModified = xmlItem.@dateModified.toString();
+			data.libraryID = _getLibraryID(itemNode.getAttribute('libraryID'), defaultLibraryID);
+			data.key = itemNode.getAttribute('key');
+			data.dateAdded = itemNode.getAttribute('dateAdded');
+			data.dateModified = itemNode.getAttribute('dateModified');
 		}
-		data.itemTypeID = Zotero.ItemTypes.getID(xmlItem.@itemType.toString());
+		data.itemTypeID = Zotero.ItemTypes.getID(itemNode.getAttribute('itemType'));
 		// TEMP - NSF
 		if (!data.itemTypeID) {
-			var msg = "Invalid item type '" + xmlItem.@itemType.toString() + "' in Zotero.Sync.Server.Data.xmlToItem()";
+			var msg = "Invalid item type '" + itemNode.getAttribute('itemType') + "' in Zotero.Sync.Server.Data.xmlToItem()";
 			var e = new Zotero.Error(msg, "INVALID_ITEM_TYPE");
 			throw (e);
 		}
@@ -4003,9 +3984,11 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		// Item data
-		for each(var field in xmlItem.field) {
-			var fieldName = field.@name.toString();
-			item.setField(fieldName, field.toString());
+		var fields = itemNode.getElementsByTagName('field');
+		for (var i=0, len=fields.length; i<len; i++) {
+			var field = fields[i];
+			var fieldName = field.getAttribute('name');
+			item.setField(fieldName, field.textContent);
 			changedFields[fieldName] = true;
 		}
 		var previousFields = item.getUsedFields(true);
@@ -4021,19 +4004,20 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		// Deleted item flag
-		var deleted = xmlItem.@deleted.toString();
+		var deleted = itemNode.getAttribute('deleted');
 		item.deleted = (deleted == 'true' || deleted == "1");
 		
 		// Item creators
 		var i = 0;
-		for each(var creator in xmlItem.creator) {
-			var pos = parseInt(creator.@index);
+		var creators = Zotero.Utilities.xpath(itemNode, "creator");
+		for each(var creator in creators) {
+			var pos = parseInt(creator.getAttribute('index'));
 			if (pos != i) {
 				throw ('No creator in position ' + i);
 			}
 			
 			var libraryID = data.libraryID;
-			var key = creator.@key.toString();
+			var key = creator.getAttribute('key');
 			var creatorObj = Zotero.Creators.getByLibraryAndKey(libraryID, key);
 			if (!creatorObj) {
 				var msg = "Data for missing local creator " + libraryID + "/" + key
@@ -4045,7 +4029,7 @@ Zotero.Sync.Server.Data = new function() {
 			item.setCreator(
 				pos,
 				creatorObj,
-				creator.@creatorType.toString()
+				creator.getAttribute('creatorType')
 			);
 			i++;
 		}
@@ -4060,23 +4044,23 @@ Zotero.Sync.Server.Data = new function() {
 		
 		// Both notes and attachments might have parents and notes
 		if (item.isNote() || item.isAttachment()) {
-			var sourceItemKey = xmlItem.@sourceItem.toString();
+			var sourceItemKey = itemNode.getAttribute('sourceItem');
 			item.setSourceKey(sourceItemKey ? sourceItemKey : false);
-			item.setNote(xmlItem.note.toString());
+			item.setNote(_getFirstChildContent(itemNode, 'note'));
 		}
 		
 		// Attachment metadata
 		if (item.isAttachment()) {
-			item.attachmentLinkMode = parseInt(xmlItem.@linkMode);
-			item.attachmentMIMEType = xmlItem.@mimeType.toString();
-			item.attachmentCharset = xmlItem.@charset.toString();
+			item.attachmentLinkMode = parseInt(itemNode.getAttribute('linkMode'));
+			item.attachmentMIMEType = itemNode.getAttribute('mimeType');
+			item.attachmentCharset = itemNode.getAttribute('charset');
 			if (item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) { 
-				item.attachmentPath = xmlItem.path.toString();
+				item.attachmentPath = _getFirstChildContent(itemNode, 'path');
 			}
 		}
 		
 		// Related items
-		var related = xmlItem.related.toString();
+		var related = _getFirstChildContent(itemNode, 'related');
 		var relatedIDs = [];
 		if (related) {
 			related = related.split(' ');
@@ -4097,11 +4081,16 @@ Zotero.Sync.Server.Data = new function() {
 	}
 	
 	
-	function removeMissingRelatedItems(xmlNode) {
-		var libraryID = parseInt(xmlNode.@libraryID);
+	this.removeMissingRelatedItems = function (itemNode) {
+		var relatedNode = Zotero.Utilities.xpath(itemNode, "related");
+		if (!relatedNode.length) {
+			return [];
+		}
+		relatedNode = relatedNode[0];
+		var libraryID = parseInt(itemNode.getAttribute('libraryID'));
 		var exist = [];
 		var missing = [];
-		var relKeys = xmlNode.related.toString();
+		var relKeys = relatedNode.textContent;
 		relKeys = relKeys ? relKeys.split(' ') : [];
 		for each(var relKey in relKeys) {
 			if (Zotero.Items.getByLibraryAndKey(libraryID, relKey)) {
@@ -4111,62 +4100,54 @@ Zotero.Sync.Server.Data = new function() {
 				missing.push(relKey);
 			}
 		}
-		xmlNode.related = exist.join(' ');
+		relatedNode.textContent = exist.join(' ');
 		return missing;
 	}
 	
 	
-	function collectionToXML(collection) {
-		var xml = <collection/>;
-		xml.@libraryID = collection.libraryID ? collection.libraryID : Zotero.libraryID;
-		xml.@key = collection.key;
-		xml.@name = _xmlize(collection.name);
-		xml.@dateAdded = collection.dateAdded;
-		xml.@dateModified = collection.dateModified;
+	this.collectionToXML = function (collection, doc) {
+		var colElem = doc.createElement('collection');
+		colElem.setAttribute('libraryID', collection.libraryID ? collection.libraryID : Zotero.libraryID);
+		colElem.setAttribute('key', collection.key);
+		colElem.setAttribute('name', _xmlize(collection.name));
+		colElem.setAttribute('dateAdded', collection.dateAdded);
+		colElem.setAttribute('dateModified', collection.dateModified);
 		if (collection.parent) {
 			var parentCol = Zotero.Collections.get(collection.parent);
-			xml.@parent = parentCol.key;
+			colElem.setAttribute('parent', parentCol.key);
 		}
 		
 		var children = collection.getChildren();
 		if (children) {
-			//xml.collections = '';
-			xml.items = '';
+			var itemKeys = [];
+			
 			for each(var child in children) {
-				/*
-				if (child.type == 'collection') {
-					xml.collections = xml.collections ?
-						xml.collections + ' ' + child.id : child.id;
-				}
-				else */if (child.type == 'item') {
-					xml.items = xml.items.toString() ?
-						xml.items + ' ' + child.key : child.key;
+				if (child.type == 'item') {
+					itemKeys.push(child.key);
 				}
 			}
-			/*
-			if (xml.collections == '') {
-				delete xml.collections;
-			}
-			*/
-			if (xml.items == '') {
-				delete xml.items;
+			
+			if (itemKeys.length) {
+				var itemsElem = doc.createElement('items');
+				itemsElem.appendChild(doc.createTextNode(itemKeys.join(' ')));
+				colElem.appendChild(itemsElem);
 			}
 		}
 		
-		return xml;
+		return colElem;
 	}
 	
 	
 	/**
-	 * Convert E4X <collection> object into an unsaved Zotero.Collection
+	 * Convert DOM <collection> node into an unsaved Zotero.Collection
 	 *
-	 * @param	object	xmlCollection	E4X XML node with collection data
+	 * @param	object	collectionNode	DOM XML node with collection data
 	 * @param	object	item		(Optional) Existing Zotero.Collection to update
 	 * @param	bool		skipPrimary		(Optional) Ignore passed primary fields (except itemTypeID)
 	 * @param	integer	defaultLibraryID	(Optional)
 	 * @param	array	deletedItems		(Optional) An array of keys that have been deleted in this sync session
 	 */
-	function xmlToCollection(xmlCollection, collection, skipPrimary, defaultLibraryID, deletedItemKeys) {
+	this.xmlToCollection = function (collectionNode, collection, skipPrimary, defaultLibraryID, deletedItemKeys) {
 		if (!collection) {
 			collection = new Zotero.Collection;
 		}
@@ -4176,20 +4157,20 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		if (!skipPrimary) {
-			collection.libraryID = _getLibraryID(xmlCollection.@libraryID.toString(), defaultLibraryID);
-			collection.key = xmlCollection.@key.toString();
-			var parentKey = xmlCollection.@parent.toString();
+			collection.libraryID = _getLibraryID(collectionNode.getAttribute('libraryID'), defaultLibraryID);
+			collection.key = collectionNode.getAttribute('key');
+			var parentKey = collectionNode.getAttribute('parent');
 			if (parentKey) {
 				collection.parentKey = parentKey;
 			}
 			else {
 				collection.parent = false;
 			}
-			collection.dateAdded = xmlCollection.@dateAdded.toString();
-			collection.dateModified = xmlCollection.@dateModified.toString();
+			collection.dateAdded = collectionNode.getAttribute('dateAdded');
+			collection.dateModified = collectionNode.getAttribute('dateModified');
 		}
 		
-		collection.name = xmlCollection.@name.toString();
+		collection.name = collectionNode.getAttribute('name');
 		
 		/*
 		// Subcollections
@@ -4198,7 +4179,7 @@ Zotero.Sync.Server.Data = new function() {
 		*/
 		
 		// Child items
-		var childItems = xmlCollection.items.toString();
+		var childItems = _getFirstChildContent(collectionNode, 'items');
 		childItems = childItems ? childItems.split(' ') : []
 		var childItemIDs = [];
 		for each(var key in childItems) {
@@ -4274,15 +4255,14 @@ Zotero.Sync.Server.Data = new function() {
 	
 	
 	/**
-	 * Converts a Zotero.Creator object to an E4X <creator> object
+	 * Converts a Zotero.Creator object to a DOM <creator> node
 	 */
-	function creatorToXML(creator) {
-		var xml = <creator/>;
-		
-		xml.@libraryID = creator.libraryID ? creator.libraryID : Zotero.libraryID;
-		xml.@key = creator.key;
-		xml.@dateAdded = creator.dateAdded;
-		xml.@dateModified = creator.dateModified;
+	this.creatorToXML = function (creator, doc) {
+		var creatorElem = doc.createElement('creator');
+		creatorElem.setAttribute('libraryID', creator.libraryID ? creator.libraryID : Zotero.libraryID);
+		creatorElem.setAttribute('key', creator.key);
+		creatorElem.setAttribute('dateAdded', creator.dateAdded);
+		creatorElem.setAttribute('dateModified', creator.dateModified);
 		
 		var allowEmpty = ['firstName', 'lastName', 'name'];
 		
@@ -4292,29 +4272,33 @@ Zotero.Sync.Server.Data = new function() {
 				continue;
 			}
 			
+			var fieldElem = doc.createElement(field);
 			switch (field) {
 				case 'firstName':
 				case 'lastName':
 				case 'name':
-					xml[field] = _xmlize(creator.fields[field]);
+					var val = _xmlize(creator.fields[field]);
 					break;
 				
 				default:
-					xml[field] = creator.fields[field];
+					var val = creator.fields[field];
 			}
+			fieldElem.appendChild(doc.createTextNode(val));
+			creatorElem.appendChild(fieldElem);
 		}
-		return xml;
+		
+		return creatorElem;
 	}
 	
 	
 	/**
-	 * Convert E4X <creator> object into an unsaved Zotero.Creator
+	 * Convert DOM <creator> node into an unsaved Zotero.Creator
 	 *
-	 * @param	object	xmlCreator	E4X XML node with creator data
+	 * @param	object	creatorNode	DOM XML node with creator data
 	 * @param	object	item		(Optional) Existing Zotero.Creator to update
 	 * @param	bool	skipPrimary	(Optional) Ignore passed primary fields (except itemTypeID)
 	 */
-	function xmlToCreator(xmlCreator, creator, skipPrimary, defaultLibraryID) {
+	this.xmlToCreator = function (creatorNode, creator, skipPrimary, defaultLibraryID) {
 		if (!creator) {
 			creator = new Zotero.Creator;
 		}
@@ -4324,67 +4308,66 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		if (!skipPrimary) {
-			creator.libraryID = _getLibraryID(xmlCreator.@libraryID.toString(), defaultLibraryID);
-			creator.key = xmlCreator.@key.toString();
-			creator.dateAdded = xmlCreator.@dateAdded.toString();
-			creator.dateModified = xmlCreator.@dateModified.toString();
+			creator.libraryID = _getLibraryID(creatorNode.getAttribute('libraryID'), defaultLibraryID);
+			creator.key = creatorNode.getAttribute('key');
+			creator.dateAdded = creatorNode.getAttribute('dateAdded');
+			creator.dateModified = creatorNode.getAttribute('dateModified');
 		}
 		
-		if (xmlCreator.fieldMode == 1) {
+		if (_getFirstChildContent(creatorNode, 'fieldMode') == 1) {
 			creator.firstName = '';
-			creator.lastName = xmlCreator.name.toString();
+			creator.lastName = _getFirstChildContent(creatorNode, 'name');
 			creator.fieldMode = 1;
 		}
 		else {
-			creator.firstName = xmlCreator.firstName.toString();
-			creator.lastName = xmlCreator.lastName.toString();
+			creator.firstName = _getFirstChildContent(creatorNode, 'firstName');
+			creator.lastName = _getFirstChildContent(creatorNode, 'lastName');
 			creator.fieldMode = 0;
 		}
-		creator.birthYear = xmlCreator.birthYear.toString();
+		creator.birthYear = _getFirstChildContent(creatorNode, 'birthYear');
 		
 		return creator;
 	}
 	
 	
-	function searchToXML(search) {
-		var xml = <search/>;
-		xml.@libraryID = search.libraryID ? search.libraryID : Zotero.libraryID;
-		xml.@key = search.key;
-		xml.@name = _xmlize(search.name);
-		xml.@dateAdded = search.dateAdded;
-		xml.@dateModified = search.dateModified;
+	this.searchToXML = function (search, doc) {
+		var searchElem = doc.createElement('search');
+		searchElem.setAttribute('libraryID', search.libraryID ? search.libraryID : Zotero.libraryID);
+		searchElem.setAttribute('key', search.key);
+		searchElem.setAttribute('name', _xmlize(search.name));
+		searchElem.setAttribute('dateAdded', search.dateAdded);
+		searchElem.setAttribute('dateModified', search.dateModified);
 		
 		var conditions = search.getSearchConditions();
 		if (conditions) {
 			for each(var condition in conditions) {
-				var conditionXML = <condition/>
-				conditionXML.@id = condition.id;
-				conditionXML.@condition = condition.condition;
+				var conditionElem = doc.createElement('condition');
+				conditionElem.setAttribute('id', condition.id);
+				conditionElem.setAttribute('condition', condition.condition);
 				if (condition.mode) {
-					conditionXML.@mode = condition.mode;
+					conditionElem.setAttribute('mode', condition.mode);
 				}
-				conditionXML.@operator = condition.operator;
-				conditionXML.@value =
-					_xmlize(condition.value ? condition.value : '');
+				conditionElem.setAttribute('operator', condition.operator);
+				conditionElem.setAttribute('value', _xmlize(condition.value ? condition.value : ''));
 				if (condition.required) {
-					conditionXML.@required = 1;
+					conditionElem.setAttribute('required', 1);
 				}
-				xml.appendChild(conditionXML);
+				searchElem.appendChild(conditionElem);
 			}
 		}
 		
-		return xml;
+		return searchElem;
 	}
 	
 	
 	/**
-	 * Convert E4X <search> object into an unsaved Zotero.Search
+	 * Convert DOM <search> node into an unsaved Zotero.Search
 	 *
-	 * @param	object	xmlSearch	E4X XML node with search data
+	 * @param	object	searchNode	DOM XML node with search data
 	 * @param	object	item		(Optional) Existing Zotero.Search to update
 	 * @param	bool	skipPrimary		(Optional) Ignore passed primary fields (except itemTypeID)
 	 */
-	function xmlToSearch(xmlSearch, search, skipPrimary, defaultLibraryID) {
+	this.xmlToSearch = function (searchNode, search, skipPrimary, defaultLibraryID) {
 		if (!search) {
 			search = new Zotero.Search;
 		}
@@ -4394,21 +4377,23 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		if (!skipPrimary) {
-			search.libraryID = _getLibraryID(xmlSearch.@libraryID.toString(), defaultLibraryID);
-			search.key = xmlSearch.@key.toString();
-			search.dateAdded = xmlSearch.@dateAdded.toString();
-			search.dateModified = xmlSearch.@dateModified.toString();
+			search.libraryID = _getLibraryID(searchNode.getAttribute('libraryID'), defaultLibraryID);
+			search.key = searchNode.getAttribute('key');
+			search.dateAdded = searchNode.getAttribute('dateAdded');
+			search.dateModified = searchNode.getAttribute('dateModified');
 		}
 		
-		search.name = xmlSearch.@name.toString();
+		search.name = searchNode.getAttribute('name');
 		
 		var conditionID = -1;
 		
 		// Search conditions
-		for each(var condition in xmlSearch.condition) {
-			conditionID = parseInt(condition.@id);
-			var name = condition.@condition.toString();
-			var mode = condition.@mode.toString();
+		var conditions = searchNode.getElementsByTagName('condition');
+		for (var i=0, len=conditions.length; i<len; i++) {
+			var condition = conditions[i];
+			conditionID = parseInt(condition.getAttribute('id'));
+			var name = condition.getAttribute('condition');
+			var mode = condition.getAttribute('mode');
 			if (mode) {
 				name = name + '/' + mode;
 			}
@@ -4416,17 +4401,17 @@ Zotero.Sync.Server.Data = new function() {
 				search.updateCondition(
 					conditionID,
 					name,
-					condition.@operator.toString(),
-					condition.@value.toString(),
-					!!condition.@required.toString()
+					condition.getAttribute('operator'),
+					condition.getAttribute('value'),
+					!!condition.getAttribute('required')
 				);
 			}
 			else {
 				var newID = search.addCondition(
 					name,
-					condition.@operator.toString(),
-					condition.@value.toString(),
-					!!condition.@required.toString()
+					condition.getAttribute('operator'),
+					condition.getAttribute('value'),
+					!!condition.getAttribute('required')
 				);
 				if (newID != conditionID) {
 					throw ("Search condition ids not contiguous in Zotero.Sync.Server.xmlToSearch()");
@@ -4444,36 +4429,38 @@ Zotero.Sync.Server.Data = new function() {
 	}
 	
 	
-	function tagToXML(tag) {
-		var xml = <tag/>;
-		xml.@libraryID = tag.libraryID ? tag.libraryID : Zotero.libraryID;
-		xml.@key = tag.key;
-		xml.@name = _xmlize(tag.name);
+	this.tagToXML = function (tag, doc) {
+		var tagElem = doc.createElement('tag');
+		tagElem.setAttribute('libraryID', tag.libraryID ? tag.libraryID : Zotero.libraryID);
+		tagElem.setAttribute('key', tag.key);
+		tagElem.setAttribute('name', _xmlize(tag.name));
 		if (tag.type) {
-			xml.@type = tag.type;
+			tagElem.setAttribute('type', tag.type);
 		}
-		xml.@dateAdded = tag.dateAdded;
-		xml.@dateModified = tag.dateModified;
+		tagElem.setAttribute('dateAdded', tag.dateAdded);
+		tagElem.setAttribute('dateModified', tag.dateModified);
 		var linkedItems = tag.getLinkedItems();
 		if (linkedItems) {
 			var linkedItemKeys = [];
 			for each(var linkedItem in linkedItems) {
 				linkedItemKeys.push(linkedItem.key);
 			}
-			xml.items = linkedItemKeys.join(' ');
+			var itemsElem = doc.createElement('items');
+			itemsElem.appendChild(doc.createTextNode(linkedItemKeys.join(' ')));
+			tagElem.appendChild(itemsElem);
 		}
-		return xml;
+		return tagElem;
 	}
 	
 	
 	/**
-	 * Convert E4X <tag> object into an unsaved Zotero.Tag
+	 * Convert DOM <tag> node into an unsaved Zotero.Tag
 	 *
-	 * @param	object	xmlTag			E4X XML node with tag data
+	 * @param	object	tagNode			DOM XML node with tag data
 	 * @param	object	tag				(Optional) Existing Zotero.Tag to update
 	 * @param	bool		skipPrimary		(Optional) Ignore passed primary fields
 	 */
-	function xmlToTag(xmlTag, tag, skipPrimary, defaultLibraryID, deletedItemKeys) {
+	this.xmlToTag = function (tagNode, tag, skipPrimary, defaultLibraryID, deletedItemKeys) {
 		if (!tag) {
 			tag = new Zotero.Tag;
 		}
@@ -4483,17 +4470,19 @@ Zotero.Sync.Server.Data = new function() {
 		}
 		
 		if (!skipPrimary) {
-			tag.libraryID = _getLibraryID(xmlTag.@libraryID.toString(), defaultLibraryID);
-			tag.key = xmlTag.@key.toString();
-			tag.dateAdded = xmlTag.@dateAdded.toString();
-			tag.dateModified = xmlTag.@dateModified.toString();
+			tag.libraryID = _getLibraryID(tagNode.getAttribute('libraryID'), defaultLibraryID);
+			tag.key = tagNode.getAttribute('key');
+			tag.dateAdded = tagNode.getAttribute('dateAdded');
+			tag.dateModified = tagNode.getAttribute('dateModified');
 		}
 		
-		tag.name = xmlTag.@name.toString();
-		tag.type = xmlTag.@type.toString() ? parseInt(xmlTag.@type) : 0;
+		tag.name = tagNode.getAttribute('name');
+		var type = tagNode.getAttribute('type');
+		tag.type = type ? parseInt(type) : 0;
 		
-		var keys = xmlTag.items.toString() ? xmlTag.items.toString().split(' ') : false;
+		var keys = _getFirstChildContent(tagNode, 'items');
 		if (keys) {
+			keys = keys.split(' ');
 			var ids = [];
 			for each(var key in keys) {
 				var item = Zotero.Items.getByLibraryAndKey(tag.libraryID, key);
@@ -4554,24 +4543,22 @@ Zotero.Sync.Server.Data = new function() {
 	
 	
 	/**
-	 * Convert E4X <group> object into an unsaved Zotero.Group
+	 * Convert DOM <group> node into an unsaved Zotero.Group
 	 *
-	 * @param	object	xmlGroup		E4X XML node with group data
+	 * @param	object	groupNode		DOM XML node with group data
 	 * @param	object	group			(Optional) Existing Zotero.Group to update
 	 */
-	this.xmlToGroup = function (xmlGroup, group) {
+	this.xmlToGroup = function (groupNode, group) {
 		if (!group) {
 			group = new Zotero.Group;
 		}
 		
-		Zotero.debug(xmlGroup.toXMLString());
-		
-		group.id = parseInt(xmlGroup.@id);
-		group.libraryID = parseInt(xmlGroup.@libraryID);
-		group.name = xmlGroup.@name.toString();
-		group.editable = !!parseInt(xmlGroup.@editable);
-		group.filesEditable = !!parseInt(xmlGroup.@filesEditable);
-		group.description = xmlGroup.description.toString();
+		group.id = parseInt(groupNode.getAttribute('id'));
+		group.libraryID = parseInt(groupNode.getAttribute('libraryID'));
+		group.name = groupNode.getAttribute('name');
+		group.editable = !!parseInt(groupNode.getAttribute('editable'));
+		group.filesEditable = !!parseInt(groupNode.getAttribute('filesEditable'));
+		group.description = _getFirstChildContent(groupNode, 'description');
 		
 		/*
 		var keys = xmlGroup.items.toString() ? xmlGroup.items.toString().split(' ') : false;
@@ -4595,12 +4582,18 @@ Zotero.Sync.Server.Data = new function() {
 	}
 	
 	
-	this.relationToXML = function (relation) {
-		return relation.toXML();
+	this.relationToXML = function (relation, doc) {
+		return relation.toXML(doc);
 	}
 	
-	this.xmlToRelation = function (xmlRelation) {
-		return Zotero.Relations.xmlToRelation(xmlRelation);
+	this.xmlToRelation = function (relationNode) {
+		return Zotero.Relations.xmlToRelation(relationNode);
+	}
+	
+	
+	function _getFirstChildContent(node, childName) {
+		var elems = Zotero.Utilities.xpath(node, childName);
+		return elems.length ? elems[0].textContent : "";
 	}
 	
 	

@@ -31,7 +31,8 @@ Zotero.Schema = new function(){
 	var _dbVersions = [];
 	var _schemaVersions = [];
 	var _repositoryTimer;
-	var _remoteUpdateInProgress = false;
+	var _remoteUpdateInProgress = false,
+		_localUpdateInProgress = false;
 	
 	var self = this;
 	
@@ -229,8 +230,6 @@ Zotero.Schema = new function(){
 				Zotero.Schema.updateFromRepository();
 			}
 		}, 5000);
-		
-		return up1 || up2 || up3;
 	}
 	
 	
@@ -446,11 +445,47 @@ Zotero.Schema = new function(){
 	 *												since deleting uses a single version table key,
 	 * 												it should only be updated the last time through
 	 */
-	this.updateBundledFiles = function (mode, skipDeleteUpdate) {
+	this.updateBundledFiles = function(mode, skipDeleteUpdate, runRemoteUpdateWhenComplete) {
+		if(_localUpdateInProgress) return;
+		_localUpdateInProgress = true;
+		
+		// Get path to addon and then call updateBundledFilesCallback, potentially asynchronously
+		if(Zotero.isStandalone) {
+			var appChrome = Components.classes["@mozilla.org/file/directory_service;1"]
+				.getService(Components.interfaces.nsIProperties)
+				.get("AChrom", Components.interfaces.nsIFile);
+			_updateBundledFilesCallback(appChrome.parent, mode, skipDeleteUpdate,
+				runRemoteUpdateWhenComplete);
+		} else {
+			Components.utils.import("resource://gre/modules/AddonManager.jsm");
+			AddonManager.getAddonByID(ZOTERO_CONFIG['GUID'],
+				function(addon) {
+					_updateBundledFilesCallback(
+						addon.getResourceURI().QueryInterface(Components.interfaces.nsIFileURL).file,
+						mode, skipDeleteUpdate, runRemoteUpdateWhenComplete);
+				});
+		}
+	}
+	
+	/**
+	 * Callback to update bundled files, after finding the path to the Zotero install location
+	 */
+	function _updateBundledFilesCallback(installLocation, mode, skipDeleteUpdate,
+			runRemoteUpdateWhenComplete) {
+		_localUpdateInProgress = false;
+		
 		if (!mode) {
-			var up1 = this.updateBundledFiles('translators', true);
-			var up2 = this.updateBundledFiles('styles');
+			var up1 = _updateBundledFilesCallback(installLocation, 'translators', true, false);
+			var up2 = _updateBundledFilesCallback(installLocation, 'styles', false,
+				runRemoteUpdateWhenComplete);
 			return up1 && up2;
+		}
+		
+		var xpiZipReader, isUnpacked = installLocation.isDirectory();
+		if(!isUnpacked) {
+			xpiZipReader = Components.classes["@mozilla.org/libjar/zip-reader;1"]
+					.createInstance(Components.interfaces.nsIZipReader);
+			xpiZipReader.open(installLocation);
 		}
 		
 		switch (mode) {
@@ -475,16 +510,9 @@ Zotero.Schema = new function(){
 		var Mode = mode[0].toUpperCase() + mode.substr(1);
 		var Modes = Mode + "s";
 		
-		var extDir = Zotero.getInstallDirectory();
-		
-		var repotime = extDir.clone();
-		repotime.append('repotime.txt');
-		repotime = Zotero.File.getContents(repotime);
+		var repotime = Zotero.File.getContentsFromURL("resource://zotero/schema/repotime.txt");
 		var date = Zotero.Date.sqlToDate(repotime, true);
 		repotime = Zotero.Date.toUnixTimestamp(date);
-		
-		var zipFile = extDir.clone();
-		zipFile.append(modes + ".zip");
 		
 		var fileNameRE = new RegExp("^[^\.].+\\" + fileExt + "$");
 		
@@ -510,13 +538,20 @@ Zotero.Schema = new function(){
 		var sql = "SELECT version FROM version WHERE schema='delete'";
 		var lastVersion = Zotero.DB.valueQuery(sql);
 		
-		var deleted = extDir.clone();
-		deleted.append('deleted.txt');
-		// In source builds, deleted.txt is in the translators directory
-		if (!deleted.exists()) {
-			deleted = extDir.clone();
-			deleted.append('translators');
+		if(isUnpacked) {
+			var deleted = installLocation.clone();
 			deleted.append('deleted.txt');
+			// In source builds, deleted.txt is in the translators directory
+			if (!deleted.exists()) {
+				deleted = installLocation.clone();
+				deleted.append('translators');
+				deleted.append('deleted.txt');
+			}
+			if (!deleted.exists()) {
+				deleted = false;
+			}
+		} else {
+			var deleted = xpiZipReader.getInputStream("deleted.txt");
 		}
 		
 		deleted = Zotero.File.getContents(deleted);
@@ -606,26 +641,47 @@ Zotero.Schema = new function(){
 		var sql = "SELECT version FROM version WHERE schema=?";
 		var lastModTime = Zotero.DB.valueQuery(sql, modes);
 		
+		var zipFileName = modes + ".zip", zipFile;
+		if(isUnpacked) {
+			zipFile = installLocation.clone();
+			zipFile.append(zipFileName);
+			if(!zipFile.exists()) zipFile = undefined;
+		} else {
+			if(xpiZipReader.hasEntry(zipFileName)) {
+				zipFile = xpiZipReader.getEntry(zipFileName);
+			}
+		}
+		
 		// XPI installation
-		if (zipFile.exists()) {
+		if (zipFile) {
 			var modTime = Math.round(zipFile.lastModifiedTime / 1000);
 			
 			if (!forceReinstall && lastModTime && modTime <= lastModTime) {
-				Zotero.debug("Installed " + modes + " are up-to-date with " + modes + ".zip");
+				Zotero.debug("Installed " + modes + " are up-to-date with " + zipFileName);
 				return false;
 			}
 			
-			Zotero.debug("Updating installed " + modes + " from " + modes + ".zip");
+			Zotero.debug("Updating installed " + modes + " from " + zipFileName);
 			
 			if (mode == 'translator') {
 				// Parse translators.index
-				var indexFile = extDir.clone();
-				indexFile.append('translators.index');
-				if (!indexFile.exists()) {
-					Components.utils.reportError("translators.index not found in Zotero.Schema.updateBundledFiles()");
-					return false;
+				var indexFile;
+				if(isUnpacked) {
+					indexFile = installLocation.clone();
+					indexFile.append('translators.index');
+					if (!indexFile.exists()) {
+						Components.utils.reportError("translators.index not found in Zotero.Schema.updateBundledFiles()");
+						return false;
+					}
+				} else {
+					if(!xpiZipReader.hasEntry("translators.index")) {
+						Components.utils.reportError("translators.index not found in Zotero.Schema.updateBundledFiles()");
+						return false;
+					}
+					var indexFile = xpiZipReader.getInputStream("translators.index");
 				}
-				var indexFile = Zotero.File.getContents(indexFile);
+				
+				indexFile = Zotero.File.getContents(indexFile);
 				indexFile = indexFile.split("\n");
 				var index = {};
 				for each(var line in indexFile) {
@@ -660,8 +716,12 @@ Zotero.Schema = new function(){
 			}
 			
 			var zipReader = Components.classes["@mozilla.org/libjar/zip-reader;1"]
-					.getService(Components.interfaces.nsIZipReader);
-			zipReader.open(zipFile);
+					.createInstance(Components.interfaces.nsIZipReader);
+			if(isUnpacked) {
+				zipReader.open(zipFile);
+			} else {
+				zipReader.openInner(xpiZipReader, zipFileName);
+			}
 			var tmpDir = Zotero.getTempDirectory();
 			
 			if (mode == 'translator') {
@@ -750,10 +810,11 @@ Zotero.Schema = new function(){
 			}
 			
 			zipReader.close();
+			if(xpiZipReader) xpiZipReader.close();
 		}
 		// Source installation
 		else {
-			var sourceDir = extDir.clone();
+			var sourceDir = installLocation.clone();
 			sourceDir.append(modes);
 			if (!sourceDir.exists()) {
 				Components.utils.reportError("No " + modes + " ZIP file or directory "
@@ -858,6 +919,13 @@ Zotero.Schema = new function(){
 		Zotero.DB.commitTransaction();
 		
 		Zotero[Modes].init();
+		
+		if (runRemoteUpdateWhenComplete) {
+			// Run a manual scraper update if upgraded and pref set
+			if (Zotero.Prefs.get('automaticScraperUpdates')){
+				Zotero.Schema.updateFromRepository(2);
+			}
+		}
 		return true;
 	}
 	
@@ -905,6 +973,12 @@ Zotero.Schema = new function(){
 				_setRepositoryTimer(Math.round((nextCheck.getTime() - now.getTime()) / 1000));
 				return false;
 			}
+		}
+			
+		if (_localUpdateInProgress) {
+			Zotero.debug('A local update is already in progress -- delaying repository check', 4);
+			_setRepositoryTimer(600);
+			return false;
 		}
 		
 		if (Zotero.locked) {
@@ -981,22 +1055,13 @@ Zotero.Schema = new function(){
 		translatorsDir.remove(true);
 		Zotero.getTranslatorsDirectory(); // recreate directory
 		Zotero.Translators.init();
-		this.updateBundledFiles('translators');
+		this.updateBundledFiles('translators', null, false);
 		
 		var stylesDir = Zotero.getStylesDirectory();
 		stylesDir.remove(true);
 		Zotero.getStylesDirectory(); // recreate directory
 		Zotero.Styles.init();
-		this.updateBundledFiles('styles');
-		
-		// Run a manual update from repository if pref set
-		if (Zotero.Prefs.get('automaticScraperUpdates')) {
-			this.updateFromRepository(2, function () {
-				if (callback) {
-					callback();
-				}
-			});
-		}
+		this.updateBundledFiles('styles', null, true);
 		
 		if (callback) {
 			callback();
@@ -1281,31 +1346,10 @@ Zotero.Schema = new function(){
 	 * Retrieve the version from the top line of the schema SQL file
 	 */
 	function _getSchemaSQLVersion(schema){
-		if (!schema){
-			throw ('Schema type not provided to _getSchemaSQLVersion()');
-		}
-		
-		var schemaFile = schema + '.sql';
-		
-		if (_schemaVersions[schema]){
-			return _schemaVersions[schema];
-		}
-		
-		var file = Zotero.getInstallDirectory();
-		file.append(schemaFile);
-		
-		// Open an input stream from file
-		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-			.createInstance(Components.interfaces.nsIFileInputStream);
-		istream.init(file, 0x01, 0444, 0);
-		istream.QueryInterface(Components.interfaces.nsILineInputStream);
-		
-		var line = {};
+		var sql = _getSchemaSQL(schema);
 		
 		// Fetch the schema version from the first line of the file
-		istream.readLine(line);
-		var schemaVersion = line.value.match(/-- ([0-9]+)/)[1];
-		istream.close();
+		var schemaVersion = sql.match(/^-- ([0-9]+)/)[1];
 		
 		_schemaVersions[schema] = schemaVersion;
 		return schemaVersion;
@@ -1322,33 +1366,7 @@ Zotero.Schema = new function(){
 			throw ('Schema type not provided to _getSchemaSQL()');
 		}
 		
-		var schemaFile = schema + '.sql';
-		
-		// We pull the schema from an external file so we only have to process
-		// it when necessary
-		var file = Zotero.getInstallDirectory();
-		file.append(schemaFile);
-		
-		// Open an input stream from file
-		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-			.createInstance(Components.interfaces.nsIFileInputStream);
-		istream.init(file, 0x01, 0444, 0);
-		istream.QueryInterface(Components.interfaces.nsILineInputStream);
-		
-		var line = {}, sql = '', hasmore;
-		
-		// Skip the first line, which contains the schema version
-		istream.readLine(line);
-		//var schemaVersion = line.value.match(/-- ([0-9]+)/)[1];
-		
-		do {
-			hasmore = istream.readLine(line);
-			sql += line.value + "\n";
-		} while(hasmore);
-		
-		istream.close();
-		
-		return sql;
+		return Zotero.File.getContentsFromURL("resource://zotero/schema/"+schema+".sql");
 	}
 	
 	
@@ -1361,38 +1379,13 @@ Zotero.Schema = new function(){
 	 * Returns the SQL statements as a string for feeding into query()
 	 */
 	function _getDropCommands(schema){
-		if (!schema){
-			throw ('Schema type not provided to _getSchemaSQL()');
+		var sql = _getSchemaSQL(schema);
+		
+		const re = /(?:[\r\n]|^)CREATE (TABLE|INDEX) IF NOT EXISTS ([^\s]+)/;
+		var m, str="";
+		while(matches = re.exec(sql)) {
+			str += "DROP " + matches[1] + " IF EXISTS " + matches[2] + ";\n";
 		}
-		
-		var schemaFile = schema + '.sql';
-		
-		// We pull the schema from an external file so we only have to process
-		// it when necessary
-		var file = Zotero.getInstallDirectory();
-		file.append(schemaFile);
-		
-		// Open an input stream from file
-		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-			.createInstance(Components.interfaces.nsIFileInputStream);
-		istream.init(file, 0x01, 0444, 0);
-		istream.QueryInterface(Components.interfaces.nsILineInputStream);
-		
-		var line = {}, str = '', hasmore;
-		
-		// Skip the first line, which contains the schema version
-		istream.readLine(line);
-		
-		do {
-			hasmore = istream.readLine(line);
-			var matches =
-				line.value.match(/CREATE (TABLE|INDEX) IF NOT EXISTS ([^\s]+)/);
-			if (matches){
-				str += "DROP " + matches[1] + " IF EXISTS " + matches[2] + ";\n";
-			}
-		} while(hasmore);
-		
-		istream.close();
 		
 		return str;
 	}
@@ -1462,7 +1455,7 @@ Zotero.Schema = new function(){
 		}
 		
 		try {
-			Zotero.Schema.updateBundledFiles();
+			Zotero.Schema.updateBundledFiles(null, null, true);
 		}
 		catch (e) {
 			Zotero.debug(e);

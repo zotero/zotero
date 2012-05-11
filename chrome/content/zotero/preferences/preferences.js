@@ -119,11 +119,6 @@ function init()
 	} else if(document.location.hash == "#cite") {
 		document.getElementById('zotero-prefs').showPane(document.getElementById("zotero-prefpane-cite"));
 	}
-	
-	var showInAppTab;
-	if(!Zotero.isFx4 && (showInAppTab = document.getElementById("zotero-prefpane-general-showIn-appTab"))) {
-		showInAppTab.setAttribute("hidden", "true");
-	}
 }
 
 
@@ -244,6 +239,7 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 		protocol = oldProtocol;
 	}
 	
+	var storageSettings = document.getElementById('storage-settings');
 	var protocolMenu = document.getElementById('storage-protocol');
 	var settings = document.getElementById('storage-webdav-settings');
 	var sep = document.getElementById('storage-separator');
@@ -257,7 +253,12 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 		sep.hidden = true;
 	}
 	
-	protocolMenu.disabled = !enabled;
+	var menulists = storageSettings.getElementsByTagName('menulist');
+	for each(var menulist in menulists) {
+		if (menulist.className == 'storage-personal') {
+			menulist.disabled = !enabled;
+		}
+	}
 	
 	if (!skipWarnings) {
 		// WARN if going between
@@ -290,7 +291,7 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 				var sql = "INSERT OR IGNORE INTO settings VALUES (?,?,?)";
 				Zotero.DB.query(sql, ['storage', 'zfsPurge', 'user']);
 				
-				Zotero.Sync.Storage.purgeDeletedStorageFiles('zfs', function (success) {
+				Zotero.Sync.Storage.ZFS.purgeDeletedStorageFiles(function (success) {
 					if (success) {
 						ps.alert(
 							null,
@@ -307,6 +308,21 @@ function updateStorageSettings(enabled, protocol, skipWarnings) {
 					}
 				});
 			}
+		}
+	}
+	
+	setTimeout(function () {
+		updateStorageTerms();
+	}, 1)
+}
+
+
+function updateStorageSettingsGroups(enabled) {
+	var storageSettings = document.getElementById('storage-settings');
+	var menulists = storageSettings.getElementsByTagName('menulist');
+	for each(var menulist in menulists) {
+		if (menulist.className == 'storage-groups') {
+			menulist.disabled = !enabled;
 		}
 	}
 	
@@ -343,7 +359,11 @@ function verifyStorageServer() {
 	var usernameField = document.getElementById("storage-username");
 	var passwordField = document.getElementById("storage-password");
 	
-	var callback = function (uri, status, error) {
+	verifyButton.hidden = true;
+	abortButton.hidden = false;
+	progressMeter.hidden = false;
+	
+	var requestHolder = Zotero.Sync.Storage.WebDAV.checkServer(function (uri, status, callback) {
 		verifyButton.hidden = false;
 		abortButton.hidden = true;
 		progressMeter.hidden = true;
@@ -368,13 +388,9 @@ function verifyStorageServer() {
 				break;
 		}
 		
-		Zotero.Sync.Storage.checkServerCallback(uri, status, window, false, error);
-	}
+		Zotero.Sync.Storage.WebDAV.checkServerCallback(uri, status, window);
+	});
 	
-	verifyButton.hidden = true;
-	abortButton.hidden = false;
-	progressMeter.hidden = false;
-	var requestHolder = Zotero.Sync.Storage.checkServer('webdav', callback);
 	abortButton.onclick = function () {
 		if (requestHolder.request) {
 			requestHolder.request.onreadystatechange = undefined;
@@ -1234,12 +1250,9 @@ function revealDataDirectory() {
 		dataDir.reveal();
 	}
 	catch (e) {
-		// On platforms that don't support nsILocalFile.reveal() (e.g. Linux), we
-		// open a small window with a selected read-only textbox containing the
-		// file path, so the user can open it, Control-c, Control-w, Alt-Tab, and
-		// Control-v the path into another app
-		var io = {alertText: dataDir.path};
-		window.openDialog('chrome://zotero/content/selectableAlert.xul', "zotero-reveal-window", "chrome", io);
+		// On platforms that don't support nsILocalFile.reveal() (e.g. Linux),
+		// launch the directory
+		window.opener.ZoteroPane_Local.launchFile(dataDir);
 	}
 }
 
@@ -1895,19 +1908,17 @@ function updateWordProcessorInstructions() {
 }
 
 /**
- * Sets "Status bar icon" to "None" if Zotero is set to load in separate tab on Fx 4
+ * Sets "Status bar icon" to "None" if Zotero is set to load in separate tab
  */
 function handleShowInPreferenceChange() {
 	var showInSeparateTab = document.getElementById("zotero-prefpane-general-showIn-separateTab");
 	var showInAppTab = document.getElementById("zotero-prefpane-general-showIn-appTab");
-	if(Zotero.isFx4) {
-		if(showInAppTab.selected) {
-			document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-none');
-			Zotero.Prefs.set("statusBarIcon", 0);
-		} else if(Zotero.isFx4) {
-			document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-full');
-			Zotero.Prefs.set("statusBarIcon", 2);
-		}
+	if(showInAppTab.selected) {
+		document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-none');
+		Zotero.Prefs.set("statusBarIcon", 0);
+	} else {
+		document.getElementById('statusBarIcon').selectedItem = document.getElementById('statusBarIcon-full');
+		Zotero.Prefs.set("statusBarIcon", 2);
 	}
 }
 

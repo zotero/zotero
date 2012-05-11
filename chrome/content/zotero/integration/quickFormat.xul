@@ -112,6 +112,9 @@
 				</html:div>
 			</rows>
 		</grid>
+		<vbox flex="1" align="center">
+			<button id="citation-properties-library-link" onclick="Zotero_QuickFormat.showInLibrary()"/>
+		</vbox>
 	</panel>
 	<zoteroguidancepanel id="quick-format-guidance" about="quickFormat"
 			for="zotero-icon" x="26"/>

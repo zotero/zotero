@@ -12,6 +12,14 @@
 
 <!ENTITY fileMenu.label "តម្កល់ឯកសារ">
 <!ENTITY fileMenu.accesskey "F">
+<!ENTITY saveCmd.label "Save…">
+<!ENTITY saveCmd.key "S">
+<!ENTITY saveCmd.accesskey "A">
+<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.accesskey "U">
+<!ENTITY printCmd.label "Print…">
+<!ENTITY printCmd.key "P">
+<!ENTITY printCmd.accesskey "U">
 <!ENTITY closeCmd.label "បិទ">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
@@ -66,7 +74,7 @@
 
 
 <!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "អប្បបរមា">
+<!ENTITY minimizeWindow.label "អប្បបរមានីយកម្ម">
 <!ENTITY bringAllToFront.label "នាំយកទាំងអស់មកខាងមុខ">
 <!ENTITY zoomWindow.label "ពង្រួម">
 <!ENTITY windowMenu.label "វីនដូយ៏">

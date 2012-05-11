@@ -7,12 +7,12 @@
     <RDF:Seq>
       <RDF:li>
         <RDF:Description>
-          <version>3.0.3.SOURCE</version>
+          <version>3.5a1.SOURCE</version>
           <targetApplication>
             <RDF:Description>
               <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
-              <minVersion>3.6</minVersion>
-              <maxVersion>13.0a1</maxVersion>
+              <minVersion>5</minVersion>
+              <maxVersion>15.0a1</maxVersion>
               <updateLink>http://download.zotero.org/extension/zotero.xpi</updateLink>
               <updateHash>sha1:</updateHash>
             </RDF:Description>

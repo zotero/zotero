@@ -497,9 +497,8 @@
 						moveDown.id = "zotero-creator-move-down";
 						moveUp.className = "zotero-creator-move";
 						moveDown.className = "zotero-creator-move";
-						// TODO: localize
-						moveUp.setAttribute("label", "Move Up");
-						moveDown.setAttribute("label", "Move Down");
+						moveUp.setAttribute("label", Zotero.getString('pane.item.creator.moveUp'));
+						moveDown.setAttribute("label", Zotero.getString('pane.item.creator.moveDown'));
 						this._creatorTypeMenu.appendChild(moveSep);
 						this._creatorTypeMenu.appendChild(moveUp);
 						this._creatorTypeMenu.appendChild(moveDown);
@@ -817,8 +816,7 @@
 					
 					var label = document.createElement('label');
 					label.id = 'more-creators-label';
-					// TODO: localize
-					label.setAttribute('value', num + " more…");
+					label.setAttribute('value', Zotero.getString('general.numMore', num));
 					label.setAttribute('onclick',
 						"var binding = document.getBindingParent(this); "
 						+ "binding._displayAllCreators = true; "
@@ -1421,6 +1419,7 @@
 					
 					if (creatorField=='lastName') {
 						t.setAttribute('fieldMode', elem.getAttribute('fieldMode'));
+						t.setAttribute('newlines','pasteintact');
 					}
 					
 					if (Zotero.ItemFields.isMultiline(fieldName) || Zotero.ItemFields.isLong(fieldName)) {
@@ -1695,9 +1694,67 @@
 						
 						var otherFields = this.getCreatorFields(row);
 						otherFields[creatorField] = value;
+						var lastName = otherFields.lastName;
 						
-						this.modifyCreator(creatorIndex, otherFields);
-						
+						//Handle \n\r and \n delimited entries
+						var rawNameArray = lastName.split(/\r\n?|\n/);
+						if (rawNameArray.length > 1) {
+							//Save tab direction and add creator flags since they are reset in the 
+							//process of adding multiple authors
+							var tabDirectionBuffer = this._tabDirection;
+							var addCreatorRowBuffer = this._addCreatorRow;
+							var tabIndexBuffer = this._lastTabIndex;
+							this._tabDirection = false;
+							this._addCreatorRow = false;
+							
+							//Filter out bad names
+							var nameArray = [tempName for each(tempName in rawNameArray) if(tempName)];
+							
+							//If not adding names at the end of the creator list, make new creator 
+							//entries and then shift down existing creators.
+							var initNumCreators = this.item.numCreators();
+							var creatorsToShift = initNumCreators - creatorIndex;
+							if (creatorsToShift > 0) { 
+								//Add extra creators
+								for (var i=0;i<nameArray.length;i++) {
+									this.modifyCreator(i+initNumCreators,otherFields);
+								}
+								
+								//Shift existing creators
+								for (var i=initNumCreators-1; i>=creatorIndex; i--) {
+									var shiftedCreator = this.item.getCreator(i);
+									this.item.setCreator(nameArray.length+i,shiftedCreator.ref,shiftedCreator.creatorTypeID);
+								}
+							}
+							
+							//Add the creators in lastNameArray one at a time
+							for each(var tempName in nameArray) {
+								// Check for tab to determine creator name format
+								otherFields.fieldMode = (tempName.indexOf('\t') == -1) ? 1 : 0;
+								if (otherFields.fieldMode == 0) {
+									otherFields.lastName=tempName.split('\t')[0];
+									otherFields.firstName=tempName.split('\t')[1];
+								} 
+								else {
+									otherFields.lastName=tempName;
+									otherFields.firstName='';
+								}
+								this.modifyCreator(creatorIndex,otherFields);
+								creatorIndex++;
+							}
+							this._tabDirection = tabDirectionBuffer;
+							this._addCreatorRow = (creatorsToShift==0) ? addCreatorRowBuffer : false;
+							if (this._tabDirection == 1) {
+								this._lastTabIndex = parseInt(tabIndexBuffer,10) + 2*(nameArray.length-1);
+								if (otherFields.fieldMode == 0) {
+									this._lastTabIndex++;
+								}
+							}
+						}
+						else {
+							this.modifyCreator(creatorIndex, otherFields);
+						}
+	
 						var val = this.item.getCreator(creatorIndex);
 						val = val ? val.ref[creatorField] : null;
 						

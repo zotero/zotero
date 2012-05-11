@@ -56,7 +56,6 @@
 <!ENTITY zotero.items.rights_column "Jabetza">
 <!ENTITY zotero.items.dateAdded_column "Noiz gehitua">
 <!ENTITY zotero.items.dateModified_column "Noiz aldatua">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Bilatu liburutegian">
 <!ENTITY zotero.items.menu.attach.note "Oharra gehitu">

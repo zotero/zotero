@@ -124,13 +124,6 @@ var ZoteroPane = new function()
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'win');
 		}
 		
-		if(Zotero.isFx4 || window.ZoteroTab) {
-			// hack, since Fx 4 no longer sets active, and the reverse in polarity of the preferred
-			// property makes things painful to handle otherwise
-			// DEBUG: remove this once we only support Fx 4
-			zp.setAttribute("ignoreActiveAttribute", "true");
-		}
-		
 		// register an observer for Zotero reload
 		observerService = Components.classes["@mozilla.org/observer-service;1"]
 					  .getService(Components.interfaces.nsIObserverService);
@@ -1154,16 +1147,17 @@ var ZoteroPane = new function()
 				var noteEditor = document.getElementById('zotero-note-editor');
 				noteEditor.mode = this.collectionsView.editable ? 'edit' : 'view';
 				
-				// If loading new or different note, disable undo while we repopulate the text field
-				// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
-				// undo content from another note into the current one.
-				if (!noteEditor.item || noteEditor.item.id != item.id) {
-					noteEditor.disableUndo();
-				}
+				var clearUndo = noteEditor.item ? noteEditor.item.id != item.id : false;
+				
 				noteEditor.parent = null;
 				noteEditor.item = item;
 				
-				noteEditor.enableUndo();
+				// If loading new or different note, disable undo while we repopulate the text field
+				// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
+				// undo content from another note into the current one.
+				if (clearUndo) {
+					noteEditor.clearUndo();
+				}
 				
 				var viewButton = document.getElementById('zotero-view-note-button');
 				if (this.collectionsView.editable) {
@@ -1254,8 +1248,7 @@ var ZoteroPane = new function()
 					Zotero_Duplicates_Pane.setItems(this.getSelectedItems(), displayNumItemsOnTypeError);
 				}
 				else {
-					// TODO: localize
-					var msg = "Select items to merge";
+					var msg = Zotero.getString('pane.item.selectToMerge');
 					this.setItemPaneMessage(msg);
 				}
 			}
@@ -1265,7 +1258,20 @@ var ZoteroPane = new function()
 					var msg = Zotero.getString('pane.item.selected.multiple', count);
 				}
 				else {
-					var msg = Zotero.getString('pane.item.selected.zero');
+					var rowCount = this.itemsView.rowCount;
+					var str = 'pane.item.unselected.';
+					switch (rowCount){
+						case 0:
+							str += 'zero';
+							break;
+						case 1:
+							str += 'singular';
+							break;
+						default:
+							str += 'plural';
+							break;
+					}
+					var msg = Zotero.getString(str, [rowCount]);
 				}
 				
 				this.setItemPaneMessage(msg);
@@ -2619,14 +2625,8 @@ var ZoteroPane = new function()
 								createInstance(Components.interfaces.nsIURI);
 						var snapID = item.getBestAttachment();
 						if (snapID) {
-							spec = Zotero.Items.get(snapID).getLocalFileURL();
-							if (spec) {
-								uri.spec = spec;
-								if (uri.scheme && uri.scheme == 'file') {
-									ZoteroPane_Local.viewAttachment(snapID, event);
-									return;
-								}
-							}
+							ZoteroPane_Local.viewAttachment(snapID, event);
+							return;
 						}
 						
 						var uri = item.getField('url');
@@ -3376,22 +3376,22 @@ var ZoteroPane = new function()
 		}
 		
 		for each(var itemID in itemIDs) {
-			var attachment = Zotero.Items.get(itemID);
-			if (!attachment.isAttachment()) {
+			var item = Zotero.Items.get(itemID);
+			if (!item.isAttachment()) {
 				throw ("Item " + itemID + " is not an attachment in ZoteroPane_Local.viewAttachment()");
 			}
 			
-			if (attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-				this.loadURI(attachment.getField('url'), event);
+			if (item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+				this.loadURI(item.getField('url'), event);
 				continue;
 			}
 			
-			var file = attachment.getFile();
+			var file = item.getFile();
 			if (file) {
 				if(forceExternalViewer !== undefined) {
 					var externalViewer = forceExternalViewer;
 				} else {
-					var mimeType = attachment.attachmentMIMEType;
+					var mimeType = item.attachmentMIMEType;
 					// If no MIME type specified, try to detect again (I guess in case
 					// we've gotten smarter since the file was imported?)
 					if (!mimeType) {
@@ -3414,6 +3414,37 @@ var ZoteroPane = new function()
 				}
 			}
 			else {
+				if (item.isImportedAttachment() && Zotero.Sync.Storage.downloadAsNeeded(item.libraryID)) {
+					let downloadedItem = item;
+					var started = Zotero.Sync.Storage.downloadFile(item, {
+						onStart: function (request) {
+							if (!(request instanceof Zotero.Sync.Storage.Request)) {
+								throw new Error("Invalid request object");
+							}
+						},
+						
+						onProgress: function (progress, progressMax) {
+							
+						},
+						
+						onStop: function () {
+							if (!downloadedItem.getFile()) {
+								ZoteroPane_Local.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
+								return;
+							}
+							
+							// check if unchanged?
+							// maybe not necessary, since we'll get an error if there's an error
+							
+							ZoteroPane_Local.viewAttachment(downloadedItem.id, event, false, forceExternalViewer);
+						},
+					});
+					
+					if (started) {
+						continue;
+					}
+				}
+				
 				this.showAttachmentNotFoundDialog(itemID, noLocateOnMissing);
 			}
 		}
@@ -3451,12 +3482,7 @@ var ZoteroPane = new function()
 				proc.init(exec);
 				
 				var args = [file.path];
-				if (!Zotero.isFx36) {
-					proc.runw(true, args, args.length);
-				}
-				else {
-					proc.run(true, args, args.length);
-				}
+				proc.runw(true, args, args.length);
 			}
 			catch (e) {
 				Zotero.debug(e);
@@ -3520,12 +3546,7 @@ var ZoteroPane = new function()
 			proc.init(exec);
 			
 			var args = [url];
-			if (!Zotero.isFx36) {
-				proc.runw(false, args, args.length);
-			}
-			else {
-				proc.run(false, args, args.length);
-			}
+			proc.runw(false, args, args.length);
 		}
 	}
 	

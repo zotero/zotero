@@ -9,7 +9,7 @@
 <!ENTITY zotero.errorReport.submissionInProgress "សូមរង់ចាំ ខណៈពេលកំពុងធ្វើរបាយការណ៍អំពីកំហុស។">
 <!ENTITY zotero.errorReport.submitted "កំហុសបានធ្វើរបាយការណ៍រួចហើយ។">
 <!ENTITY zotero.errorReport.reportID "អត្តលេខរបាយការណ៍:">
-<!ENTITY zotero.errorReport.postToForums "សូមផ្ញើសារទៅកាន់វេទិកាហ្ស៊ូតេរ៉ូ (forums.zotero.org) ជាមួយនិងអត្តលេខរបាយការណ៍នេះ ការពណ៌នាបញ្ហា និង ជំហានចាំបាច់នានា ដើម្បីផលិតឡើងវិញ។">
+<!ENTITY zotero.errorReport.postToForums "សូមផ្ញើសារទៅកាន់វេទិកាហ្ស៊ូតេរ៉ូ (forums.zotero.org) ជាមួយនិងអត្ត​លេខរ​បាយការណ៍នេះ ការពណ៌នាបញ្ហា និង ជំហានចាំបាច់នានា ដើម្បី​ផលិត​ឡើងវិញ។">
 <!ENTITY zotero.errorReport.notReviewed "របាយការណ៍អំពីកំហុសមិនត្រូវបានពិនិត្យ លុះត្រាតែឆ្លងកាត់វេទិកានេះ។">
 
 <!ENTITY zotero.upgrade.newVersionInstalled "អ្នកបានដំឡើងហ្ស៊ូតេរ៉ូកំណែថ្មី។">
@@ -19,7 +19,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "ធ្វើឲប្រាកដថា អ្នកបានអាននូវ">
 <!ENTITY zotero.upgrade.majorUpgradeLink "ការណែនាំអំពីទំនើបកម្ម">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "មុនពេលបន្ត">
-<!ENTITY zotero.upgrade.upgradeInProgress "សូមរង់ចាំ ដើម្បីឲដំណើរការទំនើបកម្មបញ្ចប់។​ ដំណើរការនេះអាចចំណាយពេលមួយរយៈខ្លី។">
+<!ENTITY zotero.upgrade.upgradeInProgress "សូមរង់ចាំ ដើម្បីឲដំណើរការទំនើបកម្មបញ្ចប់។​ ដំណើរការនេះអាចចំណាយ​ពេលមួយរយៈខ្លី។">
 <!ENTITY zotero.upgrade.upgradeSucceeded "ទិន្នន័យហ្ស៊ូតេរ៉ូរបស់អ្នកបានធ្វើទំនើបកម្មដោយជោគជ័យ។">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "សូមមើល">
 <!ENTITY zotero.upgrade.changeLogLink "កំណត់ហេតុផ្លាស់ប្តូរ">
@@ -120,7 +120,7 @@
 <!ENTITY zotero.tagSelector.renameTag "ផ្លាស់ឈ្មោះស្លាក...">
 <!ENTITY zotero.tagSelector.deleteTag "លុបស្លាកចោល...">
 
-<!ENTITY zotero.lookup.description "សូមបញ្ចូលអាយអេសប៊ីអិន ឌីអូអាយ ឬ ភីអេមអាយឌី ដើម្បីរកមើលនៅក្នុងប្រអប់ខាងក្រោមៈ">
+<!ENTITY zotero.lookup.description "សូមបញ្ចូលអាយអេសប៊ីអិន ឌីអូអាយ ឬ ភីអេមអាយឌី ដើម្បីរកមើលនៅក្នុង​ប្រអប់ខាងក្រោមៈ">
 
 <!ENTITY zotero.selectitems.title "ជ្រើសរើសឯកសារ">
 <!ENTITY zotero.selectitems.intro.label "ជ្រើសរើសឯកសារណាមួយដែលអ្នកចង់បញ្ចូលទៅក្នុងបណ្ណាល័យរបស់អ្នក">
@@ -175,10 +175,10 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "ការប្រើទម្រង់:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "កំណត់ចំណាំគេហទំព័រទុក">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "កំណត់ចំណាំគេហទំព័រអាចរក្សាទុកនៅក្នុងម៉ាយក្រូសូហ្វវើដ និង អូផិនអប់ហ្វីស ប៉ុន្តែអាចត្រូវបានកែប្រែដោយចៃដន្យ។ ដោយមូលហេតុសមិតភាព អាគតដ្ឋានមិនអាចដាក់ជាលេខយោងក្រោមអត្ថបទ​ ឬ លេខយោងចុងអត្ថបទនៅពេលត្រូវបានជ្រើសរើស។">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "កំណត់ចំណាំគេហទំព័រអាចរក្សាទុកនៅក្នុងម៉ាយក្រូសូហ្វវើដ និង អូផិនអប់ហ្វីស ប៉ុន្តែអាចត្រូវបានកែប្រែដោយចៃដន្យ។ ដោយមូលហេតុ​សមិតភាព អាគតដ្ឋានមិនអាចដាក់ជាលេខយោងក្រោមអត្ថបទ​ ឬ លេខ​យោង​ចុងអត្ថបទនៅពេលត្រូវបានជ្រើសរើស។">
 
 <!ENTITY zotero.integration.prefs.storeReferences.label "ដាក់កំណត់យោងក្នុងឯកសារ">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "ការដាក់កំណត់យោងក្នុងឯកសាររបស់អ្នកនឹងបង្កើនទំហំឯកសារ ប៉ុន្តែវានឹងអនុញ្ញាតឲអ្នកអាចចែករំលែកឯកសារជាមួយអ្នកដទៃដោយមិនចាំបាច់ប្រើហ្ស៊ូតេរ៉ូជាក្រុម។​ ហ្ស៊ូតេរ៉ូកំណែថ្មីចាប់ពី ៣.០ ឡើងទៅ​ តម្រូវឲធ្វើទំនើបកម្មឯកសារដែលបានបង្កើតសម្រាប់ជម្រើសនេះ។">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "ការដាក់កំណត់យោងក្នុងឯកសាររបស់អ្នកនឹងបង្កើនទំហំឯកសារ ប៉ុន្តែ​វានឹងអនុញ្ញាតឲអ្នកអាចចែករំលែកឯកសារជាមួយអ្នកដទៃដោយមិនចាំបាច់ប្រើហ្ស៊ូតេរ៉ូជាក្រុម។​ ហ្ស៊ូតេរ៉ូកំណែថ្មីចាប់ពី ៣.០ ឡើងទៅ​ តម្រូវឲធ្វើ​ទំនើបកម្មឯកសារដែលបានបង្កើតសម្រាប់ជម្រើសនេះ។">
 
 <!ENTITY zotero.integration.showEditor.label "បង្ហាញកំណែតម្រូវ">
 <!ENTITY zotero.integration.classicView.label "មើលតាមទម្រង់បុរាណ">
@@ -229,7 +229,7 @@
 <!ENTITY zotero.rtfScan.citationsPage.description "សូមធ្វើការពិនិត្យបញ្ជីអាគតដ្ឋានដែលបានទទួលស្គាល់ដូចខាងក្រោម ដើម្បីធ្វើឲប្រាកដថា ហ្ស៊ូតេរ៉ូបានជ្រើសរើសអាគតដ្ឋានត្រឹមត្រូវ។ អាគតដ្ឋានមិនបានផ្គូរផ្គង​ ឬ ស្រពិចស្រពិលត្រូវធ្វើការដោះស្រាយ​ជាមុន មុនពេលបន្តទៅជំហានបន្ទាប់។">
 <!ENTITY zotero.rtfScan.stylePage.label "ឯកសារកំពុងត្រូវបានធ្វើទ្រង់ទ្រាយ">
 <!ENTITY zotero.rtfScan.formatPage.label "កំពុងធ្វើទ្រង់ទ្រាយអាគតដ្ឋាន">
-<!ENTITY zotero.rtfScan.formatPage.description "សូមរង់ចាំ ខណៈពេលហ្ស៊ូតេរ៉ូកំពុងដំណើរការ និង ធ្វើទ្រង់ទ្រាយ​ឯកសារអ៊ែរធីអែហ្វរបស់អ្នក។">
+<!ENTITY zotero.rtfScan.formatPage.description "សូមរង់ចាំ ខណៈពេលហ្ស៊ូតេរ៉ូកំពុងដំណើរការ និង ធ្វើទ្រង់ទ្រាយ​ឯកសារ​អ៊ែរធីអែហ្វរបស់អ្នក។">
 <!ENTITY zotero.rtfScan.completePage.label "វិភាគអ៊ែរធីអែហ្វបានបញ្ចប់">
 <!ENTITY zotero.rtfScan.completePage.description "ឥលូវឯកសាររបស់អ្នកត្រូវបានវិភាគ និង បញ្ចប់រួចហើយ។ សូមធ្វើឲប្រាកដ​ថា ឯកសាររបស់អ្នកត្រូវបានធ្វើទ្រង់ទ្រាយដោយត្រឹមត្រូវ។">
 <!ENTITY zotero.rtfScan.inputFile.label "ឯកសារព័ត៌មាន">

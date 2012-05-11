@@ -56,18 +56,17 @@
 <!ENTITY zotero.items.rights_column "Prawa autorskie">
 <!ENTITY zotero.items.dateAdded_column "Data dodania">
 <!ENTITY zotero.items.dateModified_column "Data modyfikacji">
-<!ENTITY zotero.items.numChildren_column "+">
 
 <!ENTITY zotero.items.menu.showInLibrary "Wyświetl w bibliotece">
 <!ENTITY zotero.items.menu.attach.note "Dodaj notatkę">
 <!ENTITY zotero.items.menu.attach "Dodaj załącznik">
 <!ENTITY zotero.items.menu.attach.snapshot "Dołącz zrzut ekranu aktywnej strony">
 <!ENTITY zotero.items.menu.attach.link "Dołącz odnośnik do aktywnej strony">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
+<!ENTITY zotero.items.menu.attach.link.uri "Dołącz odnośnik do URI...">
 <!ENTITY zotero.items.menu.attach.file "Dołącz zachowaną kopię pliku...">
 <!ENTITY zotero.items.menu.attach.fileLink "Dołącz odsyłacz do pliku...">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.restoreToLibrary "Przywróć do biblioteki">
 <!ENTITY zotero.items.menu.duplicateItem "Duplikuj zaznaczony element">
 
 <!ENTITY zotero.toolbar.newItem.label "Nowy element">
@@ -99,11 +98,11 @@
 <!ENTITY zotero.item.attachment.file.show "Wyświetl plik">
 <!ENTITY zotero.item.textTransform "Przekształć tekst">
 <!ENTITY zotero.item.textTransform.titlecase "Kapitaliki">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.sentencecase "Jak w zdaniu">
 
-<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newNote "Nowa notatka">
 <!ENTITY zotero.toolbar.note.standalone "Nowa osobna notatka">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
+<!ENTITY zotero.toolbar.note.child "Nowa potomna notatka">
 <!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
 <!ENTITY zotero.toolbar.attachment.linked "Odnośnik do pliku">
 <!ENTITY zotero.toolbar.attachment.add "Zapisz kopię pliku">
@@ -177,11 +176,11 @@
 <!ENTITY zotero.integration.prefs.bookmarks.label "Zakładki">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "Zakładki są zabezpieczone zarówno przez program Microsoft Word jaki i OpenOffice, ale w wyjątkowych przypadkach mogą być modyfikowane.">
 
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Zapisz cytowania w dokumencie">
 <!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
 
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
-<!ENTITY zotero.integration.classicView.label "Classic View">
+<!ENTITY zotero.integration.showEditor.label "Pokaż edytor">
+<!ENTITY zotero.integration.classicView.label "Widok klasyczny">
 
 <!ENTITY zotero.integration.references.label "Pozycje w bibliografii">
 
@@ -202,8 +201,8 @@
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etykieta zostanie usunięte ze wszystkich elementów.">
 
 <!ENTITY zotero.proxy.recognized.title "Rozpoznano proxy">
-<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
+<!ENTITY zotero.proxy.recognized.warning "Dodaj tylko zaufane serwery proxy, powiązane z twoją stroną biblioteki, szkoły lub organizacji. ">
+<!ENTITY zotero.proxy.recognized.warning.secondary "Dodawanie innych serwerów proxy umożliwia złośliwym stronom internetowym podszywanie się pod zaufane.">
 <!ENTITY zotero.proxy.recognized.disable.label "Nie przekierowuj automatycznie żądań za pomocą poprzednio rozpoznanych serwerów proxy">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignoruj">
 
@@ -238,6 +237,6 @@
 <!ENTITY zotero.file.choose.label "Wybierz plik...">
 <!ENTITY zotero.file.noneSelected.label "Nie wybrano pliku">
 
-<!ENTITY zotero.downloadManager.label "Save to Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.label "Zapisz w Zotero">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Załączniki nie mogą być zapisane w aktualnie wybranej bibliotece. Ten element zostanie zapisany zamiast tego w twojej bibliotece.">
+<!ENTITY zotero.downloadManager.noPDFTools.description "Aby użyć tej funkcji, musisz najpierw zainstalować narzędzia PDF w ustawieniach Zotero.">

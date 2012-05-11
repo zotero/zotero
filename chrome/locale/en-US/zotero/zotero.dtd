@@ -1,4 +1,4 @@
-<!ENTITY zotero.general.optional							"(Optional)">
+﻿<!ENTITY zotero.general.optional							"(Optional)">
 <!ENTITY zotero.general.note								"Note:">
 <!ENTITY zotero.general.selectAll							"Select All">
 <!ENTITY zotero.general.deselectAll						"Deselect All">
@@ -56,7 +56,22 @@
 <!ENTITY zotero.items.rights_column						"Rights">
 <!ENTITY zotero.items.dateAdded_column					"Date Added">
 <!ENTITY zotero.items.dateModified_column				"Date Modified">
-<!ENTITY zotero.items.numChildren_column				"+">
+<!ENTITY zotero.items.extra_column						"Extra">
+<!ENTITY zotero.items.archive_column					"Archive">
+<!ENTITY zotero.items.archiveLocation_column			"Loc. in Archive">
+<!ENTITY zotero.items.place_column						"Place">
+<!ENTITY zotero.items.volume_column						"Volume">
+<!ENTITY zotero.items.edition_column					"Edition">
+<!ENTITY zotero.items.pages_column						"Pages">
+<!ENTITY zotero.items.issue_column						"Issue">
+<!ENTITY zotero.items.series_column						"Series">
+<!ENTITY zotero.items.seriesTitle_column				"Series Title">
+<!ENTITY zotero.items.court_column						"Court">
+<!ENTITY zotero.items.medium_column						"Medium/Format">
+<!ENTITY zotero.items.genre_column						"Genre">
+<!ENTITY zotero.items.system_column						"System">
+<!ENTITY zotero.items.moreColumns.label					"More Columns">
+<!ENTITY zotero.items.restoreColumnOrder.label			"Restore Column Order">
 
 <!ENTITY zotero.items.menu.showInLibrary					"Show in Library">
 <!ENTITY zotero.items.menu.attach.note					"Add Note">
@@ -69,6 +84,10 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary				"Restore to Library">
 <!ENTITY zotero.items.menu.duplicateItem					"Duplicate Selected Item">
+<!ENTITY zotero.items.menu.mergeItems					"Merge Items…">
+
+<!ENTITY zotero.duplicatesMerge.versionSelect			"Choose the version of the item to use as the master item:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect				"Select fields to keep from other versions of the item:">
 
 <!ENTITY zotero.toolbar.newItem.label					"New Item">
 <!ENTITY zotero.toolbar.moreItemTypes.label			"More">
@@ -156,6 +175,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label			"Suppress Author">
 <!ENTITY zotero.citation.prefix.label					"Prefix:">
 <!ENTITY zotero.citation.suffix.label					"Suffix:">
+<!ENTITY zotero.citation.editorWarning.label  		"Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 
 <!ENTITY zotero.richText.italic.label					"Italic">
 <!ENTITY zotero.richText.bold.label						"Bold">

@@ -245,8 +245,14 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	
 	for (var i=0; i<visibleFields.length; i++) {
 		var field = visibleFields[i];
-		if (field == 'year') {
-			field = 'date';
+		switch (field) {
+			case 'hasAttachment':
+			case 'hasNote':
+				continue;
+			
+			case 'year':
+				field = 'date';
+				break;
 		}
 		if (cacheFields.indexOf(field) == -1) {
 			cacheFields = cacheFields.concat(field);
@@ -724,13 +730,9 @@ Zotero.ItemTreeView.prototype.getCellText = function(row, column)
 	
 	var val;
 	
-	if(column.id == "zotero-items-column-numChildren")
-	{
-		var c = obj.numChildren(this._itemGroup.isTrash());
-		// Don't display '0'
-		if(c && parseInt(c) > 0) {
-			val = c;
-		}
+	// Image only
+	if (column.id === "zotero-items-column-hasAttachment" || column.id === "zotero-items-column-hasNote") {
+		return;
 	}
 	else if(column.id == "zotero-items-column-type")
 	{
@@ -815,6 +817,47 @@ Zotero.ItemTreeView.prototype.getImageSrc = function(row, col)
 	{
 		return this._getItemAtRow(row).ref.getImageSrc();
 	}
+	else if (col.id == 'zotero-items-column-hasAttachment') {
+		if (this._itemGroup.isTrash()) return false;
+		
+		var treerow = this._getItemAtRow(row);
+		if (treerow.level === 0) {
+			if (treerow.ref.isRegularItem()) {
+				switch (treerow.ref.getBestAttachmentState()) {
+					case 1:
+						return "chrome://zotero/skin/bullet_blue.png";
+					
+					case -1:
+						return "chrome://zotero/skin/bullet_blue_empty.png";
+					
+					default:
+						return "";
+				}
+			}
+		}
+		
+		if (treerow.ref.isFileAttachment()) {
+			if (treerow.ref.fileExists) {
+				return "chrome://zotero/skin/bullet_blue.png";
+			}
+			else {
+				return "chrome://zotero/skin/bullet_blue_empty.png";
+			}
+		}
+	}
+	else if (col.id == 'zotero-items-column-hasNote') {
+		if (this._itemGroup.isTrash()) return false;
+		
+		var treerow = this._getItemAtRow(row);
+		if (treerow.level === 0 && treerow.ref.isRegularItem() && treerow.ref.numNotes(false, true)) {
+			return "chrome://zotero/skin/bullet_yellow.png";
+		}
+		else if (treerow.ref.isAttachment()) {
+			if (treerow.ref.hasNote()) {
+				return "chrome://zotero/skin/bullet_yellow.png";
+			}
+		}
+	}
 }
 
 Zotero.ItemTreeView.prototype.isContainer = function(row)
@@ -829,13 +872,16 @@ Zotero.ItemTreeView.prototype.isContainerOpen = function(row)
 
 Zotero.ItemTreeView.prototype.isContainerEmpty = function(row)
 {
-	if(this._sourcesOnly) {
+	if (this._sourcesOnly) {
 		return true;
-	} else {
-		var includeTrashed = this._itemGroup.isTrash();
-		return (this._getItemAtRow(row).numNotes(includeTrashed) == 0
-			&& this._getItemAtRow(row).numAttachments(includeTrashed) == 0);
 	}
+	
+	var item = this._getItemAtRow(row).ref;
+	if (!item.isRegularItem()) {
+		return false;
+	}
+	var includeTrashed = this._itemGroup.isTrash();
+	return item.numNotes(includeTrashed) === 0 && item.numAttachments(includeTrashed) == 0;
 }
 
 Zotero.ItemTreeView.prototype.getLevel = function(row)
@@ -1034,25 +1080,51 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	
 	// Get the display field for a row (which might be a placeholder title)
 	var getField;
-	if (columnField == 'title') {
-		getField = function (row) {
-			var field;
-			var type = row.ref.itemTypeID;
-			switch (type) {
-				case 8: // letter
-				case 10: // interview
-				case 17: // case
-					field = row.ref.getDisplayTitle();
-					break;
-				
-				default:
-					field = row.getField(columnField, unformatted);
-			}
-			// Ignore some leading and trailing characters when sorting
-			return Zotero.Items.getSortTitle(field);
-		}
-	} else {
-		getField = function(row) row.getField(columnField, unformatted);
+	switch (columnField) {
+		case 'title':
+			getField = function (row) {
+				var field;
+				var type = row.ref.itemTypeID;
+				switch (type) {
+					case 8: // letter
+					case 10: // interview
+					case 17: // case
+						field = row.ref.getDisplayTitle();
+						break;
+					
+					default:
+						field = row.getField(columnField, unformatted);
+				}
+				// Ignore some leading and trailing characters when sorting
+				return Zotero.Items.getSortTitle(field);
+			};
+			break;
+		
+		case 'hasAttachment':
+			getField = function (row) {
+				if (!row.ref.isRegularItem()) {
+					return 0;
+				}
+				var state = row.ref.getBestAttachmentState();
+				// Make sort order present, missing, empty when ascending
+				if (state === -1) {
+					state = 2;
+				}
+				return state * -1;
+			};
+			break;
+		
+		case 'hasNote':
+			getField = function (row) {
+				if (!row.ref.isRegularItem()) {
+					return 0;
+				}
+				return row.ref.numNotes(false, true) ? 1 : 0;
+			};
+			break;
+		
+		default:
+			getField = function (row) row.getField(columnField, unformatted);
 	}
 	
 	var includeTrashed = this._itemGroup.isTrash();
@@ -1098,13 +1170,6 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				}
 				break;
 				
-			case 'numChildren':
-				cmp = b.numChildren(includeTrashed) - a.numChildren(includeTrashed);
-				if (cmp) {
-					return cmp;
-				}
-				break;
-			
 			default:
 				if (fieldA == undefined) {
 					fieldA = getField(a);
@@ -2665,17 +2730,16 @@ Zotero.ItemTreeView.prototype.onDragExit = function (event) {
 
 Zotero.ItemTreeView.prototype.isSeparator = function(row) 						{ return false; }
 Zotero.ItemTreeView.prototype.getRowProperties = function(row, prop) {
-	if (!this.selection.isSelected(row)) {
-		return;
-	}
-	
-	var itemID = this._getItemAtRow(row).ref.id;
+	var treeRow = this._getItemAtRow(row);
+	var itemID = treeRow.ref.id;
 	
 	// Set background color for selected items with colored tags
-	if (color = Zotero.Tags.getItemColor(itemID)) {
-		var aServ = Components.classes["@mozilla.org/atom-service;1"].
-			getService(Components.interfaces.nsIAtomService);
-		prop.AppendElement(aServ.getAtom("color" + color.substr(1)));
+	if (this.selection.isSelected(row)) {
+		if (color = Zotero.Tags.getItemColor(itemID)) {
+			var aServ = Components.classes["@mozilla.org/atom-service;1"].
+				getService(Components.interfaces.nsIAtomService);
+			prop.AppendElement(aServ.getAtom("color" + color.substr(1)));
+		}
 	}
 }
 Zotero.ItemTreeView.prototype.getColumnProperties = function(col, prop) { }
@@ -2714,28 +2778,4 @@ Zotero.ItemTreeView.TreeRow = function(ref, level, isOpen)
 Zotero.ItemTreeView.TreeRow.prototype.getField = function(field, unformatted)
 {
 	return this.ref.getField(field, unformatted, true);
-}
-
-Zotero.ItemTreeView.TreeRow.prototype.numChildren = function(includeTrashed)
-{
-	if(this.ref.isRegularItem())
-		return this.ref.numChildren(includeTrashed);
-	else
-		return 0;
-}
-
-Zotero.ItemTreeView.TreeRow.prototype.numNotes = function(includeTrashed)
-{
-	if(this.ref.isRegularItem())
-		return this.ref.numNotes(includeTrashed);
-	else
-		return 0;
-}
-
-Zotero.ItemTreeView.TreeRow.prototype.numAttachments = function(includeTrashed)
-{
-	if(this.ref.isRegularItem())
-		return this.ref.numAttachments(includeTrashed);
-	else
-		return 0;
 }

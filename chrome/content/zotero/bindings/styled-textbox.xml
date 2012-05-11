@@ -330,6 +330,14 @@
 				</body>
 			</method>
 			
+			<method name="clearUndo">
+				<body>
+				<![CDATA[
+					this._editor.undoManager.clear();
+				]]>
+				</body>
+			</method>
+			
 			<field name="_loaded"/>
 			<method name="_load">
 				<body>
