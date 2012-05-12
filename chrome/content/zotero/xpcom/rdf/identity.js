@@ -202,7 +202,7 @@ We replace the bigger with the smaller.
     moveIndex(this.classActions);
     moveIndex(this.propertyActions);
 
-    tabulator.log.debug("Equate done. "+big+" now links to "+small)    
+    $rdf.log.debug("Equate done. "+big+" now links to "+small)    
     return true; // true means the statement does not need to be put in
   };
 
@@ -250,9 +250,7 @@ We replace the bigger with the smaller.
         return new $rdf.Literal(val); // @@ differet types
       if(typeof val == 'boolean')
         return new $rdf.Literal(val ? "1" : "0", undefined, $rdf.Symbol.prototype.XSDboolean);
-      else if(typeof val == 'number')
-        return new $rdf.Literal('' + val); // @@ datatypes
-      else if(typeof val == 'undefined')
+      if(typeof val == 'undefined')
         return undefined;
       else // @@ add converting of dates and numbers
       throw "Can't make Term from " + val + " of type " + typeof val;
@@ -390,12 +388,11 @@ We replace the bigger with the smaller.
           break;
         }
       }
-      if(st != null) results.push(st);
-    }
-
-    if(justOne) {
-      if(results.length > 1)
-        results = results.slice(0, 1);
+      if(st != null) {
+        results.push(st);
+        if(justOne)
+          break;
+      }
     }
     return results;
   }; // statementsMatching
