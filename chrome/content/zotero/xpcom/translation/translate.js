@@ -2285,7 +2285,8 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		"getArcsOut":"r",
 		"getSources":"r",
 		"getTargets":"r",
-		"getStatementsMatching":"r"
+		"getStatementsMatching":"r",
+		"serialize":"r"
 	},
 	
 	/**
