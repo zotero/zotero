@@ -1054,12 +1054,8 @@ Zotero.Translate.Base.prototype = {
 		try {
 			this._sandboxManager.sandbox["do"+this._entryFunctionSuffix].apply(null, this._getParameters());
 		} catch(e) {
-			if(this._parentTranslator) {
-				throw(e);
-			} else {
-				this.complete(false, e);
-				return false;
-			}
+			this.complete(false, e);
+			return false;
 		}
 		
 		this.decrementAsyncProcesses("Zotero.Translate#translate()");
