@@ -131,22 +131,19 @@ function chooseBaseAttachmentPath() {
 	
 	
 	var nsIFilePicker = Components.interfaces.nsIFilePicker;
-	while (true) {
-		var fp = Components.classes["@mozilla.org/filepicker;1"]
-					.createInstance(nsIFilePicker);
-		fp.init(win, Zotero.getString('attachmentBasePath.selectDir'), nsIFilePicker.modeGetFolder);
-		fp.appendFilters(nsIFilePicker.filterAll);
-		if (fp.show() == nsIFilePicker.returnOK) {
-			var file = fp.file;
-			
-			// Set new data directory
-			Zotero.Prefs.set('baseAttachmentPath', file.persistentDescriptor);
-			Zotero.Prefs.set('lastDataDir', file.path);
-			break;
-		}
-		else {
-			return false;
-		}
+	var fp = Components.classes["@mozilla.org/filepicker;1"]
+				.createInstance(nsIFilePicker);
+	fp.init(win, Zotero.getString('attachmentBasePath.selectDir'), nsIFilePicker.modeGetFolder);
+	fp.appendFilters(nsIFilePicker.filterAll);
+	if (fp.show() == nsIFilePicker.returnOK) {
+		var file = fp.file;
+		
+		// Set new data directory
+		Zotero.Prefs.set('baseAttachmentPath', file.persistentDescriptor);
+		Zotero.Prefs.set('lastDataDir', file.path);
+	}
+	else {
+		return false;
 	}
 	
 	return file.path;
