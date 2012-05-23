@@ -336,7 +336,6 @@ Zotero.ItemTypes = new function() {
 			}
 		}
 		
-		// DEBUG: only have icons for some types so far. Done.
 		switch (itemType) {
 			case 'attachment-file':
 			case 'attachment-link':
