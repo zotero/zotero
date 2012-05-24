@@ -278,7 +278,8 @@
 				</vbox>
 				<label class="subhead" value="&zotero.about.additionalSoftware;"/>
 				<vbox class="subcontent">
-					<label class="zotero-text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="famfamfam (small icons)"/>
+					<label class="zotero-text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="Silk icons (by Mark James)"/>
+					<label class="zotero-text-link" href="http://p.yusukekamiyamane.com/" value="Fugue icons (by Yusuke Kamiyamane)"/>
 					<label class="zotero-text-link" href="http://simile.mit.edu/timeline/" value="SIMILE Project (Timeline)"/>
 					<label class="zotero-text-link" href="http://www.w3.org/2005/ajar/tab" value="Tabulator (RDF parser)"/>
 					<label class="zotero-text-link" href="http://tango.freedesktop.org/Tango_Desktop_Project" value="Tango Desktop Project (pref icons)"/>
