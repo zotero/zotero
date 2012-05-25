@@ -554,7 +554,6 @@ var ZoteroPane = new function()
 				break;
 			case 'library':
 				document.getElementById('zotero-collections-tree').focus();
-				ZoteroPane_Local.collectionsView.selection.select(0);
 				break;
 			case 'quicksearch':
 				document.getElementById('zotero-tb-search').select();
