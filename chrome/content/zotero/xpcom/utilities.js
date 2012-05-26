@@ -364,7 +364,7 @@ Zotero.Utilities = {
 		} else {
 			var node = document.createElement("div");
 			node.innerHTML = str;
-			return ("innerText" in node ? node.innerText : node.textContent);
+			return ("innerText" in node ? node.innerText : node.textContent).replace(/ {2,}/g, " ");
 		}
 	},
 	
