@@ -105,7 +105,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				if(type == "note") {			// handle notes differently
 					newItem = new Zotero.Item('note');
 					newItem.libraryID = this._libraryID;
-					newItem.setNote(item.note);
+					if(item.note) newItem.setNote(item.note);
 					var myID = newItem.save();
 					newItem = Zotero.Items.get(myID);
 				} else {
@@ -462,6 +462,7 @@ Zotero.Translate.ItemSaver.prototype = {
 	"_saveNotes":function(item, parentID) {
 		for(var i=0; i<item.notes.length; i++) {
 			var note = item.notes[i];
+			if(!note) continue;
 			var myNote = new Zotero.Item('note');
 			myNote.libraryID = this._libraryID;
 			myNote.setNote(typeof note == "object" ? note.note : note);
