@@ -68,6 +68,10 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Taasta raamatukokku">
 <!ENTITY zotero.items.menu.duplicateItem "Valitud kirje duplitseerimine">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
 
 <!ENTITY zotero.toolbar.newItem.label "Uus kirje">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Veel">

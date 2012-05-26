@@ -90,7 +90,7 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 			var resultsCallback = function (results) {
 				var collation = self._zotero.getLocaleCollation();
 				results.sort(function(a, b) {
-					return collation.compareString(1, a, b);
+					return collation.compareString(1, a.val, b.val);
 				});
 			}
 			break;
@@ -208,6 +208,11 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 	// Disable asynchronous until we figure out the hangs
 	if (true) {
 		var rows = this._zotero.DB.query(sql, sqlParams);
+		
+		if (resultsCallback) {
+			resultsCallback(rows);
+		}
+		
 		var results = [];
 		var comments = [];
 		for each(var row in rows) {

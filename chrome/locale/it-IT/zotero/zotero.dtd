@@ -68,6 +68,10 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Ripristina nella biblioteca">
 <!ENTITY zotero.items.menu.duplicateItem "Duplica elemento selezionato">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
 
 <!ENTITY zotero.toolbar.newItem.label "Nuovo elemento">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Altro">

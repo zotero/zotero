@@ -69,6 +69,10 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "ស្តារទៅកាន់បណ្ណាល័យវិញ">
 <!ENTITY zotero.items.menu.duplicateItem "ជ្រើសរើសឯកសារត្រួត">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
 
 <!ENTITY zotero.toolbar.newItem.label "ឯកសារថ្មី">
 <!ENTITY zotero.toolbar.moreItemTypes.label "ជម្រើសប្រភេទឯកសារ">

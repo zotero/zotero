@@ -1054,12 +1054,8 @@ Zotero.Translate.Base.prototype = {
 		try {
 			this._sandboxManager.sandbox["do"+this._entryFunctionSuffix].apply(null, this._getParameters());
 		} catch(e) {
-			if(this._parentTranslator) {
-				throw(e);
-			} else {
-				this.complete(false, e);
-				return false;
-			}
+			this.complete(false, e);
+			return false;
 		}
 		
 		this.decrementAsyncProcesses("Zotero.Translate#translate()");
@@ -2147,7 +2143,7 @@ Zotero.Translate.IO.String.prototype = {
 	
 	"_initRDF":function(callback) {
 		Zotero.debug("Translate: Initializing RDF data store");
-		this._dataStore = new Zotero.RDF.AJAW.RDFIndexedFormula();
+		this._dataStore = new Zotero.RDF.AJAW.IndexedFormula();
 		this.RDF = new Zotero.Translate.IO._RDFSandbox(this._dataStore);
 		
 		if(this.contentLength) {
@@ -2258,9 +2254,9 @@ Zotero.Translate.IO.String.prototype = {
 /**
  * @class An API for handling RDF from the sandbox. This is exposed to translators as Zotero.RDF.
  *
- * @property {Zotero.RDF.AJAW.RDFIndexedFormula} _dataStore
+ * @property {Zotero.RDF.AJAW.IndexedFormula} _dataStore
  * @property {Integer[]} _containerCounts
- * @param {Zotero.RDF.AJAW.RDFIndexedFormula} dataStore
+ * @param {Zotero.RDF.AJAW.IndexedFormula} dataStore
  */
 Zotero.Translate.IO._RDFSandbox = function(dataStore) {
 	this._dataStore = dataStore;
@@ -2281,16 +2277,17 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		"getArcsOut":"r",
 		"getSources":"r",
 		"getTargets":"r",
-		"getStatementsMatching":"r"
+		"getStatementsMatching":"r",
+		"serialize":"r"
 	},
 	
 	/**
-	 * Gets a resource as a Zotero.RDF.AJAW.RDFSymbol, rather than a string
-	 * @param {String|Zotero.RDF.AJAW.RDFSymbol} about
-	 * @return {Zotero.RDF.AJAW.RDFSymbol}
+	 * Gets a resource as a Zotero.RDF.AJAW.Symbol, rather than a string
+	 * @param {String|Zotero.RDF.AJAW.Symbol} about
+	 * @return {Zotero.RDF.AJAW.Symbol}
 	 */
 	"_getResource":function(about) {
-		return (typeof about == "object" ? about : new Zotero.RDF.AJAW.RDFSymbol(about));
+		return (typeof about == "object" ? about : new Zotero.RDF.AJAW.Symbol(about));
 	},
 	
 	/**
@@ -2307,7 +2304,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	 * Serializes the current RDF to a string
 	 */
 	"serialize":function(dataMode) {
-		var serializer = Serializer();
+		var serializer = Zotero.RDF.AJAW.Serializer(this._dataStore);
 		
 		for(var prefix in this._dataStore.namespaces) {
 			serializer.suggestPrefix(prefix, this._dataStore.namespaces[prefix]);
@@ -2323,9 +2320,9 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	
 	/**
 	 * Adds an RDF triple
-	 * @param {String|Zotero.RDF.AJAW.RDFSymbol} about
-	 * @param {String|Zotero.RDF.AJAW.RDFSymbol} relation
-	 * @param {String|Zotero.RDF.AJAW.RDFSymbol} value
+	 * @param {String|Zotero.RDF.AJAW.Symbol} about
+	 * @param {String|Zotero.RDF.AJAW.Symbol} relation
+	 * @param {String|Zotero.RDF.AJAW.Symbol} value
 	 * @param {Boolean} literal Whether value should be treated as a literal (true) or a resource
 	 *     (false)
 	 */
@@ -2352,16 +2349,16 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	
 	/**
 	 * Creates a new anonymous resource
-	 * @return {Zotero.RDF.AJAW.RDFSymbol}
+	 * @return {Zotero.RDF.AJAW.Symbol}
 	 */
 	"newResource":function() {
-		return new Zotero.RDF.AJAW.RDFBlankNode();
+		return new Zotero.RDF.AJAW.BlankNode();
 	},
 	
 	/**
 	 * Creates a new container resource
 	 * @param {String} type The type of the container ("bag", "seq", or "alt")
-	 * @param {String|Zotero.RDF.AJAW.RDFSymbol} about The URI of the resource
+	 * @param {String|Zotero.RDF.AJAW.Symbol} about The URI of the resource
 	 * @return {Zotero.Translate.RDF.prototype.newContainer
 	 */
 	"newContainer":function(type, about) {
@@ -2382,8 +2379,8 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	
 	/**
 	 * Adds a new element to a container
-	 * @param {String|Zotero.RDF.AJAW.RDFSymbol} about The container
-	 * @param {String|Zotero.RDF.AJAW.RDFSymbol} element The element to add to the container
+	 * @param {String|Zotero.RDF.AJAW.Symbol} about The container
+	 * @param {String|Zotero.RDF.AJAW.Symbol} element The element to add to the container
 	 * @param {Boolean} literal Whether element should be treated as a literal (true) or a resource
 	 *     (false)
 	 */
@@ -2391,13 +2388,13 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 		const rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 	
 		var about = this._getResource(about);
-		this._dataStore.add(about, new Zotero.RDF.AJAW.RDFSymbol(rdf+"_"+(this._containerCounts[about.toNT()]++)), element, literal);
+		this._dataStore.add(about, new Zotero.RDF.AJAW.Symbol(rdf+"_"+(this._containerCounts[about.toNT()]++)), element, literal);
 	},
 	
 	/**
 	 * Gets all elements within a container
-	 * @param {String|Zotero.RDF.AJAW.RDFSymbol} about The container
-	 * @return {Zotero.RDF.AJAW.RDFSymbol[]}
+	 * @param {String|Zotero.RDF.AJAW.Symbol} about The container
+	 * @return {Zotero.RDF.AJAW.Symbol[]}
 	 */
 	"getContainerElements":function(about) {
 		const liPrefix = "http://www.w3.org/1999/02/22-rdf-syntax-ns#_";
@@ -2435,7 +2432,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	
 	/**
 	 * Gets the URI a specific resource
-	 * @param {String|Zotero.RDF.AJAW.RDFSymbol} resource
+	 * @param {String|Zotero.RDF.AJAW.Symbol} resource
 	 * @return {String}
 	 */
 	"getResourceURI":function(resource) {
@@ -2447,7 +2444,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	
 	/**
 	 * Gets all resources in the RDF data store
-	 * @return {Zotero.RDF.AJAW.RDFSymbol[]}
+	 * @return {Zotero.RDF.AJAW.Symbol[]}
 	 */
 	"getAllResources":function() {
 		var returnArray = [];
@@ -2459,7 +2456,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	
 	/**
 	 * Gets all arcs (predicates) into a resource
-	 * @return {Zotero.RDF.AJAW.RDFSymbol[]}
+	 * @return {Zotero.RDF.AJAW.Symbol[]}
 	 * @deprecated Since 2.1. Use {@link Zotero.Translate.IO["rdf"]._RDFBase#getStatementsMatching}
 	 */
 	"getArcsIn":function(resource) {
@@ -2475,7 +2472,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	
 	/**
 	 * Gets all arcs (predicates) out of a resource
-	 * @return {Zotero.RDF.AJAW.RDFSymbol[]}
+	 * @return {Zotero.RDF.AJAW.Symbol[]}
 	 * @deprecated Since 2.1. Use {@link Zotero.Translate.IO["rdf"]._RDFBase#getStatementsMatching}
 	 */
 	"getArcsOut":function(resource) {
@@ -2491,9 +2488,9 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	
 	/**
 	 * Gets all subjects whose predicates point to a resource
-	 * @param {String|Zotero.RDF.AJAW.RDFSymbol} resource Subject that predicates should point to
-	 * @param {String|Zotero.RDF.AJAW.RDFSymbol} property Predicate
-	 * @return {Zotero.RDF.AJAW.RDFSymbol[]}
+	 * @param {String|Zotero.RDF.AJAW.Symbol} resource Subject that predicates should point to
+	 * @param {String|Zotero.RDF.AJAW.Symbol} property Predicate
+	 * @return {Zotero.RDF.AJAW.Symbol[]}
 	 * @deprecated Since 2.1. Use {@link Zotero.Translate.IO["rdf"]._RDFBase#getStatementsMatching}
 	 */
 	"getSources":function(resource, property) {
@@ -2509,9 +2506,9 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	
 	/**
 	 * Gets all objects of a given subject with a given predicate
-	 * @param {String|Zotero.RDF.AJAW.RDFSymbol} resource Subject
-	 * @param {String|Zotero.RDF.AJAW.RDFSymbol} property Predicate
-	 * @return {Zotero.RDF.AJAW.RDFSymbol[]}
+	 * @param {String|Zotero.RDF.AJAW.Symbol} resource Subject
+	 * @param {String|Zotero.RDF.AJAW.Symbol} property Predicate
+	 * @return {Zotero.RDF.AJAW.Symbol[]}
 	 * @deprecated Since 2.1. Use {@link Zotero.Translate.IO["rdf"]._RDFBase#getStatementsMatching}
 	 */
 	"getTargets":function(resource, property) {
@@ -2528,9 +2525,9 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	/**
 	 * Gets statements matching a certain pattern
 	 *
-	 * @param	{String|Zotero.RDF.AJAW.RDFSymbol}	subj 		Subject
-	 * @param	{String|Zotero.RDF.AJAW.RDFSymbol}	predicate	Predicate
-	 * @param	{String|Zotero.RDF.AJAW.RDFSymbol}	obj			Object
+	 * @param	{String|Zotero.RDF.AJAW.Symbol}	subj 		Subject
+	 * @param	{String|Zotero.RDF.AJAW.Symbol}	predicate	Predicate
+	 * @param	{String|Zotero.RDF.AJAW.Symbol}	obj			Object
 	 * @param	{Boolean}							objLiteral	Whether the object is a literal (as
 	 *															opposed to a URI)
 	 * @param	{Boolean}							justOne		Whether to stop when a single result is

@@ -68,6 +68,10 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Terugzetten in bibliotheek">
 <!ENTITY zotero.items.menu.duplicateItem "Kopie maken van geselecteerd object">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
 
 <!ENTITY zotero.toolbar.newItem.label "Nieuw object">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Meer">

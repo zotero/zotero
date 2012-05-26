@@ -1936,7 +1936,7 @@ function openInViewer(uri, newTab) {
 			win.loadURI(uri);
 		} else {
 			window.openDialog("chrome://zotero/content/standalone/basicViewer.xul",
-				"basicViewer", "chrome,resizable,centerscreen", uri);
+				"basicViewer", "chrome,resizable,centerscreen,menubar,scrollbars", uri);
 		}
 	} else {
 		var win = wm.getMostRecentWindow("navigator:browser");

@@ -1655,6 +1655,10 @@ Zotero.Sync.Server = new function () {
 						}
 					);
 					
+					try {
+						gen.next();
+					}
+					catch (e if e.toString() === "[object StopIteration]") {}
 					Zotero.pumpGenerator(gen, false, errorHandler);
 				}
 				catch (e) {

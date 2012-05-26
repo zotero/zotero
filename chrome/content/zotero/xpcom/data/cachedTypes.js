@@ -336,7 +336,6 @@ Zotero.ItemTypes = new function() {
 			}
 		}
 		
-		// DEBUG: only have icons for some types so far
 		switch (itemType) {
 			case 'attachment-file':
 			case 'attachment-link':
@@ -345,14 +344,21 @@ Zotero.ItemTypes = new function() {
 			case 'attachment-pdf':
 			case 'artwork':
 			case 'audioRecording':
+			case 'bill':
 			case 'blogPost':
 			case 'book':
 			case 'bookSection':
+			case 'case':
 			case 'computerProgram':
 			case 'conferencePaper':
+			case 'dictionaryEntry':
+			case 'document':
 			case 'email':
+			case 'encyclopediaArticle':
 			case 'film':
 			case 'forumPost':
+			case 'hearing':
+			case 'instantMessage':
 			case 'interview':
 			case 'journalArticle':
 			case 'letter':
@@ -361,9 +367,12 @@ Zotero.ItemTypes = new function() {
 			case 'map':
 			case 'newspaperArticle':
 			case 'note':
+			case 'patent':
 			case 'podcast':
+			case 'presentation':
 			case 'radioBroadcast':
 			case 'report':
+			case 'statute':
 			case 'thesis':
 			case 'tvBroadcast':
 			case 'videoRecording':

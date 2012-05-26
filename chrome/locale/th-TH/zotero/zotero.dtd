@@ -68,6 +68,10 @@
 
 <!ENTITY zotero.items.menu.restoreToLibrary "เรียกคืนกลับไลบรารี่">
 <!ENTITY zotero.items.menu.duplicateItem "ทำซ้ำรายการที่เลือก">
+<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
+
+<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
 
 <!ENTITY zotero.toolbar.newItem.label "รายการใหม่">
 <!ENTITY zotero.toolbar.moreItemTypes.label "มากกว่า">

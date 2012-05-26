@@ -239,22 +239,9 @@ Zotero.Translate.ItemSaver.prototype = {
 			var newItem = Zotero.Items.get(myID);
 		} else {
 			var file = this._parsePath(attachment.path);
-			if(!file) return;
+			if(!file || !file.exists()) return;
 			
-			if (!file.exists()) {
-				// use attachment title if possible, or else file leaf name
-				var title = attachment.title;
-				if(!title) {
-					title = file.leafName;
-				}
-				
-				var myID = Zotero.Attachments.createMissingAttachment(
-					attachment.url ? Zotero.Attachments.LINK_MODE_IMPORTED_URL
-						: Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
-					file, attachment.url ? attachment.url : null, title,
-					attachment.mimeType, attachment.charset, parentID);
-			}
-			else if (attachment.url) {
+			if (attachment.url) {
 				var myID = Zotero.Attachments.importSnapshotFromFile(file,
 					attachment.url, attachment.title, attachment.mimeType, attachment.charset,
 					parentID);

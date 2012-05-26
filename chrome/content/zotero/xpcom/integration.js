@@ -653,7 +653,7 @@ Zotero.Integration = new function() {
 					
 					if(!message && typeof(e) == "object") message = "\n\n"+e.toString();
 					
-					if(message != "\n\nExceptionAlreadyDisplayed") {
+					if(message.indexOf("ExceptionAlreadyDisplayed") !== -1) {
 						displayError = Zotero.getString("integration.error.generic")+message;
 					}
 					Zotero.debug(e);
