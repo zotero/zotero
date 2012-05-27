@@ -339,33 +339,58 @@ Zotero.Utilities = {
 	 * Decodes HTML entities within a string, returning plain text
 	 * @type String
 	 */
-	"unescapeHTML":function(/**String*/ str) {
-		// If no tags, no need to unescape
-		if(str.indexOf("<") === -1 && str.indexOf("&") === -1) return str;
+	"unescapeHTML":new function() {
+		var nsIScriptableUnescapeHTML, node;
 		
-		if(Zotero.isFx && !Zotero.isBookmarklet) {
-			if(!Zotero.Utilities._nsISUHTML) {
-				Zotero.Utilities._nsISUHTML = Components.classes["@mozilla.org/feed-unescapehtml;1"]
-					.getService(Components.interfaces.nsIScriptableUnescapeHTML);
-			}
-			return Zotero.Utilities._nsISUHTML.unescape(str);
-		} else if(Zotero.isNode) {
-			/*var doc = require('jsdom').jsdom(str, null, {
-				"features":{
-					"FetchExternalResources":false,
-					"ProcessExternalResources":false,
-					"MutationEvents":false,
-					"QuerySelector":false
+		return function(/**String*/ str) {
+			// If no tags, no need to unescape
+			if(str.indexOf("<") === -1 && str.indexOf("&") === -1) return str;
+			
+			if(Zotero.isFx && !Zotero.isBookmarklet) {
+				// Create a node and use the textContent property to do unescaping where
+				// possible, because this approach preserves <br/>
+				if(node === undefined) {
+					var platformVersion = Components.classes["@mozilla.org/xre/app-info;1"]
+						.getService(Components.interfaces.nsIXULAppInfo).platformVersion;
+					if(Components.classes["@mozilla.org/xpcom/version-comparator;1"]
+							.getService(Components.interfaces.nsIVersionComparator)
+							.compare(platformVersion, "12.0") >= 0) {
+						var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+							 .createInstance(Components.interfaces.nsIDOMParser);
+						domDocument = parser.parseFromString("<!DOCTYPE html><html></html>",
+							"text/html");
+						node = domDocument.createElement("div");
+					} else {
+						node = false;
+					}
 				}
-			});
-			if(!doc.documentElement) return str;
-			return doc.documentElement.textContent;*/
-			return Zotero.Utilities.cleanTags(str);
-		} else {
-			var node = document.createElement("div");
-			node.innerHTML = str;
-			return ("innerText" in node ? node.innerText : node.textContent).replace(/ {2,}/g, " ");
-		}
+				
+				if(!node) {
+					node.innerHTML = str;
+					return node.textContent.replace(/ {2,}/g, " ");
+				} else if(!nsIScriptableUnescapeHTML) {
+					nsIScriptableUnescapeHTML = Components.classes["@mozilla.org/feed-unescapehtml;1"]
+						.getService(Components.interfaces.nsIScriptableUnescapeHTML);
+				}
+				return nsIScriptableUnescapeHTML.unescape(str);
+			} else if(Zotero.isNode) {
+				/*var doc = require('jsdom').jsdom(str, null, {
+					"features":{
+						"FetchExternalResources":false,
+						"ProcessExternalResources":false,
+						"MutationEvents":false,
+						"QuerySelector":false
+					}
+				});
+				if(!doc.documentElement) return str;
+				return doc.documentElement.textContent;*/
+				return Zotero.Utilities.cleanTags(str);
+			} else {
+				if(!node) node = document.createElement("div");
+				node.innerHTML = str;
+				return ("innerText" in node ? node.innerText : node.textContent).replace(/ {2,}/g, " ");
+			}
+		};
 	},
 	
 	/**
