@@ -357,7 +357,7 @@ Zotero.Utilities = {
 							.compare(platformVersion, "12.0") >= 0) {
 						var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 							 .createInstance(Components.interfaces.nsIDOMParser);
-						domDocument = parser.parseFromString("<!DOCTYPE html><html></html>",
+						var domDocument = parser.parseFromString("<!DOCTYPE html><html></html>",
 							"text/html");
 						node = domDocument.createElement("div");
 					} else {
@@ -365,7 +365,7 @@ Zotero.Utilities = {
 					}
 				}
 				
-				if(!node) {
+				if(node) {
 					node.innerHTML = str;
 					return node.textContent.replace(/ {2,}/g, " ");
 				} else if(!nsIScriptableUnescapeHTML) {
