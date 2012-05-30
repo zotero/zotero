@@ -664,12 +664,20 @@ Zotero.Integration = new function() {
 				}
 				
 				if(displayError) {
+					var showErrorInFirefox = !document;
+					
 					if(document) {
-						document.activate();
-						document.displayAlert(displayError,
-								Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-								Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
-					} else {
+						try {
+							document.activate();
+							document.displayAlert(displayError,
+									Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
+									Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
+						} catch(e) {
+							showErrorInFirefox = true;
+						}
+					}
+					
+					if(showErrorInFirefox) {
 						Zotero.Integration.activate();
 						Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 							.getService(Components.interfaces.nsIPromptService)
@@ -1544,7 +1552,6 @@ Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, fo
 				ignoreCitationChanges, deleteCitations, callback));
 		}));
 	} catch(e) {
-		Zotero.logError(e);
 		Zotero.Integration.handleError(e, this._doc);
 	}
 }
