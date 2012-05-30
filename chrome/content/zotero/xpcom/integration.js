@@ -1246,7 +1246,6 @@ Zotero.Integration.Fields.prototype.get = function(callback) {
 				callback(this._fields);
 			}
 		} catch(e) {
-			Zotero.logError(e);
 			Zotero.Integration.handleError(e, this._doc);
 		}
 		return;
@@ -1296,7 +1295,6 @@ Zotero.Integration.Fields.prototype._retrieveFields = function() {
 		} else if(topic === "fields-progress" && me.progressCallback) {
 			me.progressCallback((data ? parseInt(data, 10)*(3/4) : null));
 		} else if(topic === "fields-error") {
-			Zotero.logError(data);
 			Zotero.Integration.handleError(data, me._doc);
 		}
 	}, QueryInterface:XPCOMUtils.generateQI([Components.interfaces.nsIObserver, Components.interfaces.nsISupports])});
