@@ -891,7 +891,7 @@ Zotero.Attachments = new function(){
 				break;
 				
 				default:
-					var value = item.getField(field, false, true);
+					var value = '' + item.getField(field, false, true);
 			}
 			
 			var re = new RegExp("\{?([^%\{\}]*)" + rpl + "(\{[0-9]+\})?" + "([^%\{\}]*)\}?");
