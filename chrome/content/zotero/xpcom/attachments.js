@@ -220,7 +220,7 @@ Zotero.Attachments = new function(){
 		var urlRe = /^https?:\/\/[^\s]*$/;
 		var matches = urlRe.exec(url);
 		if (!matches) {
-			callback(false);
+			if(callback) callback(false);
 			throw ("Invalid URL '" + url + "' in Zotero.Attachments.importFromURL()");
 		}
 		
@@ -302,7 +302,7 @@ Zotero.Attachments = new function(){
 								+ "'application/pdf' in Attachments.importFromURL()";
 							Zotero.debug(errString, 2);
 							attachmentItem.erase();
-							callback(false, new Error(errString));
+							if(callback) callback(false, new Error(errString));
 							return;
 						}
 						
@@ -330,7 +330,7 @@ Zotero.Attachments = new function(){
 					catch (e) {
 						// Clean up
 						attachmentItem.erase();
-						callback(false, e);
+						if(callback) callback(false, e);
 						
 						throw (e);
 					}
@@ -616,7 +616,7 @@ Zotero.Attachments = new function(){
 						// Clean up
 						var item = Zotero.Items.get(itemID);
 						item.erase();
-						callback(false, e);
+						if(callback) callback(false, e);
 						
 						throw (e);
 					}
