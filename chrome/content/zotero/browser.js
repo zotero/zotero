@@ -551,9 +551,9 @@ var Zotero_Browser = new function() {
 	function _constructLookupFunction(tab, success) {
 		return function(e) {
 			tab.page.translate.setTranslator(tab.page.translators[0]);
-			tab.page.translate.clearHandlers("done");
+			tab.page.translate.clearHandlers("itemsDone");
 			tab.page.translate.clearHandlers("itemDone");
-			tab.page.translate.setHandler("done", function(obj, status) {
+			tab.page.translate.setHandler("itemsDone", function(obj, status) {
 				if(status) {
 					success(e, obj);
 					Zotero_Browser.progress.close();
@@ -730,10 +730,10 @@ Zotero_Browser.Tab.prototype.translate = function(libraryID, collectionID, trans
 		// use first translator available
 		this.page.translate.setTranslator(translator ? translator : this.page.translators[0]);
 		
-		this.page.translate.clearHandlers("done");
+		this.page.translate.clearHandlers("itemsDone");
 		this.page.translate.clearHandlers("itemDone");
 		
-		this.page.translate.setHandler("done", function(obj, item) { Zotero_Browser.finishScraping(obj, item) });
+		this.page.translate.setHandler("itemsDone", function(obj, item) { Zotero_Browser.finishScraping(obj, item) });
 		this.page.translate.setHandler("itemDone", function(obj, dbItem, item) { Zotero_Browser.itemDone(obj, dbItem, item, collection) });
 		
 		this.page.translate.translate(libraryID);

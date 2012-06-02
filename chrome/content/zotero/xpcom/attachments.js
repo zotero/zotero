@@ -220,6 +220,7 @@ Zotero.Attachments = new function(){
 		var urlRe = /^https?:\/\/[^\s]*$/;
 		var matches = urlRe.exec(url);
 		if (!matches) {
+			callback(false);
 			throw ("Invalid URL '" + url + "' in Zotero.Attachments.importFromURL()");
 		}
 		
@@ -297,9 +298,11 @@ Zotero.Attachments = new function(){
 						
 						if (mimeType == 'application/pdf' &&
 								Zotero.MIME.sniffForMIMEType(str) != 'application/pdf') {
-							Zotero.debug("Downloaded PDF did not have MIME type "
-								+ "'application/pdf' in Attachments.importFromURL()", 2);
+							var errString = "Downloaded PDF did not have MIME type "
+								+ "'application/pdf' in Attachments.importFromURL()";
+							Zotero.debug(errString, 2);
 							attachmentItem.erase();
+							callback(false, new Error(errString));
 							return;
 						}
 						
@@ -311,6 +314,8 @@ Zotero.Attachments = new function(){
 						
 						Zotero.Notifier.trigger('add', 'item', itemID);
 						Zotero.Notifier.trigger('modify', 'item', sourceItemID);
+				
+						if(callback) callback(attachmentItem);
 						
 						// We don't have any way of knowing that the file
 						// is flushed to disk, so we just wait a second
@@ -325,6 +330,7 @@ Zotero.Attachments = new function(){
 					catch (e) {
 						// Clean up
 						attachmentItem.erase();
+						callback(false, e);
 						
 						throw (e);
 					}
@@ -345,8 +351,6 @@ Zotero.Attachments = new function(){
 							.createInstance(Components.interfaces.nsIURL);
 				nsIURL.spec = url;
 				wbp.saveURI(nsIURL, null, null, null, null, file);
-				
-				if(callback) callback(attachmentItem);
 				
 				return attachmentItem;
 			}
@@ -553,7 +557,7 @@ Zotero.Attachments = new function(){
 					Zotero.Fulltext.indexDocument(document, itemID);
 					Zotero.Notifier.trigger('refresh', 'item', itemID);
 					if (callback) {
-						callback();
+						callback(attachmentItem);
 					}
 				};
 			}
@@ -612,6 +616,7 @@ Zotero.Attachments = new function(){
 						// Clean up
 						var item = Zotero.Items.get(itemID);
 						item.erase();
+						callback(false, e);
 						
 						throw (e);
 					}

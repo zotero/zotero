@@ -87,7 +87,18 @@ Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD = 1;
 Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE = 2;
 
 Zotero.Translate.ItemSaver.prototype = {
-	"saveItems":function(items, callback) {
+	/**
+	 * Saves items to Standalone or the server
+	 * @param items Items in Zotero.Item.toArray() format
+	 * @param {Function} callback A callback to be executed when saving is complete. If saving
+	 *    succeeded, this callback will be passed true as the first argument and a list of items
+	 *    saved as the second. If saving failed, the callback will be passed false as the first
+	 *    argument and an error object as the second
+	 * @param {Function} [attachmentCallback] A callback that receives information about attachment
+	 *     save progress. The callback will be called as attachmentCallback(attachment, false, error)
+	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
+	 */
+	"saveItems":function(items, callback, attachmentCallback) {
 		// if no open transaction, open a transaction and add a timer call to close it
 		var openedTransaction = false;
 		if(!Zotero.DB.transactionInProgress()) {
@@ -110,8 +121,8 @@ Zotero.Translate.ItemSaver.prototype = {
 					newItem = Zotero.Items.get(myID);
 				} else {
 					if(type == "attachment") {	// handle attachments differently
-						newItem = this._saveAttachment(item);
-						if(!newItem) return;
+						newItem = this._saveAttachment(item, null, attachmentCallback);
+						if(!newItem) continue;
 						var myID = newItem.id;
 					} else {
 						var typeID = Zotero.ItemTypes.getID(type);
@@ -137,8 +148,12 @@ Zotero.Translate.ItemSaver.prototype = {
 						// handle attachments
 						if(item.attachments) {
 							for(var i=0; i<item.attachments.length; i++) {
-								var newAttachment = this._saveAttachment(item.attachments[i], myID);
-								if(newAttachment) this._saveTags(item.attachments[i], newAttachment);
+								var newAttachment = this._saveAttachment(item.attachments[i], myID, attachmentCallback);
+								if(typeof newAttachment === "object") {
+									this._saveTags(item.attachments[i], newAttachment);
+								} else if(!newAttachment) {
+									item.attachments.splice(i--, 1);
+								}
 							}
 						}
 					}
@@ -209,7 +224,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			
 		if(!attachment.url && !attachment.path) {
 			Zotero.debug("Translate: Ignoring attachment: no path or URL specified", 2);
-			return;
+			return false;
 		}
 		
 		if(!attachment.path) {
@@ -221,34 +236,40 @@ Zotero.Translate.ItemSaver.prototype = {
 				attachment.url = false;
 			} else if(protocol != "http" && protocol != "https") {
 				Zotero.debug("Translate: Unrecognized protocol "+protocol, 2);
-				return;
+				return false;
 			}
 		}
 		
 		if(!attachment.path) {
 			// create from URL
+			attachment.linkMode = "linked_file";
 			try {
 				var myID = Zotero.Attachments.linkFromURL(attachment.url, parentID,
 						(attachment.mimeType ? attachment.mimeType : undefined),
 						(attachment.title ? attachment.title : undefined));
 			} catch(e) {
 				Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
-				return;
+				attachmentCallback(attachment, false, e);
+				return false;
 			}
 			Zotero.debug("Translate: Created attachment; id is "+myID, 4);
+			attachmentCallback(attachment, 100);
 			var newItem = Zotero.Items.get(myID);
 		} else {
 			var file = this._parsePath(attachment.path);
 			if(!file || !file.exists()) return;
 			
 			if (attachment.url) {
+				attachment.linkMode = "imported_url";
 				var myID = Zotero.Attachments.importSnapshotFromFile(file,
 					attachment.url, attachment.title, attachment.mimeType, attachment.charset,
 					parentID);
 			}
 			else {
+				attachment.linkMode = "imported_file";
 				var myID = Zotero.Attachments.importFromFile(file, parentID);
 			}
+			attachmentCallback(attachment, 100);
 		}
 		
 		var newItem = Zotero.Items.get(myID);
@@ -306,7 +327,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		return file;
 	},
 	
-	"_saveAttachmentDownload":function(attachment, parentID) {
+	"_saveAttachmentDownload":function(attachment, parentID, attachmentCallback) {
 		Zotero.debug("Translate: Adding attachment", 4);
 		
 		// determine whether to save attachments at all
@@ -319,7 +340,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			var shouldAttach = ((attachment.document
 				|| (attachment.mimeType && attachment.mimeType == "text/html")) && automaticSnapshots)
 				|| downloadAssociatedFiles;
-			if(!shouldAttach) return;
+			if(!shouldAttach) return false;
 			
 			if(attachment.document && "__wrappedDOMObject" in attachment.document) {
 				attachment.document = attachment.document.__wrappedDOMObject;
@@ -327,10 +348,18 @@ Zotero.Translate.ItemSaver.prototype = {
 			
 			if(attachment.snapshot === false || !this._saveFiles) {
 				// if snapshot is explicitly set to false, attach as link
+				attachment.linkMode = "linked_url";
 				if(attachment.document) {
-					Zotero.Attachments.linkFromURL(attachment.document.location.href, parentID,
-							(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
-							(attachment.title ? attachment.title : attachment.document.title));
+					try {
+						Zotero.Attachments.linkFromURL(attachment.document.location.href, parentID,
+								(attachment.mimeType ? attachment.mimeType : attachment.document.contentType),
+								(attachment.title ? attachment.title : attachment.document.title));
+						attachmentCallback(attachment, 100);
+					} catch(e) {
+						Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
+						attachmentCallback(attachment, false, e);
+					}
+					return true;
 				} else {
 					if(!attachment.mimeType || !attachment.title) {
 						Zotero.debug("Translate: Either mimeType or title is missing; attaching file will be slower", 3);
@@ -340,19 +369,33 @@ Zotero.Translate.ItemSaver.prototype = {
 						Zotero.Attachments.linkFromURL(attachment.url, parentID,
 								(attachment.mimeType ? attachment.mimeType : undefined),
 								(attachment.title ? attachment.title : undefined));
+						attachmentCallback(attachment, 100);
 					} catch(e) {
 						Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
+						attachmentCallback(attachment, false, e);
 					}
+					return true;
 				}
 			} else {
 				// if snapshot is not explicitly set to false, retrieve snapshot
 				if(attachment.document) {
 					if(automaticSnapshots) {
 						try {
-							Zotero.Attachments.importFromDocument(attachment.document, parentID, attachment.title);
+							attachment.linkMode = "imported_url";
+							Zotero.Attachments.importFromDocument(attachment.document,
+								parentID, attachment.title, function(status, err) {
+									if(status) {
+										attachmentCallback(attachment, 100);
+									} else {
+										attachmentCallback(attachment, false, err);
+									}
+								}, this._libraryID);
+							attachmentCallback(attachment, 0);
 						} catch(e) {
 							Zotero.debug("Translate: Error attaching document", 2);
+							attachmentCallback(attachment, false, e);
 						}
+						return true;
 					}
 				// Save attachment if snapshot pref enabled or not HTML
 				// (in which case downloadAssociatedFiles applies)
@@ -364,14 +407,27 @@ Zotero.Translate.ItemSaver.prototype = {
 					var fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentID);
 					try {
 						Zotero.debug('Importing attachment from URL');
+						attachment.linkMode = "imported_url";
 						Zotero.Attachments.importFromURL(attachment.url, parentID, title,
-							fileBaseName, null, mimeType, this._libraryID, null, this._cookieSandbox);
+							fileBaseName, null, mimeType, this._libraryID, function(status, err) {
+								// TODO: actually indicate progress during download
+								if(status) {
+									attachmentCallback(attachment, 100);
+								} else {
+									attachmentCallback(attachment, false, err);
+								}
+							}, this._cookieSandbox);
+						attachmentCallback(attachment, 0);
 					} catch(e) {
 						Zotero.debug("Translate: Error adding attachment "+attachment.url, 2);
+						attachmentCallback(attachment, false, e);
 					}
+					return true;
 				}
 			}
 		}
+		
+		return false;
 	},
 	
 	"_saveFields":function(item, newItem) {
