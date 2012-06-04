@@ -120,6 +120,11 @@
 									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
 								<treecol
+                                    id="zotero-items-column-reporter" hidden="true"
+									label="&zotero.items.reporter_column;"
+									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
 									id="zotero-items-column-language" hidden="true"
 									label="&zotero.items.language_column;"
 									flex="1" persist="width ordinal hidden sortActive sortDirection"/>
