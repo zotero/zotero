@@ -32,6 +32,7 @@
  * and it makes the code cleaner
  */
 const CSL_NAMES_MAPPINGS = {
+	"artist":"author",
 	"author":"author",
 	"editor":"editor",
 	"bookAuthor":"container-author",
@@ -67,6 +68,7 @@ const CSL_TEXT_MAPPINGS = {
 	"archive_location":["archiveLocation"],
 	"event":["meetingName", "conferenceName"], /* these should be mapped to the same base field in SQL mapping tables */
 	"event-place":["place"],
+	"archive-place":["place"],
 	"abstract":["abstractNote"],
 	"URL":["url"],
 	"DOI":["DOI"],
@@ -83,8 +85,12 @@ const CSL_TEXT_MAPPINGS = {
 /*
  * Mappings for dates
  */
-const CSL_DATE_MAPPINGS = {
+const CSL_DATE_MAPPINGS_VANILLA = {
 	"issued":"date",
+	"accessed":"accessDate"
+}
+const CSL_DATE_MAPPINGS_LAW = {
+	"original-date":"date",
 	"accessed":"accessDate"
 }
 
@@ -200,7 +206,280 @@ Zotero.Utilities = {
 
 		return {firstName:firstName, lastName:lastName, creatorType:type};
 	},
+
+	/**
+	 * Sets a multilingual field value
+	 * Used in translators.
+	 *
+	 * @param {Object} obj Item object
+	 * @param {String} field Field name
+	 * @param {String} val Field value
+	 * @param {String} languageTag RFC 5646 language tag
+	 */
+	"setMultiField":function (obj, field, val, languageTag) {
+		// Validate parameters
+		if ("string" !== typeof val) {
+			throw "Invalid value for multilingual field";
+		}
+		if (!field) {
+			throw "No field value given to setMultiField";
+		}
+		// Initialize if required
+		if (languageTag) {
+			if (!obj.multi) {
+				obj.multi = {};
+			}
+			if (!obj.multi.main) {
+				obj.multi.main = {};
+			}
+			if (!obj.multi._lsts) {
+				obj.multi._lsts = {};
+			}
+			if (!obj.multi._keys) {
+				obj.multi._keys = {};
+			}
+		}
+		// Set field value
+		if (!obj[field]) {
+			obj[field] = val;
+			if (languageTag) {
+				obj.multi.main[field] = languageTag;
+			}
+		} else if (languageTag) {
+			if (!obj.multi._lsts[field]) {
+				obj.multi._lsts[field] = [];
+				obj.multi._keys[field] = {};
+			}
+			obj.multi._keys[field][languageTag] = val;
+			if (obj.multi._lsts[field].indexOf(languageTag) === -1) {
+				obj.multi._lsts[field].push(languageTag);
+			}
+		}
+	},
+
+	/**
+	 * Sets a multilingual creator
+	 * Used in translators.
+	 *
+	 * @param {Object} obj Parent creator object (may be empty)
+	 * @param {String} child Child creator object to be added
+	 * @param {String} languageTag RFC 5646 language tag
+	 */
+	"setMultiCreator":function (obj, child, languageTag, creatorType) {
+		// Validate parameters
+		if ("object" !== typeof obj) {
+			throw "Multilingual creator parent must be an object";
+		}
+		if ("object" !== typeof child) {
+			throw "Multilingual creator child must be an object";
+		}
+		if (obj.itemID) {
+			throw "Must give creator as multilingual creator parent, not item";
+		}
+		// Initialize if required
+		if (languageTag) {
+			if (!obj.multi) {
+				obj.multi = {};
+			}
+			if (!obj.multi._lst) {
+				obj.multi._lst = [];
+			}
+			if (!obj.multi._key) {
+				obj.multi._key = {};
+			}
+		}
+		// Set field value
+		if (!obj.lastName) {
+			obj.lastName = child.lastName;
+			obj.firstName = child.firstName;
+			obj.creatorType = creatorType;
+			if (languageTag) {
+				obj.multi.main = languageTag;
+			}
+		} else  if (languageTag) {
+			obj.multi._key[languageTag] = child;
+			if (obj.multi._lst.indexOf(languageTag) === -1) {
+				obj.multi._lst.push(languageTag);
+			}
+		}
+	},
+
+	"getMultiCreator":function(obj, fieldName, langTag) {
+		if (!langTag) {
+			return obj[fieldName];
+		} else {
+			return obj.multi._key[langTag][fieldName]
+		}
+	},
+
+	"extractCreatorFields":function(creator, langTag) {
+		if (creator.fieldMode && creator.fieldMode == 1) {
+			// Single-field mode
+			var fields = {
+				lastName: Zotero.Utilities.getMultiCreator(creator, 'lastName', langTag),
+				fieldMode: 1
+			};
+		} else {
+			// Two-field mode
+			var fields = {
+				firstName: Zotero.Utilities.getMultiCreator(creator, 'firstName', langTag),
+				lastName: Zotero.Utilities.getMultiCreator(creator, 'lastName', langTag)
+			};
+		}
+		return fields;
+	},
 	
+	/**
+	 * Retrieves the list of available content languages
+	 */
+	"languageList":function () {
+		var sql = 'SELECT nickname,tag from zlsTags';
+		var result = Zotero.DB.query(sql);
+		if (result) {
+			// Was using strcmp from itemTreeView, but that's
+			// no longer accessible.
+			result.sort();
+		} else {
+			result = [];
+		};
+		return result;
+	},
+
+	"composeDoc":function(doc, title, object, suppressURL) {
+		var o;
+		var content = false;
+		// (object) is either a single DOM element, a DOM
+		// collection, or an array of DOM elements or DOM 
+		// collections. Only the first element of a DOM collection 
+		// is used in the constructed document.
+
+		// Punch out early if there is nothing here.
+		if (!object || !(object.length || object.tagName)) {
+			return false;
+		} else if (!object.tagName) {
+			var fail = true;
+			for (var i = 0, ilen = object.length; i < ilen; i += 1) {
+				if (object[i] && (object[i].tagName || object[i].length)) {
+					fail = false;
+					break;
+				}
+			}
+			if (fail) {
+				return false;
+			}
+		}
+
+		// Cast a namespace object
+		var myns = doc.documentElement.namespaceURI;
+
+		// Cast a document type for a new custom-spun HTML document
+		var newDoctype = doc.implementation.createDocumentType("html:html", "-//W3C//DTD HTML 4.01 Transitional//EN", "http://www.w3.org/TR/html4/loose.dtd");
+
+		// Create an empty HTML document
+		var newDoc = doc.implementation.createDocument(myns, 'html', newDoctype);
+
+		// Get the HTML section of the document, into which we will insert things.
+		var html = newDoc.getElementsByTagName("html")[0];
+
+		// Cast a header and a title element,
+		// fill in some details in both; create a base
+		// element and give in a URL ending in html.
+		// merge the two, and insert into the html element
+		var head = newDoc.createElementNS(myns, "head");
+		var base = newDoc.createElementNS(myns, "base");
+		var header_title = newDoc.createElementNS(myns, "title");
+		header_title_text = newDoc.createTextNode(title);
+		header_title.appendChild(header_title_text);
+		head.appendChild(header_title);
+		base.setAttribute("target", "_blank");
+		base.setAttribute("href", doc.location.href);
+		// base.setAttribute("href", 'http://example.com/eg.html');
+		head.appendChild(base);
+		html.appendChild(head);
+
+		// Cast a body element, insert the content node
+		// into it, and insert the body into the document.
+		var body = newDoc.createElementNS(myns, "body");
+
+		// Cast a content node and populate it.
+		contentNode = newDoc.createElementNS(myns, "div");
+		if (object.tagName) {
+			// Object is a DOM node. Clone and wrap.
+			content = object.cloneNode(true);
+			contentNode.appendChild(content);
+		} else if (object.length) {
+			for (var i = 0, ilen = object.length; i < ilen; i += 1) {
+				o = object[i];
+				if (o.tagName || o.nodeName === '#text') {
+					// Object is a DOM node. Clone and wrap.
+					content = o.cloneNode(true);
+					contentNode.appendChild(content);
+				} else {
+					// Object is a DOM-list consisting of elements.
+					// If non-zero, clone the first and wrap.
+					if (o.length) {
+						content = o[0].cloneNode(true);
+						contentNode.appendChild(content);
+					}
+				}
+			}
+		}
+		body.appendChild(contentNode);
+
+		// Cast a footer div for use in the document,
+		// with a horizontal rule at the top
+		var footer = newDoc.createElementNS(myns, "div");
+		var hr = newDoc.createElementNS(myns, "hr");
+		footer.appendChild(hr);
+
+		// Cast a div for the title, populate it with the title
+		// text, and insert the unit into the footer object
+		var footer_title_div = newDoc.createElementNS(myns, "div");
+		var footer_title = newDoc.createTextNode(title);
+		footer_title_div.appendChild(footer_title);
+		footer.appendChild(footer_title);
+
+		// Cast a source div, populate it with a simple
+		// label and the URL of the document from which
+		// the text is extracted, bundle the unit up
+		// and insert it into the document HTML node.
+		var source_div = newDoc.createElementNS(myns, "div");
+		if (!suppressURL) {
+			var source_label = newDoc.createTextNode("Source: ");
+			var source_anchor = newDoc.createElementNS(myns, "a");
+			source_anchor.setAttribute("href", doc.location.href);
+			var source_anchor_text = newDoc.createTextNode(doc.location.href);
+			source_anchor.appendChild(source_anchor_text);
+			source_div.appendChild(source_anchor);
+		}
+		footer.appendChild(source_div);
+		body.appendChild(footer);
+
+		// Insert the body into the document HTML node
+		html.appendChild(body);
+
+		return newDoc;
+	},
+
+	"getTextContent":function(node) {
+		// Multi-browser fun.
+		// See http://ecmanaut.blogspot.com/2007/02/domnodetextcontent-and-nodeinnertext.html
+		var text = false;	
+		if (node) {
+		// W3C conformant browsers
+			text = node.textContent;
+		}
+		if (!text) {
+			// Opera, IE 6 & 7
+			text = node.innerText;
+		}
+		if (!text) {
+			// Safari
+			text = node.innerHTML;
+		}
+		return text;
+},
+
 	/**
 	 * Removes leading and trailing whitespace from a string
 	 * @type String
@@ -631,6 +910,7 @@ Zotero.Utilities = {
 		const skipWords = ["but", "or", "yet", "so", "for", "and", "nor", "a", "an",
 			"the", "at", "by", "from", "in", "into", "of", "on", "to", "with", "up",
 			"down", "as"];
+		const alwaysLowerCase = ["plc", "v"];
 		
 		// this may only match a single character
 		const delimiterRegexp = /([ \/\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B])/;
@@ -642,8 +922,9 @@ Zotero.Utilities = {
 		
 		// split words
 		var words = string.split(delimiterRegexp);
-		var isUpperCase = string.toUpperCase() == string;
-		
+        var stringWithoutV = string.replace(/([^A-Za-z])v([^A-Za-z])/, "$1$2");
+		var isUpperCase = stringWithoutV.toUpperCase() == stringWithoutV;
+    
 		var newString = "";
 		var delimiterOffset = words[0].length;
 		var lastWordIndex = words.length-1;
@@ -657,12 +938,15 @@ Zotero.Utilities = {
 				// only use if word does not already possess some capitalization
 				if(isUpperCase || words[i] == lowerCaseVariant) {
 					if(
-						// a skip word
-						skipWords.indexOf(lowerCaseVariant.replace(/[^a-zA-Z]+/, "")) != -1
-						// not first or last word
-						&& i != 0 && i != lastWordIndex
-						// does not follow a colon
-						&& (previousWordIndex == -1 || words[previousWordIndex][words[previousWordIndex].length-1] != ":")
+                        alwaysLowerCase.indexOf(lowerCaseVariant.replace(/[^a-zA-Z]+/, "")) != -1
+                        || (
+						    // a skip word
+						    skipWords.indexOf(lowerCaseVariant.replace(/[^a-zA-Z]+/, "")) != -1
+						    // not first word, or last word if not #2 forcing for case names
+						        && i != 0 && i != lastWordIndex
+						    // does not follow a colon
+						        && (previousWordIndex == -1 || words[previousWordIndex][words[previousWordIndex].length-1] != ":")
+                        )
 					) {
 						words[i] = lowerCaseVariant;
 					} else {
@@ -677,7 +961,7 @@ Zotero.Utilities = {
 			
 			newString += words[i];
 		}
-		
+
 		return newString;
 	},
 	
@@ -1273,7 +1557,13 @@ Zotero.Utilities = {
 			'id':item.itemID,
 			'type':cslType
 		};
-		
+
+		if (item.libraryID) {
+			cslItem.key = item.libraryID + "_" + item.key
+		} else {
+			cslItem.key = item.key
+		}
+
 		// Map text fields
 		var itemTypeID = Zotero.ItemTypes.getID(itemType);
 		for(var variable in CSL_TEXT_MAPPINGS) {
@@ -1333,6 +1623,11 @@ Zotero.Utilities = {
 		}
 		
 		// get date variables
+        if (["legal_case"].indexOf(cslType) > -1) {
+            var CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
+        } else {
+            var CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
+        }
 		for(var variable in CSL_DATE_MAPPINGS) {
 			var date = item[CSL_DATE_MAPPINGS[variable]];
 			if(date) {
@@ -1445,6 +1740,11 @@ Zotero.Utilities = {
 		}
 		
 		// get date variables
+        if (["legal_case"].indexOf(item.type) > -1) {
+            var CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
+        } else {
+            var CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
+        }
 		for(var variable in CSL_DATE_MAPPINGS) {
 			if(variable in cslItem) {
 				var field = CSL_DATE_MAPPINGS[variable],
