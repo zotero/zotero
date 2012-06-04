@@ -379,7 +379,7 @@ Zotero.Translate.ItemSaver.prototype = {
 	"_saveFields":function(item, newItem) {
 		// fields that should be handled differently
 		const skipFields = ["note", "notes", "itemID", "attachments", "tags", "seeAlso",
-							"itemType", "complete", "creators"];
+							"itemType", "complete", "creators", "multi"];
 		
 		var typeID = Zotero.ItemTypes.getID(item.itemType);
 		var fieldID;
@@ -399,6 +399,23 @@ Zotero.Translate.ItemSaver.prototype = {
 				// if field is valid for this type, set field
 				if(fieldID && Zotero.ItemFields.isValidForType(fieldID, typeID)) {
 					newItem.setField(fieldID, item[field]);
+                    if (item.multi && item.multi._lsts[field]) {
+                        for (var j = 0, jlen = item.multi._lsts[field].length; j < jlen; j += 1) {
+                            var langTag = item.multi._lsts[field][j];
+				            // Normalize lang
+				            // Patch code by Florian Ziche.
+                            var langTag = item.multi._lsts[field][j];
+				            if(Zotero.zlsValidator.validate(langTag)) {
+					            langTag = [Zotero.zlsValidator.tagdata[k].subtag for (k in Zotero.zlsValidator.tagdata)].join("-");
+					            if (!Zotero.CachedLanguages.hasTag(langTag)) {
+						            Zotero.CachedLanguages.getNickname(langTag);
+					            }
+				            } else {
+                                continue;
+                            }
+		                    newItem.setField(fieldID, item.multi._keys[field][langTag], false, langTag);
+                        }
+                    }
 				} else {
 					Zotero.debug("Translate: Discarded field "+field+" for item: field not valid for type "+item.itemType, 3);
 				}
@@ -439,7 +456,19 @@ Zotero.Translate.ItemSaver.prototype = {
 					lastName: creator.lastName
 				};
 			}
-			
+
+            var multi = {};
+            var lst = [];
+            if (creator.multi) {
+                var lst = creator.multi._lst.slice();
+                for (lang in creator.multi._key) {
+                    multi[lang] = {
+                        firstName: creator.multi._key[lang].firstName,
+                        lastName: creator.multi._key[lang].lastName
+                    }
+                }
+            }
+
 			var creator = null;
 			var creatorDataID = Zotero.Creators.getDataID(fields);
 			if(creatorDataID) {
@@ -458,6 +487,39 @@ Zotero.Translate.ItemSaver.prototype = {
 			}
 			
 			newItem.setCreator(i, creator, creatorTypeID);
+
+            for (var j = 0, jlen = lst.length; j < jlen; j += 1) {
+				// Normalize lang
+				// Patch code by Florian Ziche.
+                var langTag = lst[j];
+				if(Zotero.zlsValidator.validate(langTag)) {
+					langTag = [Zotero.zlsValidator.tagdata[j].subtag for (j in Zotero.zlsValidator.tagdata)].join("-");
+					if (!Zotero.CachedLanguages.hasTag(langTag)) {
+						Zotero.CachedLanguages.getNickname(langTag);
+					}
+				} else {
+                    continue;
+                }
+                var mcreator = null;
+                var mfields = multi[langTag];
+			    var mcreatorDataID = Zotero.Creators.getDataID(mfields);
+                
+			    if(mcreatorDataID) {
+				    var mlinkedCreators = Zotero.Creators.getCreatorsWithData(mcreatorDataID, this._libraryID);
+				    if (mlinkedCreators) {
+					    // TODO: support identical creators via popup? ugh...
+					    var mcreatorID = mlinkedCreators[0];
+					    mcreator = Zotero.Creators.get(mcreatorID);
+                    }
+                }
+			    if(!mcreator) {
+				    mcreator = new Zotero.Creator;
+				    mcreator.libraryID = this._libraryID;
+				    mcreator.setFields(mfields);
+				    var mcreatorID = mcreator.save();
+			    }
+                newItem.setCreator(i, mcreator, creatorTypeID, langTag);
+            }
 		}
 	},
 	
