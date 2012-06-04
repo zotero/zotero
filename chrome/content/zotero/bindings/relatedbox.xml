@@ -91,9 +91,87 @@
 					]]>
 				</getter>
 			</property>
+			<method name="getVolIssueJournal">
+				<parameter name="item"/>
+				<body>
+					<![CDATA[
+						var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(item.itemTypeID, 'volume');
+						var itemVol = item.getField(fieldID);
+
+						var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(item.itemTypeID, 'issue');
+						var itemIssue = item.getField(fieldID);
+
+						if (!itemIssue) {
+							var extra = item.getField('extra');
+							var m = extra.match(/\{:issue:\s*([^\}]*)\}/);
+							if (m) {
+								itemIssue = m[1];
+							}
+						}
+						var volIssue = [];
+						if (itemVol) {
+							volIssue.push(itemVol);
+						}
+						if (itemIssue) {
+							volIssue.push(itemIssue);
+						}
+						volIssue = volIssue.join(":");
+						var volIssueJournal = [];
+						if (volIssue) {
+							volIssueJournal.push(volIssue);
+						}
+						// Journal name, short if poss.
+						var journalName = false;
+						if (item.getField('journalAbbreviation')) {
+							journalName = item.getField('journalAbbreviation');
+						}
+						if (!journalName) {
+							var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(item.itemTypeID, 'publicationTitle');
+							journalName = item.getField(fieldID);
+						}
+						if (!journalName) {
+							journalName = item.getField('reporter');
+						}
+						if (!journalName) {
+							journalName = item.getField('code');
+						}
+						if (!journalName) {
+							var extra = item.getField('extra');
+							var m = extra.match(/\{:collection-title:\s*([^\}]*)\}/);
+							if (m) {
+								journalName = m[1];
+							}
+						}
+						if (journalName) {
+							volIssueJournal.push(journalName);
+						}
+						return volIssueJournal.join(" ");
+					]]>
+				</body>
+			</method>
+			<method name="getYear">
+				<parameter name="item"/>
+				<body>
+					<![CDATA[
+
+						var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(item.itemTypeID, 'date');
+						return item.getField(fieldID, false);
+					]]>
+				</body>
+			</method>
 			<method name="reload">
 				<body>
 					<![CDATA[
+						var slots, itemSlots;
+						var itemAuthors = this.item.getField('firstCreator');
+						if (!itemAuthors) {
+							itemAuthors = "";
+						}
+						var itemTitle = this.item.getDisplayTitle();
+						if (!itemTitle) {
+							itemTitle = "";
+						}
+
 						var addButton = this.id('addButton');
 						addButton.hidden = !this.editable;
 						
@@ -105,7 +183,93 @@
 							var related = this.item.relatedItemsBidirectional;
 							if (related) {
 								related = Zotero.Items.get(related);
+								var allitems = related.concat([this.item]);
+                                var deletedItems = Zotero.Items.getDeleted(this.item.libraryID, true);
+								// Gather all item data
+								var data = [];
+								var datum;
+								var keys = ["author", "title", "volIssueJournal", "year"];
+								for (var i = 0, ilen = allitems.length; i < ilen; i += 1) {
+									if (deletedItems.indexOf(allitems[i].id) > -1) {
+										continue;
+									}
+									datum = {};
+									datum.author = allitems[i].getField('firstCreator');
+									datum.title = allitems[i].getDisplayTitle();
+									datum.volIssueJournal = this.getVolIssueJournal(allitems[i]);
+									datum.year = this.getYear(allitems[i]);
+									for (var j = 0, jlen = 4; j < jlen; j += 1) {
+										var key = keys[j];
+										if (!datum[key]) {
+											datum[key] = '';
+										} else {
+											datum.last = j;
+										}
+									}
+									for (var j = datum.last - 1; j > 0; j += -1) {
+										var key = keys[j];
+										if (datum[key]) {
+											datum.penultimate = j;
+											break;
+										}
+									}
+									data.push(datum);
+								}
+								relatedInfo = [];
+								for (var i = 0, ilen = data.length - 1; i < ilen; i += 1) {
+									info = [];
+									if (related[i].numAttachments()) {
+										info.push(true);
+									} else {
+										info.push(false);
+									}
+									info.push([]);
+
+									if (data[i].author && data[i].author.slice(0, 15) !== data[data.length - 1].author.slice(0, 15)) {
+										info[1].push(data[i].author);
+									}
+									for (j = 1, jlen = 4; j < jlen; j += 1) {
+										var key = keys[j];
+										if (j === data[i].last) {
+											if (info[1].length === 0) {
+												if ("undefined" === typeof data[i].penultimate) {
+													info[1].push("");
+												} else {
+													info[1].push(data[i][keys[data[i].penultimate]]);
+												}
+											}
+											info[1].push(data[i][keys[data[i].last]]);
+											break;
+										} else {
+											var useme = true;
+											for (var k = 0, klen = data.length; k < klen; k += 1) {
+												if (i === k) {
+													continue;
+												}
+												if (data[i][key].slice(0, 15) === data[k][key].slice(0, 15)) {
+													useme = false;
+												}
+											}
+											if (useme) {
+												info[1].push(data[i][key]);
+											}
+											if (info[1].length === 2) {
+												break;
+											}
+										}
+									}
+									if (info[1].length === 0) {
+										info[1].push("");
+										info[1].push("(no data)");
+									}
+									relatedInfo.push(info);
+								}
+
+								var newCount = 0;
 								for (var i = 0; i < related.length; i++) {
+									if (deletedItems.indexOf(related[i].id) > -1) {
+										continue;
+									}
 									var icon= document.createElement("image");
 									var type = Zotero.ItemTypes.getName(related[i].itemTypeID);
 									if (type=='attachment')
@@ -129,38 +293,52 @@
 												break;
 										}
 									}
-									icon.setAttribute('src','chrome://zotero/skin/treeitem-' + type + '.png');
-							
-									var label = document.createElement("label");
-									label.setAttribute('value', related[i].getDisplayTitle());
-									label.setAttribute('crop','end');
-									label.setAttribute('flex','1');
-									
+									icon.setAttribute('src',Zotero.ItemTypes.getImageSrc(type));
 									var box = document.createElement('box');
+									if (relatedInfo[newCount][0]) {
+										var attachmentMark = document.createElement("image");
+										attachmentMark.setAttribute("src", "chrome://zotero/skin/attach.png");
+									} else {
+										var attachmentMark = document.createElement("hbox");
+										attachmentMark.setAttribute("width", "16");
+									}
 									box.setAttribute('onclick',
 										"document.getBindingParent(this).showItem('" + related[i].id + "')");
 									box.setAttribute('class','zotero-clicky');
 									box.setAttribute('flex','1');
 									box.appendChild(icon);
-									box.appendChild(label);
-									
+									for (var j = 0, jlen = relatedInfo[newCount][1].length; j < jlen; j += 1) {
+										var label = document.createElement("label");
+										label.setAttribute('value', relatedInfo[newCount][1][j]);
+										label.setAttribute('crop','center');
+										if (j === 1) {
+											label.setAttribute('flex', 1);
+											label.setAttribute("style", "text-align:right;");
+										} else {
+											label.setAttribute('flex', 1);
+											label.setAttribute("style", "min-width:50;text-align:left;");
+										}
+										box.appendChild(label);
+									}
+box.appendChild(attachmentMark);
 									if (this.editable) {
 										var remove = document.createElement("label");
 										remove.setAttribute('value','-');
 										remove.setAttribute('onclick',
 											"document.getBindingParent(this).remove('" + related[i].id + "');");
 										remove.setAttribute('class','zotero-clicky zotero-clicky-minus');
+									} else {
+										var remove = document.createNode("hbox");
+										remove.setAttribute("width", "18")
 									}
-									
 									var row = document.createElement("row");
 									row.appendChild(box);
-									if (this.editable) {
-										row.appendChild(remove);
-									}
+									row.appendChild(remove);
 									row.setAttribute('id', 'seealso-' + related[i].id);
-									rows.appendChild(row);		
+									rows.appendChild(row);
+									newCount += 1;
 								}
-								this.updateCount(related.length);
+								this.updateCount(newCount);
 							}
 							else
 							{
@@ -193,6 +371,7 @@
 								this.item.addRelatedItem(io.dataOut[i]);
 							}
 							this.item.save();
+							this.reload();
 						}
 					]]>
 				</body>
@@ -210,6 +389,7 @@
 							var item = Zotero.Items.get(id);
 							item.removeRelatedItem(this.item.id);
 							item.save();
+                            this.reload();
 						}
 					]]>
 				</body>
@@ -255,7 +435,18 @@
 				<body>
 					<![CDATA[
 						if (count == null) {
-							var count = this.item.relatedItemsBidirectional.length;
+							if (this.item.relatedItemsBidirectional) {
+								var deletedItems = Zotero.Items.getDeleted(this.item.libraryID, true);
+								count = 0;
+								for (var i = 0, ilen = this.item.relatedItemsBidirectional.length; i < ilen; i += 1) {
+									if (deletedItems.indexOf(this.item.relatedItemsBidirectional[i].id) > -1) {
+										continue;
+									}
+									count += 1;
+								}
+							} else {
+								count = 0;
+							}
 						}
 						
 						var str = 'pane.item.related.count.';
@@ -271,6 +462,9 @@
 								break;
 						}
 						this.id('seeAlsoNum').value = Zotero.getString(str, [count]);
+						if (this.updateRelatedTab) {
+							this.updateRelatedTab(this.relatedTab, count);
+						}
 					]]>
 				</body>
 			</method>
