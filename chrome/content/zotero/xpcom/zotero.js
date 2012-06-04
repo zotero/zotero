@@ -26,16 +26,19 @@
 const ZOTERO_CONFIG = {
 	GUID: 'zotero@chnm.gmu.edu',
 	DB_REBUILD: false, // erase DB and recreate from schema
-	REPOSITORY_URL: 'https://repo.zotero.org/repo',
+	REPOSITORY_URL: 'https://secure1603.hostgator.com/~fbennett/cgi-bin',
 	REPOSITORY_CHECK_INTERVAL: 86400, // 24 hours
 	REPOSITORY_RETRY_INTERVAL: 3600, // 1 hour
+	// XXX values used for iterative testing
+	//REPOSITORY_CHECK_INTERVAL: 60, // 24 hours
+	//REPOSITORY_RETRY_INTERVAL: 30, // 1 hour
 	BASE_URI: 'http://zotero.org/',
 	WWW_BASE_URL: 'http://www.zotero.org/',
 	SYNC_URL: 'https://sync.zotero.org/',
 	API_URL: 'https://api.zotero.org/',
 	PREF_BRANCH: 'extensions.zotero.',
 	BOOKMARKLET_URL: 'https://www.zotero.org/bookmarklet/',
-	VERSION: "3.0.3.SOURCE"
+	VERSION: "3.0.2.SOURCE"
 };
 
 /*
@@ -79,6 +82,8 @@ const ZOTERO_CONFIG = {
 	this.isMac;
 	this.isWin;
 	this.initialURL; // used by Schema to show the changelog on upgrades
+	this.multiFieldIds;   // key object
+	this.multiFieldNames; // key object
 	
 	
 	this.__defineGetter__('userID', function () {
@@ -205,6 +210,7 @@ const ZOTERO_CONFIG = {
 	 * Initialize the extension
 	 */
 	function init() {
+		var i, ilen, res, sql;
 		if (this.initialized || this.skipLoading) {
 			return false;
 		}
@@ -504,6 +510,7 @@ const ZOTERO_CONFIG = {
 		Zotero.VersionHeader.init();
 		
 		// Check for DB restore
+
 		var restoreFile = dataDir.clone();
 		restoreFile.append('restore-from-server');
 		if (restoreFile.exists()) {
@@ -616,6 +623,7 @@ const ZOTERO_CONFIG = {
 				return false;
 			}
 		}
+
 		// If no userdata upgrade, still might need to process system
 		else {
 			try {
@@ -641,6 +649,32 @@ const ZOTERO_CONFIG = {
 			}
 		}
 		
+		Zotero.DB.beginTransaction();
+		try {
+			var dbEditTypeIDs = [17, 20];
+			for (var i = 0, ilen = dbEditTypeIDs.length; i < ilen; i += 1) {
+				var dbEditTypeID = dbEditTypeIDs[i];
+				var shortTitleIdx = Zotero.DB.valueQuery("SELECT orderIndex FROM itemTypeFields WHERE itemTypeID=? AND fieldID=116", [dbEditTypeID]);
+				if (shortTitleIdx && shortTitleIdx != 2) {
+					var rows = Zotero.DB.query("SELECT orderIndex FROM itemTypeFields WHERE itemTypeID=?", [dbEditTypeID]);
+					for (var j = rows.length; j > 1; j += -1) {
+						var row = rows[j];
+						if (j === shortTitleIdx) {
+							Zotero.DB.query("UPDATE itemTypeFields SET orderIndex=0 WHERE orderIndex=? AND itemTypeID=?", [j, dbEditTypeID]);
+						} else if (j < shortTitleIdx) {
+							Zotero.DB.query("UPDATE itemTypeFields SET orderIndex=? WHERE orderIndex=? AND itemTypeID=?", [(j + 1), j, dbEditTypeID]);
+						}
+					}
+					Zotero.DB.query("UPDATE itemTypeFields SET orderIndex=2 WHERE orderIndex=0 AND itemTypeID=?", [dbEditTypeID]);
+				}
+			}
+			Zotero.DB.commitTransaction();
+		} catch(e){
+			Zotero.debug(e);
+			Zotero.DB.rollbackTransaction();
+			throw(e);
+		}
+
 		Zotero.DB.startDummyStatement();
 		
 		// Populate combined tables for custom types and fields -- this is likely temporary
@@ -648,6 +682,34 @@ const ZOTERO_CONFIG = {
 			Zotero.Schema.updateCustomTables();
 		}
 		
+		// XXXZ Load quick-service key sets for identifying multilingualized fields
+		// XXXZ ... _after_ creating the database.
+		// This should really all be done with a call to Zotero.Multi module.
+		var multiBaseFields = ['title', 'shortTitle', 'publicationTitle', 'series', 'seriesTitle', 'seriesText', 'publisher', 'reporter', 'court', 'place','edition','volume'];
+		Zotero.multiFieldIds = {};
+		Zotero.multiFieldNames = {};
+		sql = "SELECT fieldID FROM fields " +
+					  "WHERE fieldName in ('" + multiBaseFields.join("','") + "')";
+		res = Zotero.DB.query(sql);
+		for (i = 0, ilen = res.length; i < ilen; i += 1) {
+			Zotero.multiFieldIds[parseInt(res[i].fieldID)] = true;
+		}
+
+		sql = "SELECT fieldID from baseFieldMappings " +
+				  "WHERE baseFieldID in ('" + [key for (key in Zotero.multiFieldIds)].join("','") + "')";
+		res = Zotero.DB.query(sql);
+		for (i = 0, ilen = res.length; i < ilen; i += 1) {
+			Zotero.multiFieldIds[parseInt(res[i].fieldID)] = true;
+		}
+
+		sql = "SELECT fieldName from fields " +
+				  "WHERE fieldID in (" + [key for (key in Zotero.multiFieldIds)].join(",") + ")";
+		res = Zotero.DB.query(sql);
+
+		for (i = 0, ilen = res.length; i < ilen; i += 1) {
+			Zotero.multiFieldNames[res[i].fieldName] = true;
+		}
+
 		// Initialize various services
 		Zotero.Integration.init();
 		
@@ -655,8 +717,8 @@ const ZOTERO_CONFIG = {
 			Zotero.Server.init();
 		}
 		
-		Zotero.Zeroconf.init();
-		
+        Zotero.Zeroconf.init();
+        
 		Zotero.Sync.init();
 		Zotero.Sync.Runner.init();
 		
