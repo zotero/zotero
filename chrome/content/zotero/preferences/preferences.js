@@ -1866,21 +1866,588 @@ function refreshProxyList() {
 function updateProxyPrefs() {
 	var transparent = document.getElementById('zotero-proxies-transparent').checked;
 	Zotero.Prefs.set("proxies.transparent", transparent);
-	Zotero.Prefs.set("proxies.autoRecognize", document.getElementById('zotero-proxies-autoRecognize').checked);	
+	Zotero.Prefs.set("proxies.autoRecognize", document.getElementById('zotero-proxies-autoRecognize').checked);
 	Zotero.Prefs.set("proxies.disableByDomainString", document.getElementById('zotero-proxies-disableByDomain-textbox').value);
 	Zotero.Prefs.set("proxies.disableByDomain", document.getElementById('zotero-proxies-disableByDomain-checkbox').checked &&
 			document.getElementById('zotero-proxies-disableByDomain-textbox').value != "");
-	
+
 	Zotero.Proxies.init();
-	
+
 	document.getElementById('proxyTree-add').disabled =
 		document.getElementById('proxyTree-delete').disabled =
-		document.getElementById('proxyTree').disabled = 
-		document.getElementById('zotero-proxies-autoRecognize').disabled = 
-		document.getElementById('zotero-proxies-disableByDomain-checkbox').disabled = 
+		document.getElementById('proxyTree').disabled =
+		document.getElementById('zotero-proxies-autoRecognize').disabled =
+		document.getElementById('zotero-proxies-disableByDomain-checkbox').disabled =
 		document.getElementById('zotero-proxies-disableByDomain-textbox').disabled = !transparent;
 
 }
+
+/** LANGUAGES **/
+
+/*
+ * Initialize the language panel when preferences is
+ * opened.
+ */
+function onLangLoad() {
+	var startTime = Date.now();
+	refreshMenus();
+	refreshLanguages();
+	var radios = ['Persons', 'Institutions', 'Titles', 'Publishers', 'Places']
+	var forms = ['orig', 'translit', 'translat'];
+	for (var i = 0, ilen = radios.length; i < ilen; i += 1) {
+		var node = document.getElementById(radios[i].toLowerCase() + '-radio')
+		var settings = Zotero.Prefs.get("csl.citation" + radios[i]).split(',');
+		if (settings && settings[0] && forms.indexOf(settings[0]) > -1) {
+			node.selectedIndex = forms.indexOf(settings[0]);
+		} else {
+			Zotero.Prefs.set("csl.citation" + radios[i], 'orig');
+		}
+		citationLangSet(node);
+	}
+	Zotero.setupLocale(document);
+}
+
+function refreshMenus() {
+	Zotero.DB.beginTransaction();
+	//var startTime = Date.now();
+	refreshScriptMenu();
+	//Zotero.debug("XXX scripts: "+(Date.now() - startTime));
+	//var startTime = Date.now();
+	refreshRegionMenu();
+	//Zotero.debug("XXX regions: "+(Date.now() - startTime));
+	//
+	// The variant menu is built on the fly
+	// because the number of items is relatively 
+	// small.ZZZ
+	// 
+	//refreshVariantMenu();
+	Zotero.DB.commitTransaction();
+}
+
+function refreshScriptMenu () {
+	Zotero.DB.beginTransaction();
+	var box = document.getElementById('script-lang-box');
+	if (!box.childNodes.length) {
+		var sql = 'SELECT TA.value AS subtag, D.value AS description FROM zlsSubtags S '
+			+ 'LEFT JOIN zlsSubTagData TA ON S.subtag=TA.id '
+			+ 'LEFT JOIN zlsSubTagData TY ON S.type=TY.id '
+			+ 'LEFT JOIN zlsSubTagData D ON S.description=D.id '
+			+ 'WHERE TY.value=? '
+			+ 'ORDER BY D.value';
+		var res = Zotero.DB.query(sql,['script']);
+		for (var i = 0, ilen = res.length; i < ilen; i += 1) {
+			var item = document.createElement('menuitem');
+			item.setAttribute('label',res[i].description);
+			item.setAttribute('id',res[i].subtag+'::script');
+			item.setAttribute('onclick','selectScript(this);');
+			box.appendChild(item);
+		}
+	}
+	Zotero.DB.commitTransaction();
+};
+
+function selectScript(node) {
+	var parent = node.parentNode;
+	var hiddenItemId = parent.getAttribute('hidden-item');
+	if (hiddenItemId) {
+		var elem = document.getElementById(hiddenItemId);
+		elem.setAttribute('hidden',false);
+	}
+	var topnode = document.getElementById('extend-lang-menu');
+	var rowId = topnode.getAttribute('target-row-id');
+	var tag = rowId.slice(0,-5);
+	tag += '-' + node.getAttribute('id').slice(0, -8);
+	handleDependentLanguageRowInsert(tag);
+}
+
+function selectRegion(node) {
+	var parent = node.parentNode;
+	var topnode = document.getElementById('extend-lang-menu');
+	var rowId = topnode.getAttribute('target-row-id');
+	var tag = rowId.slice(0,-5);
+	tag += '-' + node.getAttribute('id').slice(0, -8);
+	handleDependentLanguageRowInsert(tag);
+}
+
+function selectVariant(node) {
+	var parent = node.parentNode;
+	var topnode = document.getElementById('extend-lang-menu');
+	var rowId = topnode.getAttribute('target-row-id');
+	var tag = rowId.slice(0,-5);
+	tag += '-' + node.getAttribute('id').slice(0, -9);
+	handleDependentLanguageRowInsert(tag);
+}
+
+function handleDependentLanguageRowInsert (tag) {
+	var validator = Zotero.zlsValidator;
+	var res = validator.validate(tag);
+	if (res) {
+		insertLanguageRow(validator.tagdata);
+	}
+}
+				
+function refreshRegionMenu () {
+	Zotero.DB.beginTransaction();
+	var box = document.getElementById('region-lang-box');
+	if (!box.childNodes.length) {
+		var sql = 'SELECT TA.value AS subtag, D.value AS description FROM zlsSubtags S '
+			+ 'LEFT JOIN zlsSubTagData TA ON S.subtag=TA.id '
+			+ 'LEFT JOIN zlsSubTagData TY ON S.type=TY.id '
+			+ 'LEFT JOIN zlsSubTagData D ON S.description=D.id '
+			+ 'WHERE TY.value=? '
+			+ 'ORDER BY D.value';
+		var res = Zotero.DB.query(sql,['region']);
+		for (var i = 0, ilen = res.length; i < ilen; i += 1) {
+			var item = document.createElement('menuitem');
+			item.setAttribute('label',res[i].description);
+			item.setAttribute('id',res[i].subtag+'::region');
+			item.setAttribute('onclick','selectRegion(this);');
+			box.appendChild(item);
+		}
+	}
+	Zotero.DB.commitTransaction();
+}
+
+function scriptLangMenuPrep (topnode) {
+	var targetId = topnode.getAttribute('target-row-id');
+	var tag = targetId.slice(0,-5);
+	var sql = 'SELECT SS.value AS script FROM zlsSubtags S '
+		+ 'LEFT JOIN zlsSubTagData TA ON S.subtag=TA.id '
+		+ 'LEFT JOIN zlsSubTagData SS ON S.suppressscript=SS.id '
+		+ 'LEFT JOIN zlsSubTagData TY ON S.type=TY.id '
+		+ 'WHERE TY.value=? AND TA.value=? AND S.suppressscript IS NOT NULL';
+	var script = Zotero.DB.columnQuery(sql,['language',tag]);
+	if (script && script.length) {
+		var elem = document.getElementById(script[0]+'::script');
+		elem.setAttribute('hidden',true);
+		elem.parentNode.setAttribute('hidden-item',script[0]+'::script');
+	}
+}
+
+function variantLangMenuPrep (topnode) {
+	var existing_variants = "";
+	var targetId = topnode.getAttribute('target-row-id');
+	var menubox = document.getElementById('variant-lang-box');
+	for (var i = menubox.childNodes.length - 1; i > -1; i += -1) {
+		menubox.removeChild(menubox.childNodes[i]);
+	}
+	var tag = targetId.slice(0,-5);
+	// Drop regions for prefix comparison
+	var searchtag = tag.replace(/(?:-[A-Z]{2})/g,"").replace(/(?:-[0-9]{3})/g,"");
+	var m = searchtag.match(/(?:([0-9]{4,8}|[a-zA-Z][a-zA-Z0-9]{4,8})(?:-|$))/g);
+	if (m) {
+		for (var i = 0, ilen = m.length; i < ilen; i += 1) {
+			m[i] = m[i].replace(/-$/,"");
+		}
+		existing_variants = "'" + m.join("','") + "'";
+	}
+	var sql = 'SELECT TA.value AS subtag, D.value AS description FROM zlsSubtags S '
+		+ 'LEFT JOIN zlsSubTagData TA ON S.subtag=TA.id '
+		+ 'LEFT JOIN zlsSubTagData TY ON S.type=TY.id '
+		+ 'LEFT JOIN zlsSubTagData D ON S.description=D.id '
+		+ 'LEFT JOIN zlsSubTagData PR ON S.prefix=PR.id '
+		+ 'WHERE TY.value=? AND (PR.value=? OR S.prefix IS NULL) AND NOT TA.value IN (?)';
+	var res = Zotero.DB.query(sql,['variant',searchtag,existing_variants]);
+	for (var i = 0, ilen = res.length; i < ilen; i += 1) {
+		var item = document.createElement('menuitem');
+		item.setAttribute('label',res[i].description);
+		item.setAttribute('id',res[i].subtag+'::variant');
+		item.setAttribute('onclick','selectVariant(this);');
+		menubox.appendChild(item);
+	}
+}
+
+function refreshLanguages () {
+	var parent = document.getElementById("language-rows");
+	for (var i = parent.childNodes.length - 1; i > -1; i += -1) {
+		parent.removeChild(parent.childNodes[i]);
+	}
+	var tags = Zotero.DB.query("SELECT * FROM zlsTags ORDER BY tag");
+	for (var i = 0, ilen = tags.length; i < ilen; i += 1) {
+		var validator = Zotero.zlsValidator;
+		var res = validator.validate(tags[i].tag);
+		if (res) {
+			var row = addLangRow(parent, tags[i].nickname, validator.tagdata);
+			addSelectors(row, tags[i]);
+			parent.appendChild(row);
+		}
+		// Should have an else here, that deletes invalid tags
+		// from zlsTags et al. ?
+	}
+}
+
+function getTagFromTagdata (tagdata) {
+	var tag = [];
+	for (var i = 0, ilen = tagdata.length; i < ilen; i += 1) {
+		tag.push(tagdata[i].subtag);
+	}
+	tag = tag.join('-');
+	return tag;
+}
+
+function addLangRow(parent, nickname, tagdata) {
+	// Compose tag name as a string
+	var tag = getTagFromTagdata(tagdata);
+	
+	// New row node
+	var newrow = document.createElement('row');
+	newrow.setAttribute('id', tag+'::row');
+	
+	// Set nickname
+
+	var firsthbox = document.createElement('hbox');
+	firsthbox.setAttribute('class', 'zotero-clicky');
+	firsthbox.setAttribute("flex", "1");
+	firsthbox.setAttribute('onclick', 'showNicknameEditor(this.firstChild)');
+	var valbox = document.createElement('description');
+	valbox.setAttribute("width", "100");
+	valbox.setAttribute("style", "font-size:larger;");
+	valbox.textContent = nickname;
+	firsthbox.appendChild(valbox);
+	newrow.appendChild(firsthbox);
+
+	var secondhbox = document.createElement('hbox');
+	secondhbox.setAttribute('minwidth', '150');
+	secondhbox.setAttribute('maxwidth', '150');
+	// Set tags
+	if (tagdata.length) {
+		addSubtag(secondhbox, tagdata[0]);		
+	}
+	for (var i = 1, ilen = tagdata.length; i < ilen; i += 1) {
+		var subtagdata = tagdata[i];
+		addHyphen(secondhbox);
+		addSubtag(secondhbox, subtagdata);
+	}
+	newrow.appendChild(secondhbox);
+
+	var thirdhbox = document.createElement('hbox');
+	var removeButton = document.createElement('label');
+	removeButton.setAttribute('value', "-");
+	removeButton.setAttribute('class', 'zotero-clicky zotero-clicky-minus');
+	removeButton.setAttribute('style', 'max-height:18px;min-height:18px;');
+	removeButton.setAttribute('disabled',true);
+	setRemoveDisable(removeButton, tag);
+	var removeBox = document.createElement("vbox");
+	removeBox.appendChild(removeButton);
+	thirdhbox.appendChild(removeBox);
+
+	var addButton = document.createElement('label');
+	addButton.setAttribute('value', "+");
+	addButton.setAttribute('class', 'zotero-clicky zotero-clicky-plus');
+	addButton.setAttribute('style', 'min-height:18px;max-height:18px;');
+	addButton.setAttribute('disabled',false);
+	addButton.setAttribute('onmouseover','extendLangMenuPrep(this.parentNode.parentNode.parentNode)');
+	addButton.setAttribute('popup','extend-lang-menu');
+	var addBox = document.createElement("vbox");
+	addBox.appendChild(addButton);
+	thirdhbox.appendChild(addBox);
+	newrow.appendChild(thirdhbox);
+
+	// temporary
+	parent.appendChild(newrow);
+	return newrow;
+}
+
+function addHyphen(box) {
+	var label = document.createElement('label');
+	label.setAttribute('value','-');
+	label.setAttribute('style','font-size:larger;margin:0px;');
+	box.appendChild(label);
+}
+
+function addSubtag(box, subtagdata) {
+	var label = document.createElement('label');
+	label.setAttribute('tooltiptext',subtagdata.description);
+	label.setAttribute('value',subtagdata.subtag);
+	label.setAttribute('type',subtagdata.type);
+	label.setAttribute('style','font-size:larger;margin:0px;');
+	box.appendChild(label);
+}
+
+/*
+ * Handle Return key (traps to prevent panel from closing immediately)
+ */
+function handleLangKeypress (event, type) {
+	//alert(textbox.mController);
+	var target = event.target;
+	var focused = document.commandDispatcher.focusedElement;
+					
+	switch (event.keyCode) {
+		case event.DOM_VK_TAB:
+		case event.DOM_VK_RETURN:
+			event.preventDefault();
+			switch (type) {
+				case 'simpleEdit':
+					hideNicknameEditor(target);
+				default:
+					event.target.value = '';
+					event.target.blur();
+			}
+		break;
+	}
+	return false;
+}
+
+/*
+ * Support function for SAYT
+ */
+function getResultComment (textbox){
+	var controller = textbox.controller;
+	
+	for (var i=0; i<controller.matchCount; i++) {
+		if (controller.getValueAt(i) == textbox.value) {
+			return controller.getCommentAt(i);
+		}
+	}
+	return false;
+}
+
+
+/*
+ * Function performed after auto-complete selection.
+ */
+function handleLangAutoCompleteSelect (textbox) {
+	Zotero.debug("yy: a");
+	if (textbox.value) {
+		// Comment is the tag code, value is the tag description
+		Zotero.debug("rr: a");
+		
+		var comment = getResultComment(textbox);
+		Zotero.debug("rr: b");
+		if (!comment) {
+			textbox.value = '';
+		} else {
+			Zotero.debug("ss: a");
+			var validator = Zotero.zlsValidator;
+			if (validator.validate(comment)) {
+				Zotero.debug("ss: b");
+				insertLanguageRow(validator.tagdata);
+				Zotero.debug("ss: c");
+				textbox.value = '';
+				textbox.blur();
+			}
+			Zotero.debug("ss: d");
+		}
+	}
+	Zotero.debug("yy: b");
+}
+
+function insertLanguageRow (tagdata) {
+	Zotero.debug("tt: a");
+	// XXXZ This does not run for primary tags ... system uses
+	// cachedLanguages instead. Should be using cachedLanguages
+	// for everything?
+	var tag = getTagFromTagdata(tagdata);
+	var parent = getTagFromTagdata(tagdata.slice(0,-1));
+	var sql = "INSERT INTO zlsTags VALUES (?,?,?)";
+	// XXXZ The parent field is unnecessary and can be
+	// dropped.
+	// XXXZ The tag should be added to the (persistent)
+	// store of language tags seen by the system if
+	// necessary, so that it is assigned an integer
+	// value.
+	// XXXZ The second tag field should be the integer
+	// key of the tag.
+	Zotero.DB.query(sql, [tag,tag,parent]);
+	Zotero.debug("tt: b");
+	refreshLanguages();
+	Zotero.debug("tt: c");
+}
+
+function extendLanguageTopMenu (row) {
+	// ZZZ
+	var tag = row.getAttribute('id').slice(0,-5);
+	//alert("Extend me: "+tag);
+	var validator = Zotero.zlsValidator;
+	var tagdata = validator.validate(tag);
+	var menudata = getLanguageMenuData(tag, tagdata);
+}
+
+function extendLangMenuPrep(row) {
+	var menu = document.getElementById('extend-lang-menu');
+	menu.setAttribute('target-row-id',row.getAttribute('id'));
+	var type = row.firstChild.nextSibling.lastChild.getAttribute('type');
+	var scriptElem = document.getElementById('script-lang-menu');
+	var regionElem = document.getElementById('region-lang-menu');
+	var variantElem = document.getElementById('variant-lang-menu');
+	if (type === 'script') {
+		scriptElem.setAttribute('hidden',true);
+	} else if (type === 'region') {
+		scriptElem.setAttribute('hidden',true);		
+		regionElem.setAttribute('hidden',true);		
+	} else if (type === 'variant') {
+		scriptElem.setAttribute('hidden',true);		
+		regionElem.setAttribute('hidden',true);
+		// If no variants are available, the + button
+		// itself will be disabled, so no special
+		// action is required here.
+	} else {
+		scriptElem.setAttribute('hidden',false);
+		regionElem.setAttribute('hidden',false);		
+	}
+}
+
+/*
+ * Disable or enable the delete button on language rows,
+ * as appropriate.
+ */
+function setRemoveDisable(button, tag) {
+	if (tagDependents(tag)) {
+		button.setAttribute('disabled',true);
+		button.setAttribute('onclick',false);
+	} else {
+		button.setAttribute('disabled',false);
+		button.setAttribute('onclick','deleteTag(this.parentNode.parentNode.parentNode)');
+	}
+}
+
+/*
+ * Deletes a language tag from the preferences
+ * panel and from the language tags table in the 
+ * database.
+ */
+function deleteTag (row) {
+	var tag = row.getAttribute('id');
+	// tag attribute on the row carries a '::row' suffix.
+	tag = tag.slice(0,-5);
+	if (!tagDependents(tag)) {
+		var sql = "DELETE FROM zlsTags WHERE tag=?";
+		Zotero.DB.query(sql,[tag]);
+	}
+	refreshLanguages();
+}
+
+/*
+ * Check for dependents and preferences that rely
+ * on a tag.  Return true if found, false if not.
+ */
+function tagDependents (tag) {
+	// Releasing dependent-tag constraint: disable delete
+	// only when used in default prefs.
+	//var sql = "SELECT COUNT(*) FROM zlsTags WHERE parent=?";
+	// dependent tags
+	//var hasDependents = Zotero.DB.valueQuery(sql, [tag]);
+
+	var hasDependents = false;
+	if (!hasDependents) {
+		// dependent preferences
+		var sql = "SELECT COUNT(*) FROM zlsPreferences WHERE tag=?";
+		hasDependents = Zotero.DB.valueQuery(sql, [tag]);
+	}
+	return hasDependents;
+}
+
+/*
+ * Check for a given nickname in the list of chosen
+ * language tags.  Return true if found, false if not.
+ */
+function nicknameExists (nickname) {
+	var sql = 'SELECT COUNT(*) FROM zlsTags WHERE nickname=?';
+	var result = Zotero.DB.valueQuery(sql,[nickname]);
+	return result;
+}
+
+function showNicknameEditor (label) {
+	var parent = label.parentNode;
+	parent.setAttribute('onclick',false);
+	var textbox = document.createElement('textbox');
+	textbox.setAttribute('value',label.textContent);
+	textbox.setAttribute('oncommand','hideNicknameEditor(this)');
+	textbox.setAttribute('width','80');
+	textbox.setAttribute('onkeypress', 'handleLangKeypress(event,"simpleEdit")');
+	textbox.setAttribute('flex','1');
+	parent.replaceChild(textbox,label);
+	textbox.focus();
+}
+
+function hideNicknameEditor (textbox) {
+	if (textbox.value !== textbox.getAttribute('value') && nicknameExists(textbox.value)) {
+		return;
+	}
+	var oldval = textbox.getAttribute('value');
+	var newval = textbox.value;
+	var parent = textbox.parentNode;
+	parent.setAttribute('onclick', 'showNicknameEditor(this.firstChild)');
+	var label = document.createElement('description');
+	label.textContent = newval;
+	label.setAttribute('style', 'font-size:larger;');
+	label.setAttribute("width", "100");
+	parent.replaceChild(label, textbox);
+	var sql = 'UPDATE zlsTags SET nickname=? WHERE nickname=?';
+	Zotero.DB.query(sql,[newval,oldval]);
+	Zotero.CachedLanguages.taint();
+	//updateSelectors(parent.parentNode, parent.parentNode.id.slice(-5));
+}
+
+function addSelectors (row, tag) {
+	//var tags = Zotero.DB.query("SELECT * FROM zlsTags ORDER BY tag");
+	//while (row.childNodes.length) {
+	//	row.removeChild(row.childNodes[0]);
+	//}
+	var languageSelectorTypes = [
+		'zoteroSort',
+		'zoteroDisplay',
+		'citationTransliteration',
+		'citationTranslation',
+		'citationSort'
+	];
+	for (var j = 0, jlen = languageSelectorTypes.length; j < jlen; j += 1) {
+		var newselector = buildSelector('default',tag,languageSelectorTypes[j]);
+		row.appendChild(newselector);
+	}
+}
+
+function buildSelector (profile,tagdata,param) {
+	var checkbox = document.createElement('checkbox');
+	if (langPrefIsSet(profile,tagdata.tag,param)) {
+		checkbox.setAttribute('checked',true);
+	}
+	checkbox.setAttribute('profile', profile);
+	checkbox.setAttribute('param', param);
+	checkbox.setAttribute('oncommand', 'setLangPref(event)');
+	checkbox.setAttribute('value',tagdata.tag);
+	checkbox.setAttribute("style", "overflow:hidden;margin-top:0px;max-width:18px;max-height:18px;");
+	var checkboxBox = document.createElement("vbox");
+	checkboxBox.appendChild(checkbox);
+	var hbox = document.createElement("hbox");
+	hbox.setAttribute("flex", "1");
+	var lbox = document.createElement("hbox");
+	lbox.setAttribute("flex", 1);
+	var rbox = document.createElement("hbox");
+	rbox.setAttribute("flex", 1);
+	hbox.appendChild(lbox);
+	hbox.appendChild(checkboxBox);
+	hbox.appendChild(rbox);
+	//checkbox.setAttribute('label',tagdata.nickname);
+	//checkbox.setAttribute('type','checkbox');
+	//checkbox.setAttribute('flex','1');
+	return hbox;
+}
+
+function langPrefIsSet(profile,tag,param) {
+	var sql = 'SELECT COUNT(*) FROM zlsPreferences WHERE profile=? AND tag=? AND param=?';
+	var res = Zotero.DB.valueQuery(sql,[profile, tag, param]);
+	return res;
+}
+
+function setLangPref(event) {
+	var target = event.target;
+	var profile = target.getAttribute('profile');
+	var param = target.getAttribute('param');
+	var tag = target.getAttribute('value');
+	var enable = target.hasAttribute('checked');
+	if (enable) {
+		var sql = 'INSERT INTO zlsPreferences VALUES (?,?,?)';
+		Zotero.DB.query(sql,['default',param,tag]);
+	} else {
+		var sql = 'DELETE FROM zlsPreferences WHERE profile=? AND param=? and tag=?';
+		Zotero.DB.query(sql,['default',param,tag]);
+	}
+	Zotero.CachedLanguagePreferences.taint();
+	var langRow = document.getElementById(tag+'::row');
+	var removeButton = langRow.lastChild.lastChild.previousSibling;
+	setRemoveDisable(removeButton,tag);
+};
 
 /**
  * Determines if there are word processors, and if not, enables no word processor message
@@ -1940,6 +2507,69 @@ function openInViewer(uri, newTab) {
 			var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 						.getService(Components.interfaces.nsIWindowWatcher);
 			var win = ww.openWindow(null, uri, null, features + ",width=775,height=575", null);
+		}
+	}
+}
+
+function capFirst(str) {
+	return str[0].toUpperCase() + str.slice(1);
+}
+
+function citationLangRecord(node) {
+	if (node.id.split('-')[1] === 'checkbox') {
+		var addme = false;
+		var cullme = false;
+		var secondarySetting = node.id.split('-')[2];
+		if (node.checked) {
+			addme = secondarySetting;
+		} else {
+			cullme = secondarySetting;
+		}
+		node = node.parentNode.parentNode.childNodes[1];
+		
+	};
+	var idlst = node.selectedItem.id.split('-');
+	var base = idlst[0];
+	var primarySetting = idlst[2];
+	var secondaries = Zotero.Prefs.get('csl.citation' + capFirst(base));
+	secondaries = secondaries.split(',').slice(1);
+	if (addme && secondaries.indexOf(secondarySetting) === -1) {
+		secondaries.push(secondarySetting);
+	}
+	if (cullme) {
+		var cullidx = secondaries.indexOf(secondarySetting);
+		if (cullidx > -1) {
+			secondaries = secondaries.slice(0, cullidx).concat(secondaries.slice(cullidx + 1));
+		}
+	}
+	Zotero.Prefs.set('csl.citation' + capFirst(base), [primarySetting].concat(secondaries).join(','));
+	citationLangSet(node);
+}
+
+function citationLangSet (node) {
+	var idlst = node.selectedItem.id.split('-');
+	var base = idlst[0];
+	var settings = Zotero.Prefs.get('csl.citation' + capFirst(base)).split(',');
+	var parent = node.parentNode;
+	var optionSetters = parent.lastChild.childNodes;
+	for (var i = 0, ilen = optionSetters.length; i < ilen; i += 1) {
+		optionSetters[i].checked = false;
+		for (var j = 1, jlen = settings.length; j < jlen; j += 1) {
+			if (optionSetters[i].id === base + '-checkbox-' + settings[j]) {
+				optionSetters[i].checked = true;
+			}
+		}
+		if (optionSetters[i].id === base + "-checkbox-" + settings[0]) {
+			optionSetters[i].checked = false;
+			var idx = settings.slice(1).indexOf(settings[0]);
+			if (idx > -1) {
+				// +1 and +2 b/c first-position item (primary) is sliced off for this check
+				settings = settings.slice(0,idx + 1).concat(settings.slice(idx + 2)); 
+				Zotero.Prefs.set('csl.citation' + capFirst(base), settings.join(','));
+			}
+			optionSetters[i].disabled = true;
+		} else {
+			optionSetters[i].disabled = false;
 		}
 	}
 }
