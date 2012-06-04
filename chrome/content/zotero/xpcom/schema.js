@@ -56,8 +56,9 @@ Zotero.Schema = new function(){
 	this.userDataUpgradeRequired = function () {
 		var dbVersion = this.getDBVersion('userdata');
 		var schemaVersion = _getSchemaSQLVersion('userdata');
+		var multilingualVersion = this.getDBVersion('multilingual');
 		
-		return dbVersion && (dbVersion < schemaVersion);
+		return dbVersion && (!multilingualVersion || (dbVersion < schemaVersion));
 	}
 	
 	
@@ -106,7 +107,7 @@ Zotero.Schema = new function(){
 		}
 		
 		return obj.data.success;
-	}
+	};
 	
 	
 	/*
@@ -114,16 +115,27 @@ Zotero.Schema = new function(){
 	 */
 	this.updateSchema = function () {
 		var dbVersion = this.getDBVersion('userdata');
+		var dbMultilingualVersion = this.getDBVersion('multilingual');
 		
 		// 'schema' check is for old (<= 1.0b1) schema system,
 		// 'user' is for pre-1.0b2 'user' table
-		if (!dbVersion && !this.getDBVersion('schema') && !this.getDBVersion('user')){
+		var doNeedSchema = !dbVersion && !this.getDBVersion('schema') && !this.getDBVersion('user');
+		var doNeedMultilingual = !dbMultilingualVersion && !_hasMultilingualTables();
+		if (doNeedSchema || doNeedMultilingual) {
+			if (doNeedSchema){
 			Zotero.debug('Database does not exist -- creating\n');
 			_initializeSchema();
+			}
+			if (doNeedMultilingual) {
+				Zotero.debug('Initializing multilingual database tables\n');
+				_initializeMultilingualSchema();
+				_updateSchema('zls')
+			}
 			return true;
 		}
 		
 		var schemaVersion = _getSchemaSQLVersion('userdata');
+		var schemaMultilingualVersion = _getSchemaSQLVersion('multilingual');
 		
 		try {
 			Zotero.UnresponsiveScriptIndicator.disable();
@@ -159,6 +171,11 @@ Zotero.Schema = new function(){
 					this.updateCustomTables(up2);
 				}
 				if(up2) Zotero.wait();
+
+				if (!Zotero.Schema.getDBVersion('multilingual') && !_hasMultilingualTables()) {
+					_initializeMultilingualSchema();
+				}
+
 				var up1 = _migrateUserDataSchema(dbVersion);
 				var up3 = _updateSchema('triggers');
 				// Update custom tables again in case custom fields were changed during user data migration
@@ -167,6 +184,9 @@ Zotero.Schema = new function(){
 				}
 				if(up1) Zotero.wait();
 				
+				var up4 = _updateSchema('zls')
+				if (up4) Zotero.wait();
+
 				Zotero.DB.commitTransaction();
 			}
 			catch(e){
@@ -230,7 +250,7 @@ Zotero.Schema = new function(){
 			}
 		}, 5000);
 		
-		return up1 || up2 || up3;
+		return up1 || up2 || up3 || up4;
 	}
 	
 	
@@ -436,10 +456,9 @@ Zotero.Schema = new function(){
 		);
 	}
 	
-	
 	/**
 	 * Update styles and translators in data directory with versions from
-	 * ZIP file (XPI) or directory (source) in extension directory
+	 * ZIP file (XPI) or directory (SVN) in extension directory
 	 *
 	 * @param	{String}	[mode]					'translators' or 'styles'
 	 * @param	{Boolean}	[skipDeleteUpdated]		Skip updating of the file deleting version --
@@ -447,6 +466,7 @@ Zotero.Schema = new function(){
 	 * 												it should only be updated the last time through
 	 */
 	this.updateBundledFiles = function (mode, skipDeleteUpdate) {
+
 		if (!mode) {
 			var up1 = this.updateBundledFiles('translators', true);
 			var up2 = this.updateBundledFiles('styles');
@@ -512,7 +532,7 @@ Zotero.Schema = new function(){
 		
 		var deleted = extDir.clone();
 		deleted.append('deleted.txt');
-		// In source builds, deleted.txt is in the translators directory
+		// In SVN builds, deleted.txt is in the translators directory
 		if (!deleted.exists()) {
 			deleted = extDir.clone();
 			deleted.append('translators');
@@ -553,9 +573,6 @@ Zotero.Schema = new function(){
 					case 'nature':
 					case 'nlm':
 					case 'vancouver':
-					
-					// Remove update script (included with 3.0 accidentally)
-					case 'update':
 					
 					// Delete renamed/obsolete files
 					case 'chicago-note.csl':
@@ -751,7 +768,7 @@ Zotero.Schema = new function(){
 			
 			zipReader.close();
 		}
-		// Source installation
+		// SVN installation
 		else {
 			var sourceDir = extDir.clone();
 			sourceDir.append(modes);
@@ -767,7 +784,7 @@ Zotero.Schema = new function(){
 			while (entries.hasMoreElements()) {
 				var file = entries.getNext();
 				file.QueryInterface(Components.interfaces.nsIFile);
-				// File might not exist in an source build with style symlinks
+				// File might not exist in an SVN build with style symlinks
 				if (!file.exists()
 						|| !file.leafName.match(fileNameRE)
 						|| file.isDirectory()) {
@@ -780,7 +797,7 @@ Zotero.Schema = new function(){
 				}
 			}
 			
-			// Don't attempt installation for source build with missing styles
+			// Don't attempt installation for SVN build with missing styles
 			if (!sourceFilesExist) {
 				Zotero.debug("No source " + mode + " files exist -- skipping update");
 				return false;
@@ -925,7 +942,11 @@ Zotero.Schema = new function(){
 		
 		var url = ZOTERO_CONFIG['REPOSITORY_URL'] + '/updated?'
 			+ (lastUpdated ? 'last=' + lastUpdated + '&' : '')
-			+ 'version=' + Zotero.version;
+			+ 'version=3.0m156';
+
+		// XXX Using hard-wired version, reset during build.
+		// (Version number is actually ignored by our translator update channel)
+		//	+ 'version=' + Zotero.version;
 		
 		Zotero.debug('Checking repository for updates');
 		
@@ -1397,6 +1418,20 @@ Zotero.Schema = new function(){
 		return str;
 	}
 	
+	function _initializeMultilingualSchema(){
+		Zotero.DB.beginTransaction();
+		try {
+			Zotero.DB.query(_getSchemaSQL('multilingual'));
+			_updateDBVersion('multilingual', _getSchemaSQLVersion('multilingual'));
+			Zotero.DB.commitTransaction();
+		} catch (e) {
+			Zotero.debug(e, 1);
+			Components.utils.reportError(e);
+			Zotero.DB.rollbackTransaction();
+			alert('Error initializing Zotero multilingual tables');
+			throw(e);
+		}
+	}
 	
 	/*
 	 * Create new DB schema
@@ -1502,6 +1537,9 @@ Zotero.Schema = new function(){
 				throw(e);
 			}
 			return true;
+		} else if (dbVersion == 32 && schemaVersion == 31 && !Zotero.Schema.getDBVersion('multilingual')) {
+			_updateDBVersion(schema, schemaVersion);
+			return false;
 		}
 		
 		throw ("Zotero '" + schema + "' DB version (" + dbVersion
@@ -1509,6 +1547,74 @@ Zotero.Schema = new function(){
 	}
 	
 	
+	var _multilingualTables = [
+		"creatorsMulti",
+		"fieldsMulti",
+		"zlsPreferences",
+		"languageTagData",
+		"duplicateCheckList"
+	]
+
+	function _hasMultilingualTables () {
+		for (i = 0, ilen = _multilingualTables.length; i < ilen; i += 1) {
+			if (_tableExists(_multilingualTables[i])) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	function _tableExists (tablename) {
+		var sql = "SELECT count(*) FROM sqlite_master WHERE name=? AND type='table'";
+		if (Zotero.DB.valueQuery(sql, [tablename])) {
+			return true;
+		} else {
+			return false;
+		}
+	};
+
+	function _hasAllTables (tables) {
+		var result = true;
+		for (i = 0, ilen = tables.length; i < ilen; i += 1) {
+			if (!_tableExists(tables[i])) {
+				result = false;
+			}
+		}
+		return result;
+	}
+
+	function _okMultilingual (num) {
+			switch (num) {
+			case 78:
+				if (_tableExists("zlsTags")) {
+					return true;
+				}
+				break;
+			case 79:
+				var tables = ["creatorsMulti","fieldsMulti","zlsPreferences","languageTagData"];
+				if (_hasAllTables(tables)) {
+					return true;
+				}
+				break;
+			case 80:
+				var tables = ["itemDataMain","itemDataAlt","creatorsMain","creatorsAlt","creatorDataAlt"];
+				if (_hasAllTables(tables)) {
+					return true;
+				}
+				break;
+			case 81:
+			case 82:
+			case 83:
+				var tables = ["itemDataMain","itemDataAlt","creatorsMain","creatorsAlt","creatorDataAlt","duplicateCheckList"];
+				if (_hasAllTables(tables)) {
+					return true;
+				}
+				break;
+			}
+			return false;
+	}
+
+
 	/**
 	* Process the response from the repository
 	**/
@@ -1751,17 +1857,27 @@ Zotero.Schema = new function(){
 	 * Migrate user data schema from an older version, preserving data
 	 */
 	function _migrateUserDataSchema(fromVersion){
+		var dbMultilingualVersion = Zotero.Schema.getDBVersion('multilingual');
 		var toVersion = _getSchemaSQLVersion('userdata');
 		
+		var toMultilingualVersion = _getSchemaSQLVersion('multilingual');
+
 		if (fromVersion==toVersion){
 			return false;
 		}
 		
-		if (fromVersion > toVersion){
+		if (!dbMultilingualVersion) {
+			var toVersion = 83;
+		}
+
+		if (fromVersion > toVersion && Zotero.Schema.getDBVersion('multilingual')){
 			throw("Zotero user data DB version is newer than SQL file");
 		}
 		
 		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
+		if (!Zotero.Schema.getDBVersion('multilingual')) {
+			Zotero.debug('Applying multilingual update');
+		}
 		
 		Zotero.DB.beginTransaction();
 		
@@ -1770,6 +1886,8 @@ Zotero.Schema = new function(){
 			//
 			// Each block performs the changes necessary to move from the
 			// previous revision to that one.
+
+
 			for (var i=fromVersion + 1; i<=toVersion; i++){
 				if (i==1){
 					Zotero.DB.query("DELETE FROM version WHERE schema='schema'");
@@ -3220,7 +3338,6 @@ Zotero.Schema = new function(){
 				if (i==74) {
 					Zotero.DB.query("CREATE INDEX deletedItems_dateDeleted ON deletedItems(dateDeleted)");
 				}
-				
 				// 2.1b2
 				if (i==75) {
 					Zotero.DB.query("DROP TABLE IF EXISTS translatorCache");
@@ -3231,15 +3348,160 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("DELETE FROM itemTags WHERE tagID IS NULL");
 				}
 				
+				/*
+				if (i==77 && _okMultilingual(77)) {
+				}
+				*/
+
+				if (i==78 && _okMultilingual(78)) {
+					Zotero.debug("Multilingual upgrade ok: 78");
+					// Bundled forward from 77.
+					Zotero.DB.query("DROP TABLE IF EXISTS zlsTags");
+					Zotero.DB.query("CREATE TABLE zlsTags (tag TEXT PRIMARY KEY,nickname TEXT,parent TEXT)");
+					Zotero.DB.query("CREATE INDEX zlsTags_nickname ON zlsTags(nickname)");
+					Zotero.DB.query("CREATE INDEX zlsTags_parent ON zlsTags(parent)");
+
+					Zotero.DB.query("DROP TABLE IF EXISTS zlsPreferences");
+					Zotero.DB.query("CREATE TABLE zlsPreferences (profile TEXT NOT NULL,param TEXT NOT NULL,tag TEXT NOT NULL,PRIMARY KEY (profile, param, tag))");
+					Zotero.DB.query("CREATE INDEX zlsPreferences_param ON zlsPreferences(param, profile)");
+
+					Zotero.DB.query("DROP TABLE IF EXISTS creatorsMulti");
+					Zotero.DB.query("CREATE TABLE creatorsMulti (creatorID INTEGER,languageTagID INTEGER,creatorDataID INTEGER,PRIMARY KEY (creatorID, languageTagID),FOREIGN KEY (creatorDataID) REFERENCES creatorData(creatorDataID),FOREIGN KEY (creatorID) REFERENCES creators(creatorID))");
+
+					Zotero.DB.query("DROP TABLE IF EXISTS fieldsMulti");
+					Zotero.DB.query("CREATE TABLE fieldsMulti (itemID INTEGER,fieldID INTEGER,languageTagID INTEGER,valueID INTEGER,PRIMARY KEY (itemID, fieldID, languageTagID))");
+									
+					Zotero.DB.query("DROP TABLE IF EXISTS languageTagData");
+					Zotero.DB.query("CREATE TABLE languageTagData (languageTagID INTEGER PRIMARY KEY,languageTag TEXT NOT NULL,UNIQUE (languageTag))");
+				}
+
+				if (i==79 && _okMultilingual(79)) {
+					Zotero.debug("Multilingual upgrade ok: 79");
+					// XXX: Short-lived tables cast about during development.
+					Zotero.DB.query("DROP TABLE IF EXISTS creatorsMulti");
+					Zotero.DB.query("DROP TABLE IF EXISTS fieldsMulti");
+					Zotero.DB.query("DROP TABLE IF EXISTS creatorsMain");
+					Zotero.DB.query("DROP TABLE IF EXISTS creatorsAlt");
+					Zotero.DB.query("DROP TABLE IF EXISTS itemCreatorsMain");
+					Zotero.DB.query("DROP TABLE IF EXISTS itemCreatorsAlt");
+					// XXX: Don't delete the final-version alt data tables 
+					// XXX: unless very sure they have no useful content.
+					// Zotero.DB.query("DROP TABLE IF EXISTS creatorsAlt");
+					// Zotero.DB.query("DROP TABLE IF EXISTS creatorDataAlt");
+
+					Zotero.DB.query("CREATE TABLE itemDataMain (itemID INTEGER,fieldID INTEGER,languageTag TEXT,PRIMARY KEY (itemID, fieldID, languageTag))");
+
+					Zotero.DB.query("CREATE TABLE itemDataAlt (itemID INTEGER,fieldID INTEGER,languageTag TEXT,valueID INTEGER,PRIMARY KEY (itemID, fieldID, languageTag))");
+
+					Zotero.DB.query("CREATE TABLE creatorsMain (creatorID INT,languageTag TEXT,PRIMARY KEY (creatorID, languageTag))");
+
+					Zotero.DB.query("CREATE TABLE creatorsAlt (creatorID INTEGER,creatorDataAltID INT NOT NULL,dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,libraryID INT,key TEXT NOT NULL,languageTag TEXT,UNIQUE (libraryID, key, languageTag),PRIMARY KEY (creatorID, languageTag))");
+					Zotero.DB.query("CREATE TABLE creatorDataAlt (creatorDataAltID INTEGER PRIMARY KEY,firstName TEXT,lastName TEXT,shortName TEXT)");
+				}
+
+				if (i==80 && _okMultilingual(80)) {
+					Zotero.debug("Multilingual upgrade ok: 80");
+					Zotero.DB.query("DROP TABLE IF EXISTS duplicateCheckList");
+					Zotero.DB.query("CREATE TABLE duplicateCheckList (itemID INTEGER PRIMARY KEY,checkFields TEXT)");
+				}
+
+				if (i==81 && _okMultilingual(81)) {
+					Zotero.debug("Multilingual upgrade ok: 81");
+					Zotero.DB.query("DROP TABLE IF EXISTS itemDataMain");
+					Zotero.DB.query("CREATE TABLE itemDataMain (itemID INTEGER, fieldID INTEGER, languageTag TEXT, PRIMARY KEY (itemID, fieldID))");
+					Zotero.DB.query("DROP TABLE IF EXISTS creatorsMain");
+					Zotero.DB.query("CREATE TABLE creatorsMain (creatorID INTEGER, languageTag TEXT, PRIMARY KEY (creatorID))");
+				}
+
+				if (i==82 && _okMultilingual(82)) {
+					Zotero.debug("Multilingual upgrade ok: 82");
+					// Add key field as primary key on creatorsAlt
+					Zotero.DB.query("CREATE TEMPORARY TABLE tmpCreatorsAlt AS SELECT creatorID,creatorDataAltID,dateAdded,dateModified,clientDateModified,libraryID,key,languageTag FROM creatorsAlt");
+					Zotero.DB.query("DROP TABLE IF EXISTS creatorsAlt");
+					Zotero.DB.query("CREATE TABLE creatorsAlt (creatorID INTEGER,creatorDataAltID INT NOT NULL,dateAdded TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,dateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,clientDateModified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,libraryID INT,key TEXT NOT NULL,languageTag TEXT,UNIQUE (libraryID, key, languageTag),PRIMARY KEY (creatorID, key, languageTag))");
+					Zotero.DB.query("INSERT INTO creatorsAlt SELECT creatorID,creatorDataAltID,dateAdded,dateModified,clientDateModified,libraryID,key,languageTag FROM tmpCreatorsAlt");
+
+					// Index for the value stored in itemDataValues
+					Zotero.DB.query("CREATE INDEX IF NOT EXISTS itemDataValues_value ON itemDataValues(value)");
+
+					var convie = new Zotero.MultiConvert;
+					convie.fixItems();
+				}
+
+				if (i==83 && _okMultilingual(83)) {
+					Zotero.debug("Multilingual upgrade ok: 83");
+					// Fix creatorsMain -> itemCreatorsMain
+					Zotero.DB.query("DROP TABLE IF EXISTS itemCreatorsMain");
+					Zotero.DB.query("CREATE TABLE itemCreatorsMain (itemID INT,creatorID INT,creatorTypeID INT DEFAULT 1,orderIndex INT DEFAULT 0,languageTag TEXT,PRIMARY KEY (itemID, creatorID, creatorTypeID, orderIndex, languageTag))");
+					Zotero.DB.query("INSERT INTO itemCreatorsMain SELECT itemID, IC.creatorID, IC.creatorTypeID, IC.orderIndex, languageTag FROM itemCreators IC JOIN creatorsMain CM ON IC.creatorID=CM.creatorID");
+					Zotero.DB.query("DROP TABLE IF EXISTS creatorsMain");
+
+					// Fix creatorsAlt -> itemCreatorsAlt
+
+					// Create new table to hold per-item multilingual
+					// creator pointers.
+					Zotero.DB.query("DROP TABLE IF EXISTS itemCreatorsAlt");
+					Zotero.DB.query("CREATE TABLE itemCreatorsAlt (itemID INT,creatorID INT,creatorTypeID INT DEFAULT 1,orderIndex INT DEFAULT 0,languageTag TEXT,PRIMARY KEY (itemID, creatorID, creatorTypeID, orderIndex, languageTag),FOREIGN KEY (itemID) REFERENCES items(itemID),FOREIGN KEY (creatorID) REFERENCES itemCreatorsAlt(creatorID),FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID))");
+
+					// Divide row content up among itemCreatorsAlt,
+					// creators, and creatorData, to produce properly linked
+					// and normalized tables.
+					// Get consolidated rows for creator & each multilingual variant
+					var rows = Zotero.DB.query("SELECT DISTINCT itemID,IC.creatorTypeID,IC.orderIndex,CA.languageTag,CDA.lastName,CDA.firstName,IC.orderIndex FROM itemCreators IC JOIN creators C ON IC.creatorID=C.creatorID JOIN creatorsAlt CA ON C.creatorID=CA.creatorID JOIN creatorDataAlt CDA ON CA.creatorDataAltID=CDA.creatorDataAltID ORDER BY IC.itemID, IC.orderIndex, CA.languageTag");
+					var idgen = new Zotero.ID_Tracker;
+					for (var j in rows) {
+						// Check for existence of entry in creatorData, and either
+						// use it, or create a new one and remember the ID
+						if (rows[j].firstName) {
+							var fieldMode = 0;
+						} else {
+							var fieldMode = 1;
+						}
+
+						if (rows[j].lastName && rows[j].lastName.slice(0, 8) == 'Bazhanov') {
+							Zotero.debug("Processing for conversion: "+rows[j].lastName+" @ "+rows[j].orderIndex);
+						}
+
+						sql = "SELECT creatorDataID FROM creatorData WHERE lastName=? AND firstName=? AND fieldMode=?";
+						var creatorDataID = Zotero.DB.valueQuery(sql, [rows[j].lastName, rows[j].firstName, fieldMode]);
+						if (!creatorDataID) {
+							creatorDataID = idgen.get("creatorData");
+							sql = "INSERT INTO creatorData VALUES (?, ?, ?, '', ?, '')";
+							Zotero.DB.query(sql, [creatorDataID, rows[j].firstName, rows[j].lastName, fieldMode]);
+						}
+
+						// Check for existence of entry in creators, and either
+						// use it, or create a new one and remember the ID
+						sql = "SELECT creatorID FROM creators WHERE creatorDataID=? AND libraryID IS NULL";
+						var creatorID = Zotero.DB.valueQuery(sql, creatorDataID);
+						if (!creatorID) {
+							creatorID = idgen.get("creators");
+							var key = Zotero.ID.getKey();
+							sql = "INSERT INTO creators VALUES (?, ?, ?, ?, ?, NULL, ?)";
+							Zotero.DB.query(sql, [creatorID, creatorDataID, Zotero.DB.transactionDateTime, Zotero.DB.transactionDateTime, Zotero.DB.transactionDateTime, key]);
+						}
+						// Insert appropriate IDs into itemCreatorsAlt
+						Zotero.DB.query("INSERT INTO itemCreatorsAlt VALUES (?, ?, ?, ?, ?)", [rows[j].itemID, creatorID, rows[j].creatorTypeID, rows[j].orderIndex, rows[j].languageTag]);
+					}
+					Zotero.DB.query("DROP TABLE IF EXISTS creatorsAlt");
+					Zotero.DB.query("DROP TABLE IF EXISTS creatorDataAlt");
+				}
+
 				Zotero.wait();
 			}
 			
+			if (!dbMultilingualVersion) {
+				_updateDBVersion('userdata', 76);
+			} else {
+
 			// TODO
 			//
 			// Replace customBaseFieldMappings to fix FK fields/customField -> customFields->customFieldID
 			// If libraryID set, make sure no relations still use a local user key, and then remove on-error code in sync.js
 			
 			_updateDBVersion('userdata', toVersion);
+			}
+			_updateDBVersion('multilingual', toMultilingualVersion);
 			
 			Zotero.DB.commitTransaction();
 		}
