@@ -1,191 +1,193 @@
-<!ENTITY zotero.preferences.title "Zotero eelistused">
-
-<!ENTITY zotero.preferences.default "Vaikimisi:">
-<!ENTITY zotero.preferences.items "kirjet">
-<!ENTITY zotero.preferences.period ".">
-
-<!ENTITY zotero.preferences.prefpane.general "Üldine">
-
-<!ENTITY zotero.preferences.userInterface "Kasutajaliides">
-<!ENTITY zotero.preferences.showIn "Laadida Zotero:">
-<!ENTITY zotero.preferences.showIn.browserPane "Brauseri paanil">
-<!ENTITY zotero.preferences.showIn.separateTab "Eraldi">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
-<!ENTITY zotero.preferences.statusBarIcon "Staatusriba ikoon:">
-<!ENTITY zotero.preferences.statusBarIcon.none "Puudub">
-<!ENTITY zotero.preferences.fontSize "Fondi suurus:">
-<!ENTITY zotero.preferences.fontSize.small "Väike">
-<!ENTITY zotero.preferences.fontSize.medium "Keskmine">
-<!ENTITY zotero.preferences.fontSize.large "Suur">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
-<!ENTITY zotero.preferences.fontSize.notes "Märkuse fondisuurus">
-
-<!ENTITY zotero.preferences.miscellaneous "Mitmesugust">
 <!ENTITY zotero.preferences.autoUpdate "Kontrollida automaatselt uuendatud tõlkijaid">
-<!ENTITY zotero.preferences.updateNow "Uuendada nüüd">
-<!ENTITY zotero.preferences.reportTranslationFailure "Anda teada vigastest tõlkijatest">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Lubada zotero.org modifitseerida sisu vastavalt Zotero versioonile">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Kui valitud, siis praegune Zotero versioon lisatakse HTTP päringutele zotero.org-ist.">
-<!ENTITY zotero.preferences.parseRISRefer "Kasutada Zoterot RIS/Refer failide avamiseks">
 <!ENTITY zotero.preferences.automaticSnapshots "Teha momentülesvõtted kui luuakse kirjeid lehekülgedest">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Kirje lisamisel salvestada automaatselt seotud PDF-id ja teised elemendid">
 <!ENTITY zotero.preferences.automaticTags "Lisada automaatselt märksõnad ja teemapealkirjad lipikutesse">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaatselt eemaldada kirjed prügikastist, mis on kustutatud rohkem kui">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "päeva tagasi">
-
+<!ENTITY zotero.preferences.charset "Tähtede kodeering">
+<!ENTITY zotero.preferences.charset.displayExportOption "Näidata ekspordi puhul tähtede kodeeringut">
+<!ENTITY zotero.preferences.charset.importCharset "Tähdede kodeeringu importimine">
+<!ENTITY zotero.preferences.citationOptions.caption "Tsiteeringu seaded">
+<!ENTITY zotero.preferences.cite.styles "Stiilid">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Stiilide haldamine">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Pealkiri">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Uuendatud">
+<!ENTITY zotero.preferences.cite.wordProcessors "Tekstiredaktorid">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Lisade hankimine...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Ühtegi tekstiredaktori lisa ei ole paigaldatud.">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.dataDir "Lao asukoht">
+<!ENTITY zotero.preferences.dataDir.choose "Valida...">
+<!ENTITY zotero.preferences.dataDir.custom "Oma valik:">
+<!ENTITY zotero.preferences.dataDir.reveal "Andmete kataloogi näitamine">
+<!ENTITY zotero.preferences.dataDir.useProfile "Kasutada Firefoxi profiili kataloogi">
+<!ENTITY zotero.preferences.dbMaintenance "Andmebaasi hooldus">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Andmebaasi sidususe kontroll">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stiilid alglaadida...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Tõlkijad alglaadida...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Alglaadida tõlkijad ja stiilid...">
+<!ENTITY zotero.preferences.debugOutputLogging "Veateadete logimine">
+<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Logi tühjendamine">
+<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Lülitada pärast taaskäivitamist sisse">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "ridu logitud">
+<!ENTITY zotero.preferences.debugOutputLogging.message "Veateadete logimine aitab Zotero arendajatel diagnoosida Zoteroga esinevaid probleeme. Veateadete logimine aeglustab Zotero tegevust, niisiis ei ole seda üldjuhul tarvis sisse lülitada.">
+<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Saata Zotero serverisse">
+<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Logi vaatamine">
+<!ENTITY zotero.preferences.default "Vaikimisi:">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Kirje lisamisel salvestada automaatselt seotud PDF-id ja teised elemendid">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Lisada viidetes paberartiklitele URL">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Kui see ei ole valitud, siis Zotero lisab URL vaid siis kui tsiteeritaval artiklil ei ole määratud lehekülgede vahemikku.">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Veel stiile...">
+<!ENTITY zotero.preferences.fontSize "Fondi suurus:">
+<!ENTITY zotero.preferences.fontSize.large "Suur">
+<!ENTITY zotero.preferences.fontSize.medium "Keskmine">
+<!ENTITY zotero.preferences.fontSize.notes "Märkuse fondisuurus">
+<!ENTITY zotero.preferences.fontSize.small "Väike">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Lehekülgede ülemhulk, mida faili kohta indekseeritakse:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Tähemärkide ülemhulk, mida faili kohta indekseeritakse:">
 <!ENTITY zotero.preferences.groups "Grupid">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "Kirjete kopeerimisel raamatukogude vahel lisada:">
-<!ENTITY zotero.preferences.groups.childNotes "seotud märkused">
 <!ENTITY zotero.preferences.groups.childFiles "seotud momentülesvõtted ja imporditud failid">
 <!ENTITY zotero.preferences.groups.childLinks "seotud lingid">
-
+<!ENTITY zotero.preferences.groups.childNotes "seotud märkused">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "Kirjete kopeerimisel raamatukogude vahel lisada:">
+<!ENTITY zotero.preferences.items "kirjet">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Muutused saavad nähtavaks alles uues aknas">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopeerida valitud kirje tsiteeringud lõikepuhvrisse">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopeerida valitud kirjed lõikepuhvrisse">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Lõikepuhvrist importimine">
+<!ENTITY zotero.preferences.keys.library "Raamatukogu">
+<!ENTITY zotero.preferences.keys.newItem "Uue kirje loomine">
+<!ENTITY zotero.preferences.keys.newNote "Uue kommentaari loomine">
+<!ENTITY zotero.preferences.keys.openZotero "Avada/Sulgeda Zotero aken">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Võistlevate kiirvaliku klahvide korraldamine">
+<!ENTITY zotero.preferences.keys.quicksearch "Kiirotsing">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Täisekraan režiim">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Lipikuvalija olek">
+<!ENTITY zotero.preferences.lang.addLanguage "Add a language">
+<!ENTITY zotero.preferences.lang.configureCitations "(3) Configure citations &#8680;">
+<!ENTITY zotero.preferences.lang.csl "CSL:">
+<!ENTITY zotero.preferences.lang.display "Display">
+<!ENTITY zotero.preferences.lang.inCitationsAndBibliographies "Citations and bibliographies">
+<!ENTITY zotero.preferences.lang.insideZotero "User interface">
+<!ENTITY zotero.preferences.lang.institutions "Institutions:">
+<!ENTITY zotero.preferences.lang.languageList "Language tags">
+<!ENTITY zotero.preferences.lang.languageRoles "(2) Define language roles &#8681;">
+<!ENTITY zotero.preferences.lang.languages "Languages">
+<!ENTITY zotero.preferences.lang.nickname "Nickname">
+<!ENTITY zotero.preferences.lang.originalNameFormat "Use original formatting conventions for transliterated names">
+<!ENTITY zotero.preferences.lang.persons "Persons:">
+<!ENTITY zotero.preferences.lang.places "Places:">
+<!ENTITY zotero.preferences.lang.primary "primary">
+<!ENTITY zotero.preferences.lang.publishers "Publishers:">
+<!ENTITY zotero.preferences.lang.region "Region">
+<!ENTITY zotero.preferences.lang.script "Script">
+<!ENTITY zotero.preferences.lang.secondary "[secondary]">
+<!ENTITY zotero.preferences.lang.setLocales "(1) Set locales &#8679;">
+<!ENTITY zotero.preferences.lang.showOriginal "Show original form of transliterated names in bibliography">
+<!ENTITY zotero.preferences.lang.sorting "Sorting">
+<!ENTITY zotero.preferences.lang.suppressTitleTransliteration "Suppress transliteration of titles">
+<!ENTITY zotero.preferences.lang.tag "Tag">
+<!ENTITY zotero.preferences.lang.titles "Titles:">
+<!ENTITY zotero.preferences.lang.translation "Translation">
+<!ENTITY zotero.preferences.lang.transliteration "Transliteration">
+<!ENTITY zotero.preferences.lang.ui "UI:">
+<!ENTITY zotero.preferences.lang.variant "Variant">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
+<!ENTITY zotero.preferences.locate.description "Kirjeldus">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Artikli otsingumootori haldaja">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "Otsingumootor laiendab Otsingu rippmenüü võimalusi infopaneelil. Otsingumootorite rakendamine lisab võimaluse teie raamatukogus leiduvate kirjete otsimiseks webist.">
+<!ENTITY zotero.preferences.locate.name "Nimi">
+<!ENTITY zotero.preferences.locate.restoreDefaults "Algseaded taastada">
+<!ENTITY zotero.preferences.miscellaneous "Mitmesugust">
+<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
+<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
-
-<!ENTITY zotero.preferences.openurl.search "Otsida lahendajaid">
 <!ENTITY zotero.preferences.openurl.custom "Kohandatud...">
+<!ENTITY zotero.preferences.openurl.search "Otsida lahendajaid">
 <!ENTITY zotero.preferences.openurl.server "Lahendaja:">
 <!ENTITY zotero.preferences.openurl.version "Versioon:">
-
-<!ENTITY zotero.preferences.prefpane.sync "Sünkroonimine">
-<!ENTITY zotero.preferences.sync.username "Kasutajanimi:">
-<!ENTITY zotero.preferences.sync.password "Salasõna:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero sünkroon-server">
-<!ENTITY zotero.preferences.sync.createAccount "Loo kasutaja">
-<!ENTITY zotero.preferences.sync.lostPassword "Salasõna kadunud?">
-<!ENTITY zotero.preferences.sync.syncAutomatically "Sünkroonida automaatselt">
-<!ENTITY zotero.preferences.sync.about "Sünkroonimise kohta">
-<!ENTITY zotero.preferences.sync.fileSyncing "Failide sünkroonimine">
-<!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Minu raamatukogus olevate lisade sünkroonimine kasutades">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Minu grupi raamatukogus olevate lisade sünkroonimine kasutades Zotero hoidlat">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Kasutades Zotero hoidlat, nõustute järgmiste">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "tingimuste ja piirangutega">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Zotero serveriga täissünkroonimine">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Liita kohalikele Zotero andmetele sünkroon-serveris olevad andmed, jättes tähelepanuta sünkroonimise ajaloo">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Taastada Zotero serverist">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Kustutada kõik kohalikud andmed ja taastada need sünkroon-serverist">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Taastada sünkroon-serveri andmed kohalikust hoidlast">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Kustutada kõik sünkroon-serveri andmed ja taastada need kohalikust hoidlast">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Algseadistada failide sünkroonimise ajalugu">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Rakendada hoidla serveri kontrolli kõigi kohalikele lisatud failidele.">
-<!ENTITY zotero.preferences.sync.reset.button "Algseadistada...">
-
-
+<!ENTITY zotero.preferences.parseRISRefer "Kasutada Zoterot RIS/Refer failide avamiseks">
+<!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.prefpane.advanced "Täpsemalt">
+<!ENTITY zotero.preferences.prefpane.cite "Viitamine">
+<!ENTITY zotero.preferences.prefpane.export "Eksport">
+<!ENTITY zotero.preferences.prefpane.general "Üldine">
+<!ENTITY zotero.preferences.prefpane.keys "Kiirvaliku klahvid">
+<!ENTITY zotero.preferences.prefpane.locate "Otsing">
+<!ENTITY zotero.preferences.prefpane.proxies "Proksid">
 <!ENTITY zotero.preferences.prefpane.search "Otsing">
+<!ENTITY zotero.preferences.prefpane.sync "Sünkroonimine">
+<!ENTITY zotero.preferences.prefpane.sync.reset "Reset">
+<!ENTITY zotero.preferences.prefpane.sync.settings "Settings">
+<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Suvaline string">
+<!ENTITY zotero.preferences.proxies.autoAssociate "Seosta uued leheküljed automaatselt">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Tuvastada prokside kaudu külastatavad lehed automaatselt">
+<!ENTITY zotero.preferences.proxies.configured "Konfigureeritud proksid">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Kataloogi rada (nt about/)">
+<!ENTITY zotero.preferences.proxies.desc_after_link ".">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero suunab transparentselt päringuid läbi salvestatud prokside. Palun vaadata">
+<!ENTITY zotero.preferences.proxies.desc_link "prokside dokumentatsiooni">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Proksile ümbersuunamine peatada, kui domeeninimi sisaldab ">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Failinimi (e.g., index.html)">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Proksitava lehekülje nimi (nt www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.hostname "Hostname">
+<!ENTITY zotero.preferences.proxies.multiSite "Mitme-lehekülje">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Lehekülje rada ilma kaldkriipsuta (nt about/index.html)">
+<!ENTITY zotero.preferences.proxies.proxyOptions "Proksi seaded">
+<!ENTITY zotero.preferences.proxies.scheme "Skeem">
+<!ENTITY zotero.preferences.proxies.transparent "Pidada meeles prokside kaudu kasutatavad allikad">
+<!ENTITY zotero.preferences.proxies.variables "Proksi skeemides võib kasutada järgnevaid muutujaid:">
+<!ENTITY zotero.preferences.quickCopy.caption "Kiirkopeerimine">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopeerida HTML kujul">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Vaikimisi formaat:">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "Peatada kiirkopeerimine juhul kui lohistatakse rohkem kui">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Märkus: Mac OS X-l läheb RTF formateering kaotsi.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domeen/aadress">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(nt wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Väljundformaat">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Leheküljespetsiifilised seaded:">
+<!ENTITY zotero.preferences.reportTranslationFailure "Anda teada vigastest tõlkijatest">
 <!ENTITY zotero.preferences.search.fulltextCache "Täistekst puhvrist">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF indekseerimine">
 <!ENTITY zotero.preferences.search.indexStats "Indekseerimise statistika">
-
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indekseeritud:">
 <!ENTITY zotero.preferences.search.indexStats.partial "Osaliselt:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Indekseerimata:">
 <!ENTITY zotero.preferences.search.indexStats.words "Sõnu:">
-
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Tähemärkide ülemhulk, mida faili kohta indekseeritakse:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Lehekülgede ülemhulk, mida faili kohta indekseeritakse:">
-
-<!ENTITY zotero.preferences.prefpane.export "Eksport">
-
-<!ENTITY zotero.preferences.citationOptions.caption "Tsiteeringu seaded">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Lisada viidetes paberartiklitele URL">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Kui see ei ole valitud, siis Zotero lisab URL vaid siis kui tsiteeritaval artiklil ei ole määratud lehekülgede vahemikku.">
-
-<!ENTITY zotero.preferences.quickCopy.caption "Kiirkopeerimine">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Vaikimisi formaat:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopeerida HTML kujul">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Märkus: Mac OS X-l läheb RTF formateering kaotsi.">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Leheküljespetsiifilised seaded:">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domeen/aadress">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(nt wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Väljundformaat">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "Peatada kiirkopeerimine juhul kui lohistatakse rohkem kui">
-
-<!ENTITY zotero.preferences.prefpane.cite "Viitamine">
-<!ENTITY zotero.preferences.cite.styles "Stiilid">
-<!ENTITY zotero.preferences.cite.wordProcessors "Tekstiredaktorid">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Ühtegi tekstiredaktori lisa ei ole paigaldatud.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Lisade hankimine...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
-
-<!ENTITY zotero.preferences.cite.styles.styleManager "Stiilide haldamine">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Pealkiri">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Uuendatud">
-<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Veel stiile...">
-
-<!ENTITY zotero.preferences.prefpane.keys "Kiirvaliku klahvid">
-
-<!ENTITY zotero.preferences.keys.openZotero "Avada/Sulgeda Zotero aken">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Täisekraan režiim">
-<!ENTITY zotero.preferences.keys.library "Raamatukogu">
-<!ENTITY zotero.preferences.keys.quicksearch "Kiirotsing">
-<!ENTITY zotero.preferences.keys.newItem "Uue kirje loomine">
-<!ENTITY zotero.preferences.keys.newNote "Uue kommentaari loomine">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Lipikuvalija olek">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopeerida valitud kirje tsiteeringud lõikepuhvrisse">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopeerida valitud kirjed lõikepuhvrisse">
-<!ENTITY zotero.preferences.keys.importFromClipboard "Lõikepuhvrist importimine">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Võistlevate kiirvaliku klahvide korraldamine">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Muutused saavad nähtavaks alles uues aknas">
-
-<!ENTITY zotero.preferences.prefpane.proxies "Proksid">
-
-<!ENTITY zotero.preferences.proxies.proxyOptions "Proksi seaded">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero suunab transparentselt päringuid läbi salvestatud prokside. Palun vaadata">
-<!ENTITY zotero.preferences.proxies.desc_link "prokside dokumentatsiooni">
-<!ENTITY zotero.preferences.proxies.desc_after_link ".">
-<!ENTITY zotero.preferences.proxies.transparent "Pidada meeles prokside kaudu kasutatavad allikad">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Tuvastada prokside kaudu külastatavad lehed automaatselt">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Proksile ümbersuunamine peatada, kui domeeninimi sisaldab ">
-<!ENTITY zotero.preferences.proxies.configured "Konfigureeritud proksid">
-<!ENTITY zotero.preferences.proxies.hostname "Hostname">
-<!ENTITY zotero.preferences.proxies.scheme "Skeem">
-
-<!ENTITY zotero.preferences.proxies.multiSite "Mitme-lehekülje">
-<!ENTITY zotero.preferences.proxies.autoAssociate "Seosta uued leheküljed automaatselt">
-<!ENTITY zotero.preferences.proxies.variables "Proksi skeemides võib kasutada järgnevaid muutujaid:">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Proksitava lehekülje nimi (nt www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Lehekülje rada ilma kaldkriipsuta (nt about/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Kataloogi rada (nt about/)">
-<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Failinimi (e.g., index.html)">
-<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Suvaline string">
-
-<!ENTITY zotero.preferences.prefpane.advanced "Täpsemalt">
-
-<!ENTITY zotero.preferences.prefpane.locate "Otsing">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Artikli otsingumootori haldaja">
-<!ENTITY zotero.preferences.locate.description "Kirjeldus">
-<!ENTITY zotero.preferences.locate.name "Nimi">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Otsingumootor laiendab Otsingu rippmenüü võimalusi infopaneelil. Otsingumootorite rakendamine lisab võimaluse teie raamatukogus leiduvate kirjete otsimiseks webist.">
-<!ENTITY zotero.preferences.locate.addDescription "Otsingumootori lisamiseks külastage vastavat otsingumootorit brauseris ja valige Firefoxi otsinguribalt &#37;Lisa&#37;. Kui te järgmisel korral avate Zotero eelistused, siis on siinsamas dialoogis olemas võimalus seda otsingumootorit rakendada.">
-<!ENTITY zotero.preferences.locate.restoreDefaults "Algseaded taastada">
-
-<!ENTITY zotero.preferences.charset "Tähtede kodeering">
-<!ENTITY zotero.preferences.charset.importCharset "Tähdede kodeeringu importimine">
-<!ENTITY zotero.preferences.charset.displayExportOption "Näidata ekspordi puhul tähtede kodeeringut">
-
-<!ENTITY zotero.preferences.dataDir "Lao asukoht">
-<!ENTITY zotero.preferences.dataDir.useProfile "Kasutada Firefoxi profiili kataloogi">
-<!ENTITY zotero.preferences.dataDir.custom "Oma valik:">
-<!ENTITY zotero.preferences.dataDir.choose "Valida...">
-<!ENTITY zotero.preferences.dataDir.reveal "Andmete kataloogi näitamine">
-
-<!ENTITY zotero.preferences.dbMaintenance "Andmebaasi hooldus">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Andmebaasi sidususe kontroll">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Alglaadida tõlkijad ja stiilid...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Tõlkijad alglaadida...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stiilid alglaadida...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Veateadete logimine">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Veateadete logimine aitab Zotero arendajatel diagnoosida Zoteroga esinevaid probleeme. Veateadete logimine aeglustab Zotero tegevust, niisiis ei ole seda üldjuhul tarvis sisse lülitada.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "ridu logitud">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Lülitada pärast taaskäivitamist sisse">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "Logi vaatamine">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Logi tühjendamine">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Saata Zotero serverisse">
-
-<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF indekseerimine">
+<!ENTITY zotero.preferences.showIn "Laadida Zotero:">
+<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn.browserPane "Brauseri paanil">
+<!ENTITY zotero.preferences.showIn.separateTab "Eraldi">
+<!ENTITY zotero.preferences.statusBarIcon "Staatusriba ikoon:">
+<!ENTITY zotero.preferences.statusBarIcon.none "Puudub">
+<!ENTITY zotero.preferences.sync.about "Sünkroonimise kohta">
+<!ENTITY zotero.preferences.sync.createAccount "Loo kasutaja">
+<!ENTITY zotero.preferences.sync.fileSyncing "Failide sünkroonimine">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "Failide sünkroonimise kohta">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Minu grupi raamatukogus olevate lisade sünkroonimine kasutades Zotero hoidlat">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Minu raamatukogus olevate lisade sünkroonimine kasutades">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Kasutades Zotero hoidlat, nõustute järgmiste">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "tingimuste ja piirangutega">
+<!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
+<!ENTITY zotero.preferences.sync.lostPassword "Salasõna kadunud?">
+<!ENTITY zotero.preferences.sync.password "Salasõna:">
+<!ENTITY zotero.preferences.sync.reset.button "Algseadistada...">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Zotero serveriga täissünkroonimine">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Liita kohalikele Zotero andmetele sünkroon-serveris olevad andmed, jättes tähelepanuta sünkroonimise ajaloo">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Algseadistada failide sünkroonimise ajalugu">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Rakendada hoidla serveri kontrolli kõigi kohalikele lisatud failidele.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Taastada Zotero serverist">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Kustutada kõik kohalikud andmed ja taastada need sünkroon-serverist">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Taastada sünkroon-serveri andmed kohalikust hoidlast">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Kustutada kõik sünkroon-serveri andmed ja taastada need kohalikust hoidlast">
+<!ENTITY zotero.preferences.sync.syncAutomatically "Sünkroonida automaatselt">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero sünkroon-server">
+<!ENTITY zotero.preferences.sync.username "Kasutajanimi:">
+<!ENTITY zotero.preferences.title "Zotero eelistused">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "päeva tagasi">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaatselt eemaldada kirjed prügikastist, mis on kustutatud rohkem kui">
+<!ENTITY zotero.preferences.updateNow "Uuendada nüüd">
+<!ENTITY zotero.preferences.userInterface "Kasutajaliides">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Lubada zotero.org modifitseerida sisu vastavalt Zotero versioonile">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "Kui valitud, siis praegune Zotero versioon lisatakse HTTP päringutele zotero.org-ist.">

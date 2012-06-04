@@ -1,243 +1,238 @@
-<!ENTITY zotero.general.optional "(Optioneel)">
-<!ENTITY zotero.general.note "Aantekening:">
-<!ENTITY zotero.general.selectAll "Alles selecteren">
-<!ENTITY zotero.general.deselectAll "Selectie ongedaan maken">
-<!ENTITY zotero.general.edit "Bewerken">
-<!ENTITY zotero.general.delete "Verwijderen">
-
-<!ENTITY zotero.errorReport.unrelatedMessages "Het foutenlogboek kan berichten bevatten die niet gerelateerd zijn aan Zotero.">
-<!ENTITY zotero.errorReport.submissionInProgress "Even geduld a.u.b. totdat het foutenrapport is verstuurd.">
-<!ENTITY zotero.errorReport.submitted "Het foutenrapport is verstuurd.">
-<!ENTITY zotero.errorReport.reportID "Rapport ID:">
-<!ENTITY zotero.errorReport.postToForums "Plaats een bericht op het (Engelstalige) Zotero forum (forums.zotero.org) onder vermelding van het Rapport ID, een omschrijving van het probleem, en de stappen die nodig zijn om het probleem te reproduceren.">
-<!ENTITY zotero.errorReport.notReviewed "Foutenrapporten worden niet bekeken tenzij u ernaar verwijst in het forum.">
-
-<!ENTITY zotero.upgrade.newVersionInstalled "U heeft een nieuwe versie van Zotero geinstalleerd.">
-<!ENTITY zotero.upgrade.upgradeRequired "Uw Zotero database moet bijgewerkt worden om te kunnen werken met de nieuwe versie.">
-<!ENTITY zotero.upgrade.autoBackup "Er zal een reservekopie van uw bestaande database worden gemaakt voordat er wijzigingen worden doorgevoerd.">
-<!ENTITY zotero.upgrade.majorUpgrade "Dit is een omvangrijke bijwerking.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Lees daarom eerst de">
-<!ENTITY zotero.upgrade.majorUpgradeLink "bijwerkingsinstructies">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink ".">
-<!ENTITY zotero.upgrade.upgradeInProgress "Wacht totdat het bijwerkingsproces is voltooid. Dit kan enige minuten duren.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Uw Zotero database is met succes bijgewerkt.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "Bekijk het">
-<!ENTITY zotero.upgrade.changeLogLink "changelog">
-<!ENTITY zotero.upgrade.changeLogAfterLink "om te zien wat er in de nieuwe versie veranderd is.">
-
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "Selectie toevoegen aan Zotero-aantekening">
-<!ENTITY zotero.contextMenu.addTextToNewNote "Zotero-object en -aantekening maken van selectie">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "Bewaar koppeling als Zotero-object">
-<!ENTITY zotero.contextMenu.saveImageAsItem "Bewaar afbeelding als Zotero-object">
-
-<!ENTITY zotero.tabs.info.label "Info">
-<!ENTITY zotero.tabs.notes.label "Aantekeningen">
-<!ENTITY zotero.tabs.attachments.label "Bijlagen">
-<!ENTITY zotero.tabs.tags.label "Labels">
-<!ENTITY zotero.tabs.related.label "Gerelateerd">
-<!ENTITY zotero.notes.separate "In een nieuw venster bewerken">
-
-<!ENTITY zotero.toolbar.duplicate.label "Duplicaten tonen">
-<!ENTITY zotero.collections.showUnfiledItems "Ongesorteerde objecten tonen">
-
-<!ENTITY zotero.items.itemType "Object-type">
-<!ENTITY zotero.items.type_column "Type">
-<!ENTITY zotero.items.title_column "Titel">
-<!ENTITY zotero.items.creator_column "Maker">
-<!ENTITY zotero.items.date_column "Datum">
-<!ENTITY zotero.items.year_column "Jaar">
-<!ENTITY zotero.items.publisher_column "Uitgever">
-<!ENTITY zotero.items.publication_column "Tijdschrift">
-<!ENTITY zotero.items.journalAbbr_column "Tijdschrift-afkorting">
-<!ENTITY zotero.items.language_column "Taal">
-<!ENTITY zotero.items.accessDate_column "Benaderd">
-<!ENTITY zotero.items.libraryCatalog_column "Bibliotheekscatalogus">
-<!ENTITY zotero.items.callNumber_column "Referentienummer">
-<!ENTITY zotero.items.rights_column "Rechten">
-<!ENTITY zotero.items.dateAdded_column "Toevoegdatum">
-<!ENTITY zotero.items.dateModified_column "Bewerkingsdatum">
-<!ENTITY zotero.items.numChildren_column "+">
-
-<!ENTITY zotero.items.menu.showInLibrary "In bibliotheek tonen">
-<!ENTITY zotero.items.menu.attach.note "Aantekening toevoegen">
-<!ENTITY zotero.items.menu.attach "Bijlage toevoegen">
-<!ENTITY zotero.items.menu.attach.snapshot "Snapshot van huidige pagina toevoegen">
-<!ENTITY zotero.items.menu.attach.link "Koppeling naar huidige pagina toevoegen">
-<!ENTITY zotero.items.menu.attach.link.uri "Koppeling naar URI toevoegen…">
-<!ENTITY zotero.items.menu.attach.file "Kopie van bestand toevoegen…">
-<!ENTITY zotero.items.menu.attach.fileLink "Koppeling naar bestand toevoegen…">
-
-<!ENTITY zotero.items.menu.restoreToLibrary "Terugzetten in bibliotheek">
-<!ENTITY zotero.items.menu.duplicateItem "Kopie maken van geselecteerd object">
-
-<!ENTITY zotero.toolbar.newItem.label "Nieuw object">
-<!ENTITY zotero.toolbar.moreItemTypes.label "Meer">
-<!ENTITY zotero.toolbar.newItemFromPage.label "Nieuw object aanmaken van huidige pagina">
-<!ENTITY zotero.toolbar.lookup.label "Object via identificatiecode toevoegen">
-<!ENTITY zotero.toolbar.removeItem.label "Object verwijderen…">
-<!ENTITY zotero.toolbar.newCollection.label "Nieuwe verzameling aanmaken…">
-<!ENTITY zotero.toolbar.newGroup "Nieuwe groep aanmaken…">
-<!ENTITY zotero.toolbar.newSubcollection.label "Nieuwe deelverzameling aanmaken…">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Nieuwe bewaarde zoekopdracht aanmaken…">
-<!ENTITY zotero.toolbar.emptyTrash.label "Prullenbak legen">
-<!ENTITY zotero.toolbar.tagSelector.label "Label-kiezer tonen/verbergen">
-<!ENTITY zotero.toolbar.actions.label "Acties">
-<!ENTITY zotero.toolbar.import.label "Importeren…">
-<!ENTITY zotero.toolbar.importFromClipboard "Van klembord importeren">
-<!ENTITY zotero.toolbar.export.label "Bibliotheek exporteren…">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF-scan…">
-<!ENTITY zotero.toolbar.timeline.label "Tijdslijn maken">
-<!ENTITY zotero.toolbar.preferences.label "Voorkeuren…">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Ondersteuning en documentatie">
-<!ENTITY zotero.toolbar.about.label "Over Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Uitgebreid zoeken">
-<!ENTITY zotero.toolbar.tab.tooltip "Tabbladmodus veranderen">
-<!ENTITY zotero.toolbar.openURL.label "Opzoeken">
-<!ENTITY zotero.toolbar.openURL.tooltip "Via uw bibliotheek opzoeken">
-
-<!ENTITY zotero.item.add "Toevoegen">
-<!ENTITY zotero.item.attachment.file.show "Bestand tonen">
-<!ENTITY zotero.item.textTransform "Hoofdlettergebruik wijzigen">
-<!ENTITY zotero.item.textTransform.titlecase "Alle woorden (Title Case)">
-<!ENTITY zotero.item.textTransform.sentencecase "Eerste woord (Sentence case)">
-
-<!ENTITY zotero.toolbar.newNote "Nieuwe aantekening">
-<!ENTITY zotero.toolbar.note.standalone "Nieuwe zelfstandige aantekening">
-<!ENTITY zotero.toolbar.note.child "Bijbehorende aantekening toevoegen">
-<!ENTITY zotero.toolbar.lookup "Via identificatiecode opzoeken…">
-<!ENTITY zotero.toolbar.attachment.linked "Koppeling naar bestand maken…">
-<!ENTITY zotero.toolbar.attachment.add "Kopie van bestand bewaren…">
-<!ENTITY zotero.toolbar.attachment.weblink "Koppeling naar huidige webpagina bewaren">
-<!ENTITY zotero.toolbar.attachment.snapshot "Snapshot van huidige webpagina nemen">
-
-<!ENTITY zotero.tagSelector.noTagsToDisplay "Geen labels om te tonen">
-<!ENTITY zotero.tagSelector.filter "Filter:">
-<!ENTITY zotero.tagSelector.showAutomatic "Automatische labels tonen">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Alle labels in deze bibliotheek tonen">
-<!ENTITY zotero.tagSelector.selectVisible "Getoonde labels selecteren">
-<!ENTITY zotero.tagSelector.clearVisible "Selectie getoonde labels ongedaan maken">
-<!ENTITY zotero.tagSelector.clearAll "Niets selecteren">
-<!ENTITY zotero.tagSelector.renameTag "Label hernoemen…">
-<!ENTITY zotero.tagSelector.deleteTag "Label verwijderen…">
-
-<!ENTITY zotero.lookup.description "Voer hieronder de op te zoeken ISBN, DOI of PMID in.">
-
-<!ENTITY zotero.selectitems.title "Objecten selecteren">
-<!ENTITY zotero.selectitems.intro.label "Selecteer de objecten die u aan uw bibliotheek wilt toevoegen">
-<!ENTITY zotero.selectitems.cancel.label "Annuleren">
-<!ENTITY zotero.selectitems.select.label "OK">
-
-<!ENTITY zotero.bibliography.title "Bibliografie aanmaken">
-<!ENTITY zotero.bibliography.style.label "Referentiestijl:">
-<!ENTITY zotero.bibliography.output.label "Uitvoerformaat">
-<!ENTITY zotero.bibliography.saveAsRTF.label "Bewaar als RTF">
-<!ENTITY zotero.bibliography.saveAsHTML.label "Bewaar als HTML">
-<!ENTITY zotero.bibliography.copyToClipboard.label "Naar klembord kopiëren">
-<!ENTITY zotero.bibliography.print.label "Afdrukken">
-
-<!ENTITY zotero.integration.docPrefs.title "Documentvoorkeuren">
-<!ENTITY zotero.integration.addEditCitation.title "Verwijzing toevoegen/aanpassen">
-<!ENTITY zotero.integration.editBibliography.title "Bibliografie aanpassen">
-
-<!ENTITY zotero.progress.title "Voortgang">
-
-<!ENTITY zotero.exportOptions.title "Exporteren…">
-<!ENTITY zotero.exportOptions.format.label "Formaat:">
-<!ENTITY zotero.exportOptions.translatorOptions.label "Vertaler-opties">
-
-<!ENTITY zotero.charset.label "Tekensetcodering">
-<!ENTITY zotero.moreEncodings.label "Meer coderingen">
-
-<!ENTITY zotero.citation.keepSorted.label "Bronnen gesorteerd houden">
-
-<!ENTITY zotero.citation.page "Pagina">
-<!ENTITY zotero.citation.paragraph "Paragraaf">
-<!ENTITY zotero.citation.line "Regel">
-<!ENTITY zotero.citation.suppressAuthor.label "Auteur weglaten">
-<!ENTITY zotero.citation.prefix.label "Voorvoegsel:">
-<!ENTITY zotero.citation.suffix.label "Achtervoegsel:">
-
-<!ENTITY zotero.richText.italic.label "Cursief">
-<!ENTITY zotero.richText.bold.label "Vet">
-<!ENTITY zotero.richText.underline.label "Onderlijnen">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
-
 <!ENTITY zotero.annotate.toolbar.add.label "Annotatie toevoegen">
 <!ENTITY zotero.annotate.toolbar.collapse.label "Alle annotaties inklappen">
+<!ENTITY zotero.annotate.toolbar.duplicatesView.label "Duplicates view">
+<!ENTITY zotero.annotate.toolbar.duplicatesViewCancel.label "Cancel duplicates view">
 <!ENTITY zotero.annotate.toolbar.expand.label "Alle annotaties uitklappen">
 <!ENTITY zotero.annotate.toolbar.highlight.label "Tekst markeren">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Tekstmarkering weghalen">
-
-<!ENTITY zotero.integration.prefs.displayAs.label "Toon verwijzingen als:">
-<!ENTITY zotero.integration.prefs.footnotes.label "Voetnoten">
-<!ENTITY zotero.integration.prefs.endnotes.label "Eindnoten">
-
-<!ENTITY zotero.integration.prefs.formatUsing.label "Gebruikt formaat:">
-<!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks worden behouden tussen Microsoft Word en OpenOffice, maar kunnen per ongeluk worden gewijzigd. Het is met bookmarks niet mogelijk verwijzingen op te nemen in voet- of eindnoten.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Referenties in document bewaren">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Het bewaren van referenties in uw document maakt het bestand iets groter, maar maakt het mogelijk om uw document te delen met andere zonder gebruik te maken van een Zotero-groep. Zotero 3.0 of nieuwer is nodig om dit type documenten bij te werken.">
-
-<!ENTITY zotero.integration.showEditor.label "Editor tonen">
+<!ENTITY zotero.bibliography.copyToClipboard.label "Naar klembord kopiëren">
+<!ENTITY zotero.bibliography.output.label "Uitvoerformaat">
+<!ENTITY zotero.bibliography.print.label "Afdrukken">
+<!ENTITY zotero.bibliography.saveAsHTML.label "Bewaar als HTML">
+<!ENTITY zotero.bibliography.saveAsRTF.label "Bewaar als RTF">
+<!ENTITY zotero.bibliography.style.label "Referentiestijl:">
+<!ENTITY zotero.bibliography.title "Bibliografie aanmaken">
+<!ENTITY zotero.charset.label "Tekensetcodering">
+<!ENTITY zotero.citation.keepSorted.label "Bronnen gesorteerd houden">
+<!ENTITY zotero.citation.line "Regel">
+<!ENTITY zotero.citation.page "Pagina">
+<!ENTITY zotero.citation.paragraph "Paragraaf">
+<!ENTITY zotero.citation.prefix.label "Voorvoegsel:">
+<!ENTITY zotero.citation.suffix.label "Achtervoegsel:">
+<!ENTITY zotero.citation.suppressAuthor.label "Auteur weglaten">
+<!ENTITY zotero.collections.showUnfiledItems "Ongesorteerde objecten tonen">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "Selectie toevoegen aan Zotero-aantekening">
+<!ENTITY zotero.contextMenu.addTextToNewNote "Zotero-object en -aantekening maken van selectie">
+<!ENTITY zotero.contextMenu.saveImageAsItem "Bewaar afbeelding als Zotero-object">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "Bewaar koppeling als Zotero-object">
+<!ENTITY zotero.downloadManager.label "Opslaan in Zotero">
+<!ENTITY zotero.downloadManager.noPDFTools.description "Om deze functie te gebruiken moet u eerst de PDF-hulpprogramma's installen via de Zotero-voorkeuren.">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Bijlages kunnen niet in de nu geselecteerde bibliotheek worden opgeslagen. Dit object zal daarom in plaats hiervan in uw bibliotheek worden opgeslagen.">
+<!ENTITY zotero.errorReport.notReviewed "Foutenrapporten worden niet bekeken tenzij u ernaar verwijst in het forum.">
+<!ENTITY zotero.errorReport.postToForums "Plaats een bericht op het (Engelstalige) Zotero forum (forums.zotero.org) onder vermelding van het Rapport ID, een omschrijving van het probleem, en de stappen die nodig zijn om het probleem te reproduceren.">
+<!ENTITY zotero.errorReport.reportID "Rapport ID:">
+<!ENTITY zotero.errorReport.submissionInProgress "Even geduld a.u.b. totdat het foutenrapport is verstuurd.">
+<!ENTITY zotero.errorReport.submitted "Het foutenrapport is verstuurd.">
+<!ENTITY zotero.errorReport.unrelatedMessages "Het foutenlogboek kan berichten bevatten die niet gerelateerd zijn aan Zotero.">
+<!ENTITY zotero.exportOptions.format.label "Formaat:">
+<!ENTITY zotero.exportOptions.title "Exporteren…">
+<!ENTITY zotero.exportOptions.translatorOptions.label "Vertaler-opties">
+<!ENTITY zotero.file.choose.label "Bestand kiezen…">
+<!ENTITY zotero.file.noneSelected.label "Geen bestand geselecteerd">
+<!ENTITY zotero.general.delete "Verwijderen">
+<!ENTITY zotero.general.deselectAll "Selectie ongedaan maken">
+<!ENTITY zotero.general.edit "Bewerken">
+<!ENTITY zotero.general.note "Aantekening:">
+<!ENTITY zotero.general.optional "(Optioneel)">
+<!ENTITY zotero.general.selectAll "Alles selecteren">
+<!ENTITY zotero.integration.addEditCitation.title "Verwijzing toevoegen/aanpassen">
 <!ENTITY zotero.integration.classicView.label "Klassieke weergave">
-
+<!ENTITY zotero.integration.docPrefs.title "Documentvoorkeuren">
+<!ENTITY zotero.integration.editBibliography.title "Bibliografie aanpassen">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks worden behouden tussen Microsoft Word en OpenOffice, maar kunnen per ongeluk worden gewijzigd. Het is met bookmarks niet mogelijk verwijzingen op te nemen in voet- of eindnoten.">
+<!ENTITY zotero.integration.prefs.bookmarks.label "Bookmarks">
+<!ENTITY zotero.integration.prefs.displayAs.label "Toon verwijzingen als:">
+<!ENTITY zotero.integration.prefs.endnotes.label "Eindnoten">
+<!ENTITY zotero.integration.prefs.footnotes.label "Voetnoten">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Gebruikt formaat:">
+<!ENTITY zotero.integration.prefs.lang.institutions "Institutions:">
+<!ENTITY zotero.integration.prefs.lang.languages "Languages">
+<!ENTITY zotero.integration.prefs.lang.languagesInCitations "Languages for use in citations">
+<!ENTITY zotero.integration.prefs.lang.persons "Persons:">
+<!ENTITY zotero.integration.prefs.lang.places "Places:">
+<!ENTITY zotero.integration.prefs.lang.primary "primary">
+<!ENTITY zotero.integration.prefs.lang.publishers "Publishers:">
+<!ENTITY zotero.integration.prefs.lang.secondary "[secondary]">
+<!ENTITY zotero.integration.prefs.lang.sorting "Sorting">
+<!ENTITY zotero.integration.prefs.lang.styleAndFormat "Style &amp; Format">
+<!ENTITY zotero.integration.prefs.lang.titles "Titles:">
+<!ENTITY zotero.integration.prefs.lang.translation "Translation">
+<!ENTITY zotero.integration.prefs.lang.transliteration "Transliteration">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Het bewaren van referenties in uw document maakt het bestand iets groter, maar maakt het mogelijk om uw document te delen met andere zonder gebruik te maken van een Zotero-groep. Zotero 3.0 of nieuwer is nodig om dit type documenten bij te werken.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Referenties in document bewaren">
 <!ENTITY zotero.integration.references.label "Referenties in bibliografie">
-
-<!ENTITY zotero.sync.button "Synchroniseren met Zotero-server">
-<!ENTITY zotero.sync.error "Synchroniseerfout">
-<!ENTITY zotero.sync.storage.progress "Voortgang:">
-<!ENTITY zotero.sync.storage.downloads "Downloads:">
-<!ENTITY zotero.sync.storage.uploads "Uploads:">
-
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Het volgende label in uw Zotero-bibliotheek is te lang om met de server te kunnen synchroniseren:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Gesynchroniseerde labels moeten korten zijn dan 256 tekens.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "U kunt het label opdelen in meerdere labels, het label handmatig inkorten, of het label verwijderen.">
-<!ENTITY zotero.sync.longTagFixer.split "Opdelen">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe "Opdelen bij het/de">
-<!ENTITY zotero.sync.longTagFixer.character "teken">
-<!ENTITY zotero.sync.longTagFixer.characters "tekens">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Niet aangevinkte labels worden niet bewaard.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Het label zal van alle objecten worden verwijdered.">
-
+<!ENTITY zotero.integration.showEditor.label "Editor tonen">
+<!ENTITY zotero.item.add "Toevoegen">
+<!ENTITY zotero.item.attachment.file.show "Bestand tonen">
+<!ENTITY zotero.item.creatorTransform "Transform Name Form">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last">
+<!ENTITY zotero.item.textTransform "Hoofdlettergebruik wijzigen">
+<!ENTITY zotero.item.textTransform.sentencecase "Eerste woord (Sentence case)">
+<!ENTITY zotero.item.textTransform.titlecase "Alle woorden (Title Case)">
+<!ENTITY zotero.items.accessDate_column "Benaderd">
+<!ENTITY zotero.items.callNumber_column "Referentienummer">
+<!ENTITY zotero.items.creator_column "Maker">
+<!ENTITY zotero.items.dateAdded_column "Toevoegdatum">
+<!ENTITY zotero.items.dateModified_column "Bewerkingsdatum">
+<!ENTITY zotero.items.date_column "Datum">
+<!ENTITY zotero.items.itemType "Object-type">
+<!ENTITY zotero.items.journalAbbr_column "Tijdschrift-afkorting">
+<!ENTITY zotero.items.language_column "Taal">
+<!ENTITY zotero.items.libraryCatalog_column "Bibliotheekscatalogus">
+<!ENTITY zotero.items.menu.addTag "Add Tag">
+<!ENTITY zotero.items.menu.attach "Bijlage toevoegen">
+<!ENTITY zotero.items.menu.attach.file "Kopie van bestand toevoegen…">
+<!ENTITY zotero.items.menu.attach.fileLink "Koppeling naar bestand toevoegen…">
+<!ENTITY zotero.items.menu.attach.link "Koppeling naar huidige pagina toevoegen">
+<!ENTITY zotero.items.menu.attach.link.uri "Koppeling naar URI toevoegen…">
+<!ENTITY zotero.items.menu.attach.note "Aantekening toevoegen">
+<!ENTITY zotero.items.menu.attach.snapshot "Snapshot van huidige pagina toevoegen">
+<!ENTITY zotero.items.menu.changeTag "Change Tag">
+<!ENTITY zotero.items.menu.duplicateItem "Kopie maken van geselecteerd object">
+<!ENTITY zotero.items.menu.languageTag "Language Tag">
+<!ENTITY zotero.items.menu.moveDown "Move Down">
+<!ENTITY zotero.items.menu.moveUp "Move Up">
+<!ENTITY zotero.items.menu.restoreToLibrary "Terugzetten in bibliotheek">
+<!ENTITY zotero.items.menu.showInLibrary "In bibliotheek tonen">
+<!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.publication_column "Tijdschrift">
+<!ENTITY zotero.items.publisher_column "Uitgever">
+<!ENTITY zotero.items.reporter_column "Reporter">
+<!ENTITY zotero.items.rights_column "Rechten">
+<!ENTITY zotero.items.title_column "Titel">
+<!ENTITY zotero.items.type_column "Type">
+<!ENTITY zotero.items.year_column "Jaar">
+<!ENTITY zotero.lookup.description "Voer hieronder de op te zoeken ISBN, DOI of PMID in.">
+<!ENTITY zotero.moreEncodings.label "Meer coderingen">
+<!ENTITY zotero.notes.separate "In een nieuw venster bewerken">
+<!ENTITY zotero.progress.title "Voortgang">
+<!ENTITY zotero.proxy.recognized.disable.label "Stuur dataverkeer niet automatisch door via eerder herkende proxies">
+<!ENTITY zotero.proxy.recognized.ignore.label "Negeren">
 <!ENTITY zotero.proxy.recognized.title "Proxy herkend">
 <!ENTITY zotero.proxy.recognized.warning "Voeg alleen proxies toe van uw bibliotheek-, school- of bedrijfswebsite.">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Door het toevoegen van andere proxies kunnen kwaadwillende webpagina's zich als betrouwbare webpagina's voordoen.">
-<!ENTITY zotero.proxy.recognized.disable.label "Stuur dataverkeer niet automatisch door via eerder herkende proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "Negeren">
-
-<!ENTITY zotero.recognizePDF.recognizing.label "Metadata aan het ophalen…">
 <!ENTITY zotero.recognizePDF.cancel.label "Annuleren">
-<!ENTITY zotero.recognizePDF.pdfName.label "PDF-naam">
-<!ENTITY zotero.recognizePDF.itemName.label "Objectnaam">
 <!ENTITY zotero.recognizePDF.captcha.label "Type onderstaande tekst in om door te gaan met het ophalen van metadata.">
-
-<!ENTITY zotero.rtfScan.title "RTF-scan">
+<!ENTITY zotero.recognizePDF.itemName.label "Objectnaam">
+<!ENTITY zotero.recognizePDF.pdfName.label "PDF-naam">
+<!ENTITY zotero.recognizePDF.recognizing.label "Metadata aan het ophalen…">
+<!ENTITY zotero.richText.bold.label "Vet">
+<!ENTITY zotero.richText.italic.label "Cursief">
+<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.superscript.label "Superscript">
+<!ENTITY zotero.richText.underline.label "Onderlijnen">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "Meerduidige verwijzingen">
 <!ENTITY zotero.rtfScan.cancel.label "Annuleren">
 <!ENTITY zotero.rtfScan.citation.label "Verwijzing">
-<!ENTITY zotero.rtfScan.itemName.label "Objectnaam">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Niet-herkende verwijzingen">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Meerduidige verwijzingen">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Herkende verwijzingen">
-<!ENTITY zotero.rtfScan.introPage.label "Introductie">
+<!ENTITY zotero.rtfScan.citationsPage.description "Bekijk de lijst met herkende verwijzingen om er zeker van te zijn dat Zotero de juiste corresponderende objecten heeft gevonden. Niet-herkende of meerduidige verwijzingen moeten worden nagekeken voordat naar de volgende stap kan worden gegaan.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Controleer geciteerde objecten">
+<!ENTITY zotero.rtfScan.completePage.description "Uw document is gescand en omgezet. Kijk of de tekst goed is opgemaakt.">
+<!ENTITY zotero.rtfScan.completePage.label "RTF-scan voltooid">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero is het RTF-bestand aan het omzetten. Even geduld a.u.b.">
+<!ENTITY zotero.rtfScan.formatPage.label "Opmaken van verwijzingen">
+<!ENTITY zotero.rtfScan.inputFile.label "Invoerbestand">
 <!ENTITY zotero.rtfScan.introPage.description "Zotero kan automatisch verwijzingen in RTF-bestanden herkennen. Hiermee kunnen verwijzingen en een bibliografie in de gewenste stijl worden opgemaakt. De RTF-scan-functie herkent verwijzingen die als volgt zijn opgeschreven:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Selecteer een RTF-invoerbestand en een uitvoerbestand om te beginnen:">
-<!ENTITY zotero.rtfScan.scanPage.label "Bezig met zoeken naar verwijzingen">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero is uw document aan het doorzoeken naar verwijzingen. Even geduld a.u.b.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Controleer geciteerde objecten">
-<!ENTITY zotero.rtfScan.citationsPage.description "Bekijk de lijst met herkende verwijzingen om er zeker van te zijn dat Zotero de juiste corresponderende objecten heeft gevonden. Niet-herkende of meerduidige verwijzingen moeten worden nagekeken voordat naar de volgende stap kan worden gegaan.">
-<!ENTITY zotero.rtfScan.stylePage.label "Opmaken van het document">
-<!ENTITY zotero.rtfScan.formatPage.label "Opmaken van verwijzingen">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero is het RTF-bestand aan het omzetten. Even geduld a.u.b.">
-<!ENTITY zotero.rtfScan.completePage.label "RTF-scan voltooid">
-<!ENTITY zotero.rtfScan.completePage.description "Uw document is gescand en omgezet. Kijk of de tekst goed is opgemaakt.">
-<!ENTITY zotero.rtfScan.inputFile.label "Invoerbestand">
+<!ENTITY zotero.rtfScan.introPage.label "Introductie">
+<!ENTITY zotero.rtfScan.itemName.label "Objectnaam">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Herkende verwijzingen">
 <!ENTITY zotero.rtfScan.outputFile.label "Uitvoerbestand">
-
-<!ENTITY zotero.file.choose.label "Bestand kiezen…">
-<!ENTITY zotero.file.noneSelected.label "Geen bestand geselecteerd">
-
-<!ENTITY zotero.downloadManager.label "Opslaan in Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Bijlages kunnen niet in de nu geselecteerde bibliotheek worden opgeslagen. Dit object zal daarom in plaats hiervan in uw bibliotheek worden opgeslagen.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "Om deze functie te gebruiken moet u eerst de PDF-hulpprogramma's installen via de Zotero-voorkeuren.">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero is uw document aan het doorzoeken naar verwijzingen. Even geduld a.u.b.">
+<!ENTITY zotero.rtfScan.scanPage.label "Bezig met zoeken naar verwijzingen">
+<!ENTITY zotero.rtfScan.stylePage.label "Opmaken van het document">
+<!ENTITY zotero.rtfScan.title "RTF-scan">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Niet-herkende verwijzingen">
+<!ENTITY zotero.selectitems.cancel.label "Annuleren">
+<!ENTITY zotero.selectitems.intro.label "Selecteer de objecten die u aan uw bibliotheek wilt toevoegen">
+<!ENTITY zotero.selectitems.select.label "OK">
+<!ENTITY zotero.selectitems.title "Objecten selecteren">
+<!ENTITY zotero.sync.button "Synchroniseren met Zotero-server">
+<!ENTITY zotero.sync.error "Synchroniseerfout">
+<!ENTITY zotero.sync.longTagFixer.character "teken">
+<!ENTITY zotero.sync.longTagFixer.characters "tekens">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Het volgende label in uw Zotero-bibliotheek is te lang om met de server te kunnen synchroniseren:">
+<!ENTITY zotero.sync.longTagFixer.split "Opdelen">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "Opdelen bij het/de">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "U kunt het label opdelen in meerdere labels, het label handmatig inkorten, of het label verwijderen.">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Gesynchroniseerde labels moeten korten zijn dan 256 tekens.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Het label zal van alle objecten worden verwijdered.">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Niet aangevinkte labels worden niet bewaard.">
+<!ENTITY zotero.sync.storage.downloads "Downloads:">
+<!ENTITY zotero.sync.storage.progress "Voortgang:">
+<!ENTITY zotero.sync.storage.uploads "Uploads:">
+<!ENTITY zotero.tabs.attachments.label "Bijlagen">
+<!ENTITY zotero.tabs.info.label "Info">
+<!ENTITY zotero.tabs.notes.label "Aantekeningen">
+<!ENTITY zotero.tabs.related.label "Gerelateerd">
+<!ENTITY zotero.tabs.tags.label "Labels">
+<!ENTITY zotero.tagSelector.clearAll "Niets selecteren">
+<!ENTITY zotero.tagSelector.clearVisible "Selectie getoonde labels ongedaan maken">
+<!ENTITY zotero.tagSelector.deleteTag "Label verwijderen…">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Alle labels in deze bibliotheek tonen">
+<!ENTITY zotero.tagSelector.filter "Filter:">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "Geen labels om te tonen">
+<!ENTITY zotero.tagSelector.renameTag "Label hernoemen…">
+<!ENTITY zotero.tagSelector.selectVisible "Getoonde labels selecteren">
+<!ENTITY zotero.tagSelector.showAutomatic "Automatische labels tonen">
+<!ENTITY zotero.toolbar.about.label "Over Zotero">
+<!ENTITY zotero.toolbar.actions.label "Acties">
+<!ENTITY zotero.toolbar.addChildNote.label "Add Child Note">
+<!ENTITY zotero.toolbar.addStandaloneNote.label "Add Standalone Note">
+<!ENTITY zotero.toolbar.advancedSearch "Uitgebreid zoeken">
+<!ENTITY zotero.toolbar.attachment.add "Kopie van bestand bewaren…">
+<!ENTITY zotero.toolbar.attachment.linked "Koppeling naar bestand maken…">
+<!ENTITY zotero.toolbar.attachment.snapshot "Snapshot van huidige webpagina nemen">
+<!ENTITY zotero.toolbar.attachment.weblink "Koppeling naar huidige webpagina bewaren">
+<!ENTITY zotero.toolbar.cancelDuplicatesView.label "Cancel duplicates view">
+<!ENTITY zotero.toolbar.cancelOrphansView.label "Cancel orphans view">
+<!ENTITY zotero.toolbar.duplicate.label "Duplicaten tonen">
+<!ENTITY zotero.toolbar.duplicatesView.label "Duplicates view">
+<!ENTITY zotero.toolbar.emptyTrash.label "Prullenbak legen">
+<!ENTITY zotero.toolbar.export.label "Bibliotheek exporteren…">
+<!ENTITY zotero.toolbar.import.label "Importeren…">
+<!ENTITY zotero.toolbar.importFromClipboard "Van klembord importeren">
+<!ENTITY zotero.toolbar.lookup "Via identificatiecode opzoeken…">
+<!ENTITY zotero.toolbar.lookup.label "Object via identificatiecode toevoegen">
+<!ENTITY zotero.toolbar.moreItemTypes.label "Meer">
+<!ENTITY zotero.toolbar.newCollection.label "Nieuwe verzameling aanmaken…">
+<!ENTITY zotero.toolbar.newGroup "Nieuwe groep aanmaken…">
+<!ENTITY zotero.toolbar.newItem.label "Nieuw object">
+<!ENTITY zotero.toolbar.newItemFromPage.label "Nieuw object aanmaken van huidige pagina">
+<!ENTITY zotero.toolbar.newNote "Nieuwe aantekening">
+<!ENTITY zotero.toolbar.newSavedSearch.label "Nieuwe bewaarde zoekopdracht aanmaken…">
+<!ENTITY zotero.toolbar.newSubcollection.label "Nieuwe deelverzameling aanmaken…">
+<!ENTITY zotero.toolbar.note.child "Bijbehorende aantekening toevoegen">
+<!ENTITY zotero.toolbar.note.standalone "Nieuwe zelfstandige aantekening">
+<!ENTITY zotero.toolbar.openURL.label "Opzoeken">
+<!ENTITY zotero.toolbar.openURL.tooltip "Via uw bibliotheek opzoeken">
+<!ENTITY zotero.toolbar.orphansView.label "Orphans view">
+<!ENTITY zotero.toolbar.preferences.label "Voorkeuren…">
+<!ENTITY zotero.toolbar.refresh.label "Refresh">
+<!ENTITY zotero.toolbar.removeItem.label "Object verwijderen…">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF-scan…">
+<!ENTITY zotero.toolbar.supportAndDocumentation "Ondersteuning en documentatie">
+<!ENTITY zotero.toolbar.tab.tooltip "Tabbladmodus veranderen">
+<!ENTITY zotero.toolbar.tagSelector.label "Label-kiezer tonen/verbergen">
+<!ENTITY zotero.toolbar.timeline.label "Tijdslijn maken">
+<!ENTITY zotero.upgrade.autoBackup "Er zal een reservekopie van uw bestaande database worden gemaakt voordat er wijzigingen worden doorgevoerd.">
+<!ENTITY zotero.upgrade.changeLogAfterLink "om te zien wat er in de nieuwe versie veranderd is.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Bekijk het">
+<!ENTITY zotero.upgrade.changeLogLink "changelog">
+<!ENTITY zotero.upgrade.majorUpgrade "Dit is een omvangrijke bijwerking.">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink ".">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Lees daarom eerst de">
+<!ENTITY zotero.upgrade.majorUpgradeLink "bijwerkingsinstructies">
+<!ENTITY zotero.upgrade.newVersionInstalled "U heeft een nieuwe versie van Zotero geinstalleerd.">
+<!ENTITY zotero.upgrade.upgradeInProgress "Wacht totdat het bijwerkingsproces is voltooid. Dit kan enige minuten duren.">
+<!ENTITY zotero.upgrade.upgradeRequired "Uw Zotero database moet bijgewerkt worden om te kunnen werken met de nieuwe versie.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Uw Zotero database is met succes bijgewerkt.">

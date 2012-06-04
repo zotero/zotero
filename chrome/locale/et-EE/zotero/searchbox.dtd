@@ -1,23 +1,18 @@
-<!ENTITY zotero.search.name "Nimi:">
-
-<!ENTITY zotero.search.joinMode.prefix "Valik">
-<!ENTITY zotero.search.joinMode.any "üks">
-<!ENTITY zotero.search.joinMode.all "kõik">
-<!ENTITY zotero.search.joinMode.suffix "järgnevatest:">
-
-<!ENTITY zotero.search.recursive.label "Otsida alamkataloogidest">
-<!ENTITY zotero.search.noChildren "Näidata vaid juurtasandi kirjeid">
+<!ENTITY zotero.search.clear "Puhastada">
+<!ENTITY zotero.search.date.units.days "päevi">
+<!ENTITY zotero.search.date.units.months "kuid">
+<!ENTITY zotero.search.date.units.years "aastaid">
 <!ENTITY zotero.search.includeParentsAndChildren "Näidata leitud kirje sõltuvaid ja valitsevaid kirjeid">
-
+<!ENTITY zotero.search.joinMode.all "kõik">
+<!ENTITY zotero.search.joinMode.any "üks">
+<!ENTITY zotero.search.joinMode.prefix "Valik">
+<!ENTITY zotero.search.joinMode.suffix "järgnevatest:">
+<!ENTITY zotero.search.name "Nimi:">
+<!ENTITY zotero.search.noChildren "Näidata vaid juurtasandi kirjeid">
+<!ENTITY zotero.search.recursive.label "Otsida alamkataloogidest">
+<!ENTITY zotero.search.saveSearch "Otsing salvestada">
+<!ENTITY zotero.search.search "Otsida">
 <!ENTITY zotero.search.textModes.phrase "Fraas">
 <!ENTITY zotero.search.textModes.phraseBinary "Fraas (ka binaarfailidest)">
 <!ENTITY zotero.search.textModes.regexp "Regexp">
 <!ENTITY zotero.search.textModes.regexpCS "Regexp (tõstutundlik)">
-
-<!ENTITY zotero.search.date.units.days "päevi">
-<!ENTITY zotero.search.date.units.months "kuid">
-<!ENTITY zotero.search.date.units.years "aastaid">
-
-<!ENTITY zotero.search.search "Otsida">
-<!ENTITY zotero.search.clear "Puhastada">
-<!ENTITY zotero.search.saveSearch "Otsing salvestada">

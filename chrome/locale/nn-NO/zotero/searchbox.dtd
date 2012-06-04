@@ -1,23 +1,18 @@
-<!ENTITY zotero.search.name "Namn:">
-
-<!ENTITY zotero.search.joinMode.prefix "Finn">
-<!ENTITY zotero.search.joinMode.any "kva for ein som helst">
-<!ENTITY zotero.search.joinMode.all "alle">
-<!ENTITY zotero.search.joinMode.suffix "av følgjande:">
-
-<!ENTITY zotero.search.recursive.label "Søk i undermapper">
-<!ENTITY zotero.search.noChildren "Viser berre overordna element">
+<!ENTITY zotero.search.clear "Fjern">
+<!ENTITY zotero.search.date.units.days "dagar">
+<!ENTITY zotero.search.date.units.months "månader">
+<!ENTITY zotero.search.date.units.years "år">
 <!ENTITY zotero.search.includeParentsAndChildren "Inkluder under- og overordna element">
-
+<!ENTITY zotero.search.joinMode.all "alle">
+<!ENTITY zotero.search.joinMode.any "kva for ein som helst">
+<!ENTITY zotero.search.joinMode.prefix "Finn">
+<!ENTITY zotero.search.joinMode.suffix "av følgjande:">
+<!ENTITY zotero.search.name "Namn:">
+<!ENTITY zotero.search.noChildren "Viser berre overordna element">
+<!ENTITY zotero.search.recursive.label "Søk i undermapper">
+<!ENTITY zotero.search.saveSearch "Lagra søk">
+<!ENTITY zotero.search.search "Søk">
 <!ENTITY zotero.search.textModes.phrase "Frasa">
 <!ENTITY zotero.search.textModes.phraseBinary "Frasa (inkl. binærfiler)">
 <!ENTITY zotero.search.textModes.regexp "Regexp">
 <!ENTITY zotero.search.textModes.regexpCS "Regexp (versalsensitiv)">
-
-<!ENTITY zotero.search.date.units.days "dagar">
-<!ENTITY zotero.search.date.units.months "månader">
-<!ENTITY zotero.search.date.units.years "år">
-
-<!ENTITY zotero.search.search "Søk">
-<!ENTITY zotero.search.clear "Fjern">
-<!ENTITY zotero.search.saveSearch "Lagra søk">

@@ -1,23 +1,18 @@
-<!ENTITY zotero.search.name "Нэр">
-
-<!ENTITY zotero.search.joinMode.prefix "Үр дүн">
-<!ENTITY zotero.search.joinMode.any "дурын">
-<!ENTITY zotero.search.joinMode.all "бүх">
-<!ENTITY zotero.search.joinMode.suffix "дараагийн">
-
-<!ENTITY zotero.search.recursive.label "Дэд хавтасууд хайх">
-<!ENTITY zotero.search.noChildren "Зөвхөн дээд түвшиний бүтээлүүдийг харуулах">
+<!ENTITY zotero.search.clear "Цэвэрлэх">
+<!ENTITY zotero.search.date.units.days "өдрүүд">
+<!ENTITY zotero.search.date.units.months "сарууд">
+<!ENTITY zotero.search.date.units.years "жилүүд">
 <!ENTITY zotero.search.includeParentsAndChildren "Олдсон үр дүнгийн эх сурвалж, дагавар бүтээлийг багтаана">
-
+<!ENTITY zotero.search.joinMode.all "бүх">
+<!ENTITY zotero.search.joinMode.any "дурын">
+<!ENTITY zotero.search.joinMode.prefix "Үр дүн">
+<!ENTITY zotero.search.joinMode.suffix "дараагийн">
+<!ENTITY zotero.search.name "Нэр">
+<!ENTITY zotero.search.noChildren "Зөвхөн дээд түвшиний бүтээлүүдийг харуулах">
+<!ENTITY zotero.search.recursive.label "Дэд хавтасууд хайх">
+<!ENTITY zotero.search.saveSearch "Хайлт санах">
+<!ENTITY zotero.search.search "Хайх">
 <!ENTITY zotero.search.textModes.phrase "Өгүүлбэр">
 <!ENTITY zotero.search.textModes.phraseBinary "Өгүүлбэр (incl. binary files)">
 <!ENTITY zotero.search.textModes.regexp "Regexp">
 <!ENTITY zotero.search.textModes.regexpCS "Regexp(case-sensitive)">
-
-<!ENTITY zotero.search.date.units.days "өдрүүд">
-<!ENTITY zotero.search.date.units.months "сарууд">
-<!ENTITY zotero.search.date.units.years "жилүүд">
-
-<!ENTITY zotero.search.search "Хайх">
-<!ENTITY zotero.search.clear "Цэвэрлэх">
-<!ENTITY zotero.search.saveSearch "Хайлт санах">

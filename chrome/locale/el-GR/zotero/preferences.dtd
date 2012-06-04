@@ -1,191 +1,193 @@
-<!ENTITY zotero.preferences.title "Zotero Preferences">
-
-<!ENTITY zotero.preferences.default "Default:">
-<!ENTITY zotero.preferences.items "items">
-<!ENTITY zotero.preferences.period ".">
-
-<!ENTITY zotero.preferences.prefpane.general "General">
-
-<!ENTITY zotero.preferences.userInterface "User Interface">
-<!ENTITY zotero.preferences.showIn "Load Zotero in:">
-<!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
-<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
-<!ENTITY zotero.preferences.showIn.appTab "App tab">
-<!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
-<!ENTITY zotero.preferences.statusBarIcon.none "None">
-<!ENTITY zotero.preferences.fontSize "Font size:">
-<!ENTITY zotero.preferences.fontSize.small "Small">
-<!ENTITY zotero.preferences.fontSize.medium "Medium">
-<!ENTITY zotero.preferences.fontSize.large "Large">
-<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
-<!ENTITY zotero.preferences.fontSize.notes "Note font size:">
-
-<!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
-<!ENTITY zotero.preferences.updateNow "Update now">
-<!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
-<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
-
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
+<!ENTITY zotero.preferences.cite.styles "Styles">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
+<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
+<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.dataDir "Storage Location">
+<!ENTITY zotero.preferences.dataDir.choose "Choose...">
+<!ENTITY zotero.preferences.dataDir.custom "Custom:">
+<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
+<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
+<!ENTITY zotero.preferences.debugOutputLogging "Debug Output Logging">
+<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Clear Output">
+<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Enable after restart">
+<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "lines logged">
+<!ENTITY zotero.preferences.debugOutputLogging.message "Debug output can help Zotero developers diagnose problems in Zotero. Debug logging will slow down Zotero, so you should generally leave it disabled unless a Zotero developer requests debug output.">
+<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Submit to Zotero Server">
+<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "View Output">
+<!ENTITY zotero.preferences.default "Default:">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+<!ENTITY zotero.preferences.fontSize "Font size:">
+<!ENTITY zotero.preferences.fontSize.large "Large">
+<!ENTITY zotero.preferences.fontSize.medium "Medium">
+<!ENTITY zotero.preferences.fontSize.notes "Note font size:">
+<!ENTITY zotero.preferences.fontSize.small "Small">
+<!ENTITY zotero.preferences.fontSize.xlarge "X-Large">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
 <!ENTITY zotero.preferences.groups "Groups">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "When copying items between libraries, include:">
-<!ENTITY zotero.preferences.groups.childNotes "child notes">
 <!ENTITY zotero.preferences.groups.childFiles "child snapshots and imported files">
 <!ENTITY zotero.preferences.groups.childLinks "child links">
-
+<!ENTITY zotero.preferences.groups.childNotes "child notes">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "When copying items between libraries, include:">
+<!ENTITY zotero.preferences.items "items">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.preferences.keys.library "Library">
+<!ENTITY zotero.preferences.keys.newItem "Create a new item">
+<!ENTITY zotero.preferences.keys.newNote "Create a new note">
+<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
+<!ENTITY zotero.preferences.keys.quicksearch "Quick Search">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
+<!ENTITY zotero.preferences.lang.addLanguage "Add a language">
+<!ENTITY zotero.preferences.lang.configureCitations "(3) Configure citations &#8680;">
+<!ENTITY zotero.preferences.lang.csl "CSL:">
+<!ENTITY zotero.preferences.lang.display "Display">
+<!ENTITY zotero.preferences.lang.inCitationsAndBibliographies "In citations and bibliographies">
+<!ENTITY zotero.preferences.lang.insideZotero "Zotero UI">
+<!ENTITY zotero.preferences.lang.institutions "Institutions:">
+<!ENTITY zotero.preferences.lang.languageList "Languages for Use in Metadata">
+<!ENTITY zotero.preferences.lang.languageRoles "(2) Define language roles &#8681;">
+<!ENTITY zotero.preferences.lang.languages "Languages">
+<!ENTITY zotero.preferences.lang.nickname "Nickname">
+<!ENTITY zotero.preferences.lang.originalNameFormat "Use original formatting conventions for transliterated names">
+<!ENTITY zotero.preferences.lang.persons "Persons:">
+<!ENTITY zotero.preferences.lang.places "Places:">
+<!ENTITY zotero.preferences.lang.primary "primary">
+<!ENTITY zotero.preferences.lang.publishers "Publishers:">
+<!ENTITY zotero.preferences.lang.region "Region">
+<!ENTITY zotero.preferences.lang.script "Script">
+<!ENTITY zotero.preferences.lang.secondary "[secondary]">
+<!ENTITY zotero.preferences.lang.setLocales "(1) Set locales &#8679;">
+<!ENTITY zotero.preferences.lang.showOriginal "Show original form of transliterated names in bibliography">
+<!ENTITY zotero.preferences.lang.sorting "Sorting">
+<!ENTITY zotero.preferences.lang.suppressTitleTransliteration "Suppress transliteration of titles">
+<!ENTITY zotero.preferences.lang.tag "Tag">
+<!ENTITY zotero.preferences.lang.titles "Titles:">
+<!ENTITY zotero.preferences.lang.translation "Translation">
+<!ENTITY zotero.preferences.lang.transliteration "Transliteration">
+<!ENTITY zotero.preferences.lang.ui "UI:">
+<!ENTITY zotero.preferences.lang.variant "Variant">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
+<!ENTITY zotero.preferences.locate.description "Description">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
+<!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
+<!ENTITY zotero.preferences.locate.name "Name">
+<!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
+<!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
+<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
+<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
+<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
 <!ENTITY zotero.preferences.openurl.caption "OpenURL">
-
-<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
 <!ENTITY zotero.preferences.openurl.custom "Custom...">
+<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Version:">
-
-<!ENTITY zotero.preferences.prefpane.sync "Sync">
-<!ENTITY zotero.preferences.sync.username "Username:">
-<!ENTITY zotero.preferences.sync.password "Password:">
-<!ENTITY zotero.preferences.sync.syncServer "Zotero Sync Server">
-<!ENTITY zotero.preferences.sync.createAccount "Create Account">
-<!ENTITY zotero.preferences.sync.lostPassword "Lost Password?">
-<!ENTITY zotero.preferences.sync.syncAutomatically "Sync automatically">
-<!ENTITY zotero.preferences.sync.about "About Syncing">
-<!ENTITY zotero.preferences.sync.fileSyncing "File Syncing">
-<!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Sync attachment files in group libraries using Zotero storage">
-<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "terms and conditions">
-<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync with Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local Zotero data with data from the sync server, ignoring sync history.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Erase all local Zotero data and restore from the sync server.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Zotero Server">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Erase all server data and overwrite with local Zotero data.">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reset File Sync History">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Force checking of the storage server for all local attachment files.">
-<!ENTITY zotero.preferences.sync.reset.button "Reset...">
-
-
+<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded RIS/Refer files">
+<!ENTITY zotero.preferences.period ".">
+<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
+<!ENTITY zotero.preferences.prefpane.cite "Cite">
+<!ENTITY zotero.preferences.prefpane.export "Export">
+<!ENTITY zotero.preferences.prefpane.general "General">
+<!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
+<!ENTITY zotero.preferences.prefpane.locate "Locate">
+<!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 <!ENTITY zotero.preferences.prefpane.search "Search">
+<!ENTITY zotero.preferences.prefpane.sync "Sync">
+<!ENTITY zotero.preferences.prefpane.sync.reset "Reset">
+<!ENTITY zotero.preferences.prefpane.sync.settings "Settings">
+<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
+<!ENTITY zotero.preferences.proxies.autoAssociate "Automatically associate new hosts">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
+<!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - The directory path (e.g., about/)">
+<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
+<!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - The filename (e.g., index.html)">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - The hostname of the proxied site (e.g., www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.hostname "Hostname">
+<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - The path of the proxied page excluding the leading slash (e.g., about/index.html)">
+<!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
+<!ENTITY zotero.preferences.proxies.scheme "Scheme">
+<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
+<!ENTITY zotero.preferences.proxies.variables "You may use the following variables in your proxy scheme:">
+<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Default Output Format:">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "Disable Quick Copy when dragging more than">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Note: Rich-text formatting will be lost on Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output Format">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
+<!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
 <!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
-<!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
 <!ENTITY zotero.preferences.search.indexStats "Index Statistics">
-
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
 <!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
 <!ENTITY zotero.preferences.search.indexStats.words "Words:">
-
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
-
-<!ENTITY zotero.preferences.prefpane.export "Export">
-
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
-
-<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
-<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Default Output Format:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
-<!ENTITY zotero.preferences.quickCopy.macWarning "Note: Rich-text formatting will be lost on Mac OS X.">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g. wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Output Format">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "Disable Quick Copy when dragging more than">
-
-<!ENTITY zotero.preferences.prefpane.cite "Cite">
-<!ENTITY zotero.preferences.cite.styles "Styles">
-<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
-<!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "No word processor plug-ins are currently installed.">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Get word processor plug-ins...">
-<!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
-
-<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
-<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
-
-<!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
-
-<!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
-<!ENTITY zotero.preferences.keys.library "Library">
-<!ENTITY zotero.preferences.keys.quicksearch "Quick Search">
-<!ENTITY zotero.preferences.keys.newItem "Create a new item">
-<!ENTITY zotero.preferences.keys.newNote "Create a new note">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
-<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
-
-<!ENTITY zotero.preferences.prefpane.proxies "Proxies">
-
-<!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
-<!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
-<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
-<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
-<!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
-<!ENTITY zotero.preferences.proxies.hostname "Hostname">
-<!ENTITY zotero.preferences.proxies.scheme "Scheme">
-
-<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
-<!ENTITY zotero.preferences.proxies.autoAssociate "Automatically associate new hosts">
-<!ENTITY zotero.preferences.proxies.variables "You may use the following variables in your proxy scheme:">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - The hostname of the proxied site (e.g., www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - The path of the proxied page excluding the leading slash (e.g., about/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - The directory path (e.g., about/)">
-<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - The filename (e.g., index.html)">
-<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
-
-<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
-
-<!ENTITY zotero.preferences.prefpane.locate "Locate">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
-<!ENTITY zotero.preferences.locate.description "Description">
-<!ENTITY zotero.preferences.locate.name "Name">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select 'Add' from the Firefox Search Bar. When you reopen this preference pane you will have the option to enable the new Lookup Engine.">
-<!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
-
-<!ENTITY zotero.preferences.charset "Character Encoding">
-<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
-<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
-
-<!ENTITY zotero.preferences.dataDir "Storage Location">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
-<!ENTITY zotero.preferences.dataDir.custom "Custom:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose...">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
-
-<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">
-
-<!ENTITY zotero.preferences.debugOutputLogging "Debug Output Logging">
-<!ENTITY zotero.preferences.debugOutputLogging.message "Debug output can help Zotero developers diagnose problems in Zotero. Debug logging will slow down Zotero, so you should generally leave it disabled unless a Zotero developer requests debug output.">
-<!ENTITY zotero.preferences.debugOutputLogging.linesLogged "lines logged">
-<!ENTITY zotero.preferences.debugOutputLogging.enableAfterRestart "Enable after restart">
-<!ENTITY zotero.preferences.debugOutputLogging.viewOutput "View Output">
-<!ENTITY zotero.preferences.debugOutputLogging.clearOutput "Clear Output">
-<!ENTITY zotero.preferences.debugOutputLogging.submitToServer "Submit to Zotero Server">
-
-<!ENTITY zotero.preferences.openAboutConfig "Open about:config">
-<!ENTITY zotero.preferences.openCSLEdit "Open CSL Editor">
-<!ENTITY zotero.preferences.openCSLPreview "Open CSL Preview">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
+<!ENTITY zotero.preferences.showIn "Load Zotero in:">
+<!ENTITY zotero.preferences.showIn.appTab "App tab">
+<!ENTITY zotero.preferences.showIn.browserPane "Browser pane">
+<!ENTITY zotero.preferences.showIn.separateTab "Separate tab">
+<!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
+<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.sync.about "About Syncing">
+<!ENTITY zotero.preferences.sync.createAccount "Create Account">
+<!ENTITY zotero.preferences.sync.fileSyncing "File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.about "About File Syncing">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Sync attachment files in group libraries using Zotero storage">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "terms and conditions">
+<!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
+<!ENTITY zotero.preferences.sync.lostPassword "Lost Password?">
+<!ENTITY zotero.preferences.sync.password "Password:">
+<!ENTITY zotero.preferences.sync.reset.button "Reset...">
+<!ENTITY zotero.preferences.sync.reset.fullSync "Full Sync with Zotero Server">
+<!ENTITY zotero.preferences.sync.reset.fullSync.desc "Merge local Zotero data with data from the sync server, ignoring sync history.">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reset File Sync History">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Force checking of the storage server for all local attachment files.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Zotero Server">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Erase all local Zotero data and restore from the sync server.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Restore to Zotero Server">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Erase all server data and overwrite with local Zotero data.">
+<!ENTITY zotero.preferences.sync.syncAutomatically "Sync automatically">
+<!ENTITY zotero.preferences.sync.syncServer "Zotero Sync Server">
+<!ENTITY zotero.preferences.sync.username "Username:">
+<!ENTITY zotero.preferences.title "Zotero Preferences">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
+<!ENTITY zotero.preferences.updateNow "Update now">
+<!ENTITY zotero.preferences.userInterface "User Interface">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">

@@ -1,12 +1,14 @@
-<!ENTITY zotero.version "versjon">
+<!ENTITY zotero.about.additionalSoftware "Tredjeparts programvare og standardar:">
+<!ENTITY zotero.about.close "Close">
+<!ENTITY zotero.about.localizations "Omsetjingar:">
+<!ENTITY zotero.alumni "Brukarstøtte:">
+<!ENTITY zotero.community "Community Support:">
 <!ENTITY zotero.createdby "Laga av:">
+<!ENTITY zotero.developers "Utviklarar:">
 <!ENTITY zotero.director "Director:">
 <!ENTITY zotero.directors "Regissørar:">
-<!ENTITY zotero.developers "Utviklarar:">
-<!ENTITY zotero.alumni "Brukarstøtte:">
-<!ENTITY zotero.about.localizations "Omsetjingar:">
-<!ENTITY zotero.about.additionalSoftware "Tredjeparts programvare og standardar:">
 <!ENTITY zotero.executiveProducer "Leiande produsent:">
-<!ENTITY zotero.thanks "Spesiell takk til:">
-<!ENTITY zotero.about.close "Lukk">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
+<!ENTITY zotero.processing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.thanks "Spesiell takk til:">
+<!ENTITY zotero.version "versjon">

@@ -1,23 +1,18 @@
-<!ENTITY zotero.search.name "Nombre:">
-
-<!ENTITY zotero.search.joinMode.prefix "Patrón">
-<!ENTITY zotero.search.joinMode.any "cualquiera de">
-<!ENTITY zotero.search.joinMode.all "todos">
-<!ENTITY zotero.search.joinMode.suffix "los siguientes:">
-
-<!ENTITY zotero.search.recursive.label "Buscar en carpetas interiores">
-<!ENTITY zotero.search.noChildren "Mostrar sólo los ítems de primer nivel">
+<!ENTITY zotero.search.clear "Borrar">
+<!ENTITY zotero.search.date.units.days "días">
+<!ENTITY zotero.search.date.units.months "meses">
+<!ENTITY zotero.search.date.units.years "años">
 <!ENTITY zotero.search.includeParentsAndChildren "Incluír los ítems padres e hijos de los encontrados">
-
+<!ENTITY zotero.search.joinMode.all "todos">
+<!ENTITY zotero.search.joinMode.any "cualquiera de">
+<!ENTITY zotero.search.joinMode.prefix "Patrón">
+<!ENTITY zotero.search.joinMode.suffix "los siguientes:">
+<!ENTITY zotero.search.name "Nombre:">
+<!ENTITY zotero.search.noChildren "Mostrar sólo los ítems de primer nivel">
+<!ENTITY zotero.search.recursive.label "Buscar en carpetas interiores">
+<!ENTITY zotero.search.saveSearch "Guardar búsqueda">
+<!ENTITY zotero.search.search "Buscar">
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (incl. archivos binarios)">
 <!ENTITY zotero.search.textModes.regexp "Expresión regular">
 <!ENTITY zotero.search.textModes.regexpCS "Expresión regular (distinguir mayúsculas)">
-
-<!ENTITY zotero.search.date.units.days "días">
-<!ENTITY zotero.search.date.units.months "meses">
-<!ENTITY zotero.search.date.units.years "años">
-
-<!ENTITY zotero.search.search "Buscar">
-<!ENTITY zotero.search.clear "Borrar">
-<!ENTITY zotero.search.saveSearch "Guardar búsqueda">

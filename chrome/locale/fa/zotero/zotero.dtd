@@ -1,243 +1,238 @@
-<!ENTITY zotero.general.optional "(اختیاری)">
-<!ENTITY zotero.general.note "یادداشت:">
-<!ENTITY zotero.general.selectAll "انتخاب همه">
-<!ENTITY zotero.general.deselectAll "انتخاب هیچ‌کدام">
-<!ENTITY zotero.general.edit "ویرایش">
-<!ENTITY zotero.general.delete "حذف">
-
-<!ENTITY zotero.errorReport.unrelatedMessages "گزارش خطا ممکن است شامل پیام‌های غیر مرتبط با زوترو باشد.">
-<!ENTITY zotero.errorReport.submissionInProgress "لطفا تا پایان ارسال گزارش خطا، صبر کنید.">
-<!ENTITY zotero.errorReport.submitted "گزارش خطا ارسال شد.">
-<!ENTITY zotero.errorReport.reportID "شناسه گزارش:">
-<!ENTITY zotero.errorReport.postToForums "لطفا یک پیام به انجمن گفتگوی زوترو به آدرس forums.zotero.org بفرستید که شامل شناسه گزارش، شرحی از مشکل و مراحل لازم برای تولید مجدد آن باشد.">
-<!ENTITY zotero.errorReport.notReviewed "برای بررسی گزارش خطا، حتما باید آن را به انجمن گفتگو ارجاع دهید. در غیر این صورت گزارش بررسی نخواهد شد.">
-
-<!ENTITY zotero.upgrade.newVersionInstalled "شما نسخه جدیدی از زوترو را نصب کرده‌اید.">
-<!ENTITY zotero.upgrade.upgradeRequired "برای کار کردن با نسخه جدید، بانک اطلاعات زوترو باید ارتقا یابد.">
-<!ENTITY zotero.upgrade.autoBackup "از بانک اطلاعات موجود، پیش از انجام هر تغییری، به صورت خودکار نسخه پشتیبان تهیه خواهد شد.">
-<!ENTITY zotero.upgrade.majorUpgrade "این یک ارتقای عمده است.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "حتما پیش از ادامه کار">
-<!ENTITY zotero.upgrade.majorUpgradeLink "دستورالعمل ارتقا را">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink "مرور کنید.">
-<!ENTITY zotero.upgrade.upgradeInProgress "لطفا تا اتمام فرآیند ارتقا صبر کنید. این فرآیند ممکن است چند دقیقه به طول انجامد.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "بانک اطلاعات زوتروی شما با موفقیت ارتقا یافت.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "لطفا برای یافتن نکات جدید">
-<!ENTITY zotero.upgrade.changeLogLink "گزارش تغییرات">
-<!ENTITY zotero.upgrade.changeLogAfterLink "را ببینید.">
-
-<!ENTITY zotero.contextMenu.addTextToCurrentNote "افزودن قسمت انتخاب شده به یادداشت زوترو">
-<!ENTITY zotero.contextMenu.addTextToNewNote " ساخت آیتم‌ و یادداشت از قسمت انتخاب شده">
-<!ENTITY zotero.contextMenu.saveLinkAsItem "ذخیره پیوند به صورت یک آیتم‌ زوترو">
-<!ENTITY zotero.contextMenu.saveImageAsItem "ذخیره تصویر به صورت یک آیتم‌ زوترو">
-
-<!ENTITY zotero.tabs.info.label "اطلاعات">
-<!ENTITY zotero.tabs.notes.label "یادداشت‌ها">
-<!ENTITY zotero.tabs.attachments.label "‌پیوست‌ها">
-<!ENTITY zotero.tabs.tags.label "برچسب‌ها">
-<!ENTITY zotero.tabs.related.label "مرتبط">
-<!ENTITY zotero.notes.separate "ویرایش در پنجره مستقل">
-
-<!ENTITY zotero.toolbar.duplicate.label "نمایش آیتم‌‌های تکراری">
-<!ENTITY zotero.collections.showUnfiledItems "نمایش آیتم‌های دسته‌بندی نشده">
-
-<!ENTITY zotero.items.itemType "نوع آیتم">
-<!ENTITY zotero.items.type_column "نوع">
-<!ENTITY zotero.items.title_column "عنوان‌">
-<!ENTITY zotero.items.creator_column "پدیدآورنده">
-<!ENTITY zotero.items.date_column "تاریخ">
-<!ENTITY zotero.items.year_column "سال">
-<!ENTITY zotero.items.publisher_column "ناشر">
-<!ENTITY zotero.items.publication_column "انتشار">
-<!ENTITY zotero.items.journalAbbr_column "نام مختصر مجله">
-<!ENTITY zotero.items.language_column "زبان">
-<!ENTITY zotero.items.accessDate_column "تاریخ دسترسی">
-<!ENTITY zotero.items.libraryCatalog_column "فهرست کتابخانه">
-<!ENTITY zotero.items.callNumber_column "شماره فراخوانی">
-<!ENTITY zotero.items.rights_column "حقوق">
-<!ENTITY zotero.items.dateAdded_column "تاریخ افزودن">
-<!ENTITY zotero.items.dateModified_column "تاریخ تغییر">
-<!ENTITY zotero.items.numChildren_column "+">
-
-<!ENTITY zotero.items.menu.showInLibrary "نمایش در کتابخانه">
-<!ENTITY zotero.items.menu.attach.note "افزودن یادداشت">
-<!ENTITY zotero.items.menu.attach "افزودن پیوست">
-<!ENTITY zotero.items.menu.attach.snapshot "پیوست کردن تصویر لحظه‌ای این صفحه">
-<!ENTITY zotero.items.menu.attach.link "پیوست کردن پیوند به این صفحه">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
-<!ENTITY zotero.items.menu.attach.file "پیوست کردن رونوشت پرونده...">
-<!ENTITY zotero.items.menu.attach.fileLink "پیوست کردن پیوند به پرونده...">
-
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
-<!ENTITY zotero.items.menu.duplicateItem "ساخت رونوشت از این آیتم">
-
-<!ENTITY zotero.toolbar.newItem.label "آیتم‌ جدید">
-<!ENTITY zotero.toolbar.moreItemTypes.label "بیشتر">
-<!ENTITY zotero.toolbar.newItemFromPage.label "ساخت آیتم‌ جدید از این صفحه">
-<!ENTITY zotero.toolbar.lookup.label "افزودن آیتم‌ با شناسه">
-<!ENTITY zotero.toolbar.removeItem.label "حذف آیتم‌...">
-<!ENTITY zotero.toolbar.newCollection.label "مجموعه جدید...">
-<!ENTITY zotero.toolbar.newGroup "گروه جدید...">
-<!ENTITY zotero.toolbar.newSubcollection.label "زیرمجموعه جدید...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "جستجوی ذخیره‌شده جدید...">
-<!ENTITY zotero.toolbar.emptyTrash.label "خالی کردن سطل بازیافت">
-<!ENTITY zotero.toolbar.tagSelector.label "نمایش/نهفتن انتخاب‌گر برچسب">
-<!ENTITY zotero.toolbar.actions.label "کارها">
-<!ENTITY zotero.toolbar.import.label "درون‌برد...">
-<!ENTITY zotero.toolbar.importFromClipboard "درون‌برد از حافظه">
-<!ENTITY zotero.toolbar.export.label "صدور کتابخانه...">
-<!ENTITY zotero.toolbar.rtfScan.label "پیمایش RTF...">
-<!ENTITY zotero.toolbar.timeline.label "ساخت Time Line">
-<!ENTITY zotero.toolbar.preferences.label "تنظیمات...">
-<!ENTITY zotero.toolbar.supportAndDocumentation "پشتیبانی و راهنما">
-<!ENTITY zotero.toolbar.about.label "درباره زوترو">
-<!ENTITY zotero.toolbar.advancedSearch "جستجوی پیشرفته">
-<!ENTITY zotero.toolbar.tab.tooltip "تغییر حالت برگه‌ای">
-<!ENTITY zotero.toolbar.openURL.label "مکان‌یابی">
-<!ENTITY zotero.toolbar.openURL.tooltip "یافتن از طریق کتابخانه محلی">
-
-<!ENTITY zotero.item.add "افزودن">
-<!ENTITY zotero.item.attachment.file.show "نمایش محل ذخیره پرونده">
-<!ENTITY zotero.item.textTransform "تبدیل متن">
-<!ENTITY zotero.item.textTransform.titlecase "حروف اول بزرگ">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
-
-<!ENTITY zotero.toolbar.newNote "New Note">
-<!ENTITY zotero.toolbar.note.standalone "یادداشت مستقل جدید">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
-<!ENTITY zotero.toolbar.lookup "جستجو با شاخص...">
-<!ENTITY zotero.toolbar.attachment.linked "پیوند به پرونده...">
-<!ENTITY zotero.toolbar.attachment.add "ذخیره رونوشت از پرونده...">
-<!ENTITY zotero.toolbar.attachment.weblink "ذخیره پیوند به صفحه جاری">
-<!ENTITY zotero.toolbar.attachment.snapshot "گرفتن تصویر لحظه‌ای از صفحه جاری">
-
-<!ENTITY zotero.tagSelector.noTagsToDisplay "هیچ برچسبی برای نمایش وجود ندارد">
-<!ENTITY zotero.tagSelector.filter "فیلتر:">
-<!ENTITY zotero.tagSelector.showAutomatic "نمایش خودکار">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "نمایش همه برچسب‌های کتابخانه">
-<!ENTITY zotero.tagSelector.selectVisible "انتخاب برچسب‌های پیدا">
-<!ENTITY zotero.tagSelector.clearVisible "عدم انتخاب برچسب‌های پیدا">
-<!ENTITY zotero.tagSelector.clearAll "انتخاب هیچ‌کدام">
-<!ENTITY zotero.tagSelector.renameTag "تغییر نام برچسب...">
-<!ENTITY zotero.tagSelector.deleteTag "حذف برچسب...">
-
-<!ENTITY zotero.lookup.description "شابک،‏ DOI یا PMID را برای جستجو در کادر زیر وارد کنید.">
-
-<!ENTITY zotero.selectitems.title "انتخاب آیتم‌‌ها">
-<!ENTITY zotero.selectitems.intro.label "آیتم‌‌های مورد نظر را برای افزودن به کتابخانه انتخاب کنید">
-<!ENTITY zotero.selectitems.cancel.label "انصراف">
-<!ENTITY zotero.selectitems.select.label "تایید">
-
-<!ENTITY zotero.bibliography.title "ساخت کتابنامه">
-<!ENTITY zotero.bibliography.style.label "شیوه‌نامه">
-<!ENTITY zotero.bibliography.output.label "قالب خروجی">
-<!ENTITY zotero.bibliography.saveAsRTF.label "ذخیره به صورت RTF">
-<!ENTITY zotero.bibliography.saveAsHTML.label "ذخیره به صورت HTML">
-<!ENTITY zotero.bibliography.copyToClipboard.label "رونوشت به حافظه">
-<!ENTITY zotero.bibliography.print.label "چاپ">
-
-<!ENTITY zotero.integration.docPrefs.title "تنظیمات سند">
-<!ENTITY zotero.integration.addEditCitation.title "افزودن/ویرایش یادکرد">
-<!ENTITY zotero.integration.editBibliography.title "ویرایش کتابنامه">
-
-<!ENTITY zotero.progress.title "پیشرفت">
-
-<!ENTITY zotero.exportOptions.title "صدور...">
-<!ENTITY zotero.exportOptions.format.label "قالب:">
-<!ENTITY zotero.exportOptions.translatorOptions.label "گزینه‌های مترجم">
-
-<!ENTITY zotero.charset.label "کدبندی نویسه‌ها">
-<!ENTITY zotero.moreEncodings.label "کدبندی‌های بیشتر">
-
-<!ENTITY zotero.citation.keepSorted.label "مرتب نگه داشتن منابع">
-
-<!ENTITY zotero.citation.page "صفحه">
-<!ENTITY zotero.citation.paragraph "پاراگراف">
-<!ENTITY zotero.citation.line "خط">
-<!ENTITY zotero.citation.suppressAuthor.label "حذف نام نویسنده">
-<!ENTITY zotero.citation.prefix.label "پیشوند:">
-<!ENTITY zotero.citation.suffix.label "پسوند:">
-
-<!ENTITY zotero.richText.italic.label "کج">
-<!ENTITY zotero.richText.bold.label "ضخیم">
-<!ENTITY zotero.richText.underline.label "خط زیر">
-<!ENTITY zotero.richText.superscript.label "بالانویس">
-<!ENTITY zotero.richText.subscript.label "زیرنویس">
-
 <!ENTITY zotero.annotate.toolbar.add.label "حاشیه‌نویسی">
 <!ENTITY zotero.annotate.toolbar.collapse.label "نهفتن حاشیه‌نویسی‌ها">
+<!ENTITY zotero.annotate.toolbar.duplicatesView.label "Duplicates view">
+<!ENTITY zotero.annotate.toolbar.duplicatesViewCancel.label "Cancel duplicates view">
 <!ENTITY zotero.annotate.toolbar.expand.label "نمایش حاشیه‌نویسی">
 <!ENTITY zotero.annotate.toolbar.highlight.label "پررنگ کردن متن">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "متن عادی">
-
-<!ENTITY zotero.integration.prefs.displayAs.label "نمایش یاکردها در:">
-<!ENTITY zotero.integration.prefs.footnotes.label "پاورقی">
-<!ENTITY zotero.integration.prefs.endnotes.label "انتهای متن">
-
-<!ENTITY zotero.integration.prefs.formatUsing.label "قالب‌بندی با استفاده از:">
-<!ENTITY zotero.integration.prefs.bookmarks.label "نشانک">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "نشانک‌‌ها در بین Microsoft Word و OpenOffice مشترک هستند، ولی ممکن است به شکل تصادفی، تغییر داده شوند. &#xA;در صورت انتخاب این گزینه، برای حفظ سازگاری، استفاده از یادکردها در پاورقی یا یادداشت‌های انتهایی امکان‌پذیر نخواهد بود.">
-
-<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
-<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
-
-<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.bibliography.copyToClipboard.label "رونوشت به حافظه">
+<!ENTITY zotero.bibliography.output.label "قالب خروجی">
+<!ENTITY zotero.bibliography.print.label "چاپ">
+<!ENTITY zotero.bibliography.saveAsHTML.label "ذخیره به صورت HTML">
+<!ENTITY zotero.bibliography.saveAsRTF.label "ذخیره به صورت RTF">
+<!ENTITY zotero.bibliography.style.label "شیوه‌نامه">
+<!ENTITY zotero.bibliography.title "ساخت کتابنامه">
+<!ENTITY zotero.charset.label "کدبندی نویسه‌ها">
+<!ENTITY zotero.citation.keepSorted.label "مرتب نگه داشتن منابع">
+<!ENTITY zotero.citation.line "خط">
+<!ENTITY zotero.citation.page "صفحه">
+<!ENTITY zotero.citation.paragraph "پاراگراف">
+<!ENTITY zotero.citation.prefix.label "پیشوند:">
+<!ENTITY zotero.citation.suffix.label "پسوند:">
+<!ENTITY zotero.citation.suppressAuthor.label "حذف نام نویسنده">
+<!ENTITY zotero.collections.showUnfiledItems "نمایش آیتم‌های دسته‌بندی نشده">
+<!ENTITY zotero.contextMenu.addTextToCurrentNote "افزودن قسمت انتخاب شده به یادداشت زوترو">
+<!ENTITY zotero.contextMenu.addTextToNewNote " ساخت آیتم‌ و یادداشت از قسمت انتخاب شده">
+<!ENTITY zotero.contextMenu.saveImageAsItem "ذخیره تصویر به صورت یک آیتم‌ زوترو">
+<!ENTITY zotero.contextMenu.saveLinkAsItem "ذخیره پیوند به صورت یک آیتم‌ زوترو">
+<!ENTITY zotero.downloadManager.label "ذخیره در زوترو">
+<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
+<!ENTITY zotero.errorReport.notReviewed "برای بررسی گزارش خطا، حتما باید آن را به انجمن گفتگو ارجاع دهید. در غیر این صورت گزارش بررسی نخواهد شد.">
+<!ENTITY zotero.errorReport.postToForums "لطفا یک پیام به انجمن گفتگوی زوترو به آدرس forums.zotero.org بفرستید که شامل شناسه گزارش، شرحی از مشکل و مراحل لازم برای تولید مجدد آن باشد.">
+<!ENTITY zotero.errorReport.reportID "شناسه گزارش:">
+<!ENTITY zotero.errorReport.submissionInProgress "لطفا تا پایان ارسال گزارش خطا، صبر کنید.">
+<!ENTITY zotero.errorReport.submitted "گزارش خطا ارسال شد.">
+<!ENTITY zotero.errorReport.unrelatedMessages "گزارش خطا ممکن است شامل پیام‌های غیر مرتبط با زوترو باشد.">
+<!ENTITY zotero.exportOptions.format.label "قالب:">
+<!ENTITY zotero.exportOptions.title "صدور...">
+<!ENTITY zotero.exportOptions.translatorOptions.label "گزینه‌های مترجم">
+<!ENTITY zotero.file.choose.label "انتخاب پرونده...">
+<!ENTITY zotero.file.noneSelected.label "هیچ پرونده‌ای انتخاب نشده است">
+<!ENTITY zotero.general.delete "حذف">
+<!ENTITY zotero.general.deselectAll "انتخاب هیچ‌کدام">
+<!ENTITY zotero.general.edit "ویرایش">
+<!ENTITY zotero.general.note "یادداشت:">
+<!ENTITY zotero.general.optional "(اختیاری)">
+<!ENTITY zotero.general.selectAll "انتخاب همه">
+<!ENTITY zotero.integration.addEditCitation.title "افزودن/ویرایش یادکرد">
 <!ENTITY zotero.integration.classicView.label "Classic View">
-
+<!ENTITY zotero.integration.docPrefs.title "تنظیمات سند">
+<!ENTITY zotero.integration.editBibliography.title "ویرایش کتابنامه">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "نشانک‌‌ها در بین Microsoft Word و LibreOffice مشترک هستند، ولی ممکن است به شکل تصادفی، تغییر داده شوند. &#xA;در صورت انتخاب این گزینه، برای حفظ سازگاری، استفاده از یادکردها در پاورقی یا یادداشت‌های انتهایی امکان‌پذیر نخواهد بود.">
+<!ENTITY zotero.integration.prefs.bookmarks.label "نشانک">
+<!ENTITY zotero.integration.prefs.displayAs.label "نمایش یاکردها در:">
+<!ENTITY zotero.integration.prefs.endnotes.label "انتهای متن">
+<!ENTITY zotero.integration.prefs.footnotes.label "پاورقی">
+<!ENTITY zotero.integration.prefs.formatUsing.label "قالب‌بندی با استفاده از:">
+<!ENTITY zotero.integration.prefs.lang.institutions "Institutions:">
+<!ENTITY zotero.integration.prefs.lang.languages "Languages">
+<!ENTITY zotero.integration.prefs.lang.languagesInCitations "Languages for use in citations">
+<!ENTITY zotero.integration.prefs.lang.persons "Persons:">
+<!ENTITY zotero.integration.prefs.lang.places "Places:">
+<!ENTITY zotero.integration.prefs.lang.primary "primary">
+<!ENTITY zotero.integration.prefs.lang.publishers "Publishers:">
+<!ENTITY zotero.integration.prefs.lang.secondary "[secondary]">
+<!ENTITY zotero.integration.prefs.lang.sorting "Sorting">
+<!ENTITY zotero.integration.prefs.lang.styleAndFormat "Style &amp; Format">
+<!ENTITY zotero.integration.prefs.lang.titles "Titles:">
+<!ENTITY zotero.integration.prefs.lang.translation "Translation">
+<!ENTITY zotero.integration.prefs.lang.transliteration "Transliteration">
+<!ENTITY zotero.integration.prefs.storeReferences.caption "Storing references in your document slightly increases file size, but will allow you to share your document with others without using a Zotero group. Zotero 3.0 or later is required to update documents created with this option.">
+<!ENTITY zotero.integration.prefs.storeReferences.label "Store references in document">
 <!ENTITY zotero.integration.references.label "مرجع‌های کتابنامه‌‌">
-
-<!ENTITY zotero.sync.button "همزمان‌‌سازی با کارگزار زوترو">
-<!ENTITY zotero.sync.error "خطای همزمان‌‌سازی">
-<!ENTITY zotero.sync.storage.progress "پیشرفت:">
-<!ENTITY zotero.sync.storage.downloads "بارگیری‌ها:">
-<!ENTITY zotero.sync.storage.uploads "بارگذاری‌ها:">
-
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "این برچسب که در کتابخانه زوتروی شما موجود است بیش از حد طولانی است و قابل همزمان‌‌سازی با سرور نیست:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "برچسب‌های همزمان‌ شده باید کوتاه‌تر از ۲۵۶ حرف باشند.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "شما می‌توانید برچسب را به چند برچسب تقسیم کنید، به صورت دستی آن را کوتاه و یا حذف کنید.">
-<!ENTITY zotero.sync.longTagFixer.split "تقسیم">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe "تقسیم در">
-<!ENTITY zotero.sync.longTagFixer.character "نویسه">
-<!ENTITY zotero.sync.longTagFixer.characters "نویسه‌ها">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "برچسب‌های انتخاب نشده، ذخیره نخواهند شد.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "برچسب در همه آیتم‌‌ها پاک خواهد شد.">
-
+<!ENTITY zotero.integration.showEditor.label "Show Editor">
+<!ENTITY zotero.item.add "افزودن">
+<!ENTITY zotero.item.attachment.file.show "نمایش محل ذخیره پرونده">
+<!ENTITY zotero.item.creatorTransform "Transform Name Form">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap first/last">
+<!ENTITY zotero.item.textTransform "تبدیل متن">
+<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
+<!ENTITY zotero.item.textTransform.titlecase "حروف اول بزرگ">
+<!ENTITY zotero.items.accessDate_column "تاریخ دسترسی">
+<!ENTITY zotero.items.callNumber_column "شماره فراخوانی">
+<!ENTITY zotero.items.creator_column "پدیدآورنده">
+<!ENTITY zotero.items.dateAdded_column "تاریخ افزودن">
+<!ENTITY zotero.items.dateModified_column "تاریخ تغییر">
+<!ENTITY zotero.items.date_column "تاریخ">
+<!ENTITY zotero.items.itemType "نوع آیتم">
+<!ENTITY zotero.items.journalAbbr_column "نام مختصر مجله">
+<!ENTITY zotero.items.language_column "زبان">
+<!ENTITY zotero.items.libraryCatalog_column "فهرست کتابخانه">
+<!ENTITY zotero.items.menu.addTag "Add Tag">
+<!ENTITY zotero.items.menu.attach "افزودن پیوست">
+<!ENTITY zotero.items.menu.attach.file "پیوست کردن رونوشت پرونده...">
+<!ENTITY zotero.items.menu.attach.fileLink "پیوست کردن پیوند به پرونده...">
+<!ENTITY zotero.items.menu.attach.link "پیوست کردن پیوند به این صفحه">
+<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
+<!ENTITY zotero.items.menu.attach.note "افزودن یادداشت">
+<!ENTITY zotero.items.menu.attach.snapshot "پیوست کردن تصویر لحظه‌ای این صفحه">
+<!ENTITY zotero.items.menu.changeTag "Change Tag">
+<!ENTITY zotero.items.menu.duplicateItem "ساخت رونوشت از این آیتم">
+<!ENTITY zotero.items.menu.languageTag "Language Tag">
+<!ENTITY zotero.items.menu.moveDown "Move Down">
+<!ENTITY zotero.items.menu.moveUp "Move Up">
+<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
+<!ENTITY zotero.items.menu.showInLibrary "نمایش در کتابخانه">
+<!ENTITY zotero.items.numChildren_column "+">
+<!ENTITY zotero.items.publication_column "انتشار">
+<!ENTITY zotero.items.publisher_column "ناشر">
+<!ENTITY zotero.items.reporter_column "Reporter">
+<!ENTITY zotero.items.rights_column "حقوق">
+<!ENTITY zotero.items.title_column "عنوان‌">
+<!ENTITY zotero.items.type_column "نوع">
+<!ENTITY zotero.items.year_column "سال">
+<!ENTITY zotero.lookup.description "شابک،‏ DOI یا PMID را برای جستجو در کادر زیر وارد کنید.">
+<!ENTITY zotero.moreEncodings.label "کدبندی‌های بیشتر">
+<!ENTITY zotero.notes.separate "ویرایش در پنجره مستقل">
+<!ENTITY zotero.progress.title "پیشرفت">
+<!ENTITY zotero.proxy.recognized.disable.label "عدم هدایت خودکار درخواست‌ها از طریق پیشکارهای شناسایی شده قبلی">
+<!ENTITY zotero.proxy.recognized.ignore.label "نادیده گرفتن">
 <!ENTITY zotero.proxy.recognized.title "پیشکار شناسایی شد">
 <!ENTITY zotero.proxy.recognized.warning "فقط پیشکار‌های مرتبط با کتابخانه، شرکت یا دانشگاه خود را بیفزایید.">
 <!ENTITY zotero.proxy.recognized.warning.secondary " افزودن پیشکار‌های متفرقه، ممکن  است به وب‌گاه‌های بدخواه امکان دهد که خود را به صورت منابع قابل اعتماد معرفی کنند.">
-<!ENTITY zotero.proxy.recognized.disable.label "عدم هدایت خودکار درخواست‌ها از طریق پیشکارهای شناسایی شده قبلی">
-<!ENTITY zotero.proxy.recognized.ignore.label "نادیده گرفتن">
-
-<!ENTITY zotero.recognizePDF.recognizing.label "در حال بازیابی فراداده‌ها...">
 <!ENTITY zotero.recognizePDF.cancel.label "انصراف">
-<!ENTITY zotero.recognizePDF.pdfName.label "نام PDF">
-<!ENTITY zotero.recognizePDF.itemName.label "نام آیتم‌">
 <!ENTITY zotero.recognizePDF.captcha.label "متن زیر را برای ادامه بازیابی فراداده‌ها وارد کنید.">
-
-<!ENTITY zotero.rtfScan.title "پیمایش RTF">
+<!ENTITY zotero.recognizePDF.itemName.label "نام آیتم‌">
+<!ENTITY zotero.recognizePDF.pdfName.label "نام PDF">
+<!ENTITY zotero.recognizePDF.recognizing.label "در حال بازیابی فراداده‌ها...">
+<!ENTITY zotero.richText.bold.label "ضخیم">
+<!ENTITY zotero.richText.italic.label "کج">
+<!ENTITY zotero.richText.subscript.label "زیرنویس">
+<!ENTITY zotero.richText.superscript.label "بالانویس">
+<!ENTITY zotero.richText.underline.label "خط زیر">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "یادکردهای مبهم">
 <!ENTITY zotero.rtfScan.cancel.label "انصراف">
 <!ENTITY zotero.rtfScan.citation.label "یادکرد">
-<!ENTITY zotero.rtfScan.itemName.label "نام آیتم‌">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "یادکردهای سرگردان">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "یادکردهای مبهم">
-<!ENTITY zotero.rtfScan.mappedCitations.label "یادکردهای تطبیق‌یافته">
-<!ENTITY zotero.rtfScan.introPage.label "معرفی">
+<!ENTITY zotero.rtfScan.citationsPage.description "لطفا لیست یادکردهای تطبیق‌یافته را مرور کنید و مطمئن شوید که زوترو آیتم‌های مربوطه را به درستی انتخاب کرده است. یادکردهای سرگردان یا مبهم باید پیش از ادامه کار، تعیین تکلیف شوند.">
+<!ENTITY zotero.rtfScan.citationsPage.label "تایید آیتم‌های مورد استناد">
+<!ENTITY zotero.rtfScan.completePage.description " سند شما اکنون پردازش شده است. لطفا سند را برای اطمینان از درستی قالب‌بندی بررسی کنید.">
+<!ENTITY zotero.rtfScan.completePage.label "پیمایش RTF به پایان رسید.">
+<!ENTITY zotero.rtfScan.formatPage.description "زوترو در حال پردازش و قالب‌بندی پرونده RTF شما است. لطفا صبور باشید.">
+<!ENTITY zotero.rtfScan.formatPage.label "قالب‌بندی یادکردها">
+<!ENTITY zotero.rtfScan.inputFile.label "پرونده ورودی">
 <!ENTITY zotero.rtfScan.introPage.description "زوترو می‌تواند یادکردهای موجود در پرونده‌های RTF را به صورت خودکار استخراج و تنظیم کند و کتابنامه را در پرونده RTF وارد کند. درحال حاضر، قابلیت پیمایش RTF از یادکردهایی با قالب‌های زیر پشتیبانی می‌کند:">
 <!ENTITY zotero.rtfScan.introPage.description2 "برای شروع، یک پرونده RTF ورودی و یک پرونده خروجی را انتخاب کنید:">
-<!ENTITY zotero.rtfScan.scanPage.label "در حال پیمایش پرونده برای یافتن یادکردها">
-<!ENTITY zotero.rtfScan.scanPage.description "زوترو در حال پیمایش سند شما برای یافتن یادکردها است. لطفا صبور باشید.">
-<!ENTITY zotero.rtfScan.citationsPage.label "تایید آیتم‌های مورد استناد">
-<!ENTITY zotero.rtfScan.citationsPage.description "لطفا لیست یادکردهای تطبیق‌یافته را مرور کنید و مطمئن شوید که زوترو آیتم‌های مربوطه را به درستی انتخاب کرده است. یادکردهای سرگردان یا مبهم باید پیش از ادامه کار، تعیین تکلیف شوند.">
-<!ENTITY zotero.rtfScan.stylePage.label "قالب‌بندی سند">
-<!ENTITY zotero.rtfScan.formatPage.label "قالب‌بندی یادکردها">
-<!ENTITY zotero.rtfScan.formatPage.description "زوترو در حال پردازش و قالب‌بندی پرونده RTF شما است. لطفا صبور باشید.">
-<!ENTITY zotero.rtfScan.completePage.label "پیمایش RTF به پایان رسید.">
-<!ENTITY zotero.rtfScan.completePage.description " سند شما اکنون پردازش شده است. لطفا سند را برای اطمینان از درستی قالب‌بندی بررسی کنید.">
-<!ENTITY zotero.rtfScan.inputFile.label "پرونده ورودی">
+<!ENTITY zotero.rtfScan.introPage.label "معرفی">
+<!ENTITY zotero.rtfScan.itemName.label "نام آیتم‌">
+<!ENTITY zotero.rtfScan.mappedCitations.label "یادکردهای تطبیق‌یافته">
 <!ENTITY zotero.rtfScan.outputFile.label "پرونده خروجی">
-
-<!ENTITY zotero.file.choose.label "انتخاب پرونده...">
-<!ENTITY zotero.file.noneSelected.label "هیچ پرونده‌ای انتخاب نشده است">
-
-<!ENTITY zotero.downloadManager.label "ذخیره در زوترو">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
-<!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
+<!ENTITY zotero.rtfScan.scanPage.description "زوترو در حال پیمایش سند شما برای یافتن یادکردها است. لطفا صبور باشید.">
+<!ENTITY zotero.rtfScan.scanPage.label "در حال پیمایش پرونده برای یافتن یادکردها">
+<!ENTITY zotero.rtfScan.stylePage.label "قالب‌بندی سند">
+<!ENTITY zotero.rtfScan.title "پیمایش RTF">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "یادکردهای سرگردان">
+<!ENTITY zotero.selectitems.cancel.label "انصراف">
+<!ENTITY zotero.selectitems.intro.label "آیتم‌‌های مورد نظر را برای افزودن به کتابخانه انتخاب کنید">
+<!ENTITY zotero.selectitems.select.label "تایید">
+<!ENTITY zotero.selectitems.title "انتخاب آیتم‌‌ها">
+<!ENTITY zotero.sync.button "همزمان‌‌سازی با کارگزار زوترو">
+<!ENTITY zotero.sync.error "خطای همزمان‌‌سازی">
+<!ENTITY zotero.sync.longTagFixer.character "نویسه">
+<!ENTITY zotero.sync.longTagFixer.characters "نویسه‌ها">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "این برچسب که در کتابخانه زوتروی شما موجود است بیش از حد طولانی است و قابل همزمان‌‌سازی با سرور نیست:">
+<!ENTITY zotero.sync.longTagFixer.split "تقسیم">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "تقسیم در">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "شما می‌توانید برچسب را به چند برچسب تقسیم کنید، به صورت دستی آن را کوتاه و یا حذف کنید.">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "برچسب‌های همزمان‌ شده باید کوتاه‌تر از ۲۵۶ حرف باشند.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "برچسب در همه آیتم‌‌ها پاک خواهد شد.">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "برچسب‌های انتخاب نشده، ذخیره نخواهند شد.">
+<!ENTITY zotero.sync.storage.downloads "بارگیری‌ها:">
+<!ENTITY zotero.sync.storage.progress "پیشرفت:">
+<!ENTITY zotero.sync.storage.uploads "بارگذاری‌ها:">
+<!ENTITY zotero.tabs.attachments.label "‌پیوست‌ها">
+<!ENTITY zotero.tabs.info.label "اطلاعات">
+<!ENTITY zotero.tabs.notes.label "یادداشت‌ها">
+<!ENTITY zotero.tabs.related.label "مرتبط">
+<!ENTITY zotero.tabs.tags.label "برچسب‌ها">
+<!ENTITY zotero.tagSelector.clearAll "انتخاب هیچ‌کدام">
+<!ENTITY zotero.tagSelector.clearVisible "عدم انتخاب برچسب‌های پیدا">
+<!ENTITY zotero.tagSelector.deleteTag "حذف برچسب...">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "نمایش همه برچسب‌های کتابخانه">
+<!ENTITY zotero.tagSelector.filter "فیلتر:">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "هیچ برچسبی برای نمایش وجود ندارد">
+<!ENTITY zotero.tagSelector.renameTag "تغییر نام برچسب...">
+<!ENTITY zotero.tagSelector.selectVisible "انتخاب برچسب‌های پیدا">
+<!ENTITY zotero.tagSelector.showAutomatic "نمایش خودکار">
+<!ENTITY zotero.toolbar.about.label "درباره زوترو">
+<!ENTITY zotero.toolbar.actions.label "کارها">
+<!ENTITY zotero.toolbar.addChildNote.label "Add Child Note">
+<!ENTITY zotero.toolbar.addStandaloneNote.label "Add Standalone Note">
+<!ENTITY zotero.toolbar.advancedSearch "جستجوی پیشرفته">
+<!ENTITY zotero.toolbar.attachment.add "ذخیره رونوشت از پرونده...">
+<!ENTITY zotero.toolbar.attachment.linked "پیوند به پرونده...">
+<!ENTITY zotero.toolbar.attachment.snapshot "گرفتن تصویر لحظه‌ای از صفحه جاری">
+<!ENTITY zotero.toolbar.attachment.weblink "ذخیره پیوند به صفحه جاری">
+<!ENTITY zotero.toolbar.cancelDuplicatesView.label "Cancel duplicates view">
+<!ENTITY zotero.toolbar.cancelOrphansView.label "Cancel orphans view">
+<!ENTITY zotero.toolbar.duplicate.label "نمایش آیتم‌‌های تکراری">
+<!ENTITY zotero.toolbar.duplicatesView.label "Duplicates view">
+<!ENTITY zotero.toolbar.emptyTrash.label "خالی کردن سطل بازیافت">
+<!ENTITY zotero.toolbar.export.label "صدور کتابخانه...">
+<!ENTITY zotero.toolbar.import.label "درون‌برد...">
+<!ENTITY zotero.toolbar.importFromClipboard "درون‌برد از حافظه">
+<!ENTITY zotero.toolbar.lookup "جستجو با شاخص...">
+<!ENTITY zotero.toolbar.lookup.label "افزودن آیتم‌ با شناسه">
+<!ENTITY zotero.toolbar.moreItemTypes.label "بیشتر">
+<!ENTITY zotero.toolbar.newCollection.label "مجموعه جدید...">
+<!ENTITY zotero.toolbar.newGroup "گروه جدید...">
+<!ENTITY zotero.toolbar.newItem.label "آیتم‌ جدید">
+<!ENTITY zotero.toolbar.newItemFromPage.label "ساخت آیتم‌ جدید از این صفحه">
+<!ENTITY zotero.toolbar.newNote "New Note">
+<!ENTITY zotero.toolbar.newSavedSearch.label "جستجوی ذخیره‌شده جدید...">
+<!ENTITY zotero.toolbar.newSubcollection.label "زیرمجموعه جدید...">
+<!ENTITY zotero.toolbar.note.child "Add Child Note">
+<!ENTITY zotero.toolbar.note.standalone "یادداشت مستقل جدید">
+<!ENTITY zotero.toolbar.openURL.label "مکان‌یابی">
+<!ENTITY zotero.toolbar.openURL.tooltip "یافتن از طریق کتابخانه محلی">
+<!ENTITY zotero.toolbar.orphansView.label "Orphans view">
+<!ENTITY zotero.toolbar.preferences.label "تنظیمات...">
+<!ENTITY zotero.toolbar.refresh.label "Refresh">
+<!ENTITY zotero.toolbar.removeItem.label "حذف آیتم‌...">
+<!ENTITY zotero.toolbar.rtfScan.label "پیمایش RTF...">
+<!ENTITY zotero.toolbar.supportAndDocumentation "پشتیبانی و راهنما">
+<!ENTITY zotero.toolbar.tab.tooltip "تغییر حالت برگه‌ای">
+<!ENTITY zotero.toolbar.tagSelector.label "نمایش/نهفتن انتخاب‌گر برچسب">
+<!ENTITY zotero.toolbar.timeline.label "ساخت Time Line">
+<!ENTITY zotero.upgrade.autoBackup "از بانک اطلاعات موجود، پیش از انجام هر تغییری، به صورت خودکار نسخه پشتیبان تهیه خواهد شد.">
+<!ENTITY zotero.upgrade.changeLogAfterLink "را ببینید.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "لطفا برای یافتن نکات جدید">
+<!ENTITY zotero.upgrade.changeLogLink "گزارش تغییرات">
+<!ENTITY zotero.upgrade.majorUpgrade "این یک ارتقای عمده است.">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "مرور کنید.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "حتما پیش از ادامه کار">
+<!ENTITY zotero.upgrade.majorUpgradeLink "دستورالعمل ارتقا را">
+<!ENTITY zotero.upgrade.newVersionInstalled "شما نسخه جدیدی از زوترو را نصب کرده‌اید.">
+<!ENTITY zotero.upgrade.upgradeInProgress "لطفا تا اتمام فرآیند ارتقا صبر کنید. این فرآیند ممکن است چند دقیقه به طول انجامد.">
+<!ENTITY zotero.upgrade.upgradeRequired "برای کار کردن با نسخه جدید، بانک اطلاعات زوترو باید ارتقا یابد.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "بانک اطلاعات زوتروی شما با موفقیت ارتقا یافت.">
