@@ -16,6 +16,7 @@ Zotero.LANGUAGE_NAMES = {
 	"es-ES": "Spanish",
 	"et-EE": "Estonian",
 	"eu-ES": "Basque",
+	"fa": "Farsi",
 	"fi-FI": "Finnish",
 	"fr-FR": "French",
 	"gl-ES": "Galician",
