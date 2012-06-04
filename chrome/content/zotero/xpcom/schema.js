@@ -942,7 +942,7 @@ Zotero.Schema = new function(){
 		
 		var url = ZOTERO_CONFIG['REPOSITORY_URL'] + '/updated?'
 			+ (lastUpdated ? 'last=' + lastUpdated + '&' : '')
-			+ 'version=3.0m156';
+			+ 'version=3.0m159';
 
 		// XXX Using hard-wired version, reset during build.
 		// (Version number is actually ignored by our translator update channel)

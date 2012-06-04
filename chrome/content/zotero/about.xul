@@ -242,7 +242,7 @@
 		<hbox>
 			<label class="zotero-text-link" href="http://zotero.org" value="http://zotero.org"/>
 		</hbox>
-		<label id="version" value="3.0m158"/>
+		<label id="version" value="3.0m159"/>
         <!--
 		<script>
 			document.getElementById('version').value += Zotero.version;
