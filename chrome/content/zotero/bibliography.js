@@ -38,6 +38,8 @@ var Zotero_File_Interface_Bibliography = new function() {
 	this.init = init;
 	this.styleChanged = styleChanged;
 	this.acceptSelection = acceptSelection;
+	this.setLangPref = setLangPref;
+	this.citationLangRecord = citationLangRecord;
 	
 	/*
 	 * Initialize some variables and prepare event listeners for when chrome is done
@@ -65,6 +67,10 @@ var Zotero_File_Interface_Bibliography = new function() {
 		if(!_io.style) {
 			_io.style = Zotero.Prefs.get("export.lastStyle");
 			_saveStyle = true;
+
+			// if language params not set, get from SQL prefs
+			// and Firefox preferences
+			Zotero.setCitationLanguages(_io);
 		}
 		
 		// add styles to list
@@ -120,11 +126,47 @@ var Zotero_File_Interface_Bibliography = new function() {
 				if(_io.requireStoreReferences) document.getElementById("storeReferences").disabled = true;
 			}
 		}
+
+		// Also ONLY for integrationDocPrefs.xul: update language selections
+		
+		// initialize options display from provided params
+		var citationPrefNames = ['persons', 'institutions', 'titles', 'publishers', 'places'];
+		for (var i = 0, ilen = citationPrefNames.length; i < ilen; i += 1) {
+			var citationPrefNode = document.getElementById(citationPrefNames[i] + '-radio');
+			if (citationPrefNode) {
+				if (_io['citationLangPrefs'][citationPrefNames[i]] && _io['citationLangPrefs'][citationPrefNames[i]].length) {
+					var selectedCitationPrefNode = document.getElementById(citationPrefNames[i] + "-radio-" + _io['citationLangPrefs'][citationPrefNames[i]][0]);
+					citationPrefNode.selectedItem = selectedCitationPrefNode;
+				}
+				citationLangSet(citationPrefNode);
+			}
+		}
+
+		var langPrefs = document.getElementById('lang-prefs');
+		if (langPrefs){
+			for (var i = langPrefs.childNodes.length -1; i > 0; i += -1) {
+				langPrefs.removeChild(langPrefs.childNodes.item(i));
+			}
+			var tags = Zotero.DB.query("SELECT * FROM zlsTags ORDER BY tag");
+			for (var i = 0, ilen = tags.length; i < ilen; i += 1) {
+				var langSelectors = [];
+				var langSelectorTypes = [
+					'citationTransliteration',
+					'citationTranslation',
+					'citationSort'
+				];
+				for (var j = 0, jlen = langSelectorTypes.length; j < jlen; j += 1) {
+					langSelectors.push(buildSelector('default',tags[i],langSelectorTypes[j]));
+				}
+				addSelectorRow(langPrefs,langSelectors);
+			}
+		}
+
 		
 		// set style to false, in case this is cancelled
 		_io.style = false;
 	}
-	
+
 	/*
 	 * ONLY FOR integrationDocPrefs.xul: called when style is changed
 	 */
@@ -176,4 +218,111 @@ var Zotero_File_Interface_Bibliography = new function() {
 			Zotero.Prefs.set("export.lastStyle", _io.style);
 		}
 	}
+	/*
+	 * ONLY FOR integrationDocPrefs.xul: language selection utility functions
+	 */
+	function addSelectorRow(target,selectors) {
+		var row = document.createElement('row');
+		for (var i = 0, ilen = selectors.length; i < ilen; i += 1) {
+			row.appendChild(selectors[i]);
+		}
+		target.appendChild(row);
+	}
+		
+	function buildSelector (profile,tagdata,param) {
+		var checkbox = document.createElement('checkbox');
+		if (_io[param].indexOf(tagdata.tag) > -1) {
+			checkbox.setAttribute('checked',true);
+		}
+		checkbox.setAttribute('profile', profile);
+		checkbox.setAttribute('param', param);
+		checkbox.setAttribute('oncommand', 'Zotero_File_Interface_Bibliography.setLangPref(this);');
+		checkbox.setAttribute('value',tagdata.tag);
+		checkbox.setAttribute('label',tagdata.nickname);
+		checkbox.setAttribute('type','checkbox');
+		checkbox.setAttribute('flex','1');
+		return checkbox;
+	}
+		
+	function setLangPref(target) {
+		var profile = target.getAttribute('profile');
+		var param = target.getAttribute('param');
+		var tag = target.getAttribute('value');
+		var enable = target.hasAttribute('checked');
+		if (enable) {
+			if (_io[param].indexOf(tag) === -1) {
+				if (!_io[param]) {
+					_io[param] = [];
+				}
+				_io[param].push(tag);
+			}
+		} else {
+			for (var i = _io[param].length - 1; i > -1; i += -1) {
+				if (_io[param][i] === tag) {
+					_io[param] = _io[param].slice(0,i).concat(_io[param].slice(i + 1));
+				}
+			}
+		}
+	}
+
+	function citationLangRecord(node) {
+		if (node.id.split('-')[1] === 'checkbox') {
+			var addme = false;
+			var cullme = false;
+			var secondarySetting = node.id.split('-')[2];
+			if (node.checked) {
+				addme = secondarySetting;
+			} else {
+				cullme = secondarySetting;
+			}
+			node = node.parentNode.parentNode.childNodes[1];
+		}
+		var idlst = node.selectedItem.id.split('-');
+		var base = idlst[0];
+		var primarySetting = idlst[2];
+		var secondaries = _io['citationLangPrefs'][base].slice(1);
+		if (addme && secondaries.indexOf(secondarySetting) === -1) {
+			secondaries.push(secondarySetting);
+		}
+		if (cullme) {
+			var cullidx = secondaries.indexOf(secondarySetting);
+			if (cullidx > -1) {
+				secondaries = secondaries.slice(0, cullidx).concat(secondaries.slice(cullidx + 1));
+			}
+		}
+		_io['citationLangPrefs'][base] = [primarySetting].concat(secondaries);
+		citationLangSet(node);
+	}
+
+	function citationLangSet (node) {
+		var idlst = node.selectedItem.id.split('-');
+		var base = idlst[0];
+		var settings = _io['citationLangPrefs'][base];
+        if (!settings) {
+            settings = [];
+        }
+		var parent = node.parentNode;
+		var optionSetters = parent.lastChild.childNodes;
+		for (var i = 0, ilen = optionSetters.length; i < ilen; i += 1) {
+			optionSetters[i].checked = false;
+			for (var j = 1, jlen = settings.length; j < jlen; j += 1) {
+				if (optionSetters[i].id === base + '-checkbox-' + settings[j]) {
+					optionSetters[i].checked = true;
+				}
+			}
+			if (optionSetters[i].id === base + "-checkbox-" + settings[0]) {
+				optionSetters[i].checked = false;
+				var idx = settings.slice(1).indexOf(settings[0]);
+				if (idx > -1) {
+					// +1 and +2 b/c first-position item (primary) is sliced off for this check
+					settings = settings.slice(0,idx + 1).concat(settings.slice(idx + 2));
+					_io['citationLangPrefs'][base] = settings;
+				}
+				optionSetters[i].disabled = true;
+			} else {
+				optionSetters[i].disabled = false;
+			}
+		}
+	};
 }
+
