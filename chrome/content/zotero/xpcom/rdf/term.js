@@ -11,10 +11,10 @@
 RDFTracking = 0  // Are we requiring reasons for statements?
 
 //takes in an object and makes it an object if it's a literal
-function makeTerm(val) {
+function makeTerm(val, lang) {
     //  tabulator.log.debug("Making term from " + val)
     if (typeof val == 'object') return val;
-    if (typeof val == 'string') return new RDFLiteral(val);
+    if (typeof val == 'string') return new RDFLiteral(val, lang);
     if (typeof val == 'number') return new RDFLiteral(val); // @@ differet types
     if (typeof val == 'boolean') return new RDFLiteral(val?"1":"0", undefined, 
                                                 RDFSymbol.prototype.XSDboolean);
@@ -80,7 +80,7 @@ RDFBlankNode.prototype.toString = RDFBlankNode.prototype.toNT
 
 function RDFLiteral(value, lang, datatype) {
     this.value = value
-    this.lang=lang;	  // string
+    this.lang=lang;	  // string		
     this.datatype=datatype;  // term
     this.toString = RDFLiteralToString
     this.toNT = RDFLiteral_toNT
@@ -154,10 +154,10 @@ function RDFStatement_toNT() {
 	    +  this.object.toNT() +" .")
 }
 
-function RDFStatement(subject, predicate, object, why) {
+function RDFStatement(subject, predicate, object, why, lang) {
     this.subject = makeTerm(subject)
     this.predicate = makeTerm(predicate)
-    this.object = makeTerm(object)
+    this.object = makeTerm(object, lang)
     if (typeof why !='undefined') {
 	this.why = why
     } else if (RDFTracking) {
@@ -194,8 +194,8 @@ RDFFormula.prototype.termType = 'formula'
 RDFFormula.prototype.toNT = RDFFormula_toNT
 RDFFormula.prototype.toString = RDFFormula_toNT   
 
-RDFFormula.prototype.add = function(subj, pred, obj, why) {
-    this.statements.push(new RDFStatement(subj, pred, obj, why))
+RDFFormula.prototype.add = function(subj, pred, obj, why, lang) {
+    this.statements.push(new RDFStatement(subj, pred, obj, why, lang))
 }
 
 // Convenience methods on a formula allow the creation of new RDF terms:
