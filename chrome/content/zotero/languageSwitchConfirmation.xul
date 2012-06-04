@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2009 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/preferences.dtd">
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	title="" buttons="cancel,accept"
+	id="zotero-languageSwitchConfirmation"
+    ondialogcancel="var doc = window.arguments[0];var zot = window.arguments[1];idx = window.arguments[2];var menu = doc.getElementById('locale-menulist');menu.selectedIndex = zot.LANGUAGE_INDEX[zot.locale];"
+	ondialogaccept="var doc = window.arguments[0];var zot = window.arguments[1];zot.switchLocale(doc);">
+    <vbox flex="1">
+            <description maxwidth="250">
+                Switching the language will restart Firefox. Some open
+                windows may be lost. Click OK to proceed, Cancel to
+                 abort.
+            </description>
+    </vbox>
+</dialog>
