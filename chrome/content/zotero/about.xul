@@ -82,22 +82,17 @@
 						"Goofy"
 					],
 					
-					"fa": [
-						"CRCIS"
-					],
-					
 					"fi-FI": [
 						"hirvela"
 					],
 					
 					"fr-FR": [
-						"fiuzzy",
-						"Grégoire Colly",
-						"Jojaba",
-						"La Luciole",
-						"locale_locker",
 						"Marie Léger-St-Jean",
-						"Pascal Pichon"
+						"locale_locker",
+						"fiuzzy",
+						"Pascal Pichon",
+						"Jojaba",
+						"La Luciole"
 					],
 					
 					"gl-ES": [
@@ -127,7 +122,12 @@
 						"himura",
 						"Andreas Bovens",
 						"Michael Schiltz",
-						"ehito"
+						"ehito",
+						"Tatsuki Sugiura"
+					],
+					
+					"km-KH": [
+						"Sras Hem"
 					],
 					
 					"ko-KR": [
@@ -242,10 +242,12 @@
 		<hbox>
 			<label class="zotero-text-link" href="http://zotero.org" value="http://zotero.org"/>
 		</hbox>
-		<label id="version" value="&zotero.version; "/>
+		<label id="version" value="3.0m158"/>
+        <!--
 		<script>
 			document.getElementById('version').value += Zotero.version;
 		</script>
+        -->
 		<hbox>
 			<vbox id="column1">
 				<label class="subhead" value="&zotero.createdby;"/>
