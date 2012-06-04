@@ -102,6 +102,17 @@
 					<toolbarbutton id="zotero-tb-collection-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
 					<toolbarbutton id="zotero-tb-group-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
 					<spacer flex="1"/>
+					<vbox>
+                        <hbox>
+						  <label value="Multilingual" style="margin:0;padding:0;font-size:smaller;color: blue;font-weight:bold;"/>
+						  <label value=" (testing only)" style="margin:0;padding:0;font-size:smaller;color: blue;"/>
+                        </hbox>
+                        <hbox>
+                          <label value="Click here for info" style="margin:0;padding:0;font-size:smaller;background:white;text-decoration:none;border:1px solid black;" class="text-link" href="http://citationstylist.org/announcements/" 
+/>
+                        </hbox>
+					</vbox>
+					<spacer flex="1"/>
 					<toolbarbutton id="zotero-tb-actions-menu" class="zotero-tb-button" tooltiptext="&zotero.toolbar.actions.label;" type="menu">
 						<menupopup id="zotero-tb-actions-popup" onpopupshowing="document.getElementById('cmd_zotero_reportErrors').setAttribute('disabled', Zotero.getErrors().length == 0)">
 							<menuitem id="zotero-tb-actions-import" label="&zotero.toolbar.import.label;" command="cmd_zotero_import"/>
@@ -345,6 +356,7 @@
 								<treecol
 									id="zotero-items-column-title" primary="true"
 									label="&zotero.items.title_column;"
+									crop="center"
 									flex="4" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
 								<treecol
@@ -380,6 +392,11 @@
 								<treecol
 									id="zotero-items-column-journalAbbreviation" hidden="true"
 									label="&zotero.items.journalAbbr_column;"
+									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
+								<splitter class="tree-splitter"/>
+								<treecol
+									id="zotero-items-column-reporter" hidden="true"
+									label="&zotero.items.reporter_column;"
 									flex="1" zotero-persist="width ordinal hidden sortActive sortDirection"/>
 								<splitter class="tree-splitter"/>
 								<treecol
