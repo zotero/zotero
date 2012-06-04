@@ -205,16 +205,27 @@ Zotero.Duplicates.prototype._findDuplicates = function () {
 	var creatorRowsCache = {};
 	
 	// Match on normalized title
-	var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
+	var sql = "SELECT itemID, value as checkvalue FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
 				+ "WHERE libraryID=? AND fieldID BETWEEN 110 AND 113 "
-				+ "AND itemTypeID NOT IN (1, 14) "
+				+ "AND itemTypeID NOT IN (1, 14, 16, 17, 20) "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
-				+ "ORDER BY value COLLATE locale";
+				+ "ORDER BY checkvalue COLLATE locale";
 	var rows = Zotero.DB.query(sql, [this._libraryID]);
+    // Legal types, which might have no title, and for which parallel
+    // referencing is common.
+	var sql = "SELECT itemID, group_concat(value, '::') as checkvalue FROM items JOIN itemData USING (itemID) "
+				+ "JOIN itemDataValues USING (valueID) "
+				+ "WHERE libraryID=? AND fieldID IN (15, 36, 43, 55, 93, 94, 97, 98, 101, 110, 111, 112, 113) "
+				+ "AND itemTypeID IN (16, 17, 20) "
+				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
+                + "GROUP BY itemID "
+				+ "ORDER BY checkvalue COLLATE locale";
+    var newrows = Zotero.DB.query(sql, [this._libraryID]);
+	rows = rows.concat(newrows);
 	processRows(function (a, b) {
-		var aTitle = normalizeString(a.value);
-		var bTitle = normalizeString(b.value);
+		var aTitle = normalizeString(a.checkvalue);
+		var bTitle = normalizeString(b.checkvalue);
 		
 		// If we stripped one of the strings completely, we can't compare them
 		if (aTitle.length == 0 || bTitle.length == 0) {
