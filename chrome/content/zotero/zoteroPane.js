@@ -554,7 +554,8 @@ var ZoteroPane = new function()
 				break;
 			case 'library':
 				document.getElementById('zotero-collections-tree').focus();
-				ZoteroPane_Local.collectionsView.selection.select(0);
+				var selection = ZoteroPane_Local.collectionsView.getLastViewedRow();
+				ZoteroPane_Local.collectionsView.selection.select(selection);
 				break;
 			case 'quicksearch':
 				document.getElementById('zotero-tb-search').select();
@@ -1420,6 +1421,11 @@ var ZoteroPane = new function()
 		item.clone(false, newItem);
 		newItem.save();
 		
+		var title = "title";
+		if (newItem.itemTypeID == 17) {
+			title = "caseName";
+		}
+
 		if (this.itemsView._itemGroup.isCollection() && !newItem.getSource()) {
 			this.itemsView._itemGroup.ref.addItem(newItem.id);
 		}
