@@ -76,6 +76,29 @@ ZoteroAutoComplete.prototype.startSearch = function(searchString, searchParam, p
 		case '':
 			break;
 		
+		case 'zlsPrimary':
+			var sql = 'SELECT TA.value AS comment,D.value AS val FROM zlsSubtags S '
+				+ 'LEFT JOIN zlsSubtagData TA ON S.subtag=TA.id '
+				+ 'LEFT JOIN zlsSubtagData D ON S.description=D.id '
+				+ 'LEFT JOIN zlsSubtagData TY ON S.type=TY.id '
+				+ 'LEFT JOIN zlsSubtagData SC ON S.scope=SC.id '
+				+ 'WHERE D.value LIKE ? '
+				+ 'AND S.deprecated IS NULL '
+				+ 'AND TY.value=? '
+				+ 'AND ('
+					+ 'S.scope IS NULL '
+					+ 'OR NOT SC.value=?'
+				+ ')';
+			var sqlParams = ['%' + searchString + '%', 'language', 'collection'];
+			statement = this._zotero.DB.getStatement(sql, sqlParams);
+			var resultsCallback = function (results) {
+				var collation = self._zotero.getLocaleCollation();
+				results.sort(function(a, b) {
+					return collation.compareString(1, a, b);
+				});
+			};
+			break;
+		
 		case 'tag':
 			var sql = "SELECT DISTINCT name AS val, NULL AS comment FROM tags WHERE name LIKE ?";
 			var sqlParams = [searchString + '%'];
