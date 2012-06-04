@@ -29,6 +29,7 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
 	<script src="include.js"/>
 	<script src="itemPane.js" type="application/javascript;version=1.8"/>
 	
@@ -55,7 +56,7 @@
 					<tab label="&zotero.tabs.info.label;"/>
 					<tab label="&zotero.tabs.notes.label;"/>
 					<tab label="&zotero.tabs.tags.label;"/>
-					<tab label="&zotero.tabs.related.label;"/>
+					<tab id="zotero-tab-related" label="&zotero.tabs.related.label;"/>
 				</tabs>
 					<tabpanels id="zotero-view-item" flex="1">
 						<tabpanel>
