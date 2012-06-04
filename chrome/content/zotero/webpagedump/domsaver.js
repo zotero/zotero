@@ -176,7 +176,11 @@ var wpdDOMSaver = {
 		// Added by Dan S. for Zotero, replacing three lines below
 		this.document = document;
 		this.setFrameList(document.defaultView);
-		this.baseURL = document.location.href;
+		if (document.location) {
+			this.baseURL = document.location.href;
+		} else {
+			this.baseURL = "about:blank";
+		}
 		
 		
 		// Set the document and frames                                          
@@ -731,8 +735,9 @@ var wpdDOMSaver = {
 		  	this.fileInfo[newFileName] = new Array("url","downloaded");
 		  	this.fileInfo[newFileName]["url"] = aURLSpec;                
 		  	this.fileInfo[newFileName]["downloaded"] = true;
-		  	if (aDownload) 
-		  	  this.fileInfo[newFileName]["downloaded"] = wpdCommon.downloadFile(aURLSpec,this.currentDir+newFileName);  		  
+			if (aDownload) {
+				this.fileInfo[newFileName]["downloaded"] = wpdCommon.downloadFile(aURLSpec,this.currentDir+newFileName);
+			}
 		  }                                     		  		               
 		  return newFileName;				  
 		} catch(ex) {  
@@ -1057,7 +1062,11 @@ var wpdDOMSaver = {
 	{
     // we have to set a new current url which is the 
     // base reference url (necessary for frame processing)
-		this.currentURL = aDocument.location.href;    
+		if (aDocument.location) {
+			this.currentURL = aDocument.location.href;    
+		} else {
+			this.currentURL = "about:blank";
+		}
 		                                                                    
 		// distinguish between HTML Documents and other 
 		// embedded files like flash, video or images...
