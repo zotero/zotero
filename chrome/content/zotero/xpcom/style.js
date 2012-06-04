@@ -61,6 +61,19 @@ Zotero.Styles = new function() {
 	}
 	
 	/**
+	 * Sort function for visible styles cache
+	 */
+	function _sortVisibleStyles (a,b) {
+		if (a.title > b.title) {
+			return 1;
+		} else if (a.title < b.title) {
+			return -1;
+		} else {
+			return 0;
+		}
+	}
+	
+	/**
 	 * Reads all styles from a given directory and caches their metadata
 	 * @private
 	 */
@@ -99,9 +112,10 @@ Zotero.Styles = new function() {
 			}
 			i++;
 		}
+        _visibleStyles.sort(_sortVisibleStyles);
 		return i;
 	}
-	
+
 	/**
 	 * Gets a style with a given ID
 	 * @param {String} id
@@ -479,10 +493,26 @@ function() {
 		var xml = this.getXML();
 	}
 	
+	if (Zotero.Prefs.get("csl.trigraphFormat")) {
+		var trigraph = Zotero.Prefs.get("csl.trigraphFormat");
+		if (!trigraph || !trigraph.match(/^(A[Aa]*00*)(?::(A[Aa]*00*))*$/)) {
+			// Be obnoxiously fussy and intrusive.
+			var msg = "Invalid csl.trigraphFormat string \"" + trigraph + "\".\nPlease adjust the value through about:config\nMeanwhile, the default value of \"Aaaa00:AaAa00:AaAA00:AAAA00\" will be used.";
+			alert(msg);
+			trigraph = "Aaaa00:AaAa00:AaAA00:AAAA00";
+		}
+	}
+
 	try {
-		return new Zotero.CiteProc.CSL.Engine(Zotero.Cite.System, xml, locale);
+		var citeproc = new Zotero.CiteProc.CSL.Engine(Zotero.Cite.System, xml, locale);
+		Zotero.setCitationLanguages({}, citeproc);
+		citeproc.opt.trigraph = trigraph;
+        citeproc.opt.development_extensions.static_statute_locator = true;
+        citeproc.opt.development_extensions.clobber_locator_if_no_statute_section = true;
+
+		return citeproc;
 	} catch(e) {
-		Zotero.logError(e);
+ 		Zotero.logError(e);
 		throw e;
 	}
 });
