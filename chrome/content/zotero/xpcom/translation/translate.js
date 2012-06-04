@@ -88,7 +88,7 @@ Zotero.Translate.Sandbox = {
 				Zotero.debug("Translate: WARNING: Zotero.Item#complete() called after Zotero.done(); please fix your code", 2);
 			}
 				
-			const allowedObjects = ["complete", "attachments", "seeAlso", "creators", "tags", "notes"];
+			const allowedObjects = ["complete", "attachments", "seeAlso", "creators", "tags", "notes", "multi"];
 			
 			delete item.complete;
 			for(var i in item) {
@@ -550,13 +550,12 @@ Zotero.Translate.Sandbox = {
 				item.accessDate = "CURRENT_TIMESTAMP";
 			}
 			
-			if(!item.title) {
-				translate.complete(false, new Error("No title specified for item"));
-				return;
+			 if(!item.title && ["case", "statute", "bill", "order", "gazette"].indexOf(item.itemType) === -1) {
+				throw new Error("Item is not case, statute, bill, order or gazette, and has no title");
 			}
 			
 			// create short title
-			if(item.shortTitle === undefined && Zotero.Utilities.fieldIsValidForType("shortTitle", item.itemType)) {		
+			if(item.title && item.shortTitle === undefined && Zotero.Utilities.fieldIsValidForType("shortTitle", item.itemType)) {		
 				// only set if changes have been made
 				var setShortTitle = false;
 				var title = item.title;
@@ -2330,7 +2329,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	 * @param {Boolean} literal Whether value should be treated as a literal (true) or a resource
 	 *     (false)
 	 */
-	"addStatement":function(about, relation, value, literal) {
+	"addStatement":function(about, relation, value, literal, lang) {
 		if(about === null || about === undefined) {
 			throw new Error("about must be defined in Zotero.RDF.addStatement");
 		}
@@ -2348,7 +2347,7 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 			value = this._getResource(value);
 		}
 		
-		this._dataStore.add(this._getResource(about), this._getResource(relation), value);
+		this._dataStore.add(this._getResource(about), this._getResource(relation), value, false, lang);
 	},
 	
 	/**
@@ -2515,17 +2514,18 @@ Zotero.Translate.IO._RDFSandbox.prototype = {
 	 * @return {Zotero.RDF.AJAW.RDFSymbol[]}
 	 * @deprecated Since 2.1. Use {@link Zotero.Translate.IO["rdf"]._RDFBase#getStatementsMatching}
 	 */
-	"getTargets":function(resource, property) {
+	"getTargets":function(resource, property, preserveObject) {
 		var statements = this._dataStore.statementsMatching(this._getResource(resource), this._getResource(property));
 		if(!statements.length) return false;
-		
-		var returnArray = [];
-		for(var i=0; i<statements.length; i++) {
-			returnArray.push(statements[i].object.termType == "literal" ? statements[i].object.toString() : statements[i].object);
+
+		if (preserveObject) {
+			var returnArray = [s.object for each(s in statements)];
+		} else {
+			var returnArray = [(s.object.termType == "literal" ? s.object.toString() : s.object) for each(s in statements)];
 		}
 		return returnArray;
 	},
-	
+
 	/**
 	 * Gets statements matching a certain pattern
 	 *
