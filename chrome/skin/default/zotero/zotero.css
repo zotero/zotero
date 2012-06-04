@@ -143,6 +143,16 @@ dialog[resizable="true"]
 	-moz-binding: url('chrome://zotero/content/bindings/resizabledialog.xml#resizabledialog');
 }
 
+.zotero-langy {
+	background-image: -moz-linear-gradient(left, #efebe7, white);
+	font-size: smaller;
+	padding-right: 0.5em;
+	border-bottom-width: medium;
+	border-bottom-color: #efebe7;
+	border-bottom-style: solid;
+	color: rgb(100, 100, 100);
+}
+
 zoteroguidancepanel
 {
 	-moz-binding: url('chrome://zotero/content/bindings/guidancepanel.xml#guidancepanel');
@@ -212,6 +222,19 @@ label.zotero-text-link {
 	color: white;
 	background: rgb(89, 139, 236);
 }
+
+
+.zotero-alien-clicky
+{	
+	-moz-border-radius: 6px;
+	border: 1px solid transparent;
+}
+
+.zotero-alien-clicky:hover {
+	border: 1px solid rgb(109, 149, 224);
+}
+
+
 
 
 #zotero-progress-box
