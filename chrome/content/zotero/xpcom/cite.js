@@ -34,7 +34,7 @@ Zotero.Cite.System.retrieveItem = function(item) {
 	if(!zoteroItem) {
 		throw "Zotero.Cite.getCSLItem called to wrap a non-item "+item;
 	}
-	
+
 	// don't return URL or accessed information for journal articles if a
 	// pages field exists
 	var itemType = Zotero.ItemTypes.getName(zoteroItem.itemTypeID);
@@ -44,30 +44,42 @@ Zotero.Cite.System.retrieveItem = function(item) {
 			["journalArticle", "newspaperArticle", "magazineArticle"].indexOf(itemType) !== -1
 			&& zoteroItem.getField("pages")
 			&& !Zotero.Prefs.get("export.citePaperJournalArticleURL"));
-	
+
 	var cslItem = {
 		'id':zoteroItem.id,
-		'type':cslType
+		'type':cslType,
+		'multi':{
+			'_keys':{}
+		}
 	};
-	
+
 	// get all text variables (there must be a better way)
-	// TODO: does citeproc-js permit short forms?
 	for(var variable in CSL_TEXT_MAPPINGS) {
 		var fields = CSL_TEXT_MAPPINGS[variable];
 		if(variable == "URL" && ignoreURL) continue;
 		for each(var field in fields) {
 			var value = zoteroItem.getField(field, false, true).toString();
+			var fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(zoteroItem.itemTypeID, field);
+			if (!fieldID) {
+				var fieldID = Zotero.ItemFields.getID(field);
+			}
 			if(value != "") {
 				// Strip enclosing quotes
 				if(value.match(Zotero.Cite.System._quotedRegexp)) {
 					value = value.substr(1, value.length-2);
 				}
 				cslItem[variable] = value;
+				if (zoteroItem.multi._keys[fieldID]) {
+					cslItem.multi._keys[variable] = {};
+					for (var langTag in zoteroItem.multi._keys[fieldID]) {
+						cslItem.multi._keys[variable][langTag] = zoteroItem.multi._keys[fieldID][langTag];
+					}
+				}
 				break;
 			}
 		}
 	}
-	
+
 	// separate name variables
 	var authorID = Zotero.CreatorTypes.getPrimaryIDForType(zoteroItem.itemTypeID);
 	var creators = zoteroItem.getCreators();
@@ -77,48 +89,89 @@ Zotero.Cite.System.retrieveItem = function(item) {
 		} else {
 			var creatorType = Zotero.CreatorTypes.getName(creator.creatorTypeID);
 		}
-		
+
 		var creatorType = CSL_NAMES_MAPPINGS[creatorType];
 		if(!creatorType) continue;
+
+		if (Zotero.Prefs.get('csl.enableInstitutionFormatting')) {
+			var nameObj = {
+				'family':creator.ref.lastName, 
+				'given':creator.ref.firstName,
+				'isInstitution': creator.ref.fieldMode
+			}
+		} else {
+			var nameObj = {
+				'family':creator.ref.lastName, 
+				'given':creator.ref.firstName
+			}
+		}
 		
-		var nameObj = {'family':creator.ref.lastName, 'given':creator.ref.firstName};
-		
+		for (var langTag in creator.multi._key) {
+			if (!nameObj.multi) {
+				nameObj.multi = {};
+				nameObj.multi._key = {};
+			}
+			if (Zotero.Prefs.get('csl.enableInstitutionFormatting')) {
+				nameObj.multi._key[langTag] = {
+					'family':creator.multi.get('lastName', langTag),
+					'given':creator.multi.get('firstName', langTag),
+					'isInstitution': creator.ref.fieldMode
+				};
+			} else {
+				nameObj.multi._key[langTag] = {
+					'family':creator.multi.get('lastName', langTag),
+					'given':creator.multi.get('firstName', langTag)
+				};
+			}
+			
+		}
+
 		if(cslItem[creatorType]) {
 			cslItem[creatorType].push(nameObj);
 		} else {
 			cslItem[creatorType] = [nameObj];
 		}
 	}
-	
+
 	// get date variables
+    if (["legal_case"].indexOf(cslType) > -1) {
+        var CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_LAW;
+    } else {
+        var CSL_DATE_MAPPINGS = CSL_DATE_MAPPINGS_VANILLA;
+    }
 	for(var variable in CSL_DATE_MAPPINGS) {
 		var date = zoteroItem.getField(CSL_DATE_MAPPINGS[variable], false, true);
 		if(date) {
-			var dateObj = Zotero.Date.strToDate(date);
-			// otherwise, use date-parts
-			var dateParts = [];
-			if(dateObj.year) {
-				// add year, month, and day, if they exist
-				dateParts.push(dateObj.year);
-				if(dateObj.month !== undefined) {
-					dateParts.push(dateObj.month+1);
-					if(dateObj.day) {
-						dateParts.push(dateObj.day);
-					}
-				}
-				cslItem[variable] = {"date-parts":[dateParts]};
-				
-				// if no month, use season as month
-				if(dateObj.part && !dateObj.month) {
-					cslItem[variable].season = dateObj.part;
-				}
+			if (Zotero.Prefs.get('hackUseCiteprocJsDateParser')) {
+				var raw = Zotero.Date.multipartToStr(date);
+				cslItem[variable] = {raw: raw, "date-parts":[dateParts]};
 			} else {
-				// if no year, pass date literally
-				cslItem[variable] = {"literal":date};
+				var dateObj = Zotero.Date.strToDate(date);
+				// otherwise, use date-parts
+				var dateParts = [];
+				if(dateObj.year) {
+					// add year, month, and day, if they exist
+					dateParts.push(dateObj.year);
+					if("number" === typeof dateObj.month) {
+						dateParts.push(dateObj.month+1);
+						if(dateObj.day) {
+							dateParts.push(dateObj.day);
+						}
+					}
+					cslItem[variable] = {"date-parts":[dateParts]};
+				
+					// if no month, use season as month
+					if(dateObj.part && !dateObj.month) {
+						cslItem[variable].season = dateObj.part;
+					}
+				} else {
+					// if no year, pass date literally
+					cslItem[variable] = {"literal":date};
+				}
 			}
 		}
 	}
-	
+
 	//this._cache[zoteroItem.id] = cslItem;
 	return cslItem;
 };
@@ -181,7 +234,7 @@ Zotero.Cite.getBibliographyFormatParameters = function(bib) {
 			bibStyle.tabStops = [alignAt];
 		}
 	}
-	
+
 	return bibStyle;
 }
 
@@ -248,7 +301,7 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 	cslEngine.setOutputFormat(format);
 	var bib = cslEngine.makeBibliography();
 	if(!bib) return false;
-	
+
 	if(format == "html") {
 		var output = [bib[0].bibstart];
 		for(var i in bib[1]) {
@@ -269,6 +322,7 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 		}
 		output.push(bib[0].bibend);
 		var html = output.join("");
+
 		
 		var inlineCSS = true;
 		if (!inlineCSS) {
@@ -385,12 +439,12 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 		return bib[0].bibstart+bib[1].join("")+bib[0].bibend;
 	} else if(format == "rtf") {
 		var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
-		
+
 		var preamble = (bibStyle.tabStops.length ? "\\tx"+bibStyle.tabStops.join(" \\tx")+" " : "");
 		preamble += "\\li"+bibStyle.indent+" \\fi"+bibStyle.firstLineIndent+" "
 		           +"\\sl"+bibStyle.lineSpacing+" \\slmult1 "
 		           +"\\sa"+bibStyle.entrySpacing+" ";
-		
+
 		return bib[0].bibstart+preamble+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
 	} else {
 		throw "Unimplemented bibliography format "+format;
@@ -429,3 +483,51 @@ Zotero.Cite.getItem = function(id) {
 Zotero.Cite.labels = ["page", "book", "chapter", "column", "figure", "folio",
 		"issue", "line", "note", "opus", "paragraph", "part", "section", "sub verbo",
 		"volume", "verse"];
+
+Zotero.Cite._monthStrings = false;
+Zotero.Cite.getMonthStrings = function(form, locale) {
+	if(Zotero.Cite._monthStrings){
+		return Zotero.Cite._monthStrings[form];
+	} else {
+		Zotero.Cite._monthStrings = {"long":[], "short":[]};
+
+		var sys = {'xml':new Zotero.CiteProc.CSL.System.Xml.Parsing()};
+		if(!locale) locale = Zotero.locale;
+
+		var cslLocale = Zotero.CiteProc.CSL.localeResolve(Zotero.locale);
+		if(!Zotero.CiteProc.CSL.locale[cslLocale.best]) {
+			let localexml = sys.xml.makeXml(Zotero.Cite.System.retrieveLocale(cslLocale.best));
+			if(!localexml) {
+				if(localexml == "en-US") {
+					throw "No locales.xml file could be found for the preferred locale or for en-US. "+
+					      "Please ensure that the locales directory exists and is properly populated";
+				} else {
+					let localexml = sys.xml.makeXml(Zotero.Cite.System.retrieveLocale(cslLocale.bare));
+					if(!localexml) {
+						Zotero.log("No locale "+cslLocale.best+"; using en-US", "warning");
+						return Zotero.Cite.getMonthStrings(form, "en-US");
+					}
+				}
+			}
+			Zotero.CiteProc.CSL.localeSet.call(Zotero.CiteProc.CSL, sys, localexml, cslLocale.best, cslLocale.best);
+		}
+
+		var locale = Zotero.CiteProc.CSL.locale[cslLocale.best];
+		if(!locale) {
+			Zotero.log("No locale "+cslLocale.best+"; using en-US", "warning");
+			return Zotero.Cite.getMonthStrings(form, "en-US");
+		}
+
+		for(let i=1; i<=12; i++) {
+			let term = locale.terms["month-"+(i<10 ? "0" : "")+i];
+			if(term) {
+				Zotero.Cite._monthStrings["long"][i-1] = term["long"];
+				Zotero.Cite._monthStrings["short"][i-1] = (term["short"] ? term["short"].replace(".", "", "g") : term["long"]);
+			} else {
+				Zotero.log("No month "+i+" specified for locale "+cslLocale.best, "warning");
+			}
+		}
+		return Zotero.Cite._monthStrings[form];
+	}
+}
+
