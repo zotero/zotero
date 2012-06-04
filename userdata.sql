@@ -55,6 +55,7 @@ CREATE TABLE itemDataValues (
     valueID INTEGER PRIMARY KEY,
     value UNIQUE
 );
+CREATE INDEX itemDataValues_value ON itemDataValues(value);
 
 -- Type-specific data for individual items
 CREATE TABLE itemData (
@@ -141,6 +142,7 @@ CREATE TABLE creators (
     FOREIGN KEY (creatorDataID) REFERENCES creatorData(creatorDataID)
 );
 CREATE INDEX creators_creatorDataID ON creators(creatorDataID);
+
 
 -- Unique creator data, which can be associated with more than one creator
 CREATE TABLE creatorData (
@@ -326,6 +328,26 @@ CREATE TABLE highlights (
 );
 CREATE INDEX highlights_itemID ON highlights(itemID);
 
+-- NOTE TO TESTERS: to reduce the volume of files flying around,
+-- I'll be placing the current verison of the patch at this URL:
+--
+--   http://gsl-nagoya-u.net/http/pub/duplicates_v06.patch
+--
+-- The version will be indicated with an extension to the
+-- version number, recorded inside the file.  The version of
+-- this patch is v06.13.  It should apply cleanly against
+-- r6339 Zotero sources. 
+-- 
+-- The user interface has changed from the original Zotero 
+-- "hidden preference" version.  The duplicates view is now 
+-- invoked from the library or group context menu: it is not 
+-- available on collections. If all entries are checked using
+-- the "mark item" context menu option, the behavior is
+-- similar to the existing "hidden preference" version,
+-- but with support for item merging (i.e. substitution
+-- of the master item for the dropped new item in collections
+-- where the new item appears).
+
 CREATE TABLE proxies (
     proxyID INTEGER PRIMARY KEY,
     multiHost INT,
@@ -389,3 +411,4 @@ CREATE TABLE translatorCache (
 	code TEXT,
 	lastModifiedTime INT
 );
+
