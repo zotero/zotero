@@ -74,6 +74,7 @@
 				<treecol
 					id="zotero-items-column-title" primary="true"
 					label="&zotero.items.title_column;"
+					crop="center"
 					flex="4" persist="width ordinal hidden sortActive sortDirection"/>
 				<splitter class="tree-splitter"/>
 				<treecol
