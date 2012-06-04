@@ -14,7 +14,7 @@ html, body {
 table.mceLayout > tbody > tr.mceLast {
 	position: absolute;
 	display: block;
-	top: 54px;
+	top: 80px;
 	bottom: 2px;
 	left: 1px;
 	right: 1px;
