@@ -442,6 +442,7 @@
 								}
 								var changed = tagsbox.replace(id, value);
 								if (changed) {
+								    this.reload();
 									return;
 								}
 							}
@@ -480,6 +481,8 @@
 					
 					var focusMode = 'tags';
 					var focusBox = tagsbox;
+
+					this.reload();
 					
 					if (this._tabDirection) {
 						this._focusNextField(focusBox, this._lastTabIndex, this._tabDirection == -1);
