@@ -48,6 +48,15 @@ var ZoteroItemPane = new function() {
 	}
 	
 	
+	function updateRelatedTab (relatedTab, count) {
+		var relatedLabel = relatedTab.getAttribute('label').replace(/(.*?)\s*\([0-9]+\)$/,"$1");
+		if (count) {
+			relatedTab.setAttribute('label', relatedLabel + ' (' + count + ')');
+		} else {
+			relatedTab.setAttribute('label', relatedLabel + ' (0)');
+		}
+	}
+	
 	/*
 	 * Load an item
 	 */
@@ -143,7 +152,28 @@ var ZoteroItemPane = new function() {
 		else {
 			box.mode = 'edit';
 		}
-		box.item = item;
+		if (item && (!box.item || box.getAttribute('_lastItemId') != item.id)) {
+			box.setAttribute("_lastItemId",item.id);
+			box.item = item;
+			// Update the related items count on the tab when any panel is opened or modified.
+			var relatedTab = document.getElementById('zotero-tab-related');
+			var deletedItems = Zotero.Items.getDeleted(item.libraryID, true);
+			var count = 0;
+			for (var i = 0, ilen = item.relatedItemsBidirectional.length; i < ilen; i += 1) {
+				if (deletedItems.indexOf(item.relatedItemsBidirectional[i]) > -1) {
+					continue;
+				}
+				count += 1;
+			}
+			updateRelatedTab(relatedTab, count);
+			if (box.getAttribute('id') == "zotero-editpane-related") {
+				// Attach the tab update function and the tab to the related box for its use
+				box.relatedTab = relatedTab;
+				box.updateRelatedTab = updateRelatedTab;
+			}
+		}
+		// XXXXX The trunk works with a straight assignment here.
+		//box.item = item;
 	}
 	
 	
