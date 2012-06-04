@@ -35,7 +35,7 @@ Zotero.Creator = function () {
 
 Zotero.Creator.prototype._init = function () {
 	this._id = null;
-	this._libraryID = null
+	this._libraryID = null;
 	this._key = null;
 	this._firstName = null;
 	this._lastName = null;
@@ -49,7 +49,6 @@ Zotero.Creator.prototype._init = function () {
 	this._changed = false;
 	this._previousData = false;
 }
-
 
 Zotero.Creator.prototype.__defineGetter__('objectType', function () { return 'creator'; });
 Zotero.Creator.prototype.__defineGetter__('id', function () { return this._get('id'); });
@@ -103,6 +102,7 @@ Zotero.Creator.prototype._set = function (field, val) {
 		case 'firstName':
 		case 'lastName':
 		case 'shortName':
+		case 'birthYear':
 			if (val) {
 				val = Zotero.Utilities.trim(val);
 			}
@@ -117,6 +117,7 @@ Zotero.Creator.prototype._set = function (field, val) {
 		
 		case 'creatorDataID':
 			throw ("Invalid field '" + field + "' in Zotero.Creator.set()");
+
 	}
 	
 	if (this.id || this.key) {
@@ -161,18 +162,18 @@ Zotero.Creator.prototype.exists = function() {
 	if (!this.id) {
 		throw ('creatorID not set in Zotero.Creator.exists()');
 	}
-	
 	var sql = "SELECT COUNT(*) FROM creators WHERE creatorID=?";
 	return !!Zotero.DB.valueQuery(sql, this.id);
 }
-
 
 Zotero.Creator.prototype.hasChanged = function () {
 	return this._changed;
 }
 
-
 Zotero.Creator.prototype.save = function () {
+	// Note: multilingual support also touches getDataID(), updateData()
+	// (not sure if that's still true)
+
 	Zotero.Creators.editCheck(this);
 	
 	Zotero.debug("Saving creator " + this.id);
@@ -201,37 +202,53 @@ Zotero.Creator.prototype.save = function () {
 		
 		var key = this.key ? this.key : this._generateKey();
 		
-		// If this was the only creator with the previous data,
-		// see if we can reuse or remove the old data row
-		if (this.creatorDataID) {
-			var count = Zotero.Creators.countCreatorsWithData(this.creatorDataID);
-			if (count == 1) {
-				var newCreatorDataID = Zotero.Creators.getDataID(this);
-				// Data hasn't changed
-				if (this.creatorDataID == newCreatorDataID) {
-					var creatorDataID = this.creatorDataID;
+		var res = this.checkinCreatorData(this);
+
+		var creatorDataID = res.dataID;
+		var deleteDataID = res.deleteDataID;
+
+		this.checkinCreator(creatorID, creatorDataID, key, isNew);
+
+		if (deleteDataID) {
+			Zotero.Creators.deleteData(deleteDataID);
 				}
-				// Existing data row with the new data -- switch to that
-				// and flag old row for deletion below
-				else if (newCreatorDataID) {
-					var deleteDataID = this.creatorDataID;
-					var creatorDataID = newCreatorDataID;
+
+		if (this.id) {
+			Zotero.debug("Updating linked items");
+			this.updateLinkedItems();
 				}
-				// Update current data row with new data
-				else {
-					Zotero.Creators.updateData(this.creatorDataID, this);
-					var creatorDataID = this.creatorDataID;
-				}
-			}
-		}
 		
-		if (!creatorDataID) {
-			var creatorDataID = Zotero.Creators.getDataID(this, true);
-			if (creatorDataID != this.creatorDataID) {
+		Zotero.DB.commitTransaction();
+	}
+	catch (e) {
+		Zotero.DB.rollbackTransaction();
+		throw (e);
+				}
+	// If successful, set values in object
+	if (!this.id) {
+		this._id = creatorID;
+			}
+	if (!this.key) {
+		this._key = key;
+		}
+	if (!this.creatorDataID) {
 				this._creatorDataID = creatorDataID;
 			}
+
+	Zotero.Creators.reload(this.id);
+
+	if (isNew) {
+		Zotero.Notifier.trigger('add', 'creator', this.id);
+	}
+	else {
+		Zotero.Notifier.trigger('modify', 'creator', this.id, this._previousData);
 		}
 		
+	return this.id;
+};
+
+
+Zotero.Creator.prototype.checkinCreator = function (creatorID, creatorDataID, key, isNew) {
 		var columns = [
 			'creatorID',
 			'creatorDataID',
@@ -248,15 +265,16 @@ Zotero.Creator.prototype.save = function () {
 			// If date added isn't set, use current timestamp
 			this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime,
 			// If date modified hasn't changed, use current timestamp
-			this._changed.dateModified ?
-				this.dateModified : Zotero.DB.transactionDateTime,
+			this._changed.dateModified ? this.dateModified : Zotero.DB.transactionDateTime,
 			Zotero.DB.transactionDateTime,
 			this.libraryID ? this.libraryID : null,
 			key
 		];
 		
 		if (isNew) {
-			var sql = "INSERT INTO creators (" + columns.join(', ') + ") VALUES ("
+
+		var sql = "INSERT INTO creators (";
+		sql = sql + columns.join(', ') + ") VALUES ("
 						+ placeholders.join(', ') + ")";
 			var insertID = Zotero.DB.query(sql, sqlValues);
 			if (!creatorID) {
@@ -269,49 +287,57 @@ Zotero.Creator.prototype.save = function () {
 			sqlValues.shift();
 			sqlValues.push(creatorID);
 			
-			var sql = "UPDATE creators SET " + columns.join("=?, ") + "=?"
-				+ " WHERE creatorID=?";
+		var sql = "UPDATE creators SET ";
+		sql = sql + columns.join("=?, ") + "=?"
+		sql = sql + " WHERE creatorID=?";
 			Zotero.DB.query(sql, sqlValues);
 		}
+};
 		
-		if (deleteDataID) {
-			Zotero.Creators.deleteData(deleteDataID);
-		}
 		
-		if (this.id) {
-			Zotero.debug("Updating linked items");
-			this.updateLinkedItems();
-		}
+Zotero.Creator.prototype.checkinCreatorData = function (fields) {
+	// If this was the only creator with the previous data,
+	// see if we can reuse or remove the old data row
+	var ret = {};
 		
-		Zotero.DB.commitTransaction();
+	var dataID = fields.creatorDataID;
+
+	if (dataID) {
+
+		var count = Zotero.Creators.countCreatorsWithData(fields.creatorDataID);
+
+		if (count == 1) {
+			var newDataID = Zotero.Creators.getDataID(fields);
+			// Data hasn't changed
+			if (dataID == newDataID) {
+				ret.dataID = dataID;
 	}
-	catch (e) {
-		Zotero.DB.rollbackTransaction();
-		throw (e);
+			// Existing data row with the new data -- switch to that
+			// and flag old row for deletion below
+			else if (newDataID) {
+				ret.deleteDataID = dataID;
+				ret.dataID = newDataID;
+	}
+			// Update current data row with new data
+			else {
+				// XXXX The actual database save happens in the function
+				// called here, so need to pass through the child IDs
+				// or parent ID + lang
+				Zotero.Creators.updateData(dataID, fields);
+				ret.dataID = dataID;
+	}
+	}
 	}
 	
-	// If successful, set values in object
-	if (!this.id) {
-		this._id = creatorID;
+	if (!ret.dataID) {
+		ret.dataID = Zotero.Creators.getDataID(fields, true);
+        // Adapted from Zotero 3.0 branch, 28 Feb 2012 (commit: cb19ac18f7f0817e814ffea3ce05769a1c6b289d)
+		if (ret.dataID != dataID) {
+			fields._creatorDataID = ret.dataID;
 	}
-	if (!this.key) {
-		this._key = key;
 	}
-	if (!this.creatorDataID) {
-		this._creatorDataID = creatorDataID;
-	}
-	
-	Zotero.Creators.reload(this.id);
-	
-	if (isNew) {
-		Zotero.Notifier.trigger('add', 'creator', this.id);
-	}
-	else {
-		Zotero.Notifier.trigger('modify', 'creator', this.id, this._previousData);
-	}
-	
-	return this.id;
-}
+	return ret;
+};
 
 
 Zotero.Creator.prototype.countLinkedItems = function() {
@@ -378,16 +404,19 @@ Zotero.Creator.prototype.serialize = function () {
 	
 	obj.fields = {};
 	if (this.fieldMode == 1) {
-		obj.fields.name = this.lastName;
+		obj.fields.name = this._lastName;
 	}
 	else {
 		obj.fields.firstName = this.firstName;
-		obj.fields.lastName = this.lastName;
+		obj.fields.lastName = this._lastName;
 	}
 	obj.fields.fieldMode = this.fieldMode;
 	obj.fields.shortName = this.shortName;
 	obj.fields.birthYear = this.birthYear;
 	
+	// OOOOO: We do not support multilingual in creator.serialize(), because
+	// creator objects are atomic.
+
 	return obj;
 }
 
@@ -417,7 +446,7 @@ Zotero.Creator.prototype.erase = function () {
 	
 	var linkedItemIDs = this.getLinkedItems();
 	for each(var itemID in linkedItemIDs) {
-		var item = Zotero.Items.get(itemID)
+		var item = Zotero.Items.get(itemID);
 		if (!item) {
 			throw ('Linked item not found in Zotero.Creator.erase()');
 		}
@@ -443,8 +472,8 @@ Zotero.Creator.prototype.erase = function () {
 	Zotero.Prefs.set('purge.creators', true);
 }
 
-
 Zotero.Creator.prototype.load = function (allowFail) {
+	var ms, mm, i, l, ilen;
 	var id = this._id;
 	var key = this._key;
 	var libraryID = this._libraryID;
@@ -472,6 +501,7 @@ Zotero.Creator.prototype.load = function (allowFail) {
 			sql += " AND libraryID IS NULL";
 		}
 	}
+
 	var row = Zotero.DB.rowQuery(sql, params);
 	
 	if (!row) {
@@ -481,14 +511,14 @@ Zotero.Creator.prototype.load = function (allowFail) {
 		}
 		throw ("Creator " + desc + " not found in Zotero.Item.load()");
 	}
-	
 	this.loadFromRow(row);
+
 	return true;
 }
 
-
 Zotero.Creator.prototype.loadFromRow = function (row) {
 	this._init();
+	
 	for (var col in row) {
 		//Zotero.debug("Setting field '" + col + "' to '" + row[col] + "' for creator " + this.id);
 		switch (col) {
@@ -505,6 +535,7 @@ Zotero.Creator.prototype.loadFromRow = function (row) {
 		}
 		this['_' + col] = row[col] ? row[col] : '';
 	}
+
 	this._loaded = true;
 }
 
@@ -548,6 +579,7 @@ Zotero.Creator.prototype._checkValue = function (field, value) {
 				this._invalidValueError(field, value);
 			}
 			break;
+
 	}
 }
 
