@@ -275,10 +275,10 @@ RDFIndexedFormula.prototype.uris = function(term) {
 
 // On input parameters, convert constants to terms
 // 
-function RDFMakeTerm(formula,val, canonicalize) {
-    if (typeof val != 'object') {   
+function RDFMakeTerm(formula,val, canonicalize, lang) {
+    if (typeof val != 'object') {
 	if (typeof val == 'string')
-	    return new RDFLiteral(val);
+	    return new RDFLiteral(val, lang);
         if (typeof val == 'number')
             return new RDFLiteral(val); // @@ differet types
         if (typeof val == 'boolean')
@@ -295,13 +295,13 @@ function RDFMakeTerm(formula,val, canonicalize) {
 }
 
 // add a triple to the store
-RDFIndexedFormula.prototype.add = function(subj, pred, obj, why) {
+RDFIndexedFormula.prototype.add = function(subj, pred, obj, why, lang) {
     var actions, st;
     if (why == undefined) why = this.fetcher ? this.fetcher.appNode: kb.sym("chrome:theSession"); //system generated
                                //defined in source.js, is this OK with identity.js only user?
     subj = RDFMakeTerm(this, subj);
     pred = RDFMakeTerm(this, pred);
-    obj = RDFMakeTerm(this, obj);
+	obj = RDFMakeTerm(this, obj, true, lang);
     why = RDFMakeTerm(this, why);
     
     var hash = [ this.canon(subj).hashString(), this.canon(pred).hashString(),
