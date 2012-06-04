@@ -42,34 +42,160 @@
 	
 	<script src="../include.js"/>
 	<script src="../bibliography.js"/>
-	<vbox id="zotero-bibliography-container">
-		<groupbox>
-			<caption label="&zotero.bibliography.style.label;"/>
-			<listbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
-		</groupbox>
-		
-		<groupbox>
-			<caption label="&zotero.integration.prefs.displayAs.label;"/>
-			<radiogroup id="displayAs" orient="horizontal">
+	
+	<tabbox width="600">
+	  <tabs id="doc-prefs-tabs">
+		<tab>&zotero.integration.prefs.lang.styleAndFormat;</tab>
+		<tab>&zotero.integration.prefs.lang.languages;</tab>
+	  </tabs>
+	  <tabpanels id="doc-prefs-tabpanels">
+		<tabpanel>
+		  <vbox id="zotero-bibliography-container">
+		    <groupbox>
+			  <caption label="&zotero.bibliography.style.label;"/>
+			  <listbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
+		    </groupbox>
+
+		    <groupbox>
+			  <caption label="&zotero.integration.prefs.displayAs.label;"/>
+			  <radiogroup id="displayAs" orient="horizontal">
 				<radio id="footnotes" label="&zotero.integration.prefs.footnotes.label;" selected="true"/>
 				<radio id="endnotes" label="&zotero.integration.prefs.endnotes.label;"/>
-			</radiogroup>
-		</groupbox>
+			  </radiogroup>
+		    </groupbox>
 		
-		<groupbox>
-			<caption label="&zotero.integration.prefs.formatUsing.label;"/>
+		    <groupbox>
+			  <caption label="&zotero.integration.prefs.formatUsing.label;"/>
 			
-			<radiogroup id="formatUsing" orient="vertical">
+			  <radiogroup id="formatUsing" orient="vertical">
 				<radio id="fields" selected="true"/>
 				<label class="radioDescription" id="fields-caption"/>
 				<label class="radioDescription" id="fields-file-format-notice"/>
 				<radio id="bookmarks" label="&zotero.integration.prefs.bookmarks.label;"/>
-				<description class="radioDescription" id="bookmarks-caption">&zotero.integration.prefs.bookmarks.caption;</description>
-				<description class="radioDescription" id="bookmarks-file-format-notice"/>
-			</radiogroup>
+				<description width="200" class="radioDescription" id="bookmarks-caption">&zotero.integration.prefs.bookmarks.caption;</description>
+				<description width="200" class="radioDescription" id="bookmarks-file-format-notice"/>
+			  </radiogroup>
 			
-			<checkbox id="storeReferences" label="&zotero.integration.prefs.storeReferences.label;"/>
-			<description class="radioDescription">&zotero.integration.prefs.storeReferences.caption;</description>
-		</groupbox>
-	</vbox>
+			  <checkbox id="storeReferences" label="&zotero.integration.prefs.storeReferences.label;"/>
+			  <description width="200" class="radioDescription">&zotero.integration.prefs.storeReferences.caption;</description>
+		    </groupbox>
+		  </vbox>
+		</tabpanel>
+		<tabpanel>
+		  <groupbox>
+			<caption label="&zotero.integration.prefs.lang.languagesInCitations;"/>
+			<grid>
+			  <columns>
+				<column flex="1"/>
+				<column flex="1"/>
+				<column flex="1"/>
+			  </columns>
+			  <rows>
+				<row>
+				  <label/>
+				  <caption label="&zotero.integration.prefs.lang.primary;" style="text-align:center;"/>
+				  <caption label="&zotero.integration.prefs.lang.secondary;" style="text-align:center;"/>
+				</row>
+				<row>
+				  <label/>
+				  <hbox style="background:#b7b7b7;margin:0px 0.5em 0px 0.5em;"/>
+				  <hbox style="background:#b7b7b7;margin:0px 0.5em 0px 0.5em;"/>
+				</row>
+				<row>
+				  <hbox>
+					<caption label="&zotero.integration.prefs.lang.persons;"/>
+				  </hbox>
+				  <radiogroup id="persons-radio" orient="horizontal" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);">
+					<radio label="猫 (orig)" id="persons-radio-orig"/>
+					<radio label="neko" id="persons-radio-translit"/>
+					<radio label="cat" id="persons-radio-translat"/>
+				  </radiogroup>
+				  <hbox orient="horizontal">
+					<checkbox label="猫 (orig)" id="persons-checkbox-orig" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+					<checkbox label="neko" id="persons-checkbox-translit" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+					<checkbox label="cat" id="persons-checkbox-translat" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+				  </hbox>
+				</row>
+				<row>
+				  <hbox>
+					<caption label="&zotero.integration.prefs.lang.institutions;"/>
+				  </hbox>
+				  <radiogroup id="institutions-radio" orient="horizontal" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);">
+					<radio label="猫 (orig)" id="institutions-radio-orig"/>
+					<radio label="neko" id="institutions-radio-translit"/>
+					<radio label="cat" id="institutions-radio-translat"/>
+				  </radiogroup>
+				  <hbox orient="horizontal">
+					<checkbox label="猫 (orig)" id="institutions-checkbox-orig" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+					<checkbox label="neko" id="institutions-checkbox-translit" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+					<checkbox label="cat" id="institutions-checkbox-translat" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+				  </hbox>
+				</row>
+				<row>
+				  <hbox>
+					<caption label="&zotero.integration.prefs.lang.titles;"/>
+				  </hbox>
+				  <radiogroup id="titles-radio" orient="horizontal" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);">
+					<radio label="猫 (orig)" id="titles-radio-orig"/>
+					<radio label="neko" id="titles-radio-translit"/>
+					<radio label="cat" id="titles-radio-translat"/>
+				  </radiogroup>
+				  <hbox>
+					<checkbox label="猫 (orig)" id="titles-checkbox-orig" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+					<checkbox label="neko" id="titles-checkbox-translit" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+					<checkbox label="cat" id="titles-checkbox-translat" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+				  </hbox>
+				</row>
+				<row>
+				  <hbox>
+					<caption label="&zotero.integration.prefs.lang.publishers;"/>
+				  </hbox>
+				  <radiogroup id="publishers-radio" orient="horizontal" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);">
+					<radio label="猫 (orig)" id="publishers-radio-orig"/>
+					<radio label="neko" id="publishers-radio-translit"/>
+					<radio label="cat" id="publishers-radio-translat"/>
+				  </radiogroup>
+				  <hbox orient="horizontal">
+					<checkbox label="猫 (orig)" id="publishers-checkbox-orig" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+					<checkbox label="neko" id="publishers-checkbox-translit" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+					<checkbox label="cat" id="publishers-checkbox-translat" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+				  </hbox>
+				</row>
+				<row>
+				  <hbox>
+					<caption label="&zotero.integration.prefs.lang.places;"/>
+				  </hbox>
+				  <radiogroup id="places-radio" orient="horizontal" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);">
+					<radio label="猫 (orig)" id="places-radio-orig"/>
+					<radio label="neko" id="places-radio-translit"/>
+					<radio label="cat" id="places-radio-translat"/>
+				  </radiogroup>
+				  <hbox orient="horizontal">
+					<checkbox label="猫 (orig)" id="places-checkbox-orig" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+					<checkbox label="neko" id="places-checkbox-translit" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+					<checkbox label="cat" id="places-checkbox-translat" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
+				  </hbox>
+				</row>
+			  </rows>
+			</grid>
+			<separator/>
+			<grid flex="1">
+			  <columns>
+				<column flex="1"/>
+				<column flex="1"/>
+				<column flex="1"/>
+				<column flex="1"/>
+			  </columns>
+			  <rows id="lang-prefs">
+				<row>
+				  <caption label="&zotero.integration.prefs.lang.transliteration;"/>
+				  <caption label="&zotero.integration.prefs.lang.translation;"/>
+				  <caption label="&zotero.integration.prefs.lang.sorting;"/>
+				</row>
+			  </rows>
+			</grid>
+		  </groupbox>
+		</tabpanel>
+	  </tabpanels>
+	</tabbox>
 </dialog>
