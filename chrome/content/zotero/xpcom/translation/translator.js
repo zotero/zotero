@@ -424,7 +424,7 @@ Zotero.Translator = function(file, json, code) {
 	const codeGetterFunction = function() { return Zotero.File.getContents(this.file); }
 	// Maximum length for the info JSON in a translator
 	const MAX_INFO_LENGTH = 4096;
-	const infoRe = /^\s*{[\S\s]*?}\s*?[\r\n]/;
+	const infoRe = /^\s*{[\S\s]*?[\r\n]}\s*?[\r\n]/;
 	
 	this.file = file;
 	
