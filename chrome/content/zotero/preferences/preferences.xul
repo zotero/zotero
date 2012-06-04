@@ -65,7 +65,7 @@ To add a new preference:
 			<preference id="pref-groups-copyChildFileAttachments" name="extensions.zotero.groups.copyChildFileAttachments" type="bool"/>
 			<preference id="pref-groups-copyChildLinks" name="extensions.zotero.groups.copyChildLinks" type="bool"/>
 		</preferences>
-		
+
 		<groupbox id="zotero-prefpane-general-groupbox">
 			<caption label="&zotero.preferences.userInterface;"/>
 			
@@ -700,6 +700,257 @@ To add a new preference:
 		<separator/>
 	</prefpane>
 	
+	<prefpane id="zotero-prefpane-languages"
+			  			label="&zotero.preferences.lang.languages;"
+			  			image="chrome://zotero/skin/prefs-languages.png"
+			  onpaneload="onLangLoad();" flex="1">
+
+	  <menupopup id="extend-lang-menu" 
+				 position="after_start">
+		<menu label="&zotero.preferences.lang.script;" id="script-lang-menu">
+		  <menupopup height="250"
+					 onpopupshowing="scriptLangMenuPrep(this.parentNode.parentNode)" id="script-lang-box"/>
+		</menu>
+		<menu label="&zotero.preferences.lang.region;" id="region-lang-menu">
+		  <menupopup height="250" id="region-lang-box"/>
+		</menu>
+		<menu label="&zotero.preferences.lang.variant;" id="variant-lang-menu">
+		  <menupopup maxheight="250"
+					 onpopupshowing="variantLangMenuPrep(this.parentNode.parentNode)" id="variant-lang-box"/>
+		</menu>
+	  </menupopup>
+	  <groupbox>
+		<hbox>
+		  <vbox>
+			<grid>
+			  <columns>
+				<column/>
+				<column/>
+			  </columns>
+			  <rows>
+				<row>
+				  <caption label="&zotero.preferences.lang.ui;"/>
+				  <menulist id="ui-menulist" onselect="window.openDialog('chrome://zotero/content/languageSwitchConfirmation.xul', 'Switch Interface Language', 'chrome,centerscreen', document, Zotero);">
+					<!-- generated list items go in here -->
+				  </menulist>
+				</row>
+				<row>
+				  <caption label="&zotero.preferences.lang.csl;"/>
+				  <menulist id="locale-menulist" onselect="var lang = this.selectedItem.value;Zotero.Prefs.set('csl.locale', lang)">
+				  </menulist>
+				</row>
+			  </rows>
+			</grid>
+			<hbox flex="1">
+			  <vbox style="background:#99e199;border:1px black transparent;-moz-border-radius: 6px;margin-right:0.5em;margin-top:0.5em;" flex="1">
+				<label value="&zotero.preferences.lang.setLocales;"/>
+				<label value="&zotero.preferences.lang.languageRoles;"/>
+				<label value="&zotero.preferences.lang.configureCitations;"/>
+			  </vbox>
+			</hbox>
+		  </vbox>
+		  <vbox>
+			<grid>
+			  <columns>
+				<column flex="1"/>
+				<column flex="1"/>
+				<column flex="1"/>
+			  </columns>
+			  <rows>
+				<row>
+				  <label/>
+				  <caption label="&zotero.preferences.lang.primary;" style="text-align:center;"/>
+				  <caption label="&zotero.preferences.lang.secondary;" style="text-align:center;"/>
+				</row>
+				<row>
+				  <label/>
+				  <hbox style="background:#b7b7b7;margin:0px 0.5em 0px 0.5em;"/>
+				  <hbox style="background:#b7b7b7;margin:0px 0.5em 0px 0.5em;"/>
+				</row>
+				<row style="max-height:1em;min-height:1em;">
+				  <hbox>
+					<caption label="&zotero.preferences.lang.persons;"/>
+				  </hbox>
+				  <radiogroup id="persons-radio" orient="horizontal" oncommand="citationLangRecord(this);">
+					<radio label="猫 (orig)" id="persons-radio-orig"/>
+					<radio label="neko" id="persons-radio-translit"/>
+					<radio label="cat" id="persons-radio-translat"/>
+				  </radiogroup>
+				  <hbox orient="horizontal">
+					<checkbox label="猫 (orig)" id="persons-checkbox-orig" oncommand="citationLangRecord(this);"/>
+					<checkbox label="neko" id="persons-checkbox-translit" oncommand="citationLangRecord(this);"/>
+					<checkbox label="cat" id="persons-checkbox-translat" oncommand="citationLangRecord(this);"/>
+				  </hbox>
+				</row>
+				<row style="max-height:1em;min-height:1em;">
+				  <hbox>
+					<caption label="&zotero.preferences.lang.institutions;"/>
+				  </hbox>
+				  <radiogroup id="institutions-radio" orient="horizontal" oncommand="citationLangRecord(this);">
+					<radio label="猫 (orig)" id="institutions-radio-orig"/>
+					<radio label="neko" id="institutions-radio-translit"/>
+					<radio label="cat" id="institutions-radio-translat"/>
+				  </radiogroup>
+				  <hbox orient="horizontal">
+					<checkbox label="猫 (orig)" id="institutions-checkbox-orig" oncommand="citationLangRecord(this);"/>
+					<checkbox label="neko" id="institutions-checkbox-translit" oncommand="citationLangRecord(this);"/>
+					<checkbox label="cat" id="institutions-checkbox-translat" oncommand="citationLangRecord(this);"/>
+				  </hbox>
+				</row>
+				<row style="max-height:1em;min-height:1em;">
+				  <hbox>
+					<caption label="&zotero.preferences.lang.titles;"/>
+				  </hbox>
+				  <radiogroup id="titles-radio" orient="horizontal" oncommand="citationLangRecord(this);">
+					<radio label="猫 (orig)" id="titles-radio-orig"/>
+					<radio label="neko" id="titles-radio-translit"/>
+					<radio label="cat" id="titles-radio-translat"/>
+				  </radiogroup>
+				  <hbox>
+					<checkbox label="猫 (orig)" id="titles-checkbox-orig" oncommand="citationLangRecord(this);"/>
+					<checkbox label="neko" id="titles-checkbox-translit" oncommand="citationLangRecord(this);"/>
+					<checkbox label="cat" id="titles-checkbox-translat" oncommand="citationLangRecord(this);"/>
+				  </hbox>
+				</row>
+				<row style="max-height:1em;min-height:1em;">
+				  <hbox>
+					<caption label="&zotero.preferences.lang.publishers;"/>
+				  </hbox>
+				  <radiogroup id="publishers-radio" orient="horizontal" oncommand="citationLangRecord(this);">
+					<radio label="猫 (orig)" id="publishers-radio-orig"/>
+					<radio label="neko" id="publishers-radio-translit"/>
+					<radio label="cat" id="publishers-radio-translat"/>
+				  </radiogroup>
+				  <hbox orient="horizontal">
+					<checkbox label="猫 (orig)" id="publishers-checkbox-orig" oncommand="citationLangRecord(this);"/>
+					<checkbox label="neko" id="publishers-checkbox-translit" oncommand="citationLangRecord(this);"/>
+					<checkbox label="cat" id="publishers-checkbox-translat" oncommand="citationLangRecord(this);"/>
+				  </hbox>
+				</row>
+				<row style="max-height:1em;min-height:1em;">
+				  <hbox>
+					<caption label="&zotero.preferences.lang.places;"/>
+				  </hbox>
+				  <radiogroup id="places-radio" orient="horizontal" oncommand="citationLangRecord(this);">
+					<radio label="猫 (orig)" id="places-radio-orig"/>
+					<radio label="neko" id="places-radio-translit"/>
+					<radio label="cat" id="places-radio-translat"/>
+				  </radiogroup>
+				  <hbox orient="horizontal">
+					<checkbox label="猫 (orig)" id="places-checkbox-orig" oncommand="citationLangRecord(this);"/>
+					<checkbox label="neko" id="places-checkbox-translit" oncommand="citationLangRecord(this);"/>
+					<checkbox label="cat" id="places-checkbox-translat" oncommand="citationLangRecord(this);"/>
+				  </hbox>
+				</row>
+			  </rows>
+			</grid>
+			<!--
+				This should come back at some point ...
+
+				<checkbox id="original-name-format-checkbox"
+				oncommand="toggleOriginalCreatorNameFormatOption(event)" 
+				label="&zotero.preferences.lang.originalNameFormat;"/>
+			-->
+		  </vbox>
+		</hbox>
+      </groupbox>
+	  <vbox>
+		<grid>
+		  <columns>
+			<column minwidth="250" maxwidth="250"/>
+			<column minwidth="80" maxwidth="80"/>
+			<column minwidth="157" maxwidth="157"/>
+			<column minwidth="250" maxwidth="250"/>
+		  </columns>
+		  <rows>
+			<row>
+			  <groupbox>
+				<textbox emptytext="&zotero.preferences.lang.addLanguage;"
+						 type="autocomplete"
+						 autocompletesearch="zotero"
+						 autocompletesearchparam="zlsPrimary/"
+						 onkeypress="handleLangKeypress(event)"
+						 ontextentered="handleLangAutoCompleteSelect(this)"/>
+				<grid>
+				  <columns>
+					<column minwidth="90" maxwidth="90"/>
+					<column style="margin:0px 0.5em 0px 0.5em;"/>
+					<column flex="1"/>
+				  </columns>
+				  <rows id="language-tags-header">
+					<row>
+					  <caption label="&zotero.preferences.lang.nickname;"/>
+					  <label value="&zotero.preferences.lang.tag;" style="font-weight:bold;"/>
+					  <hbox/>
+					</row>
+				  </rows>
+				</grid>
+			  </groupbox>
+			  <hbox flex="1"/>
+			  <groupbox>
+				<hbox>
+				  <hbox flex="1"/>
+				  <label value="&zotero.preferences.lang.insideZotero;" style="font-weight:bold;font-size:larger;"/>
+				  <hbox flex="1"/>
+				</hbox>
+				<hbox style="background:#b7b7b7;min-height:3px;margin:0px;"/>
+				<grid>
+				  <columns>
+					<column minwidth="18" maxwidth="18"/>
+					<column minwidth="73" maxwidth="73"/>
+					<column />
+				  </columns>
+				  <rows id="zotero-languages-header">
+					<row>
+					  <hbox flex="1"/>
+					  <caption label="&zotero.preferences.lang.sorting;" style="font-size:smaller;margin-top:0.5em;"/>
+					  <caption label="&zotero.preferences.lang.display;" style="font-size:smaller;margin-top:0.5em;"/>
+					</row>
+				  </rows>
+				</grid>
+			  </groupbox>
+			  <groupbox>
+				<hbox>
+				  <hbox flex="1"/>
+				  <label value="&zotero.preferences.lang.inCitationsAndBibliographies;" style="font-weight:bold;font-size:larger;"/>
+				  <hbox flex="1"/>
+				</hbox>
+				<hbox style="background:#b7b7b7;min-height:3px;margin:0px;"/>
+				<grid>
+				  <columns>
+					<column minwidth="88" maxwidth="88"/>
+					<column minwidth="94" maxwidth="94"/>
+					<column minwidth="20" maxwidth="20"/>
+				  </columns>
+				  <rows id="citation-languages-header">
+					<row>
+					  <caption label="&zotero.preferences.lang.transliteration;" style="font-size:smaller;margin-top:0.5em;"/>
+					  <caption label="&zotero.preferences.lang.translation;" style="font-size:smaller;margin-top:0.5em;"/>
+					  <caption label="&zotero.preferences.lang.sorting;" style="font-size:smaller;margin-top:0.5em;"/>
+					</row>
+				  </rows>
+				</grid>
+			  </groupbox>
+			</row>
+		  </rows>
+		</grid>
+	  </vbox>
+	  <vbox minheight="180" maxheight="180" style="overflow:auto;">
+		<grid>
+		  <columns>
+			<column minwidth="120" maxwidth="120"/>
+			<column minwidth="170" maxwidth="170"/>
+			<column/>
+			<column flex="1"/>
+			<column flex="1"/>
+			<column flex="1"/>
+			<column flex="1"/>
+			<column flex="1"/>
+		  </columns>
+		  <rows id="language-rows"/>
+		</grid>
+	  </vbox>
+	</prefpane>
 	
 	<prefpane id="zotero-prefpane-advanced"
 						label="&zotero.preferences.prefpane.advanced;"
