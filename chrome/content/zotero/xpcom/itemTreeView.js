@@ -223,6 +223,9 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
 	Zotero.debug('Refreshing items list');
 	if(!Zotero.ItemTreeView._haveCachedFields) yield true;
 	
+	// Set sort languages
+	this.sortLanguages = Zotero.CachedLanguagePreferences.zoteroSort;
+
 	var usiDisabled = Zotero.UnresponsiveScriptIndicator.disable();
 	
 	this._searchMode = this._itemGroup.isSearchMode();
@@ -316,6 +319,7 @@ Zotero.ItemTreeView.prototype._refreshGenerator = function()
  */
 Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 {
+	var pos, len, ppos, deleteid, checkid, pppos;
 	if (!this._treebox || !this._treebox.treeBody) {
 		Components.utils.reportError("Treebox didn't exist in itemTreeView.notify()");
 		return;
@@ -687,7 +691,6 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 				this.rememberSelection(savedSelection);
 			}
 		}
-		
 		this._treebox.invalidate();
 	}
 	// For special case in which an item needs to be selected without changes
@@ -979,13 +982,14 @@ Zotero.ItemTreeView.prototype.cycleHeader = function(column)
 	}
 	this._treebox.invalidate();
 	this.selection.selectEventsSuppressed = false;
-}
+};
 
 /*
  *  Sort the items by the currently sorted column.
  */
 Zotero.ItemTreeView.prototype.sort = function(itemID)
 {
+	var sortLanguages = this.sortLanguages;
 	// If Zotero pane is hidden, mark tree for sorting later in setTree()
 	if (!this._treebox.columns) {
 		this._needsSort = true;
@@ -1032,7 +1036,9 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	// calls are relatively expensive
 	var cache = {};
 	
-	// Get the display field for a row (which might be a placeholder title)
+	// Get the sort field for a row (which might be a placeholder title)
+	// Multilingual: feeding language parameter everywhere in this function,
+	// and in getDisplayTitle() by passthrough.
 	var getField;
 	if (columnField == 'title') {
 		getField = function (row) {
@@ -1042,21 +1048,62 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				case 8: // letter
 				case 10: // interview
 				case 17: // case
-					field = row.ref.getDisplayTitle();
+				case 16: // bill
+				case 16: // bill
+				case 20: // statute
+					field = row.ref.getDisplayTitle(false, sortLanguages);
 					break;
 				
 				default:
-					field = row.getField(columnField, unformatted);
+					field = row.getField(columnField, unformatted, true, sortLanguages);
 			}
 			// Ignore some leading and trailing characters when sorting
 			return Zotero.Items.getSortTitle(field);
 		}
+	} else if (columnField == 'firstCreator') {
+		// OOOOO: Todo: treat sortCreator (and possibly firstCreator)
+		// as ordinary multilingual fields.  Would need to have fieldID,
+		// or else getField()/MultiField.get() would need to be
+		// adjusted.
+		// XXX: first true value is for "unformatted"
+		getField = function(row) {
+			return row.ref.getField('sortCreator', unformatted, true);
+		}
 	} else {
-		getField = function(row) row.getField(columnField, unformatted);
+		getField = function(row) {
+			return row.ref.getField(columnField, unformatted, true, sortLanguages);
+		}
 	}
 	
 	var includeTrashed = this._itemGroup.isTrash();
 	
+	var collation = Zotero.getLocaleCollation();
+
+	var strcmp = function (a, b, collationSort) {
+		var isKana = /^[\u3040-\u309f\u30a0-\u30ff]/;
+		
+		// Display rows with empty values last
+		var cmp = (a == '' && b != '') ? -1 : (a != '' && b == '') ? 1 : 0;
+		if (cmp) {
+			return cmp;
+		}
+		
+		if (collationSort) {
+			if (isKana.exec(a) || isKana.exec(b)) {
+				if (a > b) {
+					return -1;
+				} else if (a < b) {
+					return 1;
+				} else {
+					return 0;
+				}
+			} else {
+				return collation.compareString(1, b, a);
+			}
+		}
+		return (a > b) ? -1 : (a < b) ? 1 : 0;
+	}
+
 	var me = this;
 	function rowSort(a, b) {
 		var cmp, fieldA, fieldB;
@@ -1079,6 +1126,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				if (cmp) {
 					return cmp;
 				}
+				// XXX: this fail-safe not in trunk, maybe not needed now?
+				cmp = (fieldA > fieldB) ? -1 : (fieldA < fieldB) ? 1 : 0;
 				break;
 			
 			case 'firstCreator':
@@ -1125,7 +1174,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 					}
 				}
 				
-				cmp = collation.compareString(1, fieldB, fieldA);
+				cmp = strcmp(fieldA, fieldB, true);
 				if (cmp) {
 					return cmp;
 				}
@@ -1141,7 +1190,6 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		if (columnField !== 'date') {
 			fieldA = a.getField('date', true).substr(0, 10);
 			fieldB = b.getField('date', true).substr(0, 10);
-			
 			cmp = strcmp(fieldA, fieldB);
 			if (cmp) {
 				return cmp;
@@ -1161,15 +1209,13 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		//
 		var fieldA = firstCreatorSortCache[a.id];
 		if (fieldA == undefined) {
-			var matches = Zotero.Items.getSortTitle(a.getField('firstCreator')).match(/^[^\s]+/);
-			var fieldA = matches ? matches[0] : '';
+			var fieldA = Zotero.Items.getSortTitle(a.getField('sortCreator'));
 			firstCreatorSortCache[a.id] = fieldA;
 		}
 		
 		var fieldB = firstCreatorSortCache[b.id];
 		if (fieldB == undefined) {
-			var matches = Zotero.Items.getSortTitle(b.getField('firstCreator')).match(/^[^\s]+/);
-			var fieldB = matches ? matches[0] : '';
+			var fieldB = Zotero.Items.getSortTitle(b.getField('sortCreator'));
 			firstCreatorSortCache[b.id] = fieldB;
 		}
 		
@@ -1272,15 +1318,15 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		
 		while (true) {
 			// Compare names
-			fieldA = Zotero.Items.getSortTitle(aCreators[aPos].ref.lastName);
-			fieldB = Zotero.Items.getSortTitle(bCreators[bPos].ref.lastName);
+			fieldA = Zotero.Items.getSortTitle(aCreators[aPos].multi.get('lastName',sortLanguages));
+			fieldB = Zotero.Items.getSortTitle(bCreators[bPos].multi.get('lastName',sortLanguages));
 			var cmp = strcmp(fieldA, fieldB, true);
 			if (cmp) {
 				return cmp;
 			}
 			
-			fieldA = Zotero.Items.getSortTitle(aCreators[aPos].ref.firstName);
-			fieldB = Zotero.Items.getSortTitle(bCreators[bPos].ref.firstName);
+			fieldA = Zotero.Items.getSortTitle(aCreators[aPos].multi.get('firstName', sortLanguages));
+			fieldB = Zotero.Items.getSortTitle(bCreators[bPos].multi.get('firstName', sortLanguages));
 			var cmp = strcmp(fieldA, fieldB, true);
 			if (cmp) {
 				return cmp;
@@ -1337,20 +1383,6 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		}
 	}
 	
-	function strcmp(a, b, collationSort) {
-		// Display rows with empty values last
-		var cmp = (a == '' && b != '') ? -1 : (a != '' && b == '') ? 1 : 0;
-		if (cmp) {
-			return cmp;
-		}
-		
-		if (collationSort) {
-			return collation.compareString(1, b, a);
-		}
-		
-		return (a > b) ? -1 : (a < b) ? 1 : 0;
-	}
-	
 	// Need to close all containers before sorting
 	var openItemIDs = this.saveOpenState(true);
 	
@@ -1383,6 +1415,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				var rowItem = this._dataItems.splice(row, 1);
 				this._dataItems.splice(i, 0, rowItem[0]);
 				this._treebox.invalidate();
+				break;
 			}
 		}
 	}
@@ -1393,9 +1426,12 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	}
 	
 	this._refreshHashMap();
-	
 	this.rememberOpenState(openItemIDs);
-}
+};
+
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ///
@@ -1561,6 +1597,7 @@ Zotero.ItemTreeView.prototype.getSelectedItems = function(asIDs)
  */
 Zotero.ItemTreeView.prototype.deleteSelection = function (force)
 {
+	var pos, len;
 	if (arguments.length > 1) {
 		throw ("deleteSelection() no longer takes two parameters");
 	}
@@ -1605,6 +1642,7 @@ Zotero.ItemTreeView.prototype.deleteSelection = function (force)
 	else if (itemGroup.isCollection()) {
 		itemGroup.ref.removeItems(ids);
 	}
+
 	this._treebox.endUpdateBatch();
 }
 
@@ -1719,8 +1757,9 @@ Zotero.ItemTreeView.prototype.saveSelection = function()
 /*
  *  Sets the selection based on saved selection ids (see above)
  */
-Zotero.ItemTreeView.prototype.rememberSelection = function(selection)
+Zotero.ItemTreeView.prototype.rememberSelection = function(selection, force)
 {	
+	
 	this.selection.clearSelection();
 	
 	for(var i=0; i < selection.length; i++)
@@ -1802,6 +1841,7 @@ Zotero.ItemTreeView.prototype.rememberOpenState = function(itemIDs) {
 		}
 		rowsToOpen.push(row);
 	}
+
 	rowsToOpen.sort();
 	this._treebox.beginUpdateBatch();
 	// Reopen from bottom up
@@ -2090,7 +2130,7 @@ Zotero.ItemTreeView.prototype.onDragStart = function (event) {
 			return;
 		}
 		
-		var text = obj.string.replace(/\r\n/g, "\n");
+		text = obj.string.replace(/\r\n/g, "\n");
 		event.dataTransfer.setData("text/plain", text);
 	}
 	
@@ -2664,6 +2704,7 @@ Zotero.ItemTreeView.prototype.onDragExit = function (event) {
 ////////////////////////////////////////////////////////////////////////////////
 
 Zotero.ItemTreeView.prototype.isSeparator = function(row) 						{ return false; }
+
 Zotero.ItemTreeView.prototype.getRowProperties = function(row, prop) {
 	if (!this.selection.isSelected(row)) {
 		return;
@@ -2677,7 +2718,9 @@ Zotero.ItemTreeView.prototype.getRowProperties = function(row, prop) {
 			getService(Components.interfaces.nsIAtomService);
 		prop.AppendElement(aServ.getAtom("color" + color.substr(1)));
 	}
-}
+};
+
+
 Zotero.ItemTreeView.prototype.getColumnProperties = function(col, prop) { }
 Zotero.ItemTreeView.prototype.getCellProperties = function(row, col, prop) {
 	var itemID = this._getItemAtRow(row).ref.id;
@@ -2711,9 +2754,9 @@ Zotero.ItemTreeView.TreeRow = function(ref, level, isOpen)
 	this.id = ref.id;
 }
 
-Zotero.ItemTreeView.TreeRow.prototype.getField = function(field, unformatted)
+Zotero.ItemTreeView.TreeRow.prototype.getField = function(field, unformatted, language)
 {
-	return this.ref.getField(field, unformatted, true);
+	return this.ref.getField(field, unformatted, true, language);
 }
 
 Zotero.ItemTreeView.TreeRow.prototype.numChildren = function(includeTrashed)
