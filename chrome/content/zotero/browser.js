@@ -307,11 +307,12 @@ var Zotero_Browser = new function() {
 			if (_locationBlacklist.indexOf(doc.location.href) != -1) {
 				return;
 			}
-			
+
 			// Ignore TinyMCE popups
 			if (!doc.location.host && doc.location.href.indexOf("tinymce/") != -1) {
 				return;
 			}
+	  
 		}
 		catch (e) {}
 		
@@ -471,7 +472,9 @@ var Zotero_Browser = new function() {
 	 * Callback to be executed when an item has been finished
 	 */
 	function itemDone(obj, dbItem, item, collection) {
-		var title = item.title;
+		var title = dbItem.getDisplayTitle();
+		// From r9471. May need to be restored for things to work.
+		// var title = item.title;
 		var icon = Zotero.ItemTypes.getImageSrc(item.itemType);
 		Zotero_Browser.progress.show();
 		Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scraping"));
