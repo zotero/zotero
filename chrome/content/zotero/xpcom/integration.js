@@ -1515,21 +1515,8 @@ Zotero.Integration.Fields.prototype.updateSession = function(callback, errorCall
 				}
 			}
 			
-			// if we are reloading this session, assume no item IDs to be updated except for edited items
-			if(me._session.reload) {
-				me._session.updateUpdateIndices();
-				Zotero.pumpGenerator(me._session.updateCitations(function(deleteCitations) {
-						me._deleteFields = me._deleteFields.concat([i for(i in deleteCitations)]);
-						me._session.updateIndices = {};
-						me._session.updateItemIDs = {};
-						me._session.citationText = {};
-						me._session.bibliographyHasChanged = false;
-						delete me._session.reload;
-						if(callback) callback(me._session);
-				}, FORCE_CITATIONS_REGENERATE));
-			} else {
-				if(callback) callback(me._session);
-			}
+			if(callback) callback(me._session);
+
 		}, errorCallback);		
 	});
 }
