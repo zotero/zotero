@@ -19,6 +19,7 @@
 <!ENTITY zotero.citation.paragraph "Paragraph">
 <!ENTITY zotero.citation.prefix.label "Prefix:">
 <!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.editorWarning.label "Editor warning">
 <!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
 <!ENTITY zotero.contextMenu.addTextToCurrentNote "Add Selection to Zotero Note">
