@@ -286,53 +286,6 @@ Zotero.Integration = new function() {
     }
 
 	
-    this.progressMeter = new function() {
-        this.showRead = showRead;
-        this.showWrite = showWrite;
-        this.showRefresh = showRefresh;
-        this.showBib = showBib;
-        this.hide = hide;
-        var _progressMeter = false;
-        
-        function showRead (session) {
-            if (Zotero.Prefs.get("integration.useClassicAddCitationDialog")
-                && (!session || !session.citationsByIndex.length)) {
-                show("Read");
-            }
-        }
-        function showWrite (session) {
-            if (Zotero.Prefs.get("integration.useClassicAddCitationDialog")
-                && (!session.citationsByIndex || !session.citationsByIndex.length
-                    || session.citationsByIndex.length > 400)) {
-
-                show("Write");
-            }
-        }
-        function showRefresh (session) {
-            if (!session || !session.citationsByIndex || citationsByIndex.length > 50) {
-                show("Refresh");
-            }
-        }
-        function showBib (session) {
-            if (!session.citationsByIndex.length
-                || session.citationsByIndex.length > 50) {
-                show("Bib");
-            }
-        }
-        function show (type) {
-            if (_progressMeter) return;
-		    _progressMeter = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-			    .getService(Components.interfaces.nsIWindowWatcher)
-			    .openWindow(null, 'chrome://zotero/content/integration/progressMeter' + type + '.xul', '', 'alwaysRaised,chrome,centerscreen', null);
-        }
-        function hide() {
-            if (_progressMeter) {
-                _progressMeter.close();
-                _progressMeter = false;
-            }
-        }
-    }
-
 	/**
 	 * Calls the Integration applicatoon
 	 */
@@ -809,7 +762,6 @@ Zotero.Integration = new function() {
 			}
 		}
         Zotero.Integration.UnresponsiveScriptIndicator.enable();
-        Zotero.Integration.progressMeter.hide();
 
 		if(Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
 			var oldWindow = Zotero.Integration.currentWindow;
@@ -1108,8 +1060,6 @@ Zotero.Integration.Document.prototype.addBibliography = function() {
 			throw new Zotero.Integration.DisplayException("noBibliography");
 		}
 
-        Zotero.Integration.progressMeter.showBib(me._session);
-		
 		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc),
 			field = fieldGetter.addField();
 		field.setCode("BIBL");
@@ -1162,8 +1112,6 @@ Zotero.Integration.Document.prototype.editBibliography = function(callback) {
 Zotero.Integration.Document.prototype.refresh = function() {
 	var me = this;
 
-    Zotero.Integration.progressMeter.showRefresh(this._session);
-
 	this._getSession(true, false, function() {
 		// Send request, forcing update of citations and bibliography
 		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
@@ -1203,19 +1151,14 @@ Zotero.Integration.Document.prototype.removeCodes = function() {
 Zotero.Integration.Document.prototype.setDocPrefs = function() {
 	var me = this;
 	
-	//Zotero.Integration.progressMeter.showRead(this._session, true);
-
     this._getSession(false, true, function(haveSession) {
 		var setDocPrefs = function() {
 
-            Zotero.Integration.progressMeter.hide();
-	
 			me._session.setDocPrefs(me._doc, me._app.primaryFieldType, me._app.secondaryFieldType,
 			function(oldData) {
 				if(oldData || oldData === null) {
 					me._doc.setDocumentData(me._session.data.serializeXML());
 					if(oldData === null) {
-                        Zotero.Integration.progressMeter.hide();
                         return;
                     }
 					
@@ -2046,8 +1989,6 @@ Zotero.Integration.CitationEditInterface.prototype = {
 		
 		if(this.citation.citationItems.length) {
 
-		    //Zotero.Integration.progressMeter.showWrite(me._fields._session);
-
 			this._runWhenSessionUpdated(function() {
 
 			    // Citation 
@@ -2228,7 +2169,6 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 			return;
 		}
 		
-        Zotero.Integration.progressMeter.showWrite(io);
         Zotero.Integration.UnresponsiveScriptIndicator.disable();
 
 		// set data
