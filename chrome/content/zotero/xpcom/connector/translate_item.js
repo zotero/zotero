@@ -34,7 +34,7 @@ Zotero.Translate.ItemSaver = function(libraryID, attachmentMode, forceTagType, d
 	}
 	
 	// Add listener for callbacks
-	if(!Zotero.Translate.ItemSaver._attachmentCallbackListenerAdded) {
+	if(Zotero.Messaging && !Zotero.Translate.ItemSaver._attachmentCallbackListenerAdded) {
 		Zotero.Messaging.addMessageListener("attachmentCallback", function(data) {
 			var id = data[0],
 				status = data[1];

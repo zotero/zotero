@@ -756,19 +756,27 @@ Zotero.Integration = new function() {
 					
 					if(!message && typeof(e) == "object") message = "\n\n"+e.toString();
 					
-					if(message != "\n\nExceptionAlreadyDisplayed") {
+					if(message.indexOf("ExceptionAlreadyDisplayed") === -1) {
 						displayError = Zotero.getString("integration.error.generic")+message;
 					}
 					Zotero.debug(e);
 				}
 				
 				if(displayError) {
+					var showErrorInFirefox = !document;
+					
 					if(document) {
-						document.activate();
-						document.displayAlert(displayError,
-								Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-								Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
-					} else {
+						try {
+							document.activate();
+							document.displayAlert(displayError,
+									Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
+									Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
+						} catch(e) {
+							showErrorInFirefox = true;
+						}
+					}
+					
+					if(showErrorInFirefox) {
 						Zotero.Integration.activate();
 						Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 							.getService(Components.interfaces.nsIPromptService)
@@ -1035,7 +1043,11 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 				// make sure style is defined
 				if(e instanceof Zotero.Integration.DisplayException && e.name === "invalidStyle") {
 					this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
-							this._app.secondaryFieldType, function() {
+							this._app.secondaryFieldType, function(status) {							
+						if(status === false) {
+							throw new Zotero.Integration.UserCancelledException();
+						}
+						
 						me._doc.setDocumentData(me._session.data.serializeXML());
 						me._session.reload = true;
 						callback(true);
@@ -1358,7 +1370,6 @@ Zotero.Integration.Fields.prototype.get = function(callback) {
 				callback(this._fields);
 			}
 		} catch(e) {
-			Zotero.logError(e);
 			Zotero.Integration.handleError(e, this._doc);
 		}
 		return;
@@ -1408,7 +1419,6 @@ Zotero.Integration.Fields.prototype._retrieveFields = function() {
 		} else if(topic === "fields-progress" && me.progressCallback) {
 			me.progressCallback((data ? parseInt(data, 10)*(3/4) : null));
 		} else if(topic === "fields-error") {
-			Zotero.logError(data);
 			Zotero.Integration.handleError(data, me._doc);
 		}
 	}, QueryInterface:XPCOMUtils.generateQI([Components.interfaces.nsIObserver, Components.interfaces.nsISupports])});
@@ -1443,9 +1453,13 @@ Zotero.Integration.Fields.prototype._showCorruptFieldError = function(e, field, 
 		// Display reselect edit citation dialog
 		var me = this;
 		var oldWindow = Zotero.Integration.currentWindow;
+		var oldProgressCallback = me.progressCallback;
 		this.addEditCitation(field, function() {
-			Zotero.Integration.currentWindow.close();
+			if(Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
+				Zotero.Integration.currentWindow.close();
+			}
 			Zotero.Integration.currentWindow = oldWindow;
+			me.progressCallback = oldProgressCallback;
 			me.updateSession(callback, errorCallback);
 		});
 		return false;
@@ -1660,7 +1674,6 @@ Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, fo
 		}, forceCitations));
 
 	} catch(e) {
-		Zotero.logError(e);
 		Zotero.Integration.handleError(e, this._doc);
 	}
 }
@@ -1806,11 +1819,12 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 		}
 		
 		// do this operations in reverse in case plug-ins care about order
-		this._deleteFields.sort();
+		var sortClosure = function(a, b) { return a-b; };
+		this._deleteFields.sort(sortClosure);
 		for(var i=(this._deleteFields.length-1); i>=0; i--) {
 			this._fields[this._deleteFields[i]].delete();
 		}
-		this._removeCodeFields.sort();
+		this._removeCodeFields.sort(sortClosure);
 		for(var i=(this._removeCodeFields.length-1); i>=0; i--) {
 			this._fields[this._removeCodeFields[i]].removeCode();
 		}

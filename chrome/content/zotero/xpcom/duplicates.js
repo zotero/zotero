@@ -36,7 +36,7 @@ Zotero.Duplicates = function (libraryID) {
 }
 
 
-Zotero.Duplicates.prototype.__defineGetter__('name', function () "Duplicate Items"); // TODO: localize
+Zotero.Duplicates.prototype.__defineGetter__('name', function () Zotero.getString('pane.collections.duplicate'));
 Zotero.Duplicates.prototype.__defineGetter__('libraryID', function () this._libraryID);
 
 

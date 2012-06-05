@@ -1367,8 +1367,7 @@
 					
 					var label = document.createElement('label');
 					label.id = 'more-creators-label';
-					// TODO: localize
-					label.setAttribute('value', num + " more…");
+					label.setAttribute('value', Zotero.getString('general.numMore', num));
 					label.setAttribute('onclick',
 						"var binding = document.getBindingParent(this); "
 						+ "binding._displayAllCreators = true; "

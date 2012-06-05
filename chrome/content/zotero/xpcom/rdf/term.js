@@ -7,139 +7,161 @@
 //
 // W3C open source licence 2005.
 //
-
-RDFTracking = 0  // Are we requiring reasons for statements?
-
-//takes in an object and makes it an object if it's a literal
-function makeTerm(val, lang) {
-    //  tabulator.log.debug("Making term from " + val)
-    if (typeof val == 'object') return val;
-    if (typeof val == 'string') return new RDFLiteral(val, lang);
-    if (typeof val == 'number') return new RDFLiteral(val); // @@ differet types
-    if (typeof val == 'boolean') return new RDFLiteral(val?"1":"0", undefined, 
-                                                RDFSymbol.prototype.XSDboolean);
-    if (typeof val == 'undefined') return undefined;
-    alert("Can't make term from " + val + " of type " + typeof val);
-}
-
-
 //	Symbol
+$rdf.Empty = function () {
+  return this;
+};
 
-function RDFEmpty() {
-	return this;
+$rdf.Empty.prototype.termType = 'empty';
+$rdf.Empty.prototype.toString = function () {
+  return "()"
+};
+$rdf.Empty.prototype.toNT = $rdf.Empty.prototype.toString;
+
+$rdf.Symbol = function (uri) {
+  this.uri = uri;
+  this.value = uri; // -- why? -tim
+  return this;
 }
-RDFEmpty.prototype.termType = 'empty'
-RDFEmpty.prototype.toString = function () { return "()" }
-RDFEmpty.prototype.toNT = function () { return "@@" }
 
-function RDFSymbol_toNT(x) {
-    return ("<" + x.uri + ">")
-}
+$rdf.Symbol.prototype.termType = 'symbol';
+$rdf.Symbol.prototype.toString = function () {
+  return("<" + this.uri + ">");
+};
+$rdf.Symbol.prototype.toNT = $rdf.Symbol.prototype.toString;
 
-function toNT() {
-    return RDFSymbol_toNT(this)
-}
-
-function RDFSymbol(uri) {
-    this.uri = uri
-    return this
-}
-	
-RDFSymbol.prototype.termType = 'symbol'
-RDFSymbol.prototype.toString = toNT
-RDFSymbol.prototype.toNT = toNT
-
-//  Some precalculaued symbols
-
-RDFSymbol.prototype.XSDboolean = new RDFSymbol('http://www.w3.org/2001/XMLSchema#boolean');
-RDFSymbol.prototype.integer = new RDFSymbol('http://www.w3.org/2001/XMLSchema#integer');
-
-
+//  Some precalculated symbols
+$rdf.Symbol.prototype.XSDboolean = new $rdf.Symbol('http://www.w3.org/2001/XMLSchema#boolean');
+$rdf.Symbol.prototype.XSDdecimal = new $rdf.Symbol('http://www.w3.org/2001/XMLSchema#decimal');
+$rdf.Symbol.prototype.XSDfloat = new $rdf.Symbol('http://www.w3.org/2001/XMLSchema#float');
+$rdf.Symbol.prototype.XSDinteger = new $rdf.Symbol('http://www.w3.org/2001/XMLSchema#integer');
+$rdf.Symbol.prototype.XSDdateTime = new $rdf.Symbol('http://www.w3.org/2001/XMLSchema#dateTime');
+$rdf.Symbol.prototype.integer = new $rdf.Symbol('http://www.w3.org/2001/XMLSchema#integer'); // Used?
 //	Blank Node
+if(typeof $rdf.NextId != 'undefined') {
+  $rdf.log.error('Attempt to re-zero existing blank node id counter at ' + $rdf.NextId);
+} else {
+  $rdf.NextId = 0; // Global genid
+}
+$rdf.NTAnonymousNodePrefix = "_:n";
 
-var RDFNextId = 0;  // Gobal genid
-RDFGenidPrefix = "genid:"
-NTAnonymousNodePrefix = "_:n"
-
-function RDFBlankNode(id) {
-    /*if (id)
+$rdf.BlankNode = function (id) {
+  /*if (id)
     	this.id = id;
     else*/
-    this.id = RDFNextId++
-    return this
-}
+  this.id = $rdf.NextId++;
+  this.value = id ? id : this.id.toString();
+  return this
+};
 
-RDFBlankNode.prototype.termType = 'bnode'
-
-RDFBlankNode.prototype.toNT = function() {
-    return NTAnonymousNodePrefix + this.id
-}
-RDFBlankNode.prototype.toString = RDFBlankNode.prototype.toNT  
+$rdf.BlankNode.prototype.termType = 'bnode';
+$rdf.BlankNode.prototype.toNT = function () {
+  return $rdf.NTAnonymousNodePrefix + this.id
+};
+$rdf.BlankNode.prototype.toString = $rdf.BlankNode.prototype.toNT;
 
 //	Literal
-
-function RDFLiteral(value, lang, datatype) {
-    this.value = value
-    this.lang=lang;	  // string		
-    this.datatype=datatype;  // term
-    this.toString = RDFLiteralToString
-    this.toNT = RDFLiteral_toNT
-    return this
+$rdf.Literal = function (value, lang, datatype) {
+  this.value = value
+  if(lang == "" || lang == null) this.lang = undefined;
+  else this.lang = lang; // string
+  if(datatype == null) this.datatype = undefined;
+  else this.datatype = datatype; // term
+  return this;
 }
 
-RDFLiteral.prototype.termType = 'literal'
+$rdf.Literal.prototype.termType = 'literal'
+$rdf.Literal.prototype.toString = function () {
+  return '' + this.value;
+};
+$rdf.Literal.prototype.toNT = function () {
+  var str = this.value
+  if(typeof str != 'string') {
+    if(typeof str == 'number') return '' + str;
+    throw Error("Value of RDF literal is not string: " + str)
+  }
+  str = str.replace(/\\/g, '\\\\'); // escape backslashes
+  str = str.replace(/\"/g, '\\"'); // escape quotes
+  str = str.replace(/\n/g, '\\n'); // escape newlines
+  str = '"' + str + '"' //';
+  if(this.datatype) {
+    str = str + '^^' + this.datatype.toNT()
+  }
+  if(this.lang) {
+    str = str + "@" + this.lang;
+  }
+  return str;
+};
 
-function RDFLiteral_toNT() {
-    var str = this.value
-    if (typeof str != 'string') {
-        if (typeof str == 'number') return ''+str;
-	throw Error("Value of RDF literal is not string: "+str)
-    }
-    str = str.replace(/\\/g, '\\\\');  // escape
-    str = str.replace(/\"/g, '\\"');
-    str = '"' + str + '"'  //'
+$rdf.Collection = function () {
+  this.id = $rdf.NextId++; // Why need an id? For hashstring.
+  this.elements = [];
+  this.closed = false;
+};
 
-    if (this.datatype){
-	str = str + '^^' + this.datatype//.toNT()
-    }
-    if (this.lang) {
-	str = str + "@" + this.lang
-    }
-    return str
+$rdf.Collection.prototype.termType = 'collection';
+
+$rdf.Collection.prototype.toNT = function () {
+  return $rdf.NTAnonymousNodePrefix + this.id
+};
+
+$rdf.Collection.prototype.toString = function () {
+  var str = '(';
+  for(var i = 0; i < this.elements.length; i++)
+  str += this.elements[i] + ' ';
+  return str + ')';
+};
+
+$rdf.Collection.prototype.append = function (el) {
+  this.elements.push(el)
+}
+$rdf.Collection.prototype.unshift = function (el) {
+  this.elements.unshift(el);
+}
+$rdf.Collection.prototype.shift = function () {
+  return this.elements.shift();
 }
 
-function RDFLiteralToString() {
-    return ''+this.value
-}
-    
-RDFLiteral.prototype.toString = RDFLiteralToString   
-RDFLiteral.prototype.toNT = RDFLiteral_toNT
-
-function RDFCollection() {
-    this.id = RDFNextId++
-    this.elements = []
-    this.closed = false
+$rdf.Collection.prototype.close = function () {
+  this.closed = true
 }
 
-RDFCollection.prototype.termType = 'collection'
 
-RDFCollection.prototype.toNT = function() {
-    return NTAnonymousNodePrefix + this.id
-}
-RDFCollection.prototype.toString = RDFCollection.prototype.toNT 
+//      Convert Javascript representation to RDF term object
+//
+$rdf.term = function (val, lang) {
+  if(typeof val == 'object')
+    if(val instanceof Date) {
+      var d2 = function (x) {
+          return('' + (100 + x)).slice(1, 3)
+        }; // format as just two digits
+      return new $rdf.Literal('' + val.getUTCFullYear() + '-' + d2(val.getUTCMonth() + 1)
+          + '-' + d2(val.getUTCDate()) + 'T' + d2(val.getUTCHours()) + ':'
+          + d2(val.getUTCMinutes()) + ':' + d2(val.getUTCSeconds()) + 'Z',
+        undefined,
+        $rdf.Symbol.prototype.XSDdateTime);
 
-RDFCollection.prototype.append = function (el) {
-    this.elements.push(el)
-}
-RDFCollection.prototype.unshift=function(el){
-    this.elements.unshift(el);
-}
-RDFCollection.prototype.shift=function(){
-    return this.elements.shift();
-}
-        
-RDFCollection.prototype.close = function () {
-    this.closed = true
+    } else if(val instanceof Array) {
+      var x = new $rdf.Collection();
+      for(var i = 0; i < val.length; i++)
+        x.append($rdf.term(val[i]));
+      return x;
+    } else
+      return val;
+  if(typeof val == 'string')
+      return new $rdf.Literal(val, lang);
+  if(typeof val == 'number') {
+    var dt;
+    if(('' + val).indexOf('e') >= 0) dt = $rdf.Symbol.prototype.XSDfloat;
+    else if(('' + val).indexOf('.') >= 0) dt = $rdf.Symbol.prototype.XSDdecimal;
+    else dt = $rdf.Symbol.prototype.XSDinteger;
+    return new $rdf.Literal(val, undefined, dt);
+  }
+  if(typeof val == 'boolean')
+    return new $rdf.Literal(val ? "1" : "0", undefined, $rdf.Symbol.prototype.XSDboolean);
+  if(typeof val == 'undefined')
+    return undefined;
+  throw("Can't make term from " + val + " of type " + typeof val);
 }
 
 //	Statement
@@ -148,144 +170,133 @@ RDFCollection.prototype.close = function () {
 //
 //   The reason can point to provenece or inference
 //
-function RDFStatement_toNT() {
-    return (this.subject.toNT() + " "
-	    + this.predicate.toNT() + " "
-	    +  this.object.toNT() +" .")
+$rdf.Statement = function (subject, predicate, object, why, lang) {
+  this.subject = $rdf.term(subject)
+  this.predicate = $rdf.term(predicate)
+	this.object = $rdf.term(object, lang)
+  if(typeof why != 'undefined') {
+    this.why = why;
+  }
+  return this;
 }
 
-function RDFStatement(subject, predicate, object, why, lang) {
-    this.subject = makeTerm(subject)
-    this.predicate = makeTerm(predicate)
-    this.object = makeTerm(object, lang)
-    if (typeof why !='undefined') {
-	this.why = why
-    } else if (RDFTracking) {
-	tabulator.log.debug("WARNING: No reason on "+subject+" "+predicate+" "+object)
-    }
-    return this
-}
+$rdf.st = function (subject, predicate, object, why) {
+  return new $rdf.Statement(subject, predicate, object, why);
+};
 
-RDFStatement.prototype.toNT = RDFStatement_toNT
-RDFStatement.prototype.toString = RDFStatement_toNT
-	
+$rdf.Statement.prototype.toNT = function () {
+  return (this.subject.toNT() + " " + this.predicate.toNT() + " " + this.object.toNT() + " .");
+};
+
+$rdf.Statement.prototype.toString = $rdf.Statement.prototype.toNT;
 
 //	Formula
 //
 //	Set of statements.
+$rdf.Formula = function () {
+  this.statements = []
+  this.constraints = []
+  this.initBindings = []
+  this.optional = []
+  return this;
+};
 
-function RDFFormula() {
-    this.statements = []
-    this.constraints = []
-    this.initBindings = []
-    this.optional = []
-    this.superFormula = null;
-    return this
-}
 
-function RDFFormula_toNT() {
-    // throw 'Who called me?';    
-    return "{" + this.statements.join('\n') + "}"
-}
+$rdf.Formula.prototype.termType = 'formula';
+$rdf.Formula.prototype.toNT = function () {
+  return "{" + this.statements.join('\n') + "}"
+};
+$rdf.Formula.prototype.toString = $rdf.Formula.prototype.toNT;
 
-//RDFQueryFormula.prototype = new RDFFormula()
-//RDFQueryFormula.termType = 'queryFormula'
-RDFFormula.prototype.termType = 'formula'
-RDFFormula.prototype.toNT = RDFFormula_toNT
-RDFFormula.prototype.toString = RDFFormula_toNT   
-
-RDFFormula.prototype.add = function(subj, pred, obj, why, lang) {
-    this.statements.push(new RDFStatement(subj, pred, obj, why, lang))
+$rdf.Formula.prototype.add = function (subj, pred, obj, why, lang) {
+	this.statements.push(new $rdf.Statement(subj, pred, obj, why, lang))
 }
 
 // Convenience methods on a formula allow the creation of new RDF terms:
+$rdf.Formula.prototype.sym = function (uri, name) {
+  if(name != null) {
+    throw "This feature (kb.sym with 2 args) is removed. Do not assume prefix mappings."
+    if(!$rdf.ns[uri]) throw 'The prefix "' + uri + '" is not set in the API';
+    uri = $rdf.ns[uri] + name
+  }
+  return new $rdf.Symbol(uri)
+}
 
-RDFFormula.prototype.sym = function(uri,name) {
-    if (name != null) {
-        if (!tabulator.ns[uri]) throw 'The prefix "'+uri+'" is not set in the API';
-	uri = tabulator.ns[uri] + name
+$rdf.sym = function (uri) {
+  return new $rdf.Symbol(uri);
+};
+
+$rdf.Formula.prototype.literal = function (val, lang, dt) {
+  return new $rdf.Literal(val.toString(), lang, dt)
+}
+$rdf.lit = $rdf.Formula.prototype.literal;
+
+$rdf.Formula.prototype.bnode = function (id) {
+  return new $rdf.BlankNode(id)
+}
+
+$rdf.Formula.prototype.formula = function () {
+  return new $rdf.Formula()
+}
+
+$rdf.Formula.prototype.collection = function () { // obsolete
+  return new $rdf.Collection()
+}
+
+$rdf.Formula.prototype.list = function (values) {
+  var li = new $rdf.Collection();
+  if(values) {
+    for(var i = 0; i < values.length; i++) {
+      li.append(values[i]);
     }
-    return new RDFSymbol(uri)
+  }
+  return li;
 }
-
-RDFFormula.prototype.literal = function(val, lang, dt) {
-    return new RDFLiteral(val.toString(), lang, dt)
-}
-
-RDFFormula.prototype.bnode = function(id) {
-    return new RDFBlankNode(id)
-}
-
-RDFFormula.prototype.formula = function() {
-    return new RDFFormula()
-}
-
-RDFFormula.prototype.collection = function () { // obsolete
-    return new RDFCollection()
-}
-
-RDFFormula.prototype.list = function (values) {
-    li = new RDFCollection();
-    if (values) {
-        for(var i = 0; i<values.length; i++) {
-            li.append(values[i]);
-        }
-    }
-    return li;
-}
-
-RDFFormula.instances={};
-RDFFormula.prototype.registerFormula = function(accesskey){
-    var superFormula = this.superFormula || this;
-    RDFFormula.instances[accesskey] = this;
-    var formulaTerm = superFormula.bnode();
-    superFormula.add(formulaTerm, tabulator.ns.rdf('type'),superFormula.sym("http://www.w3.org/2000/10/swap/log#Formula"));
-    superFormula.add(formulaTerm, tabulator.ns.foaf('name'), superFormula.literal(accesskey));
-    superFormula.add(formulaTerm, tabulator.ns.link('accesskey'), superFormula.literal(accesskey));
-    //RDFFormula.instances.push("accesskey");
-}
-
 
 /*  Variable
-**
-** Variables are placeholders used in patterns to be matched.
-** In cwm they are symbols which are the formula's list of quantified variables.
-** In sparl they are not visibily URIs.  Here we compromise, by having
-** a common special base URI for variables.
-*/
+ **
+ ** Variables are placeholders used in patterns to be matched.
+ ** In cwm they are symbols which are the formula's list of quantified variables.
+ ** In sparl they are not visibily URIs.  Here we compromise, by having
+ ** a common special base URI for variables. Their names are uris,
+ ** but the ? nottaion has an implicit base uri of 'varid:'
+ */
 
-RDFVariableBase = "varid:"; // We deem variabe x to be the symbol varid:x 
-
-function RDFVariable(rel) {
-    this.uri = URIjoin(rel, RDFVariableBase);
-    return this;
+$rdf.Variable = function (rel) {
+  this.base = "varid:"; // We deem variabe x to be the symbol varid:x 
+  this.uri = $rdf.Util.uri.join(rel, this.base);
+  return this;
 }
 
-RDFVariable.prototype.termType = 'variable';
-RDFVariable.prototype.toNT = function() {
-    if (this.uri.slice(0, RDFVariableBase.length) == RDFVariableBase) {
-	return '?'+ this.uri.slice(RDFVariableBase.length);} // @@ poor man's refTo
-    return '?' + this.uri;
+$rdf.Variable.prototype.termType = 'variable';
+$rdf.Variable.prototype.toNT = function () {
+  if(this.uri.slice(0, this.base.length) == this.base) {
+    return '?' + this.uri.slice(this.base.length);
+  } // @@ poor man's refTo
+  return '?' + this.uri;
 };
 
-RDFVariable.prototype.toString = RDFVariable.prototype.toNT;
-RDFVariable.prototype.classOrder = 7;
+$rdf.Variable.prototype.toString = $rdf.Variable.prototype.toNT;
+$rdf.Variable.prototype.classOrder = 7;
 
-RDFFormula.prototype.variable = function(name) {
-    return new RDFVariable(name);
+$rdf.variable = $rdf.Formula.prototype.variable = function (name) {
+  return new $rdf.Variable(name);
 };
 
-RDFVariable.prototype.hashString = RDFVariable.prototype.toNT;
+$rdf.Variable.prototype.hashString = $rdf.Variable.prototype.toNT;
 
 
 // The namespace function generator 
-
-function RDFNamespace(nsuri) {
-    return function(ln) { return new RDFSymbol(nsuri+(ln===undefined?'':ln)) }
+$rdf.Namespace = function (nsuri) {
+  return function (ln) {
+    return new $rdf.Symbol(nsuri + (ln === undefined ? '' : ln))
+  }
 }
 
-RDFFormula.prototype.ns = function(nsuri) {
-    return function(ln) { return new RDFSymbol(nsuri+(ln===undefined?'':ln)) }
+$rdf.Formula.prototype.ns = function (nsuri) {
+  return function (ln) {
+    return new $rdf.Symbol(nsuri + (ln === undefined ? '' : ln))
+  }
 }
 
 
@@ -293,21 +304,43 @@ RDFFormula.prototype.ns = function(nsuri) {
 //
 // The bnode bit should not be used on program-external values; designed
 // for internal work such as storing a bnode id in an HTML attribute.
-// Not coded for literals.
-
-RDFFormula.prototype.fromNT = function(str) {
-    var len = str.length
-    var ch = str.slice(0,1)
-    if (ch == '<') return this.sym(str.slice(1,len-1))
-    if (ch == '_') {
-	var x = new RDFBlankNode();
-	x.id = parseInt(str.slice(3));
-	RDFNextId--
-	return x
+// This will only parse the strings generated by the vaious toNT() methods.
+$rdf.Formula.prototype.fromNT = function (str) {
+  var len = str.length
+  var ch = str.slice(0, 1)
+  if(ch == '<') return $rdf.sym(str.slice(1, len - 1))
+  if(ch == '"') {
+    var lang = undefined;
+    var dt = undefined;
+    var k = str.lastIndexOf('"');
+    if(k < len - 1) {
+      if(str[k + 1] == '@') lang = str.slice(k + 2, len);
+      else if(str.slice(k + 1, k + 3) == '^^') dt = $rdf.fromNT(str.slice(k + 3, len));
+      else throw "Can't convert string from NT: " + str
     }
-    throw "Can't convert from NT"+str;
-    
-    //alert("Can't yet convert from NT: '"+str+"', "+str[0])
+    var str = (str.slice(1, k));
+    str = str.replace(/\\"/g, '"'); // unescape quotes '
+    str = str.replace(/\\n/g, '\n'); // unescape newlines
+    str = str.replace(/\\\\/g, '\\'); // unescape backslashes 
+    return $rdf.lit(str, lang, dt);
+  }
+  if(ch == '_') {
+    var x = new $rdf.BlankNode();
+    x.id = parseInt(str.slice(3));
+    $rdf.NextId--
+    return x
+  }
+  if(ch == '?') {
+    var x = new $rdf.Variable(str.slice(1));
+    return x;
+  }
+  throw "Can't convert from NT: " + str;
+
 }
+$rdf.fromNT = $rdf.Formula.prototype.fromNT; // Not for inexpert user
+// Convenience - and more conventional name:
+$rdf.graph = function () {
+  return new $rdf.IndexedFormula();
+};
 
 // ends

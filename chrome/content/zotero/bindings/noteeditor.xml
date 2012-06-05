@@ -308,27 +308,10 @@
 				</body>
 			</method>
 			
-			<method name="disableUndo">
-				<body>
-				<![CDATA[
-					//this.noteField.editor.enableUndo(true);
-				]]>
-				</body>
-			</method>
-			
-			<method name="enableUndo">
-				<body>
-				<![CDATA[
-					//this.noteField.editor.enableUndo(false);
-				]]>
-				</body>
-			</method>
-			
 			<method name="clearUndo">
 				<body>
 				<![CDATA[
-					this.disableUndo();
-					this.enableUndo();
+					this._id('noteField').clearUndo();
 				]]>
 				</body>
 			</method>

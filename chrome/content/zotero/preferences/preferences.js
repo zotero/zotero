@@ -1234,12 +1234,9 @@ function revealDataDirectory() {
 		dataDir.reveal();
 	}
 	catch (e) {
-		// On platforms that don't support nsILocalFile.reveal() (e.g. Linux), we
-		// open a small window with a selected read-only textbox containing the
-		// file path, so the user can open it, Control-c, Control-w, Alt-Tab, and
-		// Control-v the path into another app
-		var io = {alertText: dataDir.path};
-		window.openDialog('chrome://zotero/content/selectableAlert.xul', "zotero-reveal-window", "chrome", io);
+		// On platforms that don't support nsILocalFile.reveal() (e.g. Linux),
+		// launch the directory
+		window.opener.ZoteroPane_Local.launchFile(dataDir);
 	}
 }
 
@@ -2492,7 +2489,7 @@ function openInViewer(uri, newTab) {
 			win.loadURI(uri);
 		} else {
 			window.openDialog("chrome://zotero/content/standalone/basicViewer.xul",
-				"basicViewer", "chrome,resizable,centerscreen", uri);
+				"basicViewer", "chrome,resizable,centerscreen,menubar,scrollbars", uri);
 		}
 	} else {
 		var win = wm.getMostRecentWindow("navigator:browser");

@@ -241,20 +241,20 @@ function makeZoteroContext(isConnector) {
 	
 	// Load RDF files into Zotero.RDF.AJAW namespace (easier than modifying all of the references)
 	const rdfXpcomFiles = [
+		'rdf/init',
 		'rdf/uri',
 		'rdf/term',
 		'rdf/identity',
 		'rdf/match',
 		'rdf/n3parser',
 		'rdf/rdfparser',
-		'rdf/serialize',
-		'rdf'
+		'rdf/serialize'
 	];
-	zContext.Zotero.RDF = {AJAW:{Zotero:zContext.Zotero}};
+	zContext.Zotero.RDF = {Zotero:zContext.Zotero};
 	for (var i=0; i<rdfXpcomFiles.length; i++) {
 		Cc["@mozilla.org/moz/jssubscript-loader;1"]
 			.getService(Ci.mozIJSSubScriptLoader)
-			.loadSubScript("chrome://zotero/content/xpcom/" + rdfXpcomFiles[i] + ".js", zContext.Zotero.RDF.AJAW);
+			.loadSubScript("chrome://zotero/content/xpcom/" + rdfXpcomFiles[i] + ".js", zContext.Zotero.RDF);
 	}
 	
 	if(isStandalone()) {

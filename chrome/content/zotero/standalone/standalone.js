@@ -128,7 +128,7 @@ const ZoteroStandalone = new function() {
 			win.loadURI(uri);
 		} else {
 			window.openDialog("chrome://zotero/content/standalone/basicViewer.xul",
-				"basicViewer", "chrome,resizable,centerscreen", uri);
+				"basicViewer", "chrome,resizable,centerscreen,menubar,scrollbars", uri);
 		}
 	}
 	

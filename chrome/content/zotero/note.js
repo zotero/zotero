@@ -49,12 +49,16 @@ function onLoad() {
 	if (itemID) {
 		var ref = Zotero.Items.get(itemID);
 		
-		// Make sure Undo doesn't wipe out the note
-		if (!noteEditor.item || noteEditor.item.id != ref.id) {
-			noteEditor.disableUndo();
-		}
+		var clearUndo = noteEditor.item ? noteEditor.item.id != ref.id : false;
+		
 		noteEditor.item = ref;
-		noteEditor.enableUndo();
+		
+		// If loading new or different note, disable undo while we repopulate the text field
+		// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
+		// undo content from another note into the current one.
+		if (clearUndo) {
+			noteEditor.clearUndo();
+		}
 		
 		document.title = ref.getNoteTitle();
 	}

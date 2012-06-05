@@ -1067,7 +1067,7 @@ Zotero.Search.prototype._buildQuery = function(){
 					var unfiled = this._conditions[i]['operator'] == 'true';
 					continue;
 				
-				// Search subfolders
+				// Search subcollections
 				case 'recursive':
 					var recursive = this._conditions[i]['operator']=='true';
 					continue;
