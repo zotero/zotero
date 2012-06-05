@@ -56,6 +56,7 @@
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
 <!ENTITY zotero.preferences.keys.library "Library">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
 <!ENTITY zotero.preferences.keys.newItem "Create a new item">
 <!ENTITY zotero.preferences.keys.newNote "Create a new note">
 <!ENTITY zotero.preferences.keys.openZotero "Open/Close Zotero Pane">
