@@ -2897,22 +2897,20 @@ Zotero.Integration.Session.prototype.updateCitations = function(callback, forceC
 				var i = res[1][pos][0];
 				var str = res[1][pos][1];
 				if (!citationList[i].properties.dontUpdate) {
-						var citationID = citationList[i].citationID;
-						var cslFormattedCitation = this.style.registry.citationreg.citationById[citationID].cslFormattedCitation;
-						if (!cslFormattedCitation) {
-							//Zotero.debug("XXX (2) setting @ "+i+": "+str);
-							this.citationText[citationIndexMap[i]] = str;
-							this.updateIndices[citationIndexMap[i]] = true;
-							this.style.registry.citationreg.citationById[citationID].cslFormattedCitation = str;
-						} else if (cslFormattedCitation !== str) {
-							//Zotero.debug("XXX (2) resetting @ "+i+" from "+cslFormattedCitation+" to "+str);
-							this.citationText[citationIndexMap[i]] = str;
-							this.updateIndices[citationIndexMap[i]] = true;
-							this.style.registry.citationreg.citationById[citationID].cslFormattedCitation = str;
-						}
+					var citationID = citationList[i].citationID;
+					var cslFormattedCitation = this.style.registry.citationreg.citationById[citationID].cslFormattedCitation;
+					if (!cslFormattedCitation) {
+						//Zotero.debug("XXX (2) setting @ "+i+": "+str);
+						this.citationText[citationIndexMap[i]] = str;
+						this.updateIndices[citationIndexMap[i]] = true;
+						this.style.registry.citationreg.citationById[citationID].cslFormattedCitation = str;
+					} else if (cslFormattedCitation !== str) {
+						//Zotero.debug("XXX (2) resetting @ "+i+" from "+cslFormattedCitation+" to "+str);
+						this.citationText[citationIndexMap[i]] = str;
+						this.updateIndices[citationIndexMap[i]] = true;
+						this.style.registry.citationreg.citationById[citationID].cslFormattedCitation = str;
 					}
 				}
-				var res = this.formatCitation(index, citation, forceCitations);
 			}
 		}
 		callback(deleteCitations);
