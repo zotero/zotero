@@ -1,4 +1,3 @@
-"use strict";
 /*
     ***** BEGIN LICENSE BLOCK *****
     
@@ -240,44 +239,44 @@ Zotero.Integration = new function() {
 		}
 	}
 
-    /**
-     * Suspend the unresponsive script indicator throughout the
-     * document update, independent of the Zotero function, which
-     * may switch off and on during a single cycle.
-     */
-    this.UnresponsiveScriptIndicator = new function () {
-	    this.disable = disable;
-	    this.enable = enable;
+	/**
+	 * Suspend the unresponsive script indicator throughout the
+	 * document update, independent of the Zotero function, which
+	 * may switch off and on during a single cycle.
+	 */
+	this.UnresponsiveScriptIndicator = new function () {
+		this.disable = disable;
+		this.enable = enable;
 
-	    // for storing the unresponsive script value before disabling
-	    var _unresponsiveScriptPref = [];
+		// for storing the unresponsive script value before disabling
+		var _unresponsiveScriptPref = [];
 
-	    function disable() {
+		function disable() {
 
-		    var prefService = Components.classes["@mozilla.org/preferences-service;1"].
-		        getService(Components.interfaces.nsIPrefBranch);
-                _unresponsiveScriptPref.push(prefService.getIntPref("dom.max_chrome_script_run_time"));
+			var prefService = Components.classes["@mozilla.org/preferences-service;1"].
+				getService(Components.interfaces.nsIPrefBranch);
+				_unresponsiveScriptPref.push(prefService.getIntPref("dom.max_chrome_script_run_time"));
 
-		    // do not manipulate setting if already disabled
-		    if (_unresponsiveScriptPref.length > 1) {
-			    return false;
-		    }
+			// do not manipulate setting if already disabled
+			if (_unresponsiveScriptPref.length > 1) {
+				return false;
+			}
 
-		    prefService.setIntPref("dom.max_chrome_script_run_time", 600);
-            
-		    return true;
-	    }
+			prefService.setIntPref("dom.max_chrome_script_run_time", 600);
+			
+			return true;
+		}
 
-	    function enable() {
-		    var prefService = Components.classes["@mozilla.org/preferences-service;1"].
-		        getService(Components.interfaces.nsIPrefBranch);
+		function enable() {
+			var prefService = Components.classes["@mozilla.org/preferences-service;1"].
+				getService(Components.interfaces.nsIPrefBranch);
 
-            // reset previous to value if any
-            if (_unresponsiveScriptPref.length) {
-		        prefService.setIntPref("dom.max_chrome_script_run_time", _unresponsiveScriptPref.pop());
-            }
-	    }
-    }
+			// reset previous to value if any
+			if (_unresponsiveScriptPref.length) {
+				prefService.setIntPref("dom.max_chrome_script_run_time", _unresponsiveScriptPref.pop());
+			}
+		}
+	}
 
 	
 	/**
@@ -287,8 +286,8 @@ Zotero.Integration = new function() {
 		// Try to load the appropriate Zotero component; otherwise display an error using the alert
 		// service
 
-        Zotero.Integration.UnresponsiveScriptIndicator.disable();
-        
+		Zotero.Integration.UnresponsiveScriptIndicator.disable();
+		
 		try {
 			var componentClass = "@zotero.org/Zotero/integration/application?agent="+agent+";1";
 			Zotero.debug("Integration: Instantiating "+componentClass+" for command "+command+(docId ? " with doc "+docId : ""));
@@ -297,7 +296,7 @@ Zotero.Integration = new function() {
 		} catch(e) {
 			_inProgress = false;
 
-            Zotero.Integration.UnresponsiveScriptIndicator.enable();
+			Zotero.Integration.UnresponsiveScriptIndicator.enable();
 
 			Zotero.Integration.activate();
 			Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
@@ -313,12 +312,12 @@ Zotero.Integration = new function() {
 		try {
 
 			document = (application.getDocument && docId ? application.getDocument(docId) : application.getActiveDocument());
-    		
-            integration = new Zotero.Integration.Document(application, document);
+			
+			integration = new Zotero.Integration.Document(application, document);
 			integration[command]();
 
 		} catch(e) {
-            Zotero.Integration.UnresponsiveScriptIndicator.enable();
+			Zotero.Integration.UnresponsiveScriptIndicator.enable();
 			Zotero.Integration.handleError(e, document);
 		}
 	}
@@ -666,7 +665,7 @@ Zotero.Integration = new function() {
 		XFree(res[0]);
 
 		//return foundWindow;
-        return null;
+		return null;
 	}
 	
 	/**
@@ -748,7 +747,7 @@ Zotero.Integration = new function() {
 				Zotero.logError(e);
 			}
 		}
-        Zotero.Integration.UnresponsiveScriptIndicator.enable();
+		Zotero.Integration.UnresponsiveScriptIndicator.enable();
 
 		if(Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {
 			var oldWindow = Zotero.Integration.currentWindow;
@@ -1101,6 +1100,7 @@ Zotero.Integration.Document.prototype.refresh = function() {
 	this._getSession(true, false, function() {
 		// Send request, forcing update of citations and bibliography
 		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
+		me._session.refresh = true;
 		fieldGetter.updateSession(function() {
 			fieldGetter.updateDocument(FORCE_CITATIONS_REGENERATE, true, false, function() {
 				Zotero.Integration.complete(me._doc);
@@ -1137,7 +1137,7 @@ Zotero.Integration.Document.prototype.removeCodes = function() {
 Zotero.Integration.Document.prototype.setDocPrefs = function() {
 	var me = this;
 	
-    this._getSession(false, true, function(haveSession) {
+	this._getSession(false, true, function(haveSession) {
 		var setDocPrefs = function() {
 
 			me._session.setDocPrefs(me._doc, me._app.primaryFieldType, me._app.secondaryFieldType,
@@ -1145,8 +1145,8 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 				if(oldData || oldData === null) {
 					me._doc.setDocumentData(me._session.data.serializeXML());
 					if(oldData === null) {
-                        return;
-                    }
+						return;
+					}
 					
 					fieldGetter.get(function(fields) {
 						if(fields && fields.length) {
@@ -1198,9 +1198,9 @@ Zotero.Integration.Document.prototype.setDocPrefs = function() {
 		
 		var fieldGetter = new Zotero.Integration.Fields(me._session, me._doc);
 		
-        //elem.setAttribute("hidden", true);
+		//elem.setAttribute("hidden", true);
 
-        
+		
 		if(!haveSession) {
 			// This is a brand new document; don't try to get fields
 			setDocPrefs();
@@ -1507,12 +1507,6 @@ Zotero.Integration.Fields.prototype.updateSession = function(callback, errorCall
 			if(me._session.reload) {
 				me._session.updateUpdateIndices();
 				Zotero.pumpGenerator(me._session.updateCitations(function(deleteCitations) {
-						me._deleteFields = me._deleteFields.concat([i for(i in deleteCitations)]);
-						me._session.updateIndices = {};
-						me._session.updateItemIDs = {};
-						me._session.citationText = {};
-						me._session.bibliographyHasChanged = false;
-						delete me._session.reload;
 						if(callback) callback(me._session);
 				}, FORCE_CITATIONS_REGENERATE));
 			} else {
@@ -1980,8 +1974,8 @@ Zotero.Integration.CitationEditInterface.prototype = {
 
 			this._runWhenSessionUpdated(function() {
 
-			    // Citation 
-			    me._session.newCitation = me.citation;
+				// Citation 
+				me._session.newCitation = me.citation;
 
 				me._session.addCitation(me._fieldIndex, me._field.getNoteIndex(), me.citation);
 				me._session.updateIndices[me._fieldIndex] = true;
@@ -2158,7 +2152,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 			return;
 		}
 		
-        Zotero.Integration.UnresponsiveScriptIndicator.disable();
+		Zotero.Integration.UnresponsiveScriptIndicator.disable();
 
 		// set data
 		var oldData = me.data;
@@ -2722,123 +2716,144 @@ Zotero.Integration.Session.prototype.updateCitations = function(callback, forceC
 
 		var deleteCitations = {};
 
-		// We don't rely on these coming in
-		for (var key in this.updateIndices) {
-			delete this.updateIndices[key];
-		}
-		for (var key in this.newIndices) {
-			delete this.newIndices[key];
-		}
-
-		var citationHints = [];
-		var citationList = [];
-		var citationIndexMap = {};
-		var citationCount = 0;
-		var cslCitationIndex = -1;
-		if (this.newCitation && "number" === typeof this.citationIndex) {
-			this.citationsByIndex[this.citationIndex] = this.newCitation;
-		}
-		for (var i = 0, ilen = this.citationsByIndex.length; i < ilen; i += 1) {
-			if ("undefined" === typeof this.citationsByIndex[i]) {
-				continue;
-			}
-			if (this.citationsByIndex[i].properties.delete) {
-				deleteCitations[i] = true;
-				continue;
-			}
-			if (this.citationIndex === i) {
-				cslCitationIndex = citationCount;
-			}
-			citationHints.push([this.citationsByIndex[i].citationID, this.citationsByIndex[i].properties.noteIndex]);
-			citationList.push(this.citationsByIndex[i]);
-			citationIndexMap[citationCount] = i;
-			citationCount += 1;
-		}
-
-		if (forceCitations === FORCE_CITATIONS_RESET_TEXT || forceCitations === FORCE_CITATIONS_REGENERATE) {
-			var items = [];
-			var indexCount = 0;
-
-			for (var i = 0, ilen = citationList.length; i < ilen; i += 1) {
-				citationList[i].sortedItems = [];
-				for (var j = 0, jlen = citationList[i].citationItems.length; j < jlen; j += 1) {
-					var item = citationList[i].citationItems[j];
-					items.push(citationList[i].citationItems[j].id);
-					var Item = this.style.retrieveItem(item.id);
-					citationList[i].sortedItems.push([Item,item]);
+		if (!(this.reload && this.refresh)) {
+			if (!this.reload) {
+				// Ignore provided updateIndices unless reloading
+				for (var key in this.updateIndices) {
+					delete this.updateIndices[key];
 				}
-				var oldCitationVersion = this.style.registry.citationreg.citationById[citationList[i].citationID];
-				if (oldCitationVersion) {
-					citationList[i].cslFormattedCitation = oldCitationVersion.cslFormattedCitation;
+				for (var key in this.newIndices) {
+					delete this.newIndices[key];
 				}
-				this.style.registry.citationreg.citationById[citationList[i].citationID] = citationList[i];
 			}
-			this.style.registry.citationreg.citationByIndex = citationList;
-			// Always rerun ambigs on refresh
-			this.style.updateItems(items, false, true);
-			for (var i = 0, ilen = citationList.length; i < ilen; i += 1) {
-                var citation = citationList[i];
-                // final argument 2 is for CSL.ASSUME_ALL_ITEMS_REGISTERED
-                var res = this.style.processCitationCluster(citation, citationHints.slice(0, i), citationHints.slice(i + 1), 2);
-				var str = res[1][0][1];
-				if (!citationList[i].properties.dontUpdate) {
-					var citationID = citationList[i].citationID;
-					var cslFormattedCitation = this.style.registry.citationreg.citationById[citationID].cslFormattedCitation;
-					if (!cslFormattedCitation) {
-						this.citationText[citationIndexMap[i]] = str;
-						this.updateIndices[citationIndexMap[i]] = true;
-						this.style.registry.citationreg.citationById[citationID].cslFormattedCitation = str;
-						//Zotero.debug("XXX (1) setting @ "+i+": "+str);
-					} else if (cslFormattedCitation !== str) {
-						this.citationText[citationIndexMap[i]] = str;
-						this.updateIndices[citationIndexMap[i]] = true;
-						this.style.registry.citationreg.citationById[citationID].cslFormattedCitation = str;
-						//Zotero.debug("XXX (1) resetting @ "+i+" from "+cslFormattedCitation+" to "+str);
+			
+
+			var citationHints = [];
+			var citationList = [];
+			var citationIndexMap = {};
+			var citationCount = 0;
+			var cslCitationIndex = -1;
+			if (this.newCitation && "number" === typeof this.citationIndex) {
+				this.citationsByIndex[this.citationIndex] = this.newCitation;
+			}
+			for (var i = 0, ilen = this.citationsByIndex.length; i < ilen; i += 1) {
+				if ("undefined" === typeof this.citationsByIndex[i]) {
+					continue;
+				}
+				if (this.citationsByIndex[i].properties.delete) {
+					deleteCitations[i] = true;
+					continue;
+				}
+				if (this.citationIndex === i) {
+					cslCitationIndex = citationCount;
+				}
+				citationHints.push([this.citationsByIndex[i].citationID, this.citationsByIndex[i].properties.noteIndex]);
+				citationList.push(this.citationsByIndex[i]);
+				citationIndexMap[citationCount] = i;
+				citationCount += 1;
+			}
+			
+			if ([FORCE_CITATIONS_RESET_TEXT, FORCE_CITATIONS_REGENERATE].indexOf(forceCitations) > -1) {
+				
+				if (this.refresh) {
+					delete this.refresh;
+				}
+
+				var items = [];
+				var indexCount = 0;
+				
+				for (var i = 0, ilen = citationList.length; i < ilen; i += 1) {
+					citationList[i].sortedItems = [];
+					for (var j = 0, jlen = citationList[i].citationItems.length; j < jlen; j += 1) {
+						var item = citationList[i].citationItems[j];
+						items.push(citationList[i].citationItems[j].id);
+						var Item = this.style.retrieveItem(item.id);
+						citationList[i].sortedItems.push([Item,item]);
+					}
+					var oldCitationVersion = this.style.registry.citationreg.citationById[citationList[i].citationID];
+					if (oldCitationVersion) {
+						citationList[i].cslFormattedCitation = oldCitationVersion.cslFormattedCitation;
+					}
+					this.style.registry.citationreg.citationById[citationList[i].citationID] = citationList[i];
+				}
+				this.style.registry.citationreg.citationByIndex = citationList;
+				// Always rerun ambigs on refresh
+				this.style.updateItems(items, false, true);
+				for (var i = 0, ilen = citationList.length; i < ilen; i += 1) {
+					var citation = citationList[i];
+					// final argument 2 is for CSL.ASSUME_ALL_ITEMS_REGISTERED
+					var res = this.style.processCitationCluster(citation, citationHints.slice(0, i), citationHints.slice(i + 1), 2);
+					var str = res[1][0][1];
+					if (!citationList[i].properties.dontUpdate) {
+						var citationID = citationList[i].citationID;
+						var cslFormattedCitation = this.style.registry.citationreg.citationById[citationID].cslFormattedCitation;
+						if (!cslFormattedCitation) {
+							this.citationText[citationIndexMap[i]] = str;
+							this.updateIndices[citationIndexMap[i]] = true;
+							this.style.registry.citationreg.citationById[citationID].cslFormattedCitation = str;
+							//Zotero.debug("XXX (1) setting @ "+i+": "+str);
+						} else if (cslFormattedCitation !== str) {
+							this.citationText[citationIndexMap[i]] = str;
+							this.updateIndices[citationIndexMap[i]] = true;
+							this.style.registry.citationreg.citationById[citationID].cslFormattedCitation = str;
+							//Zotero.debug("XXX (1) resetting @ "+i+" from "+cslFormattedCitation+" to "+str);
+						}
 					}
 				}
-			}
-		} else if (cslCitationIndex > -1) {
-			// This branch assumes new citation, but it is not yet present in citationsByIndex.
-			// Insert it.
-			var items = [];
-			for (var i = 0, ilen = citationList.length; i < ilen; i += 1) {
-				for (var j = 0, jlen = citationList[i].citationItems.length; j < jlen; j += 1) {
-					items.push(citationList[i].citationItems[j].id);
+				if (this.refresh) {
+					delete this.refresh;
 				}
-			}
-			this.style.updateItems(items);
-			var citation = citationList[cslCitationIndex];
-			// Always assume all items registered.
-            var res = this.style.processCitationCluster(citation, citationHints.slice(0, cslCitationIndex), citationHints.slice(cslCitationIndex + 1), 2);
-			var citations = res[1];
-			if (citations.length > 1) {
-				citations = citations.slice(1).concat(citations.slice(0, 1));
-			}
-			for (var pos = 0, poslen = res[1].length; pos < poslen; pos += 1) {
-				var i = res[1][pos][0];
-				var str = res[1][pos][1];
-				if (!citationList[i].properties.dontUpdate) {
-					var citationID = citationList[i].citationID;
-					var cslFormattedCitation = this.style.registry.citationreg.citationById[citationID].cslFormattedCitation;
-					if (!cslFormattedCitation) {
-						//Zotero.debug("XXX (2) setting @ "+i+": "+str);
-						this.citationText[citationIndexMap[i]] = str;
-						this.updateIndices[citationIndexMap[i]] = true;
-						this.style.registry.citationreg.citationById[citationID].cslFormattedCitation = str;
-					} else if (cslFormattedCitation !== str) {
-						//Zotero.debug("XXX (2) resetting @ "+i+" from "+cslFormattedCitation+" to "+str);
-						this.citationText[citationIndexMap[i]] = str;
-						this.updateIndices[citationIndexMap[i]] = true;
-						this.style.registry.citationreg.citationById[citationID].cslFormattedCitation = str;
+			} else if (cslCitationIndex > -1) {
+				// This branch assumes new citation, but it is not yet present in citationsByIndex.
+				// Insert it.
+				//Zotero.debug("XXX insert/edit");
+				var items = [];
+				for (var i = 0, ilen = citationList.length; i < ilen; i += 1) {
+					for (var j = 0, jlen = citationList[i].citationItems.length; j < jlen; j += 1) {
+						items.push(citationList[i].citationItems[j].id);
 					}
 				}
+				this.style.updateItems(items);
+				var citation = citationList[cslCitationIndex];
+				// Always assume all items registered.
+				var res = this.style.processCitationCluster(citation, citationHints.slice(0, cslCitationIndex), citationHints.slice(cslCitationIndex + 1), 2);
+				var citations = res[1];
+				if (citations.length > 1) {
+					citations = citations.slice(1).concat(citations.slice(0, 1));
+				}
+				for (var pos = 0, poslen = res[1].length; pos < poslen; pos += 1) {
+					var i = res[1][pos][0];
+					var str = res[1][pos][1];
+					if (!citationList[i].properties.dontUpdate) {
+						var citationID = citationList[i].citationID;
+						var cslFormattedCitation = this.style.registry.citationreg.citationById[citationID].cslFormattedCitation;
+						if (!cslFormattedCitation) {
+							//Zotero.debug("XXX (2) setting @ "+i+": "+str);
+							this.citationText[citationIndexMap[i]] = str;
+							this.updateIndices[citationIndexMap[i]] = true;
+							this.style.registry.citationreg.citationById[citationID].cslFormattedCitation = str;
+						} else if (cslFormattedCitation !== str) {
+							//Zotero.debug("XXX (2) resetting @ "+i+" from "+cslFormattedCitation+" to "+str);
+							this.citationText[citationIndexMap[i]] = str;
+							this.updateIndices[citationIndexMap[i]] = true;
+							this.style.registry.citationreg.citationById[citationID].cslFormattedCitation = str;
+						}
+					}
+				}
+				if (this.reload) {
+					delete this.reload;
+				}
 			}
+		}
+		if (this.reload && this.refresh) {
+			delete this.reload;
+			delete this.refresh;
 		}
 		callback(deleteCitations);
 	} catch(e) {
 		Zotero.Integration.handleError(e, this._doc);
 	}
-    yield true;
+	yield true;
 }
 
 /**
@@ -3176,9 +3191,9 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
 		} else if (['citationTransliteration', 'citationTranslation', 'citationSort'].indexOf(pref) === -1) {
 			xmlData.prefs.pref += <pref name={pref} value={this.prefs[pref]}/>;
 		} else {
-            if (!this.prefs[pref]) {
-                continue;
-            }
+			if (!this.prefs[pref]) {
+				continue;
+			}
 			var newpref = <pref name={pref}/>;
 			for (var i = 0, ilen = this.prefs[pref].length; i < ilen; i += 1) {
 				newpref.prefitem += <prefitem value={this.prefs[pref][i]}/>;
