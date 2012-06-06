@@ -231,7 +231,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		
 	function buildSelector (profile,tagdata,param) {
 		var checkbox = document.createElement('checkbox');
-		if (_io[param].indexOf(tagdata.tag) > -1) {
+		if (_io[param] && _io[param].indexOf(tagdata.tag) > -1) {
 			checkbox.setAttribute('checked',true);
 		}
 		checkbox.setAttribute('profile', profile);
