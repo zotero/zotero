@@ -57,6 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
+    PROCESSOR_VERSION: "1.0.341",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -2204,7 +2205,7 @@ CSL.DateParser = function () {
 };
 CSL.Engine = function (sys, style, lang, forceLang) {
     var attrs, langspec, localexml, locale;
-    this.processor_version = "1.0.339";
+    this.processor_version = CSL.PROCESSOR_VERSION;
     this.csl_version = "1.0";
     this.sys = sys;
     this.sys.xml = new CSL.System.Xml.Parsing();
@@ -8113,6 +8114,10 @@ CSL.Node.text = {
                                             if (!this.decorations.length || this.decorations[0][0] !== "@" + this.variables[0]) {
                                                 this.decorations = [["@" + this.variables[0], "true"]].concat(this.decorations);
                                             }
+                                        } else {
+                                            if (this.decorations.length && this.decorations[0][0] === "@" + this.variables[0]) {
+                                                this.decorations = this.decorations.slice(1);
+                                            }
                                         }
                                         state.output.append(value, this, false, false, true);
                                     }
@@ -11404,19 +11409,17 @@ CSL.Output.Formatters.sentence = function (state, string) {
     return CSL.Output.Formatters.undoppelString(str);
 };
 CSL.Output.Formatters["capitalize-all"] = function (state, string) {
-    var str, strings, len, pos;
-    str = CSL.Output.Formatters.doppelString(string, CSL.TAG_ESCAPE);
-    strings = str.string.split(" ");
-    len = strings.length;
-    for (pos = 0; pos < len; pos += 1) {
-        if (strings[pos].length > 1) {
+    var str = CSL.Output.Formatters.doppelString(string, CSL.TAG_ESCAPE);
+    var strings = str.string.split(" ");
+    for (var i = 0, ilen = strings.length; i < ilen; i += 1) {
+        if (strings[i].length > 1) {
 			if (state.opt.development_extensions.allow_force_lowercase) {
-				strings[pos] = strings[pos].slice(0, 1).toUpperCase() + strings[pos].substr(1).toLowerCase();
+				strings[i] = strings[i].slice(0, 1).toUpperCase() + strings[i].substr(1).toLowerCase();
 			} else {
-				strings[pos] = strings[pos].slice(0, 1).toUpperCase() + strings[pos].substr(1);
+				strings[i] = strings[i].slice(0, 1).toUpperCase() + strings[i].substr(1);
 			}
-        } else if (strings[pos].length === 1) {
-            strings[pos] = strings[pos].toUpperCase();
+        } else if (strings[i].length === 1) {
+            strings[i] = strings[i].toUpperCase();
         }
     }
     str.string = strings.join(" ");
@@ -11964,18 +11967,11 @@ CSL.Registry.prototype.renumber = function () {
     for (pos = 0; pos < len; pos += 1) {
         item = this.reflist[pos];
         item.seq = (pos + 1);
-        var hasTaints = false;
-        for (var key in this.state.tmp.taintedItemIDs) {
-            hasTaints = true;
-            break;
+        if (this.state.opt.update_mode === CSL.NUMERIC && item.seq != this.oldseq[item.id]) {
+            this.state.tmp.taintedItemIDs[item.id] = true;
         }
-        if (hasTaints && item.seq != this.oldseq[item.id]) {
-            if (this.state.opt.update_mode === CSL.NUMERIC) {
-                this.state.tmp.taintedItemIDs[item.id] = true;
-            }
-            if (this.state.opt.bib_mode === CSL.NUMERIC) {
-                this.return_data.bibchange = true;
-            }
+        if (this.state.opt.bib_mode === CSL.NUMERIC && item.seq != this.oldseq[item.id]) {
+            this.return_data.bibchange = true;
         }
     }
     if (this.state.opt.citation_number_sort_direction === CSL.DESCENDING
