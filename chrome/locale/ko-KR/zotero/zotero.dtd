@@ -13,6 +13,7 @@
 <!ENTITY zotero.bibliography.style.label "인용 형식:">
 <!ENTITY zotero.bibliography.title "참조 문헌 목록 생성">
 <!ENTITY zotero.charset.label "문자 인코딩">
+<!ENTITY zotero.citation.editorWarning.label "Editor warning">
 <!ENTITY zotero.citation.keepSorted.label "원본 정렬 유지">
 <!ENTITY zotero.citation.line "행">
 <!ENTITY zotero.citation.page "페이지">
@@ -28,6 +29,8 @@
 <!ENTITY zotero.downloadManager.label "Save to Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
 <!ENTITY zotero.errorReport.notReviewed "오류 보고서는 일반적으로 포럼내에서 언급하지 않는 한 재검토하지 않습니다.">
 <!ENTITY zotero.errorReport.postToForums "Zotero 포럼(forums.zotero.org)에 보고서 ID, 문제 설명, 및 그것을 재연하는데 필요한 순서와 함께 메시지를 게시해주시기 바랍니다.">
 <!ENTITY zotero.errorReport.reportID "보고서 ID:">
@@ -100,6 +103,7 @@
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "선택된 항목 복제">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
+<!ENTITY zotero.items.menu.mergeItems "Merge items">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">

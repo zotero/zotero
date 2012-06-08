@@ -54,6 +54,7 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Muutused saavad nähtavaks alles uues aknas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopeerida valitud kirje tsiteeringud lõikepuhvrisse">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopeerida valitud kirjed lõikepuhvrisse">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Lõikepuhvrist importimine">
 <!ENTITY zotero.preferences.keys.library "Raamatukogu">
 <!ENTITY zotero.preferences.keys.newItem "Uue kirje loomine">

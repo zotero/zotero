@@ -54,6 +54,7 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Изменения вступят в силу только в новых окнах">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Скопировать цитаты из выбранного документа в буфер обмена">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копировать выбранные документы в буфер обмена">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Импортировать из буфера обмена">
 <!ENTITY zotero.preferences.keys.library "Библиотека">
 <!ENTITY zotero.preferences.keys.newItem "Создать новый документ">

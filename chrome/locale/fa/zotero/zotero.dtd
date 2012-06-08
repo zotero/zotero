@@ -13,6 +13,7 @@
 <!ENTITY zotero.bibliography.style.label "شیوه‌نامه">
 <!ENTITY zotero.bibliography.title "ساخت کتابنامه">
 <!ENTITY zotero.charset.label "کدبندی نویسه‌ها">
+<!ENTITY zotero.citation.editorWarning.label "Editor warning">
 <!ENTITY zotero.citation.keepSorted.label "مرتب نگه داشتن منابع">
 <!ENTITY zotero.citation.line "خط">
 <!ENTITY zotero.citation.page "صفحه">
@@ -28,6 +29,8 @@
 <!ENTITY zotero.downloadManager.label "ذخیره در زوترو">
 <!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
 <!ENTITY zotero.errorReport.notReviewed "برای بررسی گزارش خطا، حتما باید آن را به انجمن گفتگو ارجاع دهید. در غیر این صورت گزارش بررسی نخواهد شد.">
 <!ENTITY zotero.errorReport.postToForums "لطفا یک پیام به انجمن گفتگوی زوترو به آدرس forums.zotero.org بفرستید که شامل شناسه گزارش، شرحی از مشکل و مراحل لازم برای تولید مجدد آن باشد.">
 <!ENTITY zotero.errorReport.reportID "شناسه گزارش:">
@@ -100,6 +103,7 @@
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "ساخت رونوشت از این آیتم">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
+<!ENTITY zotero.items.menu.mergeItems "Merge items">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">

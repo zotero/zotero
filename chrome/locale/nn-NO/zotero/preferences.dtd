@@ -54,6 +54,7 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Endringar gjeld berre for nye vindauge">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier dei valde siteringane til utklipptavla.">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopier dei valde elementa til utklipptavla.">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
 <!ENTITY zotero.preferences.keys.library "Bibliotek">
 <!ENTITY zotero.preferences.keys.newItem "Lag eit nytt element">

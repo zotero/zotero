@@ -13,6 +13,7 @@
 <!ENTITY zotero.bibliography.style.label "Slog navajanja:">
 <!ENTITY zotero.bibliography.title "Ustvari bibliografijo">
 <!ENTITY zotero.charset.label "Kodiranje znakov">
+<!ENTITY zotero.citation.editorWarning.label "Editor warning">
 <!ENTITY zotero.citation.keepSorted.label "Obdrži vire razvrščene">
 <!ENTITY zotero.citation.line "Vrstica">
 <!ENTITY zotero.citation.page "Stran">
@@ -28,6 +29,8 @@
 <!ENTITY zotero.downloadManager.label "Save to Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
 <!ENTITY zotero.errorReport.notReviewed "Poročila o napaki ponavadi niso vsa pregledana, razen če o njih sporočite na forum.">
 <!ENTITY zotero.errorReport.postToForums "Opišite težavo z ID-jem tega poročila na forumih Zotero (forums.zotero.org), skupaj s potrebnimi koraki za priklic takšne napake.">
 <!ENTITY zotero.errorReport.reportID "ID poročila:">
@@ -100,6 +103,7 @@
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Podvoji izbrani vnos">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
+<!ENTITY zotero.items.menu.mergeItems "Merge items">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">

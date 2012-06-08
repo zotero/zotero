@@ -54,6 +54,7 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "يتم تفعيل التغييرات في النوافذ الجديدة فقط">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "نسخ استشهادات العنصر المختار للحافظة">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "انسخ العناصر المحددة للحافظة">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "الاستيراد من الحافظة">
 <!ENTITY zotero.preferences.keys.library "المكتبة">
 <!ENTITY zotero.preferences.keys.newItem "انشئ عنصر جديد">

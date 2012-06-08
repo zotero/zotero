@@ -54,6 +54,7 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Mudanças tem efeito apenas em novas janelas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar citações de item selecionado para a área de transferência">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar itens selecionados para a área de transferência">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importar da área de transferência">
 <!ENTITY zotero.preferences.keys.library "Biblioteca">
 <!ENTITY zotero.preferences.keys.newItem "Criar um novo item">

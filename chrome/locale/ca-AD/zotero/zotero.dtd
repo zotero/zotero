@@ -13,6 +13,7 @@
 <!ENTITY zotero.bibliography.style.label "Estil de cites:">
 <!ENTITY zotero.bibliography.title "Crea Bibliografia">
 <!ENTITY zotero.charset.label "Codificació del caràcters">
+<!ENTITY zotero.citation.editorWarning.label "Editor warning">
 <!ENTITY zotero.citation.keepSorted.label "Mantingues les fonts ordenades">
 <!ENTITY zotero.citation.line "Línia">
 <!ENTITY zotero.citation.page "Pàgina">
@@ -28,6 +29,8 @@
 <!ENTITY zotero.downloadManager.label "Desa a Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Per utilitzar aquesta funció, primer cal instal·lar les eines de PDF en les preferències de Zotero.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Els adjunts no es poden desar a la biblioteca seleccionada. En comptes, aquest ítem es desarà a la seva biblioteca.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
 <!ENTITY zotero.errorReport.notReviewed "Els informes d&apos;error generalment no són revisats ni no es notifique al fòrum.">
 <!ENTITY zotero.errorReport.postToForums "Si us plau, escriu un missatge al fòrum de Zotero (forums.zotero.org) amb aquest número de referència de l&apos;informe, una descripció del problema i qualsevol pas necessari per a reproduir-lo.">
 <!ENTITY zotero.errorReport.reportID "Número de referència de l&apos;informe:">
@@ -100,6 +103,7 @@
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Duplica l&apos;element seleccionat">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
+<!ENTITY zotero.items.menu.mergeItems "Merge items">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaura a la Biblioteca">

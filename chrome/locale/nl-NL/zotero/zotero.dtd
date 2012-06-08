@@ -13,6 +13,7 @@
 <!ENTITY zotero.bibliography.style.label "Referentiestijl:">
 <!ENTITY zotero.bibliography.title "Bibliografie aanmaken">
 <!ENTITY zotero.charset.label "Tekensetcodering">
+<!ENTITY zotero.citation.editorWarning.label "Editor warning">
 <!ENTITY zotero.citation.keepSorted.label "Bronnen gesorteerd houden">
 <!ENTITY zotero.citation.line "Regel">
 <!ENTITY zotero.citation.page "Pagina">
@@ -28,6 +29,8 @@
 <!ENTITY zotero.downloadManager.label "Opslaan in Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Om deze functie te gebruiken moet u eerst de PDF-hulpprogramma's installen via de Zotero-voorkeuren.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Bijlages kunnen niet in de nu geselecteerde bibliotheek worden opgeslagen. Dit object zal daarom in plaats hiervan in uw bibliotheek worden opgeslagen.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
 <!ENTITY zotero.errorReport.notReviewed "Foutenrapporten worden niet bekeken tenzij u ernaar verwijst in het forum.">
 <!ENTITY zotero.errorReport.postToForums "Plaats een bericht op het (Engelstalige) Zotero forum (forums.zotero.org) onder vermelding van het Rapport ID, een omschrijving van het probleem, en de stappen die nodig zijn om het probleem te reproduceren.">
 <!ENTITY zotero.errorReport.reportID "Rapport ID:">
@@ -100,6 +103,7 @@
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Kopie maken van geselecteerd object">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
+<!ENTITY zotero.items.menu.mergeItems "Merge items">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Terugzetten in bibliotheek">

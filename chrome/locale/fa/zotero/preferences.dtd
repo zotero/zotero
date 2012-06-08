@@ -54,6 +54,7 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "تغییرات فقط در پنجره‌های جدید اعمال می‌شوند">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "رونوشت یادکرد آیتم‌های انتخاب شده به حافظه موقت">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "رونوشت آیتم‌های انتخاب شده به حافظه موقت">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "درون‌برد از حافظه موقت">
 <!ENTITY zotero.preferences.keys.library "کتابخانه">
 <!ENTITY zotero.preferences.keys.newItem "ساخت آیتم‌ جدید">

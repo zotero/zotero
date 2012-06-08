@@ -54,6 +54,7 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Los cambios tendrán efecto sólo en las ventanas nuevas">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar las citas para los ítems seleccionados al portapapeles">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar los ítems seleccionados al portapapeles">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
 <!ENTITY zotero.preferences.keys.library "Biblioteca">
 <!ENTITY zotero.preferences.keys.newItem "Crear un nuevo ítem">

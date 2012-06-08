@@ -54,6 +54,7 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Os cambios só terán efecto en novas fiestras">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiar as Citas do Elemento Seleccionado ao Portapapeis">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiar os Elementos Seleccionados ao Portapapeis">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importar do portapapeis">
 <!ENTITY zotero.preferences.keys.library "Biblioteca">
 <!ENTITY zotero.preferences.keys.newItem "Crear un novo elemento">

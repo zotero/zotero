@@ -13,6 +13,7 @@
 <!ENTITY zotero.bibliography.style.label "Citační styl:">
 <!ENTITY zotero.bibliography.title "Vytvořit bibliografii">
 <!ENTITY zotero.charset.label "Kódování znaků">
+<!ENTITY zotero.citation.editorWarning.label "Editor warning">
 <!ENTITY zotero.citation.keepSorted.label "Ponechat zdroje seřazené">
 <!ENTITY zotero.citation.line "Řádek">
 <!ENTITY zotero.citation.page "Stránka">
@@ -28,6 +29,8 @@
 <!ENTITY zotero.downloadManager.label "Save to Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
 <!ENTITY zotero.errorReport.notReviewed "Chybová hlášení nejsou zpracovávána, dokud nejsou nahlášena do fóra.">
 <!ENTITY zotero.errorReport.postToForums "Prosím, napište zprávu do Zotero fóra (forums.zotero.org). Napište ID hlášení, popis problému a postupné kroky k jeho reprodukování.">
 <!ENTITY zotero.errorReport.reportID "ID hlášení:">
@@ -100,6 +103,7 @@
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Duplikovat vybranou položku">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
+<!ENTITY zotero.items.menu.mergeItems "Merge items">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">

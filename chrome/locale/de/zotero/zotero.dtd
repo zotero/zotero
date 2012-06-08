@@ -13,6 +13,7 @@
 <!ENTITY zotero.bibliography.style.label "Zitierstil:">
 <!ENTITY zotero.bibliography.title "Literaturverzeichnis erstellen">
 <!ENTITY zotero.charset.label "Zeichenkodierung">
+<!ENTITY zotero.citation.editorWarning.label "Editor warning">
 <!ENTITY zotero.citation.keepSorted.label "Quellen sortiert halten">
 <!ENTITY zotero.citation.line "Zeile">
 <!ENTITY zotero.citation.page "Seite">
@@ -28,6 +29,8 @@
 <!ENTITY zotero.downloadManager.label "In Zotero speichern">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Um diese Funktion zu nutzen, müssen Sie zuerst die PDF-Werkzeuge in den Zotero-Einstellungen installieren.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Anhänge können in der aktuell gewählten Bibliothek nicht gespeichert werden. Der Eintrag wird stattdessen in Ihrer Bibliothek gespeichert.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
 <!ENTITY zotero.errorReport.notReviewed "Fehlerberichte werden im Allgemeinen nicht beachtet, wenn kein entsprechender Thread im Forum erstellt wird.">
 <!ENTITY zotero.errorReport.postToForums "Bitte erstellen Sie einen Beitrag in den Zotero-Foren (forums.zotero.org) mit dieser Berichts-ID, einer Beschreibung des Fehlers und den Schritten, die notwendig sind, um ihn zu reproduzieren.">
 <!ENTITY zotero.errorReport.reportID "Bericht-ID:">
@@ -100,6 +103,7 @@
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Ausgewählten Eintrag duplizieren">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
+<!ENTITY zotero.items.menu.mergeItems "Merge items">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "In der Bibliothek wiederherstellen">

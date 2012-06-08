@@ -54,6 +54,7 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Změny se projeví jen v nových oknech">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopírovat citaci vybrané položky do schránky">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopírovat vybrané položky do schránky">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importovat ze schránky">
 <!ENTITY zotero.preferences.keys.library "Knihovna">
 <!ENTITY zotero.preferences.keys.newItem "Vytvořit novou položku">

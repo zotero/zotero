@@ -13,6 +13,7 @@
 <!ENTITY zotero.bibliography.style.label "引用文獻樣式：">
 <!ENTITY zotero.bibliography.title "建立參考書目">
 <!ENTITY zotero.charset.label "字元編碼">
+<!ENTITY zotero.citation.editorWarning.label "Editor warning">
 <!ENTITY zotero.citation.keepSorted.label "依序排列來源">
 <!ENTITY zotero.citation.line "行">
 <!ENTITY zotero.citation.page "頁">
@@ -28,6 +29,8 @@
 <!ENTITY zotero.downloadManager.label "貯存到Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "要使用這個功能，你必須先在Zotero的偏好設定中安裝PDF工具。">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "附件不能被存到目前選定的圖書館。這個項目會被改存到你的圖書館。">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
 <!ENTITY zotero.errorReport.notReviewed "一般來說，除非在論壇上有提到，錯誤報告是不會受到檢閱的。">
 <!ENTITY zotero.errorReport.postToForums "請在 Zotero 論壇 (forums.zotero.org) 上張貼一個含有這個報告識別號、問題的描述、及任何產生問題的必要步驟的訊息。">
 <!ENTITY zotero.errorReport.reportID "報告識別號：">
@@ -100,6 +103,7 @@
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "為選取的項目建立副本">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
+<!ENTITY zotero.items.menu.mergeItems "Merge items">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "還原到圖書館中">

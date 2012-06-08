@@ -13,6 +13,7 @@
 <!ENTITY zotero.bibliography.style.label "Siteringsstil:">
 <!ENTITY zotero.bibliography.title "Lag bibliografi">
 <!ENTITY zotero.charset.label "Character Encoding">
+<!ENTITY zotero.citation.editorWarning.label "Editor warning">
 <!ENTITY zotero.citation.keepSorted.label "Behold sortering av kildene">
 <!ENTITY zotero.citation.line "Linje">
 <!ENTITY zotero.citation.page "Side">
@@ -28,6 +29,8 @@
 <!ENTITY zotero.downloadManager.label "Save to Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "To use this feature, you must first install the PDF tools in the Zotero preferences.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
 <!ENTITY zotero.errorReport.notReviewed "Feilrapporter blir vanligvis ikke kommentert, dersom problemet ikke tas opp i forumene.">
 <!ENTITY zotero.errorReport.postToForums "Vennligst skriv en melding i Zotero-forumene (forums.zotero.org) med denne rapport-IDen, en beskrivelse av problemet og nødvendige steg for å reprodusere problemet.">
 <!ENTITY zotero.errorReport.reportID "Rapport-ID:">
@@ -100,6 +103,7 @@
 <!ENTITY zotero.items.menu.changeTag "Change Tag">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliser det valgte elementet">
 <!ENTITY zotero.items.menu.languageTag "Language Tag">
+<!ENTITY zotero.items.menu.mergeItems "Merge items">
 <!ENTITY zotero.items.menu.moveDown "Move Down">
 <!ENTITY zotero.items.menu.moveUp "Move Up">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">

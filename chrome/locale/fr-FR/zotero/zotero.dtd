@@ -13,6 +13,7 @@
 <!ENTITY zotero.bibliography.style.label "Style de citation :">
 <!ENTITY zotero.bibliography.title "Créer une bibliographie">
 <!ENTITY zotero.charset.label "Encodage des caractères">
+<!ENTITY zotero.citation.editorWarning.label "Editor warning">
 <!ENTITY zotero.citation.keepSorted.label "Conserver les sources en ordre alphabétique">
 <!ENTITY zotero.citation.line "Ligne">
 <!ENTITY zotero.citation.page "Page">
@@ -28,6 +29,8 @@
 <!ENTITY zotero.downloadManager.label "Enregistrer dans Zotero">
 <!ENTITY zotero.downloadManager.noPDFTools.description "Pour utiliser cette fonctionnalité, vous devez d'abord installer les outils PDF dans les préférences de Zotero.">
 <!ENTITY zotero.downloadManager.saveToLibrary.description "Les pièces jointes ne peuvent pas être enregistrées dans la bibliothèque sélectionnée. Ce document sera enregistré dans votre bibliothèque à la place.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Select field version">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Select master version">
 <!ENTITY zotero.errorReport.notReviewed "Les rapports d'erreurs ne sont généralement pas étudiés sauf sauf s'ils sont référencés dans les forums.">
 <!ENTITY zotero.errorReport.postToForums "Veuillez poster un message sur les forums Zotero (forums.zotero.org) avec cet ID du rapport, une description du problème et les étapes nécessaires pour le reproduire.">
 <!ENTITY zotero.errorReport.reportID "ID du rapport :">
@@ -100,6 +103,7 @@
 <!ENTITY zotero.items.menu.changeTag "Changer l'étiquette">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliquer le document sélectionné">
 <!ENTITY zotero.items.menu.languageTag "Étiquette de langue">
+<!ENTITY zotero.items.menu.mergeItems "Merge items">
 <!ENTITY zotero.items.menu.moveDown "Descendre">
 <!ENTITY zotero.items.menu.moveUp "Monter">
 <!ENTITY zotero.items.menu.restoreToLibrary "Restaurer vers la bibliothèque">

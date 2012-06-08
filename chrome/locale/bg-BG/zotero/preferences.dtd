@@ -54,6 +54,7 @@
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Промените ще се отразят само в новите прозорци">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Копирани на цитати за избраните записите в клипборда">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копиране на избраните записи в клипборда">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus libraries pane">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Внос от Клипборда">
 <!ENTITY zotero.preferences.keys.library "Библиотека">
 <!ENTITY zotero.preferences.keys.newItem "Създаване на нов запис">
