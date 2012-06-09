@@ -216,7 +216,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		return topLevelCollection;
 	},
 	
-	"_saveAttachmentFile":function(attachment, parentID) {
+	"_saveAttachmentFile":function(attachment, parentID, attachmentCallback) {
 		const urlRe = /(([A-Za-z]+):\/\/[^\s]*)/i;
 		Zotero.debug("Translate: Adding attachment", 4);
 			

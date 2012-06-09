@@ -1199,6 +1199,7 @@ Zotero.Translate.Base.prototype = {
 						deferredProgress[i][1], deferredProgress[i][2]);
 				}
 				
+				me.newItems = me.newItems.concat(newItems);
 				me._savingItems--;
 				me._checkIfDone();
 			} else {
@@ -1208,8 +1209,10 @@ Zotero.Translate.Base.prototype = {
 		},
 		function(attachment, progress, error) {
 			var attachmentIndex = me._savingAttachments.indexOf(attachment);
-			if((progress === false || progress === 100) && attachmentIndex !== -1) {
-				me._savingAttachments.splice(attachmentIndex, 1);
+			if(progress === false || progress === 100) {
+				if(attachmentIndex !== -1) {
+					me._savingAttachments.splice(attachmentIndex, 1);
+				}
 			} else if(attachmentIndex === -1) {
 				me._savingAttachments.push(attachment);
 			}
@@ -1231,6 +1234,9 @@ Zotero.Translate.Base.prototype = {
 	 * Checks if saving done, and if so, fires done event
 	 */
 	"_checkIfDone":function() {
+		Zotero.debug(this._savingItems);
+		Zotero.debug(this._savingAttachments.length);
+		Zotero.debug(this._currentState);
 		if(!this._savingItems && !this._savingAttachments.length && !this._currentState) {
 			this._runHandler("done", true);
 		}
