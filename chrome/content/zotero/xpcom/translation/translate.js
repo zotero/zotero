@@ -1234,9 +1234,6 @@ Zotero.Translate.Base.prototype = {
 	 * Checks if saving done, and if so, fires done event
 	 */
 	"_checkIfDone":function() {
-		Zotero.debug(this._savingItems);
-		Zotero.debug(this._savingAttachments.length);
-		Zotero.debug(this._currentState);
 		if(!this._savingItems && !this._savingAttachments.length && !this._currentState) {
 			this._runHandler("done", true);
 		}
