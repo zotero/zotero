@@ -130,28 +130,16 @@ Zotero.Translate.Sandbox = {
 					}
 				}
 			}
+		
+			// Fire itemSaving event
+			translate._runHandler("itemSaving", item);
 			
 			if(translate instanceof Zotero.Translate.Web) {
 				// For web translators, we queue saves
 				translate.saveQueue.push(item);
-				translate._runHandler("itemSaving", item);
 			} else {
-				var newItem;
-				translate._itemSaver.saveItems([item], function(returnValue, data) {
-					if(returnValue) {
-						newItem = data[0];
-						translate.newItems.push(newItem);
-					} else {
-						translate.complete(false, data);
-						throw data;
-					}
-				}, function(arg1, arg2, arg3) {
-					translate._attachmentProgress(arg1, arg2, arg3);
-				});
-				
-				translate._runHandler("itemSaving", item);
-				// pass both the saved item and the original JS array item
-				translate._runHandler("itemDone", newItem, item);
+				// Save items
+				translate._saveItems([item]);
 			}
 		},
 		
@@ -1014,7 +1002,8 @@ Zotero.Translate.Base.prototype = {
 		
 		this._libraryID = libraryID;
 		this._saveAttachments = saveAttachments === undefined || saveAttachments;
-		this._attachmentsSaving = [];
+		this._savingAttachments = [];
+		this._savingItems = 0;
 		
 		var me = this;
 		if(typeof this.translator[0] === "object") {
@@ -1143,14 +1132,11 @@ Zotero.Translate.Base.prototype = {
 			
 			if(returnValue) {
 				if(this.saveQueue.length) {
-					var me = this;
-					this._itemSaver.saveItems(this.saveQueue.slice(),
-						function(returnValue, data) { me._itemsSaved(returnValue, data); },
-						function(arg1, arg2, arg3) { me._attachmentProgress(arg1, arg2, arg3); });
+					this._saveItems(this.saveQueue);
+					this.saveQueue = [];
 					return;
-				} else {
-					this._debug("Translation successful");
 				}
+				this._debug("Translation successful");
 			} else {
 				if(error) {
 					// report error to console
@@ -1176,61 +1162,76 @@ Zotero.Translate.Base.prototype = {
 	},
 	
 	/**
-	 * Callback executed when items have been saved (which may happen asynchronously, if in
-	 * connector)
-	 *
-	 * @param {Boolean} returnValue Whether saving was successful
-	 * @param {Zotero.Item[]|Error} data If returnValue is true, this will be an array of
-	 *                                    Zotero.Item objects. If returnValue is false, this will
-	 *                                    be a string error message.
+	 * Saves items to the database, taking care to defer attachmentProgress notifications
+	 * until after save
 	 */
-	"_itemsSaved":function(returnValue, data) {
-		if(returnValue) {
-			// trigger deferred itemDone events
-			var nItems = data.length;
-			for(var i=0; i<nItems; i++) {
-				this._runHandler("itemDone", data[i], this.saveQueue[i]);
+	"_saveItems":function(items) {
+		var me = this,
+			itemDoneEventsDispatched = false,
+			deferredProgress = [],
+			attachmentsWithProgress = [];
+		
+		this._savingItems++;
+		this._itemSaver.saveItems(items.slice(), function(returnValue, newItems) {	
+			if(returnValue) {
+				// Remove attachments not being saved from item.attachments
+				for(var i=0; i<items.length; i++) {
+					var item = items[i];
+					for(var j=0; j<item.attachments.length; j++) {
+						if(attachmentsWithProgress.indexOf(item.attachments[j]) === -1) {
+							item.attachments.splice(j--, 1);
+						}
+					}
+				}
+				
+				// Trigger itemDone events
+				for(var i=0, nItems = items.length; i<nItems; i++) {
+					me._runHandler("itemDone", newItems[i], items[i]);
+				}
+				
+				// Specify that itemDone event was dispatched, so that we don't defer
+				// attachmentProgress notifications anymore
+				itemDoneEventsDispatched = true;
+				
+				// Run deferred attachmentProgress notifications
+				for(var i=0; i<deferredProgress.length; i++) {
+					me._runHandler("attachmentProgress", deferredProgress[i][0],
+						deferredProgress[i][1], deferredProgress[i][2]);
+				}
+				
+				me._savingItems--;
+				me._checkIfDone();
+			} else {
+				Zotero.logError(newItems);
+				me.complete(returnValue, newItems);
+			}
+		},
+		function(attachment, progress, error) {
+			var attachmentIndex = me._savingAttachments.indexOf(attachment);
+			if((progress === false || progress === 100) && attachmentIndex !== -1) {
+				me._savingAttachments.splice(attachmentIndex, 1);
+			} else if(attachmentIndex === -1) {
+				me._savingAttachments.push(attachment);
 			}
 			
-			this.saveQueue = [];
-		} else {
-			Zotero.logError(data);
-		}
-		
-		if(returnValue) {
-			this._checkIfDone();
-		} else {
-			this._runHandler("done", returnValue);
-		}
-	},
-	
-	/**
-	 * Callback for attachment progress, passed as third argument to Zotero.ItemSaver#saveItems
-	 *
-	 * @param {Object} attachment Attachment object to be saved. Should remain the same between
-	 *     repeated calls to callback.
-	 * @param {Boolean|Number} progress Percent complete, or false if an error occurred.
-	 * @param {Error} [error] Error, if an error occurred during saving.
-	 */
-	"_attachmentProgress":function(attachment, progress, error) {
-		Zotero.debug("Attachment progress (progress = "+progress+")");
-		Zotero.debug(attachment);
-		var attachmentIndex = this._attachmentsSaving.indexOf(attachment);
-		if((progress === false || progress === 100) && attachmentIndex !== -1) {
-			this._attachmentsSaving.splice(attachmentIndex, 1);
-		} else if(attachmentIndex === -1) {
-			this._attachmentsSaving.push(attachment);
-		}
-		
-		this._runHandler("attachmentProgress", attachment, progress, error);
-		this._checkIfDone();
+			if(itemDoneEventsDispatched) {
+				// itemDone event has already fired, so we can fire attachmentProgress
+				// notifications
+				me._runHandler("attachmentProgress", attachment, progress, error);
+				me._checkIfDone();
+			} else {
+				// Defer until after we fire the itemDone event
+				deferredProgress.push([attachment, progress, error]);
+				attachmentsWithProgress.push(attachment);
+			}
+		});
 	},
 	
 	/**
 	 * Checks if saving done, and if so, fires done event
 	 */
 	"_checkIfDone":function() {
-		if(!this._attachmentsSaving.length) {
+		if(!this._savingItems && !this._savingAttachments.length && !this._currentState) {
 			this._runHandler("done", true);
 		}
 	},

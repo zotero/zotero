@@ -79,83 +79,16 @@ Zotero.Translate.ItemSaver.prototype = {
 			payload.cookie = this._cookie;
 		}
 		
-		Zotero.Connector.callMethod("saveItems", payload, function(data, status) {
-			if(data !== false) {
+		Zotero.Connector.callMethod("saveItems", payload, function(success, status) {
+			if(success !== false) {
 				Zotero.debug("Translate: Save via Standalone succeeded");
-				var haveAttachments = false;
-				if(data.items) {
-					for(var i=0; i<data.items.length; i++) {
-						var attachments = items[i].attachments = data.items[i].attachments;
-						for(var j=0; j<attachments.length; j++) {
-							if(attachments[j].id) {
-								attachmentCallback(attachments[j], 0);
-								haveAttachments = true;
-							}
-						}
-					}
-				}
 				callback(true, items);
-				if(haveAttachments) me._pollForProgress(items, attachmentCallback);
 			} else if(Zotero.isFx) {
 				callback(false, new Error("Save via Standalone failed with "+status));
 			} else {
 				me._saveToServer(items, callback, attachmentCallback);
 			}
 		});
-	},
-	
-	/**
-	 * Polls for updates to attachment progress
-	 * @param items Items in Zotero.Item.toArray() format
-	 * @param {Function} attachmentCallback A callback that receives information about attachment
-	 *     save progress. The callback will be called as attachmentCallback(attachment, false, error)
-	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
-	 *     attachmentCallback() will be called with all attachments that will be saved 
-	 */
-	"_pollForProgress":function(items, attachmentCallback) {
-		var attachments = [];
-		var progressIDs = [];
-		var previousStatus = [];
-		for(var i=0; i<items.length; i++) {
-			var itemAttachments = items[i].attachments;
-			for(var j=0; j<itemAttachments.length; j++) {
-				if(itemAttachments[j].id) {
-					attachments.push(itemAttachments[j]);
-					progressIDs.push(itemAttachments[j].id);
-					previousStatus.push(0);
-				}
-			}
-		}
-		
-		var nPolls = 0;
-		var poll = function() {
-			Zotero.Connector.callMethod("attachmentProgress", progressIDs, function(currentStatus, status) {
-				if(currentStatus) {
-					for(var i=0; i<attachments.length; i++) {
-						if(currentStatus[i] === 100 || currentStatus[i] === false) {
-							attachmentCallback(attachments[i], currentStatus[i]);
-							attachments.splice(i, 1);
-							progressIDs.splice(i, 1);
-							previousStatus.splice(i, 1);
-							currentStatus.splice(i, 1);
-							i--;
-						} else if(currentStatus[i] !== previousStatus[i]) {
-							attachmentCallback(attachments[i], currentStatus[i]);
-							previousStatus[i] = currentStatus[i];
-						}
-					}
-					
-					if(nPolls++ < 60 && attachments.length) {
-						setTimeout(poll, 1000);
-					}
-				} else {
-					for(var i=0; i<attachments.length; i++) {
-						attachmentCallback(attachments[i], false, "Lost connection to Zotero Standalone");
-					}
-				}
-			});
-		};
-		poll();
 	},
 	
 	/**
@@ -168,7 +101,6 @@ Zotero.Translate.ItemSaver.prototype = {
 	 * @param {Function} attachmentCallback A callback that receives information about attachment
 	 *     save progress. The callback will be called as attachmentCallback(attachment, false, error)
 	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
-	 *     attachmentCallback() will be called with all attachments that will be saved 
 	 */
 	"_saveToServer":function(items, callback, attachmentCallback) {
 		var newItems = [], typedArraysSupported = false;
@@ -183,7 +115,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			if(typedArraysSupported) {
 				// Get rid of attachments that we won't be able to save properly and add ids
 				for(var j=0; j<item.attachments.length; j++) {
-					if(!item.attachments[j].url || item.attachments[j].mimeType === "text/html") {
+					if(item.attachments[j].url && item.attachments[j].mimeType !== "text/html") {
 						item.attachments.splice(j--, 1);
 					} else {
 						item.attachments[j].id = Zotero.Utilities.randomString();

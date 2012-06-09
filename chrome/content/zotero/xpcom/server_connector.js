@@ -33,16 +33,20 @@ Zotero.Server.Connector.AttachmentProgressManager = new function() {
 		i = 1;
 	
 	/**
+	 * Adds attachments to attachment progress manager
+	 */
+	this.add = function(attachments) {
+		for(var i=0; i<attachments.length; i++) {
+			var attachment = attachments[i];
+			attachmentsInProgress.set(attachment, (attachment.id = i++));
+		}
+	}
+	
+	/**
 	 * Called on attachment progress
 	 */
 	this.onProgress = function(attachment, progress, error) {
-		var progressID = attachmentsInProgress.get(attachment);
-		if(!progressID) {
-			progressID = attachment.id = i++;
-			attachmentsInProgress.set(attachment, progressID);
-		}
-		
-		attachmentProgress[progressID] = progress;
+		attachmentProgress[attachmentsInProgress.get(attachment)] = progress;
 	};
 		
 	/**
@@ -278,6 +282,7 @@ Zotero.Server.Connector.SavePage.prototype = {
 			Zotero.Server.Connector.AttachmentProgressManager.onProgress(attachment, progress, error);
 		});
 		translate.setHandler("itemsDone", function(obj, item) {
+			Zotero.Server.Connector.AttachmentProgressManager.add(item.attachments);
 			Zotero.Browser.deleteHiddenBrowser(me._browser);
 			if(jsonItems.length || me.selectedItems === false) {
 				me.sendResponse(201, "application/json", JSON.stringify({"items":jsonItems}));

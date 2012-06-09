@@ -50,8 +50,6 @@ var Zotero_Browser = new function() {
 	this.tabClose = tabClose;
 	this.resize = resize;
 	this.updateStatus = updateStatus;
-	this.finishScraping = finishScraping;
-	this.itemDone = itemDone;
 	
 	this.tabbrowser = null;
 	this.appcontent = null;
@@ -447,51 +445,6 @@ var Zotero_Browser = new function() {
 		}
 	}
 	
-	/*
-	 * Callback to be executed when scraping is complete
-	 */
-	function finishScraping(obj, returnValue) {
-		if(!returnValue) {
-			Zotero_Browser.progress.show();
-			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-			// Include link to Known Translator Issues page
-			var url = "http://www.zotero.org/documentation/known_translator_issues";
-			var linkText = '<a href="' + url + '" tooltiptext="' + url + '">'
-				+ Zotero.getString('ingester.scrapeErrorDescription.linkText') + '</a>';
-			Zotero_Browser.progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription", linkText));
-			Zotero_Browser.progress.startCloseTimer(8000);
-		} else {
-			Zotero_Browser.progress.startCloseTimer();
-		}
-		Zotero_Browser.isScraping = false;
-	}
-	
-	
-	/*
-	 * Callback to be executed when an item has been finished
-	 */
-	function itemDone(obj, dbItem, item, collection) {
-		var title = item.title;
-		var icon = Zotero.ItemTypes.getImageSrc(item.itemType);
-		Zotero_Browser.progress.show();
-		Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scraping"));
-		Zotero_Browser.progress.addLines([title], [icon]);
-		
-		// add item to collection, if one was specified
-		if(collection) {
-			collection.addItem(dbItem.id);
-		}
-		
-		if(Zotero_Browser.isScraping) {
-			// initialize close timer between item saves in case translator doesn't call done
-			Zotero_Browser.progress.startCloseTimer(10000);	// is this long enough?
-		} else {
-			// if we aren't supposed to be scraping now, the translator is broken; assume we're
-			// done
-			Zotero_Browser.progress.startCloseTimer();
-		}
-	}
-	
 	/**
 	 * Called when status bar icon is right-clicked
 	 */
@@ -551,9 +504,9 @@ var Zotero_Browser = new function() {
 	function _constructLookupFunction(tab, success) {
 		return function(e) {
 			tab.page.translate.setTranslator(tab.page.translators[0]);
-			tab.page.translate.clearHandlers("itemsDone");
+			tab.page.translate.clearHandlers("done");
 			tab.page.translate.clearHandlers("itemDone");
-			tab.page.translate.setHandler("itemsDone", function(obj, status) {
+			tab.page.translate.setHandler("done", function(obj, status) {
 				if(status) {
 					success(e, obj);
 					Zotero_Browser.progress.close();
@@ -716,6 +669,7 @@ Zotero_Browser.Tab.prototype._attemptLocalFileImport = function(doc) {
 Zotero_Browser.Tab.prototype.translate = function(libraryID, collectionID, translator) {
 	if(this.page.translators && this.page.translators.length) {
 		Zotero_Browser.progress.show();
+		Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scraping"));
 		Zotero_Browser.isScraping = true;
 		
 		if(collectionID) {
@@ -730,11 +684,57 @@ Zotero_Browser.Tab.prototype.translate = function(libraryID, collectionID, trans
 		// use first translator available
 		this.page.translate.setTranslator(translator ? translator : this.page.translators[0]);
 		
-		this.page.translate.clearHandlers("itemsDone");
+		this.page.translate.clearHandlers("done");
 		this.page.translate.clearHandlers("itemDone");
 		
-		this.page.translate.setHandler("itemsDone", function(obj, item) { Zotero_Browser.finishScraping(obj, item) });
-		this.page.translate.setHandler("itemDone", function(obj, dbItem, item) { Zotero_Browser.itemDone(obj, dbItem, item, collection) });
+		this.page.translate.setHandler("done", function(obj, returnValue) {		
+			if(!returnValue) {
+				Zotero_Browser.progress.show();
+				Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+				// Include link to Known Translator Issues page
+				var url = "http://www.zotero.org/documentation/known_translator_issues";
+				var linkText = '<a href="' + url + '" tooltiptext="' + url + '">'
+					+ Zotero.getString('ingester.scrapeErrorDescription.linkText') + '</a>';
+				Zotero_Browser.progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription", linkText));
+				Zotero_Browser.progress.startCloseTimer(8000);
+			} else {
+				Zotero_Browser.progress.startCloseTimer();
+			}
+			Zotero_Browser.isScraping = false;
+		});
+		
+		var attachmentsMap = new WeakMap();
+		
+		this.page.translate.setHandler("itemDone", function(obj, dbItem, item) {
+			Zotero_Browser.progress.show();
+			var itemProgress = new Zotero_Browser.progress.ItemProgress(Zotero.ItemTypes.getImageSrc(item.itemType),
+				item.title);
+			itemProgress.setProgress(100);
+			for(var i=0; i<item.attachments.length; i++) {
+				var attachment = item.attachments[i];
+				attachmentsMap.set(attachment,
+					new Zotero_Browser.progress.ItemProgress(
+						Zotero.Utilities.determineAttachmentIcon(attachment),
+						attachment.title, itemProgress));
+			}
+			
+			// add item to collection, if one was specified
+			if(collection) {
+				collection.addItem(dbItem.id);
+			}
+		});
+		
+		this.page.translate.setHandler("attachmentProgress", function(obj, attachment, progress, error) {
+			var itemProgress = attachmentsMap.get(attachment);
+			if(progress === false) {
+				itemProgress.setError();
+			} else {
+				itemProgress.setProgress(progress);
+				if(progress === 100) {
+					itemProgress.setIcon(Zotero.Utilities.determineAttachmentIcon(attachment));
+				}
+			}
+		});
 		
 		this.page.translate.translate(libraryID);
 	}

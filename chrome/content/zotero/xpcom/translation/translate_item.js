@@ -151,8 +151,6 @@ Zotero.Translate.ItemSaver.prototype = {
 								var newAttachment = this._saveAttachment(item.attachments[i], myID, attachmentCallback);
 								if(typeof newAttachment === "object") {
 									this._saveTags(item.attachments[i], newAttachment);
-								} else if(!newAttachment) {
-									item.attachments.splice(i--, 1);
 								}
 							}
 						}

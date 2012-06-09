@@ -1575,5 +1575,16 @@ Zotero.Utilities = {
 			}
 		}
 		return length;
+	},
+	
+	/**
+	 * Gets the icon for a JSON-style attachment
+	 */
+	"determineAttachmentIcon":function(attachment) {
+		if(attachment.linkMode === "linked_url") {
+			return Zotero.ItemTypes.getImageSrc("attachment-web-link");
+		}
+		return Zotero.ItemTypes.getImageSrc(attachment.mimeType === "application/pdf"
+							? "attachment-pdf" : "attachment-snapshot");
 	}
 }
