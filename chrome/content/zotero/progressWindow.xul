@@ -8,8 +8,8 @@
         windowtype="alert:alert">
 		
 	<hbox id="zotero-progress-box">
-		<vbox id="zotero-progress-text-box">
-			<label id="zotero-progress-text-headline"/>
+		<vbox id="zotero-progress-text-box" flex="1">
+			<hbox id="zotero-progress-text-headline" pack="start"/>
 		</vbox>
 	</hbox>
 </window>

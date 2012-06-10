@@ -669,7 +669,6 @@ Zotero_Browser.Tab.prototype._attemptLocalFileImport = function(doc) {
 Zotero_Browser.Tab.prototype.translate = function(libraryID, collectionID, translator) {
 	if(this.page.translators && this.page.translators.length) {
 		Zotero_Browser.progress.show();
-		Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scraping"));
 		Zotero_Browser.isScraping = true;
 		
 		if(collectionID) {
@@ -677,6 +676,28 @@ Zotero_Browser.Tab.prototype.translate = function(libraryID, collectionID, trans
 		}
 		else {
 			var collection = false;
+		}
+		
+		if(Zotero.isConnector) {
+			Zotero.Connector.callMethod("getSelectedCollection", {}, function(response, status) {
+				if(status !== 200) return;
+				Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapingTo"),
+					"chrome://zotero/skin/treesource-"+(response.id ? "collection" : "library")+".png",
+					response.name+"\u2026");
+			});
+		} else {
+			var name;
+			if(collection) {
+				name = collection.name;
+			} else if(libraryID) {
+				name = Zotero.Libraries.getName(libraryID);
+			} else {
+				name = Zotero.getString("pane.collections.library");
+			}
+			
+			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapingTo"),
+				"chrome://zotero/skin/treesource-"+(collection ? "collection" : "library")+".png",
+				name+"\u2026");
 		}
 		
 		var me = this;

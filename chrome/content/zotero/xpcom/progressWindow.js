@@ -159,8 +159,32 @@ Zotero.ProgressWindow = function(_window){
 	/**
 	 * Changes the "headline" shown at the top of the progress window
 	 */
-	this.changeHeadline = _deferUntilWindowLoad(function changeHeadline(headline) {
-		_progressWindow.document.getElementById("zotero-progress-text-headline").value = headline;
+	this.changeHeadline = _deferUntilWindowLoad(function changeHeadline(text, icon, postText) {
+		var doc = _progressWindow.document,
+			headline = doc.getElementById("zotero-progress-text-headline");
+		while(headline.hasChildNodes()) headline.removeChild(headline.firstChild);
+		
+		var preNode = doc.createElement("label");
+		preNode.setAttribute("value", text);
+		preNode.setAttribute("crop", "end");
+		headline.appendChild(preNode);
+		
+		if(icon) {
+			var img = doc.createElement("image");
+			img.width = 16;
+			img.height = 16;
+			img.setAttribute("src", icon);
+			headline.appendChild(img);
+		}
+		
+		if(postText) {
+			var postNode = doc.createElement("label");
+			postNode.style.marginLeft = 0;
+			postNode.setAttribute("value", " "+postText);
+			postNode.setAttribute("crop", "end");
+			postNode.setAttribute("flex", "1");
+			headline.appendChild(postNode);
+		}
 	});
 	
 	/**
@@ -270,6 +294,8 @@ Zotero.ProgressWindow = function(_window){
 		if(parentItemProgress) {
 			this._hbox.style.marginLeft = "16px";
 			this._hbox.zoteroIsChildItem;
+		} else {
+			this._hbox.setAttribute("parent", "true");
 		}
 		this._hbox.style.opacity = "0.5";
 		
