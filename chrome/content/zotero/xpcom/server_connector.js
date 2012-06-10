@@ -520,6 +520,64 @@ Zotero.Server.Connector.GetTranslatorCode.prototype = {
 }
 
 /**
+ * Get selected collection
+ *
+ * Accepts:
+ *		Nothing
+ * Returns:
+ *		libraryID
+ *      libraryName
+ *      collectionID
+ *      collectionName
+ */
+Zotero.Server.Connector.GetSelectedCollection = function() {};
+Zotero.Server.Endpoints["/connector/getSelectedCollection"] = Zotero.Server.Connector.GetSelectedCollection;
+Zotero.Server.Connector.GetSelectedCollection.prototype = {
+	"supportedMethods":["POST"],
+	"supportedDataTypes":["application/json"],
+	
+	/**
+	 * Returns a 200 response to say the server is alive
+	 * @param {String} data POST data or GET query string
+	 * @param {Function} sendResponseCallback function to send HTTP response
+	 */
+	"init":function(postData, sendResponseCallback) {
+		var zp = Zotero.getActiveZoteroPane(),
+			libraryID = null,
+			collection = null,
+			editable = true;
+		
+		try {
+			libraryID = zp.getSelectedLibraryID();
+			editable = ZoteroPane.collectionsView.editable;
+			collection = zp.getSelectedCollection();
+		} catch(e) {}
+		
+		var response = {
+			"editable":editable,
+			"libraryID":libraryID
+		};
+		
+		if(libraryID) {
+			response.libraryName = Zotero.Libraries.getName(libraryID);
+		} else {
+			response.libraryName = Zotero.getString("pane.collections.library");
+		}
+		
+		if(collection && collection.id) {
+			response.id = collection.id;
+			response.name = collection.name;
+		} else {
+			response.id = null;
+			response.name = response.libraryName;
+		}
+		
+		sendResponseCallback(200, "application/json", JSON.stringify(response));
+	}
+}
+
+
+/**
  * Test connection
  *
  * Accepts:
