@@ -2818,9 +2818,6 @@ Zotero.Integration.Session.prototype.updateCitations = function(callback, forceC
 				// Always assume all items registered.
 				var res = this.style.processCitationCluster(citation, citationHints.slice(0, cslCitationIndex), citationHints.slice(cslCitationIndex + 1), 2);
 				var citations = res[1];
-				if (citations.length > 1) {
-					citations = citations.slice(1).concat(citations.slice(0, 1));
-				}
 				for (var pos = 0, poslen = res[1].length; pos < poslen; pos += 1) {
 					var i = res[1][pos][0];
 					var str = res[1][pos][1];
