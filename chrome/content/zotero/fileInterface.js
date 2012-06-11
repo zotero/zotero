@@ -195,7 +195,17 @@ var Zotero_File_Interface = new function() {
 	/**
 	 * Creates Zotero.Translate instance and shows file picker for file import
 	 */
-	function importFile(file, createNewCollectionOverride) {
+	function importFile(file, createNewCollection) {
+		if(createNewCollection === undefined) {
+			createNewCollection = true;
+		} else if(!createNewCollection) {
+			try {
+				if (!ZoteroPane.collectionsView.editable) {
+					ZoteroPane.collectionsView.selectLibrary(null);
+				}
+			} catch(e) {}
+		}
+		
 		var translation = new Zotero.Translate.Import();
 		if(!file) {
 			var translators = translation.getTranslators();
@@ -216,18 +226,6 @@ var Zotero_File_Interface = new function() {
 			}
 			
 			file = fp.file;
-		}
-		
-		var createNewCollection;
-		if(createNewCollectionOverride === undefined) {
-			createNewCollection = true;
-		} else if(!createNewCollectionOverride) {
-			createNewCollection = createNewCollectionOverride;
-			try {
-				if (!ZoteroPane.collectionsView.editable) {
-					ZoteroPane.collectionsView.selectLibrary(null);
-				}
-			} catch(e) {}
 		}
 		
 		translation.setLocation(file);
@@ -271,6 +269,12 @@ var Zotero_File_Interface = new function() {
 		
 		var translate = new Zotero.Translate.Import();
 		translate.setString(str);
+	
+		try {
+			if (!ZoteroPane.collectionsView.editable) {
+				ZoteroPane.collectionsView.selectLibrary(null);
+			}
+		} catch(e) {}
 		translate.setHandler("translators", function(obj, item) {
 			_importTranslatorsAvailable(obj, item, false); 
 		});
