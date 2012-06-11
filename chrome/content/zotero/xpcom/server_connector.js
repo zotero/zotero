@@ -549,8 +549,8 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 		
 		try {
 			libraryID = zp.getSelectedLibraryID();
-			editable = ZoteroPane.collectionsView.editable;
 			collection = zp.getSelectedCollection();
+			editable = zp.collectionsView.editable;
 		} catch(e) {}
 		
 		var response = {
