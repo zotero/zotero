@@ -27,6 +27,35 @@ const CONNECTOR_API_VERSION = 2;
 Zotero.Server.Connector = function() {};
 Zotero.Server.Connector._waitingForSelection = {};
 Zotero.Server.Connector.Data = {};
+Zotero.Server.Connector.AttachmentProgressManager = new function() {
+	var attachmentsInProgress = new WeakMap(),
+		attachmentProgress = {},
+		i = 1;
+	
+	/**
+	 * Adds attachments to attachment progress manager
+	 */
+	this.add = function(attachments) {
+		for(var i=0; i<attachments.length; i++) {
+			var attachment = attachments[i];
+			attachmentsInProgress.set(attachment, (attachment.id = i++));
+		}
+	}
+	
+	/**
+	 * Called on attachment progress
+	 */
+	this.onProgress = function(attachment, progress, error) {
+		attachmentProgress[attachmentsInProgress.get(attachment)] = progress;
+	};
+		
+	/**
+	 * Gets progress for a given progressID
+	 */
+	this.getProgressForID = function(progressID) {
+		return progressID in attachmentProgress ? attachmentProgress[progressID] : 0;
+	};
+};
 
 /**
  * Lists all available translators, including code for translators that should be run on every page
@@ -169,7 +198,7 @@ Zotero.Server.Connector.Detect.prototype = {
  *		cookie - document.cookie or equivalent
  *
  * Returns:
- *		If a single item, sends response code 201 with no body.
+ *		If a single item, sends response code 201 with item in body.
  *		If multiple items, sends response code 300 with the following content:
  *			items - list of items in the format typically passed to the selectItems handler
  *			instanceID - an ID that must be maintained for the subsequent Zotero.Connector.Select call
@@ -246,9 +275,14 @@ Zotero.Server.Connector.SavePage.prototype = {
 			if(collection) {
 				collection.addItem(item.id);
 			}
+			
 			jsonItems.push(jsonItem);
 		});
-		translate.setHandler("done", function(obj, item) {
+		translate.setHandler("attachmentProgress", function(obj, attachment, progress, error) {
+			Zotero.Server.Connector.AttachmentProgressManager.onProgress(attachment, progress, error);
+		});
+		translate.setHandler("itemsDone", function(obj, item) {
+			Zotero.Server.Connector.AttachmentProgressManager.add(item.attachments);
 			Zotero.Browser.deleteHiddenBrowser(me._browser);
 			if(jsonItems.length || me.selectedItems === false) {
 				me.sendResponse(201, "application/json", JSON.stringify({"items":jsonItems}));
@@ -269,7 +303,7 @@ Zotero.Server.Connector.SavePage.prototype = {
  * Accepts:
  *		items - an array of JSON format items
  * Returns:
- *		201 response code with empty body
+ *		201 response code with item in body.
  */
 Zotero.Server.Connector.SaveItem = function() {};
 Zotero.Server.Endpoints["/connector/saveItems"] = Zotero.Server.Connector.SaveItem;
@@ -299,22 +333,23 @@ Zotero.Server.Connector.SaveItem.prototype = {
 		// save items
 		var itemSaver = new Zotero.Translate.ItemSaver(libraryID,
 			Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD, 1, undefined, cookieSandbox);
-		itemSaver.saveItems(data.items, function(returnValue, data) {
+		itemSaver.saveItems(data.items, function(returnValue, newItems) {
 			if(returnValue) {
 				try {
-					for each(var item in data) {
+					for each(var item in newItems) {
 						if(collection) collection.addItem(item.id);
 					}
-					sendResponseCallback(201);
+					
+					sendResponseCallback(201, "application/json", JSON.stringify({"items":data.items}));
 				} catch(e) {
 					Zotero.logError(e);
 					sendResponseCallback(500);
 				}
 			} else {
 				sendResponseCallback(500);
-				throw data;
+				throw newItems;
 			}
-		});
+		}, Zotero.Server.Connector.AttachmentProgressManager.onProgress);
 	}
 }
 
@@ -435,6 +470,31 @@ Zotero.Server.Connector.SelectItems.prototype = {
 }
 
 /**
+ * Gets progress for an attachment that is currently being saved
+ *
+ * Accepts:
+ *      Array of attachment IDs returned by savePage, saveItems, or saveSnapshot
+ * Returns:
+ *      200 response code with current progress in body. Progress is either a number
+ *      between 0 and 100 or "false" to indicate that saving failed.
+ */
+Zotero.Server.Connector.Progress = function() {};
+Zotero.Server.Endpoints["/connector/attachmentProgress"] = Zotero.Server.Connector.Progress;
+Zotero.Server.Connector.Progress.prototype = {
+	"supportedMethods":["POST"],
+	"supportedDataTypes":["application/json"],
+	
+	/**
+	 * @param {String} data POST data or GET query string
+	 * @param {Function} sendResponseCallback function to send HTTP response
+	 */
+	"init":function(data, sendResponseCallback) {
+		sendResponseCallback(200, "application/json",
+			JSON.stringify([Zotero.Server.Connector.AttachmentProgressManager.getProgressForID(id) for each(id in data)]));
+	}
+};
+
+/**
  * Get code for a translator
  *
  * Accepts:
@@ -458,6 +518,64 @@ Zotero.Server.Connector.GetTranslatorCode.prototype = {
 		sendResponseCallback(200, "application/javascript", translator.code);
 	}
 }
+
+/**
+ * Get selected collection
+ *
+ * Accepts:
+ *		Nothing
+ * Returns:
+ *		libraryID
+ *      libraryName
+ *      collectionID
+ *      collectionName
+ */
+Zotero.Server.Connector.GetSelectedCollection = function() {};
+Zotero.Server.Endpoints["/connector/getSelectedCollection"] = Zotero.Server.Connector.GetSelectedCollection;
+Zotero.Server.Connector.GetSelectedCollection.prototype = {
+	"supportedMethods":["POST"],
+	"supportedDataTypes":["application/json"],
+	
+	/**
+	 * Returns a 200 response to say the server is alive
+	 * @param {String} data POST data or GET query string
+	 * @param {Function} sendResponseCallback function to send HTTP response
+	 */
+	"init":function(postData, sendResponseCallback) {
+		var zp = Zotero.getActiveZoteroPane(),
+			libraryID = null,
+			collection = null,
+			editable = true;
+		
+		try {
+			libraryID = zp.getSelectedLibraryID();
+			collection = zp.getSelectedCollection();
+			editable = zp.collectionsView.editable;
+		} catch(e) {}
+		
+		var response = {
+			"editable":editable,
+			"libraryID":libraryID
+		};
+		
+		if(libraryID) {
+			response.libraryName = Zotero.Libraries.getName(libraryID);
+		} else {
+			response.libraryName = Zotero.getString("pane.collections.library");
+		}
+		
+		if(collection && collection.id) {
+			response.id = collection.id;
+			response.name = collection.name;
+		} else {
+			response.id = null;
+			response.name = response.libraryName;
+		}
+		
+		sendResponseCallback(200, "application/json", JSON.stringify(response));
+	}
+}
+
 
 /**
  * Test connection

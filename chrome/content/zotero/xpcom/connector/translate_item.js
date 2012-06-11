@@ -115,7 +115,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			if(typedArraysSupported) {
 				// Get rid of attachments that we won't be able to save properly and add ids
 				for(var j=0; j<item.attachments.length; j++) {
-					if(!item.attachments[j].url || item.attachments[j].mimeType === "text/html") {
+					if(item.attachments[j].url && item.attachments[j].mimeType !== "text/html") {
 						item.attachments.splice(j--, 1);
 					} else {
 						item.attachments[j].id = Zotero.Utilities.randomString();

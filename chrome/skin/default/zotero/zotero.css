@@ -228,12 +228,18 @@ label.zotero-text-link {
 	margin: 0;
 	min-height: 50px;
 	width: 250px;
-	padding-bottom: 3px;
+	padding: 3px 0 3px 0;
 }
 
 #zotero-progress-text-headline
 {
 	font-weight: bold;
+	margin-bottom: 2px;
+}
+
+.zotero-progress-icon-headline {
+	width: 16px;
+	height: 16px;
 }
 
 .zotero-progress-item-icon
@@ -245,8 +251,13 @@ label.zotero-text-link {
 .zotero-progress-item-hbox
 {
 	padding-left: 5px;
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.zotero-progress-item-hbox[parent]
+{
 	margin-top: 3px;
-	margin-bottom: 3px;
 }
 
 .zotero-progress-item-label

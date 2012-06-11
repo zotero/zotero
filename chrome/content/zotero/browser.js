@@ -50,8 +50,6 @@ var Zotero_Browser = new function() {
 	this.tabClose = tabClose;
 	this.resize = resize;
 	this.updateStatus = updateStatus;
-	this.finishScraping = finishScraping;
-	this.itemDone = itemDone;
 	
 	this.tabbrowser = null;
 	this.appcontent = null;
@@ -447,51 +445,6 @@ var Zotero_Browser = new function() {
 		}
 	}
 	
-	/*
-	 * Callback to be executed when scraping is complete
-	 */
-	function finishScraping(obj, returnValue) {
-		if(!returnValue) {
-			Zotero_Browser.progress.show();
-			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
-			// Include link to Known Translator Issues page
-			var url = "http://www.zotero.org/documentation/known_translator_issues";
-			var linkText = '<a href="' + url + '" tooltiptext="' + url + '">'
-				+ Zotero.getString('ingester.scrapeErrorDescription.linkText') + '</a>';
-			Zotero_Browser.progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription", linkText));
-			Zotero_Browser.progress.startCloseTimer(8000);
-		} else {
-			Zotero_Browser.progress.startCloseTimer();
-		}
-		Zotero_Browser.isScraping = false;
-	}
-	
-	
-	/*
-	 * Callback to be executed when an item has been finished
-	 */
-	function itemDone(obj, dbItem, item, collection) {
-		var title = item.title;
-		var icon = Zotero.ItemTypes.getImageSrc(item.itemType);
-		Zotero_Browser.progress.show();
-		Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scraping"));
-		Zotero_Browser.progress.addLines([title], [icon]);
-		
-		// add item to collection, if one was specified
-		if(collection) {
-			collection.addItem(dbItem.id);
-		}
-		
-		if(Zotero_Browser.isScraping) {
-			// initialize close timer between item saves in case translator doesn't call done
-			Zotero_Browser.progress.startCloseTimer(10000);	// is this long enough?
-		} else {
-			// if we aren't supposed to be scraping now, the translator is broken; assume we're
-			// done
-			Zotero_Browser.progress.startCloseTimer();
-		}
-	}
-	
 	/**
 	 * Called when status bar icon is right-clicked
 	 */
@@ -725,6 +678,28 @@ Zotero_Browser.Tab.prototype.translate = function(libraryID, collectionID, trans
 			var collection = false;
 		}
 		
+		if(Zotero.isConnector) {
+			Zotero.Connector.callMethod("getSelectedCollection", {}, function(response, status) {
+				if(status !== 200) return;
+				Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapingTo"),
+					"chrome://zotero/skin/treesource-"+(response.id ? "collection" : "library")+".png",
+					response.name+"\u2026");
+			});
+		} else {
+			var name;
+			if(collection) {
+				name = collection.name;
+			} else if(libraryID) {
+				name = Zotero.Libraries.getName(libraryID);
+			} else {
+				name = Zotero.getString("pane.collections.library");
+			}
+			
+			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapingTo"),
+				"chrome://zotero/skin/treesource-"+(collection ? "collection" : "library")+".png",
+				name+"\u2026");
+		}
+		
 		var me = this;
 		
 		// use first translator available
@@ -733,8 +708,54 @@ Zotero_Browser.Tab.prototype.translate = function(libraryID, collectionID, trans
 		this.page.translate.clearHandlers("done");
 		this.page.translate.clearHandlers("itemDone");
 		
-		this.page.translate.setHandler("done", function(obj, item) { Zotero_Browser.finishScraping(obj, item) });
-		this.page.translate.setHandler("itemDone", function(obj, dbItem, item) { Zotero_Browser.itemDone(obj, dbItem, item, collection) });
+		this.page.translate.setHandler("done", function(obj, returnValue) {		
+			if(!returnValue) {
+				Zotero_Browser.progress.show();
+				Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapeError"));
+				// Include link to Known Translator Issues page
+				var url = "http://www.zotero.org/documentation/known_translator_issues";
+				var linkText = '<a href="' + url + '" tooltiptext="' + url + '">'
+					+ Zotero.getString('ingester.scrapeErrorDescription.linkText') + '</a>';
+				Zotero_Browser.progress.addDescription(Zotero.getString("ingester.scrapeErrorDescription", linkText));
+				Zotero_Browser.progress.startCloseTimer(8000);
+			} else {
+				Zotero_Browser.progress.startCloseTimer();
+			}
+			Zotero_Browser.isScraping = false;
+		});
+		
+		var attachmentsMap = new WeakMap();
+		
+		this.page.translate.setHandler("itemDone", function(obj, dbItem, item) {
+			Zotero_Browser.progress.show();
+			var itemProgress = new Zotero_Browser.progress.ItemProgress(Zotero.ItemTypes.getImageSrc(item.itemType),
+				item.title);
+			itemProgress.setProgress(100);
+			for(var i=0; i<item.attachments.length; i++) {
+				var attachment = item.attachments[i];
+				attachmentsMap.set(attachment,
+					new Zotero_Browser.progress.ItemProgress(
+						Zotero.Utilities.determineAttachmentIcon(attachment),
+						attachment.title, itemProgress));
+			}
+			
+			// add item to collection, if one was specified
+			if(collection) {
+				collection.addItem(dbItem.id);
+			}
+		});
+		
+		this.page.translate.setHandler("attachmentProgress", function(obj, attachment, progress, error) {
+			var itemProgress = attachmentsMap.get(attachment);
+			if(progress === false) {
+				itemProgress.setError();
+			} else {
+				itemProgress.setProgress(progress);
+				if(progress === 100) {
+					itemProgress.setIcon(Zotero.Utilities.determineAttachmentIcon(attachment));
+				}
+			}
+		});
 		
 		this.page.translate.translate(libraryID);
 	}
