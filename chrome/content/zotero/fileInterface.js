@@ -218,10 +218,11 @@ var Zotero_File_Interface = new function() {
 			file = fp.file;
 		}
 		
-		var createNewCollection = createNewCollectionOverride;
+		var createNewCollection;
 		if(createNewCollectionOverride === undefined) {
-			createNewCollection = Zotero.Prefs.get("import.createNewCollection.fromFile");
+			createNewCollection = true;
 		} else if(!createNewCollectionOverride) {
+			createNewCollection = createNewCollectionOverride;
 			try {
 				if (!ZoteroPane.collectionsView.editable) {
 					ZoteroPane.collectionsView.selectLibrary(null);
@@ -271,7 +272,7 @@ var Zotero_File_Interface = new function() {
 		var translate = new Zotero.Translate.Import();
 		translate.setString(str);
 		translate.setHandler("translators", function(obj, item) {
-			_importTranslatorsAvailable(obj, item, Zotero.Prefs.get("import.createNewCollection.fromClipboard")); 
+			_importTranslatorsAvailable(obj, item, false); 
 		});
 		translators = translate.getTranslators();
 	}
