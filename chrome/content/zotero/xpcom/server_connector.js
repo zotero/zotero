@@ -30,7 +30,7 @@ Zotero.Server.Connector.Data = {};
 Zotero.Server.Connector.AttachmentProgressManager = new function() {
 	var attachmentsInProgress = new WeakMap(),
 		attachmentProgress = {},
-		i = 1;
+		id = 1;
 	
 	/**
 	 * Adds attachments to attachment progress manager
@@ -38,9 +38,9 @@ Zotero.Server.Connector.AttachmentProgressManager = new function() {
 	this.add = function(attachments) {
 		for(var i=0; i<attachments.length; i++) {
 			var attachment = attachments[i];
-			attachmentsInProgress.set(attachment, (attachment.id = i++));
+			attachmentsInProgress.set(attachment, (attachment.id = id++));
 		}
-	}
+	};
 	
 	/**
 	 * Called on attachment progress
@@ -275,6 +275,7 @@ Zotero.Server.Connector.SavePage.prototype = {
 			if(collection) {
 				collection.addItem(item.id);
 			}
+			Zotero.Server.Connector.AttachmentProgressManager.add(jsonItem.attachments);
 			
 			jsonItems.push(jsonItem);
 		});
@@ -329,6 +330,9 @@ Zotero.Server.Connector.SaveItem.prototype = {
 		
 		var cookieSandbox = data["uri"] && data["cookie"] ? new Zotero.CookieSandbox(null, data["uri"],
 			data["cookie"]) : null;
+		for(var i=0; i<data.items.length; i++) {
+			Zotero.Server.Connector.AttachmentProgressManager.add(data.items[i].attachments);
+		}
 		
 		// save items
 		var itemSaver = new Zotero.Translate.ItemSaver(libraryID,
