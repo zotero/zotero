@@ -653,19 +653,27 @@ Zotero.Integration = new function() {
 					
 					if(!message && typeof(e) == "object") message = "\n\n"+e.toString();
 					
-					if(message.indexOf("ExceptionAlreadyDisplayed") !== -1) {
+					if(message.indexOf("ExceptionAlreadyDisplayed") === -1) {
 						displayError = Zotero.getString("integration.error.generic")+message;
 					}
 					Zotero.debug(e);
 				}
 				
 				if(displayError) {
+					var showErrorInFirefox = !document;
+					
 					if(document) {
-						document.activate();
-						document.displayAlert(displayError,
-								Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
-								Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
-					} else {
+						try {
+							document.activate();
+							document.displayAlert(displayError,
+									Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
+									Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK);
+						} catch(e) {
+							showErrorInFirefox = true;
+						}
+					}
+					
+					if(showErrorInFirefox) {
 						Zotero.Integration.activate();
 						Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 							.getService(Components.interfaces.nsIPromptService)
@@ -1234,7 +1242,6 @@ Zotero.Integration.Fields.prototype.get = function(callback) {
 				callback(this._fields);
 			}
 		} catch(e) {
-			Zotero.logError(e);
 			Zotero.Integration.handleError(e, this._doc);
 		}
 		return;
@@ -1284,7 +1291,6 @@ Zotero.Integration.Fields.prototype._retrieveFields = function() {
 		} else if(topic === "fields-progress" && me.progressCallback) {
 			me.progressCallback((data ? parseInt(data, 10)*(3/4) : null));
 		} else if(topic === "fields-error") {
-			Zotero.logError(data);
 			Zotero.Integration.handleError(data, me._doc);
 		}
 	}, QueryInterface:XPCOMUtils.generateQI([Components.interfaces.nsIObserver, Components.interfaces.nsISupports])});
@@ -1540,7 +1546,6 @@ Zotero.Integration.Fields.prototype.updateDocument = function(forceCitations, fo
 				ignoreCitationChanges, deleteCitations, callback));
 		}));
 	} catch(e) {
-		Zotero.logError(e);
 		Zotero.Integration.handleError(e, this._doc);
 	}
 }

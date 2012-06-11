@@ -362,7 +362,7 @@ Zotero_TranslatorTester.prototype.fetchPageAndRunTest = function(test, testDoneC
 	var hiddenBrowser = Zotero.HTTP.processDocuments(test.url,
 		function(doc) {
 			if(test.defer) {
-				Zotero.setTimeout(function() { runTest(doc) }, 10000, true);
+				Zotero.setTimeout(function() { runTest(doc) }, 30000, true);
 			} else {
 				runTest(doc);
 			}

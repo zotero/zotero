@@ -1633,20 +1633,30 @@ Zotero.Translate.Web.prototype._translateServerComplete = function(statusCode, r
 		}
 		
 		// Extract items from ATOM/JSON response
-		var items = [];
-		var contents = response.getElementsByTagNameNS("http://www.w3.org/2005/Atom", "content");
+		var items = [], contents;
+		if("getElementsByTagNameNS" in response) {
+			contents = response.getElementsByTagNameNS("http://www.w3.org/2005/Atom", "content");
+		} else { // IE...
+			contents = response.getElementsByTagName("content");
+		}
 		for(var i=0, n=contents.length; i<n; i++) {
 			var content = contents[i];
-			if(content.getAttributeNS("http://zotero.org/ns/api", "type") != "json") continue;
+			if("getAttributeNS" in content) {
+				if(content.getAttributeNS("http://zotero.org/ns/api", "type") != "json") continue;
+			} else if(content.getAttribute("zapi:type") != "json") { // IE...
+				continue;
+			}
 			
 			try {
-				item = JSON.parse("textContent" in content ?
-					content.textContent : content.innerText);
+				var item = JSON.parse("textContent" in content ?
+					content.textContent : content.text);
 			} catch(e) {
 				Zotero.logError(e);
 				this.complete(false, "Invalid JSON response received from server");
 				return;
 			}
+			
+			if(!("attachments" in item)) item.attachments = [];
 			this._runHandler("itemDone", null, item);
 			items.push(item);
 		}

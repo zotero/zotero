@@ -664,7 +664,7 @@ To add a new preference:
 				</row>
 				
 				<row>
-					<label value="&zotero.preferences.keys.library;" control="textbox-library"/>
+					<label value="&zotero.preferences.keys.focusLibrariesPane;" control="textbox-library"/>
 					<label/>
 					<textbox id="textbox-library" maxlength="1" size="1" preference="pref-keys-library"/>
 				</row>

@@ -123,7 +123,7 @@
 
 <!ENTITY zotero.preferences.keys.openZotero				"Open/Close Zotero Pane">
 <!ENTITY zotero.preferences.keys.toggleFullscreen			"Toggle Fullscreen Mode">
-<!ENTITY zotero.preferences.keys.library					"Library">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane		"Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch				"Quick Search">
 <!ENTITY zotero.preferences.keys.newItem					"Create a new item">
 <!ENTITY zotero.preferences.keys.newNote					"Create a new note">
