@@ -377,7 +377,7 @@ ZoteroCommandLineHandler.prototype = {
 							.createInstance(Components.interfaces.nsIProtocolHandler).newChannel(uri);
 					}
 				} else {
-					Zotero.debug("Not handling URL: "+uri.spec);
+					this.Zotero.debug("Not handling URL: "+uri.spec);
 				}
 			}
 			
@@ -393,15 +393,19 @@ ZoteroCommandLineHandler.prototype = {
 					this.Zotero.Styles.install(file);
 				} else {
 					// Ask before importing
+					var checkState = {"value":this.Zotero.Prefs.get('import.createNewCollection.fromFileOpenHandler')};
 					if(Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 							.getService(Components.interfaces.nsIPromptService)
-							.confirm(null, this.Zotero.getString('ingester.importFile.title'),
-							this.Zotero.getString('ingester.importFile.text', [file.leafName]))) {
+							.confirmCheck(null, this.Zotero.getString('ingester.importFile.title'),
+							this.Zotero.getString('ingester.importFile.text', [file.leafName]),
+							this.Zotero.getString('ingester.importFile.intoNewCollection'), 
+							checkState)) {
 						// Perform file import in front window
 						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 										   .getService(Components.interfaces.nsIWindowMediator);
 						var browserWindow = wm.getMostRecentWindow("navigator:browser");
-						browserWindow.Zotero_File_Interface.importFile(file);
+						browserWindow.Zotero_File_Interface.importFile(file, checkState.value);
+						this.Zotero.Prefs.set('import.createNewCollection.fromFileOpenHandler', checkState.value);
 					}
 				}
 			}
