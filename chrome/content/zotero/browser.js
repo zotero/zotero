@@ -680,10 +680,13 @@ Zotero_Browser.Tab.prototype.translate = function(libraryID, collectionID, trans
 		
 		if(Zotero.isConnector) {
 			Zotero.Connector.callMethod("getSelectedCollection", {}, function(response, status) {
-				if(status !== 200) return;
-				Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapingTo"),
-					"chrome://zotero/skin/treesource-"+(response.id ? "collection" : "library")+".png",
-					response.name+"\u2026");
+				if(status !== 200) {
+					Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scraping"));
+				} else {
+					Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.scrapingTo"),
+						"chrome://zotero/skin/treesource-"+(response.id ? "collection" : "library")+".png",
+						response.name+"\u2026");
+				}
 			});
 		} else {
 			var name;
