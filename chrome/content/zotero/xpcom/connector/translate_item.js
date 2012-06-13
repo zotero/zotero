@@ -83,7 +83,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			if(data !== false) {
 				Zotero.debug("Translate: Save via Standalone succeeded");
 				var haveAttachments = false;
-				if(data.items) {
+				if(data && data.items) {
 					for(var i=0; i<data.items.length; i++) {
 						var attachments = items[i].attachments = data.items[i].attachments;
 						for(var j=0; j<attachments.length; j++) {
