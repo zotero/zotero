@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.341",
+    PROCESSOR_VERSION: "1.0.342",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -9367,7 +9367,7 @@ CSL.Transform = function (state) {
         }
         return function (state, Item, item, usedOrig) {
             var primary, secondary, tertiary, primary_tok, group_tok, key;
-            if (!variables[0]) {
+            if (!variables[0] || (!Item[variables[0]] && !Item[alternative_varname])) {
                 return null;
             }
 		    var slot = {primary:false, secondary:false, tertiary:false};
