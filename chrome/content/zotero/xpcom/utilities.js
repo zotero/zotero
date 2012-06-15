@@ -1399,7 +1399,7 @@ Zotero.Utilities = {
 		var isZoteroItem = item instanceof Zotero.Item, zoteroType;
 		
 		for(var type in CSL_TYPE_MAPPINGS) {
-			if(CSL_TYPE_MAPPINGS[zoteroType] == item.type) {
+			if(CSL_TYPE_MAPPINGS[type] == cslItem.type) {
 				zoteroType = type;
 				break;
 			}
@@ -1484,11 +1484,28 @@ Zotero.Utilities = {
 				if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
 					var date = "";
 					if(cslDate.literal) {
-						date = cslDate.literal;
+						if(variable === "accessed") {
+							date = strToISO(cslDate.literal);
+						} else {
+							date = cslDate.literal;
+						}
 					} else if(cslDate.year) {
-						if(cslDate.month) cslDate.month--;
-						date = Zotero.Date.formatDate(cslDate);
-						if(cslDate.season) date = cslDate.season+date;
+						if(variable === "accessed") {
+							// Need to convert to SQL
+							var date = Zotero.Utilities.lpad(cslDate.year, "0", 4);
+							if(cslDate.month) {
+								date += "-"+Zotero.Utilities.lpad(cslDate.month+1, "0", 2);
+								if(cslDate.day) {
+									date += "-"+Zotero.Utilities.lpad(cslDate.day, "0", 2);
+								}
+							}
+						} else {
+							if(cslDate.month) cslDate.month--;
+							date = Zotero.Date.formatDate(cslDate);
+							if(cslDate.season) {
+								date = date+" "+cslDate.season;
+							}
+						}
 					}
 					
 					if(isZoteroItem) {
