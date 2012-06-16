@@ -508,7 +508,7 @@ function() {
 		Zotero.setCitationLanguages({}, citeproc);
 		citeproc.opt.trigraph = trigraph;
         citeproc.opt.development_extensions.static_statute_locator = true;
-        citeproc.opt.development_extensions.clobber_locator_if_no_statute_section = true;
+        citeproc.opt.development_extensions.clobber_locator_if_no_statute_section = false;
 
 		return citeproc;
 	} catch(e) {
