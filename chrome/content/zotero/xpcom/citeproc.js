@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.343",
+    PROCESSOR_VERSION: "1.0.344",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -7977,12 +7977,14 @@ CSL.Node.text = {
                         if (!label) {
                             label = state.getCitationLabel(Item);
                         }
-                        suffix = "";
-                        if (state.registry.registry[Item.id] && state.registry.registry[Item.id].disambig.year_suffix !== false) {
-                            num = parseInt(state.registry.registry[Item.id].disambig.year_suffix, 10);
-                            suffix = state.fun.suffixator.format(num);
+                        if (!state.tmp.just_looking) {
+                            suffix = "";
+                            if (state.registry.registry[Item.id] && state.registry.registry[Item.id].disambig.year_suffix !== false) {
+                                num = parseInt(state.registry.registry[Item.id].disambig.year_suffix, 10);
+                                suffix = state.fun.suffixator.format(num);
+                            }
+                            label += suffix;
                         }
-                        label += suffix;
                         state.output.append(label, this);
                     };
                     this.execs.push(func);
