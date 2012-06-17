@@ -1489,21 +1489,30 @@ Zotero.Utilities = {
 						} else {
 							date = cslDate.literal;
 						}
-					} else if(cslDate.year) {
-						if(variable === "accessed") {
-							// Need to convert to SQL
-							var date = Zotero.Utilities.lpad(cslDate.year, "0", 4);
-							if(cslDate.month) {
-								date += "-"+Zotero.Utilities.lpad(cslDate.month+1, "0", 2);
-								if(cslDate.day) {
-									date += "-"+Zotero.Utilities.lpad(cslDate.day, "0", 2);
+					} else {
+						var newDate = Zotero.Utilities.deepCopy(cslDate);;
+						if(cslDate.dateParts && typeof cslDate.dateParts == "object") {
+							if(cslDate.dateParts[0]) newDate.year = cslDate.dateParts[0];
+							if(cslDate.dateParts[1]) newDate.month = cslDate.dateParts[1];
+							if(cslDate.dateParts[2]) newDate.day = cslDate.dateParts[2];
+						}
+						
+						if(newDate.year) {
+							if(variable === "accessed") {
+								// Need to convert to SQL
+								var date = Zotero.Utilities.lpad(newDate.year, "0", 4);
+								if(newDate.month) {
+									date += "-"+Zotero.Utilities.lpad(newDate.month+1, "0", 2);
+									if(newDate.day) {
+										date += "-"+Zotero.Utilities.lpad(newDate.day, "0", 2);
+									}
 								}
-							}
-						} else {
-							if(cslDate.month) cslDate.month--;
-							date = Zotero.Date.formatDate(cslDate);
-							if(cslDate.season) {
-								date = date+" "+cslDate.season;
+							} else {
+								if(newDate.month) newDate.month--;
+								date = Zotero.Date.formatDate(newDate);
+								if(newDate.season) {
+									date = newDate.season+" "+date;
+								}
 							}
 						}
 					}
