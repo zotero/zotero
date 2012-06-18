@@ -301,7 +301,7 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 	var lineLengths = [];
 	var str = {};
 	while(intlStream.readLine(str)) {
-		var line = lineRe.exec(str.value);
+		var line = lineRe.exec(str.value.trim());
 		if(line) {
 			lines.push(line[1]);
 			lineLengths.push(line[1].length);
