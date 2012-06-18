@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.345",
+    PROCESSOR_VERSION: "1.0.346",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -6711,6 +6711,22 @@ CSL.NameOutput.prototype._renderPersonalNames = function (values, pos) {
     }
     return ret;
 };
+CSL.NameOutput.prototype._isRomanesque = function (name) {
+    var ret = 2;
+    if (!name.family.replace('"', '', 'g').match(CSL.ROMANESQUE_REGEXP)) {
+        ret = 0;
+    }
+    if (!ret && name.given && name.given.match(CSL.STARTSWITH_ROMANESQUE_REGEXP)) {
+        ret = 1;
+    }
+    if (ret && name.multi && name.multi.main) {
+        var top_locale = name.multi.main.slice(0, 2);
+        if (["ja", "zh"].indexOf(top_locale) > -1) {
+            ret = 1;
+        }
+    }
+    return ret;
+};
 CSL.NameOutput.prototype._renderOnePersonalName = function (value, pos, i) {
     var name = value;
     var dropping_particle = this._droppingParticle(name, pos);
@@ -6733,11 +6749,11 @@ CSL.NameOutput.prototype._renderOnePersonalName = function (value, pos, i) {
     } else {
         suffix_sep = " ";
     }
-    var romanesque = name.family.match(CSL.ROMANESQUE_REGEXP);
+    var romanesque = this._isRomanesque(name);
     var blob, merged, first, second;
-    if (!romanesque) {
+    if (romanesque === 0) {
         blob = this._join([non_dropping_particle, family, given], "");
-    } else if (name["static-ordering"]) { // entry likes sort order
+    } else if (romanesque === 1 || name["static-ordering"]) { // entry likes sort order
         blob = this._join([non_dropping_particle, family, given], " ");
     } else if (this.state.tmp.sort_key_flag) {
         if (this.state.opt["demote-non-dropping-particle"] === "never") {
@@ -7090,7 +7106,7 @@ CSL.NameOutput.prototype.getStaticOrder = function (name, refresh) {
     var static_ordering_val = false;
     if (!refresh && name["static-ordering"]) {
         static_ordering_val = true;
-    } else if (!(name.family.replace('"', '', 'g') + name.given).match(CSL.ROMANESQUE_REGEXP)) {
+    } else if (this._isRomanesque(name) === 0) {
         static_ordering_val = true;
     } else if (name.multi && name.multi.main && name.multi.main.slice(0,2) == 'vn') {
         static_ordering_val = true;
