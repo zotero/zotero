@@ -2787,7 +2787,7 @@ Zotero.Integration.Session.prototype.updateCitations = function(callback, forceC
 					if (!citationList[i].properties.dontUpdate) {
 						var citationID = citationList[i].citationID;
 						var cslFormattedCitation = this.style.registry.citationreg.citationById[citationID].cslFormattedCitation;
-						if (!cslFormattedCitation) {
+						if (!cslFormattedCitation || forceCitations === FORCE_CITATIONS_RESET_TEXT) {
 							this.citationText[citationIndexMap[i]] = str;
 							this.updateIndices[citationIndexMap[i]] = true;
 							this.style.registry.citationreg.citationById[citationID].cslFormattedCitation = str;
