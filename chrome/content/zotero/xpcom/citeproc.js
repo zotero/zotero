@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.348",
+    PROCESSOR_VERSION: "1.0.349",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -6719,8 +6719,11 @@ CSL.NameOutput.prototype._isRomanesque = function (name) {
     if (!ret && name.given && name.given.match(CSL.STARTSWITH_ROMANESQUE_REGEXP)) {
         ret = 1;
     }
-    if (ret && name.multi && name.multi.main) {
+    if (ret == 2 && name.multi && name.multi.main) {
         var top_locale = name.multi.main.slice(0, 2);
+        if (!top_locale && this.Item.language) {
+            top_locale = this.Item.language.slice(0, 2);
+        }
         if (["ja", "zh"].indexOf(top_locale) > -1) {
             ret = 1;
         }
