@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.347",
+    PROCESSOR_VERSION: "1.0.348",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -7061,7 +7061,8 @@ CSL.NameOutput.prototype.getName = function (name, slotLocaleset, fallback, stop
         transliterated:transliterated,
         block_initialize:block_initialize,
         literal:name.literal,
-        isInstitution:name.isInstitution
+        isInstitution:name.isInstitution,
+        multi:name.multi
     };
     if (static_ordering_freshcheck &&
         !this.getStaticOrder(name, true)) {
