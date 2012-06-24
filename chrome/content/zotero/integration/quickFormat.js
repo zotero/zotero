@@ -313,21 +313,21 @@ var Zotero_QuickFormat = new function () {
 					Zotero.debug("Searched cited items");
 				}
 				
-				_updateItemList(citedItemsMatchingSearch, searchResultIDs, isAsync);
+				_updateItemList(citedItems, citedItemsMatchingSearch, searchResultIDs, isAsync);
 			});
 			
 			if(!completed) {
 				// We are going to have to wait until items have been retrieved from the document.
 				// Until then, show item list without cited items.
 				Zotero.debug("Getting cited items asynchronously");
-				_updateItemList(false, searchResultIDs);
+				_updateItemList(false, false, searchResultIDs);
 				isAsync = true;
 			} else {
 				Zotero.debug("Got cited items synchronously");
 			}
 		} else {
 			// No search conditions, so just clear the box
-			_updateItemList([], []);
+			_updateItemList([], [], []);
 		}
 	}
 	
@@ -348,7 +348,7 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Updates the item list
 	 */
-	function _updateItemList(citedItems, searchResultIDs, preserveSelection) {
+	function _updateItemList(citedItems, citedItemsMatchingSearch, searchResultIDs, preserveSelection) {
 		var selectedIndex = 1, previousItemID;
 		
 		// Do this so we can preserve the selected item after cited items have been loaded
@@ -366,13 +366,8 @@ var Zotero_QuickFormat = new function () {
 			selectedIndex = 2;
 		} else if(citedItems.length) {
 			// We have cited items
-			referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.cited")));
 			for(var i=0, n=citedItems.length; i<n; i++) {
 				var citedItem = citedItems[i];
-				if(i < 50) {
-					referenceBox.appendChild(_buildListItem(citedItem));
-				}
-				
 				// Tabulate number of items in document for each library
 				if(!citedItem.cslItemID) {
 					var libraryID = citedItem.libraryID ? citedItem.libraryID : 0;
@@ -381,6 +376,14 @@ var Zotero_QuickFormat = new function () {
 					} else {
 						nCitedItemsFromLibrary[libraryID] = 1;
 					}
+				}
+			}
+			
+			if(citedItemsMatchingSearch && citedItemsMatchingSearch.length) {
+				referenceBox.appendChild(_buildListSeparator(Zotero.getString("integration.cited")));
+				for(var i=0; i<Math.min(citedItemsMatchingSearch.length, 50); i++) {
+					var citedItem = citedItemsMatchingSearch[i];
+					referenceBox.appendChild(_buildListItem(citedItem));
 				}
 			}
 		}
@@ -400,7 +403,7 @@ var Zotero_QuickFormat = new function () {
 			}
 		}
 
-		if(searchResultIDs.length && (!citedItems || citedItems.length < 50)) {
+		if(searchResultIDs.length && (!citedItemsMatchingSearch || citedItemsMatchingSearch.length < 50)) {
 			var items = Zotero.Items.get(searchResultIDs);
 			
 			items.sort(function _itemSort(a, b) {
@@ -437,7 +440,7 @@ var Zotero_QuickFormat = new function () {
 			});
 			
 			var previousLibrary = -1;
-			for(var i=0, n=Math.min(items.length, citedItems ? 50-citedItems.length : 50); i<n; i++) {
+			for(var i=0, n=Math.min(items.length, citedItemsMatchingSearch ? 50-citedItemsMatchingSearch.length : 50); i<n; i++) {
 				var item = items[i], libraryID = item.libraryID;
 				
 				if(previousLibrary != libraryID) {
@@ -456,7 +459,7 @@ var Zotero_QuickFormat = new function () {
 		}
 		
 		_resize();
-		if((citedItems && citedItems.length) || searchResultIDs.length) {
+		if((citedItemsMatchingSearch && citedItemsMatchingSearch.length) || searchResultIDs.length) {
 			referenceBox.selectedIndex = selectedIndex;
 			referenceBox.ensureIndexIsVisible(selectedIndex);
 		}

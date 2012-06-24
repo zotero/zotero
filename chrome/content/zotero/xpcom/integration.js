@@ -2655,6 +2655,7 @@ Zotero.Integration.Session.prototype.updateCitations = function(callback) {
 				index = parseInt(index);
 				
 				var citation = this.citationsByIndex[index];
+				if(!citation) continue;
 				if(citation.properties.delete) {
 					deleteCitations[index] = true;
 					continue;

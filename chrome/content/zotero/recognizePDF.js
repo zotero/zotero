@@ -245,8 +245,6 @@ Zotero_RecognizePDF.Recognizer = function () {}
 Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, callback, captchaCallback) {
 	const MAX_PAGES = 3;
 	
-	const lineRe = /^\s*([^\s]+(?: [^\s]+)+)/;
-	
 	this._libraryID = libraryID;
 	this._callback = callback;
 	//this._captchaCallback = captchaCallback;
@@ -257,10 +255,6 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 		cacheFile.remove(false);
 	}
 	
-	Zotero.debug('Running pdftotext -enc UTF-8 -nopgbrk '
-				+ '-l ' + MAX_PAGES + ' "' + file.path + '" "'
-				+ cacheFile.path + '"');
-	
 	var proc = Components.classes["@mozilla.org/process/util;1"].
 			createInstance(Components.interfaces.nsIProcess);
 	var exec = Zotero.getZoteroDirectory();
@@ -269,6 +263,8 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 	
 	var args = ['-enc', 'UTF-8', '-nopgbrk', '-layout', '-l', MAX_PAGES];
 	args.push(file.path, cacheFile.path);
+	
+	Zotero.debug('Running pdftotext '+args.join(" "));
 	try {
 		if (!Zotero.isFx36) {
 			proc.runw(true, args, args.length);
@@ -297,15 +293,13 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 	intlStream.QueryInterface(Components.interfaces.nsIUnicharLineInputStream);
 	
 	// get the lines in this sample
-	var lines = [];
-	var lineLengths = [];
-	var str = {};
+	var lines = [],
+		cleanedLines = [],
+		cleanedLineLengths = [],
+		str = {};
 	while(intlStream.readLine(str)) {
-		var line = lineRe.exec(str.value);
-		if(line) {
-			lines.push(line[1]);
-			lineLengths.push(line[1].length);
-		}
+		var line = str.value.trim();
+		if(line) lines.push(line);
 	}
 	
 	inputStream.close();
@@ -319,13 +313,23 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 		this._DOI = m[0];
 	}
 	
+	// Use only first column from multi-column lines
+	const lineRe = /^\s*([^\s]+(?: [^\s]+)+)/;
+	for(var i=0; i<lines.length; i++) {
+		var m = lineRe.exec(lines[i]);
+		if(m) {
+			cleanedLines.push(m[1]);
+			cleanedLineLengths.push(m[1].length);
+		}
+	}
+	
 	// get (not quite) median length
-	var lineLengthsLength = lineLengths.length;
+	var lineLengthsLength = cleanedLineLengths.length;
 	if(lineLengthsLength < 20
-			|| lines[0] === "This is a digital copy of a book that was preserved for generations on library shelves before it was carefully scanned by Google as part of a project") {
+			|| cleanedLines[0] === "This is a digital copy of a book that was preserved for generations on library shelves before it was carefully scanned by Google as part of a project") {
 		this._callback(false, "recognizePDF.noOCR");
 	} else {		
-		var sortedLengths = lineLengths.sort();
+		var sortedLengths = cleanedLineLengths.sort();
 		var medianLength = sortedLengths[Math.floor(lineLengthsLength/2)];
 		
 		// pick lines within 4 chars of the median (this is completely arbitrary)
@@ -333,9 +337,9 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 		var uBound = medianLength + 4;
 		var lBound = medianLength - 4;
 		for (var i=0; i<lineLengthsLength; i++) {
-			if(lineLengths[i] > lBound && lineLengths[i] < uBound) {
+			if(cleanedLineLengths[i] > lBound && cleanedLineLengths[i] < uBound) {
 				// Strip quotation marks so they don't mess up search query quoting
-				var line = lines[i].replace('"', '');
+				var line = cleanedLines[i].replace('"', '');
 				this._goodLines.push(line);
 			}
 		}

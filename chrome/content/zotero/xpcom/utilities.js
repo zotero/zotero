@@ -1399,7 +1399,7 @@ Zotero.Utilities = {
 		var isZoteroItem = item instanceof Zotero.Item, zoteroType;
 		
 		for(var type in CSL_TYPE_MAPPINGS) {
-			if(CSL_TYPE_MAPPINGS[zoteroType] == item.type) {
+			if(CSL_TYPE_MAPPINGS[type] == cslItem.type) {
 				zoteroType = type;
 				break;
 			}
@@ -1484,11 +1484,37 @@ Zotero.Utilities = {
 				if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
 					var date = "";
 					if(cslDate.literal) {
-						date = cslDate.literal;
-					} else if(cslDate.year) {
-						if(cslDate.month) cslDate.month--;
-						date = Zotero.Date.formatDate(cslDate);
-						if(cslDate.season) date = cslDate.season+date;
+						if(variable === "accessed") {
+							date = strToISO(cslDate.literal);
+						} else {
+							date = cslDate.literal;
+						}
+					} else {
+						var newDate = Zotero.Utilities.deepCopy(cslDate);;
+						if(cslDate.dateParts && typeof cslDate.dateParts == "object") {
+							if(cslDate.dateParts[0]) newDate.year = cslDate.dateParts[0];
+							if(cslDate.dateParts[1]) newDate.month = cslDate.dateParts[1];
+							if(cslDate.dateParts[2]) newDate.day = cslDate.dateParts[2];
+						}
+						
+						if(newDate.year) {
+							if(variable === "accessed") {
+								// Need to convert to SQL
+								var date = Zotero.Utilities.lpad(newDate.year, "0", 4);
+								if(newDate.month) {
+									date += "-"+Zotero.Utilities.lpad(newDate.month+1, "0", 2);
+									if(newDate.day) {
+										date += "-"+Zotero.Utilities.lpad(newDate.day, "0", 2);
+									}
+								}
+							} else {
+								if(newDate.month) newDate.month--;
+								date = Zotero.Date.formatDate(newDate);
+								if(newDate.season) {
+									date = newDate.season+" "+date;
+								}
+							}
+						}
 					}
 					
 					if(isZoteroItem) {
