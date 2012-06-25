@@ -2992,55 +2992,35 @@ Zotero.Integration.DocumentData = function(string) {
  * Serializes document-specific data as XML
  */
 Zotero.Integration.DocumentData.prototype.serializeXML = function() {
-	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser);
-	var doc = parser.parseFromString("<data/>", "application/xml");
-	
-	var xmlData = doc.documentElement;
-	xmlData.setAttribute("data-version", DATA_VERSION);
-	xmlData.setAttribute("zotero-version", Zotero.version);
-	
-	var session = doc.createElement("session");
-	session.setAttribute("id", this.sessionID);
-	xmlData.appendChild(session);
-	
-	var style = doc.createElement("style");
-	style.setAttribute("id", this.style.styleID);
-	style.setAttribute("hasBibliography", this.style.hasBibliography ? 1 : 0);
-	style.setAttribute("bibliographyStyleHasBeenSet", this.style.bibliographyStyleHasBeenSet ? 1 : 0);
-	xmlData.appendChild(style);
-	
-	var prefs = doc.createElement("prefs");
+	var prefs = "";
 	for(var pref in this.prefs) {
-		var prefXML = doc.createElement("pref");
-		prefXML.setAttribute("name", pref);
-		prefXML.setAttribute("value", this.prefs[pref]);
-		prefs.appendChild(prefXML);
+		prefs += '<pref name="'+Zotero.Utilities.htmlSpecialChars(pref)+'" '+
+			'value="'+Zotero.Utilities.htmlSpecialChars(this.prefs[pref])+'"/>';
 	}
-	xmlData.appendChild(prefs);
 	
-	var domSerializer = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
-			.createInstance(Components.interfaces.nsIDOMSerializer);
-	return domSerializer.serializeToString(doc);
+	return '<data data-version="'+Zotero.Utilities.htmlSpecialChars(DATA_VERSION)+'" '+
+		'zotero-version="'+Zotero.Utilities.htmlSpecialChars(Zotero.version)+'">'+
+			'<session id="'+Zotero.Utilities.htmlSpecialChars(this.sessionID)+'"/>'+
+		'<style id="'+Zotero.Utilities.htmlSpecialChars(this.style.styleID)+'" '+
+			'hasBibliography="'+(this.style.hasBibliography ? "1" : "0")+'" '+
+			'bibliographyStyleHasBeenSet="'+(this.style.bibliographyStyleHasBeenSet ? "1" : "0)+'"/>'+
+		(prefs ? '<prefs>'+prefs+'</prefs>' : '<prefs/>')+'</data>';
 };
-
 
 /**
  * Unserializes document-specific XML
  */
 Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser);
-	xmlData = parser.parseFromString(xmlData, "application/xml").documentElement;
+			.createInstance(Components.interfaces.nsIDOMParser),
+		doc = parser.parseFromString(xmlData, "application/xml");
 	
-	this.sessionID = Zotero.Utilities.xpathText(xmlData, "session/@id");
-	this.style = {
-		"styleID":Zotero.Utilities.xpathText(xmlData, "style/@id"),
-		"hasBibliography":(Zotero.Utilities.xpathText(xmlData, "style/@hasBibliography") == "1"),
-		"bibliographyStyleHasBeenSet":(Zotero.Utilities.xpathText(xmlData, "style/@bibliographyStyleHasBeenSet") == "1")
-	};
+	this.sessionID = Zotero.Utilities.xpathText(doc, '/data/session[1]/@id');
+	this.style = {"styleID":Zotero.Utilities.xpathText(doc, '/data/style[1]/@id'),
+		"hasBibliography":(Zotero.Utilities.xpathText(doc, '/data/style[1]/@hasBibliography') == 1),
+		"bibliographyStyleHasBeenSet":(Zotero.Utilities.xpathText(doc, '/data/style[1]/@bibliographyStyleHasBeenSet') == 1)};
 	this.prefs = {};
-	for each(var pref in Zotero.Utilities.xpath(xmlData, "prefs/pref")) {
+	for each(var pref in Zotero.Utilities.xpath(doc, '/data/prefs[1]/pref')) {
 		var name = pref.getAttribute("name");
 		var value = pref.getAttribute("value");
 		if(value === "true") {
@@ -3052,9 +3032,9 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 		this.prefs[name] = value;
 	}
 	if(this.prefs["storeReferences"] === undefined) this.prefs["storeReferences"] = false;
-	this.zoteroVersion = xmlData.getAttribute("zotero-version");
+	this.zoteroVersion = doc.documentElement.getAttribute("zotero-version");
 	if(!this.zoteroVersion) this.zoteroVersion = "2.0";
-	this.dataVersion = xmlData.getAttribute("data-version");
+	this.dataVersion = doc.documentElement.getAttribute("data-version");
 	if(!this.dataVersion) this.dataVersion = 2;
 };
 

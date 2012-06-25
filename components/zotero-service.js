@@ -78,7 +78,6 @@ const xpcomFilesLocal = [
 	'data/tags',
 	'db',
 	'duplicates',
-	'enstyle',
 	'fulltext',
 	'id',
 	'integration',
