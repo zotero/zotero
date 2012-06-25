@@ -295,7 +295,7 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 		var str;
 		try {
 			var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-				.createInstance(Components.interfaces.nsIDOMParser),
+					.createInstance(Components.interfaces.nsIDOMParser),
 				doc = parser.parseFromString(html, "application/xml");
 			
 			var leftMarginDivs = Zotero.Utilities.xpath(doc, '//div[@class="csl-left-margin"]'),
