@@ -3006,8 +3006,8 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
 		'zotero-version="'+Zotero.Utilities.htmlSpecialChars(Zotero.version)+'">'+
 			'<session id="'+Zotero.Utilities.htmlSpecialChars(this.sessionID)+'"/>'+
 		'<style id="'+Zotero.Utilities.htmlSpecialChars(this.style.styleID)+'" '+
-			'hasBibliography="'+Zotero.Utilities.htmlSpecialChars(this.style.hasBibliography ? 1 : 0)+'" '+
-			'bibliographyStyleHasBeenSet="'+Zotero.Utilities.htmlSpecialChars(this.style.bibliographyStyleHasBeenSet ? 1 : 0)+'"/>'+
+			'hasBibliography="'+(this.style.hasBibliography ? "1" : "0")+'" '+
+			'bibliographyStyleHasBeenSet="'+(this.style.bibliographyStyleHasBeenSet ? "1" : "0")+'"/>'+
 		(prefs ? '<prefs>'+prefs+'</prefs>' : '<prefs/>')+'</data>';
 }
 
