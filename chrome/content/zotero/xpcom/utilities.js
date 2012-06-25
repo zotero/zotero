@@ -304,24 +304,19 @@ Zotero.Utilities = {
 	 * @type String
 	 */
 	 "htmlSpecialChars":function(/**String*/ str) {
-		if (typeof str != 'string') {
-			throw "Argument '" + str + "' must be a string in Zotero.Utilities.htmlSpecialChars()";
-		}
+		if (typeof str != 'string') str = str.toString();
 		
 		if (!str) {
 			return '';
 		}
 		
-		var chars = ['&', '"',"'",'<','>'];
-		var entities = ['amp', 'quot', 'apos', 'lt', 'gt'];
-		
-		var newString = str;
-		for (var i = 0; i < chars.length; i++) {
-			var re = new RegExp(chars[i], 'g');
-			newString = newString.replace(re, '&' + entities[i] + ';');
-		}
-		
-		newString = newString.replace(/&lt;ZOTERO([^\/]+)\/&gt;/g, function (str, p1, offset, s) {
+		return str
+			.replace(/&/g, '&amp;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&apos;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/&lt;ZOTERO([^\/]+)\/&gt;/g, function (str, p1, offset, s) {
 			switch (p1) {
 				case 'BREAK':
 					return '<br/>';
@@ -331,8 +326,6 @@ Zotero.Utilities = {
 					return p1;
 			}
 		});
-		
-		return newString;
 	},
 
 	/**
