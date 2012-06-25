@@ -293,13 +293,14 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 		if(lineSpacing == NaN) throw "Invalid linespacing";
 		
 		var str;
-		default xml namespace = ''; with({});
-		try {			
-			XML.prettyPrinting = false;
-			XML.ignoreWhitespace = false;
-			var xml = new XML(html);
+		try {
+			var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+				.createInstance(Components.interfaces.nsIDOMParser),
+				doc = parser.parseFromString(html, "application/xml");
 			
-			var multiField = !!xml..div.(@class == "csl-left-margin").length();
+			var leftMarginDivs = Zotero.Utilities.xpath(doc, '//div[@class="csl-left-margin"]'),
+				multiField = !!leftMarginDivs.length,
+				clearEntries = multiField;
 			
 			// One of the characters is usually a period, so we can adjust this down a bit
 			maxOffset = Math.max(1, maxOffset - 2);
@@ -307,7 +308,9 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 			// Force a minimum line height
 			if(lineSpacing <= 1.35) lineSpacing = 1.35;
 			
-			xml.@style += "line-height: " + lineSpacing + "; ";
+			var style = doc.documentElement.getAttribute("style");
+			if(!style) style = "";
+			style += "line-height: " + lineSpacing + "; ";
 			
 			if(hangingIndent) {
 				if (multiField && !secondFieldAlign) {
@@ -315,32 +318,28 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 				}
 				// If only one field, apply hanging indent on root
 				else if (!multiField) {
-					xml.@style += "padding-left: " + hangingIndent + "em; text-indent:-" + hangingIndent + "em;";
+					style += "padding-left: " + hangingIndent + "em; text-indent:-" + hangingIndent + "em;";
 				}
 			}
 			
-			var leftMarginDivs = xml..div.(@class == "csl-left-margin");
-			var clearEntries = leftMarginDivs.length() > 0;
+			if(style) doc.documentElement.setAttribute("style", style);
 			
 			// csl-entry
-			var divs = xml..div.(@class == "csl-entry");
-			var num = divs.length();
-			var i = 0;
-			for each(var div in divs) {
-				var first = i == 0;
-				var last = i == num - 1;
+			var divs = Zotero.Utilities.xpath(doc, '//div[@class="csl-entry"]');
+			for(var i=0, n=divs.length; i<n; i++) {
+				var div = divs[i],
+					divStyle = div.getAttribute("style");
+				if(!divStyle) divStyle = "";
 				
 				if (clearEntries) {
-					div.@style += "clear: left; ";
+					divStyle += "clear: left; ";
 				}
 				
-				if(entrySpacing) {
-					if(!last) {
-						div.@style += "margin-bottom: " + entrySpacing + "em;";
-					}
+				if(entrySpacing && i !== n - 1) {
+					divStyle += "margin-bottom: " + entrySpacing + "em;";
 				}
 				
-				i++;
+				if(divStyle) div.setAttribute("style", divStyle);
 			}
 			
 			// Padding on the label column, which we need to include when
@@ -349,32 +348,44 @@ Zotero.Cite.makeFormattedBibliography = function(cslEngine, format) {
 			
 			// div.csl-left-margin
 			for each(var div in leftMarginDivs) {
-				div.@style = "float: left; padding-right: " + rightPadding + "em;";
+				var divStyle = div.getAttribute("style");
+				if(!divStyle) divStyle = "";
+				
+				divStyle = "float: left; padding-right: " + rightPadding + "em;";
 				
 				// Right-align the labels if aligning second line, since it looks
 				// better and we don't need the second line of text to align with
 				// the left edge of the label
 				if (secondFieldAlign) {
-					div.@style += "text-align: right; width: " + maxOffset + "em;";
+					divStyle += "text-align: right; width: " + maxOffset + "em;";
 				}
+				
+				div.setAttribute("style", divStyle);
 			}
 			
 			// div.csl-right-inline
-			for each(var div in xml..div.(@class == "csl-right-inline")) {
-				div.@style = "margin: 0 .4em 0 " + (secondFieldAlign ? maxOffset + rightPadding : "0") + "em;";
+			for each(var div in Zotero.Utilities.xpath(doc, '//div[@class="csl-right-inline"]')) {
+				var divStyle = div.getAttribute("style");
+				if(!divStyle) divStyle = "";
+				
+				divStyle = "margin: 0 .4em 0 " + (secondFieldAlign ? maxOffset + rightPadding : "0") + "em;";
 				
 				if (hangingIndent) {
-					div.@style += "padding-left: " + hangingIndent + "em; text-indent:-" + hangingIndent + "em;";
+					divSstyle += "padding-left: " + hangingIndent + "em; text-indent:-" + hangingIndent + "em;";
 				}
+				
+				div.setAttribute("style", divStyle);
 			}
 			
 			// div.csl-indent
-			for each(var div in xml..div.(@class == "csl-indent")) {
-				div.@style = "margin: .5em 0 0 2em; padding: 0 0 .2em .5em; border-left: 5px solid #ccc;";
+			for each(var div in Zotero.Utilities.xpath(doc, '//div[@class="csl-indent"]')) {
+				div.setAttribute("style", "margin: .5em 0 0 2em; padding: 0 0 .2em .5em; border-left: 5px solid #ccc;");
 			}
 			
 			//Zotero.debug(xml);
-			str = xml.toXMLString();
+			var s = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
+				.createInstance(Components.interfaces.nsIDOMSerializer);
+			str = s.serializeToString(doc);
 		} finally {
 			XML.prettyPrinting = true;
 			XML.ignoreWhitespace = true;
