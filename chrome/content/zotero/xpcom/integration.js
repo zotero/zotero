@@ -2996,21 +2996,19 @@ Zotero.Integration.DocumentData = function(string) {
  * Serializes document-specific data as XML
  */
 Zotero.Integration.DocumentData.prototype.serializeXML = function() {
-	var xmlData = <data data-version={DATA_VERSION} zotero-version={Zotero.version}>
-			<session id={this.sessionID} />
-			<style id={this.style.styleID} hasBibliography={this.style.hasBibliography ? 1 : 0}
-				bibliographyStyleHasBeenSet={this.style.bibliographyStyleHasBeenSet ? 1 : 0}/>
-			<prefs/>
-		</data>;
-	
+	var prefs = "";
 	for(var pref in this.prefs) {
-		xmlData.prefs.pref += <pref name={pref} value={this.prefs[pref]}/>
+		prefs += '<pref name="'+Zotero.Utilities.htmlSpecialChars(pref)+'" '+
+			'value="'+Zotero.Utilities.htmlSpecialChars(this.prefs[pref])+'"/>';
 	}
 	
-	XML.prettyPrinting = false;
-	var output = xmlData.toXMLString().replace("\n", "", "g");
-	XML.prettyPrinting = true;
-	return output;
+	return '<data data-version="'+Zotero.Utilities.htmlSpecialChars(DATA_VERSION)+'" '+
+		'zotero-version="'+Zotero.Utilities.htmlSpecialChars(Zotero.version)+'">'+
+			'<session id="'+Zotero.Utilities.htmlSpecialChars(this.sessionID)+'"/>'+
+		'<style id="'+Zotero.Utilities.htmlSpecialChars(this.style.styleID)+'" '+
+			'hasBibliography="'+Zotero.Utilities.htmlSpecialChars(this.style.hasBibliography ? 1 : 0)+'" '+
+			'bibliographyStyleHasBeenSet="'+Zotero.Utilities.htmlSpecialChars(this.style.bibliographyStyleHasBeenSet ? 1 : 0)+'"/>'+
+		(prefs ? '<prefs>'+prefs+'</prefs>' : '<prefs/>')+'</data>';
 }
 
 
@@ -3018,18 +3016,18 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
  * Unserializes document-specific XML
  */
 Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
-	if(typeof xmlData == "string") {
-		var xmlData = new XML(xmlData);
-	}
+	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser),
+		doc = parser.parseFromString(xmlData, "application/xml");
 	
-	this.sessionID = xmlData.session.@id.toString();
-	this.style = {"styleID":xmlData.style.@id.toString(),
-		"hasBibliography":(xmlData.style.@hasBibliography.toString() == 1),
-		"bibliographyStyleHasBeenSet":(xmlData.style.@bibliographyStyleHasBeenSet.toString() == 1)};
+	this.sessionID = Zotero.Utilities.xpathText(doc, '/data/session[1]/@id');
+	this.style = {"styleID":Zotero.Utilities.xpathText(doc, '/data/style[1]/@id'),
+		"hasBibliography":(Zotero.Utilities.xpathText(doc, '/data/style[1]/@hasBibliography') == 1),
+		"bibliographyStyleHasBeenSet":(Zotero.Utilities.xpathText(doc, '/data/style[1]/@bibliographyStyleHasBeenSet') == 1)};
 	this.prefs = {};
-	for each(var pref in xmlData.prefs.children()) {
-		var name = pref.@name.toString();
-		var value = pref.@value.toString();
+	for each(var pref in Zotero.Utilities.xpath(doc, '/data/prefs[1]/pref')) {
+		var name = pref.getAttribute("name");
+		var value = pref.getAttribute("value");
 		if(value === "true") {
 			value = true;
 		} else if(value === "false") {
@@ -3039,8 +3037,10 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 		this.prefs[name] = value;
 	}
 	if(this.prefs["storeReferences"] === undefined) this.prefs["storeReferences"] = false;
-	this.zoteroVersion = xmlData["@zotero-version"].length() ? xmlData["@zotero-version"].toString() : "2.0";
-	this.dataVersion = xmlData["@data-version"].length() ? xmlData["@data-version"].toString() : 2;
+	this.zoteroVersion = doc.documentElement.getAttribute("zotero-version");
+	if(!this.zoteroVersion) this.zoteroVersion = "2.0";
+	this.dataVersion = doc.documentElement.getAttribute("data-version");
+	if(!this.dataVersion) this.dataVersion = 2;
 }
 
 /**
