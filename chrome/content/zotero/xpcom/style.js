@@ -174,8 +174,8 @@ Zotero.Styles = new function() {
 			var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 					.createInstance(Components.interfaces.nsIDOMParser),
 				doc = parser.parseFromString(style, "application/xml");
-			if (!doc.documentElement.localName) {
-				throw new Error("File is not XML");
+			if(doc.documentElement.localName === "parsererror") {
+				throw new Error("File is not valid XML");
 			}
 		} catch(e) {
 			error = e;
@@ -367,6 +367,9 @@ Zotero.Style = function(arg) {
 		parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 			.createInstance(Components.interfaces.nsIDOMParser),
 		doc = parser.parseFromString(style, "application/xml");
+	if(doc.documentElement.localName === "parsererror") {
+		throw new Error("File is not valid XML");
+	}
 				
 	this.styleID = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:id[1]',
 		Zotero.Styles.ns);
