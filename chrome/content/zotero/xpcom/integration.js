@@ -2846,6 +2846,11 @@ Zotero.Integration.Session.prototype.updateCitations = function(callback, forceC
 			delete this.reload;
 			delete this.refresh;
 		}
+		if (this.reload) {
+			delete this.reload;
+		}
+		this.citationIndex = false;
+		this.newCitation = false;
 		callback(deleteCitations);
 	} catch(e) {
 		Zotero.Integration.handleError(e, this._doc);
