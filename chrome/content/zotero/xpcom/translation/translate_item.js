@@ -381,7 +381,7 @@ Zotero.Translate.ItemSaver.prototype = {
 						try {
 							attachment.linkMode = "imported_url";
 							Zotero.Attachments.importFromDocument(attachment.document,
-								parentID, attachment.title, function(status, err) {
+								parentID, attachment.title, null, function(status, err) {
 									if(status) {
 										attachmentCallback(attachment, 100);
 									} else {
