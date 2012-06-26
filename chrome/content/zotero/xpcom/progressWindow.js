@@ -191,8 +191,12 @@ Zotero.ProgressWindow = function(_window){
 	 * Adds a line to the progress window with the specified icon
 	 */
 	this.addLines = _deferUntilWindowLoad(function addLines(labels, icons) {
-		for (var i in labels) {
-			new this.ItemProgress(icons[i], labels[i]);
+		if(typeof labels === "object" && typeof icons === "object") {
+			for (var i in labels) {
+				new this.ItemProgress(icons[i], labels[i]);
+			}
+		} else {
+			new this.ItemProgress(icons, labels);
 		}
 		
 		_move();
@@ -433,7 +437,7 @@ Zotero.ProgressWindow = function(_window){
 	 */
 	function _deferUntilWindowLoad(fn) {
 		return function() {
-			if(_window.closed) return;
+			if(_window && _window.closed) return;
 			
 			if(_windowLoaded) {
 				fn.apply(this, Array.prototype.slice.call(arguments));
