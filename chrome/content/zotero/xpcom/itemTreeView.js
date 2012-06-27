@@ -525,9 +525,22 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		// If quicksearch, re-run it, since the results may have changed
 		else
 		{
-			quicksearch.doCommand();
-			madeChanges = true;
-			sort = true;
+			// If not viewing trash and all items were deleted, ignore modify
+			var allDeleted = true;
+			if (!itemGroup.isTrash()) {
+				var items = Zotero.Items.get(ids);
+				for each(var item in items) {
+					if (!item.deleted) {
+						allDeleted = false;
+						break;
+					}
+				}
+			}
+			if (!allDeleted) {
+				quicksearch.doCommand();
+				madeChanges = true;
+				sort = true;
+			}
 		}
 	}
 	else if(action == 'add')
