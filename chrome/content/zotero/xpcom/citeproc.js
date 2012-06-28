@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.349",
+    PROCESSOR_VERSION: "1.0.350",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -2919,6 +2919,29 @@ CSL.Engine.prototype.setLangPrefsForCites = function (params) {
 	}
 };
 CSL.Engine.prototype.setLangPrefsForCiteAffixes = function (affixList) {
+    if (affixList && affixList.length === 30) {
+        var affixes = this.opt.citeAffixes;
+        var count = 0;
+        var settings = ["persons", "institutions", "titles", "publishers", "places"];
+        var forms = ["orig", "translit", "translat"];
+        for (var i = 0, ilen = settings.length; i < ilen; i += 1) {
+            for (var j = 0, jlen = forms.length; j < jlen; j += 1) {
+                var value = affixList[count];
+                if (!value) {
+                    value = "";
+                }
+                affixes[settings[i]]["locale-" + forms[j]].prefix = value;
+                count += 1;
+                var value = affixList[count];
+                if (!value) {
+                    value = "";
+                }
+                affixes[settings[i]]["locale-" + forms[j]].suffix = value;
+                count += 1;
+            }
+        }
+        this.opt.citeAffixes = affixes;
+    }
 };
 CSL.Engine.prototype.setAutoVietnameseNamesOption = function (arg) {
     if (arg) {
@@ -2952,6 +2975,78 @@ CSL.Engine.Opt = function () {
     this["locale-sort"] = [];
     this["locale-translit"] = [];
     this["locale-translat"] = [];
+    this.citeAffixes = {
+        persons:{
+            "locale-orig":{
+                prefix:"",
+                suffix:""
+            },
+            "locale-translit":{
+                prefix:"",
+                suffix:""
+            },
+            "locale-translat":{
+                prefix:"",
+                suffix:""
+            }
+        },
+        institutions:{
+            "locale-orig":{
+                prefix:"",
+                suffix:""
+            },
+            "locale-translit":{
+                prefix:"",
+                suffix:""
+            },
+            "locale-translat":{
+                prefix:"",
+                suffix:""
+            }
+        },
+        titles:{
+            "locale-orig":{
+                prefix:"",
+                suffix:""
+            },
+            "locale-translit":{
+                prefix:"",
+                suffix:""
+            },
+            "locale-translat":{
+                prefix:"",
+                suffix:""
+            }
+        },
+        publishers:{
+            "locale-orig":{
+                prefix:"",
+                suffix:""
+            },
+            "locale-translit":{
+                prefix:"",
+                suffix:""
+            },
+            "locale-translat":{
+                prefix:"",
+                suffix:""
+            }
+        },
+        places:{
+            "locale-orig":{
+                prefix:"",
+                suffix:""
+            },
+            "locale-translit":{
+                prefix:"",
+                suffix:""
+            },
+            "locale-translat":{
+                prefix:"",
+                suffix:""
+            }
+        }
+    };
     this["default-locale"] = [];
     this["noun-genders"] = {};
     this.update_mode = CSL.NONE;
@@ -6573,26 +6668,26 @@ CSL.NameOutput.prototype.renderInstitutionNames = function () {
                 long_style = this._getLongStyle(primary, v, j);
                 short_style = this._getShortStyle();
                 institution_short = this._renderOneInstitutionPart(primary["short"], short_style);
-                institution_long = this._composeOneInstitutionPart([primary, secondary, tertiary], long_style);
+                institution_long = this._composeOneInstitutionPart([primary, secondary, tertiary], slot, long_style);
                 institution = [institution_short, institution_long];
                 break;
             case "long-short":
                 long_style = this._getLongStyle(primary, v, j);
                 short_style = this._getShortStyle();
                 institution_short = this._renderOneInstitutionPart(primary["short"], short_style);
-                institution_long = this._composeOneInstitutionPart([primary, secondary, tertiary], long_style, true);
+                institution_long = this._composeOneInstitutionPart([primary, secondary, tertiary], slot, long_style, true);
                 institution = [institution_long, institution_short];
                 break;
             default:
                 long_style = this._getLongStyle(primary, v, j);
-                institution = [this._composeOneInstitutionPart([primary, secondary, tertiary], long_style)];
+                institution = [this._composeOneInstitutionPart([primary, secondary, tertiary], slot, long_style)];
                 break;
             }
             this.institutions[v][j] = this._join(institution, "");
         }
     }
 };
-CSL.NameOutput.prototype._composeOneInstitutionPart = function (names, style) {
+CSL.NameOutput.prototype._composeOneInstitutionPart = function (names, slot, style) {
     var primary = false, secondary = false, tertiary = false;
     if (names[0]) {
         primary = this._renderOneInstitutionPart(names[0]["long"], style);
@@ -6605,15 +6700,28 @@ CSL.NameOutput.prototype._composeOneInstitutionPart = function (names, style) {
     }
     var institutionblob;
     if (secondary || tertiary) {
-        var multiblob = this._join([secondary, tertiary], ", ");
-        var group_tok = new CSL.Token();
-        group_tok.strings.prefix = " [";
-        group_tok.strings.suffix = "]";
-        this.state.output.openLevel(group_tok);
-        this.state.output.append(multiblob);
+        this.state.output.openLevel("empty");
+        this.state.output.append(primary);
+        secondary_tok = CSL.Util.cloneToken(style);
+        if (slot.secondary) {
+            secondary_tok.strings.prefix = this.state.opt.citeAffixes.institutions[slot.secondary].prefix;
+            secondary_tok.strings.suffix = this.state.opt.citeAffixes.institutions[slot.secondary].suffix;
+            if (!secondary_tok.strings.prefix) {
+                secondary_tok.strings.prefix = " ";
+            }
+        }
+        this.state.output.append(secondary, secondary_tok);
+        tertiary_tok = CSL.Util.cloneToken(style);
+        if (slot.tertiary) {
+            tertiary_tok.strings.prefix = this.state.opt.citeAffixes.institutions[slot.tertiary].prefix;
+            tertiary_tok.strings.suffix = this.state.opt.citeAffixes.institutions[slot.tertiary].suffix;
+            if (!tertiary_tok.strings.prefix) {
+                tertiary_tok.strings.prefix = " ";
+            }
+        }
+        this.state.output.append(tertiary, tertiary_tok);
         this.state.output.closeLevel();
-        multiblob = this.state.output.pop();
-        institutionblob = this._join([primary, multiblob], "");
+        institutionblob = this.state.output.pop();
     } else {
         institutionblob = primary;
     }
@@ -6695,15 +6803,28 @@ CSL.NameOutput.prototype._renderPersonalNames = function (values, pos) {
 			}
             var personblob;
             if (secondary || tertiary) {
-                var multiblob = this._join([secondary, tertiary], ", ");
-                var group_tok = new CSL.Token();
-                group_tok.strings.prefix = " [";
-                group_tok.strings.suffix = "]";
-                this.state.output.openLevel(group_tok);
-                this.state.output.append(multiblob);
+                this.state.output.openLevel("empty");
+                this.state.output.append(primary);
+                secondary_tok = new CSL.Token();
+                if (slot.secondary) {
+                    secondary_tok.strings.prefix = this.state.opt.citeAffixes.persons[slot.secondary].prefix;
+                    secondary_tok.strings.suffix = this.state.opt.citeAffixes.persons[slot.secondary].suffix;
+                    if (!secondary_tok.strings.prefix) {
+                        secondary_tok.strings.prefix = " ";
+                    }
+                }
+                this.state.output.append(secondary, secondary_tok);
+                tertiary_tok = new CSL.Token();
+                if (slot.tertiary) {
+                    tertiary_tok.strings.prefix = this.state.opt.citeAffixes.persons[slot.tertiary].prefix;
+                    tertiary_tok.strings.suffix = this.state.opt.citeAffixes.persons[slot.tertiary].suffix;
+                    if (!tertiary_tok.strings.prefix) {
+                        tertiary_tok.strings.prefix = " ";
+                    }
+                }
+                this.state.output.append(tertiary, tertiary_tok);
                 this.state.output.closeLevel();
-                multiblob = this.state.output.pop();
-                personblob = this._join([primary, multiblob], "");
+                personblob = this.state.output.pop();
             } else {
                 personblob = primary;
             }
@@ -9402,16 +9523,16 @@ CSL.Transform = function (state) {
 			    if (localesets) {
 				    var slotnames = ["primary", "secondary", "tertiary"];
 				    for (var i = 0, ilen = slotnames.length; i < ilen; i += 1) {
-					    if (localesets.length - 1 <  i) {
-						    break;
-					    }
-                        if (localesets[i]) {
-						    slot[slotnames[i]] = 'locale-' + localesets[i];
+                        if (localesets.length - 1 <  i) {
+                            break;
                         }
-				    }
-			    } else {
-					slot.primary = 'locale-translat';
-			    }
+                        if (localesets[i]) {
+                            slot[slotnames[i]] = 'locale-' + localesets[i];
+                        }
+                    }
+                } else {
+                    slot.primary = 'locale-orig';
+                }
             }
 			if ((state.tmp.area !== "bibliography"
 				 && !(state.tmp.area === "citation"
@@ -9457,20 +9578,38 @@ CSL.Transform = function (state) {
                 tertiary = CSL.demoteNoiseWords(state, tertiary);
             }
             if (secondary || tertiary) {
+                state.output.openLevel("empty");
                 primary_tok = CSL.Util.cloneToken(this);
                 primary_tok.strings.suffix = "";
                 state.output.append(primary, primary_tok);
-                group_tok = new CSL.Token();
-                group_tok.strings.prefix = " [";
-                group_tok.strings.delimiter = ", ";
-                group_tok.strings.suffix = "]" + this.strings.suffix;
-				state.output.openLevel(group_tok);
-				if (secondary) {
-					state.output.append(secondary);
-				}
-				if (tertiary) {
-					state.output.append(tertiary);
-				}
+                if (secondary) {
+                    secondary_tok = CSL.Util.cloneToken(primary_tok);
+                    secondary_tok.strings.prefix = state.opt.citeAffixes[langPrefs][slot.secondary].prefix;
+                    secondary_tok.strings.suffix = state.opt.citeAffixes[langPrefs][slot.secondary].suffix;
+                    if (!secondary_tok.strings.prefix) {
+                        secondary_tok.strings.prefix = " ";
+                    }
+                    for (var i = secondary_tok.decorations.length - 1; i > -1; i += -1) {
+                        if (secondary_tok.decorations[i][0] === '@quotes') {
+                            secondary_tok.decorations = secondary_tok.decorations.slice(0, i).concat(secondary_tok.decorations.slice(i + 1))
+                        }
+                    }
+					state.output.append(secondary, secondary_tok);
+                }
+                if (tertiary) {
+                    tertiary_tok = CSL.Util.cloneToken(primary_tok);
+                    tertiary_tok.strings.prefix = state.opt.citeAffixes[langPrefs][slot.tertiary].prefix;
+                    tertiary_tok.strings.suffix = state.opt.citeAffixes[langPrefs][slot.tertiary].suffix;
+                    if (!tertiary_tok.strings.prefix) {
+                        tertiary_tok.strings.prefix = " ";
+                    }
+                    for (var i = tertiary_tok.decorations.length - 1; i > -1; i += -1) {
+                        if (tertiary_tok.decorations[i][0] === '@quotes') {
+                            tertiary_tok.decorations = tertiary_tok.decorations.slice(0, i).concat(tertiary_tok.decorations.slice(i + 1))
+                        }
+                    }
+					state.output.append(tertiary, tertiary_tok);
+                }
 				state.output.closeLevel();
             } else {
                 state.output.append(primary, this);
