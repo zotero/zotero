@@ -3179,7 +3179,6 @@ Zotero.Integration.DocumentData = function(string) {
  * Serializes document-specific data as XML
  */
 Zotero.Integration.DocumentData.prototype.serializeXML = function() {
-    Zotero.debug("XXX Fucking pref: really? (1)");
 	var xmlData = <data data-version={DATA_VERSION} zotero-version={Zotero.version}>
 			<session id={this.sessionID} />
 			<style id={this.style.styleID} hasBibliography={this.style.hasBibliography ? 1 : 0}
@@ -3188,7 +3187,6 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
 		</data>;
 	
 	for(var pref in this.prefs) {
-        Zotero.debug("XXX     trying: "+pref);
 		if (pref === 'citationLangPrefs') {
 			for (var segment in this.prefs.citationLangPrefs) {
 				if (this.prefs.citationLangPrefs[segment]) {
@@ -3199,12 +3197,9 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
 			}
 		} else if (pref === 'citationAffixes') {
             citeaffixes = "|||||||||||||||||||||||||||||";
-            Zotero.debug("XXX Thinking about saving shit: "+this.prefs.citationAffixes);
             if (this.prefs.citationAffixes.length === 30) {
-                Zotero.debug("XXX Get ready to save shit: "+this.prefs.citationAffixes);
                 var citeaffixes = this.prefs.citationAffixes.join('|');
             }
-            Zotero.debug("XXX Save shit: "+citeaffixes);
             xmlData.prefs.pref += <pref name="citationAffixes" value={citeaffixes}/>;
 		} else if (['citationTransliteration', 'citationTranslation', 'citationSort'].indexOf(pref) === -1) {
 			xmlData.prefs.pref += <pref name={pref} value={this.prefs[pref]}/>;
@@ -3231,7 +3226,6 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
  * Unserializes document-specific XML
  */
 Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
-    Zotero.debug("XXX Fucking pref: really? (2)");
 	if(typeof xmlData == "string") {
 		var xmlData = new XML(xmlData);
 	}
@@ -3254,8 +3248,6 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 		if (name.slice(17) === 'citationLangPrefs') {
 			this.prefs.citationLangPrefs[name.slice(17).toLowerCase()] = value.split(',');
 		} else if (name === "citationAffixes") {
-            Zotero.debug("XXX Retrieve fucking affixes");
-            Zotero.debug("XXX Retrieve fucking affixes: "+value);
             this.prefs.citationAffixes = value.split("|");
             
 		} else {

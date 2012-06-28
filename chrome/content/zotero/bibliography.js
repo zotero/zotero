@@ -328,7 +328,7 @@ var Zotero_File_Interface_Bibliography = new function() {
     };
 
     function citationLangSet (base, init) {
-        Zotero.debug("XXX == citationLangSet() ==");
+        Zotero.debug("XXX == citationLangSet() ==: "+base);
 		var settings = _io['citationLangPrefs'][base];
 	    var nodes = [];
 	    var forms = ['orig', 'translit', 'translat'];
@@ -408,7 +408,6 @@ var Zotero_File_Interface_Bibliography = new function() {
                 affixList.push(elem.value);
             }
         }
-        Zotero.debug("XXX b  --> setting affixList = "+affixList);
         _io['citationAffixes'] = affixList;
     };
 

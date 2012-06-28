@@ -722,8 +722,8 @@ To add a new preference:
       <menupopup id="citation-language-affix-menu" 
                  onpopupshowing="if (!document.popupNode.disabled &amp;&amp; !document.popupNode.checked) {window.citationSecondary();return true;} else {window.citationSecondary();return false;}" position="after_start">
         <menuitem label=", ..." value=", |" oncommand="window.citationSetAffixes(null, this);"/>
-        <menuitem label="[...]" value="[|]" oncommand="window.citationSetAffixes(null, this);"/>
-        <menuitem label="(...)" value="(|)" oncommand="window.citationSetAffixes(null, this);"/>
+        <menuitem label="[...]" value=" [|]" oncommand="window.citationSetAffixes(null, this);"/>
+        <menuitem label="(...)" value=" (|)" oncommand="window.citationSetAffixes(null, this);"/>
       </menupopup>
       <groupbox>
 		<hbox>

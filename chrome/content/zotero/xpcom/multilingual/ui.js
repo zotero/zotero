@@ -185,7 +185,6 @@ Zotero.switchLocale = function(document) {
 
 
 Zotero.setCitationLanguages = function (obj, citeproc) {
-    try {
 	obj.citationLangPrefs = {};
 	var segments = ['Persons', 'Institutions', 'Titles', 'Publishers', 'Places'];
 	for (var i = 0, ilen = segments.length; i < ilen; i += 1) {
@@ -230,7 +229,4 @@ Zotero.setCitationLanguages = function (obj, citeproc) {
 
 		citeproc.setAutoVietnameseNamesOption(Zotero.Prefs.get('csl.autoVietnameseNames'));
 	}
-    } catch (e) {
-        Zotero.debug("XXX UI OOOPS: "+e);
-    }
 }
