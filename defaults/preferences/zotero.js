@@ -115,6 +115,7 @@ pref("extensions.zotero.csl.citationInstitutions", "orig");
 pref("extensions.zotero.csl.citationTitles", "orig");
 pref("extensions.zotero.csl.citationPublishers", "orig");
 pref("extensions.zotero.csl.citationPlaces", "orig");
+pref("extensions.zotero.csl.citationAffixes", "||||||||||||||");
 pref("extensions.zotero.csl.autoVietnameseNames", false);
 pref("extensions.zotero.csl.enableInstitutionFormatting", true);
 pref("extensions.zotero.csl.trigraphFormat", "Aaaa00:AaAa00:AaAA00:AAAA00");

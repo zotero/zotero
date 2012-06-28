@@ -1891,15 +1891,15 @@ function onLangLoad() {
 	refreshLanguages();
 	var radios = ['Persons', 'Institutions', 'Titles', 'Publishers', 'Places']
 	var forms = ['orig', 'translit', 'translat'];
-	for (var i = 0, ilen = radios.length; i < ilen; i += 1) {
-		var node = document.getElementById(radios[i].toLowerCase() + '-radio')
+    // Check for a settings in Prefs. For those not found, set to orig.
+    // Then set language in node.
+    // Then update disable status on partner nodes.
+    for (var i = 0, ilen = radios.length; i < ilen; i += 1) {
 		var settings = Zotero.Prefs.get("csl.citation" + radios[i]).split(',');
-		if (settings && settings[0] && forms.indexOf(settings[0]) > -1) {
-			node.selectedIndex = forms.indexOf(settings[0]);
-		} else {
+		if (!settings || !settings[0] || forms.indexOf(settings[0]) == -1) {
 			Zotero.Prefs.set("csl.citation" + radios[i], 'orig');
 		}
-		citationLangSet(node);
+		citationLangSet(radios[i], true);
 	}
 	Zotero.setupLocale(document);
 }
@@ -2204,33 +2204,24 @@ function getResultComment (textbox){
  * Function performed after auto-complete selection.
  */
 function handleLangAutoCompleteSelect (textbox) {
-	Zotero.debug("yy: a");
 	if (textbox.value) {
 		// Comment is the tag code, value is the tag description
-		Zotero.debug("rr: a");
 		
 		var comment = getResultComment(textbox);
-		Zotero.debug("rr: b");
 		if (!comment) {
 			textbox.value = '';
 		} else {
-			Zotero.debug("ss: a");
 			var validator = Zotero.zlsValidator;
 			if (validator.validate(comment)) {
-				Zotero.debug("ss: b");
 				insertLanguageRow(validator.tagdata);
-				Zotero.debug("ss: c");
 				textbox.value = '';
 				textbox.blur();
 			}
-			Zotero.debug("ss: d");
 		}
 	}
-	Zotero.debug("yy: b");
 }
 
 function insertLanguageRow (tagdata) {
-	Zotero.debug("tt: a");
 	// XXXZ This does not run for primary tags ... system uses
 	// cachedLanguages instead. Should be using cachedLanguages
 	// for everything?
@@ -2246,9 +2237,7 @@ function insertLanguageRow (tagdata) {
 	// XXXZ The second tag field should be the integer
 	// key of the tag.
 	Zotero.DB.query(sql, [tag,tag,parent]);
-	Zotero.debug("tt: b");
 	refreshLanguages();
-	Zotero.debug("tt: c");
 }
 
 function extendLanguageTopMenu (row) {
@@ -2512,61 +2501,167 @@ function capFirst(str) {
 	return str[0].toUpperCase() + str.slice(1);
 }
 
-function citationLangRecord(node) {
-	if (node.id.split('-')[1] === 'checkbox') {
-		var addme = false;
-		var cullme = false;
-		var secondarySetting = node.id.split('-')[2];
-		if (node.checked) {
-			addme = secondarySetting;
-		} else {
-			cullme = secondarySetting;
-		}
-		node = node.parentNode.parentNode.childNodes[1];
-		
-	};
-	var idlst = node.selectedItem.id.split('-');
-	var base = idlst[0];
-	var primarySetting = idlst[2];
-	var secondaries = Zotero.Prefs.get('csl.citation' + capFirst(base));
-	secondaries = secondaries.split(',').slice(1);
-	if (addme && secondaries.indexOf(secondarySetting) === -1) {
-		secondaries.push(secondarySetting);
-	}
-	if (cullme) {
-		var cullidx = secondaries.indexOf(secondarySetting);
-		if (cullidx > -1) {
-			secondaries = secondaries.slice(0, cullidx).concat(secondaries.slice(cullidx + 1));
-		}
-	}
-	Zotero.Prefs.set('csl.citation' + capFirst(base), [primarySetting].concat(secondaries).join(','));
-	citationLangSet(node);
+function citationPrimary(node) {
+	var lst = node.id.split('-');
+	var base = lst[0];
+    var primarySetting = lst[2];
+	var settings = Zotero.Prefs.get('csl.citation' + capFirst(base));
+    if (settings) {
+        settings = settings.split(',');
+    } else {
+        settings = ['orig'];
+    }
+	Zotero.Prefs.set('csl.citation' + capFirst(base), [primarySetting].concat(settings.slice(1)).join(','));
+	citationLangSet(capFirst(base), true);
 }
 
-function citationLangSet (node) {
-	var idlst = node.selectedItem.id.split('-');
-	var base = idlst[0];
-	var settings = Zotero.Prefs.get('csl.citation' + capFirst(base)).split(',');
-	var parent = node.parentNode;
-	var optionSetters = parent.lastChild.childNodes;
-	for (var i = 0, ilen = optionSetters.length; i < ilen; i += 1) {
-		optionSetters[i].checked = false;
-		for (var j = 1, jlen = settings.length; j < jlen; j += 1) {
-			if (optionSetters[i].id === base + '-checkbox-' + settings[j]) {
-				optionSetters[i].checked = true;
-			}
-		}
-		if (optionSetters[i].id === base + "-checkbox-" + settings[0]) {
-			optionSetters[i].checked = false;
-			var idx = settings.slice(1).indexOf(settings[0]);
-			if (idx > -1) {
-				// +1 and +2 b/c first-position item (primary) is sliced off for this check
-				settings = settings.slice(0,idx + 1).concat(settings.slice(idx + 2)); 
-				Zotero.Prefs.set('csl.citation' + capFirst(base), settings.join(','));
-			}
-			optionSetters[i].disabled = true;
-		} else {
-			optionSetters[i].disabled = false;
+// Possibly want to cast two separate functions,
+// depending on whether we are updating in onpopupshowing
+// or menuitem? Is the ticked state the same in the two?
+function citationSecondary() {
+    var node = document.popupNode;
+	var lst = node.id.split('-');
+	var base = lst[0];
+	var addme = false;
+	var cullme = false;
+	var secondarySetting = lst[2];
+    var forms = ['orig', 'translit', 'translat'];
+    // Check-box has not yet changed when this executes.
+	if (!node.checked) {
+		addme = secondarySetting;
+	} else {
+		cullme = secondarySetting;
+        // Also unset configured affixes.
+        citationSetAffixes(node);
+	}
+	var settings = Zotero.Prefs.get('csl.citation' + capFirst(base));
+    var primarySetting = settings.split(',')[0];
+	settings = settings.split(',').slice(1);
+    for (var i = 0, ilen = settings.length; i < ilen; i += 1) {
+        if (forms.indexOf(settings[i]) === -1) {
+            settings = settings.slice(0, i).concat(settings.slice(i + 1));
+        }
+    }
+	if (addme && settings.indexOf(secondarySetting) === -1) {
+		settings.push(secondarySetting);
+	}
+	if (cullme) {
+		var cullidx = settings.indexOf(secondarySetting);
+		if (cullidx > -1) {
+			settings = settings.slice(0, cullidx).concat(settings.slice(cullidx + 1));
 		}
 	}
+	Zotero.Prefs.set('csl.citation' + capFirst(base), [primarySetting].concat(settings).join(','));
+    if (addme || cullme) {
+	    citationLangSet(capFirst(base));
+    }
+}
+
+function citationLangSet (name, init) {
+	var settings = Zotero.Prefs.get('csl.citation' + name).split(',');
+	var nodes = [];
+	var forms = ['orig', 'translit', 'translat'];
+    var base = name.toLowerCase();
+    // get node
+    // set node from pref
+    if (init) {
+        citationGetAffixes();
+        var node = document.getElementById(base + "-radio-" + settings[0]);
+        var control = node.control;
+        control.selectedItem = node;
+        for (var i = 0, ilen = forms.length; i < ilen; i += 1) {
+            nodes.push(document.getElementById(base + "-checkbox-" + forms[i]));
+        }
+	    for (var i = 0, ilen = nodes.length; i < ilen; i += 1) {
+		    nodes[i].checked = false;
+		    for (var j = 1, jlen = settings.length; j < jlen; j += 1) {
+			    if (nodes[i].id === base + '-checkbox-' + settings[j]) {
+				    nodes[i].checked = true;
+			    }
+		    }
+		    if (nodes[i].id === base + "-checkbox-" + settings[0]) {
+			    nodes[i].checked = false;
+			    var idx = settings.slice(1).indexOf(settings[0]);
+			    if (idx > -1) {
+				    // +1 and +2 b/c first-position item (primary) is sliced off for this check
+				    settings = settings.slice(0,idx + 1).concat(settings.slice(idx + 2)); 
+				    Zotero.Prefs.set('csl.citation' + capFirst(base), settings.join(','));
+			    }
+			    nodes[i].disabled = true;
+                citationSetAffixes(nodes[i]);
+		    } else {
+			    nodes[i].disabled = false;
+		    }
+	    }
+    }
+}
+
+function citationSetAffixes (node, affixNode) {
+    if (!node) {
+        var node = document.popupNode;
+    }
+    var currentId = node.id;
+    var prefixNode = document.getElementById(node.id + '-prefix');
+    var suffixNode = document.getElementById(node.id + '-suffix');
+    if (!affixNode) {
+        prefixNode.value = "";
+        suffixNode.value = "";
+    } else {
+        var prefix = affixNode.value.split("|")[0];
+        if (!prefix) {
+            prefix = "";
+        }
+        var suffix = affixNode.value.split("|")[1];
+        if (!suffix) {
+            suffix = "";
+        }
+        prefixNode.value = prefix;
+        suffixNode.value = suffix;
+    }
+    // Do something to store this data in Prefs
+    var types = ['persons', 'institutions', 'titles', 'publishers', 'places'];
+	var forms = ['orig', 'translit', 'translat'];
+    var affixList = [];
+    for (var i = 0, ilen = types.length; i < ilen; i += 1) {
+        for (var j = 0, jlen = forms.length; j < jlen; j += 1) {
+            var elem = document.getElementById(types[i] + '-checkbox-' + forms[j] + '-prefix');
+            if (!elem.value) {
+                elem.value = "";
+            }
+            affixList.push(elem.value);
+            elem = document.getElementById(types[i] + '-checkbox-' + forms[j] + '-suffix');
+            if (!elem.value) {
+                elem.value = "";
+            }
+            affixList.push(elem.value);
+        }
+    }
+    var affixes = affixList.join('|');
+    Zotero.Prefs.set('csl.citationAffixes', affixes);
+}
+
+// Hurray. For UI, all we need now is a function to apply the stored
+// affixes back into nodes.
+function citationGetAffixes () {
+    var affixList = Zotero.Prefs.get('csl.citationAffixes');
+    if (affixList) {
+        affixList = affixList.split('|');
+    } else {
+        affixList = '||||||||||||||'.split('|');
+    }
+    var types = ['persons', 'institutions', 'titles', 'publishers', 'places'];
+	var forms = ['orig', 'translit', 'translat'];
+    var affixPos = ['prefix', 'suffix']
+    var count = 0;
+    for (var i = 0, ilen = types.length; i < ilen; i += 1) {
+        for (var j = 0, jlen = forms.length; j < jlen; j += 1) {
+            for (var k = 0, klen = affixPos.length; k < klen; k += 1) {
+                var node = document.getElementById(types[i] + '-checkbox-' + forms[j] + '-' + affixPos[k]);
+                if (affixList[count]) {
+                    node.value = affixList[count];
+                }
+                count += 1;
+            }
+        }
+    }
 }

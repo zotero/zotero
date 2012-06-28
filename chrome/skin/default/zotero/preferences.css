@@ -265,3 +265,16 @@ treechildren::-moz-tree-checkbox(checked){
      in your extension or elsewhere. */
   list-style-image: url("chrome://global/skin/checkbox/cbox-check.gif");
 }
+
+hbox.plain .checkbox-label-box
+{
+-moz-appearance: none;
+border: none;
+}
+
+radiogroup.plain .radio-label-box
+{
+-moz-appearance: none;
+border: none;
+}
+

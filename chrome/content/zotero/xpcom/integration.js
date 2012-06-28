@@ -2108,6 +2108,7 @@ Zotero.Integration.Session.prototype.setData = function(data) {
 			this.style.setLangTagsForCslTranslation(data.prefs.citationTranslation);
 			this.style.setLangTagsForCslSort(data.prefs.citationSort);
 			this.style.setLangPrefsForCites(data.prefs.citationLangPrefs);
+			this.style.setLangPrefsForCiteAffixes(data.prefs.citationAffixes);
 		} catch(e) {
 			Zotero.logError(e);
 			data.style.styleID = undefined;
@@ -2138,6 +2139,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		io.citationTranslation = this.data.prefs.citationTranslation;
 		io.citationSort = this.data.prefs.citationSort;
 		io.citationLangPrefs = this.data.prefs.citationLangPrefs;
+		io.citationAffixes = this.data.prefs.citationAffixes;
 		io.primaryFieldType = primaryFieldType;
 		io.secondaryFieldType = secondaryFieldType;
 		io.storeReferences = this.data.prefs.storeReferences;
@@ -2169,6 +2171,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		me.data.prefs.citationTranslation = io.citationTranslation;
 		me.data.prefs.citationSort = io.citationSort;
 		me.data.prefs.citationLangPrefs = io.citationLangPrefs;
+		me.data.prefs.citationAffixes = io.citationAffixes;
 		
 		if(!oldData || oldData.style.styleID != data.style.styleID
 				|| oldData.prefs.noteType != data.prefs.noteType
@@ -2181,6 +2184,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		me.style.setLangTagsForCslTranslation(me.data.prefs.citationTranslation);
 		me.style.setLangTagsForCslSort(me.data.prefs.citationSort);
 		me.style.setLangPrefsForCites(me.data.prefs.citationLangPrefs);
+		me.style.setLangPrefsForCiteAffixes(me.data.prefs.citationAffixes);
 		me.style.setAutoVietnameseNamesOption(Zotero.Prefs.get('csl.autoVietnameseNames'));
 
 		callback(oldData ? oldData : null);
@@ -3164,6 +3168,7 @@ Zotero.Integration.DocumentData = function(string) {
 	this.prefs.citationTranslation = [];
 	this.prefs.citationSort = [];
 	this.prefs.citationLangPrefs = {};
+	this.prefs.citationAffixes = [,,,,,,,,,,,,,,];
 	this.sessionID = null;
 	if(string) {
 		this.unserialize(string);
@@ -3174,6 +3179,7 @@ Zotero.Integration.DocumentData = function(string) {
  * Serializes document-specific data as XML
  */
 Zotero.Integration.DocumentData.prototype.serializeXML = function() {
+    Zotero.debug("XXX Fucking pref: really? (1)");
 	var xmlData = <data data-version={DATA_VERSION} zotero-version={Zotero.version}>
 			<session id={this.sessionID} />
 			<style id={this.style.styleID} hasBibliography={this.style.hasBibliography ? 1 : 0}
@@ -3182,6 +3188,7 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
 		</data>;
 	
 	for(var pref in this.prefs) {
+        Zotero.debug("XXX     trying: "+pref);
 		if (pref === 'citationLangPrefs') {
 			for (var segment in this.prefs.citationLangPrefs) {
 				if (this.prefs.citationLangPrefs[segment]) {
@@ -3190,6 +3197,15 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
 					xmlData.prefs.pref += <pref name={citelangpref} value={citelangprefval}/>;
 				}
 			}
+		} else if (pref === 'citationAffixes') {
+            citeaffixes = "|||||||||||||||||||||||||||||";
+            Zotero.debug("XXX Thinking about saving shit: "+this.prefs.citationAffixes);
+            if (this.prefs.citationAffixes.length === 30) {
+                Zotero.debug("XXX Get ready to save shit: "+this.prefs.citationAffixes);
+                var citeaffixes = this.prefs.citationAffixes.join('|');
+            }
+            Zotero.debug("XXX Save shit: "+citeaffixes);
+            xmlData.prefs.pref += <pref name="citationAffixes" value={citeaffixes}/>;
 		} else if (['citationTransliteration', 'citationTranslation', 'citationSort'].indexOf(pref) === -1) {
 			xmlData.prefs.pref += <pref name={pref} value={this.prefs[pref]}/>;
 		} else {
@@ -3215,6 +3231,7 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
  * Unserializes document-specific XML
  */
 Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
+    Zotero.debug("XXX Fucking pref: really? (2)");
 	if(typeof xmlData == "string") {
 		var xmlData = new XML(xmlData);
 	}
@@ -3234,8 +3251,13 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 			value = false;
 		}
 		
-		if (name.slice(0,17) === 'citationLangPrefs') {
+		if (name.slice(17) === 'citationLangPrefs') {
 			this.prefs.citationLangPrefs[name.slice(17).toLowerCase()] = value.split(',');
+		} else if (name === "citationAffixes") {
+            Zotero.debug("XXX Retrieve fucking affixes");
+            Zotero.debug("XXX Retrieve fucking affixes: "+value);
+            this.prefs.citationAffixes = value.split("|");
+            
 		} else {
 			this.prefs[name] = value;
 		}

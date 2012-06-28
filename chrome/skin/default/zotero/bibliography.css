@@ -14,3 +14,20 @@ radio:not(:first-child)
 	margin: 0 0 3px 20px;
 	font-size: .85em;
 }
+
+hbox.plain .checkbox-label-box
+{
+-moz-appearance: none;
+border: none;
+}
+
+radiogroup.plain .radio-label-box
+{
+-moz-appearance: none;
+border: none;
+}
+
+radiogroup.plain radio
+{
+    margin-top: 0pt;
+}

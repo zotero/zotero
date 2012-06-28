@@ -84,6 +84,14 @@
 		<tabpanel>
 		  <groupbox>
 			<caption label="&zotero.integration.prefs.lang.languagesInCitations;"/>
+
+            <menupopup id="language-affix-menu" 
+                       onpopupshowing="if (!document.popupNode.disabled &amp;&amp; !document.popupNode.checked) {Zotero_File_Interface_Bibliography.citationSecondary();return true;} else {Zotero_File_Interface_Bibliography.citationSecondary();return false;}" position="after_start">
+              <menuitem label=", ..." value=", |" oncommand="Zotero_File_Interface_Bibliography.citationSetAffixes(null, this);"/>
+              <menuitem label="[...]" value="[|]" oncommand="Zotero_File_Interface_Bibliography.citationSetAffixes(null, this);"/>
+              <menuitem label="(...)" value="(|)" oncommand="Zotero_File_Interface_Bibliography.citationSetAffixes(null, this);"/>
+            </menupopup>
+
 			<grid>
 			  <columns>
 				<column flex="1"/>
@@ -101,81 +109,365 @@
 				  <hbox style="background:#b7b7b7;margin:0px 0.5em 0px 0.5em;"/>
 				  <hbox style="background:#b7b7b7;margin:0px 0.5em 0px 0.5em;"/>
 				</row>
-				<row>
-				  <hbox>
-					<caption label="&zotero.integration.prefs.lang.persons;"/>
-				  </hbox>
-				  <radiogroup id="persons-radio" orient="horizontal" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);">
-					<radio label="猫 (orig)" id="persons-radio-orig"/>
-					<radio label="neko" id="persons-radio-translit"/>
-					<radio label="cat" id="persons-radio-translat"/>
-				  </radiogroup>
-				  <hbox orient="horizontal">
-					<checkbox label="猫 (orig)" id="persons-checkbox-orig" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-					<checkbox label="neko" id="persons-checkbox-translit" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-					<checkbox label="cat" id="persons-checkbox-translat" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-				  </hbox>
-				</row>
-				<row>
-				  <hbox>
-					<caption label="&zotero.integration.prefs.lang.institutions;"/>
-				  </hbox>
-				  <radiogroup id="institutions-radio" orient="horizontal" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);">
-					<radio label="猫 (orig)" id="institutions-radio-orig"/>
-					<radio label="neko" id="institutions-radio-translit"/>
-					<radio label="cat" id="institutions-radio-translat"/>
-				  </radiogroup>
-				  <hbox orient="horizontal">
-					<checkbox label="猫 (orig)" id="institutions-checkbox-orig" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-					<checkbox label="neko" id="institutions-checkbox-translit" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-					<checkbox label="cat" id="institutions-checkbox-translat" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-				  </hbox>
-				</row>
-				<row>
-				  <hbox>
-					<caption label="&zotero.integration.prefs.lang.titles;"/>
-				  </hbox>
-				  <radiogroup id="titles-radio" orient="horizontal" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);">
-					<radio label="猫 (orig)" id="titles-radio-orig"/>
-					<radio label="neko" id="titles-radio-translit"/>
-					<radio label="cat" id="titles-radio-translat"/>
-				  </radiogroup>
-				  <hbox>
-					<checkbox label="猫 (orig)" id="titles-checkbox-orig" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-					<checkbox label="neko" id="titles-checkbox-translit" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-					<checkbox label="cat" id="titles-checkbox-translat" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-				  </hbox>
-				</row>
-				<row>
-				  <hbox>
-					<caption label="&zotero.integration.prefs.lang.publishers;"/>
-				  </hbox>
-				  <radiogroup id="publishers-radio" orient="horizontal" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);">
-					<radio label="猫 (orig)" id="publishers-radio-orig"/>
-					<radio label="neko" id="publishers-radio-translit"/>
-					<radio label="cat" id="publishers-radio-translat"/>
-				  </radiogroup>
-				  <hbox orient="horizontal">
-					<checkbox label="猫 (orig)" id="publishers-checkbox-orig" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-					<checkbox label="neko" id="publishers-checkbox-translit" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-					<checkbox label="cat" id="publishers-checkbox-translat" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-				  </hbox>
-				</row>
-				<row>
-				  <hbox>
-					<caption label="&zotero.integration.prefs.lang.places;"/>
-				  </hbox>
-				  <radiogroup id="places-radio" orient="horizontal" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);">
-					<radio label="猫 (orig)" id="places-radio-orig"/>
-					<radio label="neko" id="places-radio-translit"/>
-					<radio label="cat" id="places-radio-translat"/>
-				  </radiogroup>
-				  <hbox orient="horizontal">
-					<checkbox label="猫 (orig)" id="places-checkbox-orig" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-					<checkbox label="neko" id="places-checkbox-translit" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-					<checkbox label="cat" id="places-checkbox-translat" oncommand="Zotero_File_Interface_Bibliography.citationLangRecord(this);"/>
-				  </hbox>
-				</row>
+                <row>
+                  <grid>
+                    <columns>
+                      <column/>
+                    </columns>
+                    <rows>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <label/>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <hbox flex="1" text-align="right">
+                          <caption label="&zotero.integration.prefs.lang.persons;"/>
+                        </hbox>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <hbox flex="1" text-align="right">
+                          <caption label="&zotero.integration.prefs.lang.institutions;"/>
+                        </hbox>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <hbox flex="1" text-align="right">
+                          <caption label="&zotero.integration.prefs.lang.titles;"/>
+                        </hbox>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <hbox flex="1" text-align="right">
+                          <caption label="&zotero.integration.prefs.lang.publishers;"/>
+                        </hbox>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <hbox flex="1" text-align="right">
+                          <caption label="&zotero.integration.prefs.lang.places;"/>
+                        </hbox>
+                      </row>
+                    </rows>
+                  </grid>
+                  <grid flex="1">
+                    <columns>
+                      <column flex="1"/>
+                    </columns>
+                    <rows>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <hbox flex="1">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <label value="猫 (orig)"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <label value="neko"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <label value="cat"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </hbox>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <radiogroup id="persons-radio" orient="horizontal" flex="1" class="plain" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="persons-radio-orig"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="persons-radio-translit"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="persons-radio-translat"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </radiogroup>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <radiogroup id="institutions-radio" orient="horizontal" flex="1" class="plain" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="institutions-radio-orig"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="institutions-radio-translit"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="institutions-radio-translat"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </radiogroup>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <radiogroup id="titles-radio" orient="horizontal" flex="1" class="plain" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="titles-radio-orig"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="titles-radio-translit"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="titles-radio-translat"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </radiogroup>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <radiogroup id="publishers-radio" orient="horizontal" flex="1" class="plain" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="publishers-radio-orig"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="publishers-radio-translit"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="publishers-radio-translat"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </radiogroup>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <radiogroup id="places-radio" orient="horizontal" flex="1" class="plain" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="places-radio-orig"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="places-radio-translit"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio id="places-radio-translat"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </radiogroup>
+                      </row>
+                    </rows>
+                  </grid>
+                  <grid flex="1">
+                    <columns>
+                      <column flex="1"/>
+                      <column flex="1"/>
+                      <column flex="1"/>
+                    </columns>
+                    <rows>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <hbox flex="1">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <label value="猫 (orig)"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <label value="neko"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <label value="cat"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </hbox>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <hbox flex="1">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="persons-checkbox-orig-prefix"/>
+                            <checkbox popup="language-affix-menu" id="persons-checkbox-orig"/>
+                            <label id="persons-checkbox-orig-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="persons-checkbox-translit-prefix"/>
+                            <checkbox id="persons-checkbox-translit" popup="language-affix-menu"/>
+                            <label id="persons-checkbox-translit-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="persons-checkbox-translat-prefix"/>
+                            <checkbox id="persons-checkbox-translat" popup="language-affix-menu"/>
+                            <label id="persons-checkbox-translat-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </hbox>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <hbox flex="1">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="institutions-checkbox-orig-prefix"/>
+                            <checkbox id="institutions-checkbox-orig" popup="language-affix-menu"/>
+                            <label id="institutions-checkbox-orig-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="institutions-checkbox-translit-prefix"/>
+                            <checkbox id="institutions-checkbox-translit" popup="language-affix-menu"/>
+                            <label id="institutions-checkbox-translit-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="institutions-checkbox-translat-prefix"/>
+                            <checkbox id="institutions-checkbox-translat" popup="language-affix-menu"/>
+                            <label id="institutions-checkbox-translat-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </hbox>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <hbox flex="1">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="titles-checkbox-orig-prefix"/>
+                            <checkbox id="titles-checkbox-orig" popup="language-affix-menu"/>
+                            <label id="titles-checkbox-orig-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="titles-checkbox-translit-prefix"/>
+                            <checkbox id="titles-checkbox-translit" popup="language-affix-menu"/>
+                            <label id="titles-checkbox-translit-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="titles-checkbox-translat-prefix"/>
+                            <checkbox id="titles-checkbox-translat" popup="language-affix-menu"/>
+                            <label id="titles-checkbox-translat-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </hbox>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <hbox flex="1">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="publishers-checkbox-orig-prefix"/>
+                            <checkbox id="publishers-checkbox-orig" popup="language-affix-menu"/>
+                            <label id="publishers-checkbox-orig-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="publishers-checkbox-translit-prefix"/>
+                            <checkbox id="publishers-checkbox-translit" popup="language-affix-menu"/>
+                            <label id="publishers-checkbox-translit-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="publishers-checkbox-translat-prefix"/>
+                            <checkbox id="publishers-checkbox-translat" popup="language-affix-menu"/>
+                            <label id="publishers-checkbox-translat-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </hbox>
+                      </row>
+                      <row style="max-height:1.5em;min-height:1.5em;">
+                        <hbox flex="1">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="places-checkbox-orig-prefix"/>
+                            <checkbox id="places-checkbox-orig" popup="language-affix-menu"/>
+                            <label id="places-checkbox-orig-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="places-checkbox-translit-prefix"/>
+                            <checkbox id="places-checkbox-translit" popup="language-affix-menu"/>
+                            <label id="places-checkbox-translit-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;" class="plain">
+                            <hbox flex="1"/>
+                            <label id="places-checkbox-translat-prefix"/>
+                            <checkbox id="places-checkbox-translat" popup="language-affix-menu"/>
+                            <label id="places-checkbox-translat-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </hbox>
+                      </row>
+                    </rows>
+                  </grid>
+                </row>
 			  </rows>
 			</grid>
 			<separator/>
