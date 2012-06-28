@@ -467,6 +467,12 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 				
 				var row = this._itemRowMap[id];
 				
+				// Deleted items get a modify that we have to ignore when
+				// not viewing the trash
+				if (item.deleted) {
+					continue;
+				}
+				
 				// Item already exists in this view
 				if( row != null)
 				{
@@ -505,12 +511,6 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 				
 				else if (((itemGroup.isLibrary() || itemGroup.isGroup()) && itemGroup.ref.libraryID == item.libraryID)
 							|| (itemGroup.isCollection() && item.inCollection(itemGroup.ref.id))) {
-					// Deleted items get a modify that we have to ignore when
-					// not viewing the trash
-					if (item.deleted) {
-						continue;
-					}
-					
 					// Otherwise the item has to be added
 					if(item.isRegularItem() || !item.getSource())
 					{
@@ -531,9 +531,22 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 		// If quicksearch, re-run it, since the results may have changed
 		else
 		{
-			quicksearch.doCommand();
-			madeChanges = true;
-			sort = true;
+			// If not viewing trash and all items were deleted, ignore modify
+			var allDeleted = true;
+			if (!itemGroup.isTrash()) {
+				var items = Zotero.Items.get(ids);
+				for each(var item in items) {
+					if (!item.deleted) {
+						allDeleted = false;
+						break;
+					}
+				}
+			}
+			if (!allDeleted) {
+				quicksearch.doCommand();
+				madeChanges = true;
+				sort = true;
+			}
 		}
 	}
 	else if(action == 'add')
@@ -617,7 +630,6 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 			}
 		}
 		
-		
 		if (singleSelect) {
 			if (sort) {
 				this.sort(typeof sort == 'number' ? sort : false);
@@ -680,6 +692,18 @@ Zotero.ItemTreeView.prototype.notify = function(action, type, ids, extraData)
 					}
 				}
 				else {
+					// If this was a child item and the next item at this
+					// position is a top-level item, move selection one row
+					// up to select a sibling or parent
+					if (ids.length == 1 && previousRow > 0) {
+						var previousItem = Zotero.Items.get(ids[0]);
+						if (previousItem && previousItem.getSource()) {
+							if (this._dataItems[previousRow] && this.getLevel(previousRow) == 0) {
+								previousRow--;
+							}
+						}
+					}
+					
 					if (this._dataItems[previousRow]) {
 						this.selection.select(previousRow);
 					}
