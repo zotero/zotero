@@ -2918,6 +2918,8 @@ CSL.Engine.prototype.setLangPrefsForCites = function (params) {
 		}
 	}
 };
+CSL.Engine.prototype.setLangPrefsForCiteAffixes = function (affixList) {
+};
 CSL.Engine.prototype.setAutoVietnameseNamesOption = function (arg) {
     if (arg) {
         this.opt["auto-vietnamese-names"] = true;
