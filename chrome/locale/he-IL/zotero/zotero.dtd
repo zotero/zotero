@@ -160,6 +160,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Suppress Author">
 <!ENTITY zotero.citation.prefix.label "Prefix:">
 <!ENTITY zotero.citation.suffix.label "Suffix:">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 
 <!ENTITY zotero.richText.italic.label "Italic">
 <!ENTITY zotero.richText.bold.label "מודגש">

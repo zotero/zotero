@@ -160,6 +160,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Auteur weglaten">
 <!ENTITY zotero.citation.prefix.label "Voorvoegsel:">
 <!ENTITY zotero.citation.suffix.label "Achtervoegsel:">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 
 <!ENTITY zotero.richText.italic.label "Cursief">
 <!ENTITY zotero.richText.bold.label "Vet">

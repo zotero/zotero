@@ -119,7 +119,7 @@
 
 <!ENTITY zotero.preferences.keys.openZotero "Odpri/zapri podokno Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Vključi/izključi celozaslonski način">
-<!ENTITY zotero.preferences.keys.library "Knjižnica">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Hitro iskanje">
 <!ENTITY zotero.preferences.keys.newItem "Ustvari nov vnos">
 <!ENTITY zotero.preferences.keys.newNote "Ustvari novo opombo">

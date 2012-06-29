@@ -106,7 +106,7 @@
 <!ENTITY zotero.item.textTransform.sentencecase "Store bokstavar etter setningsreglar">
 
 <!ENTITY zotero.toolbar.newNote "Nytt notat">
-<!ENTITY zotero.toolbar.note.standalone "Nytt einskildståande notat">
+<!ENTITY zotero.toolbar.note.standalone "Nytt notat">
 <!ENTITY zotero.toolbar.note.child "Nytt undernotat">
 <!ENTITY zotero.toolbar.lookup "Lookup by Identifier …">
 <!ENTITY zotero.toolbar.attachment.linked "Lenkje til fil …">
@@ -160,6 +160,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Utelat forfattar">
 <!ENTITY zotero.citation.prefix.label "Prefiks:">
 <!ENTITY zotero.citation.suffix.label "Suffiks:">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 
 <!ENTITY zotero.richText.italic.label "Kursiv">
 <!ENTITY zotero.richText.bold.label "Feit">
@@ -243,5 +244,5 @@
 <!ENTITY zotero.file.noneSelected.label "Inga fil vald">
 
 <!ENTITY zotero.downloadManager.label "Lagra til Zotero">
-<!ENTITY zotero.downloadManager.saveToLibrary.description "Attachments cannot be saved to the currently selected library. This item will be saved to your library instead.">
+<!ENTITY zotero.downloadManager.saveToLibrary.description "Vedlegg kan ikkje lagrast til det valde biblioteket. Lagrar til hovudbiblioteket i staden.">
 <!ENTITY zotero.downloadManager.noPDFTools.description "For å bruka denne funksjonen må du fyrst installera PDF-verktøya i innstillingar-dialogen til Zotero.">

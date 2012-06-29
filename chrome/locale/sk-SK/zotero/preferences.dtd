@@ -119,7 +119,7 @@
 
 <!ENTITY zotero.preferences.keys.openZotero "Otvoriť/zatvoriť Zotero">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Prepnúť Zotero do celého okna">
-<!ENTITY zotero.preferences.keys.library "Knižnica">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Rýchle vyhľadávanie">
 <!ENTITY zotero.preferences.keys.newItem "Vytvoriť novú položku">
 <!ENTITY zotero.preferences.keys.newNote "Vytvoriť novú poznámku">

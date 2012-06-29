@@ -43,7 +43,7 @@
 <!ENTITY copyCmd.label "Kopyala">
 <!ENTITY copyCmd.key "C">
 <!ENTITY copyCmd.accesskey "C">
-<!ENTITY copyCitationCmd.label "Atıf Kopyala">
+<!ENTITY copyCitationCmd.label "Gönderme Kopyala">
 <!ENTITY copyBibliographyCmd.label "Kaynakça Kopyala">
 <!ENTITY pasteCmd.label "Yapıştır">
 <!ENTITY pasteCmd.key "V">

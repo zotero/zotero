@@ -119,7 +119,7 @@
 
 <!ENTITY zotero.preferences.keys.openZotero "Ireki/Itxi Zotero panela">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Pantaila osoa bai/ez">
-<!ENTITY zotero.preferences.keys.library "Liburutegia">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Bilatu:">
 <!ENTITY zotero.preferences.keys.newItem "Item berria sortu">
 <!ENTITY zotero.preferences.keys.newNote "Ohar berria sortu">

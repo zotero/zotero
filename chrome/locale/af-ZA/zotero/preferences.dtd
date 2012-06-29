@@ -119,7 +119,7 @@
 
 <!ENTITY zotero.preferences.keys.openZotero "Open/sluit Zotero-paneel">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Verwissel volskermmodus">
-<!ENTITY zotero.preferences.keys.library "Programmateek">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Kitssoektog">
 <!ENTITY zotero.preferences.keys.newItem "Skep nuwe item">
 <!ENTITY zotero.preferences.keys.newNote "Skep &apos;n nuwe nota">
