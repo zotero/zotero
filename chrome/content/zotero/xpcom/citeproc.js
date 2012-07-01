@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010 and 2011 Frank G. Bennett, Jr. All Rights
+ * Copyright (c) 2009, 2010, 2011 and 2012 Frank G. Bennett, Jr. All Rights
  * Reserved.
  *
  * The contents of this file are subject to the Common Public
@@ -10,7 +10,7 @@
  * http://bitbucket.org/fbennett/citeproc-js/src/tip/LICENSE.
  *
  * The License is based on the Mozilla Public License Version 1.1 but
- * Sections 14 and 15 have been added to cover use of software over a
+ * Sections 1.13, 14 and 15 have been added to cover use of software over a
  * computer network and provide for limited attribution for the
  * Original Developer. In addition, Exhibit A has been modified to be
  * consistent with Exhibit B.
@@ -23,7 +23,7 @@
  * The Original Code is the citation formatting software known as
  * "citeproc-js" (an implementation of the Citation Style Language
  * [CSL]), including the original test fixtures and software located
- * under the ./std subdirectory of the distribution archive.
+ * under the ./tests subdirectory of the distribution archive.
  *
  * The Original Developer is not the Initial Developer and is
  * __________. If left blank, the Original Developer is the Initial
@@ -31,7 +31,7 @@
  *
  * The Initial Developer of the Original Code is Frank G. Bennett,
  * Jr. All portions of the code written by Frank G. Bennett, Jr. are
- * Copyright (c) 2009, 2010 and 2011 Frank G. Bennett, Jr. All Rights Reserved.
+ * Copyright (c) 2009, 2010, 2011, and 2012 Frank G. Bennett, Jr. All Rights Reserved.
  *
  * Alternatively, the contents of this file may be used under the
  * terms of the GNU Affero General Public License (the [AGPLv3]
@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.350",
+    PROCESSOR_VERSION: "1.0.351",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -12581,6 +12581,14 @@ CSL.Disambiguation.prototype.disExtraText = function () {
                 this.state.registry.registerAmbigToken(this.akey, "" + this.lists[this.listpos][1][i].id, base);
             }
             this.lists[this.listpos] = [this.betterbase, []];
+        } else {
+            this.modeindex = this.modes.length - 1;
+            var base = this.lists[this.listpos][0];
+            base.disambiguate = true;
+            for (var i = 0, ilen = this.lists[this.listpos][1].length; i < ilen; i += 1) {
+                this.state.tmp.taintedItemIDs[this.lists[this.listpos][1][i].id] = true;
+                this.state.registry.registerAmbigToken(this.akey, "" + this.lists[this.listpos][1][i].id, base);
+            }
         }
     }
 };
