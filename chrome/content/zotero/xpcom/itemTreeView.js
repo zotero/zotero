@@ -1869,15 +1869,6 @@ Zotero.ItemTreeView.prototype.saveOpenState = function(close) {
 		this._refreshHashMap();
 	}
 	return itemIDs;
-	
-	
-	var ids = [];
-	for (var i=0, len=this.rowCount; i<len; i++) {
-		if (this.isContainer(i) && this.isContainerOpen(i)) {
-			ids.push(this._getItemAtRow(i).ref.id);
-		}
-	}
-	return ids;
 }
 
 
@@ -1886,12 +1877,15 @@ Zotero.ItemTreeView.prototype.rememberOpenState = function(itemIDs) {
 	for each(var id in itemIDs) {
 		var row = this._itemRowMap[id];
 		// Item may not still exist
-		if (!row) {
+		if (row == undefined) {
 			continue;
 		}
 		rowsToOpen.push(row);
 	}
-	rowsToOpen.sort();
+	rowsToOpen.sort(function (a, b) {
+		return a - b;
+	});
+	
 	this._treebox.beginUpdateBatch();
 	// Reopen from bottom up
 	for (var i=rowsToOpen.length-1; i>=0; i--) {

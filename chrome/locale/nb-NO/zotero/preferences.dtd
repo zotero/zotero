@@ -119,7 +119,7 @@
 
 <!ENTITY zotero.preferences.keys.openZotero "Åpne/lukk Zotero-panelet">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Fullskjerm av/på">
-<!ENTITY zotero.preferences.keys.library "Bibliotek">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøk">
 <!ENTITY zotero.preferences.keys.newItem "Lag et nytt element">
 <!ENTITY zotero.preferences.keys.newNote "Lag et nytt notat">

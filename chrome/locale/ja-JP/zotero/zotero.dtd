@@ -159,6 +159,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "著者名の非表示">
 <!ENTITY zotero.citation.prefix.label "接頭辞:">
 <!ENTITY zotero.citation.suffix.label "接尾辞:">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 
 <!ENTITY zotero.richText.italic.label "斜体">
 <!ENTITY zotero.richText.bold.label "太字">

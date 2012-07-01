@@ -1,9 +1,9 @@
 <!ENTITY preferencesCmdMac.label "Indstillinger...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Tjenester">
-<!ENTITY hideThisAppCmdMac.label "Gem &brandShortName;">
+<!ENTITY hideThisAppCmdMac.label "Skjul &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Gem andre">
+<!ENTITY hideOtherAppsCmdMac.label "Skjul andre">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Vis alle">
 <!ENTITY quitApplicationCmdMac.label "Afslut Zotero">

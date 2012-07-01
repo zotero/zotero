@@ -159,6 +159,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Szerző figyelmen kívül hagyása">
 <!ENTITY zotero.citation.prefix.label "Előtag:">
 <!ENTITY zotero.citation.suffix.label "Utótag:">
+<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
 
 <!ENTITY zotero.richText.italic.label "Dőlt">
 <!ENTITY zotero.richText.bold.label "Félkövér">

@@ -50,7 +50,7 @@
 <!ENTITY zotero.preferences.sync.username "Kullanıcı:">
 <!ENTITY zotero.preferences.sync.password "Şifre:">
 <!ENTITY zotero.preferences.sync.syncServer "Zotero Eşleme Sunucusu">
-<!ENTITY zotero.preferences.sync.createAccount "Hesap Yarat">
+<!ENTITY zotero.preferences.sync.createAccount "Hesap Oluştur">
 <!ENTITY zotero.preferences.sync.lostPassword "Unutulan Şifre?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Kendiliğinden eşle">
 <!ENTITY zotero.preferences.sync.about "Eşzamanlama Hakkında">
@@ -101,30 +101,30 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Çıktı Biçimi">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Bu kadardan daha fazla sürüklendiğinde Çabuk Kopyalamayı seçilemez kıl:">
 
-<!ENTITY zotero.preferences.prefpane.cite "Atıf Yapmak">
+<!ENTITY zotero.preferences.prefpane.cite "Gönderme Yapmak">
 <!ENTITY zotero.preferences.cite.styles "Stiller">
 <!ENTITY zotero.preferences.cite.wordProcessors "Sözcük İşlemcileri">
 <!ENTITY zotero.preferences.cite.wordProcessors.noWordProcessorPluginsInstalled "Hiçbir sözcük işlemcisi eklentisi kurulu değildir.">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins "Sözlük İşlemcisi Eklentilerini Al...">
 <!ENTITY zotero.preferences.cite.wordProcessors.getPlugins.url "http://www.zotero.org/support/word_processor_plugin_installation_for_zotero_2.1">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Klasik Atıf Ekleme İletişim Kutusunu kullan">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Klasik Gönderme Ekleme İletişim Kutusunu kullan">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stil Yöneticisi">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Başlık">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Güncelleştirilme">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Ek sDöööötiller indir...">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Ek stiller indir...">
 
 <!ENTITY zotero.preferences.prefpane.keys "Kısayol Tuşları">
 
 <!ENTITY zotero.preferences.keys.openZotero "Zotero Bölmesini Aç/Kapa">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Tam Ekran Moduna Geç">
-<!ENTITY zotero.preferences.keys.library "Kitaplık">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Çabuk Arama">
-<!ENTITY zotero.preferences.keys.newItem "Yeni eser yarat">
-<!ENTITY zotero.preferences.keys.newNote "Yeni not yarat">
+<!ENTITY zotero.preferences.keys.newItem "Yeni eser oluştur">
+<!ENTITY zotero.preferences.keys.newNote "Yeni not oluştur">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Konu Seçiciyi Aç">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Seçili eserin Atıflarını Pano'ya kopyala">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Seçili Eserin Göndermelerini Pano'ya Kopyala">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Seçilen eserleri panoya kopyala">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Panodan içeri aktar">
 <!ENTITY zotero.preferences.keys.overrideGlobal "Çelişen kısayolların üzerine yazdırmayı dene">

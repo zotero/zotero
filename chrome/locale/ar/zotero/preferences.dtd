@@ -119,7 +119,7 @@
 
 <!ENTITY zotero.preferences.keys.openZotero "فتح/إغلاق نافذة زوتيرو">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "التنشيط لوضع ملء الشاشة">
-<!ENTITY zotero.preferences.keys.library "المكتبة">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "البحث السريع">
 <!ENTITY zotero.preferences.keys.newItem "انشئ عنصر جديد">
 <!ENTITY zotero.preferences.keys.newNote "انشئ ملاحظة جديدة">

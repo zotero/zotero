@@ -119,7 +119,7 @@
 
 <!ENTITY zotero.preferences.keys.openZotero "Отваря/Затваря на Панела на Зотеро">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Превключва в Режим на Цял Екран">
-<!ENTITY zotero.preferences.keys.library "Библиотека">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Бързо Търсене">
 <!ENTITY zotero.preferences.keys.newItem "Създаване на нов запис">
 <!ENTITY zotero.preferences.keys.newNote "Създаване на нова бележка">
