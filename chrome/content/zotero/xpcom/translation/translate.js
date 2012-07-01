@@ -1569,7 +1569,7 @@ Zotero.Translate.Web.prototype._translateTranslatorLoaded = function() {
 			}, function(obj) { me._translateRPCComplete(obj) });
 	} else if(runMode === Zotero.Translator.RUN_MODE_ZOTERO_SERVER) {
 		var me = this;
-		Zotero.OAuth.createItem({"url":this.document.location.href.toString()}, null,
+		Zotero.API.createItem({"url":this.document.location.href.toString()}, null,
 			function(statusCode, response) {
 				me._translateServerComplete(statusCode, response);
 			});
@@ -1618,7 +1618,7 @@ Zotero.Translate.Web.prototype._translateServerComplete = function(statusCode, r
 		var me = this;
 		this._runHandler("select", response,
 			function(selectedItems) {
-				Zotero.OAuth.createItem({
+				Zotero.API.createItem({
 						"url":me.document.location.href.toString(),
 						"items":selectedItems
 					}, null,

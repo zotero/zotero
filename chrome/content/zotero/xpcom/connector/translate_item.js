@@ -127,7 +127,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		}
 		
 		var me = this;
-		Zotero.OAuth.createItem({"items":newItems}, null, function(statusCode, response) {
+		Zotero.API.createItem({"items":newItems}, null, function(statusCode, response) {
 			if(statusCode !== 201) {
 				callback(false, new Error("Save to server failed"));
 			} else {
@@ -190,7 +190,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				});
 			}
 			
-			Zotero.OAuth.createItem({"items":attachmentPayload}, itemKey, function(statusCode, response) {
+			Zotero.API.createItem({"items":attachmentPayload}, itemKey, function(statusCode, response) {
 				var err;
 				if(statusCode === 201) {
 					try {
@@ -362,7 +362,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		Zotero.Translate.ItemSaver._attachmentCallbacks[attachment.id] = function(status, error) {
 			attachmentCallback(attachment, status, error);
 		};
-		Zotero.OAuth.uploadAttachment(attachment);
+		Zotero.API.uploadAttachment(attachment);
 	},
 	
 	/**
