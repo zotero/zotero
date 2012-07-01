@@ -732,7 +732,13 @@ Zotero.Translate.IO.Read.prototype = {
 	
 	"_getXML":function() {
 		if(this._mode == "xml/dom") {
-			return Zotero.Translate.IO.parseDOMXML(this._rawStream, this._charset, this.file.fileSize);
+			try {
+				var xml = Zotero.Translate.IO.parseDOMXML(this._rawStream, this._charset, this.file.fileSize);
+			} catch(e) {
+				this._xmlInvalid = true;
+				throw e;
+			}
+			return (Zotero.isFx5 ? Zotero.Translate.SandboxManager.Fx5DOMWrapper(xml) : xml);
 		} else {
 			return this._readToString().replace(/<\?xml[^>]+\?>/, "");
 		}

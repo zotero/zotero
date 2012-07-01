@@ -1337,7 +1337,8 @@ Zotero.Translate.Base.prototype = {
 				// https://bugzilla.mozilla.org/show_bug.cgi?id=609143 - can't pass E4X to sandbox in Fx4
 				src += "Zotero.getXML = function() {"+
 					"var xml = Zotero._getXML();"+
-					"if(typeof xml == 'string') return new XML(xml);"+
+					"if(typeof xml == 'string') { return new XML(xml);}"+
+					"return xml;"+
 				"};";
 			}
 		}
@@ -2229,11 +2230,12 @@ Zotero.Translate.IO.String.prototype = {
 	"_getXML":function() {
 		if(this._mode == "xml/dom") {
 			try {
-				return Zotero.Translate.IO.parseDOMXML(this.string);
+				var xml = Zotero.Translate.IO.parseDOMXML(this.string);
 			} catch(e) {
 				this._xmlInvalid = true;
 				throw e;
 			}
+			return (Zotero.isFx5 ? Zotero.Translate.SandboxManager.Fx5DOMWrapper(xml) : xml);
 		} else {
 			return this.string.replace(/<\?xml[^>]+\?>/, "");
 		}
