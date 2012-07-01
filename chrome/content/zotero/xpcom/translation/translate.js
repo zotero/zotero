@@ -2136,7 +2136,7 @@ Zotero.Translate.IO = {
 /**
  * @class Translate backend for translating from a string
  */
-Zotero.Translate.IO.String = function(string, uri, mode) {
+Zotero.Translate.IO.String = function(string, uri) {
 	if(string && typeof string === "string") {
 		this.string = string;
 	} else {
@@ -2228,17 +2228,13 @@ Zotero.Translate.IO.String.prototype = {
 	},
 	
 	"_getXML":function() {
-		if(this._mode == "xml/dom") {
-			try {
-				var xml = Zotero.Translate.IO.parseDOMXML(this.string);
-			} catch(e) {
-				this._xmlInvalid = true;
-				throw e;
-			}
-			return (Zotero.isFx5 ? Zotero.Translate.SandboxManager.Fx5DOMWrapper(xml) : xml);
-		} else {
-			return this.string.replace(/<\?xml[^>]+\?>/, "");
+		try {
+			var xml = Zotero.Translate.IO.parseDOMXML(this.string);
+		} catch(e) {
+			this._xmlInvalid = true;
+			throw e;
 		}
+		return (Zotero.isFx ? Zotero.Translate.DOMWrapper.wrap(xml) : xml);
 	},
 	
 	"init":function(newMode, callback) {
@@ -2246,8 +2242,10 @@ Zotero.Translate.IO.String.prototype = {
 		this._noCR = undefined;
 		
 		this._mode = newMode;
-		if(newMode && (Zotero.Translate.IO.rdfDataModes.indexOf(newMode) !== -1
-				|| newMode.substr(0, 3) === "xml") && this._xmlInvalid) {
+		if(newMode === "xml/e4x") {
+			throw "E4X is not supported";
+		} else if(newMode && (Zotero.Translate.IO.rdfDataModes.indexOf(newMode) !== -1
+				|| newMode.substr(0, 3) === "xml/dom") && this._xmlInvalid) {
 			throw "XML known invalid";
 		} else if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1) {
 			this._initRDF(callback);
