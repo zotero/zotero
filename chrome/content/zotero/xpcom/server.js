@@ -216,7 +216,19 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 	Zotero.debug(this.header, 5);
 	
 	const methodRe = /^([A-Z]+) ([^ \r\n?]+)(\?[^ \r\n]+)?/;
-	const contentTypeRe = /[\r\n]Content-Type: +([^ \r\n]+)/i;
+	const contentTypeRe = /[\r\n]Content-Type: *([^ \r\n]+)/i;
+	
+	if(!Zotero.isServer) {
+		const originRe = /[\r\n]Origin: *([^ \r\n]+)/i;
+		var m = originRe.exec(this.header);
+		if(m) {
+			this.origin = m[1];
+		} else {
+			const bookmarkletRe = /[\r\n]X-Zotero-Bookmarklet: *([^ \r\n]+)/i;
+			var m = bookmarkletRe.exec(this.header);
+			if(m) this.origin = "https://www.zotero.org";
+		}
+	}
 	
 	// get first line of request
 	var method = methodRe.exec(this.header);
@@ -294,11 +306,8 @@ Zotero.Server.DataListener.prototype._generateResponse = function(status, conten
 	if(!Zotero.isServer) {
 		response += "X-Zotero-Version: "+Zotero.version+"\r\n";
 		response += "X-Zotero-Connector-API-Version: "+CONNECTOR_API_VERSION+"\r\n";
-		
-		const originRe = /[\r\n]Origin: +([^ \r\n]+)/i;
-		var m = originRe.exec(this.header);
-		if(m && (m[1] === "https://www.zotero.org" || m[1] === "http://www.zotero.org")) {
-			response += "Access-Control-Allow-Origin: "+m[1]+"\r\n";
+		if(this.origin === "https://www.zotero.org" || this.origin === "http://www.zotero.org") {
+			response += "Access-Control-Allow-Origin: "+this.origin+"\r\n";
 			response += "Access-Control-Allow-Methods: POST, GET, OPTIONS\r\n";
 			response += "Access-Control-Allow-Headers: Content-Type,X-Zotero-Connector-API-Version,X-Zotero-Version\r\n";
 		}
@@ -324,10 +333,22 @@ Zotero.Server.DataListener.prototype._processEndpoint = function(method, postDat
 	try {
 		var endpoint = new this.endpoint;
 		
-		// check that endpoint supports method
+		// Check that endpoint supports method
 		if(endpoint.supportedMethods && endpoint.supportedMethods.indexOf(method) === -1) {
 			this._requestFinished(this._generateResponse(400, "text/plain", "Endpoint does not support method\n"));
 			return;
+		}
+		
+		// Check that endpoint supports bookmarklet
+		if(this.origin) {
+			var isBookmarklet = this.origin === "https://www.zotero.org" || this.origin === "http://www.zotero.org";
+			// Disallow bookmarklet origins to access endpoints without permitBookmarklet
+			// set. We allow other origins to access these endpoints because they have to 
+			// be privileged to avoid being blocked by our headers.
+			if(isBookmarklet && !endpoint.permitBookmarklet) {
+				this._requestFinished(this._generateResponse(403, "text/plain", "Access forbidden to bookmarklet\n"));
+				return;
+			}
 		}
 		
 		var decodedData = null;

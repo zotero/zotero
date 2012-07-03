@@ -70,6 +70,7 @@ Zotero.Server.Endpoints["/connector/getTranslators"] = Zotero.Server.Connector.G
 Zotero.Server.Connector.GetTranslators.prototype = {
 	"supportedMethods":["POST"],
 	"supportedDataTypes":["application/json"],
+	"permitBookmarklet":true,
 	
 	/**
 	 * Gets available translator list and other important data
@@ -121,6 +122,7 @@ Zotero.Server.Connector.Data = {};
 Zotero.Server.Connector.Detect.prototype = {
 	"supportedMethods":["POST"],
 	"supportedDataTypes":["application/json"],
+	"permitBookmarklet":true,
 	
 	/**
 	 * Loads HTML into a hidden browser and initiates translator detection
@@ -209,6 +211,7 @@ Zotero.Server.Endpoints["/connector/savePage"] = Zotero.Server.Connector.SavePag
 Zotero.Server.Connector.SavePage.prototype = {
 	"supportedMethods":["POST"],
 	"supportedDataTypes":["application/json"],
+	"permitBookmarklet":true,
 	
 	/**
 	 * Either loads HTML into a hidden browser and initiates translation, or saves items directly
@@ -311,6 +314,7 @@ Zotero.Server.Endpoints["/connector/saveItems"] = Zotero.Server.Connector.SaveIt
 Zotero.Server.Connector.SaveItem.prototype = {
 	"supportedMethods":["POST"],
 	"supportedDataTypes":["application/json"],
+	"permitBookmarklet":true,
 	
 	/**
 	 * Either loads HTML into a hidden browser and initiates translation, or saves items directly
@@ -372,6 +376,7 @@ Zotero.Server.Endpoints["/connector/saveSnapshot"] = Zotero.Server.Connector.Sav
 Zotero.Server.Connector.SaveSnapshot.prototype = {
 	"supportedMethods":["POST"],
 	"supportedDataTypes":["application/json"],
+	"permitBookmarklet":true,
 	
 	/**
 	 * Save snapshot
@@ -454,6 +459,7 @@ Zotero.Server.Endpoints["/connector/selectItems"] = Zotero.Server.Connector.Sele
 Zotero.Server.Connector.SelectItems.prototype = {
 	"supportedMethods":["POST"],
 	"supportedDataTypes":["application/json"],
+	"permitBookmarklet":true,
 	
 	/**
 	 * Finishes up translation when item selection is complete
@@ -487,6 +493,7 @@ Zotero.Server.Endpoints["/connector/attachmentProgress"] = Zotero.Server.Connect
 Zotero.Server.Connector.Progress.prototype = {
 	"supportedMethods":["POST"],
 	"supportedDataTypes":["application/json"],
+	"permitBookmarklet":true,
 	
 	/**
 	 * @param {String} data POST data or GET query string
@@ -511,6 +518,7 @@ Zotero.Server.Endpoints["/connector/getTranslatorCode"] = Zotero.Server.Connecto
 Zotero.Server.Connector.GetTranslatorCode.prototype = {
 	"supportedMethods":["POST"],
 	"supportedDataTypes":["application/json"],
+	"permitBookmarklet":true,
 	
 	/**
 	 * Returns a 200 response to say the server is alive
@@ -539,6 +547,7 @@ Zotero.Server.Endpoints["/connector/getSelectedCollection"] = Zotero.Server.Conn
 Zotero.Server.Connector.GetSelectedCollection.prototype = {
 	"supportedMethods":["POST"],
 	"supportedDataTypes":["application/json"],
+	"permitBookmarklet":true,
 	
 	/**
 	 * Returns a 200 response to say the server is alive
@@ -594,6 +603,7 @@ Zotero.Server.Endpoints["/connector/ping"] = Zotero.Server.Connector.Ping;
 Zotero.Server.Connector.Ping.prototype = {
 	"supportedMethods":["POST"],
 	"supportedDataTypes":["application/json", "text/plain"],
+	"permitBookmarklet":true,
 	
 	/**
 	 * Sends nothing
@@ -617,6 +627,7 @@ Zotero.Server.Connector.IEHack = function() {};
 Zotero.Server.Endpoints["/connector/ieHack"] = Zotero.Server.Connector.IEHack;
 Zotero.Server.Connector.IEHack.prototype = {
 	"supportedMethods":["GET"],
+	"permitBookmarklet":true,
 	
 	/**
 	 * Sends a fixed webpage
@@ -642,6 +653,7 @@ Zotero.Server.Endpoints["/translate/select"] = Zotero.Server.Connector.Incompati
 Zotero.Server.Connector.IncompatibleVersion.prototype = {
 	"supportedMethods":["POST"],
 	"supportedDataTypes":["application/json"],
+	"permitBookmarklet":true,
 	
 	"init":function(postData, sendResponseCallback) {
 		sendResponseCallback(404);
