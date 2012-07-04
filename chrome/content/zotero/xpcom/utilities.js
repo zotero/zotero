@@ -956,7 +956,7 @@ Zotero.Utilities = {
 			};
 		}
 		
-		if(!(elements instanceof Array)) elements = [elements];
+		if(!("length" in elements)) elements = [elements];
 		
 		var results = [];
 		for(var i=0, n=elements.length; i<n; i++) {

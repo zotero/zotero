@@ -1406,7 +1406,6 @@ Zotero.Translate.Base.prototype = {
 			Zotero.debug(string, level);
 		}
 	},
-	
 	/**
 	 * Generates a string from an exception
 	 * @param {String|Exception} error
@@ -1416,13 +1415,17 @@ Zotero.Translate.Base.prototype = {
 		if(typeof(error) == "string") {
 			errorString = "\nthrown exception => "+error;
 		} else {
+			var haveStack = false;
 			for(var i in error) {
 				if(typeof(error[i]) != "object") {
+					if(i === "stack") haveStack = true;
 					errorString += "\n"+i+' => '+error[i];
 				}
 			}
-			if(error) {
-				errorString += "\nstring => "+error.toString();
+			errorString += "\nstring => "+error.toString();
+			if(!haveStack && error.stack) {
+				// In case the stack is not enumerable
+				errorString += "\nstack => "+error.stack.toString();
 			}
 		}
 		
@@ -1569,7 +1572,7 @@ Zotero.Translate.Web.prototype._translateTranslatorLoaded = function() {
 			}, function(obj) { me._translateRPCComplete(obj) });
 	} else if(runMode === Zotero.Translator.RUN_MODE_ZOTERO_SERVER) {
 		var me = this;
-		Zotero.OAuth.createItem({"url":this.document.location.href.toString()}, null,
+		Zotero.API.createItem({"url":this.document.location.href.toString()}, null,
 			function(statusCode, response) {
 				me._translateServerComplete(statusCode, response);
 			});
@@ -1618,7 +1621,7 @@ Zotero.Translate.Web.prototype._translateServerComplete = function(statusCode, r
 		var me = this;
 		this._runHandler("select", response,
 			function(selectedItems) {
-				Zotero.OAuth.createItem({
+				Zotero.API.createItem({
 						"url":me.document.location.href.toString(),
 						"items":selectedItems
 					}, null,
