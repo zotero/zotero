@@ -1164,8 +1164,24 @@ Zotero.Attachments = new function(){
 			nsIURL.fileBaseName = nsIURL.fileBaseName + '.' + tld;
 		}
 		
+		// Unencode fileBaseName
+		var decodedFileBaseName;
+		try {
+			decodedFileBaseName = decodeURIComponent(nsIURL.fileBaseName);
+		}
+		catch (e) {
+			if (e.name == 'URIError') {
+				// If we got a 'malformed URI sequence' while decoding,
+				// try MD5 (in hex string) of fileBaseName.
+				decodedFileBaseName = Zotero.Utilities.Internal.md5(nsIURL.fileBaseName, false);
+			}
+			else {
+				throw e;
+			}
+		}
+		
 		// Pass unencoded name to getValidFileName() so that '%20' isn't stripped to '20'
-		nsIURL.fileBaseName = Zotero.File.getValidFileName(decodeURIComponent(nsIURL.fileBaseName));
+		nsIURL.fileBaseName = Zotero.File.getValidFileName(decodedFileBaseName);
 		
 		return decodeURIComponent(nsIURL.fileName);
 	}
