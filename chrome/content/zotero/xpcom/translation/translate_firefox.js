@@ -96,19 +96,19 @@ Zotero.Translate.SandboxManager.Fx5DOMWrapper = function(obj, parent) {
 		return null;
 	}
 	
-	var type = typeof obj;
-	if(type === "function") {
+	if(typeof obj === "function") {
 		var me = this;
 		var val = function() {
 			var nArgs = arguments.length;
 			var args = new Array(nArgs);
 			for(var i=0; i<nArgs; i++) {
-				args[i] = (arguments[i] instanceof Object && arguments[i].__wrappedDOMObject
-						? arguments[i].__wrappedDOMObject : arguments[i]);
+				var arg = arguments[i];
+				args[i] = ((typeof arg === "object" || typeof arg === "function")
+						&& "__wrappedDOMObject" in arg ? arg.__wrappedDOMObject : arg);
 			}
 			return Zotero.Translate.SandboxManager.Fx5DOMWrapper(obj.apply(parent ? parent : null, args));
 		}
-	} else if(type === "object") {
+	} else if(typeof obj === "object") {
 		if(val instanceof Array) {
 			var val = [];
 		} else {
@@ -121,10 +121,12 @@ Zotero.Translate.SandboxManager.Fx5DOMWrapper = function(obj, parent) {
 	val.__wrappedDOMObject = obj;
 	val.__exposedProps__ = {};
 	for(var prop in obj) {
-		let localProp = prop;
+		let localProp = prop,
+			cachedWrapper;
 		val.__exposedProps__[localProp] = "r";
 		val.__defineGetter__(localProp, function() {
-			return Zotero.Translate.SandboxManager.Fx5DOMWrapper(obj[localProp], obj);
+			if(!cachedWrapper) cachedWrapper = Zotero.Translate.SandboxManager.Fx5DOMWrapper(obj[localProp], obj);
+			return cachedWrapper;
 		});
 	}
 	
