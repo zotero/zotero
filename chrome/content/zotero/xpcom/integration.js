@@ -856,10 +856,18 @@ Zotero.Integration.Document.prototype._createNewSession = function(data) {
  */
 Zotero.Integration.Document.prototype._getSession = function(require, dontRunSetDocPrefs, callback) {
 	var dataString = this._doc.getDocumentData(),
+		data,
 		me = this;
-	if(!dataString) {
+	
+	if(dataString) {
+		try {
+			data = new Zotero.Integration.DocumentData(dataString);
+		} catch(e) {};
+	}
+	
+	if(!data) {
 		var haveFields = false;
-		var data = new Zotero.Integration.DocumentData();
+		data = new Zotero.Integration.DocumentData();
 		
 		if(require) {
 			// check to see if fields already exist
@@ -902,7 +910,6 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			callback(true);
 		});
 	} else {
-		var data = new Zotero.Integration.DocumentData(dataString);
 		if(data.dataVersion < DATA_VERSION) {
 			if(data.dataVersion == 1
 					&& data.prefs.fieldType == "Field"
