@@ -224,7 +224,7 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
 		if(m) {
 			this.origin = m[1];
 		} else {
-			const bookmarkletRe = /[\r\n]X-Zotero-Bookmarklet: *([^ \r\n]+)/i;
+			const bookmarkletRe = /[\r\n]Zotero-Bookmarklet: *([^ \r\n]+)/i;
 			var m = bookmarkletRe.exec(this.header);
 			if(m) this.origin = "https://www.zotero.org";
 		}
