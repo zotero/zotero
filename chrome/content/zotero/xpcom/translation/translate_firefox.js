@@ -103,8 +103,10 @@ Zotero.Translate.SandboxManager.Fx5DOMWrapper = function(obj, parent) {
 			var args = new Array(nArgs);
 			for(var i=0; i<nArgs; i++) {
 				var arg = arguments[i];
-				args[i] = ((typeof arg === "object" || typeof arg === "function")
-						&& "__wrappedDOMObject" in arg ? arg.__wrappedDOMObject : arg);
+				args[i] = (((typeof arg === "object" && arg !== null)
+						|| typeof arg === "function")
+					&& "__wrappedDOMObject" in arg
+					? arg.__wrappedDOMObject : arg);
 			}
 			return Zotero.Translate.SandboxManager.Fx5DOMWrapper(obj.apply(parent ? parent : null, args));
 		}
