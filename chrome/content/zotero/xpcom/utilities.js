@@ -1347,7 +1347,11 @@ Zotero.Utilities = {
 				
 				if(!creatorType) continue;
 				
-				var nameObj = {'family':creator.lastName, 'given':creator.firstName};
+				if(creator.fieldMode == 1) {
+					var nameObj = {'literal':creator.lastName};
+				} else {
+					var nameObj = {'family':creator.lastName, 'given':creator.firstName};
+				}
 				
 				if(cslItem[creatorType]) {
 					cslItem[creatorType].push(nameObj);
@@ -1490,11 +1494,14 @@ Zotero.Utilities = {
 							date = cslDate.literal;
 						}
 					} else {
-						var newDate = Zotero.Utilities.deepCopy(cslDate);;
-						if(cslDate.dateParts && typeof cslDate.dateParts == "object") {
-							if(cslDate.dateParts[0]) newDate.year = cslDate.dateParts[0];
-							if(cslDate.dateParts[1]) newDate.month = cslDate.dateParts[1];
-							if(cslDate.dateParts[2]) newDate.day = cslDate.dateParts[2];
+						var newDate = Zotero.Utilities.deepCopy(cslDate);
+						if(cslDate["date-parts"] && typeof cslDate["date-parts"] === "object"
+								&& cslDate["date-parts"] !== null
+								&& typeof cslDate["date-parts"][0] === "object"
+								&& cslDate["date-parts"][0] !== null) {
+							if(cslDate["date-parts"][0][0]) newDate.year = cslDate["date-parts"][0][0];
+							if(cslDate["date-parts"][0][1]) newDate.month = cslDate["date-parts"][0][1];
+							if(cslDate["date-parts"][0][2]) newDate.day = cslDate["date-parts"][0][2];
 						}
 						
 						if(newDate.year) {
@@ -1502,7 +1509,7 @@ Zotero.Utilities = {
 								// Need to convert to SQL
 								var date = Zotero.Utilities.lpad(newDate.year, "0", 4);
 								if(newDate.month) {
-									date += "-"+Zotero.Utilities.lpad(newDate.month+1, "0", 2);
+									date += "-"+Zotero.Utilities.lpad(newDate.month, "0", 2);
 									if(newDate.day) {
 										date += "-"+Zotero.Utilities.lpad(newDate.day, "0", 2);
 									}
