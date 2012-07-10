@@ -23,11 +23,18 @@
     ***** END LICENSE BLOCK *****
 */
 
+/**
+ * Functions for reading files
+ * @namespace
+ */
 Zotero.File = new function(){
+	Components.utils.import("resource://zotero/q.jsm");
+	Components.utils.import("resource://gre/modules/NetUtil.jsm");
+	Components.utils.import("resource://gre/modules/FileUtils.jsm");
+	
 	this.getExtension = getExtension;
 	this.getClosestDirectory = getClosestDirectory;
 	this.getSample = getSample;
-	this.getContents = getContents;
 	this.getContentsFromURL = getContentsFromURL;
 	this.putContents = putContents;
 	this.getValidFileName = getValidFileName;
@@ -84,7 +91,15 @@ Zotero.File = new function(){
 	}
 	
 	
-	function getContents(file, charset, maxLength){
+	/**
+	 * Get the contents of a file or input stream
+	 * @param {nsIFile|nsIInputStream} file The file to read
+	 * @param {String} [charset] The character set; defaults to UTF-8
+	 * @param {Integer} [maxLength] The maximum number of bytes to read
+	 * @return {String} The contents of the file
+	 * @deprecated Use {@link Zotero.File.getContentsAsync} when possible
+	 */
+	this.getContents = function getContents(file, charset, maxLength){
 		var fis;
 		if(file instanceof Components.interfaces.nsIInputStream) {
 			fis = file;
@@ -96,56 +111,59 @@ Zotero.File = new function(){
 			throw new Error("File is not an nsIInputStream or nsIFile");
 		}
 		
-		if (charset){
-			charset = Zotero.CharacterSets.getName(charset);
-		}
+		charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
 		
-		if (!charset){
-			charset = "UTF-8";
-		}
+		var blockSize = maxLength ? Math.min(maxLength, 524288) : 524288;
 		
 		const replacementChar
 			= Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
 		var is = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 			.createInstance(Components.interfaces.nsIConverterInputStream);
-		is.init(fis, charset, 4096, replacementChar);
+		is.init(fis, charset, blockSize, replacementChar);
 		var chars = 0;
 		
-		var contents = [], str = {};
-		while (is.readString(4096, str) != 0) {
-			var strLen = str.value.length;
-			
+		var contents = "", str = {};
+		while (is.readString(blockSize, str) !== 0) {
 			if (maxLength) {
+				var strLen = str.value.length;
 				if ((chars + strLen) > maxLength) {
 					var remainder = maxLength - chars;
-					contents.push(str.value.slice(0, remainder));
+					contents += str.value.slice(0, remainder);
 					break;
 				}
 				chars += strLen;
 			}
 			
-			contents.push(str.value);
+			contents += str.value;
 		}
 		
 		is.close();
 		
-		return contents.join('');
-	}
-	
+		return contents;
+	};
 	
 	
 	/**
-	 * Return the contents of a file as a byte array
+	 * Get the contents of a file or input stream asynchronously
+	 * @param {nsIFile|nsIInputStream} file The file to read
+	 * @param {String} [charset] The character set; defaults to UTF-8
+	 * @param {Integer} [maxLength] The maximum number of characters to read
+	 * @return {Promise} A promise that is resolved with the contents of the file
 	 */
-	this.getBinaryContents = function (bfile) {
-		var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-			.createInstance(Components.interfaces.nsIFileInputStream);
-		istream.init(bfile, -1, -1, false);
-		var bstream = Components.classes["@mozilla.org/binaryinputstream;1"]
-			.createInstance(Components.interfaces.nsIBinaryInputStream);
-		bstream.setInputStream(istream);
-		return bstream.readBytes(bstream.available());
-	}
+	this.getContentsAsync = function getContentsAsync(file, charset, maxLength) {
+		charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
+		var deferred = Q.defer(),
+			channel = NetUtil.newChannel(file, charset);
+		NetUtil.asyncFetch(channel, function(inputStream, status) {  
+			if (!Components.isSuccessCode(status)) {
+				deferred.reject(new Components.Exception("File read operation failed", status));
+				return;
+			}
+			
+			deferred.resolve(NetUtil.readInputStreamToString(inputStream, inputStream.available()));
+		});
+		return deferred.promise;
+	};
 	
 	
 	/*
@@ -183,6 +201,34 @@ Zotero.File = new function(){
 		fos.close();
 	}
 	
+	/**
+	 * Write data to a file asynchronously
+	 * @param {nsIFile} The file to write to
+	 * @param {String|nsIInputStream} data The string or nsIInputStream to write to the
+	 *     file
+	 * @param {String} [charset] The character set; defaults to UTF-8
+	 * @return {Promise} A promise that is resolved when the file has been written
+	 */
+	this.putContentsAsync = function putContentsAsync(file, data, charset) {
+		// Create a stream for async stream copying
+		if(!(data instanceof Components.interfaces.nsIInputStream)) {
+			var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].
+					createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+			converter.charset = charset ? Zotero.CharacterSets.getName(charset) : "UTF-8";
+			data = converter.convertToInputStream(data);
+		}
+		
+		var deferred = Q.defer(),
+			ostream = FileUtils.openSafeFileOutputStream(file);
+		NetUtil.asyncCopy(data, ostream, function(inputStream, status) {  
+			if (!Components.isSuccessCode(status)) {
+				deferred.reject(new Components.Exception("File write operation failed", status));
+				return;
+			}
+			deferred.resolve();
+		});
+		return deferred.promise; 
+	};
 	
 	function copyToUnique(file, newFile) {
 		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0644);
