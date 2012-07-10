@@ -78,16 +78,16 @@ Zotero.Exception = {};
 Zotero.Exception.Alert = function(name, params, title, cause) {
 	this.name = name;
 	this.params = params || [];
-	this.title = title || "general.error";
+	this._title = title || "general.error";
 	this.cause = cause;
 	return this;
 };
 
 Zotero.Exception.Alert.prototype = {
 	get title() {
-		if(this.title) {
+		if(this._title) {
 			try {
-				return Zotero.getString(this.title);
+				return Zotero.getString(this._title);
 			} catch(e) {}
 		}
 		try {
@@ -115,7 +115,11 @@ Zotero.Exception.Alert.prototype = {
 	 */
 	"present":function(window) {
 		Components.utils.import("resource://gre/modules/Services.jsm");
+		try {
 		Services.prompt.alert(window || null, this.title, this.toString());
+		}catch(e) {
+		Zotero.debug(e);
+		}
 	},
 	
 	/**
