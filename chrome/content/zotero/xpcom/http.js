@@ -3,18 +3,146 @@
  * @namespace
  */
 Zotero.HTTP = new function() {
-	this.WebDAV = {};
-	
+	Components.utils.import("resource://zotero/q.jsm");
 	
 	/**
-	* Send an HTTP GET request via XMLHTTPRequest
-	* 
-	* @param {nsIURI|String}	url				URL to request
-	* @param {Function} 		onDone			Callback to be executed upon request completion
-	* @param {String} 		responseCharset	Character set to force on the response
-	* @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
-	* @return {Boolean} True if the request was sent, or false if the browser is offline
-	*/
+	 * Exception returned for unexpected status when promise* is used
+	 * @constructor
+	 */
+	this.UnexpectedStatusException = function(xmlhttp) {
+		this.xmlhttp = xmlhttp;
+		this.status = xmlhttp.status;
+		this.message = "XMLHttpRequest received unexpected status "+this.status;
+	};
+	
+	this.UnexpectedStatusException.prototype.toString = function() {
+		return this.message;
+	};
+	
+	/**
+	 * Exception returned if the browser is offline when promise* is used
+	 * @constructor
+	 */
+	this.BrowserOfflineException = function() {
+		this.message = "XMLHttpRequest could not complete because the browser is offline";
+	};
+	this.BrowserOfflineException.prototype.toString = function() {
+		return this.message;
+	};
+	
+	/**
+	 * Get a promise for a HTTP request
+	 * 
+	 * @param {String} method The method of the request ("GET", "POST", "HEAD", or "OPTIONS")
+	 * @param {nsIURI|String}	url				URL to request
+	 * @param {Object} [options] Options for HTTP request:<ul>
+	 *         <li>body - The body of a POST request</li>
+	 *         <li>responseType - The type of the response. See XHR 2 documentation for
+	 *             legal values</li>
+	 *         <li>responseCharset - The charset the response should be interpreted as</li>
+	 *         <li>cookieSandbox - The sandbox from which cookies should be taken</li>
+	 *         <li>dontCache - If set, specifies that the request should not be fulfilled
+	 *             from the cache</li>
+	 *     </ul>
+	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
+	 * @return {Promise} A promise resolved with the XMLHttpRequest object if the request
+	 *     succeeds, or rejected if the browser is offline or a non-2XX status response
+	 *     code is received.
+	 */
+	this.promise = function promise(method, url, options) {
+		if (url instanceof Components.interfaces.nsIURI) {
+			// Don't display password in console
+			var disp = url.clone();
+			if (disp.password) {
+				disp.password = "********";
+			}
+			url = url.spec;
+		}
+		
+		if(options && options.body) {
+			var bodyStart = options.body.substr(0, 1024);
+			// Don't display sync password or session id in console
+			bodyStart = bodyStart.replace(/password=[^&]+/, 'password=********');
+			bodyStart = bodyStart.replace(/sessionid=[^&]+/, 'sessionid=********');
+			
+			Zotero.debug("HTTP "+method+" "
+				+ (options.body.length > 1024 ?
+					bodyStart + '... (' + options.body.length + ' chars)' : bodyStart)
+				+ " to " + (disp ? disp.spec : url));
+		} else {
+			Zotero.debug("HTTP GET " + url);
+		}
+		
+		if (this.browserIsOffline()) {
+			return Q.fcall(function() {
+				Zotero.debug("HTTP GET " + url + " failed: Browser is offline");
+				throw new this.BrowserOfflineException();
+			});
+		}
+		
+		var xmlhttp = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+					.createInstance();
+		// Prevent certificate/authentication dialogs from popping up
+		xmlhttp.mozBackgroundRequest = true;
+		xmlhttp.open(method, url, true);
+		
+		// Send cookie even if "Allow third-party cookies" is disabled (>=Fx3.6 only)
+		var channel = xmlhttp.channel;
+		channel.QueryInterface(Components.interfaces.nsIHttpChannelInternal);
+		channel.forceAllowThirdPartyCookie = true;
+		
+		// Set charset
+		if (options && options.responseCharset) {
+			channel.contentCharset = responseCharset;
+		}
+		
+		// Disable caching if requested
+		if(options && options.dontCache) {
+			channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
+		}
+		
+		// Send headers
+		var headers = {};
+		if (options && options.body && !headers["Content-Type"]) {
+			headers["Content-Type"] = "application/x-www-form-urlencoded";
+		}
+		for (var header in headers) {
+			xmlhttp.setRequestHeader(header, headers[header]);
+		}
+		
+		var deferred = Q.defer();
+		
+		xmlhttp.onloadend = function() {
+			var status = xmlhttp.status;
+			if(status >= 200 && status < 300) {
+				Zotero.debug("HTTP GET " + url + " succeeded");
+				deferred.resolve(xmlhttp);
+			} else {
+				Zotero.debug("HTTP GET " + url + " failed: Unexpected status code "+xmlhttp.status);
+				deferred.reject(new Zotero.HTTP.UnexpectedStatusException(xmlhttp));
+			}
+		};
+		
+		if(options && options.cookieSandbox) {
+			options.cookieSandbox.attachToInterfaceRequestor(xmlhttp);
+		}
+		
+		xmlhttp.send((options && options.body) || null);
+		
+		return deferred.promise;
+	};
+	
+	/**
+	 * Send an HTTP GET request via XMLHTTPRequest
+	 * 
+	 * @param {nsIURI|String}	url				URL to request
+	 * @param {Function} 		onDone			Callback to be executed upon request completion
+	 * @param {String} 		responseCharset	Character set to force on the response
+	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
+	 * @return {XMLHttpRequest} The XMLHttpRequest object if the request was sent, or
+	 *     false if the browser is offline
+	 * @deprecated Use {@link Zotero.HTTP.promise}
+	 */
 	this.doGet = function(url, onDone, responseCharset, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
@@ -64,16 +192,18 @@ Zotero.HTTP = new function() {
 	}
 	
 	/**
-	* Send an HTTP POST request via XMLHTTPRequest
-	*
-	* @param {String} url URL to request
-	* @param {String} body Request body
-	* @param {Function} onDone Callback to be executed upon request completion
-	* @param {String} headers Request HTTP headers
-	* @param {String} responseCharset Character set to force on the response
-	* @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
-	* @return {Boolean} True if the request was sent, or false if the browser is offline
-	*/
+	 * Send an HTTP POST request via XMLHTTPRequest
+	 *
+	 * @param {String} url URL to request
+	 * @param {String} body Request body
+	 * @param {Function} onDone Callback to be executed upon request completion
+	 * @param {String} headers Request HTTP headers
+	 * @param {String} responseCharset Character set to force on the response
+	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
+	 * @return {XMLHttpRequest} The XMLHttpRequest object if the request was sent, or
+	 *     false if the browser is offline
+	 * @deprecated Use {@link Zotero.HTTP.promise}
+	 */
 	this.doPost = function(url, body, onDone, headers, responseCharset, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
@@ -148,14 +278,16 @@ Zotero.HTTP = new function() {
 	}
 	
 	/**
-	* Send an HTTP HEAD request via XMLHTTPRequest
-	*
-	* @param {String} url URL to request
-	* @param {Function} onDone Callback to be executed upon request completion
-	* @param {Object} requestHeaders HTTP headers to include with request
-	* @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
-	* @return {Boolean} True if the request was sent, or false if the browser is offline
-	*/
+	 * Send an HTTP HEAD request via XMLHTTPRequest
+	 *
+	 * @param {String} url URL to request
+	 * @param {Function} onDone Callback to be executed upon request completion
+	 * @param {Object} requestHeaders HTTP headers to include with request
+	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
+	 * @return {XMLHttpRequest} The XMLHttpRequest object if the request was sent, or
+	 *     false if the browser is offline
+	 * @deprecated Use {@link Zotero.HTTP.promise}
+	 */
 	this.doHead = function(url, onDone, requestHeaders, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
@@ -213,6 +345,7 @@ Zotero.HTTP = new function() {
 	 * @param	{nsIURI}		url
 	 * @param	{Function}	onDone
 	 * @return	{XMLHTTPRequest}
+	 * @deprecated Use {@link Zotero.HTTP.promise}
 	 */
 	this.doOptions = function (uri, callback) {
 		// Don't display password in console
@@ -242,6 +375,8 @@ Zotero.HTTP = new function() {
 	//
 	// WebDAV methods
 	//
+	
+	this.WebDAV = {};
 	
 	/**
 	* Send a WebDAV PROP* request via XMLHTTPRequest
