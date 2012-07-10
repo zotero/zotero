@@ -51,3 +51,90 @@ Zotero.Error.ERROR_INVALID_ITEM_TYPE = 8;
 Zotero.Error.prototype.toString = function () {
 	return this.message;
 }
+
+/**
+ * Namespace for runtime exceptions
+ * @namespace
+ */
+Zotero.Exception = {};
+
+/**
+ * Encapsulate exceptions with facilities for reporting the underlying cause and
+ * displaying a dialog with information about the error.
+ *
+ * @param {String} name
+ * @param {String[]} [params]
+ * @param {String} [title]
+ * @param {Error|String} [cause]
+ * @property {String} name The name of the exception. This should correspond to a string 
+ *     defined in zotero.properties. If it doesn't, it will be displayed as plain text.
+ * @property {String[]} params Parameters to pass to Zotero.getString() to format the
+ *     exception, or empty if no parameters.
+ * @property {String} title The title of the window in which the error will appear. If
+ *     not specified, the title is "Error."
+ * @property {Error|String} cause If specified, the report and rethrow methods will
+ *     operate on this error instead of the displayed error.
+ */
+Zotero.Exception.Alert = function(name, params, title, cause) {
+	this.name = name;
+	this.params = params || [];
+	this.title = title || "general.error";
+	this.cause = cause;
+	return this;
+};
+
+Zotero.Exception.Alert.prototype = {
+	get title() {
+		if(this.title) {
+			try {
+				return Zotero.getString(this.title);
+			} catch(e) {}
+		}
+		try {
+			return Zotero.getString("general.error");
+		} catch(e) {
+			// Something must be really wrong...
+			return "Error";
+		}
+	},
+	
+	/**
+	 * Gets the error string
+	 */
+	"toString":function() {
+		try {
+			return Zotero.getString(this.name, this.params);
+		} catch(e) {
+			return this.name;
+		}
+	},
+	
+	/**
+	 * Presents the error in a dialog
+	 * @param {DOMWindow} window The window to which the error should be attached
+	 */
+	"present":function(window) {
+		Components.utils.import("resource://gre/modules/Services.jsm");
+		Services.prompt.alert(window || null, this.title, this.toString());
+	},
+	
+	/**
+	 * Logs the error to the error console
+	 */
+	"log":function() {
+		Zotero.logError(this.cause || this.toString());
+	}
+};
+
+/**
+ * Used to encapsulated cases where the user cancelled an action. This allows us to use
+ * syntax like "catch (e if e instanceof Zotero.UserCancelledException) {}" to avoid
+ * doing what we would do with normal exceptions.
+ */
+Zotero.Exception.UserCancelled = function(whatCancelled) {
+	this.whatCancelled = whatCancelled || "current operation";
+};
+Zotero.Exception.UserCancelled.prototype = {
+	"name":"UserCancelledException",
+	"toString":function() { return "User cancelled "+this.whatCancelled+"."; }
+};
