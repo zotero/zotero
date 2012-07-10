@@ -1340,7 +1340,8 @@ function end(promise) {
             // If possible (that is, if in V8), transform the error stack
             // trace by removing Node and Q cruft, then concatenating with
             // the stack trace of the promise we are ``end``ing. See #57.
-            if (Error.captureStackTrace && "stack" in error) {
+            if (Error.captureStackTrace && typeof error === "object" &&
+                "stack" in error) {
                 var errorStackFrames = getStackFrames(error);
                 var promiseStackFrames = getStackFrames(promise);
 
@@ -1367,10 +1368,14 @@ function end(promise) {
 exports.timeout = timeout;
 function timeout(promise, ms) {
     var deferred = defer();
-    when(promise, deferred.resolve, deferred.reject);
-    setTimeout(function () {
-        deferred.reject(new Error("Timed out after " + ms + "ms"));
+    var timeoutId = setTimeout(function () {
+        deferred.reject(new Error("Timed out after " + ms + " ms"));
     }, ms);
+
+    when(promise, function (value) {
+        clearTimeout(timeoutId);
+        deferred.resolve(value);
+    }, deferred.reject);
     return deferred.promise;
 }
 
