@@ -32,7 +32,7 @@ Zotero.Styles = new function() {
 	var _initialized = false;
 	var _styles, _visibleStyles, _cacheTranslatorData;
 	
-	Components.utils.import("resource://zotero/q.jsm");
+	Components.utils.import("resource://zotero/q.js");
 	Components.utils.import("resource://gre/modules/Services.jsm");
 	
 	this.xsltProcessor = null;

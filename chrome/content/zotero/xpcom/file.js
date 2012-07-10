@@ -28,7 +28,7 @@
  * @namespace
  */
 Zotero.File = new function(){
-	Components.utils.import("resource://zotero/q.jsm");
+	Components.utils.import("resource://zotero/q.js");
 	Components.utils.import("resource://gre/modules/NetUtil.jsm");
 	Components.utils.import("resource://gre/modules/FileUtils.jsm");
 	
