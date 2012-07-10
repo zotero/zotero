@@ -622,7 +622,7 @@ Zotero.Integration = new function() {
 	 * Show appropriate dialogs for an integration error
 	 */
 	this.handleError = function(e, document) {
-		if(!(e instanceof Zotero.Integration.UserCancelledException)) {
+		if(!(e instanceof Zotero.Exception.UserCancelled)) {
 			try {
 				var displayError = null;
 				if(e instanceof Zotero.Integration.DisplayException) {
@@ -803,11 +803,6 @@ Zotero.Integration.MissingItemException.prototype.name = "MissingItemException";
 Zotero.Integration.MissingItemException.prototype.message = "An item in this document is missing from your Zotero library.";
 Zotero.Integration.MissingItemException.prototype.toString = function() { return this.message; };
 
-Zotero.Integration.UserCancelledException = function() {};
-Zotero.Integration.UserCancelledException.prototype.name = "UserCancelledException";
-Zotero.Integration.UserCancelledException.prototype.message = "User cancelled document update.";
-Zotero.Integration.UserCancelledException.prototype.toString = function() { return this.message; };
-
 Zotero.Integration.DisplayException = function(name, params) {
 	this.name = name;
 	this.params = params ? params : [];
@@ -898,7 +893,7 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 		
 		this._session.setDocPrefs(this._doc, this._app.primaryFieldType, this._app.secondaryFieldType, function(status) {
 			if(status === false) {
-				throw new Zotero.Integration.UserCancelledException();
+				throw new Zotero.Exception.UserCancelled("document preferences update");
 			}
 			
 			// save doc prefs in doc
@@ -921,7 +916,7 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 			var warning = this._doc.displayAlert(Zotero.getString("integration.upgradeWarning"),
 				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
 				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL);
-			if(!warning) throw new Zotero.Integration.UserCancelledException();
+			if(!warning) throw new Zotero.Exception.UserCancelled("document upgrade");
 		} else if(data.dataVersion > DATA_VERSION) {
 			throw new Zotero.Integration.DisplayException("newerDocumentVersion", [data.zoteroVersion, Zotero.version]);
 		}
@@ -943,7 +938,7 @@ Zotero.Integration.Document.prototype._getSession = function(require, dontRunSet
 					this._session.setDocPrefs(this._doc, this._app.primaryFieldType,
 							this._app.secondaryFieldType, function(status) {							
 						if(status === false) {
-							throw new Zotero.Integration.UserCancelledException();
+							throw new Zotero.Exception.UserCancelled("document preferences update");
 						}
 						
 						me._doc.setDocumentData(me._session.data.serializeXML());
@@ -1206,7 +1201,7 @@ Zotero.Integration.Fields.prototype.addField = function(note) {
 		if(!this._doc.displayAlert(Zotero.getString("integration.replace"),
 				Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_STOP,
 				Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL)) {
-			throw new Zotero.Integration.UserCancelledException;
+			throw new Zotero.Exception.UserCancelled("inserting citation");
 		}
 	}
 	
@@ -1324,7 +1319,7 @@ Zotero.Integration.Fields.prototype._showCorruptFieldError = function(e, field, 
 		Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_YES_NO_CANCEL);
 	
 	if(result == 0) {
-		throw new Zotero.Integration.UserCancelledException;
+			throw new Zotero.Exception.UserCancelled("document update");
 	} else if(result == 1) {		// No
 		this._removeCodeFields.push(i);
 		return true;
@@ -1376,7 +1371,7 @@ Zotero.Integration.Fields.prototype._showMissingItemError = function(e, field, c
 	this._doc.activate();
 	var result = this._doc.displayAlert(msg, 1, 3);
 	if(result == 0) {			// Cancel
-		throw new Zotero.Integration.UserCancelledException();
+		throw new Zotero.Exception.UserCancelled("document update");
 	} else if(result == 1) {	// No
 		for each(var reselectKey in e.reselectKeys) {
 			this._deleteKeys[reselectKey] = true;
@@ -1755,7 +1750,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = function(field, callback) 
 					if(!this._doc.displayAlert(Zotero.getString("integration.citationChanged.edit"),
 							Components.interfaces.zoteroIntegrationDocument.DIALOG_ICON_WARNING,
 							Components.interfaces.zoteroIntegrationDocument.DIALOG_BUTTONS_OK_CANCEL)) {
-						throw new Zotero.Integration.UserCancelledException;
+						throw new Zotero.Exception.UserCancelled("editing citation");
 					}
 				}
 				
@@ -1834,7 +1829,7 @@ Zotero.Integration.CitationEditInterface.prototype = {
 			try {
 				return defaultHandler();
 			} catch(e) {
-				if(e instanceof Zotero.Integration.UserCancelledException) {
+				if(e instanceof Zotero.Exception.UserCancelled) {
 					this._field.delete();
 				}
 				throw e;
