@@ -507,7 +507,7 @@ Zotero_TranslatorTester.prototype._checkResult = function(test, translate, retur
 			
 			if(!this._compare(testItem, translatedItem)) {
 				// Show diff
-				this._debug(this, "Data mismatch detected:");
+				this._debug(this, "TranslatorTester: Data mismatch detected:");
 				this._debug(this, this._generateDiff(testItem, translatedItem));
 				
 				// Save items. This makes it easier to correct tests automatically.
@@ -602,7 +602,7 @@ Zotero_TranslatorTester.prototype._compare = function(a, b) {
 		}
 		for(var key in a) {
 			if(!a.hasOwnProperty(key)) continue;
-			if(!b.hasOwnProperty(key)) return false;
+			if(a[key] !== false && !b.hasOwnProperty(key)) return false;
 			if(!this._compare(a[key], b[key])) return false;
 		}
 		for(var key in b) {
