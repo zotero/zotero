@@ -669,7 +669,7 @@ Zotero_TranslatorTester.prototype._generateDiff = new function() {
 					if(b.hasOwnProperty(key)) {
 						changes += compare(a[key], b[key], keyPrefix, indent+"  ");
 					} else {
-						changes += show(a[key], "- ", keyPrefix, indent+"  ");
+						changes += show(a[key], "-", keyPrefix, indent+"  ");
 					}
 				}
 				for(var key in b) {
@@ -678,7 +678,7 @@ Zotero_TranslatorTester.prototype._generateDiff = new function() {
 					haveKeys = true;
 					if(!a.hasOwnProperty(key)) {
 						var keyPrefix = aIsArray ? "" : JSON.stringify(key)+": ";
-						changes += show(b[key], "+ ", keyPrefix, indent+"  ");
+						changes += show(b[key], "+", keyPrefix, indent+"  ");
 					}
 				}
 				
