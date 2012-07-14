@@ -506,6 +506,11 @@ Zotero_TranslatorTester.prototype._checkResult = function(test, translate, retur
 			var translatedItem = Zotero_TranslatorTester._sanitizeItem(translate.newItems[i]);
 			
 			if(!this._compare(testItem, translatedItem)) {
+				// Show diff
+				this._debug(this, "TranslatorTester: Data mismatch detected:");
+				this._debug(this, this._generateDiff(testItem, translatedItem));
+				
+				// Save items. This makes it easier to correct tests automatically.
 				var m = translate.newItems.length;
 				test.itemsReturned = new Array(m);
 				for(var j=0; j<m; j++) {
@@ -584,77 +589,116 @@ Zotero_TranslatorTester.prototype._createTest = function(translate, multipleMode
 /**
  * Compare items or sets thereof
  */
-Zotero_TranslatorTester.prototype._compare = function(i, j) {
-	var match = false;
-	if (Object.prototype.toString.apply(i) === '[object Array]') {
-		if (Object.prototype.toString.apply(j) === '[object Array]') {
-			do {
-				match = this._compare(i.pop(), j.pop());
-			} while (match && i.length && j.length);
-			if (match)
-				return true;
-			else
-				return false;
-		} else {
-			this._debug(this, "TranslatorTester: i is array, j is not");
+Zotero_TranslatorTester.prototype._compare = function(a, b) {
+	// If a is false, comparisons always succeed. This allows us to explicitly set that
+	// certain properties are allowed.
+	if(a === false) return true;
+	
+	if(((typeof a === "object" && a !== null) || typeof a === "function")
+			&& ((typeof a === "object" && b !== null) || typeof b === "function")) {
+		if((Object.prototype.toString.apply(a) === "[object Array]")
+				!== (Object.prototype.toString.apply(b) === "[object Array]")) {
 			return false;
 		}
-	} else if (Object.prototype.toString.apply(j) === '[object Array]') {
-		this._debug(this, "TranslatorTester: j is array, i is not");
-		return false;
-	}
-
-	// Neither is an array
-	if(this._objectCompare(i, j)) {
+		for(var key in a) {
+			if(!a.hasOwnProperty(key)) continue;
+			if(a[key] !== false && !b.hasOwnProperty(key)) return false;
+			if(!this._compare(a[key], b[key])) return false;
+		}
+		for(var key in b) {
+			if(!b.hasOwnProperty(key)) continue;
+			if(!a.hasOwnProperty(key)) return false;
+		}
 		return true;
-	} else {
-		this._debug(this, JSON.stringify({i:i, j:j}));
-		this._debug(this, "TranslatorTester: Items don't match");
-		return false;
+	} else if(typeof a === "string" && typeof b === "string") {
+		// Ignore whitespace mismatches on strings
+		return a === b || Zotero.Utilities.trimInternal(a) === Zotero.Utilities.trimInternal(b);
 	}
+	return a === b;
 };
 
-Zotero_TranslatorTester.prototype._objectCompare = function(x, y) {
-	// Special handlers
-	var _debug = this._debug;
-	
-	var returner = function(param) {
-			if (special[param]) return special[param](x[param], y[param]);
-			else return false;
-	}
-
-	if ((y === undefined && x !== undefined)
-		|| (x === undefined && y !== undefined)) {
-		return false;
-	}
-
-	for(p in y) {
-		if(y[p] || y[p] === 0) {
-			switch(typeof(y[p])) {
-				case 'object':
-					if (!this._objectCompare(x[p],y[p])) { 
-						return false;
-					};
-					break;
-				default:
-					if (y[p] != x[p] && x[p] !== false) {	// special exemption: x (test item)
-															// can have a property set to false
-															// and we will ignore it here
-						this._debug(this, "TranslatorTester: Param "+p+" differs: " + JSON.stringify({x:x[p], y:y[p]}));
-						return false;
-					}
+/**
+ * Generate a diff of items
+ */
+Zotero_TranslatorTester.prototype._generateDiff = new function() {
+	function show(a, action, prefix, indent) {
+		if((typeof a === "object" && a !== null) || typeof a === "function") {
+			var isArray = Object.prototype.toString.apply(a) === "[object Array]",
+				startBrace = (isArray ? "[" : "{"),
+				endBrace = (isArray ? "]" : "}"),
+				changes = "",
+				haveKeys = false;
+			
+			for(var key in a) {
+				if(!a.hasOwnProperty(key)) continue;
+				
+				haveKeys = true;
+				changes += show(a[key], action,
+					isArray ? "" : JSON.stringify(key)+": ", indent+"  ");
 			}
-		} else if(x[p] || x[p] === 0) { 
-			this._debug(this, "TranslatorTester: Param "+p+" true in x, not in y");
-			return false;
+			
+			if(haveKeys) {
+				return action+" "+indent+prefix+startBrace+"\n"+
+					changes+action+" "+indent+endBrace+"\n";
+			}
+			return action+" "+indent+prefix+startBrace+endBrace+"\n";
 		}
+		
+		return action+" "+indent+prefix+JSON.stringify(a)+"\n";
 	}
-
-	for(p in x) {
-		if((x[p] || x[p] === 0) && typeof(y[p])=='undefined') {
-			this._debug(this, "TranslatorTester: Param "+p+" in x not defined in y");
-			return false;
+	
+	function compare(a, b, prefix, indent) {
+		if(!prefix) prefix = "";
+		if(!indent) indent = "";
+		
+		if(((typeof a === "object" && a !== null) || typeof a === "function")
+				&& ((typeof b === "object" && b !== null) || typeof b === "function")) {
+			var aIsArray = Object.prototype.toString.apply(a) === "[object Array]",
+				bIsArray = Object.prototype.toString.apply(b) === "[object Array]";
+			if(aIsArray === bIsArray) {
+				var startBrace = (aIsArray ? "[" : "{"),
+					endBrace = (aIsArray ? "]" : "}"),
+					changes = "",
+					haveKeys = false;
+				
+				for(var key in a) {
+					if(!a.hasOwnProperty(key)) continue;
+					
+					haveKeys = true;
+					var keyPrefix = aIsArray ? "" : JSON.stringify(key)+": ";
+					if(b.hasOwnProperty(key)) {
+						changes += compare(a[key], b[key], keyPrefix, indent+"  ");
+					} else {
+						changes += show(a[key], "-", keyPrefix, indent+"  ");
+					}
+				}
+				for(var key in b) {
+					if(!b.hasOwnProperty(key)) continue;
+					
+					haveKeys = true;
+					if(!a.hasOwnProperty(key)) {
+						var keyPrefix = aIsArray ? "" : JSON.stringify(key)+": ";
+						changes += show(b[key], "+", keyPrefix, indent+"  ");
+					}
+				}
+				
+				if(haveKeys) {
+					return "  "+indent+prefix+startBrace+"\n"+
+						changes+"  "+indent+(aIsArray ? "]" : "}")+"\n";
+				}
+				return "  "+indent+prefix+startBrace+endBrace+"\n";
+			}
 		}
+		
+		if(a === b) {
+			return show(a, " ", prefix, indent);
+		}
+		return show(a, "-", prefix, indent)+show(b, "+", prefix, indent);
 	}
-	return true;
+	
+	return function(a, b) {
+		// Remove last newline
+		var txt = compare(a, b);
+		return txt.substr(0, txt.length-1);
+	};
 };
