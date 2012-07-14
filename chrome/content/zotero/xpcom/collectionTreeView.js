@@ -182,14 +182,6 @@ Zotero.CollectionTreeView.prototype.refresh = function()
 		}
 	}
 	
-	/*var shares = Zotero.Zeroconf.instances;
-	if (shares.length) {
-		this._showRow(new Zotero.ItemGroup('separator', false));
-		for each(var share in shares) {
-			this._showRow(new Zotero.ItemGroup('share', share));
-		}
-	}*/
-	
 	if (this.hideSources.indexOf('commons') == -1 && Zotero.Commons.enabled) {
 		this._showRow(new Zotero.ItemGroup('separator', false));
 		var header = {
@@ -1282,16 +1274,6 @@ Zotero.CollectionTreeView.prototype.canDrop = function(row, orient, dragData)
 			}
 			return true;
 		}
-		else if (dataType == 'zotero/item-xml') {
-			var xml = new XML(data.data);
-			for each(var xmlNode in xml.items.item) {
-				var item = Zotero.Sync.Server.Data.xmlToItem(xmlNode);
-				if (item.isRegularItem() || !item.getSource()) {
-					return true;
-				}
-			}
-			return false;
-		}
 		else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
 			if (itemGroup.isSearch()) {
 				return false;
@@ -1694,24 +1676,6 @@ Zotero.CollectionTreeView.prototype.drop = function(row, orient)
 		}
 		
 		Zotero.DB.commitTransaction();
-	}
-	else if (dataType == 'zotero/item-xml') {
-		Zotero.DB.beginTransaction();
-		var xml = new XML(data.data);
-		var toAdd = [];
-		for each(var xmlNode in xml.items.item) {
-			var item = Zotero.Sync.Server.Data.xmlToItem(xmlNode, false, true);
-			if (item.isRegularItem() || !item.getSource()) {
-				var id = item.save();
-				toAdd.push(id);
-			}
-		}
-		if (toAdd.length > 0) {
-			this._getItemAtRow(row).ref.addItems(toAdd);
-		}
-		
-		Zotero.DB.commitTransaction();
-		return;
 	}
 	else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
 		if (itemGroup.isWithinGroup()) {

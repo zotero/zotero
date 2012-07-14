@@ -2096,20 +2096,6 @@ Zotero.ItemTreeCommandController.prototype.onEvent = function(evt)
  * Start a drag using HTML 5 Drag and Drop
  */
 Zotero.ItemTreeView.prototype.onDragStart = function (event) {
-	// Quick implementation of dragging of XML item format
-	if (this._itemGroup.isShare()) {
-		var items = this.getSelectedItems();
-		
-		var xml = <data/>;
-		for (var i=0; i<items.length; i++) {
-			var xmlNode = Zotero.Sync.Server.Data.itemToXML(items[i]);
-			xml.items.item += xmlNode;
-		}
-		Zotero.debug(xml.toXMLString());
-		event.dataTransfer.setData("zotero/item-xml", xml.toXMLString());
-		return;
-	}
-	
 	var itemIDs = this.saveSelection();
 	var items = Zotero.Items.get(itemIDs);
 	
