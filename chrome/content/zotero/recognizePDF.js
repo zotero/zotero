@@ -313,6 +313,12 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 		this._DOI = m[0];
 	}
 	
+	var isbn = this._findISBN(allText);
+	if(isbn) {
+		this._ISBN = isbn;
+		Zotero.debug("Found ISBN: " + isbn);
+	}
+	
 	// Use only first column from multi-column lines
 	const lineRe = /^\s*([^\s]+(?: [^\s]+)+)/;
 	for(var i=0; i<lines.length; i++) {
@@ -349,6 +355,19 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 	}
 }
 
+Zotero_RecognizePDF.Recognizer.prototype._findISBN = function(x) {
+    if(typeof(x) != "string") {
+            throw "findISBN: argument must be a string";
+    }
+    var m = x.match(/SBN[0-9X \u2014\u2013\u2012-]+/); // \xE28093\xE28094
+    if(m) {
+            var isbn = m[0].replace(/SBN/,'');
+            return isbn.replace(/[ \u2014\u2013\u2012-]/g, '');
+    }
+    else 
+            return null;
+}
+
 /**
  * Queries Google Scholar for metadata for this PDF
  * @private
@@ -382,6 +401,23 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 		});
 		translate.translate(this._libraryID, false);
 		delete this._DOI;
+	} else if(this._ISBN) {
+		// look for ISBN
+		var translate = new Zotero.Translate("search"); //.Search();
+		translate.setTranslator("c73a4a8c-3ef1-4ec8-8229-7531ee384cc4"); //Open WorldCat 
+		var item = {"itemType":"book", "ISBN":this._ISBN};
+		translate.setSearch(item);
+		translate.setHandler("itemDone", function(translate, item) {
+			me._callback(item);
+		});
+		translate.setHandler("select", function(translate, items, callback) {
+			return me._selectItems(translate, items, callback);
+		});
+		translate.setHandler("done", function(translate, success) {
+			if(!success) me._queryGoogle();
+		});
+		translate.translate(this._libraryID, false);
+		delete this._ISBN;
 	} else {
 		// take the relevant parts of some lines (exclude hyphenated word)
 		var queryStringWords = 0;
