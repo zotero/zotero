@@ -143,7 +143,7 @@ Zotero.Connector_Types = new function() {
 				
 				// loop through base fields for item type
 				var baseFields = itemType[5];
-				for(var i=0, n=baseFields.length; i<n; i++) {
+				for(var i in baseFields) {
 					if(baseFields[i] === baseField) {
 						return i;
 					}
