@@ -636,7 +636,7 @@ Zotero.Translate.IO.Read = function(file, mode) {
 
 Zotero.Translate.IO.Read.prototype = {
 	"__exposedProps__":{
-		"_getXML":"r",
+		"getXML":"r",
 		"RDF":"r",
 		"read":"r",
 		"setCharacterSet":"r"
@@ -730,7 +730,7 @@ Zotero.Translate.IO.Read.prototype = {
 		return str.value;
 	},
 	
-	"_getXML":function() {
+	"getXML":function() {
 		if(this.bytesRead !== 0) this._seekToStart(this._charset);
 		try {
 			var xml = Zotero.Translate.IO.parseDOMXML(this._rawStream, this._charset, this.file.fileSize);
