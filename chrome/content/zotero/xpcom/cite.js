@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * Utility functions for dealing with citations
  * @namespace
@@ -469,5 +471,259 @@ Zotero.Cite.System = {
 	 */
 	"getAbbreviations":function getAbbreviations() {
 		return {};
+	}
+};
+
+/**
+ * Functions for creating and manipulating field abbreviations
+ * @namespace
+ */
+Zotero.Cite.Abbreviations = new function() {
+	const ABBREVIATIONS_DB_VERSION = 1,
+		PHRASE_MAP = {
+			"container-title":"container-phrase",
+			"collection-title":"container-phrase",
+			"institution-part":"title-phrase",
+			"title":"title-phrase",
+			"place":"title-phrase"
+		},
+		DEFAULT_LIST = "http://www.library.uq.edu.au/faqs/endnote/medical_2010.txt";
+	var DB, caches = [];
+	
+	/**
+	 * Initialize abbreviations database.
+	 */
+	var init = function init() {
+		if(DB) return;
+		DB = new Zotero.DBConnection("abbreviations");
+		
+		var dbVersion;
+		try {
+			dbVersion = DB.valueQuery("SELECT version FROM version");
+		} catch(e) {
+			dbVersion = 0;
+		}
+		
+		if(dbVersion !== ABBREVIATIONS_DB_VERSION) {
+			// Create new database
+			var schema = Zotero.File.getContentsFromURL("resource://zotero/schema/abbreviations.sql");
+			DB.beginTransaction();
+			DB.query(schema);
+			DB.commitTransaction();
+			
+			DB.query("PRAGMA foreign_keys = ON");
+			
+			// Load default abbreviations file
+			loadAbbreviations(Zotero.File.getContentsFromURL("resource://zotero/schema/abbreviations.json"),
+				"abbreviations.json");
+		}
+	};
+	
+	var generateKeyGetter = function generateListGetter(query) {
+		var cache = {};
+		caches.push(cache);
+		return function(key) {
+			if(key in cache) return cache[key];
+			return (cache[key] = DB.valueQuery(query, key));
+		};
+	};
+	
+	/**
+	 * Get the listID of abbreviations list
+	 * @param {String} listURI URI of abbreviations list
+	 * @return {Integer} listID
+	 */
+	var getListID = generateKeyGetter("SELECT listID FROM lists "+
+		"WHERE listURI = ?");
+	
+	/**
+	 * Get the categoryID of a given category
+	 * @param {String} category Category name
+	 * @return {Integer} categoryID
+	 */
+	var getCategoryID = generateKeyGetter("SELECT categoryID FROM categories "+
+		"WHERE category = ?");
+	
+	/**
+	 * Get the jurisdictionID of a given jurisdiction
+	 * @param {String} jurisdiction Jurisdiction name
+	 * @return {Integer} jurisdictionID
+	 */
+	var getJurisdictionID = generateKeyGetter("SELECT jurisdictionID FROM jurisdictions "+
+		"WHERE jurisdiction = ?");
+	
+	/**
+	 * Normalizes a key
+	 */
+	var normalizeKey = function normalizeKey(key) {
+		// Strip periods, normalize spacing, and convert to lowercase
+		return Zotero.Utilities.trimInternal(key.replace(/\s*\./g, "."));
+	}
+	
+	/**
+	 * Loads the default abbreviations file
+	 * @param {String} json Abbreviations to load as JSON
+	 * @param {String} origin The URL or name of the file from which the abbreviations were loaded from
+	 */
+	var loadAbbreviations = function loadAbbreviations(json, origin) {
+		init();
+		
+		try {
+			var abbreviations = JSON.parse(json);
+		} catch(e) {
+			throw new Zotero.Exception.Alert("styles.abbreviations.parseError", origin,
+				"styles.abbreviations.title", e);
+		}
+		
+		if(!abbreviations.info || !abbreviations.info.name || !abbreviations.info.URI) {
+			throw new Zotero.Exception.Alert("styles.abbreviations.missingInfo", origin,
+				"styles.abbreviations.title");
+		}
+		
+		DB.beginTransaction();
+		
+		try {			
+			var listID = getListID(abbreviations.info.URI);
+			if(listID) {
+				DB.query("DELETE FROM phrases WHERE listID = ?;"+
+					"DELETE FROM abbreviations WHERE listID = ?;", [listID, listID]);
+				// TODO Purge categories and jurisdictions
+			} else {
+				listID = DB.query("INSERT INTO lists (listURI, listName) VALUES (?, ?)",
+					[abbreviations.info.URI, abbreviations.info.name]);
+			}
+			
+			for(var jurisdiction in abbreviations) {
+				if(jurisdiction === "info") continue;
+							
+				var jurisdictionAbbreviations = abbreviations[jurisdiction];
+				
+				// Get jurisdictionID
+				var jurisdictionID = getJurisdictionID(jurisdiction) ||
+					DB.query("INSERT INTO jurisdictions (jurisdiction) VALUES (?)",
+						jurisdiction);
+				
+				for(var category in jurisdictionAbbreviations) {
+					// Get categoryID
+					var categoryAbbreviations = jurisdictionAbbreviations[category],
+						categoryID = getCategoryID(category) ||
+							DB.query("INSERT INTO categories (category) VALUES (?)",
+								category),
+						table = jurisdiction.substr(jurisdiction.length-7) === "-phrases"
+							? "phrases" : "abbreviations";
+					
+					for(var key in categoryAbbreviations) {
+						// Insert abbreviation record
+						DB.query("INSERT INTO "+table+" (listID, jurisdictionID, "+
+							"categoryID, string, abbreviation) VALUES (?, ?, ?, ?, ?)",
+							[listID, jurisdictionID, categoryID, normalizeKey(key),
+								categoryAbbreviations[key]]);
+					}
+				}
+			}
+			
+			DB.commitTransaction();
+		} catch(e) {
+			DB.rollbackTransaction();
+			throw new Zotero.Exception.Alert("styles.abbreviations.unexpectedError",
+				origin, "styles.abbreviations.title", e);
+		}
+		
+		// Clear caches
+		for(var i=0; i<caches.length; i++) caches[i] = {};
+	};
+	
+	/**
+	 * Replace getAbbreviation on citeproc-js with our own handler.
+	 */
+	Zotero.CiteProc.CSL.getAbbreviation = function getAbbreviation(listname, obj, jurisdiction, category, key) {
+		var normalizedKey = normalizeKey(key),
+			abbreviation;
+		if(!normalizedKey) return;
+		
+		init();
+		
+		var listID = getListID(listname) || getListID(DEFAULT_LIST),
+			categoryID = getCategoryID(category);
+		if(!listID || !categoryID) return;
+		
+		var jurisdictions = ["default"],
+			jurisdictionIDs = [1];
+		if(jurisdiction !== "default") {
+			var jurisdictionID = getJurisdictionID(jurisdiction);
+			if(jurisdictionID) {
+				jurisdictions.unshift(jurisdiction);
+				jurisdictionIDs.unshift(jurisdictionID);
+			}
+		}
+		
+		// Get abbreviation
+		for(var i=0; i<jurisdictionIDs.length && !abbreviation; i++) {
+			abbreviation = DB.valueQuery(
+				"SELECT abbreviation FROM abbreviations WHERE listID = ? "+
+				"AND jurisdictionID = ? AND categoryID = ? AND string = ?",
+				[listID, jurisdictionIDs[i], categoryID, normalizedKey]);
+		}
+		
+		if(!abbreviation && PHRASE_MAP[category]) {
+			// Try phrases
+			categoryID = getCategoryID(PHRASE_MAP[category]);
+			if(categoryID) {
+				var keyWords = normalizedKey.split(" "),
+					params = [listID, jurisdictionIDs[0]];
+			
+				// Get all potential phrases
+				var jurisdictionIDExpression = "(?";
+				for(var j=1; j<jurisdictions.length; j++) {
+					jurisdictionIDExpression += ",?";
+					params.push(jurisdictionIDs[j]);
+				}
+				jurisdictionIDExpression += ")";
+				
+				params.push(categoryID);
+				
+				var stringExpression = "(string LIKE ?";
+				params.push(keyWords[0]+"%");
+				// TODO Query length limit?
+				for(var j=1; j<keyWords.length; j++) {
+					stringExpression += " OR string LIKE ?";
+					params.push(keyWords[j]+"%");
+				}
+				stringExpression += ")";
+				
+				var phrases = DB.query(
+					"SELECT string, abbreviation FROM abbreviations "+
+					"WHERE listID = ? AND jurisdictionID IN "+jurisdictionIDExpression+" "+
+					"AND categoryID = ? AND "+stringExpression+" "+
+					"ORDER BY jurisdictionID == 0, LENGTH(string) DESC", params);
+				
+				if(phrases) {
+					// Iterate over phrases, replacing within the (original, unnormalized)
+					// string.
+					var phraseAbbreviation = normalizedKey;
+					for(var j=0; j<phrases.length; j++) {
+						if(phraseAbbreviation.indexOf(phrases[j].string) !== -1) {
+							var re = new RegExp(
+								"\\b"+Zotero.Utilities.quotemeta(phrases[j].string)+"\\b",
+								"gi");
+							phraseAbbreviation = phraseAbbreviation.replace(re,
+								phrases[j].abbreviation);
+						}
+					}
+					
+					if(phraseAbbreviation !== normalizedKey) {
+						abbreviation = Zotero.Utilities.trimInternal(phraseAbbreviation);
+					}
+				}
+			}
+		}
+		
+		if(!abbreviation) return;
+		
+		// Add to jurisdiction object
+		if(!obj[jurisdiction]) {
+            obj[jurisdiction] = new Zotero.CiteProc.CSL.AbbreviationSegments();
+        }
+        obj[jurisdiction][category][key] = abbreviation;
 	}
 };
