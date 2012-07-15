@@ -98,15 +98,19 @@ Zotero.Exception.Alert.prototype = {
 		}
 	},
 	
-	/**
-	 * Gets the error string
-	 */
-	"toString":function() {
+	get message() {
 		try {
 			return Zotero.getString(this.name, this.params);
 		} catch(e) {
 			return this.name;
 		}
+	},
+	
+	/**
+	 * Gets the error string
+	 */
+	"toString":function() {
+		return this.cause.toString() || this.message;
 	},
 	
 	/**
@@ -116,9 +120,9 @@ Zotero.Exception.Alert.prototype = {
 	"present":function(window) {
 		Components.utils.import("resource://gre/modules/Services.jsm");
 		try {
-		Services.prompt.alert(window || null, this.title, this.toString());
-		}catch(e) {
-		Zotero.debug(e);
+			Services.prompt.alert(window || null, this.title, this.message);
+		} catch(e) {
+			Zotero.debug(e);
 		}
 	},
 	
