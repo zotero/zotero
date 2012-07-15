@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * Utility functions for dealing with citations
  * @namespace
@@ -469,5 +471,147 @@ Zotero.Cite.System = {
 	 */
 	"getAbbreviations":function getAbbreviations() {
 		return {};
+	}
+};
+
+/**
+ * Functions for creating and manipulating field abbreviations
+ * @namespace
+ */
+Zotero.Cite.Abbreviations = new function() {
+	var abbreviations,
+		abbreviationCategories;
+
+	/**
+	 * Initialize abbreviations database.
+	 */
+	function init() {
+		if(!abbreviations) Zotero.Cite.Abbreviations.loadAbbreviations();
+	}
+
+	this.loadAbbreviations = function() {
+		var file = Zotero.getZoteroDirectory();
+		file.append("abbreviations.json");
+
+		var json, origin;
+		if(file.exists()) {
+			json = Zotero.File.getContents(file);
+			origin = file.path;
+		} else {
+			json = Zotero.File.getContentsFromURL("resource://zotero/schema/abbreviations.json");
+			origin = "resource://zotero/schema/abbreviations.json";
+		}
+
+		try {
+			abbreviations = JSON.parse(json);
+		} catch(e) {
+			throw new Zotero.Exception.Alert("styles.abbreviations.parseError", origin,
+				"styles.abbreviations.title", e);
+		}
+
+		if(!abbreviations.info || !abbreviations.info.name || !abbreviations.info.URI) {
+			throw new Zotero.Exception.Alert("styles.abbreviations.missingInfo", origin,
+				"styles.abbreviations.title");
+		}
+
+		abbreviationCategories = {};
+		for(var jurisdiction in abbreviations) {
+			for(var category in abbreviations[jurisdiction]) {
+				abbreviationCategories[category] = true;
+			}
+		}
+	}
+	
+	/**
+	 * Normalizes a key
+	 */
+	function normalizeKey(key) {
+		// Strip periods, normalize spacing, and convert to lowercase
+		return key.toString().toLowerCase().
+			replace(/(?:\b|^)(?:and|et|y|und|l[ae]|the|[ld]')(?:\b|$)|[\x21-\x2C.\/\x3A-\x40\x5B-\x60\\\x7B-\x7E]/g, "").
+			replace(/\s+/g, " ").trim();
+	}
+
+	function lookupKey(key) {
+		return key.toLowerCase().replace(/\s*\./g, "." );
+	}
+	
+	/**
+	 * Replace getAbbreviation on citeproc-js with our own handler.
+	 */
+	Zotero.CiteProc.CSL.getAbbreviation = function getAbbreviation(listname, obj, jurisdiction, category, key) {
+		if(!Zotero.Prefs.get("cite.automaticTitleAbbreviation")) return;
+
+		init();
+
+		// Short circuit if we know we don't handle this kind of abbreviation
+		if(!abbreviationCategories[category] && !abbreviationCategories[category+"-word"]) return;
+
+		var normalizedKey = normalizeKey(key),
+			lcNormalizedKey = lookupKey(normalizedKey),
+			abbreviation;
+		if(!normalizedKey) return;
+		
+		var jurisdictions = ["default"];
+		if(jurisdiction !== "default" && abbreviations[jurisdiction]) {
+			jurisdictions.unshift(jurisdiction);
+		}
+
+		// Look for full abbreviation
+		var jur, cat;
+		for(var i=0; i<jurisdictions.length && !abbreviation; i++) {
+			if((jur = abbreviations[jurisdictions[i]]) && (cat = jur[category])) {
+				abbreviation = cat[lcNormalizedKey];
+			}
+		}
+
+		if(!abbreviation) {
+			// Abbreviate words individually
+			var words = normalizedKey.split(/([ \-])/);
+
+			if(words.length > 1) {
+				for(var j=0; j<words.length; j+=2) {
+					var word = words[j],
+						lcWord = lookupKey(word),
+						newWord = undefined;
+
+					for(var i=0; i<jurisdictions.length && newWord === undefined; i++) {
+						if(!(jur = abbreviations[jurisdictions[i]])) continue;
+						if(!(cat = jur[category+"-word"])) continue;
+						
+						// Complete match
+						if(cat.hasOwnProperty(lcWord)) {
+							newWord = cat[lcWord];
+						} else {
+							// Partial match
+							for(var k=1; k<=word.length && newWord === undefined; k++) {
+								newWord = cat[lcWord.substr(0, k)+"-"];
+								if(newWord && word.length - newWord.length < 1) {
+									newWord = undefined;
+								}
+							}
+						}
+					}
+
+					// Fall back to full word
+					if(newWord === undefined ) newWord = word;
+
+					words[j] = newWord.substr(0, 1).toUpperCase() + newWord.substr(1);
+				}
+			}
+			abbreviation = words.join("").replace(/\s+/g, " ").trim();
+		}
+
+		if(!abbreviation || abbreviation === key) {
+			Zotero.debug("No abbreviation found for "+key);
+			return;
+		}
+		Zotero.debug("Abbreviated "+key+" as "+abbreviation);
+		
+		// Add to jurisdiction object
+		if(!obj[jurisdiction]) {
+			obj[jurisdiction] = new Zotero.CiteProc.CSL.AbbreviationSegments();
+		}
+		obj[jurisdiction][category][key] = abbreviation;
 	}
 };
