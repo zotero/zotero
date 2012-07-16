@@ -1332,7 +1332,8 @@ Zotero.Translate.Base.prototype = {
 				// https://bugzilla.mozilla.org/show_bug.cgi?id=609143 - can't pass E4X to sandbox in Fx4
 				src += "Zotero.getXML = function() {"+
 					"var xml = Zotero._getXML();"+
-					"if(typeof xml == 'string') return new XML(xml);"+
+					"if(typeof xml == 'string') { return new XML(xml);}"+
+					"return xml;"+
 				"};";
 			}
 		}
@@ -1404,7 +1405,6 @@ Zotero.Translate.Base.prototype = {
 			Zotero.debug(string, level);
 		}
 	},
-	
 	/**
 	 * Generates a string from an exception
 	 * @param {String|Exception} error
@@ -1414,13 +1414,17 @@ Zotero.Translate.Base.prototype = {
 		if(typeof(error) == "string") {
 			errorString = "\nthrown exception => "+error;
 		} else {
+			var haveStack = false;
 			for(var i in error) {
 				if(typeof(error[i]) != "object") {
+					if(i === "stack") haveStack = true;
 					errorString += "\n"+i+' => '+error[i];
 				}
 			}
-			if(error) {
-				errorString += "\nstring => "+error.toString();
+			errorString += "\nstring => "+error.toString();
+			if(!haveStack && error.stack) {
+				// In case the stack is not enumerable
+				errorString += "\nstack => "+error.stack.toString();
 			}
 		}
 		
@@ -1567,7 +1571,7 @@ Zotero.Translate.Web.prototype._translateTranslatorLoaded = function() {
 			}, function(obj) { me._translateRPCComplete(obj) });
 	} else if(runMode === Zotero.Translator.RUN_MODE_ZOTERO_SERVER) {
 		var me = this;
-		Zotero.OAuth.createItem({"url":this.document.location.href.toString()}, null,
+		Zotero.API.createItem({"url":this.document.location.href.toString()}, null,
 			function(statusCode, response) {
 				me._translateServerComplete(statusCode, response);
 			});
@@ -1616,7 +1620,7 @@ Zotero.Translate.Web.prototype._translateServerComplete = function(statusCode, r
 		var me = this;
 		this._runHandler("select", response,
 			function(selectedItems) {
-				Zotero.OAuth.createItem({
+				Zotero.API.createItem({
 						"url":me.document.location.href.toString(),
 						"items":selectedItems
 					}, null,
@@ -1636,20 +1640,30 @@ Zotero.Translate.Web.prototype._translateServerComplete = function(statusCode, r
 		}
 		
 		// Extract items from ATOM/JSON response
-		var items = [];
-		var contents = response.getElementsByTagNameNS("http://www.w3.org/2005/Atom", "content");
+		var items = [], contents;
+		if("getElementsByTagNameNS" in response) {
+			contents = response.getElementsByTagNameNS("http://www.w3.org/2005/Atom", "content");
+		} else { // IE...
+			contents = response.getElementsByTagName("content");
+		}
 		for(var i=0, n=contents.length; i<n; i++) {
 			var content = contents[i];
-			if(content.getAttributeNS("http://zotero.org/ns/api", "type") != "json") continue;
+			if("getAttributeNS" in content) {
+				if(content.getAttributeNS("http://zotero.org/ns/api", "type") != "json") continue;
+			} else if(content.getAttribute("zapi:type") != "json") { // IE...
+				continue;
+			}
 			
 			try {
-				item = JSON.parse("textContent" in content ?
-					content.textContent : content.innerText);
+				var item = JSON.parse("textContent" in content ?
+					content.textContent : content.text);
 			} catch(e) {
 				Zotero.logError(e);
 				this.complete(false, "Invalid JSON response received from server");
 				return;
 			}
+			
+			if(!("attachments" in item)) item.attachments = [];
 			this._runHandler("itemDone", null, item);
 			items.push(item);
 		}
@@ -2218,11 +2232,12 @@ Zotero.Translate.IO.String.prototype = {
 	"_getXML":function() {
 		if(this._mode == "xml/dom") {
 			try {
-				return Zotero.Translate.IO.parseDOMXML(this.string);
+				var xml = Zotero.Translate.IO.parseDOMXML(this.string);
 			} catch(e) {
 				this._xmlInvalid = true;
 				throw e;
 			}
+			return (Zotero.isFx5 ? Zotero.Translate.SandboxManager.Fx5DOMWrapper(xml) : xml);
 		} else {
 			return this.string.replace(/<\?xml[^>]+\?>/, "");
 		}

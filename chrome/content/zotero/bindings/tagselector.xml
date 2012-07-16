@@ -644,7 +644,7 @@
 					
 					if (result && newName.value) {
 						// Add other ids with same tag
-						var ids = Zotero.Tags.getIDs(oldName);
+						var ids = Zotero.Tags.getIDs(oldName, this.libraryID);
 						
 						for (var i=0; i<ids.length; i++) {
 							if (tagIDs.indexOf(ids[i]) == -1) {
@@ -691,7 +691,7 @@
 						Zotero.DB.beginTransaction();
 						
 						// Add other ids with same tag
-						var ids = Zotero.Tags.getIDs(oldName);
+						var ids = Zotero.Tags.getIDs(oldName, this.libraryID);
 						for each(var id in ids) {
 							if (tagIDs.indexOf(id) == -1) {
 								tagIDs.push(id);

@@ -1247,7 +1247,7 @@ Zotero.Utilities = {
 			};
 		}
 		
-		if(!(elements instanceof Array)) elements = [elements];
+		if(!("length" in elements)) elements = [elements];
 		
 		var results = [];
 		for(var i=0, n=elements.length; i<n; i++) {
@@ -1637,7 +1637,11 @@ Zotero.Utilities = {
 				
 				if(!creatorType) continue;
 				
-				var nameObj = {'family':creator.lastName, 'given':creator.firstName};
+				if(creator.fieldMode == 1) {
+					var nameObj = {'literal':creator.lastName};
+				} else {
+					var nameObj = {'family':creator.lastName, 'given':creator.firstName};
+				}
 				
 				if(cslItem[creatorType]) {
 					cslItem[creatorType].push(nameObj);
@@ -1694,7 +1698,7 @@ Zotero.Utilities = {
 		var isZoteroItem = item instanceof Zotero.Item, zoteroType;
 		
 		for(var type in CSL_TYPE_MAPPINGS) {
-			if(CSL_TYPE_MAPPINGS[zoteroType] == item.type) {
+			if(CSL_TYPE_MAPPINGS[type] == cslItem.type) {
 				zoteroType = type;
 				break;
 			}
@@ -1784,11 +1788,40 @@ Zotero.Utilities = {
 				if(Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
 					var date = "";
 					if(cslDate.literal) {
-						date = cslDate.literal;
-					} else if(cslDate.year) {
-						if(cslDate.month) cslDate.month--;
-						date = Zotero.Date.formatDate(cslDate);
-						if(cslDate.season) date = cslDate.season+date;
+						if(variable === "accessed") {
+							date = strToISO(cslDate.literal);
+						} else {
+							date = cslDate.literal;
+						}
+					} else {
+						var newDate = Zotero.Utilities.deepCopy(cslDate);
+						if(cslDate["date-parts"] && typeof cslDate["date-parts"] === "object"
+								&& cslDate["date-parts"] !== null
+								&& typeof cslDate["date-parts"][0] === "object"
+								&& cslDate["date-parts"][0] !== null) {
+							if(cslDate["date-parts"][0][0]) newDate.year = cslDate["date-parts"][0][0];
+							if(cslDate["date-parts"][0][1]) newDate.month = cslDate["date-parts"][0][1];
+							if(cslDate["date-parts"][0][2]) newDate.day = cslDate["date-parts"][0][2];
+						}
+						
+						if(newDate.year) {
+							if(variable === "accessed") {
+								// Need to convert to SQL
+								var date = Zotero.Utilities.lpad(newDate.year, "0", 4);
+								if(newDate.month) {
+									date += "-"+Zotero.Utilities.lpad(newDate.month, "0", 2);
+									if(newDate.day) {
+										date += "-"+Zotero.Utilities.lpad(newDate.day, "0", 2);
+									}
+								}
+							} else {
+								if(newDate.month) newDate.month--;
+								date = Zotero.Date.formatDate(newDate);
+								if(newDate.season) {
+									date = newDate.season+" "+date;
+								}
+							}
+						}
 					}
 					
 					if(isZoteroItem) {

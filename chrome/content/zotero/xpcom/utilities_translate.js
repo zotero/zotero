@@ -166,7 +166,7 @@ Zotero.Utilities.Translate.prototype.getItemArray = function(doc, inHere, urlRe,
 		var links = inHere[j].getElementsByTagName("a");
 		for(var i=0; i<links.length; i++) {
 			if(!urlRe || urlRegexp.test(links[i].href)) {
-				var text = links[i].textContent;
+				var text = "textContent" in links[i] ? links[i].textContent : links[i].innerText;
 				if(text) {
 					text = this.trimInternal(text);
 					if(!rejectRe || !rejectRegexp.test(text)) {

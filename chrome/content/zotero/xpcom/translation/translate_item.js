@@ -309,17 +309,16 @@ Zotero.Translate.ItemSaver.prototype = {
 	"_saveAttachmentDownload":function(attachment, parentID) {
 		Zotero.debug("Translate: Adding attachment", 4);
 		
-		// determine whether to save attachments at all
-		var automaticSnapshots = Zotero.Prefs.get("automaticSnapshots");
-		var downloadAssociatedFiles = Zotero.Prefs.get("downloadAssociatedFiles");
-		
 		if(!attachment.url && !attachment.document) {
 			Zotero.debug("Translate: Not adding attachment: no URL specified", 2);
 		} else {
-			var shouldAttach = ((attachment.document
-				|| (attachment.mimeType && attachment.mimeType == "text/html")) && automaticSnapshots)
-				|| downloadAssociatedFiles;
-			if(!shouldAttach) return;
+			// Determine whether to save an attachment
+			if(attachment.document
+					|| (attachment.mimeType && attachment.mimeType == "text/html")) {
+				if(!Zotero.Prefs.get("automaticSnapshots")) return;
+			} else {
+				if(!Zotero.Prefs.get("downloadAssociatedFiles")) return;
+			}
 			
 			if(attachment.document && "__wrappedDOMObject" in attachment.document) {
 				attachment.document = attachment.document.__wrappedDOMObject;
@@ -347,17 +346,14 @@ Zotero.Translate.ItemSaver.prototype = {
 			} else {
 				// if snapshot is not explicitly set to false, retrieve snapshot
 				if(attachment.document) {
-					if(automaticSnapshots) {
-						try {
-							Zotero.Attachments.importFromDocument(attachment.document, parentID, attachment.title);
-						} catch(e) {
-							Zotero.debug("Translate: Error attaching document", 2);
-						}
+					try {
+						Zotero.Attachments.importFromDocument(attachment.document, parentID, attachment.title);
+					} catch(e) {
+						Zotero.debug("Translate: Error attaching document", 2);
 					}
 				// Save attachment if snapshot pref enabled or not HTML
 				// (in which case downloadAssociatedFiles applies)
-				} else if(this._saveFiles && (automaticSnapshots || !attachment.mimeType
-						|| attachment.mimeType != "text/html")) {
+				} else {
 					var mimeType = (attachment.mimeType ? attachment.mimeType : null);
 					var title = (attachment.title ? attachment.title : null);
 

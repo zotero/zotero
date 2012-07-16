@@ -758,7 +758,7 @@ $rdf.Serializer = function () {
 
       var attrs = '';
       if(subject.termType == 'bnode') {
-        if(sz.incoming[subject].length != 1) { // not an anonymous bnode
+        if(!sz.incoming[subject] || sz.incoming[subject].length != 1) { // not an anonymous bnode
           attrs = ' rdf:nodeID="' + subject.toNT().slice(2) + '"';
         }
       } else {
