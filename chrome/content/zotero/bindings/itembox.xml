@@ -3029,20 +3029,31 @@ if (oldCreator.id) {
 						return;
 					}
 					this.item._changedCreators = {};
+					this.item._changedAltCreators = {};
 					if (moveUp) {
-						var creator = this.item._creators[index];
-						var predecessor = this.item._creators[index - 1];
+						var creator = this.item.getCreator(index);
+						var predecessor = this.item.getCreator(index - 1);
+
 						this.item._creators[index] = predecessor;
 						this.item._creators[index - 1] = creator;
+
 						this.item._changedCreators[index] = true;
+						this.item._changedAltCreators[index] = predecessor.multi._key;
+
 						this.item._changedCreators[index - 1] = true;
+						this.item._changedAltCreators[index - 1] = creator.multi._key;
 					} else {
-						var creator = this.item._creators[index];
-						var successor = this.item._creators[index + 1];
+						var creator = this.item.getCreator(index);
+						var successor = this.item.getCreator(index + 1);
+						
 						this.item._creators[index] = successor;
 						this.item._creators[index + 1] = creator;
+
 						this.item._changedCreators[index] = true;
+						this.item._changedAltCreators[index] = successor.multi._key;
+                        
 						this.item._changedCreators[index + 1] = true;
+						this.item._changedAltCreators[index + 1] = creator.multi._key;
 					}
 					this.item._changed = true;
 					this.item.save();
@@ -3250,8 +3261,21 @@ if (oldCreator.id) {
 								
 								var item = document.getBindingParent(this).item;
 								var exists = item.hasCreatorAt(index);
-								var moreCreators = item.numCreators() > index + 1;
-                                
+                                var numCreators = item.numCreators();
+								var moreCreators = numCreators > index + 1;
+
+                                var hideMoveSep = false;
+                                var hideMoveUp = false;
+                                var hideMoveDown = false;
+                                if (2 > item.numCreators) {
+                                    hideMoveSep = true;
+                                    hideMoveUp = true;
+                                    hideMoveDown = true;
+                                } else {
+                                    hideMoveDown = !moreCreators;
+                                    hideMoveUp = (index == 0);
+                                }
+
 								document.getElementById('zotero-creator-move-sep').setAttribute('hidden', hideMoveSep);
 								document.getElementById('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
 								document.getElementById('zotero-creator-move-down').setAttribute('hidden', hideMoveDown);"
