@@ -1668,8 +1668,8 @@ Zotero.Integration.Fields.prototype._updateDocument = function(forceCitations, f
 		}
 	}
 	var removeCodeFields = Object.keys(this._removeCodeFields).sort();
-	for(var i=(this._removeCodeFields.length-1); i>=0; i--) {
-		this._fields[this._removeCodeFields[i]].removeCode();
+	for(var i=(removeCodeFields.length-1); i>=0; i--) {
+		this._fields[removeCodeFields[i]].removeCode();
 	}
 }
 
