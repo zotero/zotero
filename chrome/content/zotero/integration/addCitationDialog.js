@@ -565,10 +565,10 @@ var Zotero_Citation_Dialog = new function () {
 		if(_previewShown) {
 			document.documentElement.getButton("extra2").label = Zotero.getString("citation.hideEditor");		
 			if(text) {
-				io.preview(function(preview) {
+				io.preview().then(function(preview) {
 					_originalHTML = preview;
 					editor.value = text;
-				});
+				}).end();
 			} else {
 				_updatePreview();
 			}
@@ -581,9 +581,7 @@ var Zotero_Citation_Dialog = new function () {
 	 * called when accept button is clicked
 	 */
 	function accept() {
-		Zotero.debug("Trying to accept");
 		_getCitation();
-		Zotero.debug("got citation");
 		var isCustom = _previewShown && io.citation.citationItems.length	// if a citation is selected
 				&& _originalHTML
 				&& document.getElementById('editor').value != _originalHTML	// and citation has been edited
@@ -623,7 +621,7 @@ var Zotero_Citation_Dialog = new function () {
 			
 			editor.readonly = !io.citation.citationItems.length;
 			if(io.citation.citationItems.length) {
-				io.preview(function(preview) {
+				io.preview().then(function(preview) {
 					editor.value = preview;
 					
 					if(editor.initialized) {

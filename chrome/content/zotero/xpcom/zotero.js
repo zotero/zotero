@@ -38,6 +38,11 @@ const ZOTERO_CONFIG = {
 	VERSION: "3.0.8.SOURCE"
 };
 
+// Commonly used imports accessible anywhere
+Components.utils.import("resource://zotero/q.js");
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 /*
  * Core functions
  */
@@ -1465,16 +1470,17 @@ const ZOTERO_CONFIG = {
 	 * If errorHandler is specified, exceptions in the generator will be caught
 	 * and passed to the callback
 	 */
-	this.pumpGenerator = function(generator, ms, errorHandler) {
+	this.pumpGenerator = function(generator, ms, errorHandler, doneHandler) {
 		_waiting++;
 		
 		var timer = Components.classes["@mozilla.org/timer;1"].
-			createInstance(Components.interfaces.nsITimer);
+			createInstance(Components.interfaces.nsITimer),
+			yielded;
 		var timerCallback = {"notify":function() {
 			var err = false;
 			_waiting--;
 			try {
-				if(generator.next()) {
+				if((yielded = generator.next()) !== false) {
 					_waiting++;
 					return;
 				}
@@ -1500,12 +1506,25 @@ const ZOTERO_CONFIG = {
 				} else {
 					throw err;
 				}
+			} else if(doneHandler) {
+				doneHandler(yielded);
 			}
 		}}
 		timer.initWithCallback(timerCallback, ms ? ms : 0, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
 		// add timer to global scope so that it doesn't get garbage collected before it completes
 		_runningTimers.push(timer);
-	}
+	};
+	
+	/**
+	 * Pumps a generator until it yields false. Unlike the above, this returns a promise.
+	 */
+	this.promiseGenerator = function(generator, ms) {
+		var deferred = Q.defer();
+		this.pumpGenerator(generator, ms,
+			function(e) { deferred.reject(e); },
+			function(data) { deferred.resolve(data) });
+		return deferred.promise;
+	};
 	
 	/**
 	 * Emulates the behavior of window.setTimeout, but ensures that callbacks do not get called

@@ -278,7 +278,7 @@ var Zotero_QuickFormat = new function () {
 			// Save current search so that when we get items, we know whether it's too late to
 			// process them or not
 			var lastSearchTime = currentSearchTime = Date.now();
-			io.getItems(function(citedItems) {
+			io.getItems().then(function(citedItems) {
 				// Don't do anything if panel is already closed
 				if(isAsync &&
 						((referencePanel.state !== "open" && referencePanel.state !== "showing")
@@ -314,7 +314,7 @@ var Zotero_QuickFormat = new function () {
 				}
 				
 				_updateItemList(citedItems, citedItemsMatchingSearch, searchResultIDs, isAsync);
-			});
+			}).end();
 			
 			if(!completed) {
 				// We are going to have to wait until items have been retrieved from the document.
