@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.355",
+    PROCESSOR_VERSION: "1.0.356",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -2636,93 +2636,69 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
         var later_label = false;
         var value = false;
         if (["bill","gazette","legislation","treaty"].indexOf(Item.type) > -1) {
-            if (!Item.section
-                && this.opt.development_extensions.clobber_locator_if_no_statute_section) {
-                item.locator = undefined;
-                item.label = undefined;
-            } else if (Item.section
-                       && item
-                       && this.opt.development_extensions.static_statute_locator) {
-                value = "" + Item.section;
-                later_label = item.label;
-                if (value) {
-                    var splt = value.split(/\s+/);
-                    if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
-                        item.label = CSL.STATUTE_SUBDIV_STRINGS[splt[0]];
-                    } else {
-					    item.label = "section";
-                        value = "sec. " + value;
-                    }
-                }
-            } else if (item
-                      && item.locator
-                      &&  this.opt.development_extensions.static_statute_locator) {
-                var splt = item.locator.split(/\s+/);
+            var loci = ["section","","",""];
+            var split;
+            if (Item.section) {
+                splt = Item.section.replace(/^\s+/,"").replace(/\s+$/, "").split(/\s+/);
                 if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
-                    item.label = CSL.STATUTE_SUBDIV_STRINGS[splt[0]];
-                    item.locator = splt.slice(1).join(" ");
+                    loci[0] = splt[0] + " ";
+                    loci[1] = splt.slice(1).join(" ");
+                } else {
+                    loci[0] = "sec. ";
+                    loci[1] = splt.slice(0).join(" ");
                 }
-                if ((!item.label || item.label === "page") && item.locator && item.locator.match(/^[0-9].*/)) {
-                    item.locator = ", " + item.locator;
+            } else {
+                if (this.opt.development_extensions.clobber_locator_if_no_statute_section) {
+                    item.locator = undefined;
+                    item.label = undefined;
                 }
             }
+            if (item.locator) {
+                var splt = item.locator.replace(/^\s+/,"").replace(/\s+$/, "").split(/\s+/);
+                if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
+                    loci[2] = " " + splt[0] + " ";
+                    loci[3] = splt.slice(1).join(" ");
+                } else if (item.label) {
+                    loci[2] = " " + CSL.STATUTE_SUBDIV_STRINGS_REVERSE[item.label] + " ";
+                    loci[3] = splt.slice(0).join(" ");
+                } else {
+                    loci[3] = splt.join(" ")
+                }
+                if (loci[3] && loci[3].slice(0,1) === "&") {
+                    loci[3] = " " + loci[3];
+                }
+            }
+            if (!loci[2]) {
+                loci[2] = loci[0];
+            }
+            if (loci[3]) {
+                if (loci[3].match(/^[^0-9a-zA-Z]/)) {
+                    loci[2] = "";
+                }
+            } else {
+                loci[2] = "";
+            }
+            if (!loci[1]) {
+                loci[0] = "";
+            }
+            var value = loci.join("");
+            value = value.replace(/^\s+/,"").replace(/\s+$/, "");
+            item.force_pluralism = 0;
             if (value) {
-			    if (!later_label) {
-				    later_label = item.label;
-			    }
-                var m = value.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
-                item.section_label_count = m.length;
-                var locator = "";
-                var labelstr = "";
-                if (item.locator) {
-                    locator = item.locator;
-                    var firstword = item.locator.split(/\s/)[0];
-                    if (item.label === later_label && firstword && firstword.match(/^[0-9]/)) {
-                        labelstr = ", " + CSL.STATUTE_SUBDIV_STRINGS_REVERSE[later_label];
-                    } else if (item.label !== later_label && firstword && firstword.match(/^[0-9]/)) {
-                        labelstr = " " + CSL.STATUTE_SUBDIV_STRINGS_REVERSE[later_label] + " ";
-                    } else if (CSL.STATUTE_SUBDIV_STRINGS[firstword]) {
-                        labelstr = " ";
-                    }
-                    locator = labelstr + locator;
-                    if (locator.slice(0,1) === "&") {
-                        locator = " " + locator;
-                    }
-                    value = value + locator;
-                }
-                var m = value.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
-                if (m) {
-                    var splt = value.split(CSL.STATUTE_SUBDIV_PLAIN_REGEX);
-                    if (splt.length > 1) {
-                        var lst = [];
-                        lst.push(splt[1].replace(/\s*$/, "").replace(/^\s*/, ""));
-                        var has_repeat_label = false;
-                        var has_sublabel = false;
-                        for (var j=2, jlen=splt.length; j < jlen; j += 1) {
-                            var subdiv = m[j - 1].replace(/^\s*/, "");
-                            var fullsubdiv = CSL.STATUTE_SUBDIV_STRINGS[subdiv];
-                            if (fullsubdiv === item.label) {
-                                has_repeat_label = true;
-                            } else {
-                                has_sublabel = true;
-                            }
-                            lst.push(subdiv);
-                            lst.push(splt[j].replace(/\s*$/, "").replace(/^\s*/, ""));
-                        }
-                        for (var j=lst.length - 2; j > 0; j += -2) {
-                            if (!has_sublabel) {
-                                lst = lst.slice(0,j).concat(lst.slice(j + 1));
-                            }
-                        }
-                        value = lst.join(" ");
-                        if (!has_sublabel && has_repeat_label) {
+                splt = value.split(/\s+/);
+                if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
+                    var has_other = false;
+                    for (var j = splt.length - 2; j > 0; j += -1) {
+                        if (splt[j] === splt[0]) {
                             item.force_pluralism = 1;
-                        } else {
-                            item.force_pluralism = 0;
+                            splt = splt.slice(0,j).concat(splt.slice(j + 1));
                         }
                     }
+                    item.label = CSL.STATUTE_SUBDIV_STRINGS[splt[0]];
+                    item.locator = splt.slice(1).join(" ");
+                } else {
+                    item.locator = splt.slice(0).join(" ");
                 }
-                item.locator = value;
             }
         }
     }
