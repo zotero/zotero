@@ -2196,7 +2196,7 @@ Zotero.Translate.IO.String.prototype = {
 			if(lfIndex !== -1) {
 				// in case we have a CRLF
 				this.bytesRead = lfIndex+1;
-				if(this.contentLength > lfIndex && this.string[lfIndex-1] === "\r") {
+				if(this.contentLength > lfIndex && this.string.substr(lfIndex-1, 1) === "\r") {
 					lfIndex--;
 				}
 				return this.string.substr(oldPointer, lfIndex-oldPointer);					
