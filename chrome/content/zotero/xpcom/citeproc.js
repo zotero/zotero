@@ -2636,6 +2636,7 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
         var later_label = false;
         var value = false;
         if (["bill","gazette","legislation","treaty"].indexOf(Item.type) > -1) {
+            item.force_pluralism = 0;
             var loci = ["section","","",""];
             var split;
             if (Item.section) {
@@ -2671,10 +2672,10 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
             if (!loci[2]) {
                 loci[2] = loci[0];
             }
-            item.force_pluralism = 0;
             if (loci[3]) {
                 if (loci[3].match(/^[^0-9a-zA-Z]/)) {
-                    if (loci[0] === loci[2]) {
+                    var loclst = loci[3].split(/\s+/);
+                    if (loci[0] === loci[2] && loclst[1] && !CSL.STATUTE_SUBDIV_STRINGS[loclst[1].replace(/\s+/, "").replace(/\s+/, "")]) {
                         item.force_pluralism = 1;
                     }
                     loci[2] = "";
@@ -2687,7 +2688,6 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
             }
             var value = loci.join("");
             value = value.replace(/^\s+/,"").replace(/\s+$/, "");
-            item.force_pluralism = 0;
             if (value) {
                 splt = value.split(/\s+/);
                 if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
