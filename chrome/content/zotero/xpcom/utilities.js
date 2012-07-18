@@ -693,7 +693,7 @@ Zotero.Utilities = {
 					} else {
 						// this is not a skip word or comes after a colon;
 						// we must capitalize
-						words[i] = upperCaseVariant[0] + lowerCaseVariant.substr(1);
+						words[i] = upperCaseVariant.substr(0, 1) + lowerCaseVariant.substr(1);
 					}
 				}
 				
