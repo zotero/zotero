@@ -199,7 +199,7 @@ Zotero.setCitationLanguages = function (obj, citeproc) {
     obj.citationAffixes = null;
     var affixes = Zotero.Prefs.get("csl.citationAffixes");
     if (affixes) {
-        affixes = Zotero.Prefs.get("csl.citationAffixes").split("|");
+        affixes = affixes.split("|");
         if (affixes.length === 30) {
             obj.citationAffixes = affixes;
         }
@@ -226,6 +226,8 @@ Zotero.setCitationLanguages = function (obj, citeproc) {
 		citeproc.setLangTagsForCslTransliteration(obj.citationTransliteration);
 		citeproc.setLangTagsForCslTranslation(obj.citationTranslation);
 		citeproc.setLangTagsForCslSort(obj.citationSort);
+
+		citeproc.setLangPrefsForCiteAffixes(obj.citationAffixes);
 
 		citeproc.setAutoVietnameseNamesOption(Zotero.Prefs.get('csl.autoVietnameseNames'));
 	}
