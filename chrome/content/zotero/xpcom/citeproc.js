@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.356",
+    PROCESSOR_VERSION: "1.0.357",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -2641,10 +2641,10 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
             if (Item.section) {
                 splt = Item.section.replace(/^\s+/,"").replace(/\s+$/, "").split(/\s+/);
                 if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
-                    loci[0] = splt[0] + " ";
+                    loci[0] = " " + splt[0] + " ";
                     loci[1] = splt.slice(1).join(" ");
                 } else {
-                    loci[0] = "sec. ";
+                    loci[0] = " sec. ";
                     loci[1] = splt.slice(0).join(" ");
                 }
             } else {
