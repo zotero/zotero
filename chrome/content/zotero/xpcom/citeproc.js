@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.357",
+    PROCESSOR_VERSION: "1.0.358",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -2671,8 +2671,12 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
             if (!loci[2]) {
                 loci[2] = loci[0];
             }
+            item.force_pluralism = 0;
             if (loci[3]) {
                 if (loci[3].match(/^[^0-9a-zA-Z]/)) {
+                    if (loci[0] === loci[2]) {
+                        item.force_pluralism = 1;
+                    }
                     loci[2] = "";
                 }
             } else {
@@ -2688,7 +2692,7 @@ CSL.Engine.prototype.remapSectionVariable = function (inputList) {
                 splt = value.split(/\s+/);
                 if (CSL.STATUTE_SUBDIV_STRINGS[splt[0]]) {
                     var has_other = false;
-                    for (var j = splt.length - 2; j > 0; j += -1) {
+                    for (var j = splt.length - 2; j > 0; j += -2) {
                         if (splt[j] === splt[0]) {
                             item.force_pluralism = 1;
                             splt = splt.slice(0,j).concat(splt.slice(j + 1));
