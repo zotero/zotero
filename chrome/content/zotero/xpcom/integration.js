@@ -2068,7 +2068,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 	'chrome://zotero/content/integration/integrationDocPrefs.xul', '', io)
 	.then(function() {
 		if(!io.style) {
-			throw Zotero.Exception.UserCancelled("document preferences window");
+			throw new Zotero.Exception.UserCancelled("document preferences window");
 		}
 		
 		// set data
