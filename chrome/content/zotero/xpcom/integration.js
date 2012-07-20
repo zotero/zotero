@@ -1796,6 +1796,9 @@ Zotero.Integration.CitationEditInterface = function(citation, field, fieldGetter
 		me._fieldIndex = fieldIndex;
 		return me._acceptDeferred.promise;
 	}).then(function(progressCallback) {
+		if(!me.citation.citationItems.length) {
+			throw new Zotero.Exception.UserCancelled("inserting citation");
+		}
 		me._fieldGetter.progressCallback = progressCallback;
 		return me._updateSession(true);
 	}).then(function() {
