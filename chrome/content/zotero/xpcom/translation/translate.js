@@ -580,6 +580,19 @@ Zotero.Translate.Sandbox = {
 				if(setShortTitle) item.shortTitle = title;
 			}
 			
+			// refuse to save very long tags
+			if(item.tags) {
+				for(var i=0; i<item.tags.length; i++) {
+					var tag = item.tags[i];
+						tagString = typeof tag === "string" ? tag :
+							typeof tag === "object" ? (tag.tag || tag.name) : null;
+					if(tagString && tagString.length > 255) {
+						translate._debug("WARNING: Skipping unsynchable tag "+JSON.stringify(tagString));
+						item.tags.splice(i--, 1);
+					}
+				}
+			}
+			
 			// call super
 			Zotero.Translate.Sandbox.Base._itemDone(translate, item);
 		}
