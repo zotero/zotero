@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.358",
+    PROCESSOR_VERSION: "1.0.359",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -6723,8 +6723,12 @@ CSL.NameOutput.prototype._renderOneInstitutionPart = function (blobs, style) {
             }
             this.state.tmp.group_context.value()[2] = true;
             this.state.tmp.can_substitute.replace(false, CSL.LITERAL);
-            this.state.output.append(str, style, true);
-            blobs[i] = this.state.output.pop();
+            if (str === "{suppress}") {
+                blobs[i] = false;
+            } else {
+                this.state.output.append(str, style, true);
+                blobs[i] = this.state.output.pop();
+            }
         }
     }
     if ("undefined" === typeof this.institution.strings["part-separator"]) {
@@ -8768,34 +8772,36 @@ CSL.Attributes["@is-uncertain-date"] = function (state, arg) {
     this.tests.push(func);
 };
 CSL.Attributes["@is-numeric"] = function (state, arg) {
-    var variables, variable, func, val, pos, len, ret;
+    var variables, func, len, ret;
     variables = arg.split(/\s+/);
     len = variables.length;
     func = function (state, Item, item) {
-        var numeric_variable, counter_variable;
         ret = [];
-        var numeric = true;
-        for (pos = 0; pos < len; pos += 1) {
-            if (!state.tmp.shadow_numbers[variables[pos]]) {
-                if ("locator" === variables[pos]) {
-                    state.processNumber(false, item, "locator", Item.type);
-                } else {
-                    state.processNumber(false, Item, variables[pos], Item.type);
-                }
-            }
+        for (var i = 0; i < len; i += 1) {
             var myitem = Item;
-            if (["locator-revision"].indexOf(variables[pos]) > -1) {
+            if (["locator","locator-revision"].indexOf(variables[i]) > -1) {
                 myitem = item;
             }
-            if (!state.tmp.shadow_numbers[variables[pos]].numeric
-                && !(['title', 'locator-revision'].indexOf(variables[pos]) > -1
-                     && myitem[variables[pos]] 
-                     && myitem[variables[pos]].slice(-1) === "" + parseInt(myitem[variables[pos]].slice(-1), 10))) {
-                numeric = false;
-                break;
+            if (CSL.NUMERIC_VARIABLES.indexOf(variables[i]) > -1) {
+                if (!state.tmp.shadow_numbers[variables[i]]) {
+                    state.processNumber(false, myitem, variables[i], Item.type);
+                }
+                if (state.tmp.shadow_numbers[variables[i]].numeric) {
+                    ret.push(true);
+                } else {
+                    ret.push(false);
+                }
+            } else if (["title", "locator-revision","version"].indexOf(variables[i]) > -1) {
+                if (myitem[variables[i]]) {
+                    if (myitem[variables[i]].slice(-1) === "" + parseInt(myitem[variables[i]].slice(-1), 10)) {
+                        ret.push(true);
+                    } else {
+                        ret.push(false);
+                    }
+                }
             }
         }
-        return numeric;
+        return ret;
     };
     this.tests.push(func);
 };
@@ -9388,6 +9394,9 @@ CSL.Transform = function (state) {
         }
         if (!value) {
             value = basevalue;
+        }
+        if (value === "{suppress}") {
+            value = false;
         }
         return value;
     }
