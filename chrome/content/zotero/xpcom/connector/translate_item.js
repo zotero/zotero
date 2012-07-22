@@ -282,7 +282,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					}
 				}
 				
-				if(err) throw err;
+				if(err) Zotero.logError(err);
 			});
 		};
 		
@@ -360,21 +360,23 @@ Zotero.Translate.ItemSaver.prototype = {
 							}
 						}
 						
-						attachment.mimeType = contentType;
-						attachment.linkMode = "imported_url";
-						switch(contentType.toLowerCase()) {
-							case "application/pdf":
-								attachment.filename = baseName+".pdf";
-								break;
-							case "text/html":
-							case "application/xhtml+xml":
-								attachment.filename = baseName+".html";
-								break;
-							default:
-								attachment.filename = baseName;
+						if(!err) {
+							attachment.mimeType = contentType;
+							attachment.linkMode = "imported_url";
+							switch(contentType.toLowerCase()) {
+								case "application/pdf":
+									attachment.filename = baseName+".pdf";
+									break;
+								case "text/html":
+								case "application/xhtml+xml":
+									attachment.filename = baseName+".html";
+									break;
+								default:
+									attachment.filename = baseName;
+							}
+							if(charset) attachment.charset = charset;
+							headersValidated = true;
 						}
-						if(charset) attachment.charset = charset;
-						headersValidated = true;
 					}
 					
 					// If we didn't validate the headers, cancel the request
@@ -392,7 +394,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					// If there was an error, throw it now
 					if(err) {
 						attachmentCallback(attachment, false, err);
-						throw err;
+						Zotero.logError(err);
 					}
 				};
 				
