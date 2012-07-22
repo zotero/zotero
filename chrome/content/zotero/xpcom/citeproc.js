@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.360",
+    PROCESSOR_VERSION: "1.0.361",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -8730,29 +8730,30 @@ CSL.Attributes["@match"] = function (state, arg) {
     }
 };
 CSL.Attributes["@jurisdiction"] = function (state, arg) {
-    var lex = arg.split(/\s+/);
+    var style_lexlst = arg.split(/\s+/);
     var func = function (state, Item) {
-        var mylex = false;
+        var input_lex = false;
         var ret = false;
         if (Item.jurisdiction) {
-            mylex = Item.jurisdiction;
+            input_lex = Item.jurisdiction;
         } else if (Item.language) {
             var m = Item.language.match(/^.*-x-lex-([.;a-zA-Z]+).*$/);
             if (m) {
-                mylex = m[1];
+                input_lex = m[1];
             }
         }
-        if (mylex) {
-            var mylexlst = mylex.split(";");
-            outerLoop: for (var i = 0, ilen = lex.length; i < ilen; i += 1) {
-                if (!lex[i]) {
-                    continue;
-                }
-                var lexlst = lex[i].split(";");
-                innerLoop: for (var j = 0, jlen = lexlst.length; j < jlen; j += 1) {
-                    if (mylexlst[j] && mylexlst[j] === lexlst[j] && j === lexlst.length - 1) {
-                        ret = true;
-                        break outerLoop;
+        if (input_lex) {
+            var input_lexlst = input_lex.split(";");
+            outerLoop: for (var i = 0, ilen = style_lexlst.length; i < ilen; i += 1) {
+                var style_lexlst_subjur = style_lexlst[i].split(";");
+                middleLoop: for (var j = 0, jlen = style_lexlst_subjur.length; j < jlen; j += 1) {
+                    var style_lex_elem = style_lexlst_subjur[j];
+                    innerLoop: for (var k = 0, klen = input_lexlst.length; k < klen; k += 1) {
+                        var input_lex_elem = input_lexlst[k];
+                        if (style_lex_elem === input_lex_elem && j === style_lexlst_subjur.length - 1) {
+                            ret = true;
+                            break outerLoop;
+                        }
                     }
                 }
             }
@@ -9687,7 +9688,7 @@ CSL.Parallel = function (state) {
     this.sets = new CSL.Stack([]);
     this.try_cite = true;
     this.use_parallels = true;
-    this.midVars = ["section", "volume", "container-title", "collection-number", "issue", "number"];
+    this.midVars = ["section", "volume", "container-title", "collection-number", "issue", "page-first", "page", "number"];
     this.ignoreVarsLawGeneral = ["first-reference-note-number", "locator", "label","page-first","page"];
     this.ignoreVarsOrders = ["first-reference-note-number"];
     this.ignoreVarsOther = ["first-reference-note-number", "locator", "label","section","page-first","page"];
