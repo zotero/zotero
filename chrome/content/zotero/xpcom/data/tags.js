@@ -243,8 +243,8 @@ Zotero.Tags = new function() {
 		
 		var indexed = {};
 		for (var i=0; i<tags.length; i++) {
-			var tag = this.get(tags[i].tagID, true);
-			indexed[tags[i].tagID] = tag;
+			var tagID = tags[i].tagID;
+			indexed[tagID] = this.get(tagID, true);
 		}
 		return indexed;
 	}

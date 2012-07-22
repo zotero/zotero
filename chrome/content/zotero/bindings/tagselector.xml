@@ -547,10 +547,11 @@
 					<![CDATA[
 						var tagsToggleBox = this.id('tags-toggle');
 						
-						var labels = tagsToggleBox.getElementsByTagName('label');
+						var labels = Zotero.Utilities.xpath(tagsToggleBox, 'label[@selected="true"]');
 						for (var i=0; i<labels.length; i++){
-							labels[i].setAttribute('selected', 'false');
-							delete this.selection[labels[i].value];
+							var label = labels[i];
+							label.setAttribute('selected', 'false');
+							delete this.selection[label.value];
 						}
 						
 						this.doCommand();
