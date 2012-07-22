@@ -999,7 +999,13 @@ var ZoteroPane = new function()
 	 */
 	function updateTagFilter(){
 		if (this.itemsView) {
-			this.itemsView.setFilter('tags', getTagSelection());
+			// If setFilter returns false, that means the tags didn't change. In that
+			// case, callbacks don't get called, so we need to update tags in the tag
+			// selector on our own.
+			if(!this.itemsView.setFilter('tags', getTagSelection())) {
+				var tagSelector = document.getElementById('zotero-tag-selector');
+				tagSelector.refresh();
+			}
 		}
 	}
 	
