@@ -1153,18 +1153,14 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	
 	var includeTrashed = this._itemGroup.isTrash();
 	
-	var me = this;
+	var me = this,
+		isEmptyFirst = emptyFirst[columnField];
 	function rowSort(a, b) {
-		var cmp, fieldA, fieldB;
-		
-		var aItemID = a.id;
-		if (cache[aItemID]) {
-			fieldA = cache[aItemID];
-		}
-		var bItemID = b.id;
-		if (cache[bItemID]) {
+		var cmp,
+			aItemID = a.id,
+			bItemID = b.id,
+			fieldA = cache[aItemID],
 			fieldB = cache[bItemID];
-		}
 		
 		switch (columnField) {
 			case 'date':
@@ -1172,14 +1168,14 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				fieldB = b.getField('date', true).substr(0, 10);
 				
 				cmp = strcmp(fieldA, fieldB);
-				if (cmp) {
+				if (cmp !== 0) {
 					return cmp;
 				}
 				break;
 			
 			case 'firstCreator':
 				cmp = creatorSort(a, b);
-				if (cmp) {
+				if (cmp !== 0) {
 					return cmp;
 				}
 				break;
@@ -1189,40 +1185,35 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				var typeB = Zotero.ItemTypes.getLocalizedString(b.ref.itemTypeID);
 				
 				cmp = (typeA > typeB) ? -1 : (typeA < typeB) ? 1 : 0;
-				if (cmp) {
+				if (cmp !== 0) {
 					return cmp;
 				}
 				break;
 				
 			default:
-				if (fieldA == undefined) {
-					fieldA = getField(a);
-					cache[aItemID] = fieldA;
+				if (fieldA === undefined) {
+					cache[aItemID] = fieldA = getField(a);
 				}
 				
-				if (fieldB == undefined) {
-					fieldB = getField(b);
-					cache[bItemID] = fieldB;
+				if (fieldB === undefined) {
+					cache[bItemID] = fieldB = getField(b);
 				}
 				
 				// Display rows with empty values last
-				if (!emptyFirst[columnField]) {
-					cmp = (fieldA == '' && fieldB != '') ? -1 :
-						(fieldA != '' && fieldB == '') ? 1 : 0;
-					if (cmp) {
-						return cmp;
-					}
+				if (!isEmptyFirst) {
+					if(fieldA === '' && fieldB !== '') return -1;
+					if(fieldA !== '' && fieldB === '') return 1;
 				}
 				
 				cmp = collation.compareString(1, fieldB, fieldA);
-				if (cmp) {
+				if (cmp !== 0) {
 					return cmp;
 				}
 		}
 		
 		if (columnField !== 'firstCreator') {
 			cmp = creatorSort(a, b);
-			if (cmp) {
+			if (cmp !== 0) {
 				return cmp;
 			}
 		}
@@ -1232,7 +1223,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			fieldB = b.getField('date', true).substr(0, 10);
 			
 			cmp = strcmp(fieldA, fieldB);
-			if (cmp) {
+			if (cmp !== 0) {
 				return cmp;
 			}
 		}
@@ -1248,41 +1239,43 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 		//
 		// Try sorting by first word in firstCreator field, since we already have it
 		//
-		var fieldA = firstCreatorSortCache[a.id];
-		if (fieldA == undefined) {
+		var aItemID = a.id,
+			bItemID = b.id,
+			fieldA = firstCreatorSortCache[aItemID],
+			fieldB = firstCreatorSortCache[bItemID];
+		if (fieldA === undefined) {
 			var matches = Zotero.Items.getSortTitle(a.getField('firstCreator')).match(/^[^\s]+/);
 			var fieldA = matches ? matches[0] : '';
-			firstCreatorSortCache[a.id] = fieldA;
+			firstCreatorSortCache[aItemID] = fieldA;
 		}
-		
-		var fieldB = firstCreatorSortCache[b.id];
-		if (fieldB == undefined) {
+		if (fieldB === undefined) {
 			var matches = Zotero.Items.getSortTitle(b.getField('firstCreator')).match(/^[^\s]+/);
 			var fieldB = matches ? matches[0] : '';
-			firstCreatorSortCache[b.id] = fieldB;
+			firstCreatorSortCache[bItemID] = fieldB;
 		}
 		
-		if (!fieldA && !fieldB) {
+		if (fieldA === "" && fieldB === "") {
 			return 0;
 		}
 		
 		var cmp = strcmp(fieldA, fieldB, true);
-		if (cmp) {
-			return cmp
+		if (cmp !== 0) {
+			return cmp;
 		}
 		
 		//
 		// If first word is the same, compare actual creators
 		//
-		var aCreators = a.ref.getCreators();
-		var bCreators = b.ref.getCreators();
-		var aNumCreators = a.ref.numCreators();
-		var bNumCreators = b.ref.numCreators();
-		
-		var aPrimary = Zotero.CreatorTypes.getPrimaryIDForType(a.ref.itemTypeID);
-		var bPrimary = Zotero.CreatorTypes.getPrimaryIDForType(b.ref.itemTypeID);
-		var editorTypeID = 3;
-		var contributorTypeID = 2;
+		var aRef = a.ref,
+			bRef = b.ref,
+			aCreators = aRef.getCreators(),
+			bCreators = bRef.getCreators(),
+			aNumCreators = aCreators.length,
+			bNumCreators = bCreators.length,
+			aPrimary = Zotero.CreatorTypes.getPrimaryIDForType(aRef.itemTypeID),
+			bPrimary = Zotero.CreatorTypes.getPrimaryIDForType(bRef.itemTypeID);
+		const editorTypeID = 3,
+			contributorTypeID = 2;
 		
 		// Find the first position of each possible creator type
 		var aPrimaryFoundAt = false;
@@ -1363,14 +1356,14 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 			// Compare names
 			fieldA = Zotero.Items.getSortTitle(aCreators[aPos].ref.lastName);
 			fieldB = Zotero.Items.getSortTitle(bCreators[bPos].ref.lastName);
-			var cmp = strcmp(fieldA, fieldB, true);
+			cmp = strcmp(fieldA, fieldB, true);
 			if (cmp) {
 				return cmp;
 			}
 			
 			fieldA = Zotero.Items.getSortTitle(aCreators[aPos].ref.firstName);
 			fieldB = Zotero.Items.getSortTitle(bCreators[bPos].ref.firstName);
-			var cmp = strcmp(fieldA, fieldB, true);
+			cmp = strcmp(fieldA, fieldB, true);
 			if (cmp) {
 				return cmp;
 			}
@@ -1383,7 +1376,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				if (!aCreators[aPos]) {
 					Components.utils.reportError(
 						"Creator is missing at position " + aPos
-						+ " for item " + a.ref.libraryID + "/" + a.ref.key
+						+ " for item " + aRef.libraryID + "/" + aRef.key
 					);
 					return -1;
 				}
@@ -1402,7 +1395,7 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 				if (!bCreators[bPos]) {
 					Components.utils.reportError(
 						"Creator is missing at position " + bPos
-						+ " for item " + b.ref.libraryID + "/" + b.ref.key
+						+ " for item " + bRef.libraryID + "/" + bRef.key
 					);
 					return -1;
 				}
@@ -1428,10 +1421,8 @@ Zotero.ItemTreeView.prototype.sort = function(itemID)
 	
 	function strcmp(a, b, collationSort) {
 		// Display rows with empty values last
-		var cmp = (a == '' && b != '') ? -1 : (a != '' && b == '') ? 1 : 0;
-		if (cmp) {
-			return cmp;
-		}
+		if(a === '' && b !== '') return -1;
+		if(a !== '' && b === '') return 1;
 		
 		if (collationSort) {
 			return collation.compareString(1, b, a);
