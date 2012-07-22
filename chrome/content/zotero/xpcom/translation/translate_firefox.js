@@ -85,6 +85,8 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 			return s.serializeToString(doc.__wrappedDOMObject ? doc.__wrappedDOMObject : doc);
 		};
 	};
+	this.sandbox.XMLSerializer.__exposedProps__ = {"prototype":"r"};
+	this.sandbox.XMLSerializer.prototype = {};
 }
 
 /**
