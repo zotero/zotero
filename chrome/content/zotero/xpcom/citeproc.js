@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.359",
+    PROCESSOR_VERSION: "1.0.360",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -196,7 +196,7 @@ var CSL = {
         "delimiter"
     ],
     PARALLEL_MATCH_VARS: ["container-title"],
-    PARALLEL_TYPES: ["bill","gazette","legislation","legal_case","treaty"],
+    PARALLEL_TYPES: ["bill","gazette","legislation","legal_case","treaty","article-magazine","article-journal"],
     PARALLEL_COLLAPSING_MID_VARSET: ["volume", "issue", "container-title", "section", "collection-number"],
     LOOSE: 0,
     STRICT: 1,
@@ -1116,6 +1116,13 @@ CSL.Output.Queue.prototype.append = function (str, tokname, notSerious, ignorePr
         }
         if (this.state.tmp.strip_periods && !noStripPeriods) {
             blob.blobs = blob.blobs.replace(/\.([^a-z]|$)/g, "$1");
+        }
+        if (!blob.blobs.match(CSL.ROMANESQUE_REGEXP)) {
+            for (var i = blob.decorations.length - 1; i > -1; i += -1) {
+                if (blob.decorations[i][0] === "@font-style") {
+                    blob.decorations = blob.decorations.slice(0, i).concat(blob.decorations.slice(i + 1));
+                }
+            }
         }
         this.state.fun.flipflopper.init(str, blob);
         this.state.fun.flipflopper.processTags();
@@ -3057,6 +3064,7 @@ CSL.Engine.Opt = function () {
     this.development_extensions.clobber_locator_if_no_statute_section = false;
     this.development_extensions.wrap_url_and_doi = false;
     this.development_extensions.allow_force_lowercase = false;
+    this.development_extensions.handle_parallel_articles = false;
     this.nodenames = [];
     this.gender = {};
 	this['cite-lang-prefs'] = {
@@ -9583,7 +9591,11 @@ CSL.Transform = function (state) {
                             secondary_tok.decorations = secondary_tok.decorations.slice(0, i).concat(secondary_tok.decorations.slice(i + 1))
                         }
                     }
-					state.output.append(secondary, secondary_tok);
+                    state.output.append(secondary, secondary_tok);
+                    var blob_obj = state.output.current.value();
+                    var blobs_pos = state.output.current.value().blobs.length - 1;
+                    state.parallel.cite.front.push(variables[0] + ":secondary");
+                    state.parallel.cite[variables[0] + ":secondary"] = {blobs:[[blob_obj, blobs_pos]]};
                 }
                 if (tertiary) {
                     tertiary_tok = CSL.Util.cloneToken(primary_tok);
@@ -9597,7 +9609,11 @@ CSL.Transform = function (state) {
                             tertiary_tok.decorations = tertiary_tok.decorations.slice(0, i).concat(tertiary_tok.decorations.slice(i + 1))
                         }
                     }
-					state.output.append(tertiary, tertiary_tok);
+                    state.output.append(tertiary, tertiary_tok);
+                    var blob_obj = state.output.current.value();
+                    var blobs_pos = state.output.current.value().blobs.length - 1;
+                    state.parallel.cite.front.push(variables[0] + ":secondary");
+                    state.parallel.cite[variables[0] + ":secondary"] = {blobs:[[blob_obj, blobs_pos]]};
                 }
 				state.output.closeLevel();
             } else {
@@ -9671,9 +9687,10 @@ CSL.Parallel = function (state) {
     this.sets = new CSL.Stack([]);
     this.try_cite = true;
     this.use_parallels = true;
-    this.midVars = ["section", "volume", "container-title", "collection-number", "issue", "page", "page-first", "number"];
-    this.ignoreVarsOther = ["first-reference-note-number", "locator", "label"];
+    this.midVars = ["section", "volume", "container-title", "collection-number", "issue", "number"];
+    this.ignoreVarsLawGeneral = ["first-reference-note-number", "locator", "label","page-first","page"];
     this.ignoreVarsOrders = ["first-reference-note-number"];
+    this.ignoreVarsOther = ["first-reference-note-number", "locator", "label","section","page-first","page"];
 };
 CSL.Parallel.prototype.isMid = function (variable) {
     return (this.midVars.indexOf(variable) > -1);
@@ -9700,8 +9717,10 @@ CSL.Parallel.prototype.StartCite = function (Item, item, prevItemID) {
     var position, len, pos, x, curr, master, last_id, prev_locator, curr_locator, is_master, parallel;
     if (["treaty"].indexOf(Item.type) > -1) {
         this.ignoreVars = this.ignoreVarsOrders;
-    } else {
+    } else if (["article-journal","article-magazine"].indexOf(Item.type) > -1) {
         this.ignoreVars = this.ignoreVarsOther;
+    } else {
+        this.ignoreVars = this.ignoreVarsLawGeneral;
     }
     if (this.use_parallels) {
         if (this.sets.value().length && this.sets.value()[0].itemId == Item.id) {
@@ -9719,14 +9738,21 @@ CSL.Parallel.prototype.StartCite = function (Item, item, prevItemID) {
                 break;
             }
         }
-        var title_ok = true;
+        var basics_ok = true;
         var last_cite = this.sets.value().slice(-1)[0];
-        if (last_cite && (last_cite.Item.title || Item.title)) {
+        if (last_cite && last_cite.Item) {
             if (last_cite.Item.title !== Item.title) {
-                title_ok = false;
+                basics_ok = false;
+            } else if (last_cite.Item.type !== Item.type) {
+                basics_ok = false;
+            } else if (["article-journal","article-magazine"].indexOf(Item.type) > -1) {
+                if (!this.state.opt.development_extensions.handle_parallel_articles
+                   || last_cite.Item["container-title"] !== Item["container-title"]) {
+                    basics_ok = false;
+                }
             }
         }
-        if (!title_ok || !has_required_var || CSL.PARALLEL_TYPES.indexOf(Item.type) === -1) {
+        if (!basics_ok || !has_required_var || CSL.PARALLEL_TYPES.indexOf(Item.type) === -1) {
             this.try_cite = true;
             if (this.in_series) {
                 this.in_series = false;
@@ -9800,18 +9826,32 @@ CSL.Parallel.prototype.StartVariable = function (variable) {
         if (variable === "number") {
             this.cite.front.push(this.variable);
         } else if (CSL.PARALLEL_COLLAPSING_MID_VARSET.indexOf(variable) > -1) {
-            this.cite.front.push(this.variable);
+            if (["article-journal","article-magazine"].indexOf(this.cite.Item.type) > -1) {
+                this.cite.mid.push(this.variable);
+            } else {
+                this.cite.front.push(this.variable);
+            }
         } else {
             this.cite[this.target].push(this.variable);
         }
-    }
+   }
 };
 CSL.Parallel.prototype.AppendBlobPointer = function (blob) {
     if (this.ignoreVars.indexOf(this.variable) > -1) {
         return;
     }
-    if (this.use_parallels && this.variable && (this.try_cite || this.force_collapse) && blob && blob.blobs) {
-        this.data.blobs.push([blob, blob.blobs.length]);
+    if (this.use_parallels) {
+        if (["article-journal", "article-magazine"].indexOf(this.cite.Item.type) > -1) {
+            if (["volume","page","page-first","issue"].indexOf(this.variable) > -1) {
+                return;
+            }
+            if ("container-title" === this.variable && this.cite.mid.length > 1) {
+                return;
+            }
+        }
+        if (this.variable && (this.try_cite || this.force_collapse) && blob && blob.blobs) {
+            this.data.blobs.push([blob, blob.blobs.length]);
+        }
     }
 };
 CSL.Parallel.prototype.AppendToVariable = function (str, varname) {
