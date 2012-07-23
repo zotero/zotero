@@ -308,15 +308,15 @@ Zotero_RecognizePDF.Recognizer.prototype.recognize = function(file, libraryID, c
 	// look for DOI - Use only first 80 lines to avoid catching article references
 	var allText = lines.join("\n");
 	Zotero.debug(allText);
-	var m = Zotero.Utilities.cleanDOI(allText.slice(0,80));
+	var m = Zotero.Utilities.cleanDOI(lines.slice(0,80).join('\n'));
 	if(m) {
 		this._DOI = m[0];
-	}
-	
-	var isbns = this._findISBNs(allText);
-	if(isbns.length > 0) {
-		this._ISBNs = isbns;
-		Zotero.debug("Found ISBNs: " + isbns);
+	} else { // dont look for ISBNs if we found a DOI
+		var isbns = this._findISBNs(allText);
+		if(isbns.length > 0) {
+			this._ISBNs = isbns;
+			Zotero.debug("Found ISBNs: " + isbns);
+		}
 	}
 	
 	// Use only first column from multi-column lines
@@ -371,7 +371,6 @@ Zotero_RecognizePDF.Recognizer.prototype._findISBNs = function(x) {
 	var match;
 	
 	while (match = pattern.exec(x)) {
-		Zotero.debug("isbn0: " + match);
 		var isbn = match[3];
 		isbn = isbn.replace(/[ \u2014\u2013\u2012-]/g, '');
 		if(isbn.length==20 || isbn.length==26) { 
@@ -411,11 +410,9 @@ Zotero_RecognizePDF.Recognizer.prototype._isValidISBN = function(isbn) {
 		// last number might be 'X'
 		if (isbn[9] == 'X' || isbn[9] == 'x') check += 10;
 		else check += isbn[i]*1;
-		Zotero.debug("ISBN-10 check digit " + (check % 11));
 		return (check % 11 == 0);
-	} else {
-		return false;
 	}
+	return false;
 }
 
 /**
@@ -443,7 +440,7 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 			item = {"itemType":"journalArticle", "DOI":this._DOI};
 			
 		}
-		if(this._ISBNs) {
+		else if(this._ISBNs) {
 			// use Open WorldCat to look for ISBN
 			translate.setTranslator("c73a4a8c-3ef1-4ec8-8229-7531ee384cc4"); 
 			item = {"itemType":"book", "ISBN":this._ISBNs[0]};
@@ -460,7 +457,7 @@ Zotero_RecognizePDF.Recognizer.prototype._queryGoogle = function() {
 		});
 		translate.translate(this._libraryID, false);
 		if(this._DOI) delete this._DOI;
-		if(this._ISBNs) delete this.ISBNs;
+		else if(this._ISBNs) delete this.ISBNs;
 	} else {
 		// take the relevant parts of some lines (exclude hyphenated word)
 		var queryStringWords = 0;
