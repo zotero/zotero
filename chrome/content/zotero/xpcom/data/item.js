@@ -402,6 +402,9 @@ Zotero.Item.prototype.loadFromRow = function(row, reload) {
 					this['_' + col] = row[col] ? parseInt(row[col]) : 0;
 					break;
 				
+				case 'sourceItemID':
+					this['_sourceItem'] = row[col] || false;
+				
 				default:
 					this['_' + col] = row[col] ? row[col] : '';
 			}

@@ -46,7 +46,7 @@ Zotero.Items = new function() {
 			_primaryFields = Zotero.DB.getColumns('items');
 			_primaryFields.splice(_primaryFields.indexOf('clientDateModified'), 1);
 			_primaryFields = _primaryFields.concat(
-				['firstCreator', 'numNotes', 'numAttachments']
+				['firstCreator', 'numNotes', 'numAttachments', 'sourceItemID']
 			);
 		}
 		
@@ -749,7 +749,9 @@ Zotero.Items = new function() {
 			+ "(SELECT COUNT(*) FROM itemNotes INo WHERE sourceItemID=I.itemID AND "
 			+ "INo.itemID NOT IN (SELECT itemID FROM deletedItems)) AS numNotes, "
 			+ "(SELECT COUNT(*) FROM itemAttachments IA WHERE sourceItemID=I.itemID AND "
-			+ "IA.itemID NOT IN (SELECT itemID FROM deletedItems)) AS numAttachments "
+			+ "IA.itemID NOT IN (SELECT itemID FROM deletedItems)) AS numAttachments, "
+			+ "(CASE I.itemTypeID WHEN 14 THEN (SELECT sourceItemID FROM itemAttachments IA WHERE IA.itemID=I.itemID) "
+			+ "WHEN 1 THEN (SELECT sourceItemID FROM itemNotes INo WHERE INo.itemID=I.itemID) END) AS sourceItemID "
 			+ 'FROM items I WHERE 1';
 		if (arguments[0]) {
 			sql += ' AND I.itemID IN (' + Zotero.join(arguments[0], ',') + ')';
