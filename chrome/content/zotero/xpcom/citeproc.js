@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.361",
+    PROCESSOR_VERSION: "1.0.362",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -7843,6 +7843,9 @@ CSL.Node.number = {
             var i, ilen, newlst, lst;
             if (this.variables.length === 0) {
                 return;
+            }
+            if ("undefined" === typeof item) {
+                var item = {};
             }
             var varname, num, number, m, j, jlen;
             varname = this.variables[0];
