@@ -3,7 +3,7 @@
 	url = git@github.com:fbennett/translators.git
 [submodule "styles"]
 	path = styles
-	url = git://github.com/zotero/bundled-styles.git
+	url = git@github.com:fbennett/bundled-styles.git
 [submodule "chrome/content/zotero/locale/csl"]
 	path = chrome/content/zotero/locale/csl
-	url = git://github.com/fbennett/locales.git
+	url = git@github.com:fbennett/locales.git
