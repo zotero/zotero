@@ -784,7 +784,7 @@ Zotero.Items = new function() {
 			}
 			
 			_cachedFields = ['itemID', 'itemTypeID', 'dateAdded', 'dateModified',
-				'firstCreator', 'numNotes', 'numAttachments', 'numChildren'];
+				'firstCreator', 'numNotes', 'numAttachments', 'sourceItemID', 'numChildren'];
 			this._reloadCache = false;
 		}
 	}
