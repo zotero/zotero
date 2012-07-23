@@ -717,6 +717,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 			case 'firstCreator':
 			case 'numNotes':
 			case 'numAttachments':
+			case 'sourceItemID':
 				throw ('Primary field ' + field + ' cannot be changed in Zotero.Item.setField()');
 		}
 		
@@ -4419,6 +4420,7 @@ Zotero.Item.prototype.toArray = function (mode) {
 			case 'firstCreator':
 			case 'numNotes':
 			case 'numAttachments':
+			case 'sourceItemID':
 				continue;
 			
 			// For the rest, just copy over
@@ -4551,6 +4553,9 @@ Zotero.Item.prototype.serialize = function(mode) {
 			case 'numNotes':
 			case 'numAttachments':
 				arr.virtual[i] = this['_' + i];
+				continue;
+			
+			case 'sourceItemID':
 				continue;
 			
 			// For the rest, just copy over
