@@ -197,24 +197,27 @@ Zotero.Translate.ItemSaver.prototype = {
 			} else {
 				Zotero.debug("Translate: Save to server complete");
 				
-				if(typedArraysSupported) {
-					try {
-						var newKeys = me._getItemKeysFromServerResponse(response);
-					} catch(e) {
-						callback(false, e);
-						return;
-					}
-					
-					for(var i=0; i<items.length; i++) {
-						var item = items[i], key = newKeys[i];
-						if(item.attachments && item.attachments.length) {
-							me._saveAttachmentsToServer(key, me._getFileBaseNameFromItem(item),
-								item.attachments, attachmentCallback);
+				Zotero.Prefs.getCallback(["downloadAssociatedFiles", "automaticSnapshots"],
+				function(prefs) {
+					if(typedArraysSupported) {
+						try {
+							var newKeys = me._getItemKeysFromServerResponse(response);
+						} catch(e) {
+							callback(false, e);
+							return;
+						}
+						
+						for(var i=0; i<items.length; i++) {
+							var item = items[i], key = newKeys[i];
+							if(item.attachments && item.attachments.length) {
+								me._saveAttachmentsToServer(key, me._getFileBaseNameFromItem(item),
+									item.attachments, prefs, attachmentCallback);
+							}
 						}
 					}
-				}
-				
-				callback(true, items);
+					
+					callback(true, items);
+				});
 			}
 		});
 	},
@@ -224,11 +227,12 @@ Zotero.Translate.ItemSaver.prototype = {
 	 * @param {String} itemKey The key of the parent item
 	 * @param {String} baseName A string to use as the base name for attachments
 	 * @param {Object[]} attachments An array of attachment objects
+	 * @param {Object} prefs An object with the values of the downloadAssociatedFiles and automaticSnapshots preferences
 	 * @param {Function} attachmentCallback A callback that receives information about attachment
 	 *     save progress. The callback will be called as attachmentCallback(attachment, false, error)
 	 *     on failure or attachmentCallback(attachment, progressPercent) periodically during saving.
 	 */
-	"_saveAttachmentsToServer":function(itemKey, baseName, attachments, attachmentCallback) {
+	"_saveAttachmentsToServer":function(itemKey, baseName, attachments, prefs, attachmentCallback) {
 		var me = this,
 			uploadAttachments = [],
 			retrieveHeadersForAttachments = attachments.length;
@@ -240,6 +244,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		 * @inner
 		 */
 		var createAttachments = function() {
+			if(uploadAttachments.length === 0) return;
 			var attachmentPayload = [];
 			for(var i=0; i<uploadAttachments.length; i++) {
 				var attachment = uploadAttachments[i];
@@ -297,16 +302,6 @@ Zotero.Translate.ItemSaver.prototype = {
 				delete attachment.key;
 				delete attachment.data;
 				
-				if(attachment.snapshot === false && attachment.mimeType) {
-					// If we aren't taking a snapshot and we have the MIME type, we don't need
-					// to retrieve anything
-					attachment.linkMode = "linked_url";
-					uploadAttachments.push(attachment);
-					if(attachmentCallback) attachmentCallback(attachment, 0);
-					if(--retrieveHeadersForAttachments === 0) createAttachments();
-					return;
-				}
-				
 				var isSnapshot = false;
 				if(attachment.mimeType) {
 					switch(attachment.mimeType.toLowerCase()) {
@@ -314,6 +309,20 @@ Zotero.Translate.ItemSaver.prototype = {
 						case "application/xhtml+xml":
 							isSnapshot = true;
 					}
+				}
+				
+				if((isSnapshot && !prefs.automaticSnapshots) || (!isSnapshot && !prefs.downloadAssociatedFiles)) {
+					// Check preferences to see if we should download this file
+					if(--retrieveHeadersForAttachments === 0) createAttachments();
+					return;
+				} else if(attachment.snapshot === false && attachment.mimeType) {
+					// If we aren't taking a snapshot and we have the MIME type, we don't need
+					// to retrieve anything
+					attachment.linkMode = "linked_url";
+					uploadAttachments.push(attachment);
+					if(attachmentCallback) attachmentCallback(attachment, 0);
+					if(--retrieveHeadersForAttachments === 0) createAttachments();
+					return;
 				}
 				
 				/**
