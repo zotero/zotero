@@ -183,15 +183,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	var _waitingForDBLock = false;
 	
 	/**
-	 * Maintains nsITimers to be used when Zotero.wait() completes (to reduce performance penalty
-	 * of initializing new objects)
+	 * Maintains callbacks to be called when Zotero.wait() completes
 	 */
-	var _waitTimers = [];
-	
-	/**
-	 * Maintains nsITimerCallbacks to be used when Zotero.wait() completes
-	 */
-	var _waitTimerCallbacks = [];
+	var _waitCallbacks = [];
 	
 	/**
 	 * Maintains running nsITimers in global scope, so that they don't disappear randomly
@@ -1453,12 +1447,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		_waiting--;
 		
-		// requeue nsITimerCallbacks that came up during Zotero.wait() but couldn't execute
-		for(var i in _waitTimers) {
-			_waitTimers[i].initWithCallback(_waitTimerCallbacks[i], 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-		}
-		_waitTimers = [];
-		_waitTimerCallbacks = [];
+		// requeue callbacks that came up during Zotero.wait() but couldn't execute
+		for(var i in _waitCallbacks) Zotero.setTimeout(_waitCallbacks[i], 0);
+		_waitCallbacks = [];
 		
 		//Zotero.debug("Waited " + cycles + " cycles");
 		return;
@@ -1490,12 +1481,9 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			
 			win.clearInterval(intervalID);
 			
-			// requeue nsITimerCallbacks that came up during generator pumping but couldn't execute
-			for(var i in _waitTimers) {
-				_waitTimers[i].initWithCallback(_waitTimerCallbacks[i], 0, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-			}
-			_waitTimers = [];
-			_waitTimerCallbacks = [];
+			// requeue callbacks that came up during generator pumping but couldn't execute
+			for(var i in _waitCallbacks) Zotero.setTimeout(_waitCallbacks[i], 0);
+			_waitCallbacks = [];
 			
 			if(err) {
 				if(errorHandler) {
@@ -1530,17 +1518,17 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 *                                  is executing
 	 */
 	this.setTimeout = function(func, ms, runWhenWaiting) {
-		Services.appShell.hiddenDOMWindow.setTimeout(function() {
+		var callback = function() {
 			if(_waiting && !runWhenWaiting) {
 				// if our callback gets called during Zotero.wait(), queue it to be set again
 				// when Zotero.wait() completes
-				_waitTimers.push(timer);
-				_waitTimerCallbacks.push(timerCallback);
+				_waitCallbacks.push(callback);
 			} else {
 				// execute callback function
 				func();
 			}
-		}, ms);
+		};
+		Services.appShell.hiddenDOMWindow.setTimeout(callback, ms);
 	}
 	
 	/**
