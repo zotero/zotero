@@ -417,6 +417,8 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 			return s.serializeToString(Zotero.Translate.DOMWrapper.unwrap(doc));
 		};
 	};
+	this.sandbox.XMLSerializer.__exposedProps__ = {"prototype":"r"};
+	this.sandbox.XMLSerializer.prototype = {};
 }
 
 Zotero.Translate.SandboxManager.prototype = {

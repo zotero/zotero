@@ -510,73 +510,76 @@ Zotero.Translate.Sandbox = {
 		 * @param {SandboxItem} An item created using the Zotero.Item class from the sandbox
 		 */
 		 "_itemDone":function(translate, item) {
-			if(!item.itemType) {
-				item.itemType = "webpage";
-				translate._debug("WARNING: No item type specified");
-			}
-			
-			if(item.type == "attachment" || item.type == "note") {
-				Zotero.debug("Translate: Discarding standalone "+item.type+" in non-import translator", 2);
-				return;
-			}
-		 	
-			// store library catalog if this item was captured from a website, and
-			// libraryCatalog is truly undefined (not false or "")
-			if(item.repository !== undefined) {
-				Zotero.debug("Translate: 'repository' field is now 'libraryCatalog'; please fix your code", 2);
-				item.libraryCatalog = item.repository;
-				delete item.repository;
-			}
-			
-			// automatically set library catalog
-			if(item.libraryCatalog === undefined) {
-				item.libraryCatalog = translate.translator[0].label;
-			}
-						
-			// automatically set access date if URL is set
-			if(item.url && typeof item.accessDate == 'undefined') {
-				item.accessDate = "CURRENT_TIMESTAMP";
-			}
-			
-			if(!item.title) {
-				translate.complete(false, new Error("No title specified for item"));
-				return;
-			}
-			
-			// create short title
-			if(item.shortTitle === undefined && Zotero.Utilities.fieldIsValidForType("shortTitle", item.itemType)) {		
-				// only set if changes have been made
-				var setShortTitle = false;
-				var title = item.title;
-				
-				// shorten to before first colon
-				var index = title.indexOf(":");
-				if(index !== -1) {
-					title = title.substr(0, index);
-					setShortTitle = true;
+		 	// Only apply checks if there is no parent translator
+		 	if(!translate._parentTranslator) {
+				if(!item.itemType) {
+					item.itemType = "webpage";
+					translate._debug("WARNING: No item type specified");
 				}
-				// shorten to after first question mark
-				index = title.indexOf("?");
-				if(index !== -1) {
-					index++;
-					if(index != title.length) {
+				
+				if(item.type == "attachment" || item.type == "note") {
+					Zotero.debug("Translate: Discarding standalone "+item.type+" in non-import translator", 2);
+					return;
+				}
+				
+				// store library catalog if this item was captured from a website, and
+				// libraryCatalog is truly undefined (not false or "")
+				if(item.repository !== undefined) {
+					Zotero.debug("Translate: 'repository' field is now 'libraryCatalog'; please fix your code", 2);
+					item.libraryCatalog = item.repository;
+					delete item.repository;
+				}
+				
+				// automatically set library catalog
+				if(item.libraryCatalog === undefined) {
+					item.libraryCatalog = translate.translator[0].label;
+				}
+							
+				// automatically set access date if URL is set
+				if(item.url && typeof item.accessDate == 'undefined') {
+					item.accessDate = "CURRENT_TIMESTAMP";
+				}
+				
+				if(!item.title) {
+					translate.complete(false, new Error("No title specified for item"));
+					return;
+				}
+				
+				// create short title
+				if(item.shortTitle === undefined && Zotero.Utilities.fieldIsValidForType("shortTitle", item.itemType)) {		
+					// only set if changes have been made
+					var setShortTitle = false;
+					var title = item.title;
+					
+					// shorten to before first colon
+					var index = title.indexOf(":");
+					if(index !== -1) {
 						title = title.substr(0, index);
 						setShortTitle = true;
 					}
+					// shorten to after first question mark
+					index = title.indexOf("?");
+					if(index !== -1) {
+						index++;
+						if(index != title.length) {
+							title = title.substr(0, index);
+							setShortTitle = true;
+						}
+					}
+					
+					if(setShortTitle) item.shortTitle = title;
 				}
 				
-				if(setShortTitle) item.shortTitle = title;
-			}
-			
-			// refuse to save very long tags
-			if(item.tags) {
-				for(var i=0; i<item.tags.length; i++) {
-					var tag = item.tags[i];
-						tagString = typeof tag === "string" ? tag :
-							typeof tag === "object" ? (tag.tag || tag.name) : null;
-					if(tagString && tagString.length > 255) {
-						translate._debug("WARNING: Skipping unsynchable tag "+JSON.stringify(tagString));
-						item.tags.splice(i--, 1);
+				// refuse to save very long tags
+				if(item.tags) {
+					for(var i=0; i<item.tags.length; i++) {
+						var tag = item.tags[i];
+							tagString = typeof tag === "string" ? tag :
+								typeof tag === "object" ? (tag.tag || tag.name) : null;
+						if(tagString && tagString.length > 255) {
+							translate._debug("WARNING: Skipping unsynchable tag "+JSON.stringify(tagString));
+							item.tags.splice(i--, 1);
+						}
 					}
 				}
 			}
