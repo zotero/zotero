@@ -3245,7 +3245,7 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
 			value = false;
 		}
 		
-		if (name.slice(17) === 'citationLangPrefs') {
+		if (name.slice(0,17) === 'citationLangPrefs') {
 			this.prefs.citationLangPrefs[name.slice(17).toLowerCase()] = value.split(',');
 		} else if (name === "citationAffixes") {
             this.prefs.citationAffixes = value.split("|");
