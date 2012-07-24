@@ -1473,10 +1473,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	this.pumpGenerator = function(generator, ms, errorHandler, doneHandler) {
 		_waiting++;
 		
-		var timer = Components.classes["@mozilla.org/timer;1"].
-			createInstance(Components.interfaces.nsITimer),
-			yielded;
-		var timerCallback = {"notify":function() {
+		var win = Services.appShell.hiddenDOMWindow;
+		var intervalID = win.setInterval(function() {
 			var err = false;
 			_waiting--;
 			try {
@@ -1490,8 +1488,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 				err = e;
 			}
 			
-			timer.cancel();
-			_runningTimers.splice(_runningTimers.indexOf(timer), 1);
+			win.clearInterval(intervalID);
 			
 			// requeue nsITimerCallbacks that came up during generator pumping but couldn't execute
 			for(var i in _waitTimers) {
@@ -1509,10 +1506,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			} else if(doneHandler) {
 				doneHandler(yielded);
 			}
-		}}
-		timer.initWithCallback(timerCallback, ms ? ms : 0, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
-		// add timer to global scope so that it doesn't get garbage collected before it completes
-		_runningTimers.push(timer);
+		}, ms);
 	};
 	
 	/**
@@ -1536,9 +1530,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 *                                  is executing
 	 */
 	this.setTimeout = function(func, ms, runWhenWaiting) {
-		var timer = Components.classes["@mozilla.org/timer;1"].
-			createInstance(Components.interfaces.nsITimer);
-		var timerCallback = {"notify":function() {
+		Services.appShell.hiddenDOMWindow.setTimeout(function() {
 			if(_waiting && !runWhenWaiting) {
 				// if our callback gets called during Zotero.wait(), queue it to be set again
 				// when Zotero.wait() completes
@@ -1547,13 +1539,8 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 			} else {
 				// execute callback function
 				func();
-				// remove timer from global scope, so it can be garbage collected
-				_runningTimers.splice(_runningTimers.indexOf(timer), 1);
 			}
-		}}
-		timer.initWithCallback(timerCallback, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-		// add timer to global scope so that it doesn't get garbage collected before it completes
-		_runningTimers.push(timer);
+		}, ms);
 	}
 	
 	/**
