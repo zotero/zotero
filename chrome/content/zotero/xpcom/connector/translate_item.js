@@ -271,6 +271,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					err = new Error("Unexpected status "+statusCode+" received from server");
 				}
 				
+				Zotero.debug("Finished creating items");
 				for(var i=0; i<uploadAttachments.length; i++) {
 					var attachment = uploadAttachments[i];
 					if(err) {
@@ -278,7 +279,6 @@ Zotero.Translate.ItemSaver.prototype = {
 					} else {
 						attachment.key = newKeys[i];
 						
-						Zotero.debug("Finished creating items");
 						if(attachment.linkMode === "linked_url") {
 							attachmentCallback(attachment, 100);
 						} else if("data" in attachment) {
@@ -343,7 +343,6 @@ Zotero.Translate.ItemSaver.prototype = {
 					// Validate status
 					if(status === 0 || attachment.snapshot === false) {
 						// Failed due to SOP, or we are supposed to be getting a snapshot
-						attachmentCallback(attachment, 0);
 						attachment.linkMode = "linked_url";
 					} else if(status !== 200) {
 						err = new Error("Server returned unexpected status code "+status);
@@ -405,6 +404,7 @@ Zotero.Translate.ItemSaver.prototype = {
 						attachmentCallback(attachment, false, err);
 						Zotero.logError(err);
 					}
+					return headersValidated;
 				};
 				
 				var xhr = new XMLHttpRequest();
