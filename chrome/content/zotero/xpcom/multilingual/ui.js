@@ -49,6 +49,17 @@ Zotero.LANGUAGE_NAMES = {
 	"zh-TW": "Chinese (Taiwan)"
 }
 
+Zotero.DOCUMENT_MULTI_PREFERENCES = [
+    "citationTranslation",
+    "citationTransliteration",
+    "citationSort",
+    "citationLangPrefsPersons",
+    "citationLangPrefsInstitutions",
+    "citationLangPrefsTitles",
+    "citationLangPrefsPublishers",
+    "citationLangPrefsPlaces"
+];
+
 Zotero.LANGUAGE_INDEX = {}
 
 Zotero.setupLocale = function(document) {
@@ -185,7 +196,6 @@ Zotero.switchLocale = function(document) {
 
 
 Zotero.setCitationLanguages = function (obj, citeproc) {
-	obj.citationLangPrefs = {};
 	var segments = ['Persons', 'Institutions', 'Titles', 'Publishers', 'Places'];
 	for (var i = 0, ilen = segments.length; i < ilen; i += 1) {
         var settings = Zotero.Prefs.get("csl.citation" + segments[i]);
@@ -194,7 +204,7 @@ Zotero.setCitationLanguages = function (obj, citeproc) {
         } else {
             settings = ['orig']
         }
-		obj.citationLangPrefs[segments[i].toLowerCase()] = settings;
+		obj['citationLangPrefs'+segments[i]] = settings;
 	}
     obj.citationAffixes = null;
     var affixes = Zotero.Prefs.get("csl.citationAffixes");
@@ -221,7 +231,7 @@ Zotero.setCitationLanguages = function (obj, citeproc) {
 		}
 	}
 	if (citeproc) {
-		citeproc.setLangPrefsForCites(obj.citationLangPrefs);
+		citeproc.setLangPrefsForCites(obj);
 
 		citeproc.setLangTagsForCslTransliteration(obj.citationTransliteration);
 		citeproc.setLangTagsForCslTranslation(obj.citationTranslation);

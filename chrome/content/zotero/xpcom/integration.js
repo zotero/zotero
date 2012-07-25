@@ -2107,7 +2107,7 @@ Zotero.Integration.Session.prototype.setData = function(data) {
 			this.style.setLangTagsForCslTransliteration(data.prefs.citationTransliteration);
 			this.style.setLangTagsForCslTranslation(data.prefs.citationTranslation);
 			this.style.setLangTagsForCslSort(data.prefs.citationSort);
-			this.style.setLangPrefsForCites(data.prefs.citationLangPrefs);
+			this.style.setLangPrefsForCites(data.prefs, function(key){return 'citationLangPrefs'+key});
 			this.style.setLangPrefsForCiteAffixes(data.prefs.citationAffixes);
 		} catch(e) {
 			Zotero.logError(e);
@@ -2138,7 +2138,11 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		io.citationTransliteration = this.data.prefs.citationTransliteration;
 		io.citationTranslation = this.data.prefs.citationTranslation;
 		io.citationSort = this.data.prefs.citationSort;
-		io.citationLangPrefs = this.data.prefs.citationLangPrefs;
+		io.citationLangPrefsPersons = this.data.prefs.citationLangPrefsPersons;
+		io.citationLangPrefsInstitutions = this.data.prefs.citationLangPrefsInstitutions;
+		io.citationLangPrefsTitles = this.data.prefs.citationLangPrefsTitles;
+		io.citationLangPrefsPublishers = this.data.prefs.citationLangPrefsPublishers;
+		io.citationLangPrefsPlaces = this.data.prefs.citationLangPrefsPlaces;
 		io.citationAffixes = this.data.prefs.citationAffixes;
 		io.primaryFieldType = primaryFieldType;
 		io.secondaryFieldType = secondaryFieldType;
@@ -2170,7 +2174,11 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		me.data.prefs.citationTransliteration = io.citationTransliteration;
 		me.data.prefs.citationTranslation = io.citationTranslation;
 		me.data.prefs.citationSort = io.citationSort;
-		me.data.prefs.citationLangPrefs = io.citationLangPrefs;
+		me.data.prefs.citationLangPrefsPersons = io.citationLangPrefsPersons;
+		me.data.prefs.citationLangPrefsInstitutions = io.citationLangPrefsInstitutions;
+		me.data.prefs.citationLangPrefsTitles = io.citationLangPrefsTitles;
+		me.data.prefs.citationLangPrefsPublishers = io.citationLangPrefsPublishers;
+		me.data.prefs.citationLangPrefsPlaces = io.citationLangPrefsPlaces;
 		me.data.prefs.citationAffixes = io.citationAffixes;
 		
 		if(!oldData || oldData.style.styleID != data.style.styleID
@@ -2183,7 +2191,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = function(doc, primaryFieldTyp
 		me.style.setLangTagsForCslTransliteration(me.data.prefs.citationTransliteration);
 		me.style.setLangTagsForCslTranslation(me.data.prefs.citationTranslation);
 		me.style.setLangTagsForCslSort(me.data.prefs.citationSort);
-		me.style.setLangPrefsForCites(me.data.prefs.citationLangPrefs);
+		me.style.setLangPrefsForCites(me.data.prefs, function(key){return 'citationLangPrefs'+key});
 		me.style.setLangPrefsForCiteAffixes(me.data.prefs.citationAffixes);
 		me.style.setAutoVietnameseNamesOption(Zotero.Prefs.get('csl.autoVietnameseNames'));
 
@@ -3167,7 +3175,11 @@ Zotero.Integration.DocumentData = function(string) {
 	this.prefs.citationTransliteration = [];
 	this.prefs.citationTranslation = [];
 	this.prefs.citationSort = [];
-	this.prefs.citationLangPrefs = {};
+	this.prefs.citationLangPrefsPersons = [];
+	this.prefs.citationLangPrefsInstitutions = [];
+	this.prefs.citationLangPrefsTitles = [];
+	this.prefs.citationLangPrefsPublishers = [];
+	this.prefs.citationLangPrefsPlaces = [];
 	this.prefs.citationAffixes = [,,,,,,,,,,,,,,];
 	this.sessionID = null;
 	if(string) {
@@ -3179,84 +3191,72 @@ Zotero.Integration.DocumentData = function(string) {
  * Serializes document-specific data as XML
  */
 Zotero.Integration.DocumentData.prototype.serializeXML = function() {
-	var xmlData = <data data-version={DATA_VERSION} zotero-version={Zotero.version}>
-			<session id={this.sessionID} />
-			<style id={this.style.styleID} hasBibliography={this.style.hasBibliography ? 1 : 0}
-				bibliographyStyleHasBeenSet={this.style.bibliographyStyleHasBeenSet ? 1 : 0}/>
-			<prefs/>
-		</data>;
-	
+	var prefs = "";
 	for(var pref in this.prefs) {
-		if (pref === 'citationLangPrefs') {
-			for (var segment in this.prefs.citationLangPrefs) {
-				if (this.prefs.citationLangPrefs[segment]) {
-					var citelangpref = pref + segment[0].toUpperCase() + segment.slice(1);
-					var citelangprefval = this.prefs.citationLangPrefs[segment].join(',');
-					xmlData.prefs.pref += <pref name={citelangpref} value={citelangprefval}/>;
-				}
+		if (pref === 'citationAffixes') {
+			var citeaffixes = "|||||||||||||||||||||||||||||";
+			if (this.prefs.citationAffixes.length === 30) {
+				citeaffixes = this.prefs.citationAffixes.join('|');
 			}
-		} else if (pref === 'citationAffixes') {
-            citeaffixes = "|||||||||||||||||||||||||||||";
-            if (this.prefs.citationAffixes.length === 30) {
-                var citeaffixes = this.prefs.citationAffixes.join('|');
-            }
-            xmlData.prefs.pref += <pref name="citationAffixes" value={citeaffixes}/>;
-		} else if (['citationTransliteration', 'citationTranslation', 'citationSort'].indexOf(pref) === -1) {
-			xmlData.prefs.pref += <pref name={pref} value={this.prefs[pref]}/>;
+			prefs += '<pref name="citationAffixes" '+
+				'value="'+Zotero.Utilities.htmlSpecialChars(citeaffixes)+'"/>'
+		} else if (Zotero.DOCUMENT_MULTI_PREFERENCES.indexOf(pref) > -1) {
+			var citeprefdata = this.prefs[pref].join(",");
+			prefs += '<pref name="'+Zotero.Utilities.htmlSpecialChars(pref)+'" '+
+				'value="'+Zotero.Utilities.htmlSpecialChars(citeprefdata)+'"/>';
 		} else {
-			if (!this.prefs[pref]) {
-				continue;
-			}
-			var newpref = <pref name={pref}/>;
-			for (var i = 0, ilen = this.prefs[pref].length; i < ilen; i += 1) {
-				newpref.prefitem += <prefitem value={this.prefs[pref][i]}/>;
-			}
-			xmlData.prefs.pref += newpref;
+			prefs += '<pref name="'+Zotero.Utilities.htmlSpecialChars(pref)+'" '+
+				'value="'+Zotero.Utilities.htmlSpecialChars("" + this.prefs[pref])+'"/>';
 		}
 	}
 	
-	XML.prettyPrinting = false;
-	var output = xmlData.toXMLString().replace("\n", "", "g");
-	XML.prettyPrinting = true;
-	return output;
-}
+	return '<data data-version="'+Zotero.Utilities.htmlSpecialChars("" + DATA_VERSION)+'" '+
+		'zotero-version="'+Zotero.Utilities.htmlSpecialChars("" + Zotero.version)+'">'+
+			'<session id="'+Zotero.Utilities.htmlSpecialChars("" + this.sessionID)+'"/>'+
+		'<style id="'+Zotero.Utilities.htmlSpecialChars("" + this.style.styleID)+'" '+
+			'hasBibliography="'+(this.style.hasBibliography ? "1" : "0")+'" '+
+			'bibliographyStyleHasBeenSet="'+("" + this.style.bibliographyStyleHasBeenSet ? "1" : "0")+'"/>'+
+		(prefs ? '<prefs>'+prefs+'</prefs>' : '<prefs/>')+'</data>';
+};
 
 
 /**
  * Unserializes document-specific XML
  */
 Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
-	if(typeof xmlData == "string") {
-		var xmlData = new XML(xmlData);
-	}
-	
-	this.sessionID = xmlData.session.@id.toString();
-	this.style = {"styleID":xmlData.style.@id.toString(),
-		"hasBibliography":(xmlData.style.@hasBibliography.toString() == 1),
-		"bibliographyStyleHasBeenSet":(xmlData.style.@bibliographyStyleHasBeenSet.toString() == 1)};
+	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser),
+		 doc = parser.parseFromString(xmlData, "application/xml");
+	this.sessionID = Zotero.Utilities.xpathText(doc, '/data/session[1]/@id');
+	this.style = {"styleID":Zotero.Utilities.xpathText(doc, '/data/style[1]/@id'),
+		"hasBibliography":(Zotero.Utilities.xpathText(doc, '/data/style[1]/@hasBibliography') == 1),
+		"bibliographyStyleHasBeenSet":(Zotero.Utilities.xpathText(doc, '/data/style[1]/@bibliographyStyleHasBeenSet') == 1)};
 	this.prefs = {};
-	this.prefs.citationLangPrefs = {};
-	for each(var pref in xmlData.prefs.children()) {
-		var name = pref.@name.toString();
-		var value = pref.@value.toString();
+	for each(var pref in Zotero.Utilities.xpath(doc, '/data/prefs[1]/pref')) {
+		var name = pref.getAttribute("name");
+		var value = pref.getAttribute("value");
 		if(value === "true") {
 			value = true;
 		} else if(value === "false") {
 			value = false;
 		}
-		
-		if (name.slice(0,17) === 'citationLangPrefs') {
-			this.prefs.citationLangPrefs[name.slice(17).toLowerCase()] = value.split(',');
-		} else if (name === "citationAffixes") {
-            this.prefs.citationAffixes = value.split("|");
-            
+		if (Zotero.DOCUMENT_MULTI_PREFERENCES.indexOf(name) > -1) {
+			if (value) {
+				this.prefs[name] = value.split(",");
+			} else {
+				this.prefs[name] = [];
+			}
+		} else if ("citationAffixes" === name) {
+			this.prefs[name] = value.split("|");
 		} else {
 			this.prefs[name] = value;
 		}
 	}
 	if(this.prefs["storeReferences"] === undefined) this.prefs["storeReferences"] = false;
-	this.zoteroVersion = xmlData["@zotero-version"].length() ? xmlData["@zotero-version"].toString() : "2.0";
-	this.dataVersion = xmlData["@data-version"].length() ? xmlData["@data-version"].toString() : 2;
+	this.zoteroVersion = doc.documentElement.getAttribute("zotero-version");
+	if(!this.zoteroVersion) this.zoteroVersion = "2.0";
+	this.dataVersion = doc.documentElement.getAttribute("data-version");
+	if(!this.dataVersion) this.dataVersion = 2;
 }
 
 /**
