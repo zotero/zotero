@@ -2882,28 +2882,39 @@ CSL.Engine.prototype.setLangTagsForCslTranslation = function (tags) {
         }
     }
 };
-CSL.Engine.prototype.setLangPrefsForCites = function (params) {
-	var opt = this.opt['cite-lang-prefs'];
-	for (var segment in params) {
+CSL.Engine.prototype.setLangPrefsForCites = function (obj, conv) {
+    var opt = this.opt['cite-lang-prefs'];
+    if (!conv) {
+        conv = function (key) {
+            return key.toLowerCase();
+        };
+    }
+    var segments = ['Persons', 'Institutions', 'Titles', 'Publishers', 'Places'];
+    for (var i = 0, ilen = segments.length; i < ilen; i += 1) {
+        var clientSegment = conv(segments[i]);
+        var citeprocSegment = segments[i].toLowerCase();
+        if (!obj[clientSegment]) {
+            continue;
+        }
         var supplements = [];
-        while (params[segment].length > 1) {
-            supplements.push(params[segment].pop());
+        while (obj[clientSegment].length > 1) {
+            supplements.push(obj[clientSegment].pop());
         }
         var sortval = {orig:1,translit:2,translat:3};
         if (supplements.length === 2 && sortval[supplements[0]] < sortval[supplements[1]]) {
             supplements.reverse();
         }
         while (supplements.length) {
-            params[segment].push(supplements.pop());
+            obj[clientSegment].push(supplements.pop());
         }
-		var lst = opt[segment];
-		while (lst.length) {
-			lst.pop();
-		}
-		for (var i = 0, ilen = params[segment].length; i < ilen; i += 1) {
-			lst.push(params[segment][i]);
-		}
-	}
+        var lst = opt[citeprocSegment];
+        while (lst.length) {
+            lst.pop();
+        }
+        for (var j = 0, jlen = obj[clientSegment].length; j < jlen; j += 1) {
+            lst.push(obj[clientSegment][j]);
+        }
+    }
 };
 CSL.Engine.prototype.setLangPrefsForCiteAffixes = function (affixList) {
     if (affixList && affixList.length === 30) {
@@ -2938,9 +2949,9 @@ CSL.Engine.prototype.setAutoVietnameseNamesOption = function (arg) {
     }
 };
 CSL.Engine.prototype.setAbbreviations = function (arg) {
-	if (this.sys.setAbbreviations) {
-		this.sys.setAbbreviations(arg);
-	}
+    if (this.sys.setAbbreviations) {
+        this.sys.setAbbreviations(arg);
+    }
 };
 CSL.Engine.prototype.setEnglishLocaleEscapes = function (arg) {
     if ("string" === typeof arg) {
@@ -2950,7 +2961,7 @@ CSL.Engine.prototype.setEnglishLocaleEscapes = function (arg) {
         arg = [];
     }
     for (var i = 0, ilen = arg.length; i < ilen; i += 1) {
-	    if (this.opt.english_locale_escapes.indexOf(arg[i]) === -1) {
+        if (this.opt.english_locale_escapes.indexOf(arg[i]) === -1) {
             this.opt.english_locale_escapes.push(arg[i]);
         }
     }
