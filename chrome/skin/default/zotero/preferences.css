@@ -272,9 +272,8 @@ hbox.plain .checkbox-label-box
 border: none;
 }
 
-radiogroup.plain .radio-label-box
+radiogroup.plain radio .radio-label-box
 {
--moz-appearance: none;
-border: none;
+display: none;
 }
 
