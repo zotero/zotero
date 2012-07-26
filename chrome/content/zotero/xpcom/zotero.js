@@ -1475,8 +1475,11 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 		
 		var timer = Components.classes["@mozilla.org/timer;1"].
 			createInstance(Components.interfaces.nsITimer),
-			yielded;
+			yielded,
+			useJIT = Components.utils.methodjit;
 		var timerCallback = {"notify":function() {
+			Components.utils.methodjit = useJIT;
+			
 			var err = false;
 			_waiting--;
 			try {
@@ -1537,8 +1540,11 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 	 */
 	this.setTimeout = function(func, ms, runWhenWaiting) {
 		var timer = Components.classes["@mozilla.org/timer;1"].
-			createInstance(Components.interfaces.nsITimer);
+			createInstance(Components.interfaces.nsITimer),
+			useJIT = Components.utils.methodjit;
 		var timerCallback = {"notify":function() {
+			Components.utils.methodjit = useJIT;
+			
 			if(_waiting && !runWhenWaiting) {
 				// if our callback gets called during Zotero.wait(), queue it to be set again
 				// when Zotero.wait() completes
