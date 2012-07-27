@@ -242,3 +242,22 @@ Zotero.setCitationLanguages = function (obj, citeproc) {
 		citeproc.setAutoVietnameseNamesOption(Zotero.Prefs.get('csl.autoVietnameseNames'));
 	}
 }
+
+Zotero.isRTL = function(tagstring) {
+    ret = false;
+    if (tagstring) {
+        tagstring = tagstring.replace(/^([-a-zA-Z0-9]+).*/,"$1");
+    }
+    if (tagstring) {
+        var taglst = tagstring.split("-");
+        if (["ar", "he", "fa", "ur", "yi", "ps"].indexOf(taglst[0]) > -1) {
+            ret = true;
+            for (var i = 1, ilen = taglst.length; i < ilen; i += 1) {
+                if (taglst[i].length > 3) {
+                    ret = false;
+                }
+            }
+        }
+    }
+    return ret;
+};
