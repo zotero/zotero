@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.365",
+    PROCESSOR_VERSION: "1.0.366",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -6608,7 +6608,7 @@ CSL.NameOutput.prototype.renderInstitutionNames = function () {
             } else {
                 localesets = this.state.opt['cite-lang-prefs'].persons;
             }
-            slot = {primary:false,secondary:false,tertiary:false};
+            slot = {primary:'locale-orig',secondary:false,tertiary:false};
 	        if (localesets) {
 		        var slotnames = ["primary", "secondary", "tertiary"];
 		        for (var k = 0, klen = slotnames.length; k < klen; k += 1) {
@@ -6769,7 +6769,7 @@ CSL.NameOutput.prototype._renderPersonalNames = function (values, pos) {
             } else {
                 localesets = this.state.opt['cite-lang-prefs'].persons;
             }
-            slot = {primary:false,secondary:false,tertiary:false};
+            slot = {primary:'locale-orig',secondary:false,tertiary:false};
 	        if (localesets) {
 		        var slotnames = ["primary", "secondary", "tertiary"];
 		        for (var j = 0, jlen = slotnames.length; j < jlen; j += 1) {
