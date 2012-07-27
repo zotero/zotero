@@ -42,6 +42,12 @@
 					<label value="Simon Kornblith"/>
 					<label value="Faolan Cheslack-Postava"/>
 				</vbox>
+				<label class="subhead" value="&zotero.thanks;"/>
+				<vbox class="subcontent">
+					<label class="zotero-text-link" href="http://www.mellon.org/" value="Andrew W. Mellon Foundation"/>
+					<label class="zotero-text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
+					<label class="zotero-text-link" href="http://www.sloan.org/" value="Alfred P. Sloan Foundation"/>
+				</vbox>
 				<label class="zotero-text-link" href="http://www.zotero.org/support/credits_and_acknowledgments" value="&zotero.moreCreditsAndAcknowledgements;"/>
 			</vbox>
 			<vbox id="column2">
@@ -54,6 +60,7 @@
 				<vbox class="subcontent">
 					<label class="zotero-text-link" href="http://p.yusukekamiyamane.com/" value="Fugue icons (by Yusuke Kamiyamane)"/>
 					<label class="zotero-text-link" href="http://www.davidashen.net/rnv.html" value="RNV (CSL validation)"/>
+					<label class="zotero-text-link" href="http://documentup.com/kriskowal/q/" value="q (by Kristopher Michael Kowal)"/>
 					<label class="zotero-text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="Silk icons (by Mark James)"/>
 					<label class="zotero-text-link" href="http://simile.mit.edu/timeline/" value="SIMILE Project (Timeline)"/>
 					<label class="zotero-text-link" href="http://www.w3.org/2005/ajar/tab" value="Tabulator (RDF parser)"/>
@@ -61,12 +68,6 @@
 					<label class="zotero-text-link" href="http://tinymce.moxiecode.com/" value="TinyMCE (rich-text editing)"/>
 					<label class="zotero-text-link" href="http://www.dbai.tuwien.ac.at/user/pollak/webpagedump/" value="WebPageDump (snapshot code)"/>
 					<label class="zotero-text-link" href="http://www.foolabs.com/xpdf/" value="Xpdf (pdftotext)"/>
-				</vbox>
-				<label class="subhead" value="&zotero.thanks;"/>
-				<vbox class="subcontent">
-					<label class="zotero-text-link" href="http://www.mellon.org/" value="Andrew W. Mellon Foundation"/>
-					<label class="zotero-text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
-					<label class="zotero-text-link" href="http://www.sloan.org/" value="Alfred P. Sloan Foundation"/>
 				</vbox>
 			</vbox>
 		</hbox>
