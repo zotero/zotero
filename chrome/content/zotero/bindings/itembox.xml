@@ -431,6 +431,13 @@
 						return;
 					}
 					
+					var container = document.getElementById("item-box");
+					var language = this.item.getField("language");
+					if (language && Zotero.isRTL(language)) {
+						container.setAttribute("dir", "rtl");
+					} else {
+						container.setAttribute("dir", "ltr");
+					}
 					if (this.clickByItem) {
 						var itemBox = document.getAnonymousNodes(this)[0];
 						itemBox.setAttribute('onclick',
