@@ -509,6 +509,7 @@ function() {
 		citeproc.opt.trigraph = trigraph;
         citeproc.opt.development_extensions.static_statute_locator = true;
         citeproc.opt.development_extensions.clobber_locator_if_no_statute_section = false;
+        citeproc.opt.development_extensions.handle_parallel_articles = true;
 
 		return citeproc;
 	} catch(e) {
