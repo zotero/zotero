@@ -2559,6 +2559,9 @@ function citationSecondary() {
 
 function citationLangSet (name, init) {
 	var settings = Zotero.Prefs.get('csl.citation' + name).split(',');
+	if (!settings || !settings[0]) {
+		settings = ['orig'];
+	}
 	var nodes = [];
 	var forms = ['orig', 'translit', 'translat'];
     var base = name.toLowerCase();

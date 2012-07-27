@@ -3195,12 +3195,16 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
 	for(var pref in this.prefs) {
 		if (pref === 'citationAffixes') {
 			var citeaffixes = "|||||||||||||||||||||||||||||";
-			if (this.prefs.citationAffixes.length === 30) {
+			if (this.prefs.citationAffixes && this.prefs.citationAffixes.length === 30) {
 				citeaffixes = this.prefs.citationAffixes.join('|');
 			}
 			prefs += '<pref name="citationAffixes" '+
 				'value="'+Zotero.Utilities.htmlSpecialChars(citeaffixes)+'"/>'
 		} else if (Zotero.DOCUMENT_MULTI_PREFERENCES.indexOf(pref) > -1) {
+			// Probably not necessary
+			if (!this.prefs[pref]) {
+				this.prefs[pref] = ['orig'];
+			}
 			var citeprefdata = this.prefs[pref].join(",");
 			prefs += '<pref name="'+Zotero.Utilities.htmlSpecialChars(pref)+'" '+
 				'value="'+Zotero.Utilities.htmlSpecialChars(citeprefdata)+'"/>';

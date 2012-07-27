@@ -333,6 +333,9 @@ var Zotero_File_Interface_Bibliography = new function() {
 		//Zotero.debug("XXX == citationLangSet() ==: "+base);
 		var lowerBase = upperBase.toLowerCase();
 		var settings = _io['citationLangPrefs'+upperBase];
+		if (!settings || !settings[0]) {
+			settings = ['orig'];
+		}
 		var nodes = [];
 		var forms = ['orig', 'translit', 'translat'];
 		// get node
