@@ -689,6 +689,11 @@ Zotero.Translate.Sandbox = {
 		 * @borrows Zotero.Translate.Sandbox.Web._itemDone as this._itemDone
 		 */
 		"_itemDone":function(translate, item) {
+			// Always set library catalog, even if we have a parent translator
+			if(item.libraryCatalog === undefined) {
+				item.libraryCatalog = translate.translator[0].label;
+			}
+			
 			Zotero.Translate.Sandbox.Web._itemDone(translate, item);
 		}
 	}
