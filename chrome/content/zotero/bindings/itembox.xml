@@ -1274,6 +1274,8 @@
 						)
 					);
 					firstlast.lastChild.setAttribute('servantLang', languageTag);
+
+					Zotero.setRTL(firstlast.lastChild, [languageTag]);
 					
 					// Comma
 					var comma = document.createElement('label');
@@ -1290,6 +1292,8 @@
 						)
 					);
 					firstlast.lastChild.setAttribute('servantLang', languageTag);
+
+					Zotero.setRTL(firstlast.lastChild, [languageTag]);
 
 					if (creator.fieldMode) {
 						firstlast.lastChild.setAttribute('hidden', true);
@@ -1405,6 +1409,8 @@
 						tabindex
 					);
 					elem.setAttribute('flex', 1);
+
+					Zotero.setRTL(elem, [this.itemLanguage]);
 					
 					// y-m-d status indicator
 					var datebox = document.createElement('hbox');
@@ -2033,10 +2039,17 @@
 					
 					var [field, creatorIndex, creatorField] = fieldName.split('-');
 
+					var langs = [this.itemLanguage];
+
 					if (field == 'creator') {
 						var c = this.item.getCreator(creatorIndex);
 						var value = c ? c.multi.get(creatorField, servantLang) : '';
 						var itemID = this.item.id;
+						if (servantLang) {
+							langs.push(servantLang);
+						} else {
+							langs.push(c.multi.main)
+						}
 					}
 					else if (fieldName=='tag') {
 						var tagID = elem.parentNode.getAttribute('id').split('-')[1];
@@ -2080,7 +2093,7 @@
 									break;
 							}
 						}
-						var langs = [this.itemLanguage];
+
 						if (Zotero.multiFieldNames[fieldStub]) {
 							if (servantLang) {
 								langs.push(servantLang);
