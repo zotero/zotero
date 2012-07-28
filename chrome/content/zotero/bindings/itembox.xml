@@ -1942,6 +1942,9 @@
 								Zotero.ItemFields.isFieldOfBase(fieldID, 'publicationTitle'))) {
 							valueElement.setAttribute('contextmenu', 'zotero-field-transform-menu');
 						}
+						if (this.editable && shortFieldName == 'extra') {
+							valueElement.setAttribute('contextmenu', 'extra-field-menu');
+						}
 					}
 					
 					// ???
@@ -2047,7 +2050,7 @@
 						var itemID = this.item.id;
 						if (servantLang) {
 							langs.push(servantLang);
-						} else {
+						} else if (c && c.multi) {
 							langs.push(c.multi.main)
 						}
 					}
@@ -3265,6 +3268,23 @@ if (oldCreator.id) {
 				]]>
 				</body>
 			</method>
+
+			<method name="buildExtraMenu">
+			  <parameter name="menu"/>
+			  <parameter name="node"/>
+			  <body>
+				<![CDATA[
+						 while (menu.childNodes.length) {
+						 	menu.removeChild(menu.lastChild);
+						 }
+						 var elem = document.createElement("menuitem");
+						 elem.setAttribute("label", "Hello");
+						 elem.setAttribute("class", "menuitem-non-iconic");
+						 elem.setAttribute("oncommand", "alert('[input helper for extra fields forthcoming]')");
+						 menu.appendChild(elem);
+				]]>
+			  </body>
+			</method>
 		</implementation>
 		
 		<content>
@@ -3369,6 +3389,8 @@ if (oldCreator.id) {
 							</menupopup>
 						</menu>
 					</menupopup>
+					<menupopup id="extra-field-menu"
+							   onpopupshowing="document.getBindingParent(this).buildExtraMenu(this, document.popupNode);"/>
 					<zoteroguidancepanel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
 				</popupset>
 				<grid flex="1">
