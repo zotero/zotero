@@ -423,6 +423,8 @@
 					// For example. 
 					//this.stackTrace();
 
+					this.itemLanguage = this.item.getField("language");
+
 					var i, ilen;
 					var languageList = Zotero.Utilities.languageList();
 
@@ -431,13 +433,6 @@
 						return;
 					}
 					
-					var container = document.getElementById("item-box");
-					var language = this.item.getField("language");
-					if (language && Zotero.isRTL(language)) {
-						container.setAttribute("dir", "rtl");
-					} else {
-						container.setAttribute("dir", "ltr");
-					}
 					if (this.clickByItem) {
 						var itemBox = document.getAnonymousNodes(this)[0];
 						itemBox.setAttribute('onclick',
@@ -595,7 +590,7 @@
 								"if (this.nextSibling.inputField) { this.nextSibling.inputField.blur(); }");
 						}
 						var row = this.addDynamicRow(label, valueElement);
-						
+
 						if (fieldName && this._selectField == fieldName) {
 							this.showEditor(valueElement);
 						}
@@ -645,6 +640,9 @@
 								var nickname = Zotero.CachedLanguages.getNickname(mainLang);
 								label.parentNode.setAttribute('tooltiptext', nickname);
 							}
+
+							Zotero.setRTL(row.firstChild.nextSibling, [this.itemLanguage, mainLang]);
+
 							// OOOOO: Could use a more efficient method for this
 							for (var j = 0, jlen = languageList.length; j < jlen; j += 1) {
 								if (!this.item.multi.get(fieldID, languageList[j].tag, true)
@@ -675,8 +673,12 @@
 									fieldNamePlusLang, 
 									tabindex
 								);
-								this.addDynamicRow(label, valueElement);
+								var row = this.addDynamicRow(label, valueElement);
+
+								Zotero.setRTL(row.firstChild.nextSibling, [this.itemLanguage, key]);
 							}
+						} else {
+							Zotero.setRTL(row.firstChild.nextSibling, [this.itemLanguage]);
 						}
 					}
 					this._selectField = false;
@@ -2078,6 +2080,15 @@
 									break;
 							}
 						}
+						var langs = [this.itemLanguage];
+						if (Zotero.multiFieldNames[fieldStub]) {
+							if (servantLang) {
+								langs.push(servantLang);
+							} else {
+								var fieldID = Zotero.ItemFields.getID(fieldStub);
+								langs.push(this.item.multi.main[fieldID]);
+							}
+						}
 					}
 					
 					var t = document.createElement("textbox");
@@ -2085,6 +2096,8 @@
 					t.setAttribute('fieldname', fieldName);
 					t.setAttribute('ztabindex', tabindex);
 					t.setAttribute('flex', '1');
+
+					Zotero.setRTL(t, langs);
 					
 					if (creatorField=='lastName') {
 						t.setAttribute('fieldMode', elem.getAttribute('fieldMode'));

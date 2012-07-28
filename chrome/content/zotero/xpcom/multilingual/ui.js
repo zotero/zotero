@@ -243,21 +243,32 @@ Zotero.setCitationLanguages = function (obj, citeproc) {
 	}
 }
 
-Zotero.isRTL = function(tagstring) {
-    ret = false;
-    if (tagstring) {
-        tagstring = tagstring.replace(/^([-a-zA-Z0-9]+).*/,"$1");
-    }
-    if (tagstring) {
-        var taglst = tagstring.split("-");
-        if (["ar", "he", "fa", "ur", "yi", "ps"].indexOf(taglst[0]) > -1) {
-            ret = true;
-            for (var i = 1, ilen = taglst.length; i < ilen; i += 1) {
-                if (taglst[i].length > 3) {
-                    ret = false;
+Zotero.setRTL = function(node, langs) {
+    rtl = false;
+    for (var i = langs.length - 1; i > -1; i += -1) {
+        var langTag = langs[i];
+        if (langTag) {
+            langTag = langTag.replace(/^([-a-zA-Z0-9]+).*/,"$1");
+        }
+        if (langTag) {
+            var taglst = langTag.split("-");
+            if (["ar", "he", "fa", "ur", "yi", "ps", "syr"].indexOf(taglst[0]) > -1) {
+                rtl = true;
+                for (var i = 1, ilen = taglst.length; i < ilen; i += 1) {
+                    if (taglst[i].length > 3) {
+                        rtl = false;
+                    }
                 }
             }
+            // If there is something that looks like a language tag
+            // set on the field, it had better be valid. Should always
+            // be so, since string input is not allowed.
+            break;
         }
     }
-    return ret;
+    if (rtl) {
+        node.setAttribute("style", "direction:rtl !important;");
+    } else {
+        node.setAttribute("style", "direction:ltr !important;");
+    }
 };
