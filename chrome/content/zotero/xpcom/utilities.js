@@ -137,6 +137,10 @@ const CSL_TYPE_MAPPINGS = {
  * @class Functions for text manipulation and other miscellaneous purposes
  */
 Zotero.Utilities = {
+
+	"getCslTypeFromItemType":function(itemType) {
+		return CSL_TYPE_MAPPINGS[itemType];
+	},
 	/**
 	 * Cleans extraneous punctuation off a creator name and parse into first and last name
 	 *

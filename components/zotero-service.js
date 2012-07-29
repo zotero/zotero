@@ -92,6 +92,7 @@ const xpcomFilesLocal = [
 	'multilingual/field',
 	'multilingual/creator',
 	'multilingual/ui',
+	'multilingual/jurisdiction',
 	'notifier',
 	'proxy',
 	'quickCopy',

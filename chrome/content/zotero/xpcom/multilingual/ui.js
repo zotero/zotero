@@ -1,3 +1,100 @@
+// Extended fields needed to support the MLZ styles
+
+Zotero.EXTENDED_FIELDS = {
+	"article-newspaper": {
+		"fields": [
+			"original-date"
+		],
+		"jurisdiction": true
+	},
+	"bill": {
+		"fields": [
+			"author", 
+			"authority", 
+			"collection-number", 
+			"event", 
+			"event-date", 
+			"genre", 
+			"original-author", 
+			"volume"
+		], 
+		"jurisdiction": true, 
+		"types": [
+			"gazette", 
+			"treaty"
+		]
+	}, 
+	"book": {
+		"types": [
+			"classic", 
+			"periodical"
+		]
+	}, 
+	"broadcast": {
+		"fields": [
+			"director", 
+			"genre"
+		]
+	}, 
+	"graphic": {
+		"fields": [
+			"container-title"
+		]
+	}, 
+	"legal_case": {
+		"fields": [
+			"archive", 
+			"archive_location", 
+			"collection-number", 
+			"event-place", 
+			"genre", 
+			"issue", 
+			"issued", 
+			"original-date"
+		],
+		"jurisdiction": true
+	}, 
+	"legislation": {
+		"fields": [
+			"collection-number", 
+			"genre", 
+			"issued", 
+			"publisher", 
+			"volume"
+		],
+		"jurisdiction": true 
+	}, 
+	"map": {
+		"fields": [
+			"scale"
+		]
+	}, 
+	"patent": {
+		"fields": [
+			"original-date", 
+			"recipient"
+		],
+		"jurisdiction": true
+	}, 
+	"personal_communication": {
+		"fields": [
+			"genre"
+		]
+	}, 
+	"report": {
+		"jurisdiction": true
+	}, 
+	"song": {
+		"fields": [
+			"container-title", 
+			"issued", 
+			"original-date", 
+			"publisher", 
+			"section"
+		]
+	}
+}
+
 // Implement UI language switching
 // Based on sample application at https://developer.mozilla.org/En/How_to_enable_locale_switching_in_a_XULRunner_application
 

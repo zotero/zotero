@@ -731,6 +731,9 @@ const ZOTERO_CONFIG = {
 		// Initialize Locate Manager
 		Zotero.LocateManager.init();
 		
+		// Initialize Jurisdictions mapper
+		Zotero.Jurisdiction.init();
+		
 		Zotero.Items.startEmptyTrashTimer();
 		
 		return true;
