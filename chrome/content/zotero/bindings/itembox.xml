@@ -3270,23 +3270,23 @@ if (oldCreator.id) {
 			</method>
 
 			<method name="setExtraMenus">
-			  <parameter name="menupopup"/>
+			  <parameter name="menupop"/>
 			  <body>
 				<![CDATA[
 					 var itemType = Zotero.ItemTypes.getName(this.item.itemTypeID)
 					 cslType = Zotero.Utilities.getCslTypeFromItemType(itemType);
 					 var extensions = Zotero.EXTENDED_FIELDS[cslType];
 					 var nodes = {};
-					 nodes.jurisdiction = menupopup.firstChild;
-					 nodes.types = jurisdictionNode.nextSibling;
-					 nodes.fields = typesNode.nextSibling;
+					 nodes.jurisdiction = menupop.firstChild;
+					 nodes.types = nodes.jurisdiction.nextSibling;
+					 nodes.fields = nodes.types.nextSibling;
 
 					 if (extensions) {
 					 	for (var key in nodes) {
 							if (extensions[key]) {
-								nodes.setAttribute("hidden", false);
+								nodes[key].setAttribute("hidden", false);
 							} else {
-								nodes.setAttribute("hidden", true);
+								nodes[key].setAttribute("hidden", true);
 							}
 						}
 						return true;
@@ -3452,8 +3452,7 @@ if (oldCreator.id) {
 							   position="after_start"
 							   onpopupshowing="return document.getBindingParent(this).setExtraMenus(this);">
 					  <menu label="Jurisdiction">
-						<menupopup onpopupshowing="Zotero.debug('XXX try 1');
-												   var item = document.getBindingParent(this).item;
+						<menupopup onpopupshowing="var item = document.getBindingParent(this).item;
 						var itemType = Zotero.ItemTypes.getName(item.itemTypeID);
 						 var cslType = Zotero.Utilities.getCslTypeFromItemType(itemType);
 						 var extensions = Zotero.EXTENDED_FIELDS[cslType];
