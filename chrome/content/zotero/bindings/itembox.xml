@@ -1734,9 +1734,10 @@
 				<body>
 				<![CDATA[
 					Zotero.debug("XXX menu label: "+menu.label);
+					var fakeItemTypeID;
 					var oldFakeItemTypeID = this.popFieldValueFromExtra("type");
 					if (Zotero.EXTENDED_TYPES[itemTypeID]) {
-						var fakeItemTypeID = itemTypeID;
+						fakeItemTypeID = itemTypeID;
 						itemTypeID = Zotero.EXTENDED_TYPES[fakeItemTypeID].realID;
 						if (itemTypeID == this.item.itemTypeID
 							&& fakeItemTypeID == oldFakeItemTypeID) {
@@ -1813,16 +1814,24 @@
 						else {
 							this.refresh();
 						}
+						if (fakeItemTypeID) {
+							menu.value = fakeItemTypeID;
+						}
+						return true;
 					}
 					
 					// Revert the menu (which changes before the pop-up)
 					if (menu) {
-						if (fakeItemTypeID) {
-							menu.value = fakeItemTypeID;
+						if (oldFakeItemTypeID) {
+							this.popFieldValueFromExtra("type");
+							this.setFieldValueInExtra("type", oldFakeItemTypeID);
+							menu.value = oldFakeItemTypeID;
 						} else {
+							this.popFieldValueFromExtra("type");
 							menu.value = this.item.itemTypeID;
 						}
 					}
+					return false;
 				]]>
 				</body>
 			</method>
