@@ -3421,12 +3421,31 @@ if (oldCreator.id) {
 							var elem = document.createElement("menuitem");
 							elem.setAttribute("label", extensions.fields[i]);
 							menupop.appendChild(elem);
+							
+							elem.setAttribute("oncommand", "return document.getBindingParent(this).editExtraField('"+extensions.fields[i]+"');");
 						}
 					}
 					return true;
 				]]>
 			  </body>
 			</method>
+
+			<method name="editExtraField">
+			  <parameter name="extraFieldName"/>
+			  <body>
+				<![CDATA[
+					var value = this.popFieldValueFromExtra(extraFieldName);
+					var io = {label:extraFieldName,value:value};
+					window.openDialog('chrome://zotero/content/editExtraField.xul', 'mlz-edit-extra', 'centerscreen,modal', io);
+					if (io.value) {
+						this.setFieldValueInExtra(extraFieldName, io.value);
+					}
+					this.item.save();
+					this.refresh();
+				]]>
+			  </body>
+			</method>
+
 
 		</implementation>
 		
