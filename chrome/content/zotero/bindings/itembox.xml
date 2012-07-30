@@ -448,6 +448,11 @@
 						else {
 							this.updateItemTypeMenuSelection();
 						}
+						// true toggle leaves Extra field content intact
+						var fakeItemTypeID = this.popFieldValueFromExtra("type", true);
+						if (fakeItemTypeID) {
+							this.itemTypeMenu.value = fakeItemTypeID;
+						}
 						this.itemTypeMenu.parentNode.hidden = false;
 					}
 					else {
@@ -931,6 +936,9 @@
 							name: t[i].name,
 							localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
 						});
+					}
+					for (var key in Zotero.EXTENDED_TYPES) {
+						itemTypes.push(Zotero.EXTENDED_TYPES[key].data);
 					}
 					var collation = Zotero.getLocaleCollation();
 					itemTypes.sort(function(a, b) {
@@ -1687,16 +1695,63 @@
 				</body>
 			</method>
 			
+			<method name="popFieldValueFromExtra">
+				<parameter name="fieldName"/>
+				<parameter name="noPop"/>
+				<body>
+				<![CDATA[
+					var extraValue = this.item.getField("extra", true);
+					var rex = new RegExp("{:"+fieldName+":([^}]*)}\s*");
+					var m = rex.exec(extraValue);
+					var popValue = "";
+					if (m) {
+						popValue = m[1];
+					}
+					if (!noPop) {
+						extraValue = extraValue.replace(rex, "");
+						this.item.setField("extra", extraValue);
+					}
+					return popValue;
+				]]>
+				</body>
+			</method>
 			
+			<method name="setFieldValueInExtra">
+				<parameter name="fieldName"/>
+				<parameter name="fieldValue"/>
+				<body>
+				<![CDATA[
+					var extraValue = this.item.getField("extra", true);
+					value = "{:" + fieldName + ":" + fieldValue + "} " + extraValue;
+					this.item.setField("extra", value);
+				]]>
+				</body>
+			</method>
+
 			<method name="changeTypeTo">
 				<parameter name="itemTypeID"/>
 				<parameter name="menu"/>
 				<body>
 				<![CDATA[
-					if (itemTypeID == this.item.itemTypeID) {
-						return true;
+					Zotero.debug("XXX menu label: "+menu.label);
+					var oldFakeItemTypeID = this.popFieldValueFromExtra("type");
+					if (Zotero.EXTENDED_TYPES[itemTypeID]) {
+						var fakeItemTypeID = itemTypeID;
+						itemTypeID = Zotero.EXTENDED_TYPES[fakeItemTypeID].realID;
+						if (itemTypeID == this.item.itemTypeID
+							&& fakeItemTypeID == oldFakeItemTypeID) {
+							
+							this.setFieldValueInExtra("type", oldFakeItemTypeID);
+							return true;
+						} else {
+							this.setFieldValueInExtra("type", fakeItemTypeID);
+						}
+					} else {
+						if (!oldFakeItemTypeID && itemTypeID == this.item.itemTypeID) {
+							return true;
+						}
 					}
-					
+
 					var fieldsToDelete = this.item.getFieldsNotInType(itemTypeID, true);
 					
 					// Special cases handled below
@@ -1758,16 +1813,16 @@
 						else {
 							this.refresh();
 						}
-						
-						return true;
 					}
 					
 					// Revert the menu (which changes before the pop-up)
 					if (menu) {
-						menu.value = this.item.itemTypeID;
+						if (fakeItemTypeID) {
+							menu.value = fakeItemTypeID;
+						} else {
+							menu.value = this.item.itemTypeID;
+						}
 					}
-					
-					return false;
 				]]>
 				</body>
 			</method>
@@ -3334,10 +3389,8 @@ if (oldCreator.id) {
 			  <parameter name="key"/>
 			  <body>
 				<![CDATA[
-					var value = this.item.getField("extra");
-					value = value.replace(/{:jurisdiction:[^}]*}\s*/, "");
-					value = "{:jurisdiction:" + key + "} " + value;
-					this.item.setField("extra", value);
+					this.popFieldValueFromExtra("jurisdiction");
+					this.setFieldValueInExtra("jurisdiction", key);
 					this.item.save();
 					this.refresh();
 				]]>
@@ -3462,9 +3515,7 @@ if (oldCreator.id) {
 						 	return false;
 						 };"/>
 					  </menu>
-					  <menu label="Type">
-					  </menu>
-					  <menu label="Fields">
+					  <menu label="Supplementary fields">
 					  </menu>
 					</menupopup>
 					<zoteroguidancepanel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>

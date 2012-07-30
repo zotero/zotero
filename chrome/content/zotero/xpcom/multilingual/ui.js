@@ -1,5 +1,24 @@
 // Extended fields needed to support the MLZ styles
 
+Zotero.EXTENDED_TYPES = {
+	"classic":{
+		"realID":2,
+		"data":{id:"classic",name:"classic",localized:"Classic"}
+	},
+	"periodical":{
+		"realID":2,
+		"data":{id:"periodical",name:"periodical",localized:"Periodical"}
+	},
+	"gazette":{
+		"realID":16,
+		"data":{id:"gazette",name:"gazette",localized:"Gazette"}
+	},
+	"treaty":{
+		"realID":16,
+		"data":{id:"treaty",name:"treaty",localized:"Treaty"}
+	}
+};
+
 Zotero.EXTENDED_FIELDS = {
 	"article-newspaper": {
 		"fields": [
