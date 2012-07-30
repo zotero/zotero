@@ -424,6 +424,15 @@ Zotero.Translate.Sandbox = {
 				throw new Error("Translator called select items with no items");
 			}
 			
+			// Some translators pass an array rather than an object to Zotero.selectItems.
+			// This will break messaging outside of Firefox, so we need to fix it.
+			if(Object.prototype.toString.call(items) === "[object Array]") {
+				translate._debug("WARNING: Zotero.selectItems should be called with an object, not an array");
+				var itemsObj = {};
+				for(var i in items) itemsObj[i] = items[i];
+				items = itemsObj;
+			}
+			
 			if(translate._selectedItems) {
 				// if we have a set of selected items for this translation, use them
 				return translate._selectedItems;
