@@ -975,11 +975,6 @@ Zotero.Utilities = {
 			}
 			
 			try {
-				if(!rootDoc.evaluate && typeof installXPathIfNecessary !== undefined) {
-					// For IE: element.ownerDocument will not have an evaluate property,
-					// since this is provided by JavaScript-XPath
-					installXPathIfNecessary('defaultView' in rootDoc ? rootDoc.defaultView : rootDoc.parentWindow);
-				}
 				var xpathObject = rootDoc.evaluate(xpath, element, nsResolver, 5, // 5 = ORDERED_NODE_ITERATOR_TYPE
 					null);
 			} catch(e) {
