@@ -974,18 +974,29 @@ Zotero.Utilities = {
 				throw new Error("First argument must be either element(s) or document(s) in Zotero.Utilities.xpath(elements, '"+xpath+"')");
 			}
 			
-			try {
-				var xpathObject = rootDoc.evaluate(xpath, element, nsResolver, 5, // 5 = ORDERED_NODE_ITERATOR_TYPE
-					null);
-			} catch(e) {
-				// rethrow so that we get a stack
-				throw new Error(e.name+": "+e.message);
-			}
-			
-			var newEl;
-			while(newEl = xpathObject.iterateNext()) {
-				// Firefox 5 hack
-				results.push(isWrapped ? Zotero.Translate.DOMWrapper.wrap(newEl) : newEl);
+			if(!Zotero.isIE || "evaluate" in rootDoc) {
+				try {
+					var xpathObject = rootDoc.evaluate(xpath, element, nsResolver, 5, // 5 = ORDERED_NODE_ITERATOR_TYPE
+						null);
+				} catch(e) {
+					// rethrow so that we get a stack
+					throw new Error(e.name+": "+e.message);
+				}
+				
+				var newEl;
+				while(newEl = xpathObject.iterateNext()) {
+					// Firefox 5 hack
+					results.push(isWrapped ? Zotero.Translate.DOMWrapper.wrap(newEl) : newEl);
+				}
+			} else if("selectNodes" in element) {
+				// We use JavaScript-XPath in IE for HTML documents, but with an XML
+				// document, we need to use selectNodes
+				var nodes = element.selectNodes(xpath);
+				for(var i=0; i<nodes.length; i++) {
+					results.push(nodes[i]);
+				}
+			} else {
+				throw new Error("XPath functionality not available");
 			}
 		}
 		
@@ -1008,7 +1019,11 @@ Zotero.Utilities = {
 		
 		var strings = new Array(elements.length);
 		for(var i=0, n=elements.length; i<n; i++) {
-			strings[i] = elements[i].textContent;
+			var el = elements[i];
+			strings[i] = "textContent" in el ? el.textContent
+				: "innerText" in el ? el.innerText
+				: "text" in el ? el.text
+				: el.nodeValue;
 		}
 		
 		return strings.join(delimiter !== undefined ? delimiter : ", ");
