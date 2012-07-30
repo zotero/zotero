@@ -3342,18 +3342,18 @@ if (oldCreator.id) {
 					 var extensions = Zotero.EXTENDED_FIELDS[cslType];
 					 var nodes = {};
 					 nodes.jurisdiction = menupop.firstChild;
-					 nodes.types = nodes.jurisdiction.nextSibling;
-					 nodes.fields = nodes.types.nextSibling;
-
+					 nodes.fields = nodes.jurisdiction.nextSibling;
+					 var showSomething = false;
 					 if (extensions) {
 					 	for (var key in nodes) {
 							if (extensions[key]) {
+								showSomething = true;
 								nodes[key].setAttribute("hidden", false);
 							} else {
 								nodes[key].setAttribute("hidden", true);
 							}
 						}
-						return true;
+						return showSomething;
 					} else {
 						return false;
 					}
@@ -3402,6 +3402,28 @@ if (oldCreator.id) {
 					this.setFieldValueInExtra("jurisdiction", key);
 					this.item.save();
 					this.refresh();
+				]]>
+			  </body>
+			</method>
+
+			<method name="setExtraFieldsMenu">
+			  <parameter name="menupop"/>
+			  <body>
+				<![CDATA[
+					var itemType = Zotero.ItemTypes.getName(this.item.itemTypeID);
+					var cslType = Zotero.Utilities.getCslTypeFromItemType(itemType);
+					var extensions = Zotero.EXTENDED_FIELDS[cslType];
+					while (menupop.childNodes.length) {
+						menupop.removeChild(menupop.lastChild);
+					}
+					if (extensions && extensions.fields) {
+						for (var i = 0, ilen=extensions.fields.length; i < ilen; i += 1) {
+							var elem = document.createElement("menuitem");
+							elem.setAttribute("label", extensions.fields[i]);
+							menupop.appendChild(elem);
+						}
+					}
+					return true;
 				]]>
 			  </body>
 			</method>
@@ -3525,6 +3547,7 @@ if (oldCreator.id) {
 						 };"/>
 					  </menu>
 					  <menu label="Supplementary fields">
+						<menupopup onpopupshowing="return document.getBindingParent(this).setExtraFieldsMenu(this)"/>
 					  </menu>
 					</menupopup>
 					<zoteroguidancepanel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
