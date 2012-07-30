@@ -3,8 +3,6 @@
  * @namespace
  */
 Zotero.HTTP = new function() {
-	Components.utils.import("resource://zotero/q.js");
-	
 	/**
 	 * Exception returned for unexpected status when promise* is used
 	 * @constructor
