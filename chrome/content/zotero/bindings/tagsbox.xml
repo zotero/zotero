@@ -30,6 +30,10 @@
 			xmlns:xbl="http://www.mozilla.org/xbl"
 			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<binding id="tags-box">
+		<resources>
+			<stylesheet src="chrome://zotero/skin/bindings/tagsbox.css"/>
+		</resources>
+		
 		<implementation>
 			<field name="clickHandler"/>
 			<field name="_tagColors"/>
@@ -169,6 +173,7 @@
 						}
 						
 						var icon = document.createElement("image");
+						icon.className = "zotero-box-icon";
 						var iconFile = 'tag';
 						if (type == 0) {
 							icon.setAttribute('tooltiptext', Zotero.getString('pane.item.tags.icon.user'));
@@ -183,6 +188,7 @@
 						icon.setAttribute('onclick','if (this.nextSibling.inputField){ this.nextSibling.inputField.blur() }');
 						
 						var label = this.createValueElement(name, tabindex);
+						label.className = "zotero-box-label";
 						
 						if (this.editable) {
 							var remove = document.createElement("label");
@@ -759,12 +765,11 @@
 			</method>
 		</implementation>
 		<content>
-			<xul:scrollbox xbl:inherits="flex" orient="vertical" style="overflow:auto">
+			<xul:scrollbox xbl:inherits="flex" orient="vertical" style="overflow:auto" class="zotero-box">
 				<xul:hbox align="center">
 					<xul:label id="tagsNum"/>
 					<xul:button id="addButton" label="&zotero.item.add;" oncommand="document.getBindingParent(this).new();" hidden="true"/>
 				</xul:hbox>
-				<xul:separator class="thin"/>
 				<xul:grid>
 					<xul:columns>
 						<xul:column/>

@@ -503,3 +503,17 @@
 	visibility: visible !important;
 	display: inherit !important;
 }
+
+
+.zotero-box {
+	margin-left: 5px;
+}
+
+.zotero-box-icon {
+	width: 16px;
+	height: 16px;
+}
+
+.zotero-box-label {
+	margin-left: 3px !important;
+}

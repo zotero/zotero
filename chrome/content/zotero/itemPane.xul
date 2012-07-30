@@ -63,7 +63,7 @@
 						</tabpanel>
 						
 						<tabpanel flex="1" orient="vertical">
-							<vbox flex="1">
+							<vbox flex="1" class="zotero-box">
 								<hbox align="center">
 									<label id="zotero-editpane-notes-label"/>
 									<button id="zotero-editpane-notes-add" label="&zotero.item.add;" oncommand="ZoteroItemPane.addNote(event.shiftKey);"/>

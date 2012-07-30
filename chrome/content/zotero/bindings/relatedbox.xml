@@ -107,6 +107,7 @@
 								related = Zotero.Items.get(related);
 								for (var i = 0; i < related.length; i++) {
 									var icon= document.createElement("image");
+									icon.className = "zotero-box-icon";
 									var type = Zotero.ItemTypes.getName(related[i].itemTypeID);
 									if (type=='attachment')
 									{
@@ -132,6 +133,7 @@
 									icon.setAttribute('src','chrome://zotero/skin/treeitem-' + type + '.png');
 							
 									var label = document.createElement("label");
+									label.className = "zotero-box-label";
 									label.setAttribute('value', related[i].getDisplayTitle());
 									label.setAttribute('crop','end');
 									label.setAttribute('flex','1');
@@ -284,7 +286,7 @@
 			</method>
 		</implementation>
 		<content>
-			<xul:vbox xbl:inherits="flex">
+			<xul:vbox xbl:inherits="flex" class="zotero-box">
 				<xul:hbox align="center">
 					<xul:label id="seeAlsoNum"/>
 					<xul:button id="addButton" label="&zotero.item.add;" oncommand="this.parentNode.parentNode.parentNode.add();" hidden="true"/>

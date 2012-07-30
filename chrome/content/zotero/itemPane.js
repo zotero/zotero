@@ -101,9 +101,11 @@ var ZoteroItemPane = new function() {
 					let id = notes[i].id;
 					
 					var icon = document.createElement('image');
+					icon.className = "zotero-box-icon";
 					icon.setAttribute('src','chrome://zotero/skin/treeitem-note.png');
 					
 					var label = document.createElement('label');
+					label.className = "zotero-box-label";
 					var title = Zotero.Notes.noteToTitle(notes[i].getNote());
 					title = title ? title : Zotero.getString('pane.item.notes.untitled');
 					label.setAttribute('value', title);
