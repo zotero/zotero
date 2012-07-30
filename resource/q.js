@@ -97,9 +97,12 @@
 			var _runningTimers = [];
 			
 			return function setTimeout(func, ms) {
-				var timer = Components.classes["@mozilla.org/timer;1"].
-					createInstance(Components.interfaces.nsITimer);
+				var useMethodjit = Components.utils.methodjit,
+					timer = Components.classes["@mozilla.org/timer;1"].
+						createInstance(Components.interfaces.nsITimer);
 				timer.initWithCallback({"notify":function() {
+					Components.utils.methodjit = useMethodjit;
+					
 					// Remove timer from array so it can be garbage collected
 					_runningTimers.splice(_runningTimers.indexOf(timer), 1);
 					
