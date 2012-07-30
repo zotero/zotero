@@ -340,7 +340,7 @@ Zotero.setCitationLanguages = function (obj, citeproc) {
 	}
 }
 
-Zotero.setRTL = function(node, langs) {
+Zotero.isRTL = function(langs) {
     rtl = false;
     for (var i = langs.length - 1; i > -1; i += -1) {
         var langTag = langs[i];
@@ -363,7 +363,11 @@ Zotero.setRTL = function(node, langs) {
             break;
         }
     }
-    if (rtl) {
+	return rtl;
+}
+
+Zotero.setRTL = function(node, langs) {
+    if (Zotero.isRTL(langs)) {
         node.setAttribute("style", "direction:rtl !important;");
     } else {
         node.setAttribute("style", "direction:ltr !important;");
