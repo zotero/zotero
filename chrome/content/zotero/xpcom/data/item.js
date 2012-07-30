@@ -877,6 +877,16 @@ Zotero.Item.prototype.setField = function(field, value, loadIn, lang, force_top)
 		//     multi field value
 		// OOOOO: See multilingual/container for structure of multi object.
 
+		var baseID = Zotero.ItemFields.getBaseIDFromTypeAndField(this.itemTypeID, fieldID);
+
+		if (value && baseID == Zotero.ItemFields.getID('title')) {
+			value = value.replace(/(\u202a|\u202b|\u202c)/g, "");
+			var languageFieldID = Zotero.ItemFields.getID("language");
+			var itemLanguage = this._itemData[languageFieldID] ? this._itemData[languageFieldID] : '';
+			if (Zotero.isRTL([itemLanguage])) {
+				value = "\u202b" + value + "\u202c";
+			}
+		}
 		if (
 			(!this._itemData[fieldID] && !value) 
 			|| (
