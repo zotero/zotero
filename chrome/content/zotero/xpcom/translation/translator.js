@@ -220,7 +220,10 @@ Zotero.Translators = new function() {
 			// (i.e., www.nature.com.mutex.gmu.edu => www.nature.com)
 			var m = /^(https?:\/\/)([^\/]+)/i.exec(uri);
 			if(m) {
-				var hostnames = m[2].split(".");
+				// First, drop the 0- if it exists (this is an III invention)
+				var host = m[2];
+				if(host.substr(0, 2) === "0-") host = substr(2);
+				var hostnames = host.split(".");
 				for(var i=1; i<hostnames.length-2; i++) {
 					if(TLDS[hostnames[i].toLowerCase()]) {
 						var properHost = hostnames.slice(0, i+1).join(".");
