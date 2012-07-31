@@ -452,7 +452,8 @@ Zotero_TranslatorTester.prototype._runTestTranslate = function(translate, transl
 	if(!translators.length) {
 		testDoneCallback(this, test, "failed", "Detection failed");
 		return;
-	} else if(this.type === "web" && (translators[0].itemType !== "multiple" && test.items.length > 1 ||
+	} else if(this.type === "web" && translators[0].itemType !== Zotero.Translator.RUN_MODE_ZOTERO_SERVER
+			&& (translators[0].itemType !== "multiple" && test.items.length > 1 ||
 			test.items.length === 1 && translators[0].itemType !== test.items[0].itemType)) {
 				// this handles "items":"multiple" too, since the string has length 8
 		testDoneCallback(this, test, "failed", "Detection returned wrong item type");

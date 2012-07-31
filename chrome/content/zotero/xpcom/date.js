@@ -74,7 +74,7 @@ Zotero.Date = new function(){
 				"short":["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
 					"Oct", "Nov", "Dec"],
 				"long":["January", "February", "March", "April", "May", "June", "July",
-					"Auguest", "September", "October", "November", "December"]};
+					"August", "September", "October", "November", "December"]};
 		}
 		
 		return _months;
@@ -267,7 +267,7 @@ Zotero.Date = new function(){
 			} else {
 				// local style date (middle or little endian)
 				date.year = m[6];
-				var country = Zotero.locale.substr(3);
+				var country = Zotero.locale ? Zotero.locale.substr(3) : "US";
 				if(country == "US" ||	// The United States
 				   country == "FM" ||	// The Federated States of Micronesia
 				   country == "PW" ||	// Palau
@@ -668,7 +668,7 @@ Zotero.Date = new function(){
 	 */
 	function getLocaleDateOrder(){
 		if (!_localeDateOrder) {
-			switch (Zotero.locale.substr(-2)) {
+			switch (Zotero.locale ? Zotero.locale.substr(3) : "US") {
 				// middle-endian
 				case 'US': // The United States
 				case 'BZ': // Belize
