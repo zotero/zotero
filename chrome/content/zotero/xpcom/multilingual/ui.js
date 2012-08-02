@@ -347,7 +347,7 @@ Zotero.setCitationLanguages = function (obj, citeproc) {
 		}
 	}
 	if (citeproc) {
-		citeproc.setLangPrefsForCites(obj);
+		citeproc.setLangPrefsForCites(obj, function(key){return 'citationLangPrefs'+key});
 
 		citeproc.setLangTagsForCslTransliteration(obj.citationTransliteration);
 		citeproc.setLangTagsForCslTranslation(obj.citationTranslation);
