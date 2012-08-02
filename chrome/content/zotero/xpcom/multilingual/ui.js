@@ -326,12 +326,12 @@ Zotero.setCitationLanguages = function (obj, citeproc) {
     var affixes = Zotero.Prefs.get("csl.citationAffixes");
     if (affixes) {
         affixes = affixes.split("|");
-        if (affixes.length === 30) {
+        if (affixes.length === 40) {
             obj.citationAffixes = affixes;
         }
     }
     if (!obj.citationAffixes) {
-        obj.citationAffixes = [,,,,,,,,,,,,,,,,,,,,,,,,,,,,,];
+        obj.citationAffixes = [,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,];
     }
 	obj.citationTransliteration = [];
 	obj.citationTranslation = [];

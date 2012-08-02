@@ -719,7 +719,15 @@ To add a new preference:
 					 onpopupshowing="variantLangMenuPrep(this.parentNode.parentNode)" id="variant-lang-box"/>
 		</menu>
 	  </menupopup>
-      <menupopup id="citation-language-affix-menu" 
+      <menupopup id="citation-primary-affix-menu" 
+                 onpopupshowing="if (!document.popupNode.disabled &amp;&amp; !document.popupNode.checked) {window.citationPrimary(document.popupNode);return true;} else {window.citationPrimary(document.popupNode);return false;}" position="after_start">
+
+		<!-- Maybe don't need default here, if citationPrimary() properly scrubs existing affixes -->
+
+        <menuitem label="default" value="|" oncommand="window.citationSetAffixes(null, this);"/>
+        <menuitem label="&lt;i&gt;...&lt;/i&gt;" value="&lt;i&gt;|&lt;/i&gt;" oncommand="window.citationSetAffixes(null, this);"/>
+      </menupopup>
+      <menupopup id="citation-secondary-affix-menu" 
                  onpopupshowing="if (!document.popupNode.disabled &amp;&amp; !document.popupNode.checked) {window.citationSecondary();return true;} else {window.citationSecondary();return false;}" position="after_start">
         <menuitem label=", ..." value=", |" oncommand="window.citationSetAffixes(null, this);"/>
         <menuitem label="[...]" value=" [|]" oncommand="window.citationSetAffixes(null, this);"/>
@@ -756,7 +764,7 @@ To add a new preference:
 			</hbox>
 		  </vbox>
 		  <vbox>
-			<grid minwidth="500" maxwidth="500">
+			<grid minwidth="500">
 			  <columns>
 				<column/>
 				<column flex="1"/>
@@ -818,21 +826,21 @@ To add a new preference:
                       <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1">
                           <hbox flex="2"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox  style="min-width:4.5em;" >
                             <hbox flex="1"/>
-                            <label value="猫 (orig)"/>
-                            <hbox flex="1"/>
-                          </hbox>
-                          <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
-                            <hbox flex="1"/>
-                            <label value="neko"/>
+                            <label value="orig"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
                           <hbox  style="min-width:4.5em;">
                             <hbox flex="1"/>
-                            <label value="cat"/>
+                            <label value="translit"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <label value="translate"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="2"/>
@@ -847,13 +855,19 @@ To add a new preference:
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+								style="min-width:4.5em;" class="compact translit-primary">
                             <hbox flex="1"/>
-                            <radio group="persons-radio" id="persons-radio-translit" oncommand="citationPrimary(this);"/>
+                            <label id="persons-radio-translit-prefix"/>
+                            <radio group="persons-radio" id="persons-radio-translit" popup="citation-primary-affix-menu"/>
+                            <label id="persons-radio-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                                style="min-width:4.5em;" class="translat-primary">
                             <hbox flex="1"/>
                             <radio group="persons-radio" id="persons-radio-translat" oncommand="citationPrimary(this);"/>
                             <hbox flex="1"/>
@@ -870,13 +884,19 @@ To add a new preference:
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+                                style="min-width:4.5em;" class="compact translit-primary">
                             <hbox flex="1"/>
-                            <radio group="institutions-radio" id="institutions-radio-translit" oncommand="citationPrimary(this);"/>
+                            <label id="institutions-radio-translit-prefix"/>
+                            <radio group="institutions-radio" id="institutions-radio-translit" popup="citation-primary-affix-menu"/>
+                            <label id="institutions-radio-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                                style="min-width:4.5em;" class="compact translat-primary">
                             <hbox flex="1"/>
                             <radio group="institutions-radio" id="institutions-radio-translat" oncommand="citationPrimary(this);"/>
                             <hbox flex="1"/>
@@ -893,13 +913,19 @@ To add a new preference:
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+                                style="min-width:4.5em;" class="compact translit-primary">
                             <hbox flex="1"/>
-                            <radio group="titles-radio" id="titles-radio-translit" oncommand="citationPrimary(this);"/>
+                            <label id="titles-radio-translit-prefix"/>
+							<radio group="titles-radio" id="titles-radio-translit" popup="citation-primary-affix-menu"/>
+							<label id="titles-radio-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                                style="min-width:4.5em;" class="compact translat-primary">
                             <hbox flex="1"/>
                             <radio group="titles-radio" id="titles-radio-translat" oncommand="citationPrimary(this);"/>
                             <hbox flex="1"/>
@@ -916,13 +942,19 @@ To add a new preference:
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+                                style="min-width:4.5em;" class="compact translit-primary">
                             <hbox flex="1"/>
-                            <radio group="publishers-radio" id="publishers-radio-translit" oncommand="citationPrimary(this);"/>
+                            <label id="publishers-radio-translit-prefix"/>
+                            <radio group="publishers-radio" id="publishers-radio-translit" popup="citation-primary-affix-menu"/>
+                            <label id="publishers-radio-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                                style="min-width:4.5em;" class="compact translat-primary">
                             <hbox flex="1"/>
                             <radio group="publishers-radio" id="publishers-radio-translat" oncommand="citationPrimary(this);"/>
                             <hbox flex="1"/>
@@ -939,13 +971,19 @@ To add a new preference:
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+                                style="min-width:4.5em;" class="compact translit-primary">
                             <hbox flex="1"/>
-                            <radio group="places-radio" id="places-radio-translit" oncommand="citationPrimary(this);"/>
+                            <label id="places-radio-translit-prefix"/>
+                            <radio group="places-radio" id="places-radio-translit" popup="citation-primary-affix-menu"/>
+                            <label id="places-radio-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                                style="min-width:4.5em;" class="compact translat-primary">
                             <hbox flex="1"/>
                             <radio group="places-radio" id="places-radio-translat" oncommand="citationPrimary(this);"/>
                             <hbox flex="1"/>
@@ -968,19 +1006,19 @@ To add a new preference:
                           <hbox flex="2"/>
                           <hbox  style="min-width:4.5em;">
                             <hbox flex="1"/>
-                            <label value="猫 (orig)"/>
+                            <label value="orig"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
                           <hbox  style="min-width:4.5em;">
                             <hbox flex="1"/>
-                            <label value="neko"/>
+                            <label value="translit"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
                           <hbox  style="min-width:4.5em;">
                             <hbox flex="1"/>
-                            <label value="cat"/>
+                            <label value="translate"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="2"/>
@@ -989,26 +1027,30 @@ To add a new preference:
                       <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1">
                           <hbox flex="2"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox  style="min-width:4.5em;" class="plain compact">
                             <hbox flex="1"/>
                             <label id="persons-checkbox-orig-prefix"/>
-                            <checkbox popup="citation-language-affix-menu" id="persons-checkbox-orig"/>
+                            <checkbox popup="citation-secondary-affix-menu" id="persons-checkbox-orig"/>
                             <label id="persons-checkbox-orig-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translit-secondary', 'translit'],false);" 
+                                style="min-width:4.5em;" class="plain compact translit-secondary">
                             <hbox flex="1"/>
                             <label id="persons-checkbox-translit-prefix"/>
-                            <checkbox id="persons-checkbox-translit" popup="citation-language-affix-menu"/>
+                            <checkbox id="persons-checkbox-translit" popup="citation-secondary-affix-menu"/>
                             <label id="persons-checkbox-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                                style="min-width:4.5em;" class="plain compact translat-secondary">
                             <hbox flex="1"/>
                             <label id="persons-checkbox-translat-prefix"/>
-                            <checkbox id="persons-checkbox-translat" popup="citation-language-affix-menu"/>
+                            <checkbox id="persons-checkbox-translat" popup="citation-secondary-affix-menu"/>
                             <label id="persons-checkbox-translat-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
@@ -1018,26 +1060,30 @@ To add a new preference:
                       <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1">
                           <hbox flex="2"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox  style="min-width:4.5em;" class="plain compact">
                             <hbox flex="1"/>
                             <label id="institutions-checkbox-orig-prefix"/>
-                            <checkbox id="institutions-checkbox-orig" popup="citation-language-affix-menu"/>
+                            <checkbox id="institutions-checkbox-orig" popup="citation-secondary-affix-menu"/>
                             <label id="institutions-checkbox-orig-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translit-secondary', 'translit'],false);"
+                                style="min-width:4.5em;" class="plain compact translit-secondary">
                             <hbox flex="1"/>
                             <label id="institutions-checkbox-translit-prefix"/>
-                            <checkbox id="institutions-checkbox-translit" popup="citation-language-affix-menu"/>
+                            <checkbox id="institutions-checkbox-translit" popup="citation-secondary-affix-menu"/>
                             <label id="institutions-checkbox-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                                style="min-width:4.5em;" class="plain compact translat-secondary">
                             <hbox flex="1"/>
                             <label id="institutions-checkbox-translat-prefix"/>
-                            <checkbox id="institutions-checkbox-translat" popup="citation-language-affix-menu"/>
+                            <checkbox id="institutions-checkbox-translat" popup="citation-secondary-affix-menu"/>
                             <label id="institutions-checkbox-translat-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
@@ -1047,26 +1093,30 @@ To add a new preference:
                       <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1">
                           <hbox flex="2"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox  style="min-width:4.5em;" class="plain compact">
                             <hbox flex="1"/>
                             <label id="titles-checkbox-orig-prefix"/>
-                            <checkbox id="titles-checkbox-orig" popup="citation-language-affix-menu"/>
+                            <checkbox id="titles-checkbox-orig" popup="citation-secondary-affix-menu"/>
                             <label id="titles-checkbox-orig-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translit-secondary', 'translit'],false);"
+                                style="min-width:4.5em;" class="plain compact translit-secondary">
                             <hbox flex="1"/>
                             <label id="titles-checkbox-translit-prefix"/>
-                            <checkbox id="titles-checkbox-translit" popup="citation-language-affix-menu"/>
+                            <checkbox id="titles-checkbox-translit" popup="citation-secondary-affix-menu"/>
                             <label id="titles-checkbox-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                                style="min-width:4.5em;" class="plain compact translat-secondary">
                             <hbox flex="1"/>
                             <label id="titles-checkbox-translat-prefix"/>
-                            <checkbox id="titles-checkbox-translat" popup="citation-language-affix-menu"/>
+                            <checkbox id="titles-checkbox-translat" popup="citation-secondary-affix-menu"/>
                             <label id="titles-checkbox-translat-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
@@ -1076,26 +1126,30 @@ To add a new preference:
                       <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1">
                           <hbox flex="2"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox  style="min-width:4.5em;" class="plain compact">
                             <hbox flex="1"/>
                             <label id="publishers-checkbox-orig-prefix"/>
-                            <checkbox id="publishers-checkbox-orig" popup="citation-language-affix-menu"/>
+                            <checkbox id="publishers-checkbox-orig" popup="citation-secondary-affix-menu"/>
                             <label id="publishers-checkbox-orig-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translit-secondary', 'translit'],false);"
+                                style="min-width:4.5em;" class="plain compact translit-secondary">
                             <hbox flex="1"/>
                             <label id="publishers-checkbox-translit-prefix"/>
-                            <checkbox id="publishers-checkbox-translit" popup="citation-language-affix-menu"/>
+                            <checkbox id="publishers-checkbox-translit" popup="citation-secondary-affix-menu"/>
                             <label id="publishers-checkbox-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                                style="min-width:4.5em;" class="plain compact translat-secondary">
                             <hbox flex="1"/>
                             <label id="publishers-checkbox-translat-prefix"/>
-                            <checkbox id="publishers-checkbox-translat" popup="citation-language-affix-menu"/>
+                            <checkbox id="publishers-checkbox-translat" popup="citation-secondary-affix-menu"/>
                             <label id="publishers-checkbox-translat-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
@@ -1105,26 +1159,30 @@ To add a new preference:
                       <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1">
                           <hbox flex="2"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox style="min-width:4.5em;" class="plain compact">
                             <hbox flex="1"/>
                             <label id="places-checkbox-orig-prefix"/>
-                            <checkbox id="places-checkbox-orig" popup="citation-language-affix-menu"/>
+                            <checkbox id="places-checkbox-orig" popup="citation-secondary-affix-menu"/>
                             <label id="places-checkbox-orig-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translit-secondary', 'translit'],false);"
+                                style="min-width:4.5em;" class="plain compact translit-secondary">
                             <hbox flex="1"/>
                             <label id="places-checkbox-translit-prefix"/>
-                            <checkbox id="places-checkbox-translit" popup="citation-language-affix-menu"/>
+                            <checkbox id="places-checkbox-translit" popup="citation-secondary-affix-menu"/>
                             <label id="places-checkbox-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+								onmouseout="setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                                style="min-width:4.5em;" class="plain compact translat-secondary">
                             <hbox flex="1"/>
                             <label id="places-checkbox-translat-prefix"/>
-                            <checkbox id="places-checkbox-translat" popup="citation-language-affix-menu"/>
+                            <checkbox id="places-checkbox-translat" popup="citation-secondary-affix-menu"/>
                             <label id="places-checkbox-translat-suffix"/>
                             <hbox flex="1"/>
                           </hbox>

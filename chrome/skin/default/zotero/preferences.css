@@ -1,3 +1,36 @@
+.language-role-highlight {
+	background:#fdfdfd;
+};
+
+.translit-primary {
+}
+.translit-secondary {
+}
+
+.translit-primary label {
+	margin: 0 0 0 0;
+}
+.translit-secondary label {
+	margin: 0 0 0 0;
+}
+.translat-primary label {
+	margin: 0 0 0 0;
+}
+.translat-secondary label {
+	margin: 0 0 0 0;
+}
+
+.translit {
+}
+.translat {
+}
+
+row.compact {
+	margin: 0 0 0 0 !important;
+	padding: 0 0 0 0 !important;
+}
+
+
 prefwindow .chromeclass-toolbar
 {
 	display: -moz-box !important; /* Ignore toolbar collapse button on OS X */
