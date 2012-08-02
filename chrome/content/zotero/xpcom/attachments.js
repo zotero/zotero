@@ -89,6 +89,7 @@ Zotero.Attachments = new function(){
 			
 			var mimeType = Zotero.MIME.getMIMETypeFromFile(newFile);
 			
+			
 			attachmentItem.attachmentMIMEType = mimeType;
 			attachmentItem.attachmentPath = this.getPath(newFile, this.LINK_MODE_IMPORTED_FILE);
 			attachmentItem.save();
@@ -1325,8 +1326,7 @@ Zotero.Attachments = new function(){
 		}
 		
 		var ext = Zotero.File.getExtension(file);
-		if (mimeType.substr(0, 5)!='text/' ||
-			!Zotero.MIME.hasInternalHandler(mimeType, ext)){
+		if (!Zotero.MIME.hasInternalHandler(mimeType, ext)) {
 			return;
 		}
 		

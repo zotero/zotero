@@ -25,7 +25,6 @@
 
 Zotero.MIME = new function(){
 	this.isTextType = isTextType;
-	this.isExternalTextExtension = isExternalTextExtension;
 	this.getPrimaryExtension = getPrimaryExtension;
 	this.sniffForMIMEType = sniffForMIMEType;
 	this.sniffForBinary = sniffForBinary;
@@ -89,14 +88,6 @@ Zotero.MIME = new function(){
 	
 	function isTextType(mimeType) {
 		return mimeType.substr(0, 5) == 'text/' || _textTypes[mimeType];
-	}
-	
-	
-	/*
-	 * Check if file extension should be forced to open externally
-	 */
-	function isExternalTextExtension(ext){
-		return typeof _externalTextExtensions[ext] != 'undefined';
 	}
 	
 	
@@ -326,20 +317,11 @@ Zotero.MIME = new function(){
 	 * do what we need
 	 */
 	function hasNativeHandler(mimeType, ext) {
-		if (mimeType.match(/^text\//)) {
-			if (isExternalTextExtension(ext)){
-				Zotero.debug(mimeType + " file has extension '" + ext + "' that should be handled externally");
-				return false;
-			}
-			return true;
-		}
-		
 		if (_nativeMIMETypes[mimeType]){
 			Zotero.debug('MIME type ' + mimeType + ' can be handled natively');
 			return true;
 		}
-		
-		return null;
+		return false;
 	}
 	
 	
@@ -350,9 +332,8 @@ Zotero.MIME = new function(){
 	 * Similar to hasNativeHandler() but also includes plugins
 	 */
 	function hasInternalHandler(mimeType, ext) {
-		var isNative = hasNativeHandler(mimeType, ext);
-		if (isNative !== null) {
-			return isNative;
+		if (hasNativeHandler(mimeType, ext)) {
+			return true;
 		}
 		
 		if(mimeType === "application/pdf"
