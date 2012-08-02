@@ -256,6 +256,10 @@ var ZoteroPane = new function()
 	this.buildItemTypeSubMenu = function () {
 		var moreMenu = document.getElementById('zotero-tb-add-more');
 		
+		while (moreMenu.hasChildNodes()) {
+			moreMenu.removeChild(moreMenu.firstChild);
+		}
+		
 		// Sort by localized name
 		var t = Zotero.ItemTypes.getSecondaryTypes();
 		var itemTypes = [];

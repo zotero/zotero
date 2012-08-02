@@ -380,7 +380,7 @@ Zotero.Schema = new function(){
 		var enumerator = wm.getEnumerator("navigator:browser");
 		while (enumerator.hasMoreElements()) {
 			var win = enumerator.getNext();
-			win.ZoteroPane.buildItemTypeMenus();
+			win.ZoteroPane.buildItemTypeSubMenu();
 			win.document.getElementById('zotero-editpane-item-box').buildItemTypeMenu();
 		}
 	}
