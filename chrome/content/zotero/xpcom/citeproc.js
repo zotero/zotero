@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.366",
+    PROCESSOR_VERSION: "1.0.368",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -2917,7 +2917,7 @@ CSL.Engine.prototype.setLangPrefsForCites = function (obj, conv) {
     }
 };
 CSL.Engine.prototype.setLangPrefsForCiteAffixes = function (affixList) {
-    if (affixList && affixList.length === 30) {
+    if (affixList && affixList.length === 40) {
         var affixes = this.opt.citeAffixes;
         var count = 0;
         var settings = ["persons", "institutions", "titles", "publishers", "places"];
@@ -2925,12 +2925,17 @@ CSL.Engine.prototype.setLangPrefsForCiteAffixes = function (affixList) {
         for (var i = 0, ilen = settings.length; i < ilen; i += 1) {
             for (var j = 0, jlen = forms.length; j < jlen; j += 1) {
                 var value = affixList[count];
+                if (!value && ((count/2) % 4) === 2) {
+                    value = affixList[count - 4];
+                }
                 if (!value) {
                     value = "";
                 }
                 affixes[settings[i]]["locale-" + forms[j]].prefix = value;
                 count += 1;
-                var value = affixList[count];
+                if (!value && (((count - 1)/2) % 4) === 2) {
+                    value = affixList[count - 4];
+                }
                 if (!value) {
                     value = "";
                 }
@@ -3076,6 +3081,7 @@ CSL.Engine.Opt = function () {
     this.development_extensions.wrap_url_and_doi = false;
     this.development_extensions.allow_force_lowercase = false;
     this.development_extensions.handle_parallel_articles = false;
+    this.development_extensions.thin_non_breaking_space_html_hack = false;
     this.nodenames = [];
     this.gender = {};
 	this['cite-lang-prefs'] = {
@@ -9594,9 +9600,25 @@ CSL.Transform = function (state) {
                 secondary = CSL.demoteNoiseWords(state, secondary);
                 tertiary = CSL.demoteNoiseWords(state, tertiary);
             }
+            var primary_tok = CSL.Util.cloneToken(this);
+            var primaryPrefix;
+            if (slot.primary === "locale-translit") {
+                primaryPrefix = state.opt.citeAffixes[langPrefs][slot.primary].prefix;
+            }                
+            if (primaryPrefix === "<i>") {
+                var hasItalic = false;
+                for (var i = 0, ilen = primary_tok.decorations.length; i < ilen; i += 1) {
+                    if (primary_tok.decorations[i][0] === "@font-style"
+                        && primary_tok.decorations[i][1] === "italic") {
+                        hasItalic = true;
+                    }
+                }
+                if (!hasItalic) {
+                    primary_tok.decorations.push(["@font-style", "italic"])
+                }
+            }
             if (secondary || tertiary) {
                 state.output.openLevel("empty");
-                primary_tok = CSL.Util.cloneToken(this);
                 primary_tok.strings.suffix = "";
                 state.output.append(primary, primary_tok);
                 if (secondary) {
@@ -9637,7 +9659,7 @@ CSL.Transform = function (state) {
                 }
 				state.output.closeLevel();
             } else {
-                state.output.append(primary, this);
+                state.output.append(primary, primary_tok);
             }
             return null;
         };
@@ -11606,7 +11628,28 @@ CSL.Util.FlipFlopper.prototype.addFlipFlop = function (blob, fun) {
 CSL.Output.Formatters = {};
 CSL.getSafeEscape = function(state) {
     if (["bibliography", "citation"].indexOf(state.tmp.area) > -1) {
-        return CSL.Output.Formats[state.opt.mode].text_escape;
+        var callbacks = [];
+        if (state.opt.development_extensions.thin_non_breaking_space_html_hack && state.opt.mode === "html") {
+            callbacks.push(function (txt) {
+                return txt.replace(/\u202f/g, '<span style="white-space:nowrap">&thinsp;</span>');
+            });
+        }
+        if (state.opt.force_parens_char) {
+            callbacks.push(function (txt) {
+                return txt.replace(/([\(\<\[])/g, state.opt.force_parens_char + "$1")
+                    .replace(/([\)\>\]])/g, "$1" + state.opt.force_parens_char);
+            });
+        }
+        if (callbacks.length) {
+            return function (txt) {
+                for (var i = 0, ilen = callbacks.length; i < ilen; i += 1) {
+                    txt = callbacks[i](txt);
+                }
+                return CSL.Output.Formats[state.opt.mode].text_escape(txt);
+            }
+        } else {
+            return CSL.Output.Formats[state.opt.mode].text_escape;
+        }
     } else {
         return function (txt) { return txt; };
     }
