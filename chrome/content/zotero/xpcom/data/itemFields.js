@@ -307,6 +307,7 @@ Zotero.ItemFields = new function() {
 		
 		var autoCompleteFields = [
 			'journalAbbreviation',
+			'series',
 			'seriesTitle',
 			'seriesText',
 			'libraryCatalog',

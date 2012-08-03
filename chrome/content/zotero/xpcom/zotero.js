@@ -340,7 +340,7 @@ const ZOTERO_CONFIG = {
 						Zotero.getString('dataDir.previousDir') + ' '
 							+ Zotero.Prefs.get('lastDataDir'),
 						buttonFlags, null,
-						Zotero.getString('dataDir.useProfileDir'),
+						Zotero.getString('dataDir.useProfileDir', Zotero.appName),
 						Zotero.getString('general.locate'),
 						null, {});
 					
