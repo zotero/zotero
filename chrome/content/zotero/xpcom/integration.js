@@ -3194,8 +3194,8 @@ Zotero.Integration.DocumentData.prototype.serializeXML = function() {
 	var prefs = "";
 	for(var pref in this.prefs) {
 		if (pref === 'citationAffixes') {
-			var citeaffixes = "|||||||||||||||||||||||||||||";
-			if (this.prefs.citationAffixes && this.prefs.citationAffixes.length === 30) {
+			var citeaffixes = "|||||||||||||||||||||||||||||||||||||||";
+			if (this.prefs.citationAffixes && this.prefs.citationAffixes.length === 40) {
 				citeaffixes = this.prefs.citationAffixes.join('|');
 			}
 			prefs += '<pref name="citationAffixes" '+
