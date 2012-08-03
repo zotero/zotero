@@ -299,13 +299,3 @@ treechildren::-moz-tree-checkbox(checked){
   list-style-image: url("chrome://global/skin/checkbox/cbox-check.gif");
 }
 
-hbox.plain .checkbox-label-box
-{
--moz-appearance: none;
-border: none;
-}
-
-radiogroup.plain radio .radio-label-box
-{
-display: none;
-}
