@@ -722,9 +722,6 @@ To add a new preference:
       <menupopup id="citation-primary-affix-menu" 
                  onpopupshowing="if (!document.popupNode.disabled &amp;&amp; !document.popupNode.checked) {window.citationPrimary(document.popupNode);return true;} else {window.citationPrimary(document.popupNode);return false;}" position="after_start">
 
-		<!-- Maybe don't need default here, if citationPrimary() properly scrubs existing affixes -->
-
-        <menuitem label="default" value="|" oncommand="window.citationSetAffixes(null, this);"/>
         <menuitem label="&lt;i&gt;...&lt;/i&gt;" value="&lt;i&gt;|&lt;/i&gt;" oncommand="window.citationSetAffixes(null, this);"/>
       </menupopup>
       <menupopup id="citation-secondary-affix-menu" 
