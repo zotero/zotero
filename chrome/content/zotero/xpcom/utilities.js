@@ -336,7 +336,25 @@ Zotero.Utilities = {
 	/**
 	 * Retrieves the list of available content languages
 	 */
-	"languageList":function () {
+	"languageList":function (item) {
+        if (item) {
+            var itemLanguages = {};
+            var insertSql = "INSERT INTO zlsTags VALUES (?,?,?)";
+            var snoopSql = "SELECT COUNT (*) FROM zlsTags WHERE tag=?";
+            for (var fieldID in item.multi._keys) {
+                for (var langTag in item.multi._keys[fieldID]) {
+                    itemLanguages[langTag] = true;
+                }
+                if (item.multi.main[fieldID]) {
+                    itemLanguages[item.multi.main[fieldID]] = true;
+                }
+            }
+            for (var tag in itemLanguages) {
+                if (!Zotero.DB.valueQuery(snoopSql, [tag])) {
+	                Zotero.DB.query(insertSql, [tag,tag,null]);
+                }
+            }
+        }
 		var sql = 'SELECT nickname,tag from zlsTags';
 		var result = Zotero.DB.query(sql);
 		if (result) {

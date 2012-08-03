@@ -426,13 +426,14 @@
 					this.itemLanguage = this.item.getField("language");
 
 					var i, ilen;
-					var languageList = Zotero.Utilities.languageList();
 
 					if (!this.item) {
 						Zotero.debug('No item to refresh', 2);
 						return;
 					}
 					
+					var languageList = Zotero.Utilities.languageList(this._item);
+
 					if (this.clickByItem) {
 						var itemBox = document.getAnonymousNodes(this)[0];
 						itemBox.setAttribute('onclick',
