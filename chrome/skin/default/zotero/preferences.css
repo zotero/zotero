@@ -1,5 +1,6 @@
 .language-role-highlight {
 	background:#fdfdfd;
+    -moz-transition: background-color 0s linear 0.25s;
 };
 
 .translit-primary {
