@@ -355,6 +355,13 @@ Zotero.Translate.DOMWrapper = new function() {
  * @param {Zotero.Translate} translate
  * @param {String|window} sandboxLocation
  */
+
+
+/**
+ * @class Manages the translator sandbox
+ * @param {Zotero.Translate} translate
+ * @param {String|window} sandboxLocation
+ */
 Zotero.Translate.SandboxManager = function(sandboxLocation) {
 	this.sandbox = new Components.utils.Sandbox(sandboxLocation);
 	this.sandbox.Zotero = {};
@@ -369,27 +376,16 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 			? sandboxLocation.wrappedJSObject.DOMParser : sandboxLocation.DOMParser;
 	} else {
 		this.sandbox.DOMParser = function() {
+			var uri, principal;
 			// get URI
 			// DEBUG: In Fx 4 we can just use document.nodePrincipal, but in Fx 3.6 this doesn't work
 			if(typeof sandboxLocation === "string") {	// if sandbox specified by URI
-				var uri = sandboxLocation;
-			} else {									// if sandbox specified by DOM document
-				var uri = sandboxLocation.location.toString();
-			}
-			
-			// get from nsIURI
-			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-				.getService(Components.interfaces.nsIIOService);
-			uri = ioService.newURI(uri, "UTF-8", null);
-			
-			if(typeof sandboxLocation === "object" && sandboxLocation.nodePrincipal) {
-				// if sandbox specified by DOM document, use nodePrincipal property
-				var principal = sandboxLocation.nodePrincipal;
-			} else {
 				// if sandbox specified by URI, get codebase principal from security manager
-				var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"]
-						.getService(Components.interfaces.nsIScriptSecurityManager);
-				var principal = secMan.getCodebasePrincipal(uri);
+				var secMan = Services.scriptSecurityManager;
+				principal = (secMan.getCodebasePrincipal || secMan.getSimpleCodebasePrincipal)
+					(Services.io.newURI(sandboxLocation, "UTF-8", null));
+			} else {									// if sandbox specified by DOM document
+				uri = sandboxLocation.document.nodePrincipal;
 			}
 			
 			// initialize DOM parser
