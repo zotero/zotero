@@ -991,6 +991,14 @@ Zotero.Utilities = {
 			} else if("selectNodes" in element) {
 				// We use JavaScript-XPath in IE for HTML documents, but with an XML
 				// document, we need to use selectNodes
+				if(namespaces) {
+					var ieNamespaces = [];
+					for(var i in namespaces) {
+						if(!i) continue;
+						ieNamespaces.push('xmlns:'+i+'="'+Zotero.Utilities.htmlSpecialChars(namespaces[i])+'"');
+					}
+					rootDoc.setProperty("SelectionNamespaces", ieNamespaces.join(" "));
+				}
 				var nodes = element.selectNodes(xpath);
 				for(var i=0; i<nodes.length; i++) {
 					results.push(nodes[i]);
