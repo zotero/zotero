@@ -337,6 +337,8 @@ Zotero.Utilities = {
 	 * Retrieves the list of available content languages
 	 */
 	"languageList":function (item) {
+        // XXXX This should really be placed behind a cache in
+        // CachedLanguages(). Code needs a general tidying up.
         if (item) {
             var itemLanguages = {};
             var insertSql = "INSERT INTO zlsTags VALUES (?,?,?)";
