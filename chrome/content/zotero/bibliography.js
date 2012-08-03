@@ -42,7 +42,8 @@ var Zotero_File_Interface_Bibliography = new function() {
 	this.citationPrimary = citationPrimary;
 	this.citationSecondary = citationSecondary;
 	this.citationSetAffixes = citationSetAffixes;
-	
+	this.setLanguageRoleHighlight = setLanguageRoleHighlight
+
 	/*
 	 * Initialize some variables and prepare event listeners for when chrome is done
 	 * loading
@@ -162,7 +163,17 @@ var Zotero_File_Interface_Bibliography = new function() {
 					'citationSort'
 				];
 				for (var j = 0, jlen = langSelectorTypes.length; j < jlen; j += 1) {
-					langSelectors.push(buildSelector('default',tags[i],langSelectorTypes[j]));
+		            var newselector = buildSelector('default',tags[i],langSelectorTypes[j]);
+		            if ((j % 3) == 1) {
+			            newselector.setAttribute("class", "translit");
+                        newselector.setAttribute("onmouseover", "Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit-secondary', 'translit'],true);");
+                        newselector.setAttribute("onmouseout", "Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit-secondary', 'translit'],false);");
+		            } else if ((j % 3) == 2) {
+			            newselector.setAttribute("class", "translat");
+                        newselector.setAttribute("onmouseover", "Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat-secondary', 'translat'],true);");
+                        newselector.setAttribute("onmouseout", "Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat-secondary', 'translat'],false);");
+		            }
+		            langSelectors.push(newselector);
 				}
 				addSelectorRow(langPrefs,langSelectors);
 			}
@@ -237,6 +248,33 @@ var Zotero_File_Interface_Bibliography = new function() {
 		target.appendChild(row);
 	}
 		
+    function setLanguageRoleHighlight(classes, mode) {
+	    for (var i = 0, ilen = classes.length; i < ilen; i += 1) {
+		    var nodes = document.getElementsByClassName(classes[i]);
+		    for (var j = 0, jlen = nodes.length; j < jlen; j += 1) {
+                var lst;
+			    var str = nodes[j].getAttribute("class");
+			    if (str) {
+				    lst = str.split(/\s+/);
+			    } else {
+				    lst = [];
+			    }
+			    if (mode) {
+				    lst.push("language-role-highlight");
+                    Zotero.debug("XXX   DO: "+lst);
+				    nodes[j].setAttribute("class", lst.join(" "));
+			    } else {
+                    for (var k = lst.length - 1; k > -1; k += -1) {
+                        if (lst[k] === "language-role-highlight") {
+                            lst = lst.slice(0, k).concat(lst.slice(k + 1));
+                        }
+                    }
+                    nodes[j].setAttribute("class", lst.join(" "));
+                }
+		    }
+	    }
+    };
+
 	function buildSelector (profile,tagdata,param) {
 		//Zotero.debug("XXX == buildSelector() ==");
 		var checkbox = document.createElement('checkbox');
@@ -275,18 +313,22 @@ var Zotero_File_Interface_Bibliography = new function() {
 		}
 	}
 
-	// Coding needed.
+    function capFirst(str) {
+	    return str[0].toUpperCase() + str.slice(1);
+    }
 
-	function citationPrimary(node) {
-		node = node.selectedItem;
-		var lst = node.id.split('-');
-		var lowerBase = lst[0];
-		var upperBase = lst[0][0].toUpperCase() + lst[0].slice(1);
-		var primarySetting = lst[2];
-		var settings = _io['citationLangPrefs'+upperBase];
-		_io['citationLangPrefs'+upperBase] = [primarySetting].concat(settings.slice(1));
-		citationLangSet(upperBase, true);
-	};
+    function citationPrimary(node) {
+	    var lst = node.id.split('-');
+	    var base = lst[0];
+        var primarySetting = lst[2];
+		var settings = _io['citationLangPrefs'+capFirst(base)];
+        if (!settings) {
+            settings = ['orig'];
+        }
+	    _io['citationLangPrefs'+capFirst(base)] = [primarySetting].concat(settings.slice(1));
+        // Second true is for a radio click
+	    citationLangSet(capFirst(base), true, true);
+    }
 
 	function citationSecondary() {
 		//Zotero.debug("XXX == citationSecondary() ==");
@@ -329,120 +371,146 @@ var Zotero_File_Interface_Bibliography = new function() {
 		}
 	};
 
-	function citationLangSet (upperBase, init) {
-		//Zotero.debug("XXX == citationLangSet() ==: "+base);
-		var lowerBase = upperBase.toLowerCase();
-		var settings = _io['citationLangPrefs'+upperBase];
-		if (!settings || !settings[0]) {
-			settings = ['orig'];
-		}
-		var nodes = [];
-		var forms = ['orig', 'translit', 'translat'];
-		// get node
-		// set node from pref
-		if (init) {
-			citationGetAffixes();
-			var node = document.getElementById(lowerBase + "-radio-" + settings[0]);
-			var control = node.control;
-			control.selectedItem = node;
-			for (var i = 0, ilen = forms.length; i < ilen; i += 1) {
-				nodes.push(document.getElementById(lowerBase + "-checkbox-" + forms[i]));
-			}
-			for (var i = 0, ilen = nodes.length; i < ilen; i += 1) {
-				nodes[i].checked = false;
-				for (var j = 1, jlen = settings.length; j < jlen; j += 1) {
-					if (nodes[i].id === lowerBase + '-checkbox-' + settings[j]) {
-						nodes[i].checked = true;
-					}
-				}
-				if (nodes[i].id === lowerBase + "-checkbox-" + settings[0]) {
-					nodes[i].checked = false;
-					var idx = settings.slice(1).indexOf(settings[0]);
-					if (idx > -1) {
-						// +1 and +2 b/c first-position item (primary) is sliced off for this check
-						settings = settings.slice(0,idx + 1).concat(settings.slice(idx + 2)); 
-						// FIX
-						_io['citationLangPrefs'+upperBase] = settings;
-					}
-					nodes[i].disabled = true;
-					citationSetAffixes(nodes[i]);
-				} else {
-					nodes[i].disabled = false;
-				}
-			}
-		}
-	};
+    function citationLangSet (name, init, radioClick) {
+		var settings = _io['citationLangPrefs'+name];
+        Zotero.debug("XXX citationLangSet() "+name+" "+init+" "+radioClick);
+	    if (!settings || !settings[0]) {
+		    settings = ['orig'];
+	    }
+	    var nodes = [];
+	    var forms = ['orig', 'translit', 'translat'];
+        var base = name.toLowerCase();
+        // get node
+        // set node from pref
+        if (init) {
+            citationGetAffixes();
+            var currentPrimaryID = base + "-radio-" + settings[0];
+            var node = document.getElementById(currentPrimaryID);
+            var control = node.control;
+            control.selectedItem = node;
+            
+            var translitID = base + "-radio-translit";
+            var translitNode = document.getElementById(translitID);
+            nodes.push(translitNode);
+            
+            Zotero.debug();
 
-	function citationSetAffixes (node, affixNode) {
-		//Zotero.debug("XXX == citationSetAffixes == "+affixNode);
-		if (!node) {
-			var node = document.popupNode;
-		}
-		var currentId = node.id;
-		var prefixNode = document.getElementById(node.id + '-prefix');
-		var suffixNode = document.getElementById(node.id + '-suffix');
-		if (!affixNode) {
-			prefixNode.value = "";
-			suffixNode.value = "";
-		} else {
-			var prefix = affixNode.value.split("|")[0];
-			if (!prefix) {
-				prefix = "";
-			}
-			var suffix = affixNode.value.split("|")[1];
-			if (!suffix) {
-				suffix = "";
-			}
-			prefixNode.value = prefix;
-			suffixNode.value = suffix;
-		}
-		// Do something to store this data in Prefs
-		var types = ['persons', 'institutions', 'titles', 'publishers', 'places'];
-		var forms = ['orig', 'translit', 'translat'];
-		var affixList = [];
-		for (var i = 0, ilen = types.length; i < ilen; i += 1) {
-			for (var j = 0, jlen = forms.length; j < jlen; j += 1) {
-				var elem = document.getElementById(types[i] + '-checkbox-' + forms[j] + '-prefix');
-				if (!elem.value) {
-					elem.value = "";
-				}
-				affixList.push(elem.value);
-				elem = document.getElementById(types[i] + '-checkbox-' + forms[j] + '-suffix');
-				if (!elem.value) {
-					elem.value = "";
-				}
-				affixList.push(elem.value);
-			}
-		}
+            for (var i = 0, ilen = forms.length; i < ilen; i += 1) {
+                nodes.push(document.getElementById(base + "-checkbox-" + forms[i]));
+            }
+	        for (var i = 0, ilen = nodes.length; i < ilen; i += 1) {
+		        nodes[i].checked = false;
+		        for (var j = 1, jlen = settings.length; j < jlen; j += 1) {
+			        if (nodes[i].id === base + '-checkbox-' + settings[j]) {
+				        nodes[i].checked = true;
+			        }
+		        }
+		        if (nodes[i].id === base + "-checkbox-" + settings[0]) {
+			        nodes[i].checked = false;
+			        var idx = settings.slice(1).indexOf(settings[0]);
+			        if (idx > -1) {
+				        // +1 and +2 b/c first-position item (primary) is sliced off for this check
+				        settings = settings.slice(0,idx + 1).concat(settings.slice(idx + 2));
+		                _io['citationLangPrefs'+name] = settings.join(',');
+			        }
+                    citationSetAffixes(nodes[i]);
+			        nodes[i].disabled = true;
+                } else if (radioClick && nodes[i].id === translitID) {
+                    // true invokes a quash of the affixes
+                    if (currentPrimaryID === translitID) {
+                        Zotero.debug("XXX ONE");
+                        citationSetAffixes(nodes[i]);
+                    } else {
+                        Zotero.debug("XXX TWO");
+                        citationSetAffixes(nodes[i], null, true);
+                    }
+                } else {
+			        nodes[i].disabled = false;
+		        }
+	        }
+        }
+    }
+
+    function citationSetAffixes (node, affixNode, quashPrimaryAffixes) {
+        Zotero.debug("XXX in citationSetAffixes() "+node+" "+affixNode+" "+quashPrimaryAffixes);
+        if (!node) {
+            var node = document.popupNode;
+        }
+        var currentId = node.id;
+        var prefixNode = document.getElementById(node.id + '-prefix');
+        var suffixNode = document.getElementById(node.id + '-suffix');
+        if (!affixNode || quashPrimaryAffixes) {
+            prefixNode.value = "";
+            suffixNode.value = "";
+        } else {
+            var prefix = affixNode.value.split("|")[0];
+            if (!prefix) {
+                prefix = "";
+            }
+            var suffix = affixNode.value.split("|")[1];
+            if (!suffix) {
+                suffix = "";
+            }
+            prefixNode.value = prefix;
+            suffixNode.value = suffix;
+        }
+        // Do something to store this data in Prefs
+        var types = ['persons', 'institutions', 'titles', 'publishers', 'places'];
+	    var forms = ['orig', 'translit', 'translat'];
+        var affixList = [];
+        for (var i = 0, ilen = types.length; i < ilen; i += 1) {
+            affixListPush(types[i], "radio", "translit", affixList, "prefix");
+            affixListPush(types[i], "radio", "translit", affixList, "suffix");
+            for (var j = 0, jlen = forms.length; j < jlen; j += 1) {
+                affixListPush(types[i], "checkbox", forms[j], affixList, "prefix");
+                affixListPush(types[i], "checkbox", forms[j], affixList, "suffix");
+            }
+        }
+        Zotero.debug("XXX citationAffixes saved: "+affixList);
 		_io['citationAffixes'] = affixList;
-	};
+    }
 
-	function citationGetAffixes () {
-		//Zotero.debug("XXX == citationGetAffixes ==");
+    function affixListPush(type, boxtype, form, lst, affix) {
+        var elem = document.getElementById(type + "-" + boxtype + "-" + form + "-" +affix);
+        if (!elem.value) {
+            elem.value = "";
+        }
+        lst.push(elem.value);
+    };
+
+    function citationGetAffixes () {
 		var affixList = null;
 		if (_io['citationAffixes']) {
-			if (_io['citationAffixes'].length === 30) {
+			if (_io['citationAffixes'].length === 40) {
 				affixList = _io['citationAffixes'];
 			}
 		}
 		if (!affixList) {
-			affixList = [,,,,,,,,,,,,,,,,,,,,,,,,,,,,,];
+			affixList = [,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,];
 		}
-		var types = ['persons', 'institutions', 'titles', 'publishers', 'places'];
-		var forms = ['orig', 'translit', 'translat'];
-		var affixPos = ['prefix', 'suffix']
-		var count = 0;
-		for (var i = 0, ilen = types.length; i < ilen; i += 1) {
-			for (var j = 0, jlen = forms.length; j < jlen; j += 1) {
-				for (var k = 0, klen = affixPos.length; k < klen; k += 1) {
-					var node = document.getElementById(types[i] + '-checkbox-' + forms[j] + '-' + affixPos[k]);
-					if (affixList[count]) {
-						node.value = affixList[count];
-					}
-					count += 1;
-				}
-			}
-		}
-	};
+        var types = ['persons', 'institutions', 'titles', 'publishers', 'places'];
+	    var forms = ['orig', 'translit', 'translat'];
+        var count = 0;
+        for (var i = 0, ilen = types.length; i < ilen; i += 1) {
+        count =  citationGetAffixesAction(types[i], "radio", "translit", affixList, count);
+            
+            for (var j = 0, jlen = forms.length; j < jlen; j += 1) {
+                count = citationGetAffixesAction(types[i], "checkbox", forms[j], affixList, count);
+            }
+        }
+    }
+
+    function citationGetAffixesAction(type, boxtype, form, affixList, count) {
+        var affixPos = ['prefix', 'suffix']
+        for (var k = 0, klen = affixPos.length; k < klen; k += 1) {
+            var id = type + '-' + boxtype + '-' + form + '-' + affixPos[k];
+            var node = document.getElementById(id);
+            if (affixList[count]) {
+                node.value = affixList[count];
+        }
+            count += 1;
+        }
+        return count;
+    }
 }
 

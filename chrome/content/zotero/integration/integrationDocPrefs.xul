@@ -25,7 +25,8 @@
 -->
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
-<?xml-stylesheet href="chrome://zotero/skin/bibliography.css"?>
+<?xml-stylesheet href="chrome://zotero/skin/preferences.css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <dialog
@@ -85,7 +86,12 @@
 		  <groupbox>
 			<caption label="&zotero.integration.prefs.lang.languagesInCitations;"/>
 
-            <menupopup id="language-affix-menu" 
+            <menupopup id="citation-primary-affix-menu" 
+                       onpopupshowing="if (!document.popupNode.disabled &amp;&amp; !document.popupNode.checked) {Zotero_File_Interface_Bibliography.citationPrimary(document.popupNode);return true;} else {Zotero_File_Interface_Bibliography.citationPrimary(document.popupNode);return false;}" position="after_start">
+              
+              <menuitem label="&lt;i&gt;...&lt;/i&gt;" value="&lt;i&gt;|&lt;/i&gt;" oncommand="Zotero_File_Interface_Bibliography.citationSetAffixes(null, this);"/>
+            </menupopup>
+            <menupopup id="citation-secondary-affix-menu" 
                        onpopupshowing="if (!document.popupNode.disabled &amp;&amp; !document.popupNode.checked) {Zotero_File_Interface_Bibliography.citationSecondary();return true;} else {Zotero_File_Interface_Bibliography.citationSecondary();return false;}" position="after_start">
               <menuitem label=", ..." value=", |" oncommand="Zotero_File_Interface_Bibliography.citationSetAffixes(null, this);"/>
               <menuitem label="[...]" value=" [|]" oncommand="Zotero_File_Interface_Bibliography.citationSetAffixes(null, this);"/>
@@ -115,174 +121,205 @@
                       <column/>
                     </columns>
                     <rows>
-                      <row style="max-height:1.5em;min-height:1.5em;">
+                      <row style="max-height:1em;min-height:1em;">
                         <label/>
                       </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
+                      <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1" text-align="right">
                           <caption label="&zotero.integration.prefs.lang.persons;"/>
                         </hbox>
                       </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
+                      <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1" text-align="right">
                           <caption label="&zotero.integration.prefs.lang.institutions;"/>
                         </hbox>
                       </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
+                      <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1" text-align="right">
                           <caption label="&zotero.integration.prefs.lang.titles;"/>
                         </hbox>
                       </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
+                      <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1" text-align="right">
                           <caption label="&zotero.integration.prefs.lang.publishers;"/>
                         </hbox>
                       </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
+                      <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1" text-align="right">
                           <caption label="&zotero.integration.prefs.lang.places;"/>
                         </hbox>
                       </row>
                     </rows>
                   </grid>
+
                   <grid flex="1">
                     <columns>
                       <column flex="1"/>
                     </columns>
                     <rows>
-                      <row style="max-height:1.5em;min-height:1.5em;">
+                      <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1">
                           <hbox flex="2"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox  style="min-width:4.5em;" >
                             <hbox flex="1"/>
-                            <label value="猫 (orig)"/>
-                            <hbox flex="1"/>
-                          </hbox>
-                          <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
-                            <hbox flex="1"/>
-                            <label value="neko"/>
+                            <label value="orig"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
                           <hbox  style="min-width:4.5em;">
                             <hbox flex="1"/>
-                            <label value="cat"/>
+                            <label value="translit"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <label value="translate"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="2"/>
                         </hbox>
                       </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
-                        <radiogroup id="persons-radio" orient="horizontal" flex="1" class="plain" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);">
+                      <row style="max-height:1em;min-height:1em;">
+                        <radiogroup orient="horizontal" flex="1" class="plain">
                           <hbox flex="2"/>
                           <hbox  style="min-width:4.5em;">
                             <hbox flex="1"/>
-                            <radio id="persons-radio-orig"/>
+                            <radio group="persons-radio" id="persons-radio-orig" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+								style="min-width:4.5em;" class="compact translit-primary">
                             <hbox flex="1"/>
-                            <radio id="persons-radio-translit"/>
-                            <hbox flex="1"/>
-                          </hbox>
-                          <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
-                            <hbox flex="1"/>
-                            <radio id="persons-radio-translat"/>
-                            <hbox flex="1"/>
-                          </hbox>
-                          <hbox flex="2"/>
-                        </radiogroup>
-                      </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
-                        <radiogroup id="institutions-radio" orient="horizontal" flex="1" class="plain" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);">
-                          <hbox flex="2"/>
-                          <hbox  style="min-width:4.5em;">
-                            <hbox flex="1"/>
-                            <radio id="institutions-radio-orig"/>
+                            <label id="persons-radio-translit-prefix"/>
+                            <radio group="persons-radio" id="persons-radio-translit" popup="citation-primary-affix-menu"/>
+                            <label id="persons-radio-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                                style="min-width:4.5em;" class="translat-primary">
                             <hbox flex="1"/>
-                            <radio id="institutions-radio-translit"/>
-                            <hbox flex="1"/>
-                          </hbox>
-                          <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
-                            <hbox flex="1"/>
-                            <radio id="institutions-radio-translat"/>
+                            <radio group="persons-radio" id="persons-radio-translat" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="2"/>
                         </radiogroup>
                       </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
-                        <radiogroup id="titles-radio" orient="horizontal" flex="1" class="plain" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);">
+                      <row style="max-height:1em;min-height:1em;">
+                        <radiogroup orient="horizontal" flex="1" class="plain">
                           <hbox flex="2"/>
                           <hbox  style="min-width:4.5em;">
                             <hbox flex="1"/>
-                            <radio id="titles-radio-orig"/>
+                            <radio group="institutions-radio" id="institutions-radio-orig" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+                                style="min-width:4.5em;" class="compact translit-primary">
                             <hbox flex="1"/>
-                            <radio id="titles-radio-translit"/>
-                            <hbox flex="1"/>
-                          </hbox>
-                          <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
-                            <hbox flex="1"/>
-                            <radio id="titles-radio-translat"/>
-                            <hbox flex="1"/>
-                          </hbox>
-                          <hbox flex="2"/>
-                        </radiogroup>
-                      </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
-                        <radiogroup id="publishers-radio" orient="horizontal" flex="1" class="plain" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);">
-                          <hbox flex="2"/>
-                          <hbox  style="min-width:4.5em;">
-                            <hbox flex="1"/>
-                            <radio id="publishers-radio-orig"/>
+                            <label id="institutions-radio-translit-prefix"/>
+                            <radio group="institutions-radio" id="institutions-radio-translit" popup="citation-primary-affix-menu"/>
+                            <label id="institutions-radio-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                                style="min-width:4.5em;" class="compact translat-primary">
                             <hbox flex="1"/>
-                            <radio id="publishers-radio-translit"/>
-                            <hbox flex="1"/>
-                          </hbox>
-                          <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
-                            <hbox flex="1"/>
-                            <radio id="publishers-radio-translat"/>
+                            <radio group="institutions-radio" id="institutions-radio-translat" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="2"/>
                         </radiogroup>
                       </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
-                        <radiogroup id="places-radio" orient="horizontal" flex="1" class="plain" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);">
+                      <row style="max-height:1em;min-height:1em;">
+                        <radiogroup orient="horizontal" flex="1" class="plain">
                           <hbox flex="2"/>
                           <hbox  style="min-width:4.5em;">
                             <hbox flex="1"/>
-                            <radio id="places-radio-orig"/>
+                            <radio group="titles-radio" id="titles-radio-orig" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+                                style="min-width:4.5em;" class="compact translit-primary">
                             <hbox flex="1"/>
-                            <radio id="places-radio-translit"/>
+                            <label id="titles-radio-translit-prefix"/>
+							<radio group="titles-radio" id="titles-radio-translit" popup="citation-primary-affix-menu"/>
+							<label id="titles-radio-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                                style="min-width:4.5em;" class="compact translat-primary">
+                            <hbox flex="1"/>
+                            <radio group="titles-radio" id="titles-radio-translat" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </radiogroup>
+                      </row>
+                      <row style="max-height:1em;min-height:1em;">
+                        <radiogroup orient="horizontal" flex="1" class="plain">
+                          <hbox flex="2"/>
                           <hbox  style="min-width:4.5em;">
                             <hbox flex="1"/>
-                            <radio id="places-radio-translat"/>
+                            <radio group="publishers-radio" id="publishers-radio-orig" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+                                style="min-width:4.5em;" class="compact translit-primary">
+                            <hbox flex="1"/>
+                            <label id="publishers-radio-translit-prefix"/>
+                            <radio group="publishers-radio" id="publishers-radio-translit" popup="citation-primary-affix-menu"/>
+                            <label id="publishers-radio-translit-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                                style="min-width:4.5em;" class="compact translat-primary">
+                            <hbox flex="1"/>
+                            <radio group="publishers-radio" id="publishers-radio-translat" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="2"/>
+                        </radiogroup>
+                      </row>
+                      <row style="max-height:1em;min-height:1em;">
+                        <radiogroup orient="horizontal" flex="1" class="plain">
+                          <hbox flex="2"/>
+                          <hbox  style="min-width:4.5em;">
+                            <hbox flex="1"/>
+                            <radio group="places-radio" id="places-radio-orig" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit'],false);"
+                                style="min-width:4.5em;" class="compact translit-primary">
+                            <hbox flex="1"/>
+                            <label id="places-radio-translit-prefix"/>
+                            <radio group="places-radio" id="places-radio-translit" popup="citation-primary-affix-menu"/>
+                            <label id="places-radio-translit-suffix"/>
+                            <hbox flex="1"/>
+                          </hbox>
+                          <hbox flex="4"/>
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat'],false);"
+                                style="min-width:4.5em;" class="compact translat-primary">
+                            <hbox flex="1"/>
+                            <radio group="places-radio" id="places-radio-translat" oncommand="Zotero_File_Interface_Bibliography.citationPrimary(this);"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="2"/>
@@ -290,6 +327,8 @@
                       </row>
                     </rows>
                   </grid>
+
+
                   <grid flex="1">
                     <columns>
                       <column flex="1"/>
@@ -297,168 +336,188 @@
                       <column flex="1"/>
                     </columns>
                     <rows>
-                      <row style="max-height:1.5em;min-height:1.5em;">
+                      <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1">
                           <hbox flex="2"/>
                           <hbox  style="min-width:4.5em;">
                             <hbox flex="1"/>
-                            <label value="猫 (orig)"/>
+                            <label value="orig"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
                           <hbox  style="min-width:4.5em;">
                             <hbox flex="1"/>
-                            <label value="neko"/>
+                            <label value="translit"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
                           <hbox  style="min-width:4.5em;">
                             <hbox flex="1"/>
-                            <label value="cat"/>
+                            <label value="translate"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="2"/>
                         </hbox>
                       </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
+                      <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1">
                           <hbox flex="2"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox  style="min-width:4.5em;" class="plain compact">
                             <hbox flex="1"/>
                             <label id="persons-checkbox-orig-prefix"/>
-                            <checkbox popup="language-affix-menu" id="persons-checkbox-orig"/>
+                            <checkbox popup="citation-secondary-affix-menu" id="persons-checkbox-orig"/>
                             <label id="persons-checkbox-orig-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-secondary', 'translit'],false);" 
+                                style="min-width:4.5em;" class="plain compact translit-secondary">
                             <hbox flex="1"/>
                             <label id="persons-checkbox-translit-prefix"/>
-                            <checkbox id="persons-checkbox-translit" popup="language-affix-menu"/>
+                            <checkbox id="persons-checkbox-translit" popup="citation-secondary-affix-menu"/>
                             <label id="persons-checkbox-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                                style="min-width:4.5em;" class="plain compact translat-secondary">
                             <hbox flex="1"/>
                             <label id="persons-checkbox-translat-prefix"/>
-                            <checkbox id="persons-checkbox-translat" popup="language-affix-menu"/>
+                            <checkbox id="persons-checkbox-translat" popup="citation-secondary-affix-menu"/>
                             <label id="persons-checkbox-translat-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="2"/>
                         </hbox>
                       </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
+                      <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1">
                           <hbox flex="2"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox  style="min-width:4.5em;" class="plain compact">
                             <hbox flex="1"/>
                             <label id="institutions-checkbox-orig-prefix"/>
-                            <checkbox id="institutions-checkbox-orig" popup="language-affix-menu"/>
+                            <checkbox id="institutions-checkbox-orig" popup="citation-secondary-affix-menu"/>
                             <label id="institutions-checkbox-orig-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-secondary', 'translit'],false);"
+                                style="min-width:4.5em;" class="plain compact translit-secondary">
                             <hbox flex="1"/>
                             <label id="institutions-checkbox-translit-prefix"/>
-                            <checkbox id="institutions-checkbox-translit" popup="language-affix-menu"/>
+                            <checkbox id="institutions-checkbox-translit" popup="citation-secondary-affix-menu"/>
                             <label id="institutions-checkbox-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                                style="min-width:4.5em;" class="plain compact translat-secondary">
                             <hbox flex="1"/>
                             <label id="institutions-checkbox-translat-prefix"/>
-                            <checkbox id="institutions-checkbox-translat" popup="language-affix-menu"/>
+                            <checkbox id="institutions-checkbox-translat" popup="citation-secondary-affix-menu"/>
                             <label id="institutions-checkbox-translat-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="2"/>
                         </hbox>
                       </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
+                      <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1">
                           <hbox flex="2"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox  style="min-width:4.5em;" class="plain compact">
                             <hbox flex="1"/>
                             <label id="titles-checkbox-orig-prefix"/>
-                            <checkbox id="titles-checkbox-orig" popup="language-affix-menu"/>
+                            <checkbox id="titles-checkbox-orig" popup="citation-secondary-affix-menu"/>
                             <label id="titles-checkbox-orig-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-secondary', 'translit'],false);"
+                                style="min-width:4.5em;" class="plain compact translit-secondary">
                             <hbox flex="1"/>
                             <label id="titles-checkbox-translit-prefix"/>
-                            <checkbox id="titles-checkbox-translit" popup="language-affix-menu"/>
+                            <checkbox id="titles-checkbox-translit" popup="citation-secondary-affix-menu"/>
                             <label id="titles-checkbox-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                                style="min-width:4.5em;" class="plain compact translat-secondary">
                             <hbox flex="1"/>
                             <label id="titles-checkbox-translat-prefix"/>
-                            <checkbox id="titles-checkbox-translat" popup="language-affix-menu"/>
+                            <checkbox id="titles-checkbox-translat" popup="citation-secondary-affix-menu"/>
                             <label id="titles-checkbox-translat-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="2"/>
                         </hbox>
                       </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
+                      <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1">
                           <hbox flex="2"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox  style="min-width:4.5em;" class="plain compact">
                             <hbox flex="1"/>
                             <label id="publishers-checkbox-orig-prefix"/>
-                            <checkbox id="publishers-checkbox-orig" popup="language-affix-menu"/>
+                            <checkbox id="publishers-checkbox-orig" popup="citation-secondary-affix-menu"/>
                             <label id="publishers-checkbox-orig-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-secondary', 'translit'],false);"
+                                style="min-width:4.5em;" class="plain compact translit-secondary">
                             <hbox flex="1"/>
                             <label id="publishers-checkbox-translit-prefix"/>
-                            <checkbox id="publishers-checkbox-translit" popup="language-affix-menu"/>
+                            <checkbox id="publishers-checkbox-translit" popup="citation-secondary-affix-menu"/>
                             <label id="publishers-checkbox-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                                style="min-width:4.5em;" class="plain compact translat-secondary">
                             <hbox flex="1"/>
                             <label id="publishers-checkbox-translat-prefix"/>
-                            <checkbox id="publishers-checkbox-translat" popup="language-affix-menu"/>
+                            <checkbox id="publishers-checkbox-translat" popup="citation-secondary-affix-menu"/>
                             <label id="publishers-checkbox-translat-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="2"/>
                         </hbox>
                       </row>
-                      <row style="max-height:1.5em;min-height:1.5em;">
+                      <row style="max-height:1em;min-height:1em;">
                         <hbox flex="1">
                           <hbox flex="2"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox style="min-width:4.5em;" class="plain compact">
                             <hbox flex="1"/>
                             <label id="places-checkbox-orig-prefix"/>
-                            <checkbox id="places-checkbox-orig" popup="language-affix-menu"/>
+                            <checkbox id="places-checkbox-orig" popup="citation-secondary-affix-menu"/>
                             <label id="places-checkbox-orig-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-secondary', 'translit'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-secondary', 'translit'],false);"
+                                style="min-width:4.5em;" class="plain compact translit-secondary">
                             <hbox flex="1"/>
                             <label id="places-checkbox-translit-prefix"/>
-                            <checkbox id="places-checkbox-translit" popup="language-affix-menu"/>
+                            <checkbox id="places-checkbox-translit" popup="citation-secondary-affix-menu"/>
                             <label id="places-checkbox-translit-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
                           <hbox flex="4"/>
-                          <hbox  style="min-width:4.5em;" class="plain">
+                          <hbox onmouseover="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-secondary', 'translat'],true);" 
+								onmouseout="Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-secondary', 'translat'],false);"
+                                style="min-width:4.5em;" class="plain compact translat-secondary">
                             <hbox flex="1"/>
                             <label id="places-checkbox-translat-prefix"/>
-                            <checkbox id="places-checkbox-translat" popup="language-affix-menu"/>
+                            <checkbox id="places-checkbox-translat" popup="citation-secondary-affix-menu"/>
                             <label id="places-checkbox-translat-suffix"/>
                             <hbox flex="1"/>
                           </hbox>
@@ -467,6 +526,7 @@
                       </row>
                     </rows>
                   </grid>
+
                 </row>
 			  </rows>
 			</grid>
