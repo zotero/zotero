@@ -970,6 +970,10 @@ Zotero.Utilities = {
 				var rootDoc = element.ownerDocument;
 			} else if(element.documentElement) {
 				var rootDoc = element;
+			} else if(Zotero.isIE && element.documentElement === null) {
+				// IE: documentElement may be null if there is a parse error. In this
+				// case, we don't match anything to mimic what would happen with DOMParser
+				continue;
 			} else {
 				throw new Error("First argument must be either element(s) or document(s) in Zotero.Utilities.xpath(elements, '"+xpath+"')");
 			}
