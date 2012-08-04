@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.369",
+    PROCESSOR_VERSION: "1.0.370",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -2925,26 +2925,26 @@ CSL.Engine.prototype.setLangPrefsForCiteAffixes = function (affixList) {
         var affixes = this.opt.citeAffixes;
         var count = 0;
         var settings = ["persons", "institutions", "titles", "publishers", "places"];
-        var forms = ["orig", "translit", "translat"];
+        var forms = ["translit", "orig", "translit", "translat"];
+        var value;
         for (var i = 0, ilen = settings.length; i < ilen; i += 1) {
             for (var j = 0, jlen = forms.length; j < jlen; j += 1) {
-                var value = affixList[count];
-                if (!value && ((count/2) % 4) === 2) {
-                    value = affixList[count - 4];
+                value = "";
+                if ((count % 8) === 4) {
+                    if (!affixes[settings[i]]["locale-"+forms[j]].prefix
+                        && !affixes[settings[i]]["locale-"+forms[j]].suffix) {
+                        value = affixList[count] ? affixList[count] : "";
+                        affixes[settings[i]]["locale-" + forms[j]].prefix = value;
+                        value = affixList[count] ? affixList[count + 1] : "";
+                        affixes[settings[i]]["locale-" + forms[j]].suffix = value;
+                    }
+                } else {
+                    value = affixList[count] ? affixList[count] : "";
+                    affixes[settings[i]]["locale-" + forms[j]].prefix = value;
+                    value = affixList[count] ? affixList[count + 1] : "";
+                    affixes[settings[i]]["locale-" + forms[j]].suffix = value;
                 }
-                if (!value) {
-                    value = "";
-                }
-                affixes[settings[i]]["locale-" + forms[j]].prefix = value;
-                count += 1;
-                if (!value && (((count - 1)/2) % 4) === 2) {
-                    value = affixList[count - 4];
-                }
-                if (!value) {
-                    value = "";
-                }
-                affixes[settings[i]]["locale-" + forms[j]].suffix = value;
-                count += 1;
+                count += 2;
             }
         }
         this.opt.citeAffixes = affixes;
