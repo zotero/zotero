@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.368",
+    PROCESSOR_VERSION: "1.0.369",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -107,7 +107,11 @@ var CSL = {
         "publisher":"publishers",
         "authority":"publishers",
         "publisher-place": "places",
-        "event-place": "places"
+        "event-place": "places",
+        "number": "number",
+        "edition":"number",
+        "issue":"number",
+        "volume":"number"
     },
     AbbreviationSegments: function () {
         this["container-title"] = {};
@@ -3084,13 +3088,14 @@ CSL.Engine.Opt = function () {
     this.development_extensions.thin_non_breaking_space_html_hack = false;
     this.nodenames = [];
     this.gender = {};
-	this['cite-lang-prefs'] = {
-		persons:['orig'],
-		institutions:['orig'],
-		titles:['orig','translat'],
-		publishers:['orig'],
-		places:['orig']
-	};
+    this['cite-lang-prefs'] = {
+        persons:['orig'],
+        institutions:['orig'],
+        titles:['orig','translat'],
+        publishers:['orig'],
+        places:['orig'],
+        number:['translat']
+    };
 };
 CSL.Engine.Tmp = function () {
     this.names_max = new CSL.Stack();
@@ -9392,6 +9397,7 @@ CSL.Transform = function (state) {
     var debug = false, abbreviations, token, fieldname, abbrev_family, opt;
     this.abbrevs = {};
     this.abbrevs["default"] = new state.sys.AbbreviationSegments();
+    this.getTextSubField = getTextSubField;
     function abbreviate(state, Item, altvar, basevalue, myabbrev_family, use_field) {
         var value;
         if (!myabbrev_family) {
@@ -11017,7 +11023,14 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
     if (!ItemObject) {
         return;
     }
-    num = ItemObject[variable];
+    var languageRole = CSL.LangPrefsMap[variable];
+    if (languageRole) {
+        var localeType = this.opt["cite-lang-prefs"][languageRole][0];
+        num = this.transform.getTextSubField(ItemObject, variable, "locale-"+localeType, true);
+        num = num.name;
+    } else {
+        num = ItemObject[variable];
+    }
     if ("undefined" !== typeof num) {
         if ("number" === typeof num) {
             num = "" + num;
