@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.370",
+    PROCESSOR_VERSION: "1.0.371",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -9580,6 +9580,7 @@ CSL.Transform = function (state) {
             }
             var res = getTextSubField(Item, variables[0], slot.primary, true);
             primary = res.name;
+            var primaryUsedOrig = res.usedOrig;
             if (publisherCheck(this, Item, primary, myabbrev_family)) {
                 return null;
             }
@@ -9611,7 +9612,7 @@ CSL.Transform = function (state) {
             if (slot.primary === "locale-translit") {
                 primaryPrefix = state.opt.citeAffixes[langPrefs][slot.primary].prefix;
             }                
-            if (primaryPrefix === "<i>") {
+            if (primaryPrefix === "<i>" && !primaryUsedOrig) {
                 var hasItalic = false;
                 for (var i = 0, ilen = primary_tok.decorations.length; i < ilen; i += 1) {
                     if (primary_tok.decorations[i][0] === "@font-style"
