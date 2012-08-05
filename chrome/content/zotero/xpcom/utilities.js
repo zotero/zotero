@@ -1238,7 +1238,7 @@ Zotero.Utilities = {
 			} else if(field === "tags") {
 				// normalize tags
 				var n = val.length;
-				var newTags = newItem.tags = new Array(n);
+				var newTags = newItem.tags = [];
 				for(var j=0; j<n; j++) {
 					var tag = val[j];
 					if(typeof tag === "object") {
@@ -1253,7 +1253,7 @@ Zotero.Utilities = {
 					} else if(tag === "") {
 						continue;
 					}
-					newTags[j] = {"tag":tag.toString(), "type":1};
+					newTags.push({"tag":tag.toString(), "type":1});
 				}
 			} else if(field === "notes") {
 				// normalize notes
