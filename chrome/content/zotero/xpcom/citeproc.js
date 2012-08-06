@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.371",
+    PROCESSOR_VERSION: "1.0.372",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -1831,14 +1831,15 @@ CSL.XmlToToken = function (state, tokentype) {
                     continue;
                 }
                 if (attributes.hasOwnProperty(key)) {
-                    try {
-                        CSL.Attributes[key].call(token, state, "" + attributes[key]);
-                    } catch (e) {
-                        if (e === "TypeError: Cannot call method \"call\" of undefined") {
-                            throw "Unknown attribute \"" + key + "\" in node \"" + name + "\" while processing CSL file";
-                        } else {
+                    if (CSL.Attributes[key]) {
+                        try {
+                            CSL.Attributes[key].call(token, state, "" + attributes[key]);
+                        } catch (e) {
+                            CSL.error(e);
                             throw "CSL processor error, " + key + " attribute: " + e;
                         }
+                    } else {
+                        CSL.debug("warning: undefined attribute \""+key+"\" in style");
                     }
                 }
             }
@@ -7886,12 +7887,7 @@ CSL.Node.number = {
             if (this.strings.label_form_override) {
                 form = this.strings.label_form_override;
             }
-            if (this.text_case_normal) {
-                if (value) {
-                    value = value.replace("\\", "");
-                    state.output.append(value, this);
-                }
-            } else if (varname === "locator"
+            if (varname === "locator"
                        && item.locator) {
                 item.locator = item.locator.replace(/([^\\])\s*-\s*/, "$1" + state.getTerm("page-range-delimiter"));
                 m = item.locator.match(CSL.STATUTE_SUBDIV_GROUPED_REGEX);
@@ -9404,6 +9400,9 @@ CSL.Transform = function (state) {
             return basevalue;
         }
         var variable = myabbrev_family;
+        if (CSL.NUMERIC_VARIABLES.indexOf(myabbrev_family) > -1) {
+            myabbrev_family = "number";
+        }
         if (["publisher-place", "event-place", "jurisdiction"].indexOf(myabbrev_family) > -1) {
             myabbrev_family = "place";
         }
@@ -11032,6 +11031,17 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
     } else {
         num = ItemObject[variable];
     }
+    if (num && this.sys.getAbbreviation) {
+        num = ("" + num).replace(/^\"/, "").replace(/\"$/, "");
+        var jurisdiction = this.transform.loadAbbreviation(ItemObject.jurisdiction, "number", num);
+        if (this.transform.abbrevs[jurisdiction].number[num]) {
+            num = this.transform.abbrevs[jurisdiction].number[num];
+        } else {
+            if ("undefined" !== typeof this.transform.abbrevs[jurisdiction].number[num]) {
+                delete this.transform.abbrevs[jurisdiction].number[num];
+            }
+        }
+    }
     if ("undefined" !== typeof num) {
         if ("number" === typeof num) {
             num = "" + num;
@@ -11107,30 +11117,12 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
                             numeric = false;
                         }
                     }
-                    if (i === elements.length - 1) {
-                        if ((elements.length > 1 || subelements.length > 1)) {
-                            var matchterm = this.getTerm(variable, "long");
-                            if (matchterm && !subelements[subelements.length - 1].match(/[0-9]/)) {
-                                matchterm = matchterm.replace(".", "").toLowerCase().split(/\s+/)[0];
-                                if (subelements[subelements.length - 1].slice(0, matchterm.length).toLowerCase() === matchterm) {
-                                    elements[i] = subelements.slice(0, -1).join(" ");
-                                    numeric = true;
-                                }
-                            }
-                        }
-                    }
                     if (elements[i].match(/^[1-9][0-9]*$/)) {
                         elements[i] = parseInt(elements[i], 10);
                         node.gender = this.opt["noun-genders"][variable];
                         this.tmp.shadow_numbers[variable].values.push(["NumericBlob", elements[i], node]);
                     } else {
                         var str = elements[i];
-                        if (this.sys.getAbbreviation) {
-                            var jurisdiction = this.transform.loadAbbreviation(ItemObject.jurisdiction, "number", elements[i]);
-                            if (this.transform.abbrevs[jurisdiction].number[str]) {
-                                str = this.transform.abbrevs[jurisdiction].number[str];
-                            }
-                        }
                         this.tmp.shadow_numbers[variable].values.push(["Blob", str, node]);
                     }
                 }
@@ -11144,6 +11136,9 @@ CSL.Engine.prototype.processNumber = function (node, ItemObject, variable, type)
             this.tmp.shadow_numbers[variable].numeric = true;
         } else {
              this.tmp.shadow_numbers[variable].numeric = numeric;
+        }
+        if (!this.tmp.shadow_numbers[variable].numeric) {
+            this.transform.loadAbbreviation(ItemObject.jurisdiction, "number", num);
         }
         if (count > 1) {
             this.tmp.shadow_numbers[variable].plural = 1;
