@@ -164,11 +164,11 @@ var Zotero_File_Interface_Bibliography = new function() {
 				];
 				for (var j = 0, jlen = langSelectorTypes.length; j < jlen; j += 1) {
 		            var newselector = buildSelector('default',tags[i],langSelectorTypes[j]);
-		            if ((j % 3) == 1) {
+		            if ((j % 3) == 0) {
 			            newselector.setAttribute("class", "translit");
                         newselector.setAttribute("onmouseover", "Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit-secondary', 'translit'],true);");
                         newselector.setAttribute("onmouseout", "Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translit-primary', 'translit-secondary', 'translit'],false);");
-		            } else if ((j % 3) == 2) {
+		            } else if ((j % 3) == 1) {
 			            newselector.setAttribute("class", "translat");
                         newselector.setAttribute("onmouseover", "Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat-secondary', 'translat'],true);");
                         newselector.setAttribute("onmouseout", "Zotero_File_Interface_Bibliography.setLanguageRoleHighlight(['translat-primary', 'translat-secondary', 'translat'],false);");
@@ -242,6 +242,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	function addSelectorRow(target,selectors) {
 		//Zotero.debug("XXX == addSelectorRow() ==");
 		var row = document.createElement('row');
+		row.setAttribute("class", "compact");
 		for (var i = 0, ilen = selectors.length; i < ilen; i += 1) {
 			row.appendChild(selectors[i]);
 		}
@@ -261,7 +262,6 @@ var Zotero_File_Interface_Bibliography = new function() {
 			    }
 			    if (mode) {
 				    lst.push("language-role-highlight");
-                    Zotero.debug("XXX   DO: "+lst);
 				    nodes[j].setAttribute("class", lst.join(" "));
 			    } else {
                     for (var k = lst.length - 1; k > -1; k += -1) {
@@ -285,10 +285,17 @@ var Zotero_File_Interface_Bibliography = new function() {
 		checkbox.setAttribute('param', param);
 		checkbox.setAttribute('oncommand', 'Zotero_File_Interface_Bibliography.setLangPref(this);');
 		checkbox.setAttribute('value',tagdata.tag);
+
 		checkbox.setAttribute('label',tagdata.nickname);
 		checkbox.setAttribute('type','checkbox');
-		checkbox.setAttribute('flex','1');
-		return checkbox;
+		var hbox = document.createElement('hbox');
+		hbox.setAttribute("style", "overflow:hidden;margin-top:0px;margin-bottom:0px;");
+		hbox.setAttribute('flex','1');
+		hbox.appendChild(checkbox);
+		var hboxfil = document.createElement('hbox');
+		hboxfil.setAttribute('flex','1');
+		hbox.appendChild(hboxfil);
+		return hbox;
 	}
 		
 	function setLangPref(target) {
