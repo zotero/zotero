@@ -10,11 +10,11 @@ Zotero.EXTENDED_TYPES = {
 		"data":{id:"periodical",name:"periodical",localized:"Periodical"}
 	},
 	"gazette":{
-		"realID":16,
+		"realID":20,
 		"data":{id:"gazette",name:"gazette",localized:"Gazette"}
 	},
 	"treaty":{
-		"realID":16,
+		"realID":20,
 		"data":{id:"treaty",name:"treaty",localized:"Treaty"}
 	}
 };
