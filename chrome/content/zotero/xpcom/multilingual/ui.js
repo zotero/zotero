@@ -3,19 +3,19 @@
 Zotero.EXTENDED_TYPES = {
 	"classic":{
 		"realID":2,
-		"data":{id:"classic",name:"classic",localized:"Classic"}
+		"data":{realID:2,id:"classic",name:"classic",localized:"Classic"}
 	},
 	"periodical":{
 		"realID":2,
-		"data":{id:"periodical",name:"periodical",localized:"Periodical"}
+		"data":{realID:2,id:"periodical",name:"periodical",localized:"Periodical"}
 	},
 	"gazette":{
 		"realID":20,
-		"data":{id:"gazette",name:"gazette",localized:"Gazette"}
+		"data":{realID:20,id:"gazette",name:"gazette",localized:"Gazette"}
 	},
 	"treaty":{
 		"realID":20,
-		"data":{id:"treaty",name:"treaty",localized:"Treaty"}
+		"data":{realID:20,id:"treaty",name:"treaty",localized:"Treaty"}
 	}
 };
 

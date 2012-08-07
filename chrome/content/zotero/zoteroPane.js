@@ -270,6 +270,9 @@ var ZoteroPane = new function()
 				localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
 			});
 		}
+		for (var key in Zotero.EXTENDED_TYPES) {
+			itemTypes.push(Zotero.EXTENDED_TYPES[key].data);
+		}
 		var collation = Zotero.getLocaleCollation();
 		itemTypes.sort(function(a, b) {
 			return collation.compareString(1, a.localized, b.localized);
@@ -279,8 +282,17 @@ var ZoteroPane = new function()
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", itemTypes[i].localized);
 			menuitem.setAttribute("tooltiptext", "");
-			let type = itemTypes[i].id;
-			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, {}, null, true); }, false);
+            var mydata = {};
+            var mytype;
+            if (itemTypes[i].realID) {
+			    mytype = itemTypes[i].realID;
+                mydata.extra = '{:type:' + itemTypes[i].id + '} ';
+            } else {
+			    mytype = itemTypes[i].id;
+            }
+            let type = mytype;
+            let data = mydata;
+			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, data, null, true); }, false);
 			moreMenu.appendChild(menuitem);
 		}
 	}
@@ -308,6 +320,9 @@ var ZoteroPane = new function()
 				localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
 			});
 		}
+		for (var key in Zotero.EXTENDED_TYPES) {
+			itemTypes.push(Zotero.EXTENDED_TYPES[key].data);
+		}
 		var collation = Zotero.getLocaleCollation();
 		itemTypes.sort(function(a, b) {
 			return collation.compareString(1, a.localized, b.localized);
@@ -317,8 +332,17 @@ var ZoteroPane = new function()
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", itemTypes[i].localized);
 			menuitem.setAttribute("tooltiptext", "");
-			let type = itemTypes[i].id;
-			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, {}, null, true); }, false);
+            var mydata = {};
+            var mytype;
+            if (itemTypes[i].realID) {
+			    mytype = itemTypes[i].realID;
+                mydata.extra = '{:type:' + itemTypes[i].id + '} ';
+            } else {
+			    mytype = itemTypes[i].id;
+            }
+            let type = mytype;
+            let data = mydata;
+			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, data, null, true); }, false);
 			menuitem.className = "zotero-tb-add";
 			addMenu.insertBefore(menuitem, separator);
 		}
