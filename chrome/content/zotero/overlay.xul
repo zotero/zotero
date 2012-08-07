@@ -49,6 +49,18 @@
 						oncommand="ZoteroOverlay.toggleDisplay();"/>
 	</toolbarpalette>
 	
+	<toolbar id="nav-bar">
+		<toolbarbutton id="zotero-save-button" class="toolbarbutton-1 chromeclass-toolbar-additional"
+						label="Save to Zotero"
+						oncommand="Zotero_Browser.openTranslatePanel(this, event);"/>
+	</toolbar>
+	
+	<popupset id="mainPopupSet">
+		<panel id="zotero-save-panel" type="arrow" hidden="true" orient="vertical">
+			<iframe id="zotero-save-iframe" flex="1"/>
+		</panel>
+	</popupset>
+	
 	<toolbar id="zotero-toolbar" nowindowdrag="true"/>
 	
 	<vbox id="appcontent">

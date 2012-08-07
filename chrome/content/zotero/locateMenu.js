@@ -213,7 +213,9 @@ var Zotero_LocateMenu = new function() {
 	 */
 	this.addLocateEngines = function(menu, engines, locateFn, showIcons) {
 		if(!locateFn) {
-			locateFn = this.locateItem;
+			locateFn = function(event) {
+				Zotero_LocateMenu.locateItem(event.target.label, null, event);
+			};
 		}
 		
 		for each(var engine in engines) {
@@ -275,18 +277,18 @@ var Zotero_LocateMenu = new function() {
 	/**
 	 * Locate selected items
 	 */
-	this.locateItem = function(event, selectedItems) {
-		if(!selectedItems) {
-			selectedItems = _getSelectedItems();
+	this.locateItem = function(locateEngine, items, event) {
+		if(!items) {
+			items = _getSelectedItems();
 		}
 		
 		// find selected engine
-		var selectedEngine = Zotero.LocateManager.getEngineByName(event.target.label);
+		var selectedEngine = Zotero.LocateManager.getEngineByName(locateEngine);
 		if(!selectedEngine) throw "Selected locate engine not found";
 		
 		var urls = [];
 		var postDatas = [];
-		for each(var item in selectedItems) {
+		for each(var item in items) {
 			var submission = selectedEngine.getItemSubmission(item);
 			if(submission) {
 				urls.push(submission.uri.spec);

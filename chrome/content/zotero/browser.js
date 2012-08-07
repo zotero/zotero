@@ -416,8 +416,9 @@ var Zotero_Browser = new function() {
 		var popup = e.target;
 		while(popup.hasChildNodes()) popup.removeChild(popup.lastChild);
 		
-		var tab = _getTabObject(this.tabbrowser.selectedBrowser);
-		var translators = tab.page.translators;
+		var tab = _getTabObject(this.tabbrowser.selectedBrowser),
+			translators = tab.page.translators,
+			translate = tab.page.translate;
 		for(var i=0, n=translators.length; i<n; i++) {
 			let translator = translators[i];
 			
@@ -441,21 +442,17 @@ var Zotero_Browser = new function() {
 		menuitem.setAttribute("tooltiptext", Zotero.getString("locate.libraryLookup.tooltip"));
 		menuitem.setAttribute("image", "chrome://zotero/skin/locate-library-lookup.png");
 		menuitem.setAttribute("class", "menuitem-iconic");
-		menuitem.addEventListener("command", _constructLookupFunction(tab, function(event, obj) {
-			var urls = [];
-			for each(var item in obj.newItems) {
-				var url = Zotero.OpenURL.resolve(item);
-				if(url) urls.push(url);
-			}
-			ZoteroPane.loadURI(urls, event);
-		}), false);
+		menuitem.addEventListener("command", function() {
+			translate.setTranslator(translators[0]);
+			Zotero_Browser.performLookup(translate, null);
+		}, false);
 		popup.appendChild(menuitem);		
 		
 		var locateEngines = Zotero.LocateManager.getVisibleEngines();
-		Zotero_LocateMenu.addLocateEngines(popup, locateEngines,
-			_constructLookupFunction(tab, function(e, obj) {
-				Zotero_LocateMenu.locateItem(e, obj.newItems);
-			}), true);
+		Zotero_LocateMenu.addLocateEngines(popup, locateEngines, function(event) {
+			translate.setTranslator(translators[0]);
+			Zotero_Browser.performLookup(translate, event.target.label, event);
+		}, true);
 	}
 	
 	/**
@@ -586,33 +583,62 @@ var Zotero_Browser = new function() {
 		translate.translate(libraryID);
 	}
 	
+	this.performLookup = function(translate, lookupEngine, event) {
+		translate.clearHandlers("done");
+		translate.clearHandlers("itemDone");
+		translate.setHandler("done", function(obj, status) {
+			if(status) {
+				if(lookupEngine) {
+					Zotero_LocateMenu.locateItem(lookupEngine, obj.newItems, event);
+				} else {
+					var urls = [];
+					for each(var item in obj.newItems) {
+						var url = Zotero.OpenURL.resolve(item);
+						if(url) urls.push(url);
+					}
+					ZoteroPane.loadURI(urls, event);
+				}
+				Zotero_Browser.progress.close();
+			} else {
+				Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.lookup.error"));
+				Zotero_Browser.progress.startCloseTimer(8000);
+			}
+		});
+		
+		Zotero_Browser.progress.show();
+		Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.lookup.performing"));
+		translate.translate(false);
+	}
+	
+	this.openTranslatePanel = function(el, event) {
+		var panel = document.getElementById("zotero-save-panel");
+		panel.hidden = false;
+		panel.openPopup(el, "bottomcenter topright");
+		
+		var iframe = document.getElementById("zotero-save-iframe"),
+			webNav = iframe.webNavigation;
+		webNav.loadURI("chrome://zotero/content/saveItem.html",
+			webNav.LOAD_FLAGS_NONE, null, null, null);
+		
+		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
+		var listener = function(event) {
+			var doc = event.target;
+			if(doc.documentURI === "about:blank") return;
+			iframe.removeEventListener("DOMContentLoaded", listener, true);
+			
+			doc.defaultView.ZoteroData = {
+				"translate":tab.page.translate,
+				"translators":tab.page.translators
+			};
+		};
+		iframe.addEventListener("DOMContentLoaded", listener, true);
+	}
 	
 	//////////////////////////////////////////////////////////////////////////////
 	//
 	// Private Zotero_Browser methods
 	//
 	//////////////////////////////////////////////////////////////////////////////
-	
-	function _constructLookupFunction(tab, success) {
-		return function(e) {
-			tab.page.translate.setTranslator(tab.page.translators[0]);
-			tab.page.translate.clearHandlers("done");
-			tab.page.translate.clearHandlers("itemDone");
-			tab.page.translate.setHandler("done", function(obj, status) {
-				if(status) {
-					success(e, obj);
-					Zotero_Browser.progress.close();
-				} else {
-					Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.lookup.error"));
-					Zotero_Browser.progress.startCloseTimer(8000);
-				}
-			});
-			
-			Zotero_Browser.progress.show();
-			Zotero_Browser.progress.changeHeadline(Zotero.getString("ingester.lookup.performing"));
-			tab.page.translate.translate(false);
-		}
-	}
 	
 	/*
 	 * Gets a data object given a browser window object

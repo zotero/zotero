@@ -517,3 +517,45 @@
 .zotero-box-label {
 	margin-left: 3px !important;
 }
+
+/*
+  Add-on bar and toolbar icon
+*/
+#zotero-toolbar-button {
+	list-style-image: url(chrome://zotero/skin/zotero-z-24px.png);
+}
+
+#zotero-toolbar-button:active {
+	list-style-image: url(chrome://zotero/skin/zotero-z-24px-active.png);
+}
+
+toolbar[iconsize="small"] #zotero-toolbar-button {
+	list-style-image: url(chrome://zotero/skin/zotero-z-16px.png);
+}
+
+toolbar[iconsize="small"] #zotero-toolbar-button:active {
+	list-style-image: url(chrome://zotero/skin/zotero-z-16px-active.png);
+}
+
+#zotero-save-button {
+	list-style-image: url(chrome://zotero/skin/zotero-new-z-16px.png);
+}
+
+#addon-bar #zotero-toolbar-button {
+	list-style-image: url(chrome://zotero/skin/zotero_status_bar.png);
+	height: 18px;
+}
+
+#addon-bar #zotero-toolbar-button[compact="true"] {
+	width: 20px;
+	list-style-image: url(chrome://zotero/skin/zotero_status_bar_compact.png);
+}
+
+#addon-bar #zotero-toolbar-button[error="true"] {
+	list-style-image: url(chrome://zotero/skin/zotero_status_bar_error.png);
+}
+
+#zotero-save-panel {
+	width: 340px;
+	height: 520px;
+}
