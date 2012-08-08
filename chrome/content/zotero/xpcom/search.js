@@ -411,8 +411,9 @@ Zotero.Search.prototype.addCondition = function(condition, operator, value, requ
 		for each(var part in parts) {
 			this.addCondition('blockStart');
 			
-			if (operator == 'contains' && part.text.length > 1) {
-				this.addCondition('key', 'beginsWith', part.text, false);
+			// If search string is 8 characters, see if this is a item key
+			if (operator == 'contains' && part.text.length == 8) {
+				this.addCondition('key', 'is', part.text, false);
 			}
 			
 			if (condition == 'quicksearch-titleCreatorYear') {
