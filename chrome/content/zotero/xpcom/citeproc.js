@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.372",
+    PROCESSOR_VERSION: "1.0.373",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -9839,7 +9839,9 @@ CSL.Parallel.prototype.StartCite = function (Item, item, prevItemID) {
                     curr.position = CSL.POSITION_IBID_WITH_LOCATOR;
                 }
             }
-        }
+         } else {
+            this.state.registry.registry[Item.id].parallel = false;
+         }
         this.force_collapse = false;
         if (this.state.registry.registry[Item.id].parallel) {
             this.force_collapse = true;
@@ -10059,6 +10061,7 @@ CSL.Parallel.prototype.ComposeSet = function (next_output_in_progress) {
                     if (pos === 0) {
                         this.state.registry.registry[cite.itemId].master = true;
                         this.state.registry.registry[cite.itemId].siblings = [];
+                        this.state.registry.registry[cite.itemId].parallel = false;
                     } else {
                         if (cite.prevItemID) {
                             if (!this.state.registry.registry[cite.prevItemID].parallel) {
