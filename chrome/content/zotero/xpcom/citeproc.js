@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.373",
+    PROCESSOR_VERSION: "1.0.374",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -4522,7 +4522,9 @@ CSL.citeEnd = function (Item, item) {
         for (i = buf.length - 1; i > -1; i += -1) {
             this.tmp.original_date.list.push(buf.pop());
         }
-        this.parallel.cite["original-date"] = false;
+        if (this.parallel.use_parallels) {
+            this.parallel.cite["original-date"] = false;
+        }
     }
     this.tmp.original_date = false;
     this.tmp.renders_collection_number = false;
@@ -7277,17 +7279,16 @@ CSL.NameOutput.prototype._splitInstitution = function (value, v, i) {
                 var splitSplitLst = splitLst.split(/>>[0-9]{4}>>/);
                 var m = splitLst.match(/>>([0-9]{4})>>/);
                 splitLst = splitSplitLst.pop();
-                if (splitSplitLst.length > 0 && this.Item.issued && this.Item.issued.year) {
+                if (splitSplitLst.length > 0 && this.Item["original-date"] && this.Item["original-date"].year) {
                     for (var k=m.length - 1; k > 0; k += -1) {
-                        if (parseInt(this.Item.issued.year, 10) >= parseInt(m[k], 10)) {
+                        if (parseInt(this.Item["original-date"].year, 10) >= parseInt(m[k], 10)) {
                             break;
                         }
                         splitLst = splitSplitLst.pop();
                     }
                 }
                 splitLst = splitLst.replace(/\s*\|\s*/g, "|");
-                splitLst = splitLst.split("|");
-                splitInstitution = splitLst.concat(splitInstitution.slice(j));
+                splitInstitution = [splitLst];
             }
         }
     }
@@ -8966,6 +8967,7 @@ CSL.Attributes["@newdate"] = function (state, arg) {
 CSL.Attributes["@position"] = function (state, arg) {
     var tryposition;
     state.opt.update_mode = CSL.POSITION;
+    state.parallel.use_parallels = true;
     if ("near-note" === arg) {
         var near_note_func = function (state, Item, item) {
             if (item && item.position === CSL.POSITION_SUBSEQUENT && item["near-note"]) {
@@ -9642,8 +9644,10 @@ CSL.Transform = function (state) {
                     state.output.append(secondary, secondary_tok);
                     var blob_obj = state.output.current.value();
                     var blobs_pos = state.output.current.value().blobs.length - 1;
-                    state.parallel.cite.front.push(variables[0] + ":secondary");
-                    state.parallel.cite[variables[0] + ":secondary"] = {blobs:[[blob_obj, blobs_pos]]};
+                    if (state.parallel.use_parallels) {
+                        state.parallel.cite.front.push(variables[0] + ":secondary");
+                        state.parallel.cite[variables[0] + ":secondary"] = {blobs:[[blob_obj, blobs_pos]]};
+                    }
                 }
                 if (tertiary) {
                     tertiary_tok = CSL.Util.cloneToken(primary_tok);
@@ -9660,8 +9664,10 @@ CSL.Transform = function (state) {
                     state.output.append(tertiary, tertiary_tok);
                     var blob_obj = state.output.current.value();
                     var blobs_pos = state.output.current.value().blobs.length - 1;
-                    state.parallel.cite.front.push(variables[0] + ":secondary");
-                    state.parallel.cite[variables[0] + ":secondary"] = {blobs:[[blob_obj, blobs_pos]]};
+                    if (state.parallel.use_parallels) {
+                        state.parallel.cite.front.push(variables[0] + ":tertiary");
+                        state.parallel.cite[variables[0] + ":tertiary"] = {blobs:[[blob_obj, blobs_pos]]};
+                    }
                 }
 				state.output.closeLevel();
             } else {
@@ -9734,7 +9740,7 @@ CSL.Parallel = function (state) {
     this.state = state;
     this.sets = new CSL.Stack([]);
     this.try_cite = true;
-    this.use_parallels = true;
+    this.use_parallels = false;
     this.midVars = ["section", "volume", "container-title", "collection-number", "issue", "page-first", "page", "number"];
     this.ignoreVarsLawGeneral = ["first-reference-note-number", "locator", "label","page-first","page"];
     this.ignoreVarsOrders = ["first-reference-note-number"];
