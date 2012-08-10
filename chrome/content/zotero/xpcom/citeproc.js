@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.374",
+    PROCESSOR_VERSION: "1.0.375",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -9845,9 +9845,13 @@ CSL.Parallel.prototype.StartCite = function (Item, item, prevItemID) {
                     curr.position = CSL.POSITION_IBID_WITH_LOCATOR;
                 }
             }
-         } else {
+        } else if (this.state.registry.registry[Item.id]) {
             this.state.registry.registry[Item.id].parallel = false;
-         }
+        } else {
+            this.try_cite = false;
+            this.force_collapse = false;
+            return;
+        }
         this.force_collapse = false;
         if (this.state.registry.registry[Item.id].parallel) {
             this.force_collapse = true;
@@ -9896,7 +9900,7 @@ CSL.Parallel.prototype.AppendBlobPointer = function (blob) {
     if (this.ignoreVars.indexOf(this.variable) > -1) {
         return;
     }
-    if (this.use_parallels) {
+    if (this.use_parallels && (this.force_collapse || this.try_cite)) {
         if (["article-journal", "article-magazine"].indexOf(this.cite.Item.type) > -1) {
             if (["volume","page","page-first","issue"].indexOf(this.variable) > -1) {
                 return;
@@ -9974,7 +9978,7 @@ CSL.Parallel.prototype.CloseVariable = function () {
 };
 CSL.Parallel.prototype.CloseCite = function () {
     var x, pos, len, has_issued, use_journal_info, volume_pos, container_title_pos, section_pos;
-    if (this.use_parallels) {
+    if (this.use_parallels && (this.force_collapse || this.try_cite)) {
         use_journal_info = false;
         if (!this.cite.front_collapse["container-title"]) {
             use_journal_info = true;
@@ -10042,7 +10046,7 @@ CSL.Parallel.prototype.CloseCite = function () {
 };
 CSL.Parallel.prototype.ComposeSet = function (next_output_in_progress) {
     var cite, pos, master, len;
-    if (this.use_parallels) {
+    if (this.use_parallels && (this.force_collapse || this.try_cite)) {
         var lengthCheck = this.sets.value().length;
         if (this.sets.value().length === 1) {
             if (!this.in_series) {
@@ -12134,6 +12138,36 @@ CSL.Registry.prototype.dodeletes = function (myhash) {
             for (pos = 0; pos < len; pos += 1) {
                 id = "" + this.ambigcites[ambig][pos];
                 this.refreshes[id] = true;
+            }
+            if (this.registry[key].siblings) {
+                if (this.registry[key].siblings.length == 1) {
+                    var loneSiblingID = this.registry[key].siblings[0];
+                    this.registry[loneSiblingID].master = true;
+                    this.registry[loneSiblingID].siblings.pop();
+                    this.registry[loneSiblingID].parallel = false;
+                } else if (this.registry[key].siblings.length > 1) {
+                    var removeIDs = [key];
+                    if (this.registry[key].master) {
+                        var newmasterID = this.registry[key].siblings[0];
+                        var newmaster = this.registry[newmasterID];
+                        newmaster.master = true;
+                        newmaster.parallel = false;
+                        removeIDs.push(newmasterID);
+                        for (var k = 0, klen = this.registry[key].siblings.length; k < klen; k += 1) {
+                            this.registry[this.registry[key].siblings[k]].parallel = newmasterID;
+                        }
+                    }
+                    var buffer = [];
+                    for (var k = this.registry[key].siblings.length - 1; k > -1; k += -1) {
+                        var siblingID = this.registry[key].siblings.pop();
+                        if (removeIDs.indexOf(siblingID) === -1) {
+                            buffer.push(siblingID)
+                        }
+                    }
+                    for (var k = buffer.length - 1; k > -1; k += -1) {
+                        this.registry[key].siblings.push(buffer[k]);
+                    }
+                }
             }
             delete this.registry[key];
             if (this.generate.origIDs[key]) {
