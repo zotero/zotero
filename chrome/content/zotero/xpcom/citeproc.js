@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.375",
+    PROCESSOR_VERSION: "1.0.376",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -4982,16 +4982,16 @@ CSL.Node["date-part"] = {
                                 }
                             }
                         }
-                        if (value_end) {
-                            value_end = CSL.Util.Dates[this.strings.name][this.strings.form](state, value_end, gender);
-                            if (state.tmp.strip_periods) {
-                                value_end = value_end.replace(/\./g, "");
-                            } else {
-                                for (i = 0, ilen = this.decorations.length; i < ilen; i += 1) {
-                                    if ("@strip-periods" === this.decorations[i][0] && "true" === this.decorations[i][1]) {
-                                        value_end = value_end.replace(/\./g, "");
-                                        break;
-                                    }
+                    }
+                    if (value_end) {
+                        value_end = CSL.Util.Dates[this.strings.name][this.strings.form](state, value_end, gender);
+                        if (state.tmp.strip_periods) {
+                            value_end = value_end.replace(/\./g, "");
+                        } else {
+                            for (i = 0, ilen = this.decorations.length; i < ilen; i += 1) {
+                                if ("@strip-periods" === this.decorations[i][0] && "true" === this.decorations[i][1]) {
+                                    value_end = value_end.replace(/\./g, "");
+                                    break;
                                 }
                             }
                         }
@@ -8695,10 +8695,16 @@ CSL.Attributes["@locale"] = function (state, arg) {
         func = function (state, Item, item) {
             var key, res;
             ret = [];
+            res = false;
+            var langspec = false;
             if (Item.language) {
                 lang = CSL.localeParse(Item.language);
                 langspec = CSL.localeResolve(lang);
-                res = false;
+                if (langspec.best === state.opt["default-locale"][0]) {
+                    langspec = false;
+                }
+            }
+            if (langspec) {
                 for (i = 0, ilen = this.locale_list.length; i < ilen; i += 1) {
                     if (langspec.best === this.locale_list[i].best) {
                         state.opt.lang = this.locale;
