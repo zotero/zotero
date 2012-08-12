@@ -29,13 +29,13 @@ Zotero.EXTENDED_FIELDS = {
 	"bill": {
 		"fields": [
 			"author", 
-			"authority", 
 			"collection-number", 
 			"event", 
 			"event-date", 
 			"genre", 
 			"original-author", 
-			"volume"
+			"volume",
+            "archive_location"
 		], 
 		"jurisdiction": true, 
 		"types": [
