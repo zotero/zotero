@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.378",
+    PROCESSOR_VERSION: "1.0.379",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -8695,12 +8695,12 @@ CSL.Attributes["@locale"] = function (state, arg) {
         this.locale_raw = arg;
     } else {
         lst = arg.split(/\s+/);
-        this.locale_bases = [];
+        this.locale_bares = [];
         for (i = 0, ilen = lst.length; i < ilen; i += 1) {
             lang = CSL.localeParse(lst[i]);
             langspec = CSL.localeResolve(lang);
             if (lst[i].length === 2) {
-                this.locale_bases.push(langspec.base);
+                this.locale_bares.push(langspec.bare);
             }
             state.localeConfigure(langspec);
             lst[i] = langspec;
@@ -8731,7 +8731,7 @@ CSL.Attributes["@locale"] = function (state, arg) {
                         break;
                     }
                 }
-                if (!res && this.locale_bases.indexOf(langspec.base) > -1) {
+                if (!res && this.locale_bares.indexOf(langspec.bare) > -1) {
                     state.opt.lang = this.locale;
                     state.tmp.last_cite_locale = this.locale;
                     state.output.openLevel("empty");
