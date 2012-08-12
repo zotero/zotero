@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.379",
+    PROCESSOR_VERSION: "1.0.380",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -4619,7 +4619,7 @@ CSL.localeResolve = function (langstr) {
     ret.base = CSL.LANG_BASES[langlst[0]];
     if ("undefined" === typeof ret.base) {
         CSL.debug("Warning: unknown locale "+langstr+", setting fallback to en-US");
-        return {base:"en-US", best:langstr, bare:"en"};
+        return {base:"en-US", best:langstr, bare:langlst[0]};
     }
     if (langlst.length === 1 || langlst[1] === "x") {
         ret.best = ret.base.replace("_", "-");
