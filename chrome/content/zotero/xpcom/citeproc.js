@@ -57,7 +57,7 @@ if (!Array.indexOf) {
     };
 }
 var CSL = {
-    PROCESSOR_VERSION: "1.0.380",
+    PROCESSOR_VERSION: "1.0.381",
     STATUTE_SUBDIV_GROUPED_REGEX: /((?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/g,
     STATUTE_SUBDIV_PLAIN_REGEX: /(?:(?:^| )(?:art|ch|Ch|subch|p|pp|para|subpara|pt|r|sec|subsec|Sec|sch|tit)\.)/,
     STATUTE_SUBDIV_STRINGS: {
@@ -892,6 +892,7 @@ CSL_CHROME.prototype.flagDateMacros = function(myxml) {
 };
 CSL.getSortCompare = function () {
     var strcmp;
+    var sortCompare;
     try {
         var localeService = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
             .getService(Components.interfaces.nsILocaleService);
@@ -907,26 +908,38 @@ CSL.getSortCompare = function () {
             return a.localeCompare(b);
         };
     }
-    var isKana = /^[\u3040-\u309f\u30a0-\u30ff]/;
-    var sortCompare = function (a, b) {
-        var ak = isKana.exec(a);
-        var bk = isKana.exec(b);
-        if (ak || bk) {
-            if (!ak) {
-                return -1;
-            } else if (!bk) {
-                return 1;
-            } else if (a < b) {
-                return -1;
-            } else if (a > b) {
-                return 1;
+    if (!strcmp("\u3044", "\u3046")) {
+        var isKana = /^[\u3040-\u309f\u30a0-\u30ff]/;
+        sortCompare = function (a, b) {
+            a = a.replace(/^[\[\]\'\"]*/, "").replace(/[\[\]\'\"]*$/, "");
+            b = b.replace(/^[\[\]\'\"]*/, "").replace(/[\[\]\'\"]*$/, "");
+            var ak = isKana.exec(a);
+            var bk = isKana.exec(b);
+            if (ak || bk) {
+                if (!ak) {
+                    return -1;
+                } else if (!bk) {
+                    return 1;
+                } else if (a < b) {
+                    return -1;
+                } else if (a > b) {
+                    return 1;
+                } else {
+                    return 0;
+                }
             } else {
-                return 0;
+                return strcmp(a, b);
             }
-        } else {
+        };
+    } else if (strcmp("[x","x")) {
+        sortCompare = function (a, b) {
+            a = a.replace(/^[\[\]\'\"]*/, "").replace(/[\[\]\'\"]*$/, "");
+            b = b.replace(/^[\[\]\'\"]*/, "").replace(/[\[\]\'\"]*$/, "");
             return strcmp(a, b);
         }
-    };
+    } else {
+        sortCompare = strcmp;
+    }
     return sortCompare;
 };
 CSL.Output = {};
