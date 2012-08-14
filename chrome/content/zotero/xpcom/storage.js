@@ -2524,6 +2524,8 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	
 	onStateChange: function (wp, request, stateFlags, status) {
 		Zotero.debug("onStateChange");
+		Zotero.debug(stateFlags);
+		Zotero.debug(status);
 		
 		if ((stateFlags & Components.interfaces.nsIWebProgressListener.STATE_START)
 				&& (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK)) {
@@ -2577,7 +2579,7 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	// Private methods
 	//
 	_onStart: function (request) {
-		//Zotero.debug('Starting request');
+		Zotero.debug('Starting request');
 		if (this._data && this._data.onStart) {
 			var data = this._getPassData();
 			this._data.onStart(request, data);
@@ -2591,6 +2593,7 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	},
 	
 	_onDone: function (request, status) {
+		Zotero.debug('Request ended with status ' + status);
 		var cancelled = status == 0x804b0002; // NS_BINDING_ABORTED
 		
 		if (!cancelled && request instanceof Components.interfaces.nsIHttpChannel) {
