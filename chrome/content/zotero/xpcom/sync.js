@@ -1277,20 +1277,20 @@ Zotero.Sync.Server = new function () {
 		Zotero.Sync.Runner.setSyncStatus(Zotero.getString('sync.status.loggingIn'));
 		
 		Zotero.HTTP.doPost(url, body, function (xmlhttp) {
-			_checkResponse(xmlhttp);
+			_checkResponse(xmlhttp, true);
 			
 			var response = xmlhttp.responseXML.childNodes[0];
 			
 			if (response.firstChild.tagName == 'error') {
 				if (response.firstChild.getAttribute('code') == 'INVALID_LOGIN') {
 					var e = new Zotero.Error(Zotero.getString('sync.error.invalidLogin'), "INVALID_SYNC_LOGIN");
-					_error(e);
+					_error(e, true);
 				}
-				_error(response.firstChild.firstChild.nodeValue);
+				_error(response.firstChild.firstChild.nodeValue, true);
 			}
 			
 			if (_sessionID) {
-				_error("Session ID already set in Zotero.Sync.Server.login()")
+				_error("Session ID already set in Zotero.Sync.Server.login()", true)
 			}
 			
 			// <response><sessionID>[abcdefg0-9]{32}</sessionID></response>
@@ -1299,7 +1299,7 @@ Zotero.Sync.Server = new function () {
 			var re = /^[abcdefg0-9]{32}$/;
 			if (!re.test(_sessionID)) {
 				_sessionID = null;
-				_error('Invalid session ID received from server');
+				_error('Invalid session ID received from server', true);
 			}
 			
 			
@@ -1373,7 +1373,7 @@ Zotero.Sync.Server = new function () {
 		Zotero.HTTP.doPost(url, body, function (xmlhttp) {
 			Zotero.debug(xmlhttp.responseText);
 			
-			_checkResponse(xmlhttp);
+			_checkResponse(xmlhttp, !restart);
 			
 			if (_invalidSession(xmlhttp)) {
 				Zotero.debug("Invalid session ID -- logging in");
@@ -1795,13 +1795,10 @@ Zotero.Sync.Server = new function () {
 	}
 	
 	
-	function _checkResponse(xmlhttp) {
+	function _checkResponse(xmlhttp, noReloadOnFailure) {
 		if (!xmlhttp.responseText) {
-			// Check SSL cert
 			var channel = xmlhttp.channel;
-			if (!channel instanceof Ci.nsIChannel) {
-				_error('No HTTPS channel available');
-			}
+			// Check SSL cert
 			var secInfo = channel.securityInfo;
 			if (secInfo instanceof Ci.nsITransportSecurityInfo) {
 				secInfo.QueryInterface(Ci.nsITransportSecurityInfo);
@@ -1817,14 +1814,19 @@ Zotero.Sync.Server = new function () {
 						Zotero.debug(e);
 					}
 					// TODO: localize
-					_error("SSL certificate error connecting to " + host + "\n\nSee http://zotero.org/support/kb/ssl_certificate_error for more information.");
+					_error("SSL certificate error connecting to " + host
+						+ "\n\nSee http://zotero.org/support/kb/ssl_certificate_error for more information.",
+						false, noReloadOnFailure);
 				}
 				else if ((secInfo.securityState & Ci.nsIWebProgressListener.STATE_IS_BROKEN) == Ci.nsIWebProgressListener.STATE_IS_BROKEN) {
-					_error("SSL connection error");
+					_error("SSL connection error", false, noReloadOnFailure);
 				}
 			}
 			// TODO: localize
-			_error('Empty response from server. Please try again in a few minutes.');
+			if (xmlhttp.status === 0) {
+				_error('Error connecting to server. Check your Internet connection.', false, noReloadOnFailure);
+			}
+			_error('Empty response from server. Please try again in a few minutes.', false, noReloadOnFailure);
 		}
 		
 		if (!xmlhttp.responseXML || !xmlhttp.responseXML.childNodes[0] ||
@@ -1832,7 +1834,7 @@ Zotero.Sync.Server = new function () {
 				!xmlhttp.responseXML.childNodes[0].firstChild) {
 			Zotero.debug(xmlhttp.responseText);
 			// TODO: localize
-			_error('Invalid response from server. Please try again in a few minutes.', xmlhttp.responseText);
+			_error('Invalid response from server. Please try again in a few minutes.', xmlhttp.responseText, noReloadOnFailure);
 		}
 		
 		var firstChild = xmlhttp.responseXML.firstChild.firstChild;
@@ -1851,7 +1853,7 @@ Zotero.Sync.Server = new function () {
 			else {
 				var timeStr = time.toLocaleString();
 			}
-			_error("Auto-syncing disabled until " + timeStr);
+			_error("Auto-syncing disabled until " + timeStr, false, noReloadOnFailure);
 		}
 		
 		if (firstChild.localName == 'error') {
@@ -2267,7 +2269,7 @@ Zotero.Sync.Server = new function () {
 	}
 	
 	
-	function _error(e, extraInfo) {
+	function _error(e, extraInfo, skipReload) {
 		if (e.name && e.name == 'ZOTERO_ERROR') {
 			switch (e.error) {
 				case Zotero.Error.ERROR_MISSING_OBJECT:
@@ -2360,7 +2362,9 @@ Zotero.Sync.Server = new function () {
 		
 		_syncInProgress = false;
 		Zotero.DB.rollbackAllTransactions();
-		Zotero.reloadDataObjects();
+		if (!skipReload) {
+			Zotero.reloadDataObjects();
+		}
 		Zotero.Sync.EventListener.resetIgnored();
 		
 		_callbacks.onError(e);
