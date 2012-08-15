@@ -418,7 +418,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 			        if (idx > -1) {
 				        // +1 and +2 b/c first-position item (primary) is sliced off for this check
 				        settings = settings.slice(0,idx + 1).concat(settings.slice(idx + 2));
-		                _io['citationLangPrefs'+name] = settings.join(',');
+		                _io['citationLangPrefs'+name] = settings;
 			        }
                     citationSetAffixes(nodes[i]);
 			        nodes[i].disabled = true;
