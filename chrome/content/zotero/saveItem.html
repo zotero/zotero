@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Save Item</title>
+		<link rel="stylesheet" href="resource://zotero/jquery/jquery.mobile.css" />
+		<script src="resource://zotero/jquery/jquery.js"></script>
+		<script src="resource://zotero/jquery/jquery.mobile.js"></script>
+		<script src="resource://zotero/q.js"></script>
+		<style>
+			.ui-link-inherit, .ui-li-static {
+				font-size: 12.5px;
+				padding: 0.5em 15px !important;
+			}
+			.ui-btn:focus, .ui-focus {
+				box-shadow: none;
+			}
+			body {
+				overflow: hidden;
+			}
+			#main-page ul[data-role="listview"] {
+				height: 274px;
+				overflow: auto;
+				position: relative;
+			}
+			ul[data-role="listview"] .ui-icon:hover {
+				background-color: rgba(0, 0, 0, 0.8)
+			}
+			.collection-page > div[data-role="content"] {
+				top: 40px;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				overflow: auto;
+				position: fixed;
+			}
+			.collection-page > div[data-role="header"] {
+				top: 0;
+				right: 0;
+				left: 0;
+				position: fixed;
+			}
+		</style>
+	</head>
+	<body>
+		<div data-role="page" id="main-page" name="Libraries">
+			<div data-role="navbar" id="navbar">
+				<ul>
+					<li><a onclick="EventHandlers.navbarClick('save')" class="ui-btn-active ui-state-persist">Save to Zotero</a></li>
+					<li><a onclick="EventHandlers.navbarClick('lookup')">Lookup</a></li>
+				</ul>
+			</div>
+			<div data-role="header" style="display:none;" id="header" data-theme="b"><h1>Save to Zotero</h1></div>
+			<div data-role="content" id="save">
+				<ul data-role="listview" data-divider-theme="c" data-mini="true" id="main-page-list-view"></ul>
+				<a id="save-button" data-role="button" data-mini="true" onclick="EventHandlers.saveClick(event)" style="margin-top: 24px" class="ui-disabled">Save</a>
+				<div style="margin-top: 10px" id="translators"></div>
+			</div>
+			<div data-role="content" style="display:none;" id="lookup"></div>
+		</div>
+		<script src="saveItem.js"></script>
+	</body>
+</html>
