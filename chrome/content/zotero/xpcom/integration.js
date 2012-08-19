@@ -2193,7 +2193,7 @@ Zotero.Integration.Session.prototype.getCitationField = function(citation) {
 		
 			// add itemData only if requested
 			if(this.data.prefs.storeReferences) {
-				serializeCitationItem.itemData = citationItem.item;
+				serializeCitationItem.itemData = Zotero.Cite.System.retrieveItem(citationItem.id);
 				addSchema = true;
 			}
 		}
