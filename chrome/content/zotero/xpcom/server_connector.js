@@ -98,7 +98,7 @@ Zotero.Server.Connector.Detect.prototype = {
 	 * @param {Object} data POST data or GET query string
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
-	"init":function(data, sendResponseCallback) {
+	"init":function(url, data, sendResponseCallback) {
 		this.sendResponse = sendResponseCallback;
 		this._parsedPostData = data;
 		
@@ -115,7 +115,7 @@ Zotero.Server.Connector.Detect.prototype = {
 		var pageShowCalled = false;
 		var me = this;
 		this._translate.setCookieSandbox(new Zotero.CookieSandbox(this._browser,
-			this._parsedPostData["uri"], this._parsedPostData["cookie"]));
+			this._parsedPostData["uri"], this._parsedPostData["cookie"], url.userAgent));
 		this._browser.addEventListener("DOMContentLoaded", function() {
 			try {
 				if(me._browser.contentDocument.location.href == "about:blank") return;
@@ -283,7 +283,7 @@ Zotero.Server.Connector.SaveItem.prototype = {
 	 * @param {Object} data POST data or GET query string
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
-	"init":function(data, sendResponseCallback) {
+	"init":function(url, data, sendResponseCallback) {
 		// figure out where to save
 		var libraryID = null;
 		var collectionID = null;
@@ -293,8 +293,8 @@ Zotero.Server.Connector.SaveItem.prototype = {
 			var collection = zp.getSelectedCollection();
 		} catch(e) {}
 		
-		var cookieSandbox = data["uri"] && data["cookie"] ? new Zotero.CookieSandbox(null, data["uri"],
-			data["cookie"]) : null;
+		var cookieSandbox = data["uri"] ? new Zotero.CookieSandbox(null, data["uri"],
+			data["cookie"] || "", url.userAgent) : null;
 		
 		// save items
 		var itemSaver = new Zotero.Translate.ItemSaver(libraryID,
@@ -339,12 +339,12 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 	 * @param {String} data POST data or GET query string
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
-	"init":function(data, sendResponseCallback) {
+	"init":function(url, data, sendResponseCallback) {
 		Zotero.Server.Connector.Data[data["url"]] = "<html>"+data["html"]+"</html>";
 		var browser = Zotero.Browser.createHiddenBrowser();
 		
 		var pageShowCalled = false;
-		var cookieSandbox = new Zotero.CookieSandbox(browser, data["url"], data["cookie"]);
+		var cookieSandbox = new Zotero.CookieSandbox(browser, data["url"], data["cookie"], url.userAgent);
 		browser.addEventListener("pageshow", function() {
 			if(browser.contentDocument.location.href == "about:blank"
 				|| browser.contentDocument.readyState !== "complete") return;
