@@ -145,8 +145,7 @@ var CollectionList = {
  */
 var RecentlyUsed = {
 	"MAX": 5,
-	"_savedCollections": null,
-	"_collections": [],
+	"_collections": null,
 	
 	/**
 	 * Get an array of recently used collections
@@ -154,74 +153,80 @@ var RecentlyUsed = {
 	 */
 	"get":function get() {
 		// Load saved collections
-		if(!this._savedCollections) {
+		if(!this._collections) {
+			this._collections = [];
+			
+			var savedCollections;
 			try {
-				this._savedCollections = JSON.parse(Zotero.Prefs.get("saveItem.recentlyUsed"));
-				for(var i=0; i<this._savedCollections.length; i++) {
-					this.add(this._savedCollections[i]);
+				savedCollections = JSON.parse(Zotero.Prefs.get("saveItem.recentlyUsed"));
+				for(var i=0; i<savedCollections.length; i++) {
+					this.add(this._collections, savedCollections[i]);
 				}
 			} catch(e) {
-				this._savedCollections = [];
+				savedCollections = [];
 			};
 			
 			// Get currently selected collection
 			try {
 				var pane = Zotero.getActiveZoteroPane(),
 					collection = pane.getSelectedCollection();
-				this.add({
+				this.add(this._collections, {
 					"id": (collection ? collection.id : null),
 					"libraryID": (collection ? collection.libraryID : pane.getSelectedLibraryID())
 				}, true);
 			} catch(e) {};
 		}
 		
-		return Q.resolve(this._collections);
+		return Q.resolve(this._collections.slice());
 	},
 	
 	/**
 	 * Add a collection to the recently used list
+	 * @param {Object[]} collectionList
+	 * @param {Object} collection
+	 * @param {Boolean} prepend Whether to prepend the collection to the collection list
 	 * @return {Object[]} New collection list
 	 */
-	"add":function add(originalCollection, prepend) {
+	"add":function add(collectionList, collection, prepend) {
 		// Don't append more than MAX items to the list
-		if(this._collections.length >= this.MAX && !prepend) return;
+		if(collectionList.length >= this.MAX && !prepend) return;
 		
 		// Ensure that there are no duplicates of this collection already in the list
-		if(this._checkForDuplicate(this._collections, originalCollection, prepend)) {
-			return this._collections;
+		if(this._checkForDuplicate(collectionList, collection, prepend)) {
+			return collectionList;
 		}
 		
 		// Ensure that the collection exists and is editable
-		if((originalCollection.libraryID && (
-				!Zotero.Libraries.exists(originalCollection.libraryID) || 
-				!Zotero.Libraries.isEditable(originalCollection.libraryID)
-			)) || (originalCollection.id &&
-				!Zotero.Collections.get(originalCollection.id))) {
-			return this._collections;
+		if((collection.libraryID && (
+				!Zotero.Libraries.exists(collection.libraryID) || 
+				!Zotero.Libraries.isEditable(collection.libraryID)
+			)) || (collection.id &&
+				!Zotero.Collections.get(collection.id))) {
+			return collectionList;
 		}
 		
 		// Clone collection and modify name so that it contains the library name
-		var collection = {
-				"id":originalCollection.id,
-				"libraryID":originalCollection.libraryID
+		var newCollection = {
+				"id":collection.id,
+				"libraryID":collection.libraryID
 			},
-			libraryName = collection.libraryID
-				? Zotero.Libraries.getName(collection.libraryID)
+			libraryName = newCollection.libraryID
+				? Zotero.Libraries.getName(newCollection.libraryID)
 				: Zotero.getString("pane.collections.library");
-		if(collection.id) {
-			var zoteroCollection = Zotero.Collections.get(collection.id);
-			collection.name = zoteroCollection.name+" ("+libraryName+")";
-			collection.hasChildCollections = zoteroCollection.hasChildCollections();
+		if(newCollection.id) {
+			var zoteroCollection = Zotero.Collections.get(newCollection.id);
+			newCollection.name = zoteroCollection.name+" ("+libraryName+")";
+			newCollection.hasChildCollections = zoteroCollection.hasChildCollections();
 		} else {
-			collection.name = libraryName;
-			collection.hasChildCollections = !!Zotero.getCollections(collection.libraryID, false, null).length
+			newCollection.name = libraryName;
+			newCollection.hasChildCollections = !!Zotero.getCollections(newCollection.libraryID, false, null).length
 		}
 		
 		// Add to list
-		this._collections[prepend ? "unshift" : "push"](collection);
+		collectionList[prepend ? "unshift" : "push"](newCollection);
 		// Make sure list length doesn't exceed maximum
-		if(this._collections.length > this.MAX) this._collections.pop();
-		return this._collections;
+		if(collectionList.length > this.MAX) collectionList.pop();
+		return collectionList;
 	},
 	
 	/**
@@ -229,10 +234,13 @@ var RecentlyUsed = {
 	 * @param {Object} collection
 	 */
 	"save":function save(collection) {
-		if(!this._checkForDuplicate(this._savedCollections, collection, true)) {
-			this._savedCollections.unshift({"id":collection.id, "libraryID":collection.libraryID});
+		if(!this._checkForDuplicate(this._collections, collection, true)) {
+			this._collections.unshift({"id":collection.id, "libraryID":collection.libraryID});
 		}
-		Zotero.Prefs.set("saveItem.recentlyUsed", JSON.stringify(this._savedCollections.slice(0, this.MAX)));
+		if(this._collections.length > this.MAX) {
+			this._collections = this._collections.slice(0, this.MAX);
+		}
+		Zotero.Prefs.set("saveItem.recentlyUsed", JSON.stringify(this._collections));
 	},
 	
 	/**
@@ -373,10 +381,19 @@ var EventHandlers = {
 	 * Called when a collection (not its arrow) is clicked to select that collection
 	 */
 	"collectionSelect":function collectionSelect(event) {
-		var collection = event.data;
-		Builder.recentlyUsedList(RecentlyUsed.add(collection, true));
-		$(".recently-used.collection").first().addClass("ui-btn-active");
-		$.mobile.changePage("#main-page", {"reverse":true, "transition":"slide"});
+		var target = $(event.target);
+		$("#main-page .collection.ui-btn-active").removeClass("ui-btn-active");
+		if(target.parents("div[data-role=page]").attr("id") === "main-page") {
+			target.parents(".collection").addClass("ui-btn-active");
+		} else {
+			var collection = event.data;
+			RecentlyUsed.get().then(function(collections) {
+				RecentlyUsed.add(collections, collection, true);
+				Builder.recentlyUsedList(collections);
+				$(".recently-used.collection").first().addClass("ui-btn-active");
+				$.mobile.changePage("#main-page", {"reverse":true, "transition":"slide"});
+			});
+		}
 	},
 	
 	/**
